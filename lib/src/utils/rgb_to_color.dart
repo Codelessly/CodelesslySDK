@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:codelessly_api/api.dart';
+import 'package:codelessly_api/codelessly_api.dart';
 
 import 'extensions.dart';
 

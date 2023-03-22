@@ -1,4 +1,4 @@
-import 'package:codelessly_api/api.dart';
+import 'package:codelessly_api/codelessly_api.dart';
 
 /// This is used to store retrieved data from a document in the 'websites' collection.
 @Deprecated('Use SDKPublishModel instead.')
