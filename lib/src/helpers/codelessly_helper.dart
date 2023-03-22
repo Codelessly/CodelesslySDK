@@ -37,7 +37,7 @@ class CodelesslyHelper {
           : event['breakpoints']);
 
       final List<dynamic> listedData =
-          parsedData.entries.map((entry) => entry.value).toList();
+          parsedData.entries.map((entry) => entry.alignment).toList();
 
       breakpoints.addAll(listedData.map((e) => Breakpoint.fromJson(e)));
     }

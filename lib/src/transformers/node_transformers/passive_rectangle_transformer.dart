@@ -35,11 +35,9 @@ class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
   Widget buildRectangle(
     BaseNode node, {
     List<Widget> children = const [],
-    Map<int, Uint8List> imageBytes = const {},
   }) {
     return PassiveRectangleWidget(
       node: node,
-      imageBytes: imageBytes,
       children: children,
     );
   }
@@ -48,13 +46,13 @@ class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
 class PassiveRectangleWidget extends StatelessWidget {
   final BaseNode node;
   final List<Widget> children;
-  final Map<int, Uint8List> imageBytes;
+  final Clip Function(BaseNode node) getClipBehavior;
 
-  const PassiveRectangleWidget({
+  PassiveRectangleWidget({
     super.key,
     required this.node,
     this.children = const [],
-    this.imageBytes = const {},
+    this.getClipBehavior = defaultGetClipBehavior,
   });
 
   @override
@@ -93,105 +91,54 @@ class PassiveRectangleWidget extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        // shape: getShape(node),
-        color: boxDecorationDataColor(node),
         boxShadow: retrieveBoxShadow(node),
         borderRadius: getBorderRadius(node),
       ),
-      child: generateFills(node, codelesslyContext,
-          nodeChildren: children, imageBytes: imageBytes),
+      child: Stack(
+        clipBehavior: Clip.none,
+        fit: StackFit.expand,
+        children: [
+          ...buildFills(node, codelesslyContext),
+          ...buildStrokes(node),
+          ...wrapWithPadding(node, children),
+        ],
+      ),
     );
-
-    if (node is GeometryMixin && (node as GeometryMixin).strokeWeight > 0) {
-      final GeometryMixin geometry = node as GeometryMixin;
-
-      // TODO: We can 100% use DecoratedBox for all strokeAlignments, but the
-      // basicBoxLocal logic needs to grow to fill it first. The node shrinks in size
-      // otherwise because we need to add padding to the widget, and since the
-      // basicBoxLocal doesn't account for strokes yet, there's not enough space for
-      // the widget to fit, so it shrinks to fit.
-      if (geometry.strokeAlign == StrokeAlignC.inside &&
-          geometry.dashPattern.isEmpty) {
-        data = DecoratedBox(
-          decoration: BoxDecoration(
-            // shape: getShape(geometry),
-            borderRadius: getBorderRadius(geometry),
-            border: Border.all(
-              color: retrieveStrokeColor(
-                  geometry, geometry.strokes.length - 1, true),
-              width: geometry.strokeWeight,
-            ),
-          ),
-          position: DecorationPosition.foreground,
-          child: data,
-        );
-      } else {
-        // Make strokes render over everything by having it be on
-        // top of a stack. It clips behind the paint of the rectangle otherwise.
-        data = Stack(
-          clipBehavior: Clip.none,
-          children: [
-            data,
-            Positioned.fill(
-              child: CustomPaint(
-                painter: StrokePainter(
-                  color: retrieveStrokeColor(
-                      geometry, geometry.strokes.length - 1, true),
-                  dashPattern: geometry.dashPattern,
-                  strokeWidth: geometry.strokeWeight,
-                  borderRadius: getBorderRadius(geometry) ?? BorderRadius.zero,
-                  strokeMiterLimit: geometry.strokeMiterLimit,
-                  strokeCap: geometry.strokeCap,
-                  strokeAlign: geometry.strokeAlign,
-                  strokeSide: geometry.strokeSide,
-                  boxShape: getBoxShape(geometry),
-                ),
-              ),
-            ),
-          ],
-        );
-      }
-    }
 
     return data;
   }
 }
 
+List<Widget> wrapWithPadding(BaseNode node, List<Widget> children) {
+  final EdgeInsets resolvedPadding = node.resolvedPadding().edgeInsets;
+
+  if (resolvedPadding == EdgeInsets.zero) {
+    return children;
+  }
+
+  return children.map((child) => Padding(
+    padding: resolvedPadding,
+    child: child,
+  )).toList();
+}
+
 List<BoxShadow> retrieveBoxShadow(BaseNode node) {
   if (node is! DefaultShapeNode) return [];
   return node.effects
-      .where((element) => element.type == EffectType.dropShadow)
-      .map((d) => BoxShadow(
-            spreadRadius: d.spread!,
-            offset: Offset(d.offset!.x.toDouble(), d.offset!.y.toDouble()),
-            blurRadius: d.radius,
-            color: d.color!.toFlutterColor(),
-          ))
+      .where((effect) => effect.type == EffectType.dropShadow)
+      .map(
+        (effect) => BoxShadow(
+          spreadRadius: effect.spread!,
+          offset:
+              Offset(effect.offset!.x.toDouble(), effect.offset!.y.toDouble()),
+          blurRadius: effect.radius,
+          color: effect.color!.toFlutterColor(),
+        ),
+      )
       .toList();
 }
 
-/// Outer BoxDecorationData only sets the color attribute when node.fills is size 1 and solid.
-/// In other cases, the returned value is null, and [generateFillsData] sets the color.
-Color? boxDecorationDataColor(BaseNode node) {
-  if (node is! DefaultShapeNode) return null;
-  if (node.fills.length == 1 && node.fills.first.type == PaintType.solid) {
-    return retrieveFillColor(node);
-  } else {
-    return null;
-  }
-}
-
-Gradient? boxDecorationGradient(BaseNode node) {
-  if (node is! GeometryMixin) return null;
-
-  if (node.fills.length == 1 && node.fills.first.type == PaintType.solid) {
-    return retrieveGradient(node.fills.first);
-  } else {
-    return null;
-  }
-}
-
-BorderRadius? getBorderRadius(Object node) {
+BorderRadius? getBorderRadius(BaseNode node) {
   if (node is CornerMixin) {
     if (node.cornerRadius.linked &&
         node.cornerRadius.type == RadiusType.elliptical) {
@@ -204,11 +151,7 @@ BorderRadius? getBorderRadius(Object node) {
   }
 }
 
-Clip getClipBehavior(Object node) {
-  // Enable Clip.hardEdge when:
-  // node is an Ellipse;
-  // node is a Frame (because of clipping);
-  // node has a cornerRadius and it is different than zero.
+Clip defaultGetClipBehavior(BaseNode node) {
   if (node is ClipMixin) {
     if (node.clipsContent) {
       return Clip.hardEdge;
@@ -217,8 +160,7 @@ Clip getClipBehavior(Object node) {
     }
   }
 
-  if (node is BaseNode ||
-      (node is CornerMixin && node.cornerRadius != CornerRadius.zero)) {
+  if (node is CornerMixin && node.cornerRadius != CornerRadius.zero) {
     return Clip.antiAlias;
   } else {
     return Clip.none;
@@ -365,12 +307,14 @@ Widget applyEffects(BaseNode node, List<Widget> paint) {
         break;
       case EffectType.layerBlur:
       case EffectType.backgroundBlur:
-        result = ImageFiltered(
-          imageFilter: ImageFilter.blur(
-            sigmaX: effect.radius / 10,
-            sigmaY: effect.radius / 10,
+        result = ClipRect(
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(
+              sigmaX: effect.radius / 10,
+              sigmaY: effect.radius / 10,
+            ),
+            child: result,
           ),
-          child: result,
         );
         break;
     }
@@ -378,206 +322,132 @@ Widget applyEffects(BaseNode node, List<Widget> paint) {
   return result;
 }
 
-Widget? generateFills(
+List<Widget> buildStrokes(BaseNode node) {
+  if (node is! GeometryMixin || node.strokeWeight <= 0) {
+    return [];
+  }
+  if (node.dashPattern.isEmpty) {
+    return [
+      for (final paint in node.strokes)
+        DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: getBorderRadius(node),
+            border: Border.all(
+              strokeAlign: node.strokeAlign.alignment,
+              color: paint.toFlutterColor()!,
+              width: node.strokeWeight,
+            ),
+          ),
+        ),
+    ];
+  } else {
+    return [
+      for (final paint in node.strokes)
+        CustomPaint(
+          painter: StrokePainter(
+            color: paint.toFlutterColor()!,
+            borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+            dashPattern: node.dashPattern,
+            strokeWidth: node.strokeWeight,
+            strokeMiterLimit: node.strokeMiterLimit,
+            strokeCap: node.strokeCap,
+            strokeAlign: node.strokeAlign,
+            strokeSide: node.strokeSide,
+            boxShape: getBoxShape(node),
+          ),
+        ),
+    ];
+  }
+}
+
+List<Widget> buildFills(
   BaseNode node,
   CodelesslyContext codelesslyContext, {
-  List<Widget> nodeChildren = const [],
   Map<int, Uint8List> imageBytes = const {},
-  double? opacity,
-  double? rotationRadians,
+  double? imageOpacity,
+  double? imageRotation,
 }) {
-  final GeometryMixin? geometry = node is GeometryMixin ? node : null;
-
-  // This is used as an optimization: if there is no dotted border,
-  // there is no need to use StackWidgetData for a single image.
-  Widget? imageData;
-
-  // This method returns null when WidgetData shouldn't be created.
-  if (geometry?.fills.isEmpty ?? false) {
-    // return null;
-  } else if (geometry?.fills.length == 1) {
-    // if (node.fills.first.type == PaintType.solid ||
-    //     node.fills.first.type == PaintType.gradientLinear ||
-    //     node.fills.first.type == PaintType.gradientAngular ||
-    //     node.fills.first.type == PaintType.gradientRadial ||
-    //     node.fills.first.type == PaintType.gradientDiamond) {
-    // When node has a single solid color or gradient, BoxDecorationData will
-    // already be set. Don't return, else dottedBorder won't be loaded.
-    // }
-
-    if (geometry!.fills.first.type == PaintType.image) {
-      String imageURL = geometry.fills.first.croppedImageURL ??
-          geometry.fills.first.downloadUrl!;
-      // Substitute URL value from [CodelesslyContext]'s [data] map if
-      // [imageURL] represents a JSON path.
-      imageURL = substituteData(imageURL, codelesslyContext.data);
-      final BoxFit fit = geometry.fills.first.fit.boxFit;
-      final Alignment? alignment =
-          geometry.fills.first.alignment.flutterAlignment;
-      final double modifiedOpacity =
-          (opacity ?? 1) * geometry.fills.first.opacity;
-      final double scale = geometry.fills.first.scale;
-      final ImageRepeat repeat =
-          geometry.fills.first.imageRepeat.flutterImageRepeat;
-      final Uint8List? bytes = imageBytes[0];
-
-      imageData = Opacity(
-        opacity: modifiedOpacity,
-        child: bytes != null
-            ? Image.memory(
-                bytes,
-                fit: fit,
-                alignment: alignment ?? Alignment.center,
-                scale: scale,
-                width: geometry.basicBoxLocal.width,
-                height: geometry.basicBoxLocal.height,
-                repeat: repeat,
-              )
-            : _NetworkImageWithStates(
-                url: imageURL,
-                fit: fit,
-                alignment: alignment ?? Alignment.center,
-                scale: scale,
-                width: geometry.basicBoxLocal.width,
-                height: geometry.basicBoxLocal.height,
-                repeat: repeat,
-                paint: geometry.fills.first,
-                node: node,
-              ),
-      );
-    }
+  if (node is! GeometryMixin) {
+    return [];
   }
 
-  final bool hasPadding = node.innerBoxGlobal.edgeSize != SizeC.zero;
+  final BorderRadius? borderRadius = getBorderRadius(node);
+  return [
+    ...node.fills.mapIndexed((index, paint) {
+      switch (paint.type) {
+        case PaintType.solid:
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: borderRadius,
+              color: paint.toFlutterColor()!,
+            ),
+          );
+        case PaintType.gradientLinear:
+        case PaintType.gradientRadial:
+        case PaintType.gradientAngular:
+        case PaintType.gradientDiamond:
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: borderRadius,
+              gradient: retrieveGradient(paint),
+            ),
+          );
+        case PaintType.image:
+          final Uint8List? bytes = imageBytes[index];
 
-  // final dottedBorder = buildCenterInsideDottedBorder(node);
+          // Substitute URL value from [CodelesslyContext]'s [data] map if
+          // [imageURL] represents a JSON path.
+          String? imageURL = paint.croppedImageURL ?? paint.downloadUrl!;
+          imageURL = substituteData(imageURL, codelesslyContext.data);
 
-  // Only avoid Stack when image exists and dottedBorder and nodeChildren are null.
-  if (imageData != null && nodeChildren.isEmpty) {
-    if (rotationRadians != null) {
-      imageData = Transform.rotate(angle: rotationRadians, child: imageData);
-    }
-    return imageData;
-  } else if (geometry != null &&
-      geometry.fills.length == 1 &&
-      geometry.fills.first.type == PaintType.solid) {
-    // When color fill is already set.
-    if (nodeChildren.isEmpty) {
-      return null;
-    }
+          final BoxFit fit = paint.fit.boxFit;
+          final Alignment? alignment = paint.alignment.flutterAlignment;
+          final double modifiedOpacity = (imageOpacity ?? 1) * paint.opacity;
+          final double scale = paint.scale;
+          final ImageRepeat repeat = paint.imageRepeat.flutterImageRepeat;
 
-    if (hasPadding && nodeChildren.isNotEmpty) {
-      return Padding(
-        padding: node.innerBoxGlobal.edgeInsets.edgeInsets,
-        child: Stack(children: nodeChildren),
-      );
-    } else {
-      return Stack(children: nodeChildren);
-    }
-  }
-
-  final List<Widget> paintChildren = geometry == null
-      ? []
-      : geometry.fills
-          .mapIndexed((index, fill) {
-            Widget? widget;
-            if (fill.type == PaintType.solid) {
-              // Ignore when invisible.
-              if (fill.visible == true) {
-                widget = Container(
-                  color: fill.toFlutterColor()!,
+          Widget child = bytes != null
+              ? Image.memory(
+                  bytes,
+                  fit: fit,
+                  alignment: alignment ?? Alignment.center,
+                  scale: scale,
+                  width: node.basicBoxLocal.width,
+                  height: node.basicBoxLocal.height,
+                  repeat: repeat,
+                )
+              : _NetworkImageWithStates(
+                  url: imageURL,
+                  fit: fit,
+                  alignment: alignment ?? Alignment.center,
+                  scale: scale,
+                  width: node.basicBoxLocal.width,
+                  height: node.basicBoxLocal.height,
+                  repeat: repeat,
+                  paint: paint,
+                  node: node,
                 );
-              }
-            } else if (fill.type == PaintType.gradientLinear ||
-                fill.type == PaintType.gradientRadial ||
-                fill.type == PaintType.gradientAngular) {
-              widget = Container(
-                decoration: BoxDecoration(
-                  gradient: retrieveGradient(fill),
-                  borderRadius: getBorderRadius(geometry),
-                ),
-              );
-            } else if (fill.type == PaintType.image) {
-              String imageURL = fill.croppedImageURL ?? fill.downloadUrl!;
-              // Substitute URL value from [CodelesslyContext]'s [data] map if
-              // [imageURL] represents a JSON path.
-              imageURL = substituteData(imageURL, codelesslyContext.data);
-              final BoxFit fit = fill.fit.boxFit;
-              final Alignment? alignment = fill.alignment.flutterAlignment;
-              final double modifiedOpacity = opacity ?? fill.opacity;
-              final double scale = fill.scale;
-              final ImageRepeat repeat = fill.imageRepeat.flutterImageRepeat;
-              final Uint8List? bytes = imageBytes[index];
 
-              widget = ClipRRect(
-                borderRadius: getBorderRadius(geometry) ?? BorderRadius.zero,
-                child: Opacity(
-                  opacity: modifiedOpacity,
-                  child: bytes != null
-                      ? Image.memory(
-                          bytes,
-                          fit: fit,
-                          alignment: alignment ?? Alignment.center,
-                          scale: scale,
-                          width: geometry.basicBoxLocal.width,
-                          height: geometry.basicBoxLocal.height,
-                          repeat: repeat,
-                        )
-                      : _NetworkImageWithStates(
-                          url: imageURL,
-                          fit: fit,
-                          alignment: alignment ?? Alignment.center,
-                          scale: scale,
-                          width: geometry.basicBoxLocal.width,
-                          height: geometry.basicBoxLocal.height,
-                          paint: fill,
-                          repeat: repeat,
-                          node: node,
-                        ),
-                ),
-              );
-
-              if (rotationRadians != null) {
-                imageData =
-                    Transform.rotate(angle: rotationRadians, child: imageData);
-              }
-            }
-
-            if (widget == null) {
-              return null;
-            }
-
-            return Positioned(
-              left: 0.0,
-              top: 0.0,
-              right: 0.0,
-              bottom: 0.0,
-              width: null,
-              height: null,
-              child: widget,
+          if (modifiedOpacity != 1) {
+            child = Opacity(
+              opacity: modifiedOpacity,
+              child: child,
             );
-          })
-          .whereType<Widget>()
-          .toList();
+          }
+          if (imageRotation != null) {
+            child = Transform.rotate(
+              angle: imageRotation,
+              child: child,
+            );
+          }
 
-  return Stack(
-    children: [
-      ...paintChildren,
-      if (hasPadding && nodeChildren.isNotEmpty)
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            node.innerBoxGlobal.edgeLeft,
-            node.innerBoxGlobal.edgeTop,
-            node.innerBoxGlobal.edgeRight,
-            node.innerBoxGlobal.edgeBottom,
-          ),
-          child: Stack(children: nodeChildren),
-        )
-      else
-        ...nodeChildren,
-      // if (dottedBorder != null) dottedBorder
-    ],
-  );
+          return child;
+
+        case PaintType.emoji:
+          return const SizedBox.shrink();
+      }
+    }),
+  ];
 }
 
 class _NetworkImageWithStates extends StatefulWidget {
