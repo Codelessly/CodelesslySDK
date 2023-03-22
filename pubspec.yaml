@@ -21,10 +21,10 @@ dependencies:
   collection: ^1.17.0
   http: ^0.13.5
   intl: ^0.17.0
-  universal_html: ^2.0.9
-  webview_flutter: ^4.0.6
+  universal_html: ^2.2.1
+  webview_flutter: ^4.0.7
   webview_flutter_android: ^3.4.3
-  webview_flutter_wkwebview: ^3.2.1
+  webview_flutter_wkwebview: ^3.2.2
   flutter_animation_progress_bar: ^2.3.1
   cached_network_image: ^3.2.3
   vector_math: ^2.1.4
@@ -34,9 +34,9 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   uuid: ^3.0.7
-  path_provider: ^2.0.13
+  path_provider: ^2.0.14
   provider: ^6.0.5
-  json_path: ^0.4.2
+  json_path: ^0.4.4
   codelessly_api: ^0.0.1
   # Uncomment to develop locally.
 #  codelessly_api:
