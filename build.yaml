@@ -1,5 +1,9 @@
 targets:
   $default:
+    sources:
+      exclude:
+        - example/**
+        - example_chat_bot/**
     builders:
       json_serializable:
         options:
