@@ -1,0 +1,213 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:hive_flutter/hive_flutter.dart';
+
+import '../../codelessly_sdk.dart';
+import '../error/error_handler.dart';
+import 'cache_manager.dart';
+
+class CodelesslyCacheManager extends CacheManager {
+  final CodelesslyConfig config;
+
+  CodelesslyCacheManager({required this.config});
+
+  late Box box;
+  late Box filesBox;
+
+  @override
+  Future<void> init() async {
+    try {
+      await Hive.initFlutter('codelessly_sdk');
+      box = await Hive.openBox(cacheBoxName);
+      filesBox = await Hive.openBox(cacheFilesBoxName);
+    } on HiveError catch (e, stacktrace) {
+      throw CodelesslyException(
+        'Failed to initialize cache manager.\n${e.message}',
+        stacktrace: stacktrace,
+      );
+    } catch (e, stacktrace) {
+      throw CodelesslyException(
+        'Failed to initialize cache manager',
+        originalException: e,
+        stacktrace: stacktrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> clearAll() async {
+    print('Clearing cache...');
+    try {
+      await box.clear();
+      print('Cache cleared successfully!');
+    } catch (e, stacktrace) {
+      throw CodelesslyException.cacheClearException(
+        message: 'Failed to clear cache',
+        originalException: e,
+        stacktrace: stacktrace,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    box.close();
+  }
+
+  @override
+  Future<void> store(String key, dynamic value) {
+    try {
+      if (value is String || value is num || value is bool || value is List) {
+        return box.put(key, value);
+      }
+      return box.put(key, jsonEncode(value));
+    } catch (e, stacktrace) {
+      throw CodelesslyException.cacheStoreException(
+        message: 'Failed to store value of $key\nValue: $value',
+        originalException: e,
+        stacktrace: stacktrace,
+      );
+    }
+  }
+
+  @override
+  T get<T>(String key, {T Function(Map<String, dynamic> value)? decode}) {
+    try {
+      final dynamic value = box.get(key);
+      if (decode != null && value is String) {
+        final json = jsonDecode(value);
+        return decode(json);
+      } else {
+        return value as T;
+      }
+    } catch (e, stacktrace) {
+      throw CodelesslyException.cacheLookupException(
+        message: 'Failed to get value of $key from cache',
+        originalException: e,
+        stacktrace: stacktrace,
+      );
+    }
+  }
+
+  @override
+  bool isCached(String key) => box.containsKey(key);
+
+  @override
+  Future<void> delete(String key) => box.delete(key);
+
+  @override
+  Future<void> deleteAllFiles() async {
+    try {
+      // Delete the directory if it exists.
+      await filesBox.deleteAll(filesBox.keys);
+    } catch (e, stacktrace) {
+      throw CodelesslyException.fileIoException(
+        message: 'Failed to clear files.\n$e',
+        originalException: e,
+        stacktrace: stacktrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> deleteFile(String pathKey, String name) async {
+    try {
+      final key = '$pathKey/$name';
+      await filesBox.delete(key);
+    } catch (e, stacktrace) {
+      throw CodelesslyException.fileIoException(
+        message: 'Failed to delete file $pathKey/$name',
+        originalException: e,
+        stacktrace: stacktrace,
+      );
+    }
+  }
+
+  @override
+  Future<Uint8List> getFile(String pathKey, String name) async {
+    try {
+      final key = '$pathKey/$name';
+      if (filesBox.containsKey(key)) {
+        return await filesBox.get(key);
+      }
+      throw CodelesslyException.fileIoException(
+        message: 'File $pathKey/$name does not exist',
+      );
+    } catch (e, stacktrace) {
+      throw CodelesslyException.fileIoException(
+        message: 'Failed to get file $pathKey/$name',
+        originalException: e,
+        stacktrace: stacktrace,
+      );
+    }
+  }
+
+  @override
+  Future<bool> isFileCached(String pathKey, String name) async {
+    try {
+      final key = '$pathKey/$name';
+      return filesBox.containsKey(key);
+    } catch (e, stacktrace) {
+      throw CodelesslyException.fileIoException(
+        message: 'Failed to check if file $pathKey/$name is cached',
+        originalException: e,
+        stacktrace: stacktrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> purgeFiles(
+    String pathKey, {
+    Iterable<String> excludedFileNames = const [],
+  }) async {
+    print(
+        'Purging outdated files. (excluding: ${excludedFileNames.join(', ')})');
+    int purgedFiles = 0;
+    try {
+      for (final String path in filesBox.keys) {
+        if (!path.startsWith(pathKey)) {
+          continue;
+        }
+        final String fileName = path.split('/').last;
+        if (!excludedFileNames.contains(fileName)) {
+          print('\t\tDeleting file: $path');
+
+          await filesBox.delete(path);
+
+          print('\t\tSuccessfully deleted.');
+
+          purgedFiles++;
+        }
+      }
+
+      if (purgedFiles > 0) {
+        print('Successfully purged $purgedFiles files.');
+      } else {
+        print('No files were purged.');
+      }
+    } catch (e, stacktrace) {
+      throw CodelesslyException.fileIoException(
+        message: 'Failed to purge files in $pathKey.\nError: $e',
+        originalException: e,
+        stacktrace: stacktrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> saveFile(String pathKey, String name, Uint8List bytes) async {
+    try {
+      final key = '$pathKey/$name';
+      await filesBox.put(key, bytes);
+      print('Successfully saved file $pathKey/$name');
+    } catch (e, stacktrace) {
+      throw CodelesslyException.fileIoException(
+        message: 'Failed to save file $pathKey/$name',
+        originalException: e,
+        stacktrace: stacktrace,
+      );
+    }
+  }
+}
