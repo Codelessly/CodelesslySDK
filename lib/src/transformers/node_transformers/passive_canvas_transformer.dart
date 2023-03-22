@@ -19,7 +19,6 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     required Widget body,
     PreferredSizeWidget? topAppBarPlaceholder,
     Widget? navigationBarPlaceholder,
-    Map<int, Uint8List> imageBytes = const {},
     required WidgetBuildSettings settings,
   }) {
     final CanvasProperties props = node.properties;
@@ -94,10 +93,9 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
 
     Widget widget =
         manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
-              node,
-              children: [scaffold],
-              imageBytes: imageBytes,
-            );
+      node,
+      children: [scaffold],
+    );
 
     return widget;
   }
