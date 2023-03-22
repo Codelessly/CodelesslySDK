@@ -77,3 +77,4 @@ build/
 **/Podfile.lock
 
 coverage/
+pubspec_overrides.yaml
