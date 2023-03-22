@@ -24,7 +24,7 @@ transformers under `codelessly_sdk/lib/src/transformers/node_transformers`
 for additional examples.
 
 ```dart
-import 'package:codelessly_api/api.dart';
+import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';

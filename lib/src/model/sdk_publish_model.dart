@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:codelessly_api/api.dart';
+import 'package:codelessly_api/codelessly_api.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 

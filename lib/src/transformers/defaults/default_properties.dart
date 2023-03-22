@@ -1,4 +1,4 @@
-import 'package:codelessly_api/api.dart';
+import 'package:codelessly_api/codelessly_api.dart';
 
 import '../../../codelessly_sdk.dart';
 

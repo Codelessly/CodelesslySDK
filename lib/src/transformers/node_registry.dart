@@ -1,4 +1,4 @@
-import 'package:codelessly_api/api.dart';
+import 'package:codelessly_api/codelessly_api.dart';
 
 /// In the SDK we are not using GetIt, so this singleton should help making
 /// the nodes available when they are needed.

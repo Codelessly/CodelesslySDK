@@ -1,4 +1,4 @@
-import 'package:codelessly_api/api.dart' hide kRadialReactionRadius;
+import 'package:codelessly_api/codelessly_api.dart' hide kRadialReactionRadius;
 import 'package:flutter/material.dart';
 
 const Color kDefaultPrimaryColor = Color(0xFF5C69E5);
