@@ -1,0 +1,11 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # The other properties are the same as default (https://pub.dev/packages/json_serializable#build-configuration).
+          # explicit_to_json must be true for nested properties to work (like a Paint inside a Frame, toJson must be called in both)
+          explicit_to_json: true
+          # include_if_null should be false to avoid sending null properties to Firebase.
+          include_if_null: false
+          any_map: true # The squadron library for web requires dynamic maps.

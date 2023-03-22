@@ -1,0 +1,147 @@
+import 'dart:typed_data';
+
+import 'package:codelessly_api/api.dart';
+import 'package:flutter/material.dart';
+
+import '../../../codelessly_sdk.dart';
+
+class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
+  PassiveCanvasTransformer(super.getNode, super.manager);
+
+  static List<String> getBodyChildren(CanvasNode node) =>
+      [...node.childrenOrEmpty]
+        ..remove(node.properties.topAppBarPlaceholderId)
+        ..remove(node.properties.navigationBarPlaceholderId);
+
+  Widget _wrapInScaffold({
+    required CanvasNode node,
+    required BuildContext context,
+    required Widget body,
+    PreferredSizeWidget? topAppBarPlaceholder,
+    Widget? navigationBarPlaceholder,
+    Map<int, Uint8List> imageBytes = const {},
+    required WidgetBuildSettings settings,
+  }) {
+    final CanvasProperties props = node.properties;
+
+    Widget scaffold;
+    PreferredSizeWidget? appBar = topAppBarPlaceholder ??
+        ((props.topAppBarPlaceholderId != null)
+            ? manager.buildWidgetByID(
+                props.topAppBarPlaceholderId!,
+                context,
+                settings: settings,
+              ) as PreferredSizeWidget
+            : null);
+    Widget? floatingActionButton = (props.floatingActionButton != null)
+        ? PassiveFloatingActionButtonWidget.buildFAB(
+            props.floatingActionButton!,
+            useFonts: false,
+          )
+        : null;
+    Widget? bottomNavigationBar = navigationBarPlaceholder ??
+        ((props.navigationBarPlaceholderId != null)
+            ? manager.buildWidgetByID(
+                props.navigationBarPlaceholderId!, context,
+                settings: settings)
+            : null);
+
+    if (node.scaleMode == ScaleMode.autoScale) {
+      final double screenWidth = MediaQuery.of(context).size.width;
+      final double screenHeight = MediaQuery.of(context).size.height;
+      final double canvasWidth = node.constrainValue(
+        node.outerBoxLocal.width,
+        AxisC.horizontal,
+        nodeBoundaryType: NodeBoundaryType.outerBox,
+      );
+      final double viewRatio = screenWidth / canvasWidth;
+
+      // If the width of this canvas is smaller than the viewport's size,
+      // use the canvas's width;
+      // Otherwise, use the viewport's width.
+      body = FittedBox(
+        fit: BoxFit.fitWidth,
+        alignment: Alignment.topCenter,
+        child: SizedBox(
+          width: viewRatio < 1 ? canvasWidth : screenWidth,
+          height: screenHeight,
+          child: body,
+        ),
+      );
+    }
+
+    if (node.isScrollable) {
+      body = SingleChildScrollView(
+        scrollDirection: node.scrollDirection.flutterAxis,
+        reverse: node.reverse,
+        primary: node.primary,
+        physics: node.physics.flutterScrollPhysics,
+        keyboardDismissBehavior:
+            node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+        child: body,
+      );
+    }
+
+    scaffold = Scaffold(
+      backgroundColor: retrieveBackgroundColor(node),
+      appBar: appBar,
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation:
+          props.floatingActionButton?.location.toFloatingActionButtonLocation(),
+      bottomNavigationBar: bottomNavigationBar,
+      body: SizedBox.expand(child: body),
+    );
+
+    Widget widget =
+        manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
+              node,
+              children: [scaffold],
+              imageBytes: imageBytes,
+            );
+
+    return widget;
+  }
+
+  @override
+  Widget buildWidget(
+    CanvasNode node,
+    BuildContext context, [
+    WidgetBuildSettings settings = const WidgetBuildSettings(),
+  ]) {
+    final BaseNode placeholderBody = getNode(node.properties.bodyId);
+    Widget child = manager.buildWidgetFromNode(placeholderBody, context,
+        settings: settings);
+    if (node.isScrollable) {
+      if (node.scrollDirection == AxisC.vertical &&
+          (placeholderBody.isVerticalExpanded ||
+              placeholderBody.isVerticalFlexible)) {
+        child = SizedBox(
+          height: placeholderBody.basicBoxLocal.height,
+          child: child,
+        );
+      } else if (node.scrollDirection == AxisC.horizontal &&
+          (placeholderBody.isHorizontalExpanded ||
+              placeholderBody.isHorizontalFlexible)) {
+        child = SizedBox(
+          width: placeholderBody.basicBoxLocal.width,
+          child: child,
+        );
+      }
+    }
+
+    return _wrapInScaffold(
+      context: context,
+      node: node,
+      body: child,
+      settings: settings,
+    );
+  }
+
+  static Color? retrieveBackgroundColor(CanvasNode node) {
+    if (node.fills.length == 1 && node.fills[0].type == PaintType.solid) {
+      return node.fills[0].color
+          ?.toFlutterColor(opacity: node.fills[0].opacity);
+    }
+    return node.fills.isNotEmpty ? Colors.transparent : Colors.white;
+  }
+}
