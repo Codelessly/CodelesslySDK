@@ -96,7 +96,6 @@ class PassiveRectangleWidget extends StatelessWidget {
       ),
       child: Stack(
         clipBehavior: Clip.none,
-        fit: StackFit.expand,
         children: [
           ...buildFills(node, codelesslyContext),
           ...buildStrokes(node),
@@ -116,10 +115,17 @@ List<Widget> wrapWithPadding(BaseNode node, List<Widget> children) {
     return children;
   }
 
-  return children.map((child) => Padding(
-    padding: resolvedPadding,
-    child: child,
-  )).toList();
+  return [
+    Positioned.fill(
+      child: Padding(
+        padding: resolvedPadding,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: children,
+        ),
+      ),
+    ),
+  ];
 }
 
 List<BoxShadow> retrieveBoxShadow(BaseNode node) {
@@ -329,13 +335,15 @@ List<Widget> buildStrokes(BaseNode node) {
   if (node.dashPattern.isEmpty) {
     return [
       for (final paint in node.strokes)
-        DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: getBorderRadius(node),
-            border: Border.all(
-              strokeAlign: node.strokeAlign.alignment,
-              color: paint.toFlutterColor()!,
-              width: node.strokeWeight,
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: getBorderRadius(node),
+              border: Border.all(
+                strokeAlign: node.strokeAlign.alignment,
+                color: paint.toFlutterColor()!,
+                width: node.strokeWeight,
+              ),
             ),
           ),
         ),
@@ -343,17 +351,19 @@ List<Widget> buildStrokes(BaseNode node) {
   } else {
     return [
       for (final paint in node.strokes)
-        CustomPaint(
-          painter: StrokePainter(
-            color: paint.toFlutterColor()!,
-            borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
-            dashPattern: node.dashPattern,
-            strokeWidth: node.strokeWeight,
-            strokeMiterLimit: node.strokeMiterLimit,
-            strokeCap: node.strokeCap,
-            strokeAlign: node.strokeAlign,
-            strokeSide: node.strokeSide,
-            boxShape: getBoxShape(node),
+        Positioned.fill(
+          child: CustomPaint(
+            painter: StrokePainter(
+              color: paint.toFlutterColor()!,
+              borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+              dashPattern: node.dashPattern,
+              strokeWidth: node.strokeWeight,
+              strokeMiterLimit: node.strokeMiterLimit,
+              strokeCap: node.strokeCap,
+              strokeAlign: node.strokeAlign,
+              strokeSide: node.strokeSide,
+              boxShape: getBoxShape(node),
+            ),
           ),
         ),
     ];
@@ -376,20 +386,24 @@ List<Widget> buildFills(
     ...node.fills.mapIndexed((index, paint) {
       switch (paint.type) {
         case PaintType.solid:
-          return DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: borderRadius,
-              color: paint.toFlutterColor()!,
+          return Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: borderRadius,
+                color: paint.toFlutterColor()!,
+              ),
             ),
           );
         case PaintType.gradientLinear:
         case PaintType.gradientRadial:
         case PaintType.gradientAngular:
         case PaintType.gradientDiamond:
-          return DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: borderRadius,
-              gradient: retrieveGradient(paint),
+          return Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: borderRadius,
+                gradient: retrieveGradient(paint),
+              ),
             ),
           );
         case PaintType.image:
@@ -441,7 +455,7 @@ List<Widget> buildFills(
             );
           }
 
-          return child;
+          return Positioned.fill(child: child);
 
         case PaintType.emoji:
           return const SizedBox.shrink();
