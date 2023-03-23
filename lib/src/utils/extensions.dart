@@ -860,35 +860,37 @@ extension TextAlignHorizontalEnumExtensions on TextAlignHorizontalEnum {
   }
 }
 
+extension FontWeightExtension on FontWeightNumeric {
+  FontWeight get flutterFontWeight {
+    switch (this) {
+      case FontWeightNumeric.w100:
+        return FontWeight.w100;
+      case FontWeightNumeric.w200:
+        return FontWeight.w200;
+      case FontWeightNumeric.w300:
+        return FontWeight.w300;
+      case FontWeightNumeric.w400:
+        return FontWeight.w400;
+      case FontWeightNumeric.w500:
+        return FontWeight.w500;
+      case FontWeightNumeric.w600:
+        return FontWeight.w600;
+      case FontWeightNumeric.w700:
+        return FontWeight.w700;
+      case FontWeightNumeric.w800:
+        return FontWeight.w800;
+      case FontWeightNumeric.w900:
+        return FontWeight.w900;
+    }
+  }
+}
+
 extension FontNameExtensions on FontName {
   /// Convert text defined fontWeights like "Bold" into Flutter types, like w700.
   /// Source: https://cssreference.io/property/font-weight/
   FontWeight get flutterFontWeight {
     // This is used for layouts exported after April 30, 2021.
-    if (weight != null) {
-      switch (weight) {
-        case FontWeightNumeric.w100:
-          return FontWeight.w100;
-        case FontWeightNumeric.w200:
-          return FontWeight.w200;
-        case FontWeightNumeric.w300:
-          return FontWeight.w300;
-        case FontWeightNumeric.w400:
-          return FontWeight.w400;
-        case FontWeightNumeric.w500:
-          return FontWeight.w500;
-        case FontWeightNumeric.w600:
-          return FontWeight.w600;
-        case FontWeightNumeric.w700:
-          return FontWeight.w700;
-        case FontWeightNumeric.w800:
-          return FontWeight.w800;
-        case FontWeightNumeric.w900:
-          return FontWeight.w900;
-        case null:
-          break;
-      }
-    }
+    if (weight != null) return weight!.flutterFontWeight;
 
     // Deprecated
 
