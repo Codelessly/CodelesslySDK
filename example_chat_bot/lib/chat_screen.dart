@@ -1,8 +1,17 @@
+import 'dart:math';
+import 'dart:ui';
+
 import 'package:bubble/bubble.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:example_chat_bot/main.dart';
+import 'package:example_chat_bot/theme_extensions.dart';
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
+
+import 'constants.dart';
 
 const layouts = [
   '0Qq5F2I4ZH7u0XtMu3KE',
@@ -23,7 +32,18 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController animController = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 2),
+  )..repeat(reverse: true);
+
+  late final Animation<double> anim = CurvedAnimation(
+    parent: animController,
+    curve: Curves.easeInOut,
+  );
+
   /// A local codelessly SDK to allow us to lazily load the instance once at
   /// least the first message is sent instead of when the app first starts.
   final Codelessly codelessly = Codelessly(
@@ -47,25 +67,9 @@ class _ChatScreenState extends State<ChatScreen> {
   /// whenever a new message is sent.
   final ScrollController scrollController = ScrollController();
 
-  /// The color of the CodelesslyGPT's message bubbles.
-  final Color leftColor = const Color(0xFFff74ee);
-
-  /// The color of the user's message bubbles.
-  final Color rightColor = const Color(0xFF5C69E5);
-
-  /// The background color of the chat screen.
-  final Color bg = const Color(0xFFFAFAFA);
-
-  /// The text style of the CodelesslyGPT's message bubbles.
-  final TextStyle leftStyle =
-      GoogleFonts.poppins().copyWith(color: Colors.black, fontSize: 12);
-
-  /// The text style of the user's message bubbles.
-  final TextStyle rightStyle =
-      GoogleFonts.poppins().copyWith(color: Colors.white, fontSize: 12);
-
   @override
   void dispose() {
+    animController.dispose();
     promptController.dispose();
     scrollController.dispose();
     codelessly.dispose();
@@ -78,12 +82,18 @@ class _ChatScreenState extends State<ChatScreen> {
       margin: const BubbleEdges.all(4),
       nip: BubbleNip.rightBottom,
       alignment: Alignment.centerRight,
-      color: rightColor,
+      color: context.colorScheme.primaryContainer,
+      elevation: 0,
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.8,
         ),
-        child: Text(text, style: rightStyle),
+        child: Text(
+          text,
+          style: context.textTheme.bodySmall?.copyWith(
+            color: context.colorScheme.onSurface,
+          ),
+        ),
       ),
     );
   }
@@ -94,12 +104,18 @@ class _ChatScreenState extends State<ChatScreen> {
       margin: const BubbleEdges.all(4),
       nip: BubbleNip.leftBottom,
       alignment: Alignment.centerLeft,
-      color: leftColor,
+      color: context.colorScheme.secondaryContainer,
+      elevation: 0,
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.8,
         ),
-        child: Text(text, style: leftStyle),
+        child: Text(
+          text,
+          style: context.textTheme.bodySmall?.copyWith(
+            color: context.colorScheme.onSurface,
+          ),
+        ),
       ),
     );
   }
@@ -107,10 +123,12 @@ class _ChatScreenState extends State<ChatScreen> {
   /// The CodelesslyGPT's SDK message bubbles.
   Widget sdkBubble(BuildContext context, String layoutID) {
     return Bubble(
-      margin: const BubbleEdges.only(left: 4, right: 4, bottom: 4),
+      margin: const BubbleEdges.only(left: 12, right: 12, bottom: 8),
       padding: const BubbleEdges.all(2),
+      radius: const Radius.circular(8),
       alignment: Alignment.centerLeft,
-      color: leftColor,
+      color: context.colorScheme.secondaryContainer,
+      elevation: 0,
       child: Container(
         height: 400,
         clipBehavior: Clip.antiAlias,
@@ -118,7 +136,7 @@ class _ChatScreenState extends State<ChatScreen> {
           maxWidth: MediaQuery.of(context).size.width * 0.8,
         ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: CodelesslyWidget(
           layoutID: layoutID,
@@ -138,7 +156,9 @@ class _ChatScreenState extends State<ChatScreen> {
       width: double.infinity,
       height: unlimitedHeight ? null : 300,
       clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(color: leftColor),
+      decoration: BoxDecoration(
+        color: context.colorScheme.secondaryContainer,
+      ),
       child: CodelesslyWidget(
         layoutID: layoutID,
         codelessly: codelessly,
@@ -170,11 +190,9 @@ class _ChatScreenState extends State<ChatScreen> {
       Column(mainAxisSize: MainAxisSize.min, children: [
         leftBubble(
           context,
-          'Aurora Aksnes (born 15 June 1996), known mononymously'
-          'as Aurora, is a Norwegian singer, songwriter and record'
-          "producer. Here's what I found about here:",
+          "Here's what I found about Aurora Aksnes:",
         ),
-        sdkBubbleCentered(context, layouts[2]),
+        sdkBubble(context, layouts[2]),
       ]);
 
   /// Slides a widget from the [xOffset] if [condition] is true to its
@@ -283,278 +301,440 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: bg,
-      appBar: AppBar(
-        leading: SizedBox(
-          child: Image.asset(
-            'packages/codelessly_sdk/assets/codelessly_logo.png',
+    final box = Hive.box(settingsPath);
+    return ValueListenableBuilder(
+      valueListenable: box.listenable(),
+      builder: (context, Box box, child) {
+        final currentMode = getThemeMode(box);
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: context.colorScheme.primaryContainer.withOpacity(0.9),
+            surfaceTintColor: Colors.transparent,
+            // elevation: 10,
+            // shadowColor: Colors.black,
+            leading: SizedBox(
+              child: Image.asset(
+                'packages/codelessly_sdk/assets/codelessly_logo.png',
+              ),
+            ),
+            automaticallyImplyLeading: false,
+            title: const Text('CodelesslyGPT'),
+            actions: [
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: busy ? null : reset,
+                icon: busy
+                    ? SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(
+                          color: context.colorScheme.onPrimaryContainer,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(Icons.restart_alt),
+                tooltip: 'Clear cache & reset chat',
+              ),
+              // theme mode.
+              IconButton(
+                onPressed: () {
+                  box.put(
+                    'themeMode',
+                    currentMode == ThemeMode.light ? 'dark' : 'light',
+                  );
+                },
+                icon: Icon(
+                  currentMode == ThemeMode.light
+                      ? Icons.dark_mode
+                      : Icons.light_mode,
+                ),
+                tooltip: 'Toggle theme mode',
+              ),
+              const SizedBox(width: 8),
+            ],
+            centerTitle: true,
+          ),
+          extendBodyBehindAppBar: true,
+          body: Builder(
+            builder: (context) {
+              return Stack(
+                fit: StackFit.expand,
+                clipBehavior: Clip.none,
+                children: [
+                  // Background
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: context.colorScheme.background.withOpacity(0.75),
+                    ),
+                    position: DecorationPosition.foreground,
+                    child: AnimatedBuilder(
+                        animation: anim,
+                        builder: (context, child) {
+                          return CustomPaint(
+                            painter: BackgroundPaint(
+                              blue: const Color(0xFF4350CC),
+                              lightBlue: Colors.lightBlueAccent,
+                              purple: const Color(0xFFFE48EF),
+                              yellow: Colors.yellow,
+                              anim: anim.value,
+                            ),
+                          );
+                        }),
+                  ),
+
+                  // Contents
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      buildChatView(context),
+                      buildUserInteractionArea(context),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Expanded buildChatView(BuildContext context) {
+    return Expanded(
+      child: Scrollbar(
+        controller: scrollController,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: ScrollConfiguration(
+              behavior:
+                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
+              child: ListView(
+                controller: scrollController,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                children: [
+                  SizedBox(
+                      height: (Scaffold.of(context).appBarMaxHeight ?? 56)),
+                  leftBubble(context, 'Hi, how can I assist you today?'),
+                  slideLeftIf(
+                    chatProgress >= 1,
+                    rightBubble(context, prompts[0]),
+                  ),
+                  slideRightIf(
+                    chatProgress >= 2,
+                    firstAnswer(context),
+                  ),
+                  slideLeftIf(
+                    chatProgress >= 3,
+                    rightBubble(context, prompts[1]),
+                  ),
+                  slideRightIf(
+                    chatProgress >= 4,
+                    secondAnswer(context),
+                  ),
+                  slideLeftIf(
+                    chatProgress >= 5,
+                    rightBubble(context, prompts[2]),
+                  ),
+                  slideRightIf(
+                    chatProgress >= 6,
+                    thirdAnswer(context),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
-        automaticallyImplyLeading: false,
-        title: const Text('CodelesslyGPT'),
-        actions: [
-          IconButton(
-            onPressed: busy ? null : reset,
-            icon: busy
-                ? SizedBox.square(
-                    dimension: 18,
-                    child: CircularProgressIndicator(
-                      color: rightColor,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : const Icon(Icons.restart_alt),
-            tooltip: 'Clear cache & reset chat',
-          )
-        ],
-        shadowColor: const Color(0x8D000000),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF5C69E5),
-        centerTitle: true,
-        titleSpacing: 0,
-        titleTextStyle: GoogleFonts.getFont(
-          'Poppins',
-          color: const Color(0xFF5C69E5),
-          fontSize: 18,
-        ),
       ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    );
+  }
+
+  Center buildUserInteractionArea(BuildContext context) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        clipBehavior: Clip.hardEdge,
+        constraints: const BoxConstraints(maxWidth: 800),
+        decoration: BoxDecoration(
+          color: context.colorScheme.primaryContainer,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(8),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            const SizedBox(width: 8),
             Expanded(
-              child: Scrollbar(
-                controller: scrollController,
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 800),
-                    child: ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(context)
-                          .copyWith(scrollbars: false),
-                      child: ListView(
-                        controller: scrollController,
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        children: [
-                          leftBubble(
-                              context, 'Hi, how can I assist you today?'),
-                          slideLeftIf(
-                            chatProgress >= 1,
-                            rightBubble(context, prompts[0]),
-                          ),
-                          slideRightIf(
-                            chatProgress >= 2,
-                            firstAnswer(context),
-                          ),
-                          slideLeftIf(
-                            chatProgress >= 3,
-                            rightBubble(context, prompts[1]),
-                          ),
-                          slideRightIf(
-                            chatProgress >= 4,
-                            secondAnswer(context),
-                          ),
-                          slideLeftIf(
-                            chatProgress >= 5,
-                            rightBubble(context, prompts[2]),
-                          ),
-                          slideRightIf(
-                            chatProgress >= 6,
-                            thirdAnswer(context),
-                          ),
-                        ],
-                      ),
+              child: TextField(
+                controller: promptController,
+                readOnly: true,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.left,
+                autofocus: true,
+                autocorrect: false,
+                cursorRadius: const Radius.circular(2),
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.onSurface,
+                ),
+                decoration: InputDecoration(
+                  alignLabelWithHint: true,
+                  icon: const Material(
+                    color: Colors.transparent,
+                    shape: CircleBorder(),
+                    clipBehavior: Clip.hardEdge,
+                    child: Icon(Icons.add, size: 24),
+                  ),
+                  errorMaxLines: 1,
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  isDense: true,
+                  suffixIcon: Material(
+                    color: Colors.transparent,
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.hardEdge,
+                    child: IconButton(
+                      icon: const Icon(Icons.mic_none, size: 24),
+                      onPressed: () {},
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: context.colorScheme.onPrimaryContainer,
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(
+                      width: 1.5,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(
+                      width: 1,
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(
+                      width: 1,
+                    ),
+                  ),
+                  disabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(
+                      width: 1,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(
+                      width: 0,
+                      color: Colors.transparent,
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(
+                      width: 0,
+                      color: Colors.transparent,
                     ),
                   ),
                 ),
               ),
             ),
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                clipBehavior: Clip.hardEdge,
-                constraints: const BoxConstraints(maxWidth: 800),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(8),
+            const SizedBox(width: 8),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.fastOutSlowIn,
+              padding: const EdgeInsets.all(12),
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: context.colorScheme.onPrimaryContainer,
+                borderRadius: BorderRadius.circular(8),
+                border: chatProgress % 2 != 0
+                    ? Border.all(
+                        color: context.colorScheme.onSurfaceVariant,
+                        width: 1,
+                      )
+                    : null,
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: InkWell(
+                onTap: chatProgress % 2 == 0 && chatProgress < 6 && !busy
+                    ? progressChat
+                    : null,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  switchInCurve: Curves.easeOutQuart,
+                  switchOutCurve: Curves.easeInQuart,
+                  transitionBuilder: (child, animation) => ScaleTransition(
+                    scale: animation,
+                    child: child,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x1A000000),
-                      spreadRadius: 0,
-                      offset: Offset(0, -4),
-                      blurRadius: 6,
-                    )
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: SizedBox(
-                        height: 40,
-                        child: TextField(
-                          controller: promptController,
-                          readOnly: true,
-                          decoration: InputDecoration(
-                            icon: const Material(
-                              color: Colors.transparent,
-                              shape: CircleBorder(),
-                              clipBehavior: Clip.hardEdge,
-                              child: Icon(
-                                Icons.add,
-                                size: 24,
-                                color: Color(0xFF5C69E5),
-                              ),
-                            ),
-                            labelStyle: GoogleFonts.getFont(
-                              'Roboto',
-                              color: Colors.black,
-                              fontSize: 14,
-                            ),
-                            errorStyle: GoogleFonts.getFont(
-                              'Roboto',
-                              color: const Color(0xFFFF0000),
-                              fontSize: 12,
-                            ),
-                            errorMaxLines: 1,
-                            floatingLabelBehavior: FloatingLabelBehavior.never,
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 16),
-                            suffixIcon: Material(
-                              color: Colors.transparent,
-                              shape: const CircleBorder(),
-                              clipBehavior: Clip.hardEdge,
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.mic_none,
-                                  size: 24,
-                                  color: Color(0xFF5C69E5),
-                                ),
-                                onPressed: () {},
-                              ),
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                            focusColor: Colors.black,
-                            hoverColor: const Color(0x197F7F7F),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(100.0),
-                              borderSide: const BorderSide(
-                                color: Color(0xFFFF0000),
-                                width: 3,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(100.0),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF5C69E5),
-                                width: 2,
-                              ),
-                            ),
-                            focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(100.0),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF5C69E5),
-                                width: 2,
-                              ),
-                            ),
-                            disabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(100.0),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF5C69E5),
-                                width: 2,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(100.0),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF5C69E5),
-                                width: 2,
-                              ),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(100.0),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF5C69E5),
-                                width: 2,
-                              ),
-                            ),
-                            alignLabelWithHint: true,
+                  child: chatProgress % 2 != 0
+                      ? SizedBox.square(
+                          key: const ValueKey('loading'),
+                          dimension: 14,
+                          child: CircularProgressIndicator(
+                            color: context.colorScheme.onSurface,
+                            strokeWidth: 2,
                           ),
-                          keyboardType: TextInputType.text,
-                          style: GoogleFonts.getFont(
-                            'Roboto',
-                            color: Colors.black,
-                            fontSize: 14,
-                          ),
-                          textAlign: TextAlign.left,
-                          autofocus: true,
-                          autocorrect: false,
-                          cursorHeight: 14,
-                          cursorRadius: const Radius.circular(2),
-                          cursorColor: const Color(0xFF5C69E5),
+                        )
+                      : Icon(
+                          Icons.send,
+                          key: const ValueKey('send'),
+                          // size: 20,
+                          color: context.colorScheme.onSurface,
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    SizedBox.square(
-                      dimension: 40,
-                      child: TextButton(
-                        onPressed:
-                            chatProgress % 2 == 0 && chatProgress < 6 && !busy
-                                ? progressChat
-                                : null,
-                        style: TextButton.styleFrom(
-                          backgroundColor: const Color(0x005C69E5),
-                          foregroundColor: const Color(0xFF5C69E5),
-                          shadowColor: const Color(0xFFA5A5A5),
-                          padding: EdgeInsets.zero,
-                          textStyle: GoogleFonts.getFont(
-                            'Roboto',
-                            color: const Color(0xFF5C69E5),
-                            fontSize: 13,
-                          ),
-                          shape: const CircleBorder(
-                            side: BorderSide(
-                              color: Color(0xFF5C69E5),
-                              width: 2,
-                            ),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          switchInCurve: Curves.easeOutQuart,
-                          switchOutCurve: Curves.easeInQuart,
-                          transitionBuilder: (child, animation) =>
-                              ScaleTransition(scale: animation, child: child),
-                          child: chatProgress % 2 != 0
-                              ? SizedBox.square(
-                                  dimension: 18,
-                                  child: CircularProgressIndicator(
-                                    color: rightColor,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(
-                                  Icons.send,
-                                  size: 20,
-                                  color: Color(0xFF5C69E5),
-                                ),
-                        ),
-                      ),
-                    )
-                  ],
                 ),
               ),
-            ),
+            )
           ],
         ),
       ),
     );
   }
+}
+
+class BackgroundPaint extends CustomPainter {
+  final Color blue;
+  final Color lightBlue;
+  final Color purple;
+  final Color yellow;
+  final double anim;
+
+  BackgroundPaint({
+    required this.blue,
+    required this.lightBlue,
+    required this.purple,
+    required this.yellow,
+    required this.anim,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // final double diagonal = sqrt(pow(size.width, 2) + pow(size.height, 2));
+    // const double rectWidth = 350;
+    // const double rectHeight = 550;
+    final double rectWidth = size.shortestSide * 0.75;
+    final double rectHeight = size.shortestSide * 0.9;
+    // final double horizontalOffset = size.width / 3;
+
+    final Paint bluePaint = Paint()
+      ..style = PaintingStyle.fill
+      ..shader = ui.Gradient.radial(
+        Offset(rectWidth, 0),
+        size.shortestSide,
+        [blue, lightBlue],
+      );
+    final Paint bluePaintInverse = Paint()
+      ..style = PaintingStyle.fill
+      ..shader = ui.Gradient.radial(
+        Offset(rectWidth, 0),
+        size.shortestSide,
+        [lightBlue, blue],
+      );
+    final Paint pinkPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..shader = ui.Gradient.radial(
+         Offset(rectWidth, 0),
+        size.shortestSide,
+        [blue, purple],
+      );
+    // final Paint pinkPaintInverse = Paint()
+    //   ..style = PaintingStyle.fill
+    //   ..shader = ui.Gradient.radial(
+    //     const Offset(rectWidth, 0),
+    //     size.shortestSide,
+    //     [color2, color1],
+    //   );
+    final Paint yellowPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..shader = ui.Gradient.radial(
+        Offset(rectWidth, 0),
+        size.shortestSide,
+        [purple, yellow],
+      );
+    // final Paint yellowPaintInverse = Paint()
+    //   ..style = PaintingStyle.fill
+    //   ..shader = ui.Gradient.radial(
+    //     const Offset(rectWidth, 0),
+    //     size.shortestSide,
+    //     [color3, color2],
+    //   );
+
+    // YELLOW
+    final double bottom1 = rectHeight;
+    final Path path1 = Path()
+      ..moveTo(0, 0)
+      ..lineTo(rectWidth, 0)
+      ..cubicTo(
+        rectWidth * 1,
+        bottom1 * 0.8,
+        rectWidth * 0,
+        bottom1 * 0.5,
+        0,
+        bottom1,
+      )
+      ..close();
+
+    canvas.drawShadow(path1, Colors.black, 10, false);
+    canvas.drawPath(path1, yellowPaint);
+
+    // PINK
+    final double bottom2 = rectHeight - 150;
+    final Path path2 = Path()
+      ..moveTo(0, 0)
+      ..lineTo(rectWidth, 0)
+      ..cubicTo(
+        rectWidth * 0.75,
+        bottom2 * 0.7,
+        rectWidth * 0.15,
+        bottom2 * 0.5,
+        0,
+        bottom2,
+      )
+      ..close();
+
+    canvas.drawShadow(path2, Colors.black, 10, false);
+    canvas.drawPath(path2, pinkPaint);
+
+    // BLUE
+    final double bottom3 = rectHeight - 250;
+    final Path path3 = Path()
+      ..moveTo(0, 0)
+      ..lineTo(rectWidth, 0)
+      ..cubicTo(
+        rectWidth * 0.5,
+        bottom3 * 0.7,
+        rectWidth * 0.25,
+        bottom3 * 0.15,
+        0,
+        bottom3,
+      )
+      ..close();
+
+    canvas.drawShadow(path3, Colors.black, 10, false);
+    canvas.drawPath(path3, bluePaint);
+
+    // BLUE INVERSE
+    final double bottom3Inverse = rectHeight - 350;
+    final Path path3Inverse = Path()
+      ..moveTo(0, 0)
+      ..lineTo(rectWidth, 0)
+      ..cubicTo(
+        rectWidth * 0.3,
+        bottom3Inverse * 0.5,
+        rectWidth * 0,
+        bottom3Inverse * 0.05,
+        0,
+        bottom3Inverse,
+      )
+      ..close();
+
+    canvas.drawPath(path3Inverse, bluePaintInverse);
+  }
+
+  @override
+  bool shouldRepaint(covariant BackgroundPaint oldDelegate) =>
+      oldDelegate.anim != anim;
 }
