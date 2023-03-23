@@ -544,7 +544,6 @@ class _ChatScreenState extends State<ChatScreen>
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.fastOutSlowIn,
-              padding: const EdgeInsets.all(12),
               width: 48,
               height: 48,
               decoration: BoxDecoration(
@@ -562,29 +561,32 @@ class _ChatScreenState extends State<ChatScreen>
                 onTap: chatProgress % 2 == 0 && chatProgress < 6 && !busy
                     ? progressChat
                     : null,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  switchInCurve: Curves.easeOutQuart,
-                  switchOutCurve: Curves.easeInQuart,
-                  transitionBuilder: (child, animation) => ScaleTransition(
-                    scale: animation,
-                    child: child,
-                  ),
-                  child: chatProgress % 2 != 0
-                      ? SizedBox.square(
-                          key: const ValueKey('loading'),
-                          dimension: 14,
-                          child: CircularProgressIndicator(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    switchInCurve: Curves.easeOutQuart,
+                    switchOutCurve: Curves.easeInQuart,
+                    transitionBuilder: (child, animation) => ScaleTransition(
+                      scale: animation,
+                      child: child,
+                    ),
+                    child: chatProgress % 2 != 0
+                        ? SizedBox.square(
+                            key: const ValueKey('loading'),
+                            dimension: 14,
+                            child: CircularProgressIndicator(
+                              color: context.colorScheme.onSurface,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Icon(
+                            Icons.send,
+                            key: const ValueKey('send'),
+                            // size: 20,
                             color: context.colorScheme.onSurface,
-                            strokeWidth: 2,
                           ),
-                        )
-                      : Icon(
-                          Icons.send,
-                          key: const ValueKey('send'),
-                          // size: 20,
-                          color: context.colorScheme.onSurface,
-                        ),
+                  ),
                 ),
               ),
             )
