@@ -308,7 +308,8 @@ class _ChatScreenState extends State<ChatScreen>
         final currentMode = getThemeMode(box);
         return Scaffold(
           appBar: AppBar(
-            backgroundColor: context.colorScheme.primaryContainer.withOpacity(0.9),
+            backgroundColor:
+                context.colorScheme.primaryContainer.withOpacity(0.9),
             surfaceTintColor: Colors.transparent,
             // elevation: 10,
             // shadowColor: Colors.black,
@@ -460,137 +461,140 @@ class _ChatScreenState extends State<ChatScreen>
             top: Radius.circular(8),
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: promptController,
-                readOnly: true,
-                keyboardType: TextInputType.text,
-                textAlign: TextAlign.left,
-                autofocus: true,
-                autocorrect: false,
-                cursorRadius: const Radius.circular(2),
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: context.colorScheme.onSurface,
-                ),
-                decoration: InputDecoration(
-                  alignLabelWithHint: true,
-                  icon: const Material(
-                    color: Colors.transparent,
-                    shape: CircleBorder(),
-                    clipBehavior: Clip.hardEdge,
-                    child: Icon(Icons.add, size: 24),
+        child: SafeArea(
+          top: false,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: promptController,
+                  readOnly: true,
+                  keyboardType: TextInputType.text,
+                  textAlign: TextAlign.left,
+                  autofocus: true,
+                  autocorrect: false,
+                  cursorRadius: const Radius.circular(2),
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: context.colorScheme.onSurface,
                   ),
-                  errorMaxLines: 1,
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  isDense: true,
-                  suffixIcon: Material(
-                    color: Colors.transparent,
-                    shape: const CircleBorder(),
-                    clipBehavior: Clip.hardEdge,
-                    child: IconButton(
-                      icon: const Icon(Icons.mic_none, size: 24),
-                      onPressed: () {},
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: context.colorScheme.onPrimaryContainer,
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(
-                      width: 1.5,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide(
-                      width: 1,
-                      color: context.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(
-                      width: 1,
-                    ),
-                  ),
-                  disabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(
-                      width: 1,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(
-                      width: 0,
+                  decoration: InputDecoration(
+                    alignLabelWithHint: true,
+                    icon: const Material(
                       color: Colors.transparent,
+                      shape: CircleBorder(),
+                      clipBehavior: Clip.hardEdge,
+                      child: Icon(Icons.add, size: 24),
                     ),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(
-                      width: 0,
+                    errorMaxLines: 1,
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    isDense: true,
+                    suffixIcon: Material(
                       color: Colors.transparent,
+                      shape: const CircleBorder(),
+                      clipBehavior: Clip.hardEdge,
+                      child: IconButton(
+                        icon: const Icon(Icons.mic_none, size: 24),
+                        onPressed: () {},
+                      ),
                     ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.fastOutSlowIn,
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: context.colorScheme.onPrimaryContainer,
-                borderRadius: BorderRadius.circular(8),
-                border: chatProgress % 2 != 0
-                    ? Border.all(
-                        color: context.colorScheme.onSurfaceVariant,
+                    filled: true,
+                    fillColor: context.colorScheme.onPrimaryContainer,
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: const BorderSide(
+                        width: 1.5,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(
                         width: 1,
-                      )
-                    : null,
-              ),
-              clipBehavior: Clip.hardEdge,
-              child: InkWell(
-                onTap: chatProgress % 2 == 0 && chatProgress < 6 && !busy
-                    ? progressChat
-                    : null,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    switchInCurve: Curves.easeOutQuart,
-                    switchOutCurve: Curves.easeInQuart,
-                    transitionBuilder: (child, animation) => ScaleTransition(
-                      scale: animation,
-                      child: child,
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                    child: chatProgress % 2 != 0
-                        ? SizedBox.square(
-                            key: const ValueKey('loading'),
-                            dimension: 14,
-                            child: CircularProgressIndicator(
-                              color: context.colorScheme.onSurface,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Icon(
-                            Icons.send,
-                            key: const ValueKey('send'),
-                            // size: 20,
-                            color: context.colorScheme.onSurface,
-                          ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: const BorderSide(
+                        width: 1,
+                      ),
+                    ),
+                    disabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: const BorderSide(
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: const BorderSide(
+                        width: 0,
+                        color: Colors.transparent,
+                      ),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: const BorderSide(
+                        width: 0,
+                        color: Colors.transparent,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            )
-          ],
+              const SizedBox(width: 8),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.fastOutSlowIn,
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: context.colorScheme.onPrimaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                  border: chatProgress % 2 != 0
+                      ? Border.all(
+                          color: context.colorScheme.onSurfaceVariant,
+                          width: 1,
+                        )
+                      : null,
+                ),
+                clipBehavior: Clip.hardEdge,
+                child: InkWell(
+                  onTap: chatProgress % 2 == 0 && chatProgress < 6 && !busy
+                      ? progressChat
+                      : null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      switchInCurve: Curves.easeOutQuart,
+                      switchOutCurve: Curves.easeInQuart,
+                      transitionBuilder: (child, animation) => ScaleTransition(
+                        scale: animation,
+                        child: child,
+                      ),
+                      child: chatProgress % 2 != 0
+                          ? SizedBox.square(
+                              key: const ValueKey('loading'),
+                              dimension: 14,
+                              child: CircularProgressIndicator(
+                                color: context.colorScheme.onSurface,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Icon(
+                              Icons.send,
+                              key: const ValueKey('send'),
+                              // size: 20,
+                              color: context.colorScheme.onSurface,
+                            ),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -638,7 +642,7 @@ class BackgroundPaint extends CustomPainter {
     final Paint pinkPaint = Paint()
       ..style = PaintingStyle.fill
       ..shader = ui.Gradient.radial(
-         Offset(rectWidth, 0),
+        Offset(rectWidth, 0),
         size.shortestSide,
         [blue, purple],
       );
