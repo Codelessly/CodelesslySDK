@@ -131,7 +131,7 @@ List<Widget> wrapWithPadding(BaseNode node, List<Widget> children) {
 List<BoxShadow> retrieveBoxShadow(BaseNode node) {
   if (node is! DefaultShapeNode) return [];
   return node.effects
-      .where((effect) => effect.type == EffectType.dropShadow)
+      .where((effect) => effect.type == EffectType.dropShadow && effect.visible)
       .map(
         (effect) => BoxShadow(
           spreadRadius: effect.spread!,
@@ -334,7 +334,7 @@ List<Widget> buildStrokes(BaseNode node) {
   }
   if (node.dashPattern.isEmpty) {
     return [
-      for (final paint in node.strokes)
+      for (final paint in node.strokes.where((paint) => paint.visible))
         Positioned.fill(
           child: DecoratedBox(
             decoration: BoxDecoration(
@@ -350,7 +350,7 @@ List<Widget> buildStrokes(BaseNode node) {
     ];
   } else {
     return [
-      for (final paint in node.strokes)
+      for (final paint in node.strokes.where((paint) => paint.visible))
         Positioned.fill(
           child: CustomPaint(
             painter: StrokePainter(
@@ -383,7 +383,7 @@ List<Widget> buildFills(
 
   final BorderRadius? borderRadius = getBorderRadius(node);
   return [
-    ...node.fills.mapIndexed((index, paint) {
+    ...node.fills.where((paint) => paint.visible).mapIndexed((index, paint) {
       switch (paint.type) {
         case PaintType.solid:
           return Positioned.fill(
