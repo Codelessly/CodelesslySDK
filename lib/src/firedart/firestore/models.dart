@@ -1,7 +1,7 @@
 import 'dart:collection';
 
-import 'package:flutter/cupertino.dart';
 import 'package:grpc/grpc.dart';
+import 'package:meta/meta.dart';
 
 import '../generated/google/firestore/v1/document.pb.dart' as fs;
 import '../generated/google/firestore/v1/query.pb.dart';
