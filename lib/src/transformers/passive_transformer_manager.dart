@@ -46,7 +46,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),
       'variance': PassiveVarianceTransformer(getNode, this),
-      'webview': PassiveWebviewTransformer(getNode, this),
+      'webView': PassiveWebViewTransformer(getNode, this),
     });
   }
 

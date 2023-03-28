@@ -12,12 +12,12 @@ import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../../codelessly_sdk.dart';
 
-class PassiveWebviewTransformer extends NodeWidgetTransformer<WebviewNode> {
-  PassiveWebviewTransformer(super.getNode, super.manager);
+class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
+  PassiveWebViewTransformer(super.getNode, super.manager);
 
   @override
   Widget buildWidget(
-    WebviewNode node,
+    WebViewNode node,
     BuildContext context, [
     WidgetBuildSettings settings = const WidgetBuildSettings(),
   ]) {
@@ -25,13 +25,13 @@ class PassiveWebviewTransformer extends NodeWidgetTransformer<WebviewNode> {
   }
 
   Widget buildFromProps({
-    required WebviewProperties props,
+    required WebViewProperties props,
     required double height,
     required double width,
   }) {
-    final node = WebviewNode(
+    final node = WebViewNode(
       id: '',
-      name: 'Webview',
+      name: 'WebView',
       basicBoxLocal: NodeBox(0, 0, width, height),
       retainedOuterBoxLocal: NodeBox(0, 0, width, height),
       properties: props,
@@ -39,8 +39,8 @@ class PassiveWebviewTransformer extends NodeWidgetTransformer<WebviewNode> {
     return buildFromNode(node);
   }
 
-  Widget buildFromNode(WebviewNode node) {
-    return PassiveWebviewWidget(
+  Widget buildFromNode(WebViewNode node) {
+    return PassiveWebViewWidget(
       node: node,
     );
   }
@@ -60,8 +60,8 @@ class PassiveWebviewTransformer extends NodeWidgetTransformer<WebviewNode> {
   }
 }
 
-class PassiveWebviewWidget extends StatefulWidget {
-  final WebviewNode node;
+class PassiveWebViewWidget extends StatefulWidget {
+  final WebViewNode node;
   final List<VariableData> variables;
 
   static const Set<TargetPlatform> supportedPlatforms = {
@@ -69,17 +69,17 @@ class PassiveWebviewWidget extends StatefulWidget {
     TargetPlatform.iOS,
   };
 
-  const PassiveWebviewWidget({
+  const PassiveWebViewWidget({
     super.key,
     required this.node,
     this.variables = const [],
   });
 
   @override
-  State<PassiveWebviewWidget> createState() => _PassiveWebviewWidgetState();
+  State<PassiveWebViewWidget> createState() => _PassiveWebViewWidgetState();
 }
 
-class _PassiveWebviewWidgetState extends State<PassiveWebviewWidget> {
+class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
   late WebViewController _controller;
 
   @override
@@ -93,7 +93,7 @@ class _PassiveWebviewWidgetState extends State<PassiveWebviewWidget> {
         allowsInlineMediaPlayback: props.allowsInlineMediaPlayback == true,
         mediaTypesRequiringUserAction: {
           if (props.mediaAutoPlaybackPolicy !=
-              WebviewMediaAutoPlaybackPolicy.alwaysPlayAllMedia) ...{
+              WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia) ...{
             PlaybackMediaTypes.audio,
             PlaybackMediaTypes.video,
           },
@@ -110,7 +110,7 @@ class _PassiveWebviewWidgetState extends State<PassiveWebviewWidget> {
     if (_controller.platform is AndroidWebViewController) {
       (_controller.platform as AndroidWebViewController)
           .setMediaPlaybackRequiresUserGesture(props.mediaAutoPlaybackPolicy !=
-              WebviewMediaAutoPlaybackPolicy.alwaysPlayAllMedia);
+              WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia);
     }
 
     // Using this user-agent string to force the video to play in the webview
@@ -127,29 +127,29 @@ class _PassiveWebviewWidgetState extends State<PassiveWebviewWidget> {
   void _loadData() {
     final props = widget.node.properties;
     switch (props.webviewType) {
-      case WebviewType.webpage:
-        final properties = props as WebPageWebviewProperties;
+      case WebViewType.webpage:
+        final properties = props as WebPageWebViewProperties;
         switch (properties.pageSourceType) {
-          case WebviewWebpageSourceType.url:
+          case WebViewWebpageSourceType.url:
             _controller.loadRequest(Uri.parse(properties.input));
             break;
-          case WebviewWebpageSourceType.html:
+          case WebViewWebpageSourceType.html:
             final content = _buildHtmlContent(properties.input);
             _controller.loadRequest(Uri.parse(content));
             break;
-          case WebviewWebpageSourceType.asset:
+          case WebViewWebpageSourceType.asset:
             // provided from onWebViewCreated callback.
             _controller.loadFlutterAsset(properties.input);
             break;
         }
         break;
-      case WebviewType.googleMaps:
+      case WebViewType.googleMaps:
         final content =
-            buildGoogleMapsURL(props as GoogleMapsWebviewProperties);
+            buildGoogleMapsURL(props as GoogleMapsWebViewProperties);
         _controller.loadRequest(Uri.parse(content));
         break;
-      case WebviewType.twitter:
-        final content = buildTwitterURL(props as TwitterWebviewProperties);
+      case WebViewType.twitter:
+        final content = buildTwitterURL(props as TwitterWebViewProperties);
         _controller.loadRequest(Uri.parse(content));
         break;
     }
@@ -160,15 +160,15 @@ class _PassiveWebviewWidgetState extends State<PassiveWebviewWidget> {
     final props = widget.node.properties;
     Widget wid;
     switch (props.webviewType) {
-      case WebviewType.webpage:
-        wid = buildWebpageWebView(context, props as WebPageWebviewProperties);
+      case WebViewType.webpage:
+        wid = buildWebpageWebView(context, props as WebPageWebViewProperties);
         break;
-      case WebviewType.googleMaps:
+      case WebViewType.googleMaps:
         wid = buildGoogleMapsWebView(
-            context, props as GoogleMapsWebviewProperties);
+            context, props as GoogleMapsWebViewProperties);
         break;
-      case WebviewType.twitter:
-        wid = buildTwitterWebView(context, props as TwitterWebviewProperties);
+      case WebViewType.twitter:
+        wid = buildTwitterWebView(context, props as TwitterWebViewProperties);
         break;
     }
 
@@ -176,19 +176,19 @@ class _PassiveWebviewWidgetState extends State<PassiveWebviewWidget> {
   }
 
   Widget buildWebpageWebView(
-      BuildContext context, WebPageWebviewProperties properties) {
-    if (!PassiveWebviewWidget.supportedPlatforms
+      BuildContext context, WebPageWebViewProperties properties) {
+    if (!PassiveWebViewWidget.supportedPlatforms
         .contains(Theme.of(context).platform)) {
-      return WebviewPreviewWidget(
+      return WebViewPreviewWidget(
         icon: Icon(Icons.language_rounded),
         node: widget.node,
       );
     }
 
-    return buildWebview(properties);
+    return buildWebView(properties);
   }
 
-  String buildGoogleMapsURL(GoogleMapsWebviewProperties properties) =>
+  String buildGoogleMapsURL(GoogleMapsWebViewProperties properties) =>
       _buildHtmlContent(properties.src);
 
   String _buildHtmlContent(String? src) {
@@ -201,36 +201,36 @@ class _PassiveWebviewWidgetState extends State<PassiveWebviewWidget> {
   }
 
   Widget buildGoogleMapsWebView(
-      BuildContext context, GoogleMapsWebviewProperties properties) {
-    if (!PassiveWebviewWidget.supportedPlatforms
+      BuildContext context, GoogleMapsWebViewProperties properties) {
+    if (!PassiveWebViewWidget.supportedPlatforms
         .contains(Theme.of(context).platform)) {
-      return WebviewPreviewWidget(
+      return WebViewPreviewWidget(
         icon: Icon(Icons.map_outlined),
         node: widget.node,
       );
     }
 
-    return buildWebview(properties);
+    return buildWebView(properties);
   }
 
-  String buildTwitterURL(TwitterWebviewProperties properties) =>
+  String buildTwitterURL(TwitterWebViewProperties properties) =>
       _buildHtmlContent(properties.src);
 
   Widget buildTwitterWebView(
-      BuildContext context, TwitterWebviewProperties properties) {
-    if (!PassiveWebviewWidget.supportedPlatforms
+      BuildContext context, TwitterWebViewProperties properties) {
+    if (!PassiveWebViewWidget.supportedPlatforms
         .contains(Theme.of(context).platform)) {
-      return WebviewPreviewWidget(
+      return WebViewPreviewWidget(
         icon: ImageIcon(
             NetworkImage('https://img.icons8.com/color/344/twitter--v2.png')),
         node: widget.node,
       );
     }
 
-    return buildWebview(properties);
+    return buildWebView(properties);
   }
 
-  Widget buildWebview(WebviewProperties properties) {
+  Widget buildWebView(WebViewProperties properties) {
     return WebViewWidget(
       key: ValueKey(properties),
       controller: _controller,
@@ -254,11 +254,11 @@ class _PassiveWebviewWidgetState extends State<PassiveWebviewWidget> {
   }
 }
 
-class WebviewPreviewWidget extends StatelessWidget {
+class WebViewPreviewWidget extends StatelessWidget {
   final Widget icon;
   final BaseNode node;
 
-  const WebviewPreviewWidget({
+  const WebViewPreviewWidget({
     super.key,
     required this.icon,
     required this.node,
