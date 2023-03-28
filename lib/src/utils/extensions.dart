@@ -1280,3 +1280,11 @@ extension BuildContextExt on BuildContext {
         ?.value as T?;
   }
 }
+
+extension PaintIterableExt on Iterable<PaintModel> {
+  List<PaintModel> visible() => where((e) => e.visible).toList();
+}
+
+extension EffectIterableExt on Iterable<Effect> {
+  List<Effect> visible() => where((e) => e.visible).toList();
+}
