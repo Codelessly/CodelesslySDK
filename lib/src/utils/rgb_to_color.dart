@@ -44,7 +44,8 @@ Color retrieveFillColor(GeometryMixin node) {
 /// Converts the strokes of a given [node] to a single [Color] object.
 Color retrieveStrokeColor(GeometryMixin node,
     [int index = 0, bool all = false]) {
-  if (node.strokes.isEmpty) {
+  final strokes = node.strokes.visible();
+  if (strokes.isEmpty) {
     // Some methods expect a non-null color.
     return Color(0x00000000);
   }
@@ -56,7 +57,7 @@ Color retrieveStrokeColor(GeometryMixin node,
     // We get all the paints that have a color and reverse the list because the
     // strokes most recently added are the ones that are on top.
     for (PaintModel paint
-        in node.strokes.where((element) => element.color != null).toList()) {
+        in strokes.where((element) => element.color != null).toList()) {
       // Beginning stroke.
       if (stroke == null) {
         stroke = paint.toFlutterColor()!;
@@ -67,7 +68,7 @@ Color retrieveStrokeColor(GeometryMixin node,
     }
 
     if (stroke == null) {
-      final List<PaintModel> gradients = node.strokes
+      final List<PaintModel> gradients = strokes
           .where((element) =>
               element.gradientStops != null &&
               element.gradientStops!.isNotEmpty)
