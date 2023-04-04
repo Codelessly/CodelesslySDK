@@ -42,15 +42,16 @@ class PassiveTextTransformer extends NodeWidgetTransformer<TextNode> {
   }
 
   static List<TextSpan> getTextSpan(
-    TextNode node,
-    CodelesslyContext codelesslyContext, {
-    Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
-  }) {
+      TextNode node, CodelesslyContext codelesslyContext,
+      {Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
+      List<VariableData> variables = const []}) {
     final List<TextSpan> textSpanChildren = node.textMixedProps.map(
       (property) {
         // Get relevant characters.
-        final String characters =
+        String characters =
             retrieveCharacters(node, property, codelesslyContext);
+
+        characters = substituteVariables(characters, variables);
 
         return TextSpan(
           text: characters,
@@ -321,6 +322,21 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
 
+    final variables = [...widget.variables];
+
+    /// Check if this is a part of a list item.
+    final ListItemProvider? indexProvider = ListItemProvider.of(context);
+    if (indexProvider != null) {
+      print('indexProvider.index: ${indexProvider.index}');
+      variables.add(
+        VariableData(
+          id: 'index',
+          name: 'index',
+          value: indexProvider.index.toString(),
+        ),
+      );
+    }
+
     Widget textWidget;
 
     if (widget.node.textMixedProps.length == 1) {
@@ -333,6 +349,8 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
       // [SetValueAction].
       characters =
           context.getNodeValue(widget.node.id, 'characters') ?? characters;
+
+      characters = substituteVariables(characters, variables);
 
       final StartEndProp textProps = widget.node.textMixedProps.first;
       textWidget = Text(
@@ -362,6 +380,7 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
       List<InlineSpan> spans = PassiveTextTransformer.getTextSpan(
         widget.node,
         codelesslyContext,
+        variables: variables,
         tapGestureRecognizers: tapGestureRecognizerRegistry,
       );
 

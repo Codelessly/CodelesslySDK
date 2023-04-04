@@ -87,6 +87,18 @@ class PassiveButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// Check if this is a part of a list item.
+    final ListItemProvider? indexProvider = ListItemProvider.of(context);
+    if (indexProvider != null) {
+      variables.add(
+        VariableData(
+          id: 'index',
+          name: 'index',
+          value: indexProvider.index.toString(),
+        ),
+      );
+    }
+
     String text = transformText(node.properties.label, variables, context);
 
     // final CodelesslyContext codelesslyContext =
