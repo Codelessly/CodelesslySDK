@@ -88,7 +88,7 @@ class PassiveButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     /// Check if this is a part of a list item.
-    final ListItemProvider? indexProvider = ListItemProvider.of(context);
+    final IndexedItemProvider? indexProvider = IndexedItemProvider.of(context);
     if (indexProvider != null) {
       variables.add(
         VariableData(
