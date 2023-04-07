@@ -18,7 +18,7 @@ class PassivePageViewTransformer extends NodeWidgetTransformer<PageViewNode> {
   }
 }
 
-class PassivePageViewWidget extends StatelessWidget {
+class PassivePageViewWidget extends StatefulWidget {
   final PageViewNode node;
   final NodeTransformerManager manager;
   final WidgetBuildSettings settings;
@@ -31,34 +31,66 @@ class PassivePageViewWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    if (node.children.isEmpty) {
-      return AdaptiveNodeBox(node: node, child: SizedBox());
+  State<PassivePageViewWidget> createState() => _PassivePageViewWidgetState();
+}
+
+class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
+
+  late PageController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = PageController(
+      initialPage: widget.node.properties.initialPage,
+      keepPage: widget.node.properties.keepPage,
+      viewportFraction: widget.node.properties.viewportFraction,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant PassivePageViewWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if(widget.node.properties.initialPage != oldWidget.node.properties.initialPage) {
+      controller.jumpToPage(widget.node.properties.initialPage);
     }
-    final itemNode = node.children.first;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.node.children.isEmpty) {
+      return AdaptiveNodeBox(node: widget.node, child: SizedBox());
+    }
+    final itemNode = widget.node.children.first;
 
     return AdaptiveNodeBox(
-      node: node,
+      node: widget.node,
       child: PageView.builder(
-        itemCount: node.properties.itemCount,
-        physics: node.physics.flutterScrollPhysics,
-        scrollDirection: node.scrollDirection.flutterAxis,
-        reverse: node.reverse,
-        clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
-        padEnds: node.properties.padEnds,
-        pageSnapping: node.properties.pageSnapping,
+        itemCount: widget.node.properties.itemCount,
+        physics: widget.node.physics.flutterScrollPhysics,
+        scrollDirection: widget.node.scrollDirection.flutterAxis,
+        reverse: widget.node.reverse,
+        clipBehavior: widget.node.clipsContent ? Clip.hardEdge : Clip.none,
+        padEnds: widget.node.properties.padEnds,
+        pageSnapping: widget.node.properties.pageSnapping,
         onPageChanged: (index) {
           // TODO:
         },
         itemBuilder: (context, index) => IndexedItemProvider(
           index: index,
-          child: manager.buildWidgetByID(
+          child: widget.manager.buildWidgetByID(
             itemNode,
             context,
-            settings: settings,
+            settings: widget.settings,
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }
