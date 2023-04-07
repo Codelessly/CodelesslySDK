@@ -61,7 +61,7 @@ class PassiveListViewWidget extends StatelessWidget {
                       properties: node.properties,
                     )
                 : null,
-        itemBuilder: (context, index) => ListItemProvider(
+        itemBuilder: (context, index) => IndexedItemProvider(
           index: index,
           child: manager.buildWidgetByID(
             itemNode,
@@ -180,26 +180,5 @@ class ListViewItemSeparator extends StatelessWidget {
               scrollDirection.isVertical ? properties.separatorSpacing : null,
         );
     }
-  }
-}
-
-class ListItemProvider extends InheritedWidget {
-  final int index;
-  final dynamic item;
-
-  const ListItemProvider({
-    super.key,
-    required super.child,
-    required this.index,
-    this.item,
-  });
-
-  static ListItemProvider? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ListItemProvider>();
-  }
-
-  @override
-  bool updateShouldNotify(covariant ListItemProvider oldWidget) {
-    return index != oldWidget.index || item != oldWidget.item;
   }
 }

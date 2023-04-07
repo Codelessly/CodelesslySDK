@@ -325,7 +325,7 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
     final variables = [...widget.variables];
 
     /// Check if this is a part of a list item.
-    final ListItemProvider? indexProvider = ListItemProvider.of(context);
+    final IndexedItemProvider? indexProvider = IndexedItemProvider.of(context);
     if (indexProvider != null) {
       print('indexProvider.index: ${indexProvider.index}');
       variables.add(
