@@ -1,9 +1,7 @@
-import 'dart:developer';
-
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 
-const String authToken = 'LW1IN0cmWWI6TDhRI0V7e3lhNDJ8NyQyckBbMHBIWngkWmI1';
+const String authToken = 'UnJ5XU1fR0Z5JUU1MSpWamUvJj4wYzlzVDUmazxZIUA5Jkxr';
 const String layoutID = '0Qq3UXthyzNKDS35vgek';
 
 // METHOD 1
@@ -14,6 +12,7 @@ void main() async {
     config: const CodelesslyConfig(
       authToken: authToken,
       automaticallyCollectCrashReports: false,
+      isPreview: true,
     ),
   );
 
@@ -31,20 +30,10 @@ class MyApp extends StatelessWidget {
       home: SafeArea(
         child: CodelesslyWidget(
           layoutID: layoutID,
-          data: const {
-            'Welcome back': 'Hello',
-            'View profile': 'Next',
-            // 'SAAD ARDATI': 'Aachman',
-          },
-          functions: {
-            // 'someFunction': ValueFunction((value) {
-            //   log('someFunction: $value');
-            // }),
-            'launchYoutube': CodelesslyFunction((context) {
-              log('youtube.com');
-              return 'youtube.com';
-            }),
-          },
+          isPreview: true,
+          // config: const CodelesslyConfig(
+          //   authToken: 'UnJ5XU1fR0Z5JUU1MSpWamUvJj4wYzlzVDUmazxZIUA5Jkxr',
+          // ),
         ),
       ),
     );
