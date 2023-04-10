@@ -1,7 +1,7 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 
-const String authToken = 'UnJ5XU1fR0Z5JUU1MSpWamUvJj4wYzlzVDUmazxZIUA5Jkxr';
+const String authToken = 'LW1IN0cmWWI6TDhRI0V7e3lhNDJ8NyQyckBbMHBIWngkWmI1';
 const String layoutID = '0Qq3UXthyzNKDS35vgek';
 
 // METHOD 1
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
       home: SafeArea(
         child: CodelesslyWidget(
           layoutID: layoutID,
-          isPreview: true,
+          // isPreview: true,
           // config: const CodelesslyConfig(
           //   authToken: 'UnJ5XU1fR0Z5JUU1MSpWamUvJj4wYzlzVDUmazxZIUA5Jkxr',
           // ),
