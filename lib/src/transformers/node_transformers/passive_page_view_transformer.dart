@@ -73,6 +73,7 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
         clipBehavior: widget.node.clipsContent ? Clip.hardEdge : Clip.none,
         padEnds: widget.node.properties.padEnds,
         pageSnapping: widget.node.properties.pageSnapping,
+        controller: controller,
         onPageChanged: (index) {
           // TODO:
         },
