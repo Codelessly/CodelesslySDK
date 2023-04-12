@@ -92,7 +92,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
       icon: !decoration.icon.show || decoration.icon.isEmpty
           ? null
           : retrieveIconWidget(decoration.icon, null, useIconFonts),
-      labelText: labelText,
+      labelText: labelText?.isNotEmpty == true ? labelText : null,
       labelStyle: getTextStyle(decoration.labelStyle),
       floatingLabelStyle: getTextStyle(decoration.floatingLabelStyle),
       helperText: decoration.helperText,
