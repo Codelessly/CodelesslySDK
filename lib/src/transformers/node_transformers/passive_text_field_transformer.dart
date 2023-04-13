@@ -150,16 +150,16 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
     // Change local state of text field.
     if (payload.nodeValues.containsKey(node.id)) {
-      final List<ValueModel> values = payload.nodeValues[node.id]!.value;
+      final List<ValueModel> values = payload.nodeValues[node.id]?.value ?? [];
       final ValueModel? value =
           values.firstWhereOrNull((val) => val.name == 'inputValue');
       final List<ValueModel> updatedValues = [...values]
         ..remove(value)
         ..add(value?.copyWith(value: inputValue) ??
             StringValue(name: 'inputValue', value: inputValue));
-      payload.nodeValues[node.id]!.value = updatedValues;
+      payload.nodeValues[node.id]?.value = updatedValues;
     } else {
-      payload.nodeValues[node.id]!.value = [
+      payload.nodeValues[node.id]?.value = [
         StringValue(name: 'inputValue', value: inputValue)
       ];
     }
