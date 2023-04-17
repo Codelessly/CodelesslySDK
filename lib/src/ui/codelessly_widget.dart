@@ -203,7 +203,7 @@ class CodelesslyWidget extends StatefulWidget {
         codelessly = codelessly ?? Codelessly.instance,
         isPreview = isPreview ??
             config?.isPreview ??
-            codelessly?.config?.isPreview ??
+            (codelessly ?? Codelessly.instance).config?.isPreview ??
             false {
     final codelessly = this.codelessly;
     try {
