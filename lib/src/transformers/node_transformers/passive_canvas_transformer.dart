@@ -48,11 +48,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     if (node.scaleMode == ScaleMode.autoScale) {
       final double screenWidth = MediaQuery.of(context).size.width;
       final double screenHeight = MediaQuery.of(context).size.height;
-      final double canvasWidth = node.constrainValue(
-        node.outerBoxLocal.width,
-        AxisC.horizontal,
-        nodeBoundaryType: NodeBoundaryType.outerBox,
-      );
+      final double canvasWidth = node.outerBoxLocal.width;
       final double viewRatio = screenWidth / canvasWidth;
 
       // If the width of this canvas is smaller than the viewport's size,

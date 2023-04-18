@@ -109,7 +109,8 @@ class PassiveRectangleWidget extends StatelessWidget {
 }
 
 List<Widget> wrapWithPadding(BaseNode node, List<Widget> children) {
-  final EdgeInsets resolvedPadding = node.resolvedPadding().edgeInsets;
+  final EdgeInsets resolvedPadding =
+      node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
 
   if (resolvedPadding == EdgeInsets.zero) {
     return children;
