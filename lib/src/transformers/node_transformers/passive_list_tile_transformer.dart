@@ -236,7 +236,7 @@ class PassiveListTileWidget extends StatelessWidget {
           hoverColor: node.properties.hoverColor?.toFlutterColor(),
           focusColor: node.properties.focusColor?.toFlutterColor(),
           enabled: node.properties.enabled,
-          contentPadding: node.properties.contentPadding.edgeInsets,
+          contentPadding: node.properties.contentPadding.flutterEdgeInsets,
           visualDensity: node.properties.visualDensity.flutterVisualDensity,
           selectedColor: node.properties.selectedColor?.toFlutterColor(),
           iconColor: node.properties.iconColor?.toFlutterColor(),

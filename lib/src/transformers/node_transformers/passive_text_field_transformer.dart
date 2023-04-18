@@ -107,7 +107,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
       floatingLabelBehavior: decoration.floatingLabelBehavior.toFlutter(),
       isCollapsed: isCollapsed,
       isDense: isDense,
-      contentPadding: node.padding.edgeInsets,
+      contentPadding: node.padding.flutterEdgeInsets,
       prefixIcon: !decoration.prefixIcon.show || decoration.prefixIcon.isEmpty
           ? null
           : retrieveIconWidget(decoration.prefixIcon, null, useIconFonts),

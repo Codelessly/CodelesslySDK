@@ -45,7 +45,7 @@ class PassiveListViewWidget extends StatelessWidget {
                 ? node.isHorizontalWrap
                 : node.isVerticalWrap),
         itemCount: node.properties.itemCount,
-        padding: node.padding.edgeInsets,
+        padding: node.padding.flutterEdgeInsets,
         keyboardDismissBehavior:
             node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
         physics: node.physics.flutterScrollPhysics,

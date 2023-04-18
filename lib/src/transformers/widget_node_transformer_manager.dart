@@ -74,7 +74,7 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
   Widget applyWidgetMargins(BaseNode node, Widget widget) {
     if (node.margin == EdgeInsetsModel.zero) return widget;
     return Padding(
-      padding: node.margin.edgeInsets,
+      padding: node.margin.flutterEdgeInsets,
       child: widget,
     );
   }
