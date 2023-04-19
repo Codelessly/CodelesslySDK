@@ -256,8 +256,6 @@ class CodelesslyWidget extends StatefulWidget {
       if (codelessly.status == SDKStatus.done) {
         final model = codelessly.publishDataManager.publishModel;
         if (!(model?.layouts.containsKey(layoutID) ?? true)) {
-          print('model layouts: [${model?.layouts.keys.join(', ')}]');
-          print('this layout  : [$layoutID]');
           throw CodelesslyException.layoutNotFound(
             message: 'Layout with ID [$layoutID] does not exist.',
             layoutID: layoutID,
@@ -349,8 +347,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       if (widget.codelessly.config?.isPreview != widget.isPreview) {
         if (dataManager.status == DataManagerStatus.idle) {
           dataManager.init();
-          print(
-              'Initializing ${widget.isPreview ? 'preview' : 'publish'} data manager...');
         }
       }
     }
@@ -358,7 +354,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     // If the SDK has not yet been initialized, the stream will emit events
     // to do so here.
     statusListener = widget.codelessly.statusStream.listen((status) {
-      print('status listener: $status');
       switch (status) {
         case SDKStatus.idle:
         case SDKStatus.configured:
@@ -369,8 +364,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           if (widget.codelessly.config?.isPreview != widget.isPreview) {
             if (dataManager.status == DataManagerStatus.idle) {
               dataManager.init();
-              print(
-                  'Initializing ${widget.isPreview ? 'preview' : 'publish'} data manager...');
             }
           }
           break;
@@ -390,70 +383,73 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   /// are immediately reflected here.
   Widget buildStreamedLayout() {
     return StreamBuilder<DataManagerStatus>(
-        key: ValueKey(widget.isPreview),
-        stream: dataManager.statusStream,
-        initialData: dataManager.status,
-        builder: (context, AsyncSnapshot<DataManagerStatus> statusSnapshot) {
-          if (statusSnapshot.hasError) {
-            return CodelesslyErrorScreen(exception: statusSnapshot.error);
-          }
+      key: ValueKey(widget.isPreview),
+      stream: dataManager.statusStream,
+      initialData: dataManager.status,
+      builder: (context, AsyncSnapshot<DataManagerStatus> statusSnapshot) {
+        if (statusSnapshot.hasError) {
+          return CodelesslyErrorScreen(
+            exception: statusSnapshot.error,
+            isPreview: widget.isPreview,
+          );
+        }
 
-          if (!statusSnapshot.hasData) {
-            return CodelesslyLoadingScreen(subtitle: 'Loading...');
-          }
+        if (!statusSnapshot.hasData) {
+          return CodelesslyLoadingScreen();
+        }
 
-          final DataManagerStatus status = statusSnapshot.data!;
+        final DataManagerStatus status = statusSnapshot.data!;
 
-          switch (status) {
-            case DataManagerStatus.idle:
-              return CodelesslyLoadingScreen(subtitle: 'Waiting...');
-            case DataManagerStatus.initializing:
-            case DataManagerStatus.initialized:
-              return StreamBuilder<SDKPublishModel>(
-                stream: dataManager.publishModelStream,
-                initialData: dataManager.publishModel,
-                builder: (context, AsyncSnapshot<SDKPublishModel> snapshot) {
-                  final Widget child;
+        switch (status) {
+          case DataManagerStatus.idle:
+            return CodelesslyLoadingScreen();
+          case DataManagerStatus.initializing:
+          case DataManagerStatus.initialized:
+            return StreamBuilder<SDKPublishModel>(
+              stream: dataManager.publishModelStream,
+              initialData: dataManager.publishModel,
+              builder: (context, AsyncSnapshot<SDKPublishModel> snapshot) {
+                if (snapshot.hasError) {
+                  return CodelesslyErrorScreen(
+                    exception: snapshot.error,
+                    isPreview: widget.isPreview,
+                  );
+                }
 
-                  if (snapshot.hasError) {
-                    child = CodelesslyErrorScreen(exception: snapshot.error);
-                  } else if (!snapshot.hasData) {
-                    child = CodelesslyLoadingScreen(subtitle: 'Loading...');
-                  } else {
-                    final SDKPublishModel model = snapshot.data!;
-                    final String layoutID = widget.layoutID;
+                if (!snapshot.hasData) {
+                  return CodelesslyLoadingScreen();
+                }
 
-                    if (!model.layouts.containsKey(layoutID)) {
-                      print(
-                          'model layouts: [${model.layouts.keys.join(', ')}]');
-                      print('this layout  : [$layoutID]');
-                      CodelesslyErrorHandler.instance.captureException(
-                        CodelesslyException.layoutNotFound(
-                          message: 'Layout with ID [$layoutID] does not exist.',
-                          layoutID: layoutID,
-                        ),
-                      );
+                final SDKPublishModel model = snapshot.data!;
+                final String layoutID = widget.layoutID;
 
-                      child = CodelesslyErrorScreen(
-                        exception: CodelesslyException.layoutNotFound(
-                          message: 'Layout with ID [$layoutID] does not exist.',
-                          stacktrace: StackTrace.current,
-                          layoutID: layoutID,
-                        ),
-                      );
-                    } else {
-                      child = CodelesslyPublishedLayoutBuilder(
-                        key: ValueKey(layoutID),
-                        layout: model.layouts[layoutID]!,
-                      );
-                    }
-                  }
+                if (!model.layouts.containsKey(layoutID)) {
+                  CodelesslyErrorHandler.instance.captureException(
+                    CodelesslyException.layoutNotFound(
+                      message: 'Layout with ID [$layoutID] does not exist.',
+                      layoutID: layoutID,
+                    ),
+                  );
 
-                  return child;
-                },
-              );
-          }
-        });
+                  return CodelesslyErrorScreen(
+                    exception: CodelesslyException.layoutNotFound(
+                      message: 'Layout with ID [$layoutID] does not exist.',
+                      stacktrace: StackTrace.current,
+                      layoutID: layoutID,
+                    ),
+                    isPreview: widget.isPreview,
+                  );
+                }
+
+                return CodelesslyPublishedLayoutBuilder(
+                  key: ValueKey(layoutID),
+                  layout: model.layouts[layoutID]!,
+                );
+              },
+            );
+        }
+      },
+    );
   }
 
   @override
@@ -469,34 +465,30 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           stream: widget.codelessly.statusStream,
           initialData: widget.codelessly.status,
           builder: (context, snapshot) {
-            final Widget child;
-
             if (snapshot.hasError) {
-              child = CodelesslyErrorScreen(exception: snapshot.error);
-            } else if (!snapshot.hasData) {
-              child = CodelesslyLoadingScreen(subtitle: 'Waiting...');
-            } else {
-              final SDKStatus status = snapshot.data!;
-              switch (status) {
-                case SDKStatus.idle:
-                case SDKStatus.configured:
-                  child = CodelesslyLoadingScreen(subtitle: 'Waiting...');
-                  break;
-                case SDKStatus.loading:
-                  child = CodelesslyLoadingScreen(subtitle: 'Loading...');
-                  break;
-                case SDKStatus.errored:
-                  child = CodelesslyErrorScreen(
-                    exception: CodelesslyErrorHandler.instance.lastException ??
-                        snapshot.error,
-                  );
-                  break;
-                case SDKStatus.done:
-                  child = buildStreamedLayout();
-                  break;
-              }
+              return CodelesslyErrorScreen(
+                exception: snapshot.error,
+                isPreview: widget.isPreview,
+              );
             }
-            return child;
+            if (!snapshot.hasData) {
+              return CodelesslyLoadingScreen();
+            }
+            final SDKStatus status = snapshot.data!;
+            switch (status) {
+              case SDKStatus.idle:
+              case SDKStatus.configured:
+              case SDKStatus.loading:
+                return CodelesslyLoadingScreen();
+              case SDKStatus.errored:
+                return CodelesslyErrorScreen(
+                  exception: CodelesslyErrorHandler.instance.lastException ??
+                      snapshot.error,
+                  isPreview: widget.isPreview,
+                );
+              case SDKStatus.done:
+                return buildStreamedLayout();
+            }
           },
         ),
       ),

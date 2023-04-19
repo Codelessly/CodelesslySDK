@@ -6,14 +6,18 @@ import '../error/error_handler.dart';
 /// a graceful way of dealing with exceptions.
 class CodelesslyErrorScreen extends StatelessWidget {
   final dynamic exception;
+  final bool isPreview;
 
   const CodelesslyErrorScreen({
     super.key,
     required this.exception,
+    required this.isPreview,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (!isPreview) return const SizedBox.shrink();
+
     final String message;
     String? title;
     if (exception is CodelesslyException) {
