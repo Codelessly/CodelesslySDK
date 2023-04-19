@@ -105,7 +105,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
         StartEndProp(
           start: 0,
           end: titleText.length,
-          fills: const [PaintModel.blackPaint],
+          fills: [PaintModel.blackPaint],
           fontSize: 16,
         )
       ],
@@ -123,7 +123,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
         StartEndProp(
           start: 0,
           end: subtitleText.length,
-          fills: const [PaintModel.blackPaint],
+          fills: [PaintModel.blackPaint],
           fontSize: 14,
         )
       ],
