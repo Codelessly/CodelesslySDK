@@ -66,7 +66,8 @@ class ButtonDefaults {
       TextAlignHorizontalEnum.center;
   static const IconPlacementEnum placement = IconPlacementEnum.start;
   static const double gap = 8;
-  static const StartEndProp labelStyle = StartEndProp.general(fontSize: 13);
+
+  static StartEndProp get labelStyle => StartEndProp.general(fontSize: 13);
   static const MultiSourceIconModel icon = MultiSourceIconModel(size: 20);
 
   const ButtonDefaults._();
@@ -93,11 +94,13 @@ class TextFieldDefaults {
   static const double cursorRadius = 2;
   static const int maxLines = 1;
   static const String obscuringCharacter = '•';
-  static const StartEndProp style = StartEndProp.general(
-    fontSize: 14,
-    fills: [PaintModel.blackPaint],
-  );
-  static const InputDecorationModel decoration = InputDecorationModel();
+
+  static StartEndProp get style => StartEndProp.general(
+        fontSize: 14,
+        fills: [PaintModel.blackPaint],
+      );
+
+  static InputDecorationModel get decoration => InputDecorationModel();
   static const Color fillColor = Color(0xffeeeeee);
 
   const TextFieldDefaults._();
@@ -150,7 +153,8 @@ class AppBarDefaults {
   static const MultiSourceIconModel leading =
       MultiSourceIconModel.icon(color: null);
   static const bool automaticallyImplyLeading = false;
-  static const StartEndProp titleStyle = StartEndProp.general(fontSize: 18);
+
+  static StartEndProp get titleStyle => StartEndProp.general(fontSize: 18);
   static const Color backgroundColor = kDefaultPrimaryColor;
   static const String title = 'App Bar';
   static const double titleSpacing = 16;
@@ -185,15 +189,17 @@ class M2NavigationBarDefaults {
 class M3NavigationBarDefaults {
   static const Color backgroundColor = Color(0xfFEEEEEE);
   static const double elevation = 0;
-  static const TextProp selectedLabelStyle = TextProp(
-    fontSize: 13,
-    fontName: FontName(
-      family: 'Roboto',
-      style: 'Normal',
-      weight: FontWeightNumeric.w600,
-    ),
-  );
-  static const TextProp unselectedLabelStyle = TextProp(fontSize: 13);
+
+  static TextProp get selectedLabelStyle => TextProp(
+        fontSize: 13,
+        fontName: FontName(
+          family: 'Roboto',
+          style: 'Normal',
+          weight: FontWeightNumeric.w600,
+        ),
+      );
+
+  static TextProp get unselectedLabelStyle => TextProp(fontSize: 13);
   static const Color unselectedIconColor = Colors.black;
   static const Color selectedIconColor = kDefaultPrimaryColor;
   static const Color indicatorColor = Color(0x12000000);
@@ -268,7 +274,8 @@ class FloatingActionButtonDefaults {
   static const MultiSourceIconModel icon =
       MultiSourceIconModel.icon(size: 24, color: null);
   static const String label = 'Button';
-  static const TextProp labelStyle = TextProp.general(fontSize: 16, fills: []);
+
+  static TextProp get labelStyle => TextProp.general(fontSize: 16, fills: []);
   static const Color focusColor = kDefaultFocusColor;
   static const Color hoverColor = kDefaultHoverColor;
   static const Color splashColor = kDefaultSplashColor;
