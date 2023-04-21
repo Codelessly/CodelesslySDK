@@ -73,6 +73,7 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
   bool isDraft;
   @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
   final DateTime created;
+  final String? directory;
 
   HttpApiData({
     this.method = HttpMethod.get,
@@ -85,13 +86,14 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
     this.owner = '',
     required this.name,
     this.id = '',
-    required this.project,
+    this.project = '',
     List<VariableData> variables = const [],
     this.isDeleted = false,
     DateTime? lastUpdated,
     this.requestBodyContentType = RequestBodyTextType.json,
     this.isDraft = false,
     DateTime? created,
+    this.directory,
   })  : variables = List.of(variables),
         lastUpdated = lastUpdated ?? DateTime.now(),
         created = created ?? DateTime.now(),
@@ -115,6 +117,7 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
     RequestBodyType? bodyType,
     RequestBodyTextType? requestBodyContentType,
     bool? isDraft,
+    String? directory,
   }) =>
       HttpApiData(
         method: method ?? this.method,
@@ -133,6 +136,7 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
         created: created ?? this.created,
         bodyType: bodyType ?? this.bodyType,
         isDraft: isDraft ?? this.isDraft,
+        directory: directory ?? this.directory,
         requestBodyContentType:
             requestBodyContentType ?? this.requestBodyContentType,
       );
@@ -152,8 +156,11 @@ class HttpKeyValuePair extends Equatable {
   @override
   List<Object?> get props => [key, value, isUsed];
 
-  HttpKeyValuePair(
-      {required this.key, required this.value, this.isUsed = true});
+  HttpKeyValuePair({
+    required this.key,
+    required this.value,
+    this.isUsed = true,
+  });
 
   HttpKeyValuePair copyWidth({String? key, String? value, bool? isUsed}) =>
       HttpKeyValuePair(

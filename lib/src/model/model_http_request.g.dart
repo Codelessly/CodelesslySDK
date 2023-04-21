@@ -32,7 +32,7 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
       owner: json['owner'] as String? ?? '',
       name: json['name'] as String,
       id: json['id'] as String? ?? '',
-      project: json['project'] as String,
+      project: json['project'] as String? ?? '',
       variables: (json['variables'] as List<dynamic>?)
               ?.map((e) =>
                   VariableData.fromJson(Map<String, dynamic>.from(e as Map)))
@@ -44,6 +44,7 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
               _$RequestBodyTextTypeEnumMap, json['requestBodyContentType']) ??
           RequestBodyTextType.json,
       created: jsonToDate(json['created'] as int?),
+      directory: json['directory'] as String?,
     );
 
 Map<String, dynamic> _$HttpApiDataToJson(HttpApiData instance) {
@@ -73,6 +74,7 @@ Map<String, dynamic> _$HttpApiDataToJson(HttpApiData instance) {
       _$RequestBodyTextTypeEnumMap[instance.requestBodyContentType]!;
   val['variables'] = instance.variables.map((e) => e.toJson()).toList();
   val['created'] = dateToJson(instance.created);
+  writeNotNull('directory', instance.directory);
   return val;
 }
 
