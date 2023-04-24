@@ -118,6 +118,7 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
     RequestBodyTextType? requestBodyContentType,
     bool? isDraft,
     String? directory,
+    bool forceDirectory = false,
   }) =>
       HttpApiData(
         method: method ?? this.method,
@@ -136,7 +137,7 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
         created: created ?? this.created,
         bodyType: bodyType ?? this.bodyType,
         isDraft: isDraft ?? this.isDraft,
-        directory: directory ?? this.directory,
+        directory: forceDirectory ? directory : directory ?? this.directory,
         requestBodyContentType:
             requestBodyContentType ?? this.requestBodyContentType,
       );
