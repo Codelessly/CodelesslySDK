@@ -402,41 +402,46 @@ class _ChatScreenState extends State<ChatScreen>
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 800),
-            child: ScrollConfiguration(
-              behavior:
-                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
-              child: ListView(
-                controller: scrollController,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                children: [
-                  SizedBox(
-                      height: (Scaffold.of(context).appBarMaxHeight ?? 56)),
-                  leftBubble(context, 'Hi, how can I assist you today?'),
-                  slideLeftIf(
-                    chatProgress >= 1,
-                    rightBubble(context, prompts[0]),
+            child: SizedBox.expand(
+              child: ScrollConfiguration(
+                behavior:
+                    ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                          height: (Scaffold.of(context).appBarMaxHeight ?? 56)),
+                      leftBubble(context, 'Hi, how can I assist you today?'),
+                      slideLeftIf(
+                        chatProgress >= 1,
+                        rightBubble(context, prompts[0]),
+                      ),
+                      slideRightIf(
+                        chatProgress >= 2,
+                        firstAnswer(context),
+                      ),
+                      slideLeftIf(
+                        chatProgress >= 3,
+                        rightBubble(context, prompts[1]),
+                      ),
+                      slideRightIf(
+                        chatProgress >= 4,
+                        secondAnswer(context),
+                      ),
+                      slideLeftIf(
+                        chatProgress >= 5,
+                        rightBubble(context, prompts[2]),
+                      ),
+                      slideRightIf(
+                        chatProgress >= 6,
+                        thirdAnswer(context),
+                      ),
+                    ],
                   ),
-                  slideRightIf(
-                    chatProgress >= 2,
-                    firstAnswer(context),
-                  ),
-                  slideLeftIf(
-                    chatProgress >= 3,
-                    rightBubble(context, prompts[1]),
-                  ),
-                  slideRightIf(
-                    chatProgress >= 4,
-                    secondAnswer(context),
-                  ),
-                  slideLeftIf(
-                    chatProgress >= 5,
-                    rightBubble(context, prompts[2]),
-                  ),
-                  slideRightIf(
-                    chatProgress >= 6,
-                    thirdAnswer(context),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
