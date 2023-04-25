@@ -32,25 +32,25 @@ abstract class CacheManager {
   Future<void> clearAll();
 
   /// Stores a file in the application's directory.
-  Future<void> saveFile(String pathKey, String name, Uint8List bytes);
+  Future<void> storeBytes(String pathKey, String name, Uint8List bytes);
 
   /// Fetches a file from the application's directory.
   ///
   /// Throws an exception if the file is not found.
-  Future<Uint8List> getFile(String pathKey, String name);
+  Uint8List getBytes(String pathKey, String name);
 
   /// Checks if a file is stored in the application's directory.
-  Future<bool> isFileCached(String pathKey, String name);
+  Future<bool> areBytesCached(String pathKey, String name);
 
   /// Deletes a file from the application's directory.
-  Future<void> deleteFile(String pathKey, String name);
+  Future<void> deleteBytes(String pathKey, String name);
 
   /// Deletes all of the files from the given path, excluding the given files.
-  Future<void> purgeFiles(
+  Future<void> purgeBytes(
     String pathKey, {
     Iterable<String> excludedFileNames = const [],
   });
 
   /// Clears all of the files from the application's directory.
-  Future<void> deleteAllFiles();
+  Future<void> deleteAllByteData();
 }

@@ -237,6 +237,13 @@ class CodelesslyWidget extends StatefulWidget {
         }
       }
 
+      // If the Codelessly global instance was passed and is still idle, that
+      // means the user never triggered Codelessly.init() but this
+      // [CodelesslyWidget] is about to be rendered.
+      //
+      // We initialize the global instance here. If this were a local Codelessly
+      // instance, the user explicitly wants more control over the SDK, so we
+      // do nothing and let the user handle it.
       if (isGlobal) {
         if (status == SDKStatus.idle) {
           codelessly.configure(
@@ -250,16 +257,6 @@ class CodelesslyWidget extends StatefulWidget {
 
         if (status == SDKStatus.configured) {
           codelessly.init();
-        }
-      }
-
-      if (codelessly.status == SDKStatus.done) {
-        final model = codelessly.publishDataManager.publishModel;
-        if (!(model?.layouts.containsKey(layoutID) ?? true)) {
-          throw CodelesslyException.layoutNotFound(
-            message: 'Layout with ID [$layoutID] does not exist.',
-            layoutID: layoutID,
-          );
         }
       }
     } catch (exception, str) {
@@ -293,8 +290,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
   /// Listens to the SDK's status to figure out if it needs to manually
   /// initialize the opposite data manager if needed.
-  late final StreamSubscription<SDKStatus> statusListener;
+  StreamSubscription<SDKStatus>? sdkStatusListener;
 
+  /// The [CodelesslyContext] that will hold the data and functions that will
+  /// be used to render the layout.
+  ///
+  /// This object is observed through InheritedWidget. Node transformers can
+  /// find this object using: `Provider.of<CodelesslyContext>(context)`.
+  /// or `context.read<CodelesslyContext>()`.
   late CodelesslyContext codelesslyContext = CodelesslyContext(
     data: widget.data,
     functions: widget.functions,
@@ -316,21 +319,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       );
     }
 
-    // If this CodelesslyWidget wants to preview a layout but the SDK is
-    // configured to load published layouts, then we need to initialize the
-    // preview data manager.
-    // Vice versa for published layouts if the SDK is configured to load
-    // preview layouts.
     if (widget.isPreview != oldWidget.isPreview) {
-      dataManager = widget.isPreview
-          ? widget.codelessly.previewDataManager
-          : widget.codelessly.publishDataManager;
-
-      if (widget.codelessly.status == SDKStatus.done) {
-        if (dataManager.status == DataManagerStatus.idle) {
-          dataManager.init();
-        }
-      }
+      verifyAndListenToDataManager();
     }
   }
 
@@ -338,22 +328,24 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   void initState() {
     super.initState();
 
-    // If this CodelesslyWidget wants to preview a layout but the SDK is
-    // configured to load published layouts, then we need to initialize the
-    // preview data manager.
-    // Vice versa for published layouts if the SDK is configured to load
-    // preview layouts.
+    listenToSDK();
+  }
+
+  /// Listens to the SDK's status. If the SDK is done, then we can start
+  /// listening to the data manager's status for layout updates.
+  void listenToSDK() {
+    print(
+        'CodelesslyWidget [${widget.layoutID}]: Listening to sdk status stream.');
+
+    // First event.
     if (widget.codelessly.status == SDKStatus.done) {
-      if (widget.codelessly.config?.isPreview != widget.isPreview) {
-        if (dataManager.status == DataManagerStatus.idle) {
-          dataManager.init();
-        }
-      }
+      print(
+          'CodelesslyWidget [${widget.layoutID}]: Codelessly SDK is already loaded. Woo!');
+      verifyAndListenToDataManager();
     }
 
-    // If the SDK has not yet been initialized, the stream will emit events
-    // to do so here.
-    statusListener = widget.codelessly.statusStream.listen((status) {
+    sdkStatusListener?.cancel();
+    sdkStatusListener = widget.codelessly.statusStream.listen((status) {
       switch (status) {
         case SDKStatus.idle:
         case SDKStatus.configured:
@@ -361,19 +353,43 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         case SDKStatus.errored:
           break;
         case SDKStatus.done:
-          if (widget.codelessly.config?.isPreview != widget.isPreview) {
-            if (dataManager.status == DataManagerStatus.idle) {
-              dataManager.init();
-            }
-          }
+          print(
+              'CodelesslyWidget [${widget.layoutID}]: Codelessly SDK is done loading.');
+          verifyAndListenToDataManager();
           break;
       }
     });
   }
 
+  /// Listens to the data manager's status. If the data manager is initialized,
+  /// then we can signal to the manager that the desired layout passed to this
+  /// widget is ready to be rendered and needs to be downloaded and prepared.
+  void verifyAndListenToDataManager() {
+    print(
+        'CodelesslyWidget [${widget.layoutID}]: verifying and listening to datamanager stream.');
+    dataManager = widget.isPreview
+        ? widget.codelessly.previewDataManager
+        : widget.codelessly.publishDataManager;
+
+    // If this CodelesslyWidget wants to preview a layout but the SDK is
+    // configured to load published layouts, then we need to initialize the
+    // preview data manager.
+    // Vice versa for published layouts if the SDK is configured to load
+    // preview layouts.
+    if (!dataManager.initialized) {
+      print(
+          'CodelesslyWidget [${widget.layoutID}]: initialized data manager for the first time. [${widget.isPreview ? 'preview' : 'publish'}]');
+      dataManager.init(layoutID: widget.layoutID);
+    } else {
+      print(
+          'CodelesslyWidget [${widget.layoutID}]: requesting layout from data manager. [${widget.isPreview ? 'preview' : 'publish'}]');
+      dataManager.getOrFetchLayoutWithFontsAndEmit(layoutID: widget.layoutID);
+    }
+  }
+
   @override
   void dispose() {
-    statusListener.cancel();
+    sdkStatusListener?.cancel();
     super.dispose();
   }
 
@@ -382,72 +398,50 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   /// publishes a new update through the Codelessly publish menu, the changes
   /// are immediately reflected here.
   Widget buildStreamedLayout() {
-    return StreamBuilder<DataManagerStatus>(
-      key: ValueKey(widget.isPreview),
-      stream: dataManager.statusStream,
-      initialData: dataManager.status,
-      builder: (context, AsyncSnapshot<DataManagerStatus> statusSnapshot) {
-        if (statusSnapshot.hasError) {
+    return StreamBuilder<SDKPublishModel?>(
+      stream: dataManager.publishModelStream,
+      initialData: dataManager.publishModel,
+      builder: (context, AsyncSnapshot<SDKPublishModel?> snapshot) {
+        if (snapshot.hasError) {
           return CodelesslyErrorScreen(
-            exception: statusSnapshot.error,
+            exception: snapshot.error,
             isPreview: widget.isPreview,
           );
         }
 
-        if (!statusSnapshot.hasData) {
+        if (!snapshot.hasData || snapshot.data == null) {
           return CodelesslyLoadingScreen();
         }
 
-        final DataManagerStatus status = statusSnapshot.data!;
+        final SDKPublishModel model = snapshot.data!;
+        final String layoutID = widget.layoutID;
 
-        switch (status) {
-          case DataManagerStatus.idle:
-            return CodelesslyLoadingScreen();
-          case DataManagerStatus.initializing:
-          case DataManagerStatus.initialized:
-            return StreamBuilder<SDKPublishModel>(
-              stream: dataManager.publishModelStream,
-              initialData: dataManager.publishModel,
-              builder: (context, AsyncSnapshot<SDKPublishModel> snapshot) {
-                if (snapshot.hasError) {
-                  return CodelesslyErrorScreen(
-                    exception: snapshot.error,
-                    isPreview: widget.isPreview,
-                  );
-                }
-
-                if (!snapshot.hasData) {
-                  return CodelesslyLoadingScreen();
-                }
-
-                final SDKPublishModel model = snapshot.data!;
-                final String layoutID = widget.layoutID;
-
-                if (!model.layouts.containsKey(layoutID)) {
-                  CodelesslyErrorHandler.instance.captureException(
-                    CodelesslyException.layoutNotFound(
-                      message: 'Layout with ID [$layoutID] does not exist.',
-                      layoutID: layoutID,
-                    ),
-                  );
-
-                  return CodelesslyErrorScreen(
-                    exception: CodelesslyException.layoutNotFound(
-                      message: 'Layout with ID [$layoutID] does not exist.',
-                      stacktrace: StackTrace.current,
-                      layoutID: layoutID,
-                    ),
-                    isPreview: widget.isPreview,
-                  );
-                }
-
-                return CodelesslyPublishedLayoutBuilder(
-                  key: ValueKey(layoutID),
-                  layout: model.layouts[layoutID]!,
-                );
-              },
-            );
+        if (!model.layouts.containsKey(layoutID)) {
+          return CodelesslyLoadingScreen();
         }
+
+        // if (!model.layouts.containsKey(layoutID)) {
+        //   CodelesslyErrorHandler.instance.captureException(
+        //     CodelesslyException.layoutNotFound(
+        //       message: 'Layout with ID [$layoutID] does not exist.',
+        //       layoutID: layoutID,
+        //     ),
+        //   );
+        //
+        //   return CodelesslyErrorScreen(
+        //     exception: CodelesslyException.layoutNotFound(
+        //       message: 'Layout with ID [$layoutID] does not exist.',
+        //       stacktrace: StackTrace.current,
+        //       layoutID: layoutID,
+        //     ),
+        //     isPreview: widget.isPreview,
+        //   );
+        // }
+
+        return CodelesslyPublishedLayoutBuilder(
+          key: ValueKey(layoutID),
+          layout: model.layouts[layoutID]!,
+        );
       },
     );
   }
