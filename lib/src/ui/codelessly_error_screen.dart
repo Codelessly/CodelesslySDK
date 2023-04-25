@@ -74,13 +74,17 @@ class CodelesslyErrorScreen extends StatelessWidget {
           message = '${ce.message ?? 'Failed to connect to the internet.'}'
               '\nPlease check your internet connection and try again.';
           break;
-        case ErrorType.other:
-          message = (exception as CodelesslyException).message ??
-              'Unknown error!\nSorry this happened :(';
-          break;
         case ErrorType.assertionError:
           message = (exception as CodelesslyException).message ??
               'Assertion error!\nYou used the SDK incorrectly!.';
+          break;
+        case ErrorType.notInitializedError:
+          message = (exception as CodelesslyException).message ??
+              'Not initialized error!\nYou used the SDK incorrectly!.';
+          break;
+        case ErrorType.other:
+          message = (exception as CodelesslyException).message ??
+              'Unknown error!\nSorry this happened :(';
           break;
       }
     } else {

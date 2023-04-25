@@ -97,7 +97,7 @@ class CodelesslyCacheManager extends CacheManager {
   Future<void> delete(String key) => box.delete(key);
 
   @override
-  Future<void> deleteAllFiles() async {
+  Future<void> deleteAllByteData() async {
     try {
       // Delete the directory if it exists.
       await filesBox.deleteAll(filesBox.keys);
@@ -111,7 +111,7 @@ class CodelesslyCacheManager extends CacheManager {
   }
 
   @override
-  Future<void> deleteFile(String pathKey, String name) async {
+  Future<void> deleteBytes(String pathKey, String name) async {
     try {
       final key = '$pathKey/$name';
       await filesBox.delete(key);
@@ -125,26 +125,18 @@ class CodelesslyCacheManager extends CacheManager {
   }
 
   @override
-  Future<Uint8List> getFile(String pathKey, String name) async {
-    try {
-      final key = '$pathKey/$name';
-      if (filesBox.containsKey(key)) {
-        return await filesBox.get(key);
-      }
-      throw CodelesslyException.fileIoException(
-        message: 'File $pathKey/$name does not exist',
-      );
-    } catch (e, stacktrace) {
-      throw CodelesslyException.fileIoException(
-        message: 'Failed to get file $pathKey/$name',
-        originalException: e,
-        stacktrace: stacktrace,
-      );
+  Uint8List getBytes(String pathKey, String name) {
+    final key = '$pathKey/$name';
+    if (filesBox.containsKey(key)) {
+      return filesBox.get(key);
     }
+    throw CodelesslyException.fileIoException(
+      message: 'File $pathKey/$name does not exist',
+    );
   }
 
   @override
-  Future<bool> isFileCached(String pathKey, String name) async {
+  Future<bool> areBytesCached(String pathKey, String name) async {
     try {
       final key = '$pathKey/$name';
       return filesBox.containsKey(key);
@@ -158,7 +150,7 @@ class CodelesslyCacheManager extends CacheManager {
   }
 
   @override
-  Future<void> purgeFiles(
+  Future<void> purgeBytes(
     String pathKey, {
     Iterable<String> excludedFileNames = const [],
   }) async {
@@ -197,7 +189,7 @@ class CodelesslyCacheManager extends CacheManager {
   }
 
   @override
-  Future<void> saveFile(String pathKey, String name, Uint8List bytes) async {
+  Future<void> storeBytes(String pathKey, String name, Uint8List bytes) async {
     try {
       final key = '$pathKey/$name';
       await filesBox.put(key, bytes);

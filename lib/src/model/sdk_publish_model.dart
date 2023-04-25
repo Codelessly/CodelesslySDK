@@ -274,33 +274,43 @@ enum UpdateType {
 @JsonSerializable()
 class SDKPublishUpdates with EquatableMixin {
   /// The last time the fonts collection received an update.
-  @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
-  final DateTime fonts;
+  @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
+  final Map<String, DateTime> fonts;
 
   /// A map that holds a set of layout ids as keys, and the last time
   /// the layout was updated as the value.
   @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
   final Map<String, DateTime> layouts;
 
+  /// A map that holds a mapping of layout ids -> font ids.
+  ///
+  /// This allows the SDK to optimize its data flow by only downloading
+  /// the minimum necessary fonts for a given layout without downloading
+  /// all of the fonts of a given project.
+  final Map<String, Set<String>> layoutFonts;
+
   /// Creates a new instance of [SDKPublishUpdates].
   SDKPublishUpdates({
-    DateTime? fonts,
+    this.fonts = const {},
     this.layouts = const {},
-  }) : fonts = fonts ?? DateTime.now();
+    this.layoutFonts = const {},
+  });
 
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishUpdates copyWith({
-    DateTime? fonts,
+    Map<String, DateTime>? fonts,
     Map<String, DateTime>? layouts,
+    Map<String, Set<String>>? layoutFonts,
   }) {
     return SDKPublishUpdates(
       fonts: fonts ?? this.fonts,
       layouts: layouts ?? this.layouts,
+      layoutFonts: layoutFonts ?? this.layoutFonts,
     );
   }
 
   @override
-  List<Object?> get props => [fonts, layouts];
+  List<Object?> get props => [fonts, layouts, layoutFonts];
 
   /// Creates a new instance of [SDKPublishUpdates] from a JSON map.
   factory SDKPublishUpdates.fromJson(Map<String, dynamic> json) =>
