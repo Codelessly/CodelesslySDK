@@ -15,15 +15,16 @@ class WebDataRepository extends NetworkDataRepository {
   }) async* {
     try {
       final Response result = await post(
-        Uri.parse('$firebaseCloudFunctionsBaseURL/getPublishModel'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
+        Uri.parse('$firebaseCloudFunctionsBaseURL/getPublishModelRequest'),
+        headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
           'isPreview': isPreview,
         }),
       );
+
+      print(
+          'streamPublishModel response:\n${result.body}\n${result.statusCode}\n${result.request}\n${result.headers}');
 
       if (result.statusCode != 200) {
         yield null;
@@ -35,6 +36,7 @@ class WebDataRepository extends NetworkDataRepository {
 
       yield model;
     } catch (e) {
+      print('streamPublishModel error: $e');
       yield null;
     }
   }
@@ -47,15 +49,14 @@ class WebDataRepository extends NetworkDataRepository {
   }) async {
     try {
       final Response result = await post(
-        Uri.parse('$firebaseCloudFunctionsBaseURL/getLayoutModel'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
+        Uri.parse('$firebaseCloudFunctionsBaseURL/getLayoutModelRequest'),
+        headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
           'layoutID': layoutID,
           'isPreview': isPreview,
         }),
+        encoding: utf8,
       );
 
       if (result.statusCode != 200) return null;
@@ -77,15 +78,14 @@ class WebDataRepository extends NetworkDataRepository {
   }) async {
     try {
       final Response result = await post(
-        Uri.parse('$firebaseCloudFunctionsBaseURL/getFontModel'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
+        Uri.parse('$firebaseCloudFunctionsBaseURL/getFontModelRequest'),
+        headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
           'fontID': fontID,
           'isPreview': isPreview,
         }),
+        encoding: utf8,
       );
 
       if (result.statusCode != 200) return null;
