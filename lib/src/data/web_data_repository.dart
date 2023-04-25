@@ -23,9 +23,6 @@ class WebDataRepository extends NetworkDataRepository {
         }),
       );
 
-      print(
-          'streamPublishModel response:\n${result.body}\n${result.statusCode}\n${result.request}\n${result.headers}');
-
       if (result.statusCode != 200) {
         yield null;
         return;
