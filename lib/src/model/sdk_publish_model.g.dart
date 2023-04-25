@@ -104,14 +104,23 @@ Map<String, dynamic> _$SDKPublishFontToJson(SDKPublishFont instance) {
 }
 
 SDKPublishUpdates _$SDKPublishUpdatesFromJson(Map json) => SDKPublishUpdates(
-      fonts: jsonToDate(json['fonts'] as int?),
+      fonts: json['fonts'] == null
+          ? const {}
+          : jsonMapToDateValues(json['fonts'] as Map<String, dynamic>),
       layouts: json['layouts'] == null
           ? const {}
           : jsonMapToDateValues(json['layouts'] as Map<String, dynamic>),
+      layoutFonts: (json['layoutFonts'] as Map?)?.map(
+            (k, e) => MapEntry(k as String,
+                (e as List<dynamic>).map((e) => e as String).toSet()),
+          ) ??
+          const {},
     );
 
 Map<String, dynamic> _$SDKPublishUpdatesToJson(SDKPublishUpdates instance) =>
     <String, dynamic>{
-      'fonts': dateToJson(instance.fonts),
+      'fonts': dateValuesToJsonMap(instance.fonts),
       'layouts': dateValuesToJsonMap(instance.layouts),
+      'layoutFonts':
+          instance.layoutFonts.map((k, e) => MapEntry(k, e.toList())),
     };

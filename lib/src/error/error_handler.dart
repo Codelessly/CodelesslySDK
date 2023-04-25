@@ -44,6 +44,9 @@ enum ErrorType {
   /// An assert failed.
   assertionError('Assertion error'),
 
+  /// Not initialized.
+  notInitializedError('Not initialized'),
+
   /// Any other error that is not defined in this enum.
   other('Unknown error');
 
@@ -358,6 +361,21 @@ class CodelesslyException implements Exception {
   }) : this(
           message,
           type: ErrorType.assertionError,
+          layoutID: layoutID,
+          url: url,
+          originalException: originalException,
+          stacktrace: stacktrace,
+        );
+
+  CodelesslyException.notInitializedError({
+    String? message,
+    String? layoutID,
+    String? url,
+    dynamic originalException,
+    StackTrace? stacktrace,
+  }) : this(
+          message,
+          type: ErrorType.notInitializedError,
           layoutID: layoutID,
           url: url,
           originalException: originalException,

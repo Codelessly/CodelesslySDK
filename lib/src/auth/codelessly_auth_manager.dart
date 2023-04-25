@@ -58,7 +58,7 @@ class CodelesslyAuthManager extends AuthManager {
           _authStreamController.add(_authData);
         } else {
           await cacheManager.clearAll();
-          await cacheManager.deleteAllFiles();
+          await cacheManager.deleteAllByteData();
         }
       } catch (error, stacktrace) {
         // If the cache decoding process fails for any reason, we invalidate
@@ -73,7 +73,7 @@ class CodelesslyAuthManager extends AuthManager {
           // markForUI: false,
         );
         await cacheManager.clearAll();
-        await cacheManager.deleteAllFiles();
+        await cacheManager.deleteAllByteData();
       }
     }
 

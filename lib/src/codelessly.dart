@@ -10,7 +10,8 @@ import 'auth/codelessly_auth_manager.dart';
 import 'cache/cache_manager.dart';
 import 'cache/codelessly_cache_manager.dart';
 import 'data/firebase_data_manager.dart';
-import 'data/web_data_manager.dart';
+import 'data/local_data_repository.dart';
+import 'data/web_data_repository.dart';
 import 'error/error_handler.dart';
 import 'error/reporter.dart';
 
@@ -242,7 +243,7 @@ class Codelessly {
   /// to idle mode.
   Future<void> resetAndClearCache() async {
     await _cacheManager?.clearAll();
-    await _cacheManager?.deleteAllFiles();
+    await _cacheManager?.deleteAllByteData();
     _publishDataManager?.invalidate();
     _previewDataManager?.invalidate();
     _authManager?.invalidate();
@@ -420,36 +421,28 @@ class Codelessly {
             cacheManager: this.cacheManager,
           );
       _publishDataManager = publishDataManager ??
-          (!kIsWeb
-              ? FirebaseDataManager(
-                  config: _config!,
-                  cacheManager: this.cacheManager,
-                  authManager: this.authManager,
-                  firestore: _firestore!,
-                  isPreview: false,
-                )
-              : WebDataManager(
-                  config: _config!,
-                  cacheManager: this.cacheManager,
-                  authManager: this.authManager,
-                  isPreview: false,
-                ));
+          DataManager(
+            config: _config!.copyWith(isPreview: false),
+            cacheManager: this.cacheManager,
+            authManager: this.authManager,
+            networkDataRepository: kIsWeb
+                ? WebDataRepository()
+                : FirebaseDataRepository(firestore: firestore),
+            localDataRepository:
+                LocalDataRepository(cacheManager: this.cacheManager),
+          );
 
       _previewDataManager = previewDataManager ??
-          (!kIsWeb
-              ? FirebaseDataManager(
-                  config: _config!,
-                  cacheManager: this.cacheManager,
-                  authManager: this.authManager,
-                  firestore: _firestore!,
-                  isPreview: true,
-                )
-              : WebDataManager(
-                  config: _config!,
-                  cacheManager: this.cacheManager,
-                  authManager: this.authManager,
-                  isPreview: true,
-                ));
+          DataManager(
+            config: _config!.copyWith(isPreview: true),
+            cacheManager: this.cacheManager,
+            authManager: this.authManager,
+            networkDataRepository: kIsWeb
+                ? WebDataRepository()
+                : FirebaseDataRepository(firestore: firestore),
+            localDataRepository:
+                LocalDataRepository(cacheManager: this.cacheManager),
+          );
 
       _updateStatus(SDKStatus.loading);
 
@@ -464,21 +457,21 @@ class Codelessly {
       // emitted to the internal stream controller, ready for immediate usage.
       await this.authManager.init();
 
-      // The data manager initializes last to load the last stored published
-      // layout, or, if it doesn't exist, faults the entire process and awaits
-      // to fetch the latest published layout from the server.
+      // The data manager initializes last to load the last stored publish
+      // model, or, if it doesn't exist, halts the entire process and awaits
+      // to fetch the latest publish model from the server.
       //
-      // After either of those is done, a layout stream is created and attached
+      // After either of those is done, a stream is created and attached
       // to the internal stream controller, ready for immediate usage.
       //
       // The config sets the default data manager to initialize. If the
-      // [CodelesslyWidget]s want to load the opposite manager, the other will
+      // [CodelesslyWidget] want to load the opposite manager, the other will
       // lazily initialize.
-      if (_config!.isPreview) {
-        await this.previewDataManager.init();
-      } else {
-        await this.publishDataManager.init();
-      }
+      // if (_config!.isPreview) {
+      //   await this.previewDataManager.init(layoutID: null);
+      // } else {
+      //   await this.publishDataManager.init(layoutID: null);
+      // }
 
       _updateStatus(SDKStatus.done);
     } catch (error, stacktrace) {
