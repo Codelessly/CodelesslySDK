@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import 'utils/placeholder_painter.dart';
 
 typedef BuildWidgetFromID = Widget Function(String id, BuildContext context);
 typedef BuildWidgetFromNode = Widget Function(
@@ -62,8 +63,25 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       context,
       node: node,
       builder: (values, context) {
-        Widget widget =
-            getTransformerByNode(node).buildWidget(node, context, settings);
+        Widget widget = settings.isPreview &&
+                (node.type == 'listTile' || node.type == 'expansionTile')
+            ? SizedBox(
+                width: node.basicBoxGlobal.width,
+                height: node.basicBoxGlobal.height,
+                child: CustomPaint(
+                  painter: PlaceholderPainter(
+                    scale: 1,
+                    scaleInverse: 1,
+                    bgColor: kDefaultPrimaryColor.withOpacity(0.15),
+                    dashColor: Color(0xFFADB3F1),
+                    textSpan: TextSpan(
+                      text: node.type.camelToSentenceCase,
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ),
+              )
+            : getTransformerByNode(node).buildWidget(node, context, settings);
 
         if (settings.withOpacity) {
           widget = applyWidgetOpacity(node, widget);
