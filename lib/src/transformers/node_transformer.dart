@@ -26,6 +26,9 @@ abstract class BuildSettings {
   /// Whether to internally handle the node's alignment.
   final bool withAlignment;
 
+  /// Whether to render the preview version of the widget.
+  final bool isPreview;
+
   /// Creates a [BuildSettings] instance.
   const BuildSettings({
     this.withOpacity = true,
@@ -35,6 +38,7 @@ abstract class BuildSettings {
     this.withConstraints = true,
     this.withReactions = true,
     this.withAlignment = true,
+    this.isPreview = false,
   });
 }
 
@@ -50,6 +54,7 @@ class WidgetBuildSettings extends BuildSettings {
     super.withConstraints,
     super.withReactions,
     super.withAlignment,
+    super.isPreview,
   });
 
   /// Creates a copy of this [WidgetBuildSettings] instance.
@@ -61,6 +66,7 @@ class WidgetBuildSettings extends BuildSettings {
     bool? withConstraints,
     bool? withReactions,
     bool? withAlignment,
+    bool? isPreview,
   }) {
     return WidgetBuildSettings(
       withOpacity: withOpacity ?? this.withOpacity,
@@ -70,6 +76,7 @@ class WidgetBuildSettings extends BuildSettings {
       withConstraints: withConstraints ?? this.withConstraints,
       withReactions: withReactions ?? this.withReactions,
       withAlignment: withAlignment ?? this.withAlignment,
+      isPreview: isPreview ?? this.isPreview,
     );
   }
 }

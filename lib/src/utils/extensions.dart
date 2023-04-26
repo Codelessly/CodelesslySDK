@@ -1197,6 +1197,15 @@ extension StringExt on String {
       characters.first.toUpperCase() + characters.skip(1).string.toLowerCase();
 
   bool get isJsonPath => jsonPathRegex.hasMatch(characters.string);
+
+  String get camelToSentenceCase {
+    // Split camel case string into words.
+    final String splittedWords = replaceAll(RegExp(r'(?<!^)(?=[A-Z])'), r' ');
+    // Capitalize first character.
+    final String capitalized =
+        splittedWords[0].toUpperCase() + splittedWords.substring(1);
+    return capitalized;
+  }
 }
 
 /// Can match:
