@@ -7,40 +7,51 @@ import 'package:http/http.dart';
 import '../../codelessly_sdk.dart';
 import '../auth/auth_manager.dart';
 import '../cache/cache_manager.dart';
+import '../cache/codelessly_cache_manager.dart';
 import '../error/error_handler.dart';
 import 'local_data_repository.dart';
 import 'network_data_repository.dart';
 
-enum DataManagerStatus {
-  /// The data manager has not been initialized.
-  idle,
-
-  /// The data manager is currently initializing.
-  initializing,
-
-  /// The data manager has been initialized.
-  initialized,
-}
-
-/// Abstraction for loading UI data from a remote source.
+/// Orchestrates the data flow for the SDK.
 class DataManager {
+  /// Determines whether the data manager has been initialized at least once.
+  ///
+  /// This is used to inform systems that rely on the data manager that it might
+  /// not need to be initialized again.
   bool initialized = false;
 
   /// The passed config from the SDK.
   final CodelesslyConfig config;
 
+  /// The network data repository to use. By default, it is going to be either
+  /// [FirebaseDataRepository] or [WebDataRepository] depending on platform.
   final NetworkDataRepository networkDataRepository;
+
+  /// The local data repository to use. By default, it is going to be
+  /// [LocalDataRepository] which uses [cacheManager] to abstract away data
+  /// manager specific caching.
   final LocalDataRepository localDataRepository;
+
+  /// The cache manager to use. By default, it is [CodelesslyCacheManager]
+  /// which uses Hive.
   final CacheManager cacheManager;
+
+  /// The auth manager to use. By default, it is [CodelesslyAuthManager].
   final AuthManager authManager;
 
   SDKPublishModel? _publishModel;
 
+  /// The current publish model linked to the auth token provided by the
+  /// [authManager]
   SDKPublishModel? get publishModel => _publishModel;
 
   StreamController<SDKPublishModel?> _publishModelStreamController =
       StreamController<SDKPublishModel?>.broadcast();
 
+  /// The stream of the current publish model linked to the auth token provided
+  /// by the [authManager].
+  ///
+  /// This stream will emit whenever new publish model information is received.
   Stream<SDKPublishModel?> get publishModelStream =>
       _publishModelStreamController.stream;
 
@@ -185,7 +196,6 @@ class DataManager {
       }
       final SDKPublishModel localModel = _publishModel!;
       processPublishDifference(
-        projectID: authData.projectId,
         serverModel: serverModel,
         localModel: localModel,
       );
@@ -260,10 +270,13 @@ class DataManager {
     print('Init complete.');
   }
 
+  /// Emits the current [_publishModel] to the [_publishModelStreamController].
   void emitPublishModel() {
     _publishModelStreamController.add(_publishModel);
   }
 
+  /// Saves the current [_publishModel] if it is not null to the local cache
+  /// using [localDataRepository].
   void savePublishModel() {
     if (_publishModel != null) {
       localDataRepository.savePublishModel(
@@ -273,6 +286,8 @@ class DataManager {
     }
   }
 
+  /// Saves the provided [fontBytes] with the [SDKPublishFont.id] from [font]
+  /// as the storage key.
   void saveFontBytes(SDKPublishFont font, Uint8List fontBytes) {
     localDataRepository.saveFontBytes(
       fontID: font.id,
@@ -287,13 +302,19 @@ class DataManager {
     _publishModelDocumentListener?.cancel();
   }
 
-  /// Sets the [SDKPublishModel] as null.
+  /// Sets the [SDKPublishModel] as null and cancels document streaming.
   void invalidate() async {
     _publishModelDocumentListener?.cancel();
+    _publishModel = null;
   }
 
+  /// Takes a [serverModel], and [localModel] and compares them
+  /// to determine what changed on the server.
+  /// The changes are then processed and downloaded if necessary.
+  ///
+  /// Changes get reflected into the [_publishModel] and saved to the local
+  /// cache.
   Future<void> processPublishDifference({
-    required String projectID,
     required SDKPublishModel serverModel,
     required SDKPublishModel localModel,
   }) async {
@@ -320,12 +341,16 @@ class DataManager {
       switch (updateType) {
         case UpdateType.delete:
           localModel.layouts.remove(layoutID);
+          localDataRepository.deletePublishLayout(
+            layoutID: layoutID,
+            isPreview: config.isPreview,
+          );
           break;
         case UpdateType.add:
         case UpdateType.update:
           final SDKPublishLayout? layout =
               await networkDataRepository.downloadLayoutModel(
-            projectID: projectID,
+            projectID: authManager.authData!.projectId,
             layoutID: layoutID,
             isPreview: config.isPreview,
           );
@@ -351,7 +376,7 @@ class DataManager {
         case UpdateType.update:
           final SDKPublishFont? font =
               await networkDataRepository.downloadFontModel(
-            projectID: projectID,
+            projectID: authManager.authData!.projectId,
             fontID: fontID,
             isPreview: config.isPreview,
           );
@@ -374,18 +399,16 @@ class DataManager {
     emitPublishModel();
   }
 
-  /// Compares the current [_publishModel] with the newly fetched
-  /// [serverModel] and returns a map of layout ids and their corresponding
-  /// update type.
+  /// Compares the current [localModel] with a newly fetched [serverModel] and
+  /// returns a map of layout ids and their corresponding update types.
   ///
-  /// - If a layout did not exist in the previous model, it is marked for
-  /// download.
+  /// - If a layout did not exist in the previous model, it is marked as new.
   ///
   /// - If a layout exists in both models but has a newer time stamp, it is
-  /// marked for download.
+  /// marked as updated.
   ///
   /// - If a layout existed in the previous model, but was deleted in the
-  /// updated model, it is marked for deletion.
+  /// updated model, it is marked as deleted.
   Map<String, UpdateType> _collectLayoutUpdates({
     required SDKPublishModel serverModel,
     required SDKPublishModel localModel,
@@ -417,6 +440,16 @@ class DataManager {
     return layoutUpdates;
   }
 
+  /// Compares the current [localModel] with a newly fetched [serverModel] and
+  /// returns a map of font ids and their corresponding update types.
+  ///
+  /// - If a font did not exist in the previous model, it is marked as new.
+  ///
+  /// - If a font exists in both models but has a newer time stamp, it is
+  /// marked as updated.
+  ///
+  /// - If a font existed in the previous model, but was deleted in the
+  /// updated model, it is marked as deleted.
   Map<String, UpdateType> _collectFontUpdates({
     required SDKPublishModel serverModel,
     required SDKPublishModel localModel,
@@ -448,8 +481,28 @@ class DataManager {
     return fontUpdates;
   }
 
-  /// If the layout were cached during initialization, then it's already been
-  /// loaded. So we can skip checking cache and load from server directly.
+  /// [layoutID] is the identifier of the layout to be fetched or retrieved.
+  ///
+  /// Fetches or gets the requested [layoutID] along with its associated fonts,
+  /// and emits the updated [_publishModel].
+  ///
+  /// This method first checks if the layout with the given [layoutID] is
+  /// already cached.
+  /// If it is, the method proceeds directly to fetching the required fonts.
+  /// If not, it downloads the layout model, emits it, and saves it before
+  /// moving on to processing the fonts.
+  ///
+  /// The [SDKPublishFont]s are then fetched or downloaded in the background,
+  /// ensuring that they are ready to be used.
+  /// After the font models are fetched, their bytes are either loaded from
+  /// cache or downloaded from the network, and then saved and loaded into
+  /// the Flutter engine.
+  ///
+  /// This method will return `false` if the user is not authenticated and the
+  /// layout is not cached.
+  ///
+  /// Will return `true` if the layout and its associated fonts were fetched
+  /// successfully, `false` otherwise.
   Future<bool> getOrFetchLayoutWithFontsAndEmit({
     required String layoutID,
   }) async {
@@ -462,7 +515,7 @@ class DataManager {
 
     // If the user is not authenticated, then they get whatever is cached and
     // nothing else.
-    if (auth == null) return false;
+    if (auth == null) return model!.layouts.containsKey(layoutID);
 
     SDKPublishLayout? layout;
     if (model!.layouts.containsKey(layoutID)) {
@@ -489,7 +542,6 @@ class DataManager {
 
     // Download or load fonts in the background.
     final Set<Future<SDKPublishFont?>> fontModels = getOrFetchFontModels(
-      projectID: auth.projectId,
       fontIDs: model.updates.layoutFonts[layoutID]!,
     );
 
@@ -510,28 +562,8 @@ class DataManager {
     return true;
   }
 
-  Future<SDKPublishLayout?> getOrFetchLayoutModel({
-    required String layoutID,
-    required String projectID,
-  }) async {
-    final SDKPublishModel? model = _publishModel;
-
-    if (model != null && model.layouts.containsKey(layoutID)) {
-      print('Layout [$layoutID] is already saved. Done!');
-      return model.layouts[layoutID]!;
-    } else {
-      print('\tLayout [$layoutID] is not saved, downloading...');
-      final SDKPublishLayout? layout =
-          await networkDataRepository.downloadLayoutModel(
-        layoutID: layoutID,
-        projectID: projectID,
-        isPreview: config.isPreview,
-      );
-      print('\tLayout [$layoutID] downloaded. Done!');
-      return layout;
-    }
-  }
-
+  /// Wrapper for [getOrFetchFontBytesAndSave] that additionally loads the font
+  /// into the Flutter engine.
   Future<void> getOrFetchFontBytesAndSaveAndLoad(SDKPublishFont font) async {
     final Uint8List? fontBytes = await getOrFetchFontBytesAndSave(font);
     if (fontBytes == null) return;
@@ -539,6 +571,7 @@ class DataManager {
     return loadFont(font, fontBytes);
   }
 
+  /// Loads a [font] with its associated [fontBytes] into the Flutter engine.
   Future<void> loadFont(SDKPublishFont font, Uint8List fontBytes) async {
     final FontLoader fontLoader = FontLoader(font.fullFontName);
 
@@ -547,7 +580,8 @@ class DataManager {
     return fontLoader.load();
   }
 
-  /// Also saves to cache.
+  /// Given a [font], will fetch its bytes either from cache or download & save
+  /// them.
   Future<Uint8List?> getOrFetchFontBytesAndSave(SDKPublishFont font) async {
     final Uint8List? fontBytes = localDataRepository.fetchFontBytes(
       fontID: font.id,
@@ -562,6 +596,7 @@ class DataManager {
     }
   }
 
+  /// Downloads the bytes of a [font] and saves them to cache.
   Future<Uint8List?> downloadFontBytesAndSave(SDKPublishFont font) async =>
       networkDataRepository.downloadFontBytes(url: font.url).then(
         (Uint8List? fontBytes) {
@@ -572,19 +607,24 @@ class DataManager {
         },
       );
 
+  /// Gets all [SDKPublishFont] models of a given set of [fontIDs] either from
+  /// local cache or downloads them from the network.
   Set<Future<SDKPublishFont?>> getOrFetchFontModels({
-    required String projectID,
     required Set<String> fontIDs,
   }) {
+    final AuthData? auth = authManager.authData;
+
     final Set<Future<SDKPublishFont?>> fonts = {};
     for (final String fontID in fontIDs) {
       final SDKPublishFont? font = _publishModel?.fonts[fontID];
       if (font != null) {
         fonts.add(Future.value(font));
       } else {
+        if (auth == null) continue;
+
         final Future<SDKPublishFont?> fontModelFuture =
             networkDataRepository.downloadFontModel(
-          projectID: projectID,
+          projectID: auth.projectId,
           fontID: fontID,
           isPreview: config.isPreview,
         );
