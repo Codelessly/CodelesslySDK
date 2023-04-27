@@ -201,7 +201,11 @@ class DataManager {
       );
 
       print('Publish model comparison complete.');
-    });
+    })
+      ..onError((error, str) {
+        CodelesslyErrorHandler.instance
+            .captureException(error, stacktrace: str);
+      });
 
     // If the publish model is still null, then we need to wait for the first
     // publish model to arrive from the server via the stream above.
@@ -528,8 +532,10 @@ class DataManager {
         projectID: auth.projectId,
         isPreview: config.isPreview,
       );
-
-      if (layout == null) return false;
+      if (layout == null) {
+        print('\tlayout [$layoutID] could not be downloaded.');
+        return false;
+      }
 
       model.layouts[layoutID] = layout;
       emitPublishModel();

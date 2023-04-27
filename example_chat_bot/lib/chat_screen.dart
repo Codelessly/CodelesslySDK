@@ -617,11 +617,33 @@ class _CodelesslyChatBubbleState extends State<CodelesslyChatBubble> {
         child: CodelesslyWidget(
           codelessly: widget.codelessly,
           layoutID: widget.layoutID,
-          loadingPlaceholder: (context) {
+          loadingBuilder: (context) {
             return Padding(
               padding: const EdgeInsets.all(16),
               child: CircularProgressIndicator(
-                color: context.colorScheme.onSecondaryContainer,
+                color: context.colorScheme.onSurface,
+              ),
+            );
+          },
+          errorBuilder: (context, exception) {
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: context.colorScheme.onSurface,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SelectableText(
+                      exception.toString(),
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             );
           },
