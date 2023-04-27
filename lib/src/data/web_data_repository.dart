@@ -6,7 +6,11 @@ import 'package:http/http.dart';
 import '../../codelessly_sdk.dart';
 import 'network_data_repository.dart';
 
-/// Handles the data flow of [SDKPublishModel] from the server.
+/// A [NetworkDataRepository] implementation that utilizes the Firebase Cloud
+/// Functions to retrieve the relevant data.
+///
+/// Since Firedart is not compatible with Flutter Web, this implementation
+/// utilizes the http package instead.
 class WebDataRepository extends NetworkDataRepository {
   @override
   Stream<SDKPublishModel?> streamPublishModel({

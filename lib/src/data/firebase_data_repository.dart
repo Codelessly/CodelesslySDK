@@ -12,8 +12,11 @@ class FirebaseDataRepository extends NetworkDataRepository {
   /// The firestore instance to fetch the published model from.
   final Firestore firestore;
 
+  /// Creates a new [FirebaseDataRepository] instance with the given
+  /// [firestore] instance.
   FirebaseDataRepository({required this.firestore});
 
+  /// Returns the path collection to be used.
   String publishPath(bool isPreview) =>
       isPreview ? 'publish_preview' : 'publish';
 

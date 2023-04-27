@@ -6,21 +6,28 @@ import 'package:flutter/cupertino.dart';
 import '../../codelessly_sdk.dart';
 import '../cache/cache_manager.dart';
 
+/// The local data repository is responsible for storing and retrieving the
+/// published model and associated layouts and font files from [CacheManager].
 class LocalDataRepository {
   /// The cache manager used to store the the published model and associated
   /// layouts and font files.
   final CacheManager cacheManager;
 
+  /// Creates a new [LocalDataRepository] instance with the given
+  /// [cacheManager].
   LocalDataRepository({required this.cacheManager});
 
+  /// The cache key for the published model.
   String modelCacheKey(bool isPreview) {
     return isPreview ? previewModelCacheKey : publishModelCacheKey;
   }
 
+  /// The cache key for the font files.
   String fontsCacheKey(bool isPreview) {
     return isPreview ? previewFontsCacheKey : publishFontsCacheKey;
   }
 
+  /// Returns the [SDKPublishModel] from the cache.
   SDKPublishModel? fetchPublishModel({
     required bool isPreview,
   }) {
@@ -34,6 +41,7 @@ class LocalDataRepository {
     }
   }
 
+  /// Returns the [SDKPublishLayout] from the cache.
   Uint8List? fetchFontBytes({
     required String fontID,
     required bool isPreview,
@@ -45,6 +53,7 @@ class LocalDataRepository {
     }
   }
 
+  /// Stores the [SDKPublishModel] in the cache.
   Future<void> savePublishModel({
     required SDKPublishModel model,
     required bool isPreview,
@@ -54,6 +63,7 @@ class LocalDataRepository {
         model.toFullJson(),
       );
 
+  /// Stores the given [bytes] of a [fontID] in the cache.
   Future<void> saveFontBytes({
     required String fontID,
     required Uint8List bytes,
@@ -69,12 +79,14 @@ class LocalDataRepository {
         debugPrintStack(label: '$e', stackTrace: str);
       });
 
-  void deletePublishModel({
+  /// Deletes a given layout associated with a [layoutID] from the cache.
+  void deletePublishLayout({
     required String layoutID,
     required bool isPreview,
   }) =>
       cacheManager.delete(modelCacheKey(isPreview));
 
+  /// Deletes the stored bytes of a given [fontID] from the cache.
   void deleteFontBytes({
     required String fontID,
     required bool isPreview,
