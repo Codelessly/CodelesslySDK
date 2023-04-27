@@ -9,7 +9,7 @@ import 'auth/auth_manager.dart';
 import 'auth/codelessly_auth_manager.dart';
 import 'cache/cache_manager.dart';
 import 'cache/codelessly_cache_manager.dart';
-import 'data/firebase_data_manager.dart';
+import 'data/firebase_data_repository.dart';
 import 'data/local_data_repository.dart';
 import 'data/web_data_repository.dart';
 import 'error/error_handler.dart';

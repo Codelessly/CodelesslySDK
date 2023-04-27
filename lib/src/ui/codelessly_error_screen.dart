@@ -90,45 +90,48 @@ class CodelesslyErrorScreen extends StatelessWidget {
     } else {
       message = 'An unexpected error happened!\n$exception';
     }
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Image.asset(
-            'packages/codelessly_sdk/assets/codelessly_logo.png',
-            width: 400,
-            height: 400,
-            color: Theme.of(context).primaryColor.withOpacity(0.1),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Uh oh!', style: Theme.of(context).textTheme.titleLarge),
-              SizedBox(height: 16),
-              if (title != null) ...[
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+    return Material(
+      color: Colors.white,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Image.asset(
+              'packages/codelessly_sdk/assets/codelessly_logo.png',
+              width: 400,
+              height: 400,
+              color: Theme.of(context).primaryColor.withOpacity(0.1),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Uh oh!', style: Theme.of(context).textTheme.titleLarge),
                 SizedBox(height: 16),
-              ],
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                constraints: BoxConstraints(maxWidth: 500, maxHeight: 500),
-                child: SingleChildScrollView(
-                  primary: false,
-                  padding: EdgeInsets.zero,
-                  child: SelectableText(
-                    message,
-                    textAlign: TextAlign.left,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                if (title != null) ...[
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  SizedBox(height: 16),
+                ],
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  constraints: BoxConstraints(maxWidth: 500, maxHeight: 500),
+                  child: SingleChildScrollView(
+                    primary: false,
+                    padding: EdgeInsets.zero,
+                    child: SelectableText(
+                      message,
+                      textAlign: TextAlign.left,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

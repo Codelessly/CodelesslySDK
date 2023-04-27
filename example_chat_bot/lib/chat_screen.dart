@@ -597,47 +597,8 @@ class CodelesslyChatBubble extends StatefulWidget {
 }
 
 class _CodelesslyChatBubbleState extends State<CodelesslyChatBubble> {
-  bool showBubble = false;
-
-  late final CodelesslyWidgetController controller = CodelesslyWidgetController(
-    codelessly: widget.codelessly,
-    layoutID: widget.layoutID,
-  );
-
-  late StreamSubscription<SDKPublishModel?> publishModelStreamSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-
-    controller.init();
-    if (controller.hasLayoutModel(widget.layoutID)) {
-      showBubble = true;
-    }
-
-    publishModelStreamSubscription =
-        controller.publishModelStream.listen((model) {
-      final bool showBubble = controller.hasLayoutModel(widget.layoutID);
-      if (this.showBubble != showBubble) {
-        setState(() {
-          this.showBubble = showBubble;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    publishModelStreamSubscription.cancel();
-    controller.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (!showBubble) {
-      return const SizedBox.shrink();
-    }
     return Bubble(
       margin: const BubbleEdges.only(left: 12, right: 12, bottom: 8),
       padding: const BubbleEdges.all(2),
@@ -646,7 +607,6 @@ class _CodelesslyChatBubbleState extends State<CodelesslyChatBubble> {
       color: context.colorScheme.secondaryContainer,
       elevation: 0,
       child: Container(
-        height: 400,
         clipBehavior: Clip.antiAlias,
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.8,
@@ -654,8 +614,24 @@ class _CodelesslyChatBubbleState extends State<CodelesslyChatBubble> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
         ),
-        child:
-            CodelesslyWidget(controller: controller),
+        child: CodelesslyWidget(
+          codelessly: widget.codelessly,
+          layoutID: widget.layoutID,
+          loadingPlaceholder: (context) {
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: CircularProgressIndicator(
+                color: context.colorScheme.onSecondaryContainer,
+              ),
+            );
+          },
+          layoutBuilder: (context, layout) {
+            return SizedBox(
+              height: 400,
+              child: layout,
+            );
+          },
+        ),
       ),
     );
   }
