@@ -38,12 +38,13 @@ class DataManager {
 
   SDKPublishModel? get publishModel => _publishModel;
 
-  late StreamController<SDKPublishModel?> _publishModelStreamController;
+  StreamController<SDKPublishModel?> _publishModelStreamController =
+      StreamController<SDKPublishModel?>.broadcast();
 
   Stream<SDKPublishModel?> get publishModelStream =>
       _publishModelStreamController.stream;
 
-  StreamSubscription<SDKPublishModel?>? publishModelDocumentListener;
+  StreamSubscription<SDKPublishModel?>? _publishModelDocumentListener;
 
   /// Creates a new instance of [DataManager] with the given [config].
   DataManager({
@@ -64,7 +65,6 @@ class DataManager {
   /// immediately and awaited.
   Future<void> init({required String? layoutID}) async {
     initialized = true;
-    _publishModelStreamController = StreamController.broadcast();
 
     // Initialize all locally cached data.
     _publishModel = localDataRepository.fetchPublishModel(
@@ -139,7 +139,8 @@ class DataManager {
     // It's either going to be fetched for the first time if it doesn't exist
     // in cache, or it's going to be updated with new data.
     final Completer<SDKPublishModel> completer = Completer();
-    publishModelDocumentListener = networkDataRepository
+    _publishModelDocumentListener?.cancel();
+    _publishModelDocumentListener = networkDataRepository
         .streamPublishModel(
       projectID: authData.projectId,
       isPreview: config.isPreview,
@@ -283,11 +284,13 @@ class DataManager {
   /// Disposes the [DataManager] instance.
   void dispose() async {
     _publishModelStreamController.close();
-    publishModelDocumentListener?.cancel();
+    _publishModelDocumentListener?.cancel();
   }
 
   /// Sets the [SDKPublishModel] as null.
-  void invalidate() async {}
+  void invalidate() async {
+    _publishModelDocumentListener?.cancel();
+  }
 
   Future<void> processPublishDifference({
     required String projectID,
