@@ -11,6 +11,7 @@ import '../cache/cache_manager.dart';
 import '../error/error_handler.dart';
 import 'codelessly_error_screen.dart';
 import 'codelessly_loading_screen.dart';
+import 'codelessly_widget_controller.dart';
 import 'layout_builder.dart';
 
 /// Holds data passed from the Codelessly instance down the widget tree where
@@ -128,21 +129,23 @@ class CodelesslyContext with EquatableMixin {
 
 /// SDK widget that requires the SDK to be initialized before hand.
 class CodelesslyWidget extends StatefulWidget {
-  /// The [Codelessly] instance to use.
-  ///
-  /// By default, this is the global instance, retrieved via Codelessly.instance.
-  final Codelessly codelessly;
+  final CodelesslyWidgetController? controller;
 
   /// The ID of the layout provided from your Codelessly dashboard.
   /// This represents a single screen or canvas.
-  final String layoutID;
+  final String? layoutID;
+
+  /// The [Codelessly] instance to use.
+  ///
+  /// By default, this is the global instance, retrieved via Codelessly.instance.
+  final Codelessly? codelessly;
 
   /// Whether to show the preview version of the provided layout rather than the
   /// published version.
   ///
   /// If a value is provided, it will override the value provided in
   /// [CodelesslyConfig.isPreview].
-  final bool isPreview;
+  final bool? isPreview;
 
   /// Holds a map of data to replace.
   ///
@@ -157,6 +160,15 @@ class CodelesslyWidget extends StatefulWidget {
   /// instance. Keys in this map will override keys in the [Codelessly]
   /// instance.
   final Map<String, CodelesslyFunction> functions;
+
+  final CodelesslyConfig? config;
+
+  /// Optional managers. These are only used when using the global codelessly
+  /// instance.
+  final AuthManager? authManager;
+  final DataManager? publishDataManager;
+  final DataManager? previewDataManager;
+  final CacheManager? cacheManager;
 
   /// Creates a [CodelesslyWidget].
   ///
@@ -183,114 +195,47 @@ class CodelesslyWidget extends StatefulWidget {
   /// layout.
   CodelesslyWidget({
     super.key,
-    required this.layoutID,
-    bool? isPreview,
-    Codelessly? codelessly,
-    CodelesslyConfig? config,
+    this.layoutID,
+    this.controller,
+    this.isPreview,
+    this.codelessly,
+    this.config,
+
+    // Optional managers. These are only used when using the global codelessly
+    // instance.
+    this.authManager,
+    this.publishDataManager,
+    this.previewDataManager,
+    this.cacheManager,
 
     // Data and functions.
     Map<String, String> data = const {},
     Map<String, CodelesslyFunction> functions = const {},
-
-    // Optional managers. These are only used when using the global codelessly
-    // instance.
-    AuthManager? authManager,
-    DataManager? publishDataManager,
-    DataManager? previewDataManager,
-    CacheManager? cacheManager,
   })  : data = {...data},
         functions = {...functions},
-        codelessly = codelessly ?? Codelessly.instance,
-        isPreview = isPreview ??
-            config?.isPreview ??
-            (codelessly ?? Codelessly.instance).config?.isPreview ??
-            false {
-    final codelessly = this.codelessly;
-    try {
-      assert(
-        (config == null) != (codelessly.config == null),
-        codelessly.config == null
-            ? 'The SDK cannot be initialized if it is not configured. '
-                '\nConsider specifying a [CodelesslyConfig] when initializing.'
-                '\n\nYou can initialize the SDK by calling [Codelessly.initializeSDK]'
-                '\nor call [Codelessly.configureSDK] to lazily load instead.'
-            : 'A [CodelesslyConfig] was already provided.'
-                '\nConsider removing the duplicate config or calling '
-                '[Codelessly.dispose] before reinitializing.',
-      );
-
-      final data = this.data;
-      final functions = this.functions;
-      final SDKStatus status = codelessly.status;
-      final bool isGlobal = Codelessly.isGlobalInstance(codelessly);
-
-      // Merge [data] and [functions] from the codelessly instance
-      // into the provided fields.
-      for (final entry in codelessly.data.entries) {
-        if (!data.containsKey(entry.key)) {
-          data[entry.key] = entry.value;
-        }
-      }
-      for (final entry in codelessly.functions.entries) {
-        if (!functions.containsKey(entry.key)) {
-          functions[entry.key] = entry.value;
-        }
-      }
-
-      // If the Codelessly global instance was passed and is still idle, that
-      // means the user never triggered Codelessly.init() but this
-      // [CodelesslyWidget] is about to be rendered.
-      //
-      // We initialize the global instance here. If this were a local Codelessly
-      // instance, the user explicitly wants more control over the SDK, so we
-      // do nothing and let the user handle it.
-      if (isGlobal) {
-        if (status == SDKStatus.idle) {
-          codelessly.configure(
-            config: config,
-            authManager: authManager,
-            publishDataManager: publishDataManager,
-            previewDataManager: previewDataManager,
-            cacheManager: cacheManager,
-          );
-        }
-
-        if (status == SDKStatus.configured) {
-          codelessly.init();
-        }
-      }
-    } catch (exception, str) {
-      // Makes sure the error handler is initialized before capturing.
-      // There are cases (like the above asserts and throws) that can
-      // trigger unhandled widget/flutter errors that are not handled
-      // from the Codelessly instance.
-      //
-      // We need to handle them, and if the codelessly instance is not
-      // configured yet, we need to initialize the error handler regardless.
-      codelessly.initErrorHandler(
-        automaticallySendCrashReports:
-            codelessly.config?.automaticallyCollectCrashReports ?? false,
-      );
-      CodelesslyErrorHandler.instance.captureException(
-        exception,
-        stacktrace: str,
-      );
-    }
-  }
+        assert(
+          (layoutID != null) != (controller != null),
+          'You must provide either a layoutID or a controller. One must be specified, and both cannot be specified at the same time.',
+        ),
+        assert(
+          ((config ??
+                  (codelessly ?? Codelessly.instance).config ??
+                  (controller?.config)) !=
+              null),
+          controller != null
+              ? 'You must provide a CodelesslyConfig inside of your CodelesslyWidgetController or configure the provided codelessly instance with one.'
+              : 'You must provide a CodelesslyConfig inside of your CodelesslyWidget or through the Codelessly instance.',
+        );
 
   @override
   State<CodelesslyWidget> createState() => _CodelesslyWidgetState();
 }
 
 class _CodelesslyWidgetState extends State<CodelesslyWidget> {
-  /// Get the relevant data manager that this [CodelesslyWidget] cares about.
-  late DataManager dataManager = widget.isPreview
-      ? widget.codelessly.previewDataManager
-      : widget.codelessly.publishDataManager;
+  CodelesslyWidgetController? _controller;
 
-  /// Listens to the SDK's status to figure out if it needs to manually
-  /// initialize the opposite data manager if needed.
-  StreamSubscription<SDKStatus>? sdkStatusListener;
+  CodelesslyWidgetController get _effectiveController =>
+      widget.controller ?? _controller!;
 
   /// The [CodelesslyContext] that will hold the data and functions that will
   /// be used to render the layout.
@@ -303,6 +248,19 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     functions: widget.functions,
     nodeValues: {},
   );
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.controller == null) {
+      _controller = createDefaultController();
+    }
+
+    if (!_effectiveController.didInitialize) {
+      _effectiveController.init();
+    }
+  }
 
   /// TODO: If Codelessly instance updates variables or functions, then we need
   ///       to trigger an update.
@@ -319,77 +277,39 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       );
     }
 
-    if (widget.isPreview != oldWidget.isPreview) {
-      verifyAndListenToDataManager();
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    listenToSDK();
-  }
-
-  /// Listens to the SDK's status. If the SDK is done, then we can start
-  /// listening to the data manager's status for layout updates.
-  void listenToSDK() {
-    print(
-        'CodelesslyWidget [${widget.layoutID}]: Listening to sdk status stream.');
-
-    // First event.
-    if (widget.codelessly.status == SDKStatus.done) {
-      print(
-          'CodelesslyWidget [${widget.layoutID}]: Codelessly SDK is already loaded. Woo!');
-      verifyAndListenToDataManager();
+    if (widget.controller == null && oldWidget.controller != null) {
+      _controller = oldWidget.controller ?? createDefaultController();
+    } else if (widget.controller != null && oldWidget.controller == null) {
+      _controller!.dispose();
+      _controller = null;
     }
 
-    sdkStatusListener?.cancel();
-    sdkStatusListener = widget.codelessly.statusStream.listen((status) {
-      switch (status) {
-        case SDKStatus.idle:
-        case SDKStatus.configured:
-        case SDKStatus.loading:
-        case SDKStatus.errored:
-          break;
-        case SDKStatus.done:
-          print(
-              'CodelesslyWidget [${widget.layoutID}]: Codelessly SDK is done loading.');
-          verifyAndListenToDataManager();
-          break;
+    if (widget.controller == null) {
+      if (widget.isPreview != oldWidget.isPreview ||
+          widget.layoutID != oldWidget.layoutID ||
+          widget.codelessly != oldWidget.codelessly) {
+        _controller?.dispose();
+        _controller = createDefaultController();
+        _effectiveController.init();
       }
-    });
-  }
-
-  /// Listens to the data manager's status. If the data manager is initialized,
-  /// then we can signal to the manager that the desired layout passed to this
-  /// widget is ready to be rendered and needs to be downloaded and prepared.
-  void verifyAndListenToDataManager() {
-    print(
-        'CodelesslyWidget [${widget.layoutID}]: verifying and listening to datamanager stream.');
-    dataManager = widget.isPreview
-        ? widget.codelessly.previewDataManager
-        : widget.codelessly.publishDataManager;
-
-    // If this CodelesslyWidget wants to preview a layout but the SDK is
-    // configured to load published layouts, then we need to initialize the
-    // preview data manager.
-    // Vice versa for published layouts if the SDK is configured to load
-    // preview layouts.
-    if (!dataManager.initialized) {
-      print(
-          'CodelesslyWidget [${widget.layoutID}]: initialized data manager for the first time. [${widget.isPreview ? 'preview' : 'publish'}]');
-      dataManager.init(layoutID: widget.layoutID);
-    } else {
-      print(
-          'CodelesslyWidget [${widget.layoutID}]: requesting layout from data manager. [${widget.isPreview ? 'preview' : 'publish'}]');
-      dataManager.getOrFetchLayoutWithFontsAndEmit(layoutID: widget.layoutID);
     }
   }
+
+  CodelesslyWidgetController createDefaultController() =>
+      CodelesslyWidgetController(
+        layoutID: widget.layoutID!,
+        codelessly: widget.codelessly,
+        isPreview: widget.isPreview,
+        config: widget.config,
+        authManager: widget.authManager,
+        publishDataManager: widget.publishDataManager,
+        previewDataManager: widget.previewDataManager,
+        cacheManager: widget.cacheManager,
+      );
 
   @override
   void dispose() {
-    sdkStatusListener?.cancel();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -399,13 +319,13 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   /// are immediately reflected here.
   Widget buildStreamedLayout() {
     return StreamBuilder<SDKPublishModel?>(
-      stream: dataManager.publishModelStream,
-      initialData: dataManager.publishModel,
+      stream: _effectiveController.publishModelStream,
+      initialData: _effectiveController.publishModel,
       builder: (context, AsyncSnapshot<SDKPublishModel?> snapshot) {
         if (snapshot.hasError) {
           return CodelesslyErrorScreen(
             exception: snapshot.error,
-            isPreview: widget.isPreview,
+            isPreview: _effectiveController.isPreview,
           );
         }
 
@@ -414,29 +334,11 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         }
 
         final SDKPublishModel model = snapshot.data!;
-        final String layoutID = widget.layoutID;
+        final String layoutID = _effectiveController.layoutID;
 
         if (!model.layouts.containsKey(layoutID)) {
           return CodelesslyLoadingScreen();
         }
-
-        // if (!model.layouts.containsKey(layoutID)) {
-        //   CodelesslyErrorHandler.instance.captureException(
-        //     CodelesslyException.layoutNotFound(
-        //       message: 'Layout with ID [$layoutID] does not exist.',
-        //       layoutID: layoutID,
-        //     ),
-        //   );
-        //
-        //   return CodelesslyErrorScreen(
-        //     exception: CodelesslyException.layoutNotFound(
-        //       message: 'Layout with ID [$layoutID] does not exist.',
-        //       stacktrace: StackTrace.current,
-        //       layoutID: layoutID,
-        //     ),
-        //     isPreview: widget.isPreview,
-        //   );
-        // }
 
         return CodelesslyPublishedLayoutBuilder(
           key: ValueKey(layoutID),
@@ -451,18 +353,18 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     return MultiProvider(
       providers: [
         Provider<CodelesslyContext>.value(value: codelesslyContext),
-        Provider<Codelessly>.value(value: widget.codelessly),
+        Provider<Codelessly>.value(value: _effectiveController.codelessly),
       ],
       child: Material(
         color: Colors.white,
         child: StreamBuilder<SDKStatus>(
-          stream: widget.codelessly.statusStream,
-          initialData: widget.codelessly.status,
+          stream: _effectiveController.codelessly.statusStream,
+          initialData: _effectiveController.codelessly.status,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return CodelesslyErrorScreen(
                 exception: snapshot.error,
-                isPreview: widget.isPreview,
+                isPreview: _effectiveController.isPreview,
               );
             }
             if (!snapshot.hasData) {
@@ -478,7 +380,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                 return CodelesslyErrorScreen(
                   exception: CodelesslyErrorHandler.instance.lastException ??
                       snapshot.error,
-                  isPreview: widget.isPreview,
+                  isPreview: _effectiveController.isPreview,
                 );
               case SDKStatus.done:
                 return buildStreamedLayout();
