@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bubble/bubble.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:example_chat_bot/main.dart';
@@ -45,7 +47,7 @@ class _ChatScreenState extends State<ChatScreen>
     config: const CodelesslyConfig(
       authToken: authToken,
       automaticallyCollectCrashReports: false,
-      isPreview: true,
+      isPreview: false,
     ),
   );
 
@@ -117,30 +119,8 @@ class _ChatScreenState extends State<ChatScreen>
   }
 
   /// The CodelesslyGPT's SDK message bubbles.
-  Widget sdkBubble(BuildContext context, String layoutID) {
-    return Bubble(
-      margin: const BubbleEdges.only(left: 12, right: 12, bottom: 8),
-      padding: const BubbleEdges.all(2),
-      radius: const Radius.circular(8),
-      alignment: Alignment.centerLeft,
-      color: context.colorScheme.secondaryContainer,
-      elevation: 0,
-      child: Container(
-        height: 400,
-        clipBehavior: Clip.antiAlias,
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.8,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: CodelesslyWidget(
-          layoutID: layoutID,
-          codelessly: codelessly,
-        ),
-      ),
-    );
-  }
+  Widget sdkBubble(BuildContext context, String layoutID) =>
+      CodelesslyChatBubble(codelessly: codelessly, layoutID: layoutID);
 
   /// A centered version of the CodelesslyGPT's SDK message bubbles.
   Widget sdkBubbleCentered(
@@ -407,7 +387,7 @@ class _ChatScreenState extends State<ChatScreen>
                 behavior:
                     ScrollConfiguration.of(context).copyWith(scrollbars: false),
                 child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                  physics: const BouncingScrollPhysics(),
                   controller: scrollController,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Column(
@@ -597,6 +577,85 @@ class _ChatScreenState extends State<ChatScreen>
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class CodelesslyChatBubble extends StatefulWidget {
+  final String layoutID;
+  final Codelessly codelessly;
+
+  const CodelesslyChatBubble({
+    super.key,
+    required this.codelessly,
+    required this.layoutID,
+  });
+
+  @override
+  State<CodelesslyChatBubble> createState() => _CodelesslyChatBubbleState();
+}
+
+class _CodelesslyChatBubbleState extends State<CodelesslyChatBubble> {
+  bool showBubble = false;
+
+  late final CodelesslyWidgetController controller = CodelesslyWidgetController(
+    codelessly: widget.codelessly,
+    layoutID: widget.layoutID,
+  );
+
+  late StreamSubscription<SDKPublishModel?> publishModelStreamSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller.init();
+    if (controller.hasLayoutModel(widget.layoutID)) {
+      showBubble = true;
+    }
+
+    publishModelStreamSubscription =
+        controller.publishModelStream.listen((model) {
+      final bool showBubble = controller.hasLayoutModel(widget.layoutID);
+      if (this.showBubble != showBubble) {
+        setState(() {
+          this.showBubble = showBubble;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    publishModelStreamSubscription.cancel();
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!showBubble) {
+      return const SizedBox.shrink();
+    }
+    return Bubble(
+      margin: const BubbleEdges.only(left: 12, right: 12, bottom: 8),
+      padding: const BubbleEdges.all(2),
+      radius: const Radius.circular(8),
+      alignment: Alignment.centerLeft,
+      color: context.colorScheme.secondaryContainer,
+      elevation: 0,
+      child: Container(
+        height: 400,
+        clipBehavior: Clip.antiAlias,
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.8,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child:
+            CodelesslyWidget(controller: controller),
       ),
     );
   }
