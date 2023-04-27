@@ -175,11 +175,26 @@ class CodelesslyWidgetController extends ChangeNotifier {
     if (!dataManager.initialized) {
       print(
           'CodelesslyWidget [$layoutID]: initialized data manager for the first time. [${isPreview ? 'preview' : 'publish'}]');
-      dataManager.init(layoutID: layoutID);
+      dataManager.init(layoutID: layoutID).catchError((error, str) {
+        CodelesslyErrorHandler.instance.captureException(
+          error,
+          stacktrace: str,
+          layoutID: layoutID,
+        );
+      });
     } else {
       print(
           'CodelesslyWidget [$layoutID]: requesting layout from data manager. [${isPreview ? 'preview' : 'publish'}]');
-      dataManager.getOrFetchLayoutWithFontsAndEmit(layoutID: layoutID);
+      dataManager
+          .getOrFetchLayoutWithFontsAndEmit(layoutID: layoutID)
+          .catchError((error, str) {
+        CodelesslyErrorHandler.instance.captureException(
+          error,
+          stacktrace: str,
+          layoutID: layoutID,
+        );
+        return false;
+      });
     }
   }
 

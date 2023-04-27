@@ -425,7 +425,7 @@ class Codelessly {
             config: _config!.copyWith(isPreview: false),
             cacheManager: this.cacheManager,
             authManager: this.authManager,
-            networkDataRepository: kIsWeb
+            networkDataRepository: !kIsWeb
                 ? WebDataRepository()
                 : FirebaseDataRepository(firestore: firestore),
             localDataRepository:
@@ -437,7 +437,7 @@ class Codelessly {
             config: _config!.copyWith(isPreview: true),
             cacheManager: this.cacheManager,
             authManager: this.authManager,
-            networkDataRepository: kIsWeb
+            networkDataRepository: !kIsWeb
                 ? WebDataRepository()
                 : FirebaseDataRepository(firestore: firestore),
             localDataRepository:

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart';
 
 import '../../codelessly_sdk.dart';
+import '../error/error_handler.dart';
 import 'network_data_repository.dart';
 
 /// A [NetworkDataRepository] implementation that utilizes the Firebase Cloud
@@ -17,29 +18,29 @@ class WebDataRepository extends NetworkDataRepository {
     required String projectID,
     required bool isPreview,
   }) async* {
-    try {
-      final Response result = await post(
-        Uri.parse('$firebaseCloudFunctionsBaseURL/getPublishModelRequest'),
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'projectID': projectID,
-          'isPreview': isPreview,
-        }),
+    final Response result = await post(
+      Uri.parse('$firebaseCloudFunctionsBaseURL/getPublishModelRequest'),
+      headers: <String, String>{'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'projectID': projectID,
+        'isPreview': isPreview,
+      }),
+    );
+
+    if (result.statusCode != 200) {
+      print('Error downloading publish model from web data manager.');
+      print('Status code: ${result.statusCode}');
+      print('Message: ${result.body}');
+      throw CodelesslyException(
+        'Error downloading publish model.',
+        stacktrace: StackTrace.current,
       );
-
-      if (result.statusCode != 200) {
-        yield null;
-        return;
-      }
-
-      final Map<String, dynamic> modelDoc = jsonDecode(result.body);
-      final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
-
-      yield model;
-    } catch (e) {
-      print('streamPublishModel error: $e');
-      yield null;
     }
+
+    final Map<String, dynamic> modelDoc = jsonDecode(result.body);
+    final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
+
+    yield model;
   }
 
   @override
@@ -48,27 +49,33 @@ class WebDataRepository extends NetworkDataRepository {
     required String layoutID,
     required bool isPreview,
   }) async {
-    try {
-      final Response result = await post(
-        Uri.parse('$firebaseCloudFunctionsBaseURL/getLayoutModelRequest'),
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'projectID': projectID,
-          'layoutID': layoutID,
-          'isPreview': isPreview,
-        }),
-        encoding: utf8,
+    final Response result = await post(
+      Uri.parse('$firebaseCloudFunctionsBaseURL/getLayoutModelRequest'),
+      headers: <String, String>{'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'projectID': projectID,
+        'layoutID': layoutID,
+        'isPreview': isPreview,
+      }),
+      encoding: utf8,
+    );
+
+    if (result.statusCode != 200) {
+      print(
+          'Error downloading layout model from web data manager. [${isPreview ? 'preview' : 'publish'}]');
+      print('Status code: ${result.statusCode}');
+      print('Message: ${result.body}');
+      throw CodelesslyException(
+        'Error downloading layout model [$layoutID]',
+        layoutID: layoutID,
+        stacktrace: StackTrace.current,
       );
-
-      if (result.statusCode != 200) return null;
-
-      final Map<String, dynamic> modelDoc = jsonDecode(result.body);
-      final SDKPublishLayout layout = SDKPublishLayout.fromJson(modelDoc);
-
-      return layout;
-    } catch (e) {
-      return null;
     }
+
+    final Map<String, dynamic> modelDoc = jsonDecode(result.body);
+    final SDKPublishLayout layout = SDKPublishLayout.fromJson(modelDoc);
+
+    return layout;
   }
 
   @override
@@ -89,8 +96,15 @@ class WebDataRepository extends NetworkDataRepository {
         encoding: utf8,
       );
 
-      if (result.statusCode != 200) return null;
-
+      if (result.statusCode != 200) {
+        print('Error downloading font model from web data manager.');
+        print('Status code: ${result.statusCode}');
+        print('Message: ${result.body}');
+        throw CodelesslyException(
+          'Error downloading font model.',
+          stacktrace: StackTrace.current,
+        );
+      }
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
       final SDKPublishFont font = SDKPublishFont.fromJson(modelDoc);
 

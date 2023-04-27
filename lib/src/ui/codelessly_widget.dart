@@ -11,12 +11,15 @@ import '../cache/cache_manager.dart';
 import '../error/error_handler.dart';
 import 'codelessly_error_screen.dart';
 import 'codelessly_loading_screen.dart';
-import 'codelessly_widget_controller.dart';
 import 'layout_builder.dart';
 
 typedef CodelesslyWidgetLayoutBuilder = Widget Function(
   BuildContext context,
   Widget layout,
+);
+typedef CodelesslyWidgetErrorBuilder = Widget Function(
+  BuildContext context,
+  dynamic exception,
 );
 
 Widget _defaultLayoutBuilder(context, layout) => layout;
@@ -194,7 +197,10 @@ class CodelesslyWidget extends StatefulWidget {
   final CacheManager? cacheManager;
 
   /// Optional placeholder widget to show while the layout is loading.
-  final WidgetBuilder? loadingPlaceholder;
+  final WidgetBuilder? loadingBuilder;
+
+  /// Optional placeholder widget to show if the layout fails to load.
+  final CodelesslyWidgetErrorBuilder? errorBuilder;
 
   /// Optional widget builder to wrap the rendered layout widget with for
   /// advanced control over the layout's behavior.
@@ -223,8 +229,10 @@ class CodelesslyWidget extends StatefulWidget {
   /// [functions] is a map of functions that will be used to populate the
   /// layout.
   ///
-  /// [loadingPlaceholder] is a widget that will be shown while the layout is
+  /// [loadingBuilder] is a widget that will be shown while the layout is
   /// being loaded.
+  ///
+  /// [errorBuilder] is a widget that will be shown if the layout fails to load.
   ///
   /// [layoutBuilder] can be used to wrap any widget provided to it around the
   /// loaded layout for advanced control over the rendered widget.
@@ -235,7 +243,8 @@ class CodelesslyWidget extends StatefulWidget {
     this.isPreview,
     this.codelessly,
     this.config,
-    this.loadingPlaceholder,
+    this.loadingBuilder,
+    this.errorBuilder,
     this.layoutBuilder = _defaultLayoutBuilder,
 
     // Optional managers. These are only used when using the global codelessly
@@ -303,6 +312,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     nodeValues: {},
   );
 
+  StreamSubscription<CodelesslyException?>? _exceptionSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -314,6 +325,13 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     if (!_effectiveController.didInitialize) {
       _effectiveController.init();
     }
+
+    _exceptionSubscription =
+        CodelesslyErrorHandler.instance.exceptionStream.listen(
+      (event) {
+        setState(() {});
+      },
+    );
   }
 
   /// TODO: If Codelessly instance updates variables or functions, then we need
@@ -367,6 +385,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   @override
   void dispose() {
     _controller?.dispose();
+    _exceptionSubscription?.cancel();
     super.dispose();
   }
 
@@ -380,22 +399,33 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       initialData: _effectiveController.publishModel,
       builder: (context, AsyncSnapshot<SDKPublishModel?> snapshot) {
         if (snapshot.hasError) {
-          return CodelesslyErrorScreen(
-            exception: snapshot.error,
-            isPreview: _effectiveController.isPreview,
-          );
+          return widget.errorBuilder?.call(context, snapshot.error) ??
+              CodelesslyErrorScreen(
+                exception: snapshot.error,
+                isPreview: _effectiveController.isPreview,
+              );
         }
 
         if (!snapshot.hasData) {
-          return widget.loadingPlaceholder?.call(context) ??
+          return widget.loadingBuilder?.call(context) ??
               CodelesslyLoadingScreen();
+        }
+
+        if (CodelesslyErrorHandler.instance.lastException?.layoutID ==
+            _effectiveController.layoutID) {
+          return widget.errorBuilder?.call(
+                  context, CodelesslyErrorHandler.instance.lastException) ??
+              CodelesslyErrorScreen(
+                exception: snapshot.error,
+                isPreview: _effectiveController.isPreview,
+              );
         }
 
         final SDKPublishModel model = snapshot.data!;
         final String layoutID = _effectiveController.layoutID;
 
         if (!model.layouts.containsKey(layoutID)) {
-          return widget.loadingPlaceholder?.call(context) ??
+          return widget.loadingBuilder?.call(context) ??
               CodelesslyLoadingScreen();
         }
 
@@ -424,13 +454,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         initialData: _effectiveController.codelessly.status,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return CodelesslyErrorScreen(
-              exception: snapshot.error,
-              isPreview: _effectiveController.isPreview,
-            );
+            return widget.errorBuilder?.call(context, snapshot.error) ??
+                CodelesslyErrorScreen(
+                  exception: snapshot.error,
+                  isPreview: _effectiveController.isPreview,
+                );
           }
           if (!snapshot.hasData) {
-            return widget.loadingPlaceholder?.call(context) ??
+            return widget.loadingBuilder?.call(context) ??
                 CodelesslyLoadingScreen();
           }
           final SDKStatus status = snapshot.data!;
@@ -438,14 +469,15 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             case SDKStatus.idle:
             case SDKStatus.configured:
             case SDKStatus.loading:
-              return widget.loadingPlaceholder?.call(context) ??
+              return widget.loadingBuilder?.call(context) ??
                   CodelesslyLoadingScreen();
             case SDKStatus.errored:
-              return CodelesslyErrorScreen(
-                exception: CodelesslyErrorHandler.instance.lastException ??
-                    snapshot.error,
-                isPreview: _effectiveController.isPreview,
-              );
+              return widget.errorBuilder?.call(context, snapshot.error) ??
+                  CodelesslyErrorScreen(
+                    exception: CodelesslyErrorHandler.instance.lastException ??
+                        snapshot.error,
+                    isPreview: _effectiveController.isPreview,
+                  );
             case SDKStatus.done:
               return buildStreamedLayout();
           }

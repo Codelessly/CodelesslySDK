@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'codelessly_event.dart';
 import 'reporter.dart';
 
@@ -95,6 +97,11 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
   final ErrorReporter? _reporter;
   final ExceptionCallback? onException;
 
+  final StreamController<CodelesslyException> _exceptionStreamController =
+      StreamController<CodelesslyException>.broadcast();
+
+  Stream<CodelesslyException> get exceptionStream => _exceptionStreamController.stream;
+
   CodelesslyErrorHandler({
     required ErrorReporter? reporter,
     this.onException,
@@ -126,6 +133,7 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
     dynamic throwable, {
     StackTrace? stacktrace,
     String? message,
+    String? layoutID,
     bool markForUI = true,
   }) async {
     final bool isAssertionError = throwable is AssertionError;
@@ -134,11 +142,13 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
         : isAssertionError
             ? CodelesslyException.assertionError(
                 message: throwable.message.toString(),
+                layoutID: layoutID,
                 originalException: throwable,
                 stacktrace: stacktrace ?? StackTrace.current,
               )
             : CodelesslyException(
                 message ?? throwable.toString(),
+                layoutID: layoutID,
                 originalException: throwable,
                 stacktrace: stacktrace ?? StackTrace.current,
               );
@@ -153,6 +163,7 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
       exception,
       stacktrace: exception.stacktrace ?? StackTrace.current,
     );
+    _exceptionStreamController.add(exception);
   }
 
   @override
