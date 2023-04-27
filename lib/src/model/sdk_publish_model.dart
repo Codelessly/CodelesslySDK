@@ -4,6 +4,8 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import 'model_http_request.dart';
+
 part 'sdk_publish_model.g.dart';
 
 /// A model that represents the collection of published layouts.
@@ -32,6 +34,9 @@ class SDKPublishModel with EquatableMixin {
   /// This is used to determine whether fonts and layouts should be updated.
   final SDKPublishUpdates updates;
 
+  /// Contains information about the apis used in the published project.
+  final Map<String, HttpApiData> apis;
+
   /// Creates a new instance of [SDKPublishModel].
   SDKPublishModel({
     required this.projectId,
@@ -39,9 +44,11 @@ class SDKPublishModel with EquatableMixin {
     Map<String, SDKPublishFont>? fonts,
     Map<String, SDKPublishLayout>? layouts,
     SDKPublishUpdates? updates,
+    Map<String, HttpApiData>? apis,
   })  : layouts = layouts ?? {},
         fonts = fonts ?? {},
-        updates = updates ?? SDKPublishUpdates();
+        updates = updates ?? SDKPublishUpdates(),
+        apis = apis ?? {};
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
   factory SDKPublishModel.fromJson(Map<String, dynamic> json) =>
@@ -50,7 +57,8 @@ class SDKPublishModel with EquatableMixin {
   /// Converts this instance to a JSON map.
   Map<String, dynamic> toJson() => _$SDKPublishModelToJson(this)
     ..remove('fonts')
-    ..remove('layouts');
+    ..remove('layouts')
+    ..remove('apis');
 
   /// Converts this instance to a JSON map.
   Map<String, dynamic> toFullJson() => _$SDKPublishModelToJson(this);
@@ -62,6 +70,7 @@ class SDKPublishModel with EquatableMixin {
     Map<String, SDKPublishFont>? fonts,
     Map<String, SDKPublishLayout>? layouts,
     SDKPublishUpdates? updates,
+    Map<String, HttpApiData>? apis,
   }) {
     return SDKPublishModel(
       projectId: projectId ?? this.projectId,
@@ -69,6 +78,7 @@ class SDKPublishModel with EquatableMixin {
       fonts: fonts ?? this.fonts,
       layouts: layouts ?? this.layouts,
       updates: updates ?? this.updates,
+      apis: apis ?? this.apis,
     );
   }
 

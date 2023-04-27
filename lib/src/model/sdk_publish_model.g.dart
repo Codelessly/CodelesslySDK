@@ -21,6 +21,10 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
           ? null
           : SDKPublishUpdates.fromJson(
               Map<String, dynamic>.from(json['updates'] as Map)),
+      apis: (json['apis'] as Map?)?.map(
+        (k, e) => MapEntry(k as String,
+            HttpApiData.fromJson(Map<String, dynamic>.from(e as Map))),
+      ),
     );
 
 Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) =>
@@ -30,6 +34,7 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) =>
       'fonts': instance.fonts.map((k, e) => MapEntry(k, e.toJson())),
       'layouts': instance.layouts.map((k, e) => MapEntry(k, e.toJson())),
       'updates': instance.updates.toJson(),
+      'apis': instance.apis.map((k, e) => MapEntry(k, e.toJson())),
     };
 
 SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
