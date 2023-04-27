@@ -55,10 +55,6 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .collection('layouts')
         .document(layoutID);
 
-    if (!(await layoutDoc.exists)) {
-      return null;
-    }
-
     return layoutDoc.get().then((value) {
       final Map<String, dynamic> data = value.map;
       final SDKPublishLayout layout = SDKPublishLayout.fromJson(
