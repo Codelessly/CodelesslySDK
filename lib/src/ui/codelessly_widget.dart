@@ -326,6 +326,13 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       _effectiveController.init();
     }
 
+    if (!CodelesslyErrorHandler.didInitialize) {
+      _effectiveController.codelessly.initErrorHandler(
+        automaticallySendCrashReports:
+            _effectiveController.config?.automaticallyCollectCrashReports ??
+                false,
+      );
+    }
     _exceptionSubscription =
         CodelesslyErrorHandler.instance.exceptionStream.listen(
       (event) {

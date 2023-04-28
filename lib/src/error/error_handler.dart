@@ -82,6 +82,8 @@ abstract class BaseErrorHandler {
 // TODO: Use logging implementation to log these exceptions, errors and events
 // before sending to Codelessly.
 class CodelesslyErrorHandler extends BaseErrorHandler {
+
+  static bool didInitialize = false;
   static CodelesslyErrorHandler? _instance;
 
   static CodelesslyErrorHandler get instance {
@@ -116,6 +118,7 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
       reporter: reporter,
       onException: onException,
     );
+    didInitialize = true;
   }
 
   CodelesslyException? _lastException;

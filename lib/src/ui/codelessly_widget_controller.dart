@@ -112,7 +112,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
         }
         status = codelessly.status;
         if (status == SDKStatus.configured) {
-          codelessly.init();
+          codelessly.init(initializeDataManagers: false);
         }
       }
     } catch (exception, str) {
