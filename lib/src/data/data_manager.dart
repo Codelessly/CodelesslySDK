@@ -76,7 +76,6 @@ class DataManager {
   /// If a [layoutID] is null, all layouts will be downloaded immediately and
   /// awaited.
   Future<void> init({required String? layoutID}) async {
-    debugPrintStack();
     assert(
       layoutID != null || config.preload,
       'If [layoutID] is null, [config.preload] must be true.',
