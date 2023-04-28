@@ -41,16 +41,6 @@ class _ChatScreenState extends State<ChatScreen>
     curve: Curves.easeInOut,
   );
 
-  /// A local codelessly SDK to allow us to lazily load the instance once at
-  /// least the first message is sent instead of when the app first starts.
-  final Codelessly codelessly = Codelessly(
-    config: const CodelesslyConfig(
-      authToken: authToken,
-      automaticallyCollectCrashReports: false,
-      isPreview: false,
-    ),
-  );
-
   /// Blocks the UI (mainly the send button).
   bool busy = false;
 
@@ -66,11 +56,22 @@ class _ChatScreenState extends State<ChatScreen>
   final ScrollController scrollController = ScrollController();
 
   @override
+  void initState() {
+    super.initState();
+    Codelessly.instance.configure(
+      config: const CodelesslyConfig(
+        authToken: authToken,
+        automaticallyCollectCrashReports: false,
+        isPreview: false,
+        // preload: false,
+      ),
+    );
+  }
+  @override
   void dispose() {
     animController.dispose();
     promptController.dispose();
     scrollController.dispose();
-    codelessly.dispose();
     super.dispose();
   }
 
@@ -120,7 +121,7 @@ class _ChatScreenState extends State<ChatScreen>
 
   /// The CodelesslyGPT's SDK message bubbles.
   Widget sdkBubble(BuildContext context, String layoutID) =>
-      CodelesslyChatBubble(codelessly: codelessly, layoutID: layoutID);
+      CodelesslyChatBubble(layoutID: layoutID);
 
   /// A centered version of the CodelesslyGPT's SDK message bubbles.
   Widget sdkBubbleCentered(
@@ -137,7 +138,6 @@ class _ChatScreenState extends State<ChatScreen>
       ),
       child: CodelesslyWidget(
         layoutID: layoutID,
-        codelessly: codelessly,
       ),
     );
   }
@@ -198,9 +198,9 @@ class _ChatScreenState extends State<ChatScreen>
   /// Progresses the chat by one step.
   Future<void> progressChat() async {
     // Lazily initialize the SDK instance!
-    if (chatProgress == 0) {
-      codelessly.init();
-    }
+    // if (chatProgress == 0) {
+      // codelessly.init();
+    // }
 
     // "Send" the message
     setState(() {
@@ -264,7 +264,7 @@ class _ChatScreenState extends State<ChatScreen>
     await Future.delayed(const Duration(seconds: 2));
 
     // Reset the SDK.
-    await codelessly.resetAndClearCache();
+    await Codelessly.instance.resetAndClearCache();
     // await codelessly.init();
 
     // Unblock the UI (send button).
@@ -584,11 +584,9 @@ class _ChatScreenState extends State<ChatScreen>
 
 class CodelesslyChatBubble extends StatefulWidget {
   final String layoutID;
-  final Codelessly codelessly;
 
   const CodelesslyChatBubble({
     super.key,
-    required this.codelessly,
     required this.layoutID,
   });
 
@@ -615,7 +613,6 @@ class _CodelesslyChatBubbleState extends State<CodelesslyChatBubble> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: CodelesslyWidget(
-          codelessly: widget.codelessly,
           layoutID: widget.layoutID,
           loadingBuilder: (context) {
             return Padding(

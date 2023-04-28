@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -55,6 +56,10 @@ class CodelesslyConfig with EquatableMixin {
   /// Defaults to `false`.
   final bool isPreview;
 
+  /// Notifies the data manager to download all layouts and fonts of the
+  /// configured project during the initialization process of the SDK.
+  final bool preload;
+
   /// Creates a new instance of [CodelesslyConfig].
   ///
   /// [authToken] is the SDK auth token required to initialize the SDK.
@@ -69,6 +74,7 @@ class CodelesslyConfig with EquatableMixin {
     required this.authToken,
     this.automaticallyCollectCrashReports = true,
     this.isPreview = false,
+    this.preload = true,
   });
 
   /// Creates a new instance of [CodelesslyConfig] with the provided
@@ -77,12 +83,14 @@ class CodelesslyConfig with EquatableMixin {
     String? authToken,
     bool? automaticallyCollectCrashReports,
     bool? isPreview,
+    bool? preload,
   }) =>
       CodelesslyConfig(
         authToken: authToken ?? this.authToken,
         automaticallyCollectCrashReports: automaticallyCollectCrashReports ??
             this.automaticallyCollectCrashReports,
         isPreview: isPreview ?? this.isPreview,
+        preload: preload ?? this.preload,
       );
 
   @override
@@ -385,6 +393,8 @@ class Codelessly {
     AuthManager? authManager,
     DataManager? publishDataManager,
     DataManager? previewDataManager,
+
+    bool initializeDataManagers = true,
   }) async {
     assert(
       (config == null) != (_config == null),
@@ -437,7 +447,7 @@ class Codelessly {
             config: _config!.copyWith(isPreview: true),
             cacheManager: this.cacheManager,
             authManager: this.authManager,
-            networkDataRepository: !kIsWeb
+            networkDataRepository: kIsWeb
                 ? WebDataRepository()
                 : FirebaseDataRepository(firestore: firestore),
             localDataRepository:
@@ -446,9 +456,11 @@ class Codelessly {
 
       _updateStatus(SDKStatus.loading);
 
+      log('Initializing cache manager');
       // The cache manager initializes first to load the local cache.
       await this.cacheManager.init();
 
+      log('Initializing auth manager');
       // The auth manager initializes second to look up cached auth data
       // from the cache manager. If no auth data is available, it will
       // halt the entire process and awaits to authenticate with the server.
@@ -457,21 +469,27 @@ class Codelessly {
       // emitted to the internal stream controller, ready for immediate usage.
       await this.authManager.init();
 
+      log('Initializing data managers');
       // The data manager initializes last to load the last stored publish
       // model, or, if it doesn't exist, halts the entire process and awaits
       // to fetch the latest publish model from the server.
       //
-      // After either of those is done, a stream is created and attached
-      // to the internal stream controller, ready for immediate usage.
-      //
       // The config sets the default data manager to initialize. If the
       // [CodelesslyWidget] want to load the opposite manager, the other will
       // lazily initialize.
-      // if (_config!.isPreview) {
-      //   await this.previewDataManager.init(layoutID: null);
-      // } else {
-      //   await this.publishDataManager.init(layoutID: null);
-      // }
+      if (initializeDataManagers && _config!.preload) {
+        if (_config!.isPreview) {
+          if (!this.previewDataManager.initialized) {
+            await this.previewDataManager.init(layoutID: null);
+          }
+        } else {
+          if (!this.publishDataManager.initialized) {
+            await this.publishDataManager.init(layoutID: null);
+          }
+        }
+      }
+
+      log('Codelessly ${isGlobalInstance(this) ? 'global' : 'local'} instance initialization complete.');
 
       _updateStatus(SDKStatus.done);
     } catch (error, stacktrace) {
