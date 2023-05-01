@@ -27,6 +27,11 @@ class LocalDataRepository {
     return isPreview ? previewFontsCacheKey : publishFontsCacheKey;
   }
 
+  /// The cache key for the font files.
+  String apisCacheKey(bool isPreview) {
+    return isPreview ? previewApisCacheKey : publishApisCacheKey;
+  }
+
   /// Returns the [SDKPublishModel] from the cache.
   SDKPublishModel? fetchPublishModel({
     required bool isPreview,
@@ -85,6 +90,13 @@ class LocalDataRepository {
     required bool isPreview,
   }) =>
       cacheManager.delete(modelCacheKey(isPreview));
+
+  /// Deletes a given api associated with a [apiId] from the cache.
+  void deletePublishApi({
+    required String apiId,
+    required bool isPreview,
+  }) =>
+      cacheManager.delete(apisCacheKey(isPreview));
 
   /// Deletes the stored bytes of a given [fontID] from the cache.
   void deleteFontBytes({

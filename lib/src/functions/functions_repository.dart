@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -38,8 +40,12 @@ class FunctionsRepository {
   static const String _firebaseCloudFunctionsBaseURL =
       'https://us-central1-codeless-dev.cloudfunctions.net';
 
-  static void performAction(BuildContext context, ActionModel action,
-      {dynamic internalValue}) async {
+  static void performAction(
+    BuildContext context,
+    ActionModel action, {
+    dynamic internalValue,
+  }) async {
+    log('Performing action: $action');
     switch (action.type) {
       case ActionType.navigation:
         navigate(context, action as NavigationAction);
@@ -63,7 +69,68 @@ class FunctionsRepository {
       case ActionType.callFunction:
         callFunction(context, action as CallFunctionAction);
         break;
+      case ActionType.callApi:
+        makeApiRequestFromAction(action as ApiCallAction, context);
+        break;
     }
+  }
+
+  static Future<http.Response> makeApiRequestFromAction(
+    ApiCallAction action,
+    BuildContext context,
+  ) {
+    final Map<String, HttpApiData> apis = context
+        .read<Codelessly>()
+        .dataManager
+        .publishModel!
+        .apis;
+
+    final HttpApiData? apiData = apis[action.apiId];
+
+    if(apiData == null) {
+      CodelesslyErrorHandler.instance.captureException(
+        CodelesslyException.apiNotFound(
+          apiId: action.apiId,
+          message: 'Api with id [${action.apiId}] does not exist.',
+        ),
+      );
+      return Future.error('Api with id [${action.apiId}] does not exist.');
+    }
+
+    print('Calling api ${apiData?.name}.');
+    // TODO: Should we handle null case? We are just assuming the api always exists.
+    return makeApiRequest(
+      method: apiData.method,
+      url: _applyVariables(apiData.url, action.parameters),
+      headers: _generateMapFromPairs(apiData.headers, action.parameters),
+      body: apiData.bodyType == RequestBodyType.form
+          ? _generateMapFromPairs(apiData.formFields, action.parameters)
+          : apiData.body,
+    );
+  }
+
+  static Map<String, String> _generateMapFromPairs(
+      List<HttpKeyValuePair> pairs, Map<String, String> parameters) {
+    return pairs
+        .where((pair) => pair.isUsed && pair.key.isNotEmpty)
+        .toList()
+        .asMap()
+        .map((key, pair) => MapEntry(_applyVariables(pair.key, parameters),
+            _applyVariables(pair.value, parameters)));
+  }
+
+  static String _applyVariables(String data, Map<String, String> parameters) {
+    final updatedData = data.replaceAllMapped(variableRegex, (match) {
+      print('matched group: ${match[0]}');
+      final MapEntry<String, String>? parameter = parameters.entries
+          .firstWhereOrNull((entry) => entry.key == match.group(1));
+      if (parameter == null) {
+        print('parameter ${match.group(1)} not found');
+        return match[0]!;
+      }
+      return parameter.value;
+    });
+    return updatedData;
   }
 
   static void navigate(BuildContext context, NavigationAction action) {
@@ -111,19 +178,43 @@ class FunctionsRepository {
 
   static void launchURL(String url) => launchUrl(Uri.parse(url));
 
-  /// Makes API request using cloud function to prevent any CORS issues.
   static Future<http.Response> makeApiRequest({
-    required ApiRequestType requestType,
+    required HttpMethod method,
+    required String url,
+    required Map<String, String> headers,
+    required Object? body,
+  }) async {
+    if (kIsWeb) {
+      return makeApiRequestWeb(
+          method: method, url: url, headers: headers, body: body);
+    } else {
+      final Uri uri = Uri.parse(url);
+      switch (method) {
+        case HttpMethod.get:
+          return http.get(uri, headers: headers);
+        case HttpMethod.post:
+          return http.post(uri, headers: headers, body: body);
+        case HttpMethod.delete:
+          return http.delete(uri, headers: headers, body: body);
+        case HttpMethod.put:
+          return http.put(uri, headers: headers, body: body);
+      }
+    }
+  }
+
+  /// Makes API request using cloud function to prevent any CORS issues.
+  static Future<http.Response> makeApiRequestWeb({
+    required HttpMethod method,
     required String url,
     required Map<String, dynamic> headers,
-    required Map<String, dynamic> body,
+    required Object? body,
   }) async {
     return http.post(
       Uri.parse('$_firebaseCloudFunctionsBaseURL/makeApiRequest'),
       headers: {'content-type': 'application/json'},
       body: jsonEncode({
         'url': url,
-        'method': requestType.prettify,
+        'method': method.shortName,
         'headers': headers,
         'body': body,
       }),
@@ -196,12 +287,12 @@ class FunctionsRepository {
     final String url =
         'https://${action.dataCenter}.api.mailchimp.com/3.0/lists/${action.listID}';
     // Headers to authenticate request.
-    final Map<String, dynamic> headers = {
+    final Map<String, String> headers = {
       'Authorization': 'auth ${action.apiKey}'
     };
     // Submit data to Mailchimp.
     return makeApiRequest(
-      requestType: ApiRequestType.post,
+      method: HttpMethod.post,
       url: url,
       headers: headers,
       body: body,

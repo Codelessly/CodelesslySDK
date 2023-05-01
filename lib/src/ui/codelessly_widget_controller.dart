@@ -186,7 +186,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       print(
           'CodelesslyWidget [$layoutID]: requesting layout from data manager. [${isPreview ? 'preview' : 'publish'}]');
       dataManager
-          .getOrFetchLayoutWithFontsAndEmit(layoutID: layoutID)
+          .getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID)
           .catchError((error, str) {
         CodelesslyErrorHandler.instance.captureException(
           error,
