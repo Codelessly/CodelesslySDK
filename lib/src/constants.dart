@@ -13,3 +13,5 @@ const String publishModelCacheKey = 'publish_layout_model';
 const String previewModelCacheKey = 'preview_layout_model';
 const String publishFontsCacheKey = 'publish_fonts';
 const String previewFontsCacheKey = 'preview_fonts';
+const String publishApisCacheKey = 'publish_apis';
+const String previewApisCacheKey = 'preview_apis';

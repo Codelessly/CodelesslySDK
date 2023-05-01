@@ -67,10 +67,10 @@ class CodelesslyContext with EquatableMixin {
   }
 
   /// TODO: @Aachman document this
-  void handleActionConnections(
+  Future<void> handleActionConnections(
     ActionModel actionModel,
     Map<String, BaseNode> nodes,
-  ) {
+  ) async {
     switch (actionModel.type) {
       case ActionType.submit:
         final action = actionModel as MailchimpSubmitAction;

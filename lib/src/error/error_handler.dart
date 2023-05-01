@@ -185,6 +185,7 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
 class CodelesslyException implements Exception {
   final String? message;
   final String? layoutID;
+  final String? apiId;
   final StackTrace? stacktrace;
   final dynamic originalException;
 
@@ -196,6 +197,7 @@ class CodelesslyException implements Exception {
     this.message, {
     this.url,
     this.layoutID,
+    this.apiId,
     this.originalException,
     this.stacktrace,
     this.type = ErrorType.other,
@@ -256,6 +258,21 @@ class CodelesslyException implements Exception {
           message,
           type: ErrorType.layoutNotFound,
           layoutID: layoutID,
+          url: url,
+          originalException: originalException,
+          stacktrace: stacktrace,
+        );
+
+  CodelesslyException.apiNotFound({
+    String? message,
+    String? apiId,
+    String? url,
+    dynamic originalException,
+    StackTrace? stacktrace,
+  }) : this(
+          message,
+          type: ErrorType.layoutNotFound,
+          apiId: apiId,
           url: url,
           originalException: originalException,
           stacktrace: stacktrace,

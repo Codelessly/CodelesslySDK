@@ -2,9 +2,6 @@ import 'dart:async';
 
 import '../../codelessly_sdk.dart';
 import '../../firedart.dart';
-import '../auth/auth_manager.dart';
-import '../cache/cache_manager.dart';
-import '../error/error_handler.dart';
 import 'network_data_repository.dart';
 
 /// Handles the data flow of [SDKPublishModel] from the server.
@@ -37,6 +34,8 @@ class FirebaseDataRepository extends NetworkDataRepository {
       final SDKPublishModel model = SDKPublishModel.fromJson(
         {...data, 'id': event?.id},
       );
+      print('publish data: $data');
+      print('publish model: ${model.toJson()}');
       return model;
     });
   }
@@ -84,6 +83,29 @@ class FirebaseDataRepository extends NetworkDataRepository {
         {...data, 'id': value.id},
       );
       return font;
+    });
+  }
+
+  @override
+  Future<HttpApiData?> downloadApi({
+    required String projectID,
+    required String apiId,
+    required bool isPreview,
+  }) {
+    final String publishPath = this.publishPath(isPreview);
+
+    final DocumentReference apiDoc = firestore
+        .collection(publishPath)
+        .document(projectID)
+        .collection('apis')
+        .document(apiId);
+
+    return apiDoc.get().then((value) {
+      final Map<String, dynamic> data = value.map;
+      final HttpApiData api = HttpApiData.fromJson(
+        {...data, 'id': value.id},
+      );
+      return api;
     });
   }
 }
