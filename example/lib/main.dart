@@ -1,8 +1,8 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 
-const String authToken = 'LW1IN0cmWWI6TDhRI0V7e3lhNDJ8NyQyckBbMHBIWngkWmI1';
-const String layoutID = '0Qq3UXthyzNKDS35vgek';
+const String authToken = 'LzgxKT1yfFo8Py9se2g9ZzQjOWt7KUtCUl57XzVGdGhoMGpP';
+const String layoutID = '0QulTBDc3r8gHgv0KeVK';
 
 // METHOD 1
 void main() async {
@@ -11,7 +11,7 @@ void main() async {
   await Codelessly.initializeSDK(
     config: const CodelesslyConfig(
       authToken: authToken,
-      isPreview: true,
+      isPreview: false,
       automaticallyCollectCrashReports: false,
     ),
   );

@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:http/http.dart';
+import 'package:hive/hive.dart';
 
 import '../../codelessly_sdk.dart';
 import '../auth/auth_manager.dart';
@@ -82,6 +81,7 @@ class DataManager {
     );
 
     initialized = true;
+    // await Hive.deleteFromDisk();
 
     // Initialize all locally cached data.
     _publishModel = localDataRepository.fetchPublishModel(
@@ -92,6 +92,7 @@ class DataManager {
       log('Publish model is cached locally. Emitting.');
       emitPublishModel();
 
+      print('Cached apis: ${_publishModel!.apis}');
       for (final SDKPublishFont font in _publishModel!.fonts.values) {
         log('\tLoading font in init: [${font.id}](${font.fullFontName})');
         final Uint8List? fontBytes = localDataRepository.fetchFontBytes(
@@ -130,7 +131,7 @@ class DataManager {
     if (_publishModel != null && layoutID != null) {
       if (!_publishModel!.layouts.containsKey(layoutID)) {
         log('Layout [$layoutID] during init is not cached locally. Downloading...');
-        didPrepareLayout = await getOrFetchLayoutWithFontsAndEmit(
+        didPrepareLayout = await getOrFetchLayoutWithFontsAndApisAndEmit(
           layoutID: layoutID,
         );
         log('Layout in init [$layoutID] fetch complete.');
@@ -217,8 +218,7 @@ class DataManager {
       emitPublishModel();
       savePublishModel();
 
-      log('Publish model during init is now available. Proceeding with init!');
-    }
+    log('Publish model during init is now available. Proceeding with init!');
 
     if (_publishModel == null) {
       log(
@@ -248,7 +248,7 @@ class DataManager {
       log(
         'Publish model is definitely available. We can safely download layout [$layoutID] now.',
       );
-      await getOrFetchLayoutWithFontsAndEmit(layoutID: layoutID);
+      await getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID);
 
       log(
         'Layout [$layoutID] during init download complete.',
@@ -266,7 +266,7 @@ class DataManager {
           log(
             '\tDownloading layout [$layoutID]...',
           );
-          await getOrFetchLayoutWithFontsAndEmit(layoutID: layoutID);
+          await getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID);
           log(
             '\tLayout [$layoutID] during init download complete.',
           );
@@ -347,12 +347,18 @@ class DataManager {
       serverModel: serverModel,
       localModel: localModel,
     );
+    final Map<String, UpdateType> apiUpdates = _collectApiUpdates(
+      serverModel: serverModel,
+      localModel: localModel,
+    );
 
-    if (layoutUpdates.isEmpty && fontUpdates.isEmpty) {
+    if (layoutUpdates.isEmpty && fontUpdates.isEmpty && apiUpdates.isEmpty) {
       log('No updates to process.');
       return;
     } else {
-      log('Processing ${layoutUpdates.length} layout updates and ${fontUpdates.length} font updates.');
+      log('Processing ${layoutUpdates.length} layout updates, '
+          '${fontUpdates.length} font updates, and '
+          '${apiUpdates.length} api updates.');
     }
 
     for (final String layoutID in layoutUpdates.keys) {
@@ -407,6 +413,33 @@ class DataManager {
               if (fontBytes == null) return null;
               loadFont(font, fontBytes);
             });
+          }
+          break;
+      }
+    }
+
+    print('Found api updates: ${apiUpdates.keys}}');
+    for (final String apiId in apiUpdates.keys) {
+      final UpdateType updateType = apiUpdates[apiId]!;
+
+      switch (updateType) {
+        case UpdateType.delete:
+          localModel.apis.remove(apiId);
+          localDataRepository.deletePublishApi(
+            apiId: apiId,
+            isPreview: config.isPreview,
+          );
+          break;
+        case UpdateType.add:
+        case UpdateType.update:
+          print('API downloading api: $apiId');
+          final HttpApiData? api = await networkDataRepository.downloadApi(
+            projectID: authManager.authData!.projectId,
+            apiId: apiId,
+            isPreview: config.isPreview,
+          );
+          if (api != null) {
+            localModel.apis[apiId] = api;
           }
           break;
       }
@@ -501,6 +534,47 @@ class DataManager {
     return fontUpdates;
   }
 
+  /// Compares the current [localModel] with a newly fetched [serverModel] and
+  /// returns a map of layout ids and their corresponding update types.
+  ///
+  /// - If a layout did not exist in the previous model, it is marked as new.
+  ///
+  /// - If a layout exists in both models but has a newer time stamp, it is
+  /// marked as updated.
+  ///
+  /// - If a layout existed in the previous model, but was deleted in the
+  /// updated model, it is marked as deleted.
+  Map<String, UpdateType> _collectApiUpdates({
+    required SDKPublishModel serverModel,
+    required SDKPublishModel localModel,
+  }) {
+    final Map<String, DateTime> serverApis = serverModel.updates.apis;
+    final Map<String, DateTime> currentApis = localModel.updates.apis;
+    final Map<String, UpdateType> apiUpdates = {};
+
+    // Check for deleted layouts.
+    for (final String apiId in currentApis.keys) {
+      if (!serverApis.containsKey(apiId)) {
+        apiUpdates[apiId] = UpdateType.delete;
+      }
+    }
+
+    // Check for added or updated layouts.
+    for (final String apiId in serverApis.keys) {
+      if (!currentApis.containsKey(apiId)) {
+        apiUpdates[apiId] = UpdateType.add;
+      } else {
+        final DateTime lastUpdated = currentApis[apiId]!;
+        final DateTime newlyUpdated = serverApis[apiId]!;
+        if (newlyUpdated.isAfter(lastUpdated)) {
+          apiUpdates[apiId] = UpdateType.update;
+        }
+      }
+    }
+
+    return apiUpdates;
+  }
+
   /// [layoutID] is the identifier of the layout to be fetched or retrieved.
   ///
   /// Fetches or gets the requested [layoutID] along with its associated fonts,
@@ -523,7 +597,7 @@ class DataManager {
   ///
   /// Will return `true` if the layout and its associated fonts were fetched
   /// successfully, `false` otherwise.
-  Future<bool> getOrFetchLayoutWithFontsAndEmit({
+  Future<bool> getOrFetchLayoutWithFontsAndApisAndEmit({
     required String layoutID,
   }) async {
     final SDKPublishModel? model = _publishModel;
@@ -554,11 +628,27 @@ class DataManager {
       }
 
       model.layouts[layoutID] = layout;
-      emitPublishModel();
-      savePublishModel();
     }
 
     assert(layout != null, 'Layout should not be null at this point.');
+
+    // Download or load fonts in the background.
+    final Set<Future<HttpApiData?>> apiModels = getOrFetchApis(
+      apiIds: model.updates.layoutApis[layoutID]!,
+    );
+
+    for (final future in apiModels) {
+      try {
+        final api = await future;
+        if (api == null) continue;
+        model.apis[api.id] = api;
+      } catch (e, stacktrace) {
+        print('Error while fetching api: $e');
+        print(stacktrace);
+      }
+    }
+    emitPublishModel();
+    savePublishModel();
 
     log('\tLayoutModel [$layoutID] ready, time for fonts. Get Set...');
     log('\tLayoutModel [$layoutID] has ${model.updates.layoutFonts[layoutID]} fonts.');
@@ -659,5 +749,32 @@ class DataManager {
       }
     }
     return fonts;
+  }
+
+  /// Gets all [SDKPublishFont] models of a given set of [fontIDs] either from
+  /// local cache or downloads them from the network.
+  Set<Future<HttpApiData?>> getOrFetchApis({
+    required Set<String> apiIds,
+  }) {
+    final AuthData? auth = authManager.authData;
+
+    final Set<Future<HttpApiData?>> apis = {};
+    for (final String apiId in apiIds) {
+      final HttpApiData? api = _publishModel?.apis[apiId];
+      if (api != null) {
+        apis.add(Future.value(api));
+      } else {
+        if (auth == null) continue;
+
+        final Future<HttpApiData?> apiFuture =
+            networkDataRepository.downloadApi(
+          projectID: auth.projectId,
+          apiId: apiId,
+          isPreview: config.isPreview,
+        );
+        apis.add(apiFuture);
+      }
+    }
+    return apis;
   }
 }

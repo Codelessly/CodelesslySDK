@@ -110,7 +110,15 @@ SDKPublishUpdates _$SDKPublishUpdatesFromJson(Map json) => SDKPublishUpdates(
       layouts: json['layouts'] == null
           ? const {}
           : jsonMapToDateValues(json['layouts'] as Map<String, dynamic>),
+      apis: json['apis'] == null
+          ? const {}
+          : jsonMapToDateValues(json['apis'] as Map<String, dynamic>),
       layoutFonts: (json['layoutFonts'] as Map?)?.map(
+            (k, e) => MapEntry(k as String,
+                (e as List<dynamic>).map((e) => e as String).toSet()),
+          ) ??
+          const {},
+      layoutApis: (json['layoutApis'] as Map?)?.map(
             (k, e) => MapEntry(k as String,
                 (e as List<dynamic>).map((e) => e as String).toSet()),
           ) ??
@@ -121,6 +129,8 @@ Map<String, dynamic> _$SDKPublishUpdatesToJson(SDKPublishUpdates instance) =>
     <String, dynamic>{
       'fonts': dateValuesToJsonMap(instance.fonts),
       'layouts': dateValuesToJsonMap(instance.layouts),
+      'apis': dateValuesToJsonMap(instance.apis),
       'layoutFonts':
           instance.layoutFonts.map((k, e) => MapEntry(k, e.toList())),
+      'layoutApis': instance.layoutApis.map((k, e) => MapEntry(k, e.toList())),
     };

@@ -113,4 +113,42 @@ class WebDataRepository extends NetworkDataRepository {
       return null;
     }
   }
+
+  @override
+  Future<HttpApiData?> downloadApi({
+    required String projectID,
+    required String apiId,
+    required bool isPreview,
+  }) async {
+    try {
+      final Response result = await post(
+        Uri.parse('$firebaseCloudFunctionsBaseURL/getPublishedApiRequest'),
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'projectID': projectID,
+          'apiId': apiId,
+          'isPreview': isPreview,
+        }),
+        encoding: utf8,
+      );
+
+      if (result.statusCode != 200) {
+        print('Error downloading api from web data manager.');
+        print('Status code: ${result.statusCode}');
+        print('Message: ${result.body}');
+        throw CodelesslyException(
+          'Error downloading api.',
+          stacktrace: StackTrace.current,
+        );
+      }
+      final Map<String, dynamic> modelDoc = jsonDecode(result.body);
+      final HttpApiData api = HttpApiData.fromJson(modelDoc);
+
+      return api;
+    } catch (e, stacktrace) {
+      print(e);
+      print(stacktrace);
+      return null;
+    }
+  }
 }

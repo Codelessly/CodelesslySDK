@@ -164,6 +164,9 @@ class Codelessly {
 
   Firestore? _firestore;
 
+  DataManager get dataManager =>
+      _config!.isPreview ? _previewDataManager! : _publishDataManager!;
+
   /// [returns] the local instance of the Firestore SDK. Used by the
   /// data manager to retrieve server data.
   Firestore get firestore => _firestore!;

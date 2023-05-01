@@ -88,6 +88,7 @@ class SDKPublishModel with EquatableMixin {
         owner,
         fonts,
         layouts,
+        apis,
         updates,
       ];
 }
@@ -292,6 +293,11 @@ class SDKPublishUpdates with EquatableMixin {
   @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
   final Map<String, DateTime> layouts;
 
+  /// A map that holds a set of layout ids as keys, and the last time
+  /// the layout was updated as the value.
+  @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
+  final Map<String, DateTime> apis;
+
   /// A map that holds a mapping of layout ids -> font ids.
   ///
   /// This allows the SDK to optimize its data flow by only downloading
@@ -299,28 +305,41 @@ class SDKPublishUpdates with EquatableMixin {
   /// all of the fonts of a given project.
   final Map<String, Set<String>> layoutFonts;
 
+  /// A map that holds a mapping of layout ids -> api ids.
+  ///
+  /// This allows the SDK to optimize its data flow by only downloading
+  /// the minimum necessary apis for a given layout without downloading
+  /// all of the apis of a given project.
+  final Map<String, Set<String>> layoutApis;
+
   /// Creates a new instance of [SDKPublishUpdates].
   SDKPublishUpdates({
     this.fonts = const {},
     this.layouts = const {},
+    this.apis = const {},
     this.layoutFonts = const {},
+    this.layoutApis = const {},
   });
 
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishUpdates copyWith({
     Map<String, DateTime>? fonts,
     Map<String, DateTime>? layouts,
+    Map<String, DateTime>? apis,
     Map<String, Set<String>>? layoutFonts,
+    Map<String, Set<String>>? layoutApis,
   }) {
     return SDKPublishUpdates(
       fonts: fonts ?? this.fonts,
       layouts: layouts ?? this.layouts,
+      apis: apis ?? this.apis,
       layoutFonts: layoutFonts ?? this.layoutFonts,
+      layoutApis: layoutApis ?? this.layoutApis,
     );
   }
 
   @override
-  List<Object?> get props => [fonts, layouts, layoutFonts];
+  List<Object?> get props => [fonts, layouts, apis, layoutFonts, layoutApis];
 
   /// Creates a new instance of [SDKPublishUpdates] from a JSON map.
   factory SDKPublishUpdates.fromJson(Map<String, dynamic> json) =>
