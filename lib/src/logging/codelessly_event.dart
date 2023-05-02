@@ -6,17 +6,28 @@ import 'package:uuid/uuid.dart';
 part 'codelessly_event.g.dart';
 
 /// Holds information for an event that happened inside the SDK. This data
-/// is supposed to be sent back to Codelessly for analytics and improvements.
+/// will be sent to Codelessly for analysis.
 @JsonSerializable()
 class CodelesslyEvent with EquatableMixin {
+  /// A unique identifier for this event.
   final String id;
+
+  /// An optional attached message that describes this event.
   final String? message;
+
+  /// The time at which this event was created.
   @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
   final DateTime timestamp;
+
+  /// An optional stacktrace associated with this message if it was an error.
   final String? stacktrace;
+
+  /// A list of tags that can be used to filter events.
   final List<String> tags;
+
   // DeviceMetadata? deviceMetadata;
 
+  /// Creates a new [CodelesslyEvent] with the given properties.
   CodelesslyEvent({
     this.message,
     DateTime? timestamp,
@@ -55,6 +66,7 @@ class CodelesslyEvent with EquatableMixin {
         // deviceMetadata: deviceMetadata ?? this.deviceMetadata,
       );
 
+  /// Populates the [deviceMetadata] field with information about the device
   Future<void> populateDeviceMetadata() async {
     // deviceMetadata = await DeviceMetadata.fromPlatform();
   }

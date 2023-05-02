@@ -79,13 +79,15 @@ abstract class BaseErrorHandler {
 /// This follows singleton pattern for easy accessibility. Must call
 /// [CodelesslyErrorHandler.init] before using it.
 ///
-// TODO: Use logging implementation to log these exceptions, errors and events
-// before sending to Codelessly.
 class CodelesslyErrorHandler extends BaseErrorHandler {
 
+  /// Whether the [CodelesslyErrorHandler] has been initialized or not.
   static bool didInitialize = false;
+
+  /// The global instance of this class.
   static CodelesslyErrorHandler? _instance;
 
+  /// Returns the global instance of this class.
   static CodelesslyErrorHandler get instance {
     if (_instance == null) {
       throw Exception(
@@ -96,14 +98,20 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
     return _instance!;
   }
 
+  /// The reporter that will be used to report errors.
   final ErrorReporter? _reporter;
+
+  /// The callback that will be called when an exception is thrown.
   final ExceptionCallback? onException;
 
+  /// A stream controller that will be used to broadcast exceptions.
   final StreamController<CodelesslyException> _exceptionStreamController =
       StreamController<CodelesslyException>.broadcast();
 
+  /// A stream that will be used to broadcast exceptions.
   Stream<CodelesslyException> get exceptionStream => _exceptionStreamController.stream;
 
+  /// Initializes an instance of this with given [reporter].
   CodelesslyErrorHandler({
     required ErrorReporter? reporter,
     this.onException,
@@ -121,8 +129,10 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
     didInitialize = true;
   }
 
+  /// The last exception that was thrown.
   CodelesslyException? _lastException;
 
+  /// Returns the last exception that was thrown.
   CodelesslyException? get lastException => _lastException;
 
   @override

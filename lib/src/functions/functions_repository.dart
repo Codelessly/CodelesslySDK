@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../codelessly_sdk.dart';
-import '../error/error_handler.dart';
+import '../logging/error_handler.dart';
 
 enum ApiRequestType {
   get,

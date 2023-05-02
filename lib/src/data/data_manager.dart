@@ -7,7 +7,7 @@ import '../../codelessly_sdk.dart';
 import '../auth/auth_manager.dart';
 import '../cache/cache_manager.dart';
 import '../cache/codelessly_cache_manager.dart';
-import '../error/error_handler.dart';
+import '../logging/error_handler.dart';
 import 'local_data_repository.dart';
 import 'network_data_repository.dart';
 

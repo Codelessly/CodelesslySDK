@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import '../../codelessly_sdk.dart';
 import '../auth/auth_manager.dart';
 import '../cache/cache_manager.dart';
-import '../error/error_handler.dart';
+import '../logging/error_handler.dart';
 import 'codelessly_error_screen.dart';
 import 'codelessly_loading_screen.dart';
 import 'layout_builder.dart';
