@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../error/error_handler.dart';
+import '../logging/error_handler.dart';
 
 /// A dialog UI that is displayed when something crashes in the SDK. This is
 /// a graceful way of dealing with exceptions.
