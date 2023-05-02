@@ -34,6 +34,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
             : null);
     Widget? floatingActionButton = (props.floatingActionButton != null)
         ? PassiveFloatingActionButtonWidget.buildFAB(
+            node.id,
             props.floatingActionButton!,
             useFonts: false,
           )

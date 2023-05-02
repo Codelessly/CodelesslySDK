@@ -97,6 +97,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
       width: node.middleBoxLocal.width,
       height: node.middleBoxLocal.height,
       child: buildFAB(
+        node.id,
         fab,
         onPressed: onPressed,
         elevation: elevation,
@@ -106,6 +107,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
   }
 
   static FloatingActionButton buildFAB(
+    String fabID,
     FloatingActionButtonProperties fab, {
     VoidCallback? onPressed,
     double? elevation,
@@ -115,6 +117,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
     switch (fab.type) {
       case FloatingActionButtonType.small:
         return FloatingActionButton.small(
+          heroTag: fabID,
           key: ValueKey(fab.type),
           onPressed: onPressed,
           backgroundColor: fab.backgroundColor.toFlutterColor(),
@@ -131,6 +134,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
         );
       case FloatingActionButtonType.regular:
         return FloatingActionButton(
+          heroTag: fabID,
           key: ValueKey(fab.type),
           onPressed: onPressed,
           backgroundColor: fab.backgroundColor.toFlutterColor(),
@@ -147,6 +151,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
         );
       case FloatingActionButtonType.large:
         return FloatingActionButton.large(
+          heroTag: fabID,
           key: ValueKey(fab.type),
           onPressed: onPressed,
           backgroundColor: fab.backgroundColor.toFlutterColor(),
@@ -163,6 +168,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
         );
       case FloatingActionButtonType.extended:
         return FloatingActionButton.extended(
+          heroTag: fabID,
           key: ValueKey(fab.type),
           onPressed: onPressed,
           extendedPadding: EdgeInsets.symmetric(vertical: 2, horizontal: 10),
