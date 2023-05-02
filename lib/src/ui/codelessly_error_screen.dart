@@ -16,7 +16,7 @@ class CodelesslyErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // if (!isPreview) return const SizedBox.shrink();
+    if (!isPreview) return const SizedBox.shrink();
 
     final String message;
     String? title;
