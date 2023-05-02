@@ -79,15 +79,12 @@ class FunctionsRepository {
     ApiCallAction action,
     BuildContext context,
   ) {
-    final Map<String, HttpApiData> apis = context
-        .read<Codelessly>()
-        .dataManager
-        .publishModel!
-        .apis;
+    final Map<String, HttpApiData> apis =
+        context.read<Codelessly>().dataManager.publishModel!.apis;
 
     final HttpApiData? apiData = apis[action.apiId];
 
-    if(apiData == null) {
+    if (apiData == null) {
       CodelesslyErrorHandler.instance.captureException(
         CodelesslyException.apiNotFound(
           apiId: action.apiId,
@@ -97,7 +94,6 @@ class FunctionsRepository {
       return Future.error('Api with id [${action.apiId}] does not exist.');
     }
 
-    print('Calling api ${apiData?.name}.');
     // TODO: Should we handle null case? We are just assuming the api always exists.
     return makeApiRequest(
       method: apiData.method,
@@ -184,22 +180,79 @@ class FunctionsRepository {
     required Map<String, String> headers,
     required Object? body,
   }) async {
+    printApiDetails(method: method, url: url, headers: headers, body: body);
+
+    final http.Response response;
     if (kIsWeb) {
-      return makeApiRequestWeb(
+      response = await makeApiRequestWeb(
           method: method, url: url, headers: headers, body: body);
     } else {
       final Uri uri = Uri.parse(url);
       switch (method) {
         case HttpMethod.get:
-          return http.get(uri, headers: headers);
+          response = await http.get(uri, headers: headers);
+          break;
         case HttpMethod.post:
-          return http.post(uri, headers: headers, body: body);
+          response = await http.post(uri, headers: headers, body: body);
+          break;
         case HttpMethod.delete:
-          return http.delete(uri, headers: headers, body: body);
+          response = await http.delete(uri, headers: headers, body: body);
+          break;
         case HttpMethod.put:
-          return http.put(uri, headers: headers, body: body);
+          response = await http.put(uri, headers: headers, body: body);
+          break;
       }
     }
+    printResponse(response);
+
+    return response;
+  }
+
+  static void printApiDetails({
+    required HttpMethod method,
+    required String url,
+    required Map<String, String> headers,
+    required Object? body,
+  }) {
+    if (kReleaseMode) return;
+    log('--------------------------------------------------------------------');
+    log('API Request:');
+    log('--------------------------------------------------------------------');
+    log('${method.shortName} $url');
+    log('Headers: ${headers.isEmpty ? 'None' : ''}');
+    if (headers.isNotEmpty) {
+      log(JsonEncoder.withIndent('  ').convert(headers));
+      log('');
+    }
+    log('Body: ${body == null || body.toString().trim().isEmpty ? 'None' : ''}');
+    if (body != null && body.toString().trim().isNotEmpty) {
+      try {
+        final parsed = json.decode(body.toString());
+        log(JsonEncoder.withIndent('  ').convert(parsed));
+      } catch (e) {
+        log(body.toString());
+      }
+    }
+    log('--------------------------------------------------------------------');
+  }
+
+  static void printResponse(http.Response response) {
+    if (kReleaseMode) return;
+    log('--------------------------------------------------------------------');
+    log('Response:');
+    log('--------------------------------------------------------------------');
+    log('Status Code: ${response.statusCode}');
+    log('Headers:');
+    log(JsonEncoder.withIndent('  ').convert(response.headers));
+    log('');
+    log('Body:');
+    try {
+      final parsed = json.decode(response.body);
+      log(JsonEncoder.withIndent('  ').convert(parsed));
+    } catch (e) {
+      log(response.body);
+    }
+    log('--------------------------------------------------------------------');
   }
 
   /// Makes API request using cloud function to prevent any CORS issues.
