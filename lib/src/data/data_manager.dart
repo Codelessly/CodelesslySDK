@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/services.dart';
-import 'package:hive/hive.dart';
 
 import '../../codelessly_sdk.dart';
 import '../auth/auth_manager.dart';
@@ -81,7 +80,6 @@ class DataManager {
     );
 
     initialized = true;
-    // await Hive.deleteFromDisk();
 
     // Initialize all locally cached data.
     _publishModel = localDataRepository.fetchPublishModel(
@@ -92,7 +90,6 @@ class DataManager {
       log('Publish model is cached locally. Emitting.');
       emitPublishModel();
 
-      print('Cached apis: ${_publishModel!.apis}');
       for (final SDKPublishFont font in _publishModel!.fonts.values) {
         log('\tLoading font in init: [${font.id}](${font.fullFontName})');
         final Uint8List? fontBytes = localDataRepository.fetchFontBytes(
@@ -218,77 +215,78 @@ class DataManager {
       emitPublishModel();
       savePublishModel();
 
-    log('Publish model during init is now available. Proceeding with init!');
+      log('Publish model during init is now available. Proceeding with init!');
 
-    if (_publishModel == null) {
-      log(
-        'Publish model is still null.\n'
-        'Is there a network problem or bad authentication?',
-      );
-      return;
-    }
-
-    // If a [layoutID] was specified, then that layout must be prioritized and
-    // downloaded first if it is not already cached.
-    //
-    // If we could not download it earlier, that would be because we did not
-    // have a publish model available and needed to wait for one to arrive
-    // from the server for the first time or that it failed to download for some
-    // unknown reason.
-    //
-    // Perhaps the publish model was simply out of date locally,
-    // but now that we fetched a new one, and didPrepareLayout is still false,
-    // we can try to download the layout again with the new publish model.
-    //
-    // At this stage of the function, we can be sure that a publish model exists
-    // and can safely download the desired [layoutID], because if a publish
-    // model is still null, we cannot proceed further and this function
-    // terminates earlier.
-    if (!didPrepareLayout && layoutID != null) {
-      log(
-        'Publish model is definitely available. We can safely download layout [$layoutID] now.',
-      );
-      await getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID);
-
-      log(
-        'Layout [$layoutID] during init download complete.',
-      );
-    }
-
-    // If a [layoutID] is not specified, then we need to download all layouts
-    // in the background.
-    if (config.preload) {
-      final preloadFuture = Future(() async {
+      if (_publishModel == null) {
         log(
-          'Config preload was specified during init. Downloading ${_publishModel!.updates.layouts.length} layouts...',
+          'Publish model is still null.\n'
+          'Is there a network problem or bad authentication?',
         );
-        for (final String layoutID in _publishModel!.updates.layouts.keys) {
-          log(
-            '\tDownloading layout [$layoutID]...',
-          );
-          await getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID);
-          log(
-            '\tLayout [$layoutID] during init download complete.',
-          );
-        }
-
-        log(
-          'All layouts during init download complete.',
-        );
-      });
-
-      // Don't await for all the of the layouts to download if the data manager
-      // is initialized with a layoutID. The layoutID should be prioritized
-      // and downloaded first, the rest can be downloaded in the background.
-      if (layoutID == null) {
-        log(
-          'Config preload was specified during init, but a layoutID was not specified. Waiting for all layouts to download...',
-        );
-        await preloadFuture;
+        return;
       }
-    }
 
-    log('Init complete.');
+      // If a [layoutID] was specified, then that layout must be prioritized and
+      // downloaded first if it is not already cached.
+      //
+      // If we could not download it earlier, that would be because we did not
+      // have a publish model available and needed to wait for one to arrive
+      // from the server for the first time or that it failed to download for some
+      // unknown reason.
+      //
+      // Perhaps the publish model was simply out of date locally,
+      // but now that we fetched a new one, and didPrepareLayout is still false,
+      // we can try to download the layout again with the new publish model.
+      //
+      // At this stage of the function, we can be sure that a publish model exists
+      // and can safely download the desired [layoutID], because if a publish
+      // model is still null, we cannot proceed further and this function
+      // terminates earlier.
+      if (!didPrepareLayout && layoutID != null) {
+        log(
+          'Publish model is definitely available. We can safely download layout [$layoutID] now.',
+        );
+        await getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID);
+
+        log(
+          'Layout [$layoutID] during init download complete.',
+        );
+      }
+
+      // If a [layoutID] is not specified, then we need to download all layouts
+      // in the background.
+      if (config.preload) {
+        final preloadFuture = Future(() async {
+          log(
+            'Config preload was specified during init. Downloading ${_publishModel!.updates.layouts.length} layouts...',
+          );
+          for (final String layoutID in _publishModel!.updates.layouts.keys) {
+            log(
+              '\tDownloading layout [$layoutID]...',
+            );
+            await getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID);
+            log(
+              '\tLayout [$layoutID] during init download complete.',
+            );
+          }
+
+          log(
+            'All layouts during init download complete.',
+          );
+        });
+
+        // Don't await for all the of the layouts to download if the data manager
+        // is initialized with a layoutID. The layoutID should be prioritized
+        // and downloaded first, the rest can be downloaded in the background.
+        if (layoutID == null) {
+          log(
+            'Config preload was specified during init, but a layoutID was not specified. Waiting for all layouts to download...',
+          );
+          await preloadFuture;
+        }
+      }
+
+      log('Init complete.');
+    }
   }
 
   /// Emits the current [_publishModel] to the [_publishModelStreamController].
@@ -325,6 +323,7 @@ class DataManager {
 
   /// Sets the [SDKPublishModel] as null and cancels document streaming.
   void invalidate() async {
+    log('Invalidating data manager...');
     _publishModelDocumentListener?.cancel();
     _publishModel = null;
   }
@@ -418,7 +417,6 @@ class DataManager {
       }
     }
 
-    print('Found api updates: ${apiUpdates.keys}}');
     for (final String apiId in apiUpdates.keys) {
       final UpdateType updateType = apiUpdates[apiId]!;
 
@@ -432,7 +430,6 @@ class DataManager {
           break;
         case UpdateType.add:
         case UpdateType.update:
-          print('API downloading api: $apiId');
           final HttpApiData? api = await networkDataRepository.downloadApi(
             projectID: authManager.authData!.projectId,
             apiId: apiId,
@@ -632,7 +629,6 @@ class DataManager {
 
     assert(layout != null, 'Layout should not be null at this point.');
 
-    // Download or load fonts in the background.
     final Set<Future<HttpApiData?>> apiModels = getOrFetchApis(
       apiIds: model.updates.layoutApis[layoutID]!,
     );
@@ -643,8 +639,8 @@ class DataManager {
         if (api == null) continue;
         model.apis[api.id] = api;
       } catch (e, stacktrace) {
-        print('Error while fetching api: $e');
-        print(stacktrace);
+        log('Error while fetching api: $e');
+        log(stacktrace.toString());
       }
     }
     emitPublishModel();
