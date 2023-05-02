@@ -8,9 +8,6 @@ import '../error/error_handler.dart';
 import 'cache_manager.dart';
 
 class CodelesslyCacheManager extends CacheManager {
-  final CodelesslyConfig config;
-
-  CodelesslyCacheManager({required this.config});
 
   late Box box;
   late Box filesBox;

@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/services.dart';
 
 import '../../codelessly_sdk.dart';
 import '../auth/auth_manager.dart';
-import '../cache/cache_manager.dart';
-import '../cache/codelessly_cache_manager.dart';
 import '../error/error_handler.dart';
 import 'local_data_repository.dart';
 import 'network_data_repository.dart';
@@ -30,10 +27,6 @@ class DataManager {
   /// [LocalDataRepository] which uses [cacheManager] to abstract away data
   /// manager specific caching.
   final LocalDataRepository localDataRepository;
-
-  /// The cache manager to use. By default, it is [CodelesslyCacheManager]
-  /// which uses Hive.
-  final CacheManager cacheManager;
 
   /// The auth manager to use. By default, it is [CodelesslyAuthManager].
   final AuthManager authManager;
@@ -59,11 +52,14 @@ class DataManager {
   /// Creates a new instance of [DataManager] with the given [config].
   DataManager({
     required this.config,
-    required this.cacheManager,
     required this.authManager,
     required this.networkDataRepository,
     required this.localDataRepository,
   });
+
+  void log(String msg) {
+    print('[DataManager] $msg');
+  }
 
   /// Initializes the [DataManager] instance.
   ///

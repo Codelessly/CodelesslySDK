@@ -396,7 +396,6 @@ class Codelessly {
     AuthManager? authManager,
     DataManager? publishDataManager,
     DataManager? previewDataManager,
-
     bool initializeDataManagers = true,
   }) async {
     assert(
@@ -424,10 +423,7 @@ class Codelessly {
       if (data != null) this.data.addAll(data);
       if (functions != null) this.functions.addAll(functions);
 
-      _cacheManager = cacheManager ??
-          CodelesslyCacheManager(
-            config: _config!,
-          );
+      _cacheManager = cacheManager ?? CodelesslyCacheManager();
       _authManager = authManager ??
           CodelesslyAuthManager(
             config: _config!,
@@ -436,7 +432,6 @@ class Codelessly {
       _publishDataManager = publishDataManager ??
           DataManager(
             config: _config!.copyWith(isPreview: false),
-            cacheManager: this.cacheManager,
             authManager: this.authManager,
             networkDataRepository: kIsWeb
                 ? WebDataRepository()
@@ -448,7 +443,6 @@ class Codelessly {
       _previewDataManager = previewDataManager ??
           DataManager(
             config: _config!.copyWith(isPreview: true),
-            cacheManager: this.cacheManager,
             authManager: this.authManager,
             networkDataRepository: kIsWeb
                 ? WebDataRepository()
