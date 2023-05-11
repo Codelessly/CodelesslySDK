@@ -27,7 +27,7 @@ String substituteData(String text, Map<String, dynamic> data) {
     if (text.isJsonPath) {
       // Remove $-sign and curly brackets.
       String path = text.substring(2, text.length - 1);
-      // Add $-sign and dot so that the expression matches json path standards.
+      // Add $-sign and dot so that the expression matches JSON path standards.
       path = '\$.$path';
       // [text] represent a JSON path here. Decode it.
       final JsonPath jsonPath = JsonPath(path);
@@ -47,7 +47,7 @@ String substituteData(String text, Map<String, dynamic> data) {
 String transformText(
     String text, List<VariableData> variables, BuildContext context) {
   text = substituteVariables(text, variables);
-  // TODO: Add support for data substitution with json path
+  // TODO: Add support for data substitution with JSON path.
   // text = substituteData(text, context);
   return text;
 }
@@ -71,10 +71,12 @@ List<InlineSpan> transformTextSpans(List<InlineSpan> spans,
   }).toList();
 }
 
-/// Returns the greatest common divisor (gcd) of two integers using Euclid's algorithm.
+/// Returns the greatest common divisor (gcd) of two integers using Euclid's
+/// algorithm.
 int greatestCommonDivisor(int a, int b) => a.gcd(b);
 
-/// Returns the greatest common divisor (gcd) of two integers using Euclid's algorithm.
+/// Returns the greatest common divisor (gcd) of the input integers using
+/// Euclid's algorithm.
 int greatestCommonDivisorOfMany(List<int> integers) {
   if (integers.isEmpty) {
     return 0;
@@ -89,7 +91,8 @@ int greatestCommonDivisorOfMany(List<int> integers) {
   return gcd;
 }
 
-/// Returns the least common multiple (lcm) of two integers using Euclid's algorithm.
+/// Returns the least common multiple (lcm) of two integers using Euclid's
+/// algorithm.
 int leastCommonMultiple(int a, int b) {
   if ((a == 0) || (b == 0)) {
     return 0;
@@ -98,7 +101,8 @@ int leastCommonMultiple(int a, int b) {
   return ((a ~/ greatestCommonDivisor(a, b)) * b).abs();
 }
 
-/// Returns the least common multiple (lcm) of many [BigInt] using Euclid's algorithm.
+/// Returns the least common multiple (lcm) of many [BigInt] using Euclid's
+/// algorithm.
 int leastCommonMultipleOfMany(List<int> integers) {
   if (integers.isEmpty) {
     return 1;

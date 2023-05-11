@@ -19,8 +19,8 @@ class SDKPublishModel with EquatableMixin {
   /// The project's owner id.
   final String owner;
 
-  /// A lazily loaded map of fonts. This map is populated during
-  /// initialization of the SDK.
+  /// A lazily loaded map of fonts. This map is populated during initialization
+  /// of the SDK.
   final Map<String, SDKPublishFont> fonts;
 
   /// A lazily loaded map of layouts. This map is populated during
@@ -216,8 +216,8 @@ class SDKPublishFont with EquatableMixin {
   /// The font's full name is formatted in such a way that Flutter can use it
   /// to load the font, for convenience.
   ///
-  /// It's often in the format of:
-  /// `${family} ${what makes this variation unique}`
+  /// It's in the format of:
+  /// `${family} ${variant}`
   final String id;
 
   /// The font's url to download the font file from.
@@ -300,16 +300,16 @@ class SDKPublishUpdates with EquatableMixin {
 
   /// A map that holds a mapping of layout ids -> font ids.
   ///
-  /// This allows the SDK to optimize its data flow by only downloading
-  /// the minimum necessary fonts for a given layout without downloading
-  /// all of the fonts of a given project.
+  /// This allows the SDK to optimize its data flow by only downloading the
+  /// minimum necessary fonts for a given layout without downloading all of the
+  /// fonts of a given project.
   final Map<String, Set<String>> layoutFonts;
 
   /// A map that holds a mapping of layout ids -> api ids.
   ///
-  /// This allows the SDK to optimize its data flow by only downloading
-  /// the minimum necessary apis for a given layout without downloading
-  /// all of the apis of a given project.
+  /// This allows the SDK to optimize its data flow by only downloading the
+  /// minimum necessary apis for a given layout without downloading all of the
+  /// apis of a given project.
   final Map<String, Set<String>> layoutApis;
 
   /// Creates a new instance of [SDKPublishUpdates].

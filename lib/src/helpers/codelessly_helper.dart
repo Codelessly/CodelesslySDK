@@ -74,7 +74,7 @@ class CodelesslyHelper {
     );
   }
 
-  // https://stackoverflow.com/a/59003292/4418073
+  // Copied from [https://stackoverflow.com/a/59003292/4418073].
   static dynamic _firestoreParser(dynamic jsonMap) {
     final String? prop = _getFireStoreProp(jsonMap);
     dynamic value = jsonMap;

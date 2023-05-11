@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 
-/// This is used to store retrieved data from a document in the 'websites' collection.
+/// This is used to store retrieved data from a document in the 'websites'
+/// collection.
 @Deprecated('Use SDKPublishModel instead.')
 class FetchWebsiteData {
   final Map<String, SceneNode> nodes;

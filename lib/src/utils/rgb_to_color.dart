@@ -50,8 +50,8 @@ Color retrieveStrokeColor(GeometryMixin node,
     return Color(0x00000000);
   }
 
-  // If we want to disregard the single color index and retrieve all of the colors,
-  // we set [all] to true and we blend all the colors.
+  // If we want to disregard the single color index and retrieve all of the
+  // colors, we set [all] to true and we blend all the colors.
   if (all) {
     Color? stroke;
     // We get all the paints that have a color and reverse the list because the
@@ -62,7 +62,7 @@ Color retrieveStrokeColor(GeometryMixin node,
       if (stroke == null) {
         stroke = paint.toFlutterColor()!;
       } else {
-        // Blend
+        // Blend.
         stroke = Color.alphaBlend(paint.toFlutterColor()!, stroke);
       }
     }
@@ -77,9 +77,9 @@ Color retrieveStrokeColor(GeometryMixin node,
       if (gradients.isNotEmpty) {
         return gradients.last.gradientStops![0].color.toFlutterColor();
       } else {
-        // Return black when something unknown is found until we have better support
-        // for Gradients. Some methods expect a non-null color, so returning null
-        // may crash the UI.
+        // Return black when something unknown is found until we have better
+        // support for gradients. Some methods expect a non-null color, so
+        // returning null may crash the UI.
         return Color(0xff000000);
       }
     }
@@ -96,7 +96,7 @@ Color retrieveStrokeColor(GeometryMixin node,
     return stroke.gradientStops![0].color.toFlutterColor();
   } else {
     // Return black when something unknown is found until we have better support
-    // for Gradients. Some methods expect a non-null color, so returning null
+    // for gradients. Some methods expect a non-null color, so returning null
     // may crash the UI.
     return Color(0xff000000);
   }

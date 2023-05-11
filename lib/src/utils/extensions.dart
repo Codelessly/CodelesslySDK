@@ -887,8 +887,9 @@ extension FontWeightExtension on FontWeightNumeric {
 }
 
 extension FontNameExtensions on FontName {
-  /// Convert text defined fontWeights like "Bold" into Flutter types, like w700.
-  /// Source: https://cssreference.io/property/font-weight/
+  /// Convert text defined fontWeights like "Bold" into Flutter types, like
+  /// w700.
+  /// Source: [https://cssreference.io/property/font-weight/].
   FontWeight get flutterFontWeight {
     // This is used for layouts exported after April 30, 2021.
     if (weight != null) return weight!.flutterFontWeight;
@@ -899,7 +900,8 @@ extension FontNameExtensions on FontName {
     final String style =
         this.style.toLowerCase().replaceAll('-', '').replaceAll(' ', '');
 
-    // String might contain 'italic', which is why it uses contains in for the comparison
+    // String might contain 'italic', which is why it uses [contains] for the
+    // comparison.
     if (style.contains('thin')) {
       return FontWeight.w100;
     } else if (style.contains('extralight')) {
@@ -1210,13 +1212,13 @@ extension StringExt on String {
 }
 
 /// Can match:
-///   1. https://youtu.be/<video_id>
-///   2. https://www.youtube.com/embed/<video_id>
-///   3. https://youtube.com/embed/<video_id>
+///   1. [https://youtu.be/<video_id>]
+///   2. [https://www.youtube.com/embed/<video_id>]
+///   3. [https://youtube.com/embed/<video_id>]
 RegExp youtubeShareUrlRegex = RegExp(
     'https://(www.)?(youtu.be|((youtube.com)(?:/embed)))/(?<video_id>[a-zA-Z_0-9]+)');
 
-/// Can match: https://www.youtube.com/watch?v=<video_id>
+/// Can match: [https://www.youtube.com/watch?v=<video_id>]
 RegExp youtubeWatchUrlRegex = RegExp(
     '^https://(www.)?(youtube.com/watch)?.*v=(?<video_id>[a-zA-Z_0-9]+)');
 

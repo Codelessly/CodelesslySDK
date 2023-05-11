@@ -27,12 +27,12 @@ Widget _defaultLayoutBuilder(context, layout) => layout;
 /// Holds data passed from the Codelessly instance down the widget tree where
 /// all of the [WidgetNodeTransformer]s have access to it.
 class CodelesslyContext with EquatableMixin {
-  /// A map of data that is passed to loaded layouts for nodes to replace
-  /// their values with.
+  /// A map of data that is passed to loaded layouts for nodes to replace their
+  /// values with.
   final Map<String, dynamic> data;
 
-  /// A map of functions that is passed to loaded layouts for nodes to call
-  /// when they are triggered.
+  /// A map of functions that is passed to loaded layouts for nodes to call when
+  /// they are triggered.
   final Map<String, CodelesslyFunction> functions;
 
   /// A map that holds the current values of nodes that have internal values.
@@ -66,7 +66,9 @@ class CodelesslyContext with EquatableMixin {
     );
   }
 
-  /// TODO: @Aachman document this
+  /// Used for actions that are connected to one or more nodes.
+  /// Ex. submit action is connected to a textfield node to access its data to
+  /// submit to the server.
   Future<void> handleActionConnections(
     ActionModel actionModel,
     Map<String, BaseNode> nodes,
@@ -116,7 +118,9 @@ class CodelesslyContext with EquatableMixin {
     }
   }
 
-  /// TODO: @Aachman document this
+  /// Add [values] to the [nodeValues] map corresponding to the [node].
+  /// [values] refer to the local values of the node's properties that can be
+  /// changed, for example, with set value action.
   void addToNodeValues(BaseNode node, List<ValueModel> values) {
     // Get current values for the node, if any.
     final List<ValueModel> currentValues = nodeValues[node.id]?.value ?? [];
@@ -137,7 +141,7 @@ class CodelesslyContext with EquatableMixin {
   List<Object?> get props => [data, functions];
 }
 
-/// SDK widget that requires the SDK to be initialized before hand.
+/// SDK widget that requires the SDK to be initialized beforehand.
 class CodelesslyWidget extends StatefulWidget {
   final CodelesslyWidgetController? controller;
 
@@ -151,7 +155,7 @@ class CodelesslyWidget extends StatefulWidget {
   /// The [Codelessly] instance to use.
   ///
   /// By default, if this is null, the global instance is used, which is
-  /// retrieved via Codelessly.instance.
+  /// retrieved via [Codelessly.instance].
   final Codelessly? codelessly;
 
   /// Whether to show the preview version of the provided layout rather than the
@@ -159,7 +163,7 @@ class CodelesslyWidget extends StatefulWidget {
   ///
   /// If a value is provided, it will override the value provided in
   /// [CodelesslyConfig.isPreview].
-  /// If a [controller is provided, the controller's [isPreview] value will
+  /// If a [controller] is provided, the controller's [isPreview] value will
   /// override this value.
   final bool? isPreview;
 
@@ -214,13 +218,13 @@ class CodelesslyWidget extends StatefulWidget {
   ///    relevant parameters. Initialization of the global instance is done
   ///    implicitly if not already initialized.
   ///
-  /// 2. Using your own [codelessly] instance, initialization of the
+  /// 2. Using a custom [codelessly] instance, initialization of the
   ///    [codelessly] instance must be done explicitly.
   ///
-  /// 3. Using your own [config], which will be used to initialize the global
+  /// 3. Using a custom [config], which will be used to initialize the global
   ///    [codelessly] instance.
   ///
-  /// You can optionally provide your own [authManager], [publishDataManager],
+  /// Optionally, provide custom [authManager], [publishDataManager],
   /// [previewDataManager], and [cacheManager] instances for advanced control
   /// over the SDK's behavior.
   ///
@@ -300,8 +304,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   CodelesslyWidgetController get _effectiveController =>
       widget.controller ?? _controller!;
 
-  /// The [CodelesslyContext] that will hold the data and functions that will
-  /// be used to render the layout.
+  /// The [CodelesslyContext] that will hold the data and functions that will be
+  /// used to render the layout.
   ///
   /// This object is observed through InheritedWidget. Node transformers can
   /// find this object using: `Provider.of<CodelesslyContext>(context)`.

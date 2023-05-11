@@ -30,11 +30,11 @@ class AuthData {
     required this.timestamp,
   });
 
-  /// Converts a json map to an [AuthData] instance.
+  /// Converts a JSON map to an [AuthData] instance.
   factory AuthData.fromJson(Map<String, dynamic> json) =>
       _$AuthDataFromJson(json);
 
-  /// Converts an [AuthData] instance to a json map.
+  /// Converts an [AuthData] instance to a JSON map.
   Map<String, dynamic> toJson() => _$AuthDataToJson(this);
 }
 
@@ -43,10 +43,10 @@ abstract class AuthManager {
   /// Creates a [AuthManager] instance.
   const AuthManager();
 
-  /// [returns] the auth data used to authenticate the token if it exists.
+  /// Returns the auth data used to authenticate the token if it exists.
   AuthData? get authData;
 
-  /// [returns] the stream of the auth data. Any changes to it will be
+  /// Returns the stream of the auth data. Any changes to it will be
   /// broad0casted to the stream.
   Stream<AuthData?> get authStream;
 
@@ -54,7 +54,7 @@ abstract class AuthManager {
   @mustCallSuper
   Future<void> init();
 
-  /// [returns] true if a handshake was done successfully.
+  /// Returns true if a handshake was done successfully.
   bool isAuthenticated();
 
   /// Performs a handshake with the server to authenticate the token.

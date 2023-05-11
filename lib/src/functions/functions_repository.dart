@@ -94,7 +94,8 @@ class FunctionsRepository {
       return Future.error('Api with id [${action.apiId}] does not exist.');
     }
 
-    // TODO: Should we handle null case? We are just assuming the api always exists.
+    // TODO: Should we handle null case? We are just assuming the api always
+    // exists.
     return makeApiRequest(
       method: apiData.method,
       url: _applyVariables(apiData.url, action.parameters),

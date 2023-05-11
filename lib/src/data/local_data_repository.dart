@@ -27,7 +27,7 @@ class LocalDataRepository {
     return isPreview ? previewFontsCacheKey : publishFontsCacheKey;
   }
 
-  /// The cache key for the font files.
+  /// The cache key for the APIs.
   String apisCacheKey(bool isPreview) {
     return isPreview ? previewApisCacheKey : publishApisCacheKey;
   }
