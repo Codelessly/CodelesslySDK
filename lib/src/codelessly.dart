@@ -21,7 +21,7 @@ enum SDKStatus {
   /// The SDK has not been initialized.
   idle('Idle'),
 
-  /// The SDK has configurations set and ready to be initialized.
+  /// The SDK has configurations set and is ready to be initialized.
   configured('Configured'),
 
   /// The SDK is initializing.
@@ -43,7 +43,6 @@ enum SDKStatus {
 /// Holds initialization configuration options for the SDK.
 class CodelesslyConfig with EquatableMixin {
   /// The SDK auth token required for using the SDK.
-  /// You can retrieve it from your project's settings page.
   final String authToken;
 
   /// Allows the SDK to automatically send crash reports back to Codelessly's
@@ -51,9 +50,9 @@ class CodelesslyConfig with EquatableMixin {
   final bool automaticallyCollectCrashReports;
 
   /// Whether [CodelesslyWidget]s should show the preview versions of their
-  /// layouts or the published versions.
+  /// layouts.
   ///
-  /// Defaults to `false`.
+  /// Defaults to [false].
   final bool isPreview;
 
   /// Notifies the data manager to download all layouts and fonts of the
@@ -62,8 +61,7 @@ class CodelesslyConfig with EquatableMixin {
 
   /// Creates a new instance of [CodelesslyConfig].
   ///
-  /// [authToken] is the SDK auth token required to initialize the SDK.
-  ///             You can retrieve it from your project's publish menu.
+  /// [authToken] is the token required to authenticate and initialize the SDK.
   ///
   /// [automaticallyCollectCrashReports] allows the SDK to automatically send
   /// crash reports back to Codelessly's servers for developer analysis.
@@ -77,8 +75,8 @@ class CodelesslyConfig with EquatableMixin {
     this.preload = true,
   });
 
-  /// Creates a new instance of [CodelesslyConfig] with the provided
-  /// optional parameters.
+  /// Creates a new instance of [CodelesslyConfig] with the provided optional
+  /// parameters.
   CodelesslyConfig copyWith({
     String? authToken,
     bool? automaticallyCollectCrashReports,
@@ -111,45 +109,43 @@ class CodelesslyConfig with EquatableMixin {
 ///   // Get global instance
 ///   Codelessly.instance;
 ///
-/// Look at [CodelesslyConfig] for more information on available
-/// configuration options.
+/// Look at [CodelesslyConfig] for more information on available configuration
+/// options.
 class Codelessly {
   /// Internal singleton instance
   static Codelessly _instance = Codelessly();
 
-  /// [returns] the global singleton instance of the SDK.
+  /// Returns the global singleton instance of the SDK.
   /// Initialization is needed before formal usage.
   static Codelessly get instance => _instance;
 
-  /// [returns] the current status of the SDK.
+  /// Returns the current status of the SDK.
   static SDKStatus get sdkStatus => _instance.status;
 
-  /// [returns] a stream of SDK status changes.
+  /// Returns a stream of SDK status changes.
   static Stream<SDKStatus> get sdkStatusStream => _instance.statusStream;
 
   CodelesslyConfig? _config;
 
-  /// [returns] the configuration options provided to this SDk.
+  /// Returns the configuration options provided to this SDK.
   CodelesslyConfig? get config => _config;
 
   AuthManager? _authManager;
 
-  /// [returns] the authentication manager that is responsible for managing
+  /// Returns the authentication manager that is responsible for managing
   /// auth token validation and project ID retrieval.
   AuthManager get authManager => _authManager!;
 
   DataManager? _publishDataManager;
 
-  /// [returns] the data manager that is responsible for retrieving layout
-  /// information to and from the Codelessly servers or the local device's
-  /// cache.
+  /// Returns the data manager that is responsible for retrieving layout
+  /// information from the Codelessly servers or the local device's cache.
   DataManager get publishDataManager => _publishDataManager!;
 
   DataManager? _previewDataManager;
 
-  /// [returns] the data manager that is responsible for retrieving layout
-  /// information to and from the Codelessly servers or the local device's
-  /// cache.
+  /// Returns the data manager that is responsible for retrieving layout
+  /// information from the Codelessly servers or the local device's cache.
   ///
   /// The difference between [publishDataManager] and [previewDataManager] is
   /// that the preview data manager will retrieve the preview versions of
@@ -158,7 +154,7 @@ class Codelessly {
 
   CacheManager? _cacheManager;
 
-  /// [returns] the cache manager that is responsible for providing an interface
+  /// Returns the cache manager that is responsible for providing an interface
   /// to the local device's cache.
   CacheManager get cacheManager => _cacheManager!;
 
@@ -167,12 +163,12 @@ class Codelessly {
   DataManager get dataManager =>
       _config!.isPreview ? _previewDataManager! : _publishDataManager!;
 
-  /// [returns] the local instance of the Firestore SDK. Used by the
-  /// data manager to retrieve server data.
+  /// Returns the local instance of the Firestore SDK. Used by the data manager
+  /// to retrieve server data.
   Firestore get firestore => _firestore!;
 
-  /// A map of data that is passed to loaded layouts for nodes to replace
-  /// their values with.
+  /// A map of data that is passed to loaded layouts for nodes to replace their
+  /// property values with.
   final Map<String, dynamic> data = {};
 
   /// A map of functions that is passed to loaded layouts for nodes to call
@@ -216,13 +212,13 @@ class Codelessly {
 
   SDKStatus _status = SDKStatus.idle;
 
-  /// [returns] the current status of this sdk instance.
+  /// Returns the current status of this SDK instance.
   SDKStatus get status => _status;
 
   final StreamController<SDKStatus> _statusStreamController =
       StreamController.broadcast()..add(SDKStatus.idle);
 
-  /// [returns] a stream of status updates for this sdk instance.
+  /// Returns a stream of status updates for this SDK instance.
   Stream<SDKStatus> get statusStream => _statusStreamController.stream;
 
   /// Disposes this instance of the SDK permanently.
@@ -250,8 +246,8 @@ class Codelessly {
   /// Resets the state of the SDK. This is useful for resetting the data without
   /// disposing the instance permanently.
   ///
-  /// This will not close the status stream, and will instead set the SDK back
-  /// to idle mode.
+  /// This does not close the status stream, and instead sets the SDK back to
+  /// idle mode.
   Future<void> resetAndClearCache() async {
     await _cacheManager?.clearAll();
     await _cacheManager?.deleteAllByteData();
@@ -265,13 +261,13 @@ class Codelessly {
 
   static Future<void> resetAndClearSDKCache() => _instance.resetAndClearCache();
 
-  /// [returns] true if the provided instance is the global instance.
+  /// Returns true if the provided instance is the global instance.
   static bool isGlobalInstance(Codelessly codelessly) {
     return _instance == codelessly;
   }
 
-  /// Internally updates the status of this instance of the SDK and emits
-  /// a status update event to the [statusStream].
+  /// Internally updates the status of this instance of the SDK and emits a
+  /// status update event to the [statusStream].
   void _updateStatus(SDKStatus status) {
     if (_status == status) {
       return;
@@ -283,15 +279,15 @@ class Codelessly {
   /// Configures this instance of the SDK with the provided configuration
   /// options. This will mark the SDK as ready to be initialized.
   ///
-  /// You can use this function to lazily initialize the SDK. Layouts and fonts
+  /// This function can be used to lazily initialize the SDK. Layouts and fonts
   /// will only be downloaded and cached when [initialize] is called.
   ///
-  /// You can call [initialize] directly without needing to call this function
-  /// first to immediately configure and initialize the SDK.
+  /// Calling [initialize] directly without calling this function first
+  /// immediately configures and initializes the SDK.
   ///
   /// If the [CodelesslyWidget] recognizes that this instance of the
   /// [Codelessly] SDK is the global instance rather than a local one, it will
-  /// configure and initialize the SDK automatically for you via its widget's
+  /// configure and initialize the SDK automatically via its widget's
   /// constructor parameters.
   SDKStatus configure({
     CodelesslyConfig? config,
@@ -349,9 +345,9 @@ class Codelessly {
   /// configures the error handler to use it.
   ///
   /// This will only fully run once if the [Firestore] instance is not already
-  /// initialized. If it is, this is ignored.
+  /// initialized. If it is initialized, this is ignored.
   ///
-  /// If the SDK is running on a web platform, this will be ignored.
+  /// If the SDK is running on web platform, this will be ignored.
   void initErrorHandler({
     required bool automaticallySendCrashReports,
   }) {
@@ -377,13 +373,13 @@ class Codelessly {
 
   /// Initializes this instance of the SDK.
   ///
-  /// You do not need to await the future. You can simply listen to the status
-  /// events from the [statusStream] to know when the SDK is ready.
+  /// To know when the SDK is ready, simply listen to the status events from
+  /// [statusStream]. There's no need to await the future.
   ///
   /// If the [CodelesslyWidget] recognizes that this instance of the
   /// [Codelessly] SDK is the global instance rather than a local one, it will
-  /// configure and/or initialize the SDK automatically for you via its
-  /// widget's constructor parameters, if specified.
+  /// configure and/or initialize the SDK automatically via its widget's
+  /// constructor parameters, if specified.
   Future<SDKStatus> init({
     CodelesslyConfig? config,
 
@@ -464,8 +460,8 @@ class Codelessly {
 
       log('Initializing auth manager');
       // The auth manager initializes second to look up cached auth data
-      // from the cache manager. If no auth data is available, it will
-      // halt the entire process and awaits to authenticate with the server.
+      // from the cache manager. If no auth data is available, it halts the
+      // entire process and awaits to authenticate with the server.
       //
       // After either of those is done, the relevant auth data is immediately
       // emitted to the internal stream controller, ready for immediate usage.
@@ -477,7 +473,7 @@ class Codelessly {
       // to fetch the latest publish model from the server.
       //
       // The config sets the default data manager to initialize. If the
-      // [CodelesslyWidget] want to load the opposite manager, the other will
+      // [CodelesslyWidget] wants to load the opposite manager, the other will
       // lazily initialize.
       if (initializeDataManagers && _config!.preload) {
         if (_config!.isPreview) {
@@ -508,15 +504,15 @@ class Codelessly {
   /// Configures this instance of the SDK with the provided configuration
   /// options. This will mark the SDK as ready to be initialized.
   ///
-  /// You can use this function to lazily initialize the SDK. Layouts and fonts
-  /// will only be downloaded and cached when [initialize] is called.
+  /// This function can still be used to lazily initialize the SDK. Layouts and
+  /// fonts will only be downloaded and cached when [initialize] is called.
   ///
-  /// You can call [initialize] directly without needing to call this function
-  /// first to immediately configure and initialize the SDK.
+  /// To immediately configure and initialize the SDK, [initialize] can be
+  /// called directly without needing to call this function first.
   ///
   /// If the [CodelesslyWidget] recognizes that this instance of the
   /// [Codelessly] SDK is the global instance rather than a local one, it will
-  /// configure and initialize the SDK automatically for you via its widget's
+  /// configure and initialize the SDK automatically via its widget's
   /// constructor parameters.
   static SDKStatus configureSDK({
     CodelesslyConfig? config,
@@ -544,23 +540,22 @@ class Codelessly {
 
   /// Initializes this instance of the SDK.
   ///
-  /// You do not need to await the future. You can simply listen to the status
-  /// events from the [Codelessly.instance.statusStream] to know when the SDK
-  /// is ready.
+  /// To know when the SDK is ready, simply listen to the status events from the
+  /// [Codelessly.instance.statusStream]. No need to await the future.
   ///
   /// If the [CodelesslyWidget] recognizes that this instance of the
   /// [Codelessly] SDK is the global instance rather than a local one, it will
-  /// initialize the SDK automatically for you, if specified.
+  /// initialize the SDK automatically, if specified.
   static Future<SDKStatus> initializeSDK({
     CodelesslyConfig? config,
 
-    // raw managers
+    // Raw managers.
     AuthManager? authManager,
     DataManager? publishDataManager,
     DataManager? previewDataManager,
     CacheManager? cacheManager,
 
-    // raw data
+    // Raw data.
     Map<String, dynamic>? data,
     Map<String, CodelesslyFunction>? functions,
   }) async {

@@ -47,8 +47,8 @@ class CodelesslyEvent with EquatableMixin {
     // required this.deviceMetadata,
   });
 
-  /// Creates a copy of this event but with the given fields replaced with
-  /// the new values.
+  /// Creates a copy of this event but with the given fields replaced with the
+  /// new values.
   CodelesslyEvent copyWith({
     String? message,
     Map<String, dynamic>? extras,
@@ -66,7 +66,7 @@ class CodelesslyEvent with EquatableMixin {
         // deviceMetadata: deviceMetadata ?? this.deviceMetadata,
       );
 
-  /// Populates the [deviceMetadata] field with information about the device
+  /// Populates the [deviceMetadata] field with information about the device.
   Future<void> populateDeviceMetadata() async {
     // deviceMetadata = await DeviceMetadata.fromPlatform();
   }

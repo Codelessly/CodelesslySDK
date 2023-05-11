@@ -6,9 +6,9 @@ import '../../codelessly_sdk.dart';
 
 /// A widget that builds a layout from an [SDKPublishLayout].
 ///
-/// The internal node list is resolved by linking parentIDs based on the
-/// node tree's children hierarchy. It additionally resolve action links
-/// and updates the internal [CodelesslyContext] with the node values.
+/// The internal node list is resolved by linking parentIDs based on the node
+/// tree's children hierarchy. It additionally resolve action links and updates
+/// the internal [CodelesslyContext] with the node values.
 class CodelesslyPublishedLayoutBuilder extends StatefulWidget {
   /// The layout to build. The nodes list must be populated inside.
   final SDKPublishLayout layout;
@@ -29,15 +29,15 @@ class _CodelesslyPublishedLayoutBuilderState
     extends State<CodelesslyPublishedLayoutBuilder> {
   /// The node registry that is used to store the nodes.
   /// The [NodeWidgetTransformer]s use this to get nodes by their ids (via the
-  /// [transformerManager].
+  /// [transformerManager]).
   late final NodeRegistry nodeRegistry = NodeRegistry();
 
   /// The [PassiveNodeTransformerManager] that is used to build the widgets
   /// from the nodes.
   ///
-  /// The transformer is responsible for getting the appropriate transformer
-  /// for each node and building them. It also stores the [nodeRegistry]
-  /// and delegates the node lookup to it.
+  /// The transformer is responsible for getting the appropriate transformer for
+  /// each node and building them. It also stores the [nodeRegistry] and
+  /// delegates the node lookup to it.
   late final PassiveNodeTransformerManager transformerManager =
       PassiveNodeTransformerManager(nodeRegistry.getNodeByID);
 

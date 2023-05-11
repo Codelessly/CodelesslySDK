@@ -13,12 +13,12 @@ void main(List<String> args) {
 /// Compares the given [a] [FontVariantModel] with the [b] [FontVariantModel]
 /// and returns the score.
 ///
-/// The score is the sum of the absolute difference of the [FontWeight] and
-/// the [FontStyle] of the two [FontVariantModel]s.
+/// The score is the sum of the absolute difference of the [FontWeight] and the
+/// [FontStyle] of the two [FontVariantModel]s.
 ///
 /// The lower the score, the closer the match.
 ///
-/// [returns] The score of the match.
+/// Returns the score of the match.
 int _computeMatch(FontVariantModel a, FontVariantModel b) {
   if (a == b) {
     return 0;
@@ -30,8 +30,8 @@ int _computeMatch(FontVariantModel a, FontVariantModel b) {
   return score;
 }
 
-/// [returns] The closest matching [FontVariantModel] from [variantsToCompare]
-/// to the given [sourceVariant].
+/// Returns the closest matching [FontVariantModel] from [variantsToCompare] to
+/// the given [sourceVariant].
 ///
 /// The [FontVariantModel] with the lowest score is returned.
 FontVariantModel _closestMatch(FontVariantModel sourceVariant,
@@ -48,7 +48,7 @@ FontVariantModel _closestMatch(FontVariantModel sourceVariant,
   return bestMatch;
 }
 
-/// [returns] The Flutter-usable font family name for the given [fontName].
+/// Returns the Flutter-usable font family name for the given [fontName].
 String getFontFamilyNameAndVariant(
   FontName fontName, {
   FontFamilyModel? familyModel,
@@ -59,8 +59,9 @@ String getFontFamilyNameAndVariant(
       fontName.style.toLowerCase().contains('italic') ? 'Italic' : 'Normal';
 
   if (familyModel != null) {
-    /// familyModel is not null then this is running from the IDE. In this case,
-    /// we need to derive the font family name from the font variants.
+    /// If [familyModel] is not null, then this is running from the editor. In
+    /// this case, we need to derive the font family name from the font
+    /// variants.
     // final FontVariantModel bestMatchedVariant = _closestMatch(
     //   FontVariantModel(
     //     weight: weight,
@@ -75,7 +76,7 @@ String getFontFamilyNameAndVariant(
       style: fontName.style,
     );
   }
-  // familyModel is null then this is running from the SDK. In this case,
+  // If [familyModel] is null, then this is running from the SDK. In this case,
   // we don't need to derive the font family name since it is already processed.
   return deriveFontFamily(
     family: family,
@@ -179,7 +180,7 @@ class FontParser {
     var data = Uint8List.fromList(buff);
     var tag = bin.readASCII(data, 0, 4);
 
-    // If the file is a TrueType Collection
+    // If the file is a TrueType Collection.
     if (tag == 'ttcf') {
       var offset = 8;
       var numF = bin.readUint(data, offset);

@@ -14,7 +14,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
   /// The [Codelessly] instance to use.
   ///
-  /// By default, this is the global instance, retrieved via Codelessly.instance.
+  /// By default, this is the global instance, retrieved via
+  /// [Codelessly.instance].
   final Codelessly codelessly;
 
   /// Whether to show the preview version of the provided layout rather than the
@@ -94,7 +95,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       final bool isGlobal = Codelessly.isGlobalInstance(codelessly);
 
       // If the Codelessly global instance was passed and is still idle, that
-      // means the user never triggered Codelessly.init() but this
+      // means the user never triggered [Codelessly.init] but this
       // [CodelesslyWidget] is about to be rendered.
       //
       // We initialize the global instance here. If this were a local Codelessly
@@ -170,8 +171,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // If this CodelesslyWidget wants to preview a layout but the SDK is
     // configured to load published layouts, then we need to initialize the
     // preview data manager.
-    // Vice versa for published layouts if the SDK is configured to load
-    // preview layouts.
+    // Vice versa for published layouts if the SDK is configured to load preview
+    // layouts.
     if (!dataManager.initialized) {
       print(
           'CodelesslyWidget [$layoutID]: initialized data manager for the first time. [${isPreview ? 'preview' : 'publish'}]');

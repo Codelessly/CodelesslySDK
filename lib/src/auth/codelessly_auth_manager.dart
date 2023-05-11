@@ -18,7 +18,7 @@ class CodelesslyAuthManager extends AuthManager {
   final CacheManager cacheManager;
 
   /// The stream controller used to stream the auth data. Any changes to
-  /// it will be broad-casted to the stream.
+  /// it will be broadcasted to the stream.
   final StreamController<AuthData?> _authStreamController;
 
   /// Creates a [CodelesslyAuthManager] instance.
@@ -26,7 +26,7 @@ class CodelesslyAuthManager extends AuthManager {
   /// [config] is the configuration used to authenticate the token.
   ///
   /// [cacheManager] is the cache manager used to store the project id after
-  ///                authentication.
+  /// authentication.
   CodelesslyAuthManager({
     required this.config,
     required this.cacheManager,
@@ -61,7 +61,7 @@ class CodelesslyAuthManager extends AuthManager {
           await cacheManager.deleteAllByteData();
         }
       } catch (error, stacktrace) {
-        // If the cache decoding process fails for any reason, we invalidate
+        // If the cache decoding process fails for any reason, invalidate
         // the cache, log the error, and move on by fetching a fresh token
         // from the server.
         CodelesslyErrorHandler.instance.captureException(

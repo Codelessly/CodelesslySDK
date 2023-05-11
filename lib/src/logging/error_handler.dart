@@ -3,7 +3,7 @@ import 'dart:async';
 import 'codelessly_event.dart';
 import 'reporter.dart';
 
-/// A typedef that defines the callback for [CodelesslyErrorHandler].
+/// A [typedef] that defines the callback for [CodelesslyErrorHandler].
 /// It allows supplementary handling of any captured exceptions that the SDK
 /// throws.
 typedef ExceptionCallback = void Function(CodelesslyException e);
