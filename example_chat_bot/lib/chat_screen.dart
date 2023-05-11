@@ -67,6 +67,7 @@ class _ChatScreenState extends State<ChatScreen>
       ),
     );
   }
+
   @override
   void dispose() {
     animController.dispose();
@@ -199,7 +200,7 @@ class _ChatScreenState extends State<ChatScreen>
   Future<void> progressChat() async {
     // Lazily initialize the SDK instance!
     // if (chatProgress == 0) {
-      // codelessly.init();
+    // codelessly.init();
     // }
 
     // "Send" the message

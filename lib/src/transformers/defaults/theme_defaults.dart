@@ -275,7 +275,8 @@ class FloatingActionButtonDefaults {
       MultiSourceIconModel.icon(size: 24, color: null);
   static const String label = 'Button';
 
-  static TextProp get labelStyle => TextProp.general(fontSize: 16, fills: []);
+  static TextProp get labelStyle =>
+      TextProp.general(fontSize: 16, fills: List.empty(growable: true));
   static const Color focusColor = kDefaultFocusColor;
   static const Color hoverColor = kDefaultHoverColor;
   static const Color splashColor = kDefaultSplashColor;

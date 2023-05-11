@@ -31,7 +31,7 @@ Future main() async {
   });
 
   test('Get public document using FireDart with login w/o auth', () async {
-    var auth = FirebaseAuth(defaultApiKey, VolatileStore());
+    // var auth = FirebaseAuth(defaultApiKey, VolatileStore());
     var firestore = Firestore(defaultProjectId);
 
     final document = firestore.collection('publish').document('test');

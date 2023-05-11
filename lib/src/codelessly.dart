@@ -396,7 +396,6 @@ class Codelessly {
     AuthManager? authManager,
     DataManager? publishDataManager,
     DataManager? previewDataManager,
-
     bool initializeDataManagers = true,
   }) async {
     assert(

@@ -91,7 +91,7 @@ class TextSizeCalculator implements ITextSizeCalculator {
               CodelesslyContext.empty(),
             ),
           ),
-          textScaleFactor: WidgetsBinding.instance.window.textScaleFactor,
+          textScaleFactor: PlatformDispatcher.instance.textScaleFactor,
           textDirection: TextDirection.ltr,
           textWidthBasis: TextWidthBasis.longestLine,
           maxLines: node.maxLines,

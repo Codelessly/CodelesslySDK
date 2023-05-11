@@ -61,13 +61,13 @@ String getFontFamilyNameAndVariant(
   if (familyModel != null) {
     /// familyModel is not null then this is running from the IDE. In this case,
     /// we need to derive the font family name from the font variants.
-    final FontVariantModel bestMatchedVariant = _closestMatch(
-      FontVariantModel(
-        weight: weight,
-        style: style,
-      ),
-      familyModel.fontVariants,
-    );
+    // final FontVariantModel bestMatchedVariant = _closestMatch(
+    //   FontVariantModel(
+    //     weight: weight,
+    //     style: style,
+    //   ),
+    //   familyModel.fontVariants,
+    // );
     // print('Best matched variant for family $family: ${bestMatchedVariant.name} | ${bestMatchedVariant.style} | ${bestMatchedVariant.weight}');
     return deriveFontFamily(
       family: family,
