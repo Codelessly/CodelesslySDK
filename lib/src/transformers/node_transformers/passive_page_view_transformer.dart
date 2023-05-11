@@ -35,7 +35,6 @@ class PassivePageViewWidget extends StatefulWidget {
 }
 
 class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
-
   late PageController controller;
 
   @override
@@ -51,7 +50,8 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
   @override
   void didUpdateWidget(covariant PassivePageViewWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if(widget.node.properties.initialPage != oldWidget.node.properties.initialPage) {
+    if (widget.node.properties.initialPage !=
+        oldWidget.node.properties.initialPage) {
       controller.jumpToPage(widget.node.properties.initialPage);
     }
   }

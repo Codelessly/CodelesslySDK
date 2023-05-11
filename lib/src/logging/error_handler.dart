@@ -80,7 +80,6 @@ abstract class BaseErrorHandler {
 /// [CodelesslyErrorHandler.init] before using it.
 ///
 class CodelesslyErrorHandler extends BaseErrorHandler {
-
   /// Whether the [CodelesslyErrorHandler] has been initialized or not.
   static bool didInitialize = false;
 
@@ -109,7 +108,8 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
       StreamController<CodelesslyException>.broadcast();
 
   /// A stream that will be used to broadcast exceptions.
-  Stream<CodelesslyException> get exceptionStream => _exceptionStreamController.stream;
+  Stream<CodelesslyException> get exceptionStream =>
+      _exceptionStreamController.stream;
 
   /// Initializes an instance of this with given [reporter].
   CodelesslyErrorHandler({

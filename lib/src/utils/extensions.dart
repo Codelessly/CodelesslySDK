@@ -509,7 +509,8 @@ extension VecHelper on Vec {
 }
 
 extension EdgeInsetsHelper on EdgeInsetsModel {
-  flutter.EdgeInsets get flutterEdgeInsets => flutter.EdgeInsets.fromLTRB(l, t, r, b);
+  flutter.EdgeInsets get flutterEdgeInsets =>
+      flutter.EdgeInsets.fromLTRB(l, t, r, b);
 
   bool get isSymmetric => l == r && r == t && t == b;
 
