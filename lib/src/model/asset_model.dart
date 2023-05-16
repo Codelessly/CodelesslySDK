@@ -27,11 +27,16 @@ class AssetModel with EquatableMixin {
   @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
   final DateTime createdAt;
 
+  final String blurHash;
+
+  double get aspectRatio => sourceWidth / sourceHeight;
+
   /// Creates a new asset model.
   AssetModel({
     required this.id,
     required this.name,
     required this.url,
+    this.blurHash = '',
     required this.sourceWidth,
     required this.sourceHeight,
     required this.createdAt,
@@ -43,6 +48,7 @@ class AssetModel with EquatableMixin {
     String? id,
     String? name,
     String? url,
+    String? blurHash,
     double? sourceWidth,
     double? sourceHeight,
     DateTime? createdAt,
@@ -51,6 +57,7 @@ class AssetModel with EquatableMixin {
       id: id ?? this.id,
       name: name ?? this.name,
       url: url ?? this.url,
+      blurHash: blurHash ?? this.blurHash,
       sourceWidth: sourceWidth ?? this.sourceWidth,
       sourceHeight: sourceHeight ?? this.sourceHeight,
       createdAt: createdAt ?? this.createdAt,
@@ -69,6 +76,7 @@ class AssetModel with EquatableMixin {
         id,
         name,
         url,
+        blurHash,
         sourceWidth,
         sourceHeight,
         createdAt,
