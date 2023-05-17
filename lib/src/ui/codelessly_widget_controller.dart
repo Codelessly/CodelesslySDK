@@ -137,11 +137,11 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // First event.
     if (codelessly.status == SDKStatus.done) {
       print(
-          'CodelesslyWidget [$layoutID]: Codelessly SDK is already loaded. Woo!');
+          '[CodelesslyWidgetController] [$layoutID]: Codelessly SDK is already loaded. Woo!');
       _verifyAndListenToDataManager();
     }
 
-    print('CodelesslyWidget [$layoutID]: Listening to sdk status stream.');
+    print('[CodelesslyWidgetController] [$layoutID]: Listening to sdk status stream.');
     _sdkStatusListener?.cancel();
     _sdkStatusListener = codelessly.statusStream.listen((status) {
       switch (status) {
@@ -152,7 +152,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
           break;
         case SDKStatus.done:
           print(
-              'CodelesslyWidget [$layoutID]: Codelessly SDK is done loading.');
+              '[CodelesslyWidgetController] [$layoutID]: Codelessly SDK is done loading.');
           _verifyAndListenToDataManager();
           break;
       }
@@ -164,7 +164,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// widget is ready to be rendered and needs to be downloaded and prepared.
   void _verifyAndListenToDataManager() {
     print(
-        'CodelesslyWidget [$layoutID]: verifying and listening to datamanager stream.');
+        '[CodelesslyWidgetController] [$layoutID]: verifying and listening to datamanager stream.');
 
     notifyListeners();
 
@@ -175,7 +175,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // layouts.
     if (!dataManager.initialized) {
       print(
-          'CodelesslyWidget [$layoutID]: initialized data manager for the first time. [${isPreview ? 'preview' : 'publish'}]');
+          '[CodelesslyWidgetController] [$layoutID]: initialized data manager for the first time. [${isPreview ? 'preview' : 'publish'}]');
       dataManager.init(layoutID: layoutID).catchError((error, str) {
         CodelesslyErrorHandler.instance.captureException(
           error,
@@ -185,7 +185,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       });
     } else {
       print(
-          'CodelesslyWidget [$layoutID]: requesting layout from data manager. [${isPreview ? 'preview' : 'publish'}]');
+          '[CodelesslyWidgetController] [$layoutID]: requesting layout from data manager. [${isPreview ? 'preview' : 'publish'}]');
       dataManager
           .getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID)
           .catchError((error, str) {

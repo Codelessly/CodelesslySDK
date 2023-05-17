@@ -5,11 +5,8 @@ import 'package:flutter/services.dart';
 
 import '../../codelessly_sdk.dart';
 import '../auth/auth_manager.dart';
-import '../cache/cache_manager.dart';
 import '../cache/codelessly_cache_manager.dart';
 import '../logging/error_handler.dart';
-import 'local_data_repository.dart';
-import 'network_data_repository.dart';
 
 /// Orchestrates the data flow for the SDK.
 class DataManager {
@@ -316,13 +313,13 @@ class DataManager {
   }
 
   /// Disposes the [DataManager] instance.
-  void dispose() async {
+  void dispose() {
     _publishModelStreamController.close();
     _publishModelDocumentListener?.cancel();
   }
 
   /// Sets the [SDKPublishModel] as null and cancels document streaming.
-  void invalidate() async {
+  void invalidate() {
     log('Invalidating data manager...');
     _publishModelDocumentListener?.cancel();
     _publishModel = null;

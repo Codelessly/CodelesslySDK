@@ -420,15 +420,18 @@ class Codelessly {
       if (functions != null) this.functions.addAll(functions);
 
       _cacheManager = cacheManager ??
+          _cacheManager ??
           CodelesslyCacheManager(
             config: _config!,
           );
       _authManager = authManager ??
+          _authManager ??
           CodelesslyAuthManager(
             config: _config!,
             cacheManager: this.cacheManager,
           );
       _publishDataManager = publishDataManager ??
+          _publishDataManager ??
           DataManager(
             config: _config!.copyWith(isPreview: false),
             cacheManager: this.cacheManager,
@@ -441,6 +444,7 @@ class Codelessly {
           );
 
       _previewDataManager = previewDataManager ??
+          _previewDataManager ??
           DataManager(
             config: _config!.copyWith(isPreview: true),
             cacheManager: this.cacheManager,
