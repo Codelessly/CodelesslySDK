@@ -24,21 +24,31 @@ Widget _defaultLayoutBuilder(context, layout) => layout;
 
 /// Holds data passed from the Codelessly instance down the widget tree where
 /// all of the [WidgetNodeTransformer]s have access to it.
-class CodelesslyContext with EquatableMixin {
+class CodelesslyContext with ChangeNotifier, EquatableMixin {
   /// A map of data that is passed to loaded layouts for nodes to replace their
   /// values with.
-  final Map<String, dynamic> data;
+  Map<String, dynamic> data;
+
+  set setData(Map<String, dynamic> data) {
+    this.data = data;
+    notifyListeners();
+  }
 
   /// A map of functions that is passed to loaded layouts for nodes to call when
   /// they are triggered.
-  final Map<String, CodelesslyFunction> functions;
+  Map<String, CodelesslyFunction> functions;
+
+  set setFunctions(Map<String, CodelesslyFunction> functions) {
+    this.functions = functions;
+    notifyListeners();
+  }
 
   /// A map that holds the current values of nodes that have internal values.
   final Map<String, ValueNotifier<List<ValueModel>>> nodeValues;
 
   /// Creates a [CodelesslyContext] with the given [data], [functions], and
   /// [nodeValues].
-  const CodelesslyContext({
+  CodelesslyContext({
     required this.data,
     required this.functions,
     required this.nodeValues,
@@ -52,17 +62,17 @@ class CodelesslyContext with EquatableMixin {
 
   /// Creates a copy of this [CodelesslyContext] with the given [data],
   /// [functions], and [nodeValues].
-  CodelesslyContext copyWith({
-    Map<String, dynamic>? data,
-    Map<String, CodelesslyFunction>? functions,
-    Map<String, ValueNotifier<List<ValueModel>>>? nodeValues,
-  }) {
-    return CodelesslyContext(
-      data: data ?? this.data,
-      functions: functions ?? this.functions,
-      nodeValues: nodeValues ?? this.nodeValues,
-    );
-  }
+  // CodelesslyContext copyWith({
+  //   Map<String, dynamic>? data,
+  //   Map<String, CodelesslyFunction>? functions,
+  //   Map<String, ValueNotifier<List<ValueModel>>>? nodeValues,
+  // }) {
+  //   return CodelesslyContext(
+  //     data: data ?? this.data,
+  //     functions: functions ?? this.functions,
+  //     nodeValues: nodeValues ?? this.nodeValues,
+  //   );
+  // }
 
   /// Used for actions that are connected to one or more nodes.
   /// Ex. submit action is connected to a textfield node to access its data to
@@ -350,12 +360,12 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   @override
   void didUpdateWidget(covariant CodelesslyWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.data != codelesslyContext.data ||
-        widget.functions != codelesslyContext.functions) {
-      codelesslyContext = codelesslyContext.copyWith(
-        data: widget.data,
-        functions: widget.functions,
-      );
+    if (widget.data != codelesslyContext.data) {
+      codelesslyContext.data = widget.data;
+    }
+
+    if (widget.functions != codelesslyContext.functions) {
+      codelesslyContext.functions = widget.functions;
     }
 
     if (widget.controller == null && oldWidget.controller != null) {
@@ -395,6 +405,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   void dispose() {
     _controller?.dispose();
     _exceptionSubscription?.cancel();
+    codelesslyContext.dispose();
     super.dispose();
   }
 
@@ -455,7 +466,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<CodelesslyContext>.value(value: codelesslyContext),
+        ChangeNotifierProvider<CodelesslyContext>.value(
+            value: codelesslyContext),
         Provider<Codelessly>.value(value: _effectiveController.codelessly),
       ],
       child: StreamBuilder<SDKStatus>(
