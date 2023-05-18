@@ -49,7 +49,7 @@ class PassiveTextTransformer extends NodeWidgetTransformer<TextNode> {
       (property) {
         // Get relevant characters.
         String characters =
-            retrieveCharacters(node, property, codelesslyContext);
+            retrieveCharacters(node.characters, property, codelesslyContext);
 
         characters = substituteVariables(characters, variables);
 
@@ -79,12 +79,12 @@ class PassiveTextTransformer extends NodeWidgetTransformer<TextNode> {
   /// Substitutes JSON values and returns the relevant characters.
   /// If values don't exist in JSON, returns the node's characters.
   static String retrieveCharacters(
-    TextNode node,
+    String characters,
     StartEndProp property,
     CodelesslyContext codelesslyContext,
   ) {
     // Get characters from the property itself.
-    String characters = node.characters.substring(property.start, property.end);
+    characters = characters.substring(property.start, property.end);
     // If the characters represent a JSON path, get the relevant value from
     // [CodelesslyContext]'s [data] map.
     if (codelesslyContext.data.isNotEmpty) {
@@ -339,15 +339,15 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
     Widget textWidget;
 
     if (widget.node.textMixedProps.length == 1) {
-      // Get relevant characters.
-      String characters = PassiveTextTransformer.retrieveCharacters(
-          widget.node, widget.node.textMixedProps.first, codelesslyContext);
-
       // Get characters' local value if its available. Local value refers to the
       // current state of the characters which can be changed via
       // [SetValueAction].
-      characters =
-          context.getNodeValue(widget.node.id, 'characters') ?? characters;
+      String characters = context.getNodeValue(widget.node.id, 'characters') ??
+          widget.node.characters;
+
+      // Get relevant characters.
+      characters = PassiveTextTransformer.retrieveCharacters(
+          characters, widget.node.textMixedProps.first, codelesslyContext);
 
       characters = substituteVariables(characters, variables);
 
