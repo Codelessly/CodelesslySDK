@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'package:flutter/services.dart';
 
 import '../../codelessly_sdk.dart';
-import '../auth/auth_manager.dart';
 import '../cache/codelessly_cache_manager.dart';
 import '../logging/error_handler.dart';
 
@@ -626,19 +625,23 @@ class DataManager {
 
     assert(layout != null, 'Layout should not be null at this point.');
 
-    final Set<Future<HttpApiData?>> apiModels = getOrFetchApis(
-      apiIds: model.updates.layoutApis[layoutID]!,
-    );
+    if (model.updates.layoutApis.containsKey(layoutID)) {
+      final Set<Future<HttpApiData?>> apiModels = getOrFetchApis(
+        apiIds: model.updates.layoutApis[layoutID]!,
+      );
 
-    for (final future in apiModels) {
-      try {
-        final api = await future;
-        if (api == null) continue;
-        model.apis[api.id] = api;
-      } catch (e, stacktrace) {
-        log('Error while fetching api: $e');
-        log(stacktrace.toString());
+      for (final future in apiModels) {
+        try {
+          final api = await future;
+          if (api == null) continue;
+          model.apis[api.id] = api;
+        } catch (e, stacktrace) {
+          log('Error while fetching api: $e');
+          log(stacktrace.toString());
+        }
       }
+    } else {
+      log('\tLayout [$layoutID] has no apis.');
     }
     emitPublishModel();
     savePublishModel();
@@ -646,22 +649,26 @@ class DataManager {
     log('\tLayoutModel [$layoutID] ready, time for fonts. Get Set...');
     log('\tLayoutModel [$layoutID] has ${model.updates.layoutFonts[layoutID]} fonts.');
 
-    // Download or load fonts in the background.
-    getOrFetchFontModels(
-      fontIDs: model.updates.layoutFonts[layoutID]!,
-    ).then((Set<SDKPublishFont> fontModels) async {
-      log('\tFound ${fontModels.length} fonts to fetch for layout [$layoutID]. Go!');
+    if (model.updates.layoutFonts.containsKey(layoutID)) {
+      // Download or load fonts in the background.
+      getOrFetchFontModels(
+        fontIDs: model.updates.layoutFonts[layoutID]!,
+      ).then((Set<SDKPublishFont> fontModels) async {
+        log('\tFound ${fontModels.length} fonts to fetch for layout [$layoutID]. Go!');
 
-      for (final SDKPublishFont fontModel in fontModels) {
-        log('\t\tFontModel [${fontModel.id}] ready. Fetching bytes & loading...');
+        for (final SDKPublishFont fontModel in fontModels) {
+          log('\t\tFontModel [${fontModel.id}] ready. Fetching bytes & loading...');
 
-        model.fonts[fontModel.id] = fontModel;
+          model.fonts[fontModel.id] = fontModel;
 
-        await getOrFetchFontBytesAndSaveAndLoad(fontModel).then((_) {
-          log('\t\tFontModel [${fontModel.id}] loaded. Done!\n');
-        });
-      }
-    });
+          await getOrFetchFontBytesAndSaveAndLoad(fontModel).then((_) {
+            log('\t\tFontModel [${fontModel.id}] loaded. Done!\n');
+          });
+        }
+      });
+    } else {
+      log('\tLayout [$layoutID] has no fonts.');
+    }
 
     return true;
   }
