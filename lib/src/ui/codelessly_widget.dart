@@ -60,20 +60,6 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
         functions = {},
         nodeValues = {};
 
-  /// Creates a copy of this [CodelesslyContext] with the given [data],
-  /// [functions], and [nodeValues].
-  // CodelesslyContext copyWith({
-  //   Map<String, dynamic>? data,
-  //   Map<String, CodelesslyFunction>? functions,
-  //   Map<String, ValueNotifier<List<ValueModel>>>? nodeValues,
-  // }) {
-  //   return CodelesslyContext(
-  //     data: data ?? this.data,
-  //     functions: functions ?? this.functions,
-  //     nodeValues: nodeValues ?? this.nodeValues,
-  //   );
-  // }
-
   /// Used for actions that are connected to one or more nodes.
   /// Ex. submit action is connected to a textfield node to access its data to
   /// submit to the server.
