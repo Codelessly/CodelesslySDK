@@ -3,6 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/functions_repository.dart';
 
 class PassiveNavigationBarTransformer
     extends NodeWidgetTransformer<NavigationBarNode> {
@@ -14,7 +15,17 @@ class PassiveNavigationBarTransformer
     BuildContext context, [
     WidgetBuildSettings settings = const WidgetBuildSettings(),
   ]) {
-    return PassiveNavigationBarWidget(node: node);
+    return PassiveNavigationBarWidget(
+      node: node,
+      onChanged: (index) => onChanged(node, context, index),
+    );
+  }
+
+  void onChanged(NavigationBarNode node, BuildContext context, int index) {
+    final item = node.properties.items[index];
+    item.reactions.forEach((reaction) {
+      FunctionsRepository.performAction(context, reaction.action);
+    });
   }
 
   Widget buildNavigationBarWidgetFromProps({
@@ -59,7 +70,7 @@ class PassiveNavigationBarTransformer
   }
 }
 
-class PassiveNavigationBarWidget extends StatelessWidget
+class PassiveNavigationBarWidget extends StatefulWidget
     implements PreferredSizeWidget {
   final NavigationBarNode node;
   final ValueChanged<int>? onChanged;
@@ -75,35 +86,60 @@ class PassiveNavigationBarWidget extends StatelessWidget
   });
 
   @override
+  Size get preferredSize => node.basicBoxLocal.size.flutterSize;
+
+  @override
+  State<PassiveNavigationBarWidget> createState() =>
+      _PassiveNavigationBarWidgetState();
+}
+
+class _PassiveNavigationBarWidgetState
+    extends State<PassiveNavigationBarWidget> {
+  int currentIndex = 0;
+
+  @override
+  void initState() {
+    currentIndex = context.getNodeValue(widget.node.id, 'currentIndex') ??
+        widget.node.currentIndex;
+    super.initState();
+  }
+
+  void onChanged(int index) {
+    currentIndex = index;
+    widget.onChanged?.call(index);
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     Widget navBar;
-    switch (node.properties.styleDefinition) {
+    switch (widget.node.properties.styleDefinition) {
       case StyleDefinition.material_2:
-        navBar = buildM2NavigationBar(context, node, onChanged);
+        navBar = buildM2NavigationBar(context, widget.node, onChanged);
         break;
       case StyleDefinition.material_3:
-        navBar = buildM3NavigationBar(context, node, onChanged);
+        navBar = buildM3NavigationBar(context, widget.node, onChanged);
         break;
     }
 
-    if (node.properties.makeNotched) {
+    if (widget.node.properties.makeNotched) {
       final double elevation;
       final Color? backgroundColor;
-      switch (node.properties.styleDefinition) {
+      switch (widget.node.properties.styleDefinition) {
         case StyleDefinition.material_2:
-          final prop = node.properties as M2NavigationBarProperties;
+          final prop = widget.node.properties as M2NavigationBarProperties;
           elevation = prop.elevation;
           backgroundColor = prop.backgroundColor?.toFlutterColor();
           break;
         case StyleDefinition.material_3:
-          final prop = node.properties as M3NavigationBarProperties;
+          final prop = widget.node.properties as M3NavigationBarProperties;
           elevation = prop.elevation;
           backgroundColor = prop.backgroundColor?.toFlutterColor();
           break;
       }
       navBar = BottomAppBar(
         shape: CircularNotchedRectangle(),
-        notchMargin: node.properties.notchMargin,
+        notchMargin: widget.node.properties.notchMargin,
         clipBehavior: Clip.antiAlias,
         elevation: elevation,
         color: backgroundColor,
@@ -111,7 +147,7 @@ class PassiveNavigationBarWidget extends StatelessWidget
       );
     }
     navBar = AdaptiveNodeBox(
-      node: node,
+      node: widget.node,
       child: navBar,
     );
     return navBar;
@@ -156,10 +192,10 @@ class PassiveNavigationBarWidget extends StatelessWidget
       ),
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(
-          padding: applyBottomPadding ? null : EdgeInsets.zero,
+          padding: widget.applyBottomPadding ? null : EdgeInsets.zero,
         ),
         child: NavigationBar(
-          selectedIndex: node.currentIndex,
+          selectedIndex: currentIndex,
           onDestinationSelected: onChanged,
           backgroundColor: bgColor,
           elevation: elevation,
@@ -227,10 +263,10 @@ class PassiveNavigationBarWidget extends StatelessWidget
     ///  We don't want that. We disable it here.
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
-        padding: applyBottomPadding ? null : EdgeInsets.zero,
+        padding: widget.applyBottomPadding ? null : EdgeInsets.zero,
       ),
       child: BottomNavigationBar(
-        currentIndex: node.currentIndex,
+        currentIndex: currentIndex,
         onTap: onChanged,
         type: style.navigationBarType.flutterNavigationBarType,
         landscapeLayout: style.landscapeLayout.flutterLandscapeLayout,
@@ -260,7 +296,7 @@ class PassiveNavigationBarWidget extends StatelessWidget
       itemModel.icon,
       null,
       // style.unselectedIconSize,
-      useIconFonts,
+      widget.useIconFonts,
     );
 
     final Widget? selectedIconDj =
@@ -269,7 +305,7 @@ class PassiveNavigationBarWidget extends StatelessWidget
                 itemModel.selectedIcon!,
                 null,
                 // style.selectedIconSize,
-                useIconFonts,
+                widget.useIconFonts,
               )
             : null;
     return BottomNavigationBarItem(
@@ -296,7 +332,7 @@ class PassiveNavigationBarWidget extends StatelessWidget
       itemModel.icon,
       null,
       // style.unselectedIconSize,
-      useIconFonts,
+      widget.useIconFonts,
     );
 
     final Widget? selectedIconDj =
@@ -305,7 +341,7 @@ class PassiveNavigationBarWidget extends StatelessWidget
                 itemModel.selectedIcon!,
                 null,
                 // style.selectedIconSize,
-                useIconFonts,
+                widget.useIconFonts,
               )
             : null;
     return NavigationDestination(
@@ -315,7 +351,4 @@ class PassiveNavigationBarWidget extends StatelessWidget
       tooltip: itemModel.tooltip.orNullIf(itemModel.label == itemModel.tooltip),
     );
   }
-
-  @override
-  Size get preferredSize => node.basicBoxLocal.size.flutterSize;
 }
