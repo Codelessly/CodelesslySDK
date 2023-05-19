@@ -280,19 +280,19 @@ Widget retrieveNavBarItemIconWidget(
       );
     case IconTypeEnum.image:
       if (icon.iconImage == null) return SizedBox.shrink();
-      // if (color != null && color.opacity == 0) {
-      //   // when opacity is zero, we need to display original colors of
-      //   // the image icon which `ImageIcon` widget cannot do. So we
-      //   // use the raw Image widget.
-      //   return SizedBox.square(
-      //     dimension: icon.size ?? size ?? kDefaultIconSize,
-      //     child: Image.network(
-      //       icon.iconImage!,
-      //       // scale: icon.scale,
-      //       // color: color,
-      //     ),
-      //   );
-      // }
+      if (color == null || color.opacity == 0) {
+        // when opacity is zero, we need to display original colors of
+        // the image icon which `ImageIcon` widget cannot do. So we
+        // use the raw Image widget.
+        return SizedBox.square(
+          dimension: icon.size ?? size ?? kDefaultIconSize,
+          child: Image.network(
+            icon.iconImage!,
+            // scale: icon.scale,
+            // color: color,
+          ),
+        );
+      }
 
       // Always use ImageIcon for nav bar because it has to adhere to the theme
       // color.
