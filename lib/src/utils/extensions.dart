@@ -1300,3 +1300,10 @@ extension PaintIterableExt on Iterable<PaintModel> {
 extension EffectIterableExt on Iterable<Effect> {
   List<Effect> visible() => where((e) => e.visible).toList();
 }
+
+extension ReactionIterableExt on Iterable<Reaction> {
+  bool hasTriggerType(TriggerType type) => any((e) => e.trigger.type == type);
+
+  Iterable whereTriggerType(TriggerType type) =>
+      where((e) => e.trigger.type == type);
+}
