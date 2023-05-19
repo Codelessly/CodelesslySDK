@@ -2,6 +2,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/functions_repository.dart';
 
 class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
   PassiveListTileTransformer(super.getNode, super.manager);
@@ -15,9 +16,25 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
     return PassiveListTileWidget(
       node: node,
       getNode: getNode,
+      onTap: node.reactions.hasTriggerType(TriggerType.click)
+          ? () => onTap(context, node.reactions)
+          : null,
+      onLongPress: node.reactions.hasTriggerType(TriggerType.longPress)
+          ? () => onLongPress(context, node.reactions)
+          : null,
       buildWidgetFromNode: (node, context) =>
           manager.buildWidgetFromNode(node, context, settings: settings),
     );
+  }
+
+  void onTap(BuildContext context, List<Reaction> reactions) {
+    reactions.whereTriggerType(TriggerType.click).forEach((reaction) =>
+        FunctionsRepository.performAction(context, reaction.action));
+  }
+
+  void onLongPress(BuildContext context, List<Reaction> reactions) {
+    reactions.whereTriggerType(TriggerType.longPress).forEach((reaction) =>
+        FunctionsRepository.performAction(context, reaction.action));
   }
 
   Widget buildPreview({
@@ -176,6 +193,8 @@ class PassiveListTileWidget extends StatelessWidget {
   final Widget? trailingWidget;
   final BuildWidgetFromNode buildWidgetFromNode;
   final GetNode getNode;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   const PassiveListTileWidget({
     super.key,
@@ -190,6 +209,8 @@ class PassiveListTileWidget extends StatelessWidget {
     this.trailingWidget,
     required this.buildWidgetFromNode,
     required this.getNode,
+    this.onTap,
+    this.onLongPress,
   });
 
   @override
@@ -223,8 +244,8 @@ class PassiveListTileWidget extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: ListTile(
-          onTap: () {},
-          onLongPress: () {},
+          onTap: onTap,
+          onLongPress: onLongPress,
           dense: node.properties.dense,
           autofocus: node.properties.autofocus,
           tileColor: node.properties.tileColor?.toFlutterColor(),
