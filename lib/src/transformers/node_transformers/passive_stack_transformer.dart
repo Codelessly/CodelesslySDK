@@ -1,5 +1,4 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
@@ -12,17 +11,22 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       List<BaseNode> siblings, BaseNode parent) {
     if (siblings.isEmpty) return null;
 
-    final BaseNode? firstSibling = parent is! RowColumnMixin
-        ? siblings.firstWhereOrNull((element) => element.alignment.data != null)
-        : siblings.first;
-    if (firstSibling == null) return null;
-    return siblings.fold<BaseNode>(
-        firstSibling,
-        (previousValue, element) => (parent is RowColumnMixin ||
-                    element.alignment.data != null) &&
-                element.basicBoxLocal.width > previousValue.basicBoxLocal.width
-            ? element
-            : previousValue);
+    return siblings.reduce((a, b) {
+      // If one of the siblings has alignment, while the other does not,
+      // return the one with alignment.
+      if (a.alignment != AlignmentModel.none &&
+          b.alignment == AlignmentModel.none) {
+        return a;
+      }
+      if (b.alignment != AlignmentModel.none &&
+          a.alignment == AlignmentModel.none) {
+        return b;
+      }
+
+      // If both siblings have alignment or both do not have alignment, compare
+      // their widths.
+      return a.basicBoxLocal.width > b.basicBoxLocal.width ? a : b;
+    });
   }
 
   /// Retrieves the widest child for given [parent] node.
@@ -37,19 +41,22 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       List<BaseNode> siblings, BaseNode parent) {
     if (siblings.isEmpty) return null;
 
-    final BaseNode? firstSibling = parent is! RowColumnMixin
-        ? siblings.firstWhereOrNull((element) => element.alignment.data != null)
-        : siblings.first;
-    if (firstSibling == null) return null;
+    return siblings.reduce((a, b) {
+      // If one of the siblings has alignment, while the other does not,
+      // return the one with alignment.
+      if (a.alignment != AlignmentModel.none &&
+          b.alignment == AlignmentModel.none) {
+        return a;
+      }
+      if (b.alignment != AlignmentModel.none &&
+          a.alignment == AlignmentModel.none) {
+        return b;
+      }
 
-    return siblings.fold<BaseNode>(
-        firstSibling,
-        (previousValue, element) =>
-            (parent is RowColumnMixin || element.alignment.data != null) &&
-                    element.basicBoxLocal.height >
-                        previousValue.basicBoxLocal.height
-                ? element
-                : previousValue);
+      // If both siblings have alignment or both do not have alignment, compare
+      // their heights.
+      return a.basicBoxLocal.height > b.basicBoxLocal.height ? a : b;
+    });
   }
 
   /// Retrieves the tallest child for given [parent] node.
@@ -75,31 +82,42 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     WidgetBuildSettings settings = const WidgetBuildSettings(),
   }) {
     if (node is! ChildrenMixin) {
-      return const SizedBox(child: Icon(Icons.error));
+      throw Exception(
+        'PassiveStackTransformer can only be used on nodes that implement ChildrenMixin',
+      );
     }
 
-    final List<BaseNode> children = [];
+    final List<BaseNode> children = [
+      if (childrenNodes != null)
+        ...childrenNodes
+      else
+        for (final String childId in node.children) getNode(childId),
+    ];
 
-    if (childrenNodes == null) {
-      for (final String childId in node.children) {
-        children.add(getNode(childId));
-      }
-    } else {
-      children.addAll(childrenNodes);
-    }
-
-    final BaseNode? widestChild =
-        getWidestSiblingFromSiblingsList(children, node);
-    final BaseNode? tallestChild =
-        getTallestSiblingFromSiblingsList(children, node);
+    final isAllPositioned =
+        children.every((node) => node.alignment.data == null);
 
     final List<Widget> childrenWidgets = [];
+
+    final BaseNode? widestChild = isAllPositioned && node.isHorizontalWrap
+        ? getWidestSiblingFromSiblingsList(children, node)
+        : null;
+    final BaseNode? tallestChild = isAllPositioned && node.isVerticalWrap
+        ? getTallestSiblingFromSiblingsList(children, node)
+        : null;
+
     for (final BaseNode childNode in children) {
       Widget child =
           manager.buildWidgetFromNode(childNode, context, settings: settings);
 
       if (childNode.alignment == AlignmentModel.none) {
-        child = wrapWithPositioned(childNode, node, child);
+        child = wrapWithPositioned(
+          childNode,
+          node,
+          child,
+          isWidest: widestChild?.id == childNode.id,
+          isTallest: tallestChild?.id == childNode.id,
+        );
       } else {
         child = Align(
           alignment: childNode.alignment.flutterAlignment!,
@@ -113,16 +131,16 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         .getTransformer<PassiveRectangleTransformer>()
         .buildRectangle(node, children: childrenWidgets);
 
-    // This makes sure that children stay positioned correctly even if the stack
-    // is shrink wrapping. It makes it so the stack sizes itself to its tallest
-    // or widest child as a "best" size.
-    if (node.isOneWrap) {
-      return SizedBox(
-        width: node.isHorizontalWrap ? widestChild?.outerBoxLocal.width : null,
-        height: node.isVerticalWrap ? tallestChild?.outerBoxLocal.height : null,
-        child: stack,
-      );
-    }
+    // // This makes sure that children stay positioned correctly even if the stack
+    // // is shrink wrapping. It makes it so the stack sizes itself to its tallest
+    // // or widest child as a "best" size.
+    // if (node.isOneWrap) {
+    //   return SizedBox(
+    //     width: node.isHorizontalWrap ? widestChild?.outerBoxLocal.width : null,
+    //     height: node.isVerticalWrap ? tallestChild?.outerBoxLocal.height : null,
+    //     child: stack,
+    //   );
+    // }
 
     if (isTestLayout) {
       return DecoratedBox(
@@ -137,7 +155,13 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     }
   }
 
-  Widget wrapWithPositioned(BaseNode childNode, BaseNode node, Widget child) {
+  Widget wrapWithPositioned(
+    BaseNode childNode,
+    BaseNode node,
+    Widget child, {
+    required bool isWidest,
+    required bool isTallest,
+  }) {
     final double? left = childNode.isHorizontalExpanded
         ? 0
         : childNode.edgePins.left != null
@@ -170,14 +194,26 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     assert(left == null || right == null || width == null);
     assert(top == null || bottom == null || height == null);
 
-    return Positioned(
-      left: left,
-      right: right,
-      top: top,
-      bottom: bottom,
-      width: width,
-      height: height,
-      child: child,
-    );
+    if (!isTallest && !isWidest) {
+      return Positioned(
+        left: left,
+        right: right,
+        top: top,
+        bottom: bottom,
+        width: width,
+        height: height,
+        child: child,
+      );
+    } else if (isTallest) {
+      return Padding(
+        padding: EdgeInsets.only(left: left ?? 0, right: right ?? 0),
+        child: child,
+      );
+    } else {
+      return Padding(
+        padding: EdgeInsets.only(top: top ?? 0, bottom: bottom ?? 0),
+        child: child,
+      );
+    }
   }
 }

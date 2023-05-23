@@ -117,13 +117,11 @@ List<Widget> wrapWithPadding(BaseNode node, List<Widget> children) {
   }
 
   return [
-    Positioned.fill(
-      child: Padding(
-        padding: resolvedPadding,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: children,
-        ),
+    Padding(
+      padding: resolvedPadding,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: children,
       ),
     ),
   ];

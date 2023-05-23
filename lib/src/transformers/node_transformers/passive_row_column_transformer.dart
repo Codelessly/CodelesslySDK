@@ -15,32 +15,23 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     final bool isRow =
         (rowColumnNode as RowColumnMixin).rowColumnType == RowColumnType.row;
 
-    // final BaseNode parentNode =
-    //     getNodeByID(rowColumnNode.parentID, intertype: TransformerType.passive,);
-    final BaseNode superiorRowCol = rowColumnNode;
-    // if (parentNode is RowColumnMixin) {
-    //   superiorRowCol = parentNode;
-    // } else {
-    //   superiorRowCol = rowColumnNode;
-    // }
-
     final double? fixWidth;
     final double? fixHeight;
-    if (superiorRowCol.verticalFit == SizeFit.locked ||
-        superiorRowCol.verticalFit == SizeFit.fixed) {
+    if (rowColumnNode.verticalFit == SizeFit.locked ||
+        rowColumnNode.verticalFit == SizeFit.fixed) {
       fixHeight = rowColumnNode.outerBoxLocal.height;
-    } else if (superiorRowCol.verticalFit == SizeFit.shrinkWrap) {
-      fixHeight = superiorRowCol.constraints.minHeight;
+    } else if (rowColumnNode.verticalFit == SizeFit.shrinkWrap) {
+      fixHeight = rowColumnNode.constraints.minHeight;
     } else {
-      fixHeight = superiorRowCol.constraints.maxHeight ?? double.infinity;
+      fixHeight = rowColumnNode.constraints.maxHeight ?? double.infinity;
     }
-    if (superiorRowCol.horizontalFit == SizeFit.locked ||
-        superiorRowCol.horizontalFit == SizeFit.fixed) {
+    if (rowColumnNode.horizontalFit == SizeFit.locked ||
+        rowColumnNode.horizontalFit == SizeFit.fixed) {
       fixWidth = rowColumnNode.outerBoxLocal.width;
-    } else if (superiorRowCol.horizontalFit == SizeFit.shrinkWrap) {
-      fixWidth = superiorRowCol.constraints.minWidth;
+    } else if (rowColumnNode.horizontalFit == SizeFit.shrinkWrap) {
+      fixWidth = rowColumnNode.constraints.minWidth;
     } else {
-      fixWidth = superiorRowCol.constraints.maxWidth ?? double.infinity;
+      fixWidth = rowColumnNode.constraints.maxWidth ?? double.infinity;
     }
 
     if (isRow) {
@@ -54,9 +45,9 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         children: children,
       );
 
-      if (fixHeight == null) {
-        res = IntrinsicHeight(child: res);
-      }
+      // if (fixHeight == null) {
+      //   res = IntrinsicHeight(child: res);
+      // }
 
       if (fixWidth == null && fixHeight == null) {
         return res;
@@ -78,9 +69,9 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         children: children,
       );
 
-      if (fixWidth == null) {
-        res = IntrinsicWidth(child: res);
-      }
+      // if (fixWidth == null) {
+      //   res = IntrinsicWidth(child: res);
+      // }
 
       if (fixWidth == null && fixHeight == null) {
         return res;
@@ -116,14 +107,14 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
             : AxisC.vertical);
     final SizeFit mainAxisFit =
         (mainAxis == AxisC.horizontal ? node.horizontalFit : node.verticalFit);
-    final SizeFit crossAxisFit =
-        (mainAxis == AxisC.horizontal ? node.verticalFit : node.horizontalFit);
+    // final SizeFit crossAxisFit =
+    //     (mainAxis == AxisC.horizontal ? node.verticalFit : node.horizontalFit);
 
     final double? mainAxisMaxConstraint = (mainAxis == AxisC.horizontal
         ? node.constraints.maxWidth
         : node.constraints.maxHeight);
-    final double? horizontalMaxConstraint = node.constraints.maxWidth;
-    final double? verticalMaxConstraint = node.constraints.maxHeight;
+    // final double? horizontalMaxConstraint = node.constraints.maxWidth;
+    // final double? verticalMaxConstraint = node.constraints.maxHeight;
 
     if (node.horizontalFit == node.verticalFit) {
       if (hasAlignment) {
@@ -158,26 +149,29 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     } else {
       // If any side flexes we need to wrap the node into a Flexible.
       if (node.horizontalFit.isFlex || node.verticalFit.isFlex) {
-        double width = node.outerBoxLocal.width;
-        double height = node.outerBoxLocal.height;
 
-        if (horizontalMaxConstraint == null &&
-            (node.horizontalFit == SizeFit.expanded ||
-                (hasAlignment && mainAxis == AxisC.vertical))) {
-          width = double.infinity;
-        }
-        if (verticalMaxConstraint == null &&
-            (node.verticalFit == SizeFit.expanded ||
-                (hasAlignment && mainAxis == AxisC.horizontal))) {
-          height = double.infinity;
-        }
+        // Commenting this our fixes row column responsiveness.
 
-        if (crossAxisFit == SizeFit.expanded) {
-          childWidget = ConstrainedBox(
-            constraints: BoxConstraints.expand(width: width, height: height),
-            child: childWidget,
-          );
-        }
+        // double width = node.outerBoxLocal.width;
+        // double height = node.outerBoxLocal.height;
+        //
+        // if (horizontalMaxConstraint == null &&
+        //     (node.horizontalFit == SizeFit.expanded ||
+        //         (hasAlignment && mainAxis == AxisC.vertical))) {
+        //   width = double.infinity;
+        // }
+        // if (verticalMaxConstraint == null &&
+        //     (node.verticalFit == SizeFit.expanded ||
+        //         (hasAlignment && mainAxis == AxisC.horizontal))) {
+        //   height = double.infinity;
+        // }
+
+        // if (crossAxisFit == SizeFit.expanded) {
+        //   childWidget = ConstrainedBox(
+        //     constraints: BoxConstraints.expand(width: width, height: height),
+        //     child: childWidget,
+        //   );
+        // }
 
         if (hasAlignment) {
           childWidget = Align(
