@@ -107,18 +107,22 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: () {
-          for (final Reaction reaction in onClickReactions) {
-            final ActionModel action = reaction.action;
-            FunctionsRepository.performAction(context, action);
-          }
-        },
-        onLongPress: () {
-          for (final Reaction reaction in onLongPressReactions) {
-            final ActionModel action = reaction.action;
-            FunctionsRepository.performAction(context, action);
-          }
-        },
+        onTap: onClickReactions.isEmpty
+            ? null
+            : () {
+                for (final Reaction reaction in onClickReactions) {
+                  final ActionModel action = reaction.action;
+                  FunctionsRepository.performAction(context, action);
+                }
+              },
+        onLongPress: onLongPressReactions.isEmpty
+            ? null
+            : () {
+                for (final Reaction reaction in onLongPressReactions) {
+                  final ActionModel action = reaction.action;
+                  FunctionsRepository.performAction(context, action);
+                }
+              },
         child: widget,
       ),
     );

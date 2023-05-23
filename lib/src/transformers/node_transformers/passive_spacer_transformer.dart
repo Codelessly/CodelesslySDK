@@ -21,11 +21,11 @@ class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
         (mainAxis == AxisC.horizontal ? horizontalFit : verticalFit);
 
     Widget spacerWidget = SizedBox(
-      width: node.outerBoxLocal.width,
-      height: node.outerBoxLocal.height,
+      width: mainAxis.isVertical ? null : node.outerBoxLocal.width,
+      height: mainAxis.isHorizontal ? null : node.outerBoxLocal.height,
     );
 
-    if (mainFit == SizeFit.flexible) {
+    if (mainFit.isFlex) {
       spacerWidget = Flexible(
         flex: flex,
         child: spacerWidget,
