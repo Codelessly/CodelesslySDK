@@ -80,14 +80,26 @@ class _CodelesslyPublishedLayoutBuilderState
 
     for (final BaseNode node in allNodes) {
       node.parentID = resolveParentNodeIDs(node: node, nodes: allNodes);
-    }
 
-    // Handle node action connections and populate local node values.
-    for (final ReactionMixin node in allNodes.whereType<ReactionMixin>()) {
-      for (final Reaction reaction in node.reactions) {
-        final ActionModel actionModel = reaction.action;
-        codelesslyContext.handleActionConnections(
-            actionModel, nodeRegistry.getNodes());
+      if (node is ReactionMixin) {
+        // Handle node action connections and populate local node values.
+        for (final Reaction reaction in (node as ReactionMixin).reactions) {
+          final ActionModel actionModel = reaction.action;
+          codelesslyContext.handleActionConnections(
+              actionModel, nodeRegistry.getNodes());
+        }
+      }
+
+      if (node is ParentReactionMixin) {
+        for (final ReactionMixin reactiveChild
+            in (node as ParentReactionMixin).reactiveChildren) {
+          // Handle node action connections and populate local node values.
+          for (final Reaction reaction in reactiveChild.reactions) {
+            final ActionModel actionModel = reaction.action;
+            codelesslyContext.handleActionConnections(
+                actionModel, nodeRegistry.getNodes());
+          }
+        }
       }
     }
   }
