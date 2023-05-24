@@ -3,8 +3,6 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import 'variables_model.dart';
-
 part 'model_http_request.g.dart';
 
 enum HttpMethod {

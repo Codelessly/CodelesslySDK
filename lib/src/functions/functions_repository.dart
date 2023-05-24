@@ -66,6 +66,9 @@ class FunctionsRepository {
       case ActionType.setVariant:
         setVariant(context, action as SetVariantAction);
         break;
+      case ActionType.setVariable:
+        setVariable(context, action as SetVariableAction);
+        break;
       case ActionType.callFunction:
         callFunction(context, action as CallFunctionAction);
         break;
@@ -439,6 +442,18 @@ class FunctionsRepository {
       ..add(newValue);
     // Update values list.
     payload.nodeValues[action.nodeID]!.value = updateValues;
+  }
+
+  static void setVariable(BuildContext context, SetVariableAction action) {
+    final CodelesslyContext payload = context.read<CodelesslyContext>();
+    // Get updated variable.
+    final VariableData? updatedVariable = payload
+        .variables[action.variable.id]?.value
+        .copyWith(value: action.newValue);
+    if (updatedVariable != null) {
+      // Update values list.
+      payload.variables[action.variable.id]?.value = updatedVariable;
+    }
   }
 
   static void callFunction(BuildContext context, CallFunctionAction action) {
