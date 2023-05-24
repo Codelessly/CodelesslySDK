@@ -46,19 +46,40 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   /// A map that holds the current values of nodes that have internal values.
   final Map<String, ValueNotifier<List<ValueModel>>> nodeValues;
 
+  /// A map that holds the current state of all variables.
+  final Map<String, ValueNotifier<VariableData>> variables;
+
   /// Creates a [CodelesslyContext] with the given [data], [functions], and
   /// [nodeValues].
   CodelesslyContext({
     required this.data,
     required this.functions,
     required this.nodeValues,
+    required this.variables,
   });
 
   /// Creates a [CodelesslyContext] with empty an empty map of each property.
   CodelesslyContext.empty()
       : data = {},
         functions = {},
-        nodeValues = {};
+        nodeValues = {},
+        variables = {};
+
+  /// Creates a copy of this [CodelesslyContext] with the given [data],
+  /// [functions], and [nodeValues].
+  CodelesslyContext copyWith({
+    Map<String, dynamic>? data,
+    Map<String, CodelesslyFunction>? functions,
+    Map<String, ValueNotifier<List<ValueModel>>>? nodeValues,
+    Map<String, ValueNotifier<VariableData>>? variables,
+  }) {
+    return CodelesslyContext(
+      data: data ?? this.data,
+      functions: functions ?? this.functions,
+      nodeValues: nodeValues ?? this.nodeValues,
+      variables: variables ?? this.variables,
+    );
+  }
 
   /// Used for actions that are connected to one or more nodes.
   /// Ex. submit action is connected to a textfield node to access its data to
@@ -108,6 +129,10 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
           ]);
         }
         break;
+      case ActionType.setVariable:
+        final action = actionModel as SetVariableAction;
+        final VariableData variable = action.variable;
+        variables[variable.id] = ValueNotifier(variable);
       default:
     }
   }
@@ -312,6 +337,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     data: widget.data,
     functions: widget.functions,
     nodeValues: {},
+    variables: {},
   );
 
   StreamSubscription<CodelesslyException?>? _exceptionSubscription;
