@@ -21,7 +21,6 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   }) {
     final CanvasProperties props = node.properties;
 
-    Widget scaffold;
     PreferredSizeWidget? appBar = topAppBarPlaceholder ??
         ((props.topAppBarPlaceholderId != null)
             ? manager.buildWidgetByID(
@@ -76,23 +75,20 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       );
     }
 
-    scaffold = Scaffold(
+    final Widget scaffold = Scaffold(
       backgroundColor: retrieveBackgroundColor(node),
       appBar: appBar,
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation:
           props.floatingActionButton?.location.toFloatingActionButtonLocation(),
       bottomNavigationBar: bottomNavigationBar,
-      body: SizedBox.expand(child: body),
+      body: body,
     );
 
-    Widget widget =
-        manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
+    return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
       node,
       children: [scaffold],
     );
-
-    return widget;
   }
 
   @override
