@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codelessly_api/codelessly_api.dart';
@@ -99,6 +98,31 @@ class PassiveRectangleWidget extends StatelessWidget {
         children: [
           ...buildFills(node, codelesslyContext),
           ...buildStrokes(node),
+          if (node is BlendMixin && (node as BlendMixin).inkWell != null)
+            Positioned.fill(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  splashColor: (node as BlendMixin)
+                      .inkWell!
+                      .splashColor
+                      ?.toFlutterColor(),
+                  highlightColor: (node as BlendMixin)
+                      .inkWell!
+                      .highlightColor
+                      ?.toFlutterColor(),
+                  focusColor: (node as BlendMixin)
+                      .inkWell!
+                      .focusColor
+                      ?.toFlutterColor(),
+                  hoverColor: (node as BlendMixin)
+                      .inkWell!
+                      .hoverColor
+                      ?.toFlutterColor(),
+                  onTap: () {},
+                ),
+              ),
+            ),
           ...wrapWithPadding(node, children),
         ],
       ),
@@ -297,35 +321,6 @@ List<num> applyGradientRotation(List<num>? t1, double angle) {
 }
 
 List<num> defaultGradientTransform() => [1.0, 0.0, 0.0, -0.0, 1.0, 0.0];
-
-Widget applyEffects(BaseNode node, List<Widget> paint) {
-  Widget result = paint.length == 1 ? paint[0] : Stack(children: paint);
-  if (node is! BlendMixin) {
-    return result;
-  }
-
-  for (final Effect effect in node.effects) {
-    switch (effect.type) {
-      case EffectType.innerShadow:
-      case EffectType.dropShadow:
-        // Already handled.
-        break;
-      case EffectType.layerBlur:
-      case EffectType.backgroundBlur:
-        result = ClipRect(
-          child: ImageFiltered(
-            imageFilter: ImageFilter.blur(
-              sigmaX: effect.radius / 10,
-              sigmaY: effect.radius / 10,
-            ),
-            child: result,
-          ),
-        );
-        break;
-    }
-  }
-  return result;
-}
 
 List<Widget> buildStrokes(BaseNode node) {
   if (node is! GeometryMixin || node.strokeWeight <= 0) {
