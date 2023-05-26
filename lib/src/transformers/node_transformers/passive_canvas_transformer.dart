@@ -75,15 +75,28 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       );
     }
 
-    final Widget scaffold = Scaffold(
-      backgroundColor: retrieveBackgroundColor(node),
-      appBar: appBar,
-      floatingActionButton: floatingActionButton,
-      floatingActionButtonLocation:
-          props.floatingActionButton?.location.toFloatingActionButtonLocation(),
-      bottomNavigationBar: bottomNavigationBar,
-      body: body,
-    );
+    final bool needsAScaffold = appBar != null ||
+        floatingActionButton != null ||
+        bottomNavigationBar != null;
+
+    final Widget scaffold;
+
+    if (needsAScaffold) {
+      scaffold = Scaffold(
+        backgroundColor: retrieveBackgroundColor(node),
+        appBar: appBar,
+        floatingActionButton: floatingActionButton,
+        floatingActionButtonLocation: props.floatingActionButton?.location
+            .toFloatingActionButtonLocation(),
+        bottomNavigationBar: bottomNavigationBar,
+        body: body,
+      );
+    } else {
+      scaffold = Material(
+        color: retrieveBackgroundColor(node),
+        child: body,
+      );
+    }
 
     return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
       node,
