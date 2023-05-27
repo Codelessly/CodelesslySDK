@@ -128,7 +128,11 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
       }
     }
     // Add new values to the node's values list.
-    nodeValues[node.id] = ValueNotifier([...currentValues, ...newValues]);
+    if (nodeValues[node.id] == null) {
+      nodeValues[node.id] = ValueNotifier([...currentValues, ...newValues]);
+    } else {
+      nodeValues[node.id]!.value = [...currentValues, ...newValues];
+    }
   }
 
   @override
