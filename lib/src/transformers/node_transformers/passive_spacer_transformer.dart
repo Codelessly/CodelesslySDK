@@ -9,28 +9,28 @@ class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
   Widget buildSpacer(BaseNode node, int flex) {
     final BaseNode parentNode = getNode(node.parentID);
 
-    final AxisC mainAxis;
-    if (parentNode is RowColumnNode) {
-      mainAxis = parentNode.mainAxis;
-    } else {
-      mainAxis = AxisC.horizontal;
+    if (parentNode is! RowColumnNode) {
+      throw Exception(
+        'SpacerNode must be a child of a RowColumnNode to be rendered.',
+      );
     }
+
+    final AxisC mainAxis = parentNode.mainAxis;
     final SizeFit horizontalFit = node.horizontalFit;
     final SizeFit verticalFit = node.verticalFit;
     final SizeFit mainFit =
         (mainAxis == AxisC.horizontal ? horizontalFit : verticalFit);
 
-    Widget spacerWidget = SizedBox(
-      width: mainAxis.isVertical ? null : node.outerBoxLocal.width,
-      height: mainAxis.isHorizontal ? null : node.outerBoxLocal.height,
-    );
-
+    final Widget spacerWidget;
     if (mainFit.isFlex) {
-      spacerWidget = Flexible(
-        flex: flex,
-        child: spacerWidget,
+      spacerWidget = Spacer(flex: flex);
+    } else {
+      spacerWidget = SizedBox(
+        width: mainAxis.isVertical ? null : node.outerBoxLocal.width,
+        height: mainAxis.isHorizontal ? null : node.outerBoxLocal.height,
       );
     }
+
     return spacerWidget;
   }
 
