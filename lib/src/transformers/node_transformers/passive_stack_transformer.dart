@@ -94,6 +94,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         for (final String childId in node.children) getNode(childId),
     ];
 
+    final AlignmentModel commonAlignment = retrieveCommonAlignment(children);
     final isAllPositioned =
         children.every((node) => node.alignment.data == null);
 
@@ -119,17 +120,22 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
           isTallest: tallestChild?.id == childNode.id,
         );
       } else {
-        child = Align(
-          alignment: childNode.alignment.flutterAlignment!,
-          child: child,
-        );
+        if (childNode.alignment != commonAlignment) {
+          child = Align(
+            alignment: childNode.alignment.flutterAlignment!,
+            child: child,
+          );
+        }
       }
       childrenWidgets.add(child);
     }
 
-    Widget stack = manager
-        .getTransformer<PassiveRectangleTransformer>()
-        .buildRectangle(node, children: childrenWidgets);
+    Widget stack =
+        manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
+              node,
+              stackAlignment: commonAlignment,
+              children: childrenWidgets,
+            );
 
     // // This makes sure that children stay positioned correctly even if the stack
     // // is shrink wrapping. It makes it so the stack sizes itself to its tallest
@@ -215,5 +221,33 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         child: child,
       );
     }
+  }
+
+  AlignmentModel retrieveCommonAlignment(List<BaseNode> nodes) {
+    final List<AlignmentModel> alignments = [];
+
+    for (final BaseNode node in nodes) {
+      final AlignmentModel alignment = node.alignment;
+      if (alignment.data == null) continue;
+      alignments.add(alignment);
+    }
+
+    final AlignmentModel? mostCommonAlignment;
+
+    if (alignments.isEmpty) {
+      mostCommonAlignment = null;
+    } else {
+      mostCommonAlignment = mostCommon<AlignmentModel>(alignments);
+    }
+
+    return mostCommonAlignment ?? AlignmentModel.none;
+  }
+
+  T mostCommon<T>(List<T> list) {
+    final Map<T, int> counts = {};
+    for (final T element in list) {
+      counts[element] = (counts[element] ?? 0) + 1;
+    }
+    return counts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
   }
 }

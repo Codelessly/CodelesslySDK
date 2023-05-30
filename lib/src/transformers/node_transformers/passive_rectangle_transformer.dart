@@ -33,10 +33,12 @@ class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
 
   Widget buildRectangle(
     BaseNode node, {
+    AlignmentModel stackAlignment = AlignmentModel.none,
     List<Widget> children = const [],
   }) {
     return PassiveRectangleWidget(
       node: node,
+      stackAlignment: stackAlignment,
       children: children,
     );
   }
@@ -45,12 +47,14 @@ class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
 class PassiveRectangleWidget extends StatelessWidget {
   final BaseNode node;
   final List<Widget> children;
+  final AlignmentModel stackAlignment;
   final Clip Function(BaseNode node) getClipBehavior;
 
   PassiveRectangleWidget({
     super.key,
     required this.node,
     this.children = const [],
+    this.stackAlignment = AlignmentModel.none,
     this.getClipBehavior = defaultGetClipBehavior,
   });
 
@@ -95,6 +99,8 @@ class PassiveRectangleWidget extends StatelessWidget {
       ),
       child: Stack(
         clipBehavior: Clip.none,
+        alignment:
+            stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
         children: [
           ...buildFills(node, codelesslyContext),
           ...buildStrokes(node),
