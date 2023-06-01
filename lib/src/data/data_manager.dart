@@ -347,13 +347,19 @@ class DataManager {
       localModel: localModel,
     );
 
-    if (layoutUpdates.isEmpty && fontUpdates.isEmpty && apiUpdates.isEmpty) {
+    final Map<String, UpdateType> variableUpdates = _collectVariableUpdates(
+      serverModel: serverModel,
+      localModel: localModel,
+    );
+
+    if (layoutUpdates.isEmpty && fontUpdates.isEmpty && apiUpdates.isEmpty && variableUpdates.isEmpty) {
       log('No updates to process.');
       return;
     } else {
       log('Processing ${layoutUpdates.length} layout updates, '
           '${fontUpdates.length} font updates, and '
-          '${apiUpdates.length} api updates.');
+          '${apiUpdates.length} api updates, and '
+          '${variableUpdates.length} variable updates.');
     }
 
     for (final String layoutID in layoutUpdates.keys) {
@@ -433,6 +439,31 @@ class DataManager {
           );
           if (api != null) {
             localModel.apis[apiId] = api;
+          }
+          break;
+      }
+    }
+
+    for (final String layoutId in variableUpdates.keys) {
+      final UpdateType updateType = variableUpdates[layoutId]!;
+
+      switch (updateType) {
+        case UpdateType.delete:
+          localModel.variables.remove(layoutId);
+          localDataRepository.deletePublishVariable(
+            layoutId: layoutId,
+            isPreview: config.isPreview,
+          );
+          break;
+        case UpdateType.add:
+        case UpdateType.update:
+          final SDKLayoutVariables? layoutVariables = await networkDataRepository.downloadLayoutVariables(
+            projectID: authManager.authData!.projectId,
+            layoutId: layoutId,
+            isPreview: config.isPreview,
+          );
+          if (layoutVariables != null) {
+            localModel.variables[layoutId] = layoutVariables;
           }
           break;
       }
@@ -566,6 +597,47 @@ class DataManager {
     }
 
     return apiUpdates;
+  }
+
+  /// Compares the current [localModel] with a newly fetched [serverModel] and
+  /// returns a map of layout ids and their corresponding update types.
+  ///
+  /// - If a layout did not exist in the previous model, it is marked as new.
+  ///
+  /// - If a layout exists in both models but has a newer time stamp, it is
+  /// marked as updated.
+  ///
+  /// - If a layout existed in the previous model, but was deleted in the
+  /// updated model, it is marked as deleted.
+  Map<String, UpdateType> _collectVariableUpdates({
+    required SDKPublishModel serverModel,
+    required SDKPublishModel localModel,
+  }) {
+    final Map<String, DateTime> serverVariables = serverModel.updates.variables;
+    final Map<String, DateTime> currentVariables = localModel.updates.variables;
+    final Map<String, UpdateType> variableUpdates = {};
+
+    // Check for deleted layouts.
+    for (final String layoutId in currentVariables.keys) {
+      if (!serverVariables.containsKey(layoutId)) {
+        variableUpdates[layoutId] = UpdateType.delete;
+      }
+    }
+
+    // Check for added or updated layouts.
+    for (final String layoutId in serverVariables.keys) {
+      if (!currentVariables.containsKey(layoutId)) {
+        variableUpdates[layoutId] = UpdateType.add;
+      } else {
+        final DateTime lastUpdated = currentVariables[layoutId]!;
+        final DateTime newlyUpdated = serverVariables[layoutId]!;
+        if (newlyUpdated.isAfter(lastUpdated)) {
+          variableUpdates[layoutId] = UpdateType.update;
+        }
+      }
+    }
+
+    return variableUpdates;
   }
 
   /// [layoutID] is the identifier of the layout to be fetched or retrieved.

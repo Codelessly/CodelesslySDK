@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
@@ -74,16 +75,16 @@ class PassiveButtonWidget extends StatelessWidget {
   final double? elevation;
   final bool useIconFonts;
 
-  const PassiveButtonWidget({
+  PassiveButtonWidget({
     super.key,
     required this.node,
     required this.settings,
-    this.variables = const [],
+    List<VariableData>? variables,
     this.onPressed,
     this.onLongPress,
     this.elevation,
     this.useIconFonts = false,
-  });
+  }) : variables = variables ?? [];
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +98,20 @@ class PassiveButtonWidget extends StatelessWidget {
           value: indexProvider.index.toString(),
         ),
       );
+    }
+
+    final String? layoutID = context.read<CodelesslyContext>().layoutID;
+    if (layoutID != null) {
+      final Map<String, VariableData> variablesMap = context
+              .read<Codelessly>()
+              .dataManager
+              .publishModel!
+              .variables[layoutID]
+              ?.variables ??
+          {};
+
+      variables.addAll(variablesMap.values);
+      print('variables: ${variablesMap.values.map((e) => e.name)}');
     }
 
     String text = transformText(node.properties.label, variables, context);

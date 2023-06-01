@@ -27,11 +27,26 @@ Widget _defaultLayoutBuilder(context, layout) => layout;
 class CodelesslyContext with ChangeNotifier, EquatableMixin {
   /// A map of data that is passed to loaded layouts for nodes to replace their
   /// values with.
-  Map<String, dynamic> data;
+  Map<String, dynamic> _data;
 
-  set setData(Map<String, dynamic> data) {
-    this.data = data;
+  /// A map of data that is passed to loaded layouts for nodes to replace their
+  /// values with.
+  Map<String, dynamic> get data => _data;
+
+  /// A map of data that is passed to loaded layouts for nodes to replace their
+  /// values with.
+  set data(Map<String, dynamic> value) {
+    _data = value;
     notifyListeners();
+  }
+
+  String? _layoutID;
+
+  /// The ID of the layout that is currently loaded.
+  String? get layoutID => _layoutID;
+
+  set layoutID(String? value) {
+    _layoutID = value;
   }
 
   /// A map of functions that is passed to loaded layouts for nodes to call when
@@ -52,18 +67,20 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   /// Creates a [CodelesslyContext] with the given [data], [functions], and
   /// [nodeValues].
   CodelesslyContext({
-    required this.data,
+    required Map<String, dynamic> data,
     required this.functions,
     required this.nodeValues,
     required this.variables,
-  });
+    required String? layoutID,
+  }) : _layoutID = layoutID, _data = data;
 
   /// Creates a [CodelesslyContext] with empty an empty map of each property.
   CodelesslyContext.empty()
-      : data = {},
+      : _data = {},
         functions = {},
         nodeValues = {},
-        variables = {};
+        variables = {},
+        _layoutID = null;
 
   /// Creates a copy of this [CodelesslyContext] with the given [data],
   /// [functions], and [nodeValues].
@@ -72,12 +89,15 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     Map<String, CodelesslyFunction>? functions,
     Map<String, ValueNotifier<List<ValueModel>>>? nodeValues,
     Map<String, ValueNotifier<VariableData>>? variables,
+    String? layoutId,
+    bool forceLayoutId = false,
   }) {
     return CodelesslyContext(
       data: data ?? this.data,
       functions: functions ?? this.functions,
       nodeValues: nodeValues ?? this.nodeValues,
       variables: variables ?? this.variables,
+      layoutID: forceLayoutId ? layoutId : layoutId ?? this.layoutID,
     );
   }
 
@@ -333,12 +353,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   /// This object is observed through InheritedWidget. Node transformers can
   /// find this object using: `Provider.of<CodelesslyContext>(context)`.
   /// or `context.read<CodelesslyContext>()`.
-  late CodelesslyContext codelesslyContext = CodelesslyContext(
-    data: widget.data,
-    functions: widget.functions,
-    nodeValues: {},
-    variables: {},
-  );
+  late CodelesslyContext codelesslyContext;
 
   StreamSubscription<CodelesslyException?>? _exceptionSubscription;
 
@@ -366,6 +381,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       (event) {
         setState(() {});
       },
+    );
+
+    codelesslyContext = CodelesslyContext(
+      data: widget.data,
+      functions: widget.functions,
+      nodeValues: {},
+      variables: {},
+      layoutID: _effectiveController.layoutID,
     );
   }
 
@@ -400,6 +423,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         _controller?.dispose();
         _controller = createDefaultController();
         _effectiveController.init();
+        codelesslyContext.layoutID = _effectiveController.layoutID;
       }
     }
   }
