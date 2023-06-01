@@ -298,6 +298,11 @@ class SDKPublishUpdates with EquatableMixin {
   @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
   final Map<String, DateTime> apis;
 
+  /// A map that holds a set of layout ids as keys, and the last time
+  /// the layout was updated as the value.
+  @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
+  final Map<String, DateTime> variables;
+
   /// A map that holds a mapping of layout ids -> font ids.
   ///
   /// This allows the SDK to optimize its data flow by only downloading the
@@ -312,13 +317,22 @@ class SDKPublishUpdates with EquatableMixin {
   /// apis of a given project.
   final Map<String, Set<String>> layoutApis;
 
+  /// A map that holds a mapping of layout ids -> variable ids.
+  ///
+  /// This allows the SDK to optimize its data flow by only downloading the
+  /// minimum necessary variables for a given layout without downloading all of the
+  /// variables of a given project.
+  final Map<String, Set<String>> layoutVariables;
+
   /// Creates a new instance of [SDKPublishUpdates].
   SDKPublishUpdates({
     this.fonts = const {},
     this.layouts = const {},
     this.apis = const {},
+    this.variables = const {},
     this.layoutFonts = const {},
     this.layoutApis = const {},
+    this.layoutVariables = const {},
   });
 
   /// Creates a copy of this instance with the provided parameters.
@@ -326,15 +340,19 @@ class SDKPublishUpdates with EquatableMixin {
     Map<String, DateTime>? fonts,
     Map<String, DateTime>? layouts,
     Map<String, DateTime>? apis,
+    Map<String, DateTime>? variables,
     Map<String, Set<String>>? layoutFonts,
     Map<String, Set<String>>? layoutApis,
+    Map<String, Set<String>>? layoutVariables,
   }) {
     return SDKPublishUpdates(
       fonts: fonts ?? this.fonts,
       layouts: layouts ?? this.layouts,
       apis: apis ?? this.apis,
+      variables: variables ?? this.variables,
       layoutFonts: layoutFonts ?? this.layoutFonts,
       layoutApis: layoutApis ?? this.layoutApis,
+      layoutVariables: layoutVariables ?? this.layoutVariables,
     );
   }
 
