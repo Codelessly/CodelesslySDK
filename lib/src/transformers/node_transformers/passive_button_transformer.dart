@@ -88,6 +88,10 @@ class PassiveButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final codelesslyContext = context.read<CodelesslyContext>();
+    variables.addAll(codelesslyContext.variables.values.map((e) => e.value));
+
+    // TODO: ignore node value if a variable is used.
     /// Check if this is a part of a list item.
     final IndexedItemProvider? indexProvider = IndexedItemProvider.of(context);
     if (indexProvider != null) {
@@ -98,20 +102,6 @@ class PassiveButtonWidget extends StatelessWidget {
           value: indexProvider.index.toString(),
         ),
       );
-    }
-
-    final String? layoutID = context.read<CodelesslyContext>().layoutID;
-    if (layoutID != null) {
-      final Map<String, VariableData> variablesMap = context
-              .read<Codelessly>()
-              .dataManager
-              .publishModel!
-              .variables[layoutID]
-              ?.variables ??
-          {};
-
-      variables.addAll(variablesMap.values);
-      print('variables: ${variablesMap.values.map((e) => e.name)}');
     }
 
     String text = transformText(node.properties.label, variables, context);
