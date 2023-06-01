@@ -149,7 +149,6 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     } else {
       // If any side flexes we need to wrap the node into a Flexible.
       if (node.horizontalFit.isFlex || node.verticalFit.isFlex) {
-
         // Commenting this our fixes row column responsiveness.
 
         // double width = node.outerBoxLocal.width;

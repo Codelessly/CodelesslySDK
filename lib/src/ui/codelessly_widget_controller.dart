@@ -139,7 +139,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
       _verifyAndListenToDataManager();
     }
 
-    print('[CodelesslyWidgetController] [$layoutID]: Listening to sdk status stream.');
+    print(
+        '[CodelesslyWidgetController] [$layoutID]: Listening to sdk status stream.');
     _sdkStatusListener?.cancel();
     _sdkStatusListener = codelessly.statusStream.listen((status) {
       switch (status) {

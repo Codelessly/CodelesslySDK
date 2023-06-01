@@ -5,7 +5,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
-import 'cache_manager.dart';
 
 class CodelesslyCacheManager extends CacheManager {
   final CodelesslyConfig config;
