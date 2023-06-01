@@ -457,8 +457,11 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<CodelesslyContext>.value(
-            value: codelesslyContext),
-        Provider<Codelessly>.value(value: _effectiveController.codelessly),
+          value: codelesslyContext,
+        ),
+        Provider<Codelessly>.value(
+          value: _effectiveController.codelessly,
+        ),
       ],
       child: StreamBuilder<SDKStatus>(
         stream: _effectiveController.codelessly.statusStream,

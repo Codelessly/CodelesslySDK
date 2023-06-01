@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
-import '../auth/auth_manager.dart';
-import '../cache/cache_manager.dart';
 import '../logging/error_handler.dart';
 
 class CodelesslyWidgetController extends ChangeNotifier {
