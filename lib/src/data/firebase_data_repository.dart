@@ -107,4 +107,27 @@ class FirebaseDataRepository extends NetworkDataRepository {
       return api;
     });
   }
+
+  @override
+  Future<SDKLayoutVariables?> downloadLayoutVariables({
+    required String projectID,
+    required String layoutId,
+    required bool isPreview,
+  }) {
+    final String publishPath = this.publishPath(isPreview);
+
+    final DocumentReference variablesDoc = firestore
+        .collection(publishPath)
+        .document(projectID)
+        .collection('variables')
+        .document(layoutId);
+
+    return variablesDoc.get().then((value) {
+      final Map<String, dynamic> data = value.map;
+      final SDKLayoutVariables layoutVariables = SDKLayoutVariables.fromJson(
+        {...data, 'id': value.id},
+      );
+      return layoutVariables;
+    });
+  }
 }

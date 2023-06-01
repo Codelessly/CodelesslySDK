@@ -37,6 +37,9 @@ class SDKPublishModel with EquatableMixin {
   /// Contains information about the apis used in the published project.
   final Map<String, HttpApiData> apis;
 
+  /// Contains information about the apis used in the published project.
+  final Map<String, SDKLayoutVariables> variables;
+
   /// Creates a new instance of [SDKPublishModel].
   SDKPublishModel({
     required this.projectId,
@@ -45,10 +48,12 @@ class SDKPublishModel with EquatableMixin {
     Map<String, SDKPublishLayout>? layouts,
     SDKPublishUpdates? updates,
     Map<String, HttpApiData>? apis,
+    Map<String, SDKLayoutVariables>? variables,
   })  : layouts = layouts ?? {},
         fonts = fonts ?? {},
         updates = updates ?? SDKPublishUpdates(),
-        apis = apis ?? {};
+        apis = apis ?? {},
+        variables = variables ?? {};
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
   factory SDKPublishModel.fromJson(Map<String, dynamic> json) =>
@@ -58,7 +63,8 @@ class SDKPublishModel with EquatableMixin {
   Map<String, dynamic> toJson() => _$SDKPublishModelToJson(this)
     ..remove('fonts')
     ..remove('layouts')
-    ..remove('apis');
+    ..remove('apis')
+    ..remove('variables');
 
   /// Converts this instance to a JSON map.
   Map<String, dynamic> toFullJson() => _$SDKPublishModelToJson(this);
@@ -71,6 +77,7 @@ class SDKPublishModel with EquatableMixin {
     Map<String, SDKPublishLayout>? layouts,
     SDKPublishUpdates? updates,
     Map<String, HttpApiData>? apis,
+    Map<String, SDKLayoutVariables>? variables,
   }) {
     return SDKPublishModel(
       projectId: projectId ?? this.projectId,
@@ -79,6 +86,7 @@ class SDKPublishModel with EquatableMixin {
       layouts: layouts ?? this.layouts,
       updates: updates ?? this.updates,
       apis: apis ?? this.apis,
+      variables: variables ?? this.variables,
     );
   }
 
@@ -89,6 +97,7 @@ class SDKPublishModel with EquatableMixin {
         fonts,
         layouts,
         apis,
+        variables,
         updates,
       ];
 }
@@ -357,7 +366,15 @@ class SDKPublishUpdates with EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [fonts, layouts, apis, layoutFonts, layoutApis];
+  List<Object?> get props => [
+        fonts,
+        layouts,
+        apis,
+        variables,
+        layoutFonts,
+        layoutApis,
+        layoutVariables,
+      ];
 
   /// Creates a new instance of [SDKPublishUpdates] from a JSON map.
   factory SDKPublishUpdates.fromJson(Map<String, dynamic> json) =>
@@ -365,4 +382,38 @@ class SDKPublishUpdates with EquatableMixin {
 
   /// Converts this instance to a JSON map.
   Map<String, dynamic> toJson() => _$SDKPublishUpdatesToJson(this);
+}
+
+/// A model that defines variables for a layout.
+@JsonSerializable()
+class SDKLayoutVariables with EquatableMixin {
+  final String id;
+  final Map<String, VariableData> variables;
+
+  /// Creates a new instance of [SDKLayoutVariables].
+  const SDKLayoutVariables({
+    required this.id,
+    required this.variables,
+  });
+
+  /// copyWith
+  SDKLayoutVariables copyWith({
+    String? id,
+    Map<String, VariableData>? variables,
+  }) {
+    return SDKLayoutVariables(
+      id: id ?? this.id,
+      variables: variables ?? this.variables,
+    );
+  }
+
+  @override
+  List<Object?> get props => [id, variables];
+
+  /// Creates a new instance of [SDKLayoutVariables] from a JSON map.
+  factory SDKLayoutVariables.fromJson(Map<String, dynamic> json) =>
+      _$SDKLayoutVariablesFromJson(json);
+
+  /// Converts this instance to a JSON map.
+  Map<String, dynamic> toJson() => _$SDKLayoutVariablesToJson(this);
 }

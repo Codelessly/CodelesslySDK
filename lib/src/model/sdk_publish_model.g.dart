@@ -25,6 +25,10 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
         (k, e) => MapEntry(k as String,
             HttpApiData.fromJson(Map<String, dynamic>.from(e as Map))),
       ),
+      variables: (json['variables'] as Map?)?.map(
+        (k, e) => MapEntry(k as String,
+            SDKLayoutVariables.fromJson(Map<String, dynamic>.from(e as Map))),
+      ),
     );
 
 Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) =>
@@ -35,6 +39,7 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) =>
       'layouts': instance.layouts.map((k, e) => MapEntry(k, e.toJson())),
       'updates': instance.updates.toJson(),
       'apis': instance.apis.map((k, e) => MapEntry(k, e.toJson())),
+      'variables': instance.variables.map((k, e) => MapEntry(k, e.toJson())),
     };
 
 SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
@@ -144,4 +149,18 @@ Map<String, dynamic> _$SDKPublishUpdatesToJson(SDKPublishUpdates instance) =>
       'layoutApis': instance.layoutApis.map((k, e) => MapEntry(k, e.toList())),
       'layoutVariables':
           instance.layoutVariables.map((k, e) => MapEntry(k, e.toList())),
+    };
+
+SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
+      id: json['id'] as String,
+      variables: (json['variables'] as Map).map(
+        (k, e) => MapEntry(k as String,
+            VariableData.fromJson(Map<String, dynamic>.from(e as Map))),
+      ),
+    );
+
+Map<String, dynamic> _$SDKLayoutVariablesToJson(SDKLayoutVariables instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'variables': instance.variables.map((k, e) => MapEntry(k, e.toJson())),
     };

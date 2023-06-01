@@ -15,3 +15,5 @@ const String publishFontsCacheKey = 'publish_fonts';
 const String previewFontsCacheKey = 'preview_fonts';
 const String publishApisCacheKey = 'publish_apis';
 const String previewApisCacheKey = 'preview_apis';
+const String publishVariablesCacheKey = 'publish_variables';
+const String previewVariablesCacheKey = 'preview_variables';
