@@ -5,9 +5,7 @@ import 'dart:io';
 import 'package:http/http.dart';
 
 import '../../codelessly_sdk.dart';
-import '../cache/cache_manager.dart';
 import '../logging/error_handler.dart';
-import 'auth_manager.dart';
 
 /// An implementation of [AuthManager] that uses Firebase auth.
 class CodelesslyAuthManager extends AuthManager {

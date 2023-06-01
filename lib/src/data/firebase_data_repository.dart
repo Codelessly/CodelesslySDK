@@ -2,7 +2,6 @@ import 'dart:async';
 
 import '../../codelessly_sdk.dart';
 import '../../firedart.dart';
-import 'network_data_repository.dart';
 
 /// Handles the data flow of [SDKPublishModel] from the server.
 class FirebaseDataRepository extends NetworkDataRepository {

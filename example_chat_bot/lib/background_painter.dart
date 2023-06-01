@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+
+import 'package:flutter/material.dart';
 
 class BackgroundPaint extends CustomPainter {
   final Color blue;
