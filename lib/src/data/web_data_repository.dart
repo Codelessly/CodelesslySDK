@@ -154,36 +154,36 @@ class WebDataRepository extends NetworkDataRepository {
   @override
   Future<SDKLayoutVariables?> downloadLayoutVariables({
     required String projectID,
-    required String layoutId,
+    required String layoutID,
     required bool isPreview,
   }) async {
     try {
       final Response result = await post(
         Uri.parse(
-            '$firebaseCloudFunctionsBaseURL/getPublishedVariablesRequest'),
+            '$firebaseCloudFunctionsBaseURL/getPublishedLayoutVariablesRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
-          'layoutId': layoutId,
+          'layoutID': layoutID,
           'isPreview': isPreview,
         }),
         encoding: utf8,
       );
 
       if (result.statusCode != 200) {
-        print('Error downloading api from web data manager.');
+        print('Error downloading variables from web data manager.');
         print('Status code: ${result.statusCode}');
         print('Message: ${result.body}');
         throw CodelesslyException(
-          'Error downloading api.',
+          'Error downloading variables.',
           stacktrace: StackTrace.current,
         );
       }
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
-      final SDKLayoutVariables api =
-          SDKLayoutVariables.fromJson({...modelDoc, 'id': layoutId});
+      final SDKLayoutVariables variables =
+          SDKLayoutVariables.fromJson({...modelDoc, 'id': layoutID});
 
-      return api;
+      return variables;
     } catch (e, stacktrace) {
       print(e);
       print(stacktrace);
