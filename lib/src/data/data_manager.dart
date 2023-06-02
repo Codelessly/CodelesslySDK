@@ -444,14 +444,14 @@ class DataManager {
       }
     }
 
-    for (final String layoutId in variableUpdates.keys) {
-      final UpdateType updateType = variableUpdates[layoutId]!;
+    for (final String layoutID in variableUpdates.keys) {
+      final UpdateType updateType = variableUpdates[layoutID]!;
 
       switch (updateType) {
         case UpdateType.delete:
-          localModel.variables.remove(layoutId);
+          localModel.variables.remove(layoutID);
           localDataRepository.deletePublishVariable(
-            layoutId: layoutId,
+            layoutId: layoutID,
             isPreview: config.isPreview,
           );
           break;
@@ -459,11 +459,11 @@ class DataManager {
         case UpdateType.update:
           final SDKLayoutVariables? layoutVariables = await networkDataRepository.downloadLayoutVariables(
             projectID: authManager.authData!.projectId,
-            layoutId: layoutId,
+            layoutID: layoutID,
             isPreview: config.isPreview,
           );
           if (layoutVariables != null) {
-            localModel.variables[layoutId] = layoutVariables;
+            localModel.variables[layoutID] = layoutVariables;
           }
           break;
       }

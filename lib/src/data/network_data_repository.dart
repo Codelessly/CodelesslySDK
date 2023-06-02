@@ -35,7 +35,7 @@ abstract class NetworkDataRepository {
   /// configurations of the implementation.
   Future<SDKLayoutVariables?> downloadLayoutVariables({
     required String projectID,
-    required String layoutId,
+    required String layoutID,
     required bool isPreview,
   });
 
