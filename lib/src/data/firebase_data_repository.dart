@@ -111,7 +111,7 @@ class FirebaseDataRepository extends NetworkDataRepository {
   @override
   Future<SDKLayoutVariables?> downloadLayoutVariables({
     required String projectID,
-    required String layoutId,
+    required String layoutID,
     required bool isPreview,
   }) {
     final String publishPath = this.publishPath(isPreview);
@@ -120,7 +120,7 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .collection(publishPath)
         .document(projectID)
         .collection('variables')
-        .document(layoutId);
+        .document(layoutID);
 
     return variablesDoc.get().then((value) {
       final Map<String, dynamic> data = value.map;
