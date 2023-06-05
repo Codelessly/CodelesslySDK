@@ -39,6 +39,14 @@ abstract class NetworkDataRepository {
     required bool isPreview,
   });
 
+  /// Fetches the relevant [SDKPublishLayout] from the server based on the
+  /// configurations of the implementation.
+  Future<SDKLayoutConditions?> downloadLayoutConditions({
+    required String projectID,
+    required String layoutID,
+    required bool isPreview,
+  });
+
   /// Fetches the relevant [SDKPublishFont] from the server based on the
   /// configurations of the implementation.
   Future<SDKPublishFont?> downloadFontModel({

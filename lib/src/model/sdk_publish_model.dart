@@ -37,8 +37,11 @@ class SDKPublishModel with EquatableMixin {
   /// Contains information about the apis used in the published project.
   final Map<String, HttpApiData> apis;
 
-  /// Contains information about the apis used in the published project.
+  /// Contains information about the variables used in the published project.
   final Map<String, SDKLayoutVariables> variables;
+
+  /// Contains information about the conditions used in the published project.
+  final Map<String, SDKLayoutConditions> conditions;
 
   /// Creates a new instance of [SDKPublishModel].
   SDKPublishModel({
@@ -49,11 +52,13 @@ class SDKPublishModel with EquatableMixin {
     SDKPublishUpdates? updates,
     Map<String, HttpApiData>? apis,
     Map<String, SDKLayoutVariables>? variables,
+    Map<String, SDKLayoutConditions>? conditions,
   })  : layouts = layouts ?? {},
         fonts = fonts ?? {},
         updates = updates ?? SDKPublishUpdates(),
         apis = apis ?? {},
-        variables = variables ?? {};
+        variables = variables ?? {},
+        conditions = conditions ?? {};
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
   factory SDKPublishModel.fromJson(Map<String, dynamic> json) =>
@@ -64,7 +69,8 @@ class SDKPublishModel with EquatableMixin {
     ..remove('fonts')
     ..remove('layouts')
     ..remove('apis')
-    ..remove('variables');
+    ..remove('variables')
+    ..remove('conditions');
 
   /// Converts this instance to a JSON map.
   Map<String, dynamic> toFullJson() => _$SDKPublishModelToJson(this);
@@ -78,6 +84,7 @@ class SDKPublishModel with EquatableMixin {
     SDKPublishUpdates? updates,
     Map<String, HttpApiData>? apis,
     Map<String, SDKLayoutVariables>? variables,
+    Map<String, SDKLayoutConditions>? conditions,
   }) {
     return SDKPublishModel(
       projectId: projectId ?? this.projectId,
@@ -87,6 +94,7 @@ class SDKPublishModel with EquatableMixin {
       updates: updates ?? this.updates,
       apis: apis ?? this.apis,
       variables: variables ?? this.variables,
+      conditions: conditions ?? this.conditions,
     );
   }
 
@@ -98,6 +106,7 @@ class SDKPublishModel with EquatableMixin {
         layouts,
         apis,
         variables,
+        conditions,
         updates,
       ];
 }

@@ -352,14 +352,20 @@ class DataManager {
       localModel: localModel,
     );
 
-    if (layoutUpdates.isEmpty && fontUpdates.isEmpty && apiUpdates.isEmpty && variableUpdates.isEmpty) {
+    final Map<String, UpdateType> conditionUpdates = _collectConditionUpdates(
+      serverModel: serverModel,
+      localModel: localModel,
+    );
+
+    if (layoutUpdates.isEmpty && fontUpdates.isEmpty && apiUpdates.isEmpty && variableUpdates.isEmpty && conditionUpdates.isEmpty) {
       log('No updates to process.');
       return;
     } else {
       log('Processing ${layoutUpdates.length} layout updates, '
           '${fontUpdates.length} font updates, and '
           '${apiUpdates.length} api updates, and '
-          '${variableUpdates.length} variable updates.');
+          '${variableUpdates.length} variable updates.'
+          '${conditionUpdates.length} condition updates.');
     }
 
     for (final String layoutID in layoutUpdates.keys) {
@@ -450,7 +456,7 @@ class DataManager {
       switch (updateType) {
         case UpdateType.delete:
           localModel.variables.remove(layoutID);
-          localDataRepository.deletePublishVariable(
+          localDataRepository.deletePublishVariables(
             layoutId: layoutID,
             isPreview: config.isPreview,
           );
@@ -464,6 +470,31 @@ class DataManager {
           );
           if (layoutVariables != null) {
             localModel.variables[layoutID] = layoutVariables;
+          }
+          break;
+      }
+    }
+
+    for (final String layoutID in conditionUpdates.keys) {
+      final UpdateType updateType = conditionUpdates[layoutID]!;
+
+      switch (updateType) {
+        case UpdateType.delete:
+          localModel.variables.remove(layoutID);
+          localDataRepository.deletePublishConditions(
+            layoutId: layoutID,
+            isPreview: config.isPreview,
+          );
+          break;
+        case UpdateType.add:
+        case UpdateType.update:
+          final SDKLayoutConditions? layoutConditions = await networkDataRepository.downloadLayoutConditions(
+            projectID: authManager.authData!.projectId,
+            layoutID: layoutID,
+            isPreview: config.isPreview,
+          );
+          if (layoutConditions != null) {
+            localModel.conditions[layoutID] = layoutConditions;
           }
           break;
       }
@@ -517,16 +548,6 @@ class DataManager {
     return layoutUpdates;
   }
 
-  /// Compares the current [localModel] with a newly fetched [serverModel] and
-  /// returns a map of font ids and their corresponding update types.
-  ///
-  /// - If a font did not exist in the previous model, it is marked as new.
-  ///
-  /// - If a font exists in both models but has a newer time stamp, it is
-  /// marked as updated.
-  ///
-  /// - If a font existed in the previous model, but was deleted in the
-  /// updated model, it is marked as deleted.
   Map<String, UpdateType> _collectFontUpdates({
     required SDKPublishModel serverModel,
     required SDKPublishModel localModel,
@@ -558,16 +579,6 @@ class DataManager {
     return fontUpdates;
   }
 
-  /// Compares the current [localModel] with a newly fetched [serverModel] and
-  /// returns a map of layout ids and their corresponding update types.
-  ///
-  /// - If a layout did not exist in the previous model, it is marked as new.
-  ///
-  /// - If a layout exists in both models but has a newer time stamp, it is
-  /// marked as updated.
-  ///
-  /// - If a layout existed in the previous model, but was deleted in the
-  /// updated model, it is marked as deleted.
   Map<String, UpdateType> _collectApiUpdates({
     required SDKPublishModel serverModel,
     required SDKPublishModel localModel,
@@ -599,16 +610,6 @@ class DataManager {
     return apiUpdates;
   }
 
-  /// Compares the current [localModel] with a newly fetched [serverModel] and
-  /// returns a map of layout ids and their corresponding update types.
-  ///
-  /// - If a layout did not exist in the previous model, it is marked as new.
-  ///
-  /// - If a layout exists in both models but has a newer time stamp, it is
-  /// marked as updated.
-  ///
-  /// - If a layout existed in the previous model, but was deleted in the
-  /// updated model, it is marked as deleted.
   Map<String, UpdateType> _collectVariableUpdates({
     required SDKPublishModel serverModel,
     required SDKPublishModel localModel,
@@ -631,6 +632,37 @@ class DataManager {
       } else {
         final DateTime lastUpdated = currentVariables[layoutId]!;
         final DateTime newlyUpdated = serverVariables[layoutId]!;
+        if (newlyUpdated.isAfter(lastUpdated)) {
+          variableUpdates[layoutId] = UpdateType.update;
+        }
+      }
+    }
+
+    return variableUpdates;
+  }
+
+  Map<String, UpdateType> _collectConditionUpdates({
+    required SDKPublishModel serverModel,
+    required SDKPublishModel localModel,
+  }) {
+    final Map<String, DateTime> serverConditions = serverModel.updates.conditions;
+    final Map<String, DateTime> currentConditions = localModel.updates.conditions;
+    final Map<String, UpdateType> variableUpdates = {};
+
+    // Check for deleted layouts.
+    for (final String layoutId in currentConditions.keys) {
+      if (!serverConditions.containsKey(layoutId)) {
+        variableUpdates[layoutId] = UpdateType.delete;
+      }
+    }
+
+    // Check for added or updated layouts.
+    for (final String layoutId in serverConditions.keys) {
+      if (!currentConditions.containsKey(layoutId)) {
+        variableUpdates[layoutId] = UpdateType.add;
+      } else {
+        final DateTime lastUpdated = currentConditions[layoutId]!;
+        final DateTime newlyUpdated = serverConditions[layoutId]!;
         if (newlyUpdated.isAfter(lastUpdated)) {
           variableUpdates[layoutId] = UpdateType.update;
         }
