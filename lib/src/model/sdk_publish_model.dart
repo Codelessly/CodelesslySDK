@@ -312,6 +312,11 @@ class SDKPublishUpdates with EquatableMixin {
   @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
   final Map<String, DateTime> variables;
 
+  /// A map that holds a set of layout ids as keys, and the last time
+  /// the layout was updated as the value.
+  @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
+  final Map<String, DateTime> conditions;
+
   /// A map that holds a mapping of layout ids -> font ids.
   ///
   /// This allows the SDK to optimize its data flow by only downloading the
@@ -326,22 +331,15 @@ class SDKPublishUpdates with EquatableMixin {
   /// apis of a given project.
   final Map<String, Set<String>> layoutApis;
 
-  /// A map that holds a mapping of layout ids -> variable ids.
-  ///
-  /// This allows the SDK to optimize its data flow by only downloading the
-  /// minimum necessary variables for a given layout without downloading all of the
-  /// variables of a given project.
-  final Map<String, Set<String>> layoutVariables;
-
   /// Creates a new instance of [SDKPublishUpdates].
   SDKPublishUpdates({
     this.fonts = const {},
     this.layouts = const {},
     this.apis = const {},
     this.variables = const {},
+    this.conditions = const {},
     this.layoutFonts = const {},
     this.layoutApis = const {},
-    this.layoutVariables = const {},
   });
 
   /// Creates a copy of this instance with the provided parameters.
@@ -350,18 +348,18 @@ class SDKPublishUpdates with EquatableMixin {
     Map<String, DateTime>? layouts,
     Map<String, DateTime>? apis,
     Map<String, DateTime>? variables,
+    Map<String, DateTime>? conditions,
     Map<String, Set<String>>? layoutFonts,
     Map<String, Set<String>>? layoutApis,
-    Map<String, Set<String>>? layoutVariables,
   }) {
     return SDKPublishUpdates(
       fonts: fonts ?? this.fonts,
       layouts: layouts ?? this.layouts,
       apis: apis ?? this.apis,
       variables: variables ?? this.variables,
+      conditions: conditions ?? this.conditions,
       layoutFonts: layoutFonts ?? this.layoutFonts,
       layoutApis: layoutApis ?? this.layoutApis,
-      layoutVariables: layoutVariables ?? this.layoutVariables,
     );
   }
 
@@ -371,9 +369,9 @@ class SDKPublishUpdates with EquatableMixin {
         layouts,
         apis,
         variables,
+        conditions,
         layoutFonts,
         layoutApis,
-        layoutVariables,
       ];
 
   /// Creates a new instance of [SDKPublishUpdates] from a JSON map.
@@ -416,4 +414,38 @@ class SDKLayoutVariables with EquatableMixin {
 
   /// Converts this instance to a JSON map.
   Map<String, dynamic> toJson() => _$SDKLayoutVariablesToJson(this);
+}
+
+/// A model that defines variables for a layout.
+@JsonSerializable()
+class SDKLayoutConditions with EquatableMixin {
+  final String id;
+  final Map<String, BaseCondition> conditions;
+
+  /// Creates a new instance of [SDKLayoutConditions].
+  const SDKLayoutConditions({
+    required this.id,
+    required this.conditions,
+  });
+
+  /// copyWith
+  SDKLayoutConditions copyWith({
+    String? id,
+    Map<String, BaseCondition>? conditions,
+  }) {
+    return SDKLayoutConditions(
+      id: id ?? this.id,
+      conditions: conditions ?? this.conditions,
+    );
+  }
+
+  @override
+  List<Object?> get props => [id, conditions];
+
+  /// Creates a new instance of [SDKLayoutVariables] from a JSON map.
+  factory SDKLayoutConditions.fromJson(Map<String, dynamic> json) =>
+      _$SDKLayoutConditionsFromJson(json);
+
+  /// Converts this instance to a JSON map.
+  Map<String, dynamic> toJson() => _$SDKLayoutConditionsToJson(this);
 }
