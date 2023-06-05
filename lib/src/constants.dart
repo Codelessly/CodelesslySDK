@@ -17,3 +17,5 @@ const String publishApisCacheKey = 'publish_apis';
 const String previewApisCacheKey = 'preview_apis';
 const String publishVariablesCacheKey = 'publish_variables';
 const String previewVariablesCacheKey = 'preview_variables';
+const String publishConditionsCacheKey = 'publish_conditions';
+const String previewConditionsCacheKey = 'preview_conditions';

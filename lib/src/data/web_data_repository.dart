@@ -190,4 +190,44 @@ class WebDataRepository extends NetworkDataRepository {
       return null;
     }
   }
+
+  @override
+  Future<SDKLayoutConditions?> downloadLayoutConditions({
+    required String projectID,
+    required String layoutID,
+    required bool isPreview,
+  }) async {
+    try {
+      final Response result = await post(
+        Uri.parse(
+            '$firebaseCloudFunctionsBaseURL/getPublishedLayoutConditionsRequest'),
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'projectID': projectID,
+          'layoutID': layoutID,
+          'isPreview': isPreview,
+        }),
+        encoding: utf8,
+      );
+
+      if (result.statusCode != 200) {
+        print('Error downloading conditions from web data manager.');
+        print('Status code: ${result.statusCode}');
+        print('Message: ${result.body}');
+        throw CodelesslyException(
+          'Error downloading conditions.',
+          stacktrace: StackTrace.current,
+        );
+      }
+      final Map<String, dynamic> modelDoc = jsonDecode(result.body);
+      final SDKLayoutConditions conditions =
+          SDKLayoutConditions.fromJson({...modelDoc, 'id': layoutID});
+
+      return conditions;
+    } catch (e, stacktrace) {
+      print(e);
+      print(stacktrace);
+      return null;
+    }
+  }
 }

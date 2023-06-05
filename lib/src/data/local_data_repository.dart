@@ -32,8 +32,13 @@ class LocalDataRepository {
   }
 
   /// The cache key for the APIs.
-  String variableCacheKey(bool isPreview) {
+  String variablesCacheKey(bool isPreview) {
     return isPreview ? previewVariablesCacheKey : publishVariablesCacheKey;
+  }
+
+  /// The cache key for the APIs.
+  String conditionsCacheKey(bool isPreview) {
+    return isPreview ? previewConditionsCacheKey : publishConditionsCacheKey;
   }
 
   /// Returns the [SDKPublishModel] from the cache.
@@ -103,11 +108,18 @@ class LocalDataRepository {
       cacheManager.delete(apisCacheKey(isPreview));
 
   /// Deletes a given api associated with a [apiId] from the cache.
-  void deletePublishVariable({
+  void deletePublishVariables({
     required String layoutId,
     required bool isPreview,
   }) =>
-      cacheManager.delete(variableCacheKey(isPreview));
+      cacheManager.delete(variablesCacheKey(isPreview));
+
+  /// Deletes a given api associated with a [apiId] from the cache.
+  void deletePublishConditions({
+    required String layoutId,
+    required bool isPreview,
+  }) =>
+      cacheManager.delete(conditionsCacheKey(isPreview));
 
   /// Deletes the stored bytes of a given [fontID] from the cache.
   void deleteFontBytes({
