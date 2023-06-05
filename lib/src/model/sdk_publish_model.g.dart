@@ -29,6 +29,10 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
         (k, e) => MapEntry(k as String,
             SDKLayoutVariables.fromJson(Map<String, dynamic>.from(e as Map))),
       ),
+      conditions: (json['conditions'] as Map?)?.map(
+        (k, e) => MapEntry(k as String,
+            SDKLayoutConditions.fromJson(Map<String, dynamic>.from(e as Map))),
+      ),
     );
 
 Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) =>
@@ -40,6 +44,7 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) =>
       'updates': instance.updates.toJson(),
       'apis': instance.apis.map((k, e) => MapEntry(k, e.toJson())),
       'variables': instance.variables.map((k, e) => MapEntry(k, e.toJson())),
+      'conditions': instance.conditions.map((k, e) => MapEntry(k, e.toJson())),
     };
 
 SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(

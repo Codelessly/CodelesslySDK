@@ -130,4 +130,27 @@ class FirebaseDataRepository extends NetworkDataRepository {
       return layoutVariables;
     });
   }
+
+  @override
+  Future<SDKLayoutConditions?> downloadLayoutConditions({
+    required String projectID,
+    required String layoutID,
+    required bool isPreview,
+  }) {
+    final String publishPath = this.publishPath(isPreview);
+
+    final DocumentReference conditionsDoc = firestore
+        .collection(publishPath)
+        .document(projectID)
+        .collection('conditions')
+        .document(layoutID);
+
+    return conditionsDoc.get().then((value) {
+      final Map<String, dynamic> data = value.map;
+      final SDKLayoutConditions layoutConditions = SDKLayoutConditions.fromJson(
+        {...data, 'id': value.id},
+      );
+      return layoutConditions;
+    });
+  }
 }
