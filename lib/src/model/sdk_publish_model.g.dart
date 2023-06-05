@@ -121,17 +121,15 @@ SDKPublishUpdates _$SDKPublishUpdatesFromJson(Map json) => SDKPublishUpdates(
       variables: json['variables'] == null
           ? const {}
           : jsonMapToDateValues(json['variables'] as Map<String, dynamic>),
+      conditions: json['conditions'] == null
+          ? const {}
+          : jsonMapToDateValues(json['conditions'] as Map<String, dynamic>),
       layoutFonts: (json['layoutFonts'] as Map?)?.map(
             (k, e) => MapEntry(k as String,
                 (e as List<dynamic>).map((e) => e as String).toSet()),
           ) ??
           const {},
       layoutApis: (json['layoutApis'] as Map?)?.map(
-            (k, e) => MapEntry(k as String,
-                (e as List<dynamic>).map((e) => e as String).toSet()),
-          ) ??
-          const {},
-      layoutVariables: (json['layoutVariables'] as Map?)?.map(
             (k, e) => MapEntry(k as String,
                 (e as List<dynamic>).map((e) => e as String).toSet()),
           ) ??
@@ -144,11 +142,10 @@ Map<String, dynamic> _$SDKPublishUpdatesToJson(SDKPublishUpdates instance) =>
       'layouts': dateValuesToJsonMap(instance.layouts),
       'apis': dateValuesToJsonMap(instance.apis),
       'variables': dateValuesToJsonMap(instance.variables),
+      'conditions': dateValuesToJsonMap(instance.conditions),
       'layoutFonts':
           instance.layoutFonts.map((k, e) => MapEntry(k, e.toList())),
       'layoutApis': instance.layoutApis.map((k, e) => MapEntry(k, e.toList())),
-      'layoutVariables':
-          instance.layoutVariables.map((k, e) => MapEntry(k, e.toList())),
     };
 
 SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
@@ -163,4 +160,20 @@ Map<String, dynamic> _$SDKLayoutVariablesToJson(SDKLayoutVariables instance) =>
     <String, dynamic>{
       'id': instance.id,
       'variables': instance.variables.map((k, e) => MapEntry(k, e.toJson())),
+    };
+
+SDKLayoutConditions _$SDKLayoutConditionsFromJson(Map json) =>
+    SDKLayoutConditions(
+      id: json['id'] as String,
+      conditions: (json['conditions'] as Map).map(
+        (k, e) => MapEntry(k as String,
+            BaseCondition.fromJson(Map<String, dynamic>.from(e as Map))),
+      ),
+    );
+
+Map<String, dynamic> _$SDKLayoutConditionsToJson(
+        SDKLayoutConditions instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'conditions': instance.conditions.map((k, e) => MapEntry(k, e.toJson())),
     };
