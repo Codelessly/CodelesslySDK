@@ -62,7 +62,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     return _wrapWithListener(
       context,
       node: node,
-      builder: (values, context) {
+      builder: (context) {
         Widget widget = settings.isPreview &&
                 (node.type == 'listTile' || node.type == 'expansionTile')
             ? SizedBox(
@@ -120,23 +120,42 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     return buildWidgetFromNode(node, context, settings: settings);
   }
 
-  /// This is very specific to the SDK, and is not used in the editor since
-  /// [DataUtils.nodeValues] is only populated in SDK initialization.
+  /// This is SDK specific and is also used in editor's preview dialog.
   Widget _wrapWithListener(
     BuildContext context, {
     required BaseNode node,
-    required Widget Function(List<ValueModel> values, BuildContext context)
-        builder,
+    required Widget Function(BuildContext context) builder,
   }) {
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
-    if (codelesslyContext.nodeValues.containsKey(node.id)) {
-      return ValueListenableBuilder<List<ValueModel>>(
-        valueListenable: codelesslyContext.nodeValues[node.id]!,
-        builder: (context, values, child) => builder(values, context),
+
+    // List of value notifiers that the widget listens to. This includes node's
+    // local values and the variables attached to node properties.
+    final List<ValueNotifier> listenables = [];
+
+    // Local node values.
+    final ValueNotifier<List<ValueModel>>? listenableNodeValues =
+        codelesslyContext.nodeValues[node.id];
+    // Add node values to [listenables].
+    if (listenableNodeValues != null) listenables.add(listenableNodeValues);
+
+    // Traverse through all the variables that the node properties are attached
+    // to.
+    for (final String variableID in node.variables.values) {
+      // Get corresponding variable data from codelessly context.
+      final ValueNotifier<VariableData>? listenableVariable =
+          codelesslyContext.variables[variableID];
+      // Add variable to [listenables].
+      if (listenableVariable != null) listenables.add(listenableVariable);
+    }
+
+    if (listenables.isNotEmpty) {
+      return ListenableBuilder(
+        listenable: Listenable.merge(listenables),
+        builder: (context, child) => builder(context),
       );
     } else {
-      return builder([], context);
+      return builder(context);
     }
   }
 }
