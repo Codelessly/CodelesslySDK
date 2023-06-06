@@ -33,8 +33,6 @@ class FirebaseDataRepository extends NetworkDataRepository {
       final SDKPublishModel model = SDKPublishModel.fromJson(
         {...data, 'id': event?.id},
       );
-      print('publish data: $data');
-      print('publish model: ${model.toJson()}');
       return model;
     });
   }

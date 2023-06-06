@@ -526,7 +526,7 @@ extension VariableDataListExtensions<T extends VariableData> on List<T> {
   VariableData findByName(String name) =>
       firstWhere((element) => element.name == name);
 
-  VariableData? findByIdOrNull(String id) =>
+  VariableData? findByIdOrNull(String? id) =>
       firstWhereOrNull((element) => element.id == id);
 
   VariableData findById(String id) => firstWhere((element) => element.id == id);
