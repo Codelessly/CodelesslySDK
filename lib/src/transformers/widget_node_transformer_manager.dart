@@ -29,13 +29,22 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
   /// Convenience method to handle widget visibility.
   Widget applyWidgetVisibility(
       BuildContext context, BaseNode node, Widget widget) {
-    final CodelesslyContext payload = context.read<CodelesslyContext>();
+    final CodelesslyContext codelesslyContext =
+        context.read<CodelesslyContext>();
+    // Get variable for visibility property, if available.
+    final VariableData? variable =
+        codelesslyContext.variables[node.variables['visible']]?.value;
+    // Parse variable's value.
+    final bool? variableValue = bool.tryParse(variable?.value ?? '');
+    // Get node's property values that are used in any actions.
     final List<ValueModel> nodeValues =
-        payload.nodeValues[node.id]?.value ?? [];
+        codelesslyContext.nodeValues[node.id]?.value ?? [];
+    // Get visibility value from node values.
+    final bool? nodeValue =
+        nodeValues.firstWhereOrNull((val) => val.name == 'visible')?.value;
 
-    final bool visible =
-        nodeValues.firstWhereOrNull((val) => val.name == 'visible')?.value ??
-            node.visible;
+    // Priority: variable > local node value > node property.
+    final bool visible = variableValue ?? nodeValue ?? node.visible;
 
     if (visible) return widget;
 
