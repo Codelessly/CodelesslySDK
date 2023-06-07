@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart' as flutter;
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../transformers/utils/evaluators.dart';
 
 extension FABLocationHelper on FABLocation {
   FloatingActionButtonLocation toFloatingActionButtonLocation() {
@@ -519,7 +520,7 @@ extension EdgeInsetsHelper on EdgeInsetsModel {
   bool get isVerticalSymmetric => t == b;
 }
 
-extension VariableDataListExtensions<T extends VariableData> on List<T> {
+extension VariableDataListExtensions<T extends VariableData> on Iterable<T> {
   VariableData? findByNameOrNull(String name) =>
       firstWhereOrNull((element) => element.name == name);
 
@@ -1402,32 +1403,8 @@ extension BaseConditionExt on BaseCondition {
   }
 
   /// [variables] is a map of variable name to variable value.
-  T? evaluate<T>(Map<String, VariableData> variables) {
-    final condition = this;
-    if (condition is Condition) {
-      final condition = this as Condition;
-      if (condition.expression.evaluate(variables)) {
-        return condition.actions.firstOrNull?.getValue<T?>();
-      } else {
-        return null;
-      }
-    } else if (condition is ConditionGroup) {
-      if (condition.ifCondition.expression.evaluate(variables)) {
-        return condition.ifCondition.actions.firstOrNull?.getValue<T?>();
-      } else {
-        for (final elseIfCondition in condition.elseIfConditions) {
-          if (elseIfCondition.expression.evaluate(variables)) {
-            return elseIfCondition.actions.firstOrNull?.getValue<T?>();
-          }
-        }
-        return condition.elseCondition?.actions.firstOrNull?.getValue<T?>();
-      }
-    } else if (condition is ElseCondition) {
-      return condition.actions.firstOrNull?.getValue<T?>();
-    }
-
-    return null;
-  }
+  T? evaluate<T>(Map<String, VariableData> variables) =>
+      evaluateCondition(this, variables);
 }
 
 extension CanvasConditionsMapExt on Map<String, CanvasConditions> {
@@ -1464,65 +1441,14 @@ extension ExpressionExt on BaseExpression {
   }
 
   /// [variables] is a map of variable names and their values.
-  bool evaluate(Map<String, VariableData> variables) {
-    final expression = this;
-    if (expression is Expression) {
-      final left = expression.leftPart.evaluate(variables);
-      final right = expression.rightPart.evaluate(variables);
-      switch (expression.operator) {
-        case ConditionOperation.equalsTo:
-          return left.toString().toLowerCase() ==
-              right.toString().toLowerCase();
-        case ConditionOperation.notEqualsTo:
-          return left.toString().toLowerCase() !=
-              right.toString().toLowerCase();
-        case ConditionOperation.greaterThan:
-          if (left is num && right is num) {
-            return left > right;
-          }
-          return left
-                  .toString()
-                  .toLowerCase()
-                  .compareTo(right.toString().toLowerCase()) >
-              0;
-        case ConditionOperation.lessThan:
-          if (left is num && right is num) {
-            return left < right;
-          }
-          return left
-                  .toString()
-                  .toLowerCase()
-                  .compareTo(right.toString().toLowerCase()) <
-              0;
-      }
-    }
-    if (expression is ExpressionGroup) {
-      final left = expression.leftExpression.evaluate(variables);
-      final right = expression.rightExpression.evaluate(variables);
-      switch (expression.join) {
-        case ConditionJoin.and:
-          return left && right;
-        case ConditionJoin.or:
-          return left || right;
-      }
-    }
-    return false;
-  }
+  bool evaluate(Map<String, VariableData> variables) =>
+      evaluateExpression(this, variables);
 }
 
 extension ExpressionPartExt on ExpressionPart {
   /// [variables] is a map of variable name and its value.
-  dynamic evaluate(Map<String, VariableData> variables) {
-    final part = this;
-    if (part is VariablePart) {
-      // TODO: [Aachman] handle JSON path?
-      return variables[part.variableName]?.value;
-    }
-    if (part is RawValuePart) {
-      return part.value;
-    }
-    return null;
-  }
+  dynamic evaluate(Map<String, VariableData> variables) =>
+      evaluateExpressionPart(this, variables);
 }
 
 extension ConditionsMapExt on Map<String, BaseCondition> {
