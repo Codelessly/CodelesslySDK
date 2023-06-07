@@ -104,28 +104,91 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
         .where((reaction) => reaction.trigger.type == TriggerType.longPress)
         .toList();
 
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onClickReactions.isEmpty
-            ? null
-            : () {
-                for (final Reaction reaction in onClickReactions) {
-                  final ActionModel action = reaction.action;
-                  FunctionsRepository.performAction(context, action);
-                }
-              },
-        onLongPress: onLongPressReactions.isEmpty
-            ? null
-            : () {
-                for (final Reaction reaction in onLongPressReactions) {
-                  final ActionModel action = reaction.action;
-                  FunctionsRepository.performAction(context, action);
-                }
-              },
-        child: widget,
-      ),
-    );
+    final InkWellModel? inkWell = node is BlendMixin ? node.inkWell : null;
+
+    if (inkWell != null) {
+      return Material(
+        color: Colors.transparent,
+        borderRadius: getBorderRadius(node),
+        clipBehavior: getClipBehavior(node),
+        child: InkWell(
+          onTap: onClickReactions.isEmpty
+              ? null
+              : () {
+                  for (final Reaction reaction in onClickReactions) {
+                    final ActionModel action = reaction.action;
+                    FunctionsRepository.performAction(context, action);
+                  }
+                },
+          onLongPress: onLongPressReactions.isEmpty
+              ? null
+              : () {
+                  for (final Reaction reaction in onLongPressReactions) {
+                    final ActionModel action = reaction.action;
+                    FunctionsRepository.performAction(context, action);
+                  }
+                },
+          splashColor: inkWell.splashColor?.toFlutterColor(),
+          highlightColor: inkWell.highlightColor?.toFlutterColor(),
+          hoverColor: inkWell.hoverColor?.toFlutterColor(),
+          focusColor: inkWell.focusColor?.toFlutterColor(),
+          child: widget,
+        ),
+      );
+    } else {
+      return MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: onClickReactions.isEmpty
+              ? null
+              : () {
+                  for (final Reaction reaction in onClickReactions) {
+                    final ActionModel action = reaction.action;
+                    FunctionsRepository.performAction(context, action);
+                  }
+                },
+          onLongPress: onLongPressReactions.isEmpty
+              ? null
+              : () {
+                  for (final Reaction reaction in onLongPressReactions) {
+                    final ActionModel action = reaction.action;
+                    FunctionsRepository.performAction(context, action);
+                  }
+                },
+          child: widget,
+        ),
+      );
+    }
+  }
+
+
+  BorderRadius? getBorderRadius(BaseNode node) {
+    if (node is CornerMixin) {
+      if (node.cornerRadius.linked &&
+          node.cornerRadius.type == RadiusType.elliptical) {
+        return BorderRadius.all(Radius.elliptical(
+            node.basicBoxLocal.width, node.basicBoxLocal.height));
+      }
+      return node.cornerRadius.borderRadius;
+    } else {
+      return null;
+    }
+  }
+
+  Clip getClipBehavior(BaseNode node) {
+    if (node is ClipMixin) {
+      if (node.clipsContent) {
+        return Clip.hardEdge;
+      } else {
+        return Clip.none;
+      }
+    }
+
+    if (node is CornerMixin && node.cornerRadius != CornerRadius.zero) {
+      return Clip.antiAlias;
+    } else {
+      return Clip.none;
+    }
   }
 }
 
