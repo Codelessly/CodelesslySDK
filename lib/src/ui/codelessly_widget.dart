@@ -64,6 +64,8 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   /// A map that holds the current state of all variables.
   final Map<String, ValueNotifier<VariableData>> variables;
 
+  final Map<String, BaseCondition> conditions;
+
   /// Creates a [CodelesslyContext] with the given [data], [functions], and
   /// [nodeValues].
   CodelesslyContext({
@@ -71,6 +73,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     required this.functions,
     required this.nodeValues,
     required this.variables,
+    required this.conditions,
     required String? layoutID,
   }) : _layoutID = layoutID, _data = data;
 
@@ -80,7 +83,12 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
         functions = {},
         nodeValues = {},
         variables = {},
+        conditions = {},
         _layoutID = null;
+
+  /// Returns a map of all of the [VariableData]s in [variables] mapped by their
+  /// name.
+  Map<String, VariableData> variableNamesMap() => variables.map((key, value) => MapEntry(value.value.name, value.value));
 
   /// Creates a copy of this [CodelesslyContext] with the given [data],
   /// [functions], and [nodeValues].
@@ -89,20 +97,22 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     Map<String, CodelesslyFunction>? functions,
     Map<String, ValueNotifier<List<ValueModel>>>? nodeValues,
     Map<String, ValueNotifier<VariableData>>? variables,
-    String? layoutId,
-    bool forceLayoutId = false,
+    Map<String, BaseCondition>? conditions,
+    String? layoutID,
+    bool forceLayoutID = false,
   }) {
     return CodelesslyContext(
       data: data ?? this.data,
       functions: functions ?? this.functions,
       nodeValues: nodeValues ?? this.nodeValues,
       variables: variables ?? this.variables,
-      layoutID: forceLayoutId ? layoutId : layoutId ?? this.layoutID,
+      layoutID: forceLayoutID ? layoutID : layoutID ?? this.layoutID,
+      conditions: conditions ?? this.conditions,
     );
   }
 
   /// Used for actions that are connected to one or more nodes.
-  /// Ex. submit action is connected to a textfield node to access its data to
+  /// Ex. submit action is connected to a text field node to access its data to
   /// submit to the server.
   Future<void> handleActionConnections(
     ActionModel actionModel,
@@ -388,6 +398,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       functions: widget.functions,
       nodeValues: {},
       variables: {},
+      conditions: {},
       layoutID: _effectiveController.layoutID,
     );
   }

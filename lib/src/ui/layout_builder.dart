@@ -62,6 +62,7 @@ class _CodelesslyPublishedLayoutBuilderState
   void loadLayout(BuildContext context) {
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
+    final Codelessly codelessly = context.read<Codelessly>();
     nodeRegistry.clear();
     nodeRegistry.setNodes(widget.layout.nodes);
     codelesslyContext.nodeValues.clear();
@@ -118,6 +119,11 @@ class _CodelesslyPublishedLayoutBuilderState
         codelesslyContext.variables[variable.id] = notifier;
       }
     }
+
+    final conditions =
+        codelessly.dataManager.publishModel?.conditions[layoutID]?.conditions ??
+            {};
+    codelesslyContext.conditions.addAll(conditions);
   }
 
   @override

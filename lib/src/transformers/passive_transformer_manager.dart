@@ -150,6 +150,22 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       if (listenableVariable != null) listenables.add(listenableVariable);
     }
 
+    // Traverse through all the conditions that affects the node.
+    for (final BaseCondition condition in codelesslyContext.conditions.values) {
+      if (!condition.hasNode(node.id)) continue;
+
+      final List<String> variableNames = condition.getVariables();
+
+      for (final name in variableNames) {
+        // Get corresponding variable data from codelessly context.
+        final ValueNotifier<VariableData>? listenableVariable =
+            codelesslyContext.variables.values
+                .firstWhereOrNull((notifier) => notifier.value.name == name);
+        // Add variable to [listenables].
+        if (listenableVariable != null) listenables.add(listenableVariable);
+      }
+    }
+
     if (listenables.isNotEmpty) {
       return ManagedListenableBuilder(
         key: ValueKey(node.id),

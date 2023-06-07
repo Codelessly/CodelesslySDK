@@ -1307,3 +1307,228 @@ extension ReactionIterableExt on Iterable<Reaction> {
   Iterable whereTriggerType(TriggerType type) =>
       where((e) => e.trigger.type == type);
 }
+
+extension ActionModelExt on ActionModel {
+  bool hasProperty(String nodeId, String name) {
+    final action = this;
+    if (action is SetValueAction && action.nodeID == nodeId) {
+      return action.values.any((element) => element.name == name);
+    }
+    if (action is SetVariantAction &&
+        (name == 'variant' || name == 'currentVariantId')) {
+      return action.nodeID == nodeId;
+    }
+
+    return false;
+  }
+
+  bool hasNode(String nodeId) {
+    final action = this;
+    if (action is SetValueAction && action.nodeID == nodeId) {
+      return true;
+    }
+    if (action is SetVariantAction) {
+      return action.nodeID == nodeId;
+    }
+
+    return false;
+  }
+
+  T? getValue<T>() {
+    final action = this;
+    if (action is SetValueAction) {
+      return action.values.firstOrNull?.value as T;
+    }
+    if (action is SetVariantAction) {
+      return action.variantID as T;
+    }
+    return null;
+  }
+}
+
+extension BaseConditionExt on BaseCondition {
+  bool hasProperty(String nodeId, String name) {
+    final condition = this;
+    if (condition is Condition) {
+      final condition = this as Condition;
+      return condition.actions
+          .any((action) => action.hasProperty(nodeId, name));
+    }
+    if (condition is ConditionGroup) {
+      return condition.ifCondition.hasProperty(nodeId, name) ||
+          condition.elseCondition?.hasProperty(nodeId, name) == true ||
+          condition.elseIfConditions
+              .any((condition) => condition.hasProperty(nodeId, name));
+    }
+    if (condition is ElseCondition) {
+      return condition.actions
+          .any((action) => action.hasProperty(nodeId, name));
+    }
+    return false;
+  }
+
+  bool hasNode(String nodeId) {
+    final condition = this;
+    if (condition is Condition) {
+      final condition = this as Condition;
+      return condition.actions.any((action) => action.hasNode(nodeId));
+    }
+    if (condition is ConditionGroup) {
+      return condition.ifCondition.hasNode(nodeId) ||
+          condition.elseCondition?.hasNode(nodeId) == true ||
+          condition.elseIfConditions
+              .any((condition) => condition.hasNode(nodeId));
+    }
+    if (condition is ElseCondition) {
+      return condition.actions.any((action) => action.hasNode(nodeId));
+    }
+    return false;
+  }
+
+  List<String> getVariables() {
+    final condition = this;
+    if (condition is Condition) {
+      final condition = this as Condition;
+      return condition.expression.getVariables();
+    }
+    if (condition is ConditionGroup) {
+      return [
+        ...condition.ifCondition.expression.getVariables(),
+        ...condition.elseIfConditions
+            .expand((condition) => condition.expression.getVariables()),
+      ];
+    }
+    return [];
+  }
+
+  /// [variables] is a map of variable name to variable value.
+  T? evaluate<T>(Map<String, VariableData> variables) {
+    final condition = this;
+    if (condition is Condition) {
+      final condition = this as Condition;
+      if (condition.expression.evaluate(variables)) {
+        return condition.actions.firstOrNull?.getValue<T?>();
+      } else {
+        return null;
+      }
+    } else if (condition is ConditionGroup) {
+      if (condition.ifCondition.expression.evaluate(variables)) {
+        return condition.ifCondition.actions.firstOrNull?.getValue<T?>();
+      } else {
+        for (final elseIfCondition in condition.elseIfConditions) {
+          if (elseIfCondition.expression.evaluate(variables)) {
+            return elseIfCondition.actions.firstOrNull?.getValue<T?>();
+          }
+        }
+        return condition.elseCondition?.actions.firstOrNull?.getValue<T?>();
+      }
+    } else if (condition is ElseCondition) {
+      return condition.actions.firstOrNull?.getValue<T?>();
+    }
+
+    return null;
+  }
+}
+
+extension CanvasConditionsMapExt on Map<String, CanvasConditions> {
+  bool hasCondition(String nodeId, String name) {
+    return values.any((condition) => condition.hasCondition(nodeId, name));
+  }
+}
+
+extension CanvasConditionsExt on CanvasConditions {
+  bool hasCondition(String nodeId, String name) {
+    return conditions.values
+        .any((condition) => condition.hasProperty(nodeId, name));
+  }
+}
+
+extension ExpressionExt on BaseExpression {
+  List<String> getVariables() {
+    final expression = this;
+    if (expression is Expression) {
+      return [
+        if (expression.leftPart is VariablePart)
+          (expression.leftPart as VariablePart).variableName,
+        if (expression.rightPart is VariablePart)
+          (expression.rightPart as VariablePart).variableName,
+      ];
+    }
+    if (expression is ExpressionGroup) {
+      return [
+        ...expression.leftExpression.getVariables(),
+        ...expression.rightExpression.getVariables(),
+      ];
+    }
+    return [];
+  }
+
+  /// [variables] is a map of variable names and their values.
+  bool evaluate(Map<String, VariableData> variables) {
+    final expression = this;
+    if (expression is Expression) {
+      final left = expression.leftPart.evaluate(variables);
+      final right = expression.rightPart.evaluate(variables);
+      switch (expression.operator) {
+        case ConditionOperation.equalsTo:
+          return left.toString().toLowerCase() ==
+              right.toString().toLowerCase();
+        case ConditionOperation.notEqualsTo:
+          return left.toString().toLowerCase() !=
+              right.toString().toLowerCase();
+        case ConditionOperation.greaterThan:
+          if (left is num && right is num) {
+            return left > right;
+          }
+          return left
+                  .toString()
+                  .toLowerCase()
+                  .compareTo(right.toString().toLowerCase()) >
+              0;
+        case ConditionOperation.lessThan:
+          if (left is num && right is num) {
+            return left < right;
+          }
+          return left
+                  .toString()
+                  .toLowerCase()
+                  .compareTo(right.toString().toLowerCase()) <
+              0;
+      }
+    }
+    if (expression is ExpressionGroup) {
+      final left = expression.leftExpression.evaluate(variables);
+      final right = expression.rightExpression.evaluate(variables);
+      switch (expression.join) {
+        case ConditionJoin.and:
+          return left && right;
+        case ConditionJoin.or:
+          return left || right;
+      }
+    }
+    return false;
+  }
+}
+
+extension ExpressionPartExt on ExpressionPart {
+  /// [variables] is a map of variable name and its value.
+  dynamic evaluate(Map<String, VariableData> variables) {
+    final part = this;
+    if (part is VariablePart) {
+      // TODO: [Aachman] handle JSON path?
+      return variables[part.variableName]?.value;
+    }
+    if (part is RawValuePart) {
+      return part.value;
+    }
+    return null;
+  }
+}
+
+extension ConditionsMapExt on Map<String, BaseCondition> {
+  BaseCondition? findByNodeProperty(String nodeId, String property) => values
+      .firstWhereOrNull((condition) => condition.hasProperty(nodeId, property));
+
+  BaseCondition? findByNode(String nodeId) =>
+      values.firstWhereOrNull((condition) => condition.hasNode(nodeId));
+}
