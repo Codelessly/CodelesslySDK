@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -75,7 +76,8 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     required this.variables,
     required this.conditions,
     required String? layoutID,
-  }) : _layoutID = layoutID, _data = data;
+  })  : _layoutID = layoutID,
+        _data = data;
 
   /// Creates a [CodelesslyContext] with empty an empty map of each property.
   CodelesslyContext.empty()
@@ -88,7 +90,8 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
 
   /// Returns a map of all of the [VariableData]s in [variables] mapped by their
   /// name.
-  Map<String, VariableData> variableNamesMap() => variables.map((key, value) => MapEntry(value.value.name, value.value));
+  Map<String, VariableData> variableNamesMap() =>
+      variables.map((key, value) => MapEntry(value.value.name, value.value));
 
   /// Creates a copy of this [CodelesslyContext] with the given [data],
   /// [functions], and [nodeValues].
@@ -155,7 +158,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
         // value.
         if (connectedNode != null) {
           addToNodeValues(connectedNode, [
-            StringValue(name: 'variant', value: connectedNode.currentVariantId)
+            StringValue(name: 'currentVariantId', value: connectedNode.currentVariantId)
           ]);
         }
         break;
@@ -189,6 +192,12 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
       nodeValues[node.id]!.value = [...currentValues, ...newValues];
     }
   }
+
+  VariableData? findVariableById(String? id) => variables[id]?.value;
+
+  VariableData? findVariableByName(String? name) => variables.values
+      .firstWhereOrNull((variable) => variable.value.name == name)
+      ?.value;
 
   @override
   List<Object?> get props => [data, functions];

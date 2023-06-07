@@ -1532,3 +1532,11 @@ extension ConditionsMapExt on Map<String, BaseCondition> {
   BaseCondition? findByNode(String nodeId) =>
       values.firstWhereOrNull((condition) => condition.hasNode(nodeId));
 }
+
+extension VariantIterable on Iterable<Variant> {
+  Variant? findByName(String? name) =>
+      firstWhereOrNull((variant) => variant.name == name);
+
+  Variant? findById(String? id) =>
+      firstWhereOrNull((variant) => variant.id == id);
+}
