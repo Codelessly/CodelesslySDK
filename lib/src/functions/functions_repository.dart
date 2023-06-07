@@ -432,7 +432,7 @@ class FunctionsRepository {
     final List<ValueModel> values = payload.nodeValues[action.nodeID]!.value;
     // Get new variant value.
     final ValueModel newValue =
-        StringValue(name: 'variant', value: action.variantID);
+        StringValue(name: 'currentVariantId', value: action.variantID);
     // Get old value by name.
     final ValueModel oldValue =
         values.firstWhere((value) => value.name == newValue.name);

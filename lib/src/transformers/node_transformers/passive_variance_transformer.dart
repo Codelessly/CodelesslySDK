@@ -1,5 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -36,9 +37,26 @@ class PassiveVarianceWidget extends StatelessWidget {
   });
 
   List<String> getChildren(BuildContext context) {
+    final CodelesslyContext codelesslyContext =
+        context.read<CodelesslyContext>();
+
+    final BaseCondition? condition = codelesslyContext.conditions
+        .findByNodeProperty(node.id, 'currentVariantId');
+    final String? conditionValue =
+        condition?.evaluate<String>(codelesslyContext.variableNamesMap());
+
+    final String? variableValue = node.variants
+        .findByName(codelesslyContext
+            .findVariableById(node.variables['currentVariantId'])
+            ?.value)
+        ?.id;
+
+    final String? nodeValue =
+        context.getNodeValue(node.id, 'currentVariantId') ??
+            context.getNodeValue(node.id, 'variant');
     final String variantID =
-        context.getNodeValue(node.id, 'variant') ?? node.currentVariantId;
-    final Variant variant = node.variants.firstWhere((v) => v.id == variantID);
+        conditionValue ?? variableValue ?? nodeValue ?? node.currentVariantId;
+    final Variant variant = node.variants.findById(variantID)!;
     return variant.children;
   }
 
