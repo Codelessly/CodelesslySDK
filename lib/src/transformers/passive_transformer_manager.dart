@@ -1,4 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -150,12 +151,66 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
 
     if (listenables.isNotEmpty) {
-      return ListenableBuilder(
-        listenable: Listenable.merge(listenables),
-        builder: (context, child) => builder(context),
+      return ManagedListenableBuilder(
+        key: ValueKey(node.id),
+        listenables: listenables,
+        builder: (context) => builder(context),
       );
     } else {
       return builder(context);
     }
+  }
+}
+
+class ManagedListenableBuilder extends StatefulWidget {
+  final WidgetBuilder builder;
+  final List<Listenable> listenables;
+
+  const ManagedListenableBuilder({
+    required super.key,
+    required this.builder,
+    required this.listenables,
+  });
+
+  @override
+  State<ManagedListenableBuilder> createState() =>
+      _ManagedListenableBuilderState();
+}
+
+class _ManagedListenableBuilderState extends State<ManagedListenableBuilder> {
+  Listenable? listenable;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.listenables.isNotEmpty) {
+      listenable = Listenable.merge(widget.listenables);
+      listenable?.addListener(onChanged);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ManagedListenableBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!const ListEquality<Listenable>()
+        .equals(oldWidget.listenables, widget.listenables)) {
+      // ValueNotifier objects are equatable by object identity, so we check
+      // if those objects are the same or not.
+      listenable?.removeListener(onChanged);
+      listenable = Listenable.merge(widget.listenables);
+      listenable?.addListener(onChanged);
+    }
+  }
+
+  void onChanged() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) => widget.builder(context);
+
+  @override
+  void dispose() {
+    listenable?.removeListener(onChanged);
+    super.dispose();
   }
 }
