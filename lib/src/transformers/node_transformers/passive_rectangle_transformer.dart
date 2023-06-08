@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' as vec_math;
 
 import '../../../codelessly_sdk.dart';
+import '../utils/evaluators.dart';
 
 class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
   PassiveRectangleTransformer(super.getNode, super.manager);
@@ -365,20 +366,22 @@ List<Widget> buildFills(
   double? imageOpacity,
   double? imageRotation,
 }) {
-  if (node is! GeometryMixin) {
-    return [];
-  }
+  if (node is! GeometryMixin) return [];
 
   final BorderRadius? borderRadius = getBorderRadius(node);
   return [
     ...node.fills.where((paint) => paint.visible).mapIndexed((index, paint) {
       switch (paint.type) {
         case PaintType.solid:
+          final BaseCondition? condition = codelesslyContext.conditions
+              .findByNodeProperty(node.id, 'fill-${paint.id}');
+          final PaintModel? conditionValue = evaluateCondition<PaintModel>(
+              condition, codelesslyContext.variableNamesMap());
           return Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: borderRadius,
-                color: paint.toFlutterColor()!,
+                color: (conditionValue ?? paint).toFlutterColor()!,
               ),
             ),
           );
