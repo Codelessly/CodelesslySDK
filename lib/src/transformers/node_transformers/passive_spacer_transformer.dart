@@ -11,7 +11,8 @@ class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
 
     if (parentNode is! RowColumnNode) {
       throw Exception(
-        'SpacerNode must be a child of a RowColumnNode to be rendered.',
+        'SpacerNode must be a child of a RowColumnNode to be rendered.'
+        ' ${node.name} is a child of [${parentNode.id}](${parentNode.name})',
       );
     }
 
