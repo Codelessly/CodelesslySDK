@@ -7,5 +7,6 @@ export 'passive_transformer_manager.dart';
 export 'transformer_functions.dart';
 export 'utils/dash_path.dart';
 export 'utils/indexed_item_provider.dart';
+export 'utils/property_getter_mixin.dart';
 export 'utils/stroke_painter.dart';
 export 'widget_node_transformer_manager.dart';
