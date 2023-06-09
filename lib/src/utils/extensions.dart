@@ -368,10 +368,10 @@ extension BoxConstraintsModelHelper on BoxConstraintsModel {
 extension AlignmentDataHelper on AlignmentData {
   Vec get vec => Vec(x, y);
 
-  flutter.AlignmentGeometry? get flutterAlignmentGeometry =>
+  flutter.AlignmentGeometry get flutterAlignmentGeometry =>
       flutter.Alignment(x, y);
 
-  flutter.Alignment? get flutterAlignment => flutter.Alignment(x, y);
+  flutter.Alignment get flutterAlignment => flutter.Alignment(x, y);
 
   AlignmentData resolve(TextDirection direction) {
     switch (direction) {

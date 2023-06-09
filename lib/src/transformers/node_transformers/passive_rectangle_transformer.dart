@@ -104,32 +104,7 @@ class PassiveRectangleWidget extends StatelessWidget {
         children: [
           ...buildFills(node, codelesslyContext),
           ...buildStrokes(node),
-          if (node is BlendMixin && (node as BlendMixin).inkWell != null)
-            Positioned.fill(
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  splashColor: (node as BlendMixin)
-                      .inkWell!
-                      .splashColor
-                      ?.toFlutterColor(),
-                  highlightColor: (node as BlendMixin)
-                      .inkWell!
-                      .highlightColor
-                      ?.toFlutterColor(),
-                  focusColor: (node as BlendMixin)
-                      .inkWell!
-                      .focusColor
-                      ?.toFlutterColor(),
-                  hoverColor: (node as BlendMixin)
-                      .inkWell!
-                      .hoverColor
-                      ?.toFlutterColor(),
-                  onTap: () {},
-                ),
-              ),
-            ),
-          ...wrapWithPadding(node, children),
+          ...wrapWithPadding(node, children, stackAlignment: stackAlignment),
         ],
       ),
     );
@@ -138,7 +113,11 @@ class PassiveRectangleWidget extends StatelessWidget {
   }
 }
 
-List<Widget> wrapWithPadding(BaseNode node, List<Widget> children) {
+List<Widget> wrapWithPadding(
+  BaseNode node,
+  List<Widget> children, {
+  required AlignmentModel stackAlignment,
+}) {
   final EdgeInsets resolvedPadding =
       node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
 
@@ -147,10 +126,19 @@ List<Widget> wrapWithPadding(BaseNode node, List<Widget> children) {
   }
 
   return [
+    // This fixes editor but embedded preview works either way.
+    // for (Widget child in children)
+    //   Padding(
+    //     padding: resolvedPadding,
+    //     child: child,
+    //   ),
     Padding(
       padding: resolvedPadding,
       child: Stack(
         clipBehavior: Clip.none,
+        // fit: StackFit.expand,
+        alignment:
+            stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
         children: children,
       ),
     ),
