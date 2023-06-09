@@ -1,6 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -22,7 +21,8 @@ class PassiveVarianceTransformer extends NodeWidgetTransformer<VarianceNode> {
   }
 }
 
-class PassiveVarianceWidget extends StatelessWidget {
+class PassiveVarianceWidget extends StatelessWidget
+    with PropertyValueGetterMixin {
   final VarianceNode node;
   final WidgetBuildSettings settings;
   final GetNode getNode;
@@ -37,25 +37,10 @@ class PassiveVarianceWidget extends StatelessWidget {
   });
 
   List<String> getChildren(BuildContext context) {
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
-
-    final BaseCondition? condition = codelesslyContext.conditions
-        .findByNodeProperty(node.id, 'currentVariantId');
-    final String? conditionValue =
-        condition?.evaluate<String>(codelesslyContext.variableNamesMap());
-
-    final String? variableValue = node.variants
-        .findByName(codelesslyContext
-            .findVariableById(node.variables['currentVariantId'])
-            ?.value)
-        ?.id;
-
-    final String? nodeValue =
-        context.getNodeValue(node.id, 'currentVariantId') ??
-            context.getNodeValue(node.id, 'variant');
     final String variantID =
-        conditionValue ?? variableValue ?? nodeValue ?? node.currentVariantId;
+        getPropertyValue<String>(context, node, 'currentVariantId') ??
+            node.currentVariantId;
+
     final Variant variant = node.variants.findById(variantID)!;
     return variant.children;
   }
@@ -83,5 +68,18 @@ class PassiveVarianceWidget extends StatelessWidget {
       width: node.basicBoxLocal.width,
       height: node.basicBoxLocal.height,
     );
+  }
+
+  @override
+  T? getPropertyValueFromVariable<T>(
+      BuildContext context, BaseNode node, String property) {
+    final T? value =
+        super.getPropertyValueFromVariable(context, node, property);
+
+    if (property == 'currentVariantId') {
+      (node as VarianceNode).variants.findByName('$value')?.id as T?;
+    }
+
+    return value;
   }
 }

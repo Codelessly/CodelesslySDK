@@ -158,7 +158,10 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
         // value.
         if (connectedNode != null) {
           addToNodeValues(connectedNode, [
-            StringValue(name: 'currentVariantId', value: connectedNode.currentVariantId)
+            StringValue(
+              name: 'currentVariantId',
+              value: connectedNode.currentVariantId,
+            )
           ]);
         }
         break;
@@ -198,6 +201,21 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   VariableData? findVariableByName(String? name) => variables.values
       .firstWhereOrNull((variable) => variable.value.name == name)
       ?.value;
+
+  T? getPropertyValue<T>(BaseNode node, String property) {
+    final condition = conditions.findByNodeProperty(node.id, property);
+    final T? conditionValue = condition?.evaluate<T>(variableNamesMap());
+
+    final T? variableValue =
+        findVariableById(node.variables[property])?.typedValue<T>();
+
+    final T? nodeValue = nodeValues[node.id]
+        ?.value
+        .firstWhereOrNull((value) => value.name == property)
+        ?.value as T?;
+
+    return conditionValue ?? variableValue ?? nodeValue;
+  }
 
   @override
   List<Object?> get props => [data, functions];
