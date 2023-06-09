@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' as vec_math;
 
 import '../../../codelessly_sdk.dart';
-import '../utils/evaluators.dart';
 
 class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
   PassiveRectangleTransformer(super.getNode, super.manager);
@@ -373,15 +372,13 @@ List<Widget> buildFills(
     ...node.fills.where((paint) => paint.visible).mapIndexed((index, paint) {
       switch (paint.type) {
         case PaintType.solid:
-          final BaseCondition? condition = codelesslyContext.conditions
-              .findByNodeProperty(node.id, 'fill-${paint.id}');
-          final PaintModel? conditionValue = evaluateCondition<PaintModel>(
-              condition, codelesslyContext.variableNamesMap());
+          final propertyValue = codelesslyContext.getPropertyValue<PaintModel>(
+              node, 'fill-${paint.id}');
           return Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: borderRadius,
-                color: (conditionValue ?? paint).toFlutterColor()!,
+                color: (propertyValue ?? paint).toFlutterColor()!,
               ),
             ),
           );

@@ -32,27 +32,9 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
 
-    final BaseCondition? condition =
-        codelesslyContext.conditions.findByNodeProperty(node.id, 'visible');
-
-    bool? conditionValue =
-        condition?.evaluate<bool>(codelesslyContext.variableNamesMap());
-
-    // Get variable for visibility property, if available.
-    final VariableData? variable =
-        codelesslyContext.variables[node.variables['visible']]?.value;
-    // Parse variable's value.
-    final bool? variableValue = bool.tryParse(variable?.value ?? '');
-    // Get node's property values that are used in any actions.
-    final List<ValueModel> nodeValues =
-        codelesslyContext.nodeValues[node.id]?.value ?? [];
-    // Get visibility value from node values.
-    final bool? nodeValue =
-        nodeValues.firstWhereOrNull((val) => val.name == 'visible')?.value;
-
-    // Priority: variable > local node value > node property.
     final bool visible =
-        conditionValue ?? variableValue ?? nodeValue ?? node.visible;
+        codelesslyContext.getPropertyValue<bool>(node, 'visible') ??
+            node.visible;
 
     if (visible) return widget;
 
