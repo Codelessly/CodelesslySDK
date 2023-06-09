@@ -1411,6 +1411,21 @@ extension CanvasConditionsMapExt on Map<String, CanvasConditions> {
   bool hasCondition(String nodeId, String name) {
     return values.any((condition) => condition.hasCondition(nodeId, name));
   }
+
+  BaseCondition? findByNodeProperty(String nodeId, String property) => values
+      .expand((element) => element.conditions.values)
+      .firstWhereOrNull((condition) => condition.hasProperty(nodeId, property));
+
+  BaseCondition? findByNode(String nodeId) => values
+      .expand((element) => element.conditions.values)
+      .firstWhereOrNull((condition) => condition.hasNode(nodeId));
+
+
+  Iterable<BaseCondition> findAllByNode(String nodeId) {
+    return values
+      .expand((element) => element.conditions.values)
+      .where((condition) => condition.hasNode(nodeId));
+  }
 }
 
 extension CanvasConditionsExt on CanvasConditions {
