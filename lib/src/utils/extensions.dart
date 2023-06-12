@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart' as flutter;
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
-import '../transformers/utils/evaluators.dart';
+import '../transformers/utils/condition_evaluator.dart';
 
 extension FABLocationHelper on FABLocation {
   FloatingActionButtonLocation toFloatingActionButtonLocation() {
@@ -1403,8 +1403,8 @@ extension BaseConditionExt on BaseCondition {
   }
 
   /// [variables] is a map of variable name to variable value.
-  T? evaluate<T>(Map<String, VariableData> variables) =>
-      evaluateCondition(this, variables);
+  R? evaluate<R>(Map<String, VariableData> variables) =>
+      accept<R>(ConditionEvaluator<R>(variables));
 }
 
 extension CanvasConditionsMapExt on Map<String, CanvasConditions> {
@@ -1420,11 +1420,10 @@ extension CanvasConditionsMapExt on Map<String, CanvasConditions> {
       .expand((element) => element.conditions.values)
       .firstWhereOrNull((condition) => condition.hasNode(nodeId));
 
-
   Iterable<BaseCondition> findAllByNode(String nodeId) {
     return values
-      .expand((element) => element.conditions.values)
-      .where((condition) => condition.hasNode(nodeId));
+        .expand((element) => element.conditions.values)
+        .where((condition) => condition.hasNode(nodeId));
   }
 }
 
@@ -1457,13 +1456,13 @@ extension ExpressionExt on BaseExpression {
 
   /// [variables] is a map of variable names and their values.
   bool evaluate(Map<String, VariableData> variables) =>
-      evaluateExpression(this, variables);
+      accept<bool>(ConditionEvaluator(variables))!;
 }
 
 extension ExpressionPartExt on ExpressionPart {
   /// [variables] is a map of variable name and its value.
   dynamic evaluate(Map<String, VariableData> variables) =>
-      evaluateExpressionPart(this, variables);
+      accept(ConditionEvaluator(variables));
 }
 
 extension ConditionsMapExt on Map<String, BaseCondition> {
