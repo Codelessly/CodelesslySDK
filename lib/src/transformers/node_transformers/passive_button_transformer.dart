@@ -66,7 +66,8 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
           FunctionsRepository.performAction(context, reaction.action));
 }
 
-class PassiveButtonWidget extends StatelessWidget {
+class PassiveButtonWidget extends StatelessWidget
+    with PropertyValueGetterMixin {
   final ButtonNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variables;
@@ -104,7 +105,10 @@ class PassiveButtonWidget extends StatelessWidget {
       );
     }
 
-    String text = transformText(node.properties.label, variables, context);
+    String text = transformText(
+        getPropertyValue(context, node, 'label') ?? node.properties.label,
+        variables,
+        context);
 
     // final CodelesslyContext codelesslyContext =
     //     context.read<CodelesslyContext>();
@@ -121,7 +125,7 @@ class PassiveButtonWidget extends StatelessWidget {
         node.properties.icon, effectiveIconSize, useIconFonts);
 
     final bool enabled =
-        context.getNodeValue(node.id, 'enabled') ?? node.properties.enabled;
+        getPropertyValue(context, node, 'enabled') ?? node.properties.enabled;
 
     Widget buttonWidget;
     switch (node.properties.buttonType) {

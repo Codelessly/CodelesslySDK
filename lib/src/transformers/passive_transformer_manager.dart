@@ -142,7 +142,18 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     // Traverse through all the variables that the node properties are attached
     // to.
-    for (final String variableID in node.variables.values) {
+    for (final String variableID in node.variables.values.toSet()) {
+      // Get corresponding variable data from codelessly context.
+      final ValueNotifier<VariableData>? listenableVariable =
+          codelesslyContext.variables[variableID];
+      // Add variable to [listenables].
+      if (listenableVariable != null) listenables.add(listenableVariable);
+    }
+
+    // Traverse through all the multi-variables that the node properties are attached
+    // to.
+    for (final String variableID
+        in node.multipleVariables.values.expand((id) => id).toSet()) {
       // Get corresponding variable data from codelessly context.
       final ValueNotifier<VariableData>? listenableVariable =
           codelesslyContext.variables[variableID];
@@ -154,7 +165,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     for (final BaseCondition condition in codelesslyContext.conditions.values) {
       if (!condition.hasNode(node.id)) continue;
 
-      final List<String> variableNames = condition.getVariables();
+      final Set<String> variableNames = condition.getVariables().toSet();
 
       for (final name in variableNames) {
         // Get corresponding variable data from codelessly context.
