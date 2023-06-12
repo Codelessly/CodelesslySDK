@@ -161,7 +161,6 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     }
   }
 
-
   BorderRadius? getBorderRadius(BaseNode node) {
     if (node is CornerMixin) {
       if (node.cornerRadius.linked &&
