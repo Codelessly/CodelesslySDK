@@ -192,9 +192,7 @@ bool evaluateExpression(
 ) {
   if (expression is Expression) {
     final left = evaluateExpressionPart(expression.leftPart, variables);
-    print('left: $left');
     final right = evaluateExpressionPart(expression.rightPart, variables);
-    print('right: $right');
     switch (expression.operator) {
       case ConditionOperation.equalsTo:
         if (left is num && right is num) return left == right;
