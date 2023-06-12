@@ -16,8 +16,7 @@ class PassiveVarianceTransformer extends NodeWidgetTransformer<VarianceNode> {
       node: node,
       settings: settings,
       getNode: getNode,
-      buildWidgetFromID: (id, context) =>
-          manager.buildWidgetByID(id, context, settings: settings),
+      manager: manager,
     );
   }
 }
@@ -26,13 +25,13 @@ class PassiveVarianceWidget extends StatelessWidget {
   final VarianceNode node;
   final WidgetBuildSettings settings;
   final GetNode getNode;
-  final BuildWidgetFromID buildWidgetFromID;
+  final WidgetNodeTransformerManager manager;
 
   const PassiveVarianceWidget({
     super.key,
     required this.node,
     required this.getNode,
-    required this.buildWidgetFromID,
+    required this.manager,
     this.settings = const WidgetBuildSettings(),
   });
 
@@ -48,34 +47,18 @@ class PassiveVarianceWidget extends StatelessWidget {
     final List<String> children = getChildren(context);
     if (children.isNotEmpty) {
       final childNode = getNode(children.first);
-      Widget child = buildWidgetFromID(children.first, context);
 
-      // Manually handle positioning.
-      if (childNode.isBothExpanded) {
-        // no need to wrap with anything.
-        child = child;
-      } else if (childNode.alignment.data != null) {
-        // align mode.
-        child = Align(
-          alignment: childNode.alignment.flutterAlignment!,
-          child: child,
-        );
-      } else {
-        // pinning mode. use stack.
-        child = Stack(
-          children: [
-            Positioned(
-              left: childNode.edgePins.left,
-              top: childNode.edgePins.top,
-              right: childNode.edgePins.right,
-              bottom: childNode.edgePins.bottom,
-              child: child,
-            ),
+      return ClipRect(
+        child: manager
+            .getTransformer<PassiveStackTransformer>()
+            .buildWidgetForChildren(
+          node,
+          context,
+          childrenNodes: [
+            childNode
           ],
-        );
-      }
-
-      return AdaptiveNodeBox(node: node, child: child);
+        ),
+      );
     }
 
     return SizedBox(
