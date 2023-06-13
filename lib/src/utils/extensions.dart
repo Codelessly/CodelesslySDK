@@ -1200,7 +1200,14 @@ extension StringExt on String {
   String get capitalized =>
       characters.first.toUpperCase() + characters.skip(1).string.toLowerCase();
 
+  /// Whether the string represents a valid JSON path.
   bool get isJsonPath => jsonPathRegex.hasMatch(characters.string);
+
+  /// Whether the string represents a valid path of the JSON that is input in
+  /// the [CodelesslyWidget] through the [data] parameter.
+  /// The path needs to start with 'data' to differentiate it from a variable's
+  /// JSON path.
+  bool get isDataJsonPath => dataJsonPathRegex.hasMatch(characters.string);
 
   String get camelToSentenceCase {
     // Split camel case string into words.
