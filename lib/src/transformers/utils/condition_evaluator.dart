@@ -40,7 +40,7 @@ class ConditionEvaluator<R>
     final left = expression.leftPart.accept(this);
     final right = expression.rightPart.accept(this);
 
-    return expression.operator.accept(this, left, right);
+    return expression.operator.accept(left, right, this);
   }
 
   @override
