@@ -103,7 +103,7 @@ class PassiveRectangleWidget extends StatelessWidget {
             stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
         children: [
           ...buildFills(node, codelesslyContext),
-          ...buildStrokes(node),
+          ...buildStrokes(node, codelesslyContext),
           ...wrapWithPadding(node, children, stackAlignment: stackAlignment),
         ],
       ),
@@ -316,33 +316,35 @@ List<num> applyGradientRotation(List<num>? t1, double angle) {
 
 List<num> defaultGradientTransform() => [1.0, 0.0, 0.0, -0.0, 1.0, 0.0];
 
-List<Widget> buildStrokes(BaseNode node) {
+List<Widget> buildStrokes(BaseNode node, CodelesslyContext codelesslyContext) {
   if (node is! GeometryMixin || node.strokeWeight <= 0) {
     return [];
   }
-  if (node.dashPattern.isEmpty) {
-    return [
-      for (final paint in node.strokes.where((paint) => paint.visible))
+  final List<Widget> strokeWidgets = [];
+  for (final paint in node.strokes.where((paint) => paint.visible)) {
+    final paintValue = codelesslyContext.getPropertyValue<PaintModel>(
+        node, 'stroke-${paint.id}');
+    if (node.dashPattern.isEmpty) {
+      strokeWidgets.add(
         Positioned.fill(
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: getBorderRadius(node),
               border: Border.all(
                 strokeAlign: node.strokeAlign.alignment,
-                color: paint.toFlutterColor()!,
+                color: (paintValue ?? paint).toFlutterColor()!,
                 width: node.strokeWeight,
               ),
             ),
           ),
         ),
-    ];
-  } else {
-    return [
-      for (final paint in node.strokes.where((paint) => paint.visible))
+      );
+    } else {
+      strokeWidgets.add(
         Positioned.fill(
           child: CustomPaint(
             painter: StrokePainter(
-              color: paint.toFlutterColor()!,
+              color: (paintValue ?? paint).toFlutterColor()!,
               borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
               dashPattern: node.dashPattern,
               strokeWidth: node.strokeWeight,
@@ -354,8 +356,11 @@ List<Widget> buildStrokes(BaseNode node) {
             ),
           ),
         ),
-    ];
+      );
+    }
   }
+
+  return strokeWidgets;
 }
 
 List<Widget> buildFills(
