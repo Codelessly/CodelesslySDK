@@ -10,7 +10,12 @@ final RegExp variableRegex = RegExp(variablePattern);
 const String jsonPathPattern = r'\${([a-zA-Z.\[\]]+[a-zA-Z0-9_.\[\]]*)}';
 final RegExp jsonPathRegex = RegExp(jsonPathPattern);
 
-String substituteVariables(String characters, Iterable<VariableData> variables) {
+const String dataJsonPathPattern =
+    r'\${data\.([a-zA-Z.\[\]]+[a-zA-Z0-9_.\[\]]*)}';
+final RegExp dataJsonPathRegex = RegExp(dataJsonPathPattern);
+
+String substituteVariables(
+    String characters, Iterable<VariableData> variables) {
   if (variables.isEmpty) return characters;
   return characters.splitMapJoin(
     RegExp(variablePattern),
