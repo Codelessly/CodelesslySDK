@@ -94,7 +94,7 @@ class PassiveRectangleWidget extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        boxShadow: retrieveBoxShadow(node),
+        boxShadow: retrieveBoxShadow(node, codelesslyContext),
         borderRadius: getBorderRadius(node),
       ),
       child: Stack(
@@ -145,20 +145,25 @@ List<Widget> wrapWithPadding(
   ];
 }
 
-List<BoxShadow> retrieveBoxShadow(BaseNode node) {
+List<BoxShadow> retrieveBoxShadow(
+    BaseNode node, CodelesslyContext codelesslyContext) {
   if (node is! DefaultShapeNode) return [];
   return node.effects
       .where((effect) => effect.type == EffectType.dropShadow && effect.visible)
       .map(
-        (effect) => BoxShadow(
-          spreadRadius: effect.spread!,
-          offset:
-              Offset(effect.offset!.x.toDouble(), effect.offset!.y.toDouble()),
-          blurRadius: effect.radius,
-          color: effect.color!.toFlutterColor(),
-        ),
-      )
-      .toList();
+    (effect) {
+      final ColorRGBA? color = codelesslyContext.getPropertyValue<ColorRGBA>(
+              node, 'shadow-color-${effect.id}') ??
+          effect.color;
+      return BoxShadow(
+        spreadRadius: effect.spread!,
+        offset:
+            Offset(effect.offset!.x.toDouble(), effect.offset!.y.toDouble()),
+        blurRadius: effect.radius,
+        color: color!.toFlutterColor(),
+      );
+    },
+  ).toList();
 }
 
 BorderRadius? getBorderRadius(BaseNode node) {
@@ -323,7 +328,7 @@ List<Widget> buildStrokes(BaseNode node, CodelesslyContext codelesslyContext) {
   final List<Widget> strokeWidgets = [];
   for (final paint in node.strokes.where((paint) => paint.visible)) {
     final paintValue = codelesslyContext.getPropertyValue<PaintModel>(
-        node, 'stroke-${paint.id}');
+        node, 'stroke-paint-${paint.id}');
     if (node.dashPattern.isEmpty) {
       strokeWidgets.add(
         Positioned.fill(
