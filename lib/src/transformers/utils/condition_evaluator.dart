@@ -10,8 +10,9 @@ class ConditionEvaluator<R>
         ExpressionPartVisitor,
         ConditionOperatorVisitor {
   final Map<String, VariableData> variables;
+  final Map<String, dynamic> data;
 
-  const ConditionEvaluator(this.variables);
+  const ConditionEvaluator({required this.variables, required this.data});
 
   @override
   R? visitCondition(Condition condition) {
@@ -58,21 +59,21 @@ class ConditionEvaluator<R>
 
   @override
   dynamic visitVariablePart(VariablePart part) {
-    if (part.jsonPath != null) {
-      // TODO: [Aachman] handle JSON path?
-      // This is a JSON path.
-      return part.valueString;
-    }
-
-    if (part.valueString.isNotEmpty &&
-        '\${${part.variableName}}' != part.valueString) {
-      // Interpolation is required
-      return _visitRawValue(
-          substituteVariables(part.valueString, variables.values));
-    } else {
-      return _visitRawValue(
-          variables[part.variableName]?.value.toString() ?? '');
-    }
+    final value =
+        part.valueString.splitMapJoin(jsonPathRegex, onMatch: (match) {
+      // value of the variable without $-sign and curly brackets.
+      final variableValue = match.group(1)!;
+      if (variableValue.startsWith('data.')) {
+        // json data path.
+        final value =
+            substituteJsonPath(match[0]!.replaceFirst('data.', ''), data);
+        return value;
+      } else {
+        // variable name
+        return variables[variableValue]?.value.toString() ?? '';
+      }
+    });
+    return _visitRawValue(value);
   }
 
   @override

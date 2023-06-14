@@ -14,6 +14,9 @@ const String dataJsonPathPattern =
     r'\${data\.([a-zA-Z.\[\]]+[a-zA-Z0-9_.\[\]]*)}';
 final RegExp dataJsonPathRegex = RegExp(dataJsonPathPattern);
 
+final String variableNamePattern = r'\${(?!data\.)([a-zA-Z0-9_]+)(\.[a-zA-Z0-9_.\[\]]*)?}';
+final RegExp variableNameRegex = RegExp(variableNamePattern);
+
 String substituteVariables(
     String characters, Iterable<VariableData> variables) {
   if (variables.isEmpty) return characters;
@@ -27,7 +30,7 @@ String substituteVariables(
   );
 }
 
-String substituteData(String text, Map<String, dynamic> data) {
+String substituteJsonPath(String text, Map<String, dynamic> data) {
   // If the text represents a JSON path, get the relevant value from [data] map.
   if (data.isNotEmpty) {
     if (text.isJsonPath) {

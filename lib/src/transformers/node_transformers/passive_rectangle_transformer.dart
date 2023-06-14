@@ -410,7 +410,7 @@ List<Widget> buildFills(
           // Substitute URL value from [CodelesslyContext]'s [data] map if
           // [imageURL] represents a JSON path.
           String? imageURL = paint.croppedImageURL ?? paint.downloadUrl!;
-          imageURL = substituteData(imageURL, codelesslyContext.data);
+          imageURL = substituteJsonPath(imageURL, codelesslyContext.data);
 
           final BoxFit fit = paint.fit.boxFit;
           final Alignment? alignment = paint.alignment.flutterAlignment;
