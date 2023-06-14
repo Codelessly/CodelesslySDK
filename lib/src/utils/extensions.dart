@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
 import '../transformers/utils/condition_evaluator.dart';
+import '../transformers/utils/condition_variable_visitor.dart';
 
 extension FABLocationHelper on FABLocation {
   FloatingActionButtonLocation toFloatingActionButtonLocation() {
@@ -1207,7 +1208,9 @@ extension StringExt on String {
   /// the [CodelesslyWidget] through the [data] parameter.
   /// The path needs to start with 'data' to differentiate it from a variable's
   /// JSON path.
-  bool get isDataJsonPath => dataJsonPathRegex.hasMatch(characters.string);
+  bool get containsJsonPath => dataJsonPathRegex.hasMatch(characters.string);
+
+  bool get containsVariablePath => jsonPathRegex.hasMatch(characters.string);
 
   String get camelToSentenceCase {
     // Split camel case string into words.
@@ -1393,25 +1396,13 @@ extension BaseConditionExt on BaseCondition {
     return false;
   }
 
-  List<String> getVariables() {
-    final condition = this;
-    if (condition is Condition) {
-      final condition = this as Condition;
-      return condition.expression.getVariables();
-    }
-    if (condition is ConditionGroup) {
-      return [
-        ...condition.ifCondition.expression.getVariables(),
-        ...condition.elseIfConditions
-            .expand((condition) => condition.expression.getVariables()),
-      ];
-    }
-    return [];
-  }
+  Set<String> getVariables() =>
+      accept<Set<String>>(const ConditionVariablesVisitor()) ?? {};
 
   /// [variables] is a map of variable name to variable value.
-  R? evaluate<R>(Map<String, VariableData> variables) =>
-      accept<R>(ConditionEvaluator<R>(variables));
+  R? evaluate<R>(
+          Map<String, VariableData> variables, Map<String, dynamic> data) =>
+      accept<R>(ConditionEvaluator<R>(variables: variables, data: data));
 }
 
 extension CanvasConditionsMapExt on Map<String, CanvasConditions> {
@@ -1442,34 +1433,17 @@ extension CanvasConditionsExt on CanvasConditions {
 }
 
 extension ExpressionExt on BaseExpression {
-  List<String> getVariables() {
-    final expression = this;
-    if (expression is Expression) {
-      return [
-        if (expression.leftPart is VariablePart)
-          (expression.leftPart as VariablePart).variableName,
-        if (expression.rightPart is VariablePart)
-          (expression.rightPart as VariablePart).variableName,
-      ];
-    }
-    if (expression is ExpressionGroup) {
-      return [
-        ...expression.leftExpression.getVariables(),
-        ...expression.rightExpression.getVariables(),
-      ];
-    }
-    return [];
-  }
-
   /// [variables] is a map of variable names and their values.
-  bool evaluate(Map<String, VariableData> variables) =>
-      accept<bool>(ConditionEvaluator(variables))!;
+  bool evaluate(
+          Map<String, VariableData> variables, Map<String, dynamic> data) =>
+      accept<bool>(ConditionEvaluator(variables: variables, data: data))!;
 }
 
 extension ExpressionPartExt on ExpressionPart {
   /// [variables] is a map of variable name and its value.
-  dynamic evaluate(Map<String, VariableData> variables) =>
-      accept(ConditionEvaluator(variables));
+  dynamic evaluate(
+          Map<String, VariableData> variables, Map<String, dynamic> data) =>
+      accept(ConditionEvaluator(variables: variables, data: data));
 }
 
 extension ConditionsMapExt on Map<String, BaseCondition> {
