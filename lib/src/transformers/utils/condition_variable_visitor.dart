@@ -1,7 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 
-import '../../utils/utils.dart';
+import '../../utils/regexes.dart';
 
 /// A visitor that returns the list of variable names used in a condition.
 class ConditionVariablesVisitor
@@ -9,7 +9,11 @@ class ConditionVariablesVisitor
         ConditionVisitor<Set<String>>,
         ExpressionVisitor<Set<String>>,
         ExpressionPartVisitor<Set<String>> {
-  const ConditionVariablesVisitor();
+  const ConditionVariablesVisitor({
+    this.excludedVariableNames = const {},
+  });
+
+  final Set<String> excludedVariableNames;
 
   @override
   Set<String> visitCondition(Condition condition) {
@@ -53,12 +57,13 @@ class ConditionVariablesVisitor
 
   @override
   Set<String> visitVariablePart(VariablePart part) {
-    return variableNameRegex
+    return variablePathRegex
         .allMatches(part.valueString)
         // group 1 is the variable name without the $ prefix, curly braces, and
         // the path.
-        .map((match) => match.group(1))
+        .map((match) => match.namedGroup('name'))
         .whereNotNull()
+        .where((element) => !excludedVariableNames.contains(element))
         .toSet();
   }
 }

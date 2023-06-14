@@ -165,7 +165,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     for (final BaseCondition condition in codelesslyContext.conditions.values) {
       if (!condition.hasNode(node.id)) continue;
 
-      final Set<String> variableNames = condition.getVariables().toSet();
+      final Set<String> variableNames = condition.getReactiveVariables().toSet();
 
       for (final name in variableNames) {
         // Get corresponding variable data from codelessly context.

@@ -4,26 +4,26 @@ import 'package:json_path/json_path.dart';
 
 import '../../codelessly_sdk.dart';
 
-const String variablePattern = r'\${([a-zA-Z]+[a-zA-Z0-9_]*)}';
-final RegExp variableRegex = RegExp(variablePattern);
+// const String jsonPathPattern = r'\${([a-zA-Z.\[\]]+[a-zA-Z0-9_.\[\]]*)}';
+// final RegExp jsonPathRegex = RegExp(jsonPathPattern);
 
-const String jsonPathPattern = r'\${([a-zA-Z.\[\]]+[a-zA-Z0-9_.\[\]]*)}';
-final RegExp jsonPathRegex = RegExp(jsonPathPattern);
+// const String dataJsonPathPattern =
+//     r'\${data\.([a-zA-Z.\[\]]+[a-zA-Z0-9_.\[\]]*)}';
+// final RegExp dataJsonPathRegex = RegExp(dataJsonPathPattern);
 
-const String dataJsonPathPattern =
-    r'\${data\.([a-zA-Z.\[\]]+[a-zA-Z0-9_.\[\]]*)}';
-final RegExp dataJsonPathRegex = RegExp(dataJsonPathPattern);
-
-final String variableNamePattern = r'\${(?!data\.)([a-zA-Z0-9_]+)(\.[a-zA-Z0-9_.\[\]]*)?}';
-final RegExp variableNameRegex = RegExp(variableNamePattern);
+const Set<String> predefinedVariableNames = {'data', 'index', 'item'};
 
 String substituteVariables(
     String characters, Iterable<VariableData> variables) {
   if (variables.isEmpty) return characters;
   return characters.splitMapJoin(
-    RegExp(variablePattern),
+    variablePathRegex,
     onMatch: (match) {
-      final String variableName = match.group(1)!;
+      final String? variableName = variablePathRegex
+          .allMatches(match[0]!)
+          .firstOrNull
+          ?.namedGroup('name');
+      if (variableName == null || variableName.isEmpty) return match[0]!;
       return variables.getStringByName(variableName,
           defaultValue: match.group(0)!);
     },
@@ -33,7 +33,7 @@ String substituteVariables(
 String substituteJsonPath(String text, Map<String, dynamic> data) {
   // If the text represents a JSON path, get the relevant value from [data] map.
   if (data.isNotEmpty) {
-    if (text.isJsonPath) {
+    if (text.isValidVariablePath) {
       // Remove $-sign and curly brackets.
       String path = text.substring(2, text.length - 1);
       // Add $-sign and dot so that the expression matches JSON path standards.

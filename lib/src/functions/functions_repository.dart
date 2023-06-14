@@ -101,7 +101,7 @@ class FunctionsRepository {
     // exists.
     return makeApiRequest(
       method: apiData.method,
-      url: _applyVariables(apiData.url, action.parameters),
+      url: _applyApiInputs(apiData.url, action.parameters),
       headers: _generateMapFromPairs(apiData.headers, action.parameters),
       body: apiData.bodyType == RequestBodyType.form
           ? _generateMapFromPairs(apiData.formFields, action.parameters)
@@ -115,12 +115,12 @@ class FunctionsRepository {
         .where((pair) => pair.isUsed && pair.key.isNotEmpty)
         .toList()
         .asMap()
-        .map((key, pair) => MapEntry(_applyVariables(pair.key, parameters),
-            _applyVariables(pair.value, parameters)));
+        .map((key, pair) => MapEntry(_applyApiInputs(pair.key, parameters),
+        _applyApiInputs(pair.value, parameters)));
   }
 
-  static String _applyVariables(String data, Map<String, String> parameters) {
-    final updatedData = data.replaceAllMapped(variableRegex, (match) {
+  static String _applyApiInputs(String data, Map<String, String> parameters) {
+    final updatedData = data.replaceAllMapped(inputRegex, (match) {
       print('matched group: ${match[0]}');
       final MapEntry<String, String>? parameter = parameters.entries
           .firstWhereOrNull((entry) => entry.key == match.group(1));
