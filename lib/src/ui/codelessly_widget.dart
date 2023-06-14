@@ -204,7 +204,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
 
   T? getPropertyValue<T>(BaseNode node, String property) {
     final condition = conditions.findByNodeProperty(node.id, property);
-    final T? conditionValue = condition?.evaluate<T>(variableNamesMap());
+    final T? conditionValue = condition?.evaluate<T>(variableNamesMap(), data);
 
     final T? variableValue =
         findVariableById(node.variables[property])?.typedValue<T>();

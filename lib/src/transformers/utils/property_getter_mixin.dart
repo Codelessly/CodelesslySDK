@@ -28,7 +28,8 @@ mixin PropertyValueGetterMixin {
     final BaseCondition? condition =
         codelesslyContext.conditions.findByNodeProperty(node.id, property);
 
-    return condition?.evaluate<T>(codelesslyContext.variableNamesMap());
+    return condition?.evaluate<T>(
+        codelesslyContext.variableNamesMap(), codelesslyContext.data);
   }
 
   T? getPropertyValueFromVariable<T>(
