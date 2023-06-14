@@ -1201,23 +1201,21 @@ extension StringExt on String {
   String get capitalized =>
       characters.first.toUpperCase() + characters.skip(1).string.toLowerCase();
 
-  /// Whether the string represents a valid JSON path.
-  bool get isJsonPath => jsonPathRegex.hasMatch(characters.string);
+  /// Whether the string contains all the valid variable paths inside it.
+  /// This will also evaluate the path inside the ${} to be valid.
+  bool get isValidVariablePath => variablePathRegex.hasMatch(characters.string);
 
-  /// Whether the string represents a valid path of the JSON that is input in
-  /// the [CodelesslyWidget] through the [data] parameter.
-  /// The path needs to start with 'data' to differentiate it from a variable's
-  /// JSON path.
-  bool get containsJsonPath => dataJsonPathRegex.hasMatch(characters.string);
-
-  bool get containsVariablePath => jsonPathRegex.hasMatch(characters.string);
+  /// Whether the string contains a variable path that is not checked for
+  /// validity. This will only check for ${...} and not the path inside.
+  bool get containsUncheckedVariablePath =>
+      variableSyntaxIdentifierRegex.hasMatch(characters.string);
 
   String get camelToSentenceCase {
     // Split camel case string into words.
-    final String splittedWords = replaceAll(RegExp(r'(?<!^)(?=[A-Z])'), r' ');
+    final String splitWords = replaceAll(RegExp(r'(?<!^)(?=[A-Z])'), r' ');
     // Capitalize first character.
     final String capitalized =
-        splittedWords[0].toUpperCase() + splittedWords.substring(1);
+        splitWords[0].toUpperCase() + splitWords.substring(1);
     return capitalized;
   }
 }
@@ -1396,8 +1394,17 @@ extension BaseConditionExt on BaseCondition {
     return false;
   }
 
+  /// Returns all the variables used in this condition. This includes the
+  /// predefined variables as well.
   Set<String> getVariables() =>
       accept<Set<String>>(const ConditionVariablesVisitor()) ?? {};
+
+  /// Returns all the variables used in this condition except the predefined
+  /// variables.
+  Set<String> getReactiveVariables() =>
+      accept<Set<String>>(const ConditionVariablesVisitor(
+          excludedVariableNames: predefinedVariableNames)) ??
+      {};
 
   /// [variables] is a map of variable name to variable value.
   R? evaluate<R>(

@@ -60,10 +60,11 @@ class ConditionEvaluator<R>
   @override
   dynamic visitVariablePart(VariablePart part) {
     final value =
-        part.valueString.splitMapJoin(jsonPathRegex, onMatch: (match) {
+        part.valueString.splitMapJoin(variablePathRegex, onMatch: (match) {
       // value of the variable without $-sign and curly brackets.
-      final variableValue = match.group(1)!;
-      if (variableValue.startsWith('data.')) {
+      final RegExpMatch regexMatch = variablePathRegex.firstMatch(match[0]!)!;
+      final variableValue = regexMatch.namedGroup('name')!;
+      if (variableValue == 'data') {
         // json data path.
         final value =
             substituteJsonPath(match[0]!.replaceFirst('data.', ''), data);
