@@ -308,10 +308,15 @@ extension ColorHelper on flutter.Color {
 
   String get hex => value.toRadixString(16).padLeft(8, '0').toUpperCase();
 
-  PaintModel toPaint() =>
-      PaintModel.solid(visible: true, opacity: opacity, color: toColorRGB());
+  PaintModel toPaint([String? id]) => PaintModel.solid(
+        id: id ?? generateId(),
+        visible: true,
+        opacity: opacity,
+        color: toColorRGB(),
+      );
 
   Effect toShadow() => Effect(
+        id: generateId(),
         type: EffectType.dropShadow,
         color: colorToRGBA(this),
         offset: Vec(0, 4),
@@ -331,8 +336,11 @@ extension ColorRGBAHelper on ColorRGBA {
 
   ColorRGB toRGB() => toFlutterColor().colorRGB;
 
-  PaintModel toPaint() => PaintModel.solid(
-      visible: true, opacity: toFlutterColor().opacity, color: toRGB());
+  PaintModel toPaint([String? id]) => PaintModel.solid(
+      id: id ?? generateId(),
+      visible: true,
+      opacity: toFlutterColor().opacity,
+      color: toRGB());
 }
 
 extension PaintColorExt on PaintModel {
