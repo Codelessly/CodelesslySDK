@@ -1350,17 +1350,6 @@ extension ActionModelExt on ActionModel {
 
     return false;
   }
-
-  T? getValue<T>() {
-    final action = this;
-    if (action is SetValueAction) {
-      return action.values.firstOrNull?.value as T;
-    }
-    if (action is SetVariantAction) {
-      return action.variantID as T;
-    }
-    return null;
-  }
 }
 
 extension BaseConditionExt on BaseCondition {

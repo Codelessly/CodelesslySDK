@@ -8,7 +8,8 @@ class ConditionEvaluator<R>
         ConditionVisitor<R>,
         ExpressionVisitor<bool>,
         ExpressionPartVisitor,
-        ConditionOperatorVisitor {
+        ConditionOperatorVisitor,
+        ActionVisitor<R> {
   final Map<String, VariableData> variables;
   final Map<String, dynamic> data;
 
@@ -17,7 +18,7 @@ class ConditionEvaluator<R>
   @override
   R? visitCondition(Condition condition) {
     if (condition.expression.accept<bool>(this) == true) {
-      return condition.actions.firstOrNull?.getValue<R?>();
+      return condition.actions.firstOrNull?.accept<R?>(this);
     }
     return null;
   }
@@ -33,7 +34,7 @@ class ConditionEvaluator<R>
 
   @override
   R? visitElseCondition(ElseCondition condition) {
-    return condition.actions.firstOrNull?.getValue<R?>();
+    return condition.actions.firstOrNull?.accept<R?>(this);
   }
 
   @override
@@ -120,4 +121,34 @@ class ConditionEvaluator<R>
             .compareTo(right.toString().toLowerCase()) <
         0;
   }
+
+  @override
+  R? visitSetValueAction(SetValueAction action) {
+    final ValueModel value = action.values.first;
+    if (value is StringValue) {
+      return visitVariablePart(VariablePart(valueString: value.value));
+    }
+    return value.value as R?;
+  }
+
+  @override
+  R? visitSetVariantAction(SetVariantAction action) => action.variantID as R?;
+
+  @override
+  R? visitApiCall(ApiCallAction action) => null;
+
+  @override
+  R? visitCallFunctionAction(CallFunctionAction action) => null;
+
+  @override
+  R? visitLinkAction(LinkAction action) => null;
+
+  @override
+  R? visitNavigationAction(NavigationAction action) => null;
+
+  @override
+  R? visitSetVariableAction(SetVariableAction action) => null;
+
+  @override
+  R? visitSubmitAction(SubmitAction action) => null;
 }
