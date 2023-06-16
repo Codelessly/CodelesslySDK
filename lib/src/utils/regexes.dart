@@ -99,13 +99,22 @@
 ///     )*                          # End of the outer group, allows for zero or more occurrences
 /// ============================================================================
 ///
+/// Available named capture groups:
+///     1. value:       The entire variable expression with path.
+///     2. name:        The variable name isolated from the expression.
+///     3. accessor:    The array accessor applied directly to the variable.
+///     4. path:        The nested property path applied directly to the variable.
+///
 /// Try it out here: https://regex101.com/r/FOyWLJ/1
 const String variablePathPattern =
     r'\$\{(?<value>(?<name>[a-zA-Z][a-zA-Z0-9_]*)((?<accessor>\[\d+\])|(?:\.(?<path>[a-zA-Z]+[a-zA-Z0-9_]*(?:\[\d+\])*))*)?)\}';
 final RegExp variablePathRegex = RegExp(variablePathPattern);
 
+/// A flexible version of [variablePathPattern] that allows for partial match
+/// on $ or ${} curly braces in a string while the text/path is actively being
+/// composed.
 const String variablePathComposingPattern =
-    r'\$\{?(?<value>(?<name>[a-zA-Z][a-zA-Z0-9_]*)((?<accessor>\[\d+\])|(?:\.(?<path>[a-zA-Z]+[a-zA-Z0-9_]*(?:\[\d+\])*))*)?)\}?';
+    r'\$\{?(?<value>(?<name>[a-zA-Z][a-zA-Z0-9_]*)((?<accessor>\[\d+\])|(?:\.(?<path>[a-zA-Z]+[a-zA-Z0-9_]*(?:\[\d+\])*))*)?)?\}?';
 final RegExp variablePathComposingRegex = RegExp(variablePathComposingPattern);
 
 /// A regex that matches any variable path identifier in a string that is
@@ -130,6 +139,10 @@ final RegExp variableSyntaxIdentifierRegex =
 ///   [a-zA-Z0-9_]*              # Matches zero or more alphanumeric characters or underscores
 /// )                            # End of the named capture group "name"
 /// \}?                          # Matches the closing "}" literal (optional)
+///
+/// Available named capture groups:
+///    1. name: The variable name isolated from the expression.
+///
 const String variableNameIdentifierPattern =
     r'\$\{?(?<name>[a-zA-Z]+[a-zA-Z0-9_]*)\}?';
 final RegExp variableNameIdentifierRegex =
