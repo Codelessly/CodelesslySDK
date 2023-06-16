@@ -71,6 +71,17 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
 
   void onChanged(BuildContext context, SwitchNode node, bool internalValue) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
+
+    if (node.variables.containsKey('value')) {
+      // a variable is linked to this node.
+      final ValueNotifier<VariableData>? variable =
+      payload.variables[node.variables['value'] ?? ''];
+      if (variable != null) {
+        variable.value =
+            variable.value.copyWith(value: internalValue.toString());
+      }
+    }
+
     // Change local state of switch.
     if (payload.nodeValues.containsKey(node.id)) {
       final List<ValueModel> values = payload.nodeValues[node.id]!.value;
@@ -90,7 +101,7 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
   }
 }
 
-class PassiveSwitchWidget extends StatelessWidget {
+class PassiveSwitchWidget extends StatelessWidget with PropertyValueGetterMixin {
   final SwitchNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variables;
@@ -106,7 +117,7 @@ class PassiveSwitchWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool value = context.getNodeValue(node.id, 'value') ?? node.value;
+    final bool value = getPropertyValue<bool>(context, node, 'value') ?? node.value;
     // final bool value = variables.getBooleanById(node.variables['value'] ?? '',
     //     defaultValue: node.value);
     final scale = node.basicBoxLocal.width / kSwitchDefaultWidth;

@@ -322,7 +322,12 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
 
-    final variables = [...widget.variables];
+    final List<VariableData> variables = [
+      ...widget.variables,
+      // TODO[Aachman]: this should not be needed with full variable support on
+      // text node text property.
+      ...codelesslyContext.variableNamesMap().values,
+    ];
 
     /// Check if this is a part of a list item.
     final IndexedItemProvider? indexProvider = IndexedItemProvider.of(context);
