@@ -71,6 +71,17 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
 
   void onChanged(BuildContext context, CheckboxNode node, bool? internalValue) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
+
+    if (node.variables.containsKey('value')) {
+      // a variable is linked to this node.
+      final ValueNotifier<VariableData>? variable =
+          payload.variables[node.variables['value'] ?? ''];
+      if (variable != null) {
+        variable.value =
+            variable.value.copyWith(value: internalValue.toString());
+      }
+    }
+
     // Change local state of checkbox.
     if (payload.nodeValues.containsKey(node.id)) {
       final List<ValueModel> values = payload.nodeValues[node.id]!.value;
@@ -91,7 +102,8 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
   }
 }
 
-class PassiveCheckboxWidget extends StatelessWidget {
+class PassiveCheckboxWidget extends StatelessWidget
+    with PropertyValueGetterMixin {
   final CheckboxNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variables;
@@ -113,7 +125,8 @@ class PassiveCheckboxWidget extends StatelessWidget {
     // }
     final scale = node.basicBoxLocal.width / kCheckboxDefaultSize;
 
-    final bool? value = context.getNodeValue(node.id, 'value') ?? node.value;
+    final bool? value =
+        getPropertyValue<bool>(context, node, 'value') ?? node.value;
 
     return SizedBox(
       width: node.basicBoxLocal.width,

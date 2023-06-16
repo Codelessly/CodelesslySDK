@@ -73,6 +73,17 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
 
   void onChanged(BuildContext context, SliderNode node, double internalValue) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
+
+    if (node.variables.containsKey('value')) {
+      // a variable is linked to this node.
+      final ValueNotifier<VariableData>? variable =
+          payload.variables[node.variables['value'] ?? ''];
+      if (variable != null) {
+        variable.value = variable.value.copyWith(
+            value: internalValue.toStringAsFixed(
+                variable.value.type == VariableType.integer ? 0 : 2));
+      }
+    }
     if (payload.nodeValues.containsKey(node.id)) {
       // Change local state of checkbox.
       payload.nodeValues[node.id]!.value = [
@@ -89,7 +100,8 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
   }
 }
 
-class PassiveSliderWidget extends StatelessWidget {
+class PassiveSliderWidget extends StatelessWidget
+    with PropertyValueGetterMixin {
   final SliderNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variables;
@@ -105,8 +117,8 @@ class PassiveSliderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final model = context.getNodeValueModel(node.id, 'value');
-    final double value = model?.value ?? node.value;
+    final double value =
+        getPropertyValue<double>(context, node, 'value') ?? node.value;
 
     // final double value = variables.getDoubleById(node.variables['value'] ?? '',
     //     defaultValue: node.value);
