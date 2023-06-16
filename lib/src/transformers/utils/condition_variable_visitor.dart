@@ -8,7 +8,8 @@ class ConditionVariablesVisitor
     implements
         ConditionVisitor<Set<String>>,
         ExpressionVisitor<Set<String>>,
-        ExpressionPartVisitor<Set<String>> {
+        ExpressionPartVisitor<Set<String>>,
+        ActionVisitor<Set<String>> {
   const ConditionVariablesVisitor({
     this.excludedVariableNames = const {},
   });
@@ -17,7 +18,11 @@ class ConditionVariablesVisitor
 
   @override
   Set<String> visitCondition(Condition condition) {
-    return condition.expression.accept<Set<String>>(this) ?? {};
+    return {
+      ...condition.expression.accept<Set<String>>(this) ?? {},
+      ...condition.actions
+          .expand((action) => action.accept<Set<String>>(this) ?? <String>{}),
+    };
   }
 
   @override
@@ -25,13 +30,17 @@ class ConditionVariablesVisitor
     return <String>{
       ...condition.ifCondition.accept<Set<String>>(this) ?? {},
       ...condition.elseIfConditions
-          .expand((condition) => condition.accept<Set<String>>(this) ?? {}),
+          .expand((action) => action.accept<Set<String>>(this) ?? <String>{})
+          .toSet(),
+      ...condition.elseCondition?.accept<Set<String>>(this) ?? {},
     };
   }
 
   @override
   Set<String> visitElseCondition(ElseCondition condition) {
-    return {};
+    return condition.actions
+        .expand((action) => action.accept<Set<String>>(this) ?? <String>{})
+        .toSet();
   }
 
   @override
@@ -59,11 +68,44 @@ class ConditionVariablesVisitor
   Set<String> visitVariablePart(VariablePart part) {
     return variablePathRegex
         .allMatches(part.valueString)
-        // group 1 is the variable name without the $ prefix, curly braces, and
-        // the path.
         .map((match) => match.namedGroup('name'))
         .whereNotNull()
         .where((element) => !excludedVariableNames.contains(element))
+        .toSet();
+  }
+
+  @override
+  Set<String>? visitApiCall(ApiCallAction action) => {};
+
+  @override
+  Set<String>? visitCallFunctionAction(CallFunctionAction action) => {};
+
+  @override
+  Set<String>? visitLinkAction(LinkAction action) => {};
+
+  @override
+  Set<String>? visitNavigationAction(NavigationAction action) => {};
+
+  @override
+  Set<String>? visitSubmitAction(SubmitAction action) => {};
+
+  @override
+  Set<String>? visitSetVariableAction(SetVariableAction action) => {};
+
+  @override
+  Set<String>? visitSetVariantAction(SetVariantAction action) => {};
+
+  @override
+  Set<String>? visitSetValueAction(SetValueAction action) {
+    return action.values
+        .whereType<StringValue>()
+        .expand(
+          (value) => variablePathRegex
+              .allMatches(value.value.toString())
+              .map((match) => match.namedGroup('name'))
+              .whereNotNull()
+              .where((element) => !excludedVariableNames.contains(element)),
+        )
         .toSet();
   }
 }
