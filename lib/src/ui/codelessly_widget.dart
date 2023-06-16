@@ -80,13 +80,13 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
         _data = data;
 
   /// Creates a [CodelesslyContext] with empty an empty map of each property.
-  CodelesslyContext.empty()
+  CodelesslyContext.empty({String? layoutID})
       : _data = {},
         functions = {},
         nodeValues = {},
         variables = {},
         conditions = {},
-        _layoutID = null;
+        _layoutID = layoutID;
 
   /// Returns a map of all of the [VariableData]s in [variables] mapped by their
   /// name.
@@ -290,6 +290,9 @@ class CodelesslyWidget extends StatefulWidget {
   /// advanced control over the layout's behavior.
   final CodelesslyWidgetLayoutBuilder layoutBuilder;
 
+  /// Optional [CodelesslyContext] that can be provided explicitly if needed.
+  final CodelesslyContext? codelesslyContext;
+
   /// Creates a [CodelesslyWidget].
   ///
   /// Can be instantiated in several ways:
@@ -341,6 +344,7 @@ class CodelesslyWidget extends StatefulWidget {
     // Data and functions.
     Map<String, dynamic> data = const {},
     Map<String, CodelesslyFunction> functions = const {},
+    this.codelesslyContext,
   })  : data = {...data},
         functions = {...functions},
         assert(
@@ -420,14 +424,19 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       },
     );
 
-    codelesslyContext = CodelesslyContext(
-      data: widget.data,
-      functions: widget.functions,
-      nodeValues: {},
-      variables: {},
-      conditions: {},
-      layoutID: _effectiveController.layoutID,
-    );
+    if (widget.codelesslyContext != null) {
+      debugPrint('CodelesslyContext is provided explicitly by the widget.');
+    }
+
+    codelesslyContext = widget.codelesslyContext ??
+        CodelesslyContext(
+          data: widget.data,
+          functions: widget.functions,
+          nodeValues: {},
+          variables: {},
+          conditions: {},
+          layoutID: _effectiveController.layoutID,
+        );
   }
 
   /// TODO: If Codelessly instance updates variables or functions, then we need
@@ -437,6 +446,21 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   @override
   void didUpdateWidget(covariant CodelesslyWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.codelesslyContext != widget.codelesslyContext) {
+      if (oldWidget.codelesslyContext != null &&
+          widget.codelesslyContext == null) {
+        // explicitly provided context is removed
+        codelesslyContext = codelesslyContext.copyWith();
+      } else if (oldWidget.codelesslyContext == null &&
+          widget.codelesslyContext != null) {
+        // explicitly provided context is added
+        codelesslyContext = widget.codelesslyContext!;
+      }
+      // explicitly provided context is updated
+      codelesslyContext = widget.codelesslyContext!;
+    }
+
     if (widget.data != codelesslyContext.data) {
       codelesslyContext.data = widget.data;
     }
