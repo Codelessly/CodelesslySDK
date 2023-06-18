@@ -6,17 +6,22 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.19.2 <3.0.0'
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
 dependencies:
   flutter:
     sdk: flutter
 
-  google_fonts: ^4.0.3
+  google_fonts: ^5.0.0
   bubble: ^1.2.1
   hive: ^2.2.3
   hive_flutter: ^1.0.0
   codelessly_sdk:
     path: ../
+
+dependency_overrides:
+  http: ^1.0.0
 
 dev_dependencies:
   flutter_test:

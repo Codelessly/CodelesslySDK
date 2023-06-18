@@ -5,16 +5,17 @@ version: 0.0.2
 
 homepage: https://codelessly.com/
 repository: https://github.com/Codelessly/CodelesslySDK
-issue_tracker: https://github.com/Codelessly/CodelesslySDK/issues
 
 environment:
-  sdk: ^3.0.2
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  codelessly_api: ^0.0.2
   equatable: ^2.0.5
-  google_fonts: ^4.0.4
+  google_fonts: ^5.0.0
   json_annotation: ^4.8.1
   url_launcher: ^6.1.11
   collection: '>=1.17.0 <2.0.0'
@@ -37,7 +38,6 @@ dependencies:
   provider: ^6.0.5
   json_path: ^0.6.0
   meta: ^1.9.1
-  codelessly_api: ^0.0.2
   # Uncomment to develop locally.
 #  codelessly_api:
 #    path: ../codelessly_api
@@ -48,6 +48,9 @@ dev_dependencies:
     sdk: flutter
   json_serializable: ^6.7.0
   flutter_lints: ^2.0.1
+
+dependency_overrides:
+  http: ^1.0.0
 
 flutter:
   uses-material-design: true
