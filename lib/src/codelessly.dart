@@ -14,27 +14,21 @@ import 'logging/error_handler.dart';
 import 'logging/reporter.dart';
 
 /// Represents the current status of the SDK.
-enum SDKStatus {
+enum CodelesslyStatus {
   /// The SDK has not been initialized.
-  idle('Idle'),
+  empty,
 
-  /// The SDK has configurations set and is ready to be initialized.
-  configured('Configured'),
+  /// The SDK has loaded settings and is ready to be initialized.
+  configured,
 
   /// The SDK is initializing.
-  loading('Loading'),
+  loading,
 
-  /// The SDK is initialized.
-  done('Done'),
+  /// The SDK is loaded and is ready to use.
+  loaded,
 
-  /// The SDK crashed.
-  errored('Errored');
-
-  /// The label of the status.
-  final String label;
-
-  /// A const constructor for [SDKStatus].
-  const SDKStatus(this.label);
+  /// The SDK has an error..
+  error,
 }
 
 /// Holds initialization configuration options for the SDK.
@@ -117,10 +111,10 @@ class Codelessly {
   static Codelessly get instance => _instance;
 
   /// Returns the current status of the SDK.
-  static SDKStatus get sdkStatus => _instance.status;
+  static CodelesslyStatus get sdkStatus => _instance.status;
 
   /// Returns a stream of SDK status changes.
-  static Stream<SDKStatus> get sdkStatusStream => _instance.statusStream;
+  static Stream<CodelesslyStatus> get sdkStatusStream => _instance.statusStream;
 
   CodelesslyConfig? _config;
 
@@ -203,20 +197,20 @@ class Codelessly {
 
     // If the config is not null, update the status to configured.
     if (_config != null) {
-      _updateStatus(SDKStatus.configured);
+      _updateStatus(CodelesslyStatus.configured);
     }
   }
 
-  SDKStatus _status = SDKStatus.idle;
+  CodelesslyStatus _status = CodelesslyStatus.empty;
 
   /// Returns the current status of this SDK instance.
-  SDKStatus get status => _status;
+  CodelesslyStatus get status => _status;
 
-  final StreamController<SDKStatus> _statusStreamController =
-      StreamController.broadcast()..add(SDKStatus.idle);
+  final StreamController<CodelesslyStatus> _statusStreamController =
+      StreamController.broadcast()..add(CodelesslyStatus.empty);
 
   /// Returns a stream of status updates for this SDK instance.
-  Stream<SDKStatus> get statusStream => _statusStreamController.stream;
+  Stream<CodelesslyStatus> get statusStream => _statusStreamController.stream;
 
   /// Disposes this instance of the SDK permanently.
   @mustCallSuper
@@ -226,7 +220,7 @@ class Codelessly {
       'Cannot dispose global instance. Only dispose locally created instances.',
     );
 
-    _status = SDKStatus.idle;
+    _status = CodelesslyStatus.empty;
     _statusStreamController.close();
 
     _cacheManager?.dispose();
@@ -252,7 +246,7 @@ class Codelessly {
     _previewDataManager?.invalidate();
     _authManager?.invalidate();
 
-    _status = SDKStatus.idle;
+    _status = CodelesslyStatus.empty;
     _statusStreamController.add(_status);
   }
 
@@ -265,7 +259,7 @@ class Codelessly {
 
   /// Internally updates the status of this instance of the SDK and emits a
   /// status update event to the [statusStream].
-  void _updateStatus(SDKStatus status) {
+  void _updateStatus(CodelesslyStatus status) {
     if (_status == status) {
       return;
     }
@@ -286,7 +280,7 @@ class Codelessly {
   /// [Codelessly] SDK is the global instance rather than a local one, it will
   /// configure and initialize the SDK automatically via its widget's
   /// constructor parameters.
-  SDKStatus configure({
+  CodelesslyStatus configure({
     CodelesslyConfig? config,
 
     // Optional data and functions.
@@ -306,7 +300,7 @@ class Codelessly {
     );
 
     assert(
-      status == SDKStatus.idle,
+      status == CodelesslyStatus.empty,
       'The SDK cannot be configured if it is not idle. '
       'Consider calling [Codelessly.dispose] before reconfiguring.',
     );
@@ -334,7 +328,7 @@ class Codelessly {
     if (functions != null) {
       this.functions.addAll(functions);
     }
-    _updateStatus(SDKStatus.configured);
+    _updateStatus(CodelesslyStatus.configured);
     return status;
   }
 
@@ -363,7 +357,7 @@ class Codelessly {
         if (exception.layoutID != null) {
           return;
         }
-        _updateStatus(SDKStatus.errored);
+        _updateStatus(CodelesslyStatus.error);
       },
     );
   }
@@ -377,7 +371,7 @@ class Codelessly {
   /// [Codelessly] SDK is the global instance rather than a local one, it will
   /// configure and/or initialize the SDK automatically via its widget's
   /// constructor parameters, if specified.
-  Future<SDKStatus> init({
+  Future<CodelesslyStatus> init({
     CodelesslyConfig? config,
 
     // Optional data and functions.
@@ -406,7 +400,7 @@ class Codelessly {
       automaticallySendCrashReports: _config!.automaticallyCollectCrashReports,
     );
     try {
-      _updateStatus(SDKStatus.configured);
+      _updateStatus(CodelesslyStatus.configured);
 
       // Clean up.
       if (cacheManager != null) _cacheManager?.dispose();
@@ -453,7 +447,7 @@ class Codelessly {
                 LocalDataRepository(cacheManager: this.cacheManager),
           );
 
-      _updateStatus(SDKStatus.loading);
+      _updateStatus(CodelesslyStatus.loading);
 
       log('Initializing cache manager');
       // The cache manager initializes first to load the local cache.
@@ -490,9 +484,9 @@ class Codelessly {
 
       log('Codelessly ${isGlobalInstance(this) ? 'global' : 'local'} instance initialization complete.');
 
-      _updateStatus(SDKStatus.done);
+      _updateStatus(CodelesslyStatus.loaded);
     } catch (error, stacktrace) {
-      _updateStatus(SDKStatus.errored);
+      _updateStatus(CodelesslyStatus.error);
       CodelesslyErrorHandler.instance.captureException(
         error,
         stacktrace: stacktrace,
@@ -515,7 +509,7 @@ class Codelessly {
   /// [Codelessly] SDK is the global instance rather than a local one, it will
   /// configure and initialize the SDK automatically via its widget's
   /// constructor parameters.
-  static SDKStatus configureSDK({
+  static CodelesslyStatus configureSDK({
     CodelesslyConfig? config,
 
     // Optional data and functions.
@@ -547,7 +541,7 @@ class Codelessly {
   /// If the [CodelesslyWidget] recognizes that this instance of the
   /// [Codelessly] SDK is the global instance rather than a local one, it will
   /// initialize the SDK automatically, if specified.
-  static Future<SDKStatus> initializeSDK({
+  static Future<CodelesslyStatus> initializeSDK({
     CodelesslyConfig? config,
 
     // Raw managers.
@@ -591,7 +585,7 @@ class Codelessly {
         error,
         stacktrace: stacktrace,
       );
-      return SDKStatus.errored;
+      return CodelesslyStatus.error;
     }
   }
 }
