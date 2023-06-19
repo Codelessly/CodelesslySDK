@@ -1,6 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
@@ -70,38 +69,16 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
   }
 
   void onChanged(BuildContext context, SwitchNode node, bool internalValue) {
-    final CodelesslyContext payload = context.read<CodelesslyContext>();
+    FunctionsRepository.setPropertyValue(context,
+        node: node, property: 'value', value: internalValue);
 
-    if (node.variables.containsKey('value')) {
-      // a variable is linked to this node.
-      final ValueNotifier<VariableData>? variable =
-      payload.variables[node.variables['value'] ?? ''];
-      if (variable != null) {
-        variable.value =
-            variable.value.copyWith(value: internalValue.toString());
-      }
-    }
-
-    // Change local state of switch.
-    if (payload.nodeValues.containsKey(node.id)) {
-      final List<ValueModel> values = payload.nodeValues[node.id]!.value;
-      final ValueModel value = values.firstWhere((val) => val.name == 'value');
-      final List<ValueModel> updatedValues = [...values]
-        ..remove(value)
-        ..add(value.copyWith(value: internalValue));
-      payload.nodeValues[node.id]!.value = updatedValues;
-    }
-    node.reactions
-        .where((reaction) => reaction.trigger.type == TriggerType.changed)
-        .forEach((reaction) => FunctionsRepository.performAction(
-              context,
-              reaction.action,
-              internalValue: internalValue,
-            ));
+    FunctionsRepository.triggerAction(
+        context, node, TriggerType.changed, internalValue);
   }
 }
 
-class PassiveSwitchWidget extends StatelessWidget with PropertyValueGetterMixin {
+class PassiveSwitchWidget extends StatelessWidget
+    with PropertyValueGetterMixin {
   final SwitchNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variables;
@@ -117,7 +94,8 @@ class PassiveSwitchWidget extends StatelessWidget with PropertyValueGetterMixin 
 
   @override
   Widget build(BuildContext context) {
-    final bool value = getPropertyValue<bool>(context, node, 'value') ?? node.value;
+    final bool value =
+        getPropertyValue<bool>(context, node, 'value') ?? node.value;
     // final bool value = variables.getBooleanById(node.variables['value'] ?? '',
     //     defaultValue: node.value);
     final scale = node.basicBoxLocal.width / kSwitchDefaultWidth;

@@ -1,6 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
@@ -72,31 +71,11 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
   }
 
   void onChanged(BuildContext context, SliderNode node, double internalValue) {
-    final CodelesslyContext payload = context.read<CodelesslyContext>();
+    FunctionsRepository.setPropertyValue(context,
+        node: node, property: 'value', value: internalValue);
 
-    if (node.variables.containsKey('value')) {
-      // a variable is linked to this node.
-      final ValueNotifier<VariableData>? variable =
-          payload.variables[node.variables['value'] ?? ''];
-      if (variable != null) {
-        variable.value = variable.value.copyWith(
-            value: internalValue.toStringAsFixed(
-                variable.value.type == VariableType.integer ? 0 : 2));
-      }
-    }
-    if (payload.nodeValues.containsKey(node.id)) {
-      // Change local state of checkbox.
-      payload.nodeValues[node.id]!.value = [
-        DoubleValue(name: 'value', value: internalValue)
-      ];
-    }
-    node.reactions
-        .where((reaction) => reaction.trigger.type == TriggerType.changed)
-        .forEach((reaction) => FunctionsRepository.performAction(
-              context,
-              reaction.action,
-              internalValue: internalValue,
-            ));
+    FunctionsRepository.triggerAction(
+        context, node, TriggerType.changed, internalValue);
   }
 }
 
