@@ -3,6 +3,7 @@ library codelessly_sdk;
 export 'src/auth/auth_manager.dart';
 export 'src/cache/cache_manager.dart';
 export 'src/codelessly.dart';
+export 'src/codelessly_config.dart';
 export 'src/constants.dart';
 export 'src/data/data_manager.dart';
 export 'src/data/local_data_repository.dart';
