@@ -43,6 +43,18 @@ class SDKPublishModel with EquatableMixin {
   /// Contains information about the conditions used in the published project.
   final Map<String, SDKLayoutConditions> conditions;
 
+  /// The title of the template.
+  final String? title;
+
+  /// The description of the template.
+  final String? description;
+
+  /// The date the template was first published.
+  @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
+  final DateTime createdAt;
+
+  final String? entryLayoutId;
+
   /// Creates a new instance of [SDKPublishModel].
   SDKPublishModel({
     required this.projectId,
@@ -53,18 +65,26 @@ class SDKPublishModel with EquatableMixin {
     Map<String, HttpApiData>? apis,
     Map<String, SDKLayoutVariables>? variables,
     Map<String, SDKLayoutConditions>? conditions,
+
+    // Template gallery details
+    this.title,
+    this.description,
+    DateTime? createdAt,
+    this.entryLayoutId,
   })  : layouts = layouts ?? {},
         fonts = fonts ?? {},
         updates = updates ?? SDKPublishUpdates(),
         apis = apis ?? {},
         variables = variables ?? {},
         conditions = conditions ?? {};
+        apis = apis ?? {},
+        createdAt = createdAt ?? DateTime.now();
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
   factory SDKPublishModel.fromJson(Map<String, dynamic> json) =>
       _$SDKPublishModelFromJson(json);
 
-  /// Converts this instance to a JSON map.
+  /// Converts this instance to a JSON map without the fonts, layouts, and apis.
   Map<String, dynamic> toJson() => _$SDKPublishModelToJson(this)
     ..remove('fonts')
     ..remove('layouts')
@@ -85,6 +105,10 @@ class SDKPublishModel with EquatableMixin {
     Map<String, HttpApiData>? apis,
     Map<String, SDKLayoutVariables>? variables,
     Map<String, SDKLayoutConditions>? conditions,
+    String? title,
+    String? description,
+    DateTime? createdAt,
+    String? entryLayoutId,
   }) {
     return SDKPublishModel(
       projectId: projectId ?? this.projectId,
@@ -95,6 +119,10 @@ class SDKPublishModel with EquatableMixin {
       apis: apis ?? this.apis,
       variables: variables ?? this.variables,
       conditions: conditions ?? this.conditions,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+      entryLayoutId: entryLayoutId ?? this.entryLayoutId,
     );
   }
 
@@ -108,6 +136,10 @@ class SDKPublishModel with EquatableMixin {
         variables,
         conditions,
         updates,
+        title,
+        description,
+        createdAt,
+        entryLayoutId,
       ];
 }
 
