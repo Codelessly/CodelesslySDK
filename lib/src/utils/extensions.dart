@@ -1230,6 +1230,7 @@ extension StringExt on String {
   /// [String.splitMapJoin] is limited to [Pattern] which can only do [Match]
   /// and not [RegExpMatch]. Because of this, you can't access named groups
   /// inside the pattern. This function fixes that.
+  /// Ref: https://github.com/dart-lang/sdk/issues/52721
   String splitMapJoinRegex(
     RegExp pattern, {
     String Function(RegExpMatch match)? onMatch,
