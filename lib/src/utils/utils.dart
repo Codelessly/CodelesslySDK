@@ -16,13 +16,10 @@ const Set<String> predefinedVariableNames = {'data', 'index', 'item'};
 String substituteVariables(
     String characters, Iterable<VariableData> variables) {
   if (variables.isEmpty) return characters;
-  return characters.splitMapJoin(
+  return characters.splitMapJoinRegex(
     variablePathRegex,
     onMatch: (match) {
-      final String? variableName = variablePathRegex
-          .allMatches(match[0]!)
-          .firstOrNull
-          ?.namedGroup('name');
+      final String? variableName = match.namedGroup('name');
       if (variableName == null || variableName.isEmpty) return match[0]!;
       return variables.getStringByName(variableName,
           defaultValue: match.group(0)!);
