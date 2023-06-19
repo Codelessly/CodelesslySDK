@@ -1226,6 +1226,30 @@ extension StringExt on String {
         splitWords[0].toUpperCase() + splitWords.substring(1);
     return capitalized;
   }
+
+  /// [String.splitMapJoin] is limited to [Pattern] which can only do [Match]
+  /// and not [RegExpMatch]. Because of this, you can't access named groups
+  /// inside the pattern. This function fixes that.
+  String splitMapJoinRegex(
+    RegExp pattern, {
+    String Function(RegExpMatch match)? onMatch,
+    String Function(String text)? onNonMatch,
+  }) {
+    return splitMapJoin(
+      pattern,
+      onMatch: onMatch != null
+          ? (match) {
+              match as RegExpMatch;
+              return onMatch(match);
+            }
+          : null,
+      onNonMatch: onNonMatch != null
+          ? (text) {
+              return onNonMatch(text);
+            }
+          : null,
+    );
+  }
 }
 
 /// Can match:
