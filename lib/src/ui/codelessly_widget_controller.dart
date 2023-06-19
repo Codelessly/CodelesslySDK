@@ -34,7 +34,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
   /// Listens to the SDK's status to figure out if it needs to manually
   /// initialize the opposite data manager if needed.
-  StreamSubscription<SDKStatus>? _sdkStatusListener;
+  StreamSubscription<CodelesslyStatus>? _sdkStatusListener;
 
   DataManager get dataManager =>
       isPreview ? codelessly.previewDataManager : codelessly.publishDataManager;
@@ -89,7 +89,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     didInitialize = true;
 
     try {
-      SDKStatus status = codelessly.status;
+      CodelesslyStatus status = codelessly.status;
       final bool isGlobal = Codelessly.isGlobalInstance(codelessly);
 
       // If the Codelessly global instance was passed and is still idle, that
@@ -100,7 +100,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       // instance, the user explicitly wants more control over the SDK, so we
       // do nothing and let the user handle it.
       if (isGlobal) {
-        if (status == SDKStatus.idle) {
+        if (status == CodelesslyStatus.empty) {
           codelessly.configure(
             config: config,
             authManager: authManager,
@@ -110,7 +110,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
           );
         }
         status = codelessly.status;
-        if (status == SDKStatus.configured) {
+        if (status == CodelesslyStatus.configured) {
           codelessly.init(initializeDataManagers: false);
         }
       }
@@ -133,7 +133,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     }
 
     // First event.
-    if (codelessly.status == SDKStatus.done) {
+    if (codelessly.status == CodelesslyStatus.loaded) {
       print(
           '[CodelesslyWidgetController] [$layoutID]: Codelessly SDK is already loaded. Woo!');
       _verifyAndListenToDataManager();
@@ -144,12 +144,12 @@ class CodelesslyWidgetController extends ChangeNotifier {
     _sdkStatusListener?.cancel();
     _sdkStatusListener = codelessly.statusStream.listen((status) {
       switch (status) {
-        case SDKStatus.idle:
-        case SDKStatus.configured:
-        case SDKStatus.loading:
-        case SDKStatus.errored:
+        case CodelesslyStatus.empty:
+        case CodelesslyStatus.configured:
+        case CodelesslyStatus.loading:
+        case CodelesslyStatus.error:
           break;
-        case SDKStatus.done:
+        case CodelesslyStatus.loaded:
           print(
               '[CodelesslyWidgetController] [$layoutID]: Codelessly SDK is done loading.');
           _verifyAndListenToDataManager();

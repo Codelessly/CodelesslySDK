@@ -463,7 +463,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           value: _effectiveController.codelessly,
         ),
       ],
-      child: StreamBuilder<SDKStatus>(
+      child: StreamBuilder<CodelesslyStatus>(
         stream: _effectiveController.codelessly.statusStream,
         initialData: _effectiveController.codelessly.status,
         builder: (context, snapshot) {
@@ -478,21 +478,21 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             return widget.loadingBuilder?.call(context) ??
                 CodelesslyLoadingScreen();
           }
-          final SDKStatus status = snapshot.data!;
+          final CodelesslyStatus status = snapshot.data!;
           switch (status) {
-            case SDKStatus.idle:
-            case SDKStatus.configured:
-            case SDKStatus.loading:
+            case CodelesslyStatus.empty:
+            case CodelesslyStatus.configured:
+            case CodelesslyStatus.loading:
               return widget.loadingBuilder?.call(context) ??
                   CodelesslyLoadingScreen();
-            case SDKStatus.errored:
+            case CodelesslyStatus.error:
               return widget.errorBuilder?.call(context, snapshot.error) ??
                   CodelesslyErrorScreen(
                     exception: CodelesslyErrorHandler.instance.lastException ??
                         snapshot.error,
                     isPreview: _effectiveController.isPreview,
                   );
-            case SDKStatus.done:
+            case CodelesslyStatus.loaded:
               return buildStreamedLayout();
           }
         },
