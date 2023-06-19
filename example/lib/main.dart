@@ -8,7 +8,7 @@ const String layoutID = '0QulTBDc3r8gHgv0KeVK';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Codelessly.initializeSDK(
+  await Codelessly.initialize(
     config: const CodelesslyConfig(
       authToken: authToken,
       isPreview: false,

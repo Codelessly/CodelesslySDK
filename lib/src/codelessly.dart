@@ -7,7 +7,6 @@ import '../codelessly_sdk.dart';
 import '../firedart.dart';
 import 'auth/codelessly_auth_manager.dart';
 import 'cache/codelessly_cache_manager.dart';
-import 'codelessly_config.dart';
 import 'data/firebase_data_repository.dart';
 import 'data/web_data_repository.dart';
 import 'logging/error_handler.dart';
@@ -89,6 +88,17 @@ class Codelessly {
   /// when they are triggered.
   final Map<String, CodelesslyFunction> functions = {};
 
+  CodelesslyStatus _status = CodelesslyStatus.empty;
+
+  /// Returns the current status of this SDK instance.
+  CodelesslyStatus get status => _status;
+
+  final StreamController<CodelesslyStatus> _statusStreamController =
+      StreamController.broadcast()..add(CodelesslyStatus.empty);
+
+  /// Returns a stream of status updates for this SDK instance.
+  Stream<CodelesslyStatus> get statusStream => _statusStreamController.stream;
+
   /// Creates a new instance of [Codelessly].
   Codelessly({
     CodelesslyConfig? config,
@@ -124,19 +134,7 @@ class Codelessly {
     }
   }
 
-  CodelesslyStatus _status = CodelesslyStatus.empty;
-
-  /// Returns the current status of this SDK instance.
-  CodelesslyStatus get status => _status;
-
-  final StreamController<CodelesslyStatus> _statusStreamController =
-      StreamController.broadcast()..add(CodelesslyStatus.empty);
-
-  /// Returns a stream of status updates for this SDK instance.
-  Stream<CodelesslyStatus> get statusStream => _statusStreamController.stream;
-
   /// Disposes this instance of the SDK permanently.
-  @mustCallSuper
   void dispose() {
     assert(
       !isGlobalInstance(this),
@@ -155,6 +153,62 @@ class Codelessly {
     _authManager = null;
     _publishDataManager = null;
     _previewDataManager = null;
+  }
+
+  /// Initializes this instance of the SDK.
+  ///
+  /// To know when the SDK is ready, simply listen to the status events from the
+  /// [Codelessly.instance.statusStream]. No need to await the future.
+  ///
+  /// If the [CodelesslyWidget] recognizes that this instance of the
+  /// [Codelessly] SDK is the global instance rather than a local one, it will
+  /// initialize the SDK automatically, if specified.
+  static Future<CodelesslyStatus> initialize({
+    CodelesslyConfig? config,
+
+    // Raw managers.
+    AuthManager? authManager,
+    DataManager? publishDataManager,
+    DataManager? previewDataManager,
+    CacheManager? cacheManager,
+
+    // Raw data.
+    Map<String, dynamic>? data,
+    Map<String, CodelesslyFunction>? functions,
+  }) async {
+    assert(
+      (config == null) != (_instance._config == null),
+      _instance._config == null
+          ? 'The SDK cannot be initialized if it is not configured. '
+              '\nConsider specifying a [CodelesslyConfig] when initializing.'
+          : 'A [CodelesslyConfig] was already provided.'
+              '\nConsider removing the duplicate config or calling '
+              '[Codelessly.dispose] before reinitializing.',
+    );
+
+    try {
+      return _instance.init(
+        config: config,
+        cacheManager: cacheManager,
+        authManager: authManager,
+        publishDataManager: publishDataManager,
+        previewDataManager: previewDataManager,
+        data: data,
+        functions: functions,
+      );
+    } catch (error, stacktrace) {
+      _instance._config ??= config;
+      _instance.initErrorHandler(
+        automaticallySendCrashReports:
+            (_instance._config?.automaticallyCollectCrashReports) ?? false,
+      );
+
+      CodelesslyErrorHandler.instance.captureException(
+        error,
+        stacktrace: stacktrace,
+      );
+      return CodelesslyStatus.error;
+    }
   }
 
   /// Resets the state of the SDK. This is useful for resetting the data without
@@ -454,61 +508,5 @@ class Codelessly {
       data: data,
       functions: functions,
     );
-  }
-
-  /// Initializes this instance of the SDK.
-  ///
-  /// To know when the SDK is ready, simply listen to the status events from the
-  /// [Codelessly.instance.statusStream]. No need to await the future.
-  ///
-  /// If the [CodelesslyWidget] recognizes that this instance of the
-  /// [Codelessly] SDK is the global instance rather than a local one, it will
-  /// initialize the SDK automatically, if specified.
-  static Future<CodelesslyStatus> initializeSDK({
-    CodelesslyConfig? config,
-
-    // Raw managers.
-    AuthManager? authManager,
-    DataManager? publishDataManager,
-    DataManager? previewDataManager,
-    CacheManager? cacheManager,
-
-    // Raw data.
-    Map<String, dynamic>? data,
-    Map<String, CodelesslyFunction>? functions,
-  }) async {
-    assert(
-      (config == null) != (_instance._config == null),
-      _instance._config == null
-          ? 'The SDK cannot be initialized if it is not configured. '
-              '\nConsider specifying a [CodelesslyConfig] when initializing.'
-          : 'A [CodelesslyConfig] was already provided.'
-              '\nConsider removing the duplicate config or calling '
-              '[Codelessly.dispose] before reinitializing.',
-    );
-
-    try {
-      return _instance.init(
-        config: config,
-        cacheManager: cacheManager,
-        authManager: authManager,
-        publishDataManager: publishDataManager,
-        previewDataManager: previewDataManager,
-        data: data,
-        functions: functions,
-      );
-    } catch (error, stacktrace) {
-      _instance._config ??= config;
-      _instance.initErrorHandler(
-        automaticallySendCrashReports:
-            (_instance._config?.automaticallyCollectCrashReports) ?? false,
-      );
-
-      CodelesslyErrorHandler.instance.captureException(
-        error,
-        stacktrace: stacktrace,
-      );
-      return CodelesslyStatus.error;
-    }
   }
 }
