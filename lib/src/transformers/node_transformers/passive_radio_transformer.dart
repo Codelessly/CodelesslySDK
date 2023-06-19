@@ -1,9 +1,9 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/functions_repository.dart';
 
 class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
   PassiveRadioTransformer(super.getNode, super.manager);
@@ -69,20 +69,10 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
   }
 
   void onChanged(BuildContext context, RadioNode node, String? value) {
-    final CodelesslyContext payload = context.read<CodelesslyContext>();
+    FunctionsRepository.setPropertyValue(context,
+        node: node, property: 'groupValue', value: value);
 
-    if (node.variables.containsKey('groupValue')) {
-      // a variable is linked to this node.
-      final ValueNotifier<VariableData>? variable =
-          payload.variables[node.variables['groupValue'] ?? ''];
-      if (variable != null) {
-        variable.value = variable.value.copyWith(value: value);
-      }
-    }
-
-    node.reactions
-        .where((reaction) => reaction.trigger.type == TriggerType.click)
-        .forEach(onAction);
+    FunctionsRepository.triggerAction(context, node, TriggerType.click, value);
   }
 
   void onAction(Reaction reaction) {

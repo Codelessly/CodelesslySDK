@@ -67,7 +67,7 @@ class FunctionsRepository {
         setVariant(context, action as SetVariantAction);
         break;
       case ActionType.setVariable:
-        setVariable(context, action as SetVariableAction);
+        setVariableFromAction(context, action as SetVariableAction);
         break;
       case ActionType.callFunction:
         callFunction(context, action as CallFunctionAction);
@@ -116,7 +116,7 @@ class FunctionsRepository {
         .toList()
         .asMap()
         .map((key, pair) => MapEntry(_applyApiInputs(pair.key, parameters),
-        _applyApiInputs(pair.value, parameters)));
+            _applyApiInputs(pair.value, parameters)));
   }
 
   static String _applyApiInputs(String data, Map<String, String> parameters) {
@@ -444,16 +444,133 @@ class FunctionsRepository {
     payload.nodeValues[action.nodeID]!.value = updateValues;
   }
 
-  static void setVariable(BuildContext context, SetVariableAction action) {
+  /// Sets given [action.newValue] for given [action.variable] to a variable
+  /// from [CodelesslyContext.variables].
+  /// Returns `true` if variable was found and updated, `false` otherwise.
+  static bool setVariableFromAction(
+      BuildContext context, SetVariableAction action) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
     // Get updated variable.
     final VariableData? updatedVariable = payload
         .variables[action.variable.id]?.value
         .copyWith(value: action.newValue);
-    if (updatedVariable != null) {
-      // Update values list.
-      payload.variables[action.variable.id]?.value = updatedVariable;
+
+    if (updatedVariable == null) return false;
+    payload.variables[action.variable.id]?.value = updatedVariable;
+    return true;
+  }
+
+  /// Sets given [value] for given [id] to a variable from
+  /// [CodelesslyContext.variables].
+  /// Returns `true` if variable was found and updated, `false` otherwise.
+  static bool setVariableValue(
+    BuildContext context, {
+    required String id,
+    required String value,
+  }) {
+    final CodelesslyContext payload = context.read<CodelesslyContext>();
+
+    final ValueNotifier<VariableData>? variableNotifier = payload.variables[id];
+    if (variableNotifier == null) return false;
+
+    variableNotifier.value = variableNotifier.value.copyWith(value: value);
+
+    return true;
+  }
+
+  /// Sets given [value] for given [property] of given [node] to a variable
+  /// from [CodelesslyContext.variables].
+  /// Returns `true` if variable was found and updated, `false` otherwise.
+  static bool setPropertyVariable(
+    BuildContext context, {
+    required BaseNode node,
+    required String property,
+    required String value,
+  }) {
+    final CodelesslyContext payload = context.read<CodelesslyContext>();
+
+    final String? variableId = node.variables[property];
+
+    if (variableId == null) return false;
+
+    final ValueNotifier<VariableData>? propertyNotifier =
+        payload.variables[variableId];
+    if (propertyNotifier == null) return false;
+
+    propertyNotifier.value = propertyNotifier.value.copyWith(value: value);
+
+    return true;
+  }
+
+  /// Sets given [value] to given [property] of given [node] as node value from
+  /// [CodelesslyContext.nodeValues].
+  /// Returns `true` if node value was found and updated, `false` otherwise.
+  static bool setNodeValue(
+    BuildContext context, {
+    required BaseNode node,
+    required String property,
+    required dynamic value,
+  }) {
+    final CodelesslyContext payload = context.read<CodelesslyContext>();
+
+    if (!node.variables.containsKey(property)) return false;
+
+    final List<ValueModel> values = payload.nodeValues[node.id]!.value;
+    final ValueModel? value =
+        values.firstWhereOrNull((val) => val.name == property);
+
+    if (value == null) return false;
+
+    final List<ValueModel> updatedValues = [...values]
+      ..remove(value)
+      ..add(value.copyWith(value: value));
+
+    // DataUtils.nodeValues[node.id]!.value = updatedValues;
+    payload.nodeValues[node.id]!.value = updatedValues;
+
+    return true;
+  }
+
+  /// Sets given [value] to given [property] of given [node]. If a variable
+  /// exists for given [property], it will set the variable's value, otherwise,
+  /// it will set the node value.
+  /// Returns `true` if variable or node value was found and updated, `false` otherwise.
+  static bool setPropertyValue(
+    BuildContext context, {
+    required BaseNode node,
+    required String property,
+    required dynamic value,
+  }) {
+    return setPropertyVariable(
+          context,
+          node: node,
+          property: property,
+          value: value.toString(),
+        ) ||
+        setNodeValue(
+          context,
+          node: node,
+          property: property,
+          value: value,
+        );
+  }
+
+  static bool triggerAction(BuildContext context, ReactionMixin node, TriggerType type,
+       dynamic value) {
+    final reactions = node.reactions
+        .where((reaction) => reaction.trigger.type == TriggerType.changed);
+
+    if (reactions.isEmpty) return false;
+
+    for (final reaction in reactions) {
+      FunctionsRepository.performAction(
+        context,
+        reaction.action,
+        internalValue: value,
+      );
     }
+
+    return true;
   }
 
   static void callFunction(BuildContext context, CallFunctionAction action) {
