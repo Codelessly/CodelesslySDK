@@ -34,6 +34,7 @@ int _computeMatch(FontVariantModel a, FontVariantModel b) {
 /// the given [sourceVariant].
 ///
 /// The [FontVariantModel] with the lowest score is returned.
+// ignore: unused_element
 FontVariantModel _closestMatch(FontVariantModel sourceVariant,
     Iterable<FontVariantModel> variantsToCompare) {
   int? bestScore;
