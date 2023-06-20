@@ -196,18 +196,15 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     }
   }
 
-  VariableData? findVariableById(String? id) => variables[id]?.value;
-
-  VariableData? findVariableByName(String? name) => variables.values
-      .firstWhereOrNull((variable) => variable.value.name == name)
-      ?.value;
+  ValueNotifier<VariableData>? findVariableByName(String? name) => variables.values
+      .firstWhereOrNull((variable) => variable.value.name == name);
 
   T? getPropertyValue<T>(BaseNode node, String property) {
     final condition = conditions.findByNodeProperty(node.id, property);
     final T? conditionValue = condition?.evaluate<T>(variableNamesMap(), data);
 
     final T? variableValue =
-        findVariableById(node.variables[property])?.typedValue<T>();
+        findVariableByName(node.variables[property])?.value.typedValue<T>();
 
     final T? nodeValue = nodeValues[node.id]
         ?.value
