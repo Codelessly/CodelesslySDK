@@ -100,8 +100,8 @@ class PassiveRadioWidget extends StatelessWidget with PropertyValueGetterMixin {
 
   @override
   Widget build(BuildContext context) {
-    final value = variables.getStringById(node.variables['value'] ?? '',
-        defaultValue: node.value);
+    final value =
+        getPropertyValue<String>(context, node, 'value') ?? node.value;
     final groupValue = getPropertyValue<String>(context, node, 'groupValue') ??
         node.groupValue ??
         '';

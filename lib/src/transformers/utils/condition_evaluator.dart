@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 
@@ -11,7 +13,7 @@ class ConditionEvaluator<R>
         ConditionOperatorVisitor,
         ActionVisitor<R> {
   final Map<String, VariableData> variables;
-  final Map<String, dynamic> data;
+  final dynamic data;
 
   const ConditionEvaluator({required this.variables, required this.data});
 
@@ -62,19 +64,68 @@ class ConditionEvaluator<R>
   dynamic visitVariablePart(VariablePart part) {
     final value =
         part.valueString.splitMapJoinRegex(variablePathRegex, onMatch: (match) {
-      // value of the variable without $-sign and curly brackets.
-      final variableValue = match.namedGroup('name')!;
-      if (variableValue == 'data') {
-        // json data path.
-        final value =
-            substituteJsonPath(match[0]!.replaceFirst('data.', ''), data);
-        return value;
-      } else {
-        // variable name
-        return variables[variableValue]?.value.toString() ?? '';
+      // Raw name of the variable without path or accessor.
+      final String variableName = match.namedGroup('name')!;
+      // Path applied on the variable (without accessor and variable name).
+      final String? variablePath = match.namedGroup('path');
+      // Accessor applied on the variable name (without path and variable name).
+      final String? accessor = match.namedGroup('accessor');
+
+      // Full path of the variable (with accessor and variable name).
+      final String? fullPath = match.namedGroup('value');
+
+      if (fullPath == null) return match[0]!;
+
+      if (predefinedVariableNames.contains(variableName)) {
+        return visitPredefinedVariable(variableName, fullPath, match)
+            .toString();
       }
+
+      final VariableData? variable = variables[variableName];
+
+      if (variable == null) return 'null';
+
+      if ((accessor != null || variablePath != null)) {
+        // variable either has a path or accessor so we need to get the value
+        // of the variable and apply the path or accessor on it.
+        if (variable.type == VariableType.map) {
+          final Map<String, dynamic> json =
+              variable.value.isNotEmpty ? jsonDecode(variable.value) : {};
+          return substituteJsonPath(fullPath, {variableName: json}).toString();
+        } else if (variable.type == VariableType.list) {
+          // TODO: support list type variable paths.
+          return substituteJsonPath(fullPath, {variableName: variable.value})
+              .toString();
+        }
+      }
+
+      // variable name
+      return variables[variableName]?.value.toString() ?? '';
     });
     return _visitRawValue(value);
+  }
+
+  String? visitPredefinedVariable(
+      String variableName, String fullPath, RegExpMatch match) {
+    if (variableName == 'data') {
+      // json data path.
+      return substituteJsonPath(fullPath, {'data': data});
+    }
+
+    if (variableName == 'index') {
+      // index of the current item in the list
+      // TODO: support index for ListView and PageView.
+      return match[0]!;
+    }
+
+    if (variableName == 'item') {
+      // index of the current item in the list
+      // TODO: support index for ListView and PageView.
+      return match[0]!;
+    }
+
+    // default value when variable is not found.
+    return 'null';
   }
 
   @override

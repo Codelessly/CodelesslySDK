@@ -142,21 +142,31 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     // Traverse through all the variables that the node properties are attached
     // to.
-    for (final String variableID in node.variables.values.toSet()) {
+    for (final String variablePath in node.variables.values.toSet()) {
+      final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
+      if (match == null) continue;
+
+      if (match.isPredefinedVariable) continue;
+
       // Get corresponding variable data from codelessly context.
       final ValueNotifier<VariableData>? listenableVariable =
-          codelesslyContext.variables[variableID];
+          codelesslyContext.findVariableByName(match.name);
       // Add variable to [listenables].
       if (listenableVariable != null) listenables.add(listenableVariable);
     }
 
     // Traverse through all the multi-variables that the node properties are attached
     // to.
-    for (final String variableID
+    for (final String variablePath
         in node.multipleVariables.values.expand((id) => id).toSet()) {
+      final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
+      if (match == null) continue;
+
+      if (match.isPredefinedVariable) continue;
+
       // Get corresponding variable data from codelessly context.
       final ValueNotifier<VariableData>? listenableVariable =
-          codelesslyContext.variables[variableID];
+          codelesslyContext.variables[match.name];
       // Add variable to [listenables].
       if (listenableVariable != null) listenables.add(listenableVariable);
     }
@@ -165,7 +175,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     for (final BaseCondition condition in codelesslyContext.conditions.values) {
       if (!condition.hasNode(node.id)) continue;
 
-      final Set<String> variableNames = condition.getReactiveVariables().toSet();
+      final Set<String> variableNames =
+          condition.getReactiveVariables().toSet();
 
       for (final name in variableNames) {
         // Get corresponding variable data from codelessly context.

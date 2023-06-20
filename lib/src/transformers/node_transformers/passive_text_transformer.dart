@@ -89,6 +89,7 @@ class PassiveTextTransformer extends NodeWidgetTransformer<TextNode> {
     // [CodelesslyContext]'s [data] map.
     if (codelesslyContext.data.isNotEmpty) {
       if (property.isJsonPath) {
+        // TODO: use substituteJsonPath method instead.
         // Remove $-sign and curly brackets.
         String path = characters.substring(2, characters.length - 1);
         // Add $-sign and dot so that the expression matches json path

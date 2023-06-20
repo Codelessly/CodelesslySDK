@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
@@ -37,9 +39,69 @@ mixin PropertyValueGetterMixin {
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
 
-    return codelesslyContext
-        .findVariableById(node.variables[property])
-        ?.typedValue<T>();
+    final String? variablePath = node.variables[property];
+
+    if (variablePath == null) return null;
+
+    final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
+
+    if (match == null) return null;
+
+    if (match.isPredefinedVariable) {
+      return getPredefinedVariableValue<T>(context, match.name, match.fullPath);
+    }
+
+    final VariableData? variable =
+        codelesslyContext.findVariableByName(match.name)?.value;
+
+    if (variable == null) return null;
+
+    if (match.hasPathOrAccessor) {
+      if (variable.type == VariableType.map) {
+        final Map<String, dynamic> json =
+            variable.value.isNotEmpty ? jsonDecode(variable.value) : {};
+        return substituteJsonPath(match.fullPath, {match.name: json})
+            ?.typedValue<T>();
+      } else if (variable.type == VariableType.list) {
+        // TODO: support list type variable paths.
+        return substituteJsonPath(match.fullPath, {match.name: variable.value})
+            ?.typedValue<T>();
+      }
+    }
+
+    return variable.value.typedValue<T>();
+  }
+
+  T? getPredefinedVariableValue<T>(
+      BuildContext context, String name, String path) {
+    final CodelesslyContext codelesslyContext =
+        context.read<CodelesslyContext>();
+
+    if (name == 'data') {
+      // substitute path with data.
+      return substituteJsonPath(
+              path.wrapWithVariableSyntax(), {'data': codelesslyContext.data})
+          ?.typedValue<T>();
+    }
+
+    if (name == 'index') {
+      // substitute path with screen.
+      final index = IndexedItemProvider.of(context)?.index;
+      if (index == null) return null;
+
+      return '$index'.typedValue<T>();
+    }
+
+    if (name == 'item') {
+      // substitute path with screen.
+      final item = IndexedItemProvider.of(context)?.item;
+      if (item == null) return null;
+
+      return substituteJsonPath(path.wrapWithVariableSyntax(), {'item': item})
+          ?.typedValue<T>();
+    }
+
+    return null;
   }
 
   T? getPropertyValueFromNodeValues<T>(
