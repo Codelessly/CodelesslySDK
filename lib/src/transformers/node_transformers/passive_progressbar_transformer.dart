@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/functions_repository.dart';
 
 class PassiveProgressBarTransformer
     extends NodeWidgetTransformer<ProgressBarNode> {
@@ -14,10 +15,11 @@ class PassiveProgressBarTransformer
     BuildContext context, [
     WidgetBuildSettings settings = const WidgetBuildSettings(),
   ]) {
-    return buildFromNode(node, settings);
+    return buildFromNode(context, node, settings);
   }
 
-  Widget buildFromProps({
+  Widget buildFromProps(
+    BuildContext context, {
     required ProgressBarProperties props,
     required double height,
     required double width,
@@ -29,7 +31,7 @@ class PassiveProgressBarTransformer
       retainedOuterBoxLocal: NodeBox(0, 0, width, height),
       properties: props,
     );
-    return buildFromNode(node);
+    return buildFromNode(context, node);
   }
 
   Widget buildPreview({
@@ -58,21 +60,33 @@ class PassiveProgressBarTransformer
   }
 
   Widget buildFromNode(
+    BuildContext context,
     ProgressBarNode node, [
     WidgetBuildSettings settings = const WidgetBuildSettings(),
   ]) {
     return PassiveProgressBarWidget(
       node: node,
       settings: settings,
+      onChanged: (value) => onChanged(context, node, value),
     );
+  }
+
+  void onChanged(BuildContext context, ProgressBarNode node, double value) {
+    FunctionsRepository.setPropertyValue(context,
+        node: node, property: 'currentValue', value: value);
+
+    FunctionsRepository.triggerAction(
+        context, node, TriggerType.changed, value);
   }
 }
 
-class PassiveProgressBarWidget extends StatelessWidget {
+class PassiveProgressBarWidget extends StatelessWidget
+    with PropertyValueGetterMixin {
   final ProgressBarNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variables;
   final bool? animate;
+  final ValueChanged<double>? onChanged;
 
   const PassiveProgressBarWidget({
     super.key,
@@ -80,17 +94,23 @@ class PassiveProgressBarWidget extends StatelessWidget {
     this.settings = const WidgetBuildSettings(),
     this.variables = const [],
     this.animate,
+    this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     final double currentValue =
-        context.getNodeValue(node.id, 'currentValue') ?? node.currentValue;
+        getPropertyValue<double>(context, node, 'currentValue') ??
+            node.currentValue;
+
+    final Color progressColor =
+        getPropertyValue<ColorRGBA>(context, node, 'progressColor')
+                ?.toFlutterColor() ??
+            node.properties.progressColor.toFlutterColor();
 
     return AdaptiveNodeBox(
       node: node,
       child: FAProgressBar(
-        key: ValueKey(currentValue),
         size: node.properties.isVertical
             ? node.basicBoxLocal.width
             : node.basicBoxLocal.height,
@@ -99,7 +119,7 @@ class PassiveProgressBarWidget extends StatelessWidget {
         currentValue: currentValue,
         maxValue: node.properties.maxValue,
         backgroundColor: node.properties.backgroundColor.toFlutterColor(),
-        progressColor: node.properties.progressColor.toFlutterColor(),
+        progressColor: progressColor,
         animatedDuration: (animate ?? node.properties.animate)
             ? Duration(milliseconds: node.properties.animationDurationInMillis)
             : Duration.zero,

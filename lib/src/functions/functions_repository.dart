@@ -489,13 +489,27 @@ class FunctionsRepository {
   }) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
 
-    final String? variableId = node.variables[property];
+    final String? variablePath = node.variables[property];
 
-    if (variableId == null) return false;
+    if (variablePath == null) return false;
+
+    final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
+
+    if (match == null) return false;
 
     final ValueNotifier<VariableData>? propertyNotifier =
-        payload.variables[variableId];
+        payload.findVariableByName(match.name);
+
     if (propertyNotifier == null) return false;
+
+    if (match.name != match.fullPath &&
+        (propertyNotifier.value.type == VariableType.map ||
+            propertyNotifier.value.type == VariableType.list)) {
+      // TODO: support sub path on the variable
+      // sub path on the variable
+      propertyNotifier.value = propertyNotifier.value.copyWith(value: value);
+      return true;
+    }
 
     propertyNotifier.value = propertyNotifier.value.copyWith(value: value);
 
@@ -513,17 +527,17 @@ class FunctionsRepository {
   }) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
 
-    if (!node.variables.containsKey(property)) return false;
+    if (payload.nodeValues[node.id] == null) return false;
 
-    final List<ValueModel> values = payload.nodeValues[node.id]!.value;
-    final ValueModel? value =
+    final List<ValueModel> values = payload.nodeValues[node.id]?.value ?? [];
+    final ValueModel? valueModel =
         values.firstWhereOrNull((val) => val.name == property);
 
-    if (value == null) return false;
+    if (valueModel == null) return false;
 
     final List<ValueModel> updatedValues = [...values]
-      ..remove(value)
-      ..add(value.copyWith(value: value));
+      ..remove(valueModel)
+      ..add(valueModel.copyWith(value: value));
 
     // DataUtils.nodeValues[node.id]!.value = updatedValues;
     payload.nodeValues[node.id]!.value = updatedValues;
@@ -555,8 +569,8 @@ class FunctionsRepository {
         );
   }
 
-  static bool triggerAction(BuildContext context, ReactionMixin node, TriggerType type,
-       dynamic value) {
+  static bool triggerAction(BuildContext context, ReactionMixin node,
+      TriggerType type, dynamic value) {
     final reactions = node.reactions
         .where((reaction) => reaction.trigger.type == TriggerType.changed);
 

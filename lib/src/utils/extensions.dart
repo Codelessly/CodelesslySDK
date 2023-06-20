@@ -530,7 +530,7 @@ extension EdgeInsetsHelper on EdgeInsetsModel {
 }
 
 extension VariableDataListExtensions<T extends VariableData> on Iterable<T> {
-  VariableData? findByNameOrNull(String name) =>
+  VariableData? findByNameOrNull(String? name) =>
       firstWhereOrNull((element) => element.name == name);
 
   VariableData findByName(String name) =>
@@ -1211,12 +1211,12 @@ extension StringExt on String {
 
   /// Whether the string contains all the valid variable paths inside it.
   /// This will also evaluate the path inside the ${} to be valid.
-  bool get isValidVariablePath => variablePathRegex.hasMatch(characters.string);
+  bool get isValidVariablePath => variablePathRegex.hasMatch(this);
 
   /// Whether the string contains a variable path that is not checked for
   /// validity. This will only check for ${...} and not the path inside.
   bool get containsUncheckedVariablePath =>
-      variableSyntaxIdentifierRegex.hasMatch(characters.string);
+      variableSyntaxIdentifierRegex.hasMatch(this);
 
   String get camelToSentenceCase {
     // Split camel case string into words.
@@ -1225,6 +1225,13 @@ extension StringExt on String {
     final String capitalized =
         splitWords[0].toUpperCase() + splitWords.substring(1);
     return capitalized;
+  }
+
+  String wrapWithVariableSyntax() {
+    if (variableSyntaxIdentifierRegex.hasMatch(this)) {
+      return this;
+    }
+    return '\${$this}';
   }
 
   /// [String.splitMapJoin] is limited to [Pattern] which can only do [Match]
@@ -1250,6 +1257,32 @@ extension StringExt on String {
             }
           : null,
     );
+  }
+
+  T? typedValue<T>() {
+    final value = this;
+    if (value.isEmpty) return null;
+    if (T == int) {
+      return int.parse(value) as T;
+    } else if (T == double) {
+      return double.parse(value) as T;
+    } else if (T == num) {
+      return num.parse(value) as T;
+    } else if (T == bool) {
+      return (value.toLowerCase() == 'true' || value == '1') as T;
+    } else if (T == String) {
+      return value as T;
+    } else if (T == String) {
+      return value as T;
+    } else if (T == List) {
+      // TODO: implement type conversion.
+      throw UnimplementedError('Not Implemented');
+    } else if (T == Map) {
+      // TODO: implement type conversion.
+      throw UnimplementedError('Not Implemented');
+    } else {
+      return value as T?;
+    }
   }
 }
 
@@ -1416,7 +1449,7 @@ extension BaseConditionExt on BaseCondition {
     return false;
   }
 
-  /// Returns all the variables used in this condition. This includes the
+  /// Returns all the variables names used in this condition. This includes the
   /// predefined variables as well. Returns names of the variables.
   Set<String> getVariables() =>
       accept<Set<String>>(const ConditionVariablesVisitor()) ?? {};

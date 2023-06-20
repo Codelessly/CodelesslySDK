@@ -409,8 +409,13 @@ List<Widget> buildFills(
 
           // Substitute URL value from [CodelesslyContext]'s [data] map if
           // [imageURL] represents a JSON path.
+          // TODO[Aachman]: make it support variable along with json path.
           String? imageURL = paint.croppedImageURL ?? paint.downloadUrl!;
-          imageURL = substituteJsonPath(imageURL, codelesslyContext.data);
+          if (variableSyntaxIdentifierRegex.hasMatch(imageURL)) {
+            imageURL = substituteJsonPath(
+                    imageURL, {'data': codelesslyContext.data}) ??
+                imageURL;
+          }
 
           final BoxFit fit = paint.fit.boxFit;
           final Alignment? alignment = paint.alignment.flutterAlignment;
