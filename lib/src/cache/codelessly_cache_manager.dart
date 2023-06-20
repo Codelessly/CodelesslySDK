@@ -18,8 +18,8 @@ class CodelesslyCacheManager extends CacheManager {
   Future<void> init() async {
     try {
       await Hive.initFlutter('codelessly_sdk');
-      box = await Hive.openBox(cacheBoxName);
-      filesBox = await Hive.openBox(cacheFilesBoxName);
+      box = await Hive.openBox('$cacheBoxName-${config.authToken}');
+      filesBox = await Hive.openBox('$cacheFilesBoxName-${config.authToken}');
     } on HiveError catch (e, stacktrace) {
       throw CodelesslyException(
         'Failed to initialize cache manager.\n${e.message}',

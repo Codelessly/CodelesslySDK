@@ -357,19 +357,28 @@ class DataManager {
       localModel: localModel,
     );
 
+    final bool templateChanged = localModel.isTemplate != serverModel.isTemplate ||
+        localModel.title != serverModel.title ||
+        localModel.description != serverModel.description ||
+        localModel.entryLayoutId != serverModel.entryLayoutId ||
+        localModel.defaultData != serverModel.defaultData;
+
     if (layoutUpdates.isEmpty &&
         fontUpdates.isEmpty &&
         apiUpdates.isEmpty &&
         variableUpdates.isEmpty &&
-        conditionUpdates.isEmpty) {
+        conditionUpdates.isEmpty &&
+        !templateChanged) {
       log('No updates to process.');
       return;
     } else {
       log('Processing ${layoutUpdates.length} layout updates, '
-          '${fontUpdates.length} font updates, and '
-          '${apiUpdates.length} api updates, and '
-          '${variableUpdates.length} variable updates.'
-          '${conditionUpdates.length} condition updates.');
+          '${fontUpdates.length} font updates, '
+          '${apiUpdates.length} api updates, '
+          '${variableUpdates.length} variable updates, '
+          '${conditionUpdates.length} condition updates, and ',
+          '${templateChanged ? 1 : 0} template updates.',
+      );
     }
 
     for (final String layoutID in layoutUpdates.keys) {
@@ -508,6 +517,10 @@ class DataManager {
 
     _publishModel = localModel.copyWith(
       updates: serverModel.updates,
+      title: serverModel.title,
+      description: serverModel.description,
+      entryLayoutId: serverModel.entryLayoutId,
+      defaultData: serverModel.defaultData,
     );
     savePublishModel();
     emitPublishModel();

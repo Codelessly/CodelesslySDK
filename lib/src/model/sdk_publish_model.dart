@@ -53,7 +53,13 @@ class SDKPublishModel with EquatableMixin {
   @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
   final DateTime createdAt;
 
+  /// The id of the layout that should be used as the entry point in the
+  /// Codelessly template gallery.
   final String? entryLayoutId;
+
+  /// The default data that should be used when previewing the template in the
+  /// Codelessly template gallery.
+  Map<String, String>? defaultData;
 
   /// Creates a new instance of [SDKPublishModel].
   SDKPublishModel({
@@ -71,6 +77,7 @@ class SDKPublishModel with EquatableMixin {
     this.description,
     DateTime? createdAt,
     this.entryLayoutId,
+    Map<String, String>? defaultData,
   })  : layouts = layouts ?? {},
         fonts = fonts ?? {},
         updates = updates ?? SDKPublishUpdates(),
@@ -78,7 +85,8 @@ class SDKPublishModel with EquatableMixin {
         variables = variables ?? {},
         conditions = conditions ?? {};
         apis = apis ?? {},
-        createdAt = createdAt ?? DateTime.now();
+        createdAt = createdAt ?? DateTime.now(),
+        defaultData = defaultData ?? {};
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
   factory SDKPublishModel.fromJson(Map<String, dynamic> json) =>
@@ -109,6 +117,7 @@ class SDKPublishModel with EquatableMixin {
     String? description,
     DateTime? createdAt,
     String? entryLayoutId,
+    Map<String, String>? defaultData,
   }) {
     return SDKPublishModel(
       projectId: projectId ?? this.projectId,
@@ -123,6 +132,7 @@ class SDKPublishModel with EquatableMixin {
       description: description ?? this.description,
       createdAt: createdAt ?? this.createdAt,
       entryLayoutId: entryLayoutId ?? this.entryLayoutId,
+      defaultData: defaultData ?? this.defaultData,
     );
   }
 
@@ -140,6 +150,7 @@ class SDKPublishModel with EquatableMixin {
         description,
         createdAt,
         entryLayoutId,
+        defaultData,
       ];
 }
 
