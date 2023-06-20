@@ -33,7 +33,7 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
         context.read<CodelesslyContext>();
 
     final bool visible =
-        codelesslyContext.getPropertyValue<bool>(node, 'visible') ??
+        codelesslyContext.getPropertyValue<bool>(context, node, 'visible') ??
             node.visible;
 
     if (visible) return widget;
