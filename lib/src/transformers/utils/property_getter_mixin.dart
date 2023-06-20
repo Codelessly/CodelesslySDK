@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
@@ -31,7 +29,7 @@ mixin PropertyValueGetterMixin {
         codelesslyContext.conditions.findByNodeProperty(node.id, property);
 
     return condition?.evaluate<T>(
-        codelesslyContext.variableNamesMap(), codelesslyContext.data);
+        context, codelesslyContext.variableNamesMap(), codelesslyContext.data);
   }
 
   T? getPropertyValueFromVariable<T>(
@@ -58,14 +56,14 @@ mixin PropertyValueGetterMixin {
 
     if (match.hasPathOrAccessor) {
       if (variable.type == VariableType.map) {
-        final Map<String, dynamic> json =
-            variable.value.isNotEmpty ? jsonDecode(variable.value) : {};
-        return substituteJsonPath(match.fullPath, {match.name: json})
-            ?.typedValue<T>();
+        return substituteJsonPath(match.fullPath, {
+          match.name: variable.value.typedValue<Map>(defaultValue: {})
+        })?.typedValue<T>();
       } else if (variable.type == VariableType.list) {
         // TODO: support list type variable paths.
-        return substituteJsonPath(match.fullPath, {match.name: variable.value})
-            ?.typedValue<T>();
+        return substituteJsonPath(match.fullPath, {
+          match.name: variable.value.typedValue<List>(defaultValue: [])
+        })?.typedValue<T>();
       }
     }
 

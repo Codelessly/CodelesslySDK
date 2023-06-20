@@ -1,8 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 
-import '../../utils/regexes.dart';
-
 /// A visitor that returns the list of variable names used in a condition.
 class ConditionVariablesVisitor
     implements

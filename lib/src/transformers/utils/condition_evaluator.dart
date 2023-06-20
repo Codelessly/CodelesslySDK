@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -14,8 +13,13 @@ class ConditionEvaluator<R>
         ActionVisitor<R> {
   final Map<String, VariableData> variables;
   final dynamic data;
+  final BuildContext context;
 
-  const ConditionEvaluator({required this.variables, required this.data});
+  const ConditionEvaluator({
+    required this.context,
+    required this.variables,
+    required this.data,
+  });
 
   @override
   R? visitCondition(Condition condition) {
@@ -66,10 +70,6 @@ class ConditionEvaluator<R>
         part.valueString.splitMapJoinRegex(variablePathRegex, onMatch: (match) {
       // Raw name of the variable without path or accessor.
       final String variableName = match.namedGroup('name')!;
-      // Path applied on the variable (without accessor and variable name).
-      final String? variablePath = match.namedGroup('path');
-      // Accessor applied on the variable name (without path and variable name).
-      final String? accessor = match.namedGroup('accessor');
 
       // Full path of the variable (with accessor and variable name).
       final String? fullPath = match.namedGroup('value');
@@ -85,16 +85,17 @@ class ConditionEvaluator<R>
 
       if (variable == null) return 'null';
 
-      if ((accessor != null || variablePath != null)) {
+      if (variableName != fullPath) {
         // variable either has a path or accessor so we need to get the value
         // of the variable and apply the path or accessor on it.
         if (variable.type == VariableType.map) {
-          final Map<String, dynamic> json =
-              variable.value.isNotEmpty ? jsonDecode(variable.value) : {};
-          return substituteJsonPath(fullPath, {variableName: json}).toString();
+          return substituteJsonPath(
+                  fullPath, {variableName: variable.typedValue<Map>() ?? {}})
+              .toString();
         } else if (variable.type == VariableType.list) {
           // TODO: support list type variable paths.
-          return substituteJsonPath(fullPath, {variableName: variable.value})
+          return substituteJsonPath(
+                  fullPath, {variableName: variable.typedValue<List>() ?? []})
               .toString();
         }
       }
@@ -109,19 +110,25 @@ class ConditionEvaluator<R>
       String variableName, String fullPath, RegExpMatch match) {
     if (variableName == 'data') {
       // json data path.
-      return substituteJsonPath(fullPath, {'data': data});
+      return substituteJsonPath(
+          fullPath.wrapWithVariableSyntax(), {'data': data});
     }
 
     if (variableName == 'index') {
-      // index of the current item in the list
-      // TODO: support index for ListView and PageView.
-      return match[0]!;
+      // substitute path with screen.
+      final index = IndexedItemProvider.of(context)?.index;
+      if (index == null) return null;
+
+      return '$index';
     }
 
     if (variableName == 'item') {
-      // index of the current item in the list
-      // TODO: support index for ListView and PageView.
-      return match[0]!;
+      // substitute path with screen.
+      final item = IndexedItemProvider.of(context)?.item;
+      if (item == null) return null;
+
+      return substituteJsonPath(
+          fullPath.wrapWithVariableSyntax(), {'item': item});
     }
 
     // default value when variable is not found.
