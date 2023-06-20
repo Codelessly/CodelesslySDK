@@ -120,7 +120,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       if (hasAlignment) {
         childWidget = Align(
           alignment:
-              (alignment ?? node.alignment).data!.flutterAlignmentGeometry!,
+              (alignment ?? node.alignment).data!.flutterAlignmentGeometry,
           child: childWidget,
         );
       }
@@ -175,7 +175,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         if (hasAlignment) {
           childWidget = Align(
             alignment:
-                (alignment ?? node.alignment).data!.flutterAlignmentGeometry!,
+                (alignment ?? node.alignment).data!.flutterAlignmentGeometry,
             child: childWidget,
           );
         }
@@ -208,7 +208,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         if (hasAlignment) {
           childWidget = Align(
             alignment:
-                (alignment ?? node.alignment).data!.flutterAlignmentGeometry!,
+                (alignment ?? node.alignment).data!.flutterAlignmentGeometry,
             child: childWidget,
           );
         }

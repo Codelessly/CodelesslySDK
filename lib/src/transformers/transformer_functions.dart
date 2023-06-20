@@ -299,7 +299,7 @@ Widget retrieveNavBarItemIconWidget(
       return ImageIcon(
         NetworkImage(icon.iconImage!, scale: icon.scale),
         size: size ?? icon.size,
-        color: color ?? themeColor,
+        color: color, // TODO: Add theming support with themeColor.
       );
   }
 }
