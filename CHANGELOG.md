@@ -1,3 +1,7 @@
+## 0.0.3
+- Update GoogleFonts v5.0.0
+- Update CodelesslyAPI v0.0.3.
+
 ## 0.0.2
 - Upgrade to Flutter 3.10 and Dart 3.
 - Add support for listview and pageview.
