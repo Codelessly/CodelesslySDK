@@ -1258,32 +1258,6 @@ extension StringExt on String {
           : null,
     );
   }
-
-  T? typedValue<T>() {
-    final value = this;
-    if (value.isEmpty) return null;
-    if (T == int) {
-      return int.parse(value) as T;
-    } else if (T == double) {
-      return double.parse(value) as T;
-    } else if (T == num) {
-      return num.parse(value) as T;
-    } else if (T == bool) {
-      return (value.toLowerCase() == 'true' || value == '1') as T;
-    } else if (T == String) {
-      return value as T;
-    } else if (T == String) {
-      return value as T;
-    } else if (T == List) {
-      // TODO: implement type conversion.
-      throw UnimplementedError('Not Implemented');
-    } else if (T == Map) {
-      // TODO: implement type conversion.
-      throw UnimplementedError('Not Implemented');
-    } else {
-      return value as T?;
-    }
-  }
 }
 
 /// Can match:
@@ -1463,8 +1437,12 @@ extension BaseConditionExt on BaseCondition {
 
   /// [variables] is a map of variable name to variable value.
   R? evaluate<R>(
-          Map<String, VariableData> variables, Map<String, dynamic> data) =>
-      accept<R>(ConditionEvaluator<R>(variables: variables, data: data));
+    BuildContext context,
+    Map<String, VariableData> variables,
+    Map<String, dynamic> data,
+  ) =>
+      accept<R>(ConditionEvaluator<R>(
+          context: context, variables: variables, data: data));
 }
 
 extension CanvasConditionsMapExt on Map<String, CanvasConditions> {
@@ -1497,15 +1475,29 @@ extension CanvasConditionsExt on CanvasConditions {
 extension ExpressionExt on BaseExpression {
   /// [variables] is a map of variable names and their values.
   bool evaluate(
-          Map<String, VariableData> variables, Map<String, dynamic> data) =>
-      accept<bool>(ConditionEvaluator(variables: variables, data: data))!;
+    BuildContext context,
+    Map<String, VariableData> variables,
+    Map<String, dynamic> data,
+  ) =>
+      accept<bool>(ConditionEvaluator(
+        context: context,
+        variables: variables,
+        data: data,
+      ))!;
 }
 
 extension ExpressionPartExt on ExpressionPart {
   /// [variables] is a map of variable name and its value.
   dynamic evaluate(
-          Map<String, VariableData> variables, Map<String, dynamic> data) =>
-      accept(ConditionEvaluator(variables: variables, data: data));
+    BuildContext context,
+    Map<String, VariableData> variables,
+    Map<String, dynamic> data,
+  ) =>
+      accept(ConditionEvaluator(
+        context: context,
+        variables: variables,
+        data: data,
+      ));
 }
 
 extension ConditionsMapExt on Map<String, BaseCondition> {
