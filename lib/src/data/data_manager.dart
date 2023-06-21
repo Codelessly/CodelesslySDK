@@ -376,7 +376,7 @@ class DataManager {
           '${fontUpdates.length} font updates, '
           '${apiUpdates.length} api updates, '
           '${variableUpdates.length} variable updates, '
-          '${conditionUpdates.length} condition updates, and ',
+          '${conditionUpdates.length} condition updates, and '
           '${templateChanged ? 1 : 0} template updates.',
       );
     }

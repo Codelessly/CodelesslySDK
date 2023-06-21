@@ -44,12 +44,18 @@ class SDKPublishModel with EquatableMixin {
   final Map<String, SDKLayoutConditions> conditions;
 
   /// The title of the template.
+  /// Whether this published model is part of the template gallery in the
+  /// Codelessly editor.
+  final bool isTemplate;
+
+  /// The title of the template in the Codelessly template gallery.
   final String? title;
 
-  /// The description of the template.
+  /// The description of the template in the Codelessly template gallery.
   final String? description;
 
-  /// The date the template was first published.
+  /// The date the template was first published in the Codelessly template
+  /// gallery.
   @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
   final DateTime createdAt;
 
@@ -73,6 +79,7 @@ class SDKPublishModel with EquatableMixin {
     Map<String, SDKLayoutConditions>? conditions,
 
     // Template gallery details
+    this.isTemplate = false,
     this.title,
     this.description,
     DateTime? createdAt,
@@ -83,8 +90,7 @@ class SDKPublishModel with EquatableMixin {
         updates = updates ?? SDKPublishUpdates(),
         apis = apis ?? {},
         variables = variables ?? {},
-        conditions = conditions ?? {};
-        apis = apis ?? {},
+        conditions = conditions ?? {},
         createdAt = createdAt ?? DateTime.now(),
         defaultData = defaultData ?? {};
 
@@ -113,6 +119,7 @@ class SDKPublishModel with EquatableMixin {
     Map<String, HttpApiData>? apis,
     Map<String, SDKLayoutVariables>? variables,
     Map<String, SDKLayoutConditions>? conditions,
+    bool? isTemplate,
     String? title,
     String? description,
     DateTime? createdAt,
@@ -128,6 +135,7 @@ class SDKPublishModel with EquatableMixin {
       apis: apis ?? this.apis,
       variables: variables ?? this.variables,
       conditions: conditions ?? this.conditions,
+      isTemplate: isTemplate ?? this.isTemplate,
       title: title ?? this.title,
       description: description ?? this.description,
       createdAt: createdAt ?? this.createdAt,
@@ -146,6 +154,7 @@ class SDKPublishModel with EquatableMixin {
         variables,
         conditions,
         updates,
+        isTemplate,
         title,
         description,
         createdAt,
