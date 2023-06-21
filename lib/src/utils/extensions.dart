@@ -1258,6 +1258,30 @@ extension StringExt on String {
           : null,
     );
   }
+
+  Iterable<R> splitMap<R>(
+    RegExp pattern, {
+    R Function(RegExpMatch match)? onMatch,
+    R Function(String text)? onNonMatch,
+  }) {
+    List<R> result = [];
+    splitMapJoinRegex(
+      pattern,
+      onMatch: onMatch != null
+          ? (match) {
+              result.add(onMatch(match));
+              return match[0]!;
+            }
+          : null,
+      onNonMatch: onNonMatch != null
+          ? (text) {
+              result.add(onNonMatch(text));
+              return text;
+            }
+          : null,
+    );
+    return result;
+  }
 }
 
 /// Can match:
