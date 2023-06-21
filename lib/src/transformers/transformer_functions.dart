@@ -33,8 +33,9 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
           (brightness == Brightness.light ? Colors.black : Colors.white)
               .toColorRGBA();
       node.properties
-        ..labelStyle =
-            node.properties.labelStyle.copyWith(fills: [color.toPaint(node.properties.labelStyle.fills.firstOrNull?.id)])
+        ..labelStyle = node.properties.labelStyle.copyWith(fills: [
+          color.toPaint(node.properties.labelStyle.fills.firstOrNull?.id)
+        ])
         ..icon = node.properties.icon
             .copyWith(color: color.toFlutterColor().toColorRGBA())
         ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
@@ -47,8 +48,11 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
     case ButtonTypeEnum.text:
       node.properties
         ..buttonColor = node.properties.buttonColor.copyWith(a: 0.1)
-        ..labelStyle = node.properties.labelStyle.copyWith(
-            fills: [node.properties.buttonColor.copyWith(a: 1).toPaint(node.properties.labelStyle.fills.firstOrNull?.id)])
+        ..labelStyle = node.properties.labelStyle.copyWith(fills: [
+          node.properties.buttonColor
+              .copyWith(a: 1)
+              .toPaint(node.properties.labelStyle.fills.firstOrNull?.id)
+        ])
         ..icon = node.properties.icon
             .copyWith(color: node.properties.buttonColor.copyWith(a: 1))
         ..elevation = 0
@@ -59,8 +63,11 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
     case ButtonTypeEnum.outlined:
       node.properties
         ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
-        ..labelStyle = node.properties.labelStyle.copyWith(
-            fills: [node.properties.buttonColor.copyWith(a: 1).toPaint(node.properties.labelStyle.fills.firstOrNull?.id)])
+        ..labelStyle = node.properties.labelStyle.copyWith(fills: [
+          node.properties.buttonColor
+              .copyWith(a: 1)
+              .toPaint(node.properties.labelStyle.fills.firstOrNull?.id)
+        ])
         ..icon = node.properties.icon
             .copyWith(color: node.properties.buttonColor.copyWith(a: 1))
         ..elevation = 0
@@ -75,8 +82,9 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
           (brightness == Brightness.light ? Colors.black : Colors.white)
               .toColorRGBA();
       node.properties
-        ..labelStyle =
-            node.properties.labelStyle.copyWith(fills: [color.toPaint(node.properties.labelStyle.fills.firstOrNull?.id)])
+        ..labelStyle = node.properties.labelStyle.copyWith(fills: [
+          color.toPaint(node.properties.labelStyle.fills.firstOrNull?.id)
+        ])
         ..icon = node.properties.icon.copyWith(color: color)
         ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
         ..icon = node.properties.icon.copyWith(show: true)

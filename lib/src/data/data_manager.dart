@@ -357,7 +357,11 @@ class DataManager {
       localModel: localModel,
     );
 
-    if (layoutUpdates.isEmpty && fontUpdates.isEmpty && apiUpdates.isEmpty && variableUpdates.isEmpty && conditionUpdates.isEmpty) {
+    if (layoutUpdates.isEmpty &&
+        fontUpdates.isEmpty &&
+        apiUpdates.isEmpty &&
+        variableUpdates.isEmpty &&
+        conditionUpdates.isEmpty) {
       log('No updates to process.');
       return;
     } else {
@@ -463,7 +467,8 @@ class DataManager {
           break;
         case UpdateType.add:
         case UpdateType.update:
-          final SDKLayoutVariables? layoutVariables = await networkDataRepository.downloadLayoutVariables(
+          final SDKLayoutVariables? layoutVariables =
+              await networkDataRepository.downloadLayoutVariables(
             projectID: authManager.authData!.projectId,
             layoutID: layoutID,
             isPreview: config.isPreview,
@@ -488,7 +493,8 @@ class DataManager {
           break;
         case UpdateType.add:
         case UpdateType.update:
-          final SDKLayoutConditions? layoutConditions = await networkDataRepository.downloadLayoutConditions(
+          final SDKLayoutConditions? layoutConditions =
+              await networkDataRepository.downloadLayoutConditions(
             projectID: authManager.authData!.projectId,
             layoutID: layoutID,
             isPreview: config.isPreview,
@@ -645,8 +651,10 @@ class DataManager {
     required SDKPublishModel serverModel,
     required SDKPublishModel localModel,
   }) {
-    final Map<String, DateTime> serverConditions = serverModel.updates.conditions;
-    final Map<String, DateTime> currentConditions = localModel.updates.conditions;
+    final Map<String, DateTime> serverConditions =
+        serverModel.updates.conditions;
+    final Map<String, DateTime> currentConditions =
+        localModel.updates.conditions;
     final Map<String, UpdateType> variableUpdates = {};
 
     // Check for deleted layouts.
