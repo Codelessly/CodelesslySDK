@@ -94,7 +94,7 @@ class PassiveRectangleWidget extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        boxShadow: retrieveBoxShadow(context,node, codelesslyContext),
+        boxShadow: retrieveBoxShadow(context, node, codelesslyContext),
         borderRadius: getBorderRadius(node),
       ),
       child: Stack(
@@ -102,8 +102,8 @@ class PassiveRectangleWidget extends StatelessWidget {
         alignment:
             stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
         children: [
-          ...buildFills(context,node, codelesslyContext),
-          ...buildStrokes(context,node, codelesslyContext),
+          ...buildFills(context, node, codelesslyContext),
+          ...buildStrokes(context, node, codelesslyContext),
           ...wrapWithPadding(node, children, stackAlignment: stackAlignment),
         ],
       ),
@@ -146,15 +146,14 @@ List<Widget> wrapWithPadding(
 }
 
 List<BoxShadow> retrieveBoxShadow(
-    BuildContext context,
-    BaseNode node, CodelesslyContext codelesslyContext) {
+    BuildContext context, BaseNode node, CodelesslyContext codelesslyContext) {
   if (node is! DefaultShapeNode) return [];
   return node.effects
       .where((effect) => effect.type == EffectType.dropShadow && effect.visible)
       .map(
     (effect) {
-      final ColorRGBA? color = codelesslyContext.getPropertyValue<ColorRGBA>(context,
-              node, 'shadow-color-${effect.id}') ??
+      final ColorRGBA? color = codelesslyContext.getPropertyValue<ColorRGBA>(
+              context, node, 'shadow-color-${effect.id}') ??
           effect.color;
       return BoxShadow(
         spreadRadius: effect.spread!,
@@ -322,14 +321,15 @@ List<num> applyGradientRotation(List<num>? t1, double angle) {
 
 List<num> defaultGradientTransform() => [1.0, 0.0, 0.0, -0.0, 1.0, 0.0];
 
-List<Widget> buildStrokes(BuildContext context, BaseNode node, CodelesslyContext codelesslyContext) {
+List<Widget> buildStrokes(
+    BuildContext context, BaseNode node, CodelesslyContext codelesslyContext) {
   if (node is! GeometryMixin || node.strokeWeight <= 0) {
     return [];
   }
   final List<Widget> strokeWidgets = [];
   for (final paint in node.strokes.where((paint) => paint.visible)) {
-    final paintValue = codelesslyContext.getPropertyValue<PaintModel>(context,
-        node, 'stroke-paint-${paint.id}');
+    final paintValue = codelesslyContext.getPropertyValue<PaintModel>(
+        context, node, 'stroke-paint-${paint.id}');
     if (node.dashPattern.isEmpty) {
       strokeWidgets.add(
         Positioned.fill(
@@ -370,7 +370,7 @@ List<Widget> buildStrokes(BuildContext context, BaseNode node, CodelesslyContext
 }
 
 List<Widget> buildFills(
-    BuildContext context,
+  BuildContext context,
   BaseNode node,
   CodelesslyContext codelesslyContext, {
   Map<int, Uint8List> imageBytes = const {},
@@ -384,8 +384,8 @@ List<Widget> buildFills(
     ...node.fills.where((paint) => paint.visible).mapIndexed((index, paint) {
       switch (paint.type) {
         case PaintType.solid:
-          final propertyValue = codelesslyContext.getPropertyValue<PaintModel>(context,
-              node, 'fill-${paint.id}');
+          final propertyValue = codelesslyContext.getPropertyValue<PaintModel>(
+              context, node, 'fill-${paint.id}');
           return Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(

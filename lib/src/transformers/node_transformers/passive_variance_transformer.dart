@@ -57,9 +57,7 @@ class PassiveVarianceWidget extends StatelessWidget
             .buildWidgetForChildren(
           node,
           context,
-          childrenNodes: [
-            childNode
-          ],
+          childrenNodes: [childNode],
         ),
       );
     }
