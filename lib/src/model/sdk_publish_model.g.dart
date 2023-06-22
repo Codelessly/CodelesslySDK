@@ -17,6 +17,8 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
         (k, e) => MapEntry(k as String,
             SDKPublishLayout.fromJson(Map<String, dynamic>.from(e as Map))),
       ),
+      pages:
+          (json['pages'] as List<dynamic>?)?.map((e) => e as String).toList(),
       updates: json['updates'] == null
           ? null
           : SDKPublishUpdates.fromJson(
@@ -49,6 +51,7 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
     'owner': instance.owner,
     'fonts': instance.fonts.map((k, e) => MapEntry(k, e.toJson())),
     'layouts': instance.layouts.map((k, e) => MapEntry(k, e.toJson())),
+    'pages': instance.pages,
     'updates': instance.updates.toJson(),
     'apis': instance.apis.map((k, e) => MapEntry(k, e.toJson())),
     'variables': instance.variables.map((k, e) => MapEntry(k, e.toJson())),
