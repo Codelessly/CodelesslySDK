@@ -30,6 +30,14 @@ class SDKPublishModel with EquatableMixin {
   /// Value is the layout.
   final Map<String, SDKPublishLayout> layouts;
 
+  /// A list containing all of the pages that contain any of the layouts in
+  /// [layouts] map.
+  ///
+  /// [SDKPublishLayout] already stores the page id, but it is not available
+  /// without loading the data from Firestore. This list is used to avoid
+  /// needing an extra step to access the page ids of the layouts.
+  final List<String> pages;
+
   /// Contains information about the state of the published project.
   /// This is used to determine whether fonts and layouts should be updated.
   final SDKPublishUpdates updates;
@@ -73,6 +81,7 @@ class SDKPublishModel with EquatableMixin {
     required this.owner,
     Map<String, SDKPublishFont>? fonts,
     Map<String, SDKPublishLayout>? layouts,
+    List<String>? pages,
     SDKPublishUpdates? updates,
     Map<String, HttpApiData>? apis,
     Map<String, SDKLayoutVariables>? variables,
@@ -87,6 +96,7 @@ class SDKPublishModel with EquatableMixin {
     Map<String, String>? defaultData,
   })  : layouts = layouts ?? {},
         fonts = fonts ?? {},
+        pages = pages ?? [],
         updates = updates ?? SDKPublishUpdates(),
         apis = apis ?? {},
         variables = variables ?? {},
@@ -115,6 +125,7 @@ class SDKPublishModel with EquatableMixin {
     String? owner,
     Map<String, SDKPublishFont>? fonts,
     Map<String, SDKPublishLayout>? layouts,
+    List<String>? pages,
     SDKPublishUpdates? updates,
     Map<String, HttpApiData>? apis,
     Map<String, SDKLayoutVariables>? variables,
@@ -131,6 +142,7 @@ class SDKPublishModel with EquatableMixin {
       owner: owner ?? this.owner,
       fonts: fonts ?? this.fonts,
       layouts: layouts ?? this.layouts,
+      pages: pages ?? this.pages,
       updates: updates ?? this.updates,
       apis: apis ?? this.apis,
       variables: variables ?? this.variables,
@@ -149,6 +161,7 @@ class SDKPublishModel with EquatableMixin {
         projectId,
         owner,
         fonts,
+        pages,
         layouts,
         apis,
         variables,
