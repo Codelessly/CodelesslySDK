@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
@@ -63,26 +65,34 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
     }
     final itemNode = widget.node.children.first;
 
+    final List data = PropertyValueDelegate.getVariableValueFromPath<List>(
+        context, widget.node.variables['data'] ?? '') ??
+        [];
+
     return AdaptiveNodeBox(
       node: widget.node,
-      child: PageView.builder(
-        itemCount: widget.node.properties.itemCount,
-        physics: widget.node.physics.flutterScrollPhysics,
-        scrollDirection: widget.node.scrollDirection.flutterAxis,
-        reverse: widget.node.reverse,
-        clipBehavior: widget.node.clipsContent ? Clip.hardEdge : Clip.none,
-        padEnds: widget.node.properties.padEnds,
-        pageSnapping: widget.node.properties.pageSnapping,
-        controller: controller,
-        onPageChanged: (index) {
-          // TODO:
-        },
-        itemBuilder: (context, index) => IndexedItemProvider(
-          index: index,
-          child: widget.manager.buildWidgetByID(
-            itemNode,
-            context,
-            settings: widget.settings,
+      child: ScrollConfiguration(
+        behavior: DraggableScrollBehavior(),
+        child: PageView.builder(
+          itemCount: widget.node.properties.itemCount,
+          physics: widget.node.physics.flutterScrollPhysics,
+          scrollDirection: widget.node.scrollDirection.flutterAxis,
+          reverse: widget.node.reverse,
+          clipBehavior: widget.node.clipsContent ? Clip.hardEdge : Clip.none,
+          padEnds: widget.node.properties.padEnds,
+          pageSnapping: widget.node.properties.pageSnapping,
+          controller: controller,
+          onPageChanged: (index) {
+            // TODO:
+          },
+          itemBuilder: (context, index) => IndexedItemProvider(
+            index: index,
+            item: data.elementAtOrNull(index),
+            child: widget.manager.buildWidgetByID(
+              itemNode,
+              context,
+              settings: widget.settings,
+            ),
           ),
         ),
       ),
@@ -94,4 +104,13 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
     controller.dispose();
     super.dispose();
   }
+}
+
+/// Used for views that can be scrolled by all devices.
+class DraggableScrollBehavior extends MaterialScrollBehavior {
+  const DraggableScrollBehavior();
+
+  // Override behavior methods and getters like dragDevices
+  @override
+  Set<PointerDeviceKind> get dragDevices => PointerDeviceKind.values.toSet();
 }
