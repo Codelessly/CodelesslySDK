@@ -86,10 +86,7 @@ class TextSizeCalculator implements ITextSizeCalculator {
   TextSizeCalculator({required this.node})
       : painter = TextPainter(
           text: TextSpan(
-            children: PassiveTextTransformer.getTextSpan(
-              node,
-              CodelesslyContext.empty(),
-            ),
+            children: PassiveTextTransformer.getTextSpan(node),
           ),
           textScaleFactor: PlatformDispatcher.instance.textScaleFactor,
           textDirection: TextDirection.ltr,

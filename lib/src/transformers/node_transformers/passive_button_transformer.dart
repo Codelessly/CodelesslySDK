@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/property_value_delegate.dart';
 
 class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
   PassiveButtonTransformer(super.getNode, super.manager);
@@ -66,11 +66,10 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
           FunctionsRepository.performAction(context, reaction.action));
 }
 
-class PassiveButtonWidget extends StatelessWidget
-    with PropertyValueGetterMixin {
+class PassiveButtonWidget extends StatelessWidget {
   final ButtonNode node;
   final WidgetBuildSettings settings;
-  final List<VariableData> variables;
+  final List<VariableData> variablesOverrides;
   final VoidCallback? onPressed;
   final VoidCallback? onLongPress;
   final double? elevation;
@@ -85,36 +84,19 @@ class PassiveButtonWidget extends StatelessWidget
     this.onLongPress,
     this.elevation,
     this.useIconFonts = false,
-  }) : variables = variables ?? [];
+  }) : variablesOverrides = variables ?? [];
 
   @override
   Widget build(BuildContext context) {
-    final codelesslyContext = context.read<CodelesslyContext>();
-    variables.addAll(codelesslyContext.variables.values.map((e) => e.value));
+    final rawLabel =
+        PropertyValueDelegate.getPropertyValue(context, node, 'label') ??
+            node.properties.label;
 
-    // TODO: ignore node value if a variable is used.
-    /// Check if this is a part of a list item.
-    final IndexedItemProvider? indexProvider = IndexedItemProvider.of(context);
-    if (indexProvider != null) {
-      variables.add(
-        VariableData(
-          id: 'index',
-          name: 'index',
-          value: indexProvider.index.toString(),
-        ),
-      );
-    }
-
-    String text = transformText(
-        getPropertyValue(context, node, 'label') ?? node.properties.label,
-        variables,
-        context);
-
-    // final CodelesslyContext codelesslyContext =
-    //     context.read<CodelesslyContext>();
-
-    // codelesslyContext.data
-    //     .forEach((key, value) => text = text.replaceAll(key, value));
+    String text = PropertyValueDelegate.substituteVariables(
+      context,
+      rawLabel,
+      variablesOverrides: variablesOverrides,
+    );
 
     final ButtonStyle buttonStyle =
         createMasterButtonStyle(node, elevation: elevation);
@@ -124,8 +106,13 @@ class PassiveButtonWidget extends StatelessWidget
     Widget iconWidget = retrieveIconWidget(
         node.properties.icon, effectiveIconSize, useIconFonts);
 
-    final bool enabled =
-        getPropertyValue(context, node, 'enabled') ?? node.properties.enabled;
+    final bool enabled = PropertyValueDelegate.getPropertyValue(
+          context,
+          node,
+          'enabled',
+          variablesOverrides: variablesOverrides,
+        ) ??
+        node.properties.enabled;
 
     Widget buttonWidget;
     switch (node.properties.buttonType) {

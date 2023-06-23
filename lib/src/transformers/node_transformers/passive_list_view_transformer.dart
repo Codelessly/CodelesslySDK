@@ -1,7 +1,10 @@
+import 'dart:core';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../utils/property_value_delegate.dart';
 
 class PassiveListViewTransformer extends NodeWidgetTransformer<ListViewNode> {
   PassiveListViewTransformer(super.getNode, super.manager);
@@ -36,6 +39,10 @@ class PassiveListViewWidget extends StatelessWidget {
     }
     final itemNode = node.children.first;
 
+    final List data = PropertyValueDelegate.getVariableValueFromPath<List>(
+            context, node.variables['data'] ?? '') ??
+        [];
+
     return AdaptiveNodeBox(
       node: node,
       child: ListViewBuilder(
@@ -63,6 +70,7 @@ class PassiveListViewWidget extends StatelessWidget {
                 : null,
         itemBuilder: (context, index) => IndexedItemProvider(
           index: index,
+          item: data.elementAtOrNull(index),
           child: manager.buildWidgetByID(
             itemNode,
             context,

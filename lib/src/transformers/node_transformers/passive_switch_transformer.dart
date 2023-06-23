@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/property_value_delegate.dart';
 
 class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
   PassiveSwitchTransformer(super.getNode, super.manager);
@@ -77,11 +78,10 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
   }
 }
 
-class PassiveSwitchWidget extends StatelessWidget
-    with PropertyValueGetterMixin {
+class PassiveSwitchWidget extends StatelessWidget {
   final SwitchNode node;
   final WidgetBuildSettings settings;
-  final List<VariableData> variables;
+  final List<VariableData> variablesOverrides;
   final ValueChanged<bool>? onChanged;
 
   const PassiveSwitchWidget({
@@ -89,13 +89,18 @@ class PassiveSwitchWidget extends StatelessWidget
     required this.node,
     this.settings = const WidgetBuildSettings(),
     this.onChanged,
-    this.variables = const [],
+    this.variablesOverrides = const [],
   });
 
   @override
   Widget build(BuildContext context) {
-    final bool value =
-        getPropertyValue<bool>(context, node, 'value') ?? node.value;
+    final bool value = PropertyValueDelegate.getPropertyValue<bool>(
+          context,
+          node,
+          'value',
+          variablesOverrides: variablesOverrides,
+        ) ??
+        node.value;
     // final bool value = variables.getBooleanById(node.variables['value'] ?? '',
     //     defaultValue: node.value);
     final scale = node.basicBoxLocal.width / kSwitchDefaultWidth;

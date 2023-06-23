@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/property_value_delegate.dart';
 
 class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
   PassiveRadioTransformer(super.getNode, super.manager);
@@ -86,23 +87,33 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
   }
 }
 
-class PassiveRadioWidget extends StatelessWidget with PropertyValueGetterMixin {
+class PassiveRadioWidget extends StatelessWidget {
   final RadioNode node;
-  final List<VariableData> variables;
+  final List<VariableData> variablesOverrides;
   final ValueChanged<String?>? onChanged;
 
   const PassiveRadioWidget({
     super.key,
     required this.node,
     required this.onChanged,
-    this.variables = const [],
+    this.variablesOverrides = const [],
   });
 
   @override
   Widget build(BuildContext context) {
-    final value =
-        getPropertyValue<String>(context, node, 'value') ?? node.value;
-    final groupValue = getPropertyValue<String>(context, node, 'groupValue') ??
+    final value = PropertyValueDelegate.getPropertyValue<String>(
+          context,
+          node,
+          'value',
+          variablesOverrides: variablesOverrides,
+        ) ??
+        node.value;
+    final groupValue = PropertyValueDelegate.getPropertyValue<String>(
+          context,
+          node,
+          'groupValue',
+          variablesOverrides: variablesOverrides,
+        ) ??
         node.groupValue ??
         '';
     final scale = node.basicBoxLocal.width / kRadioDefaultSize;

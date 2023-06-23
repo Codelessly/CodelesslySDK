@@ -1,6 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -13,12 +12,12 @@ class ConditionEvaluator<R>
         ActionVisitor<R> {
   final Map<String, VariableData> variables;
   final dynamic data;
-  final BuildContext context;
+  final IndexedItemProvider? itemProvider;
 
   const ConditionEvaluator({
-    required this.context,
     required this.variables,
     required this.data,
+    this.itemProvider,
   });
 
   @override
@@ -77,8 +76,7 @@ class ConditionEvaluator<R>
       if (fullPath == null) return match[0]!;
 
       if (predefinedVariableNames.contains(variableName)) {
-        return visitPredefinedVariable(variableName, fullPath, match)
-            .toString();
+        return visitPredefinedVariable(variableName, fullPath, match);
       }
 
       final VariableData? variable = variables[variableName];
@@ -90,24 +88,25 @@ class ConditionEvaluator<R>
         // of the variable and apply the path or accessor on it.
         if (variable.type == VariableType.map) {
           return substituteJsonPath(
-                  fullPath, {variableName: variable.typedValue<Map>() ?? {}})
-              .toString();
+              fullPath, {variableName: variable.typedValue<Map>() ?? {}});
         } else if (variable.type == VariableType.list) {
           // TODO: support list type variable paths.
           return substituteJsonPath(
-                  fullPath, {variableName: variable.typedValue<List>() ?? []})
-              .toString();
+              fullPath, {variableName: variable.typedValue<List>() ?? []});
         }
       }
 
       // variable name
-      return variables[variableName]?.value.toString() ?? '';
+      return variables[variableName]?.value ?? '';
     });
     return _visitRawValue(value);
   }
 
-  String? visitPredefinedVariable(
-      String variableName, String fullPath, RegExpMatch match) {
+  dynamic visitPredefinedVariable(
+    String variableName,
+    String fullPath,
+    RegExpMatch match,
+  ) {
     if (variableName == 'data') {
       // json data path.
       return substituteJsonPath(
@@ -116,7 +115,7 @@ class ConditionEvaluator<R>
 
     if (variableName == 'index') {
       // substitute path with screen.
-      final index = IndexedItemProvider.of(context)?.index;
+      final index = itemProvider?.index;
       if (index == null) return null;
 
       return '$index';
@@ -124,7 +123,7 @@ class ConditionEvaluator<R>
 
     if (variableName == 'item') {
       // substitute path with screen.
-      final item = IndexedItemProvider.of(context)?.item;
+      final item = itemProvider?.item;
       if (item == null) return null;
 
       return substituteJsonPath(
