@@ -208,3 +208,109 @@ class ConditionEvaluator<R>
   @override
   R? visitSubmitAction(SubmitAction action) => null;
 }
+
+class ConditionPrinter
+    implements
+        ConditionVisitor<void>,
+        ExpressionVisitor<void>,
+        ExpressionPartVisitor,
+        ActionVisitor<void> {
+  final StringBuffer _buffer = StringBuffer();
+
+  void printCondition(BaseCondition condition) {
+    condition.accept(this);
+    print('\n${_buffer.toString()}');
+  }
+
+  @override
+  void visitApiCall(ApiCallAction action) {}
+
+  @override
+  void visitCallFunctionAction(CallFunctionAction action) {}
+
+  @override
+  void visitCondition(Condition condition) {
+    _buffer.write('${condition.mode.label.toUpperCase()} ');
+    condition.expression.accept(this);
+    _buffer.write(' {\n');
+    condition.actions.first.accept(this);
+    _buffer.write('} ');
+  }
+
+  @override
+  void visitConditionGroup(ConditionGroup condition) {
+    condition.ifCondition.accept(this);
+    for (final elseIfCondition in condition.elseIfConditions) {
+      elseIfCondition.accept(this);
+    }
+    condition.elseCondition?.accept(this);
+  }
+
+  @override
+  void visitElseCondition(ElseCondition condition) {
+    _buffer.write('ELSE { \n');
+    condition.actions.first.accept(this);
+    _buffer.write('} ');
+  }
+
+  @override
+  void visitExpression(Expression expression) {
+    _buffer.write('( ');
+    expression.leftPart.accept(this);
+    _buffer.write(' ${expression.operator.sign} ');
+    expression.rightPart.accept(this);
+    _buffer.write(' )');
+  }
+
+  @override
+  void visitExpressionGroup(ExpressionGroup expression) {
+    _buffer.write('( ');
+    expression.leftExpression.accept(this);
+    _buffer.write(' ${expression.join.sign} ');
+    expression.rightExpression.accept(this);
+    _buffer.write(' )');
+  }
+
+  @override
+  void visitLinkAction(LinkAction action) {}
+
+  @override
+  void visitNavigationAction(NavigationAction action) {}
+
+  @override
+  void visitRawValuePart(RawValuePart part) => _buffer.write(part.value);
+
+  @override
+  void visitSetValueAction(SetValueAction action) {
+    _buffer.writeln(
+        '\tSet Value of ${action.values.first.name} to ${valueModelToString(action.values.first)}');
+  }
+
+  String valueModelToString(ValueModel model) {
+    if(model is PaintValue) {
+      return 'Color(0x${model.value?.color?.toFlutterColor(opacity: model.value?.opacity ?? 1).hex})';
+    }
+    if(model is ColorValue) {
+      return 'Color(0x${model.value?.toFlutterColor().hex})';
+    }
+
+    return model.value.toString();
+  }
+
+  @override
+  void visitSetVariableAction(SetVariableAction action) {
+    _buffer.writeln(
+        '\tSet Variable ${action.variable.name} to ${action.variable.value}');
+  }
+
+  @override
+  void visitSetVariantAction(SetVariantAction action) {
+    _buffer.writeln('\tSetVariant to ${action.variantID}');
+  }
+
+  @override
+  void visitSubmitAction(SubmitAction action) {}
+
+  @override
+  void visitVariablePart(VariablePart part) => _buffer.write(part.valueString);
+}

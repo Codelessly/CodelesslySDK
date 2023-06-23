@@ -24,12 +24,14 @@ class PassivePageViewWidget extends StatefulWidget {
   final PageViewNode node;
   final NodeTransformerManager manager;
   final WidgetBuildSettings settings;
+  final ValueChanged<int>? onPageChanged;
 
   const PassivePageViewWidget({
     super.key,
     required this.node,
     required this.manager,
     this.settings = const WidgetBuildSettings(),
+    this.onPageChanged,
   });
 
   @override
@@ -65,16 +67,17 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
     }
     final itemNode = widget.node.children.first;
 
-    final List data = PropertyValueDelegate.getVariableValueFromPath<List>(
-        context, widget.node.variables['data'] ?? '') ??
-        [];
+    final List? data = PropertyValueDelegate.getVariableValueFromPath<List>(
+        context, widget.node.variables['data'] ?? '');
+
+    final int? itemCount = widget.node.properties.itemCount ?? data?.length;
 
     return AdaptiveNodeBox(
       node: widget.node,
       child: ScrollConfiguration(
         behavior: DraggableScrollBehavior(),
         child: PageView.builder(
-          itemCount: widget.node.properties.itemCount,
+          itemCount: itemCount,
           physics: widget.node.physics.flutterScrollPhysics,
           scrollDirection: widget.node.scrollDirection.flutterAxis,
           reverse: widget.node.reverse,
@@ -82,12 +85,10 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
           padEnds: widget.node.properties.padEnds,
           pageSnapping: widget.node.properties.pageSnapping,
           controller: controller,
-          onPageChanged: (index) {
-            // TODO:
-          },
+          onPageChanged: widget.onPageChanged,
           itemBuilder: (context, index) => IndexedItemProvider(
             index: index,
-            item: data.elementAtOrNull(index),
+            item: data?.elementAtOrNull(index),
             child: widget.manager.buildWidgetByID(
               itemNode,
               context,

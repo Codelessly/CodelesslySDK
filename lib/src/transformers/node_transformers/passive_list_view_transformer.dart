@@ -4,7 +4,6 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../utils/property_value_delegate.dart';
 
 class PassiveListViewTransformer extends NodeWidgetTransformer<ListViewNode> {
   PassiveListViewTransformer(super.getNode, super.manager);
@@ -39,9 +38,10 @@ class PassiveListViewWidget extends StatelessWidget {
     }
     final itemNode = node.children.first;
 
-    final List data = PropertyValueDelegate.getVariableValueFromPath<List>(
-            context, node.variables['data'] ?? '') ??
-        [];
+    final List? data = PropertyValueDelegate.getVariableValueFromPath<List>(
+        context, node.variables['data'] ?? '');
+
+    final int? itemCount = node.properties.itemCount ?? data?.length;
 
     return AdaptiveNodeBox(
       node: node,
@@ -51,7 +51,7 @@ class PassiveListViewWidget extends StatelessWidget {
             (node.scrollDirection == AxisC.horizontal
                 ? node.isHorizontalWrap
                 : node.isVerticalWrap),
-        itemCount: node.properties.itemCount,
+        itemCount: itemCount,
         padding: node.padding.flutterEdgeInsets,
         keyboardDismissBehavior:
             node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
@@ -62,7 +62,7 @@ class PassiveListViewWidget extends StatelessWidget {
         itemExtent: node.properties.itemExtent,
         clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
         separatedBuilder:
-            node.properties.itemCount != null && node.properties.hasSeparator
+            (node.properties.itemCount != null || data != null) && node.properties.hasSeparator
                 ? (context, index) => ListViewItemSeparator(
                       scrollDirection: node.scrollDirection,
                       properties: node.properties,
@@ -70,7 +70,7 @@ class PassiveListViewWidget extends StatelessWidget {
                 : null,
         itemBuilder: (context, index) => IndexedItemProvider(
           index: index,
-          item: data.elementAtOrNull(index),
+          item: data?.elementAtOrNull(index),
           child: manager.buildWidgetByID(
             itemNode,
             context,
