@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/property_value_delegate.dart';
 
 class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
   PassiveCheckboxTransformer(super.getNode, super.manager);
@@ -77,8 +78,7 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
   }
 }
 
-class PassiveCheckboxWidget extends StatelessWidget
-    with PropertyValueGetterMixin {
+class PassiveCheckboxWidget extends StatelessWidget {
   final CheckboxNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variables;
@@ -100,8 +100,13 @@ class PassiveCheckboxWidget extends StatelessWidget
     // }
     final scale = node.basicBoxLocal.width / kCheckboxDefaultSize;
 
-    final bool? value =
-        getPropertyValue<bool>(context, node, 'value') ?? node.value;
+    final bool? value = PropertyValueDelegate.getPropertyValue<bool>(
+          context,
+          node,
+          'value',
+          variablesOverrides: variables,
+        ) ??
+        node.value;
 
     return SizedBox(
       width: node.basicBoxLocal.width,

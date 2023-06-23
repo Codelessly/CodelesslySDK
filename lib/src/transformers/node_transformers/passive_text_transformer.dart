@@ -3,8 +3,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:json_path/json_path.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../codelessly_sdk.dart';
@@ -42,72 +40,48 @@ class PassiveTextTransformer extends NodeWidgetTransformer<TextNode> {
   }
 
   static List<TextSpan> getTextSpan(
-      TextNode node, CodelesslyContext codelesslyContext,
-      {Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
-      List<VariableData> variables = const []}) {
+    TextNode node, {
+    Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
+    List<VariableData> variablesOverrides = const [],
+    BuildContext? context,
+  }) {
     final List<TextSpan> textSpanChildren = node.textMixedProps.map(
-      (property) {
+      (spanProp) {
         // Get relevant characters.
-        String characters =
-            retrieveCharacters(node.characters, property, codelesslyContext);
+        String characters = node.characters.substring(
+          spanProp.start,
+          spanProp.end,
+        );
 
-        characters = substituteVariables(characters, variables);
+        if (context != null) {
+          characters = PropertyValueDelegate.substituteVariables(
+            context,
+            characters,
+            variablesOverrides: variablesOverrides,
+          );
+        }
 
         return TextSpan(
           text: characters,
           style: retrieveTextStyleData(
-            fontSize: property.fontSize,
-            fontName: property.fontName,
-            textDecoration: property.textDecoration,
-            lineHeight: property.lineHeight,
-            letterSpacing: property.letterSpacing,
+            fontSize: spanProp.fontSize,
+            fontName: spanProp.fontName,
+            textDecoration: spanProp.textDecoration,
+            lineHeight: spanProp.lineHeight,
+            letterSpacing: spanProp.letterSpacing,
             effects: node.effects,
             // Use pink as a placeholder while we add support for Gradients.
             color:
-                (property.fills.isNotEmpty && (property.fills[0].color != null))
-                    ? property.fills[0].toFlutterColor()!
+                (spanProp.fills.isNotEmpty && (spanProp.fills[0].color != null))
+                    ? spanProp.fills[0].toFlutterColor()!
                     : Colors.pink,
           ),
-          recognizer: tapGestureRecognizers[property.link],
+          recognizer: tapGestureRecognizers[spanProp.link],
         );
       },
     ).toList();
 
     return textSpanChildren;
-  }
-
-  /// Substitutes JSON values and returns the relevant characters.
-  /// If values don't exist in JSON, returns the node's characters.
-  static String retrieveCharacters(
-    String characters,
-    StartEndProp property,
-    CodelesslyContext codelesslyContext,
-  ) {
-    // Get characters from the property itself.
-    characters = characters.substring(property.start, property.end);
-    // If the characters represent a JSON path, get the relevant value from
-    // [CodelesslyContext]'s [data] map.
-    if (codelesslyContext.data.isNotEmpty) {
-      if (property.isJsonPath) {
-        // TODO: use substituteJsonPath method instead.
-        // Remove $-sign and curly brackets.
-        String path = characters.substring(2, characters.length - 1);
-        // Add $-sign and dot so that the expression matches json path
-        // standards.
-        path = '\$.$path';
-        // [characters] represent a JSON path here. Decode it.
-        final JsonPath jsonPath = JsonPath(path);
-        // Retrieve values from JSON that match the path.
-        final values = jsonPath.readValues(codelesslyContext.data);
-        if (values.isNotEmpty) {
-          // Only one value should match the path.
-          final value = values.first;
-          // Type check value and update the characters with value.
-          if (value is String) characters = value;
-        }
-      }
-    }
-    return characters;
   }
 
   /// Convert LetterSpacing from Figma values into Flutter.
@@ -257,14 +231,14 @@ class PassiveTextTransformer extends NodeWidgetTransformer<TextNode> {
 class PassiveTextWidget extends StatefulWidget {
   final TextNode node;
   final WidgetBuildSettings settings;
-  final List<VariableData> variables;
+  final List<VariableData> variablesOverrides;
   final bool clickable;
 
   PassiveTextWidget({
     super.key,
     required this.node,
     this.settings = const WidgetBuildSettings(),
-    this.variables = const [],
+    this.variablesOverrides = const [],
     this.clickable = true,
   });
 
@@ -320,42 +294,23 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
-
-    final List<VariableData> variables = [
-      ...widget.variables,
-      // TODO[Aachman]: this should not be needed with full variable support on
-      // text node text property.
-      ...codelesslyContext.variableNamesMap().values,
-    ];
-
-    /// Check if this is a part of a list item.
-    final IndexedItemProvider? indexProvider = IndexedItemProvider.of(context);
-    if (indexProvider != null) {
-      variables.add(
-        VariableData(
-          id: 'index',
-          name: 'index',
-          value: indexProvider.index.toString(),
-        ),
-      );
-    }
-
     Widget textWidget;
 
     if (widget.node.textMixedProps.length == 1) {
-      // Get characters' local value if its available. Local value refers to the
-      // current state of the characters which can be changed via
-      // [SetValueAction].
-      String characters = context.getNodeValue(widget.node.id, 'characters') ??
+      // Get relevant characters.
+      final charactersValue = PropertyValueDelegate.getPropertyValue<String>(
+            context,
+            widget.node,
+            'characters',
+            variablesOverrides: widget.variablesOverrides,
+          ) ??
           widget.node.characters;
 
-      // Get relevant characters.
-      characters = PassiveTextTransformer.retrieveCharacters(
-          characters, widget.node.textMixedProps.first, codelesslyContext);
-
-      characters = substituteVariables(characters, variables);
+      final String characters = PropertyValueDelegate.substituteVariables(
+        context,
+        charactersValue,
+        variablesOverrides: widget.variablesOverrides,
+      );
 
       final StartEndProp textProps = widget.node.textMixedProps.first;
       textWidget = Text(
@@ -384,8 +339,8 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
     } else {
       List<InlineSpan> spans = PassiveTextTransformer.getTextSpan(
         widget.node,
-        codelesslyContext,
-        variables: variables,
+        variablesOverrides: widget.variablesOverrides,
+        context: context,
         tapGestureRecognizers: tapGestureRecognizerRegistry,
       );
 

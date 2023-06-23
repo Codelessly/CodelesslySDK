@@ -1465,8 +1465,13 @@ extension BaseConditionExt on BaseCondition {
     Map<String, VariableData> variables,
     Map<String, dynamic> data,
   ) =>
-      accept<R>(ConditionEvaluator<R>(
-          context: context, variables: variables, data: data));
+      accept<R>(
+        ConditionEvaluator<R>(
+          variables: variables,
+          data: data,
+          itemProvider: IndexedItemProvider.of(context),
+        ),
+      );
 }
 
 extension CanvasConditionsMapExt on Map<String, CanvasConditions> {
@@ -1503,11 +1508,13 @@ extension ExpressionExt on BaseExpression {
     Map<String, VariableData> variables,
     Map<String, dynamic> data,
   ) =>
-      accept<bool>(ConditionEvaluator(
-        context: context,
-        variables: variables,
-        data: data,
-      ))!;
+      accept<bool>(
+        ConditionEvaluator<bool>(
+          itemProvider: IndexedItemProvider.of(context),
+          variables: variables,
+          data: data,
+        ),
+      )!;
 }
 
 extension ExpressionPartExt on ExpressionPart {
@@ -1517,11 +1524,13 @@ extension ExpressionPartExt on ExpressionPart {
     Map<String, VariableData> variables,
     Map<String, dynamic> data,
   ) =>
-      accept(ConditionEvaluator(
-        context: context,
-        variables: variables,
-        data: data,
-      ));
+      accept(
+        ConditionEvaluator(
+          itemProvider: IndexedItemProvider.of(context),
+          variables: variables,
+          data: data,
+        ),
+      );
 }
 
 extension ConditionsMapExt on Map<String, BaseCondition> {

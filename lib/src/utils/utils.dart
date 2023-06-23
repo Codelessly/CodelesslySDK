@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:json_path/json_path.dart';
 
 import '../../codelessly_sdk.dart';
+import '../transformers/utils/property_value_delegate.dart';
 
 // const String jsonPathPattern = r'\${([a-zA-Z.\[\]]+[a-zA-Z0-9_.\[\]]*)}';
 // final RegExp jsonPathRegex = RegExp(jsonPathPattern);
@@ -20,26 +21,12 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'item'),
 };
 
-String substituteVariables(
-    String characters, Iterable<VariableData> variables) {
-  if (variables.isEmpty) return characters;
-  return characters.splitMapJoinRegex(
-    variablePathRegex,
-    onMatch: (match) {
-      final String? variableName = match.namedGroup('name');
-      if (variableName == null || variableName.isEmpty) return match[0]!;
-      return variables.getStringByName(variableName,
-          defaultValue: match.group(0)!);
-    },
-  );
-}
-
 /// Substitutes json paths found in [text] with values from [data].
 /// supported text format:
 ///   - ${data.name}: will be replaced with data['name'].
 ///   - data.name: will be replaced with data['name'].
 ///
-String? substituteJsonPath(String text, Map<String, dynamic> data) {
+dynamic substituteJsonPath(String text, Map<String, dynamic> data) {
   // If the text represents a JSON path, get the relevant value from [data] map.
   if (data.isEmpty) return null;
 
@@ -62,15 +49,7 @@ String? substituteJsonPath(String text, Map<String, dynamic> data) {
   final values = jsonPath.readValues(data);
   if (values.isEmpty) return null;
   // Return the first value.
-  return '${values.first}';
-}
-
-String transformText(
-    String text, List<VariableData> variables, BuildContext context) {
-  text = substituteVariables(text, variables);
-  // TODO: Add support for data substitution with JSON path.
-  // text = substituteData(text, context);
-  return text;
+  return values.first;
 }
 
 List<InlineSpan> transformTextSpans(List<InlineSpan> spans,
@@ -78,7 +57,7 @@ List<InlineSpan> transformTextSpans(List<InlineSpan> spans,
   return spans.map((span) {
     if (span is! TextSpan) return span;
     return TextSpan(
-      text: transformText(span.text!, variables, context),
+      text: PropertyValueDelegate.substituteVariables(context, span.text!),
       style: span.style,
       children: transformTextSpans(span.children ?? [], variables, context),
       locale: span.locale,

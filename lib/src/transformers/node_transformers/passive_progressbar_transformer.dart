@@ -4,6 +4,7 @@ import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.da
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/property_value_delegate.dart';
 
 class PassiveProgressBarTransformer
     extends NodeWidgetTransformer<ProgressBarNode> {
@@ -80,11 +81,10 @@ class PassiveProgressBarTransformer
   }
 }
 
-class PassiveProgressBarWidget extends StatelessWidget
-    with PropertyValueGetterMixin {
+class PassiveProgressBarWidget extends StatelessWidget {
   final ProgressBarNode node;
   final WidgetBuildSettings settings;
-  final List<VariableData> variables;
+  final List<VariableData> variablesOverrides;
   final bool? animate;
   final ValueChanged<double>? onChanged;
 
@@ -92,20 +92,28 @@ class PassiveProgressBarWidget extends StatelessWidget
     super.key,
     required this.node,
     this.settings = const WidgetBuildSettings(),
-    this.variables = const [],
+    this.variablesOverrides = const [],
     this.animate,
     this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final double currentValue =
-        getPropertyValue<double>(context, node, 'currentValue') ??
-            node.currentValue;
+    final double currentValue = PropertyValueDelegate.getPropertyValue<double>(
+          context,
+          node,
+          'currentValue',
+          variablesOverrides: variablesOverrides,
+        ) ??
+        node.currentValue;
 
     final Color progressColor =
-        getPropertyValue<ColorRGBA>(context, node, 'progressColor')
-                ?.toFlutterColor() ??
+        PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+              context,
+              node,
+              'progressColor',
+              variablesOverrides: variablesOverrides,
+            )?.toFlutterColor() ??
             node.properties.progressColor.toFlutterColor();
 
     return AdaptiveNodeBox(

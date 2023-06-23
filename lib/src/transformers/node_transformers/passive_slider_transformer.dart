@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/property_value_delegate.dart';
 
 class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
   PassiveSliderTransformer(super.getNode, super.manager);
@@ -79,11 +80,10 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
   }
 }
 
-class PassiveSliderWidget extends StatelessWidget
-    with PropertyValueGetterMixin {
+class PassiveSliderWidget extends StatelessWidget {
   final SliderNode node;
   final WidgetBuildSettings settings;
-  final List<VariableData> variables;
+  final List<VariableData> variablesOverrides;
   final ValueChanged<double>? onChanged;
 
   const PassiveSliderWidget({
@@ -91,13 +91,18 @@ class PassiveSliderWidget extends StatelessWidget
     required this.node,
     required this.settings,
     required this.onChanged,
-    this.variables = const [],
+    this.variablesOverrides = const [],
   });
 
   @override
   Widget build(BuildContext context) {
-    final double value =
-        getPropertyValue<double>(context, node, 'value') ?? node.value;
+    final double value = PropertyValueDelegate.getPropertyValue<double>(
+          context,
+          node,
+          'value',
+          variablesOverrides: variablesOverrides,
+        ) ??
+        node.value;
 
     // final double value = variables.getDoubleById(node.variables['value'] ?? '',
     //     defaultValue: node.value);
