@@ -1472,6 +1472,8 @@ extension BaseConditionExt on BaseCondition {
           itemProvider: IndexedItemProvider.of(context),
         ),
       );
+
+  void prettyPrint() => ConditionPrinter().printCondition(this);
 }
 
 extension CanvasConditionsMapExt on Map<String, CanvasConditions> {
