@@ -115,6 +115,7 @@ Map<String, dynamic> _$SDKPublishLayoutToJson(SDKPublishLayout instance) {
 
 SDKPublishFont _$SDKPublishFontFromJson(Map json) => SDKPublishFont(
       id: json['id'] as String?,
+      owner: json['owner'] as String,
       url: json['url'] as String,
       family: json['family'] as String,
       weight: json['weight'] as String,
@@ -124,6 +125,7 @@ SDKPublishFont _$SDKPublishFontFromJson(Map json) => SDKPublishFont(
 Map<String, dynamic> _$SDKPublishFontToJson(SDKPublishFont instance) {
   final val = <String, dynamic>{
     'id': instance.id,
+    'owner': instance.owner,
     'url': instance.url,
     'family': instance.family,
     'weight': instance.weight,
@@ -181,6 +183,7 @@ Map<String, dynamic> _$SDKPublishUpdatesToJson(SDKPublishUpdates instance) =>
 
 SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
       id: json['id'] as String,
+      owner: json['owner'] as String,
       variables: (json['variables'] as Map).map(
         (k, e) => MapEntry(k as String,
             VariableData.fromJson(Map<String, dynamic>.from(e as Map))),
@@ -190,12 +193,14 @@ SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
 Map<String, dynamic> _$SDKLayoutVariablesToJson(SDKLayoutVariables instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'owner': instance.owner,
       'variables': instance.variables.map((k, e) => MapEntry(k, e.toJson())),
     };
 
 SDKLayoutConditions _$SDKLayoutConditionsFromJson(Map json) =>
     SDKLayoutConditions(
       id: json['id'] as String,
+      owner: json['owner'] as String,
       conditions: (json['conditions'] as Map).map(
         (k, e) => MapEntry(k as String,
             BaseCondition.fromJson(Map<String, dynamic>.from(e as Map))),
@@ -206,5 +211,6 @@ Map<String, dynamic> _$SDKLayoutConditionsToJson(
         SDKLayoutConditions instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'owner': instance.owner,
       'conditions': instance.conditions.map((k, e) => MapEntry(k, e.toJson())),
     };
