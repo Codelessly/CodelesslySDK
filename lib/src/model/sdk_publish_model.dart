@@ -299,6 +299,9 @@ class SDKPublishFont with EquatableMixin {
   /// `${family} ${variant}`
   final String id;
 
+  /// The font's owner id.
+  final String owner;
+
   /// The font's url to download the font file from.
   final String url;
 
@@ -317,6 +320,7 @@ class SDKPublishFont with EquatableMixin {
   /// Creates a new instance of [SDKPublishFont].
   const SDKPublishFont({
     String? id,
+    required this.owner,
     required this.url,
     required this.family,
     required this.weight,
@@ -326,6 +330,7 @@ class SDKPublishFont with EquatableMixin {
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishFont copyWith({
     String? id,
+    String? owner,
     String? url,
     String? family,
     String? weight,
@@ -333,6 +338,7 @@ class SDKPublishFont with EquatableMixin {
   }) {
     return SDKPublishFont(
       id: id ?? this.id,
+      owner: owner ?? this.owner,
       url: url ?? this.url,
       family: family ?? this.family,
       weight: weight ?? this.weight,
@@ -341,7 +347,7 @@ class SDKPublishFont with EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [url, family, weight, style];
+  List<Object?> get props => [url, owner, family, weight, style];
 
   /// Creates a new instance of [SDKPublishFont] from a JSON map.
   factory SDKPublishFont.fromJson(Map<String, dynamic> json) =>
@@ -455,28 +461,38 @@ class SDKPublishUpdates with EquatableMixin {
 /// A model that defines variables for a layout.
 @JsonSerializable()
 class SDKLayoutVariables with EquatableMixin {
+
+  /// The id of the layout.
   final String id;
+
+  /// The owner of the variables.
+  final String owner;
+
+  /// The variables that are defined for this layout.
   final Map<String, VariableData> variables;
 
   /// Creates a new instance of [SDKLayoutVariables].
   const SDKLayoutVariables({
     required this.id,
+    required this.owner,
     required this.variables,
   });
 
   /// copyWith
   SDKLayoutVariables copyWith({
     String? id,
+    String? owner,
     Map<String, VariableData>? variables,
   }) {
     return SDKLayoutVariables(
       id: id ?? this.id,
+      owner: owner ?? this.owner,
       variables: variables ?? this.variables,
     );
   }
 
   @override
-  List<Object?> get props => [id, variables];
+  List<Object?> get props => [id, owner, variables];
 
   /// Creates a new instance of [SDKLayoutVariables] from a JSON map.
   factory SDKLayoutVariables.fromJson(Map<String, dynamic> json) =>
@@ -489,22 +505,32 @@ class SDKLayoutVariables with EquatableMixin {
 /// A model that defines variables for a layout.
 @JsonSerializable()
 class SDKLayoutConditions with EquatableMixin {
+
+  /// The id of the layout.
   final String id;
+
+  /// The owner of the conditions.
+  final String owner;
+
+  /// The conditions that are defined for this layout.
   final Map<String, BaseCondition> conditions;
 
   /// Creates a new instance of [SDKLayoutConditions].
   const SDKLayoutConditions({
     required this.id,
+    required this.owner,
     required this.conditions,
   });
 
   /// copyWith
   SDKLayoutConditions copyWith({
     String? id,
+    String? owner,
     Map<String, BaseCondition>? conditions,
   }) {
     return SDKLayoutConditions(
       id: id ?? this.id,
+      owner: owner ?? this.owner,
       conditions: conditions ?? this.conditions,
     );
   }
