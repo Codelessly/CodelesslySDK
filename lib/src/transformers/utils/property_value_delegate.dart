@@ -220,12 +220,12 @@ class PropertyValueDelegate {
         final dynamic value = substituteJsonPath(match.fullPath,
             {match.name: variable.typedValue<Map>(defaultValue: {})});
 
-        return value as R?;
+        return value.typedValue<R>();
       } else if (variable.type == VariableType.list) {
         final dynamic value = substituteJsonPath(match.fullPath,
             {match.name: variable.typedValue<List>(defaultValue: [])});
 
-        return value as R?;
+        return value.typedValue<R>();
       }
     }
 
@@ -252,37 +252,43 @@ class PropertyValueDelegate {
     String path, {
     Map<String, dynamic>? dataOverrides,
   }) {
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
+    try {
+      final CodelesslyContext codelesslyContext =
+          context.read<CodelesslyContext>();
 
-    if (name == 'data') {
-      // substitute path with data.
-      final dynamic value = substituteJsonPath(path.wrapWithVariableSyntax(),
-          {'data': dataOverrides ?? codelesslyContext.data});
+      if (name == 'data') {
+        // substitute path with data.
+        final Object? value = substituteJsonPath(path.wrapWithVariableSyntax(),
+            {'data': dataOverrides ?? codelesslyContext.data});
 
-      return value as R?;
+        return value.typedValue<R>();
+      }
+
+      if (name == 'index') {
+        // substitute path with screen.
+        final index = IndexedItemProvider.of(context)?.index;
+        if (index == null) return null;
+
+        return index.typedValue<R>();
+      }
+
+      if (name == 'item') {
+        // substitute path with screen.
+        final item = IndexedItemProvider.of(context)?.item;
+        if (item == null) return null;
+
+        final Object? value =
+            substituteJsonPath(path.wrapWithVariableSyntax(), {'item': item});
+
+        return value.typedValue<R>();
+      }
+
+      return null;
+    } catch (error, stackTrace) {
+      print(error);
+      print(stackTrace);
+      return null;
     }
-
-    if (name == 'index') {
-      // substitute path with screen.
-      final index = IndexedItemProvider.of(context)?.index;
-      if (index == null) return null;
-
-      return '$index'.typedValue<R>();
-    }
-
-    if (name == 'item') {
-      // substitute path with screen.
-      final item = IndexedItemProvider.of(context)?.item;
-      if (item == null) return null;
-
-      final dynamic value =
-          substituteJsonPath(path.wrapWithVariableSyntax(), {'item': item});
-
-      return value as R?;
-    }
-
-    return null;
   }
 
   /// Retrieves the value of a node [property] from node values by evaluating
@@ -301,6 +307,6 @@ class PropertyValueDelegate {
 
     if (model == null) return null;
 
-    return model.value as R?;
+    return model.value.typedValue<R>();
   }
 }

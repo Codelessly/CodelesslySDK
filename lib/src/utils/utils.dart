@@ -26,7 +26,7 @@ final Set<PredefinedVariableData> predefinedVariables = {
 ///   - ${data.name}: will be replaced with data['name'].
 ///   - data.name: will be replaced with data['name'].
 ///
-dynamic substituteJsonPath(String text, Map<String, dynamic> data) {
+Object? substituteJsonPath(String text, Map<String, dynamic> data) {
   // If the text represents a JSON path, get the relevant value from [data] map.
   if (data.isEmpty) return null;
 

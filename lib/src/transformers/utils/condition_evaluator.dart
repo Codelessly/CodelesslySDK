@@ -64,7 +64,7 @@ class ConditionEvaluator<R>
   }
 
   @override
-  dynamic visitVariablePart(VariablePart part) {
+  Object? visitVariablePart(VariablePart part) {
     final value =
         part.valueString.splitMapJoinRegex(variablePathRegex, onMatch: (match) {
       // Raw name of the variable without path or accessor.
@@ -76,23 +76,29 @@ class ConditionEvaluator<R>
       if (fullPath == null) return match[0]!;
 
       if (predefinedVariableNames.contains(variableName)) {
-        return visitPredefinedVariable(variableName, fullPath, match);
+        return visitPredefinedVariable(variableName, fullPath, match)
+                .typedValue<String>() ??
+            match[0]!;
       }
 
       final VariableData? variable = variables[variableName];
 
-      if (variable == null) return 'null';
+      if (variable == null) return match[0]!;
 
       if (variableName != fullPath) {
         // variable either has a path or accessor so we need to get the value
         // of the variable and apply the path or accessor on it.
         if (variable.type == VariableType.map) {
-          return substituteJsonPath(
-              fullPath, {variableName: variable.typedValue<Map>() ?? {}});
+          return substituteJsonPath(fullPath, {
+                variableName: variable.typedValue<Map>() ?? {}
+              }).typedValue<String>() ??
+              match[0]!;
         } else if (variable.type == VariableType.list) {
           // TODO: support list type variable paths.
-          return substituteJsonPath(
-              fullPath, {variableName: variable.typedValue<List>() ?? []});
+          return substituteJsonPath(fullPath, {
+                variableName: variable.typedValue<List>() ?? []
+              }).typedValue<String>() ??
+              match[0]!;
         }
       }
 
@@ -102,7 +108,7 @@ class ConditionEvaluator<R>
     return _visitRawValue(value);
   }
 
-  dynamic visitPredefinedVariable(
+  Object? visitPredefinedVariable(
     String variableName,
     String fullPath,
     RegExpMatch match,
@@ -135,9 +141,9 @@ class ConditionEvaluator<R>
   }
 
   @override
-  dynamic visitRawValuePart(RawValuePart part) => _visitRawValue(part.value);
+  Object? visitRawValuePart(RawValuePart part) => _visitRawValue(part.value);
 
-  dynamic _visitRawValue(String value) {
+  Object? _visitRawValue(String value) {
     final parsedValue = num.tryParse(value) ?? bool.tryParse(value) ?? value;
     return parsedValue;
   }
@@ -182,13 +188,15 @@ class ConditionEvaluator<R>
   R? visitSetValueAction(SetValueAction action) {
     final ValueModel value = action.values.first;
     if (value is StringValue) {
-      return visitVariablePart(VariablePart(valueString: value.value));
+      return visitVariablePart(VariablePart(valueString: value.value))
+          .typedValue<R>();
     }
-    return value.value as R?;
+    return value.value.typedValue<R>();
   }
 
   @override
-  R? visitSetVariantAction(SetVariantAction action) => action.variantID as R?;
+  R? visitSetVariantAction(SetVariantAction action) =>
+      action.variantID.typedValue<R>();
 
   @override
   R? visitApiCall(ApiCallAction action) => null;
@@ -213,7 +221,7 @@ class ConditionPrinter
     implements
         ConditionVisitor<void>,
         ExpressionVisitor<void>,
-        ExpressionPartVisitor,
+        ExpressionPartVisitor<Object>,
         ActionVisitor<void> {
   final StringBuffer _buffer = StringBuffer();
 
@@ -287,10 +295,10 @@ class ConditionPrinter
   }
 
   String valueModelToString(ValueModel model) {
-    if(model is PaintValue) {
+    if (model is PaintValue) {
       return 'Color(0x${model.value?.color?.toFlutterColor(opacity: model.value?.opacity ?? 1).hex})';
     }
-    if(model is ColorValue) {
+    if (model is ColorValue) {
       return 'Color(0x${model.value?.toFlutterColor().hex})';
     }
 

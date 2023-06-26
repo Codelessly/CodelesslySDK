@@ -54,7 +54,7 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     // Get local rotation value if it exists, else use node's rotation value.
     final int rotationDegrees = nodeValues
             .firstWhereOrNull((value) => value.name == 'rotationDegrees')
-            ?.value ??
+            ?.value.typedValue<int>() ??
         node.rotationDegrees;
     if (rotationDegrees == 0) return widget;
     return widget = Transform.rotate(
