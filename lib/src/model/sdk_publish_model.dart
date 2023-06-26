@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'model_http_request.dart';
+import 'privacy_base.dart';
 
 part 'sdk_publish_model.g.dart';
 
@@ -12,12 +13,9 @@ part 'sdk_publish_model.g.dart';
 ///
 /// This class also holds common data that is shared across all layouts.
 @JsonSerializable()
-class SDKPublishModel with EquatableMixin {
+class SDKPublishModel extends PrivacyBase with EquatableMixin {
   /// The project's id.
   final String projectId;
-
-  /// The project's owner id.
-  final String owner;
 
   /// A lazily loaded map of fonts. This map is populated during initialization
   /// of the SDK.
@@ -78,7 +76,8 @@ class SDKPublishModel with EquatableMixin {
   /// Creates a new instance of [SDKPublishModel].
   SDKPublishModel({
     required this.projectId,
-    required this.owner,
+
+    // Conditional
     Map<String, SDKPublishFont>? fonts,
     Map<String, SDKPublishLayout>? layouts,
     List<String>? pages,
@@ -94,6 +93,12 @@ class SDKPublishModel with EquatableMixin {
     DateTime? createdAt,
     this.entryLayoutId,
     Map<String, String>? defaultData,
+
+    // Privacy
+    required super.owner,
+    super.editors,
+    super.viewers,
+    super.public,
   })  : layouts = layouts ?? {},
         fonts = fonts ?? {},
         pages = pages ?? [],
@@ -122,7 +127,6 @@ class SDKPublishModel with EquatableMixin {
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishModel copyWith({
     String? projectId,
-    String? owner,
     Map<String, SDKPublishFont>? fonts,
     Map<String, SDKPublishLayout>? layouts,
     List<String>? pages,
@@ -136,10 +140,13 @@ class SDKPublishModel with EquatableMixin {
     DateTime? createdAt,
     String? entryLayoutId,
     Map<String, String>? defaultData,
+    String? owner,
+    Set<String>? editors,
+    Set<String>? viewers,
+    bool? public,
   }) {
     return SDKPublishModel(
       projectId: projectId ?? this.projectId,
-      owner: owner ?? this.owner,
       fonts: fonts ?? this.fonts,
       layouts: layouts ?? this.layouts,
       pages: pages ?? this.pages,
@@ -153,13 +160,17 @@ class SDKPublishModel with EquatableMixin {
       createdAt: createdAt ?? this.createdAt,
       entryLayoutId: entryLayoutId ?? this.entryLayoutId,
       defaultData: defaultData ?? this.defaultData,
+      owner: owner ?? this.owner,
+      editors: editors ?? this.editors,
+      viewers: viewers ?? this.viewers,
+      public: public ?? this.public,
     );
   }
 
   @override
   List<Object?> get props => [
+        super.props,
         projectId,
-        owner,
         fonts,
         pages,
         layouts,
@@ -177,7 +188,7 @@ class SDKPublishModel with EquatableMixin {
 }
 
 @JsonSerializable()
-class SDKPublishLayout with EquatableMixin {
+class SDKPublishLayout extends PrivacyBase with EquatableMixin {
   /// The layout's unique id.
   final String id;
 
@@ -189,9 +200,6 @@ class SDKPublishLayout with EquatableMixin {
 
   /// The layout's project id.
   final String projectId;
-
-  /// The layout's owner id.
-  final String owner;
 
   /// A list of the nodes that makes up this layout.
   @JsonKey(fromJson: jsonToNodes, toJson: nodesToJson)
@@ -219,13 +227,18 @@ class SDKPublishLayout with EquatableMixin {
     required this.canvasId,
     required this.pageId,
     required this.projectId,
-    required this.owner,
     required this.nodes,
     required this.lastUpdated,
     this.version,
     this.password,
     this.subdomain,
     this.breakpoint,
+
+    // Privacy
+    required super.owner,
+    super.editors,
+    super.viewers,
+    super.public,
   });
 
   /// Returns true if the layout is expired.
@@ -245,7 +258,6 @@ class SDKPublishLayout with EquatableMixin {
     String? canvasId,
     String? pageId,
     String? projectId,
-    String? owner,
     Map<String, BaseNode>? nodes,
     int? version,
     String? password,
@@ -254,24 +266,32 @@ class SDKPublishLayout with EquatableMixin {
     Breakpoint? breakpoint,
     bool forceSubdomain = false,
     bool forcePassword = false,
+    String? owner,
+    Set<String>? editors,
+    Set<String>? viewers,
+    bool? public,
   }) {
     return SDKPublishLayout(
       id: id ?? this.id,
       canvasId: canvasId ?? this.canvasId,
       pageId: pageId ?? this.pageId,
       projectId: projectId ?? this.projectId,
-      owner: owner ?? this.owner,
       nodes: nodes ?? this.nodes,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       version: version ?? this.version,
       password: forcePassword ? password : password ?? this.password,
       subdomain: subdomain ?? this.subdomain,
       breakpoint: breakpoint ?? this.breakpoint,
+      owner: owner ?? this.owner,
+      editors: editors ?? this.editors,
+      viewers: viewers ?? this.viewers,
+      public: public ?? this.public,
     );
   }
 
   @override
   List<Object?> get props => [
+        super.props,
         id,
         canvasId,
         pageId,
@@ -288,7 +308,7 @@ class SDKPublishLayout with EquatableMixin {
 
 /// Represents a single variation of a common font.
 @JsonSerializable()
-class SDKPublishFont with EquatableMixin {
+class SDKPublishFont extends PrivacyBase with EquatableMixin {
   /// The font's unique id. To keep this unique but seeded, we generate
   /// the id by base64 encoding the font's full name.
   ///
@@ -298,9 +318,6 @@ class SDKPublishFont with EquatableMixin {
   /// It's in the format of:
   /// `${family} ${variant}`
   final String id;
-
-  /// The font's owner id.
-  final String owner;
 
   /// The font's url to download the font file from.
   final String url;
@@ -320,34 +337,45 @@ class SDKPublishFont with EquatableMixin {
   /// Creates a new instance of [SDKPublishFont].
   const SDKPublishFont({
     String? id,
-    required this.owner,
     required this.url,
     required this.family,
     required this.weight,
     this.style,
+
+    // Privacy
+    required super.owner,
+    super.editors,
+    super.viewers,
+    super.public,
   }) : id = id ?? family;
 
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishFont copyWith({
     String? id,
-    String? owner,
     String? url,
     String? family,
     String? weight,
     String? style,
+    String? owner,
+    Set<String>? editors,
+    Set<String>? viewers,
+    bool? public,
   }) {
     return SDKPublishFont(
       id: id ?? this.id,
-      owner: owner ?? this.owner,
       url: url ?? this.url,
       family: family ?? this.family,
       weight: weight ?? this.weight,
       style: style ?? this.style,
+      owner: owner ?? this.owner,
+      editors: editors ?? this.editors,
+      viewers: viewers ?? this.viewers,
+      public: public ?? this.public,
     );
   }
 
   @override
-  List<Object?> get props => [url, owner, family, weight, style];
+  List<Object?> get props => [super.props, url, owner, family, weight, style];
 
   /// Creates a new instance of [SDKPublishFont] from a JSON map.
   factory SDKPublishFont.fromJson(Map<String, dynamic> json) =>
@@ -460,13 +488,9 @@ class SDKPublishUpdates with EquatableMixin {
 
 /// A model that defines variables for a layout.
 @JsonSerializable()
-class SDKLayoutVariables with EquatableMixin {
-
+class SDKLayoutVariables extends PrivacyBase with EquatableMixin {
   /// The id of the layout.
   final String id;
-
-  /// The owner of the variables.
-  final String owner;
 
   /// The variables that are defined for this layout.
   final Map<String, VariableData> variables;
@@ -474,25 +498,36 @@ class SDKLayoutVariables with EquatableMixin {
   /// Creates a new instance of [SDKLayoutVariables].
   const SDKLayoutVariables({
     required this.id,
-    required this.owner,
     required this.variables,
+
+    // Privacy
+    required super.owner,
+    super.editors,
+    super.viewers,
+    super.public,
   });
 
   /// copyWith
   SDKLayoutVariables copyWith({
     String? id,
-    String? owner,
     Map<String, VariableData>? variables,
+    String? owner,
+    Set<String>? editors,
+    Set<String>? viewers,
+    bool? public,
   }) {
     return SDKLayoutVariables(
       id: id ?? this.id,
-      owner: owner ?? this.owner,
       variables: variables ?? this.variables,
+      owner: owner ?? this.owner,
+      editors: editors ?? this.editors,
+      viewers: viewers ?? this.viewers,
+      public: public ?? this.public,
     );
   }
 
   @override
-  List<Object?> get props => [id, owner, variables];
+  List<Object?> get props => [super.props, id, owner, variables];
 
   /// Creates a new instance of [SDKLayoutVariables] from a JSON map.
   factory SDKLayoutVariables.fromJson(Map<String, dynamic> json) =>
@@ -504,13 +539,9 @@ class SDKLayoutVariables with EquatableMixin {
 
 /// A model that defines variables for a layout.
 @JsonSerializable()
-class SDKLayoutConditions with EquatableMixin {
-
+class SDKLayoutConditions extends PrivacyBase with EquatableMixin {
   /// The id of the layout.
   final String id;
-
-  /// The owner of the conditions.
-  final String owner;
 
   /// The conditions that are defined for this layout.
   final Map<String, BaseCondition> conditions;
@@ -518,25 +549,36 @@ class SDKLayoutConditions with EquatableMixin {
   /// Creates a new instance of [SDKLayoutConditions].
   const SDKLayoutConditions({
     required this.id,
-    required this.owner,
     required this.conditions,
+
+    // Privacy
+    required super.owner,
+    super.editors,
+    super.viewers,
+    super.public,
   });
 
   /// copyWith
   SDKLayoutConditions copyWith({
     String? id,
-    String? owner,
     Map<String, BaseCondition>? conditions,
+    String? owner,
+    Set<String>? editors,
+    Set<String>? viewers,
+    bool? public,
   }) {
     return SDKLayoutConditions(
       id: id ?? this.id,
       owner: owner ?? this.owner,
       conditions: conditions ?? this.conditions,
+      editors: editors ?? this.editors,
+      viewers: viewers ?? this.viewers,
+      public: public ?? this.public,
     );
   }
 
   @override
-  List<Object?> get props => [id, conditions];
+  List<Object?> get props => [super.props, id, conditions];
 
   /// Creates a new instance of [SDKLayoutVariables] from a JSON map.
   factory SDKLayoutConditions.fromJson(Map<String, dynamic> json) =>

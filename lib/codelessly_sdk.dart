@@ -14,6 +14,7 @@ export 'src/model/asset_model.dart';
 export 'src/model/font_file_data.dart';
 export 'src/model/model_http_request.dart';
 export 'src/model/sdk_publish_model.dart';
+export 'src/model/privacy_base.dart';
 export 'src/transformers/transformers.dart';
 export 'src/ui/codelessly_widget.dart';
 export 'src/ui/codelessly_widget_controller.dart';
