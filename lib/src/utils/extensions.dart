@@ -1496,6 +1496,28 @@ extension CanvasConditionsMapExt on Map<String, CanvasConditions> {
   }
 }
 
+extension ConditionsMapExt on Map<String, BaseCondition> {
+  bool hasCondition(String nodeId, String name) {
+    return values.any((condition) => condition.hasProperty(nodeId, name));
+  }
+
+  BaseCondition? findByNodeProperty(String nodeId, String property) => values
+      .firstWhereOrNull((condition) => condition.hasProperty(nodeId, property));
+
+  BaseCondition? findByNode(String nodeId) =>
+      values.firstWhereOrNull((condition) => condition.hasNode(nodeId));
+
+  Iterable<BaseCondition> findAllByNode(String nodeId) {
+    return values.where((condition) => condition.hasNode(nodeId));
+  }
+
+  Iterable<BaseCondition> findAllForNodes(Iterable<BaseNode> nodes) =>
+      nodes.expand((node) => findAllByNode(node.id));
+
+  Iterable<BaseCondition> findAllForNodeIds(Iterable<String> nodeIds) =>
+      nodeIds.expand(findAllByNode);
+}
+
 extension CanvasConditionsExt on CanvasConditions {
   bool hasCondition(String nodeId, String name) {
     return conditions.values
@@ -1535,18 +1557,16 @@ extension ExpressionPartExt on ExpressionPart {
       );
 }
 
-extension ConditionsMapExt on Map<String, BaseCondition> {
-  BaseCondition? findByNodeProperty(String nodeId, String property) => values
-      .firstWhereOrNull((condition) => condition.hasProperty(nodeId, property));
-
-  BaseCondition? findByNode(String nodeId) =>
-      values.firstWhereOrNull((condition) => condition.hasNode(nodeId));
-}
-
 extension VariantIterable on Iterable<Variant> {
   Variant? findByName(String? name) =>
       firstWhereOrNull((variant) => variant.name == name);
 
   Variant? findById(String? id) =>
       firstWhereOrNull((variant) => variant.id == id);
+}
+
+extension IterableExt<V> on Iterable<V> {
+  Map<K, V> mapBy<K>(K Function(V) key) => <K, V>{
+        for (final value in this) key(value): value,
+      };
 }
