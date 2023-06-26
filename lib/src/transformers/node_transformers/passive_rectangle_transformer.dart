@@ -687,8 +687,7 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
 
   /// Uses CachedNetworkImage
   Widget buildImage3({required bool withAlignment}) {
-    // TODO[Aachman]: migrate to new api of getting a property value.
-    if (widget.url.isValidVariablePath && widget.isActive) {
+    if (widget.url.containsUncheckedVariablePath && widget.isActive) {
       return SizedBox(
         width: widget.width,
         height: widget.height,
@@ -750,7 +749,9 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
 
   /// Uses Image.network
   Widget buildImage({required bool withAlignment}) {
-    if (widget.url.isValidVariablePath) return jsonPathBuilder(widget.url);
+    if (widget.url.containsUncheckedVariablePath && widget.isActive) {
+      return jsonPathBuilder(widget.url);
+    }
     return Image.network(
       widget.url,
       fit: widget.fit,
