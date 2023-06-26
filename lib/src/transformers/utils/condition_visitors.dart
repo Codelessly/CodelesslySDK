@@ -107,3 +107,56 @@ class ConditionVariablesVisitor
         .toSet();
   }
 }
+
+/// A visitor that returns the list of node IDs used in a condition's actions.
+class ConditionNodesVisitor
+    implements ConditionVisitor<Set<String>>, ActionVisitor<String> {
+  const ConditionNodesVisitor();
+
+  @override
+  String? visitApiCall(ApiCallAction action) => null;
+
+  @override
+  String? visitCallFunctionAction(CallFunctionAction action) => null;
+
+  @override
+  Set<String>? visitCondition(Condition condition) => {
+        ...condition.actions
+            .map((action) => action.accept<String>(this))
+            .whereNotNull()
+            .toSet(),
+      };
+
+  @override
+  Set<String>? visitConditionGroup(ConditionGroup condition) => {
+        ...condition.ifCondition.actions,
+        ...condition.elseIfConditions.expand((condition) => condition.actions),
+        ...condition.elseCondition?.actions ?? [],
+      }.map((action) => action.accept<String>(this)).whereNotNull().toSet();
+
+  @override
+  Set<String>? visitElseCondition(ElseCondition condition) {
+    return condition.actions
+        .map((action) => action.accept<String>(this))
+        .whereNotNull()
+        .toSet();
+  }
+
+  @override
+  String? visitLinkAction(LinkAction action) => null;
+
+  @override
+  String? visitNavigationAction(NavigationAction action) => null;
+
+  @override
+  String? visitSetValueAction(SetValueAction action) => action.nodeID;
+
+  @override
+  String? visitSetVariableAction(SetVariableAction action) => null;
+
+  @override
+  String? visitSetVariantAction(SetVariantAction action) => action.nodeID;
+
+  @override
+  String? visitSubmitAction(SubmitAction action) => null;
+}

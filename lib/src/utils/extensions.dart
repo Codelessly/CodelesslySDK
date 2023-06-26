@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
 import '../transformers/utils/condition_evaluator.dart';
-import '../transformers/utils/condition_variable_visitor.dart';
+import '../transformers/utils/condition_visitors.dart';
 
 extension FABLocationHelper on FABLocation {
   FloatingActionButtonLocation toFloatingActionButtonLocation() {
@@ -1474,6 +1474,9 @@ extension BaseConditionExt on BaseCondition {
       );
 
   void prettyPrint() => ConditionPrinter().printCondition(this);
+
+  Set<String> getNodeIds() =>
+      accept<Set<String>>(ConditionNodesVisitor()) ?? {};
 }
 
 extension CanvasConditionsMapExt on Map<String, CanvasConditions> {
