@@ -8,7 +8,6 @@ part of 'sdk_publish_model.dart';
 
 SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
       projectId: json['projectId'] as String,
-      owner: json['owner'] as String,
       fonts: (json['fonts'] as Map?)?.map(
         (k, e) => MapEntry(k as String,
             SDKPublishFont.fromJson(Map<String, dynamic>.from(e as Map))),
@@ -43,12 +42,21 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
       defaultData: (json['defaultData'] as Map?)?.map(
         (k, e) => MapEntry(k as String, e as String),
       ),
+      owner: json['owner'] as String,
+      editors:
+          (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      viewers:
+          (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      public: json['public'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
   final val = <String, dynamic>{
-    'projectId': instance.projectId,
     'owner': instance.owner,
+    'editors': instance.editors.toList(),
+    'viewers': instance.viewers.toList(),
+    'public': instance.public,
+    'projectId': instance.projectId,
     'fonts': instance.fonts.map((k, e) => MapEntry(k, e.toJson())),
     'layouts': instance.layouts.map((k, e) => MapEntry(k, e.toJson())),
     'pages': instance.pages,
@@ -78,7 +86,6 @@ SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
       canvasId: json['canvasId'] as String,
       pageId: json['pageId'] as String,
       projectId: json['projectId'] as String,
-      owner: json['owner'] as String,
       nodes: jsonToNodes(json['nodes'] as Map<String, dynamic>),
       lastUpdated: jsonToDate(json['lastUpdated'] as int?),
       version: json['version'] as int?,
@@ -87,15 +94,24 @@ SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
       breakpoint: json['breakpoint'] == null
           ? null
           : Breakpoint.fromJson(json['breakpoint'] as Map),
+      owner: json['owner'] as String,
+      editors:
+          (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      viewers:
+          (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      public: json['public'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$SDKPublishLayoutToJson(SDKPublishLayout instance) {
   final val = <String, dynamic>{
+    'owner': instance.owner,
+    'editors': instance.editors.toList(),
+    'viewers': instance.viewers.toList(),
+    'public': instance.public,
     'id': instance.id,
     'canvasId': instance.canvasId,
     'pageId': instance.pageId,
     'projectId': instance.projectId,
-    'owner': instance.owner,
     'nodes': nodesToJson(instance.nodes),
     'lastUpdated': dateToJson(instance.lastUpdated),
   };
@@ -115,17 +131,25 @@ Map<String, dynamic> _$SDKPublishLayoutToJson(SDKPublishLayout instance) {
 
 SDKPublishFont _$SDKPublishFontFromJson(Map json) => SDKPublishFont(
       id: json['id'] as String?,
-      owner: json['owner'] as String,
       url: json['url'] as String,
       family: json['family'] as String,
       weight: json['weight'] as String,
       style: json['style'] as String?,
+      owner: json['owner'] as String,
+      editors:
+          (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      viewers:
+          (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      public: json['public'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$SDKPublishFontToJson(SDKPublishFont instance) {
   final val = <String, dynamic>{
-    'id': instance.id,
     'owner': instance.owner,
+    'editors': instance.editors.toList(),
+    'viewers': instance.viewers.toList(),
+    'public': instance.public,
+    'id': instance.id,
     'url': instance.url,
     'family': instance.family,
     'weight': instance.weight,
@@ -183,34 +207,50 @@ Map<String, dynamic> _$SDKPublishUpdatesToJson(SDKPublishUpdates instance) =>
 
 SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
       id: json['id'] as String,
-      owner: json['owner'] as String,
       variables: (json['variables'] as Map).map(
         (k, e) => MapEntry(k as String,
             VariableData.fromJson(Map<String, dynamic>.from(e as Map))),
       ),
+      owner: json['owner'] as String,
+      editors:
+          (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      viewers:
+          (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      public: json['public'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$SDKLayoutVariablesToJson(SDKLayoutVariables instance) =>
     <String, dynamic>{
-      'id': instance.id,
       'owner': instance.owner,
+      'editors': instance.editors.toList(),
+      'viewers': instance.viewers.toList(),
+      'public': instance.public,
+      'id': instance.id,
       'variables': instance.variables.map((k, e) => MapEntry(k, e.toJson())),
     };
 
 SDKLayoutConditions _$SDKLayoutConditionsFromJson(Map json) =>
     SDKLayoutConditions(
       id: json['id'] as String,
-      owner: json['owner'] as String,
       conditions: (json['conditions'] as Map).map(
         (k, e) => MapEntry(k as String,
             BaseCondition.fromJson(Map<String, dynamic>.from(e as Map))),
       ),
+      owner: json['owner'] as String,
+      editors:
+          (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      viewers:
+          (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      public: json['public'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$SDKLayoutConditionsToJson(
         SDKLayoutConditions instance) =>
     <String, dynamic>{
-      'id': instance.id,
       'owner': instance.owner,
+      'editors': instance.editors.toList(),
+      'viewers': instance.viewers.toList(),
+      'public': instance.public,
+      'id': instance.id,
       'conditions': instance.conditions.map((k, e) => MapEntry(k, e.toJson())),
     };
