@@ -376,6 +376,7 @@ List<Widget> buildFills(
   Map<int, Uint8List> imageBytes = const {},
   double? imageOpacity,
   double? imageRotation,
+  bool isActive = false,
 }) {
   if (node is! GeometryMixin) return [];
 
@@ -448,6 +449,7 @@ List<Widget> buildFills(
                   repeat: repeat,
                   paint: paint,
                   node: node,
+                  isActive: isActive,
                 );
 
           if (modifiedOpacity != 1) {
@@ -482,6 +484,7 @@ class _NetworkImageWithStates extends StatefulWidget {
   final PaintModel paint;
   final ImageRepeat repeat;
   final BaseNode node;
+  final bool isActive;
 
   const _NetworkImageWithStates({
     required this.url,
@@ -493,6 +496,7 @@ class _NetworkImageWithStates extends StatefulWidget {
     required this.height,
     this.repeat = ImageRepeat.noRepeat,
     required this.node,
+    this.isActive = false,
   });
 
   @override
@@ -545,23 +549,46 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
   }
 
   Widget errorBuilder() {
+    if (!widget.isActive) {
+      // for passive transformer.
+      return FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Center(
+          child: ColorFiltered(
+            colorFilter: ColorFilter.mode(
+              Colors.white.withOpacity(0.1),
+              BlendMode.dst,
+            ),
+            child: Icon(
+              Icons.broken_image_outlined,
+              size: 200,
+              color: Colors.grey.withOpacity(0.2),
+            ),
+          ),
+        ),
+      );
+    }
+
     return LayoutBuilder(builder: (context, constraints) {
       if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
         return FittedBox(child: Center(child: Icon(Icons.error_outline)));
       }
       return FittedBox(
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.error_outline),
-              Text(
-                'Failed to load image',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.error_outline),
+                Text(
+                  'Failed to load image',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -590,32 +617,48 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
   Widget jsonPathBuilder(String path) {
     return LayoutBuilder(builder: (context, constraints) {
       if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
-        return FittedBox(child: Center(child: Icon(Icons.image)));
+        return FittedBox(child: Center(child: Icon(Icons.image_outlined)));
       }
       return FittedBox(
+        fit: BoxFit.scaleDown,
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.image),
-              Text(
-                'Variable Image',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.merge(
-                      GoogleFonts.sourceCodePro(),
-                    ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: ColorFiltered(
+              colorFilter: ColorFilter.mode(
+                Colors.white.withOpacity(0.1),
+                BlendMode.dst,
               ),
-              Text(
-                path,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.merge(
-                      GoogleFonts.sourceCodePro(
-                        color: Colors.greenAccent.shade700,
-                      ),
-                    ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.image_outlined,
+                    size: 100,
+                  ),
+                  Text(
+                    'Variable Image',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.merge(
+                          GoogleFonts.sourceCodePro(
+                            fontSize: 24,
+                          ),
+                        ),
+                  ),
+                  Text(
+                    path,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.merge(
+                          GoogleFonts.sourceCodePro(
+                            color: Colors.greenAccent.shade700,
+                            fontSize: 24,
+                          ),
+                        ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       );
@@ -645,7 +688,7 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
   /// Uses CachedNetworkImage
   Widget buildImage3({required bool withAlignment}) {
     // TODO[Aachman]: migrate to new api of getting a property value.
-    if (widget.url.isValidVariablePath) {
+    if (widget.url.isValidVariablePath && widget.isActive) {
       return SizedBox(
         width: widget.width,
         height: widget.height,
@@ -681,8 +724,9 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
         }
         return child;
       },
-      progressIndicatorBuilder: (context, url, downloadProgress) =>
-          loadingBuilder(downloadProgress),
+      progressIndicatorBuilder: widget.isActive
+          ? (context, url, downloadProgress) => loadingBuilder(downloadProgress)
+          : null,
       errorWidget: (context, url, error) => errorBuilder(),
     );
   }
