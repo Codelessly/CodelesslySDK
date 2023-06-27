@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
-import '../utils/property_value_delegate.dart';
 
 class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
   PassiveButtonTransformer(super.getNode, super.manager);
@@ -88,9 +87,9 @@ class PassiveButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rawLabel =
-        PropertyValueDelegate.getPropertyValue(context, node, 'label') ??
-            node.properties.label;
+    final rawLabel = PropertyValueDelegate.getPropertyValue<String>(
+            context, node, 'label') ??
+        node.properties.label;
 
     String text = PropertyValueDelegate.substituteVariables(
       context,
@@ -106,7 +105,7 @@ class PassiveButtonWidget extends StatelessWidget {
     Widget iconWidget = retrieveIconWidget(
         node.properties.icon, effectiveIconSize, useIconFonts);
 
-    final bool enabled = PropertyValueDelegate.getPropertyValue(
+    final bool enabled = PropertyValueDelegate.getPropertyValue<bool>(
           context,
           node,
           'enabled',

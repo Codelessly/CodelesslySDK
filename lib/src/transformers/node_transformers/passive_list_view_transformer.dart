@@ -61,13 +61,13 @@ class PassiveListViewWidget extends StatelessWidget {
         reverse: node.reverse,
         itemExtent: node.properties.itemExtent,
         clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
-        separatedBuilder:
-            (node.properties.itemCount != null || data != null) && node.properties.hasSeparator
-                ? (context, index) => ListViewItemSeparator(
-                      scrollDirection: node.scrollDirection,
-                      properties: node.properties,
-                    )
-                : null,
+        separatedBuilder: (node.properties.itemCount != null || data != null) &&
+                node.properties.hasSeparator
+            ? (context, index) => ListViewItemSeparator(
+                  scrollDirection: node.scrollDirection,
+                  properties: node.properties,
+                )
+            : null,
         itemBuilder: (context, index) => IndexedItemProvider(
           index: index,
           item: data?.elementAtOrNull(index),

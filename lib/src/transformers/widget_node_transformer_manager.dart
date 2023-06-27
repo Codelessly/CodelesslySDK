@@ -29,12 +29,9 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
   /// Convenience method to handle widget visibility.
   Widget applyWidgetVisibility(
       BuildContext context, BaseNode node, Widget widget) {
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
-
-    final bool visible =
-        codelesslyContext.getPropertyValue<bool>(context, node, 'visible') ??
-            node.visible;
+    final bool visible = PropertyValueDelegate.getPropertyValue<bool>(
+            context, node, 'visible') ??
+        node.visible;
 
     if (visible) return widget;
 
@@ -54,7 +51,8 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     // Get local rotation value if it exists, else use node's rotation value.
     final int rotationDegrees = nodeValues
             .firstWhereOrNull((value) => value.name == 'rotationDegrees')
-            ?.value.typedValue<int>() ??
+            ?.value
+            .typedValue<int>() ??
         node.rotationDegrees;
     if (rotationDegrees == 0) return widget;
     return widget = Transform.rotate(
