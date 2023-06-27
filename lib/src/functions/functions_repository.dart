@@ -289,7 +289,8 @@ class FunctionsRepository {
     // Email ID would be primary field's input value.
     final String emailID = primaryFieldValues
             .firstWhereOrNull((value) => value.name == 'inputValue')
-            ?.value.typedValue<String>() ??
+            ?.value
+            .typedValue<String>() ??
         '';
     // Do nothing if field is empty.
     if (emailID.isEmpty) return;
@@ -318,11 +319,13 @@ class FunctionsRepository {
     // Get first and last names.
     final String firstName = firstNameFieldValues
             .firstWhereOrNull((value) => value.name == 'inputValue')
-            ?.value.typedValue<String>() ??
+            ?.value
+            .typedValue<String>() ??
         '';
     final String lastName = lastNameFieldValues
             .firstWhereOrNull((value) => value.name == 'inputValue')
-            ?.value.typedValue<String>() ??
+            ?.value
+            .typedValue<String>() ??
         '';
     // Map to merge first and last name values with email ID to submit to
     // Mailchimp.
@@ -373,8 +376,9 @@ class FunctionsRepository {
         toggle: value is BoolValue
             ? () {
                 return currentValue.copyWith(
-                  value:
-                      currentValue.value == null ? null : !currentValue.value.typedValue<bool>()!,
+                  value: currentValue.value == null
+                      ? null
+                      : !currentValue.value.typedValue<bool>()!,
                 );
               }
             : null,

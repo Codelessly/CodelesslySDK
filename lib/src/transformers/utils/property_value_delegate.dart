@@ -31,14 +31,14 @@ class PropertyValueDelegate {
   ///
   /// If [dataOverrides] is provided, it will be used to instead of the
   /// data retrieved from [CodelesslyContext].
-  static R? getPropertyValue<R>(
+  static R? getPropertyValue<R extends Object>(
     BuildContext context,
     BaseNode node,
     String property, {
     List<VariableData>? variablesOverrides,
     Map<String, dynamic>? dataOverrides,
   }) {
-    final R? conditionValue = getPropertyValueFromCondition(
+    final R? conditionValue = getPropertyValueFromCondition<R>(
       context,
       node,
       property,
@@ -46,7 +46,7 @@ class PropertyValueDelegate {
       dataOverrides: dataOverrides,
     );
 
-    final R? variableValue = getPropertyValueFromVariable(
+    final R? variableValue = getPropertyValueFromVariable<R>(
       context,
       node,
       property,
@@ -54,7 +54,7 @@ class PropertyValueDelegate {
       dataOverrides: dataOverrides,
     );
 
-    final R? nodeValue = getPropertyValueFromNodeValues(
+    final R? nodeValue = getPropertyValueFromNodeValues<R>(
       context,
       node,
       property,
@@ -74,7 +74,7 @@ class PropertyValueDelegate {
   ///
   /// If [dataOverrides] is provided, it will be used to instead of the
   /// data retrieved from [CodelesslyContext].
-  static R? getPropertyValueFromCondition<R>(
+  static R? getPropertyValueFromCondition<R extends Object>(
     BuildContext context,
     BaseNode node,
     String property, {
@@ -115,7 +115,7 @@ class PropertyValueDelegate {
   ///
   /// If [dataOverrides] is provided, it will be used to instead of the
   /// data retrieved from [CodelesslyContext].
-  static R? getPropertyValueFromVariable<R>(
+  static R? getPropertyValueFromVariable<R extends Object>(
     BuildContext context,
     BaseNode node,
     String property, {
@@ -185,7 +185,7 @@ class PropertyValueDelegate {
   ///
   /// If [dataOverrides] is provided, it will be used to instead of the
   /// data retrieved from [CodelesslyContext].
-  static R? getVariableValueFromPath<R>(
+  static R? getVariableValueFromPath<R extends Object>(
     BuildContext context,
     String path, {
     List<VariableData>? variablesOverrides,
@@ -246,7 +246,7 @@ class PropertyValueDelegate {
   ///
   /// If [dataOverrides] is provided, it will be used to instead of the
   /// data retrieved from [CodelesslyContext].
-  static R? getPredefinedVariableValue<R>(
+  static R? getPredefinedVariableValue<R extends Object>(
     BuildContext context,
     String name,
     String path, {
@@ -293,7 +293,7 @@ class PropertyValueDelegate {
 
   /// Retrieves the value of a node [property] from node values by evaluating
   /// the node values if it exists.
-  static R? getPropertyValueFromNodeValues<R>(
+  static R? getPropertyValueFromNodeValues<R extends Object>(
       BuildContext context, BaseNode node, String property) {
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();

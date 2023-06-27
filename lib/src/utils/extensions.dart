@@ -1460,7 +1460,7 @@ extension BaseConditionExt on BaseCondition {
       {};
 
   /// [variables] is a map of variable name to variable value.
-  R? evaluate<R>(
+  R? evaluate<R extends Object>(
     BuildContext context,
     Map<String, VariableData> variables,
     Map<String, dynamic> data,

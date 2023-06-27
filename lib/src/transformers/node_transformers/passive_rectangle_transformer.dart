@@ -152,9 +152,10 @@ List<BoxShadow> retrieveBoxShadow(
       .where((effect) => effect.type == EffectType.dropShadow && effect.visible)
       .map(
     (effect) {
-      final ColorRGBA? color = codelesslyContext.getPropertyValue<ColorRGBA>(
-              context, node, 'shadow-color-${effect.id}') ??
-          effect.color;
+      final ColorRGBA? color =
+          PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+                  context, node, 'shadow-color-${effect.id}') ??
+              effect.color;
       return BoxShadow(
         spreadRadius: effect.spread!,
         offset:
@@ -328,7 +329,7 @@ List<Widget> buildStrokes(
   }
   final List<Widget> strokeWidgets = [];
   for (final paint in node.strokes.where((paint) => paint.visible)) {
-    final paintValue = codelesslyContext.getPropertyValue<PaintModel>(
+    final paintValue = PropertyValueDelegate.getPropertyValue<PaintModel>(
         context, node, 'stroke-paint-${paint.id}');
     if (node.dashPattern.isEmpty) {
       strokeWidgets.add(
@@ -385,8 +386,9 @@ List<Widget> buildFills(
     ...node.fills.where((paint) => paint.visible).mapIndexed((index, paint) {
       switch (paint.type) {
         case PaintType.solid:
-          final propertyValue = codelesslyContext.getPropertyValue<PaintModel>(
-              context, node, 'fill-${paint.id}');
+          final propertyValue =
+              PropertyValueDelegate.getPropertyValue<PaintModel>(
+                  context, node, 'fill-${paint.id}');
           return Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(

@@ -200,22 +200,6 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
       variables.values
           .firstWhereOrNull((variable) => variable.value.name == name);
 
-  T? getPropertyValue<T>(BuildContext context, BaseNode node, String property) {
-    final condition = conditions.findByNodeProperty(node.id, property);
-    final T? conditionValue =
-        condition?.evaluate<T>(context, variableNamesMap(), data);
-
-    final T? variableValue =
-        findVariableByName(node.variables[property])?.value.typedValue<T>();
-
-    final T? nodeValue = nodeValues[node.id]
-        ?.value
-        .firstWhereOrNull((value) => value.name == property)
-        ?.value as T?;
-
-    return conditionValue ?? variableValue ?? nodeValue;
-  }
-
   @override
   List<Object?> get props => [data, functions];
 }

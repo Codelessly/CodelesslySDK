@@ -3,7 +3,7 @@ import 'package:collection/collection.dart';
 
 import '../../../codelessly_sdk.dart';
 
-class ConditionEvaluator<R>
+class ConditionEvaluator<R extends Object>
     implements
         ConditionVisitor<R>,
         ExpressionVisitor<bool>,
@@ -23,7 +23,7 @@ class ConditionEvaluator<R>
   @override
   R? visitCondition(Condition condition) {
     if (condition.expression.accept<bool>(this) == true) {
-      return condition.actions.firstOrNull?.accept<R?>(this);
+      return condition.actions.firstOrNull?.accept<R>(this);
     }
     return null;
   }
@@ -39,7 +39,7 @@ class ConditionEvaluator<R>
 
   @override
   R? visitElseCondition(ElseCondition condition) {
-    return condition.actions.firstOrNull?.accept<R?>(this);
+    return condition.actions.firstOrNull?.accept<R>(this);
   }
 
   @override
@@ -143,10 +143,7 @@ class ConditionEvaluator<R>
   @override
   Object? visitRawValuePart(RawValuePart part) => _visitRawValue(part.value);
 
-  Object? _visitRawValue(String value) {
-    final parsedValue = num.tryParse(value) ?? bool.tryParse(value) ?? value;
-    return parsedValue;
-  }
+  Object? _visitRawValue(String value) => value.parsedValue();
 
   @override
   bool visitEqualsOperator(Object? left, Object? right) {
