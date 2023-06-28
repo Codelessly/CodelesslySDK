@@ -12,6 +12,8 @@ abstract class PrivacyBase with EquatableMixin {
   /// The ids of the users that can view the object.
   final Set<String> viewers;
 
+  Set<String> get whitelistedUsers => {owner, ...editors, ...viewers};
+
   /// Whether the object is public or not. If it is public, then
   /// it is accessible to read by anyone.
   final bool public;
@@ -22,8 +24,8 @@ abstract class PrivacyBase with EquatableMixin {
     Set<String>? editors,
     Set<String>? viewers,
     this.public = false,
-  }) : editors = editors ?? const <String>{},
-       viewers = viewers ?? const <String>{};
+  })  : editors = editors ?? const <String>{},
+        viewers = viewers ?? const <String>{};
 
   @override
   List<Object?> get props => [owner, editors, viewers, public];
