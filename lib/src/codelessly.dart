@@ -163,7 +163,7 @@ class Codelessly {
   /// If the [CodelesslyWidget] recognizes that this instance of the
   /// [Codelessly] SDK is the global instance rather than a local one, it will
   /// initialize the SDK automatically, if specified.
-  static Future<CodelesslyStatus> initialize({
+  Future<CodelesslyStatus> initialize({
     CodelesslyConfig? config,
 
     // Raw managers.

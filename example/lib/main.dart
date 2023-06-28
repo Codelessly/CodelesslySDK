@@ -1,16 +1,12 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 
-const String authToken = 'LCVyNTxyLCVxQXh3WDc5MFowLjApQXJfWyNdSnlAQjphLyN1';
-const String layoutID = '0Qz5TaUXGRBrc53IZW7M';
-
-// METHOD 1
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Codelessly.initialize(
+  Codelessly.instance.initialize(
     config: const CodelesslyConfig(
-      authToken: authToken,
+      authToken: "LCVyNTxyLCVxQXh3WDc5MFowLjApQXJfWyNdSnlAQjphLyN1",
       isPreview: false,
       automaticallyCollectCrashReports: false,
     ),
@@ -26,48 +22,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Codelessly SDK Example',
-      debugShowCheckedModeBanner: false,
       home: SafeArea(
         child: CodelesslyWidget(
-          layoutID: layoutID,
-          // isPreview: true,
-          // config: const CodelesslyConfig(
-          //   authToken: 'UnJ5XU1fR0Z5JUU1MSpWamUvJj4wYzlzVDUmazxZIUA5Jkxr',
-          // ),
+          layoutID: "0Qz5TaUXGRBrc53IZW7M",
         ),
       ),
     );
   }
 }
-
-// METHOD 2
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   runApp(
-//     CodelesslyWidget(
-//       layoutID: layoutID,
-//       config: const CodelesslyConfig(
-//         authToken: authToken,
-//       ),
-//     ),
-//   );
-// }
-//
-// METHOD 3
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//
-//   final Codelessly codelessly = Codelessly(
-//     config: const CodelesslyConfig(
-//       authToken: authToken,
-//     ),
-//   );
-//
-//   // Can be run at any point in time.
-//   codelessly.init();
-//
-//   runApp(CodelesslyWidget(
-//     codelessly: codelessly,
-//     layoutID: layoutID,
-//   ));
-// }
