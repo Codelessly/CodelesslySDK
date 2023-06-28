@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  codelessly_api: ^0.0.4
+  codelessly_api: 0.0.5
   equatable: ^2.0.5
   google_fonts: ^5.1.0
   json_annotation: ^4.8.1
@@ -24,7 +24,6 @@ dependencies:
   webview_flutter_android: ^3.8.0
   webview_flutter_wkwebview: ^3.5.0
   flutter_animation_progress_bar: ^2.3.1
-  cached_network_image: ^3.2.3
   vector_math: ^2.1.4
   grpc: ^3.2.2
   fixnum: ^1.1.0
@@ -42,9 +41,6 @@ dev_dependencies:
     sdk: flutter
   json_serializable: ^6.7.0
   flutter_lints: ^2.0.1
-
-dependency_overrides:
-  http: ^1.0.0
 
 flutter:
   uses-material-design: true
