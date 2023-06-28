@@ -1,3 +1,7 @@
+## 0.0.4
+- Update CodelesslyAPI v0.0.5.
+- Update example.
+
 ## 0.0.3
 - Update GoogleFonts v5.0.0
 - Update CodelesslyAPI v0.0.3.

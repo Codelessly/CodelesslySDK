@@ -1,6 +1,6 @@
 name: codelessly_sdk
-description: Codelessly CloudUI™ - Supercharge your Flutter apps with dynamic UI and real-time updates. Build and publish UI without code!"
-version: 0.0.3
+description: Codelessly CloudUI™ - Supercharge your Flutter apps with dynamic UI and real-time updates. Build and publish UI without code!
+version: 0.0.4
 homepage: https://codelessly.com/
 repository: https://github.com/Codelessly/CodelesslySDK
 
