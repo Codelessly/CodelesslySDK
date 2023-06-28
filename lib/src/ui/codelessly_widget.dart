@@ -41,14 +41,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     notifyListeners();
   }
 
-  String? _layoutID;
-
-  /// The ID of the layout that is currently loaded.
-  String? get layoutID => _layoutID;
-
-  set layoutID(String? value) {
-    _layoutID = value;
-  }
+  String? layoutID;
 
   /// A map of functions that is passed to loaded layouts for nodes to call when
   /// they are triggered.
@@ -75,9 +68,8 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     required this.nodeValues,
     required this.variables,
     required this.conditions,
-    required String? layoutID,
-  })  : _layoutID = layoutID,
-        _data = data;
+    required this.layoutID,
+  }) : _data = data;
 
   /// Creates a [CodelesslyContext] with empty an empty map of each property.
   CodelesslyContext.empty({String? layoutID})
@@ -85,8 +77,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
         functions = {},
         nodeValues = {},
         variables = {},
-        conditions = {},
-        _layoutID = layoutID;
+        conditions = {};
 
   /// Returns a map of all of the [VariableData]s in [variables] mapped by their
   /// name.

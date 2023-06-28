@@ -137,19 +137,15 @@ class SDKPublishLayout with EquatableMixin {
   final DateTime lastUpdated;
 
   /// The layout's version.
-  @Deprecated('Future use')
   final int? version;
 
   /// The layout's password.
-  @Deprecated('Future use')
   final String? password;
 
   /// The layout's subdomain.
-  @Deprecated('Future use')
   final String? subdomain;
 
   /// The layout's breakpoint.
-  @Deprecated('Future use')
   final Breakpoint? breakpoint;
 
   /// Creates a new instance of [SDKPublishLayout].

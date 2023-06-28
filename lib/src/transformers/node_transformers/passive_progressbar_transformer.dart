@@ -4,7 +4,6 @@ import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.da
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
-import '../utils/property_value_delegate.dart';
 
 class PassiveProgressBarTransformer
     extends NodeWidgetTransformer<ProgressBarNode> {
