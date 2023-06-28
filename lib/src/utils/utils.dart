@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:json_path/json_path.dart';
 
 import '../../codelessly_sdk.dart';
-import '../transformers/utils/property_value_delegate.dart';
 
 // const String jsonPathPattern = r'\${([a-zA-Z.\[\]]+[a-zA-Z0-9_.\[\]]*)}';
 // final RegExp jsonPathRegex = RegExp(jsonPathPattern);

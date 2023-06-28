@@ -2,7 +2,6 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../utils/property_value_delegate.dart';
 
 class PassiveVarianceTransformer extends NodeWidgetTransformer<VarianceNode> {
   PassiveVarianceTransformer(super.getNode, super.manager);

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
-import '../utils/property_value_delegate.dart';
 
 class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
   PassiveSliderTransformer(super.getNode, super.manager);

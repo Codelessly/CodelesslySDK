@@ -4,7 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
-import '../utils/property_value_delegate.dart';
 
 class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
   PassiveRadioTransformer(super.getNode, super.manager);
