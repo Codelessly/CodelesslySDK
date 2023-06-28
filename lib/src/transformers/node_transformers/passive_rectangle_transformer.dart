@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -597,25 +596,6 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
     });
   }
 
-  Widget loadingBuilder(DownloadProgress progress) {
-    return Center(
-      child: SizedBox(
-        width: widget.width / 3,
-        height: widget.height / 3,
-        child: FittedBox(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(4),
-              child: CircularProgressIndicator(
-                value: progress.progress,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget jsonPathBuilder(String path) {
     return LayoutBuilder(builder: (context, constraints) {
       if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
@@ -678,75 +658,13 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
             top: position!.y,
             width: effectiveChildSize!.width,
             height: effectiveChildSize!.height,
-            child: buildImage3(withAlignment: false),
+            child: buildImage(withAlignment: false),
           )
         ],
       );
     }
 
-    return buildImage3(withAlignment: true);
-  }
-
-  /// Uses CachedNetworkImage
-  Widget buildImage3({required bool withAlignment}) {
-    if (widget.url.containsUncheckedVariablePath && widget.isActive) {
-      return SizedBox(
-        width: widget.width,
-        height: widget.height,
-        child: jsonPathBuilder(widget.url),
-      );
-    }
-    return CachedNetworkImage(
-      imageUrl: widget.url,
-      width: widget.width,
-      height: widget.height,
-      repeat: widget.repeat,
-      fadeInDuration: const Duration(milliseconds: 300),
-      fadeOutDuration: const Duration(milliseconds: 300),
-      placeholderFadeInDuration: const Duration(milliseconds: 300),
-      imageBuilder: (context, imageProvider) {
-        final child = DecoratedBox(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: imageProvider,
-              fit: widget.fit,
-              repeat: widget.repeat,
-              alignment: withAlignment ? widget.alignment : Alignment.center,
-              scale: widget.paint.isNonUniformScale ? 1 : widget.scale.abs(),
-            ),
-          ),
-        );
-        if (widget.paint.hasFlippedAxis) {
-          return Transform.scale(
-            scaleX: widget.paint.scaleX.sign,
-            scaleY: widget.paint.scaleY.sign,
-            child: child,
-          );
-        }
-        return child;
-      },
-      progressIndicatorBuilder: widget.isActive
-          ? (context, url, downloadProgress) => loadingBuilder(downloadProgress)
-          : null,
-      errorWidget: (context, url, error) => errorBuilder(),
-    );
-  }
-
-  /// Uses DecorationImage
-  Widget buildImage2({required bool withAlignment}) {
-    return Container(
-      width: widget.width,
-      height: widget.height,
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: NetworkImage(widget.url),
-          fit: widget.fit,
-          alignment: withAlignment ? widget.alignment : Alignment.center,
-          scale: widget.scale,
-          repeat: widget.repeat,
-        ),
-      ),
-    );
+    return buildImage(withAlignment: true);
   }
 
   /// Uses Image.network
