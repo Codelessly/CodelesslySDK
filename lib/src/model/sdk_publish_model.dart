@@ -119,10 +119,12 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
     ..remove('layouts')
     ..remove('apis')
     ..remove('variables')
-    ..remove('conditions');
+    ..remove('conditions')
+    ..['whitelistedUsers'] = [...whitelistedUsers];
 
   /// Converts this instance to a JSON map.
-  Map<String, dynamic> toFullJson() => _$SDKPublishModelToJson(this);
+  Map<String, dynamic> toFullJson() => _$SDKPublishModelToJson(this)
+    ..['whitelistedUsers'] = [...whitelistedUsers];
 
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishModel copyWith({
@@ -169,7 +171,7 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        super.props,
+        ...super.props,
         projectId,
         fonts,
         pages,
@@ -250,7 +252,8 @@ class SDKPublishLayout extends PrivacyBase with EquatableMixin {
       _$SDKPublishLayoutFromJson(json);
 
   /// Converts this instance to a JSON map.
-  Map<String, dynamic> toJson() => _$SDKPublishLayoutToJson(this);
+  Map<String, dynamic> toJson() => _$SDKPublishLayoutToJson(this)
+    ..['whitelistedUsers'] = [...whitelistedUsers];
 
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishLayout copyWith({
@@ -291,7 +294,7 @@ class SDKPublishLayout extends PrivacyBase with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        super.props,
+        ...super.props,
         id,
         canvasId,
         pageId,
@@ -375,14 +378,16 @@ class SDKPublishFont extends PrivacyBase with EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [super.props, url, owner, family, weight, style];
+  List<Object?> get props =>
+      [...super.props, url, owner, family, weight, style];
 
   /// Creates a new instance of [SDKPublishFont] from a JSON map.
   factory SDKPublishFont.fromJson(Map<String, dynamic> json) =>
       _$SDKPublishFontFromJson(json);
 
   /// Converts this instance to a JSON map.
-  Map<String, dynamic> toJson() => _$SDKPublishFontToJson(this);
+  Map<String, dynamic> toJson() => _$SDKPublishFontToJson(this)
+    ..['whitelistedUsers'] = [...whitelistedUsers];
 }
 
 /// Defines an interpretation of what kind of update has been made to a given
@@ -527,14 +532,15 @@ class SDKLayoutVariables extends PrivacyBase with EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [super.props, id, owner, variables];
+  List<Object?> get props => [...super.props, id, owner, variables];
 
   /// Creates a new instance of [SDKLayoutVariables] from a JSON map.
   factory SDKLayoutVariables.fromJson(Map<String, dynamic> json) =>
       _$SDKLayoutVariablesFromJson(json);
 
   /// Converts this instance to a JSON map.
-  Map<String, dynamic> toJson() => _$SDKLayoutVariablesToJson(this);
+  Map<String, dynamic> toJson() => _$SDKLayoutVariablesToJson(this)
+    ..['whitelistedUsers'] = [...whitelistedUsers];
 }
 
 /// A model that defines variables for a layout.
@@ -578,12 +584,13 @@ class SDKLayoutConditions extends PrivacyBase with EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [super.props, id, conditions];
+  List<Object?> get props => [...super.props, id, conditions];
 
   /// Creates a new instance of [SDKLayoutVariables] from a JSON map.
   factory SDKLayoutConditions.fromJson(Map<String, dynamic> json) =>
       _$SDKLayoutConditionsFromJson(json);
 
   /// Converts this instance to a JSON map.
-  Map<String, dynamic> toJson() => _$SDKLayoutConditionsToJson(this);
+  Map<String, dynamic> toJson() => _$SDKLayoutConditionsToJson(this)
+    ..['whitelistedUsers'] = [...whitelistedUsers];
 }
