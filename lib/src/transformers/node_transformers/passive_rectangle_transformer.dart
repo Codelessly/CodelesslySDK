@@ -685,7 +685,7 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
           AnimatedSwitcher(
         duration: const Duration(milliseconds: 150),
         child: loadingProgress == null
-            ? child
+            ? SizedBox.expand(child: child)
             : Center(
                 child: CircularProgressIndicator(
                   value: loadingProgress.expectedTotalBytes != null
