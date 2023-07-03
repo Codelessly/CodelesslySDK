@@ -1573,3 +1573,12 @@ extension IterableExt<V> on Iterable<V> {
         for (final value in this) key(value): value,
       };
 }
+
+extension TabBarIndicatorSizeExtensions on TabBarIndicatorSizeEnum {
+  TabBarIndicatorSize toFlutter() {
+    return switch (this) {
+      TabBarIndicatorSizeEnum.label => TabBarIndicatorSize.label,
+      TabBarIndicatorSizeEnum.tab => TabBarIndicatorSize.tab,
+    };
+  }
+}
