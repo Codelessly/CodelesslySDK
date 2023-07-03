@@ -309,3 +309,22 @@ class ProgressBarDefaults {
   static const CornerRadius cornerRadius =
       CornerRadius.all(RadiusModel.circular(8));
 }
+
+class TabBarDefaults {
+  static const Color indicatorColor = kDefaultPrimaryColor;
+  static const double indicatorWeight = 2.0;
+  static const TabBarIndicatorSizeEnum indicatorSize =
+      TabBarIndicatorSizeEnum.tab;
+  static const Color labelColor = kDefaultTextColor;
+
+  static TextProp get labelStyle => TextProp(fontSize: 14);
+  static const Color unselectedLabelColor = Colors.grey;
+
+  static TextProp get unselectedLabelStyle =>
+      TextProp(fontSize: 14, fills: [PaintModel.greyPaint]);
+  static const Color overlayColor = kDefaultHoverColor;
+  static const EdgeInsetsModel indicatorPadding = EdgeInsetsModel.zero;
+  static const EdgeInsetsModel labelPadding =
+      EdgeInsetsModel.symmetric(horizontal: 16, vertical: 12);
+  static const Color dividerColor = Colors.grey;
+}
