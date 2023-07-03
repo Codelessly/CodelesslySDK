@@ -28,3 +28,4 @@ export 'passive_text_field_transformer.dart';
 export 'passive_text_transformer.dart';
 export 'passive_variance_transformer.dart';
 export 'passive_web_view_transformer.dart';
+export 'passive_tab_bar_transformer.dart';
