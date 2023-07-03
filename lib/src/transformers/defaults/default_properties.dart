@@ -258,3 +258,16 @@ ProgressBarProperties get defaultProgressBarProperties => ProgressBarProperties(
       animationDurationInMillis: ProgressBarDefaults.animationDurationInMillis,
       cornerRadius: ProgressBarDefaults.cornerRadius,
     );
+
+TabBarProperties get defaultTabBarProperties => TabBarProperties(
+      dividerColor: TabBarDefaults.dividerColor.toColorRGBA(),
+      indicatorColor: TabBarDefaults.indicatorColor.toColorRGBA(),
+      indicatorWeight: TabBarDefaults.indicatorWeight,
+      labelColor: TabBarDefaults.labelColor.toColorRGBA(),
+      labelPadding: TabBarDefaults.labelPadding,
+      labelStyle: TabBarDefaults.labelStyle,
+      unselectedLabelColor: TabBarDefaults.unselectedLabelColor.toColorRGBA(),
+      unselectedLabelStyle: TabBarDefaults.unselectedLabelStyle,
+      indicatorSize: TabBarDefaults.indicatorSize,
+      indicatorPadding: TabBarDefaults.indicatorPadding,
+    );

@@ -8,6 +8,8 @@ import '../../../codelessly_sdk.dart';
 /// A delegate class that helps retrieving the value of a node property from
 /// multiple sources such as conditions, variables, data, and node values.
 class PropertyValueDelegate {
+  const PropertyValueDelegate._();
+
   /// Retrieves the value of a node [property] from multiple sources.
   /// Sources: Conditions, Variables, Data, item, index, and Node Values.
   ///
