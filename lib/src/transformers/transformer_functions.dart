@@ -402,7 +402,7 @@ OutlinedBorder? getShapeFromMixin(ShapeBorderMixin mixin,
       borderWidth: onlyShape ? null : mixin.borderWidth,
     );
 
-OutlinedBorder? getShape({
+OutlinedBorder getShape({
   required CShapeBorder shape,
   required CornerRadius radius,
   ColorRGBA? borderColor,

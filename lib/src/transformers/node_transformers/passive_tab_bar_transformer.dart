@@ -39,13 +39,14 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
     double? height,
     double? width,
   }) {
-    final previewNode = TabBarNode(
-      properties: properties ?? node?.properties ?? TabBarProperties(),
-      id: '',
-      name: 'tabBar',
-      basicBoxLocal: NodeBox(0, 0, width ?? 32, height ?? 32),
-      retainedOuterBoxLocal: NodeBox(0, 0, width ?? 32, height ?? 32),
-    );
+    final previewNode = node ??
+        TabBarNode(
+          properties: properties ?? node?.properties ?? TabBarProperties(),
+          id: '',
+          name: 'tabBar',
+          basicBoxLocal: NodeBox(0, 0, width ?? 32, height ?? 32),
+          retainedOuterBoxLocal: NodeBox(0, 0, width ?? 32, height ?? 32),
+        );
     return PassiveTabBarWidget(
       node: previewNode,
       settings: WidgetBuildSettings(),
@@ -140,6 +141,8 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
         PassiveTextTransformer.retrieveTextStyleFromProp(
             widget.node.properties.unselectedLabelStyle);
 
+    final Decoration? indicator = getIndicator();
+
     return SizedBox(
       width: width,
       height: height,
@@ -153,13 +156,18 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
               widget.node.properties.overlayColor?.toFlutterColor()),
           dividerColor: widget.node.properties.dividerColor?.toFlutterColor(),
           indicatorColor:
-              widget.node.properties.indicatorColor?.toFlutterColor(),
+              widget.node.properties.indicatorColor.toFlutterColor(),
           indicatorPadding:
               widget.node.properties.indicatorPadding.flutterEdgeInsets,
           indicatorSize: widget.node.properties.indicatorSize.toFlutter(),
           isScrollable: widget.node.isScrollable,
-          indicatorWeight: widget.node.properties.indicatorWeight,
+          indicatorWeight:
+              indicator != null ? 0 : widget.node.properties.indicatorWeight,
           labelStyle: labelStyle,
+          indicator: indicator,
+          splashBorderRadius:
+              widget.node.properties.indicatorCornerRadius.borderRadius,
+          splashFactory: NoSplash.splashFactory,
           labelColor: widget.node.properties.labelColor?.toFlutterColor(),
           labelPadding: widget.node.properties.labelPadding.flutterEdgeInsets,
           unselectedLabelColor:
@@ -204,6 +212,7 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
     }
 
     return Tab(
+      height: widget.node.basicBoxLocal.height,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -213,6 +222,48 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
         ],
       ),
     );
+  }
+
+  Decoration? getIndicator() {
+    switch (widget.node.properties.indicatorStyle) {
+      case TabIndicatorStyle.underline:
+        return UnderlineTabIndicator(
+          borderRadius:
+              widget.node.properties.indicatorCornerRadius.borderRadius,
+          borderSide: BorderSide(
+            color: widget.node.properties.indicatorColor.toFlutterColor(),
+            width: widget.node.properties.indicatorWeight,
+          ),
+        ).orNullIf(widget.node.properties.indicatorCornerRadius.isUniform &&
+            widget.node.properties.indicatorCornerRadius == CornerRadius.zero);
+      case TabIndicatorStyle.filled:
+        return ShapeDecoration(
+          color: widget.node.properties.indicatorColor.toFlutterColor(),
+          shape: getShape(
+            shape: widget.node.properties.indicatorShape,
+            radius: widget.node.properties.indicatorCornerRadius,
+            borderColor: widget.node.properties.indicatorColor,
+            borderWidth: widget.node.properties.indicatorStyle ==
+                    TabIndicatorStyle.border
+                ? widget.node.properties.indicatorWeight
+                : 0,
+          ),
+        );
+      case TabIndicatorStyle.border:
+        return ShapeDecoration(
+          shape: getShape(
+            shape: widget.node.properties.indicatorShape,
+            radius: widget.node.properties.indicatorCornerRadius,
+            borderColor: widget.node.properties.indicatorColor,
+            borderWidth: widget.node.properties.indicatorStyle ==
+                    TabIndicatorStyle.border
+                ? widget.node.properties.indicatorWeight
+                : 0,
+          ),
+        );
+      case TabIndicatorStyle.none:
+        return BoxDecoration();
+    }
   }
 
   @override
