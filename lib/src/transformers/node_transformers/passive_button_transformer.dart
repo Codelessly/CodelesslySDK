@@ -102,7 +102,7 @@ class PassiveButtonWidget extends StatelessWidget {
     final textAlign = node.properties.labelAlignment.toFlutter();
     final double effectiveIconSize =
         min(node.properties.icon.size ?? 24, node.basicBoxLocal.height);
-    Widget iconWidget = retrieveIconWidget(
+    Widget? iconWidget = retrieveIconWidget(
         node.properties.icon, effectiveIconSize, useIconFonts);
 
     final bool enabled = PropertyValueDelegate.getPropertyValue<bool>(
@@ -120,7 +120,7 @@ class PassiveButtonWidget extends StatelessWidget {
           onPressed: enabled ? () => onPressed?.call() : null,
           onLongPress: enabled ? () => onLongPress?.call() : null,
           style: buttonStyle,
-          child: !node.properties.icon.isEmpty
+          child: iconWidget != null
               ? Row(
                   mainAxisSize: MainAxisSize.min,
                   verticalDirection: VerticalDirection.down,
@@ -147,7 +147,7 @@ class PassiveButtonWidget extends StatelessWidget {
           onPressed: () => onPressed?.call(),
           onLongPress: () => onLongPress?.call(),
           style: buttonStyle,
-          child: !node.properties.icon.isEmpty
+          child: iconWidget != null
               ? Row(
                   mainAxisSize: MainAxisSize.min,
                   verticalDirection: VerticalDirection.down,
@@ -172,7 +172,7 @@ class PassiveButtonWidget extends StatelessWidget {
           onPressed: enabled ? () => onPressed?.call() : null,
           onLongPress: enabled ? () => onLongPress?.call() : null,
           style: buttonStyle,
-          child: !node.properties.icon.isEmpty
+          child: iconWidget != null
               ? Row(
                   mainAxisSize: MainAxisSize.min,
                   verticalDirection: VerticalDirection.down,
