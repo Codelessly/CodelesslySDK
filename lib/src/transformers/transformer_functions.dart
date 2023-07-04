@@ -230,13 +230,13 @@ String? getSliderLabel(SliderNode node, double value) {
   return node.properties.label.replaceAll('\${value}', valueString);
 }
 
-Widget retrieveIconWidget(MultiSourceIconModel icon,
+Widget? retrieveIconWidget(MultiSourceIconModel icon,
     [double? size, bool useIconFonts = false]) {
-  if (!icon.show) return SizedBox.shrink();
+  if (!icon.show) return null;
   final Color? color = icon.color?.toFlutterColor();
   switch (icon.type) {
     case IconTypeEnum.icon:
-      if (icon.icon == null) return SizedBox.shrink();
+      if (icon.icon == null) return null;
       return Icon(
         useIconFonts
             ? icon.icon!.toFontIconData()
@@ -245,7 +245,7 @@ Widget retrieveIconWidget(MultiSourceIconModel icon,
         color: color,
       );
     case IconTypeEnum.image:
-      if (icon.iconImage == null) return SizedBox.shrink();
+      if (icon.iconImage == null) return null;
       if (color == null || color.opacity == 0) {
         // when opacity is zero, we need to display original colors of
         // the image icon which `ImageIcon` widget cannot do. So we
