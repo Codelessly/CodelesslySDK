@@ -100,7 +100,9 @@ class PassiveAppBarWidget extends StatelessWidget
               // splashRadius: 20,
               iconSize: item.icon.size,
               tooltip: item.tooltip,
-              icon: retrieveIconWidget(item.icon, item.icon.size, useIconFonts),
+              icon:
+                  retrieveIconWidget(item.icon, item.icon.size, useIconFonts) ??
+                      SizedBox.shrink(),
             ),
         ],
       ),

@@ -270,4 +270,6 @@ TabBarProperties get defaultTabBarProperties => TabBarProperties(
       unselectedLabelStyle: TabBarDefaults.unselectedLabelStyle,
       indicatorSize: TabBarDefaults.indicatorSize,
       indicatorPadding: TabBarDefaults.indicatorPadding,
+      tabItemDirection: TabBarDefaults.tabItemDirection,
+      gap: TabBarDefaults.gap,
     );

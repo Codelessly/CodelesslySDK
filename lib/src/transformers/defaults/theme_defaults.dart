@@ -324,6 +324,8 @@ class TabBarDefaults {
       TextProp(fontSize: 14, fills: [PaintModel.greyPaint]);
   static const Color overlayColor = kDefaultHoverColor;
   static const EdgeInsetsModel indicatorPadding = EdgeInsetsModel.zero;
+  static const AxisC tabItemDirection = AxisC.horizontal;
+  static const double gap = 10;
   static const EdgeInsetsModel labelPadding =
       EdgeInsetsModel.symmetric(horizontal: 16, vertical: 12);
   static const Color dividerColor = Colors.grey;

@@ -143,29 +143,34 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
     return SizedBox(
       width: width,
       height: height,
-      child: TabBar(
-        controller: controller,
-        padding: widget.node.padding.flutterEdgeInsets,
-        overlayColor: MaterialStateProperty.all(
-            widget.node.properties.overlayColor?.toFlutterColor()),
-        dividerColor: widget.node.properties.dividerColor?.toFlutterColor(),
-        indicatorColor: widget.node.properties.indicatorColor?.toFlutterColor(),
-        indicatorPadding:
-            widget.node.properties.indicatorPadding.flutterEdgeInsets,
-        indicatorSize: widget.node.properties.indicatorSize.toFlutter(),
-        isScrollable: widget.node.isScrollable,
-        indicatorWeight: widget.node.properties.indicatorWeight,
-        labelStyle: labelStyle,
-        labelColor: widget.node.properties.labelColor?.toFlutterColor(),
-        labelPadding: widget.node.properties.labelPadding?.flutterEdgeInsets,
-        unselectedLabelColor:
-            widget.node.properties.unselectedLabelColor?.toFlutterColor(),
-        unselectedLabelStyle: unselectedLabelStyle,
-        physics: widget.node.physics.flutterScrollPhysics,
-        onTap: widget.onChanged,
-        tabs: [
-          for (final tab in widget.node.properties.tabs) getTab(context, tab)
-        ],
+      child: Theme(
+        data: Theme.of(context)
+            .copyWith(useMaterial3: widget.node.properties.showDivider),
+        child: TabBar(
+          controller: controller,
+          padding: widget.node.padding.flutterEdgeInsets,
+          overlayColor: MaterialStateProperty.all(
+              widget.node.properties.overlayColor?.toFlutterColor()),
+          dividerColor: widget.node.properties.dividerColor?.toFlutterColor(),
+          indicatorColor:
+              widget.node.properties.indicatorColor?.toFlutterColor(),
+          indicatorPadding:
+              widget.node.properties.indicatorPadding.flutterEdgeInsets,
+          indicatorSize: widget.node.properties.indicatorSize.toFlutter(),
+          isScrollable: widget.node.isScrollable,
+          indicatorWeight: widget.node.properties.indicatorWeight,
+          labelStyle: labelStyle,
+          labelColor: widget.node.properties.labelColor?.toFlutterColor(),
+          labelPadding: widget.node.properties.labelPadding.flutterEdgeInsets,
+          unselectedLabelColor:
+              widget.node.properties.unselectedLabelColor?.toFlutterColor(),
+          unselectedLabelStyle: unselectedLabelStyle,
+          physics: widget.node.physics.flutterScrollPhysics,
+          onTap: widget.onChanged,
+          tabs: [
+            for (final tab in widget.node.properties.tabs) getTab(context, tab)
+          ],
+        ),
       ),
     );
   }
@@ -179,28 +184,34 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
     final double effectiveIconSize =
         min(tab.icon.size ?? 24, widget.node.basicBoxLocal.height);
 
-    Widget iconWidget =
-        retrieveIconWidget(tab.icon, effectiveIconSize, widget.useIconFonts);
+    Widget? iconWidget = widget.node.properties.contentType.showIcon
+        ? retrieveIconWidget(tab.icon, effectiveIconSize, widget.useIconFonts)
+        : null;
 
-    final TextAlign textAlign = tab.labelAlignment.toFlutter();
+    if (iconWidget == null) return Tab(text: label);
+
+    if (!widget.node.properties.contentType.showLabel) {
+      return Tab(icon: iconWidget);
+    }
+
+    if (widget.node.properties.tabItemDirection == AxisC.vertical) {
+      // can use text and icon property of the Tab.
+      return Tab(
+        text: label,
+        icon: iconWidget,
+        iconMargin: EdgeInsets.only(bottom: widget.node.properties.gap),
+      );
+    }
+
     return Tab(
-      child: !tab.icon.isEmpty
-          ? Row(
-              mainAxisSize: MainAxisSize.min,
-              verticalDirection: VerticalDirection.down,
-              children: [
-                if (tab.placement == IconPlacementEnum.start) ...{
-                  iconWidget,
-                  if (tab.icon.show) SizedBox(width: tab.gap),
-                },
-                Flexible(child: Text(label, textAlign: textAlign)),
-                if (tab.placement == IconPlacementEnum.end) ...{
-                  if (tab.icon.show) SizedBox(width: tab.gap),
-                  iconWidget,
-                }
-              ],
-            )
-          : Text(label, textAlign: textAlign),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          iconWidget,
+          SizedBox(width: widget.node.properties.gap),
+          Flexible(child: Text(label)),
+        ],
+      ),
     );
   }
 
