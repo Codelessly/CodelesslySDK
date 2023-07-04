@@ -4,6 +4,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/functions_repository.dart';
 
 class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
   PassiveTabBarTransformer(super.getNode, super.manager);
@@ -39,14 +40,18 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
     double? height,
     double? width,
   }) {
-    final previewNode = node ??
-        TabBarNode(
-          properties: properties ?? node?.properties ?? TabBarProperties(),
-          id: '',
-          name: 'tabBar',
-          basicBoxLocal: NodeBox(0, 0, width ?? 32, height ?? 32),
-          retainedOuterBoxLocal: NodeBox(0, 0, width ?? 32, height ?? 32),
-        );
+    final previewNode = TabBarNode(
+      properties: properties ?? node?.properties ?? TabBarProperties(),
+      id: '',
+      name: 'tabBar',
+      basicBoxLocal: NodeBox(
+          0, 0, width ?? 32, height ?? node?.basicBoxLocal.height ?? 56),
+      retainedOuterBoxLocal: NodeBox(
+          0, 0, width ?? 32, height ?? node?.basicBoxLocal.height ?? 56),
+      initialIndex: node?.initialIndex ?? 0,
+      isScrollable: node?.isScrollable ?? false,
+      physics: node?.physics ?? ScrollPhysicsC.alwaysScrollableScrollPhysics,
+    );
     return PassiveTabBarWidget(
       node: previewNode,
       settings: WidgetBuildSettings(),
@@ -66,7 +71,10 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
   }
 
   void onChanged(BuildContext context, TabBarNode node, int index) {
-    // TODO:
+    final tab = node.properties.tabs[index];
+    tab.reactions.forEach((reaction) {
+      FunctionsRepository.performAction(context, reaction.action);
+    });
   }
 }
 
