@@ -104,20 +104,18 @@ class _CodelesslyPublishedLayoutBuilderState
       }
     }
 
-    final String? layoutID = codelesslyContext.layoutID;
-    if (layoutID != null) {
-      final Map<String, VariableData> variablesMap = context
-              .read<Codelessly>()
-              .dataManager
-              .publishModel!
-              .variables[layoutID]
-              ?.variables ??
-          {};
+    final String layoutID = widget.layout.id;
+    final Map<String, VariableData> variablesMap = context
+            .read<Codelessly>()
+            .dataManager
+            .publishModel!
+            .variables[layoutID]
+            ?.variables ??
+        {};
 
-      for (final variable in variablesMap.values) {
-        final notifier = ValueNotifier(variable);
-        codelesslyContext.variables[variable.id] = notifier;
-      }
+    for (final variable in variablesMap.values) {
+      final notifier = ValueNotifier(variable);
+      codelesslyContext.variables[variable.id] = notifier;
     }
 
     final conditions =
