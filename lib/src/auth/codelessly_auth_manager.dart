@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:http/http.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
+import '../model/auth_data.dart';
 
 /// An implementation of [AuthManager] that uses Firebase auth.
 class CodelesslyAuthManager extends AuthManager {
@@ -16,7 +18,7 @@ class CodelesslyAuthManager extends AuthManager {
   final CacheManager cacheManager;
 
   /// The stream controller used to stream the auth data. Any changes to
-  /// it will be broadcasted to the stream.
+  /// it will be broad=casted to the stream.
   final StreamController<AuthData?> _authStreamController;
 
   /// Creates a [CodelesslyAuthManager] instance.
@@ -84,11 +86,11 @@ class CodelesslyAuthManager extends AuthManager {
     // is still valid. We do this so as to not block the UI, we load whatever
     // is there immediately while we run our security in the background.
     if (!isAuthenticated()) {
-      print('Token is not authenticated. Authenticating...');
+      log('[AuthManager] Token is not authenticated. Authenticating...');
       await authenticate();
-      print('Authentication successfully!');
+      log('[AuthManager] Authentication successfully!');
     } else {
-      print('Token already authenticated! Verifying in the background...');
+      log('[AuthManager] Token already authenticated! Verifying in the background...');
       authenticate().catchError((error) {
         // Error handling needs to be done here because this will not be caught
         // by SDK initialization.
@@ -117,7 +119,7 @@ class CodelesslyAuthManager extends AuthManager {
   @override
   Future<void> authenticate() async {
     try {
-      print('Authenticating token...');
+      log('[AuthManager] Authenticating token...');
       final Response result = await post(
         Uri.parse('$firebaseCloudFunctionsBaseURL/verifyProjectAuthToken'),
         headers: <String, String>{
@@ -127,7 +129,7 @@ class CodelesslyAuthManager extends AuthManager {
         body: jsonEncode({'token': config.authToken}),
       );
 
-      print('Auth token response: ${result.body}');
+      log('[AuthManager] Auth token response: ${result.body}');
 
       if (result.statusCode == 200) {
         final jsonBody = jsonDecode(result.body);
@@ -137,9 +139,9 @@ class CodelesslyAuthManager extends AuthManager {
         _authData =
             AuthData.fromJson({...jsonBody, 'authToken': config.authToken});
         _authStreamController.add(_authData!);
-        print('Authenticated token. Project ID: ${_authData!.projectId}');
+        log('[AuthManager] Authenticated token. Project ID: ${_authData!.projectId}');
         await cacheManager.store(authCacheKey, _authData!.toJson());
-        print('Stored auth data in cache');
+        log('[AuthManager] Stored auth data in cache');
       } else {
         _authData = null;
         _authStreamController.add(_authData);
