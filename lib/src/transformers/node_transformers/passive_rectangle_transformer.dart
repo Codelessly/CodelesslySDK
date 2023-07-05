@@ -686,12 +686,18 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
         duration: const Duration(milliseconds: 150),
         child: loadingProgress == null
             ? SizedBox.expand(child: child)
-            : Center(
-                child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                      : null,
+            : Padding(
+                padding: const EdgeInsets.all(2),
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  ),
                 ),
               ),
       ),
