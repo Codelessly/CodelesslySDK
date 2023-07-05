@@ -42,7 +42,7 @@ class MyStoryBookApp extends StatelessWidget {
             name: 'Pricing UI',
             description: "Demo of Codelessly's pricing UI.",
             builder: (context) => CodelesslyWidget(
-              layoutID: "0R0PZFch5qUj1vhRPO_f",
+              layoutID: "0R0QijsF87BJvWfbiezE",
             ),
           ),
         ],
