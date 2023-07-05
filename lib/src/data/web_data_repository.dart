@@ -15,14 +15,14 @@ class WebDataRepository extends NetworkDataRepository {
   @override
   Stream<SDKPublishModel?> streamPublishModel({
     required String projectID,
-    required bool isPreview,
+    required PublishSource source,
   }) async* {
     final Response result = await post(
       Uri.parse('$firebaseCloudFunctionsBaseURL/getPublishModelRequest'),
       headers: <String, String>{'Content-Type': 'application/json'},
       body: jsonEncode({
         'projectID': projectID,
-        'isPreview': isPreview,
+        'source': source.serverPath,
       }),
     );
 
@@ -46,7 +46,7 @@ class WebDataRepository extends NetworkDataRepository {
   Future<SDKPublishLayout?> downloadLayoutModel({
     required String projectID,
     required String layoutID,
-    required bool isPreview,
+    required PublishSource source,
   }) async {
     final Response result = await post(
       Uri.parse('$firebaseCloudFunctionsBaseURL/getLayoutModelRequest'),
@@ -54,14 +54,14 @@ class WebDataRepository extends NetworkDataRepository {
       body: jsonEncode({
         'projectID': projectID,
         'layoutID': layoutID,
-        'isPreview': isPreview,
+        'source': source.serverPath,
       }),
       encoding: utf8,
     );
 
     if (result.statusCode != 200) {
       print(
-          'Error downloading layout model from web data manager. [${isPreview ? 'preview' : 'publish'}]');
+          'Error downloading layout model from web data manager. [${source.serverPath}]');
       print('Status code: ${result.statusCode}');
       print('Message: ${result.body}');
       throw CodelesslyException(
@@ -81,7 +81,7 @@ class WebDataRepository extends NetworkDataRepository {
   Future<SDKPublishFont?> downloadFontModel({
     required String projectID,
     required String fontID,
-    required bool isPreview,
+    required PublishSource source,
   }) async {
     try {
       final Response result = await post(
@@ -90,7 +90,7 @@ class WebDataRepository extends NetworkDataRepository {
         body: jsonEncode({
           'projectID': projectID,
           'fontID': fontID,
-          'isPreview': isPreview,
+          'source': source.serverPath,
         }),
         encoding: utf8,
       );
@@ -117,7 +117,7 @@ class WebDataRepository extends NetworkDataRepository {
   Future<HttpApiData?> downloadApi({
     required String projectID,
     required String apiId,
-    required bool isPreview,
+    required PublishSource source,
   }) async {
     try {
       final Response result = await post(
@@ -126,7 +126,7 @@ class WebDataRepository extends NetworkDataRepository {
         body: jsonEncode({
           'projectID': projectID,
           'apiId': apiId,
-          'isPreview': isPreview,
+          'source': source.serverPath,
         }),
         encoding: utf8,
       );
@@ -155,7 +155,7 @@ class WebDataRepository extends NetworkDataRepository {
   Future<SDKLayoutVariables?> downloadLayoutVariables({
     required String projectID,
     required String layoutID,
-    required bool isPreview,
+    required PublishSource source,
   }) async {
     try {
       final Response result = await post(
@@ -165,7 +165,7 @@ class WebDataRepository extends NetworkDataRepository {
         body: jsonEncode({
           'projectID': projectID,
           'layoutID': layoutID,
-          'isPreview': isPreview,
+          'source': source.serverPath,
         }),
         encoding: utf8,
       );
@@ -195,7 +195,7 @@ class WebDataRepository extends NetworkDataRepository {
   Future<SDKLayoutConditions?> downloadLayoutConditions({
     required String projectID,
     required String layoutID,
-    required bool isPreview,
+    required PublishSource source,
   }) async {
     try {
       final Response result = await post(
@@ -205,7 +205,7 @@ class WebDataRepository extends NetworkDataRepository {
         body: jsonEncode({
           'projectID': projectID,
           'layoutID': layoutID,
-          'isPreview': isPreview,
+          'source': source.serverPath,
         }),
         encoding: utf8,
       );

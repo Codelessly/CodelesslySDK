@@ -6,7 +6,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   Codelessly.instance.initialize(
-    config: const CodelesslyConfig(
+    config: CodelesslyConfig(
       authToken: "fC9IZE0jL2kzME03bXEwIzE+LD04Z093ci1xMTJaJjMlI3hT",
       isPreview: false,
       automaticallyCollectCrashReports: false,
