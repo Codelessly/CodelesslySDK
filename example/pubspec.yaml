@@ -12,6 +12,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  storybook_flutter: ^0.12.0
   codelessly_sdk:
     path: ../
 
