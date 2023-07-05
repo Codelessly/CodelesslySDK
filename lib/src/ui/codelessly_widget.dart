@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
+import '../model/publish_source.dart';
 import 'codelessly_error_screen.dart';
 import 'codelessly_loading_screen.dart';
 import 'layout_builder.dart';
@@ -216,10 +217,10 @@ class CodelesslyWidget extends StatefulWidget {
   /// published version.
   ///
   /// If a value is provided, it will override the value provided in
-  /// [CodelesslyConfig.isPreview].
-  /// If a [controller] is provided, the controller's [isPreview] value will
+  /// [CodelesslyConfig.publishSource].
+  /// If a [controller] is provided, the controller's [publishSource] value will
   /// override this value.
-  final bool? isPreview;
+  final PublishSource? publishSource;
 
   /// Holds a map of data to replace.
   ///
@@ -301,7 +302,7 @@ class CodelesslyWidget extends StatefulWidget {
     super.key,
     this.layoutID,
     this.controller,
-    this.isPreview,
+    this.publishSource,
     this.codelessly,
     this.config,
     this.loadingBuilder,
@@ -326,9 +327,9 @@ class CodelesslyWidget extends StatefulWidget {
           'You must provide either a [layoutID] or a [controller]. One must be specified, and both cannot be specified at the same time.',
         ),
         assert(
-          (isPreview == null && controller == null) ||
-              (isPreview != null) != (controller != null),
-          'You must provide either an [isPreview] or a [controller]. One must be specified, and both cannot be specified at the same time.',
+          (publishSource == null && controller == null) ||
+              (publishSource != null) != (controller != null),
+          'You must provide either an [publishSource] or a [controller]. One must be specified, and both cannot be specified at the same time.',
         ),
         assert(
           (codelessly == null && controller == null) ||
@@ -453,7 +454,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     // If the controller is intrinsic, then we need to dispose of the old one
     // and create a new one if any of the values change.
     if (widget.controller == null) {
-      if (widget.isPreview != oldWidget.isPreview ||
+      if (widget.publishSource != oldWidget.publishSource ||
           widget.layoutID != oldWidget.layoutID ||
           widget.codelessly != oldWidget.codelessly) {
         _controller?.dispose();
@@ -469,7 +470,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       CodelesslyWidgetController(
         layoutID: widget.layoutID!,
         codelessly: widget.codelessly,
-        isPreview: widget.isPreview,
+        publishSource: widget.publishSource,
         config: widget.config,
         authManager: widget.authManager,
         publishDataManager: widget.publishDataManager,
@@ -498,7 +499,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           return widget.errorBuilder?.call(context, snapshot.error) ??
               CodelesslyErrorScreen(
                 exception: snapshot.error,
-                isPreview: _effectiveController.isPreview,
+                publishSource: _effectiveController.publishSource,
               );
         }
 
@@ -513,7 +514,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                   context, CodelesslyErrorHandler.instance.lastException) ??
               CodelesslyErrorScreen(
                 exception: snapshot.error,
-                isPreview: _effectiveController.isPreview,
+                publishSource: _effectiveController.publishSource,
               );
         }
 
@@ -557,7 +558,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             return widget.errorBuilder?.call(context, snapshot.error) ??
                 CodelesslyErrorScreen(
                   exception: snapshot.error,
-                  isPreview: _effectiveController.isPreview,
+                  publishSource: _effectiveController.publishSource,
                 );
           }
           if (!snapshot.hasData) {
@@ -576,7 +577,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                   CodelesslyErrorScreen(
                     exception: CodelesslyErrorHandler.instance.lastException ??
                         snapshot.error,
-                    isPreview: _effectiveController.isPreview,
+                    publishSource: _effectiveController.publishSource,
                   );
             case CodelesslyStatus.loaded:
               return buildStreamedLayout();

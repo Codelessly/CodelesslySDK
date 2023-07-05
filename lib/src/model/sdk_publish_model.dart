@@ -49,30 +49,6 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
   /// Contains information about the conditions used in the published project.
   final Map<String, SDKLayoutConditions> conditions;
 
-  /// The title of the template.
-  /// Whether this published model is part of the template gallery in the
-  /// Codelessly editor.
-  final bool isTemplate;
-
-  /// The title of the template in the Codelessly template gallery.
-  final String? title;
-
-  /// The description of the template in the Codelessly template gallery.
-  final String? description;
-
-  /// The date the template was first published in the Codelessly template
-  /// gallery.
-  @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
-  final DateTime createdAt;
-
-  /// The id of the layout that should be used as the entry point in the
-  /// Codelessly template gallery.
-  final String? entryLayoutId;
-
-  /// The default data that should be used when previewing the template in the
-  /// Codelessly template gallery.
-  Map<String, String>? defaultData;
-
   /// Creates a new instance of [SDKPublishModel].
   SDKPublishModel({
     required this.projectId,
@@ -86,14 +62,6 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
     Map<String, SDKLayoutVariables>? variables,
     Map<String, SDKLayoutConditions>? conditions,
 
-    // Template gallery details
-    this.isTemplate = false,
-    this.title,
-    this.description,
-    DateTime? createdAt,
-    this.entryLayoutId,
-    Map<String, String>? defaultData,
-
     // Privacy
     required super.owner,
     super.editors,
@@ -105,9 +73,7 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
         updates = updates ?? SDKPublishUpdates(),
         apis = apis ?? {},
         variables = variables ?? {},
-        conditions = conditions ?? {},
-        createdAt = createdAt ?? DateTime.now(),
-        defaultData = defaultData ?? {};
+        conditions = conditions ?? {};
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
   factory SDKPublishModel.fromJson(Map<String, dynamic> json) =>
@@ -136,12 +102,6 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
     Map<String, HttpApiData>? apis,
     Map<String, SDKLayoutVariables>? variables,
     Map<String, SDKLayoutConditions>? conditions,
-    bool? isTemplate,
-    String? title,
-    String? description,
-    DateTime? createdAt,
-    String? entryLayoutId,
-    Map<String, String>? defaultData,
     String? owner,
     Set<String>? editors,
     Set<String>? viewers,
@@ -156,12 +116,6 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
       apis: apis ?? this.apis,
       variables: variables ?? this.variables,
       conditions: conditions ?? this.conditions,
-      isTemplate: isTemplate ?? this.isTemplate,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      createdAt: createdAt ?? this.createdAt,
-      entryLayoutId: entryLayoutId ?? this.entryLayoutId,
-      defaultData: defaultData ?? this.defaultData,
       owner: owner ?? this.owner,
       editors: editors ?? this.editors,
       viewers: viewers ?? this.viewers,
@@ -180,12 +134,6 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
         variables,
         conditions,
         updates,
-        isTemplate,
-        title,
-        description,
-        createdAt,
-        entryLayoutId,
-        defaultData,
       ];
 }
 

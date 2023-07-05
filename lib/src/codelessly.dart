@@ -65,6 +65,16 @@ class Codelessly {
   /// layouts.
   DataManager get previewDataManager => _previewDataManager!;
 
+  DataManager? _templateDataManager;
+
+  /// Returns the data manager that is responsible for retrieving layout
+  /// information from the Codelessly servers or the local device's cache.
+  ///
+  /// The difference between [publishDataManager] and [templateDataManager] is
+  /// that the template data manager will retrieve the template versions of
+  /// layouts.
+  DataManager get templateDataManager => _templateDataManager!;
+
   CacheManager? _cacheManager;
 
   /// Returns the cache manager that is responsible for providing an interface
@@ -73,8 +83,11 @@ class Codelessly {
 
   Firestore? _firestore;
 
-  DataManager get dataManager =>
-      _config!.isPreview ? _previewDataManager! : _publishDataManager!;
+  DataManager get dataManager => switch (config!.publishSource) {
+        PublishSource.publish => publishDataManager,
+        PublishSource.preview => previewDataManager,
+        PublishSource.template => templateDataManager,
+      };
 
   /// Returns the local instance of the Firestore SDK. Used by the data manager
   /// to retrieve server data.
@@ -148,6 +161,7 @@ class Codelessly {
     _authManager?.dispose();
     _publishDataManager?.dispose();
     _previewDataManager?.dispose();
+    _templateDataManager?.dispose();
 
     _cacheManager = null;
     _authManager = null;
@@ -221,6 +235,7 @@ class Codelessly {
     await _cacheManager?.deleteAllByteData();
     _publishDataManager?.invalidate();
     _previewDataManager?.invalidate();
+    _templateDataManager?.invalidate();
     _authManager?.invalidate();
 
     _status = CodelesslyStatus.empty;
@@ -387,17 +402,22 @@ class Codelessly {
       if (data != null) this.data.addAll(data);
       if (functions != null) this.functions.addAll(functions);
 
+      // Create the cache manager.
       _cacheManager = cacheManager ??
           _cacheManager ??
           CodelesslyCacheManager(
             config: _config!,
           );
+
+      // Create the auth manager.
       _authManager = authManager ??
           _authManager ??
           CodelesslyAuthManager(
             config: _config!,
             cacheManager: this.cacheManager,
           );
+
+      // Create the publish data manager.
       _publishDataManager = publishDataManager ??
           _publishDataManager ??
           DataManager(
@@ -411,6 +431,7 @@ class Codelessly {
                 LocalDataRepository(cacheManager: this.cacheManager),
           );
 
+      // Create the preview data manager.
       _previewDataManager = previewDataManager ??
           _previewDataManager ??
           DataManager(
@@ -423,6 +444,19 @@ class Codelessly {
             localDataRepository:
                 LocalDataRepository(cacheManager: this.cacheManager),
           );
+
+      // Create the template data manager. This is always automatically
+      // created.
+      _templateDataManager = DataManager(
+        config: _config!.copyWith(isPreview: false),
+        cacheManager: this.cacheManager,
+        authManager: this.authManager,
+        networkDataRepository: kIsWeb
+            ? WebDataRepository()
+            : FirebaseDataRepository(firestore: firestore),
+        localDataRepository:
+            LocalDataRepository(cacheManager: this.cacheManager),
+      );
 
       _updateStatus(CodelesslyStatus.loading);
 
@@ -439,6 +473,8 @@ class Codelessly {
       // emitted to the internal stream controller, ready for immediate usage.
       await this.authManager.init();
 
+      _config!.publishSource = this.authManager.getBestPublishSource(_config!);
+
       log('Initializing data managers');
       // The data manager initializes last to load the last stored publish
       // model, or, if it doesn't exist, halts the entire process and awaits
@@ -448,14 +484,22 @@ class Codelessly {
       // [CodelesslyWidget] wants to load the opposite manager, the other will
       // lazily initialize.
       if (initializeDataManagers && _config!.preload) {
-        if (_config!.isPreview) {
-          if (!this.previewDataManager.initialized) {
-            await this.previewDataManager.init(layoutID: null);
-          }
-        } else {
-          if (!this.publishDataManager.initialized) {
-            await this.publishDataManager.init(layoutID: null);
-          }
+        switch (_config!.publishSource) {
+          case PublishSource.publish:
+            if (!this.publishDataManager.initialized) {
+              await this.publishDataManager.init(layoutID: null);
+            }
+            break;
+          case PublishSource.preview:
+            if (!this.previewDataManager.initialized) {
+              await this.previewDataManager.init(layoutID: null);
+            }
+            break;
+          case PublishSource.template:
+            if (!templateDataManager.initialized) {
+              await templateDataManager.init(layoutID: null);
+            }
+            break;
         }
       }
 

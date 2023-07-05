@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../codelessly_sdk.dart';
 import '../cache/codelessly_cache_manager.dart';
 import '../logging/error_handler.dart';
+import '../model/auth_data.dart';
 
 /// Orchestrates the data flow for the SDK.
 class DataManager {
@@ -79,7 +80,7 @@ class DataManager {
 
     // Initialize all locally cached data.
     _publishModel = localDataRepository.fetchPublishModel(
-      isPreview: config.isPreview,
+      source: config.publishSource,
     );
 
     if (_publishModel != null) {
@@ -90,7 +91,7 @@ class DataManager {
         log('\tLoading font in init: [${font.id}](${font.fullFontName})');
         final Uint8List? fontBytes = localDataRepository.fetchFontBytes(
           fontID: font.id,
-          isPreview: config.isPreview,
+          source: config.publishSource,
         );
         if (fontBytes != null) {
           loadFont(font, fontBytes);
@@ -149,7 +150,7 @@ class DataManager {
     _publishModelDocumentListener = networkDataRepository
         .streamPublishModel(
       projectID: authData.projectId,
-      isPreview: config.isPreview,
+      source: config.publishSource,
     )
         .listen((SDKPublishModel? serverModel) {
       if (serverModel == null) return;
@@ -296,7 +297,7 @@ class DataManager {
     if (_publishModel != null) {
       localDataRepository.savePublishModel(
         model: _publishModel!,
-        isPreview: config.isPreview,
+        source: config.publishSource,
       );
     }
   }
@@ -307,7 +308,7 @@ class DataManager {
     localDataRepository.saveFontBytes(
       fontID: font.id,
       bytes: fontBytes,
-      isPreview: config.isPreview,
+      source: config.publishSource,
     );
   }
 
@@ -357,11 +358,12 @@ class DataManager {
       localModel: localModel,
     );
 
-    final bool templateChanged = localModel.isTemplate != serverModel.isTemplate ||
-        localModel.title != serverModel.title ||
-        localModel.description != serverModel.description ||
-        localModel.entryLayoutId != serverModel.entryLayoutId ||
-        localModel.defaultData != serverModel.defaultData;
+    final bool templateChanged;
+    if (config.publishSource.isTemplate) {
+      templateChanged = true;
+    } else {
+      templateChanged = false;
+    }
 
     if (layoutUpdates.isEmpty &&
         fontUpdates.isEmpty &&
@@ -372,12 +374,13 @@ class DataManager {
       log('No updates to process.');
       return;
     } else {
-      log('Processing ${layoutUpdates.length} layout updates, '
-          '${fontUpdates.length} font updates, '
-          '${apiUpdates.length} api updates, '
-          '${variableUpdates.length} variable updates, '
-          '${conditionUpdates.length} condition updates, and '
-          '${templateChanged ? 1 : 0} template updates.',
+      log(
+        'Processing ${layoutUpdates.length} layout updates, '
+        '${fontUpdates.length} font updates, '
+        '${apiUpdates.length} api updates, '
+        '${variableUpdates.length} variable updates, '
+        '${conditionUpdates.length} condition updates, and '
+        '${templateChanged ? 1 : 0} template updates.',
       );
     }
 
@@ -389,7 +392,7 @@ class DataManager {
           localModel.layouts.remove(layoutID);
           localDataRepository.deletePublishLayout(
             layoutID: layoutID,
-            isPreview: config.isPreview,
+            source: config.publishSource,
           );
           break;
         case UpdateType.add:
@@ -398,7 +401,7 @@ class DataManager {
               await networkDataRepository.downloadLayoutModel(
             projectID: authManager.authData!.projectId,
             layoutID: layoutID,
-            isPreview: config.isPreview,
+            source: config.publishSource,
           );
           if (layout != null) {
             localModel.layouts[layoutID] = layout;
@@ -415,7 +418,7 @@ class DataManager {
           localModel.fonts.remove(fontID);
           localDataRepository.deleteFontBytes(
             fontID: fontID,
-            isPreview: config.isPreview,
+            source: config.publishSource,
           );
           break;
         case UpdateType.add:
@@ -424,7 +427,7 @@ class DataManager {
               await networkDataRepository.downloadFontModel(
             projectID: authManager.authData!.projectId,
             fontID: fontID,
-            isPreview: config.isPreview,
+            source: config.publishSource,
           );
 
           if (font != null) {
@@ -446,7 +449,7 @@ class DataManager {
           localModel.apis.remove(apiId);
           localDataRepository.deletePublishApi(
             apiId: apiId,
-            isPreview: config.isPreview,
+            source: config.publishSource,
           );
           break;
         case UpdateType.add:
@@ -454,7 +457,7 @@ class DataManager {
           final HttpApiData? api = await networkDataRepository.downloadApi(
             projectID: authManager.authData!.projectId,
             apiId: apiId,
-            isPreview: config.isPreview,
+            source: config.publishSource,
           );
           if (api != null) {
             localModel.apis[apiId] = api;
@@ -471,7 +474,7 @@ class DataManager {
           localModel.variables.remove(layoutID);
           localDataRepository.deletePublishVariables(
             layoutId: layoutID,
-            isPreview: config.isPreview,
+            source: config.publishSource,
           );
           break;
         case UpdateType.add:
@@ -480,7 +483,7 @@ class DataManager {
               await networkDataRepository.downloadLayoutVariables(
             projectID: authManager.authData!.projectId,
             layoutID: layoutID,
-            isPreview: config.isPreview,
+            source: config.publishSource,
           );
           if (layoutVariables != null) {
             localModel.variables[layoutID] = layoutVariables;
@@ -497,7 +500,7 @@ class DataManager {
           localModel.variables.remove(layoutID);
           localDataRepository.deletePublishConditions(
             layoutId: layoutID,
-            isPreview: config.isPreview,
+            source: config.publishSource,
           );
           break;
         case UpdateType.add:
@@ -506,7 +509,7 @@ class DataManager {
               await networkDataRepository.downloadLayoutConditions(
             projectID: authManager.authData!.projectId,
             layoutID: layoutID,
-            isPreview: config.isPreview,
+            source: config.publishSource,
           );
           if (layoutConditions != null) {
             localModel.conditions[layoutID] = layoutConditions;
@@ -517,11 +520,12 @@ class DataManager {
 
     _publishModel = localModel.copyWith(
       updates: serverModel.updates,
-      title: serverModel.title,
-      description: serverModel.description,
-      entryLayoutId: serverModel.entryLayoutId,
-      defaultData: serverModel.defaultData,
     );
+
+    if (config.publishSource.isTemplate) {
+      _publishModel = publishModel?.copyWith();
+    }
+
     savePublishModel();
     emitPublishModel();
   }
@@ -738,7 +742,7 @@ class DataManager {
       layout = await networkDataRepository.downloadLayoutModel(
         layoutID: layoutID,
         projectID: auth.projectId,
-        isPreview: config.isPreview,
+        source: config.publishSource,
       );
       if (layout == null) {
         log('\tlayout [$layoutID] could not be downloaded.');
@@ -821,7 +825,7 @@ class DataManager {
   Future<Uint8List?> getOrFetchFontBytesAndSave(SDKPublishFont font) async {
     final Uint8List? fontBytes = localDataRepository.fetchFontBytes(
       fontID: font.id,
-      isPreview: config.isPreview,
+      source: config.publishSource,
     );
     if (fontBytes != null) {
       log('\t\tFont [${font.id}] bytes already cached.');
@@ -863,7 +867,7 @@ class DataManager {
               await networkDataRepository.downloadFontModel(
             projectID: auth.projectId,
             fontID: fontID,
-            isPreview: config.isPreview,
+            source: config.publishSource,
           );
           if (downloadedFont != null) {
             fonts.add(downloadedFont);
@@ -895,7 +899,7 @@ class DataManager {
             networkDataRepository.downloadApi(
           projectID: auth.projectId,
           apiId: apiId,
-          isPreview: config.isPreview,
+          source: config.publishSource,
         );
         apis.add(apiFuture);
       }

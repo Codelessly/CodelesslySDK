@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 
 import '../logging/error_handler.dart';
+import '../model/publish_source.dart';
 
 /// A dialog UI that is displayed when something crashes in the SDK. This is
 /// a graceful way of dealing with exceptions.
 class CodelesslyErrorScreen extends StatelessWidget {
   final dynamic exception;
-  final bool isPreview;
+  final PublishSource publishSource;
 
   const CodelesslyErrorScreen({
     super.key,
     required this.exception,
-    required this.isPreview,
+    required this.publishSource,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (!isPreview) return const SizedBox.shrink();
+    if (publishSource.isPreview) return const SizedBox.shrink();
 
     final String message;
     String? title;

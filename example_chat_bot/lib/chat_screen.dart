@@ -59,7 +59,7 @@ class _ChatScreenState extends State<ChatScreen>
   void initState() {
     super.initState();
     Codelessly.instance.configure(
-      config: const CodelesslyConfig(
+      config: CodelesslyConfig(
         authToken: authToken,
         automaticallyCollectCrashReports: false,
         isPreview: false,

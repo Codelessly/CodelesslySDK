@@ -1,42 +1,10 @@
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part 'auth_manager.g.dart';
-
-/// Holds data returned from the server after a successful handshake.
-@JsonSerializable()
-class AuthData {
-  /// The authentication token used to authenticate this client.
-  final String authToken;
-
-  /// The project id of the project.
-  final String projectId;
-
-  /// The owner id of the project.
-  final String ownerId;
-
-  /// The issued timestamp of the authentication.
-  /// The time the handshake was done that resulted in the successful
-  /// authentication.
-  @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
-  final DateTime timestamp;
-
-  /// Creates a [AuthData] instance.
-  const AuthData({
-    required this.authToken,
-    required this.projectId,
-    required this.ownerId,
-    required this.timestamp,
-  });
-
-  /// Converts a JSON map to an [AuthData] instance.
-  factory AuthData.fromJson(Map<String, dynamic> json) =>
-      _$AuthDataFromJson(json);
-
-  /// Converts an [AuthData] instance to a JSON map.
-  Map<String, dynamic> toJson() => _$AuthDataToJson(this);
-}
+import '../../codelessly_sdk.dart';
+import '../model/auth_data.dart';
 
 /// An abstraction for providing authentication to the SDK.
 abstract class AuthManager {
@@ -49,6 +17,15 @@ abstract class AuthManager {
   /// Returns the stream of the auth data. Any changes to it will be
   /// broad0casted to the stream.
   Stream<AuthData?> get authStream;
+
+  /// Returns the [PublishSource] to be used for fetching the published model.
+  /// If the [AuthData] reveals that the project is a template, then the
+  /// [PublishSource.template] is returned, otherwise the [PublishSource]
+  /// configured in the [CodelesslyConfig] is returned.
+  PublishSource getBestPublishSource(CodelesslyConfig config) =>
+      authData?.isTemplate == true
+          ? PublishSource.template
+          : config.publishSource;
 
   /// Initializes the [AuthManager].
   @mustCallSuper

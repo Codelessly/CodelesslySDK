@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'model/publish_source.dart';
+
 /// Holds initialization configuration options for the SDK.
 class CodelesslyConfig with EquatableMixin {
   /// The SDK auth token required for using the SDK.
@@ -12,12 +14,23 @@ class CodelesslyConfig with EquatableMixin {
   /// Whether [CodelesslyWidget]s should show the preview versions of their
   /// layouts.
   ///
-  /// Defaults to [false].
+  /// Defaults to false.
   final bool isPreview;
 
   /// Notifies the data manager to download all layouts and fonts of the
   /// configured project during the initialization process of the SDK.
   final bool preload;
+
+  /// The source of the data that should be used when initializing the SDK.
+  /// The value will be determined by the [isPreview] and [authToken] values.
+  ///
+  /// If the authentication data reveals that the layout is a template, then
+  /// the value will be [PublishSource.template].
+  ///
+  /// If the [isPreview] value is true, then the value will be
+  /// [PublishSource.preview], otherwise it will be [PublishSource.publish].
+  late PublishSource publishSource =
+      isPreview ? PublishSource.preview : PublishSource.publish;
 
   /// Creates a new instance of [CodelesslyConfig].
   ///
@@ -28,7 +41,7 @@ class CodelesslyConfig with EquatableMixin {
   ///
   /// No device data is sent with the crash report. Only the stack trace and
   /// the error message.
-  const CodelesslyConfig({
+  CodelesslyConfig({
     required this.authToken,
     this.automaticallyCollectCrashReports = true,
     this.isPreview = false,
@@ -56,6 +69,7 @@ class CodelesslyConfig with EquatableMixin {
         authToken,
         automaticallyCollectCrashReports,
         isPreview,
+        preload,
       ];
 }
 

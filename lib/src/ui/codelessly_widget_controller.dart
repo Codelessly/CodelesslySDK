@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
+import '../model/publish_source.dart';
 
 class CodelesslyWidgetController extends ChangeNotifier {
   String layoutID;
@@ -20,8 +21,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// published version.
   ///
   /// If a value is provided, it will override the value provided in
-  /// [CodelesslyConfig.isPreview].
-  final bool isPreview;
+  /// [CodelesslyConfig.publishSource].
+  final PublishSource publishSource;
 
   final CodelesslyConfig? config;
 
@@ -36,8 +37,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// initialize the opposite data manager if needed.
   StreamSubscription<CodelesslyStatus>? _sdkStatusListener;
 
-  DataManager get dataManager =>
-      isPreview ? codelessly.previewDataManager : codelessly.publishDataManager;
+  DataManager get dataManager => codelessly.dataManager;
 
   Stream<SDKPublishModel?> get publishModelStream =>
       dataManager.publishModelStream;
@@ -46,7 +46,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
   CodelesslyWidgetController({
     required this.layoutID,
-    bool? isPreview,
+    PublishSource? publishSource,
     Codelessly? codelessly,
     CodelesslyConfig? config,
 
@@ -58,10 +58,10 @@ class CodelesslyWidgetController extends ChangeNotifier {
     this.cacheManager,
   })  : codelessly = codelessly ?? Codelessly.instance,
         config = config ?? (codelessly ?? Codelessly.instance).config,
-        isPreview = isPreview ??
-            config?.isPreview ??
-            (codelessly ?? Codelessly.instance).config?.isPreview ??
-            false {
+        publishSource = publishSource ??
+            config?.publishSource ??
+            (codelessly ?? Codelessly.instance).config?.publishSource ??
+            PublishSource.publish {
     final codelessly = this.codelessly;
     assert(
       (config == null) != (codelessly.config == null) ||
@@ -174,7 +174,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // layouts.
     if (!dataManager.initialized) {
       print(
-          '[CodelesslyWidgetController] [$layoutID]: initialized data manager for the first time. [${isPreview ? 'preview' : 'publish'}]');
+          '[CodelesslyWidgetController] [$layoutID]: initialized data manager for the first time. [${publishSource.serverPath}]');
       dataManager.init(layoutID: layoutID).catchError((error, str) {
         CodelesslyErrorHandler.instance.captureException(
           error,
@@ -184,7 +184,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       });
     } else {
       print(
-          '[CodelesslyWidgetController] [$layoutID]: requesting layout from data manager. [${isPreview ? 'preview' : 'publish'}]');
+          '[CodelesslyWidgetController] [$layoutID]: requesting layout from data manager. [${publishSource.serverPath}]');
       dataManager
           .getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID)
           .catchError((error, str) {

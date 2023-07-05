@@ -9,13 +9,27 @@ const defaultErrorMessage =
 const String cacheBoxName = 'cache';
 const String cacheFilesBoxName = 'cache_files';
 const String authCacheKey = 'auth';
+
 const String publishModelCacheKey = 'publish_layout_model';
 const String previewModelCacheKey = 'preview_layout_model';
+const String templateModelCacheKey = 'template_layout_model';
+
 const String publishFontsCacheKey = 'publish_fonts';
 const String previewFontsCacheKey = 'preview_fonts';
+const String templateFontsCacheKey = 'template_fonts';
+
 const String publishApisCacheKey = 'publish_apis';
 const String previewApisCacheKey = 'preview_apis';
+const String templateApisCacheKey = 'template_apis';
+
 const String publishVariablesCacheKey = 'publish_variables';
 const String previewVariablesCacheKey = 'preview_variables';
+const String templateVariablesCacheKey = 'template_variables';
+
 const String publishConditionsCacheKey = 'publish_conditions';
 const String previewConditionsCacheKey = 'preview_conditions';
+const String templateConditionsCacheKey = 'template_conditions';
+
+const String publishPath = 'publish';
+const String previewPath = 'publish_preview';
+const String templatesPath = 'templates';

@@ -12,18 +12,13 @@ class FirebaseDataRepository extends NetworkDataRepository {
   /// instance.
   FirebaseDataRepository({required this.firestore});
 
-  /// Returns the path collection to be used.
-  String publishPath(bool isPreview) =>
-      isPreview ? 'publish_preview' : 'publish';
-
   @override
   Stream<SDKPublishModel?> streamPublishModel({
     required String projectID,
-    required bool isPreview,
+    required PublishSource source,
   }) {
-    final String publishPath = this.publishPath(isPreview);
     final DocumentReference publishModelDoc =
-        firestore.collection(publishPath).document(projectID);
+        firestore.collection(source.serverPath).document(projectID);
 
     return publishModelDoc.stream.map((event) {
       final Map<String, dynamic>? data = event?.map;
@@ -41,12 +36,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
   Future<SDKPublishLayout?> downloadLayoutModel({
     required String projectID,
     required String layoutID,
-    required bool isPreview,
+    required PublishSource source,
   }) async {
-    final String publishPath = this.publishPath(isPreview);
-
     final DocumentReference layoutDoc = firestore
-        .collection(publishPath)
+        .collection(source.serverPath)
         .document(projectID)
         .collection('layouts')
         .document(layoutID);
@@ -64,12 +57,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
   Future<SDKPublishFont?> downloadFontModel({
     required String projectID,
     required String fontID,
-    required bool isPreview,
+    required PublishSource source,
   }) {
-    final String publishPath = this.publishPath(isPreview);
-
     final DocumentReference fontDoc = firestore
-        .collection(publishPath)
+        .collection(source.serverPath)
         .document(projectID)
         .collection('fonts')
         .document(fontID);
@@ -87,12 +78,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
   Future<HttpApiData?> downloadApi({
     required String projectID,
     required String apiId,
-    required bool isPreview,
+    required PublishSource source,
   }) {
-    final String publishPath = this.publishPath(isPreview);
-
     final DocumentReference apiDoc = firestore
-        .collection(publishPath)
+        .collection(source.serverPath)
         .document(projectID)
         .collection('apis')
         .document(apiId);
@@ -110,12 +99,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
   Future<SDKLayoutVariables?> downloadLayoutVariables({
     required String projectID,
     required String layoutID,
-    required bool isPreview,
+    required PublishSource source,
   }) {
-    final String publishPath = this.publishPath(isPreview);
-
     final DocumentReference variablesDoc = firestore
-        .collection(publishPath)
+        .collection(source.serverPath)
         .document(projectID)
         .collection('variables')
         .document(layoutID);
@@ -133,12 +120,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
   Future<SDKLayoutConditions?> downloadLayoutConditions({
     required String projectID,
     required String layoutID,
-    required bool isPreview,
+    required PublishSource source,
   }) {
-    final String publishPath = this.publishPath(isPreview);
-
     final DocumentReference conditionsDoc = firestore
-        .collection(publishPath)
+        .collection(source.serverPath)
         .document(projectID)
         .collection('conditions')
         .document(layoutID);

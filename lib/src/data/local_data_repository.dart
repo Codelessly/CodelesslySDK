@@ -16,38 +16,13 @@ class LocalDataRepository {
   /// [cacheManager].
   LocalDataRepository({required this.cacheManager});
 
-  /// The cache key for the published model.
-  String modelCacheKey(bool isPreview) {
-    return isPreview ? previewModelCacheKey : publishModelCacheKey;
-  }
-
-  /// The cache key for the font files.
-  String fontsCacheKey(bool isPreview) {
-    return isPreview ? previewFontsCacheKey : publishFontsCacheKey;
-  }
-
-  /// The cache key for the APIs.
-  String apisCacheKey(bool isPreview) {
-    return isPreview ? previewApisCacheKey : publishApisCacheKey;
-  }
-
-  /// The cache key for the APIs.
-  String variablesCacheKey(bool isPreview) {
-    return isPreview ? previewVariablesCacheKey : publishVariablesCacheKey;
-  }
-
-  /// The cache key for the APIs.
-  String conditionsCacheKey(bool isPreview) {
-    return isPreview ? previewConditionsCacheKey : publishConditionsCacheKey;
-  }
-
   /// Returns the [SDKPublishModel] from the cache.
   SDKPublishModel? fetchPublishModel({
-    required bool isPreview,
+    required PublishSource source,
   }) {
     try {
       return cacheManager.get(
-        modelCacheKey(isPreview),
+        source.modelCacheKey,
         decode: SDKPublishModel.fromJson,
       );
     } catch (e) {
@@ -58,10 +33,10 @@ class LocalDataRepository {
   /// Returns the [SDKPublishLayout] from the cache.
   Uint8List? fetchFontBytes({
     required String fontID,
-    required bool isPreview,
+    required PublishSource source,
   }) {
     try {
-      return cacheManager.getBytes(fontsCacheKey(isPreview), fontID);
+      return cacheManager.getBytes(source.fontsCacheKey, fontID);
     } catch (e) {
       return null;
     }
@@ -70,10 +45,10 @@ class LocalDataRepository {
   /// Stores the [SDKPublishModel] in the cache.
   Future<void> savePublishModel({
     required SDKPublishModel model,
-    required bool isPreview,
+    required PublishSource source,
   }) =>
       cacheManager.store(
-        modelCacheKey(isPreview),
+        source.modelCacheKey,
         model.toFullJson(),
       );
 
@@ -81,11 +56,11 @@ class LocalDataRepository {
   Future<void> saveFontBytes({
     required String fontID,
     required Uint8List bytes,
-    required bool isPreview,
+    required PublishSource source,
   }) =>
       cacheManager
           .storeBytes(
-        fontsCacheKey(isPreview),
+        source.fontsCacheKey,
         fontID,
         bytes,
       )
@@ -96,35 +71,35 @@ class LocalDataRepository {
   /// Deletes a given layout associated with a [layoutID] from the cache.
   void deletePublishLayout({
     required String layoutID,
-    required bool isPreview,
+    required PublishSource source,
   }) =>
-      cacheManager.delete(modelCacheKey(isPreview));
+      cacheManager.delete(source.modelCacheKey);
 
   /// Deletes a given api associated with a [apiId] from the cache.
   void deletePublishApi({
     required String apiId,
-    required bool isPreview,
+    required PublishSource source,
   }) =>
-      cacheManager.delete(apisCacheKey(isPreview));
+      cacheManager.delete(source.apisCacheKey);
 
   /// Deletes a given api associated with a [apiId] from the cache.
   void deletePublishVariables({
     required String layoutId,
-    required bool isPreview,
+    required PublishSource source,
   }) =>
-      cacheManager.delete(variablesCacheKey(isPreview));
+      cacheManager.delete(source.variablesCacheKey);
 
   /// Deletes a given api associated with a [apiId] from the cache.
   void deletePublishConditions({
     required String layoutId,
-    required bool isPreview,
+    required PublishSource source,
   }) =>
-      cacheManager.delete(conditionsCacheKey(isPreview));
+      cacheManager.delete(source.conditionsCacheKey);
 
   /// Deletes the stored bytes of a given [fontID] from the cache.
   void deleteFontBytes({
     required String fontID,
-    required bool isPreview,
+    required PublishSource source,
   }) =>
-      cacheManager.deleteBytes(fontsCacheKey(isPreview), fontID);
+      cacheManager.deleteBytes(source.fontsCacheKey, fontID);
 }
