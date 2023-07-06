@@ -17,7 +17,7 @@ import 'logging/reporter.dart';
 /// Usage:
 ///
 ///   // Initialize SDK
-///   Codelessly.instance.initializeSDK(CodelesslyConfig(authToken: XXX));
+///   Codelessly.initialize(CodelesslyConfig(authToken: XXX));
 ///
 ///   // Get global instance
 ///   Codelessly.instance;
@@ -163,7 +163,7 @@ class Codelessly {
   /// If the [CodelesslyWidget] recognizes that this instance of the
   /// [Codelessly] SDK is the global instance rather than a local one, it will
   /// initialize the SDK automatically, if specified.
-  Future<CodelesslyStatus> initialize({
+  static Future<CodelesslyStatus> initialize({
     CodelesslyConfig? config,
 
     // Raw managers.

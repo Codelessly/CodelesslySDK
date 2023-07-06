@@ -69,7 +69,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       codelessly.config == null
           ? 'The SDK cannot be initialized if it is not configured. '
               '\nConsider specifying a [CodelesslyConfig] when initializing.'
-              '\n\nYou can initialize the SDK by calling [Codelessly.initializeSDK]'
+              '\n\nYou can initialize the SDK by calling [Codelessly.initialize]'
               '\nor call [Codelessly.configureSDK] to lazily load instead.'
           : 'A [CodelesslyConfig] was already provided.'
               '\nConsider removing the duplicate config or calling '

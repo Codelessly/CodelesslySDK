@@ -24,14 +24,14 @@ codelessly_sdk: ^latest_version
 
 #### Step 2: Initialize the SDK
 
-Initialize Codelessly before calling `runApp`.
+Initialize Codelessly before calling `runApp()`.
 
 ```dart
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize SDK.
-  Codelessly.instance.initialize(
+  Codelessly.initialize(
     config: const CodelesslyConfig(
       authToken: AUTH_TOKEN,
       isPreview: kIsDebug,
@@ -41,12 +41,14 @@ void main() {
   runApp(const MyApp());
 }
 ```
+- `authToken`: Can be found for each project under `Publish > Settings > Settings`.
+- `isPreview`: Whether the layout is in preview or production mode. Preview mode is meant for debugging the layout and syncs with the changes made in the editor. Widgets in production mode do not sync and are only updated when explicitly published using the Publish button.
 
-The `authToken` can be found for each project under `Publish > Settings > Settings`. Information on customizing SDK initialization can be found later in the documentation.
+Information on customizing SDK initialization can be found later in the documentation.
 
 #### Step 3: Get a Layout ID
 
-The `CodelesslyWidget` enables your application to update its UI over the air.
+Use `CodelesslyWidget` to enable your app to update its UI over the air.
 
 ```dart
 CodelesslyWidget(
@@ -105,14 +107,15 @@ are optional.
 
 ### Customize Initialization
 
-`initializeSDK` takes in several parameters to provide complete flexibility. For example, you 
+Initialization method `initialize` takes in several parameters to provide complete flexibility. For example, you 
 can declare config in this method to make it the default configuration of all 
 `CodelesslyWidget`s, unless overridden.
 
 ```dart
-Codelessly.instance.initializeSDK(
+Codelessly.initialize(
   config: const CodelesslyConfig(
     authToken: authToken,
+    isPreview: kIsDebug,
   ),
 );
 ```
@@ -136,10 +139,12 @@ The CodelesslyWidget is a widget that renders a layout by accessing its associat
 > The `config` parameter may be required depending on how you configure your CodelesslyWidget. Please read below for more information.
 
 ### Initializing the SDK
-There are multiple methods to initialize your `CodelesslyWidget`.
+There are several ways to initialize your `CodelesslyWidget`.
 
 #### Method #1: Lazy Initialization using the CodelesslyWidget
-The simplest method is to directly use the `CodelesslyWidget` and allow it to initialize itself automatically when it comes into view in your widget tree. If you use this method, you **must** provide the `authToken` in a `CodelesslyConfig` in the `config` constructor parameter of the `CodelesslyWidget`.
+The simplest method is to directly use the `CodelesslyWidget` and allow it to initialize itself automatically when it
+comes into view in your widget tree. If you use this method, you **must** provide the `authToken` in a 
+`CodelesslyConfig` in the `config` constructor parameter of the `CodelesslyWidget`.
 
 ```dart
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -162,19 +167,23 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-The global `Codelessly` instance will be configured for you automatically using this method. The first time you load data, you may see an empty loading state while the SDK attempts to download all the necessary information; subsequent attempts will be instantaneous as the caching system kicks in.
+The global `Codelessly` instance will be configured for you automatically using this method. The first time you load 
+data, you may see an empty loading state while the SDK attempts to download all the necessary information; 
+subsequent attempts will be instantaneous as the caching system kicks in.
 
 > Subsequent attempts should be instantaneous as the caching system kicks in.
 
 #### Method #2: Preemptive Initialization using the Codelessly global instance
 
-To initialize the SDK before rendering any `CodelesslyWidget`, perform the initialization through the global `Codelessly` instance.. To do this, you must initialize the SDK through the global `Codelessly` instance. To do this, simply call the `Codelessly.initializeSDK` method before you render any `CodelesslyWidget`. Ideally, call it in the `main` method.
+To initialize the SDK before rendering any `CodelesslyWidget`, perform the initialization through the global 
+`Codelessly` instance. To do this, Simply call the `Codelessly.initialize` method before you render any 
+`CodelesslyWidget`. Ideally, call it in the `main` method.
 
 ```dart
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 
 void main() async {
-  await Codelessly.initializeSDK(
+  await Codelessly.initialize(
     config: const CodelesslyConfig(
       authToken:'YOUR AUTH TOKEN HERE',
     ),
@@ -198,9 +207,9 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-`initializeSDK` takes in several parameters to provide more  flexibility and control. For example, you can declare 
-your `CodelesslyConfig` in this method to make it the default configuration of all `CodelesslyWidget`s, unless 
-explicitly overridden.
+The `Codelessly.initialize()` method takes in several parameters to provide more  flexibility and control. 
+For example, you can declare your `CodelesslyConfig` in this method to make it the default configuration of all 
+`CodelesslyWidget`s, unless explicitly overridden.
 
 ### CodelesslyConfig
 
