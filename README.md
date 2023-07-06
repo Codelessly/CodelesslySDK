@@ -107,10 +107,10 @@ are optional.
 
 `initializeSDK` takes in several parameters to provide complete flexibility. For example, you 
 can declare config in this method to make it the default configuration of all 
-`CodelesslyWidget`s, unless overriden.
+`CodelesslyWidget`s, unless overridden.
 
 ```dart
-Codelessly.initializeSDK(
+Codelessly.instance.initializeSDK(
   config: const CodelesslyConfig(
     authToken: authToken,
   ),
@@ -121,7 +121,7 @@ Similarly, you can declare `data` and `functions` to make them globally accessib
 
 ## Demo
 ### [CodelesslyGPT](https://sdk-chat-bot.web.app/#/)
-A demo chatbot interface built with the Codelessly SDK. [View Code](https://github.com/Codelessly/CodelesslySDK/tree/main/example_chat_bot)
+A demo chat-bot interface built with the Codelessly SDK. [View Code](https://github.com/Codelessly/CodelesslySDK/tree/main/example_chat_bot)
 
 ## Customization
 
@@ -198,7 +198,9 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-`initializeSDK` takes in several parameters to provide more  flexibility and control. For example, you can declare your `CodelesslyConfig` in this method to make it the default configuration of all `CodelesslyWidget`s, unless explicitly overridden.
+`initializeSDK` takes in several parameters to provide more  flexibility and control. For example, you can declare 
+your `CodelesslyConfig` in this method to make it the default configuration of all `CodelesslyWidget`s, unless 
+explicitly overridden.
 
 ### CodelesslyConfig
 
@@ -208,40 +210,92 @@ The CodelesslyConfig provides you with additional configuration capabilities to 
 * `preload`: Determines if the SDK should preload all of the published layouts of a given Codelessly project. This allows you to provision your entire project ahead of time instead of lazily as `CodelesslyWidget`s render into view and individually download their data.
 * `automaticallyCollectCrashReports`: By default, any crashes or errors are sent to Codelessly’s servers for analysis. You can optionally disable this behavior.
 
-### Data & Functions
+## Data & Functions
 
-You can provide custom data and functions dynamically to your layout. The UI will dynamically replace any variables defined in the Codelessly editor with the appropriate provided value. Similarly, any function names defined in the editor will be executed through a map of the function’s name and a value of `CodelesslyFunction`.
+You can provide custom **data** and **functions** dynamically to your layout. The UI will dynamically replace any 
+variables defined in the Codelessly editor with the appropriate provided value.
+
+### Using data with UI
+
+**Step 1:** Use `${}` syntax in input fields to link data from the Codelessly editor to your layout as shown below. 
+
+For example, if you want to link the title of a text widget to the `title` variable in the Codelessly editor, you 
+would use `${title}` in the text widget’s text field.
+
+> `${}` must start with `data` to access the data variable. For example, `${data.title}`.
+> `data` is one the predefined variables available in the Codelessly editor.
+
+![Data](packages/ui_with_data_linking.png)
+
+> Green color indicates that the variable placeholder syntax is valid. Red color indicates that the variable
+> placeholder syntax is invalid.
+
+**Step 2:** Once this is set from the editor, you can provide the data to the layout from your app.
 
 ```dart
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Codelessly SDK Example',
-      home: CodelesslyWidget(
-        layoutID: 'YOUR LAYOUT ID HERE',
-        data: {
-          'name': 'John Doe',
-          'age': 25,
-        },
-        functions: {
-          'myFunction': CodelesslyFunction((CodelesslyContext context) {
-            // TODO: Implement your function here
-          }),
-        },
-      ),
-    );
-  }
-}
+CodelesslyWidget(
+  layoutID: '<YOUR LAYOUT ID HERE>',
+  data: {
+    'title': 'Fast Performance',
+    'description': 'Complete projects on time and easily with our APIs. Get blazing fast performance!',
+  },
+),
 ```
+
+Here, `data` parameter is a map of type `Map<String, dynamic>` which is used to populate information in the layout UI where `data`
+variable is used from the Codelessly editor. The layout UI will automatically update to reflect the new data whenever
+the `data` is updated.
+
+This how it would look like with populated data:
+
+![Data](packages/ui_with_populated_data.png)
+
+### Using functions
+
+Codelessly SDK also supports providing callback functions for user actions on the UI like onClick, onLongPress, etc.
+
+Use `Call Function` action to define an external function call for an action. For example, here, we are defining a
+function call for the `onClick` action of the `Button` widget.
+
+1. Select your button and navigate to `Develop` see bring up the `Actions` panel.
+2. Click on the `+` button to add a new action.
+3. Select `Call Function` from the list of actions.
+4. Click on the `Settings` button to bring up the `Action Settings` popup.
+5. Write a valid function name in the `Function Name` field. For example, `myFunction`.
+
+![Defining call function action](packages/defining_call_function_action.png)
+
+Here, we defined `onNextButtonClicked` function call action of the button widget when the button is clicked.
+Implementation for this `onNextButtonClicked` function callback can be provided in the `functions` parameter of the
+`CodelesslyWidget` as shown below.
+
+```dart
+CodelesslyWidget(
+  layoutID: 'YOUR LAYOUT ID HERE',
+  data: {
+    'title': 'Fast Performance',
+    'description': 'Complete projects on time and easily with our APIs. Get blazing fast performance!',
+  },
+  functions: {
+    'onNextButtonClicked': CodelesslyFunction((CodelesslyContext context) {
+      print('onNextButtonClicked function called');
+      // TODO: Implement your function here
+    }),
+  },
+),
+```
+
+Here, `functions` parameter takes a map of type `Map<String, CodelesslyFunction>` which is used to execute functions 
+defined as action calls in the Codelessly editor. This will be called when user clicks on the button. 
+
+The `CodelesslyFunction` takes in a `CodelesslyContext` which provides you the access to data, variables, conditions, 
+functions and much more.
 
 > Similarly, you can declare `data` and `functions` in the global `Codelessly` instance to make them globally accessible by all `CodelesslyWidget`s.
 
 ## Additional Resources
 Please find additional tutorials at our [documentation](https://app.gitbook.com/o/rXXdMMDhFOAfV2g6j8A1/s/x4NeiXalJWaOaV6tsK5f/getting-started/3-minute-quick-start).
 
-If you have any questions or run into any issues, please open an issue or email us at codelessly@gmail.com.
+If you have any questions or run into any issues, please open an issue or email us at [codelessly@gmail.com](mailto:codelessly@gmail.com).
 
 For the latest information on releases and product updates, subscribe to our newsletter on the [Codelessly Website](https://codelessly.com/).
