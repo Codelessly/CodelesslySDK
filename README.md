@@ -15,25 +15,60 @@ Supercharge your Flutter apps with dynamic UI and real-time updates. Build and p
 ## Quickstart
 [![Pub release](https://img.shields.io/pub/v/codelessly_sdk.svg?style=flat-square)](https://pub.dev/packages/codelessly_sdk)
 
+#### Step 1: Import Library
+
 Import this library into your project:
 ```yaml
 codelessly_sdk: ^latest_version
 ```
-**Initialize the SDK**
+
+#### Step 2: Initialize the SDK
+
+Initialize Codelessly before calling `runApp`.
 
 ```dart
-Codelessly.instance.initialize(
-  config: const CodelesslyConfig(
-    authToken: authToken,
-  ),
-);
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize SDK.
+  Codelessly.instance.initialize(
+    config: const CodelesslyConfig(
+      authToken: AUTH_TOKEN,
+      isPreview: kIsDebug,
+    ),
+  );
+
+  runApp(const MyApp());
+}
 ```
 
-Find the `authToken` in your Codelessly Project under `Publish > Settings > Settings`.
+The `authToken` can be found for each project under `Publish > Settings > Settings`. Information on customizing SDK initialization can be found later in the documentation.
 
+#### Step 3: Get a Layout ID
 
+The `CodelesslyWidget` enables your application to update its UI over the air.
 
-The Codelessly SDK's key feature is **Cloud UI** which allows the users to update their app's UI over the air, without updating the app itself. To enable this feature, the SDK provides a widget called `CodelesslyWidget`.
+```dart
+CodelesslyWidget(
+  layoutID: LAYOUT_ID,
+)
+```
+
+Any design or layout can be streamed directly from the Codelessly Editor to your app via the `CodelesslyWidget` with a `layoutID`. 
+
+1. In the Codelessly Editor, select the **canvas** of your layout.
+2. Press the **Preview Icon** in the toolbar. ![CloudUI Preview Icon](packages/preview_icon.png)
+3. Copy the **layoutID**.
+
+![Codelessly Widget Code](packages/codelessly_widget_code.png)
+
+Refer to the later sections for how to pass variables and functions to the CodelesslyWidget.
+
+#### Step 4: Embed the CodelesslyWidget
+
+The `CodelesslyWidget` can be used like any other widget and embedded anywhere in your app. It can even be used to render entire pages as the root widget.
+
+Here is a complete example:
 
 ```dart
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -46,32 +81,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Codelessly SDK Example',
       home: CodelesslyWidget(
-        layoutID: 'YOUR LAYOUT ID HERE',
-        config: const CodelesslyConfig(
-          authToken: 'YOUR AUTH TOKEN HERE',
-        ),
+        layoutID: LAYOUT_ID,
       ),
     );
   }
 }
 ```
 
-> To learn how to use the Codelessly editor to publish layouts, check out our user guide [here](https://app.gitbook.com/o/rXXdMMDhFOAfV2g6j8A1/s/x4NeiXalJWaOaV6tsK5f/getting-started/3-minute-quick-start).
-
-## Features
-
-This package is used to create active and passive transformers that convert `BaseNode`s
-from the `codelessly_api` into Flutter widgets that can be published, previewed,
-and interacted with in the Codelessly Editor.
-
-## Usage
-
-CodelesslySDK's key feature is **Cloud UI** which allows the users to update their app's UI 
-over the air, without updating the app itself. To enable this feature, the SDK provides
-a widget called `CodelesslyWidget`.
-
-> To learn how to use the Codelessly Editor to publish layouts, check out our user guide
-> [here](https://app.gitbook.com/o/rXXdMMDhFOAfV2g6j8A1/s/x4NeiXalJWaOaV6tsK5f/getting-started/3-minute-quick-start).
+To learn how to use the Codelessly editor to publish layouts, check out our [3-minute Quickstart Guide](https://app.gitbook.com/o/rXXdMMDhFOAfV2g6j8A1/s/x4NeiXalJWaOaV6tsK5f/getting-started/3-minute-quick-start).
 
 ### CodelesslyWidget
 
@@ -86,19 +103,7 @@ Publish button.
 to fetch the canvas data from the server. `authToken` is required while other parameters 
 are optional.
 
-### Initializing SDK
-
-Before you can use `CodelesslyWidget`, you need to initialize the SDK. To do that, simply 
-call the `initializeSDK` method before you render any `CodelesslyWidget`. Ideally, call it in 
-the `main` method.
-
-```dart
-void main() {
-  Codelessly.initializeSDK();
-  
-  runApp(MyApp());
-}
-```
+### Customize Initialization
 
 `initializeSDK` takes in several parameters to provide complete flexibility. For example, you 
 can declare config in this method to make it the default configuration of all 
@@ -113,105 +118,6 @@ Codelessly.initializeSDK(
 ```
 
 Similarly, you can declare `data` and `functions` to make them globally accessible.
-
-### Example
-
-Here's an example of how you can embed a canvas in your app using CodelesslySDK:
-```dart
-import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:flutter/material.dart';
-
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize SDK.
-  Codelessly.initializeSDK(
-    config: const CodelesslyConfig(
-      authToken: 'LDliZlRlTS5EOTAsUzsrR3VfK0coN2sqbDI9OkVMazN4YXUv',
-    ),
-  );
-
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Codelessly SDK Example',
-      debugShowCheckedModeBanner: false,
-      home: SafeArea(
-        child: CodelesslyWidget(
-          layoutID: '0QsQaSzQ0A4RIzKKuN8Y',
-        ),
-      ),
-    );
-  }
-}
-```
-
-## Extending the transformer API
-
-Here is a minimal example of how to use this package to create a custom transformer
-for the `MyNode` node:
-
-Please read the code inside `BaseNode` and `AbstractNodeWidgetTransformer`
-to better understand what each property does, and refer to the many
-transformers under `codelessly_sdk/lib/src/transformers/node_transformers`
-for additional examples.
-
-```dart
-import 'package:codelessly_api/codelessly_api.dart';
-import 'package:flutter/material.dart';
-
-import '../../../codelessly_sdk.dart';
-class MyNodeTransformer extends NodeWidgetTransformer<MyNode> {
-  const MyNodeTransformer();
-
-  @override
-  Widget buildWidget(
-      IconNode node,
-      BuildContext context, [
-        WidgetBuildSettings settings = const WidgetBuildSettings(),
-      ]) {
-    return Icon(
-      Icons.flutter_dash,
-      size: node.basicBoxLocal.shortestSide,
-      color: Colors.blue,
-    );
-  }
-}
-```
-
-To register a transformer:
-
-```dart
-globalActiveManager.registerTransformer('my_node', MyNodeTransformer());
-globalPassiveManager.registerTransformer('my_node', MyNodeTransformer());
-```
-
-## Additional information
-
-If you have any questions or run into any issues, you can file a support ticket through the Codelessly website or
-contact the Codelessly team directly. We welcome contributions to this package and encourage you to submit any issues or
-pull requests through the
-GitHub repository.
-
-You can contact us on our [Website](https://codelessly.com/) or join us on
-our [Discord Server](https://discord.gg/Bzaz7zmY6q).
-
-## Features
-* 💾 Built-in Caching: Experience instantaneous UI rendering on subsequent loads.
-* 🔄 UI Preloading: Efficiently provision your published Codelessly Cloud UI, avoiding loading phases.
-* ⚡ Live Updates: Enjoy real-time UI updates as you re-publish changes from your Codelessly editor that get reflected immediately to your users without any app updates.
-* 📐 Responsive Rendering: Ensure consistent UI appearances across any widget tree.
-* 🌟 Dynamic Data Injection: Widgets with variables update and react immediately to any data provided to the CodelesslyWidget dynamically during runtime.
-* ⚙️ Function Support: Create your own functions that execute custom logic, triggering whenever they are configured to run from your Codelessly editor.
-* 🎛️ Controller-Pattern Support: Leverage the full potential of Flutter's controller-pattern for advanced control over your UI.
-* 🌍 Cross-Platform Compatibility: Ensures maximum accessibility with support for all platforms.
-* 🎨 Customizable Placeholders: Personalize loading and error placeholders for a unique and consistent user experience.
 
 ## Demo
 ### [CodelesslyGPT](https://sdk-chat-bot.web.app/#/)
@@ -333,81 +239,9 @@ class MyApp extends StatelessWidget {
 
 > Similarly, you can declare `data` and `functions` in the global `Codelessly` instance to make them globally accessible by all `CodelesslyWidget`s.
 
-## Custom Transformers
-Here is a minimal example of how to use this package to create a custom transformer
-for the `MyNode` node:
-
-Please read the code inside `BaseNode` and `AbstractNodeWidgetTransformer`
-to better understand what each property does, and refer to any of the
-transformers under `codelessly_sdk/lib/src/transformers/node_transformers`
-for additional examples.
-
-```dart
-import 'package:codelessly_api/codelessly_api.dart';
-import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:flutter/material.dart';
-
-class MyNodeTransformer extends NodeWidgetTransformer<MyNode> {
-  const MyNodeTransformer();
-
-  @override
-  Widget buildWidget(
-      MyNode node,
-      BuildContext context, [
-        WidgetBuildSettings settings = const WidgetBuildSettings(),
-      ]) {
-    return Icon(
-      Icons.flutter_dash,
-      size: node.basicBoxLocal.shortestSide,
-      color: Colors.blue,
-    );
-  }
-}
-```
-To register a transformer:
-```dart
-transformerManager.registerTransformer('my_node', MyNodeTransformer());
-```
 ## Additional Resources
-Visit [LINK](https://example.com) to read our complete and exhaustive documentation of this package.
+Please find additional tutorials at our [documentation](https://app.gitbook.com/o/rXXdMMDhFOAfV2g6j8A1/s/x4NeiXalJWaOaV6tsK5f/getting-started/3-minute-quick-start).
 
-If you have any questions or run into any issues, you can file a support ticket through the Codelessly website or contact the Codelessly team directly. We welcome contributions to this package and encourage you to submit any issues or pull requests through the GitHub repository.
+If you have any questions or run into any issues, please open an issue or email us at codelessly@gmail.com.
 
-You can contact us on our [Website](https://codelessly.com/) or join us on
-our [Discord Server](https://discord.gg/Bzaz7zmY6q).
-
-## Authors ❤️
-* [Ray Li](https://github.com/searchy2)
-* [Saad Ardati](https://github.com/SaadArdati)
-* [Birju Vachhani](https://github.com/BirjuVachhani)
-* [Aachman Garg](https://github.com/imaachman)
-* [Tibor Szuntheimer](https://github.com/Producer86)
-
-Flutter is a game-changing technology that will revolutionize not just development, but software itself. A big thank you to the Flutter team for building such an amazing platform 💙
-
-<a href="https://github.com/flutter/flutter"><img alt="Flutter" src="https://raw.githubusercontent.com/Codelessly/ResponsiveFramework/master/packages/Flutter%20Logo%20Banner.png" /></a>
-
-## License
-```
-Copyright 2023 Codelessly
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
-following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
-   disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
-   disclaimer in the documentation and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products
-   derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-```
+For the latest information on releases and product updates, subscribe to our newsletter on the [Codelessly Website](https://codelessly.com/).
