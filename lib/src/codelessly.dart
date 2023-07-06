@@ -17,7 +17,7 @@ import 'logging/reporter.dart';
 /// Usage:
 ///
 ///   // Initialize SDK
-///   Codelessly.initializeSDK(CodelesslyConfig(authToken: XXX));
+///   Codelessly.instance.initializeSDK(CodelesslyConfig(authToken: XXX));
 ///
 ///   // Get global instance
 ///   Codelessly.instance;
