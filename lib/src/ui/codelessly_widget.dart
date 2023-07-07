@@ -202,7 +202,11 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
           .firstWhereOrNull((variable) => variable.value.name == name);
 
   @override
-  List<Object?> get props => [data, functions];
+  List<Object?> get props => [
+        layoutID,
+        data,
+        functions,
+      ];
 }
 
 /// SDK widget that requires the SDK to be initialized beforehand.
