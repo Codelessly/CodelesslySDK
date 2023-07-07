@@ -103,7 +103,7 @@ class ConditionEvaluator<R extends Object>
       }
 
       // variable name
-      return variables[variableName]?.value ?? '';
+      return variables[variableName]?.getValue()?.toString() ?? '';
     });
     return _visitRawValue(value);
   }
