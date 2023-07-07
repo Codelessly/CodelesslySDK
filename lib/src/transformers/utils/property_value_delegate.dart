@@ -232,19 +232,19 @@ class PropertyValueDelegate {
 
     if (match.hasPathOrAccessor) {
       if (variable.type == VariableType.map) {
-        final dynamic value = substituteJsonPath(match.fullPath,
+        final Object? value = substituteJsonPath(match.fullPath,
             {match.name: variable.typedValue<Map>(defaultValue: {})});
 
         return value.typedValue<R>();
       } else if (variable.type == VariableType.list) {
-        final dynamic value = substituteJsonPath(match.fullPath,
+        final Object? value = substituteJsonPath(match.fullPath,
             {match.name: variable.typedValue<List>(defaultValue: [])});
 
         return value.typedValue<R>();
       }
     }
 
-    return variable.value.typedValue<R>();
+    return variable.getValue().typedValue<R>();
   }
 
   /// Retrieves the value of a predefined variable [name] using given [path].

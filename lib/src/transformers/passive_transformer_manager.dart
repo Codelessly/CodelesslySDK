@@ -163,7 +163,6 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       if (match == null) continue;
 
       if (match.isPredefinedVariable) continue;
-      print('found multi variable path: ${match.name}');
 
       // Get corresponding variable data from codelessly context.
       final ValueNotifier<VariableData>? listenableVariable =
