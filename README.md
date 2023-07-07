@@ -31,7 +31,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize SDK.
-  Codelessly.initialize(
+  Codelessly.instance.initialize(
     config: const CodelesslyConfig(
       authToken: AUTH_TOKEN,
       isPreview: kIsDebug,
@@ -112,7 +112,7 @@ can declare config in this method to make it the default configuration of all
 `CodelesslyWidget`s, unless overridden.
 
 ```dart
-Codelessly.initialize(
+Codelessly.instance.initialize(
   config: const CodelesslyConfig(
     authToken: authToken,
     isPreview: kIsDebug,
@@ -176,14 +176,14 @@ subsequent attempts will be instantaneous as the caching system kicks in.
 #### Method #2: Preemptive Initialization using the Codelessly global instance
 
 To initialize the SDK before rendering any `CodelesslyWidget`, perform the initialization through the global 
-`Codelessly` instance. To do this, Simply call the `Codelessly.initialize` method before you render any 
+`Codelessly` instance. To do this, Simply call the `Codelessly.instance.initialize()` method before you render any 
 `CodelesslyWidget`. Ideally, call it in the `main` method.
 
 ```dart
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 
 void main() async {
-  await Codelessly.initialize(
+  await Codelessly.instance.initialize(
     config: const CodelesslyConfig(
       authToken:'YOUR AUTH TOKEN HERE',
     ),
@@ -207,7 +207,7 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-The `Codelessly.initialize()` method takes in several parameters to provide more  flexibility and control. 
+The `Codelessly.instance.initialize()` method takes in several parameters to provide more  flexibility and control. 
 For example, you can declare your `CodelesslyConfig` in this method to make it the default configuration of all 
 `CodelesslyWidget`s, unless explicitly overridden.
 
