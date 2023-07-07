@@ -38,6 +38,9 @@ class PropertyValueDelegate {
     List<VariableData>? variablesOverrides,
     Map<String, dynamic>? dataOverrides,
   }) {
+    variablesOverrides =
+        variablesOverrides?.isEmpty == true ? null : variablesOverrides;
+
     final R? conditionValue = getPropertyValueFromCondition<R>(
       context,
       node,
@@ -81,6 +84,9 @@ class PropertyValueDelegate {
     List<VariableData>? variablesOverrides,
     Map<String, dynamic>? dataOverrides,
   }) {
+    variablesOverrides =
+        variablesOverrides?.isEmpty == true ? null : variablesOverrides;
+
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
 
@@ -122,6 +128,9 @@ class PropertyValueDelegate {
     List<VariableData>? variablesOverrides,
     Map<String, dynamic>? dataOverrides,
   }) {
+    variablesOverrides =
+        variablesOverrides?.isEmpty == true ? null : variablesOverrides;
+
     final String? variablePath = node.variables[property];
 
     if (variablePath == null) return null;
@@ -154,6 +163,9 @@ class PropertyValueDelegate {
     List<VariableData>? variablesOverrides,
     Map<String, dynamic>? dataOverrides,
   }) {
+    variablesOverrides =
+        variablesOverrides?.isEmpty == true ? null : variablesOverrides;
+
     return text.splitMapJoinRegex(
       variablePathRegex,
       onNonMatch: (text) => text,
@@ -191,6 +203,9 @@ class PropertyValueDelegate {
     List<VariableData>? variablesOverrides,
     Map<String, dynamic>? dataOverrides,
   }) {
+    variablesOverrides =
+        variablesOverrides?.isEmpty == true ? null : variablesOverrides;
+
     if (path.isEmpty) return null;
 
     final match = VariableMatch.parse(path.wrapWithVariableSyntax());
