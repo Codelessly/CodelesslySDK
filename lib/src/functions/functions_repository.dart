@@ -38,7 +38,7 @@ enum ApiRequestType {
 class FunctionsRepository {
   // TODO: URL should be environment specific.
   static const String _firebaseCloudFunctionsBaseURL =
-      'https://us-central1-codeless-dev.cloudfunctions.net';
+      defaultFirebaseCloudFunctionsBaseURL;
 
   static void performAction(
     BuildContext context,

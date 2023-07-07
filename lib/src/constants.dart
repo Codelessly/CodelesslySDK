@@ -1,7 +1,17 @@
-const defaultProjectId = 'codeless-dev';
-const defaultApiKey = 'AIzaSyBk-blUIZe_brP4D8xsjo2TcUPF-FDQLGs';
-const String firebaseCloudFunctionsBaseURL =
-    'https://us-central1-codeless-dev.cloudfunctions.net';
+const String defaultFirebaseProjectId = String.fromEnvironment(
+  'firebase_project_id',
+  defaultValue: prodFirebaseProjectId,
+);
+
+const String defaultFirebaseCloudFunctionsBaseURL = String.fromEnvironment(
+  'cloud_functions_base_url',
+  defaultValue: prodFirebaseCloudFunctionsBaseURL,
+);
+
+const String prodFirebaseProjectId = 'codeless-app';
+const String prodFirebaseCloudFunctionsBaseURL =
+    'https://us-central1-codeless-app.cloudfunctions.net';
+
 const defaultErrorMessage =
     'We encountered some error while rendering this page! '
     'We are working on it to fix it as soon as possible.';

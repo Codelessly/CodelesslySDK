@@ -8,6 +8,8 @@ import '../../codelessly_sdk.dart';
 /// need to utilize to offer a complete usage experience of a [Codelessly]
 /// layout.
 abstract class NetworkDataRepository {
+  const NetworkDataRepository();
+
   /// Streams a given [projectID]'s associated [SDKPublishModel] from the
   /// network with preferably live updates.
   Stream<SDKPublishModel?> streamPublishModel({

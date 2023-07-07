@@ -283,6 +283,17 @@ class CodelesslyWidget extends StatefulWidget {
   /// Optional [CodelesslyContext] that can be provided explicitly if needed.
   final CodelesslyContext? codelesslyContext;
 
+  /// The project ID of the Firebase project to use. This is used to
+  /// initialize Firebase.
+  ///
+  /// Note that if this is changed changed when widget is already initialized,
+  /// it will have no effect. Only the value provided when the widget is
+  /// initialized will be used.
+  final String firebaseProjectId;
+
+  /// Base URL of the Firebase Cloud Functions instance to use.
+  final String firebaseCloudFunctionsBaseURL;
+
   /// Creates a [CodelesslyWidget].
   ///
   /// Can be instantiated in several ways:
@@ -337,6 +348,8 @@ class CodelesslyWidget extends StatefulWidget {
 
     // Additional parameters.
     this.codelesslyContext,
+    this.firebaseProjectId = defaultFirebaseProjectId,
+    this.firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
   })  : data = {...data},
         functions = {...functions},
         assert(
@@ -404,6 +417,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
     if (!CodelesslyErrorHandler.didInitialize) {
       _effectiveController.codelessly.initErrorHandler(
+        firebaseProjectId: widget.firebaseProjectId,
         automaticallySendCrashReports:
             _effectiveController.config?.automaticallyCollectCrashReports ??
                 false,
@@ -496,6 +510,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         publishDataManager: widget.publishDataManager,
         previewDataManager: widget.previewDataManager,
         cacheManager: widget.cacheManager,
+        firebaseProjectId: widget.firebaseProjectId,
+        firebaseCloudFunctionsBaseURL: widget.firebaseCloudFunctionsBaseURL,
       );
 
   @override
