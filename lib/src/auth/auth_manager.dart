@@ -1,10 +1,6 @@
-import 'package:codelessly_api/codelessly_api.dart';
-import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 import '../../codelessly_sdk.dart';
-import '../model/auth_data.dart';
 
 /// An abstraction for providing authentication to the SDK.
 abstract class AuthManager {

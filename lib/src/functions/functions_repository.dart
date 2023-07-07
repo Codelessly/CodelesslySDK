@@ -144,10 +144,18 @@ class FunctionsRepository {
           .firstWhereOrNull((layout) => layout.canvasId == action.destinationId)
           ?.id;
 
+      print('looking for layout with canvas id: [${action.destinationId}]');
+      for (final layout
+          in codelessly.dataManager.publishModel!.layouts.values) {
+        print('layout [${layout.id}] canvas id: [${layout.canvasId}]');
+      }
+
       if (layoutId == null) {
         CodelesslyErrorHandler.instance.captureException(
           CodelesslyException.layoutNotFound(
-              message: 'Layout with id [$layoutId] does not exist.'),
+            message:
+                'Could not find a layout with a canvas id of [${action.destinationId}]',
+          ),
         );
         return;
       }

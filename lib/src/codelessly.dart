@@ -83,6 +83,8 @@ class Codelessly {
 
   Firestore? _firestore;
 
+  /// A helper getter to retrieve the active [DataManager] based on the
+  /// [PublishSource] provided by the [CodelesslyConfig].
   DataManager get dataManager => switch (config!.publishSource) {
         PublishSource.publish => publishDataManager,
         PublishSource.preview => previewDataManager,
@@ -242,6 +244,14 @@ class Codelessly {
     _statusStreamController.add(_status);
   }
 
+  /// Resets the state of the SDK. This is useful for resetting the data without
+  /// disposing the instance permanently.
+  ///
+  /// This does not close the status stream, and instead sets the SDK back to
+  /// idle mode.
+  ///
+  /// This is different from [resetAndClearCache] in that it only affects the
+  /// global [Codelessly] instance.
   static Future<void> resetAndClearSDKCache() => _instance.resetAndClearCache();
 
   /// Returns true if the provided instance is the global instance.
@@ -475,7 +485,8 @@ class Codelessly {
 
       _config!.publishSource = this.authManager.getBestPublishSource(_config!);
 
-      log('Initializing data managers');
+      log('Initializing data managers with publish source '
+          '${_config!.publishSource}');
       // The data manager initializes last to load the last stored publish
       // model, or, if it doesn't exist, halts the entire process and awaits
       // to fetch the latest publish model from the server.

@@ -6,12 +6,20 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
 
+/// Handles caching of any data that needs to be cached via Hive.
 class CodelesslyCacheManager extends CacheManager {
+  /// The configuration used by the [Codelessly] SDK.
   final CodelesslyConfig config;
 
+  /// Creates a [CodelesslyCacheManager] instance with the provided [config].
   CodelesslyCacheManager({required this.config});
 
+  /// The [Box] instance used to store any arbitrary data excluding byte
+  /// information.
   late Box box;
+
+  /// The [Box] instance used to store any byte information, mainly used for
+  /// storing font files.
   late Box filesBox;
 
   @override
