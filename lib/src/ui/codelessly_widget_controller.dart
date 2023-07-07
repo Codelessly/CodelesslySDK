@@ -1,15 +1,18 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
-import '../model/publish_source.dart';
 
 class CodelesslyWidgetController extends ChangeNotifier {
-  String layoutID;
-
-  bool didInitialize = false;
+  /// The ID of the layout provided from your Codelessly dashboard.
+  /// This represents a single screen or canvas.
+  ///
+  /// If this is null, the controller's layoutID will be used.
+  /// This cannot be null if no controller is provided.
+  final String layoutID;
 
   /// The [Codelessly] instance to use.
   ///
@@ -17,33 +20,67 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// [Codelessly.instance].
   final Codelessly codelessly;
 
-  /// Whether to show the preview version of the provided layout rather than the
-  /// published version.
-  ///
-  /// If a value is provided, it will override the value provided in
-  /// [CodelesslyConfig.publishSource].
-  final PublishSource publishSource;
-
+  /// Holds initialization configuration options for the SDK.
   final CodelesslyConfig? config;
 
-  /// Optional managers. These are only used when using the global codelessly
-  /// instance.
+  /// Optional auth manager for advanced control over the SDK's authentication
+  /// flow.
   final AuthManager? authManager;
+
+  /// Optional publish data manager for advanced control over the SDK's
+  /// publish data flow.
   final DataManager? publishDataManager;
+
+  /// Optional preview data manager for advanced control over the SDK's
+  /// preview data flow.
   final DataManager? previewDataManager;
+
+  /// Optional cache manager for advanced control over the SDK's caching
+  /// behavior.
   final CacheManager? cacheManager;
 
   /// Listens to the SDK's status to figure out if it needs to manually
   /// initialize the opposite data manager if needed.
   StreamSubscription<CodelesslyStatus>? _sdkStatusListener;
 
+  /// Helper getter to retrieve the active data manager being used by
+  /// the [Codelessly] instance.
   DataManager get dataManager => codelessly.dataManager;
 
+  /// Helper getter to retrieve the active publish model stream being used by
+  /// the [Codelessly] instance.
   Stream<SDKPublishModel?> get publishModelStream =>
       dataManager.publishModelStream;
 
+  /// Helper getter to retrieve the active publish model being used by
+  /// the [Codelessly] instance.
   SDKPublishModel? get publishModel => dataManager.publishModel;
 
+  /// Helper getter to retrieve the publish source being used by
+  /// the [Codelessly] instance.
+  PublishSource get publishSource => codelessly.config!.publishSource;
+
+  /// A boolean that helps keep track of the state of this controller's
+  /// initialization.
+  bool didInitialize = false;
+
+  /// Creates a [CodelesslyWidgetController].
+  ///
+  /// Can be instantiated in several ways:
+  ///
+  /// 1. Using the global instance of the SDK by not passing any of the
+  ///    relevant parameters. Initialization of the global instance is done
+  ///    implicitly if not already initialized.
+  ///
+  /// 2. Using a custom [codelessly] instance, initialization of the
+  ///    [codelessly] instance must be done explicitly.
+  ///
+  /// 3. Using a custom [config], which will be used to initialize the global
+  ///    [codelessly] instance.
+  ///
+  /// Optionally, provide custom [authManager], [publishDataManager],
+  /// [previewDataManager], and [cacheManager] instances for advanced control
+  /// over the SDK's behavior.
   CodelesslyWidgetController({
     required this.layoutID,
     PublishSource? publishSource,
@@ -57,11 +94,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     this.previewDataManager,
     this.cacheManager,
   })  : codelessly = codelessly ?? Codelessly.instance,
-        config = config ?? (codelessly ?? Codelessly.instance).config,
-        publishSource = publishSource ??
-            config?.publishSource ??
-            (codelessly ?? Codelessly.instance).config?.publishSource ??
-            PublishSource.publish {
+        config = config ?? (codelessly ?? Codelessly.instance).config {
     final codelessly = this.codelessly;
     assert(
       (config == null) != (codelessly.config == null) ||
@@ -69,7 +102,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
       codelessly.config == null
           ? 'The SDK cannot be initialized if it is not configured. '
               '\nConsider specifying a [CodelesslyConfig] when initializing.'
-              '\n\nYou can initialize the SDK by calling [Codelessly.initializeSDK]'
+              '\n\nYou can initialize the SDK by calling '
+              '[Codelessly.initializeSDK]'
               '\nor call [Codelessly.configureSDK] to lazily load instead.'
           : 'A [CodelesslyConfig] was already provided.'
               '\nConsider removing the duplicate config or calling '
@@ -134,13 +168,17 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
     // First event.
     if (codelessly.status == CodelesslyStatus.loaded) {
-      print(
-          '[CodelesslyWidgetController] [$layoutID]: Codelessly SDK is already loaded. Woo!');
+      log(
+        '[CodelesslyWidgetController] [$layoutID]: Codelessly SDK is already'
+        ' loaded. Woo!',
+      );
       _verifyAndListenToDataManager();
     }
 
-    print(
-        '[CodelesslyWidgetController] [$layoutID]: Listening to sdk status stream.');
+    log(
+      '[CodelesslyWidgetController] [$layoutID]: Listening to sdk status'
+      ' stream.',
+    );
     _sdkStatusListener?.cancel();
     _sdkStatusListener = codelessly.statusStream.listen((status) {
       switch (status) {
@@ -150,8 +188,10 @@ class CodelesslyWidgetController extends ChangeNotifier {
         case CodelesslyStatus.error:
           break;
         case CodelesslyStatus.loaded:
-          print(
-              '[CodelesslyWidgetController] [$layoutID]: Codelessly SDK is done loading.');
+          log(
+            '[CodelesslyWidgetController] [$layoutID]: Codelessly SDK is'
+            ' done loading.',
+          );
           _verifyAndListenToDataManager();
           break;
       }
@@ -162,8 +202,10 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// then we can signal to the manager that the desired layout passed to this
   /// widget is ready to be rendered and needs to be downloaded and prepared.
   void _verifyAndListenToDataManager() {
-    print(
-        '[CodelesslyWidgetController] [$layoutID]: verifying and listening to datamanager stream.');
+    log(
+      '[CodelesslyWidgetController] [$layoutID]: verifying and listening to'
+      ' data manager stream.',
+    );
 
     notifyListeners();
 
@@ -173,8 +215,10 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // Vice versa for published layouts if the SDK is configured to load preview
     // layouts.
     if (!dataManager.initialized) {
-      print(
-          '[CodelesslyWidgetController] [$layoutID]: initialized data manager for the first time. [${publishSource.serverPath}]');
+      log(
+        '[CodelesslyWidgetController] [$layoutID]: initialized data manager'
+        ' for the first time with a publish source of $publishSource.',
+      );
       dataManager.init(layoutID: layoutID).catchError((error, str) {
         CodelesslyErrorHandler.instance.captureException(
           error,
@@ -183,8 +227,10 @@ class CodelesslyWidgetController extends ChangeNotifier {
         );
       });
     } else {
-      print(
-          '[CodelesslyWidgetController] [$layoutID]: requesting layout from data manager. [${publishSource.serverPath}]');
+      log(
+        '[CodelesslyWidgetController] [$layoutID]: requesting layout from'
+        ' data manager with a publish source of $publishSource.',
+      );
       dataManager
           .getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID)
           .catchError((error, str) {
@@ -197,7 +243,4 @@ class CodelesslyWidgetController extends ChangeNotifier {
       });
     }
   }
-
-  bool hasLayoutModel(String layoutID) =>
-      publishModel?.layouts.containsKey(layoutID) ?? false;
 }

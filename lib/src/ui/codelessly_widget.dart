@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
@@ -8,15 +9,19 @@ import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
-import '../model/publish_source.dart';
 import 'codelessly_error_screen.dart';
 import 'codelessly_loading_screen.dart';
 import 'layout_builder.dart';
 
+/// Allows wrapping a loaded [Codelessly] layout with any widget for additional
+/// control over the rendering.
 typedef CodelesslyWidgetLayoutBuilder = Widget Function(
   BuildContext context,
   Widget layout,
 );
+
+/// Allows creation of a custom error screen for when a [Codelessly] layout
+/// fails to load.
 typedef CodelesslyWidgetErrorBuilder = Widget Function(
   BuildContext context,
   dynamic exception,
@@ -42,6 +47,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     notifyListeners();
   }
 
+  /// The passed ID of the layout to load.
   String? layoutID;
 
   /// A map of functions that is passed to loaded layouts for nodes to call when
@@ -59,6 +65,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   /// A map that holds the current state of all variables.
   final Map<String, ValueNotifier<VariableData>> variables;
 
+  /// A map that holds the current state of all conditions.
   final Map<String, BaseCondition> conditions;
 
   /// Creates a [CodelesslyContext] with the given [data], [functions], and
@@ -188,6 +195,8 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     }
   }
 
+  /// Returns a reverse-lookup of the [VariableData] associated with a given
+  /// [name].
   ValueNotifier<VariableData>? findVariableByName(String? name) =>
       variables.values
           .firstWhereOrNull((variable) => variable.value.name == name);
@@ -198,6 +207,8 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
 
 /// SDK widget that requires the SDK to be initialized beforehand.
 class CodelesslyWidget extends StatefulWidget {
+  /// An external [CodelesslyWidgetController] to use. If this is not provided,
+  /// an internal one will be created.
   final CodelesslyWidgetController? controller;
 
   /// The ID of the layout provided from your Codelessly dashboard.
@@ -319,6 +330,8 @@ class CodelesslyWidget extends StatefulWidget {
     // Data and functions.
     Map<String, dynamic> data = const {},
     Map<String, CodelesslyFunction> functions = const {},
+
+    // Additional parameters.
     this.codelesslyContext,
   })  : data = {...data},
         functions = {...functions},
@@ -400,7 +413,10 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     );
 
     if (widget.codelesslyContext != null) {
-      debugPrint('CodelesslyContext is provided explicitly by the widget.');
+      log(
+        '[CodelesslyWidget] A CodelesslyContext was provided explicitly by'
+        ' the widget.',
+      );
     }
 
     codelesslyContext = widget.codelesslyContext ??
@@ -482,7 +498,10 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   void dispose() {
     _controller?.dispose();
     _exceptionSubscription?.cancel();
-    codelesslyContext.dispose();
+
+    if (widget.codelesslyContext == null) {
+      codelesslyContext.dispose();
+    }
     super.dispose();
   }
 

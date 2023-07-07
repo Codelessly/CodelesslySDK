@@ -17,7 +17,7 @@ class AuthData with EquatableMixin {
   final String ownerId;
 
   /// Whether the project is published as template or not.
-  bool isTemplate;
+  final bool isTemplate;
 
   /// The issued timestamp of the authentication.
   /// The time the handshake was done that resulted in the successful
@@ -26,7 +26,7 @@ class AuthData with EquatableMixin {
   final DateTime timestamp;
 
   /// Creates a [AuthData] instance.
-  AuthData({
+  const AuthData({
     required this.authToken,
     required this.projectId,
     required this.ownerId,

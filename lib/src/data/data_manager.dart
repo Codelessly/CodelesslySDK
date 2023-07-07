@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import '../../codelessly_sdk.dart';
 import '../cache/codelessly_cache_manager.dart';
 import '../logging/error_handler.dart';
-import '../model/auth_data.dart';
 
 /// Orchestrates the data flow for the SDK.
 class DataManager {
@@ -37,15 +36,13 @@ class DataManager {
 
   SDKPublishModel? _publishModel;
 
-  /// The current publish model linked to the auth token provided by the
-  /// [authManager]
+  /// The current publish model loaded by this data manager.
   SDKPublishModel? get publishModel => _publishModel;
 
   StreamController<SDKPublishModel?> _publishModelStreamController =
       StreamController<SDKPublishModel?>.broadcast();
 
-  /// The stream of the current publish model linked to the auth token provided
-  /// by the [authManager].
+  /// The stream of the current publish model loaded by this data manager.
   ///
   /// This stream will emit whenever new publish model information is received.
   Stream<SDKPublishModel?> get publishModelStream =>
