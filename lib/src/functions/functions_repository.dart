@@ -140,7 +140,7 @@ class FunctionsRepository {
       final Codelessly codelessly = context.read<Codelessly>();
       // Check if a layout exists for the action's [destinationId].
       final String? layoutId = codelessly
-          .publishDataManager.publishModel?.layouts.values
+          .dataManager.publishModel?.layouts.values
           .firstWhereOrNull((layout) => layout.canvasId == action.destinationId)
           ?.id;
 

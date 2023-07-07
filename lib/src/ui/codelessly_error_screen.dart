@@ -107,12 +107,17 @@ class CodelesslyErrorScreen extends StatelessWidget {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Uh oh!', style: Theme.of(context).textTheme.titleLarge),
+                Text('Uh oh!',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.surface,
+                        )),
                 SizedBox(height: 16),
                 if (title != null) ...[
                   Text(
                     title,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.surface,
+                        ),
                   ),
                   SizedBox(height: 16),
                 ],
@@ -125,7 +130,9 @@ class CodelesslyErrorScreen extends StatelessWidget {
                     child: SelectableText(
                       message,
                       textAlign: TextAlign.left,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.surface,
+                          ),
                     ),
                   ),
                 ),
