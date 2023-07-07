@@ -20,6 +20,8 @@ class CodelesslyAuthManager extends AuthManager {
   /// it will be broad=casted to the stream.
   final StreamController<AuthData?> _authStreamController;
 
+  final String cloudFunctionsBaseURL;
+
   /// Creates a [CodelesslyAuthManager] instance.
   ///
   /// [config] is the configuration used to authenticate the token.
@@ -29,6 +31,7 @@ class CodelesslyAuthManager extends AuthManager {
   CodelesslyAuthManager({
     required this.config,
     required this.cacheManager,
+    this.cloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
   }) : _authStreamController = StreamController<AuthData?>.broadcast();
 
   /// The data provided after successful authentication.
@@ -120,7 +123,7 @@ class CodelesslyAuthManager extends AuthManager {
     try {
       log('[AuthManager] Authenticating token...');
       final Response result = await post(
-        Uri.parse('$firebaseCloudFunctionsBaseURL/verifyProjectAuthToken'),
+        Uri.parse('$cloudFunctionsBaseURL/verifyProjectAuthToken'),
         headers: <String, String>{
           'Content-Type': 'application/json',
           // 'Authorization ': 'Bearer ${config.authToken}',
