@@ -158,15 +158,16 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // Traverse through all the multi-variables that the node properties are attached
     // to.
     for (final String variablePath
-        in node.multipleVariables.values.expand((id) => id).toSet()) {
+        in node.multipleVariables.values.expand((path) => path).toSet()) {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
       if (match == null) continue;
 
       if (match.isPredefinedVariable) continue;
+      print('found multi variable path: ${match.name}');
 
       // Get corresponding variable data from codelessly context.
       final ValueNotifier<VariableData>? listenableVariable =
-          codelesslyContext.variables[match.name];
+          codelesslyContext.findVariableByName(match.name);
       // Add variable to [listenables].
       if (listenableVariable != null) listenables.add(listenableVariable);
     }
