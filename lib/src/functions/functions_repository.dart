@@ -189,12 +189,12 @@ class FunctionsRepository {
     required Map<String, String> headers,
     required Object? body,
     required BuildContext context,
+    bool useCloudFunctionForWeb = false,
   }) async {
     printApiDetails(method: method, url: url, headers: headers, body: body);
 
     final http.Response response;
-    if (kIsWeb) {
-      // TODO: Do we really wanna use our cloud function for this?
+    if (kIsWeb && useCloudFunctionForWeb) {
       final String cloudFunctionsURL =
           context.read<Codelessly>().config!.firebaseCloudFunctionsBaseURL;
       response = await makeApiRequestWeb(
