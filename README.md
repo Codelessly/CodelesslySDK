@@ -178,7 +178,7 @@ CodelesslyWidget(
 - `isPreview`: Whether the layout is in preview or production mode. Preview mode is meant for debugging the layout and syncs with the changes made in the editor. Widgets in production mode are only updated when published using the Publish button.
 - `config`: An optional `CodelesslyConfig` that holds the information required to authenticate your layout from the server.
 
-**Note:** Setting a `CodelesslyConfig` overrides the global project settings. This enables using layouts from other projects with different auth tokens and settings.
+**Note:** Setting a `CodelesslyConfig` on a CodelesslyWidget overrides the global Codelessly instance settings. This lets you embed layouts from other projects with different auth tokens.
 
 ## Configuring Environments
 
@@ -202,9 +202,9 @@ CodelesslyWidget(
 
 > Realtime UI updates - edits made in the Codelessly Editor are mirrored immediately to the app.
 
-When `isPreview` is set to true, the CodelesslyWidget will stream UI updates from the Codelessly Editor in realtime. Any edits to the UI in the editor will update in the app immediately. It's a pretty amazing feature, give it a try and let us know how you're using it!
+When `isPreview` is set to true, the CodelesslyWidget will stream UI updates from the Codelessly Editor in realtime. Any edits to the UI in the editor will update in the app immediately. We think this is a pretty amazing feature so give it a try!
 
-Use preview mode to quickly test UI and prototype. 
+Use preview mode to test and prototype UI quickly. 
 
 #### Flavor Support
 
