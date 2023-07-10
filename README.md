@@ -91,6 +91,95 @@ From dynamic forms to constantly changing sales and marketing pages, any design 
 
 To learn how to use the Codelessly editor to publish layouts, check out our [3-minute Quickstart Guide](https://app.gitbook.com/o/rXXdMMDhFOAfV2g6j8A1/s/x4NeiXalJWaOaV6tsK5f/getting-started/3-minute-quick-start).
 
+## Data
+
+Customize Codelessly CloudUI™ widgets by passing data into your layout. The UI will dynamically replace any variables defined in the Codelessly editor with the provided values.
+
+![Data](packages/ui_with_data_linking.png)
+
+**Step 1:** Use the `${}` templating syntax in input fields to link data from the Codelessly editor to layouts as shown below. 
+
+To link the title of a text widget to the `title` variable in the Codelessly editor, put `${data.title}` in the text widget’s text field.
+
+> The `data` object contains all the variables passed to the CodelesslyWidget. 
+>
+> Use `${data.title}` to access the `title` variable passed from the client. `${title}` alone is a Codelessly variable and will try to load variables defined in Codelessly, not your client.
+
+**Step 2:** Once this is set from the editor, you can provide the data to the layout from your app.
+
+```dart
+CodelesslyWidget(
+  layoutID: LAYOUT_ID,
+  data: {
+    'title': 'Fast Performance',
+    'description': 'Complete projects on time and easily with our APIs. Get blazing fast performance!',
+  },
+),
+```
+
+Here, `data` parameter is a map of type `Map<String, dynamic>` which is used to populate information in the layout UI where `data`
+variable is used from the Codelessly editor. The layout UI will automatically update to reflect the new data whenever
+the `data` is updated.
+
+This how it looks with populated data:
+
+![Data](packages/ui_with_populated_data.png)
+
+## Functions
+
+Codelessly SDK also supports providing callback functions for user actions such as onClick, onLongPress, etc.
+
+```dart
+CodelesslyWidget(
+  layoutID: LAYOUT_ID,
+  functions: {
+    'onNextButtonClicked': CodelesslyFunction((CodelesslyContext context) {
+      print('onNextButtonClicked function called');
+      // TODO: Implement your function here
+    }),
+  },
+),
+```
+The `functions` parameter takes a map of type `Map<String, CodelesslyFunction>` which is used to execute functions defined as action calls in the Codelessly editor.
+
+Here, we define an `onNextButtonClicked` function that can be invoked by the widget. Once a function is provided, it can be referenced by name in the Codelessly Editor.
+
+![Defining call function action](packages/defining_call_function_action.png)
+
+In the Codelessly Editor, you can easily add an Action to a widget. Use the `Call Function` action to invoke `onNextButtonClicked`.
+
+1. Switch to the `Develop` tab.
+2. Select a widget to open the `Actions` panel.
+2. Click on the `+` button to add a new action.
+3. Select `Call Function` from the list of actions.
+4. Click on the `Settings` button to bring up the `Action Settings` popup.
+5. Reference the function name in the `Function Name` field. For example, `onNextButtonClicked`.
+
+The `CodelesslyFunction` provides a `CodelesslyContext` which provides internal access to the widget's data, variables, conditions, functions, etc.
+
+**Note** You can declare `data` and `functions` in the global `Codelessly` instance to make them globally accessible to all `CodelesslyWidget`s.
+
+## CodelesslyWidget Customization
+
+```dart
+CodelesslyWidget(
+      layoutID: '0R0Qe7wgeAJMnj3MGW4l',
+      isPreview: kDebugMode,
+      config: const CodelesslyConfig(
+        authToken: 'LCVyNTxyLCVxQXh3WDc5MFowLjApQXJfWyNdSnlAQjphLyN1',
+      ),
+    )
+```
+
+- `layoutID`: The ID of the published canvas. The ID can be found in Quick Preview or under `Publish > Settings > Published Layouts`.
+
+![Codelessly Published Layout ID](packages/codelessly_published_layout_id.png)
+
+- `isPreview`: Whether the layout is in preview or production mode. Preview mode is meant for debugging the layout and syncs with the changes made in the editor. Widgets in production mode are only updated when published using the Publish button.
+- `config`: An optional `CodelesslyConfig` that holds the information required to authenticate your layout from the server.
+
+**Note:** Setting a `CodelesslyConfig` overrides the global project settings. This enables using layouts from other projects with different auth tokens and settings.
+
 ## Configuring Environments
 
 The CodelesslyWidget supports **Preview** and **Published** environments via the `isPreview` boolean.
@@ -138,107 +227,7 @@ This enables realtime updates on release devices in a test environment, excludin
 
 `isPreview` should be set to false for production environments to prevent the UI from changing. When running in Publish (aka Production) mode, UI changes must be explicitly published to update the UI. This makes working in the editor safe and prevents undesired changes from reaching end users.
 
-**Note:** You do not need to change layoutIDs from Preview to Production. Canvases have a single unique layoutID identifies itself in the system. Codelessly Servers automatically handles loading the correct layout from Preview or Production. 
-
-## CodelesslyWidget Customization
-
-```dart
-CodelesslyWidget(
-      layoutID: '0R0Qe7wgeAJMnj3MGW4l',
-      isPreview: kDebugMode,
-      config: const CodelesslyConfig(
-        authToken: 'LCVyNTxyLCVxQXh3WDc5MFowLjApQXJfWyNdSnlAQjphLyN1',
-      ),
-    )
-```
-
-- `layoutID`: The ID of the published canvas. The ID can be found in Quick Preview or under `Publish > Settings > Published Layouts`.
-
-![Codelessly Published Layout ID](packages/codelessly_published_layout_id.png)
-
-- `isPreview`: Whether the layout is in preview or production mode. Preview mode is meant for debugging the layout and syncs with the changes made in the editor. Widgets in production mode are only updated when published using the Publish button.
-- `config`: An optional `CodelesslyConfig` that holds the information required to authenticate your layout from the server.
-
-**Note:** Setting a `CodelesslyConfig` overrides the global project settings. This enables using layouts from other projects with different auth tokens and settings.
-
-## Data
-
-Customize remote UI by passing data into your layout. The UI will dynamically replace any variables defined in the Codelessly editor with the appropriate provided value.
-
-### Using data with UI
-
-![Data](packages/ui_with_data_linking.png)
-
-**Step 1:** Use the `${}` templating syntax in input fields to link data from the Codelessly editor to layouts as shown below. 
-
-To link the title of a text widget to the `title` variable in the Codelessly editor, put `${data.title}` in the text widget’s text field.
-
-> The `data` object contains all the variables passed to the CodelesslyWidget. 
->
-> Use `${data.title}` to access the `title` variable passed from the client. `${title}` alone is a Codelessly variable and will try to load variables defined in Codelessly, not your client.
-
-**Step 2:** Once this is set from the editor, you can provide the data to the layout from your app.
-
-```dart
-CodelesslyWidget(
-  layoutID: '<YOUR LAYOUT ID HERE>',
-  data: {
-    'title': 'Fast Performance',
-    'description': 'Complete projects on time and easily with our APIs. Get blazing fast performance!',
-  },
-),
-```
-
-Here, `data` parameter is a map of type `Map<String, dynamic>` which is used to populate information in the layout UI where `data`
-variable is used from the Codelessly editor. The layout UI will automatically update to reflect the new data whenever
-the `data` is updated.
-
-This how it looks with populated data:
-
-![Data](packages/ui_with_populated_data.png)
-
-## Functions
-
-Codelessly SDK also supports providing callback functions for user actions on the UI like onClick, onLongPress, etc.
-
-Use `Call Function` action to define an external function call for an action. For example, here, we are defining a
-function call for the `onClick` action of the `Button` widget.
-
-1. Select your button and navigate to `Develop` see bring up the `Actions` panel.
-2. Click on the `+` button to add a new action.
-3. Select `Call Function` from the list of actions.
-4. Click on the `Settings` button to bring up the `Action Settings` popup.
-5. Write a valid function name in the `Function Name` field. For example, `myFunction`.
-
-![Defining call function action](packages/defining_call_function_action.png)
-
-Here, we defined `onNextButtonClicked` function call action of the button widget when the button is clicked.
-Implementation for this `onNextButtonClicked` function callback can be provided in the `functions` parameter of the
-`CodelesslyWidget` as shown below.
-
-```dart
-CodelesslyWidget(
-  layoutID: 'YOUR LAYOUT ID HERE',
-  data: {
-    'title': 'Fast Performance',
-    'description': 'Complete projects on time and easily with our APIs. Get blazing fast performance!',
-  },
-  functions: {
-    'onNextButtonClicked': CodelesslyFunction((CodelesslyContext context) {
-      print('onNextButtonClicked function called');
-      // TODO: Implement your function here
-    }),
-  },
-),
-```
-
-Here, `functions` parameter takes a map of type `Map<String, CodelesslyFunction>` which is used to execute functions 
-defined as action calls in the Codelessly editor. This will be called when user clicks on the button. 
-
-The `CodelesslyFunction` takes in a `CodelesslyContext` which provides you the access to data, variables, conditions, 
-functions and much more.
-
-> Similarly, you can declare `data` and `functions` in the global `Codelessly` instance to make them globally accessible by all `CodelesslyWidget`s.
+**Note:** You do not need to change layoutIDs when switching from Preview to Production. Canvases have a single unique layoutID that the system uses to identify layouts with. Codelessly Servers will automatically handle loading the correct layout when moving from Preview to Production.
 
 ### Initializing the SDK
 There are several ways to initialize your `CodelesslyWidget`.
