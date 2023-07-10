@@ -191,8 +191,6 @@ class Codelessly {
     // Raw data.
     Map<String, dynamic>? data,
     Map<String, CodelesslyFunction>? functions,
-    String firebaseProjectId = defaultFirebaseProjectId,
-    String firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
   }) async {
     assert(
       (config == null) != (_instance._config == null),
@@ -213,13 +211,11 @@ class Codelessly {
         previewDataManager: previewDataManager,
         data: data,
         functions: functions,
-        firebaseProjectId: firebaseProjectId,
-        firebaseCloudFunctionsBaseURL: firebaseCloudFunctionsBaseURL,
       );
     } catch (error, stacktrace) {
       _instance._config ??= config;
       _instance.initErrorHandler(
-        firebaseProjectId: firebaseProjectId,
+        firebaseProjectId: _instance._config?.firebaseProjectId,
         automaticallySendCrashReports:
             (_instance._config?.automaticallyCollectCrashReports) ?? false,
       );
@@ -299,13 +295,11 @@ class Codelessly {
     AuthManager? authManager,
     DataManager? publishDataManager,
     DataManager? previewDataManager,
-    String firebaseProjectId = defaultFirebaseProjectId,
-    String firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
   }) {
     _config ??= config;
 
     initErrorHandler(
-      firebaseProjectId: firebaseProjectId,
+      firebaseProjectId: _config!.firebaseProjectId,
       automaticallySendCrashReports: _config!.automaticallyCollectCrashReports,
     );
 
@@ -351,8 +345,9 @@ class Codelessly {
   /// If the SDK is running on web platform, this will be ignored.
   void initErrorHandler({
     required bool automaticallySendCrashReports,
-    required String firebaseProjectId,
+    String? firebaseProjectId,
   }) {
+    firebaseProjectId ??= defaultFirebaseProjectId;
     if (!kIsWeb) {
       if (_firestore != null) return;
       log('[SDK] Initializing Firestore instance with project ID: $firebaseProjectId');
@@ -394,8 +389,6 @@ class Codelessly {
     DataManager? publishDataManager,
     DataManager? previewDataManager,
     bool initializeDataManagers = true,
-    String firebaseProjectId = defaultFirebaseProjectId,
-    String firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
   }) async {
     assert(
       (config == null) != (_config == null),
@@ -407,12 +400,13 @@ class Codelessly {
               '[Codelessly.dispose] before reinitializing.',
     );
 
-    log('Initializing Codelessly with project ID: $firebaseProjectId | '
-        'Cloud Functions Base URL: $firebaseCloudFunctionsBaseURL');
-
     _config ??= config;
+
+    log('[INIT] Initializing Codelessly with project ID: ${_config!.firebaseProjectId}');
+    log('[INIT] Cloud Functions Base URL: ${_config!.firebaseCloudFunctionsBaseURL}');
+
     initErrorHandler(
-      firebaseProjectId: firebaseProjectId,
+      firebaseProjectId: _config!.firebaseProjectId,
       automaticallySendCrashReports: _config!.automaticallyCollectCrashReports,
     );
     try {
@@ -429,9 +423,7 @@ class Codelessly {
       // Create the cache manager.
       _cacheManager = cacheManager ??
           _cacheManager ??
-          CodelesslyCacheManager(
-            config: _config!,
-          );
+          CodelesslyCacheManager(config: _config!);
 
       // Create the auth manager.
       _authManager = authManager ??
@@ -439,7 +431,6 @@ class Codelessly {
           CodelesslyAuthManager(
             config: _config!,
             cacheManager: this.cacheManager,
-            cloudFunctionsBaseURL: firebaseCloudFunctionsBaseURL,
           );
 
       // Create the publish data manager.
@@ -451,7 +442,8 @@ class Codelessly {
             authManager: this.authManager,
             networkDataRepository: kIsWeb
                 ? WebDataRepository(
-                    cloudFunctionsBaseURL: firebaseCloudFunctionsBaseURL,
+                    cloudFunctionsBaseURL:
+                        _config!.firebaseCloudFunctionsBaseURL,
                   )
                 : FirebaseDataRepository(firestore: firestore),
             localDataRepository:
@@ -467,7 +459,8 @@ class Codelessly {
             authManager: this.authManager,
             networkDataRepository: kIsWeb
                 ? WebDataRepository(
-                    cloudFunctionsBaseURL: firebaseCloudFunctionsBaseURL,
+                    cloudFunctionsBaseURL:
+                        _config!.firebaseCloudFunctionsBaseURL,
                   )
                 : FirebaseDataRepository(firestore: firestore),
             localDataRepository:
@@ -481,7 +474,9 @@ class Codelessly {
         cacheManager: this.cacheManager,
         authManager: this.authManager,
         networkDataRepository: kIsWeb
-            ? WebDataRepository()
+            ? WebDataRepository(
+                cloudFunctionsBaseURL: _config!.firebaseCloudFunctionsBaseURL,
+              )
             : FirebaseDataRepository(firestore: firestore),
         localDataRepository:
             LocalDataRepository(cacheManager: this.cacheManager),
@@ -572,8 +567,6 @@ class Codelessly {
     AuthManager? authManager,
     DataManager? publishDataManager,
     DataManager? previewDataManager,
-    String firebaseProjectId = defaultFirebaseProjectId,
-    String firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
   }) {
     return _instance.configure(
       config: config,
@@ -583,8 +576,6 @@ class Codelessly {
       previewDataManager: previewDataManager,
       data: data,
       functions: functions,
-      firebaseProjectId: firebaseProjectId,
-      firebaseCloudFunctionsBaseURL: firebaseCloudFunctionsBaseURL,
     );
   }
 }
