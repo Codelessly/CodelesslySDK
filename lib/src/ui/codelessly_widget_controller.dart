@@ -81,17 +81,6 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// Optionally, provide custom [authManager], [publishDataManager],
   /// [previewDataManager], and [cacheManager] instances for advanced control
   /// over the SDK's behavior.
-  /// The project ID of the Firebase project to use. This is used to
-  /// initialize Firebase.
-  ///
-  /// Note that if this is changed changed when widget is already initialized,
-  /// it will have no effect. Only the value provided when the widget is
-  /// initialized will be used.
-  final String firebaseProjectId;
-
-  /// Base URL of the Firebase Cloud Functions instance to use.
-  final String firebaseCloudFunctionsBaseURL;
-
   CodelesslyWidgetController({
     required this.layoutID,
     PublishSource? publishSource,
@@ -104,8 +93,6 @@ class CodelesslyWidgetController extends ChangeNotifier {
     this.publishDataManager,
     this.previewDataManager,
     this.cacheManager,
-    this.firebaseProjectId = defaultFirebaseProjectId,
-    this.firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
   })  : codelessly = codelessly ?? Codelessly.instance,
         config = config ?? (codelessly ?? Codelessly.instance).config {
     final codelessly = this.codelessly;
@@ -154,17 +141,11 @@ class CodelesslyWidgetController extends ChangeNotifier {
             publishDataManager: publishDataManager,
             previewDataManager: previewDataManager,
             cacheManager: cacheManager,
-            firebaseProjectId: firebaseProjectId,
-            firebaseCloudFunctionsBaseURL: firebaseCloudFunctionsBaseURL,
           );
         }
         status = codelessly.status;
         if (status == CodelesslyStatus.configured) {
-          codelessly.init(
-            initializeDataManagers: false,
-            firebaseProjectId: firebaseProjectId,
-            firebaseCloudFunctionsBaseURL: firebaseCloudFunctionsBaseURL,
-          );
+          codelessly.init(initializeDataManagers: false);
         }
       }
     } catch (exception, str) {
@@ -176,14 +157,12 @@ class CodelesslyWidgetController extends ChangeNotifier {
       // We need to handle them, and if the codelessly instance is not
       // configured yet, we need to initialize the error handler regardless.
       codelessly.initErrorHandler(
-        firebaseProjectId: firebaseProjectId,
+        firebaseProjectId: codelessly.config?.firebaseProjectId,
         automaticallySendCrashReports:
             codelessly.config?.automaticallyCollectCrashReports ?? false,
       );
-      CodelesslyErrorHandler.instance.captureException(
-        exception,
-        stacktrace: str,
-      );
+      CodelesslyErrorHandler.instance
+          .captureException(exception, stacktrace: str);
     }
 
     // First event.

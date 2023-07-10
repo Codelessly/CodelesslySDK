@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import 'constants.dart';
 import 'model/publish_source.dart';
 
 /// Holds initialization configuration options for the SDK.
@@ -32,6 +33,17 @@ class CodelesslyConfig with EquatableMixin {
   late PublishSource publishSource =
       isPreview ? PublishSource.preview : PublishSource.publish;
 
+  /// The project ID of the Firebase project to use. This is used to
+  /// initialize Firebase.
+  ///
+  /// Note that if this is changed changed when widget is already initialized,
+  /// it will have no effect. Only the value provided when the widget is
+  /// initialized will be used.
+  final String firebaseProjectId;
+
+  /// Base URL of the Firebase Cloud Functions instance to use.
+  final String firebaseCloudFunctionsBaseURL;
+
   /// Creates a new instance of [CodelesslyConfig].
   ///
   /// [authToken] is the token required to authenticate and initialize the SDK.
@@ -46,6 +58,8 @@ class CodelesslyConfig with EquatableMixin {
     this.automaticallyCollectCrashReports = true,
     this.isPreview = false,
     this.preload = true,
+    this.firebaseProjectId = defaultFirebaseProjectId,
+    this.firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
   });
 
   /// Creates a new instance of [CodelesslyConfig] with the provided optional
@@ -55,6 +69,8 @@ class CodelesslyConfig with EquatableMixin {
     bool? automaticallyCollectCrashReports,
     bool? isPreview,
     bool? preload,
+    String? firebaseProjectId,
+    String? firebaseCloudFunctionsBaseURL,
   }) =>
       CodelesslyConfig(
         authToken: authToken ?? this.authToken,
@@ -62,6 +78,9 @@ class CodelesslyConfig with EquatableMixin {
             this.automaticallyCollectCrashReports,
         isPreview: isPreview ?? this.isPreview,
         preload: preload ?? this.preload,
+        firebaseProjectId: firebaseProjectId ?? this.firebaseProjectId,
+        firebaseCloudFunctionsBaseURL:
+            firebaseCloudFunctionsBaseURL ?? this.firebaseCloudFunctionsBaseURL,
       );
 
   @override

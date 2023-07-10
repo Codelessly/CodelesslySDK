@@ -36,10 +36,6 @@ enum ApiRequestType {
 }
 
 class FunctionsRepository {
-  // TODO: URL should be environment specific.
-  static const String _firebaseCloudFunctionsBaseURL =
-      defaultFirebaseCloudFunctionsBaseURL;
-
   static void performAction(
     BuildContext context,
     ActionModel action, {
@@ -100,6 +96,7 @@ class FunctionsRepository {
     // TODO: Should we handle null case? We are just assuming the api always
     // exists.
     return makeApiRequest(
+      context: context,
       method: apiData.method,
       url: _applyApiInputs(apiData.url, action.parameters),
       headers: _generateMapFromPairs(apiData.headers, action.parameters),
@@ -191,13 +188,22 @@ class FunctionsRepository {
     required String url,
     required Map<String, String> headers,
     required Object? body,
+    required BuildContext context,
   }) async {
     printApiDetails(method: method, url: url, headers: headers, body: body);
 
     final http.Response response;
     if (kIsWeb) {
+      // TODO: Do we really wanna use our cloud function for this?
+      final String cloudFunctionsURL =
+          context.read<Codelessly>().config!.firebaseCloudFunctionsBaseURL;
       response = await makeApiRequestWeb(
-          method: method, url: url, headers: headers, body: body);
+        method: method,
+        url: url,
+        headers: headers,
+        body: body,
+        cloudFunctionsURL: cloudFunctionsURL,
+      );
     } else {
       final Uri uri = Uri.parse(url);
       switch (method) {
@@ -273,9 +279,10 @@ class FunctionsRepository {
     required String url,
     required Map<String, dynamic> headers,
     required Object? body,
+    required String cloudFunctionsURL,
   }) async {
     return http.post(
-      Uri.parse('$_firebaseCloudFunctionsBaseURL/makeApiRequest'),
+      Uri.parse('$cloudFunctionsURL/makeApiRequest'),
       headers: {'content-type': 'application/json'},
       body: jsonEncode({
         'url': url,
@@ -360,6 +367,7 @@ class FunctionsRepository {
     };
     // Submit data to Mailchimp.
     return makeApiRequest(
+      context: context,
       method: HttpMethod.post,
       url: url,
       headers: headers,
