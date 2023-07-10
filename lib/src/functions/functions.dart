@@ -1,9 +1,11 @@
+import 'package:flutter/widgets.dart';
+
 import '../../codelessly_sdk.dart';
 
 // typedef CodelesslyCallback<T> = T Function(CodelesslyContext reference);
 
 class CodelesslyFunction<T> {
-  final T Function(CodelesslyContext reference) call;
+  final T Function(BuildContext context, CodelesslyContext reference) call;
 
   CodelesslyFunction(this.call);
 }
