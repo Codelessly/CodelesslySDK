@@ -23,11 +23,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
-  assets:
-    - assets/Tofu.ttc
-
-  fonts:
-    - family: Tofu
-      fonts:
-        - asset: assets/Tofu.ttc
