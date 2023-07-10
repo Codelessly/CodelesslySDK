@@ -152,44 +152,30 @@ CodelesslyWidget(
     )
 ```
 
-CodelesslyWidget is a widget that renders the layout by utilizing the data of the canvas 
-you publish from the editor. It takes in the following parameters:
-1. `layoutID`: ID of the published canvas.
-2. `isPreview`: Whether the layout is in preview or production mode. Preview mode is meant 
-for debugging the layout and syncs with the changes made in the editor. Widgets in 
-production mode do not sync and are only updated when explicitly published using the 
-Publish button.
-3. `config`: It takes an instance of `CodelesslyConfig` that holds the information required 
-to fetch the canvas data from the server. `authToken` is required while other parameters 
-are optional.
+- `layoutID`: The ID of the published canvas. The ID can be found in Quick Preview or under `Publish > Settings > Published Layouts`.
 
-The CodelesslyWidget is a widget that renders a layout by accessing its associated canvas that you publish from the Codelessly editor. It takes the following parameters:
+![Codelessly Published Layout ID](packages/codelessly_published_layout_id.png)
 
-* `layoutID`: The ID of the published canvas. You can retrieve this from the Codelessly editor’s published layouts menu.
-* `isPreview`: Whether the layout is in preview or production mode. Preview mode is meant for debugging the layout and syncs with the changes made in the editor. Widgets in production mode do not sync and are only updated when explicitly published using the Publish button.
-* `config`: An optional `CodelesslyConfig` that holds the information required to authenticate your layout from the server. `authToken` is required while other parameters are optional. You can retrieve this from the Codelessly editor’s publish settings menu.
+- `isPreview`: Whether the layout is in preview or production mode. Preview mode is meant for debugging the layout and syncs with the changes made in the editor. Widgets in production mode are only updated when published using the Publish button.
+- `config`: An optional `CodelesslyConfig` that holds the information required to authenticate your layout from the server.
 
-> The `config` parameter may be required depending on how you configure your CodelesslyWidget. Please read below for more information.
+**Note:** Setting a `CodelesslyConfig` overrides the global project settings. This enables using layouts from other projects with different auth tokens and settings.
 
-## Data & Functions
+## Data
 
-You can provide custom **data** and **functions** dynamically to your layout. The UI will dynamically replace any 
-variables defined in the Codelessly editor with the appropriate provided value.
+Customize remote UI by passing data into your layout. The UI will dynamically replace any variables defined in the Codelessly editor with the appropriate provided value.
 
 ### Using data with UI
 
-**Step 1:** Use `${}` syntax in input fields to link data from the Codelessly editor to your layout as shown below. 
-
-For example, if you want to link the title of a text widget to the `title` variable in the Codelessly editor, you 
-would use `${title}` in the text widget’s text field.
-
-> `${}` must start with `data` to access the data variable. For example, `${data.title}`.
-> `data` is one the predefined variables available in the Codelessly editor.
-
 ![Data](packages/ui_with_data_linking.png)
 
-> Green color indicates that the variable placeholder syntax is valid. Red color indicates that the variable
-> placeholder syntax is invalid.
+**Step 1:** Use the `${}` templating syntax in input fields to link data from the Codelessly editor to layouts as shown below. 
+
+To link the title of a text widget to the `title` variable in the Codelessly editor, put `${data.title}` in the text widget’s text field.
+
+> The `data` object contains all the variables passed to the CodelesslyWidget. 
+>
+> Use `${data.title}` to access the `title` variable passed from the client. `${title}` alone is a Codelessly variable and will try to load variables defined in Codelessly, not your client.
 
 **Step 2:** Once this is set from the editor, you can provide the data to the layout from your app.
 
@@ -207,11 +193,11 @@ Here, `data` parameter is a map of type `Map<String, dynamic>` which is used to 
 variable is used from the Codelessly editor. The layout UI will automatically update to reflect the new data whenever
 the `data` is updated.
 
-This how it would look like with populated data:
+This how it looks with populated data:
 
 ![Data](packages/ui_with_populated_data.png)
 
-### Using functions
+## Functions
 
 Codelessly SDK also supports providing callback functions for user actions on the UI like onClick, onLongPress, etc.
 
