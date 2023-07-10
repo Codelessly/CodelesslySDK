@@ -11,7 +11,7 @@ abstract class AuthManager {
   AuthData? get authData;
 
   /// Returns the stream of the auth data. Any changes to it will be
-  /// broad0casted to the stream.
+  /// broadcast to the stream.
   Stream<AuthData?> get authStream;
 
   /// Returns the [PublishSource] to be used for fetching the published model.
