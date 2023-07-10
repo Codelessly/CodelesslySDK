@@ -27,22 +27,37 @@ class MyStoryBookApp extends StatelessWidget {
           Story(
             name: 'Hello World',
             description: 'A simple hello world demo.',
-            builder: (context) => CodelesslyWidget(
-              layoutID: "0R0PZ0qWewZyKqYrSjNq",
+            builder: (context) => MaterialApp(
+              theme: Theme.of(context),
+              home: Center(
+                child: CodelesslyWidget(
+                  layoutID: "0R0PZ0qWewZyKqYrSjNq",
+                ),
+              ),
             ),
           ),
           Story(
             name: 'License UI',
             description: "Demo of Codelessly's license UI.",
-            builder: (context) => CodelesslyWidget(
-              layoutID: "0R0PYsM6kNpkBMr93LS7",
+            builder: (context) => MaterialApp(
+              theme: Theme.of(context),
+              home: Center(
+                child: CodelesslyWidget(
+                  layoutID: "0R0PYsM6kNpkBMr93LS7",
+                ),
+              ),
             ),
           ),
           Story(
             name: 'Pricing UI',
             description: "Demo of Codelessly's pricing UI.",
-            builder: (context) => CodelesslyWidget(
-              layoutID: "0R0QijsF87BJvWfbiezE",
+            builder: (context) => MaterialApp(
+              theme: Theme.of(context),
+              home: Center(
+                child: CodelesslyWidget(
+                  layoutID: "0R0QijsF87BJvWfbiezE",
+                ),
+              ),
             ),
           ),
         ],
