@@ -612,6 +612,6 @@ class FunctionsRepository {
         context.read<CodelesslyContext>();
     final CodelesslyFunction? function =
         codelesslyContext.functions[action.name];
-    function?.call(codelesslyContext);
+    function?.call(context, codelesslyContext);
   }
 }
