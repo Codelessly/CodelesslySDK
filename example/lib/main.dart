@@ -16,8 +16,15 @@ void main() async {
   runApp(const MyStoryBookApp());
 }
 
-class MyStoryBookApp extends StatelessWidget {
+class MyStoryBookApp extends StatefulWidget {
   const MyStoryBookApp({super.key});
+
+  @override
+  State<MyStoryBookApp> createState() => _MyStoryBookAppState();
+}
+
+class _MyStoryBookAppState extends State<MyStoryBookApp> {
+  Map<String, dynamic> licenseData = {'license': 'FREE'};
 
   @override
   Widget build(BuildContext context) => Storybook(
@@ -44,6 +51,21 @@ class MyStoryBookApp extends StatelessWidget {
               home: Center(
                 child: CodelesslyWidget(
                   layoutID: "0R0PYsM6kNpkBMr93LS7",
+                  data: licenseData,
+                  functions: {
+                    'onFreeSelected': CodelesslyFunction((ref) {
+                      licenseData['license'] = 'FREE';
+                      setState(() {});
+                    }),
+                    'onProSelected': CodelesslyFunction((ref) {
+                      licenseData['license'] = 'PRO';
+                      setState(() {});
+                    }),
+                    'onBusinessSelected': CodelesslyFunction((ref) {
+                      licenseData['license'] = 'BUSINESS';
+                      setState(() {});
+                    }),
+                  },
                 ),
               ),
             ),
