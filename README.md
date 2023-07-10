@@ -31,10 +31,10 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize SDK.
-  Codelessly.initialize(
+  Codelessly.instance.initialize(
     config: const CodelesslyConfig(
       authToken: AUTH_TOKEN,
-      isPreview: kIsDebug,
+      isPreview: kDebugMode,
     ),
   );
 
@@ -186,7 +186,7 @@ The CodelesslyWidget supports **Preview** and **Published** environments via the
 
 ```dart
 // Global config.
-Codelessly.initialize(
+Codelessly.instance.initialize(
   config: const CodelesslyConfig(
     isPreview: true,
   ),
@@ -212,7 +212,7 @@ A common request is to enable Preview mode in QA environments to support updatin
 
 ```dart
 // Global config.
-Codelessly.initialize(
+Codelessly.instance.initialize(
   config: const CodelesslyConfig(
     isPreview: FlavorConfig.flavor != "prod",
   ),
@@ -229,30 +229,40 @@ This enables realtime updates on release devices in a test environment, excludin
 
 **Note:** You do not need to change layoutIDs when switching from Preview to Production. Canvases have a single unique layoutID that the system uses to identify layouts with. Codelessly Servers will automatically handle loading the correct layout when moving from Preview to Production.
 
+## Configuration Options
+
 ### CodelesslyConfig
 
-The CodelesslyConfig provides you with additional configuration capabilities to the SDK.
-
-* `isPreview`: Globally enable or disable preview-mode from the SDK.
-* `preload`: Determines if the SDK should preload all of the published layouts of a given Codelessly project. This allows you to provision your entire project ahead of time instead of lazily as `CodelesslyWidget`s render into view and individually download their data.
-* `automaticallyCollectCrashReports`: By default, any crashes or errors are sent to Codelessly’s servers for analysis. You can optionally disable this behavior.
-
-### Customize Initialization
-
-Initialization method `initialize` takes in several parameters to provide complete flexibility. For example, you 
-can declare config in this method to make it the default configuration of all 
-`CodelesslyWidget`s, unless overridden.
-
 ```dart
-Codelessly.initialize(
-  config: const CodelesslyConfig(
-    authToken: authToken,
-    isPreview: kIsDebug,
+Codelessly.instance.initialize(
+  config: CodelesslyConfig(
+    authToken: AUTH_TOKEN,
+    isPreview: kDebugMode,
+    preload: true,
+    automaticallyCollectCrashReports: true,
   ),
 );
 ```
 
-Similarly, you can declare `data` and `functions` to make them globally accessible.
+CodelesslyConfig supports the following configuration capabilities.
+
+* `isPreview`: Global enable or disable preview-mode setting.
+* `preload`: Preload layouts to improve performance. When layouts are preloaded, they load instantly and behave like local widgets. `true` by default.
+* `automaticallyCollectCrashReports`: Report SDK crashes to Codelessly. `true` by default. You can optionally disable this behavior.
+
+### Global Data and Functions
+
+Data and functions registered in the global `Codelessly.instance` are available to all CodelesslyWidgets.
+
+```dart
+Codelessly.instance.initialize(
+  data: {'username': 'Sample User', 'paid': false},
+  functions: {
+    'openPurchasePage': CodelesslyFunction(
+      (context) => Navigator.pushNamed(context, "PurchasePage")),
+  },
+);
+```
 
 ## Demo
 ### [CodelesslyGPT](https://sdk-chat-bot.web.app/#/)
