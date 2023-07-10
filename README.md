@@ -41,22 +41,19 @@ void main() {
   runApp(const MyApp());
 }
 ```
-- `authToken`: Can be found for each project under `Publish > Settings > Settings`.
-- `isPreview`: Whether the layout is in preview or production mode. Preview mode is meant for debugging the layout and syncs with the changes made in the editor. Widgets in production mode do not sync and are only updated when explicitly published using the Publish button.
+The `authToken`can be found for each project under `Publish > Settings > Settings`.
 
 Information on customizing SDK initialization can be found later in the documentation.
 
-#### Step 3: Get a Layout ID
+#### Step 3: Get a Layout ID from the Codelessly Editor
 
-Use `CodelesslyWidget` to enable your app to update its UI over the air.
+Easily embed a design from the Codelessly Editor into your app with a `layoutID`. The `CodelesslyWidget` enables your app to update its UI over the air.
 
 ```dart
 CodelesslyWidget(
   layoutID: LAYOUT_ID,
 )
 ```
-
-Any design or layout can be streamed directly from the Codelessly Editor to your app via the `CodelesslyWidget` with a `layoutID`. 
 
 1. In the Codelessly Editor, select the **canvas** of your layout.
 2. Press the **Preview Icon** in the toolbar. ![CloudUI Preview Icon](packages/preview_icon.png)
@@ -66,9 +63,9 @@ Any design or layout can be streamed directly from the Codelessly Editor to your
 
 Refer to the later sections for how to pass variables and functions to the CodelesslyWidget.
 
-#### Step 4: Embed the CodelesslyWidget
+#### Full Example: Putting it All Together
 
-The `CodelesslyWidget` can be used like any other widget and embedded anywhere in your app. It can even be used to render entire pages as the root widget.
+The `CodelesslyWidget` can be used like any other widget and embedded anywhere in your app. It can even be used to render entire pages as the root widget!
 
 Here is a complete example:
 
@@ -90,9 +87,70 @@ class MyApp extends StatelessWidget {
 }
 ```
 
+From dynamic forms to constantly changing sales and marketing pages, any design or layout can be streamed to your app via the `CodelesslyWidget`. 
+
 To learn how to use the Codelessly editor to publish layouts, check out our [3-minute Quickstart Guide](https://app.gitbook.com/o/rXXdMMDhFOAfV2g6j8A1/s/x4NeiXalJWaOaV6tsK5f/getting-started/3-minute-quick-start).
 
-### CodelesslyWidget
+## Configuring Environments
+
+The CodelesslyWidget supports **Preview** and **Published** environments via the `isPreview` boolean.
+
+```dart
+// Global config.
+Codelessly.initialize(
+  config: const CodelesslyConfig(
+    isPreview: true,
+  ),
+);
+
+// Widget level. Overrides global settings for this widget.
+CodelesslyWidget(
+  isPreview: true
+)
+```
+
+### Preview Mode
+
+> Realtime UI updates - edits made in the Codelessly Editor are mirrored immediately to the app.
+
+When `isPreview` is set to true, the CodelesslyWidget will stream UI updates from the Codelessly Editor in realtime. Any edits to the UI in the editor will update in the app immediately. It's a pretty amazing feature, give it a try and let us know how you're using it!
+
+Use preview mode to quickly test UI and prototype. 
+
+#### Flavor Support
+
+A common request is to enable Preview mode in QA environments to support updating the UI on test user's devices. That can be done by setting the `isPreview` value based on the flavor or runtime environment.
+
+```dart
+// Global config.
+Codelessly.initialize(
+  config: const CodelesslyConfig(
+    isPreview: FlavorConfig.flavor != "prod",
+  ),
+);
+```
+
+This enables realtime updates on release devices in a test environment, excluding production.
+
+### Production Mode
+
+> Publish UIs with absolute control over updates and versioning.
+
+`isPreview` should be set to false for production environments to prevent the UI from changing. When running in Publish (aka Production) mode, UI changes must be explicitly published to update the UI. This makes working in the editor safe and prevents undesired changes from reaching end users.
+
+**Note:** You do not need to change layoutIDs from Preview to Production. Canvases have a single unique layoutID identifies itself in the system. Codelessly Servers automatically handles loading the correct layout from Preview or Production. 
+
+## CodelesslyWidget Customization
+
+```dart
+CodelesslyWidget(
+      layoutID: '0R0Qe7wgeAJMnj3MGW4l',
+      isPreview: kDebugMode,
+      config: const CodelesslyConfig(
+        authToken: 'LCVyNTxyLCVxQXh3WDc5MFowLjApQXJfWyNdSnlAQjphLyN1',
+      ),
+    )
+```
 
 CodelesslyWidget is a widget that renders the layout by utilizing the data of the canvas 
 you publish from the editor. It takes in the following parameters:
@@ -105,31 +163,6 @@ Publish button.
 to fetch the canvas data from the server. `authToken` is required while other parameters 
 are optional.
 
-### Customize Initialization
-
-Initialization method `initialize` takes in several parameters to provide complete flexibility. For example, you 
-can declare config in this method to make it the default configuration of all 
-`CodelesslyWidget`s, unless overridden.
-
-```dart
-Codelessly.initialize(
-  config: const CodelesslyConfig(
-    authToken: authToken,
-    isPreview: kIsDebug,
-  ),
-);
-```
-
-Similarly, you can declare `data` and `functions` to make them globally accessible.
-
-## Demo
-### [CodelesslyGPT](https://sdk-chat-bot.web.app/#/)
-A demo chat-bot interface built with the Codelessly SDK. [View Code](https://github.com/Codelessly/CodelesslySDK/tree/main/example_chat_bot)
-
-## Customization
-
-### The CodelesslyWidget
-
 The CodelesslyWidget is a widget that renders a layout by accessing its associated canvas that you publish from the Codelessly editor. It takes the following parameters:
 
 * `layoutID`: The ID of the published canvas. You can retrieve this from the Codelessly editor’s published layouts menu.
@@ -137,87 +170,6 @@ The CodelesslyWidget is a widget that renders a layout by accessing its associat
 * `config`: An optional `CodelesslyConfig` that holds the information required to authenticate your layout from the server. `authToken` is required while other parameters are optional. You can retrieve this from the Codelessly editor’s publish settings menu.
 
 > The `config` parameter may be required depending on how you configure your CodelesslyWidget. Please read below for more information.
-
-### Initializing the SDK
-There are several ways to initialize your `CodelesslyWidget`.
-
-#### Method #1: Lazy Initialization using the CodelesslyWidget
-The simplest method is to directly use the `CodelesslyWidget` and allow it to initialize itself automatically when it
-comes into view in your widget tree. If you use this method, you **must** provide the `authToken` in a 
-`CodelesslyConfig` in the `config` constructor parameter of the `CodelesslyWidget`.
-
-```dart
-import 'package:codelessly_sdk/codelessly_sdk.dart';
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Codelessly SDK Example',
-      home: CodelesslyWidget(
-        layoutID: 'YOUR LAYOUT ID HERE',
-        config: const CodelesslyConfig(
-          authToken: 'YOUR AUTH TOKEN HERE',
-        ),
-      ),
-    );
-  }
-}
-```
-
-The global `Codelessly` instance will be configured for you automatically using this method. The first time you load 
-data, you may see an empty loading state while the SDK attempts to download all the necessary information; 
-subsequent attempts will be instantaneous as the caching system kicks in.
-
-> Subsequent attempts should be instantaneous as the caching system kicks in.
-
-#### Method #2: Preemptive Initialization using the Codelessly global instance
-
-To initialize the SDK before rendering any `CodelesslyWidget`, perform the initialization through the global 
-`Codelessly` instance. To do this, Simply call the `Codelessly.initialize` method before you render any 
-`CodelesslyWidget`. Ideally, call it in the `main` method.
-
-```dart
-import 'package:codelessly_sdk/codelessly_sdk.dart';
-
-void main() async {
-  await Codelessly.initialize(
-    config: const CodelesslyConfig(
-      authToken:'YOUR AUTH TOKEN HERE',
-    ),
-  );
-
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Codelessly SDK Example',
-      home: CodelesslyWidget(
-        layoutID: 'YOUR LAYOUT ID HERE',
-      ),
-    );
-  }
-}
-```
-
-The `Codelessly.initialize()` method takes in several parameters to provide more  flexibility and control. 
-For example, you can declare your `CodelesslyConfig` in this method to make it the default configuration of all 
-`CodelesslyWidget`s, unless explicitly overridden.
-
-### CodelesslyConfig
-
-The CodelesslyConfig provides you with additional configuration capabilities to the SDK.
-
-* `isPreview`: Globally enable or disable preview-mode from the SDK.
-* `preload`: Determines if the SDK should preload all of the published layouts of a given Codelessly project. This allows you to provision your entire project ahead of time instead of lazily as `CodelesslyWidget`s render into view and individually download their data.
-* `automaticallyCollectCrashReports`: By default, any crashes or errors are sent to Codelessly’s servers for analysis. You can optionally disable this behavior.
 
 ## Data & Functions
 
@@ -302,8 +254,110 @@ functions and much more.
 
 > Similarly, you can declare `data` and `functions` in the global `Codelessly` instance to make them globally accessible by all `CodelesslyWidget`s.
 
+### Initializing the SDK
+There are several ways to initialize your `CodelesslyWidget`.
+
+#### Method #1: Lazy Initialization using the CodelesslyWidget
+The simplest method is to directly use the `CodelesslyWidget` and allow it to initialize itself automatically when it
+comes into view in your widget tree. If you use this method, you **must** provide the `authToken` in a 
+`CodelesslyConfig` in the `config` constructor parameter of the `CodelesslyWidget`.
+
+```dart
+import 'package:codelessly_sdk/codelessly_sdk.dart';
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Codelessly SDK Example',
+      home: CodelesslyWidget(
+        layoutID: 'YOUR LAYOUT ID HERE',
+        config: const CodelesslyConfig(
+          authToken: 'YOUR AUTH TOKEN HERE',
+        ),
+      ),
+    );
+  }
+}
+```
+
+The global `Codelessly` instance will be configured for you automatically using this method. The first time you load 
+data, you may see an empty loading state while the SDK attempts to download all the necessary information; 
+subsequent attempts will be instantaneous as the caching system kicks in.
+
+> Subsequent attempts should be instantaneous as the caching system kicks in.
+
+#### Method #2: Preemptive Initialization using the Codelessly global instance
+
+To initialize the SDK before rendering any `CodelesslyWidget`, perform the initialization through the global 
+`Codelessly` instance. To do this, Simply call the `Codelessly.initialize` method before you render any 
+`CodelesslyWidget`. Ideally, call it in the `main` method.
+
+```dart
+import 'package:codelessly_sdk/codelessly_sdk.dart';
+
+void main() async {
+  await Codelessly.initialize(
+    config: const CodelesslyConfig(
+      authToken:'YOUR AUTH TOKEN HERE',
+    ),
+  );
+
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Codelessly SDK Example',
+      home: CodelesslyWidget(
+        layoutID: 'YOUR LAYOUT ID HERE',
+      ),
+    );
+  }
+}
+```
+
+The `Codelessly.initialize()` method takes in several parameters to provide more  flexibility and control. 
+For example, you can declare your `CodelesslyConfig` in this method to make it the default configuration of all 
+`CodelesslyWidget`s, unless explicitly overridden.
+
+### CodelesslyConfig
+
+The CodelesslyConfig provides you with additional configuration capabilities to the SDK.
+
+* `isPreview`: Globally enable or disable preview-mode from the SDK.
+* `preload`: Determines if the SDK should preload all of the published layouts of a given Codelessly project. This allows you to provision your entire project ahead of time instead of lazily as `CodelesslyWidget`s render into view and individually download their data.
+* `automaticallyCollectCrashReports`: By default, any crashes or errors are sent to Codelessly’s servers for analysis. You can optionally disable this behavior.
+
+### Customize Initialization
+
+Initialization method `initialize` takes in several parameters to provide complete flexibility. For example, you 
+can declare config in this method to make it the default configuration of all 
+`CodelesslyWidget`s, unless overridden.
+
+```dart
+Codelessly.initialize(
+  config: const CodelesslyConfig(
+    authToken: authToken,
+    isPreview: kIsDebug,
+  ),
+);
+```
+
+Similarly, you can declare `data` and `functions` to make them globally accessible.
+
+## Demo
+### [CodelesslyGPT](https://sdk-chat-bot.web.app/#/)
+A demo chat-bot interface built with the Codelessly SDK. [View Code](https://github.com/Codelessly/CodelesslySDK/tree/main/example_chat_bot)
+
 ## Additional Resources
-Please find additional tutorials at our [documentation](https://app.gitbook.com/o/rXXdMMDhFOAfV2g6j8A1/s/x4NeiXalJWaOaV6tsK5f/getting-started/3-minute-quick-start).
+Additional resources and tutorials are on our [documentation website](https://app.gitbook.com/o/rXXdMMDhFOAfV2g6j8A1/s/x4NeiXalJWaOaV6tsK5f/getting-started/3-minute-quick-start).
 
 If you have any questions or run into any issues, please open an issue or email us at [codelessly@gmail.com](mailto:codelessly@gmail.com).
 
