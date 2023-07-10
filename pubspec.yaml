@@ -18,11 +18,11 @@ platforms:
 dependencies:
   flutter:
     sdk: flutter
-  codelessly_api: ^0.0.5
+  codelessly_api: 0.0.6
   equatable: ^2.0.5
   google_fonts: ^5.1.0
   json_annotation: ^4.8.1
-  url_launcher: ^6.1.11
+  url_launcher: ^6.1.12
   collection: '>=1.17.0 <2.0.0'
   http: '>=0.13.0 <2.0.0'
   intl: '>=0.17.0 <1.0.0'
