@@ -1,4 +1,5 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:storybook_flutter/storybook_flutter.dart';
 
@@ -8,8 +9,7 @@ void main() async {
   Codelessly.instance.initialize(
     config: CodelesslyConfig(
       authToken: "fC9IZE0jL2kzME03bXEwIzE+LD04Z093ci1xMTJaJjMlI3hT",
-      isPreview: false,
-      automaticallyCollectCrashReports: false,
+      isPreview: kDebugMode,
     ),
   );
 
