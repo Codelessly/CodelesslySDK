@@ -35,7 +35,15 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
 
     if (visible) return widget;
 
-    return Visibility(visible: visible, child: widget);
+    return Visibility(
+      visible: visible,
+      maintainState: true,
+      maintainAnimation: true,
+      maintainSize: true,
+      maintainSemantics: false,
+      maintainInteractivity: false,
+      child: widget,
+    );
   }
 
   /// Convenience method to handle widget rotation.
