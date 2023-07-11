@@ -43,10 +43,22 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
                 settings: settings)
             : null);
 
+    if (node.isScrollable) {
+      body = SingleChildScrollView(
+        scrollDirection: node.scrollDirection.flutterAxis,
+        reverse: node.reverse,
+        primary: node.primary,
+        physics: node.physics.flutterScrollPhysics,
+        keyboardDismissBehavior:
+            node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+        child: body,
+      );
+    }
+
     if (node.scaleMode == ScaleMode.autoScale) {
       final double screenWidth = MediaQuery.of(context).size.width;
-      final double screenHeight = MediaQuery.of(context).size.height;
       final double canvasWidth = node.outerBoxLocal.width;
+      final double canvasHeight = node.outerBoxLocal.height;
       final double viewRatio = screenWidth / canvasWidth;
 
       // If the width of this canvas is smaller than the viewport's size,
@@ -57,21 +69,9 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         alignment: Alignment.topCenter,
         child: SizedBox(
           width: viewRatio < 1 ? canvasWidth : screenWidth,
-          height: screenHeight,
+          height: canvasHeight,
           child: body,
         ),
-      );
-    }
-
-    if (node.isScrollable) {
-      body = SingleChildScrollView(
-        scrollDirection: node.scrollDirection.flutterAxis,
-        reverse: node.reverse,
-        primary: node.primary,
-        physics: node.physics.flutterScrollPhysics,
-        keyboardDismissBehavior:
-            node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-        child: body,
       );
     }
 
