@@ -8,7 +8,7 @@ void main() async {
 
   Codelessly.instance.initialize(
     config: CodelesslyConfig(
-      authToken: "fC9IZE0jL2kzME03bXEwIzE+LD04Z093ci1xMTJaJjMlI3hT",
+      authToken: "cSlMIT93cj1lXkBuYk5QNmImSTUsTHw2MDQ4VkdlOCZFLHc7",
       isPreview: kDebugMode,
     ),
   );
@@ -38,7 +38,7 @@ class _MyStoryBookAppState extends State<MyStoryBookApp> {
               theme: Theme.of(context),
               home: Center(
                 child: CodelesslyWidget(
-                  layoutID: "0R0PZ0qWewZyKqYrSjNq",
+                  layoutID: "0R0yB82iCD4RPZMZYOYZ",
                 ),
               ),
             ),
@@ -50,7 +50,7 @@ class _MyStoryBookAppState extends State<MyStoryBookApp> {
               theme: Theme.of(context),
               home: Center(
                 child: CodelesslyWidget(
-                  layoutID: "0R0PYsM6kNpkBMr93LS7",
+                  layoutID: "0R0yeUx1iGDe9kgW5xwn",
                   data: licenseData,
                   functions: {
                     'onFreeSelected': CodelesslyFunction((context, ref) {
@@ -77,7 +77,7 @@ class _MyStoryBookAppState extends State<MyStoryBookApp> {
               theme: Theme.of(context),
               home: Center(
                 child: CodelesslyWidget(
-                  layoutID: "0R0QijsF87BJvWfbiezE",
+                  layoutID: "0R0yedXWbqOrI_W7PBlo",
                 ),
               ),
             ),

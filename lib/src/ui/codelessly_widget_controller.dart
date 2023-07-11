@@ -228,7 +228,11 @@ class CodelesslyWidgetController extends ChangeNotifier {
     } else {
       log(
         '[CodelesslyWidgetController] [$layoutID]: requesting layout from'
-        ' data manager with a publish source of $publishSource.',
+        ' data manager.',
+      );
+      log(
+        '[CodelesslyWidgetController] [$layoutID]: Using publish source'
+        ' $publishSource.',
       );
       dataManager
           .getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID)
