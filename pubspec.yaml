@@ -29,7 +29,7 @@ dependencies:
   universal_html: ^2.2.3
   webview_flutter: ^4.2.2
   webview_flutter_android: ^3.8.2
-  webview_flutter_wkwebview: ^3.6.2
+  webview_flutter_wkwebview: ^3.6.3
   flutter_animation_progress_bar: ^2.3.1
   vector_math: ^2.1.4
   grpc: ^3.2.2
