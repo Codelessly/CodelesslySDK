@@ -1,8 +1,11 @@
+## 0.0.6
+- Update visibility rendering.
+
 ## 0.0.5
 - Update CodelesslyAPI v0.0.5.
 - Fix image rendering.
 - Fix layout loading with conditions.
-- Revamp example app.\
+- Revamp example app.
 - Fix multi-variables not being registered.
 - Fix auto-scale rendering.
 - Provide BuildContext as a parameter for `CodelesslyFunction`.
