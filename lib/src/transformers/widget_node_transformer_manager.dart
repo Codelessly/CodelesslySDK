@@ -28,7 +28,11 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
 
   /// Convenience method to handle widget visibility.
   Widget applyWidgetVisibility(
-      BuildContext context, BaseNode node, Widget widget) {
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    required bool maintainState,
+  }) {
     final bool visible = PropertyValueDelegate.getPropertyValue<bool>(
             context, node, 'visible') ??
         node.visible;
@@ -37,11 +41,11 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
 
     return Visibility(
       visible: visible,
-      maintainState: true,
-      maintainAnimation: true,
-      maintainSize: true,
-      maintainSemantics: false,
-      maintainInteractivity: false,
+      maintainState: maintainState,
+      maintainAnimation: maintainState,
+      maintainSize: maintainState,
+      maintainSemantics: maintainState,
+      maintainInteractivity: maintainState,
       child: widget,
     );
   }

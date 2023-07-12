@@ -103,7 +103,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           widget = applyWidgetMargins(node, widget);
         }
         if (settings.withVisibility) {
-          widget = applyWidgetVisibility(context, node, widget);
+          widget = applyWidgetVisibility(
+            context,
+            node,
+            widget,
+            maintainState: false,
+          );
         }
 
         return widget;
