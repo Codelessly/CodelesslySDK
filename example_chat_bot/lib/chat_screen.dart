@@ -11,9 +11,9 @@ import 'background_painter.dart';
 import 'constants.dart';
 
 const layouts = [
-  '0Qtp7dkhQckYLmx_whEJ',
-  '0Qtp7dkhPXSKQbsi4hCy',
-  '0Qtp7dkhzcgzDP6OAcUX',
+  '0R0bRontTC4rlrlzOIkq',
+  '0R0bRone19zPAwRqCg01',
+  '0R0bRonmXXXD1NgH7HyS',
 ];
 
 const prompts = [
@@ -63,6 +63,9 @@ class _ChatScreenState extends State<ChatScreen>
         authToken: authToken,
         automaticallyCollectCrashReports: false,
         isPreview: false,
+        firebaseProjectId: 'codeless-dev',
+        firebaseCloudFunctionsBaseURL:
+            'https://us-central1-codeless-dev.cloudfunctions.net',
         // preload: false,
       ),
     );
