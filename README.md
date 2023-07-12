@@ -1,8 +1,8 @@
-![Codelessly Logo](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/main/packages/Codelessly-Logo-Text.png)
+![Codelessly Logo](packages/Codelessly-Logo-Text.png)
 # Codelessly CloudUI™ SDK
 [![Pub release](https://img.shields.io/pub/v/codelessly_sdk.svg?style=flat-square)](https://pub.dev/packages/codelessly_sdk) [![GitHub Release Date](https://img.shields.io/github/release-date/Codelessly/CodelesslySDK.svg?style=flat-square)](https://github.com/Codelessly/CodelesslySDK) [![GitHub issues](https://img.shields.io/github/issues/Codelessly/CodelesslySDK.svg?style=flat-square)](https://github.com/Codelessly/CodelesslySDK/issues) [![GitHub top language](https://img.shields.io/github/languages/top/Codelessly/CodelesslySDK.svg?style=flat-square)](https://github.com/Codelessly/CodelesslySDK)
 
-![Codelessly Publish UI](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/main/packages/Codelessly-Cover.png)
+![Codelessly Publish UI](packages/Codelessly-Cover.png)
 
 > ### Dynamic UI and real-time updates for Flutter apps
 
@@ -56,10 +56,10 @@ CodelesslyWidget(
 ```
 
 1. In the Codelessly Editor, select the **canvas** of your layout.
-2. Press the **Preview Icon** in the toolbar. ![CloudUI Preview Icon](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/main/packages/preview_icon.png)
+2. Press the **Preview Icon** in the toolbar. ![CloudUI Preview Icon](packages/preview_icon.png)
 3. Copy the **layoutID**.
 
-![Codelessly Widget Code](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/main/packages/codelessly_widget_code.png)
+![Codelessly Widget Code](packages/codelessly_widget_code.png)
 
 Refer to the later sections for how to pass variables and functions to the CodelesslyWidget.
 
@@ -95,7 +95,7 @@ To learn how to use the Codelessly editor to publish layouts, check out our [3-m
 
 Customize Codelessly CloudUI™ widgets by passing data into your layout. The UI will dynamically replace any variables defined in the Codelessly editor with the provided values.
 
-![Data](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/main/packages/ui_with_data_linking.png)
+![Data](packages/ui_with_data_linking.png)
 
 **Step 1:** Use the `${}` templating syntax in input fields to link data from the Codelessly editor to layouts as shown below. 
 
@@ -123,7 +123,7 @@ the `data` is updated.
 
 This how it looks with populated data:
 
-![Data](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/main/packages/ui_with_populated_data.png)
+![Data](packages/ui_with_populated_data.png)
 
 ## Functions
 
@@ -144,7 +144,7 @@ The `functions` parameter takes a map of type `Map<String, CodelesslyFunction>` 
 
 Here, we define an `onNextButtonClicked` function that can be invoked by the widget. Once a function is provided, it can be referenced by name in the Codelessly Editor.
 
-![Defining call function action](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/main/packages/defining_call_function_action.png)
+![Defining call function action](packages/defining_call_function_action.png)
 
 In the Codelessly Editor, you can easily add an Action to a widget. Use the `Call Function` action to invoke `onNextButtonClicked`.
 
@@ -173,7 +173,7 @@ CodelesslyWidget(
 
 - `layoutID`: The ID of the published canvas. The ID can be found in Quick Preview or under `Publish > Settings > Published Layouts`.
 
-![Codelessly Published Layout ID](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/main/packages/codelessly_published_layout_id.png)
+![Codelessly Published Layout ID](packages/codelessly_published_layout_id.png)
 
 - `isPreview`: Whether the layout is in preview or production mode. Preview mode is meant for debugging the layout and syncs with the changes made in the editor. Widgets in production mode are only updated when published using the Publish button.
 - `config`: An optional `CodelesslyConfig` that holds the information required to authenticate your layout from the server.
