@@ -32,7 +32,7 @@ void main() {
   
   // Initialize SDK.
   Codelessly.instance.initialize(
-    config: const CodelesslyConfig(
+    config: CodelesslyConfig(
       authToken: AUTH_TOKEN,
       isPreview: kDebugMode,
     ),
@@ -163,12 +163,12 @@ The `CodelesslyFunction` provides a `CodelesslyContext` which provides internal 
 
 ```dart
 CodelesslyWidget(
-      layoutID: '0R0Qe7wgeAJMnj3MGW4l',
-      isPreview: kDebugMode,
-      config: const CodelesslyConfig(
-        authToken: 'LCVyNTxyLCVxQXh3WDc5MFowLjApQXJfWyNdSnlAQjphLyN1',
-      ),
-    )
+  layoutID: '0R0Qe7wgeAJMnj3MGW4l',
+  isPreview: kDebugMode,
+  config: CodelesslyConfig(
+  authToken: 'LCVyNTxyLCVxQXh3WDc5MFowLjApQXJfWyNdSnlAQjphLyN1',
+  ),
+)
 ```
 
 - `layoutID`: The ID of the published canvas. The ID can be found in Quick Preview or under `Publish > Settings > Published Layouts`.
@@ -187,7 +187,7 @@ The CodelesslyWidget supports **Preview** and **Published** environments via the
 ```dart
 // Global config.
 Codelessly.instance.initialize(
-  config: const CodelesslyConfig(
+  config: CodelesslyConfig(
     isPreview: true,
   ),
 );
@@ -213,7 +213,7 @@ A common request is to enable Preview mode in QA environments to support updatin
 ```dart
 // Global config.
 Codelessly.instance.initialize(
-  config: const CodelesslyConfig(
+  config: CodelesslyConfig(
     isPreview: FlavorConfig.flavor != "prod",
   ),
 );
