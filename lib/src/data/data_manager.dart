@@ -122,7 +122,7 @@ class DataManager {
     if (_publishModel != null && layoutID != null) {
       if (!_publishModel!.layouts.containsKey(layoutID)) {
         log('Layout [$layoutID] during init is not cached locally. Downloading...');
-        didPrepareLayout = await getOrFetchLayoutWithFontsAndApisAndEmit(
+        didPrepareLayout = await getOrFetchPopulatedLayout(
           layoutID: layoutID,
         );
         log('Layout in init [$layoutID] fetch complete.');
@@ -239,7 +239,7 @@ class DataManager {
         log(
           'Publish model is definitely available. We can safely download layout [$layoutID] now.',
         );
-        await getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID);
+        await getOrFetchPopulatedLayout(layoutID: layoutID);
 
         log(
           'Layout [$layoutID] during init download complete.',
@@ -257,7 +257,7 @@ class DataManager {
             log(
               '\tDownloading layout [$layoutID]...',
             );
-            await getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID);
+            await getOrFetchPopulatedLayout(layoutID: layoutID);
             log(
               '\tLayout [$layoutID] during init download complete.',
             );
@@ -669,29 +669,29 @@ class DataManager {
         serverModel.updates.conditions;
     final Map<String, DateTime> currentConditions =
         localModel.updates.conditions;
-    final Map<String, UpdateType> variableUpdates = {};
+    final Map<String, UpdateType> conditionUpdates = {};
 
     // Check for deleted layouts.
     for (final String layoutId in currentConditions.keys) {
       if (!serverConditions.containsKey(layoutId)) {
-        variableUpdates[layoutId] = UpdateType.delete;
+        conditionUpdates[layoutId] = UpdateType.delete;
       }
     }
 
     // Check for added or updated layouts.
     for (final String layoutId in serverConditions.keys) {
       if (!currentConditions.containsKey(layoutId)) {
-        variableUpdates[layoutId] = UpdateType.add;
+        conditionUpdates[layoutId] = UpdateType.add;
       } else {
         final DateTime lastUpdated = currentConditions[layoutId]!;
         final DateTime newlyUpdated = serverConditions[layoutId]!;
         if (newlyUpdated.isAfter(lastUpdated)) {
-          variableUpdates[layoutId] = UpdateType.update;
+          conditionUpdates[layoutId] = UpdateType.update;
         }
       }
     }
 
-    return variableUpdates;
+    return conditionUpdates;
   }
 
   /// [layoutID] is the identifier of the layout to be fetched or retrieved.
@@ -716,7 +716,7 @@ class DataManager {
   ///
   /// Will return `true` if the layout and its associated fonts were fetched
   /// successfully, `false` otherwise.
-  Future<bool> getOrFetchLayoutWithFontsAndApisAndEmit({
+  Future<bool> getOrFetchPopulatedLayout({
     required String layoutID,
   }) async {
     final SDKPublishModel? model = _publishModel;
@@ -769,6 +769,37 @@ class DataManager {
     } else {
       log('\tLayout [$layoutID] has no apis.');
     }
+
+    if (model.updates.conditions.containsKey(layoutID)) {
+      try {
+        final SDKLayoutConditions? conditions =
+            await getOrFetchConditions(layoutID);
+        if (conditions != null) {
+          model.conditions[layoutID] = conditions;
+        }
+      } catch (e, stacktrace) {
+        log('Error while fetching conditions: $e');
+        log(stacktrace.toString());
+      }
+    } else {
+      log('\tLayout [$layoutID] has no conditions.');
+    }
+
+    if (model.updates.variables.containsKey(layoutID)) {
+      try {
+        final SDKLayoutVariables? variables =
+            await getOrFetchVariables(layoutID);
+        if (variables != null) {
+          model.variables[layoutID] = variables;
+        }
+      } catch (e, stacktrace) {
+        log('Error while fetching variables: $e');
+        log(stacktrace.toString());
+      }
+    } else {
+      log('\tLayout [$layoutID] has no variables.');
+    }
+
     emitPublishModel();
     savePublishModel();
 
@@ -902,5 +933,35 @@ class DataManager {
       }
     }
     return apis;
+  }
+
+  Future<SDKLayoutConditions?> getOrFetchConditions(String layoutID) {
+    final AuthData? auth = authManager.authData;
+
+    final SDKLayoutConditions? conditions = _publishModel?.conditions[layoutID];
+    if (conditions != null) return Future.value(conditions);
+
+    if (auth == null) return Future.value(null);
+
+    return networkDataRepository.downloadLayoutConditions(
+      projectID: auth.projectId,
+      layoutID: layoutID,
+      source: config.publishSource,
+    );
+  }
+
+  Future<SDKLayoutVariables?> getOrFetchVariables(String layoutID) {
+    final AuthData? auth = authManager.authData;
+
+    final SDKLayoutVariables? variables = _publishModel?.variables[layoutID];
+    if (variables != null) return Future.value(variables);
+
+    if (auth == null) return Future.value(null);
+
+    return networkDataRepository.downloadLayoutVariables(
+      projectID: auth.projectId,
+      layoutID: layoutID,
+      source: config.publishSource,
+    );
   }
 }

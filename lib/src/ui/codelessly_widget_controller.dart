@@ -235,7 +235,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
         ' $publishSource.',
       );
       dataManager
-          .getOrFetchLayoutWithFontsAndApisAndEmit(layoutID: layoutID)
+          .getOrFetchPopulatedLayout(layoutID: layoutID)
           .catchError((error, str) {
         CodelesslyErrorHandler.instance.captureException(
           error,
