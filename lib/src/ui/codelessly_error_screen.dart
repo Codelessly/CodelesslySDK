@@ -89,7 +89,8 @@ class CodelesslyErrorScreen extends StatelessWidget {
           break;
       }
     } else {
-      message = 'An unexpected error happened!${exception != null ? '\n$exception' : ''}';
+      message =
+          'An unexpected error happened!${exception != null ? '\n$exception' : ''}';
     }
     return FittedBox(
       fit: BoxFit.scaleDown,
