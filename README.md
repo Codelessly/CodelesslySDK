@@ -89,7 +89,7 @@ class MyApp extends StatelessWidget {
 
 From dynamic forms to constantly changing sales and marketing pages, any design or layout can be streamed to your app via the `CodelesslyWidget`. 
 
-To learn how to use the Codelessly editor to publish layouts, check out our [3-minute Quickstart Guide](https://app.gitbook.com/o/rXXdMMDhFOAfV2g6j8A1/s/x4NeiXalJWaOaV6tsK5f/getting-started/3-minute-quick-start).
+To learn how to use the Codelessly editor to publish layouts, check out our [3-minute Quickstart Guide](https://docs.codelessly.com/getting-started/3-minute-quick-start).
 
 ## Data
 
@@ -269,7 +269,7 @@ Codelessly.instance.initialize(
 A demo chat-bot interface built with the Codelessly SDK. [View Code](https://github.com/Codelessly/CodelesslySDK/tree/main/example_chat_bot)
 
 ## Additional Resources
-Additional resources and tutorials are on our [documentation website](https://app.gitbook.com/o/rXXdMMDhFOAfV2g6j8A1/s/x4NeiXalJWaOaV6tsK5f/getting-started/3-minute-quick-start).
+Additional resources and tutorials are on our [documentation website](https://docs.codelessly.com/getting-started/3-minute-quick-start).
 
 If you have any questions or run into any issues, please open an issue or email us at [codelessly@gmail.com](mailto:codelessly@gmail.com).
 
