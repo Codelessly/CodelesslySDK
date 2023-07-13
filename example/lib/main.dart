@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,15 +18,8 @@ void main() async {
   runApp(const MyStoryBookApp());
 }
 
-class MyStoryBookApp extends StatefulWidget {
+class MyStoryBookApp extends StatelessWidget {
   const MyStoryBookApp({super.key});
-
-  @override
-  State<MyStoryBookApp> createState() => _MyStoryBookAppState();
-}
-
-class _MyStoryBookAppState extends State<MyStoryBookApp> {
-  Map<String, dynamic> licenseData = {'license': 'FREE'};
 
   @override
   Widget build(BuildContext context) => Storybook(
@@ -51,19 +46,21 @@ class _MyStoryBookAppState extends State<MyStoryBookApp> {
               home: Center(
                 child: CodelesslyWidget(
                   layoutID: "0R0yeUx1iGDe9kgW5xwn",
-                  data: licenseData,
                   functions: {
                     'onFreeSelected': (context, ref) {
-                      licenseData['license'] = 'FREE';
-                      setState(() {});
+                      log('Free license selected');
                     },
                     'onProSelected': (context, ref) {
-                      licenseData['license'] = 'PRO';
-                      setState(() {});
+                      log('Pro license selected');
                     },
                     'onBusinessSelected': (context, ref) {
-                      licenseData['license'] = 'BUSINESS';
-                      setState(() {});
+                      log('Business license selected');
+                    },
+                    'onUpgradeToPro': (context, ref) {
+                      log('Upgrade to Pro license');
+                    },
+                    'onUpgradeToBusiness': (context, ref) {
+                      log('Upgrade to Business license');
                     },
                   },
                 ),
