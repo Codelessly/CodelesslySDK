@@ -1,14 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import '../../codelessly_sdk.dart';
 
-// typedef CodelesslyCallback<T> = T Function(CodelesslyContext reference);
-
-class CodelesslyFunction<T> {
-  final T Function(BuildContext context, CodelesslyContext reference) call;
-
-  CodelesslyFunction(this.call);
-}
+/// A function signature passing functions into [CodelesslyWidget].
+typedef CodelesslyFunction<T> = FutureOr<T> Function(
+    BuildContext context, CodelesslyContext reference);
 
 /// Alias of VoidCallback.
 /// Example:
