@@ -47,7 +47,7 @@ class FunctionsRepository {
         navigate(context, action as NavigationAction);
         break;
       case ActionType.link:
-        launchURL((action as LinkAction).url);
+        launchURL(context, (action as LinkAction));
         break;
       case ActionType.submit:
         submitToNewsletter(context, action as SubmitAction);
@@ -181,7 +181,10 @@ class FunctionsRepository {
     }
   }
 
-  static void launchURL(String url) => launchUrl(Uri.parse(url));
+  static void launchURL(BuildContext context, LinkAction action) {
+    final url = PropertyValueDelegate.substituteVariables(context, action.url);
+    launchUrl(Uri.parse(url));
+  }
 
   static Future<http.Response> makeApiRequest({
     required HttpMethod method,
