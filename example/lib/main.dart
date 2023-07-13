@@ -53,18 +53,18 @@ class _MyStoryBookAppState extends State<MyStoryBookApp> {
                   layoutID: "0R0yeUx1iGDe9kgW5xwn",
                   data: licenseData,
                   functions: {
-                    'onFreeSelected': CodelesslyFunction((context, ref) {
+                    'onFreeSelected': (context, ref) {
                       licenseData['license'] = 'FREE';
                       setState(() {});
-                    }),
-                    'onProSelected': CodelesslyFunction((context, ref) {
+                    },
+                    'onProSelected': (context, ref) {
                       licenseData['license'] = 'PRO';
                       setState(() {});
-                    }),
-                    'onBusinessSelected': CodelesslyFunction((context, ref) {
+                    },
+                    'onBusinessSelected': (context, ref) {
                       licenseData['license'] = 'BUSINESS';
                       setState(() {});
-                    }),
+                    },
                   },
                 ),
               ),
