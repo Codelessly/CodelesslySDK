@@ -43,7 +43,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
                 settings: settings)
             : null);
 
-    if (node.isScrollable) {
+    if (node.isScrollable && node.scaleMode == ScaleMode.responsive) {
       body = SingleChildScrollView(
         scrollDirection: node.scrollDirection.flutterAxis,
         reverse: node.reverse,
@@ -58,22 +58,31 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     if (node.scaleMode == ScaleMode.autoScale) {
       final double screenWidth = MediaQuery.of(context).size.width;
       final double canvasWidth = node.outerBoxLocal.width;
-      final double canvasHeight = node.outerBoxLocal.height;
       final double viewRatio = screenWidth / canvasWidth;
 
-      // If the width of this canvas is smaller than the viewport's size,
-      // use the canvas's width;
-      // Otherwise, use the viewport's width.
       body = FittedBox(
-        fit: BoxFit.fitWidth,
+        fit: BoxFit.scaleDown,
         alignment: Alignment.topCenter,
         child: SizedBox(
           width: viewRatio < 1 ? canvasWidth : screenWidth,
-          height: canvasHeight,
           child: body,
         ),
       );
+
+      if (node.isScrollable) {
+        body = SingleChildScrollView(
+          scrollDirection: node.scrollDirection.flutterAxis,
+          reverse: node.reverse,
+          primary: node.primary,
+          physics: node.physics.flutterScrollPhysics,
+          keyboardDismissBehavior:
+              node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+          child: body,
+        );
+      }
     }
+
+    body = SizedBox.expand(child: body);
 
     final bool needsAScaffold = appBar != null ||
         floatingActionButton != null ||
@@ -113,6 +122,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     final BaseNode placeholderBody = getNode(node.properties.bodyId);
     Widget child = manager.buildWidgetFromNode(placeholderBody, context,
         settings: settings);
+
     if (node.isScrollable) {
       if (node.scrollDirection == AxisC.vertical &&
           (placeholderBody.isVerticalExpanded ||

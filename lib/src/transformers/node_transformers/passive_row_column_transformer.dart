@@ -9,7 +9,10 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   PassiveRowColumnTransformer(super.getNode, super.manager);
 
   static Widget buildRowColumnWidget(
-      BaseNode rowColumnNode, List<Widget> children) {
+    BaseNode rowColumnNode, {
+    required List<Widget> childrenWidgets,
+    required List<BaseNode> childrenNodes,
+  }) {
     assert(rowColumnNode is RowColumnMixin);
 
     final bool isRow =
@@ -42,12 +45,17 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
             ? MainAxisSize.min
             : MainAxisSize.max,
         key: ValueKey(rowColumnNode.id),
-        children: children,
+        children: childrenWidgets,
       );
 
-      // if (fixHeight == null) {
-      //   res = IntrinsicHeight(child: res);
-      // }
+      if (fixHeight == null && rowColumnNode.isVerticalWrap) {
+        final bool anyChildNeedsAlignment = childrenNodes.any(
+          (child) => child.alignment != AlignmentModel.none,
+        );
+        if (anyChildNeedsAlignment) {
+          res = IntrinsicHeight(child: res);
+        }
+      }
 
       if (fixWidth == null && fixHeight == null) {
         return res;
@@ -66,12 +74,21 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
             ? MainAxisSize.min
             : MainAxisSize.max,
         key: ValueKey(rowColumnNode.id),
-        children: children,
+        children: childrenWidgets,
       );
 
-      // if (fixWidth == null) {
-      //   res = IntrinsicWidth(child: res);
-      // }
+      if (fixWidth == null && rowColumnNode.isHorizontalWrap) {
+        final bool anyChildNeedsAlignment = childrenNodes.any(
+              (child) => child.alignment != AlignmentModel.none,
+        );
+        if (anyChildNeedsAlignment) {
+          res = IntrinsicWidth(child: res);
+        }
+      }
+
+      if (fixWidth == null && fixHeight == null) {
+        return res;
+      }
 
       if (fixWidth == null && fixHeight == null) {
         return res;
@@ -269,13 +286,15 @@ class PassiveRowColumnWidget extends StatelessWidget {
             children: [
               PassiveRowColumnTransformer.buildRowColumnWidget(
                 node,
-                widgetChildren,
+                childrenWidgets: widgetChildren,
+                childrenNodes: children,
               )
             ],
           )
         : PassiveRowColumnTransformer.buildRowColumnWidget(
             node,
-            widgetChildren,
+            childrenWidgets: widgetChildren,
+            childrenNodes: children,
           );
 
     if (isTestLayout) {
