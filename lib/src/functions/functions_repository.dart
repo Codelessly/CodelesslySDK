@@ -615,6 +615,18 @@ class FunctionsRepository {
         context.read<CodelesslyContext>();
     final CodelesslyFunction? function =
         codelesslyContext.functions[action.name];
-    function?.call(context, codelesslyContext);
+
+    // Substitute variables in params.
+    final Map<String, dynamic> parsedParams = {};
+    for (final MapEntry(key: name, value: value) in action.params.entries) {
+      final parsedValue =
+          PropertyValueDelegate.substituteVariables(context, value)
+              .parsedValue();
+      parsedParams[name] = parsedValue;
+    }
+
+    log('Calling function ${action.name}(${parsedParams.entries.map((e) => '${e.key}: ${e.value}').join(', ')}).');
+
+    function?.call(context, codelesslyContext, Map.unmodifiable(parsedParams));
   }
 }

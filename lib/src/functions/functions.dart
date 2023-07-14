@@ -6,7 +6,11 @@ import '../../codelessly_sdk.dart';
 
 /// A function signature passing functions into [CodelesslyWidget].
 typedef CodelesslyFunction<T> = FutureOr<T> Function(
-    BuildContext context, CodelesslyContext reference);
+  BuildContext context,
+  // TODO: Reference can be retrieved using context, should we remove this?
+  CodelesslyContext reference,
+  Map<String, dynamic> params,
+);
 
 /// Alias of VoidCallback.
 /// Example:
