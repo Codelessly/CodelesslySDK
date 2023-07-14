@@ -47,20 +47,11 @@ class MyStoryBookApp extends StatelessWidget {
                 child: CodelesslyWidget(
                   layoutID: "0R0yeUx1iGDe9kgW5xwn",
                   functions: {
-                    'onFreeSelected': (context, ref) {
-                      log('Free license selected');
+                    'onSelected': (context, ref, params) {
+                      log('selected license: ${params['license']}');
                     },
-                    'onProSelected': (context, ref) {
-                      log('Pro license selected');
-                    },
-                    'onBusinessSelected': (context, ref) {
-                      log('Business license selected');
-                    },
-                    'onUpgradeToPro': (context, ref) {
-                      log('Upgrade to Pro license');
-                    },
-                    'onUpgradeToBusiness': (context, ref) {
-                      log('Upgrade to Business license');
+                    'onUpgrade': (context, ref, params) {
+                      log('Upgrade to ${params['license']} license');
                     },
                   },
                 ),
