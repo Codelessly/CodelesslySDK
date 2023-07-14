@@ -82,11 +82,11 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       }
     }
 
-    body = SizedBox.expand(child: body);
-
     final bool needsAScaffold = appBar != null ||
         floatingActionButton != null ||
         bottomNavigationBar != null;
+
+    if (needsAScaffold) body = SizedBox.expand(child: body);
 
     final Widget scaffold;
 
