@@ -435,7 +435,7 @@ List<Widget> buildFills(
                   bytes,
                   fit: fit,
                   alignment: alignment ?? Alignment.center,
-                  scale: scale,
+                  scale: scale.abs(),
                   width: node.basicBoxLocal.width,
                   height: node.basicBoxLocal.height,
                   repeat: repeat,
@@ -444,7 +444,7 @@ List<Widget> buildFills(
                   url: imageURL,
                   fit: fit,
                   alignment: alignment ?? Alignment.center,
-                  scale: scale,
+                  scale: scale.abs(),
                   width: node.basicBoxLocal.width,
                   height: node.basicBoxLocal.height,
                   repeat: repeat,
@@ -452,6 +452,12 @@ List<Widget> buildFills(
                   node: node,
                   isActive: isActive,
                 );
+
+          child = Transform.scale(
+            scaleX: paint.isFlippedX ? -1 : 1,
+            scaleY: paint.isFlippedY ? -1 : 1,
+            child: child,
+          );
 
           if (modifiedOpacity != 1) {
             child = Opacity(
@@ -686,20 +692,7 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
         duration: const Duration(milliseconds: 150),
         child: loadingProgress == null
             ? SizedBox.expand(child: child)
-            : Padding(
-                padding: const EdgeInsets.all(2),
-                child: Center(
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                    ),
-                  ),
-                ),
-              ),
+            : SizedBox.shrink(),
       ),
       errorBuilder: (context, Object error, StackTrace? stackTrace) =>
           LayoutBuilder(builder: (context, constraints) {

@@ -213,7 +213,7 @@ class AdaptiveNodeBox extends StatelessWidget {
   /// Creates a [AdaptiveNodeBox] that will fit its [child] to the size of the
   /// [node], taking into account the node's [BaseNode.horizontalFit] and
   /// [BaseNode.verticalFit].
-  AdaptiveNodeBox({super.key, required this.node, required this.child});
+  const AdaptiveNodeBox({super.key, required this.node, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -221,6 +221,33 @@ class AdaptiveNodeBox extends StatelessWidget {
       horizontalFit: node.horizontalFit,
       verticalFit: node.verticalFit,
       size: node.basicBoxLocal.size,
+      child: child,
+    );
+  }
+}
+
+/// A [Widget] that will fit its child to the size of the [BaseNode], it will
+/// not take into account the node's [BaseNode.horizontalFit] and
+/// [BaseNode.verticalFit]. It will strictly use the
+/// [BaseNode.middleBoxLocal] as the size of the node.
+class StrictNodeBox extends StatelessWidget {
+  /// The [BaseNode] that will be used to determine the size of the box and
+  /// its accompanying [SizeFit] values.
+  final BaseNode node;
+
+  /// The child [Widget] that will be fitted to the size of the [BaseNode].
+  final Widget? child;
+
+  /// Creates a [StrictNodeBox] that will fit its [child] to the size of the
+  /// [node], taking into account the node's [BaseNode.horizontalFit] and
+  /// [BaseNode.verticalFit].
+  const StrictNodeBox({super.key, required this.node, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: node.basicBoxLocal.width,
+      height: node.basicBoxLocal.height,
       child: child,
     );
   }
