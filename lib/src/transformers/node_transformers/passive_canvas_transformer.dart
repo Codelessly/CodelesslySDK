@@ -154,6 +154,6 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       return node.fills[0].color
           ?.toFlutterColor(opacity: node.fills[0].opacity);
     }
-    return node.fills.isNotEmpty ? Colors.transparent : Colors.white;
+    return Colors.transparent;
   }
 }
