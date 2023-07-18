@@ -56,7 +56,8 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     }
 
     if (node.scaleMode == ScaleMode.autoScale) {
-      final double screenWidth = MediaQuery.of(context).size.width;
+      final Size screenSize = MediaQuery.sizeOf(context);
+      final double screenWidth = screenSize.width;
       final double canvasWidth = node.outerBoxLocal.width;
       final double viewRatio = screenWidth / canvasWidth;
 
@@ -65,6 +66,12 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         alignment: Alignment.topCenter,
         child: SizedBox(
           width: viewRatio < 1 ? canvasWidth : screenWidth,
+          // This fixes an auto scale crash when a simple canvas with no
+          // scrolling because the FittedBox needs to have a non-zero height.
+          //
+          // The scrollview normally takes care of that, but under this
+          // condition, a fixed height is required for auto-scaling.
+          height: node.isScrollable ? null : node.outerBoxLocal.height,
           child: body,
         ),
       );
