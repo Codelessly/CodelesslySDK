@@ -551,7 +551,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         }
 
         final layoutWidget = Material(
-          color: Colors.white,
+          type: MaterialType.transparency,
           child: CodelesslyPublishedLayoutBuilder(
             key: ValueKey(layoutID),
             layout: model.layouts[layoutID]!,
