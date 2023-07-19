@@ -9,7 +9,7 @@ class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
   Widget buildSpacer(BaseNode node, int flex) {
     final BaseNode parentNode = getNode(node.parentID);
 
-    if (parentNode is! RowColumnNode) {
+    if (parentNode is! RowColumnMixin) {
       throw Exception(
         'SpacerNode must be a child of a RowColumnNode to be rendered.'
         ' ${node.name} is a child of [${parentNode.id}](${parentNode.name})',
