@@ -592,8 +592,12 @@ class FunctionsRepository {
         );
   }
 
-  static bool triggerAction(BuildContext context, ReactionMixin node,
-      TriggerType type, dynamic value) {
+  static bool triggerAction(
+    BuildContext context,
+    ReactionMixin node,
+    TriggerType type, [
+    dynamic value,
+  ]) {
     final reactions = node.reactions
         .where((reaction) => reaction.trigger.type == TriggerType.changed);
 

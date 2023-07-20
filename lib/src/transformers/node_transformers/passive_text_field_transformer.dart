@@ -1,7 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
@@ -18,9 +16,9 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     return PassiveTextFieldWidget(
       node: node,
       settings: settings,
-      onTap: () => onTap(context, node.reactions),
+      onTap: () => onTap(context, node),
       onChanged: (value) => onChanged(context, node, value),
-      onSubmitted: () => onSubmitted(context, node.reactions),
+      onSubmitted: (value) => onSubmitted(context, node, value),
     );
   }
 
@@ -141,49 +139,35 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     );
   }
 
-  void onTap(BuildContext context, List<Reaction> reactions) => reactions
-      .where((reaction) => reaction.trigger.type == TriggerType.click)
-      .forEach((reaction) =>
-          FunctionsRepository.performAction(context, reaction.action));
+  void onTap(BuildContext context, TextFieldNode node) =>
+      FunctionsRepository.triggerAction(context, node, TriggerType.changed);
 
   void onChanged(BuildContext context, TextFieldNode node, String inputValue) {
-    final CodelesslyContext payload = context.read<CodelesslyContext>();
-    // Change local state of text field.
-    if (payload.nodeValues.containsKey(node.id)) {
-      final List<ValueModel> values = payload.nodeValues[node.id]?.value ?? [];
-      final ValueModel? value =
-          values.firstWhereOrNull((val) => val.name == 'inputValue');
-      final List<ValueModel> updatedValues = [...values]
-        ..remove(value)
-        ..add(value?.copyWith(value: inputValue) ??
-            StringValue(name: 'inputValue', value: inputValue));
-      payload.nodeValues[node.id]?.value = updatedValues;
-    } else {
-      payload.nodeValues[node.id]?.value = [
-        StringValue(name: 'inputValue', value: inputValue)
-      ];
-    }
-    node.reactions
-        .where((reaction) => reaction.trigger.type == TriggerType.changed)
-        .forEach((reaction) => FunctionsRepository.performAction(
-              context,
-              reaction.action,
-              internalValue: inputValue,
-            ));
+    FunctionsRepository.setNodeValue(context,
+        node: node, property: 'inputValue', value: inputValue);
+
+    FunctionsRepository.setPropertyVariable(context,
+        node: node, property: 'inputValue', value: inputValue);
+
+    FunctionsRepository.triggerAction(
+        context, node, TriggerType.changed, inputValue);
   }
 
-  void onSubmitted(BuildContext context, List<Reaction> reactions) => reactions
-      .where((reaction) => reaction.trigger.type == TriggerType.submitted)
-      .forEach((reaction) =>
-          FunctionsRepository.performAction(context, reaction.action));
+  void onSubmitted(
+    BuildContext context,
+    TextFieldNode node,
+    String inputValue,
+  ) =>
+      FunctionsRepository.triggerAction(
+          context, node, TriggerType.changed, inputValue);
 }
 
-class PassiveTextFieldWidget extends StatelessWidget {
+class PassiveTextFieldWidget extends StatefulWidget {
   final TextFieldNode node;
   final WidgetBuildSettings settings;
   final VoidCallback? onTap;
-  final Function(String)? onChanged;
-  final VoidCallback? onSubmitted;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
   final bool useIconFonts;
 
   const PassiveTextFieldWidget({
@@ -197,62 +181,83 @@ class PassiveTextFieldWidget extends StatelessWidget {
   });
 
   @override
+  State<PassiveTextFieldWidget> createState() => _PassiveTextFieldWidgetState();
+}
+
+class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
+  late final TextEditingController _controller = TextEditingController(
+    text: PropertyValueDelegate.substituteVariables(
+      context,
+      widget.node.initialText,
+    ),
+  );
+
+  @override
   Widget build(BuildContext context) {
-    final bool enabled =
-        context.getNodeValue(node.id, 'enabled') ?? node.properties.enabled;
-    final bool obscureText = context.getNodeValue(node.id, 'obscureText') ??
-        node.properties.obscureText;
-    final bool readOnly =
-        context.getNodeValue(node.id, 'readOnly') ?? node.properties.readOnly;
-    final bool showCursor = context.getNodeValue(node.id, 'showCursor') ??
-        node.properties.showCursor;
-    final int? maxLength =
-        context.getNodeValue(node.id, 'maxLength') ?? node.properties.maxLength;
+    final bool enabled = context.getNodeValue(widget.node.id, 'enabled') ??
+        widget.node.properties.enabled;
+    final bool obscureText =
+        context.getNodeValue(widget.node.id, 'obscureText') ??
+            widget.node.properties.obscureText;
+    final bool readOnly = context.getNodeValue(widget.node.id, 'readOnly') ??
+        widget.node.properties.readOnly;
+    final bool showCursor =
+        context.getNodeValue(widget.node.id, 'showCursor') ??
+            widget.node.properties.showCursor;
+    final int? maxLength = context.getNodeValue(widget.node.id, 'maxLength') ??
+        widget.node.properties.maxLength;
 
-    Widget widget;
+    Widget field;
 
-    widget = TextField(
-      autocorrect: node.properties.autoCorrect,
-      autofocus: node.properties.autoFocus,
-      enableInteractiveSelection: node.properties.enableInteractiveSelection,
+    field = TextField(
+      autocorrect: widget.node.properties.autoCorrect,
+      autofocus: widget.node.properties.autoFocus,
+      enableInteractiveSelection:
+          widget.node.properties.enableInteractiveSelection,
       enabled: enabled,
+      controller: _controller,
       obscureText: obscureText,
       readOnly: readOnly,
       showCursor: showCursor,
-      keyboardType: node.properties.keyboardType.toFlutter(),
-      selectionHeightStyle: node.properties.selectionHeightStyle.toFlutter(),
-      selectionWidthStyle: node.properties.selectionWidthStyle.toFlutter(),
-      textAlign: node.properties.textAlign.toFlutter(),
+      keyboardType: widget.node.properties.keyboardType.toFlutter(),
+      selectionHeightStyle:
+          widget.node.properties.selectionHeightStyle.toFlutter(),
+      selectionWidthStyle:
+          widget.node.properties.selectionWidthStyle.toFlutter(),
+      textAlign: widget.node.properties.textAlign.toFlutter(),
       textAlignVertical:
-          node.properties.textAlignVertical.flutterTextAlignVertical,
-      cursorColor: node.properties.cursorColor.toFlutterColor(opacity: 1),
-      cursorHeight: node.properties.cursorHeight,
-      cursorWidth: node.properties.cursorWidth,
-      cursorRadius: Radius.circular(node.properties.cursorRadius),
+          widget.node.properties.textAlignVertical.flutterTextAlignVertical,
+      cursorColor:
+          widget.node.properties.cursorColor.toFlutterColor(opacity: 1),
+      cursorHeight: widget.node.properties.cursorHeight,
+      cursorWidth: widget.node.properties.cursorWidth,
+      cursorRadius: Radius.circular(widget.node.properties.cursorRadius),
       maxLength: maxLength,
-      maxLines: node.properties.maxLines.orNullIf(node.properties.expands),
-      minLines: node.properties.minLines.orNullIf(node.properties.expands),
-      expands: node.properties.expands,
-      obscuringCharacter: node.properties.obscuringCharacter,
+      maxLines: widget.node.properties.maxLines
+          .orNullIf(widget.node.properties.expands),
+      minLines: widget.node.properties.minLines
+          .orNullIf(widget.node.properties.expands),
+      expands: widget.node.properties.expands,
+      obscuringCharacter: widget.node.properties.obscuringCharacter,
+      style: PassiveTextFieldTransformer.getTextStyle(
+          widget.node.properties.inputStyle),
+      onTap: widget.onTap,
+      onChanged: widget.onChanged,
+      onEditingComplete: () {},
+      onSubmitted: (value) => widget.onSubmitted?.call(value),
       decoration: PassiveTextFieldTransformer.getDecoration(
         context,
-        node,
-        node.properties.decoration,
-        useIconFonts,
-        settings,
+        widget.node,
+        widget.node.properties.decoration,
+        widget.useIconFonts,
+        widget.settings,
       ),
-      style:
-          PassiveTextFieldTransformer.getTextStyle(node.properties.inputStyle),
-      onTap: onTap,
-      onChanged: onChanged,
-      onEditingComplete: () {},
-      onSubmitted: (value) => onSubmitted?.call(),
     );
 
-    if (!node.isHorizontalExpanded) {
-      widget = SizedBox(width: node.basicBoxLocal.width, child: widget);
+    if (!widget.node.isHorizontalExpanded) {
+      field = SizedBox(width: widget.node.basicBoxLocal.width, child: field);
     }
 
-    return widget;
+    return field;
   }
 }
