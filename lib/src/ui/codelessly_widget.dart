@@ -63,9 +63,11 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   final Map<String, ValueNotifier<List<ValueModel>>> nodeValues;
 
   /// A map that holds the current state of all variables.
+  /// The key is the variable's id.
   final Map<String, ValueNotifier<VariableData>> variables;
 
   /// A map that holds the current state of all conditions.
+  /// The key is the condition's id.
   final Map<String, BaseCondition> conditions;
 
   /// Creates a [CodelesslyContext] with the given [data], [functions], and
@@ -201,12 +203,32 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
       variables.values
           .firstWhereOrNull((variable) => variable.value.name == name);
 
+  /// Allows to easily [value] of a variable with a given [name].
+  /// Returns false if the variable does not exist.
+  /// Returns true if the variable was updated successfully.
+  bool updateVariable(String name, Object? value) {
+    final ValueNotifier<VariableData>? variable = findVariableByName(name);
+    if (variable == null) return false;
+    final String newValue = value == null ? '' : '$value';
+
+    // If the value is the same, then the underlying value notifier will not
+    // notify listeners, so we need to return false.
+    if (variable.value.value == newValue) return false;
+    variable.value = variable.value.copyWith(value: newValue);
+    return true;
+  }
+
+  /// Allows to easily get the [value] of a variable with a given [name].
+  /// Returns null if the variable does not exist.
+  /// If [R] is provided, the returned value will be cast to that type.
+  R? getVariableValue<R extends Object>(String name) {
+    final ValueNotifier<VariableData>? variable = findVariableByName(name);
+    if (variable == null) return null;
+    return variable.value.getValue().typedValue<R>();
+  }
+
   @override
-  List<Object?> get props => [
-        layoutID,
-        data,
-        functions,
-      ];
+  List<Object?> get props => [layoutID, data, functions];
 }
 
 /// SDK widget that requires the SDK to be initialized beforehand.
