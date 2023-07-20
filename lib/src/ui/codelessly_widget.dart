@@ -208,12 +208,18 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   /// Returns true if the variable was updated successfully.
   bool updateVariable(String name, Object? value) {
     final ValueNotifier<VariableData>? variable = findVariableByName(name);
-    if (variable == null) return false;
+    if (variable == null) {
+      log('[CodelesslyContext] Variable with name $name does not exist.');
+      return false;
+    }
     final String newValue = value == null ? '' : '$value';
 
     // If the value is the same, then the underlying value notifier will not
     // notify listeners, so we need to return false.
-    if (variable.value.value == newValue) return false;
+    if (variable.value.value == newValue) {
+      log('[CodelesslyContext] Variable with name $name already has the value $newValue.');
+      return false;
+    }
     variable.value = variable.value.copyWith(value: newValue);
     return true;
   }
@@ -223,7 +229,10 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   /// If [R] is provided, the returned value will be cast to that type.
   R? getVariableValue<R extends Object>(String name) {
     final ValueNotifier<VariableData>? variable = findVariableByName(name);
-    if (variable == null) return null;
+    if (variable == null) {
+      log('[CodelesslyContext] Variable with name $name does not exist.');
+      return null;
+    }
     return variable.value.getValue().typedValue<R>();
   }
 
