@@ -1582,3 +1582,13 @@ extension TabBarIndicatorSizeExtensions on TabBarIndicatorSizeEnum {
     };
   }
 }
+
+extension TextAlignVerticalEnumExt on TextAlignVerticalEnum {
+  TextAlignVertical get flutterTextAlignVertical {
+    return switch (this) {
+      TextAlignVerticalEnum.top => TextAlignVertical.top,
+      TextAlignVerticalEnum.bottom => TextAlignVertical.bottom,
+      TextAlignVerticalEnum.center => TextAlignVertical.center,
+    };
+  }
+}
