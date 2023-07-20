@@ -237,7 +237,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
           .orNullIf(widget.node.isVerticalExpanded),
       minLines: widget.node.properties.minLines
           .orNullIf(widget.node.isVerticalExpanded),
-      expands: widget.node.isVerticalExpanded,
+      expands: widget.node.properties.expands,
       obscuringCharacter: widget.node.properties.obscuringCharacter,
       style: PassiveTextFieldTransformer.getTextStyle(
           widget.node.properties.inputStyle),
