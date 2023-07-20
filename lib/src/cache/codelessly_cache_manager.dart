@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
@@ -28,13 +26,12 @@ class CodelesslyCacheManager extends CacheManager {
   Future<void> init() async {
     try {
       await Hive.initFlutter('codelessly_sdk');
-      if (!kIsWeb) {
-        final dir = await getApplicationDocumentsDirectory();
-        print(
-            'SDK cache initialized at ${path.join(dir.path, 'codelessly_sdk')}');
-      }
-      box = await Hive.openBox('$cacheBoxName-${config.authToken}');
-      filesBox = await Hive.openBox('$cacheFilesBoxName-${config.authToken}');
+      box = await Hive.openBox(
+        '${cacheBoxName}_${config.authToken.replaceAll('/', '')}',
+      );
+      filesBox = await Hive.openBox(
+        '${cacheFilesBoxName}_${config.authToken.replaceAll('/', '')}',
+      );
     } on HiveError catch (e, stacktrace) {
       throw CodelesslyException(
         'Failed to initialize cache manager.\n${e.message}',
