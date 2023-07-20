@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' hide log;
 import 'dart:typed_data';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' as vec_math;
 
 import '../../../codelessly_sdk.dart';
+import '../utils/transparent_image.dart';
 
 class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
   PassiveRectangleTransformer(super.getNode, super.manager);
@@ -472,7 +473,17 @@ List<Widget> buildFills(
             );
           }
 
-          return Positioned.fill(child: child);
+          if (node.childrenOrEmpty.isEmpty) {
+            // If we don't do this then shrink-wrapping images will not work.
+            // They will expand to the size of the parent.
+            return child;
+          } else {
+            // This was Positioned.fill before. If this is breaking something,
+            // then we need to figure out a way to make it work with
+            // Positioned.fill and Positioned because Positioned.fill breaks
+            // shrink-wrapping.
+            return Positioned(child: child);
+          }
 
         case PaintType.emoji:
           return const SizedBox.shrink();
@@ -678,44 +689,85 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
     if (widget.url.containsUncheckedVariablePath && widget.isActive) {
       return jsonPathBuilder(widget.url);
     }
-    return Image.network(
-      widget.url,
+
+    return FadeInImage(
+      placeholder: MemoryImage(kTransparentImage),
+      image: NetworkImage(
+        widget.url,
+        scale: widget.scale,
+      ),
       fit: widget.fit,
       alignment: withAlignment ? widget.alignment : Alignment.center,
-      scale: widget.scale,
       width: widget.width,
       height: widget.height,
       repeat: widget.repeat,
-      loadingBuilder: (BuildContext context, Widget child,
-              ImageChunkEvent? loadingProgress) =>
-          AnimatedSwitcher(
-        duration: const Duration(milliseconds: 150),
-        child: loadingProgress == null
-            ? SizedBox.expand(child: child)
-            : SizedBox.shrink(),
+      placeholderErrorBuilder:
+          (context, Object error, StackTrace? stackTrace) => LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
+            return Center(child: Icon(Icons.error_outline));
+          }
+          return Align(
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.error_outline),
+                Text(
+                  'Failed to load image',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          );
+        },
       ),
-      errorBuilder: (context, Object error, StackTrace? stackTrace) =>
-          LayoutBuilder(builder: (context, constraints) {
-        if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
-          return Center(child: Icon(Icons.error_outline));
-        }
-        return Align(
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.error_outline),
-              Text(
-                'Failed to load image',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-        );
-      }),
     );
+
+    // Having a loading builder to fade-in the image doesn't work if the image
+    // is shrink-wrapped because AnimatedSwitcher widget expands by default.
+    // FadeInImage is a fix of this.
+
+    // return Image.network(
+    //   widget.url,
+    //   fit: widget.fit,
+    //   alignment: withAlignment ? widget.alignment : Alignment.center,
+    //   scale: widget.scale,
+    //   width: widget.width,
+    //   height: widget.height,
+    //   repeat: widget.repeat,
+    //   loadingBuilder: (BuildContext context, Widget child,
+    //           ImageChunkEvent? loadingProgress) =>
+    //       AnimatedSwitcher(
+    //     duration: const Duration(milliseconds: 150),
+    //     child: loadingProgress == null
+    //         ? SizedBox.expand(child: child)
+    //         : SizedBox.shrink(),
+    //   ),
+    //   errorBuilder: (context, Object error, StackTrace? stackTrace) =>
+    //       LayoutBuilder(builder: (context, constraints) {
+    //     if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
+    //       return Center(child: Icon(Icons.error_outline));
+    //     }
+    //     return Align(
+    //       alignment: Alignment.center,
+    //       child: Column(
+    //         mainAxisAlignment: MainAxisAlignment.center,
+    //         mainAxisSize: MainAxisSize.min,
+    //         children: [
+    //           Icon(Icons.error_outline),
+    //           Text(
+    //             'Failed to load image',
+    //             textAlign: TextAlign.center,
+    //             style: Theme.of(context).textTheme.bodySmall,
+    //           ),
+    //         ],
+    //       ),
+    //     );
+    //   }),
+    // );
   }
 }
 
