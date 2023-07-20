@@ -55,14 +55,12 @@ class PassiveVarianceWidget extends StatelessWidget {
     if (children.isNotEmpty) {
       final childNode = getNode(children.first);
 
-      return ClipRect(
-        child: manager
-            .getTransformer<PassiveStackTransformer>()
-            .buildWidgetForChildren(
-          node,
-          context,
-          childrenNodes: [childNode],
-        ),
+      return manager
+          .getTransformer<PassiveStackTransformer>()
+          .buildWidgetForChildren(
+        node,
+        context,
+        childrenNodes: [childNode],
       );
     }
 
