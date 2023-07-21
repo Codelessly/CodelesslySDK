@@ -592,18 +592,23 @@ class FunctionsRepository {
         );
   }
 
+  /// Triggers actions on given [node] or [reactions] with given [type].
+  /// Returns `true` if any action was triggered, `false` otherwise.
+  /// If [reactions] is not provided, it will use [node]'s reactions.
+  /// If [value] is provided, it will be passed to the action.
   static bool triggerAction(
     BuildContext context,
     ReactionMixin node,
-    TriggerType type, [
+    TriggerType type, {
     dynamic value,
-  ]) {
-    final reactions = node.reactions
-        .where((reaction) => reaction.trigger.type == TriggerType.changed);
+    List<Reaction>? reactions,
+  }) {
+    final filteredReactions = (reactions ?? node.reactions)
+        .where((reaction) => reaction.trigger.type == type);
 
-    if (reactions.isEmpty) return false;
+    if (filteredReactions.isEmpty) return false;
 
-    for (final reaction in reactions) {
+    for (final reaction in filteredReactions) {
       FunctionsRepository.performAction(
         context,
         reaction.action,

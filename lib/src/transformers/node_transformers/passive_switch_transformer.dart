@@ -72,8 +72,8 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'value', value: internalValue);
 
-    FunctionsRepository.triggerAction(
-        context, node, TriggerType.changed, internalValue);
+    FunctionsRepository.triggerAction(context, node, TriggerType.changed,
+        value: internalValue);
   }
 }
 
