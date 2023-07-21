@@ -75,7 +75,7 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
         node: node, property: 'value', value: internalValue);
 
     FunctionsRepository.triggerAction(
-        context, node, TriggerType.changed, internalValue);
+        context, node, TriggerType.changed, value: internalValue);
   }
 }
 

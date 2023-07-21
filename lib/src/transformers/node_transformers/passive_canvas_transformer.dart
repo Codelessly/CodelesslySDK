@@ -2,6 +2,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/functions_repository.dart';
 
 class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   PassiveCanvasTransformer(super.getNode, super.manager);
@@ -34,6 +35,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
             node.id,
             props.floatingActionButton!,
             useFonts: false,
+            onPressed: () => onFaBPressed(context, node),
           )
         : null;
     Widget? bottomNavigationBar = navigationBarPlaceholder ??
@@ -118,6 +120,11 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       node,
       children: [scaffold],
     );
+  }
+
+  void onFaBPressed(BuildContext context, CanvasNode node) {
+    FunctionsRepository.triggerAction(context, node, TriggerType.click,
+        reactions: node.properties.floatingActionButton?.reactions);
   }
 
   @override

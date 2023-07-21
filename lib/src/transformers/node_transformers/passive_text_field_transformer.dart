@@ -150,7 +150,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
         node: node, property: 'inputValue', value: inputValue);
 
     FunctionsRepository.triggerAction(
-        context, node, TriggerType.changed, inputValue);
+        context, node, TriggerType.changed, value: inputValue);
   }
 
   void onSubmitted(
@@ -159,7 +159,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     String inputValue,
   ) =>
       FunctionsRepository.triggerAction(
-          context, node, TriggerType.changed, inputValue);
+          context, node, TriggerType.changed, value: inputValue);
 }
 
 class PassiveTextFieldWidget extends StatefulWidget {
