@@ -2,9 +2,9 @@
 # Codelessly CloudUI™ SDK
 [![Pub release](https://img.shields.io/pub/v/codelessly_sdk.svg?style=flat-square)](https://pub.dev/packages/codelessly_sdk) [![GitHub Release Date](https://img.shields.io/github/release-date/Codelessly/CodelesslySDK.svg?style=flat-square)](https://github.com/Codelessly/CodelesslySDK) [![GitHub issues](https://img.shields.io/github/issues/Codelessly/CodelesslySDK.svg?style=flat-square)](https://github.com/Codelessly/CodelesslySDK/issues) [![GitHub top language](https://img.shields.io/github/languages/top/Codelessly/CodelesslySDK.svg?style=flat-square)](https://github.com/Codelessly/CodelesslySDK)
 
-![Codelessly Publish UI](packages/Codelessly-Cover.png)
-
 > ### Dynamic UI and real-time updates for Flutter apps
+
+![Codelessly Publish UI](packages/Codelessly-Cover.png)
 
 Supercharge your Flutter apps with dynamic UI and real-time updates. Build and publish UI without code!
 
@@ -15,14 +15,13 @@ Supercharge your Flutter apps with dynamic UI and real-time updates. Build and p
 ## Quickstart
 [![Pub release](https://img.shields.io/pub/v/codelessly_sdk.svg?style=flat-square)](https://pub.dev/packages/codelessly_sdk)
 
-#### Step 1: Import Library
+#### **Step 1: Import Library**
 
-Import this library into your project:
 ```yaml
 codelessly_sdk: ^latest_version
 ```
 
-#### Step 2: Initialize the SDK
+#### **Step 2: Initialize the SDK**
 
 Initialize Codelessly before calling `runApp()`.
 
@@ -43,11 +42,9 @@ void main() {
 ```
 The `authToken`can be found for each project under `Publish > Settings > Settings`.
 
-Information on customizing SDK initialization can be found later in the documentation.
+#### **Step 3: Embed the CodelesslyWidget**
 
-#### Step 3: Get a Layout ID from the Codelessly Editor
-
-Easily embed a design from the Codelessly Editor into your app with a `layoutID`. The `CodelesslyWidget` enables your app to update its UI over the air.
+Easily embed any design from the Codelessly Editor into your app using the `layoutID`.
 
 ```dart
 CodelesslyWidget(
@@ -55,17 +52,15 @@ CodelesslyWidget(
 )
 ```
 
+**How to obtain a Layout ID**
+
 1. In the Codelessly Editor, select the **canvas** of your layout.
 2. Press the **Preview Icon** in the toolbar. ![CloudUI Preview Icon](packages/preview_icon.png)
 3. Copy the **layoutID**.
 
 ![Codelessly Widget Code](packages/codelessly_widget_code.png)
 
-Refer to the later sections for how to pass variables and functions to the CodelesslyWidget.
-
-#### Full Example: Putting it All Together
-
-The `CodelesslyWidget` can be used like any other widget and embedded anywhere in your app. It can even be used to render entire pages as the root widget!
+### Complete Example
 
 Here is a complete example:
 
@@ -87,25 +82,38 @@ class MyApp extends StatelessWidget {
 }
 ```
 
+The `CodelesslyWidget` can be used like any other widget and embedded anywhere in your app. It can even be used to render entire pages as the root widget!
+
 From dynamic forms to constantly changing sales and marketing pages, any design or layout can be streamed to your app via the `CodelesslyWidget`. 
 
 To learn how to use the Codelessly editor to publish layouts, check out our [3-minute Quickstart Guide](https://docs.codelessly.com/getting-started/3-minute-quick-start).
 
-## Data
+## Injecting Data
 
-Customize Codelessly CloudUI™ widgets by passing data into your layout. The UI will dynamically replace any variables defined in the Codelessly editor with the provided values.
+Customize Codelessly CloudUI™ widgets by passing data values into your layout. The UI will dynamically replace any variables defined in the Codelessly editor with the provided values.
+
+```dart
+CodelesslyWidget(
+  layoutID: LAYOUT_ID,
+  data: {
+    // A map of variables, Map<String, dynamic>
+  },
+),
+```
+
+#### **Step 1:** Define variables in the Codelessly Editor
+
+Use the `${}` templating syntax in input fields to link data from the Codelessly editor to layouts as shown below. 
 
 ![Data](packages/ui_with_data_linking.png)
 
-**Step 1:** Use the `${}` templating syntax in input fields to link data from the Codelessly editor to layouts as shown below. 
-
 To link the title of a text widget to the `title` variable in the Codelessly editor, put `${data.title}` in the text widget’s text field.
 
-> The `data` object contains all the variables passed to the CodelesslyWidget. 
+> **Note:** The `data` object contains all the variables passed to the CodelesslyWidget. 
 >
 > Use `${data.title}` to access the `title` variable passed from the client. `${title}` alone is a Codelessly variable and will try to load variables defined in Codelessly, not your client.
 
-**Step 2:** Once this is set from the editor, you can provide the data to the layout from your app.
+#### **Step 2:** Pass data to the layout from your app.
 
 ```dart
 CodelesslyWidget(
@@ -127,22 +135,22 @@ This how it looks with populated data:
 
 ## Functions
 
-Codelessly SDK also supports providing callback functions for user actions such as onClick, onLongPress, etc.
+Codelessly SDK also supports calling functions for user actions such as onClick, onLongPress, etc.
 
 ```dart
 CodelesslyWidget(
   layoutID: LAYOUT_ID,
   functions: {
-    'onNextButtonClicked': CodelesslyFunction((CodelesslyContext context) {
-      print('onNextButtonClicked function called');
+    'functionName': (context, reference, params) {
       // TODO: Implement your function here
     }),
   },
 ),
 ```
-The `functions` parameter takes a map of type `Map<String, CodelesslyFunction>` which is used to execute functions defined as action calls in the Codelessly editor.
 
-Here, we define an `onNextButtonClicked` function that can be invoked by the widget. Once a function is provided, it can be referenced by name in the Codelessly Editor.
+#### **Step 1:** Add a "Call Function" Action in the Codelessly Editor
+
+Here, we tell the button to call the native `onNextButtonClicked` function when pressed.
 
 ![Defining call function action](packages/defining_call_function_action.png)
 
@@ -155,11 +163,11 @@ In the Codelessly Editor, you can easily add an Action to a widget. Use the `Cal
 4. Click on the `Settings` button to bring up the `Action Settings` popup.
 5. Reference the function name in the `Function Name` field. For example, `onNextButtonClicked`.
 
-The `CodelesslyFunction` provides a `CodelesslyContext` which provides internal access to the widget's data, variables, conditions, functions, etc.
+**Note:** The `CodelesslyFunction` provides a `CodelesslyContext` which provides internal access to the widget's data, variables, conditions, functions, etc.
 
-**Note** You can declare `data` and `functions` in the global `Codelessly` instance to make them globally accessible to all `CodelesslyWidget`s.
+**Note 2:** You can declare `data` and `functions` in the global `Codelessly` instance to make them globally accessible to all `CodelesslyWidget`s.
 
-## CodelesslyWidget Customization
+## CodelesslyWidget Options
 
 ```dart
 CodelesslyWidget(
@@ -180,7 +188,7 @@ CodelesslyWidget(
 
 **Note:** Setting a `CodelesslyConfig` on a CodelesslyWidget overrides the global Codelessly instance settings. This lets you embed layouts from other projects with different auth tokens.
 
-## Configuring Environments
+## Environment Configuration
 
 The CodelesslyWidget supports **Preview** and **Published** environments via the `isPreview` boolean.
 
@@ -195,7 +203,7 @@ Codelessly.instance.initialize(
 // Widget level. Overrides global settings for this widget.
 CodelesslyWidget(
   isPreview: true
-)
+);
 ```
 
 ### Preview Mode
