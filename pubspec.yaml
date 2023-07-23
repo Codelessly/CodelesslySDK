@@ -1,6 +1,6 @@
 name: codelessly_sdk
 description: Codelessly CloudUI™ - Supercharge your Flutter apps with dynamic UI and real-time updates. Build and publish UI without code!
-version: 0.0.6
+version: 0.0.7
 homepage: https://codelessly.com/
 repository: https://github.com/Codelessly/CodelesslySDK
 
@@ -30,7 +30,7 @@ dependencies:
   universal_html: ^2.2.3
   webview_flutter: ^4.2.2
   webview_flutter_android: ^3.9.1
-  webview_flutter_wkwebview: ^3.7.0
+  webview_flutter_wkwebview: ^3.7.1
   flutter_animation_progress_bar: ^2.3.1
   vector_math: ^2.1.4
   grpc: ^3.2.3
@@ -41,7 +41,7 @@ dependencies:
   uuid: ^3.0.7
   path_provider: ^2.0.15
   provider: ^6.0.5
-  json_path: ^0.6.0
+  json_path: ^0.6.2
   meta: ^1.9.1
   path: ^1.8.3
 

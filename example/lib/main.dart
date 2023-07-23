@@ -1,4 +1,5 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:storybook_flutter/storybook_flutter.dart';
@@ -41,6 +42,9 @@ class _MyAppState extends State<MyApp> {
               builder: (context) {
                 return CodelesslyWidget(
                   layoutID: "0R0yB82iCD4RPZMZYOYZ",
+                  loadingBuilder: (context) {
+                    return const CupertinoActivityIndicator();
+                  },
                 );
               }),
           Story(
