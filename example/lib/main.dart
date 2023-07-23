@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,60 +13,72 @@ void main() async {
     ),
   );
 
-  runApp(const MyStoryBookApp());
+  runApp(const MyApp());
 }
 
-class MyStoryBookApp extends StatelessWidget {
-  const MyStoryBookApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Map<String, dynamic> licenseData = {'license': 'FREE'};
 
   @override
   Widget build(BuildContext context) => Storybook(
         initialStory: 'Hello World',
         showPanel: true,
+        wrapperBuilder: (context, child) {
+          return MaterialApp(
+            home: child,
+          );
+        },
         stories: [
           Story(
-            name: 'Hello World',
-            description: 'A simple hello world demo.',
-            builder: (context) => MaterialApp(
-              theme: Theme.of(context),
-              home: Center(
-                child: CodelesslyWidget(
-                  layoutID: "0R0yRfzR23SQfDGrbg3h",
-                ),
-              ),
-            ),
-          ),
+              name: 'Hello World',
+              builder: (context) {
+                return CodelesslyWidget(
+                  layoutID: "0R0yB82iCD4RPZMZYOYZ",
+                );
+              }),
           Story(
-            name: 'License UI',
-            description: "Demo of Codelessly's license UI.",
-            builder: (context) => MaterialApp(
-              theme: Theme.of(context),
-              home: Center(
-                child: CodelesslyWidget(
+              name: 'License UI',
+              builder: (context) {
+                return CodelesslyWidget(
                   layoutID: "0R0yeUx1iGDe9kgW5xwn",
+                  data: licenseData,
                   functions: {
-                    'onSelected': (context, ref, params) {
-                      log('selected license: ${params['license']}');
+                    'onFreeSelected': (context, reference, params) {
+                      licenseData['license'] = 'FREE';
+                      setState(() {});
                     },
-                    'onUpgrade': (context, ref, params) {
-                      log('Upgrade to ${params['license']} license');
+                    'onProSelected': (context, reference, params) {
+                      licenseData['license'] = 'PRO';
+                      setState(() {});
+                    },
+                    'onBusinessSelected': (context, reference, params) {
+                      licenseData['license'] = 'BUSINESS';
+                      setState(() {});
                     },
                   },
-                ),
-              ),
-            ),
-          ),
+                );
+              }),
           Story(
-            name: 'Pricing UI',
-            description: "Demo of Codelessly's pricing UI.",
-            builder: (context) => MaterialApp(
-              theme: Theme.of(context),
-              home: Center(
-                child: CodelesslyWidget(
+              name: 'Pricing UI',
+              builder: (context) {
+                return CodelesslyWidget(
                   layoutID: "0R0yedXWbqOrI_W7PBlo",
-                ),
-              ),
-            ),
+                );
+              }),
+          Story(
+            name: 'Pricing Card',
+            builder: (context) {
+              return CodelesslyWidget(
+                layoutID: '0R1xmqF5lXMr6LpLA9h5',
+              );
+            },
           ),
         ],
       );
