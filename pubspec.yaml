@@ -19,7 +19,7 @@ platforms:
 dependencies:
   flutter:
     sdk: flutter
-  codelessly_api: 0.0.6
+  codelessly_api: 0.0.7
   equatable: ^2.0.5
   google_fonts: ^5.1.0
   json_annotation: ^4.8.1
