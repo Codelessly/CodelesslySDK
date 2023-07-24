@@ -149,8 +149,8 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     FunctionsRepository.setPropertyVariable(context,
         node: node, property: 'inputValue', value: inputValue);
 
-    FunctionsRepository.triggerAction(
-        context, node, TriggerType.changed, value: inputValue);
+    FunctionsRepository.triggerAction(context, node, TriggerType.changed,
+        value: inputValue);
   }
 
   void onSubmitted(
@@ -158,8 +158,8 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     TextFieldNode node,
     String inputValue,
   ) =>
-      FunctionsRepository.triggerAction(
-          context, node, TriggerType.changed, value: inputValue);
+      FunctionsRepository.triggerAction(context, node, TriggerType.changed,
+          value: inputValue);
 }
 
 class PassiveTextFieldWidget extends StatefulWidget {
@@ -254,9 +254,17 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       ),
     );
 
-    if (!widget.node.isHorizontalExpanded) {
-      field = SizedBox(width: widget.node.basicBoxLocal.width, child: field);
-    }
+    final double? width = widget.node.isHorizontalExpanded
+        ? null
+        : widget.node.basicBoxLocal.width;
+    // TODO: Make adaptive
+    final double height = widget.node.basicBoxLocal.height;
+
+    field = SizedBox(
+      width: width,
+      height: height,
+      child: field,
+    );
 
     return field;
   }
