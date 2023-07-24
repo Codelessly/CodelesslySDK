@@ -370,6 +370,17 @@ List<Widget> buildStrokes(
   return strokeWidgets;
 }
 
+typedef ImageFillBuilder = Widget Function(
+  String url,
+  BoxFit fit,
+  Alignment alignment,
+  double scale,
+  double width,
+  double height,
+  ImageRepeat repeat,
+  PaintModel paint,
+);
+
 List<Widget> buildFills(
   BuildContext context,
   BaseNode node,
@@ -378,6 +389,7 @@ List<Widget> buildFills(
   double? imageOpacity,
   double? imageRotation,
   bool isActive = false,
+  ImageFillBuilder? imageFillBuilder,
 }) {
   if (node is! GeometryMixin) return [];
 
@@ -431,28 +443,41 @@ List<Widget> buildFills(
           final double scale = paint.scale;
           final ImageRepeat repeat = paint.imageRepeat.flutterImageRepeat;
 
-          Widget child = bytes != null
-              ? Image.memory(
-                  bytes,
-                  fit: fit,
-                  alignment: alignment ?? Alignment.center,
-                  scale: scale.abs(),
-                  width: node.basicBoxLocal.width,
-                  height: node.basicBoxLocal.height,
-                  repeat: repeat,
-                )
-              : _NetworkImageWithStates(
-                  url: imageURL,
-                  fit: fit,
-                  alignment: alignment ?? Alignment.center,
-                  scale: scale.abs(),
-                  width: node.basicBoxLocal.width,
-                  height: node.basicBoxLocal.height,
-                  repeat: repeat,
-                  paint: paint,
-                  node: node,
-                  isActive: isActive,
-                );
+          Widget child;
+          if (bytes != null) {
+            child = Image.memory(
+              bytes,
+              fit: fit,
+              alignment: alignment ?? Alignment.center,
+              scale: scale.abs(),
+              width: node.basicBoxLocal.width,
+              height: node.basicBoxLocal.height,
+              repeat: repeat,
+            );
+          } else if (imageFillBuilder != null) {
+            child = imageFillBuilder(
+                imageURL,
+                fit,
+                alignment ?? Alignment.center,
+                scale,
+                node.basicBoxLocal.width,
+                node.basicBoxLocal.height,
+                repeat,
+                paint);
+          } else {
+            child = _NetworkImageWithStates(
+              url: imageURL,
+              fit: fit,
+              alignment: alignment ?? Alignment.center,
+              scale: scale.abs(),
+              width: node.basicBoxLocal.width,
+              height: node.basicBoxLocal.height,
+              repeat: repeat,
+              paint: paint,
+              node: node,
+              isActive: isActive,
+            );
+          }
 
           child = Transform.scale(
             scaleX: paint.isFlippedX ? -1 : 1,
