@@ -204,6 +204,7 @@ class WebDataRepository extends NetworkDataRepository {
     required String layoutID,
     required PublishSource source,
   }) async {
+    print('Downloading conditions for $layoutID');
     try {
       final Response result = await post(
         Uri.parse('$cloudFunctionsBaseURL/getPublishedLayoutConditionsRequest'),
@@ -229,8 +230,11 @@ class WebDataRepository extends NetworkDataRepository {
       final SDKLayoutConditions conditions =
           SDKLayoutConditions.fromJson({...modelDoc, 'id': layoutID});
 
+      print('Layout Conditions [${conditions.id}]: ${conditions.conditions.length}');
+
       return conditions;
     } catch (e, stacktrace) {
+      print('Error downloading conditions for $layoutID');
       print(e);
       print(stacktrace);
       return null;
