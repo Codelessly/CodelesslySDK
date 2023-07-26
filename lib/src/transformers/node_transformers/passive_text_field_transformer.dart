@@ -257,8 +257,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     final double? width = widget.node.isHorizontalExpanded
         ? null
         : widget.node.basicBoxLocal.width;
-    // TODO: Make adaptive
-    final double height = widget.node.basicBoxLocal.height;
+    final double? height = widget.node.isVerticalExpanded
+        ? null
+        : widget.node.basicBoxLocal.height;
 
     field = SizedBox(
       width: width,
