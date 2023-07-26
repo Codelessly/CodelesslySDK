@@ -72,7 +72,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
 
   static InputDecoration getDecoration(
     BuildContext context,
-    BaseNode node,
+    TextFieldNode node,
     InputDecorationModel decoration,
     bool useIconFonts, [
     WidgetBuildSettings settings = const WidgetBuildSettings(),
@@ -120,7 +120,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
       suffixStyle: getTextStyle(decoration.suffixStyle),
       // suffixIconConstraints:
       //     decoration.suffixIconConstraints.flutterConstraints,
-      counterText: decoration.counterText,
+      counterText: decoration.showCounter ? decoration.counterText : '',
       counterStyle: getTextStyle(decoration.counterStyle),
       filled: decoration.filled,
       fillColor: decoration.fillColor.toFlutterColor(),
