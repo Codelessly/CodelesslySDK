@@ -1,3 +1,8 @@
+## 0.0.8
+- Update CodelesslyAPI v0.0.8.
+- Text field and code-gen improvements.
+- Fix text field counter text not working properly.
+
 ## 0.0.7
 - Update CodelesslyAPI v0.0.7.
 - Add support for Tabs.
