@@ -124,7 +124,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
     try {
       CodelesslyStatus status = codelessly.status;
-      final bool isGlobal = Codelessly.isGlobalInstance(codelessly);
+      final bool isGlobal = codelessly == Codelessly.instance;
 
       // If the Codelessly global instance was passed and is still idle, that
       // means the user never triggered [Codelessly.init] but this
