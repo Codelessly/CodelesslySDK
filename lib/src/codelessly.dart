@@ -33,10 +33,10 @@ class Codelessly {
   static Codelessly get instance => _instance;
 
   /// Returns the current status of the SDK.
-  static CodelesslyStatus get sdkStatus => _instance.status;
+  CodelesslyStatus get sdkStatus => _instance.status;
 
   /// Returns a stream of SDK status changes.
-  static Stream<CodelesslyStatus> get sdkStatusStream => _instance.statusStream;
+  Stream<CodelesslyStatus> get sdkStatusStream => _instance.statusStream;
 
   CodelesslyConfig? _config;
 
@@ -151,11 +151,6 @@ class Codelessly {
 
   /// Disposes this instance of the SDK permanently.
   void dispose() {
-    assert(
-      !isGlobalInstance(this),
-      'Cannot dispose global instance. Only dispose locally created instances.',
-    );
-
     _status = CodelesslyStatus.empty;
     _statusStreamController.close();
 
@@ -243,21 +238,6 @@ class Codelessly {
 
     _status = CodelesslyStatus.empty;
     _statusStreamController.add(_status);
-  }
-
-  /// Resets the state of the SDK. This is useful for resetting the data without
-  /// disposing the instance permanently.
-  ///
-  /// This does not close the status stream, and instead sets the SDK back to
-  /// idle mode.
-  ///
-  /// This is different from [resetAndClearCache] in that it only affects the
-  /// global [Codelessly] instance.
-  static Future<void> resetAndClearSDKCache() => _instance.resetAndClearCache();
-
-  /// Returns true if the provided instance is the global instance.
-  static bool isGlobalInstance(Codelessly codelessly) {
-    return _instance == codelessly;
   }
 
   /// Internally updates the status of this instance of the SDK and emits a
@@ -528,7 +508,7 @@ class Codelessly {
         }
       }
 
-      log('Codelessly ${isGlobalInstance(this) ? 'global' : 'local'} instance initialization complete.');
+      log('Codelessly ${_instance == this ? 'global' : 'local'} instance initialization complete.');
 
       _updateStatus(CodelesslyStatus.loaded);
     } catch (error, stacktrace) {
@@ -540,42 +520,5 @@ class Codelessly {
     }
 
     return _status;
-  }
-
-  /// Configures this instance of the SDK with the provided configuration
-  /// options. This will mark the SDK as ready to be initialized.
-  ///
-  /// This function can still be used to lazily initialize the SDK. Layouts and
-  /// fonts will only be downloaded and cached when [initialize] is called.
-  ///
-  /// To immediately configure and initialize the SDK, [initialize] can be
-  /// called directly without needing to call this function first.
-  ///
-  /// If the [CodelesslyWidget] recognizes that this instance of the
-  /// [Codelessly] SDK is the global instance rather than a local one, it will
-  /// configure and initialize the SDK automatically via its widget's
-  /// constructor parameters.
-  static CodelesslyStatus configureSDK({
-    CodelesslyConfig? config,
-
-    // Optional data and functions.
-    Map<String, String>? data,
-    Map<String, CodelesslyFunction>? functions,
-
-    // Optional managers.
-    CacheManager? cacheManager,
-    AuthManager? authManager,
-    DataManager? publishDataManager,
-    DataManager? previewDataManager,
-  }) {
-    return _instance.configure(
-      config: config,
-      cacheManager: cacheManager,
-      authManager: authManager,
-      publishDataManager: publishDataManager,
-      previewDataManager: previewDataManager,
-      data: data,
-      functions: functions,
-    );
   }
 }
