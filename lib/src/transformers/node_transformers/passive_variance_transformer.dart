@@ -45,7 +45,8 @@ class PassiveVarianceWidget extends StatelessWidget {
             node.currentVariantId;
 
     final Variant variant = node.variants.findById(variantIdOrName) ??
-        node.variants.findByName(variantIdOrName)!;
+        node.variants.findByName(variantIdOrName) ??
+        node.currentVariant;
     return variant.children;
   }
 
