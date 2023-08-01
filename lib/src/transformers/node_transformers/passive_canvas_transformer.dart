@@ -101,7 +101,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
 
     if (needsAScaffold) {
       scaffold = Scaffold(
-        backgroundColor: retrieveBackgroundColor(node),
+        backgroundColor: retrieveBackgroundColor(context, node),
         appBar: appBar,
         floatingActionButton: floatingActionButton,
         floatingActionButtonLocation: props.floatingActionButton?.location
@@ -111,7 +111,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       );
     } else {
       scaffold = Material(
-        color: retrieveBackgroundColor(node),
+        color: retrieveBackgroundColor(context, node),
         child: body,
       );
     }
@@ -163,10 +163,15 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     );
   }
 
-  static Color? retrieveBackgroundColor(CanvasNode node) {
-    if (node.fills.length == 1 && node.fills[0].type == PaintType.solid) {
-      return node.fills[0].color
-          ?.toFlutterColor(opacity: node.fills[0].opacity);
+  static Color? retrieveBackgroundColor(BuildContext context, CanvasNode node) {
+    final fills = <PaintModel>[
+      for (final fill in node.fills)
+        PropertyValueDelegate.getPropertyValue(
+                context, node, 'fill-${fill.id}') ??
+            fill
+    ];
+    if (fills.length == 1 && fills[0].type == PaintType.solid) {
+      return fills[0].color?.toFlutterColor(opacity: fills[0].opacity);
     }
     return Colors.transparent;
   }
