@@ -150,9 +150,15 @@ class Codelessly {
   }
 
   /// Disposes this instance of the SDK permanently.
-  void dispose() {
-    _status = CodelesslyStatus.empty;
-    _statusStreamController.close();
+  /// if [completeDispose] is true, the SDK's internal stream controllers are
+  /// also disposed instead of reset.
+  void dispose({bool completeDispose = false}) {
+    if (completeDispose) {
+      _statusStreamController.close();
+    } else {
+      _status = CodelesslyStatus.empty;
+      _statusStreamController.add(_status);
+    }
 
     _cacheManager?.dispose();
     _authManager?.dispose();
@@ -164,6 +170,7 @@ class Codelessly {
     _authManager = null;
     _publishDataManager = null;
     _previewDataManager = null;
+    _config = null;
   }
 
   /// Initializes this instance of the SDK.
@@ -236,6 +243,7 @@ class Codelessly {
     _templateDataManager?.invalidate();
     _authManager?.invalidate();
 
+    _config = null;
     _status = CodelesslyStatus.empty;
     _statusStreamController.add(_status);
   }
@@ -377,7 +385,7 @@ class Codelessly {
               '\nConsider specifying a [CodelesslyConfig] when initializing.'
           : 'A [CodelesslyConfig] was already provided.'
               '\nConsider removing the duplicate config or calling '
-              '[Codelessly.dispose] before reinitializing.',
+              '[Codelessly.instance.dispose] before reinitializing.',
     );
 
     _config ??= config;
