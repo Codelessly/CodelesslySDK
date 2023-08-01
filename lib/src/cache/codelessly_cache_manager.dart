@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -48,10 +49,10 @@ class CodelesslyCacheManager extends CacheManager {
 
   @override
   Future<void> clearAll() async {
-    print('Clearing cache...');
+    log('[CacheManager] Clearing cache...');
     try {
       await box.clear();
-      print('Cache cleared successfully!');
+      log('[CacheManager] Cache cleared successfully!');
     } catch (e, stacktrace) {
       throw CodelesslyException.cacheClearException(
         message: 'Failed to clear cache',
@@ -165,8 +166,7 @@ class CodelesslyCacheManager extends CacheManager {
     String pathKey, {
     Iterable<String> excludedFileNames = const [],
   }) async {
-    print(
-        'Purging outdated files. (excluding: ${excludedFileNames.join(', ')})');
+    log('[CacheManager] Purging outdated files. (excluding: ${excludedFileNames.join(', ')})');
     int purgedFiles = 0;
     try {
       for (final String path in filesBox.keys) {
@@ -175,20 +175,20 @@ class CodelesslyCacheManager extends CacheManager {
         }
         final String fileName = path.split('/').last;
         if (!excludedFileNames.contains(fileName)) {
-          print('\t\tDeleting file: $path');
+          log('[CacheManager] \t\tDeleting file: $path');
 
           await filesBox.delete(path);
 
-          print('\t\tSuccessfully deleted.');
+          log('[CacheManager] \t\tSuccessfully deleted.');
 
           purgedFiles++;
         }
       }
 
       if (purgedFiles > 0) {
-        print('Successfully purged $purgedFiles files.');
+        log('[CacheManager] Successfully purged $purgedFiles files.');
       } else {
-        print('No files were purged.');
+        log('[CacheManager] No files were purged.');
       }
     } catch (e, stacktrace) {
       throw CodelesslyException.fileIoException(
@@ -204,7 +204,7 @@ class CodelesslyCacheManager extends CacheManager {
     try {
       final key = '$pathKey/$name';
       await filesBox.put(key, bytes);
-      print('Successfully saved file $pathKey/$name');
+      log('[CacheManager] Successfully saved file $pathKey/$name');
     } catch (e, stacktrace) {
       throw CodelesslyException.fileIoException(
         message: 'Failed to save file $pathKey/$name',
