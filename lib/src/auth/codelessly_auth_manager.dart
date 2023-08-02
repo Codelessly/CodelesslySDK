@@ -42,6 +42,8 @@ class CodelesslyAuthManager extends AuthManager {
 
   @override
   Future<void> init() async {
+    final Stopwatch stopwatch = Stopwatch()..start();
+
     if (cacheManager.isCached(authCacheKey)) {
       try {
         final AuthData cachedAuthData = cacheManager.get<AuthData>(
@@ -96,6 +98,9 @@ class CodelesslyAuthManager extends AuthManager {
         CodelesslyErrorHandler.instance.captureException(error);
       });
     }
+
+    stopwatch.stop();
+    log('[AuthManager] Auth manager initialized took ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s');
   }
 
   @override

@@ -173,63 +173,6 @@ class Codelessly {
     _config = null;
   }
 
-  /// Initializes this instance of the SDK.
-  ///
-  /// To know when the SDK is ready, simply listen to the status events from the
-  /// [Codelessly.instance.statusStream]. No need to await the future.
-  ///
-  /// If the [CodelesslyWidget] recognizes that this instance of the
-  /// [Codelessly] SDK is the global instance rather than a local one, it will
-  /// initialize the SDK automatically, if specified.
-  Future<CodelesslyStatus> initialize({
-    CodelesslyConfig? config,
-
-    // Raw managers.
-    AuthManager? authManager,
-    DataManager? publishDataManager,
-    DataManager? previewDataManager,
-    CacheManager? cacheManager,
-
-    // Raw data.
-    Map<String, dynamic>? data,
-    Map<String, CodelesslyFunction>? functions,
-  }) async {
-    assert(
-      (config == null) != (_instance._config == null),
-      _instance._config == null
-          ? 'The SDK cannot be initialized if it is not configured. '
-              '\nConsider specifying a [CodelesslyConfig] when initializing.'
-          : 'A [CodelesslyConfig] was already provided.'
-              '\nConsider removing the duplicate config or calling '
-              '[Codelessly.dispose] before reinitializing.',
-    );
-
-    try {
-      return _instance.init(
-        config: config,
-        cacheManager: cacheManager,
-        authManager: authManager,
-        publishDataManager: publishDataManager,
-        previewDataManager: previewDataManager,
-        data: data,
-        functions: functions,
-      );
-    } catch (error, stacktrace) {
-      _instance._config ??= config;
-      _instance.initErrorHandler(
-        firebaseProjectId: _instance._config?.firebaseProjectId,
-        automaticallySendCrashReports:
-            (_instance._config?.automaticallyCollectCrashReports) ?? false,
-      );
-
-      CodelesslyErrorHandler.instance.captureException(
-        error,
-        stacktrace: stacktrace,
-      );
-      return CodelesslyStatus.error;
-    }
-  }
-
   /// Resets the state of the SDK. This is useful for resetting the data without
   /// disposing the instance permanently.
   ///
@@ -335,11 +278,19 @@ class Codelessly {
     required bool automaticallySendCrashReports,
     String? firebaseProjectId,
   }) {
+    final Stopwatch stopwatch = Stopwatch()..start();
+
     firebaseProjectId ??= defaultFirebaseProjectId;
     if (!kIsWeb) {
       if (_firestore != null) return;
-      log('[SDK] Initializing Firestore instance with project ID: $firebaseProjectId');
+      log('[SDK] [INIT] Initializing Firestore instance with project ID: $firebaseProjectId');
+
+      final Stopwatch stopwatch = Stopwatch()..start();
       _firestore = Firestore(firebaseProjectId);
+      stopwatch.stop();
+
+      final elapsed = stopwatch.elapsed;
+      log('[SDK] [INIT] Firestore instance initialized in ${elapsed.inMilliseconds}ms or ${elapsed.inSeconds}s');
     }
     CodelesslyErrorHandler.init(
       reporter: automaticallySendCrashReports && !kIsWeb
@@ -353,6 +304,9 @@ class Codelessly {
         _updateStatus(CodelesslyStatus.error);
       },
     );
+
+    stopwatch.stop();
+    log('[SDK] [INIT] Error handler initialized in ${stopwatch.elapsed.inMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s');
   }
 
   /// Initializes this instance of the SDK.
@@ -364,7 +318,7 @@ class Codelessly {
   /// [Codelessly] SDK is the global instance rather than a local one, it will
   /// configure and/or initialize the SDK automatically via its widget's
   /// constructor parameters, if specified.
-  Future<CodelesslyStatus> init({
+  Future<CodelesslyStatus> initialize({
     CodelesslyConfig? config,
 
     // Optional data and functions.
@@ -390,8 +344,10 @@ class Codelessly {
 
     _config ??= config;
 
-    log('[INIT] Initializing Codelessly with project ID: ${_config!.firebaseProjectId}');
-    log('[INIT] Cloud Functions Base URL: ${_config!.firebaseCloudFunctionsBaseURL}');
+    log('[SDK] [INIT] Initializing Codelessly with project ID: ${_config!.firebaseProjectId}');
+    log('[SDK] [INIT] Cloud Functions Base URL: ${_config!.firebaseCloudFunctionsBaseURL}');
+
+    final Stopwatch stopwatch = Stopwatch()..start();
 
     initErrorHandler(
       firebaseProjectId: _config!.firebaseProjectId,
@@ -472,11 +428,11 @@ class Codelessly {
 
       _updateStatus(CodelesslyStatus.loading);
 
-      log('Initializing cache manager');
+      log('[SDK] [INIT] Initializing cache manager');
       // The cache manager initializes first to load the local cache.
       await this.cacheManager.init();
 
-      log('Initializing auth manager');
+      log('[SDK] [INIT] Initializing auth manager');
       // The auth manager initializes second to look up cached auth data
       // from the cache manager. If no auth data is available, it halts the
       // entire process and awaits to authenticate with the server.
@@ -487,7 +443,7 @@ class Codelessly {
 
       _config!.publishSource = this.authManager.getBestPublishSource(_config!);
 
-      log('Initializing data managers with publish source '
+      log('[SDK] [INIT] Initializing data managers with publish source '
           '${_config!.publishSource}');
       // The data manager initializes last to load the last stored publish
       // model, or, if it doesn't exist, halts the entire process and awaits
@@ -516,7 +472,7 @@ class Codelessly {
         }
       }
 
-      log('Codelessly ${_instance == this ? 'global' : 'local'} instance initialization complete.');
+      log('[SDK] [INIT] Codelessly ${_instance == this ? 'global' : 'local'} instance initialization complete.');
 
       _updateStatus(CodelesslyStatus.loaded);
     } catch (error, stacktrace) {
@@ -525,6 +481,9 @@ class Codelessly {
         error,
         stacktrace: stacktrace,
       );
+    } finally {
+      stopwatch.stop();
+      log('[SDK] [INIT] Initialization took ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s');
     }
 
     return _status;
