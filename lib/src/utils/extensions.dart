@@ -1041,35 +1041,50 @@ extension BoxWidthStyleEnumExtensions on BoxWidthStyleEnum {
 extension IconModelExt on IconModel {
   String get label => name.split('_').map((part) => part.capitalized).join(' ');
 
-  IconData toFontIconData() {
-    if (this is MaterialIcon) {
-      return IconData(
-        codepoint,
-        fontFamily: 'MaterialIcons${(this as MaterialIcon).style.fontFamily}',
-        fontPackage: fontPackage,
-      );
-    }
-    return IconData(codepoint,
-        fontFamily: fontFamily, fontPackage: fontPackage);
-  }
+  // IconData toFontIconData() {
+  //   if (this is MaterialIcon) {
+  //     return IconData(
+  //       codepoint,
+  //       fontFamily: 'MaterialIcons${(this as MaterialIcon).style.fontFamily}',
+  //       fontPackage: fontPackage,
+  //     );
+  //   }
+  //   return IconData(codepoint,
+  //       fontFamily: fontFamily, fontPackage: fontPackage);
+  // }
 
-  IconData toFlutterIconData() {
-    if (this is MaterialIcon) {
-      return IconData(
-        flutterIconsDataMap[flutterID] ?? 0,
-        fontFamily: 'MaterialIcons',
-      );
-    }
-
-    return IconData(codepoint,
-        fontFamily: fontFamily, fontPackage: fontPackage);
-  }
+  // IconData toFlutterIconData() {
+  //   if (this is MaterialIcon) {
+  //     return IconData(
+  //       flutterIconsDataMap[flutterID] ?? 0,
+  //       fontFamily: 'MaterialIcons',
+  //     );
+  //   }
+  //
+  //   return IconData(codepoint,
+  //       fontFamily: fontFamily, fontPackage: fontPackage);
+  // }
 
   /// This would return flutter icon name if it is a material icon. This is
   /// useful for codegen.
   String? get flutterID {
     if (this is MaterialIcon) {
       return flutterIconNames[(this as MaterialIcon).styledName];
+    }
+    return null;
+  }
+
+  String? toSvgUrl() {
+    if (this is MaterialIcon) {
+      final icon = this as MaterialIcon;
+      // e.g https://fonts.gstatic.com/s/i/materialiconsoutlined/home/v16/24px.svg
+      // TODO: how to get the right version?
+      return kSvgIconBaseUrlTemplate
+          .replaceAll(
+              '{{style}}', 'materialicons${icon.style.styleName.toLowerCase()}')
+          .replaceAll('{{name}}', icon.name.toLowerCase())
+          .replaceAll('{{version}}', '${icon.version ?? 1}')
+          .replaceAll('{{size}}', '24');
     }
     return null;
   }
