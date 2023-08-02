@@ -145,7 +145,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
         }
         status = codelessly.status;
         if (status == CodelesslyStatus.configured) {
-          codelessly.init(initializeDataManagers: false);
+          codelessly.initialize(initializeDataManagers: false);
         }
       }
     } catch (exception, str) {

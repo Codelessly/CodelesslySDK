@@ -35,9 +35,9 @@ class WebDataRepository extends NetworkDataRepository {
     );
 
     if (result.statusCode != 200) {
-      print('Error downloading publish model from web data manager.');
-      print('Status code: ${result.statusCode}');
-      print('Message: ${result.body}');
+      log('[WebDataRepo] Error downloading publish model from web data manager.');
+      log('[WebDataRepo] Status code: ${result.statusCode}');
+      log('[WebDataRepo] Message: ${result.body}');
       throw CodelesslyException(
         'Error downloading publish model.',
         stacktrace: StackTrace.current,
@@ -70,8 +70,8 @@ class WebDataRepository extends NetworkDataRepository {
     if (result.statusCode != 200) {
       print(
           'Error downloading layout model from web data manager. [${source.serverPath}]');
-      print('Status code: ${result.statusCode}');
-      print('Message: ${result.body}');
+      log('[WebDataRepo] Status code: ${result.statusCode}');
+      log('[WebDataRepo] Message: ${result.body}');
       throw CodelesslyException(
         'Error downloading layout model [$layoutID]',
         layoutID: layoutID,
@@ -104,9 +104,9 @@ class WebDataRepository extends NetworkDataRepository {
       );
 
       if (result.statusCode != 200) {
-        print('Error downloading font model from web data manager.');
-        print('Status code: ${result.statusCode}');
-        print('Message: ${result.body}');
+        log('[WebDataRepo] Error downloading font model from web data manager.');
+        log('[WebDataRepo] Status code: ${result.statusCode}');
+        log('[WebDataRepo] Message: ${result.body}');
         throw CodelesslyException(
           'Error downloading font model.',
           stacktrace: StackTrace.current,
@@ -140,9 +140,9 @@ class WebDataRepository extends NetworkDataRepository {
       );
 
       if (result.statusCode != 200) {
-        print('Error downloading api from web data manager.');
-        print('Status code: ${result.statusCode}');
-        print('Message: ${result.body}');
+        log('[WebDataRepo] Error downloading api from web data manager.');
+        log('[WebDataRepo] Status code: ${result.statusCode}');
+        log('[WebDataRepo] Message: ${result.body}');
         throw CodelesslyException(
           'Error downloading api.',
           stacktrace: StackTrace.current,
@@ -178,9 +178,9 @@ class WebDataRepository extends NetworkDataRepository {
       );
 
       if (result.statusCode != 200) {
-        print('Error downloading variables from web data manager.');
-        print('Status code: ${result.statusCode}');
-        print('Message: ${result.body}');
+        log('[WebDataRepo] Error downloading variables from web data manager.');
+        log('[WebDataRepo] Status code: ${result.statusCode}');
+        log('[WebDataRepo] Message: ${result.body}');
         throw CodelesslyException(
           'Error downloading variables.',
           stacktrace: StackTrace.current,
@@ -204,7 +204,7 @@ class WebDataRepository extends NetworkDataRepository {
     required String layoutID,
     required PublishSource source,
   }) async {
-    print('Downloading conditions for $layoutID');
+    log('[WebDataRepo] Downloading conditions for $layoutID');
     try {
       final Response result = await post(
         Uri.parse('$cloudFunctionsBaseURL/getPublishedLayoutConditionsRequest'),
@@ -218,9 +218,9 @@ class WebDataRepository extends NetworkDataRepository {
       );
 
       if (result.statusCode != 200) {
-        print('Error downloading conditions from web data manager.');
-        print('Status code: ${result.statusCode}');
-        print('Message: ${result.body}');
+        log('[WebDataRepo] Error downloading conditions from web data manager.');
+        log('[WebDataRepo] Status code: ${result.statusCode}');
+        log('[WebDataRepo] Message: ${result.body}');
         throw CodelesslyException(
           'Error downloading conditions.',
           stacktrace: StackTrace.current,
@@ -230,11 +230,11 @@ class WebDataRepository extends NetworkDataRepository {
       final SDKLayoutConditions conditions =
           SDKLayoutConditions.fromJson({...modelDoc, 'id': layoutID});
 
-      print('Layout Conditions [${conditions.id}]: ${conditions.conditions.length}');
+      log('[WebDataRepo] Layout Conditions [${conditions.id}]: ${conditions.conditions.length}');
 
       return conditions;
     } catch (e, stacktrace) {
-      print('Error downloading conditions for $layoutID');
+      log('[WebDataRepo] Error downloading conditions for $layoutID');
       print(e);
       print(stacktrace);
       return null;

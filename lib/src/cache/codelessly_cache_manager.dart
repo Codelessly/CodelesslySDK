@@ -25,6 +25,7 @@ class CodelesslyCacheManager extends CacheManager {
 
   @override
   Future<void> init() async {
+    final Stopwatch stopwatch = Stopwatch()..start();
     try {
       await Hive.initFlutter('codelessly_sdk');
       box = await Hive.openBox(
@@ -43,6 +44,12 @@ class CodelesslyCacheManager extends CacheManager {
         'Failed to initialize cache manager',
         originalException: e,
         stacktrace: stacktrace,
+      );
+    } finally {
+      stopwatch.stop();
+
+      log(
+        '[CacheManager] Initialized Hive in ${stopwatch.elapsed.inMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s',
       );
     }
   }
@@ -65,6 +72,7 @@ class CodelesslyCacheManager extends CacheManager {
   @override
   void dispose() {
     box.close();
+    filesBox.close();
   }
 
   @override
