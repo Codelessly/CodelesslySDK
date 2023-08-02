@@ -19,7 +19,14 @@ class CodelesslyConfig with EquatableMixin {
   final bool isPreview;
 
   /// Notifies the data manager to download all layouts and fonts of the
-  /// configured project during the initialization process of the SDK.
+  /// configured project during the initialization process of the SDK
+  /// all-at-once so that they are all available instead of on-demand whenever
+  /// a [CodelesslyWidget] requests a layout when it becomes visible.
+  ///
+  /// This may cause the initialization process to take longer than usual, but
+  /// will ensure that all layouts and fonts are available when needed.
+  ///
+  /// Defaults to true.
   final bool preload;
 
   /// The source of the data that should be used when initializing the SDK.
