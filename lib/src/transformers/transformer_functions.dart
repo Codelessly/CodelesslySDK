@@ -230,17 +230,20 @@ String? getSliderLabel(SliderNode node, double value) {
   return node.properties.label.replaceAll('\${value}', valueString);
 }
 
-Widget? retrieveIconWidget(MultiSourceIconModel icon,
-    [double? size, bool useIconFonts = false]) {
+Widget? retrieveIconWidget(
+  MultiSourceIconModel icon, [
+  double? size,
+  bool useIconFonts = false,
+]) {
   if (!icon.show) return null;
   final Color? color = icon.color?.toFlutterColor();
   switch (icon.type) {
     case IconTypeEnum.icon:
       if (icon.icon == null) return null;
-      return Icon(
-        useIconFonts
-            ? icon.icon!.toFontIconData()
-            : icon.icon!.toFlutterIconData(),
+
+      // Using SVG icon instead of Flutter's Icon widget to reduce the SDK.
+      return SvgIcon(
+        icon: icon.icon!,
         size: size ?? icon.size ?? kDefaultIconSize,
         color: color,
       );
@@ -279,10 +282,8 @@ Widget retrieveNavBarItemIconWidget(
   switch (icon.type) {
     case IconTypeEnum.icon:
       if (icon.icon == null) return SizedBox.shrink();
-      return Icon(
-        useIconFonts
-            ? icon.icon!.toFontIconData()
-            : icon.icon!.toFlutterIconData(),
+      return SvgIcon(
+        icon: icon.icon!,
         size: icon.size ?? size ?? kDefaultIconSize,
         color: color,
       );

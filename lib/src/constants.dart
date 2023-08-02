@@ -43,3 +43,10 @@ const String templateConditionsCacheKey = 'template_conditions';
 const String publishPath = 'publish';
 const String previewPath = 'publish_preview';
 const String templatesPath = 'templates';
+
+/// The template url for the svg icons.
+/// {{style}}: The style of the icon. e.g. materialiconsoutlined
+/// {{name}}: The name of the icon. e.g. home
+/// {{version}}: The version of the icon. e.g. 16
+/// {{size}}: The size of the icon. e.g. 24
+const String kSvgIconBaseUrlTemplate = 'https://fonts.gstatic.com/s/i/{{style}}/{{name}}/v{{version}}/{{size}}px.svg';

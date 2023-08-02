@@ -1,8 +1,10 @@
-import 'dart:math';
+import 'dart:developer';
+import 'dart:math' hide log;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
@@ -304,6 +306,57 @@ class AdaptiveSizeFitBox extends StatelessWidget {
               ? double.infinity
               : size.height,
       child: child,
+    );
+  }
+}
+
+class SvgIcon extends StatelessWidget {
+  final IconModel icon;
+  final Color? color;
+  final double? size;
+  final BoxFit fit;
+
+  const SvgIcon({
+    super.key,
+    required this.icon,
+    this.color,
+    this.size,
+    this.fit = BoxFit.fitWidth,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // In material apps, if there is a [Theme] without any [IconTheme]s
+    // specified, icon colors default to white if [ThemeData.brightness] is dark
+    // and black if [ThemeData.brightness] is light.
+    //
+    // Otherwise, falls back to black.
+    final iconTheme = Theme.of(context).iconTheme;
+    final Color iconColor = switch (icon) {
+      _ when color != null => color!,
+      _ when iconTheme.color != null => iconTheme.color!,
+      _ => Theme.of(context).brightness == Brightness.light
+          ? Colors.black
+          : Colors.white,
+    };
+    final url = icon.toSvgUrl();
+
+    if (url != null) {
+      log('SVG ICON URL: $url');
+    } else {
+      log('SVG ICON URL: 404 | name: ${icon.name} | type: ${icon.type} | '
+          'codepoint: ${icon.codepoint} | fontFamily: ${icon.fontFamily} | '
+          'fontPackage: ${icon.fontPackage}${icon is MaterialIcon ? ' | '
+              'style: ${(icon as MaterialIcon).style}' : ''}');
+    }
+
+    return SizedBox.square(
+      dimension: size ?? Theme.of(context).iconTheme.size ?? 24,
+      child: SvgPicture.network(
+        url ?? '',
+        fit: fit,
+        colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+      ),
     );
   }
 }

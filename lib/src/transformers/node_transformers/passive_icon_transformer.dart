@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 
+const String kIconBaseUrl =
+    'https://fonts.gstatic.com/s/i/materialiconsoutlined/home/v16/24px.svg';
+
 class PassiveIconTransformer extends NodeWidgetTransformer<IconNode> {
   PassiveIconTransformer(super.getNode, super.manager);
 
@@ -35,10 +38,16 @@ class PassiveIconWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final IconModel icon = node.icon;
-    return Icon(
-      useFonts ? icon.toFontIconData() : icon.toFlutterIconData(),
+
+    return SvgIcon(
+      icon: icon,
       size: min(node.basicBoxLocal.width, node.basicBoxLocal.height),
-      color: node.color?.toFlutterColor(),
     );
+
+    // return Icon(
+    //   useFonts ? icon.toFontIconData() : icon.toFlutterIconData(),
+    //   size: min(node.basicBoxLocal.width, node.basicBoxLocal.height),
+    //   color: node.color?.toFlutterColor(),
+    // );
   }
 }

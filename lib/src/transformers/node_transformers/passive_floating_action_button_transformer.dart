@@ -201,11 +201,8 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
     if (!fab.icon.isIconAvailable) return null;
     switch (fab.icon.type) {
       case IconTypeEnum.icon:
-        final data = useFonts
-            ? fab.icon.icon!.toFontIconData()
-            : fab.icon.icon!.toFlutterIconData();
-        return Icon(
-          data,
+        return SvgIcon(
+          icon: fab.icon.icon!,
           color: fab.icon.color?.toFlutterColor(),
           size: fab.icon.size,
         );
