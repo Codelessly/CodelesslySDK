@@ -41,6 +41,7 @@ class PassiveIconWidget extends StatelessWidget {
 
     return SvgIcon(
       icon: icon,
+      color: node.color?.toFlutterColor(),
       size: min(node.basicBoxLocal.width, node.basicBoxLocal.height),
     );
 
