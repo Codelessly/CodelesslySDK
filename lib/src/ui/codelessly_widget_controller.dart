@@ -225,10 +225,13 @@ class CodelesslyWidgetController extends ChangeNotifier {
           layoutID: layoutID,
         );
       });
-    } else {
+    } else if (config!.preload == false) {
+      log(
+        '[CodelesslyWidgetController] [$layoutID]: Config preloading is false.',
+      );
       log(
         '[CodelesslyWidgetController] [$layoutID]: requesting layout from'
-        ' data manager.',
+        ' data manager since preloading is false',
       );
       log(
         '[CodelesslyWidgetController] [$layoutID]: Using publish source'
@@ -244,6 +247,10 @@ class CodelesslyWidgetController extends ChangeNotifier {
         );
         return false;
       });
+    } else {
+      log(
+        '[CodelesslyWidgetController] [$layoutID]: Config preloading is true. Doing nothing while DataManager finishes.',
+      );
     }
   }
 }

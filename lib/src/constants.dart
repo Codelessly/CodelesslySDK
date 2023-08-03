@@ -49,4 +49,5 @@ const String templatesPath = 'templates';
 /// {{name}}: The name of the icon. e.g. home
 /// {{version}}: The version of the icon. e.g. 16
 /// {{size}}: The size of the icon. e.g. 24
-const String kSvgIconBaseUrlTemplate = 'https://fonts.gstatic.com/s/i/{{style}}/{{name}}/v{{version}}/{{size}}px.svg';
+const String kSvgIconBaseUrlTemplate =
+    'https://fonts.gstatic.com/s/i/{{style}}/{{name}}/v{{version}}/{{size}}px.svg';

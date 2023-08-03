@@ -5,8 +5,19 @@ import 'model/publish_source.dart';
 
 /// Holds initialization configuration options for the SDK.
 class CodelesslyConfig with EquatableMixin {
-  /// The SDK auth token required for using the SDK.
+  /// The SDK auth token used to authenticate the SDK with the Codelessly
+  /// servers.
   final String authToken;
+
+  /// A project slug configured in the publish settings of the Codelessly
+  /// editor. Provides unauthenticated access to the published layouts of the
+  /// project.
+  final String? slug;
+
+  /// A convenience getter that returns a non-null unique identifier for this
+  /// [CodelesslyConfig] instance since either [authToken] or [slug] will be
+  /// non-null.
+  String get uniqueID => slug ?? authToken;
 
   /// Allows the SDK to automatically send crash reports back to Codelessly's
   /// servers for developer analysis.
@@ -62,6 +73,7 @@ class CodelesslyConfig with EquatableMixin {
   /// the error message.
   CodelesslyConfig({
     required this.authToken,
+    this.slug,
     this.automaticallyCollectCrashReports = true,
     this.isPreview = false,
     this.preload = true,
@@ -73,6 +85,7 @@ class CodelesslyConfig with EquatableMixin {
   /// parameters.
   CodelesslyConfig copyWith({
     String? authToken,
+    String? slug,
     bool? automaticallyCollectCrashReports,
     bool? isPreview,
     bool? preload,
@@ -81,6 +94,7 @@ class CodelesslyConfig with EquatableMixin {
   }) =>
       CodelesslyConfig(
         authToken: authToken ?? this.authToken,
+        slug: slug ?? this.slug,
         automaticallyCollectCrashReports: automaticallyCollectCrashReports ??
             this.automaticallyCollectCrashReports,
         isPreview: isPreview ?? this.isPreview,
@@ -93,6 +107,7 @@ class CodelesslyConfig with EquatableMixin {
   @override
   List<Object?> get props => [
         authToken,
+        slug,
         automaticallyCollectCrashReports,
         isPreview,
         preload,

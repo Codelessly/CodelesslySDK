@@ -75,8 +75,8 @@ class PassiveProgressBarTransformer
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'currentValue', value: value);
 
-    FunctionsRepository.triggerAction(
-        context, node, TriggerType.changed, value: value);
+    FunctionsRepository.triggerAction(context, node, TriggerType.changed,
+        value: value);
   }
 }
 

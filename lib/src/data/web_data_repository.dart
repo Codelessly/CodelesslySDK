@@ -13,11 +13,9 @@ import '../logging/error_handler.dart';
 /// Since Firedart is not compatible with Flutter Web, this implementation
 /// utilizes the http package instead.
 class WebDataRepository extends NetworkDataRepository {
-  final String cloudFunctionsBaseURL;
-
   /// Creates a [WebDataRepository] instance.
-  WebDataRepository({required this.cloudFunctionsBaseURL}) {
-    log('WebDataRepository created with cloudFunctionsBaseURL: $cloudFunctionsBaseURL');
+  WebDataRepository({required super.cloudFunctionsBaseURL}) {
+    log('[WebDataRepo] created with cloudFunctionsBaseURL: $cloudFunctionsBaseURL');
   }
 
   @override
@@ -35,7 +33,7 @@ class WebDataRepository extends NetworkDataRepository {
     );
 
     if (result.statusCode != 200) {
-      log('[WebDataRepo] Error downloading publish model from web data manager.');
+      log('[WebDataRepo] Error downloading publish model.');
       log('[WebDataRepo] Status code: ${result.statusCode}');
       log('[WebDataRepo] Message: ${result.body}');
       throw CodelesslyException(
@@ -68,8 +66,7 @@ class WebDataRepository extends NetworkDataRepository {
     );
 
     if (result.statusCode != 200) {
-      print(
-          'Error downloading layout model from web data manager. [${source.serverPath}]');
+      log('[WebDataRepo] Error downloading layout model. [${source.serverPath}]');
       log('[WebDataRepo] Status code: ${result.statusCode}');
       log('[WebDataRepo] Message: ${result.body}');
       throw CodelesslyException(
@@ -104,7 +101,7 @@ class WebDataRepository extends NetworkDataRepository {
       );
 
       if (result.statusCode != 200) {
-        log('[WebDataRepo] Error downloading font model from web data manager.');
+        log('[WebDataRepo] Error downloading font model.');
         log('[WebDataRepo] Status code: ${result.statusCode}');
         log('[WebDataRepo] Message: ${result.body}');
         throw CodelesslyException(
@@ -140,7 +137,7 @@ class WebDataRepository extends NetworkDataRepository {
       );
 
       if (result.statusCode != 200) {
-        log('[WebDataRepo] Error downloading api from web data manager.');
+        log('[WebDataRepo] Error downloading api.');
         log('[WebDataRepo] Status code: ${result.statusCode}');
         log('[WebDataRepo] Message: ${result.body}');
         throw CodelesslyException(
@@ -178,7 +175,7 @@ class WebDataRepository extends NetworkDataRepository {
       );
 
       if (result.statusCode != 200) {
-        log('[WebDataRepo] Error downloading variables from web data manager.');
+        log('[WebDataRepo] Error downloading variables.');
         log('[WebDataRepo] Status code: ${result.statusCode}');
         log('[WebDataRepo] Message: ${result.body}');
         throw CodelesslyException(
@@ -218,7 +215,7 @@ class WebDataRepository extends NetworkDataRepository {
       );
 
       if (result.statusCode != 200) {
-        log('[WebDataRepo] Error downloading conditions from web data manager.');
+        log('[WebDataRepo] Error downloading conditions.');
         log('[WebDataRepo] Status code: ${result.statusCode}');
         log('[WebDataRepo] Message: ${result.body}');
         throw CodelesslyException(

@@ -108,7 +108,39 @@ class DataManager {
       }
     }
 
-    if (authManager.authData == null) return;
+    // A slug was specified, no layout is cached. We need a layout FAST.
+    // No authentication is required; let's download a complete publish bundle.
+    if (config.slug != null && _publishModel == null) {
+      try {
+        _publishModel =
+            await networkDataRepository.downloadCompletePublishBundle(
+          slug: config.slug!,
+          source: config.publishSource,
+        );
+        if (_publishModel != null) {
+          log('[DataManager] Complete publish model from slug is downloaded. Emitting.');
+          emitPublishModel();
+          savePublishModel();
+          _recordTime(stopwatch);
+          return;
+        } else {
+          log('[DataManager] Failed to download complete publish model from slug. Continuing as if offline.');
+        }
+      } catch (e, stackTrace) {
+        log('[DataManager] Error trying to download complete publish model from slug.');
+        log('[DataManager] Continuing as if offline.');
+        log('[DataManager]', error: e, stackTrace: stackTrace);
+
+        _recordTime(stopwatch);
+        return;
+      }
+    }
+
+    if (authManager.authData == null) {
+      log('[DataManager] No auth data is available. Continuing as if offline.');
+      _recordTime(stopwatch);
+      return;
+    }
 
     final AuthData authData = authManager.authData!;
 
@@ -144,62 +176,8 @@ class DataManager {
     // Listen the publish model document.
     // It's either going to be fetched for the first time if it doesn't exist
     // in cache, or it's going to be updated with new data.
-    final Completer<SDKPublishModel> completer = Completer();
-    _publishModelDocumentListener?.cancel();
-    _publishModelDocumentListener = networkDataRepository
-        .streamPublishModel(
-      projectID: authData.projectId,
-      source: config.publishSource,
-    )
-        .listen((SDKPublishModel? serverModel) {
-      if (serverModel == null) return;
-
-      log('[DataManager] Publish model stream event received.');
-
-      final bool isFirstEvent = !completer.isCompleted;
-
-      // If the completer has not completed yet, it needs to be
-      // completed with the first available publish model form the server.
-      if (isFirstEvent) {
-        log('[DataManager] Completing publish model stream completer since this is the first event.');
-        completer.complete(serverModel);
-      }
-
-      // If the publish model is null, meaning no publish model was previously
-      // cached, then this is the first available publish model we have that
-      // just arrived from the server.
-      //
-      // We can skip publish model comparison as there is nothing to compare
-      // to yet.
-      //
-      // Since it is null, it will be hydrated with a value outside of this
-      // listener when the completer completes. The publish model is emitted
-      // once that happens, therefore we don't need to emit it here, nor
-      // compare.
-      if (_publishModel == null) {
-        log('[DataManager] Publish model is null during init and received the first publish model from the server. Skipping comparison in stream.');
-        return;
-      }
-
-      if (isFirstEvent) {
-        log('[DataManager] Publish model during init was not null, and we received a new publish model from the server. Comparing...');
-      } else {
-        log('[DataManager] Received a second publish model from the server. Comparing...');
-      }
-      final SDKPublishModel localModel = _publishModel!;
-
-      // Comparison should always be a background process.
-      processPublishDifference(
-        serverModel: serverModel,
-        localModel: localModel,
-      );
-
-      log('[DataManager] Publish model comparison complete.');
-    })
-      ..onError((error, str) {
-        CodelesslyErrorHandler.instance
-            .captureException(error, stacktrace: str);
-      });
+    final Future<SDKPublishModel> firstPublishEvent =
+        listenToPublishModel(authData.projectId);
 
     // If the publish model is still null, then we need to wait for the first
     // publish model to arrive from the server via the stream above.
@@ -207,7 +185,7 @@ class DataManager {
       log(
         '[DataManager] Publish model is still null during init. Waiting for the first publish model from the server.',
       );
-      _publishModel = await completer.future;
+      _publishModel = await firstPublishEvent;
       emitPublishModel();
       savePublishModel();
 
@@ -282,10 +260,85 @@ class DataManager {
       }
     }
 
+    _recordTime(stopwatch);
+  }
+
+  void _recordTime(Stopwatch stopwatch) {
     stopwatch.stop();
     log(
       '[DataManager] Initialization took ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.',
     );
+  }
+
+  /// Listen the publish model document.
+  /// It's either going to be fetched for the first time if it doesn't exist
+  /// in cache, or it's going to be updated with new data.
+  ///
+  /// [returns] the first publish model event from the stream & will continue
+  /// to listen to the stream for future publish model events.
+  Future<SDKPublishModel> listenToPublishModel(String projectId) async {
+    log('[DataManager] About to listen to publish model doc.');
+    final Completer<SDKPublishModel> completer = Completer();
+    _publishModelDocumentListener?.cancel();
+
+    _publishModelDocumentListener = networkDataRepository
+        .streamPublishModel(
+      projectID: projectId,
+      source: config.publishSource,
+    )
+        .listen((SDKPublishModel? serverModel) {
+      if (serverModel == null) return;
+
+      log('[DataManager] Publish model stream event received.');
+
+      final bool isFirstEvent = !completer.isCompleted;
+
+      // If the completer has not completed yet, it needs to be
+      // completed with the first available publish model form the server.
+      if (isFirstEvent) {
+        log('[DataManager] Completing publish model stream completer since this is the first event.');
+        completer.complete(serverModel);
+      }
+
+      // If the publish model is null, meaning no publish model was previously
+      // cached, then this is the first available publish model we have that
+      // just arrived from the server.
+      //
+      // We can skip publish model comparison as there is nothing to compare
+      // to yet.
+      //
+      // Since it is null, it will be hydrated with a value outside of this
+      // listener when the completer completes. The publish model is emitted
+      // once that happens, therefore we don't need to emit it here, nor
+      // compare.
+      if (_publishModel == null) {
+        log('[DataManager] Publish model is null during init and received the first publish model from the server. Skipping comparison in stream.');
+        return;
+      }
+
+      if (config.slug != null) {
+        log('[DataManager] Initialized using the slug, this event is not essential for initial loading.');
+      } else if (isFirstEvent) {
+        log('[DataManager] Publish model during init was not null, and we received a new publish model from the server. Comparing...');
+      } else {
+        log('[DataManager] Received a second publish model from the server. Comparing...');
+      }
+      final SDKPublishModel localModel = _publishModel!;
+
+      // Comparison should always be a background process.
+      processPublishDifference(
+        serverModel: serverModel,
+        localModel: localModel,
+      );
+
+      log('[DataManager] Publish model comparison complete.');
+    })
+      ..onError((error, str) {
+        CodelesslyErrorHandler.instance
+            .captureException(error, stacktrace: str);
+      });
+
+    return completer.future;
   }
 
   /// Emits the current [_publishModel] to the [_publishModelStreamController].
@@ -318,13 +371,17 @@ class DataManager {
   void dispose() {
     _publishModelStreamController.close();
     _publishModelDocumentListener?.cancel();
+    initialized = false;
+    _publishModel = null;
   }
 
   /// Sets the [SDKPublishModel] as null and cancels document streaming.
-  void invalidate() {
-    log('[DataManager] Invalidating data manager...');
+  void invalidate([String? debugLabel]) {
+    log('[DataManager] ${debugLabel == null ? '' : '[$debugLabel]'} Invalidating...');
     _publishModelDocumentListener?.cancel();
+    _publishModelStreamController.add(null);
     _publishModel = null;
+    initialized = false;
   }
 
   /// Takes a [serverModel], and [localModel] and compares them
@@ -833,6 +890,29 @@ class DataManager {
     }
 
     return true;
+  }
+
+  Future<bool> fetchCompletePublishBundle({
+    required String slug,
+  }) async {
+    final Stopwatch stopwatch = Stopwatch()..start();
+
+    final SDKPublishModel? model =
+        await networkDataRepository.downloadCompletePublishBundle(
+      slug: slug,
+      source: config.publishSource,
+    );
+
+    log('[DataManager] Downloaded complete publish bundle in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.');
+
+    if (model != null) {
+      _publishModel = model;
+      emitPublishModel();
+      savePublishModel();
+      return true;
+    }
+
+    return false;
   }
 
   /// Wrapper for [getOrFetchFontBytesAndSave] that additionally loads the font

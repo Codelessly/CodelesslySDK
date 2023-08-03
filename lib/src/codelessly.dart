@@ -179,16 +179,34 @@ class Codelessly {
   /// This does not close the status stream, and instead sets the SDK back to
   /// idle mode.
   Future<void> resetAndClearCache() async {
-    await _cacheManager?.clearAll();
-    await _cacheManager?.deleteAllByteData();
-    _publishDataManager?.invalidate();
-    _previewDataManager?.invalidate();
-    _templateDataManager?.invalidate();
+    _publishDataManager?.invalidate('Publish');
+    _previewDataManager?.invalidate('Preview');
+    _templateDataManager?.invalidate('Template');
     _authManager?.invalidate();
 
     _config = null;
     _status = CodelesslyStatus.empty;
     _statusStreamController.add(_status);
+
+    try {
+      await _cacheManager?.clearAll();
+    } catch (e, str) {
+      log(
+        '[SDK] [resetAndClearCache] Error clearing cache.',
+        error: e,
+        stackTrace: str,
+      );
+    }
+
+    try {
+      await _cacheManager?.deleteAllByteData();
+    } catch (e, str) {
+      log(
+        '[SDK] [resetAndClearCache] Error deleting cached bytes.',
+        error: e,
+        stackTrace: str,
+      );
+    }
   }
 
   /// Internally updates the status of this instance of the SDK and emits a
@@ -389,7 +407,11 @@ class Codelessly {
                     cloudFunctionsBaseURL:
                         _config!.firebaseCloudFunctionsBaseURL,
                   )
-                : FirebaseDataRepository(firestore: firestore),
+                : FirebaseDataRepository(
+                    firestore: firestore,
+                    cloudFunctionsBaseURL:
+                        _config!.firebaseCloudFunctionsBaseURL,
+                  ),
             localDataRepository:
                 LocalDataRepository(cacheManager: this.cacheManager),
           );
@@ -406,7 +428,11 @@ class Codelessly {
                     cloudFunctionsBaseURL:
                         _config!.firebaseCloudFunctionsBaseURL,
                   )
-                : FirebaseDataRepository(firestore: firestore),
+                : FirebaseDataRepository(
+                    firestore: firestore,
+                    cloudFunctionsBaseURL:
+                        _config!.firebaseCloudFunctionsBaseURL,
+                  ),
             localDataRepository:
                 LocalDataRepository(cacheManager: this.cacheManager),
           );
@@ -421,7 +447,10 @@ class Codelessly {
             ? WebDataRepository(
                 cloudFunctionsBaseURL: _config!.firebaseCloudFunctionsBaseURL,
               )
-            : FirebaseDataRepository(firestore: firestore),
+            : FirebaseDataRepository(
+                firestore: firestore,
+                cloudFunctionsBaseURL: _config!.firebaseCloudFunctionsBaseURL,
+              ),
         localDataRepository:
             LocalDataRepository(cacheManager: this.cacheManager),
       );
@@ -439,12 +468,15 @@ class Codelessly {
       //
       // After either of those is done, the relevant auth data is immediately
       // emitted to the internal stream controller, ready for immediate usage.
-      await this.authManager.init();
+      //
+      // If the slug is specified, the SDK can skip all authentication and
+      // immediately jump to loading the data manager.
+      if (_config!.slug == null) {
+        await this.authManager.init();
+        _config!.publishSource =
+            this.authManager.getBestPublishSource(_config!);
+      }
 
-      _config!.publishSource = this.authManager.getBestPublishSource(_config!);
-
-      log('[SDK] [INIT] Initializing data managers with publish source '
-          '${_config!.publishSource}');
       // The data manager initializes last to load the last stored publish
       // model, or, if it doesn't exist, halts the entire process and awaits
       // to fetch the latest publish model from the server.
@@ -453,6 +485,9 @@ class Codelessly {
       // [CodelesslyWidget] wants to load the opposite manager, the other will
       // lazily initialize.
       if (initializeDataManagers && _config!.preload) {
+        log('[SDK] [INIT] Initializing data managers with publish source '
+            '${_config!.publishSource}');
+
         switch (_config!.publishSource) {
           case PublishSource.publish:
             if (!this.publishDataManager.initialized) {
@@ -470,6 +505,20 @@ class Codelessly {
             }
             break;
         }
+      }
+
+      // If the slug is specified, the SDK can skip all authentication for
+      // initial layout as it will use the slug to fetch a complete publish
+      // bundle. After that though, we can safely authenticate in the
+      // background to keep listening for updates to the publish model.
+      if (_config!.slug != null) {
+        this.authManager.init().then((_) {
+          if (this.authManager.authData == null) return;
+
+          dataManager.listenToPublishModel(
+            this.authManager.authData!.projectId,
+          );
+        });
       }
 
       log('[SDK] [INIT] Codelessly ${_instance == this ? 'global' : 'local'} instance initialization complete.');
