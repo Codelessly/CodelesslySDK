@@ -35,7 +35,7 @@ class CodelesslyAuthManager extends AuthManager {
   AuthData? _authData;
 
   @override
-  AuthData? get authData => _authData!;
+  AuthData? get authData => _authData;
 
   @override
   Stream<AuthData?> get authStream => _authStreamController.stream;
@@ -110,6 +110,7 @@ class CodelesslyAuthManager extends AuthManager {
 
   @override
   void invalidate() {
+    log('[AuthManager] Invalidating...');
     _authData = null;
     _authStreamController.add(_authData);
   }

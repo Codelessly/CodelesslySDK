@@ -29,10 +29,10 @@ class CodelesslyCacheManager extends CacheManager {
     try {
       await Hive.initFlutter('codelessly_sdk');
       box = await Hive.openBox(
-        '${cacheBoxName}_${config.authToken.replaceAll('/', '')}',
+        '${cacheBoxName}_${config.uniqueID.replaceAll('/', '')}',
       );
       filesBox = await Hive.openBox(
-        '${cacheFilesBoxName}_${config.authToken.replaceAll('/', '')}',
+        '${cacheFilesBoxName}_${config.uniqueID.replaceAll('/', '')}',
       );
     } on HiveError catch (e, stacktrace) {
       throw CodelesslyException(
@@ -58,11 +58,15 @@ class CodelesslyCacheManager extends CacheManager {
   Future<void> clearAll() async {
     log('[CacheManager] Clearing cache...');
     try {
-      await box.clear();
+      if (kIsWeb) {
+        box.deleteFromDisk();
+      } else {
+        await box.deleteFromDisk();
+      }
       log('[CacheManager] Cache cleared successfully!');
     } catch (e, stacktrace) {
       throw CodelesslyException.cacheClearException(
-        message: 'Failed to clear cache',
+        message: 'Failed to clear cache. $e',
         originalException: e,
         stacktrace: stacktrace,
       );
@@ -118,9 +122,14 @@ class CodelesslyCacheManager extends CacheManager {
 
   @override
   Future<void> deleteAllByteData() async {
+    log('[CacheManager] Deleting all byte data...');
     try {
-      // Delete the directory if it exists.
-      await filesBox.deleteAll(filesBox.keys);
+      if (kIsWeb) {
+        filesBox.deleteFromDisk();
+      } else {
+        await filesBox.deleteFromDisk();
+      }
+      log('[CacheManager] Cache bytes deleted successfully!');
     } catch (e, stacktrace) {
       throw CodelesslyException.fileIoException(
         message: 'Failed to clear files.\n$e',

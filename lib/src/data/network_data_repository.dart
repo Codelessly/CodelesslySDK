@@ -1,14 +1,51 @@
+import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
 import '../../codelessly_sdk.dart';
+import '../logging/error_handler.dart';
 
 /// An abstract class that represents the operations that a [DataManager] will
 /// need to utilize to offer a complete usage experience of a [Codelessly]
 /// layout.
 abstract class NetworkDataRepository {
-  const NetworkDataRepository();
+  final String cloudFunctionsBaseURL;
+
+  NetworkDataRepository({required this.cloudFunctionsBaseURL}) {
+    log('[NetworkDataRepo] created with cloudFunctionsBaseURL: $cloudFunctionsBaseURL');
+  }
+
+  /// Calls a cloud function that searches for the project associated with the
+  /// given unique slug and returns a completely populated [SDKPublishModel]
+  /// instance.
+  Future<SDKPublishModel?> downloadCompletePublishBundle({
+    required String slug,
+    required PublishSource source,
+  }) async {
+    final http.Response result = await http.post(
+      Uri.parse('$cloudFunctionsBaseURL/getPublishBundleBySlugRequest'),
+      headers: <String, String>{'Content-Type': 'application/json'},
+      body: jsonEncode({'slug': slug, 'source': source.serverPath}),
+      encoding: utf8,
+    );
+
+    if (result.statusCode != 200) {
+      log('[NetworkDataRepo] Error downloading publish bundle.');
+      log('[NetworkDataRepo] Status code: ${result.statusCode}');
+      log('[NetworkDataRepo] Message: ${result.body}');
+      throw CodelesslyException(
+        'Error downloading publish bundle from slug [$slug]',
+        stacktrace: StackTrace.current,
+      );
+    }
+
+    final Map<String, dynamic> modelDoc = jsonDecode(result.body);
+    final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
+
+    return model;
+  }
 
   /// Streams a given [projectID]'s associated [SDKPublishModel] from the
   /// network with preferably live updates.

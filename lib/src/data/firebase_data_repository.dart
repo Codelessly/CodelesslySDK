@@ -10,7 +10,8 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
   /// Creates a new [FirebaseDataRepository] instance with the given [firestore]
   /// instance.
-  FirebaseDataRepository({required this.firestore});
+  FirebaseDataRepository(
+      {required this.firestore, required super.cloudFunctionsBaseURL});
 
   @override
   Stream<SDKPublishModel?> streamPublishModel({

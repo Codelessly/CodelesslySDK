@@ -79,7 +79,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
 
       if (fixWidth == null && rowColumnNode.isHorizontalWrap) {
         final bool anyChildNeedsAlignment = childrenNodes.any(
-              (child) => child.alignment != AlignmentModel.none,
+          (child) => child.alignment != AlignmentModel.none,
         );
         if (anyChildNeedsAlignment) {
           res = IntrinsicWidth(child: res);
