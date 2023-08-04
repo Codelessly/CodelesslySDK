@@ -69,8 +69,9 @@ class DataManager {
   /// awaited.
   Future<void> init({required String? layoutID}) async {
     assert(
-      layoutID != null || config.preload,
-      'If [layoutID] is null, [config.preload] must be true.',
+      layoutID != null || config.preload || config.slug != null,
+      'If [layoutID] is null, [config.preload] must be true. If both are not '
+      'specified, then a slug must be provided in the config.',
     );
 
     final Stopwatch stopwatch = Stopwatch()..start();
@@ -86,26 +87,7 @@ class DataManager {
       log('[DataManager] Publish model is cached locally. Emitting.');
       emitPublishModel();
 
-      for (final SDKPublishFont font in _publishModel!.fonts.values) {
-        log('[DataManager] \tLoading font in init: [${font.id}](${font.fullFontName})');
-        final Uint8List? fontBytes = localDataRepository.fetchFontBytes(
-          fontID: font.id,
-          source: config.publishSource,
-        );
-        if (fontBytes != null) {
-          loadFont(font, fontBytes);
-        } else {
-          // If a font's bytes are missing from cache, it should be
-          // downloaded again. Should runs in the background.
-          //
-          // Authentication is not needed to download public font files.
-          log("[DataManager] \tFont bytes from init doesn't exist, downloading [${font.id}](${font.fullFontName}) bytes...");
-          downloadFontBytesAndSave(font).then((fontBytes) {
-            if (fontBytes == null) return null;
-            loadFont(font, fontBytes);
-          });
-        }
-      }
+      loadFontsFromPublishModel();
     }
 
     // A slug was specified, no layout is cached. We need a layout FAST.
@@ -121,6 +103,9 @@ class DataManager {
           log('[DataManager] Complete publish model from slug is downloaded. Emitting.');
           emitPublishModel();
           savePublishModel();
+
+          loadFontsFromPublishModel();
+
           _recordTime(stopwatch);
           return;
         } else {
@@ -129,7 +114,9 @@ class DataManager {
       } catch (e, stackTrace) {
         log('[DataManager] Error trying to download complete publish model from slug.');
         log('[DataManager] Continuing as if offline.');
-        log('[DataManager]', error: e, stackTrace: stackTrace);
+        log('[DataManager]', level: 900, error: e, stackTrace: stackTrace);
+        print(e);
+        print(stackTrace);
 
         _recordTime(stopwatch);
         return;
@@ -196,6 +183,7 @@ class DataManager {
           '[DataManager] Publish model is still null.\n'
           'Is there a network problem or bad authentication?',
         );
+        _recordTime(stopwatch);
         return;
       }
 
@@ -268,6 +256,19 @@ class DataManager {
     log(
       '[DataManager] Initialization took ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.',
     );
+  }
+
+  /// Will consume all of the [SDKFontModel]s loaded in the [_publishModel]
+  /// and either load them into the Flutter SDK or download them then load them.
+  void loadFontsFromPublishModel() {
+    assert(_publishModel != null, 'Publish model cannot be null here.');
+
+    log('[DataManager] About to load all fonts that are present in the current publish model.');
+    log('[DataManager] Fonts: ${_publishModel!.fonts.values.map((font) => font.fullFontName).join(', ')}');
+
+    for (final SDKPublishFont font in _publishModel!.fonts.values) {
+      getOrFetchFontBytesAndSaveAndLoad(font);
+    }
   }
 
   /// Listen the publish model document.
@@ -496,10 +497,7 @@ class DataManager {
 
           if (font != null) {
             localModel.fonts[fontID] = font;
-            downloadFontBytesAndSave(font).then((fontBytes) {
-              if (fontBytes == null) return null;
-              loadFont(font, fontBytes);
-            });
+            getOrFetchFontBytesAndSaveAndLoad(font);
           }
           break;
       }
@@ -939,16 +937,20 @@ class DataManager {
 
   /// Loads a [font] with its associated [fontBytes] into the Flutter engine.
   Future<void> loadFont(SDKPublishFont font, Uint8List fontBytes) async {
+    log('[DataManager] [FLUTTER] Loading font [${font.id}](${font.fullFontName}) into Flutter framework.');
     final FontLoader fontLoader = FontLoader(font.fullFontName);
 
     fontLoader.addFont(Future.value(ByteData.view(fontBytes.buffer)));
 
-    return fontLoader.load();
+    return fontLoader.load().then((_) {
+      log('[DataManager] [FLUTTER] Successfully loaded font [${font.id}](${font.fullFontName}) into Flutter framework.');
+    });
   }
 
   /// Given a [font], will fetch its bytes either from cache or download & save
   /// them.
   Future<Uint8List?> getOrFetchFontBytesAndSave(SDKPublishFont font) async {
+    log('[DataManager] \t\tChecking bytes for [${font.id}](${font.fullFontName}).');
     final Uint8List? fontBytes = localDataRepository.fetchFontBytes(
       fontID: font.id,
       source: config.publishSource,
