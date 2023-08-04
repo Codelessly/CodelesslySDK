@@ -241,6 +241,21 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
 }
 
 /// SDK widget that requires the SDK to be initialized beforehand.
+///
+/// The SDK can be instantiated in several ways:
+///
+/// 1. Using the global instance of the SDK by not passing any of the
+///    relevant parameters. Initialization of the global instance is done
+///    implicitly if not already initialized.
+///
+/// 2. Using a custom [codelessly] instance, initialization of the
+///    [codelessly] instance must be done explicitly.
+///
+/// 3. Using a custom [config], which will be used to initialize the global
+///    [codelessly] instance.
+///
+/// 4. Using a [controller], which can be customized in any of the ways
+///    described above but with explicit control over the state.
 class CodelesslyWidget extends StatefulWidget {
   /// An external [CodelesslyWidgetController] to use. If this is not provided,
   /// an internal one will be created.
@@ -316,21 +331,15 @@ class CodelesslyWidget extends StatefulWidget {
 
   /// Creates a [CodelesslyWidget].
   ///
-  /// Can be instantiated in several ways:
+  /// Required parameters for base functionality:
+  /// A [layoutID] will determine which layout to load. If that is not provided,
+  /// then a [controller] must be provided with its own [layoutID].
   ///
-  /// 1. Using the global instance of the SDK by not passing any of the
-  ///    relevant parameters. Initialization of the global instance is done
-  ///    implicitly if not already initialized.
-  ///
-  /// 2. Using a custom [codelessly] instance, initialization of the
-  ///    [codelessly] instance must be done explicitly.
-  ///
-  /// 3. Using a custom [config], which will be used to initialize the global
-  ///    [codelessly] instance.
-  ///
-  /// Optionally, provide custom [authManager], [publishDataManager],
-  /// [previewDataManager], and [cacheManager] instances for advanced control
-  /// over the SDK's behavior.
+  /// If neither are provided, then it is assumed that the published model is
+  /// public via a defined slug or is a template for the template gallery, in
+  /// which case, the [SDKPublishModel.entryLayoutID] is provided and must not
+  /// be null. If it is not provided, than there is an error in the data,
+  /// perhaps from a usage bug in the Codelessly Editor.
   ///
   /// [data] is a map of data that will be used to populate the layout.
   ///
@@ -344,19 +353,24 @@ class CodelesslyWidget extends StatefulWidget {
   ///
   /// [layoutBuilder] can be used to wrap any widget provided to it around the
   /// loaded layout for advanced control over the rendered widget.
+  ///
+  /// Optionally, provide custom [authManager], [publishDataManager],
+  /// [previewDataManager], and [cacheManager] instances for advanced control
+  /// over the SDK's behavior.
   CodelesslyWidget({
     super.key,
     this.layoutID,
     this.controller,
-    this.publishSource,
     this.codelessly,
     this.config,
+    this.publishSource,
+
+    // UI.
     this.loadingBuilder,
     this.errorBuilder,
     this.layoutBuilder = _defaultLayoutBuilder,
 
-    // Optional managers. These are only used when using the global codelessly
-    // instance.
+    // Optional managers overrides.
     this.authManager,
     this.publishDataManager,
     this.previewDataManager,
@@ -371,8 +385,23 @@ class CodelesslyWidget extends StatefulWidget {
   })  : data = {...data},
         functions = {...functions},
         assert(
-          (layoutID != null) != (controller != null),
-          'You must provide either a [layoutID] or a [controller]. One must be specified, and both cannot be specified at the same time.',
+          ((config ??
+                  (codelessly ?? Codelessly.instance).config ??
+                  (controller?.config)) !=
+              null),
+          controller != null
+              ? 'You must provide a CodelesslyConfig inside of your CodelesslyWidgetController or configure the provided codelessly instance with one.'
+              : 'You must provide a CodelesslyConfig inside of your CodelesslyWidget or through the Codelessly instance.',
+        ),
+        assert(
+          ((layoutID != null) != (controller != null)) ||
+              ((config ??
+                          (codelessly ?? Codelessly.instance).config ??
+                          (controller?.config)))!
+                      .slug !=
+                  null,
+          'You must provide either a [layoutID] or a [controller]. One must be specified, and both cannot be specified at the same time.'
+          '\nIf you provided neither, then a slug must be configured in the config.',
         ),
         assert(
           (publishSource == null && controller == null) ||
@@ -383,15 +412,6 @@ class CodelesslyWidget extends StatefulWidget {
           (codelessly == null && controller == null) ||
               (codelessly != null) != (controller != null),
           'You must provide either a [codelessly] or a [controller]. One must be specified, and both cannot be specified at the same time.',
-        ),
-        assert(
-          ((config ??
-                  (codelessly ?? Codelessly.instance).config ??
-                  (controller?.config)) !=
-              null),
-          controller != null
-              ? 'You must provide a CodelesslyConfig inside of your CodelesslyWidgetController or configure the provided codelessly instance with one.'
-              : 'You must provide a CodelesslyConfig inside of your CodelesslyWidget or through the Codelessly instance.',
         );
 
   @override
@@ -520,7 +540,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   /// Creates a default controller if one was not provided in the constructor.
   CodelesslyWidgetController createDefaultController() =>
       CodelesslyWidgetController(
-        layoutID: widget.layoutID!,
+        layoutID: widget.layoutID,
         codelessly: widget.codelessly,
         publishSource: widget.publishSource,
         config: widget.config,
@@ -563,8 +583,9 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
               CodelesslyLoadingScreen();
         }
 
-        if (CodelesslyErrorHandler.instance.lastException?.layoutID ==
-            _effectiveController.layoutID) {
+        if (_effectiveController.layoutID != null &&
+            CodelesslyErrorHandler.instance.lastException?.layoutID ==
+                _effectiveController.layoutID) {
           return widget.errorBuilder?.call(
                   context, CodelesslyErrorHandler.instance.lastException) ??
               CodelesslyErrorScreen(
@@ -574,7 +595,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         }
 
         final SDKPublishModel model = snapshot.data!;
-        final String layoutID = _effectiveController.layoutID;
+        final String layoutID =
+            _effectiveController.layoutID ?? model.entryLayoutId!;
 
         if (!model.layouts.containsKey(layoutID)) {
           return widget.loadingBuilder?.call(context) ??

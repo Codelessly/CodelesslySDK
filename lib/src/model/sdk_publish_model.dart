@@ -49,6 +49,18 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
   /// Contains information about the conditions used in the published project.
   final Map<String, SDKLayoutConditions> conditions;
 
+  /// The id of the layout that should be used as the entry point when viewing
+  /// from site.codelessly.com or the Codelessly template gallery.
+  final String? entryLayoutId;
+
+  /// The id of the page that should be used as the entry point when viewing
+  /// from site.codelessly.com or the Codelessly template gallery.
+  final String? entryPageId;
+
+  /// The id of the canvas that should be used as the entry point when viewing
+  /// from site.codelessly.com or the Codelessly template gallery.
+  final String? entryCanvasId;
+
   /// Creates a new instance of [SDKPublishModel].
   SDKPublishModel({
     required this.projectId,
@@ -56,11 +68,14 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
     // Conditional
     Map<String, SDKPublishFont>? fonts,
     Map<String, SDKPublishLayout>? layouts,
-    List<String>? pages,
     SDKPublishUpdates? updates,
     Map<String, HttpApiData>? apis,
     Map<String, SDKLayoutVariables>? variables,
     Map<String, SDKLayoutConditions>? conditions,
+    List<String>? pages,
+    this.entryLayoutId,
+    this.entryPageId,
+    this.entryCanvasId,
 
     // Privacy
     required super.owner,
@@ -102,6 +117,9 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
     Map<String, HttpApiData>? apis,
     Map<String, SDKLayoutVariables>? variables,
     Map<String, SDKLayoutConditions>? conditions,
+    String? entryLayoutId,
+    String? entryPageId,
+    String? entryCanvasId,
     String? owner,
     Set<String>? editors,
     Set<String>? viewers,
@@ -116,6 +134,9 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
       apis: apis ?? this.apis,
       variables: variables ?? this.variables,
       conditions: conditions ?? this.conditions,
+      entryLayoutId: entryLayoutId ?? this.entryLayoutId,
+      entryPageId: entryPageId ?? this.entryPageId,
+      entryCanvasId: entryCanvasId ?? this.entryCanvasId,
       owner: owner ?? this.owner,
       editors: editors ?? this.editors,
       viewers: viewers ?? this.viewers,
@@ -134,6 +155,9 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
         variables,
         conditions,
         updates,
+        entryLayoutId,
+        entryPageId,
+        entryCanvasId,
       ];
 }
 
