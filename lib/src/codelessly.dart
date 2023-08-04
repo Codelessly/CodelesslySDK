@@ -178,7 +178,7 @@ class Codelessly {
   ///
   /// This does not close the status stream, and instead sets the SDK back to
   /// idle mode.
-  Future<void> resetAndClearCache() async {
+  FutureOr<void> reset({bool clearCache = false}) async {
     _publishDataManager?.invalidate('Publish');
     _previewDataManager?.invalidate('Preview');
     _templateDataManager?.invalidate('Template');
@@ -188,24 +188,26 @@ class Codelessly {
     _status = CodelesslyStatus.empty;
     _statusStreamController.add(_status);
 
-    try {
-      await _cacheManager?.clearAll();
-    } catch (e, str) {
-      log(
-        '[SDK] [resetAndClearCache] Error clearing cache.',
-        error: e,
-        stackTrace: str,
-      );
-    }
+    if (clearCache) {
+      try {
+        await _cacheManager?.clearAll();
+      } catch (e, str) {
+        log(
+          '[SDK] [resetAndClearCache] Error clearing cache.',
+          error: e,
+          stackTrace: str,
+        );
+      }
 
-    try {
-      await _cacheManager?.deleteAllByteData();
-    } catch (e, str) {
-      log(
-        '[SDK] [resetAndClearCache] Error deleting cached bytes.',
-        error: e,
-        stackTrace: str,
-      );
+      try {
+        await _cacheManager?.deleteAllByteData();
+      } catch (e, str) {
+        log(
+          '[SDK] [resetAndClearCache] Error deleting cached bytes.',
+          error: e,
+          stackTrace: str,
+        );
+      }
     }
   }
 
@@ -490,7 +492,8 @@ class Codelessly {
           (_config!.preload || _config!.slug != null)) {
         log(
           '[SDK] [INIT] Initializing data managers with publish source '
-          '${_config!.publishSource}',
+          '${_config!.publishSource}'
+          ' ${_config!.slug != null ? 'and slug ${_config!.slug}' : ''}',
         );
 
         switch (_config!.publishSource) {

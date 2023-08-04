@@ -268,7 +268,7 @@ class _ChatScreenState extends State<ChatScreen>
     await Future.delayed(const Duration(seconds: 2));
 
     // Reset the SDK.
-    await Codelessly.instance.resetAndClearCache();
+    await Codelessly.instance.reset();
     // await codelessly.init();
 
     // Unblock the UI (send button).

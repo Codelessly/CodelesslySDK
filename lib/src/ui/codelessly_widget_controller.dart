@@ -35,7 +35,16 @@ class CodelesslyWidgetController extends ChangeNotifier {
   ///
   /// By default, this is the global instance, retrieved via
   /// [Codelessly.instance].
-  final Codelessly codelessly;
+  final Codelessly? codelessly;
+
+  /// A convenience getter that returns the provided [codelessly] instance, or,
+  /// if it's null, returns the global [Codelessly.instance].
+  Codelessly get effectiveCodelessly => codelessly ?? Codelessly.instance;
+
+  /// A convenience getter that decides whether this controller is configured
+  /// to use an explicitly-controlled [Codelessly] instance, or to use the
+  /// global [Codelessly.instance].
+  bool get isGlobalInstance => codelessly == null;
 
   /// Holds initialization configuration options for the SDK.
   final CodelesslyConfig? config;
@@ -62,7 +71,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
   /// Helper getter to retrieve the active data manager being used by
   /// the [Codelessly] instance.
-  DataManager get dataManager => codelessly.dataManager;
+  DataManager get dataManager => effectiveCodelessly.dataManager;
 
   /// Helper getter to retrieve the active publish model stream being used by
   /// the [Codelessly] instance.
@@ -75,7 +84,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
   /// Helper getter to retrieve the publish source being used by
   /// the [Codelessly] instance.
-  PublishSource get publishSource => codelessly.config!.publishSource;
+  PublishSource get publishSource => effectiveCodelessly.config!.publishSource;
 
   /// A boolean that helps keep track of the state of this controller's
   /// initialization.
@@ -94,9 +103,9 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// over the SDK's behavior.
   CodelesslyWidgetController({
     this.layoutID,
-    PublishSource? publishSource,
-    Codelessly? codelessly,
+    this.codelessly,
     CodelesslyConfig? config,
+    PublishSource? publishSource,
 
     // Optional managers. These are only used when using the global codelessly
     // instance.
@@ -104,25 +113,11 @@ class CodelesslyWidgetController extends ChangeNotifier {
     this.publishDataManager,
     this.previewDataManager,
     this.cacheManager,
-  })  : codelessly = codelessly ?? Codelessly.instance,
-        config = config ?? (codelessly ?? Codelessly.instance).config {
-    final codelessly = this.codelessly;
+  }) : config = config ?? (codelessly ?? Codelessly.instance).config {
     assert(
-      (config == null) != (codelessly.config == null) ||
-          (config == codelessly.config),
-      codelessly.config == null
-          ? 'The SDK cannot be initialized if it is not configured. '
-              '\nConsider specifying a [CodelesslyConfig] when initializing.'
-              '\nYou can initialize the SDK by calling [Codelessly.instance.initialize()].'
-              '\nOr call [Codelessly.instance.configure()] to load the SDK lazily instead.'
-          : 'A [CodelesslyConfig] was already provided.'
-              '\nConsider removing the duplicate config or calling '
-              '[Codelessly.instance.dispose()] before reinitializing.',
-    );
-    assert(
-      (layoutID != null) || (config ?? codelessly.config)!.slug != null,
-      'You must specify a [layoutID] in the constructor of this controller.'
-      "\nIf you don't, then a slug must be configured in the config.",
+      config == null || effectiveCodelessly.config == null,
+      'You cannot provide a [config] if you are also providing one '
+      'inside the [codelessly] instance.',
     );
   }
 
@@ -134,12 +129,33 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
   /// Listens to the SDK's status. If the SDK is done, then we can start
   /// listening to the data manager's status for layout updates.
-  void init() {
+  void initialize({
+    CodelesslyConfig? config,
+    String? layoutID,
+  }) {
+    assert(
+      (config == null) != (this.config == null),
+      config == null
+          ? 'A [config] must be provided. Please provide one either in the initialize() function, or the constructor of this controller, or in the Codelessly instance.'
+          : 'A config was already provided from '
+              '${effectiveCodelessly.config == null ? 'the constructor of this controller.' : 'from the configured Codelessly instance.'}'
+              ' You cannot specify it again in the initialize function of this controller.',
+    );
+
+    config ??= this.config;
+
+    assert(
+      config!.slug != null || ((layoutID == null) != (layoutID == null)),
+      layoutID == null
+          ? 'The [layoutID] must be provided once either from the constructor of this controller or in the initialize function.'
+              "\nIf you don't, then a slug must be configured in the config."
+          : 'The [layoutID] must be provided only once either from the constructor of this controller or in the initialize function. Not in both at the same time.',
+    );
+
     didInitialize = true;
 
     try {
-      CodelesslyStatus status = codelessly.status;
-      final bool isGlobal = codelessly == Codelessly.instance;
+      CodelesslyStatus status = effectiveCodelessly.status;
 
       // If the Codelessly global instance was passed and is still idle, that
       // means the user never triggered [Codelessly.init] but this
@@ -148,9 +164,9 @@ class CodelesslyWidgetController extends ChangeNotifier {
       // We initialize the global instance here. If this were a local Codelessly
       // instance, the user explicitly wants more control over the SDK, so we
       // do nothing and let the user handle it.
-      if (isGlobal) {
+      if (isGlobalInstance) {
         if (status == CodelesslyStatus.empty) {
-          codelessly.configure(
+          effectiveCodelessly.configure(
             config: config,
             authManager: authManager,
             publishDataManager: publishDataManager,
@@ -158,9 +174,9 @@ class CodelesslyWidgetController extends ChangeNotifier {
             cacheManager: cacheManager,
           );
         }
-        status = codelessly.status;
+        status = effectiveCodelessly.status;
         if (status == CodelesslyStatus.configured) {
-          codelessly.initialize(initializeDataManagers: true);
+          effectiveCodelessly.initialize();
         }
       }
     } catch (exception, str) {
@@ -171,17 +187,18 @@ class CodelesslyWidgetController extends ChangeNotifier {
       //
       // We need to handle them, and if the codelessly instance is not
       // configured yet, we need to initialize the error handler regardless.
-      codelessly.initErrorHandler(
-        firebaseProjectId: codelessly.config?.firebaseProjectId,
+      effectiveCodelessly.initErrorHandler(
+        firebaseProjectId: effectiveCodelessly.config?.firebaseProjectId,
         automaticallySendCrashReports:
-            codelessly.config?.automaticallyCollectCrashReports ?? false,
+            effectiveCodelessly.config?.automaticallyCollectCrashReports ??
+                false,
       );
       CodelesslyErrorHandler.instance
           .captureException(exception, stacktrace: str);
     }
 
     // First event.
-    if (codelessly.status == CodelesslyStatus.loaded) {
+    if (effectiveCodelessly.status == CodelesslyStatus.loaded) {
       log(
         '[CodelesslyWidgetController] [$layoutID]: Codelessly SDK is already'
         ' loaded. Woo!',
@@ -194,7 +211,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       ' stream.',
     );
     _sdkStatusListener?.cancel();
-    _sdkStatusListener = codelessly.statusStream.listen((status) {
+    _sdkStatusListener = effectiveCodelessly.statusStream.listen((status) {
       switch (status) {
         case CodelesslyStatus.empty:
         case CodelesslyStatus.configured:

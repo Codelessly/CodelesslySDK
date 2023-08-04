@@ -411,7 +411,7 @@ class CodelesslyWidget extends StatefulWidget {
         assert(
           (codelessly == null && controller == null) ||
               (codelessly != null) != (controller != null),
-          'You must provide either a [codelessly] or a [controller]. One must be specified, and both cannot be specified at the same time.',
+          'You must provide either a [codelessly] or a [controller]. One may be specified, and both cannot be specified at the same time.',
         );
 
   @override
@@ -445,22 +445,22 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   void initState() {
     super.initState();
 
+    // If a controller was not provided, then create a default internal one and
+    // immediately initialize it.
     if (widget.controller == null) {
       _controller = createDefaultController();
-    }
-
-    if (!_effectiveController.didInitialize) {
-      _effectiveController.init();
+      _effectiveController.initialize();
     }
 
     if (!CodelesslyErrorHandler.didInitialize) {
-      _effectiveController.codelessly.initErrorHandler(
+      _effectiveController.effectiveCodelessly.initErrorHandler(
         firebaseProjectId: _effectiveController.config?.firebaseProjectId,
         automaticallySendCrashReports:
             _effectiveController.config?.automaticallyCollectCrashReports ??
                 false,
       );
     }
+
     _exceptionSubscription =
         CodelesslyErrorHandler.instance.exceptionStream.listen(
       (event) {
@@ -531,7 +531,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           widget.codelessly != oldWidget.codelessly) {
         _controller?.dispose();
         _controller = createDefaultController();
-        _effectiveController.init();
+        _effectiveController.initialize();
         codelesslyContext.layoutID = _effectiveController.layoutID;
       }
     }
@@ -618,18 +618,19 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final Codelessly codelessly = _effectiveController.effectiveCodelessly;
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<CodelesslyContext>.value(
           value: codelesslyContext,
         ),
         Provider<Codelessly>.value(
-          value: _effectiveController.codelessly,
+          value: codelessly,
         ),
       ],
       child: StreamBuilder<CodelesslyStatus>(
-        stream: _effectiveController.codelessly.statusStream,
-        initialData: _effectiveController.codelessly.status,
+        stream: codelessly.statusStream,
+        initialData: codelessly.status,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return widget.errorBuilder?.call(context, snapshot.error) ??
