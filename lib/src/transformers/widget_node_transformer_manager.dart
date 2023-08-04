@@ -342,7 +342,7 @@ class SvgIcon extends StatelessWidget {
     final url = icon.toSvgUrl();
 
     if (url != null) {
-      log('SVG ICON URL: $url');
+      // log('SVG ICON URL: $url');
     } else {
       log('SVG ICON URL: 404 | name: ${icon.name} | type: ${icon.type} | '
           'codepoint: ${icon.codepoint} | fontFamily: ${icon.fontFamily} | '
