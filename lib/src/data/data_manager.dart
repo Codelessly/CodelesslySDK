@@ -296,7 +296,9 @@ class DataManager {
       // If the completer has not completed yet, it needs to be
       // completed with the first available publish model form the server.
       if (isFirstEvent) {
-        log('[DataManager] Completing publish model stream completer since this is the first event.');
+        log(
+          '[DataManager] Completing publish model stream completer since this is the first event.',
+        );
         completer.complete(serverModel);
       }
 
@@ -312,7 +314,9 @@ class DataManager {
       // once that happens, therefore we don't need to emit it here, nor
       // compare.
       if (_publishModel == null) {
-        log('[DataManager] Publish model is null during init and received the first publish model from the server. Skipping comparison in stream.');
+        log(
+          '[DataManager] Publish model is null during init and received the first publish model from the server. Skipping comparison in stream.',
+        );
         return;
       }
 
@@ -417,30 +421,31 @@ class DataManager {
       localModel: localModel,
     );
 
-    final bool templateChanged;
-    if (config.publishSource.isTemplate) {
-      templateChanged = true;
-    } else {
-      templateChanged = false;
-    }
+    final bool templateChanged = config.publishSource.isTemplate;
+
+    final bool entryChanged =
+        localModel.entryLayoutId != serverModel.entryLayoutId ||
+            localModel.entryCanvasId != serverModel.entryCanvasId ||
+            localModel.entryPageId != serverModel.entryPageId;
 
     if (layoutUpdates.isEmpty &&
         fontUpdates.isEmpty &&
         apiUpdates.isEmpty &&
         variableUpdates.isEmpty &&
         conditionUpdates.isEmpty &&
-        !templateChanged) {
+        !templateChanged &&
+        !entryChanged) {
       log('[DataManager] No updates to process.');
       return;
     } else {
-      log(
-        '[DataManager] Processing ${layoutUpdates.length} layout updates, '
-        '${fontUpdates.length} font updates, '
-        '${apiUpdates.length} api updates, '
-        '${variableUpdates.length} variable updates, '
-        '${conditionUpdates.length} condition updates, and '
-        '${templateChanged ? 1 : 0} template updates.',
-      );
+      log('[DataManager] Processing updates:');
+      log('      | ${layoutUpdates.length} layout updates.');
+      log('      | ${fontUpdates.length} font updates.');
+      log('      | ${apiUpdates.length} api updates.');
+      log('      | ${variableUpdates.length} variable updates.');
+      log('      | ${conditionUpdates.length} condition updates.');
+      log('      | ${templateChanged ? 1 : 0} template update${templateChanged ? '' : 's'}.');
+      log('      | ${entryChanged ? 1 : 0} entry id update${entryChanged ? '' : 's'}.');
     }
 
     for (final String layoutID in layoutUpdates.keys) {
@@ -581,8 +586,16 @@ class DataManager {
       updates: serverModel.updates,
     );
 
-    if (config.publishSource.isTemplate) {
+    if (templateChanged) {
       _publishModel = publishModel?.copyWith();
+    }
+
+    if (entryChanged) {
+      _publishModel = _publishModel!.copyWith(
+        entryPageId: serverModel.entryPageId,
+        entryCanvasId: serverModel.entryCanvasId,
+        entryLayoutId: serverModel.entryLayoutId,
+      );
     }
 
     savePublishModel();

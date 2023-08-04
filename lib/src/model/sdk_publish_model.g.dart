@@ -16,8 +16,6 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
         (k, e) => MapEntry(k as String,
             SDKPublishLayout.fromJson(Map<String, dynamic>.from(e as Map))),
       ),
-      pages:
-          (json['pages'] as List<dynamic>?)?.map((e) => e as String).toList(),
       updates: json['updates'] == null
           ? null
           : SDKPublishUpdates.fromJson(
@@ -34,6 +32,11 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
         (k, e) => MapEntry(k as String,
             SDKLayoutConditions.fromJson(Map<String, dynamic>.from(e as Map))),
       ),
+      pages:
+          (json['pages'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      entryLayoutId: json['entryLayoutId'] as String?,
+      entryPageId: json['entryPageId'] as String?,
+      entryCanvasId: json['entryCanvasId'] as String?,
       owner: json['owner'] as String,
       editors:
           (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
@@ -42,21 +45,33 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
       public: json['public'] as bool? ?? false,
     );
 
-Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) =>
-    <String, dynamic>{
-      'owner': instance.owner,
-      'editors': instance.editors.toList(),
-      'viewers': instance.viewers.toList(),
-      'public': instance.public,
-      'projectId': instance.projectId,
-      'fonts': instance.fonts.map((k, e) => MapEntry(k, e.toJson())),
-      'layouts': instance.layouts.map((k, e) => MapEntry(k, e.toJson())),
-      'pages': instance.pages,
-      'updates': instance.updates.toJson(),
-      'apis': instance.apis.map((k, e) => MapEntry(k, e.toJson())),
-      'variables': instance.variables.map((k, e) => MapEntry(k, e.toJson())),
-      'conditions': instance.conditions.map((k, e) => MapEntry(k, e.toJson())),
-    };
+Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
+  final val = <String, dynamic>{
+    'owner': instance.owner,
+    'editors': instance.editors.toList(),
+    'viewers': instance.viewers.toList(),
+    'public': instance.public,
+    'projectId': instance.projectId,
+    'fonts': instance.fonts.map((k, e) => MapEntry(k, e.toJson())),
+    'layouts': instance.layouts.map((k, e) => MapEntry(k, e.toJson())),
+    'pages': instance.pages,
+    'updates': instance.updates.toJson(),
+    'apis': instance.apis.map((k, e) => MapEntry(k, e.toJson())),
+    'variables': instance.variables.map((k, e) => MapEntry(k, e.toJson())),
+    'conditions': instance.conditions.map((k, e) => MapEntry(k, e.toJson())),
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('entryLayoutId', instance.entryLayoutId);
+  writeNotNull('entryPageId', instance.entryPageId);
+  writeNotNull('entryCanvasId', instance.entryCanvasId);
+  return val;
+}
 
 SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
       id: json['id'] as String,

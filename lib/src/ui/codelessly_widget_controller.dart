@@ -6,13 +6,30 @@ import 'package:flutter/material.dart';
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
 
+/// The [CodelesslyWidgetController] provides advanced explicit control over
+/// the state of the instantiated [CodelesslyWidget] that it is attached to.
+///
+/// The SDK must be instantiated when using a [CodelesslyWidget] or
+/// [CodelesslyWidgetController].
+///
+/// The SDK can be instantiated in several ways:
+///
+/// 1. Using the global instance of the SDK by not passing any of the
+///    relevant parameters. Initialization of the global instance is done
+///    implicitly if not already initialized.
+///
+/// 2. Using a custom [codelessly] instance, initialization of the
+///    [codelessly] instance must be done explicitly.
+///
+/// 3. Using a custom [config], which will be used to initialize the global
+///    [codelessly] instance.
 class CodelesslyWidgetController extends ChangeNotifier {
   /// The ID of the layout provided from your Codelessly dashboard.
   /// This represents a single screen or canvas.
   ///
   /// If this is null, the controller's layoutID will be used.
   /// This cannot be null if no controller is provided.
-  final String layoutID;
+  final String? layoutID;
 
   /// The [Codelessly] instance to use.
   ///
@@ -66,23 +83,17 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
   /// Creates a [CodelesslyWidgetController].
   ///
-  /// Can be instantiated in several ways:
-  ///
-  /// 1. Using the global instance of the SDK by not passing any of the
-  ///    relevant parameters. Initialization of the global instance is done
-  ///    implicitly if not already initialized.
-  ///
-  /// 2. Using a custom [codelessly] instance, initialization of the
-  ///    [codelessly] instance must be done explicitly.
-  ///
-  /// 3. Using a custom [config], which will be used to initialize the global
-  ///    [codelessly] instance.
+  /// If the [layoutID] is not provided, then it is assumed that the published
+  /// model is public via a defined slug or is a template for the template
+  /// gallery, in which case, the [SDKPublishModel.entryLayoutID] is provided
+  /// and must not be null. If it is not provided, than there is an error in
+  /// the data, perhaps from a usage bug in the Codelessly Editor.
   ///
   /// Optionally, provide custom [authManager], [publishDataManager],
   /// [previewDataManager], and [cacheManager] instances for advanced control
   /// over the SDK's behavior.
   CodelesslyWidgetController({
-    required this.layoutID,
+    this.layoutID,
     PublishSource? publishSource,
     Codelessly? codelessly,
     CodelesslyConfig? config,
@@ -102,12 +113,16 @@ class CodelesslyWidgetController extends ChangeNotifier {
       codelessly.config == null
           ? 'The SDK cannot be initialized if it is not configured. '
               '\nConsider specifying a [CodelesslyConfig] when initializing.'
-              '\n\nYou can initialize the SDK by calling '
-              '[Codelessly.initializeSDK]'
-              '\nor call [Codelessly.configureSDK] to lazily load instead.'
+              '\nYou can initialize the SDK by calling [Codelessly.instance.initialize()].'
+              '\nOr call [Codelessly.instance.configure()] to load the SDK lazily instead.'
           : 'A [CodelesslyConfig] was already provided.'
               '\nConsider removing the duplicate config or calling '
-              '[Codelessly.dispose] before reinitializing.',
+              '[Codelessly.instance.dispose()] before reinitializing.',
+    );
+    assert(
+      (layoutID != null) || (config ?? codelessly.config)!.slug != null,
+      'You must specify a [layoutID] in the constructor of this controller.'
+      "\nIf you don't, then a slug must be configured in the config.",
     );
   }
 
@@ -225,12 +240,12 @@ class CodelesslyWidgetController extends ChangeNotifier {
           layoutID: layoutID,
         );
       });
-    } else if (config!.preload == false) {
+    } else if (config!.preload == false && layoutID != null) {
       log(
         '[CodelesslyWidgetController] [$layoutID]: Config preloading is false.',
       );
       log(
-        '[CodelesslyWidgetController] [$layoutID]: requesting layout from'
+        '[CodelesslyWidgetController] [$layoutID]: Requesting layout from'
         ' data manager since preloading is false',
       );
       log(
@@ -238,7 +253,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
         ' $publishSource.',
       );
       dataManager
-          .getOrFetchPopulatedLayout(layoutID: layoutID)
+          .getOrFetchPopulatedLayout(layoutID: layoutID!)
           .catchError((error, str) {
         CodelesslyErrorHandler.instance.captureException(
           error,

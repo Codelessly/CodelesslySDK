@@ -10,8 +10,7 @@ class CodelesslyConfig with EquatableMixin {
   final String authToken;
 
   /// A project slug configured in the publish settings of the Codelessly
-  /// editor. Provides unauthenticated access to the published layouts of the
-  /// project.
+  /// editor.
   final String? slug;
 
   /// A convenience getter that returns a non-null unique identifier for this
