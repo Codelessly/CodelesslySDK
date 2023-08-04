@@ -94,11 +94,15 @@ class DataManager {
     // No authentication is required; let's download a complete publish bundle.
     if (config.slug != null && _publishModel == null) {
       try {
+        log('[DataManager] No local publish model, but a slug was specified!');
+        log('[DataManager] Downloading complete publish bundle for slug ${config.slug}.');
+
         _publishModel =
             await networkDataRepository.downloadCompletePublishBundle(
           slug: config.slug!,
           source: config.publishSource,
         );
+
         if (_publishModel != null) {
           log('[DataManager] Complete publish model from slug is downloaded. Emitting.');
           emitPublishModel();

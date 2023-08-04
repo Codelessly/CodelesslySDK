@@ -24,6 +24,7 @@ abstract class NetworkDataRepository {
     required String slug,
     required PublishSource source,
   }) async {
+    log('[NetworkDataRepo] Downloading publish bundle with slug: $slug and source: $source');
     final http.Response result = await http.post(
       Uri.parse('$cloudFunctionsBaseURL/getPublishBundleBySlugRequest'),
       headers: <String, String>{'Content-Type': 'application/json'},
@@ -44,6 +45,7 @@ abstract class NetworkDataRepository {
     final Map<String, dynamic> modelDoc = jsonDecode(result.body);
     final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
 
+    log('[NetworkDataRepo] Finished downloading publish bundle with slug: $slug and source: $source.');
     return model;
   }
 
