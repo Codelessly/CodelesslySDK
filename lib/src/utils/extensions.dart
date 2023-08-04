@@ -530,6 +530,9 @@ extension EdgeInsetsHelper on EdgeInsetsModel {
 }
 
 extension VariableDataListExtensions<T extends VariableData> on Iterable<T> {
+  Iterable<T> findAllByNames(Iterable<String> names) =>
+      where((element) => names.contains(element.name));
+
   VariableData? findByNameOrNull(String? name) =>
       firstWhereOrNull((element) => element.name == name);
 
@@ -1605,5 +1608,33 @@ extension TextAlignVerticalEnumExt on TextAlignVerticalEnum {
       TextAlignVerticalEnum.bottom => TextAlignVertical.bottom,
       TextAlignVerticalEnum.center => TextAlignVertical.center,
     };
+  }
+}
+
+extension BaseNodeExt on BaseNode {
+  /// Collects all the variable names used in this node.
+  Set<String> getUsedVariableNames({bool includePredefined = false}) {
+    final Set<String> usedVariables = {};
+    for (final path in variables.values) {
+      final match = VariableMatch.parse(path.wrapWithVariableSyntax());
+      if (match == null) continue;
+
+      final bool isPredefined = predefinedVariableNames.contains(match.name);
+      if (!includePredefined && isPredefined) continue;
+
+      usedVariables.add(match.name);
+    }
+    for (final paths in multipleVariables.values) {
+      for (final path in paths) {
+        final match = VariableMatch.parse(path.wrapWithVariableSyntax());
+        if (match == null) continue;
+
+        final bool isPredefined = predefinedVariableNames.contains(match.name);
+        if (!includePredefined && isPredefined) continue;
+
+        usedVariables.add(match.name);
+      }
+    }
+    return usedVariables;
   }
 }
