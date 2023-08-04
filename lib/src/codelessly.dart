@@ -461,7 +461,6 @@ class Codelessly {
       // The cache manager initializes first to load the local cache.
       await this.cacheManager.init();
 
-      log('[SDK] [INIT] Initializing auth manager');
       // The auth manager initializes second to look up cached auth data
       // from the cache manager. If no auth data is available, it halts the
       // entire process and awaits to authenticate with the server.
@@ -472,9 +471,12 @@ class Codelessly {
       // If the slug is specified, the SDK can skip all authentication and
       // immediately jump to loading the data manager.
       if (_config!.slug == null) {
+        log('[SDK] [INIT] Initializing auth manager.');
         await this.authManager.init();
         _config!.publishSource =
             this.authManager.getBestPublishSource(_config!);
+      } else {
+        log('[SDK] [INIT] A slug was provided. Acutely skipping authentication.');
       }
 
       // The data manager initializes last to load the last stored publish
@@ -484,9 +486,12 @@ class Codelessly {
       // The config sets the default data manager to initialize. If the
       // [CodelesslyWidget] wants to load the opposite manager, the other will
       // lazily initialize.
-      if (initializeDataManagers && _config!.preload) {
-        log('[SDK] [INIT] Initializing data managers with publish source '
-            '${_config!.publishSource}');
+      if (initializeDataManagers &&
+          (_config!.preload || _config!.slug != null)) {
+        log(
+          '[SDK] [INIT] Initializing data managers with publish source '
+          '${_config!.publishSource}',
+        );
 
         switch (_config!.publishSource) {
           case PublishSource.publish:
@@ -505,6 +510,16 @@ class Codelessly {
             }
             break;
         }
+      } else {
+        if (!initializeDataManagers) {
+          log(
+            '[SDK] [INIT] Skipping data manager loading because [initializeDataManagers] is set to false.',
+          );
+        } else {
+          log(
+            '[SDK] [INIT] Skipping data manager loading because preload is ${_config!.preload} & slug is ${_config!.slug}.',
+          );
+        }
       }
 
       // If the slug is specified, the SDK can skip all authentication for
@@ -512,9 +527,11 @@ class Codelessly {
       // bundle. After that though, we can safely authenticate in the
       // background to keep listening for updates to the publish model.
       if (_config!.slug != null) {
+        log('[SDK] [INIT] Since a slug was provided & data manager finished, authenticating in the background...');
         this.authManager.init().then((_) {
           if (this.authManager.authData == null) return;
 
+          log('[SDK] [POST-INIT] Background authentication succeeded.');
           dataManager.listenToPublishModel(
             this.authManager.authData!.projectId,
           );

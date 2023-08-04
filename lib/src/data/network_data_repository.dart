@@ -134,7 +134,7 @@ abstract class NetworkDataRepository {
 
       return Uint8List.view(response.bodyBytes.buffer);
     } catch (e) {
-      print('Error downloading font bytes: $e');
+      log('Error downloading font bytes: $e');
       return null;
     }
   }
