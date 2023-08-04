@@ -1424,6 +1424,17 @@ extension ActionModelExt on ActionModel {
 
     return false;
   }
+
+  ActionModel withUpdatedNodeId(String oldNodeId, String newNodeId) {
+    final action = this;
+    if (action is SetValueAction && action.nodeID == oldNodeId) {
+      return action.copyWith(nodeID: newNodeId);
+    }
+    if (action is SetVariantAction && action.nodeID == oldNodeId) {
+      return action.copyWith(nodeID: newNodeId);
+    }
+    return action;
+  }
 }
 
 extension BaseConditionExt on BaseCondition {
@@ -1495,6 +1506,36 @@ extension BaseConditionExt on BaseCondition {
 
   Set<String> getNodeIds() =>
       accept<Set<String>>(ConditionNodesVisitor()) ?? {};
+
+  BaseCondition withUpdatedNodeId(String oldNodeId, String newNodeId) {
+    final condition = this;
+    return switch (condition) {
+      ElseCondition() => condition.copyWith(
+          actions: condition.actions
+              .map((action) => action.withUpdatedNodeId(oldNodeId, newNodeId))
+              .toList()),
+      Condition() => condition.copyWith(
+          actions: condition.actions
+              .map((action) => action.withUpdatedNodeId(oldNodeId, newNodeId))
+              .toList()),
+      ConditionGroup() => condition.copyWith(
+          elseCondition: condition.elseCondition?.withUpdatedNodeId(
+            oldNodeId,
+            newNodeId,
+          ) as ElseCondition?,
+          elseIfConditions: condition.elseIfConditions
+              .map((condition) => condition.withUpdatedNodeId(
+                    oldNodeId,
+                    newNodeId,
+                  ) as Condition)
+              .toList(),
+          ifCondition: condition.ifCondition.withUpdatedNodeId(
+            oldNodeId,
+            newNodeId,
+          ) as Condition,
+        ),
+    };
+  }
 }
 
 extension CanvasConditionsMapExt on Map<String, CanvasConditions> {
