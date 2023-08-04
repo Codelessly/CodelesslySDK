@@ -145,7 +145,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     config ??= this.config;
 
     assert(
-      config!.slug != null || ((layoutID == null) != (layoutID == null)),
+      config!.slug != null || ((layoutID == null) != (this.layoutID == null)),
       layoutID == null
           ? 'The [layoutID] must be provided once either from the constructor of this controller or in the initialize function.'
               "\nIf you don't, then a slug must be configured in the config."
