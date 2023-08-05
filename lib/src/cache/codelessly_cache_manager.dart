@@ -58,11 +58,7 @@ class CodelesslyCacheManager extends CacheManager {
   Future<void> clearAll() async {
     log('[CacheManager] Clearing cache...');
     try {
-      if (kIsWeb) {
-        box.deleteFromDisk();
-      } else {
-        await box.deleteFromDisk();
-      }
+      await box.clear();
       log('[CacheManager] Cache cleared successfully!');
     } catch (e, stacktrace) {
       throw CodelesslyException.cacheClearException(
@@ -74,7 +70,7 @@ class CodelesslyCacheManager extends CacheManager {
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     box.close();
     filesBox.close();
   }
@@ -124,11 +120,7 @@ class CodelesslyCacheManager extends CacheManager {
   Future<void> deleteAllByteData() async {
     log('[CacheManager] Deleting all byte data...');
     try {
-      if (kIsWeb) {
-        filesBox.deleteFromDisk();
-      } else {
-        await filesBox.deleteFromDisk();
-      }
+      filesBox.clear();
       log('[CacheManager] Cache bytes deleted successfully!');
     } catch (e, stacktrace) {
       throw CodelesslyException.fileIoException(
