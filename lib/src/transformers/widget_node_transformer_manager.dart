@@ -321,7 +321,7 @@ class SvgIcon extends StatelessWidget {
     required this.icon,
     this.color,
     this.size,
-    this.fit = BoxFit.fitWidth,
+    this.fit = BoxFit.contain,
   });
 
   @override
