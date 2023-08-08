@@ -115,9 +115,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
     this.cacheManager,
   }) : config = config ?? (codelessly ?? Codelessly.instance).config {
     assert(
-      config == null || effectiveCodelessly.config == null,
-      'You cannot provide a [config] if you are also providing one '
-      'inside the [codelessly] instance.',
+      (config != null) != (codelessly?.config != null),
+      'A [config] must be provided. Please provide one either in the constructor of this controller, or in the passed Codelessly instance.',
     );
   }
 
