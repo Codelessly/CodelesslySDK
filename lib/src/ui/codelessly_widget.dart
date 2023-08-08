@@ -587,7 +587,9 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             CodelesslyErrorHandler.instance.lastException?.layoutID ==
                 _effectiveController.layoutID) {
           return widget.errorBuilder?.call(
-                  context, CodelesslyErrorHandler.instance.lastException) ??
+                context,
+                CodelesslyErrorHandler.instance.lastException,
+              ) ??
               CodelesslyErrorScreen(
                 exception: snapshot.error,
                 publishSource: _effectiveController.publishSource,
