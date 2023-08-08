@@ -114,18 +114,28 @@ class DataManager {
           _recordTime(stopwatch);
           return;
         } else {
-          log('[DataManager] Failed to download complete publish model from slug. Continuing as if offline.');
+          throw CodelesslyException(
+            'Failed to download complete publish bundle for slug ${config.slug}.',
+          );
         }
       } catch (e, stackTrace) {
         log('[DataManager] Error trying to download complete publish model from slug.');
-        log('[DataManager] Continuing as if offline.');
+        log('[DataManager] Since no publish model is cached, this is a complete stop to the data manager.');
         log('[DataManager]', level: 900, error: e, stackTrace: stackTrace);
         print(e);
         print(stackTrace);
 
         _recordTime(stopwatch);
-        return;
+
+        throw CodelesslyException.networkException(
+          message:
+              'Failed to download complete publish bundle for slug ${config.slug}.',
+          layoutID: layoutID,
+          originalException: e,
+          stacktrace: stackTrace,
+        );
       } finally {
+        bundleStopWatch.stop();
         log('[DataManager] Publish bundle flow took ${bundleStopWatch.elapsedMilliseconds}ms or ${bundleStopWatch.elapsed.inSeconds}s.');
       }
     }

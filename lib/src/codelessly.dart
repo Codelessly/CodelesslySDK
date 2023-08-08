@@ -32,12 +32,6 @@ class Codelessly {
   /// Initialization is needed before formal usage.
   static Codelessly get instance => _instance;
 
-  /// Returns the current status of the SDK.
-  CodelesslyStatus get sdkStatus => _instance.status;
-
-  /// Returns a stream of SDK status changes.
-  Stream<CodelesslyStatus> get sdkStatusStream => _instance.statusStream;
-
   CodelesslyConfig? _config;
 
   /// Returns the configuration options provided to this SDK.
