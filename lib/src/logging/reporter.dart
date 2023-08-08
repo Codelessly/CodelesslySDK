@@ -57,7 +57,13 @@ class FirestoreErrorReporter extends ErrorReporter {
     await event.populateDeviceMetadata();
     await _firestore.collection(_collection).add(event.toJson()).then((doc) {
       log('Exception captured. ID: [${doc.id}]');
-      log('Exception URL: https://console.firebase.google.com/u/1/project/${Firestore.projectId}/firestore/data/~2Fsdk_errors~2F${doc.id}');
+      if(Firestore.isInitialized) {
+        log(
+            'Exception URL: https://console.firebase.google.com/u/1/project/${Firestore
+                .projectId}/firestore/data/~2Fsdk_errors~2F${doc.id}');
+      }else {
+        log('Cannot get exception URL. Firestore is not initialized.');
+      }
     });
   }
 
