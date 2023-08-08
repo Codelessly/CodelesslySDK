@@ -586,18 +586,13 @@ class DataManager {
 
     _publishModel = localModel.copyWith(
       updates: serverModel.updates,
+      entryPageId: serverModel.entryPageId,
+      entryCanvasId: serverModel.entryCanvasId,
+      entryLayoutId: serverModel.entryLayoutId,
     );
 
     if (templateChanged) {
       _publishModel = publishModel?.copyWith();
-    }
-
-    if (entryChanged) {
-      _publishModel = _publishModel!.copyWith(
-        entryPageId: serverModel.entryPageId,
-        entryCanvasId: serverModel.entryCanvasId,
-        entryLayoutId: serverModel.entryLayoutId,
-      );
     }
 
     savePublishModel();
