@@ -147,21 +147,34 @@ class ConditionEvaluator<R extends Object>
 
   @override
   bool visitEqualsOperator(Object? left, Object? right) {
+    if (left == null && right == null) return true;
     if (left is num && right is num) return left == right;
+
+    if (left == null && right != null) return false;
+    if (left != null && right == null) return false;
+
     if (left is bool && right is bool) return left == right;
+
     return left.toString().toLowerCase() == right.toString().toLowerCase();
   }
 
   @override
   bool visitNotEqualsOperator(Object? left, Object? right) {
+    if (left == null && right != null) return true;
+    if (left != null && right == null) return true;
+
     if (left is num && right is num) return left != right;
     if (left is bool && right is bool) return left != right;
+
     return left.toString().toLowerCase() == right.toString().toLowerCase();
   }
 
   @override
   bool visitGreaterThanOperator(Object? left, Object? right) {
     if (left is num && right is num) return left > right;
+
+    if (left == null || right == null) return false;
+
     // This is required since we have loose type checking.
     return left
             .toString()
@@ -173,6 +186,9 @@ class ConditionEvaluator<R extends Object>
   @override
   bool visitLessThanOperator(Object? left, Object? right) {
     if (left is num && right is num) return left < right;
+
+    if (left == null || right == null) return false;
+
     // This is required since we have loose type checking.
     return left
             .toString()
