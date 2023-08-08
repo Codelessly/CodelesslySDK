@@ -93,6 +93,7 @@ class DataManager {
     // A slug was specified, no layout is cached. We need a layout FAST.
     // No authentication is required; let's download a complete publish bundle.
     if (config.slug != null && _publishModel == null) {
+      final Stopwatch bundleStopWatch = Stopwatch()..start();
       try {
         log('[DataManager] No local publish model, but a slug was specified!');
         log('[DataManager] Downloading complete publish bundle for slug ${config.slug}.');
@@ -124,6 +125,8 @@ class DataManager {
 
         _recordTime(stopwatch);
         return;
+      } finally {
+        log('[DataManager] Publish bundle flow took ${bundleStopWatch.elapsedMilliseconds}ms or ${bundleStopWatch.elapsed.inSeconds}s.');
       }
     }
 
