@@ -73,17 +73,17 @@ class ConditionEvaluator<R extends Object>
       // Full path of the variable (with accessor and variable name).
       final String? fullPath = match.namedGroup('value');
 
-      if (fullPath == null) return match[0]!;
+      if (fullPath == null) return 'null';
 
       if (predefinedVariableNames.contains(variableName)) {
         return visitPredefinedVariable(variableName, fullPath, match)
                 .typedValue<String>() ??
-            match[0]!;
+            'null';
       }
 
       final VariableData? variable = variables[variableName];
 
-      if (variable == null) return match[0]!;
+      if (variable == null) return 'null';
 
       if (variableName != fullPath) {
         // variable either has a path or accessor so we need to get the value
@@ -92,13 +92,13 @@ class ConditionEvaluator<R extends Object>
           return substituteJsonPath(fullPath, {
                 variableName: variable.typedValue<Map>() ?? {}
               }).typedValue<String>() ??
-              match[0]!;
+              'null';
         } else if (variable.type == VariableType.list) {
           // TODO: support list type variable paths.
           return substituteJsonPath(fullPath, {
                 variableName: variable.typedValue<List>() ?? []
               }).typedValue<String>() ??
-              match[0]!;
+              'null';
         }
       }
 
@@ -160,8 +160,11 @@ class ConditionEvaluator<R extends Object>
 
   @override
   bool visitNotEqualsOperator(Object? left, Object? right) {
+    print('left: $left, right: $right');
+
     if (left == null && right != null) return true;
     if (left != null && right == null) return true;
+    if (left == null && right == null) return false;
 
     if (left is num && right is num) return left != right;
     if (left is bool && right is bool) return left != right;
