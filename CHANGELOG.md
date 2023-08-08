@@ -1,3 +1,10 @@
+## 0.1.0
+- Update CodelesslyAPI v0.1.0.
+- Optimize SDK size by 90% by switching to SVG icons.
+- Add path support for Flutter Website publishing.
+- Consolidate `initialize()` function.
+- Fix Hive cache dispose not working on web.
+
 ## 0.0.8
 - Update CodelesslyAPI v0.0.8.
 - Text field and code-gen improvements.
