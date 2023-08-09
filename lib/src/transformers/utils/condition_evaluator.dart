@@ -160,8 +160,6 @@ class ConditionEvaluator<R extends Object>
 
   @override
   bool visitNotEqualsOperator(Object? left, Object? right) {
-    print('left: $left, right: $right');
-
     if (left == null && right != null) return true;
     if (left != null && right == null) return true;
     if (left == null && right == null) return false;

@@ -61,6 +61,9 @@ class SDKPublishModel extends PrivacyBase {
   /// from site.codelessly.com or the Codelessly template gallery.
   final String? entryCanvasId;
 
+  @DateTimeConverter()
+  final DateTime lastUpdated;
+
   /// Creates a new instance of [SDKPublishModel].
   SDKPublishModel({
     required this.projectId,
@@ -82,13 +85,15 @@ class SDKPublishModel extends PrivacyBase {
     super.editors,
     super.viewers,
     super.public,
+    DateTime? lastUpdated,
   })  : layouts = layouts ?? {},
         fonts = fonts ?? {},
         pages = pages ?? [],
         updates = updates ?? SDKPublishUpdates(),
         apis = apis ?? {},
         variables = variables ?? {},
-        conditions = conditions ?? {};
+        conditions = conditions ?? {},
+        lastUpdated = lastUpdated ?? DateTime.now();
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
   factory SDKPublishModel.fromJson(Map<String, dynamic> json) =>
@@ -125,6 +130,7 @@ class SDKPublishModel extends PrivacyBase {
     Set<String>? editors,
     Set<String>? viewers,
     bool? public,
+    DateTime? lastUpdated,
   }) {
     return SDKPublishModel(
       projectId: projectId ?? this.projectId,
@@ -142,6 +148,7 @@ class SDKPublishModel extends PrivacyBase {
       editors: editors ?? this.editors,
       viewers: viewers ?? this.viewers,
       public: public ?? this.public,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
     );
   }
 
@@ -159,6 +166,7 @@ class SDKPublishModel extends PrivacyBase {
         entryLayoutId,
         entryPageId,
         entryCanvasId,
+        lastUpdated,
       ];
 }
 
