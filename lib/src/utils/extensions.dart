@@ -4,6 +4,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart' as flutter;
+import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
@@ -343,11 +344,20 @@ extension ColorRGBAHelper on ColorRGBA {
       color: toRGB());
 }
 
-extension PaintColorExt on PaintModel {
+extension PaintModelExt on PaintModel {
   Color? toFlutterColor() {
     if (color == null) return null;
     return color!.toFlutterColor(opacity: opacity);
   }
+
+  String get imageExtension =>
+      path.extension(Uri.parse(croppedImageURL ?? downloadUrl ?? '').path);
+
+  bool get isStaticImage => staticImageTypesRegex.hasMatch(imageExtension);
+
+  bool get isSvgImage => imageExtension == '.svg' || imageExtension == 'svg';
+
+  bool get isGifImage => imageExtension == '.gif';
 }
 
 extension ColorRGBHelper on ColorRGB {

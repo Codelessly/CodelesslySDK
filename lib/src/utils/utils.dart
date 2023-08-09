@@ -189,3 +189,11 @@ class VariableMatch with EquatableMixin {
   @override
   List<Object?> get props => [text, name, path, accessor, fullPath, match];
 }
+
+// TODO: GIF Support
+/// Supported image file types that can be dropped on the canvas.
+final RegExp supportedAssetTypesRegex =
+    RegExp('jpg|jpeg|png|webp', caseSensitive: false);
+
+final RegExp staticImageTypesRegex =
+    RegExp('jpg|jpeg|png|webp', caseSensitive: false);
