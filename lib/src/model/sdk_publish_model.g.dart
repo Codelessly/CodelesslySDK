@@ -43,6 +43,8 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
       viewers:
           (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       public: json['public'] as bool? ?? false,
+      lastUpdated:
+          const DateTimeConverter().fromJson(json['lastUpdated'] as int?),
     );
 
 Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
@@ -70,6 +72,8 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
   writeNotNull('entryLayoutId', instance.entryLayoutId);
   writeNotNull('entryPageId', instance.entryPageId);
   writeNotNull('entryCanvasId', instance.entryCanvasId);
+  writeNotNull(
+      'lastUpdated', const DateTimeConverter().toJson(instance.lastUpdated));
   return val;
 }
 
@@ -164,23 +168,23 @@ SDKPublishUpdates _$SDKPublishUpdatesFromJson(Map json) => SDKPublishUpdates(
       fonts: json['fonts'] == null
           ? const {}
           : const DateTimeMapConverter()
-              .fromJson(json['fonts'] as Map<String, int>),
+              .fromJson(json['fonts'] as Map<String, dynamic>),
       layouts: json['layouts'] == null
           ? const {}
           : const DateTimeMapConverter()
-              .fromJson(json['layouts'] as Map<String, int>),
+              .fromJson(json['layouts'] as Map<String, dynamic>),
       apis: json['apis'] == null
           ? const {}
           : const DateTimeMapConverter()
-              .fromJson(json['apis'] as Map<String, int>),
+              .fromJson(json['apis'] as Map<String, dynamic>),
       variables: json['variables'] == null
           ? const {}
           : const DateTimeMapConverter()
-              .fromJson(json['variables'] as Map<String, int>),
+              .fromJson(json['variables'] as Map<String, dynamic>),
       conditions: json['conditions'] == null
           ? const {}
           : const DateTimeMapConverter()
-              .fromJson(json['conditions'] as Map<String, int>),
+              .fromJson(json['conditions'] as Map<String, dynamic>),
       layoutFonts: (json['layoutFonts'] as Map?)?.map(
             (k, e) => MapEntry(k as String,
                 (e as List<dynamic>).map((e) => e as String).toSet()),
