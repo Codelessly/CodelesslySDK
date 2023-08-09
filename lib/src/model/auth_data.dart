@@ -22,7 +22,7 @@ class AuthData with EquatableMixin {
   /// The issued timestamp of the authentication.
   /// The time the handshake was done that resulted in the successful
   /// authentication.
-  @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
+  @DateTimeConverter()
   final DateTime timestamp;
 
   /// Creates a [AuthData] instance.

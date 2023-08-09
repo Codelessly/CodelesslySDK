@@ -13,16 +13,26 @@ AssetModel _$AssetModelFromJson(Map json) => AssetModel(
       blurHash: json['blurHash'] as String? ?? '',
       sourceWidth: (json['sourceWidth'] as num).toDouble(),
       sourceHeight: (json['sourceHeight'] as num).toDouble(),
-      createdAt: jsonToDate(json['createdAt'] as int?),
+      createdAt: const DateTimeConverter().fromJson(json['createdAt'] as int?),
     );
 
-Map<String, dynamic> _$AssetModelToJson(AssetModel instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'url': instance.url,
-      'sourceWidth': instance.sourceWidth,
-      'sourceHeight': instance.sourceHeight,
-      'createdAt': dateToJson(instance.createdAt),
-      'blurHash': instance.blurHash,
-    };
+Map<String, dynamic> _$AssetModelToJson(AssetModel instance) {
+  final val = <String, dynamic>{
+    'id': instance.id,
+    'name': instance.name,
+    'url': instance.url,
+    'sourceWidth': instance.sourceWidth,
+    'sourceHeight': instance.sourceHeight,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull(
+      'createdAt', const DateTimeConverter().toJson(instance.createdAt));
+  val['blurHash'] = instance.blurHash;
+  return val;
+}

@@ -78,8 +78,10 @@ SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
       canvasId: json['canvasId'] as String,
       pageId: json['pageId'] as String,
       projectId: json['projectId'] as String,
-      nodes: jsonToNodes(json['nodes'] as Map<String, dynamic>),
-      lastUpdated: jsonToDate(json['lastUpdated'] as int?),
+      nodes: const NodesMapConverter()
+          .fromJson(json['nodes'] as Map<String, dynamic>),
+      lastUpdated:
+          const DateTimeConverter().fromJson(json['lastUpdated'] as int?),
       version: json['version'] as int?,
       password: json['password'] as String?,
       subdomain: json['subdomain'] as String?,
@@ -104,8 +106,7 @@ Map<String, dynamic> _$SDKPublishLayoutToJson(SDKPublishLayout instance) {
     'canvasId': instance.canvasId,
     'pageId': instance.pageId,
     'projectId': instance.projectId,
-    'nodes': nodesToJson(instance.nodes),
-    'lastUpdated': dateToJson(instance.lastUpdated),
+    'nodes': const NodesMapConverter().toJson(instance.nodes),
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -114,6 +115,8 @@ Map<String, dynamic> _$SDKPublishLayoutToJson(SDKPublishLayout instance) {
     }
   }
 
+  writeNotNull(
+      'lastUpdated', const DateTimeConverter().toJson(instance.lastUpdated));
   writeNotNull('version', instance.version);
   writeNotNull('password', instance.password);
   writeNotNull('subdomain', instance.subdomain);
@@ -160,19 +163,24 @@ Map<String, dynamic> _$SDKPublishFontToJson(SDKPublishFont instance) {
 SDKPublishUpdates _$SDKPublishUpdatesFromJson(Map json) => SDKPublishUpdates(
       fonts: json['fonts'] == null
           ? const {}
-          : jsonMapToDateValues(json['fonts'] as Map<String, dynamic>),
+          : const DateTimeMapConverter()
+              .fromJson(json['fonts'] as Map<String, int>),
       layouts: json['layouts'] == null
           ? const {}
-          : jsonMapToDateValues(json['layouts'] as Map<String, dynamic>),
+          : const DateTimeMapConverter()
+              .fromJson(json['layouts'] as Map<String, int>),
       apis: json['apis'] == null
           ? const {}
-          : jsonMapToDateValues(json['apis'] as Map<String, dynamic>),
+          : const DateTimeMapConverter()
+              .fromJson(json['apis'] as Map<String, int>),
       variables: json['variables'] == null
           ? const {}
-          : jsonMapToDateValues(json['variables'] as Map<String, dynamic>),
+          : const DateTimeMapConverter()
+              .fromJson(json['variables'] as Map<String, int>),
       conditions: json['conditions'] == null
           ? const {}
-          : jsonMapToDateValues(json['conditions'] as Map<String, dynamic>),
+          : const DateTimeMapConverter()
+              .fromJson(json['conditions'] as Map<String, int>),
       layoutFonts: (json['layoutFonts'] as Map?)?.map(
             (k, e) => MapEntry(k as String,
                 (e as List<dynamic>).map((e) => e as String).toSet()),
@@ -187,11 +195,11 @@ SDKPublishUpdates _$SDKPublishUpdatesFromJson(Map json) => SDKPublishUpdates(
 
 Map<String, dynamic> _$SDKPublishUpdatesToJson(SDKPublishUpdates instance) =>
     <String, dynamic>{
-      'fonts': dateValuesToJsonMap(instance.fonts),
-      'layouts': dateValuesToJsonMap(instance.layouts),
-      'apis': dateValuesToJsonMap(instance.apis),
-      'variables': dateValuesToJsonMap(instance.variables),
-      'conditions': dateValuesToJsonMap(instance.conditions),
+      'fonts': const DateTimeMapConverter().toJson(instance.fonts),
+      'layouts': const DateTimeMapConverter().toJson(instance.layouts),
+      'apis': const DateTimeMapConverter().toJson(instance.apis),
+      'variables': const DateTimeMapConverter().toJson(instance.variables),
+      'conditions': const DateTimeMapConverter().toJson(instance.conditions),
       'layoutFonts':
           instance.layoutFonts.map((k, e) => MapEntry(k, e.toList())),
       'layoutApis': instance.layoutApis.map((k, e) => MapEntry(k, e.toList())),

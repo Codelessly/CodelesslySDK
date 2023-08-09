@@ -24,7 +24,7 @@ class AssetModel with EquatableMixin {
   final double sourceHeight;
 
   /// Date and time when the asset was created.
-  @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
+  @DateTimeConverter()
   final DateTime createdAt;
 
   final String blurHash;
