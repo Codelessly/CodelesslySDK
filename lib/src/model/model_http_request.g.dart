@@ -39,11 +39,12 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
               .toList() ??
           const [],
       isDeleted: json['deleted'] as bool? ?? false,
-      lastUpdated: jsonToDate(json['lastUpdated'] as int?),
+      lastUpdated:
+          const DateTimeConverter().fromJson(json['lastUpdated'] as int?),
       requestBodyContentType: $enumDecodeNullable(
               _$RequestBodyTextTypeEnumMap, json['requestBodyContentType']) ??
           RequestBodyTextType.json,
-      created: jsonToDate(json['created'] as int?),
+      created: const DateTimeConverter().fromJson(json['created'] as int?),
       directory: json['directory'] as String?,
     );
 
@@ -69,11 +70,12 @@ Map<String, dynamic> _$HttpApiDataToJson(HttpApiData instance) {
   writeNotNull('body', instance.body);
   val['bodyType'] = _$RequestBodyTypeEnumMap[instance.bodyType]!;
   val['deleted'] = instance.isDeleted;
-  val['lastUpdated'] = dateToJson(instance.lastUpdated);
+  writeNotNull(
+      'lastUpdated', const DateTimeConverter().toJson(instance.lastUpdated));
   val['requestBodyContentType'] =
       _$RequestBodyTextTypeEnumMap[instance.requestBodyContentType]!;
   val['variables'] = instance.variables.map((e) => e.toJson()).toList();
-  val['created'] = dateToJson(instance.created);
+  writeNotNull('created', const DateTimeConverter().toJson(instance.created));
   writeNotNull('directory', instance.directory);
   return val;
 }

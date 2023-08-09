@@ -1,8 +1,9 @@
+import 'package:codelessly_api/codelessly_api.dart';
 import 'package:equatable/equatable.dart';
 
 /// Represents the privacy controls of a given model that this mixin
 /// is applied to.
-abstract class PrivacyBase with EquatableMixin {
+abstract class PrivacyBase with SerializableMixin, EquatableMixin {
   /// The id of the owner user of the object.
   final String owner;
 

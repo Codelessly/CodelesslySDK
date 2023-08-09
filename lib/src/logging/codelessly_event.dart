@@ -16,7 +16,7 @@ class CodelesslyEvent with EquatableMixin {
   final String? message;
 
   /// The time at which this event was created.
-  @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
+  @DateTimeConverter()
   final DateTime timestamp;
 
   /// An optional stacktrace associated with this message if it was an error.

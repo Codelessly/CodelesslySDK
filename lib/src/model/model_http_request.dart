@@ -63,13 +63,13 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
   final RequestBodyType bodyType;
   @JsonKey(name: 'deleted')
   final bool isDeleted;
-  @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
+  @DateTimeConverter()
   final DateTime lastUpdated;
   final RequestBodyTextType requestBodyContentType;
   final List<VariableData> variables;
   @JsonKey(includeFromJson: false, includeToJson: false)
   bool isDraft;
-  @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
+  @DateTimeConverter()
   final DateTime created;
   final String? directory;
 

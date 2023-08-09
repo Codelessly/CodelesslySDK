@@ -13,7 +13,7 @@ part 'sdk_publish_model.g.dart';
 ///
 /// This class also holds common data that is shared across all layouts.
 @JsonSerializable()
-class SDKPublishModel extends PrivacyBase with EquatableMixin {
+class SDKPublishModel extends PrivacyBase {
   /// The project's id.
   final String projectId;
 
@@ -95,6 +95,7 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
       _$SDKPublishModelFromJson(json);
 
   /// Converts this instance to a JSON map without the fonts, layouts, and apis.
+  @override
   Map<String, dynamic> toJson() => _$SDKPublishModelToJson(this)
     ..remove('fonts')
     ..remove('layouts')
@@ -162,7 +163,7 @@ class SDKPublishModel extends PrivacyBase with EquatableMixin {
 }
 
 @JsonSerializable()
-class SDKPublishLayout extends PrivacyBase with EquatableMixin {
+class SDKPublishLayout extends PrivacyBase {
   /// The layout's unique id.
   final String id;
 
@@ -176,11 +177,11 @@ class SDKPublishLayout extends PrivacyBase with EquatableMixin {
   final String projectId;
 
   /// A list of the nodes that makes up this layout.
-  @JsonKey(fromJson: jsonToNodes, toJson: nodesToJson)
+  @NodesMapConverter()
   final Map<String, BaseNode> nodes;
 
   /// The last time this layout was updated. Used for cache validation.
-  @JsonKey(fromJson: jsonToDate, toJson: dateToJson)
+  @DateTimeConverter()
   final DateTime lastUpdated;
 
   /// The layout's version.
@@ -224,6 +225,7 @@ class SDKPublishLayout extends PrivacyBase with EquatableMixin {
       _$SDKPublishLayoutFromJson(json);
 
   /// Converts this instance to a JSON map.
+  @override
   Map<String, dynamic> toJson() => _$SDKPublishLayoutToJson(this)
     ..['whitelistedUsers'] = [...whitelistedUsers];
 
@@ -283,7 +285,7 @@ class SDKPublishLayout extends PrivacyBase with EquatableMixin {
 
 /// Represents a single variation of a common font.
 @JsonSerializable()
-class SDKPublishFont extends PrivacyBase with EquatableMixin {
+class SDKPublishFont extends PrivacyBase {
   /// The font's unique id. To keep this unique but seeded, we generate
   /// the id by base64 encoding the font's full name.
   ///
@@ -349,17 +351,24 @@ class SDKPublishFont extends PrivacyBase with EquatableMixin {
     );
   }
 
-  @override
-  List<Object?> get props =>
-      [...super.props, url, owner, family, weight, style];
-
   /// Creates a new instance of [SDKPublishFont] from a JSON map.
   factory SDKPublishFont.fromJson(Map<String, dynamic> json) =>
       _$SDKPublishFontFromJson(json);
 
   /// Converts this instance to a JSON map.
+  @override
   Map<String, dynamic> toJson() => _$SDKPublishFontToJson(this)
     ..['whitelistedUsers'] = [...whitelistedUsers];
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        url,
+        owner,
+        family,
+        weight,
+        style,
+      ];
 }
 
 /// Defines an interpretation of what kind of update has been made to a given
@@ -375,27 +384,27 @@ enum UpdateType {
 @JsonSerializable()
 class SDKPublishUpdates with EquatableMixin {
   /// The last time the fonts collection received an update.
-  @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
+  @DateTimeMapConverter()
   final Map<String, DateTime> fonts;
 
   /// A map that holds a set of layout ids as keys, and the last time
   /// the layout was updated as the value.
-  @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
+  @DateTimeMapConverter()
   final Map<String, DateTime> layouts;
 
   /// A map that holds a set of layout ids as keys, and the last time
   /// the layout was updated as the value.
-  @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
+  @DateTimeMapConverter()
   final Map<String, DateTime> apis;
 
   /// A map that holds a set of layout ids as keys, and the last time
   /// the layout was updated as the value.
-  @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
+  @DateTimeMapConverter()
   final Map<String, DateTime> variables;
 
   /// A map that holds a set of layout ids as keys, and the last time
   /// the layout was updated as the value.
-  @JsonKey(fromJson: jsonMapToDateValues, toJson: dateValuesToJsonMap)
+  @DateTimeMapConverter()
   final Map<String, DateTime> conditions;
 
   /// A map that holds a mapping of layout ids -> font ids.
@@ -465,7 +474,7 @@ class SDKPublishUpdates with EquatableMixin {
 
 /// A model that defines variables for a layout.
 @JsonSerializable()
-class SDKLayoutVariables extends PrivacyBase with EquatableMixin {
+class SDKLayoutVariables extends PrivacyBase {
   /// The id of the layout.
   final String id;
 
@@ -511,13 +520,14 @@ class SDKLayoutVariables extends PrivacyBase with EquatableMixin {
       _$SDKLayoutVariablesFromJson(json);
 
   /// Converts this instance to a JSON map.
+  @override
   Map<String, dynamic> toJson() => _$SDKLayoutVariablesToJson(this)
     ..['whitelistedUsers'] = [...whitelistedUsers];
 }
 
 /// A model that defines variables for a layout.
 @JsonSerializable()
-class SDKLayoutConditions extends PrivacyBase with EquatableMixin {
+class SDKLayoutConditions extends PrivacyBase {
   /// The id of the layout.
   final String id;
 
@@ -563,6 +573,7 @@ class SDKLayoutConditions extends PrivacyBase with EquatableMixin {
       _$SDKLayoutConditionsFromJson(json);
 
   /// Converts this instance to a JSON map.
+  @override
   Map<String, dynamic> toJson() => _$SDKLayoutConditionsToJson(this)
     ..['whitelistedUsers'] = [...whitelistedUsers];
 }
