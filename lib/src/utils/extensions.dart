@@ -704,7 +704,7 @@ extension FitsExtension on BaseNode {
   bool get isOneOrBothExpanded => isHorizontalExpanded || isVerticalExpanded;
 
   bool canFillParent(BaseNode parent) =>
-      edgePins.inner(parent).isDoubleChained || isBothExpanded;
+      edgePins.inner(parent).isBothExpanded || isBothExpanded;
 }
 
 extension RowColumnMixinExtensions on RowColumnMixin {
