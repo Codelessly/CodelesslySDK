@@ -331,7 +331,10 @@ class SvgIcon extends StatelessWidget {
     // and black if [ThemeData.brightness] is light.
     //
     // Otherwise, falls back to black.
-    final iconTheme = Theme.of(context).iconTheme;
+    // Apparently, Theme.of(context).iconTheme is not same as IconTheme.of(context)
+    // Theme.of(context).iconTheme doesn't work properly inheriting theme when
+    // in app bar, nav bar, tabs!
+    final iconTheme = IconTheme.of(context);
     final Color iconColor = switch (icon) {
       _ when color != null => color!,
       _ when iconTheme.color != null => iconTheme.color!,
