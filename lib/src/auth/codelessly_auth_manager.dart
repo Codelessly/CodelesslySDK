@@ -157,6 +157,7 @@ class CodelesslyAuthManager extends AuthManager {
           '\nError Code: ${result.statusCode}'
           '\nReason: ${result.reasonPhrase}',
         );
+        return;
       }
     } on CodelesslyException {
       rethrow;
