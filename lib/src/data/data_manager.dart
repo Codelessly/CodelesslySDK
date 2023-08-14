@@ -117,6 +117,7 @@ class DataManager {
           print(
             'Failed to download complete publish bundle for slug ${config.slug}.',
           );
+          return;
         }
       } catch (e, stackTrace) {
         log('[DataManager] Error trying to download complete publish model from slug.');
@@ -129,6 +130,7 @@ class DataManager {
 
         print(
             'Failed to download complete publish bundle for slug ${config.slug}.');
+        return;
       } finally {
         bundleStopWatch.stop();
         log('[DataManager] Publish bundle flow took ${bundleStopWatch.elapsedMilliseconds}ms or ${bundleStopWatch.elapsed.inSeconds}s.');
