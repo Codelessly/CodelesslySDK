@@ -1,8 +1,9 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/functions_repository.dart';
 
 class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
   PassiveDropdownTransformer(super.getNode, super.manager);
@@ -13,11 +14,15 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
     BuildContext context, [
     WidgetBuildSettings settings = const WidgetBuildSettings(),
   ]) {
-    return buildDropdownFromNode(node);
+    return buildDropdownFromNode(context, node);
   }
 
-  Widget buildDropdownFromNode(DropdownNode node) {
-    return PassiveDropdownWidget(node: node);
+  Widget buildDropdownFromNode(BuildContext context, DropdownNode node) {
+    return PassiveDropdownWidget(
+      node: node,
+      onTap: () => onTap(context, node),
+      onChanged: (value) => onChanged(context, node, value),
+    );
   }
 
   static TextStyle getTextStyle(TextProp? style) {
@@ -32,22 +37,15 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
     );
   }
 
-  void onTap(List<Reaction> reactions) => reactions
-      .where((reaction) => reaction.trigger.type == TriggerType.click)
-      .forEach(onAction);
+  void onTap(context, DropdownNode node) =>
+      FunctionsRepository.triggerAction(context, node, TriggerType.click);
 
-  // void onChanged(List<Reaction> reactions) => reactions
-  //     .where((reaction) => reaction.trigger.type == TriggerType.changed)
-  //     .forEach(onAction);
+  void onChanged(BuildContext context, DropdownNode node, int internalValue) {
+    FunctionsRepository.setPropertyValue(context,
+        node: node, property: 'value', value: internalValue);
 
-  void onAction(Reaction reaction) {
-    switch (reaction.action.type) {
-      case ActionType.link:
-        launchUrl(Uri.parse((reaction.action as LinkAction).url));
-        break;
-      default:
-        break;
-    }
+    FunctionsRepository.triggerAction(context, node, TriggerType.changed,
+        value: internalValue);
   }
 }
 
@@ -55,55 +53,113 @@ class PassiveDropdownWidget extends StatelessWidget {
   final DropdownNode node;
   final VoidCallback? onTap;
   final bool useIconFonts;
+  final ValueChanged<int>? onChanged;
+  final int? initialValue;
 
   const PassiveDropdownWidget({
     super.key,
     required this.node,
     this.onTap,
     this.useIconFonts = false,
+    this.onChanged,
+    this.initialValue,
   });
 
-  List<DropdownMenuItem<int>> get items {
-    return node.properties.items
-        .map(
-          (item) => DropdownMenuItem<int>(
-            value: node.properties.items.indexOf(item),
-            alignment: node.properties.itemAlignment.flutterAlignmentGeometry ??
-                AlignmentDirectional.centerStart,
-            child: Text(
-              item,
-              style: PassiveDropdownTransformer.getTextStyle(
-                  node.properties.itemTextStyle),
-              overflow: TextOverflow.ellipsis,
+  List<DropdownMenuItem<int>> buildItems(BuildContext context, List items) {
+    return [
+      for (final (index, value) in items.indexed)
+        DropdownMenuItem<int>(
+          value: index,
+          alignment: node.properties.itemAlignment.flutterAlignmentGeometry ??
+              AlignmentDirectional.centerStart,
+          child: ChangeNotifierProvider<CodelesslyContext>.value(
+            value: context.read<CodelesslyContext>(),
+            child: IndexedItemProvider(
+              index: index,
+              item: value,
+              child: Builder(builder: (context) {
+                String label = '$value';
+                if (node.properties.useDataSource) {
+                  String? labelText =
+                      PropertyValueDelegate.getPropertyValue<String>(
+                          context, node, 'itemLabel');
+                  labelText ??= node.properties.itemLabel;
+                  label = PropertyValueDelegate.substituteVariables(
+                      context, labelText);
+                }
+                return Text(
+                  label,
+                  style: PassiveDropdownTransformer.getTextStyle(
+                      node.properties.itemTextStyle),
+                  overflow: TextOverflow.ellipsis,
+                );
+              }),
             ),
           ),
         )
-        .toList();
+    ];
   }
 
-  List<Widget> selectedItemBuilder(BuildContext context) {
-    return node.properties.items
-        .map(
-          (item) => Container(
-            constraints: BoxConstraints(
-                maxWidth: node.basicBoxLocal.width - node.properties.iconSize),
-            child: Text(
-              item,
-              style: PassiveDropdownTransformer.getTextStyle(
-                  node.properties.selectedItemTextStyle),
-              overflow: TextOverflow.ellipsis,
-            ),
+  List<Widget> selectedItemBuilder(BuildContext context, List items) {
+    return [
+      for (final (index, value) in items.indexed)
+        DropdownMenuItem<int>(
+          value: index,
+          alignment: node.properties.itemAlignment.flutterAlignmentGeometry ??
+              AlignmentDirectional.centerStart,
+          child: IndexedItemProvider(
+            index: index,
+            item: value,
+            child: Builder(builder: (context) {
+              String label = '$value';
+              if (node.properties.useDataSource) {
+                String? labelText =
+                    PropertyValueDelegate.getPropertyValue<String>(
+                        context, node, 'itemLabel');
+                labelText ??= node.properties.itemLabel;
+                label = PropertyValueDelegate.substituteVariables(
+                    context, labelText);
+              }
+              return Container(
+                constraints: BoxConstraints(
+                    maxWidth:
+                        node.basicBoxLocal.width - node.properties.iconSize),
+                child: Text(
+                  label,
+                  style: PassiveDropdownTransformer.getTextStyle(
+                      node.properties.selectedItemTextStyle),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            }),
           ),
         )
-        .toList();
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
+    final List items = node.properties.useDataSource
+        ? PropertyValueDelegate.getPropertyValue<List>(context, node, 'data') ??
+            []
+        : node.properties.items;
+
+    int? value = PropertyValueDelegate.getPropertyValue<int>(
+          context,
+          node,
+          'value',
+        ) ??
+        node.value;
+
+    if (value == -1) value = null;
+
+    final CodelesslyContext codelesslyContext =
+        context.read<CodelesslyContext>();
+    codelesslyContext.conditions;
     return AdaptiveNodeBox(
       node: node,
       child: DropdownButton<int>(
-        value: node.properties.value,
+        value: value,
         isDense: node.properties.dense,
         isExpanded: node.properties.expanded,
         autofocus: node.properties.autoFocus,
@@ -131,10 +187,13 @@ class PassiveDropdownWidget extends StatelessWidget {
         elevation: node.properties.elevation,
         borderRadius: node.properties.borderRadius.borderRadius,
         onTap: onTap,
-        onChanged: node.properties.enabled ? (value) {} : null,
+        padding: node.padding.flutterEdgeInsets,
+        onChanged: node.properties.enabled
+            ? (value) => onChanged?.call(value ?? 0)
+            : null,
         underline: node.properties.underline ? null : SizedBox.shrink(),
-        items: items,
-        selectedItemBuilder: selectedItemBuilder,
+        items: buildItems(context, items),
+        selectedItemBuilder: (context) => selectedItemBuilder(context, items),
       ),
     );
   }
