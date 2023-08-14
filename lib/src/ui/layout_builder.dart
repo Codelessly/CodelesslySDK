@@ -1,4 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -69,13 +70,16 @@ class _CodelesslyPublishedLayoutBuilderState
     final List<BaseNode> allNodes = nodeRegistry.getNodes().values.toList();
 
     // Populate node values for nodes with internal values.
-    final List<SceneNode> nodesWithInternalValue = allNodes
-        .whereType<SceneNode>()
+    final List<PropertyVariableMixin> nodesWithInternalValue = allNodes
+        .whereType<ReactionMixin>()
         .where((node) => node.triggerTypes.contains(TriggerType.changed))
+        .whereType<PropertyVariableMixin>()
         .toList();
-    for (final SceneNode node in nodesWithInternalValue) {
-      final ValueModel value = node.propertyVariables.firstWhere((property) =>
-          property.name == 'value' || property.name == 'inputValue');
+    for (final node in nodesWithInternalValue) {
+      final ValueModel? value = node.propertyVariables.firstWhereOrNull(
+          (property) =>
+              property.name == 'value' || property.name == 'inputValue');
+      if (value == null) continue;
       codelesslyContext.addToNodeValues(node, [value]);
     }
 
