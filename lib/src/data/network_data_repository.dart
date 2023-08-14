@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import '../../codelessly_sdk.dart';
+import '../logging/error_handler.dart';
 
 /// An abstract class that represents the operations that a [DataManager] will
 /// need to utilize to offer a complete usage experience of a [Codelessly]
@@ -35,7 +36,10 @@ abstract class NetworkDataRepository {
       log('[NetworkDataRepo] Error downloading publish bundle.');
       log('[NetworkDataRepo] Status code: ${result.statusCode}');
       log('[NetworkDataRepo] Message: ${result.body}');
-      print('Error downloading publish bundle from slug [$slug]');
+      CodelesslyErrorHandler.instance.captureException(CodelesslyException(
+        'Error downloading publish bundle from slug [$slug]',
+        stacktrace: StackTrace.current,
+      ));
       return null;
     }
 

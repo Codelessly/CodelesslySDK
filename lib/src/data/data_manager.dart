@@ -50,6 +50,8 @@ class DataManager {
 
   StreamSubscription<SDKPublishModel?>? _publishModelDocumentListener;
 
+  String? slug;
+
   /// Creates a new instance of [DataManager] with the given [config].
   DataManager({
     required this.config,
@@ -92,9 +94,11 @@ class DataManager {
 
     // A slug was specified, no layout is cached. We need a layout FAST.
     // No authentication is required; let's download a complete publish bundle.
-    if (config.slug != null && _publishModel == null) {
+    if (config.slug != null && (_publishModel == null || slug != config.slug)) {
       final Stopwatch bundleStopWatch = Stopwatch()..start();
       try {
+        slug = config.slug;
+
         log('[DataManager] No local publish model, but a slug was specified!');
         log('[DataManager] Downloading complete publish bundle for slug ${config.slug}.');
 
@@ -114,9 +118,7 @@ class DataManager {
           _recordTime(stopwatch);
           return;
         } else {
-          print(
-            'Failed to download complete publish bundle for slug ${config.slug}.',
-          );
+          log('Failed to download complete publish bundle for slug ${config.slug}.');
           return;
         }
       } catch (e, stackTrace) {
@@ -128,8 +130,7 @@ class DataManager {
 
         _recordTime(stopwatch);
 
-        print(
-            'Failed to download complete publish bundle for slug ${config.slug}.');
+        log('Failed to download complete publish bundle for slug ${config.slug}.');
         return;
       } finally {
         bundleStopWatch.stop();

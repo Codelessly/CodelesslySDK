@@ -278,6 +278,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
         );
         return false;
       });
+    } else if (config!.slug != null && dataManager.publishModel == null) {
+      dataManager.fetchCompletePublishBundle(slug: config!.slug ?? '');
     } else {
       log(
         '[CodelesslyWidgetController] [$layoutID]: Config preloading is true. Doing nothing while DataManager finishes.',
