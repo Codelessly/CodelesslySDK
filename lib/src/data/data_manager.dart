@@ -114,7 +114,7 @@ class DataManager {
           _recordTime(stopwatch);
           return;
         } else {
-          throw CodelesslyException(
+          print(
             'Failed to download complete publish bundle for slug ${config.slug}.',
           );
         }
@@ -127,13 +127,8 @@ class DataManager {
 
         _recordTime(stopwatch);
 
-        throw CodelesslyException.networkException(
-          message:
-              'Failed to download complete publish bundle for slug ${config.slug}.',
-          layoutID: layoutID,
-          originalException: e,
-          stacktrace: stackTrace,
-        );
+        print(
+            'Failed to download complete publish bundle for slug ${config.slug}.');
       } finally {
         bundleStopWatch.stop();
         log('[DataManager] Publish bundle flow took ${bundleStopWatch.elapsedMilliseconds}ms or ${bundleStopWatch.elapsed.inSeconds}s.');
