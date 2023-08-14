@@ -152,10 +152,10 @@ class CodelesslyAuthManager extends AuthManager {
         _authData = null;
         _authStreamController.add(_authData);
         await cacheManager.delete(authCacheKey);
-        throw CodelesslyException.invalidAuthToken(
-          message: 'Failed to authenticate token.'
-              '\nError Code: ${result.statusCode}'
-              '\nReason: ${result.reasonPhrase}',
+        print(
+          'Failed to authenticate token.'
+          '\nError Code: ${result.statusCode}'
+          '\nReason: ${result.reasonPhrase}',
         );
       }
     } on CodelesslyException {
