@@ -29,17 +29,17 @@ dependencies:
   intl: '>=0.17.0 <1.0.0'
   universal_html: ^2.2.3
   webview_flutter: ^4.2.2
-  webview_flutter_android: ^3.9.2
-  webview_flutter_wkwebview: ^3.7.2
+  webview_flutter_android: ^3.9.3
+  webview_flutter_wkwebview: ^3.7.3
   flutter_animation_progress_bar: ^2.3.1
   vector_math: ^2.1.4
   grpc: ^3.2.3
-  protobuf: ^3.0.0
+  protobuf: ^3.1.0
   fixnum: ^1.1.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   uuid: ^3.0.7
-  path_provider: ^2.0.15
+  path_provider: ^2.1.0
   provider: ^6.0.5
   json_path: ^0.6.2
   meta: ^1.9.1
