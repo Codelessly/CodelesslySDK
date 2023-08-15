@@ -5,6 +5,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
@@ -510,6 +511,15 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
     if (widget.data != codelesslyContext.data) {
       codelesslyContext.data = widget.data;
+      // addPostFrameCallback is used to ensure that the data is updated after
+      // the build method is called since setting the data will trigger a
+      // rebuild and it will crash if this happens when a rebuild is ongoing.
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        for (final notifier in codelesslyContext.variables.values) {
+          notifier.value =
+              notifier.value.copyWith(value: widget.data[notifier.value.name]);
+        }
+      });
     }
 
     if (widget.functions != codelesslyContext.functions) {

@@ -118,7 +118,10 @@ class _CodelesslyPublishedLayoutBuilderState
         {};
 
     for (final variable in variablesMap.values) {
-      final notifier = ValueNotifier(variable);
+      // Override default values of variables with values provided in data.
+      final notifier = ValueNotifier(variable.copyWith(
+        value: codelesslyContext.data[variable.name],
+      ));
       codelesslyContext.variables[variable.id] = notifier;
     }
 
