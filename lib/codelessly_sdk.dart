@@ -25,5 +25,4 @@ export 'src/utils/flutter_icons_data_map.dart';
 export 'src/utils/flutter_icons_names_map.dart';
 export 'src/utils/font_parser.dart';
 export 'src/utils/rgb_to_color.dart';
-export 'src/utils/text_processor.dart';
 export 'src/utils/utils.dart';
