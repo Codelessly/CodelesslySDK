@@ -123,12 +123,12 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
             childNode.isHorizontalWrap ||
             childNode.edgePins.isHorizontallyExpanded
         ? null
-            : childNode.outerBoxLocal.width;
+        : childNode.outerBoxLocal.width;
     final double? height = childNode.isVerticalExpanded ||
             childNode.isVerticalWrap ||
             childNode.edgePins.isVerticallyExpanded
         ? null
-            : childNode.outerBoxLocal.height;
+        : childNode.outerBoxLocal.height;
 
     if (!isTallest && !isWidest) {
       return Positioned(
