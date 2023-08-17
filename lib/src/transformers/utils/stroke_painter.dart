@@ -67,7 +67,7 @@ class StrokePainter extends CustomPainter {
     this.boxShape = BoxShape.rectangle,
     this.strokeSide = StrokeSide.all,
     this.strokeAlign = StrokeAlignC.inside,
-    this.strokeCap = StrokeCapEnum.none,
+    this.strokeCap = StrokeCapEnum.square,
     this.borderRadius = BorderRadius.zero,
   })  : dashArray = LoopingList(dashPattern),
         border = Border(
