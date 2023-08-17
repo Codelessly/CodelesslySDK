@@ -1689,3 +1689,11 @@ extension BaseNodeExt on BaseNode {
     return usedVariables;
   }
 }
+
+extension StrokeCapEnumExt on StrokeCapEnum {
+  StrokeCap get flutterStrokeCap => switch (this) {
+        StrokeCapEnum.round => StrokeCap.round,
+        StrokeCapEnum.butt => StrokeCap.butt,
+        StrokeCapEnum.square => StrokeCap.square,
+      };
+}
