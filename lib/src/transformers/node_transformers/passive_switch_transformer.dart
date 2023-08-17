@@ -108,19 +108,32 @@ class PassiveSwitchWidget extends StatelessWidget {
       height: node.basicBoxLocal.height,
       child: Transform.scale(
         scale: scale,
-        child: Switch(
-          value: value,
-          onChanged: onChanged,
-          autofocus: node.properties.autofocus,
-          activeTrackColor: node.properties.activeTrackColor.toFlutterColor(),
-          inactiveTrackColor:
-              node.properties.inactiveTrackColor.toFlutterColor(),
-          activeColor: node.properties.activeThumbColor.toFlutterColor(),
-          inactiveThumbColor:
-              node.properties.inactiveThumbColor.toFlutterColor(),
-          hoverColor: node.properties.hoverColor.toFlutterColor(),
-          focusColor: node.properties.focusColor.toFlutterColor(),
-          splashRadius: node.properties.splashRadius,
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            useMaterial3: node.properties.useMaterial3,
+          ),
+          child: Switch(
+            value: value,
+            onChanged: onChanged,
+            autofocus: node.properties.autofocus,
+            activeTrackColor: node.properties.activeTrackColor.toFlutterColor(),
+            inactiveTrackColor:
+                node.properties.inactiveTrackColor.toFlutterColor(),
+            activeColor: node.properties.activeThumbColor.toFlutterColor(),
+            inactiveThumbColor:
+                node.properties.inactiveThumbColor.toFlutterColor(),
+            hoverColor: node.properties.hoverColor.toFlutterColor(),
+            focusColor: node.properties.focusColor.toFlutterColor(),
+            splashRadius: node.properties.splashRadius,
+            trackOutlineColor: MaterialStateProperty.resolveWith((states) {
+              if (states.contains(MaterialState.selected)) {
+                return node.properties.activeTrackBorderColor?.toFlutterColor();
+              }
+              return node.properties.inactiveTrackBorderColor?.toFlutterColor();
+            }),
+            trackOutlineWidth:
+                MaterialStateProperty.all(node.properties.trackOutlineWidth),
+          ),
         ),
       ),
     );
