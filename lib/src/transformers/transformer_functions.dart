@@ -2,6 +2,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:universal_html/html.dart';
 
 import '../utils/extensions.dart';
@@ -253,6 +254,13 @@ Widget? retrieveIconWidget(
         // when opacity is zero, we need to display original colors of
         // the image icon which `ImageIcon` widget cannot do. So we
         // use the raw Image widget.
+        if (icon.isSvgImage) {
+          return SvgPicture.network(
+            icon.iconImage!,
+            width: size ?? icon.size ?? kDefaultIconSize,
+            height: size ?? icon.size ?? kDefaultIconSize,
+          );
+        }
         return SizedBox.square(
           dimension: size ?? icon.size ?? kDefaultIconSize,
           child: Image.network(
@@ -262,6 +270,13 @@ Widget? retrieveIconWidget(
           ),
         );
       } else {
+        if (icon.isSvgImage) {
+          return SvgIconImage(
+            url: icon.iconImage!,
+            size: size ?? icon.size,
+            color: color,
+          );
+        }
         return ImageIcon(
           NetworkImage(icon.iconImage!, scale: icon.scale),
           size: size ?? icon.size,
@@ -290,6 +305,16 @@ Widget retrieveNavBarItemIconWidget(
     case IconTypeEnum.image:
       if (icon.iconImage == null) return SizedBox.shrink();
       if (color == null || color.opacity == 0) {
+        if (icon.isSvgImage) {
+          return SizedBox.square(
+            dimension: icon.size ?? size ?? kDefaultIconSize,
+            child: SvgPicture.network(
+              icon.iconImage!,
+              // scale: icon.scale,
+              // color: color,
+            ),
+          );
+        }
         // when opacity is zero, we need to display original colors of
         // the image icon which `ImageIcon` widget cannot do. So we
         // use the raw Image widget.
@@ -300,6 +325,14 @@ Widget retrieveNavBarItemIconWidget(
             // scale: icon.scale,
             // color: color,
           ),
+        );
+      }
+
+      if (icon.isSvgImage) {
+        return SvgIconImage(
+          url: icon.iconImage!,
+          size: size ?? icon.size,
+          color: color, // TODO: Add theming support with themeColor.
         );
       }
 
