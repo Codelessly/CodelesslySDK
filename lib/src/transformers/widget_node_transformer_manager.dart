@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:math' hide log;
+import 'dart:typed_data';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
@@ -360,6 +361,59 @@ class SvgIcon extends StatelessWidget {
         fit: fit,
         colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
       ),
+    );
+  }
+}
+
+class SvgIconImage extends StatelessWidget {
+  final String? url;
+  final Color? color;
+  final double? size;
+  final BoxFit fit;
+  final Uint8List? bytes;
+
+  const SvgIconImage({
+    super.key,
+    this.url,
+    this.bytes,
+    this.color,
+    this.size,
+    this.fit = BoxFit.contain,
+  }) : assert(url != null || bytes != null,
+            'Either url or bytes must be provided');
+
+  @override
+  Widget build(BuildContext context) {
+    // In material apps, if there is a [Theme] without any [IconTheme]s
+    // specified, icon colors default to white if [ThemeData.brightness] is dark
+    // and black if [ThemeData.brightness] is light.
+    //
+    // Otherwise, falls back to black.
+    // Apparently, Theme.of(context).iconTheme is not same as IconTheme.of(context)
+    // Theme.of(context).iconTheme doesn't work properly inheriting theme when
+    // in app bar, nav bar, tabs!
+    final iconTheme = IconTheme.of(context);
+    final Color iconColor = switch (url) {
+      _ when color != null => color!,
+      _ when iconTheme.color != null => iconTheme.color!,
+      _ => Theme.of(context).brightness == Brightness.light
+          ? Colors.black
+          : Colors.white,
+    };
+
+    return SizedBox.square(
+      dimension: size ?? Theme.of(context).iconTheme.size ?? 24,
+      child: bytes != null
+          ? SvgPicture.memory(
+              bytes!,
+              fit: fit,
+              colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+            )
+          : SvgPicture.network(
+              url!,
+              fit: fit,
+              colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+            ),
     );
   }
 }

@@ -867,6 +867,24 @@ extension MultiIconModelExtensions on MultiSourceIconModel {
         return iconImage != null;
     }
   }
+
+  String get imageExtension => path.extension(Uri.parse(iconImage ?? '').path);
+
+  bool get isStaticImage => staticImageTypesRegex.hasMatch(imageExtension);
+
+  bool get isSvgImage => imageExtension == '.svg' || imageExtension == 'svg';
+
+  bool get isGifImage => imageExtension == '.gif';
+}
+
+extension AssetModelExt on AssetModel {
+  String get imageExtension => path.extension(Uri.parse(url ?? '').path);
+
+  bool get isStaticImage => staticImageTypesRegex.hasMatch(imageExtension);
+
+  bool get isSvgImage => imageExtension == '.svg' || imageExtension == 'svg';
+
+  bool get isGifImage => imageExtension == '.gif';
 }
 
 extension TextAlignHorizontalEnumExtensions on TextAlignHorizontalEnum {
@@ -1309,6 +1327,12 @@ extension StringExt on String {
           : null,
     );
     return result;
+  }
+
+  bool get isSvgUrl {
+    final uri = Uri.tryParse(this);
+    if (uri == null) return false;
+    return path.extension(uri.path).contains('svg');
   }
 }
 

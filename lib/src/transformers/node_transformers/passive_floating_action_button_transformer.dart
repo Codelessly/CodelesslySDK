@@ -1,5 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
@@ -207,6 +208,16 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
           size: fab.icon.size,
         );
       case IconTypeEnum.image:
+        if (fab.icon.isSvgImage) {
+          return SizedBox.square(
+            dimension: fab.icon.size,
+            child: SvgPicture.network(
+              fab.icon.iconImage!,
+              color: fab.icon.color?.toFlutterColor(),
+              fit: BoxFit.contain,
+            ),
+          );
+        }
         return SizedBox.square(
           dimension: fab.icon.size,
           child: Image.network(

@@ -1,10 +1,13 @@
 import 'dart:math' hide log;
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' as vec_math;
 
@@ -423,6 +426,11 @@ List<Widget> buildFills(
           );
         case PaintType.image:
           final Uint8List? bytes = imageBytes[index];
+          final BoxFit fit = paint.fit.boxFit;
+          final Alignment? alignment = paint.alignment.flutterAlignment;
+          final double modifiedOpacity = (imageOpacity ?? 1) * paint.opacity;
+          final double scale = paint.scale;
+          final ImageRepeat repeat = paint.imageRepeat.flutterImageRepeat;
 
           // Substitute URL value from [CodelesslyContext]'s [data] map if
           // [imageURL] represents a JSON path.
@@ -436,15 +444,21 @@ List<Widget> buildFills(
           imageURL = PropertyValueDelegate.getVariableValueFromPath<String>(
                   context, imageURLValue) ??
               imageURL;
-
-          final BoxFit fit = paint.fit.boxFit;
-          final Alignment? alignment = paint.alignment.flutterAlignment;
-          final double modifiedOpacity = (imageOpacity ?? 1) * paint.opacity;
-          final double scale = paint.scale;
-          final ImageRepeat repeat = paint.imageRepeat.flutterImageRepeat;
-
           Widget child;
-          if (bytes != null) {
+
+          if (paint.isSvgImage) {
+            child = ImageBuilder(
+              bytes: bytes,
+              url: imageURL,
+              fit: fit,
+              alignment: alignment ?? Alignment.center,
+              scale: scale.abs(),
+              width: node.basicBoxLocal.width,
+              height: node.basicBoxLocal.height,
+              repeat: repeat,
+              isSvg: true,
+            );
+          } else if (bytes != null) {
             child = Image.memory(
               bytes,
               fit: fit,
@@ -456,14 +470,15 @@ List<Widget> buildFills(
             );
           } else if (imageFillBuilder != null) {
             child = imageFillBuilder(
-                imageURL,
-                fit,
-                alignment ?? Alignment.center,
-                scale,
-                node.basicBoxLocal.width,
-                node.basicBoxLocal.height,
-                repeat,
-                paint);
+              imageURL,
+              fit,
+              alignment ?? Alignment.center,
+              scale,
+              node.basicBoxLocal.width,
+              node.basicBoxLocal.height,
+              repeat,
+              paint,
+            );
           } else {
             child = _NetworkImageWithStates(
               url: imageURL,
@@ -715,6 +730,20 @@ class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
       return jsonPathBuilder(widget.url);
     }
 
+    if(widget.paint.isSvgImage) {
+      return ImageBuilder(
+        url: widget.url,
+        fit: widget.fit,
+        alignment: withAlignment ? widget.alignment : Alignment.center,
+        scale: widget.scale,
+        width: widget.width,
+        height: widget.height,
+        repeat: widget.repeat,
+        isSvg: widget.paint.isSvgImage,
+        errorWidget: (context, error, stackTrace) => errorBuilder(),
+      );
+    }
+
     return FadeInImage(
       placeholder: MemoryImage(kTransparentImage),
       image: NetworkImage(
@@ -827,4 +856,97 @@ class RelativeTransform {
         scale: scale ?? this.scale,
         skew: skew ?? this.skew,
       );
+}
+
+class ImageBuilder extends StatelessWidget {
+  final String? url;
+  final Uint8List? bytes;
+  final BoxFit? fit;
+  final Alignment alignment;
+  final double scale;
+  final double? width;
+  final double? height;
+  final ImageRepeat repeat;
+  final bool? isSvg;
+  final Color? color;
+  final LoadingErrorWidgetBuilder? errorWidget;
+
+  const ImageBuilder({
+    super.key,
+    this.url,
+    this.bytes,
+    this.fit,
+    this.alignment = Alignment.center,
+    this.scale = 1,
+    this.width,
+    this.height,
+    this.repeat = ImageRepeat.noRepeat,
+    this.color,
+    this.isSvg,
+    this.errorWidget,
+  }) : assert(url != null || bytes != null,
+            'Either url or bytes must be provided.');
+
+  @override
+  Widget build(BuildContext context) {
+    if (bytes != null) {
+      if (isSvg ?? false) {
+        return SvgPicture.memory(
+          bytes!,
+          fit: fit ?? BoxFit.contain,
+          alignment: alignment,
+          width: width,
+          height: height,
+          colorFilter:
+              color != null ? ColorFilter.mode(color!, BlendMode.srcIn) : null,
+        );
+      }
+      return Image.memory(
+        bytes!,
+        fit: fit ?? BoxFit.contain,
+        alignment: alignment,
+        scale: scale.abs(),
+        width: width,
+        height: height,
+        repeat: repeat,
+        color: color,
+      );
+    }
+
+    if ((isSvg == true) ||
+        path.extension(Uri.parse(url!).path).contains('svg')) {
+      return SvgPicture.network(
+        url!,
+        fit: fit ?? BoxFit.contain,
+        alignment: alignment,
+        width: width,
+        height: height,
+        colorFilter:
+            color != null ? ColorFilter.mode(color!, BlendMode.srcIn) : null,
+      );
+    }
+
+    return CachedNetworkImage(
+      imageUrl: url!,
+      fit: fit ?? BoxFit.contain,
+      alignment: alignment,
+      width: width,
+      height: height,
+      repeat: repeat,
+      color: color,
+      filterQuality: FilterQuality.medium,
+      errorWidget: errorWidget,
+      imageBuilder: (context, imageProvider) {
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: imageProvider,
+              fit: fit,
+              scale: scale.abs(),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

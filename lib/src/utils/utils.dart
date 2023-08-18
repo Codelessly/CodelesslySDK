@@ -192,7 +192,7 @@ class VariableMatch with EquatableMixin {
 
 /// Supported image file types that can be dropped on the canvas.
 final RegExp supportedAssetTypesRegex =
-    RegExp('jpg|jpeg|png|webp|gif', caseSensitive: false);
+    RegExp('jpg|jpeg|png|webp|gif|svg', caseSensitive: false);
 
 final RegExp staticImageTypesRegex =
     RegExp('jpg|jpeg|png|webp', caseSensitive: false);
