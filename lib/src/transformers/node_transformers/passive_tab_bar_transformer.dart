@@ -201,7 +201,13 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
         min(tab.icon.size ?? 24, widget.node.basicBoxLocal.height);
 
     Widget? iconWidget = widget.node.properties.contentType.showIcon
-        ? retrieveIconWidget(tab.icon, effectiveIconSize, widget.useIconFonts)
+        ? retrieveIconWidget(
+            tab.icon.color != null || !tab.icon.isSvgImage
+                ? tab.icon
+                : tab.icon.copyWith(color: ColorRGBA.transparent),
+            effectiveIconSize,
+            widget.useIconFonts,
+          )
         : null;
 
     if (iconWidget == null) return Tab(text: label);
