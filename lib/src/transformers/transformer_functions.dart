@@ -250,7 +250,7 @@ Widget? retrieveIconWidget(
       );
     case IconTypeEnum.image:
       if (icon.iconImage == null) return null;
-      if (color == null || color.opacity == 0) {
+      if (color != null && color.opacity == 0) {
         // when opacity is zero, we need to display original colors of
         // the image icon which `ImageIcon` widget cannot do. So we
         // use the raw Image widget.
@@ -304,7 +304,7 @@ Widget retrieveNavBarItemIconWidget(
       );
     case IconTypeEnum.image:
       if (icon.iconImage == null) return SizedBox.shrink();
-      if (color == null || color.opacity == 0) {
+      if (color != null && color.opacity == 0) {
         if (icon.isSvgImage) {
           return SizedBox.square(
             dimension: icon.size ?? size ?? kDefaultIconSize,

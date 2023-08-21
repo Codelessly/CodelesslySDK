@@ -1,18 +1,12 @@
 import 'dart:math' hide log;
-import 'dart:typed_data';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' as vec_math;
 
 import '../../../codelessly_sdk.dart';
-import '../utils/transparent_image.dart';
 
 class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
   PassiveRectangleTransformer(super.getNode, super.manager);
@@ -375,23 +369,19 @@ List<Widget> buildStrokes(
 
 typedef ImageFillBuilder = Widget Function(
   String url,
-  BoxFit fit,
-  Alignment alignment,
-  double scale,
   double width,
   double height,
-  ImageRepeat repeat,
   PaintModel paint,
+  TypedBytes? bytes,
 );
 
 List<Widget> buildFills(
   BuildContext context,
   BaseNode node,
   CodelesslyContext codelesslyContext, {
-  Map<int, Uint8List> imageBytes = const {},
+  Map<int, TypedBytes> imageBytes = const {},
   double? imageOpacity,
   double? imageRotation,
-  bool isActive = false,
   ImageFillBuilder? imageFillBuilder,
 }) {
   if (node is! GeometryMixin) return [];
@@ -425,12 +415,8 @@ List<Widget> buildFills(
             ),
           );
         case PaintType.image:
-          final Uint8List? bytes = imageBytes[index];
-          final BoxFit fit = paint.fit.boxFit;
-          final Alignment? alignment = paint.alignment.flutterAlignment;
+          final TypedBytes? bytes = imageBytes[index];
           final double modifiedOpacity = (imageOpacity ?? 1) * paint.opacity;
-          final double scale = paint.scale;
-          final ImageRepeat repeat = paint.imageRepeat.flutterImageRepeat;
 
           // Substitute URL value from [CodelesslyContext]'s [data] map if
           // [imageURL] represents a JSON path.
@@ -446,51 +432,22 @@ List<Widget> buildFills(
               imageURL;
           Widget child;
 
-          if (paint.isSvgImage) {
-            child = ImageBuilder(
-              bytes: bytes,
-              url: imageURL,
-              fit: fit,
-              alignment: alignment ?? Alignment.center,
-              scale: scale.abs(),
-              width: node.basicBoxLocal.width,
-              height: node.basicBoxLocal.height,
-              repeat: repeat,
-              isSvg: true,
-            );
-          } else if (bytes != null) {
-            child = Image.memory(
-              bytes,
-              fit: fit,
-              alignment: alignment ?? Alignment.center,
-              scale: scale.abs(),
-              width: node.basicBoxLocal.width,
-              height: node.basicBoxLocal.height,
-              repeat: repeat,
-            );
-          } else if (imageFillBuilder != null) {
+          if (imageFillBuilder != null) {
             child = imageFillBuilder(
               imageURL,
-              fit,
-              alignment ?? Alignment.center,
-              scale,
               node.basicBoxLocal.width,
               node.basicBoxLocal.height,
-              repeat,
               paint,
+              bytes,
             );
           } else {
-            child = _NetworkImageWithStates(
+            child = UltimateImageBuilder(
               url: imageURL,
-              fit: fit,
-              alignment: alignment ?? Alignment.center,
-              scale: scale.abs(),
               width: node.basicBoxLocal.width,
               height: node.basicBoxLocal.height,
-              repeat: repeat,
               paint: paint,
               node: node,
-              isActive: isActive,
+              bytes: bytes,
             );
           }
 
@@ -532,299 +489,6 @@ List<Widget> buildFills(
   ];
 }
 
-class _NetworkImageWithStates extends StatefulWidget {
-  final String url;
-  final BoxFit? fit;
-  final Alignment alignment;
-  final double scale;
-  final double width;
-  final double height;
-  final PaintModel paint;
-  final ImageRepeat repeat;
-  final BaseNode node;
-  final bool isActive;
-
-  const _NetworkImageWithStates({
-    required this.url,
-    required this.paint,
-    this.fit,
-    this.alignment = Alignment.center,
-    this.scale = 1,
-    required this.width,
-    required this.height,
-    this.repeat = ImageRepeat.noRepeat,
-    required this.node,
-    this.isActive = false,
-  });
-
-  @override
-  State<_NetworkImageWithStates> createState() =>
-      _NetworkImageWithStatesState();
-}
-
-class _NetworkImageWithStatesState extends State<_NetworkImageWithStates> {
-  Vec? position;
-  SizeC? effectiveChildSize;
-
-  @override
-  void initState() {
-    super.initState();
-
-    calculatePosition();
-  }
-
-  @override
-  void didUpdateWidget(_NetworkImageWithStates oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.url != oldWidget.url ||
-        widget.paint != oldWidget.paint ||
-        widget.width != oldWidget.width ||
-        widget.height != oldWidget.height ||
-        widget.alignment != oldWidget.alignment ||
-        widget.fit != oldWidget.fit ||
-        widget.scale != oldWidget.scale) {
-      calculatePosition();
-    }
-  }
-
-  void calculatePosition() {
-    if (isCustomPositionRequiredForImage(
-        widget.paint, SizeC(widget.width, widget.height))) {
-      effectiveChildSize =
-          getEffectiveChildSizeForImage(widget.node, widget.paint);
-
-      position = convertAlignmentToPosition(
-        parentWidth: widget.node.basicBoxGlobal.width,
-        parentHeight: widget.node.basicBoxGlobal.height,
-        childWidth: effectiveChildSize!.width,
-        childHeight: effectiveChildSize!.height,
-        alignmentX: widget.paint.alignment.data?.x ?? 0,
-        alignmentY: widget.paint.alignment.data?.y ?? 0,
-      );
-    } else {
-      position = null;
-    }
-  }
-
-  Widget errorBuilder() {
-    if (!widget.isActive) {
-      // for passive transformer.
-      return FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Center(
-          child: ColorFiltered(
-            colorFilter: ColorFilter.mode(
-              Colors.white.withOpacity(0.1),
-              BlendMode.dst,
-            ),
-            child: Icon(
-              Icons.broken_image_outlined,
-              size: 200,
-              color: Colors.grey.withOpacity(0.2),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return LayoutBuilder(builder: (context, constraints) {
-      if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
-        return FittedBox(child: Center(child: Icon(Icons.error_outline)));
-      }
-      return FittedBox(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.error_outline),
-                Text(
-                  'Failed to load image',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    });
-  }
-
-  Widget jsonPathBuilder(String path) {
-    return LayoutBuilder(builder: (context, constraints) {
-      if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
-        return FittedBox(child: Center(child: Icon(Icons.image_outlined)));
-      }
-      return FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: ColorFiltered(
-              colorFilter: ColorFilter.mode(
-                Colors.white.withOpacity(0.1),
-                BlendMode.dst,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.image_outlined,
-                    size: 100,
-                  ),
-                  Text(
-                    'Variable Image',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.merge(
-                          GoogleFonts.sourceCodePro(
-                            fontSize: 24,
-                          ),
-                        ),
-                  ),
-                  Text(
-                    path,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.merge(
-                          GoogleFonts.sourceCodePro(
-                            color: Colors.greenAccent.shade700,
-                            fontSize: 24,
-                          ),
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (position != null && effectiveChildSize != null) {
-      return Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            left: position!.x,
-            top: position!.y,
-            width: effectiveChildSize!.width,
-            height: effectiveChildSize!.height,
-            child: buildImage(withAlignment: false),
-          )
-        ],
-      );
-    }
-
-    return buildImage(withAlignment: true);
-  }
-
-  /// Uses Image.network
-  Widget buildImage({required bool withAlignment}) {
-    if (widget.url.containsUncheckedVariablePath && widget.isActive) {
-      return jsonPathBuilder(widget.url);
-    }
-
-    if(widget.paint.isSvgImage) {
-      return ImageBuilder(
-        url: widget.url,
-        fit: widget.fit,
-        alignment: withAlignment ? widget.alignment : Alignment.center,
-        scale: widget.scale,
-        width: widget.width,
-        height: widget.height,
-        repeat: widget.repeat,
-        isSvg: widget.paint.isSvgImage,
-        errorWidget: (context, error, stackTrace) => errorBuilder(),
-      );
-    }
-
-    return FadeInImage(
-      placeholder: MemoryImage(kTransparentImage),
-      image: NetworkImage(
-        widget.url,
-        scale: widget.scale,
-      ),
-      fit: widget.fit,
-      alignment: withAlignment ? widget.alignment : Alignment.center,
-      width: widget.width,
-      height: widget.height,
-      repeat: widget.repeat,
-      placeholderErrorBuilder:
-          (context, Object error, StackTrace? stackTrace) => LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
-            return Center(child: Icon(Icons.error_outline));
-          }
-          return Align(
-            alignment: Alignment.center,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.error_outline),
-                Text(
-                  'Failed to load image',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-
-    // Having a loading builder to fade-in the image doesn't work if the image
-    // is shrink-wrapped because AnimatedSwitcher widget expands by default.
-    // FadeInImage is a fix of this.
-
-    // return Image.network(
-    //   widget.url,
-    //   fit: widget.fit,
-    //   alignment: withAlignment ? widget.alignment : Alignment.center,
-    //   scale: widget.scale,
-    //   width: widget.width,
-    //   height: widget.height,
-    //   repeat: widget.repeat,
-    //   loadingBuilder: (BuildContext context, Widget child,
-    //           ImageChunkEvent? loadingProgress) =>
-    //       AnimatedSwitcher(
-    //     duration: const Duration(milliseconds: 150),
-    //     child: loadingProgress == null
-    //         ? SizedBox.expand(child: child)
-    //         : SizedBox.shrink(),
-    //   ),
-    //   errorBuilder: (context, Object error, StackTrace? stackTrace) =>
-    //       LayoutBuilder(builder: (context, constraints) {
-    //     if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
-    //       return Center(child: Icon(Icons.error_outline));
-    //     }
-    //     return Align(
-    //       alignment: Alignment.center,
-    //       child: Column(
-    //         mainAxisAlignment: MainAxisAlignment.center,
-    //         mainAxisSize: MainAxisSize.min,
-    //         children: [
-    //           Icon(Icons.error_outline),
-    //           Text(
-    //             'Failed to load image',
-    //             textAlign: TextAlign.center,
-    //             style: Theme.of(context).textTheme.bodySmall,
-    //           ),
-    //         ],
-    //       ),
-    //     );
-    //   }),
-    // );
-  }
-}
-
 class RelativeTransform {
   final List<double> translation;
   final double rotation;
@@ -856,97 +520,4 @@ class RelativeTransform {
         scale: scale ?? this.scale,
         skew: skew ?? this.skew,
       );
-}
-
-class ImageBuilder extends StatelessWidget {
-  final String? url;
-  final Uint8List? bytes;
-  final BoxFit? fit;
-  final Alignment alignment;
-  final double scale;
-  final double? width;
-  final double? height;
-  final ImageRepeat repeat;
-  final bool? isSvg;
-  final Color? color;
-  final LoadingErrorWidgetBuilder? errorWidget;
-
-  const ImageBuilder({
-    super.key,
-    this.url,
-    this.bytes,
-    this.fit,
-    this.alignment = Alignment.center,
-    this.scale = 1,
-    this.width,
-    this.height,
-    this.repeat = ImageRepeat.noRepeat,
-    this.color,
-    this.isSvg,
-    this.errorWidget,
-  }) : assert(url != null || bytes != null,
-            'Either url or bytes must be provided.');
-
-  @override
-  Widget build(BuildContext context) {
-    if (bytes != null) {
-      if (isSvg ?? false) {
-        return SvgPicture.memory(
-          bytes!,
-          fit: fit ?? BoxFit.contain,
-          alignment: alignment,
-          width: width,
-          height: height,
-          colorFilter:
-              color != null ? ColorFilter.mode(color!, BlendMode.srcIn) : null,
-        );
-      }
-      return Image.memory(
-        bytes!,
-        fit: fit ?? BoxFit.contain,
-        alignment: alignment,
-        scale: scale.abs(),
-        width: width,
-        height: height,
-        repeat: repeat,
-        color: color,
-      );
-    }
-
-    if ((isSvg == true) ||
-        path.extension(Uri.parse(url!).path).contains('svg')) {
-      return SvgPicture.network(
-        url!,
-        fit: fit ?? BoxFit.contain,
-        alignment: alignment,
-        width: width,
-        height: height,
-        colorFilter:
-            color != null ? ColorFilter.mode(color!, BlendMode.srcIn) : null,
-      );
-    }
-
-    return CachedNetworkImage(
-      imageUrl: url!,
-      fit: fit ?? BoxFit.contain,
-      alignment: alignment,
-      width: width,
-      height: height,
-      repeat: repeat,
-      color: color,
-      filterQuality: FilterQuality.medium,
-      errorWidget: errorWidget,
-      imageBuilder: (context, imageProvider) {
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: imageProvider,
-              fit: fit,
-              scale: scale.abs(),
-            ),
-          ),
-        );
-      },
-    );
-  }
 }
