@@ -878,7 +878,7 @@ extension MultiIconModelExtensions on MultiSourceIconModel {
 }
 
 extension AssetModelExt on AssetModel {
-  String get imageExtension => path.extension(Uri.parse(url ?? '').path);
+  String get imageExtension => path.extension(Uri.parse(url).path);
 
   bool get isStaticImage => staticImageTypesRegex.hasMatch(imageExtension);
 
@@ -1719,5 +1719,39 @@ extension StrokeCapEnumExt on StrokeCapEnum {
         StrokeCapEnum.round => StrokeCap.round,
         StrokeCapEnum.butt => StrokeCap.butt,
         StrokeCapEnum.square => StrokeCap.square,
+      };
+}
+
+extension BlendModeCExt on BlendModeC {
+  BlendMode get flutterBlendMode => switch (this) {
+        BlendModeC.src => BlendMode.src,
+        BlendModeC.srcOver => BlendMode.srcOver,
+        BlendModeC.srcATop => BlendMode.srcATop,
+        BlendModeC.srcIn => BlendMode.srcIn,
+        BlendModeC.srcOut => BlendMode.srcOut,
+        BlendModeC.dst => BlendMode.dst,
+        BlendModeC.dstOver => BlendMode.dstOver,
+        BlendModeC.dstIn => BlendMode.dstIn,
+        BlendModeC.dstOut => BlendMode.dstOut,
+        BlendModeC.dstATop => BlendMode.dstATop,
+        BlendModeC.clear => BlendMode.clear,
+        BlendModeC.multiply => BlendMode.multiply,
+        BlendModeC.screen => BlendMode.screen,
+        BlendModeC.overlay => BlendMode.overlay,
+        BlendModeC.darken => BlendMode.darken,
+        BlendModeC.lighten => BlendMode.lighten,
+        BlendModeC.colorDodge => BlendMode.colorDodge,
+        BlendModeC.colorBurn => BlendMode.colorBurn,
+        BlendModeC.hardLight => BlendMode.hardLight,
+        BlendModeC.softLight => BlendMode.softLight,
+        BlendModeC.difference => BlendMode.difference,
+        BlendModeC.exclusion => BlendMode.exclusion,
+        BlendModeC.hue => BlendMode.hue,
+        BlendModeC.saturation => BlendMode.saturation,
+        BlendModeC.color => BlendMode.color,
+        BlendModeC.luminosity => BlendMode.luminosity,
+        BlendModeC.xor => BlendMode.xor,
+        BlendModeC.plus => BlendMode.plus,
+        BlendModeC.modulate => BlendMode.modulate,
       };
 }
