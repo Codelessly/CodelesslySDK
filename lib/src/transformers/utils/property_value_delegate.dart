@@ -103,6 +103,13 @@ class PropertyValueDelegate {
 
     final Map<String, dynamic> data = dataOverrides ?? codelesslyContext.data;
 
+    // if (condition != null) {
+    //   print('----------------------------------------------------------------');
+    //   print('CONDITION on ${node.name}-> ${property}:');
+    //   print('----------------------------------------------------------------');
+    //   condition.prettyPrint();
+    //   print('----------------------------------------------------------------');
+    // }
     return condition?.evaluate<R>(context, variables, data);
   }
 
