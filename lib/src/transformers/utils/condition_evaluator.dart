@@ -199,6 +199,34 @@ class ConditionEvaluator<R extends Object>
   }
 
   @override
+  bool visitGreaterThanOrEqualToOperator(Object? left, Object? right) {
+    if (left is num && right is num) return left >= right;
+
+    if (left == null || right == null) return false;
+
+    // This is required since we have loose type checking.
+    return left
+            .toString()
+            .toLowerCase()
+            .compareTo(right.toString().toLowerCase()) >=
+        0;
+  }
+
+  @override
+  bool visitLessThanOrEqualToOperator(Object? left, Object? right) {
+    if (left is num && right is num) return left <= right;
+
+    if (left == null || right == null) return false;
+
+    // This is required since we have loose type checking.
+    return left
+            .toString()
+            .toLowerCase()
+            .compareTo(right.toString().toLowerCase()) <=
+        0;
+  }
+
+  @override
   R? visitSetValueAction(SetValueAction action) {
     final ValueModel value = action.values.first;
     if (value is StringValue) {
