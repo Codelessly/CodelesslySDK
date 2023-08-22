@@ -517,7 +517,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         for (final notifier in codelesslyContext.variables.values) {
           notifier.value =
-              notifier.value.copyWith(value: widget.data[notifier.value.name]);
+              notifier.value.copyWith(value: widget.data[notifier.value.name]?.toString());
         }
       });
     }
