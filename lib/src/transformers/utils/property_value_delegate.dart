@@ -241,13 +241,13 @@ class PropertyValueDelegate {
 
     if (match.hasPathOrAccessor) {
       if (variable.type == VariableType.map) {
-        final Object? value = substituteJsonPath(match.fullPath,
-            {match.name: variable.typedValue<Map>(defaultValue: {})});
+        final Object? value = substituteJsonPath(
+            match.fullPath, {match.name: variable.getValue()});
 
         return value.typedValue<R>();
       } else if (variable.type == VariableType.list) {
-        final Object? value = substituteJsonPath(match.fullPath,
-            {match.name: variable.typedValue<List>(defaultValue: [])});
+        final Object? value = substituteJsonPath(
+            match.fullPath, {match.name: variable.getValue()});
 
         return value.typedValue<R>();
       }

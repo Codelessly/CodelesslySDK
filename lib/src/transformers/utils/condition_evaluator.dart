@@ -90,13 +90,13 @@ class ConditionEvaluator<R extends Object>
         // of the variable and apply the path or accessor on it.
         if (variable.type == VariableType.map) {
           return substituteJsonPath(fullPath, {
-                variableName: variable.typedValue<Map>() ?? {}
+                variableName: variable.getValue() ?? {},
               }).typedValue<String>() ??
               'null';
         } else if (variable.type == VariableType.list) {
           // TODO: support list type variable paths.
           return substituteJsonPath(fullPath, {
-                variableName: variable.typedValue<List>() ?? []
+                variableName: variable.getValue() ?? [],
               }).typedValue<String>() ??
               'null';
         }
