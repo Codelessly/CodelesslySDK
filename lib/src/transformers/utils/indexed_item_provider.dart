@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class IndexedItemProvider extends InheritedWidget {
   final int index;
-  final dynamic item;
+  final Object? item;
 
   const IndexedItemProvider({
     super.key,
