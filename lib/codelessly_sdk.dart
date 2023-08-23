@@ -19,6 +19,7 @@ export 'src/model/publish_source.dart';
 export 'src/model/sdk_publish_model.dart';
 export 'src/transformers/transformers.dart';
 export 'src/ui/codelessly_widget.dart';
+export 'src/ui/codelessly_context.dart';
 export 'src/ui/codelessly_widget_controller.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/flutter_icons_data_map.dart';
