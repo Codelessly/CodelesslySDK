@@ -1,16 +1,8 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
-import 'package:json_path/json_path.dart';
 
 import '../../codelessly_sdk.dart';
-
-// const String jsonPathPattern = r'\${([a-zA-Z.\[\]]+[a-zA-Z0-9_.\[\]]*)}';
-// final RegExp jsonPathRegex = RegExp(jsonPathPattern);
-
-// const String dataJsonPathPattern =
-//     r'\${data\.([a-zA-Z.\[\]]+[a-zA-Z0-9_.\[\]]*)}';
-// final RegExp dataJsonPathRegex = RegExp(dataJsonPathPattern);
 
 const Set<String> predefinedVariableNames = {'data', 'index', 'item'};
 
@@ -19,37 +11,6 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'index', type: VariableType.integer),
   PredefinedVariableData(name: 'item'),
 };
-
-/// Substitutes json paths found in [text] with values from [data].
-/// supported text format:
-///   - ${data.name}: will be replaced with data['name'].
-///   - data.name: will be replaced with data['name'].
-///
-Object? substituteJsonPath(String text, Map<String, dynamic> data) {
-  // If the text represents a JSON path, get the relevant value from [data] map.
-  if (data.isEmpty) return null;
-
-  if (!variableSyntaxIdentifierRegex.hasMatch(text)) {
-    // text is not wrapped with ${}. Wrap it since a validation is done later.
-    text = '\${$text}';
-  }
-
-  if (!text.isValidVariablePath) return null;
-
-  // Remove $-sign and curly brackets.
-  String path = variableSyntaxIdentifierRegex.hasMatch(text)
-      ? text.substring(2, text.length - 1)
-      : text;
-  // Add $-sign and dot so that the expression matches JSON path standards.
-  path = '\$.$path';
-  // [text] represent a JSON path here. Decode it.
-  final JsonPath jsonPath = JsonPath(path);
-  // Retrieve values from JSON that match the path.
-  final values = jsonPath.readValues(data);
-  if (values.isEmpty) return null;
-  // Return the first value.
-  return values.first;
-}
 
 List<InlineSpan> transformTextSpans(List<InlineSpan> spans,
     List<VariableData> variables, BuildContext context) {

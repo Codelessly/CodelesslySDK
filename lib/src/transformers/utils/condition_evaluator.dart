@@ -67,77 +67,16 @@ class ConditionEvaluator<R extends Object>
   Object? visitVariablePart(VariablePart part) {
     final value =
         part.valueString.splitMapJoinRegex(variablePathRegex, onMatch: (match) {
-      // Raw name of the variable without path or accessor.
-      final String variableName = match.namedGroup('name')!;
+      final Object? value = PropertyValueDelegate.retrieveVariableValue(
+        match[0]!,
+        variables.values,
+        data,
+        itemProvider,
+      );
 
-      // Full path of the variable (with accessor and variable name).
-      final String? fullPath = match.namedGroup('value');
-
-      if (fullPath == null) return 'null';
-
-      if (predefinedVariableNames.contains(variableName)) {
-        return visitPredefinedVariable(variableName, fullPath, match)
-                .typedValue<String>() ??
-            'null';
-      }
-
-      final VariableData? variable = variables[variableName];
-
-      if (variable == null) return 'null';
-
-      if (variableName != fullPath) {
-        // variable either has a path or accessor so we need to get the value
-        // of the variable and apply the path or accessor on it.
-        if (variable.type == VariableType.map) {
-          return substituteJsonPath(fullPath, {
-                variableName: variable.getValue() ?? {},
-              }).typedValue<String>() ??
-              'null';
-        } else if (variable.type == VariableType.list) {
-          // TODO: support list type variable paths.
-          return substituteJsonPath(fullPath, {
-                variableName: variable.getValue() ?? [],
-              }).typedValue<String>() ??
-              'null';
-        }
-      }
-
-      // variable name
-      return variables[variableName]?.getValue()?.toString() ?? 'null';
+      return value?.typedValue<String>() ?? 'null';
     });
     return _visitRawValue(value);
-  }
-
-  Object? visitPredefinedVariable(
-    String variableName,
-    String fullPath,
-    RegExpMatch match,
-  ) {
-    if (variableName == 'data') {
-      // json data path.
-      return substituteJsonPath(
-          fullPath.wrapWithVariableSyntax(), {'data': data});
-    }
-
-    if (variableName == 'index') {
-      // substitute path with screen.
-      final index = itemProvider?.index;
-      if (index == null) return null;
-
-      return '$index';
-    }
-
-    if (variableName == 'item') {
-      // substitute path with screen.
-      final item = itemProvider?.item;
-      if (item == null) return null;
-
-      return substituteJsonPath(
-          fullPath.wrapWithVariableSyntax(), {'item': item});
-    }
-
-    // default value when variable is not found.
-    return 'null';
   }
 
   @override
