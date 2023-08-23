@@ -473,13 +473,21 @@ class FunctionsRepository {
   static bool setVariableFromAction(
       BuildContext context, SetVariableAction action) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
-    // Get updated variable.
-    final VariableData? updatedVariable = payload
-        .variables[action.variable.id]?.value
-        .copyWith(value: action.newValue);
+    final variableNotifier = payload.variables[action.variable.id];
+    if (variableNotifier == null) return false;
 
-    if (updatedVariable == null) return false;
-    payload.variables[action.variable.id]?.value = updatedVariable;
+    String newValue = action.newValue;
+    if (action.variable.type.isBoolean && action.toggled) {
+      final bool? currentValue =
+          variableNotifier.value.getValue().typedValue<bool>();
+      if (currentValue == null) return false;
+      newValue = (!currentValue).toString();
+    }
+
+    final VariableData updatedVariable =
+        variableNotifier.value.copyWith(value: newValue);
+
+    variableNotifier.value = updatedVariable;
     return true;
   }
 
