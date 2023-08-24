@@ -119,33 +119,46 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     final InkWellModel? inkWell = node is BlendMixin ? node.inkWell : null;
 
     if (inkWell != null) {
-      return Material(
-        color: Colors.transparent,
-        borderRadius: getBorderRadius(node),
-        clipBehavior: getClipBehavior(node),
-        child: InkWell(
-          onTap: onClickReactions.isEmpty
-              ? null
-              : () {
-                  for (final Reaction reaction in onClickReactions) {
-                    final ActionModel action = reaction.action;
+      return Stack(
+        clipBehavior: Clip.none,
+        key: ValueKey('InkWell Stack [${node.id}]'),
+        children: [
+          widget,
+          Positioned.fill(
+            child: Material(
+              type: MaterialType.transparency,
+              borderRadius: getBorderRadius(node),
+              clipBehavior: getClipBehavior(node),
+              child: InkWell(
+                onTap: onClickReactions.isEmpty
+                    ? null
+                    : () {
+                        for (final Reaction reaction in onClickReactions) {
+                          final ActionModel action = reaction.action;
                     FunctionsRepository.performAction(context, action);
                   }
                 },
-          onLongPress: onLongPressReactions.isEmpty
-              ? null
-              : () {
-                  for (final Reaction reaction in onLongPressReactions) {
-                    final ActionModel action = reaction.action;
+                onLongPress: onLongPressReactions.isEmpty
+                    ? null
+                    : () {
+                        for (final Reaction reaction in onLongPressReactions) {
+                          final ActionModel action = reaction.action;
                     FunctionsRepository.performAction(context, action);
                   }
                 },
-          splashColor: inkWell.splashColor?.toFlutterColor(),
-          highlightColor: inkWell.highlightColor?.toFlutterColor(),
-          hoverColor: inkWell.hoverColor?.toFlutterColor(),
-          focusColor: inkWell.focusColor?.toFlutterColor(),
-          child: widget,
-        ),
+                overlayColor: inkWell.overlayColor != null
+                    ? MaterialStatePropertyAll<Color>(
+                        inkWell.overlayColor!.toFlutterColor(),
+                      )
+                    : null,
+                splashColor: inkWell.splashColor?.toFlutterColor(),
+                highlightColor: inkWell.highlightColor?.toFlutterColor(),
+                hoverColor: inkWell.hoverColor?.toFlutterColor(),
+                focusColor: inkWell.focusColor?.toFlutterColor(),
+              ),
+            ),
+          ),
+        ],
       );
     } else {
       return MouseRegion(
