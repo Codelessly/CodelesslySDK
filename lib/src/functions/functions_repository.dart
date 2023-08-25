@@ -484,6 +484,23 @@ class FunctionsRepository {
       newValue = (!currentValue).toString();
     }
 
+    if (action.variable.type.isList &&
+        action.listOperation != ListOperation.replace) {
+      final List? currentValue =
+          variableNotifier.value.getValue().typedValue<List>();
+      if (currentValue == null) return false;
+      if (action.listOperation == ListOperation.add) {
+        currentValue.addAll(newValue.toList() ?? []);
+      } else if (action.listOperation == ListOperation.insert) {
+        currentValue.insertAll(action.index, newValue.toList() ?? []);
+      } else if (action.listOperation == ListOperation.remove) {
+        currentValue.removeAt(action.index);
+      } else if (action.listOperation == ListOperation.update) {
+        currentValue[action.index] = newValue;
+      }
+      newValue = jsonEncode(currentValue);
+    }
+
     final VariableData updatedVariable =
         variableNotifier.value.copyWith(value: newValue);
 
