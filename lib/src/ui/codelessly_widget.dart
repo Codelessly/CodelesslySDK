@@ -1,16 +1,12 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:codelessly_api/codelessly_api.dart';
-import 'package:collection/collection.dart';
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
-import 'codelessly_context.dart';
 import 'codelessly_error_screen.dart';
 import 'codelessly_loading_screen.dart';
 import 'layout_builder.dart';
@@ -30,7 +26,6 @@ typedef CodelesslyWidgetErrorBuilder = Widget Function(
 );
 
 Widget _defaultLayoutBuilder(context, layout) => layout;
-
 
 /// SDK widget that requires the SDK to be initialized beforehand.
 ///
@@ -323,8 +318,10 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       codelesslyContext.functions = widget.functions;
     }
 
-    if (widget.externalComponentBuilders != oldWidget.externalComponentBuilders) {
-      codelesslyContext.externalComponentBuilders = widget.externalComponentBuilders;
+    if (widget.externalComponentBuilders !=
+        oldWidget.externalComponentBuilders) {
+      codelesslyContext.externalComponentBuilders =
+          widget.externalComponentBuilders;
     }
 
     if (widget.controller == null && oldWidget.controller != null) {
