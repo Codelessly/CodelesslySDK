@@ -28,7 +28,7 @@ Initialize Codelessly before calling `runApp()`.
 ```dart
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize SDK.
   Codelessly.instance.initialize(
     config: CodelesslyConfig(
@@ -84,7 +84,7 @@ class MyApp extends StatelessWidget {
 
 The `CodelesslyWidget` can be used like any other widget and embedded anywhere in your app. It can even be used to render entire pages as the root widget!
 
-From dynamic forms to constantly changing sales and marketing pages, any design or layout can be streamed to your app via the `CodelesslyWidget`. 
+From dynamic forms to constantly changing sales and marketing pages, any design or layout can be streamed to your app via the `CodelesslyWidget`.
 
 To learn how to use the Codelessly editor to publish layouts, check out our [3-minute Quickstart Guide](https://docs.codelessly.com/getting-started/3-minute-quick-start).
 
@@ -103,15 +103,17 @@ CodelesslyWidget(
 
 #### **Step 1:** Define variables in the Codelessly Editor
 
-Use the `${}` templating syntax in input fields to link data from the Codelessly editor to layouts as shown below. 
+Use the `${}` templating syntax in input fields to link data from the Codelessly editor to layouts as shown below.
 
 ![Data](packages/ui_with_data_linking.png)
 
-To link the title of a text widget to the `title` variable in the Codelessly editor, put `${data.title}` in the text widget’s text field.
+To link the title of a text widget to the `title` variable in the Codelessly editor, put `${title}` in the text widget’s text field.
 
-> **Note:** The `data` object contains all the variables passed to the CodelesslyWidget. 
+> **Note:** All data passed into the Codelessly widget is stored in the `data` object.
 >
-> Use `${data.title}` to access the `title` variable passed from the client. `${title}` alone is a Codelessly variable and will try to load variables defined in Codelessly, not your client.
+> You can access the `title` variable with `${title}` or `${data.title}`.
+>
+> Use `data` to reference nested JSON payloads. Example: ${data.productData.nested.json.path}
 
 #### **Step 2:** Pass data to the layout from your app.
 
@@ -212,7 +214,7 @@ CodelesslyWidget(
 
 When `isPreview` is set to true, the CodelesslyWidget will stream UI updates from the Codelessly Editor in realtime. Any edits to the UI in the editor will update in the app immediately. We think this is a pretty amazing feature so give it a try!
 
-Use preview mode to test and prototype UI quickly. 
+Use preview mode to test and prototype UI quickly.
 
 #### Flavor Support
 
