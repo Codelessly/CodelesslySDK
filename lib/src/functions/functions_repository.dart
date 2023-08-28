@@ -472,8 +472,9 @@ class FunctionsRepository {
   /// Returns `true` if variable was found and updated, `false` otherwise.
   static bool setVariableFromAction(
       BuildContext context, SetVariableAction action) {
-    final CodelesslyContext payload = context.read<CodelesslyContext>();
-    final variableNotifier = payload.variables[action.variable.id];
+    final CodelesslyContext codelesslyContext =
+        context.read<CodelesslyContext>();
+    final variableNotifier = codelesslyContext.variables[action.variable.id];
     if (variableNotifier == null) return false;
 
     String newValue = action.newValue;
@@ -488,15 +489,22 @@ class FunctionsRepository {
         action.listOperation != ListOperation.replace) {
       final List? currentValue =
           variableNotifier.value.getValue().typedValue<List>();
+      final int index = int.tryParse(action.index) ??
+          PropertyValueDelegate.retrieveVariableValue(
+              action.index,
+              codelesslyContext.variables.values.map((e) => e.value),
+              codelesslyContext.data,
+              null) as int? ??
+          0;
       if (currentValue == null) return false;
       if (action.listOperation == ListOperation.add) {
         currentValue.addAll(newValue.toList() ?? []);
       } else if (action.listOperation == ListOperation.insert) {
-        currentValue.insertAll(action.index, newValue.toList() ?? []);
+        currentValue.insertAll(index, newValue.toList() ?? []);
       } else if (action.listOperation == ListOperation.remove) {
-        currentValue.removeAt(action.index);
+        currentValue.removeAt(index);
       } else if (action.listOperation == ListOperation.update) {
-        currentValue[action.index] = newValue;
+        currentValue[index] = newValue;
       }
       newValue = jsonEncode(currentValue);
     }
