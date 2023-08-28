@@ -213,8 +213,11 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
             dimension: fab.icon.size,
             child: SvgPicture.network(
               fab.icon.iconImage!,
-              color: fab.icon.color?.toFlutterColor(),
               fit: BoxFit.contain,
+              colorFilter: fab.icon.color != null
+                  ? ColorFilter.mode(
+                      fab.icon.color!.toFlutterColor(), BlendMode.srcIn)
+                  : null,
             ),
           );
         }

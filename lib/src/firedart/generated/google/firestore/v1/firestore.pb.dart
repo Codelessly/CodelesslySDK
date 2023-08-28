@@ -1026,7 +1026,7 @@ enum BatchGetDocumentsRequest_ConsistencySelector {
 
 class BatchGetDocumentsRequest extends $pb.GeneratedMessage {
   static const $core
-          .Map<$core.int, BatchGetDocumentsRequest_ConsistencySelector>
+      .Map<$core.int, BatchGetDocumentsRequest_ConsistencySelector>
       _BatchGetDocumentsRequest_ConsistencySelectorByTag = {
     4: BatchGetDocumentsRequest_ConsistencySelector.transaction,
     5: BatchGetDocumentsRequest_ConsistencySelector.newTransaction,

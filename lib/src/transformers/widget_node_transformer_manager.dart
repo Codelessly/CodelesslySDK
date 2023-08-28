@@ -135,17 +135,17 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
                     : () {
                         for (final Reaction reaction in onClickReactions) {
                           final ActionModel action = reaction.action;
-                    FunctionsRepository.performAction(context, action);
-                  }
-                },
+                          FunctionsRepository.performAction(context, action);
+                        }
+                      },
                 onLongPress: onLongPressReactions.isEmpty
                     ? null
                     : () {
                         for (final Reaction reaction in onLongPressReactions) {
                           final ActionModel action = reaction.action;
-                    FunctionsRepository.performAction(context, action);
-                  }
-                },
+                          FunctionsRepository.performAction(context, action);
+                        }
+                      },
                 overlayColor: inkWell.overlayColor != null
                     ? MaterialStatePropertyAll<Color>(
                         inkWell.overlayColor!.toFlutterColor(),
