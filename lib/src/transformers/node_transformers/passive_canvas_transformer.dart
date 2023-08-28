@@ -172,7 +172,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     final double viewRatio = screenWidth / canvasWidth;
 
     body = FittedBox(
-      fit: BoxFit.scaleDown,
+      fit: BoxFit.fitWidth,
       alignment: Alignment.topCenter,
       child: SizedBox(
         width: viewRatio < 1 ? canvasWidth : screenWidth,
