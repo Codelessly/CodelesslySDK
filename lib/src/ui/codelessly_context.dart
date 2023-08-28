@@ -38,10 +38,13 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   }
 
   /// A map of widget builders used to build dynamic widgets.
-Map<String, WidgetBuilder> externalComponentBuilders;
+  Map<String, WidgetBuilder> _externalComponentBuilders;
 
-  set setDynamicWidgetBuilders(Map<String, WidgetBuilder> externalComponentBuilders) {
-    this.externalComponentBuilders = externalComponentBuilders;
+  Map<String, WidgetBuilder> get externalComponentBuilders =>
+      _externalComponentBuilders;
+
+  set externalComponentBuilders(Map<String, WidgetBuilder> builders) {
+    externalComponentBuilders = builders;
     notifyListeners();
   }
 
@@ -61,18 +64,19 @@ Map<String, WidgetBuilder> externalComponentBuilders;
   CodelesslyContext({
     required Map<String, dynamic> data,
     required this.functions,
-    required this.externalComponentBuilders,
+    required Map<String, WidgetBuilder>? externalComponentBuilders,
     required this.nodeValues,
     required this.variables,
     required this.conditions,
     required this.layoutID,
-  }) : _data = data;
+  })  : _data = data,
+        _externalComponentBuilders = externalComponentBuilders ?? {};
 
   /// Creates a [CodelesslyContext] with empty an empty map of each property.
   CodelesslyContext.empty({String? layoutID})
       : _data = {},
         functions = {},
-        externalComponentBuilders = {},
+        _externalComponentBuilders = {},
         nodeValues = {},
         variables = {},
         conditions = {};
@@ -97,7 +101,8 @@ Map<String, WidgetBuilder> externalComponentBuilders;
     return CodelesslyContext(
       data: data ?? this.data,
       functions: functions ?? this.functions,
-      externalComponentBuilders: dynamicWidgetBuilders ?? this.externalComponentBuilders,
+      externalComponentBuilders:
+          dynamicWidgetBuilders ?? externalComponentBuilders,
       nodeValues: nodeValues ?? this.nodeValues,
       variables: variables ?? this.variables,
       layoutID: forceLayoutID ? layoutID : layoutID ?? this.layoutID,
@@ -109,9 +114,9 @@ Map<String, WidgetBuilder> externalComponentBuilders;
   /// Ex. submit action is connected to a text field node to access its data to
   /// submit to the server.
   Future<void> handleActionConnections(
-      ActionModel actionModel,
-      Map<String, BaseNode> nodes,
-      ) async {
+    ActionModel actionModel,
+    Map<String, BaseNode> nodes,
+  ) async {
     switch (actionModel.type) {
       case ActionType.submit:
         final action = actionModel as MailchimpSubmitAction;
@@ -137,14 +142,14 @@ Map<String, WidgetBuilder> externalComponentBuilders;
               connectedNode,
               connectedNode.propertyVariables
                   .where((property) =>
-                  action.values.any((value) => property.name == value.name))
+                      action.values.any((value) => property.name == value.name))
                   .toList());
         }
         break;
       case ActionType.setVariant:
         final action = actionModel as SetVariantAction;
         final VarianceNode? connectedNode =
-        nodes[action.nodeID] as VarianceNode?;
+            nodes[action.nodeID] as VarianceNode?;
         // Populate node values with node's variant value, not action's variant
         // value.
         if (connectedNode != null) {
