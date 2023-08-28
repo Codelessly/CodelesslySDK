@@ -44,7 +44,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
       _externalComponentBuilders;
 
   set externalComponentBuilders(Map<String, WidgetBuilder> builders) {
-    externalComponentBuilders = builders;
+    _externalComponentBuilders = builders;
     notifyListeners();
   }
 
