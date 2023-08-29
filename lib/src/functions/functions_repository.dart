@@ -487,24 +487,41 @@ class FunctionsRepository {
 
     if (action.variable.type.isList &&
         action.listOperation != ListOperation.replace) {
+      // Get current value of the list variable.
       final List? currentValue =
           variableNotifier.value.getValue().typedValue<List>();
-      final int index = int.tryParse(action.index) ??
-          PropertyValueDelegate.retrieveVariableValue(
-              action.index,
-              codelesslyContext.variables.values.map((e) => e.value),
-              codelesslyContext.data,
-              null) as int? ??
-          0;
+      // If list variable does not exist, return false.
       if (currentValue == null) return false;
-      if (action.listOperation == ListOperation.add) {
-        currentValue.addAll(newValue.toList() ?? []);
-      } else if (action.listOperation == ListOperation.insert) {
-        currentValue.insertAll(index, newValue.toList() ?? []);
-      } else if (action.listOperation == ListOperation.remove) {
-        currentValue.removeAt(index);
-      } else if (action.listOperation == ListOperation.update) {
-        currentValue[index] = newValue;
+      // Retrieve all variables.
+      final Iterable<VariableData> variables =
+          codelesslyContext.variables.values.map((e) => e.value);
+      // Find the value of variable referenced by index.
+      final indexVariableValue = PropertyValueDelegate.retrieveVariableValue(
+        action.index,
+        variables,
+        codelesslyContext.data,
+        IndexedItemProvider.of(context),
+      );
+      // Try to parse index if it's an integer. Else, try to use the variable's
+      // value.
+      final int index = int.tryParse(action.index) ??
+          (indexVariableValue is int ? indexVariableValue : 0);
+      // Perform list operations.
+      switch (action.listOperation) {
+        case ListOperation.add:
+          currentValue.addAll(newValue.toList() ?? []);
+          break;
+        case ListOperation.insert:
+          currentValue.insertAll(index, newValue.toList() ?? []);
+          break;
+        case ListOperation.remove:
+          currentValue.removeAt(index);
+          break;
+        case ListOperation.update:
+          currentValue[index] = newValue;
+          break;
+        default:
+          break;
       }
       newValue = jsonEncode(currentValue);
     }
