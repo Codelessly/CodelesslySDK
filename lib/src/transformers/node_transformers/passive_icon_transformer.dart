@@ -70,7 +70,10 @@ class PassiveIconWidget extends StatelessWidget {
       return GestureDetector(
         onTap: onPressed,
         onLongPress: onLongPressed,
-        child: iconWidget,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: iconWidget,
+        ),
       );
     }
 
