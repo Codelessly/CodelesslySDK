@@ -472,8 +472,9 @@ class FunctionsRepository {
   /// Returns `true` if variable was found and updated, `false` otherwise.
   static bool setVariableFromAction(
       BuildContext context, SetVariableAction action) {
-    final CodelesslyContext payload = context.read<CodelesslyContext>();
-    final variableNotifier = payload.variables[action.variable.id];
+    final CodelesslyContext codelesslyContext =
+        context.read<CodelesslyContext>();
+    final variableNotifier = codelesslyContext.variables[action.variable.id];
     if (variableNotifier == null) return false;
 
     String newValue = action.newValue;
@@ -482,6 +483,47 @@ class FunctionsRepository {
           variableNotifier.value.getValue().typedValue<bool>();
       if (currentValue == null) return false;
       newValue = (!currentValue).toString();
+    }
+
+    if (action.variable.type.isList &&
+        action.listOperation != ListOperation.replace) {
+      // Get current value of the list variable.
+      final List? currentValue =
+          variableNotifier.value.getValue().typedValue<List>();
+      // If list variable does not exist, return false.
+      if (currentValue == null) return false;
+      // Retrieve all variables.
+      final Iterable<VariableData> variables =
+          codelesslyContext.variables.values.map((e) => e.value);
+      // Find the value of variable referenced by index.
+      final indexVariableValue = PropertyValueDelegate.retrieveVariableValue(
+        action.index,
+        variables,
+        codelesslyContext.data,
+        IndexedItemProvider.of(context),
+      );
+      // Try to parse index if it's an integer. Else, try to use the variable's
+      // value.
+      final int index = int.tryParse(action.index) ??
+          (indexVariableValue is int ? indexVariableValue : 0);
+      // Perform list operations.
+      switch (action.listOperation) {
+        case ListOperation.add:
+          currentValue.addAll(newValue.toList() ?? []);
+          break;
+        case ListOperation.insert:
+          currentValue.insertAll(index, newValue.toList() ?? []);
+          break;
+        case ListOperation.remove:
+          currentValue.removeAt(index);
+          break;
+        case ListOperation.update:
+          currentValue[index] = newValue;
+          break;
+        default:
+          break;
+      }
+      newValue = jsonEncode(currentValue);
     }
 
     final VariableData updatedVariable =
