@@ -140,8 +140,11 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   }) {
     final CanvasProperties props = node.properties;
     final BaseNode placeholderBody = getNode(node.properties.bodyId);
-    Widget body = manager.buildWidgetFromNode(placeholderBody, context,
-        settings: settings);
+    Widget body = StrictNodeBox(
+             node: placeholderBody,
+             child: manager.buildWidgetFromNode(placeholderBody, context,
+                settings: settings),
+       );
 
     PreferredSizeWidget? appBar = topAppBarPlaceholder ??
         ((props.topAppBarPlaceholderId != null)
