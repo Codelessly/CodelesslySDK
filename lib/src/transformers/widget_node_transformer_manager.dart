@@ -102,7 +102,7 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
 
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
-    if (node is! ReactionMixin || (node as ReactionMixin).reactions.isEmpty) {
+    if (node is! ReactionMixin) {
       return widget;
     }
 
@@ -130,22 +130,18 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
               borderRadius: getBorderRadius(node),
               clipBehavior: getClipBehavior(node),
               child: InkWell(
-                onTap: onClickReactions.isEmpty
-                    ? null
-                    : () {
-                        for (final Reaction reaction in onClickReactions) {
-                          final ActionModel action = reaction.action;
-                          FunctionsRepository.performAction(context, action);
-                        }
-                      },
-                onLongPress: onLongPressReactions.isEmpty
-                    ? null
-                    : () {
-                        for (final Reaction reaction in onLongPressReactions) {
-                          final ActionModel action = reaction.action;
-                          FunctionsRepository.performAction(context, action);
-                        }
-                      },
+                onTap: () {
+                  for (final Reaction reaction in onClickReactions) {
+                    final ActionModel action = reaction.action;
+                    FunctionsRepository.performAction(context, action);
+                  }
+                },
+                onLongPress: () {
+                  for (final Reaction reaction in onLongPressReactions) {
+                    final ActionModel action = reaction.action;
+                    FunctionsRepository.performAction(context, action);
+                  }
+                },
                 overlayColor: inkWell.overlayColor != null
                     ? MaterialStatePropertyAll<Color>(
                         inkWell.overlayColor!.toFlutterColor(),
@@ -164,22 +160,18 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
-          onTap: onClickReactions.isEmpty
-              ? null
-              : () {
-                  for (final Reaction reaction in onClickReactions) {
-                    final ActionModel action = reaction.action;
-                    FunctionsRepository.performAction(context, action);
-                  }
-                },
-          onLongPress: onLongPressReactions.isEmpty
-              ? null
-              : () {
-                  for (final Reaction reaction in onLongPressReactions) {
-                    final ActionModel action = reaction.action;
-                    FunctionsRepository.performAction(context, action);
-                  }
-                },
+          onTap: () {
+            for (final Reaction reaction in onClickReactions) {
+              final ActionModel action = reaction.action;
+              FunctionsRepository.performAction(context, action);
+            }
+          },
+          onLongPress: () {
+            for (final Reaction reaction in onLongPressReactions) {
+              final ActionModel action = reaction.action;
+              FunctionsRepository.performAction(context, action);
+            }
+          },
           child: widget,
         ),
       );

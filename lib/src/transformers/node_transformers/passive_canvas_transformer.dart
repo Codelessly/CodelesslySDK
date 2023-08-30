@@ -12,10 +12,9 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         ..remove(node.properties.topAppBarPlaceholderId)
         ..remove(node.properties.navigationBarPlaceholderId);
 
-  Widget _wrapInScaffold({
+  Widget _wrapInScaffoldForResponsive({
     required CanvasNode node,
     required BuildContext context,
-    required Widget body,
     PreferredSizeWidget? topAppBarPlaceholder,
     Widget? navigationBarPlaceholder,
     required WidgetBuildSettings settings,
@@ -25,77 +24,158 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     PreferredSizeWidget? appBar = topAppBarPlaceholder ??
         ((props.topAppBarPlaceholderId != null)
             ? manager.buildWidgetByID(
-          props.topAppBarPlaceholderId!,
-          context,
-          settings: settings,
-        ) as PreferredSizeWidget
+                props.topAppBarPlaceholderId!,
+                context,
+                settings: settings,
+              ) as PreferredSizeWidget
             : null);
     Widget? floatingActionButton = (props.floatingActionButton != null)
         ? PassiveFloatingActionButtonWidget.buildFAB(
-      node.id,
-      props.floatingActionButton!,
-      useFonts: false,
-      onPressed: () => onFaBPressed(context, node),
-    )
+            node.id,
+            props.floatingActionButton!,
+            useFonts: false,
+            onPressed: () => onFaBPressed(context, node),
+          )
         : null;
     Widget? bottomNavigationBar = navigationBarPlaceholder ??
         ((props.navigationBarPlaceholderId != null)
             ? manager.buildWidgetByID(
-            props.navigationBarPlaceholderId!, context,
-            settings: settings)
+                props.navigationBarPlaceholderId!, context,
+                settings: settings)
             : null);
 
-    if (node.isScrollable && node.scaleMode == ScaleMode.responsive) {
+    final BaseNode placeholderBody = getNode(node.properties.bodyId);
+    Widget body = manager.buildWidgetFromNode(
+      placeholderBody,
+      context,
+      settings: settings,
+    );
+
+    if (node.isScrollable) {
       body = SingleChildScrollView(
         scrollDirection: node.scrollDirection.flutterAxis,
         reverse: node.reverse,
         primary: node.primary,
         physics: node.physics.flutterScrollPhysics,
         keyboardDismissBehavior:
-        node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-        child: body,
-      );
-    }
-
-    if (node.scaleMode == ScaleMode.autoScale) {
-      final Size screenSize = MediaQuery.sizeOf(context);
-      final double screenWidth = screenSize.width;
-      final double canvasWidth = node.outerBoxLocal.width;
-      final double viewRatio = screenWidth / canvasWidth;
-
-      body = FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.topCenter,
+            node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
         child: SizedBox(
-          width: viewRatio < 1 ? canvasWidth : screenWidth,
-          // This fixes an auto scale crash when a simple canvas with no
-          // scrolling because the FittedBox needs to have a non-zero height.
-          //
-          // The scrollview normally takes care of that, but under this
-          // condition, a fixed height is required for auto-scaling.
-          height: node.isScrollable ? null : node.outerBoxLocal.height,
+          width: node.scrollDirection.isHorizontal
+              ? node.outerBoxLocal.width
+              : null,
+          height: node.scrollDirection.isVertical
+              ? node.outerBoxLocal.height
+              : null,
           child: body,
         ),
       );
-
-      if (node.isScrollable) {
-        body = SingleChildScrollView(
-          scrollDirection: node.scrollDirection.flutterAxis,
-          reverse: node.reverse,
-          primary: node.primary,
-          physics: node.physics.flutterScrollPhysics,
-          keyboardDismissBehavior:
-          node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-          child: body,
-        );
-      }
     }
 
     final bool needsAScaffold = appBar != null ||
         floatingActionButton != null ||
         bottomNavigationBar != null;
 
+    // Optionally expand if needed. Layout is responsive, so it doesn't matter
+    // unless the other scaffold properties are set.
     if (needsAScaffold) body = SizedBox.expand(child: body);
+
+    final Widget scaffold;
+
+    if (needsAScaffold) {
+      scaffold = Scaffold(
+        backgroundColor: retrieveBackgroundColor(context, node),
+        appBar: appBar,
+        floatingActionButton: floatingActionButton,
+        floatingActionButtonLocation: props.floatingActionButton?.location
+            .toFloatingActionButtonLocation(),
+        bottomNavigationBar: bottomNavigationBar,
+        body: body,
+      );
+    } else {
+      scaffold = Material(
+        color: retrieveBackgroundColor(context, node),
+        child: body,
+      );
+    }
+
+    return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
+      node,
+      children: [scaffold],
+    );
+  }
+
+  Widget _wrapInScaffoldForAutoScale({
+    required CanvasNode node,
+    required BuildContext context,
+    PreferredSizeWidget? topAppBarPlaceholder,
+    Widget? navigationBarPlaceholder,
+    required WidgetBuildSettings settings,
+  }) {
+    final CanvasProperties props = node.properties;
+    final BaseNode placeholderBody = getNode(node.properties.bodyId);
+    Widget body = manager.buildWidgetFromNode(placeholderBody, context,
+      settings: settings,
+    );
+
+    PreferredSizeWidget? appBar = topAppBarPlaceholder ??
+        ((props.topAppBarPlaceholderId != null)
+            ? manager.buildWidgetByID(
+                props.topAppBarPlaceholderId!,
+                context,
+                settings: settings,
+              ) as PreferredSizeWidget
+            : null);
+    Widget? floatingActionButton = (props.floatingActionButton != null)
+        ? PassiveFloatingActionButtonWidget.buildFAB(
+            node.id,
+            props.floatingActionButton!,
+            useFonts: false,
+            onPressed: () => onFaBPressed(context, node),
+          )
+        : null;
+    Widget? bottomNavigationBar = navigationBarPlaceholder ??
+        ((props.navigationBarPlaceholderId != null)
+            ? manager.buildWidgetByID(
+                props.navigationBarPlaceholderId!, context,
+                settings: settings)
+            : null);
+
+    final Size screenSize = MediaQuery.sizeOf(context);
+    final double screenWidth = screenSize.width;
+    final double canvasWidth = node.outerBoxLocal.width;
+    final double viewRatio = screenWidth / canvasWidth;
+
+    body = FittedBox(
+      fit: BoxFit.fitWidth,
+      alignment: Alignment.topCenter,
+      child: SizedBox(
+        width: viewRatio < 1 ? canvasWidth : screenWidth,
+        height: node.outerBoxLocal.height,
+        child: body,
+      ),
+    );
+
+    if (node.isScrollable) {
+      body = SingleChildScrollView(
+        scrollDirection: node.scrollDirection.flutterAxis,
+        reverse: node.reverse,
+        primary: node.primary,
+        physics: node.physics.flutterScrollPhysics,
+        keyboardDismissBehavior:
+            node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+        child: body,
+      );
+    }
+
+    final bool needsAScaffold = appBar != null ||
+        floatingActionButton != null ||
+        bottomNavigationBar != null;
+
+    // Always expand the body when auto scaling. This makes it so that even if
+    // scrolling is disabled, the entire layout is still horizontally fitting.
+    // Without this, the layout will size to itself and align-left in a shrunken
+    // state.
+    body = SizedBox.expand(child: body);
 
     final Widget scaffold;
 
@@ -129,45 +209,29 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
 
   @override
   Widget buildWidget(
-      CanvasNode node,
-      BuildContext context, [
-        WidgetBuildSettings settings = const WidgetBuildSettings(),
-      ]) {
-    final BaseNode placeholderBody = getNode(node.properties.bodyId);
-    Widget child = manager.buildWidgetFromNode(placeholderBody, context,
-        settings: settings);
-
-    if (node.isScrollable) {
-      if (node.scrollDirection == AxisC.vertical &&
-          (placeholderBody.isVerticalExpanded ||
-              placeholderBody.isVerticalFlexible)) {
-        child = SizedBox(
-          height: placeholderBody.basicBoxLocal.height,
-          child: child,
-        );
-      } else if (node.scrollDirection == AxisC.horizontal &&
-          (placeholderBody.isHorizontalExpanded ||
-              placeholderBody.isHorizontalFlexible)) {
-        child = SizedBox(
-          width: placeholderBody.basicBoxLocal.width,
-          child: child,
-        );
-      }
-    }
-
-    return _wrapInScaffold(
-      context: context,
-      node: node,
-      body: child,
-      settings: settings,
-    );
+    CanvasNode node,
+    BuildContext context, [
+    WidgetBuildSettings settings = const WidgetBuildSettings(),
+  ]) {
+    return switch (node.scaleMode) {
+      ScaleMode.responsive => _wrapInScaffoldForResponsive(
+          context: context,
+          node: node,
+          settings: settings,
+        ),
+      ScaleMode.autoScale => _wrapInScaffoldForAutoScale(
+          context: context,
+          node: node,
+          settings: settings,
+        )
+    };
   }
 
   static Color? retrieveBackgroundColor(BuildContext context, CanvasNode node) {
     final fills = <PaintModel>[
       for (final fill in node.fills)
         PropertyValueDelegate.getPropertyValue(
-            context, node, 'fill-${fill.id}') ??
+                context, node, 'fill-${fill.id}') ??
             fill
     ];
     if (fills.length == 1 && fills[0].type == PaintType.solid) {

@@ -57,9 +57,14 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         }
       }
 
-      if (fixWidth == null && fixHeight == null) {
-        return res;
+      if (rowColumnNode is ScrollableMixin) {
+        res = wrapWithScrollable(
+          node: (rowColumnNode as ScrollableMixin),
+          child: res,
+        );
       }
+
+      if (fixWidth == null && fixHeight == null) return res;
 
       return SizedBox(
         width: fixWidth,
@@ -86,13 +91,14 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         }
       }
 
-      if (fixWidth == null && fixHeight == null) {
-        return res;
+      if (rowColumnNode is ScrollableMixin) {
+        res = wrapWithScrollable(
+          node: (rowColumnNode as ScrollableMixin),
+          child: res,
+        );
       }
 
-      if (fixWidth == null && fixHeight == null) {
-        return res;
-      }
+      if (fixWidth == null && fixHeight == null) return res;
 
       return SizedBox(
         width: fixWidth,
