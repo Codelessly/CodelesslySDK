@@ -572,3 +572,23 @@ bool isCustomPositionRequiredForImage(PaintModel paint, SizeC nodeSize) {
 
   return imgX == nodeSize.width || imgY == nodeSize.height;
 }
+
+Widget wrapWithScrollable({
+  required ScrollableMixin node,
+  EdgeInsets? padding,
+  Clip? clipBehavior,
+  required Widget child,
+}) {
+  if (!node.isScrollable) return child;
+  return SingleChildScrollView(
+    scrollDirection: node.scrollDirection.flutterAxis,
+    reverse: node.reverse,
+    physics: node.physics.flutterScrollPhysics,
+    primary: node.primary,
+    padding: padding,
+    keyboardDismissBehavior:
+        node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+    clipBehavior: clipBehavior ?? Clip.hardEdge,
+    child: child,
+  );
+}

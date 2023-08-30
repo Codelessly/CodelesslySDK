@@ -157,3 +157,151 @@ final RegExp supportedAssetTypesRegex =
 
 final RegExp staticImageTypesRegex =
     RegExp('jpg|jpeg|png|webp', caseSensitive: false);
+
+/// Queries available scrollable axes determined by children expanding behavior.
+///
+/// Specifically, this method checks whether any child of a given node is
+/// expanding horizontally or vertically. It then returns a record with two bool
+/// values: [horizontal] and [vertical].
+///
+/// If a child node is found to be expanding in a particular direction, the
+/// corresponding value in the returned record becomes false.
+///
+/// Scrollable containers produce unbounded space inside of their bodies,
+/// therefore, children of scrollable containers cannot expand to fill that
+/// unbounded space.
+///
+/// [returns] A record with two bool values:
+/// - [horizontal] is true if no child is expanding horizontally,
+/// - [vertical] is true if no child is expanding vertically.
+({bool horizontal, bool vertical}) checkChildrenForLegalScrollableAxes({
+  required BaseNode node,
+  required GetNode getNode,
+  required ScaleMode scaleMode,
+}) {
+  // Auto scale canvas nodes always force fixed-size children, even if they are
+  // set to expanded.
+  if (node is CanvasNode && scaleMode == ScaleMode.autoScale) {
+    return (
+      horizontal: true,
+      vertical: true,
+    );
+  }
+
+  bool isAnyExpandingHorizontally = false;
+  bool isAnyExpandingVertically = false;
+
+  final BaseNode delegatedNode;
+  if (node is! CanvasNode) {
+    delegatedNode = node;
+  } else {
+    delegatedNode = getNode(node.properties.bodyId);
+  }
+  for (final id in delegatedNode.childrenOrEmpty) {
+    final child = getNode(id);
+    isAnyExpandingHorizontally =
+        isAnyExpandingHorizontally || child.horizontalFit.isFlex;
+    isAnyExpandingVertically =
+        isAnyExpandingVertically || child.verticalFit.isFlex;
+  }
+
+  return (
+    horizontal: !isAnyExpandingHorizontally,
+    vertical: !isAnyExpandingVertically,
+  );
+}
+
+({bool horizontal, bool vertical}) checkSelfForLegalScrollableAxes(
+    {required BaseNode node}) {
+  if (node is CanvasNode) {
+    return (
+      horizontal: true,
+      vertical: true,
+    );
+  }
+
+  return (
+    horizontal: node.isHorizontalWrap,
+    vertical: node.isVerticalWrap,
+  );
+}
+
+({bool horizontal, bool vertical}) checkParentForLegalScrollableAxes({
+  required BaseNode node,
+  required GetNode getNode,
+}) {
+  BaseNode parent = getNode(node.parentID);
+
+  if (parent is PlaceholderMixin) {
+    final canvas = getNode(parent.parentID);
+    if (canvas is CanvasNode && canvas.properties.bodyId == parent.id) {
+      // Autoscale is an exception.
+      if (canvas.scaleMode == ScaleMode.autoScale) {
+        return (
+          horizontal: true,
+          vertical: true,
+        );
+      }
+
+      parent = canvas;
+    }
+  }
+
+  bool isParentScrollingHorizontally = false;
+  bool isParentScrollingVertically = false;
+  if (parent is ScrollableMixin && parent.isScrollable) {
+    switch (parent.scrollDirection) {
+      case AxisC.horizontal:
+        isParentScrollingHorizontally = true;
+        break;
+      case AxisC.vertical:
+        isParentScrollingVertically = true;
+        break;
+    }
+  }
+
+  return (
+    horizontal: !isParentScrollingHorizontally,
+    vertical: !isParentScrollingVertically,
+  );
+}
+
+AxisC? getBestAxisForScrolling({
+  required BaseNode node,
+  required GetNode getNode,
+  required ScaleMode scaleMode,
+}) {
+  final availableAxes = checkChildrenForLegalScrollableAxes(
+    node: node,
+    getNode: getNode,
+    scaleMode: scaleMode,
+  );
+
+  if (!availableAxes.horizontal && !availableAxes.vertical) {
+    return null;
+  } else if (availableAxes.horizontal && availableAxes.vertical) {
+    return node is ScrollableMixin ? node.scrollDirection : null;
+  } else if (availableAxes.horizontal) {
+    return AxisC.horizontal;
+  } else {
+    return AxisC.vertical;
+  }
+}
+
+bool canScrollOnAxis({
+  required BaseNode node,
+  required GetNode getNode,
+  required AxisC axis,
+  required ScaleMode scaleMode,
+}) {
+  final availableAxes = checkChildrenForLegalScrollableAxes(
+    node: node,
+    getNode: getNode,
+    scaleMode: scaleMode,
+  );
+
+  return switch (axis) {
+    AxisC.horizontal => availableAxes.horizontal,
+    AxisC.vertical => availableAxes.vertical
+  };
+}

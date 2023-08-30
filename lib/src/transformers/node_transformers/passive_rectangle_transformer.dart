@@ -115,25 +115,44 @@ List<Widget> wrapWithPadding(
   List<Widget> children, {
   required AlignmentModel stackAlignment,
 }) {
+  if (children.isEmpty) return children;
+
   final EdgeInsets resolvedPadding =
       node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
+
+  if (node is FrameNode && node.isScrollable) {
+    return [
+      wrapWithScrollable(
+        node: node,
+        padding: resolvedPadding,
+        clipBehavior: defaultGetClipBehavior(node),
+        child: SizedBox(
+          width: node.scrollDirection.isHorizontal
+              ? node.outerBoxLocal.width
+              : null,
+          height: node.scrollDirection.isVertical
+              ? node.outerBoxLocal.height
+              : null,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: stackAlignment.flutterAlignment ??
+                AlignmentDirectional.topStart,
+            children: children,
+          ),
+        ),
+      ),
+    ];
+  }
 
   if (resolvedPadding == EdgeInsets.zero) {
     return children;
   }
 
   return [
-    // This fixes editor but embedded preview works either way.
-    // for (Widget child in children)
-    //   Padding(
-    //     padding: resolvedPadding,
-    //     child: child,
-    //   ),
     Padding(
       padding: resolvedPadding,
       child: Stack(
         clipBehavior: Clip.none,
-        // fit: StackFit.expand,
         alignment:
             stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
         children: children,
