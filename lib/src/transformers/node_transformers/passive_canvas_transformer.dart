@@ -113,7 +113,9 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   }) {
     final CanvasProperties props = node.properties;
     final BaseNode placeholderBody = getNode(node.properties.bodyId);
-    Widget body = manager.buildWidgetFromNode(placeholderBody, context,
+    Widget body = manager.buildWidgetFromNode(
+      placeholderBody,
+      context,
       settings: settings,
     );
 
@@ -140,20 +142,30 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
                 settings: settings)
             : null);
 
-    final Size screenSize = MediaQuery.sizeOf(context);
-    final double screenWidth = screenSize.width;
-    final double canvasWidth = node.outerBoxLocal.width;
-    final double viewRatio = screenWidth / canvasWidth;
-
     body = FittedBox(
       fit: BoxFit.fitWidth,
       alignment: Alignment.topCenter,
       child: SizedBox(
-        width: viewRatio < 1 ? canvasWidth : screenWidth,
+        width: node.outerBoxLocal.width,
         height: node.outerBoxLocal.height,
         child: body,
       ),
     );
+
+    if (node.constraints.maxWidth != null) {
+      body = Stack(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints:
+                  BoxConstraints(maxWidth: node.resolvedConstraints.maxWidth!),
+              child: body,
+            ),
+          ),
+        ],
+      );
+    }
 
     if (node.isScrollable) {
       body = SingleChildScrollView(
