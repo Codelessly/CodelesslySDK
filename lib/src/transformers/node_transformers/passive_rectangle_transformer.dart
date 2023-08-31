@@ -470,6 +470,7 @@ List<Widget> buildFills(
               paint: paint,
               node: node,
               bytes: bytes,
+              useInk: true,
             );
           }
 

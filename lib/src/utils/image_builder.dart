@@ -24,6 +24,7 @@ class UltimateImageBuilder extends StatefulWidget {
   final PaintModel? paint;
   final BaseNode? node;
   final BlendMode? blendMode;
+  final bool useInk;
 
   const UltimateImageBuilder({
     super.key,
@@ -41,6 +42,7 @@ class UltimateImageBuilder extends StatefulWidget {
     this.paint,
     this.node,
     this.blendMode,
+    this.useInk = false,
   })  : assert(url != null || bytes != null || paint != null,
             'url or bytes or paint must be provided'),
         assert(
@@ -198,24 +200,26 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
       errorWidget: (context, _, __) =>
           (widget.errorBuilder ?? _defaultErrorBuilder)(context),
       imageBuilder: (context, imageProvider) {
-        Widget child = Material(
-          type: MaterialType.transparency,
-          child: Ink(
-            width: width,
-            height: height,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: imageProvider,
-                fit: fit,
-                repeat: repeat,
-                alignment: alignment,
-                scale: scale,
-                colorFilter: colorFilter,
-                filterQuality: FilterQuality.medium,
-              ),
-            ),
+        final decoration = BoxDecoration(
+          borderRadius: widget.node is CornerMixin
+              ? (widget.node as CornerMixin).cornerRadius.borderRadius
+              : null,
+          image: DecorationImage(
+            image: imageProvider,
+            fit: fit,
+            repeat: repeat,
+            alignment: alignment,
+            opacity: widget.paint?.opacity ?? 1,
+            scale: scale,
+            colorFilter: colorFilter,
+            filterQuality: FilterQuality.medium,
           ),
         );
+        Widget child = switch (widget.useInk) {
+          true => Ink(decoration: decoration),
+          false => DecoratedBox(decoration: decoration),
+        };
+
         if (widget.paint?.hasFlippedAxis ?? false) {
           return Transform.scale(
             scaleX: widget.paint!.scaleX.sign,
