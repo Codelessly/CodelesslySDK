@@ -198,16 +198,21 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
       errorWidget: (context, _, __) =>
           (widget.errorBuilder ?? _defaultErrorBuilder)(context),
       imageBuilder: (context, imageProvider) {
-        Widget child = DecoratedBox(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: imageProvider,
-              fit: fit,
-              repeat: repeat,
-              alignment: alignment,
-              scale: scale,
-              colorFilter: colorFilter,
-              filterQuality: FilterQuality.medium,
+        Widget child = Material(
+          type: MaterialType.transparency,
+          child: Ink(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: imageProvider,
+                fit: fit,
+                repeat: repeat,
+                alignment: alignment,
+                scale: scale,
+                colorFilter: colorFilter,
+                filterQuality: FilterQuality.medium,
+              ),
             ),
           ),
         );

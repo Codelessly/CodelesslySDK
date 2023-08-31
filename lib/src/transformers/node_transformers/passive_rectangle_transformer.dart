@@ -94,15 +94,18 @@ class PassiveRectangleWidget extends StatelessWidget {
         boxShadow: retrieveBoxShadow(context, node, codelesslyContext),
         borderRadius: getBorderRadius(node),
       ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment:
-            stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-        children: [
-          ...buildFills(context, node, codelesslyContext),
-          ...buildStrokes(context, node, codelesslyContext),
-          ...wrapWithPadding(node, children, stackAlignment: stackAlignment),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment:
+              stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
+          children: [
+            ...buildFills(context, node, codelesslyContext),
+            ...buildStrokes(context, node, codelesslyContext),
+            ...wrapWithPadding(node, children, stackAlignment: stackAlignment),
+          ],
+        ),
       ),
     );
 
@@ -414,7 +417,7 @@ List<Widget> buildFills(
               PropertyValueDelegate.getPropertyValue<PaintModel>(
                   context, node, 'fill-${paint.id}');
           return Positioned.fill(
-            child: DecoratedBox(
+            child: Ink(
               decoration: BoxDecoration(
                 borderRadius: borderRadius,
                 color: (propertyValue ?? paint).toFlutterColor()!,
@@ -426,7 +429,7 @@ List<Widget> buildFills(
         case PaintType.gradientAngular:
         case PaintType.gradientDiamond:
           return Positioned.fill(
-            child: DecoratedBox(
+            child: Ink(
               decoration: BoxDecoration(
                 borderRadius: borderRadius,
                 gradient: retrieveGradient(paint),
@@ -489,17 +492,26 @@ List<Widget> buildFills(
             );
           }
 
-          if (node.childrenOrEmpty.isEmpty) {
-            // If we don't do this then shrink-wrapping images will not work.
-            // They will expand to the size of the parent.
-            return child;
-          } else {
-            // This was Positioned.fill before. If this is breaking something,
-            // then we need to figure out a way to make it work with
-            // Positioned.fill and Positioned because Positioned.fill breaks
-            // shrink-wrapping.
+          if (node.isHorizontalWrap || node.isVerticalWrap) {
+            // if the node is shrink-wrapping on one or both axes, then we
+            // need to wrap the image in a Positioned widget so that it
+            // doesn't expand to the size of the parent.
             return Positioned(child: child);
           }
+
+          return Positioned.fill(child: child);
+
+        // if (node.childrenOrEmpty.isEmpty) {
+        //   // If we don't do this then shrink-wrapping images will not work.
+        //   // They will expand to the size of the parent.
+        //   return child;
+        // } else {
+        //   // This was Positioned.fill before. If this is breaking something,
+        //   // then we need to figure out a way to make it work with
+        //   // Positioned.fill and Positioned because Positioned.fill breaks
+        //   // shrink-wrapping.
+        //   return Positioned(child: child);
+        // }
 
         case PaintType.emoji:
           return const SizedBox.shrink();
