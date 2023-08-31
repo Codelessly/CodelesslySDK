@@ -150,7 +150,12 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
         ),
       );
     } else {
-      if ((node as ReactionMixin).reactions.isEmpty) return widget;
+      if ((node as ReactionMixin).reactions.isEmpty) {
+        return Material(
+          type: MaterialType.transparency,
+          child: widget,
+        );
+      }
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
@@ -166,7 +171,10 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
               FunctionsRepository.performAction(context, action);
             }
           },
-          child: widget,
+          child: Material(
+            type: MaterialType.transparency,
+            child: widget,
+          ),
         ),
       );
     }
