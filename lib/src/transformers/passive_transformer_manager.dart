@@ -91,7 +91,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         }
         if (settings.withReactions &&
             node is! CanvasNode &&
-            node is! CustomPropertiesMixin &&
+            (node is! CustomPropertiesMixin || node is IconNode) &&
             node is! SpacerNode) {
           widget = wrapWithReaction(context, node, widget);
         }
