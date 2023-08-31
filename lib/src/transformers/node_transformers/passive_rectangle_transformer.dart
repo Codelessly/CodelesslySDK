@@ -94,18 +94,15 @@ class PassiveRectangleWidget extends StatelessWidget {
         boxShadow: retrieveBoxShadow(context, node, codelesslyContext),
         borderRadius: getBorderRadius(node),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment:
-              stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-          children: [
-            ...buildFills(context, node, codelesslyContext),
-            ...buildStrokes(context, node, codelesslyContext),
-            ...wrapWithPadding(node, children, stackAlignment: stackAlignment),
-          ],
-        ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment:
+            stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
+        children: [
+          ...buildFills(context, node, codelesslyContext),
+          ...buildStrokes(context, node, codelesslyContext),
+          ...wrapWithPadding(node, children, stackAlignment: stackAlignment),
+        ],
       ),
     );
 
