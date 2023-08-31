@@ -99,7 +99,9 @@ class PassiveRectangleWidget extends StatelessWidget {
         alignment:
             stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
         children: [
-          ...buildFills(context, node, codelesslyContext),
+          ...buildFills(context, node, codelesslyContext,
+              useInk:
+                  node is BlendMixin && (node as BlendMixin).inkWell != null),
           ...buildStrokes(context, node, codelesslyContext),
           ...wrapWithPadding(node, children, stackAlignment: stackAlignment),
         ],
@@ -392,6 +394,7 @@ typedef ImageFillBuilder = Widget Function(
   double height,
   PaintModel paint,
   TypedBytes? bytes,
+  bool useInk,
 );
 
 List<Widget> buildFills(
@@ -402,6 +405,7 @@ List<Widget> buildFills(
   double? imageOpacity,
   double? imageRotation,
   ImageFillBuilder? imageFillBuilder,
+  bool useInk = true,
 }) {
   if (node is! GeometryMixin) return [];
 
@@ -413,25 +417,27 @@ List<Widget> buildFills(
           final propertyValue =
               PropertyValueDelegate.getPropertyValue<PaintModel>(
                   context, node, 'fill-${paint.id}');
+          final decoration = BoxDecoration(
+            borderRadius: borderRadius,
+            color: (propertyValue ?? paint).toFlutterColor()!,
+          );
           return Positioned.fill(
-            child: Ink(
-              decoration: BoxDecoration(
-                borderRadius: borderRadius,
-                color: (propertyValue ?? paint).toFlutterColor()!,
-              ),
-            ),
+            child: useInk
+                ? Ink(decoration: decoration)
+                : DecoratedBox(decoration: decoration),
           );
         case PaintType.gradientLinear:
         case PaintType.gradientRadial:
         case PaintType.gradientAngular:
         case PaintType.gradientDiamond:
+          final decoration = BoxDecoration(
+            borderRadius: borderRadius,
+            gradient: retrieveGradient(paint),
+          );
           return Positioned.fill(
-            child: Ink(
-              decoration: BoxDecoration(
-                borderRadius: borderRadius,
-                gradient: retrieveGradient(paint),
-              ),
-            ),
+            child: useInk
+                ? Ink(decoration: decoration)
+                : DecoratedBox(decoration: decoration),
           );
         case PaintType.image:
           final TypedBytes? bytes = imageBytes[index];
@@ -458,6 +464,7 @@ List<Widget> buildFills(
               node.basicBoxLocal.height,
               paint,
               bytes,
+              useInk,
             );
           } else {
             child = UltimateImageBuilder(
@@ -467,7 +474,7 @@ List<Widget> buildFills(
               paint: paint,
               node: node,
               bytes: bytes,
-              useInk: true,
+              useInk: useInk,
             );
           }
 
