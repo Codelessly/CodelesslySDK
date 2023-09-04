@@ -514,8 +514,11 @@ class FunctionsRepository {
         case ListOperation.insert:
           currentValue.insertAll(index, newValue.toList() ?? []);
           break;
-        case ListOperation.remove:
+        case ListOperation.removeAt:
           currentValue.removeAt(index);
+          break;
+        case ListOperation.remove:
+          currentValue.remove(newValue);
           break;
         case ListOperation.update:
           currentValue[index] = newValue;
