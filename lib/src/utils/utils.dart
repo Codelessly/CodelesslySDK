@@ -305,3 +305,20 @@ bool canScrollOnAxis({
     AxisC.vertical => availableAxes.vertical
   };
 }
+
+/// Returns the most common value in a list. Returns null for ties.
+T? mostCommon<T>(List<T> list) {
+  final Map<T, int> counts = {};
+  for (final T element in list) {
+    counts[element] = (counts[element] ?? 0) + 1;
+  }
+
+  final sortedEntries = counts.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
+
+  if (sortedEntries.length > 1 && sortedEntries[0].value == sortedEntries[1].value) {
+    return null;
+  }
+
+  return sortedEntries.first.key;
+}

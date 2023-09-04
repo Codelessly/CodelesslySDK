@@ -173,14 +173,6 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     return mostCommonAlignment ?? AlignmentModel.none;
   }
 
-  static T mostCommon<T>(List<T> list) {
-    final Map<T, int> counts = {};
-    for (final T element in list) {
-      counts[element] = (counts[element] ?? 0) + 1;
-    }
-    return counts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
-  }
-
   @override
   Widget buildWidget(
     BaseNode node,
