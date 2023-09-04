@@ -48,6 +48,7 @@ TextFieldProperties get defaultTextFieldProperties => TextFieldProperties(
       obscuringCharacter: TextFieldDefaults.obscuringCharacter,
       inputStyle: TextFieldDefaults.style,
       decoration: TextFieldDefaults.decoration,
+      expands: true,
     );
 
 ButtonProperties get defaultButtonProperties => ButtonProperties(
