@@ -166,6 +166,52 @@ class ConditionEvaluator<R extends Object>
   }
 
   @override
+  bool visitIsEmptyOperator(Object? left) {
+    if (left is List) return left.isEmpty;
+    if (left is String) return left.isEmpty;
+    if (left is Map) return left.isEmpty;
+
+    return false;
+  }
+
+  @override
+  bool visitIsNotEmptyOperator(Object? left) {
+    if (left is List) return left.isNotEmpty;
+    if (left is String) return left.isNotEmpty;
+    if (left is Map) return left.isNotEmpty;
+
+    return false;
+  }
+
+  @override
+  bool visitContainsOperator(Object? left, Object? right) {
+    if (left is List) return left.contains(right);
+    if (left is String && right != null) return left.contains(right.toString());
+    if (left is Map) return left.containsKey(right);
+
+    return false;
+  }
+
+  @override
+  bool visitIsOddOperator(Object? value) {
+    if (value is int) return value.isOdd;
+    return false;
+  }
+
+  @override
+  bool visitIsEvenOperator(Object? value) {
+    if (value is int) return value.isEven;
+    return false;
+  }
+
+  @override
+  bool visitIsNullOperator(Object? value) {
+    if (value == null) return true;
+    if (value == 'null') return true;
+    return false;
+  }
+
+  @override
   R? visitSetValueAction(SetValueAction action) {
     final ValueModel value = action.values.first;
     if (value is StringValue) {
@@ -246,7 +292,8 @@ class ConditionPrinter
   void visitExpression(Expression expression) {
     _buffer.write('( ');
     expression.leftPart.accept(this);
-    _buffer.write(' ${expression.operator.sign} ');
+    _buffer
+        .write(' ${expression.operator.sign ?? expression.operator.sentence} ');
     expression.rightPart.accept(this);
     _buffer.write(' )');
   }
