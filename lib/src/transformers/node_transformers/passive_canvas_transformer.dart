@@ -21,14 +21,22 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   }) {
     final CanvasProperties props = node.properties;
 
+    BaseNode? appBarPlaceholderNode;
+    if (props.topAppBarPlaceholderId != null) {
+      appBarPlaceholderNode = getNode(props.topAppBarPlaceholderId!);
+    }
     PreferredSizeWidget? appBar = topAppBarPlaceholder ??
         ((props.topAppBarPlaceholderId != null)
-            ? manager.buildWidgetByID(
-                props.topAppBarPlaceholderId!,
-                context,
-                settings: settings,
-              ) as PreferredSizeWidget
+            ? PreferredSize(
+                preferredSize: Size.fromHeight(
+                    appBarPlaceholderNode!.outerBoxLocal.height),
+                child: manager.buildWidgetByID(
+                  props.topAppBarPlaceholderId!,
+                  context,
+                  settings: settings,
+                ))
             : null);
+
     Widget? floatingActionButton = (props.floatingActionButton != null)
         ? PassiveFloatingActionButtonWidget.buildFAB(
             node.id,
@@ -119,14 +127,22 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       settings: settings,
     );
 
+    BaseNode? appBarPlaceholderNode;
+    if (props.topAppBarPlaceholderId != null) {
+      appBarPlaceholderNode = getNode(props.topAppBarPlaceholderId!);
+    }
     PreferredSizeWidget? appBar = topAppBarPlaceholder ??
         ((props.topAppBarPlaceholderId != null)
-            ? manager.buildWidgetByID(
-                props.topAppBarPlaceholderId!,
-                context,
-                settings: settings,
-              ) as PreferredSizeWidget
+            ? PreferredSize(
+                preferredSize: Size.fromHeight(
+                    appBarPlaceholderNode!.outerBoxLocal.height),
+                child: manager.buildWidgetByID(
+                  props.topAppBarPlaceholderId!,
+                  context,
+                  settings: settings,
+                ))
             : null);
+
     Widget? floatingActionButton = (props.floatingActionButton != null)
         ? PassiveFloatingActionButtonWidget.buildFAB(
             node.id,
