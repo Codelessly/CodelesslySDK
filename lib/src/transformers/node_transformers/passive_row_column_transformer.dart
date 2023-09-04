@@ -12,6 +12,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     BaseNode rowColumnNode, {
     required List<Widget> childrenWidgets,
     required List<BaseNode> childrenNodes,
+    required bool withScroll,
   }) {
     assert(rowColumnNode is RowColumnMixin);
 
@@ -57,8 +58,11 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         }
       }
 
-      if (rowColumnNode is ScrollableMixin) {
+      if (withScroll &&
+          rowColumnNode is ScrollableMixin &&
+          (rowColumnNode as ScrollableMixin).isScrollable) {
         res = wrapWithScrollable(
+          padding: rowColumnNode.resolvedPadding().flutterEdgeInsets,
           node: (rowColumnNode as ScrollableMixin),
           child: res,
         );
@@ -91,8 +95,11 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         }
       }
 
-      if (rowColumnNode is ScrollableMixin) {
+      if (withScroll &&
+          rowColumnNode is ScrollableMixin &&
+          (rowColumnNode as ScrollableMixin).isScrollable) {
         res = wrapWithScrollable(
+          padding: rowColumnNode.resolvedPadding().flutterEdgeInsets,
           node: (rowColumnNode as ScrollableMixin),
           child: res,
         );
@@ -289,11 +296,14 @@ class PassiveRowColumnWidget extends StatelessWidget {
     final Widget child = (node is DefaultShapeNode)
         ? manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
             node as DefaultShapeNode,
+            applyPadding: node is! ScrollableMixin ||
+                !(node as ScrollableMixin).isScrollable,
             children: [
               PassiveRowColumnTransformer.buildRowColumnWidget(
                 node,
                 childrenWidgets: widgetChildren,
                 childrenNodes: children,
+                withScroll: true,
               )
             ],
           )
@@ -301,6 +311,7 @@ class PassiveRowColumnWidget extends StatelessWidget {
             node,
             childrenWidgets: widgetChildren,
             childrenNodes: children,
+            withScroll: true,
           );
 
     if (isTestLayout) {

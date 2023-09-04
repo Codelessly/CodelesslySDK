@@ -32,10 +32,12 @@ class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
     BaseNode node, {
     AlignmentModel stackAlignment = AlignmentModel.none,
     List<Widget> children = const [],
+    bool applyPadding = true,
   }) {
     return PassiveRectangleWidget(
       node: node,
       stackAlignment: stackAlignment,
+      applyPadding: applyPadding,
       children: children,
     );
   }
@@ -46,6 +48,7 @@ class PassiveRectangleWidget extends StatelessWidget {
   final List<Widget> children;
   final AlignmentModel stackAlignment;
   final Clip Function(BaseNode node) getClipBehavior;
+  final bool applyPadding;
 
   PassiveRectangleWidget({
     super.key,
@@ -53,6 +56,7 @@ class PassiveRectangleWidget extends StatelessWidget {
     this.children = const [],
     this.stackAlignment = AlignmentModel.none,
     this.getClipBehavior = defaultGetClipBehavior,
+    this.applyPadding = true,
   });
 
   @override
@@ -65,6 +69,7 @@ class PassiveRectangleWidget extends StatelessWidget {
     //     : getNode(node.parentID);
 
     /// TODO Birju / Saad. Why does the commented out parent code below break published layouts only?
+    /// Saad's note: The below code looks like AdaptiveNodeBox
     final double? width = (node.horizontalFit == SizeFit.shrinkWrap)
         ? null
         : (node.horizontalFit ==
@@ -103,7 +108,12 @@ class PassiveRectangleWidget extends StatelessWidget {
               useInk:
                   node is BlendMixin && (node as BlendMixin).inkWell != null),
           ...buildStrokes(context, node, codelesslyContext),
-          ...wrapWithPadding(node, children, stackAlignment: stackAlignment),
+          ...wrapWithPaddingAndScroll(
+            node,
+            children,
+            stackAlignment: stackAlignment,
+            applyPadding: applyPadding,
+          ),
         ],
       ),
     );
@@ -112,10 +122,39 @@ class PassiveRectangleWidget extends StatelessWidget {
   }
 }
 
-List<Widget> wrapWithPadding(
+List<Widget> wrapWithPaddingNoScroll(
   BaseNode node,
   List<Widget> children, {
   required AlignmentModel stackAlignment,
+  bool applyPadding = true,
+}) {
+  if (children.isEmpty || !applyPadding) return children;
+
+  final EdgeInsets resolvedPadding =
+      node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
+
+  if (resolvedPadding == EdgeInsets.zero) {
+    return children;
+  }
+
+  return [
+    Padding(
+      padding: resolvedPadding,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment:
+            stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
+        children: children,
+      ),
+    ),
+  ];
+}
+
+List<Widget> wrapWithPaddingAndScroll(
+  BaseNode node,
+  List<Widget> children, {
+  required AlignmentModel stackAlignment,
+  bool applyPadding = true,
 }) {
   if (children.isEmpty) return children;
 
@@ -126,7 +165,7 @@ List<Widget> wrapWithPadding(
     return [
       wrapWithScrollable(
         node: node,
-        padding: resolvedPadding,
+        padding: applyPadding ? resolvedPadding : null,
         clipBehavior: defaultGetClipBehavior(node),
         child: SizedBox(
           width: node.scrollDirection.isHorizontal
@@ -146,21 +185,12 @@ List<Widget> wrapWithPadding(
     ];
   }
 
-  if (resolvedPadding == EdgeInsets.zero) {
-    return children;
-  }
-
-  return [
-    Padding(
-      padding: resolvedPadding,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment:
-            stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-        children: children,
-      ),
-    ),
-  ];
+  return wrapWithPaddingNoScroll(
+    node,
+    children,
+    stackAlignment: stackAlignment,
+    applyPadding: applyPadding,
+  );
 }
 
 List<BoxShadow> retrieveBoxShadow(
