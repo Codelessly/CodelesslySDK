@@ -316,9 +316,54 @@ T? mostCommon<T>(List<T> list) {
   final sortedEntries = counts.entries.toList()
     ..sort((a, b) => b.value.compareTo(a.value));
 
-  if (sortedEntries.length > 1 && sortedEntries[0].value == sortedEntries[1].value) {
+  if (sortedEntries.length > 1 &&
+      sortedEntries[0].value == sortedEntries[1].value) {
     return null;
   }
 
   return sortedEntries.first.key;
+}
+
+/// Retrieves the widest child from given [siblings].
+BaseNode? getWidestNode(List<BaseNode> siblings) {
+  if (siblings.isEmpty) return null;
+
+  return siblings.reduce((a, b) {
+    // If one of the siblings has alignment, while the other does not,
+    // return the one with alignment.
+    if (a.alignment != AlignmentModel.none &&
+        b.alignment == AlignmentModel.none) {
+      return a;
+    }
+    if (b.alignment != AlignmentModel.none &&
+        a.alignment == AlignmentModel.none) {
+      return b;
+    }
+
+    // If both siblings have alignment or both do not have alignment, compare
+    // their widths.
+    return a.basicBoxLocal.width > b.basicBoxLocal.width ? a : b;
+  });
+}
+
+/// Retrieves the tallest child from given [siblings].
+BaseNode? getTallestNode(List<BaseNode> siblings) {
+  if (siblings.isEmpty) return null;
+
+  return siblings.reduce((a, b) {
+    // If one of the siblings has alignment, while the other does not,
+    // return the one with alignment.
+    if (a.alignment != AlignmentModel.none &&
+        b.alignment == AlignmentModel.none) {
+      return a;
+    }
+    if (b.alignment != AlignmentModel.none &&
+        a.alignment == AlignmentModel.none) {
+      return b;
+    }
+
+    // If both siblings have alignment or both do not have alignment, compare
+    // their heights.
+    return a.basicBoxLocal.height > b.basicBoxLocal.height ? a : b;
+  });
 }

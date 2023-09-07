@@ -6,50 +6,6 @@ import '../../../codelessly_sdk.dart';
 class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
   PassiveStackTransformer(super.getNode, super.manager);
 
-  /// Retrieves the widest child from given [siblings].
-  static BaseNode? getWidestNode(List<BaseNode> siblings) {
-    if (siblings.isEmpty) return null;
-
-    return siblings.reduce((a, b) {
-      // If one of the siblings has alignment, while the other does not,
-      // return the one with alignment.
-      if (a.alignment != AlignmentModel.none &&
-          b.alignment == AlignmentModel.none) {
-        return a;
-      }
-      if (b.alignment != AlignmentModel.none &&
-          a.alignment == AlignmentModel.none) {
-        return b;
-      }
-
-      // If both siblings have alignment or both do not have alignment, compare
-      // their widths.
-      return a.basicBoxLocal.width > b.basicBoxLocal.width ? a : b;
-    });
-  }
-
-  /// Retrieves the tallest child from given [siblings].
-  static BaseNode? getTallestNode(List<BaseNode> siblings) {
-    if (siblings.isEmpty) return null;
-
-    return siblings.reduce((a, b) {
-      // If one of the siblings has alignment, while the other does not,
-      // return the one with alignment.
-      if (a.alignment != AlignmentModel.none &&
-          b.alignment == AlignmentModel.none) {
-        return a;
-      }
-      if (b.alignment != AlignmentModel.none &&
-          a.alignment == AlignmentModel.none) {
-        return b;
-      }
-
-      // If both siblings have alignment or both do not have alignment, compare
-      // their heights.
-      return a.basicBoxLocal.height > b.basicBoxLocal.height ? a : b;
-    });
-  }
-
   static Widget buildStackChild(
     BaseNode node,
     BaseNode parent,
