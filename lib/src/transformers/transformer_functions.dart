@@ -3,27 +3,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:universal_html/html.dart';
+import 'package:universal_html/html.dart' as html;
 
 import '../utils/extensions.dart';
 import 'transformers.dart';
-
-/// Convenience method that looks up the [BaseNode] of a given [id].
-///
-/// This function uses [nodeDelegate] to look up the node. The node must
-/// be registered before-hand.
-// BaseNode getNodeByID(String id) => nodeDelegate.getNodeByID(id);
-
-/// Convenience method that looks up the [BaseNode] of a given [id].
-///
-/// This function uses [nodeDelegate] to look up the node.
-// bool hasNodeID(String id) => nodeDelegate.hasNodeID(id);
-
-/// Convenience method that gets a transformer from our registry of
-/// passive transformers for the sdk.
-// T getPassiveTransformer<T>() {
-//   return passiveTransformerManager.getTransformer<T>();
-// }
 
 void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
   switch (type) {
@@ -412,7 +395,7 @@ String getVideoUrl(EmbeddedVideoSource source, String baseUrl) {
   String updatedBaseUrl = baseUrl;
   if (kIsWeb && !kReleaseMode) {
     // This allows to test and debug video player scripts in local environment.
-    var url = Uri.parse(window.location.href);
+    var url = Uri.parse(html.window.location.href);
     updatedBaseUrl = url.origin;
   }
 
@@ -594,3 +577,8 @@ Widget wrapWithScrollable({
     child: child,
   );
 }
+
+bool get isPlatformSupportedForWebView =>
+    kIsWeb ||
+    PassiveEmbeddedVideoWidget.supportedPlatforms
+        .contains(defaultTargetPlatform);

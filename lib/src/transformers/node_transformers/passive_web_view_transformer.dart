@@ -86,8 +86,12 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
   @override
   void initState() {
     super.initState();
-    final props = widget.node.properties;
+    if (!isPlatformSupportedForWebView) {
+      print('Unsupported platform: $defaultTargetPlatform for WebView.');
+      return;
+    }
 
+    final props = widget.node.properties;
     if (kIsWeb) {
       // WebView on web only supports loadRequest. Any other method invocation
       // on the controller will result in an exception. Be aware!!
@@ -187,9 +191,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
 
   Widget buildWebpageWebView(
       BuildContext context, WebPageWebViewProperties properties) {
-    if (!PassiveWebViewWidget.supportedPlatforms
-            .contains(Theme.of(context).platform) &&
-        !kIsWeb) {
+    if (!isPlatformSupportedForWebView) {
       return WebViewPreviewWidget(
         icon: Icon(Icons.language_rounded),
         node: widget.node,
@@ -213,9 +215,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
 
   Widget buildGoogleMapsWebView(
       BuildContext context, GoogleMapsWebViewProperties properties) {
-    if (!PassiveWebViewWidget.supportedPlatforms
-            .contains(Theme.of(context).platform) &&
-        !kIsWeb) {
+    if (!isPlatformSupportedForWebView) {
       return WebViewPreviewWidget(
         icon: Icon(Icons.map_outlined),
         node: widget.node,
@@ -230,9 +230,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
 
   Widget buildTwitterWebView(
       BuildContext context, TwitterWebViewProperties properties) {
-    if (!PassiveWebViewWidget.supportedPlatforms
-            .contains(Theme.of(context).platform) &&
-        !kIsWeb) {
+    if (!isPlatformSupportedForWebView) {
       return WebViewPreviewWidget(
         icon: ImageIcon(
             NetworkImage('https://img.icons8.com/color/344/twitter--v2.png')),
