@@ -529,6 +529,43 @@ class FunctionsRepository {
       newValue = jsonEncode(currentValue);
     }
 
+    if (action.variable.type.isMap &&
+        action.mapOperation != MapOperation.replace) {
+      // Get current value of the map variable.
+      final Map? currentValue =
+          variableNotifier.value.getValue().typedValue<Map>();
+      // If map variable does not exist, return false.
+      if (currentValue == null) return false;
+      // Retrieve all variables.
+      final Iterable<VariableData> variables =
+          codelesslyContext.variables.values.map((e) => e.value);
+      // Find the value of variable referenced by key.
+      final keyVariableValue = PropertyValueDelegate.retrieveVariableValue(
+        action.key,
+        variables,
+        codelesslyContext.data,
+        IndexedItemProvider.of(context),
+      );
+      // If key is a variable, use its value. Else, use the key as it is.
+      final String key =
+          keyVariableValue is String ? keyVariableValue : action.key;
+      // Perform map operations.
+      switch (action.mapOperation) {
+        case MapOperation.add:
+          currentValue.addAll(newValue.toMap() ?? {});
+          break;
+        case MapOperation.remove:
+          currentValue.remove(key);
+          break;
+        case MapOperation.update:
+          currentValue[key] = newValue;
+          break;
+        default:
+          break;
+      }
+      newValue = jsonEncode(currentValue);
+    }
+
     final VariableData updatedVariable =
         variableNotifier.value.copyWith(value: newValue);
 
