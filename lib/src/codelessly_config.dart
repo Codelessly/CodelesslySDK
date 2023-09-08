@@ -54,6 +54,9 @@ class CodelesslyConfig with EquatableMixin {
   /// Base URL of the Firebase Cloud Functions instance to use.
   final String firebaseCloudFunctionsBaseURL;
 
+  /// Base URL of the environment to use. Helpful for hosted video players.
+  final String baseURL;
+
   /// Creates a new instance of [CodelesslyConfig].
   ///
   /// [authToken] is the token required to authenticate and initialize the SDK.
@@ -71,6 +74,7 @@ class CodelesslyConfig with EquatableMixin {
     this.preload = true,
     this.firebaseProjectId = defaultFirebaseProjectId,
     this.firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
+    this.baseURL = defaultBaseURL,
   });
 
   /// Creates a new instance of [CodelesslyConfig] with the provided optional
@@ -83,17 +87,19 @@ class CodelesslyConfig with EquatableMixin {
     bool? preload,
     String? firebaseProjectId,
     String? firebaseCloudFunctionsBaseURL,
+    String? baseURL,
   }) =>
       CodelesslyConfig(
         authToken: authToken ?? this.authToken,
         slug: slug ?? this.slug,
-        automaticallySendCrashReports: automaticallySendCrashReports ??
-            this.automaticallySendCrashReports,
+        automaticallySendCrashReports:
+            automaticallySendCrashReports ?? this.automaticallySendCrashReports,
         isPreview: isPreview ?? this.isPreview,
         preload: preload ?? this.preload,
         firebaseProjectId: firebaseProjectId ?? this.firebaseProjectId,
         firebaseCloudFunctionsBaseURL:
             firebaseCloudFunctionsBaseURL ?? this.firebaseCloudFunctionsBaseURL,
+        baseURL: baseURL ?? this.baseURL,
       );
 
   @override
@@ -105,6 +111,7 @@ class CodelesslyConfig with EquatableMixin {
         preload,
         firebaseProjectId,
         firebaseCloudFunctionsBaseURL,
+        baseURL,
       ];
 }
 

@@ -66,6 +66,7 @@ class _ChatScreenState extends State<ChatScreen>
         firebaseProjectId: 'codeless-dev',
         firebaseCloudFunctionsBaseURL:
             'https://us-central1-codeless-dev.cloudfunctions.net',
+        baseURL: 'https://dev.codelessly.com',
         // preload: false,
       ),
     );

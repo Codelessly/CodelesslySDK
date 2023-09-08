@@ -8,9 +8,16 @@ const String defaultFirebaseCloudFunctionsBaseURL = String.fromEnvironment(
   defaultValue: prodFirebaseCloudFunctionsBaseURL,
 );
 
+const String defaultBaseURL = String.fromEnvironment(
+  'base_url',
+  defaultValue: prodBaseUrl,
+);
+
 const String prodFirebaseProjectId = 'codeless-app';
 const String prodFirebaseCloudFunctionsBaseURL =
     'https://us-central1-codeless-app.cloudfunctions.net';
+
+const String prodBaseUrl = 'https://app.codelessly.com';
 
 const defaultErrorMessage =
     'We encountered some error while rendering this page! '

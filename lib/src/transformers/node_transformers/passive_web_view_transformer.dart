@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_web/webview_flutter_web.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../../codelessly_sdk.dart';
@@ -87,39 +88,48 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
     super.initState();
     final props = widget.node.properties;
 
-    final PlatformWebViewControllerCreationParams params;
-    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
-      params = WebKitWebViewControllerCreationParams(
-        allowsInlineMediaPlayback: props.allowsInlineMediaPlayback == true,
-        mediaTypesRequiringUserAction: {
-          if (props.mediaAutoPlaybackPolicy !=
-              WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia) ...{
-            PlaybackMediaTypes.audio,
-            PlaybackMediaTypes.video,
-          },
-        },
-      );
-    } else if (WebViewPlatform.instance is AndroidWebViewPlatform) {
-      params = AndroidWebViewControllerCreationParams();
+    if (kIsWeb) {
+      // WebView on web only supports loadRequest. Any other method invocation
+      // on the controller will result in an exception. Be aware!!
+      WebViewPlatform.instance = WebWebViewPlatform();
+      _controller = WebViewController();
     } else {
-      params = const PlatformWebViewControllerCreationParams();
+      final PlatformWebViewControllerCreationParams params;
+      if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+        params = WebKitWebViewControllerCreationParams(
+          allowsInlineMediaPlayback: props.allowsInlineMediaPlayback == true,
+          mediaTypesRequiringUserAction: {
+            if (props.mediaAutoPlaybackPolicy !=
+                WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia) ...{
+              PlaybackMediaTypes.audio,
+              PlaybackMediaTypes.video,
+            },
+          },
+        );
+      } else if (WebViewPlatform.instance is AndroidWebViewPlatform) {
+        params = AndroidWebViewControllerCreationParams();
+      } else {
+        params = const PlatformWebViewControllerCreationParams();
+      }
+
+      _controller = WebViewController.fromPlatformCreationParams(params);
+      _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
+
+      if (_controller.platform is AndroidWebViewController) {
+        (_controller.platform as AndroidWebViewController)
+            .setMediaPlaybackRequiresUserGesture(
+                props.mediaAutoPlaybackPolicy !=
+                    WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia);
+      }
+
+      // Using this user-agent string to force the video to play in the webview
+      // on Android. This is a hack, but it works.
+      // _controller.setUserAgent(
+      //     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
+
+      _controller.setBackgroundColor(
+          props.backgroundColor?.toFlutterColor() ?? Colors.transparent);
     }
-
-    _controller = WebViewController.fromPlatformCreationParams(params);
-    _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
-    if (_controller.platform is AndroidWebViewController) {
-      (_controller.platform as AndroidWebViewController)
-          .setMediaPlaybackRequiresUserGesture(props.mediaAutoPlaybackPolicy !=
-              WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia);
-    }
-
-    // Using this user-agent string to force the video to play in the webview
-    // on Android. This is a hack, but it works.
-    // _controller.setUserAgent(
-    //     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
-
-    _controller.setBackgroundColor(
-        props.backgroundColor?.toFlutterColor() ?? Colors.transparent);
 
     _loadData();
   }
@@ -178,7 +188,8 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
   Widget buildWebpageWebView(
       BuildContext context, WebPageWebViewProperties properties) {
     if (!PassiveWebViewWidget.supportedPlatforms
-        .contains(Theme.of(context).platform)) {
+            .contains(Theme.of(context).platform) &&
+        !kIsWeb) {
       return WebViewPreviewWidget(
         icon: Icon(Icons.language_rounded),
         node: widget.node,
@@ -203,7 +214,8 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
   Widget buildGoogleMapsWebView(
       BuildContext context, GoogleMapsWebViewProperties properties) {
     if (!PassiveWebViewWidget.supportedPlatforms
-        .contains(Theme.of(context).platform)) {
+            .contains(Theme.of(context).platform) &&
+        !kIsWeb) {
       return WebViewPreviewWidget(
         icon: Icon(Icons.map_outlined),
         node: widget.node,
@@ -219,7 +231,8 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
   Widget buildTwitterWebView(
       BuildContext context, TwitterWebViewProperties properties) {
     if (!PassiveWebViewWidget.supportedPlatforms
-        .contains(Theme.of(context).platform)) {
+            .contains(Theme.of(context).platform) &&
+        !kIsWeb) {
       return WebViewPreviewWidget(
         icon: ImageIcon(
             NetworkImage('https://img.icons8.com/color/344/twitter--v2.png')),
