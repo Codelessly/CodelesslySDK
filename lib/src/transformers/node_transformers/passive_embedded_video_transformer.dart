@@ -86,6 +86,11 @@ class _PassiveEmbeddedVideoWidgetState
   @override
   void initState() {
     super.initState();
+    if (!isPlatformSupportedForWebView) {
+      print('Unsupported platform: $defaultTargetPlatform for embedded '
+          'video.');
+      return;
+    }
     final PlatformWebViewControllerCreationParams params;
     if (kIsWeb) {
       // WebView on web only supports loadRequest. Any other method invocation
@@ -177,9 +182,7 @@ class _PassiveEmbeddedVideoWidgetState
 
   Widget buildEmbeddedYoutubeVideo(
       BuildContext context, EmbeddedYoutubeVideoProperties properties) {
-    if (PassiveEmbeddedVideoWidget.supportedPlatforms
-            .contains(Theme.of(context).platform) ||
-        kIsWeb) {
+    if (isPlatformSupportedForWebView) {
       return WebViewWidget(
         controller: _controller,
         key: ValueKey(properties),
@@ -205,9 +208,7 @@ class _PassiveEmbeddedVideoWidgetState
 
   Widget buildEmbeddedVimeoVideo(
       BuildContext context, EmbeddedVimeoVideoProperties properties) {
-    if (PassiveEmbeddedVideoWidget.supportedPlatforms
-            .contains(Theme.of(context).platform) ||
-        kIsWeb) {
+    if (isPlatformSupportedForWebView) {
       return WebViewWidget(
         key: ValueKey(properties),
         controller: _controller,
