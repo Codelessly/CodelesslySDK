@@ -20,7 +20,7 @@ class CodelesslyConfig with EquatableMixin {
 
   /// Allows the SDK to automatically send crash reports back to Codelessly's
   /// servers for developer analysis.
-  final bool automaticallyCollectCrashReports;
+  final bool automaticallySendCrashReports;
 
   /// Whether [CodelesslyWidget]s should show the preview versions of their
   /// layouts.
@@ -58,7 +58,7 @@ class CodelesslyConfig with EquatableMixin {
   ///
   /// [authToken] is the token required to authenticate and initialize the SDK.
   ///
-  /// [automaticallyCollectCrashReports] allows the SDK to automatically send
+  /// [automaticallySendCrashReports] allows the SDK to automatically send
   /// crash reports back to Codelessly's servers for developer analysis.
   ///
   /// No device data is sent with the crash report. Only the stack trace and
@@ -66,7 +66,7 @@ class CodelesslyConfig with EquatableMixin {
   CodelesslyConfig({
     required this.authToken,
     this.slug,
-    this.automaticallyCollectCrashReports = true,
+    this.automaticallySendCrashReports = true,
     this.isPreview = false,
     this.preload = true,
     this.firebaseProjectId = defaultFirebaseProjectId,
@@ -78,7 +78,7 @@ class CodelesslyConfig with EquatableMixin {
   CodelesslyConfig copyWith({
     String? authToken,
     String? slug,
-    bool? automaticallyCollectCrashReports,
+    bool? automaticallySendCrashReports,
     bool? isPreview,
     bool? preload,
     String? firebaseProjectId,
@@ -87,8 +87,8 @@ class CodelesslyConfig with EquatableMixin {
       CodelesslyConfig(
         authToken: authToken ?? this.authToken,
         slug: slug ?? this.slug,
-        automaticallyCollectCrashReports: automaticallyCollectCrashReports ??
-            this.automaticallyCollectCrashReports,
+        automaticallySendCrashReports: automaticallySendCrashReports ??
+            this.automaticallySendCrashReports,
         isPreview: isPreview ?? this.isPreview,
         preload: preload ?? this.preload,
         firebaseProjectId: firebaseProjectId ?? this.firebaseProjectId,
@@ -100,9 +100,11 @@ class CodelesslyConfig with EquatableMixin {
   List<Object?> get props => [
         authToken,
         slug,
-        automaticallyCollectCrashReports,
+        automaticallySendCrashReports,
         isPreview,
         preload,
+        firebaseProjectId,
+        firebaseCloudFunctionsBaseURL,
       ];
 }
 

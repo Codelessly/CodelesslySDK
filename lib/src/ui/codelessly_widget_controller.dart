@@ -189,7 +189,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       effectiveCodelessly.initErrorHandler(
         firebaseProjectId: effectiveCodelessly.config?.firebaseProjectId,
         automaticallySendCrashReports:
-            effectiveCodelessly.config?.automaticallyCollectCrashReports ??
+            effectiveCodelessly.config?.automaticallySendCrashReports ??
                 false,
       );
       CodelesslyErrorHandler.instance

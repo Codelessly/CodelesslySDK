@@ -61,7 +61,7 @@ class _ChatScreenState extends State<ChatScreen>
     Codelessly.instance.configure(
       config: CodelesslyConfig(
         authToken: authToken,
-        automaticallyCollectCrashReports: false,
+        automaticallySendCrashReports: false,
         isPreview: false,
         firebaseProjectId: 'codeless-dev',
         firebaseCloudFunctionsBaseURL:
