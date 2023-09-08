@@ -5,10 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
-import 'package:webview_flutter_web/webview_flutter_web.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../web/web_webview_platform.dart';
 
 class PassiveEmbeddedVideoTransformer
     extends NodeWidgetTransformer<EmbeddedVideoNode> {
