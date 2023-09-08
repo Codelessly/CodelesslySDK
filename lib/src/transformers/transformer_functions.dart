@@ -350,7 +350,7 @@ String buildYoutubeEmbedUrl({
   required EmbeddedYoutubeVideoProperties properties,
   required double? width,
   required double? height,
-  String? baseUrl,
+  required String baseUrl,
 }) {
   final Map<String, String> queryParams = {
     'video_id': properties.videoId ?? '<video_id>',
@@ -368,7 +368,7 @@ String buildYoutubeEmbedUrl({
     'caption_lang': properties.captionLanguage,
   };
 
-  final baseUri = Uri.parse(getBaseUrl(properties.source, baseUrl));
+  final baseUri = Uri.parse(getVideoUrl(properties.source, baseUrl));
   final String url = Uri(
     scheme: baseUri.scheme,
     host: baseUri.host,
@@ -383,7 +383,7 @@ String buildVimeoEmbedUrl({
   required EmbeddedVimeoVideoProperties properties,
   required double? width,
   required double? height,
-  String? baseUrl,
+  required String baseUrl,
 }) {
   final Map<String, String> queryParams = {
     'video_id': properties.videoId ?? '<video_id>',
@@ -395,7 +395,7 @@ String buildVimeoEmbedUrl({
     if (height != null) 'height': '${height.toInt()}',
   };
 
-  final baseUri = Uri.parse(getBaseUrl(properties.source, baseUrl));
+  final baseUri = Uri.parse(getVideoUrl(properties.source, baseUrl));
   final String url = Uri(
     scheme: baseUri.scheme,
     host: baseUri.host,
@@ -408,15 +408,17 @@ String buildVimeoEmbedUrl({
 }
 
 /// [baseUrl] param allows to override the base url of the video.
-String getBaseUrl(EmbeddedVideoSource source, [String? baseUrl]) {
-  String updatedBaseUrl;
-  if (baseUrl != null) {
-    updatedBaseUrl = baseUrl;
-  } else if (kIsWeb) {
+String getVideoUrl(EmbeddedVideoSource source, String baseUrl) {
+  String updatedBaseUrl = baseUrl;
+  if (kIsWeb && !kReleaseMode) {
+    // This allows to test and debug video player scripts in local environment.
     var url = Uri.parse(window.location.href);
     updatedBaseUrl = url.origin;
-  } else {
-    updatedBaseUrl = 'https://dev.codelessly.com';
+  }
+
+  // Remove trailing slash if any.
+  if (updatedBaseUrl.endsWith('/')) {
+    updatedBaseUrl = updatedBaseUrl.substring(0, updatedBaseUrl.length - 1);
   }
 
   switch (source) {

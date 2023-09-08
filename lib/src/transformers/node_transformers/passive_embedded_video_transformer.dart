@@ -1,8 +1,11 @@
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_web/webview_flutter_web.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../../codelessly_sdk.dart';
@@ -84,24 +87,31 @@ class _PassiveEmbeddedVideoWidgetState
   void initState() {
     super.initState();
     final PlatformWebViewControllerCreationParams params;
-    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
-      params = WebKitWebViewControllerCreationParams(
-        allowsInlineMediaPlayback: true,
-        mediaTypesRequiringUserAction: {
-          if (!widget.node.properties.autoPlay) ...{
-            PlaybackMediaTypes.audio,
-            PlaybackMediaTypes.video,
-          },
-        },
-      );
-    } else if (WebViewPlatform.instance is AndroidWebViewPlatform) {
-      params = AndroidWebViewControllerCreationParams();
+    if (kIsWeb) {
+      // WebView on web only supports loadRequest. Any other method invocation
+      // on the controller will result in an exception. Be aware!!
+      WebViewPlatform.instance = WebWebViewPlatform();
+      _controller = WebViewController();
     } else {
-      params = const PlatformWebViewControllerCreationParams();
-    }
+      if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+        params = WebKitWebViewControllerCreationParams(
+          allowsInlineMediaPlayback: true,
+          mediaTypesRequiringUserAction: {
+            if (!widget.node.properties.autoPlay) ...{
+              PlaybackMediaTypes.audio,
+              PlaybackMediaTypes.video,
+            },
+          },
+        );
+      } else if (WebViewPlatform.instance is AndroidWebViewPlatform) {
+        params = AndroidWebViewControllerCreationParams();
+      } else {
+        params = const PlatformWebViewControllerCreationParams();
+      }
 
-    _controller = WebViewController.fromPlatformCreationParams(params);
-    _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
+      _controller = WebViewController.fromPlatformCreationParams(params);
+      _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
+    }
     // _controller.setUserAgent('chrome');
     if (_controller.platform is AndroidWebViewController) {
       print('setting android config');
@@ -121,6 +131,9 @@ class _PassiveEmbeddedVideoWidgetState
         // controller.setUserAgent('chrome');
       }
     }
+
+    final config = context.read<CodelesslyConfig>();
+
     final String embedUrl;
     switch (widget.node.properties.source) {
       case EmbeddedVideoSource.youtube:
@@ -128,6 +141,7 @@ class _PassiveEmbeddedVideoWidgetState
           properties: widget.node.properties as EmbeddedYoutubeVideoProperties,
           width: widget.node.basicBoxLocal.width,
           height: widget.node.basicBoxLocal.height,
+          baseUrl: config.baseURL,
         );
         break;
       case EmbeddedVideoSource.vimeo:
@@ -135,6 +149,7 @@ class _PassiveEmbeddedVideoWidgetState
           properties: widget.node.properties as EmbeddedVimeoVideoProperties,
           width: widget.node.basicBoxLocal.width,
           height: widget.node.basicBoxLocal.height,
+          baseUrl: config.baseURL,
         );
         break;
     }
@@ -163,7 +178,8 @@ class _PassiveEmbeddedVideoWidgetState
   Widget buildEmbeddedYoutubeVideo(
       BuildContext context, EmbeddedYoutubeVideoProperties properties) {
     if (PassiveEmbeddedVideoWidget.supportedPlatforms
-        .contains(Theme.of(context).platform)) {
+            .contains(Theme.of(context).platform) ||
+        kIsWeb) {
       return WebViewWidget(
         controller: _controller,
         key: ValueKey(properties),
@@ -190,7 +206,8 @@ class _PassiveEmbeddedVideoWidgetState
   Widget buildEmbeddedVimeoVideo(
       BuildContext context, EmbeddedVimeoVideoProperties properties) {
     if (PassiveEmbeddedVideoWidget.supportedPlatforms
-        .contains(Theme.of(context).platform)) {
+            .contains(Theme.of(context).platform) ||
+        kIsWeb) {
       return WebViewWidget(
         key: ValueKey(properties),
         controller: _controller,
@@ -217,12 +234,14 @@ class _PassiveEmbeddedVideoWidgetState
 
   @override
   void dispose() {
-    // _controller doesn't have a way to dispose the player, so we call
-    // js methods directly.
-    if (widget.node.properties.source == EmbeddedVideoSource.youtube) {
-      _controller.runJavaScript('player.stopVideo();');
-    } else {
-      _controller.runJavaScript('player.pause();');
+    if (!kIsWeb) {
+      // _controller doesn't have a way to dispose the player, so we call
+      // js methods directly.
+      if (widget.node.properties.source == EmbeddedVideoSource.youtube) {
+        _controller.runJavaScript('player.stopVideo();');
+      } else {
+        _controller.runJavaScript('player.pause();');
+      }
     }
 
     super.dispose();
