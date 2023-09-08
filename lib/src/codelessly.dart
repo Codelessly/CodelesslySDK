@@ -245,7 +245,7 @@ class Codelessly {
 
     initErrorHandler(
       firebaseProjectId: _config!.firebaseProjectId,
-      automaticallySendCrashReports: _config!.automaticallyCollectCrashReports,
+      automaticallySendCrashReports: _config!.automaticallySendCrashReports,
     );
 
     assert(
@@ -365,7 +365,7 @@ class Codelessly {
 
     initErrorHandler(
       firebaseProjectId: _config!.firebaseProjectId,
-      automaticallySendCrashReports: _config!.automaticallyCollectCrashReports,
+      automaticallySendCrashReports: _config!.automaticallySendCrashReports,
     );
     try {
       _updateStatus(CodelesslyStatus.configured);
