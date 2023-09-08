@@ -17,7 +17,7 @@ class PassiveTextTransformer extends NodeWidgetTransformer<TextNode> {
     WidgetBuildSettings settings = const WidgetBuildSettings(),
   ]) {
     final Widget child = PassiveTextWidget(node: node, settings: settings);
-    if (isTestLayout) {
+    if (kIsTestLayout) {
       return DecoratedBox(
         decoration: BoxDecoration(
           border: Border.all(color: Colors.red, width: 2),
