@@ -202,7 +202,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     //   );
     // }
 
-    if (isTestLayout) {
+    if (kIsTestLayout) {
       return DecoratedBox(
         decoration: BoxDecoration(
           border: Border.all(color: Colors.yellow, width: 2),

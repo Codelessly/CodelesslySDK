@@ -314,7 +314,7 @@ class PassiveRowColumnWidget extends StatelessWidget {
             withScroll: true,
           );
 
-    if (isTestLayout) {
+    if (kIsTestLayout) {
       return DecoratedBox(
         decoration: BoxDecoration(
           border: Border.all(color: Colors.green, width: 1),
