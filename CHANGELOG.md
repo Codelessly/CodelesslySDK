@@ -1,3 +1,21 @@
+## 0.4.0
+- New WebView support for Web! Embedded videos and Iframes now work great!
+- Improved WebView embedding for Android and iOS.
+- New `SetMapVariableAction` support for map variables.
+- Support more conditions.
+    - `isEmpty`, `isNotEmpty`, `contains`
+    - `isOdd`, `isEven`, `isNull`
+- Add `remove` for list type variable.
+- Remove deprecations and update formatting and documentation.
+- Update Stack rendering to match Flutter's updated Stack behavior.
+  - If a stack is wrapping, use margin to position children to preserve Stack layout. 
+  - Change magnetization delegate to lock child inside the bounds of a stack that is wrapping.
+  - Disallow wrapping if any child is outside the bounds of the wrapping node.
+- Fix row/column scrollable widget tree implementation to render more accurately, especially with padding.
+- Fix EdgeInsets.LTRB missing values in codegen.
+- Round snapping value in NodeInteractionFreeform to discourage negative precision errors.
+- Rename `automaticallyCollectCrashReports` to `automaticallySendCrashReports`.
+
 ## 0.3.0
 - Scrolling V1. Enable scrolling for Columns, Frames, and Canvases.
 - Create list operations and index for List `SetVariableAction`.
