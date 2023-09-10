@@ -55,32 +55,37 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     required bool isWidest,
     required bool isTallest,
   }) {
-    final double? left = childNode.isHorizontalExpanded
+    final bool horizontallyExpands = childNode.isHorizontalExpanded &&
+        childNode.resolvedConstraints.maxWidth == null;
+    final bool verticallyExpands = childNode.isVerticalExpanded &&
+        childNode.resolvedConstraints.maxHeight == null;
+
+    final double? left = horizontallyExpands
         ? 0
         : childNode.edgePins.left != null
             ? childNode.outerBoxLocal.x - node.innerBoxGlobal.edgeLeft
             : null;
-    final double? right = childNode.isHorizontalExpanded
+    final double? right = horizontallyExpands
         ? 0
         : childNode.edgePins.right != null
             ? childNode.edgePins.right! - node.innerBoxGlobal.edgeRight
             : null;
-    final double? top = childNode.isVerticalExpanded
+    final double? top = verticallyExpands
         ? 0
         : childNode.edgePins.top != null
             ? childNode.outerBoxLocal.y - node.innerBoxGlobal.edgeTop
             : null;
-    final double? bottom = childNode.isVerticalExpanded
+    final double? bottom = verticallyExpands
         ? 0
         : childNode.edgePins.bottom != null
             ? childNode.edgePins.bottom! - node.innerBoxGlobal.edgeBottom
             : null;
-    final double? width = childNode.isHorizontalExpanded ||
+    final double? width = horizontallyExpands ||
             childNode.isHorizontalWrap ||
             childNode.edgePins.isHorizontallyExpanded
         ? null
         : childNode.outerBoxLocal.width;
-    final double? height = childNode.isVerticalExpanded ||
+    final double? height = verticallyExpands ||
             childNode.isVerticalWrap ||
             childNode.edgePins.isVerticallyExpanded
         ? null
