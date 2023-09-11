@@ -13,9 +13,9 @@ class PassiveTextTransformer extends NodeWidgetTransformer<TextNode> {
   @override
   Widget buildWidget(
     TextNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     final Widget child = PassiveTextWidget(node: node, settings: settings);
     if (kIsTestLayout) {
       return DecoratedBox(
@@ -237,7 +237,7 @@ class PassiveTextWidget extends StatefulWidget {
   PassiveTextWidget({
     super.key,
     required this.node,
-    this.settings = const WidgetBuildSettings(),
+    required this.settings,
     this.variablesOverrides = const [],
     this.clickable = true,
   });

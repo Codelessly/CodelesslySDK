@@ -10,9 +10,9 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
   @override
   Widget buildWidget(
     SwitchNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildFromNode(context, node, settings);
   }
 
@@ -22,6 +22,7 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
     required double height,
     required double width,
     bool value = false,
+    required WidgetBuildSettings settings,
   }) {
     final node = SwitchNode(
       id: '',
@@ -31,7 +32,7 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
       properties: props,
       value: value,
     );
-    return buildFromNode(context, node);
+    return buildFromNode(context, node, settings);
   }
 
   Widget buildPreview({
@@ -41,6 +42,8 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
     double? width,
     bool value = false,
     ValueChanged<bool>? onChanged,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final previewNode = SwitchNode(
       properties: properties ?? node?.properties ?? SwitchProperties(),
@@ -53,14 +56,15 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
     return PassiveSwitchWidget(
       node: previewNode,
       onChanged: onChanged,
+      settings: settings,
     );
   }
 
   Widget buildFromNode(
     BuildContext context,
-    SwitchNode node, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    SwitchNode node,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveSwitchWidget(
       node: node,
       settings: settings,
@@ -86,7 +90,7 @@ class PassiveSwitchWidget extends StatelessWidget {
   const PassiveSwitchWidget({
     super.key,
     required this.node,
-    this.settings = const WidgetBuildSettings(),
+    required this.settings,
     this.onChanged,
     this.variablesOverrides = const [],
   });

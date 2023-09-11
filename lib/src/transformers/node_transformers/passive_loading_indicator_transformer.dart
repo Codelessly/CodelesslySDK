@@ -12,9 +12,9 @@ class PassiveLoadingIndicatorTransformer
   @override
   Widget buildWidget(
     LoadingIndicatorNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildFromNode(node);
   }
 

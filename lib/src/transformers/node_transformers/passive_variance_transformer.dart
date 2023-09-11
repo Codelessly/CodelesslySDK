@@ -9,9 +9,9 @@ class PassiveVarianceTransformer extends NodeWidgetTransformer<VarianceNode> {
   @override
   Widget buildWidget(
     VarianceNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveVarianceWidget(
       node: node,
       settings: settings,
@@ -32,7 +32,7 @@ class PassiveVarianceWidget extends StatelessWidget {
     required this.node,
     required this.getNode,
     required this.manager,
-    this.settings = const WidgetBuildSettings(),
+    required this.settings,
   });
 
   List<String> getChildren(BuildContext context) {
@@ -59,10 +59,11 @@ class PassiveVarianceWidget extends StatelessWidget {
       return manager
           .getTransformer<PassiveStackTransformer>()
           .buildWidgetForChildren(
-        node,
-        context,
-        childrenNodes: [childNode],
-      );
+            node,
+            context,
+            childrenNodes: [childNode],
+            settings: settings,
+          );
     }
 
     return SizedBox(

@@ -17,9 +17,9 @@ class PassiveEmbeddedVideoTransformer
   @override
   Widget buildWidget(
     EmbeddedVideoNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildFromNode(node);
   }
 

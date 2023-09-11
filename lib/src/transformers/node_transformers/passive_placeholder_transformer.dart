@@ -10,9 +10,9 @@ class PassivePlaceholderTransformer
   @override
   Widget buildWidget(
     PlaceholderNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return const SizedBox();
   }
 }

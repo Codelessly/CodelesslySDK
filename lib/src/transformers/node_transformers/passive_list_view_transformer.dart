@@ -28,7 +28,7 @@ class PassiveListViewWidget extends StatelessWidget {
     super.key,
     required this.node,
     required this.manager,
-    this.settings = const WidgetBuildSettings(),
+    required this.settings,
   });
 
   @override

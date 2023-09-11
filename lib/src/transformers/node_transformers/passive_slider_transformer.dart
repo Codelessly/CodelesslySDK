@@ -10,9 +10,9 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
   @override
   Widget buildWidget(
     SliderNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildFromNode(context, node, settings);
   }
 
@@ -22,6 +22,7 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
     required double height,
     required double width,
     double value = 0,
+    required WidgetBuildSettings settings,
   }) {
     final node = SliderNode(
       id: '',
@@ -31,7 +32,7 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
       properties: props,
       value: value,
     );
-    return buildFromNode(context, node);
+    return buildFromNode(context, node, settings);
   }
 
   Widget buildPreview({
@@ -41,6 +42,8 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
     double width = kSliderDefaultWidth,
     double value = 0,
     ValueChanged<double>? onChanged,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final previewNode = SliderNode(
       properties: properties ?? node?.properties ?? SliderProperties(),
@@ -54,15 +57,15 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
     return PassiveSliderWidget(
       node: previewNode,
       onChanged: onChanged,
-      settings: WidgetBuildSettings(),
+      settings: settings,
     );
   }
 
   Widget buildFromNode(
     BuildContext context,
-    SliderNode node, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    SliderNode node,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveSliderWidget(
       node: node,
       settings: settings,

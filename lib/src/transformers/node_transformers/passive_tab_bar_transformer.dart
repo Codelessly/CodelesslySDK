@@ -12,9 +12,9 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
   @override
   Widget buildWidget(
     TabBarNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildFromNode(context, node, settings: settings);
   }
 
@@ -23,6 +23,7 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
     required TabBarProperties props,
     required double height,
     required double width,
+    required WidgetBuildSettings settings,
   }) {
     final node = TabBarNode(
       id: '',
@@ -31,7 +32,7 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
       alignment: AlignmentModel.none,
       properties: props,
     );
-    return buildFromNode(context, node, settings: WidgetBuildSettings());
+    return buildFromNode(context, node, settings: settings);
   }
 
   Widget buildPreview({
@@ -39,6 +40,8 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
     TabBarNode? node,
     double? height,
     double? width,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final previewNode = TabBarNode(
       properties: properties ?? node?.properties ?? TabBarProperties(),
@@ -54,7 +57,7 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
     );
     return PassiveTabBarWidget(
       node: previewNode,
-      settings: WidgetBuildSettings(),
+      settings: settings,
     );
   }
 

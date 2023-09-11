@@ -60,7 +60,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   Widget buildWidgetFromNode(
     BaseNode node,
     BuildContext context, {
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
+    required WidgetBuildSettings settings,
   }) {
     return _wrapWithListener(
       context,
@@ -127,7 +127,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   Widget buildWidgetByID(
     String id,
     BuildContext context, {
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
+    required WidgetBuildSettings settings,
   }) {
     final BaseNode node = getNode(id);
     return buildWidgetFromNode(node, context, settings: settings);

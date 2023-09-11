@@ -10,9 +10,9 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
   @override
   Widget buildWidget(
     CheckboxNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildFromNode(context, node, settings: settings);
   }
 
@@ -22,6 +22,7 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
     required double height,
     required double width,
     bool? value,
+    required WidgetBuildSettings settings,
   }) {
     final node = CheckboxNode(
       id: '',
@@ -30,7 +31,7 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
       alignment: AlignmentModel.none,
       properties: props,
     )..value = value;
-    return buildFromNode(context, node, settings: WidgetBuildSettings());
+    return buildFromNode(context, node, settings: settings);
   }
 
   Widget buildPreview({
@@ -40,6 +41,8 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
     double? width,
     bool? value,
     ValueChanged<bool?>? onChanged,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final previewNode = CheckboxNode(
       properties: properties ?? node?.properties ?? CheckboxProperties(),
@@ -52,7 +55,7 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
     return PassiveCheckboxWidget(
       node: previewNode,
       onChanged: onChanged,
-      settings: WidgetBuildSettings(),
+      settings: settings,
     );
   }
 

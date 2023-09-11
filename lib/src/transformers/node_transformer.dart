@@ -1,10 +1,11 @@
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../codelessly_sdk.dart';
 
 /// A class that holds information about how to build a node.
-abstract class BuildSettings {
+abstract class BuildSettings with EquatableMixin {
   /// Whether to internally handle the node's opacity.
   final bool withOpacity;
 
@@ -29,6 +30,8 @@ abstract class BuildSettings {
   /// Whether to render the preview version of the widget.
   final bool isPreview;
 
+  final bool useInk;
+
   /// Creates a [BuildSettings] instance.
   const BuildSettings({
     this.withOpacity = true,
@@ -39,12 +42,28 @@ abstract class BuildSettings {
     this.withReactions = true,
     this.withAlignment = true,
     this.isPreview = false,
+    this.useInk = true,
   });
+
+  @override
+  List<Object?> get props => [
+        withOpacity,
+        withVisibility,
+        withRotation,
+        withMargins,
+        withConstraints,
+        withReactions,
+        withAlignment,
+        isPreview,
+        useInk,
+      ];
 }
 
 /// A class that holds information about how to build a node that is to be
 /// output as a Flutter widget.
 class WidgetBuildSettings extends BuildSettings {
+  final String debugLabel;
+
   /// Creates a [WidgetBuildSettings] instance.
   const WidgetBuildSettings({
     super.withOpacity,
@@ -55,6 +74,8 @@ class WidgetBuildSettings extends BuildSettings {
     super.withReactions,
     super.withAlignment,
     super.isPreview,
+    super.useInk,
+    required this.debugLabel,
   });
 
   /// Creates a copy of this [WidgetBuildSettings] instance.
@@ -67,6 +88,8 @@ class WidgetBuildSettings extends BuildSettings {
     bool? withReactions,
     bool? withAlignment,
     bool? isPreview,
+    bool? useInk,
+    String? debugLabel,
   }) {
     return WidgetBuildSettings(
       withOpacity: withOpacity ?? this.withOpacity,
@@ -77,8 +100,16 @@ class WidgetBuildSettings extends BuildSettings {
       withReactions: withReactions ?? this.withReactions,
       withAlignment: withAlignment ?? this.withAlignment,
       isPreview: isPreview ?? this.isPreview,
+      useInk: useInk ?? this.useInk,
+      debugLabel: debugLabel ?? this.debugLabel,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        debugLabel,
+      ];
 }
 
 /// This is the base class for all transformers.

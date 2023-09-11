@@ -19,9 +19,9 @@ class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
   @override
   Widget buildWidget(
     WebViewNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildFromNode(node);
   }
 

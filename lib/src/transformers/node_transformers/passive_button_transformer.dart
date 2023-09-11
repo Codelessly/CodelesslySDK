@@ -12,9 +12,9 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
   @override
   Widget buildWidget(
     ButtonNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildButtonFromNode(
       context,
       node,
@@ -28,7 +28,7 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
     required double height,
     required double width,
     EdgeInsetsModel? padding,
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
+    required WidgetBuildSettings settings,
   }) {
     final node = ButtonNode(
       id: '',

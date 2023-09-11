@@ -14,9 +14,9 @@ class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
   @override
   Widget buildWidget(
     BaseNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     final List<Widget> children = [];
 
     for (String childID in node.childrenOrEmpty) {
@@ -25,7 +25,11 @@ class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
 
       children.add(builtWidget);
     }
-    return buildRectangle(node, children: children);
+    return buildRectangle(
+      node,
+      settings: settings,
+      children: children,
+    );
   }
 
   Widget buildRectangle(
@@ -33,11 +37,13 @@ class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
     AlignmentModel stackAlignment = AlignmentModel.none,
     List<Widget> children = const [],
     bool applyPadding = true,
+    required WidgetBuildSettings settings,
   }) {
     return PassiveRectangleWidget(
       node: node,
       stackAlignment: stackAlignment,
       applyPadding: applyPadding,
+      settings: settings,
       children: children,
     );
   }
@@ -49,6 +55,7 @@ class PassiveRectangleWidget extends StatelessWidget {
   final AlignmentModel stackAlignment;
   final Clip Function(BaseNode node) getClipBehavior;
   final bool applyPadding;
+  final WidgetBuildSettings settings;
 
   PassiveRectangleWidget({
     super.key,
@@ -57,6 +64,7 @@ class PassiveRectangleWidget extends StatelessWidget {
     this.stackAlignment = AlignmentModel.none,
     this.getClipBehavior = defaultGetClipBehavior,
     this.applyPadding = true,
+    required this.settings,
   });
 
   @override
@@ -105,8 +113,9 @@ class PassiveRectangleWidget extends StatelessWidget {
             stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
         children: [
           ...buildFills(context, node, codelesslyContext,
-              useInk:
-                  node is BlendMixin && (node as BlendMixin).inkWell != null),
+              useInk: node is BlendMixin &&
+                  (node as BlendMixin).inkWell != null &&
+                  settings.useInk),
           ...buildStrokes(context, node, codelesslyContext),
           ...wrapWithPaddingAndScroll(
             node,

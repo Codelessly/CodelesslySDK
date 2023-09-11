@@ -14,9 +14,9 @@ class PassiveIconTransformer extends NodeWidgetTransformer<IconNode> {
   @override
   Widget buildWidget(
     IconNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildFromNode(context, node);
   }
 
