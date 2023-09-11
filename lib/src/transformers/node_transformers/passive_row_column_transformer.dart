@@ -254,9 +254,9 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   @override
   Widget buildWidget(
     BaseNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) =>
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) =>
       PassiveRowColumnWidget(
         node: node,
         children: node.childrenOrEmpty.map(getNode).toList(),
@@ -295,18 +295,19 @@ class PassiveRowColumnWidget extends StatelessWidget {
 
     final Widget child = (node is DefaultShapeNode)
         ? manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
-            node as DefaultShapeNode,
-            applyPadding: node is! ScrollableMixin ||
-                !(node as ScrollableMixin).isScrollable,
-            children: [
-              PassiveRowColumnTransformer.buildRowColumnWidget(
-                node,
-                childrenWidgets: widgetChildren,
-                childrenNodes: children,
-                withScroll: true,
-              )
-            ],
-          )
+              node as DefaultShapeNode,
+              applyPadding: node is! ScrollableMixin ||
+                  !(node as ScrollableMixin).isScrollable,
+              children: [
+                PassiveRowColumnTransformer.buildRowColumnWidget(
+                  node,
+                  childrenWidgets: widgetChildren,
+                  childrenNodes: children,
+                  withScroll: true,
+                )
+              ],
+              settings: settings,
+            )
         : PassiveRowColumnTransformer.buildRowColumnWidget(
             node,
             childrenWidgets: widgetChildren,

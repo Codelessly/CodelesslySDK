@@ -11,9 +11,9 @@ class PassiveExternalComponentTransformer
   @override
   Widget buildWidget(
     ExternalComponentNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveExternalComponentWidget(node: node, settings: settings);
   }
 }
@@ -25,7 +25,7 @@ class PassiveExternalComponentWidget extends StatelessWidget {
   const PassiveExternalComponentWidget({
     super.key,
     required this.node,
-    this.settings = const WidgetBuildSettings(),
+    required this.settings,
   });
 
   @override

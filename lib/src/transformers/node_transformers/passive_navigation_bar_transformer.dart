@@ -12,9 +12,9 @@ class PassiveNavigationBarTransformer
   @override
   Widget buildWidget(
     NavigationBarNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveNavigationBarWidget(
       node: node,
       onChanged: (index) => onChanged(node, context, index),

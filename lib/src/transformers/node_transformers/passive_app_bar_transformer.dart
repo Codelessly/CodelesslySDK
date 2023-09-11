@@ -10,9 +10,9 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
   @override
   Widget buildWidget(
     AppBarNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveAppBarWidget(node: node);
   }
 

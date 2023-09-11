@@ -107,9 +107,10 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     }
 
     return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
-      node,
-      children: [scaffold],
-    );
+          node,
+          children: [scaffold],
+          settings: settings,
+        );
   }
 
   Widget _wrapInScaffoldForAutoScale({
@@ -225,9 +226,10 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     }
 
     return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
-      node,
-      children: [scaffold],
-    );
+          node,
+          children: [scaffold],
+          settings: settings,
+        );
   }
 
   void onFaBPressed(BuildContext context, CanvasNode node) {
@@ -238,9 +240,9 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   @override
   Widget buildWidget(
     CanvasNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return switch (node.scaleMode) {
       ScaleMode.responsive => _wrapInScaffoldForResponsive(
           context: context,

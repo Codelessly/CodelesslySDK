@@ -12,9 +12,9 @@ class PassiveProgressBarTransformer
   @override
   Widget buildWidget(
     ProgressBarNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildFromNode(context, node, settings);
   }
 
@@ -23,6 +23,7 @@ class PassiveProgressBarTransformer
     required ProgressBarProperties props,
     required double height,
     required double width,
+    required WidgetBuildSettings settings,
   }) {
     final node = ProgressBarNode(
       id: '',
@@ -31,7 +32,7 @@ class PassiveProgressBarTransformer
       retainedOuterBoxLocal: NodeBox(0, 0, width, height),
       properties: props,
     );
-    return buildFromNode(context, node);
+    return buildFromNode(context, node, settings);
   }
 
   Widget buildPreview({
@@ -42,6 +43,8 @@ class PassiveProgressBarTransformer
     double? currentValue,
     ValueChanged<bool>? onChanged,
     bool animate = false,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final previewNode = ProgressBarNode(
       properties: properties ?? node?.properties ?? ProgressBarProperties(),
@@ -56,14 +59,15 @@ class PassiveProgressBarTransformer
     return PassiveProgressBarWidget(
       node: previewNode,
       animate: animate,
+      settings: settings,
     );
   }
 
   Widget buildFromNode(
     BuildContext context,
-    ProgressBarNode node, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    ProgressBarNode node,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveProgressBarWidget(
       node: node,
       settings: settings,
@@ -90,7 +94,7 @@ class PassiveProgressBarWidget extends StatelessWidget {
   const PassiveProgressBarWidget({
     super.key,
     required this.node,
-    this.settings = const WidgetBuildSettings(),
+    required this.settings,
     this.variablesOverrides = const [],
     this.animate,
     this.onChanged,

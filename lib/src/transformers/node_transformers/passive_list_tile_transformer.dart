@@ -10,9 +10,9 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
   @override
   Widget buildWidget(
     ListTileNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveListTileWidget(
       node: node,
       getNode: getNode,
@@ -46,7 +46,8 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
     BaseNode? trailing,
     BaseNode? title,
     BaseNode? subtitle,
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final previewNode = node ??
         ListTileNode(
@@ -89,7 +90,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
     required ListTileProperties properties,
     double height = kDefaultListTileHeight,
     double width = kDefaultListTileWidth,
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
+    required WidgetBuildSettings settings,
     required BuildWidgetFromNode buildWidgetFromNode,
   }) {
     final leading = IconNode(

@@ -10,9 +10,9 @@ class PassiveExpansionTileTransformer
   @override
   Widget buildWidget(
     ExpansionTileNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveExpansionTileWidget(
       node: node,
       getNode: getNode,
@@ -25,6 +25,7 @@ class PassiveExpansionTileTransformer
     required ExpansionTileProperties props,
     required double height,
     required double width,
+    required WidgetBuildSettings settings,
   }) {
     final node = ExpansionTileNode(
       id: '',
@@ -34,7 +35,7 @@ class PassiveExpansionTileTransformer
       properties: props,
       children: [],
     );
-    return buildFromNode(node);
+    return buildFromNode(node, settings: settings);
   }
 
   Widget buildPreview({
@@ -48,7 +49,8 @@ class PassiveExpansionTileTransformer
     BaseNode? trailingNode,
     ListTileControlAffinityC? controlAffinity,
     bool? initiallyExpanded,
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final listTileNode = node == null
         ? ListTileNode(
@@ -103,7 +105,7 @@ class PassiveExpansionTileTransformer
 
   Widget buildFromNode(
     ExpansionTileNode node, {
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
+    required WidgetBuildSettings settings,
   }) {
     return PassiveExpansionTileWidget(
       node: node,

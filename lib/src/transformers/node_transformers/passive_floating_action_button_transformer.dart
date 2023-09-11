@@ -12,9 +12,9 @@ class PassiveFloatingActionButtonTransformer
   @override
   Widget buildWidget(
     FloatingActionButtonNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildFromNode(context, node, useFonts: false);
   }
 

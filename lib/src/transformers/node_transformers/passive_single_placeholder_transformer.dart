@@ -10,9 +10,9 @@ class PassiveSinglePlaceholderTransformer
   @override
   Widget buildWidget(
     SinglePlaceholderNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveSinglePlaceholderWidget(
       node: node,
       buildWidgetFromID: (id, context) =>

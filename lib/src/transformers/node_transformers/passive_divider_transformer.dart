@@ -10,9 +10,9 @@ class PassiveDividerTransformer extends NodeWidgetTransformer<DividerNode> {
   @override
   Widget buildWidget(
     DividerNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildFromNode(node);
   }
 

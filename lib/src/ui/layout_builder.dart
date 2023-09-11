@@ -135,6 +135,10 @@ class _CodelesslyPublishedLayoutBuilderState
   Widget build(BuildContext context) {
     final BaseNode canvasNode = widget.layout.nodes[widget.layout.canvasId]!;
 
-    return transformerManager.buildWidgetFromNode(canvasNode, context);
+    return transformerManager.buildWidgetFromNode(
+      canvasNode,
+      context,
+      settings: const WidgetBuildSettings(debugLabel: 'layout builder'),
+    );
   }
 }

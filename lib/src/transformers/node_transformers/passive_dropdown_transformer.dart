@@ -11,9 +11,9 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
   @override
   Widget buildWidget(
     DropdownNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildDropdownFromNode(context, node);
   }
 

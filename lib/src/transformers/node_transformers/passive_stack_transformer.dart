@@ -15,7 +15,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     required BaseNode? widestChild,
     required BaseNode? tallestChild,
     required AlignmentModel commonAlignment,
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
+    required WidgetBuildSettings settings,
   }) {
     assert(childWidget != null || manager != null,
         'Either childWidget or manager must be provided.');
@@ -137,9 +137,9 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
   @override
   Widget buildWidget(
     BaseNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) =>
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) =>
       buildWidgetForChildren(node, context, settings: settings);
 
   Widget buildWidgetForChildren(
@@ -147,7 +147,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     BuildContext context, {
     List<ValueModel> values = const [],
     List<BaseNode>? childrenNodes,
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
+    required WidgetBuildSettings settings,
   }) {
     if (node is! ChildrenMixin) {
       throw Exception(
@@ -194,6 +194,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
               node,
               stackAlignment: commonAlignment,
               children: childrenWidgets,
+              settings: settings,
             );
 
     // // This makes sure that children stay positioned correctly even if the stack

@@ -38,9 +38,9 @@ class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
   @override
   Widget buildWidget(
     SpacerNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildSpacer(node, node.flex);
   }
 }

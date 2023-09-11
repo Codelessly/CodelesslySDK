@@ -11,9 +11,9 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
   @override
   Widget buildWidget(
     RadioNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return buildFromNode(context, node);
   }
 

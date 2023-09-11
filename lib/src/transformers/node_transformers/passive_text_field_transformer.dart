@@ -10,9 +10,9 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
   @override
   Widget buildWidget(
     TextFieldNode node,
-    BuildContext context, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveTextFieldWidget(
       node: node,
       settings: settings,
@@ -26,6 +26,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     required TextFieldProperties props,
     required double height,
     required double width,
+    required WidgetBuildSettings settings,
   }) {
     final node = TextFieldNode(
       id: '',
@@ -34,7 +35,10 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
       properties: props,
       edgePins: EdgePinsModel.standard,
     );
-    return PassiveTextFieldWidget(node: node);
+    return PassiveTextFieldWidget(
+      node: node,
+      settings: settings,
+    );
   }
 
   static TextStyle getTextStyle(TextProp? style) {
@@ -74,9 +78,9 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     BuildContext context,
     TextFieldNode node,
     InputDecorationModel decoration,
-    bool useIconFonts, [
-    WidgetBuildSettings settings = const WidgetBuildSettings(),
-  ]) {
+    bool useIconFonts,
+    WidgetBuildSettings settings,
+  ) {
     final bool isCollapsed =
         context.getNodeValue(node.id, 'isCollapsed') ?? decoration.isCollapsed;
     final bool isDense =
@@ -173,7 +177,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
   const PassiveTextFieldWidget({
     super.key,
     required this.node,
-    this.settings = const WidgetBuildSettings(),
+    required this.settings,
     this.onTap,
     this.onChanged,
     this.onSubmitted,
