@@ -119,42 +119,34 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     final InkWellModel? inkWell = node is BlendMixin ? node.inkWell : null;
 
     if (inkWell != null) {
-      return Material(
-        type: MaterialType.transparency,
-        // borderRadius: getBorderRadius(node),
-        // clipBehavior: getClipBehavior(node),
-        child: InkWell(
-          onTap: () {
-            for (final Reaction reaction in onClickReactions) {
-              final ActionModel action = reaction.action;
-              FunctionsRepository.performAction(context, action);
-            }
-          },
-          onLongPress: () {
-            for (final Reaction reaction in onLongPressReactions) {
-              final ActionModel action = reaction.action;
-              FunctionsRepository.performAction(context, action);
-            }
-          },
-          borderRadius: getBorderRadius(node),
-          overlayColor: inkWell.overlayColor != null
-              ? MaterialStatePropertyAll<Color>(
-                  inkWell.overlayColor!.toFlutterColor(),
-                )
-              : null,
-          splashColor: inkWell.splashColor?.toFlutterColor(),
-          highlightColor: inkWell.highlightColor?.toFlutterColor(),
-          hoverColor: inkWell.hoverColor?.toFlutterColor(),
-          focusColor: inkWell.focusColor?.toFlutterColor(),
-          child: widget,
-        ),
+      return InkWell(
+        onTap: () {
+          for (final Reaction reaction in onClickReactions) {
+            final ActionModel action = reaction.action;
+            FunctionsRepository.performAction(context, action);
+          }
+        },
+        onLongPress: () {
+          for (final Reaction reaction in onLongPressReactions) {
+            final ActionModel action = reaction.action;
+            FunctionsRepository.performAction(context, action);
+          }
+        },
+        borderRadius: getBorderRadius(node),
+        overlayColor: inkWell.overlayColor != null
+            ? MaterialStatePropertyAll<Color>(
+                inkWell.overlayColor!.toFlutterColor(),
+              )
+            : null,
+        splashColor: inkWell.splashColor?.toFlutterColor(),
+        highlightColor: inkWell.highlightColor?.toFlutterColor(),
+        hoverColor: inkWell.hoverColor?.toFlutterColor(),
+        focusColor: inkWell.focusColor?.toFlutterColor(),
+        child: widget,
       );
     } else {
       if ((node as ReactionMixin).reactions.isEmpty) {
-        return Material(
-          type: MaterialType.transparency,
-          child: widget,
-        );
+        return widget;
       }
       return MouseRegion(
         cursor: SystemMouseCursors.click,
@@ -171,10 +163,7 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
               FunctionsRepository.performAction(context, action);
             }
           },
-          child: Material(
-            type: MaterialType.transparency,
-            child: widget,
-          ),
+          child: widget,
         ),
       );
     }

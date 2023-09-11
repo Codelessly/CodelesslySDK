@@ -1,6 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
@@ -95,6 +95,11 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             node is! SpacerNode) {
           widget = wrapWithReaction(context, node, widget);
         }
+        // required for Ink widget to work.
+        widget = Material(
+          type: MaterialType.transparency,
+          child: widget,
+        );
         if (settings.withRotation) {
           widget = applyWidgetRotation(context, node, widget);
         }
