@@ -1374,10 +1374,10 @@ String extractVimeoVideoId(String? url) {
   return vimeoUrlRegex.firstMatch(url)?.namedGroup('video_id') ?? '';
 }
 
-const _epsilon = 1.0e-8;
+const kEpsilon = 1.0e-8;
 
 extension FloatHelper on double {
-  bool closeTo(double other, [double precision = _epsilon]) {
+  bool closeTo(double other, [double precision = kEpsilon]) {
     return (this - other).abs() <= precision;
   }
 }
