@@ -48,6 +48,8 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     );
   }
 
+  /// Wraps a child with a [Positioned] widget. Does not wrap if the child
+  /// is the widest or tallest child.
   static Widget wrapWithPositioned(
     BaseNode childNode,
     BaseNode node,
