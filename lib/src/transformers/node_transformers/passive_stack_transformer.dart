@@ -133,7 +133,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       mostCommonAlignment = mostCommon<AlignmentModel>(alignments);
     }
 
-    return mostCommonAlignment ?? AlignmentModel.none;
+    return mostCommonAlignment ?? AlignmentModel.center;
   }
 
   @override

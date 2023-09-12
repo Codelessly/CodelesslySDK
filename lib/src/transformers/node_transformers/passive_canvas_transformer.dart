@@ -67,15 +67,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         physics: node.physics.flutterScrollPhysics,
         keyboardDismissBehavior:
             node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-        child: SizedBox(
-          width: node.scrollDirection.isHorizontal
-              ? node.outerBoxLocal.width
-              : null,
-          height: node.scrollDirection.isVertical
-              ? node.outerBoxLocal.height
-              : null,
-          child: body,
-        ),
+        child: body,
       );
     }
 
@@ -200,11 +192,24 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         floatingActionButton != null ||
         bottomNavigationBar != null;
 
-    // Always expand the body when auto scaling. This makes it so that even if
-    // scrolling is disabled, the entire layout is still horizontally fitting.
-    // Without this, the layout will size to itself and align-left in a shrunken
-    // state.
-    body = SizedBox.expand(child: body);
+    // For auto scaling:
+    //
+    // width: Always expanding because the layout should grow to fit the screen
+    // horizontally always, not just when shrinking and the FittedBox that
+    // does the auto-scaling has a BoxFit.fitWidth.
+    //
+    // height: Only expand vertically if the layout is scrollable and vertical.
+    // That means the canvas fills are expanded to fill the viewport and the
+    // content is scrollable inside without being cut off. However, if the
+    // layout is not scrollable vertically and the canvas is shrink-wrapping,
+    // we set height to null to allow it to shrink-wrap.
+    body = SizedBox(
+      width: double.infinity,
+      height: node.isScrollable && node.scrollDirection.isVertical
+          ? double.infinity
+          : null,
+      child: body,
+    );
 
     final Widget scaffold;
 
@@ -221,7 +226,9 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     } else {
       scaffold = Material(
         color: retrieveBackgroundColor(context, node),
-        child: body,
+        child: !node.isScrollable
+            ? Align(alignment: Alignment.topCenter, child: body)
+            : body,
       );
     }
 
