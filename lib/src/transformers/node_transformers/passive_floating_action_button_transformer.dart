@@ -1,6 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
@@ -198,38 +197,12 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
     FloatingActionButtonProperties fab, {
     required bool useFonts,
   }) {
-    if (!fab.icon.show) return null;
-    if (!fab.icon.isIconAvailable) return null;
-    switch (fab.icon.type) {
-      case IconTypeEnum.icon:
-        return SvgIcon(
-          icon: fab.icon.icon!,
-          color: fab.icon.color?.toFlutterColor(),
-          size: fab.icon.size,
-        );
-      case IconTypeEnum.image:
-        if (fab.icon.isSvgImage) {
-          return SizedBox.square(
-            dimension: fab.icon.size,
-            child: SvgPicture.network(
-              fab.icon.iconImage!,
-              fit: BoxFit.contain,
-              colorFilter: fab.icon.color != null
-                  ? ColorFilter.mode(
-                      fab.icon.color!.toFlutterColor(), BlendMode.srcIn)
-                  : null,
-            ),
-          );
-        }
-        return SizedBox.square(
-          dimension: fab.icon.size,
-          child: Image.network(
-            fab.icon.iconImage!,
-            color: fab.icon.color?.toFlutterColor(),
-            fit: BoxFit.contain,
-          ),
-        );
-    }
+    return retrieveIconWidget(
+      fab.icon,
+      null,
+      useFonts,
+      fab.foregroundColor.toFlutterColor(),
+    );
   }
 
   static ShapeBorder? getFABShape(FloatingActionButtonProperties fab) {

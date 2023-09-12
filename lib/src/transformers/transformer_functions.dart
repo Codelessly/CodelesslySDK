@@ -218,9 +218,10 @@ Widget? retrieveIconWidget(
   MultiSourceIconModel icon, [
   double? size,
   bool useIconFonts = false,
+  Color? themeColor,
 ]) {
   if (!icon.show) return null;
-  final Color? color = icon.color?.toFlutterColor();
+  final Color? color = icon.color?.toFlutterColor() ?? themeColor;
   switch (icon.type) {
     case IconTypeEnum.icon:
       if (icon.icon == null) return null;
@@ -274,60 +275,9 @@ Widget retrieveNavBarItemIconWidget(
   double? size,
   bool useIconFonts = false,
   Color? themeColor,
-]) {
-  if (!icon.show) return SizedBox.shrink();
-  final Color? color = icon.color?.toFlutterColor();
-  switch (icon.type) {
-    case IconTypeEnum.icon:
-      if (icon.icon == null) return SizedBox.shrink();
-      return SvgIcon(
-        icon: icon.icon!,
-        size: icon.size ?? size ?? kDefaultIconSize,
-        color: color,
-      );
-    case IconTypeEnum.image:
-      if (icon.iconImage == null) return SizedBox.shrink();
-      if (color != null && color.opacity == 0) {
-        if (icon.isSvgImage) {
-          return SizedBox.square(
-            dimension: icon.size ?? size ?? kDefaultIconSize,
-            child: SvgPicture.network(
-              icon.iconImage!,
-              // scale: icon.scale,
-              // color: color,
-            ),
-          );
-        }
-        // when opacity is zero, we need to display original colors of
-        // the image icon which `ImageIcon` widget cannot do. So we
-        // use the raw Image widget.
-        return SizedBox.square(
-          dimension: icon.size ?? size ?? kDefaultIconSize,
-          child: Image.network(
-            icon.iconImage!,
-            // scale: icon.scale,
-            // color: color,
-          ),
-        );
-      }
-
-      if (icon.isSvgImage) {
-        return SvgIconImage(
-          url: icon.iconImage!,
-          size: size ?? icon.size,
-          color: color, // TODO: Add theming support with themeColor.
-        );
-      }
-
-      // Always use ImageIcon for nav bar because it has to adhere to the theme
-      // color.
-      return ImageIcon(
-        NetworkImage(icon.iconImage!, scale: icon.scale),
-        size: size ?? icon.size,
-        color: color, // TODO: Add theming support with themeColor.
-      );
-  }
-}
+]) =>
+    retrieveIconWidget(icon, size, useIconFonts, themeColor) ??
+    SizedBox.shrink();
 
 String buildYoutubeEmbedUrl({
   required EmbeddedYoutubeVideoProperties properties,
