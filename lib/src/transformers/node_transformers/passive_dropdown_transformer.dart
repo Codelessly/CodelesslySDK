@@ -158,42 +158,48 @@ class PassiveDropdownWidget extends StatelessWidget {
     codelesslyContext.conditions;
     return AdaptiveNodeBox(
       node: node,
-      child: DropdownButton<int>(
-        value: value,
-        isDense: node.properties.dense,
-        isExpanded: node.properties.expanded,
-        autofocus: node.properties.autoFocus,
-        enableFeedback: node.properties.enableFeedback,
-        alignment:
-            node.properties.selectedItemAlignment.flutterAlignmentGeometry ??
-                Alignment.centerLeft,
-        hint: node.properties.hint.isNotEmpty
-            ? Text(
-                node.properties.hint,
-                style: PassiveDropdownTransformer.getTextStyle(
-                    node.properties.hintStyle),
-                overflow: TextOverflow.ellipsis,
-              )
-            : null,
-        iconDisabledColor: node.properties.iconDisabledColor.toFlutterColor(),
-        iconEnabledColor: node.properties.iconEnabledColor.toFlutterColor(),
-        iconSize: node.properties.iconSize,
-        icon: node.properties.icon.show && node.properties.icon.icon != null
-            ? retrieveIconWidget(
-                node.properties.icon, node.properties.iconSize, useIconFonts)
-            : null,
-        dropdownColor: node.properties.dropdownColor.toFlutterColor(),
-        focusColor: node.properties.focusColor.toFlutterColor(),
-        elevation: node.properties.elevation,
-        borderRadius: node.properties.borderRadius.borderRadius,
-        onTap: onTap,
-        padding: node.padding.flutterEdgeInsets,
-        onChanged: node.properties.enabled
-            ? (value) => onChanged?.call(value ?? 0)
-            : null,
-        underline: node.properties.underline ? null : SizedBox.shrink(),
-        items: buildItems(context, items),
-        selectedItemBuilder: (context) => selectedItemBuilder(context, items),
+      child: Theme(
+        data: ThemeData(
+          hoverColor: node.properties.hoverColor?.toFlutterColor(),
+          splashColor: node.properties.splashColor?.toFlutterColor(),
+        ),
+        child: DropdownButton<int>(
+          value: value,
+          isDense: node.properties.dense,
+          isExpanded: node.properties.expanded,
+          autofocus: node.properties.autoFocus,
+          enableFeedback: node.properties.enableFeedback,
+          alignment:
+              node.properties.selectedItemAlignment.flutterAlignmentGeometry ??
+                  Alignment.centerLeft,
+          hint: node.properties.hint.isNotEmpty
+              ? Text(
+                  node.properties.hint,
+                  style: PassiveDropdownTransformer.getTextStyle(
+                      node.properties.hintStyle),
+                  overflow: TextOverflow.ellipsis,
+                )
+              : null,
+          iconDisabledColor: node.properties.iconDisabledColor.toFlutterColor(),
+          iconEnabledColor: node.properties.iconEnabledColor.toFlutterColor(),
+          iconSize: node.properties.iconSize,
+          icon: node.properties.icon.show && node.properties.icon.icon != null
+              ? retrieveIconWidget(
+                  node.properties.icon, node.properties.iconSize, useIconFonts)
+              : null,
+          dropdownColor: node.properties.dropdownColor.toFlutterColor(),
+          focusColor: node.properties.focusColor.toFlutterColor(),
+          elevation: node.properties.elevation,
+          borderRadius: node.properties.borderRadius.borderRadius,
+          onTap: onTap,
+          padding: node.padding.flutterEdgeInsets,
+          onChanged: node.properties.enabled
+              ? (value) => onChanged?.call(value ?? 0)
+              : null,
+          underline: node.properties.underline ? null : SizedBox.shrink(),
+          items: buildItems(context, items),
+          selectedItemBuilder: (context) => selectedItemBuilder(context, items),
+        ),
       ),
     );
   }
