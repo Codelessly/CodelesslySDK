@@ -1,3 +1,12 @@
+## 0.4.1
+- Add hover and splash color to dropdown node.
+- Add color support for custom image icons.
+- Fix spacer crashing.
+- Remove unnecessary Material widgets.
+- Add WidgetBuildSettings to control widget decorators.
+- Fix layout system to support max constraints.
+- Miscellaneous fixes.
+
 ## 0.4.0
 - New WebView support for Web! Embedded videos and Iframes now work great!
 - Improved WebView embedding for Android and iOS.
