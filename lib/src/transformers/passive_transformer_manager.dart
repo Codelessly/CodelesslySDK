@@ -94,12 +94,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             (node is! CustomPropertiesMixin || node is IconNode) &&
             node is! SpacerNode) {
           widget = wrapWithReaction(context, node, widget);
+          // required for Ink widget to work.
+          widget = Material(
+            type: MaterialType.transparency,
+            child: widget,
+          );
         }
-        // required for Ink widget to work.
-        widget = Material(
-          type: MaterialType.transparency,
-          child: widget,
-        );
+
         if (settings.withRotation) {
           widget = applyWidgetRotation(context, node, widget);
         }
