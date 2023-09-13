@@ -183,10 +183,8 @@ class PassiveDropdownWidget extends StatelessWidget {
           iconDisabledColor: node.properties.iconDisabledColor.toFlutterColor(),
           iconEnabledColor: node.properties.iconEnabledColor.toFlutterColor(),
           iconSize: node.properties.iconSize,
-          icon: node.properties.icon.show && node.properties.icon.icon != null
-              ? retrieveIconWidget(
-                  node.properties.icon, node.properties.iconSize, useIconFonts)
-              : null,
+          icon: retrieveIconWidget(
+              node.properties.icon, node.properties.iconSize, useIconFonts),
           dropdownColor: node.properties.dropdownColor.toFlutterColor(),
           focusColor: node.properties.focusColor.toFlutterColor(),
           elevation: node.properties.elevation,
