@@ -367,3 +367,27 @@ BaseNode? getTallestNode(List<BaseNode> siblings) {
     return a.basicBoxLocal.height > b.basicBoxLocal.height ? a : b;
   });
 }
+
+AlignmentModel retrieveCommonStackAlignment(
+  BaseNode parent,
+  List<BaseNode> nodes,
+) {
+  final List<AlignmentModel> alignments = [];
+
+  for (final BaseNode node in nodes) {
+    final AlignmentModel alignment = node.alignment;
+    if (alignment.data == null) continue;
+    alignments.add(alignment);
+  }
+
+  final AlignmentModel? mostCommonAlignment;
+
+  if (alignments.isEmpty) {
+    mostCommonAlignment = null;
+  } else {
+    mostCommonAlignment = mostCommon<AlignmentModel>(alignments);
+  }
+
+  return mostCommonAlignment ??
+      (parent.isOneOrBothWrap ? AlignmentModel.center : AlignmentModel.none);
+}
