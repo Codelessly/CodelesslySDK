@@ -93,37 +93,40 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         ? null
         : childNode.outerBoxLocal.height;
 
-    // if (!isTallest && !isWidest) {
-    //   return Positioned(
-    //     left: left,
-    //     right: right,
-    //     top: top,
-    //     bottom: bottom,
-    //     width: width,
-    //     height: height,
-    //     child: child,
-    //   );
-    // } else if (isTallest) {
-    //   return Padding(
-    //     padding: EdgeInsets.only(left: left ?? 0, right: right ?? 0),
-    //     child: child,
-    //   );
-    // } else {
-    //   return Padding(
-    //     padding: EdgeInsets.only(top: top ?? 0, bottom: bottom ?? 0),
-    //     child: child,
-    //   );
-    // }
+    // This is required to make wrapping stack in a scroll view work because
+    // wrapping stack cannot figure out its size when there only positioned
+    // children.
+    if (!isTallest && !isWidest) {
+      return Positioned(
+        left: left,
+        right: right,
+        top: top,
+        bottom: bottom,
+        width: width,
+        height: height,
+        child: child,
+      );
+    } else if (isTallest) {
+      return Padding(
+        padding: EdgeInsets.only(left: left ?? 0, right: right ?? 0),
+        child: child,
+      );
+    } else {
+      return Padding(
+        padding: EdgeInsets.only(top: top ?? 0, bottom: bottom ?? 0),
+        child: child,
+      );
+    }
 
-    return Positioned(
-      left: left,
-      right: right,
-      top: top,
-      bottom: bottom,
-      width: width,
-      height: height,
-      child: child,
-    );
+    // return Positioned(
+    //   left: left,
+    //   right: right,
+    //   top: top,
+    //   bottom: bottom,
+    //   width: width,
+    //   height: height,
+    //   child: child,
+    // );
   }
 
   @override
@@ -154,7 +157,8 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         for (final String childId in node.children) getNode(childId),
     ];
 
-    final AlignmentModel commonAlignment = retrieveCommonStackAlignment(node, children);
+    final AlignmentModel commonAlignment =
+        retrieveCommonStackAlignment(node, children);
     final isAllPositioned =
         children.every((node) => node.alignment.data == null);
 
