@@ -126,26 +126,6 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     );
   }
 
-  static AlignmentModel retrieveCommonAlignment(List<BaseNode> nodes) {
-    final List<AlignmentModel> alignments = [];
-
-    for (final BaseNode node in nodes) {
-      final AlignmentModel alignment = node.alignment;
-      if (alignment.data == null) continue;
-      alignments.add(alignment);
-    }
-
-    final AlignmentModel? mostCommonAlignment;
-
-    if (alignments.isEmpty) {
-      mostCommonAlignment = null;
-    } else {
-      mostCommonAlignment = mostCommon<AlignmentModel>(alignments);
-    }
-
-    return mostCommonAlignment ?? AlignmentModel.center;
-  }
-
   @override
   Widget buildWidget(
     BaseNode node,
@@ -174,7 +154,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         for (final String childId in node.children) getNode(childId),
     ];
 
-    final AlignmentModel commonAlignment = retrieveCommonAlignment(children);
+    final AlignmentModel commonAlignment = retrieveCommonStackAlignment(node, children);
     final isAllPositioned =
         children.every((node) => node.alignment.data == null);
 
