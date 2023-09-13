@@ -389,5 +389,7 @@ AlignmentModel retrieveCommonStackAlignment(
   }
 
   return mostCommonAlignment ??
-      (parent.isOneOrBothWrap ? AlignmentModel.center : AlignmentModel.none);
+      (parent.isOneOrBothWrap && alignments.isNotEmpty
+          ? AlignmentModel.center
+          : AlignmentModel.none);
 }
