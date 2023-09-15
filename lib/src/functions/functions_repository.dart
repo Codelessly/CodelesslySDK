@@ -76,8 +76,9 @@ class FunctionsRepository {
 
   static Future<http.Response> makeApiRequestFromAction(
     ApiCallAction action,
-    BuildContext context,
-  ) {
+    BuildContext context, [
+    ValueNotifier<VariableData>? variable,
+  ]) {
     final Map<String, HttpApiData> apis =
         context.read<Codelessly>().dataManager.publishModel!.apis;
 
@@ -103,6 +104,7 @@ class FunctionsRepository {
       body: apiData.bodyType == RequestBodyType.form
           ? _generateMapFromPairs(apiData.formFields, action.parameters)
           : apiData.body,
+      variable: variable,
     );
   }
 
@@ -193,40 +195,67 @@ class FunctionsRepository {
     required Object? body,
     required BuildContext context,
     bool useCloudFunctionForWeb = false,
+    ValueNotifier<VariableData>? variable,
   }) async {
+    assert(variable == null || variable.value.type.isMap,
+        'Provided variable for api call must be of type map. Found ${variable.value.type}');
+
     printApiDetails(method: method, url: url, headers: headers, body: body);
 
-    final http.Response response;
-    if (kIsWeb && useCloudFunctionForWeb) {
-      final String cloudFunctionsURL =
-          context.read<Codelessly>().config!.firebaseCloudFunctionsBaseURL;
-      response = await makeApiRequestWeb(
-        method: method,
-        url: url,
-        headers: headers,
-        body: body,
-        cloudFunctionsURL: cloudFunctionsURL,
+    if (variable case var variable?) {
+      variable.value = variable.value.copyWith(
+        value: ApiResponseVariableUtils.loading(),
       );
-    } else {
-      final Uri uri = Uri.parse(url);
-      switch (method) {
-        case HttpMethod.get:
-          response = await http.get(uri, headers: headers);
-          break;
-        case HttpMethod.post:
-          response = await http.post(uri, headers: headers, body: body);
-          break;
-        case HttpMethod.delete:
-          response = await http.delete(uri, headers: headers, body: body);
-          break;
-        case HttpMethod.put:
-          response = await http.put(uri, headers: headers, body: body);
-          break;
-      }
     }
-    printResponse(response);
 
-    return response;
+    try {
+      final http.Response response;
+      if (kIsWeb && useCloudFunctionForWeb) {
+        final String cloudFunctionsURL =
+            context.read<Codelessly>().config!.firebaseCloudFunctionsBaseURL;
+        response = await makeApiRequestWeb(
+          method: method,
+          url: url,
+          headers: headers,
+          body: body,
+          cloudFunctionsURL: cloudFunctionsURL,
+        );
+      } else {
+        final Uri uri = Uri.parse(url);
+        switch (method) {
+          case HttpMethod.get:
+            response = await http.get(uri, headers: headers);
+            break;
+          case HttpMethod.post:
+            response = await http.post(uri, headers: headers, body: body);
+            break;
+          case HttpMethod.delete:
+            response = await http.delete(uri, headers: headers, body: body);
+            break;
+          case HttpMethod.put:
+            response = await http.put(uri, headers: headers, body: body);
+            break;
+        }
+      }
+      printResponse(response);
+
+      if (variable case var variable?) {
+        variable.value = variable.value.copyWith(
+          value: ApiResponseVariableUtils.fromResponse(response),
+        );
+      }
+
+      return response;
+    } catch (error, stackTrace) {
+      log(error.toString());
+      log(stackTrace.toString());
+      if (variable case var variable?) {
+        variable.value = variable.value.copyWith(
+          value: ApiResponseVariableUtils.error(error),
+        );
+      }
+      return Future.error(error);
+    }
   }
 
   static void printApiDetails({
