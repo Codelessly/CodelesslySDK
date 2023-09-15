@@ -69,10 +69,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
 
   BoxFit get fit => widget.fit ?? widget.paint?.fit.boxFit ?? BoxFit.contain;
 
-  double get scale =>
-      (widget.paint?.isNonUniformScale == true ? 1 : widget.scale?.abs()) ??
-      widget.scale?.abs() ??
-      1;
+  double get scale => widget.scale ?? widget.paint?.scale ?? 1;
 
   BlendMode? get colorBlendMode =>
       widget.blendMode ?? widget.paint?.blendMode.flutterBlendMode;
