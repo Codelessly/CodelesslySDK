@@ -9,7 +9,6 @@ export 'src/data/data_manager.dart';
 export 'src/data/local_data_repository.dart';
 export 'src/data/network_data_repository.dart';
 export 'src/functions/functions.dart';
-export 'src/helpers/helper.dart';
 export 'src/model/asset_model.dart';
 export 'src/model/auth_data.dart';
 export 'src/model/font_file_data.dart';
