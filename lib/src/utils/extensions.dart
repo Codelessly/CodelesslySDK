@@ -1429,7 +1429,7 @@ extension EffectIterableExt on Iterable<Effect> {
 extension ReactionIterableExt on Iterable<Reaction> {
   bool hasTriggerType(TriggerType type) => any((e) => e.trigger.type == type);
 
-  Iterable whereTriggerType(TriggerType type) =>
+  Iterable<Reaction> whereTriggerType(TriggerType type) =>
       where((e) => e.trigger.type == type);
 }
 
