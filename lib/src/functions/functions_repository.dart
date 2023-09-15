@@ -69,7 +69,22 @@ class FunctionsRepository {
         callFunction(context, action as CallFunctionAction);
         break;
       case ActionType.callApi:
-        makeApiRequestFromAction(action as ApiCallAction, context);
+        // Find a variable for the api and pass it.
+        // This makes it so the same variable for the api gets updated. This
+        // helps updating UI with new data.
+        // TODO(Birju): Keep it?
+        final codelesslyContext = context.read<CodelesslyContext>();
+        final api = context
+            .read<Codelessly>()
+            .dataManager
+            .publishModel!
+            .apis[(action as ApiCallAction).apiId];
+        ValueNotifier<VariableData>? variable;
+        if (api != null) {
+          final name = apiNameToVariableName(api.name);
+          variable = codelesslyContext.findVariableByName(name);
+        }
+        makeApiRequestFromAction(action, context, variable);
         break;
     }
   }
