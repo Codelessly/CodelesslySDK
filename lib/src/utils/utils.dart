@@ -1,6 +1,8 @@
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 
 import '../../codelessly_sdk.dart';
 
@@ -402,4 +404,106 @@ AlignmentModel retrieveCommonStackAlignment(
       (parent.isOneOrBothWrap && alignments.isNotEmpty
           ? AlignmentModel.center
           : AlignmentModel.none);
+}
+
+String apiNameToVariableName(String name) {
+  if (name.startsWith(RegExp(r'\d+'))) {
+    name = name.replaceFirst(RegExp(r'\d+'), '').trim();
+  }
+  name =
+      name.replaceAll(RegExp(r'\s+'), '_').replaceAll(RegExp(r'\W'), '').trim();
+  final tokens = name.split(RegExp(r'_+'));
+  final sanitizedName = ['api', ...tokens.map((e) => e.capitalized)].join('');
+  return sanitizedName;
+}
+
+/// Returns a list of api ids that should be loaded for a given [canvasNode].
+Set<String> getApisToLoadForCanvas(CanvasNode canvasNode) {
+  return canvasNode.reactions
+      .whereTriggerType(TriggerType.onLoad)
+      .map((e) => e.action)
+      .whereType<ApiCallAction>()
+      .map((e) => e.apiId)
+      .whereNotNull()
+      .toSet();
+}
+
+/// Helper utility class to easily convert [ApiResponseVariable] to a map and
+/// update different statuses.
+class ApiResponseVariableUtils {
+  ApiResponseVariableUtils._();
+
+  static Map idle() => {
+        'isIdle': true,
+        'isLoading': false,
+        'isError': false,
+        'isSuccess': false,
+        'status': 'idle',
+      };
+
+  static Map loading() => {
+        'isIdle': false,
+        'isLoading': true,
+        'isError': false,
+        'isSuccess': false,
+        'status': 'loading',
+      };
+
+  static Map error(
+    Object? error, {
+    Map<String, String>? headers,
+  }) =>
+      {
+        'isIdle': false,
+        'isLoading': false,
+        'isError': true,
+        'isSuccess': false,
+        'error': error,
+        'status': 'error',
+        'headers': headers,
+      };
+
+  static Map success(
+    Object? data, {
+    int statusCode = 200,
+    Map<String, String>? headers,
+  }) =>
+      {
+        'isIdle': false,
+        'isLoading': false,
+        'isError': false,
+        'isSuccess': true,
+        'data': data,
+        'status': 'error',
+        'headers': headers,
+        'statusCode': statusCode,
+      };
+
+  static Map fromResponse(http.Response response) {
+    final bool isSuccess =
+        response.statusCode >= 200 && response.statusCode < 300;
+    final Object body = tryJsonDecode(response.body) ?? response.body;
+    return {
+      'isIdle': false,
+      'isLoading': false,
+      'isError': !isSuccess,
+      'isSuccess': isSuccess,
+      isSuccess ? 'data' : 'error': body,
+      'body': body,
+      'status': isSuccess ? 'success' : 'error',
+      'bodyBytes': response.bodyBytes,
+      'headers': response.headers,
+      'statusCode': response.statusCode,
+    };
+  }
+
+// static Object? sanitizeValueForJson(Object? value) {
+//   return switch (value) {
+//     String() || int() || double() || bool() => value,
+//     List() => value.map(sanitizeValueForJson).toList(),
+//     Map() => value.map((key, value) =>
+//         MapEntry(key.toString(), sanitizeValueForJson(value))),
+//     _ => value?.toString(),
+//   };
+// }
 }
