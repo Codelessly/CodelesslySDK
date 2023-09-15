@@ -197,6 +197,16 @@ final RegExp staticImageTypesRegex =
   } else {
     delegatedNode = getNode(node.properties.bodyId);
   }
+
+  final bool hasChildren = delegatedNode.childrenOrEmpty.isNotEmpty;
+
+  if (!hasChildren) {
+    return (
+      horizontal: false,
+      vertical: false,
+    );
+  }
+
   for (final id in delegatedNode.childrenOrEmpty) {
     final child = getNode(id);
     isAnyExpandingHorizontally =
@@ -206,7 +216,7 @@ final RegExp staticImageTypesRegex =
   }
 
   return (
-    horizontal: !isAnyExpandingHorizontally,
+    horizontal: !isAnyExpandingHorizontally ,
     vertical: !isAnyExpandingVertically,
   );
 }
