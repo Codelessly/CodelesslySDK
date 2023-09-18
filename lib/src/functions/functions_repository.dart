@@ -69,22 +69,7 @@ class FunctionsRepository {
         callFunction(context, action as CallFunctionAction);
         break;
       case ActionType.callApi:
-        // Find a variable for the api and pass it.
-        // This makes it so the same variable for the api gets updated. This
-        // helps updating UI with new data.
-        // TODO(Birju): Keep it?
-        final codelesslyContext = context.read<CodelesslyContext>();
-        final api = context
-            .read<Codelessly>()
-            .dataManager
-            .publishModel!
-            .apis[(action as ApiCallAction).apiId];
-        ValueNotifier<VariableData>? variable;
-        if (api != null) {
-          final name = apiNameToVariableName(api.name);
-          variable = codelesslyContext.findVariableByName(name);
-        }
-        makeApiRequestFromAction(action, context, variable);
+        makeApiRequestFromAction(action as ApiCallAction, context);
         break;
     }
   }
@@ -109,8 +94,15 @@ class FunctionsRepository {
       return Future.error('Api with id [${action.apiId}] does not exist.');
     }
 
-    // TODO: Should we handle null case? We are just assuming the api always
-    // exists.
+    if (variable == null) {
+      // Find a variable for the api and pass it.
+      // This makes it so the same variable for the api gets updated. This
+      // helps updating UI with new data.
+      final codelesslyContext = context.read<CodelesslyContext>();
+      final name = apiNameToVariableName(apiData.name);
+      variable = codelesslyContext.findVariableByName(name);
+    }
+
     return makeApiRequest(
       context: context,
       method: apiData.method,
@@ -217,9 +209,12 @@ class FunctionsRepository {
 
     printApiDetails(method: method, url: url, headers: headers, body: body);
 
+    // persist previous api call data if there is any. This allows us to
+    // show previous data while new data is being fetched.
+    final existingData = variable?.value.getValue().typedValue<Map>()?['data'];
     if (variable case var variable?) {
       variable.value = variable.value.copyWith(
-        value: ApiResponseVariableUtils.loading(),
+        value: ApiResponseVariableUtils.loading(data: existingData),
       );
     }
 
@@ -266,7 +261,10 @@ class FunctionsRepository {
       log(stackTrace.toString());
       if (variable case var variable?) {
         variable.value = variable.value.copyWith(
-          value: ApiResponseVariableUtils.error(error),
+          value: ApiResponseVariableUtils.error(
+            error,
+            data: existingData,
+          ),
         );
       }
       return Future.error(error);
