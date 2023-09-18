@@ -441,16 +441,19 @@ class ApiResponseVariableUtils {
         'status': 'idle',
       };
 
-  static Map loading() => {
+  static Map loading({Object? data}) => {
         'isIdle': false,
         'isLoading': true,
         'isError': false,
         'isSuccess': false,
         'status': 'loading',
+        'data': data,
+        'hasData': data != null,
       };
 
   static Map error(
     Object? error, {
+    Object? data,
     Map<String, String>? headers,
   }) =>
       {
@@ -461,6 +464,8 @@ class ApiResponseVariableUtils {
         'error': error,
         'status': 'error',
         'headers': headers,
+        'hasData': data != null,
+        'data': data,
       };
 
   static Map success(
@@ -477,9 +482,10 @@ class ApiResponseVariableUtils {
         'status': 'error',
         'headers': headers,
         'statusCode': statusCode,
+        'hasData': data != null,
       };
 
-  static Map fromResponse(http.Response response) {
+  static Map fromResponse(http.Response response, {Object? existingData}) {
     final bool isSuccess =
         response.statusCode >= 200 && response.statusCode < 300;
     final Object body = tryJsonDecode(response.body) ?? response.body;
@@ -488,12 +494,14 @@ class ApiResponseVariableUtils {
       'isLoading': false,
       'isError': !isSuccess,
       'isSuccess': isSuccess,
-      isSuccess ? 'data' : 'error': body,
+      'data': isSuccess ? body : existingData,
+      'error': isSuccess ? null : body,
       'body': body,
       'status': isSuccess ? 'success' : 'error',
       'bodyBytes': response.bodyBytes,
       'headers': response.headers,
       'statusCode': response.statusCode,
+      'hasData': isSuccess || existingData != null,
     };
   }
 
