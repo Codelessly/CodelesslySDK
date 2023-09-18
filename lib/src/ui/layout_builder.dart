@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -139,6 +137,10 @@ class _CodelesslyPublishedLayoutBuilderState
     codelesslyContext.conditions.addAll(conditions);
   }
 
+  /// This loads all the apis for the layout as variables to be available
+  /// in the layout. Any api that is defined on canvas' load action will be
+  /// called right away. Otherwise, the api will be available as a variable
+  /// with idle state.
   void loadApisAndItsVariables(BuildContext context) {
     final apiCallActions = canvasNode.reactions
         .whereTriggerType(TriggerType.load)
@@ -152,33 +154,31 @@ class _CodelesslyPublishedLayoutBuilderState
 
     final apisMap = context.read<Codelessly>().dataManager.publishModel!.apis;
 
-    // create variables from these api names.
-    for (final action in apiCallActions) {
-      final api = apisMap[action.apiId!];
-      if (api == null) {
-        log('Api with id ${action.apiId} not found in published apis. Skipping.');
-        continue;
-      }
+    for (final api in apisMap.values) {
+      final ApiCallAction? canvasAction =
+          apiCallActions.firstWhereOrNull((action) => action.apiId == api.id);
 
       final variableName = apiNameToVariableName(api.name);
+
+      final data = canvasAction != null
+          ? ApiResponseVariableUtils.loading()
+          : ApiResponseVariableUtils.idle();
+
       final RuntimeVariableData variable = RuntimeVariableData(
         name: variableName,
         type: VariableType.map,
-        value: {
-          'data': null,
-          'isLoading': true,
-          'isError': false,
-          'isSuccess': false,
-          'error': null,
-        },
+        value: data,
       );
 
       // Override default values of variables with values provided in data.
       final notifier = ValueNotifier(variable);
       codelesslyContext.variables[variable.id] = notifier;
 
-      // Make api request.
-      FunctionsRepository.makeApiRequestFromAction(action, context, notifier);
+      // Make api request right away if it is a canvas action.
+      if (canvasAction != null) {
+        FunctionsRepository.makeApiRequestFromAction(
+            canvasAction, context, notifier);
+      }
     }
   }
 
