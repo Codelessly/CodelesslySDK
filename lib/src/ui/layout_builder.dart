@@ -141,7 +141,7 @@ class _CodelesslyPublishedLayoutBuilderState
 
   void loadApisAndItsVariables(BuildContext context) {
     final apiCallActions = canvasNode.reactions
-        .whereTriggerType(TriggerType.onLoad)
+        .whereTriggerType(TriggerType.load)
         .map((e) => e.action)
         .whereType<ApiCallAction>()
         .where((action) => action.apiId != null)

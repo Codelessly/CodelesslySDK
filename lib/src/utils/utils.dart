@@ -420,7 +420,7 @@ String apiNameToVariableName(String name) {
 /// Returns a list of api ids that should be loaded for a given [canvasNode].
 Set<String> getApisToLoadForCanvas(CanvasNode canvasNode) {
   return canvasNode.reactions
-      .whereTriggerType(TriggerType.onLoad)
+      .whereTriggerType(TriggerType.load)
       .map((e) => e.action)
       .whereType<ApiCallAction>()
       .map((e) => e.apiId)
