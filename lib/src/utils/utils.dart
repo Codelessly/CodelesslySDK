@@ -216,7 +216,7 @@ final RegExp staticImageTypesRegex =
   }
 
   return (
-    horizontal: !isAnyExpandingHorizontally ,
+    horizontal: !isAnyExpandingHorizontally,
     vertical: !isAnyExpandingVertically,
   );
 }

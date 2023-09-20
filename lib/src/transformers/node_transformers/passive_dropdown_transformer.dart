@@ -14,10 +14,14 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return buildDropdownFromNode(context, node);
+    return buildDropdownFromNode(context, node, settings);
   }
 
-  Widget buildDropdownFromNode(BuildContext context, DropdownNode node) {
+  Widget buildDropdownFromNode(
+    BuildContext context,
+    DropdownNode node,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveDropdownWidget(
       node: node,
       onTap: () => onTap(context, node),
@@ -25,12 +29,30 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
     );
   }
 
+  Widget buildFromProps(
+    BuildContext context, {
+    required DropdownProperties props,
+    required double height,
+    required double width,
+    bool value = false,
+    required WidgetBuildSettings settings,
+  }) {
+    final node = DropdownNode(
+      id: '',
+      name: 'Dropdown',
+      basicBoxLocal: NodeBox(0, 0, width, height),
+      retainedOuterBoxLocal: NodeBox(0, 0, width, height),
+      properties: props,
+    );
+    return buildDropdownFromNode(context, node, settings);
+  }
+
   static TextStyle getTextStyle(TextProp? style) {
     return PassiveTextTransformer.retrieveTextStyleData(
       fontSize: style?.fontSize ?? 18,
       lineHeight: style?.lineHeight ?? LineHeight.auto,
       letterSpacing: style?.letterSpacing ?? LetterSpacing.zero,
-      color: style?.fills[0].toFlutterColor() ?? Colors.black,
+      color: style?.fills.firstOrNull?.toFlutterColor() ?? Colors.black,
       fontName: style?.fontName ?? FontName.robotoRegular,
       textDecoration: style?.textDecoration ?? TextDecorationEnum.none,
       effects: [],
