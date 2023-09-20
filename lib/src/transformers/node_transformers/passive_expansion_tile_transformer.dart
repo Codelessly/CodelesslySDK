@@ -200,92 +200,77 @@ class PassiveExpansionTileWidget extends StatelessWidget {
     final List<String> children = node.children.toList()
       ..remove(node.listTileChild);
 
-    return SizedBox(
-      width: (node.horizontalFit == SizeFit.shrinkWrap)
-          ? null
-          : (node.horizontalFit == SizeFit.expanded)
-              ? double.infinity
-              : node.basicBoxLocal.width,
-      height: (node.verticalFit == SizeFit.shrinkWrap)
-          ? null
-          : (node.verticalFit == SizeFit.expanded)
-              ? double.infinity
-              : node.basicBoxLocal.height,
-      child: IgnorePointer(
-        child: Theme(
-          data: Theme.of(context).copyWith(
-            visualDensity: node.properties.visualDensity.flutterVisualDensity,
-            dividerColor:
-                node.properties.showDividers ? null : Colors.transparent,
+    return AdaptiveNodeBox(
+      node: listTileNode,
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          visualDensity: node.properties.visualDensity.flutterVisualDensity,
+          dividerColor:
+              node.properties.showDividers ? null : Colors.transparent,
+        ),
+        child: ExpansionTile(
+          key: ValueKey(node.properties.props),
+          initiallyExpanded: node.properties.initiallyExpanded,
+          maintainState: node.properties.maintainState,
+          tilePadding: node.properties.tilePadding?.flutterEdgeInsets,
+          expandedCrossAxisAlignment:
+              node.properties.expandedCrossAxisAlignment.flutterAxis,
+          expandedAlignment:
+              node.properties.expandedAlignment?.flutterAlignment,
+          childrenPadding: node.properties.childrenPadding?.flutterEdgeInsets,
+          backgroundColor: node.properties.backgroundColor?.toFlutterColor(),
+          collapsedBackgroundColor:
+              node.properties.collapsedBackgroundColor?.toFlutterColor(),
+          iconColor: node.properties.iconColor?.toFlutterColor(),
+          textColor: node.properties.textColor?.toFlutterColor(),
+          collapsedTextColor:
+              node.properties.collapsedTextColor?.toFlutterColor(),
+          collapsedIconColor:
+              node.properties.collapsedIconColor?.toFlutterColor(),
+          controlAffinity: node.properties
+              .effectiveAffinity(node.properties.controlAffinity)
+              .flutterControlAffinity,
+          title: StrictNodeBox(
+            node: title,
+            child: buildWidgetFromNode(title, context),
           ),
-          child: ExpansionTile(
-            key: ValueKey(node.properties.props),
-            initiallyExpanded: node.properties.initiallyExpanded,
-            maintainState: node.properties.maintainState,
-            tilePadding: node.properties.tilePadding?.flutterEdgeInsets,
-            expandedCrossAxisAlignment:
-                node.properties.expandedCrossAxisAlignment.flutterAxis,
-            expandedAlignment:
-                node.properties.expandedAlignment?.flutterAlignment,
-            childrenPadding: node.properties.childrenPadding?.flutterEdgeInsets,
-            backgroundColor: node.properties.backgroundColor?.toFlutterColor(),
-            collapsedBackgroundColor:
-                node.properties.collapsedBackgroundColor?.toFlutterColor(),
-            iconColor: node.properties.iconColor?.toFlutterColor(),
-            textColor: node.properties.textColor?.toFlutterColor(),
-            collapsedTextColor:
-                node.properties.collapsedTextColor?.toFlutterColor(),
-            collapsedIconColor:
-                node.properties.collapsedIconColor?.toFlutterColor(),
-            controlAffinity: node.properties
-                .effectiveAffinity(node.properties.controlAffinity)
-                .flutterControlAffinity,
-            title: SizedBox(
-              width: title.basicBoxLocal.width,
-              height: title.basicBoxLocal.height,
-              child: buildWidgetFromNode(title, context),
-            ),
-            subtitle: subtitle == null
-                ? null
-                : SizedBox(
-                    width: subtitle.basicBoxLocal.width,
-                    height: subtitle.basicBoxLocal.height,
-                    child: buildWidgetFromNode(subtitle, context),
-                  ),
-            leading: leading == null
-                ? null
-                : leading is SinglePlaceholderNode &&
-                        leading.children.isEmpty &&
-                        shouldBuildLeading()
-                    ? null
-                    : SizedBox(
-                        width: leading.basicBoxLocal.width,
-                        height: leading.basicBoxLocal.height,
-                        child: Stack(
-                          children: [
-                            buildWidgetFromNode(leading, context),
-                          ],
-                        ),
+          subtitle: subtitle == null
+              ? null
+              : StrictNodeBox(
+                  node: subtitle,
+                  child: buildWidgetFromNode(subtitle, context),
+                ),
+          leading: leading == null
+              ? null
+              : leading is SinglePlaceholderNode &&
+                      leading.children.isEmpty &&
+                      shouldBuildLeading()
+                  ? null
+                  : StrictNodeBox(
+                      node: leading,
+                      child: Stack(
+                        children: [
+                          buildWidgetFromNode(leading, context),
+                        ],
                       ),
-            trailing: trailing == null
-                ? null
-                : trailing is SinglePlaceholderNode &&
-                        trailing.children.isEmpty &&
-                        shouldBuildTrailing()
-                    ? null
-                    : SizedBox(
-                        width: trailing.basicBoxLocal.width,
-                        height: trailing.basicBoxLocal.height,
-                        child: buildWidgetFromNode(
-                          trailing,
-                          context,
-                        ),
+                    ),
+          trailing: trailing == null
+              ? null
+              : trailing is SinglePlaceholderNode &&
+                      trailing.children.isEmpty &&
+                      shouldBuildTrailing()
+                  ? null
+                  : StrictNodeBox(
+                      node: trailing,
+                      child: buildWidgetFromNode(
+                        trailing,
+                        context,
                       ),
-            children: children
-                .map((id) => buildWidgetFromNode(getNode(id), context))
-                .toList(),
-            onExpansionChanged: (value) {},
-          ),
+                    ),
+          children: children
+              .map((id) => buildWidgetFromNode(getNode(id), context))
+              .toList(),
+          onExpansionChanged: (value) {},
         ),
       ),
     );
