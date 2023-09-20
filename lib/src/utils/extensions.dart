@@ -1252,8 +1252,10 @@ extension VisualDensityTypeExt on VisualDensityType {
 }
 
 extension StringExt on String {
-  String get capitalized =>
-      characters.first.toUpperCase() + characters.skip(1).string.toLowerCase();
+  String get capitalized => characters.isEmpty
+      ? this
+      : characters.first.toUpperCase() +
+          characters.skip(1).string.toLowerCase();
 
   /// Whether the string contains all the valid variable paths inside it.
   /// This will also evaluate the path inside the ${} to be valid.
