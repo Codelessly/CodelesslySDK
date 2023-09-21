@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  google_fonts: ^5.1.0
+  google_fonts: ^6.1.0
   bubble: ^1.2.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
@@ -23,7 +23,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.2
+  flutter_lints: ^2.0.3
 
 flutter:
 
