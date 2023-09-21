@@ -41,8 +41,8 @@ class PassiveExpansionTileTransformer
   Widget buildPreview({
     ExpansionTileProperties? properties,
     ExpansionTileNode? node,
-    double height = kDefaultListTileWidth,
-    double width = kDefaultListTileHeight * 2,
+    double height = kDefaultListTileHeight * 2,
+    double width = kDefaultListTileWidth,
     BaseNode? leadingNode,
     BaseNode? titleNode,
     BaseNode? subtitleNode,
@@ -201,7 +201,7 @@ class PassiveExpansionTileWidget extends StatelessWidget {
       ..remove(node.listTileChild);
 
     return AdaptiveNodeBox(
-      node: listTileNode,
+      node: node,
       child: Theme(
         data: Theme.of(context).copyWith(
           visualDensity: node.properties.visualDensity.flutterVisualDensity,
