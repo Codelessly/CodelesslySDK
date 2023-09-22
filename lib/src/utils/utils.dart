@@ -14,14 +14,27 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'item'),
 };
 
-List<InlineSpan> transformTextSpans(List<InlineSpan> spans,
-    List<VariableData> variables, BuildContext context) {
+List<InlineSpan> transformTextSpans(
+  List<InlineSpan> spans,
+  List<VariableData> variables,
+  BuildContext context,
+  WidgetBuildSettings settings,
+) {
   return spans.map((span) {
     if (span is! TextSpan) return span;
     return TextSpan(
-      text: PropertyValueDelegate.substituteVariables(context, span.text!),
+      text: PropertyValueDelegate.substituteVariables(
+        context,
+        span.text!,
+        nullSubstitutionMode: settings.nullSubstitutionMode,
+      ),
       style: span.style,
-      children: transformTextSpans(span.children ?? [], variables, context),
+      children: transformTextSpans(
+        span.children ?? [],
+        variables,
+        context,
+        settings,
+      ),
       locale: span.locale,
       mouseCursor: span.mouseCursor,
       onEnter: span.onEnter,

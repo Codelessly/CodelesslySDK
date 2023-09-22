@@ -26,6 +26,7 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
       node: node,
       onTap: () => onTap(context, node),
       onChanged: (value) => onChanged(context, node, value),
+      settings: settings,
     );
   }
 
@@ -77,6 +78,7 @@ class PassiveDropdownWidget extends StatelessWidget {
   final bool useIconFonts;
   final ValueChanged<int>? onChanged;
   final int? initialValue;
+  final WidgetBuildSettings settings;
 
   const PassiveDropdownWidget({
     super.key,
@@ -85,6 +87,7 @@ class PassiveDropdownWidget extends StatelessWidget {
     this.useIconFonts = false,
     this.onChanged,
     this.initialValue,
+    required this.settings,
   });
 
   List<DropdownMenuItem<int>> buildItems(BuildContext context, List items) {
@@ -107,7 +110,10 @@ class PassiveDropdownWidget extends StatelessWidget {
                           context, node, 'itemLabel');
                   labelText ??= node.properties.itemLabel;
                   label = PropertyValueDelegate.substituteVariables(
-                      context, labelText);
+                    context,
+                    labelText,
+                    nullSubstitutionMode: settings.nullSubstitutionMode,
+                  );
                 }
                 return Text(
                   label,
@@ -140,7 +146,10 @@ class PassiveDropdownWidget extends StatelessWidget {
                         context, node, 'itemLabel');
                 labelText ??= node.properties.itemLabel;
                 label = PropertyValueDelegate.substituteVariables(
-                    context, labelText);
+                  context,
+                  labelText,
+                  nullSubstitutionMode: settings.nullSubstitutionMode,
+                );
               }
               return Container(
                 constraints: BoxConstraints(

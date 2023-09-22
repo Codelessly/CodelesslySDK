@@ -187,7 +187,10 @@ class _CodelesslyPublishedLayoutBuilderState
     return transformerManager.buildWidgetFromNode(
       canvasNode,
       context,
-      settings: const WidgetBuildSettings(debugLabel: 'layout builder'),
+      settings: const WidgetBuildSettings(
+        debugLabel: 'layout builder',
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ),
     );
   }
 }

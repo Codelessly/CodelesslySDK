@@ -193,6 +193,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     text: PropertyValueDelegate.substituteVariables(
       context,
       widget.node.initialText,
+      nullSubstitutionMode: widget.settings.nullSubstitutionMode,
     ),
   );
 

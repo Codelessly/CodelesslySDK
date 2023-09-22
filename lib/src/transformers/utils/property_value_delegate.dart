@@ -7,6 +7,21 @@ import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 
+/// Represents what to do when a variable path evaluates to null when
+/// substituting variables in a text.
+enum NullSubstitutionMode {
+  /// If a variable path evaluates to null, it will be substituted with an empty
+  /// string.
+  emptyString,
+
+  /// If a variable path evaluates to null, it won't be substituted at all.
+  noChange,
+
+  /// If a variable path evaluates to null, it will be substituted with
+  /// 'null' string.
+  nullValue,
+}
+
 /// A delegate class that helps retrieving the value of a node property from
 /// multiple sources such as conditions, variables, data, and node values.
 class PropertyValueDelegate {
@@ -168,11 +183,15 @@ class PropertyValueDelegate {
   ///
   /// If [dataOverrides] is provided, it will be used to instead of the
   /// data retrieved from [CodelesslyContext].
+  ///
+  /// [nullSubstitutionMode] determines what to do when a variable path
+  /// evaluates to null. See [NullSubstitutionMode] for more details.
   static String substituteVariables(
     BuildContext context,
     String text, {
     List<VariableData>? variablesOverrides,
     Map<String, dynamic>? dataOverrides,
+    required NullSubstitutionMode nullSubstitutionMode,
   }) {
     variablesOverrides =
         variablesOverrides?.isEmpty == true ? null : variablesOverrides;
@@ -189,7 +208,13 @@ class PropertyValueDelegate {
           dataOverrides: dataOverrides,
         );
 
-        return value ?? path;
+        if (value != null) return value;
+
+        return switch (nullSubstitutionMode) {
+          NullSubstitutionMode.emptyString => '',
+          NullSubstitutionMode.nullValue => 'null',
+          NullSubstitutionMode.noChange => match[0]!,
+        };
       },
     );
   }

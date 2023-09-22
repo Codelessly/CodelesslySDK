@@ -95,6 +95,7 @@ class PassiveButtonWidget extends StatelessWidget {
       context,
       rawLabel,
       variablesOverrides: variablesOverrides,
+      nullSubstitutionMode: settings.nullSubstitutionMode,
     );
 
     final ButtonStyle buttonStyle =

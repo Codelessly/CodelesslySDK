@@ -199,7 +199,11 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
             context, widget.node, 'tab-label-${tab.id}') ??
         tab.label;
 
-    String label = PropertyValueDelegate.substituteVariables(context, rawLabel);
+    String label = PropertyValueDelegate.substituteVariables(
+      context,
+      rawLabel,
+      nullSubstitutionMode: widget.settings.nullSubstitutionMode,
+    );
     final double effectiveIconSize =
         min(tab.icon.size ?? 24, widget.node.basicBoxLocal.height);
 

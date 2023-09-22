@@ -64,6 +64,9 @@ abstract class BuildSettings with EquatableMixin {
 class WidgetBuildSettings extends BuildSettings {
   final String debugLabel;
 
+  /// Defines what to do when a variable path results in a null value.
+  final NullSubstitutionMode nullSubstitutionMode;
+
   /// Creates a [WidgetBuildSettings] instance.
   const WidgetBuildSettings({
     super.withOpacity,
@@ -76,6 +79,7 @@ class WidgetBuildSettings extends BuildSettings {
     super.isPreview,
     super.useInk,
     required this.debugLabel,
+    this.nullSubstitutionMode = NullSubstitutionMode.noChange,
   });
 
   /// Creates a copy of this [WidgetBuildSettings] instance.
@@ -90,6 +94,7 @@ class WidgetBuildSettings extends BuildSettings {
     bool? isPreview,
     bool? useInk,
     String? debugLabel,
+    NullSubstitutionMode? nullSubstitutionMode,
   }) {
     return WidgetBuildSettings(
       withOpacity: withOpacity ?? this.withOpacity,
@@ -102,6 +107,7 @@ class WidgetBuildSettings extends BuildSettings {
       isPreview: isPreview ?? this.isPreview,
       useInk: useInk ?? this.useInk,
       debugLabel: debugLabel ?? this.debugLabel,
+      nullSubstitutionMode: nullSubstitutionMode ?? this.nullSubstitutionMode,
     );
   }
 
@@ -109,6 +115,7 @@ class WidgetBuildSettings extends BuildSettings {
   List<Object?> get props => [
         ...super.props,
         debugLabel,
+        nullSubstitutionMode,
       ];
 }
 
