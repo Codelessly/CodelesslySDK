@@ -13,11 +13,13 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return PassiveAppBarWidget(node: node);
+    return PassiveAppBarWidget(node: node, settings: settings);
   }
 
   PreferredSizeWidget buildAppBarWidgetFromProps({
     required AppBarProperties props,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final node = AppBarNode(
       id: '',
@@ -25,7 +27,10 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
       basicBoxLocal: NodeBox(0, 0, 250, kAppBarDefaultHeight),
       properties: props,
     );
-    return PassiveAppBarWidget(node: node);
+    return PassiveAppBarWidget(
+      node: node,
+      settings: settings,
+    );
   }
 
   Widget buildPreview(
@@ -34,6 +39,8 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
     AppBarNode? node,
     double? height,
     double? width,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final previewNode = AppBarNode(
       properties: properties ?? node!.properties,
@@ -46,7 +53,10 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
     );
     return Theme(
       data: Theme.of(context).copyWith(platform: TargetPlatform.android),
-      child: PassiveAppBarWidget(node: previewNode),
+      child: PassiveAppBarWidget(
+        node: previewNode,
+        settings: settings,
+      ),
     );
   }
 }
@@ -56,12 +66,14 @@ class PassiveAppBarWidget extends StatelessWidget
   final AppBarNode node;
   final double? elevation;
   final bool useIconFonts;
+  final WidgetBuildSettings settings;
 
   const PassiveAppBarWidget({
     super.key,
     required this.node,
     this.elevation,
     this.useIconFonts = false,
+    required this.settings,
   });
 
   @override
@@ -87,7 +99,13 @@ class PassiveAppBarWidget extends StatelessWidget
         automaticallyImplyLeading: node.properties.leading.icon.show
             ? node.properties.automaticallyImplyLeading
             : false,
-        title: Text(node.properties.title),
+        title: Text(
+          PropertyValueDelegate.substituteVariables(
+            context,
+            node.properties.title,
+            nullSubstitutionMode: settings.nullSubstitutionMode,
+          ),
+        ),
         foregroundColor:
             node.properties.titleStyle.fills.firstOrNull?.toFlutterColor(),
         titleSpacing: node.properties.titleSpacing,

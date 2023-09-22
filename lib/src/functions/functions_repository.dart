@@ -191,7 +191,11 @@ class FunctionsRepository {
   }
 
   static void launchURL(BuildContext context, LinkAction action) {
-    final url = PropertyValueDelegate.substituteVariables(context, action.url);
+    final url = PropertyValueDelegate.substituteVariables(
+      context,
+      action.url,
+      nullSubstitutionMode: NullSubstitutionMode.nullValue,
+    );
     launchUrl(Uri.parse(url));
   }
 
@@ -760,9 +764,11 @@ class FunctionsRepository {
     // Substitute variables in params.
     final Map<String, dynamic> parsedParams = {};
     for (final MapEntry(key: name, value: value) in action.params.entries) {
-      final parsedValue =
-          PropertyValueDelegate.substituteVariables(context, value)
-              .parsedValue();
+      final parsedValue = PropertyValueDelegate.substituteVariables(
+        context,
+        value,
+        nullSubstitutionMode: NullSubstitutionMode.nullValue,
+      ).parsedValue();
       parsedParams[name] = parsedValue;
     }
 

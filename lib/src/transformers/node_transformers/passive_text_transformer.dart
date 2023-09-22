@@ -44,6 +44,7 @@ class PassiveTextTransformer extends NodeWidgetTransformer<TextNode> {
     Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
     List<VariableData> variablesOverrides = const [],
     BuildContext? context,
+    required WidgetBuildSettings settings,
   }) {
     final List<TextSpan> textSpanChildren = node.textMixedProps.map(
       (spanProp) {
@@ -58,6 +59,7 @@ class PassiveTextTransformer extends NodeWidgetTransformer<TextNode> {
             context,
             characters,
             variablesOverrides: variablesOverrides,
+            nullSubstitutionMode: settings.nullSubstitutionMode,
           );
         }
 
@@ -310,6 +312,7 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
         context,
         charactersValue,
         variablesOverrides: widget.variablesOverrides,
+        nullSubstitutionMode: widget.settings.nullSubstitutionMode,
       );
 
       final StartEndProp textProps = widget.node.textMixedProps.first;
@@ -342,6 +345,7 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
         variablesOverrides: widget.variablesOverrides,
         context: context,
         tapGestureRecognizers: tapGestureRecognizerRegistry,
+        settings: widget.settings,
       );
 
       textWidget = RichText(
