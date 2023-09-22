@@ -11,6 +11,7 @@ void main() async {
     config: CodelesslyConfig(
       authToken: "cSlMIT93cj1lXkBuYk5QNmImSTUsTHw2MDQ4VkdlOCZFLHc7",
       isPreview: kDebugMode,
+      preload: false,
     ),
   );
 
