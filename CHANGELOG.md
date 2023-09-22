@@ -1,3 +1,16 @@
+## 0.5.0
+- Load API V1.
+- Update layout algorithm to Flutter's Stack behavior changes.
+- Fix ExpansionTiles layout and functionality issues.
+- Fix reactions not being modified.
+- Support Google Fonts v6.
+- Add visual density support for buttons.
+- Fix image alignment overlay BoxFit.none rendering poorly with different scaling.
+- Fix stack alignment in code-gen.
+- Fix ListTile action invocation.
+- Fix dropdown image icon not updating
+- Remove FetchWebsiteData.
+
 ## 0.4.1
 - Add hover and splash color to dropdown node.
 - Add color support for custom image icons.
