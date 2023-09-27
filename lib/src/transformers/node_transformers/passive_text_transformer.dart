@@ -29,10 +29,10 @@ class PassiveTextTransformer extends NodeWidgetTransformer<TextNode> {
     }
   }
 
-  static Color? getTextColor(TextNode node) {
-    if (node.textMixedProps[0].fills.isNotEmpty &&
-        (node.textMixedProps[0].fills[0].color != null)) {
-      return node.textMixedProps[0].fills[0].toFlutterColor()!;
+  static Color? getTextColor(List<TextProp> textMixedProps) {
+    if (textMixedProps[0].fills.isNotEmpty &&
+        (textMixedProps[0].fills[0].color != null)) {
+      return textMixedProps[0].fills[0].toFlutterColor()!;
     } else {
       // Use pink as a placeholder while we add support for Gradients.
       return null;
@@ -131,7 +131,7 @@ class PassiveTextTransformer extends NodeWidgetTransformer<TextNode> {
       textDecoration: node.textMixedProps[0].textDecoration,
       lineHeight: node.textMixedProps[0].lineHeight,
       letterSpacing: node.textMixedProps[0].letterSpacing,
-      color: PassiveTextTransformer.getTextColor(node),
+      color: PassiveTextTransformer.getTextColor(node.textMixedProps),
       effects: node.effects,
     );
   }
@@ -327,7 +327,7 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
           textDecoration: textProps.textDecoration,
           lineHeight: textProps.lineHeight,
           letterSpacing: textProps.letterSpacing,
-          color: PassiveTextTransformer.getTextColor(widget.node),
+          color: PassiveTextTransformer.getTextColor(widget.node.textMixedProps),
           effects: widget.node.effects,
         ),
       );
