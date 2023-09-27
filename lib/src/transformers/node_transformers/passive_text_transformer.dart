@@ -327,7 +327,8 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
           textDecoration: textProps.textDecoration,
           lineHeight: textProps.lineHeight,
           letterSpacing: textProps.letterSpacing,
-          color: PassiveTextTransformer.getTextColor(widget.node.textMixedProps),
+          color:
+              PassiveTextTransformer.getTextColor(widget.node.textMixedProps),
           effects: widget.node.effects,
         ),
       );
