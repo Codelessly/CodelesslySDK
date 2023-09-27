@@ -187,6 +187,7 @@ ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
         foregroundColor: primary,
         elevation: elevation ?? node.properties.elevation,
         visualDensity: VisualDensity.standard,
+        padding: node.padding.flutterEdgeInsets,
         backgroundColor: node.properties.buttonColor.toFlutterColor(),
         shadowColor: node.properties.shadowColor.toFlutterColor(),
         shape: getButtonShape(node.properties),
