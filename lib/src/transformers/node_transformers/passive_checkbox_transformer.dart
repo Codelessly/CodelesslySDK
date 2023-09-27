@@ -110,9 +110,8 @@ class PassiveCheckboxWidget extends StatelessWidget {
         ) ??
         node.value;
 
-    return SizedBox(
-      width: node.basicBoxLocal.width,
-      height: node.basicBoxLocal.height,
+    return AdaptiveNodeBox(
+      node: node,
       child: Transform.scale(
           scale: scale,
           child: Checkbox(
@@ -124,6 +123,7 @@ class PassiveCheckboxWidget extends StatelessWidget {
             hoverColor: node.properties.hoverColor.toFlutterColor(),
             focusColor: node.properties.focusColor.toFlutterColor(),
             onChanged: onChanged,
+            visualDensity: VisualDensity.standard,
             splashRadius: node.properties.splashRadius,
             shape: RoundedRectangleBorder(
               borderRadius: node.properties.cornerRadius.borderRadius,
