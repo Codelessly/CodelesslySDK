@@ -20,7 +20,7 @@ class PassiveEmbeddedVideoTransformer
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return buildFromNode(node);
+    return buildFromNode(node, settings);
   }
 
   Widget buildPreview({
@@ -31,6 +31,8 @@ class PassiveEmbeddedVideoTransformer
     String url = '',
     EmbeddedVideoSource source = EmbeddedVideoSource.youtube,
     required String baseUrl,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview', isPreview: true),
   }) {
     final previewNode = EmbeddedVideoNode(
       properties: properties ??
@@ -46,13 +48,15 @@ class PassiveEmbeddedVideoTransformer
     return PassiveEmbeddedVideoWidget(
       node: previewNode,
       baseUrl: baseUrl,
+      settings: settings,
     );
   }
 
-  Widget buildFromNode(EmbeddedVideoNode node) {
+  Widget buildFromNode(EmbeddedVideoNode node, WidgetBuildSettings settings) {
     return PassiveEmbeddedVideoWidget(
       key: ValueKey(node.properties.url),
       node: node,
+      settings: settings,
     );
   }
 }
@@ -61,12 +65,14 @@ class PassiveEmbeddedVideoWidget extends StatefulWidget {
   final EmbeddedVideoNode node;
   final List<VariableData> variables;
   final String? baseUrl;
+  final WidgetBuildSettings settings;
 
   const PassiveEmbeddedVideoWidget({
     super.key,
     required this.node,
     this.variables = const [],
     this.baseUrl,
+    required this.settings,
   });
 
   static const Set<TargetPlatform> supportedPlatforms = {
@@ -86,7 +92,7 @@ class _PassiveEmbeddedVideoWidgetState
   @override
   void initState() {
     super.initState();
-    if (!isPlatformSupportedForWebView) {
+    if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
       print('Unsupported platform: $defaultTargetPlatform for embedded '
           'video.');
       return;
@@ -181,8 +187,10 @@ class _PassiveEmbeddedVideoWidgetState
   }
 
   Widget buildEmbeddedYoutubeVideo(
-      BuildContext context, EmbeddedYoutubeVideoProperties properties) {
-    if (isPlatformSupportedForWebView) {
+    BuildContext context,
+    EmbeddedYoutubeVideoProperties properties,
+  ) {
+    if (isPlatformSupportedForWebView && !widget.settings.isPreview) {
       return WebViewWidget(
         controller: _controller,
         key: ValueKey(properties),
@@ -208,7 +216,7 @@ class _PassiveEmbeddedVideoWidgetState
 
   Widget buildEmbeddedVimeoVideo(
       BuildContext context, EmbeddedVimeoVideoProperties properties) {
-    if (isPlatformSupportedForWebView) {
+    if (isPlatformSupportedForWebView && !widget.settings.isPreview) {
       return WebViewWidget(
         key: ValueKey(properties),
         controller: _controller,
