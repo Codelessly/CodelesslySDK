@@ -213,13 +213,14 @@ final RegExp staticImageTypesRegex =
     delegatedNode = getNode(node.properties.bodyId);
   }
 
+  if (delegatedNode is ScrollableMixin && delegatedNode.isScrollingEnforced) {
+    return (horizontal: true, vertical: true);
+  }
+
   final bool hasChildren = delegatedNode.childrenOrEmpty.isNotEmpty;
 
   if (!hasChildren) {
-    return (
-      horizontal: false,
-      vertical: false,
-    );
+    return (horizontal: false, vertical: false);
   }
 
   for (final id in delegatedNode.childrenOrEmpty) {
