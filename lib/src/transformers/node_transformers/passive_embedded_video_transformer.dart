@@ -246,10 +246,12 @@ class _PassiveEmbeddedVideoWidgetState
     if (!kIsWeb) {
       // _controller doesn't have a way to dispose the player, so we call
       // js methods directly.
-      if (widget.node.properties.source == EmbeddedVideoSource.youtube) {
-        _controller.runJavaScript('player.stopVideo();');
-      } else {
-        _controller.runJavaScript('player.pause();');
+      if (isPlatformSupportedForWebView && !widget.settings.isPreview) {
+        if (widget.node.properties.source == EmbeddedVideoSource.youtube) {
+          _controller.runJavaScript('player.stopVideo();');
+        } else {
+          _controller.runJavaScript('player.pause();');
+        }
       }
     }
 
