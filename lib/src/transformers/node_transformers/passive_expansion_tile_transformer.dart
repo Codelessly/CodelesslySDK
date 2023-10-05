@@ -59,6 +59,7 @@ class PassiveExpansionTileTransformer
             basicBoxLocal: NodeBox(0, 0, width, kDefaultListTileHeight),
             properties: ListTileProperties(),
             children: [],
+            title: titleNode?.id,
           )
         : null;
 
@@ -79,11 +80,6 @@ class PassiveExpansionTileTransformer
           listTileChild: listTileNode?.id,
         );
 
-    previewNode.properties = previewNode.properties.copyWith(
-      controlAffinity: controlAffinity,
-      initiallyExpanded: initiallyExpanded,
-    );
-
     listTileNode?.parentID = previewNode.id;
     // previewNode.properties.initiallyExpanded = false;
 
@@ -94,6 +90,7 @@ class PassiveExpansionTileTransformer
       titleNode: titleNode,
       subtitleNode: subtitleNode,
       trailingNode: trailingNode,
+      initiallyExpanded: initiallyExpanded,
       getNode: getNode,
       buildWidgetFromNode: (node, context) => manager.buildWidgetFromNode(
         node,
@@ -126,6 +123,9 @@ class PassiveExpansionTileWidget extends StatelessWidget {
   final BuildWidgetFromNode buildWidgetFromNode;
   final GetNode getNode;
 
+  /// Allows to override initial expansion state.
+  final bool? initiallyExpanded;
+
   const PassiveExpansionTileWidget({
     super.key,
     required this.node,
@@ -136,6 +136,7 @@ class PassiveExpansionTileWidget extends StatelessWidget {
     this.trailingNode,
     required this.buildWidgetFromNode,
     required this.getNode,
+    this.initiallyExpanded,
   });
 
   /// Defines whether the ExpansionTile should render its internal rotating
@@ -210,7 +211,8 @@ class PassiveExpansionTileWidget extends StatelessWidget {
         ),
         child: ExpansionTile(
           key: ValueKey(node.id),
-          initiallyExpanded: node.properties.initiallyExpanded,
+          initiallyExpanded:
+              initiallyExpanded ?? node.properties.initiallyExpanded,
           maintainState: node.properties.maintainState,
           tilePadding: node.properties.tilePadding?.flutterEdgeInsets,
           expandedCrossAxisAlignment:
