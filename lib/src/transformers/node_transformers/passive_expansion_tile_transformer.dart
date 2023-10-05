@@ -209,7 +209,7 @@ class PassiveExpansionTileWidget extends StatelessWidget {
               node.properties.showDividers ? null : Colors.transparent,
         ),
         child: ExpansionTile(
-          key: ValueKey(node.properties.props),
+          key: ValueKey(node.id),
           initiallyExpanded: node.properties.initiallyExpanded,
           maintainState: node.properties.maintainState,
           tilePadding: node.properties.tilePadding?.flutterEdgeInsets,
