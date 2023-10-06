@@ -49,34 +49,102 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
     );
 
 Map<String, dynamic> _$HttpApiDataToJson(HttpApiData instance) {
-  final val = <String, dynamic>{
-    'id': instance.id,
-    'name': instance.name,
-    'project': instance.project,
-    'owner': instance.owner,
-    'method': _$HttpMethodEnumMap[instance.method]!,
-    'url': instance.url,
-    'headers': instance.headers.map((e) => e.toJson()).toList(),
-    'queryParams': instance.queryParams.map((e) => e.toJson()).toList(),
-    'formFields': instance.formFields.map((e) => e.toJson()).toList(),
-  };
+  final val = <String, dynamic>{};
 
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
+  /// Code from: https://github.com/google/quiver-dart/blob/master/lib/src/collection/utils.dart
+  bool listsEqual(List? a, List? b) {
+    if (a == b) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+
+    return true;
+  }
+
+  /// Code from: https://github.com/google/quiver-dart/blob/master/lib/src/collection/utils.dart
+  bool mapsEqual(Map? a, Map? b) {
+    if (a == b) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+
+    for (final k in a.keys) {
+      var bValue = b[k];
+      if (bValue == null && !b.containsKey(k)) return false;
+      if (bValue != a[k]) return false;
+    }
+
+    return true;
+  }
+
+  /// Code from: https://github.com/google/quiver-dart/blob/master/lib/src/collection/utils.dart
+  bool setsEqual(Set? a, Set? b) {
+    if (a == b) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+
+    return a.containsAll(b);
+  }
+
+  void writeNotNull(
+      String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
+    if (value == null) return;
+    bool areEqual = false;
+    if (value is List) {
+      areEqual = listsEqual(value, defaultValue);
+    } else if (value is Map) {
+      areEqual = mapsEqual(value, defaultValue);
+    } else if (value is Set) {
+      areEqual = setsEqual(value, defaultValue);
+    } else {
+      areEqual = value == defaultValue;
+    }
+
+    if (!areEqual) {
+      val[key] = jsonValue;
     }
   }
 
-  writeNotNull('body', instance.body);
-  val['bodyType'] = _$RequestBodyTypeEnumMap[instance.bodyType]!;
-  val['deleted'] = instance.isDeleted;
+  writeNotNull('id', instance.id, instance.id, '');
+  val['name'] = instance.name;
+  writeNotNull('project', instance.project, instance.project, '');
+  writeNotNull('owner', instance.owner, instance.owner, '');
+  writeNotNull('method', instance.method, _$HttpMethodEnumMap[instance.method]!,
+      HttpMethod.get);
+  writeNotNull('url', instance.url, instance.url, '');
   writeNotNull(
-      'lastUpdated', const DateTimeConverter().toJson(instance.lastUpdated));
-  val['requestBodyContentType'] =
-      _$RequestBodyTextTypeEnumMap[instance.requestBodyContentType]!;
-  val['variables'] = instance.variables.map((e) => e.toJson()).toList();
-  writeNotNull('created', const DateTimeConverter().toJson(instance.created));
-  writeNotNull('directory', instance.directory);
+      'headers',
+      instance.headers,
+      instance.headers.map((e) => e.toJson()).toList(),
+      const <HttpKeyValuePair>[]);
+  writeNotNull(
+      'queryParams',
+      instance.queryParams,
+      instance.queryParams.map((e) => e.toJson()).toList(),
+      const <HttpKeyValuePair>[]);
+  writeNotNull(
+      'formFields',
+      instance.formFields,
+      instance.formFields.map((e) => e.toJson()).toList(),
+      const <HttpKeyValuePair>[]);
+  writeNotNull('body', instance.body, instance.body, null);
+  writeNotNull('bodyType', instance.bodyType,
+      _$RequestBodyTypeEnumMap[instance.bodyType]!, RequestBodyType.text);
+  writeNotNull('deleted', instance.isDeleted, instance.isDeleted, false);
+  writeNotNull('lastUpdated', instance.lastUpdated,
+      const DateTimeConverter().toJson(instance.lastUpdated), null);
+  writeNotNull(
+      'requestBodyContentType',
+      instance.requestBodyContentType,
+      _$RequestBodyTextTypeEnumMap[instance.requestBodyContentType]!,
+      RequestBodyTextType.json);
+  writeNotNull('variables', instance.variables,
+      instance.variables.map((e) => e.toJson()).toList(), const []);
+  writeNotNull('created', instance.created,
+      const DateTimeConverter().toJson(instance.created), null);
+  writeNotNull('directory', instance.directory, instance.directory, null);
   return val;
 }
 
@@ -105,9 +173,68 @@ HttpKeyValuePair _$HttpKeyValuePairFromJson(Map json) => HttpKeyValuePair(
       isUsed: json['isUsed'] as bool? ?? true,
     );
 
-Map<String, dynamic> _$HttpKeyValuePairToJson(HttpKeyValuePair instance) =>
-    <String, dynamic>{
-      'key': instance.key,
-      'value': instance.value,
-      'isUsed': instance.isUsed,
-    };
+Map<String, dynamic> _$HttpKeyValuePairToJson(HttpKeyValuePair instance) {
+  final val = <String, dynamic>{
+    'key': instance.key,
+    'value': instance.value,
+  };
+
+  /// Code from: https://github.com/google/quiver-dart/blob/master/lib/src/collection/utils.dart
+  bool listsEqual(List? a, List? b) {
+    if (a == b) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+
+    return true;
+  }
+
+  /// Code from: https://github.com/google/quiver-dart/blob/master/lib/src/collection/utils.dart
+  bool mapsEqual(Map? a, Map? b) {
+    if (a == b) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+
+    for (final k in a.keys) {
+      var bValue = b[k];
+      if (bValue == null && !b.containsKey(k)) return false;
+      if (bValue != a[k]) return false;
+    }
+
+    return true;
+  }
+
+  /// Code from: https://github.com/google/quiver-dart/blob/master/lib/src/collection/utils.dart
+  bool setsEqual(Set? a, Set? b) {
+    if (a == b) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+
+    return a.containsAll(b);
+  }
+
+  void writeNotNull(
+      String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
+    if (value == null) return;
+    bool areEqual = false;
+    if (value is List) {
+      areEqual = listsEqual(value, defaultValue);
+    } else if (value is Map) {
+      areEqual = mapsEqual(value, defaultValue);
+    } else if (value is Set) {
+      areEqual = setsEqual(value, defaultValue);
+    } else {
+      areEqual = value == defaultValue;
+    }
+
+    if (!areEqual) {
+      val[key] = jsonValue;
+    }
+  }
+
+  writeNotNull('isUsed', instance.isUsed, instance.isUsed, true);
+  return val;
+}
