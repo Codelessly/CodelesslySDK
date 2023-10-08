@@ -1,3 +1,13 @@
+## 0.5.1
+- New shrink-wrap support for Buttons. Buttons can now resize based on the content inside them.
+- New shrink-wrapping support for Slider, Switch, and Radio Button components.
+- Fix ListView and PageView reverse scroll direction not enabled.
+- Update null values to display empty instead of "null" text.
+- Add video thumbnail previews.
+- Fix video controller disposal.
+- Fix expansion tile auto collapsing on resize.
+- Fix expansion tile settings panel resetting `initiallyExpanded` property.
+
 ## 0.5.0
 - Load API V1.
 - Update layout algorithm to Flutter's Stack behavior changes.
