@@ -19,76 +19,64 @@ class PassiveAccordionTransformer extends NodeWidgetTransformer<AccordionNode> {
     );
   }
 
-  Widget buildPreview({Widget? title, Widget? content}) {
+  Widget buildPreview({
+    required BuildContext context,
+    AccordionNode? node,
+    Widget? title,
+    Widget? content,
+    bool enabled = false,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview', isPreview: true),
+  }) {
+    node ??= AccordionNode(
+      children: [],
+      basicBoxLocal: NodeBox(0, 0, 0, 0),
+      name: 'AccordionNode',
+      id: 'accordion_node',
+    );
     return PassiveAccordionWidget(
-      topWidget: AdaptiveSizeFitBox(
-        horizontalFit: SizeFit.expanded,
-        verticalFit: SizeFit.fixed,
-        size: SizeC(300, 64),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: title,
-        ),
-      ),
-      bottomWidget: AdaptiveSizeFitBox(
-        horizontalFit: SizeFit.expanded,
-        verticalFit: SizeFit.fixed,
-        size: SizeC(300, 38),
-        child: content,
-      ),
-      node: AccordionNode(
-        children: [],
-        basicBoxLocal: NodeBox(0, 0, 0, 0),
-        name: 'AccordionNode',
-        id: 'accordion_node',
-      ),
-    );
-  }
-}
-
-class PassiveAccordionWidget extends StatelessWidget {
-  final AccordionNode node;
-  final Widget topWidget;
-  final Widget bottomWidget;
-
-  const PassiveAccordionWidget({
-    super.key,
-    required this.node,
-    required this.topWidget,
-    required this.bottomWidget,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AccordionWidget(
+      enabled: enabled,
+      topWidget: title ??
+          manager.buildWidgetFromNode(getNode(node.children[0]), context,
+              settings: settings),
+      bottomWidget: content ??
+          manager.buildWidgetFromNode(getNode(node.children[1]), context,
+              settings: settings),
       node: node,
-      topWidget: topWidget,
-      bottomWidget: bottomWidget,
-      isInitiallyExpanded: node.isExpanded,
     );
   }
 }
 
-class AccordionWidget extends StatefulWidget {
+class PassiveAccordionWidget extends StatefulWidget {
   final Widget topWidget;
   final Widget bottomWidget;
   final bool isInitiallyExpanded;
   final AccordionNode node;
+  final bool enabled;
 
-  const AccordionWidget({
+  const PassiveAccordionWidget({
     required this.topWidget,
     required this.bottomWidget,
     required this.node,
     this.isInitiallyExpanded = false,
+    this.enabled = true,
     super.key,
   });
 
   @override
-  State<AccordionWidget> createState() => _AccordionWidgetState();
+  State<PassiveAccordionWidget> createState() => _AccordionWidgetState();
 }
 
-class _AccordionWidgetState extends State<AccordionWidget> {
+class _AccordionWidgetState extends State<PassiveAccordionWidget> {
   late bool isExpanded = widget.isInitiallyExpanded;
+
+  @override
+  void didUpdateWidget(covariant PassiveAccordionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isInitiallyExpanded != widget.isInitiallyExpanded) {
+      isExpanded = widget.isInitiallyExpanded;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,9 +100,8 @@ class _AccordionWidgetState extends State<AccordionWidget> {
                     height: 48,
                     child: TextButton(
                       onPressed: () {
-                        setState(() {
-                          isExpanded = !isExpanded;
-                        });
+                        if (widget.enabled) return;
+                        setState(() => isExpanded = !isExpanded);
                       },
                       child: Icon(
                         isExpanded
