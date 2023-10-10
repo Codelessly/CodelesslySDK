@@ -56,7 +56,8 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
 
   void writeNotNull(
       String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize = shouldSerialize(key, value, jsonValue, defaultValue);
+    final bool serialize =
+        shouldSerialize(key, value, jsonValue, defaultValue, true);
 
     if (serialize) {
       val[key] = jsonValue;
@@ -115,7 +116,8 @@ Map<String, dynamic> _$SDKPublishLayoutToJson(SDKPublishLayout instance) {
 
   void writeNotNull(
       String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize = shouldSerialize(key, value, jsonValue, defaultValue);
+    final bool serialize =
+        shouldSerialize(key, value, jsonValue, defaultValue, true);
 
     if (serialize) {
       val[key] = jsonValue;
@@ -161,7 +163,8 @@ Map<String, dynamic> _$SDKPublishFontToJson(SDKPublishFont instance) {
 
   void writeNotNull(
       String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize = shouldSerialize(key, value, jsonValue, defaultValue);
+    final bool serialize =
+        shouldSerialize(key, value, jsonValue, defaultValue, true);
 
     if (serialize) {
       val[key] = jsonValue;
@@ -202,12 +205,12 @@ SDKPublishUpdates _$SDKPublishUpdatesFromJson(Map json) => SDKPublishUpdates(
             (k, e) => MapEntry(k as String,
                 (e as List<dynamic>).map((e) => e as String).toSet()),
           ) ??
-          const {},
+          {},
       layoutApis: (json['layoutApis'] as Map?)?.map(
             (k, e) => MapEntry(k as String,
                 (e as List<dynamic>).map((e) => e as String).toSet()),
           ) ??
-          const {},
+          {},
     );
 
 Map<String, dynamic> _$SDKPublishUpdatesToJson(SDKPublishUpdates instance) {
@@ -215,7 +218,8 @@ Map<String, dynamic> _$SDKPublishUpdatesToJson(SDKPublishUpdates instance) {
 
   void writeNotNull(
       String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize = shouldSerialize(key, value, jsonValue, defaultValue);
+    final bool serialize =
+        shouldSerialize(key, value, jsonValue, defaultValue, true);
 
     if (serialize) {
       val[key] = jsonValue;
@@ -262,7 +266,8 @@ Map<String, dynamic> _$SDKLayoutVariablesToJson(SDKLayoutVariables instance) {
 
   void writeNotNull(
       String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize = shouldSerialize(key, value, jsonValue, defaultValue);
+    final bool serialize =
+        shouldSerialize(key, value, jsonValue, defaultValue, true);
 
     if (serialize) {
       val[key] = jsonValue;
@@ -299,7 +304,8 @@ Map<String, dynamic> _$SDKLayoutConditionsToJson(SDKLayoutConditions instance) {
 
   void writeNotNull(
       String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize = shouldSerialize(key, value, jsonValue, defaultValue);
+    final bool serialize =
+        shouldSerialize(key, value, jsonValue, defaultValue, true);
 
     if (serialize) {
       val[key] = jsonValue;
