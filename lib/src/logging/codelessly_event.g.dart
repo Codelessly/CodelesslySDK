@@ -12,7 +12,7 @@ CodelesslyEvent _$CodelesslyEventFromJson(Map json) => CodelesslyEvent(
       stacktrace: json['stacktrace'] as String?,
       tags:
           (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-              const [],
+              [],
     );
 
 Map<String, dynamic> _$CodelesslyEventToJson(CodelesslyEvent instance) {
@@ -20,7 +20,8 @@ Map<String, dynamic> _$CodelesslyEventToJson(CodelesslyEvent instance) {
 
   void writeNotNull(
       String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize = shouldSerialize(key, value, jsonValue, defaultValue);
+    final bool serialize =
+        shouldSerialize(key, value, jsonValue, defaultValue, true);
 
     if (serialize) {
       val[key] = jsonValue;
