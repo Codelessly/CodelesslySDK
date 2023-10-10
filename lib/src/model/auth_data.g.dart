@@ -23,7 +23,8 @@ Map<String, dynamic> _$AuthDataToJson(AuthData instance) {
 
   void writeNotNull(
       String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize = shouldSerialize(key, value, jsonValue, defaultValue);
+    final bool serialize =
+        shouldSerialize(key, value, jsonValue, defaultValue, true);
 
     if (serialize) {
       val[key] = jsonValue;

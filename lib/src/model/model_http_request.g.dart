@@ -14,17 +14,17 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
               ?.map((e) => HttpKeyValuePair.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
-          const <HttpKeyValuePair>[],
+          <HttpKeyValuePair>[],
       queryParams: (json['queryParams'] as List<dynamic>?)
               ?.map((e) => HttpKeyValuePair.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
-          const <HttpKeyValuePair>[],
+          <HttpKeyValuePair>[],
       formFields: (json['formFields'] as List<dynamic>?)
               ?.map((e) => HttpKeyValuePair.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
-          const <HttpKeyValuePair>[],
+          <HttpKeyValuePair>[],
       body: json['body'] as String?,
       bodyType:
           $enumDecodeNullable(_$RequestBodyTypeEnumMap, json['bodyType']) ??
@@ -37,7 +37,7 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
               ?.map((e) =>
                   VariableData.fromJson(Map<String, dynamic>.from(e as Map)))
               .toList() ??
-          const [],
+          [],
       isDeleted: json['deleted'] as bool? ?? false,
       lastUpdated:
           const DateTimeConverter().fromJson(json['lastUpdated'] as int?),
@@ -53,7 +53,8 @@ Map<String, dynamic> _$HttpApiDataToJson(HttpApiData instance) {
 
   void writeNotNull(
       String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize = shouldSerialize(key, value, jsonValue, defaultValue);
+    final bool serialize =
+        shouldSerialize(key, value, jsonValue, defaultValue, true);
 
     if (serialize) {
       val[key] = jsonValue;
@@ -134,7 +135,8 @@ Map<String, dynamic> _$HttpKeyValuePairToJson(HttpKeyValuePair instance) {
 
   void writeNotNull(
       String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize = shouldSerialize(key, value, jsonValue, defaultValue);
+    final bool serialize =
+        shouldSerialize(key, value, jsonValue, defaultValue, true);
 
     if (serialize) {
       val[key] = jsonValue;
