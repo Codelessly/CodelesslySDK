@@ -6,12 +6,18 @@ import 'package:http/http.dart' as http;
 
 import '../../codelessly_sdk.dart';
 
-const Set<String> predefinedVariableNames = {'data', 'index', 'item'};
+const Set<String> predefinedVariableNames = {
+  'data',
+  'index',
+  'item',
+  'storage'
+};
 
 final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'data', type: VariableType.map),
   PredefinedVariableData(name: 'index', type: VariableType.integer),
   PredefinedVariableData(name: 'item'),
+  PredefinedVariableData(name: 'storage', type: VariableType.map),
 };
 
 List<InlineSpan> transformTextSpans(

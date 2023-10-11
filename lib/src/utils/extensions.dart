@@ -1535,6 +1535,7 @@ extension BaseConditionExt on BaseCondition {
           variables: variables,
           data: data,
           itemProvider: IndexedItemProvider.of(context),
+          localStorage: context.read<Codelessly>().localStorage,
         ),
       );
 
@@ -1635,6 +1636,7 @@ extension ExpressionExt on BaseExpression {
           itemProvider: IndexedItemProvider.of(context),
           variables: variables,
           data: data,
+          localStorage: context.read<Codelessly>().localStorage,
         ),
       )!;
 }
@@ -1651,6 +1653,7 @@ extension ExpressionPartExt on ExpressionPart {
           itemProvider: IndexedItemProvider.of(context),
           variables: variables,
           data: data,
+          localStorage: context.read<Codelessly>().localStorage,
         ),
       );
 }

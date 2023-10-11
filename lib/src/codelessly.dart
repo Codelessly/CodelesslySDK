@@ -6,6 +6,9 @@ import 'package:flutter/foundation.dart';
 import '../codelessly_sdk.dart';
 import '../firedart.dart';
 import 'cache/codelessly_cache_manager.dart';
+import 'data/firebase_data_repository.dart';
+import 'data/local_storage.dart';
+import 'data/web_data_repository.dart';
 import 'logging/error_handler.dart';
 import 'logging/reporter.dart';
 
@@ -104,6 +107,8 @@ class Codelessly {
 
   /// Returns a stream of status updates for this SDK instance.
   Stream<CodelesslyStatus> get statusStream => _statusStreamController.stream;
+
+  LocalStorage get localStorage => dataManager.localStorage;
 
   /// Creates a new instance of [Codelessly].
   Codelessly({
