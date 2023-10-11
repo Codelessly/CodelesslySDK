@@ -144,7 +144,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     // List of value notifiers that the widget listens to. This includes node's
     // local values and the variables attached to node properties.
-    final List<ValueNotifier> listenables = [];
+    final List<Listenable> listenables = [];
 
     // Local node values.
     final ValueNotifier<List<ValueModel>>? listenableNodeValues =
@@ -158,7 +158,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
       if (match == null) continue;
 
-      if (match.isPredefinedVariable) continue;
+      if (match.isPredefinedVariable) {
+        if (match.name == 'storage') {
+          final notifier = getStorageListenerFor(match, context);
+          if (notifier != null) listenables.add(notifier);
+        }
+        continue;
+      }
 
       // Get corresponding variable data from codelessly context.
       final ValueNotifier<VariableData>? listenableVariable =
@@ -174,7 +180,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
       if (match == null) continue;
 
-      if (match.isPredefinedVariable) continue;
+      if (match.isPredefinedVariable) {
+        if (match.name == 'storage') {
+          final notifier = getStorageListenerFor(match, context);
+          if (notifier != null) listenables.add(notifier);
+        }
+        continue;
+      }
 
       // Get corresponding variable data from codelessly context.
       final ValueNotifier<VariableData>? listenableVariable =
@@ -209,6 +221,19 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     } else {
       return builder(context);
     }
+  }
+
+  Listenable? getStorageListenerFor(VariableMatch match, BuildContext context) {
+    final localStorage = context.read<Codelessly>().localStorage;
+    if (match.hasPath) {
+      final pathMatch =
+          VariableMatch.parse(match.path!.wrapWithVariableSyntax());
+      if (pathMatch == null) return null;
+      final key = pathMatch.name;
+      return localStorage.getNotifier(key);
+    }
+
+    return localStorage.getNotifier(null);
   }
 }
 

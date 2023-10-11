@@ -2,6 +2,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../data/local_storage.dart';
 
 class ConditionEvaluator<R extends Object>
     implements
@@ -13,12 +14,14 @@ class ConditionEvaluator<R extends Object>
   final Map<String, VariableData> variables;
   final dynamic data;
   final IndexedItemProvider? itemProvider;
+  final WeakReference<LocalStorage>? localStorage;
 
-  const ConditionEvaluator({
+  ConditionEvaluator({
     required this.variables,
     required this.data,
     this.itemProvider,
-  });
+    LocalStorage? localStorage,
+  }) : localStorage = localStorage != null ? WeakReference(localStorage) : null;
 
   @override
   R? visitCondition(Condition condition) {
@@ -72,6 +75,7 @@ class ConditionEvaluator<R extends Object>
         variables.values,
         data,
         itemProvider,
+        localStorage?.target,
       );
 
       return value?.typedValue<String>() ?? 'null';

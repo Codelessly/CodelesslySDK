@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../data/local_storage.dart';
 
 /// Represents what to do when a variable path evaluates to null when
 /// substituting variables in a text.
@@ -238,6 +239,7 @@ class PropertyValueDelegate {
     String path, {
     List<VariableData>? variablesOverrides,
     Map<String, dynamic>? dataOverrides,
+    LocalStorage? storage,
   }) {
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
@@ -256,6 +258,7 @@ class PropertyValueDelegate {
       variables,
       data,
       IndexedItemProvider.of(context),
+      storage,
     );
 
     return value?.typedValue<R>();
@@ -267,6 +270,7 @@ class PropertyValueDelegate {
     Iterable<VariableData> variables,
     Map<String, dynamic> data,
     IndexedItemProvider? itemProvider,
+    LocalStorage? storage,
   ) {
     if (path.isEmpty) return null;
     final match = VariableMatch.parse(path.wrapWithVariableSyntax());
@@ -274,7 +278,7 @@ class PropertyValueDelegate {
 
     if (match.isPredefinedVariable) {
       final Object? value =
-          retrievePredefinedVariableValue(match, data, itemProvider);
+          retrievePredefinedVariableValue(match, data, itemProvider, storage);
       return value;
     }
 
@@ -315,11 +319,13 @@ class PropertyValueDelegate {
     VariableMatch match,
     Map<String, dynamic> data,
     IndexedItemProvider? itemProvider,
+    LocalStorage? storage,
   ) {
     final Object? variableValue = switch (match.name) {
       'data' => data,
       'item' => itemProvider?.item,
       'index' => itemProvider?.index,
+      'storage' => storage?.getAll(),
       _ => null,
     };
 
@@ -371,6 +377,7 @@ class PropertyValueDelegate {
     BuildContext context,
     String path, {
     Map<String, dynamic>? dataOverrides,
+    LocalStorage? storage,
   }) {
     final match = VariableMatch.parse(path);
     if (match == null) return null;
@@ -387,6 +394,7 @@ class PropertyValueDelegate {
       match,
       data,
       IndexedItemProvider.of(context),
+      storage,
     );
 
     return value?.typedValue<R>();

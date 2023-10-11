@@ -547,6 +547,7 @@ class FunctionsRepository {
         variables,
         codelesslyContext.data,
         IndexedItemProvider.of(context),
+        context.read<Codelessly>().localStorage,
       );
       // Try to parse index if it's an integer. Else, try to use the variable's
       // value.
@@ -591,6 +592,7 @@ class FunctionsRepository {
         variables,
         codelesslyContext.data,
         IndexedItemProvider.of(context),
+        context.read<Codelessly>().localStorage,
       );
       // If key is a variable, use its value. Else, use the key as it is.
       final String key =

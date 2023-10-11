@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
 
 import '../../codelessly_sdk.dart';
 import '../cache/codelessly_cache_manager.dart';
 import '../logging/error_handler.dart';
+import 'local_storage.dart';
 
 /// Orchestrates the data flow for the SDK.
 class DataManager {
@@ -35,6 +37,14 @@ class DataManager {
   final AuthManager authManager;
 
   SDKPublishModel? _publishModel;
+
+  LocalStorage? _localStorage;
+
+  /// The local storage instance used by this data manager.
+  LocalStorage get localStorage {
+    assert(_localStorage != null, 'Local storage is not initialized yet.');
+    return _localStorage!;
+  }
 
   /// The current publish model loaded by this data manager.
   SDKPublishModel? get publishModel => _publishModel;
@@ -92,6 +102,8 @@ class DataManager {
       emitPublishModel();
 
       loadFontsFromPublishModel();
+
+      onPublishModelLoaded(fromCache: true);
     }
 
     // A slug was specified. We need a layout FAST.
@@ -195,6 +207,7 @@ class DataManager {
       _publishModel = await firstPublishEvent;
       emitPublishModel();
       savePublishModel();
+      onPublishModelLoaded();
 
       log('[DataManager] Publish model during init is now available. Proceeding with init!');
 
@@ -269,6 +282,15 @@ class DataManager {
     }
 
     _recordTime(stopwatch);
+  }
+
+  /// Called when the publish model is loaded.
+  Future<void> onPublishModelLoaded({bool fromCache = false}) async {
+    if (_localStorage == null) {
+      // Initialize local storage
+      final Box _box = await Hive.openBox(_publishModel!.projectId);
+      _localStorage = HiveLocalStorage(_box);
+    }
   }
 
   void _recordTime(Stopwatch stopwatch) {
@@ -402,6 +424,8 @@ class DataManager {
     _publishModelDocumentListener?.cancel();
     initialized = false;
     _publishModel = null;
+    _localStorage?.close();
+    _localStorage = null;
   }
 
   /// Sets the [SDKPublishModel] as null and cancels document streaming.
@@ -410,6 +434,8 @@ class DataManager {
     _publishModelDocumentListener?.cancel();
     _publishModelStreamController.add(null);
     _publishModel = null;
+    _localStorage?.close();
+    _localStorage = null;
     initialized = false;
   }
 
@@ -947,6 +973,7 @@ class DataManager {
       _publishModel = model;
       emitPublishModel();
       savePublishModel();
+      onPublishModelLoaded();
       return true;
     }
 
