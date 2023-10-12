@@ -30,7 +30,11 @@ abstract class BuildSettings with EquatableMixin {
   /// Whether to render the preview version of the widget.
   final bool isPreview;
 
+  /// Whether to wrap an [Ink] widget around this widget.
   final bool useInk;
+
+  /// Whether to obscure images instead of rendering them.
+  final bool obscureImages;
 
   /// Creates a [BuildSettings] instance.
   const BuildSettings({
@@ -43,6 +47,7 @@ abstract class BuildSettings with EquatableMixin {
     this.withAlignment = true,
     this.isPreview = false,
     this.useInk = true,
+    this.obscureImages = false,
   });
 
   @override
@@ -56,6 +61,7 @@ abstract class BuildSettings with EquatableMixin {
         withAlignment,
         isPreview,
         useInk,
+        obscureImages,
       ];
 }
 
@@ -78,6 +84,7 @@ class WidgetBuildSettings extends BuildSettings {
     super.withAlignment,
     super.isPreview,
     super.useInk,
+    super.obscureImages,
     required this.debugLabel,
     this.nullSubstitutionMode = NullSubstitutionMode.noChange,
   });
@@ -93,6 +100,7 @@ class WidgetBuildSettings extends BuildSettings {
     bool? withAlignment,
     bool? isPreview,
     bool? useInk,
+    bool? obscureImages,
     String? debugLabel,
     NullSubstitutionMode? nullSubstitutionMode,
   }) {
@@ -106,6 +114,7 @@ class WidgetBuildSettings extends BuildSettings {
       withAlignment: withAlignment ?? this.withAlignment,
       isPreview: isPreview ?? this.isPreview,
       useInk: useInk ?? this.useInk,
+      obscureImages: obscureImages ?? this.obscureImages,
       debugLabel: debugLabel ?? this.debugLabel,
       nullSubstitutionMode: nullSubstitutionMode ?? this.nullSubstitutionMode,
     );
