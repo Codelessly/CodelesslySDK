@@ -118,7 +118,9 @@ class PassiveRectangleWidget extends StatelessWidget {
           ...buildFills(context, node, codelesslyContext,
               useInk: node is BlendMixin &&
                   (node as BlendMixin).inkWell != null &&
-                  settings.useInk),
+                settings.useInk,
+            obscureImages: settings.obscureImages,
+          ),
           ...buildStrokes(context, node, codelesslyContext),
           ...wrapWithPaddingAndScroll(
             node,
@@ -446,6 +448,7 @@ typedef ImageFillBuilder = Widget Function(
   PaintModel paint,
   TypedBytes? bytes,
   bool useInk,
+  bool obscureImages,
 );
 
 List<Widget> buildFills(
@@ -457,6 +460,7 @@ List<Widget> buildFills(
   double? imageRotation,
   ImageFillBuilder? imageFillBuilder,
   bool useInk = true,
+  bool obscureImages = false,
 }) {
   if (node is! GeometryMixin) return [];
 
@@ -516,17 +520,26 @@ List<Widget> buildFills(
               paint,
               bytes,
               useInk,
+              obscureImages,
             );
           } else {
-            child = UltimateImageBuilder(
-              url: imageURL,
-              width: node.basicBoxLocal.width,
-              height: node.basicBoxLocal.height,
-              paint: paint,
-              node: node,
-              bytes: bytes,
-              useInk: useInk,
-            );
+            if (obscureImages) {
+              child = SizedBox(
+                width: node.basicBoxLocal.width,
+                height: node.basicBoxLocal.height,
+                child: Placeholder(),
+              );
+            } else {
+              child = UltimateImageBuilder(
+                url: imageURL,
+                width: node.basicBoxLocal.width,
+                height: node.basicBoxLocal.height,
+                paint: paint,
+                node: node,
+                bytes: bytes,
+                useInk: useInk,
+              );
+            }
           }
 
           child = Transform.scale(
