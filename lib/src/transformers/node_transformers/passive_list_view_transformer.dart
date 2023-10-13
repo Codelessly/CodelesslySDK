@@ -39,7 +39,7 @@ class PassiveListViewWidget extends StatelessWidget {
     final itemNode = node.children.first;
 
     final List? data = PropertyValueDelegate.getVariableValueFromPath<List>(
-        context, node.variables['data'] ?? '');
+        context, node.variables['data'] ?? '') ?? (node.variables['data'] != null ? [] : null);
 
     final int? itemCount = node.properties.itemCount ?? data?.length;
 

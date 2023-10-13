@@ -288,8 +288,8 @@ class DataManager {
   Future<void> onPublishModelLoaded({bool fromCache = false}) async {
     if (_localStorage == null) {
       // Initialize local storage
-      final Box _box = await Hive.openBox(_publishModel!.projectId);
-      _localStorage = HiveLocalStorage(_box);
+      final Box box = await Hive.openBox(publishModel!.projectId);
+      _localStorage = HiveLocalStorage(box);
     }
   }
 
