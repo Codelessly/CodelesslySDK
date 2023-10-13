@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
@@ -11,11 +12,11 @@ import '../logging/error_handler.dart';
 /// need to utilize to offer a complete usage experience of a [Codelessly]
 /// layout.
 abstract class NetworkDataRepository {
-  final String cloudFunctionsBaseURL;
+  /// The [CodelesslyConfig] instance that is used to configure the SDK.
+  final CodelesslyConfig config;
 
-  NetworkDataRepository({required this.cloudFunctionsBaseURL}) {
-    log('[NetworkDataRepo] created with cloudFunctionsBaseURL: $cloudFunctionsBaseURL');
-  }
+  /// Creates a new instance of [NetworkDataRepository].
+  NetworkDataRepository({required this.config});
 
   /// Calls a cloud function that searches for the project associated with the
   /// given unique slug and returns a completely populated [SDKPublishModel]
@@ -25,12 +26,12 @@ abstract class NetworkDataRepository {
     required PublishSource source,
   }) async {
     log('[NetworkDataRepo] Downloading publish bundle with slug: $slug and source: $source');
-    final http.Response result = await http.post(
-      Uri.parse('$cloudFunctionsBaseURL/getPublishBundleBySlugRequest'),
-      headers: <String, String>{'Content-Type': 'application/json'},
-      body: jsonEncode({'slug': slug, 'source': source.serverPath}),
-      encoding: utf8,
-    );
+
+    final url =
+        'https://firebasestorage.googleapis.com/v0/b/${config.firebaseProjectId}.appspot.com/o/${Uri.encodeComponent('${source.serverPath}/$slug.json')}?alt=media';
+
+    log('[NetworkDataRepo] Downloading publish bundle from url: $url');
+    final http.Response result = await http.get(Uri.parse(url));
 
     if (result.statusCode != 200) {
       log('[NetworkDataRepo] Error downloading publish bundle.');
@@ -43,12 +44,48 @@ abstract class NetworkDataRepository {
       return null;
     }
 
-    final Map<String, dynamic> modelDoc = jsonDecode(result.body);
+    final Map<String, dynamic> modelDoc =
+        jsonDecode(utf8.decode(result.bodyBytes));
+
     final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
 
     log('[NetworkDataRepo] Finished downloading publish bundle with slug: $slug and source: $source.');
     return model;
   }
+
+  /// Calls a cloud function that searches for the project associated with the
+  /// given unique slug and returns a completely populated [SDKPublishModel]
+  /// instance.
+  // Future<SDKPublishModel?> downloadCompletePublishBundle({
+  //   required String slug,
+  //   required PublishSource source,
+  // }) async {
+  //   log('[NetworkDataRepo] Downloading publish bundle with slug: $slug and source: $source');
+  //   final http.Response result = await http.post(
+  //     Uri.parse(
+  //         '${config.firebaseCloudFunctionsBaseURL}/getPublishBundleBySlugRequest'),
+  //     headers: <String, String>{'Content-Type': 'application/json'},
+  //     body: jsonEncode({'slug': slug, 'source': source.serverPath}),
+  //     encoding: utf8,
+  //   );
+  //
+  //   if (result.statusCode != 200) {
+  //     log('[NetworkDataRepo] Error downloading publish bundle.');
+  //     log('[NetworkDataRepo] Status code: ${result.statusCode}');
+  //     log('[NetworkDataRepo] Message: ${result.body}');
+  //     CodelesslyErrorHandler.instance.captureException(CodelesslyException(
+  //       'Error downloading publish bundle from slug [$slug]',
+  //       stacktrace: StackTrace.current,
+  //     ));
+  //     return null;
+  //   }
+  //
+  //   final Map<String, dynamic> modelDoc = jsonDecode(result.body);
+  //   final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
+  //
+  //   log('[NetworkDataRepo] Finished downloading publish bundle with slug: $slug and source: $source.');
+  //   return model;
+  // }
 
   /// Streams a given [projectID]'s associated [SDKPublishModel] from the
   /// network with preferably live updates.

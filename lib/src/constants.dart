@@ -8,11 +8,6 @@ const String defaultFirebaseCloudFunctionsBaseURL = String.fromEnvironment(
   defaultValue: prodFirebaseCloudFunctionsBaseURL,
 );
 
-const String defaultFirebaseApiKey = String.fromEnvironment(
-  'firebase_api_key',
-  defaultValue: prodApiKey,
-);
-
 const String defaultBaseURL = String.fromEnvironment(
   'base_url',
   defaultValue: prodBaseUrl,
@@ -21,7 +16,6 @@ const String defaultBaseURL = String.fromEnvironment(
 const String prodFirebaseProjectId = 'codeless-app';
 const String prodFirebaseCloudFunctionsBaseURL =
     'https://us-central1-codeless-app.cloudfunctions.net';
-const String prodApiKey = 'AIzaSyBR92IoT_1kwBYOLBbPvln48DwaXTeTrxk';
 const String prodBaseUrl = 'https://app.codelessly.com';
 
 const defaultErrorMessage =

@@ -50,7 +50,8 @@ class DataManager {
 
   StreamSubscription<SDKPublishModel?>? _publishModelDocumentListener;
 
-  String? slug;
+  /// The slug for the project as defined in the editor's publish settings.
+  late String? slug = config.slug;
 
   /// Creates a new instance of [DataManager] with the given [config].
   DataManager({
@@ -97,21 +98,22 @@ class DataManager {
     if (config.slug != null && (_publishModel == null || slug != config.slug)) {
       final Stopwatch bundleStopWatch = Stopwatch()..start();
       try {
+        if (_publishModel == null) {
+          log('[DataManager] No local publish model found, but a slug was specified!');
+        } else {
+          log('[DataManager] Slug changed from $slug to ${config.slug}.');
+        }
+        log('[DataManager] Downloading complete publish bundle for slug $slug.');
+
         slug = config.slug;
 
-        log('[DataManager] No local publish model, but a slug was specified!');
-        log('[DataManager] Downloading complete publish bundle for slug ${config.slug}.');
-
-        _publishModel =
-            await networkDataRepository.downloadCompletePublishBundle(
-          slug: config.slug!,
+        final bool success = await fetchCompletePublishBundle(
+          slug: slug!,
           source: config.publishSource,
         );
 
-        if (_publishModel != null) {
+        if (success) {
           log('[DataManager] Complete publish model from slug is downloaded. Emitting.');
-          emitPublishModel();
-          savePublishModel();
 
           loadFontsFromPublishModel();
 
@@ -279,7 +281,11 @@ class DataManager {
     assert(_publishModel != null, 'Publish model cannot be null here.');
 
     log('[DataManager] About to load all fonts that are present in the current publish model.');
-    log('[DataManager] Fonts: ${_publishModel!.fonts.values.map((font) => font.fullFontName).join(', ')}');
+    if (_publishModel!.fonts.isNotEmpty) {
+      log('[DataManager] Fonts: ${_publishModel!.fonts.values.map((font) => font.fullFontName).join(', ')}');
+    } else {
+      log('[DataManager] No fonts to load.');
+    }
 
     for (final SDKPublishFont font in _publishModel!.fonts.values) {
       getOrFetchFontBytesAndSaveAndLoad(font);
@@ -915,24 +921,33 @@ class DataManager {
 
   Future<bool> fetchCompletePublishBundle({
     required String slug,
+    required PublishSource source,
   }) async {
     final Stopwatch stopwatch = Stopwatch()..start();
 
-    final SDKPublishModel? model =
-        await networkDataRepository.downloadCompletePublishBundle(
-      slug: slug,
-      source: config.publishSource,
-    );
-
-    log('[DataManager] Downloaded complete publish bundle in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.');
+    SDKPublishModel? model;
+    try {
+      model = await networkDataRepository.downloadCompletePublishBundle(
+        slug: slug,
+        source: source,
+      );
+    } catch (e) {
+      log('[DataManager] Failed to download complete publish bundle.');
+      return false;
+    } finally {
+      stopwatch.stop();
+      log('[DataManager] Publish bundle download stopwatch done in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.');
+    }
 
     if (model != null) {
+      log('[DataManager] Successfully downloaded complete publish bundle. Emitting it.');
       _publishModel = model;
       emitPublishModel();
       savePublishModel();
       return true;
     }
 
+    log('[DataManager] Failed to download complete publish bundle in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.');
     return false;
   }
 
