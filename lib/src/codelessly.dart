@@ -298,11 +298,12 @@ class Codelessly {
     if (!kIsWeb) {
       if (_firestore != null) return;
       log('[SDK] [INIT] Initializing Firestore instance with project ID: $firebaseProjectId');
-
       final Stopwatch stopwatch = Stopwatch()..start();
-      _firestore = Firestore(firebaseProjectId);
-      stopwatch.stop();
 
+
+      _firestore = Firestore(firebaseProjectId);
+
+      stopwatch.stop();
       final elapsed = stopwatch.elapsed;
       log('[SDK] [INIT] Firestore instance initialized in ${elapsed.inMilliseconds}ms or ${elapsed.inSeconds}s');
     }
@@ -399,14 +400,10 @@ class Codelessly {
             cacheManager: this.cacheManager,
             authManager: this.authManager,
             networkDataRepository: kIsWeb
-                ? WebDataRepository(
-                    cloudFunctionsBaseURL:
-                        _config!.firebaseCloudFunctionsBaseURL,
-                  )
+                ? WebDataRepository(config: _config!)
                 : FirebaseDataRepository(
                     firestore: firestore,
-                    cloudFunctionsBaseURL:
-                        _config!.firebaseCloudFunctionsBaseURL,
+                    config: _config!,
                   ),
             localDataRepository:
                 LocalDataRepository(cacheManager: this.cacheManager),
@@ -420,14 +417,10 @@ class Codelessly {
             cacheManager: this.cacheManager,
             authManager: this.authManager,
             networkDataRepository: kIsWeb
-                ? WebDataRepository(
-                    cloudFunctionsBaseURL:
-                        _config!.firebaseCloudFunctionsBaseURL,
-                  )
+                ? WebDataRepository(config: _config!)
                 : FirebaseDataRepository(
                     firestore: firestore,
-                    cloudFunctionsBaseURL:
-                        _config!.firebaseCloudFunctionsBaseURL,
+                    config: _config!,
                   ),
             localDataRepository:
                 LocalDataRepository(cacheManager: this.cacheManager),
@@ -440,12 +433,10 @@ class Codelessly {
         cacheManager: this.cacheManager,
         authManager: this.authManager,
         networkDataRepository: kIsWeb
-            ? WebDataRepository(
-                cloudFunctionsBaseURL: _config!.firebaseCloudFunctionsBaseURL,
-              )
+            ? WebDataRepository(config: _config!)
             : FirebaseDataRepository(
                 firestore: firestore,
-                cloudFunctionsBaseURL: _config!.firebaseCloudFunctionsBaseURL,
+                config: _config!,
               ),
         localDataRepository:
             LocalDataRepository(cacheManager: this.cacheManager),
