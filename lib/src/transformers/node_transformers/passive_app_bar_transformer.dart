@@ -3,6 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/functions_repository.dart';
 
 class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
   PassiveAppBarTransformer(super.getNode, super.manager);
@@ -13,8 +14,19 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return PassiveAppBarWidget(node: node, settings: settings);
+    return PassiveAppBarWidget(
+      node: node,
+      settings: settings,
+      onLeadingPressed: onTriggerAction,
+      onActionPressed: onTriggerAction,
+    );
   }
+
+  void onTriggerAction(BuildContext context, List<Reaction> reactions) =>
+      reactions
+          .where((reaction) => reaction.trigger.type == TriggerType.click)
+          .forEach((reaction) =>
+              FunctionsRepository.performAction(context, reaction.action));
 
   PreferredSizeWidget buildAppBarWidgetFromProps({
     required AppBarProperties props,
@@ -67,6 +79,10 @@ class PassiveAppBarWidget extends StatelessWidget
   final double? elevation;
   final bool useIconFonts;
   final WidgetBuildSettings settings;
+  final Function(BuildContext context, List<Reaction> reactions)?
+      onLeadingPressed;
+  final Function(BuildContext context, List<Reaction> reactions)?
+      onActionPressed;
 
   const PassiveAppBarWidget({
     super.key,
@@ -74,6 +90,8 @@ class PassiveAppBarWidget extends StatelessWidget
     this.elevation,
     this.useIconFonts = false,
     required this.settings,
+    this.onLeadingPressed,
+    this.onActionPressed,
   });
 
   @override
@@ -88,7 +106,8 @@ class PassiveAppBarWidget extends StatelessWidget
         centerTitle: node.properties.centerTitle,
         leading: leading != null
             ? IconButton(
-                onPressed: () {},
+                onPressed: () => onLeadingPressed?.call(
+                    context, node.properties.leading.reactions),
                 icon: leading,
               )
             : null,
@@ -114,7 +133,7 @@ class PassiveAppBarWidget extends StatelessWidget
           for (final item
               in node.properties.actions.whereType<IconAppBarActionItem>())
             IconButton(
-              onPressed: () {},
+              onPressed: () => onActionPressed?.call(context, item.reactions),
               // splashRadius: 20,
               iconSize: item.icon.size,
               tooltip: item.tooltip,
