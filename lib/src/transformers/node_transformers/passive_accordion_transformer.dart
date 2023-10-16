@@ -120,7 +120,7 @@ class _AccordionWidgetState extends State<PassiveAccordionWidget> {
             transitionBuilder: (child, animation) {
               return SizeTransition(sizeFactor: animation, child: child);
             },
-            child: isExpanded ? Center(child: widget.bottomWidget) : SizedBox(),
+            child: isExpanded ? Center(child: widget.bottomWidget) : const SizedBox(),
           ),
         ],
       ),

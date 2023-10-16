@@ -284,7 +284,7 @@ class AdaptiveSizeFitBox extends StatelessWidget {
   /// Creates a [AdaptiveSizeFitBox] that will fit its [child] to the size of
   /// the [SizeC], taking into account the [horizontalFit] and [verticalFit]
   /// values.
-  AdaptiveSizeFitBox({
+  const AdaptiveSizeFitBox({
     super.key,
     required this.horizontalFit,
     required this.verticalFit,

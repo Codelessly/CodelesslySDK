@@ -171,7 +171,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
           heroTag: fabID,
           key: ValueKey(fab.type),
           onPressed: onPressed,
-          extendedPadding: EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+          extendedPadding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
           backgroundColor: fab.backgroundColor.toFlutterColor(),
           foregroundColor: fab.foregroundColor.toFlutterColor(),
           elevation: elevation ?? fab.elevation,
@@ -211,14 +211,14 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
           (fab.borderColor == null ||
               fab.borderWidth == null ||
               fab.borderWidth == 0)) {
-        return StadiumBorder();
+        return const StadiumBorder();
       }
     } else {
       if (fab.shape == CShapeBorder.circle &&
           (fab.borderColor == null ||
               fab.borderWidth == null ||
               fab.borderWidth == 0)) {
-        return CircleBorder();
+        return const CircleBorder();
       }
     }
     return getShapeFromMixin(fab);

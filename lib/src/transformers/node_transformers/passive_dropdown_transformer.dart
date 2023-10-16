@@ -225,7 +225,7 @@ class PassiveDropdownWidget extends StatelessWidget {
           onChanged: node.properties.enabled
               ? (value) => onChanged?.call(value ?? 0)
               : null,
-          underline: node.properties.underline ? null : SizedBox.shrink(),
+          underline: node.properties.underline ? null : const SizedBox.shrink(),
           items: buildItems(context, items),
           selectedItemBuilder: (context) => selectedItemBuilder(context, items),
         ),

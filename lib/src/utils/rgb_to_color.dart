@@ -27,18 +27,18 @@ ColorRGBA colorToRGBA(Color color) {
 /// Converts the fills of a given [node] to a single [Color] object.
 Color retrieveFillColor(GeometryMixin node) {
   if (node.fills.isEmpty) {
-    return Color(0x00000000);
+    return const Color(0x00000000);
   }
 
   final fill = node.fills.first;
   if (fill.visible == false) {
-    return Color(0x00000000);
+    return const Color(0x00000000);
   }
   if (fill.color != null) {
     return fill.toFlutterColor()!;
   }
 
-  return Color(0xff000000);
+  return const Color(0xff000000);
 }
 
 /// Converts the strokes of a given [node] to a single [Color] object.
@@ -47,7 +47,7 @@ Color retrieveStrokeColor(GeometryMixin node,
   final strokes = node.strokes.visible();
   if (strokes.isEmpty) {
     // Some methods expect a non-null color.
-    return Color(0x00000000);
+    return const Color(0x00000000);
   }
 
   // If we want to disregard the single color index and retrieve all of the
@@ -80,7 +80,7 @@ Color retrieveStrokeColor(GeometryMixin node,
         // Return black when something unknown is found until we have better
         // support for gradients. Some methods expect a non-null color, so
         // returning null may crash the UI.
-        return Color(0xff000000);
+        return const Color(0xff000000);
       }
     }
 
@@ -98,7 +98,7 @@ Color retrieveStrokeColor(GeometryMixin node,
     // Return black when something unknown is found until we have better support
     // for gradients. Some methods expect a non-null color, so returning null
     // may crash the UI.
-    return Color(0xff000000);
+    return const Color(0xff000000);
   }
 }
 

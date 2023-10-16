@@ -263,7 +263,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
-          return FittedBox(
+          return const FittedBox(
             child: Center(
               child: Icon(Icons.image_outlined),
             ),
@@ -283,7 +283,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.image_outlined,
                       size: 100,
                     ),

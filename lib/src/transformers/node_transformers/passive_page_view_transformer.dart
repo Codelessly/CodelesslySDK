@@ -63,7 +63,7 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
   @override
   Widget build(BuildContext context) {
     if (widget.node.children.isEmpty) {
-      return AdaptiveNodeBox(node: widget.node, child: SizedBox());
+      return AdaptiveNodeBox(node: widget.node, child: const SizedBox());
     }
     final itemNode = widget.node.children.first;
 
@@ -75,7 +75,7 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
     return AdaptiveNodeBox(
       node: widget.node,
       child: ScrollConfiguration(
-        behavior: DraggableScrollBehavior(),
+        behavior: const DraggableScrollBehavior(),
         child: PageView.builder(
           itemCount: itemCount,
           physics: widget.node.physics.flutterScrollPhysics,

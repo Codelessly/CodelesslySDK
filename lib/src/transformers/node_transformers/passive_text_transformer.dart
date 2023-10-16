@@ -236,7 +236,7 @@ class PassiveTextWidget extends StatefulWidget {
   final List<VariableData> variablesOverrides;
   final bool clickable;
 
-  PassiveTextWidget({
+  const PassiveTextWidget({
     super.key,
     required this.node,
     required this.settings,

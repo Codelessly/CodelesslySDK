@@ -34,7 +34,7 @@ class CodelesslyEvent with EquatableMixin {
     this.stacktrace,
     this.tags = const [],
     // this.deviceMetadata,
-  })  : id = Uuid().v4(),
+  })  : id = const Uuid().v4(),
         timestamp = timestamp ?? DateTime.now();
 
   /// Internal constructor to support [copyWith] method.

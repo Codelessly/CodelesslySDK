@@ -44,6 +44,7 @@ class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
       stackAlignment: stackAlignment,
       applyPadding: applyPadding,
       settings: settings,
+      manager: manager,
       children: children,
     );
   }
@@ -56,8 +57,9 @@ class PassiveRectangleWidget extends StatelessWidget {
   final Clip Function(BaseNode node) getClipBehavior;
   final bool applyPadding;
   final WidgetBuildSettings settings;
+  final WidgetNodeTransformerManager manager;
 
-  PassiveRectangleWidget({
+  const PassiveRectangleWidget({
     super.key,
     required this.node,
     this.children = const [],
@@ -65,6 +67,7 @@ class PassiveRectangleWidget extends StatelessWidget {
     this.getClipBehavior = defaultGetClipBehavior,
     this.applyPadding = true,
     required this.settings,
+    required this.manager,
   });
 
   @override
@@ -119,7 +122,16 @@ class PassiveRectangleWidget extends StatelessWidget {
           ...buildStrokes(context, node, codelesslyContext),
           ...wrapWithPaddingAndScroll(
             node,
-            children,
+            [
+              ...children,
+              // if (node case PortalMixin portal)
+              //   if (portal.showPortal && portal.portalID != null)
+              //     manager.buildWidgetByID(
+              //       portal.portalID!,
+              //       context,
+              //       settings: WidgetBuildSettings(debugLabel: 'PORTAL'),
+              //     ),
+            ],
             stackAlignment: stackAlignment,
             applyPadding: applyPadding,
           ),

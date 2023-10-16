@@ -39,7 +39,7 @@ class DataManager {
   /// The current publish model loaded by this data manager.
   SDKPublishModel? get publishModel => _publishModel;
 
-  StreamController<SDKPublishModel?> _publishModelStreamController =
+  final StreamController<SDKPublishModel?> _publishModelStreamController =
       StreamController<SDKPublishModel?>.broadcast();
 
   /// The stream of the current publish model loaded by this data manager.

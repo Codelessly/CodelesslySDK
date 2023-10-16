@@ -161,7 +161,7 @@ class PassiveExpansionTileWidget extends StatelessWidget {
       return Container(
         color: Colors.red,
         alignment: Alignment.center,
-        child: Text(
+        child: const Text(
           'This ExpansionTile node does not have a listTileChild defined for some reason...',
         ),
       );
@@ -183,7 +183,7 @@ class PassiveExpansionTileWidget extends StatelessWidget {
       return Container(
         color: Colors.red,
         alignment: Alignment.center,
-        child: Text(
+        child: const Text(
           "ExpansionTile's internal ListTile is missing it's title node id.",
         ),
       );

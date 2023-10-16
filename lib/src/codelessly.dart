@@ -26,7 +26,7 @@ import 'logging/reporter.dart';
 /// options.
 class Codelessly {
   /// Internal singleton instance
-  static Codelessly _instance = Codelessly();
+  static final Codelessly _instance = Codelessly();
 
   /// Returns the global singleton instance of the SDK.
   /// Initialization is needed before formal usage.
