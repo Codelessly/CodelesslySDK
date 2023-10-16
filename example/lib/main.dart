@@ -68,6 +68,9 @@ class _MyAppState extends State<MyApp> {
                       setState(() {});
                     },
                   },
+                  loadingBuilder: (context) {
+                    return const CupertinoActivityIndicator();
+                  },
                 );
               }),
           Story(
@@ -75,6 +78,9 @@ class _MyAppState extends State<MyApp> {
               builder: (context) {
                 return CodelesslyWidget(
                   layoutID: "0R0yedXWbqOrI_W7PBlo",
+                  loadingBuilder: (context) {
+                    return const CupertinoActivityIndicator();
+                  },
                 );
               }),
           Story(
@@ -82,6 +88,9 @@ class _MyAppState extends State<MyApp> {
             builder: (context) {
               return CodelesslyWidget(
                 layoutID: '0R1xmqF5lXMr6LpLA9h5',
+                loadingBuilder: (context) {
+                  return const CupertinoActivityIndicator();
+                },
               );
             },
           ),
@@ -96,6 +105,9 @@ class _MyAppState extends State<MyApp> {
                   'count': 1,
                   'description':
                       'Mangos are versatile fruits that can be enjoyed in many ways. You can eat them fresh as a snack or dessert, or add them to salads, smoothies, salsas, curries, cakes, pies, and more. You can also make mango juice, jam, chutney, or pickle.\n\nMangos are a great way to add some tropical flavor and nutrition to your diet.'
+                },
+                loadingBuilder: (context) {
+                  return const CupertinoActivityIndicator();
                 },
               );
             },
