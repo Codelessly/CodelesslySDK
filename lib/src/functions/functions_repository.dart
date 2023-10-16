@@ -288,14 +288,14 @@ class FunctionsRepository {
     log('${method.shortName} $url');
     log('Headers: ${headers.isEmpty ? 'None' : ''}');
     if (headers.isNotEmpty) {
-      log(JsonEncoder.withIndent('  ').convert(headers));
+      log(const JsonEncoder.withIndent('  ').convert(headers));
       log('');
     }
     log('Body: ${body == null || body.toString().trim().isEmpty ? 'None' : ''}');
     if (body != null && body.toString().trim().isNotEmpty) {
       try {
         final parsed = json.decode(body.toString());
-        log(JsonEncoder.withIndent('  ').convert(parsed));
+        log(const JsonEncoder.withIndent('  ').convert(parsed));
       } catch (e) {
         log(body.toString());
       }
@@ -310,12 +310,12 @@ class FunctionsRepository {
     log('--------------------------------------------------------------------');
     log('Status Code: ${response.statusCode}');
     log('Headers:');
-    log(JsonEncoder.withIndent('  ').convert(response.headers));
+    log(const JsonEncoder.withIndent('  ').convert(response.headers));
     log('');
     log('Body:');
     try {
       final parsed = json.decode(response.body);
-      log(JsonEncoder.withIndent('  ').convert(parsed));
+      log(const JsonEncoder.withIndent('  ').convert(parsed));
     } catch (e) {
       log(response.body);
     }

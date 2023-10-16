@@ -9,7 +9,7 @@ class FontFileData extends Equatable {
   final String style;
   final Uint8List bytes;
 
-  FontFileData({
+  const FontFileData({
     required this.fileName,
     required this.fileExtension,
     required this.familyName,

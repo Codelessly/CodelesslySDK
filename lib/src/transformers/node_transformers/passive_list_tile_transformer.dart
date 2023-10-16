@@ -111,7 +111,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
       icon: defaultIcon,
     );
 
-    final titleText = 'Title Text';
+    const titleText = 'Title Text';
     final title = TextNode(
       id: 'title',
       name: 'Title',
@@ -129,7 +129,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
       ],
     );
 
-    final subtitleText = 'Subtitle Text';
+    const subtitleText = 'Subtitle Text';
     final subtitle = TextNode(
       id: 'subtitle',
       name: 'Subtitle',

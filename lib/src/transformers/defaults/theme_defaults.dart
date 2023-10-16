@@ -192,7 +192,7 @@ class M3NavigationBarDefaults {
 
   static TextProp get selectedLabelStyle => TextProp(
         fontSize: 13,
-        fontName: FontName(
+        fontName: const FontName(
           family: 'Roboto',
           style: 'Normal',
           weight: FontWeightNumeric.w600,

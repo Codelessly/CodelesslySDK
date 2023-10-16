@@ -101,17 +101,17 @@ class CodelesslyErrorScreen extends StatelessWidget {
             'Uh oh!',
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           if (title != null) ...[
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
           ],
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            constraints: BoxConstraints(maxWidth: 500, maxHeight: 500),
+            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 500),
             child: SingleChildScrollView(
               primary: false,
               padding: EdgeInsets.zero,

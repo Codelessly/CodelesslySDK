@@ -110,15 +110,15 @@ class PassiveSliderWidget extends StatelessWidget {
     //     defaultValue: node.value);
     final SliderTrackShape trackShape;
     if (node.properties.trackShape == SliderTrackShapeEnum.rectangle) {
-      trackShape = RectangularSliderTrackShape();
+      trackShape = const RectangularSliderTrackShape();
     } else {
-      trackShape = RoundedRectSliderTrackShape();
+      trackShape = const RoundedRectSliderTrackShape();
     }
 
     final valueIndicatorShape = node.properties.valueIndicatorShape ==
             SliderValueIndicatorShape.rectangle
-        ? RectangularSliderValueIndicatorShape()
-        : PaddleSliderValueIndicatorShape();
+        ? const RectangularSliderValueIndicatorShape()
+        : const PaddleSliderValueIndicatorShape();
 
     return SizedBox(
       width: node.basicBoxLocal.width,

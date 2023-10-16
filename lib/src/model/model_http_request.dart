@@ -155,7 +155,7 @@ class HttpKeyValuePair extends Equatable {
   @override
   List<Object?> get props => [key, value, isUsed];
 
-  HttpKeyValuePair({
+  const HttpKeyValuePair({
     required this.key,
     required this.value,
     this.isUsed = true,

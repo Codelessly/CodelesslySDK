@@ -282,7 +282,7 @@ Widget retrieveNavBarItemIconWidget(
   Color? themeColor,
 ]) =>
     retrieveIconWidget(icon, size, useIconFonts, themeColor) ??
-    SizedBox.shrink();
+    const SizedBox.shrink();
 
 String buildYoutubeEmbedUrl({
   required EmbeddedYoutubeVideoProperties properties,

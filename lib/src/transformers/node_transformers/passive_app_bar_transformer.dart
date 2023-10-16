@@ -120,7 +120,7 @@ class PassiveAppBarWidget extends StatelessWidget
               tooltip: item.tooltip,
               icon:
                   retrieveIconWidget(item.icon, item.icon.size, useIconFonts) ??
-                      SizedBox.shrink(),
+                      const SizedBox.shrink(),
             ),
         ],
       ),

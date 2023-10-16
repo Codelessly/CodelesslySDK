@@ -283,7 +283,7 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
           ),
         );
       case TabIndicatorStyle.none:
-        return BoxDecoration();
+        return const BoxDecoration();
     }
   }
 

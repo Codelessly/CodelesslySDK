@@ -66,6 +66,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       context,
       node: node,
       builder: (context) {
+
+        // ListTiles and ExpansionTiles throw exceptions when they are being
+        // rendered specifically for preview image capture.
         Widget widget = settings.isPreview &&
                 (node.type == 'listTile' || node.type == 'expansionTile')
             ? SizedBox(
@@ -76,10 +79,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
                     scale: 1,
                     scaleInverse: 1,
                     bgColor: kDefaultPrimaryColor.withOpacity(0.15),
-                    dashColor: Color(0xFFADB3F1),
+                    dashColor: const Color(0xFFADB3F1),
                     textSpan: TextSpan(
                       text: node.type.camelToSentenceCase,
-                      style: TextStyle(fontSize: 14),
+                      style: const TextStyle(fontSize: 14),
                     ),
                   ),
                 ),

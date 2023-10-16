@@ -196,7 +196,7 @@ class PassiveButtonWidget extends StatelessWidget {
       case ButtonTypeEnum.icon:
         buttonWidget = ElevatedButton(
           style: buttonStyle.copyWith(
-            textStyle: MaterialStateProperty.all(TextStyle()),
+            textStyle: MaterialStateProperty.all(const TextStyle()),
           ),
           onPressed: enabled ? () => onPressed?.call() : null,
           child: iconWidget,

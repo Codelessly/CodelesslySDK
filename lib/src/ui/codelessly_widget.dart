@@ -387,7 +387,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
         if (!snapshot.hasData) {
           return widget.loadingBuilder?.call(context) ??
-              CodelesslyLoadingScreen();
+              const CodelesslyLoadingScreen();
         }
 
         if (_effectiveController.layoutID != null &&
@@ -409,7 +409,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
         if (!model.layouts.containsKey(layoutID)) {
           return widget.loadingBuilder?.call(context) ??
-              CodelesslyLoadingScreen();
+              const CodelesslyLoadingScreen();
         }
 
         final layoutWidget = Material(
@@ -450,7 +450,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           }
           if (!snapshot.hasData) {
             return widget.loadingBuilder?.call(context) ??
-                CodelesslyLoadingScreen();
+                const CodelesslyLoadingScreen();
           }
           final CodelesslyStatus status = snapshot.data!;
           switch (status) {
@@ -458,7 +458,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             case CodelesslyStatus.configured:
             case CodelesslyStatus.loading:
               return widget.loadingBuilder?.call(context) ??
-                  CodelesslyLoadingScreen();
+                  const CodelesslyLoadingScreen();
             case CodelesslyStatus.error:
               return widget.errorBuilder?.call(context, snapshot.error) ??
                   CodelesslyErrorScreen(

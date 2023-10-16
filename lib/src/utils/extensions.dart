@@ -226,15 +226,15 @@ extension ScrollPhysicsHelper on ScrollPhysicsC {
   ScrollPhysics get flutterScrollPhysics {
     switch (this) {
       case ScrollPhysicsC.alwaysScrollableScrollPhysics:
-        return AlwaysScrollableScrollPhysics();
+        return const AlwaysScrollableScrollPhysics();
       case ScrollPhysicsC.bouncingScrollPhysics:
-        return BouncingScrollPhysics();
+        return const BouncingScrollPhysics();
       case ScrollPhysicsC.clampingScrollPhysics:
-        return ClampingScrollPhysics();
+        return const ClampingScrollPhysics();
       case ScrollPhysicsC.rangeMaintainingScrollPhysics:
-        return RangeMaintainingScrollPhysics();
+        return const RangeMaintainingScrollPhysics();
       case ScrollPhysicsC.neverScrollableScrollPhysics:
-        return NeverScrollableScrollPhysics();
+        return const NeverScrollableScrollPhysics();
     }
   }
 }
@@ -320,7 +320,7 @@ extension ColorHelper on flutter.Color {
         id: generateId(),
         type: EffectType.dropShadow,
         color: colorToRGBA(this),
-        offset: Vec(0, 4),
+        offset: const Vec(0, 4),
         radius: 8,
         spread: 0,
       );
@@ -1198,12 +1198,12 @@ extension VisualDensityModelExt on VisualDensityModel {
       case VisualDensityType.adaptivePlatformDensity:
         return VisualDensity.adaptivePlatformDensity;
       case VisualDensityType.minimum:
-        return VisualDensity(
+        return const VisualDensity(
           horizontal: VisualDensity.minimumDensity,
           vertical: VisualDensity.minimumDensity,
         );
       case VisualDensityType.maximum:
-        return VisualDensity(
+        return const VisualDensity(
           horizontal: VisualDensity.maximumDensity,
           vertical: VisualDensity.maximumDensity,
         );
@@ -1232,13 +1232,13 @@ extension VisualDensityTypeExt on VisualDensityType {
           type: VisualDensityType.adaptivePlatformDensity,
         );
       case VisualDensityType.minimum:
-        return VisualDensityModel(
+        return const VisualDensityModel(
           horizontal: VisualDensity.minimumDensity,
           vertical: VisualDensity.minimumDensity,
           type: VisualDensityType.minimum,
         );
       case VisualDensityType.maximum:
-        return VisualDensityModel(
+        return const VisualDensityModel(
           horizontal: VisualDensity.maximumDensity,
           vertical: VisualDensity.maximumDensity,
           type: VisualDensityType.maximum,
@@ -1541,7 +1541,7 @@ extension BaseConditionExt on BaseCondition {
   void prettyPrint() => ConditionPrinter().printCondition(this);
 
   Set<String> getNodeIds() =>
-      accept<Set<String>>(ConditionNodesVisitor()) ?? {};
+      accept<Set<String>>(const ConditionNodesVisitor()) ?? {};
 
   BaseCondition withUpdatedNodeId(String oldNodeId, String newNodeId) {
     final condition = this;

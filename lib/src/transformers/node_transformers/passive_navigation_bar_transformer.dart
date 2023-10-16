@@ -138,7 +138,7 @@ class _PassiveNavigationBarWidgetState
           break;
       }
       navBar = BottomAppBar(
-        shape: CircularNotchedRectangle(),
+        shape: const CircularNotchedRectangle(),
         notchMargin: widget.node.properties.notchMargin,
         clipBehavior: Clip.antiAlias,
         elevation: elevation,

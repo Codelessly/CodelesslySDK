@@ -193,7 +193,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
       BuildContext context, WebPageWebViewProperties properties) {
     if (!isPlatformSupportedForWebView) {
       return WebViewPreviewWidget(
-        icon: Icon(Icons.language_rounded),
+        icon: const Icon(Icons.language_rounded),
         node: widget.node,
       );
     }
@@ -217,7 +217,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
       BuildContext context, GoogleMapsWebViewProperties properties) {
     if (!isPlatformSupportedForWebView) {
       return WebViewPreviewWidget(
-        icon: Icon(Icons.map_outlined),
+        icon: const Icon(Icons.map_outlined),
         node: widget.node,
       );
     }
@@ -232,7 +232,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
       BuildContext context, TwitterWebViewProperties properties) {
     if (!isPlatformSupportedForWebView) {
       return WebViewPreviewWidget(
-        icon: ImageIcon(
+        icon: const ImageIcon(
             NetworkImage('https://img.icons8.com/color/344/twitter--v2.png')),
         node: widget.node,
       );
@@ -247,19 +247,19 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
       controller: _controller,
       gestureRecognizers: {
         if (properties.controlVerticalScrollGesture == true)
-          Factory<VerticalDragGestureRecognizer>(
+          const Factory<VerticalDragGestureRecognizer>(
               VerticalDragGestureRecognizer.new),
         if (properties.controlHorizontalScrollGesture == true)
-          Factory<HorizontalDragGestureRecognizer>(
+          const Factory<HorizontalDragGestureRecognizer>(
               HorizontalDragGestureRecognizer.new),
         if (properties.controlScaleGesture == true)
-          Factory<ScaleGestureRecognizer>(ScaleGestureRecognizer.new),
+          const Factory<ScaleGestureRecognizer>(ScaleGestureRecognizer.new),
         if (properties.controlTapGesture == true)
-          Factory<TapGestureRecognizer>(TapGestureRecognizer.new),
+          const Factory<TapGestureRecognizer>(TapGestureRecognizer.new),
         if (properties.controlLongPressGesture == true)
-          Factory<LongPressGestureRecognizer>(LongPressGestureRecognizer.new),
+          const Factory<LongPressGestureRecognizer>(LongPressGestureRecognizer.new),
         if (properties.controlForcePressGesture == true)
-          Factory<ForcePressGestureRecognizer>(ForcePressGestureRecognizer.new),
+          const Factory<ForcePressGestureRecognizer>(ForcePressGestureRecognizer.new),
       },
     );
   }
@@ -286,7 +286,7 @@ class WebViewPreviewWidget extends StatelessWidget {
           border: Border.all(color: Colors.blue),
         ),
         child: Container(
-          margin: EdgeInsets.all(8),
+          margin: const EdgeInsets.all(8),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: Colors.blue.shade50,

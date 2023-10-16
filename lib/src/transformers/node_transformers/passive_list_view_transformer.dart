@@ -34,7 +34,7 @@ class PassiveListViewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (node.children.isEmpty) {
-      return AdaptiveNodeBox(node: node, child: SizedBox());
+      return AdaptiveNodeBox(node: node, child: const SizedBox());
     }
     final itemNode = node.children.first;
 

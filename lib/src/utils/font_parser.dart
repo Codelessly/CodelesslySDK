@@ -7,7 +7,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 void main(List<String> args) {
   final file = File(args[0]);
   final result = FontParser.parse(file.readAsBytesSync());
-  print('Result: ${JsonEncoder.withIndent('  ').convert(result)}');
+  print('Result: ${const JsonEncoder.withIndent('  ').convert(result)}');
 }
 
 /// Compares the given [a] [FontVariantModel] with the [b] [FontVariantModel]
