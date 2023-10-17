@@ -72,8 +72,8 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'groupValue', value: value);
 
-    FunctionsRepository.triggerAction(context, node, TriggerType.click,
-        value: value);
+    FunctionsRepository.triggerAction(
+        context, node: node, TriggerType.click, value: value);
   }
 
   void onAction(Reaction reaction) {

@@ -54,15 +54,19 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
     );
   }
 
-  void onPressed(BuildContext context, List<Reaction> reactions) => reactions
-      .where((reaction) => reaction.trigger.type == TriggerType.click)
-      .forEach((reaction) =>
-          FunctionsRepository.performAction(context, reaction.action));
+  void onPressed(BuildContext context, List<Reaction> reactions) =>
+      FunctionsRepository.triggerAction(
+        context,
+        reactions: reactions,
+        TriggerType.click,
+      );
 
-  void onLongPress(BuildContext context, List<Reaction> reactions) => reactions
-      .where((reaction) => reaction.trigger.type == TriggerType.longPress)
-      .forEach((reaction) =>
-          FunctionsRepository.performAction(context, reaction.action));
+  void onLongPress(BuildContext context, List<Reaction> reactions) =>
+      FunctionsRepository.triggerAction(
+        context,
+        reactions: reactions,
+        TriggerType.longPress,
+      );
 }
 
 class PassiveButtonWidget extends StatelessWidget {

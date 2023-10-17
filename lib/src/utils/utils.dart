@@ -13,6 +13,10 @@ const Set<String> predefinedVariableNames = {
   'storage'
 };
 
+const Set<String> predefinedListenableVariableNames = {
+  'storage'
+};
+
 final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'data', type: VariableType.map),
   PredefinedVariableData(name: 'index', type: VariableType.integer),

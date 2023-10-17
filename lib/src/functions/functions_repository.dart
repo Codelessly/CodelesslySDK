@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../codelessly_sdk.dart';
+import '../data/local_storage.dart';
 import '../logging/error_handler.dart';
 
 enum ApiRequestType {
@@ -36,7 +37,7 @@ enum ApiRequestType {
 }
 
 class FunctionsRepository {
-  static void performAction(
+  static Future<void> performAction(
     BuildContext context,
     ActionModel action, {
     dynamic internalValue,
@@ -45,32 +46,26 @@ class FunctionsRepository {
     switch (action.type) {
       case ActionType.navigation:
         navigate(context, action as NavigationAction);
-        break;
       case ActionType.link:
         launchURL(context, (action as LinkAction));
-        break;
       case ActionType.submit:
         submitToNewsletter(context, action as SubmitAction);
-        break;
       case ActionType.setValue:
         setValue(
           context,
           action as SetValueAction,
           internalValue: internalValue,
         );
-        break;
       case ActionType.setVariant:
         setVariant(context, action as SetVariantAction);
-        break;
       case ActionType.setVariable:
         setVariableFromAction(context, action as SetVariableAction);
-        break;
       case ActionType.callFunction:
         callFunction(context, action as CallFunctionAction);
-        break;
       case ActionType.callApi:
         makeApiRequestFromAction(action as ApiCallAction, context);
-        break;
+      case ActionType.setStorage:
+        setStorageFromAction(context, action as SetStorageAction);
     }
   }
 
@@ -588,7 +583,7 @@ class FunctionsRepository {
           codelesslyContext.variables.values.map((e) => e.value);
       // Find the value of variable referenced by key.
       final keyVariableValue = PropertyValueDelegate.retrieveVariableValue(
-        action.key,
+        action.mapKey,
         variables,
         codelesslyContext.data,
         IndexedItemProvider.of(context),
@@ -596,7 +591,7 @@ class FunctionsRepository {
       );
       // If key is a variable, use its value. Else, use the key as it is.
       final String key =
-          keyVariableValue is String ? keyVariableValue : action.key;
+          keyVariableValue is String ? keyVariableValue : action.mapKey;
       // Perform map operations.
       switch (action.mapOperation) {
         case MapOperation.add:
@@ -734,20 +729,20 @@ class FunctionsRepository {
   /// Returns `true` if any action was triggered, `false` otherwise.
   /// If [reactions] is not provided, it will use [node]'s reactions.
   /// If [value] is provided, it will be passed to the action.
-  static bool triggerAction(
+  static Future<bool> triggerAction(
     BuildContext context,
-    ReactionMixin node,
     TriggerType type, {
+    ReactionMixin? node,
     dynamic value,
     List<Reaction>? reactions,
-  }) {
-    final filteredReactions = (reactions ?? node.reactions)
+  }) async {
+    final filteredReactions = (reactions ?? node?.reactions ?? [])
         .where((reaction) => reaction.trigger.type == type);
 
     if (filteredReactions.isEmpty) return false;
 
     for (final reaction in filteredReactions) {
-      FunctionsRepository.performAction(
+      await FunctionsRepository.performAction(
         context,
         reaction.action,
         internalValue: value,
@@ -777,5 +772,133 @@ class FunctionsRepository {
     log('Calling function ${action.name}(${parsedParams.entries.map((e) => '${e.key}: ${e.value}').join(', ')}).');
 
     function?.call(context, codelesslyContext, Map.unmodifiable(parsedParams));
+  }
+
+  static Future<void> setStorageFromAction(
+    BuildContext context,
+    SetStorageAction action,
+  ) async {
+    final LocalStorage storage = context.read<Codelessly>().localStorage;
+
+    final storageKey = PropertyValueDelegate.substituteVariables(
+        context, action.key,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString);
+
+    if (action.operation == StorageOperation.remove) {
+      // TODO: How to do nested deletion in JSON map or list?
+      await storage.remove(storageKey);
+      log('Removed storage key [$storageKey].');
+      return;
+    }
+
+    final newValue = PropertyValueDelegate.substituteVariables(
+        context, action.newValue,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString);
+
+    final dynamic value = switch (action.variableType) {
+      VariableType.text => newValue,
+      VariableType.integer => int.tryParse(newValue),
+      VariableType.decimal => double.tryParse(newValue),
+      VariableType.boolean => action.toggled
+          ? !(bool.tryParse(storage.get(storageKey).toString()) ?? false)
+          : bool.tryParse(newValue),
+      VariableType.list => _performListOperation(
+          context,
+          action,
+          storage.get(storageKey)?.toList(),
+          newValue,
+        ),
+      VariableType.map => _performMapOperation(
+          context,
+          action,
+          storage.get(storageKey)?.toList(),
+          newValue,
+        ),
+      _ => null,
+    };
+
+    log('Setting storage key [$storageKey] to value [$value].');
+    await storage.put(storageKey, value);
+  }
+
+  static Map? _performMapOperation(
+    BuildContext context,
+    DataOperationActionModel action,
+    Map? currentValue,
+    String newValue,
+  ) {
+    // If list variable does not exist, return false.
+    currentValue ??= {};
+
+    final String substitutedKey = PropertyValueDelegate.substituteVariables(
+      context,
+      action.mapKey,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
+
+    // Perform map operations.
+    switch (action.mapOperation) {
+      case MapOperation.add:
+        currentValue.addAll(newValue.toMap() ?? {});
+        break;
+      case MapOperation.remove:
+        currentValue.remove(substitutedKey);
+        break;
+      case MapOperation.update:
+        currentValue[substitutedKey] = newValue.toMap() ?? {};
+        break;
+      default:
+        break;
+    }
+    return currentValue;
+  }
+
+  static List? _performListOperation(
+    BuildContext context,
+    DataOperationActionModel action,
+    List? currentValue,
+    String newValue,
+  ) {
+    // If list variable does not exist, return false.
+    currentValue ??= [];
+
+    // Try to parse index if it's an integer. Else, try to use the variable's
+    // value.
+    final String substitutedIndex = PropertyValueDelegate.substituteVariables(
+      context,
+      action.index,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
+    final index = int.tryParse(substitutedIndex);
+    if (index == null) {
+      log('Invalid index: $substitutedIndex');
+      return currentValue;
+    }
+    final parsedValue = newValue
+            .toList<List>()
+            ?.map((e) => e.toString().parsedValue())
+            .toList() ??
+        [];
+    // Perform list operations.
+    switch (action.listOperation) {
+      case ListOperation.add:
+        currentValue.addAll(parsedValue);
+        break;
+      case ListOperation.insert:
+        currentValue.insertAll(index, parsedValue);
+        break;
+      case ListOperation.removeAt:
+        currentValue.removeAt(index);
+        break;
+      case ListOperation.remove:
+        currentValue.remove(newValue);
+        break;
+      case ListOperation.update:
+        currentValue[index] = parsedValue;
+        break;
+      default:
+        break;
+    }
+    return currentValue;
   }
 }

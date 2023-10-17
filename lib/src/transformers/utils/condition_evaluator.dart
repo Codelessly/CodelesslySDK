@@ -246,6 +246,9 @@ class ConditionEvaluator<R extends Object>
 
   @override
   R? visitSubmitAction(SubmitAction action) => null;
+
+  @override
+  R? visitSetStorageAction(SetStorageAction action) => null;
 }
 
 class ConditionPrinter
@@ -353,4 +356,7 @@ class ConditionPrinter
 
   @override
   void visitVariablePart(VariablePart part) => _buffer.write(part.valueString);
+
+  @override
+  void visitSetStorageAction(SetStorageAction action) {}
 }
