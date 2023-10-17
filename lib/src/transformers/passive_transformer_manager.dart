@@ -159,11 +159,16 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       if (match == null) continue;
 
       if (match.isPredefinedVariable) {
-        if (match.name == 'storage') {
-          final notifier = getStorageListenerFor(match, context);
-          if (notifier != null) listenables.add(notifier);
+        // If variable is not listenable or doesn't need to create a listenable,
+        // skip it.
+        if (!predefinedListenableVariableNames.contains(match.name)) continue;
+
+        switch (match.name) {
+          case 'storage':
+            // handle storage variable
+            final notifier = getStorageListenerFor(match, context);
+            if (notifier != null) listenables.add(notifier);
         }
-        continue;
       }
 
       // Get corresponding variable data from codelessly context.
@@ -181,11 +186,16 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       if (match == null) continue;
 
       if (match.isPredefinedVariable) {
-        if (match.name == 'storage') {
-          final notifier = getStorageListenerFor(match, context);
-          if (notifier != null) listenables.add(notifier);
+        // If variable is not listenable or doesn't need to create a listenable,
+        // skip it.
+        if (!predefinedListenableVariableNames.contains(match.name)) continue;
+
+        switch (match.name) {
+          case 'storage':
+            // handle storage variable
+            final notifier = getStorageListenerFor(match, context);
+            if (notifier != null) listenables.add(notifier);
         }
-        continue;
       }
 
       // Get corresponding variable data from codelessly context.
@@ -203,6 +213,15 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           condition.getReactiveVariables().toSet();
 
       for (final name in variableNames) {
+        if (predefinedListenableVariableNames.contains(name)) {
+          switch (name) {
+            case 'storage':
+              final notifier = getStorageListenerFor(
+                  VariableMatch.parse(name.wrapWithVariableSyntax())!, context);
+              if (notifier != null) listenables.add(notifier);
+          }
+          continue;
+        }
         // Get corresponding variable data from codelessly context.
         final ValueNotifier<VariableData>? listenableVariable =
             codelesslyContext.variables.values
@@ -225,7 +244,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   Listenable? getStorageListenerFor(VariableMatch match, BuildContext context) {
     final localStorage = context.read<Codelessly?>()?.localStorage;
-    if(localStorage == null) return null;
+    if (localStorage == null) return null;
     if (match.hasPath) {
       final pathMatch =
           VariableMatch.parse(match.path!.wrapWithVariableSyntax());

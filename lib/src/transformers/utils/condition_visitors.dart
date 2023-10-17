@@ -106,6 +106,9 @@ class ConditionVariablesVisitor
         )
         .toSet();
   }
+
+  @override
+  Set<String>? visitSetStorageAction(SetStorageAction action) => {};
 }
 
 /// A visitor that returns the list of node IDs used in a condition's actions.
@@ -159,4 +162,7 @@ class ConditionNodesVisitor
 
   @override
   String? visitSubmitAction(SubmitAction action) => null;
+
+  @override
+  String? visitSetStorageAction(SetStorageAction action) => null;
 }

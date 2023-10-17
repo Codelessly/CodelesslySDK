@@ -240,7 +240,10 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   }
 
   void onFaBPressed(BuildContext context, CanvasNode node) {
-    FunctionsRepository.triggerAction(context, node, TriggerType.click,
+    FunctionsRepository.triggerAction(
+        context,
+        node: node,
+        TriggerType.click,
         reactions: node.properties.floatingActionButton?.reactions);
   }
 
