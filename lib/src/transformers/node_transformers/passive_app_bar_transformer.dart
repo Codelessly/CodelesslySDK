@@ -23,10 +23,8 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
   }
 
   void onTriggerAction(BuildContext context, List<Reaction> reactions) =>
-      reactions
-          .where((reaction) => reaction.trigger.type == TriggerType.click)
-          .forEach((reaction) =>
-              FunctionsRepository.performAction(context, reaction.action));
+      FunctionsRepository.triggerAction(
+          context, reactions: reactions, TriggerType.click);
 
   PreferredSizeWidget buildAppBarWidgetFromProps({
     required AppBarProperties props,

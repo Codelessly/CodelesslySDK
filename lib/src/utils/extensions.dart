@@ -1520,8 +1520,9 @@ extension BaseConditionExt on BaseCondition {
   /// Returns all the variables used in this condition except the predefined
   /// variables. Returns names of the variables.
   Set<String> getReactiveVariables() =>
-      accept<Set<String>>(const ConditionVariablesVisitor(
-          excludedVariableNames: predefinedVariableNames)) ??
+      accept<Set<String>>(ConditionVariablesVisitor(
+          excludedVariableNames: {...predefinedVariableNames}
+            ..removeAll(predefinedListenableVariableNames))) ??
       {};
 
   /// [variables] is a map of variable name to variable value.

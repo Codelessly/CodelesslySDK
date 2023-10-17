@@ -258,7 +258,7 @@ class PropertyValueDelegate {
       variables,
       data,
       IndexedItemProvider.of(context),
-      storage,
+      storage ?? context.read<Codelessly?>()?.localStorage,
     );
 
     return value?.typedValue<R>();
@@ -352,8 +352,8 @@ class PropertyValueDelegate {
     final variableProps = getVariableProperties(variableValue, variableType);
     final Map<String, dynamic> values = {
       ...variableProps,
-      if (variableType.isMap && variableValue is Map<String, dynamic>)
-        ...variableValue,
+      if (variableType.isMap && variableValue is Map)
+        ...Map.from(variableValue),
     };
     final Object? value = substituteJsonPath(match.text, {match.name: values});
     return value;

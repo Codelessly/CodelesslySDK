@@ -219,7 +219,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     return true;
   }
 
-  /// Allows to easily get the [value] of a variable with a given [name].
+  /// Allows to easily get the [newValue] of a variable with a given [name].
   /// Returns null if the variable does not exist.
   /// If [R] is provided, the returned value will be cast to that type.
   R? getVariableValue<R extends Object>(String name) {
