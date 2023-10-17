@@ -110,6 +110,8 @@ class PassiveCheckboxWidget extends StatelessWidget {
         ) ??
         node.value;
 
+    print('checkbox value: $value');
+
     return AdaptiveNodeBox(
       node: node,
       child: Transform.scale(

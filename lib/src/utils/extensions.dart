@@ -1336,6 +1336,12 @@ extension StringExt on String {
     if (uri == null) return false;
     return path.extension(uri.path).contains('svg');
   }
+
+  String toJsonPointerPath() {
+    final tokens = split(RegExp('[\[\.]'));
+    final formatted = tokens.map((e) => e.replaceAll(']', '')).join('/');
+    return '/$formatted';
+  }
 }
 
 /// Can match:
