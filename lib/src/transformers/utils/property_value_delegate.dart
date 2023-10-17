@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:json_path/json_path.dart';
 import 'package:meta/meta.dart';
 import 'package:provider/provider.dart';
+import 'package:rfc_6901/rfc_6901.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../data/local_storage.dart';
@@ -77,11 +78,24 @@ class PropertyValueDelegate {
       dataOverrides: dataOverrides,
     );
 
-    final R? nodeValue = getPropertyValueFromNodeValues<R>(
-      context,
-      node,
-      property,
-    );
+    // If a variable/json-path is not found then variableValue will be null.
+    // In that case, a node value might exist but we may not wanna use it
+    // in this situation as we may wanna fall back to default value when a
+    // variable is not found. This checks takes care of that, making sure that
+    // node value is only used when a variable is not found.
+    //
+    // One serious example of this is, a node inside a list view. Since list
+    // view duplicates the node for each item, the node value will be duplicated
+    // as well. If we use node value as a fallback, it will use the value of
+    // the first item for all items. So if a checkbox is checked in the first
+    // item, it will be checked in all items. This specifically prevents that.
+    final R? nodeValue = node.variables[property] == null
+        ? getPropertyValueFromNodeValues<R>(
+            context,
+            node,
+            property,
+          )
+        : null;
 
     return conditionValue ?? variableValue ?? nodeValue;
   }
@@ -287,12 +301,12 @@ class PropertyValueDelegate {
     if (match.hasAccessor) {
       if (variable.type.isText) {
         final characters = variable.getValue().toString().characters.toList();
-        final Object? value =
+        final (Object? value, _) =
             substituteJsonPath(match.fullPath, {match.name: characters});
         return value;
       }
       if (!variable.type.isList) return null;
-      final Object? value =
+      final (Object? value, _) =
           substituteJsonPath(match.fullPath, {match.name: variable.getValue()});
 
       return value;
@@ -308,7 +322,7 @@ class PropertyValueDelegate {
       if (variable.type.isMap && variableValue is Map<String, dynamic>)
         ...variableValue,
     };
-    final Object? value =
+    final (Object? value, _) =
         substituteJsonPath(match.fullPath, {match.name: values});
 
     return value;
@@ -337,12 +351,12 @@ class PropertyValueDelegate {
     if (match.hasAccessor) {
       if (variableType.isText) {
         final characters = variableValue.toString().characters.toList();
-        final Object? value =
+        final (Object? value, _) =
             substituteJsonPath(match.fullPath, {match.name: characters});
         return value;
       }
       if (!variableType.isList) return null;
-      final Object? value =
+      final (Object? value, _) =
           substituteJsonPath(match.text, {match.name: variableValue});
       return value;
     }
@@ -355,7 +369,8 @@ class PropertyValueDelegate {
       if (variableType.isMap && variableValue is Map)
         ...Map.from(variableValue),
     };
-    final Object? value = substituteJsonPath(match.text, {match.name: values});
+    final (Object? value, _) =
+        substituteJsonPath(match.text, {match.name: values});
     return value;
   }
 
@@ -424,16 +439,17 @@ class PropertyValueDelegate {
   ///   - ${data.name}: will be replaced with data['name'].
   ///   - data.name: will be replaced with data['name'].
   ///
-  static Object? substituteJsonPath(String text, Map<String, dynamic> data) {
+  static (Object?, JsonPointer?) substituteJsonPath(
+      String text, Map<String, dynamic> data) {
     // If the text represents a JSON path, get the relevant value from [data] map.
-    if (data.isEmpty) return null;
+    if (data.isEmpty) return (null, null);
 
     if (!variableSyntaxIdentifierRegex.hasMatch(text)) {
       // text is not wrapped with ${}. Wrap it since a validation is done later.
       text = '\${$text}';
     }
 
-    if (!text.isValidVariablePath) return null;
+    if (!text.isValidVariablePath) return (null, null);
 
     // Remove $-sign and curly brackets.
     String path = variableSyntaxIdentifierRegex.hasMatch(text)
@@ -444,10 +460,50 @@ class PropertyValueDelegate {
     // [text] represent a JSON path here. Decode it.
     final JsonPath jsonPath = JsonPath(path);
     // Retrieve values from JSON that match the path.
-    final values = jsonPath.readValues(data);
-    if (values.isEmpty) return null;
+    final values = jsonPath.read(data);
+    if (values.isEmpty) return (null, null);
     // Return the first value.
-    return values.first;
+    return (values.first.value, values.first.pointer);
+  }
+
+  static void putValueInJsonPath(
+      String path, Object? value, Map<String, dynamic> data) {
+    final tokens = path.split('.');
+    final leafKey = tokens.removeLast();
+    Object? traversedValue;
+    for (final token in tokens) {
+      final match = VariableMatch.parse(token.wrapWithVariableSyntax());
+      if (match != null && match.hasAccessor) {
+        if (traversedValue is List) {
+          (traversedValue, _) =
+              substituteJsonPath(token, {match.name: traversedValue});
+        } else {
+          traversedValue = [];
+        }
+      } else if (traversedValue is Map) {
+        traversedValue = traversedValue[token];
+      } else {
+        traversedValue = {};
+      }
+    }
+    final match = VariableMatch.parse(leafKey.wrapWithVariableSyntax());
+
+    traversedValue ??= match != null
+        ? data[match.name] ?? (match.hasAccessor ? [] : {})
+        : data[path];
+
+    if (match != null && match.hasAccessor) {
+      if (traversedValue is List) {
+        final index =
+            match.accessor!.replaceAll('[', '').replaceAll(']', '').toInt();
+        if (index != null) {
+          traversedValue[index] =
+              substituteJsonPath(leafKey, {match.name: value}).$1;
+        }
+      }
+    } else if (traversedValue is Map) {
+      traversedValue[leafKey] = value;
+    }
   }
 
   /// Creates a map of variable properties for given [value] and [type].

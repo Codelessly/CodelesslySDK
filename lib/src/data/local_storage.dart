@@ -11,9 +11,9 @@ abstract class LocalStorage extends ChangeNotifier {
 
   Map<String, dynamic> getAll();
 
-  Future<void> put(String key, Object value);
+  Future<void> put(String key, Object? value);
 
-  Object? get(String key);
+  Object? get(String key, {Object? defaultValue});
 
   Future<void> remove(String key);
 
@@ -58,12 +58,12 @@ class HiveLocalStorage extends LocalStorage {
   Map<String, dynamic> getAll() => Map<String, dynamic>.from(_box.toMap());
 
   @override
-  Future<void> put(String key, Object value) => _box.put(key, value);
+  Future<void> put(String key, Object? value) => _box.put(key, value);
 
   @override
-  Object? get(String key) {
-    if (!_box.containsKey(key)) return null;
-    return _box.get(key);
+  Object? get(String key, {Object? defaultValue}) {
+    if (!_box.containsKey(key)) return defaultValue;
+    return _box.get(key) ?? defaultValue;
   }
 
   @override

@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:rfc_6901/rfc_6901.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../codelessly_sdk.dart';
@@ -795,30 +796,69 @@ class FunctionsRepository {
         context, action.newValue,
         nullSubstitutionMode: NullSubstitutionMode.emptyString);
 
-    final dynamic value = switch (action.variableType) {
+    final match = VariableMatch.parse(storageKey.wrapWithVariableSyntax());
+
+    final Object? currentValue;
+    JsonPointer? pointer;
+    if (match != null && match.hasPathOrAccessor) {
+      (currentValue, pointer) = PropertyValueDelegate.substituteJsonPath(
+        storageKey.wrapWithVariableSyntax(),
+        {match.name: storage.get(match.name)},
+      );
+      if (pointer == null) {
+        // This means the key path does not exist.
+        final pointerPath = storageKey.toJsonPointerPath();
+        pointer = JsonPointer(pointerPath);
+      }
+    } else {
+      currentValue = storage.get(storageKey);
+    }
+
+    final Object? value = switch (action.variableType) {
       VariableType.text => newValue,
       VariableType.integer => int.tryParse(newValue),
       VariableType.decimal => double.tryParse(newValue),
       VariableType.boolean => action.toggled
-          ? !(bool.tryParse(storage.get(storageKey).toString()) ?? false)
+          ? !(bool.tryParse(currentValue.toString()) ?? false)
           : bool.tryParse(newValue),
       VariableType.list => _performListOperation(
           context,
           action,
-          storage.get(storageKey)?.toList(),
+          currentValue?.toList(),
           newValue,
         ),
       VariableType.map => _performMapOperation(
           context,
           action,
-          storage.get(storageKey)?.toList(),
+          currentValue?.toMap(),
           newValue,
         ),
       _ => null,
     };
 
-    log('Setting storage key [$storageKey] to value [$value].');
-    await storage.put(storageKey, value);
+    if (pointer != null) {
+      Map<String, dynamic> updatedData = {
+        match?.name ?? storageKey: storage.get(
+          match?.name ?? storageKey,
+          defaultValue: action.variableType.isList
+              ? []
+              : action.variableType.isMap
+                  ? {}
+                  : null,
+        )
+      };
+
+      final result = pointer.write(updatedData, value);
+      if (result != null) {
+        updatedData = Map<String, dynamic>.from(result as Map);
+      }
+
+      log('Setting storage key [$storageKey] to value [$value].');
+      await storage.put(match!.name, updatedData[match?.name ?? storageKey]);
+    } else {
+      log('Setting storage key [$storageKey] to value [$value].');
+      await storage.put(storageKey, value);
+    }
   }
 
   static Map? _performMapOperation(
@@ -845,7 +885,7 @@ class FunctionsRepository {
         currentValue.remove(substitutedKey);
         break;
       case MapOperation.update:
-        currentValue[substitutedKey] = newValue.toMap() ?? {};
+        currentValue[substitutedKey] = newValue.parsedValue();
         break;
       default:
         break;

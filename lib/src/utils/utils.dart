@@ -13,9 +13,7 @@ const Set<String> predefinedVariableNames = {
   'storage'
 };
 
-const Set<String> predefinedListenableVariableNames = {
-  'storage'
-};
+const Set<String> predefinedListenableVariableNames = {'storage'};
 
 final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'data', type: VariableType.map),
@@ -164,6 +162,8 @@ class VariableMatch with EquatableMixin {
   bool get hasPath => path != null && path!.isNotEmpty;
 
   bool get hasAccessor => accessor != null && accessor!.isNotEmpty;
+
+  bool get hasOnlyAccessor => hasAccessor && !hasPath;
 
   bool get hasRawValue => !hasPath && !hasAccessor;
 
