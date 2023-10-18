@@ -8,13 +8,16 @@ import 'utils/placeholder_painter.dart';
 
 typedef BuildWidgetFromID = Widget Function(String id, BuildContext context);
 typedef BuildWidgetFromNode = Widget Function(
-    BaseNode node, BuildContext context);
+  BaseNode node,
+  BuildContext context,
+);
 
 /// This is the passive implementation of the [NodeTransformerManager],
 /// registering all the transformers that are available in the SDK.
 class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
+
   /// This is the registry of transformers that are used by the manager.
-  PassiveNodeTransformerManager(super.getNode) {
+  PassiveNodeTransformerManager(super.getNode, super.retrieveLayout) {
     registerAllTransformers({
       'rowColumn': PassiveRowColumnTransformer(getNode, this),
       'stack': PassiveStackTransformer(getNode, this),

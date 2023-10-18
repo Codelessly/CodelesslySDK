@@ -119,6 +119,10 @@ class CodelesslyWidget extends StatefulWidget {
   /// Optional [CodelesslyContext] that can be provided explicitly if needed.
   final CodelesslyContext? codelesslyContext;
 
+  /// Returns a widget that decides how to load nested layouts of a rendered
+  /// node.
+  final LayoutRetrieverBuilder? layoutRetrievalBuilder;
+
   /// Creates a [CodelesslyWidget].
   ///
   /// Required parameters for base functionality:
@@ -159,6 +163,7 @@ class CodelesslyWidget extends StatefulWidget {
     this.loadingBuilder,
     this.errorBuilder,
     this.layoutBuilder = _defaultLayoutBuilder,
+    this.layoutRetrievalBuilder,
 
     // Optional managers overrides.
     this.authManager,
@@ -182,8 +187,8 @@ class CodelesslyWidget extends StatefulWidget {
                   (controller?.config)) !=
               null),
           controller != null
-              ? 'You must provide a CodelesslyConfig inside of your CodelesslyWidgetController or configure the provided codelessly instance with one.'
-              : 'You must provide a CodelesslyConfig inside of your CodelesslyWidget or through the Codelessly instance.',
+              ? 'You must provide a [config] inside of your [controller] or configure the provided codelessly instance with one.'
+              : 'You must provide a [config inside of your CodelesslyWidget or through the Codelessly instance.',
         ),
         assert(
           ((layoutID != null) != (controller != null)) ||
@@ -260,10 +265,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     );
 
     if (widget.codelesslyContext != null) {
-      log(
-        '[CodelesslyWidget] A CodelesslyContext was provided explicitly by'
-        ' the widget.',
-      );
+      log('[CodelesslyWidget] A CodelesslyContext was provided explicitly by the widget.');
     }
 
     codelesslyContext = widget.codelesslyContext ??
@@ -278,10 +280,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         );
   }
 
-  /// TODO: If Codelessly instance updates variables or functions, then we need
-  ///       to trigger an update.
-  ///       The global instance's variables and functions are currently only
-  ///       read once, and never updated.
   @override
   void didUpdateWidget(covariant CodelesslyWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -414,9 +412,11 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
         final layoutWidget = Material(
           type: MaterialType.transparency,
-          child: CodelesslyPublishedLayoutBuilder(
+          child: CodelesslyLayoutBuilder(
             key: ValueKey(layoutID),
+            controller: _effectiveController,
             layout: model.layouts[layoutID]!,
+            layoutRetrievalBuilder: widget.layoutRetrievalBuilder,
           ),
         );
 

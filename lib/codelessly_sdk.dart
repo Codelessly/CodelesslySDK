@@ -1,6 +1,7 @@
 library codelessly_sdk;
 
 export 'src/auth/auth_manager.dart';
+export 'src/auth/codelessly_auth_manager.dart';
 export 'src/cache/cache_manager.dart';
 export 'src/codelessly.dart';
 export 'src/codelessly_config.dart';
@@ -8,6 +9,8 @@ export 'src/constants.dart';
 export 'src/data/data_manager.dart';
 export 'src/data/local_data_repository.dart';
 export 'src/data/network_data_repository.dart';
+export 'src/data/web_data_repository.dart';
+export 'src/data/firebase_data_repository.dart';
 export 'src/functions/functions.dart';
 export 'src/model/asset_model.dart';
 export 'src/model/auth_data.dart';
