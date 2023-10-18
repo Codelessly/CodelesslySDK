@@ -775,89 +775,144 @@ class FunctionsRepository {
     function?.call(context, codelesslyContext, Map.unmodifiable(parsedParams));
   }
 
-  static Future<void> setStorageFromAction(
+  static Future<bool> setStorageFromAction(
+    BuildContext context,
+    SetStorageAction action,
+  ) async =>
+      await switch (action.operation) {
+        StorageOperation.addOrUpdate => _updateStorage(context, action),
+        StorageOperation.remove => _removeFromStorage(context, action),
+      };
+
+  static Future<bool> _updateStorage(
     BuildContext context,
     SetStorageAction action,
   ) async {
-    final LocalStorage storage = context.read<Codelessly>().localStorage;
+    try {
+      final LocalStorage storage = context.read<Codelessly>().localStorage;
 
-    final storageKey = PropertyValueDelegate.substituteVariables(
-        context, action.key,
-        nullSubstitutionMode: NullSubstitutionMode.emptyString);
+      final storageKey = PropertyValueDelegate.substituteVariables(
+          context, action.key,
+          nullSubstitutionMode: NullSubstitutionMode.emptyString);
 
-    if (action.operation == StorageOperation.remove) {
-      // TODO: How to do nested deletion in JSON map or list?
-      await storage.remove(storageKey);
-      log('Removed storage key [$storageKey].');
-      return;
-    }
+      final newValue = PropertyValueDelegate.substituteVariables(
+          context, action.newValue,
+          nullSubstitutionMode: NullSubstitutionMode.emptyString);
 
-    final newValue = PropertyValueDelegate.substituteVariables(
-        context, action.newValue,
-        nullSubstitutionMode: NullSubstitutionMode.emptyString);
+      final match = VariableMatch.parse(storageKey.wrapWithVariableSyntax());
 
-    final match = VariableMatch.parse(storageKey.wrapWithVariableSyntax());
-
-    final Object? currentValue;
-    JsonPointer? pointer;
-    if (match != null && match.hasPathOrAccessor) {
-      (currentValue, pointer) = PropertyValueDelegate.substituteJsonPath(
-        storageKey.wrapWithVariableSyntax(),
-        {match.name: storage.get(match.name)},
-      );
-      if (pointer == null) {
-        // This means the key path does not exist.
-        final pointerPath = storageKey.toJsonPointerPath();
-        pointer = JsonPointer(pointerPath);
+      final Object? currentValue;
+      JsonPointer? pointer;
+      if (match != null && match.hasPathOrAccessor) {
+        (currentValue, pointer) = PropertyValueDelegate.substituteJsonPath(
+          storageKey.wrapWithVariableSyntax(),
+          {match.name: storage.get(match.name)},
+        );
+        if (pointer == null) {
+          // This means the key path does not exist.
+          final pointerPath = storageKey.toJsonPointerPath();
+          pointer = JsonPointer(pointerPath);
+        }
+      } else {
+        currentValue = storage.get(storageKey);
       }
-    } else {
-      currentValue = storage.get(storageKey);
-    }
 
-    final Object? value = switch (action.variableType) {
-      VariableType.text => newValue,
-      VariableType.integer => int.tryParse(newValue),
-      VariableType.decimal => double.tryParse(newValue),
-      VariableType.boolean => action.toggled
-          ? !(bool.tryParse(currentValue.toString()) ?? false)
-          : bool.tryParse(newValue),
-      VariableType.list => _performListOperation(
-          context,
-          action,
-          currentValue?.toList(),
-          newValue,
-        ),
-      VariableType.map => _performMapOperation(
-          context,
-          action,
-          currentValue?.toMap(),
-          newValue,
-        ),
-      _ => null,
-    };
-
-    if (pointer != null) {
-      Map<String, dynamic> updatedData = {
-        match?.name ?? storageKey: storage.get(
-          match?.name ?? storageKey,
-          defaultValue: action.variableType.isList
-              ? []
-              : action.variableType.isMap
-                  ? {}
-                  : null,
-        )
+      final Object? value = switch (action.variableType) {
+        VariableType.text => newValue,
+        VariableType.integer => int.tryParse(newValue),
+        VariableType.decimal => double.tryParse(newValue),
+        VariableType.boolean => action.toggled
+            ? !(bool.tryParse(currentValue.toString()) ?? false)
+            : bool.tryParse(newValue),
+        VariableType.list => _performListOperation(
+            context,
+            action,
+            currentValue?.toList(),
+            newValue,
+          ),
+        VariableType.map => _performMapOperation(
+            context,
+            action,
+            currentValue?.toMap(),
+            newValue,
+          ),
+        _ => null,
       };
 
-      final result = pointer.write(updatedData, value);
+      if (match == null || pointer == null) {
+        // This means the key is a simple key without any path or accessor. So
+        // we can set it directly.
+
+        log('Setting storage key [$storageKey] to value [$value].');
+        await storage.put(storageKey, value);
+        return false;
+      }
+
+      final defaultValue = action.variableType.isList
+          ? []
+          : action.variableType.isMap
+              ? {}
+              : null;
+      Map<String, dynamic> storageData = {
+        match.name: storage.get(match.name, defaultValue: defaultValue)
+      };
+
+      final result = pointer.write(storageData, value);
       if (result != null) {
-        updatedData = Map<String, dynamic>.from(result as Map);
+        storageData = Map<String, dynamic>.from(result as Map);
       }
 
       log('Setting storage key [$storageKey] to value [$value].');
-      await storage.put(match!.name, updatedData[match?.name ?? storageKey]);
-    } else {
-      log('Setting storage key [$storageKey] to value [$value].');
-      await storage.put(storageKey, value);
+      await storage.put(match.name, storageData[match.name]);
+
+      return true;
+    } catch (error, stackTrace) {
+      log(error.toString());
+      log(stackTrace.toString());
+      return false;
+    }
+  }
+
+  /// Performs remove operation on given storage [action] and returns `true` if
+  /// the operation was successful, `false` otherwise.
+  static Future<bool> _removeFromStorage(
+      BuildContext context, SetStorageAction action) async {
+    try {
+      final LocalStorage storage = context.read<Codelessly>().localStorage;
+
+      final storageKey = PropertyValueDelegate.substituteVariables(
+          context, action.key,
+          nullSubstitutionMode: NullSubstitutionMode.emptyString);
+
+      final match = VariableMatch.parse(storageKey.wrapWithVariableSyntax());
+      if (match == null || !match.hasPathOrAccessor) {
+        // This means the key is a simple key without any path or accessor. So
+        // we can remove it directly.
+        await storage.remove(storageKey);
+        log('Removed storage key [$storageKey].');
+        return true;
+      }
+
+      // The key is a json path so we need to remove partial information from
+      // a nested path.
+      final pointerPath = storageKey.toJsonPointerPath();
+      final pointer = JsonPointer(pointerPath);
+
+      Map<String, dynamic> storageData = {match.name: storage.get(match.name)};
+
+      final result = pointer.remove(storageData);
+      if (result != null) {
+        storageData = Map<String, dynamic>.from(result as Map);
+      }
+
+      log('Removed storage key [$storageKey].');
+      await storage.put(match.name, storageData[match.name]);
+
+      return true;
+    } catch (error, stackTrace) {
+      log(error.toString());
+      log(stackTrace.toString());
+      return false;
     }
   }
 
