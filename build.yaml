@@ -5,7 +5,7 @@ targets:
         - example/**
         - example_chat_bot/**
     builders:
-      json_serializable:
+      codelessly_json_serializable:
         options:
           # The other properties are the same as default (https://pub.dev/packages/json_serializable#build-configuration).
           # explicit_to_json must be true for nested properties to work (like a Paint inside a Frame, toJson must be called in both)
