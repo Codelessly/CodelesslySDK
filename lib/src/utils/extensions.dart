@@ -1338,7 +1338,7 @@ extension StringExt on String {
   }
 
   String toJsonPointerPath() {
-    final tokens = split(RegExp('[\[\.]'));
+    final tokens = split(RegExp('[[.]'));
     final formatted = tokens.map((e) => e.replaceAll(']', '')).join('/');
     return '/$formatted';
   }
