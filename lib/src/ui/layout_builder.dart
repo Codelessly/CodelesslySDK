@@ -6,33 +6,104 @@ import 'package:provider/provider.dart';
 import '../../codelessly_sdk.dart';
 import '../functions/functions_repository.dart';
 
+class CodelesslyLayoutRetriever extends StatefulWidget {
+  final CodelesslyWidgetController controller;
+  final SizeC bounds;
+  final String layoutID;
+  final String pageID;
+
+  const CodelesslyLayoutRetriever({
+    super.key,
+    required this.controller,
+    required this.bounds,
+    required this.layoutID,
+    required this.pageID,
+  });
+
+  @override
+  State<CodelesslyLayoutRetriever> createState() =>
+      _CodelesslyLayoutRetrieverState();
+}
+
+class _CodelesslyLayoutRetrieverState extends State<CodelesslyLayoutRetriever> {
+  late final Codelessly codelessly = Codelessly(
+    config: widget.controller.config,
+  );
+  late final CodelesslyWidgetController controller = widget.controller.copyWith(
+    layoutID: widget.layoutID,
+    codelessly: codelessly,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    codelessly.initialize();
+    controller.initialize();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    codelessly.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: widget.bounds.width,
+      height: widget.bounds.height,
+      child: CodelesslyWidget(
+        controller: controller,
+        loadingBuilder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        errorBuilder: (context, error) => Center(
+          child: Text(
+            error.toString(),
+            style: const TextStyle(color: Colors.red),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// A widget that builds a layout from an [SDKPublishLayout].
 ///
 /// The internal node list is resolved by linking parentIDs based on the node
 /// tree's children hierarchy. It additionally resolve action links and updates
 /// the internal [CodelesslyContext] with the node values.
-class CodelesslyPublishedLayoutBuilder extends StatefulWidget {
+class CodelesslyLayoutBuilder extends StatefulWidget {
+  /// The [CodelesslyWidgetController] that is used to control the layout.
+  final CodelesslyWidgetController controller;
+
   /// The layout to build. The nodes list must be populated inside.
   final SDKPublishLayout layout;
 
-  /// Creates a [CodelesslyPublishedLayoutBuilder] instance given a [layout].
-  const CodelesslyPublishedLayoutBuilder({
+  /// Returns a widget that decides how to load nested layouts of a rendered
+  /// node.
+  final LayoutRetrieverBuilder? layoutRetrievalBuilder;
+
+  /// Creates a [CodelesslyLayoutBuilder] instance given a [layout].
+  const CodelesslyLayoutBuilder({
     super.key,
+    required this.controller,
     required this.layout,
+    this.layoutRetrievalBuilder,
   });
 
   @override
-  State<CodelesslyPublishedLayoutBuilder> createState() =>
-      _CodelesslyPublishedLayoutBuilderState();
+  State<CodelesslyLayoutBuilder> createState() =>
+      _CodelesslyLayoutBuilderState();
 }
 
-/// The state of the [CodelesslyPublishedLayoutBuilder].
-class _CodelesslyPublishedLayoutBuilderState
-    extends State<CodelesslyPublishedLayoutBuilder> {
+/// The state of the [CodelesslyLayoutBuilder].
+class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
   /// The node registry that is used to store the nodes.
   /// The [NodeWidgetTransformer]s use this to get nodes by their ids (via the
   /// [transformerManager]).
-  late final NodeRegistry nodeRegistry = NodeRegistry();
+  final NodeRegistry nodeRegistry = NodeRegistry();
 
   /// The [PassiveNodeTransformerManager] that is used to build the widgets
   /// from the nodes.
@@ -41,7 +112,18 @@ class _CodelesslyPublishedLayoutBuilderState
   /// each node and building them. It also stores the [nodeRegistry] and
   /// delegates the node lookup to it.
   late final PassiveNodeTransformerManager transformerManager =
-      PassiveNodeTransformerManager(nodeRegistry.getNodeByID);
+      PassiveNodeTransformerManager(
+    nodeRegistry.getNodeByID,
+    (context, bounds, layoutID, pageID) =>
+        widget.layoutRetrievalBuilder
+            ?.call(context, bounds, layoutID, pageID) ??
+        CodelesslyLayoutRetriever(
+          controller: widget.controller,
+          layoutID: layoutID,
+          pageID: pageID,
+          bounds: bounds,
+        ),
+  );
 
   late final CanvasNode canvasNode =
       widget.layout.nodes[widget.layout.canvasId] as CanvasNode;
@@ -54,7 +136,7 @@ class _CodelesslyPublishedLayoutBuilderState
   }
 
   @override
-  void didUpdateWidget(covariant CodelesslyPublishedLayoutBuilder oldWidget) {
+  void didUpdateWidget(covariant CodelesslyLayoutBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.layout.id != widget.layout.id ||
         oldWidget.layout.lastUpdated != widget.layout.lastUpdated) {

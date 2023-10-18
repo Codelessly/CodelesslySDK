@@ -60,7 +60,8 @@ class DataManager {
     required this.authManager,
     required this.networkDataRepository,
     required this.localDataRepository,
-  });
+    SDKPublishModel? publishModel,
+  }) : _publishModel = publishModel;
 
   /// Initializes the [DataManager] instance.
   ///
@@ -82,7 +83,7 @@ class DataManager {
     initialized = true;
 
     // Initialize all locally cached data.
-    _publishModel = localDataRepository.fetchPublishModel(
+    _publishModel ??= localDataRepository.fetchPublishModel(
       source: config.publishSource,
     );
 

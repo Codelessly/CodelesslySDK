@@ -11,13 +11,25 @@ import 'package:provider/provider.dart';
 import '../../codelessly_sdk.dart';
 import '../functions/functions_repository.dart';
 
+typedef LayoutRetrieverBuilder = Widget Function(
+  BuildContext context,
+  SizeC bounds,
+  String layoutID,
+  String pageID,
+);
+
 /// A wrapper class for both [PassiveNodeTransformerManager] and
 /// [ActiveNodeTransformerManager].
 ///
 /// Helps separate the functions that are common between them into one place.
 abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     Widget, BuildContext, WidgetBuildSettings, NodeWidgetTransformer> {
-  WidgetNodeTransformerManager(super.getNode);
+
+  /// Returns a widget that decides how to load nested layouts of a rendered
+  /// node.
+  final LayoutRetrieverBuilder layoutRetrievalBuilder;
+
+  WidgetNodeTransformerManager(super.getNode, this.layoutRetrievalBuilder);
 
   /// Convenience method to handle widget opacity.
   Widget applyWidgetOpacity(BaseNode node, Widget widget) {

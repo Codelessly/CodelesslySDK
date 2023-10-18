@@ -120,6 +120,28 @@ class CodelesslyWidgetController extends ChangeNotifier {
     );
   }
 
+  CodelesslyWidgetController copyWith({
+    String? layoutID,
+    Codelessly? codelessly,
+    CodelesslyConfig? config,
+    PublishSource? publishSource,
+    AuthManager? authManager,
+    DataManager? publishDataManager,
+    DataManager? previewDataManager,
+    CacheManager? cacheManager,
+  }) {
+    return CodelesslyWidgetController(
+      layoutID: layoutID ?? this.layoutID,
+      codelessly: codelessly ?? this.codelessly,
+      config: config ?? this.config,
+      publishSource: publishSource ?? this.publishSource,
+      authManager: authManager ?? this.authManager,
+      publishDataManager: publishDataManager ?? this.publishDataManager,
+      previewDataManager: previewDataManager ?? this.previewDataManager,
+      cacheManager: cacheManager ?? this.cacheManager,
+    );
+  }
+
   @override
   void dispose() {
     _sdkStatusListener?.cancel();

@@ -18,7 +18,17 @@ class CodelesslyAuthManager extends AuthManager {
 
   /// The stream controller used to stream the auth data. Any changes to
   /// it will be broad=casted to the stream.
-  final StreamController<AuthData?> _authStreamController;
+  final StreamController<AuthData?> _authStreamController =
+      StreamController<AuthData?>.broadcast();
+
+  /// The data provided after successful authentication.
+  AuthData? _authData;
+
+  @override
+  AuthData? get authData => _authData;
+
+  @override
+  Stream<AuthData?> get authStream => _authStreamController.stream;
 
   /// Creates a [CodelesslyAuthManager] instance.
   ///
@@ -29,16 +39,12 @@ class CodelesslyAuthManager extends AuthManager {
   CodelesslyAuthManager({
     required this.config,
     required this.cacheManager,
-  }) : _authStreamController = StreamController<AuthData?>.broadcast();
-
-  /// The data provided after successful authentication.
-  AuthData? _authData;
-
-  @override
-  AuthData? get authData => _authData;
-
-  @override
-  Stream<AuthData?> get authStream => _authStreamController.stream;
+    AuthData? authData,
+  }) : _authData = authData {
+    if (_authData != null) {
+      _authStreamController.add(_authData);
+    }
+  }
 
   @override
   Future<void> init() async {
