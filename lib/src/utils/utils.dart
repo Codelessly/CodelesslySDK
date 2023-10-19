@@ -10,7 +10,8 @@ const Set<String> predefinedVariableNames = {
   'data',
   'index',
   'item',
-  'storage'
+  'storage',
+  'route',
 };
 
 const Set<String> predefinedListenableVariableNames = {'storage'};
@@ -20,6 +21,7 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'index', type: VariableType.integer),
   PredefinedVariableData(name: 'item'),
   PredefinedVariableData(name: 'storage', type: VariableType.map),
+  PredefinedVariableData(name: 'route', type: VariableType.map),
 };
 
 List<InlineSpan> transformTextSpans(
