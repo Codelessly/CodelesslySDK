@@ -375,52 +375,62 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       stream: _effectiveController.publishModelStream,
       initialData: _effectiveController.publishModel,
       builder: (context, AsyncSnapshot<SDKPublishModel?> snapshot) {
-        if (snapshot.hasError) {
-          return widget.errorBuilder?.call(context, snapshot.error) ??
+        try {
+          if (snapshot.hasError) {
+            return widget.errorBuilder?.call(context, snapshot.error) ??
+                CodelesslyErrorScreen(
+                  exception: snapshot.error,
+                  publishSource: _effectiveController.publishSource,
+                );
+          }
+
+          if (!snapshot.hasData) {
+            return widget.loadingBuilder?.call(context) ??
+                const CodelesslyLoadingScreen();
+          }
+
+          if (_effectiveController.layoutID != null &&
+              CodelesslyErrorHandler.instance.lastException?.layoutID ==
+                  _effectiveController.layoutID) {
+            return widget.errorBuilder?.call(
+                  context,
+                  CodelesslyErrorHandler.instance.lastException,
+                ) ??
+                CodelesslyErrorScreen(
+                  exception: snapshot.error,
+                  publishSource: _effectiveController.publishSource,
+                );
+          }
+
+          final SDKPublishModel model = snapshot.data!;
+          final String layoutID =
+              _effectiveController.layoutID ?? model.entryLayoutId!;
+
+          if (!model.layouts.containsKey(layoutID)) {
+            return widget.loadingBuilder?.call(context) ??
+                const CodelesslyLoadingScreen();
+          }
+
+          final layoutWidget = Material(
+            type: MaterialType.transparency,
+            child: CodelesslyLayoutBuilder(
+              key: ValueKey(layoutID),
+              controller: _effectiveController,
+              layout: model.layouts[layoutID]!,
+              layoutRetrievalBuilder: widget.layoutRetrievalBuilder,
+            ),
+          );
+
+          return widget.layoutBuilder(context, layoutWidget);
+        } catch (e, str) {
+          print(e);
+          print(str);
+          return widget.errorBuilder?.call(context, e) ??
               CodelesslyErrorScreen(
-                exception: snapshot.error,
+                exception: e,
                 publishSource: _effectiveController.publishSource,
               );
         }
-
-        if (!snapshot.hasData) {
-          return widget.loadingBuilder?.call(context) ??
-              const CodelesslyLoadingScreen();
-        }
-
-        if (_effectiveController.layoutID != null &&
-            CodelesslyErrorHandler.instance.lastException?.layoutID ==
-                _effectiveController.layoutID) {
-          return widget.errorBuilder?.call(
-                context,
-                CodelesslyErrorHandler.instance.lastException,
-              ) ??
-              CodelesslyErrorScreen(
-                exception: snapshot.error,
-                publishSource: _effectiveController.publishSource,
-              );
-        }
-
-        final SDKPublishModel model = snapshot.data!;
-        final String layoutID =
-            _effectiveController.layoutID ?? model.entryLayoutId!;
-
-        if (!model.layouts.containsKey(layoutID)) {
-          return widget.loadingBuilder?.call(context) ??
-              const CodelesslyLoadingScreen();
-        }
-
-        final layoutWidget = Material(
-          type: MaterialType.transparency,
-          child: CodelesslyLayoutBuilder(
-            key: ValueKey(layoutID),
-            controller: _effectiveController,
-            layout: model.layouts[layoutID]!,
-            layoutRetrievalBuilder: widget.layoutRetrievalBuilder,
-          ),
-        );
-
-        return widget.layoutBuilder(context, layoutWidget);
       },
     );
   }

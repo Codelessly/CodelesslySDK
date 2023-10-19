@@ -25,32 +25,42 @@ abstract class NetworkDataRepository {
     required String slug,
     required PublishSource source,
   }) async {
-    log('[NetworkDataRepo] Downloading publish bundle with slug: $slug and source: $source');
+      log(
+          '[NetworkDataRepo] Downloading publish bundle with slug: $slug and source: $source');
+    try {
+      final String url =
+          'https://firebasestorage.googleapis.com/v0/b/${config
+          .firebaseProjectId}.appspot.com/o/${Uri.encodeComponent(
+          '${source.serverPath}/$slug.json')}?alt=media';
 
-    final url =
-        'https://firebasestorage.googleapis.com/v0/b/${config.firebaseProjectId}.appspot.com/o/${Uri.encodeComponent('${source.serverPath}/$slug.json')}?alt=media';
+      print('[NetworkDataRepo] Publish bundle URL: $url');
+      final http.Response result = await http.get(Uri.parse(url));
 
-    log('[NetworkDataRepo] Downloading publish bundle from url: $url');
-    final http.Response result = await http.get(Uri.parse(url));
+      if (result.statusCode != 200) {
+        log('[NetworkDataRepo] Error downloading publish bundle.');
+        log('[NetworkDataRepo] Status code: ${result.statusCode}');
+        log('[NetworkDataRepo] Message: ${result.body}');
+        CodelesslyErrorHandler.instance.captureException(CodelesslyException(
+          'Error downloading publish bundle from slug [$slug]',
+          stacktrace: StackTrace.current,
+        ));
+        return null;
+      }
 
-    if (result.statusCode != 200) {
-      log('[NetworkDataRepo] Error downloading publish bundle.');
-      log('[NetworkDataRepo] Status code: ${result.statusCode}');
-      log('[NetworkDataRepo] Message: ${result.body}');
-      CodelesslyErrorHandler.instance.captureException(CodelesslyException(
-        'Error downloading publish bundle from slug [$slug]',
-        stacktrace: StackTrace.current,
-      ));
+      final Map<String, dynamic> modelDoc =
+      jsonDecode(utf8.decode(result.bodyBytes));
+
+      final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
+
+      log(
+          '[NetworkDataRepo] Finished downloading publish bundle with slug: $slug and source: $source.');
+      return model;
+    } catch (e, str) {
+      log('[NetworkDataRepo] Error downloading publish bundle');
+      print(e);
+      print(str);
       return null;
     }
-
-    final Map<String, dynamic> modelDoc =
-        jsonDecode(utf8.decode(result.bodyBytes));
-
-    final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
-
-    log('[NetworkDataRepo] Finished downloading publish bundle with slug: $slug and source: $source.');
-    return model;
   }
 
   /// Calls a cloud function that searches for the project associated with the

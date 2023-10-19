@@ -94,9 +94,9 @@ class DataManager {
       loadFontsFromPublishModel();
     }
 
-    // A slug was specified, no layout is cached. We need a layout FAST.
+    // A slug was specified. We need a layout FAST.
     // No authentication is required; let's download a complete publish bundle.
-    if (config.slug != null && (_publishModel == null || slug != config.slug)) {
+    if (config.slug != null && slug != config.slug) {
       final Stopwatch bundleStopWatch = Stopwatch()..start();
       try {
         if (_publishModel == null) {
@@ -139,6 +139,8 @@ class DataManager {
         bundleStopWatch.stop();
         log('[DataManager] Publish bundle flow took ${bundleStopWatch.elapsedMilliseconds}ms or ${bundleStopWatch.elapsed.inSeconds}s.');
       }
+    } else {
+      log('[DataManager] Slug is null or slug is the same as the last slug (cache). Skipping slug flow.');
     }
 
     if (authManager.authData == null) {
