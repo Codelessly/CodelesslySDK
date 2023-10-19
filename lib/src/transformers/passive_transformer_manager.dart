@@ -15,7 +15,6 @@ typedef BuildWidgetFromNode = Widget Function(
 /// This is the passive implementation of the [NodeTransformerManager],
 /// registering all the transformers that are available in the SDK.
 class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
-
   /// This is the registry of transformers that are used by the manager.
   PassiveNodeTransformerManager(super.getNode, super.retrieveLayout) {
     registerAllTransformers({
@@ -69,7 +68,6 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       context,
       node: node,
       builder: (context) {
-
         // ListTiles and ExpansionTiles throw exceptions when they are being
         // rendered specifically for preview image capture.
         Widget widget = settings.isPreview &&

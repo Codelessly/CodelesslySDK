@@ -24,7 +24,6 @@ typedef LayoutRetrieverBuilder = Widget Function(
 /// Helps separate the functions that are common between them into one place.
 abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     Widget, BuildContext, WidgetBuildSettings, NodeWidgetTransformer> {
-
   /// Returns a widget that decides how to load nested layouts of a rendered
   /// node.
   final LayoutRetrieverBuilder layoutRetrievalBuilder;

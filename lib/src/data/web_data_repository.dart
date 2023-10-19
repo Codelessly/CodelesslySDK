@@ -13,7 +13,6 @@ import '../logging/error_handler.dart';
 /// Since Firedart is not compatible with Flutter Web, this implementation
 /// utilizes the http package instead.
 class WebDataRepository extends NetworkDataRepository {
-
   /// Creates a [WebDataRepository] instance.
   WebDataRepository({required super.config});
 
@@ -23,7 +22,8 @@ class WebDataRepository extends NetworkDataRepository {
     required PublishSource source,
   }) async* {
     final Response result = await post(
-      Uri.parse('${config.firebaseCloudFunctionsBaseURL}/getPublishModelRequest'),
+      Uri.parse(
+          '${config.firebaseCloudFunctionsBaseURL}/getPublishModelRequest'),
       headers: <String, String>{'Content-Type': 'application/json'},
       body: jsonEncode({
         'projectID': projectID,
@@ -54,7 +54,8 @@ class WebDataRepository extends NetworkDataRepository {
     required PublishSource source,
   }) async {
     final Response result = await post(
-      Uri.parse('${config.firebaseCloudFunctionsBaseURL}/getLayoutModelRequest'),
+      Uri.parse(
+          '${config.firebaseCloudFunctionsBaseURL}/getLayoutModelRequest'),
       headers: <String, String>{'Content-Type': 'application/json'},
       body: jsonEncode({
         'projectID': projectID,
@@ -89,7 +90,8 @@ class WebDataRepository extends NetworkDataRepository {
   }) async {
     try {
       final Response result = await post(
-        Uri.parse('${config.firebaseCloudFunctionsBaseURL}/getFontModelRequest'),
+        Uri.parse(
+            '${config.firebaseCloudFunctionsBaseURL}/getFontModelRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
@@ -125,7 +127,8 @@ class WebDataRepository extends NetworkDataRepository {
   }) async {
     try {
       final Response result = await post(
-        Uri.parse('${config.firebaseCloudFunctionsBaseURL}/getPublishedApiRequest'),
+        Uri.parse(
+            '${config.firebaseCloudFunctionsBaseURL}/getPublishedApiRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
@@ -163,7 +166,8 @@ class WebDataRepository extends NetworkDataRepository {
   }) async {
     try {
       final Response result = await post(
-        Uri.parse('${config.firebaseCloudFunctionsBaseURL}/getPublishedLayoutVariablesRequest'),
+        Uri.parse(
+            '${config.firebaseCloudFunctionsBaseURL}/getPublishedLayoutVariablesRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
@@ -203,7 +207,8 @@ class WebDataRepository extends NetworkDataRepository {
     log('[WebDataRepo] Downloading conditions for $layoutID');
     try {
       final Response result = await post(
-        Uri.parse('${config.firebaseCloudFunctionsBaseURL}/getPublishedLayoutConditionsRequest'),
+        Uri.parse(
+            '${config.firebaseCloudFunctionsBaseURL}/getPublishedLayoutConditionsRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,

@@ -171,7 +171,8 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
           heroTag: fabID,
           key: ValueKey(fab.type),
           onPressed: onPressed,
-          extendedPadding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+          extendedPadding:
+              const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
           backgroundColor: fab.backgroundColor.toFlutterColor(),
           foregroundColor: fab.foregroundColor.toFlutterColor(),
           elevation: elevation ?? fab.elevation,
