@@ -13,6 +13,7 @@ class ConditionEvaluator<R extends Object>
         ActionVisitor<R> {
   final Map<String, VariableData> variables;
   final dynamic data;
+  final Map<String, dynamic> routeParams;
   final IndexedItemProvider? itemProvider;
   final WeakReference<LocalStorage>? localStorage;
 
@@ -20,6 +21,7 @@ class ConditionEvaluator<R extends Object>
     required this.variables,
     required this.data,
     this.itemProvider,
+    this.routeParams = const {},
     LocalStorage? localStorage,
   }) : localStorage = localStorage != null ? WeakReference(localStorage) : null;
 
@@ -74,6 +76,7 @@ class ConditionEvaluator<R extends Object>
         match[0]!,
         variables.values,
         data,
+        routeParams,
         itemProvider,
         localStorage?.target,
       );

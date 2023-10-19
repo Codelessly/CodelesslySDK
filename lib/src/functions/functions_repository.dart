@@ -135,9 +135,39 @@ class FunctionsRepository {
     return updatedData;
   }
 
+  static Map<String, dynamic> substituteVariablesInMap(
+    BuildContext context,
+    Map<String, dynamic> data,
+  ) {
+    // Substitute variables in params.
+    final Map<String, dynamic> parsedParams = {};
+
+    for (final MapEntry(:key, :value) in data.entries) {
+      final parsedKey = PropertyValueDelegate.substituteVariables(
+        context,
+        key,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      );
+
+      final parsedValue = PropertyValueDelegate.substituteVariables(
+        context,
+        value is! String ? jsonEncode(value) : value,
+        nullSubstitutionMode: NullSubstitutionMode.nullValue,
+      ).parsedValue();
+
+      // don't add empty keys to the map.
+      if (parsedKey.isNotEmpty) parsedParams[parsedKey] = parsedValue;
+    }
+    return parsedParams;
+  }
+
   static void navigate(BuildContext context, NavigationAction action) {
+    final parsedParams = substituteVariablesInMap(context, action.params);
+
+    log('Performing navigation action with params: $parsedParams');
+
     if (action.navigationType == NavigationType.pop) {
-      Navigator.pop(context);
+      Navigator.pop(context, parsedParams);
     } else {
       final Codelessly codelessly = context.read<Codelessly>();
       // Check if a layout exists for the action's [destinationId].
@@ -166,6 +196,7 @@ class FunctionsRepository {
         Navigator.push(
           context,
           MaterialPageRoute(
+            settings: RouteSettings(arguments: parsedParams),
             builder: (context) => CodelesslyWidget(
               codelessly: codelessly,
               layoutID: layoutId,
@@ -176,6 +207,7 @@ class FunctionsRepository {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
+            settings: RouteSettings(arguments: parsedParams),
             builder: (context) => CodelesslyWidget(
               codelessly: codelessly,
               layoutID: layoutId,
@@ -519,7 +551,10 @@ class FunctionsRepository {
     final variableNotifier = codelesslyContext.variables[action.variable.id];
     if (variableNotifier == null) return false;
 
-    String newValue = action.newValue;
+    String newValue = PropertyValueDelegate.substituteVariables(
+        context, action.newValue,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString);
+
     if (action.variable.type.isBoolean && action.toggled) {
       final bool? currentValue =
           variableNotifier.value.getValue().typedValue<bool>();
@@ -542,6 +577,8 @@ class FunctionsRepository {
         action.index,
         variables,
         codelesslyContext.data,
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
+            {},
         IndexedItemProvider.of(context),
         context.read<Codelessly>().localStorage,
       );
@@ -587,6 +624,8 @@ class FunctionsRepository {
         action.mapKey,
         variables,
         codelesslyContext.data,
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
+            {},
         IndexedItemProvider.of(context),
         context.read<Codelessly>().localStorage,
       );
@@ -760,15 +799,8 @@ class FunctionsRepository {
         codelesslyContext.functions[action.name];
 
     // Substitute variables in params.
-    final Map<String, dynamic> parsedParams = {};
-    for (final MapEntry(key: name, value: value) in action.params.entries) {
-      final parsedValue = PropertyValueDelegate.substituteVariables(
-        context,
-        value,
-        nullSubstitutionMode: NullSubstitutionMode.nullValue,
-      ).parsedValue();
-      parsedParams[name] = parsedValue;
-    }
+    final Map<String, dynamic> parsedParams =
+        substituteVariablesInMap(context, action.params);
 
     log('Calling function ${action.name}(${parsedParams.entries.map((e) => '${e.key}: ${e.value}').join(', ')}).');
 
