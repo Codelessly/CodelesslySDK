@@ -96,10 +96,6 @@ class PassiveCheckboxWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // bool? value = node.value;
-    // if (node.variables['value'] != null) {
-    //   value = variables.getBooleanByIdOrNull(node.variables['value']!);
-    // }
     final scale = node.basicBoxLocal.width / kCheckboxDefaultSize;
 
     final bool? value = PropertyValueDelegate.getPropertyValue<bool>(
@@ -115,26 +111,28 @@ class PassiveCheckboxWidget extends StatelessWidget {
     return AdaptiveNodeBox(
       node: node,
       child: Transform.scale(
-          scale: scale,
-          child: Checkbox(
-            value: node.properties.tristate ? value : (value ?? false),
-            tristate: node.properties.tristate,
-            autofocus: node.properties.autofocus,
-            checkColor: node.properties.checkColor.toFlutterColor(),
-            activeColor: node.properties.activeColor.toFlutterColor(),
-            hoverColor: node.properties.hoverColor.toFlutterColor(),
-            focusColor: node.properties.focusColor.toFlutterColor(),
-            onChanged: onChanged,
-            visualDensity: VisualDensity.standard,
-            splashRadius: node.properties.splashRadius,
-            shape: RoundedRectangleBorder(
-              borderRadius: node.properties.cornerRadius.borderRadius,
-            ),
-            side: BorderSide(
-              color: node.properties.borderColor.toFlutterColor(),
-              width: node.properties.borderWidth,
-            ),
-          )),
+        scale: scale,
+        child: Checkbox(
+          key: ValueKey('${node.id}-${IndexedItemProvider.of(context)?.index ?? ''}'),
+          value: node.properties.tristate ? value : (value ?? false),
+          tristate: node.properties.tristate,
+          autofocus: node.properties.autofocus,
+          checkColor: node.properties.checkColor.toFlutterColor(),
+          activeColor: node.properties.activeColor.toFlutterColor(),
+          hoverColor: node.properties.hoverColor.toFlutterColor(),
+          focusColor: node.properties.focusColor.toFlutterColor(),
+          onChanged: onChanged,
+          visualDensity: VisualDensity.standard,
+          splashRadius: node.properties.splashRadius,
+          shape: RoundedRectangleBorder(
+            borderRadius: node.properties.cornerRadius.borderRadius,
+          ),
+          side: BorderSide(
+            color: node.properties.borderColor.toFlutterColor(),
+            width: node.properties.borderWidth,
+          ),
+        ),
+      ),
     );
   }
 }
