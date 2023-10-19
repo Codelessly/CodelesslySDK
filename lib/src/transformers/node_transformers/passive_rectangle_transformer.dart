@@ -115,9 +115,12 @@ class PassiveRectangleWidget extends StatelessWidget {
         alignment:
             stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
         children: [
-          ...buildFills(context, node, codelesslyContext,
-              useInk: node is BlendMixin &&
-                  (node as BlendMixin).inkWell != null &&
+          ...buildFills(
+            context,
+            node,
+            codelesslyContext,
+            useInk: node is BlendMixin &&
+                (node as BlendMixin).inkWell != null &&
                 settings.useInk,
             obscureImages: settings.obscureImages,
           ),

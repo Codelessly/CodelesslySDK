@@ -257,9 +257,11 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
         if (properties.controlTapGesture == true)
           const Factory<TapGestureRecognizer>(TapGestureRecognizer.new),
         if (properties.controlLongPressGesture == true)
-          const Factory<LongPressGestureRecognizer>(LongPressGestureRecognizer.new),
+          const Factory<LongPressGestureRecognizer>(
+              LongPressGestureRecognizer.new),
         if (properties.controlForcePressGesture == true)
-          const Factory<ForcePressGestureRecognizer>(ForcePressGestureRecognizer.new),
+          const Factory<ForcePressGestureRecognizer>(
+              ForcePressGestureRecognizer.new),
       },
     );
   }

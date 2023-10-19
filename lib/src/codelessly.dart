@@ -297,7 +297,6 @@ class Codelessly {
       log('[SDK] [INIT] Initializing Firestore instance with project ID: $firebaseProjectId');
       final Stopwatch stopwatch = Stopwatch()..start();
 
-
       _firestore = Firestore(firebaseProjectId);
 
       stopwatch.stop();
