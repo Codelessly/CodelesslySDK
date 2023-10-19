@@ -782,7 +782,22 @@ class FunctionsRepository {
       await switch (action.operation) {
         StorageOperation.addOrUpdate => _updateStorage(context, action),
         StorageOperation.remove => _removeFromStorage(context, action),
+        StorageOperation.clear => _clearStorage(context, action),
       };
+
+  static Future<bool> _clearStorage(
+    BuildContext context,
+    SetStorageAction action,
+  ) async {
+    try {
+      await context.read<Codelessly>().localStorage.clear();
+      return true;
+    } catch (error, stackTrace) {
+      log(error.toString());
+      log(stackTrace.toString());
+      return false;
+    }
+  }
 
   static Future<bool> _updateStorage(
     BuildContext context,
