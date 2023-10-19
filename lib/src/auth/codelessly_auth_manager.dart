@@ -95,7 +95,6 @@ class CodelesslyAuthManager extends AuthManager {
     if (!isAuthenticated()) {
       log('[AuthManager] Token is not authenticated. Authenticating...');
       await authenticate();
-      log('[AuthManager] Authentication successfully!');
     } else {
       log('[AuthManager] Token already authenticated! Verifying in the background...');
       authenticate().catchError((error) {
@@ -154,6 +153,7 @@ class CodelesslyAuthManager extends AuthManager {
         log('[AuthManager] Authenticated token. Project ID: ${_authData!.projectId}');
         await cacheManager.store(authCacheKey, _authData!.toJson());
         log('[AuthManager] Stored auth data in cache');
+        log('[AuthManager] Authentication successfully!');
       } else {
         _authData = null;
         _authStreamController.add(_authData);

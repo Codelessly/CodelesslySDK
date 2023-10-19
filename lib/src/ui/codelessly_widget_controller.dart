@@ -296,9 +296,10 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // a publish model yet, then we need to fetch the publish model from the
     // data manager.
     else if (config!.slug != null && dataManager.publishModel == null) {
-      log('[CodelesslyWidgetController] [$layoutID]: A slug is specified and data manager publish model is null. Fetching publish model from data manager.');
+      log('[CodelesslyWidgetController] [$layoutID]: A slug is specified and publish model is null.');
+      log('[CodelesslyWidgetController] [$layoutID]: ...Fetching complete publish bundle from data manager.');
       dataManager.fetchCompletePublishBundle(
-        slug: config!.slug ?? '',
+        slug: config!.slug!,
         source: publishSource,
       );
     } else {
