@@ -535,7 +535,7 @@ List<Widget> buildFills(
               child = SizedBox(
                 width: node.basicBoxLocal.width,
                 height: node.basicBoxLocal.height,
-                child: Placeholder(),
+                child: const Placeholder(),
               );
             } else {
               child = UltimateImageBuilder(
