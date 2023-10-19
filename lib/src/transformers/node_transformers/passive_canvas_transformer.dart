@@ -290,7 +290,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
 class PassiveCanvasWidget extends StatefulWidget {
   final CanvasNode node;
   final WidgetBuildSettings settings;
-  final child;
+  final Widget child;
 
   const PassiveCanvasWidget({
     super.key,
@@ -315,7 +315,12 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       final onLoadActions = widget.node.reactions
           .whereTriggerType(TriggerType.load)
           .map((e) => e.action)
-          .where((action) => action.type != ActionType.callApi)
+          .where((action) =>
+              // Because calling api is handled in LayoutBuilder.
+              action.type != ActionType.callApi &&
+              action.type != ActionType.navigation &&
+              action.type != ActionType.submit &&
+              action.type != ActionType.link)
           .toList();
 
       if (onLoadActions.isEmpty) return;
