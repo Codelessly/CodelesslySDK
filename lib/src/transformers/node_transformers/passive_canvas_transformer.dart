@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
@@ -253,18 +255,22 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return switch (node.scaleMode) {
-      ScaleMode.responsive => _wrapInScaffoldForResponsive(
-          context: context,
-          node: node,
-          settings: settings,
-        ),
-      ScaleMode.autoScale => _wrapInScaffoldForAutoScale(
-          context: context,
-          node: node,
-          settings: settings,
-        )
-    };
+    return PassiveCanvasWidget(
+      node: node,
+      settings: settings,
+      child: switch (node.scaleMode) {
+        ScaleMode.responsive => _wrapInScaffoldForResponsive(
+            context: context,
+            node: node,
+            settings: settings,
+          ),
+        ScaleMode.autoScale => _wrapInScaffoldForAutoScale(
+            context: context,
+            node: node,
+            settings: settings,
+          )
+      },
+    );
   }
 
   static Color? retrieveBackgroundColor(BuildContext context, CanvasNode node) {
@@ -279,4 +285,48 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     }
     return Colors.transparent;
   }
+}
+
+class PassiveCanvasWidget extends StatefulWidget {
+  final CanvasNode node;
+  final WidgetBuildSettings settings;
+  final child;
+
+  const PassiveCanvasWidget({
+    super.key,
+    required this.node,
+    required this.settings,
+    required this.child,
+  });
+
+  @override
+  State<PassiveCanvasWidget> createState() => _PassiveCanvasWidgetState();
+}
+
+class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
+  bool shouldPerformOnLoadActions = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (shouldPerformOnLoadActions) {
+      shouldPerformOnLoadActions = false;
+      // perform onLoad actions. This must always be the last step in this method.
+      final onLoadActions = widget.node.reactions
+          .whereTriggerType(TriggerType.load)
+          .map((e) => e.action)
+          .where((action) => action.type != ActionType.callApi)
+          .toList();
+
+      if (onLoadActions.isEmpty) return;
+
+      log('Performing actions on canvas load');
+      onLoadActions.forEach((action) {
+        FunctionsRepository.performAction(context, action);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

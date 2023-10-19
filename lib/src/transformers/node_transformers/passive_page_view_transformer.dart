@@ -87,12 +87,22 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
           controller: controller,
           onPageChanged: widget.onPageChanged,
           itemBuilder: (context, index) => IndexedItemProvider(
+            key: ValueKey(index),
             index: index,
             item: data?.elementAtOrNull(index),
-            child: widget.manager.buildWidgetByID(
-              itemNode,
-              context,
-              settings: widget.settings,
+            child: Builder(
+              builder: (context) {
+                // This builder is important to pass a context that has
+                // the IndexedItemProvider.
+                return KeyedSubtree(
+                  key: ValueKey(index),
+                  child: widget.manager.buildWidgetByID(
+                    itemNode,
+                    context,
+                    settings: widget.settings,
+                  ),
+                );
+              },
             ),
           ),
         ),

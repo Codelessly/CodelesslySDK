@@ -271,6 +271,7 @@ class PropertyValueDelegate {
       path,
       variables,
       data,
+      ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? {},
       IndexedItemProvider.of(context),
       storage ?? context.read<Codelessly?>()?.localStorage,
     );
@@ -283,6 +284,7 @@ class PropertyValueDelegate {
     String path,
     Iterable<VariableData> variables,
     Map<String, dynamic> data,
+    Map<String, dynamic> routeParams,
     IndexedItemProvider? itemProvider,
     LocalStorage? storage,
   ) {
@@ -291,8 +293,13 @@ class PropertyValueDelegate {
     if (match == null) return null;
 
     if (match.isPredefinedVariable) {
-      final Object? value =
-          retrievePredefinedVariableValue(match, data, itemProvider, storage);
+      final Object? value = retrievePredefinedVariableValue(
+        match,
+        data,
+        routeParams,
+        itemProvider,
+        storage,
+      );
       return value;
     }
 
@@ -332,6 +339,7 @@ class PropertyValueDelegate {
   static Object? retrievePredefinedVariableValue(
     VariableMatch match,
     Map<String, dynamic> data,
+    Map<String, dynamic> routeParams,
     IndexedItemProvider? itemProvider,
     LocalStorage? storage,
   ) {
@@ -340,6 +348,7 @@ class PropertyValueDelegate {
       'item' => itemProvider?.item,
       'index' => itemProvider?.index,
       'storage' => storage?.getAll(),
+      'route' => routeParams,
       _ => null,
     };
 
@@ -408,6 +417,7 @@ class PropertyValueDelegate {
     final Object? value = retrievePredefinedVariableValue(
       match,
       data,
+      ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? {},
       IndexedItemProvider.of(context),
       storage,
     );
