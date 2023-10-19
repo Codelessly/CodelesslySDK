@@ -70,12 +70,16 @@ class PassiveListViewWidget extends StatelessWidget {
                 )
             : null,
         itemBuilder: (context, index) => IndexedItemProvider(
+          key: ValueKey(index),
           index: index,
           item: data?.elementAtOrNull(index),
-          child: manager.buildWidgetByID(
-            itemNode,
-            context,
-            settings: settings,
+          child: KeyedSubtree(
+            key: ValueKey(index),
+            child: manager.buildWidgetByID(
+              itemNode,
+              context,
+              settings: settings,
+            ),
           ),
         ),
       ),
