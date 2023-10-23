@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../codelessly_sdk.dart';
 import '../data/local_storage.dart';
 import '../logging/error_handler.dart';
+import '../ui/codelessly_dialog_widget.dart';
 
 enum ApiRequestType {
   get,
@@ -252,13 +253,14 @@ class FunctionsRepository {
       return;
     }
 
-    // TODO: add more options
     showDialog(
       context: context,
       barrierDismissible: action.barrierDismissible,
+      barrierColor: action.barrierColor?.toFlutterColor(),
       routeSettings: RouteSettings(arguments: parsedParams),
-      builder: (context) => Center(
-        child: CodelesslyWidget(
+      builder: (context) => CodelesslyDialogWidget(
+        showCloseButton: action.showCloseButton,
+        builder: (context) => CodelesslyWidget(
           codelessly: codelessly,
           layoutID: layoutId,
         ),
