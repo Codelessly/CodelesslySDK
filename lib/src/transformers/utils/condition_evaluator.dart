@@ -252,6 +252,9 @@ class ConditionEvaluator<R extends Object>
 
   @override
   R? visitSetStorageAction(SetStorageAction action) => null;
+
+  @override
+  R? visitShowDialogAction(ShowDialogAction action) => null;
 }
 
 class ConditionPrinter
@@ -362,4 +365,7 @@ class ConditionPrinter
 
   @override
   void visitSetStorageAction(SetStorageAction action) {}
+
+  @override
+  void visitShowDialogAction(ShowDialogAction action) {}
 }
