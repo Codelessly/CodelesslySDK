@@ -48,6 +48,8 @@ class FunctionsRepository {
     switch (action.type) {
       case ActionType.navigation:
         navigate(context, action as NavigationAction);
+      case ActionType.showDialog:
+        showDialogAction(context, action as ShowDialogAction);
       case ActionType.link:
         launchURL(context, (action as LinkAction));
       case ActionType.submit:
@@ -219,6 +221,49 @@ class FunctionsRepository {
         );
       }
     }
+  }
+
+  static void showDialogAction(
+    BuildContext context,
+    ShowDialogAction action,
+  ) {
+    final parsedParams = substituteVariablesInMap(context, action.params);
+
+    log('Performing show dialog action with params: $parsedParams');
+
+    final Codelessly codelessly = context.read<Codelessly>();
+    // Check if a layout exists for the action's [destinationId].
+    final String? layoutId = codelessly.dataManager.publishModel?.layouts.values
+        .firstWhereOrNull((layout) => layout.canvasId == action.destinationId)
+        ?.id;
+
+    print('looking for layout with canvas id: [${action.destinationId}]');
+    for (final layout in codelessly.dataManager.publishModel!.layouts.values) {
+      print('layout [${layout.id}] canvas id: [${layout.canvasId}]');
+    }
+
+    if (layoutId == null) {
+      CodelesslyErrorHandler.instance.captureException(
+        CodelesslyException.layoutNotFound(
+          message:
+              'Could not find a layout with a canvas id of [${action.destinationId}]',
+        ),
+      );
+      return;
+    }
+
+    // TODO: add more options
+    showDialog(
+      context: context,
+      barrierDismissible: action.barrierDismissible,
+      routeSettings: RouteSettings(arguments: parsedParams),
+      builder: (context) => Center(
+        child: CodelesslyWidget(
+          codelessly: codelessly,
+          layoutID: layoutId,
+        ),
+      ),
+    );
   }
 
   static void launchURL(BuildContext context, LinkAction action) {
