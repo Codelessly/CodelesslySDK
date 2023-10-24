@@ -164,7 +164,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     String inputValue,
   ) =>
       FunctionsRepository.triggerAction(
-          context, node: node, TriggerType.changed, value: inputValue);
+          context, node: node, TriggerType.submitted, value: inputValue);
 }
 
 class PassiveTextFieldWidget extends StatefulWidget {
@@ -198,6 +198,20 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     ),
   );
 
+  late final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(onFocusChanged);
+  }
+
+  void onFocusChanged() {
+    if (!_focusNode.hasFocus) {
+      widget.onSubmitted?.call(_controller.text);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool enabled = context.getNodeValue(widget.node.id, 'enabled') ??
@@ -216,6 +230,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     Widget field;
 
     field = TextField(
+      focusNode: _focusNode,
       autocorrect: widget.node.properties.autoCorrect,
       autofocus: widget.node.properties.autoFocus,
       enableInteractiveSelection:
@@ -250,7 +265,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       onTap: widget.onTap,
       onChanged: widget.onChanged,
       onEditingComplete: () {},
-      onSubmitted: (value) => widget.onSubmitted?.call(value),
+      onSubmitted: (value) {
+        // handled by the focus listener!
+      },
       decoration: PassiveTextFieldTransformer.getDecoration(
         context,
         widget.node,
@@ -274,5 +291,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     );
 
     return field;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 }
