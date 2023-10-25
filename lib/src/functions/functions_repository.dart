@@ -564,11 +564,10 @@ class FunctionsRepository {
     if (action.variable.type.isList &&
         action.listOperation != ListOperation.replace) {
       // Get current value of the list variable.
-      List? currentValue =
-          variableNotifier.value.getValue().typedValue<List>();
+      List? currentValue = variableNotifier.value.getValue().typedValue<List>();
 
       // Set default value if it is a list type variable.
-      if(variableNotifier.value.type.isList) currentValue ??= [];
+      if (variableNotifier.value.type.isList) currentValue ??= [];
 
       // If list variable does not exist, return false.
       if (currentValue == null) return false;
@@ -601,10 +600,10 @@ class FunctionsRepository {
           currentValue.removeAt(index);
           break;
         case ListOperation.remove:
-          currentValue.remove(newValue);
+          currentValue.remove(newValue.parsedValue());
           break;
         case ListOperation.update:
-          currentValue[index] = newValue;
+          currentValue[index] = newValue.parsedValue();
           break;
         default:
           break;
@@ -615,11 +614,10 @@ class FunctionsRepository {
     if (action.variable.type.isMap &&
         action.mapOperation != MapOperation.replace) {
       // Get current value of the map variable.
-       Map? currentValue =
-          variableNotifier.value.getValue().typedValue<Map>();
+      Map? currentValue = variableNotifier.value.getValue().typedValue<Map>();
 
-       // Set default value if it is a map type variable.
-      if(variableNotifier.value.type.isMap) currentValue ??= {};
+      // Set default value if it is a map type variable.
+      if (variableNotifier.value.type.isMap) currentValue ??= {};
 
       // If map variable does not exist, return false.
       if (currentValue == null) return false;
@@ -648,7 +646,7 @@ class FunctionsRepository {
           currentValue.remove(key);
           break;
         case MapOperation.update:
-          currentValue[key] = newValue;
+          currentValue[key] = newValue.parsedValue();
           break;
         default:
           break;
