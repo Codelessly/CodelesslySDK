@@ -23,14 +23,14 @@ dependencies:
   equatable: ^2.0.5
   google_fonts: ^6.1.0
   codelessly_json_annotation: ^4.8.1
-  url_launcher: ^6.1.14
+  url_launcher: ^6.2.0
   collection: '>=1.17.0 <2.0.0'
   http: '>=0.13.0 <2.0.0'
   intl: '>=0.17.0 <1.0.0'
   universal_html: ^2.2.4
   webview_flutter: ^4.4.1
   webview_flutter_android: ^3.12.0
-  webview_flutter_wkwebview: ^3.9.1
+  webview_flutter_wkwebview: ^3.9.2
   webview_flutter_web: ^0.2.2+3
   flutter_animation_progress_bar: ^2.3.1
   vector_math: ^2.1.4
@@ -45,7 +45,7 @@ dependencies:
   json_path: ^0.6.3
   meta: ^1.9.1
   path: ^1.8.3
-  flutter_svg: ^2.0.7
+  flutter_svg: ^2.0.8
   cached_network_image: ^3.3.0
   rfc_6901: ^0.1.1 # json pointer spec
 
@@ -54,7 +54,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   codelessly_json_serializable: ^6.7.1
-  flutter_lints: ^2.0.3
+  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
