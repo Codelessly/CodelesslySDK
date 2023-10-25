@@ -556,17 +556,20 @@ class FunctionsRepository {
         nullSubstitutionMode: NullSubstitutionMode.emptyString);
 
     if (action.variable.type.isBoolean && action.toggled) {
-      final bool? currentValue =
-          variableNotifier.value.getValue().typedValue<bool>();
-      if (currentValue == null) return false;
+      final bool currentValue =
+          variableNotifier.value.getValue().typedValue<bool>() ?? false;
       newValue = (!currentValue).toString();
     }
 
     if (action.variable.type.isList &&
         action.listOperation != ListOperation.replace) {
       // Get current value of the list variable.
-      final List? currentValue =
+      List? currentValue =
           variableNotifier.value.getValue().typedValue<List>();
+
+      // Set default value if it is a list type variable.
+      if(variableNotifier.value.type.isList) currentValue ??= [];
+
       // If list variable does not exist, return false.
       if (currentValue == null) return false;
       // Retrieve all variables.
@@ -612,8 +615,12 @@ class FunctionsRepository {
     if (action.variable.type.isMap &&
         action.mapOperation != MapOperation.replace) {
       // Get current value of the map variable.
-      final Map? currentValue =
+       Map? currentValue =
           variableNotifier.value.getValue().typedValue<Map>();
+
+       // Set default value if it is a map type variable.
+      if(variableNotifier.value.type.isMap) currentValue ??= {};
+
       // If map variable does not exist, return false.
       if (currentValue == null) return false;
       // Retrieve all variables.
