@@ -1023,7 +1023,6 @@ class FunctionsRepository {
     }
     final parsedValue = newValue
             .toList<List>()
-            ?.map((e) => e.toString().parsedValue())
             .toList() ??
         [];
     // Perform list operations.
