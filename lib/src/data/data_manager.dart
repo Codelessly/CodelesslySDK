@@ -93,17 +93,21 @@ class DataManager {
     initialized = true;
 
     // Initialize all locally cached data.
-    _publishModel ??= localDataRepository.fetchPublishModel(
+    final cachedModel = localDataRepository.fetchPublishModel(
       source: config.publishSource,
     );
+
+    if(_publishModel ?? cachedModel case var model?) {
+      await onPublishModelLoaded(model, fromCache: true);
+    }
+
+    _publishModel ??= cachedModel;
 
     if (_publishModel != null) {
       log('[DataManager] Publish model is cached locally. Emitting.');
       emitPublishModel();
 
       loadFontsFromPublishModel();
-
-      onPublishModelLoaded(fromCache: true);
     }
 
     // A slug was specified. We need a layout FAST.
@@ -204,10 +208,11 @@ class DataManager {
       log(
         '[DataManager] Publish model is still null during init. Waiting for the first publish model from the server.',
       );
-      _publishModel = await firstPublishEvent;
+      final model = await firstPublishEvent;
+      await onPublishModelLoaded(model);
+      _publishModel = model;
       emitPublishModel();
       savePublishModel();
-      onPublishModelLoaded();
 
       log('[DataManager] Publish model during init is now available. Proceeding with init!');
 
@@ -285,11 +290,13 @@ class DataManager {
   }
 
   /// Called when the publish model is loaded.
-  Future<void> onPublishModelLoaded({bool fromCache = false}) async {
+  Future<void> onPublishModelLoaded(SDKPublishModel model, {bool fromCache = false}) async {
+    log('[DataManager] Publish model loaded. Initializing local storage...');
     if (_localStorage == null) {
       // Initialize local storage
-      final Box box = await Hive.openBox(publishModel!.projectId);
+      final Box box = await Hive.openBox(model.projectId);
       _localStorage = HiveLocalStorage(box);
+      log('[DataManager] Local storage initialized.');
     }
   }
 
@@ -394,6 +401,7 @@ class DataManager {
 
   /// Emits the current [_publishModel] to the [_publishModelStreamController].
   void emitPublishModel() {
+    log('[DataManager] Emitting publish model to stream. has model: ${_publishModel != null}');
     _publishModelStreamController.add(_publishModel);
   }
 
@@ -970,10 +978,10 @@ class DataManager {
 
     if (model != null) {
       log('[DataManager] Successfully downloaded complete publish bundle. Emitting it.');
+      await onPublishModelLoaded(model);
       _publishModel = model;
       emitPublishModel();
       savePublishModel();
-      onPublishModelLoaded();
       return true;
     }
 
