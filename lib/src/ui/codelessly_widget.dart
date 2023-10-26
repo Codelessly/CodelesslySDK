@@ -238,6 +238,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
   StreamSubscription<CodelesslyException?>? _exceptionSubscription;
 
+  Stopwatch? _stopwatch;
+
   @override
   void initState() {
     super.initState();
@@ -359,6 +361,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   void dispose() {
     _controller?.dispose();
     _exceptionSubscription?.cancel();
+    _stopwatch?.stop();
 
     if (widget.codelesslyContext == null) {
       codelesslyContext.dispose();
@@ -421,10 +424,17 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             ),
           );
 
+          if (_stopwatch!= null && _stopwatch!.isRunning) {
+            final millis = _stopwatch!.elapsedMilliseconds;
+            _stopwatch?.stop();
+            log('[CodelesslyWidget] Layout loaded in ${millis}ms or ${millis / 1000}s');
+          }
+
           return widget.layoutBuilder(context, layoutWidget);
         } catch (e, str) {
           print(e);
           print(str);
+          _stopwatch?.stop();
           return widget.errorBuilder?.call(context, e) ??
               CodelesslyErrorScreen(
                 exception: e,
@@ -437,6 +447,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
   @override
   Widget build(BuildContext context) {
+    _stopwatch ??= Stopwatch()..start();
     final Codelessly codelessly = _effectiveController.effectiveCodelessly;
     return MultiProvider(
       providers: [
