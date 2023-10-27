@@ -424,7 +424,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             ),
           );
 
-          if (_stopwatch!= null && _stopwatch!.isRunning) {
+          if (_stopwatch != null && _stopwatch!.isRunning) {
             final millis = _stopwatch!.elapsedMilliseconds;
             _stopwatch?.stop();
             log('[CodelesslyWidget] Layout loaded in ${millis}ms or ${millis / 1000}s');

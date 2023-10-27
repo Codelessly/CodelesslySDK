@@ -207,7 +207,7 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
 
     for (final variable in variablesMap.values) {
       // Override default values of variables with values provided in data.
-      final notifier = ValueNotifier(variable.copyWith(
+      final notifier = Observable(variable.copyWith(
         value: codelesslyContext.data[variable.name],
       ));
       codelesslyContext.variables[variable.id] = notifier;
@@ -253,7 +253,7 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
       );
 
       // Override default values of variables with values provided in data.
-      final notifier = ValueNotifier(variable);
+      final notifier = Observable(variable);
       codelesslyContext.variables[variable.id] = notifier;
 
       // Make api request right away if it is a canvas action.

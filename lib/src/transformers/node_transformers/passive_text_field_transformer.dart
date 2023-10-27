@@ -98,6 +98,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
       labelStyle: getTextStyle(decoration.labelStyle),
       floatingLabelStyle: getTextStyle(decoration.floatingLabelStyle),
       helperText: decoration.helperText,
+
       helperStyle: getTextStyle(decoration.helperStyle),
       helperMaxLines: decoration.helperMaxLines,
       hintText: hintText,
@@ -277,12 +278,20 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       ),
     );
 
-    final double? width = widget.node.isHorizontalExpanded
-        ? null
-        : widget.node.basicBoxLocal.width;
-    final double? height = widget.node.isVerticalExpanded
-        ? null
-        : widget.node.basicBoxLocal.height;
+    final double? width =
+        widget.node.isHorizontalWrap || widget.node.isHorizontalExpanded
+            ? null
+            : widget.node.basicBoxLocal.width;
+    final double? height =
+        widget.node.isVerticalWrap || widget.node.isVerticalExpanded
+            ? null
+            : widget.node.basicBoxLocal.height;
+
+    if (widget.node.isHorizontalWrap) {
+      field = IntrinsicWidth(
+        child: field,
+      );
+    }
 
     field = SizedBox(
       width: width,
