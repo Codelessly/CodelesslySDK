@@ -39,3 +39,4 @@ linter:
     prefer_relative_imports: true
     # allow nodes to override type.
     overridden_fields: false
+    implicit_call_tearoffs: false
