@@ -28,6 +28,7 @@ export 'src/utils/flutter_icons_data_map.dart';
 export 'src/utils/flutter_icons_names_map.dart';
 export 'src/utils/font_parser.dart';
 export 'src/utils/image_builder.dart';
+export 'src/utils/observable.dart';
 export 'src/utils/rgb_to_color.dart';
 export 'src/utils/typed_image_bytes.dart';
 export 'src/utils/utils.dart';

@@ -298,7 +298,9 @@ class _ManagedListenableBuilderState extends State<ManagedListenableBuilder> {
     }
   }
 
-  void onChanged() => setState(() {});
+  void onChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) => widget.builder(context);

@@ -97,7 +97,7 @@ class DataManager {
       source: config.publishSource,
     );
 
-    if(_publishModel ?? cachedModel case var model?) {
+    if (_publishModel ?? cachedModel case var model?) {
       await onPublishModelLoaded(model, fromCache: true);
     }
 
@@ -290,7 +290,8 @@ class DataManager {
   }
 
   /// Called when the publish model is loaded.
-  Future<void> onPublishModelLoaded(SDKPublishModel model, {bool fromCache = false}) async {
+  Future<void> onPublishModelLoaded(SDKPublishModel model,
+      {bool fromCache = false}) async {
     log('[DataManager] Publish model loaded. Initializing local storage...');
     if (_localStorage == null) {
       // Initialize local storage

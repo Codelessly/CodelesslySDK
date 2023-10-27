@@ -258,7 +258,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     return PassiveCanvasWidget(
       node: node,
       settings: settings,
-      child: switch (node.scaleMode) {
+      builder: (context) => switch (node.scaleMode) {
         ScaleMode.responsive => _wrapInScaffoldForResponsive(
             context: context,
             node: node,
@@ -290,13 +290,13 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
 class PassiveCanvasWidget extends StatefulWidget {
   final CanvasNode node;
   final WidgetBuildSettings settings;
-  final Widget child;
+  final WidgetBuilder builder;
 
   const PassiveCanvasWidget({
     super.key,
     required this.node,
     required this.settings,
-    required this.child,
+    required this.builder,
   });
 
   @override
@@ -327,11 +327,11 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
 
       log('Performing actions on canvas load');
       onLoadActions.forEach((action) {
-        FunctionsRepository.performAction(context, action);
+        FunctionsRepository.performAction(context, action, notify: false);
       });
     }
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) => widget.builder(context);
 }

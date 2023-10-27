@@ -38,11 +38,12 @@ enum ApiRequestType {
 }
 
 class FunctionsRepository {
-  static Future<void> performAction(
+  static void performAction(
     BuildContext context,
     ActionModel action, {
     dynamic internalValue,
-  }) async {
+    bool notify = true,
+  }) {
     log('Performing action: $action');
     switch (action.type) {
       case ActionType.navigation:
@@ -56,11 +57,13 @@ class FunctionsRepository {
           context,
           action as SetValueAction,
           internalValue: internalValue,
+          notify: notify,
         );
       case ActionType.setVariant:
-        setVariant(context, action as SetVariantAction);
+        setVariant(context, action as SetVariantAction, notify: notify);
       case ActionType.setVariable:
-        setVariableFromAction(context, action as SetVariableAction);
+        setVariableFromAction(context, action as SetVariableAction,
+            notify: notify);
       case ActionType.callFunction:
         callFunction(context, action as CallFunctionAction);
       case ActionType.callApi:
@@ -456,6 +459,7 @@ class FunctionsRepository {
     BuildContext context,
     SetValueAction action, {
     dynamic internalValue,
+    bool notify = true,
   }) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
     for (final ValueModel value in action.values) {
@@ -466,6 +470,7 @@ class FunctionsRepository {
         action: action,
         mode: value.mode,
         discrete: () => value,
+        notify: notify,
         toggle: value is BoolValue
             ? () {
                 return currentValue.copyWith(
@@ -489,6 +494,7 @@ class FunctionsRepository {
     V Function()? discrete,
     V Function()? toggle,
     V Function()? syncValue,
+    bool notify = true,
   }) {
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
@@ -519,11 +525,16 @@ class FunctionsRepository {
         ..remove(oldValue)
         ..add(newValue);
       // Update values list.
-      codelesslyContext.nodeValues[action.nodeID]!.value = updateValues;
+      codelesslyContext.nodeValues[action.nodeID]!
+          .set(updateValues, notify: notify);
     }
   }
 
-  static void setVariant(BuildContext context, SetVariantAction action) {
+  static void setVariant(
+    BuildContext context,
+    SetVariantAction action, {
+    bool notify = true,
+  }) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
     // Get node's values.
     final List<ValueModel> values = payload.nodeValues[action.nodeID]!.value;
@@ -538,14 +549,17 @@ class FunctionsRepository {
       ..remove(oldValue)
       ..add(newValue);
     // Update values list.
-    payload.nodeValues[action.nodeID]!.value = updateValues;
+    payload.nodeValues[action.nodeID]!.set(updateValues, notify: notify);
   }
 
   /// Sets given [action.newValue] for given [action.variable] to a variable
   /// from [CodelesslyContext.variables].
   /// Returns `true` if variable was found and updated, `false` otherwise.
   static bool setVariableFromAction(
-      BuildContext context, SetVariableAction action) {
+    BuildContext context,
+    SetVariableAction action, {
+    bool notify = true,
+  }) {
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
     final variableNotifier = codelesslyContext.variables[action.variable.id];
@@ -657,7 +671,7 @@ class FunctionsRepository {
     final VariableData updatedVariable =
         variableNotifier.value.copyWith(value: newValue);
 
-    variableNotifier.value = updatedVariable;
+    variableNotifier.set(updatedVariable, notify: notify);
     return true;
   }
 
@@ -787,7 +801,7 @@ class FunctionsRepository {
     if (filteredReactions.isEmpty) return false;
 
     for (final reaction in filteredReactions) {
-      await FunctionsRepository.performAction(
+      FunctionsRepository.performAction(
         context,
         reaction.action,
         internalValue: value,
@@ -1021,10 +1035,7 @@ class FunctionsRepository {
       log('Invalid index: $substitutedIndex');
       return currentValue;
     }
-    final parsedValue = newValue
-            .toList<List>()
-            .toList() ??
-        [];
+    final parsedValue = newValue.toList<List>().toList() ?? [];
     // Perform list operations.
     switch (action.listOperation) {
       case ListOperation.add:

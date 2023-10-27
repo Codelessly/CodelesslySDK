@@ -49,11 +49,11 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   }
 
   /// A map that holds the current values of nodes that have internal values.
-  final Map<String, ValueNotifier<List<ValueModel>>> nodeValues;
+  final Map<String, Observable<List<ValueModel>>> nodeValues;
 
   /// A map that holds the current state of all variables.
   /// The key is the variable's id.
-  final Map<String, ValueNotifier<VariableData>> variables;
+  final Map<String, Observable<VariableData>> variables;
 
   /// A map that holds the current state of all conditions.
   /// The key is the condition's id.
@@ -92,8 +92,8 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     Map<String, dynamic>? data,
     Map<String, CodelesslyFunction>? functions,
     Map<String, WidgetBuilder>? dynamicWidgetBuilders,
-    Map<String, ValueNotifier<List<ValueModel>>>? nodeValues,
-    Map<String, ValueNotifier<VariableData>>? variables,
+    Map<String, Observable<List<ValueModel>>>? nodeValues,
+    Map<String, Observable<VariableData>>? variables,
     Map<String, BaseCondition>? conditions,
     String? layoutID,
     bool forceLayoutID = false,
@@ -164,7 +164,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
       case ActionType.setVariable:
         final action = actionModel as SetVariableAction;
         final VariableData variable = action.variable;
-        variables[variable.id] = ValueNotifier(variable);
+        variables[variable.id] = Observable(variable);
       default:
     }
   }
@@ -186,7 +186,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     }
     // Add new values to the node's values list.
     if (nodeValues[node.id] == null) {
-      nodeValues[node.id] = ValueNotifier([...currentValues, ...newValues]);
+      nodeValues[node.id] = Observable([...currentValues, ...newValues]);
     } else {
       nodeValues[node.id]!.value = [...currentValues, ...newValues];
     }
