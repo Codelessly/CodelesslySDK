@@ -70,7 +70,12 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
     final List? data = PropertyValueDelegate.getVariableValueFromPath<List>(
         context, widget.node.variables['data'] ?? '');
 
-    final int? itemCount = widget.node.properties.itemCount ?? data?.length;
+    final int? itemCount;
+    if (widget.settings.isPreview) {
+      itemCount = widget.node.properties.itemCount ?? data?.length;
+    } else {
+      itemCount = data?.length ?? widget.node.properties.itemCount;
+    }
 
     return AdaptiveNodeBox(
       node: widget.node,
