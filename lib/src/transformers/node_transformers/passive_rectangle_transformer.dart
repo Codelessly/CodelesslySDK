@@ -132,13 +132,14 @@ class PassiveRectangleWidget extends StatelessWidget {
               if (node case PortalMixin portal)
                 if (portal.showPortal &&
                     portal.layoutID != null &&
-                    portal.pageID != null)
+                    portal.pageID != null && portal.canvasID != null)
                   Positioned.fill(
                     child: manager.layoutRetrievalBuilder(
                       context,
                       node.innerBoxLocal.size,
-                      portal.layoutID!,
                       portal.pageID!,
+                      portal.layoutID!,
+                      portal.canvasID!,
                     ),
                   )
             ],

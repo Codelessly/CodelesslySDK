@@ -114,13 +114,13 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
   late final PassiveNodeTransformerManager transformerManager =
       PassiveNodeTransformerManager(
     nodeRegistry.getNodeByID,
-    (context, bounds, layoutID, pageID) =>
+    (context, bounds, pageID, layoutID, canvasID) =>
         widget.layoutRetrievalBuilder
-            ?.call(context, bounds, layoutID, pageID) ??
+            ?.call(context, bounds, pageID, layoutID, canvasID) ??
         CodelesslyLayoutRetriever(
           controller: widget.controller,
-          layoutID: layoutID,
           pageID: pageID,
+          layoutID: layoutID,
           bounds: bounds,
         ),
   );

@@ -14,8 +14,9 @@ import '../functions/functions_repository.dart';
 typedef LayoutRetrieverBuilder = Widget Function(
   BuildContext context,
   SizeC bounds,
-  String layoutID,
   String pageID,
+  String layoutID,
+  String canvasID,
 );
 
 /// A wrapper class for both [PassiveNodeTransformerManager] and
