@@ -17,6 +17,13 @@ class DataManager {
   /// not need to be initialized again.
   bool initialized = false;
 
+  /// This is set to true once the while loop that processes the
+  /// [_downloadQueue] finishes processing in the initialization of this
+  /// [DataManager].
+  ///
+  /// Queuing is ignored after this is set to true.
+  bool queuingDone = false;
+
   /// The passed config from the SDK.
   final CodelesslyConfig config;
 
@@ -62,6 +69,16 @@ class DataManager {
 
   /// The slug for the project as defined in the editor's publish settings.
   late String? slug = config.slug;
+
+  /// The download queue holds the list of layout IDs that need to be
+  /// downloaded in order. Tracking this as an external queue allows
+  /// us to interrupt and inject different layouts to prioritize when needed.
+  ///
+  /// Use Case: Config preloading is set to true, but a CodelesslyWidget got
+  /// rendered on the screen with a layoutID specified before preload could
+  /// finish its queue.
+  /// We inject the layoutID at the start of this queue to prioritize it.
+  final List<String> _downloadQueue = [];
 
   /// Creates a new instance of [DataManager] with the given [config].
   DataManager({
@@ -269,34 +286,20 @@ class DataManager {
       // If a [layoutID] is not specified, then we need to download all layouts
       // in the background.
       if (config.preload) {
-        final preloadFuture = Future(() async {
-          log(
-            '[DataManager] Config preload was specified during init. Downloading ${_publishModel!.updates.layouts.length} layouts...',
-          );
-          for (final String layoutID in _publishModel!.updates.layouts.keys) {
-            log(
-              '[DataManager] \tDownloading layout [$layoutID]...',
-            );
-            await getOrFetchPopulatedLayout(layoutID: layoutID);
-            log(
-              '[DataManager] \tLayout [$layoutID] during init download complete.',
-            );
-          }
+        log('[DataManager] Config preload was specified during init, but a layoutID was not specified. Waiting for all layouts to download...');
+        log('[DataManager] Config preload was specified during init. Downloading ${_publishModel!.updates.layouts.length} layouts as a queue...');
+        _downloadQueue.addAll(_publishModel!.updates.layouts.keys);
 
-          log(
-            '[DataManager] All layouts during init download complete.',
-          );
-        });
-
-        // Don't await for all the of the layouts to download if the data manager
-        // is initialized with a layoutID. The layoutID should be prioritized
-        // and downloaded first, the rest can be downloaded in the background.
-        if (layoutID == null) {
-          log(
-            '[DataManager] Config preload was specified during init, but a layoutID was not specified. Waiting for all layouts to download...',
-          );
-          await preloadFuture;
+        while (_downloadQueue.isNotEmpty) {
+          final String layoutID = _downloadQueue.removeAt(0);
+          log('[DataManager] \tDownloading layout [$layoutID]...');
+          await getOrFetchPopulatedLayout(layoutID: layoutID);
+          log('[DataManager] \tLayout [$layoutID] during init download complete.');
         }
+
+        queuingDone = true;
+
+        log('[DataManager] All layouts during init download complete.');
       }
     }
 
@@ -835,10 +838,36 @@ class DataManager {
     return conditionUpdates;
   }
 
-  /// [layoutID] is the identifier of the layout to be fetched or retrieved.
+  /// Similar to [getOrFetchPopulatedLayout], but utilizes the download queue
+  /// to respect the order of downloads.
+  Future<void> queueLayout({
+    required String layoutID,
+    bool prioritize = false,
+  }) async {
+    if (_publishModel != null && queuingDone) {
+      log('[DataManager] [queueLayout] Download queue is empty. Downloading layout [$layoutID] immediately...');
+      await getOrFetchPopulatedLayout(layoutID: layoutID);
+      log('[DataManager] [queueLayout] Layout [$layoutID] download complete.');
+    } else {
+      if (_downloadQueue.contains(layoutID)) {
+        log('[DataManager] [queueLayout] Layout [$layoutID] is already in the queue. Skipping.');
+        return;
+      }
+
+      if (prioritize) {
+        log('[DataManager] [queueLayout] Prioritizing this layout. Inserting [$layoutID] to the front of the queue.');
+        _downloadQueue.insert(0, layoutID);
+      } else {
+        log('[DataManager] [queueLayout] Adding [$layoutID] to the back of the queue.');
+        _downloadQueue.add(layoutID);
+      }
+    }
+  }
+
+  /// Downloads or looks up the requested [layoutID] along with its associated
+  /// fonts, and emits the updated [_publishModel].
   ///
-  /// Fetches or gets the requested [layoutID] along with its associated fonts,
-  /// and emits the updated [_publishModel].
+  /// [layoutID] is the identifier of the layout to be fetched or retrieved.
   ///
   /// This method first checks if the layout with the given [layoutID] is
   /// already cached.

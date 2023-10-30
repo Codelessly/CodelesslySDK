@@ -95,16 +95,16 @@ class Codelessly {
   /// when they are triggered.
   final Map<String, CodelesslyFunction> functions = {};
 
-  CodelesslyStatus _status = CodelesslyStatus.empty;
+  CStatus _status = CStatus.empty();
 
   /// Returns the current status of this SDK instance.
-  CodelesslyStatus get status => _status;
+  CStatus get status => _status;
 
-  final StreamController<CodelesslyStatus> _statusStreamController =
-      StreamController.broadcast()..add(CodelesslyStatus.empty);
+  final StreamController<CStatus> _statusStreamController =
+      StreamController.broadcast()..add(CStatus.empty());
 
   /// Returns a stream of status updates for this SDK instance.
-  Stream<CodelesslyStatus> get statusStream => _statusStreamController.stream;
+  Stream<CStatus> get statusStream => _statusStreamController.stream;
 
   LocalStorage get localStorage => dataManager.localStorage;
 
@@ -139,7 +139,7 @@ class Codelessly {
 
     // If the config is not null, update the status to configured.
     if (_config != null) {
-      _updateStatus(CodelesslyStatus.configured);
+      _updateStatus(CStatus.configured());
     }
   }
 
@@ -150,7 +150,7 @@ class Codelessly {
     if (completeDispose) {
       _statusStreamController.close();
     } else {
-      _status = CodelesslyStatus.empty;
+      _status = CStatus.empty();
       _statusStreamController.add(_status);
     }
 
@@ -178,8 +178,8 @@ class Codelessly {
     _templateDataManager?.invalidate('Template');
     _authManager?.invalidate();
 
-    _config = null;
-    _status = CodelesslyStatus.empty;
+    _status =
+        config == null ? CStatus.empty() : CStatus.configured();
     _statusStreamController.add(_status);
 
     if (clearCache) {
@@ -207,7 +207,7 @@ class Codelessly {
 
   /// Internally updates the status of this instance of the SDK and emits a
   /// status update event to the [statusStream].
-  void _updateStatus(CodelesslyStatus status) {
+  void _updateStatus(CStatus status) {
     if (_status == status) {
       return;
     }
@@ -228,7 +228,7 @@ class Codelessly {
   /// [Codelessly] SDK is the global instance rather than a local one, it will
   /// configure and initialize the SDK automatically via its widget's
   /// constructor parameters.
-  CodelesslyStatus configure({
+  CStatus configure({
     CodelesslyConfig? config,
 
     // Optional data and functions.
@@ -249,7 +249,7 @@ class Codelessly {
     );
 
     assert(
-      status == CodelesslyStatus.empty,
+      status == CStatus.empty(),
       'The SDK cannot be configured if it is not idle. '
       'Consider calling [Codelessly.dispose] before reconfiguring.',
     );
@@ -277,7 +277,7 @@ class Codelessly {
     if (functions != null) {
       this.functions.addAll(functions);
     }
-    _updateStatus(CodelesslyStatus.configured);
+    _updateStatus(CStatus.configured());
     return status;
   }
 
@@ -315,7 +315,7 @@ class Codelessly {
         if (exception.layoutID != null) {
           return;
         }
-        _updateStatus(CodelesslyStatus.error);
+        _updateStatus(CStatus.error());
       },
     );
 
@@ -332,7 +332,7 @@ class Codelessly {
   /// [Codelessly] SDK is the global instance rather than a local one, it will
   /// configure and/or initialize the SDK automatically via its widget's
   /// constructor parameters, if specified.
-  Future<CodelesslyStatus> initialize({
+  Future<CStatus> initialize({
     CodelesslyConfig? config,
 
     // Optional data and functions.
@@ -368,7 +368,7 @@ class Codelessly {
       automaticallySendCrashReports: _config!.automaticallySendCrashReports,
     );
     try {
-      _updateStatus(CodelesslyStatus.configured);
+      _updateStatus(CStatus.configured());
 
       // Clean up.
       if (cacheManager != null) _cacheManager?.dispose();
@@ -441,11 +441,13 @@ class Codelessly {
             LocalDataRepository(cacheManager: this.cacheManager),
       );
 
-      _updateStatus(CodelesslyStatus.loading);
+      _updateStatus(CStatus.loading('initialized_managers'));
 
       log('[SDK] [INIT] Initializing cache manager');
       // The cache manager initializes first to load the local cache.
       await this.cacheManager.init();
+
+      _updateStatus(CStatus.loading('initialized_cache'));
 
       // The auth manager initializes second to look up cached auth data
       // from the cache manager. If no auth data is available, it halts the
@@ -461,6 +463,8 @@ class Codelessly {
         await this.authManager.init();
         _config!.publishSource =
             this.authManager.getBestPublishSource(_config!);
+
+        _updateStatus(CStatus.loading('initialized_auth'));
       } else {
         log('[SDK] [INIT] A slug was provided. Acutely skipping authentication.');
       }
@@ -497,6 +501,8 @@ class Codelessly {
             }
             break;
         }
+
+        _updateStatus(CStatus.loading('initialized_data_managers'));
       } else {
         if (!initializeDataManagers) {
           log(
@@ -523,13 +529,14 @@ class Codelessly {
             this.authManager.authData!.projectId,
           );
         });
+        _updateStatus(CStatus.loading('initialized_slug'));
       }
 
       log('[SDK] [INIT] Codelessly ${_instance == this ? 'global' : 'local'} instance initialization complete.');
 
-      _updateStatus(CodelesslyStatus.loaded);
+      _updateStatus(CStatus.loaded());
     } catch (error, stacktrace) {
-      _updateStatus(CodelesslyStatus.error);
+      _updateStatus(CStatus.error());
       CodelesslyErrorHandler.instance.captureException(
         error,
         stacktrace: stacktrace,
