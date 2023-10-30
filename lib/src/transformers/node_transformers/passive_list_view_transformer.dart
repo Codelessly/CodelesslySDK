@@ -42,7 +42,12 @@ class PassiveListViewWidget extends StatelessWidget {
             context, node.variables['data'] ?? '') ??
         (node.variables['data'] != null ? [] : null);
 
-    final int? itemCount = data?.length ?? node.properties.itemCount;
+    final int? itemCount;
+    if (settings.isPreview) {
+      itemCount = node.properties.itemCount ?? data?.length;
+    } else {
+      itemCount = data?.length ?? node.properties.itemCount;
+    }
 
     return AdaptiveNodeBox(
       node: node,
