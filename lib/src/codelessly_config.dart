@@ -132,3 +132,35 @@ enum CodelesslyStatus {
   /// The SDK has an error..
   error,
 }
+
+sealed class CStatus {
+  const CStatus();
+
+  factory CStatus.empty() => const CEmpty();
+  factory CStatus.configured() => const CConfigured();
+  factory CStatus.loading(String step) => CLoading(step);
+  factory CStatus.loaded() => const CLoaded();
+  factory CStatus.error() => const CError();
+}
+
+class CEmpty extends CStatus {
+  const CEmpty();
+}
+
+class CConfigured extends CStatus {
+  const CConfigured();
+}
+
+class CLoading extends CStatus {
+  final String step;
+
+  const CLoading(this.step);
+}
+
+class CLoaded extends CStatus {
+  const CLoaded();
+}
+
+class CError extends CStatus {
+  const CError();
+}

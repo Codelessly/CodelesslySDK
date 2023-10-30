@@ -11,7 +11,7 @@ void main() async {
     config: CodelesslyConfig(
       authToken: "cSlMIT93cj1lXkBuYk5QNmImSTUsTHw2MDQ4VkdlOCZFLHc7",
       isPreview: kDebugMode,
-      preload: false,
+      preload: true,
     ),
   );
 
@@ -34,7 +34,18 @@ class _MyAppState extends State<MyApp> {
         showPanel: true,
         wrapperBuilder: (context, child) {
           return MaterialApp(
-            home: child,
+            home: Column(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Codelessly.instance.reset(clearCache: true);
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Reset'),
+                ),
+                if (child != null) child,
+              ],
+            ),
           );
         },
         stories: [
@@ -47,7 +58,8 @@ class _MyAppState extends State<MyApp> {
                     return const CupertinoActivityIndicator();
                   },
                 );
-              }),
+            },
+          ),
           Story(
               name: 'License UI',
               builder: (context) {

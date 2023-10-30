@@ -67,7 +67,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
   /// Listens to the SDK's status to figure out if it needs to manually
   /// initialize the opposite data manager if needed.
-  StreamSubscription<CodelesslyStatus>? _sdkStatusListener;
+  StreamSubscription<CStatus>? _sdkStatusListener;
 
   /// Helper getter to retrieve the active data manager being used by
   /// the [Codelessly] instance.
@@ -180,7 +180,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     didInitialize = true;
 
     try {
-      CodelesslyStatus status = effectiveCodelessly.status;
+      CStatus status = effectiveCodelessly.status;
 
       // If the Codelessly global instance was passed and is still idle, that
       // means the user never triggered [Codelessly.init] but this
@@ -190,7 +190,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       // instance, the user explicitly wants more control over the SDK, so we
       // do nothing and let the user handle it.
       if (isGlobalInstance) {
-        if (status == CodelesslyStatus.empty) {
+        if (status == const CEmpty()) {
           effectiveCodelessly.configure(
             config: config,
             authManager: authManager,
@@ -200,7 +200,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
           );
         }
         status = effectiveCodelessly.status;
-        if (status == CodelesslyStatus.configured) {
+        if (status == const CConfigured()) {
           effectiveCodelessly.initialize();
         }
       }
@@ -222,25 +222,35 @@ class CodelesslyWidgetController extends ChangeNotifier {
     }
 
     // First event.
-    if (effectiveCodelessly.status == CodelesslyStatus.loaded) {
-      log('[CodelesslyWidgetController] [${this.layoutID}]: Codelessly SDK is already loaded. Woo!');
-      _verifyAndListenToDataManager();
+    if (effectiveCodelessly.status case CLoaded() || CLoading()) {
+      if (effectiveCodelessly.status case CLoading(step: String step)) {
+        log('[CodelesslyWidgetController] [${this.layoutID}]: Codelessly SDK is already loading with step $step.');
+      } else {
+        log('[CodelesslyWidgetController] [${this.layoutID}]: Codelessly SDK is already loaded. Woo!');
+      }
+      _verifyAndListenToDataManager(
+        effectiveCodelessly.status is CLoading
+            ? (effectiveCodelessly.status as CLoading).step
+            : null,
+      );
     }
 
     log('[CodelesslyWidgetController] [${this.layoutID}]: Listening to sdk status stream.');
+    log('[CodelesslyWidgetController] [${this.layoutID}]: Initial sdk status is: ${effectiveCodelessly.status}');
 
     _sdkStatusListener?.cancel();
     _sdkStatusListener = effectiveCodelessly.statusStream.listen((status) {
-      switch (status) {
-        case CodelesslyStatus.empty:
-        case CodelesslyStatus.configured:
-        case CodelesslyStatus.loading:
-        case CodelesslyStatus.error:
-          break;
-        case CodelesslyStatus.loaded:
+      if (status case CLoaded() || CLoaded()) {
+        if (status case CLoading(step: String step)) {
+          log('[CodelesslyWidgetController] [${this.layoutID}]: Codelessly SDK is loading with step $step.');
+        } else {
           log('[CodelesslyWidgetController] [${this.layoutID}]: Codelessly SDK is done loading.');
-          _verifyAndListenToDataManager();
-          break;
+        }
+        _verifyAndListenToDataManager(
+          effectiveCodelessly.status is CLoading?
+              ? (effectiveCodelessly.status as CLoading).step
+              : null,
+        );
       }
     });
   }
@@ -248,7 +258,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// Listens to the data manager's status. If the data manager is initialized,
   /// then we can signal to the manager that the desired layout passed to this
   /// widget is ready to be rendered and needs to be downloaded and prepared.
-  void _verifyAndListenToDataManager() {
+  void _verifyAndListenToDataManager(String? loadingStep) {
     log('[CodelesslyWidgetController] [$layoutID]: Verifying and listening to data manager stream.');
 
     notifyListeners();
@@ -258,7 +268,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // preview data manager.
     // Vice versa for published layouts if the SDK is configured to load preview
     // layouts.
-    if (!dataManager.initialized) {
+    if (!dataManager.initialized &&
+        effectiveCodelessly.authManager.isAuthenticated()) {
       log('[CodelesslyWidgetController] [$layoutID]: Initialized data manager for the first time with a publish source of $publishSource because the SDK is configured to load ${publishSource == PublishSource.publish ? 'published' : 'preview'} layouts.');
 
       dataManager.init(layoutID: layoutID).catchError((error, str) {
@@ -276,13 +287,33 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // taking care of this layout and we just need to wait. But if the config
     // has preloading set to false, then we need to manually request the layout
     // from the data manager on-demand.
-    else if (config!.preload == false && layoutID != null) {
+    else if (config!.preload == false &&
+        layoutID != null &&
+        loadingStep == null) {
       log('[CodelesslyWidgetController] [$layoutID]: Config preloading is false.');
       log('[CodelesslyWidgetController] [$layoutID]: Requesting layout [$layoutID] from data manager since preloading is false, we need to manually request it.');
       log('[CodelesslyWidgetController] [$layoutID]: Using publish source $publishSource.');
 
-      dataManager
-          .getOrFetchPopulatedLayout(layoutID: layoutID!)
+      dataManager.queueLayout(layoutID: layoutID!).catchError((error, str) {
+        CodelesslyErrorHandler.instance.captureException(
+          error,
+          stacktrace: str,
+          layoutID: layoutID,
+        );
+      });
+    }
+    // If the config has a slug specified and the data manager doesn't have
+    // a publish model yet, then we need to fetch the publish model from the
+    // data manager.
+    else if (config!.slug != null &&
+        dataManager.publishModel == null &&
+        loadingStep == null) {
+      log('[CodelesslyWidgetController] [$layoutID]: A slug is specified and publish model is null.');
+      log('[CodelesslyWidgetController] [$layoutID]: Fetching complete publish bundle from data manager.');
+      dataManager.fetchCompletePublishBundle(
+        slug: config!.slug!,
+        source: publishSource,
+      )
           .catchError((error, str) {
         CodelesslyErrorHandler.instance.captureException(
           error,
@@ -291,21 +322,18 @@ class CodelesslyWidgetController extends ChangeNotifier {
         );
         return false;
       });
-    }
-    // If the config has a slug specified and the data manager doesn't have
-    // a publish model yet, then we need to fetch the publish model from the
-    // data manager.
-    else if (config!.slug != null && dataManager.publishModel == null) {
-      log('[CodelesslyWidgetController] [$layoutID]: A slug is specified and publish model is null.');
-      log('[CodelesslyWidgetController] [$layoutID]: ...Fetching complete publish bundle from data manager.');
-      dataManager.fetchCompletePublishBundle(
-        slug: config!.slug!,
-        source: publishSource,
-      );
     } else {
-      log(
-        '[CodelesslyWidgetController] [$layoutID]: Config preloading is true. Doing nothing while DataManager finishes.',
-      );
+      log('[CodelesslyWidgetController] [$layoutID]: Config preloading is true, but a layout is requested immediately.');
+      log('[CodelesslyWidgetController] [$layoutID]: Inserting this layoutID to the top of the download queue.');
+      dataManager
+          .queueLayout(layoutID: layoutID!, prioritize: true)
+          .catchError((error, str) {
+        CodelesslyErrorHandler.instance.captureException(
+          error,
+          stacktrace: str,
+          layoutID: layoutID,
+        );
+      });
     }
   }
 }
