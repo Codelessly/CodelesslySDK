@@ -458,7 +458,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           value: codelessly,
         ),
       ],
-      child: StreamBuilder<CodelesslyStatus>(
+      child: StreamBuilder<CStatus>(
         stream: codelessly.statusStream,
         initialData: codelessly.status,
         builder: (context, snapshot) {
@@ -473,23 +473,19 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             return widget.loadingBuilder?.call(context) ??
                 const CodelesslyLoadingScreen();
           }
-          final CodelesslyStatus status = snapshot.data!;
-          switch (status) {
-            case CodelesslyStatus.empty:
-            case CodelesslyStatus.configured:
-            case CodelesslyStatus.loading:
-              return widget.loadingBuilder?.call(context) ??
-                  const CodelesslyLoadingScreen();
-            case CodelesslyStatus.error:
-              return widget.errorBuilder?.call(context, snapshot.error) ??
-                  CodelesslyErrorScreen(
-                    exception: CodelesslyErrorHandler.instance.lastException ??
-                        snapshot.error,
-                    publishSource: _effectiveController.publishSource,
-                  );
-            case CodelesslyStatus.loaded:
-              return buildStreamedLayout();
-          }
+          final CStatus status = snapshot.data!;
+
+          return switch (status) {
+            CEmpty() || CConfigured() => widget.loadingBuilder?.call(context) ??
+                const CodelesslyLoadingScreen(),
+            CError() => widget.errorBuilder?.call(context, snapshot.error) ??
+                CodelesslyErrorScreen(
+                  exception: CodelesslyErrorHandler.instance.lastException ??
+                      snapshot.error,
+                  publishSource: _effectiveController.publishSource,
+                ),
+            CLoading() || CLoaded() => buildStreamedLayout(),
+          };
         },
       ),
     );
