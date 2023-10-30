@@ -233,7 +233,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     field = TextField(
       focusNode: _focusNode,
       autocorrect: widget.node.properties.autoCorrect,
-      autofocus: widget.node.properties.autoFocus,
+      autofocus: !widget.settings.isPreview && widget.node.properties.autoFocus,
       enableInteractiveSelection:
           widget.node.properties.enableInteractiveSelection,
       enabled: enabled,
