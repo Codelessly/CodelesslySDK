@@ -1,3 +1,27 @@
+## 0.6.0
+- Embedded Canvases V1.
+  - Embed canvases into layouts.
+- Local Storage V1.
+  - Store and persist data locally.
+- Optimize JSON data to reduce data usage and storage by 80%.
+- ListView Improvements
+  - Use keys for ListView items.
+  - Fix list view not using data length first.
+  - Prioritize hard coded item count for list view and page view in preview mode.
+  - Fix set variable actions on null list and map variables.
+  - Fix set variable action for list and map items.
+- TextField Improvements
+  - Implement TextField model for better shrink-wrapping.
+  - Fix TextField not submitting on focus change.
+  - Fix TextField not invoking onSubmitted actions.
+  - Fix text field always being wrapped with SizedBox.
+  - Allow horizontally shrink-wrapping text fields.
+- Variable Improvements
+  - Implement custom value notifier for SDK use with controllable notify feature.
+  - Avoid notifying variable changes when actions are executed on canvas load.
+  - Fix canvas load crash when variables notify.
+  - Fix ManagedListenableBuilder notifying when not mounted.
+
 ## 0.5.2
 - New properties panel for Accordion widget.
 - Optimize SDK loading performance. Load from Firestore Storage to reduce loading time by up to 90%.
