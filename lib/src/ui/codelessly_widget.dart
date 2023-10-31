@@ -472,36 +472,63 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           value: codelessly,
         ),
       ],
-      child: StreamBuilder<CStatus>(
-        stream: codelessly.statusStream,
-        initialData: codelessly.status,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return widget.errorBuilder?.call(context, snapshot.error) ??
-                CodelesslyErrorScreen(
-                  exception: snapshot.error,
-                  publishSource: _effectiveController.publishSource,
-                );
-          }
-          if (!snapshot.hasData) {
-            return widget.loadingBuilder?.call(context) ??
-                const CodelesslyLoadingScreen();
-          }
-          final CStatus status = snapshot.data!;
-
-          return switch (status) {
-            CEmpty() || CConfigured() => widget.loadingBuilder?.call(context) ??
-                const CodelesslyLoadingScreen(),
-            CError() => widget.errorBuilder?.call(context, snapshot.error) ??
-                CodelesslyErrorScreen(
-                  exception: CodelesslyErrorHandler.instance.lastException ??
-                      snapshot.error,
-                  publishSource: _effectiveController.publishSource,
-                ),
-            CLoading() || CLoaded() => buildStreamedLayout(),
-          };
-        },
-      ),
+      child: _NavigationBuilder(
+          key: ValueKey(_effectiveController.layoutID),
+          builder: (context) {
+            return StreamBuilder<CStatus>(
+              stream: codelessly.statusStream,
+              initialData: codelessly.status,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return widget.errorBuilder?.call(context, snapshot.error) ??
+                      CodelesslyErrorScreen(
+                        exception: snapshot.error,
+                        publishSource: _effectiveController.publishSource,
+                      );
+                }
+                if (!snapshot.hasData) {
+                  return widget.loadingBuilder?.call(context) ??
+                      const CodelesslyLoadingScreen();
+                }
+                final CStatus status = snapshot.data!;
+               return switch (status) {
+                  CEmpty() || CConfigured() => widget.loadingBuilder?.call(context) ??
+                        const CodelesslyLoadingScreen(),
+                  CError() => widget.errorBuilder?.call(context, snapshot.error) ??
+                        CodelesslyErrorScreen(
+                          exception:
+                              CodelesslyErrorHandler.instance.lastException ??
+                                  snapshot.error,
+                          publishSource: _effectiveController.publishSource,
+                        ),
+                  CLoading() || CLoaded() => buildStreamedLayout(),
+                };
+              },
+            );
+          }),
     );
   }
+}
+
+class _NavigationBuilder extends StatefulWidget {
+  final WidgetBuilder builder;
+
+  const _NavigationBuilder({super.key, required this.builder});
+
+  @override
+  State<_NavigationBuilder> createState() => _NavigationBuilderState();
+}
+
+class _NavigationBuilderState extends State<_NavigationBuilder> {
+  @override
+  void initState() {
+    super.initState();
+    log('initState');
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      Codelessly.notifyNavigationListeners(context);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(context);
 }
