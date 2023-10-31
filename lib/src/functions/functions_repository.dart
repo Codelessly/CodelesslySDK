@@ -208,7 +208,9 @@ class FunctionsRepository {
               layoutID: layoutId,
             ),
           ),
-        );
+        ).then((value) {
+          Codelessly.notifyNavigationListeners(context);
+        });
       } else if (action.navigationType == NavigationType.replace) {
         Navigator.pushReplacement(
           context,
@@ -219,7 +221,9 @@ class FunctionsRepository {
               layoutID: layoutId,
             ),
           ),
-        );
+        ).then((value) {
+          Codelessly.notifyNavigationListeners(context);
+        });
       }
     }
   }
