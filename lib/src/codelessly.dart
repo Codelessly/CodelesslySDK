@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import '../codelessly_sdk.dart';
 import '../firedart.dart';
@@ -9,6 +10,8 @@ import 'cache/codelessly_cache_manager.dart';
 import 'data/local_storage.dart';
 import 'logging/error_handler.dart';
 import 'logging/reporter.dart';
+
+typedef NavigationListener = void Function(BuildContext context);
 
 /// The entry point for accessing the Codelessly SDK.
 ///
@@ -107,6 +110,22 @@ class Codelessly {
   Stream<CStatus> get statusStream => _statusStreamController.stream;
 
   LocalStorage get localStorage => dataManager.localStorage;
+
+  static final List<NavigationListener> _navigationListeners = [];
+
+  static void notifyNavigationListeners(BuildContext context) {
+    _navigationListeners.forEach((listener) => listener(context));
+  }
+
+  static void addNavigationListener(NavigationListener callback) {
+    if (!_navigationListeners.contains(callback)) {
+      _navigationListeners.add(callback);
+    }
+  }
+
+  static void removeNavigationListener(NavigationListener callback) {
+    _navigationListeners.remove(callback);
+  }
 
   /// Creates a new instance of [Codelessly].
   Codelessly({
