@@ -108,6 +108,7 @@ class DataManager {
     final Stopwatch stopwatch = Stopwatch()..start();
 
     initialized = true;
+    queuingDone = false;
 
     // Initialize all locally cached data.
     final cachedModel = localDataRepository.fetchPublishModel(
@@ -156,25 +157,21 @@ class DataManager {
           if (success) {
             log('[DataManager] [slug] Complete publish model from slug is downloaded in background. Emitting.');
 
-            loadFontsFromPublishModel();
-          } else {
-            log('[DataManager] [slug] Failed to download complete publish bundle for slug ${config.slug}.');
-          }
-        });
-
-        if (_publishModel == null) {
-          await publishBundleFuture;
+          loadFontsFromPublishModel();
+        } else {
+          log('Failed to download complete publish bundle for slug ${config.slug}.');
         }
 
-        _recordTime(stopwatch);
-      } catch (e, stackTrace) {
+          _logTime(stopwatch);
+          return;
+        } catch (e, stackTrace) {
         log('[DataManager] Error trying to download complete publish model from slug.');
         log('[DataManager] Since no publish model is cached, this is a complete stop to the data manager.');
         log('[DataManager]', level: 900, error: e, stackTrace: stackTrace);
         print(e);
         print(stackTrace);
 
-        _recordTime(stopwatch);
+        _logTime(stopwatch);
 
         log('[DataManager] [slug] Failed to download complete publish bundle for slug ${config.slug}.');
         return;
@@ -192,7 +189,7 @@ class DataManager {
 
     if (authManager.authData == null) {
       log('[DataManager] No auth data is available. Continuing as if offline.');
-      _recordTime(stopwatch);
+      _logTime(stopwatch);
       return;
     }
 
@@ -236,9 +233,7 @@ class DataManager {
     // If the publish model is still null, then we need to wait for the first
     // publish model to arrive from the server via the stream above.
     if (_publishModel == null) {
-      log(
-        '[DataManager] Publish model is still null during init. Waiting for the first publish model from the server.',
-      );
+      log('[DataManager] Publish model is still null during init. Waiting for the first publish model from the server.');
       final model = await firstPublishEvent;
       await onPublishModelLoaded(model);
       _publishModel = model;
@@ -252,58 +247,67 @@ class DataManager {
           '[DataManager] Publish model is still null.\n'
           'Is there a network problem or bad authentication?',
         );
-        _recordTime(stopwatch);
+        _logTime(stopwatch);
         return;
-      }
-
-      // If a [layoutID] was specified, then that layout must be prioritized and
-      // downloaded first if it is not already cached.
-      //
-      // If we could not download it earlier, that would be because we did not
-      // have a publish model available and needed to wait for one to arrive
-      // from the server for the first time or that it failed to download for some
-      // unknown reason.
-      //
-      // Perhaps the publish model was simply out of date locally,
-      // but now that we fetched a new one, and didPrepareLayout is still false,
-      // we can try to download the layout again with the new publish model.
-      //
-      // At this stage of the function, we can be sure that a publish model exists
-      // and can safely download the desired [layoutID], because if a publish
-      // model is still null, we cannot proceed further and this function
-      // terminates earlier.
-      if (!didPrepareLayout && layoutID != null) {
-        log(
-          '[DataManager] Publish model is definitely available. We can safely download layout [$layoutID] now.',
-        );
-        await getOrFetchPopulatedLayout(layoutID: layoutID);
-
-        log(
-          '[DataManager] Layout [$layoutID] during init download complete.',
-        );
-      }
-
-      // If a [layoutID] is not specified, then we need to download all layouts
-      // in the background.
-      if (config.preload) {
-        log('[DataManager] Config preload was specified during init, but a layoutID was not specified. Waiting for all layouts to download...');
-        log('[DataManager] Config preload was specified during init. Downloading ${_publishModel!.updates.layouts.length} layouts as a queue...');
-        _downloadQueue.addAll(_publishModel!.updates.layouts.keys);
-
-        while (_downloadQueue.isNotEmpty) {
-          final String layoutID = _downloadQueue.removeAt(0);
-          log('[DataManager] \tDownloading layout [$layoutID]...');
-          await getOrFetchPopulatedLayout(layoutID: layoutID);
-          log('[DataManager] \tLayout [$layoutID] during init download complete.');
-        }
-
-        queuingDone = true;
-
-        log('[DataManager] All layouts during init download complete.');
       }
     }
 
-    _recordTime(stopwatch);
+    // If a [layoutID] was specified, then that layout must be prioritized and
+    // downloaded first if it is not already cached.
+    //
+    // If we could not download it earlier, that would be because we did not
+    // have a publish model available and needed to wait for one to arrive
+    // from the server for the first time or that it failed to download for
+    // some unknown reason.
+    //
+    // Perhaps the publish model was simply out of date locally,
+    // but now that we fetched a new one, and [didPrepareLayout] is still
+    // false, we can try to download the layout again with the new publish
+    // model.
+    //
+    // At this stage of the function, we can be sure that a publish model
+    // exists and can safely download the desired [layoutID], because if a
+    // publish model is still null, we cannot proceed further and this
+    // function terminates earlier.
+    if (!didPrepareLayout && layoutID != null) {
+      log('[DataManager] We can safely download layout [$layoutID] now.');
+      await getOrFetchPopulatedLayout(layoutID: layoutID);
+      log('[DataManager] Layout [$layoutID] downloaded from init successfully.');
+    }
+
+    // Add all the layouts to the download queue excluding the [layoutID] if
+    // that was specified. We don't want to download that layout twice.
+    if (config.preload) {
+      log('[DataManager] Config preload was specified during init, adding ${_publishModel!.updates.layouts.length - 1} the layouts to the download queue...');
+      _downloadQueue.addAll(
+        [..._publishModel!.updates.layouts.keys]..remove(layoutID),
+      );
+      log('[DataManager] All layouts during init download complete.');
+    }
+
+    // If a [layoutID] was specified for this initialization, then the Future
+    // callback of this init function must complete once the layout has been
+    // downloaded.
+    // Otherwise we need to await for all layouts to be downloaded before
+    // completing the Future.
+    if (layoutID != null) {
+      processDownloadQueue();
+    } else {
+      await processDownloadQueue();
+    }
+
+    _logTime(stopwatch);
+  }
+
+  Future<void> processDownloadQueue() async {
+    while (_downloadQueue.isNotEmpty) {
+      final String layoutID = _downloadQueue.removeAt(0);
+      log('[DataManager] \tDownloading layout [$layoutID]...');
+      await getOrFetchPopulatedLayout(layoutID: layoutID);
+      log('[DataManager] \tLayout [$layoutID] during init download complete.');
+    }
+
+    queuingDone = true;
   }
 
   /// Called when the publish model is loaded.
@@ -318,7 +322,10 @@ class DataManager {
     }
   }
 
-  void _recordTime(Stopwatch stopwatch) {
+  /// This function serves to complete any post initialization steps like
+  /// indicating that queuing is done and logging the time it took to
+  /// initialize.
+  void _logTime(Stopwatch stopwatch) {
     stopwatch.stop();
     log(
       '[DataManager] Initialization took ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.',
@@ -845,7 +852,7 @@ class DataManager {
     bool prioritize = false,
   }) async {
     if (_publishModel != null && queuingDone) {
-      log('[DataManager] [queueLayout] Download queue is empty. Downloading layout [$layoutID] immediately...');
+      log('[DataManager] [queueLayout] No longer queuing. Downloading layout [$layoutID] immediately...');
       await getOrFetchPopulatedLayout(layoutID: layoutID);
       log('[DataManager] [queueLayout] Layout [$layoutID] download complete.');
     } else {
