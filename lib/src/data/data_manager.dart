@@ -112,34 +112,44 @@ class DataManager {
 
     // A slug was specified. We need a layout FAST.
     // No authentication is required; let's download a complete publish bundle.
-    if (config.slug != null && slug != config.slug) {
+    if (config.slug != null &&
+        (slug != config.slug || authManager.authData == null)) {
+      if (slug == config.slug) {
+        log('[DataManager] [slug] Slug is the same as the last cached slug, but auth data is null, so going through slug flow again...');
+      } else {
+        log('[DataManager] [slug] Slug changed from $slug to ${config.slug}. Going through slug flow...');
+      }
+
       final Stopwatch bundleStopWatch = Stopwatch()..start();
       try {
-        if (_publishModel == null) {
-          log('[DataManager] No local publish model found, but a slug was specified!');
-        } else {
-          log('[DataManager] Slug changed from $slug to ${config.slug}.');
-        }
-        log('[DataManager] Downloading complete publish bundle for slug $slug.');
+        log('[DataManager] [slug] Downloading complete publish bundle for slug $slug.');
 
         slug = config.slug;
 
-        final bool success = await fetchCompletePublishBundle(
+        if (_publishModel == null) {
+          log('[DataManager] [slug] Publish model is not cached locally. Downloading complete publish bundle for slug ${config.slug} in foreground.');
+        } else {
+          log('[DataManager] [slug] Publish model is already cached locally. Downloading complete publish bundle for slug ${config.slug} in background.');
+        }
+
+        final publishBundleFuture = fetchCompletePublishBundle(
           slug: slug!,
           source: config.publishSource,
-        );
+        ).then((success) {
+          if (success) {
+            log('[DataManager] [slug] Complete publish model from slug is downloaded in background. Emitting.');
 
-        if (success) {
-          log('[DataManager] Complete publish model from slug is downloaded. Emitting.');
+            loadFontsFromPublishModel();
+          } else {
+            log('[DataManager] [slug] Failed to download complete publish bundle for slug ${config.slug}.');
+          }
+        });
 
-          loadFontsFromPublishModel();
-
-          _recordTime(stopwatch);
-          return;
-        } else {
-          log('Failed to download complete publish bundle for slug ${config.slug}.');
-          return;
+        if (_publishModel == null) {
+          await publishBundleFuture;
         }
+
+        _recordTime(stopwatch);
       } catch (e, stackTrace) {
         log('[DataManager] Error trying to download complete publish model from slug.');
         log('[DataManager] Since no publish model is cached, this is a complete stop to the data manager.');
@@ -149,14 +159,18 @@ class DataManager {
 
         _recordTime(stopwatch);
 
-        log('Failed to download complete publish bundle for slug ${config.slug}.');
+        log('[DataManager] [slug] Failed to download complete publish bundle for slug ${config.slug}.');
         return;
       } finally {
         bundleStopWatch.stop();
-        log('[DataManager] Publish bundle flow took ${bundleStopWatch.elapsedMilliseconds}ms or ${bundleStopWatch.elapsed.inSeconds}s.');
+        log('[DataManager] [slug] Publish bundle flow took ${bundleStopWatch.elapsedMilliseconds}ms or ${bundleStopWatch.elapsed.inSeconds}s.');
       }
     } else {
-      log('[DataManager] Slug is null or slug is the same as the last slug (cache). Skipping slug flow.');
+      if (config.slug == null) {
+        log('[DataManager] [slug] Slug is null. Skipping slug flow.');
+      } else if (config.slug == slug) {
+        log('[DataManager] [slug] Slug is the same as the last cached slug and auth data exists. We can load through the normal flow. Skipping slug flow.');
+      }
     }
 
     if (authManager.authData == null) {
