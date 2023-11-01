@@ -147,6 +147,7 @@ ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
         visualDensity: VisualDensity.standard,
         padding: node.padding.flutterEdgeInsets,
         textStyle: textStyle,
+        minimumSize: Size.zero,
         shape: getButtonShape(node.properties),
       );
       break;
@@ -158,6 +159,7 @@ ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
         padding: node.padding.flutterEdgeInsets,
         visualDensity: VisualDensity.standard,
         textStyle: textStyle,
+        minimumSize: Size.zero,
         shadowColor: node.properties.shadowColor.toFlutterColor(),
         shape: getButtonShape(node.properties),
       );
@@ -171,6 +173,7 @@ ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
         visualDensity: VisualDensity.standard,
         padding: node.padding.flutterEdgeInsets,
         textStyle: textStyle,
+        minimumSize: Size.zero,
         shadowColor: node.properties.shadowColor.toFlutterColor(),
         shape: getButtonShape(node.properties),
       );
@@ -188,6 +191,7 @@ ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
         elevation: elevation ?? node.properties.elevation,
         visualDensity: VisualDensity.standard,
         padding: node.padding.flutterEdgeInsets,
+        minimumSize: Size.zero,
         backgroundColor: node.properties.buttonColor.toFlutterColor(),
         shadowColor: node.properties.shadowColor.toFlutterColor(),
         shape: getButtonShape(node.properties),
