@@ -161,10 +161,6 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
           ]);
         }
         break;
-      case ActionType.setVariable:
-        final action = actionModel as SetVariableAction;
-        final VariableData variable = action.variable;
-        variables[variable.id] = Observable(variable);
       default:
     }
   }
@@ -194,7 +190,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
 
   /// Returns a reverse-lookup of the [VariableData] associated with a given
   /// [name].
-  ValueNotifier<VariableData>? findVariableByName(String? name) =>
+  Observable<VariableData>? findVariableByName(String? name) =>
       variables.values
           .firstWhereOrNull((variable) => variable.value.name == name);
 
