@@ -609,7 +609,8 @@ class FunctionsRepository {
   }) {
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
-    final variableNotifier = codelesslyContext.variables[action.variable.id];
+    final variableNotifier =
+        codelesslyContext.findVariableByName(action.variable.name);
     if (variableNotifier == null) return false;
 
     String newValue = PropertyValueDelegate.substituteVariables(
