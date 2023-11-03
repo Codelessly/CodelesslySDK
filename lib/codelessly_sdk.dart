@@ -23,6 +23,7 @@ export 'src/transformers/transformers.dart';
 export 'src/ui/codelessly_context.dart';
 export 'src/ui/codelessly_widget.dart';
 export 'src/ui/codelessly_widget_controller.dart';
+export 'src/ui/stripe_painter.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/flutter_icons_data_map.dart';
 export 'src/utils/flutter_icons_names_map.dart';
