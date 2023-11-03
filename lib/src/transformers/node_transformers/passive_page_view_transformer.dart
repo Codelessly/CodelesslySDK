@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
+import '../../functions/functions_repository.dart';
 import '../../utils/extensions.dart';
 import '../transformers.dart';
 
@@ -16,7 +17,19 @@ class PassivePageViewTransformer extends NodeWidgetTransformer<PageViewNode> {
       node: node,
       manager: manager,
       settings: settings,
+      onPageChanged: (context, index) => onPageChanged(context, index, node),
     );
+  }
+
+  void onPageChanged(BuildContext context, int index, PageViewNode node) {
+    FunctionsRepository.setNodeValue(context,
+        node: node, property: 'indexValue', value: index);
+
+    FunctionsRepository.setPropertyVariable(context,
+        node: node, property: 'indexValue', value: '$index');
+
+    FunctionsRepository.triggerAction(context, TriggerType.changed,
+        node: node, value: index);
   }
 }
 
@@ -24,7 +37,8 @@ class PassivePageViewWidget extends StatefulWidget {
   final PageViewNode node;
   final NodeTransformerManager manager;
   final WidgetBuildSettings settings;
-  final ValueChanged<int>? onPageChanged;
+
+  final Function(BuildContext context, int index)? onPageChanged;
 
   const PassivePageViewWidget({
     super.key,
@@ -90,7 +104,7 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
           padEnds: widget.node.properties.padEnds,
           pageSnapping: widget.node.properties.pageSnapping,
           controller: controller,
-          onPageChanged: widget.onPageChanged,
+          onPageChanged: (index) => widget.onPageChanged?.call(context, index),
           itemBuilder: (context, index) => IndexedItemProvider(
             key: ValueKey(index),
             index: index,
