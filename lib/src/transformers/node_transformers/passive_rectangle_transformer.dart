@@ -132,15 +132,27 @@ class PassiveRectangleWidget extends StatelessWidget {
               if (node case PortalMixin portal)
                 if (portal.showPortal &&
                     portal.layoutID != null &&
-                    portal.pageID != null && portal.canvasID != null)
+                    portal.pageID != null &&
+                    portal.canvasID != null)
                   Positioned.fill(
-                    child: manager.layoutRetrievalBuilder(
-                      context,
-                      node.innerBoxLocal.size,
-                      portal.pageID!,
-                      portal.layoutID!,
-                      portal.canvasID!,
-                    ),
+                    child: settings.isPreview
+                        // Show stripes in preview mode
+                        ? CustomPaint(
+                            painter: StripePainter(
+                              bgColor: const Color(0xFFBA79F4).withOpacity(0.1),
+                              stripeColor: const Color(0xFFBA79F4),
+                              nbOfStripes:
+                                  (node.outerBoxGlobal.size.longestSide / 20)
+                                      .round(),
+                            ),
+                          )
+                        : manager.layoutRetrievalBuilder(
+                            context,
+                            node.innerBoxLocal.size,
+                            portal.pageID!,
+                            portal.layoutID!,
+                            portal.canvasID!,
+                          ),
                   )
             ],
             stackAlignment: stackAlignment,
