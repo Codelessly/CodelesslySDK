@@ -470,7 +470,7 @@ extension CCrossAxisAlignmentHelper on CrossAxisAlignmentC {
   }
 }
 
-extension CAxisHelper on AxisC {
+extension AxisHelperExt on AxisC {
   flutter.Axis get flutterAxis => this == AxisC.horizontal
       ? flutter.Axis.horizontal
       : flutter.Axis.vertical;

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -43,14 +44,39 @@ class UltimateImageBuilder extends StatefulWidget {
     this.node,
     this.blendMode,
     this.useInk = false,
-  })  : assert(url != null || bytes != null || paint != null,
-            'url or bytes or paint must be provided'),
-        assert(
+  }) : assert(url != null || bytes != null || paint != null,
+            'url or bytes or paint must be provided')
+  /*assert(
             paint == null || (width != null && height != null && node != null),
-            'width, height and node must be provided when paint is provided');
+            'width, height and node must be provided when paint is provided')*/
+  ;
 
   @override
   State<UltimateImageBuilder> createState() => _UltimateImageBuilderState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties.add(StringProperty('url', url));
+    properties.add(DiagnosticsProperty<TypedBytes>('bytes', bytes));
+    properties.add(EnumProperty<BoxFit>('fit', fit));
+    properties.add(DiagnosticsProperty<Alignment>('alignment', alignment));
+    properties.add(DoubleProperty('scale', scale));
+    properties.add(DoubleProperty('width', width));
+    properties.add(DoubleProperty('height', height));
+    properties.add(EnumProperty<ImageRepeat>('repeat', repeat));
+    properties.add(ColorProperty('color', color));
+    properties.add(
+        ObjectFlagProperty<WidgetBuilder>.has('errorBuilder', errorBuilder));
+    properties.add(ObjectFlagProperty<
+        Widget Function(BuildContext context,
+            DownloadProgress? progress)>.has('loadingBuilder', loadingBuilder));
+    properties.add(DiagnosticsProperty<PaintModel>('paint', paint));
+    properties.add(DiagnosticsProperty<BaseNode>('node', node));
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
+    properties.add(DiagnosticsProperty<bool>('useInk', useInk));
+
+    super.debugFillProperties(properties);
+  }
 }
 
 class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
@@ -82,9 +108,27 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
               BlendMode.srcIn)
       : null;
 
-  double? get width => widget.width ?? widget.node?.basicBoxLocal.width;
+  double? get width {
+    if (widget.width case var width?) return width;
 
-  double? get height => widget.height ?? widget.node?.basicBoxLocal.height;
+    if (widget.node case var node?) {
+      if (node.isHorizontalExpanded) return double.infinity;
+      return node.basicBoxLocal.width;
+    }
+
+    return null;
+  }
+
+  double? get height {
+    if (widget.height case var height?) return height;
+
+    if (widget.node case var node?) {
+      if (node.isVerticalExpanded) return null;
+      return node.basicBoxLocal.height;
+    }
+
+    return null;
+  }
 
   @override
   void initState() {

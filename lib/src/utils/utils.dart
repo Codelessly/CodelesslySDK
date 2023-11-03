@@ -229,39 +229,72 @@ final RegExp staticImageTypesRegex =
     return (horizontal: true, vertical: true);
   }
 
-  final bool hasChildren = delegatedNode.childrenOrEmpty.isNotEmpty;
+  if (delegatedNode is RowColumnMixin) {
+    final bool hasChildren = delegatedNode.childrenOrEmpty.isNotEmpty;
 
-  if (!hasChildren) {
+    if (!hasChildren) {
+      return (horizontal: false, vertical: false);
+    }
+
+    for (final id in delegatedNode.childrenOrEmpty) {
+      final child = getNode(id);
+      isAnyExpandingHorizontally =
+          isAnyExpandingHorizontally || child.horizontalFit.isFlex;
+      isAnyExpandingVertically =
+          isAnyExpandingVertically || child.verticalFit.isFlex;
+    }
+    return (
+      horizontal: !isAnyExpandingHorizontally,
+      vertical: !isAnyExpandingVertically,
+    );
+  }
+
+  if (delegatedNode.childrenOrEmpty.length != 1) {
     return (horizontal: false, vertical: false);
   }
 
-  for (final id in delegatedNode.childrenOrEmpty) {
-    final child = getNode(id);
-    isAnyExpandingHorizontally =
-        isAnyExpandingHorizontally || child.horizontalFit.isFlex;
-    isAnyExpandingVertically =
-        isAnyExpandingVertically || child.verticalFit.isFlex;
+  if (node is! ScrollableMixin) return (horizontal: false, vertical: false);
+
+  final child = getNode(delegatedNode.childrenOrEmpty.first);
+
+  bool allowHorizontal = true;
+  bool allowVertical = true;
+  if (child.isHorizontalExpanded) allowHorizontal = false;
+  if (child.alignment.data == null || child.alignment.data!.x != -1) {
+    allowHorizontal = false;
+  }
+  if (child.alignment.data == null &&
+      child.outerBoxLocal.left.roundToPrecision(3) != 0) {
+    allowHorizontal = false;
   }
 
-  return (
-    horizontal: !isAnyExpandingHorizontally,
-    vertical: !isAnyExpandingVertically,
-  );
+  if (child.isVerticalExpanded) allowVertical = false;
+  if (child.alignment.data != null && child.alignment.data!.y != -1) {
+    allowVertical = false;
+  }
+  if (child.alignment.data == null &&
+      child.outerBoxLocal.top.roundToPrecision(3) != 0) {
+    allowVertical = false;
+  }
+
+  return (horizontal: allowHorizontal, vertical: allowVertical);
 }
 
 ({bool horizontal, bool vertical}) checkSelfForLegalScrollableAxes(
     {required BaseNode node}) {
-  if (node is CanvasNode) {
-    return (
-      horizontal: true,
-      vertical: true,
-    );
-  }
+  return (horizontal: true, vertical: true);
 
-  return (
-    horizontal: node.isHorizontalWrap,
-    vertical: node.isVerticalWrap,
-  );
+  // if (node is CanvasNode) {
+  //   return (
+  //     horizontal: true,
+  //     vertical: true,
+  //   );
+  // }
+  //
+  // return (
+  //   horizontal: node.isHorizontalWrap,
+  //   vertical: node.isVerticalWrap,
+  // );
 }
 
 ({bool horizontal, bool vertical}) checkParentForLegalScrollableAxes({
@@ -411,6 +444,12 @@ AlignmentModel retrieveCommonStackAlignment(
   List<BaseNode> nodes,
 ) {
   final List<AlignmentModel> alignments = [];
+
+  if (nodes.length == 1 &&
+      nodes.first is ScrollableMixin &&
+      (nodes.first as ScrollableMixin).isScrollable) {
+    return AlignmentModel.none;
+  }
 
   for (final BaseNode node in nodes) {
     final AlignmentModel alignment = node.alignment;
