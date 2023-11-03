@@ -168,36 +168,11 @@ class PortalPreviewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-          color: const Color(0xFFBA79F4),
-          width: 2,
-        ),
-      ),
-      child: CustomPaint(
-        painter: StripePainter(
-          bgColor: const Color(0xFFBA79F4).withOpacity(0.1),
-          stripeColor: const Color(0xFFBA79F4),
-          nbOfStripes: (node.outerBoxGlobal.size.longestSide / 10).round(),
-        ),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFBA79F4),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: const Text(
-              'Embedded Canvas',
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
+    return CustomPaint(
+      painter: StripePainter(
+        bgColor: const Color(0xFFBA79F4).withOpacity(0.1),
+        stripeColor: const Color(0xFFBA79F4),
+        nbOfStripes: (node.outerBoxGlobal.size.longestSide / 10).round(),
       ),
     );
   }
