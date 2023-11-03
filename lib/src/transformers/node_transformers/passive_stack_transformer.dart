@@ -32,7 +32,8 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         isTallest: tallestChild?.id == node.id,
       );
     } else {
-      if (node.alignment != commonAlignment) {
+      if (node.alignment != commonAlignment &&
+          (node is! ScrollableMixin || !node.isScrollable)) {
         child = Align(
           alignment: node.alignment.flutterAlignment!,
           child: child,

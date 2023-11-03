@@ -223,19 +223,11 @@ List<Widget> wrapWithPaddingAndScroll(
         node: node,
         padding: applyPadding ? resolvedPadding : null,
         clipBehavior: defaultGetClipBehavior(node),
-        child: SizedBox(
-          width: node.scrollDirection.isHorizontal
-              ? node.outerBoxLocal.width
-              : null,
-          height: node.scrollDirection.isVertical
-              ? node.outerBoxLocal.height
-              : null,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: stackAlignment.flutterAlignment ??
-                AlignmentDirectional.topStart,
-            children: children,
-          ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment:
+              stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
+          children: children,
         ),
       ),
     ];
@@ -565,8 +557,16 @@ List<Widget> buildFills(
             } else {
               child = UltimateImageBuilder(
                 url: imageURL,
-                width: node.basicBoxLocal.width,
-                height: node.basicBoxLocal.height,
+                width: (node.horizontalFit == SizeFit.shrinkWrap)
+                    ? null
+                    : (node.horizontalFit == SizeFit.expanded)
+                        ? double.infinity
+                        : node.basicBoxLocal.width,
+                height: (node.verticalFit == SizeFit.shrinkWrap)
+                    ? null
+                    : (node.verticalFit == SizeFit.expanded)
+                        ? double.infinity
+                        : node.basicBoxLocal.height,
                 paint: paint,
                 node: node,
                 bytes: bytes,
