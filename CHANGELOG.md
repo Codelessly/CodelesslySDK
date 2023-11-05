@@ -1,3 +1,21 @@
+## 0.7.0
+- New Dialogs feature! 100% customizable dialogs with customizable close button, background, and padding.
+  - New show dialog action.
+  - New show dialog settings panel.
+- Improve Embedded Canvases preview rendering.
+- Improve Scrolling.
+  - Enable scrolling for expanded frames with special conditions for child.
+  - Fix ClipRect as SingleChildScrollView child not being merge swept.
+  - Don't use alignment on container from the child in codegen if it is scrollable.
+  - Removed fixed width/height with a SizedBox around SingleChildScrollView.
+  - Don't wrap a stack child with Align widget if it is scrollable.
+  - Fix scrollable property enable/disable conditions to allow proper scrolling in some special cases.
+- Fix Edge Pins not syncing with server.
+- Fix PageView triggers not executing.
+- Fix Button size rendering incorrectly.
+- Fix SDK incorrect variables initialization from actions.
+- Fix image always using fixed sizes.
+
 ## 0.6.0
 - Embedded Canvases V1.
   - Embed canvases into layouts.
