@@ -128,10 +128,21 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         ? null
         : childNode.outerBoxLocal.height;
 
+    final bool doesParentScroll = node is ScrollableMixin && node.isScrollable;
+
+    // This decides whether to use a positioned widget or padding widget
+    // to position the child. This makes it so if an expanded (parent) frame
+    // has one child, the child won't be wrapped with a positioned widget
+    // because if it does, than the stack and SingleChildScrollView wouldn't
+    // expand and crash because the Positioned widget would give the scroll
+    // view unbounded sizing.
+    // cut off when scrolling is forced (i.e. with bouncing scroll physics).
+    final bool shouldUsePositioned = !doesParentScroll && !isTallest && !isWidest;
+
     // This is required to make wrapping stack in a scroll view work because
     // wrapping stack cannot figure out its size when there only positioned
     // children.
-    if (!isTallest && !isWidest) {
+    if (shouldUsePositioned) {
       return Positioned(
         left: left,
         right: right,
