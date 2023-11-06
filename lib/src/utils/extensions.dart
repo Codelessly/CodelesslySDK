@@ -820,10 +820,10 @@ extension BoxFitExt on BoxFit {
 
 extension AlignmentModelExtensions on AlignmentModel {
   bool get touchesVerticalEdges =>
-      data != null && data!.y == -1 || data!.y == 1;
+      data != null && (data!.y == -1 || data!.y == 1);
 
   bool get touchesHorizontalEdges =>
-      data != null && data!.x == -1 || data!.x == 1;
+      data != null && (data!.x == -1 || data!.x == 1);
 
   bool get touchesACorner {
     if (data == null) return false;
