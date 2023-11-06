@@ -524,16 +524,28 @@ Widget wrapWithScrollable({
   required Widget child,
 }) {
   if (!node.isScrollable) return child;
-  return SingleChildScrollView(
-    scrollDirection: node.scrollDirection.flutterAxis,
-    reverse: node.reverse,
-    physics: node.physics.flutterScrollPhysics,
-    primary: node.primary,
-    padding: padding,
-    keyboardDismissBehavior:
-        node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-    clipBehavior: clipBehavior ?? Clip.hardEdge,
-    child: child,
+  return SizedBox(
+    width: (node.horizontalFit == SizeFit.shrinkWrap)
+        ? null
+        : (node.horizontalFit == SizeFit.expanded)
+        ? double.infinity
+        : node.basicBoxLocal.width,
+    height: (node.verticalFit == SizeFit.shrinkWrap)
+        ? null
+        : (node.verticalFit == SizeFit.expanded)
+        ? double.infinity
+        : node.basicBoxLocal.height,
+    child: SingleChildScrollView(
+      scrollDirection: node.scrollDirection.flutterAxis,
+      reverse: node.reverse,
+      physics: node.physics.flutterScrollPhysics,
+      primary: node.primary,
+      padding: padding,
+      keyboardDismissBehavior:
+          node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+      clipBehavior: clipBehavior ?? Clip.hardEdge,
+      child: child,
+    ),
   );
 }
 
