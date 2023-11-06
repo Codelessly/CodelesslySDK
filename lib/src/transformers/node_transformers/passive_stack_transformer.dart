@@ -23,14 +23,41 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     Widget child = childWidget ??
         manager!.buildWidgetFromNode(node, context, settings: settings);
 
-    if (node.alignment == AlignmentModel.none) {
-      child = wrapWithPositioned(
-        node,
-        parent,
-        child,
-        isWidest: widestChild?.id == node.id,
-        isTallest: tallestChild?.id == node.id,
-      );
+    final bool shouldWrapWithPositioned =
+        node.alignment == AlignmentModel.none ||
+            (parent.isOneOrBothWrap && node.alignment != commonAlignment);
+
+    // TODO: This is good, put this in codegen too.
+    if (shouldWrapWithPositioned) {
+      if (node.alignment != AlignmentModel.none) {
+        final align = node.alignment.data!;
+
+        child = Positioned(
+          left: align.x <= 0
+              ? node.outerBoxLocal.left - parent.innerBoxLocal.edgeLeft
+              : null,
+          right: align.x >= 0
+              ? (parent.innerBoxLocal.width - node.outerBoxLocal.right) +
+                  parent.innerBoxLocal.edgeRight
+              : null,
+          top: align.y <= 0
+              ? node.outerBoxLocal.top - parent.innerBoxLocal.edgeTop
+              : null,
+          bottom: align.y >= 0
+              ? (parent.innerBoxLocal.height - node.outerBoxLocal.bottom) +
+                  parent.innerBoxLocal.edgeBottom
+              : null,
+          child: child,
+        );
+      } else {
+        child = wrapWithPositioned(
+          node,
+          parent,
+          child,
+          isWidest: widestChild?.id == node.id,
+          isTallest: tallestChild?.id == node.id,
+        );
+      }
     } else {
       if (node.alignment != commonAlignment &&
           (node is! ScrollableMixin || !node.isScrollable)) {
