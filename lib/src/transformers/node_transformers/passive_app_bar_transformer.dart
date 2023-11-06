@@ -22,9 +22,14 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
     );
   }
 
-  void onTriggerAction(BuildContext context, List<Reaction> reactions) =>
-      FunctionsRepository.triggerAction(
-          context, reactions: reactions, TriggerType.click);
+  void onTriggerAction(BuildContext context, List<Reaction> reactions) async {
+    final bool executed = await FunctionsRepository.triggerAction(
+        context, reactions: reactions, TriggerType.click);
+
+    // only navigate back by default if no actions are defined on the leading
+    // icon.
+    if (!executed && context.mounted) Navigator.of(context).maybePop();
+  }
 
   PreferredSizeWidget buildAppBarWidgetFromProps({
     required AppBarProperties props,
