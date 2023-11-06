@@ -27,8 +27,16 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         node.alignment == AlignmentModel.none ||
             (parent.isOneOrBothWrap && node.alignment != commonAlignment);
 
-    // TODO: This is good, put this in codegen too.
+    // TODO: Put this in codegen too.
     if (shouldWrapWithPositioned) {
+      // You cannot use the Align widget when inside a shrink-wrapping Stack.
+      // The Align RenderBox will force the Stack to grow as much as possible.
+      // Positioned widgets are only laid out after the Stack lays out its
+      // concrete children and figures out its own size. So for wrapping stacks,
+      // we need to use Positioned instead of Align.
+      //
+      // The behavior is absolutely different, but it's the best compromise we
+      // can do.
       if (node.alignment != AlignmentModel.none) {
         final align = node.alignment.data!;
 
@@ -59,8 +67,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         );
       }
     } else {
-      if (node.alignment != commonAlignment &&
-          (node is! ScrollableMixin || !node.isScrollable)) {
+      if (node.alignment != commonAlignment) {
         child = Align(
           alignment: node.alignment.flutterAlignment!,
           child: child,
