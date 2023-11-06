@@ -34,19 +34,19 @@ class _MyAppState extends State<MyApp> {
         showPanel: true,
         wrapperBuilder: (context, child) {
           return MaterialApp(
-            home: child,
-            // home: Column(
-            //   children: [
-            //     ElevatedButton.icon(
-            //       onPressed: () {
-            //         Codelessly.instance.reset(clearCache: true);
-            //       },
-            //       icon: const Icon(Icons.refresh),
-            //       label: const Text('Reset'),
-            //     ),
-            //     if (child != null) child,
-            //   ],
-            // ),
+            // home: child,
+            home: Column(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Codelessly.instance.reset(clearCache: true);
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Reset'),
+                ),
+                if (child != null) Expanded(child: child),
+              ],
+            ),
           );
         },
         stories: [

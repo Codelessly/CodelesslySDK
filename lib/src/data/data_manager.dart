@@ -67,9 +67,6 @@ class DataManager {
 
   StreamSubscription<SDKPublishModel?>? _publishModelDocumentListener;
 
-  /// The slug for the project as defined in the editor's publish settings.
-  late String? slug = config.slug;
-
   /// The download queue holds the list of layout IDs that need to be
   /// downloaded in order. Tracking this as an external queue allows
   /// us to interrupt and inject different layouts to prioritize when needed.
@@ -130,28 +127,21 @@ class DataManager {
 
     // A slug was specified. We need a layout FAST.
     // No authentication is required; let's download a complete publish bundle.
-    if (config.slug != null &&
-        (slug != config.slug || authManager.authData == null)) {
-      if (slug == config.slug) {
-        log('[DataManager] [slug] Slug is the same as the last cached slug, but auth data is null, so going through slug flow again...');
-      } else {
-        log('[DataManager] [slug] Slug changed from $slug to ${config.slug}. Going through slug flow...');
-      }
+    if (config.slug case String slug) {
+      log('[DataManager] [slug] Slug was specified [$slug]. Going through slug flow...');
 
       final Stopwatch bundleStopWatch = Stopwatch()..start();
       try {
         log('[DataManager] [slug] Downloading complete publish bundle for slug $slug.');
 
-        slug = config.slug;
-
         if (_publishModel == null) {
-          log('[DataManager] [slug] Publish model is not cached locally. Downloading complete publish bundle for slug ${config.slug} in foreground.');
+          log('[DataManager] [slug] Publish model is not cached locally. Downloading complete publish bundle for slug $slug in foreground.');
         } else {
-          log('[DataManager] [slug] Publish model is already cached locally. Downloading complete publish bundle for slug ${config.slug} in background.');
+          log('[DataManager] [slug] Publish model is already cached locally. Downloading complete publish bundle for slug $slug in background.');
         }
 
         final publishBundleFuture = fetchCompletePublishBundle(
-          slug: slug!,
+          slug: slug,
           source: config.publishSource,
         ).then((success) {
           if (success) {
@@ -159,7 +149,7 @@ class DataManager {
 
             loadFontsFromPublishModel();
           } else {
-            log('[DataManager] [slug] Failed to download complete publish bundle for slug ${config.slug}.');
+            log('[DataManager] [slug] Failed to download complete publish bundle for slug $slug.');
           }
         });
 
@@ -177,18 +167,14 @@ class DataManager {
 
         _logTime(stopwatch);
 
-        log('[DataManager] [slug] Failed to download complete publish bundle for slug ${config.slug}.');
+        log('[DataManager] [slug] Failed to download complete publish bundle for slug $slug.');
         return;
       } finally {
         bundleStopWatch.stop();
         log('[DataManager] [slug] Publish bundle flow took ${bundleStopWatch.elapsedMilliseconds}ms or ${bundleStopWatch.elapsed.inSeconds}s.');
       }
     } else {
-      if (config.slug == null) {
-        log('[DataManager] [slug] Slug is null. Skipping slug flow.');
-      } else if (config.slug == slug) {
-        log('[DataManager] [slug] Slug is the same as the last cached slug and auth data exists. We can load through the normal flow. Skipping slug flow.');
-      }
+      log('[DataManager] [slug] Slug is ${config.slug}. Skipping slug flow.');
     }
 
     if (authManager.authData == null) {
@@ -861,7 +847,18 @@ class DataManager {
       log('[DataManager] [queueLayout] Layout [$layoutID] download complete.');
     } else {
       if (_downloadQueue.contains(layoutID)) {
-        log('[DataManager] [queueLayout] Layout [$layoutID] is already in the queue. Skipping.');
+        if (prioritize) {
+          if (_downloadQueue.first == layoutID) {
+            log('[DataManager] [queueLayout] Layout [$layoutID] is already at the front of the queue. Skipping.');
+            return;
+          } else {
+            log('[DataManager] [queueLayout] Layout [$layoutID] is already in the queue. Moving it to the front to prioritize it.');
+            _downloadQueue.remove(layoutID);
+          }
+        } else {
+          log('[DataManager] [queueLayout] Layout [$layoutID] is already in the queue. Skipping.');
+          return;
+        }
         return;
       }
 
