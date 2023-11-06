@@ -188,7 +188,7 @@ class CodelesslyWidget extends StatefulWidget {
               null),
           controller != null
               ? 'You must provide a [config] inside of your [controller] or configure the provided codelessly instance with one.'
-              : 'You must provide a [config inside of your CodelesslyWidget or through the Codelessly instance.',
+              : 'You must provide a [config] inside of your CodelesslyWidget or through the Codelessly instance.',
         ),
         assert(
           ((layoutID != null) != (controller != null)) ||
@@ -253,9 +253,9 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
     if (!CodelesslyErrorHandler.didInitialize) {
       _effectiveController.effectiveCodelessly.initErrorHandler(
-        firebaseProjectId: _effectiveController.config?.firebaseProjectId,
+        firebaseProjectId: _effectiveController.config.firebaseProjectId,
         automaticallySendCrashReports:
-            _effectiveController.config?.automaticallySendCrashReports ?? false,
+            _effectiveController.config.automaticallySendCrashReports,
       );
     }
 
@@ -406,8 +406,22 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           }
 
           final SDKPublishModel model = snapshot.data!;
-          final String layoutID =
-              _effectiveController.layoutID ?? model.entryLayoutId!;
+          final String? layoutID =
+              _effectiveController.layoutID ?? model.entryLayoutId;
+
+          if (layoutID == null) {
+            return widget.errorBuilder?.call(
+                  context,
+                  CodelesslyException.notInitializedError(
+                    message:
+                        'A layoutID was not specified and the model does not have an entry layoutID specified.',
+                  ),
+                ) ??
+                CodelesslyErrorScreen(
+                  publishSource: _effectiveController.publishSource,
+                  exception: null,
+                );
+          }
 
           if (!model.layouts.containsKey(layoutID)) {
             return widget.loadingBuilder?.call(context) ??
