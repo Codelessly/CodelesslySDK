@@ -157,14 +157,18 @@ class DataManager {
           if (success) {
             log('[DataManager] [slug] Complete publish model from slug is downloaded in background. Emitting.');
 
-          loadFontsFromPublishModel();
-        } else {
-          log('Failed to download complete publish bundle for slug ${config.slug}.');
+            loadFontsFromPublishModel();
+          } else {
+            log('[DataManager] [slug] Failed to download complete publish bundle for slug ${config.slug}.');
+          }
+        });
+
+        if (_publishModel == null) {
+          await publishBundleFuture;
         }
 
-          _logTime(stopwatch);
-          return;
-        } catch (e, stackTrace) {
+        _logTime(stopwatch);
+      } catch (e, stackTrace) {
         log('[DataManager] Error trying to download complete publish model from slug.');
         log('[DataManager] Since no publish model is cached, this is a complete stop to the data manager.');
         log('[DataManager]', level: 900, error: e, stackTrace: stackTrace);
