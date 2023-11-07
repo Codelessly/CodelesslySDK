@@ -61,7 +61,7 @@ class PassiveListViewWidget extends StatelessWidget {
         padding: node.padding.flutterEdgeInsets,
         keyboardDismissBehavior:
             node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-        physics: node.physics.flutterScrollPhysics,
+        physics: node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
         scrollDirection: node.scrollDirection.flutterAxis,
         cacheExtent: node.properties.cacheExtent,
         reverse: node.reverse,
@@ -100,7 +100,7 @@ class ListViewBuilder extends StatelessWidget {
   final bool shrinkWrap;
   final int? itemCount;
   final EdgeInsets? padding;
-  final ScrollPhysics physics;
+  final ScrollPhysics? physics;
   final Axis scrollDirection;
   final double? cacheExtent;
   final bool reverse;
@@ -116,7 +116,7 @@ class ListViewBuilder extends StatelessWidget {
     required this.shrinkWrap,
     this.itemCount,
     this.padding,
-    required this.physics,
+    this.physics,
     required this.scrollDirection,
     this.cacheExtent,
     required this.reverse,

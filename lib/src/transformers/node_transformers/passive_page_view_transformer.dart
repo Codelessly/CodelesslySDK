@@ -97,7 +97,8 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
         behavior: const DraggableScrollBehavior(),
         child: PageView.builder(
           itemCount: itemCount,
-          physics: widget.node.physics.flutterScrollPhysics,
+          physics: widget.node.physics
+              .flutterScrollPhysics(widget.node.shouldAlwaysScroll),
           scrollDirection: widget.node.scrollDirection.flutterAxis,
           reverse: widget.node.reverse,
           clipBehavior: widget.node.clipsContent ? Clip.hardEdge : Clip.none,

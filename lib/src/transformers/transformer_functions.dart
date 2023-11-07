@@ -528,17 +528,17 @@ Widget wrapWithScrollable({
     width: (node.horizontalFit == SizeFit.shrinkWrap)
         ? null
         : (node.horizontalFit == SizeFit.expanded)
-        ? double.infinity
-        : node.basicBoxLocal.width,
+            ? double.infinity
+            : node.basicBoxLocal.width,
     height: (node.verticalFit == SizeFit.shrinkWrap)
         ? null
         : (node.verticalFit == SizeFit.expanded)
-        ? double.infinity
-        : node.basicBoxLocal.height,
+            ? double.infinity
+            : node.basicBoxLocal.height,
     child: SingleChildScrollView(
       scrollDirection: node.scrollDirection.flutterAxis,
       reverse: node.reverse,
-      physics: node.physics.flutterScrollPhysics,
+      physics: node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
       primary: node.primary,
       padding: padding,
       keyboardDismissBehavior:

@@ -53,7 +53,7 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
           0, 0, width ?? 32, height ?? node?.basicBoxLocal.height ?? 56),
       initialIndex: node?.initialIndex ?? 0,
       isScrollable: node?.isScrollable ?? false,
-      physics: node?.physics ?? ScrollPhysicsC.alwaysScrollableScrollPhysics,
+      physics: node?.physics ?? ScrollPhysicsC.platformDependent,
     );
     return PassiveTabBarWidget(
       node: previewNode,
@@ -184,7 +184,8 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
           unselectedLabelColor:
               widget.node.properties.unselectedLabelColor?.toFlutterColor(),
           unselectedLabelStyle: unselectedLabelStyle,
-          physics: widget.node.physics.flutterScrollPhysics,
+          physics: widget.node.physics
+              .flutterScrollPhysics(widget.node.shouldAlwaysScroll),
           onTap: widget.onChanged,
           tabs: [
             for (final tab in widget.node.properties.tabs) getTab(context, tab)
