@@ -14,45 +14,90 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         ..remove(node.properties.topAppBarPlaceholderId)
         ..remove(node.properties.navigationBarPlaceholderId);
 
+  PreferredSizeWidget? getAppBar(
+    BuildContext context,
+    CanvasNode node,
+    WidgetBuildSettings settings,
+  ) {
+    if (node.properties.topAppBarPlaceholderId == null) return null;
+    SinglePlaceholderNode appBarPlaceholderNode =
+        getNode(node.properties.topAppBarPlaceholderId!)
+            as SinglePlaceholderNode;
+    final childId = appBarPlaceholderNode.childrenOrEmpty.firstOrNull;
+    if (childId == null) return null;
+
+    final BaseNode appBarNode = getNode(childId);
+
+    Widget? appBarChild = manager.buildWidgetByID(
+      appBarPlaceholderNode.id,
+      context,
+      settings: settings,
+    );
+
+    if (appBarNode is! AppBarNode) {
+      // wrap with SafeArea if not an AppBarNode.
+      appBarChild = SafeArea(child: appBarChild);
+    }
+
+    return PreferredSize(
+      preferredSize:
+          Size.fromHeight(appBarPlaceholderNode.outerBoxLocal.height),
+      child: SafeArea(child: appBarChild),
+    );
+  }
+
+  Widget? getNavigationBar(
+    BuildContext context,
+    CanvasNode node,
+    WidgetBuildSettings settings,
+  ) {
+    if (node.properties.navigationBarPlaceholderId == null) return null;
+    SinglePlaceholderNode navigationBarPlaceholderNode =
+        getNode(node.properties.navigationBarPlaceholderId!)
+            as SinglePlaceholderNode;
+
+    if (navigationBarPlaceholderNode.childrenOrEmpty.isEmpty) return null;
+
+    final navigationBarNode =
+        getNode(navigationBarPlaceholderNode.childrenOrEmpty.first);
+
+    Widget navBar = manager.buildWidgetByID(
+      node.properties.navigationBarPlaceholderId!,
+      context,
+      settings: settings,
+    );
+
+    if (navigationBarNode is! NavigationBarNode) {
+      navBar = SafeArea(child: navBar);
+    }
+
+    return navBar;
+  }
+
+  Widget? getFAB(
+    BuildContext context,
+    CanvasNode node,
+    WidgetBuildSettings settings,
+  ) {
+    if (node.properties.floatingActionButton == null) return null;
+    return PassiveFloatingActionButtonWidget.buildFAB(
+      node.id,
+      node.properties.floatingActionButton!,
+      useFonts: false,
+      onPressed: () => onFaBPressed(context, node),
+    );
+  }
+
   Widget _wrapInScaffoldForResponsive({
     required CanvasNode node,
     required BuildContext context,
-    PreferredSizeWidget? topAppBarPlaceholder,
-    Widget? navigationBarPlaceholder,
     required WidgetBuildSettings settings,
   }) {
     final CanvasProperties props = node.properties;
 
-    BaseNode? appBarPlaceholderNode;
-    if (props.topAppBarPlaceholderId != null) {
-      appBarPlaceholderNode = getNode(props.topAppBarPlaceholderId!);
-    }
-    PreferredSizeWidget? appBar = topAppBarPlaceholder ??
-        ((props.topAppBarPlaceholderId != null)
-            ? PreferredSize(
-                preferredSize: Size.fromHeight(
-                    appBarPlaceholderNode!.outerBoxLocal.height),
-                child: manager.buildWidgetByID(
-                  props.topAppBarPlaceholderId!,
-                  context,
-                  settings: settings,
-                ))
-            : null);
-
-    Widget? floatingActionButton = (props.floatingActionButton != null)
-        ? PassiveFloatingActionButtonWidget.buildFAB(
-            node.id,
-            props.floatingActionButton!,
-            useFonts: false,
-            onPressed: () => onFaBPressed(context, node),
-          )
-        : null;
-    Widget? bottomNavigationBar = navigationBarPlaceholder ??
-        ((props.navigationBarPlaceholderId != null)
-            ? manager.buildWidgetByID(
-                props.navigationBarPlaceholderId!, context,
-                settings: settings)
-            : null);
+    PreferredSizeWidget? appBar = getAppBar(context, node, settings);
+    Widget? bottomNavigationBar = getNavigationBar(context, node, settings);
+    Widget? floatingActionButton = getFAB(context, node, settings);
 
     final BaseNode placeholderBody = getNode(node.properties.bodyId);
     Widget body = manager.buildWidgetFromNode(
@@ -110,8 +155,6 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   Widget _wrapInScaffoldForAutoScale({
     required CanvasNode node,
     required BuildContext context,
-    PreferredSizeWidget? topAppBarPlaceholder,
-    Widget? navigationBarPlaceholder,
     required WidgetBuildSettings settings,
   }) {
     final CanvasProperties props = node.properties;
@@ -122,36 +165,9 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       settings: settings,
     );
 
-    BaseNode? appBarPlaceholderNode;
-    if (props.topAppBarPlaceholderId != null) {
-      appBarPlaceholderNode = getNode(props.topAppBarPlaceholderId!);
-    }
-    PreferredSizeWidget? appBar = topAppBarPlaceholder ??
-        ((props.topAppBarPlaceholderId != null)
-            ? PreferredSize(
-                preferredSize: Size.fromHeight(
-                    appBarPlaceholderNode!.outerBoxLocal.height),
-                child: manager.buildWidgetByID(
-                  props.topAppBarPlaceholderId!,
-                  context,
-                  settings: settings,
-                ))
-            : null);
-
-    Widget? floatingActionButton = (props.floatingActionButton != null)
-        ? PassiveFloatingActionButtonWidget.buildFAB(
-            node.id,
-            props.floatingActionButton!,
-            useFonts: false,
-            onPressed: () => onFaBPressed(context, node),
-          )
-        : null;
-    Widget? bottomNavigationBar = navigationBarPlaceholder ??
-        ((props.navigationBarPlaceholderId != null)
-            ? manager.buildWidgetByID(
-                props.navigationBarPlaceholderId!, context,
-                settings: settings)
-            : null);
+    PreferredSizeWidget? appBar = getAppBar(context, node, settings);
+    Widget? bottomNavigationBar = getNavigationBar(context, node, settings);
+    Widget? floatingActionButton = getFAB(context, node, settings);
 
     body = FittedBox(
       fit: BoxFit.fitWidth,
