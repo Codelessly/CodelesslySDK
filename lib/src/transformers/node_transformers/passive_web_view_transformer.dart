@@ -83,6 +83,8 @@ class PassiveWebViewWidget extends StatefulWidget {
 class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
   late WebViewController _controller;
 
+  bool _isDataLoaded = false;
+
   @override
   void initState() {
     super.initState();
@@ -134,8 +136,6 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
       _controller.setBackgroundColor(
           props.backgroundColor?.toFlutterColor() ?? Colors.transparent);
     }
-
-    _loadData();
   }
 
   void _loadData() {
@@ -143,17 +143,21 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
     switch (props.webviewType) {
       case WebViewType.webpage:
         final properties = props as WebPageWebViewProperties;
+        final String input =
+            PropertyValueDelegate.getVariableValueFromPath<String>(
+                    context, properties.input) ??
+                properties.input;
         switch (properties.pageSourceType) {
           case WebViewWebpageSourceType.url:
-            _controller.loadRequest(Uri.parse(properties.input));
+            _controller.loadRequest(Uri.parse(input));
             break;
           case WebViewWebpageSourceType.html:
-            final content = _buildHtmlContent(properties.input);
+            final content = _buildHtmlContent(input);
             _controller.loadRequest(Uri.parse(content));
             break;
           case WebViewWebpageSourceType.asset:
             // provided from onWebViewCreated callback.
-            _controller.loadFlutterAsset(properties.input);
+            _controller.loadFlutterAsset(input);
             break;
         }
         break;
@@ -166,6 +170,15 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
         final content = buildTwitterURL(props as TwitterWebViewProperties);
         _controller.loadRequest(Uri.parse(content));
         break;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isDataLoaded) {
+      _isDataLoaded = true;
+      _loadData();
     }
   }
 
@@ -201,8 +214,15 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
     return buildWebView(properties);
   }
 
-  String buildGoogleMapsURL(GoogleMapsWebViewProperties properties) =>
-      _buildHtmlContent(properties.src);
+  String buildGoogleMapsURL(GoogleMapsWebViewProperties properties) {
+    final String? originalSrc = properties.src;
+    final String? updatedSrc = originalSrc != null
+        ? PropertyValueDelegate.getVariableValueFromPath<String>(
+                context, originalSrc) ??
+            originalSrc
+        : null;
+    return _buildHtmlContent(updatedSrc);
+  }
 
   String _buildHtmlContent(String? src) {
     final String html = src?.replaceAll('\n', '') ?? 'about:blank';
@@ -225,8 +245,15 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
     return buildWebView(properties);
   }
 
-  String buildTwitterURL(TwitterWebViewProperties properties) =>
-      _buildHtmlContent(properties.src);
+  String buildTwitterURL(TwitterWebViewProperties properties) {
+    final String? originalSrc = properties.src;
+    final String? updatedSrc = originalSrc != null
+        ? PropertyValueDelegate.getVariableValueFromPath<String>(
+                context, originalSrc) ??
+            originalSrc
+        : null;
+    return _buildHtmlContent(updatedSrc);
+  }
 
   Widget buildTwitterWebView(
       BuildContext context, TwitterWebViewProperties properties) {
