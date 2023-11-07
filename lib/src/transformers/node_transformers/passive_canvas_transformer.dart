@@ -66,7 +66,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         scrollDirection: node.scrollDirection.flutterAxis,
         reverse: node.reverse,
         primary: node.primary,
-        physics: node.physics.flutterScrollPhysics,
+        physics: node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
         keyboardDismissBehavior:
             node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
         child: body,
@@ -183,7 +183,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         scrollDirection: node.scrollDirection.flutterAxis,
         reverse: node.reverse,
         primary: node.primary,
-        physics: node.physics.flutterScrollPhysics,
+        physics: node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
         keyboardDismissBehavior:
             node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
         child: body,
