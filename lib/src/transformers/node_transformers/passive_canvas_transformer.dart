@@ -88,6 +88,17 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     );
   }
 
+  Widget wrapWithSafeArea(SafeAreaModel safeArea, Widget body) {
+    if (!safeArea.enabled) return body;
+    return SafeArea(
+      left: safeArea.left,
+      top: safeArea.top,
+      right: safeArea.right,
+      bottom: safeArea.bottom,
+      child: body,
+    );
+  }
+
   Widget _wrapInScaffoldForResponsive({
     required CanvasNode node,
     required BuildContext context,
@@ -127,6 +138,8 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     if (needsAScaffold) body = SizedBox.expand(child: body);
 
     final Widget scaffold;
+
+    body = wrapWithSafeArea(props.safeArea, body);
 
     if (needsAScaffold) {
       scaffold = Scaffold(
@@ -228,6 +241,8 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
           : null,
       child: body,
     );
+
+    body = wrapWithSafeArea(props.safeArea, body);
 
     final Widget scaffold;
 
