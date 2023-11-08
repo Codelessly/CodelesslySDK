@@ -526,7 +526,6 @@ class _NavigationBuilderState extends State<_NavigationBuilder> {
   @override
   void initState() {
     super.initState();
-    log('initState');
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       context.read<Codelessly>().notifyNavigationListeners(context);
     });

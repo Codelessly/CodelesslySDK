@@ -112,10 +112,6 @@ class DataManager {
       source: config.publishSource,
     );
 
-    if (_publishModel ?? cachedModel case var model?) {
-      await onPublishModelLoaded(model, fromCache: true);
-    }
-
     _publishModel ??= cachedModel;
 
     if (_publishModel != null) {
@@ -210,6 +206,8 @@ class DataManager {
         log('[DataManager] Publish model during init is not cached locally. Going to wait for the first publish model from the server.');
       } else if (layoutID == null) {
         log('[DataManager] Publish model during init is available and layoutID is not specified. All layouts will be downloaded soon!');
+      } else{
+        log('[DataManager] Publish model during init is available and layoutID is specified. Layout [$layoutID] will be downloaded soon from stream.');
       }
       didPrepareLayout = false;
     }
@@ -225,7 +223,6 @@ class DataManager {
     if (_publishModel == null) {
       log('[DataManager] Publish model is still null during init. Waiting for the first publish model from the server.');
       final model = await firstPublishEvent;
-      await onPublishModelLoaded(model);
       _publishModel = model;
       emitPublishModel();
       savePublishModel();
@@ -241,6 +238,10 @@ class DataManager {
         return;
       }
     }
+
+    // The PublishModel is guaranteed to be available here. The init exits
+    // otherwise.
+    await onPublishModelLoaded(_publishModel!);
 
     // If a [layoutID] was specified, then that layout must be prioritized and
     // downloaded first if it is not already cached.
@@ -301,14 +302,14 @@ class DataManager {
   }
 
   /// Called when the publish model is loaded.
-  Future<void> onPublishModelLoaded(SDKPublishModel model,
-      {bool fromCache = false}) async {
+  Future<void> onPublishModelLoaded(SDKPublishModel model) async {
     log('[DataManager] Publish model loaded. Initializing local storage...');
     if (_localStorage == null) {
-      // Initialize local storage
       final Box box = await Hive.openBox(model.projectId);
       _localStorage = HiveLocalStorage(box);
       log('[DataManager] Local storage initialized.');
+    } else {
+      log('[DataManager] Local storage already initialized.');
     }
   }
 
