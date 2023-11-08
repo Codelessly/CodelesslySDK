@@ -22,13 +22,14 @@ class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return buildFromNode(node);
+    return buildFromNode(node, settings);
   }
 
   Widget buildFromProps({
     required WebViewProperties props,
     required double height,
     required double width,
+    required WidgetBuildSettings settings,
   }) {
     final node = WebViewNode(
       id: '',
@@ -37,12 +38,13 @@ class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
       retainedOuterBoxLocal: NodeBox(0, 0, width, height),
       properties: props,
     );
-    return buildFromNode(node);
+    return buildFromNode(node, settings);
   }
 
-  Widget buildFromNode(WebViewNode node) {
+  Widget buildFromNode(WebViewNode node, WidgetBuildSettings settings) {
     return PassiveWebViewWidget(
       node: node,
+      settings: settings,
     );
   }
 
@@ -64,6 +66,7 @@ class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
 class PassiveWebViewWidget extends StatefulWidget {
   final WebViewNode node;
   final List<VariableData> variables;
+  final WidgetBuildSettings settings;
 
   static const Set<TargetPlatform> supportedPlatforms = {
     TargetPlatform.android,
@@ -74,6 +77,7 @@ class PassiveWebViewWidget extends StatefulWidget {
     super.key,
     required this.node,
     this.variables = const [],
+    required this.settings,
   });
 
   @override
@@ -88,7 +92,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
   @override
   void initState() {
     super.initState();
-    if (!isPlatformSupportedForWebView) {
+    if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
       print('Unsupported platform: $defaultTargetPlatform for WebView.');
       return;
     }
@@ -177,7 +181,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!isPlatformSupportedForWebView) {
+    if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
       print('Unsupported platform: $defaultTargetPlatform for WebView.');
       return;
     }
@@ -209,7 +213,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
 
   Widget buildWebpageWebView(
       BuildContext context, WebPageWebViewProperties properties) {
-    if (!isPlatformSupportedForWebView) {
+    if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
       return WebViewPreviewWidget(
         icon: const Icon(Icons.language_rounded),
         node: widget.node,
@@ -240,7 +244,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
 
   Widget buildGoogleMapsWebView(
       BuildContext context, GoogleMapsWebViewProperties properties) {
-    if (!isPlatformSupportedForWebView) {
+    if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
       return WebViewPreviewWidget(
         icon: const Icon(Icons.map_outlined),
         node: widget.node,
@@ -262,7 +266,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
 
   Widget buildTwitterWebView(
       BuildContext context, TwitterWebViewProperties properties) {
-    if (!isPlatformSupportedForWebView) {
+    if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
       return WebViewPreviewWidget(
         icon: const ImageIcon(
             NetworkImage('https://img.icons8.com/color/344/twitter--v2.png')),
