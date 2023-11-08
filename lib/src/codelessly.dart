@@ -111,19 +111,24 @@ class Codelessly {
 
   LocalStorage get localStorage => dataManager.localStorage;
 
-  static final List<NavigationListener> _navigationListeners = [];
+  final List<NavigationListener> _navigationListeners = [];
 
-  static void notifyNavigationListeners(BuildContext context) {
+  /// Calls navigation listeners when navigation happens.
+  /// Provided [context] must be of the destination widget. This context
+  /// can be used to retrieve new [CodelesslyContext].
+  void notifyNavigationListeners(BuildContext context) {
     _navigationListeners.forEach((listener) => listener(context));
   }
 
-  static void addNavigationListener(NavigationListener callback) {
+  /// Adds a global listener for navigation.
+  void addNavigationListener(NavigationListener callback) {
     if (!_navigationListeners.contains(callback)) {
       _navigationListeners.add(callback);
     }
   }
 
-  static void removeNavigationListener(NavigationListener callback) {
+  /// Removes a global navigation listener.
+  void removeNavigationListener(NavigationListener callback) {
     _navigationListeners.remove(callback);
   }
 
@@ -184,6 +189,7 @@ class Codelessly {
     _publishDataManager = null;
     _previewDataManager = null;
     _config = null;
+    _navigationListeners.clear();
   }
 
   /// Resets the state of the SDK. This is useful for resetting the data without
@@ -197,8 +203,7 @@ class Codelessly {
     _templateDataManager?.invalidate('Template');
     _authManager?.invalidate();
 
-    _status =
-        config == null ? CStatus.empty() : CStatus.configured();
+    _status = config == null ? CStatus.empty() : CStatus.configured();
     _statusStreamController.add(_status);
 
     if (clearCache) {

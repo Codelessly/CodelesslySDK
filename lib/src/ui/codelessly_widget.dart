@@ -491,10 +491,13 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                       const CodelesslyLoadingScreen();
                 }
                 final CStatus status = snapshot.data!;
-               return switch (status) {
-                  CEmpty() || CConfigured() => widget.loadingBuilder?.call(context) ??
+                return switch (status) {
+                  CEmpty() ||
+                  CConfigured() =>
+                    widget.loadingBuilder?.call(context) ??
                         const CodelesslyLoadingScreen(),
-                  CError() => widget.errorBuilder?.call(context, snapshot.error) ??
+                  CError() =>
+                    widget.errorBuilder?.call(context, snapshot.error) ??
                         CodelesslyErrorScreen(
                           exception:
                               CodelesslyErrorHandler.instance.lastException ??
@@ -525,7 +528,7 @@ class _NavigationBuilderState extends State<_NavigationBuilder> {
     super.initState();
     log('initState');
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      Codelessly.notifyNavigationListeners(context);
+      context.read<Codelessly>().notifyNavigationListeners(context);
     });
   }
 

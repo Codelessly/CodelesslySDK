@@ -209,7 +209,7 @@ class FunctionsRepository {
             ),
           ),
         ).then((value) {
-          Codelessly.notifyNavigationListeners(context);
+          context.read<Codelessly>().notifyNavigationListeners(context);
         });
       } else if (action.navigationType == NavigationType.replace) {
         Navigator.pushReplacement(
@@ -222,7 +222,7 @@ class FunctionsRepository {
             ),
           ),
         ).then((value) {
-          Codelessly.notifyNavigationListeners(context);
+          context.read<Codelessly>().notifyNavigationListeners(context);
         });
       }
     }
