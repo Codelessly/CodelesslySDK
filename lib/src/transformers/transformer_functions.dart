@@ -517,7 +517,7 @@ bool isCustomPositionRequiredForImage(PaintModel paint, SizeC nodeSize) {
   return imgX == nodeSize.width || imgY == nodeSize.height;
 }
 
-Widget wrapWithScrollable({
+Widget wrapWithPaddedScrollable({
   required ScrollableMixin node,
   EdgeInsets? padding,
   Clip? clipBehavior,
