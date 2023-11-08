@@ -61,7 +61,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       if (withScroll &&
           rowColumnNode is ScrollableMixin &&
           (rowColumnNode as ScrollableMixin).isScrollable) {
-        res = wrapWithScrollable(
+        res = wrapWithPaddedScrollable(
           padding: rowColumnNode.resolvedPadding().flutterEdgeInsets,
           node: (rowColumnNode as ScrollableMixin),
           child: res,
@@ -98,7 +98,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       if (withScroll &&
           rowColumnNode is ScrollableMixin &&
           (rowColumnNode as ScrollableMixin).isScrollable) {
-        res = wrapWithScrollable(
+        res = wrapWithPaddedScrollable(
           padding: rowColumnNode.resolvedPadding().flutterEdgeInsets,
           node: (rowColumnNode as ScrollableMixin),
           child: res,

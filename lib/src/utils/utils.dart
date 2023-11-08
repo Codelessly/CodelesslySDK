@@ -377,7 +377,8 @@ bool canScrollOnAxis({
   };
 }
 
-/// Returns the most common value in a list. Returns null for ties.
+/// Returns the most common value in a list.
+/// Returns null for ties.
 T? mostCommon<T>(List<T> list) {
   final Map<T, int> counts = {};
   for (final T element in list) {
@@ -439,6 +440,38 @@ BaseNode? getTallestNode(List<BaseNode> siblings) {
   });
 }
 
+/// If the [parent] is wrapping on an axis, one of its [siblings] is going to be
+/// laid out without Positioned or Align, marking the child as the best
+/// candidate for the [Stack] to figure out its own size.
+///
+/// To do this, we need to find the largest child on the axis that the parent
+/// is wrapping on. If the parent is wrapping on both axes, we need to find the
+/// largest child by multiplying its width and height as a sort of best
+/// approximation.
+BaseNode? getLargestNodeForWrappingStack(
+    BaseNode parent, List<BaseNode> sibling) {
+  if (sibling.isEmpty) return null;
+
+  // Only horizontal wrap.
+  if (parent.isHorizontalWrap && !parent.isVerticalWrap) {
+    return sibling.reduce(
+        (a, b) => a.basicBoxLocal.width > b.basicBoxLocal.width ? a : b);
+  }
+
+  // Only vertical wrap, compare heights.
+  if (parent.isVerticalWrap && !parent.isHorizontalWrap) {
+    return sibling.reduce(
+        (a, b) => a.basicBoxLocal.height > b.basicBoxLocal.height ? a : b);
+  }
+
+  // Both wrap.
+  return sibling.reduce((a, b) =>
+      a.basicBoxLocal.height * a.basicBoxLocal.width >
+              b.basicBoxLocal.height * b.basicBoxLocal.width
+          ? a
+          : b);
+}
+
 AlignmentModel retrieveCommonStackAlignment(
   BaseNode parent,
   List<BaseNode> nodes,
@@ -465,10 +498,36 @@ AlignmentModel retrieveCommonStackAlignment(
     mostCommonAlignment = mostCommon<AlignmentModel>(alignments);
   }
 
-  return mostCommonAlignment ??
-      (parent.isOneOrBothWrap && alignments.isNotEmpty
-          ? AlignmentModel.center
-          : AlignmentModel.none);
+  AlignmentModel? bestAlignment = mostCommonAlignment;
+
+  // mostCommonAlignment will be null if a tie exists. In such cases, we
+  // completely disregard common alignment and use an Align widget on each child
+  // as it is higher quality, more readable code. While that works most of the
+  // time, if the stack is wrapping in any axis, all [Align]ed children will be
+  // converted into [Positioned] widgets to prevent the Stack from expanding
+  // instead of wrapping.
+  //
+  // With that in mind, if all of the children are Positioned in a wrapping
+  // Stack, the Stack will implode on itself as it has no concrete,
+  // non-Positioned children and to figure out its first-pass size. The
+  // Positioned children end up in a zero-size Stack as a result.
+  //
+  // To fix this specific situation, we arbitrarily return one of the tied
+  // alignments. The stack will use this alignment for its `stackAlignment`
+  // property, which does not expand the stack, rather aligns children
+  // correctly instead. Once we pass this stack alignment, the singular child
+  // that this alignment matches is not going to wrap itself with an Align
+  // widget because its alignment matches the stack alignment. This means that
+  // the stack will have a concrete child to figure out its size and will not
+  // implode. The rest of the children will be wrapped with Positioned widgets
+  // in a Stack that has a concrete size.
+  if (bestAlignment == null &&
+      parent.isOneOrBothWrap &&
+      alignments.isNotEmpty) {
+    bestAlignment = getLargestNodeForWrappingStack(parent, nodes)?.alignment;
+  }
+
+  return bestAlignment ?? AlignmentModel.none;
 }
 
 String apiNameToVariableName(String name) {

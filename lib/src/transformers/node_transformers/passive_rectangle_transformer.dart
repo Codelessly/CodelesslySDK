@@ -178,7 +178,7 @@ class PortalPreviewWidget extends StatelessWidget {
   }
 }
 
-List<Widget> wrapWithPaddingNoScroll(
+List<Widget> wrapWithPadding(
   BaseNode node,
   List<Widget> children, {
   required AlignmentModel stackAlignment,
@@ -194,13 +194,20 @@ List<Widget> wrapWithPaddingNoScroll(
   }
 
   return [
-    Padding(
-      padding: resolvedPadding,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment:
-            stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-        children: children,
+    // This adaptive box forces the Stack to respect the configurations of its
+    // associated [node]. Without it, the Stack can produce cases where it
+    // wraps around its concrete child tightly instead of expanding from a
+    // SizeFit.expand.
+    AdaptiveNodeBox(
+      node: node,
+      child: Padding(
+        padding: resolvedPadding,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment:
+              stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
+          children: children,
+        ),
       ),
     ),
   ];
@@ -219,7 +226,7 @@ List<Widget> wrapWithPaddingAndScroll(
 
   if (node is FrameNode && node.isScrollable) {
     return [
-      wrapWithScrollable(
+      wrapWithPaddedScrollable(
         node: node,
         padding: applyPadding ? resolvedPadding : null,
         clipBehavior: defaultGetClipBehavior(node),
@@ -233,7 +240,7 @@ List<Widget> wrapWithPaddingAndScroll(
     ];
   }
 
-  return wrapWithPaddingNoScroll(
+  return wrapWithPadding(
     node,
     children,
     stackAlignment: stackAlignment,
