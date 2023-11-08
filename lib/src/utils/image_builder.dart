@@ -313,15 +313,15 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
             ),
           );
         }
-        return FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+        return FractionallySizedBox(
+          widthFactor: 0.6,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Center(
               child: ColorFiltered(
                 colorFilter: ColorFilter.mode(
                   Colors.white.withOpacity(0.1),
-                  BlendMode.dst,
+                  BlendMode.srcATop,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -337,6 +337,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
                       style: Theme.of(context).textTheme.bodyMedium?.merge(
                             GoogleFonts.sourceCodePro(
                               fontSize: 24,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                     ),
