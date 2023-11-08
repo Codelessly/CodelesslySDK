@@ -175,7 +175,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       // instance, the user explicitly wants more control over the SDK, so we
       // do nothing and let the user handle it.
       if (isGlobalInstance) {
-        if (status == const CEmpty()) {
+        if (status == CEmpty()) {
           effectiveCodelessly.configure(
             config: config,
             authManager: authManager,
@@ -185,7 +185,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
           );
         }
         status = effectiveCodelessly.status;
-        if (status == const CConfigured()) {
+        if (status == CConfigured()) {
           effectiveCodelessly.initialize();
         }
       }

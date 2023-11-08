@@ -116,7 +116,7 @@ class DataManager {
 
     if (_publishModel != null) {
       log('[DataManager] Publish model is cached locally. Emitting.');
-      emitPublishModel();
+      await emitPublishModel();
 
       loadFontsFromPublishModel();
     }
@@ -224,7 +224,7 @@ class DataManager {
       log('[DataManager] Publish model is still null during init. Waiting for the first publish model from the server.');
       final model = await firstPublishEvent;
       _publishModel = model;
-      emitPublishModel();
+      await emitPublishModel();
       savePublishModel();
 
       log('[DataManager] Publish model during init is now available. Proceeding with init!');
@@ -238,10 +238,6 @@ class DataManager {
         return;
       }
     }
-
-    // The PublishModel is guaranteed to be available here. The init exits
-    // otherwise.
-    await onPublishModelLoaded(_publishModel!);
 
     // If a [layoutID] was specified, then that layout must be prioritized and
     // downloaded first if it is not already cached.
@@ -416,7 +412,8 @@ class DataManager {
   }
 
   /// Emits the current [_publishModel] to the [_publishModelStreamController].
-  void emitPublishModel() {
+  Future<void> emitPublishModel() async {
+    await onPublishModelLoaded(_publishModel!);
     log('[DataManager] Emitting publish model to stream. has model: ${_publishModel != null}');
     _publishModelStreamController.add(_publishModel);
   }
@@ -444,6 +441,7 @@ class DataManager {
 
   /// Disposes the [DataManager] instance.
   void dispose() {
+    log('[DataManager] Disposing dataManager...');
     _publishModelStreamController.close();
     _publishModelDocumentListener?.cancel();
     initialized = false;
@@ -666,7 +664,7 @@ class DataManager {
     }
 
     savePublishModel();
-    emitPublishModel();
+    await emitPublishModel();
   }
 
   /// Compares the current [localModel] with a newly fetched [serverModel] and
@@ -979,7 +977,7 @@ class DataManager {
       log('[DataManager] \tLayout [$layoutID] has no variables.');
     }
 
-    emitPublishModel();
+    await emitPublishModel();
     savePublishModel();
 
     log('[DataManager] \tLayoutModel [$layoutID] ready, time for fonts. Get Set...');
@@ -1031,9 +1029,8 @@ class DataManager {
 
     if (model != null) {
       log('[DataManager] Successfully downloaded complete publish bundle. Emitting it.');
-      await onPublishModelLoaded(model);
       _publishModel = model;
-      emitPublishModel();
+      await emitPublishModel();
       savePublishModel();
       return true;
     }

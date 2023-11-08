@@ -1,9 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class CodelesslyLoadingScreen extends StatelessWidget {
+class CodelesslyLoadingScreen extends StatefulWidget {
   const CodelesslyLoadingScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
+  State<CodelesslyLoadingScreen> createState() => _CodelesslyLoadingScreenState();
+}
+
+class _CodelesslyLoadingScreenState extends State<CodelesslyLoadingScreen> {
+  @override
+  Widget build(BuildContext context) => SizedBox.shrink();
 }
