@@ -115,40 +115,30 @@ class CodelesslyConfig with EquatableMixin {
       ];
 }
 
-/// SDK initialization state enums.
-enum CodelesslyStatus {
-  /// The SDK has not been initialized.
-  empty,
-
-  /// The SDK has loaded settings and is ready to be initialized.
-  configured,
-
-  /// The SDK is initializing.
-  loading,
-
-  /// The SDK is loaded and is ready to use.
-  loaded,
-
-  /// The SDK has an error..
-  error,
-}
-
 sealed class CStatus {
   const CStatus();
 
-  factory CStatus.empty() => const CEmpty();
-  factory CStatus.configured() => const CConfigured();
+  factory CStatus.empty() => CEmpty();
+
+  factory CStatus.configured() => CConfigured();
+
   factory CStatus.loading(String step) => CLoading(step);
-  factory CStatus.loaded() => const CLoaded();
-  factory CStatus.error() => const CError();
+
+  factory CStatus.loaded() => CLoaded();
+
+  factory CStatus.error() => CError();
 }
 
 class CEmpty extends CStatus {
-  const CEmpty();
+  const CEmpty._();
+
+  factory CEmpty() => const CEmpty._();
 }
 
 class CConfigured extends CStatus {
-  const CConfigured();
+  const CConfigured._();
+
+  factory CConfigured() => const CConfigured._();
 }
 
 class CLoading extends CStatus {
@@ -158,9 +148,13 @@ class CLoading extends CStatus {
 }
 
 class CLoaded extends CStatus {
-  const CLoaded();
+  const CLoaded._();
+
+  factory CLoaded() => const CLoaded._();
 }
 
 class CError extends CStatus {
-  const CError();
+  const CError._();
+
+  factory CError() => const CError._();
 }

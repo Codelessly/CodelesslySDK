@@ -171,6 +171,7 @@ class Codelessly {
   /// if [completeDispose] is true, the SDK's internal stream controllers are
   /// also disposed instead of reset.
   void dispose({bool completeDispose = false}) {
+    log('[Codelessly] Disposing SDK completeDispose: $completeDispose');
     if (completeDispose) {
       _statusStreamController.close();
     } else {
