@@ -1,3 +1,15 @@
+## 0.7.1
+- Improve Alignment and Positioning.
+- Improve SDK preload performance. New Download Queue system speeds up layout downloads.
+- Fix AppBar not navigating back when leading is a custom icon.
+- Scrolling Improvements.
+  - Fix scroll physics and always scrollable option.
+  - Fix scrolling being cut off.
+  - Fix stack crash when scrollable and no aligned children.
+  - Fix scrollable size fit rules to allow fixed and flexible size fits.
+- Implement safe area for canvases
+- Substitute WebView input/src with variable values.
+
 ## 0.7.0
 - New Dialogs feature! 100% customizable dialogs with customizable close button, background, and padding.
   - New show dialog action.
