@@ -34,31 +34,19 @@ class _MyAppState extends State<MyApp> {
         showPanel: true,
         wrapperBuilder: (context, child) {
           return MaterialApp(
-            // home: child,
-            home: Column(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Codelessly.instance.reset(clearCache: true);
-                  },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Reset'),
-                ),
-                if (child != null) Expanded(child: child),
-              ],
-            ),
+            home: child,
           );
         },
         stories: [
           Story(
-              name: 'Hello World',
-              builder: (context) {
-                return CodelesslyWidget(
-                  layoutID: "0R0yRfzR23SQfDGrbg3h",
-                  loadingBuilder: (context) {
-                    return const CupertinoActivityIndicator();
-                  },
-                );
+            name: 'Hello World',
+            builder: (context) {
+              return CodelesslyWidget(
+                layoutID: "0R0yRfzR23SQfDGrbg3h",
+                loadingBuilder: (context) {
+                  return const CupertinoActivityIndicator();
+                },
+              );
             },
           ),
           Story(
