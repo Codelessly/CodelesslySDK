@@ -149,6 +149,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
                 properties.input;
         switch (properties.pageSourceType) {
           case WebViewWebpageSourceType.url:
+            print('Loading URL: $input');
             _controller.loadRequest(Uri.parse(input));
             break;
           case WebViewWebpageSourceType.html:
@@ -176,6 +177,10 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (!isPlatformSupportedForWebView) {
+      print('Unsupported platform: $defaultTargetPlatform for WebView.');
+      return;
+    }
     if (!_isDataLoaded) {
       _isDataLoaded = true;
       _loadData();
