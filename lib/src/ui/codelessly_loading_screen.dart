@@ -10,5 +10,5 @@ class CodelesslyLoadingScreen extends StatefulWidget {
 
 class _CodelesslyLoadingScreenState extends State<CodelesslyLoadingScreen> {
   @override
-  Widget build(BuildContext context) => SizedBox.shrink();
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }
