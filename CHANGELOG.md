@@ -1,3 +1,11 @@
+## 0.7.2
+- Implement global listeners for navigation.
+- Update Alignment rules and behavior in Stacks.
+- Fix web view controller crashing on macOS.
+- Fix sdk disposing not working properly.
+- Fix embedded canvases crashing with local storage.
+- Fix and improve CStatus constructors.
+
 ## 0.7.1
 - Improve Alignment and Positioning.
 - Improve SDK preload performance. New Download Queue system speeds up layout downloads.
