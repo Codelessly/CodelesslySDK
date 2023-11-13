@@ -73,6 +73,8 @@ class FunctionsRepository {
         makeApiRequestFromAction(action as ApiCallAction, context);
       case ActionType.setStorage:
         setStorageFromAction(context, action as SetStorageAction);
+      case ActionType.setCloudStorage:
+        setStorageFromAction(context, action as SetStorageAction);
     }
   }
 
@@ -1154,4 +1156,18 @@ class FunctionsRepository {
     }
     return currentValue;
   }
+
+  static Future<bool> setCloudStorageFromAction(
+      BuildContext context,
+      SetCloudStorageAction action,
+      ) async {
+    // TODO: implement
+    return true;
+    // return await switch (action.operation) {
+    //     CloudStorageOperation.addOrUpdate => _updateStorage(context, action),
+    //     CloudStorageOperation.remove => _removeFromStorage(context, action),
+    //     CloudStorageOperation.clear => _clearStorage(context, action),
+    //   };
+  }
+
 }
