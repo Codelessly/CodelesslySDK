@@ -254,6 +254,9 @@ class ConditionEvaluator<R extends Object>
   R? visitSetStorageAction(SetStorageAction action) => null;
 
   @override
+  R? visitSetCloudStorageAction(SetCloudStorageAction action) => null;
+
+  @override
   R? visitShowDialogAction(ShowDialogAction action) => null;
 }
 
@@ -365,6 +368,9 @@ class ConditionPrinter
 
   @override
   void visitSetStorageAction(SetStorageAction action) {}
+
+  @override
+  void visitSetCloudStorageAction(SetCloudStorageAction action) {}
 
   @override
   void visitShowDialogAction(ShowDialogAction action) {}
