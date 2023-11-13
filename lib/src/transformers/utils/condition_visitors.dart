@@ -111,6 +111,9 @@ class ConditionVariablesVisitor
   Set<String>? visitSetStorageAction(SetStorageAction action) => {};
 
   @override
+  Set<String>? visitSetCloudStorageAction(SetCloudStorageAction action) => {};
+
+  @override
   Set<String>? visitShowDialogAction(ShowDialogAction action) => {};
 }
 
@@ -168,6 +171,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitSetStorageAction(SetStorageAction action) => null;
+
+  @override
+  String? visitSetCloudStorageAction(SetCloudStorageAction action) => null;
 
   @override
   String? visitShowDialogAction(ShowDialogAction action) => null;
