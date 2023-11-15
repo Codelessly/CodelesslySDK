@@ -37,7 +37,8 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       //
       // The behavior is absolutely different, but it's the best compromise we
       // can do.
-      if (node.alignment != AlignmentModel.none) {
+      if (node.alignment != AlignmentModel.none &&
+          parent.childrenOrEmpty.length > 1) {
         final align = node.alignment.data!;
 
         child = Positioned(
@@ -86,49 +87,50 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
   /// Wraps a child with a [Positioned] widget. Does not wrap if the child
   /// is the widest or tallest child.
   static Widget wrapWithPositioned(
-    BaseNode childNode,
     BaseNode node,
+    BaseNode parent,
     Widget child, {
     required bool isWidest,
     required bool isTallest,
   }) {
-    final bool horizontallyExpands = childNode.isHorizontalExpanded &&
-        childNode.resolvedConstraints.maxWidth == null;
-    final bool verticallyExpands = childNode.isVerticalExpanded &&
-        childNode.resolvedConstraints.maxHeight == null;
+    final bool horizontallyExpands =
+        node.isHorizontalExpanded && node.resolvedConstraints.maxWidth == null;
+    final bool verticallyExpands =
+        node.isVerticalExpanded && node.resolvedConstraints.maxHeight == null;
 
     final double? left = horizontallyExpands
         ? 0
-        : childNode.edgePins.left != null
-            ? childNode.outerBoxLocal.x - node.innerBoxGlobal.edgeLeft
+        : node.edgePins.left != null
+            ? node.outerBoxLocal.x - parent.innerBoxGlobal.edgeLeft
             : null;
     final double? right = horizontallyExpands
         ? 0
-        : childNode.edgePins.right != null
-            ? childNode.edgePins.right! - node.innerBoxGlobal.edgeRight
+        : node.edgePins.right != null
+            ? node.edgePins.right! - parent.innerBoxGlobal.edgeRight
             : null;
     final double? top = verticallyExpands
         ? 0
-        : childNode.edgePins.top != null
-            ? childNode.outerBoxLocal.y - node.innerBoxGlobal.edgeTop
+        : node.edgePins.top != null
+            ? node.outerBoxLocal.y - parent.innerBoxGlobal.edgeTop
             : null;
     final double? bottom = verticallyExpands
         ? 0
-        : childNode.edgePins.bottom != null
-            ? childNode.edgePins.bottom! - node.innerBoxGlobal.edgeBottom
+        : node.edgePins.bottom != null
+            ? node.edgePins.bottom! - parent.innerBoxGlobal.edgeBottom
             : null;
     final double? width = horizontallyExpands ||
-            childNode.isHorizontalWrap ||
-            childNode.edgePins.isHorizontallyExpanded
+            node.isHorizontalWrap ||
+            node.edgePins.isHorizontallyExpanded
         ? null
-        : childNode.outerBoxLocal.width;
+        : node.outerBoxLocal.width;
     final double? height = verticallyExpands ||
-            childNode.isVerticalWrap ||
-            childNode.edgePins.isVerticallyExpanded
+            node.isVerticalWrap ||
+            node.edgePins.isVerticallyExpanded
         ? null
-        : childNode.outerBoxLocal.height;
+        : node.outerBoxLocal.height;
 
-    final bool doesParentScroll = node is ScrollableMixin && node.isScrollable;
+    final bool doesParentScroll =
+        parent is ScrollableMixin && parent.isScrollable;
 
     // This decides whether to use a positioned widget or padding widget
     // to position the child. This makes it so if an expanded (parent) frame
@@ -137,7 +139,10 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     // expand and crash because the Positioned widget would give the scroll
     // view unbounded sizing.
     // cut off when scrolling is forced (i.e. with bouncing scroll physics).
-    final bool shouldUsePositioned = !doesParentScroll && !isTallest && !isWidest;
+    final bool shouldUsePositioned = parent.childrenOrEmpty.length > 1 &&
+        !doesParentScroll &&
+        !isTallest &&
+        !isWidest;
 
     // This is required to make wrapping stack in a scroll view work because
     // wrapping stack cannot figure out its size when there only positioned
