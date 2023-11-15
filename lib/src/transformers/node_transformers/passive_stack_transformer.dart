@@ -27,7 +27,6 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         node.alignment == AlignmentModel.none ||
             (parent.isOneOrBothWrap && node.alignment != commonAlignment);
 
-    // TODO: Put this in codegen too.
     if (shouldWrapWithPositioned) {
       // You cannot use the Align widget when inside a shrink-wrapping Stack.
       // The Align RenderBox will force the Stack to grow as much as possible.

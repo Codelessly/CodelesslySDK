@@ -479,8 +479,8 @@ AlignmentModel retrieveCommonStackAlignment(
   final List<AlignmentModel> alignments = [];
 
   if (nodes.length == 1 &&
-      nodes.first is ScrollableMixin &&
-      (nodes.first as ScrollableMixin).isScrollable) {
+      nodes.single is ScrollableMixin &&
+      (nodes.single as ScrollableMixin).isScrollable) {
     return AlignmentModel.none;
   }
 
