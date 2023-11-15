@@ -342,6 +342,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     super.didChangeDependencies();
     if (shouldPerformOnLoadActions) {
       shouldPerformOnLoadActions = false;
+      print('[PassiveCanvasWidget] Checking for onLoad actions on canvas ${widget.node.id}');
       // perform onLoad actions. This must always be the last step in this method.
       final onLoadActions = widget.node.reactions
           .whereTriggerType(TriggerType.load)
@@ -354,9 +355,12 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
               action.type != ActionType.link)
           .toList();
 
-      if (onLoadActions.isEmpty) return;
+      if (onLoadActions.isEmpty) {
+        log('[PassiveCanvasWidget] No onLoad actions found for canvas ${widget.node.id}');
+        return;
+      }
 
-      log('Performing actions on canvas load');
+      log('[PassiveCanvasWidget] Performing actions on canvas load');
       onLoadActions.forEach((action) {
         FunctionsRepository.performAction(context, action, notify: false);
       });

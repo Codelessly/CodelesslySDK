@@ -663,8 +663,8 @@ class DataManager {
       _publishModel = publishModel?.copyWith();
     }
 
-    savePublishModel();
     await emitPublishModel();
+    savePublishModel();
   }
 
   /// Compares the current [localModel] with a newly fetched [serverModel] and
