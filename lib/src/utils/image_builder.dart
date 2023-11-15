@@ -370,7 +370,7 @@ Widget _defaultErrorBuilder(BuildContext context) {
       child: ColorFiltered(
         colorFilter: ColorFilter.mode(
           Colors.white.withOpacity(0.1),
-          BlendMode.dst,
+          BlendMode.srcATop,
         ),
         child: Icon(
           Icons.broken_image_outlined,
