@@ -202,6 +202,24 @@ class _PassiveEmbeddedVideoWidgetState
         child: YoutubeVideoPreviewUI(metadata: properties.metadata!),
       );
     }
+
+    if (widget.settings.isPreview) {
+      // An editor like video preview for renderer.
+      return AdaptiveNodeBox(
+        node: widget.node,
+        child: Container(
+          decoration: BoxDecoration(
+            image: const DecorationImage(
+                image: AssetImage('assets/images/image_youtube_video.png'),
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: Theme.of(context).colorScheme.secondary),
+          ),
+        ),
+      );
+    }
+
     final dummyMetadata = YoutubeVideoMetadata.empty(
       width: widget.node.basicBoxLocal.width,
       height: widget.node.basicBoxLocal.height,
@@ -229,6 +247,24 @@ class _PassiveEmbeddedVideoWidgetState
             Center(child: VimeoVideoPreviewUI(metadata: properties.metadata!)),
       );
     }
+
+    if (widget.settings.isPreview) {
+      // An editor like video preview for renderer.
+      return AdaptiveNodeBox(
+        node: widget.node,
+        child: Container(
+          decoration: BoxDecoration(
+            image: const DecorationImage(
+                image: AssetImage('assets/images/image_vimeo_video.png'),
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: Theme.of(context).colorScheme.secondary),
+          ),
+        ),
+      );
+    }
+
     final dummyMetadata = VimeoVideoMetadata.empty(
       width: widget.node.basicBoxLocal.width,
       height: widget.node.basicBoxLocal.height,
