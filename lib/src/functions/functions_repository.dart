@@ -79,7 +79,7 @@ class FunctionsRepository {
   static Future<http.Response> makeApiRequestFromAction(
     ApiCallAction action,
     BuildContext context, [
-    ValueNotifier<VariableData>? variable,
+    Observable<VariableData>? variable,
   ]) {
     final Map<String, HttpApiData> apis =
         context.read<Codelessly>().dataManager.publishModel!.apis;
@@ -129,7 +129,6 @@ class FunctionsRepository {
 
   static String _applyApiInputs(String data, Map<String, String> parameters) {
     final updatedData = data.replaceAllMapped(inputRegex, (match) {
-      print('matched group: ${match[0]}');
       final MapEntry<String, String>? parameter = parameters.entries
           .firstWhereOrNull((entry) => entry.key == match.group(1));
       if (parameter == null) {
@@ -288,7 +287,7 @@ class FunctionsRepository {
     required Object? body,
     required BuildContext context,
     bool useCloudFunctionForWeb = false,
-    ValueNotifier<VariableData>? variable,
+    Observable<VariableData>? variable,
   }) async {
     assert(variable == null || variable.value.type.isMap,
         'Provided variable for api call must be of type map. Found ${variable.value.type}');
@@ -298,10 +297,13 @@ class FunctionsRepository {
     // persist previous api call data if there is any. This allows us to
     // show previous data while new data is being fetched.
     final existingData = variable?.value.getValue().typedValue<Map>()?['data'];
-    if (variable case var variable?) {
+    if (variable != null) {
       variable.value = variable.value.copyWith(
         value: ApiResponseVariableUtils.loading(data: existingData),
       );
+      print('${variable.value.name} updated with loading state.');
+    } else {
+      print('No variable provided for api call.');
     }
 
     try {
@@ -335,23 +337,29 @@ class FunctionsRepository {
       }
       printResponse(response);
 
-      if (variable case var variable?) {
+      if (variable !=null) {
         variable.value = variable.value.copyWith(
           value: ApiResponseVariableUtils.fromResponse(response),
         );
+        print('${variable.value.name} updated with success state.');
+      } else {
+        print('No variable provided for api call.');
       }
 
       return response;
     } catch (error, stackTrace) {
       log(error.toString());
       log(stackTrace.toString());
-      if (variable case var variable?) {
+      if (variable != null) {
         variable.value = variable.value.copyWith(
           value: ApiResponseVariableUtils.error(
             error,
             data: existingData,
           ),
         );
+        print('${variable.value.name} updated with error state.');
+      } else {
+        print('No variable provided for api call.');
       }
       return Future.error(error);
     }

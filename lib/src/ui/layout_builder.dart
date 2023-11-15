@@ -258,6 +258,7 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
 
       // Make api request right away if it is a canvas action.
       if (canvasAction != null) {
+        print('Making api request for onLoad canvas action');
         FunctionsRepository.makeApiRequestFromAction(
             canvasAction, context, notifier);
       }
