@@ -256,10 +256,10 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       cursorRadius: Radius.circular(widget.node.properties.cursorRadius),
       maxLength: maxLength,
       maxLines: widget.node.properties.maxLines
-          .orNullIf(widget.node.properties.expands),
+          .orNullIf(!widget.node.isVerticalWrap),
       minLines: widget.node.properties.minLines
-          .orNullIf(widget.node.properties.expands),
-      expands: widget.node.properties.expands,
+          .orNullIf(!widget.node.isVerticalWrap),
+      expands: !widget.node.isVerticalWrap,
       obscuringCharacter: widget.node.properties.obscuringCharacter,
       style: PassiveTextFieldTransformer.getTextStyle(
           widget.node.properties.inputStyle),
