@@ -138,10 +138,9 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     // expand and crash because the Positioned widget would give the scroll
     // view unbounded sizing.
     // cut off when scrolling is forced (i.e. with bouncing scroll physics).
-    final bool shouldUsePositioned = parent.childrenOrEmpty.length > 1 &&
-        !doesParentScroll &&
-        !isTallest &&
-        !isWidest;
+    final bool shouldUsePositioned =
+        (parent.isOneOrBothWrap && parent.childrenOrEmpty.length > 1) ||
+            (!doesParentScroll && !isTallest && !isWidest);
 
     // This is required to make wrapping stack in a scroll view work because
     // wrapping stack cannot figure out its size when there only positioned
