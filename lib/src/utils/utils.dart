@@ -585,11 +585,11 @@ class ApiResponseVariableUtils {
         'isLoading': false,
         'isError': true,
         'isSuccess': false,
-        'error': error,
+        'error': error is Map || error is List ? error : error.toString(),
         'status': 'error',
         'headers': headers,
         'hasData': data != null,
-        'data': data,
+        'data': data is Map || data is List ? data : data.toString(),
       };
 
   static Map success(
