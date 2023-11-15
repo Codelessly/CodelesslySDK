@@ -311,12 +311,21 @@ class FunctionsRepository {
       if (kIsWeb && useCloudFunctionForWeb) {
         final String cloudFunctionsURL =
             context.read<Codelessly>().config!.firebaseCloudFunctionsBaseURL;
-        response = await makeApiRequestWeb(
+        final receivedResponse = await makeApiRequestWeb(
           method: method,
           url: url,
           headers: headers,
           body: body,
           cloudFunctionsURL: cloudFunctionsURL,
+        );
+
+        // cloud function returns actual response in body.
+        final actualResponse = json.decode(receivedResponse.body);
+        response = http.Response(
+          jsonEncode(actualResponse['body'] ?? ''),
+          int.parse(actualResponse['statusCode'].toString()),
+          headers: Map<String, String>.from(actualResponse['headers'] ?? {}),
+          reasonPhrase: actualResponse['reasonPhrase']?.toString(),
         );
       } else {
         final Uri uri = Uri.parse(url);
@@ -337,7 +346,7 @@ class FunctionsRepository {
       }
       printResponse(response);
 
-      if (variable !=null) {
+      if (variable != null) {
         variable.value = variable.value.copyWith(
           value: ApiResponseVariableUtils.fromResponse(response),
         );
@@ -372,44 +381,51 @@ class FunctionsRepository {
     required Object? body,
   }) {
     if (kReleaseMode) return;
-    log('--------------------------------------------------------------------');
-    log('API Request:');
-    log('--------------------------------------------------------------------');
-    log('${method.shortName} $url');
-    log('Headers: ${headers.isEmpty ? 'None' : ''}');
+    print(
+        '--------------------------------------------------------------------');
+    print('API Request:');
+    print(
+        '--------------------------------------------------------------------');
+    print('${method.shortName} $url');
+    print('Headers: ${headers.isEmpty ? 'None' : ''}');
     if (headers.isNotEmpty) {
-      log(const JsonEncoder.withIndent('  ').convert(headers));
-      log('');
+      print(const JsonEncoder.withIndent('  ').convert(headers));
+      print('');
     }
-    log('Body: ${body == null || body.toString().trim().isEmpty ? 'None' : ''}');
+    print(
+        'Body: ${body == null || body.toString().trim().isEmpty ? 'None' : ''}');
     if (body != null && body.toString().trim().isNotEmpty) {
       try {
         final parsed = json.decode(body.toString());
-        log(const JsonEncoder.withIndent('  ').convert(parsed));
+        print(const JsonEncoder.withIndent('  ').convert(parsed));
       } catch (e) {
-        log(body.toString());
+        print(body.toString());
       }
     }
-    log('--------------------------------------------------------------------');
+    print(
+        '--------------------------------------------------------------------');
   }
 
   static void printResponse(http.Response response) {
     if (kReleaseMode) return;
-    log('--------------------------------------------------------------------');
-    log('Response:');
-    log('--------------------------------------------------------------------');
-    log('Status Code: ${response.statusCode}');
-    log('Headers:');
-    log(const JsonEncoder.withIndent('  ').convert(response.headers));
-    log('');
-    log('Body:');
+    print(
+        '--------------------------------------------------------------------');
+    print('Response:');
+    print(
+        '--------------------------------------------------------------------');
+    print('Status Code: ${response.statusCode}');
+    print('Headers:');
+    print(const JsonEncoder.withIndent('  ').convert(response.headers));
+    print('');
+    print('Body:');
     try {
       final parsed = json.decode(response.body);
-      log(const JsonEncoder.withIndent('  ').convert(parsed));
+      print(const JsonEncoder.withIndent('  ').convert(parsed));
     } catch (e) {
-      log(response.body);
+      print(response.body);
     }
-    log('--------------------------------------------------------------------');
+    print(
+        '--------------------------------------------------------------------');
   }
 
   /// Makes API request using cloud function to prevent any CORS issues.
