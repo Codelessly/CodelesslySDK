@@ -1,3 +1,7 @@
+## 0.7.4
+- Hotfix shrinkwrapping stack alignment layout.
+- Use maybePop instead of pop for navigate action.
+
 ## 0.7.3
 - Migrate Variables and Conditions to use permissions model.
 - TextField Improvements.
