@@ -1,3 +1,19 @@
+## 0.7.3
+- Migrate Variables and Conditions to use permissions model.
+- TextField Improvements.
+  - Fix shrink-wrapping conflict with expands property.
+  - Fix text field model not calculating text field height properly for shrink-wrapping.
+  - Allow min lines and max lines input fields to clear.
+  - Fix shrink-wrap height calculation being affected by isDense property.
+- Preview Improvements.
+  - Use editor video preview images for renderer.
+  - Show current variant for preview mode.
+- Stack Layout Improvements.
+  - Update codegen to reflect new shrinkwrapping-stack alignment changes.
+  - Miscellaneous fixes.
+- Fix color filter for image error builder.
+- Add more logs & minor improvements.
+
 ## 0.7.2
 - Implement global listeners for navigation.
 - Update Alignment rules and behavior in Stacks.
