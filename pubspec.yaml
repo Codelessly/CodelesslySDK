@@ -43,7 +43,7 @@ dependencies:
   path_provider: ^2.1.1
   provider: ^6.1.1
   json_path: ^0.6.6
-  meta: ^1.10.0
+  meta: ">=1.9.0 <2.0.0"
   path: ^1.8.3
   flutter_svg: ^2.0.9
   cached_network_image: ^3.3.0
