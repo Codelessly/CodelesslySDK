@@ -172,7 +172,7 @@ class FunctionsRepository {
     log('Performing navigation action with params: $parsedParams');
 
     if (action.navigationType == NavigationType.pop) {
-      Navigator.pop(context, parsedParams);
+      Navigator.maybePop(context, parsedParams);
     } else {
       final Codelessly codelessly = context.read<Codelessly>();
       // Check if a layout exists for the action's [destinationId].
