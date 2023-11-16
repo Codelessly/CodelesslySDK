@@ -42,12 +42,12 @@ dependencies:
   uuid: ^4.2.1
   path_provider: ^2.1.1
   provider: ^6.1.1
-  json_path: ^0.6.3
-  meta: ^1.9.1
+  json_path: ^0.6.6
+  meta: ^1.10.0
   path: ^1.8.3
   flutter_svg: ^2.0.9
   cached_network_image: ^3.3.0
-  rfc_6901: ^0.1.1 # json pointer spec
+  rfc_6901: ^0.2.0 # json pointer spec
 
 dev_dependencies:
   flutter_test:
