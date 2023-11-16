@@ -23,11 +23,11 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     Widget child = childWidget ??
         manager!.buildWidgetFromNode(node, context, settings: settings);
 
-    final bool shouldWrapWithPositioned =
+    final bool potentiallyPositionable =
         node.alignment == AlignmentModel.none ||
             (parent.isOneOrBothWrap && node.alignment != commonAlignment);
 
-    if (shouldWrapWithPositioned) {
+    if (potentiallyPositionable) {
       // You cannot use the Align widget when inside a shrink-wrapping Stack.
       // The Align RenderBox will force the Stack to grow as much as possible.
       // Positioned widgets are only laid out after the Stack lays out its
@@ -139,8 +139,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     // view unbounded sizing.
     // cut off when scrolling is forced (i.e. with bouncing scroll physics).
     final bool shouldUsePositioned =
-        (parent.isOneOrBothWrap && parent.childrenOrEmpty.length > 1) ||
-            (!doesParentScroll && !isTallest && !isWidest);
+        (!doesParentScroll && !isTallest && !isWidest);
 
     // This is required to make wrapping stack in a scroll view work because
     // wrapping stack cannot figure out its size when there only positioned
@@ -208,16 +207,19 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
 
     final AlignmentModel commonAlignment =
         retrieveCommonStackAlignment(node, children);
-    final isAllPositioned =
-        children.every((node) => node.alignment.data == null);
+    final Set<BaseNode> potentiallyPositionableChildren =
+        children.where((child) {
+      return child.alignment == AlignmentModel.none ||
+          (node.isOneOrBothWrap && child.alignment != commonAlignment);
+    }).toSet();
 
     final List<Widget> childrenWidgets = [];
 
-    final BaseNode? widestChild = isAllPositioned && node.isHorizontalWrap
-        ? getWidestNode(children)
+    final BaseNode? widestChild = node.isHorizontalWrap
+        ? getWidestNode(potentiallyPositionableChildren)
         : null;
-    final BaseNode? tallestChild = isAllPositioned && node.isVerticalWrap
-        ? getTallestNode(children)
+    final BaseNode? tallestChild = node.isVerticalWrap
+        ? getTallestNode(potentiallyPositionableChildren)
         : null;
 
     for (final BaseNode childNode in children) {
