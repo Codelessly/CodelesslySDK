@@ -397,7 +397,7 @@ T? mostCommon<T>(List<T> list) {
 }
 
 /// Retrieves the widest child from given [siblings].
-BaseNode? getWidestNode(List<BaseNode> siblings) {
+BaseNode? getWidestNode(Iterable<BaseNode> siblings) {
   if (siblings.isEmpty) return null;
 
   return siblings.reduce((a, b) {
@@ -419,7 +419,7 @@ BaseNode? getWidestNode(List<BaseNode> siblings) {
 }
 
 /// Retrieves the tallest child from given [siblings].
-BaseNode? getTallestNode(List<BaseNode> siblings) {
+BaseNode? getTallestNode(Iterable<BaseNode> siblings) {
   if (siblings.isEmpty) return null;
 
   return siblings.reduce((a, b) {
