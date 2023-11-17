@@ -223,6 +223,22 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
       );
     }
 
+    if (url.isBase64Blob) {
+      return Image.memory(
+        url.base64Data,
+        fit: fit,
+        alignment: alignment,
+        scale: scale,
+        width: width,
+        height: height,
+        repeat: repeat,
+        color: widget.color,
+        colorBlendMode: colorBlendMode,
+        errorBuilder: (context, _, __) =>
+            (widget.errorBuilder ?? _defaultErrorBuilder)(context),
+      );
+    }
+
     return CachedNetworkImage(
       imageUrl: url,
       fit: fit,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -1336,6 +1338,18 @@ extension StringExt on String {
     final uri = Uri.tryParse(this);
     if (uri == null) return false;
     return path.extension(uri.path).contains('svg');
+  }
+
+  bool get isBase64Blob {
+    final uri = Uri.tryParse(this);
+    if (uri == null) return false;
+    return uri.scheme == 'data' && uri.path.contains('base64');
+  }
+
+  // Assumes [isBase64Blob] is true. Decodes the base64 data and returns it.
+  // data:image/gif;base64,<BASE64 CODE>
+  Uint8List get base64Data {
+    return base64Decode(split(',')[1]);
   }
 
   String toJsonPointerPath() {
