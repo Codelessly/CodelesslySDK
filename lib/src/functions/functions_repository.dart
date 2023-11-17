@@ -108,26 +108,30 @@ class FunctionsRepository {
     return makeApiRequest(
       context: context,
       method: apiData.method,
-      url: _applyApiInputs(apiData.url, action.parameters),
-      headers: _generateMapFromPairs(apiData.headers, action.parameters),
+      url: _applyApiInputs(context, apiData.url, action.parameters),
+      headers:
+          _generateMapFromPairs(context, apiData.headers, action.parameters),
       body: apiData.bodyType == RequestBodyType.form
-          ? _generateMapFromPairs(apiData.formFields, action.parameters)
+          ? _generateMapFromPairs(
+              context, apiData.formFields, action.parameters)
           : apiData.body,
       variable: variable,
     );
   }
 
-  static Map<String, String> _generateMapFromPairs(
+  static Map<String, String> _generateMapFromPairs(BuildContext context,
       List<HttpKeyValuePair> pairs, Map<String, String> parameters) {
     return pairs
         .where((pair) => pair.isUsed && pair.key.isNotEmpty)
         .toList()
         .asMap()
-        .map((key, pair) => MapEntry(_applyApiInputs(pair.key, parameters),
-            _applyApiInputs(pair.value, parameters)));
+        .map((key, pair) => MapEntry(
+            _applyApiInputs(context, pair.key, parameters),
+            _applyApiInputs(context, pair.value, parameters)));
   }
 
-  static String _applyApiInputs(String data, Map<String, String> parameters) {
+  static String _applyApiInputs(
+      BuildContext context, String data, Map<String, String> parameters) {
     final updatedData = data.replaceAllMapped(inputRegex, (match) {
       final MapEntry<String, String>? parameter = parameters.entries
           .firstWhereOrNull((entry) => entry.key == match.group(1));
@@ -135,7 +139,9 @@ class FunctionsRepository {
         print('parameter ${match.group(1)} not found');
         return match[0]!;
       }
-      return parameter.value;
+      // Substitute variables in parameter value.
+      return PropertyValueDelegate.substituteVariables(context, parameter.value,
+          nullSubstitutionMode: NullSubstitutionMode.nullValue);
     });
     return updatedData;
   }

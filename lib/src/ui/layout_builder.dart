@@ -128,11 +128,19 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
   late final CanvasNode canvasNode =
       widget.layout.nodes[widget.layout.canvasId] as CanvasNode;
 
-  @override
-  void initState() {
-    super.initState();
+  /// Whether the layout should be loaded. This is used to prevent the layout
+  /// from being loaded multiple times since we call [loadLayout] in
+  /// [didChangeDependencies] to ensure access to inherited widgets which is
+  /// something that cannot be accessed in [initState].
+  bool shouldLoadLayout = true;
 
-    loadLayout(context);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (shouldLoadLayout) {
+      shouldLoadLayout = false;
+      loadLayout(context);
+    }
   }
 
   @override
@@ -203,8 +211,6 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
             ?.variables ??
         {};
 
-    loadApisAndItsVariables(context);
-
     for (final variable in variablesMap.values) {
       // Override default values of variables with values provided in data.
       final notifier = Observable(variable.copyWith(
@@ -217,6 +223,11 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         codelessly.dataManager.publishModel?.conditions[layoutID]?.conditions ??
             {};
     codelesslyContext.conditions.addAll(conditions);
+
+    // Load apis and its variables. This has to be done after the variables
+    // are loaded above because the api can have parameters with values
+    // from the variables.
+    loadApisAndItsVariables(context);
   }
 
   /// This loads all the apis for the layout as variables to be available
