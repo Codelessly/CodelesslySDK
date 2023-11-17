@@ -105,15 +105,27 @@ class FunctionsRepository {
       variable = codelesslyContext.findVariableByName(name);
     }
 
+    // set default values for action parameters.
+    final Map<String, String> params = {};
+    for (final MapEntry(key: name, :value) in action.parameters.entries) {
+      if (value.isNotEmpty) {
+        params[name] = value;
+        continue;
+      }
+      // fetch default value from api data.
+      final param = apiData.variables.findByNameOrNull(name);
+      final paramValue =
+          param != null && param.value.isNotEmpty ? param.value : '';
+      params[name] = paramValue;
+    }
+
     return makeApiRequest(
       context: context,
       method: apiData.method,
-      url: _applyApiInputs(context, apiData.url, action.parameters),
-      headers:
-          _generateMapFromPairs(context, apiData.headers, action.parameters),
+      url: _applyApiInputs(context, apiData.url, params),
+      headers: _generateMapFromPairs(context, apiData.headers, params),
       body: apiData.bodyType == RequestBodyType.form
-          ? _generateMapFromPairs(
-              context, apiData.formFields, action.parameters)
+          ? _generateMapFromPairs(context, apiData.formFields, params)
           : apiData.body,
       variable: variable,
     );
