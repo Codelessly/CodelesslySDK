@@ -74,7 +74,7 @@ class FunctionsRepository {
       case ActionType.setStorage:
         setStorageFromAction(context, action as SetStorageAction);
       case ActionType.setCloudStorage:
-        setStorageFromAction(context, action as SetStorageAction);
+        setCloudStorageFromAction(context, action as SetCloudStorageAction);
     }
   }
 
@@ -1082,7 +1082,7 @@ class FunctionsRepository {
 
   static Map? _performMapOperation(
     BuildContext context,
-    DataOperationActionModel action,
+      DataOperationInterface action,
     Map? currentValue,
     String newValue,
   ) {
@@ -1114,7 +1114,7 @@ class FunctionsRepository {
 
   static List? _performListOperation(
     BuildContext context,
-    DataOperationActionModel action,
+      DataOperationInterface action,
     List? currentValue,
     String newValue,
   ) {
