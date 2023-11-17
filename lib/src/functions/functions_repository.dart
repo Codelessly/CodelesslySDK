@@ -362,6 +362,7 @@ class FunctionsRepository {
             break;
         }
       }
+
       printResponse(response);
 
       if (variable != null) {

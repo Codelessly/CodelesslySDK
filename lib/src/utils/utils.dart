@@ -620,9 +620,12 @@ class ApiResponseVariableUtils {
       'isSuccess': isSuccess,
       'data': isSuccess ? body : existingData,
       'error': isSuccess ? null : body,
-      'body': body,
+      // This is handy but can have a lot worse performance if the body is large.
+      // 'body': body,
       'status': isSuccess ? 'success' : 'error',
-      'bodyBytes': response.bodyBytes,
+      // This is nice but it doesn't seem to be useful at the moment. We can
+      // always add it back later. It's also a bit expensive for large bodies.
+      // 'bodyBytes': response.bodyBytes,
       'headers': response.headers,
       'statusCode': response.statusCode,
       'hasData': isSuccess || existingData != null,

@@ -224,14 +224,16 @@ extension KeyboardDismissBehaviorHelper on ScrollViewKeyboardDismissBehaviorC {
 
 extension ScrollPhysicsHelper on ScrollPhysicsC {
   ScrollPhysics? flutterScrollPhysics(bool shouldAlwaysScroll) {
-    final parent =  switch (this) {
+    final parent = switch (this) {
       ScrollPhysicsC.platformDependent => null,
       ScrollPhysicsC.bouncingScrollPhysics => const BouncingScrollPhysics(),
       ScrollPhysicsC.clampingScrollPhysics => const ClampingScrollPhysics(),
-      ScrollPhysicsC.rangeMaintainingScrollPhysics => const RangeMaintainingScrollPhysics(),
-      ScrollPhysicsC.neverScrollableScrollPhysics => const NeverScrollableScrollPhysics()
+      ScrollPhysicsC.rangeMaintainingScrollPhysics =>
+        const RangeMaintainingScrollPhysics(),
+      ScrollPhysicsC.neverScrollableScrollPhysics =>
+        const NeverScrollableScrollPhysics()
     };
-    if(shouldAlwaysScroll) {
+    if (shouldAlwaysScroll) {
       return AlwaysScrollableScrollPhysics(parent: parent);
     }
     return parent;
