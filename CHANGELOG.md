@@ -1,3 +1,11 @@
+## 0.7.5
+- API fixes.
+  - Fix variable substitution in API parameter value.
+  - Fix default value not being used correctly for API parameters.
+  - Remove body and bodyBytes param from API response to optimize performance.
+- Fix drag and drop insert to the edge of Accordion, Expansion Tile, ListView, and PageView.
+- Enable support for base64 data decoding in ImageBuilder.
+
 ## 0.7.4
 - Hotfix shrinkwrapping stack alignment layout.
 - Use maybePop instead of pop for navigate action.
