@@ -206,7 +206,7 @@ class DataManager {
         log('[DataManager] Publish model during init is not cached locally. Going to wait for the first publish model from the server.');
       } else if (layoutID == null) {
         log('[DataManager] Publish model during init is available and layoutID is not specified. All layouts will be downloaded soon!');
-      } else{
+      } else {
         log('[DataManager] Publish model during init is available and layoutID is specified. Layout [$layoutID] will be downloaded soon from stream.');
       }
       didPrepareLayout = false;
