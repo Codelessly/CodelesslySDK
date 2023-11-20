@@ -53,7 +53,7 @@ class FirestoreErrorReporter extends ErrorReporter {
           : stacktrace?.toString(),
       tags: ['error'],
     );
-    log('Stacktrace:\n${event.stacktrace}');
+    print('Stacktrace:\n${event.stacktrace}');
     await event.populateDeviceMetadata();
     await _firestore.collection(_collection).add(event.toJson()).then((doc) {
       log('Exception captured. ID: [${doc.id}]');

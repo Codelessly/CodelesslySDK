@@ -11,6 +11,7 @@ import 'package:rfc_6901/rfc_6901.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../codelessly_sdk.dart';
+import '../data/cloud_storage.dart';
 import '../data/local_storage.dart';
 import '../logging/error_handler.dart';
 import '../ui/codelessly_dialog_widget.dart';
@@ -1082,7 +1083,7 @@ class FunctionsRepository {
 
   static Map? _performMapOperation(
     BuildContext context,
-      DataOperationInterface action,
+    DataOperationInterface action,
     Map? currentValue,
     String newValue,
   ) {
@@ -1114,12 +1115,14 @@ class FunctionsRepository {
 
   static List? _performListOperation(
     BuildContext context,
-      DataOperationInterface action,
+    DataOperationInterface action,
     List? currentValue,
     String newValue,
   ) {
     // If list variable does not exist, return false.
     currentValue ??= [];
+
+    currentValue = [...currentValue];
 
     // Try to parse index if it's an integer. Else, try to use the variable's
     // value.
@@ -1158,16 +1161,194 @@ class FunctionsRepository {
   }
 
   static Future<bool> setCloudStorageFromAction(
-      BuildContext context,
-      SetCloudStorageAction action,
-      ) async {
-    // TODO: implement
-    return true;
-    // return await switch (action.operation) {
-    //     CloudStorageOperation.addOrUpdate => _updateStorage(context, action),
-    //     CloudStorageOperation.remove => _removeFromStorage(context, action),
-    //     CloudStorageOperation.clear => _clearStorage(context, action),
-    //   };
+    BuildContext context,
+    SetCloudStorageAction action,
+  ) async {
+    return await switch (action.subAction) {
+      AddDocumentSubAction action => addDocumentToCloud(context, action),
+      UpdateDocumentSubAction action => updateDocumentOnCloud(context, action),
+      RemoveDocumentSubAction action =>
+        removeDocumentFromCloud(context, action),
+    };
   }
 
+  static Future<bool> addDocumentToCloud(
+    BuildContext context,
+    AddDocumentSubAction subAction,
+  ) async {
+    try {
+      final CloudStorage cloudStorage = context.read<Codelessly>().cloudStorage;
+      Map<String, dynamic> data = {};
+      if (subAction.useRawValue) {
+        // Substitute variables in raw value.
+        final updatedValue = PropertyValueDelegate.substituteVariables(
+          context,
+          subAction.rawValue,
+          nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        );
+        // Parse to JSON.
+        data = jsonDecode(updatedValue);
+      } else {
+        // Substitute variables in value.
+        final updatedValue = PropertyValueDelegate.substituteVariables(
+          context,
+          subAction.newValue,
+          nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        );
+        // Parse to JSON.
+        data = jsonDecode(updatedValue);
+      }
+
+      return await cloudStorage.addDocument(
+        subAction.path,
+        value: data,
+        documentId: subAction.documentId,
+        autoGenerateId: subAction.autoGenerateId,
+        skipCreationIfDocumentExists: subAction.skipCreationIfDocumentExists,
+      );
+    } catch (error, stackTrace) {
+      log(error.toString());
+      log(stackTrace.toString());
+      return false;
+    }
+  }
+
+  static Future<bool> updateDocumentOnCloud(
+    BuildContext context,
+    UpdateDocumentSubAction subAction,
+  ) async {
+    final CloudStorage cloudStorage = context.read<Codelessly>().cloudStorage;
+    if (subAction.useRawValue) {
+      // Substitute variables in raw value.
+      final updatedValue = PropertyValueDelegate.substituteVariables(
+        context,
+        subAction.rawValue,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      );
+      // Parse to JSON.
+      final Map<String, dynamic> data = jsonDecode(updatedValue);
+
+      return await cloudStorage.updateDocument(
+        subAction.path,
+        documentId: subAction.documentId,
+        value: data,
+      );
+    }
+
+    try {
+      final CloudStorage storage = context.read<Codelessly>().cloudStorage;
+
+      final storageKey = PropertyValueDelegate.substituteVariables(
+          context, subAction.key,
+          nullSubstitutionMode: NullSubstitutionMode.emptyString);
+
+      final newValue = PropertyValueDelegate.substituteVariables(
+          context, subAction.newValue,
+          nullSubstitutionMode: NullSubstitutionMode.emptyString);
+
+      final match = VariableMatch.parse(storageKey.wrapWithVariableSyntax());
+      final docData =
+          await storage.getDocumentData(subAction.path, subAction.documentId);
+
+      final Object? currentValue;
+      JsonPointer? pointer;
+      if (match != null && match.hasPathOrAccessor) {
+        (currentValue, pointer) = PropertyValueDelegate.substituteJsonPath(
+          storageKey.wrapWithVariableSyntax(),
+          {match.name: docData[match.name]},
+        );
+        if (pointer == null) {
+          // This means the key path does not exist.
+          final pointerPath = storageKey.toJsonPointerPath();
+          pointer = JsonPointer(pointerPath);
+        }
+      } else {
+        currentValue = docData[storageKey];
+      }
+
+      // if (!context.mounted) throw Exception('Context is not mounted.');
+
+      final Object? value = switch (subAction.variableType) {
+        VariableType.text => newValue,
+        VariableType.integer => int.tryParse(newValue),
+        VariableType.decimal => double.tryParse(newValue),
+        VariableType.boolean => subAction.toggled
+            ? !(bool.tryParse(currentValue.toString()) ?? false)
+            : bool.tryParse(newValue),
+        VariableType.list => _performListOperation(
+            context,
+            subAction,
+            currentValue?.toList(),
+            newValue,
+          ),
+        VariableType.map => _performMapOperation(
+            context,
+            subAction,
+            currentValue?.toMap(),
+            newValue,
+          ),
+        _ => null,
+      };
+
+      if (match == null || pointer == null) {
+        // This means the key is a simple key without any path or accessor. So
+        // we can set it directly.
+
+        log('Setting storage key [$storageKey] to value [$value].');
+        docData[storageKey] = value;
+        return await cloudStorage.updateDocument(
+          subAction.path,
+          documentId: subAction.documentId,
+          // Update only the field that was changed.
+          value: {storageKey: docData[storageKey]},
+        );
+      }
+
+      final defaultValue = subAction.variableType.isList
+          ? []
+          : subAction.variableType.isMap
+              ? {}
+              : null;
+      Map<String, dynamic> storageData = {
+        match.name: docData[match.name] ?? defaultValue,
+      };
+
+      final result = pointer.write(storageData, value);
+      if (result != null) {
+        storageData = Map<String, dynamic>.from(result as Map);
+      }
+
+      log('Setting storage key [$storageKey] to value [$value].');
+      docData[match.name] = storageData[match.name];
+
+      return await cloudStorage.updateDocument(
+        subAction.path,
+        documentId: subAction.documentId,
+        // Update only the field that was changed.
+        value: {match.name: docData[match.name]},
+      );
+    } catch (error, stackTrace) {
+      log(error.toString());
+      log(stackTrace.toString());
+      return false;
+    }
+  }
+
+  static Future<bool> removeDocumentFromCloud(
+    BuildContext context,
+    RemoveDocumentSubAction subAction,
+  ) async {
+    try {
+      final CloudStorage cloudStorage = context.read<Codelessly>().cloudStorage;
+
+      return await cloudStorage.removeDocument(
+        subAction.path,
+        subAction.documentId,
+      );
+    } catch (error, stackTrace) {
+      log(error.toString());
+      log(stackTrace.toString());
+      return false;
+    }
+  }
 }

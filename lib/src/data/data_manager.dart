@@ -7,6 +7,7 @@ import 'package:hive/hive.dart';
 import '../../codelessly_sdk.dart';
 import '../cache/codelessly_cache_manager.dart';
 import '../logging/error_handler.dart';
+import 'cloud_storage.dart';
 import 'local_storage.dart';
 
 /// Orchestrates the data flow for the SDK.
@@ -47,10 +48,18 @@ class DataManager {
 
   LocalStorage? _localStorage;
 
+  CloudStorage? _cloudStorage;
+
   /// The local storage instance used by this data manager.
   LocalStorage get localStorage {
     assert(_localStorage != null, 'Local storage is not initialized yet.');
     return _localStorage!;
+  }
+
+  /// The cloud storage instance used by this data manager.
+  CloudStorage get cloudStorage {
+    assert(_cloudStorage != null, 'Cloud storage is not initialized yet.');
+    return _cloudStorage!;
   }
 
   /// The current publish model loaded by this data manager.
@@ -301,12 +310,36 @@ class DataManager {
   Future<void> onPublishModelLoaded(SDKPublishModel model) async {
     log('[DataManager] Publish model loaded. Initializing local storage...');
     if (_localStorage == null) {
-      final Box box = await Hive.openBox(model.projectId);
-      _localStorage = HiveLocalStorage(box);
+      _localStorage = await initializeLocalStorage(model);
       log('[DataManager] Local storage initialized.');
     } else {
       log('[DataManager] Local storage already initialized.');
     }
+
+    log('[DataManager] Publish model loaded. Initializing cloud storage...');
+    if (_cloudStorage == null) {
+      _cloudStorage = await initializeCloudStorage(model);
+      log('[DataManager] Cloud storage initialized.');
+    } else {
+      log('[DataManager] Cloud storage already initialized.');
+    }
+  }
+
+  Future<LocalStorage> initializeLocalStorage(SDKPublishModel model) async {
+    final Box box = await Hive.openBox(model.projectId);
+    return HiveLocalStorage(box);
+  }
+
+  Future<CloudStorage> initializeCloudStorage(SDKPublishModel model) async {
+    if (networkDataRepository is! FirebaseDataRepository) {
+      throw UnimplementedError(
+          'Only FirebaseDataRepository is supported for cloud storage.');
+    }
+    final instance = FirestoreCloudStorage(model.projectId,
+        (networkDataRepository as FirebaseDataRepository).firestore);
+    // initialize cloud storage.
+    await instance.init();
+    return instance;
   }
 
   /// This function serves to complete any post initialization steps like
@@ -448,6 +481,8 @@ class DataManager {
     _publishModel = null;
     _localStorage?.close();
     _localStorage = null;
+    _cloudStorage?.dispose();
+    _cloudStorage = null;
   }
 
   /// Sets the [SDKPublishModel] as null and cancels document streaming.
@@ -458,6 +493,8 @@ class DataManager {
     _publishModel = null;
     _localStorage?.close();
     _localStorage = null;
+    _cloudStorage?.dispose();
+    _cloudStorage = null;
     initialized = false;
   }
 
