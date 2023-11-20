@@ -5,7 +5,8 @@ class CodelesslyLoadingScreen extends StatefulWidget {
   const CodelesslyLoadingScreen({super.key});
 
   @override
-  State<CodelesslyLoadingScreen> createState() => _CodelesslyLoadingScreenState();
+  State<CodelesslyLoadingScreen> createState() =>
+      _CodelesslyLoadingScreenState();
 }
 
 class _CodelesslyLoadingScreenState extends State<CodelesslyLoadingScreen> {

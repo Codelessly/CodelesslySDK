@@ -578,7 +578,8 @@ class ApiResponseVariableUtils {
       };
 
   static Map error(
-      String url,    Object? error, {
+    String url,
+    Object? error, {
     Object? data,
     Map<String, String>? headers,
   }) =>
@@ -596,8 +597,8 @@ class ApiResponseVariableUtils {
       };
 
   static Map success(
-      String url,
-      Object? data, {
+    String url,
+    Object? data, {
     int statusCode = 200,
     Map<String, String>? headers,
   }) =>

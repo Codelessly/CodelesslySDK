@@ -184,9 +184,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
           splashColor: fab.splashColor?.toFlutterColor(),
           extendedIconLabelSpacing: fab.extendedIconLabelSpacing,
           extendedTextStyle:
-              PassiveTextTransformer.retrieveTextStyleFromTextProp(
-            fab.labelStyle,
-          ),
+              TextUtils.retrieveTextStyleFromProp(fab.labelStyle),
           shape: shape,
           icon: !fab.icon.show ? null : getFABIcon(fab, useFonts: useFonts),
           label: Text(fab.label),

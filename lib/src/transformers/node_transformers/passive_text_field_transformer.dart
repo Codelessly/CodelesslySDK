@@ -41,18 +41,6 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     );
   }
 
-  static TextStyle getTextStyle(TextProp? style) {
-    return PassiveTextTransformer.retrieveTextStyleData(
-      fontSize: style?.fontSize ?? 18,
-      lineHeight: style?.lineHeight ?? LineHeight.auto,
-      letterSpacing: style?.letterSpacing ?? LetterSpacing.zero,
-      color: style?.fills[0].toFlutterColor() ?? Colors.black,
-      fontName: style?.fontName ?? FontName.robotoRegular,
-      textDecoration: style?.textDecoration ?? TextDecorationEnum.none,
-      effects: [],
-    );
-  }
-
   static InputBorder? getInputBorder(InputBorderModel? inputBorder) {
     if (inputBorder == null) return null;
     switch (inputBorder.borderType) {
@@ -95,17 +83,18 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
           ? null
           : retrieveIconWidget(decoration.icon, null, useIconFonts),
       labelText: labelText?.isNotEmpty == true ? labelText : null,
-      labelStyle: getTextStyle(decoration.labelStyle),
-      floatingLabelStyle: getTextStyle(decoration.floatingLabelStyle),
+      labelStyle: TextUtils.retrieveTextStyleFromProp(decoration.labelStyle),
+      floatingLabelStyle:
+          TextUtils.retrieveTextStyleFromProp(decoration.floatingLabelStyle),
       helperText: decoration.helperText,
 
-      helperStyle: getTextStyle(decoration.helperStyle),
+      helperStyle: TextUtils.retrieveTextStyleFromProp(decoration.helperStyle),
       helperMaxLines: decoration.helperMaxLines,
       hintText: hintText,
-      hintStyle: getTextStyle(decoration.hintStyle),
+      hintStyle: TextUtils.retrieveTextStyleFromProp(decoration.hintStyle),
       hintMaxLines: decoration.hintMaxLines,
       errorText: decoration.errorText,
-      errorStyle: getTextStyle(decoration.errorStyle),
+      errorStyle: TextUtils.retrieveTextStyleFromProp(decoration.errorStyle),
       errorMaxLines: decoration.errorMaxLines,
       floatingLabelBehavior: decoration.floatingLabelBehavior.toFlutter(),
       isCollapsed: isCollapsed,
@@ -117,16 +106,17 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
       // prefixIconConstraints:
       //     decoration.prefixIconConstraints.flutterConstraints,
       prefixText: decoration.prefixText,
-      prefixStyle: getTextStyle(decoration.prefixStyle),
+      prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
       suffixIcon: !decoration.suffixIcon.show || decoration.suffixIcon.isEmpty
           ? null
           : retrieveIconWidget(decoration.suffixIcon, null, useIconFonts),
       suffixText: decoration.suffixText,
-      suffixStyle: getTextStyle(decoration.suffixStyle),
+      suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
       // suffixIconConstraints:
       //     decoration.suffixIconConstraints.flutterConstraints,
       counterText: decoration.showCounter ? decoration.counterText : '',
-      counterStyle: getTextStyle(decoration.counterStyle),
+      counterStyle:
+          TextUtils.retrieveTextStyleFromProp(decoration.counterStyle),
       filled: decoration.filled,
       fillColor: decoration.fillColor.toFlutterColor(),
       focusColor: decoration.focusColor.toFlutterColor(),
@@ -255,13 +245,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       cursorWidth: widget.node.properties.cursorWidth,
       cursorRadius: Radius.circular(widget.node.properties.cursorRadius),
       maxLength: maxLength,
-      maxLines: widget.node.properties.maxLines
-          .orNullIf(!widget.node.isVerticalWrap),
-      minLines: widget.node.properties.minLines
-          .orNullIf(!widget.node.isVerticalWrap),
+      maxLines:
+          widget.node.properties.maxLines.orNullIf(!widget.node.isVerticalWrap),
+      minLines:
+          widget.node.properties.minLines.orNullIf(!widget.node.isVerticalWrap),
       expands: !widget.node.isVerticalWrap,
       obscuringCharacter: widget.node.properties.obscuringCharacter,
-      style: PassiveTextFieldTransformer.getTextStyle(
+      style: TextUtils.retrieveTextStyleFromProp(
           widget.node.properties.inputStyle),
       onTap: widget.onTap,
       onChanged: widget.onChanged,
