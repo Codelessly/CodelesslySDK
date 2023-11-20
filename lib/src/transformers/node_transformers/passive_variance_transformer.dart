@@ -36,7 +36,7 @@ class PassiveVarianceWidget extends StatelessWidget {
   });
 
   List<String> getChildren(BuildContext context) {
-    if(settings.isPreview) return node.currentVariant.children;
+    if (settings.isPreview) return node.currentVariant.children;
     final String variantIdOrName =
         PropertyValueDelegate.getPropertyValue<String>(
               context,

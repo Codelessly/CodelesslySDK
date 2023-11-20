@@ -48,18 +48,6 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
     return buildDropdownFromNode(context, node, settings);
   }
 
-  static TextStyle getTextStyle(TextProp? style) {
-    return PassiveTextTransformer.retrieveTextStyleData(
-      fontSize: style?.fontSize ?? 18,
-      lineHeight: style?.lineHeight ?? LineHeight.auto,
-      letterSpacing: style?.letterSpacing ?? LetterSpacing.zero,
-      color: style?.fills.firstOrNull?.toFlutterColor() ?? Colors.black,
-      fontName: style?.fontName ?? FontName.robotoRegular,
-      textDecoration: style?.textDecoration ?? TextDecorationEnum.none,
-      effects: [],
-    );
-  }
-
   void onTap(context, DropdownNode node) =>
       FunctionsRepository.triggerAction(context, node: node, TriggerType.click);
 
@@ -117,8 +105,9 @@ class PassiveDropdownWidget extends StatelessWidget {
                 }
                 return Text(
                   label,
-                  style: PassiveDropdownTransformer.getTextStyle(
-                      node.properties.itemTextStyle),
+                  style: TextUtils.retrieveTextStyleFromProp(
+                    node.properties.itemTextStyle,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 );
               }),
@@ -157,8 +146,9 @@ class PassiveDropdownWidget extends StatelessWidget {
                         node.basicBoxLocal.width - node.properties.iconSize),
                 child: Text(
                   label,
-                  style: PassiveDropdownTransformer.getTextStyle(
-                      node.properties.selectedItemTextStyle),
+                  style: TextUtils.retrieveTextStyleFromProp(
+                    node.properties.selectedItemTextStyle,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               );
@@ -206,8 +196,9 @@ class PassiveDropdownWidget extends StatelessWidget {
           hint: node.properties.hint.isNotEmpty
               ? Text(
                   node.properties.hint,
-                  style: PassiveDropdownTransformer.getTextStyle(
-                      node.properties.hintStyle),
+                  style: TextUtils.retrieveTextStyleFromProp(
+                    node.properties.hintStyle,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 )
               : null,

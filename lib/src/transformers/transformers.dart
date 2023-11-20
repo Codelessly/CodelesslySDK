@@ -9,4 +9,6 @@ export 'utils/dash_path.dart';
 export 'utils/indexed_item_provider.dart';
 export 'utils/property_value_delegate.dart';
 export 'utils/stroke_painter.dart';
+export 'utils/text_utils.dart';
+export 'utils/variable_span.dart';
 export 'widget_node_transformer_manager.dart';

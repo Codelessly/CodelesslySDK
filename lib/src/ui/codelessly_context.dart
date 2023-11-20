@@ -190,9 +190,8 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
 
   /// Returns a reverse-lookup of the [VariableData] associated with a given
   /// [name].
-  Observable<VariableData>? findVariableByName(String? name) =>
-      variables.values
-          .firstWhereOrNull((variable) => variable.value.name == name);
+  Observable<VariableData>? findVariableByName(String? name) => variables.values
+      .firstWhereOrNull((variable) => variable.value.name == name);
 
   /// Allows to easily [value] of a variable with a given [name].
   /// Returns false if the variable does not exist.

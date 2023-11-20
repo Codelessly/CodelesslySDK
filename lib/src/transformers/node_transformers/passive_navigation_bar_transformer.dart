@@ -183,10 +183,10 @@ class _PassiveNavigationBarWidgetState
         labelBehavior: style.labelBehavior.flutterLabelBehavior,
         labelTextStyle: MaterialStateProperty.resolveWith<TextStyle?>((states) {
           if (states.contains(MaterialState.selected)) {
-            return PassiveTextTransformer.retrieveTextStyleFromTextProp(
+            return TextUtils.retrieveTextStyleFromProp(
                 style.selectedLabelStyle);
           }
-          return PassiveTextTransformer.retrieveTextStyleFromTextProp(
+          return TextUtils.retrieveTextStyleFromProp(
               style.unselectedLabelStyle);
         }),
       ),
@@ -232,12 +232,10 @@ class _PassiveNavigationBarWidgetState
       size: style.unselectedIconSize,
     );
 
-    final TextStyle selectedLabelStyle =
-        PassiveTextTransformer.retrieveTextStyleFromProp(
-            style.selectedLabelStyle.copyWith(fills: []));
-    final unselectedLabelStyle =
-        PassiveTextTransformer.retrieveTextStyleFromProp(
-            style.unselectedLabelStyle.copyWith(fills: []));
+    final TextStyle selectedLabelStyle = TextUtils.retrieveTextStyleFromProp(
+        style.selectedLabelStyle.copyWith(fills: []));
+    final unselectedLabelStyle = TextUtils.retrieveTextStyleFromProp(
+        style.unselectedLabelStyle.copyWith(fills: []));
 
     final double elevation = style.makeNotched ? 0 : style.elevation;
 

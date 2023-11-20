@@ -126,7 +126,7 @@ class FunctionsRepository {
       headers: _generateMapFromPairs(context, apiData.headers, params),
       body: apiData.bodyType == RequestBodyType.form
           ? _generateMapFromPairs(context, apiData.formFields, params)
-          :_applyApiInputs(context, apiData.body ?? '', params),
+          : _applyApiInputs(context, apiData.body ?? '', params),
       variable: variable,
     );
   }

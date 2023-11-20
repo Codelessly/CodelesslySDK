@@ -86,6 +86,7 @@ class PassiveAppBarWidget extends StatelessWidget
       onLeadingPressed;
   final Function(BuildContext context, List<Reaction> reactions)?
       onActionPressed;
+  final List<VariableData> variablesOverrides;
 
   const PassiveAppBarWidget({
     super.key,
@@ -95,6 +96,7 @@ class PassiveAppBarWidget extends StatelessWidget
     required this.settings,
     this.onLeadingPressed,
     this.onActionPressed,
+    this.variablesOverrides = const [],
   });
 
   @override
@@ -103,6 +105,21 @@ class PassiveAppBarWidget extends StatelessWidget
             !node.properties.automaticallyImplyLeading
         ? retrieveIconWidget(node.properties.leading.icon, null, useIconFonts)
         : null;
+
+    final Widget? title = node.properties.title.trim().isEmpty
+        ? null
+        : TextUtils.buildText(
+            context,
+            node.properties.title,
+            textAlignHorizontal: null,
+            maxLines: null,
+            overflow: null,
+            fieldName: 'title',
+            node: node,
+            variablesOverrides: variablesOverrides,
+            nullSubstitutionMode: settings.nullSubstitutionMode,
+            replaceVariablesWithSymbol: settings.isPreview,
+          );
     return AdaptiveNodeBox(
       node: node,
       child: AppBar(
@@ -114,20 +131,16 @@ class PassiveAppBarWidget extends StatelessWidget
                 icon: leading,
               )
             : null,
-        titleTextStyle: PassiveTextTransformer.retrieveTextStyleFromTextProp(
-            node.properties.titleStyle),
+        titleTextStyle: TextUtils.retrieveTextStyleFromProp(
+          node.properties.titleStyle,
+          effects: const [],
+        ),
         backgroundColor: node.properties.backgroundColor.toFlutterColor(),
         elevation: elevation ?? node.properties.elevation,
         automaticallyImplyLeading: node.properties.leading.icon.show
             ? node.properties.automaticallyImplyLeading
             : false,
-        title: Text(
-          PropertyValueDelegate.substituteVariables(
-            context,
-            node.properties.title,
-            nullSubstitutionMode: settings.nullSubstitutionMode,
-          ),
-        ),
+        title: title,
         foregroundColor:
             node.properties.titleStyle.fills.firstOrNull?.toFlutterColor(),
         titleSpacing: node.properties.titleSpacing,

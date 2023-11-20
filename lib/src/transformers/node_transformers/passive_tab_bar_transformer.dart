@@ -145,12 +145,10 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
         : widget.node.basicBoxLocal.height;
 
     final TextStyle labelStyle =
-        PassiveTextTransformer.retrieveTextStyleFromProp(
-            widget.node.properties.labelStyle);
+        TextUtils.retrieveTextStyleFromProp(widget.node.properties.labelStyle);
 
-    final TextStyle unselectedLabelStyle =
-        PassiveTextTransformer.retrieveTextStyleFromProp(
-            widget.node.properties.unselectedLabelStyle);
+    final TextStyle unselectedLabelStyle = TextUtils.retrieveTextStyleFromProp(
+        widget.node.properties.unselectedLabelStyle);
 
     final Decoration? indicator = getIndicator();
 

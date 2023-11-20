@@ -90,9 +90,12 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
 void transformNodeFromIconButton(ButtonNode node) {
   final painter = TextPainter(
     text: TextSpan(
-        text: node.properties.label,
-        style: PassiveTextTransformer.retrieveTextStyleFromProp(
-            node.properties.labelStyle)),
+      text: node.properties.label,
+      style: TextUtils.retrieveTextStyleFromProp(
+        node.properties.labelStyle,
+        effects: const [],
+      ),
+    ),
     textDirection: TextDirection.ltr,
     textAlign: node.properties.labelAlignment.toFlutter(),
   );
@@ -131,10 +134,10 @@ void transformNodeToIconButton(ButtonNode node) {
 /// Flutter's ButtonStyle parameters do different things depending on the button
 /// type. So we have to manually change them.
 ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
-  final TextStyle textStyle = PassiveTextTransformer.retrieveTextStyleFromProp(
-      node.properties.labelStyle);
+  final TextStyle textStyle =
+      TextUtils.retrieveTextStyleFromProp(node.properties.labelStyle);
   final Color? labelColor =
-      node.properties.labelStyle.fills.firstOrNull?.toFlutterColor();
+      TextUtils.retrievePropColor(node.properties.labelStyle);
 
   ButtonStyle? buttonStyle;
   switch (node.properties.buttonType) {
