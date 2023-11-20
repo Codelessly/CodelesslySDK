@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import '../codelessly_sdk.dart';
 import '../firedart.dart';
 import 'cache/codelessly_cache_manager.dart';
+import 'data/cloud_storage.dart';
 import 'data/local_storage.dart';
 import 'logging/error_handler.dart';
 import 'logging/reporter.dart';
@@ -109,7 +110,11 @@ class Codelessly {
   /// Returns a stream of status updates for this SDK instance.
   Stream<CStatus> get statusStream => _statusStreamController.stream;
 
+  /// Provides access to the local storage of this SDK instance.
   LocalStorage get localStorage => dataManager.localStorage;
+
+  /// Provides access to the cloud storage of this SDK instance.
+  CloudStorage get cloudStorage => dataManager.cloudStorage;
 
   final List<NavigationListener> _navigationListeners = [];
 
