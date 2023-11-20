@@ -254,8 +254,8 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
       final variableName = apiNameToVariableName(api.name);
 
       final data = canvasAction != null
-          ? ApiResponseVariableUtils.loading()
-          : ApiResponseVariableUtils.idle();
+          ? ApiResponseVariableUtils.loading(api.url)
+          : ApiResponseVariableUtils.idle(api.url);
 
       final RuntimeVariableData variable = RuntimeVariableData(
         name: variableName,

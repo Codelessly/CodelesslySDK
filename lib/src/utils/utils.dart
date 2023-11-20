@@ -557,7 +557,8 @@ Set<String> getApisToLoadForCanvas(CanvasNode canvasNode) {
 class ApiResponseVariableUtils {
   ApiResponseVariableUtils._();
 
-  static Map idle() => {
+  static Map idle(String url) => {
+        'url': url,
         'isIdle': true,
         'isLoading': false,
         'isError': false,
@@ -565,7 +566,8 @@ class ApiResponseVariableUtils {
         'status': 'idle',
       };
 
-  static Map loading({Object? data}) => {
+  static Map loading(String url, {Object? data}) => {
+        'url': url,
         'isIdle': false,
         'isLoading': true,
         'isError': false,
@@ -576,11 +578,12 @@ class ApiResponseVariableUtils {
       };
 
   static Map error(
-    Object? error, {
+      String url,    Object? error, {
     Object? data,
     Map<String, String>? headers,
   }) =>
       {
+        'url': url,
         'isIdle': false,
         'isLoading': false,
         'isError': true,
@@ -593,11 +596,13 @@ class ApiResponseVariableUtils {
       };
 
   static Map success(
-    Object? data, {
+      String url,
+      Object? data, {
     int statusCode = 200,
     Map<String, String>? headers,
   }) =>
       {
+        'url': url,
         'isIdle': false,
         'isLoading': false,
         'isError': false,
@@ -614,6 +619,7 @@ class ApiResponseVariableUtils {
         response.statusCode >= 200 && response.statusCode < 300;
     final Object body = tryJsonDecode(response.body) ?? response.body;
     return {
+      'url': response.request!.url.toString(),
       'isIdle': false,
       'isLoading': false,
       'isError': !isSuccess,

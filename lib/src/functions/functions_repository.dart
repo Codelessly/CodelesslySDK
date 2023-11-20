@@ -317,7 +317,7 @@ class FunctionsRepository {
     final existingData = variable?.value.getValue().typedValue<Map>()?['data'];
     if (variable != null) {
       variable.value = variable.value.copyWith(
-        value: ApiResponseVariableUtils.loading(data: existingData),
+        value: ApiResponseVariableUtils.loading(url, data: existingData),
       );
       print('${variable.value.name} updated with loading state.');
     } else {
@@ -381,6 +381,7 @@ class FunctionsRepository {
       if (variable != null) {
         variable.value = variable.value.copyWith(
           value: ApiResponseVariableUtils.error(
+            url,
             error,
             data: existingData,
           ),

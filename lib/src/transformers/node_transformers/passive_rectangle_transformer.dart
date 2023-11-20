@@ -123,6 +123,7 @@ class PassiveRectangleWidget extends StatelessWidget {
                 (node as BlendMixin).inkWell != null &&
                 settings.useInk,
             obscureImages: settings.obscureImages,
+            settings: settings,
           ),
           ...buildStrokes(context, node, codelesslyContext),
           ...wrapWithPaddingAndScroll(
@@ -493,6 +494,7 @@ List<Widget> buildFills(
   ImageFillBuilder? imageFillBuilder,
   bool useInk = true,
   bool obscureImages = false,
+  required WidgetBuildSettings settings,
 }) {
   if (node is! GeometryMixin) return [];
 
@@ -539,9 +541,11 @@ List<Widget> buildFills(
                 'fill-image-${paint.id}',
               ) ??
               imageURL;
-          imageURL = PropertyValueDelegate.getVariableValueFromPath<String>(
-                  context, imageURLValue) ??
-              imageURL;
+          imageURL = PropertyValueDelegate.substituteVariables(
+            context,
+            imageURLValue,
+            nullSubstitutionMode: settings.nullSubstitutionMode,
+          );
           Widget child;
 
           if (imageFillBuilder != null) {
