@@ -115,6 +115,11 @@ class ConditionVariablesVisitor
 
   @override
   Set<String>? visitShowDialogAction(ShowDialogAction action) => {};
+
+  @override
+  Set<String>? visitLoadFromCloudStorageAction(
+          LoadFromCloudStorageAction action) =>
+      {};
 }
 
 /// A visitor that returns the list of node IDs used in a condition's actions.
@@ -177,4 +182,8 @@ class ConditionNodesVisitor
 
   @override
   String? visitShowDialogAction(ShowDialogAction action) => null;
+
+  @override
+  String? visitLoadFromCloudStorageAction(LoadFromCloudStorageAction action) =>
+      null;
 }
