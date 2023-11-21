@@ -74,6 +74,8 @@ class FunctionsRepository {
         setStorageFromAction(context, action as SetStorageAction);
       case ActionType.setCloudStorage:
         setCloudStorageFromAction(context, action as SetCloudStorageAction);
+      case ActionType.loadFromCloudStorage:
+        loadFromStorageAction(context, action as LoadFromCloudStorageAction);
     }
   }
 
@@ -1382,6 +1384,67 @@ class FunctionsRepository {
       log(error.toString());
       log(stackTrace.toString());
       return false;
+    }
+  }
+
+  static Future<void> loadFromStorageAction(
+    BuildContext context,
+    LoadFromCloudStorageAction action,
+  ) async {
+    final CloudStorage cloudStorage = context.read<Codelessly>().cloudStorage;
+
+    final evaluatedPath = PropertyValueDelegate.substituteVariables(
+      context,
+      action.path,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
+    final evaluatedDocumentId = PropertyValueDelegate.substituteVariables(
+      context,
+      action.documentId,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
+
+    Observable<VariableData>? variable;
+    if (action.variable != null) {
+      // Find a variable for the api and pass it.
+      // This makes it so the same variable for the api gets updated. This
+      // helps updating UI with new data.
+      final codelesslyContext = context.read<CodelesslyContext>();
+      variable = codelesslyContext.findVariableByName(action.variable!.name);
+    }
+
+    if (variable != null) {
+      // set loading
+      variable.value = variable.value.copyWith(
+        value: CloudStorageVariableUtils.loading(),
+      );
+    }
+
+    try {
+      log('Loading document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
+      final data = await cloudStorage.getDocumentData(
+          evaluatedPath, evaluatedDocumentId);
+
+      log('Loaded document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
+      if (variable != null) {
+        log('Updating variable ${variable.value.name} with success state.');
+        variable.value = variable.value.copyWith(
+          value: CloudStorageVariableUtils.success(
+            data,
+            docId: evaluatedDocumentId,
+          ),
+        );
+      }
+    } catch (error, stacktrace) {
+      print(
+          'Error loading document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
+      print(error);
+      print(stacktrace);
+      if (variable != null) {
+        variable.value = variable.value.copyWith(
+          value: CloudStorageVariableUtils.error(error),
+        );
+      }
     }
   }
 }

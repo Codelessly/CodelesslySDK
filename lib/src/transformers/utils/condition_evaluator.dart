@@ -2,7 +2,6 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../../data/local_storage.dart';
 
 class ConditionEvaluator<R extends Object>
     implements
@@ -258,6 +257,9 @@ class ConditionEvaluator<R extends Object>
 
   @override
   R? visitShowDialogAction(ShowDialogAction action) => null;
+
+  @override
+  R? visitLoadFromCloudStorageAction(LoadFromCloudStorageAction action) => null;
 }
 
 class ConditionPrinter
@@ -374,4 +376,7 @@ class ConditionPrinter
 
   @override
   void visitShowDialogAction(ShowDialogAction action) {}
+
+  @override
+  void visitLoadFromCloudStorageAction(LoadFromCloudStorageAction action) {}
 }

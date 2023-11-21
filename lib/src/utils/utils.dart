@@ -649,3 +649,56 @@ class ApiResponseVariableUtils {
 //   };
 // }
 }
+
+/// Helper utility class to easily update different statuses for cloud storage variable
+class CloudStorageVariableUtils {
+  CloudStorageVariableUtils._();
+
+  static Map idle() => {
+        'isIdle': true,
+        'isLoading': false,
+        'isError': false,
+        'isSuccess': false,
+        'status': 'idle',
+      };
+
+  static Map loading({Object? data}) => {
+        'isIdle': false,
+        'isLoading': true,
+        'isError': false,
+        'isSuccess': false,
+        'status': 'loading',
+        'data': data,
+        'hasData': data != null,
+      };
+
+  static Map error(
+    Object? error, {
+    Object? data,
+  }) =>
+      {
+        'isIdle': false,
+        'isLoading': false,
+        'isError': true,
+        'isSuccess': false,
+        'error': error is Map || error is List ? error : error.toString(),
+        'status': 'error',
+        'hasData': data != null,
+        'data': data is Map || data is List ? data : data.toString(),
+      };
+
+  static Map success(
+    Object? data, {
+    String? docId,
+  }) =>
+      {
+        'id': docId,
+        'isIdle': false,
+        'isLoading': false,
+        'isError': false,
+        'isSuccess': true,
+        'data': data,
+        'status': 'error',
+        'hasData': data != null,
+      };
+}

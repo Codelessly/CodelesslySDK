@@ -228,6 +228,8 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     // are loaded above because the api can have parameters with values
     // from the variables.
     loadApisAndItsVariables(context);
+
+    setCloudStorageVariables(context);
   }
 
   /// This loads all the apis for the layout as variables to be available
@@ -273,6 +275,33 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         FunctionsRepository.makeApiRequestFromAction(
             canvasAction, context, notifier);
       }
+    }
+  }
+
+  /// Sets all cloud storage variables to idle state.
+  void setCloudStorageVariables(BuildContext context) {
+    final loadFromStorageActions = canvasNode.reactions
+        .whereTriggerType(TriggerType.load)
+        .map((e) => e.action)
+        .whereType<LoadFromCloudStorageAction>()
+        .where((action) => action.variable != null)
+        .toList();
+
+    final CodelesslyContext codelesslyContext =
+        context.read<CodelesslyContext>();
+
+    for (final action in loadFromStorageActions) {
+      final data = CloudStorageVariableUtils.idle();
+
+      final variable =
+          codelesslyContext.findVariableByName(action.variable!.name);
+
+      if (variable == null) {
+        print('Variable with name ${action.variable!.name} does not exist');
+        continue;
+      }
+
+      variable.set(variable.value.copyWith(value: data), notify: false);
     }
   }
 
