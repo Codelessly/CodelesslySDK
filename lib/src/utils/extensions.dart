@@ -1558,6 +1558,9 @@ extension BaseConditionExt on BaseCondition {
           data: data,
           itemProvider: IndexedItemProvider.of(context),
           localStorage: context.read<Codelessly>().localStorage,
+          routeParams: ModalRoute.of(context)?.settings.arguments
+                  as Map<String, dynamic>? ??
+              {},
         ),
       );
 
@@ -1655,11 +1658,13 @@ extension ExpressionExt on BaseExpression {
   ) =>
       accept<bool>(
         ConditionEvaluator<bool>(
-          itemProvider: IndexedItemProvider.of(context),
-          variables: variables,
-          data: data,
-          localStorage: context.read<Codelessly>().localStorage,
-        ),
+            itemProvider: IndexedItemProvider.of(context),
+            variables: variables,
+            data: data,
+            localStorage: context.read<Codelessly>().localStorage,
+            routeParams: ModalRoute.of(context)?.settings.arguments
+                    as Map<String, dynamic>? ??
+                {}),
       )!;
 }
 
@@ -1676,6 +1681,9 @@ extension ExpressionPartExt on ExpressionPart {
           variables: variables,
           data: data,
           localStorage: context.read<Codelessly>().localStorage,
+          routeParams: ModalRoute.of(context)?.settings.arguments
+                  as Map<String, dynamic>? ??
+              {},
         ),
       );
 }
