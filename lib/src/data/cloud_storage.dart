@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../../firedart.dart';
@@ -70,7 +71,7 @@ class FirestoreCloudStorage extends CloudStorage {
   CollectionReference getCollectionPath(String path) {
     if (path.trim().isNotEmpty) {
       // path is provided.
-      final pathParts = path.split('.');
+      final pathParts = path.split(pathSeparatorRegex);
       CollectionReference? ref;
       while (pathParts.isNotEmpty) {
         final part = pathParts.removeAt(0);

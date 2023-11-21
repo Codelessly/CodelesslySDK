@@ -11,8 +11,6 @@ import 'package:rfc_6901/rfc_6901.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../codelessly_sdk.dart';
-import '../data/cloud_storage.dart';
-import '../data/local_storage.dart';
 import '../logging/error_handler.dart';
 import '../ui/codelessly_dialog_widget.dart';
 
@@ -1178,6 +1176,18 @@ class FunctionsRepository {
   ) async {
     try {
       final CloudStorage cloudStorage = context.read<Codelessly>().cloudStorage;
+
+      final evaluatedPath = PropertyValueDelegate.substituteVariables(
+        context,
+        subAction.path,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      );
+      final evaluatedDocumentId = PropertyValueDelegate.substituteVariables(
+        context,
+        subAction.documentId,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      );
+
       Map<String, dynamic> data = {};
       if (subAction.useRawValue) {
         // Substitute variables in raw value.
@@ -1200,9 +1210,9 @@ class FunctionsRepository {
       }
 
       return await cloudStorage.addDocument(
-        subAction.path,
+        evaluatedPath,
         value: data,
-        documentId: subAction.documentId,
+        documentId: evaluatedDocumentId,
         autoGenerateId: subAction.autoGenerateId,
         skipCreationIfDocumentExists: subAction.skipCreationIfDocumentExists,
       );
@@ -1218,6 +1228,18 @@ class FunctionsRepository {
     UpdateDocumentSubAction subAction,
   ) async {
     final CloudStorage cloudStorage = context.read<Codelessly>().cloudStorage;
+
+    final evaluatedPath = PropertyValueDelegate.substituteVariables(
+      context,
+      subAction.path,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
+    final evaluatedDocumentId = PropertyValueDelegate.substituteVariables(
+      context,
+      subAction.documentId,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
+
     if (subAction.useRawValue) {
       // Substitute variables in raw value.
       final updatedValue = PropertyValueDelegate.substituteVariables(
@@ -1229,8 +1251,8 @@ class FunctionsRepository {
       final Map<String, dynamic> data = jsonDecode(updatedValue);
 
       return await cloudStorage.updateDocument(
-        subAction.path,
-        documentId: subAction.documentId,
+        evaluatedPath,
+        documentId: evaluatedDocumentId,
         value: data,
       );
     }
@@ -1297,8 +1319,8 @@ class FunctionsRepository {
         log('Setting storage key [$storageKey] to value [$value].');
         docData[storageKey] = value;
         return await cloudStorage.updateDocument(
-          subAction.path,
-          documentId: subAction.documentId,
+          evaluatedPath,
+          documentId: evaluatedDocumentId,
           // Update only the field that was changed.
           value: {storageKey: docData[storageKey]},
         );
@@ -1322,8 +1344,8 @@ class FunctionsRepository {
       docData[match.name] = storageData[match.name];
 
       return await cloudStorage.updateDocument(
-        subAction.path,
-        documentId: subAction.documentId,
+        evaluatedPath,
+        documentId: evaluatedDocumentId,
         // Update only the field that was changed.
         value: {match.name: docData[match.name]},
       );
@@ -1341,9 +1363,20 @@ class FunctionsRepository {
     try {
       final CloudStorage cloudStorage = context.read<Codelessly>().cloudStorage;
 
-      return await cloudStorage.removeDocument(
+      final evaluatedPath = PropertyValueDelegate.substituteVariables(
+        context,
         subAction.path,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      );
+      final evaluatedDocumentId = PropertyValueDelegate.substituteVariables(
+        context,
         subAction.documentId,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      );
+
+      return await cloudStorage.removeDocument(
+        evaluatedPath,
+        evaluatedDocumentId,
       );
     } catch (error, stackTrace) {
       log(error.toString());
