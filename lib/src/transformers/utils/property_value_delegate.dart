@@ -74,7 +74,7 @@ class PropertyValueDelegate {
     // as well. If we use node value as a fallback, it will use the value of
     // the first item for all items. So if a checkbox is checked in the first
     // item, it will be checked in all items. This specifically prevents that.
-    final R? nodeValue = node.variables[property] == null
+    final R? retrievedNodeValue = node.variables[property] == null
         ? getPropertyValueFromNodeValues<R>(
             node,
             property,
@@ -82,7 +82,7 @@ class PropertyValueDelegate {
           )
         : null;
 
-    return conditionValue ?? variableValue ?? nodeValue;
+    return conditionValue ?? variableValue ?? retrievedNodeValue;
   }
 
   /// Retrieves the value of a node [property] from a condition by evaluating
@@ -252,11 +252,13 @@ class PropertyValueDelegate {
   static Object? retrievePredefinedVariableValue(
     VariableMatch match,
     ScopedValues scopedValues,
+    Object? nodeValue,
   ) {
     final Object? variableValue = switch (match.name) {
       'data' => scopedValues.data,
       'item' => scopedValues.indexedItem?.item,
       'index' => scopedValues.indexedItem?.index,
+      'value' => nodeValue,
       'storage' => scopedValues.localStorage?.getAll(),
       'route' => scopedValues.routeParams,
       _ => null,
@@ -307,6 +309,7 @@ class PropertyValueDelegate {
   static R? getPredefinedVariableValue<R extends Object>(
     String path, {
     required ScopedValues scopedValues,
+    required Object? nodeValue,
   }) {
     final match = VariableMatch.parse(path);
     if (match == null) return null;

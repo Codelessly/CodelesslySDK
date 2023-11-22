@@ -17,8 +17,8 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
       node: node,
       settings: settings,
       onTap: () => onTap(context, node),
-      onChanged: (value) => onChanged(context, node, value),
-      onSubmitted: (value) => onSubmitted(context, node, value),
+      onChanged: (context, value) => onChanged(context, node, value),
+      onSubmitted: (context, value) => onSubmitted(context, node, value),
     );
   }
 
@@ -139,6 +139,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
           context, node: node, TriggerType.changed);
 
   void onChanged(BuildContext context, TextFieldNode node, String inputValue) {
+    node.initialText = inputValue;
     FunctionsRepository.setNodeValue(context,
         node: node, property: 'inputValue', value: inputValue);
 
@@ -162,8 +163,8 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final TextFieldNode node;
   final WidgetBuildSettings settings;
   final VoidCallback? onTap;
-  final ValueChanged<String>? onChanged;
-  final ValueChanged<String>? onSubmitted;
+  final Function(BuildContext context, String value)? onChanged;
+  final Function(BuildContext context, String value)? onSubmitted;
   final bool useIconFonts;
 
   const PassiveTextFieldWidget({
@@ -199,7 +200,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
   void onFocusChanged() {
     if (!_focusNode.hasFocus) {
-      widget.onSubmitted?.call(_controller.text);
+      widget.onSubmitted?.call(context, _controller.text);
     }
   }
 
@@ -254,7 +255,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       style: TextUtils.retrieveTextStyleFromProp(
           widget.node.properties.inputStyle),
       onTap: widget.onTap,
-      onChanged: widget.onChanged,
+      onChanged: (value) => widget.onChanged?.call(context, value),
       onEditingComplete: () {},
       onSubmitted: (value) {
         // handled by the focus listener!

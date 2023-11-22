@@ -9,6 +9,7 @@ import '../../codelessly_sdk.dart';
 const Set<String> predefinedVariableNames = {
   'data',
   'index',
+  'value',
   'item',
   'storage',
   'route',
@@ -20,6 +21,7 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'data', type: VariableType.map),
   PredefinedVariableData(name: 'index', type: VariableType.integer),
   PredefinedVariableData(name: 'item'),
+  PredefinedVariableData(name: 'value'),
   PredefinedVariableData(name: 'storage', type: VariableType.map),
   PredefinedVariableData(name: 'route', type: VariableType.map),
 };

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import 'utils/node_provider.dart';
 import 'utils/placeholder_painter.dart';
 
 typedef BuildWidgetFromID = Widget Function(String id, BuildContext context);
@@ -118,7 +119,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           );
         }
 
-        return widget;
+        return NodeProvider(node: node, child: widget);
       },
     );
   }
