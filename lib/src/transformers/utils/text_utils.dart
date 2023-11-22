@@ -16,6 +16,234 @@ import '../../../codelessly_sdk.dart';
 class TextUtils {
   const TextUtils._();
 
+  static TextSpan buildTextSpanForProp(
+    BuildContext? context,
+    String rawText, {
+    required BaseNode? node,
+    required TextProp prop,
+    required TapGestureRecognizer? tapGestureRecognizer,
+    required List<VariableData> variablesOverrides,
+    required NullSubstitutionMode nullSubstitutionMode,
+    required bool replaceVariableWithSymbol,
+    List<Effect>? effects,
+  }) {
+    String characters = rawText;
+
+    // Get substring from the raw text for the given start and end positions.
+    if (prop is StartEndProp) {
+      characters = rawText.substring(prop.start, prop.end);
+    }
+
+    return buildTextSpan(
+      context,
+      characters,
+      node: node,
+      color: retrievePropColor(prop),
+      fontSize: prop.fontSize,
+      letterSpacing: prop.letterSpacing,
+      fontName: prop.fontName,
+      lineHeight: prop.lineHeight,
+      textDecoration: prop.textDecoration,
+      effects: effects ?? (node is BlendMixin ? node.effects : const []),
+      variablesOverrides: variablesOverrides,
+      nullSubstitutionMode: nullSubstitutionMode,
+      replaceVariableWithSymbol: replaceVariableWithSymbol,
+      tapGestureRecognizer: tapGestureRecognizer,
+    );
+  }
+
+  static TextSpan buildTextSpan(
+    BuildContext? context,
+    String rawText, {
+    // Text properties.
+    Color? color,
+    double? fontSize,
+    LetterSpacing? letterSpacing,
+    LineHeight? lineHeight,
+    FontName? fontName,
+    TextDecorationEnum? textDecoration,
+    List<Effect>? effects,
+
+    // Additional properties.
+    required BaseNode? node,
+    required List<VariableData> variablesOverrides,
+    required NullSubstitutionMode nullSubstitutionMode,
+    required bool replaceVariableWithSymbol,
+    TapGestureRecognizer? tapGestureRecognizer,
+  }) {
+    String characters = rawText;
+
+    final TextStyle style = retrieveTextStyle(
+      fontSize: fontSize,
+      fontName: fontName,
+      textDecoration: textDecoration,
+      lineHeight: lineHeight,
+      letterSpacing: letterSpacing,
+      color: color,
+      effects: effects ?? (node is BlendMixin ? node.effects : const []),
+    );
+
+    // Replace with fx symbol if required.
+    if (replaceVariableWithSymbol) {
+      final bool isVariable =
+          variableSyntaxIdentifierRegex.hasMatch(characters);
+      if (isVariable) {
+        return VariableSpan(
+          variable: characters,
+          style: style,
+        );
+      }
+    } else if (context != null) {
+      // Substitute variables.
+      characters = PropertyValueDelegate.substituteVariables(
+        context,
+        rawText,
+        variablesOverrides: variablesOverrides,
+        nullSubstitutionMode: nullSubstitutionMode,
+      );
+    }
+
+    return TextSpan(
+      text: characters,
+      style: style,
+      recognizer: tapGestureRecognizer,
+    );
+  }
+
+  static List<TextSpan> buildTextSpansForProps(
+    BuildContext? context,
+    String rawText, {
+    required BaseNode? node,
+    required List<TextProp> props,
+    required List<VariableData> variablesOverrides,
+    required NullSubstitutionMode nullSubstitutionMode,
+    required bool replaceVariablesWithSymbol,
+    List<Effect>? effects,
+    Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
+  }) {
+    return [
+      for (final prop in props)
+        buildTextSpanForProp(
+          context,
+          rawText,
+          node: node,
+          prop: prop,
+          variablesOverrides: variablesOverrides,
+          nullSubstitutionMode: nullSubstitutionMode,
+          replaceVariableWithSymbol: replaceVariablesWithSymbol,
+          tapGestureRecognizer: tapGestureRecognizers[prop.link],
+          effects: effects ?? (node is BlendMixin ? node.effects : const []),
+        ),
+    ];
+  }
+
+  static Text buildTextForProps(
+    BuildContext context,
+    String rawText, {
+    required BaseNode node,
+    required List<TextProp> props,
+    required List<VariableData> variablesOverrides,
+    required NullSubstitutionMode nullSubstitutionMode,
+    required bool replaceVariablesWithSymbol,
+    TextAlignHorizontalEnum? textAlignHorizontal,
+    int? maxLines,
+    TextOverflowC? overflow,
+    Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
+  }) {
+    final spans = buildTextSpansForProps(
+      context,
+      rawText,
+      node: node,
+      props: props,
+      variablesOverrides: variablesOverrides,
+      nullSubstitutionMode: nullSubstitutionMode,
+      replaceVariablesWithSymbol: replaceVariablesWithSymbol,
+      tapGestureRecognizers: tapGestureRecognizers,
+    );
+
+    return Text.rich(
+      TextSpan(children: spans),
+      textAlign: textAlignHorizontal?.toFlutter(),
+      maxLines: maxLines,
+      overflow: overflow?.flutterOverflow,
+    );
+  }
+
+  static Text buildTextForTextNode(
+    BuildContext context,
+    TextNode textNode, {
+    required List<VariableData> variablesOverrides,
+    required NullSubstitutionMode nullSubstitutionMode,
+    required bool replaceVariablesWithSymbol,
+    Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
+  }) {
+    final spans = buildTextSpansForProps(
+      context,
+      textNode.characters,
+      node: textNode,
+      props: textNode.textMixedProps,
+      variablesOverrides: variablesOverrides,
+      nullSubstitutionMode: nullSubstitutionMode,
+      replaceVariablesWithSymbol: replaceVariablesWithSymbol,
+      tapGestureRecognizers: tapGestureRecognizers,
+    );
+
+    return Text.rich(
+      TextSpan(children: spans),
+      textAlign: textNode.textAlignHorizontal.toFlutter(),
+      maxLines: textNode.maxLines,
+      overflow: textNode.overflow.flutterOverflow,
+    );
+  }
+
+  static Text buildText(
+    BuildContext context,
+    String rawText, {
+    required BaseNode? node,
+
+    // Text properties.
+    Color? color,
+    double? fontSize,
+    LetterSpacing? letterSpacing,
+    LineHeight? lineHeight,
+    FontName? fontName,
+    TextDecorationEnum? textDecoration,
+    List<Effect>? effects,
+    TapGestureRecognizer? tapGestureRecognizers,
+    TextAlignHorizontalEnum? textAlignHorizontal,
+    int? maxLines,
+    TextOverflowC? overflow,
+
+    // Additional data.
+    required List<VariableData> variablesOverrides,
+    required NullSubstitutionMode nullSubstitutionMode,
+    required bool replaceVariablesWithSymbol,
+  }) {
+    final span = buildTextSpan(
+      context,
+      rawText,
+      fontSize: fontSize,
+      fontName: fontName,
+      textDecoration: textDecoration,
+      lineHeight: lineHeight,
+      letterSpacing: letterSpacing,
+      color: color,
+      effects: effects,
+      variablesOverrides: variablesOverrides,
+      nullSubstitutionMode: nullSubstitutionMode,
+      replaceVariableWithSymbol: replaceVariablesWithSymbol,
+      tapGestureRecognizer: tapGestureRecognizers,
+      node: node,
+    );
+
+    return Text.rich(
+      TextSpan(children: [span]),
+      textAlign: textAlignHorizontal?.toFlutter(),
+      maxLines: maxLines,
+      overflow: overflow?.flutterOverflow,
+    );
+  }
+
   static Color? retrievePropColor(TextProp prop) => prop.fills
       .firstWhereOrNull((fill) => fill.color != null)
       ?.toFlutterColor();
@@ -61,56 +289,19 @@ class TextUtils {
     }
   }
 
-  static TextStyle retrieveTextStyleFromTextNode(
-    TextNode node, {
-    Color? color,
-    double? fontSize,
-    LetterSpacing? letterSpacing,
-    LineHeight? lineHeight,
-    FontName? fontName,
-    TextDecorationEnum? textDecoration,
-  }) {
-    double? effectiveFontSize;
-    FontName? effectiveFontName;
-    TextDecorationEnum? effectiveTextDecoration;
-    LineHeight? effectiveLineHeight;
-    LetterSpacing? effectiveLetterSpacing;
-    Color? effectiveColor;
-
-    for (final prop in node.textMixedProps) {
-      effectiveFontSize ??= prop.fontSize;
-      effectiveFontName ??= prop.fontName;
-      effectiveTextDecoration ??= prop.textDecoration;
-      effectiveLineHeight ??= prop.lineHeight;
-      effectiveLetterSpacing ??= prop.letterSpacing;
-      effectiveColor ??= retrievePropColor(prop);
-    }
-
-    return retrieveTextStyle(
-      fontSize: effectiveFontSize ?? fontSize,
-      fontName: effectiveFontName ?? fontName,
-      textDecoration: effectiveTextDecoration ?? textDecoration,
-      lineHeight: effectiveLineHeight ?? lineHeight,
-      letterSpacing: effectiveLetterSpacing ?? letterSpacing,
-      color: effectiveColor ?? color,
-      effects: node.effects,
-    );
-  }
-
   static TextStyle retrieveTextStyleFromProp(
     TextProp prop, {
     List<Effect> effects = const [],
-  }) {
-    return retrieveTextStyle(
-      fontSize: prop.fontSize,
-      fontName: prop.fontName,
-      textDecoration: prop.textDecoration,
-      lineHeight: prop.lineHeight,
-      letterSpacing: prop.letterSpacing,
-      color: retrievePropColor(prop),
-      effects: effects,
-    );
-  }
+  }) =>
+      retrieveTextStyle(
+        fontSize: prop.fontSize,
+        fontName: prop.fontName,
+        textDecoration: prop.textDecoration,
+        lineHeight: prop.lineHeight,
+        letterSpacing: prop.letterSpacing,
+        color: retrievePropColor(prop),
+        effects: effects,
+      );
 
   /// Sets default values.
   static TextStyle retrieveTextStyle({
@@ -137,6 +328,7 @@ class TextUtils {
             : FontStyle.normal
         : null;
 
+    // Not supported yet but good to have.
     final List<Shadow> shadows = effects
         .where((element) => element.type == EffectType.dropShadow)
         .map(
@@ -148,9 +340,8 @@ class TextUtils {
         )
         .toList();
 
-    final bool isGoogleFont = fontName == null
-        ? false
-        : GoogleFonts.asMap().containsKey(fontName.family);
+    final bool isGoogleFont =
+        fontName != null && GoogleFonts.asMap().containsKey(fontName.family);
     if (isGoogleFont) {
       return GoogleFonts.getFont(
         fontName.family,
@@ -185,277 +376,5 @@ class TextUtils {
         ],
       );
     }
-  }
-
-  static TextSpan buildTextSpanForProp(
-    BuildContext? context,
-    String rawText, {
-    required String? fieldName,
-    required BaseNode? node,
-    required TextProp prop,
-    required TapGestureRecognizer? tapGestureRecognizer,
-    required List<VariableData> variablesOverrides,
-    required NullSubstitutionMode nullSubstitutionMode,
-    required bool replaceVariableWithSymbol,
-    List<Effect>? effects,
-  }) {
-    String characters;
-
-    if (fieldName != null && node != null && context != null) {
-      characters = PropertyValueDelegate.getPropertyValue<String>(
-            context,
-            node,
-            fieldName,
-            variablesOverrides: variablesOverrides,
-          ) ??
-          rawText;
-    } else {
-      characters = rawText;
-    }
-
-    if (prop is StartEndProp) {
-      characters = rawText.substring(prop.start, prop.end);
-    }
-
-    final TextStyle style = retrieveTextStyleFromProp(
-      prop,
-      effects: effects ?? (node is BlendMixin ? node.effects : const []),
-    );
-
-    if (replaceVariableWithSymbol) {
-      final bool isVariable =
-          variableSyntaxIdentifierRegex.hasMatch(characters);
-      if (isVariable) {
-        return VariableSpan(
-          variable: characters,
-          style: style,
-        );
-      }
-    }
-
-    if (context != null) {
-      characters = PropertyValueDelegate.substituteVariables(
-        context,
-        characters,
-        variablesOverrides: variablesOverrides,
-        nullSubstitutionMode: nullSubstitutionMode,
-      );
-    }
-
-    return TextSpan(
-      text: characters,
-      style: style,
-      recognizer: tapGestureRecognizer,
-    );
-  }
-
-  static TextSpan buildTextSpan(
-    BuildContext context,
-    String rawText, {
-    // Text properties.
-    Color? color,
-    double? fontSize,
-    LetterSpacing? letterSpacing,
-    LineHeight? lineHeight,
-    FontName? fontName,
-    TextDecorationEnum? textDecoration,
-    List<Effect>? effects,
-
-    // Additional properties.
-    required String? fieldName,
-    required BaseNode? node,
-    required List<VariableData> variablesOverrides,
-    required NullSubstitutionMode nullSubstitutionMode,
-    required bool replaceVariableWithSymbol,
-    TapGestureRecognizer? tapGestureRecognizer,
-  }) {
-    String characters;
-
-    if (fieldName != null && node != null) {
-      characters = PropertyValueDelegate.getPropertyValue<String>(
-            context,
-            node,
-            fieldName,
-            variablesOverrides: variablesOverrides,
-          ) ??
-          rawText;
-    } else {
-      characters = rawText;
-    }
-
-    final TextStyle style = retrieveTextStyle(
-      fontSize: fontSize,
-      fontName: fontName,
-      textDecoration: textDecoration,
-      lineHeight: lineHeight,
-      letterSpacing: letterSpacing,
-      color: color,
-      effects: effects ?? (node is BlendMixin ? node.effects : const []),
-    );
-
-    if (replaceVariableWithSymbol) {
-      final bool isVariable =
-          variableSyntaxIdentifierRegex.hasMatch(characters);
-      if (isVariable) {
-        return VariableSpan(
-          variable: characters,
-          style: style,
-        );
-      }
-    }
-
-    characters = PropertyValueDelegate.substituteVariables(
-      context,
-      characters,
-      variablesOverrides: variablesOverrides,
-      nullSubstitutionMode: nullSubstitutionMode,
-    );
-
-    return TextSpan(
-      text: characters,
-      style: style,
-      recognizer: tapGestureRecognizer,
-    );
-  }
-
-  static List<TextSpan> buildTextSpansForProps(
-    BuildContext? context,
-    String rawText, {
-    required String? fieldName,
-    required BaseNode? node,
-    required List<TextProp> props,
-    required List<VariableData> variablesOverrides,
-    required NullSubstitutionMode nullSubstitutionMode,
-    required bool replaceVariablesWithSymbol,
-    List<Effect>? effects,
-    Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
-  }) {
-    return [
-      for (final prop in props)
-        buildTextSpanForProp(
-          context,
-          rawText,
-          fieldName: fieldName,
-          node: node,
-          prop: prop,
-          variablesOverrides: variablesOverrides,
-          nullSubstitutionMode: nullSubstitutionMode,
-          replaceVariableWithSymbol: replaceVariablesWithSymbol,
-          tapGestureRecognizer: tapGestureRecognizers[prop.link],
-          effects: effects ?? (node is BlendMixin ? node.effects : const []),
-        ),
-    ];
-  }
-
-  static Text buildTextForProps(
-    BuildContext context,
-    String rawText, {
-    required BaseNode node,
-    required String fieldName,
-    required List<TextProp> props,
-    required List<VariableData> variablesOverrides,
-    required NullSubstitutionMode nullSubstitutionMode,
-    required bool replaceVariablesWithSymbol,
-    TextAlignHorizontalEnum? textAlignHorizontal,
-    int? maxLines,
-    TextOverflowC? overflow,
-    Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
-  }) {
-    final spans = buildTextSpansForProps(
-      context,
-      rawText,
-      node: node,
-      props: props,
-      fieldName: fieldName,
-      variablesOverrides: variablesOverrides,
-      nullSubstitutionMode: nullSubstitutionMode,
-      replaceVariablesWithSymbol: replaceVariablesWithSymbol,
-      tapGestureRecognizers: tapGestureRecognizers,
-    );
-
-    return Text.rich(
-      TextSpan(children: spans),
-      textAlign: textAlignHorizontal?.toFlutter(),
-      maxLines: maxLines,
-      overflow: overflow?.flutterOverflow,
-    );
-  }
-
-  static Text buildTextForTextNode(
-    BuildContext context,
-    TextNode textNode, {
-    required List<VariableData> variablesOverrides,
-    required NullSubstitutionMode nullSubstitutionMode,
-    required bool replaceVariablesWithSymbol,
-    Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
-  }) {
-    final spans = buildTextSpansForProps(
-      context,
-      textNode.characters,
-      node: textNode,
-      props: textNode.textMixedProps,
-      fieldName: 'characters',
-      variablesOverrides: variablesOverrides,
-      nullSubstitutionMode: nullSubstitutionMode,
-      replaceVariablesWithSymbol: replaceVariablesWithSymbol,
-      tapGestureRecognizers: tapGestureRecognizers,
-    );
-
-    return Text.rich(
-      TextSpan(children: spans),
-      textAlign: textNode.textAlignHorizontal.toFlutter(),
-      maxLines: textNode.maxLines,
-      overflow: textNode.overflow.flutterOverflow,
-    );
-  }
-
-  static Text buildText(
-    BuildContext context,
-    String rawText, {
-    required BaseNode? node,
-    required String? fieldName,
-
-    // Text properties.
-    Color? color,
-    double? fontSize,
-    LetterSpacing? letterSpacing,
-    LineHeight? lineHeight,
-    FontName? fontName,
-    TextDecorationEnum? textDecoration,
-    List<Effect>? effects,
-    TapGestureRecognizer? tapGestureRecognizers,
-    TextAlignHorizontalEnum? textAlignHorizontal,
-    int? maxLines,
-    TextOverflowC? overflow,
-
-    // Additional data.
-    required List<VariableData> variablesOverrides,
-    required NullSubstitutionMode nullSubstitutionMode,
-    required bool replaceVariablesWithSymbol,
-  }) {
-    final span = buildTextSpan(
-      context,
-      rawText,
-      fontSize: fontSize,
-      fontName: fontName,
-      textDecoration: textDecoration,
-      lineHeight: lineHeight,
-      letterSpacing: letterSpacing,
-      color: color,
-      effects: effects,
-      variablesOverrides: variablesOverrides,
-      nullSubstitutionMode: nullSubstitutionMode,
-      replaceVariableWithSymbol: replaceVariablesWithSymbol,
-      tapGestureRecognizer: tapGestureRecognizers,
-      fieldName: fieldName,
-      node: node,
-    );
-
-    return Text.rich(
-      TextSpan(children: [span]),
-      textAlign: textAlignHorizontal?.toFlutter(),
-      maxLines: maxLines,
-      overflow: overflow?.flutterOverflow,
-    );
   }
 }

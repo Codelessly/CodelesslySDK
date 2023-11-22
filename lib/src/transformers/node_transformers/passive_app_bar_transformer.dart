@@ -114,7 +114,6 @@ class PassiveAppBarWidget extends StatelessWidget
             textAlignHorizontal: null,
             maxLines: null,
             overflow: null,
-            fieldName: 'title',
             node: node,
             variablesOverrides: variablesOverrides,
             nullSubstitutionMode: settings.nullSubstitutionMode,
