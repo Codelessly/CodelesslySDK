@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/node_provider.dart';
 
 class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
   PassiveTextFieldTransformer(super.getNode, super.manager);
@@ -16,7 +17,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     return PassiveTextFieldWidget(
       node: node,
       settings: settings,
-      onTap: () => onTap(context, node),
+      onTap: (context, value) => onTap(context, node, value),
       onChanged: (context, value) => onChanged(context, node, value),
       onSubmitted: (context, value) => onSubmitted(context, node, value),
     );
@@ -134,12 +135,13 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     );
   }
 
-  void onTap(BuildContext context, TextFieldNode node) =>
-      FunctionsRepository.triggerAction(
-          context, node: node, TriggerType.changed);
+  void onTap(BuildContext context, TextFieldNode node, String inputValue) {
+    NodeProvider.setState(context, inputValue);
+    FunctionsRepository.triggerAction(context, node: node, TriggerType.changed);
+  }
 
   void onChanged(BuildContext context, TextFieldNode node, String inputValue) {
-    node.initialText = inputValue;
+    NodeProvider.setState(context, inputValue);
     FunctionsRepository.setNodeValue(context,
         node: node, property: 'inputValue', value: inputValue);
 
@@ -154,15 +156,17 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     BuildContext context,
     TextFieldNode node,
     String inputValue,
-  ) =>
-      FunctionsRepository.triggerAction(
-          context, node: node, TriggerType.submitted, value: inputValue);
+  ) {
+    NodeProvider.setState(context, inputValue);
+    FunctionsRepository.triggerAction(
+        context, node: node, TriggerType.submitted, value: inputValue);
+  }
 }
 
 class PassiveTextFieldWidget extends StatefulWidget {
   final TextFieldNode node;
   final WidgetBuildSettings settings;
-  final VoidCallback? onTap;
+  final Function(BuildContext context, String value)? onTap;
   final Function(BuildContext context, String value)? onChanged;
   final Function(BuildContext context, String value)? onSubmitted;
   final bool useIconFonts;
@@ -196,6 +200,20 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   void initState() {
     super.initState();
     _focusNode.addListener(onFocusChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    NodeProvider.setState(context, _controller.text);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 
   void onFocusChanged() {
@@ -254,7 +272,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       obscuringCharacter: widget.node.properties.obscuringCharacter,
       style: TextUtils.retrieveTextStyleFromProp(
           widget.node.properties.inputStyle),
-      onTap: widget.onTap,
+      onTap: () => widget.onTap?.call(context, _controller.text),
       onChanged: (value) => widget.onChanged?.call(context, value),
       onEditingComplete: () {},
       onSubmitted: (value) {
@@ -291,12 +309,5 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     );
 
     return field;
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _focusNode.dispose();
-    super.dispose();
   }
 }
