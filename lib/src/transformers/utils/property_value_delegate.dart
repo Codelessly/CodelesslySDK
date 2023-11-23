@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../../data/local_storage.dart';
 
 /// Represents what to do when a variable path evaluates to null when
 /// substituting variables in a text.

@@ -28,7 +28,7 @@ abstract class NetworkDataRepository {
     log('[NetworkDataRepo] Downloading publish bundle with slug: $slug and source: $source');
     try {
       final String url =
-          'https://firebasestorage.googleapis.com/v0/b/${config.firebaseProjectId}.appspot.com/o/${Uri.encodeComponent('${source.serverPath}/$slug.json')}?alt=media';
+          'https://firebasestorage.googleapis.com/v0/b/${config.firebaseOptions.projectId}.appspot.com/o/${Uri.encodeComponent('${source.serverPath}/$slug.json')}?alt=media';
 
       print('[NetworkDataRepo] Publish bundle URL: $url');
       final http.Response result = await http.get(Uri.parse(url));

@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 
 import '../codelessly_sdk.dart';
-import '../firedart.dart';
 import 'cache/codelessly_cache_manager.dart';
-import 'data/cloud_storage.dart';
-import 'data/local_storage.dart';
+import 'firebase_options_prod.dart';
 import 'logging/error_handler.dart';
 import 'logging/reporter.dart';
 
@@ -77,7 +76,8 @@ class Codelessly {
   /// to the local device's cache.
   CacheManager get cacheManager => _cacheManager!;
 
-  Firestore? _firestore;
+  FirebaseApp? _firebaseApp;
+  FirebaseFirestore? _firestore;
 
   /// A helper getter to retrieve the active [DataManager] based on the
   /// [PublishSource] provided by the [CodelesslyConfig].
@@ -89,7 +89,7 @@ class Codelessly {
 
   /// Returns the local instance of the Firestore SDK. Used by the data manager
   /// to retrieve server data.
-  Firestore get firestore => _firestore!;
+  FirebaseFirestore get firestore => _firestore!;
 
   /// A map of data that is passed to loaded layouts for nodes to replace their
   /// property values with.
@@ -274,7 +274,7 @@ class Codelessly {
     _config ??= config;
 
     initErrorHandler(
-      firebaseProjectId: _config!.firebaseProjectId,
+      firebaseOptions: _config!.firebaseOptions,
       automaticallySendCrashReports: _config!.automaticallySendCrashReports,
     );
 
@@ -318,27 +318,27 @@ class Codelessly {
   /// initialized. If it is initialized, this is ignored.
   ///
   /// If the SDK is running on web platform, this will be ignored.
-  void initErrorHandler({
+  Future<void> initErrorHandler({
     required bool automaticallySendCrashReports,
-    String? firebaseProjectId,
-  }) {
+    FirebaseOptions? firebaseOptions,
+  }) async {
     final Stopwatch stopwatch = Stopwatch()..start();
 
-    firebaseProjectId ??= defaultFirebaseProjectId;
-    if (!kIsWeb) {
-      if (_firestore != null) return;
-      log('[SDK] [INIT] Initializing Firestore instance with project ID: $firebaseProjectId');
-      final Stopwatch stopwatch = Stopwatch()..start();
+    firebaseOptions ??= DefaultFirebaseOptionsProd.currentPlatform;
 
-      _firestore = Firestore(firebaseProjectId);
+    if (_firestore != null) return;
+    log('[SDK] [INIT] Initializing Firestore instance with project ID: ${firebaseOptions.projectId}');
 
-      stopwatch.stop();
-      final elapsed = stopwatch.elapsed;
-      log('[SDK] [INIT] Firestore instance initialized in ${elapsed.inMilliseconds}ms or ${elapsed.inSeconds}s');
-    }
+    _firebaseApp = await Firebase.initializeApp(
+        name: 'Codelessly', options: firebaseOptions);
+    _firestore = FirebaseFirestore.instanceFor(app: _firebaseApp!);
+
+    final elapsed = stopwatch.elapsed;
+    log('[SDK] [INIT] Firestore instance initialized in ${elapsed.inMilliseconds}ms or ${elapsed.inSeconds}s');
+
     CodelesslyErrorHandler.init(
-      reporter: automaticallySendCrashReports && !kIsWeb
-          ? FirestoreErrorReporter(_firestore!)
+      reporter: automaticallySendCrashReports
+          ? FirestoreErrorReporter(_firebaseApp!, _firestore!)
           : null,
       onException: (CodelesslyException exception) {
         // Layout errors are not SDK errors.
@@ -388,13 +388,13 @@ class Codelessly {
 
     _config ??= config;
 
-    log('[SDK] [INIT] Initializing Codelessly with project ID: ${_config!.firebaseProjectId}');
+    log('[SDK] [INIT] Initializing Codelessly with project ID: ${_config!.firebaseOptions.projectId}');
     log('[SDK] [INIT] Cloud Functions Base URL: ${_config!.firebaseCloudFunctionsBaseURL}');
 
     final Stopwatch stopwatch = Stopwatch()..start();
 
-    initErrorHandler(
-      firebaseProjectId: _config!.firebaseProjectId,
+    await initErrorHandler(
+      firebaseOptions: _config!.firebaseOptions,
       automaticallySendCrashReports: _config!.automaticallySendCrashReports,
     );
     try {
@@ -428,12 +428,8 @@ class Codelessly {
             config: _config!.copyWith(isPreview: false),
             cacheManager: this.cacheManager,
             authManager: this.authManager,
-            networkDataRepository: kIsWeb
-                ? WebDataRepository(config: _config!)
-                : FirebaseDataRepository(
-                    firestore: firestore,
-                    config: _config!,
-                  ),
+            networkDataRepository:
+                FirebaseDataRepository(firestore: firestore, config: _config!),
             localDataRepository:
                 LocalDataRepository(cacheManager: this.cacheManager),
           );
@@ -445,12 +441,8 @@ class Codelessly {
             config: _config!.copyWith(isPreview: true),
             cacheManager: this.cacheManager,
             authManager: this.authManager,
-            networkDataRepository: kIsWeb
-                ? WebDataRepository(config: _config!)
-                : FirebaseDataRepository(
-                    firestore: firestore,
-                    config: _config!,
-                  ),
+            networkDataRepository:
+                FirebaseDataRepository(firestore: firestore, config: _config!),
             localDataRepository:
                 LocalDataRepository(cacheManager: this.cacheManager),
           );
@@ -461,12 +453,8 @@ class Codelessly {
         config: _config!.copyWith(isPreview: false),
         cacheManager: this.cacheManager,
         authManager: this.authManager,
-        networkDataRepository: kIsWeb
-            ? WebDataRepository(config: _config!)
-            : FirebaseDataRepository(
-                firestore: firestore,
-                config: _config!,
-              ),
+        networkDataRepository:
+            FirebaseDataRepository(firestore: firestore, config: _config!),
         localDataRepository:
             LocalDataRepository(cacheManager: this.cacheManager),
       );
