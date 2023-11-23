@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'constants.dart';
+import 'firebase_options_prod.dart';
 import 'model/publish_source.dart';
 
 /// Holds initialization configuration options for the SDK.
@@ -49,7 +51,7 @@ class CodelesslyConfig with EquatableMixin {
   /// Note that if this is changed changed when widget is already initialized,
   /// it will have no effect. Only the value provided when the widget is
   /// initialized will be used.
-  final String firebaseProjectId;
+  final FirebaseOptions firebaseOptions;
 
   /// Base URL of the Firebase Cloud Functions instance to use.
   final String firebaseCloudFunctionsBaseURL;
@@ -72,10 +74,11 @@ class CodelesslyConfig with EquatableMixin {
     this.automaticallySendCrashReports = true,
     this.isPreview = false,
     this.preload = true,
-    this.firebaseProjectId = defaultFirebaseProjectId,
+    FirebaseOptions? firebaseOptions,
     this.firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
     this.baseURL = defaultBaseURL,
-  });
+  }) : firebaseOptions =
+            firebaseOptions ?? DefaultFirebaseOptionsProd.currentPlatform;
 
   /// Creates a new instance of [CodelesslyConfig] with the provided optional
   /// parameters.
@@ -85,7 +88,7 @@ class CodelesslyConfig with EquatableMixin {
     bool? automaticallySendCrashReports,
     bool? isPreview,
     bool? preload,
-    String? firebaseProjectId,
+    FirebaseOptions? firebaseOptions,
     String? firebaseCloudFunctionsBaseURL,
     String? baseURL,
   }) =>
@@ -96,7 +99,7 @@ class CodelesslyConfig with EquatableMixin {
             automaticallySendCrashReports ?? this.automaticallySendCrashReports,
         isPreview: isPreview ?? this.isPreview,
         preload: preload ?? this.preload,
-        firebaseProjectId: firebaseProjectId ?? this.firebaseProjectId,
+        firebaseOptions: firebaseOptions ?? this.firebaseOptions,
         firebaseCloudFunctionsBaseURL:
             firebaseCloudFunctionsBaseURL ?? this.firebaseCloudFunctionsBaseURL,
         baseURL: baseURL ?? this.baseURL,
@@ -109,7 +112,7 @@ class CodelesslyConfig with EquatableMixin {
         automaticallySendCrashReports,
         isPreview,
         preload,
-        firebaseProjectId,
+        firebaseOptions,
         firebaseCloudFunctionsBaseURL,
         baseURL,
       ];

@@ -7,8 +7,6 @@ import 'package:hive/hive.dart';
 import '../../codelessly_sdk.dart';
 import '../cache/codelessly_cache_manager.dart';
 import '../logging/error_handler.dart';
-import 'cloud_storage.dart';
-import 'local_storage.dart';
 
 /// Orchestrates the data flow for the SDK.
 class DataManager {
@@ -28,8 +26,8 @@ class DataManager {
   /// The passed config from the SDK.
   final CodelesslyConfig config;
 
-  /// The network data repository to use. By default, it is going to be either
-  /// [FirebaseDataRepository] or [WebDataRepository] depending on platform.
+  /// The network data repository to use. By default, it is going to be
+  /// [FirebaseDataRepository].
   final NetworkDataRepository networkDataRepository;
 
   /// The local data repository to use. By default, it is going to be
@@ -331,6 +329,7 @@ class DataManager {
   }
 
   Future<CloudStorage> initializeCloudStorage(SDKPublishModel model) async {
+    // TODO: change this? how do we get firestore instance here?
     if (networkDataRepository is! FirebaseDataRepository) {
       throw UnimplementedError(
           'Only FirebaseDataRepository is supported for cloud storage.');

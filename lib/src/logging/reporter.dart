@@ -1,6 +1,8 @@
 import 'dart:developer';
 
-import '../../firedart.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+
 import 'codelessly_event.dart';
 import 'error_handler.dart';
 
@@ -20,13 +22,14 @@ abstract class ErrorReporter {
 /// Responsible for uploading events and exceptions to firestore database.
 class FirestoreErrorReporter extends ErrorReporter {
   /// The firestore instance to use for uploading events and exceptions.
-  final Firestore _firestore;
+  final FirebaseFirestore _firestore;
+  final FirebaseApp _firebaseApp;
 
   /// The collection to use for uploading events and exceptions.
   static const _collection = 'sdk_errors';
 
   /// Creates a new [FirestoreErrorReporter] with the given firestore instance.
-  FirestoreErrorReporter(this._firestore);
+  FirestoreErrorReporter(this._firebaseApp, this._firestore);
 
   @override
   Future<void> captureEvent(CodelesslyEvent event) async {
@@ -57,11 +60,7 @@ class FirestoreErrorReporter extends ErrorReporter {
     await event.populateDeviceMetadata();
     await _firestore.collection(_collection).add(event.toJson()).then((doc) {
       log('Exception captured. ID: [${doc.id}]');
-      if (Firestore.isInitialized) {
-        log('Exception URL: https://console.firebase.google.com/u/1/project/${Firestore.projectId}/firestore/data/~2Fsdk_errors~2F${doc.id}');
-      } else {
-        log('Cannot get exception URL. Firestore is not initialized.');
-      }
+      log('Exception URL: https://console.firebase.google.com/u/1/project/${_firebaseApp.options.projectId}/firestore/data/~2Fsdk_errors~2F${doc.id}');
     });
   }
 

@@ -12,6 +12,7 @@ import '../logging/error_handler.dart';
 ///
 /// Since Firedart is not compatible with Flutter Web, this implementation
 /// utilizes the http package instead.
+@Deprecated('Use [FirebaseDataRepository] instead.')
 class WebDataRepository extends NetworkDataRepository {
   /// Creates a [WebDataRepository] instance.
   WebDataRepository({required super.config});

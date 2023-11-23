@@ -58,12 +58,12 @@ class _ChatScreenState extends State<ChatScreen>
   @override
   void initState() {
     super.initState();
+    // TODO: move this example to production.
     Codelessly.instance.configure(
       config: CodelesslyConfig(
         authToken: authToken,
         automaticallySendCrashReports: false,
         isPreview: false,
-        firebaseProjectId: 'codeless-dev',
         firebaseCloudFunctionsBaseURL:
             'https://us-central1-codeless-dev.cloudfunctions.net',
         baseURL: 'https://dev.codelessly.com',

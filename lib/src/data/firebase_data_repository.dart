@@ -1,12 +1,13 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../codelessly_sdk.dart';
-import '../../firedart.dart';
 
 /// Handles the data flow of [SDKPublishModel] from the server.
 class FirebaseDataRepository extends NetworkDataRepository {
   /// The firestore instance to fetch the published model from.
-  final Firestore firestore;
+  final FirebaseFirestore firestore;
 
   /// Creates a new [FirebaseDataRepository] instance with the given [firestore]
   /// instance.
@@ -17,16 +18,16 @@ class FirebaseDataRepository extends NetworkDataRepository {
     required String projectID,
     required PublishSource source,
   }) {
-    final DocumentReference publishModelDoc =
-        firestore.collection(source.serverPath).document(projectID);
+    final publishModelDoc =
+        firestore.collection(source.serverPath).doc(projectID);
 
-    return publishModelDoc.stream.map((event) {
-      final Map<String, dynamic>? data = event?.map;
+    return publishModelDoc.snapshots().map((event) {
+      final Map<String, dynamic>? data = event.data();
       if (data == null) {
         return null;
       }
       final SDKPublishModel model = SDKPublishModel.fromJson(
-        {...data, 'id': event?.id},
+        {...data, 'id': event.id},
       );
       return model;
     });
@@ -38,14 +39,14 @@ class FirebaseDataRepository extends NetworkDataRepository {
     required String layoutID,
     required PublishSource source,
   }) async {
-    final DocumentReference layoutDoc = firestore
+    final layoutDoc = firestore
         .collection(source.serverPath)
-        .document(projectID)
+        .doc(projectID)
         .collection('layouts')
-        .document(layoutID);
+        .doc(layoutID);
 
     return layoutDoc.get().then((value) {
-      final Map<String, dynamic> data = value.map;
+      final Map<String, dynamic> data = value.data() ?? {};
       final SDKPublishLayout layout = SDKPublishLayout.fromJson(
         {...data, 'id': value.id},
       );
@@ -59,14 +60,14 @@ class FirebaseDataRepository extends NetworkDataRepository {
     required String fontID,
     required PublishSource source,
   }) {
-    final DocumentReference fontDoc = firestore
+    final fontDoc = firestore
         .collection(source.serverPath)
-        .document(projectID)
+        .doc(projectID)
         .collection('fonts')
-        .document(fontID);
+        .doc(fontID);
 
     return fontDoc.get().then((value) {
-      final Map<String, dynamic> data = value.map;
+      final Map<String, dynamic> data = value.data() ?? {};
       final SDKPublishFont font = SDKPublishFont.fromJson(
         {...data, 'id': value.id},
       );
@@ -80,14 +81,14 @@ class FirebaseDataRepository extends NetworkDataRepository {
     required String apiId,
     required PublishSource source,
   }) {
-    final DocumentReference apiDoc = firestore
+    final apiDoc = firestore
         .collection(source.serverPath)
-        .document(projectID)
+        .doc(projectID)
         .collection('apis')
-        .document(apiId);
+        .doc(apiId);
 
     return apiDoc.get().then((value) {
-      final Map<String, dynamic> data = value.map;
+      final Map<String, dynamic> data = value.data() ?? {};
       final HttpApiData api = HttpApiData.fromJson(
         {...data, 'id': value.id},
       );
@@ -101,14 +102,14 @@ class FirebaseDataRepository extends NetworkDataRepository {
     required String layoutID,
     required PublishSource source,
   }) {
-    final DocumentReference variablesDoc = firestore
+    final variablesDoc = firestore
         .collection(source.serverPath)
-        .document(projectID)
+        .doc(projectID)
         .collection('variables')
-        .document(layoutID);
+        .doc(layoutID);
 
     return variablesDoc.get().then((value) {
-      final Map<String, dynamic> data = value.map;
+      final Map<String, dynamic> data = value.data() ?? {};
       final SDKLayoutVariables layoutVariables = SDKLayoutVariables.fromJson(
         {...data, 'id': value.id},
       );
@@ -122,14 +123,14 @@ class FirebaseDataRepository extends NetworkDataRepository {
     required String layoutID,
     required PublishSource source,
   }) {
-    final DocumentReference conditionsDoc = firestore
+    final conditionsDoc = firestore
         .collection(source.serverPath)
-        .document(projectID)
+        .doc(projectID)
         .collection('conditions')
-        .document(layoutID);
+        .doc(layoutID);
 
     return conditionsDoc.get().then((value) {
-      final Map<String, dynamic> data = value.map;
+      final Map<String, dynamic> data = value.data() ?? {};
       final SDKLayoutConditions layoutConditions = SDKLayoutConditions.fromJson(
         {...data, 'id': value.id},
       );

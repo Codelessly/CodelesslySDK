@@ -197,13 +197,16 @@ class CodelesslyWidgetController extends ChangeNotifier {
       //
       // We need to handle them, and if the codelessly instance is not
       // configured yet, we need to initialize the error handler regardless.
-      effectiveCodelessly.initErrorHandler(
-        firebaseProjectId: effectiveCodelessly.config?.firebaseProjectId,
+      effectiveCodelessly
+          .initErrorHandler(
+        firebaseOptions: effectiveCodelessly.config?.firebaseOptions,
         automaticallySendCrashReports:
             effectiveCodelessly.config?.automaticallySendCrashReports ?? false,
-      );
-      CodelesslyErrorHandler.instance
-          .captureException(exception, stacktrace: str);
+      )
+          .then((_) {
+        CodelesslyErrorHandler.instance
+            .captureException(exception, stacktrace: str);
+      });
     }
 
     // First event.
