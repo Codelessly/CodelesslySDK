@@ -253,7 +253,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
     if (!CodelesslyErrorHandler.didInitialize) {
       _effectiveController.effectiveCodelessly.initErrorHandler(
-        firebaseProjectId: _effectiveController.config.firebaseProjectId,
+        firebaseOptions: _effectiveController.config.firebaseOptions,
         automaticallySendCrashReports:
             _effectiveController.config.automaticallySendCrashReports,
       );

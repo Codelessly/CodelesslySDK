@@ -38,22 +38,24 @@ enum ApiRequestType {
 }
 
 class FunctionsRepository {
-  static void performAction(
+  static Future<void> performAction(
     BuildContext context,
     ActionModel action, {
     dynamic internalValue,
     bool notify = true,
-  }) {
+  }) async {
     log('Performing action: $action');
     switch (action.type) {
       case ActionType.navigation:
-        navigate(context, action as NavigationAction);
+        await navigate(context, action as NavigationAction);
+        return;
       case ActionType.showDialog:
-        showDialogAction(context, action as ShowDialogAction);
+        await showDialogAction(context, action as ShowDialogAction);
+        return;
       case ActionType.link:
         launchURL(context, (action as LinkAction));
       case ActionType.submit:
-        submitToNewsletter(context, action as SubmitAction);
+        await submitToNewsletter(context, action as SubmitAction);
       case ActionType.setValue:
         setValue(
           context,
@@ -67,15 +69,17 @@ class FunctionsRepository {
         setVariableFromAction(context, action as SetVariableAction,
             notify: notify);
       case ActionType.callFunction:
-        callFunction(context, action as CallFunctionAction);
+        return callFunction(context, action as CallFunctionAction);
       case ActionType.callApi:
-        makeApiRequestFromAction(action as ApiCallAction, context);
+        await makeApiRequestFromAction(action as ApiCallAction, context);
       case ActionType.setStorage:
-        setStorageFromAction(context, action as SetStorageAction);
+        await setStorageFromAction(context, action as SetStorageAction);
       case ActionType.setCloudStorage:
-        setCloudStorageFromAction(context, action as SetCloudStorageAction);
+        await setCloudStorageFromAction(
+            context, action as SetCloudStorageAction);
       case ActionType.loadFromCloudStorage:
-        loadFromStorageAction(context, action as LoadFromCloudStorageAction);
+        await loadFromStorageAction(
+            context, action as LoadFromCloudStorageAction);
     }
   }
 
@@ -187,13 +191,14 @@ class FunctionsRepository {
     return parsedParams;
   }
 
-  static void navigate(BuildContext context, NavigationAction action) {
+  static Future<void> navigate(
+      BuildContext context, NavigationAction action) async {
     final parsedParams = substituteVariablesInMap(context, action.params);
 
     log('Performing navigation action with params: $parsedParams');
 
     if (action.navigationType == NavigationType.pop) {
-      Navigator.maybePop(context, parsedParams);
+      await Navigator.maybePop(context, parsedParams);
     } else {
       final Codelessly codelessly = context.read<Codelessly>();
       // Check if a layout exists for the action's [destinationId].
@@ -219,7 +224,7 @@ class FunctionsRepository {
       }
 
       if (action.navigationType == NavigationType.push) {
-        Navigator.push(
+        await Navigator.push(
           context,
           MaterialPageRoute(
             settings: RouteSettings(arguments: parsedParams),
@@ -228,11 +233,10 @@ class FunctionsRepository {
               layoutID: layoutId,
             ),
           ),
-        ).then((value) {
-          context.read<Codelessly>().notifyNavigationListeners(context);
-        });
+        );
+        context.read<Codelessly>().notifyNavigationListeners(context);
       } else if (action.navigationType == NavigationType.replace) {
-        Navigator.pushReplacement(
+        await Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             settings: RouteSettings(arguments: parsedParams),
@@ -241,17 +245,16 @@ class FunctionsRepository {
               layoutID: layoutId,
             ),
           ),
-        ).then((value) {
-          context.read<Codelessly>().notifyNavigationListeners(context);
-        });
+        );
+        context.read<Codelessly>().notifyNavigationListeners(context);
       }
     }
   }
 
-  static void showDialogAction(
+  static Future<void> showDialogAction(
     BuildContext context,
     ShowDialogAction action,
-  ) {
+  ) async {
     final parsedParams = substituteVariablesInMap(context, action.params);
 
     log('Performing show dialog action with params: $parsedParams');
@@ -277,7 +280,7 @@ class FunctionsRepository {
       return;
     }
 
-    showDialog(
+    await showDialog(
       context: context,
       barrierDismissible: action.barrierDismissible,
       barrierColor: action.barrierColor?.toFlutterColor(),
@@ -900,7 +903,7 @@ class FunctionsRepository {
     if (filteredReactions.isEmpty) return false;
 
     for (final reaction in filteredReactions) {
-      FunctionsRepository.performAction(
+      await FunctionsRepository.performAction(
         context,
         reaction.action,
         internalValue: value,
@@ -1136,26 +1139,26 @@ class FunctionsRepository {
       log('Invalid index: $substitutedIndex');
       return currentValue;
     }
-    final parsedValue = newValue.toList<List>().toList() ?? [];
+
     // Perform list operations.
     switch (action.listOperation) {
       case ListOperation.add:
+        final parsedValue = newValue.toList<List>().toList() ?? [];
         currentValue.addAll(parsedValue);
-        break;
       case ListOperation.insert:
+        final parsedValue = newValue.toList<List>().toList() ?? [];
         currentValue.insertAll(index, parsedValue);
-        break;
       case ListOperation.removeAt:
         currentValue.removeAt(index);
-        break;
       case ListOperation.remove:
+        final parsedValue = newValue.parsedValue();
         currentValue.remove(newValue);
-        break;
       case ListOperation.update:
+        final parsedValue = newValue.parsedValue();
         currentValue[index] = parsedValue;
-        break;
-      default:
-        break;
+      case ListOperation.replace:
+        final parsedValue = newValue.toList<List>().toList() ?? [];
+        return parsedValue;
     }
     return currentValue;
   }
@@ -1413,38 +1416,15 @@ class FunctionsRepository {
       variable = codelesslyContext.findVariableByName(action.variable!.name);
     }
 
-    if (variable != null) {
-      // set loading
-      variable.value = variable.value.copyWith(
-        value: CloudStorageVariableUtils.loading(),
-      );
-    }
+    if (variable == null) return;
 
-    try {
-      log('Loading document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
-      final data = await cloudStorage.getDocumentData(
-          evaluatedPath, evaluatedDocumentId);
+    // set loading
+    variable.value = variable.value.copyWith(
+      value: CloudStorageVariableUtils.loading(),
+    );
 
-      log('Loaded document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
-      if (variable != null) {
-        log('Updating variable ${variable.value.name} with success state.');
-        variable.value = variable.value.copyWith(
-          value: CloudStorageVariableUtils.success(
-            data,
-            docId: evaluatedDocumentId,
-          ),
-        );
-      }
-    } catch (error, stacktrace) {
-      print(
-          'Error loading document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
-      print(error);
-      print(stacktrace);
-      if (variable != null) {
-        variable.value = variable.value.copyWith(
-          value: CloudStorageVariableUtils.error(error),
-        );
-      }
-    }
+    log('Streaming document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
+    cloudStorage.streamDocumentToVariable(
+        evaluatedPath, evaluatedDocumentId, variable);
   }
 }

@@ -16,7 +16,6 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
     WidgetBuildSettings settings,
   ) {
     return buildButtonFromNode(
-      context,
       node,
       settings: settings,
     );
@@ -38,19 +37,18 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
       edgePins: EdgePinsModel.standard,
       padding: padding ?? EdgeInsetsModel.zero,
     );
-    return buildButtonFromNode(context, node, settings: settings);
+    return buildButtonFromNode(node, settings: settings);
   }
 
   Widget buildButtonFromNode(
-    BuildContext context,
     ButtonNode node, {
     required WidgetBuildSettings settings,
   }) {
     return PassiveButtonWidget(
       node: node,
       settings: settings,
-      onPressed: () => onPressed(context, node.reactions),
-      onLongPress: () => onLongPress(context, node.reactions),
+      onPressed: (context) => onPressed(context, node.reactions),
+      onLongPress: (context) => onLongPress(context, node.reactions),
     );
   }
 
@@ -73,8 +71,8 @@ class PassiveButtonWidget extends StatelessWidget {
   final ButtonNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
-  final VoidCallback? onPressed;
-  final VoidCallback? onLongPress;
+  final void Function(BuildContext context)? onPressed;
+  final void Function(BuildContext context)? onLongPress;
   final double? elevation;
   final bool useIconFonts;
 
@@ -120,8 +118,8 @@ class PassiveButtonWidget extends StatelessWidget {
     switch (node.properties.buttonType) {
       case ButtonTypeEnum.elevated:
         buttonWidget = ElevatedButton(
-          onPressed: enabled ? () => onPressed?.call() : null,
-          onLongPress: enabled ? () => onLongPress?.call() : null,
+          onPressed: enabled ? () => onPressed?.call(context) : null,
+          onLongPress: enabled ? () => onLongPress?.call(context) : null,
           style: buttonStyle,
           child: iconWidget != null
               ? Row(
@@ -147,8 +145,8 @@ class PassiveButtonWidget extends StatelessWidget {
         break;
       case ButtonTypeEnum.text:
         buttonWidget = TextButton(
-          onPressed: () => onPressed?.call(),
-          onLongPress: () => onLongPress?.call(),
+          onPressed: () => onPressed?.call(context),
+          onLongPress: () => onLongPress?.call(context),
           style: buttonStyle,
           child: iconWidget != null
               ? Row(
@@ -172,8 +170,8 @@ class PassiveButtonWidget extends StatelessWidget {
         break;
       case ButtonTypeEnum.outlined:
         buttonWidget = OutlinedButton(
-          onPressed: enabled ? () => onPressed?.call() : null,
-          onLongPress: enabled ? () => onLongPress?.call() : null,
+          onPressed: enabled ? () => onPressed?.call(context) : null,
+          onLongPress: enabled ? () => onLongPress?.call(context) : null,
           style: buttonStyle,
           child: iconWidget != null
               ? Row(
@@ -200,7 +198,7 @@ class PassiveButtonWidget extends StatelessWidget {
           style: buttonStyle.copyWith(
             textStyle: MaterialStateProperty.all(const TextStyle()),
           ),
-          onPressed: enabled ? () => onPressed?.call() : null,
+          onPressed: enabled ? () => onPressed?.call(context) : null,
           child: iconWidget,
         );
     }
