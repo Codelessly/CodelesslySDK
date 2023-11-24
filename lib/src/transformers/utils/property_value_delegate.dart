@@ -3,7 +3,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:json_path/json_path.dart';
 import 'package:meta/meta.dart';
-import 'package:provider/provider.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 
 import '../../../codelessly_sdk.dart';
@@ -46,35 +45,22 @@ class PropertyValueDelegate {
   /// Generic type [R] is the expected return type of the variable value and
   /// it must be specified.
   ///
-  /// If [variablesOverrides] is provided, it will be used to instead of the
-  /// variables retrieved from [CodelesslyContext].
-  ///
-  /// If [dataOverrides] is provided, it will be used to instead of the
-  /// data retrieved from [CodelesslyContext].
+  /// [scopedValues] is required to retrieve the data from various sources.
   static R? getPropertyValue<R extends Object>(
-    BuildContext context,
     BaseNode node,
     String property, {
-    List<VariableData>? variablesOverrides,
-    Map<String, dynamic>? dataOverrides,
+    required ScopedValues scopedValues,
   }) {
-    variablesOverrides =
-        variablesOverrides?.isEmpty == true ? null : variablesOverrides;
-
     final R? conditionValue = getPropertyValueFromCondition<R>(
-      context,
       node,
       property,
-      variablesOverrides: variablesOverrides,
-      dataOverrides: dataOverrides,
+      scopedValues: scopedValues,
     );
 
     final R? variableValue = getPropertyValueFromVariable<R>(
-      context,
       node,
       property,
-      variablesOverrides: variablesOverrides,
-      dataOverrides: dataOverrides,
+      scopedValues: scopedValues,
     );
 
     // If a variable/json-path is not found then variableValue will be null.
@@ -90,9 +76,9 @@ class PropertyValueDelegate {
     // item, it will be checked in all items. This specifically prevents that.
     final R? nodeValue = node.variables[property] == null
         ? getPropertyValueFromNodeValues<R>(
-            context,
             node,
             property,
+            scopedValues: scopedValues,
           )
         : null;
 
@@ -105,34 +91,18 @@ class PropertyValueDelegate {
   /// Generic type [R] is the expected return type of the variable value and
   /// it must be specified.
   ///
-  /// If [variablesOverrides] is provided, it will be used to instead of the
-  /// variables retrieved from [CodelesslyContext].
-  ///
-  /// If [dataOverrides] is provided, it will be used to instead of the
-  /// data retrieved from [CodelesslyContext].
+  /// [scopedValues] is required to retrieve the data from various sources.
   static R? getPropertyValueFromCondition<R extends Object>(
-    BuildContext context,
     BaseNode node,
     String property, {
-    List<VariableData>? variablesOverrides,
-    Map<String, dynamic>? dataOverrides,
+    required ScopedValues scopedValues,
   }) {
-    variablesOverrides =
-        variablesOverrides?.isEmpty == true ? null : variablesOverrides;
+    final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
 
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
+    if (codelesslyContext == null) return null;
 
     final BaseCondition? condition =
         codelesslyContext.conditions.findByNodeProperty(node.id, property);
-
-    // Variable name -> Variable.
-    final Map<String, VariableData> variables = variablesOverrides
-            ?.asMap()
-            .map((key, value) => MapEntry(value.name, value)) ??
-        codelesslyContext.variableNamesMap();
-
-    final Map<String, dynamic> data = dataOverrides ?? codelesslyContext.data;
 
     // if (condition != null) {
     //   print('----------------------------------------------------------------');
@@ -141,7 +111,7 @@ class PropertyValueDelegate {
     //   condition.prettyPrint();
     //   print('----------------------------------------------------------------');
     // }
-    return condition?.evaluate<R>(context, variables, data);
+    return condition?.evaluate<R>(scopedValues);
   }
 
   /// Retrieves the value of a node [property] from a variable by evaluating
@@ -156,30 +126,19 @@ class PropertyValueDelegate {
   /// Generic type [R] is the expected return type of the variable value and
   /// it must be specified.
   ///
-  /// If [variablesOverrides] is provided, it will be used to instead of the
-  /// variables retrieved from [CodelesslyContext].
-  ///
-  /// If [dataOverrides] is provided, it will be used to instead of the
-  /// data retrieved from [CodelesslyContext].
+  /// [scopedValues] is required to retrieve the data from various sources.
   static R? getPropertyValueFromVariable<R extends Object>(
-    BuildContext context,
     BaseNode node,
     String property, {
-    List<VariableData>? variablesOverrides,
-    Map<String, dynamic>? dataOverrides,
+    required ScopedValues scopedValues,
   }) {
-    variablesOverrides =
-        variablesOverrides?.isEmpty == true ? null : variablesOverrides;
-
     final String? variablePath = node.variables[property];
 
     if (variablePath == null) return null;
 
     return getVariableValueFromPath<R>(
-      context,
       variablePath,
-      variablesOverrides: variablesOverrides,
-      dataOverrides: dataOverrides,
+      scopedValues: scopedValues,
     );
   }
 
@@ -192,34 +151,23 @@ class PropertyValueDelegate {
   /// Retrieve [text] value using [getPropertyValue] to make sure that you have
   /// the correct value from the correct source before substituting variables.
   ///
-  /// If [variablesOverrides] is provided, it will be used to instead of the
-  /// variables retrieved from [CodelesslyContext].
-  ///
-  /// If [dataOverrides] is provided, it will be used to instead of the
-  /// data retrieved from [CodelesslyContext].
-  ///
   /// [nullSubstitutionMode] determines what to do when a variable path
   /// evaluates to null. See [NullSubstitutionMode] for more details.
+  ///
+  /// [scopedValues] is required to retrieve the data from various sources.
   static String substituteVariables(
-    BuildContext context,
     String text, {
-    List<VariableData>? variablesOverrides,
-    Map<String, dynamic>? dataOverrides,
+    required ScopedValues scopedValues,
     required NullSubstitutionMode nullSubstitutionMode,
   }) {
-    variablesOverrides =
-        variablesOverrides?.isEmpty == true ? null : variablesOverrides;
-
     return text.splitMapJoinRegex(
       variablePathRegex,
       onNonMatch: (text) => text,
       onMatch: (match) {
         final path = match.namedGroup('value')!;
         final value = getVariableValueFromPath<String>(
-          context,
           path,
-          variablesOverrides: variablesOverrides,
-          dataOverrides: dataOverrides,
+          scopedValues: scopedValues,
         );
 
         if (value != null) return value;
@@ -242,67 +190,33 @@ class PropertyValueDelegate {
   /// Generic type [R] is the expected return type of the variable value and
   /// it must be specified.
   ///
-  /// If [variablesOverrides] is provided, it will be used to instead of the
-  /// variables retrieved from [CodelesslyContext].
-  ///
-  /// If [dataOverrides] is provided, it will be used to instead of the
-  /// data retrieved from [CodelesslyContext].
+  /// [scopedValues] is required to retrieve the data from various sources.
   static R? getVariableValueFromPath<R extends Object>(
-    BuildContext context,
     String path, {
-    List<VariableData>? variablesOverrides,
-    Map<String, dynamic>? dataOverrides,
-    LocalStorage? storage,
+    required ScopedValues scopedValues,
   }) {
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
-
-    final Iterable<VariableData> variables = {
-      ...codelesslyContext.variableNamesMap().values,
-      ...variablesOverrides ?? {}
-    };
-    final Map<String, dynamic> data = {
-      ...codelesslyContext.data,
-      ...dataOverrides ?? {}
-    };
-
-    final Object? value = retrieveVariableValue(
-      path,
-      variables,
-      data,
-      ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? {},
-      IndexedItemProvider.of(context),
-      storage ?? context.read<Codelessly?>()?.localStorage,
-    );
+    final Object? value =
+        retrieveVariableValue(path, scopedValues: scopedValues);
 
     return value?.typedValue<R>();
   }
 
   @internal
   static Object? retrieveVariableValue(
-    String path,
-    Iterable<VariableData> variables,
-    Map<String, dynamic> data,
-    Map<String, dynamic> routeParams,
-    IndexedItemProvider? itemProvider,
-    LocalStorage? storage,
-  ) {
+    String path, {
+    required ScopedValues scopedValues,
+  }) {
     if (path.isEmpty) return null;
     final match = VariableMatch.parse(path.wrapWithVariableSyntax());
     if (match == null) return null;
 
     if (match.isPredefinedVariable) {
-      final Object? value = retrievePredefinedVariableValue(
-        match,
-        data,
-        routeParams,
-        itemProvider,
-        storage,
-      );
+      final Object? value =
+          retrievePredefinedVariableValue(match, scopedValues);
       return value;
     }
 
-    final VariableData? variable = variables.findByNameOrNull(match.name);
+    final VariableData? variable = scopedValues.variables[match.name];
     if (variable == null) return null;
     if (match.hasAccessor) {
       if (variable.type.isText) {
@@ -337,17 +251,14 @@ class PropertyValueDelegate {
   @internal
   static Object? retrievePredefinedVariableValue(
     VariableMatch match,
-    Map<String, dynamic> data,
-    Map<String, dynamic> routeParams,
-    IndexedItemProvider? itemProvider,
-    LocalStorage? storage,
+    ScopedValues scopedValues,
   ) {
     final Object? variableValue = switch (match.name) {
-      'data' => data,
-      'item' => itemProvider?.item,
-      'index' => itemProvider?.index,
-      'storage' => storage?.getAll(),
-      'route' => routeParams,
+      'data' => scopedValues.data,
+      'item' => scopedValues.indexedItem?.item,
+      'index' => scopedValues.indexedItem?.index,
+      'storage' => scopedValues.localStorage?.getAll(),
+      'route' => scopedValues.routeParams,
       _ => null,
     };
 
@@ -393,33 +304,14 @@ class PropertyValueDelegate {
   ///
   /// Generic type [R] is the expected return type of the variable value and
   /// it must be specified.
-  ///
-  /// If [dataOverrides] is provided, it will be used to instead of the
-  /// data retrieved from [CodelesslyContext].
   static R? getPredefinedVariableValue<R extends Object>(
-    BuildContext context,
     String path, {
-    Map<String, dynamic>? dataOverrides,
-    LocalStorage? storage,
+    required ScopedValues scopedValues,
   }) {
     final match = VariableMatch.parse(path);
     if (match == null) return null;
 
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
-
-    final Map<String, dynamic> data = {
-      ...codelesslyContext.data,
-      ...dataOverrides ?? {}
-    };
-
-    final Object? value = retrievePredefinedVariableValue(
-      match,
-      data,
-      ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? {},
-      IndexedItemProvider.of(context),
-      storage,
-    );
+    final Object? value = retrievePredefinedVariableValue(match, scopedValues);
 
     return value?.typedValue<R>();
   }
@@ -427,11 +319,12 @@ class PropertyValueDelegate {
   /// Retrieves the value of a node [property] from node values by evaluating
   /// the node values if it exists.
   static R? getPropertyValueFromNodeValues<R extends Object>(
-      BuildContext context, BaseNode node, String property) {
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
+    BaseNode node,
+    String property, {
+    required ScopedValues scopedValues,
+  }) {
     final List<ValueModel>? nodeValues =
-        codelesslyContext.nodeValues[node.id]?.value;
+        scopedValues.nodeValues[node.id]?.value;
 
     if (nodeValues == null) return null;
 
@@ -476,7 +369,10 @@ class PropertyValueDelegate {
   }
 
   static void putValueInJsonPath(
-      String path, Object? value, Map<String, dynamic> data) {
+    String path,
+    Object? value,
+    Map<String, dynamic> data,
+  ) {
     final tokens = path.split('.');
     final leafKey = tokens.removeLast();
     Object? traversedValue;

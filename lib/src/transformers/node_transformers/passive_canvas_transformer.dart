@@ -308,7 +308,10 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     final fills = <PaintModel>[
       for (final fill in node.fills)
         PropertyValueDelegate.getPropertyValue(
-                context, node, 'fill-${fill.id}') ??
+              node,
+              'fill-${fill.id}',
+              scopedValues: ScopedValues.of(context),
+            ) ??
             fill
     ];
     if (fills.length == 1 && fills[0].type == PaintType.solid) {

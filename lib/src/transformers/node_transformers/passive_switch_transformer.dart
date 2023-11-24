@@ -97,11 +97,14 @@ class PassiveSwitchWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ScopedValues scopedValues = ScopedValues.of(
+      context,
+      variablesOverrides: variablesOverrides,
+    );
     final bool value = PropertyValueDelegate.getPropertyValue<bool>(
-          context,
           node,
           'value',
-          variablesOverrides: variablesOverrides,
+          scopedValues: scopedValues,
         ) ??
         node.value;
     // final bool value = variables.getBooleanById(node.variables['value'] ?? '',

@@ -171,10 +171,8 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
           } else {
             childWidget = Expanded(flex: flex, child: childWidget);
           }
-          break;
         case SizeFit.flexible:
           childWidget = Flexible(flex: flex, child: childWidget);
-          break;
       }
     } else {
       // If any side flexes we need to wrap the node into a Flexible.

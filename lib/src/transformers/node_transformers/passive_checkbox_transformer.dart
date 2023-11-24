@@ -99,10 +99,9 @@ class PassiveCheckboxWidget extends StatelessWidget {
     final scale = node.basicBoxLocal.width / kCheckboxDefaultSize;
 
     final bool? value = PropertyValueDelegate.getPropertyValue<bool>(
-          context,
           node,
           'value',
-          variablesOverrides: variables,
+          scopedValues: ScopedValues.of(context, variablesOverrides: variables),
         ) ??
         node.value;
 

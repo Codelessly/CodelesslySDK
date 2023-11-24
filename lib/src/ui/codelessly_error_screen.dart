@@ -28,65 +28,51 @@ class CodelesslyErrorScreen extends StatelessWidget {
         case ErrorType.invalidAuthToken:
           message = '${ce.message ?? 'Invalid auth token!'}'
               '\nPlease change the token to a valid one.';
-          break;
         case ErrorType.notAuthenticated:
           message = '${ce.message ?? 'Not authenticated!'}'
               '\nPlease authenticate with a valid token.';
-          break;
         case ErrorType.projectNotFound:
           message = '${ce.message ?? 'Project not found!'}'
               '\nPlease check the provided auth token and try again.';
-          break;
         case ErrorType.layoutNotFound:
           message = '${ce.message ?? 'Layout not found.'}'
               '\nAre you sure the layout ID is correct? If yes, are you sure '
               'you published it successfully through the Codelessly publish '
               'menu?';
-          break;
         case ErrorType.cacheStoreException:
           message = '${ce.message ?? 'Failed to store value in cache.'}'
               '\nDoes this device have enough storage space?'
               '\nDoes this app have storage access?';
-          break;
         case ErrorType.cacheLookupException:
           message = '${ce.message ?? 'Failed to look up a value in cache.'}'
               '\nDoes this app have storage access?'
               '\nIs the app up to date?';
-          break;
         case ErrorType.cacheClearException:
           message = '${ce.message ?? 'Failed to clear cache.'}'
               '\nDoes this app have storage access?';
-          break;
         case ErrorType.fontDownloadException:
           message = '${ce.message ?? 'Failed to download a font.'}'
               '\nPlease check your internet connection and try again.';
-          break;
         case ErrorType.fontLoadException:
           message = '${ce.message ?? 'Failed to load a font.'}'
               '\nDoes this device have enough storage space?'
               '\nDoes this app have storage access?';
-          break;
         case ErrorType.fileIoException:
           message = '${ce.message ?? 'Failed to read/write to storage.'}'
               '\nDoes this device have enough storage space?'
               '\nDoes this app have storage access?';
-          break;
         case ErrorType.networkException:
           message = '${ce.message ?? 'Failed to connect to the internet.'}'
               '\nPlease check your internet connection and try again.';
-          break;
         case ErrorType.assertionError:
           message = (exception as CodelesslyException).message ??
               'Assertion error!\nYou used the SDK incorrectly!.';
-          break;
         case ErrorType.notInitializedError:
           message = (exception as CodelesslyException).message ??
               'Not initialized error!\nYou used the SDK incorrectly!.';
-          break;
         case ErrorType.other:
           message = (exception as CodelesslyException).message ??
               'Unknown error!\nSorry this happened :(';
-          break;
       }
     } else {
       message =
