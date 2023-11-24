@@ -1162,7 +1162,12 @@ class FunctionsRepository {
           scopedValues: scopedValues,
         );
         // Parse to JSON.
-        data = jsonDecode(updatedValue);
+        final parsed = tryJsonDecode(updatedValue);
+        data = switch (parsed) {
+          null => {},
+          Map map => Map<String, dynamic>.from(map),
+          _ => {'data': parsed},
+        };
       } else {
         // Substitute variables in value.
         final updatedValue = PropertyValueDelegate.substituteVariables(
@@ -1171,7 +1176,12 @@ class FunctionsRepository {
           scopedValues: scopedValues,
         );
         // Parse to JSON.
-        data = jsonDecode(updatedValue);
+        final parsed = tryJsonDecode(updatedValue);
+        data = switch (parsed) {
+          null => {},
+          Map map => Map<String, dynamic>.from(map),
+          _ => {'data': parsed},
+        };
       }
 
       return await cloudStorage.addDocument(

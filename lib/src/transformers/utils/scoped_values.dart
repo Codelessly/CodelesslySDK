@@ -61,8 +61,10 @@ class ScopedValues {
     routeParams =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
             {};
-    final instance = context.read<Codelessly>();
-    _localStorageRef = WeakReference(instance.localStorage);
-    _cloudStorageRef = WeakReference(instance.cloudStorage);
+    final instance = context.read<Codelessly?>();
+    if (instance != null) {
+      _localStorageRef = WeakReference(instance.localStorage);
+      _cloudStorageRef = WeakReference(instance.cloudStorage);
+    }
   }
 }
