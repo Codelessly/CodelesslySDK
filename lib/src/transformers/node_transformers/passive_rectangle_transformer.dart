@@ -72,7 +72,7 @@ class PassiveRectangleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = context.read<ScopedValues>();
+    final ScopedValues scopedValues = ScopedValues.of(context);
 
     // final BaseNode? parent = node.id == kRootNode || node.parentID == kRootNode
     //     ? null
