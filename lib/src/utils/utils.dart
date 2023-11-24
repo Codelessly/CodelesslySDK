@@ -24,38 +24,6 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'route', type: VariableType.map),
 };
 
-List<InlineSpan> transformTextSpans(
-  List<InlineSpan> spans,
-  List<VariableData> variables,
-  BuildContext context,
-  WidgetBuildSettings settings,
-) {
-  return spans.map((span) {
-    if (span is! TextSpan) return span;
-    return TextSpan(
-      text: PropertyValueDelegate.substituteVariables(
-        context,
-        span.text!,
-        nullSubstitutionMode: settings.nullSubstitutionMode,
-      ),
-      style: span.style,
-      children: transformTextSpans(
-        span.children ?? [],
-        variables,
-        context,
-        settings,
-      ),
-      locale: span.locale,
-      mouseCursor: span.mouseCursor,
-      onEnter: span.onEnter,
-      onExit: span.onExit,
-      recognizer: span.recognizer,
-      semanticsLabel: span.semanticsLabel,
-      spellOut: span.spellOut,
-    );
-  }).toList();
-}
-
 /// Returns the greatest common divisor (gcd) of two integers using Euclid's
 /// algorithm.
 int greatestCommonDivisor(int a, int b) => a.gcd(b);
@@ -324,10 +292,8 @@ final RegExp staticImageTypesRegex =
     switch (parent.scrollDirection) {
       case AxisC.horizontal:
         isParentScrollingHorizontally = true;
-        break;
       case AxisC.vertical:
         isParentScrollingVertically = true;
-        break;
     }
   }
 

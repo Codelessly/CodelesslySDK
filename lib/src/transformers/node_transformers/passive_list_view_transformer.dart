@@ -39,7 +39,9 @@ class PassiveListViewWidget extends StatelessWidget {
     final itemNode = node.children.first;
 
     final List? data = PropertyValueDelegate.getVariableValueFromPath<List>(
-            context, node.variables['data'] ?? '') ??
+          node.variables['data'] ?? '',
+          scopedValues: ScopedValues.of(context),
+        ) ??
         (node.variables['data'] != null ? [] : null);
 
     final int? itemCount;
@@ -76,8 +78,7 @@ class PassiveListViewWidget extends StatelessWidget {
             : null,
         itemBuilder: (context, index) => IndexedItemProvider(
           key: ValueKey(index),
-          index: index,
-          item: data?.elementAtOrNull(index),
+          item: IndexedItem(index, data?.elementAtOrNull(index)),
           child: Builder(builder: (context) {
             // This builder is important to pass a context that has
             // the IndexedItemProvider.

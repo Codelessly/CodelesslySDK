@@ -96,10 +96,12 @@ class TextUtils {
     } else if (context != null) {
       // Substitute variables.
       characters = PropertyValueDelegate.substituteVariables(
-        context,
         rawText,
-        variablesOverrides: variablesOverrides,
         nullSubstitutionMode: nullSubstitutionMode,
+        scopedValues: ScopedValues.of(
+          context,
+          variablesOverrides: variablesOverrides,
+        ),
       );
     }
 

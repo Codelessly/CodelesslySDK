@@ -116,10 +116,8 @@ class _PassiveNavigationBarWidgetState
     switch (widget.node.properties.styleDefinition) {
       case StyleDefinition.material_2:
         navBar = buildM2NavigationBar(context, widget.node, onChanged);
-        break;
       case StyleDefinition.material_3:
         navBar = buildM3NavigationBar(context, widget.node, onChanged);
-        break;
     }
 
     if (widget.node.properties.makeNotched) {
@@ -130,12 +128,10 @@ class _PassiveNavigationBarWidgetState
           final prop = widget.node.properties as M2NavigationBarProperties;
           elevation = prop.elevation;
           backgroundColor = prop.backgroundColor?.toFlutterColor();
-          break;
         case StyleDefinition.material_3:
           final prop = widget.node.properties as M3NavigationBarProperties;
           elevation = prop.elevation;
           backgroundColor = prop.backgroundColor?.toFlutterColor();
-          break;
       }
       navBar = BottomAppBar(
         shape: const CircularNotchedRectangle(),

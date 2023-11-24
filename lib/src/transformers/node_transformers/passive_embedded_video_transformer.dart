@@ -154,7 +154,6 @@ class _PassiveEmbeddedVideoWidgetState
           height: widget.node.basicBoxLocal.height,
           baseUrl: config.baseURL,
         );
-        break;
       case EmbeddedVideoSource.vimeo:
         embedUrl = buildVimeoEmbedUrl(
           properties: widget.node.properties as EmbeddedVimeoVideoProperties,
@@ -162,7 +161,6 @@ class _PassiveEmbeddedVideoWidgetState
           height: widget.node.basicBoxLocal.height,
           baseUrl: config.baseURL,
         );
-        break;
     }
     print('Loading $embedUrl');
     _controller.loadRequest(Uri.parse(embedUrl));
@@ -176,11 +174,9 @@ class _PassiveEmbeddedVideoWidgetState
       case EmbeddedVideoSource.youtube:
         videoWidget = buildEmbeddedYoutubeVideo(
             context, widget.node.properties as EmbeddedYoutubeVideoProperties);
-        break;
       case EmbeddedVideoSource.vimeo:
         videoWidget = buildEmbeddedVimeoVideo(
             context, widget.node.properties as EmbeddedVimeoVideoProperties);
-        break;
     }
 
     return AdaptiveNodeBox(node: widget.node, child: videoWidget);

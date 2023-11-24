@@ -80,7 +80,6 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
     switch (reaction.action.type) {
       case ActionType.link:
         launchUrl(Uri.dataFromString((reaction.action as LinkAction).url));
-        break;
       default:
         break;
     }
@@ -101,18 +100,20 @@ class PassiveRadioWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ScopedValues scopedValues = ScopedValues.of(
+      context,
+      variablesOverrides: variablesOverrides,
+    );
     final value = PropertyValueDelegate.getPropertyValue<String>(
-          context,
           node,
           'value',
-          variablesOverrides: variablesOverrides,
+          scopedValues: scopedValues,
         ) ??
         node.value;
     final groupValue = PropertyValueDelegate.getPropertyValue<String>(
-          context,
           node,
           'groupValue',
-          variablesOverrides: variablesOverrides,
+          scopedValues: scopedValues,
         ) ??
         node.groupValue ??
         '';

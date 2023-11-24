@@ -56,7 +56,6 @@ class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
     switch (reaction.action.type) {
       case ActionType.link:
         launchUrl(Uri.parse((reaction.action as LinkAction).url));
-        break;
       default:
         break;
     }
@@ -143,38 +142,35 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
   }
 
   void _loadData() {
+    final ScopedValues scopedValues = ScopedValues.of(context);
     final props = widget.node.properties;
     switch (props.webviewType) {
       case WebViewType.webpage:
         final properties = props as WebPageWebViewProperties;
         final String input =
             PropertyValueDelegate.getVariableValueFromPath<String>(
-                    context, properties.input) ??
+                    properties.input,
+                    scopedValues: scopedValues) ??
                 properties.input;
         switch (properties.pageSourceType) {
           case WebViewWebpageSourceType.url:
             print('Loading URL: $input');
             _controller.loadRequest(Uri.parse(input));
-            break;
           case WebViewWebpageSourceType.html:
             final content = _buildHtmlContent(input);
             _controller.loadRequest(Uri.parse(content));
-            break;
           case WebViewWebpageSourceType.asset:
             // provided from onWebViewCreated callback.
             _controller.loadFlutterAsset(input);
-            break;
         }
-        break;
       case WebViewType.googleMaps:
-        final content =
-            buildGoogleMapsURL(props as GoogleMapsWebViewProperties);
+        final content = buildGoogleMapsURL(
+            props as GoogleMapsWebViewProperties, scopedValues);
         _controller.loadRequest(Uri.parse(content));
-        break;
       case WebViewType.twitter:
-        final content = buildTwitterURL(props as TwitterWebViewProperties);
+        final content =
+            buildTwitterURL(props as TwitterWebViewProperties, scopedValues);
         _controller.loadRequest(Uri.parse(content));
-        break;
     }
   }
 
@@ -198,14 +194,11 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
     switch (props.webviewType) {
       case WebViewType.webpage:
         wid = buildWebpageWebView(context, props as WebPageWebViewProperties);
-        break;
       case WebViewType.googleMaps:
         wid = buildGoogleMapsWebView(
             context, props as GoogleMapsWebViewProperties);
-        break;
       case WebViewType.twitter:
         wid = buildTwitterWebView(context, props as TwitterWebViewProperties);
-        break;
     }
 
     return AdaptiveNodeBox(node: widget.node, child: wid);
@@ -223,11 +216,12 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
     return buildWebView(properties);
   }
 
-  String buildGoogleMapsURL(GoogleMapsWebViewProperties properties) {
+  String buildGoogleMapsURL(
+      GoogleMapsWebViewProperties properties, ScopedValues scopedValues) {
     final String? originalSrc = properties.src;
     final String? updatedSrc = originalSrc != null
-        ? PropertyValueDelegate.getVariableValueFromPath<String>(
-                context, originalSrc) ??
+        ? PropertyValueDelegate.getVariableValueFromPath<String>(originalSrc,
+                scopedValues: scopedValues) ??
             originalSrc
         : null;
     return _buildHtmlContent(updatedSrc);
@@ -254,11 +248,12 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
     return buildWebView(properties);
   }
 
-  String buildTwitterURL(TwitterWebViewProperties properties) {
+  String buildTwitterURL(
+      TwitterWebViewProperties properties, ScopedValues scopedValues) {
     final String? originalSrc = properties.src;
     final String? updatedSrc = originalSrc != null
-        ? PropertyValueDelegate.getVariableValueFromPath<String>(
-                context, originalSrc) ??
+        ? PropertyValueDelegate.getVariableValueFromPath<String>(originalSrc,
+                scopedValues: scopedValues) ??
             originalSrc
         : null;
     return _buildHtmlContent(updatedSrc);

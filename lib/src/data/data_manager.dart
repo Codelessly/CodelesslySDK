@@ -567,7 +567,6 @@ class DataManager {
             layoutID: layoutID,
             source: config.publishSource,
           );
-          break;
         case UpdateType.add:
         case UpdateType.update:
           final SDKPublishLayout? layout =
@@ -579,7 +578,6 @@ class DataManager {
           if (layout != null) {
             localModel.layouts[layoutID] = layout;
           }
-          break;
       }
     }
 
@@ -593,7 +591,6 @@ class DataManager {
             fontID: fontID,
             source: config.publishSource,
           );
-          break;
         case UpdateType.add:
         case UpdateType.update:
           final SDKPublishFont? font =
@@ -607,7 +604,6 @@ class DataManager {
             localModel.fonts[fontID] = font;
             getOrFetchFontBytesAndSaveAndLoad(font);
           }
-          break;
       }
     }
 
@@ -621,7 +617,6 @@ class DataManager {
             apiId: apiId,
             source: config.publishSource,
           );
-          break;
         case UpdateType.add:
         case UpdateType.update:
           final HttpApiData? api = await networkDataRepository.downloadApi(
@@ -632,7 +627,6 @@ class DataManager {
           if (api != null) {
             localModel.apis[apiId] = api;
           }
-          break;
       }
     }
 
@@ -646,7 +640,6 @@ class DataManager {
             layoutId: layoutID,
             source: config.publishSource,
           );
-          break;
         case UpdateType.add:
         case UpdateType.update:
           final SDKLayoutVariables? layoutVariables =
@@ -658,7 +651,6 @@ class DataManager {
           if (layoutVariables != null) {
             localModel.variables[layoutID] = layoutVariables;
           }
-          break;
       }
     }
 
@@ -672,7 +664,6 @@ class DataManager {
             layoutId: layoutID,
             source: config.publishSource,
           );
-          break;
         case UpdateType.add:
         case UpdateType.update:
           final SDKLayoutConditions? layoutConditions =
@@ -684,7 +675,6 @@ class DataManager {
           if (layoutConditions != null) {
             localModel.conditions[layoutID] = layoutConditions;
           }
-          break;
       }
     }
 

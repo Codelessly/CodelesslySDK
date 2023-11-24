@@ -136,6 +136,7 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
 
   @override
   Widget build(BuildContext context) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
     final width =
         widget.node.isHorizontalExpanded || widget.node.isHorizontalWrap
             ? null
@@ -186,22 +187,27 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
               .flutterScrollPhysics(widget.node.shouldAlwaysScroll),
           onTap: widget.onChanged,
           tabs: [
-            for (final tab in widget.node.properties.tabs) getTab(context, tab)
+            for (final (index, tab) in widget.node.properties.tabs.indexed)
+              IndexedItemProvider(
+                item: IndexedItem(index, null),
+                child: getTab(tab, scopedValues),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget getTab(BuildContext context, TabItem tab) {
+  Widget getTab(TabItem tab, ScopedValues scopedValues) {
     final String rawLabel = PropertyValueDelegate.getPropertyValue<String>(
-            context, widget.node, 'tab-label-${tab.id}') ??
+            widget.node, 'tab-label-${tab.id}',
+            scopedValues: scopedValues) ??
         tab.label;
 
     String label = PropertyValueDelegate.substituteVariables(
-      context,
       rawLabel,
       nullSubstitutionMode: widget.settings.nullSubstitutionMode,
+      scopedValues: scopedValues,
     );
     final double effectiveIconSize =
         min(tab.icon.size ?? 24, widget.node.basicBoxLocal.height);

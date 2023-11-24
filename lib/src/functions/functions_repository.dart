@@ -126,31 +126,36 @@ class FunctionsRepository {
       params[name] = paramValue;
     }
 
+    final ScopedValues scopedValues = ScopedValues.of(context);
+
     return makeApiRequest(
       context: context,
       method: apiData.method,
-      url: _applyApiInputs(context, apiData.url, params),
-      headers: _generateMapFromPairs(context, apiData.headers, params),
+      url: _applyApiInputs(apiData.url, params, scopedValues),
+      headers: _generateMapFromPairs(apiData.headers, params, scopedValues),
       body: apiData.bodyType == RequestBodyType.form
-          ? _generateMapFromPairs(context, apiData.formFields, params)
-          : _applyApiInputs(context, apiData.body ?? '', params),
+          ? _generateMapFromPairs(apiData.formFields, params, scopedValues)
+          : _applyApiInputs(apiData.body ?? '', params, scopedValues),
       variable: variable,
     );
   }
 
-  static Map<String, String> _generateMapFromPairs(BuildContext context,
-      List<HttpKeyValuePair> pairs, Map<String, String> parameters) {
+  static Map<String, String> _generateMapFromPairs(List<HttpKeyValuePair> pairs,
+      Map<String, String> parameters, ScopedValues scopedValues) {
     return pairs
         .where((pair) => pair.isUsed && pair.key.isNotEmpty)
         .toList()
         .asMap()
         .map((key, pair) => MapEntry(
-            _applyApiInputs(context, pair.key, parameters),
-            _applyApiInputs(context, pair.value, parameters)));
+            _applyApiInputs(pair.key, parameters, scopedValues),
+            _applyApiInputs(pair.value, parameters, scopedValues)));
   }
 
   static String _applyApiInputs(
-      BuildContext context, String data, Map<String, String> parameters) {
+    String data,
+    Map<String, String> parameters,
+    ScopedValues scopedValues,
+  ) {
     final updatedData = data.replaceAllMapped(inputRegex, (match) {
       final MapEntry<String, String>? parameter = parameters.entries
           .firstWhereOrNull((entry) => entry.key == match.group(1));
@@ -159,30 +164,33 @@ class FunctionsRepository {
         return match[0]!;
       }
       // Substitute variables in parameter value.
-      return PropertyValueDelegate.substituteVariables(context, parameter.value,
-          nullSubstitutionMode: NullSubstitutionMode.nullValue);
+      return PropertyValueDelegate.substituteVariables(
+        parameter.value,
+        nullSubstitutionMode: NullSubstitutionMode.nullValue,
+        scopedValues: scopedValues,
+      );
     });
     return updatedData;
   }
 
   static Map<String, dynamic> substituteVariablesInMap(
-    BuildContext context,
     Map<String, dynamic> data,
+    ScopedValues scopedValues,
   ) {
     // Substitute variables in params.
     final Map<String, dynamic> parsedParams = {};
 
     for (final MapEntry(:key, :value) in data.entries) {
       final parsedKey = PropertyValueDelegate.substituteVariables(
-        context,
         key,
         nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
       );
 
       final parsedValue = PropertyValueDelegate.substituteVariables(
-        context,
         value is! String ? jsonEncode(value) : value,
         nullSubstitutionMode: NullSubstitutionMode.nullValue,
+        scopedValues: scopedValues,
       ).parsedValue();
 
       // don't add empty keys to the map.
@@ -192,8 +200,11 @@ class FunctionsRepository {
   }
 
   static Future<void> navigate(
-      BuildContext context, NavigationAction action) async {
-    final parsedParams = substituteVariablesInMap(context, action.params);
+    BuildContext context,
+    NavigationAction action,
+  ) async {
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    final parsedParams = substituteVariablesInMap(action.params, scopedValues);
 
     log('Performing navigation action with params: $parsedParams');
 
@@ -234,7 +245,8 @@ class FunctionsRepository {
             ),
           ),
         );
-        context.read<Codelessly>().notifyNavigationListeners(context);
+        // ignore: use_build_context_synchronously
+        codelessly.notifyNavigationListeners(context);
       } else if (action.navigationType == NavigationType.replace) {
         await Navigator.pushReplacement(
           context,
@@ -246,7 +258,8 @@ class FunctionsRepository {
             ),
           ),
         );
-        context.read<Codelessly>().notifyNavigationListeners(context);
+        // ignore: use_build_context_synchronously
+        codelessly.notifyNavigationListeners(context);
       }
     }
   }
@@ -255,7 +268,8 @@ class FunctionsRepository {
     BuildContext context,
     ShowDialogAction action,
   ) async {
-    final parsedParams = substituteVariablesInMap(context, action.params);
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    final parsedParams = substituteVariablesInMap(action.params, scopedValues);
 
     log('Performing show dialog action with params: $parsedParams');
 
@@ -293,13 +307,15 @@ class FunctionsRepository {
         ),
       ),
     );
+    // ignore: use_build_context_synchronously
+    codelessly.notifyNavigationListeners(context);
   }
 
   static void launchURL(BuildContext context, LinkAction action) {
     final url = PropertyValueDelegate.substituteVariables(
-      context,
       action.url,
       nullSubstitutionMode: NullSubstitutionMode.nullValue,
+      scopedValues: ScopedValues.of(context),
     );
     launchUrl(Uri.parse(url));
   }
@@ -353,20 +369,13 @@ class FunctionsRepository {
         );
       } else {
         final Uri uri = Uri.parse(url);
-        switch (method) {
-          case HttpMethod.get:
-            response = await http.get(uri, headers: headers);
-            break;
-          case HttpMethod.post:
-            response = await http.post(uri, headers: headers, body: body);
-            break;
-          case HttpMethod.delete:
-            response = await http.delete(uri, headers: headers, body: body);
-            break;
-          case HttpMethod.put:
-            response = await http.put(uri, headers: headers, body: body);
-            break;
-        }
+        response = switch (method) {
+          HttpMethod.get => await http.get(uri, headers: headers),
+          HttpMethod.post => await http.post(uri, headers: headers, body: body),
+          HttpMethod.delete =>
+            await http.delete(uri, headers: headers, body: body),
+          HttpMethod.put => await http.put(uri, headers: headers, body: body)
+        };
       }
 
       printResponse(response);
@@ -494,7 +503,6 @@ class FunctionsRepository {
     switch (action.service) {
       case SubmitActionService.mailchimp:
         submitToMailchimp(context, action as MailchimpSubmitAction, emailID);
-        break;
     }
   }
 
@@ -607,15 +615,12 @@ class FunctionsRepository {
       case SetValueMode.discrete:
         // Get new discrete value.
         if (discrete != null) newValue = discrete();
-        break;
       case SetValueMode.toggle:
         // Get new toggle value.
         if (toggle != null) newValue = toggle();
-        break;
       case SetValueMode.syncValue:
         // Get new synced value.
         if (syncValue != null) newValue = syncValue();
-        break;
     }
     if (newValue != null) {
       // Get old value by name.
@@ -661,6 +666,7 @@ class FunctionsRepository {
     SetVariableAction action, {
     bool notify = true,
   }) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
     final variableNotifier =
@@ -668,110 +674,37 @@ class FunctionsRepository {
     if (variableNotifier == null) return false;
 
     String newValue = PropertyValueDelegate.substituteVariables(
-        context, action.newValue,
-        nullSubstitutionMode: NullSubstitutionMode.emptyString);
+      action.newValue,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
 
-    if (action.variable.type.isBoolean && action.toggled) {
-      final bool currentValue =
-          variableNotifier.value.getValue().typedValue<bool>() ?? false;
-      newValue = (!currentValue).toString();
-    }
+    Object? currentValue = variableNotifier.value.getValue();
 
-    if (action.variable.type.isList &&
-        action.listOperation != ListOperation.replace) {
-      // Get current value of the list variable.
-      List? currentValue = variableNotifier.value.getValue().typedValue<List>();
-
-      // Set default value if it is a list type variable.
-      if (variableNotifier.value.type.isList) currentValue ??= [];
-
-      // If list variable does not exist, return false.
-      if (currentValue == null) return false;
-      // Retrieve all variables.
-      final Iterable<VariableData> variables =
-          codelesslyContext.variables.values.map((e) => e.value);
-      // Find the value of variable referenced by index.
-      final indexVariableValue = PropertyValueDelegate.retrieveVariableValue(
-        action.index,
-        variables,
-        codelesslyContext.data,
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
-            {},
-        IndexedItemProvider.of(context),
-        context.read<Codelessly>().localStorage,
-      );
-      // Try to parse index if it's an integer. Else, try to use the variable's
-      // value.
-      final int index = int.tryParse(action.index) ??
-          (indexVariableValue is int ? indexVariableValue : 0);
-      // Perform list operations.
-      switch (action.listOperation) {
-        case ListOperation.add:
-          currentValue.addAll(newValue.toList() ?? []);
-          break;
-        case ListOperation.insert:
-          currentValue.insertAll(index, newValue.toList() ?? []);
-          break;
-        case ListOperation.removeAt:
-          currentValue.removeAt(index);
-          break;
-        case ListOperation.remove:
-          currentValue.remove(newValue.parsedValue());
-          break;
-        case ListOperation.update:
-          currentValue[index] = newValue.parsedValue();
-          break;
-        default:
-          break;
-      }
-      newValue = jsonEncode(currentValue);
-    }
-
-    if (action.variable.type.isMap &&
-        action.mapOperation != MapOperation.replace) {
-      // Get current value of the map variable.
-      Map? currentValue = variableNotifier.value.getValue().typedValue<Map>();
-
-      // Set default value if it is a map type variable.
-      if (variableNotifier.value.type.isMap) currentValue ??= {};
-
-      // If map variable does not exist, return false.
-      if (currentValue == null) return false;
-      // Retrieve all variables.
-      final Iterable<VariableData> variables =
-          codelesslyContext.variables.values.map((e) => e.value);
-      // Find the value of variable referenced by key.
-      final keyVariableValue = PropertyValueDelegate.retrieveVariableValue(
-        action.mapKey,
-        variables,
-        codelesslyContext.data,
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
-            {},
-        IndexedItemProvider.of(context),
-        context.read<Codelessly>().localStorage,
-      );
-      // If key is a variable, use its value. Else, use the key as it is.
-      final String key =
-          keyVariableValue is String ? keyVariableValue : action.mapKey;
-      // Perform map operations.
-      switch (action.mapOperation) {
-        case MapOperation.add:
-          currentValue.addAll(newValue.toMap() ?? {});
-          break;
-        case MapOperation.remove:
-          currentValue.remove(key);
-          break;
-        case MapOperation.update:
-          currentValue[key] = newValue.parsedValue();
-          break;
-        default:
-          break;
-      }
-      newValue = jsonEncode(currentValue);
-    }
+    final Object? updatedValue = switch (action.variable.type) {
+      VariableType.text => newValue,
+      VariableType.integer => int.tryParse(newValue),
+      VariableType.decimal => double.tryParse(newValue),
+      VariableType.boolean => action.toggled
+          ? !(bool.tryParse(currentValue.toString()) ?? false)
+          : bool.tryParse(newValue),
+      VariableType.list => _performListOperation(
+          action,
+          currentValue?.toList(),
+          newValue,
+          scopedValues,
+        ),
+      VariableType.map => _performMapOperation(
+          action,
+          currentValue?.toMap(),
+          newValue,
+          scopedValues,
+        ),
+      _ => null,
+    };
 
     final VariableData updatedVariable =
-        variableNotifier.value.copyWith(value: newValue);
+        variableNotifier.value.copyWith(value: updatedValue);
 
     variableNotifier.set(updatedVariable, notify: notify);
     return true;
@@ -822,7 +755,7 @@ class FunctionsRepository {
     if (match.name != match.fullPath &&
         (propertyNotifier.value.type == VariableType.map ||
             propertyNotifier.value.type == VariableType.list)) {
-      // TODO: support sub path on the variable
+      // TODO: support sub path on the variable?
       // sub path on the variable
       propertyNotifier.value = propertyNotifier.value.copyWith(value: value);
       return true;
@@ -914,6 +847,7 @@ class FunctionsRepository {
   }
 
   static void callFunction(BuildContext context, CallFunctionAction action) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
     final CodelesslyFunction? function =
@@ -921,7 +855,7 @@ class FunctionsRepository {
 
     // Substitute variables in params.
     final Map<String, dynamic> parsedParams =
-        substituteVariablesInMap(context, action.params);
+        substituteVariablesInMap(action.params, scopedValues);
 
     log('Calling function ${action.name}(${parsedParams.entries.map((e) => '${e.key}: ${e.value}').join(', ')}).');
 
@@ -931,19 +865,26 @@ class FunctionsRepository {
   static Future<bool> setStorageFromAction(
     BuildContext context,
     SetStorageAction action,
-  ) async =>
-      await switch (action.operation) {
-        StorageOperation.addOrUpdate => _updateStorage(context, action),
-        StorageOperation.remove => _removeFromStorage(context, action),
-        StorageOperation.clear => _clearStorage(context, action),
-      };
+  ) async {
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    return await switch (action.operation) {
+      StorageOperation.addOrUpdate => _updateStorage(action, scopedValues),
+      StorageOperation.remove => _removeFromStorage(action, scopedValues),
+      StorageOperation.clear => _clearStorage(action, scopedValues),
+    };
+  }
 
   static Future<bool> _clearStorage(
-    BuildContext context,
     SetStorageAction action,
+    ScopedValues scopedValues,
   ) async {
     try {
-      await context.read<Codelessly>().localStorage.clear();
+      final LocalStorage? storage = scopedValues.localStorage;
+      if (storage == null) {
+        log('Storage is null.');
+        return false;
+      }
+      await storage.clear();
       return true;
     } catch (error, stackTrace) {
       log(error.toString());
@@ -953,19 +894,28 @@ class FunctionsRepository {
   }
 
   static Future<bool> _updateStorage(
-    BuildContext context,
     SetStorageAction action,
+    ScopedValues scopedValues,
   ) async {
     try {
-      final LocalStorage storage = context.read<Codelessly>().localStorage;
+      final LocalStorage? storage = scopedValues.localStorage;
+
+      if (storage == null) {
+        log('Storage is null.');
+        return false;
+      }
 
       final storageKey = PropertyValueDelegate.substituteVariables(
-          context, action.key,
-          nullSubstitutionMode: NullSubstitutionMode.emptyString);
+        action.key,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
+      );
 
       final newValue = PropertyValueDelegate.substituteVariables(
-          context, action.newValue,
-          nullSubstitutionMode: NullSubstitutionMode.emptyString);
+        action.newValue,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
+      );
 
       final match = VariableMatch.parse(storageKey.wrapWithVariableSyntax());
 
@@ -993,16 +943,16 @@ class FunctionsRepository {
             ? !(bool.tryParse(currentValue.toString()) ?? false)
             : bool.tryParse(newValue),
         VariableType.list => _performListOperation(
-            context,
             action,
             currentValue?.toList(),
             newValue,
+            scopedValues,
           ),
         VariableType.map => _performMapOperation(
-            context,
             action,
             currentValue?.toMap(),
             newValue,
+            scopedValues,
           ),
         _ => null,
       };
@@ -1044,13 +994,19 @@ class FunctionsRepository {
   /// Performs remove operation on given storage [action] and returns `true` if
   /// the operation was successful, `false` otherwise.
   static Future<bool> _removeFromStorage(
-      BuildContext context, SetStorageAction action) async {
+      SetStorageAction action, ScopedValues scopedValues) async {
     try {
-      final LocalStorage storage = context.read<Codelessly>().localStorage;
+      final LocalStorage? storage = scopedValues.localStorage;
+      if (storage == null) {
+        log('Storage is null.');
+        return false;
+      }
 
       final storageKey = PropertyValueDelegate.substituteVariables(
-          context, action.key,
-          nullSubstitutionMode: NullSubstitutionMode.emptyString);
+        action.key,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
+      );
 
       final match = VariableMatch.parse(storageKey.wrapWithVariableSyntax());
       if (match == null || !match.hasPathOrAccessor) {
@@ -1085,42 +1041,40 @@ class FunctionsRepository {
   }
 
   static Map? _performMapOperation(
-    BuildContext context,
     DataOperationInterface action,
     Map? currentValue,
     String newValue,
+    ScopedValues scopedValues,
   ) {
     // If list variable does not exist, return false.
     currentValue ??= {};
 
     final String substitutedKey = PropertyValueDelegate.substituteVariables(
-      context,
       action.mapKey,
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
     );
 
     // Perform map operations.
     switch (action.mapOperation) {
       case MapOperation.add:
         currentValue.addAll(newValue.toMap() ?? {});
-        break;
       case MapOperation.remove:
         currentValue.remove(substitutedKey);
-        break;
       case MapOperation.update:
         currentValue[substitutedKey] = newValue.parsedValue();
-        break;
-      default:
-        break;
+      case MapOperation.replace:
+      case MapOperation.set:
+        currentValue = newValue.toMap() ?? {};
     }
     return currentValue;
   }
 
   static List? _performListOperation(
-    BuildContext context,
     DataOperationInterface action,
     List? currentValue,
     String newValue,
+    ScopedValues scopedValues,
   ) {
     // If list variable does not exist, return false.
     currentValue ??= [];
@@ -1130,9 +1084,9 @@ class FunctionsRepository {
     // Try to parse index if it's an integer. Else, try to use the variable's
     // value.
     final String substitutedIndex = PropertyValueDelegate.substituteVariables(
-      context,
       action.index,
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
     );
     final index = int.tryParse(substitutedIndex);
     if (index == null) {
@@ -1143,21 +1097,20 @@ class FunctionsRepository {
     // Perform list operations.
     switch (action.listOperation) {
       case ListOperation.add:
-        final parsedValue = newValue.toList<List>().toList() ?? [];
+        final parsedValue = newValue.toList<List>() ?? [];
         currentValue.addAll(parsedValue);
       case ListOperation.insert:
-        final parsedValue = newValue.toList<List>().toList() ?? [];
+        final parsedValue = newValue.toList<List>() ?? [];
         currentValue.insertAll(index, parsedValue);
       case ListOperation.removeAt:
         currentValue.removeAt(index);
       case ListOperation.remove:
-        final parsedValue = newValue.parsedValue();
         currentValue.remove(newValue);
       case ListOperation.update:
         final parsedValue = newValue.parsedValue();
         currentValue[index] = parsedValue;
       case ListOperation.replace:
-        final parsedValue = newValue.toList<List>().toList() ?? [];
+        final parsedValue = newValue.toList<List>() ?? [];
         return parsedValue;
     }
     return currentValue;
@@ -1167,48 +1120,55 @@ class FunctionsRepository {
     BuildContext context,
     SetCloudStorageAction action,
   ) async {
+    final ScopedValues scopedValues = ScopedValues.of(context);
     return await switch (action.subAction) {
-      AddDocumentSubAction action => addDocumentToCloud(context, action),
-      UpdateDocumentSubAction action => updateDocumentOnCloud(context, action),
+      AddDocumentSubAction action => addDocumentToCloud(action, scopedValues),
+      UpdateDocumentSubAction action =>
+        updateDocumentOnCloud(action, scopedValues),
       RemoveDocumentSubAction action =>
-        removeDocumentFromCloud(context, action),
+        removeDocumentFromCloud(action, scopedValues),
     };
   }
 
   static Future<bool> addDocumentToCloud(
-    BuildContext context,
     AddDocumentSubAction subAction,
+    ScopedValues scopedValues,
   ) async {
     try {
-      final CloudStorage cloudStorage = context.read<Codelessly>().cloudStorage;
+      final CloudStorage? cloudStorage = scopedValues.cloudStorage;
+
+      if (cloudStorage == null) {
+        log('Cloud storage is null.');
+        return false;
+      }
 
       final evaluatedPath = PropertyValueDelegate.substituteVariables(
-        context,
         subAction.path,
         nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
       );
       final evaluatedDocumentId = PropertyValueDelegate.substituteVariables(
-        context,
         subAction.documentId,
         nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
       );
 
       Map<String, dynamic> data = {};
       if (subAction.useRawValue) {
         // Substitute variables in raw value.
         final updatedValue = PropertyValueDelegate.substituteVariables(
-          context,
           subAction.rawValue,
           nullSubstitutionMode: NullSubstitutionMode.emptyString,
+          scopedValues: scopedValues,
         );
         // Parse to JSON.
         data = jsonDecode(updatedValue);
       } else {
         // Substitute variables in value.
         final updatedValue = PropertyValueDelegate.substituteVariables(
-          context,
           subAction.newValue,
           nullSubstitutionMode: NullSubstitutionMode.emptyString,
+          scopedValues: scopedValues,
         );
         // Parse to JSON.
         data = jsonDecode(updatedValue);
@@ -1229,28 +1189,33 @@ class FunctionsRepository {
   }
 
   static Future<bool> updateDocumentOnCloud(
-    BuildContext context,
     UpdateDocumentSubAction subAction,
+    ScopedValues scopedValues,
   ) async {
-    final CloudStorage cloudStorage = context.read<Codelessly>().cloudStorage;
+    final CloudStorage? cloudStorage = scopedValues.cloudStorage;
+
+    if (cloudStorage == null) {
+      log('Cloud storage is null.');
+      return false;
+    }
 
     final evaluatedPath = PropertyValueDelegate.substituteVariables(
-      context,
       subAction.path,
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
     );
     final evaluatedDocumentId = PropertyValueDelegate.substituteVariables(
-      context,
       subAction.documentId,
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
     );
 
     if (subAction.useRawValue) {
       // Substitute variables in raw value.
       final updatedValue = PropertyValueDelegate.substituteVariables(
-        context,
         subAction.rawValue,
         nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
       );
       // Parse to JSON.
       final Map<String, dynamic> data = jsonDecode(updatedValue);
@@ -1263,19 +1228,21 @@ class FunctionsRepository {
     }
 
     try {
-      final CloudStorage storage = context.read<Codelessly>().cloudStorage;
-
       final storageKey = PropertyValueDelegate.substituteVariables(
-          context, subAction.key,
-          nullSubstitutionMode: NullSubstitutionMode.emptyString);
+        subAction.key,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
+      );
 
       final newValue = PropertyValueDelegate.substituteVariables(
-          context, subAction.newValue,
-          nullSubstitutionMode: NullSubstitutionMode.emptyString);
+        subAction.newValue,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
+      );
 
       final match = VariableMatch.parse(storageKey.wrapWithVariableSyntax());
-      final docData =
-          await storage.getDocumentData(subAction.path, subAction.documentId);
+      final docData = await cloudStorage.getDocumentData(
+          subAction.path, subAction.documentId);
 
       final Object? currentValue;
       JsonPointer? pointer;
@@ -1303,16 +1270,16 @@ class FunctionsRepository {
             ? !(bool.tryParse(currentValue.toString()) ?? false)
             : bool.tryParse(newValue),
         VariableType.list => _performListOperation(
-            context,
             subAction,
             currentValue?.toList(),
             newValue,
+            scopedValues,
           ),
         VariableType.map => _performMapOperation(
-            context,
             subAction,
             currentValue?.toMap(),
             newValue,
+            scopedValues,
           ),
         _ => null,
       };
@@ -1362,21 +1329,26 @@ class FunctionsRepository {
   }
 
   static Future<bool> removeDocumentFromCloud(
-    BuildContext context,
     RemoveDocumentSubAction subAction,
+    ScopedValues scopedValues,
   ) async {
     try {
-      final CloudStorage cloudStorage = context.read<Codelessly>().cloudStorage;
+      final CloudStorage? cloudStorage = scopedValues.cloudStorage;
+
+      if (cloudStorage == null) {
+        log('Cloud storage is null.');
+        return false;
+      }
 
       final evaluatedPath = PropertyValueDelegate.substituteVariables(
-        context,
         subAction.path,
         nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
       );
       final evaluatedDocumentId = PropertyValueDelegate.substituteVariables(
-        context,
         subAction.documentId,
         nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
       );
 
       return await cloudStorage.removeDocument(
@@ -1394,17 +1366,24 @@ class FunctionsRepository {
     BuildContext context,
     LoadFromCloudStorageAction action,
   ) async {
-    final CloudStorage cloudStorage = context.read<Codelessly>().cloudStorage;
+    final ScopedValues scopedValues = ScopedValues.of(context);
+
+    final CloudStorage? cloudStorage = scopedValues.cloudStorage;
+
+    if (cloudStorage == null) {
+      log('Cloud storage is null.');
+      return;
+    }
 
     final evaluatedPath = PropertyValueDelegate.substituteVariables(
-      context,
       action.path,
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
     );
     final evaluatedDocumentId = PropertyValueDelegate.substituteVariables(
-      context,
       action.documentId,
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
     );
 
     Observable<VariableData>? variable;

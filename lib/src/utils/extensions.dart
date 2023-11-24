@@ -1547,21 +1547,8 @@ extension BaseConditionExt on BaseCondition {
       {};
 
   /// [variables] is a map of variable name to variable value.
-  R? evaluate<R extends Object>(
-    BuildContext context,
-    Map<String, VariableData> variables,
-    Map<String, dynamic> data,
-  ) =>
-      accept<R>(
-        ConditionEvaluator<R>(
-          variables: variables,
-          data: data,
-          itemProvider: IndexedItemProvider.of(context),
-          localStorage: context.read<Codelessly>().localStorage,
-          routeParams: ModalRoute.of(context)?.settings.arguments
-                  as Map<String, dynamic>? ??
-              {},
-        ),
+  R? evaluate<R extends Object>(ScopedValues scopedValues) => accept<R>(
+        ConditionEvaluator<R>(scopedValues: scopedValues),
       );
 
   void prettyPrint() => ConditionPrinter().printCondition(this);
@@ -1651,41 +1638,14 @@ extension CanvasConditionsExt on CanvasConditions {
 
 extension ExpressionExt on BaseExpression {
   /// [variables] is a map of variable names and their values.
-  bool evaluate(
-    BuildContext context,
-    Map<String, VariableData> variables,
-    Map<String, dynamic> data,
-  ) =>
-      accept<bool>(
-        ConditionEvaluator<bool>(
-            itemProvider: IndexedItemProvider.of(context),
-            variables: variables,
-            data: data,
-            localStorage: context.read<Codelessly>().localStorage,
-            routeParams: ModalRoute.of(context)?.settings.arguments
-                    as Map<String, dynamic>? ??
-                {}),
-      )!;
+  bool evaluate(ScopedValues scopedValues) =>
+      accept<bool>(ConditionEvaluator<bool>(scopedValues: scopedValues))!;
 }
 
 extension ExpressionPartExt on ExpressionPart {
   /// [variables] is a map of variable name and its value.
-  dynamic evaluate(
-    BuildContext context,
-    Map<String, VariableData> variables,
-    Map<String, dynamic> data,
-  ) =>
-      accept(
-        ConditionEvaluator(
-          itemProvider: IndexedItemProvider.of(context),
-          variables: variables,
-          data: data,
-          localStorage: context.read<Codelessly>().localStorage,
-          routeParams: ModalRoute.of(context)?.settings.arguments
-                  as Map<String, dynamic>? ??
-              {},
-        ),
-      );
+  dynamic evaluate(ScopedValues scopedValues) =>
+      accept(ConditionEvaluator(scopedValues: scopedValues));
 }
 
 extension VariantIterable on Iterable<Variant> {

@@ -70,7 +70,6 @@ class TokenProvider {
           map['refresh_token'],
           int.parse(map['expires_in']),
         );
-        break;
       case 400:
         signOut();
         throw AuthException(response.body);

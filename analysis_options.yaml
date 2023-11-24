@@ -23,6 +23,7 @@ analyzer:
 
 linter:
   rules:
+    unnecessary_breaks: true
     prefer_single_quotes: true
     constant_identifier_names: true
     prefer_final_fields: true

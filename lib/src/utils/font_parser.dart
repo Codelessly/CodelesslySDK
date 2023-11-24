@@ -94,31 +94,22 @@ String deriveFontFamily({
   switch (weight) {
     case FontWeightNumeric.w100:
       family = '$family Thin';
-      break;
     case FontWeightNumeric.w200:
       family = '$family Extra Light';
-      break;
     case FontWeightNumeric.w300:
       family = '$family Light';
-      break;
     case FontWeightNumeric.w400:
       family = '$family Regular';
-      break;
     case FontWeightNumeric.w500:
       family = '$family Medium';
-      break;
     case FontWeightNumeric.w600:
       family = '$family Semibold';
-      break;
     case FontWeightNumeric.w700:
       family = '$family Bold';
-      break;
     case FontWeightNumeric.w800:
       family = '$family Extra Bold';
-      break;
     case FontWeightNumeric.w900:
       family = '$family Black';
-      break;
     default:
       break;
   }

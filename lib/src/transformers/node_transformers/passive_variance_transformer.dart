@@ -35,13 +35,13 @@ class PassiveVarianceWidget extends StatelessWidget {
     required this.settings,
   });
 
-  List<String> getChildren(BuildContext context) {
+  List<String> getChildren(ScopedValues scopedValues) {
     if (settings.isPreview) return node.currentVariant.children;
     final String variantIdOrName =
         PropertyValueDelegate.getPropertyValue<String>(
-              context,
               node,
               'currentVariantId',
+              scopedValues: scopedValues,
             ) ??
             node.currentVariantId;
 
@@ -53,7 +53,8 @@ class PassiveVarianceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> children = getChildren(context);
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    final List<String> children = getChildren(scopedValues);
     if (children.isNotEmpty) {
       final childNode = getNode(children.first);
 

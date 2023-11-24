@@ -102,20 +102,22 @@ class PassiveProgressBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ScopedValues scopedValues = ScopedValues.of(
+      context,
+      variablesOverrides: variablesOverrides,
+    );
     final double currentValue = PropertyValueDelegate.getPropertyValue<double>(
-          context,
           node,
           'currentValue',
-          variablesOverrides: variablesOverrides,
+          scopedValues: scopedValues,
         ) ??
         node.currentValue;
 
     final Color progressColor =
         PropertyValueDelegate.getPropertyValue<ColorRGBA>(
-              context,
               node,
               'progressColor',
-              variablesOverrides: variablesOverrides,
+              scopedValues: scopedValues,
             )?.toFlutterColor() ??
             node.properties.progressColor.toFlutterColor();
 

@@ -507,17 +507,14 @@ class Codelessly {
             if (!this.publishDataManager.initialized) {
               await this.publishDataManager.init(layoutID: null);
             }
-            break;
           case PublishSource.preview:
             if (!this.previewDataManager.initialized) {
               await this.previewDataManager.init(layoutID: null);
             }
-            break;
           case PublishSource.template:
             if (!templateDataManager.initialized) {
               await templateDataManager.init(layoutID: null);
             }
-            break;
         }
 
         _updateStatus(CStatus.loading('initialized_data_managers'));

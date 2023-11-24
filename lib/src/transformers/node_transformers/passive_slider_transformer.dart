@@ -98,11 +98,14 @@ class PassiveSliderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ScopedValues scopedValues = ScopedValues.of(
+      context,
+      variablesOverrides: variablesOverrides,
+    );
     final double value = PropertyValueDelegate.getPropertyValue<double>(
-          context,
           node,
           'value',
-          variablesOverrides: variablesOverrides,
+          scopedValues: scopedValues,
         ) ??
         node.value;
 

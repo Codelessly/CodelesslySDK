@@ -208,12 +208,10 @@ class StrokePainter extends CustomPainter {
         case StrokeAlignC.center:
           topLeft = Offset(-strokeWidth / 2, -strokeWidth / 2);
           realSize = Size(size.width + strokeWidth, size.height + strokeWidth);
-          break;
         case StrokeAlignC.outside:
           topLeft = Offset(-strokeWidth, -strokeWidth);
           realSize =
               Size(size.width + strokeWidth * 2, size.height + strokeWidth * 2);
-          break;
         case StrokeAlignC.inside:
           break;
       }

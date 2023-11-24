@@ -183,9 +183,9 @@ class PassiveTextFieldWidget extends StatefulWidget {
 class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   late final TextEditingController _controller = TextEditingController(
     text: PropertyValueDelegate.substituteVariables(
-      context,
       widget.node.initialText,
       nullSubstitutionMode: widget.settings.nullSubstitutionMode,
+      scopedValues: ScopedValues.of(context),
     ),
   );
 

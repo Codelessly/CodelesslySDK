@@ -70,7 +70,6 @@ class PassiveLoadingIndicatorTransformer
     switch (reaction.action.type) {
       case ActionType.link:
         launchUrl(Uri.parse((reaction.action as LinkAction).url));
-        break;
       default:
         break;
     }
