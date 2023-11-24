@@ -132,7 +132,6 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
         if (lastNameField != null) {
           addToNodeValues(lastNameField, [StringValue(name: 'inputValue')]);
         }
-        break;
       case ActionType.setValue:
         final action = actionModel as SetValueAction;
         final SceneNode? connectedNode = nodes[action.nodeID] as SceneNode?;
@@ -145,7 +144,6 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
                       action.values.any((value) => property.name == value.name))
                   .toList());
         }
-        break;
       case ActionType.setVariant:
         final action = actionModel as SetVariantAction;
         final VarianceNode? connectedNode =
@@ -160,7 +158,6 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
             )
           ]);
         }
-        break;
       default:
     }
   }

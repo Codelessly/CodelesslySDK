@@ -97,10 +97,10 @@ class PassiveButtonWidget extends StatelessWidget {
         node.properties.icon, effectiveIconSize, useIconFonts);
 
     final bool enabled = PropertyValueDelegate.getPropertyValue<bool>(
-          context,
           node,
           'enabled',
-          variablesOverrides: variablesOverrides,
+          scopedValues:
+              ScopedValues.of(context, variablesOverrides: variablesOverrides),
         ) ??
         node.properties.enabled;
 
@@ -142,7 +142,6 @@ class PassiveButtonWidget extends StatelessWidget {
                 )
               : label,
         );
-        break;
       case ButtonTypeEnum.text:
         buttonWidget = TextButton(
           onPressed: () => onPressed?.call(context),
@@ -167,7 +166,6 @@ class PassiveButtonWidget extends StatelessWidget {
                 )
               : label,
         );
-        break;
       case ButtonTypeEnum.outlined:
         buttonWidget = OutlinedButton(
           onPressed: enabled ? () => onPressed?.call(context) : null,
@@ -192,7 +190,6 @@ class PassiveButtonWidget extends StatelessWidget {
                 )
               : label,
         );
-        break;
       case ButtonTypeEnum.icon:
         buttonWidget = ElevatedButton(
           style: buttonStyle.copyWith(

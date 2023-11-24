@@ -72,8 +72,7 @@ class PassiveRectangleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
+    final ScopedValues scopedValues = context.read<ScopedValues>();
 
     // final BaseNode? parent = node.id == kRootNode || node.parentID == kRootNode
     //     ? null
@@ -107,7 +106,7 @@ class PassiveRectangleWidget extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        boxShadow: retrieveBoxShadow(context, node, codelesslyContext),
+        boxShadow: retrieveBoxShadow(node, scopedValues),
         borderRadius: getBorderRadius(node),
       ),
       child: Stack(
@@ -116,16 +115,15 @@ class PassiveRectangleWidget extends StatelessWidget {
             stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
         children: [
           ...buildFills(
-            context,
             node,
-            codelesslyContext,
             useInk: node is BlendMixin &&
                 (node as BlendMixin).inkWell != null &&
                 settings.useInk,
             obscureImages: settings.obscureImages,
             settings: settings,
+            scopedValues: scopedValues,
           ),
-          ...buildStrokes(context, node, codelesslyContext),
+          ...buildStrokes(node, scopedValues),
           ...wrapWithPaddingAndScroll(
             node,
             [
@@ -249,8 +247,7 @@ List<Widget> wrapWithPaddingAndScroll(
   );
 }
 
-List<BoxShadow> retrieveBoxShadow(
-    BuildContext context, BaseNode node, CodelesslyContext codelesslyContext) {
+List<BoxShadow> retrieveBoxShadow(BaseNode node, ScopedValues scopedValues) {
   if (node is! DefaultShapeNode) return [];
   return node.effects
       .where((effect) => effect.type == EffectType.dropShadow && effect.visible)
@@ -258,7 +255,10 @@ List<BoxShadow> retrieveBoxShadow(
     (effect) {
       final ColorRGBA? color =
           PropertyValueDelegate.getPropertyValue<ColorRGBA>(
-                  context, node, 'shadow-color-${effect.id}') ??
+                node,
+                'shadow-color-${effect.id}',
+                scopedValues: scopedValues,
+              ) ??
               effect.color;
       return BoxShadow(
         spreadRadius: effect.spread!,
@@ -426,15 +426,17 @@ List<num> applyGradientRotation(List<num>? t1, double angle) {
 
 List<num> defaultGradientTransform() => [1.0, 0.0, 0.0, -0.0, 1.0, 0.0];
 
-List<Widget> buildStrokes(
-    BuildContext context, BaseNode node, CodelesslyContext codelesslyContext) {
+List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
   if (node is! GeometryMixin || node.strokeWeight <= 0) {
     return [];
   }
   final List<Widget> strokeWidgets = [];
   for (final paint in node.strokes.where((paint) => paint.visible)) {
     final paintValue = PropertyValueDelegate.getPropertyValue<PaintModel>(
-        context, node, 'stroke-paint-${paint.id}');
+      node,
+      'stroke-paint-${paint.id}',
+      scopedValues: scopedValues,
+    );
     if (node.dashPattern.isEmpty) {
       strokeWidgets.add(
         Positioned.fill(
@@ -485,9 +487,7 @@ typedef ImageFillBuilder = Widget Function(
 );
 
 List<Widget> buildFills(
-  BuildContext context,
-  BaseNode node,
-  CodelesslyContext codelesslyContext, {
+  BaseNode node, {
   Map<int, TypedBytes> imageBytes = const {},
   double? imageOpacity,
   double? imageRotation,
@@ -495,6 +495,7 @@ List<Widget> buildFills(
   bool useInk = true,
   bool obscureImages = false,
   required WidgetBuildSettings settings,
+  required ScopedValues scopedValues,
 }) {
   if (node is! GeometryMixin) return [];
 
@@ -505,7 +506,10 @@ List<Widget> buildFills(
         case PaintType.solid:
           final propertyValue =
               PropertyValueDelegate.getPropertyValue<PaintModel>(
-                  context, node, 'fill-${paint.id}');
+            node,
+            'fill-${paint.id}',
+            scopedValues: scopedValues,
+          );
           final decoration = BoxDecoration(
             borderRadius: borderRadius,
             color: (propertyValue ?? paint).toFlutterColor()!,
@@ -536,15 +540,15 @@ List<Widget> buildFills(
           // [imageURL] represents a JSON path.
           String? imageURL = paint.croppedImageURL ?? paint.downloadUrl!;
           final imageURLValue = PropertyValueDelegate.getPropertyValue<String>(
-                context,
                 node,
                 'fill-image-${paint.id}',
+                scopedValues: scopedValues,
               ) ??
               imageURL;
           imageURL = PropertyValueDelegate.substituteVariables(
-            context,
             imageURLValue,
             nullSubstitutionMode: settings.nullSubstitutionMode,
+            scopedValues: scopedValues,
           );
           Widget child;
 

@@ -28,7 +28,6 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
         ..shape = CShapeBorder.roundedRectangle
         ..borderColor = null
         ..borderWidth = null;
-      break;
     case ButtonTypeEnum.text:
       node.properties
         ..buttonColor = node.properties.buttonColor.copyWith(a: 0.1)
@@ -43,7 +42,6 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
         ..shape = CShapeBorder.roundedRectangle
         ..borderWidth = null
         ..borderColor = null;
-      break;
     case ButtonTypeEnum.outlined:
       node.properties
         ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
@@ -58,7 +56,6 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
         ..shape = CShapeBorder.roundedRectangle
         ..borderWidth = 1
         ..borderColor = null;
-      break;
     case ButtonTypeEnum.icon:
       final brightness = ThemeData.estimateBrightnessForColor(
           node.properties.buttonColor.toFlutterColor());
@@ -77,7 +74,6 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
         ..elevation = 2
         ..borderColor = null
         ..borderWidth = null;
-      break;
   }
   if (node.properties.buttonType == ButtonTypeEnum.icon) {
     transformNodeFromIconButton(node);
@@ -153,7 +149,6 @@ ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
         minimumSize: Size.zero,
         shape: getButtonShape(node.properties),
       );
-      break;
     case ButtonTypeEnum.text:
       buttonStyle = TextButton.styleFrom(
         foregroundColor: labelColor,
@@ -166,7 +161,6 @@ ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
         shadowColor: node.properties.shadowColor.toFlutterColor(),
         shape: getButtonShape(node.properties),
       );
-      break;
     case ButtonTypeEnum.outlined:
       buttonStyle = OutlinedButton.styleFrom(
         foregroundColor: labelColor,
@@ -180,7 +174,6 @@ ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
         shadowColor: node.properties.shadowColor.toFlutterColor(),
         shape: getButtonShape(node.properties),
       );
-      break;
     case ButtonTypeEnum.icon:
       Color? primary;
       if (node.properties.buttonColor.toFlutterColor().opacity > 0 &&
@@ -199,7 +192,6 @@ ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
         shadowColor: node.properties.shadowColor.toFlutterColor(),
         shape: getButtonShape(node.properties),
       );
-      break;
   }
   return buttonStyle.copyWith(
       elevation:

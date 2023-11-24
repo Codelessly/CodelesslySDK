@@ -82,7 +82,9 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
     final itemNode = widget.node.children.first;
 
     final List? data = PropertyValueDelegate.getVariableValueFromPath<List>(
-        context, widget.node.variables['data'] ?? '');
+      widget.node.variables['data'] ?? '',
+      scopedValues: ScopedValues.of(context),
+    );
 
     final int? itemCount;
     if (widget.settings.isPreview) {
@@ -108,8 +110,7 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
           onPageChanged: (index) => widget.onPageChanged?.call(context, index),
           itemBuilder: (context, index) => IndexedItemProvider(
             key: ValueKey(index),
-            index: index,
-            item: data?.elementAtOrNull(index),
+            item: IndexedItem(index, data?.elementAtOrNull(index)),
             child: Builder(
               builder: (context) {
                 // This builder is important to pass a context that has

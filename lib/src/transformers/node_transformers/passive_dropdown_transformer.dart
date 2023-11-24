@@ -88,19 +88,21 @@ class PassiveDropdownWidget extends StatelessWidget {
           child: ChangeNotifierProvider<CodelesslyContext>.value(
             value: context.read<CodelesslyContext>(),
             child: IndexedItemProvider(
-              index: index,
-              item: value,
+              item: IndexedItem(index, value),
               child: Builder(builder: (context) {
                 String label = '$value';
                 if (node.properties.useDataSource) {
                   String? labelText =
                       PropertyValueDelegate.getPropertyValue<String>(
-                          context, node, 'itemLabel');
+                    node,
+                    'itemLabel',
+                    scopedValues: ScopedValues.of(context),
+                  );
                   labelText ??= node.properties.itemLabel;
                   label = PropertyValueDelegate.substituteVariables(
-                    context,
                     labelText,
                     nullSubstitutionMode: settings.nullSubstitutionMode,
+                    scopedValues: ScopedValues.of(context),
                   );
                 }
                 return Text(
@@ -125,19 +127,21 @@ class PassiveDropdownWidget extends StatelessWidget {
           alignment: node.properties.itemAlignment.flutterAlignmentGeometry ??
               AlignmentDirectional.centerStart,
           child: IndexedItemProvider(
-            index: index,
-            item: value,
+            item: IndexedItem(index, value),
             child: Builder(builder: (context) {
               String label = '$value';
               if (node.properties.useDataSource) {
                 String? labelText =
                     PropertyValueDelegate.getPropertyValue<String>(
-                        context, node, 'itemLabel');
+                  node,
+                  'itemLabel',
+                  scopedValues: ScopedValues.of(context),
+                );
                 labelText ??= node.properties.itemLabel;
                 label = PropertyValueDelegate.substituteVariables(
-                  context,
                   labelText,
                   nullSubstitutionMode: settings.nullSubstitutionMode,
+                  scopedValues: ScopedValues.of(context),
                 );
               }
               return Container(
@@ -160,23 +164,25 @@ class PassiveDropdownWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
     final List items = node.properties.useDataSource
-        ? PropertyValueDelegate.getPropertyValue<List>(context, node, 'data') ??
+        ? PropertyValueDelegate.getPropertyValue<List>(
+              node,
+              'data',
+              scopedValues: scopedValues,
+            ) ??
             []
         : node.properties.items;
 
     int? value = PropertyValueDelegate.getPropertyValue<int>(
-          context,
           node,
           'value',
+          scopedValues: scopedValues,
         ) ??
         node.value;
 
     if (value == -1) value = null;
 
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
-    codelesslyContext.conditions;
     return AdaptiveNodeBox(
       node: node,
       child: Theme(

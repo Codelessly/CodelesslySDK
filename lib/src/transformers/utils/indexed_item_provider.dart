@@ -1,22 +1,29 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 class IndexedItemProvider extends InheritedWidget {
-  final int index;
-  final Object? item;
+  final IndexedItem item;
 
   const IndexedItemProvider({
     super.key,
     required super.child,
-    required this.index,
-    this.item,
+    required this.item,
   });
 
-  static IndexedItemProvider? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<IndexedItemProvider>();
-  }
+  static IndexedItem? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<IndexedItemProvider>()?.item;
 
   @override
-  bool updateShouldNotify(covariant IndexedItemProvider oldWidget) {
-    return index != oldWidget.index || item != oldWidget.item;
-  }
+  bool updateShouldNotify(covariant IndexedItemProvider oldWidget) =>
+      oldWidget.item != item;
+}
+
+class IndexedItem with EquatableMixin {
+  final int index;
+  final Object? item;
+
+  IndexedItem(this.index, this.item);
+
+  @override
+  List<Object?> get props => [index, item];
 }

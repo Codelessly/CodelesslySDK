@@ -10,19 +10,9 @@ class ConditionEvaluator<R extends Object>
         ExpressionPartVisitor,
         ConditionOperatorVisitor,
         ActionVisitor<R> {
-  final Map<String, VariableData> variables;
-  final dynamic data;
-  final Map<String, dynamic> routeParams;
-  final IndexedItemProvider? itemProvider;
-  final WeakReference<LocalStorage>? localStorage;
+  final ScopedValues scopedValues;
 
-  ConditionEvaluator({
-    required this.variables,
-    required this.data,
-    this.itemProvider,
-    this.routeParams = const {},
-    LocalStorage? localStorage,
-  }) : localStorage = localStorage != null ? WeakReference(localStorage) : null;
+  ConditionEvaluator({required this.scopedValues});
 
   @override
   R? visitCondition(Condition condition) {
@@ -73,11 +63,7 @@ class ConditionEvaluator<R extends Object>
         part.valueString.splitMapJoinRegex(variablePathRegex, onMatch: (match) {
       final Object? value = PropertyValueDelegate.retrieveVariableValue(
         match[0]!,
-        variables.values,
-        data,
-        routeParams,
-        itemProvider,
-        localStorage?.target,
+        scopedValues: scopedValues,
       );
 
       return value?.typedValue<String>() ?? 'null';

@@ -49,7 +49,10 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     required bool maintainState,
   }) {
     final bool visible = PropertyValueDelegate.getPropertyValue<bool>(
-            context, node, 'visible') ??
+          node,
+          'visible',
+          scopedValues: ScopedValues.of(context),
+        ) ??
         node.visible;
 
     if (visible) return widget;
