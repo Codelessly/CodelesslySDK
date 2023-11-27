@@ -478,7 +478,7 @@ class DataManager {
     _publishModelDocumentListener?.cancel();
     initialized = false;
     _publishModel = null;
-    _localStorage?.close();
+    _localStorage?.dispose();
     _localStorage = null;
     _cloudStorage?.dispose();
     _cloudStorage = null;
@@ -490,7 +490,7 @@ class DataManager {
     _publishModelDocumentListener?.cancel();
     _publishModelStreamController.add(null);
     _publishModel = null;
-    _localStorage?.close();
+    _localStorage?.dispose();
     _localStorage = null;
     _cloudStorage?.dispose();
     _cloudStorage = null;
