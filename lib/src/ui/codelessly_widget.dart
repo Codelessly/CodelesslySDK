@@ -386,7 +386,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           }
 
           if (!snapshot.hasData ||
-              _effectiveController.dataManager.status is CLoading) {
+              _effectiveController.dataManager.status is! CLoaded) {
             return widget.loadingBuilder?.call(context) ??
                 const CodelesslyLoadingScreen();
           }
