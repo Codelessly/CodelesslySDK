@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/node_provider.dart';
 
 class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
   PassiveRadioTransformer(super.getNode, super.manager);
@@ -57,18 +58,19 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
     previewNode.groupValue = groupValue;
     return PassiveRadioWidget(
       node: previewNode,
-      onChanged: onChanged,
+      onChanged: (context, value) => onChanged?.call(value),
     );
   }
 
   Widget buildFromNode(BuildContext context, RadioNode node) {
     return PassiveRadioWidget(
       node: node,
-      onChanged: (value) => onChanged(context, node, value),
+      onChanged: (context, value) => onChanged(context, node, value),
     );
   }
 
   void onChanged(BuildContext context, RadioNode node, String? value) {
+    NodeProvider.setState(context, value);
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'groupValue', value: value);
 
@@ -89,7 +91,7 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
 class PassiveRadioWidget extends StatelessWidget {
   final RadioNode node;
   final List<VariableData> variablesOverrides;
-  final ValueChanged<String?>? onChanged;
+  final void Function(BuildContext context, String? value)? onChanged;
 
   const PassiveRadioWidget({
     super.key,
@@ -131,7 +133,7 @@ class PassiveRadioWidget extends StatelessWidget {
           activeColor: node.properties.activeColor.toFlutterColor(),
           hoverColor: node.properties.hoverColor.toFlutterColor(),
           focusColor: node.properties.focusColor.toFlutterColor(),
-          onChanged: onChanged,
+          onChanged: (value) => onChanged?.call(context, value),
           toggleable: node.properties.toggleable,
           splashRadius: node.properties.splashRadius,
           fillColor: MaterialStateProperty.resolveWith((states) {

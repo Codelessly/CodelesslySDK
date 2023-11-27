@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/node_provider.dart';
 
 class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
   PassiveCheckboxTransformer(super.getNode, super.manager);
@@ -54,7 +55,7 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
     previewNode.value = value;
     return PassiveCheckboxWidget(
       node: previewNode,
-      onChanged: onChanged,
+      onChanged: (context, value) => onChanged?.call(value),
       settings: settings,
     );
   }
@@ -67,11 +68,12 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
     return PassiveCheckboxWidget(
       node: node,
       settings: settings,
-      onChanged: (value) => onChanged(context, node, value),
+      onChanged: (context, value) => onChanged(context, node, value),
     );
   }
 
   void onChanged(BuildContext context, CheckboxNode node, bool? internalValue) {
+    NodeProvider.setState(context, internalValue);
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'value', value: internalValue);
 
@@ -84,7 +86,7 @@ class PassiveCheckboxWidget extends StatelessWidget {
   final CheckboxNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variables;
-  final ValueChanged<bool?>? onChanged;
+  final void Function(BuildContext context, bool? value)? onChanged;
 
   const PassiveCheckboxWidget({
     super.key,
@@ -119,7 +121,7 @@ class PassiveCheckboxWidget extends StatelessWidget {
           activeColor: node.properties.activeColor.toFlutterColor(),
           hoverColor: node.properties.hoverColor.toFlutterColor(),
           focusColor: node.properties.focusColor.toFlutterColor(),
-          onChanged: onChanged,
+          onChanged: (value) => onChanged?.call(context, value),
           visualDensity: VisualDensity.standard,
           splashRadius: node.properties.splashRadius,
           shape: RoundedRectangleBorder(

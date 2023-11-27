@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/node_provider.dart';
 
 class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
   PassiveSliderTransformer(super.getNode, super.manager);
@@ -56,7 +57,7 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
     previewNode.value = value;
     return PassiveSliderWidget(
       node: previewNode,
-      onChanged: onChanged,
+      onChanged: (context, value) => onChanged?.call(value),
       settings: settings,
     );
   }
@@ -69,11 +70,12 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
     return PassiveSliderWidget(
       node: node,
       settings: settings,
-      onChanged: (value) => onChanged(context, node, value),
+      onChanged: (context, value) => onChanged(context, node, value),
     );
   }
 
   void onChanged(BuildContext context, SliderNode node, double internalValue) {
+    NodeProvider.setState(context, internalValue);
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'value', value: internalValue);
 
@@ -86,7 +88,7 @@ class PassiveSliderWidget extends StatelessWidget {
   final SliderNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
-  final ValueChanged<double>? onChanged;
+  final void Function(BuildContext context, double value)? onChanged;
 
   const PassiveSliderWidget({
     super.key,
@@ -167,7 +169,7 @@ class PassiveSliderWidget extends StatelessWidget {
         ),
         child: Slider(
           value: value,
-          onChanged: onChanged,
+          onChanged: (value) => onChanged?.call(context, value),
           autofocus: node.properties.autofocus,
           min: node.properties.min,
           max: node.properties.max,

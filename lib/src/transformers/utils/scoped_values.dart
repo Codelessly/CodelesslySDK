@@ -21,20 +21,20 @@ class ScopedValues {
   late final Map<String, dynamic> routeParams;
 
   // private fields.
-  late final WeakReference<CodelesslyContext> _codelesslyContextRef;
-  late final WeakReference<LocalStorage> _localStorageRef;
-  late final WeakReference<CloudStorage> _cloudStorageRef;
+  late final WeakReference<CodelesslyContext>? _codelesslyContextRef;
+  late final WeakReference<LocalStorage>? _localStorageRef;
+  late final WeakReference<CloudStorage>? _cloudStorageRef;
   late final List<VariableData>? _variablesOverrides;
   late final Map<String, dynamic>? _dataOverrides;
 
   /// Codelessly context instance for the relative Codelessly instance.
-  CodelesslyContext? get codelesslyContext => _codelesslyContextRef.target;
+  CodelesslyContext? get codelesslyContext => _codelesslyContextRef?.target;
 
   /// Local storage instance for the relative Codelessly instance.
-  LocalStorage? get localStorage => _localStorageRef.target;
+  LocalStorage? get localStorage => _localStorageRef?.target;
 
   /// Cloud storage instance for the relative Codelessly instance.
-  CloudStorage? get cloudStorage => _cloudStorageRef.target;
+  CloudStorage? get cloudStorage => _cloudStorageRef?.target;
 
   /// Variable name -> Variable.
   Map<String, VariableData> get variables => {
@@ -60,9 +60,12 @@ class ScopedValues {
   }) {
     _variablesOverrides = variablesOverrides;
     _dataOverrides = dataOverrides;
-    _codelesslyContextRef = WeakReference(context.read<CodelesslyContext>());
+    final codelesslyContext = context.read<CodelesslyContext?>();
+    if (codelesslyContext != null) {
+      _codelesslyContextRef = WeakReference(codelesslyContext);
+    }
     indexedItem = IndexedItemProvider.of(context);
-    nodeState = NodeProvider.of(context).state;
+    nodeState = NodeProvider.maybeOf(context)?.state;
     routeParams =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
             {};

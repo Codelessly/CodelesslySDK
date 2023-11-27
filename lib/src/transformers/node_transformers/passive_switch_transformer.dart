@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/node_provider.dart';
 
 class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
   PassiveSwitchTransformer(super.getNode, super.manager);
@@ -55,7 +56,7 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
     previewNode.value = value;
     return PassiveSwitchWidget(
       node: previewNode,
-      onChanged: onChanged,
+      onChanged: (context, value) => onChanged?.call(value),
       settings: settings,
     );
   }
@@ -68,11 +69,12 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
     return PassiveSwitchWidget(
       node: node,
       settings: settings,
-      onChanged: (value) => onChanged(context, node, value),
+      onChanged: (context, value) => onChanged(context, node, value),
     );
   }
 
   void onChanged(BuildContext context, SwitchNode node, bool internalValue) {
+    NodeProvider.setState(context, internalValue);
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'value', value: internalValue);
 
@@ -85,7 +87,7 @@ class PassiveSwitchWidget extends StatelessWidget {
   final SwitchNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
-  final ValueChanged<bool>? onChanged;
+  final void Function(BuildContext context, bool value)? onChanged;
 
   const PassiveSwitchWidget({
     super.key,
@@ -121,7 +123,7 @@ class PassiveSwitchWidget extends StatelessWidget {
           ),
           child: Switch(
             value: value,
-            onChanged: onChanged,
+            onChanged: (value) => onChanged?.call(context, value),
             autofocus: node.properties.autofocus,
             activeTrackColor: node.properties.activeTrackColor.toFlutterColor(),
             inactiveTrackColor:
