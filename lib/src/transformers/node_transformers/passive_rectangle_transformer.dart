@@ -3,7 +3,6 @@ import 'dart:math' hide log;
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' as vec_math;
 
 import '../../../codelessly_sdk.dart';
