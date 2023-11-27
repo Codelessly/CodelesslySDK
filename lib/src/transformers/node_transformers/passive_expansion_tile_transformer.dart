@@ -2,6 +2,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../utils/placeholder_painter.dart';
 
 class PassiveExpansionTileTransformer
     extends NodeWidgetTransformer<ExpansionTileNode> {
@@ -15,6 +16,7 @@ class PassiveExpansionTileTransformer
   ) {
     return PassiveExpansionTileWidget(
       node: node,
+      settings: settings,
       getNode: getNode,
       buildWidgetFromNode: (node, context) =>
           manager.buildWidgetFromNode(node, context, settings: settings),
@@ -85,6 +87,7 @@ class PassiveExpansionTileTransformer
 
     return PassiveExpansionTileWidget(
       node: previewNode,
+      settings: settings,
       listTileNode: listTileNode,
       leadingNode: leadingNode,
       titleNode: titleNode,
@@ -106,6 +109,7 @@ class PassiveExpansionTileTransformer
   }) {
     return PassiveExpansionTileWidget(
       node: node,
+      settings: settings,
       getNode: getNode,
       buildWidgetFromNode: (node, context) =>
           manager.buildWidgetFromNode(node, context, settings: settings),
@@ -115,6 +119,8 @@ class PassiveExpansionTileTransformer
 
 class PassiveExpansionTileWidget extends StatelessWidget {
   final ExpansionTileNode node;
+  final WidgetBuildSettings settings;
+
   final ListTileNode? listTileNode;
   final BaseNode? titleNode;
   final BaseNode? subtitleNode;
@@ -129,6 +135,7 @@ class PassiveExpansionTileWidget extends StatelessWidget {
   const PassiveExpansionTileWidget({
     super.key,
     required this.node,
+    required this.settings,
     this.listTileNode,
     this.titleNode,
     this.subtitleNode,
@@ -157,6 +164,24 @@ class PassiveExpansionTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (settings.isPreview) {
+      return StrictNodeBox(
+        node: node,
+        child: CustomPaint(
+          painter: PlaceholderPainter(
+            scale: 1,
+            scaleInverse: 1,
+            bgColor: kDefaultPrimaryColor.withOpacity(0.15),
+            dashColor: const Color(0xFFADB3F1),
+            textSpan: TextSpan(
+              text: node.type.camelToSentenceCase,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+        ),
+      );
+    }
+
     if (node.listTileChild == null) {
       return Container(
         color: Colors.red,

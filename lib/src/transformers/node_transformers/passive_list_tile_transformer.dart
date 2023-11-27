@@ -225,9 +225,8 @@ class PassiveListTileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (settings.isPreview) {
-     return SizedBox(
-        width: node.basicBoxGlobal.width,
-        height: node.basicBoxGlobal.height,
+     return StrictNodeBox(
+       node: node,
         child: CustomPaint(
           painter: PlaceholderPainter(
             scale: 1,
