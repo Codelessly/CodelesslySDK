@@ -252,13 +252,12 @@ class PropertyValueDelegate {
   static Object? retrievePredefinedVariableValue(
     VariableMatch match,
     ScopedValues scopedValues,
-    Object? nodeValue,
   ) {
     final Object? variableValue = switch (match.name) {
       'data' => scopedValues.data,
       'item' => scopedValues.indexedItem?.item,
       'index' => scopedValues.indexedItem?.index,
-      'value' => nodeValue,
+      'value' => scopedValues.nodeState,
       'storage' => scopedValues.localStorage?.getAll(),
       'route' => scopedValues.routeParams,
       _ => null,

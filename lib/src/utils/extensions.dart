@@ -12,7 +12,6 @@ import 'package:provider/provider.dart';
 import '../../codelessly_sdk.dart';
 import '../transformers/utils/condition_evaluator.dart';
 import '../transformers/utils/condition_visitors.dart';
-import '../transformers/utils/node_provider.dart';
 
 extension FABLocationHelper on FABLocation {
   FloatingActionButtonLocation toFloatingActionButtonLocation() {

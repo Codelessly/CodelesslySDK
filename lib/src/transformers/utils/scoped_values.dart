@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
+import 'node_provider.dart';
 
 /// A class that holds the scoped values for a widget/context. This is helpful
 /// access context bound data in a widget tree. This makes it so that you don't
@@ -12,6 +13,9 @@ import '../../../codelessly_sdk.dart';
 class ScopedValues {
   /// The indexed item provider if it exists in this context.
   late final IndexedItem? indexedItem;
+
+  /// The exposed internal value of a node in the widget tree.
+  late final Object? nodeState;
 
   /// The route params for this route/page for given context.
   late final Map<String, dynamic> routeParams;
@@ -58,6 +62,7 @@ class ScopedValues {
     _dataOverrides = dataOverrides;
     _codelesslyContextRef = WeakReference(context.read<CodelesslyContext>());
     indexedItem = IndexedItemProvider.of(context);
+    nodeState = NodeProvider.of(context).state;
     routeParams =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
             {};
