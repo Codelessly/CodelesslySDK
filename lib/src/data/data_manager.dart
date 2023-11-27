@@ -14,7 +14,7 @@ class DataManager {
   ///
   /// This is used to inform systems that rely on the data manager that it might
   /// not need to be initialized again.
-  bool initialized = false;
+  CStatus status = CStatus.empty();
 
   /// This is set to true once the while loop that processes the
   /// [_downloadQueue] finishes processing in the initialization of this
@@ -111,7 +111,8 @@ class DataManager {
 
     final Stopwatch stopwatch = Stopwatch()..start();
 
-    initialized = true;
+    status = CStatus.loading('initializing_data_manager');
+
     queuingDone = false;
 
     // Initialize all locally cached data.
@@ -308,7 +309,7 @@ class DataManager {
   Future<void> onPublishModelLoaded(SDKPublishModel model) async {
     log('[DataManager] Publish model loaded. Initializing local storage...');
     if (_localStorage == null) {
-      _localStorage = await initializeLocalStorage(model);
+      _localStorage = await initializeLocalStorage(projectId: model.projectId);
       log('[DataManager] Local storage initialized.');
     } else {
       log('[DataManager] Local storage already initialized.');
@@ -316,26 +317,28 @@ class DataManager {
 
     log('[DataManager] Publish model loaded. Initializing cloud storage...');
     if (_cloudStorage == null) {
-      _cloudStorage = await initializeCloudStorage(model);
+      _cloudStorage = await initializeCloudStorage(projectId: model.projectId);
       log('[DataManager] Cloud storage initialized.');
     } else {
       log('[DataManager] Cloud storage already initialized.');
     }
   }
 
-  Future<LocalStorage> initializeLocalStorage(SDKPublishModel model) async {
-    final Box box = await Hive.openBox(model.projectId);
+  Future<LocalStorage> initializeLocalStorage(
+      {required String projectId}) async {
+    final Box box = await Hive.openBox(projectId);
     return HiveLocalStorage(box);
   }
 
-  Future<CloudStorage> initializeCloudStorage(SDKPublishModel model) async {
+  Future<CloudStorage> initializeCloudStorage(
+      {required String projectId}) async {
     // TODO: change this? how do we get firestore instance here?
     if (networkDataRepository is! FirebaseDataRepository) {
       throw UnimplementedError(
           'Only FirebaseDataRepository is supported for cloud storage.');
     }
-    final instance = FirestoreCloudStorage(model.projectId,
-        (networkDataRepository as FirebaseDataRepository).firestore);
+    final instance = FirestoreCloudStorage(
+        projectId, (networkDataRepository as FirebaseDataRepository).firestore);
     // initialize cloud storage.
     await instance.init();
     return instance;
@@ -447,6 +450,7 @@ class DataManager {
   Future<void> emitPublishModel() async {
     await onPublishModelLoaded(_publishModel!);
     log('[DataManager] Emitting publish model to stream. has model: ${_publishModel != null}');
+    status = CStatus.loaded();
     _publishModelStreamController.add(_publishModel);
   }
 
@@ -476,7 +480,7 @@ class DataManager {
     log('[DataManager] Disposing dataManager...');
     _publishModelStreamController.close();
     _publishModelDocumentListener?.cancel();
-    initialized = false;
+    status = CStatus.empty();
     _publishModel = null;
     _localStorage?.dispose();
     _localStorage = null;
@@ -494,7 +498,7 @@ class DataManager {
     _localStorage = null;
     _cloudStorage?.dispose();
     _cloudStorage = null;
-    initialized = false;
+    status = CStatus.empty();
   }
 
   /// Takes a [serverModel], and [localModel] and compares them

@@ -251,13 +251,10 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       _effectiveController.initialize();
     }
 
-    if (!CodelesslyErrorHandler.didInitialize) {
-      _effectiveController.effectiveCodelessly.initErrorHandler(
-        firebaseOptions: _effectiveController.config.firebaseOptions,
-        automaticallySendCrashReports:
-            _effectiveController.config.automaticallySendCrashReports,
-      );
-    }
+    _effectiveController.effectiveCodelessly.initErrorHandler(
+      automaticallySendCrashReports:
+          _effectiveController.config.automaticallySendCrashReports,
+    );
 
     _exceptionSubscription =
         CodelesslyErrorHandler.instance.exceptionStream.listen(
@@ -379,7 +376,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       initialData: _effectiveController.publishModel,
       builder: (context, AsyncSnapshot<SDKPublishModel?> snapshot) {
         try {
-          if (snapshot.hasError) {
+          if (snapshot.hasError ||
+              _effectiveController.dataManager.status is CError) {
             return widget.errorBuilder?.call(context, snapshot.error) ??
                 CodelesslyErrorScreen(
                   exception: snapshot.error,
@@ -387,7 +385,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                 );
           }
 
-          if (!snapshot.hasData) {
+          if (!snapshot.hasData ||
+              _effectiveController.dataManager.status is CLoading) {
             return widget.loadingBuilder?.call(context) ??
                 const CodelesslyLoadingScreen();
           }

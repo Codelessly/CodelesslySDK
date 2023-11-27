@@ -1,3 +1,5 @@
+const String kCodelesslyFirebaseApp = 'codelessly';
+
 const String defaultFirebaseProjectId = String.fromEnvironment(
   'firebase_project_id',
   defaultValue: prodFirebaseProjectId,

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 
@@ -274,7 +275,6 @@ class Codelessly {
     _config ??= config;
 
     initErrorHandler(
-      firebaseOptions: _config!.firebaseOptions,
       automaticallySendCrashReports: _config!.automaticallySendCrashReports,
     );
 
@@ -307,8 +307,34 @@ class Codelessly {
     if (functions != null) {
       this.functions.addAll(functions);
     }
+
     _updateStatus(CStatus.configured());
     return status;
+  }
+
+  Future<void> initFirebase({FirebaseOptions? firebaseOptions}) async {
+    if (_firestore != null) return;
+    firebaseOptions ??= DefaultFirebaseOptionsProd.currentPlatform;
+    log('[SDK] [INIT] Initializing Firebase instance with project ID: ${firebaseOptions.projectId}');
+
+    final Stopwatch stopwatch = Stopwatch()..start();
+
+    final FirebaseApp? existingApp = Firebase.apps
+        .firstWhereOrNull((app) => app.name == kCodelesslyFirebaseApp);
+    if (existingApp != null) {
+      log('[SDK] [INIT] Reusing existing Firebase app instance.');
+    } else {
+      log('[SDK] [INIT] Creating new Firebase app instance.');
+      _firebaseApp = await Firebase.initializeApp(
+        name: 'Codelessly',
+        options: firebaseOptions,
+      );
+    }
+
+    _firestore = FirebaseFirestore.instanceFor(app: _firebaseApp!);
+
+    stopwatch.stop();
+    log('[SDK] [INIT] Firebase initialized in ${stopwatch.elapsed.inMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s');
   }
 
   /// Initializes the internal Firestore instance used by this SDK and
@@ -318,23 +344,10 @@ class Codelessly {
   /// initialized. If it is initialized, this is ignored.
   ///
   /// If the SDK is running on web platform, this will be ignored.
-  Future<void> initErrorHandler({
+  void initErrorHandler({
     required bool automaticallySendCrashReports,
-    FirebaseOptions? firebaseOptions,
-  }) async {
-    final Stopwatch stopwatch = Stopwatch()..start();
-
-    firebaseOptions ??= DefaultFirebaseOptionsProd.currentPlatform;
-
-    if (_firestore != null) return;
-    log('[SDK] [INIT] Initializing Firestore instance with project ID: ${firebaseOptions.projectId}');
-
-    _firebaseApp = await Firebase.initializeApp(
-        name: 'Codelessly', options: firebaseOptions);
-    _firestore = FirebaseFirestore.instanceFor(app: _firebaseApp!);
-
-    final elapsed = stopwatch.elapsed;
-    log('[SDK] [INIT] Firestore instance initialized in ${elapsed.inMilliseconds}ms or ${elapsed.inSeconds}s');
+  }) {
+    if (CodelesslyErrorHandler.didInitialize) return;
 
     CodelesslyErrorHandler.init(
       reporter: automaticallySendCrashReports
@@ -348,9 +361,6 @@ class Codelessly {
         _updateStatus(CStatus.error());
       },
     );
-
-    stopwatch.stop();
-    log('[SDK] [INIT] Error handler initialized in ${stopwatch.elapsed.inMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s');
   }
 
   /// Initializes this instance of the SDK.
@@ -393,10 +403,12 @@ class Codelessly {
 
     final Stopwatch stopwatch = Stopwatch()..start();
 
-    await initErrorHandler(
-      firebaseOptions: _config!.firebaseOptions,
+    await initFirebase(firebaseOptions: _config!.firebaseOptions);
+
+    initErrorHandler(
       automaticallySendCrashReports: _config!.automaticallySendCrashReports,
     );
+
     try {
       _updateStatus(CStatus.configured());
 
@@ -502,19 +514,8 @@ class Codelessly {
           ' ${_config!.slug != null ? 'and slug ${_config!.slug}' : ''}',
         );
 
-        switch (_config!.publishSource) {
-          case PublishSource.publish:
-            if (!this.publishDataManager.initialized) {
-              await this.publishDataManager.init(layoutID: null);
-            }
-          case PublishSource.preview:
-            if (!this.previewDataManager.initialized) {
-              await this.previewDataManager.init(layoutID: null);
-            }
-          case PublishSource.template:
-            if (!templateDataManager.initialized) {
-              await templateDataManager.init(layoutID: null);
-            }
+        if (dataManager.status is! CLoaded && dataManager.status is! CLoaded) {
+          await dataManager.init(layoutID: null);
         }
 
         _updateStatus(CStatus.loading('initialized_data_managers'));

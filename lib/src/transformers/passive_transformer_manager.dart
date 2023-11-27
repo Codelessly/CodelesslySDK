@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
 import 'utils/node_provider.dart';
-import 'utils/placeholder_painter.dart';
 
 typedef BuildWidgetFromID = Widget Function(String id, BuildContext context);
 typedef BuildWidgetFromNode = Widget Function(
@@ -69,31 +68,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       context,
       node: node,
       builder: (context) {
-        // ListTiles and ExpansionTiles throw exceptions when they are being
-        // rendered specifically for preview image capture.
-        Widget widget = settings.isPreview &&
-                (node.type == 'listTile' || node.type == 'expansionTile')
-            ? SizedBox(
-                width: node.basicBoxGlobal.width,
-                height: node.basicBoxGlobal.height,
-                child: CustomPaint(
-                  painter: PlaceholderPainter(
-                    scale: 1,
-                    scaleInverse: 1,
-                    bgColor: kDefaultPrimaryColor.withOpacity(0.15),
-                    dashColor: const Color(0xFFADB3F1),
-                    textSpan: TextSpan(
-                      text: node.type.camelToSentenceCase,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ),
-                ),
-              )
-            : getTransformerByNode(node).buildWidget(node, context, settings);
+        Widget widget =
+            getTransformerByNode(node).buildWidget(node, context, settings);
 
         if (settings.withOpacity) {
           widget = applyWidgetOpacity(node, widget);
         }
+
         if (settings.withReactions &&
             node is! CanvasNode &&
             (node is! CustomPropertiesMixin || node is IconNode) &&
@@ -110,6 +91,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         if (settings.withMargins) {
           widget = applyWidgetMargins(node, widget);
         }
+
         if (settings.withVisibility) {
           widget = applyWidgetVisibility(
             context,
@@ -119,7 +101,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           );
         }
 
-        return NodeProvider(node: node, child: widget);
+        return widget;
       },
     );
   }
@@ -232,15 +214,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       }
     }
 
-    if (listenables.isNotEmpty) {
-      return ManagedListenableBuilder(
-        key: ValueKey(node.id),
-        listenables: listenables,
-        builder: (context) => builder(context),
-      );
-    } else {
-      return builder(context);
-    }
+    return NodeProvider(
+      node: node,
+      child: Builder(builder: (context) {
+        if (listenables.isNotEmpty) {
+          return ManagedListenableBuilder(
+            key: ValueKey(node.id),
+            listenables: listenables,
+            builder: (context) => builder(context),
+          );
+        } else {
+          return builder(context);
+        }
+      }),
+    );
   }
 
   Listenable? getStorageListenerFor(VariableMatch match, BuildContext context) {

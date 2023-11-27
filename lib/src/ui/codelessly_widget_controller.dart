@@ -199,14 +199,12 @@ class CodelesslyWidgetController extends ChangeNotifier {
       // configured yet, we need to initialize the error handler regardless.
       effectiveCodelessly
           .initErrorHandler(
-        firebaseOptions: effectiveCodelessly.config?.firebaseOptions,
         automaticallySendCrashReports:
             effectiveCodelessly.config?.automaticallySendCrashReports ?? false,
-      )
-          .then((_) {
-        CodelesslyErrorHandler.instance
+      );
+
+      CodelesslyErrorHandler.instance
             .captureException(exception, stacktrace: str);
-      });
     }
 
     // First event.
@@ -248,7 +246,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // preview data manager.
     // Vice versa for published layouts if the SDK is configured to load preview
     // layouts.
-    if (!dataManager.initialized &&
+    if (dataManager.status is! CLoaded &&
         effectiveCodelessly.authManager.isAuthenticated()) {
       log('[CodelesslyWidgetController] [$layoutID]: Initialized data manager for the first time with a publish source of $publishSource because the SDK is configured to load ${publishSource == PublishSource.publish ? 'published' : 'preview'} layouts.');
 
