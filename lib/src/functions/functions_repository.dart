@@ -12,7 +12,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
-import '../transformers/utils/node_provider.dart';
 import '../ui/codelessly_dialog_widget.dart';
 
 enum ApiRequestType {
@@ -694,7 +693,6 @@ class FunctionsRepository {
           currentValue?.toList(),
           newValue,
           scopedValues,
-        NodeProvider.getValue(context),
       ),
       VariableType.map => _performMapOperation(
           action,
@@ -1111,6 +1109,7 @@ class FunctionsRepository {
       case ListOperation.update:
         final parsedValue = newValue.parsedValue();
         currentValue[index] = parsedValue;
+      case ListOperation.set:
       case ListOperation.replace:
         final parsedValue = newValue.toList<List>() ?? [];
         return parsedValue;
