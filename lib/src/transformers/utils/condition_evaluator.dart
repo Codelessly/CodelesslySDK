@@ -64,7 +64,6 @@ class ConditionEvaluator<R extends Object>
       final Object? value = PropertyValueDelegate.retrieveVariableValue(
         match[0]!,
         scopedValues: scopedValues,
-        nodeValue,
       );
 
       return value?.typedValue<String>() ?? 'null';
