@@ -71,7 +71,7 @@ class CodelesslyConfig with EquatableMixin {
   CodelesslyConfig({
     required this.authToken,
     this.slug,
-    this.automaticallySendCrashReports = true,
+    this.automaticallySendCrashReports = false,
     this.isPreview = false,
     this.preload = true,
     FirebaseOptions? firebaseOptions,

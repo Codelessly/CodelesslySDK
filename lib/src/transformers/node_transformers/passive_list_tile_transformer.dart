@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/placeholder_painter.dart';
 
 class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
   PassiveListTileTransformer(super.getNode, super.manager);
@@ -24,6 +25,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
           : null,
       buildWidgetFromNode: (node, context) =>
           manager.buildWidgetFromNode(node, context, settings: settings),
+      settings: settings,
     );
   }
 
@@ -76,6 +78,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
 
     return PassiveListTileWidget(
       node: previewNode,
+      settings: settings,
       leading: leading,
       title: title,
       subtitle: subtitle,
@@ -171,6 +174,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
     trailing.parentID = node.id;
     return PassiveListTileWidget(
       node: node,
+      settings: settings,
       leading: leading,
       title: title,
       subtitle: subtitle,
@@ -183,6 +187,8 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
 
 class PassiveListTileWidget extends StatelessWidget {
   final ListTileNode node;
+  final WidgetBuildSettings settings;
+
   final BaseNode? leading;
   final BaseNode? title;
   final BaseNode? subtitle;
@@ -200,6 +206,8 @@ class PassiveListTileWidget extends StatelessWidget {
   const PassiveListTileWidget({
     super.key,
     required this.node,
+    required this.settings,
+
     this.leading,
     this.title,
     this.subtitle,
@@ -216,6 +224,25 @@ class PassiveListTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (settings.isPreview) {
+     return SizedBox(
+        width: node.basicBoxGlobal.width,
+        height: node.basicBoxGlobal.height,
+        child: CustomPaint(
+          painter: PlaceholderPainter(
+            scale: 1,
+            scaleInverse: 1,
+            bgColor: kDefaultPrimaryColor.withOpacity(0.15),
+            dashColor: const Color(0xFFADB3F1),
+            textSpan: TextSpan(
+              text: node.type.camelToSentenceCase,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+        ),
+      );
+    }
+
     BaseNode? leading = !node.properties.showLeading ? null : this.leading;
     if (node.properties.showLeading &&
         leading == null &&
