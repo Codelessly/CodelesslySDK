@@ -63,21 +63,92 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     }
   }
 
+  static String? getText(
+    BuildContext context,
+    BaseNode node, {
+    required String property,
+    required String? defaultValue,
+    required ScopedValues scopedValues,
+        required WidgetBuildSettings settings,
+  }) {
+    final String? value =
+        context.getNodeValue(node.id, 'labelText') ?? defaultValue;
+    if (value == null) return null;
+    return PropertyValueDelegate.substituteVariables(
+      value,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: settings.nullSubstitutionMode,
+    );
+  }
+
   static InputDecoration getDecoration(
     BuildContext context,
     TextFieldNode node,
     InputDecorationModel decoration,
     bool useIconFonts,
     WidgetBuildSettings settings,
+    ScopedValues scopedValues,
   ) {
     final bool isCollapsed =
         context.getNodeValue(node.id, 'isCollapsed') ?? decoration.isCollapsed;
     final bool isDense =
         context.getNodeValue(node.id, 'isDense') ?? decoration.isDense;
-    final String? labelText =
-        context.getNodeValue(node.id, 'labelText') ?? decoration.labelText;
-    final String? hintText =
-        context.getNodeValue(node.id, 'hintText') ?? decoration.hintText;
+    final String? labelText = getText(
+      context,
+      node,
+      property: 'labelText',
+      defaultValue: decoration.labelText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+    final String? hintText = getText(
+      context,
+      node,
+      property: 'hintText',
+      defaultValue: decoration.labelText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+    final String? helperText = getText(
+      context,
+      node,
+      property: 'helperText',
+      defaultValue: decoration.helperText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+    final String? errorText = getText(
+      context,
+      node,
+      property: 'errorText',
+      defaultValue: decoration.errorText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+    final String? prefixText = getText(
+      context,
+      node,
+      property: 'prefixText',
+      defaultValue: decoration.prefixText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+    final String? suffixText = getText(
+      context,
+      node,
+      property: 'suffixText',
+      defaultValue: decoration.suffixText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+    final String? counterText = getText(
+      context,
+      node,
+      property: 'counterText',
+      defaultValue: decoration.counterText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
 
     return InputDecoration(
       icon: !decoration.icon.show || decoration.icon.isEmpty
@@ -87,14 +158,13 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
       labelStyle: TextUtils.retrieveTextStyleFromProp(decoration.labelStyle),
       floatingLabelStyle:
           TextUtils.retrieveTextStyleFromProp(decoration.floatingLabelStyle),
-      helperText: decoration.helperText,
-
+      helperText: helperText,
       helperStyle: TextUtils.retrieveTextStyleFromProp(decoration.helperStyle),
       helperMaxLines: decoration.helperMaxLines,
       hintText: hintText,
       hintStyle: TextUtils.retrieveTextStyleFromProp(decoration.hintStyle),
       hintMaxLines: decoration.hintMaxLines,
-      errorText: decoration.errorText,
+      errorText: errorText,
       errorStyle: TextUtils.retrieveTextStyleFromProp(decoration.errorStyle),
       errorMaxLines: decoration.errorMaxLines,
       floatingLabelBehavior: decoration.floatingLabelBehavior.toFlutter(),
@@ -106,16 +176,16 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
           : retrieveIconWidget(decoration.prefixIcon, null, useIconFonts),
       // prefixIconConstraints:
       //     decoration.prefixIconConstraints.flutterConstraints,
-      prefixText: decoration.prefixText,
+      prefixText: prefixText,
       prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
       suffixIcon: !decoration.suffixIcon.show || decoration.suffixIcon.isEmpty
           ? null
           : retrieveIconWidget(decoration.suffixIcon, null, useIconFonts),
-      suffixText: decoration.suffixText,
+      suffixText: suffixText,
       suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
       // suffixIconConstraints:
       //     decoration.suffixIconConstraints.flutterConstraints,
-      counterText: decoration.showCounter ? decoration.counterText : '',
+      counterText: decoration.showCounter ? counterText : '',
       counterStyle:
           TextUtils.retrieveTextStyleFromProp(decoration.counterStyle),
       filled: decoration.filled,
@@ -237,6 +307,8 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     final int? maxLength = context.getNodeValue(widget.node.id, 'maxLength') ??
         widget.node.properties.maxLength;
 
+    final ScopedValues scopedValues = ScopedValues.of(context);
+
     Widget field;
 
     field = TextField(
@@ -284,6 +356,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         widget.node.properties.decoration,
         widget.useIconFonts,
         widget.settings,
+        scopedValues,
       ),
     );
 
