@@ -25,10 +25,7 @@ class DefaultFirebaseOptionsProd {
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -83,5 +80,16 @@ class DefaultFirebaseOptionsProd {
     iosClientId:
         '1008464357540-quq84tmv8e0b7qo3jo2r3148pd9snfni.apps.googleusercontent.com',
     iosBundleId: 'com.codelessly',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyBR92IoT_1kwBYOLBbPvln48DwaXTeTrxk',
+    appId: '1:1008464357540:web:ed36d3c5f17fe57ea6de31',
+    messagingSenderId: '1008464357540',
+    projectId: 'codeless-app',
+    authDomain: 'codeless-app.firebaseapp.com',
+    databaseURL: 'https://codeless-app-default-rtdb.firebaseio.com',
+    storageBucket: 'codeless-app.appspot.com',
+    measurementId: 'G-4ZDTJ4YDM0',
   );
 }
