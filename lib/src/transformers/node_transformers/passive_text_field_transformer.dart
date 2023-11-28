@@ -69,7 +69,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     required String property,
     required String? defaultValue,
     required ScopedValues scopedValues,
-        required WidgetBuildSettings settings,
+    required WidgetBuildSettings settings,
   }) {
     final String? value =
         context.getNodeValue(node.id, 'labelText') ?? defaultValue;
@@ -173,14 +173,24 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
       contentPadding: node.padding.flutterEdgeInsets,
       prefixIcon: !decoration.prefixIcon.show || decoration.prefixIcon.isEmpty
           ? null
-          : retrieveIconWidget(decoration.prefixIcon, null, useIconFonts),
+          : Align(
+              widthFactor: 1,
+              heightFactor: 1,
+              child:
+                  retrieveIconWidget(decoration.prefixIcon, null, useIconFonts),
+            ),
       // prefixIconConstraints:
       //     decoration.prefixIconConstraints.flutterConstraints,
       prefixText: prefixText,
       prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
       suffixIcon: !decoration.suffixIcon.show || decoration.suffixIcon.isEmpty
           ? null
-          : retrieveIconWidget(decoration.suffixIcon, null, useIconFonts),
+          : Align(
+              widthFactor: 1,
+              heightFactor: 1,
+              child: retrieveIconWidget(
+                  decoration.suffixIcon, null, useIconFonts)!,
+            ),
       suffixText: suffixText,
       suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
       // suffixIconConstraints:
