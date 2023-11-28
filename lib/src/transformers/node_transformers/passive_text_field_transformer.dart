@@ -18,6 +18,8 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
       node: node,
       settings: settings,
       onTap: (context, value) => onTap(context, node, value),
+      onIconTap: (context, reactions, value) =>
+          onIconTap(context, node, reactions, value),
       onChanged: (context, value) => onChanged(context, node, value),
       onSubmitted: (context, value) => onSubmitted(context, node, value),
     );
@@ -39,179 +41,6 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     return PassiveTextFieldWidget(
       node: node,
       settings: settings,
-    );
-  }
-
-  static InputBorder? getInputBorder(InputBorderModel? inputBorder) {
-    if (inputBorder == null) return null;
-    switch (inputBorder.borderType) {
-      case BorderTypeEnum.none:
-        return InputBorder.none;
-      case BorderTypeEnum.outline:
-        return OutlineInputBorder(
-          borderRadius: inputBorder.cornerRadius.borderRadius,
-          borderSide: inputBorder.borderSide.toFlutter(),
-          gapPadding: inputBorder.gapPadding,
-        );
-      case BorderTypeEnum.underline:
-        return UnderlineInputBorder(
-          borderRadius: inputBorder.cornerRadius.borderRadius,
-          borderSide: inputBorder.borderSide.toFlutter(),
-        );
-      default:
-        return null;
-    }
-  }
-
-  static String? getText(
-    BuildContext context,
-    BaseNode node, {
-    required String property,
-    required String? defaultValue,
-    required ScopedValues scopedValues,
-    required WidgetBuildSettings settings,
-  }) {
-    final String? value =
-        context.getNodeValue(node.id, 'labelText') ?? defaultValue;
-    if (value == null) return null;
-    return PropertyValueDelegate.substituteVariables(
-      value,
-      scopedValues: scopedValues,
-      nullSubstitutionMode: settings.nullSubstitutionMode,
-    );
-  }
-
-  static InputDecoration getDecoration(
-    BuildContext context,
-    TextFieldNode node,
-    InputDecorationModel decoration,
-    bool useIconFonts,
-    WidgetBuildSettings settings,
-    ScopedValues scopedValues,
-  ) {
-    final bool isCollapsed =
-        context.getNodeValue(node.id, 'isCollapsed') ?? decoration.isCollapsed;
-    final bool isDense =
-        context.getNodeValue(node.id, 'isDense') ?? decoration.isDense;
-    final String? labelText = getText(
-      context,
-      node,
-      property: 'labelText',
-      defaultValue: decoration.labelText,
-      scopedValues: scopedValues,
-      settings: settings,
-    );
-    final String? hintText = getText(
-      context,
-      node,
-      property: 'hintText',
-      defaultValue: decoration.labelText,
-      scopedValues: scopedValues,
-      settings: settings,
-    );
-    final String? helperText = getText(
-      context,
-      node,
-      property: 'helperText',
-      defaultValue: decoration.helperText,
-      scopedValues: scopedValues,
-      settings: settings,
-    );
-    final String? errorText = getText(
-      context,
-      node,
-      property: 'errorText',
-      defaultValue: decoration.errorText,
-      scopedValues: scopedValues,
-      settings: settings,
-    );
-    final String? prefixText = getText(
-      context,
-      node,
-      property: 'prefixText',
-      defaultValue: decoration.prefixText,
-      scopedValues: scopedValues,
-      settings: settings,
-    );
-    final String? suffixText = getText(
-      context,
-      node,
-      property: 'suffixText',
-      defaultValue: decoration.suffixText,
-      scopedValues: scopedValues,
-      settings: settings,
-    );
-    final String? counterText = getText(
-      context,
-      node,
-      property: 'counterText',
-      defaultValue: decoration.counterText,
-      scopedValues: scopedValues,
-      settings: settings,
-    );
-
-    return InputDecoration(
-      icon: !decoration.icon.show || decoration.icon.isEmpty
-          ? null
-          : retrieveIconWidget(decoration.icon, null, useIconFonts),
-      labelText: labelText?.isNotEmpty == true ? labelText : null,
-      labelStyle: TextUtils.retrieveTextStyleFromProp(decoration.labelStyle),
-      floatingLabelStyle:
-          TextUtils.retrieveTextStyleFromProp(decoration.floatingLabelStyle),
-      helperText: helperText,
-      helperStyle: TextUtils.retrieveTextStyleFromProp(decoration.helperStyle),
-      helperMaxLines: decoration.helperMaxLines,
-      hintText: hintText,
-      hintStyle: TextUtils.retrieveTextStyleFromProp(decoration.hintStyle),
-      hintMaxLines: decoration.hintMaxLines,
-      errorText: errorText,
-      errorStyle: TextUtils.retrieveTextStyleFromProp(decoration.errorStyle),
-      errorMaxLines: decoration.errorMaxLines,
-      floatingLabelBehavior: decoration.floatingLabelBehavior.toFlutter(),
-      isCollapsed: isCollapsed,
-      isDense: isDense,
-      contentPadding: node.padding.flutterEdgeInsets,
-      prefixIcon: !decoration.prefixIcon.show || decoration.prefixIcon.isEmpty
-          ? null
-          : Align(
-              widthFactor: 1,
-              heightFactor: 1,
-              child:
-                  retrieveIconWidget(decoration.prefixIcon, null, useIconFonts),
-            ),
-      // prefixIconConstraints:
-      //     decoration.prefixIconConstraints.flutterConstraints,
-      prefixText: prefixText,
-      prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
-      suffixIcon: !decoration.suffixIcon.show || decoration.suffixIcon.isEmpty
-          ? null
-          : Align(
-              widthFactor: 1,
-              heightFactor: 1,
-              child: retrieveIconWidget(
-                  decoration.suffixIcon, null, useIconFonts)!,
-            ),
-      suffixText: suffixText,
-      suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
-      // suffixIconConstraints:
-      //     decoration.suffixIconConstraints.flutterConstraints,
-      counterText: decoration.showCounter ? counterText : '',
-      counterStyle:
-          TextUtils.retrieveTextStyleFromProp(decoration.counterStyle),
-      filled: decoration.filled,
-      fillColor: decoration.fillColor.toFlutterColor(),
-      focusColor: decoration.focusColor.toFlutterColor(),
-      hoverColor: decoration.hoverColor.toFlutterColor(),
-      errorBorder: getInputBorder(decoration.errorBorder),
-      focusedBorder: getInputBorder(decoration.focusedBorder),
-      focusedErrorBorder: getInputBorder(decoration.focusedErrorBorder),
-      disabledBorder: getInputBorder(decoration.disabledBorder),
-      enabledBorder: getInputBorder(decoration.enabledBorder),
-      border: getInputBorder(decoration.border),
-      enabled: decoration.enabled,
-      semanticCounterText: decoration.semanticCounterText,
-      alignLabelWithHint: decoration.alignLabelWithHint,
-      constraints: decoration.constraints.flutterConstraints,
     );
   }
 
@@ -241,6 +70,18 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     FunctionsRepository.triggerAction(
         context, node: node, TriggerType.submitted, value: inputValue);
   }
+
+  void onIconTap(BuildContext context, TextFieldNode node,
+      List<Reaction> reactions, String inputValue) {
+    NodeProvider.setState(context, inputValue);
+    FunctionsRepository.triggerAction(
+      context,
+      node: node,
+      TriggerType.click,
+      value: inputValue,
+      reactions: reactions,
+    );
+  }
 }
 
 class PassiveTextFieldWidget extends StatefulWidget {
@@ -249,6 +90,8 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final Function(BuildContext context, String value)? onTap;
   final Function(BuildContext context, String value)? onChanged;
   final Function(BuildContext context, String value)? onSubmitted;
+  final Function(BuildContext context, List<Reaction> reactions, String value)?
+      onIconTap;
   final bool useIconFonts;
 
   const PassiveTextFieldWidget({
@@ -259,6 +102,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.useIconFonts = false,
+    this.onIconTap,
   });
 
   @override
@@ -360,7 +204,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       onSubmitted: (value) {
         // handled by the focus listener!
       },
-      decoration: PassiveTextFieldTransformer.getDecoration(
+      decoration: getDecoration(
         context,
         widget.node,
         widget.node.properties.decoration,
@@ -392,5 +236,211 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     );
 
     return field;
+  }
+
+  InputDecoration getDecoration(
+    BuildContext context,
+    TextFieldNode node,
+    InputDecorationModel decoration,
+    bool useIconFonts,
+    WidgetBuildSettings settings,
+    ScopedValues scopedValues,
+  ) {
+    final bool isCollapsed =
+        context.getNodeValue(node.id, 'isCollapsed') ?? decoration.isCollapsed;
+    final bool isDense =
+        context.getNodeValue(node.id, 'isDense') ?? decoration.isDense;
+    final String? labelText = getText(
+      context,
+      node,
+      property: 'labelText',
+      defaultValue: decoration.labelText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+    final String? hintText = getText(
+      context,
+      node,
+      property: 'hintText',
+      defaultValue: decoration.labelText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+    final String? helperText = getText(
+      context,
+      node,
+      property: 'helperText',
+      defaultValue: decoration.helperText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+    final String? errorText = getText(
+      context,
+      node,
+      property: 'errorText',
+      defaultValue: decoration.errorText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+    final String? prefixText = getText(
+      context,
+      node,
+      property: 'prefixText',
+      defaultValue: decoration.prefixText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+    final String? suffixText = getText(
+      context,
+      node,
+      property: 'suffixText',
+      defaultValue: decoration.suffixText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+    final String? counterText = getText(
+      context,
+      node,
+      property: 'counterText',
+      defaultValue: decoration.counterText,
+      scopedValues: scopedValues,
+      settings: settings,
+    );
+
+    return InputDecoration(
+      icon: !decoration.icon.show || decoration.icon.isEmpty
+          ? null
+          : retrieveIconWidget(decoration.icon, null, useIconFonts),
+      labelText: labelText?.isNotEmpty == true ? labelText : null,
+      labelStyle: TextUtils.retrieveTextStyleFromProp(decoration.labelStyle),
+      floatingLabelStyle:
+          TextUtils.retrieveTextStyleFromProp(decoration.floatingLabelStyle),
+      helperText: helperText,
+      helperStyle: TextUtils.retrieveTextStyleFromProp(decoration.helperStyle),
+      helperMaxLines: decoration.helperMaxLines,
+      hintText: hintText,
+      hintStyle: TextUtils.retrieveTextStyleFromProp(decoration.hintStyle),
+      hintMaxLines: decoration.hintMaxLines,
+      errorText: errorText,
+      errorStyle: TextUtils.retrieveTextStyleFromProp(decoration.errorStyle),
+      errorMaxLines: decoration.errorMaxLines,
+      floatingLabelBehavior: decoration.floatingLabelBehavior.toFlutter(),
+      isCollapsed: isCollapsed,
+      isDense: isDense,
+      contentPadding: node.padding.flutterEdgeInsets,
+      prefixIcon: !decoration.prefixIcon.icon.show ||
+              decoration.prefixIcon.icon.isEmpty
+          ? null
+          : _ReactiveIcon(
+              onTap: () => widget.onIconTap?.call(
+                  context, decoration.prefixIcon.reactions, _controller.text),
+              iconModel: decoration.prefixIcon,
+              useIconFonts: useIconFonts,
+            ),
+      // prefixIconConstraints:
+      //     decoration.prefixIconConstraints.flutterConstraints,
+      prefixText: prefixText,
+      prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
+      suffixIcon: !decoration.suffixIcon.icon.show ||
+              decoration.suffixIcon.icon.isEmpty
+          ? null
+          : _ReactiveIcon(
+              onTap: () => widget.onIconTap?.call(
+                  context, decoration.suffixIcon.reactions, _controller.text),
+              iconModel: decoration.suffixIcon,
+              useIconFonts: useIconFonts,
+            ),
+      suffixText: suffixText,
+      suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
+      // suffixIconConstraints:
+      //     decoration.suffixIconConstraints.flutterConstraints,
+      counterText: decoration.showCounter ? counterText : '',
+      counterStyle:
+          TextUtils.retrieveTextStyleFromProp(decoration.counterStyle),
+      filled: decoration.filled,
+      fillColor: decoration.fillColor.toFlutterColor(),
+      focusColor: decoration.focusColor.toFlutterColor(),
+      hoverColor: decoration.hoverColor.toFlutterColor(),
+      errorBorder: getInputBorder(decoration.errorBorder),
+      focusedBorder: getInputBorder(decoration.focusedBorder),
+      focusedErrorBorder: getInputBorder(decoration.focusedErrorBorder),
+      disabledBorder: getInputBorder(decoration.disabledBorder),
+      enabledBorder: getInputBorder(decoration.enabledBorder),
+      border: getInputBorder(decoration.border),
+      enabled: decoration.enabled,
+      semanticCounterText: decoration.semanticCounterText,
+      alignLabelWithHint: decoration.alignLabelWithHint,
+      constraints: decoration.constraints.flutterConstraints,
+    );
+  }
+
+  InputBorder? getInputBorder(InputBorderModel? inputBorder) {
+    if (inputBorder == null) return null;
+    switch (inputBorder.borderType) {
+      case BorderTypeEnum.none:
+        return InputBorder.none;
+      case BorderTypeEnum.outline:
+        return OutlineInputBorder(
+          borderRadius: inputBorder.cornerRadius.borderRadius,
+          borderSide: inputBorder.borderSide.toFlutter(),
+          gapPadding: inputBorder.gapPadding,
+        );
+      case BorderTypeEnum.underline:
+        return UnderlineInputBorder(
+          borderRadius: inputBorder.cornerRadius.borderRadius,
+          borderSide: inputBorder.borderSide.toFlutter(),
+        );
+      default:
+        return null;
+    }
+  }
+
+  String? getText(
+    BuildContext context,
+    BaseNode node, {
+    required String property,
+    required String? defaultValue,
+    required ScopedValues scopedValues,
+    required WidgetBuildSettings settings,
+  }) {
+    final String? value =
+        context.getNodeValue(node.id, 'labelText') ?? defaultValue;
+    if (value == null) return null;
+    return PropertyValueDelegate.substituteVariables(
+      value,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: settings.nullSubstitutionMode,
+    );
+  }
+}
+
+class _ReactiveIcon extends StatelessWidget {
+  final VoidCallback onTap;
+  final ReactiveIconModel iconModel;
+  final bool useIconFonts;
+
+  const _ReactiveIcon({
+    required this.onTap,
+    required this.iconModel,
+    required this.useIconFonts,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = Align(
+      widthFactor: 1,
+      heightFactor: 1,
+      child: retrieveIconWidget(iconModel.icon, null, useIconFonts)!,
+    );
+
+    if (iconModel.reactions.isEmpty) return icon;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: icon,
+      ),
+    );
   }
 }
