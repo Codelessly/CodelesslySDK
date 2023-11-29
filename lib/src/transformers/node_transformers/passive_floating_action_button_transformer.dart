@@ -117,8 +117,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
     switch (fab.type) {
       case FloatingActionButtonType.small:
         return FloatingActionButton.small(
-          heroTag: fabID,
-          key: ValueKey(fab.type),
+          heroTag: null,
           onPressed: onPressed,
           backgroundColor: fab.backgroundColor.toFlutterColor(),
           foregroundColor: fab.foregroundColor.toFlutterColor(),
@@ -134,8 +133,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
         );
       case FloatingActionButtonType.regular:
         return FloatingActionButton(
-          heroTag: fabID,
-          key: ValueKey(fab.type),
+          heroTag: null,
           onPressed: onPressed,
           backgroundColor: fab.backgroundColor.toFlutterColor(),
           foregroundColor: fab.foregroundColor.toFlutterColor(),
@@ -151,8 +149,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
         );
       case FloatingActionButtonType.large:
         return FloatingActionButton.large(
-          heroTag: fabID,
-          key: ValueKey(fab.type),
+          heroTag: null,
           onPressed: onPressed,
           backgroundColor: fab.backgroundColor.toFlutterColor(),
           foregroundColor: fab.foregroundColor.toFlutterColor(),
@@ -168,8 +165,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
         );
       case FloatingActionButtonType.extended:
         return FloatingActionButton.extended(
-          heroTag: fabID,
-          key: ValueKey(fab.type),
+          heroTag: null,
           onPressed: onPressed,
           extendedPadding:
               const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
