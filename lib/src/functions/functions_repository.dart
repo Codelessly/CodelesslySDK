@@ -683,8 +683,10 @@ class FunctionsRepository {
 
     final Object? updatedValue = switch (action.variable.type) {
       VariableType.text => newValue,
-      VariableType.integer => int.tryParse(newValue),
-      VariableType.decimal => double.tryParse(newValue),
+      VariableType.integer => _performIntOperation(action.numberOperation,
+          currentValue?.toInt(), newValue, scopedValues),
+      VariableType.decimal => _performDecimalOperation(action.numberOperation,
+          currentValue?.toDouble(), newValue, scopedValues),
       VariableType.boolean => action.toggled
           ? !(bool.tryParse(currentValue.toString()) ?? false)
           : bool.tryParse(newValue),
@@ -693,7 +695,7 @@ class FunctionsRepository {
           currentValue?.toList(),
           newValue,
           scopedValues,
-      ),
+        ),
       VariableType.map => _performMapOperation(
           action,
           currentValue?.toMap(),
@@ -937,8 +939,10 @@ class FunctionsRepository {
 
       final Object? value = switch (action.variableType) {
         VariableType.text => newValue,
-        VariableType.integer => int.tryParse(newValue),
-        VariableType.decimal => double.tryParse(newValue),
+        VariableType.integer => _performIntOperation(action.numberOperation,
+            currentValue?.toInt(), newValue, scopedValues),
+        VariableType.decimal => _performDecimalOperation(action.numberOperation,
+            currentValue?.toDouble(), newValue, scopedValues),
         VariableType.boolean => action.toggled
             ? !(bool.tryParse(currentValue.toString()) ?? false)
             : bool.tryParse(newValue),
@@ -1275,8 +1279,13 @@ class FunctionsRepository {
 
       final Object? value = switch (subAction.variableType) {
         VariableType.text => newValue,
-        VariableType.integer => int.tryParse(newValue),
-        VariableType.decimal => double.tryParse(newValue),
+        VariableType.integer => _performIntOperation(subAction.numberOperation,
+            currentValue?.toInt(), newValue, scopedValues),
+        VariableType.decimal => _performDecimalOperation(
+            subAction.numberOperation,
+            currentValue?.toDouble(),
+            newValue,
+            scopedValues),
         VariableType.boolean => subAction.toggled
             ? !(bool.tryParse(currentValue.toString()) ?? false)
             : bool.tryParse(newValue),
@@ -1416,5 +1425,61 @@ class FunctionsRepository {
     log('Streaming document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
     cloudStorage.streamDocumentToVariable(
         evaluatedPath, evaluatedDocumentId, variable);
+  }
+
+  static int? _performIntOperation(
+    NumberOperation numberOperation,
+    int? currentValue,
+    String newValue,
+    ScopedValues scopedValues,
+  ) {
+    final String substitutedValue = PropertyValueDelegate.substituteVariables(
+      newValue,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
+
+    final int? parsedValue = int.tryParse(substitutedValue);
+
+    if (parsedValue == null) {
+      log('Invalid value: $substitutedValue');
+      return currentValue;
+    }
+
+    currentValue ??= 0;
+
+    return switch (numberOperation) {
+      NumberOperation.set => parsedValue,
+      NumberOperation.add => currentValue + parsedValue,
+      NumberOperation.subtract => currentValue - parsedValue,
+    };
+  }
+
+  static double? _performDecimalOperation(
+    NumberOperation numberOperation,
+    double? currentValue,
+    String newValue,
+    ScopedValues scopedValues,
+  ) {
+    final String substitutedValue = PropertyValueDelegate.substituteVariables(
+      newValue,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
+
+    final double? parsedValue = double.tryParse(substitutedValue);
+
+    if (parsedValue == null) {
+      log('Invalid value: $substitutedValue');
+      return currentValue;
+    }
+
+    currentValue ??= 0;
+
+    return switch (numberOperation) {
+      NumberOperation.set => parsedValue,
+      NumberOperation.add => currentValue + parsedValue,
+      NumberOperation.subtract => currentValue - parsedValue,
+    };
   }
 }
