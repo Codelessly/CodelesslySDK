@@ -262,7 +262,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       context,
       node,
       property: 'hintText',
-      defaultValue: decoration.labelText,
+      defaultValue: decoration.hintText,
       scopedValues: scopedValues,
       settings: settings,
     );
@@ -404,7 +404,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     required WidgetBuildSettings settings,
   }) {
     final String? value =
-        context.getNodeValue(node.id, 'labelText') ?? defaultValue;
+        context.getNodeValue(node.id, property) ?? defaultValue;
     if (value == null) return null;
     return PropertyValueDelegate.substituteVariables(
       value,
