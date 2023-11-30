@@ -1104,6 +1104,8 @@ class FunctionsRepository {
         final parsedValue = newValue.toList<List>() ?? [];
         currentValue.addAll(parsedValue);
       case ListOperation.insert:
+        currentValue.insert(index, newValue.parsedValue());
+      case ListOperation.insertAll:
         final parsedValue = newValue.toList<List>() ?? [];
         currentValue.insertAll(index, parsedValue);
       case ListOperation.removeAt:
