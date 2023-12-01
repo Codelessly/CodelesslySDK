@@ -9,6 +9,7 @@ export 'passive_embedded_video_transformer.dart';
 export 'passive_expansion_tile_transformer.dart';
 export 'passive_external_component_transformer.dart';
 export 'passive_floating_action_button_transformer.dart';
+export 'passive_grid_view_transformer.dart';
 export 'passive_icon_transformer.dart';
 export 'passive_list_tile_transformer.dart';
 export 'passive_list_view_transformer.dart';

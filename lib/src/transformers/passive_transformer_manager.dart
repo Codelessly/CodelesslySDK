@@ -52,6 +52,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'variance': PassiveVarianceTransformer(getNode, this),
       'webView': PassiveWebViewTransformer(getNode, this),
       'listView': PassiveListViewTransformer(getNode, this),
+      'gridView': PassiveGridViewTransformer(getNode, this),
       'pageView': PassivePageViewTransformer(getNode, this),
       'tabBar': PassiveTabBarTransformer(getNode, this),
       'external': PassiveExternalComponentTransformer(getNode, this),
