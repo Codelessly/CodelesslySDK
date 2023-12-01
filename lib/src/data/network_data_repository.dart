@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
+
+const String _label = 'Network Data Repository';
 
 /// An abstract class that represents the operations that a [DataManager] will
 /// need to utilize to offer a complete usage experience of a [Codelessly]
@@ -25,18 +26,19 @@ abstract class NetworkDataRepository {
     required String slug,
     required PublishSource source,
   }) async {
-    log('[NetworkDataRepo] Downloading publish bundle with slug: $slug and source: $source');
+    logger.log(_label,
+        'Downloading publish bundle with slug: $slug and source: $source');
     try {
       final String url =
           'https://firebasestorage.googleapis.com/v0/b/${config.firebaseOptions.projectId}.appspot.com/o/${Uri.encodeComponent('${source.serverPath}/$slug.json')}?alt=media';
 
-      print('[NetworkDataRepo] Publish bundle URL: $url');
+      logger.log(_label, 'Publish bundle URL: $url');
       final http.Response result = await http.get(Uri.parse(url));
 
       if (result.statusCode != 200) {
-        log('[NetworkDataRepo] Error downloading publish bundle.');
-        log('[NetworkDataRepo] Status code: ${result.statusCode}');
-        log('[NetworkDataRepo] Message: ${result.body}');
+        logger.log(_label, 'Error downloading publish bundle.');
+        logger.log(_label, 'Status code: ${result.statusCode}');
+        logger.log(_label, 'Message: ${result.body}');
         CodelesslyErrorHandler.instance.captureException(CodelesslyException(
           'Error downloading publish bundle from slug [$slug]',
           stacktrace: StackTrace.current,
@@ -49,10 +51,12 @@ abstract class NetworkDataRepository {
 
       final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
 
-      log('[NetworkDataRepo] Finished downloading publish bundle with slug: $slug and source: $source.');
+      logger.log(_label,
+          'Finished downloading publish bundle with slug: $slug and source: $source.');
       return model;
     } catch (e, str) {
-      log('[NetworkDataRepo] Error downloading publish bundle');
+      logger.error(_label, 'Error downloading publish bundle',
+          error: e, stackTrace: str);
       print(e);
       print(str);
       return null;
@@ -66,7 +70,7 @@ abstract class NetworkDataRepository {
   //   required String slug,
   //   required PublishSource source,
   // }) async {
-  //   log('[NetworkDataRepo] Downloading publish bundle with slug: $slug and source: $source');
+  //   logger.log(_label, 'Downloading publish bundle with slug: $slug and source: $source');
   //   final http.Response result = await http.post(
   //     Uri.parse(
   //         '${config.firebaseCloudFunctionsBaseURL}/getPublishBundleBySlugRequest'),
@@ -76,9 +80,9 @@ abstract class NetworkDataRepository {
   //   );
   //
   //   if (result.statusCode != 200) {
-  //     log('[NetworkDataRepo] Error downloading publish bundle.');
-  //     log('[NetworkDataRepo] Status code: ${result.statusCode}');
-  //     log('[NetworkDataRepo] Message: ${result.body}');
+  //     logger.log(_label, 'Error downloading publish bundle.');
+  //     logger.log(_label, 'Status code: ${result.statusCode}');
+  //     logger.log(_label, 'Message: ${result.body}');
   //     CodelesslyErrorHandler.instance.captureException(CodelesslyException(
   //       'Error downloading publish bundle from slug [$slug]',
   //       stacktrace: StackTrace.current,
@@ -89,7 +93,7 @@ abstract class NetworkDataRepository {
   //   final Map<String, dynamic> modelDoc = jsonDecode(result.body);
   //   final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
   //
-  //   log('[NetworkDataRepo] Finished downloading publish bundle with slug: $slug and source: $source.');
+  //   logger.log(_label, 'Finished downloading publish bundle with slug: $slug and source: $source.');
   //   return model;
   // }
 
@@ -179,8 +183,13 @@ abstract class NetworkDataRepository {
       if (response.statusCode != 200) return null;
 
       return Uint8List.view(response.bodyBytes.buffer);
-    } catch (e) {
-      log('Error downloading font bytes: $e');
+    } catch (e, str) {
+      logger.error(
+        _label,
+        'Error downloading font bytes',
+        error: e,
+        stackTrace: str,
+      );
       return null;
     }
   }

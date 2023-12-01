@@ -1,10 +1,11 @@
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'codelessly_event.dart';
+import 'codelessly_logger.dart';
 import 'error_handler.dart';
+
+const String _label = 'Firestore Error Reporter';
 
 /// Abstraction for reporting exceptions and event to remote server.
 abstract class ErrorReporter {
@@ -59,8 +60,9 @@ class FirestoreErrorReporter extends ErrorReporter {
     print('Stacktrace:\n${event.stacktrace}');
     await event.populateDeviceMetadata();
     await _firestore.collection(_collection).add(event.toJson()).then((doc) {
-      log('Exception captured. ID: [${doc.id}]');
-      log('Exception URL: https://console.firebase.google.com/u/1/project/${_firebaseApp.options.projectId}/firestore/data/~2Fsdk_errors~2F${doc.id}');
+      logger.log(_label, 'Exception captured. ID: [${doc.id}]');
+      logger.log(_label,
+          'Exception URL: https://console.firebase.google.com/u/1/project/${_firebaseApp.options.projectId}/firestore/data/~2Fsdk_errors~2F${doc.id}');
     });
   }
 
@@ -80,7 +82,7 @@ class FirestoreErrorReporter extends ErrorReporter {
         .collection(_collection)
         .add(event.toJson())
         .whenComplete(() {
-      log('Message captured');
+      logger.log(_label, 'Message captured');
     });
   }
 }
