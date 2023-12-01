@@ -78,10 +78,12 @@ class CodelesslyConfig with EquatableMixin {
     this.automaticallySendCrashReports = false,
     this.isPreview = false,
     this.preload = true,
+
+    // Firebase.
     FirebaseOptions? firebaseOptions,
+    this.firebaseInstanceName = kCodelesslyFirebaseApp,
     this.firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
     this.baseURL = defaultBaseURL,
-    this.firebaseInstanceName = kCodelesslyFirebaseApp,
   }) : firebaseOptions =
             firebaseOptions ?? DefaultFirebaseOptionsProd.currentPlatform;
 
@@ -97,6 +99,7 @@ class CodelesslyConfig with EquatableMixin {
     String? firebaseCloudFunctionsBaseURL,
     String? baseURL,
     String? firebaseInstanceName,
+    // FirebaseApp? firebaseApp,
   }) =>
       CodelesslyConfig(
         authToken: authToken ?? this.authToken,
@@ -110,6 +113,7 @@ class CodelesslyConfig with EquatableMixin {
             firebaseCloudFunctionsBaseURL ?? this.firebaseCloudFunctionsBaseURL,
         baseURL: baseURL ?? this.baseURL,
         firebaseInstanceName: firebaseInstanceName ?? this.firebaseInstanceName,
+        // firebaseApp: firebaseApp ?? this.firebaseApp,
       );
 
   @override

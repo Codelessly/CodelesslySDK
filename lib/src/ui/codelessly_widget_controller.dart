@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
@@ -142,6 +143,10 @@ class CodelesslyWidgetController extends ChangeNotifier {
         ),
         config = config ?? (codelessly ?? Codelessly.instance).config!;
 
+  /// Creates a copy of this controller with the provided parameters.
+  /// If no parameters are provided, then the current parameters are used.
+  /// Note that some fields are nullable, so setting some values here to
+  /// null may not have the desired effect.
   CodelesslyWidgetController copyWith({
     String? layoutID,
     Codelessly? codelessly,
@@ -151,6 +156,11 @@ class CodelesslyWidgetController extends ChangeNotifier {
     DataManager? publishDataManager,
     DataManager? previewDataManager,
     CacheManager? cacheManager,
+    WidgetBuilder? loadingBuilder,
+    CodelesslyWidgetErrorBuilder? errorBuilder,
+    CodelesslyWidgetLayoutBuilder? layoutBuilder,
+    LayoutRetrieverBuilder? layoutRetrievalBuilder,
+    FirebaseApp? firebaseApp,
   }) {
     return CodelesslyWidgetController(
       layoutID: layoutID ?? this.layoutID,
@@ -161,10 +171,11 @@ class CodelesslyWidgetController extends ChangeNotifier {
       publishDataManager: publishDataManager ?? this.publishDataManager,
       previewDataManager: previewDataManager ?? this.previewDataManager,
       cacheManager: cacheManager ?? this.cacheManager,
-      layoutBuilder: layoutBuilder,
-      layoutRetrievalBuilder: layoutRetrievalBuilder,
-      loadingBuilder: loadingBuilder,
-      errorBuilder: errorBuilder,
+      layoutBuilder: layoutBuilder ?? this.layoutBuilder,
+      layoutRetrievalBuilder:
+          layoutRetrievalBuilder ?? this.layoutRetrievalBuilder,
+      loadingBuilder: loadingBuilder ?? this.loadingBuilder,
+      errorBuilder: errorBuilder ?? this.errorBuilder,
     );
   }
 
@@ -173,6 +184,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
     _sdkStatusListener?.cancel();
     super.dispose();
   }
+
+  void log(String message) => logger.log(_label, message);
 
   /// Listens to the SDK's status. If the SDK is done, then we can start
   /// listening to the data manager's status for layout updates.
@@ -236,28 +249,23 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // First event.
     if (effectiveCodelessly.status case CLoaded() || CLoading()) {
       if (effectiveCodelessly.status case CLoading(step: String step)) {
-        logger.log(_label,
-            '[${this.layoutID}]: Codelessly SDK is already loading with step $step.');
+        log('[${this.layoutID}]: Codelessly SDK is already loading with step $step.');
       } else {
-        logger.log(_label,
-            '[${this.layoutID}]: Codelessly SDK is already loaded. Woo!');
+        log('[${this.layoutID}]: Codelessly SDK is already loaded. Woo!');
       }
       _verifyAndListenToDataManager();
     }
 
-    logger.log(_label, '[${this.layoutID}]: Listening to sdk status stream.');
-    logger.log(_label,
-        '[${this.layoutID}]: Initial sdk status is: ${effectiveCodelessly.status}');
+    log('[${this.layoutID}]: Listening to sdk status stream.');
+    log('[${this.layoutID}]: Initial sdk status is: ${effectiveCodelessly.status}');
 
     _sdkStatusListener?.cancel();
     _sdkStatusListener = effectiveCodelessly.statusStream.listen((status) {
       if (status case CLoaded() || CLoaded()) {
         if (status case CLoading(step: String step)) {
-          logger.log(_label,
-              '[${this.layoutID}]: Codelessly SDK is loading with step $step.');
+          log('[${this.layoutID}]: Codelessly SDK is loading with step $step.');
         } else {
-          logger.log(
-              _label, '[${this.layoutID}]: Codelessly SDK is done loading.');
+          log('[${this.layoutID}]: Codelessly SDK is done loading.');
         }
         _verifyAndListenToDataManager();
       }
@@ -268,8 +276,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// then we can signal to the manager that the desired layout passed to this
   /// widget is ready to be rendered and needs to be downloaded and prepared.
   void _verifyAndListenToDataManager() {
-    logger.log(
-        _label, '[$layoutID]: Verifying and listening to data manager stream.');
+    log('[$layoutID]: Verifying and listening to data manager stream.');
 
     notifyListeners();
 
@@ -280,8 +287,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // layouts.
     if (dataManager.status is! CLoaded &&
         effectiveCodelessly.authManager.isAuthenticated()) {
-      logger.log(_label,
-          '[$layoutID]: Initialized data manager for the first time with a publish source of $publishSource because the SDK is configured to load ${publishSource == PublishSource.publish ? 'published' : 'preview'} layouts.');
+      log('[$layoutID]: Initialized data manager for the first time with a publish source of $publishSource because the SDK is configured to load ${publishSource == PublishSource.publish ? 'published' : 'preview'} layouts.');
 
       dataManager.init(layoutID: layoutID).catchError((error, str) {
         CodelesslyErrorHandler.instance.captureException(
@@ -295,10 +301,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // a publish model yet, then we need to fetch the publish model from the
     // data manager.
     else if (config.slug != null && dataManager.publishModel == null) {
-      logger.log(_label,
-          '[$layoutID]: A slug is specified and publish model is null.');
-      logger.log(_label,
-          '[$layoutID]: Fetching complete publish bundle from data manager.');
+      log('[$layoutID]: A slug is specified and publish model is null.');
+      log('[$layoutID]: Fetching complete publish bundle from data manager.');
       dataManager
           .fetchCompletePublishBundle(
         slug: config.slug!,
@@ -320,9 +324,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // If the config has preloading set to true, then the DataManager is already
     // taking care of this layout and we just need to tell it to prioritize it.
     else if (layoutID != null) {
-      logger.log(
-          _label, '[$layoutID]: Queuing layout [$layoutID] from data manager.');
-      logger.log(_label, '[$layoutID]: Using publish source $publishSource.');
+      log('[$layoutID]: Queuing layout [$layoutID] from data manager.');
+      log('[$layoutID]: Using publish source $publishSource.');
 
       dataManager
           .queueLayout(layoutID: layoutID!, prioritize: true)
@@ -339,11 +342,9 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // Preloading must be true, so this controller can only wait...
     else {
       if (layoutID != null) {
-        logger.log(_label,
-            '[$layoutID]: LayoutID specified, but preload is set to ${config.preload}, skipping to let data manager to download everything');
+        log('[$layoutID]: LayoutID specified, but preload is set to ${config.preload}, skipping to let data manager to download everything');
       } else {
-        logger.log(_label,
-            '[$layoutID]: LayoutID is null, skipping to let data manager to download everything.');
+        log('[$layoutID]: LayoutID is null, skipping to let data manager to download everything.');
       }
     }
   }
