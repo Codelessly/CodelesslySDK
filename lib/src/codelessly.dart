@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as dev;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
@@ -190,9 +189,9 @@ class Codelessly {
     Object? error,
     StackTrace? stackTrace,
   }) =>
-      dev.log(
+      logger.log(
+        'Codelessly SDK',
         message,
-        name: 'Codelessly SDK',
         time: time,
         sequenceNumber: sequenceNumber,
         level: level,
@@ -348,10 +347,7 @@ class Codelessly {
   /// Instead of initializing firebase directly, we first check if an existing
   /// instance exists with the same [CodelesslyConfig.firebaseInstanceName]
   /// and use that to avoid duplicate initialization.
-  Future<void> initFirebase({
-    required CodelesslyConfig config,
-    FirebaseApp? firebaseApp,
-  }) async {
+  Future<void> initFirebase({required CodelesslyConfig config}) async {
     // Early return if Firebase instances are already initialized
     if (_firebaseFirestore != null &&
         _firebaseAuth != null &&
@@ -367,7 +363,7 @@ class Codelessly {
     final Stopwatch stopwatch = Stopwatch()..start();
 
     // Check if an existing Firebase app instance can be reused.
-    final FirebaseApp? existingApp = firebaseApp ??
+    final FirebaseApp? existingApp =
         Firebase.apps.firstWhereOrNull((app) => app.name == name);
 
     if (existingApp != null) {
@@ -437,9 +433,6 @@ class Codelessly {
     DataManager? publishDataManager,
     DataManager? previewDataManager,
     bool initializeDataManagers = true,
-
-    // Optional external FirebaseApp instance.
-    FirebaseApp? firebaseApp,
   }) async {
     assert(
       (config == null) != (_config == null),
@@ -458,7 +451,7 @@ class Codelessly {
 
     final Stopwatch stopwatch = Stopwatch()..start();
 
-    await initFirebase(config: _config!, firebaseApp: firebaseApp);
+    await initFirebase(config: _config!);
 
     initErrorHandler(
       automaticallySendCrashReports: _config!.automaticallySendCrashReports,
@@ -497,6 +490,7 @@ class Codelessly {
                 firestore: firebaseFirestore, config: _config!),
             localDataRepository:
                 LocalDataRepository(cacheManager: _cacheManager!),
+            firebaseFirestore: firebaseFirestore,
           );
 
       // Create the preview data manager.
@@ -510,6 +504,7 @@ class Codelessly {
                 firestore: firebaseFirestore, config: _config!),
             localDataRepository:
                 LocalDataRepository(cacheManager: _cacheManager!),
+            firebaseFirestore: firebaseFirestore,
           );
 
       // Create the template data manager. This is always automatically
@@ -522,6 +517,7 @@ class Codelessly {
         networkDataRepository: FirebaseDataRepository(
             firestore: firebaseFirestore, config: _config!),
         localDataRepository: LocalDataRepository(cacheManager: _cacheManager!),
+        firebaseFirestore: firebaseFirestore,
       );
 
       _updateStatus(CStatus.loading('initialized_managers'));

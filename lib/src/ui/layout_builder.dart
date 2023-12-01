@@ -39,9 +39,7 @@ class _CodelesslyLayoutRetrieverState extends State<CodelesslyLayoutRetriever> {
   @override
   void initState() {
     super.initState();
-    codelessly.initialize(
-      firebaseApp: widget.controller.codelessly?.firebaseApp,
-    );
+    codelessly.initialize();
     controller.initialize();
   }
 

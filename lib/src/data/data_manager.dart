@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 
@@ -44,6 +45,9 @@ class DataManager {
 
   /// The auth manager to use. By default, it is [CodelesslyAuthManager].
   final AuthManager authManager;
+
+  /// The firestore instance to use
+  final FirebaseFirestore firebaseFirestore;
 
   SDKPublishModel? _publishModel;
 
@@ -95,6 +99,7 @@ class DataManager {
     required this.authManager,
     required this.networkDataRepository,
     required this.localDataRepository,
+    required this.firebaseFirestore,
     SDKPublishModel? publishModel,
   }) : _publishModel = publishModel;
 
@@ -361,14 +366,9 @@ class DataManager {
 
   Future<CloudStorage> initializeCloudStorage(
       {required String projectId}) async {
-    // TODO: change this? how do we get firestore instance here?
-    if (networkDataRepository is! FirebaseDataRepository) {
-      throw UnimplementedError(
-          'Only FirebaseDataRepository is supported for cloud storage.');
-    }
     final instance = FirestoreCloudStorage(
       projectId,
-      (networkDataRepository as FirebaseDataRepository).firestore,
+      firebaseFirestore,
       config.publishSource,
     );
     // initialize cloud storage.
