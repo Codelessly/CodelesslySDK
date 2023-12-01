@@ -6,6 +6,8 @@ import 'package:flutter/cupertino.dart';
 
 import '../../codelessly_sdk.dart';
 
+const String _label = 'Cloud Storage';
+
 /// Allows access to cloud storage. Implementations of this class should be
 /// able to store and retrieve data from the cloud storage in secure manner.
 /// This is mainly used to store data on cloud via actions for the SDK.
@@ -34,7 +36,7 @@ abstract class CloudStorage extends ChangeNotifier {
 
   final PublishSource publishSource;
 
-  /// Creates a new instance of [CloudStorage] with the given [identifier].
+  /// Creates a new instance of with the given [identifier].
   /// The [identifier] cannot be empty. The actual identity of this depends on
   /// the implementation.
   ///
@@ -158,7 +160,7 @@ abstract class CloudStorage extends ChangeNotifier {
   );
 }
 
-/// A [CloudStorage] implementation that uses Firestore as the backend.
+/// A implementation that uses Firestore as the backend.
 /// This is used to store data via actions for the SDK.
 class FirestoreCloudStorage extends CloudStorage {
   /// Reference to the root document for this session.
@@ -181,11 +183,14 @@ class FirestoreCloudStorage extends CloudStorage {
   /// [firestore] instance.
   FirestoreCloudStorage(super.identifier, this.firestore, super.publishSource);
 
+  void log(String message) => logger.log(_label, message);
+
   /// Initializes the cloud storage for the given [identifier]. This must be
   /// called and awaited before using the cloud storage.
   Future<void> init() async {
-    print(
-        'Initializing FirestoreCloudStorage for $identifier at ${rootRef.path}');
+    logger.log(_label,
+        'Initializing for $identifier at [${rootRef.path}]');
+
     // Create project doc if missing.
     final snapshot = await rootRef.get();
 
@@ -194,6 +199,8 @@ class FirestoreCloudStorage extends CloudStorage {
 
     // Create project doc if it does not exist.
     await rootRef.set({'project': identifier});
+
+    logger.log(_label, 'Done initializing for $identifier');
   }
 
   /// Gives a collection reference for the given [path].
@@ -267,7 +274,7 @@ class FirestoreCloudStorage extends CloudStorage {
     if (autoGenerateId) {
       // if autoGenerateId is true, then skipCreationIfDocumentExists and docId is ignored.
       final document = await rootRef.collection(path).add(value);
-      print('Document added: ${document.path}');
+      logger.log(_label, 'Document added: ${document.path}');
       return true;
     }
     // Get doc reference.
@@ -278,13 +285,13 @@ class FirestoreCloudStorage extends CloudStorage {
     if (skipCreationIfDocumentExists && snapshot.exists) {
       // if skipCreationIfDocumentExists is true, check if document exists.
       // if document exists, then return.
-      print('Document already exists: ${docRef.path}');
+      logger.log(_label, 'Document already exists: ${docRef.path}');
       return true;
     }
 
     // Set document.
     await docRef.set(value);
-    print('Document added: ${docRef.path}/$documentId');
+    logger.log(_label, 'Document added: ${docRef.path}/$documentId');
     return true;
   }
 
@@ -303,7 +310,7 @@ class FirestoreCloudStorage extends CloudStorage {
 
     // TODO: Should we do update instead of set?
     await docRef.set(value, SetOptions(merge: true));
-    print('Document updated: ${docRef.path}/$documentId');
+    logger.log(_label, 'Document updated: ${docRef.path}/$documentId');
     return true;
   }
 
@@ -346,8 +353,10 @@ class FirestoreCloudStorage extends CloudStorage {
     // Listen to the stream and update the variable.
     final subscription = stream.listen(
       (data) {
-        print('Document stream update from cloud storage: $path/$documentId');
-        print('Updating variable ${variable.value.name} with success state.');
+        logger.log(_label,
+            'Document stream update from cloud storage: $path/$documentId');
+        logger.log(_label,
+            'Updating variable ${variable.value.name} with success state.');
         // Set the variable with success state.
         variable.set(
           variable.value
@@ -355,7 +364,8 @@ class FirestoreCloudStorage extends CloudStorage {
         );
       },
       onError: (error) {
-        print('Error loading document from cloud storage: $path/$documentId');
+        logger.log(_label,
+            'Error loading document from cloud storage: $path/$documentId');
         // Set the variable with error state.
         variable.set(
           variable.value.copyWith(

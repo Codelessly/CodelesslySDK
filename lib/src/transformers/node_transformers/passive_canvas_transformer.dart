@@ -345,7 +345,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     super.didChangeDependencies();
     if (shouldPerformOnLoadActions) {
       shouldPerformOnLoadActions = false;
-      if(widget.settings.isPreview) return;
+      if (widget.settings.isPreview) return;
       print(
           '[PassiveCanvasWidget] Checking for onLoad actions on canvas ${widget.node.id}');
       // perform onLoad actions. This must always be the last step in this method.

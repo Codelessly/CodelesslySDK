@@ -1,11 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
+
+const String _label = 'Cache Manager';
 
 /// Handles caching of any data that needs to be cached via Hive.
 class CodelesslyCacheManager extends CacheManager {
@@ -48,18 +50,19 @@ class CodelesslyCacheManager extends CacheManager {
     } finally {
       stopwatch.stop();
 
-      log(
-        '[CacheManager] Initialized Hive in ${stopwatch.elapsed.inMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s',
+      logger.log(
+        _label,
+        'Initialized Hive in ${stopwatch.elapsed.inMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s',
       );
     }
   }
 
   @override
   Future<void> clearAll() async {
-    log('[CacheManager] Clearing cache...');
+    logger.log(_label, 'Clearing cache...');
     try {
       await box.clear();
-      log('[CacheManager] Cache cleared successfully!');
+      logger.log(_label, 'Cache cleared successfully!');
     } catch (e, stacktrace) {
       throw CodelesslyException.cacheClearException(
         message: 'Failed to clear cache. $e',
@@ -118,10 +121,10 @@ class CodelesslyCacheManager extends CacheManager {
 
   @override
   Future<void> deleteAllByteData() async {
-    log('[CacheManager] Deleting all byte data...');
+    logger.log(_label, 'Deleting all byte data...');
     try {
       filesBox.clear();
-      log('[CacheManager] Cache bytes deleted successfully!');
+      logger.log(_label, 'Cache bytes deleted successfully!');
     } catch (e, stacktrace) {
       throw CodelesslyException.fileIoException(
         message: 'Failed to clear files.\n$e',
@@ -175,7 +178,8 @@ class CodelesslyCacheManager extends CacheManager {
     String pathKey, {
     Iterable<String> excludedFileNames = const [],
   }) async {
-    log('[CacheManager] Purging outdated files. (excluding: ${excludedFileNames.join(', ')})');
+    logger.log(_label,
+        'Purging outdated files. (excluding: ${excludedFileNames.join(', ')})');
     int purgedFiles = 0;
     try {
       for (final String path in filesBox.keys) {
@@ -184,20 +188,20 @@ class CodelesslyCacheManager extends CacheManager {
         }
         final String fileName = path.split('/').last;
         if (!excludedFileNames.contains(fileName)) {
-          log('[CacheManager] \t\tDeleting file: $path');
+          logger.log(_label, '\t\tDeleting file: $path');
 
           await filesBox.delete(path);
 
-          log('[CacheManager] \t\tSuccessfully deleted.');
+          logger.log(_label, '\t\tSuccessfully deleted.');
 
           purgedFiles++;
         }
       }
 
       if (purgedFiles > 0) {
-        log('[CacheManager] Successfully purged $purgedFiles files.');
+        logger.log(_label, 'Successfully purged $purgedFiles files.');
       } else {
-        log('[CacheManager] No files were purged.');
+        logger.log(_label, 'No files were purged.');
       }
     } catch (e, stacktrace) {
       throw CodelesslyException.fileIoException(
@@ -213,7 +217,7 @@ class CodelesslyCacheManager extends CacheManager {
     try {
       final key = '$pathKey/$name';
       await filesBox.put(key, bytes);
-      log('[CacheManager] Successfully saved file $pathKey/$name');
+      logger.log(_label, 'Successfully saved file $pathKey/$name');
     } catch (e, stacktrace) {
       throw CodelesslyException.fileIoException(
         message: 'Failed to save file $pathKey/$name',

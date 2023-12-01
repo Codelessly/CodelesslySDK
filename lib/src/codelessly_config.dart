@@ -59,6 +59,10 @@ class CodelesslyConfig with EquatableMixin {
   /// Base URL of the environment to use. Helpful for hosted video players.
   final String baseURL;
 
+  /// The unique name of the Firebase instance to use. Defaults to
+  /// [kCodelesslyFirebaseApp].
+  final String firebaseInstanceName;
+
   /// Creates a new instance of [CodelesslyConfig].
   ///
   /// [authToken] is the token required to authenticate and initialize the SDK.
@@ -77,6 +81,7 @@ class CodelesslyConfig with EquatableMixin {
     FirebaseOptions? firebaseOptions,
     this.firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
     this.baseURL = defaultBaseURL,
+    this.firebaseInstanceName = kCodelesslyFirebaseApp,
   }) : firebaseOptions =
             firebaseOptions ?? DefaultFirebaseOptionsProd.currentPlatform;
 
@@ -91,6 +96,7 @@ class CodelesslyConfig with EquatableMixin {
     FirebaseOptions? firebaseOptions,
     String? firebaseCloudFunctionsBaseURL,
     String? baseURL,
+    String? firebaseInstanceName,
   }) =>
       CodelesslyConfig(
         authToken: authToken ?? this.authToken,
@@ -103,6 +109,7 @@ class CodelesslyConfig with EquatableMixin {
         firebaseCloudFunctionsBaseURL:
             firebaseCloudFunctionsBaseURL ?? this.firebaseCloudFunctionsBaseURL,
         baseURL: baseURL ?? this.baseURL,
+        firebaseInstanceName: firebaseInstanceName ?? this.firebaseInstanceName,
       );
 
   @override
@@ -115,6 +122,7 @@ class CodelesslyConfig with EquatableMixin {
         firebaseOptions,
         firebaseCloudFunctionsBaseURL,
         baseURL,
+        firebaseInstanceName,
       ];
 }
 
