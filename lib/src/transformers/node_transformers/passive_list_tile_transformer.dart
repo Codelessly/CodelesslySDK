@@ -207,7 +207,6 @@ class PassiveListTileWidget extends StatelessWidget {
     super.key,
     required this.node,
     required this.settings,
-
     this.leading,
     this.title,
     this.subtitle,
@@ -225,8 +224,8 @@ class PassiveListTileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (settings.isPreview) {
-     return StrictNodeBox(
-       node: node,
+      return StrictNodeBox(
+        node: node,
         child: CustomPaint(
           painter: PlaceholderPainter(
             scale: 1,

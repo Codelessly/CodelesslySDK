@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
@@ -37,6 +36,8 @@ enum ApiRequestType {
   }
 }
 
+const String _label = 'Functions Repository';
+
 class FunctionsRepository {
   static Future<void> performAction(
     BuildContext context,
@@ -44,7 +45,7 @@ class FunctionsRepository {
     dynamic internalValue,
     bool notify = true,
   }) async {
-    log('Performing action: $action');
+    logger.log(_label, 'Performing action: $action');
     switch (action.type) {
       case ActionType.navigation:
         await navigate(context, action as NavigationAction);
@@ -160,7 +161,7 @@ class FunctionsRepository {
       final MapEntry<String, String>? parameter = parameters.entries
           .firstWhereOrNull((entry) => entry.key == match.group(1));
       if (parameter == null) {
-        print('parameter ${match.group(1)} not found');
+        logger.log(_label, 'parameter ${match.group(1)} not found');
         return match[0]!;
       }
       // Substitute variables in parameter value.
@@ -206,7 +207,8 @@ class FunctionsRepository {
     final ScopedValues scopedValues = ScopedValues.of(context);
     final parsedParams = substituteVariablesInMap(action.params, scopedValues);
 
-    log('Performing navigation action with params: $parsedParams');
+    logger.log(
+        _label, 'Performing navigation action with params: $parsedParams');
 
     if (action.navigationType == NavigationType.pop) {
       await Navigator.maybePop(context, parsedParams);
@@ -218,10 +220,12 @@ class FunctionsRepository {
           .firstWhereOrNull((layout) => layout.canvasId == action.destinationId)
           ?.id;
 
-      print('looking for layout with canvas id: [${action.destinationId}]');
+      logger.log(_label,
+          'looking for layout with canvas id: [${action.destinationId}]');
       for (final layout
           in codelessly.dataManager.publishModel!.layouts.values) {
-        print('layout [${layout.id}] canvas id: [${layout.canvasId}]');
+        logger.log(
+            _label, 'layout [${layout.id}] canvas id: [${layout.canvasId}]');
       }
 
       if (layoutId == null) {
@@ -234,14 +238,19 @@ class FunctionsRepository {
         return;
       }
 
+      final parentController = context.read<CodelesslyWidgetController>();
+      final effectiveController = parentController.copyWith(
+        layoutID: layoutId,
+        codelessly: codelessly,
+      );
+
       if (action.navigationType == NavigationType.push) {
         await Navigator.push(
           context,
           MaterialPageRoute(
             settings: RouteSettings(arguments: parsedParams),
             builder: (context) => CodelesslyWidget(
-              codelessly: codelessly,
-              layoutID: layoutId,
+              controller: effectiveController,
             ),
           ),
         );
@@ -253,8 +262,7 @@ class FunctionsRepository {
           MaterialPageRoute(
             settings: RouteSettings(arguments: parsedParams),
             builder: (context) => CodelesslyWidget(
-              codelessly: codelessly,
-              layoutID: layoutId,
+              controller: effectiveController,
             ),
           ),
         );
@@ -271,7 +279,8 @@ class FunctionsRepository {
     final ScopedValues scopedValues = ScopedValues.of(context);
     final parsedParams = substituteVariablesInMap(action.params, scopedValues);
 
-    log('Performing show dialog action with params: $parsedParams');
+    logger.log(
+        _label, 'Performing show dialog action with params: $parsedParams');
 
     final Codelessly codelessly = context.read<Codelessly>();
     // Check if a layout exists for the action's [destinationId].
@@ -279,9 +288,11 @@ class FunctionsRepository {
         .firstWhereOrNull((layout) => layout.canvasId == action.destinationId)
         ?.id;
 
-    print('looking for layout with canvas id: [${action.destinationId}]');
+    logger.log(
+        _label, 'looking for layout with canvas id: [${action.destinationId}]');
     for (final layout in codelessly.dataManager.publishModel!.layouts.values) {
-      print('layout [${layout.id}] canvas id: [${layout.canvasId}]');
+      logger.log(
+          _label, 'layout [${layout.id}] canvas id: [${layout.canvasId}]');
     }
 
     if (layoutId == null) {
@@ -341,9 +352,9 @@ class FunctionsRepository {
       variable.value = variable.value.copyWith(
         value: ApiResponseVariableUtils.loading(url, data: existingData),
       );
-      print('${variable.value.name} updated with loading state.');
+      logger.log(_label, '${variable.value.name} updated with loading state.');
     } else {
-      print('No variable provided for api call.');
+      logger.log(_label, 'No variable provided for api call.');
     }
 
     try {
@@ -384,15 +395,16 @@ class FunctionsRepository {
         variable.value = variable.value.copyWith(
           value: ApiResponseVariableUtils.fromResponse(response),
         );
-        print('${variable.value.name} updated with success state.');
+        logger.log(
+            _label, '${variable.value.name} updated with success state.');
       } else {
-        print('No variable provided for api call.');
+        logger.log(_label, 'No variable provided for api call.');
       }
 
       return response;
     } catch (error, stackTrace) {
-      log(error.toString());
-      log(stackTrace.toString());
+      logger.log(_label, error.toString());
+      logger.log(_label, stackTrace.toString());
       if (variable != null) {
         variable.value = variable.value.copyWith(
           value: ApiResponseVariableUtils.error(
@@ -401,9 +413,9 @@ class FunctionsRepository {
             data: existingData,
           ),
         );
-        print('${variable.value.name} updated with error state.');
+        logger.log(_label, '${variable.value.name} updated with error state.');
       } else {
-        print('No variable provided for api call.');
+        logger.log(_label, 'No variable provided for api call.');
       }
       return Future.error(error);
     }
@@ -416,50 +428,51 @@ class FunctionsRepository {
     required Object? body,
   }) {
     if (kReleaseMode) return;
-    print(
+    logger.log(_label,
         '--------------------------------------------------------------------');
-    print('API Request:');
-    print(
+    logger.log(_label, 'API Request:');
+    logger.log(_label,
         '--------------------------------------------------------------------');
-    print('${method.shortName} $url');
-    print('Headers: ${headers.isEmpty ? 'None' : ''}');
+    logger.log(_label, '${method.shortName} $url');
+    logger.log(_label, 'Headers: ${headers.isEmpty ? 'None' : ''}');
     if (headers.isNotEmpty) {
-      print(const JsonEncoder.withIndent('  ').convert(headers));
-      print('');
+      logger.log(_label, const JsonEncoder.withIndent('  ').convert(headers));
+      logger.log(_label, '');
     }
-    print(
+    logger.log(_label,
         'Body: ${body == null || body.toString().trim().isEmpty ? 'None' : ''}');
     if (body != null && body.toString().trim().isNotEmpty) {
       try {
         final parsed = json.decode(body.toString());
-        print(const JsonEncoder.withIndent('  ').convert(parsed));
+        logger.log(_label, const JsonEncoder.withIndent('  ').convert(parsed));
       } catch (e) {
-        print(body.toString());
+        logger.log(_label, body.toString());
       }
     }
-    print(
+    logger.log(_label,
         '--------------------------------------------------------------------');
   }
 
   static void printResponse(http.Response response) {
     if (kReleaseMode) return;
-    print(
+    logger.log(_label,
         '--------------------------------------------------------------------');
-    print('Response:');
-    print(
+    logger.log(_label, 'Response:');
+    logger.log(_label,
         '--------------------------------------------------------------------');
-    print('Status Code: ${response.statusCode}');
-    print('Headers:');
-    print(const JsonEncoder.withIndent('  ').convert(response.headers));
-    print('');
-    print('Body:');
+    logger.log(_label, 'Status Code: ${response.statusCode}');
+    logger.log(_label, 'Headers:');
+    logger.log(
+        _label, const JsonEncoder.withIndent('  ').convert(response.headers));
+    logger.log(_label, '');
+    logger.log(_label, 'Body:');
     try {
       final parsed = json.decode(response.body);
-      print(const JsonEncoder.withIndent('  ').convert(parsed));
+      logger.log(_label, const JsonEncoder.withIndent('  ').convert(parsed));
     } catch (e) {
-      print(response.body);
+      logger.log(_label, response.body);
     }
-    print(
+    logger.log(_label,
         '--------------------------------------------------------------------');
   }
 
@@ -859,7 +872,8 @@ class FunctionsRepository {
     final Map<String, dynamic> parsedParams =
         substituteVariablesInMap(action.params, scopedValues);
 
-    log('Calling function ${action.name}(${parsedParams.entries.map((e) => '${e.key}: ${e.value}').join(', ')}).');
+    logger.log(_label,
+        'Calling function ${action.name}(${parsedParams.entries.map((e) => '${e.key}: ${e.value}').join(', ')}).');
 
     function?.call(context, codelesslyContext, Map.unmodifiable(parsedParams));
   }
@@ -883,14 +897,14 @@ class FunctionsRepository {
     try {
       final LocalStorage? storage = scopedValues.localStorage;
       if (storage == null) {
-        log('Storage is null.');
+        logger.log(_label, 'Storage is null.');
         return false;
       }
       await storage.clear();
       return true;
     } catch (error, stackTrace) {
-      log(error.toString());
-      log(stackTrace.toString());
+      logger.log(_label, error.toString());
+      logger.log(_label, stackTrace.toString());
       return false;
     }
   }
@@ -903,7 +917,7 @@ class FunctionsRepository {
       final LocalStorage? storage = scopedValues.localStorage;
 
       if (storage == null) {
-        log('Storage is null.');
+        logger.log(_label, 'Storage is null.');
         return false;
       }
 
@@ -965,7 +979,8 @@ class FunctionsRepository {
         // This means the key is a simple key without any path or accessor. So
         // we can set it directly.
 
-        log('Setting storage key [$storageKey] to value [$value].');
+        logger.log(
+            _label, 'Setting storage key [$storageKey] to value [$value].');
         await storage.put(storageKey, value);
         return false;
       }
@@ -984,13 +999,14 @@ class FunctionsRepository {
         storageData = Map<String, dynamic>.from(result as Map);
       }
 
-      log('Setting storage key [$storageKey] to value [$value].');
+      logger.log(
+          _label, 'Setting storage key [$storageKey] to value [$value].');
       await storage.put(match.name, storageData[match.name]);
 
       return true;
     } catch (error, stackTrace) {
-      log(error.toString());
-      log(stackTrace.toString());
+      logger.log(_label, error.toString());
+      logger.log(_label, stackTrace.toString());
       return false;
     }
   }
@@ -1002,7 +1018,7 @@ class FunctionsRepository {
     try {
       final LocalStorage? storage = scopedValues.localStorage;
       if (storage == null) {
-        log('Storage is null.');
+        logger.log(_label, 'Storage is null.');
         return false;
       }
 
@@ -1017,7 +1033,7 @@ class FunctionsRepository {
         // This means the key is a simple key without any path or accessor. So
         // we can remove it directly.
         await storage.remove(storageKey);
-        log('Removed storage key [$storageKey].');
+        logger.log(_label, 'Removed storage key [$storageKey].');
         return true;
       }
 
@@ -1033,13 +1049,13 @@ class FunctionsRepository {
         storageData = Map<String, dynamic>.from(result as Map);
       }
 
-      log('Removed storage key [$storageKey].');
+      logger.log(_label, 'Removed storage key [$storageKey].');
       await storage.put(match.name, storageData[match.name]);
 
       return true;
     } catch (error, stackTrace) {
-      log(error.toString());
-      log(stackTrace.toString());
+      logger.log(_label, error.toString());
+      logger.log(_label, stackTrace.toString());
       return false;
     }
   }
@@ -1094,7 +1110,7 @@ class FunctionsRepository {
     );
     final index = int.tryParse(substitutedIndex);
     if (index == null) {
-      log('Invalid index: $substitutedIndex');
+      logger.log(_label, 'Invalid index: $substitutedIndex');
       return currentValue;
     }
 
@@ -1145,7 +1161,7 @@ class FunctionsRepository {
       final CloudStorage? cloudStorage = scopedValues.cloudStorage;
 
       if (cloudStorage == null) {
-        log('Cloud storage is null.');
+        logger.log(_label, 'Cloud storage is null.');
         return false;
       }
 
@@ -1199,8 +1215,8 @@ class FunctionsRepository {
         skipCreationIfDocumentExists: subAction.skipCreationIfDocumentExists,
       );
     } catch (error, stackTrace) {
-      log(error.toString());
-      log(stackTrace.toString());
+      logger.log(_label, error.toString());
+      logger.log(_label, stackTrace.toString());
       return false;
     }
   }
@@ -1212,7 +1228,7 @@ class FunctionsRepository {
     final CloudStorage? cloudStorage = scopedValues.cloudStorage;
 
     if (cloudStorage == null) {
-      log('Cloud storage is null.');
+      logger.log(_label, 'Cloud storage is null.');
       return false;
     }
 
@@ -1310,7 +1326,8 @@ class FunctionsRepository {
         // This means the key is a simple key without any path or accessor. So
         // we can set it directly.
 
-        log('Setting storage key [$storageKey] to value [$value].');
+        logger.log(
+            _label, 'Setting storage key [$storageKey] to value [$value].');
         docData[storageKey] = value;
         return await cloudStorage.updateDocument(
           evaluatedPath,
@@ -1334,7 +1351,8 @@ class FunctionsRepository {
         storageData = Map<String, dynamic>.from(result as Map);
       }
 
-      log('Setting storage key [$storageKey] to value [$value].');
+      logger.log(
+          _label, 'Setting storage key [$storageKey] to value [$value].');
       docData[match.name] = storageData[match.name];
 
       return await cloudStorage.updateDocument(
@@ -1344,8 +1362,8 @@ class FunctionsRepository {
         value: {match.name: docData[match.name]},
       );
     } catch (error, stackTrace) {
-      log(error.toString());
-      log(stackTrace.toString());
+      logger.log(_label, error.toString());
+      logger.log(_label, stackTrace.toString());
       return false;
     }
   }
@@ -1358,7 +1376,7 @@ class FunctionsRepository {
       final CloudStorage? cloudStorage = scopedValues.cloudStorage;
 
       if (cloudStorage == null) {
-        log('Cloud storage is null.');
+        logger.log(_label, 'Cloud storage is null.');
         return false;
       }
 
@@ -1378,8 +1396,8 @@ class FunctionsRepository {
         evaluatedDocumentId,
       );
     } catch (error, stackTrace) {
-      log(error.toString());
-      log(stackTrace.toString());
+      logger.log(_label, error.toString());
+      logger.log(_label, stackTrace.toString());
       return false;
     }
   }
@@ -1393,7 +1411,7 @@ class FunctionsRepository {
     final CloudStorage? cloudStorage = scopedValues.cloudStorage;
 
     if (cloudStorage == null) {
-      log('Cloud storage is null.');
+      logger.log(_label, 'Cloud storage is null.');
       return;
     }
 
@@ -1424,7 +1442,8 @@ class FunctionsRepository {
       value: CloudStorageVariableUtils.loading(),
     );
 
-    log('Streaming document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
+    logger.log(_label,
+        'Streaming document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
     cloudStorage.streamDocumentToVariable(
         evaluatedPath, evaluatedDocumentId, variable);
   }
@@ -1444,7 +1463,7 @@ class FunctionsRepository {
     final int? parsedValue = int.tryParse(substitutedValue);
 
     if (parsedValue == null) {
-      log('Invalid value: $substitutedValue');
+      logger.log(_label, 'Invalid value: $substitutedValue');
       return currentValue;
     }
 
@@ -1472,7 +1491,7 @@ class FunctionsRepository {
     final double? parsedValue = double.tryParse(substitutedValue);
 
     if (parsedValue == null) {
-      log('Invalid value: $substitutedValue');
+      logger.log(_label, 'Invalid value: $substitutedValue');
       return currentValue;
     }
 

@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import 'codelessly_event.dart';
+import 'codelessly_logger.dart';
 import 'reporter.dart';
+
+const String _label = 'Error Reporter';
 
 /// A [typedef] that defines the callback for [CodelesslyErrorHandler].
 /// It allows supplementary handling of any captured exceptions that the SDK
@@ -67,10 +70,6 @@ abstract class BaseErrorHandler {
   /// than [captureException]. This also can be use for logging non-throwing
   /// paths.
   Future<void> captureEvent(CodelesslyEvent event);
-
-  /// Allows to catch and log a message in the SDK. Optionally allows to pass
-  /// [stacktrace]. Can be an alternative of [captureException].
-  Future<void> captureMessage(String message, {StackTrace? stacktrace});
 }
 
 /// Can be used to capture all the exceptions, errors and events
@@ -137,7 +136,7 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
 
   @override
   Future<void> captureEvent(CodelesslyEvent event) async {
-    print(event);
+    logger.log(_label, event.toString());
     _reporter?.captureEvent(event);
   }
 
@@ -170,23 +169,18 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
       _lastException = exception;
       onException?.call(exception);
     }
-    print(exception);
-    print(exception.stacktrace ?? StackTrace.current);
+    logger.error(
+      _label,
+      message ?? exception.message ?? 'Unknown error',
+      error: exception,
+      stackTrace: exception.stacktrace ?? StackTrace.current,
+    );
+
     _reporter?.captureException(
       exception,
       stacktrace: exception.stacktrace ?? StackTrace.current,
     );
     _exceptionStreamController.add(exception);
-  }
-
-  @override
-  Future<void> captureMessage(
-    String message, {
-    StackTrace? stacktrace,
-  }) async {
-    print(message);
-    print(stacktrace);
-    _reporter?.captureMessage(message, stacktrace: stacktrace);
   }
 }
 

@@ -1,8 +1,11 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:hive/hive.dart';
+
+import '../logging/codelessly_logger.dart';
+
+const String _label = 'Local Storage';
 
 /// Allows access to local storage on the device. Implementations of this class
 /// should be able to store and retrieve data from the device's local storage.
@@ -72,7 +75,7 @@ class HiveLocalStorage extends LocalStorage {
   /// given [key] in the storage. This also notifies the listeners for the
   /// storage itself.
   void _onBoxChanged(BoxEvent event) {
-    log('storage changed for key: ${event.key}');
+    logger.log(_label, 'Storage changed for key: ${event.key}');
 
     // Get the notifier for the given key.
     final notifier = _notifiers[event.key.toString()];
@@ -147,7 +150,8 @@ class _StorageListenable extends ChangeNotifier {
   /// Notifies the listeners that the value for the given [key] in the storage
   /// has changed.
   void notify() {
-    log('notifying storage changed for key: $_key');
+    logger.log(
+        'Local Storage Listenable', 'Notifying storage changed for key: $_key');
     notifyListeners();
   }
 }

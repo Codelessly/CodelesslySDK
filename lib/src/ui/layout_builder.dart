@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import '../../codelessly_sdk.dart';
 import '../functions/functions_repository.dart';
 
+const String _label = 'Layout Builder';
+
 class CodelesslyLayoutRetriever extends StatefulWidget {
   final CodelesslyWidgetController controller;
   final SizeC bounds;
@@ -37,7 +39,9 @@ class _CodelesslyLayoutRetrieverState extends State<CodelesslyLayoutRetriever> {
   @override
   void initState() {
     super.initState();
-    codelessly.initialize();
+    codelessly.initialize(
+      firebaseApp: widget.controller.codelessly?.firebaseApp,
+    );
     controller.initialize();
   }
 
@@ -55,15 +59,6 @@ class _CodelesslyLayoutRetrieverState extends State<CodelesslyLayoutRetriever> {
       height: widget.bounds.height,
       child: CodelesslyWidget(
         controller: controller,
-        loadingBuilder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        errorBuilder: (context, error) => Center(
-          child: Text(
-            error.toString(),
-            style: const TextStyle(color: Colors.red),
-          ),
-        ),
       ),
     );
   }
@@ -271,7 +266,7 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
 
       // Make api request right away if it is a canvas action.
       if (canvasAction != null) {
-        print('Making api request for onLoad canvas action');
+        logger.log(_label, 'Making api request for onLoad canvas action');
         FunctionsRepository.makeApiRequestFromAction(
             canvasAction, context, notifier);
       }
@@ -297,7 +292,8 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
           codelesslyContext.findVariableByName(action.variable!.name);
 
       if (variable == null) {
-        print('Variable with name ${action.variable!.name} does not exist');
+        logger.log(_label,
+            'Variable with name ${action.variable!.name} does not exist');
         continue;
       }
 
