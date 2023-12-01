@@ -62,21 +62,15 @@ class CodelesslyAuthManager extends AuthManager {
     final Stopwatch stopwatch = Stopwatch()..start();
 
     if (firebaseAuth.currentUser == null) {
-      log('[SAAD] USER IS NOT AUTHENTICATED. Authenticating anonymously...');
       await firebaseAuth.signInAnonymously();
-      log('[SAAD] USER IS NOW AUTHENTICATED. USER ID: ${firebaseAuth.currentUser!.uid}');
-    } else {
-      log('[SAAD] USER IS ALREADY AUTHENTICATED. USER ID: ${firebaseAuth.currentUser!.uid}');
     }
 
-    // TODO: Are we wasting time here?
-    await firebaseAuth.currentUser!.reload();
+    // This step is mandatory to compare claims for auth. If re-auth is
+    // needed, it needs to halt the entire process until auth completes because
+    // the server attached a custom claim to the user's token to allow
+    // Codelessly Cloud Data to work.
     final token = await firebaseAuth.currentUser!.getIdTokenResult(true);
-    await firebaseAuth.currentUser!.reload();
     final claims = token.claims;
-    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    log('[SAAD] INIT CLAIMS:\n${encoder.convert(claims)}');
-    log('[SAAD] USER ID: ${firebaseAuth.currentUser!.uid}');
 
     if (cacheManager.isCached(authCacheKey)) {
       try {
@@ -106,8 +100,6 @@ class CodelesslyAuthManager extends AuthManager {
             log('Auth token mismatch. Cache invalidated.');
           } else {
             log('Project ID is not in user claims. Cache invalidated.');
-            log('Claims: ${encoder.convert(claims)}');
-            log('Cached Auth Data: ${encoder.convert(cachedAuthData.toJson())}');
           }
           await cacheManager.clearAll();
           await cacheManager.deleteAllByteData();
@@ -150,36 +142,6 @@ class CodelesslyAuthManager extends AuthManager {
       });
     }
 
-    // _authStateChangesSubscription =
-    //     firebaseAuth.authStateChanges().listen((User? user) async {
-    //   if (_authData == null) return;
-    //
-    //   final claims =
-    //       await user?.getIdTokenResult(true).then((value) => value.claims);
-    //
-    //   if (claims == null ||
-    //       !claims.containsKey('projectId') ||
-    //       claims['projectId'] != _authData!.projectId) {
-    //     log('Auth state changed. User is no longer authenticated. Re-authenticating...');
-    //
-    //     await cacheManager.clearAll();
-    //     await cacheManager.deleteAllByteData();
-    //     invalidate();
-    //
-    //     authenticate();
-    //   } else {
-    //     log('Auth state changed. User is still authenticated.');
-    //   }
-    // }, onError: (error, stacktrace) {
-    //   CodelesslyErrorHandler.instance.captureException(
-    //     CodelesslyException.other(
-    //       message: 'Auth error inside auth change listener.\nError: $error',
-    //       originalException: error,
-    //       stacktrace: stacktrace,
-    //     ),
-    //   );
-    // });
-
     stopwatch.stop();
     log('Auth manager initialized took ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s');
   }
@@ -219,15 +181,6 @@ class CodelesslyAuthManager extends AuthManager {
         _authData = authData;
         _authStreamController.add(_authData!);
 
-        // TODO: Are we wasting time here?
-        final token = await firebaseAuth.currentUser!.getIdTokenResult(true);
-        final claims = token.claims;
-        const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-        log('[SAAD] AUTHENTICATE CLAIMS:\n${encoder.convert(claims)}');
-        log('[SAAD] USER ID: ${firebaseAuth.currentUser!.uid}');
-
-        log('Authenticated token. Project ID: ${_authData!.projectId}');
-
         await cacheManager.store(authCacheKey, _authData!.toJson());
         log('Stored auth data in cache');
         log('Authentication successfully!');
@@ -266,10 +219,6 @@ class CodelesslyAuthManager extends AuthManager {
     );
 
     if (result.statusCode == 200) {
-      // Force refresh the token to update current local auth with the latest
-      // claims.
-      // await auth.currentUser!.getIdTokenResult(true);
-
       final jsonBody = jsonDecode(result.body);
 
       dev.log('Auth token response: ${result.body}',
