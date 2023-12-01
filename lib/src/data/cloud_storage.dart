@@ -32,12 +32,14 @@ abstract class CloudStorage extends ChangeNotifier {
   /// This cannot be an empty string.
   final String identifier;
 
+  final PublishSource publishSource;
+
   /// Creates a new instance of [CloudStorage] with the given [identifier].
   /// The [identifier] cannot be empty. The actual identity of this depends on
   /// the implementation.
   ///
   /// It will throw an [AssertionError] if the [identifier] is empty.
-  CloudStorage(this.identifier)
+  CloudStorage(this.identifier, this.publishSource)
       : assert(identifier.isNotEmpty, 'identifier cannot be empty');
 
   /// Adds a document to the cloud storage at the given [path].
@@ -161,7 +163,13 @@ abstract class CloudStorage extends ChangeNotifier {
 class FirestoreCloudStorage extends CloudStorage {
   /// Reference to the root document for this session.
   late final DocumentReference<Map<String, dynamic>> rootRef =
-      firestore.collection('data').doc(identifier);
+      firestore.collection(_rootCollection).doc(identifier);
+
+  String get _rootCollection => switch (publishSource) {
+        PublishSource.publish => 'data',
+        PublishSource.preview => 'preview_data',
+        PublishSource.template => 'template_data',
+      };
 
   /// Reference to the Firestore instance.
   final FirebaseFirestore firestore;
@@ -171,7 +179,7 @@ class FirestoreCloudStorage extends CloudStorage {
 
   /// Creates a [FirestoreCloudStorage] with the given [identifier] and
   /// [firestore] instance.
-  FirestoreCloudStorage(super.identifier, this.firestore);
+  FirestoreCloudStorage(super.identifier, this.firestore, super.publishSource);
 
   /// Initializes the cloud storage for the given [identifier]. This must be
   /// called and awaited before using the cloud storage.

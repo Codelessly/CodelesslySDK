@@ -338,7 +338,10 @@ class DataManager {
           'Only FirebaseDataRepository is supported for cloud storage.');
     }
     final instance = FirestoreCloudStorage(
-        projectId, (networkDataRepository as FirebaseDataRepository).firestore);
+      projectId,
+      (networkDataRepository as FirebaseDataRepository).firestore,
+      config.publishSource,
+    );
     // initialize cloud storage.
     await instance.init();
     return instance;
