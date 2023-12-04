@@ -46,8 +46,11 @@ class DataManager {
   /// The auth manager to use. By default, it is [CodelesslyAuthManager].
   final AuthManager authManager;
 
-  /// The firestore instance to use
+  /// The firestore instance to use.
   final FirebaseFirestore firebaseFirestore;
+
+  /// The error handler to use.
+  final CodelesslyErrorHandler errorHandler;
 
   SDKPublishModel? _publishModel;
 
@@ -100,6 +103,7 @@ class DataManager {
     required this.networkDataRepository,
     required this.localDataRepository,
     required this.firebaseFirestore,
+    required this.errorHandler,
     SDKPublishModel? publishModel,
   }) : _publishModel = publishModel;
 
@@ -177,7 +181,8 @@ class DataManager {
         }
 
         _logTime(stopwatch);
-      } catch (e, stackTrace) {
+      }
+      catch (e, stackTrace) {
         logger.log(logLabel,
             'Error trying to download complete publish model from slug.');
         logger.log(logLabel,
@@ -189,7 +194,16 @@ class DataManager {
 
         logger.log(logLabel,
             '[slug] Failed to download complete publish bundle for slug $slug.');
-        return;
+
+        if (e is CodelesslyException) {
+          rethrow;
+        } else {
+          throw CodelesslyException.networkException(
+            message: 'Failed to download complete publish bundle for slug $slug.',
+            originalException: e,
+            stacktrace: stackTrace,
+          );
+        }
       } finally {
         bundleStopWatch.stop();
         logger.log(logLabel,
@@ -479,8 +493,7 @@ class DataManager {
       logger.log(logLabel, 'Publish model comparison complete.');
     })
       ..onError((error, str) {
-        CodelesslyErrorHandler.instance
-            .captureException(error, stacktrace: str);
+        errorHandler.captureException(error, stacktrace: str);
       });
 
     return completer.future;
@@ -531,7 +544,7 @@ class DataManager {
   }
 
   /// Sets the [SDKPublishModel] as null and cancels document streaming.
-  void invalidate() {
+  void reset() {
     logger.log(logLabel, 'Invalidating...');
     _publishModelDocumentListener?.cancel();
     _publishModelStreamController.add(null);
@@ -1110,7 +1123,7 @@ class DataManager {
       );
     } catch (e) {
       logger.log(logLabel, 'Failed to download complete publish bundle.');
-      return false;
+      rethrow;
     } finally {
       stopwatch.stop();
       logger.log(logLabel,

@@ -79,23 +79,6 @@ abstract class BaseErrorHandler {
 /// [CodelesslyErrorHandler.init] before using it.
 ///
 class CodelesslyErrorHandler extends BaseErrorHandler {
-  /// Whether the [CodelesslyErrorHandler] has been initialized or not.
-  static bool didInitialize = false;
-
-  /// The global instance of this class.
-  static CodelesslyErrorHandler? _instance;
-
-  /// Returns the global instance of this class.
-  static CodelesslyErrorHandler get instance {
-    if (_instance == null) {
-      throw Exception(
-        'CodelesslyErrorHandler not initialized. '
-        'Please call CodelesslyErrorHandler.init() before using it.',
-      );
-    }
-    return _instance!;
-  }
-
   /// The reporter that will be used to report errors.
   final ErrorReporter? _reporter;
 
@@ -115,18 +98,6 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
     required ErrorReporter? reporter,
     this.onException,
   }) : _reporter = reporter;
-
-  /// Initializes a global instance of this with given [reporter].
-  static void init({
-    required ErrorReporter? reporter,
-    ExceptionCallback? onException,
-  }) {
-    _instance = CodelesslyErrorHandler(
-      reporter: reporter,
-      onException: onException,
-    );
-    didInitialize = true;
-  }
 
   /// The last exception that was thrown.
   CodelesslyException? _lastException;
@@ -165,10 +136,10 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
                 stacktrace: stacktrace ?? StackTrace.current,
               );
 
-    if (markForUI) {
+    // if (markForUI) {
       _lastException = exception;
       onException?.call(exception);
-    }
+    // }
     logger.error(
       _label,
       message ?? exception.message ?? 'Unknown error',

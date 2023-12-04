@@ -71,6 +71,10 @@ class CodelesslyCacheManager extends CacheManager {
       );
     }
   }
+  
+  @override
+  void reset() {
+  }
 
   @override
   void dispose() async {

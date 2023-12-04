@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../codelessly_sdk.dart';
+import '../logging/error_handler.dart';
 
 /// Handles the data flow of [SDKPublishModel] from the server.
 class FirebaseDataRepository extends NetworkDataRepository {
@@ -23,8 +24,9 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
     return publishModelDoc.snapshots().map((event) {
       final Map<String, dynamic>? data = event.data();
-      if (data == null) {
-        return null;
+      if (data == null || data.isEmpty) {
+        throw CodelesslyException(
+            'Failed to stream publish model for [$projectID] with source [${source.name}].');
       }
       final SDKPublishModel model = SDKPublishModel.fromJson(
         {...data, 'id': event.id},
@@ -47,6 +49,12 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
     return layoutDoc.get().then((value) {
       final Map<String, dynamic> data = value.data() ?? {};
+
+      // Layout does not exist or there's a network error.
+      if (data.isEmpty) {
+        throw CodelesslyException('Failed to download layout [$layoutID].');
+      }
+
       final SDKPublishLayout layout = SDKPublishLayout.fromJson(
         {...data, 'id': value.id},
       );
@@ -68,6 +76,12 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
     return fontDoc.get().then((value) {
       final Map<String, dynamic> data = value.data() ?? {};
+
+      // Font does not exist or there's a network error.
+      if (data.isEmpty) {
+        throw CodelesslyException('Failed to download font [$fontID].');
+      }
+
       final SDKPublishFont font = SDKPublishFont.fromJson(
         {...data, 'id': value.id},
       );
@@ -89,6 +103,12 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
     return apiDoc.get().then((value) {
       final Map<String, dynamic> data = value.data() ?? {};
+
+      // Api does not exist or there's a network error.
+      if (data.isEmpty) {
+        throw CodelesslyException('Failed to download api [$apiId].');
+      }
+
       final HttpApiData api = HttpApiData.fromJson(
         {...data, 'id': value.id},
       );
@@ -110,6 +130,13 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
     return variablesDoc.get().then((value) {
       final Map<String, dynamic> data = value.data() ?? {};
+
+      // Variables do not exist or there's a network error.
+      if (data.isEmpty) {
+        throw CodelesslyException(
+            'Failed to download variables for layout [$layoutID].');
+      }
+
       final SDKLayoutVariables layoutVariables = SDKLayoutVariables.fromJson(
         {...data, 'id': value.id},
       );
@@ -131,6 +158,13 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
     return conditionsDoc.get().then((value) {
       final Map<String, dynamic> data = value.data() ?? {};
+
+      // Conditions do not exist or there's a network error.
+      if (data.isEmpty) {
+        throw CodelesslyException(
+            'Failed to download conditions for layout [$layoutID].');
+      }
+
       final SDKLayoutConditions layoutConditions = SDKLayoutConditions.fromJson(
         {...data, 'id': value.id},
       );
