@@ -374,7 +374,8 @@ class DataManager {
     final bool shouldInitCloudStorage = _cloudStorage == null ||
         (cloudStorage!.publishSource != config.publishSource ||
             cloudStorage!.identifier != projectId);
-    final bool isAuthenticated = authManager.isAuthenticated();
+    final bool isAuthenticated = authManager.isAuthenticated() &&
+        authManager.hasCloudStorageAccess(projectId);
     final bool canInitCloudStorage = shouldInitCloudStorage && isAuthenticated;
 
     if (canInitCloudStorage) {
