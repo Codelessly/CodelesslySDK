@@ -99,6 +99,28 @@ class PassiveRectangleWidget extends StatelessWidget {
             ? double.infinity
             : node.basicBoxLocal.height;
 
+    Widget? portalWidget;
+    if (node case PortalMixin portal) {
+      if (portal.showPortal &&
+          portal.layoutID != null &&
+          portal.pageID != null &&
+          portal.canvasID != null) {
+        portalWidget = Positioned.fill(
+          key: ValueKey('Portal ${portal.layoutID}'),
+          child: settings.isPreview
+              // Show stripes in preview mode
+              ? PortalPreviewWidget(node: node)
+              : manager.layoutRetrievalBuilder(
+                  context,
+                  node.innerBoxLocal.size,
+                  portal.pageID!,
+                  portal.layoutID!,
+                  portal.canvasID!,
+                ),
+        );
+      }
+    }
+
     Widget data = Container(
       key: ValueKey('Rectangle Transformer of ${node.debugLabel}'),
       clipBehavior: getClipBehavior(node),
@@ -127,23 +149,7 @@ class PassiveRectangleWidget extends StatelessWidget {
             node,
             [
               ...children,
-              if (node case PortalMixin portal)
-                if (portal.showPortal &&
-                    portal.layoutID != null &&
-                    portal.pageID != null &&
-                    portal.canvasID != null)
-                  Positioned.fill(
-                    child: settings.isPreview
-                        // Show stripes in preview mode
-                        ? PortalPreviewWidget(node: node)
-                        : manager.layoutRetrievalBuilder(
-                            context,
-                            node.innerBoxLocal.size,
-                            portal.pageID!,
-                            portal.layoutID!,
-                            portal.canvasID!,
-                          ),
-                  )
+              if (portalWidget != null) portalWidget,
             ],
             stackAlignment: stackAlignment,
             applyPadding: applyPadding,

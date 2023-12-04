@@ -75,6 +75,12 @@ class Codelessly {
   /// to the local device's cache.
   CacheManager get cacheManager => _cacheManager!;
 
+  CodelesslyErrorHandler? _errorHandler;
+
+  /// Returns the error handler that is responsible for capturing and reporting
+  /// errors to the Codelessly servers for this instance of the SDK.
+  CodelesslyErrorHandler get errorHandler => _errorHandler!;
+
   FirebaseApp? _firebaseApp;
   FirebaseFirestore? _firebaseFirestore;
   FirebaseAuth? _firebaseAuth;
@@ -158,12 +164,14 @@ class Codelessly {
     AuthManager? authManager,
     DataManager? publishDataManager,
     DataManager? previewDataManager,
+    DataManager? templateDataManager,
   }) {
     _config = config;
     _cacheManager = cacheManager;
     _authManager = authManager;
     _publishDataManager = publishDataManager;
     _previewDataManager = previewDataManager;
+    _templateDataManager = templateDataManager;
 
     // Set data and functions.
     if (data != null) {
@@ -200,19 +208,20 @@ class Codelessly {
         stackTrace: stackTrace,
       );
 
-  /// Disposes this instance of the SDK permanently.
-  /// if [completeDispose] is true, the SDK's internal stream controllers are
-  /// also disposed instead of reset.
-  void dispose({bool completeDispose = false}) {
-    log('Disposing SDK completeDispose: $completeDispose');
-    if (completeDispose) {
-      _statusStreamController.close();
-    } else {
-      _status = CStatus.empty();
-      _statusStreamController.add(_status);
-    }
+  /// Disposes this instance of the SDK permanently along with all of its
+  /// managers.
+  ///
+  /// If [sealCache] is true, the cacheManager will be reset instead of
+  /// disposed. This is useful for [CodelesslyCacheManager] to keep the [Hive]
+  /// boxes open for other instances of the SDK that are still running.
+  void dispose({bool sealCache = true}) {
+    log('Disposing SDK. ${sealCache ? 'Sealing cache.' : 'Keeping cache open.'}');
+    _status = CStatus.empty();
+    _statusStreamController.close();
 
-    _cacheManager?.dispose();
+    if (sealCache) {
+      _cacheManager?.dispose();
+    }
     _authManager?.dispose();
     _publishDataManager?.dispose();
     _previewDataManager?.dispose();
@@ -232,11 +241,12 @@ class Codelessly {
   /// This does not close the status stream, and instead sets the SDK back to
   /// idle mode.
   FutureOr<void> reset({bool clearCache = false}) async {
-    _cacheManager?.dispose();
-    _publishDataManager?.invalidate();
-    _previewDataManager?.invalidate();
-    _templateDataManager?.invalidate();
-    _authManager?.invalidate();
+    log('Resetting SDK. ${clearCache ? 'Clearing cache.' : 'Keeping cache.'}');
+    _cacheManager?.reset();
+    _publishDataManager?.reset();
+    _previewDataManager?.reset();
+    _templateDataManager?.reset();
+    _authManager?.reset();
 
     _status = config == null ? CStatus.empty() : CStatus.configured();
     _statusStreamController.add(_status);
@@ -246,7 +256,7 @@ class Codelessly {
         await _cacheManager?.clearAll();
       } catch (e, str) {
         log(
-          '[SDK] [resetAndClearCache] Error clearing cache.',
+          'Error clearing cache.',
           error: e,
           stackTrace: str,
         );
@@ -256,7 +266,7 @@ class Codelessly {
         await _cacheManager?.deleteAllByteData();
       } catch (e, str) {
         log(
-          '[SDK] [resetAndClearCache] Error deleting cached bytes.',
+          'Error deleting cached bytes.',
           error: e,
           stackTrace: str,
         );
@@ -299,6 +309,7 @@ class Codelessly {
     AuthManager? authManager,
     DataManager? publishDataManager,
     DataManager? previewDataManager,
+    DataManager? templateDataManager,
   }) {
     _config ??= config;
 
@@ -327,6 +338,10 @@ class Codelessly {
     if (previewDataManager != null) {
       _previewDataManager?.dispose();
       _previewDataManager = previewDataManager;
+    }
+    if (templateDataManager != null) {
+      _templateDataManager?.dispose();
+      _templateDataManager = templateDataManager;
     }
 
     if (data != null) {
@@ -395,18 +410,19 @@ class Codelessly {
   void initErrorHandler({
     required bool automaticallySendCrashReports,
   }) {
-    if (CodelesslyErrorHandler.didInitialize) return;
+    if (_errorHandler != null) return;
 
-    CodelesslyErrorHandler.init(
+    _errorHandler = CodelesslyErrorHandler(
       reporter: automaticallySendCrashReports
           ? FirestoreErrorReporter(_firebaseApp!, _firebaseFirestore!)
           : null,
       onException: (CodelesslyException exception) {
         // Layout errors are not SDK errors.
-        if (exception.layoutID != null) {
-          return;
-        }
-        _updateStatus(CStatus.error());
+        // if (exception.layoutID != null) {
+        //   return;
+        // }
+        _updateStatus(CStatus.error(exception));
+        log('Error received. Status is now $status');
       },
     );
   }
@@ -432,6 +448,7 @@ class Codelessly {
     AuthManager? authManager,
     DataManager? publishDataManager,
     DataManager? previewDataManager,
+    DataManager? templateDataManager,
     bool initializeDataManagers = true,
   }) async {
     assert(
@@ -465,6 +482,7 @@ class Codelessly {
       if (authManager != null) _authManager?.dispose();
       if (publishDataManager != null) _publishDataManager?.dispose();
       if (previewDataManager != null) _previewDataManager?.dispose();
+      if (templateDataManager != null) _templateDataManager?.dispose();
       if (data != null) this.data.addAll(data);
       if (functions != null) this.functions.addAll(functions);
 
@@ -477,6 +495,7 @@ class Codelessly {
             config: _config!,
             cacheManager: _cacheManager!,
             firebaseAuth: _firebaseAuth!,
+            errorHandler: errorHandler,
           );
 
       // Create the publish data manager.
@@ -491,6 +510,7 @@ class Codelessly {
             localDataRepository:
                 LocalDataRepository(cacheManager: _cacheManager!),
             firebaseFirestore: firebaseFirestore,
+            errorHandler: errorHandler,
           );
 
       // Create the preview data manager.
@@ -505,20 +525,24 @@ class Codelessly {
             localDataRepository:
                 LocalDataRepository(cacheManager: _cacheManager!),
             firebaseFirestore: firebaseFirestore,
+            errorHandler: errorHandler,
           );
 
       // Create the template data manager. This is always automatically
       // created.
-      _templateDataManager = DataManager(
-        'Template',
-        config: _config!.copyWith(isPreview: false),
-        cacheManager: _cacheManager!,
-        authManager: _authManager!,
-        networkDataRepository: FirebaseDataRepository(
-            firestore: firebaseFirestore, config: _config!),
-        localDataRepository: LocalDataRepository(cacheManager: _cacheManager!),
-        firebaseFirestore: firebaseFirestore,
-      );
+      _templateDataManager = templateDataManager ??
+          DataManager(
+            'Template',
+            config: _config!.copyWith(isPreview: false),
+            cacheManager: _cacheManager!,
+            authManager: _authManager!,
+            networkDataRepository: FirebaseDataRepository(
+                firestore: firebaseFirestore, config: _config!),
+            localDataRepository:
+                LocalDataRepository(cacheManager: _cacheManager!),
+            firebaseFirestore: firebaseFirestore,
+            errorHandler: errorHandler,
+          );
 
       _updateStatus(CStatus.loading('initialized_managers'));
 
@@ -589,7 +613,7 @@ class Codelessly {
         _authManager!.init().then((_) {
           if (_authManager!.authData == null) return;
 
-          log('[SDK] [POST-INIT] Background authentication succeeded.');
+          log('[POST-INIT] Background authentication succeeded.');
           dataManager.listenToPublishModel(
             _authManager!.authData!.projectId,
           );
@@ -601,8 +625,7 @@ class Codelessly {
 
       _updateStatus(CStatus.loaded());
     } catch (error, stacktrace) {
-      _updateStatus(CStatus.error());
-      CodelesslyErrorHandler.instance.captureException(
+      errorHandler.captureException(
         error,
         stacktrace: stacktrace,
       );

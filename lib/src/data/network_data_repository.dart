@@ -39,11 +39,10 @@ abstract class NetworkDataRepository {
         logger.log(_label, 'Error downloading publish bundle.');
         logger.log(_label, 'Status code: ${result.statusCode}');
         logger.log(_label, 'Message: ${result.body}');
-        CodelesslyErrorHandler.instance.captureException(CodelesslyException(
+        throw CodelesslyException(
           'Error downloading publish bundle from slug [$slug]',
           stacktrace: StackTrace.current,
-        ));
-        return null;
+        );
       }
 
       final Map<String, dynamic> modelDoc =

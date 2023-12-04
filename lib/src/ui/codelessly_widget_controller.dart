@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/error_handler.dart';
 
 const String _label = 'Codelessly Widget Controller';
 
@@ -64,6 +63,10 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// Optional preview data manager for advanced control over the SDK's
   /// preview data flow.
   final DataManager? previewDataManager;
+
+  /// Optional template data manager for advanced control over the SDK's
+  /// template data flow.
+  final DataManager? templateDataManager;
 
   /// Optional cache manager for advanced control over the SDK's caching
   /// behavior.
@@ -136,6 +139,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     this.authManager,
     this.publishDataManager,
     this.previewDataManager,
+    this.templateDataManager,
     this.cacheManager,
   })  : assert(
           (config ?? (codelessly ?? Codelessly.instance).config) != null,
@@ -155,6 +159,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     AuthManager? authManager,
     DataManager? publishDataManager,
     DataManager? previewDataManager,
+    DataManager? templateDataManager,
     CacheManager? cacheManager,
     WidgetBuilder? loadingBuilder,
     CodelesslyWidgetErrorBuilder? errorBuilder,
@@ -170,6 +175,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       authManager: authManager ?? this.authManager,
       publishDataManager: publishDataManager ?? this.publishDataManager,
       previewDataManager: previewDataManager ?? this.previewDataManager,
+      templateDataManager: templateDataManager ?? this.templateDataManager,
       cacheManager: cacheManager ?? this.cacheManager,
       layoutBuilder: layoutBuilder ?? this.layoutBuilder,
       layoutRetrievalBuilder:
@@ -242,7 +248,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
             effectiveCodelessly.config?.automaticallySendCrashReports ?? false,
       );
 
-      CodelesslyErrorHandler.instance
+      effectiveCodelessly.errorHandler
           .captureException(exception, stacktrace: str);
     }
 
@@ -290,7 +296,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       log('[$layoutID]: Initialized data manager for the first time with a publish source of $publishSource because the SDK is configured to load ${publishSource == PublishSource.publish ? 'published' : 'preview'} layouts.');
 
       dataManager.init(layoutID: layoutID).catchError((error, str) {
-        CodelesslyErrorHandler.instance.captureException(
+        effectiveCodelessly.errorHandler.captureException(
           error,
           stacktrace: str,
           layoutID: layoutID,
@@ -309,7 +315,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
         source: publishSource,
       )
           .catchError((error, str) {
-        CodelesslyErrorHandler.instance.captureException(
+        effectiveCodelessly.errorHandler.captureException(
           error,
           stacktrace: str,
           layoutID: layoutID,
@@ -330,7 +336,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       dataManager
           .queueLayout(layoutID: layoutID!, prioritize: true)
           .catchError((error, str) {
-        CodelesslyErrorHandler.instance.captureException(
+        effectiveCodelessly.errorHandler.captureException(
           error,
           stacktrace: str,
           layoutID: layoutID,

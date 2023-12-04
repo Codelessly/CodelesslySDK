@@ -94,8 +94,10 @@ class FunctionsRepository {
 
     final HttpApiData? apiData = apis[action.apiId];
 
+    final Codelessly codelessly = context.read<Codelessly>();
+
     if (apiData == null) {
-      CodelesslyErrorHandler.instance.captureException(
+      codelessly.errorHandler.captureException(
         CodelesslyException.apiNotFound(
           apiId: action.apiId,
           message: 'Api with id [${action.apiId}] does not exist.',
@@ -229,7 +231,8 @@ class FunctionsRepository {
       }
 
       if (layoutId == null) {
-        CodelesslyErrorHandler.instance.captureException(
+        final Codelessly codelessly = context.read<Codelessly>();
+        codelessly.errorHandler.captureException(
           CodelesslyException.layoutNotFound(
             message:
                 'Could not find a layout with a canvas id of [${action.destinationId}]',
@@ -296,7 +299,8 @@ class FunctionsRepository {
     }
 
     if (layoutId == null) {
-      CodelesslyErrorHandler.instance.captureException(
+      final Codelessly codelessly = context.read<Codelessly>();
+      codelessly.errorHandler.captureException(
         CodelesslyException.layoutNotFound(
           message:
               'Could not find a layout with a canvas id of [${action.destinationId}]',

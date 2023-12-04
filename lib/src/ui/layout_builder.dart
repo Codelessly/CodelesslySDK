@@ -46,7 +46,7 @@ class _CodelesslyLayoutRetrieverState extends State<CodelesslyLayoutRetriever> {
   @override
   void dispose() {
     controller.dispose();
-    codelessly.dispose(completeDispose: true);
+    codelessly.dispose(sealCache: false);
     super.dispose();
   }
 

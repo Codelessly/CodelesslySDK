@@ -12,6 +12,9 @@ abstract class CacheManager {
   @mustCallSuper
   void dispose();
 
+  /// Invalidates this instance of the cache manager without disposing.
+  void reset();
+
   /// Stores a value in the cache, given a [key].
   Future<void> store(String key, dynamic value);
 
