@@ -30,6 +30,9 @@ abstract class AuthManager {
   /// Returns true if a handshake was done successfully.
   bool isAuthenticated();
 
+  /// Returns true if the user has access to cloud storage.
+  bool hasCloudStorageAccess(String projectId);
+
   /// Performs a handshake with the server to authenticate the token.
   Future<void> authenticate();
 
