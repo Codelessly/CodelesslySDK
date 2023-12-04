@@ -131,6 +131,24 @@ class CodelesslyConfig with EquatableMixin {
       ];
 }
 
+enum CLoadingState {
+  initializing('Initializing'),
+  initializedFirebase('Initialized Firebase'),
+  createdManagers('Created Managers'),
+  initializedCache('Initialized Cache'),
+  initializedAuth('Initialized Auth'),
+  initializedDataManagers('Initialized Data Managers'),
+  initializedSlug('Initialized Slug');
+
+  final String label;
+
+  const CLoadingState(this.label);
+
+  bool hasPassed(CLoadingState state) {
+    return index >= state.index;
+  }
+}
+
 sealed class CStatus {
   const CStatus();
 
@@ -138,7 +156,7 @@ sealed class CStatus {
 
   factory CStatus.configured() => CConfigured();
 
-  factory CStatus.loading(String step) => CLoading(step);
+  factory CStatus.loading(CLoadingState state) => CLoading(state);
 
   factory CStatus.loaded() => CLoaded();
 
@@ -158,9 +176,9 @@ class CConfigured extends CStatus {
 }
 
 class CLoading extends CStatus {
-  final String step;
+  final CLoadingState state;
 
-  const CLoading(this.step);
+  const CLoading(this.state);
 }
 
 class CLoaded extends CStatus {
