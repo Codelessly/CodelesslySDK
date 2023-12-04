@@ -65,9 +65,9 @@ class DataManager {
   }
 
   /// The cloud storage instance used by this data manager.
-  CloudStorage get cloudStorage {
-    assert(_cloudStorage != null, 'Cloud storage is not initialized yet.');
-    return _cloudStorage!;
+  CloudStorage? get cloudStorage {
+    // assert(_cloudStorage != null, 'Cloud storage is not initialized yet.');
+    return _cloudStorage;
   }
 
   /// The current publish model loaded by this data manager.
@@ -171,8 +171,10 @@ class DataManager {
 
             loadFontsFromPublishModel();
           } else {
-            logger.log(logLabel,
-                '[slug] Failed to download complete publish bundle for slug $slug.');
+            errorHandler.captureException(CodelesslyException.networkException(
+              message:
+                  'Failed to download complete publish bundle for slug $slug.',
+            ));
           }
         });
 
@@ -181,8 +183,7 @@ class DataManager {
         }
 
         _logTime(stopwatch);
-      }
-      catch (e, stackTrace) {
+      } catch (e, stackTrace) {
         logger.log(logLabel,
             'Error trying to download complete publish model from slug.');
         logger.log(logLabel,
@@ -199,7 +200,8 @@ class DataManager {
           rethrow;
         } else {
           throw CodelesslyException.networkException(
-            message: 'Failed to download complete publish bundle for slug $slug.',
+            message:
+                'Failed to download complete publish bundle for slug $slug.',
             originalException: e,
             stacktrace: stackTrace,
           );
@@ -351,31 +353,55 @@ class DataManager {
   }
 
   /// Called when the publish model is loaded.
-  /// TODO: error handling
-  Future<void> onPublishModelLoaded(SDKPublishModel model) async {
-    logger.log(logLabel,
-        'Publish model loaded. Initializing local storage for project ${model.projectId}...');
-    if (_localStorage == null) {
-      _localStorage = await initializeLocalStorage(projectId: model.projectId);
+  Future<bool> onPublishModelLoaded(String projectId) async {
+    bool didChange = false;
+
+    final bool shouldInitLocalStorage =
+        _localStorage == null || (_localStorage!.identifier != projectId);
+
+    if (shouldInitLocalStorage) {
+      logger.log(
+          logLabel, 'Initializing local storage for project $projectId...');
+      _localStorage?.reset();
+      _localStorage = await initializeLocalStorage(projectId: projectId);
+      didChange = true;
       logger.log(logLabel, 'Local storage initialized.');
     } else {
-      logger.log(logLabel, 'Local storage already initialized.');
+      logger.log(
+          logLabel, 'Local storage already initialized correctly. Skipping.');
     }
 
-    logger.log(logLabel,
-        'Publish model loaded. Initializing cloud storage for project ${model.projectId}...');
-    if (_cloudStorage == null) {
-      _cloudStorage = await initializeCloudStorage(projectId: model.projectId);
+    final bool shouldInitCloudStorage = _cloudStorage == null ||
+        (cloudStorage!.publishSource != config.publishSource ||
+            cloudStorage!.identifier != projectId);
+    final bool isAuthenticated = authManager.isAuthenticated();
+    final bool canInitCloudStorage = shouldInitCloudStorage && isAuthenticated;
+
+    if (canInitCloudStorage) {
+      logger.log(
+          logLabel, 'Initializing cloud storage for project $projectId...');
+      _cloudStorage?.reset();
+      _cloudStorage = await initializeCloudStorage(projectId: projectId);
+      _publishModelStreamController.add(_publishModel);
+      didChange = true;
       logger.log(logLabel, 'Cloud storage initialized.');
     } else {
-      logger.log(logLabel, 'Cloud storage already initialized.');
+      if (isAuthenticated) {
+        logger.log(
+            logLabel, 'Cloud storage already initialized correctly. Skipping.');
+      } else {
+        logger.log(logLabel,
+            'Cloud storage cannot be initialized because the user is not authenticated.');
+      }
     }
+
+    return didChange;
   }
 
   Future<LocalStorage> initializeLocalStorage(
       {required String projectId}) async {
     final Box box = await Hive.openBox(projectId);
-    return HiveLocalStorage(box);
+    return HiveLocalStorage(box, identifier: projectId);
   }
 
   Future<CloudStorage> initializeCloudStorage(
@@ -501,7 +527,7 @@ class DataManager {
 
   /// Emits the current [_publishModel] to the [_publishModelStreamController].
   Future<void> emitPublishModel() async {
-    await onPublishModelLoaded(_publishModel!);
+    await onPublishModelLoaded(_publishModel!.projectId);
 
     logger.log(logLabel,
         'Emitting publish model to stream. has model: ${_publishModel != null}');

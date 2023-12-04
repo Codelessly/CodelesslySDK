@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import 'codelessly_event.dart';
 import 'codelessly_logger.dart';
 import 'reporter.dart';
@@ -107,7 +109,11 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
 
   @override
   Future<void> captureEvent(CodelesslyEvent event) async {
-    logger.log(_label, event.toString());
+    if (kIsWeb) {
+      debugPrint('[$_label] ${event.toString()}');
+    } else {
+      logger.log(_label, event.toString());
+    }
     _reporter?.captureEvent(event);
   }
 
@@ -140,12 +146,20 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
       _lastException = exception;
       onException?.call(exception);
     // }
-    logger.error(
-      _label,
-      message ?? exception.message ?? 'Unknown error',
-      error: exception,
-      stackTrace: exception.stacktrace ?? StackTrace.current,
-    );
+
+    if (kIsWeb) {
+      debugPrintStack(
+        stackTrace: exception.stacktrace ?? StackTrace.current,
+        label: message ?? exception.message ?? 'Unknown error',
+      );
+    } else {
+      logger.error(
+        _label,
+        message ?? exception.message ?? 'Unknown error',
+        error: exception,
+        stackTrace: exception.stacktrace ?? StackTrace.current,
+      );
+    }
 
     _reporter?.captureException(
       exception,

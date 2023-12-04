@@ -20,6 +20,13 @@ abstract class LocalStorage extends ChangeNotifier {
   /// listeners when the value for a key in the storage changes.
   final Map<String, _StorageListenable> _notifiers = {};
 
+  /// The identifier for the storage. This is used to identify the storage
+  /// from its project id.
+  final String identifier;
+
+  /// Creates a [LocalStorage] with the given [identifier].
+  LocalStorage({required this.identifier});
+
   /// Whether or not the storage contains the given [key].
   bool containsKey(String key);
 
@@ -48,6 +55,8 @@ abstract class LocalStorage extends ChangeNotifier {
   /// value in the storage changes.
   Listenable getNotifier(String? key);
 
+  void reset();
+
   @override
   void dispose() {
     // Dispose all the notifiers.
@@ -66,7 +75,7 @@ class HiveLocalStorage extends LocalStorage {
   late final StreamSubscription? _subscription;
 
   /// Creates a [HiveLocalStorage] with the given [box].
-  HiveLocalStorage(this._box) {
+  HiveLocalStorage(this._box, {required super.identifier}) {
     // Listen to changes in the storage.
     _subscription = _box.watch().listen(_onBoxChanged);
   }
@@ -124,6 +133,11 @@ class HiveLocalStorage extends LocalStorage {
 
   @override
   Future<void> remove(String key) => _box.delete(key);
+
+  @override
+  void reset(){
+    _subscription?.cancel();
+  }
 
   @override
   void dispose() async {
