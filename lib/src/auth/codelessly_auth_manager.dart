@@ -41,8 +41,15 @@ class CodelesslyAuthManager extends AuthManager {
 
   StreamSubscription<User?>? _authStateChangesSubscription;
 
+  /// The listener for the id token changes on the user's Firebase Auth account.
+  StreamSubscription? _idTokenChangeListener;
+
+  /// The id token result of the user's Firebase Auth account.
+  IdTokenResult? _idTokenResult;
+
   /// Indicates whether this instance of the auth manager has been disposed.
-  /// This is used to prevent any further background operations on this instance.
+  /// This is used to prevent any further background operations on this
+  /// instance.
   bool _disposed = false;
 
   /// Creates a [CodelesslyAuthManager] instance.
@@ -63,6 +70,7 @@ class CodelesslyAuthManager extends AuthManager {
     }
   }
 
+  /// A helper function to log messages.
   void log(String message) => logger.log(_label, message);
 
   @override
@@ -81,8 +89,8 @@ class CodelesslyAuthManager extends AuthManager {
     // needed, it needs to halt the entire process until auth completes because
     // the server attached a custom claim to the user's token to allow
     // Codelessly Cloud Data to work.
-    final token = await firebaseAuth.currentUser!.getIdTokenResult(true);
-    final claims = token.claims;
+    _idTokenResult = await firebaseAuth.currentUser!.getIdTokenResult(true);
+    final claims = _idTokenResult!.claims;
 
     if (cacheManager.isCached(authCacheKey)) {
       try {
@@ -153,6 +161,8 @@ class CodelesslyAuthManager extends AuthManager {
 
   @override
   void dispose() {
+    log('Disposing...');
+    _idTokenChangeListener?.cancel();
     _authStateChangesSubscription?.cancel();
     _authStreamController.close();
     _disposed = true;
@@ -163,10 +173,105 @@ class CodelesslyAuthManager extends AuthManager {
     log('Invalidating...');
     _authData = null;
     _authStreamController.add(_authData);
+    _idTokenChangeListener?.cancel();
   }
 
   @override
   bool isAuthenticated() => _authData != null;
+
+  @override
+  bool hasCloudStorageAccess(String projectId) {
+    return checkClaimsForProject(_idTokenResult, projectId);
+  }
+
+  /// A helper method to check if the user has access to a project given their
+  /// [result] from [getIdTokenResult] and the [projectId] they're trying to
+  /// access.
+  bool checkClaimsForProject(IdTokenResult? result, String projectId) {
+    log('Checking claims for user for a project id [$projectId]');
+
+    if (result == null) return false;
+    final claims = result.claims;
+
+    if (claims == null) return false;
+    if (!claims.containsKey('project_ids')) return false;
+    if (claims['project_ids'] is! List) return false;
+
+    final projectIds = claims['project_ids'] as List;
+
+    if (kIsWeb) {
+      debugPrint('User project id claims: $projectIds');
+    } else {
+      log('User project id claims: $projectIds');
+    }
+
+    return projectIds.contains(projectId);
+  }
+
+  /// This method is called after successful authentication of the token.
+  /// It checks if the user has access to the project via token claims and if
+  /// not, it listens to Firebase Auth user changes until the claim appears
+  /// on the user's token and then completes the Firebase Auth process.
+  ///
+  /// The reason we do this is because custom claims may token a moment to
+  /// propagate; especially to firestore rules. So we ensure that the user
+  /// has access to the project before we proceed but verifying the claim
+  /// on the client side.
+  ///
+  /// [authData] is the data provided after successful authentication.
+  Future<void> postAuthSuccess(AuthData authData) async {
+    // Check if the instance of the auth manager has been disposed.
+    if (_disposed) return;
+
+    // Check if the user already has access to the project.
+    if (checkClaimsForProject(_idTokenResult, authData.projectId)) {
+      log('User has access to project since the claim exists already. Completing Firebase Auth process.');
+      return;
+    }
+
+    // Force refresh the token immediately to check if the claim exists.
+    _idTokenResult = await firebaseAuth.currentUser?.getIdTokenResult(true);
+    if (checkClaimsForProject(_idTokenResult, authData.projectId)) {
+      log('User has access to project since the claim exists already after force-refreshing. Completing Firebase Auth process.');
+      return;
+    }
+
+    log('Listening & waiting for Firebase Auth state changes to proceed since user token does not have desired claims for project access...');
+
+    // Create a completer to handle the completion of the Firebase Auth process.
+    final Completer completer = Completer();
+
+    // Listen to Firebase Auth state changes.
+    _idTokenChangeListener =
+        firebaseAuth.userChanges().listen((User? event) async {
+      // If the completer is already completed, return.
+      // We check this because getIdTokenResult may take a while to complete
+      // and this userChanges() event may have already triggered a new event.
+      if (completer.isCompleted) return;
+
+      log('Firebase Auth state changed. Checking claims...');
+      _idTokenResult = await event?.getIdTokenResult(true);
+
+      // If the completer is already completed, return.
+      // We check this because getIdTokenResult may take a while to complete
+      // and this userChanges() event may have already triggered a new event.
+      if (completer.isCompleted) return;
+
+      // Check if the user has access to the project.
+      if (checkClaimsForProject(_idTokenResult, authData.projectId)) {
+        log('User has access to project since the claim exists. Completing Firebase Auth process.');
+        completer.complete(event);
+      }
+    });
+
+    // Wait for the completer to complete.
+    await completer.future;
+
+    // Cancel the listener for Firebase Auth state changes.
+    _idTokenChangeListener?.cancel();
+
+    log('Auth state changed successfully as expected. Firebase Auth complete.');
+  }
 
   /// Calls a cloud function with the auth token as a payload.
   /// The cloud function will validate the token and return a project id.
@@ -176,11 +281,12 @@ class CodelesslyAuthManager extends AuthManager {
     try {
       log('Authenticating token...');
 
-      final String? userIdToken = await firebaseAuth.currentUser?.getIdToken();
+      _idTokenResult = await firebaseAuth.currentUser?.getIdTokenResult();
 
       final authData = await verifyProjectAuthToken(
-        userToken: userIdToken!,
+        userToken: _idTokenResult!.token!,
         config: config,
+        postSuccess: postAuthSuccess,
       );
 
       if (_disposed) {
@@ -215,10 +321,27 @@ class CodelesslyAuthManager extends AuthManager {
     }
   }
 
+  /// Verifies the project auth token by making a POST request to the
+  /// Codelessly's backend.
+  ///
+  /// This function is static and can be called without an instance of the
+  /// class.
+  ///
+  /// [userToken] is the token of the user that is currently logged in.
+  /// [config] is the configuration that holds the project token to
+  /// authenticate.
+  /// [postSuccess] is a callback function that is called after successful
+  /// authentication that is awaited before this function is completed.
+  ///
+  /// [returns] a Future that resolves to an instance of [AuthData] if the
+  /// authentication is successful and `null` otherwise.
   static Future<AuthData?> verifyProjectAuthToken({
     required String userToken,
     required CodelesslyConfig config,
+    required Future<void> Function(AuthData authData) postSuccess,
   }) async {
+    // Function to log messages. Uses different methods depending on whether
+    // the platform is web or not.
     void log(String msg) {
       if (kIsWeb) {
         debugPrint('[verifyProjectAuthToken] $msg');
@@ -228,6 +351,8 @@ class CodelesslyAuthManager extends AuthManager {
     }
 
     log('About to verify token with: authToken: ${config.authToken}, slug: ${config.slug}');
+
+    // Make a POST request to the server to verify the token.
     final Response result = await post(
       Uri.parse(
           '${config.firebaseCloudFunctionsBaseURL}/verifyProjectAuthToken'),
@@ -241,17 +366,33 @@ class CodelesslyAuthManager extends AuthManager {
       }),
     );
 
+    // If the status code of the response is 200, the authentication was
+    // successful.
     if (result.statusCode == 200) {
+      // Parse the body of the response to JSON.
       final jsonBody = jsonDecode(result.body);
 
+      // Create an instance of AuthData from the JSON body.
+      final AuthData authData = AuthData.fromJson(jsonBody);
+
+      // Call the postSuccess callback function and wait for it to decide
+      // success.
+      await postSuccess(authData);
+
       log('Auth token response:\n${result.body}');
-      return AuthData.fromJson(jsonBody);
-    } else {
+
+      return authData;
+    }
+    // If the status code of the response is not 200, the authentication failed.
+    // Log the status code, reason, and body of the response.
+    else {
       log(
         'Failed to authenticate token.\nStatus Code: ${result.statusCode}.\nReason: ${result.reasonPhrase}\nBody: ${result.body}',
       );
     }
 
+    // If the function has not returned by this point, return null.
+    // Live authentication has failed.
     return null;
   }
 }
