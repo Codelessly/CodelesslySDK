@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
@@ -508,31 +506,30 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
               stream: codelessly.statusStream,
               initialData: codelessly.status,
               builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return _effectiveErrorBuilder?.call(
-                          context, snapshot.error) ??
+                Widget loading() =>
+                    _effectiveLoadingBuilder?.call(context) ??
+                    const CodelesslyLoadingScreen();
+                Widget error(Object? exception) {
+                  final error = exception ?? snapshot.error;
+                  return _effectiveErrorBuilder?.call(context, error) ??
                       CodelesslyErrorScreen(
-                        exception: snapshot.error,
+                        exception: error,
                         publishSource: _effectiveController.publishSource,
                       );
                 }
-                if (!snapshot.hasData) {
-                  return _effectiveLoadingBuilder?.call(context) ??
-                      const CodelesslyLoadingScreen();
-                }
+
+                if (snapshot.hasError) return error(snapshot.error);
+                if (!snapshot.hasData) return loading();
+
                 final CStatus status = snapshot.data!;
                 return switch (status) {
-                  CEmpty() ||
-                  CConfigured() =>
-                    _effectiveLoadingBuilder?.call(context) ??
-                        const CodelesslyLoadingScreen(),
-                  CError() =>
-                    _effectiveErrorBuilder?.call(context, status.exception) ??
-                        CodelesslyErrorScreen(
-                          exception: status.exception,
-                          publishSource: _effectiveController.publishSource,
-                        ),
-                  CLoading() || CLoaded() => buildStreamedLayout(),
+                  CEmpty() || CConfigured() => loading(),
+                  CError() => error(status.exception),
+                  CLoading(state: CLoadingState state) =>
+                    state.hasPassed(CLoadingState.createdManagers)
+                        ? buildStreamedLayout()
+                        : loading(),
+                  CLoaded() => buildStreamedLayout(),
                 };
               },
             );

@@ -105,6 +105,9 @@ class Codelessly {
   /// manager to retrieve auth data.
   FirebaseAuth get firebaseAuth => _firebaseAuth!;
 
+  /// Whether this Codelessly instance already initialized firebase or not.
+  bool _didInitializeFirebase = false;
+
   /// A map of data that is passed to loaded layouts for nodes to replace their
   /// property values with.
   final Map<String, dynamic> data = {};
@@ -363,6 +366,11 @@ class Codelessly {
   /// instance exists with the same [CodelesslyConfig.firebaseInstanceName]
   /// and use that to avoid duplicate initialization.
   Future<void> initFirebase({required CodelesslyConfig config}) async {
+    // Early return if Firebase is already initialized. This is important
+    // because this function is asynchronous and there may be an attempt at
+    // initialization twice.
+    if (_didInitializeFirebase) return;
+
     // Early return if Firebase instances are already initialized
     if (_firebaseFirestore != null &&
         _firebaseAuth != null &&
@@ -370,31 +378,52 @@ class Codelessly {
       return;
     }
 
+    _didInitializeFirebase = true;
+
     final String name = config.firebaseInstanceName;
     final FirebaseOptions firebaseOptions = config.firebaseOptions;
 
     log('Initializing Firebase instance with project ID: [${firebaseOptions.projectId}] and instance name [$name]');
 
     final Stopwatch stopwatch = Stopwatch()..start();
+    try {
 
-    // Check if an existing Firebase app instance can be reused.
-    final FirebaseApp? existingApp =
-        Firebase.apps.firstWhereOrNull((app) => app.name == name);
+      if (Firebase.apps.isEmpty) {
+        log('Firebase default app not initialized. Either the the project '
+            "doesn't have its own firebase configuration or the firebase "
+            'configuration is not initialized before initializing Codelessly.');
+        // initialize default app.
+        _firebaseApp = await Firebase.initializeApp(options: firebaseOptions);
+      }
 
-    if (existingApp != null) {
-      log('Reusing existing Firebase app instance. name: [${existingApp.name}]');
-      _firebaseApp = existingApp;
-    } else {
-      // Create a new Firebase app instance if none exists
-      log('Creating new Firebase app instance with name: [$name]');
-      _firebaseApp =
-          await Firebase.initializeApp(name: name, options: firebaseOptions);
+      // Check if an existing Firebase app instance can be reused.
+      final FirebaseApp? existingApp =
+          Firebase.apps.firstWhereOrNull((app) => app.name == name);
+
+      if (existingApp != null) {
+        log('Reusing existing Firebase app instance. name: [${existingApp.name}]');
+        _firebaseApp = existingApp;
+      } else {
+        // Create a new Firebase app instance if none exists
+        log('Creating new Firebase app instance with name: [$name]');
+        _firebaseApp =
+            await Firebase.initializeApp(name: name, options: firebaseOptions);
+      }
+
+      // Initialize Firestore and FirebaseAuth instances.
+      _firebaseFirestore = FirebaseFirestore.instanceFor(app: _firebaseApp!);
+
+      _firebaseAuth = FirebaseAuth.instanceFor(app: _firebaseApp!);
+    } catch (e, str) {
+      _didInitializeFirebase = false;
+      initErrorHandler(
+        automaticallySendCrashReports: false,
+      );
+      errorHandler.captureException(
+        e,
+        stacktrace: str,
+      );
     }
-
-    // Initialize Firestore and FirebaseAuth instances.
-    _firebaseFirestore = FirebaseFirestore.instanceFor(app: _firebaseApp!);
-
-    _firebaseAuth = FirebaseAuth.instanceFor(app: _firebaseApp!);
 
     stopwatch.stop();
     log('Firebase initialized in ${stopwatch.elapsed.inMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s');
@@ -451,6 +480,10 @@ class Codelessly {
     DataManager? templateDataManager,
     bool initializeDataManagers = true,
   }) async {
+    if (_status is CLoading) {
+      return _status;
+    }
+
     assert(
       (config == null) != (_config == null),
       _config == null
@@ -460,6 +493,8 @@ class Codelessly {
               '\nConsider removing the duplicate config or calling '
               '[Codelessly.instance.dispose] before reinitializing.',
     );
+
+    _updateStatus(CStatus.loading(CLoadingState.initializing));
 
     _config ??= config;
 
@@ -475,7 +510,7 @@ class Codelessly {
     );
 
     try {
-      _updateStatus(CStatus.configured());
+      _updateStatus(CStatus.loading(CLoadingState.initializedFirebase));
 
       // Clean up.
       if (cacheManager != null) _cacheManager?.dispose();
@@ -544,13 +579,13 @@ class Codelessly {
             errorHandler: errorHandler,
           );
 
-      _updateStatus(CStatus.loading('initialized_managers'));
+      _updateStatus(CStatus.loading(CLoadingState.createdManagers));
 
       log('Initializing cache manager');
       // The cache manager initializes first to load the local cache.
       await _cacheManager!.init();
 
-      _updateStatus(CStatus.loading('initialized_cache'));
+      _updateStatus(CStatus.loading(CLoadingState.initializedCache));
 
       // The auth manager initializes second to look up cached auth data
       // from the cache manager. If no auth data is available, it halts the
@@ -566,7 +601,7 @@ class Codelessly {
         await _authManager!.init();
         _config!.publishSource = _authManager!.getBestPublishSource(_config!);
 
-        _updateStatus(CStatus.loading('initialized_auth'));
+        _updateStatus(CStatus.loading(CLoadingState.initializedAuth));
       } else {
         log('A slug was provided. Acutely skipping authentication.');
       }
@@ -591,7 +626,7 @@ class Codelessly {
         }
 
         log('Data managers initialized.');
-        _updateStatus(CStatus.loading('initialized_data_managers'));
+        _updateStatus(CStatus.loading(CLoadingState.initializedDataManagers));
       } else {
         if (!initializeDataManagers) {
           log(
@@ -618,7 +653,7 @@ class Codelessly {
             _authManager!.authData!.projectId,
           );
         });
-        _updateStatus(CStatus.loading('initialized_slug'));
+        _updateStatus(CStatus.loading(CLoadingState.initializedSlug));
       }
 
       log('Codelessly ${_instance == this ? 'global' : 'local'} instance initialization complete.');

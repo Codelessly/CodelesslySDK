@@ -254,12 +254,19 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
     // First event.
     if (effectiveCodelessly.status case CLoaded() || CLoading()) {
-      if (effectiveCodelessly.status case CLoading(step: String step)) {
-        log('[${this.layoutID}]: Codelessly SDK is already loading with step $step.');
+      if (effectiveCodelessly.status
+          case CLoading(state: CLoadingState state)) {
+        // Listen to data manager after it has been created. If it hasn't been
+        // created yet, Firebase may still be initializing.
+        if (state.hasPassed(CLoadingState.createdManagers)) {
+          _verifyAndListenToDataManager();
+        }
+
+        log('[${this.layoutID}]: Codelessly SDK is already loading with step $state.');
       } else {
+        _verifyAndListenToDataManager();
         log('[${this.layoutID}]: Codelessly SDK is already loaded. Woo!');
       }
-      _verifyAndListenToDataManager();
     }
 
     log('[${this.layoutID}]: Listening to sdk status stream.');
@@ -267,13 +274,19 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
     _sdkStatusListener?.cancel();
     _sdkStatusListener = effectiveCodelessly.statusStream.listen((status) {
-      if (status case CLoaded() || CLoaded()) {
-        if (status case CLoading(step: String step)) {
-          log('[${this.layoutID}]: Codelessly SDK is loading with step $step.');
+      if (status case CLoaded() || CLoading()) {
+        if (status case CLoading(state: CLoadingState state)) {
+          // Listen to data manager after it has been created. If it hasn't been
+          // created yet, Firebase may still be initializing.
+          if (state.hasPassed(CLoadingState.createdManagers)) {
+            _verifyAndListenToDataManager();
+          }
+
+          log('[${this.layoutID}]: Codelessly SDK is loading with step $state.');
         } else {
+          _verifyAndListenToDataManager();
           log('[${this.layoutID}]: Codelessly SDK is done loading.');
         }
-        _verifyAndListenToDataManager();
       }
     });
   }

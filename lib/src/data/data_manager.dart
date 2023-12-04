@@ -124,7 +124,7 @@ class DataManager {
 
     final Stopwatch stopwatch = Stopwatch()..start();
 
-    status = CStatus.loading('initializing_data_manager');
+    status = CStatus.loading(CLoadingState.initializedDataManagers);
 
     queuingDone = false;
 
