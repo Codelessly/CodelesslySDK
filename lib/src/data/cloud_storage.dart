@@ -158,6 +158,8 @@ abstract class CloudStorage extends ChangeNotifier {
     String documentId,
     Observable<VariableData> variable,
   );
+
+  void reset();
 }
 
 /// A implementation that uses Firestore as the backend.
@@ -377,6 +379,12 @@ class FirestoreCloudStorage extends CloudStorage {
 
     // Add subscription to the list of subscriptions.
     _subscriptions.add(subscription);
+  }
+
+  @override
+  void reset() {
+    // Cancel all subscriptions.
+    _subscriptions.forEach((sub) => sub.cancel());
   }
 
   @override

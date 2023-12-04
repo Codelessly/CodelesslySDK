@@ -131,7 +131,7 @@ class Codelessly {
   LocalStorage get localStorage => dataManager.localStorage;
 
   /// Provides access to the cloud storage of this SDK instance.
-  CloudStorage get cloudStorage => dataManager.cloudStorage;
+  CloudStorage? get cloudStorage => dataManager.cloudStorage;
 
   final List<NavigationListener> _navigationListeners = [];
 
@@ -321,7 +321,7 @@ class Codelessly {
     );
 
     assert(
-      status == CStatus.empty(),
+      status is! CEmpty,
       'The SDK cannot be configured if it is not idle. '
       'Consider calling [Codelessly.dispose] before reconfiguring.',
     );
@@ -387,7 +387,6 @@ class Codelessly {
 
     final Stopwatch stopwatch = Stopwatch()..start();
     try {
-
       if (Firebase.apps.isEmpty) {
         log('Firebase default app not initialized. Either the the project '
             "doesn't have its own firebase configuration or the firebase "
@@ -496,7 +495,7 @@ class Codelessly {
 
     _updateStatus(CStatus.loading(CLoadingState.initializing));
 
-    _config ??= config;
+    _config = config;
 
     log('Initializing Codelessly with firebase project ID: ${_config!.firebaseOptions.projectId}');
     log('Cloud Functions Base URL: ${_config!.firebaseCloudFunctionsBaseURL}');
@@ -645,12 +644,19 @@ class Codelessly {
       // background to keep listening for updates to the publish model.
       if (_config!.slug != null) {
         log('Since a slug was provided & data manager finished, authenticating in the background...');
-        _authManager!.init().then((_) {
+        _authManager!.init().then((_) async {
           if (_authManager!.authData == null) return;
 
-          log('[POST-INIT] Background authentication succeeded.');
-          dataManager.listenToPublishModel(
-            _authManager!.authData!.projectId,
+          log('[POST-INIT] Background authentication succeeded. Initializing layout storage.');
+          await dataManager.onPublishModelLoaded(_authManager!.authData!.projectId);
+
+          log('[POST-INIT] Layout storage initialized. Listening to publish model.');
+          dataManager.listenToPublishModel(_authManager!.authData!.projectId);
+        }).catchError((e, str) {
+          log('[POST-INIT] Background authentication failed.');
+          errorHandler.captureException(
+            e,
+            stacktrace: str,
           );
         });
         _updateStatus(CStatus.loading(CLoadingState.initializedSlug));

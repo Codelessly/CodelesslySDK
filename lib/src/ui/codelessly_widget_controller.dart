@@ -196,14 +196,6 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// Listens to the SDK's status. If the SDK is done, then we can start
   /// listening to the data manager's status for layout updates.
   void initialize({String? layoutID}) {
-    assert(
-      config.slug != null || ((layoutID == null) != (this.layoutID == null)),
-      layoutID == null
-          ? 'The [layoutID] must be provided once either from the constructor of this controller or in the initialize function.'
-              "\nIf you don't, then a slug must be configured in the config."
-          : 'The [layoutID] must be provided only once either from the constructor of this controller or in the initialize function. Not in both at the same time.',
-    );
-
     if (layoutID != null) {
       this.layoutID = layoutID;
     }
@@ -221,7 +213,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
       // instance, the user explicitly wants more control over the SDK, so we
       // do nothing and let the user handle it.
       if (isGlobalInstance) {
-        if (status == CEmpty()) {
+        if (status is CEmpty) {
+          log('Codelessly SDK is idle, configuring...');
           effectiveCodelessly.configure(
             config: config,
             authManager: authManager,
@@ -231,9 +224,12 @@ class CodelesslyWidgetController extends ChangeNotifier {
           );
         }
         status = effectiveCodelessly.status;
-        if (status == CConfigured()) {
+        if (status is CConfigured) {
+          log('Codelessly SDK is configured, initializing...');
           effectiveCodelessly.initialize();
         }
+      } else {
+        log('Codelessly SDK is already configured and initialized.');
       }
     } catch (exception, str) {
       // Makes sure the error handler is initialized before capturing.

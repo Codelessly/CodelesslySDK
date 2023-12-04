@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as dev;
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 
 import '../../codelessly_sdk.dart';
@@ -70,7 +70,11 @@ class CodelesslyAuthManager extends AuthManager {
     final Stopwatch stopwatch = Stopwatch()..start();
 
     if (firebaseAuth.currentUser == null) {
+      log('Authenticating anonymously...');
       await firebaseAuth.signInAnonymously();
+      log('Anonymous authentication successful!');
+    } else {
+      log('Already authenticated ${firebaseAuth.currentUser!.isAnonymous ? 'anonymously' : 'with email ${firebaseAuth.currentUser!.email}'}');
     }
 
     // This step is mandatory to compare claims for auth. If re-auth is
@@ -215,6 +219,15 @@ class CodelesslyAuthManager extends AuthManager {
     required String userToken,
     required CodelesslyConfig config,
   }) async {
+    void log(String msg) {
+      if (kIsWeb) {
+        debugPrint('[verifyProjectAuthToken] $msg');
+      } else {
+        logger.log('verifyProjectAuthToken', msg);
+      }
+    }
+
+    log('About to verify token with: authToken: ${config.authToken}, slug: ${config.slug}');
     final Response result = await post(
       Uri.parse(
           '${config.firebaseCloudFunctionsBaseURL}/verifyProjectAuthToken'),
@@ -222,20 +235,21 @@ class CodelesslyAuthManager extends AuthManager {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $userToken',
       },
-      body: jsonEncode({'token': config.authToken}),
+      body: jsonEncode({
+        'token': config.authToken,
+        'slug': config.slug,
+      }),
     );
 
     if (result.statusCode == 200) {
       final jsonBody = jsonDecode(result.body);
 
-      dev.log('Auth token response: ${result.body}',
-          name: 'verifyProjectAuthToken');
-
-      return AuthData.fromJson({...jsonBody, 'authToken': config.authToken});
+      log('Auth token response:\n${result.body}');
+      return AuthData.fromJson(jsonBody);
     } else {
-      dev.log(
-          'Failed to authenticate token. Status Code ${result.statusCode}. ${result.reasonPhrase}',
-          name: 'verifyProjectAuthToken');
+      log(
+        'Failed to authenticate token.\nStatus Code: ${result.statusCode}.\nReason: ${result.reasonPhrase}\nBody: ${result.body}',
+      );
     }
 
     return null;

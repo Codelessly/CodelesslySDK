@@ -72,7 +72,9 @@ class ScopedValues {
     final instance = context.read<Codelessly?>();
     if (instance != null) {
       _localStorageRef = WeakReference(instance.localStorage);
-      _cloudStorageRef = WeakReference(instance.cloudStorage);
+      _cloudStorageRef = instance.cloudStorage == null
+          ? null
+          : WeakReference(instance.cloudStorage!);
     }
   }
 }
