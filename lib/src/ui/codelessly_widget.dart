@@ -100,6 +100,10 @@ class CodelesslyWidget extends StatefulWidget {
   /// preview data flow.
   final DataManager? previewDataManager;
 
+  /// Optional template data manager for advanced control over the SDK's
+  /// template data flow.
+  final DataManager? templateDataManager;
+
   /// Optional cache manager for advanced control over the SDK's caching
   /// behavior.
   final CacheManager? cacheManager;
@@ -150,8 +154,8 @@ class CodelesslyWidget extends StatefulWidget {
   /// loaded layout for advanced control over the rendered widget.
   ///
   /// Optionally, provide custom [authManager], [publishDataManager],
-  /// [previewDataManager], and [cacheManager] instances for advanced control
-  /// over the SDK's behavior.
+  /// [previewDataManager], [templateDataManager], and [cacheManager] instances
+  /// for advanced control over the SDK's behavior.
   CodelesslyWidget({
     super.key,
     this.layoutID,
@@ -170,6 +174,7 @@ class CodelesslyWidget extends StatefulWidget {
     this.authManager,
     this.publishDataManager,
     this.previewDataManager,
+    this.templateDataManager,
     this.cacheManager,
 
     // Data and functions.
@@ -229,6 +234,9 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   CodelesslyWidgetController get _effectiveController =>
       widget.controller ?? _controller!;
 
+  Codelessly get _effectiveCodelessly =>
+      _effectiveController.effectiveCodelessly;
+
   /// The [CodelesslyContext] that will hold the data and functions that will be
   /// used to render the layout.
   ///
@@ -236,8 +244,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   /// find this object using: `Provider.of<CodelesslyContext>(context)`.
   /// or `context.read<CodelesslyContext>()`.
   late CodelesslyContext codelesslyContext;
-
-  StreamSubscription<CodelesslyException?>? _exceptionSubscription;
 
   Stopwatch? _stopwatch;
 
@@ -272,12 +278,12 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           _effectiveController.config.automaticallySendCrashReports,
     );
 
-    _exceptionSubscription =
-        CodelesslyErrorHandler.instance.exceptionStream.listen(
-      (event) {
-        setState(() {});
-      },
-    );
+    // _exceptionSubscription =
+    //     CodelesslyErrorHandler.instance.exceptionStream.listen(
+    //   (event) {
+    //     setState(() {});
+    //   },
+    // );
 
     if (widget.codelesslyContext != null) {
       logger.log(
@@ -368,6 +374,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         authManager: widget.authManager,
         publishDataManager: widget.publishDataManager,
         previewDataManager: widget.previewDataManager,
+        templateDataManager: widget.templateDataManager,
         cacheManager: widget.cacheManager,
         layoutBuilder: widget.layoutBuilder,
         layoutRetrievalBuilder: widget.layoutRetrievalBuilder,
@@ -378,7 +385,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   @override
   void dispose() {
     _controller?.dispose();
-    _exceptionSubscription?.cancel();
     _stopwatch?.stop();
 
     if (widget.codelesslyContext == null) {
@@ -396,9 +402,9 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       stream: _effectiveController.publishModelStream,
       initialData: _effectiveController.publishModel,
       builder: (context, AsyncSnapshot<SDKPublishModel?> snapshot) {
+        final status = _effectiveController.dataManager.status;
         try {
-          if (snapshot.hasError ||
-              _effectiveController.dataManager.status is CError) {
+          if (snapshot.hasError || status is CError) {
             return _effectiveErrorBuilder?.call(context, snapshot.error) ??
                 CodelesslyErrorScreen(
                   exception: snapshot.error,
@@ -406,18 +412,17 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                 );
           }
 
-          if (!snapshot.hasData ||
-              _effectiveController.dataManager.status is! CLoaded) {
+          if (!snapshot.hasData || status is! CLoaded) {
             return _effectiveLoadingBuilder?.call(context) ??
                 const CodelesslyLoadingScreen();
           }
 
           if (_effectiveController.layoutID != null &&
-              CodelesslyErrorHandler.instance.lastException?.layoutID ==
+              _effectiveCodelessly.errorHandler.lastException?.layoutID ==
                   _effectiveController.layoutID) {
             return _effectiveErrorBuilder?.call(
                   context,
-                  CodelesslyErrorHandler.instance.lastException,
+                  _effectiveCodelessly.errorHandler.lastException,
                 ) ??
                 CodelesslyErrorScreen(
                   exception: snapshot.error,
@@ -522,11 +527,9 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                     _effectiveLoadingBuilder?.call(context) ??
                         const CodelesslyLoadingScreen(),
                   CError() =>
-                    _effectiveErrorBuilder?.call(context, snapshot.error) ??
+                    _effectiveErrorBuilder?.call(context, status.exception) ??
                         CodelesslyErrorScreen(
-                          exception:
-                              CodelesslyErrorHandler.instance.lastException ??
-                                  snapshot.error,
+                          exception: status.exception,
                           publishSource: _effectiveController.publishSource,
                         ),
                   CLoading() || CLoaded() => buildStreamedLayout(),

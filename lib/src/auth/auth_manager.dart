@@ -39,5 +39,5 @@ abstract class AuthManager {
 
   /// Sets the [AuthData] to null and emits a null value to the stream.
   @mustCallSuper
-  void invalidate();
+  void reset();
 }

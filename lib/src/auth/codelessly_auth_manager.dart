@@ -22,6 +22,9 @@ class CodelesslyAuthManager extends AuthManager {
   /// The firebase auth instance used to authenticate the device anonymously.
   final FirebaseAuth firebaseAuth;
 
+  /// The error handler used to report errors.
+  final CodelesslyErrorHandler errorHandler;
+
   /// The stream controller used to stream the auth data. Any changes to
   /// it will be broad=casted to the stream.
   final StreamController<AuthData?> _authStreamController =
@@ -38,6 +41,10 @@ class CodelesslyAuthManager extends AuthManager {
 
   StreamSubscription<User?>? _authStateChangesSubscription;
 
+  /// Indicates whether this instance of the auth manager has been disposed.
+  /// This is used to prevent any further background operations on this instance.
+  bool _disposed = false;
+
   /// Creates a [CodelesslyAuthManager] instance.
   ///
   /// [config] is the configuration used to authenticate the token.
@@ -48,6 +55,7 @@ class CodelesslyAuthManager extends AuthManager {
     required this.config,
     required this.cacheManager,
     required this.firebaseAuth,
+    required this.errorHandler,
     AuthData? authData,
   }) : _authData = authData {
     if (_authData != null) {
@@ -104,17 +112,10 @@ class CodelesslyAuthManager extends AuthManager {
           await cacheManager.clearAll();
           await cacheManager.deleteAllByteData();
         }
-      } catch (error, stacktrace) {
+      } catch (error) {
         // If the cache decoding process fails for any reason, invalidate
-        // the cache, log the error, and move on by fetching a fresh token
+        // the cache, and move on by fetching a fresh token
         // from the server.
-        CodelesslyErrorHandler.instance.captureException(
-          CodelesslyException.cacheLookupException(
-            message: 'Failed to decode cached auth data. Cache invalidated.\n'
-                'Error: $error',
-          ),
-          stacktrace: stacktrace,
-        );
         await cacheManager.clearAll();
         await cacheManager.deleteAllByteData();
       }
@@ -138,7 +139,7 @@ class CodelesslyAuthManager extends AuthManager {
       authenticate().catchError((error) {
         // Error handling needs to be done here because this will not be caught
         // by SDK initialization.
-        CodelesslyErrorHandler.instance.captureException(error);
+        errorHandler.captureException(error);
       });
     }
 
@@ -150,10 +151,11 @@ class CodelesslyAuthManager extends AuthManager {
   void dispose() {
     _authStateChangesSubscription?.cancel();
     _authStreamController.close();
+    _disposed = true;
   }
 
   @override
-  void invalidate() {
+  void reset() {
     log('Invalidating...');
     _authData = null;
     _authStreamController.add(_authData);
@@ -176,6 +178,11 @@ class CodelesslyAuthManager extends AuthManager {
         userToken: userIdToken!,
         config: config,
       );
+
+      if (_disposed) {
+        log('Auth manager was disposed. Aborting authentication.');
+        return;
+      }
 
       if (authData != null) {
         _authData = authData;
