@@ -186,8 +186,7 @@ class DataManager {
             'Error trying to download complete publish model from slug.');
         logger.log(logLabel,
             'Since no publish model is cached, this is a complete stop to the data manager.');
-        logger.log(logLabel, 'Error',
-            level: 900, error: e, stackTrace: stackTrace);
+        logger.error(logLabel, 'Error', error: e, stackTrace: stackTrace);
 
         _logTime(stopwatch);
 
