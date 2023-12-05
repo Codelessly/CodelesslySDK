@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
@@ -260,6 +262,9 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   CodelesslyWidgetErrorBuilder? get _effectiveErrorBuilder =>
       widget.errorBuilder ?? _effectiveController.errorBuilder;
 
+  StreamSubscription<CodelesslyException?>? _exceptionSubscription;
+  CodelesslyException? _lastException;
+
   @override
   void initState() {
     super.initState();
@@ -276,12 +281,15 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           _effectiveController.config.automaticallySendCrashReports,
     );
 
-    // _exceptionSubscription =
-    //     CodelesslyErrorHandler.instance.exceptionStream.listen(
-    //   (event) {
-    //     setState(() {});
-    //   },
-    // );
+    _exceptionSubscription =
+        _effectiveCodelessly.errorHandler.exceptionStream.listen(
+      (CodelesslyException event) {
+        if (event.layoutID == _effectiveController.layoutID) {
+          _lastException = event;
+          setState(() {});
+        }
+      },
+    );
 
     if (widget.codelesslyContext != null) {
       logger.log(
@@ -382,6 +390,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
   @override
   void dispose() {
+    _exceptionSubscription?.cancel();
     _controller?.dispose();
     _stopwatch?.stop();
 
@@ -405,7 +414,18 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           if (snapshot.hasError || status is CError) {
             return _effectiveErrorBuilder?.call(context, snapshot.error) ??
                 CodelesslyErrorScreen(
-                  exception: snapshot.error,
+                  exception: snapshot.error ?? (status as CError).exception,
+                  publishSource: _effectiveController.publishSource,
+                );
+          }
+
+          if (_lastException != null) {
+            return _effectiveErrorBuilder?.call(
+                  context,
+                  _lastException,
+                ) ??
+                CodelesslyErrorScreen(
+                  exception: _lastException,
                   publishSource: _effectiveController.publishSource,
                 );
           }
@@ -413,19 +433,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           if (!snapshot.hasData || status is! CLoaded) {
             return _effectiveLoadingBuilder?.call(context) ??
                 const CodelesslyLoadingScreen();
-          }
-
-          if (_effectiveController.layoutID != null &&
-              _effectiveCodelessly.errorHandler.lastException?.layoutID ==
-                  _effectiveController.layoutID) {
-            return _effectiveErrorBuilder?.call(
-                  context,
-                  _effectiveCodelessly.errorHandler.lastException,
-                ) ??
-                CodelesslyErrorScreen(
-                  exception: snapshot.error,
-                  publishSource: _effectiveController.publishSource,
-                );
           }
 
           final SDKPublishModel model = snapshot.data!;
