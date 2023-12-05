@@ -461,9 +461,9 @@ class Codelessly {
           : null,
       onException: (CodelesslyException exception) {
         // Layout errors are not SDK errors.
-        // if (exception.layoutID != null) {
-        //   return;
-        // }
+        if (exception.layoutID != null) {
+          return;
+        }
         _updateStatus(CStatus.error(exception));
         log('Error received. Status is now $status');
       },

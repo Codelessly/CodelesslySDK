@@ -105,6 +105,28 @@ class DataManager {
     SDKPublishModel? publishModel,
   }) : _publishModel = publishModel;
 
+  void log(
+    String message, {
+    bool largePrint = false,
+  }) =>
+      logger.log(
+        logLabel,
+        message,
+        largePrint: largePrint,
+      );
+
+  void logError(
+    String message, {
+    required Object? error,
+    required StackTrace? stackTrace,
+  }) =>
+      logger.error(
+        logLabel,
+        message,
+        error: error,
+        stackTrace: stackTrace,
+      );
+
   /// Initializes the instance.
   ///
   /// If a [layoutID] is specified, that layout will be downloaded from the
@@ -134,7 +156,7 @@ class DataManager {
     _publishModel ??= cachedModel;
 
     if (_publishModel != null) {
-      logger.log(logLabel, 'Publish model is cached locally. Emitting.');
+      log('Publish model is cached locally. Emitting.');
       await emitPublishModel();
 
       loadFontsFromPublishModel();
@@ -143,20 +165,16 @@ class DataManager {
     // A slug was specified. We need a layout FAST.
     // No authentication is required; let's download a complete publish bundle.
     if (config.slug case String slug) {
-      logger.log(logLabel,
-          '[slug] Slug was specified [$slug]. Going through slug flow...');
+      log('[slug] Slug was specified [$slug]. Going through slug flow...');
 
       final Stopwatch bundleStopWatch = Stopwatch()..start();
       try {
-        logger.log(logLabel,
-            '[slug] Downloading complete publish bundle for slug $slug.');
+        log('[slug] Downloading complete publish bundle for slug $slug.');
 
         if (_publishModel == null) {
-          logger.log(logLabel,
-              '[slug] Publish model is not cached locally. Downloading complete publish bundle for slug $slug in foreground.');
+          log('[slug] Publish model is not cached locally. Downloading complete publish bundle for slug $slug in foreground.');
         } else {
-          logger.log(logLabel,
-              '[slug] Publish model is already cached locally. Downloading complete publish bundle for slug $slug in background.');
+          log('[slug] Publish model is already cached locally. Downloading complete publish bundle for slug $slug in background.');
         }
 
         final publishBundleFuture = fetchCompletePublishBundle(
@@ -164,8 +182,7 @@ class DataManager {
           source: config.publishSource,
         ).then((success) {
           if (success) {
-            logger.log(logLabel,
-                '[slug] Complete publish model from slug is downloaded in background. Emitting.');
+            log('[slug] Complete publish model from slug is downloaded in background. Emitting.');
 
             loadFontsFromPublishModel();
           } else {
@@ -182,16 +199,12 @@ class DataManager {
 
         _logTime(stopwatch);
       } catch (e, stackTrace) {
-        logger.log(logLabel,
-            'Error trying to download complete publish model from slug.');
-        logger.log(logLabel,
-            'Since no publish model is cached, this is a complete stop to the data manager.');
-        logger.error(logLabel, 'Error', error: e, stackTrace: stackTrace);
+        logError('Error trying to download complete publish model from slug',
+            error: e, stackTrace: stackTrace);
+        log('[slug] Failed to download complete publish bundle for slug $slug.');
+        log('[slug] Since no publish model is cached, this is a complete stop to the data manager.');
 
         _logTime(stopwatch);
-
-        logger.log(logLabel,
-            '[slug] Failed to download complete publish bundle for slug $slug.');
 
         if (e is CodelesslyException) {
           rethrow;
@@ -205,17 +218,14 @@ class DataManager {
         }
       } finally {
         bundleStopWatch.stop();
-        logger.log(logLabel,
-            '[slug] Publish bundle flow took ${bundleStopWatch.elapsedMilliseconds}ms or ${bundleStopWatch.elapsed.inSeconds}s.');
+        log('[slug] Publish bundle flow took ${bundleStopWatch.elapsedMilliseconds}ms or ${bundleStopWatch.elapsed.inSeconds}s.');
       }
     } else {
-      logger.log(
-          logLabel, '[slug] Slug is ${config.slug}. Skipping slug flow.');
+      log('[slug] Slug is ${config.slug}. Skipping slug flow.');
     }
 
     if (authManager.authData == null) {
-      logger.log(
-          logLabel, 'No auth data is available. Continuing as if offline.');
+      log('No auth data is available. Continuing as if offline.');
       _logTime(stopwatch);
       return;
     }
@@ -233,27 +243,36 @@ class DataManager {
     final bool didPrepareLayout;
     if (_publishModel != null && layoutID != null) {
       if (!_publishModel!.layouts.containsKey(layoutID)) {
-        logger.log(logLabel,
-            'Layout [$layoutID] during init is not cached locally. Downloading...');
-        didPrepareLayout = await getOrFetchPopulatedLayout(
-          layoutID: layoutID,
-        );
-        logger.log(logLabel, 'Layout in init [$layoutID] fetch complete.');
+        log('Layout [$layoutID] during init is not cached locally. Downloading...');
+
+        try {
+          didPrepareLayout = await getOrFetchPopulatedLayout(
+            layoutID: layoutID,
+          );
+        } catch (e, str) {
+          final exception = CodelesslyException(
+            'Failed to download layout [$layoutID] during init.',
+            originalException: e,
+            stacktrace: str,
+            layoutID: layoutID,
+          );
+          errorHandler.captureException(exception, stacktrace: str);
+
+          _logTime(stopwatch);
+          return;
+        }
+        log('Layout in init [$layoutID] fetch complete.');
       } else {
-        logger.log(logLabel,
-            'Layout [$layoutID] during init is already cached locally. Skipping layout download.');
+        log('Layout [$layoutID] during init is already cached locally. Skipping layout download.');
         didPrepareLayout = true;
       }
     } else {
       if (_publishModel == null) {
-        logger.log(logLabel,
-            'Publish model during init is not cached locally. Going to wait for the first publish model from the server.');
+        log('Publish model during init is not cached locally. Going to wait for the first publish model from the server.');
       } else if (layoutID == null) {
-        logger.log(logLabel,
-            'Publish model during init is available and layoutID is not specified. All layouts will be downloaded soon!');
+        log('Publish model during init is available and layoutID is not specified. All layouts will be downloaded soon!');
       } else {
-        logger.log(logLabel,
-            'Publish model during init is available and layoutID is specified. Layout [$layoutID] will be downloaded soon from stream.');
+        log('Publish model during init is available and layoutID is specified. Layout [$layoutID] will be downloaded soon from stream.');
       }
       didPrepareLayout = false;
     }
@@ -267,19 +286,16 @@ class DataManager {
     // If the publish model is still null, then we need to wait for the first
     // publish model to arrive from the server via the stream above.
     if (_publishModel == null) {
-      logger.log(logLabel,
-          'Publish model is still null during init. Waiting for the first publish model from the server.');
+      log('Publish model is still null during init. Waiting for the first publish model from the server.');
       final model = await firstPublishEvent;
       _publishModel = model;
       await emitPublishModel();
       savePublishModel();
 
-      logger.log(logLabel,
-          'Publish model during init is now available. Proceeding with init!');
+      log('Publish model during init is now available. Proceeding with init!');
 
       if (_publishModel == null) {
-        logger.log(
-          logLabel,
+        log(
           'Publish model is still null.\n'
           'Is there a network problem or bad authentication?',
         );
@@ -306,21 +322,31 @@ class DataManager {
     // publish model is still null, we cannot proceed further and this
     // function terminates earlier.
     if (!didPrepareLayout && layoutID != null) {
-      logger.log(logLabel, 'We can safely download layout [$layoutID] now.');
-      await getOrFetchPopulatedLayout(layoutID: layoutID);
-      logger.log(
-          logLabel, 'Layout [$layoutID] downloaded from init successfully.');
+      log('We can safely download layout [$layoutID] now.');
+      try {
+        await getOrFetchPopulatedLayout(layoutID: layoutID);
+        log('Layout [$layoutID] downloaded from init successfully.');
+      } catch (e, str) {
+        final exception = CodelesslyException(
+          'Failed to download layout [$layoutID] during init.',
+          originalException: e,
+          stacktrace: str,
+          layoutID: layoutID,
+        );
+        errorHandler.captureException(exception, stacktrace: str);
+        // _logTime(stopwatch);
+        // return;
+      }
     }
 
     // Add all the layouts to the download queue excluding the [layoutID] if
     // that was specified. We don't want to download that layout twice.
     if (config.preload) {
-      logger.log(logLabel,
-          'Config preload was specified during init, adding ${_publishModel!.updates.layouts.length - 1} the layouts to the download queue...');
+      log('Config preload was specified during init, adding ${_publishModel!.updates.layouts.length - 1} the layouts to the download queue...');
       _downloadQueue.addAll(
         [..._publishModel!.updates.layouts.keys]..remove(layoutID),
       );
-      logger.log(logLabel, 'All layouts during init download complete.');
+      log('All layouts during init download complete.');
     }
 
     // If a [layoutID] was specified for this initialization, then the Future
@@ -340,10 +366,19 @@ class DataManager {
   Future<void> processDownloadQueue() async {
     while (_downloadQueue.isNotEmpty) {
       final String layoutID = _downloadQueue.removeAt(0);
-      logger.log(logLabel, '\tDownloading layout [$layoutID]...');
-      await getOrFetchPopulatedLayout(layoutID: layoutID);
-      logger.log(
-          logLabel, '\tLayout [$layoutID] during init download complete.');
+      log('\tDownloading layout [$layoutID]...');
+      try {
+        await getOrFetchPopulatedLayout(layoutID: layoutID);
+      } catch (e, str) {
+        final exception = CodelesslyException(
+          'Failed to download layout [$layoutID] during download queue.',
+          originalException: e,
+          stacktrace: str,
+          layoutID: layoutID,
+        );
+        errorHandler.captureException(exception, stacktrace: str);
+      }
+      log('\tLayout [$layoutID] during init download complete.');
     }
 
     queuingDone = true;
@@ -357,15 +392,13 @@ class DataManager {
         _localStorage == null || (_localStorage!.identifier != projectId);
 
     if (shouldInitLocalStorage) {
-      logger.log(
-          logLabel, 'Initializing local storage for project $projectId...');
+      log('Initializing local storage for project $projectId...');
       _localStorage?.reset();
       _localStorage = await initializeLocalStorage(projectId: projectId);
       didChange = true;
-      logger.log(logLabel, 'Local storage initialized.');
+      log('Local storage initialized.');
     } else {
-      logger.log(
-          logLabel, 'Local storage already initialized correctly. Skipping.');
+      log('Local storage already initialized correctly. Skipping.');
     }
 
     final bool shouldInitCloudStorage = _cloudStorage == null ||
@@ -376,20 +409,17 @@ class DataManager {
     final bool canInitCloudStorage = shouldInitCloudStorage && isAuthenticated;
 
     if (canInitCloudStorage) {
-      logger.log(
-          logLabel, 'Initializing cloud storage for project $projectId...');
+      log('Initializing cloud storage for project $projectId...');
       _cloudStorage?.reset();
       _cloudStorage = await initializeCloudStorage(projectId: projectId);
       _publishModelStreamController.add(_publishModel);
       didChange = true;
-      logger.log(logLabel, 'Cloud storage initialized.');
+      log('Cloud storage initialized.');
     } else {
       if (isAuthenticated) {
-        logger.log(
-            logLabel, 'Cloud storage already initialized correctly. Skipping.');
+        log('Cloud storage already initialized correctly. Skipping.');
       } else {
-        logger.log(logLabel,
-            'Cloud storage cannot be initialized because the user is not authenticated.');
+        log('Cloud storage cannot be initialized because the user is not authenticated.');
       }
     }
 
@@ -419,8 +449,7 @@ class DataManager {
   /// initialize.
   void _logTime(Stopwatch stopwatch) {
     stopwatch.stop();
-    logger.log(
-      logLabel,
+    log(
       'Initialization took ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.',
     );
   }
@@ -430,13 +459,11 @@ class DataManager {
   void loadFontsFromPublishModel() {
     assert(_publishModel != null, 'Publish model cannot be null here.');
 
-    logger.log(logLabel,
-        'About to load all fonts that are present in the current publish model.');
+    log('About to load all fonts that are present in the current publish model.');
     if (_publishModel!.fonts.isNotEmpty) {
-      logger.log(logLabel,
-          'Fonts: ${_publishModel!.fonts.values.map((font) => font.fullFontName).join(', ')}');
+      log('Fonts: ${_publishModel!.fonts.values.map((font) => font.fullFontName).join(', ')}');
     } else {
-      logger.log(logLabel, 'No fonts to load.');
+      log('No fonts to load.');
     }
 
     for (final SDKPublishFont font in _publishModel!.fonts.values) {
@@ -451,7 +478,7 @@ class DataManager {
   /// [returns] the first publish model event from the stream & will continue
   /// to listen to the stream for future publish model events.
   Future<SDKPublishModel> listenToPublishModel(String projectId) async {
-    logger.log(logLabel, 'About to listen to publish model doc.');
+    log('About to listen to publish model doc.');
     final Completer<SDKPublishModel> completer = Completer();
     _publishModelDocumentListener?.cancel();
 
@@ -463,15 +490,14 @@ class DataManager {
         .listen((SDKPublishModel? serverModel) {
       if (serverModel == null) return;
 
-      logger.log(logLabel, 'Publish model stream event received.');
+      log('Publish model stream event received.');
 
       final bool isFirstEvent = !completer.isCompleted;
 
       // If the completer has not completed yet, it needs to be
       // completed with the first available publish model form the server.
       if (isFirstEvent) {
-        logger.log(
-          logLabel,
+        log(
           'Completing publish model stream completer since this is the first event.',
         );
         completer.complete(serverModel);
@@ -489,22 +515,18 @@ class DataManager {
       // once that happens, therefore we don't need to emit it here, nor
       // compare.
       if (_publishModel == null) {
-        logger.log(
-          logLabel,
+        log(
           'Publish model is null during init and received the first publish model from the server. Skipping comparison in stream.',
         );
         return;
       }
 
       if (config.slug != null) {
-        logger.log(logLabel,
-            'Initialized using the slug, this event is not essential for initial loading.');
+        log('Initialized using the slug, this event is not essential for initial loading.');
       } else if (isFirstEvent) {
-        logger.log(logLabel,
-            'Publish model during init was not null, and we received a new publish model from the server. Comparing...');
+        log('Publish model during init was not null, and we received a new publish model from the server. Comparing...');
       } else {
-        logger.log(logLabel,
-            'Received a second publish model from the server. Comparing...');
+        log('Received a second publish model from the server. Comparing...');
       }
       final SDKPublishModel localModel = _publishModel!;
 
@@ -514,7 +536,7 @@ class DataManager {
         localModel: localModel,
       );
 
-      logger.log(logLabel, 'Publish model comparison complete.');
+      log('Publish model comparison complete.');
     })
       ..onError((error, str) {
         errorHandler.captureException(error, stacktrace: str);
@@ -527,8 +549,7 @@ class DataManager {
   Future<void> emitPublishModel() async {
     await onPublishModelLoaded(_publishModel!.projectId);
 
-    logger.log(logLabel,
-        'Emitting publish model to stream. has model: ${_publishModel != null}');
+    log('Emitting publish model to stream. has model: ${_publishModel != null}');
     status = CStatus.loaded();
     _publishModelStreamController.add(_publishModel);
   }
@@ -556,7 +577,7 @@ class DataManager {
 
   /// Disposes the instance.
   void dispose() {
-    logger.log(logLabel, 'Disposing...');
+    log('Disposing...');
     _publishModelStreamController.close();
     _publishModelDocumentListener?.cancel();
     status = CStatus.empty();
@@ -569,7 +590,7 @@ class DataManager {
 
   /// Sets the [SDKPublishModel] as null and cancels document streaming.
   void reset() {
-    logger.log(logLabel, 'Invalidating...');
+    log('Invalidating...');
     _publishModelDocumentListener?.cancel();
     _publishModelStreamController.add(null);
     _publishModel = null;
@@ -627,21 +648,17 @@ class DataManager {
         conditionUpdates.isEmpty &&
         !templateChanged &&
         !entryChanged) {
-      logger.log(logLabel, 'No updates to process.');
+      log('No updates to process.');
       return;
     } else {
-      logger.log(logLabel, 'Processing updates:');
-      logger.log(logLabel, '      | ${layoutUpdates.length} layout updates.');
-      logger.log(logLabel, '      | ${fontUpdates.length} font updates.');
-      logger.log(logLabel, '      | ${apiUpdates.length} api updates.');
-      logger.log(
-          logLabel, '      | ${variableUpdates.length} variable updates.');
-      logger.log(
-          logLabel, '      | ${conditionUpdates.length} condition updates.');
-      logger.log(logLabel,
-          '      | ${templateChanged ? 1 : 0} template update${templateChanged ? '' : 's'}.');
-      logger.log(logLabel,
-          '      | ${entryChanged ? 1 : 0} entry id update${entryChanged ? '' : 's'}.');
+      log('Processing updates:');
+      log('      | ${layoutUpdates.length} layout updates.');
+      log('      | ${fontUpdates.length} font updates.');
+      log('      | ${apiUpdates.length} api updates.');
+      log('      | ${variableUpdates.length} variable updates.');
+      log('      | ${conditionUpdates.length} condition updates.');
+      log('      | ${templateChanged ? 1 : 0} template update${templateChanged ? '' : 's'}.');
+      log('      | ${entryChanged ? 1 : 0} entry id update${entryChanged ? '' : 's'}.');
     }
 
     for (final String layoutID in layoutUpdates.keys) {
@@ -954,38 +971,31 @@ class DataManager {
     bool prioritize = false,
   }) async {
     if (_publishModel != null && queuingDone) {
-      logger.log(logLabel,
-          '[queueLayout] No longer queuing. Downloading layout [$layoutID] immediately...');
+      log('[queueLayout] No longer queuing. Downloading layout [$layoutID] immediately...');
       await getOrFetchPopulatedLayout(layoutID: layoutID);
-      logger.log(
-          logLabel, '[queueLayout] Layout [$layoutID] download complete.');
+      log('[queueLayout] Layout [$layoutID] download complete.');
     } else {
       if (_downloadQueue.contains(layoutID)) {
         if (prioritize) {
           if (_downloadQueue.first == layoutID) {
-            logger.log(logLabel,
-                '[queueLayout] Layout [$layoutID] is already at the front of the queue. Skipping.');
+            log('[queueLayout] Layout [$layoutID] is already at the front of the queue. Skipping.');
             return;
           } else {
-            logger.log(logLabel,
-                '[queueLayout] Layout [$layoutID] is already in the queue. Moving it to the front to prioritize it.');
+            log('[queueLayout] Layout [$layoutID] is already in the queue. Moving it to the front to prioritize it.');
             _downloadQueue.remove(layoutID);
           }
         } else {
-          logger.log(logLabel,
-              '[queueLayout] Layout [$layoutID] is already in the queue. Skipping.');
+          log('[queueLayout] Layout [$layoutID] is already in the queue. Skipping.');
           return;
         }
         return;
       }
 
       if (prioritize) {
-        logger.log(logLabel,
-            '[queueLayout] Prioritizing this layout. Inserting [$layoutID] to the front of the queue.');
+        log('[queueLayout] Prioritizing this layout. Inserting [$layoutID] to the front of the queue.');
         _downloadQueue.insert(0, layoutID);
       } else {
-        logger.log(logLabel,
-            '[queueLayout] Adding [$layoutID] to the back of the queue.');
+        log('[queueLayout] Adding [$layoutID] to the back of the queue.');
         _downloadQueue.add(layoutID);
       }
     }
@@ -1029,18 +1039,17 @@ class DataManager {
 
     SDKPublishLayout? layout;
     if (model!.layouts.containsKey(layoutID)) {
-      logger.log(
-          logLabel, '\tLayout [$layoutID] already cached. On Your Marks...');
+      log('\tLayout [$layoutID] already cached. On Your Marks...');
       layout = model.layouts[layoutID];
     } else {
-      logger.log(logLabel, '\tLayout [$layoutID] not cached. On Your Marks...');
+      log('\tLayout [$layoutID] not cached. On Your Marks...');
       layout = await networkDataRepository.downloadLayoutModel(
         layoutID: layoutID,
         projectID: auth.projectId,
         source: config.publishSource,
       );
       if (layout == null) {
-        logger.log(logLabel, '\tLayout [$layoutID] could not be downloaded.');
+        log('\tLayout [$layoutID] could not be downloaded.');
         return false;
       }
 
@@ -1060,12 +1069,15 @@ class DataManager {
           if (api == null) continue;
           model.apis[api.id] = api;
         } catch (e, stacktrace) {
-          logger.log(logLabel, 'Error while fetching api: $e');
-          logger.log(logLabel, stacktrace.toString());
+          logError(
+            'Error while fetching apis',
+            error: e,
+            stackTrace: stacktrace,
+          );
         }
       }
     } else {
-      logger.log(logLabel, '\tLayout [$layoutID] has no apis.');
+      log('\tLayout [$layoutID] has no apis.');
     }
 
     if (model.updates.conditions.containsKey(layoutID)) {
@@ -1076,11 +1088,14 @@ class DataManager {
           model.conditions[layoutID] = conditions;
         }
       } catch (e, stacktrace) {
-        logger.log(logLabel, 'Error while fetching conditions: $e');
-        logger.log(logLabel, stacktrace.toString());
+        logError(
+          'Error while fetching conditions',
+          error: e,
+          stackTrace: stacktrace,
+        );
       }
     } else {
-      logger.log(logLabel, '\tLayout [$layoutID] has no conditions.');
+      log('\tLayout [$layoutID] has no conditions.');
     }
 
     if (model.updates.variables.containsKey(layoutID)) {
@@ -1091,43 +1106,47 @@ class DataManager {
           model.variables[layoutID] = variables;
         }
       } catch (e, stacktrace) {
-        logger.log(logLabel, 'Error while fetching variables: $e');
-        logger.log(logLabel, stacktrace.toString());
+        logError(
+          'Error while fetching variables',
+          error: e,
+          stackTrace: stacktrace,
+        );
       }
     } else {
-      logger.log(logLabel, '\tLayout [$layoutID] has no variables.');
+      log('\tLayout [$layoutID] has no variables.');
     }
 
     await emitPublishModel();
     savePublishModel();
 
-    logger.log(logLabel,
-        '\tLayoutModel [$layoutID] ready, time for fonts. Get Set...');
-    logger.log(logLabel,
-        '\tLayoutModel [$layoutID] has ${model.updates.layoutFonts[layoutID]} fonts.');
+    log('\tLayoutModel [$layoutID] ready, time for fonts. Get Set...');
+    log('\tLayoutModel [$layoutID] has ${model.updates.layoutFonts[layoutID]} fonts.');
 
     if (model.updates.layoutFonts.containsKey(layoutID)) {
       // Download or load fonts in the background.
       getOrFetchFontModels(
         fontIDs: model.updates.layoutFonts[layoutID]!,
       ).then((Set<SDKPublishFont> fontModels) async {
-        logger.log(logLabel,
-            '\tFound ${fontModels.length} fonts to fetch for layout [$layoutID]. Go!');
+        log('\tFound ${fontModels.length} fonts to fetch for layout [$layoutID]. Go!');
 
         for (final SDKPublishFont fontModel in fontModels) {
-          logger.log(logLabel,
-              '\t\tFontModel [${fontModel.id}] ready. Fetching bytes & loading...');
+          log('\t\tFontModel [${fontModel.id}] ready. Fetching bytes & loading...');
 
           model.fonts[fontModel.id] = fontModel;
 
           await getOrFetchFontBytesAndSaveAndLoad(fontModel).then((_) {
-            logger.log(
-                logLabel, '\t\tFontModel [${fontModel.id}] loaded. Done!\n');
+            log('\t\tFontModel [${fontModel.id}] loaded. Done!\n');
           });
         }
+      }).catchError((error, stack) {
+        logError(
+          'Error while fetching fonts',
+          error: error,
+          stackTrace: stack,
+        );
       });
     } else {
-      logger.log(logLabel, '\tLayout [$layoutID] has no fonts.');
+      log('\tLayout [$layoutID] has no fonts.');
     }
 
     return true;
@@ -1146,25 +1165,22 @@ class DataManager {
         source: source,
       );
     } catch (e) {
-      logger.log(logLabel, 'Failed to download complete publish bundle.');
+      log('Failed to download complete publish bundle.');
       rethrow;
     } finally {
       stopwatch.stop();
-      logger.log(logLabel,
-          'Publish bundle download stopwatch done in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.');
+      log('Publish bundle download stopwatch done in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.');
     }
 
     if (model != null) {
-      logger.log(logLabel,
-          'Successfully downloaded complete publish bundle. Emitting it.');
+      log('Successfully downloaded complete publish bundle. Emitting it.');
       _publishModel = model;
       await emitPublishModel();
       savePublishModel();
       return true;
     }
 
-    logger.log(logLabel,
-        'Failed to download complete publish bundle in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.');
+    log('Failed to download complete publish bundle in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.');
     return false;
   }
 
@@ -1179,33 +1195,29 @@ class DataManager {
 
   /// Loads a [font] with its associated [fontBytes] into the Flutter engine.
   Future<void> loadFont(SDKPublishFont font, Uint8List fontBytes) async {
-    logger.log(logLabel,
-        '[FLUTTER] Loading font [${font.id}](${font.fullFontName}) into Flutter framework.');
+    log('[FLUTTER] Loading font [${font.id}](${font.fullFontName}) into Flutter framework.');
     final FontLoader fontLoader = FontLoader(font.fullFontName);
 
     fontLoader.addFont(Future.value(ByteData.view(fontBytes.buffer)));
 
     return fontLoader.load().then((_) {
-      logger.log(logLabel,
-          '[FLUTTER] Successfully loaded font [${font.id}](${font.fullFontName}) into Flutter framework.');
+      log('[FLUTTER] Successfully loaded font [${font.id}](${font.fullFontName}) into Flutter framework.');
     });
   }
 
   /// Given a [font], will fetch its bytes either from cache or download & save
   /// them.
   Future<Uint8List?> getOrFetchFontBytesAndSave(SDKPublishFont font) async {
-    logger.log(
-        logLabel, '\t\tChecking bytes for [${font.id}](${font.fullFontName}).');
+    log('\t\tChecking bytes for [${font.id}](${font.fullFontName}).');
     final Uint8List? fontBytes = localDataRepository.fetchFontBytes(
       fontID: font.id,
       source: config.publishSource,
     );
     if (fontBytes != null) {
-      logger.log(logLabel, '\t\tFont [${font.id}] bytes already cached.');
+      log('\t\tFont [${font.id}] bytes already cached.');
       return Future.value(fontBytes);
     } else {
-      logger.log(
-          logLabel, '\t\tFont [${font.id}] bytes not cached. Downloading...');
+      log('\t\tFont [${font.id}] bytes not cached. Downloading...');
       return downloadFontBytesAndSave(font);
     }
   }
@@ -1247,7 +1259,7 @@ class DataManager {
             fonts.add(downloadedFont);
           }
         } catch (e) {
-          logger.log(logLabel, '\t\tFont [$fontID] could not be downloaded.');
+          log('\t\tFont [$fontID] could not be downloaded.');
         }
       }
     }

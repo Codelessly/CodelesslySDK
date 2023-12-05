@@ -224,7 +224,7 @@ class CodelesslyException implements Exception {
 
   CodelesslyException.layoutNotFound({
     String? message,
-    String? layoutID,
+    required String? layoutID,
     String? url,
     dynamic originalException,
     StackTrace? stacktrace,
@@ -239,6 +239,7 @@ class CodelesslyException implements Exception {
 
   CodelesslyException.apiNotFound({
     String? message,
+    String? layoutID,
     String? apiId,
     String? url,
     dynamic originalException,
@@ -250,6 +251,7 @@ class CodelesslyException implements Exception {
           url: url,
           originalException: originalException,
           stacktrace: stacktrace,
+      layoutID: layoutID,
         );
 
   CodelesslyException.cacheStoreException({
