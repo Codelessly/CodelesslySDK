@@ -109,11 +109,7 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
 
   @override
   Future<void> captureEvent(CodelesslyEvent event) async {
-    if (kIsWeb) {
-      debugPrint('[$_label] ${event.toString()}');
-    } else {
-      logger.log(_label, event.toString());
-    }
+    logger.log(_label, event.toString(), largePrint: true);
     _reporter?.captureEvent(event);
   }
 
@@ -142,24 +138,15 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
                 stacktrace: stacktrace ?? StackTrace.current,
               );
 
-    // if (markForUI) {
-      _lastException = exception;
-      onException?.call(exception);
-    // }
+    _lastException = exception;
+    onException?.call(exception);
 
-    if (kIsWeb) {
-      debugPrintStack(
-        stackTrace: exception.stacktrace ?? StackTrace.current,
-        label: message ?? exception.message ?? 'Unknown error',
-      );
-    } else {
-      logger.error(
-        _label,
-        message ?? exception.message ?? 'Unknown error',
-        error: exception,
-        stackTrace: exception.stacktrace ?? StackTrace.current,
-      );
-    }
+    logger.error(
+      _label,
+      message ?? exception.message ?? 'Unknown error',
+      error: exception,
+      stackTrace: exception.stacktrace ?? StackTrace.current,
+    );
 
     _reporter?.captureException(
       exception,

@@ -131,6 +131,7 @@ class Codelessly {
   LocalStorage get localStorage => dataManager.localStorage;
 
   /// Provides access to the cloud storage of this SDK instance.
+  /// If it is null, it means it has not yet been initialized.
   CloudStorage? get cloudStorage => dataManager.cloudStorage;
 
   final List<NavigationListener> _navigationListeners = [];
@@ -193,20 +194,22 @@ class Codelessly {
 
   void log(
     String message, {
-    DateTime? time,
-    int? sequenceNumber,
-    int level = 0,
-    Zone? zone,
-    Object? error,
-    StackTrace? stackTrace,
+    bool largePrint = false,
   }) =>
       logger.log(
         'Codelessly SDK',
         message,
-        time: time,
-        sequenceNumber: sequenceNumber,
-        level: level,
-        zone: zone,
+        largePrint: largePrint,
+      );
+
+  void logError(
+    String message, {
+    required Object? error,
+    required StackTrace? stackTrace,
+  }) =>
+      logger.error(
+        'Codelessly SDK',
+        message,
         error: error,
         stackTrace: stackTrace,
       );
@@ -258,7 +261,7 @@ class Codelessly {
       try {
         await _cacheManager?.clearAll();
       } catch (e, str) {
-        log(
+        logError(
           'Error clearing cache.',
           error: e,
           stackTrace: str,
@@ -268,7 +271,7 @@ class Codelessly {
       try {
         await _cacheManager?.deleteAllByteData();
       } catch (e, str) {
-        log(
+        logError(
           'Error deleting cached bytes.',
           error: e,
           stackTrace: str,
@@ -387,12 +390,24 @@ class Codelessly {
 
     final Stopwatch stopwatch = Stopwatch()..start();
     try {
-      if (Firebase.apps.isEmpty) {
-        log('Firebase default app not initialized. Either the the project '
-            "doesn't have its own firebase configuration or the firebase "
-            'configuration is not initialized before initializing Codelessly.');
-        // initialize default app.
+      try {
+        // Initialize default app if no default app exists.
+        if (Firebase.apps.isEmpty) {
+          _firebaseApp = await Firebase.initializeApp(options: firebaseOptions);
+        }
+      } catch (e) {
+        // On web, Firebase.apps crashes if there is no default app, so we
+        // initialize it here if that happens.
         _firebaseApp = await Firebase.initializeApp(options: firebaseOptions);
+      } finally {
+        log(
+          'Firebase default app not initialized. Either the the project '
+          "doesn't have its own firebase configuration or the firebase "
+          'configuration is not initialized before initializing Codelessly. '
+          'As such, initialized the default FirebaseApp with Codelessly '
+          'configs.',
+          largePrint: true,
+        );
       }
 
       // Check if an existing Firebase app instance can be reused.

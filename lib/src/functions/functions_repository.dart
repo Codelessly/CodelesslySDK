@@ -1412,13 +1412,6 @@ class FunctionsRepository {
   ) async {
     final ScopedValues scopedValues = ScopedValues.of(context);
 
-    final CloudStorage? cloudStorage = scopedValues.cloudStorage;
-
-    if (cloudStorage == null) {
-      logger.log(_label, 'Cloud storage is null.');
-      return;
-    }
-
     final evaluatedPath = PropertyValueDelegate.substituteVariables(
       action.path,
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
@@ -1445,6 +1438,14 @@ class FunctionsRepository {
     variable.value = variable.value.copyWith(
       value: CloudStorageVariableUtils.loading(),
     );
+
+    final CloudStorage? cloudStorage = scopedValues.cloudStorage;
+
+    if (cloudStorage == null) {
+      logger.log(
+          _label, 'Cloud storage is null. Waiting for it to initialize...');
+      return;
+    }
 
     logger.log(_label,
         'Streaming document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
