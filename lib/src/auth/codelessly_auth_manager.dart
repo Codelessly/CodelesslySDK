@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 
 import '../../codelessly_sdk.dart';
@@ -71,7 +70,15 @@ class CodelesslyAuthManager extends AuthManager {
   }
 
   /// A helper function to log messages.
-  void log(String message) => logger.log(_label, message);
+  void log(
+    String message, {
+    bool largePrint = false,
+  }) =>
+      logger.log(
+        _label,
+        message,
+        largePrint: largePrint,
+      );
 
   @override
   Future<void> init() async {
@@ -199,11 +206,7 @@ class CodelesslyAuthManager extends AuthManager {
 
     final projectIds = claims['project_ids'] as List;
 
-    if (kIsWeb) {
-      debugPrint('User project id claims: $projectIds');
-    } else {
-      log('User project id claims: $projectIds');
-    }
+    log('User project id claims: $projectIds', largePrint: true);
 
     return projectIds.contains(projectId);
   }
@@ -340,17 +343,15 @@ class CodelesslyAuthManager extends AuthManager {
     required CodelesslyConfig config,
     required Future<void> Function(AuthData authData) postSuccess,
   }) async {
+    const String label = 'verifyProjectAuthToken';
+
     // Function to log messages. Uses different methods depending on whether
     // the platform is web or not.
-    void log(String msg) {
-      if (kIsWeb) {
-        debugPrint('[verifyProjectAuthToken] $msg');
-      } else {
-        logger.log('verifyProjectAuthToken', msg);
-      }
-    }
-
-    log('About to verify token with: authToken: ${config.authToken}, slug: ${config.slug}');
+    logger.log(
+      label,
+      'About to verify token with: authToken: ${config.authToken}, slug: ${config.slug}',
+      largePrint: true,
+    );
 
     // Make a POST request to the server to verify the token.
     final Response result = await post(
@@ -379,15 +380,18 @@ class CodelesslyAuthManager extends AuthManager {
       // success.
       await postSuccess(authData);
 
-      log('Auth token response:\n${result.body}');
+      logger.log(label, 'Auth token response:\n${result.body}',
+          largePrint: true);
 
       return authData;
     }
     // If the status code of the response is not 200, the authentication failed.
     // Log the status code, reason, and body of the response.
     else {
-      log(
+      logger.log(
+        label,
         'Failed to authenticate token.\nStatus Code: ${result.statusCode}.\nReason: ${result.reasonPhrase}\nBody: ${result.body}',
+        largePrint: true,
       );
     }
 

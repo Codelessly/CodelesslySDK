@@ -65,10 +65,8 @@ class DataManager {
   }
 
   /// The cloud storage instance used by this data manager.
-  CloudStorage? get cloudStorage {
-    // assert(_cloudStorage != null, 'Cloud storage is not initialized yet.');
-    return _cloudStorage;
-  }
+  /// If it is null, it means it has not yet been initialized.
+  CloudStorage? get cloudStorage => _cloudStorage;
 
   /// The current publish model loaded by this data manager.
   SDKPublishModel? get publishModel => _publishModel;
