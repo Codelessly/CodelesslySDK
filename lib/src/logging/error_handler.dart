@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-
 import 'codelessly_event.dart';
 import 'codelessly_logger.dart';
 import 'reporter.dart';
