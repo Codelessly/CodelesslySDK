@@ -53,6 +53,7 @@ class FunctionsRepository {
   static void _log(String message, {bool largePrint = false}) =>
       logger.log(_label, message, largePrint: largePrint);
 
+  // Avoid using this method directly in favor of [triggerAction] if possible.
   static Future<void> performAction(
     BuildContext context,
     ActionModel action, {
@@ -861,11 +862,20 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     if (filteredReactions.isEmpty) return false;
 
     for (final reaction in filteredReactions) {
-      await FunctionsRepository.performAction(
+      // ignore: use_build_context_synchronously
+      final future = FunctionsRepository.performAction(
         context,
         reaction.action,
         internalValue: value,
       );
+      if (!reaction.action.nonBlocking) {
+        // Await only if this action is not a non-blocking. It must not be
+        // awaited if it is non-blocking.
+        await future;
+      } else {
+        _log(
+            'Skipping awaiting for action ${reaction.name} as it is non-blocking...');
+      }
     }
 
     return true;

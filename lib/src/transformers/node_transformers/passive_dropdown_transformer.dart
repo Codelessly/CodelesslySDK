@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/node_provider.dart';
 
 class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
   PassiveDropdownTransformer(super.getNode, super.manager);
@@ -52,6 +53,7 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
       FunctionsRepository.triggerAction(context, node: node, TriggerType.click);
 
   void onChanged(BuildContext context, DropdownNode node, int internalValue) {
+    NodeProvider.setState(context, internalValue);
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'value', value: internalValue);
 

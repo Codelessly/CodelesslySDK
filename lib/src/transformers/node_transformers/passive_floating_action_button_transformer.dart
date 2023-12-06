@@ -70,10 +70,9 @@ class PassiveFloatingActionButtonTransformer
     );
   }
 
-  void onPressed(BuildContext context, List<Reaction> reactions) => reactions
-      .where((reaction) => reaction.trigger.type == TriggerType.click)
-      .forEach((reaction) =>
-          FunctionsRepository.performAction(context, reaction.action));
+  void onPressed(BuildContext context, List<Reaction> reactions) =>
+      FunctionsRepository.triggerAction(context, TriggerType.click,
+          reactions: reactions);
 }
 
 class PassiveFloatingActionButtonWidget extends StatelessWidget {
