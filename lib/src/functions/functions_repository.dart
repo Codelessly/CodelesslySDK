@@ -46,6 +46,7 @@ enum ApiRequestType {
     }
   }
 }
+
 const String _label = 'Functions Repository';
 
 class FunctionsRepository {
@@ -958,6 +959,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         }
       } else {
         currentValue = storage.get(storageKey);
+      }
+
+      if (currentValue != null && action.skipIfAlreadyExists) {
+        _log('Storage key [$storageKey] already exists. Skipping.');
+        return false;
       }
 
       final Object? value = switch (action.variableType) {
