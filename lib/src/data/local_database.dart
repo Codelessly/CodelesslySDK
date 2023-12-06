@@ -15,7 +15,7 @@ const String _label = 'Local Storage';
 /// The key is a string and the value is an object. The object can be any
 /// primitive type or a list or map of primitive types depending on the
 /// implementation.
-abstract class LocalStorage extends ChangeNotifier {
+abstract class LocalDatabase extends ChangeNotifier {
   /// A map of notifiers for a key in the storage. This is used to notify
   /// listeners when the value for a key in the storage changes.
   final Map<String, _StorageListenable> _notifiers = {};
@@ -24,8 +24,8 @@ abstract class LocalStorage extends ChangeNotifier {
   /// from its project id.
   final String identifier;
 
-  /// Creates a [LocalStorage] with the given [identifier].
-  LocalStorage({required this.identifier});
+  /// Creates a [LocalDatabase] with the given [identifier].
+  LocalDatabase({required this.identifier});
 
   /// Whether or not the storage contains the given [key].
   bool containsKey(String key);
@@ -67,15 +67,15 @@ abstract class LocalStorage extends ChangeNotifier {
   }
 }
 
-/// A [LocalStorage] implementation that uses [Hive] as the underlying storage.
+/// A [LocalDatabase] implementation that uses [Hive] as the underlying storage.
 /// This is used to store data via actions for the SDK.
-class HiveLocalStorage extends LocalStorage {
+class HiveLocalDatabase extends LocalDatabase {
   final Box _box;
 
   late final StreamSubscription? _subscription;
 
-  /// Creates a [HiveLocalStorage] with the given [box].
-  HiveLocalStorage(this._box, {required super.identifier}) {
+  /// Creates a [HiveLocalDatabase] with the given [box].
+  HiveLocalDatabase(this._box, {required super.identifier}) {
     // Listen to changes in the storage.
     _subscription = _box.watch().listen(_onBoxChanged);
   }

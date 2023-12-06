@@ -128,11 +128,11 @@ class Codelessly {
   Stream<CStatus> get statusStream => _statusStreamController.stream;
 
   /// Provides access to the local storage of this SDK instance.
-  LocalStorage get localStorage => dataManager.localStorage;
+  LocalDatabase get localDatabase => dataManager.localDatabase;
 
   /// Provides access to the cloud storage of this SDK instance.
   /// If it is null, it means it has not yet been initialized.
-  CloudStorage? get cloudStorage => dataManager.cloudStorage;
+  CloudDatabase? get cloudDatabase => dataManager.cloudDatabase;
 
   final List<NavigationListener> _navigationListeners = [];
 
