@@ -619,8 +619,8 @@ class ApiResponseVariableUtils {
 }
 
 /// Helper utility class to easily update different statuses for cloud storage variable
-class CloudStorageVariableUtils {
-  CloudStorageVariableUtils._();
+class CloudDatabaseVariableUtils {
+  CloudDatabaseVariableUtils._();
 
   static Map idle() => {
         'isIdle': true,

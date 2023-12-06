@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../../codelessly_sdk.dart';
 
-const String _label = 'Cloud Storage';
+const String _label = 'Cloud Database';
 
 /// Allows access to cloud storage. Implementations of this class should be
 /// able to store and retrieve data from the cloud storage in secure manner.
@@ -26,7 +26,7 @@ const String _label = 'Cloud Storage';
 /// SDK session is using. This is used to separate data for different projects
 /// and users. The actual identity of this [identifier] depends on the
 /// implementation.
-abstract class CloudStorage extends ChangeNotifier {
+abstract class CloudDatabase extends ChangeNotifier {
   /// Used to identify the instance of the cloud storage this SDK session is
   /// using. This is used to separate data for different projects and users.
   /// The actual identity of this depends on the implementation.
@@ -41,7 +41,7 @@ abstract class CloudStorage extends ChangeNotifier {
   /// the implementation.
   ///
   /// It will throw an [AssertionError] if the [identifier] is empty.
-  CloudStorage(this.identifier, this.publishSource)
+  CloudDatabase(this.identifier, this.publishSource)
       : assert(identifier.isNotEmpty, 'identifier cannot be empty');
 
   /// Adds a document to the cloud storage at the given [path].
@@ -164,7 +164,7 @@ abstract class CloudStorage extends ChangeNotifier {
 
 /// A implementation that uses Firestore as the backend.
 /// This is used to store data via actions for the SDK.
-class FirestoreCloudStorage extends CloudStorage {
+class FirestoreCloudDatabase extends CloudDatabase {
   /// Reference to the root document for this session.
   late final DocumentReference<Map<String, dynamic>> rootRef =
       firestore.collection(_rootCollection).doc(identifier);
@@ -181,17 +181,16 @@ class FirestoreCloudStorage extends CloudStorage {
   /// Subscriptions to the streams that are being listened to.
   final List<StreamSubscription> _subscriptions = [];
 
-  /// Creates a [FirestoreCloudStorage] with the given [identifier] and
+  /// Creates a [FirestoreCloudDatabase] with the given [identifier] and
   /// [firestore] instance.
-  FirestoreCloudStorage(super.identifier, this.firestore, super.publishSource);
+  FirestoreCloudDatabase(super.identifier, this.firestore, super.publishSource);
 
   void log(String message) => logger.log(_label, message);
 
   /// Initializes the cloud storage for the given [identifier]. This must be
   /// called and awaited before using the cloud storage.
   Future<void> init() async {
-    logger.log(_label,
-        'Initializing for $identifier at [${rootRef.path}]');
+    logger.log(_label, 'Initializing for $identifier at [${rootRef.path}]');
 
     // Create project doc if missing.
     final snapshot = await rootRef.get();
@@ -362,7 +361,7 @@ class FirestoreCloudStorage extends CloudStorage {
         // Set the variable with success state.
         variable.set(
           variable.value
-              .copyWith(value: CloudStorageVariableUtils.success(data)),
+              .copyWith(value: CloudDatabaseVariableUtils.success(data)),
         );
       },
       onError: (error) {
@@ -371,7 +370,7 @@ class FirestoreCloudStorage extends CloudStorage {
         // Set the variable with error state.
         variable.set(
           variable.value.copyWith(
-            value: CloudStorageVariableUtils.error(error.toString()),
+            value: CloudDatabaseVariableUtils.error(error.toString()),
           ),
         );
       },

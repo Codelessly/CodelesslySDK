@@ -22,8 +22,8 @@ class ScopedValues {
 
   // private fields.
   late final WeakReference<CodelesslyContext>? _codelesslyContextRef;
-  late final WeakReference<LocalStorage>? _localStorageRef;
-  late final WeakReference<CloudStorage>? _cloudStorageRef;
+  late final WeakReference<LocalDatabase>? _localStorageRef;
+  late final WeakReference<CloudDatabase>? _cloudDatabaseRef;
   late final List<VariableData>? _variablesOverrides;
   late final Map<String, dynamic>? _dataOverrides;
 
@@ -31,10 +31,10 @@ class ScopedValues {
   CodelesslyContext? get codelesslyContext => _codelesslyContextRef?.target;
 
   /// Local storage instance for the relative Codelessly instance.
-  LocalStorage? get localStorage => _localStorageRef?.target;
+  LocalDatabase? get localStorage => _localStorageRef?.target;
 
   /// Cloud storage instance for the relative Codelessly instance.
-  CloudStorage? get cloudStorage => _cloudStorageRef?.target;
+  CloudDatabase? get cloudDatabase => _cloudDatabaseRef?.target;
 
   /// Variable name -> Variable.
   Map<String, VariableData> get variables => {
@@ -71,10 +71,10 @@ class ScopedValues {
             {};
     final instance = context.read<Codelessly?>();
     if (instance != null) {
-      _localStorageRef = WeakReference(instance.localStorage);
-      _cloudStorageRef = instance.cloudStorage == null
+      _localStorageRef = WeakReference(instance.localDatabase);
+      _cloudDatabaseRef = instance.cloudDatabase == null
           ? null
-          : WeakReference(instance.cloudStorage!);
+          : WeakReference(instance.cloudDatabase!);
     }
   }
 }

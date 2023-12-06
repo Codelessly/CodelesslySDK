@@ -54,19 +54,19 @@ class DataManager {
 
   SDKPublishModel? _publishModel;
 
-  LocalStorage? _localStorage;
+  LocalDatabase? _localDatabase;
 
-  CloudStorage? _cloudStorage;
+  CloudDatabase? _cloudDatabase;
 
   /// The local storage instance used by this data manager.
-  LocalStorage get localStorage {
-    assert(_localStorage != null, 'Local storage is not initialized yet.');
-    return _localStorage!;
+  LocalDatabase get localDatabase {
+    assert(_localDatabase != null, 'Local storage is not initialized yet.');
+    return _localDatabase!;
   }
 
   /// The cloud storage instance used by this data manager.
   /// If it is null, it means it has not yet been initialized.
-  CloudStorage? get cloudStorage => _cloudStorage;
+  CloudDatabase? get cloudDatabase => _cloudDatabase;
 
   /// The current publish model loaded by this data manager.
   SDKPublishModel? get publishModel => _publishModel;
@@ -389,29 +389,29 @@ class DataManager {
     bool didChange = false;
 
     final bool shouldInitLocalStorage =
-        _localStorage == null || (_localStorage!.identifier != projectId);
+        _localDatabase == null || (_localDatabase!.identifier != projectId);
 
     if (shouldInitLocalStorage) {
       log('Initializing local storage for project $projectId...');
-      _localStorage?.reset();
-      _localStorage = await initializeLocalStorage(projectId: projectId);
+      _localDatabase?.reset();
+      _localDatabase = await initializeLocalStorage(projectId: projectId);
       didChange = true;
       log('Local storage initialized.');
     } else {
       log('Local storage already initialized correctly. Skipping.');
     }
 
-    final bool shouldInitCloudStorage = _cloudStorage == null ||
-        (cloudStorage!.publishSource != config.publishSource ||
-            cloudStorage!.identifier != projectId);
+    final bool shouldInitCloudStorage = _cloudDatabase == null ||
+        (cloudDatabase!.publishSource != config.publishSource ||
+            cloudDatabase!.identifier != projectId);
     final bool isAuthenticated = authManager.isAuthenticated() &&
         authManager.hasCloudStorageAccess(projectId);
     final bool canInitCloudStorage = shouldInitCloudStorage && isAuthenticated;
 
     if (canInitCloudStorage) {
       log('Initializing cloud storage for project $projectId...');
-      _cloudStorage?.reset();
-      _cloudStorage = await initializeCloudStorage(projectId: projectId);
+      _cloudDatabase?.reset();
+      _cloudDatabase = await initializeCloudStorage(projectId: projectId);
       _publishModelStreamController.add(_publishModel);
       didChange = true;
       log('Cloud storage initialized.');
@@ -426,15 +426,15 @@ class DataManager {
     return didChange;
   }
 
-  Future<LocalStorage> initializeLocalStorage(
+  Future<LocalDatabase> initializeLocalStorage(
       {required String projectId}) async {
     final Box box = await Hive.openBox(projectId);
-    return HiveLocalStorage(box, identifier: projectId);
+    return HiveLocalDatabase(box, identifier: projectId);
   }
 
-  Future<CloudStorage> initializeCloudStorage(
+  Future<CloudDatabase> initializeCloudStorage(
       {required String projectId}) async {
-    final instance = FirestoreCloudStorage(
+    final instance = FirestoreCloudDatabase(
       projectId,
       firebaseFirestore,
       config.publishSource,
@@ -582,10 +582,10 @@ class DataManager {
     _publishModelDocumentListener?.cancel();
     status = CStatus.empty();
     _publishModel = null;
-    _localStorage?.dispose();
-    _localStorage = null;
-    _cloudStorage?.dispose();
-    _cloudStorage = null;
+    _localDatabase?.dispose();
+    _localDatabase = null;
+    _cloudDatabase?.dispose();
+    _cloudDatabase = null;
   }
 
   /// Sets the [SDKPublishModel] as null and cancels document streaming.
@@ -594,10 +594,10 @@ class DataManager {
     _publishModelDocumentListener?.cancel();
     _publishModelStreamController.add(null);
     _publishModel = null;
-    _localStorage?.dispose();
-    _localStorage = null;
-    _cloudStorage?.dispose();
-    _cloudStorage = null;
+    _localDatabase?.dispose();
+    _localDatabase = null;
+    _cloudDatabase?.dispose();
+    _cloudDatabase = null;
     status = CStatus.empty();
   }
 

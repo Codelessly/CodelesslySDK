@@ -231,7 +231,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   }
 
   Listenable? getStorageListenerFor(VariableMatch match, BuildContext context) {
-    final localStorage = context.read<Codelessly?>()?.localStorage;
+    final localStorage = context.read<Codelessly?>()?.localDatabase;
     if (localStorage == null) return null;
     if (match.hasPath) {
       final pathMatch =

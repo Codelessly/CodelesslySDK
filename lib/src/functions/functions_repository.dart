@@ -91,7 +91,7 @@ class FunctionsRepository {
       case ActionType.setStorage:
         await setStorageFromAction(context, action as SetStorageAction);
       case ActionType.setCloudStorage:
-        await setCloudStorageFromAction(
+        await setCloudDatabaseFromAction(
             context, action as SetCloudStorageAction);
       case ActionType.loadFromCloudStorage:
         await loadFromStorageAction(
@@ -915,7 +915,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     ScopedValues scopedValues,
   ) async {
     try {
-      final LocalStorage? storage = scopedValues.localStorage;
+      final LocalDatabase? storage = scopedValues.localStorage;
       if (storage == null) {
         _log('Storage is null.');
         return false;
@@ -934,7 +934,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     ScopedValues scopedValues,
   ) async {
     try {
-      final LocalStorage? storage = scopedValues.localStorage;
+      final LocalDatabase? storage = scopedValues.localStorage;
 
       if (storage == null) {
         _log('Storage is null.');
@@ -1039,7 +1039,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
   static Future<bool> _removeFromStorage(
       SetStorageAction action, ScopedValues scopedValues) async {
     try {
-      final LocalStorage? storage = scopedValues.localStorage;
+      final LocalDatabase? storage = scopedValues.localStorage;
       if (storage == null) {
         _log('Storage is null.');
         return false;
@@ -1162,7 +1162,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     return currentValue;
   }
 
-  static Future<bool> setCloudStorageFromAction(
+  static Future<bool> setCloudDatabaseFromAction(
     BuildContext context,
     SetCloudStorageAction action,
   ) async {
@@ -1181,9 +1181,9 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     ScopedValues scopedValues,
   ) async {
     try {
-      final CloudStorage? cloudStorage = scopedValues.cloudStorage;
+      final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
 
-      if (cloudStorage == null) {
+      if (cloudDatabase == null) {
         _log('Cloud storage is null.');
         return false;
       }
@@ -1230,7 +1230,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         };
       }
 
-      return await cloudStorage.addDocument(
+      return await cloudDatabase.addDocument(
         evaluatedPath,
         value: data,
         documentId: evaluatedDocumentId,
@@ -1248,9 +1248,9 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     UpdateDocumentSubAction subAction,
     ScopedValues scopedValues,
   ) async {
-    final CloudStorage? cloudStorage = scopedValues.cloudStorage;
+    final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
 
-    if (cloudStorage == null) {
+    if (cloudDatabase == null) {
       _log('Cloud storage is null.');
       return false;
     }
@@ -1276,7 +1276,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       // Parse to JSON.
       final Map<String, dynamic> data = jsonDecode(updatedValue);
 
-      return await cloudStorage.updateDocument(
+      return await cloudDatabase.updateDocument(
         evaluatedPath,
         documentId: evaluatedDocumentId,
         value: data,
@@ -1297,7 +1297,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       );
 
       final match = VariableMatch.parse(storageKey.wrapWithVariableSyntax());
-      final docData = await cloudStorage.getDocumentData(
+      final docData = await cloudDatabase.getDocumentData(
           subAction.path, subAction.documentId);
 
       final Object? currentValue;
@@ -1351,7 +1351,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
         _log('Setting storage key [$storageKey] to value [$value].');
         docData[storageKey] = value;
-        return await cloudStorage.updateDocument(
+        return await cloudDatabase.updateDocument(
           evaluatedPath,
           documentId: evaluatedDocumentId,
           // Update only the field that was changed.
@@ -1376,7 +1376,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       _log('Setting storage key [$storageKey] to value [$value].');
       docData[match.name] = storageData[match.name];
 
-      return await cloudStorage.updateDocument(
+      return await cloudDatabase.updateDocument(
         evaluatedPath,
         documentId: evaluatedDocumentId,
         // Update only the field that was changed.
@@ -1394,9 +1394,9 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     ScopedValues scopedValues,
   ) async {
     try {
-      final CloudStorage? cloudStorage = scopedValues.cloudStorage;
+      final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
 
-      if (cloudStorage == null) {
+      if (cloudDatabase == null) {
         _log('Cloud storage is null.');
         return false;
       }
@@ -1412,7 +1412,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         scopedValues: scopedValues,
       );
 
-      return await cloudStorage.removeDocument(
+      return await cloudDatabase.removeDocument(
         evaluatedPath,
         evaluatedDocumentId,
       );
@@ -1453,19 +1453,19 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     // set loading
     variable.value = variable.value.copyWith(
-      value: CloudStorageVariableUtils.loading(),
+      value: CloudDatabaseVariableUtils.loading(),
     );
 
-    final CloudStorage? cloudStorage = scopedValues.cloudStorage;
+    final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
 
-    if (cloudStorage == null) {
+    if (cloudDatabase == null) {
       _log('Cloud storage is null. Waiting for it to initialize...');
       return;
     }
 
     _log(
         'Streaming document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
-    cloudStorage.streamDocumentToVariable(
+    cloudDatabase.streamDocumentToVariable(
         evaluatedPath, evaluatedDocumentId, variable);
   }
 
