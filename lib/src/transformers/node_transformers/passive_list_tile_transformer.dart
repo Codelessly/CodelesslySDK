@@ -29,15 +29,13 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
     );
   }
 
-  void onTap(BuildContext context, List<Reaction> reactions) {
-    reactions.whereTriggerType(TriggerType.click).forEach((reaction) =>
-        FunctionsRepository.performAction(context, reaction.action));
-  }
+  void onTap(BuildContext context, List<Reaction> reactions) =>
+      FunctionsRepository.triggerAction(context, TriggerType.click,
+          reactions: reactions);
 
-  void onLongPress(BuildContext context, List<Reaction> reactions) {
-    reactions.whereTriggerType(TriggerType.longPress).forEach((reaction) =>
-        FunctionsRepository.performAction(context, reaction.action));
-  }
+  void onLongPress(BuildContext context, List<Reaction> reactions) =>
+      FunctionsRepository.triggerAction(context, TriggerType.longPress,
+          reactions: reactions);
 
   Widget buildPreview({
     ListTileProperties? properties,

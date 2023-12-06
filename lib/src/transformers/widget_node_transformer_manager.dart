@@ -137,18 +137,16 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
       return Material(
         type: MaterialType.transparency,
         child: InkWell(
-          onTap: () {
-            for (final Reaction reaction in onClickReactions) {
-              final ActionModel action = reaction.action;
-              FunctionsRepository.performAction(context, action);
-            }
-          },
-          onLongPress: () {
-            for (final Reaction reaction in onLongPressReactions) {
-              final ActionModel action = reaction.action;
-              FunctionsRepository.performAction(context, action);
-            }
-          },
+          onTap: () => FunctionsRepository.triggerAction(
+            context,
+            TriggerType.click,
+            reactions: onClickReactions,
+          ),
+          onLongPress: () => FunctionsRepository.triggerAction(
+            context,
+            TriggerType.longPress,
+            reactions: onLongPressReactions,
+          ),
           borderRadius: getBorderRadius(node),
           overlayColor: inkWell.overlayColor != null
               ? MaterialStatePropertyAll<Color>(
@@ -169,18 +167,16 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
-          onTap: () {
-            for (final Reaction reaction in onClickReactions) {
-              final ActionModel action = reaction.action;
-              FunctionsRepository.performAction(context, action);
-            }
-          },
-          onLongPress: () {
-            for (final Reaction reaction in onLongPressReactions) {
-              final ActionModel action = reaction.action;
-              FunctionsRepository.performAction(context, action);
-            }
-          },
+          onTap: () => FunctionsRepository.triggerAction(
+            context,
+            TriggerType.click,
+            reactions: onClickReactions,
+          ),
+          onLongPress: () => FunctionsRepository.triggerAction(
+            context,
+            TriggerType.longPress,
+            reactions: onLongPressReactions,
+          ),
           child: widget,
         ),
       );

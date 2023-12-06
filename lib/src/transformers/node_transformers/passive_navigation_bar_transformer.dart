@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/node_provider.dart';
 
 class PassiveNavigationBarTransformer
     extends NodeWidgetTransformer<NavigationBarNode> {
@@ -22,10 +23,10 @@ class PassiveNavigationBarTransformer
   }
 
   void onChanged(NavigationBarNode node, BuildContext context, int index) {
+    NodeProvider.setState(context, index);
     final item = node.properties.items[index];
-    item.reactions.forEach((reaction) {
-      FunctionsRepository.performAction(context, reaction.action);
-    });
+    FunctionsRepository.triggerAction(context, TriggerType.changed,
+        reactions: item.reactions);
   }
 
   Widget buildNavigationBarWidgetFromProps({

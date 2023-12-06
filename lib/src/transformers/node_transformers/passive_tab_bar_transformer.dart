@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
+import '../utils/node_provider.dart';
 
 class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
   PassiveTabBarTransformer(super.getNode, super.manager);
@@ -74,10 +75,10 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
   }
 
   void onChanged(BuildContext context, TabBarNode node, int index) {
+    NodeProvider.setState(context, index);
     final tab = node.properties.tabs[index];
-    tab.reactions.forEach((reaction) {
-      FunctionsRepository.performAction(context, reaction.action);
-    });
+    FunctionsRepository.triggerAction(context, TriggerType.changed,
+        reactions: tab.reactions, value: index);
   }
 }
 
