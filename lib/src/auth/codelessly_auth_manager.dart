@@ -284,8 +284,6 @@ class CodelesslyAuthManager extends AuthManager {
     try {
       log('Authenticating token...');
 
-      _idTokenResult = await firebaseAuth.currentUser?.getIdTokenResult();
-
       final authData = await verifyProjectAuthToken(
         userToken: _idTokenResult!.token!,
         config: config,
