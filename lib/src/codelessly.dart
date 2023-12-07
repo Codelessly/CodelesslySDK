@@ -639,7 +639,7 @@ class Codelessly {
           await dataManager.init(layoutID: null);
         }
 
-        log('Data managers initialized.');
+        log('Data manager initialized.');
         _updateStatus(CStatus.loading(CLoadingState.initializedDataManagers));
       } else {
         if (!initializeDataManagers) {
