@@ -20,7 +20,14 @@ enum PublishSource {
   /// Whether this is the templates collection.
   bool get isTemplate => this == PublishSource.template;
 
-  /// The path to the collection.
+  /// The path to the data collection.
+  String get rootDataCollection => switch (this) {
+        PublishSource.publish => 'data',
+        PublishSource.preview => 'preview_data',
+        PublishSource.template => 'template_data',
+      };
+
+  /// The path to the publish model collection.
   String get serverPath => switch (this) {
         PublishSource.publish => publishPath,
         PublishSource.preview => previewPath,
