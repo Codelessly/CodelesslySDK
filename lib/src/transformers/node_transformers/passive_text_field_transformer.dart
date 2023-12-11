@@ -110,15 +110,18 @@ class PassiveTextFieldWidget extends StatefulWidget {
 }
 
 class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
-  late final TextEditingController _controller = TextEditingController(
-    text: PropertyValueDelegate.substituteVariables(
-      widget.node.initialText,
-      nullSubstitutionMode: widget.settings.nullSubstitutionMode,
-      scopedValues: ScopedValues.of(context),
-    ),
-  );
+  late final TextEditingController _controller =
+      TextEditingController(text: getInitialText(widget.node.initialText));
 
   late final FocusNode _focusNode = FocusNode();
+
+  String getInitialText(String text) {
+    return PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: widget.settings.nullSubstitutionMode,
+      scopedValues: ScopedValues.of(context),
+    );
+  }
 
   @override
   void initState() {
@@ -131,6 +134,28 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     super.didChangeDependencies();
 
     NodeProvider.setState(context, _controller.text);
+  }
+
+  @override
+  void didUpdateWidget(covariant PassiveTextFieldWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Update controller text if this text field is bound to a variable.
+
+    // Get the value of bound variable and update the controller text if it's
+    // different from the current controller text.
+    final String? currentPropertyValue =
+        widget.node.variables['inputValue'] != null
+            ? PropertyValueDelegate.getPropertyValue<String>(
+                widget.node,
+                'inputValue',
+                scopedValues: ScopedValues.of(context),
+              )
+            : null;
+    if (currentPropertyValue != null &&
+        _controller.text != currentPropertyValue) {
+      _controller.text = currentPropertyValue;
+    }
   }
 
   @override

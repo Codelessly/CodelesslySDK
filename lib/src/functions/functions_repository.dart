@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -54,24 +55,23 @@ class FunctionsRepository {
       logger.log(_label, message, largePrint: largePrint);
 
   // Avoid using this method directly in favor of [triggerAction] if possible.
-  static Future<void> performAction(
+  static FutureOr performAction(
     BuildContext context,
     ActionModel action, {
     dynamic internalValue,
     bool notify = true,
-  }) async {
+  }) {
     _log('Performing action: $action');
     switch (action.type) {
       case ActionType.navigation:
-        await navigate(context, action as NavigationAction);
-        return;
+        return navigate(context, action as NavigationAction);
       case ActionType.showDialog:
-        await showDialogAction(context, action as ShowDialogAction);
-        return;
+        return showDialogAction(context, action as ShowDialogAction);
       case ActionType.link:
         launchURL(context, (action as LinkAction));
+        return true;
       case ActionType.submit:
-        await submitToNewsletter(context, action as SubmitAction);
+        return submitToNewsletter(context, action as SubmitAction);
       case ActionType.setValue:
         setValue(
           context,
@@ -79,22 +79,25 @@ class FunctionsRepository {
           internalValue: internalValue,
           notify: notify,
         );
+        return true;
       case ActionType.setVariant:
         setVariant(context, action as SetVariantAction, notify: notify);
+        return true;
       case ActionType.setVariable:
-        setVariableFromAction(context, action as SetVariableAction,
+        return setVariableFromAction(context, action as SetVariableAction,
             notify: notify);
       case ActionType.callFunction:
-        return callFunction(context, action as CallFunctionAction);
+        callFunction(context, action as CallFunctionAction);
+        return true;
       case ActionType.callApi:
-        await makeApiRequestFromAction(action as ApiCallAction, context);
+        return makeApiRequestFromAction(action as ApiCallAction, context);
       case ActionType.setStorage:
-        await setStorageFromAction(context, action as SetStorageAction);
+        return setStorageFromAction(context, action as SetStorageAction);
       case ActionType.setCloudStorage:
-        await setCloudDatabaseFromAction(
+        return setCloudDatabaseFromAction(
             context, action as SetCloudStorageAction);
       case ActionType.loadFromCloudStorage:
-        await loadFromStorageAction(
+        return loadFromStorageAction(
             context, action as LoadFromCloudStorageAction);
     }
   }
