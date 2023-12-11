@@ -1,7 +1,10 @@
 import 'dart:core';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -37,6 +40,104 @@ class PassiveListViewWidget extends StatelessWidget {
       return AdaptiveNodeBox(node: node, child: const SizedBox());
     }
     final itemNode = node.children.first;
+
+    final bool useCloudDatabase = node.properties.useCloudDatabase;
+
+    if (useCloudDatabase) {
+      final String? collectionPath = node.properties.collectionPath;
+
+      final codelessly = context.read<Codelessly>();
+      final codelesslyController = context.read<CodelesslyWidgetController>();
+
+      if (codelessly.authManager.authData == null) {
+        return codelesslyController.loadingBuilder?.call(context) ??
+            const Center(child: CircularProgressIndicator());
+      }
+
+      final PublishSource source =
+          codelessly.config?.publishSource ?? PublishSource.preview;
+      final query = codelessly.firebaseFirestore.collection(
+        '${source.rootDataCollection}/${codelessly.authManager.authData!.projectId}/$collectionPath',
+      );
+
+      return AdaptiveNodeBox(
+        node: node,
+        child: FirestoreQueryBuilder<Map<String, dynamic>>(
+          query: query,
+          builder: (context,
+              FirestoreQueryBuilderSnapshot<Map<String, dynamic>> snapshot,
+              child) {
+            if (snapshot.isFetching) {
+              return codelesslyController.loadingBuilder?.call(context) ??
+                  const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return codelesslyController.errorBuilder?.call(
+                    context,
+                    snapshot.error,
+                  ) ??
+                  const Center(child: Text('Error'));
+            }
+
+            final List<QueryDocumentSnapshot<Map>> docs = snapshot.docs;
+            final itemCount = docs.length;
+
+            // Item Count always exists.
+            return ListViewBuilder(
+              primary: node.primary,
+              shrinkWrap: (node.scrollDirection == AxisC.horizontal
+                  ? node.isHorizontalWrap
+                  : node.isVerticalWrap),
+              itemCount: itemCount,
+              padding: node.padding.flutterEdgeInsets,
+              keyboardDismissBehavior:
+                  node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+              physics:
+                  node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
+              scrollDirection: node.scrollDirection.flutterAxis,
+              cacheExtent: node.properties.cacheExtent,
+              reverse: node.reverse,
+              itemExtent: node.properties.itemExtent,
+              clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+              separatedBuilder: node.properties.hasSeparator
+                  ? (context, index) => ListViewItemSeparator(
+                        scrollDirection: node.scrollDirection,
+                        properties: node.properties,
+                      )
+                  : null,
+              itemBuilder: (context, index) {
+                final doc = docs.elementAtOrNull(index);
+                final id = doc?.id;
+                final data = doc?.data();
+                return IndexedItemProvider(
+                  key: ValueKey(index),
+                  item: IndexedItem(
+                    index,
+                    {
+                      if (id != null) 'id': id,
+                      ...?data,
+                    },
+                  ),
+                  child: Builder(builder: (context) {
+                    // This builder is important to pass a context that has
+                    // the IndexedItemProvider.
+                    return KeyedSubtree(
+                      key: ValueKey(index),
+                      child: manager.buildWidgetByID(
+                        itemNode,
+                        context,
+                        settings: settings,
+                      ),
+                    );
+                  }),
+                );
+              },
+            );
+          },
+        ),
+      );
+    }
 
     final List? data = PropertyValueDelegate.getVariableValueFromPath<List>(
           node.variables['data'] ?? '',

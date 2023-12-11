@@ -350,6 +350,8 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       shouldPerformOnLoadActions = false;
       if (widget.settings.isPreview) return;
 
+      triggerOnLoadActions(context);
+
       _subscription?.cancel();
       _subscription = context
           .read<Codelessly>()
@@ -360,8 +362,6 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
             'Received publish event for canvas ${widget.node.id}');
         triggerOnLoadActions(context);
       });
-
-      triggerOnLoadActions(context);
     }
   }
 
