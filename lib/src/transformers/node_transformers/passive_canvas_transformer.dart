@@ -371,7 +371,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     super.dispose();
   }
 
-  Future<void> triggerOnLoadActions(BuildContext context) async {
+  void triggerOnLoadActions(BuildContext context) {
     logger.log('PassiveCanvasWidget',
         'Checking for onLoad actions on canvas ${widget.node.id}');
     // perform onLoad actions. This must always be the last step in this method.
@@ -393,19 +393,23 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     }
 
     logger.log('PassiveCanvasWidget', 'Performing actions on canvas load');
-    for (final action in onLoadActions) {
-      // ignore: use_build_context_synchronously
-      final future = FunctionsRepository.performAction(
-        context,
-        action,
-        notify: false,
-      );
+    executeActionAt(0, onLoadActions);
+  }
 
-      if (!action.nonBlocking) {
-        // Await only if this action is not a non-blocking. It must not be
-        // awaited if it is non-blocking.
-        await future;
-      }
+  void executeActionAt(int index, List<ActionModel> actions) {
+    if (index >= actions.length) return;
+
+    final action = actions[index];
+    final future = FunctionsRepository.performAction(
+      context,
+      action,
+      notify: false,
+    );
+
+    if (future is! Future || action.nonBlocking) {
+      executeActionAt(index + 1, actions);
+    } else {
+      future.whenComplete(() => executeActionAt(index + 1, actions));
     }
   }
 
