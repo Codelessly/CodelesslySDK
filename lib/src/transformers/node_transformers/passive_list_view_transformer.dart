@@ -43,7 +43,7 @@ class PassiveListViewWidget extends StatelessWidget {
 
     final bool useCloudDatabase = node.properties.useCloudDatabase;
 
-    if (useCloudDatabase) {
+    if (useCloudDatabase && !settings.isPreview) {
       final String? collectionPath = node.properties.collectionPath;
 
       final codelessly = context.read<Codelessly>();
@@ -216,18 +216,18 @@ class ListViewBuilder extends StatelessWidget {
   const ListViewBuilder({
     super.key,
     required this.shrinkWrap,
+    required this.scrollDirection,
+    required this.reverse,
+    required this.clipBehavior,
+    required this.keyboardDismissBehavior,
     this.itemCount,
     this.padding,
     this.physics,
-    required this.scrollDirection,
     this.cacheExtent,
-    required this.reverse,
     this.itemExtent,
-    required this.clipBehavior,
     this.itemBuilder,
     this.separatedBuilder,
     this.primary = false,
-    required this.keyboardDismissBehavior,
   });
 
   @override
