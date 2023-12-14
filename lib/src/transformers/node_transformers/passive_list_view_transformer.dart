@@ -34,6 +34,85 @@ class PassiveListViewWidget extends StatelessWidget {
     required this.settings,
   });
 
+  Query<Map<String, dynamic>> constructQuery(
+      BuildContext context, Codelessly codelessly) {
+    final PublishSource source =
+        codelessly.config?.publishSource ?? PublishSource.preview;
+
+    final String collectionPath = node.collectionPath ?? '';
+
+    Query<Map<String, dynamic>> query = codelessly.firebaseFirestore.collection(
+      '${source.rootDataCollection}/${codelessly.authManager.authData!.projectId}/$collectionPath',
+    );
+
+    for (final whereFilter in node.whereFilters) {
+      // TODO: @Birju help.
+      // final String field = PropertyValueDelegate.substituteVariables(
+      //   whereFilter.field,
+      //   scopedValues: ScopedValues.of(context),
+      //   nullSubstitutionMode: settings.nullSubstitutionMode,
+      // );
+      // final Object value = PropertyValueDelegate.retrieveVariableValue(
+      //         whereFilter.value,
+      //         scopedValues: ScopedValues.of(context)) ??
+      //     '';
+      final String field = whereFilter.field;
+      final dynamic value = whereFilter.value;
+
+      query = switch (whereFilter.operator) {
+        WhereQueryOperator.equal => query.where(
+            field,
+            isEqualTo: value,
+          ),
+        WhereQueryOperator.notEqual => query.where(
+            field,
+            isNotEqualTo: value,
+          ),
+        WhereQueryOperator.arrayContains => query.where(
+            field,
+            arrayContains: value,
+          ),
+        WhereQueryOperator.inArray => query.where(
+            field,
+            whereIn: value as List,
+          ),
+        WhereQueryOperator.notInArray => query.where(
+            field,
+            whereNotIn: value as List,
+          ),
+        WhereQueryOperator.greaterThan => query.where(
+            field,
+            isGreaterThan: value,
+          ),
+        WhereQueryOperator.greaterThanOrEqual => query.where(
+            field,
+            isGreaterThanOrEqualTo: value,
+          ),
+        WhereQueryOperator.lessThan => query.where(
+            field,
+            isLessThan: value,
+          ),
+        WhereQueryOperator.lessThanOrEqual => query.where(
+            field,
+            isLessThanOrEqualTo: value,
+          ),
+        WhereQueryOperator.arrayContainsAny => query.where(
+            field,
+            arrayContainsAny: value as List,
+          ),
+      };
+    }
+
+    for (final orderByFilter in node.orderByOperations) {
+      query = query.orderBy(
+        orderByFilter.field,
+        descending: orderByFilter.sortOrder == OrderByQuerySortOrder.descending,
+      );
+    }
+
+    return query;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (node.children.isEmpty) {
@@ -41,11 +120,9 @@ class PassiveListViewWidget extends StatelessWidget {
     }
     final itemNode = node.children.first;
 
-    final bool useCloudDatabase = node.properties.useCloudDatabase;
+    final bool useCloudDatabase = node.useCloudDatabase;
 
     if (useCloudDatabase && !settings.isPreview) {
-      final String? collectionPath = node.properties.collectionPath;
-
       final codelessly = context.read<Codelessly>();
       final codelesslyController = context.read<CodelesslyWidgetController>();
 
@@ -54,19 +131,14 @@ class PassiveListViewWidget extends StatelessWidget {
             const Center(child: CircularProgressIndicator());
       }
 
-      final PublishSource source =
-          codelessly.config?.publishSource ?? PublishSource.preview;
-      final query = codelessly.firebaseFirestore.collection(
-        '${source.rootDataCollection}/${codelessly.authManager.authData!.projectId}/$collectionPath',
-      );
+      final query = constructQuery(context, codelessly);
 
       return AdaptiveNodeBox(
         node: node,
         child: FirestoreQueryBuilder<Map<String, dynamic>>(
           query: query,
-          builder: (context,
-              FirestoreQueryBuilderSnapshot<Map<String, dynamic>> snapshot,
-              child) {
+          pageSize: node.limit,
+          builder: (context, snapshot, child) {
             if (snapshot.isFetching) {
               return codelesslyController.loadingBuilder?.call(context) ??
                   const Center(child: CircularProgressIndicator());
