@@ -160,6 +160,16 @@ abstract class CloudDatabase extends ChangeNotifier {
   );
 
   void reset();
+
+  void streamCollectionToVariable(
+    String path,
+    Observable<VariableData> variable, {
+    required List<WhereQueryFilter> whereFilters,
+    required List<OrderByQueryFilter> orderByOperations,
+    int? limit,
+    required ScopedValues scopedValues,
+    required NullSubstitutionMode nullSubstitutionMode,
+  });
 }
 
 /// A implementation that uses Firestore as the backend.
@@ -391,5 +401,64 @@ class FirestoreCloudDatabase extends CloudDatabase {
     // Cancel all subscriptions.
     _subscriptions.forEach((sub) => sub.cancel());
     super.dispose();
+  }
+
+  @override
+  void streamCollectionToVariable(
+    String path,
+    Observable<VariableData> variable, {
+    required List<WhereQueryFilter> whereFilters,
+    required List<OrderByQueryFilter> orderByOperations,
+    int? limit,
+    required ScopedValues scopedValues,
+    required NullSubstitutionMode nullSubstitutionMode,
+  }) {
+    // Get doc reference.
+    final collectionRef = getCollectionPath(path);
+
+    final Stream<QuerySnapshot<Map<String, dynamic>>> stream;
+    // build query if required
+    if (whereFilters.isNotEmpty || orderByOperations.isNotEmpty) {
+      final query = constructQueryFromRef(
+        collectionRef,
+        whereFilters: whereFilters,
+        orderByOperations: orderByOperations,
+        limit: limit,
+        scopedValues: scopedValues,
+        nullSubstitutionMode: nullSubstitutionMode,
+      );
+      stream = query.snapshots();
+    } else {
+      // Stream document.
+      stream = collectionRef.snapshots();
+    }
+
+    // Listen to the stream and update the variable.
+    final subscription = stream.listen(
+      (snapshot) {
+        final docs =
+            snapshot.docs.map((doc) => {...doc.data(), 'id': doc.id}).toList();
+        logger.log(_label, 'Document stream update from cloud storage: $path');
+        logger.log(_label,
+            'Updating variable ${variable.value.name} with success state.');
+        // Set the variable with success state.
+        variable.set(
+          variable.value
+              .copyWith(value: CloudDatabaseVariableUtils.success(docs)),
+        );
+      },
+      onError: (error) {
+        logger.log(_label, 'Error loading document from cloud storage: $path');
+        // Set the variable with error state.
+        variable.set(
+          variable.value.copyWith(
+            value: CloudDatabaseVariableUtils.error(error.toString()),
+          ),
+        );
+      },
+    );
+
+    // Add subscription to the list of subscriptions.
+    _subscriptions.add(subscription);
   }
 }
