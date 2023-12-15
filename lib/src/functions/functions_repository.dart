@@ -1441,11 +1441,6 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
       scopedValues: scopedValues,
     );
-    final evaluatedDocumentId = PropertyValueDelegate.substituteVariables(
-      action.documentId,
-      nullSubstitutionMode: NullSubstitutionMode.emptyString,
-      scopedValues: scopedValues,
-    );
 
     Observable<VariableData>? variable;
     if (action.variable != null) {
@@ -1470,10 +1465,29 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       return;
     }
 
-    _log(
-        'Streaming document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
-    cloudDatabase.streamDocumentToVariable(
-        evaluatedPath, evaluatedDocumentId, variable);
+    if (action.loadSingleDocument) {
+      final evaluatedDocumentId = PropertyValueDelegate.substituteVariables(
+        action.documentId,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
+      );
+      _log(
+          'Streaming document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
+      cloudDatabase.streamDocumentToVariable(
+          evaluatedPath, evaluatedDocumentId, variable);
+    } else {
+      _log('Streaming collection from cloud storage: $evaluatedPath');
+
+      cloudDatabase.streamCollectionToVariable(
+        evaluatedPath,
+        variable,
+        whereFilters: action.whereFilters,
+        orderByOperations: action.orderByOperations,
+        limit: action.limit > 0 ? action.limit : null,
+        scopedValues: ScopedValues.of(context),
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      );
+    }
   }
 
   static int? _performIntOperation(
