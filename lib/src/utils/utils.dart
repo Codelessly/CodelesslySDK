@@ -714,14 +714,6 @@ Query<Map<String, dynamic>> constructQueryFromRef(
           field,
           arrayContains: value,
         ),
-      WhereQueryOperator.inArray => query.where(
-          field,
-          whereIn: value as List,
-        ),
-      WhereQueryOperator.notInArray => query.where(
-          field,
-          whereNotIn: value as List,
-        ),
       WhereQueryOperator.greaterThan => query.where(
           field,
           isGreaterThan: value,
@@ -740,7 +732,15 @@ Query<Map<String, dynamic>> constructQueryFromRef(
         ),
       WhereQueryOperator.arrayContainsAny => query.where(
           field,
-          arrayContainsAny: value as List,
+          arrayContainsAny: value.typedValue<List>(),
+        ),
+      WhereQueryOperator.inArray => query.where(
+          field,
+          whereIn: value.typedValue<List>(),
+        ),
+      WhereQueryOperator.notInArray => query.where(
+          field,
+          whereNotIn: value.typedValue<List>(),
         ),
     };
   }
