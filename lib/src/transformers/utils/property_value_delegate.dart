@@ -160,6 +160,7 @@ class PropertyValueDelegate {
     required ScopedValues scopedValues,
     required NullSubstitutionMode nullSubstitutionMode,
   }) {
+    if (text.trim().isEmpty) return text;
     return text.splitMapJoinRegex(
       variablePathRegex,
       onNonMatch: (text) => text,

@@ -430,12 +430,14 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   }) {
     final String? value =
         context.getNodeValue(node.id, property) ?? defaultValue;
-    if (value == null) return null;
-    return PropertyValueDelegate.substituteVariables(
+    if (value == null || value.isEmpty) return null;
+    final newValue = PropertyValueDelegate.substituteVariables(
       value,
       scopedValues: scopedValues,
       nullSubstitutionMode: settings.nullSubstitutionMode,
     );
+    if(newValue.isEmpty) return null;
+    return newValue;
   }
 }
 
