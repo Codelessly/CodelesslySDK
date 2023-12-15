@@ -48,7 +48,7 @@ class PassiveListViewWidget extends StatelessWidget {
     return constructQueryFromRef(
       query,
       whereFilters: node.whereFilters,
-      orderByOperations: node.orderByOperations,
+      orderByOperations: node.orderByFilters,
       scopedValues: ScopedValues.of(context),
       nullSubstitutionMode: settings.nullSubstitutionMode,
     );
@@ -78,7 +78,7 @@ class PassiveListViewWidget extends StatelessWidget {
         node: node,
         child: FirestoreQueryBuilder<Map<String, dynamic>>(
           query: query,
-          pageSize: node.limit,
+          pageSize: node.limit ?? 20,
           builder: (context, snapshot, child) {
             if (snapshot.isFetching) {
               return codelesslyController.loadingBuilder?.call(context) ??
