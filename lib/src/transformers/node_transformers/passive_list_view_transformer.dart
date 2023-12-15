@@ -46,18 +46,17 @@ class PassiveListViewWidget extends StatelessWidget {
     );
 
     for (final whereFilter in node.whereFilters) {
-      // TODO: @Birju help.
-      // final String field = PropertyValueDelegate.substituteVariables(
-      //   whereFilter.field,
-      //   scopedValues: ScopedValues.of(context),
-      //   nullSubstitutionMode: settings.nullSubstitutionMode,
-      // );
-      // final Object value = PropertyValueDelegate.retrieveVariableValue(
-      //         whereFilter.value,
-      //         scopedValues: ScopedValues.of(context)) ??
-      //     '';
-      final String field = whereFilter.field;
-      final dynamic value = whereFilter.value;
+      final String field = PropertyValueDelegate.substituteVariables(
+        whereFilter.field,
+        scopedValues: ScopedValues.of(context),
+        nullSubstitutionMode: settings.nullSubstitutionMode,
+      );
+      final Object value = PropertyValueDelegate.substituteVariables(
+            whereFilter.value,
+            scopedValues: ScopedValues.of(context),
+            nullSubstitutionMode: settings.nullSubstitutionMode,
+          ).parsedValue() ??
+          '';
 
       query = switch (whereFilter.operator) {
         WhereQueryOperator.equal => query.where(
@@ -104,8 +103,13 @@ class PassiveListViewWidget extends StatelessWidget {
     }
 
     for (final orderByFilter in node.orderByOperations) {
-      query = query.orderBy(
+      final String field = PropertyValueDelegate.substituteVariables(
         orderByFilter.field,
+        scopedValues: ScopedValues.of(context),
+        nullSubstitutionMode: settings.nullSubstitutionMode,
+      );
+      query = query.orderBy(
+        field,
         descending: orderByFilter.sortOrder == OrderByQuerySortOrder.descending,
       );
     }
