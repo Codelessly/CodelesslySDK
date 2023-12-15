@@ -1482,8 +1482,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         evaluatedPath,
         variable,
         whereFilters: action.whereFilters,
-        orderByOperations: action.orderByOperations,
-        limit: action.limit > 0 ? action.limit : null,
+        orderByOperations: action.orderByFilters,
+        limit: (action.limit ?? 0) > 0 ? action.limit : null,
         scopedValues: ScopedValues.of(context),
         nullSubstitutionMode: NullSubstitutionMode.emptyString,
       );
