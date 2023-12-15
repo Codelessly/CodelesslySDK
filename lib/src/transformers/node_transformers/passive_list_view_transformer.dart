@@ -45,76 +45,13 @@ class PassiveListViewWidget extends StatelessWidget {
       '${source.rootDataCollection}/${codelessly.authManager.authData!.projectId}/$collectionPath',
     );
 
-    for (final whereFilter in node.whereFilters) {
-      final String field = PropertyValueDelegate.substituteVariables(
-        whereFilter.field,
-        scopedValues: ScopedValues.of(context),
-        nullSubstitutionMode: settings.nullSubstitutionMode,
-      );
-      final Object value = PropertyValueDelegate.substituteVariables(
-            whereFilter.value,
-            scopedValues: ScopedValues.of(context),
-            nullSubstitutionMode: settings.nullSubstitutionMode,
-          ).parsedValue() ??
-          '';
-
-      query = switch (whereFilter.operator) {
-        WhereQueryOperator.equal => query.where(
-            field,
-            isEqualTo: value,
-          ),
-        WhereQueryOperator.notEqual => query.where(
-            field,
-            isNotEqualTo: value,
-          ),
-        WhereQueryOperator.arrayContains => query.where(
-            field,
-            arrayContains: value,
-          ),
-        WhereQueryOperator.inArray => query.where(
-            field,
-            whereIn: value as List,
-          ),
-        WhereQueryOperator.notInArray => query.where(
-            field,
-            whereNotIn: value as List,
-          ),
-        WhereQueryOperator.greaterThan => query.where(
-            field,
-            isGreaterThan: value,
-          ),
-        WhereQueryOperator.greaterThanOrEqual => query.where(
-            field,
-            isGreaterThanOrEqualTo: value,
-          ),
-        WhereQueryOperator.lessThan => query.where(
-            field,
-            isLessThan: value,
-          ),
-        WhereQueryOperator.lessThanOrEqual => query.where(
-            field,
-            isLessThanOrEqualTo: value,
-          ),
-        WhereQueryOperator.arrayContainsAny => query.where(
-            field,
-            arrayContainsAny: value as List,
-          ),
-      };
-    }
-
-    for (final orderByFilter in node.orderByOperations) {
-      final String field = PropertyValueDelegate.substituteVariables(
-        orderByFilter.field,
-        scopedValues: ScopedValues.of(context),
-        nullSubstitutionMode: settings.nullSubstitutionMode,
-      );
-      query = query.orderBy(
-        field,
-        descending: orderByFilter.sortOrder == OrderByQuerySortOrder.descending,
-      );
-    }
-
-    return query;
+    return constructQueryFromRef(
+      query,
+      whereFilters: node.whereFilters,
+      orderByOperations: node.orderByOperations,
+      scopedValues: ScopedValues.of(context),
+      nullSubstitutionMode: settings.nullSubstitutionMode,
+    );
   }
 
   @override

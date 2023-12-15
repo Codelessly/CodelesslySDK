@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
@@ -669,4 +670,92 @@ class CloudDatabaseVariableUtils {
         'status': 'error',
         'hasData': data != null,
       };
+}
+
+/// Constructs a [Query] on top of given [Query] reference using given [whereFilters]
+/// and [orderByOperations].
+Query<Map<String, dynamic>> constructQueryFromRef(
+  Query<Map<String, dynamic>> ref, {
+  required List<WhereQueryFilter> whereFilters,
+  required List<OrderByQueryFilter> orderByOperations,
+  int? limit,
+  required ScopedValues scopedValues,
+  required NullSubstitutionMode nullSubstitutionMode,
+}) {
+  Query<Map<String, dynamic>> query = ref;
+
+  if (limit != null) query.limit(limit);
+
+  if (whereFilters.isEmpty && orderByOperations.isEmpty) return query;
+
+  for (final whereFilter in whereFilters) {
+    final String field = PropertyValueDelegate.substituteVariables(
+      whereFilter.field,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: nullSubstitutionMode,
+    );
+    final Object value = PropertyValueDelegate.substituteVariables(
+          whereFilter.value,
+          scopedValues: scopedValues,
+          nullSubstitutionMode: nullSubstitutionMode,
+        ).parsedValue() ??
+        '';
+
+    query = switch (whereFilter.operator) {
+      WhereQueryOperator.equal => query.where(
+          field,
+          isEqualTo: value,
+        ),
+      WhereQueryOperator.notEqual => query.where(
+          field,
+          isNotEqualTo: value,
+        ),
+      WhereQueryOperator.arrayContains => query.where(
+          field,
+          arrayContains: value,
+        ),
+      WhereQueryOperator.inArray => query.where(
+          field,
+          whereIn: value as List,
+        ),
+      WhereQueryOperator.notInArray => query.where(
+          field,
+          whereNotIn: value as List,
+        ),
+      WhereQueryOperator.greaterThan => query.where(
+          field,
+          isGreaterThan: value,
+        ),
+      WhereQueryOperator.greaterThanOrEqual => query.where(
+          field,
+          isGreaterThanOrEqualTo: value,
+        ),
+      WhereQueryOperator.lessThan => query.where(
+          field,
+          isLessThan: value,
+        ),
+      WhereQueryOperator.lessThanOrEqual => query.where(
+          field,
+          isLessThanOrEqualTo: value,
+        ),
+      WhereQueryOperator.arrayContainsAny => query.where(
+          field,
+          arrayContainsAny: value as List,
+        ),
+    };
+  }
+
+  for (final orderByFilter in orderByOperations) {
+    final String field = PropertyValueDelegate.substituteVariables(
+      orderByFilter.field,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: nullSubstitutionMode,
+    );
+    query = query.orderBy(
+      field,
+      descending: orderByFilter.sortOrder == OrderByQuerySortOrder.descending,
+    );
+  }
+
+  return query;
 }
