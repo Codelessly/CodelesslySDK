@@ -188,6 +188,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
     final ScopedValues scopedValues = ScopedValues.of(context);
 
+    final TextInputType keyboardType =
+        widget.node.properties.keyboardType == TextInputTypeEnum.number
+            ? TextInputType.numberWithOptions(
+                decimal: widget.node.properties.showDecimalKey,
+                signed: widget.node.properties.showSignKey)
+            : widget.node.properties.keyboardType.toFlutter();
+
     Widget field;
 
     field = TextField(
@@ -201,7 +208,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       obscureText: obscureText,
       readOnly: readOnly,
       showCursor: showCursor,
-      keyboardType: widget.node.properties.keyboardType.toFlutter(),
+      keyboardType: keyboardType,
       selectionHeightStyle:
           widget.node.properties.selectionHeightStyle.toFlutter(),
       selectionWidthStyle:
@@ -436,7 +443,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       scopedValues: scopedValues,
       nullSubstitutionMode: settings.nullSubstitutionMode,
     );
-    if(newValue.isEmpty) return null;
+    if (newValue.isEmpty) return null;
     return newValue;
   }
 }
