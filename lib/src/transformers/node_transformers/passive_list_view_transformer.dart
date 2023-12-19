@@ -127,10 +127,7 @@ class PassiveListViewWidget extends StatelessWidget {
                   key: ValueKey(index),
                   item: IndexedItem(
                     index,
-                    {
-                      if (id != null) 'id': id,
-                      ...?data,
-                    },
+                    {if (id != null) 'id': id, ...?data},
                   ),
                   child: Builder(builder: (context) {
                     // This builder is important to pass a context that has
