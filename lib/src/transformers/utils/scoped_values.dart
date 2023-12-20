@@ -53,6 +53,18 @@ class ScopedValues {
   Map<String, Observable<List<ValueModel>>> get nodeValues =>
       codelesslyContext?.nodeValues ?? {};
 
+  /// Creates a new scoped values instance with empty values.
+  ScopedValues.empty()
+      : _codelesslyContextRef = null,
+        _localStorageRef = null,
+        _cloudDatabaseRef = null,
+        _variablesOverrides = null,
+        _dataOverrides = null,
+        indexedItem = null,
+        nodeState = null,
+        routeParams = {};
+
+  /// Creates a new scoped values instance from a given context.
   ScopedValues.of(
     BuildContext context, {
     List<VariableData>? variablesOverrides,
