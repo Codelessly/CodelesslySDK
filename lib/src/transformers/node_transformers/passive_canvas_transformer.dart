@@ -379,6 +379,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
         .whereTriggerType(TriggerType.load)
         .map((e) => e.action)
         .where((action) =>
+            action.enabled &&
             // Because calling api is handled in LayoutBuilder.
             action.type != ActionType.callApi &&
             action.type != ActionType.navigation &&
