@@ -87,8 +87,8 @@ class PassiveDividerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (node.properties.isVertical) {
-      return SizedBox(
-        height: node.isVerticalExpanded ? null : node.basicBoxLocal.height,
+      return AdaptiveNodeBox(
+        node: node,
         child: VerticalDivider(
           width: node.basicBoxLocal.width,
           thickness: node.properties.thickness,
@@ -98,8 +98,8 @@ class PassiveDividerWidget extends StatelessWidget {
         ),
       );
     }
-    return SizedBox(
-      width: node.isHorizontalExpanded ? null : node.basicBoxLocal.width,
+    return AdaptiveNodeBox(
+      node: node,
       child: Divider(
         height: node.basicBoxLocal.height,
         thickness: node.properties.thickness,

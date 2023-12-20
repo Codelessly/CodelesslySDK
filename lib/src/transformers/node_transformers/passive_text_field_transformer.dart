@@ -195,9 +195,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
                 signed: widget.node.properties.showSignKey)
             : widget.node.properties.keyboardType.toFlutter();
 
-    Widget field;
-
-    field = TextField(
+    Widget field = TextField(
       focusNode: _focusNode,
       autocorrect: widget.node.properties.autoCorrect,
       autofocus: !widget.settings.isPreview && widget.node.properties.autoFocus,
@@ -246,24 +244,15 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       ),
     );
 
-    final double? width =
-        widget.node.isHorizontalWrap || widget.node.isHorizontalExpanded
-            ? null
-            : widget.node.basicBoxLocal.width;
-    final double? height =
-        widget.node.isVerticalWrap || widget.node.isVerticalExpanded
-            ? null
-            : widget.node.basicBoxLocal.height;
-
     if (widget.node.isHorizontalWrap) {
-      field = IntrinsicWidth(
-        child: field,
-      );
+      field = IntrinsicWidth(child: field);
+    }
+    if (widget.node.isVerticalWrap) {
+      field = IntrinsicHeight(child: field);
     }
 
-    field = SizedBox(
-      width: width,
-      height: height,
+    field = AdaptiveNodeBox(
+      node: widget.node,
       child: field,
     );
 
