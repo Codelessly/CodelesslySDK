@@ -61,6 +61,10 @@ class FunctionsRepository {
     dynamic internalValue,
     bool notify = true,
   }) {
+    if (!action.enabled) {
+      _log('Action ${action.type} is disabled. Skipping...');
+      return true;
+    }
     _log('Performing action: $action');
     switch (action.type) {
       case ActionType.navigation:

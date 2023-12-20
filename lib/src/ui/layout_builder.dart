@@ -234,7 +234,7 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         .whereTriggerType(TriggerType.load)
         .map((e) => e.action)
         .whereType<ApiCallAction>()
-        .where((action) => action.apiId != null)
+        .where((action) => action.enabled && action.apiId != null)
         .toList();
 
     final CodelesslyContext codelesslyContext =
@@ -277,7 +277,7 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         .whereTriggerType(TriggerType.load)
         .map((e) => e.action)
         .whereType<LoadFromCloudStorageAction>()
-        .where((action) => action.variable != null)
+        .where((action) => action.enabled && action.variable != null)
         .toList();
 
     final CodelesslyContext codelesslyContext =
