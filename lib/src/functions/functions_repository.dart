@@ -330,6 +330,7 @@ class FunctionsRepository {
 
     await showDialog(
       context: context,
+      useRootNavigator: false,
       barrierDismissible: action.barrierDismissible,
       barrierColor: action.barrierColor?.toFlutterColor(),
       routeSettings: RouteSettings(arguments: parsedParams),
