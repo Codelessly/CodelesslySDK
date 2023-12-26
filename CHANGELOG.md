@@ -1,3 +1,43 @@
+## 0.8.0
+- Codelessly Data support. Save and write data to Codelessly Cloud.
+- New GridView widget.
+- Codelessly Data Query Filters support. Sort and filter data.
+- Variable improvements.
+  - Include 'set' and 'replace' operations for list operations.
+  - Add new ${value} predefined variable to expose internal node data. TextFields only for now.
+  - Track internal value with new NodeProvider InheritedWidget per-widget.
+  - Fix variable substitution for api request body of text type.
+- TextField improvements.
+  - Add variable support for all text field text properties.
+  - Add support for actions on prefix and suffix icons on text fields.
+  - Fix set operation on map not showing input field.
+  - Implement proper TextFieldModel minimum size computation.
+  - Add support for TextInputType.numberWithOptions.
+- JSON improvements.
+  - Fix json variable controller highlighting.
+  - Fix json syntax highlighting for storage operations.
+  - Fix focus nodes for json variable input fields.
+- List improvements.
+  - Add insertAll option for list operations
+  - Refactor insert list operation to use json input field.
+- Add copy-paste and shortcuts support for actions.
+- Add support for non-blocking actions.
+- Implement option to enable/disable action.
+- Add firebase queries support for grid view.
+- Add support for number operations.
+- Codelessly Data improvements.
+  - Implement filters and sort for load from cloud database action.
+  - Make document ID optional for load from cloud database action.
+  - Improve UI of list view settings panel.
+  - Dismiss filters dialog on save.
+  - Implement collection streaming for cloud database.
+  - Add limit option in list view settings panel.
+  - Add limit option for load from cloud database action.
+- Add Firestore ListView support.
+- Add Firestore and remove FireDart. 
+- Fix image url substitution.
+- New authentication and Firebase initialization.
+
 ## 0.7.5
 - API fixes.
   - Fix variable substitution in API parameter value.
