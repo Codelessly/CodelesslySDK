@@ -57,16 +57,17 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
   }
 
   @override
-  void dispose() {
-    disposeTapGestureRecognizers();
-    super.dispose();
-  }
-
-  @override
   void didUpdateWidget(covariant PassiveTextWidget oldWidget) {
     disposeTapGestureRecognizers();
     initTapGestureRecognizers();
     super.didUpdateWidget(oldWidget);
+  }
+
+
+  @override
+  void dispose() {
+    disposeTapGestureRecognizers();
+    super.dispose();
   }
 
   /// Initializes TapGestureRecognizer for each link that's not empty and

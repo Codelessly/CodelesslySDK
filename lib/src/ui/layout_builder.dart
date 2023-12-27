@@ -301,12 +301,15 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    return transformerManager.buildWidgetFromNode(
-      canvasNode,
-      context,
-      settings: const WidgetBuildSettings(
-        debugLabel: 'layout builder',
-        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+      child: transformerManager.buildWidgetFromNode(
+        canvasNode,
+        context,
+        settings: const WidgetBuildSettings(
+          debugLabel: 'layout builder',
+          nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        ),
       ),
     );
   }

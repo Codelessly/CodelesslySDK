@@ -262,34 +262,27 @@ class TextUtils {
   }
 
   /// Convert LetterSpacing from Figma values into Flutter.
-  static double? retrieveLetterSpacing(
+  static double retrieveLetterSpacing(
     LetterSpacing letterSpacing,
     double fontSize,
-  ) {
-    if (letterSpacing.unit == LetterSpacingUnitEnum.pixels) {
-      return letterSpacing.value;
-    } else if (letterSpacing.unit == LetterSpacingUnitEnum.percent) {
-      return (letterSpacing.value * fontSize) / 100;
-    } else {
-      // When it is set to ZERO.
-      return null;
-    }
-  }
+  ) =>
+      switch (letterSpacing.unit) {
+        LetterSpacingUnitEnum.pixels => letterSpacing.value,
+        LetterSpacingUnitEnum.percent => (letterSpacing.value * fontSize) / 100,
+      };
 
   /// Convert LineHeight from Figma values into Flutter.
   static double? retrieveLineHeight(
     LineHeight lineHeight,
     double fontSize,
-  ) {
-    if (lineHeight.unit == LineHeightUnitEnum.pixels) {
-      return lineHeight.value! / fontSize;
-    } else if (lineHeight.unit == LineHeightUnitEnum.percent) {
-      return lineHeight.value! / 100;
-    } else {
-      // When it is set to AUTO.
-      return null;
-    }
-  }
+  ) =>
+      lineHeight.value == null
+          ? 1
+          : switch (lineHeight.unit) {
+              LineHeightUnitEnum.pixels => lineHeight.value! / fontSize,
+              LineHeightUnitEnum.percent => lineHeight.value! / 100,
+              LineHeightUnitEnum.auto => 1,
+            };
 
   static TextStyle retrieveTextStyleFromProp(
     TextProp prop, {
