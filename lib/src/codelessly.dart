@@ -498,16 +498,6 @@ class Codelessly {
       return _status;
     }
 
-    assert(
-      (config == null) != (_config == null),
-      _config == null
-          ? 'The SDK cannot be initialized if it is not configured. '
-              '\nConsider specifying a [CodelesslyConfig] when initializing.'
-          : 'A [CodelesslyConfig] was already provided.'
-              '\nConsider removing the duplicate config or calling '
-              '[Codelessly.instance.dispose] before reinitializing.',
-    );
-
     _updateStatus(CStatus.loading(CLoadingState.initializing));
 
     _config = config;
