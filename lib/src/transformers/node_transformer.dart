@@ -68,7 +68,12 @@ abstract class BuildSettings with EquatableMixin {
 /// A class that holds information about how to build a node that is to be
 /// output as a Flutter widget.
 class WidgetBuildSettings extends BuildSettings {
+  /// A debug label that is used to identify transformers in
+  /// the widget tree.
   final String debugLabel;
+
+  /// Whether to replace variables with fx symbols.
+  final bool replaceVariablesWithSymbols;
 
   /// Defines what to do when a variable path results in a null value.
   final NullSubstitutionMode nullSubstitutionMode;
@@ -87,6 +92,7 @@ class WidgetBuildSettings extends BuildSettings {
     super.obscureImages,
     required this.debugLabel,
     this.nullSubstitutionMode = NullSubstitutionMode.noChange,
+    this.replaceVariablesWithSymbols = false,
   });
 
   /// Creates a copy of this [WidgetBuildSettings] instance.
@@ -103,6 +109,7 @@ class WidgetBuildSettings extends BuildSettings {
     bool? obscureImages,
     String? debugLabel,
     NullSubstitutionMode? nullSubstitutionMode,
+    bool? replaceVariablesWithSymbols,
   }) {
     return WidgetBuildSettings(
       withOpacity: withOpacity ?? this.withOpacity,
@@ -117,6 +124,8 @@ class WidgetBuildSettings extends BuildSettings {
       obscureImages: obscureImages ?? this.obscureImages,
       debugLabel: debugLabel ?? this.debugLabel,
       nullSubstitutionMode: nullSubstitutionMode ?? this.nullSubstitutionMode,
+      replaceVariablesWithSymbols:
+          replaceVariablesWithSymbols ?? this.replaceVariablesWithSymbols,
     );
   }
 
@@ -125,6 +134,7 @@ class WidgetBuildSettings extends BuildSettings {
         ...super.props,
         debugLabel,
         nullSubstitutionMode,
+        replaceVariablesWithSymbols,
       ];
 }
 

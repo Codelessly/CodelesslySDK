@@ -63,7 +63,6 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
     super.didUpdateWidget(oldWidget);
   }
 
-
   @override
   void dispose() {
     disposeTapGestureRecognizers();

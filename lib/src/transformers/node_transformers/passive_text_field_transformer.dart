@@ -87,6 +87,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
 class PassiveTextFieldWidget extends StatefulWidget {
   final TextFieldNode node;
   final WidgetBuildSettings settings;
+  final List<VariableData> variablesOverrides;
   final Function(BuildContext context, String value)? onTap;
   final Function(BuildContext context, String value)? onChanged;
   final Function(BuildContext context, String value)? onSubmitted;
@@ -94,7 +95,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
       onIconTap;
   final bool useIconFonts;
 
-  const PassiveTextFieldWidget({
+  PassiveTextFieldWidget({
     super.key,
     required this.node,
     required this.settings,
@@ -103,7 +104,8 @@ class PassiveTextFieldWidget extends StatefulWidget {
     this.onSubmitted,
     this.useIconFonts = false,
     this.onIconTap,
-  });
+    List<VariableData>? variables,
+  }) : variablesOverrides = variables ?? [];
 
   @override
   State<PassiveTextFieldWidget> createState() => _PassiveTextFieldWidgetState();
@@ -141,17 +143,25 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     super.didUpdateWidget(oldWidget);
 
     // Update controller text if this text field is bound to a variable.
+    final ScopedValues scopedValues = ScopedValues.of(context);
 
     // Get the value of bound variable and update the controller text if it's
     // different from the current controller text.
-    final String? currentPropertyValue =
-        widget.node.variables['inputValue'] != null
-            ? PropertyValueDelegate.getPropertyValue<String>(
-                widget.node,
-                'inputValue',
-                scopedValues: ScopedValues.of(context),
-              )
-            : null;
+    String? currentPropertyValue = widget.node.variables['inputValue'] != null
+        ? PropertyValueDelegate.getPropertyValue<String>(
+            widget.node,
+            'inputValue',
+            scopedValues: scopedValues,
+          )
+        : null;
+    if (currentPropertyValue != null) {
+      currentPropertyValue = PropertyValueDelegate.substituteVariables(
+        currentPropertyValue,
+        scopedValues: scopedValues,
+        nullSubstitutionMode: widget.settings.nullSubstitutionMode,
+      );
+    }
+
     if (currentPropertyValue != null &&
         _controller.text != currentPropertyValue) {
       _controller.text = currentPropertyValue;
@@ -271,13 +281,14 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         context.getNodeValue(node.id, 'isCollapsed') ?? decoration.isCollapsed;
     final bool isDense =
         context.getNodeValue(node.id, 'isDense') ?? decoration.isDense;
-    final String? labelText = getText(
+    final Widget? labelText = buildText(
       context,
       node,
       property: 'labelText',
       defaultValue: decoration.labelText,
       scopedValues: scopedValues,
       settings: settings,
+      variablesOverrides: widget.variablesOverrides,
     );
     final String? hintText = getText(
       context,
@@ -295,45 +306,48 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       scopedValues: scopedValues,
       settings: settings,
     );
-    final String? errorText = getText(
+    final Widget? errorText = buildText(
       context,
       node,
       property: 'errorText',
       defaultValue: decoration.errorText,
       scopedValues: scopedValues,
       settings: settings,
+      variablesOverrides: widget.variablesOverrides,
     );
-    final String? prefixText = getText(
+    final Widget? prefixText = buildText(
       context,
       node,
       property: 'prefixText',
       defaultValue: decoration.prefixText,
       scopedValues: scopedValues,
       settings: settings,
+      variablesOverrides: widget.variablesOverrides,
     );
-    final String? suffixText = getText(
+    final Widget? suffixText = buildText(
       context,
       node,
       property: 'suffixText',
       defaultValue: decoration.suffixText,
       scopedValues: scopedValues,
       settings: settings,
+      variablesOverrides: widget.variablesOverrides,
     );
-    final String? counterText = getText(
+    final Widget? counterText = buildText(
       context,
       node,
       property: 'counterText',
       defaultValue: decoration.counterText,
       scopedValues: scopedValues,
       settings: settings,
+      variablesOverrides: widget.variablesOverrides,
     );
 
     return InputDecoration(
       icon: !decoration.icon.show || decoration.icon.isEmpty
           ? null
           : retrieveIconWidget(decoration.icon, null, useIconFonts),
-      labelText: labelText?.isNotEmpty == true ? labelText : null,
-      labelStyle: TextUtils.retrieveTextStyleFromProp(decoration.labelStyle),
+      label: labelText,
       floatingLabelStyle:
           TextUtils.retrieveTextStyleFromProp(decoration.floatingLabelStyle),
       helperText: helperText,
@@ -342,7 +356,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       hintText: hintText,
       hintStyle: TextUtils.retrieveTextStyleFromProp(decoration.hintStyle),
       hintMaxLines: decoration.hintMaxLines,
-      errorText: errorText,
+      error: errorText,
       errorStyle: TextUtils.retrieveTextStyleFromProp(decoration.errorStyle),
       errorMaxLines: decoration.errorMaxLines,
       floatingLabelBehavior: decoration.floatingLabelBehavior.toFlutter(),
@@ -360,7 +374,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
             ),
       // prefixIconConstraints:
       //     decoration.prefixIconConstraints.flutterConstraints,
-      prefixText: prefixText,
+      prefix: prefixText,
       prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
       suffixIcon: !decoration.suffixIcon.icon.show ||
               decoration.suffixIcon.icon.isEmpty
@@ -371,11 +385,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
               iconModel: decoration.suffixIcon,
               useIconFonts: useIconFonts,
             ),
-      suffixText: suffixText,
+      suffix: suffixText,
       suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
       // suffixIconConstraints:
       //     decoration.suffixIconConstraints.flutterConstraints,
-      counterText: decoration.showCounter ? counterText : '',
+      counter: decoration.showCounter ? counterText : null,
       counterStyle:
           TextUtils.retrieveTextStyleFromProp(decoration.counterStyle),
       filled: decoration.filled,
@@ -434,6 +448,28 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     );
     if (newValue.isEmpty) return null;
     return newValue;
+  }
+
+  Widget? buildText(
+    BuildContext context,
+    BaseNode node, {
+    required List<VariableData> variablesOverrides,
+    required String property,
+    required String? defaultValue,
+    required ScopedValues scopedValues,
+    required WidgetBuildSettings settings,
+  }) {
+    final String? value =
+        context.getNodeValue(node.id, property) ?? defaultValue;
+    if (value == null || value.isEmpty) return null;
+    return TextUtils.buildText(
+      context,
+      value,
+      node: node,
+      variablesOverrides: variablesOverrides,
+      nullSubstitutionMode: settings.nullSubstitutionMode,
+      replaceVariablesWithSymbol: settings.replaceVariablesWithSymbols,
+    );
   }
 }
 

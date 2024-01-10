@@ -111,7 +111,7 @@ class PassiveButtonWidget extends StatelessWidget {
       textAlignHorizontal: node.properties.labelAlignment,
       variablesOverrides: variablesOverrides,
       nullSubstitutionMode: settings.nullSubstitutionMode,
-      replaceVariablesWithSymbol: true,
+      replaceVariablesWithSymbol: settings.replaceVariablesWithSymbols,
     );
 
     Widget buttonWidget;

@@ -41,8 +41,10 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
     TabBarNode? node,
     double? height,
     double? width,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+      replaceVariablesWithSymbols: true,
+    ),
   }) {
     final previewNode = TabBarNode(
       properties: properties ?? node?.properties ?? TabBarProperties(),

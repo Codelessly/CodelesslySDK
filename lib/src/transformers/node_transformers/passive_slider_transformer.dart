@@ -43,8 +43,10 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
     double width = kSliderDefaultWidth,
     double value = 0,
     ValueChanged<double>? onChanged,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+      replaceVariablesWithSymbols: true,
+    ),
   }) {
     final previewNode = SliderNode(
       properties: properties ?? node?.properties ?? SliderProperties(),

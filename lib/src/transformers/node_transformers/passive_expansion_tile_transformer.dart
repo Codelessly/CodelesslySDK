@@ -51,8 +51,10 @@ class PassiveExpansionTileTransformer
     BaseNode? trailingNode,
     ListTileControlAffinityC? controlAffinity,
     bool? initiallyExpanded,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+      replaceVariablesWithSymbols: true,
+    ),
   }) {
     final listTileNode = node == null
         ? ListTileNode(

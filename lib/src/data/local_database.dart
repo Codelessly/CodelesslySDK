@@ -135,7 +135,7 @@ class HiveLocalDatabase extends LocalDatabase {
   Future<void> remove(String key) => _box.delete(key);
 
   @override
-  void reset(){
+  void reset() {
     _subscription?.cancel();
   }
 
