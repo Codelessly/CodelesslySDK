@@ -653,7 +653,8 @@ class Codelessly {
           if (_authManager!.authData == null) return;
 
           log('[POST-INIT] Background authentication succeeded. Initializing layout storage.');
-          await dataManager.onPublishModelLoaded(_authManager!.authData!.projectId);
+          await dataManager
+              .onPublishModelLoaded(_authManager!.authData!.projectId);
 
           log('[POST-INIT] Layout storage initialized. Listening to publish model.');
           dataManager.listenToPublishModel(_authManager!.authData!.projectId);

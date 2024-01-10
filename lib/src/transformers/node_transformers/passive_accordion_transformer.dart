@@ -25,8 +25,11 @@ class PassiveAccordionTransformer extends NodeWidgetTransformer<AccordionNode> {
     Widget? title,
     Widget? content,
     bool enabled = false,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview', isPreview: true),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+      isPreview: true,
+      replaceVariablesWithSymbols: true,
+    ),
   }) {
     node ??= AccordionNode(
       children: [],

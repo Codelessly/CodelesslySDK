@@ -46,8 +46,10 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
     BaseNode? trailing,
     BaseNode? title,
     BaseNode? subtitle,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+      replaceVariablesWithSymbols: true,
+    ),
   }) {
     final previewNode = node ??
         ListTileNode(

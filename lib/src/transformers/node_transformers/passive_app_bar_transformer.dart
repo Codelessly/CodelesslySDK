@@ -33,8 +33,10 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
 
   PreferredSizeWidget buildAppBarWidgetFromProps({
     required AppBarProperties props,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+      replaceVariablesWithSymbols: true,
+    ),
   }) {
     final node = AppBarNode(
       id: '',
@@ -54,8 +56,10 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
     AppBarNode? node,
     double? height,
     double? width,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+      replaceVariablesWithSymbols: true,
+    ),
   }) {
     final previewNode = AppBarNode(
       properties: properties ?? node!.properties,
@@ -117,7 +121,7 @@ class PassiveAppBarWidget extends StatelessWidget
             node: node,
             variablesOverrides: variablesOverrides,
             nullSubstitutionMode: settings.nullSubstitutionMode,
-            replaceVariablesWithSymbol: settings.isPreview,
+            replaceVariablesWithSymbol: settings.replaceVariablesWithSymbols,
           );
     return AdaptiveNodeBox(
       node: node,
