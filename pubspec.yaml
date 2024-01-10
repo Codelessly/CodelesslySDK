@@ -22,33 +22,33 @@ dependencies:
   codelessly_api: 0.8.0
   codelessly_json_annotation: 4.8.1
   firebase_core: ^2.24.2
-  firebase_auth: ^4.15.3
-  cloud_firestore: ^4.13.6
-  cloud_functions: ^4.5.8
-  firebase_ui_firestore: ^1.5.15
+  firebase_auth: ^4.16.0
+  cloud_firestore: ^4.14.0
+  cloud_functions: ^4.6.0
+  firebase_ui_firestore: ^1.6.1
   equatable: ^2.0.5
   google_fonts: ^6.1.0
-  url_launcher: ^6.2.2
+  url_launcher: ^6.2.3
   collection: '>=1.17.0 <2.0.0'
   http: '>=0.13.0 <2.0.0'
   intl: '>=0.17.0 <1.0.0'
   universal_html: ^2.2.4
-  webview_flutter: ^4.4.2
-  webview_flutter_android: ^3.13.1
-  webview_flutter_wkwebview: ^3.10.0
-  webview_flutter_web: ^0.2.2+3
+  webview_flutter: ^4.4.4
+  webview_flutter_android: ^3.13.2
+  webview_flutter_wkwebview: ^3.10.1
+  webview_flutter_web: ^0.2.2+4
   flutter_animation_progress_bar: ^2.3.1
   vector_math: ^2.1.4
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   uuid: ^4.2.1
-  path_provider: ^2.1.1
+  path_provider: ^2.1.2
   provider: ^6.1.1
-  json_path: ^0.6.6
+  json_path: ^0.7.0
   meta: ">=1.9.0 <2.0.0"
   path: ^1.8.3
   flutter_svg: ^2.0.9
-  cached_network_image: ^3.3.0
+  cached_network_image: ^3.3.1
   rfc_6901: ^0.2.0 # json pointer spec
 
 dev_dependencies:
