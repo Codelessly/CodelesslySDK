@@ -277,11 +277,11 @@ class TextUtils {
     double fontSize,
   ) =>
       lineHeight.value == null
-          ? 1
+          ? null
           : switch (lineHeight.unit) {
               LineHeightUnitEnum.pixels => lineHeight.value! / fontSize,
               LineHeightUnitEnum.percent => lineHeight.value! / 100,
-              LineHeightUnitEnum.auto => 1,
+              LineHeightUnitEnum.auto => null,
             };
 
   static TextStyle retrieveTextStyleFromProp(

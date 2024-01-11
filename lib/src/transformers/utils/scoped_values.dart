@@ -76,7 +76,7 @@ class ScopedValues {
     if (codelesslyContext != null) {
       _codelesslyContextRef = WeakReference(codelesslyContext);
     }
-    indexedItem = IndexedItemProvider.of(context);
+    indexedItem = IndexedItemProvider.maybeOf(context);
     nodeState = NodeProvider.maybeOf(context)?.state;
     routeParams =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
