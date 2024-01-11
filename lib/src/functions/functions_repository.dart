@@ -715,6 +715,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     final Object? updatedValue = switch (action.variable.type) {
       VariableType.text => newValue,
+      VariableType.color => ColorRGBA.fromHex(newValue),
       VariableType.integer => _performIntOperation(action.numberOperation,
           currentValue?.toInt(), newValue, scopedValues),
       VariableType.decimal => _performDecimalOperation(action.numberOperation,
@@ -734,7 +735,6 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
           newValue,
           scopedValues,
         ),
-      _ => null,
     };
 
     final VariableData updatedVariable =
@@ -986,6 +986,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
       final Object? value = switch (action.variableType) {
         VariableType.text => newValue,
+        VariableType.color => ColorRGBA.fromHex(newValue),
         VariableType.integer => _performIntOperation(action.numberOperation,
             currentValue?.toInt(), newValue, scopedValues),
         VariableType.decimal => _performDecimalOperation(action.numberOperation,
@@ -1328,6 +1329,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
       final Object? value = switch (subAction.variableType) {
         VariableType.text => newValue,
+        VariableType.color => ColorRGBA.fromHex(newValue),
         VariableType.integer => _performIntOperation(subAction.numberOperation,
             currentValue?.toInt(), newValue, scopedValues),
         VariableType.decimal => _performDecimalOperation(

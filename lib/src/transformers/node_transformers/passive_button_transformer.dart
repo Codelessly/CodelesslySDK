@@ -89,8 +89,11 @@ class PassiveButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ButtonStyle buttonStyle =
-        createMasterButtonStyle(node, elevation: elevation);
+    final ButtonStyle buttonStyle = createMasterButtonStyle(
+      node,
+      elevation: elevation,
+      scopedValues: ScopedValues.of(context),
+    );
     final double effectiveIconSize =
         min(node.properties.icon.size ?? 24, node.basicBoxLocal.height);
     Widget? iconWidget = retrieveIconWidget(

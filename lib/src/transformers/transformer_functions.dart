@@ -129,11 +129,30 @@ void transformNodeToIconButton(ButtonNode node) {
 
 /// Flutter's ButtonStyle parameters do different things depending on the button
 /// type. So we have to manually change them.
-ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
+ButtonStyle createMasterButtonStyle(ButtonNode node,
+    {double? elevation, required ScopedValues scopedValues}) {
   final TextStyle textStyle =
       TextUtils.retrieveTextStyleFromProp(node.properties.labelStyle);
-  final Color? labelColor =
+  final Color? labelColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+        node,
+        'labelColor',
+        scopedValues: scopedValues,
+      )?.toFlutterColor() ??
       TextUtils.retrievePropColor(node.properties.labelStyle);
+
+  final buttonColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+        node,
+        'buttonColor',
+        scopedValues: scopedValues,
+      ) ??
+      node.properties.buttonColor;
+
+  final shadowColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+        node,
+        'shadowColor',
+        scopedValues: scopedValues,
+      ) ??
+      node.properties.shadowColor;
 
   ButtonStyle? buttonStyle;
   switch (node.properties.buttonType) {
@@ -141,46 +160,52 @@ ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
       buttonStyle = ElevatedButton.styleFrom(
         foregroundColor: labelColor,
         elevation: elevation ?? node.properties.elevation,
-        shadowColor: node.properties.shadowColor.toFlutterColor(),
-        backgroundColor: node.properties.buttonColor.toFlutterColor(),
+        shadowColor: shadowColor.toFlutterColor(),
+        backgroundColor: buttonColor.toFlutterColor(),
         visualDensity: VisualDensity.standard,
         padding: node.padding.flutterEdgeInsets,
         textStyle: textStyle,
         minimumSize: Size.zero,
-        shape: getButtonShape(node.properties),
+        shape: getButtonShape(node, scopedValues),
       );
     case ButtonTypeEnum.text:
       buttonStyle = TextButton.styleFrom(
         foregroundColor: labelColor,
         elevation: elevation ?? node.properties.elevation,
-        backgroundColor: node.properties.buttonColor.toFlutterColor(),
+        backgroundColor: buttonColor.toFlutterColor(),
         padding: node.padding.flutterEdgeInsets,
         visualDensity: VisualDensity.standard,
         textStyle: textStyle,
         minimumSize: Size.zero,
-        shadowColor: node.properties.shadowColor.toFlutterColor(),
-        shape: getButtonShape(node.properties),
+        shadowColor: shadowColor.toFlutterColor(),
+        shape: getButtonShape(node, scopedValues),
       );
     case ButtonTypeEnum.outlined:
       buttonStyle = OutlinedButton.styleFrom(
         foregroundColor: labelColor,
         elevation: elevation ?? node.properties.elevation,
-        side: getButtonShape(node.properties)?.side,
+        side: getButtonShape(node, scopedValues)?.side,
         backgroundColor: Colors.transparent,
         visualDensity: VisualDensity.standard,
         padding: node.padding.flutterEdgeInsets,
         textStyle: textStyle,
         minimumSize: Size.zero,
-        shadowColor: node.properties.shadowColor.toFlutterColor(),
-        shape: getButtonShape(node.properties),
+        shadowColor: shadowColor.toFlutterColor(),
+        shape: getButtonShape(node, scopedValues),
       );
     case ButtonTypeEnum.icon:
       Color? primary;
-      if (node.properties.buttonColor.toFlutterColor().opacity > 0 &&
-          node.properties.buttonColor.toFlutterColor().opacity < 0.7) {
-        primary = node.properties.buttonColor.toFlutterColor().withOpacity(0.1);
-      } else if (node.properties.buttonColor.toFlutterColor().opacity == 0) {
-        primary = node.properties.icon.color?.toFlutterColor().withOpacity(0.1);
+      if (buttonColor.toFlutterColor().opacity > 0 &&
+          buttonColor.toFlutterColor().opacity < 0.7) {
+        primary = buttonColor.toFlutterColor().withOpacity(0.1);
+      } else if (buttonColor.toFlutterColor().opacity == 0) {
+        final iconColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+              node,
+              'iconColor',
+              scopedValues: scopedValues,
+            ) ??
+            node.properties.icon.color;
+        primary = iconColor?.toFlutterColor().withOpacity(0.1);
       }
       buttonStyle = TextButton.styleFrom(
         foregroundColor: primary,
@@ -188,9 +213,9 @@ ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
         visualDensity: VisualDensity.standard,
         padding: node.padding.flutterEdgeInsets,
         minimumSize: Size.zero,
-        backgroundColor: node.properties.buttonColor.toFlutterColor(),
-        shadowColor: node.properties.shadowColor.toFlutterColor(),
-        shape: getButtonShape(node.properties),
+        backgroundColor: buttonColor.toFlutterColor(),
+        shadowColor: shadowColor.toFlutterColor(),
+        shape: getButtonShape(node, scopedValues),
       );
   }
   return buttonStyle.copyWith(
@@ -198,14 +223,27 @@ ButtonStyle createMasterButtonStyle(ButtonNode node, {double? elevation}) {
           MaterialStateProperty.all(elevation ?? node.properties.elevation));
 }
 
-OutlinedBorder? getButtonShape(ButtonProperties properties) {
+OutlinedBorder? getButtonShape(ButtonNode node, ScopedValues scopedValues) {
+  final buttonColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+        node,
+        'buttonColor',
+        scopedValues: scopedValues,
+      ) ??
+      node.properties.buttonColor;
+  final borderColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+        node,
+        'borderColor',
+        scopedValues: scopedValues,
+      ) ??
+      node.properties.borderColor;
+
   return getShape(
-    radius: properties.cornerRadius,
-    shape: properties.shape,
-    borderColor: properties.buttonType == ButtonTypeEnum.outlined
-        ? properties.borderColor ?? properties.buttonColor
-        : properties.borderColor,
-    borderWidth: properties.borderWidth,
+    radius: node.properties.cornerRadius,
+    shape: node.properties.shape,
+    borderColor: node.properties.buttonType == ButtonTypeEnum.outlined
+        ? borderColor ?? buttonColor
+        : borderColor,
+    borderWidth: node.properties.borderWidth,
   );
 }
 
