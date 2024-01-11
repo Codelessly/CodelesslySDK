@@ -15,6 +15,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     WidgetBuildSettings settings,
   ) {
     return PassiveTextFieldWidget(
+      key: ValueKey((node.id, IndexedItemProvider.of(context))),
       node: node,
       settings: settings,
       onTap: (context, value) => onTap(context, node, value),
