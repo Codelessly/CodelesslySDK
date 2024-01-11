@@ -10,7 +10,7 @@ class IndexedItemProvider extends InheritedWidget {
     required this.item,
   });
 
-  static IndexedItem? of(BuildContext context) =>
+  static IndexedItem? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<IndexedItemProvider>()?.item;
 
   @override

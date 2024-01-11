@@ -113,7 +113,7 @@ class PassiveCheckboxWidget extends StatelessWidget {
         scale: scale,
         child: Checkbox(
           key: ValueKey(
-              '${node.id}-${IndexedItemProvider.of(context)?.index ?? ''}'),
+              '${node.id}-${IndexedItemProvider.maybeOf(context)?.index ?? ''}'),
           value: node.properties.tristate ? value : (value ?? false),
           tristate: node.properties.tristate,
           autofocus: node.properties.autofocus,
