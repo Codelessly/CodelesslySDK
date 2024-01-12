@@ -290,6 +290,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       scopedValues: scopedValues,
       settings: settings,
       variablesOverrides: widget.variablesOverrides,
+      color: decoration.labelStyle.fills.first.toFlutterColor(),
+      fontSize: decoration.labelStyle.fontSize,
+      letterSpacing: decoration.labelStyle.letterSpacing,
+      lineHeight: decoration.labelStyle.lineHeight,
+      fontName: decoration.labelStyle.fontName,
+      textDecoration: decoration.labelStyle.textDecoration,
     );
     final String? hintText = getText(
       context,
@@ -315,6 +321,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       scopedValues: scopedValues,
       settings: settings,
       variablesOverrides: widget.variablesOverrides,
+      color: decoration.errorStyle.fills.first.toFlutterColor(),
+      fontSize: decoration.errorStyle.fontSize,
+      letterSpacing: decoration.errorStyle.letterSpacing,
+      lineHeight: decoration.errorStyle.lineHeight,
+      fontName: decoration.errorStyle.fontName,
+      textDecoration: decoration.errorStyle.textDecoration,
     );
     final Widget? prefixText = buildText(
       context,
@@ -324,6 +336,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       scopedValues: scopedValues,
       settings: settings,
       variablesOverrides: widget.variablesOverrides,
+      color: decoration.prefixStyle.fills.first.toFlutterColor(),
+      fontSize: decoration.prefixStyle.fontSize,
+      letterSpacing: decoration.prefixStyle.letterSpacing,
+      lineHeight: decoration.prefixStyle.lineHeight,
+      fontName: decoration.prefixStyle.fontName,
+      textDecoration: decoration.prefixStyle.textDecoration,
     );
     final Widget? suffixText = buildText(
       context,
@@ -333,6 +351,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       scopedValues: scopedValues,
       settings: settings,
       variablesOverrides: widget.variablesOverrides,
+      color: decoration.suffixStyle.fills.first.toFlutterColor(),
+      fontSize: decoration.suffixStyle.fontSize,
+      letterSpacing: decoration.suffixStyle.letterSpacing,
+      lineHeight: decoration.suffixStyle.lineHeight,
+      fontName: decoration.suffixStyle.fontName,
+      textDecoration: decoration.suffixStyle.textDecoration,
     );
     final Widget? counterText = buildText(
       context,
@@ -342,6 +366,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       scopedValues: scopedValues,
       settings: settings,
       variablesOverrides: widget.variablesOverrides,
+      color: decoration.counterStyle.fills.first.toFlutterColor(),
+      fontSize: decoration.counterStyle.fontSize,
+      letterSpacing: decoration.counterStyle.letterSpacing,
+      lineHeight: decoration.counterStyle.lineHeight,
+      fontName: decoration.counterStyle.fontName,
+      textDecoration: decoration.counterStyle.textDecoration,
     );
 
     return InputDecoration(
@@ -459,6 +489,15 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     required String? defaultValue,
     required ScopedValues scopedValues,
     required WidgetBuildSettings settings,
+    Color? color,
+    double? fontSize,
+    LetterSpacing? letterSpacing,
+    LineHeight? lineHeight,
+    FontName? fontName,
+    TextDecorationEnum? textDecoration,
+    List<Effect>? effects,
+    TextAlignHorizontalEnum? textAlignHorizontal,
+    int? maxLines,
   }) {
     final String? value =
         context.getNodeValue(node.id, property) ?? defaultValue;
@@ -470,6 +509,15 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       variablesOverrides: variablesOverrides,
       nullSubstitutionMode: settings.nullSubstitutionMode,
       replaceVariablesWithSymbol: settings.replaceVariablesWithSymbols,
+      color: color,
+      fontSize: fontSize,
+      letterSpacing: letterSpacing,
+      lineHeight: lineHeight,
+      fontName: fontName,
+      textDecoration: textDecoration,
+      effects: effects,
+      textAlignHorizontal: textAlignHorizontal,
+      maxLines: maxLines,
     );
   }
 }
