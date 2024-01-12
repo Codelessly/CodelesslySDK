@@ -1,6 +1,5 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-
-import '../../codelessly_sdk.dart';
 
 class DraggableScrollConfiguration extends StatelessWidget {
   final Widget child;
@@ -17,4 +16,13 @@ class DraggableScrollConfiguration extends StatelessWidget {
       child: child,
     );
   }
+}
+
+/// Used for views that can be scrolled by all devices.
+class DraggableScrollBehavior extends MaterialScrollBehavior {
+  const DraggableScrollBehavior();
+
+  // Override behavior methods and getters like dragDevices
+  @override
+  Set<PointerDeviceKind> get dragDevices => PointerDeviceKind.values.toSet();
 }
