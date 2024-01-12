@@ -337,8 +337,9 @@ class TextUtils {
 
     final bool isGoogleFont =
         fontName != null && GoogleFonts.asMap().containsKey(fontName.family);
+    final TextStyle style;
     if (isGoogleFont) {
-      return GoogleFonts.getFont(
+      style = GoogleFonts.getFont(
         fontName.family,
         color: color,
         fontStyle: fontStyle,
@@ -355,7 +356,7 @@ class TextUtils {
 
       // Enable this for fonts debugging.
       // print('Transformer is using fontFamily: $fontFamily');
-      return TextStyle(
+      style = TextStyle(
         color: color,
         fontSize: fontSize,
         fontWeight: fontWeightProp,
@@ -371,5 +372,9 @@ class TextUtils {
         ],
       );
     }
+
+    final TextTheme typography = Typography.material2021().englishLike;
+
+    return typography.bodySmall!.merge(style);
   }
 }
