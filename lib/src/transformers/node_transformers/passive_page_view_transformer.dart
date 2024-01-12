@@ -1,9 +1,8 @@
-import 'dart:ui';
-
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../functions/functions_repository.dart';
+import '../../ui/draggable_scroll_configuration.dart';
 import '../../utils/extensions.dart';
 import '../transformers.dart';
 
@@ -95,8 +94,7 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
 
     return AdaptiveNodeBox(
       node: widget.node,
-      child: ScrollConfiguration(
-        behavior: const DraggableScrollBehavior(),
+      child: DraggableScrollConfiguration(
         child: PageView.builder(
           itemCount: itemCount,
           physics: widget.node.physics
@@ -136,13 +134,4 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
     controller.dispose();
     super.dispose();
   }
-}
-
-/// Used for views that can be scrolled by all devices.
-class DraggableScrollBehavior extends MaterialScrollBehavior {
-  const DraggableScrollBehavior();
-
-  // Override behavior methods and getters like dragDevices
-  @override
-  Set<PointerDeviceKind> get dragDevices => PointerDeviceKind.values.toSet();
 }
