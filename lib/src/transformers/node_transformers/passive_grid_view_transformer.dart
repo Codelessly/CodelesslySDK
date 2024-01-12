@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../ui/draggable_scroll_configuration.dart';
 
 class PassiveGridViewTransformer extends NodeWidgetTransformer<GridViewNode> {
   PassiveGridViewTransformer(super.getNode, super.manager);
@@ -230,36 +231,38 @@ class GridViewBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      primary: primary,
-      shrinkWrap: shrinkWrap,
-      itemCount: itemCount,
-      padding: padding,
-      physics: physics,
-      scrollDirection: scrollDirection,
-      cacheExtent: cacheExtent,
-      reverse: reverse,
-      clipBehavior: clipBehavior,
-      itemBuilder: itemBuilder!,
-      keyboardDismissBehavior: keyboardDismissBehavior,
-      gridDelegate: switch (gridDelegate) {
-        FixedCrossAxisCountGridDelegateProperties props =>
-          SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: props.crossAxisCount,
-            crossAxisSpacing: props.crossAxisSpacing,
-            mainAxisSpacing: props.mainAxisSpacing,
-            childAspectRatio: props.childAspectRatio,
-            mainAxisExtent: props.mainAxisExtent,
-          ),
-        MaxCrossAxisExtentGridDelegateProperties props =>
-          SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: props.maxCrossAxisExtent,
-            mainAxisExtent: props.mainAxisExtent,
-            childAspectRatio: props.childAspectRatio,
-            crossAxisSpacing: props.crossAxisSpacing,
-            mainAxisSpacing: props.mainAxisSpacing,
-          ),
-      },
+    return DraggableScrollConfiguration(
+      child: GridView.builder(
+        primary: primary,
+        shrinkWrap: shrinkWrap,
+        itemCount: itemCount,
+        padding: padding,
+        physics: physics,
+        scrollDirection: scrollDirection,
+        cacheExtent: cacheExtent,
+        reverse: reverse,
+        clipBehavior: clipBehavior,
+        itemBuilder: itemBuilder!,
+        keyboardDismissBehavior: keyboardDismissBehavior,
+        gridDelegate: switch (gridDelegate) {
+          FixedCrossAxisCountGridDelegateProperties props =>
+            SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: props.crossAxisCount,
+              crossAxisSpacing: props.crossAxisSpacing,
+              mainAxisSpacing: props.mainAxisSpacing,
+              childAspectRatio: props.childAspectRatio,
+              mainAxisExtent: props.mainAxisExtent,
+            ),
+          MaxCrossAxisExtentGridDelegateProperties props =>
+            SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: props.maxCrossAxisExtent,
+              mainAxisExtent: props.mainAxisExtent,
+              childAspectRatio: props.childAspectRatio,
+              crossAxisSpacing: props.crossAxisSpacing,
+              mainAxisSpacing: props.mainAxisSpacing,
+            ),
+        },
+      ),
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../ui/draggable_scroll_configuration.dart';
 
 class PassiveListViewTransformer extends NodeWidgetTransformer<ListViewNode> {
   PassiveListViewTransformer(super.getNode, super.manager);
@@ -242,36 +243,42 @@ class ListViewBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (separatedBuilder != null) {
-      return ListView.separated(
-        primary: primary,
-        shrinkWrap: shrinkWrap,
-        itemCount: itemCount!,
-        padding: padding,
-        physics: physics,
-        scrollDirection: scrollDirection,
-        cacheExtent: cacheExtent,
-        reverse: reverse,
-        clipBehavior: clipBehavior,
-        itemBuilder: itemBuilder!,
-        separatorBuilder: separatedBuilder!,
-        keyboardDismissBehavior: keyboardDismissBehavior,
-      );
-    }
+    return DraggableScrollConfiguration(
+      child: Builder(
+        builder: (context) {
+          if (separatedBuilder != null) {
+            return ListView.separated(
+              primary: primary,
+              shrinkWrap: shrinkWrap,
+              itemCount: itemCount!,
+              padding: padding,
+              physics: physics,
+              scrollDirection: scrollDirection,
+              cacheExtent: cacheExtent,
+              reverse: reverse,
+              clipBehavior: clipBehavior,
+              itemBuilder: itemBuilder!,
+              separatorBuilder: separatedBuilder!,
+              keyboardDismissBehavior: keyboardDismissBehavior,
+            );
+          }
 
-    return ListView.builder(
-      primary: primary,
-      shrinkWrap: shrinkWrap,
-      itemCount: itemCount,
-      padding: padding,
-      physics: physics,
-      scrollDirection: scrollDirection,
-      cacheExtent: cacheExtent,
-      reverse: reverse,
-      itemExtent: itemExtent,
-      clipBehavior: clipBehavior,
-      itemBuilder: itemBuilder!,
-      keyboardDismissBehavior: keyboardDismissBehavior,
+          return ListView.builder(
+            primary: primary,
+            shrinkWrap: shrinkWrap,
+            itemCount: itemCount,
+            padding: padding,
+            physics: physics,
+            scrollDirection: scrollDirection,
+            cacheExtent: cacheExtent,
+            reverse: reverse,
+            itemExtent: itemExtent,
+            clipBehavior: clipBehavior,
+            itemBuilder: itemBuilder!,
+            keyboardDismissBehavior: keyboardDismissBehavior,
+          );
+        },
+      ),
     );
   }
 }
