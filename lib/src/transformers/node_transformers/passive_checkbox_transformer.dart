@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
-import '../utils/node_provider.dart';
+import '../utils/node_state_provider.dart';
 
 class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
   PassiveCheckboxTransformer(super.getNode, super.manager);
@@ -73,7 +73,7 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
   }
 
   void onChanged(BuildContext context, CheckboxNode node, bool? internalValue) {
-    NodeProvider.setState(context, internalValue);
+    NodeStateProvider.setState(context, internalValue);
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'value', value: internalValue);
 

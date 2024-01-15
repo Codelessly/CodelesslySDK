@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
-import '../utils/node_provider.dart';
+import '../utils/node_state_provider.dart';
 
 class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
   PassiveSwitchTransformer(super.getNode, super.manager);
@@ -74,7 +74,7 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
   }
 
   void onChanged(BuildContext context, SwitchNode node, bool internalValue) {
-    NodeProvider.setState(context, internalValue);
+    NodeStateProvider.setState(context, internalValue);
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'value', value: internalValue);
 

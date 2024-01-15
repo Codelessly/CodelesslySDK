@@ -3,12 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Stores a state object for a given [NodeProvider] per widget.
-class NodeProviderState {
+class NodeStateWrapper {
   /// The state object associated with the [NodeProvider] widget.
   Object? state;
 
-  /// Creates a new [NodeProviderState].
-  NodeProviderState();
+  /// Creates a new [NodeStateWrapper].
+  NodeStateWrapper();
 }
 
 /// A widget that provides a [BaseNode] to its descendants.
@@ -16,67 +16,64 @@ class NodeProviderState {
 /// This widget uses the [InheritedWidget] mechanism to provide a [BaseNode]
 /// to its descendants without requiring them to explicitly pass around
 /// a reference.
-class NodeProvider extends InheritedWidget {
+class NodeStateProvider extends InheritedWidget {
   /// The [BaseNode] provided by this widget.
   final BaseNode node;
 
-  final NodeProviderState _state;
+  final NodeStateWrapper _stateWrapper;
 
   /// The associated state object.
-  Object? get state => _state.state;
+  Object? get state => _stateWrapper.state;
 
   /// Sets the associated state object.
-  set state(Object? state) => _state.state = state;
+  set state(Object? state) => _stateWrapper.state = state;
 
-  /// Creates a new [NodeProvider].
+  /// Creates a new [NodeStateProvider].
   ///
   /// The [child] and [node] arguments are required and must not be null.
-  NodeProvider({
+  NodeStateProvider({
     super.key,
     required super.child,
     required this.node,
-    NodeProviderState? state,
-  }) : _state = state ?? NodeProviderState();
+    NodeStateWrapper? state,
+  }) : _stateWrapper = state ?? NodeStateWrapper();
 
-  /// Returns the [BaseNode] provided by the closest [NodeProvider] ancestor.
-  ///
-  /// If there is no [NodeProvider] ancestor, an error is thrown.
-  static NodeProvider of(BuildContext context) {
-    final NodeProvider? provider =
-        context.dependOnInheritedWidgetOfExactType<NodeProvider>();
-    assert(provider != null, 'No NodeProvider found in context');
-    return provider!;
-  }
-
-  /// Returns the [BaseNode] provided by the closest [NodeProvider] ancestor,
+  /// Returns the [BaseNode] provided by the closest [NodeStateProvider] ancestor,
   /// if any.
   ///
-  /// If there is no [NodeProvider] ancestor, returns null.
-  static NodeProvider? maybeOf(BuildContext context) {
-    final NodeProvider? provider =
-        context.dependOnInheritedWidgetOfExactType<NodeProvider>();
+  /// If there is no [NodeStateProvider] ancestor, returns null.
+  static NodeStateProvider? maybeOf(BuildContext context) {
+    final NodeStateProvider? provider =
+    context.dependOnInheritedWidgetOfExactType<NodeStateProvider>();
     if (provider == null) return null;
     return provider;
   }
 
-  /// Returns the value associated with the [BaseNode] provided by the closest
-  /// [NodeProvider] ancestor, if any.
+  /// Returns the [BaseNode] provided by the closest [NodeStateProvider] ancestor.
   ///
-  /// If there is no [NodeProvider] ancestor, returns null.
+  /// If there is no [NodeStateProvider] ancestor, an error is thrown.
+  static NodeStateProvider of(BuildContext context) {
+    final NodeStateProvider? result = maybeOf(context);
+    assert(result != null, 'No NodeProvider found in context');
+    return result!;
+  }
+
+  /// Returns the value associated with the [BaseNode] provided by the closest
+  /// [NodeStateProvider] ancestor, if any.
+  ///
+  /// If there is no [NodeStateProvider] ancestor, returns null.
   static Object? getState(BuildContext context) {
-    final NodeProvider? provider =
-        context.dependOnInheritedWidgetOfExactType<NodeProvider>();
+    final NodeStateProvider? provider = maybeOf(context);
     if (provider == null) return null;
     return provider.state;
   }
 
   /// Sets the value associated with the [BaseNode] provided by the closest
-  /// [NodeProvider] ancestor, if any.
+  /// [NodeStateProvider] ancestor, if any.
   ///
-  /// If there is no [NodeProvider] ancestor, does nothing.
+  /// If there is no [NodeStateProvider] ancestor, does nothing.
   static void setState(BuildContext context, Object? state) {
-    final NodeProvider? provider =
-        context.dependOnInheritedWidgetOfExactType<NodeProvider>();
+    final NodeStateProvider? provider = maybeOf(context);
     if (provider == null) return;
     provider.state = state;
   }
@@ -86,7 +83,7 @@ class NodeProvider extends InheritedWidget {
   /// In this case, the widget notifies its descendants whenever the provided
   /// [BaseNode] changes.
   @override
-  bool updateShouldNotify(covariant NodeProvider oldWidget) {
+  bool updateShouldNotify(covariant NodeStateProvider oldWidget) {
     return oldWidget.node != node;
   }
 
