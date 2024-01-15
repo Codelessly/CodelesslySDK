@@ -1161,7 +1161,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         currentValue.remove(newValue);
       case ListOperation.update:
         final parsedValue = newValue.parsedValue();
-        currentValue[index] = parsedValue;
+        if (currentValue.length > index) currentValue[index] = parsedValue;
       case ListOperation.set:
       case ListOperation.replace:
         final parsedValue = newValue.toList<List>() ?? [];
