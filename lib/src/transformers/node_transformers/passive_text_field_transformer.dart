@@ -15,7 +15,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     WidgetBuildSettings settings,
   ) {
     return PassiveTextFieldWidget(
-      key: ValueKey((node.id, IndexedItemProvider.maybeOf(context))),
+      key: ValueKey(node.id),
       node: node,
       settings: settings,
       onTap: (context, value) => onTap(context, node, value),
@@ -148,13 +148,17 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
     // Get the value of bound variable and update the controller text if it's
     // different from the current controller text.
+    // widget.node.variables['inputValue'] only works when a sync variable is specified. If it is not then
+    // we rely on initial text to be able to see if controller text needs to be updated.
     String? currentPropertyValue = widget.node.variables['inputValue'] != null
         ? PropertyValueDelegate.getPropertyValue<String>(
             widget.node,
             'inputValue',
             scopedValues: scopedValues,
           )
-        : null;
+        : widget.node.initialText.isNotEmpty
+            ? widget.node.initialText
+            : null;
     if (currentPropertyValue != null) {
       currentPropertyValue = PropertyValueDelegate.substituteVariables(
         currentPropertyValue,

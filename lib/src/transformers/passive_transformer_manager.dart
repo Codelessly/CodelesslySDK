@@ -215,7 +215,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       }
     }
 
-    return NodeProvider(
+    return NodeStateWidget(
+      key: ValueKey(node.id),
       node: node,
       child: Builder(builder: (context) {
         if (listenables.isNotEmpty) {
@@ -299,4 +300,34 @@ class _ManagedListenableBuilderState extends State<ManagedListenableBuilder> {
     listenable?.removeListener(onChanged);
     super.dispose();
   }
+}
+
+/// Makes it so the NodeProvider state is kept around and not recreated on
+/// every build.
+class NodeStateWidget extends StatefulWidget {
+  final Widget child;
+  final BaseNode node;
+
+  const NodeStateWidget({super.key, required this.child, required this.node});
+
+  @override
+  State<NodeStateWidget> createState() => _NodeStateWidgetState();
+}
+
+class _NodeStateWidgetState extends State<NodeStateWidget>
+    with AutomaticKeepAliveClientMixin {
+  final NodeProviderState nodeState = NodeProviderState();
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return NodeProvider(
+      node: widget.node,
+      state: nodeState,
+      child: widget.child,
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

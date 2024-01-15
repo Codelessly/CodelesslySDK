@@ -3,12 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Stores a state object for a given [NodeProvider] per widget.
-class _NodeProviderState {
+class NodeProviderState {
   /// The state object associated with the [NodeProvider] widget.
   Object? state;
 
-  /// Creates a new [_NodeProviderState].
-  _NodeProviderState();
+  /// Creates a new [NodeProviderState].
+  NodeProviderState();
 }
 
 /// A widget that provides a [BaseNode] to its descendants.
@@ -20,7 +20,7 @@ class NodeProvider extends InheritedWidget {
   /// The [BaseNode] provided by this widget.
   final BaseNode node;
 
-  final _NodeProviderState _state;
+  final NodeProviderState _state;
 
   /// The associated state object.
   Object? get state => _state.state;
@@ -35,7 +35,8 @@ class NodeProvider extends InheritedWidget {
     super.key,
     required super.child,
     required this.node,
-  }) : _state = _NodeProviderState();
+    NodeProviderState? state,
+  }) : _state = state ?? NodeProviderState();
 
   /// Returns the [BaseNode] provided by the closest [NodeProvider] ancestor.
   ///
