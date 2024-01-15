@@ -197,12 +197,26 @@ class CodelesslyAuthManager extends AuthManager {
   bool checkClaimsForProject(IdTokenResult? result, String projectId) {
     log('Checking claims for user for a project id [$projectId]');
 
-    if (result == null) return false;
+    if (result == null) {
+      log('Id token result is null. Cannot check claims for project id [$projectId]');
+      return false;
+    }
+
     final claims = result.claims;
 
-    if (claims == null) return false;
-    if (!claims.containsKey('project_ids')) return false;
-    if (claims['project_ids'] is! List) return false;
+    log('User claims: $claims', largePrint: true);
+    if (claims == null) {
+      log('User claims is null. Cannot check claims for project id [$projectId]');
+      return false;
+    }
+    if (!claims.containsKey('project_ids')) {
+      log('User claims does not contain project_ids. Cannot check claims for project id [$projectId]');
+      return false;
+    }
+    if (claims['project_ids'] is! List) {
+      log('User claims project_ids is not a list. Cannot check claims for project id [$projectId]');
+      return false;
+    }
 
     final projectIds = claims['project_ids'] as List;
 
@@ -351,44 +365,55 @@ class CodelesslyAuthManager extends AuthManager {
       largePrint: true,
     );
 
-    // Make a POST request to the server to verify the token.
-    final Response result = await post(
-      Uri.parse(
-          '${config.firebaseCloudFunctionsBaseURL}/verifyProjectAuthToken'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $userToken',
-      },
-      body: jsonEncode({
-        'token': config.authToken,
-        'slug': config.slug,
-      }),
-    );
+    try {
+      // Make a POST request to the server to verify the token.
+      final Response result = await post(
+        Uri.parse(
+            '${config.firebaseCloudFunctionsBaseURL}/verifyProjectAuthToken'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $userToken',
+        },
+        body: jsonEncode({
+          'token': config.authToken,
+          'slug': config.slug,
+        }),
+      );
 
-    // If the status code of the response is 200, the authentication was
-    // successful.
-    if (result.statusCode == 200) {
-      // Parse the body of the response to JSON.
-      final jsonBody = jsonDecode(result.body);
+      // If the status code of the response is 200, the authentication was
+      // successful.
+      if (result.statusCode == 200) {
+        logger.log(label, 'Successful auth token verification response received.',
+            largePrint: true);
 
-      // Create an instance of AuthData from the JSON body.
-      final AuthData authData = AuthData.fromJson(jsonBody);
+        // Parse the body of the response to JSON.
+        final jsonBody = jsonDecode(result.body);
 
-      // Call the postSuccess callback function and wait for it to decide
-      // success.
-      await postSuccess(authData);
+        // Create an instance of AuthData from the JSON body.
+        final AuthData authData = AuthData.fromJson(jsonBody);
 
-      logger.log(label, 'Auth token response:\n${result.body}',
-          largePrint: true);
+        // Call the postSuccess callback function and wait for it to decide
+        // success.
+        await postSuccess(authData);
 
-      return authData;
-    }
-    // If the status code of the response is not 200, the authentication failed.
-    // Log the status code, reason, and body of the response.
-    else {
+        logger.log(label, 'Auth token response:\n${result.body}',
+            largePrint: true);
+
+        return authData;
+      }
+      // If the status code of the response is not 200, the authentication failed.
+      // Log the status code, reason, and body of the response.
+      else {
+        logger.log(
+          label,
+          'Failed to authenticate token.\nStatus Code: ${result.statusCode}.\nReason: ${result.reasonPhrase}\nBody: ${result.body}',
+          largePrint: true,
+        );
+      }
+    } catch (e) {
       logger.log(
         label,
-        'Failed to authenticate token.\nStatus Code: ${result.statusCode}.\nReason: ${result.reasonPhrase}\nBody: ${result.body}',
+        'Error trying to authenticate token.\nError: $e',
         largePrint: true,
       );
     }
