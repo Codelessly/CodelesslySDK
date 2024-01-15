@@ -1006,7 +1006,6 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
             newValue,
             scopedValues,
           ),
-        _ => null,
       };
 
       if (match == null || pointer == null) {
@@ -1352,7 +1351,6 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
             newValue,
             scopedValues,
           ),
-        _ => null,
       };
 
       if (match == null || pointer == null) {
