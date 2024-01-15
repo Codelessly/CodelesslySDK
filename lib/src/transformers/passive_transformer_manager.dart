@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
-import 'utils/node_provider.dart';
+import 'utils/node_state_provider.dart';
 
 typedef BuildWidgetFromID = Widget Function(String id, BuildContext context);
 typedef BuildWidgetFromNode = Widget Function(
@@ -215,7 +215,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       }
     }
 
-    return NodeStateWidget(
+    return NodeStateProviderWidget(
       key: ValueKey(node.id),
       node: node,
       child: Builder(builder: (context) {
@@ -302,26 +302,28 @@ class _ManagedListenableBuilderState extends State<ManagedListenableBuilder> {
   }
 }
 
-/// Makes it so the NodeProvider state is kept around and not recreated on
-/// every build.
-class NodeStateWidget extends StatefulWidget {
+/// Makes it so [NodeStateProvider]'s state is kept around and not recreated
+/// on every widget rebuild.
+class NodeStateProviderWidget extends StatefulWidget {
   final Widget child;
   final BaseNode node;
 
-  const NodeStateWidget({super.key, required this.child, required this.node});
+  const NodeStateProviderWidget(
+      {super.key, required this.child, required this.node});
 
   @override
-  State<NodeStateWidget> createState() => _NodeStateWidgetState();
+  State<NodeStateProviderWidget> createState() =>
+      _NodeStateProviderWidgetState();
 }
 
-class _NodeStateWidgetState extends State<NodeStateWidget>
+class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
     with AutomaticKeepAliveClientMixin {
-  final NodeProviderState nodeState = NodeProviderState();
+  final NodeStateWrapper nodeState = NodeStateWrapper();
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return NodeProvider(
+    return NodeStateProvider(
       node: widget.node,
       state: nodeState,
       child: widget.child,

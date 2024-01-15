@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
-import '../utils/node_provider.dart';
+import '../utils/node_state_provider.dart';
 
 class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
   PassiveRadioTransformer(super.getNode, super.manager);
@@ -70,7 +70,7 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
   }
 
   void onChanged(BuildContext context, RadioNode node, String? value) {
-    NodeProvider.setState(context, value);
+    NodeStateProvider.setState(context, value);
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'groupValue', value: value);
 

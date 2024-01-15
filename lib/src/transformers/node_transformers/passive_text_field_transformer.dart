@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
-import '../utils/node_provider.dart';
+import '../utils/node_state_provider.dart';
 
 class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
   PassiveTextFieldTransformer(super.getNode, super.manager);
@@ -46,12 +46,12 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
   }
 
   void onTap(BuildContext context, TextFieldNode node, String inputValue) {
-    NodeProvider.setState(context, inputValue);
+    NodeStateProvider.setState(context, inputValue);
     FunctionsRepository.triggerAction(context, node: node, TriggerType.changed);
   }
 
   void onChanged(BuildContext context, TextFieldNode node, String inputValue) {
-    NodeProvider.setState(context, inputValue);
+    NodeStateProvider.setState(context, inputValue);
     FunctionsRepository.setNodeValue(context,
         node: node, property: 'inputValue', value: inputValue);
 
@@ -67,14 +67,14 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     TextFieldNode node,
     String inputValue,
   ) {
-    NodeProvider.setState(context, inputValue);
+    NodeStateProvider.setState(context, inputValue);
     FunctionsRepository.triggerAction(
         context, node: node, TriggerType.submitted, value: inputValue);
   }
 
   void onIconTap(BuildContext context, TextFieldNode node,
       List<Reaction> reactions, String inputValue) {
-    NodeProvider.setState(context, inputValue);
+    NodeStateProvider.setState(context, inputValue);
     FunctionsRepository.triggerAction(
       context,
       node: node,
@@ -113,10 +113,10 @@ class PassiveTextFieldWidget extends StatefulWidget {
 }
 
 class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
-  late final TextEditingController _controller =
+  late final TextEditingController controller =
       TextEditingController(text: getInitialText(widget.node.initialText));
 
-  late final FocusNode _focusNode = FocusNode();
+  late final FocusNode focusNode = FocusNode();
 
   String getInitialText(String text) {
     return PropertyValueDelegate.substituteVariables(
@@ -129,14 +129,14 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(onFocusChanged);
+    focusNode.addListener(onFocusChanged);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    NodeProvider.setState(context, _controller.text);
+    NodeStateProvider.setState(context, controller.text);
   }
 
   @override
@@ -168,21 +168,21 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     }
 
     if (currentPropertyValue != null &&
-        _controller.text != currentPropertyValue) {
-      _controller.text = currentPropertyValue;
+        controller.text != currentPropertyValue) {
+      controller.text = currentPropertyValue;
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
-    _focusNode.dispose();
+    controller.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 
   void onFocusChanged() {
-    if (!_focusNode.hasFocus) {
-      widget.onSubmitted?.call(context, _controller.text);
+    if (!focusNode.hasFocus) {
+      widget.onSubmitted?.call(context, controller.text);
     }
   }
 
@@ -211,13 +211,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
             : widget.node.properties.keyboardType.toFlutter();
 
     Widget field = TextField(
-      focusNode: _focusNode,
+      focusNode: focusNode,
       autocorrect: widget.node.properties.autoCorrect,
       autofocus: !widget.settings.isPreview && widget.node.properties.autoFocus,
       enableInteractiveSelection:
           widget.node.properties.enableInteractiveSelection,
       enabled: enabled,
-      controller: _controller,
+      controller: controller,
       obscureText: obscureText,
       readOnly: readOnly,
       showCursor: showCursor,
@@ -243,7 +243,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       obscuringCharacter: widget.node.properties.obscuringCharacter,
       style: TextUtils.retrieveTextStyleFromProp(
           widget.node.properties.inputStyle),
-      onTap: () => widget.onTap?.call(context, _controller.text),
+      onTap: () => widget.onTap?.call(context, controller.text),
       onChanged: (value) => widget.onChanged?.call(context, value),
       onEditingComplete: () {},
       onSubmitted: (value) {
@@ -403,7 +403,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
           ? null
           : _ReactiveIcon(
               onTap: () => widget.onIconTap?.call(
-                  context, decoration.prefixIcon.reactions, _controller.text),
+                  context, decoration.prefixIcon.reactions, controller.text),
               iconModel: decoration.prefixIcon,
               useIconFonts: useIconFonts,
             ),
@@ -416,7 +416,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
           ? null
           : _ReactiveIcon(
               onTap: () => widget.onIconTap?.call(
-                  context, decoration.suffixIcon.reactions, _controller.text),
+                  context, decoration.suffixIcon.reactions, controller.text),
               iconModel: decoration.suffixIcon,
               useIconFonts: useIconFonts,
             ),

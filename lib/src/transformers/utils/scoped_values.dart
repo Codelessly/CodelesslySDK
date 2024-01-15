@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
-import 'node_provider.dart';
+import 'node_state_provider.dart';
 
 /// A class that holds the scoped values for a widget/context. This is helpful
 /// access context bound data in a widget tree. This makes it so that you don't
@@ -77,7 +77,7 @@ class ScopedValues {
       _codelesslyContextRef = WeakReference(codelesslyContext);
     }
     indexedItem = IndexedItemProvider.maybeOf(context);
-    nodeState = NodeProvider.maybeOf(context)?.state;
+    nodeState = NodeStateProvider.maybeOf(context)?.state;
     routeParams =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
             {};

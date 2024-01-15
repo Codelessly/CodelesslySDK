@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
-import '../utils/node_provider.dart';
+import '../utils/node_state_provider.dart';
 
 class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
   PassiveSliderTransformer(super.getNode, super.manager);
@@ -77,7 +77,7 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
   }
 
   void onChanged(BuildContext context, SliderNode node, double internalValue) {
-    NodeProvider.setState(context, internalValue);
+    NodeStateProvider.setState(context, internalValue);
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'value', value: internalValue);
 
