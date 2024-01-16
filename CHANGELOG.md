@@ -1,3 +1,6 @@
+## 0.8.1
+- Fix Flutter Text Scale API changes affecting text size calculations.
+
 ## 0.8.0
 - Codelessly Data support. Save and write data to Codelessly Cloud.
 - New GridView widget.
