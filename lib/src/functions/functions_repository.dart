@@ -1012,7 +1012,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         // This means the key is a simple key without any path or accessor. So
         // we can set it directly.
 
-        _log('Setting storage key [$storageKey] to value [$value].');
+        _log(
+            '[_updateStorage 1] Setting storage key [$storageKey] to value [$value].');
         await storage.put(storageKey, value);
         return false;
       }
@@ -1031,7 +1032,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         storageData = Map<String, dynamic>.from(result as Map);
       }
 
-      _log('Setting storage key [$storageKey] to value [$value].');
+      _log(
+          '[_updateStorage 2] Setting storage key [$storageKey] to value [$value].');
       await storage.put(match.name, storageData[match.name]);
 
       return true;
@@ -1161,7 +1163,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         currentValue.remove(newValue);
       case ListOperation.update:
         final parsedValue = newValue.parsedValue();
-        if (currentValue.length > index) currentValue[index] = parsedValue;
+        if (currentValue.length > index) {
+          currentValue[index] = parsedValue;
+        } else if (currentValue.length == index) {
+          currentValue.add(parsedValue);
+        }
       case ListOperation.set:
       case ListOperation.replace:
         final parsedValue = newValue.toList<List>() ?? [];
@@ -1306,7 +1312,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
       final match = VariableMatch.parse(storageKey.wrapWithVariableSyntax());
       final docData = await cloudDatabase.getDocumentData(
-          subAction.path, subAction.documentId);
+          subAction.path, evaluatedDocumentId);
 
       final Object? currentValue;
       JsonPointer? pointer;
@@ -1357,7 +1363,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         // This means the key is a simple key without any path or accessor. So
         // we can set it directly.
 
-        _log('Setting storage key [$storageKey] to value [$value].');
+        _log(
+            '[updateDocumentOnCloud 1] Setting storage key [$storageKey] to value [$value].');
         docData[storageKey] = value;
         return await cloudDatabase.updateDocument(
           evaluatedPath,
@@ -1381,7 +1388,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         storageData = Map<String, dynamic>.from(result as Map);
       }
 
-      _log('Setting storage key [$storageKey] to value [$value].');
+      _log(
+          '[updateDocumentOnCloud 2] Setting storage key [$storageKey] to value [$value].');
       docData[match.name] = storageData[match.name];
 
       return await cloudDatabase.updateDocument(
