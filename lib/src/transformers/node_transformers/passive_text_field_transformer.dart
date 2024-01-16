@@ -156,9 +156,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
             'inputValue',
             scopedValues: scopedValues,
           )
-        : widget.node.initialText.isNotEmpty
-            ? widget.node.initialText
-            : null;
+        :  null;
     if (currentPropertyValue != null) {
       currentPropertyValue = PropertyValueDelegate.substituteVariables(
         currentPropertyValue,
