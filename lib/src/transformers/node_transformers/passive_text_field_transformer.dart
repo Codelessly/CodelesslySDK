@@ -156,7 +156,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
             'inputValue',
             scopedValues: scopedValues,
           )
-        :  null;
+        : findIndexedValueIfApplied(scopedValues);
     if (currentPropertyValue != null) {
       currentPropertyValue = PropertyValueDelegate.substituteVariables(
         currentPropertyValue,
@@ -169,6 +169,17 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         controller.text != currentPropertyValue) {
       controller.text = currentPropertyValue;
     }
+  }
+
+  ///
+  String? findIndexedValueIfApplied(ScopedValues scopedValues) {
+    if (scopedValues.indexedItem == null) return null;
+    if (widget.node.initialText.isEmpty) return null;
+    if (widget.node.variables['inputValue'] != null) return null;
+    final match = VariableMatch.parseAll(widget.node.initialText);
+    if (!match.any((match) => match.name == 'item')) return null;
+
+    return widget.node.initialText;
   }
 
   @override
