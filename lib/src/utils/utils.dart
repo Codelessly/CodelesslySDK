@@ -689,7 +689,15 @@ Query<Map<String, dynamic>> constructQueryFromRef(
   if (whereFilters.isEmpty && orderByOperations.isEmpty) return query;
 
   for (final whereFilter in whereFilters) {
-    final String field = PropertyValueDelegate.substituteVariables(
+    Object? field;
+    final matches = VariableMatch.parseAll(whereFilter.field);
+    if (matches.length == 1) {
+      final match = matches.first;
+      if (match.hasRawValue && match.name == 'documentId') {
+        field = FieldPath.documentId;
+      }
+    }
+    field ??= PropertyValueDelegate.substituteVariables(
       whereFilter.field,
       scopedValues: scopedValues,
       nullSubstitutionMode: nullSubstitutionMode,
@@ -746,11 +754,21 @@ Query<Map<String, dynamic>> constructQueryFromRef(
   }
 
   for (final orderByFilter in orderByOperations) {
-    final String field = PropertyValueDelegate.substituteVariables(
+    Object? field;
+    final matches = VariableMatch.parseAll(orderByFilter.field);
+    if (matches.length == 1) {
+      final match = matches.first;
+      if (match.hasRawValue && match.name == 'documentId') {
+        field = FieldPath.documentId;
+      }
+    }
+
+    field ??= PropertyValueDelegate.substituteVariables(
       orderByFilter.field,
       scopedValues: scopedValues,
       nullSubstitutionMode: nullSubstitutionMode,
     );
+
     query = query.orderBy(
       field,
       descending: orderByFilter.sortOrder == OrderByQuerySortOrder.descending,
