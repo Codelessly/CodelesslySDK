@@ -163,14 +163,27 @@ class PassiveListViewWidget extends StatelessWidget {
       itemCount = data?.length ?? node.properties.itemCount;
     }
 
+    // If this ListView is inside another scrollable, Flutter will crash
+    // if shrinkWrap is false in order to enforce this ListView to take
+    // up its own space by itself since it will be inside an unbounded space.
+    // This statement remains true even if this inner ListView is wrapped with
+    // SizedBoxes and nested deeply inside other widgets, Flutter will crash
+    // regardless unless shrinkwrap is true.
+    // https://stackoverflow.com/a/54587532/4327834
+    final ScrollableState? parentScrollable = Scrollable.maybeOf(context);
+
+    final bool shrinkWrap = parentScrollable != null
+        ? true
+        : node.properties.itemCount != null &&
+            (node.scrollDirection == AxisC.horizontal
+                ? node.isHorizontalWrap
+                : node.isVerticalWrap);
+
     return AdaptiveNodeBox(
       node: node,
       child: ListViewBuilder(
         primary: node.primary,
-        shrinkWrap: node.properties.itemCount != null &&
-            (node.scrollDirection == AxisC.horizontal
-                ? node.isHorizontalWrap
-                : node.isVerticalWrap),
+        shrinkWrap: shrinkWrap,
         itemCount: itemCount,
         padding: node.padding.flutterEdgeInsets,
         keyboardDismissBehavior:
