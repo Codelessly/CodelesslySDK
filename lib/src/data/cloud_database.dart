@@ -321,7 +321,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
     // TODO: Should we do update instead of set?
     await docRef.set(value, SetOptions(merge: true));
-    logger.log(_label, 'Document updated: ${docRef.path}/$documentId');
+    logger.log(_label, 'Document updated: ${docRef.path}');
     return true;
   }
 
