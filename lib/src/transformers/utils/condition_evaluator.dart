@@ -61,7 +61,7 @@ class ConditionEvaluator<R extends Object>
   Object? visitVariablePart(VariablePart part) {
     final value =
         part.valueString.splitMapJoinRegex(variablePathRegex, onMatch: (match) {
-      final Object? value = PropertyValueDelegate.retrieveVariableValue(
+      final Object? value = PropertyValueDelegate.getVariableValueFromPath(
         match[0]!,
         scopedValues: scopedValues,
       );
