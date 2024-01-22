@@ -196,14 +196,48 @@ class PropertyValueDelegate {
     String path, {
     required ScopedValues scopedValues,
   }) {
-    final Object? value =
-        retrieveVariableValue(path, scopedValues: scopedValues);
+    final match = VariableMatch.parse(path.wrapWithVariableSyntax());
+    if (match == null) return null;
+
+    final List<String> segments = match.fullPath.split(r'.');
+    // remove variable name
+    final initial = segments.removeAt(0);
+
+    Object? value = _retrieveVariableValue(initial, scopedValues: scopedValues);
+
+    if (segments.isEmpty) return value?.typedValue<R>();
+    if (value == null) return null;
+
+    final variable = match.isPredefinedVariable
+        ? predefinedVariables.findByNameOrNull(match.name)
+        : scopedValues.variables.values.findByNameOrNull(match.name);
+
+    if (variable == null) return null;
+
+    VariableType accessorType =
+        match.hasAccessor ? VariableType.fromObjectType(value) : variable.type;
+    List<Accessor> accessors = variable.name.startsWith('api')
+        ? getApiResponseAccessorsForType(VariableType.map)
+        : getAccessorsForType(accessorType);
+
+    while (segments.isNotEmpty) {
+      String accessor = segments.removeAt(0);
+
+      final Accessor? matchedAccessor =
+          accessors.firstWhereOrNull((element) => element.name == accessor);
+
+      if (matchedAccessor == null || value == null) return null;
+
+      value = matchedAccessor.getValue(value);
+      accessorType = matchedAccessor.type;
+
+      accessors = getAccessorsForType(accessorType);
+    }
 
     return value?.typedValue<R>();
   }
 
-  @internal
-  static Object? retrieveVariableValue(
+  static Object? _retrieveVariableValue(
     String path, {
     required ScopedValues scopedValues,
   }) {
@@ -487,3 +521,357 @@ class PropertyValueDelegate {
     };
   }
 }
+
+/// Defines accessors for a variable based on its type.
+List<Accessor> getAccessorsForType(VariableType type) {
+  switch (type) {
+    case VariableType.text:
+      return [
+        Accessor(
+          name: 'length',
+          type: VariableType.integer,
+          getValue: (value) => value?.toString().length,
+        ),
+        Accessor(
+          name: 'upcase',
+          type: VariableType.text,
+          getValue: (value) => value?.toString().toUpperCase(),
+        ),
+        Accessor(
+          name: 'downcase',
+          type: VariableType.text,
+          getValue: (value) => value?.toString().toUpperCase(),
+        ),
+        Accessor(
+          name: 'capitalize',
+          type: VariableType.text,
+          getValue: (value) => value?.toString().capitalized,
+        ),
+        Accessor(
+          name: 'isEmpty',
+          type: VariableType.boolean,
+          getValue: (value) => value?.toString().isEmpty,
+        ),
+        Accessor(
+          name: 'isNotEmpty',
+          type: VariableType.boolean,
+          getValue: (value) => value?.toString().isNotEmpty,
+        ),
+        Accessor(
+          name: 'isBlank',
+          type: VariableType.boolean,
+          getValue: (value) => value?.toString().trim().isEmpty,
+        ),
+      ];
+    case VariableType.integer:
+      return [
+        Accessor(
+          name: 'isEven',
+          type: VariableType.boolean,
+          getValue: (value) => value?.toInt()?.isEven,
+        ),
+        Accessor(
+          name: 'isOdd',
+          type: VariableType.boolean,
+          getValue: (value) => value?.toInt()?.isOdd,
+        ),
+        Accessor(
+          name: 'isFinite',
+          type: VariableType.boolean,
+          getValue: (value) => value?.toInt()?.isFinite,
+        ),
+        Accessor(
+          name: 'isInfinite',
+          type: VariableType.boolean,
+          getValue: (value) => value?.toInt()?.isInfinite,
+        ),
+        Accessor(
+          name: 'isNegative',
+          type: VariableType.boolean,
+          getValue: (value) => value?.toInt()?.isNegative,
+        ),
+        Accessor(
+          name: 'isPositive',
+          type: VariableType.boolean,
+          getValue: (value) {
+            final int? parsedValue = value?.toInt();
+            if (parsedValue == null) return null;
+            return !parsedValue.isNegative;
+          },
+        ),
+      ];
+    case VariableType.decimal:
+      return [
+        Accessor(
+          name: 'whole',
+          type: VariableType.integer,
+          getValue: (value) => value?.toDouble()?.toInt(),
+        ),
+        Accessor(
+          name: 'floor',
+          type: VariableType.integer,
+          getValue: (value) => value?.toDouble()?.floor(),
+        ),
+        Accessor(
+          name: 'ceil',
+          type: VariableType.integer,
+          getValue: (value) => value?.toDouble()?.ceil(),
+        ),
+        Accessor(
+          name: 'isFinite',
+          type: VariableType.boolean,
+          getValue: (value) => value?.toDouble()?.isFinite,
+        ),
+        Accessor(
+          name: 'isInfinite',
+          type: VariableType.boolean,
+          getValue: (value) => value?.toDouble()?.isInfinite,
+        ),
+        Accessor(
+          name: 'isNegative',
+          type: VariableType.boolean,
+          getValue: (value) => value?.toDouble()?.isNegative,
+        ),
+        Accessor(
+          name: 'isPositive',
+          type: VariableType.boolean,
+          getValue: (value) {
+            final newValue = value?.toDouble();
+            if (newValue == null) return null;
+            return !newValue.isNegative;
+          },
+        ),
+        Accessor(
+          name: 'isNaN',
+          type: VariableType.boolean,
+          getValue: (value) => value?.toDouble()?.isNaN,
+        ),
+      ];
+    case VariableType.boolean:
+      return [
+        LeafAccessor(
+          name: 'toggled',
+          type: VariableType.boolean,
+          getValue: (value) => !(value?.toBool() ?? false),
+        ),
+      ];
+    case VariableType.map:
+      return [
+        Accessor(
+          name: 'length',
+          type: VariableType.integer,
+          getValue: (value) => value?.toMap()?.length,
+        ),
+        Accessor(
+          name: 'keys',
+          type: VariableType.list,
+          getValue: (value) => value?.toMap()?.keys,
+        ),
+        Accessor(
+          name: 'values',
+          type: VariableType.list,
+          getValue: (value) => value?.toMap()?.values,
+        ),
+        Accessor(
+          name: 'isEmpty',
+          type: VariableType.boolean,
+          getValue: (value) {
+            final newValue = value?.toMap();
+            if (newValue == null) return null;
+            return newValue.isEmpty;
+          },
+        ),
+        Accessor(
+          name: 'isNotEmpty',
+          type: VariableType.boolean,
+          getValue: (value) {
+            final newValue = value?.toMap();
+            if (newValue == null) return null;
+            return newValue.isNotEmpty;
+          },
+        ),
+      ];
+    case VariableType.list:
+      return [
+        Accessor(
+          name: 'length',
+          type: VariableType.integer,
+          getValue: (value) => value?.toList()?.length,
+        ),
+        Accessor(
+          name: 'isEmpty',
+          type: VariableType.boolean,
+          getValue: (value) {
+            final newValue = value?.toMap();
+            if (newValue == null) return null;
+            return newValue.isEmpty;
+          },
+        ),
+        Accessor(
+          name: 'isNotEmpty',
+          type: VariableType.boolean,
+          getValue: (value) {
+            final newValue = value?.toMap();
+            if (newValue == null) return null;
+            return newValue.isNotEmpty;
+          },
+        ),
+      ];
+    case VariableType.color:
+      return [
+        Accessor(
+          name: 'red',
+          type: VariableType.integer,
+          getValue: (value) {
+            final newValue = value.toColorRGBA();
+            if (newValue == null) return null;
+            return (newValue.r * 255).toInt();
+          },
+        ),
+        Accessor(
+          name: 'green',
+          type: VariableType.integer,
+          getValue: (value) {
+            final newValue = value.toColorRGBA();
+            if (newValue == null) return null;
+            return (newValue.g * 255).toInt();
+          },
+        ),
+        Accessor(
+          name: 'blue',
+          type: VariableType.integer,
+          getValue: (value) {
+            final newValue = value.toColorRGBA();
+            if (newValue == null) return null;
+            return (newValue.b * 255).toInt();
+          },
+        ),
+        Accessor(
+          name: 'alpha',
+          type: VariableType.integer,
+          getValue: (value) {
+            final newValue = value.toColorRGBA();
+            if (newValue == null) return null;
+            return (newValue.a * 255).toInt();
+          },
+        ),
+        Accessor(
+          name: 'opacity',
+          type: VariableType.integer,
+          getValue: (value) {
+            final newValue = value.toColorRGBA();
+            if (newValue == null) return null;
+            return (newValue.a).toInt();
+          },
+        ),
+      ];
+  }
+}
+
+/// Defines accessors for an api variable based on the type of date it holds.
+List<Accessor> getApiResponseAccessorsForType(VariableType dataType) => [
+      Accessor(
+        name: 'url',
+        type: VariableType.text,
+        getValue: (value) => value.toMap()?['url'],
+      ),
+      Accessor(
+        name: 'status',
+        type: VariableType.text,
+        getValue: (value) => value.toMap()?['status']?.toString(),
+      ),
+      Accessor(
+        name: 'statusCode',
+        type: VariableType.integer,
+        getValue: (value) => value.toMap()?['statusCode']?.toInt(),
+      ),
+      Accessor(
+        name: 'isIdle',
+        type: VariableType.boolean,
+        getValue: (value) => value.toMap()?['isIdle']?.toBool(),
+      ),
+      Accessor(
+        name: 'isLoading',
+        type: VariableType.boolean,
+        getValue: (value) => value.toMap()?['isLoading']?.toBool(),
+      ),
+      Accessor(
+        name: 'isError',
+        type: VariableType.boolean,
+        getValue: (value) => value.toMap()?['isError']?.toBool(),
+      ),
+      Accessor(
+        name: 'isSuccess',
+        type: VariableType.boolean,
+        getValue: (value) => value.toMap()?['isSuccess']?.toBool(),
+      ),
+      Accessor(
+        name: 'hasData',
+        type: VariableType.boolean,
+        getValue: (value) => value.toMap()?['hasData']?.toBool(),
+      ),
+      Accessor(
+        name: 'data',
+        type: dataType,
+        getValue: (value) => value.toMap()?['data'],
+      ),
+      Accessor(
+        name: 'error',
+        type: dataType,
+        getValue: (value) => value.toMap()?['error'],
+      ),
+      Accessor(
+        name: 'headers',
+        type: VariableType.map,
+        getValue: (value) => value.toMap()?['headers']?.toMap(),
+      ),
+    ];
+
+/// Defines accessors for a cloud data variable based on the type of date it holds.
+List<Accessor> getCloudDataVariableAccessorsForType(VariableType dataType) => [
+      Accessor(
+        name: 'url',
+        type: VariableType.text,
+        getValue: (value) => value.toMap()?['url'],
+      ),
+      Accessor(
+        name: 'status',
+        type: VariableType.text,
+        getValue: (value) => value.toMap()?['status']?.toString(),
+      ),
+      Accessor(
+        name: 'isIdle',
+        type: VariableType.boolean,
+        getValue: (value) => value.toMap()?['isIdle']?.toBool(),
+      ),
+      Accessor(
+        name: 'isLoading',
+        type: VariableType.boolean,
+        getValue: (value) => value.toMap()?['isLoading']?.toBool(),
+      ),
+      Accessor(
+        name: 'isError',
+        type: VariableType.boolean,
+        getValue: (value) => value.toMap()?['isError']?.toBool(),
+      ),
+      Accessor(
+        name: 'isSuccess',
+        type: VariableType.boolean,
+        getValue: (value) => value.toMap()?['isSuccess']?.toBool(),
+      ),
+      Accessor(
+        name: 'hasData',
+        type: VariableType.boolean,
+        getValue: (value) => value.toMap()?['hasData']?.toBool(),
+      ),
+      Accessor(
+        name: 'data',
+        type: dataType,
+        getValue: (value) => value.toMap()?['data'],
+      ),
+      Accessor(
+        name: 'error',
+        type: dataType,
+        getValue: (value) => value.toMap()?['error'],
+      ),
+    ];
