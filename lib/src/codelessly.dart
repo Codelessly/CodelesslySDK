@@ -500,7 +500,15 @@ class Codelessly {
 
     _updateStatus(CStatus.loading(CLoadingState.initializing));
 
-    _config = config;
+    if (config != null) {
+      _config = config;
+    }
+
+    assert(
+      _config != null,
+      'The SDK cannot be initialized without a configuration. '
+      'Make sure you are correctly passing a [CodelesslyConfig] to the SDK.',
+    );
 
     log('Initializing Codelessly with firebase project ID: ${_config!.firebaseOptions.projectId}');
     log('Cloud Functions Base URL: ${_config!.firebaseCloudFunctionsBaseURL}');
