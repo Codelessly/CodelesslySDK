@@ -1,3 +1,13 @@
+## 1.0.0
+- Official v1 release!
+- Migrate to Material 3.
+- Text field improvements.
+  - Fix text field not updating internal state in a list view.
+  - Fix text field state sync issue.
+  - Fix list operation action when index is out of bounds.
+  - Changes to enable ListViews to shrinkwrap.
+- Add variable support for button color properties. 
+
 ## 0.8.0
 - Codelessly Data support. Save and write data to Codelessly Cloud.
 - New GridView widget.
