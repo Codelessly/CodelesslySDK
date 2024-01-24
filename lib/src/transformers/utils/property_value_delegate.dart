@@ -221,16 +221,28 @@ class PropertyValueDelegate {
         : getAccessorsForType(accessorType);
 
     while (segments.isNotEmpty) {
+      if (value == null) return null;
       String accessor = segments.removeAt(0);
 
       final Accessor? matchedAccessor =
           accessors.firstWhereOrNull((element) => element.name == accessor);
 
-      if (matchedAccessor == null || value == null) return null;
+      if (matchedAccessor == null) {
+        // If the accessor is not found, it means that the path is invalid. But
+        // it could be a json path. So we will try to substitute it with the
+        // value and see if it is a valid json path.
+        if (value is Map) {
+          (value, _) = substituteJsonPath(accessor, {...value});
+        } else {
+          return null;
+        }
+      } else {
+        value = matchedAccessor.getValue(value);
+      }
 
-      value = matchedAccessor.getValue(value);
-      accessorType = matchedAccessor.type;
-
+      if (value == null) return null;
+      accessorType =
+          matchedAccessor?.type ?? VariableType.fromObjectType(value);
       accessors = getAccessorsForType(accessorType);
     }
 
