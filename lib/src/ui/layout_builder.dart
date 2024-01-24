@@ -305,12 +305,14 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
       data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
       child: Theme(
         data: ThemeData(),
-        child: transformerManager.buildWidgetFromNode(
-          canvasNode,
-          context,
-          settings: const WidgetBuildSettings(
-            debugLabel: 'layout builder',
-            nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        child: Form(
+          child: transformerManager.buildWidgetFromNode(
+            canvasNode,
+            context,
+            settings: const WidgetBuildSettings(
+              debugLabel: 'layout builder',
+              nullSubstitutionMode: NullSubstitutionMode.emptyString,
+            ),
           ),
         ),
       ),

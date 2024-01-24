@@ -1,5 +1,8 @@
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
@@ -95,6 +98,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final Function(BuildContext context, List<Reaction> reactions, String value)?
       onIconTap;
   final bool useIconFonts;
+  final AutovalidateMode autovalidateMode;
 
   PassiveTextFieldWidget({
     super.key,
@@ -105,6 +109,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
     this.onSubmitted,
     this.useIconFonts = false,
     this.onIconTap,
+    this.autovalidateMode = AutovalidateMode.onUserInteraction,
     List<VariableData>? variables,
   }) : variablesOverrides = variables ?? [];
 
@@ -219,7 +224,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
                 signed: widget.node.properties.showSignKey)
             : widget.node.properties.keyboardType.toFlutter();
 
-    Widget field = TextField(
+    Widget field = TextFormField(
       focusNode: focusNode,
       autocorrect: widget.node.properties.autoCorrect,
       autofocus: !widget.settings.isPreview && widget.node.properties.autoFocus,
@@ -255,9 +260,46 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       onTap: () => widget.onTap?.call(context, controller.text),
       onChanged: (value) => widget.onChanged?.call(context, value),
       onEditingComplete: () {},
-      onSubmitted: (value) {
-        // handled by the focus listener!
+      // onSubmitted: (value) {
+      // handled by the focus listener!
+      // },
+      autovalidateMode: widget.autovalidateMode,
+      validator: (value) => switch (widget.node.properties.validator) {
+        TextInputValidatorC.none => value,
+        TextInputValidatorC.required =>
+          value == null || value.isEmpty || value.trim().isEmpty
+              ? 'This field is required.'
+              : null,
+        TextInputValidatorC.email =>
+          value != null && EmailValidator.validate(value)
+              ? null
+              : 'Please enter a valid email address.',
+        TextInputValidatorC.phoneNumber =>
+          value != null && PhoneNumber.parse(value).isValid()
+              ? null
+              : 'Please enter a valid phone number.',
+        TextInputValidatorC.url => value == null || Uri.tryParse(value) == null
+            ? 'Please enter a valid URL.'
+            : null,
       },
+      inputFormatters: [
+        switch (widget.node.properties.formatter) {
+          TextInputFormatterC.noSlashes =>
+            FilteringTextInputFormatter.deny('/'),
+          TextInputFormatterC.noSpaces => FilteringTextInputFormatter.deny(' '),
+          TextInputFormatterC.noSpecialCharacters =>
+            FilteringTextInputFormatter.deny(RegExp(r'[^\w\s]+')),
+          TextInputFormatterC.lettersOnly =>
+            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),
+          TextInputFormatterC.numericOnly =>
+            FilteringTextInputFormatter.digitsOnly,
+          TextInputFormatterC.alphaNumericOnly =>
+            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+          TextInputFormatterC.numbersAndSymbolsOnly =>
+            FilteringTextInputFormatter.allow(RegExp(r'[^a-zA-Z\n]')),
+          TextInputFormatterC.none => null,
+        },
+      ].nonNulls.toList(),
       decoration: getDecoration(
         context,
         widget.node,
