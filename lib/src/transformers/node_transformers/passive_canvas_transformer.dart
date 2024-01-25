@@ -315,7 +315,9 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
             ) ??
             fill
     ];
-    if (fills.length == 1 && fills[0].type == PaintType.solid) {
+    if (fills.length == 1 &&
+        fills[0].type == PaintType.solid &&
+        fills[0].visible) {
       return fills[0].color?.toFlutterColor(opacity: fills[0].opacity);
     }
     return Colors.transparent;
