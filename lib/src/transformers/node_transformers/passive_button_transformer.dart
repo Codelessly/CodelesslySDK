@@ -107,15 +107,34 @@ class PassiveButtonWidget extends StatelessWidget {
         ) ??
         node.properties.enabled;
 
-    final Text label = TextUtils.buildText(
-      context,
-      node.properties.label,
-      node: node,
-      textAlignHorizontal: node.properties.labelAlignment,
-      variablesOverrides: variablesOverrides,
-      nullSubstitutionMode: settings.nullSubstitutionMode,
-      replaceVariablesWithSymbol: settings.replaceVariablesWithSymbols,
-    );
+    final Text label;
+
+    // TODO: refactor into TextUtils where it can be built without a style.
+    if (settings.replaceVariablesWithSymbols) {
+      final List<TextSpan> spans = node.properties.label
+          .splitMap(
+            variablePathRegex,
+            onMatch: (match) {
+              return VariableSpan(
+                  variable: match[0]!, style: const TextStyle());
+            },
+            onNonMatch: (text) => TextSpan(text: text),
+          )
+          .toList();
+      label = Text.rich(
+        TextSpan(children: spans),
+        textAlign: node.properties.labelAlignment.flutterTextAlignment,
+      );
+    } else {
+      label = Text(
+        PropertyValueDelegate.substituteVariables(
+          node.properties.label,
+          scopedValues: ScopedValues.of(context),
+          nullSubstitutionMode: settings.nullSubstitutionMode,
+        ),
+        textAlign: node.properties.labelAlignment.flutterTextAlignment,
+      );
+    }
 
     Widget buttonWidget;
     switch (node.properties.buttonType) {

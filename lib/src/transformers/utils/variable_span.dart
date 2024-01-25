@@ -10,12 +10,12 @@ class VariableSpan extends TextSpan {
   /// Creates a [VariableSpan] with the given [variable] name and [style].
   VariableSpan({
     required this.variable,
-    required TextStyle style,
+    TextStyle? style,
     super.mouseCursor,
     super.onEnter,
     super.onExit,
   }) : super(
           text: 'fx',
-          style: style.merge(GoogleFonts.unna(fontStyle: FontStyle.italic)),
+          style: style?.merge(GoogleFonts.unna(fontStyle: FontStyle.italic)),
         );
 }
