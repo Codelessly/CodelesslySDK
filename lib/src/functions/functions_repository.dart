@@ -713,7 +713,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     Object? currentValue = variableNotifier.value.getValue();
 
-    final Object? updatedValue = switch (action.variable.type) {
+    final Object? updatedValue = switch (variableNotifier.value.type) {
       VariableType.text => newValue,
       VariableType.color => ColorRGBA.fromHex(newValue),
       VariableType.integer => _performIntOperation(action.numberOperation,
