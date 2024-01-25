@@ -85,14 +85,18 @@ class TextUtils {
 
     // Replace with fx symbol if required.
     if (replaceVariableWithSymbol) {
-      final bool isVariable =
-          variableSyntaxIdentifierRegex.hasMatch(characters);
-      if (isVariable) {
-        return VariableSpan(
-          variable: characters,
-          style: style,
-        );
-      }
+      final spans = characters
+          .splitMap(
+            variableSyntaxIdentifierRegex,
+            onMatch: (match) =>
+                VariableSpan(variable: characters, style: style),
+            onNonMatch: (text) => TextSpan(text: text, style: style),
+          )
+          .toList();
+
+      if (spans.length == 1) return spans.first;
+
+      return TextSpan(children: spans, style: style);
     } else if (context != null) {
       // Substitute variables.
       characters = PropertyValueDelegate.substituteVariables(
@@ -276,7 +280,7 @@ class TextUtils {
     LineHeight lineHeight,
     double fontSize,
   ) =>
-      lineHeight.value == null
+      lineHeight.value == null || lineHeight.value! <= 0
           ? null
           : switch (lineHeight.unit) {
               LineHeightUnitEnum.pixels => lineHeight.value! / fontSize,
