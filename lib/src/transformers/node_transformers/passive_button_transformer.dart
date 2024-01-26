@@ -89,10 +89,12 @@ class PassiveButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ScopedValues scopedValues =
+        ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final ButtonStyle buttonStyle = createMasterButtonStyle(
       node,
       elevation: elevation,
-      scopedValues: ScopedValues.of(context),
+      scopedValues: scopedValues,
     );
     final double effectiveIconSize =
         min(node.properties.icon.size ?? 24, node.basicBoxLocal.height);
@@ -102,22 +104,22 @@ class PassiveButtonWidget extends StatelessWidget {
     final bool enabled = PropertyValueDelegate.getPropertyValue<bool>(
           node,
           'enabled',
-          scopedValues:
-              ScopedValues.of(context, variablesOverrides: variablesOverrides),
+          scopedValues: scopedValues,
         ) ??
         node.properties.enabled;
 
     final Text label;
 
     // TODO: refactor into TextUtils where it can be built without a style.
+    // TODO: @Birju @Saad Use FX symbol if conditions are applied.
     if (settings.replaceVariablesWithSymbols) {
       final List<TextSpan> spans = node.properties.label
           .splitMap(
             variablePathRegex,
-            onMatch: (match) {
-              return VariableSpan(
-                  variable: match[0]!, style: const TextStyle());
-            },
+            onMatch: (match) => VariableSpan(
+              variable: match[0]!,
+              style: const TextStyle(),
+            ),
             onNonMatch: (text) => TextSpan(text: text),
           )
           .toList();
@@ -126,12 +128,18 @@ class PassiveButtonWidget extends StatelessWidget {
         textAlign: node.properties.labelAlignment.flutterTextAlignment,
       );
     } else {
+      final String value = PropertyValueDelegate.getPropertyValue<String>(
+            node,
+            'label',
+            scopedValues: scopedValues,
+          ) ??
+          PropertyValueDelegate.substituteVariables(
+            node.properties.label,
+            scopedValues: scopedValues,
+            nullSubstitutionMode: settings.nullSubstitutionMode,
+          );
       label = Text(
-        PropertyValueDelegate.substituteVariables(
-          node.properties.label,
-          scopedValues: ScopedValues.of(context),
-          nullSubstitutionMode: settings.nullSubstitutionMode,
-        ),
+        value,
         textAlign: node.properties.labelAlignment.flutterTextAlignment,
       );
     }
