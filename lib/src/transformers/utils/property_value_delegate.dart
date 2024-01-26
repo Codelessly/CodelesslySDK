@@ -106,7 +106,7 @@ class PropertyValueDelegate {
 
     // if (condition != null) {
     //   print('----------------------------------------------------------------');
-    //   print('CONDITION on ${node.name}-> ${property}:');
+    //   print('CONDITION on ${node.name}-> $property:');
     //   print('----------------------------------------------------------------');
     //   condition.prettyPrint();
     //   print('----------------------------------------------------------------');
