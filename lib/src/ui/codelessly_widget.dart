@@ -459,6 +459,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           }
 
           final layoutWidget = Material(
+            clipBehavior: Clip.none,
             type: MaterialType.transparency,
             child: CodelesslyLayoutBuilder(
               key: ValueKey(layoutID),
