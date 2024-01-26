@@ -98,7 +98,7 @@ class ConditionEvaluator<R extends Object>
     if (left is num && right is num) return left != right;
     if (left is bool && right is bool) return left != right;
 
-    return left.toString().toLowerCase() == right.toString().toLowerCase();
+    return left.toString().toLowerCase() != right.toString().toLowerCase();
   }
 
   @override
