@@ -5,8 +5,15 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../../codelessly_sdk.dart';
+import '../utils/constants.dart';
 
 const String _label = 'Cloud Database';
+
+const List<String> _privateDocumentFields = [
+  SDKConstants.id,
+  SDKConstants.createdAt,
+  SDKConstants.updatedAt,
+];
 
 /// Allows access to cloud storage. Implementations of this class should be
 /// able to store and retrieve data from the cloud storage in secure manner.
@@ -282,6 +289,9 @@ class FirestoreCloudDatabase extends CloudDatabase {
     bool skipCreationIfDocumentExists = true,
     required Map<String, dynamic> value,
   }) async {
+    // filter data for private fields.
+    value = sanitizeCloudDataToSend(value);
+
     if (autoGenerateId) {
       // if autoGenerateId is true, then skipCreationIfDocumentExists and docId is ignored.
       final document = await rootRef.collection(path).add(value);
@@ -319,6 +329,9 @@ class FirestoreCloudDatabase extends CloudDatabase {
     //   await docRef.set(value);
     // }
 
+    // Sanitize data.
+    value = sanitizeCloudDataToSend(value);
+
     // TODO: Should we do update instead of set?
     await docRef.set(value, SetOptions(merge: true));
     logger.log(_label, 'Document updated: ${docRef.path}');
@@ -346,7 +359,10 @@ class FirestoreCloudDatabase extends CloudDatabase {
   @override
   Stream<Map<String, dynamic>> streamDocument(String path, String documentId) {
     final docRef = getDocPath(path, documentId);
-    return docRef.snapshots().map((snapshot) => snapshot.data() ?? {});
+    return docRef.snapshots().map((snapshot) =>
+        snapshot.data()?.let(
+            (value) => sanitizeCloudDataForUse(value, docId: snapshot.id)) ??
+        {});
   }
 
   @override
@@ -368,6 +384,9 @@ class FirestoreCloudDatabase extends CloudDatabase {
             'Document stream update from cloud storage: $path/$documentId');
         logger.log(_label,
             'Updating variable ${variable.value.name} with success state.');
+
+        data = sanitizeCloudDataForUse(data);
+
         // Set the variable with success state.
         variable.set(
           variable.value
@@ -461,4 +480,62 @@ class FirestoreCloudDatabase extends CloudDatabase {
     // Add subscription to the list of subscriptions.
     _subscriptions.add(subscription);
   }
+}
+
+/// Returns a sanitized version of the given [data] to be used in the SDK
+/// and variables.
+Map<String, dynamic> sanitizeCloudDataForUse(Map<String, dynamic> data,
+    {String? docId}) {
+  if (data.isEmpty) return data;
+  // breaks reference and allows to modify the data.
+  data = {...data};
+
+  data[SDKConstants.createdAt] =
+      getSanitizedDate(data[SDKConstants.createdAt]) ??
+          DateTime.now().toUtc().toIso8601String();
+  data[SDKConstants.updatedAt] =
+      getSanitizedDate(data[SDKConstants.updatedAt]) ??
+          DateTime.now().toUtc().toIso8601String();
+
+  if (docId != null) data[SDKConstants.id] = docId;
+
+  return data;
+}
+
+/// Returns a sanitized version of the given [data] to be sent to the cloud
+/// storage.
+Map<String, dynamic> sanitizeCloudDataToSend(Map<String, dynamic> data) {
+  if (data.isEmpty) return data;
+  // breaks reference and allows to modify the data.
+  data = {...data};
+
+  final createdAt = getSanitizedDate(data[SDKConstants.createdAt]) ??
+      DateTime.now().toUtc().toIso8601String();
+
+  final updatedAt = DateTime.now().toUtc().toIso8601String();
+
+  // Remove private fields.
+  data.removeWhere((key, value) => _privateDocumentFields.contains(key));
+
+  // put back private fields.
+  data[SDKConstants.createdAt] = createdAt;
+  data[SDKConstants.updatedAt] = updatedAt;
+
+  return data;
+}
+
+/// Returns a sanitized date string from the given [value].
+/// Converts different representation of date to a string representation.
+String? getSanitizedDate(Object? value) {
+  return switch (value) {
+    Timestamp timestamp => timestamp.toDate().toUtc().toIso8601String(),
+    DateTime dateTime => dateTime.toUtc().toIso8601String(),
+    // TODO: maybe we can avoid this since it is already a string representation of date.
+    String string => DateTime.tryParse(string)?.toUtc().toIso8601String(),
+    int millisecondsSinceEpoch =>
+      DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch)
+          .toUtc()
+          .toIso8601String(),
+    _ => null,
+  };
 }

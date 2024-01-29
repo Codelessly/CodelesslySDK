@@ -1750,3 +1750,12 @@ extension BlendModeCExt on BlendModeC {
         BlendModeC.modulate => BlendMode.modulate,
       };
 }
+
+extension GenericExt<T extends Object> on T? {
+  /// Runs the [block] if the value is not null and returns the result.
+  /// Returns null if the value is null.
+  R? let<R>(R? Function(T value) block) {
+    if (this == null) return null;
+    return block(this!);
+  }
+}
