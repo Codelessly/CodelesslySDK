@@ -9,7 +9,7 @@ import '../utils/constants.dart';
 
 const String _label = 'Cloud Database';
 
-const List<String> _privateDocumentFields = [
+const List<String> privateDocumentFields = [
   SDKConstants.id,
   SDKConstants.createdAt,
   SDKConstants.updatedAt,
@@ -289,15 +289,23 @@ class FirestoreCloudDatabase extends CloudDatabase {
     bool skipCreationIfDocumentExists = true,
     required Map<String, dynamic> value,
   }) async {
-    // filter data for private fields.
-    value = sanitizeCloudDataToSend(value);
-
+    // Auto generate id if desired.
     if (autoGenerateId) {
       // if autoGenerateId is true, then skipCreationIfDocumentExists and docId is ignored.
       final document = await rootRef.collection(path).add(value);
       logger.log(_label, 'Document added: ${document.path}');
+
+      // Sanitize data afterwards because we didn't have the docId before.
+      value = sanitizeCloudDataToSend(value, docId: document.id);
+      await document.set(value);
+
       return true;
     }
+
+    // Since we're not auto-generating ids at this point, we can sanitize
+    // the data before we do anything, ahead of time.
+    value = sanitizeCloudDataToSend(value, docId: documentId);
+
     // Get doc reference.
     final DocumentReference docRef = getDocPath(path, documentId);
 
@@ -330,7 +338,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
     // }
 
     // Sanitize data.
-    value = sanitizeCloudDataToSend(value);
+    value = sanitizeCloudDataToSend(value, docId: documentId);
 
     // TODO: Should we do update instead of set?
     await docRef.set(value, SetOptions(merge: true));
@@ -353,7 +361,8 @@ class FirestoreCloudDatabase extends CloudDatabase {
       String path, String documentId) async {
     final docRef = getDocPath(path, documentId);
     final snapshot = await docRef.get();
-    return snapshot.data() ?? {};
+    final data = snapshot.data() ?? {};
+    return sanitizeCloudDataForUse(data, docId: snapshot.id);
   }
 
   @override
@@ -385,7 +394,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
         logger.log(_label,
             'Updating variable ${variable.value.name} with success state.');
 
-        data = sanitizeCloudDataForUse(data);
+        data = sanitizeCloudDataForUse(data, docId: documentId);
 
         // Set the variable with success state.
         variable.set(
@@ -455,8 +464,9 @@ class FirestoreCloudDatabase extends CloudDatabase {
     // Listen to the stream and update the variable.
     final subscription = stream.listen(
       (snapshot) {
-        final docs =
-            snapshot.docs.map((doc) => {...doc.data(), 'id': doc.id}).toList();
+        final docs = snapshot.docs
+            .map((doc) => sanitizeCloudDataForUse(doc.data(), docId: doc.id))
+            .toList();
         logger.log(_label, 'Document stream update from cloud storage: $path');
         logger.log(_label,
             'Updating variable ${variable.value.name} with success state.');
@@ -484,58 +494,101 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
 /// Returns a sanitized version of the given [data] to be used in the SDK
 /// and variables.
-Map<String, dynamic> sanitizeCloudDataForUse(Map<String, dynamic> data,
-    {String? docId}) {
+/// Updates the [SDKConstants.createdAt] and [SDKConstants.updatedAt] fields
+/// with the current time.
+Map<String, dynamic> sanitizeCloudDataForUse(
+  Map<String, dynamic> data, {
+  required String docId,
+}) {
   if (data.isEmpty) return data;
   // breaks reference and allows to modify the data.
   data = {...data};
 
-  data[SDKConstants.createdAt] =
-      getSanitizedDate(data[SDKConstants.createdAt]) ??
-          DateTime.now().toUtc().toIso8601String();
-  data[SDKConstants.updatedAt] =
-      getSanitizedDate(data[SDKConstants.updatedAt]) ??
-          DateTime.now().toUtc().toIso8601String();
+  // Late because it can potentially be unused;
+  late final DateTime now = DateTime.now();
 
-  if (docId != null) data[SDKConstants.id] = docId;
+  data[SDKConstants.createdAt] =
+      deserializeCosmicValue(data[SDKConstants.createdAt] ?? now);
+  data[SDKConstants.updatedAt] =
+      deserializeCosmicValue(data[SDKConstants.updatedAt] ?? now);
+  data[SDKConstants.id] = docId;
+
+  // Sort private fields to the bottom.
+  for (final field in privateDocumentFields) {
+    if (data.containsKey(field)) {
+      final value = data.remove(field);
+      data[field] = value;
+    }
+  }
 
   return data;
 }
 
 /// Returns a sanitized version of the given [data] to be sent to the cloud
 /// storage.
-Map<String, dynamic> sanitizeCloudDataToSend(Map<String, dynamic> data) {
+/// Updates the [SDKConstants.createdAt] and [SDKConstants.updatedAt] fields
+/// with the current time.
+Map<String, dynamic> sanitizeCloudDataToSend(
+  Map<String, dynamic> data, {
+  required String? docId,
+  bool hidePrivateFields = false,
+}) {
   if (data.isEmpty) return data;
-  // breaks reference and allows to modify the data.
+
+  // Breaks reference and allows to modify the data.
   data = {...data};
 
-  final createdAt = getSanitizedDate(data[SDKConstants.createdAt]) ??
-      DateTime.now().toUtc().toIso8601String();
-
-  final updatedAt = DateTime.now().toUtc().toIso8601String();
-
   // Remove private fields.
-  data.removeWhere((key, value) => _privateDocumentFields.contains(key));
+  if (hidePrivateFields) {
+    for (final field in privateDocumentFields) {
+      data.remove(field);
+    }
+  } else {
+    // Late because it can potentially be unused;
+    late final DateTime now = DateTime.now();
 
-  // put back private fields.
-  data[SDKConstants.createdAt] = createdAt;
-  data[SDKConstants.updatedAt] = updatedAt;
+    data[SDKConstants.createdAt] =
+        serializedCosmicValue(data[SDKConstants.createdAt] ?? now);
+    data[SDKConstants.updatedAt] = serializedCosmicValue(now);
+
+    if (docId != null) {
+      data[SDKConstants.id] = docId;
+    }
+
+    // Sort private fields to the bottom.
+    for (final field in privateDocumentFields) {
+      if (data.containsKey(field)) {
+        final value = data.remove(field);
+        data[field] = value;
+      }
+    }
+  }
 
   return data;
 }
 
 /// Returns a sanitized date string from the given [value].
 /// Converts different representation of date to a string representation.
-String? getSanitizedDate(Object? value) {
+String? serializedCosmicValue(Object? value) {
   return switch (value) {
     Timestamp timestamp => timestamp.toDate().toUtc().toIso8601String(),
     DateTime dateTime => dateTime.toUtc().toIso8601String(),
-    // TODO: maybe we can avoid this since it is already a string representation of date.
     String string => DateTime.tryParse(string)?.toUtc().toIso8601String(),
     int millisecondsSinceEpoch =>
       DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch)
           .toUtc()
           .toIso8601String(),
+    _ => null,
+  };
+}
+
+DateTime? deserializeCosmicValue(Object? value) {
+  return switch (value) {
+    Timestamp timestamp => timestamp.toDate().toUtc(),
+    DateTime dateTime => dateTime.toUtc(),
+    String string => DateTime.tryParse(string)?.toUtc(),
+    int millisecondsSinceEpoch =>
+      DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch).toUtc(),
     _ => null,
   };
 }

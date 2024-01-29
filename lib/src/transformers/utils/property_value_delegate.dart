@@ -171,7 +171,6 @@ class PropertyValueDelegate {
           scopedValues: scopedValues,
         );
 
-        print('text: $text | value: $value');
         if (value != null) return value;
 
         return switch (nullSubstitutionMode) {
