@@ -595,12 +595,6 @@ List<Widget> buildFills(
             }
           }
 
-          child = Transform.scale(
-            scaleX: paint.isFlippedX ? -1 : 1,
-            scaleY: paint.isFlippedY ? -1 : 1,
-            child: child,
-          );
-
           if (modifiedOpacity != 1) {
             child = Opacity(
               opacity: modifiedOpacity,
