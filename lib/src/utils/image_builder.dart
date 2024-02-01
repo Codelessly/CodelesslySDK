@@ -95,7 +95,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
 
   BoxFit get fit => widget.fit ?? widget.paint?.fit.boxFit ?? BoxFit.contain;
 
-  double get scale => widget.scale ?? widget.paint?.scale ?? 1;
+  double get scale => (widget.scale ?? widget.paint?.scale ?? 1).abs();
 
   BlendMode? get colorBlendMode =>
       widget.blendMode ?? widget.paint?.blendMode.flutterBlendMode;
@@ -202,6 +202,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
     return buildFromUrl(withAlignment: withAlignment);
   }
 
+  /// TODO: Decorate the rest of the image widgets, not just CachedNetworkImage.
   Widget buildFromUrl({required bool withAlignment}) {
     final String url = widget.url ??
         widget.paint!.croppedImageURL ??
@@ -257,38 +258,43 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
       errorWidget: (context, _, __) =>
           (widget.errorBuilder ?? _defaultErrorBuilder)(context),
       imageBuilder: (context, imageProvider) {
-        final decoration = BoxDecoration(
-          borderRadius: widget.node is CornerMixin
-              ? (widget.node as CornerMixin).cornerRadius.borderRadius
-              : null,
-          image: DecorationImage(
-            image: imageProvider,
-            fit: fit,
-            repeat: repeat,
-            alignment: alignment,
-            opacity: widget.paint?.opacity ?? 1,
-            scale: scale,
-            colorFilter: colorFilter,
-            filterQuality: FilterQuality.medium,
-          ),
-        );
-        Widget child = switch (widget.useInk) {
-          true => Ink(decoration: decoration),
-          false => DecoratedBox(decoration: decoration),
-        };
-
-        if (widget.paint?.hasFlippedAxis ?? false) {
-          return Transform.scale(
-            scaleX: widget.paint!.scaleX.sign,
-            scaleY: widget.paint!.scaleY.sign,
-            child: child,
-          );
-        }
-        return child;
+        return decorateImageProvider(imageProvider);
       },
     );
   }
 
+  Widget decorateImageProvider(ImageProvider imageProvider) {
+    final decoration = BoxDecoration(
+      borderRadius: widget.node is CornerMixin
+          ? (widget.node as CornerMixin).cornerRadius.borderRadius
+          : null,
+      image: DecorationImage(
+        image: imageProvider,
+        fit: fit,
+        repeat: repeat,
+        alignment: alignment,
+        opacity: widget.paint?.opacity ?? 1,
+        scale: scale,
+        colorFilter: colorFilter,
+        filterQuality: FilterQuality.medium,
+      ),
+    );
+    Widget child = switch (widget.useInk) {
+      true => Ink(decoration: decoration),
+      false => DecoratedBox(decoration: decoration),
+    };
+
+    if (widget.paint?.hasFlippedAxis ?? false) {
+      return Transform.scale(
+        scaleX: widget.paint!.scaleX.sign,
+        scaleY: widget.paint!.scaleY.sign,
+        child: child,
+      );
+    }
+    return child;
+  }
+
+  /// TODO: Decorate these image widgets.
   Widget buildFromBytes() {
     final bytes = widget.bytes!;
     if (bytes.type.isSvg) {
