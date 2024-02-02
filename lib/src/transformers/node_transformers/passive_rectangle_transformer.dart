@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' as vec_math;
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/functions_repository.dart';
 
 class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
   PassiveRectangleTransformer(super.getNode, super.manager);
@@ -137,29 +138,129 @@ class PassiveRectangleWidget extends StatelessWidget {
         children: [
           ...buildFills(
             node,
-            useInk: node is BlendMixin &&
-                (node as BlendMixin).inkWell != null &&
-                settings.useInk,
+            useInk: false,
+            // useInk: node is BlendMixin &&
+            //     (node as BlendMixin).inkWell != null &&
+            //     settings.useInk,
             obscureImages: settings.obscureImages,
             settings: settings,
             scopedValues: scopedValues,
           ),
           ...buildStrokes(node, scopedValues),
-          ...wrapWithPaddingAndScroll(
+          // old
+          // ...wrapWithPaddingAndScroll(
+          //   node,
+          //   [
+          //     ...children,
+          //     if (portalWidget != null) portalWidget,
+          //   ],
+          //   stackAlignment: stackAlignment,
+          //   applyPadding: applyPadding,
+          // ),
+
+          ...wrapWithInkWell(
+            context,
             node,
-            [
-              ...children,
-              if (portalWidget != null) portalWidget,
-            ],
-            stackAlignment: stackAlignment,
-            applyPadding: applyPadding,
+            wrapWithPaddingAndScroll(
+              node,
+              [
+                ...children,
+                if (portalWidget != null) portalWidget,
+              ],
+              stackAlignment: stackAlignment,
+              applyPadding: applyPadding,
+            ),
           ),
+
+          // Builder(builder: (context) {
+          //   final child = Stack(
+          //     children: [
+          //       ...wrapWithPaddingAndScroll(
+          //         node,
+          //         [
+          //           ...children,
+          //           if (portalWidget != null) portalWidget,
+          //         ],
+          //         stackAlignment: stackAlignment,
+          //         applyPadding: applyPadding,
+          //       ),
+          //     ],
+          //   );
+          //
+          //   if (node is BlendMixin && (node as BlendMixin).inkWell != null) {
+          //     return Material(
+          //       type: MaterialType.transparency,
+          //       child: InkWell(
+          //         onLongPress: () {},
+          //         onTap: () {
+          //           // TODO:
+          //         },
+          //         child: child,
+          //       ),
+          //     );
+          //   }
+          //
+          //   return child;
+          // }),
         ],
       ),
     );
 
     return data;
   }
+}
+
+List<Widget> wrapWithInkWell(
+  BuildContext context,
+  BaseNode node,
+  List<Widget> children,
+) {
+  if (node is! ReactionMixin) return children;
+
+  final InkWellModel? inkWell = node is BlendMixin ? node.inkWell : null;
+
+  if (inkWell == null) return children;
+
+  final List<Reaction> onClickReactions = (node as ReactionMixin)
+      .reactions
+      .where((reaction) => reaction.trigger.type == TriggerType.click)
+      .toList();
+
+  final List<Reaction> onLongPressReactions = (node as ReactionMixin)
+      .reactions
+      .where((reaction) => reaction.trigger.type == TriggerType.longPress)
+      .toList();
+
+  final widget = Material(
+    type: MaterialType.transparency,
+    child: InkWell(
+      onTap: () => FunctionsRepository.triggerAction(
+        context,
+        TriggerType.click,
+        reactions: onClickReactions,
+      ),
+      onLongPress: () => FunctionsRepository.triggerAction(
+        context,
+        TriggerType.longPress,
+        reactions: onLongPressReactions,
+      ),
+      borderRadius: getBorderRadius(node),
+      overlayColor: inkWell.overlayColor != null
+          ? MaterialStatePropertyAll<Color>(
+              inkWell.overlayColor!.toFlutterColor(),
+            )
+          : null,
+      splashColor: inkWell.splashColor?.toFlutterColor(),
+      highlightColor: inkWell.highlightColor?.toFlutterColor(),
+      hoverColor: inkWell.hoverColor?.toFlutterColor(),
+      focusColor: inkWell.focusColor?.toFlutterColor(),
+      child: Stack(
+        children: children,
+      ),
+    ),
+  );
+
+  return [widget];
 }
 
 class PortalPreviewWidget extends StatelessWidget {
