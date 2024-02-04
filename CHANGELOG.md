@@ -1,3 +1,20 @@
+## 1.1.0
+- New AutoComplete support for Variables.
+- New `createdAt` and `updatedAt` variables to support sorting by date. 
+- Button improvements:
+  - Improve button layout calculations.
+  - Fix conditions not evaluating on button labels.
+- Image Editor improvements:
+  - Fix image fill editor pixel overflow. 
+  - Fix image fill tooltips rendering oddly. 
+  - Fix images invisible after flipping.
+- Fixes:
+  - Fix disable automatic padding from Frames with strokes.
+  - Fix canvas color visibility not working when there's only 1 fill.
+  - Fix set variable action not using variable type properly.
+  - Fix inequality operator was checking for equality.
+  - Fix unsupported type text not visible in json view.
+
 ## 1.0.0
 - Official v1 release!
 - Migrate to Material 3.
