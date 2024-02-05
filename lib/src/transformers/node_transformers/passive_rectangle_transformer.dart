@@ -234,14 +234,18 @@ List<Widget> wrapWithInkWell(
   final widget = Material(
     type: MaterialType.transparency,
     child: InkWell(
-      onTap: () => FunctionsRepository.triggerAction(
-        context,
-        TriggerType.click,
+      onTap: onClickReactions.isEmpty
+          ? null
+          : () => FunctionsRepository.triggerAction(
+                context,
+                TriggerType.click,
         reactions: onClickReactions,
       ),
-      onLongPress: () => FunctionsRepository.triggerAction(
-        context,
-        TriggerType.longPress,
+      onLongPress: onLongPressReactions.isEmpty
+          ? null
+          : () => FunctionsRepository.triggerAction(
+                context,
+                TriggerType.longPress,
         reactions: onLongPressReactions,
       ),
       borderRadius: getBorderRadius(node),
