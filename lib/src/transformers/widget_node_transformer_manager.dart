@@ -117,9 +117,13 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
 
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
-    if (node is! ReactionMixin) {
-      return widget;
-    }
+    if (node is! ReactionMixin) return widget;
+    if (node is! BlendMixin) return widget;
+    if (node case CanvasNode() || SpacerNode()) return widget;
+    if (node is CustomPropertiesMixin && node is! IconNode) return widget;
+    final InkWellModel? inkWell = node.inkWell;
+
+    if (node is DefaultShapeNode && inkWell != null) return widget;
 
     final List<Reaction> onClickReactions = (node as ReactionMixin)
         .reactions
@@ -130,8 +134,6 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
         .reactions
         .where((reaction) => reaction.trigger.type == TriggerType.longPress)
         .toList();
-
-    final InkWellModel? inkWell = node is BlendMixin ? node.inkWell : null;
 
     if (inkWell != null) {
       return Material(
