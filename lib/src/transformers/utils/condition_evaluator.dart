@@ -204,6 +204,22 @@ class ConditionEvaluator<R extends Object>
   }
 
   @override
+  bool visitIsTrueOperator(Object? left) {
+    if (left is bool) return left == true;
+    if (left is String) return left.toLowerCase() == 'true';
+
+    return false;
+  }
+
+  @override
+  bool visitIsFalseOperator(Object? left) {
+    if (left is bool) return left == false;
+    if (left is String) return left.toLowerCase() == 'false';
+
+    return false;
+  }
+
+  @override
   R? visitSetValueAction(SetValueAction action) {
     final ValueModel value = action.values.first;
     if (value is StringValue) {
