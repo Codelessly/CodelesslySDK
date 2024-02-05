@@ -76,10 +76,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           widget = applyWidgetOpacity(node, widget);
         }
 
-        if (settings.withReactions &&
-            node is! CanvasNode &&
-            (node is! CustomPropertiesMixin || node is IconNode) &&
-            node is! SpacerNode) {
+        if (settings.withReactions) {
           widget = wrapWithReaction(context, node, widget);
         }
 
