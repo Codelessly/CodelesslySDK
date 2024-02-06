@@ -564,6 +564,9 @@ Map<String, dynamic> sanitizeCloudDataToSend(
     }
   }
 
+  // Remove any key that is empty. Empty keys are not allowed on Firestore.
+  data.remove('');
+
   return data;
 }
 
