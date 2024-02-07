@@ -1160,7 +1160,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       case ListOperation.removeAt:
         currentValue.removeAt(index);
       case ListOperation.remove:
-        currentValue.remove(newValue);
+        currentValue.removeWhere((element) => element.toString() == newValue);
       case ListOperation.update:
         final parsedValue = newValue.parsedValue();
         if (currentValue.length > index) {
