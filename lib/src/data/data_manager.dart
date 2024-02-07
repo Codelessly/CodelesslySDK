@@ -365,17 +365,33 @@ class DataManager {
   }
 
   Future<void> processDownloadQueue() async {
+    int start;
+    int elapsed = 0;
     while (_downloadQueue.isNotEmpty) {
       final String layoutID = _downloadQueue.removeAt(0);
       log('\tDownloading layout [$layoutID]...');
       try {
+        start = DateTime.now().millisecondsSinceEpoch;
+        elapsed = 0;
         await getOrFetchPopulatedLayout(layoutID: layoutID);
+        elapsed = DateTime.now().millisecondsSinceEpoch - start;
+
+        final bool shouldStagger = elapsed < 300;
 
         if (kIsWeb &&
+            shouldStagger &&
             config.staggerDownloadQueue &&
             _downloadQueue.isNotEmpty) {
-          log('\tWaiting for 1 second before downloading the next layout...');
-          await Future.delayed(const Duration(seconds: 1));
+          // log('\tWaiting for next frame before downloading the next layout...');
+          // log('\tWaiting for 300ms before downloading the next layout...');
+          await Future.delayed(Duration(seconds: 300 - elapsed));
+          // final Completer completer = Completer();
+          // SchedulerBinding.instance.addPostFrameCallback((_) {
+          //   completer.complete();
+          // log('\tDownload queue is staggered. Downloading the next layout...');
+          // processDownloadQueue();
+          // });
+          // await completer.future;
         }
       } catch (e, str) {
         final exception = CodelesslyException(
@@ -389,6 +405,7 @@ class DataManager {
       log('\tLayout [$layoutID] during init download complete.');
     }
 
+    log('Download queue is now empty. All layouts during init have been downloaded.');
     queuingDone = true;
   }
 
