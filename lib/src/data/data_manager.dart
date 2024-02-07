@@ -369,6 +369,10 @@ class DataManager {
       log('\tDownloading layout [$layoutID]...');
       try {
         await getOrFetchPopulatedLayout(layoutID: layoutID);
+
+        if (config.staggerDownloadQueue) {
+          await Future.delayed(const Duration(seconds: 1));
+        }
       } catch (e, str) {
         final exception = CodelesslyException(
           'Failed to download layout [$layoutID] during download queue.',
@@ -404,11 +408,12 @@ class DataManager {
     final bool shouldInitCloudStorage = _cloudDatabase == null ||
         (cloudDatabase!.publishSource != config.publishSource ||
             cloudDatabase!.identifier != projectId);
-    final bool isAuthenticated = authManager.isAuthenticated() &&
-        authManager.hasCloudStorageAccess(projectId);
-    final bool canInitCloudStorage = shouldInitCloudStorage && isAuthenticated;
-
-    if (canInitCloudStorage) {
+    bool isAuthenticated = false;
+    if (shouldInitCloudStorage) {
+      isAuthenticated = authManager.isAuthenticated() &&
+          authManager.hasCloudStorageAccess(projectId);
+    }
+    if (shouldInitCloudStorage && isAuthenticated) {
       log('Initializing cloud storage for project $projectId...');
       _cloudDatabase?.reset();
       _cloudDatabase = await initializeCloudStorage(projectId: projectId);
@@ -416,10 +421,10 @@ class DataManager {
       didChange = true;
       log('Cloud storage initialized.');
     } else {
-      if (isAuthenticated) {
-        log('Cloud storage already initialized correctly. Skipping.');
-      } else {
+      if (shouldInitCloudStorage) {
         log('Cloud storage cannot be initialized because the user is not authenticated.');
+      } else {
+        log('Cloud storage already initialized correctly. Skipping.');
       }
     }
 
@@ -1039,10 +1044,10 @@ class DataManager {
 
     SDKPublishLayout? layout;
     if (model!.layouts.containsKey(layoutID)) {
-      log('\tLayout [$layoutID] already cached. On Your Marks...');
+      log('\tLayout [$layoutID] is already cached. Skipping download.');
       layout = model.layouts[layoutID];
     } else {
-      log('\tLayout [$layoutID] not cached. On Your Marks...');
+      log('\tLayout [$layoutID] is not cached. Downloading...');
       layout = await networkDataRepository.downloadLayoutModel(
         layoutID: layoutID,
         projectID: auth.projectId,
@@ -1063,18 +1068,23 @@ class DataManager {
         apiIds: model.updates.layoutApis[layoutID]!,
       );
 
-      for (final future in apiModels) {
+      final List<HttpApiData?> results =
+          await Future.wait(apiModels.map((future) async {
         try {
-          final api = await future;
-          if (api == null) continue;
-          model.apis[api.id] = api;
+          return await future;
         } catch (e, stacktrace) {
           logError(
             'Error while fetching apis',
             error: e,
             stackTrace: stacktrace,
           );
+          return null;
         }
+      }));
+
+      for (final api in results) {
+        if (api == null) continue;
+        model.apis[api.id] = api;
       }
     } else {
       log('\tLayout [$layoutID] has no apis.');
@@ -1119,7 +1129,7 @@ class DataManager {
     await emitPublishModel();
     savePublishModel();
 
-    log('\tLayoutModel [$layoutID] ready, time for fonts. Get Set...');
+    log('\tLayoutModel [$layoutID] ready, time for fonts...');
     log('\tLayoutModel [$layoutID] has ${model.updates.layoutFonts[layoutID]} fonts.');
 
     if (model.updates.layoutFonts.containsKey(layoutID)) {
@@ -1127,7 +1137,7 @@ class DataManager {
       getOrFetchFontModels(
         fontIDs: model.updates.layoutFonts[layoutID]!,
       ).then((Set<SDKPublishFont> fontModels) async {
-        log('\tFound ${fontModels.length} fonts to fetch for layout [$layoutID]. Go!');
+        log('\tFound ${fontModels.length} fonts to fetch for layout [$layoutID].');
 
         for (final SDKPublishFont fontModel in fontModels) {
           log('\t\tFontModel [${fontModel.id}] ready. Fetching bytes & loading...');

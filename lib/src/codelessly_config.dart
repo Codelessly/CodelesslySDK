@@ -35,6 +35,12 @@ class CodelesslyConfig with EquatableMixin {
   /// configured project during the initialization process of the SDK.
   final bool preload;
 
+  /// If this is set to true and a set of layouts are about to be sequentially
+  /// downloaded, the SDK will stagger the download queue to avoid overloading
+  /// the network or main thread, allowing the app to remain responsive while
+  /// the layouts are being downloaded in the background.
+  final bool staggerDownloadQueue;
+
   /// The source of the data that should be used when initializing the SDK.
   /// The value will be determined by the [isPreview] and [authToken] values.
   ///
@@ -79,6 +85,7 @@ class CodelesslyConfig with EquatableMixin {
     this.automaticallySendCrashReports = false,
     this.isPreview = false,
     this.preload = true,
+    this.staggerDownloadQueue = false,
 
     // Firebase.
     FirebaseOptions? firebaseOptions,
@@ -96,11 +103,11 @@ class CodelesslyConfig with EquatableMixin {
     bool? automaticallySendCrashReports,
     bool? isPreview,
     bool? preload,
+    bool? staggerDownloadQueue,
     FirebaseOptions? firebaseOptions,
     String? firebaseCloudFunctionsBaseURL,
     String? baseURL,
     String? firebaseInstanceName,
-    // FirebaseApp? firebaseApp,
   }) =>
       CodelesslyConfig(
         authToken: authToken ?? this.authToken,
@@ -109,6 +116,7 @@ class CodelesslyConfig with EquatableMixin {
             automaticallySendCrashReports ?? this.automaticallySendCrashReports,
         isPreview: isPreview ?? this.isPreview,
         preload: preload ?? this.preload,
+        staggerDownloadQueue: staggerDownloadQueue ?? this.staggerDownloadQueue,
         firebaseOptions: firebaseOptions ?? this.firebaseOptions,
         firebaseCloudFunctionsBaseURL:
             firebaseCloudFunctionsBaseURL ?? this.firebaseCloudFunctionsBaseURL,
@@ -124,6 +132,7 @@ class CodelesslyConfig with EquatableMixin {
         automaticallySendCrashReports,
         isPreview,
         preload,
+        staggerDownloadQueue,
         firebaseOptions,
         firebaseCloudFunctionsBaseURL,
         baseURL,
