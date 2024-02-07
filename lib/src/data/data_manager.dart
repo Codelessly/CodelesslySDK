@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 
@@ -370,7 +371,10 @@ class DataManager {
       try {
         await getOrFetchPopulatedLayout(layoutID: layoutID);
 
-        if (config.staggerDownloadQueue) {
+        if (kIsWeb &&
+            config.staggerDownloadQueue &&
+            _downloadQueue.isNotEmpty) {
+          log('\tWaiting for 1 second before downloading the next layout...');
           await Future.delayed(const Duration(seconds: 1));
         }
       } catch (e, str) {
