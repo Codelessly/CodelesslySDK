@@ -261,7 +261,12 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       scaffold = Material(
         color: retrieveBackgroundColor(context, node),
         child: !node.isScrollable
-            ? Align(alignment: Alignment.topCenter, child: body)
+            // This would make it so auto scale layouts are top-center aligned
+            // in the viewport. But this doesn't work if the layout is inside a
+            // dialog. it will force it to top-center align in the dialog
+            // which is not what we want.
+            // ? Align(alignment: Alignment.topCenter, child: body)
+            ? body
             : body,
       );
     }
