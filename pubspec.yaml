@@ -21,11 +21,10 @@ dependencies:
     sdk: flutter
   codelessly_api: 1.1.0
   codelessly_json_annotation: 4.8.1
-  firebase_core: ^2.24.2
-  firebase_auth: ^4.16.0
-  cloud_firestore: ^4.14.0
-  cloud_functions: ^4.6.0
-  firebase_ui_firestore: ^1.6.1
+  firebase_core: ^2.25.4
+  firebase_auth: ^4.17.4
+  cloud_firestore: ^4.15.4
+  firebase_ui_firestore: ^1.6.2
   equatable: ^2.0.5
   google_fonts: ^6.1.0
   url_launcher: ^6.2.4
@@ -33,15 +32,15 @@ dependencies:
   http: '>=0.13.0 <2.0.0'
   intl: '>=0.17.0 <1.0.0'
   universal_html: ^2.2.4
-  webview_flutter: ^4.4.4
-  webview_flutter_android: ^3.14.0
-  webview_flutter_wkwebview: ^3.11.0
+  webview_flutter: ^4.5.0
+  webview_flutter_android: ^3.15.0
+  webview_flutter_wkwebview: ^3.12.0
   webview_flutter_web: ^0.2.2+4
   flutter_animation_progress_bar: ^2.3.1
   vector_math: ^2.1.4
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  uuid: ^4.2.1
+  uuid: ^4.3.3
   path_provider: ^2.1.2
   provider: ^6.1.1
   json_path: ^0.7.0

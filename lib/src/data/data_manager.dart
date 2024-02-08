@@ -343,11 +343,11 @@ class DataManager {
     // Add all the layouts to the download queue excluding the [layoutID] if
     // that was specified. We don't want to download that layout twice.
     if (config.preload) {
-      log('Config preload was specified during init, adding ${_publishModel!.updates.layouts.length - 1} the layouts to the download queue...');
+      log('Config preload was specified during init, adding ${_publishModel!.updates.layouts.length - 1} layouts to the download queue...');
       _downloadQueue.addAll(
         [..._publishModel!.updates.layouts.keys]..remove(layoutID),
       );
-      log('All layouts during init download complete.');
+      log('All layouts during init download complete. ${_downloadQueue.length} layouts in queue.');
     }
 
     // If a [layoutID] was specified for this initialization, then the Future
@@ -356,8 +356,10 @@ class DataManager {
     // Otherwise we need to await for all layouts to be downloaded before
     // completing the Future.
     if (layoutID != null) {
+      log('Layout [$layoutID] was specified during init. Processing download queue in the background...');
       processDownloadQueue();
     } else {
+      log('No layout was specified during init. Awaiting all layouts to be downloaded...');
       await processDownloadQueue();
     }
 
@@ -1014,7 +1016,6 @@ class DataManager {
           log('[queueLayout] Layout [$layoutID] is already in the queue. Skipping.');
           return;
         }
-        return;
       }
 
       if (prioritize) {
@@ -1077,6 +1078,8 @@ class DataManager {
       if (layout == null) {
         log('\tLayout [$layoutID] could not be downloaded.');
         return false;
+      } else {
+        log('\tLayout [$layoutID] downloaded successfully.');
       }
 
       model.layouts[layoutID] = layout;
@@ -1085,6 +1088,7 @@ class DataManager {
     assert(layout != null, 'Layout should not be null at this point.');
 
     if (model.updates.layoutApis.containsKey(layoutID)) {
+      log('\tLayout [$layoutID] has ${model.updates.layoutApis[layoutID]!.length} apis.');
       final Set<Future<HttpApiData?>> apiModels = getOrFetchApis(
         apiIds: model.updates.layoutApis[layoutID]!,
       );
@@ -1112,6 +1116,7 @@ class DataManager {
     }
 
     if (model.updates.conditions.containsKey(layoutID)) {
+      log('\tLayout [$layoutID] has conditions.');
       try {
         final SDKLayoutConditions? conditions =
             await getOrFetchConditions(layoutID);
@@ -1130,6 +1135,7 @@ class DataManager {
     }
 
     if (model.updates.variables.containsKey(layoutID)) {
+      log('\tLayout [$layoutID] has variables.');
       try {
         final SDKLayoutVariables? variables =
             await getOrFetchVariables(layoutID);
@@ -1150,10 +1156,11 @@ class DataManager {
     await emitPublishModel();
     savePublishModel();
 
-    log('\tLayoutModel [$layoutID] ready, time for fonts...');
-    log('\tLayoutModel [$layoutID] has ${model.updates.layoutFonts[layoutID]} fonts.');
+    log('\tLayout [$layoutID] ready, time for fonts...');
 
     if (model.updates.layoutFonts.containsKey(layoutID)) {
+      log('\tLayout [$layoutID] has ${model.updates.layoutFonts[layoutID]!.length} fonts.');
+
       // Download or load fonts in the background.
       getOrFetchFontModels(
         fontIDs: model.updates.layoutFonts[layoutID]!,
