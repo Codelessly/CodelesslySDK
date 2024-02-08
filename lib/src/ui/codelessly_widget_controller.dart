@@ -300,7 +300,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // preview data manager.
     // Vice versa for published layouts if the SDK is configured to load preview
     // layouts.
-    if (dataManager.status is! CLoaded &&
+    if ((dataManager.status is! CLoaded && dataManager.status is! CLoading) &&
         effectiveCodelessly.authManager.isAuthenticated()) {
       log('[$layoutID]: Initialized data manager for the first time with a publish source of $publishSource because the SDK is configured to load ${publishSource == PublishSource.publish ? 'published' : 'preview'} layouts.');
 
