@@ -254,14 +254,16 @@ class CodelesslyWidgetController extends ChangeNotifier {
           case CLoading(state: CLoadingState state)) {
         // Listen to data manager after it has been created. If it hasn't been
         // created yet, Firebase may still be initializing.
+        log('[${this.layoutID}]: Codelessly SDK is loading with step $state.');
         if (state.hasPassed(CLoadingState.createdManagers)) {
-          _verifyAndListenToDataManager();
+          log('[${this.layoutID}]: Checking layout because it passed the created managers step.');
+          _checkLayout();
+        } else {
+          log('[${this.layoutID}]: Waiting for data manager to be created. Skipping for now.');
         }
-
-        log('[${this.layoutID}]: Codelessly SDK is already loading with step $state.');
       } else {
-        _verifyAndListenToDataManager();
-        log('[${this.layoutID}]: Codelessly SDK is already loaded. Woo!');
+        log('[${this.layoutID}]: Codelessly SDK is already loaded, checking layout.');
+        _checkLayout();
       }
     }
 
@@ -270,19 +272,27 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
     _sdkStatusListener?.cancel();
     _sdkStatusListener = effectiveCodelessly.statusStream.listen((status) {
+      log('[${this.layoutID}]: (Listener) SDK status changed to $status.');
+
       if (status case CLoaded() || CLoading()) {
         if (status case CLoading(state: CLoadingState state)) {
+          log('[${this.layoutID}]: (Listener) Codelessly SDK is loading with step $state.');
+
           // Listen to data manager after it has been created. If it hasn't been
           // created yet, Firebase may still be initializing.
           if (state.hasPassed(CLoadingState.createdManagers)) {
-            _verifyAndListenToDataManager();
-          }
+            log('[${this.layoutID}]: (Listener) Checking layout because it passed the created managers step.');
 
-          log('[${this.layoutID}]: Codelessly SDK is loading with step $state.');
+            _checkLayout();
+          } else {
+            log('[${this.layoutID}]: (Listener) Waiting for data manager to be created. Skipping for now.');
+          }
         } else {
-          _verifyAndListenToDataManager();
-          log('[${this.layoutID}]: Codelessly SDK is done loading.');
+          log('[${this.layoutID}]: (Listener) Codelessly SDK is already loaded, checking layout.');
+          _checkLayout();
         }
+      } else {
+        log('[${this.layoutID}]: (Listener) Codelessly SDK is not loaded, skipping layout check.');
       }
     });
   }
@@ -290,10 +300,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// Listens to the data manager's status. If the data manager is initialized,
   /// then we can signal to the manager that the desired layout passed to this
   /// widget is ready to be rendered and needs to be downloaded and prepared.
-  void _verifyAndListenToDataManager() {
-    log('[$layoutID]: Verifying and listening to data manager stream.');
-
-    notifyListeners();
+  void _checkLayout() {
+    log('[$layoutID]: (Check) Checking layout...');
 
     // If this CodelesslyWidget wants to preview a layout but the SDK is
     // configured to load published layouts, then we need to initialize the
@@ -302,7 +310,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // layouts.
     if ((dataManager.status is! CLoaded && dataManager.status is! CLoading) &&
         effectiveCodelessly.authManager.isAuthenticated()) {
-      log('[$layoutID]: Initialized data manager for the first time with a publish source of $publishSource because the SDK is configured to load ${publishSource == PublishSource.publish ? 'published' : 'preview'} layouts.');
+      log('[$layoutID]: (Check) Initializing data manager for the first time with a publish source of $publishSource because the SDK is configured to load ${publishSource == PublishSource.publish ? 'published' : 'preview'} layouts.');
 
       dataManager.init(layoutID: layoutID).catchError((error, str) {
         effectiveCodelessly.errorHandler.captureException(
@@ -316,8 +324,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // a publish model yet, then we need to fetch the publish model from the
     // data manager.
     else if (config.slug != null && dataManager.publishModel == null) {
-      log('[$layoutID]: A slug is specified and publish model is null.');
-      log('[$layoutID]: Fetching complete publish bundle from data manager.');
+      log('[$layoutID]: (Check) A slug is specified and publish model is null.');
+      log('[$layoutID]: (Check) Fetching complete publish bundle from data manager.');
       dataManager
           .fetchCompletePublishBundle(
         slug: config.slug!,
@@ -339,8 +347,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // If the config has preloading set to true, then the DataManager is already
     // taking care of this layout and we just need to tell it to prioritize it.
     else if (layoutID != null) {
-      log('[$layoutID]: Queuing layout [$layoutID] from data manager.');
-      log('[$layoutID]: Using publish source $publishSource.');
+      log('[$layoutID]: (Check) Queuing layout [$layoutID] in data manager.');
+      log('[$layoutID]: (Check) Using publish source $publishSource.');
 
       dataManager
           .queueLayout(layoutID: layoutID!, prioritize: true)
@@ -357,9 +365,9 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // Preloading must be true, so this controller can only wait...
     else {
       if (layoutID != null) {
-        log('[$layoutID]: LayoutID specified, but preload is set to ${config.preload}, skipping to let data manager to download everything');
+        log('[$layoutID]: (Check) LayoutID specified, but preload is set to ${config.preload}, skipping to let data manager to download everything');
       } else {
-        log('[$layoutID]: LayoutID is null, skipping to let data manager to download everything.');
+        log('[$layoutID]: (Check) LayoutID is null, skipping to let data manager to download everything.');
       }
     }
   }
