@@ -143,7 +143,7 @@ class _PassiveEmbeddedVideoWidgetState
       }
     }
 
-    final config = context.read<CodelesslyConfig>();
+    final config = context.read<Codelessly>().config!;
 
     final String embedUrl;
     switch (widget.node.properties.source) {
