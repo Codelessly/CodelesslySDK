@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
@@ -346,58 +345,58 @@ class PassiveCanvasWidget extends StatefulWidget {
 }
 
 class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
-  bool shouldPerformOnLoadActions = true;
+  late List<ActionModel> onLoadActions = collectOnLoadActions();
 
-  StreamSubscription? _subscription;
+  // StreamSubscription? _subscription;
+
+  bool didPerformOnLoadActions = false;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (shouldPerformOnLoadActions) {
-      shouldPerformOnLoadActions = false;
-      if (widget.settings.isPreview) return;
-
-      triggerOnLoadActions(context);
-
-      _subscription?.cancel();
-      _subscription = context
-          .read<Codelessly>()
-          .dataManager
-          .publishModelStream
-          .listen((event) {
-        logger.log('PassiveCanvasWidget',
-            'Received publish event for canvas ${widget.node.id}');
-        triggerOnLoadActions(context);
-      });
+  void didUpdateWidget(covariant PassiveCanvasWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.node != oldWidget.node) {
+      onLoadActions = collectOnLoadActions();
     }
   }
 
   @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.settings.isPreview) return;
+
+    if (didPerformOnLoadActions) return;
+    didPerformOnLoadActions = true;
+
+    triggerOnLoadActions(context);
+
+    // _subscription?.cancel();
+    // _subscription = context
+    //     .read<Codelessly>()
+    //     .dataManager
+    //     .publishModelStream
+    //     .listen((event) {
+    //   logger.log('PassiveCanvasWidget',
+    //       'Received publish event for canvas ${widget.node.id}');
+    //   triggerOnLoadActions(context);
+    // });
   }
 
-  void triggerOnLoadActions(BuildContext context) {
-    logger.log('PassiveCanvasWidget',
-        'Checking for onLoad actions on canvas ${widget.node.id}');
-    // perform onLoad actions. This must always be the last step in this method.
-    final onLoadActions = widget.node.reactions
-        .whereTriggerType(TriggerType.load)
-        .map((e) => e.action)
-        .where((action) =>
-            action.enabled &&
-            // Because calling api is handled in LayoutBuilder.
-            action.type != ActionType.callApi &&
-            action.type != ActionType.navigation &&
-            action.type != ActionType.submit &&
-            action.type != ActionType.link)
-        .toList();
+  List<ActionModel> collectOnLoadActions() => widget.node.reactions
+      .whereTriggerType(TriggerType.load)
+      .map((e) => e.action)
+      .where((action) =>
+          action.enabled &&
+          // Because calling api is handled in LayoutBuilder.
+          action.type != ActionType.callApi &&
+          action.type != ActionType.navigation &&
+          action.type != ActionType.submit &&
+          action.type != ActionType.link)
+      .toList();
 
+  void triggerOnLoadActions(BuildContext context) {
     if (onLoadActions.isEmpty) {
       logger.log('PassiveCanvasWidget',
           'No onLoad actions found for canvas ${widget.node.id}');
-      return;
     }
 
     logger.log('PassiveCanvasWidget', 'Performing actions on canvas load');
