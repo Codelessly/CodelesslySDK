@@ -1,3 +1,14 @@
+## 1.2.0
+- Cache system improvements to load layouts better.
+- Inkwell improvements.
+- Implement isTrue and isFalse operators for conditions.
+- Refactor operator filtering to use index if available.
+- **Fixes**
+  - Fix doc data validation on creation.
+  - Fix canvas with auto-scale always aligning at top center.
+  - Fix list remove operation type mismatch.
+  - Fix download and cache system optimizations.
+
 ## 1.1.0
 - New AutoComplete support for Variables.
 - New `createdAt` and `updatedAt` variables to support sorting by date. 
