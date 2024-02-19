@@ -57,6 +57,15 @@ dev_dependencies:
   build_runner: ^2.4.8
   flutter_lints: ^3.0.1
 
+dependency_overrides:
+  web: 0.4.2
+  # TODO: temporary fix until a new version of firebase_auth_web is released.
+  firebase_auth_web:
+    git:
+      url: git@github.com:firebase/flutterfire.git
+      ref: master
+      path: packages/firebase_auth/firebase_auth_web
+
 flutter:
   uses-material-design: true
   assets:
