@@ -22,8 +22,8 @@ dependencies:
   codelessly_api: 1.2.0
   codelessly_json_annotation: 4.8.1
   firebase_core: ^2.25.4
-  firebase_auth: ^4.17.4
-  cloud_firestore: ^4.15.4
+  firebase_auth: ^4.17.5
+  cloud_firestore: ^4.15.5
   firebase_ui_firestore: ^1.6.2
   equatable: ^2.0.5
   google_fonts: ^6.1.0
@@ -56,15 +56,6 @@ dev_dependencies:
   codelessly_json_serializable: 6.7.1+1
   build_runner: ^2.4.8
   flutter_lints: ^3.0.1
-
-dependency_overrides:
-  web: 0.4.2
-  # TODO: temporary fix until a new version of firebase_auth_web is released.
-  firebase_auth_web:
-    git:
-      url: https://github.com/firebase/flutterfire.git
-      ref: master
-      path: packages/firebase_auth/firebase_auth_web
 
 flutter:
   uses-material-design: true
