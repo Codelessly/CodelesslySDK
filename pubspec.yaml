@@ -62,7 +62,7 @@ dependency_overrides:
   # TODO: temporary fix until a new version of firebase_auth_web is released.
   firebase_auth_web:
     git:
-      url: git@github.com:firebase/flutterfire.git
+      url: https://github.com/firebase/flutterfire.git
       ref: master
       path: packages/firebase_auth/firebase_auth_web
 
