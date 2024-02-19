@@ -87,6 +87,9 @@ class ScopedValues {
       _cloudDatabaseRef = instance.cloudDatabase == null
           ? null
           : WeakReference(instance.cloudDatabase!);
+    } else {
+      _localStorageRef = null;
+      _cloudDatabaseRef = null;
     }
   }
 }
