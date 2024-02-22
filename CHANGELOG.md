@@ -1,3 +1,7 @@
+## 1.3.0
+- Temporarily remove Windows support as Firebase Auth is not supported on Windows yet.
+- Update dependencies.
+
 ## 1.2.0
 - Cache system improvements to load layouts better.
 - Inkwell improvements.
