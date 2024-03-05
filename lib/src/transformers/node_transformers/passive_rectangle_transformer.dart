@@ -239,15 +239,15 @@ List<Widget> wrapWithInkWell(
           : () => FunctionsRepository.triggerAction(
                 context,
                 TriggerType.click,
-        reactions: onClickReactions,
-      ),
+                reactions: onClickReactions,
+              ),
       onLongPress: onLongPressReactions.isEmpty
           ? null
           : () => FunctionsRepository.triggerAction(
                 context,
                 TriggerType.longPress,
-        reactions: onLongPressReactions,
-      ),
+                reactions: onLongPressReactions,
+              ),
       borderRadius: getBorderRadius(node),
       overlayColor: inkWell.overlayColor != null
           ? MaterialStatePropertyAll<Color>(

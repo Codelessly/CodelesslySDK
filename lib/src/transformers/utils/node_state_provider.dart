@@ -44,7 +44,7 @@ class NodeStateProvider extends InheritedWidget {
   /// If there is no [NodeStateProvider] ancestor, returns null.
   static NodeStateProvider? maybeOf(BuildContext context) {
     final NodeStateProvider? provider =
-    context.dependOnInheritedWidgetOfExactType<NodeStateProvider>();
+        context.dependOnInheritedWidgetOfExactType<NodeStateProvider>();
     if (provider == null) return null;
     return provider;
   }

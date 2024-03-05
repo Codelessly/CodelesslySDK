@@ -383,7 +383,8 @@ class CodelesslyAuthManager extends AuthManager {
       // If the status code of the response is 200, the authentication was
       // successful.
       if (result.statusCode == 200) {
-        logger.log(label, 'Successful auth token verification response received.',
+        logger.log(
+            label, 'Successful auth token verification response received.',
             largePrint: true);
 
         // Parse the body of the response to JSON.
