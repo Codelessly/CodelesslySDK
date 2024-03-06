@@ -1,3 +1,10 @@
+## 1.4.0
+- New StyleSheets support! Create reusable color and text styles.
+- Update GridView `childAlignment` property. Minor refactor.
+- Improve Edge Pins.
+  - Fix edge pins not being saved.
+  - Clamp edge pins to positive values in wrapping parent layouts.
+
 ## 1.3.0
 - Temporarily remove Windows support as Firebase Auth is not supported on Windows yet.
 - Update dependencies.
