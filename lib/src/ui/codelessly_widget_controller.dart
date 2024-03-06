@@ -38,11 +38,23 @@ class CodelesslyWidgetController extends ChangeNotifier {
   ///
   /// By default, this is the global instance, retrieved via
   /// [Codelessly.instance].
-  final Codelessly? codelessly;
+  Codelessly? codelessly;
 
   /// A convenience getter that returns the provided [codelessly] instance, or,
   /// if it's null, returns the global [Codelessly.instance].
   Codelessly get effectiveCodelessly => codelessly ?? Codelessly.instance;
+
+  /// A boolean that helps keep track of whether this controller created an
+  /// intrinsic [Codelessly] instance automatically.
+  ///
+  /// This may happen if the user does not pass a [codelessly] instance,
+  /// implying they want to use the global instance, but they pass a custom
+  /// config to this controller that is not the same as the global instance's
+  /// config.
+  ///
+  /// In this case, a locally managed intrinsic [Codelessly] instance is created
+  /// here with the provided config.
+  late final bool createdIntrinsicCodelessly;
 
   /// A convenience getter that decides whether this controller is configured
   /// to use an explicitly-controlled [Codelessly] instance, or to use the
@@ -145,7 +157,23 @@ class CodelesslyWidgetController extends ChangeNotifier {
           (config ?? (codelessly ?? Codelessly.instance).config) != null,
           'A [config] must be provided. Please provide one either in the constructor of this controller, or in the passed Codelessly instance.',
         ),
-        config = config ?? (codelessly ?? Codelessly.instance).config!;
+        config = config ?? (codelessly ?? Codelessly.instance).config! {
+    // If this controller is configured with its own Codelessly config but
+    // wants to use the global instance, and the global instance is already
+    // configured with a different config, then we need to create a custom
+    // Codelessly instance with the provided config.
+    if (codelessly == null &&
+        config != null &&
+        Codelessly.instance.config != config) {
+      createdIntrinsicCodelessly = true;
+      codelessly = Codelessly(config: config);
+      log(
+        'Created an intrinsic Codelessly instance because the global instance is already configured with a different config than the one provided to this controller.',
+      );
+    } else {
+      createdIntrinsicCodelessly = false;
+    }
+  }
 
   /// Creates a copy of this controller with the provided parameters.
   /// If no parameters are provided, then the current parameters are used.
@@ -187,6 +215,9 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
   @override
   void dispose() {
+    if (createdIntrinsicCodelessly) {
+      codelessly?.dispose(sealCache: false);
+    }
     _sdkStatusListener?.cancel();
     super.dispose();
   }
@@ -207,12 +238,20 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
       // If the Codelessly global instance was passed and is still idle, that
       // means the user never triggered [Codelessly.init] but this
-      // [CodelesslyWidget] is about to be rendered.
+      // [CodelesslyWidget] is about to be rendered. Using the global instance
+      // is the most common use case, so we initialize it automatically as the
+      // user may have wished to use the global instance but didn't bother or
+      // forgot to initialize it themselves.
       //
       // We initialize the global instance here. If this were a local Codelessly
       // instance, the user explicitly wants more control over the SDK, so we
       // do nothing and let the user handle it.
-      if (isGlobalInstance) {
+      //
+      // Alternatively, if this controller made an intrinsic Codelessly instance
+      // because the global instance is already configured with a different
+      // config, then we need to initialize the intrinsic instance manually
+      // here.
+      if (isGlobalInstance || createdIntrinsicCodelessly) {
         if (status is CEmpty) {
           log('Codelessly SDK is idle, configuring...');
           effectiveCodelessly.configure(
