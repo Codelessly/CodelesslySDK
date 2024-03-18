@@ -85,6 +85,7 @@ class SDKPublishModel extends PrivacyBase {
     super.editors,
     super.viewers,
     super.public,
+    super.team,
     DateTime? lastUpdated,
   })  : layouts = layouts ?? {},
         fonts = fonts ?? {},
@@ -126,11 +127,13 @@ class SDKPublishModel extends PrivacyBase {
     String? entryLayoutId,
     String? entryPageId,
     String? entryCanvasId,
+    DateTime? lastUpdated,
     String? owner,
     Set<String>? editors,
     Set<String>? viewers,
     bool? public,
-    DateTime? lastUpdated,
+    String? team,
+    bool forceTeam = false,
   }) {
     return SDKPublishModel(
       projectId: projectId ?? this.projectId,
@@ -149,6 +152,19 @@ class SDKPublishModel extends PrivacyBase {
       viewers: viewers ?? this.viewers,
       public: public ?? this.public,
       lastUpdated: lastUpdated ?? this.lastUpdated,
+      team: forceTeam ? team : team ?? this.team,
+    );
+  }
+
+  @override
+  SDKPublishModel copyWithPrivacyFrom(PrivacyBase privacy) {
+    return copyWith(
+      owner: privacy.owner,
+      editors: privacy.editors,
+      viewers: privacy.viewers,
+      public: privacy.public,
+      team: privacy.team,
+      forceTeam: true,
     );
   }
 
@@ -210,6 +226,7 @@ class SDKPublishLayout extends PrivacyBase {
     super.editors,
     super.viewers,
     super.public,
+    super.team,
   })  : breakpoints = breakpoints ?? [],
         canvasIds = canvases.keys.toSet();
 
@@ -224,7 +241,6 @@ class SDKPublishLayout extends PrivacyBase {
   /// Converts this instance to a JSON map.
   @override
   Map<String, dynamic> toJson() => _$SDKPublishLayoutToJson(this)
-    ..['whitelistedUsers'] = [...whitelistedUsers]
     ..['canvasIds'] = canvases.keys.toList();
 
   /// Creates a copy of this instance with the provided parameters.
@@ -239,6 +255,8 @@ class SDKPublishLayout extends PrivacyBase {
     Set<String>? editors,
     Set<String>? viewers,
     bool? public,
+    String? team,
+    bool forceTeam = false,
   }) {
     return SDKPublishLayout(
       id: id ?? this.id,
@@ -250,7 +268,20 @@ class SDKPublishLayout extends PrivacyBase {
       editors: editors ?? this.editors,
       viewers: viewers ?? this.viewers,
       public: public ?? this.public,
+      team: forceTeam ? team : team ?? this.team,
       breakpoints: breakpoints ?? this.breakpoints,
+    );
+  }
+
+  @override
+  SDKPublishLayout copyWithPrivacyFrom(PrivacyBase privacy) {
+    return copyWith(
+      owner: privacy.owner,
+      editors: privacy.editors,
+      viewers: privacy.viewers,
+      public: privacy.public,
+      team: privacy.team,
+      forceTeam: true,
     );
   }
 
@@ -308,6 +339,7 @@ class SDKPublishFont extends PrivacyBase {
     super.editors,
     super.viewers,
     super.public,
+    super.team,
   }) : id = id ?? family;
 
   /// Creates a copy of this instance with the provided parameters.
@@ -321,6 +353,8 @@ class SDKPublishFont extends PrivacyBase {
     Set<String>? editors,
     Set<String>? viewers,
     bool? public,
+    String? team,
+    bool forceTeam = false,
   }) {
     return SDKPublishFont(
       id: id ?? this.id,
@@ -332,6 +366,19 @@ class SDKPublishFont extends PrivacyBase {
       editors: editors ?? this.editors,
       viewers: viewers ?? this.viewers,
       public: public ?? this.public,
+      team: forceTeam ? team : team ?? this.team,
+    );
+  }
+
+  @override
+  SDKPublishFont copyWithPrivacyFrom(PrivacyBase privacy) {
+    return copyWith(
+      owner: privacy.owner,
+      editors: privacy.editors,
+      viewers: privacy.viewers,
+      public: privacy.public,
+      team: privacy.team,
+      forceTeam: true,
     );
   }
 
@@ -476,6 +523,7 @@ class SDKLayoutVariables extends PrivacyBase {
     super.editors,
     super.viewers,
     super.public,
+    super.team,
   });
 
   /// copyWith
@@ -486,6 +534,8 @@ class SDKLayoutVariables extends PrivacyBase {
     Set<String>? editors,
     Set<String>? viewers,
     bool? public,
+    String? team,
+    bool forceTeam = false,
   }) {
     return SDKLayoutVariables(
       id: id ?? this.id,
@@ -494,6 +544,19 @@ class SDKLayoutVariables extends PrivacyBase {
       editors: editors ?? this.editors,
       viewers: viewers ?? this.viewers,
       public: public ?? this.public,
+      team: forceTeam ? team : team ?? this.team,
+    );
+  }
+
+  @override
+  SDKLayoutVariables copyWithPrivacyFrom(PrivacyBase privacy) {
+    return copyWith(
+      owner: privacy.owner,
+      editors: privacy.editors,
+      viewers: privacy.viewers,
+      public: privacy.public,
+      team: privacy.team,
+      forceTeam: true,
     );
   }
 
@@ -530,6 +593,7 @@ class SDKLayoutConditions extends PrivacyBase {
     super.editors,
     super.viewers,
     super.public,
+    super.team,
   });
 
   /// copyWith
@@ -540,6 +604,8 @@ class SDKLayoutConditions extends PrivacyBase {
     Set<String>? editors,
     Set<String>? viewers,
     bool? public,
+    String? team,
+    bool forceTeam = false,
   }) {
     return SDKLayoutConditions(
       id: id ?? this.id,
@@ -548,6 +614,19 @@ class SDKLayoutConditions extends PrivacyBase {
       editors: editors ?? this.editors,
       viewers: viewers ?? this.viewers,
       public: public ?? this.public,
+      team: forceTeam ? team : team ?? this.team,
+    );
+  }
+
+  @override
+  SDKLayoutConditions copyWithPrivacyFrom(PrivacyBase privacy) {
+    return copyWith(
+      owner: privacy.owner,
+      editors: privacy.editors,
+      viewers: privacy.viewers,
+      public: privacy.public,
+      team: privacy.team,
+      forceTeam: true,
     );
   }
 

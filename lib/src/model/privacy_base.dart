@@ -7,6 +7,9 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
   /// The id of the owner user of the object.
   final String owner;
 
+  /// The team that this object belongs to.
+  final String? team;
+
   /// The ids of the users that can edit the object.
   final Set<String> editors;
 
@@ -16,18 +19,23 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
   Set<String> get whitelistedUsers => {owner, ...editors, ...viewers};
 
   /// Whether the object is public or not. If it is public, then
-  /// it is accessible to read by anyone.
+  /// it is accessible to read by anyone on the platform.
   final bool public;
 
   /// Creates a new [PrivacyBase] with the given parameters.
   const PrivacyBase({
     required this.owner,
+    this.team,
     Set<String>? editors,
     Set<String>? viewers,
     this.public = false,
   })  : editors = editors ?? const <String>{},
         viewers = viewers ?? const <String>{};
 
+  /// Returns a new instance of this object but with the properties from
+  /// the given [PrivacyBase] object.
+  PrivacyBase copyWithPrivacyFrom(PrivacyBase privacy);
+
   @override
-  List<Object?> get props => [owner, editors, viewers, public];
+  List<Object?> get props => [owner, team, editors, viewers, public];
 }
