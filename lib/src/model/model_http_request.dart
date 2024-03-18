@@ -1,7 +1,8 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
-import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
+
+import '../../codelessly_sdk.dart';
 
 part 'model_http_request.g.dart';
 
@@ -49,11 +50,10 @@ extension HttpMethodExt on HttpMethod {
 }
 
 @JsonSerializable()
-class HttpApiData extends EqualityBy<HttpApiData, String> {
+class HttpApiData extends PrivacyBase {
   final String id;
   final String name;
   final String project;
-  final String owner;
   final HttpMethod method;
   final String url;
   final List<HttpKeyValuePair> headers;
@@ -81,7 +81,6 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
     this.formFields = const <HttpKeyValuePair>[],
     this.body,
     this.bodyType = RequestBodyType.text,
-    this.owner = '',
     required this.name,
     this.id = '',
     this.project = '',
@@ -92,10 +91,16 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
     this.isDraft = false,
     DateTime? created,
     this.directory,
+
+    // Privacy
+    super.owner = '',
+    super.editors,
+    super.viewers,
+    super.public,
+    super.team,
   })  : variables = List.of(variables),
         lastUpdated = lastUpdated ?? DateTime.now(),
-        created = created ?? DateTime.now(),
-        super((e) => e.id);
+        created = created ?? DateTime.now();
 
   HttpApiData copyWith({
     HttpMethod? method,
@@ -105,7 +110,6 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
     List<HttpKeyValuePair>? formFields,
     List<VariableData>? variables,
     String? body,
-    String? owner,
     String? name,
     String? id,
     String? project,
@@ -117,6 +121,14 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
     bool? isDraft,
     String? directory,
     bool forceDirectory = false,
+
+    // Privacy
+    String? owner,
+    bool? public,
+    Set<String>? editors,
+    Set<String>? viewers,
+    String? team,
+    bool forceTeam = false,
   }) =>
       HttpApiData(
         method: method ?? this.method,
@@ -128,7 +140,6 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
         variables: variables ?? this.variables,
         name: name ?? this.name,
         project: project ?? this.project,
-        owner: owner ?? this.owner,
         id: id ?? this.id,
         isDeleted: isDeleted ?? this.isDeleted,
         lastUpdated: lastUpdated ?? this.lastUpdated,
@@ -138,12 +149,33 @@ class HttpApiData extends EqualityBy<HttpApiData, String> {
         directory: forceDirectory ? directory : directory ?? this.directory,
         requestBodyContentType:
             requestBodyContentType ?? this.requestBodyContentType,
+        owner: owner ?? this.owner,
+        public: public ?? this.public,
+        editors: editors ?? this.editors,
+        viewers: viewers ?? this.viewers,
+        team: forceTeam ? team : team ?? this.team,
       );
+
+  @override
+  HttpApiData copyWithPrivacyFrom(PrivacyBase privacy) {
+    return copyWith(
+      owner: privacy.owner,
+      public: privacy.public,
+      editors: privacy.editors,
+      viewers: privacy.viewers,
+      team: privacy.team,
+      forceTeam: true,
+    );
+  }
 
   factory HttpApiData.fromJson(Map<String, dynamic> json) =>
       _$HttpApiDataFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => _$HttpApiDataToJson(this);
+
+  @override
+  List<Object?> get props => [id];
 }
 
 @JsonSerializable()
