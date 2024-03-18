@@ -29,7 +29,6 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
       bodyType:
           $enumDecodeNullable(_$RequestBodyTypeEnumMap, json['bodyType']) ??
               RequestBodyType.text,
-      owner: json['owner'] as String? ?? '',
       name: json['name'] as String,
       id: json['id'] as String? ?? '',
       project: json['project'] as String? ?? '',
@@ -46,6 +45,13 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
           RequestBodyTextType.json,
       created: const DateTimeConverter().fromJson(json['created'] as int?),
       directory: json['directory'] as String?,
+      owner: json['owner'] as String? ?? '',
+      editors:
+          (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      viewers:
+          (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      public: json['public'] as bool? ?? false,
+      team: json['team'] as String?,
     );
 
 Map<String, dynamic> _$HttpApiDataToJson(HttpApiData instance) {
@@ -61,10 +67,14 @@ Map<String, dynamic> _$HttpApiDataToJson(HttpApiData instance) {
     }
   }
 
+  writeNotNull('owner', instance.owner, instance.owner, '');
+  writeNotNull('team', instance.team, instance.team, null);
+  val['editors'] = instance.editors.toList();
+  val['viewers'] = instance.viewers.toList();
+  writeNotNull('public', instance.public, instance.public, false);
   writeNotNull('id', instance.id, instance.id, '');
   val['name'] = instance.name;
   writeNotNull('project', instance.project, instance.project, '');
-  writeNotNull('owner', instance.owner, instance.owner, '');
   writeNotNull('method', instance.method, _$HttpMethodEnumMap[instance.method]!,
       HttpMethod.get);
   writeNotNull('url', instance.url, instance.url, '');
