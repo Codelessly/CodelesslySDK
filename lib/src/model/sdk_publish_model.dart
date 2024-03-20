@@ -79,14 +79,13 @@ class SDKPublishModel extends PrivacyBase {
     this.entryLayoutId,
     this.entryPageId,
     this.entryCanvasId,
+    DateTime? lastUpdated,
 
     // Privacy
-    required super.owner,
-    super.editors,
-    super.viewers,
-    super.public,
-    super.team,
-    DateTime? lastUpdated,
+    required super.teams,
+    required super.users,
+    required super.roles,
+    required super.public,
   })  : layouts = layouts ?? {},
         fonts = fonts ?? {},
         pages = pages ?? [],
@@ -95,6 +94,36 @@ class SDKPublishModel extends PrivacyBase {
         variables = variables ?? {},
         conditions = conditions ?? {},
         lastUpdated = lastUpdated ?? DateTime.now();
+
+  /// Creates a new instance of [SDKPublishModel] with privacy inherited from
+  /// another [PrivacyBase].
+  SDKPublishModel.private({
+    required this.projectId,
+
+    // Conditional
+    Map<String, SDKPublishFont>? fonts,
+    Map<String, SDKPublishLayout>? layouts,
+    SDKPublishUpdates? updates,
+    Map<String, HttpApiData>? apis,
+    Map<String, SDKLayoutVariables>? variables,
+    Map<String, SDKLayoutConditions>? conditions,
+    List<String>? pages,
+    this.entryLayoutId,
+    this.entryPageId,
+    this.entryCanvasId,
+    DateTime? lastUpdated,
+
+    // Privacy
+    required super.privacy,
+  })  : layouts = layouts ?? {},
+        fonts = fonts ?? {},
+        pages = pages ?? [],
+        updates = updates ?? SDKPublishUpdates(),
+        apis = apis ?? {},
+        variables = variables ?? {},
+        conditions = conditions ?? {},
+        lastUpdated = lastUpdated ?? DateTime.now(),
+        super.private();
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
   factory SDKPublishModel.fromJson(Map<String, dynamic> json) =>
@@ -106,13 +135,10 @@ class SDKPublishModel extends PrivacyBase {
     ..remove('fonts')
     ..remove('layouts')
     ..remove('apis')
-    ..remove('variables')
-    ..remove('conditions')
-    ..['whitelistedUsers'] = [...whitelistedUsers];
+    ..remove('variables')..remove('conditions');
 
   /// Converts this instance to a JSON map.
-  Map<String, dynamic> toFullJson() => _$SDKPublishModelToJson(this)
-    ..['whitelistedUsers'] = [...whitelistedUsers];
+  Map<String, dynamic> toFullJson() => _$SDKPublishModelToJson(this);
 
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishModel copyWith({
@@ -128,14 +154,11 @@ class SDKPublishModel extends PrivacyBase {
     String? entryPageId,
     String? entryCanvasId,
     DateTime? lastUpdated,
-    String? owner,
-    Set<String>? editors,
-    Set<String>? viewers,
-    bool? public,
-    String? team,
-    bool forceTeam = false,
+
+    // Privacy
+    PrivacyBase? privacy,
   }) {
-    return SDKPublishModel(
+    return SDKPublishModel.private(
       projectId: projectId ?? this.projectId,
       fonts: fonts ?? this.fonts,
       layouts: layouts ?? this.layouts,
@@ -147,24 +170,10 @@ class SDKPublishModel extends PrivacyBase {
       entryLayoutId: entryLayoutId ?? this.entryLayoutId,
       entryPageId: entryPageId ?? this.entryPageId,
       entryCanvasId: entryCanvasId ?? this.entryCanvasId,
-      owner: owner ?? this.owner,
-      editors: editors ?? this.editors,
-      viewers: viewers ?? this.viewers,
-      public: public ?? this.public,
       lastUpdated: lastUpdated ?? this.lastUpdated,
-      team: forceTeam ? team : team ?? this.team,
-    );
-  }
 
-  @override
-  SDKPublishModel copyWithPrivacyFrom(PrivacyBase privacy) {
-    return copyWith(
-      owner: privacy.owner,
-      editors: privacy.editors,
-      viewers: privacy.viewers,
-      public: privacy.public,
-      team: privacy.team,
-      forceTeam: true,
+      // Privacy
+      privacy: privacy ?? this,
     );
   }
 
@@ -222,13 +231,30 @@ class SDKPublishLayout extends PrivacyBase {
     List<Breakpoint>? breakpoints,
 
     // Privacy
-    required super.owner,
-    super.editors,
-    super.viewers,
-    super.public,
-    super.team,
+    required super.teams,
+    required super.users,
+    required super.roles,
+    required super.public,
   })  : breakpoints = breakpoints ?? [],
         canvasIds = canvases.keys.toSet();
+
+  /// Creates a new instance of [SDKPublishLayout] with privacy inherited from
+  /// another [PrivacyBase].
+  SDKPublishLayout.private({
+    required this.id,
+    required this.canvasId,
+    required this.pageId,
+    required this.projectId,
+    required this.nodes,
+    required this.lastUpdated,
+    this.version,
+    this.password,
+    this.subdomain,
+    this.breakpoint,
+
+    // Privacy
+    required super.privacy,
+  }) : super.private();
 
   /// Returns true if the layout is expired.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -251,37 +277,19 @@ class SDKPublishLayout extends PrivacyBase {
     Map<String, Map<String, BaseNode>>? canvases,
     DateTime? lastUpdated,
     List<Breakpoint>? breakpoints,
-    String? owner,
-    Set<String>? editors,
-    Set<String>? viewers,
-    bool? public,
-    String? team,
-    bool forceTeam = false,
+
+    // Privacy
+    PrivacyBase? privacy,
   }) {
-    return SDKPublishLayout(
+    return SDKPublishLayout.private(
       id: id ?? this.id,
       pageId: pageId ?? this.pageId,
       projectId: projectId ?? this.projectId,
       canvases: canvases ?? this.canvases,
       lastUpdated: lastUpdated ?? this.lastUpdated,
-      owner: owner ?? this.owner,
-      editors: editors ?? this.editors,
-      viewers: viewers ?? this.viewers,
-      public: public ?? this.public,
-      team: forceTeam ? team : team ?? this.team,
       breakpoints: breakpoints ?? this.breakpoints,
-    );
-  }
-
-  @override
-  SDKPublishLayout copyWithPrivacyFrom(PrivacyBase privacy) {
-    return copyWith(
-      owner: privacy.owner,
-      editors: privacy.editors,
-      viewers: privacy.viewers,
-      public: privacy.public,
-      team: privacy.team,
-      forceTeam: true,
+      // Privacy
+      privacy: privacy ?? this,
     );
   }
 
@@ -335,12 +343,25 @@ class SDKPublishFont extends PrivacyBase {
     this.style,
 
     // Privacy
-    required super.owner,
-    super.editors,
-    super.viewers,
-    super.public,
-    super.team,
+    required super.teams,
+    required super.users,
+    required super.roles,
+    required super.public,
   }) : id = id ?? family;
+
+  /// Creates a new instance of [SDKPublishFont] with privacy inherited from
+  /// another [PrivacyBase].
+  SDKPublishFont.private(
+      {String? id,
+      required this.url,
+      required this.family,
+      required this.weight,
+      this.style,
+
+      // Privacy
+      required super.privacy})
+      : id = id ?? family,
+        super.private();
 
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishFont copyWith({
@@ -349,36 +370,17 @@ class SDKPublishFont extends PrivacyBase {
     String? family,
     String? weight,
     String? style,
-    String? owner,
-    Set<String>? editors,
-    Set<String>? viewers,
-    bool? public,
-    String? team,
-    bool forceTeam = false,
+    // Privacy
+    PrivacyBase? privacy,
   }) {
-    return SDKPublishFont(
+    return SDKPublishFont.private(
       id: id ?? this.id,
       url: url ?? this.url,
       family: family ?? this.family,
       weight: weight ?? this.weight,
       style: style ?? this.style,
-      owner: owner ?? this.owner,
-      editors: editors ?? this.editors,
-      viewers: viewers ?? this.viewers,
-      public: public ?? this.public,
-      team: forceTeam ? team : team ?? this.team,
-    );
-  }
-
-  @override
-  SDKPublishFont copyWithPrivacyFrom(PrivacyBase privacy) {
-    return copyWith(
-      owner: privacy.owner,
-      editors: privacy.editors,
-      viewers: privacy.viewers,
-      public: privacy.public,
-      team: privacy.team,
-      forceTeam: true,
+      // Privacy
+      privacy: privacy ?? this,
     );
   }
 
@@ -388,8 +390,7 @@ class SDKPublishFont extends PrivacyBase {
 
   /// Converts this instance to a JSON map.
   @override
-  Map<String, dynamic> toJson() => _$SDKPublishFontToJson(this)
-    ..['whitelistedUsers'] = [...whitelistedUsers];
+  Map<String, dynamic> toJson() => _$SDKPublishFontToJson(this);
 
   @override
   List<Object?> get props => [
@@ -519,44 +520,35 @@ class SDKLayoutVariables extends PrivacyBase {
     required this.variables,
 
     // Privacy
-    required super.owner,
-    super.editors,
-    super.viewers,
-    super.public,
-    super.team,
+    required super.teams,
+    required super.users,
+    required super.roles,
+    required super.public,
   });
+
+  /// Creates a new instance of [SDKLayoutVariables] with privacy inherited from
+  /// another [PrivacyBase].
+  SDKLayoutVariables.private({
+    required this.id,
+    required this.variables,
+
+    // Privacy
+    required super.privacy,
+  }) : super.private();
 
   /// copyWith
   SDKLayoutVariables copyWith({
     String? id,
     Map<String, Map<String, VariableData>>? variables,
-    String? owner,
-    Set<String>? editors,
-    Set<String>? viewers,
-    bool? public,
-    String? team,
-    bool forceTeam = false,
+
+    // Privacy
+    PrivacyBase? privacy,
   }) {
-    return SDKLayoutVariables(
+    return SDKLayoutVariables.private(
       id: id ?? this.id,
       variables: variables ?? this.variables,
-      owner: owner ?? this.owner,
-      editors: editors ?? this.editors,
-      viewers: viewers ?? this.viewers,
-      public: public ?? this.public,
-      team: forceTeam ? team : team ?? this.team,
-    );
-  }
-
-  @override
-  SDKLayoutVariables copyWithPrivacyFrom(PrivacyBase privacy) {
-    return copyWith(
-      owner: privacy.owner,
-      editors: privacy.editors,
-      viewers: privacy.viewers,
-      public: privacy.public,
-      team: privacy.team,
-      forceTeam: true,
+      // Privacy
+      privacy: privacy ?? this,
     );
   }
 
@@ -569,8 +561,7 @@ class SDKLayoutVariables extends PrivacyBase {
 
   /// Converts this instance to a JSON map.
   @override
-  Map<String, dynamic> toJson() => _$SDKLayoutVariablesToJson(this)
-    ..['whitelistedUsers'] = [...whitelistedUsers];
+  Map<String, dynamic> toJson() => _$SDKLayoutVariablesToJson(this);
 }
 
 /// A model that defines variables for a layout.
@@ -589,44 +580,34 @@ class SDKLayoutConditions extends PrivacyBase {
     required this.conditions,
 
     // Privacy
-    required super.owner,
-    super.editors,
-    super.viewers,
-    super.public,
-    super.team,
+    required super.teams,
+    required super.users,
+    required super.roles,
+    required super.public,
   });
+
+  /// Creates a new instance of [SDKLayoutConditions] with privacy inherited
+  /// from another [PrivacyBase].
+  SDKLayoutConditions.private({
+    required this.id,
+    required this.conditions,
+
+    // Privacy
+    required super.privacy,
+  }) : super.private();
 
   /// copyWith
   SDKLayoutConditions copyWith({
     String? id,
     Map<String, Map<String, BaseCondition>>? conditions,
-    String? owner,
-    Set<String>? editors,
-    Set<String>? viewers,
-    bool? public,
-    String? team,
-    bool forceTeam = false,
+    // Privacy
+    PrivacyBase? privacy,
   }) {
-    return SDKLayoutConditions(
+    return SDKLayoutConditions.private(
       id: id ?? this.id,
-      owner: owner ?? this.owner,
       conditions: conditions ?? this.conditions,
-      editors: editors ?? this.editors,
-      viewers: viewers ?? this.viewers,
-      public: public ?? this.public,
-      team: forceTeam ? team : team ?? this.team,
-    );
-  }
-
-  @override
-  SDKLayoutConditions copyWithPrivacyFrom(PrivacyBase privacy) {
-    return copyWith(
-      owner: privacy.owner,
-      editors: privacy.editors,
-      viewers: privacy.viewers,
-      public: privacy.public,
-      team: privacy.team,
-      forceTeam: true,
+      // Privacy
+      privacy: privacy ?? this,
     );
   }
 
@@ -639,6 +620,5 @@ class SDKLayoutConditions extends PrivacyBase {
 
   /// Converts this instance to a JSON map.
   @override
-  Map<String, dynamic> toJson() => _$SDKLayoutConditionsToJson(this)
-    ..['whitelistedUsers'] = [...whitelistedUsers];
+  Map<String, dynamic> toJson() => _$SDKLayoutConditionsToJson(this);
 }
