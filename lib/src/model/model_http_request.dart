@@ -93,14 +93,39 @@ class HttpApiData extends PrivacyBase {
     this.directory,
 
     // Privacy
-    super.owner = '',
-    super.editors,
-    super.viewers,
-    super.public,
-    super.team,
+    required super.teams,
+    required super.users,
+    required super.roles,
+    required super.public,
   })  : variables = List.of(variables),
         lastUpdated = lastUpdated ?? DateTime.now(),
         created = created ?? DateTime.now();
+
+  HttpApiData.private({
+    this.method = HttpMethod.get,
+    this.url = '',
+    this.headers = const <HttpKeyValuePair>[],
+    this.queryParams = const <HttpKeyValuePair>[],
+    this.formFields = const <HttpKeyValuePair>[],
+    this.body,
+    this.bodyType = RequestBodyType.text,
+    required this.name,
+    this.id = '',
+    this.project = '',
+    List<VariableData> variables = const [],
+    this.isDeleted = false,
+    DateTime? lastUpdated,
+    this.requestBodyContentType = RequestBodyTextType.json,
+    this.isDraft = false,
+    DateTime? created,
+    this.directory,
+
+    // Privacy
+    required super.privacy,
+  })  : variables = List.of(variables),
+        lastUpdated = lastUpdated ?? DateTime.now(),
+        created = created ?? DateTime.now(),
+        super.private();
 
   HttpApiData copyWith({
     HttpMethod? method,
@@ -123,14 +148,9 @@ class HttpApiData extends PrivacyBase {
     bool forceDirectory = false,
 
     // Privacy
-    String? owner,
-    bool? public,
-    Set<String>? editors,
-    Set<String>? viewers,
-    String? team,
-    bool forceTeam = false,
+    PrivacyBase? privacy,
   }) =>
-      HttpApiData(
+      HttpApiData.private(
         method: method ?? this.method,
         url: url ?? this.url,
         headers: headers ?? this.headers,
@@ -149,24 +169,8 @@ class HttpApiData extends PrivacyBase {
         directory: forceDirectory ? directory : directory ?? this.directory,
         requestBodyContentType:
             requestBodyContentType ?? this.requestBodyContentType,
-        owner: owner ?? this.owner,
-        public: public ?? this.public,
-        editors: editors ?? this.editors,
-        viewers: viewers ?? this.viewers,
-        team: forceTeam ? team : team ?? this.team,
+        privacy: privacy ?? this,
       );
-
-  @override
-  HttpApiData copyWithPrivacyFrom(PrivacyBase privacy) {
-    return copyWith(
-      owner: privacy.owner,
-      public: privacy.public,
-      editors: privacy.editors,
-      viewers: privacy.viewers,
-      team: privacy.team,
-      forceTeam: true,
-    );
-  }
 
   factory HttpApiData.fromJson(Map<String, dynamic> json) =>
       _$HttpApiDataFromJson(json);
