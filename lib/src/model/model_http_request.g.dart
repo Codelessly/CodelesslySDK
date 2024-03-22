@@ -45,17 +45,21 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
           RequestBodyTextType.json,
       created: const DateTimeConverter().fromJson(json['created'] as int?),
       directory: json['directory'] as String?,
-      owner: json['owner'] as String? ?? '',
-      editors:
-          (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      viewers:
-          (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      public: json['public'] as bool? ?? false,
-      team: json['team'] as String?,
+      teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      roles: (PrivacyBase.readRole(json, 'roles') as Map).map(
+        (k, e) => MapEntry(k as String, $enumDecode(_$RoleEnumMap, e)),
+      ),
+      public: json['public'] as bool?,
     );
 
 Map<String, dynamic> _$HttpApiDataToJson(HttpApiData instance) {
-  final val = <String, dynamic>{};
+  final val = <String, dynamic>{
+    'users': instance.users.toList(),
+    'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
+    'teams': instance.teams.toList(),
+    'public': instance.public,
+  };
 
   void writeNotNull(
       String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
@@ -67,11 +71,6 @@ Map<String, dynamic> _$HttpApiDataToJson(HttpApiData instance) {
     }
   }
 
-  writeNotNull('owner', instance.owner, instance.owner, '');
-  writeNotNull('team', instance.team, instance.team, null);
-  val['editors'] = instance.editors.toList();
-  val['viewers'] = instance.viewers.toList();
-  writeNotNull('public', instance.public, instance.public, false);
   writeNotNull('id', instance.id, instance.id, '');
   val['name'] = instance.name;
   writeNotNull('project', instance.project, instance.project, '');
@@ -129,6 +128,12 @@ const _$RequestBodyTextTypeEnumMap = {
   RequestBodyTextType.json: 'json',
   RequestBodyTextType.xml: 'xml',
   RequestBodyTextType.html: 'html',
+};
+
+const _$RoleEnumMap = {
+  Role.owner: 'owner',
+  Role.editor: 'editor',
+  Role.viewer: 'viewer',
 };
 
 HttpKeyValuePair _$HttpKeyValuePairFromJson(Map json) => HttpKeyValuePair(
