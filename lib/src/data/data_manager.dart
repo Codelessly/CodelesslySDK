@@ -740,14 +740,16 @@ class DataManager {
       }
     }
 
-    for (final String layoutID in variableUpdates.keys) {
-      final UpdateType updateType = variableUpdates[layoutID]!;
+    // docID is can be either a layoutID or a canvasID.
+    // layoutID is for backward compatibility.
+    for (final String docID in variableUpdates.keys) {
+      final UpdateType updateType = variableUpdates[docID]!;
 
       switch (updateType) {
         case UpdateType.delete:
-          localModel.variables.remove(layoutID);
+          localModel.variables.remove(docID);
           localDataRepository.deletePublishVariables(
-            layoutId: layoutID,
+            docID: docID,
             source: config.publishSource,
           );
         case UpdateType.add:
@@ -755,23 +757,23 @@ class DataManager {
           final SDKLayoutVariables? layoutVariables =
               await networkDataRepository.downloadLayoutVariables(
             projectID: authManager.authData!.projectId,
-            layoutID: layoutID,
+            docID: docID,
             source: config.publishSource,
           );
           if (layoutVariables != null) {
-            localModel.variables[layoutID] = layoutVariables;
+            localModel.variables[docID] = layoutVariables;
           }
       }
     }
 
-    for (final String layoutID in conditionUpdates.keys) {
-      final UpdateType updateType = conditionUpdates[layoutID]!;
+    for (final String docID in conditionUpdates.keys) {
+      final UpdateType updateType = conditionUpdates[docID]!;
 
       switch (updateType) {
         case UpdateType.delete:
-          localModel.variables.remove(layoutID);
+          localModel.variables.remove(docID);
           localDataRepository.deletePublishConditions(
-            layoutId: layoutID,
+            docID: docID,
             source: config.publishSource,
           );
         case UpdateType.add:
@@ -779,11 +781,11 @@ class DataManager {
           final SDKLayoutConditions? layoutConditions =
               await networkDataRepository.downloadLayoutConditions(
             projectID: authManager.authData!.projectId,
-            layoutID: layoutID,
+            docID: docID,
             source: config.publishSource,
           );
           if (layoutConditions != null) {
-            localModel.conditions[layoutID] = layoutConditions;
+            localModel.conditions[docID] = layoutConditions;
           }
       }
     }
@@ -1094,7 +1096,7 @@ class DataManager {
     }
 
     if (model.updates.conditions.containsKey(layoutID)) {
-      log('\tLayout [$layoutID] has conditions.');
+      // backward compatibility
       try {
         final SDKLayoutConditions? conditions =
             await getOrFetchConditions(layoutID);
@@ -1108,12 +1110,7 @@ class DataManager {
           stackTrace: stacktrace,
         );
       }
-    } else {
-      log('\tLayout [$layoutID] has no conditions.');
-    }
 
-    if (model.updates.variables.containsKey(layoutID)) {
-      log('\tLayout [$layoutID] has variables.');
       try {
         final SDKLayoutVariables? variables =
             await getOrFetchVariables(layoutID);
@@ -1128,7 +1125,45 @@ class DataManager {
         );
       }
     } else {
-      log('\tLayout [$layoutID] has no variables.');
+      for (final canvasID in layout!.canvasIds) {
+        if (model.updates.conditions.containsKey(canvasID)) {
+          log('\tCanvas [$canvasID] has conditions.');
+          try {
+            final SDKLayoutConditions? conditions =
+                await getOrFetchConditions(canvasID);
+            if (conditions != null) {
+              model.conditions[canvasID] = conditions;
+            }
+          } catch (e, stacktrace) {
+            logError(
+              'Error while fetching conditions',
+              error: e,
+              stackTrace: stacktrace,
+            );
+          }
+        } else {
+          log('\tCanvas [$canvasID] has no conditions.');
+        }
+
+        if (model.updates.variables.containsKey(canvasID)) {
+          log('\tCanvas [$canvasID] has variables.');
+          try {
+            final SDKLayoutVariables? variables =
+                await getOrFetchVariables(canvasID);
+            if (variables != null) {
+              model.variables[canvasID] = variables;
+            }
+          } catch (e, stacktrace) {
+            logError(
+              'Error while fetching variables',
+              error: e,
+              stackTrace: stacktrace,
+            );
+          }
+        } else {
+          log('\tCanvas [$canvasID] has no variables.');
+        }
+      }
     }
 
     await emitPublishModel();
@@ -1309,32 +1344,32 @@ class DataManager {
     return apis;
   }
 
-  Future<SDKLayoutConditions?> getOrFetchConditions(String layoutID) {
+  Future<SDKLayoutConditions?> getOrFetchConditions(String docID) {
     final AuthData? auth = authManager.authData;
 
-    final SDKLayoutConditions? conditions = _publishModel?.conditions[layoutID];
+    final SDKLayoutConditions? conditions = _publishModel?.conditions[docID];
     if (conditions != null) return Future.value(conditions);
 
     if (auth == null) return Future.value(null);
 
     return networkDataRepository.downloadLayoutConditions(
       projectID: auth.projectId,
-      layoutID: layoutID,
+      docID: docID,
       source: config.publishSource,
     );
   }
 
-  Future<SDKLayoutVariables?> getOrFetchVariables(String layoutID) {
+  Future<SDKLayoutVariables?> getOrFetchVariables(String canvasID) {
     final AuthData? auth = authManager.authData;
 
-    final SDKLayoutVariables? variables = _publishModel?.variables[layoutID];
+    final SDKLayoutVariables? variables = _publishModel?.variables[canvasID];
     if (variables != null) return Future.value(variables);
 
     if (auth == null) return Future.value(null);
 
     return networkDataRepository.downloadLayoutVariables(
       projectID: auth.projectId,
-      layoutID: layoutID,
+      docID: canvasID,
       source: config.publishSource,
     );
   }

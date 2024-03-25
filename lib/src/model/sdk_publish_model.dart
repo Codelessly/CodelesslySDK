@@ -175,9 +175,6 @@ class SDKPublishLayout extends PrivacyBase {
   /// The layout's unique id.
   final String id;
 
-  /// The layout's canvas id.
-  final String canvasId;
-
   /// The layout's page id.
   final String pageId;
 
@@ -185,44 +182,37 @@ class SDKPublishLayout extends PrivacyBase {
   final String projectId;
 
   /// A list of the nodes that makes up this layout.
-  @NodesMapConverter()
-  final Map<String, BaseNode> nodes;
+  /// CanvasID -> <NodeID -> Node>
+  @CanvasesMapConverter()
+  @JsonKey(readValue: nodesOrCanvasesReader)
+  final Map<String, Map<String, BaseNode>> canvases;
+
+  final List<Breakpoint> breakpoints;
 
   /// The last time this layout was updated. Used for cache validation.
   @DateTimeConverter()
   final DateTime lastUpdated;
 
-  /// The layout's version.
-  final int? version;
-
-  /// The layout's password.
-  final String? password;
-
-  /// The layout's subdomain.
-  final String? subdomain;
-
-  /// The layout's breakpoint.
-  final Breakpoint? breakpoint;
+  /// Extracted canvas ids from the [canvases] map. This is available for
+  /// convenience. Do not modify this set directly.
+  final Set<String> canvasIds;
 
   /// Creates a new instance of [SDKPublishLayout].
-  const SDKPublishLayout({
+  SDKPublishLayout({
     required this.id,
-    required this.canvasId,
     required this.pageId,
     required this.projectId,
-    required this.nodes,
+    required this.canvases,
     required this.lastUpdated,
-    this.version,
-    this.password,
-    this.subdomain,
-    this.breakpoint,
+    List<Breakpoint>? breakpoints,
 
     // Privacy
     required super.owner,
     super.editors,
     super.viewers,
     super.public,
-  });
+  })  : breakpoints = breakpoints ?? [],
+        canvasIds = canvases.keys.toSet();
 
   /// Returns true if the layout is expired.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -235,22 +225,17 @@ class SDKPublishLayout extends PrivacyBase {
   /// Converts this instance to a JSON map.
   @override
   Map<String, dynamic> toJson() => _$SDKPublishLayoutToJson(this)
-    ..['whitelistedUsers'] = [...whitelistedUsers];
+    ..['whitelistedUsers'] = [...whitelistedUsers]
+    ..['canvasIds'] = canvases.keys.toList();
 
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishLayout copyWith({
     String? id,
-    String? canvasId,
     String? pageId,
     String? projectId,
-    Map<String, BaseNode>? nodes,
-    int? version,
-    String? password,
+    Map<String, Map<String, BaseNode>>? canvases,
     DateTime? lastUpdated,
-    String? subdomain,
-    Breakpoint? breakpoint,
-    bool forceSubdomain = false,
-    bool forcePassword = false,
+    List<Breakpoint>? breakpoints,
     String? owner,
     Set<String>? editors,
     Set<String>? viewers,
@@ -258,19 +243,15 @@ class SDKPublishLayout extends PrivacyBase {
   }) {
     return SDKPublishLayout(
       id: id ?? this.id,
-      canvasId: canvasId ?? this.canvasId,
       pageId: pageId ?? this.pageId,
       projectId: projectId ?? this.projectId,
-      nodes: nodes ?? this.nodes,
+      canvases: canvases ?? this.canvases,
       lastUpdated: lastUpdated ?? this.lastUpdated,
-      version: version ?? this.version,
-      password: forcePassword ? password : password ?? this.password,
-      subdomain: subdomain ?? this.subdomain,
-      breakpoint: breakpoint ?? this.breakpoint,
       owner: owner ?? this.owner,
       editors: editors ?? this.editors,
       viewers: viewers ?? this.viewers,
       public: public ?? this.public,
+      breakpoints: breakpoints ?? this.breakpoints,
     );
   }
 
@@ -278,17 +259,24 @@ class SDKPublishLayout extends PrivacyBase {
   List<Object?> get props => [
         ...super.props,
         id,
-        canvasId,
         pageId,
         projectId,
         owner,
-        nodes,
+        canvases,
         lastUpdated,
-        version,
-        password,
-        subdomain,
-        breakpoint,
+        breakpoints,
       ];
+
+  // For backwards compatibility
+  static Map<String, dynamic> nodesOrCanvasesReader(
+      Map<dynamic, dynamic> json, String key) {
+    if (json.containsKey('nodes') && json.containsKey('canvasId')) {
+      // backwards compatibility
+      return {json['canvasId']: json['nodes']};
+    }
+    assert(json.containsKey('canvases'));
+    return json[key];
+  }
 }
 
 /// Represents a single variation of a common font.
@@ -483,7 +471,7 @@ class SDKPublishUpdates with EquatableMixin {
 /// A model that defines variables for a layout.
 @JsonSerializable()
 class SDKLayoutVariables extends PrivacyBase {
-  /// The id of the layout.
+  /// The id of the canvas. Can be layout id for backwards compatibility.
   final String id;
 
   /// The variables that are defined for this layout.
@@ -536,7 +524,7 @@ class SDKLayoutVariables extends PrivacyBase {
 /// A model that defines variables for a layout.
 @JsonSerializable()
 class SDKLayoutConditions extends PrivacyBase {
-  /// The id of the layout.
+  /// The id of the canvas. Can be layout id for backwards compatibility.
   final String id;
 
   /// The conditions that are defined for this layout.

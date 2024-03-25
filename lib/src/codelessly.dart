@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,6 +12,8 @@ import 'logging/error_handler.dart';
 import 'logging/reporter.dart';
 
 typedef NavigationListener = void Function(BuildContext context);
+typedef BreakpointsListener = void Function(
+    BuildContext context, Breakpoint breakpoint);
 
 /// The entry point for accessing the Codelessly SDK.
 ///
@@ -136,6 +139,8 @@ class Codelessly {
 
   final List<NavigationListener> _navigationListeners = [];
 
+  final List<BreakpointsListener> _breakpointsListeners = [];
+
   /// Calls navigation listeners when navigation happens.
   /// Provided [context] must be of the destination widget. This context
   /// can be used to retrieve new [CodelesslyContext].
@@ -153,6 +158,25 @@ class Codelessly {
   /// Removes a global navigation listener.
   void removeNavigationListener(NavigationListener callback) {
     _navigationListeners.remove(callback);
+  }
+
+  /// Calls navigation listeners when navigation happens.
+  /// Provided [context] must be of the destination widget. This context
+  /// can be used to retrieve new [CodelesslyContext].
+  void notifyBreakpointsListener(BuildContext context, Breakpoint breakpoint) {
+    _breakpointsListeners.forEach((listener) => listener(context, breakpoint));
+  }
+
+  /// Adds a global listener for navigation.
+  void addBreakpointsListener(BreakpointsListener callback) {
+    if (!_breakpointsListeners.contains(callback)) {
+      _breakpointsListeners.add(callback);
+    }
+  }
+
+  /// Removes a global navigation listener.
+  void removeBreakpointsListener(BreakpointsListener callback) {
+    _breakpointsListeners.remove(callback);
   }
 
   /// Creates a new instance of [Codelessly].

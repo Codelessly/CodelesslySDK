@@ -291,6 +291,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
+    print('Building canvas ${node.name}|${node.id} with ${node.scaleMode}');
     return PassiveCanvasWidget(
       node: node,
       settings: settings,

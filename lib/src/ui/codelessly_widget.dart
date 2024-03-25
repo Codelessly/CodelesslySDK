@@ -265,6 +265,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   StreamSubscription<CodelesslyException?>? _exceptionSubscription;
   CodelesslyException? _lastException;
 
+  // Saved in the state for the didChangeDependencies method to use to compare
+  // with the new canvas ID to determine if the layout needs to be reloaded
+  // when the media query changes resulting into a new breakpoint.
+  String? canvasID;
+
+  // Saved in the state for the didChangeDependencies method to use.
+  String? effectiveLayoutID;
+
   @override
   void initState() {
     super.initState();
@@ -306,6 +314,35 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           conditions: {},
           layoutID: _effectiveController.layoutID,
         );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Only run this if controller is initialized and everything is ready.
+    // This shouldn't run for the first time, only when media query changes.
+    // canvasId and effectiveLayoutID are set initially in the build method.
+    if (_effectiveController.didInitialize &&
+        _effectiveController.publishModel != null &&
+        canvasID != null &&
+        effectiveLayoutID != null) {
+      // Get the canvas ID from layout group for the current screen size.
+      final newCanvasID = getCanvasIDForLayoutGroup(effectiveLayoutID,
+          _effectiveController.publishModel!, MediaQuery.sizeOf(context));
+
+      if (newCanvasID != canvasID) {
+        // Breakpoint changed. Everything needs to be reloaded.
+        canvasID = newCanvasID;
+        final breakpoint = _effectiveController
+            .publishModel!.layouts[effectiveLayoutID]!.breakpoints
+            .firstWhere((breakpoint) => breakpoint.nodeId == canvasID);
+
+        // Notify breakpoints listeners.
+        _effectiveController.effectiveCodelessly
+            .notifyBreakpointsListener(context, breakpoint);
+      }
+    }
   }
 
   @override
@@ -436,10 +473,10 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           }
 
           final SDKPublishModel model = snapshot.data!;
-          final String? layoutID =
+          effectiveLayoutID =
               _effectiveController.layoutID ?? model.entryLayoutId;
 
-          if (layoutID == null) {
+          if (effectiveLayoutID == null) {
             return _effectiveErrorBuilder?.call(
                   context,
                   CodelesslyException.notInitializedError(
@@ -453,18 +490,30 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                 );
           }
 
-          if (!model.layouts.containsKey(layoutID)) {
+          if (!model.layouts.containsKey(effectiveLayoutID)) {
             return _effectiveLoadingBuilder?.call(context) ??
                 const CodelesslyLoadingScreen();
           }
+
+          // Set the canvas ID if it is not already set. (This is for the first
+          // time the layout is loaded. For subsequent loads, the canvas ID is
+          // set in the didChangeDependencies method.) e.g. when media query
+          // changes.
+          canvasID ??= getCanvasIDForLayoutGroup(
+              effectiveLayoutID, model, MediaQuery.sizeOf(context));
 
           final layoutWidget = Material(
             clipBehavior: Clip.none,
             type: MaterialType.transparency,
             child: CodelesslyLayoutBuilder(
-              key: ValueKey(layoutID),
+              // This key is important to ensure that the layout is rebuilt
+              // from scratch whenever the layout ID changes, not when the
+              // canvas ID changes.
+              key: ValueKey(effectiveLayoutID),
               controller: _effectiveController,
-              layout: model.layouts[layoutID]!,
+              layout: model.layouts[effectiveLayoutID]!,
+              // ID of the canvas to load for current breakpoint.
+              canvasId: canvasID!,
               layoutRetrievalBuilder: _effectiveLayoutRetrieverBuilder,
             ),
           );
@@ -566,4 +615,32 @@ class _NavigationBuilderState extends State<_NavigationBuilder> {
 
   @override
   Widget build(BuildContext context) => widget.builder(context);
+}
+
+/// Retrieves a canvas ID for a layout group based on the current screen size.
+/// Returns null if the layout group does not have a canvas for the current
+/// screen size or if the layout group does not exist.
+String? getCanvasIDForLayoutGroup(
+    String? layoutID, SDKPublishModel model, Size screenSize) {
+  if (layoutID != null && model.layouts.containsKey(layoutID)) {
+    final SDKPublishLayout? layout = model.layouts[layoutID];
+    if (layout != null) {
+      if (layout.canvases.length == 1) {
+        // standalone layout. No need to check breakpoints.
+        return layout.canvases.keys.first;
+      }
+      // this layout belongs to a layout group. Load correct layout
+      // for the current breakpoint.
+      final width = screenSize.width;
+      final breakpoints = layout.breakpoints;
+      // Get a breakpoint for the current width.
+      final breakpoint = breakpoints.findForWidth(width);
+      if (breakpoint != null) {
+        print(
+            'Found breakpoint for width ${width.toInt()}: ${breakpoint.nodeId}');
+        return breakpoint.nodeId;
+      }
+    }
+  }
+  return null;
 }

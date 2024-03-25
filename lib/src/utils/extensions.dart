@@ -1759,3 +1759,29 @@ extension GenericExt<T extends Object> on T? {
     return block(this!);
   }
 }
+
+extension BreakpointExt on Iterable<Breakpoint> {
+  /// Retrieves the breakpoint applicable for the given width.
+  Breakpoint? findForWidth(double width) => firstWhereOrNull((breakpoint) =>
+      width >= breakpoint.lowerBound && width < breakpoint.upperBound);
+}
+
+extension LayoutGroupsExt on Map<String, List<Breakpoint>> {
+  /// Finds the layout group and breakpoint for the given canvas id.
+  ({String? layoutGroupId, Breakpoint? breakpoint}) findByCanvasId(
+      String canvasId) {
+    for (final MapEntry(key: groupId, value: breakpoints) in entries) {
+      final breakpoint = breakpoints
+          .firstWhereOrNull((breakpoint) => breakpoint.nodeId == canvasId);
+      if (breakpoint != null) {
+        return (layoutGroupId: groupId, breakpoint: breakpoint);
+      }
+    }
+    return (layoutGroupId: null, breakpoint: null);
+  }
+
+  Map toJson() {
+    return map((key, value) =>
+        MapEntry(key, value.map((breakpoint) => breakpoint.toJson()).toList()));
+  }
+}
