@@ -74,6 +74,8 @@ class CodelesslyLayoutBuilder extends StatefulWidget {
   /// The layout to build. The nodes list must be populated inside.
   final SDKPublishLayout layout;
 
+  final String canvasId;
+
   /// Returns a widget that decides how to load nested layouts of a rendered
   /// node.
   final LayoutRetrieverBuilder? layoutRetrievalBuilder;
@@ -83,6 +85,7 @@ class CodelesslyLayoutBuilder extends StatefulWidget {
     super.key,
     required this.controller,
     required this.layout,
+    required this.canvasId,
     this.layoutRetrievalBuilder,
   });
 
@@ -118,8 +121,8 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         ),
   );
 
-  late final CanvasNode canvasNode =
-      widget.layout.nodes[widget.layout.canvasId] as CanvasNode;
+  CanvasNode get canvasNode =>
+      widget.layout.canvases[widget.canvasId]![widget.canvasId] as CanvasNode;
 
   /// Whether the layout should be loaded. This is used to prevent the layout
   /// from being loaded multiple times since we call [loadLayout] in
@@ -140,6 +143,7 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
   void didUpdateWidget(covariant CodelesslyLayoutBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.layout.id != widget.layout.id ||
+        oldWidget.canvasId != widget.canvasId ||
         oldWidget.layout.lastUpdated != widget.layout.lastUpdated) {
       loadLayout(context);
     }
@@ -150,9 +154,8 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
   void loadLayout(BuildContext context) {
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
-    final Codelessly codelessly = context.read<Codelessly>();
     nodeRegistry.clear();
-    nodeRegistry.setNodes(widget.layout.nodes);
+    nodeRegistry.setNodes(widget.layout.canvases[widget.canvasId]!);
     codelesslyContext.nodeValues.clear();
     final List<BaseNode> allNodes = nodeRegistry.getNodes().values.toList();
 
@@ -194,16 +197,16 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         }
       }
     }
+    final publishModel = context.read<Codelessly>().dataManager.publishModel!;
 
-    final String layoutID = widget.layout.id;
-    final Map<String, VariableData> variablesMap = context
-            .read<Codelessly>()
-            .dataManager
-            .publishModel!
-            .variables[layoutID]
-            ?.variables ??
-        {};
+    // Uses layout id for backwards compatibility.
+    final Map<String, VariableData> variablesMap =
+        (publishModel.variables[widget.canvasId] ??
+                    publishModel.variables[widget.layout.id])
+                ?.variables ??
+            {};
 
+    codelesslyContext.variables.clear();
     for (final variable in variablesMap.values) {
       // Override default values of variables with values provided in data.
       final notifier = Observable(variable.copyWith(
@@ -212,9 +215,12 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
       codelesslyContext.variables[variable.id] = notifier;
     }
 
-    final conditions =
-        codelessly.dataManager.publishModel?.conditions[layoutID]?.conditions ??
-            {};
+    // Uses layout id for backwards compatibility.
+    final conditions = (publishModel.conditions[widget.canvasId] ??
+                publishModel.conditions[widget.layout.id])
+            ?.conditions ??
+        {};
+    codelesslyContext.conditions.clear();
     codelesslyContext.conditions.addAll(conditions);
 
     // Load apis and its variables. This has to be done after the variables

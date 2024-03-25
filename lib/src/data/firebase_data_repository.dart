@@ -119,14 +119,14 @@ class FirebaseDataRepository extends NetworkDataRepository {
   @override
   Future<SDKLayoutVariables?> downloadLayoutVariables({
     required String projectID,
-    required String layoutID,
+    required String docID,
     required PublishSource source,
   }) {
     final variablesDoc = firestore
         .collection(source.serverPath)
         .doc(projectID)
         .collection('variables')
-        .doc(layoutID);
+        .doc(docID);
 
     return variablesDoc.get().then((value) {
       final Map<String, dynamic> data = value.data() ?? {};
@@ -134,7 +134,7 @@ class FirebaseDataRepository extends NetworkDataRepository {
       // Variables do not exist or there's a network error.
       if (data.isEmpty) {
         throw CodelesslyException(
-            'Failed to download variables for layout [$layoutID].');
+            'Failed to download variables for layout/canvas [$docID].');
       }
 
       final SDKLayoutVariables layoutVariables = SDKLayoutVariables.fromJson(
@@ -147,14 +147,14 @@ class FirebaseDataRepository extends NetworkDataRepository {
   @override
   Future<SDKLayoutConditions?> downloadLayoutConditions({
     required String projectID,
-    required String layoutID,
+    required String docID,
     required PublishSource source,
   }) {
     final conditionsDoc = firestore
         .collection(source.serverPath)
         .doc(projectID)
         .collection('conditions')
-        .doc(layoutID);
+        .doc(docID);
 
     return conditionsDoc.get().then((value) {
       final Map<String, dynamic> data = value.data() ?? {};
@@ -162,7 +162,7 @@ class FirebaseDataRepository extends NetworkDataRepository {
       // Conditions do not exist or there's a network error.
       if (data.isEmpty) {
         throw CodelesslyException(
-            'Failed to download conditions for layout [$layoutID].');
+            'Failed to download conditions for canvas/layout [$docID].');
       }
 
       final SDKLayoutConditions layoutConditions = SDKLayoutConditions.fromJson(

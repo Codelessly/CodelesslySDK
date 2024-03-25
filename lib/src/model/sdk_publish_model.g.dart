@@ -86,19 +86,16 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
 
 SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
       id: json['id'] as String,
-      canvasId: json['canvasId'] as String,
       pageId: json['pageId'] as String,
       projectId: json['projectId'] as String,
-      nodes: const NodesMapConverter()
-          .fromJson(json['nodes'] as Map<String, dynamic>),
+      canvases: const CanvasesMapConverter().fromJson(
+          SDKPublishLayout.nodesOrCanvasesReader(json, 'canvases')
+              as Map<String, dynamic>),
       lastUpdated:
           const DateTimeConverter().fromJson(json['lastUpdated'] as int?),
-      version: json['version'] as int?,
-      password: json['password'] as String?,
-      subdomain: json['subdomain'] as String?,
-      breakpoint: json['breakpoint'] == null
-          ? null
-          : Breakpoint.fromJson(json['breakpoint'] as Map),
+      breakpoints: (json['breakpoints'] as List<dynamic>?)
+          ?.map((e) => Breakpoint.fromJson(e as Map))
+          .toList(),
       owner: json['owner'] as String,
       editors:
           (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
@@ -126,17 +123,12 @@ Map<String, dynamic> _$SDKPublishLayoutToJson(SDKPublishLayout instance) {
 
   writeNotNull('public', instance.public, instance.public, false);
   val['id'] = instance.id;
-  val['canvasId'] = instance.canvasId;
   val['pageId'] = instance.pageId;
   val['projectId'] = instance.projectId;
-  val['nodes'] = const NodesMapConverter().toJson(instance.nodes);
+  val['canvases'] = const CanvasesMapConverter().toJson(instance.canvases);
+  val['breakpoints'] = instance.breakpoints.map((e) => e.toJson()).toList();
   writeNotNull('lastUpdated', instance.lastUpdated,
       const DateTimeConverter().toJson(instance.lastUpdated), null);
-  writeNotNull('version', instance.version, instance.version, null);
-  writeNotNull('password', instance.password, instance.password, null);
-  writeNotNull('subdomain', instance.subdomain, instance.subdomain, null);
-  writeNotNull(
-      'breakpoint', instance.breakpoint, instance.breakpoint?.toJson(), null);
   return val;
 }
 
