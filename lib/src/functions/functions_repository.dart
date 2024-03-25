@@ -241,13 +241,13 @@ class FunctionsRepository {
       // Check if a layout exists for the action's [destinationId].
       final String? layoutId = codelessly
           .dataManager.publishModel?.layouts.values
-          .firstWhereOrNull((layout) => layout.canvasId == action.destinationId)
+          .firstWhereOrNull((layout) => layout.canvasIds.contains(action.destinationId))
           ?.id;
 
       _log('looking for layout with canvas id: [${action.destinationId}]');
       for (final layout
           in codelessly.dataManager.publishModel!.layouts.values) {
-        _log('layout [${layout.id}] canvas id: [${layout.canvasId}]');
+        _log('layout [${layout.id}] canvas ids: [${layout.canvasIds.join(', ')}]');
       }
 
       if (layoutId == null) {
@@ -308,12 +308,12 @@ class FunctionsRepository {
     final Codelessly codelessly = context.read<Codelessly>();
     // Check if a layout exists for the action's [destinationId].
     final String? layoutId = codelessly.dataManager.publishModel?.layouts.values
-        .firstWhereOrNull((layout) => layout.canvasId == action.destinationId)
+        .firstWhereOrNull((layout) => layout.canvasIds.contains(action.destinationId))
         ?.id;
 
     _log('looking for layout with canvas id: [${action.destinationId}]');
     for (final layout in codelessly.dataManager.publishModel!.layouts.values) {
-      _log('layout [${layout.id}] canvas id: [${layout.canvasId}]');
+      _log('layout [${layout.id}] canvas ids: [${layout.canvasIds.join(', ')}]');
     }
 
     if (layoutId == null) {
