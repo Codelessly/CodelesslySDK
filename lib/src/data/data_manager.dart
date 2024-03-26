@@ -742,6 +742,10 @@ class DataManager {
 
     // docID is can be either a layoutID or a canvasID.
     // layoutID is for backward compatibility.
+    // [variableUpdates] is layoutID -> UpdateType for published variables
+    // before layout group, but it would be canvasID -> UpdateType for published
+    // variables after layout group. So calling it docID to be more generic.
+    // TODO: rename docID to canvasID after layout group migration.
     for (final String docID in variableUpdates.keys) {
       final UpdateType updateType = variableUpdates[docID]!;
 
@@ -766,6 +770,12 @@ class DataManager {
       }
     }
 
+    // docID is can be either a layoutID or a canvasID.
+    // layoutID is for backward compatibility.
+    // [conditionUpdates] is layoutID -> UpdateType for published variables
+    // before layout group, but it would be canvasID -> UpdateType for published
+    // variables after layout group. So calling it docID to be more generic.
+    // TODO: rename docID to canvasID after layout group migration.
     for (final String docID in conditionUpdates.keys) {
       final UpdateType updateType = conditionUpdates[docID]!;
 
@@ -917,21 +927,33 @@ class DataManager {
     final Map<String, UpdateType> variableUpdates = {};
 
     // Check for deleted layouts.
-    for (final String layoutId in currentVariables.keys) {
-      if (!serverVariables.containsKey(layoutId)) {
-        variableUpdates[layoutId] = UpdateType.delete;
+    // docID is can be either a layoutID or a canvasID.
+    // layoutID is for backward compatibility.
+    // variable updates is layoutID -> UpdateType for published variables
+    // before layout group, but it would be canvasID -> UpdateType for published
+    // variables after layout group. So calling it docID to be more generic.
+    // TODO: rename docID to canvasID after layout group migration.
+    for (final String docId in currentVariables.keys) {
+      if (!serverVariables.containsKey(docId)) {
+        variableUpdates[docId] = UpdateType.delete;
       }
     }
 
     // Check for added or updated layouts.
-    for (final String layoutId in serverVariables.keys) {
-      if (!currentVariables.containsKey(layoutId)) {
-        variableUpdates[layoutId] = UpdateType.add;
+    // docID is can be either a layoutID or a canvasID.
+    // layoutID is for backward compatibility.
+    // variable updates is layoutID -> UpdateType for published variables
+    // before layout group, but it would be canvasID -> UpdateType for published
+    // variables after layout group. So calling it docID to be more generic.
+    // TODO: rename docID to canvasID after layout group migration.
+    for (final String docId in serverVariables.keys) {
+      if (!currentVariables.containsKey(docId)) {
+        variableUpdates[docId] = UpdateType.add;
       } else {
-        final DateTime lastUpdated = currentVariables[layoutId]!;
-        final DateTime newlyUpdated = serverVariables[layoutId]!;
+        final DateTime lastUpdated = currentVariables[docId]!;
+        final DateTime newlyUpdated = serverVariables[docId]!;
         if (newlyUpdated.isAfter(lastUpdated)) {
-          variableUpdates[layoutId] = UpdateType.update;
+          variableUpdates[docId] = UpdateType.update;
         }
       }
     }
@@ -950,21 +972,33 @@ class DataManager {
     final Map<String, UpdateType> conditionUpdates = {};
 
     // Check for deleted layouts.
-    for (final String layoutId in currentConditions.keys) {
-      if (!serverConditions.containsKey(layoutId)) {
-        conditionUpdates[layoutId] = UpdateType.delete;
+    // docID is can be either a layoutID or a canvasID.
+    // layoutID is for backward compatibility.
+    // conditions updates is layoutID -> UpdateType for published variables
+    // before layout group, but it would be canvasID -> UpdateType for published
+    // variables after layout group. So calling it docID to be more generic.
+    // TODO: rename docID to canvasID after layout group migration.
+    for (final String docId in currentConditions.keys) {
+      if (!serverConditions.containsKey(docId)) {
+        conditionUpdates[docId] = UpdateType.delete;
       }
     }
 
     // Check for added or updated layouts.
-    for (final String layoutId in serverConditions.keys) {
-      if (!currentConditions.containsKey(layoutId)) {
-        conditionUpdates[layoutId] = UpdateType.add;
+    // docID is can be either a layoutID or a canvasID.
+    // layoutID is for backward compatibility.
+    // conditions updates is layoutID -> UpdateType for published variables
+    // before layout group, but it would be canvasID -> UpdateType for published
+    // variables after layout group. So calling it docID to be more generic.
+    // TODO: rename docID to canvasID after layout group migration.
+    for (final String docId in serverConditions.keys) {
+      if (!currentConditions.containsKey(docId)) {
+        conditionUpdates[docId] = UpdateType.add;
       } else {
-        final DateTime lastUpdated = currentConditions[layoutId]!;
-        final DateTime newlyUpdated = serverConditions[layoutId]!;
+        final DateTime lastUpdated = currentConditions[docId]!;
+        final DateTime newlyUpdated = serverConditions[docId]!;
         if (newlyUpdated.isAfter(lastUpdated)) {
-          conditionUpdates[layoutId] = UpdateType.update;
+          conditionUpdates[docId] = UpdateType.update;
         }
       }
     }
@@ -1044,6 +1078,7 @@ class DataManager {
     // nothing else.
     if (auth == null) return model!.layouts.containsKey(layoutID);
 
+    // Process Layouts
     SDKPublishLayout? layout;
     if (model!.layouts.containsKey(layoutID)) {
       log('\tLayout [$layoutID] is already cached. Skipping download.');
@@ -1067,6 +1102,7 @@ class DataManager {
 
     assert(layout != null, 'Layout should not be null at this point.');
 
+    // Process APIs
     if (model.updates.layoutApis.containsKey(layoutID)) {
       log('\tLayout [$layoutID] has ${model.updates.layoutApis[layoutID]!.length} apis.');
       final Set<Future<HttpApiData?>> apiModels = getOrFetchApis(
@@ -1095,22 +1131,12 @@ class DataManager {
       log('\tLayout [$layoutID] has no apis.');
     }
 
-    if (model.updates.conditions.containsKey(layoutID)) {
-      // backward compatibility
-      try {
-        final SDKLayoutConditions? conditions =
-            await getOrFetchConditions(layoutID);
-        if (conditions != null) {
-          model.conditions[layoutID] = conditions;
-        }
-      } catch (e, stacktrace) {
-        logError(
-          'Error while fetching conditions',
-          error: e,
-          stackTrace: stacktrace,
-        );
-      }
-
+    // Process Variables
+    if (model.updates.variables.containsKey(layoutID)) {
+      log('\tLayout [$layoutID] has variables.');
+      // backward compatibility. Old layout structure. Layout contains only
+      // one canvas. So we need to fetch variables using layoutID.
+      // TODO: remove after migration
       try {
         final SDKLayoutVariables? variables =
             await getOrFetchVariables(layoutID);
@@ -1125,26 +1151,9 @@ class DataManager {
         );
       }
     } else {
+      // New layout group structure. Layout contains multiple canvases. So
+      // we need to fetch variables for each canvas and store it by canvasID.
       for (final canvasID in layout!.canvasIds) {
-        if (model.updates.conditions.containsKey(canvasID)) {
-          log('\tCanvas [$canvasID] has conditions.');
-          try {
-            final SDKLayoutConditions? conditions =
-                await getOrFetchConditions(canvasID);
-            if (conditions != null) {
-              model.conditions[canvasID] = conditions;
-            }
-          } catch (e, stacktrace) {
-            logError(
-              'Error while fetching conditions',
-              error: e,
-              stackTrace: stacktrace,
-            );
-          }
-        } else {
-          log('\tCanvas [$canvasID] has no conditions.');
-        }
-
         if (model.updates.variables.containsKey(canvasID)) {
           log('\tCanvas [$canvasID] has variables.');
           try {
@@ -1166,11 +1175,56 @@ class DataManager {
       }
     }
 
+    // Process Conditions
+    if (model.updates.conditions.containsKey(layoutID)) {
+      log('\tLayout [$layoutID] has conditions.');
+      // backward compatibility. Old layout structure. Layout contains only
+      // one canvas. So we need to fetch conditions using layoutID.
+      // TODO: remove after migration
+      try {
+        final SDKLayoutConditions? conditions =
+            await getOrFetchConditions(layoutID);
+        if (conditions != null) {
+          model.conditions[layoutID] = conditions;
+        }
+      } catch (e, stacktrace) {
+        logError(
+          'Error while fetching conditions',
+          error: e,
+          stackTrace: stacktrace,
+        );
+      }
+    } else {
+      // New layout group structure. Layout contains multiple canvases. So
+      // we need to fetch conditions for each canvas and store it by canvasID.
+      for (final canvasID in layout!.canvasIds) {
+        if (model.updates.conditions.containsKey(canvasID)) {
+          log('\tCanvas [$canvasID] has conditions.');
+          try {
+            final SDKLayoutConditions? conditions =
+                await getOrFetchConditions(canvasID);
+            if (conditions != null) {
+              model.conditions[canvasID] = conditions;
+            }
+          } catch (e, stacktrace) {
+            logError(
+              'Error while fetching conditions',
+              error: e,
+              stackTrace: stacktrace,
+            );
+          }
+        } else {
+          log('\tCanvas [$canvasID] has no conditions.');
+        }
+      }
+    }
+
     await emitPublishModel();
     savePublishModel();
 
     log('\tLayout [$layoutID] ready, time for fonts...');
 
+    // Process Fonts
     if (model.updates.layoutFonts.containsKey(layoutID)) {
       log('\tLayout [$layoutID] has ${model.updates.layoutFonts[layoutID]!.length} fonts.');
 
@@ -1344,6 +1398,11 @@ class DataManager {
     return apis;
   }
 
+  /// fetches conditions for a given docID.
+  /// [docID] can be either a layoutID or a canvasID.
+  /// For published layouts before layout group, it would be layoutID.
+  /// For published layouts after layout group, it would be canvasID.
+  // TODO: rename docID to canvasID after layout group migration.
   Future<SDKLayoutConditions?> getOrFetchConditions(String docID) {
     final AuthData? auth = authManager.authData;
 
@@ -1359,17 +1418,22 @@ class DataManager {
     );
   }
 
-  Future<SDKLayoutVariables?> getOrFetchVariables(String canvasID) {
+  /// fetches conditions for a given docID.
+  /// [docID] can be either a layoutID or a canvasID.
+  /// For published layouts before layout group, it would be layoutID.
+  /// For published layouts after layout group, it would be canvasID.
+  // TODO: rename docID to canvasID after layout group migration.
+  Future<SDKLayoutVariables?> getOrFetchVariables(String docID) {
     final AuthData? auth = authManager.authData;
 
-    final SDKLayoutVariables? variables = _publishModel?.variables[canvasID];
+    final SDKLayoutVariables? variables = _publishModel?.variables[docID];
     if (variables != null) return Future.value(variables);
 
     if (auth == null) return Future.value(null);
 
     return networkDataRepository.downloadLayoutVariables(
       projectID: auth.projectId,
-      docID: canvasID,
+      docID: docID,
       source: config.publishSource,
     );
   }
