@@ -160,10 +160,10 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         context.read<CodelesslyContext>();
     nodeRegistry.clear();
     nodeRegistry.setNodes(widget.layout.canvases[widget.canvasId]!);
-    codelesslyContext.nodeValues.clear();
     final List<BaseNode> allNodes = nodeRegistry.getNodes().values.toList();
 
     // Populate node values for nodes with internal values.
+    codelesslyContext.nodeValues.clear();
     final List<PropertyVariableMixin> nodesWithInternalValue = allNodes
         .whereType<ReactionMixin>()
         .where((node) => node.triggerTypes.contains(TriggerType.changed))
@@ -210,7 +210,11 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
                 ?.variables ??
             {};
 
-    codelesslyContext.variables.clear();
+    // Clear all the variables that are not api variables. We persist api
+    // variables across canvases from the same layout group so that the
+    // api request is not made again.
+    codelesslyContext.variables
+        .removeWhere((key, value) => !value.value.isApiVariable);
     for (final variable in variablesMap.values) {
       // Override default values of variables with values provided in data.
       final notifier = Observable(variable.copyWith(
@@ -262,11 +266,17 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
           ? ApiResponseVariableUtils.loading(api.url)
           : ApiResponseVariableUtils.idle(api.url);
 
-      final RuntimeVariableData variable = RuntimeVariableData(
-        name: variableName,
-        type: VariableType.map,
-        value: data,
-      );
+      final existingVariable =
+          codelesslyContext.variableNamesMap()[variableName];
+
+      final RuntimeVariableData variable =
+          existingVariable is RuntimeVariableData
+              ? existingVariable
+              : RuntimeVariableData(
+                  name: variableName,
+                  type: VariableType.map,
+                  value: data,
+                );
 
       // Override default values of variables with values provided in data.
       final notifier = Observable(variable);
