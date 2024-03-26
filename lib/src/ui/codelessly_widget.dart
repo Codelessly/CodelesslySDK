@@ -323,13 +323,22 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
     // Only run this if controller is initialized and everything is ready.
     // This shouldn't run for the first time, only when media query changes.
+    // That is because it depends on the data manager to load layouts first in
+    // order to determine the breakpoint and canvasID to use for the current
+    // screen size. This information is not available until the layout is
+    // loaded for the first time. Since didChangeDependencies runs before the
+    // build method, we can't rely on the data manager to have the layout loaded
+    // for the first time. This is why we set the canvasID in the build method
+    // for the first time the layout is loaded. For subsequent loads, we can
+    // rely on the data manager to have the layout loaded and we can determine
+    // the breakpoint and canvasID to use for the current screen size.
     // canvasId and effectiveLayoutID are set initially in the build method.
     if (_effectiveController.effectiveCodelessly.status == CStatus.loaded() &&
         _effectiveController.publishModel != null &&
         canvasID != null &&
         effectiveLayoutID != null) {
       // Get the canvas ID from layout group for the current screen size.
-      final newCanvasID = getCanvasIDForLayoutGroup(
+      final newCanvasID = _getCanvasIDForLayoutGroup(
           effectiveLayoutID, _effectiveController.publishModel!, screenSize);
 
       if (newCanvasID != canvasID) {
@@ -500,7 +509,12 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           // time the layout is loaded. For subsequent loads, the canvas ID is
           // set in the didChangeDependencies method.) e.g. when media query
           // changes.
-          canvasID ??= getCanvasIDForLayoutGroup(
+          // We do this so that the layout is reloaded when the media query
+          // changes resulting into a new breakpoint only from
+          // didChangeDependencies method since doing it here is not ideal
+          // since build method is called multiple times and we don't want to
+          // reload the layout multiple times.
+          canvasID ??= _getCanvasIDForLayoutGroup(
               effectiveLayoutID, model, MediaQuery.sizeOf(context));
 
           final layoutWidget = Material(
@@ -509,7 +523,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             child: CodelesslyLayoutBuilder(
               // This key is important to ensure that the layout is rebuilt
               // from scratch whenever the layout ID changes, not when the
-              // canvas ID changes.
+              // canvas ID changes. This is because when the layout ID changes,
+              // the controller changes too and everything is reinitialized. So
+              // it makes sense to rebuild the layout from scratch. However,
+              // when the canvas ID changes, we don't reinitialize the
+              // controller, only the widget needs to reload the layout,
+              // conditions, and variables which is done in the [loadLayout]
+              // method of the this widget. It uses the passed [canvasId] to
+              // reload necessary data for given canvas ID.
               key: ValueKey(effectiveLayoutID),
               controller: _effectiveController,
               layout: model.layouts[effectiveLayoutID]!,
@@ -621,7 +642,7 @@ class _NavigationBuilderState extends State<_NavigationBuilder> {
 /// Retrieves a canvas ID for a layout group based on the current screen size.
 /// Returns null if the layout group does not have a canvas for the current
 /// screen size or if the layout group does not exist.
-String? getCanvasIDForLayoutGroup(
+String? _getCanvasIDForLayoutGroup(
     String? layoutID, SDKPublishModel model, Size screenSize) {
   if (layoutID != null && model.layouts.containsKey(layoutID)) {
     final SDKPublishLayout? layout = model.layouts[layoutID];
