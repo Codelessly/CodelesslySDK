@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 import '../../codelessly_sdk.dart';
+import 'constants.dart';
 
 const Set<String> predefinedVariableNames = {
   'data',
@@ -316,7 +317,10 @@ String apiNameToVariableName(String name) {
   name =
       name.replaceAll(RegExp(r'\s+'), '_').replaceAll(RegExp(r'\W'), '').trim();
   final tokens = name.split(RegExp(r'_+'));
-  final sanitizedName = ['api', ...tokens.map((e) => e.capitalized)].join('');
+  final sanitizedName = [
+    SDKConstants.apiVariablePrefix,
+    ...tokens.map((e) => e.capitalized)
+  ].join('');
   return sanitizedName;
 }
 
