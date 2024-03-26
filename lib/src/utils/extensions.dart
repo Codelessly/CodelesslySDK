@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import '../../codelessly_sdk.dart';
 import '../transformers/utils/condition_evaluator.dart';
 import '../transformers/utils/condition_visitors.dart';
+import 'constants.dart';
 
 extension FABLocationHelper on FABLocation {
   FloatingActionButtonLocation toFloatingActionButtonLocation() {
@@ -1784,4 +1785,8 @@ extension LayoutGroupsExt on Map<String, List<Breakpoint>> {
     return map((key, value) =>
         MapEntry(key, value.map((breakpoint) => breakpoint.toJson()).toList()));
   }
+}
+
+extension VariableDataExt on VariableData {
+  bool get isApiVariable => name.startsWith(SDKConstants.apiVariablePrefix);
 }
