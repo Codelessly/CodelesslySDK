@@ -74,6 +74,10 @@ class CodelesslyLayoutBuilder extends StatefulWidget {
   /// The layout to build. The nodes list must be populated inside.
   final SDKPublishLayout layout;
 
+  /// The effective canvas id to build the layout from. This is the canvas id
+  /// that was determined for the current breakpoint by the [CodelesslyWidget].
+  /// We call [_CodelesslyLayoutBuilderState.loadLayout] when this changes
+  /// to reload data like conditions, variables, etc for the new canvas.
   final String canvasId;
 
   /// Returns a widget that decides how to load nested layouts of a rendered
