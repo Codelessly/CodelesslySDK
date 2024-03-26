@@ -319,17 +319,18 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final screenSize = MediaQuery.sizeOf(context);
 
     // Only run this if controller is initialized and everything is ready.
     // This shouldn't run for the first time, only when media query changes.
     // canvasId and effectiveLayoutID are set initially in the build method.
-    if (_effectiveController.didInitialize &&
+    if (_effectiveController.effectiveCodelessly.status == CStatus.loaded() &&
         _effectiveController.publishModel != null &&
         canvasID != null &&
         effectiveLayoutID != null) {
       // Get the canvas ID from layout group for the current screen size.
-      final newCanvasID = getCanvasIDForLayoutGroup(effectiveLayoutID,
-          _effectiveController.publishModel!, MediaQuery.sizeOf(context));
+      final newCanvasID = getCanvasIDForLayoutGroup(
+          effectiveLayoutID, _effectiveController.publishModel!, screenSize);
 
       if (newCanvasID != canvasID) {
         // Breakpoint changed. Everything needs to be reloaded.
