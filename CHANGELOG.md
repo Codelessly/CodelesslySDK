@@ -1,3 +1,7 @@
+## 1.5.0
+- Multi environment support. Use multiple Codelessly widgets simultaneously from different projects.
+- Update Google Fonts v6.2.1.
+
 ## 1.4.0
 - New StyleSheets support! Create reusable color and text styles.
 - Update GridView `childAlignment` property. Minor refactor.
