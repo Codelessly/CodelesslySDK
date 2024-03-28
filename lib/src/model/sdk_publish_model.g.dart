@@ -88,9 +88,8 @@ SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
       id: json['id'] as String,
       pageId: json['pageId'] as String,
       projectId: json['projectId'] as String,
-      canvases: const CanvasesMapConverter().fromJson(
-          SDKPublishLayout.nodesOrCanvasesReader(json, 'canvases')
-              as Map<String, dynamic>),
+      canvases: const CanvasesMapConverter()
+          .fromJson(json['canvases'] as Map<String, dynamic>),
       lastUpdated:
           const DateTimeConverter().fromJson(json['lastUpdated'] as int?),
       breakpoints: (json['breakpoints'] as List<dynamic>?)

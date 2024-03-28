@@ -203,7 +203,6 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     }
     final publishModel = context.read<Codelessly>().dataManager.publishModel!;
 
-    // Uses layout id for backwards compatibility.
     final Map<String, VariableData> variablesMap =
         publishModel.variables[widget.layout.id]?.variables[widget.canvasId] ??
             {};
@@ -221,7 +220,6 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
       codelesslyContext.variables[variable.id] = notifier;
     }
 
-    // Uses layout id for backwards compatibility.
     final conditions = publishModel
             .conditions[widget.layout.id]?.conditions[widget.canvasId] ??
         {};
