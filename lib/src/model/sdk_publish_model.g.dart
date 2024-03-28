@@ -238,8 +238,12 @@ Map<String, dynamic> _$SDKPublishUpdatesToJson(SDKPublishUpdates instance) {
 SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
       id: json['id'] as String,
       variables: (json['variables'] as Map).map(
-        (k, e) => MapEntry(k as String,
-            VariableData.fromJson(Map<String, dynamic>.from(e as Map))),
+        (k, e) => MapEntry(
+            k as String,
+            (e as Map).map(
+              (k, e) => MapEntry(k as String,
+                  VariableData.fromJson(Map<String, dynamic>.from(e as Map))),
+            )),
       ),
       owner: json['owner'] as String,
       editors:
@@ -268,7 +272,8 @@ Map<String, dynamic> _$SDKLayoutVariablesToJson(SDKLayoutVariables instance) {
 
   writeNotNull('public', instance.public, instance.public, false);
   val['id'] = instance.id;
-  val['variables'] = instance.variables.map((k, e) => MapEntry(k, e.toJson()));
+  val['variables'] = instance.variables
+      .map((k, e) => MapEntry(k, e.map((k, e) => MapEntry(k, e.toJson()))));
   return val;
 }
 
@@ -276,8 +281,12 @@ SDKLayoutConditions _$SDKLayoutConditionsFromJson(Map json) =>
     SDKLayoutConditions(
       id: json['id'] as String,
       conditions: (json['conditions'] as Map).map(
-        (k, e) => MapEntry(k as String,
-            BaseCondition.fromJson(Map<String, dynamic>.from(e as Map))),
+        (k, e) => MapEntry(
+            k as String,
+            (e as Map).map(
+              (k, e) => MapEntry(k as String,
+                  BaseCondition.fromJson(Map<String, dynamic>.from(e as Map))),
+            )),
       ),
       owner: json['owner'] as String,
       editors:
@@ -306,7 +315,7 @@ Map<String, dynamic> _$SDKLayoutConditionsToJson(SDKLayoutConditions instance) {
 
   writeNotNull('public', instance.public, instance.public, false);
   val['id'] = instance.id;
-  val['conditions'] =
-      instance.conditions.map((k, e) => MapEntry(k, e.toJson()));
+  val['conditions'] = instance.conditions
+      .map((k, e) => MapEntry(k, e.map((k, e) => MapEntry(k, e.toJson()))));
   return val;
 }

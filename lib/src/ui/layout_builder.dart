@@ -205,9 +205,7 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
 
     // Uses layout id for backwards compatibility.
     final Map<String, VariableData> variablesMap =
-        (publishModel.variables[widget.canvasId] ??
-                    publishModel.variables[widget.layout.id])
-                ?.variables ??
+        publishModel.variables[widget.layout.id]?.variables[widget.canvasId] ??
             {};
 
     // Clear all the variables that are not api variables. We persist api
@@ -224,9 +222,8 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     }
 
     // Uses layout id for backwards compatibility.
-    final conditions = (publishModel.conditions[widget.canvasId] ??
-                publishModel.conditions[widget.layout.id])
-            ?.conditions ??
+    final conditions = publishModel
+            .conditions[widget.layout.id]?.conditions[widget.canvasId] ??
         {};
     codelesslyContext.conditions.clear();
     codelesslyContext.conditions.addAll(conditions);

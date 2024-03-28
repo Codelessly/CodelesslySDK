@@ -471,11 +471,12 @@ class SDKPublishUpdates with EquatableMixin {
 /// A model that defines variables for a layout.
 @JsonSerializable()
 class SDKLayoutVariables extends PrivacyBase {
-  /// The id of the canvas. Can be layout id for backwards compatibility.
+  /// The id of the layout.
   final String id;
 
   /// The variables that are defined for this layout.
-  final Map<String, VariableData> variables;
+  /// CanvasID -> (VariableID -> VariableData)
+  final Map<String, Map<String, VariableData>> variables;
 
   /// Creates a new instance of [SDKLayoutVariables].
   const SDKLayoutVariables({
@@ -492,7 +493,7 @@ class SDKLayoutVariables extends PrivacyBase {
   /// copyWith
   SDKLayoutVariables copyWith({
     String? id,
-    Map<String, VariableData>? variables,
+    Map<String, Map<String, VariableData>>? variables,
     String? owner,
     Set<String>? editors,
     Set<String>? viewers,
@@ -524,11 +525,12 @@ class SDKLayoutVariables extends PrivacyBase {
 /// A model that defines variables for a layout.
 @JsonSerializable()
 class SDKLayoutConditions extends PrivacyBase {
-  /// The id of the canvas. Can be layout id for backwards compatibility.
+  /// The id of the layout.
   final String id;
 
   /// The conditions that are defined for this layout.
-  final Map<String, BaseCondition> conditions;
+  /// CanvasID -> (ConditionID -> ConditionData)
+  final Map<String, Map<String, BaseCondition>> conditions;
 
   /// Creates a new instance of [SDKLayoutConditions].
   const SDKLayoutConditions({
@@ -545,7 +547,7 @@ class SDKLayoutConditions extends PrivacyBase {
   /// copyWith
   SDKLayoutConditions copyWith({
     String? id,
-    Map<String, BaseCondition>? conditions,
+    Map<String, Map<String, BaseCondition>>? conditions,
     String? owner,
     Set<String>? editors,
     Set<String>? viewers,
