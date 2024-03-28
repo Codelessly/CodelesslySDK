@@ -134,8 +134,7 @@ class SDKPublishModel extends PrivacyBase {
   Map<String, dynamic> toJson() => _$SDKPublishModelToJson(this)
     ..remove('fonts')
     ..remove('layouts')
-    ..remove('apis')
-    ..remove('variables')..remove('conditions');
+    ..remove('apis')..remove('variables')..remove('conditions');
 
   /// Converts this instance to a JSON map.
   Map<String, dynamic> toFullJson() => _$SDKPublishModelToJson(this);
@@ -242,19 +241,17 @@ class SDKPublishLayout extends PrivacyBase {
   /// another [PrivacyBase].
   SDKPublishLayout.private({
     required this.id,
-    required this.canvasId,
     required this.pageId,
     required this.projectId,
-    required this.nodes,
+    required this.canvases,
     required this.lastUpdated,
-    this.version,
-    this.password,
-    this.subdomain,
-    this.breakpoint,
+    List<Breakpoint>? breakpoints,
 
     // Privacy
     required super.privacy,
-  }) : super.private();
+  })  : breakpoints = breakpoints ?? [],
+        canvasIds = canvases.keys.toSet(),
+        super.private();
 
   /// Returns true if the layout is expired.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -266,8 +263,8 @@ class SDKPublishLayout extends PrivacyBase {
 
   /// Converts this instance to a JSON map.
   @override
-  Map<String, dynamic> toJson() => _$SDKPublishLayoutToJson(this)
-    ..['canvasIds'] = canvases.keys.toList();
+  Map<String, dynamic> toJson() =>
+      _$SDKPublishLayoutToJson(this)..['canvasIds'] = canvases.keys.toList();
 
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishLayout copyWith({
