@@ -1099,9 +1099,6 @@ class DataManager {
     // Process Variables
     if (model.updates.variables.containsKey(layoutID)) {
       log('\tLayout [$layoutID] has variables.');
-      // backward compatibility. Old layout structure. Layout contains only
-      // one canvas. So we need to fetch variables using layoutID.
-      // TODO: remove after migration
       try {
         final SDKLayoutVariables? variables =
             await getOrFetchVariables(layoutID);
@@ -1122,9 +1119,6 @@ class DataManager {
     // Process Conditions
     if (model.updates.conditions.containsKey(layoutID)) {
       log('\tLayout [$layoutID] has conditions.');
-      // backward compatibility. Old layout structure. Layout contains only
-      // one canvas. So we need to fetch conditions using layoutID.
-      // TODO: remove after migration
       try {
         final SDKLayoutConditions? conditions =
             await getOrFetchConditions(layoutID);
