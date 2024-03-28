@@ -184,7 +184,6 @@ class SDKPublishLayout extends PrivacyBase {
   /// A list of the nodes that makes up this layout.
   /// CanvasID -> <NodeID -> Node>
   @CanvasesMapConverter()
-  @JsonKey(readValue: nodesOrCanvasesReader)
   final Map<String, Map<String, BaseNode>> canvases;
 
   final List<Breakpoint> breakpoints;
@@ -266,17 +265,6 @@ class SDKPublishLayout extends PrivacyBase {
         lastUpdated,
         breakpoints,
       ];
-
-  // For backwards compatibility
-  static Map<String, dynamic> nodesOrCanvasesReader(
-      Map<dynamic, dynamic> json, String key) {
-    if (json.containsKey('nodes') && json.containsKey('canvasId')) {
-      // backwards compatibility
-      return {json['canvasId']: json['nodes']};
-    }
-    assert(json.containsKey('canvases'));
-    return json[key];
-  }
 }
 
 /// Represents a single variation of a common font.
