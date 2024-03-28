@@ -47,7 +47,7 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
       directory: json['directory'] as String?,
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      roles: (PrivacyBase.readRole(json, 'roles') as Map).map(
+      roles: (json['roles'] as Map).map(
         (k, e) => MapEntry(k as String, $enumDecode(_$RoleEnumMap, e)),
       ),
       public: json['public'] as bool?,

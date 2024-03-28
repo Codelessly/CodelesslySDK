@@ -1,5 +1,4 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
 enum Role {
@@ -15,22 +14,11 @@ enum Role {
 /// Represents the privacy controls of a given model that this mixin
 /// is applied to.
 abstract class PrivacyBase with SerializableMixin, EquatableMixin {
-  /// Backwards compatibility for the old owner field.
-  static Object? readRole(Map<dynamic, dynamic> json, String? key) {
-    if (json.containsKey('owner')) {
-      return {
-        json['owner']: Role.owner.name,
-      };
-    }
-    return json[key];
-  }
-
   /// A set of user ids that are allowed to access the project in some way
   /// defined by the [roles] map.
   final Set<String> users;
 
   /// The roles of each user from the [users] set.
-  @JsonKey(readValue: readRole)
   final Map<String, Role> roles;
 
   /// The list of teams associated with a particular document.
@@ -66,11 +54,6 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
         users = users ?? const {},
         public = public ?? false;
 
-  // assert(
-  //   roles.containsValue(Role.owner),
-  //   'An owner must exist in the roles map.',
-  // );
-
   /// Creates a new [PrivacyBase] derived from another [PrivacyBase].
   PrivacyBase.private({required PrivacyBase privacy})
       : this(
@@ -79,6 +62,25 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
           roles: privacy.roles,
           public: privacy.public,
         );
+
+  /// While this PrivacyBase object is extended by other models, calling
+  /// toJson on those models will return data in addition to these core
+  /// privacy properties.
+  ///
+  /// This function, however, will only return the core privacy properties
+  /// by themselves. It's useful when you need to append these properties to
+  /// a map manually, e.g:
+  ///
+  /// dataWithPrivacy: {
+  ///   someKeys: someValues,
+  ///   ...privacyBase.toMinimalJson(),
+  /// }
+  Map<String, dynamic> toMinimalJson() => {
+        'users': users.toList(),
+        'roles': roles.map((key, value) => MapEntry(key, value.name)),
+        'teams': teams.toList(),
+        'public': public,
+      };
 
   @override
   List<Object?> get props => [users, roles, teams, public];
