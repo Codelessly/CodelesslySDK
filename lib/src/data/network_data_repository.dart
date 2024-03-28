@@ -121,21 +121,17 @@ abstract class NetworkDataRepository {
 
   /// Fetches the relevant [SDKPublishLayout] from the server based on the
   /// configurations of the implementation.
-  /// [docID] is the unique identifier of the document. It either can be the
-  /// layout ID (for backward compatibility) or the canvas ID.
   Future<SDKLayoutVariables?> downloadLayoutVariables({
     required String projectID,
-    required String docID,
+    required String layoutID,
     required PublishSource source,
   });
 
   /// Fetches the relevant [SDKPublishLayout] from the server based on the
   /// configurations of the implementation.
-  /// [docID] is the unique identifier of the document. It either can be the
-  /// layout ID (for backward compatibility) or the canvas ID.
   Future<SDKLayoutConditions?> downloadLayoutConditions({
     required String projectID,
-    required String docID,
+    required String layoutID,
     required PublishSource source,
   });
 

@@ -740,20 +740,14 @@ class DataManager {
       }
     }
 
-    // docID is can be either a layoutID or a canvasID.
-    // layoutID is for backward compatibility.
-    // [variableUpdates] is layoutID -> UpdateType for published variables
-    // before layout group, but it would be canvasID -> UpdateType for published
-    // variables after layout group. So calling it docID to be more generic.
-    // TODO: rename docID to canvasID after layout group migration.
-    for (final String docID in variableUpdates.keys) {
-      final UpdateType updateType = variableUpdates[docID]!;
+    for (final String layoutId in variableUpdates.keys) {
+      final UpdateType updateType = variableUpdates[layoutId]!;
 
       switch (updateType) {
         case UpdateType.delete:
-          localModel.variables.remove(docID);
+          localModel.variables.remove(layoutId);
           localDataRepository.deletePublishVariables(
-            docID: docID,
+            layoutID: layoutId,
             source: config.publishSource,
           );
         case UpdateType.add:
@@ -761,29 +755,23 @@ class DataManager {
           final SDKLayoutVariables? layoutVariables =
               await networkDataRepository.downloadLayoutVariables(
             projectID: authManager.authData!.projectId,
-            docID: docID,
+            layoutID: layoutId,
             source: config.publishSource,
           );
           if (layoutVariables != null) {
-            localModel.variables[docID] = layoutVariables;
+            localModel.variables[layoutId] = layoutVariables;
           }
       }
     }
 
-    // docID is can be either a layoutID or a canvasID.
-    // layoutID is for backward compatibility.
-    // [conditionUpdates] is layoutID -> UpdateType for published variables
-    // before layout group, but it would be canvasID -> UpdateType for published
-    // variables after layout group. So calling it docID to be more generic.
-    // TODO: rename docID to canvasID after layout group migration.
-    for (final String docID in conditionUpdates.keys) {
-      final UpdateType updateType = conditionUpdates[docID]!;
+    for (final String layoutID in conditionUpdates.keys) {
+      final UpdateType updateType = conditionUpdates[layoutID]!;
 
       switch (updateType) {
         case UpdateType.delete:
-          localModel.variables.remove(docID);
+          localModel.variables.remove(layoutID);
           localDataRepository.deletePublishConditions(
-            docID: docID,
+            layoutID: layoutID,
             source: config.publishSource,
           );
         case UpdateType.add:
@@ -791,11 +779,11 @@ class DataManager {
           final SDKLayoutConditions? layoutConditions =
               await networkDataRepository.downloadLayoutConditions(
             projectID: authManager.authData!.projectId,
-            docID: docID,
+            layoutID: layoutID,
             source: config.publishSource,
           );
           if (layoutConditions != null) {
-            localModel.conditions[docID] = layoutConditions;
+            localModel.conditions[layoutID] = layoutConditions;
           }
       }
     }
@@ -927,33 +915,22 @@ class DataManager {
     final Map<String, UpdateType> variableUpdates = {};
 
     // Check for deleted layouts.
-    // docID is can be either a layoutID or a canvasID.
-    // layoutID is for backward compatibility.
-    // variable updates is layoutID -> UpdateType for published variables
-    // before layout group, but it would be canvasID -> UpdateType for published
-    // variables after layout group. So calling it docID to be more generic.
-    // TODO: rename docID to canvasID after layout group migration.
-    for (final String docId in currentVariables.keys) {
-      if (!serverVariables.containsKey(docId)) {
-        variableUpdates[docId] = UpdateType.delete;
+    for (final String layoutID in currentVariables.keys) {
+      if (!serverVariables.containsKey(layoutID)) {
+        variableUpdates[layoutID] = UpdateType.delete;
       }
     }
 
     // Check for added or updated layouts.
-    // docID is can be either a layoutID or a canvasID.
-    // layoutID is for backward compatibility.
-    // variable updates is layoutID -> UpdateType for published variables
-    // before layout group, but it would be canvasID -> UpdateType for published
-    // variables after layout group. So calling it docID to be more generic.
-    // TODO: rename docID to canvasID after layout group migration.
-    for (final String docId in serverVariables.keys) {
-      if (!currentVariables.containsKey(docId)) {
-        variableUpdates[docId] = UpdateType.add;
+
+    for (final String layoutID in serverVariables.keys) {
+      if (!currentVariables.containsKey(layoutID)) {
+        variableUpdates[layoutID] = UpdateType.add;
       } else {
-        final DateTime lastUpdated = currentVariables[docId]!;
-        final DateTime newlyUpdated = serverVariables[docId]!;
+        final DateTime lastUpdated = currentVariables[layoutID]!;
+        final DateTime newlyUpdated = serverVariables[layoutID]!;
         if (newlyUpdated.isAfter(lastUpdated)) {
-          variableUpdates[docId] = UpdateType.update;
+          variableUpdates[layoutID] = UpdateType.update;
         }
       }
     }
@@ -972,33 +949,21 @@ class DataManager {
     final Map<String, UpdateType> conditionUpdates = {};
 
     // Check for deleted layouts.
-    // docID is can be either a layoutID or a canvasID.
-    // layoutID is for backward compatibility.
-    // conditions updates is layoutID -> UpdateType for published variables
-    // before layout group, but it would be canvasID -> UpdateType for published
-    // variables after layout group. So calling it docID to be more generic.
-    // TODO: rename docID to canvasID after layout group migration.
-    for (final String docId in currentConditions.keys) {
-      if (!serverConditions.containsKey(docId)) {
-        conditionUpdates[docId] = UpdateType.delete;
+    for (final String layoutID in currentConditions.keys) {
+      if (!serverConditions.containsKey(layoutID)) {
+        conditionUpdates[layoutID] = UpdateType.delete;
       }
     }
 
     // Check for added or updated layouts.
-    // docID is can be either a layoutID or a canvasID.
-    // layoutID is for backward compatibility.
-    // conditions updates is layoutID -> UpdateType for published variables
-    // before layout group, but it would be canvasID -> UpdateType for published
-    // variables after layout group. So calling it docID to be more generic.
-    // TODO: rename docID to canvasID after layout group migration.
-    for (final String docId in serverConditions.keys) {
-      if (!currentConditions.containsKey(docId)) {
-        conditionUpdates[docId] = UpdateType.add;
+    for (final String layoutID in serverConditions.keys) {
+      if (!currentConditions.containsKey(layoutID)) {
+        conditionUpdates[layoutID] = UpdateType.add;
       } else {
-        final DateTime lastUpdated = currentConditions[docId]!;
-        final DateTime newlyUpdated = serverConditions[docId]!;
+        final DateTime lastUpdated = currentConditions[layoutID]!;
+        final DateTime newlyUpdated = serverConditions[layoutID]!;
         if (newlyUpdated.isAfter(lastUpdated)) {
-          conditionUpdates[docId] = UpdateType.update;
+          conditionUpdates[layoutID] = UpdateType.update;
         }
       }
     }
@@ -1151,28 +1116,7 @@ class DataManager {
         );
       }
     } else {
-      // New layout group structure. Layout contains multiple canvases. So
-      // we need to fetch variables for each canvas and store it by canvasID.
-      for (final canvasID in layout!.canvasIds) {
-        if (model.updates.variables.containsKey(canvasID)) {
-          log('\tCanvas [$canvasID] has variables.');
-          try {
-            final SDKLayoutVariables? variables =
-                await getOrFetchVariables(canvasID);
-            if (variables != null) {
-              model.variables[canvasID] = variables;
-            }
-          } catch (e, stacktrace) {
-            logError(
-              'Error while fetching variables',
-              error: e,
-              stackTrace: stacktrace,
-            );
-          }
-        } else {
-          log('\tCanvas [$canvasID] has no variables.');
-        }
-      }
+      log('\Layout [$layoutID] has no variables.');
     }
 
     // Process Conditions
@@ -1195,28 +1139,7 @@ class DataManager {
         );
       }
     } else {
-      // New layout group structure. Layout contains multiple canvases. So
-      // we need to fetch conditions for each canvas and store it by canvasID.
-      for (final canvasID in layout!.canvasIds) {
-        if (model.updates.conditions.containsKey(canvasID)) {
-          log('\tCanvas [$canvasID] has conditions.');
-          try {
-            final SDKLayoutConditions? conditions =
-                await getOrFetchConditions(canvasID);
-            if (conditions != null) {
-              model.conditions[canvasID] = conditions;
-            }
-          } catch (e, stacktrace) {
-            logError(
-              'Error while fetching conditions',
-              error: e,
-              stackTrace: stacktrace,
-            );
-          }
-        } else {
-          log('\tCanvas [$canvasID] has no conditions.');
-        }
-      }
+      log('\tLayout [$layoutID] has no conditions.');
     }
 
     await emitPublishModel();
@@ -1398,42 +1321,34 @@ class DataManager {
     return apis;
   }
 
-  /// fetches conditions for a given docID.
-  /// [docID] can be either a layoutID or a canvasID.
-  /// For published layouts before layout group, it would be layoutID.
-  /// For published layouts after layout group, it would be canvasID.
-  // TODO: rename docID to canvasID after layout group migration.
-  Future<SDKLayoutConditions?> getOrFetchConditions(String docID) {
+  /// fetches conditions for a given layoutID.
+  Future<SDKLayoutConditions?> getOrFetchConditions(String layoutID) {
     final AuthData? auth = authManager.authData;
 
-    final SDKLayoutConditions? conditions = _publishModel?.conditions[docID];
+    final SDKLayoutConditions? conditions = _publishModel?.conditions[layoutID];
     if (conditions != null) return Future.value(conditions);
 
     if (auth == null) return Future.value(null);
 
     return networkDataRepository.downloadLayoutConditions(
       projectID: auth.projectId,
-      docID: docID,
+      layoutID: layoutID,
       source: config.publishSource,
     );
   }
 
-  /// fetches conditions for a given docID.
-  /// [docID] can be either a layoutID or a canvasID.
-  /// For published layouts before layout group, it would be layoutID.
-  /// For published layouts after layout group, it would be canvasID.
-  // TODO: rename docID to canvasID after layout group migration.
-  Future<SDKLayoutVariables?> getOrFetchVariables(String docID) {
+  /// fetches conditions for a given layoutID.
+  Future<SDKLayoutVariables?> getOrFetchVariables(String layoutID) {
     final AuthData? auth = authManager.authData;
 
-    final SDKLayoutVariables? variables = _publishModel?.variables[docID];
+    final SDKLayoutVariables? variables = _publishModel?.variables[layoutID];
     if (variables != null) return Future.value(variables);
 
     if (auth == null) return Future.value(null);
 
     return networkDataRepository.downloadLayoutVariables(
       projectID: auth.projectId,
-      docID: docID,
+      layoutID: layoutID,
       source: config.publishSource,
     );
   }
