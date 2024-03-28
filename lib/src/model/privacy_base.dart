@@ -75,9 +75,11 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
   ///   someKeys: someValues,
   ///   ...privacyBase.toMinimalJson(),
   /// }
-  Map<String, dynamic> toMinimalJson() => {
+  Map<String, dynamic> toMinimalPrivacyJson() => {
         'users': users.toList(),
-        'roles': roles.map((key, value) => MapEntry(key, value.name)),
+        'roles': {
+          for (final MapEntry(:key, :value) in roles.entries) key: value.name,
+        },
         'teams': teams.toList(),
         'public': public,
       };
