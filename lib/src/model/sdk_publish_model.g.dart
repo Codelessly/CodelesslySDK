@@ -37,20 +37,30 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
       entryLayoutId: json['entryLayoutId'] as String?,
       entryPageId: json['entryPageId'] as String?,
       entryCanvasId: json['entryCanvasId'] as String?,
-      owner: json['owner'] as String,
-      editors:
-          (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      viewers:
-          (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      public: json['public'] as bool? ?? false,
-      team: json['team'] as String?,
       lastUpdated:
           const DateTimeConverter().fromJson(json['lastUpdated'] as int?),
+      teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      roles: (json['roles'] as Map).map(
+        (k, e) => MapEntry(k as String, $enumDecode(_$RoleEnumMap, e)),
+      ),
+      public: json['public'] as bool?,
     );
 
 Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
   final val = <String, dynamic>{
-    'owner': instance.owner,
+    'users': instance.users.toList(),
+    'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
+    'teams': instance.teams.toList(),
+    'public': instance.public,
+    'projectId': instance.projectId,
+    'fonts': instance.fonts.map((k, e) => MapEntry(k, e.toJson())),
+    'layouts': instance.layouts.map((k, e) => MapEntry(k, e.toJson())),
+    'pages': instance.pages,
+    'updates': instance.updates.toJson(),
+    'apis': instance.apis.map((k, e) => MapEntry(k, e.toJson())),
+    'variables': instance.variables.map((k, e) => MapEntry(k, e.toJson())),
+    'conditions': instance.conditions.map((k, e) => MapEntry(k, e.toJson())),
   };
 
   void writeNotNull(
@@ -63,19 +73,6 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
     }
   }
 
-  writeNotNull('team', instance.team, instance.team, null);
-  val['editors'] = instance.editors.toList();
-  val['viewers'] = instance.viewers.toList();
-  writeNotNull('public', instance.public, instance.public, false);
-  val['projectId'] = instance.projectId;
-  val['fonts'] = instance.fonts.map((k, e) => MapEntry(k, e.toJson()));
-  val['layouts'] = instance.layouts.map((k, e) => MapEntry(k, e.toJson()));
-  val['pages'] = instance.pages;
-  val['updates'] = instance.updates.toJson();
-  val['apis'] = instance.apis.map((k, e) => MapEntry(k, e.toJson()));
-  val['variables'] = instance.variables.map((k, e) => MapEntry(k, e.toJson()));
-  val['conditions'] =
-      instance.conditions.map((k, e) => MapEntry(k, e.toJson()));
   writeNotNull(
       'entryLayoutId', instance.entryLayoutId, instance.entryLayoutId, null);
   writeNotNull('entryPageId', instance.entryPageId, instance.entryPageId, null);
@@ -85,6 +82,12 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
       const DateTimeConverter().toJson(instance.lastUpdated), null);
   return val;
 }
+
+const _$RoleEnumMap = {
+  Role.owner: 'owner',
+  Role.editor: 'editor',
+  Role.viewer: 'viewer',
+};
 
 SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
       id: json['id'] as String,
@@ -97,18 +100,25 @@ SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
       breakpoints: (json['breakpoints'] as List<dynamic>?)
           ?.map((e) => Breakpoint.fromJson(e as Map))
           .toList(),
-      owner: json['owner'] as String,
-      editors:
-          (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      viewers:
-          (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      public: json['public'] as bool? ?? false,
-      team: json['team'] as String?,
+      teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      roles: (json['roles'] as Map).map(
+        (k, e) => MapEntry(k as String, $enumDecode(_$RoleEnumMap, e)),
+      ),
+      public: json['public'] as bool?,
     );
 
 Map<String, dynamic> _$SDKPublishLayoutToJson(SDKPublishLayout instance) {
   final val = <String, dynamic>{
-    'owner': instance.owner,
+    'users': instance.users.toList(),
+    'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
+    'teams': instance.teams.toList(),
+    'public': instance.public,
+    'id': instance.id,
+    'pageId': instance.pageId,
+    'projectId': instance.projectId,
+    'canvases': const CanvasesMapConverter().toJson(instance.canvases),
+    'breakpoints': instance.breakpoints.map((e) => e.toJson()).toList(),
   };
 
   void writeNotNull(
@@ -121,15 +131,6 @@ Map<String, dynamic> _$SDKPublishLayoutToJson(SDKPublishLayout instance) {
     }
   }
 
-  writeNotNull('team', instance.team, instance.team, null);
-  val['editors'] = instance.editors.toList();
-  val['viewers'] = instance.viewers.toList();
-  writeNotNull('public', instance.public, instance.public, false);
-  val['id'] = instance.id;
-  val['pageId'] = instance.pageId;
-  val['projectId'] = instance.projectId;
-  val['canvases'] = const CanvasesMapConverter().toJson(instance.canvases);
-  val['breakpoints'] = instance.breakpoints.map((e) => e.toJson()).toList();
   writeNotNull('lastUpdated', instance.lastUpdated,
       const DateTimeConverter().toJson(instance.lastUpdated), null);
   return val;
@@ -141,18 +142,24 @@ SDKPublishFont _$SDKPublishFontFromJson(Map json) => SDKPublishFont(
       family: json['family'] as String,
       weight: json['weight'] as String,
       style: json['style'] as String?,
-      owner: json['owner'] as String,
-      editors:
-          (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      viewers:
-          (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      public: json['public'] as bool? ?? false,
-      team: json['team'] as String?,
+      teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      roles: (json['roles'] as Map).map(
+        (k, e) => MapEntry(k as String, $enumDecode(_$RoleEnumMap, e)),
+      ),
+      public: json['public'] as bool?,
     );
 
 Map<String, dynamic> _$SDKPublishFontToJson(SDKPublishFont instance) {
   final val = <String, dynamic>{
-    'owner': instance.owner,
+    'users': instance.users.toList(),
+    'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
+    'teams': instance.teams.toList(),
+    'public': instance.public,
+    'id': instance.id,
+    'url': instance.url,
+    'family': instance.family,
+    'weight': instance.weight,
   };
 
   void writeNotNull(
@@ -165,14 +172,6 @@ Map<String, dynamic> _$SDKPublishFontToJson(SDKPublishFont instance) {
     }
   }
 
-  writeNotNull('team', instance.team, instance.team, null);
-  val['editors'] = instance.editors.toList();
-  val['viewers'] = instance.viewers.toList();
-  writeNotNull('public', instance.public, instance.public, false);
-  val['id'] = instance.id;
-  val['url'] = instance.url;
-  val['family'] = instance.family;
-  val['weight'] = instance.weight;
   writeNotNull('style', instance.style, instance.style, null);
   return val;
 }
@@ -250,39 +249,24 @@ SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
                   VariableData.fromJson(Map<String, dynamic>.from(e as Map))),
             )),
       ),
-      owner: json['owner'] as String,
-      editors:
-          (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      viewers:
-          (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      public: json['public'] as bool? ?? false,
-      team: json['team'] as String?,
+      teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      roles: (json['roles'] as Map).map(
+        (k, e) => MapEntry(k as String, $enumDecode(_$RoleEnumMap, e)),
+      ),
+      public: json['public'] as bool?,
     );
 
-Map<String, dynamic> _$SDKLayoutVariablesToJson(SDKLayoutVariables instance) {
-  final val = <String, dynamic>{
-    'owner': instance.owner,
-  };
-
-  void writeNotNull(
-      String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize =
-        shouldSerialize(key, value, jsonValue, defaultValue, true);
-
-    if (serialize) {
-      val[key] = jsonValue;
-    }
-  }
-
-  writeNotNull('team', instance.team, instance.team, null);
-  val['editors'] = instance.editors.toList();
-  val['viewers'] = instance.viewers.toList();
-  writeNotNull('public', instance.public, instance.public, false);
-  val['id'] = instance.id;
-  val['variables'] = instance.variables
-      .map((k, e) => MapEntry(k, e.map((k, e) => MapEntry(k, e.toJson()))));
-  return val;
-}
+Map<String, dynamic> _$SDKLayoutVariablesToJson(SDKLayoutVariables instance) =>
+    <String, dynamic>{
+      'users': instance.users.toList(),
+      'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
+      'teams': instance.teams.toList(),
+      'public': instance.public,
+      'id': instance.id,
+      'variables': instance.variables
+          .map((k, e) => MapEntry(k, e.map((k, e) => MapEntry(k, e.toJson())))),
+    };
 
 SDKLayoutConditions _$SDKLayoutConditionsFromJson(Map json) =>
     SDKLayoutConditions(
@@ -295,36 +279,22 @@ SDKLayoutConditions _$SDKLayoutConditionsFromJson(Map json) =>
                   BaseCondition.fromJson(Map<String, dynamic>.from(e as Map))),
             )),
       ),
-      owner: json['owner'] as String,
-      editors:
-          (json['editors'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      viewers:
-          (json['viewers'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      public: json['public'] as bool? ?? false,
-      team: json['team'] as String?,
+      teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+      roles: (json['roles'] as Map).map(
+        (k, e) => MapEntry(k as String, $enumDecode(_$RoleEnumMap, e)),
+      ),
+      public: json['public'] as bool?,
     );
 
-Map<String, dynamic> _$SDKLayoutConditionsToJson(SDKLayoutConditions instance) {
-  final val = <String, dynamic>{
-    'owner': instance.owner,
-  };
-
-  void writeNotNull(
-      String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize =
-        shouldSerialize(key, value, jsonValue, defaultValue, true);
-
-    if (serialize) {
-      val[key] = jsonValue;
-    }
-  }
-
-  writeNotNull('team', instance.team, instance.team, null);
-  val['editors'] = instance.editors.toList();
-  val['viewers'] = instance.viewers.toList();
-  writeNotNull('public', instance.public, instance.public, false);
-  val['id'] = instance.id;
-  val['conditions'] = instance.conditions
-      .map((k, e) => MapEntry(k, e.map((k, e) => MapEntry(k, e.toJson()))));
-  return val;
-}
+Map<String, dynamic> _$SDKLayoutConditionsToJson(
+        SDKLayoutConditions instance) =>
+    <String, dynamic>{
+      'users': instance.users.toList(),
+      'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
+      'teams': instance.teams.toList(),
+      'public': instance.public,
+      'id': instance.id,
+      'conditions': instance.conditions
+          .map((k, e) => MapEntry(k, e.map((k, e) => MapEntry(k, e.toJson())))),
+    };
