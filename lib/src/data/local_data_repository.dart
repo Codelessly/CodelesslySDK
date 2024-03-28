@@ -84,14 +84,14 @@ class LocalDataRepository {
 
   /// Deletes a given api associated with a [apiId] from the cache.
   void deletePublishVariables({
-    required String docID,
+    required String layoutID,
     required PublishSource source,
   }) =>
       cacheManager.delete(source.variablesCacheKey);
 
   /// Deletes a given api associated with a [apiId] from the cache.
   void deletePublishConditions({
-    required String docID,
+    required String layoutID,
     required PublishSource source,
   }) =>
       cacheManager.delete(source.conditionsCacheKey);

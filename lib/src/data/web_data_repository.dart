@@ -162,7 +162,7 @@ class WebDataRepository extends NetworkDataRepository {
   @override
   Future<SDKLayoutVariables?> downloadLayoutVariables({
     required String projectID,
-    required String docID,
+    required String layoutID,
     required PublishSource source,
   }) async {
     try {
@@ -172,7 +172,7 @@ class WebDataRepository extends NetworkDataRepository {
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
-          'docID': docID,
+          'layoutID': layoutID,
           'source': source.serverPath,
         }),
         encoding: utf8,
@@ -189,7 +189,7 @@ class WebDataRepository extends NetworkDataRepository {
       }
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
       final SDKLayoutVariables variables =
-          SDKLayoutVariables.fromJson({...modelDoc, 'id': docID});
+          SDKLayoutVariables.fromJson({...modelDoc, 'id': layoutID});
 
       return variables;
     } catch (e, stacktrace) {
@@ -202,10 +202,10 @@ class WebDataRepository extends NetworkDataRepository {
   @override
   Future<SDKLayoutConditions?> downloadLayoutConditions({
     required String projectID,
-    required String docID,
+    required String layoutID,
     required PublishSource source,
   }) async {
-    log('[WebDataRepo] Downloading conditions for $docID');
+    log('[WebDataRepo] Downloading conditions for $layoutID');
     try {
       final Response result = await post(
         Uri.parse(
@@ -213,7 +213,7 @@ class WebDataRepository extends NetworkDataRepository {
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
-          'docID': docID,
+          'layoutID': layoutID,
           'source': source.serverPath,
         }),
         encoding: utf8,
@@ -230,13 +230,13 @@ class WebDataRepository extends NetworkDataRepository {
       }
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
       final SDKLayoutConditions conditions =
-          SDKLayoutConditions.fromJson({...modelDoc, 'id': docID});
+          SDKLayoutConditions.fromJson({...modelDoc, 'id': layoutID});
 
       log('[WebDataRepo] Layout Conditions [${conditions.id}]: ${conditions.conditions.length}');
 
       return conditions;
     } catch (e, stacktrace) {
-      log('[WebDataRepo] Error downloading conditions for $docID');
+      log('[WebDataRepo] Error downloading conditions for $layoutID');
       print(e);
       print(stacktrace);
       return null;
