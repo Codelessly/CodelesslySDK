@@ -69,7 +69,7 @@ class AssetModel with EquatableMixin {
       _$AssetModelFromJson(json);
 
   /// Converts this asset model to a json map.
-  Map<String, dynamic> toJson() => _$AssetModelToJson(this);
+  Map<String, dynamic> toJson() => _$AssetModelToJson(this)..remove('id');
 
   @override
   List<Object?> get props => [
