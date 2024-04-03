@@ -9,6 +9,12 @@ enum Role {
   final String label;
 
   const Role(this.label);
+
+  String get article => switch (this) {
+        owner => 'an',
+        editor => 'an',
+        viewer => 'a',
+      };
 }
 
 /// Represents the privacy controls of a given model that this mixin
