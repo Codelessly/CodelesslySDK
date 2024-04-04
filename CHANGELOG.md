@@ -1,3 +1,7 @@
+## 1.6.0
+- Initial CloudUI support for Layout Groups.
+  - Display different layouts for different screen sizes.
+
 ## 1.5.0
 - Multi environment support. Use multiple Codelessly widgets simultaneously from different projects.
 - Update Google Fonts v6.2.1.
