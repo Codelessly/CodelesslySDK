@@ -101,10 +101,22 @@ class CodelesslyErrorScreen extends StatelessWidget {
             child: SingleChildScrollView(
               primary: false,
               padding: EdgeInsets.zero,
-              child: SelectableText(
-                message,
-                textAlign: TextAlign.left,
-                style: Theme.of(context).textTheme.bodyMedium,
+              child: SelectionArea(
+                child: Column(
+                  children: [
+                    Text(
+                      message,
+                      textAlign: TextAlign.left,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    if (exception case CodelesslyException ex)
+                      Text(
+                        ex.originalException.toString(),
+                        textAlign: TextAlign.left,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
