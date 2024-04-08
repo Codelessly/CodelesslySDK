@@ -11,10 +11,52 @@ enum Role {
   const Role(this.label);
 
   String get article => switch (this) {
-        owner => 'an',
-        editor => 'an',
+        owner || editor => 'an',
         viewer => 'a',
       };
+
+  /// ----------------- POWER HIERARCHY -----------------
+
+  bool isHigherLevelThan(Role other) => switch (this) {
+        owner => other != owner,
+        editor => other == viewer,
+        viewer => false,
+      };
+
+  bool isHigherOrEqualLevelThan(Role other) =>
+      isHigherLevelThan(other) || this == other;
+
+  bool isLowerLevelThan(Role other) => !isHigherLevelThan(other);
+
+  bool isLowerOrEqualLevelThan(Role other) =>
+      isLowerLevelThan(other) || this == other;
+
+  bool get isLowestLevel => this == viewer;
+
+  bool get isHighestLevel => this == owner;
+
+  /// ----------------- PERMISSIONS -----------------
+
+  /// Only owners can modify project metadata.
+  bool get canManageProject => switch (this) {
+        owner => true,
+        editor || viewer => false,
+      };
+
+  /// Only owners and editors can edit projects.
+  bool get canEditProject => switch (this) {
+        owner || editor => true,
+        viewer => false,
+      };
+
+  /// Only owners and editors can manage team members.
+  bool get canManageTeam => switch (this) {
+        owner || editor => true,
+        viewer => false,
+      };
+
+  /// Anyone can manage project members.
+  bool get canManageProjectMembers => true;
 }
 
 /// Represents the privacy controls of a given model that this mixin
@@ -36,7 +78,8 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
 
   /// An owner ID must always exist in the roles map. It's an error
   /// if it doesn't.
-  String get owner => roles.keys.firstWhere((id) => roles[id] == Role.owner);
+  Set<String> get owners =>
+      roles.keys.where((id) => roles[id] == Role.owner).toSet();
 
   /// A list of user ids that are editors of this object.
   List<String> get editors => roles.entries

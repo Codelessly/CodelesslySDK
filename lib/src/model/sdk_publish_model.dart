@@ -296,7 +296,6 @@ class SDKPublishLayout extends PrivacyBase {
         id,
         pageId,
         projectId,
-        owner,
         canvases,
         lastUpdated,
         breakpoints,
@@ -393,7 +392,6 @@ class SDKPublishFont extends PrivacyBase {
   List<Object?> get props => [
         ...super.props,
         url,
-        owner,
         family,
         weight,
         style,
@@ -550,7 +548,7 @@ class SDKLayoutVariables extends PrivacyBase {
   }
 
   @override
-  List<Object?> get props => [...super.props, id, owner, variables];
+  List<Object?> get props => [...super.props, id, variables];
 
   /// Creates a new instance of [SDKLayoutVariables] from a JSON map.
   factory SDKLayoutVariables.fromJson(Map<String, dynamic> json) =>
