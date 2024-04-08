@@ -1,20 +1,18 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
-import 'package:equatable/equatable.dart';
+
+import '../../codelessly_sdk.dart';
 
 part 'auth_data.g.dart';
 
 /// Holds data returned from the server after a successful handshake.
 @JsonSerializable()
-class AuthData with EquatableMixin {
+class AuthData extends PrivacyBase {
   /// The authentication token used to authenticate this client.
   final String authToken;
 
   /// The project id of the project.
   final String projectId;
-
-  /// The owner id of the project.
-  final String ownerId;
 
   /// Whether the project is published as template or not.
   final bool isTemplate;
@@ -29,23 +27,40 @@ class AuthData with EquatableMixin {
   const AuthData({
     required this.authToken,
     required this.projectId,
-    required this.ownerId,
     required this.timestamp,
     this.isTemplate = false,
-  });
+
+    // Privacy
+    required super.teams,
+    required super.users,
+    required super.roles,
+    Map<String, Role>? invitations,
+  }) : super(public: true);
+
+  AuthData.private({
+    required this.authToken,
+    required this.projectId,
+    required this.timestamp,
+    this.isTemplate = false,
+
+    // Privacy
+    required super.privacy,
+    required Map<String, Role>? invitations,
+  }) : super.private();
 
   /// Converts a JSON map to an [AuthData] instance.
   factory AuthData.fromJson(Map<String, dynamic> json) =>
       _$AuthDataFromJson(json);
 
   /// Converts an [AuthData] instance to a JSON map.
+  @override
   Map<String, dynamic> toJson() => _$AuthDataToJson(this);
 
   @override
   List<Object?> get props => [
+        ...super.props,
         authToken,
         projectId,
-        ownerId,
         timestamp,
         isTemplate,
       ];
