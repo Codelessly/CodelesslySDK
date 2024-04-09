@@ -6,13 +6,11 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../codelessly_sdk.dart';
-
 part 'custom_component.g.dart';
 
 /// A model to hold custom component data.
 @JsonSerializable()
-class CustomComponent extends PrivacyBase {
+class CustomComponent with EquatableMixin, SerializableMixin {
   /// Unique identifier for the component.
   final String id;
 
@@ -41,27 +39,7 @@ class CustomComponent extends PrivacyBase {
     DateTime? createdAt,
     this.previewUrl,
     this.blurhash = '',
-
-    // Privacy
-    required super.teams,
-    required super.users,
-    required super.roles,
-    required super.public,
-    Map<String, Role>? invitations,
   }) : createdAt = createdAt ?? DateTime.now();
-
-  CustomComponent.private({
-    required this.id,
-    this.name = '',
-    required this.data,
-    DateTime? createdAt,
-    this.previewUrl,
-    this.blurhash = '',
-
-    // Privacy
-    required super.privacy,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        super.private();
 
   /// Duplicate this [CustomComponent] instance with the given data overrides.
   CustomComponent copyWith({
@@ -71,16 +49,14 @@ class CustomComponent extends PrivacyBase {
     bool? deleted,
     String? previewUrl,
     String? blurhash,
-    PrivacyBase? privacy,
   }) =>
-      CustomComponent.private(
+      CustomComponent(
         id: id ?? this.id,
         name: name ?? this.name,
         data: data ?? this.data,
         createdAt: DateTime.now(),
         previewUrl: previewUrl ?? this.previewUrl,
         blurhash: blurhash ?? this.blurhash,
-        privacy: privacy ?? this,
       );
 
   /// Factory constructor for creating a new instance of this class from
@@ -93,7 +69,6 @@ class CustomComponent extends PrivacyBase {
 
   @override
   List<Object?> get props => [
-        ...super.props,
         id,
         name,
         data,

@@ -14,20 +14,10 @@ CustomComponent _$CustomComponentFromJson(Map json) => CustomComponent(
       createdAt: const DateTimeConverter().fromJson(json['createdAt'] as int?),
       previewUrl: json['previewUrl'] as String?,
       blurhash: json['blurhash'] as String? ?? '',
-      teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      roles: (json['roles'] as Map).map(
-        (k, e) => MapEntry(k as String, $enumDecode(_$RoleEnumMap, e)),
-      ),
-      public: json['public'] as bool?,
     );
 
 Map<String, dynamic> _$CustomComponentToJson(CustomComponent instance) {
   final val = <String, dynamic>{
-    'users': instance.users.toList(),
-    'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
-    'teams': instance.teams.toList(),
-    'public': instance.public,
     'id': instance.id,
   };
 
@@ -49,12 +39,6 @@ Map<String, dynamic> _$CustomComponentToJson(CustomComponent instance) {
   writeNotNull('blurhash', instance.blurhash, instance.blurhash, '');
   return val;
 }
-
-const _$RoleEnumMap = {
-  Role.owner: 'owner',
-  Role.editor: 'editor',
-  Role.viewer: 'viewer',
-};
 
 ComponentData _$ComponentDataFromJson(Map json) => ComponentData(
       width: (json['width'] as num).toDouble(),
