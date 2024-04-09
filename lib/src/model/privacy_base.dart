@@ -2,7 +2,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:equatable/equatable.dart';
 
 enum Role {
-  owner('Owner'),
+  owner('Admin'),
   editor('Editor'),
   viewer('Viewer');
 
