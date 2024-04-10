@@ -71,9 +71,10 @@ class HttpApiData extends PrivacyBase {
   bool isDraft;
   @DateTimeConverter()
   final DateTime created;
-  final String? directory;
+  final String directory;
 
   HttpApiData({
+    required this.directory,
     this.method = HttpMethod.get,
     this.url = '',
     this.headers = const <HttpKeyValuePair>[],
@@ -90,7 +91,6 @@ class HttpApiData extends PrivacyBase {
     this.requestBodyContentType = RequestBodyTextType.json,
     this.isDraft = false,
     DateTime? created,
-    this.directory,
 
     // Privacy
     required super.teams,
@@ -102,6 +102,7 @@ class HttpApiData extends PrivacyBase {
         created = created ?? DateTime.now();
 
   HttpApiData.private({
+    required this.directory,
     this.method = HttpMethod.get,
     this.url = '',
     this.headers = const <HttpKeyValuePair>[],
@@ -118,7 +119,6 @@ class HttpApiData extends PrivacyBase {
     this.requestBodyContentType = RequestBodyTextType.json,
     this.isDraft = false,
     DateTime? created,
-    this.directory,
 
     // Privacy
     required super.privacy,
@@ -166,7 +166,7 @@ class HttpApiData extends PrivacyBase {
         created: created ?? this.created,
         bodyType: bodyType ?? this.bodyType,
         isDraft: isDraft ?? this.isDraft,
-        directory: forceDirectory ? directory : directory ?? this.directory,
+        directory: directory ?? this.directory,
         requestBodyContentType:
             requestBodyContentType ?? this.requestBodyContentType,
         privacy: privacy ?? this,
@@ -179,7 +179,7 @@ class HttpApiData extends PrivacyBase {
   Map<String, dynamic> toJson() => _$HttpApiDataToJson(this);
 
   @override
-  List<Object?> get props => [id];
+  List<Object?> get props => [...super.props, id];
 }
 
 @JsonSerializable()
