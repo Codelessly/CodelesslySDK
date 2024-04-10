@@ -7,6 +7,7 @@ part of 'model_http_request.dart';
 // **************************************************************************
 
 HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
+      directory: json['directory'] as String,
       method: $enumDecodeNullable(_$HttpMethodEnumMap, json['method']) ??
           HttpMethod.get,
       url: json['url'] as String? ?? '',
@@ -44,7 +45,6 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
               _$RequestBodyTextTypeEnumMap, json['requestBodyContentType']) ??
           RequestBodyTextType.json,
       created: const DateTimeConverter().fromJson(json['created'] as int?),
-      directory: json['directory'] as String?,
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
@@ -107,7 +107,7 @@ Map<String, dynamic> _$HttpApiDataToJson(HttpApiData instance) {
       instance.variables.map((e) => e.toJson()).toList(), const []);
   writeNotNull('created', instance.created,
       const DateTimeConverter().toJson(instance.created), null);
-  writeNotNull('directory', instance.directory, instance.directory, null);
+  val['directory'] = instance.directory;
   return val;
 }
 
