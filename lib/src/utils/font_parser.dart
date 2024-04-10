@@ -4,6 +4,8 @@ import 'dart:typed_data';
 
 import 'package:codelessly_api/codelessly_api.dart';
 
+import '../model/font_family.dart';
+
 void main(List<String> args) {
   final file = File(args[0]);
   final result = FontParser.parse(file.readAsBytesSync());
