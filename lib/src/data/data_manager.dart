@@ -1113,7 +1113,7 @@ class DataManager {
         );
       }
     } else {
-      log('\Layout [$layoutID] has no variables.');
+      log('Layout [$layoutID] has no variables.');
     }
 
     // Process Conditions
