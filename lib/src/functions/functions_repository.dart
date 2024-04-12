@@ -876,6 +876,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     for (final reaction in filteredReactions) {
       // ignore: use_build_context_synchronously
+      if (!context.mounted) continue;
       final future = FunctionsRepository.performAction(
         context,
         reaction.action,
