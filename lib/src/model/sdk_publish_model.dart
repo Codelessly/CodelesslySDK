@@ -134,7 +134,9 @@ class SDKPublishModel extends PrivacyBase {
   Map<String, dynamic> toJson() => _$SDKPublishModelToJson(this)
     ..remove('fonts')
     ..remove('layouts')
-    ..remove('apis')..remove('variables')..remove('conditions');
+    ..remove('apis')
+    ..remove('variables')
+    ..remove('conditions');
 
   /// Converts this instance to a JSON map.
   Map<String, dynamic> toFullJson() => _$SDKPublishModelToJson(this);
