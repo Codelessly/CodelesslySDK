@@ -1,3 +1,6 @@
+## 1.7.0
+- Teams v1 support.
+
 ## 1.6.0
 - Initial CloudUI support for Layout Groups.
   - Display different layouts for different screen sizes.
