@@ -78,50 +78,53 @@ class CodelesslyErrorScreen extends StatelessWidget {
       message =
           'An unexpected error happened!${exception != null ? '\n$exception' : ''}';
     }
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Uh oh!',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 16),
-          if (title != null) ...[
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
             Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium,
+              'Uh oh!',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-          ],
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 500),
-            child: SingleChildScrollView(
-              primary: false,
-              padding: EdgeInsets.zero,
-              child: SelectionArea(
-                child: Column(
-                  children: [
-                    Text(
-                      message,
-                      textAlign: TextAlign.left,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    if (exception case CodelesslyException ex)
-                      if (ex.originalException != null)
-                        Text(
-                          ex.originalException.toString(),
-                          textAlign: TextAlign.left,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                  ],
+            if (title != null) ...[
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 16),
+            ],
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              constraints: const BoxConstraints(maxWidth: 500, maxHeight: 500),
+              child: SingleChildScrollView(
+                primary: false,
+                padding: EdgeInsets.zero,
+                child: SelectionArea(
+                  child: Column(
+                    children: [
+                      Text(
+                        message,
+                        textAlign: TextAlign.left,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      if (exception case CodelesslyException ex)
+                        if (ex.originalException != null)
+                          Text(
+                            ex.originalException.toString(),
+                            textAlign: TextAlign.left,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
