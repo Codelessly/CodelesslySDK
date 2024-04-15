@@ -321,7 +321,8 @@ class CodelesslyAuthManager extends AuthManager {
         _authStreamController.add(_authData);
         await cacheManager.delete(authCacheKey);
         log('Failed to authenticate token.');
-        return;
+
+        throw CodelesslyException.notAuthenticated();
       }
     } on CodelesslyException {
       rethrow;

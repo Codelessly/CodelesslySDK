@@ -17,7 +17,7 @@ class CodelesslyErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!publishSource.isPreview) return const SizedBox.shrink();
+    // if (!publishSource.isPreview) return const SizedBox.shrink();
 
     final String message;
     String? title;
@@ -110,11 +110,12 @@ class CodelesslyErrorScreen extends StatelessWidget {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     if (exception case CodelesslyException ex)
-                      Text(
-                        ex.originalException.toString(),
-                        textAlign: TextAlign.left,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
+                      if (ex.originalException != null)
+                        Text(
+                          ex.originalException.toString(),
+                          textAlign: TextAlign.left,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
                   ],
                 ),
               ),
