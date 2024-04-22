@@ -345,7 +345,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         // Breakpoint changed. Everything needs to be reloaded.
         canvasID = newCanvasID;
         final breakpoint = _effectiveController
-            .publishModel!.layouts[effectiveLayoutID]!.breakpoints
+            .publishModel!.layouts[effectiveLayoutID!]!.breakpoints
             .firstWhere((breakpoint) => breakpoint.nodeId == canvasID);
 
         // Notify breakpoints listeners.
@@ -500,7 +500,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                 );
           }
 
-          if (!model.layouts.containsKey(effectiveLayoutID)) {
+          if (!model.layouts.containsKey(effectiveLayoutID!)) {
             return _effectiveLoadingBuilder?.call(context) ??
                 const CodelesslyLoadingScreen();
           }
@@ -533,7 +533,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
               // reload necessary data for given canvas ID.
               key: ValueKey(effectiveLayoutID),
               controller: _effectiveController,
-              layout: model.layouts[effectiveLayoutID]!,
+              layout: model.layouts[effectiveLayoutID!]!,
               // ID of the canvas to load for current breakpoint.
               canvasId: canvasID!,
               layoutRetrievalBuilder: _effectiveLayoutRetrieverBuilder,

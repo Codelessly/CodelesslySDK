@@ -9,6 +9,61 @@ import 'privacy_base.dart';
 
 part 'sdk_publish_model.g.dart';
 
+/// A record typedef that holds a lookup map and a data map.
+/// This is used to create a [LookupMap] extension type.
+///
+/// The [lookupMap] is a map that maps a custom id to the original id.
+/// The [dataMap] is the actual data map that holds the data.
+typedef LookupMapRecord<T> = ({
+  Map<String, String> lookupMap,
+  Map<String, T> dataMap
+});
+
+/// An extension type that allows for automatic correction of custom ids to
+/// the original id.
+///
+/// This is used to automatically correct the id when accessing the data.
+class LookupMap<T> {
+  final LookupMapRecord<T> value;
+
+  LookupMap(this.value);
+
+  /// Takes a [key] and outputs either itself or the looked-up key associated
+  /// by the [value.lookupMap].
+  String correctedKey(String key) => value.lookupMap[key] ?? key;
+
+  /// Returns the data associated with the corrected key.
+  T? operator [](String key) => value.dataMap[correctedKey(key)];
+
+  /// Sets the data associated with the corrected key.
+  operator []=(String key, T data) => value.dataMap[correctedKey(key)] = data;
+
+  /// Removes the data associated with the corrected key.
+  void remove(String customID) => value.dataMap.remove(correctedKey(customID));
+
+  /// Returns true if the corrected key is in the data map.
+  bool containsKey(String customID) =>
+      value.dataMap.containsKey(correctedKey(customID));
+
+  /// Returns true if the data map is empty.
+  bool get isEmpty => value.dataMap.isEmpty;
+
+  /// Returns true if the data map is not empty.
+  bool get isNotEmpty => value.dataMap.isNotEmpty;
+
+  /// Returns the keys of the data map.
+  Iterable<String> get keys => value.dataMap.keys;
+
+  /// Returns the values of the data map.
+  Iterable<T> get values => value.dataMap.values;
+
+  /// Returns the data map.
+  Map<String, T> get dataMap => value.dataMap;
+
+  /// Returns the lookup map.
+  Map<String, String> get lookupMap => value.lookupMap;
+}
+
 /// A model that represents the collection of published layouts.
 ///
 /// This class also holds common data that is shared across all layouts.
@@ -19,14 +74,26 @@ class SDKPublishModel extends PrivacyBase {
 
   /// A lazily loaded map of fonts. This map is populated during initialization
   /// of the SDK.
-  final Map<String, SDKPublishFont> fonts;
+  @JsonKey(
+    toJson: serializeLookupMapFonts,
+    fromJson: deserializeFonts,
+    readValue: readLookupMap,
+    includeToJson: true,
+  )
+  final LookupMap<SDKPublishFont> fonts;
 
   /// A lazily loaded map of layouts. This map is populated during
   /// initialization of the SDK.
   ///
   /// Key is the layout's id.
   /// Value is the layout.
-  final Map<String, SDKPublishLayout> layouts;
+  @JsonKey(
+    toJson: serializeLookupMapLayouts,
+    fromJson: deserializeLayouts,
+    readValue: readLookupMap,
+    includeToJson: true,
+  )
+  final LookupMap<SDKPublishLayout> layouts;
 
   /// A list containing all of the pages that contain any of the layouts in
   /// [layouts] map.
@@ -40,14 +107,28 @@ class SDKPublishModel extends PrivacyBase {
   /// This is used to determine whether fonts and layouts should be updated.
   final SDKPublishUpdates updates;
 
+  /// A map of apiId -> HttpApiData.
+  ///
   /// Contains information about the apis used in the published project.
   final Map<String, HttpApiData> apis;
 
   /// Contains information about the variables used in the published project.
-  final Map<String, SDKLayoutVariables> variables;
+  @JsonKey(
+    toJson: serializeLookupMapVariables,
+    fromJson: deserializeVariables,
+    readValue: readLookupMap,
+    includeToJson: true,
+  )
+  final LookupMap<SDKLayoutVariables> variables;
 
   /// Contains information about the conditions used in the published project.
-  final Map<String, SDKLayoutConditions> conditions;
+  @JsonKey(
+    toJson: serializeLookupMapConditions,
+    fromJson: deserializeConditions,
+    readValue: readLookupMap,
+    includeToJson: true,
+  )
+  final LookupMap<SDKLayoutConditions> conditions;
 
   /// The id of the layout that should be used as the entry point when viewing
   /// from site.codelessly.com or the Codelessly template gallery.
@@ -64,18 +145,117 @@ class SDKPublishModel extends PrivacyBase {
   @DateTimeConverter()
   final DateTime lastUpdated;
 
+  /// This map is a map of CustomLayoutID -> OriginalLayoutID.
+  ///
+  /// [SDKPublishLayouts] may be associated with a custom developer-friendly
+  /// id instead of the original randomly generated string of characters.
+  ///
+  /// To avoid destructive changes to the publish flow and to the SDK, as well
+  /// as to maintain compatibility and restoration of the original layout id,
+  /// we keep this map to map the custom id to the original id if available.
+  ///
+  /// If, in the editor, an [SDKPublishLayout] is renamed with a friendlier
+  /// id, that mapping is stored here. For automatic usage, we use a
+  /// [LookupMap] for all [layouts], [fonts], [variables], and
+  /// [conditions] to automatically correct the id when accessing the data.
+  ///
+  /// So whether the original layout id or a custom id is used, the SDK will
+  /// always return the correct data from this [SDKPublishModel].
+  ///
+  /// The original layoutID is always used in all of the fields, but when a
+  /// [CodelesslyWidget] tries to access the data, the developer may use
+  /// a custom id. This map will modify that usage without being destructive.
+  final Map<String, String> layoutIDMap;
+
+  static Map<String, dynamic> serializeLookupMapFonts(
+          LookupMap<SDKPublishFont> map) =>
+      map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
+
+  static Map<String, dynamic> serializeLookupMapLayouts(
+          LookupMap<SDKPublishLayout> map) =>
+      map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
+
+  static Map<String, dynamic> serializeLookupMapConditions(
+          LookupMap<SDKLayoutConditions> map) =>
+      map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
+
+  static Map<String, dynamic> serializeLookupMapVariables(
+          LookupMap<SDKLayoutVariables> map) =>
+      map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
+
+  static Object? readLookupMap(Map json, String key) {
+    return {'layoutIDMap': json['layoutIDMap'], key: json[key]};
+  }
+
+  static Map<String, String> deserializeLookupMap(Map json) {
+    return (json['layoutIDMap'] as Map? ?? {}).map(
+      (k, e) => MapEntry(k as String, e as String),
+    );
+  }
+
+  static LookupMap<SDKPublishLayout> deserializeLayouts(Map json) {
+    final Map<String, String> layoutIDMap = deserializeLookupMap(json);
+    final Map<String, dynamic> data = (json['layouts'] ?? <String, dynamic>{});
+    return LookupMap((
+      lookupMap: layoutIDMap,
+      dataMap: {
+        for (final item in data.entries)
+          item.key: SDKPublishLayout.fromJson(item.value)
+      }
+    ));
+  }
+
+  static LookupMap<SDKPublishFont> deserializeFonts(Map json) {
+    final Map<String, String> layoutIDMap = deserializeLookupMap(json);
+    final Map<String, dynamic> data = (json['fonts'] ?? <String, dynamic>{});
+    return LookupMap((
+      lookupMap: layoutIDMap,
+      dataMap: {
+        for (final item in data.entries)
+          item.key: SDKPublishFont.fromJson(item.value)
+      }
+    ));
+  }
+
+  static LookupMap<SDKLayoutVariables> deserializeVariables(Map json) {
+    final Map<String, String> layoutIDMap = deserializeLookupMap(json);
+    final Map<String, dynamic> data =
+        (json['variables'] ?? <String, dynamic>{});
+    return LookupMap((
+      lookupMap: layoutIDMap,
+      dataMap: {
+        for (final item in data.entries)
+          item.key: SDKLayoutVariables.fromJson(item.value)
+      }
+    ));
+  }
+
+  static LookupMap<SDKLayoutConditions> deserializeConditions(Map json) {
+    final Map<String, String> layoutIDMap = deserializeLookupMap(json);
+    final Map<String, dynamic> data =
+        (json['conditions'] ?? <String, dynamic>{});
+    return LookupMap((
+      lookupMap: layoutIDMap,
+      dataMap: {
+        for (final item in data.entries)
+          item.key: SDKLayoutConditions.fromJson(item.value)
+      }
+    ));
+  }
+
   /// Creates a new instance of [SDKPublishModel].
   SDKPublishModel({
     required this.projectId,
 
     // Conditional
-    Map<String, SDKPublishFont>? fonts,
-    Map<String, SDKPublishLayout>? layouts,
     SDKPublishUpdates? updates,
-    Map<String, HttpApiData>? apis,
-    Map<String, SDKLayoutVariables>? variables,
-    Map<String, SDKLayoutConditions>? conditions,
     List<String>? pages,
+    Map<String, String>? layoutIDMap,
+    LookupMap<SDKPublishFont>? fonts,
+    LookupMap<SDKPublishLayout>? layouts,
+    LookupMap<SDKLayoutVariables>? variables,
+    LookupMap<SDKLayoutConditions>? conditions,
+    Map<String, HttpApiData>? apis,
     this.entryLayoutId,
     this.entryPageId,
     this.entryCanvasId,
@@ -86,13 +266,26 @@ class SDKPublishModel extends PrivacyBase {
     required super.users,
     required super.roles,
     required super.public,
-  })  : layouts = layouts ?? {},
-        fonts = fonts ?? {},
+  })  : layoutIDMap = layoutIDMap ?? {},
         pages = pages ?? [],
         updates = updates ?? SDKPublishUpdates(),
+        layouts = layouts ??
+            LookupMap<SDKPublishLayout>(
+              (lookupMap: layoutIDMap ?? {}, dataMap: {}),
+            ),
+        fonts = fonts ??
+            LookupMap<SDKPublishFont>(
+              (lookupMap: layoutIDMap ?? {}, dataMap: {}),
+            ),
+        variables = variables ??
+            LookupMap<SDKLayoutVariables>(
+              (lookupMap: layoutIDMap ?? {}, dataMap: {}),
+            ),
+        conditions = conditions ??
+            LookupMap<SDKLayoutConditions>(
+              (lookupMap: layoutIDMap ?? {}, dataMap: {}),
+            ),
         apis = apis ?? {},
-        variables = variables ?? {},
-        conditions = conditions ?? {},
         lastUpdated = lastUpdated ?? DateTime.now();
 
   /// Creates a new instance of [SDKPublishModel] with privacy inherited from
@@ -101,13 +294,14 @@ class SDKPublishModel extends PrivacyBase {
     required this.projectId,
 
     // Conditional
+    SDKPublishUpdates? updates,
+    List<String>? pages,
+    Map<String, String>? layoutIDMap,
     Map<String, SDKPublishFont>? fonts,
     Map<String, SDKPublishLayout>? layouts,
-    SDKPublishUpdates? updates,
-    Map<String, HttpApiData>? apis,
     Map<String, SDKLayoutVariables>? variables,
     Map<String, SDKLayoutConditions>? conditions,
-    List<String>? pages,
+    Map<String, HttpApiData>? apis,
     this.entryLayoutId,
     this.entryPageId,
     this.entryCanvasId,
@@ -115,14 +309,23 @@ class SDKPublishModel extends PrivacyBase {
 
     // Privacy
     required super.privacy,
-  })  : layouts = layouts ?? {},
-        fonts = fonts ?? {},
+  })  : layoutIDMap = layoutIDMap ?? {},
         pages = pages ?? [],
         updates = updates ?? SDKPublishUpdates(),
-        apis = apis ?? {},
-        variables = variables ?? {},
-        conditions = conditions ?? {},
+        layouts = LookupMap<SDKPublishLayout>(
+          (lookupMap: layoutIDMap ?? {}, dataMap: layouts ?? {}),
+        ),
+        fonts = LookupMap<SDKPublishFont>(
+          (lookupMap: layoutIDMap ?? {}, dataMap: fonts ?? {}),
+        ),
+        variables = LookupMap<SDKLayoutVariables>(
+          (lookupMap: layoutIDMap ?? {}, dataMap: variables ?? {}),
+        ),
+        conditions = LookupMap<SDKLayoutConditions>(
+          (lookupMap: layoutIDMap ?? {}, dataMap: conditions ?? {}),
+        ),
         lastUpdated = lastUpdated ?? DateTime.now(),
+        apis = apis ?? {},
         super.private();
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
@@ -144,10 +347,11 @@ class SDKPublishModel extends PrivacyBase {
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishModel copyWith({
     String? projectId,
-    Map<String, SDKPublishFont>? fonts,
-    Map<String, SDKPublishLayout>? layouts,
     List<String>? pages,
     SDKPublishUpdates? updates,
+    Map<String, String>? layoutIDMap,
+    Map<String, SDKPublishFont>? fonts,
+    Map<String, SDKPublishLayout>? layouts,
     Map<String, HttpApiData>? apis,
     Map<String, SDKLayoutVariables>? variables,
     Map<String, SDKLayoutConditions>? conditions,
@@ -161,13 +365,14 @@ class SDKPublishModel extends PrivacyBase {
   }) {
     return SDKPublishModel.private(
       projectId: projectId ?? this.projectId,
-      fonts: fonts ?? this.fonts,
-      layouts: layouts ?? this.layouts,
+      layoutIDMap: layoutIDMap ?? this.layoutIDMap,
       pages: pages ?? this.pages,
       updates: updates ?? this.updates,
+      fonts: fonts ?? this.fonts.dataMap,
+      layouts: layouts ?? this.layouts.dataMap,
       apis: apis ?? this.apis,
-      variables: variables ?? this.variables,
-      conditions: conditions ?? this.conditions,
+      variables: variables ?? this.variables.dataMap,
+      conditions: conditions ?? this.conditions.dataMap,
       entryLayoutId: entryLayoutId ?? this.entryLayoutId,
       entryPageId: entryPageId ?? this.entryPageId,
       entryCanvasId: entryCanvasId ?? this.entryCanvasId,
@@ -184,11 +389,12 @@ class SDKPublishModel extends PrivacyBase {
         projectId,
         fonts,
         pages,
+        updates,
+        layoutIDMap,
         layouts,
         apis,
         variables,
         conditions,
-        updates,
         entryLayoutId,
         entryPageId,
         entryCanvasId,
