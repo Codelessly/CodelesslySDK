@@ -8,32 +8,27 @@ part of 'sdk_publish_model.dart';
 
 SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
       projectId: json['projectId'] as String,
-      fonts: (json['fonts'] as Map?)?.map(
-        (k, e) => MapEntry(k as String,
-            SDKPublishFont.fromJson(Map<String, dynamic>.from(e as Map))),
-      ),
-      layouts: (json['layouts'] as Map?)?.map(
-        (k, e) => MapEntry(k as String,
-            SDKPublishLayout.fromJson(Map<String, dynamic>.from(e as Map))),
-      ),
       updates: json['updates'] == null
           ? null
           : SDKPublishUpdates.fromJson(
               Map<String, dynamic>.from(json['updates'] as Map)),
+      pages:
+          (json['pages'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      layoutIDMap: (json['layoutIDMap'] as Map?)?.map(
+        (k, e) => MapEntry(k as String, e as String),
+      ),
+      fonts: SDKPublishModel.deserializeFonts(
+          SDKPublishModel.readLookupMap(json, 'fonts') as Map),
+      layouts: SDKPublishModel.deserializeLayouts(
+          SDKPublishModel.readLookupMap(json, 'layouts') as Map),
+      variables: SDKPublishModel.deserializeVariables(
+          SDKPublishModel.readLookupMap(json, 'variables') as Map),
+      conditions: SDKPublishModel.deserializeConditions(
+          SDKPublishModel.readLookupMap(json, 'conditions') as Map),
       apis: (json['apis'] as Map?)?.map(
         (k, e) => MapEntry(k as String,
             HttpApiData.fromJson(Map<String, dynamic>.from(e as Map))),
       ),
-      variables: (json['variables'] as Map?)?.map(
-        (k, e) => MapEntry(k as String,
-            SDKLayoutVariables.fromJson(Map<String, dynamic>.from(e as Map))),
-      ),
-      conditions: (json['conditions'] as Map?)?.map(
-        (k, e) => MapEntry(k as String,
-            SDKLayoutConditions.fromJson(Map<String, dynamic>.from(e as Map))),
-      ),
-      pages:
-          (json['pages'] as List<dynamic>?)?.map((e) => e as String).toList(),
       entryLayoutId: json['entryLayoutId'] as String?,
       entryPageId: json['entryPageId'] as String?,
       entryCanvasId: json['entryCanvasId'] as String?,
@@ -54,13 +49,15 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
     'teams': instance.teams.toList(),
     'public': instance.public,
     'projectId': instance.projectId,
-    'fonts': instance.fonts.map((k, e) => MapEntry(k, e.toJson())),
-    'layouts': instance.layouts.map((k, e) => MapEntry(k, e.toJson())),
+    'fonts': SDKPublishModel.serializeLookupMapFonts(instance.fonts),
+    'layouts': SDKPublishModel.serializeLookupMapLayouts(instance.layouts),
     'pages': instance.pages,
     'updates': instance.updates.toJson(),
     'apis': instance.apis.map((k, e) => MapEntry(k, e.toJson())),
-    'variables': instance.variables.map((k, e) => MapEntry(k, e.toJson())),
-    'conditions': instance.conditions.map((k, e) => MapEntry(k, e.toJson())),
+    'variables':
+        SDKPublishModel.serializeLookupMapVariables(instance.variables),
+    'conditions':
+        SDKPublishModel.serializeLookupMapConditions(instance.conditions),
   };
 
   void writeNotNull(
@@ -80,6 +77,7 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
       'entryCanvasId', instance.entryCanvasId, instance.entryCanvasId, null);
   writeNotNull('lastUpdated', instance.lastUpdated,
       const DateTimeConverter().toJson(instance.lastUpdated), null);
+  val['layoutIDMap'] = instance.layoutIDMap;
   return val;
 }
 

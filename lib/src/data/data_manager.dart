@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 
@@ -647,13 +648,23 @@ class DataManager {
             localModel.entryCanvasId != serverModel.entryCanvasId ||
             localModel.entryPageId != serverModel.entryPageId;
 
+    final bool didLayoutIDMapChange = const MapEquality().equals(
+      localModel.layoutIDMap,
+      serverModel.layoutIDMap,
+    );
+    if (didLayoutIDMapChange) {
+      localModel = localModel.copyWith(layoutIDMap: serverModel.layoutIDMap);
+      log('Layout ID map changed. Updating...');
+    }
+
     if (layoutUpdates.isEmpty &&
         fontUpdates.isEmpty &&
         apiUpdates.isEmpty &&
         variableUpdates.isEmpty &&
         conditionUpdates.isEmpty &&
         !templateChanged &&
-        !entryChanged) {
+        !entryChanged &&
+        !didLayoutIDMapChange) {
       log('No updates to process.');
       return;
     } else {
@@ -793,6 +804,7 @@ class DataManager {
       entryPageId: serverModel.entryPageId,
       entryCanvasId: serverModel.entryCanvasId,
       entryLayoutId: serverModel.entryLayoutId,
+      layoutIDMap: serverModel.layoutIDMap,
     );
 
     if (templateChanged) {
@@ -1042,6 +1054,10 @@ class DataManager {
     // If the user is not authenticated, then they get whatever is cached and
     // nothing else.
     if (auth == null) return model!.layouts.containsKey(layoutID);
+
+    if (_publishModel!.layoutIDMap.containsKey(layoutID)) {
+      layoutID = _publishModel!.layoutIDMap[layoutID]!;
+    }
 
     // Process Layouts
     SDKPublishLayout? layout;
