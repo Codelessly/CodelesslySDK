@@ -658,8 +658,8 @@ String? _getCanvasIDForLayoutGroup(
       // Get a breakpoint for the current width.
       final breakpoint = breakpoints.findForWidth(width);
       if (breakpoint != null) {
-        print(
-            'Found breakpoint for width ${width.toInt()}: ${breakpoint.nodeId}');
+        // print(
+        //     'Found breakpoint for width ${width.toInt()}: ${breakpoint.nodeId}');
         return breakpoint.nodeId;
       }
     }
