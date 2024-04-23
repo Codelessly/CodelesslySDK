@@ -412,10 +412,15 @@ class CodelesslyAuthManager extends AuthManager {
           largePrint: true,
         );
       }
-    } catch (e) {
+    } catch (e,stacktrace) {
       logger.log(
         label,
         'Error trying to authenticate token.\nError: $e',
+        largePrint: true,
+      );
+      logger.log(
+        label,
+        '$stacktrace',
         largePrint: true,
       );
     }
