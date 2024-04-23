@@ -1,5 +1,8 @@
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
 import 'package:equatable/equatable.dart';
+
+part 'privacy_base.g.dart';
 
 enum Role {
   owner('Admin'),
@@ -78,16 +81,19 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
 
   /// An owner ID must always exist in the roles map. It's an error
   /// if it doesn't.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   Set<String> get owners =>
       roles.keys.where((id) => roles[id] == Role.owner).toSet();
 
   /// A list of user ids that are editors of this object.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   List<String> get editors => roles.entries
       .where((entry) => entry.value == Role.editor)
       .map((entry) => entry.key)
       .toList();
 
   /// A list of user ids that are viewers of this object.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   List<String> get viewers => roles.entries
       .where((entry) => entry.value == Role.viewer)
       .map((entry) => entry.key)
@@ -122,17 +128,32 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
   ///
   /// dataWithPrivacy: {
   ///   someKeys: someValues,
-  ///   ...privacyBase.toMinimalJson(),
+  ///   ...privacyBase.privacy.toJson(),
   /// }
-  Map<String, dynamic> toMinimalPrivacyJson() => {
-        'users': users.toList(),
-        'roles': {
-          for (final MapEntry(:key, :value) in roles.entries) key: value.name,
-        },
-        'teams': teams.toList(),
-        'public': public,
-      };
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  PrivacyBaseImpl get privacy => PrivacyBaseImpl._(
+        teams: teams,
+        users: users,
+        roles: roles,
+        public: public,
+      );
 
   @override
   List<Object?> get props => [users, roles, teams, public];
+}
+
+/// A base implementation of the [PrivacyBase] to extract privacy fields from
+/// an inherited model without worrying about the other fields that may be
+/// present in the model.
+@JsonSerializable(constructor: '_')
+class PrivacyBaseImpl extends PrivacyBase {
+  const PrivacyBaseImpl._({
+    required super.teams,
+    required super.users,
+    required super.roles,
+    required super.public,
+  });
+
+  @override
+  Map toJson() => _$PrivacyBaseImplToJson(this);
 }

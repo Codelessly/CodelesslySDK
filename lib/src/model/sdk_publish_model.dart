@@ -329,8 +329,9 @@ class SDKPublishModel extends PrivacyBase {
         super.private();
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
-  factory SDKPublishModel.fromJson(Map<String, dynamic> json) =>
-      _$SDKPublishModelFromJson(json);
+  factory SDKPublishModel.fromJson(Map<String, dynamic> json) {
+    return _$SDKPublishModelFromJson(json);
+  }
 
   /// Converts this instance to a JSON map without the fonts, layouts, and apis.
   @override
