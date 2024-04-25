@@ -43,8 +43,7 @@ class CodelesslyConfig with EquatableMixin {
   ///
   /// If the [isPreview] value is true, then the value will be
   /// [PublishSource.preview], otherwise it will be [PublishSource.publish].
-  late PublishSource publishSource =
-      isPreview ? PublishSource.preview : PublishSource.publish;
+  PublishSource publishSource;
 
   /// The project ID of the Firebase project to use. This is used to
   /// initialize Firebase.
@@ -85,8 +84,11 @@ class CodelesslyConfig with EquatableMixin {
     this.firebaseInstanceName = kCodelesslyFirebaseApp,
     this.firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
     this.baseURL = defaultBaseURL,
-  }) : firebaseOptions =
-            firebaseOptions ?? DefaultFirebaseOptionsProd.currentPlatform;
+    PublishSource? publishSource,
+  })  : firebaseOptions =
+            firebaseOptions ?? DefaultFirebaseOptionsProd.currentPlatform,
+        publishSource = publishSource ??
+            (isPreview ? PublishSource.preview : PublishSource.publish);
 
   /// Creates a new instance of [CodelesslyConfig] with the provided optional
   /// parameters.
@@ -101,6 +103,7 @@ class CodelesslyConfig with EquatableMixin {
     String? firebaseCloudFunctionsBaseURL,
     String? baseURL,
     String? firebaseInstanceName,
+    PublishSource? publishSource,
   }) =>
       CodelesslyConfig(
         authToken: authToken ?? this.authToken,
@@ -114,7 +117,7 @@ class CodelesslyConfig with EquatableMixin {
             firebaseCloudFunctionsBaseURL ?? this.firebaseCloudFunctionsBaseURL,
         baseURL: baseURL ?? this.baseURL,
         firebaseInstanceName: firebaseInstanceName ?? this.firebaseInstanceName,
-        // firebaseApp: firebaseApp ?? this.firebaseApp,
+        publishSource: publishSource ?? this.publishSource,
       );
 
   @override
@@ -128,6 +131,7 @@ class CodelesslyConfig with EquatableMixin {
         firebaseCloudFunctionsBaseURL,
         baseURL,
         firebaseInstanceName,
+        publishSource,
       ];
 }
 
