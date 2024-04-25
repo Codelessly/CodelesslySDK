@@ -208,6 +208,8 @@ class FirestoreCloudDatabase extends CloudDatabase {
   /// called and awaited before using the cloud storage.
   Future<void> init() async {
     logger.log(_label, 'Initializing for $identifier at [${rootRef.path}]');
+    logger.log(_label,
+        'PublishSource: $publishSource | rootCollection: $_rootCollection');
 
     // Create project doc if missing.
     final snapshot = await rootRef.get();

@@ -604,7 +604,10 @@ class Codelessly {
       _templateDataManager = templateDataManager ??
           DataManager(
             'Template',
-            config: _config!.copyWith(isPreview: false),
+            config: _config!.copyWith(
+              isPreview: false,
+              publishSource: PublishSource.template,
+            ),
             cacheManager: _cacheManager!,
             authManager: _authManager!,
             networkDataRepository: FirebaseDataRepository(
