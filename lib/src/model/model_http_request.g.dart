@@ -32,7 +32,6 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
               RequestBodyType.text,
       name: json['name'] as String,
       id: json['id'] as String? ?? '',
-      project: json['project'] as String? ?? '',
       variables: (json['variables'] as List<dynamic>?)
               ?.map((e) =>
                   VariableData.fromJson(Map<String, dynamic>.from(e as Map)))
@@ -73,7 +72,6 @@ Map<String, dynamic> _$HttpApiDataToJson(HttpApiData instance) {
 
   writeNotNull('id', instance.id, instance.id, '');
   val['name'] = instance.name;
-  writeNotNull('project', instance.project, instance.project, '');
   writeNotNull('method', instance.method, _$HttpMethodEnumMap[instance.method]!,
       HttpMethod.get);
   writeNotNull('url', instance.url, instance.url, '');
