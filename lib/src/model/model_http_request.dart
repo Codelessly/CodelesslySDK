@@ -53,6 +53,7 @@ extension HttpMethodExt on HttpMethod {
 class HttpApiData extends PrivacyBase {
   final String id;
   final String name;
+  final String project;
   final HttpMethod method;
   final String url;
   final List<HttpKeyValuePair> headers;
@@ -83,6 +84,7 @@ class HttpApiData extends PrivacyBase {
     this.bodyType = RequestBodyType.text,
     required this.name,
     this.id = '',
+    this.project = '',
     List<VariableData> variables = const [],
     this.isDeleted = false,
     DateTime? lastUpdated,
@@ -110,6 +112,7 @@ class HttpApiData extends PrivacyBase {
     this.bodyType = RequestBodyType.text,
     required this.name,
     this.id = '',
+    this.project = '',
     List<VariableData> variables = const [],
     this.isDeleted = false,
     DateTime? lastUpdated,
@@ -156,6 +159,7 @@ class HttpApiData extends PrivacyBase {
         formFields: formFields ?? this.formFields,
         variables: variables ?? this.variables,
         name: name ?? this.name,
+        project: project ?? this.project,
         id: id ?? this.id,
         isDeleted: isDeleted ?? this.isDeleted,
         lastUpdated: lastUpdated ?? this.lastUpdated,
