@@ -805,22 +805,22 @@ List<Accessor> getApiResponseAccessorsForType(VariableType dataType) => [
       Accessor(
         name: 'isLoading',
         type: VariableType.boolean,
-        getValue: (value) => (value.toMap()?['isLoading'] as Object?).toBool(),
+        getValue: (value) => (value.toMap()?['isLoading']).toBool(),
       ),
       Accessor(
         name: 'isError',
         type: VariableType.boolean,
-        getValue: (value) => (value.toMap()?['isError'] as Object?).toBool(),
+        getValue: (value) => (value.toMap()?['isError']).toBool(),
       ),
       Accessor(
         name: 'isSuccess',
         type: VariableType.boolean,
-        getValue: (value) => (value.toMap()?['isSuccess'] as Object?).toBool(),
+        getValue: (value) => (value.toMap()?['isSuccess']).toBool(),
       ),
       Accessor(
         name: 'hasData',
         type: VariableType.boolean,
-        getValue: (value) => (value.toMap()?['hasData'] as Object?).toBool(),
+        getValue: (value) => (value.toMap()?['hasData']).toBool(),
       ),
       Accessor(
         name: 'data',
