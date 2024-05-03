@@ -21,6 +21,7 @@ export 'src/model/auth_data.dart';
 export 'src/model/custom_component.dart';
 export 'src/model/font_family.dart';
 export 'src/model/font_file_data.dart';
+export 'src/model/markdown_document_model.dart';
 export 'src/model/model_http_request.dart';
 export 'src/model/privacy_base.dart';
 export 'src/model/publish_source.dart';
