@@ -617,8 +617,9 @@ Map<String, dynamic> sanitizeCloudDataToSend(
   Map<String, dynamic> data, {
   required String? docId,
   bool hidePrivateFields = false,
+      bool allowEmptyData = false,
 }) {
-  if (data.isEmpty) return data;
+  if (data.isEmpty && !allowEmptyData) return data;
 
   // Breaks reference and allows to modify the data.
   data = {...data};
