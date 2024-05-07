@@ -1,3 +1,6 @@
+## 1.8.0
+- Custom Layout IDs support! Use a human readable ID for CodelesslyWidgets to help identify and differentiate CloudUI in your code. 
+
 ## 1.7.0
 - Teams v1 support.
 
