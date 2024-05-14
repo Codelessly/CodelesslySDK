@@ -275,4 +275,5 @@ TabBarProperties get defaultTabBarProperties => TabBarProperties(
       indicatorPadding: TabBarDefaults.indicatorPadding,
       tabItemDirection: TabBarDefaults.tabItemDirection,
       gap: TabBarDefaults.gap,
+      showDivider: false,
     );
