@@ -370,7 +370,7 @@ class CodelesslyAuthManager extends AuthManager {
       // Make a POST request to the server to verify the token.
       final Response result = await post(
         Uri.parse(
-            '${config.firebaseCloudFunctionsBaseURL}/verifyProjectAuthToken'),
+            '${config.firebaseCloudFunctionsBaseURL}/v2/verifyProjectAuthToken'),
         headers: <String, String>{
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $userToken',
