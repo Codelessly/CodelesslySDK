@@ -24,7 +24,7 @@ class WebDataRepository extends NetworkDataRepository {
   }) async* {
     final Response result = await post(
       Uri.parse(
-          '${config.firebaseCloudFunctionsBaseURL}/v2/getPublishModelRequest'),
+          '${config.firebaseCloudFunctionsBaseURL}/api/getPublishModelRequest'),
       headers: <String, String>{'Content-Type': 'application/json'},
       body: jsonEncode({
         'projectID': projectID,
@@ -56,7 +56,7 @@ class WebDataRepository extends NetworkDataRepository {
   }) async {
     final Response result = await post(
       Uri.parse(
-          '${config.firebaseCloudFunctionsBaseURL}/v2/getLayoutModelRequest'),
+          '${config.firebaseCloudFunctionsBaseURL}/api/getLayoutModelRequest'),
       headers: <String, String>{'Content-Type': 'application/json'},
       body: jsonEncode({
         'projectID': projectID,
@@ -92,7 +92,7 @@ class WebDataRepository extends NetworkDataRepository {
     try {
       final Response result = await post(
         Uri.parse(
-            '${config.firebaseCloudFunctionsBaseURL}/v2/getFontModelRequest'),
+            '${config.firebaseCloudFunctionsBaseURL}/api/getFontModelRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
@@ -129,7 +129,7 @@ class WebDataRepository extends NetworkDataRepository {
     try {
       final Response result = await post(
         Uri.parse(
-            '${config.firebaseCloudFunctionsBaseURL}/v2/getPublishedApiRequest'),
+            '${config.firebaseCloudFunctionsBaseURL}/api/getPublishedApiRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
@@ -168,7 +168,7 @@ class WebDataRepository extends NetworkDataRepository {
     try {
       final Response result = await post(
         Uri.parse(
-            '${config.firebaseCloudFunctionsBaseURL}/v2/getPublishedLayoutVariablesRequest'),
+            '${config.firebaseCloudFunctionsBaseURL}/api/getPublishedLayoutVariablesRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
@@ -209,7 +209,7 @@ class WebDataRepository extends NetworkDataRepository {
     try {
       final Response result = await post(
         Uri.parse(
-            '${config.firebaseCloudFunctionsBaseURL}/v2/getPublishedLayoutConditionsRequest'),
+            '${config.firebaseCloudFunctionsBaseURL}/api/getPublishedLayoutConditionsRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
