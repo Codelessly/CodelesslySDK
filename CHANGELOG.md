@@ -1,3 +1,6 @@
+## 1.9.0
+- Flutter v3.22 support.
+
 ## 1.8.0
 - Custom Layout IDs support! Use a human readable ID for CodelesslyWidgets to help identify and differentiate CloudUI in your code. 
 
