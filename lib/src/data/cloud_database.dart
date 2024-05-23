@@ -15,6 +15,11 @@ const List<String> privateDocumentFields = [
   SDKConstants.updatedAt,
 ];
 
+const List<String> privateDateTimeDocumentFields = [
+  SDKConstants.createdAt,
+  SDKConstants.updatedAt,
+];
+
 /// Allows access to cloud storage. Implementations of this class should be
 /// able to store and retrieve data from the cloud storage in secure manner.
 /// This is mainly used to store data on cloud via actions for the SDK.
