@@ -9,16 +9,21 @@ import '../logging/debug_logger.dart';
 import '../logging/stat_tracker.dart';
 import '../utils/constants.dart';
 
-const List<String> privateDocumentFields = [
-  SDKConstants.id,
-  SDKConstants.createdAt,
-  SDKConstants.updatedAt,
-];
+const String _label = 'Cloud Database';
 
-const List<String> privateDateTimeDocumentFields = [
-  SDKConstants.createdAt,
-  SDKConstants.updatedAt,
-];
+abstract final class PrivateDocumentFields {
+  PrivateDocumentFields._();
+
+  static const String id = 'id';
+  static const String createdAt = 'createdAt';
+  static const String updatedAt = 'updatedAt';
+
+  static const List<String> all = [id, createdAt, updatedAt];
+
+  static const List<String> dateTimeFields = [createdAt, updatedAt];
+
+  static bool contains(String field) => all.contains(field);
+}
 
 /// Allows access to cloud storage. Implementations of this class should be
 /// able to store and retrieve data from the cloud storage in secure manner.
@@ -594,17 +599,14 @@ Map<String, dynamic> sanitizeCloudDataForUse(
   // breaks reference and allows to modify the data.
   data = {...data};
 
-  // Late because it can potentially be unused;
-  late final DateTime now = DateTime.now();
-
   data[SDKConstants.createdAt] =
-      deserializeCosmicValue(data[SDKConstants.createdAt] ?? now);
+      deserializeCosmicValue(data[SDKConstants.createdAt]);
   data[SDKConstants.updatedAt] =
-      deserializeCosmicValue(data[SDKConstants.updatedAt] ?? now);
+      deserializeCosmicValue(data[SDKConstants.updatedAt]);
   data[SDKConstants.id] = docId;
 
   // Sort private fields to the bottom.
-  for (final field in privateDocumentFields) {
+  for (final field in PrivateDocumentFields.all) {
     if (data.containsKey(field)) {
       final value = data.remove(field);
       data[field] = value;
@@ -622,7 +624,8 @@ Map<String, dynamic> sanitizeCloudDataToSend(
   Map<String, dynamic> data, {
   required String? docId,
   bool hidePrivateFields = false,
-      bool allowEmptyData = false,
+  bool allowEmptyData = false,
+  bool autoChangeUpdatedAt = true,
 }) {
   if (data.isEmpty && !allowEmptyData) return data;
 
@@ -631,23 +634,24 @@ Map<String, dynamic> sanitizeCloudDataToSend(
 
   // Remove private fields.
   if (hidePrivateFields) {
-    for (final field in privateDocumentFields) {
+    for (final field in PrivateDocumentFields.all) {
       data.remove(field);
     }
   } else {
-    // Late because it can potentially be unused;
-    late final DateTime now = DateTime.now();
+    late final DateTime now = DateTime.now().toUtc();
 
-    data[SDKConstants.createdAt] =
-        serializedCosmicValue(data[SDKConstants.createdAt] ?? now);
-    data[SDKConstants.updatedAt] = serializedCosmicValue(now);
+    if (autoChangeUpdatedAt) {
+      data[SDKConstants.createdAt] =
+          serializedCosmicValue(data[SDKConstants.createdAt] ?? now);
+      data[SDKConstants.updatedAt] = serializedCosmicValue(now);
+    }
 
     if (docId != null) {
       data[SDKConstants.id] = docId;
     }
 
     // Sort private fields to the bottom.
-    for (final field in privateDocumentFields) {
+    for (final field in PrivateDocumentFields.all) {
       if (data.containsKey(field)) {
         final value = data.remove(field);
         data[field] = value;
