@@ -20,9 +20,9 @@ dependencies:
     sdk: flutter
   codelessly_api: 1.8.0
   codelessly_json_annotation: 4.8.1
-  firebase_core: ^2.31.1
-  firebase_auth: ^4.19.6
-  cloud_firestore: ^4.17.4
+  firebase_core: ^2.32.0
+  firebase_auth: ^4.20.0
+  cloud_firestore: ^4.17.5
   firebase_ui_firestore: ^1.6.3
   equatable: ^2.0.5
   google_fonts: ^6.2.1
@@ -31,8 +31,8 @@ dependencies:
   http: '>=1.1.2 <2.0.0'
   intl: '>=0.17.0 <1.0.0'
   universal_html: ^2.2.4
-  webview_flutter: ^4.7.0
-  webview_flutter_android: ^3.16.1
+  webview_flutter: ^4.8.0
+  webview_flutter_android: ^3.16.4
   webview_flutter_wkwebview: ^3.13.1
   webview_flutter_web: ^0.2.2+4
   flutter_animation_progress_bar: ^2.3.1
