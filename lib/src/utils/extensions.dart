@@ -516,6 +516,13 @@ extension OffsetHelper on flutter.Offset {
   Vec get vec => Vec(dx, dy);
 
   SizeC get cSize => SizeC(dx, dy);
+
+  Offset copyWith({double? dx, double? dy}) =>
+      Offset(dx ?? this.dx, dy ?? this.dy);
+
+  Offset translateX(double dx) => Offset(this.dx + dx, dy);
+
+  Offset translateY(double dy) => Offset(dx, this.dy + dy);
 }
 
 extension VecHelper on Vec {
