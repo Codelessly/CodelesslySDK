@@ -98,7 +98,7 @@ class PassiveCheckboxWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scale = node.basicBoxLocal.width / kCheckboxDefaultSize;
+    final scale = node.basicBoxLocal.width / (node.properties.compact ? Checkbox.width : kCheckboxDefaultSize);
 
     final bool? value = PropertyValueDelegate.getPropertyValue<bool>(
           node,
@@ -107,8 +107,8 @@ class PassiveCheckboxWidget extends StatelessWidget {
         ) ??
         node.value;
 
-    return AdaptiveNodeBox(
-      node: node,
+    return SizedBox.fromSize(
+      size: node.basicBoxLocal.size.flutterSize,
       child: Transform.scale(
         scale: scale,
         child: Checkbox(
