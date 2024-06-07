@@ -1720,7 +1720,7 @@ extension BaseNodeExt on BaseNode {
 extension StrokeCapEnumExt on StrokeCapEnum {
   StrokeCap get flutterStrokeCap => switch (this) {
         StrokeCapEnum.round => StrokeCap.round,
-        StrokeCapEnum.butt => StrokeCap.butt,
+        StrokeCapEnum.none => StrokeCap.butt,
         StrokeCapEnum.square => StrokeCap.square,
       };
 }
