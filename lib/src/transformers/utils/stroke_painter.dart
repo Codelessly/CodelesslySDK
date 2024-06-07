@@ -4,6 +4,8 @@ import 'dart:ui';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
+import '../../utils/extensions.dart';
+
 /// This stroke painter is needed because Flutter's built in stroke for
 /// containers only does inside strokes and doesn't do dotted borders.
 ///
@@ -87,6 +89,8 @@ class StrokePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Whether the shape that we're outlining is so thin that it is effectively
+    // a line rather than a quadrilateral.
     final bool isLine =
         size.shortestSide <= strokeWidth * 2 && boxShape == BoxShape.rectangle;
     final bool isHorizLine = isLine && size.width <= strokeWidth * 2;
@@ -96,7 +100,7 @@ class StrokePainter extends CustomPainter {
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.values[strokeCap.index]
+      ..strokeCap = strokeCap.flutterStrokeCap
       ..strokeMiterLimit = strokeMiterLimit;
 
     // If the stroke is dotted, we take a completely different rendering
@@ -174,12 +178,20 @@ class StrokePainter extends CustomPainter {
                     parallelTangentVector.dy * isInside * isCenter,
                     parallelTangentVector.dx * isOutside,
                   ) *
+                  // Multiply by the stroke thickness to figure out the distance
+                  // needed from the start position to the stroke.
                   strokeWidth *
+
+                  // If it's a center stroke, we need to divide the normal by 2.
+                  // It will be rendered twice, once inside, once outside,
+                  // achieving the center stroke effect.
                   (strokeAlign == StrokeAlignC.center ? 0.5 : 1);
 
               canvas.drawLine(
                 tangent.position,
                 tangent.position + normal,
+
+                // The width of the "needle" on the "balloon"
                 paint..strokeWidth = dashDistance,
               );
 
@@ -188,7 +200,12 @@ class StrokePainter extends CustomPainter {
               if (strokeAlign == StrokeAlignC.center) {
                 canvas.drawLine(
                   tangent.position,
+
+                  // Rendering the needle as if it were on the inside of the
+                  // balloon.
                   tangent.position + normal * -1,
+
+                  // The width of the "needle" on the "balloon"
                   paint..strokeWidth = dashDistance,
                 );
               }
