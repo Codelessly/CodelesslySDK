@@ -25,6 +25,7 @@ class TextUtils {
     required List<VariableData> variablesOverrides,
     required NullSubstitutionMode nullSubstitutionMode,
     required bool replaceVariableWithSymbol,
+    bool hasMissingFont = false,
     List<Effect>? effects,
   }) {
     String characters = rawText;
@@ -48,6 +49,7 @@ class TextUtils {
       variablesOverrides: variablesOverrides,
       nullSubstitutionMode: nullSubstitutionMode,
       replaceVariableWithSymbol: replaceVariableWithSymbol,
+      hasMissingFont: hasMissingFont,
       tapGestureRecognizer: tapGestureRecognizer,
     );
   }
@@ -69,19 +71,29 @@ class TextUtils {
     required List<VariableData> variablesOverrides,
     required NullSubstitutionMode nullSubstitutionMode,
     required bool replaceVariableWithSymbol,
+    bool hasMissingFont = false,
     TapGestureRecognizer? tapGestureRecognizer,
   }) {
     String characters = rawText;
 
-    final TextStyle style = retrieveTextStyle(
-      fontSize: fontSize,
-      fontName: fontName,
-      textDecoration: textDecoration,
-      lineHeight: lineHeight,
-      letterSpacing: letterSpacing,
-      color: color,
-      effects: effects ?? (node is BlendMixin ? node.effects : const []),
-    );
+    final TextStyle style = switch (hasMissingFont) {
+      false => retrieveTextStyle(
+          fontSize: fontSize,
+          fontName: fontName,
+          textDecoration: textDecoration,
+          lineHeight: lineHeight,
+          letterSpacing: letterSpacing,
+          color: color,
+          effects: effects ?? (node is BlendMixin ? node.effects : const []),
+        ),
+      true => TextStyle(
+          color: Colors.red,
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          decorationColor: Colors.yellow,
+          decoration: TextDecoration.underline,
+        ),
+    };
 
     // Replace with fx symbol if required.
     if (replaceVariableWithSymbol) {
@@ -124,6 +136,7 @@ class TextUtils {
     required List<VariableData> variablesOverrides,
     required NullSubstitutionMode nullSubstitutionMode,
     required bool replaceVariablesWithSymbol,
+    bool hasMissingFont = false,
     List<Effect>? effects,
     Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
   }) {
@@ -137,6 +150,7 @@ class TextUtils {
           variablesOverrides: variablesOverrides,
           nullSubstitutionMode: nullSubstitutionMode,
           replaceVariableWithSymbol: replaceVariablesWithSymbol,
+          hasMissingFont: hasMissingFont,
           tapGestureRecognizer: tapGestureRecognizers[prop.link],
           effects: effects ?? (node is BlendMixin ? node.effects : const []),
         ),
@@ -181,6 +195,7 @@ class TextUtils {
     required List<VariableData> variablesOverrides,
     required NullSubstitutionMode nullSubstitutionMode,
     required bool replaceVariablesWithSymbol,
+    bool hasMissingFont = false,
     Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
   }) {
     final spans = buildTextSpansForProps(
@@ -192,6 +207,7 @@ class TextUtils {
       nullSubstitutionMode: nullSubstitutionMode,
       replaceVariablesWithSymbol: replaceVariablesWithSymbol,
       tapGestureRecognizers: tapGestureRecognizers,
+      hasMissingFont: hasMissingFont,
     );
 
     return Text.rich(
@@ -224,6 +240,7 @@ class TextUtils {
     required List<VariableData> variablesOverrides,
     required NullSubstitutionMode nullSubstitutionMode,
     required bool replaceVariablesWithSymbol,
+    bool hasMissingFont = false,
   }) {
     final span = buildTextSpan(
       context,
@@ -238,6 +255,7 @@ class TextUtils {
       variablesOverrides: variablesOverrides,
       nullSubstitutionMode: nullSubstitutionMode,
       replaceVariableWithSymbol: replaceVariablesWithSymbol,
+      hasMissingFont: hasMissingFont,
       tapGestureRecognizer: tapGestureRecognizers,
       node: node,
     );
