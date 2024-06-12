@@ -67,11 +67,6 @@ class PassiveWebViewWidget extends StatefulWidget {
   final List<VariableData> variables;
   final WidgetBuildSettings settings;
 
-  static const Set<TargetPlatform> supportedPlatforms = {
-    TargetPlatform.android,
-    TargetPlatform.iOS,
-  };
-
   const PassiveWebViewWidget({
     super.key,
     required this.node,
@@ -84,6 +79,81 @@ class PassiveWebViewWidget extends StatefulWidget {
 }
 
 class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return AdaptiveNodeBox(
+      node: widget.node,
+      child: RawWebViewWidget(
+        properties: widget.node.properties,
+        settings: widget.settings,
+      ),
+    );
+  }
+}
+
+class WebViewPreviewWidget extends StatelessWidget {
+  final Widget icon;
+  final double aspectRatio;
+
+  const WebViewPreviewWidget({
+    super.key,
+    required this.icon,
+    this.aspectRatio = 1,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue),
+      ),
+      child: Container(
+        margin: const EdgeInsets.all(8),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: FractionallySizedBox(
+          widthFactor: aspectRatio > 1 ? 0.2 : null,
+          heightFactor: aspectRatio < 1 ? 0.2 : null,
+          child: LayoutBuilder(builder: (context, constraints) {
+            return IconTheme(
+              data: IconThemeData(
+                color: Colors.blue,
+                size: min(constraints.maxWidth, constraints.maxHeight),
+              ),
+              child: icon,
+            );
+          }),
+        ),
+      ),
+    );
+  }
+}
+
+class RawWebViewWidget extends StatefulWidget {
+  final WebViewProperties properties;
+  final WidgetBuildSettings settings;
+
+  static const Set<TargetPlatform> supportedPlatforms = {
+    TargetPlatform.android,
+    TargetPlatform.iOS,
+  };
+
+  const RawWebViewWidget({
+    super.key,
+    required this.properties,
+    required this.settings,
+  });
+
+  @override
+  State<RawWebViewWidget> createState() => _RawWebViewWidgetState();
+}
+
+class _RawWebViewWidgetState extends State<RawWebViewWidget> {
   late WebViewController _controller;
 
   bool _isDataLoaded = false;
@@ -96,7 +166,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
       return;
     }
 
-    final props = widget.node.properties;
+    final props = widget.properties;
     if (kIsWeb) {
       // WebView on web only supports loadRequest. Any other method invocation
       // on the controller will result in an exception. Be aware!!
@@ -143,7 +213,7 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
 
   void _loadData() {
     final ScopedValues scopedValues = ScopedValues.of(context);
-    final props = widget.node.properties;
+    final props = widget.properties;
     switch (props.webviewType) {
       case WebViewType.webpage:
         final properties = props as WebPageWebViewProperties;
@@ -189,27 +259,26 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final props = widget.node.properties;
-    Widget wid;
+    final props = widget.properties;
+    Widget child;
     switch (props.webviewType) {
       case WebViewType.webpage:
-        wid = buildWebpageWebView(context, props as WebPageWebViewProperties);
+        child = buildWebpageWebView(context, props as WebPageWebViewProperties);
       case WebViewType.googleMaps:
-        wid = buildGoogleMapsWebView(
+        child = buildGoogleMapsWebView(
             context, props as GoogleMapsWebViewProperties);
       case WebViewType.twitter:
-        wid = buildTwitterWebView(context, props as TwitterWebViewProperties);
+        child = buildTwitterWebView(context, props as TwitterWebViewProperties);
     }
 
-    return AdaptiveNodeBox(node: widget.node, child: wid);
+    return child;
   }
 
   Widget buildWebpageWebView(
       BuildContext context, WebPageWebViewProperties properties) {
     if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      return WebViewPreviewWidget(
-        icon: const Icon(Icons.language_rounded),
-        node: widget.node,
+      return const WebViewPreviewWidget(
+        icon: Icon(Icons.language_rounded),
       );
     }
 
@@ -239,9 +308,8 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
   Widget buildGoogleMapsWebView(
       BuildContext context, GoogleMapsWebViewProperties properties) {
     if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      return WebViewPreviewWidget(
-        icon: const Icon(Icons.map_outlined),
-        node: widget.node,
+      return const WebViewPreviewWidget(
+        icon: Icon(Icons.map_outlined),
       );
     }
 
@@ -262,10 +330,9 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
   Widget buildTwitterWebView(
       BuildContext context, TwitterWebViewProperties properties) {
     if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      return WebViewPreviewWidget(
-        icon: const ImageIcon(
+      return const WebViewPreviewWidget(
+        icon: ImageIcon(
             NetworkImage('https://img.icons8.com/color/344/twitter--v2.png')),
-        node: widget.node,
       );
     }
 
@@ -294,52 +361,6 @@ class _PassiveWebViewWidgetState extends State<PassiveWebViewWidget> {
           const Factory<ForcePressGestureRecognizer>(
               ForcePressGestureRecognizer.new),
       },
-    );
-  }
-}
-
-class WebViewPreviewWidget extends StatelessWidget {
-  final Widget icon;
-  final BaseNode node;
-
-  const WebViewPreviewWidget({
-    super.key,
-    required this.icon,
-    required this.node,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AdaptiveNodeBox(
-      node: node,
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.blue),
-        ),
-        child: Container(
-          margin: const EdgeInsets.all(8),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: Colors.blue.shade50,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: FractionallySizedBox(
-            widthFactor: node.basicBoxLocal.aspectRatio > 1 ? 0.2 : null,
-            heightFactor: node.basicBoxLocal.aspectRatio < 1 ? 0.2 : null,
-            child: LayoutBuilder(builder: (context, constraints) {
-              return IconTheme(
-                data: IconThemeData(
-                  color: Colors.blue,
-                  size: min(constraints.maxWidth, constraints.maxHeight),
-                ),
-                child: icon,
-              );
-            }),
-          ),
-        ),
-      ),
     );
   }
 }
