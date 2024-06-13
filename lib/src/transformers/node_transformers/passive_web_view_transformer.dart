@@ -208,10 +208,11 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
       _controller.setBackgroundColor(
           props.backgroundColor?.toFlutterColor() ?? Colors.transparent);
     }
-    _controller.setNavigationDelegate(NavigationDelegate(
-      onPageFinished: (url) => widget.onPageLoaded?.call(_controller, url),
-      onPageStarted: (url) => widget.onPageStarted?.call(_controller, url),
-    ));
+
+    // _controller.setNavigationDelegate(NavigationDelegate(
+    //   onPageFinished: (url) => widget.onPageLoaded?.call(_controller, url),
+    //   onPageStarted: (url) => widget.onPageStarted?.call(_controller, url),
+    // ));
   }
 
   Future<void> _loadData() {
