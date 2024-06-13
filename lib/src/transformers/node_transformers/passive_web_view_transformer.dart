@@ -137,16 +137,13 @@ class WebViewPreviewWidget extends StatelessWidget {
 class RawWebViewWidget extends StatefulWidget {
   final WebViewProperties properties;
   final WidgetBuildSettings settings;
-
-  static const Set<TargetPlatform> supportedPlatforms = {
-    TargetPlatform.android,
-    TargetPlatform.iOS,
-  };
+  final ValueChanged<WebViewController>? onPageLoaded;
 
   const RawWebViewWidget({
     super.key,
     required this.properties,
     required this.settings,
+    this.onPageLoaded,
   });
 
   @override
@@ -211,7 +208,7 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
     }
   }
 
-  void _loadData() {
+  Future<void> _loadData() {
     final ScopedValues scopedValues = ScopedValues.of(context);
     final props = widget.properties;
     switch (props.webviewType) {
@@ -225,22 +222,22 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
         switch (properties.pageSourceType) {
           case WebViewWebpageSourceType.url:
             print('Loading URL: $input');
-            _controller.loadRequest(Uri.parse(input));
+            return _controller.loadRequest(Uri.parse(input));
           case WebViewWebpageSourceType.html:
             final content = _buildHtmlContent(input);
-            _controller.loadRequest(Uri.parse(content));
+            return _controller.loadRequest(Uri.parse(content));
           case WebViewWebpageSourceType.asset:
             // provided from onWebViewCreated callback.
-            _controller.loadFlutterAsset(input);
+            return _controller.loadFlutterAsset(input);
         }
       case WebViewType.googleMaps:
         final content = buildGoogleMapsURL(
             props as GoogleMapsWebViewProperties, scopedValues);
-        _controller.loadRequest(Uri.parse(content));
+        return _controller.loadRequest(Uri.parse(content));
       case WebViewType.twitter:
         final content =
             buildTwitterURL(props as TwitterWebViewProperties, scopedValues);
-        _controller.loadRequest(Uri.parse(content));
+        return _controller.loadRequest(Uri.parse(content));
     }
   }
 
@@ -253,7 +250,9 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
     }
     if (!_isDataLoaded) {
       _isDataLoaded = true;
-      _loadData();
+      _loadData().then((value)  {
+        widget.onPageLoaded?.call(_controller);
+      });
     }
   }
 
