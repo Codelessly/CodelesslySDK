@@ -137,12 +137,14 @@ class WebViewPreviewWidget extends StatelessWidget {
 class RawWebViewWidget extends StatefulWidget {
   final WebViewProperties properties;
   final WidgetBuildSettings settings;
-  final ValueChanged<WebViewController>? onPageLoaded;
+  final void Function(WebViewController controller, String url)? onPageStarted;
+  final void Function(WebViewController controller, String url)? onPageLoaded;
 
   const RawWebViewWidget({
     super.key,
     required this.properties,
     required this.settings,
+    this.onPageStarted,
     this.onPageLoaded,
   });
 
@@ -205,6 +207,11 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
 
       _controller.setBackgroundColor(
           props.backgroundColor?.toFlutterColor() ?? Colors.transparent);
+
+      _controller.setNavigationDelegate(NavigationDelegate(
+        onPageFinished: (url) => widget.onPageLoaded?.call(_controller, url),
+        onPageStarted: (url) => widget.onPageStarted?.call(_controller, url),
+      ));
     }
   }
 
@@ -250,9 +257,7 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
     }
     if (!_isDataLoaded) {
       _isDataLoaded = true;
-      _loadData().then((value)  {
-        widget.onPageLoaded?.call(_controller);
-      });
+      _loadData();
     }
   }
 
