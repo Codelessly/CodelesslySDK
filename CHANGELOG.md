@@ -1,3 +1,11 @@
+## 2.0.0
+- Firebase v3.1.0 support.
+- Update Checkbox shrinkwrap and padding sizing.
+- Change default Stroke cap to none.
+- Optimize node sorting algorithm.
+- Highlight text with missing fonts.
+- Improve WebView widget support for multiple platforms.
+
 ## 1.9.0
 - Flutter v3.22 support.
 
