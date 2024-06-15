@@ -13,11 +13,6 @@ enum Role {
 
   const Role(this.label);
 
-  String get article => switch (this) {
-        owner || editor => 'an',
-        viewer => 'a',
-      };
-
   /// ----------------- POWER HIERARCHY -----------------
 
   bool isHigherLevelThan(Role other) => switch (this) {
