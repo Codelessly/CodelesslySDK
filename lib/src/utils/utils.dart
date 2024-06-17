@@ -194,7 +194,7 @@ BaseNode? getWidestNode(Iterable<BaseNode> siblings) {
 
     // If both siblings have alignment or both do not have alignment, compare
     // their widths.
-    return a.basicBoxLocal.width > b.basicBoxLocal.width ? a : b;
+    return a.outerBoxLocal.width > b.outerBoxLocal.width ? a : b;
   });
 }
 
@@ -216,7 +216,7 @@ BaseNode? getTallestNode(Iterable<BaseNode> siblings) {
 
     // If both siblings have alignment or both do not have alignment, compare
     // their heights.
-    return a.basicBoxLocal.height > b.basicBoxLocal.height ? a : b;
+    return a.outerBoxLocal.height > b.outerBoxLocal.height ? a : b;
   });
 }
 
@@ -235,19 +235,19 @@ BaseNode? getLargestNodeForWrappingStack(
   // Only horizontal wrap.
   if (parent.isHorizontalWrap && !parent.isVerticalWrap) {
     return sibling.reduce(
-        (a, b) => a.basicBoxLocal.width > b.basicBoxLocal.width ? a : b);
+        (a, b) => a.outerBoxLocal.width > b.outerBoxLocal.width ? a : b);
   }
 
   // Only vertical wrap, compare heights.
   if (parent.isVerticalWrap && !parent.isHorizontalWrap) {
     return sibling.reduce(
-        (a, b) => a.basicBoxLocal.height > b.basicBoxLocal.height ? a : b);
+        (a, b) => a.outerBoxLocal.height > b.outerBoxLocal.height ? a : b);
   }
 
   // Both wrap.
   return sibling.reduce((a, b) =>
-      a.basicBoxLocal.height * a.basicBoxLocal.width >
-              b.basicBoxLocal.height * b.basicBoxLocal.width
+      a.outerBoxLocal.height * a.outerBoxLocal.width >
+              b.outerBoxLocal.height * b.outerBoxLocal.width
           ? a
           : b);
 }
