@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/error_handler.dart';
@@ -97,7 +99,6 @@ class CodelesslyAuthManager extends AuthManager {
     // the server attached a custom claim to the user's token to allow
     // Codelessly Cloud Data to work.
     _idTokenResult = await firebaseAuth.currentUser!.getIdTokenResult(true);
-    final claims = _idTokenResult!.claims;
 
     if (cacheManager.isCached(authCacheKey)) {
       try {
@@ -115,11 +116,7 @@ class CodelesslyAuthManager extends AuthManager {
         // also need to invalidate the cache and fetch auth data from the
         // server and revalidate.
         if (cachedAuthData.authToken == config.authToken &&
-            claims != null &&
-            claims.containsKey('project_ids') &&
-            claims['project_ids'] is List &&
-            (claims['project_ids'] as List)
-                .contains(cachedAuthData.projectId)) {
+            checkClaimsForProject(_idTokenResult, cachedAuthData.projectId)) {
           _authData = cachedAuthData;
           _authStreamController.add(_authData);
         } else {
@@ -202,10 +199,18 @@ class CodelesslyAuthManager extends AuthManager {
       return false;
     }
 
-    final claims = result.claims;
+    final Map<String, dynamic> claims;
+
+    // https://github.com/firebase/flutterfire/issues/11768#issuecomment-1888363494
+    // A temporary fix for windows platform until the issue is resolved.
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+      claims = JwtDecoder.decode(result.toString());
+    } else {
+      claims = result.claims ?? {};
+    }
 
     log('User claims: $claims', largePrint: true);
-    if (claims == null) {
+    if (claims.isEmpty) {
       log('User claims is null. Cannot check claims for project id [$projectId]');
       return false;
     }
@@ -298,7 +303,7 @@ class CodelesslyAuthManager extends AuthManager {
     try {
       log('Authenticating token...');
 
-      final authData = await verifyProjectAuthToken(
+      final AuthData? authData = await verifyProjectAuthToken(
         userToken: _idTokenResult!.token!,
         config: config,
         postSuccess: postAuthSuccess,
@@ -385,8 +390,10 @@ class CodelesslyAuthManager extends AuthManager {
       // successful.
       if (result.statusCode == 200) {
         logger.log(
-            label, 'Successful auth token verification response received.',
-            largePrint: true);
+          label,
+          'Successful auth token verification response received.',
+          largePrint: true,
+        );
 
         // Parse the body of the response to JSON.
         final jsonBody = jsonDecode(result.body);
