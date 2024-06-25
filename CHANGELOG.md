@@ -1,3 +1,6 @@
+## 2.0.1
+- Fix nested shrink-wrapping Stacks size calculations.
+
 ## 2.0.0
 - Firebase v3.1.0 support.
 - Update Checkbox shrinkwrap and padding sizing.
