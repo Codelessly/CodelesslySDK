@@ -118,21 +118,33 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
     if (node is! ReactionMixin) return widget;
-    if (node is! BlendMixin) return widget;
     if (node case CanvasNode() || SpacerNode()) return widget;
-    if (node is CustomPropertiesMixin && node is! IconNode) return widget;
-    final InkWellModel? inkWell = node.inkWell;
+    if (node is CustomPropertiesMixin &&
+        node.handlesDefaultReactionsInternally) {
+      // Node is a custom properties mixin and intends to handle reactions
+      // internally, even default ones. So, we don't need to wrap it with
+      // reactions.
+      return widget;
+    }
+    final InkWellModel? inkWell = node is BlendMixin ? node.inkWell : null;
 
+    // Due to the way inkwell works internally, it is handled by
+    // the individual node transformers internally if it is default shape mixin
+    // because then it has fills that obscure the inkwell effect.
     if (node is DefaultShapeNode && inkWell != null) return widget;
 
     final List<Reaction> onClickReactions = (node as ReactionMixin)
         .reactions
-        .where((reaction) => reaction.trigger.type == TriggerType.click)
+        .where((reaction) =>
+            reaction.trigger.type == TriggerType.click &&
+            reaction.action.enabled)
         .toList();
 
     final List<Reaction> onLongPressReactions = (node as ReactionMixin)
         .reactions
-        .where((reaction) => reaction.trigger.type == TriggerType.longPress)
+        .where((reaction) =>
+            reaction.trigger.type == TriggerType.longPress &&
+            reaction.action.enabled)
         .toList();
 
     if (inkWell != null) {
@@ -151,9 +163,8 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
           ),
           borderRadius: getBorderRadius(node),
           overlayColor: inkWell.overlayColor != null
-              ? MaterialStatePropertyAll<Color>(
-                  inkWell.overlayColor!.toFlutterColor(),
-                )
+              ? WidgetStatePropertyAll<Color>(
+                  inkWell.overlayColor!.toFlutterColor())
               : null,
           splashColor: inkWell.splashColor?.toFlutterColor(),
           highlightColor: inkWell.highlightColor?.toFlutterColor(),
@@ -163,12 +174,15 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
         ),
       );
     } else {
-      if ((node as ReactionMixin).reactions.isEmpty) {
+      if (onClickReactions.isEmpty && onLongPressReactions.isEmpty) {
         return widget;
       }
+      // TODO: should handle TriggerType.hover and TriggerType.unhover too.
       return MouseRegion(
         cursor: SystemMouseCursors.click,
+        hitTestBehavior: HitTestBehavior.opaque,
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () => FunctionsRepository.triggerAction(
             context,
             TriggerType.click,
