@@ -16,6 +16,7 @@ export 'src/data/network_data_repository.dart';
 export 'src/data/web_data_repository.dart';
 export 'src/functions/functions.dart';
 export 'src/logging/codelessly_logger.dart';
+export 'src/logging/error_handler.dart';
 export 'src/model/asset_model.dart';
 export 'src/model/auth_data.dart';
 export 'src/model/custom_component.dart';
