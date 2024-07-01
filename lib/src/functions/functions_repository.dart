@@ -11,7 +11,6 @@ import 'package:rfc_6901/rfc_6901.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/error_handler.dart';
 import '../ui/codelessly_dialog_widget.dart';
 
 /// Enum representing the types of API requests.
