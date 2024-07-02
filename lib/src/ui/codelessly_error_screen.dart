@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../logging/error_handler.dart';
 import '../model/publish_source.dart';
 
 /// A dialog UI that is displayed when something crashes in the SDK. This is
 /// a graceful way of dealing with exceptions.
-class CodelesslyErrorScreen extends StatelessWidget {
+class CodelesslyErrorScreen extends StatefulWidget {
   final dynamic exception;
   final PublishSource publishSource;
 
@@ -16,13 +17,20 @@ class CodelesslyErrorScreen extends StatelessWidget {
   });
 
   @override
+  State<CodelesslyErrorScreen> createState() => _CodelesslyErrorScreenState();
+}
+
+class _CodelesslyErrorScreenState extends State<CodelesslyErrorScreen> {
+  bool detailsVisible = false;
+
+  @override
   Widget build(BuildContext context) {
     // if (!publishSource.isPreview) return const SizedBox.shrink();
 
     final String message;
     String? title;
-    if (exception is CodelesslyException) {
-      final CodelesslyException ce = exception as CodelesslyException;
+    if (widget.exception is CodelesslyException) {
+      final CodelesslyException ce = widget.exception as CodelesslyException;
       title = ce.type.label;
       switch (ce.type) {
         case ErrorType.invalidAuthToken:
@@ -34,7 +42,7 @@ class CodelesslyErrorScreen extends StatelessWidget {
         case ErrorType.projectNotFound:
           message = '${ce.message ?? 'Project not found!'}'
               '\nPlease check the provided auth token and try again.';
-        case ErrorType.layoutNotFound:
+        case ErrorType.layoutFailed:
           message = '${ce.message ?? 'Layout not found.'}'
               '\nAre you sure the layout ID is correct? If yes, are you sure '
               'you published it successfully through the Codelessly publish '
@@ -65,18 +73,18 @@ class CodelesslyErrorScreen extends StatelessWidget {
           message = '${ce.message ?? 'Failed to connect to the internet.'}'
               '\nPlease check your internet connection and try again.';
         case ErrorType.assertionError:
-          message = (exception as CodelesslyException).message ??
+          message = (widget.exception as CodelesslyException).message ??
               'Assertion error!\nYou used the SDK incorrectly!.';
         case ErrorType.notInitializedError:
-          message = (exception as CodelesslyException).message ??
+          message = (widget.exception as CodelesslyException).message ??
               'Not initialized error!\nYou used the SDK incorrectly!.';
         case ErrorType.other:
-          message = (exception as CodelesslyException).message ??
+          message = (widget.exception as CodelesslyException).message ??
               'Unknown error!\nSorry this happened :(';
       }
     } else {
       message =
-          'An unexpected error happened!${exception != null ? '\n$exception' : ''}';
+          'An unexpected error happened!${widget.exception != null ? '\n${widget.exception}' : ''}';
     }
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -118,13 +126,90 @@ class CodelesslyErrorScreen extends StatelessWidget {
                           textAlign: TextAlign.left,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
-                        if (exception case CodelesslyException ex)
-                          if (ex.originalException != null)
-                            Text(
-                              ex.originalException.toString(),
-                              textAlign: TextAlign.left,
-                              style: Theme.of(context).textTheme.bodyMedium,
+                        if (widget.exception case CodelesslyException ex)
+                          if (ex.originalException != null) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .tertiaryContainer,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.only(
+                                top: 8,
+                                left: 16,
+                                right: 16,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          'Error Details',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.copy),
+                                        iconSize: 14,
+                                        onPressed: () {
+                                          Clipboard.setData(
+                                            ClipboardData(
+                                              text:
+                                                  '${ex.originalException}\n\n${ex.stacktrace}',
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(
+                                          detailsVisible
+                                              ? Icons.expand_less
+                                              : Icons.expand_more,
+                                        ),
+                                        iconSize: 14,
+                                        onPressed: () {
+                                          setState(() {
+                                            detailsVisible = !detailsVisible;
+                                          });
+                                        },
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ClipRect(
+                                    child: AnimatedAlign(
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      curve: Curves.easeOutQuart,
+                                      alignment: Alignment.topCenter,
+                                      heightFactor: detailsVisible ? 1 : 0,
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxHeight: 200,
+                                        ),
+                                        child: SingleChildScrollView(
+                                          padding: EdgeInsets.zero,
+                                          child: Text(
+                                            '${ex.originalException}\n\n${ex.stacktrace}',
+                                            textAlign: TextAlign.left,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                          ]
                       ],
                     ),
                   ),

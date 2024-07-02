@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/error_handler.dart';
 
 /// Orchestrates the data flow for the SDK.
 class DataManager {
@@ -991,8 +990,20 @@ class DataManager {
   }) async {
     if (_publishModel != null && queuingDone) {
       log('[queueLayout] No longer queuing. Downloading layout [$layoutID] immediately...');
-      await getOrFetchPopulatedLayout(layoutID: layoutID);
-      log('[queueLayout] Layout [$layoutID] download complete.');
+      try {
+        await getOrFetchPopulatedLayout(layoutID: layoutID);
+        log('[queueLayout] Layout [$layoutID] download complete.');
+      } catch (e, str) {
+        log('[queueLayout] Layout [$layoutID] failed to download immediately.');
+        final exception = CodelesslyException(
+          'Failed to download layout [$layoutID].',
+          originalException: e,
+          stacktrace: str,
+          layoutID: layoutID,
+          type: ErrorType.layoutFailed,
+        );
+        errorHandler.captureException(exception, stacktrace: str);
+      }
     } else {
       if (_downloadQueue.contains(layoutID)) {
         if (prioritize) {

@@ -23,7 +23,7 @@ enum ErrorType {
   projectNotFound('Project not found'),
 
   /// The layout was not found in the database.
-  layoutNotFound('Layout not found'),
+  layoutFailed('Layout failed'),
 
   /// Failed to store an object in cache.
   cacheStoreException('Failed to store value in cache'),
@@ -230,7 +230,7 @@ class CodelesslyException implements Exception {
     StackTrace? stacktrace,
   }) : this(
           message,
-          type: ErrorType.layoutNotFound,
+          type: ErrorType.layoutFailed,
           layoutID: layoutID,
           url: url,
           originalException: originalException,
@@ -246,7 +246,7 @@ class CodelesslyException implements Exception {
     StackTrace? stacktrace,
   }) : this(
           message,
-          type: ErrorType.layoutNotFound,
+          type: ErrorType.layoutFailed,
           apiId: apiId,
           url: url,
           originalException: originalException,
