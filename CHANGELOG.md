@@ -1,3 +1,8 @@
+## 2.0.2
+- Update CodelesslyException to display better errors during development.
+- Update external components with reactions.
+- Add click and long click reactions to rectangle node.
+
 ## 2.0.1
 - Fix nested shrink-wrapping Stacks size calculations.
 
