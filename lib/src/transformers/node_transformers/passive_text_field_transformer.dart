@@ -1,5 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
@@ -219,7 +220,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
                 signed: widget.node.properties.showSignKey)
             : widget.node.properties.keyboardType.toFlutter();
 
-    Widget field = TextField(
+    Widget field = TextFormField(
       focusNode: focusNode,
       autocorrect: widget.node.properties.autoCorrect,
       autofocus: !widget.settings.isPreview && widget.node.properties.autoFocus,
@@ -244,6 +245,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       cursorWidth: widget.node.properties.cursorWidth,
       cursorRadius: Radius.circular(widget.node.properties.cursorRadius),
       maxLength: maxLength,
+      validator: widget.node.properties.validator,
+      inputFormatters: [
+        if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
+        if (widget.node.properties.formatter.flutterFormatter
+            case var formatter?)
+          formatter,
+      ],
       maxLines:
           widget.node.properties.maxLines.orNullIf(!widget.node.isVerticalWrap),
       minLines:
@@ -255,7 +263,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       onTap: () => widget.onTap?.call(context, controller.text),
       onChanged: (value) => widget.onChanged?.call(context, value),
       onEditingComplete: () {},
-      onSubmitted: (value) {
+      onFieldSubmitted: (value) {
         // handled by the focus listener!
       },
       decoration: getDecoration(
