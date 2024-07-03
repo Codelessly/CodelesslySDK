@@ -246,6 +246,8 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       cursorRadius: Radius.circular(widget.node.properties.cursorRadius),
       maxLength: maxLength,
       validator: widget.node.properties.validator,
+      autofillHints:
+          widget.node.properties.autofillHints.map((hint) => hint.code),
       inputFormatters: [
         if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
         if (widget.node.properties.formatter.flutterFormatter
