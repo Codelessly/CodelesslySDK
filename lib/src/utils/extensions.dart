@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' as flutter;
 import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
@@ -1796,4 +1796,15 @@ extension LayoutGroupsExt on Map<String, List<Breakpoint>> {
 
 extension VariableDataExt on VariableData {
   bool get isApiVariable => name.startsWith(SDKConstants.apiVariablePrefix);
+}
+
+extension TextFieldFormatterExt on TextInputFormatterModel {
+  TextInputFormatter? get flutterFormatter {
+    return switch (this) {
+      TextInputFormatterModel.none => null,
+      TextInputFormatterModel.digitsOnly =>
+        FilteringTextInputFormatter.digitsOnly,
+      _ => FilteringTextInputFormatter.allow(RegExp(pattern)),
+    };
+  }
 }
