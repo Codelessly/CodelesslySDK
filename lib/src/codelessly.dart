@@ -19,7 +19,7 @@ typedef BreakpointsListener = void Function(
 /// Usage:
 ///
 ///   // Initialize SDK
-///   Codelessly.instance.initializeSDK(CodelesslyConfig(authToken: XXX));
+///   Codelessly.instance.initialize(config: CodelesslyConfig(authToken: XXX));
 ///
 ///   // Get global instance
 ///   Codelessly.instance;
@@ -31,7 +31,7 @@ class Codelessly {
   static final Codelessly _instance = Codelessly();
 
   /// Returns the global singleton instance of the SDK.
-  /// Initialization is needed before formal usage.
+  /// Initialization is needed before usage.
   static Codelessly get instance => _instance;
 
   CodelesslyConfig? _config;
@@ -139,44 +139,6 @@ class Codelessly {
   final List<NavigationListener> _navigationListeners = [];
 
   final List<BreakpointsListener> _breakpointsListeners = [];
-
-  /// Calls navigation listeners when navigation happens.
-  /// Provided [context] must be of the destination widget. This context
-  /// can be used to retrieve new [CodelesslyContext].
-  void notifyNavigationListeners(BuildContext context) {
-    _navigationListeners.forEach((listener) => listener(context));
-  }
-
-  /// Adds a global listener for navigation.
-  void addNavigationListener(NavigationListener callback) {
-    if (!_navigationListeners.contains(callback)) {
-      _navigationListeners.add(callback);
-    }
-  }
-
-  /// Removes a global navigation listener.
-  void removeNavigationListener(NavigationListener callback) {
-    _navigationListeners.remove(callback);
-  }
-
-  /// Calls navigation listeners when navigation happens.
-  /// Provided [context] must be of the destination widget. This context
-  /// can be used to retrieve new [CodelesslyContext].
-  void notifyBreakpointsListener(BuildContext context, Breakpoint breakpoint) {
-    _breakpointsListeners.forEach((listener) => listener(context, breakpoint));
-  }
-
-  /// Adds a global listener for navigation.
-  void addBreakpointsListener(BreakpointsListener callback) {
-    if (!_breakpointsListeners.contains(callback)) {
-      _breakpointsListeners.add(callback);
-    }
-  }
-
-  /// Removes a global navigation listener.
-  void removeBreakpointsListener(BreakpointsListener callback) {
-    _breakpointsListeners.remove(callback);
-  }
 
   /// Creates a new instance of [Codelessly].
   Codelessly({
@@ -404,55 +366,84 @@ class Codelessly {
       return;
     }
 
-    _didInitializeFirebase = true;
-
     final String name = config.firebaseInstanceName;
     final FirebaseOptions firebaseOptions = config.firebaseOptions;
 
-    log('Initializing Firebase instance with project ID: [${firebaseOptions.projectId}] and instance name [$name]');
+    log('Initializing Firebase instance with project ID: [${firebaseOptions.projectId}] and Firebase instance name [$name]');
 
     final Stopwatch stopwatch = Stopwatch()..start();
     try {
+      // If no [DEFAULT] firebase app is initialized, the entire Firebase SDK
+      // will crash. To avoid this, we initialize the default app with the
+      // provided configuration.
       try {
         // Initialize default app if no default app exists.
         if (Firebase.apps.isEmpty) {
           _firebaseApp = await Firebase.initializeApp(options: firebaseOptions);
         }
-      } catch (e) {
-        // On web, Firebase.apps crashes if there is no default app, so we
-        // initialize it here if that happens.
+      } on FirebaseException catch (_) {
+        // On web, Firebase.apps crashes with error [core/not-initialized] if
+        // the list is empty and no app is registered, so we catch the error
+        // here and ignore it.
         _firebaseApp = await Firebase.initializeApp(options: firebaseOptions);
       } finally {
-        log(
-          'Firebase default app not initialized. Either the the project '
-          "doesn't have its own firebase configuration or the firebase "
-          'configuration is not initialized before initializing Codelessly. '
-          'As such, initialized the default FirebaseApp with Codelessly '
-          'configs.',
-          largePrint: true,
-        );
+        if (_firebaseApp != null) {
+          log(
+            'Since no default Firebase app was found registered, IE: You did '
+            'not call Firebase.initializeApp() before initializing the '
+            'CodelesslySDK, the SDK will instead be initialized using the '
+            'default Firebase instance. Firebase crashes if no default app is '
+            'registered otherwise.\n\n'
+            'If your project requires its own Firebase instance, please call '
+            'Firebase.initializeApp() before initializing the CodelesslySDK. '
+            "The SDK will automatically use a custom Firebase instance that's "
+            'separate from your active default Firebase instance.',
+            largePrint: true,
+          );
+        }
       }
 
+      if (_firebaseApp != null) {
+        // Initialize Firestore and FirebaseAuth instances.
+        _firebaseFirestore = FirebaseFirestore.instanceFor(app: _firebaseApp!);
+        _firebaseAuth = FirebaseAuth.instanceFor(app: _firebaseApp!);
+        _didInitializeFirebase = true;
+
+        log('Codelessly successfully initialized the default Firebase app.');
+        return;
+      }
+
+      log('A default Firebase app was found already registered. Checking for an existing [$name] Firebase app.');
+
+      FirebaseApp? existingApp;
+
       // Check if an existing Firebase app instance can be reused.
-      final FirebaseApp? existingApp =
-          Firebase.apps.firstWhereOrNull((app) => app.name == name);
+      // We do not reach this point if the default app wasn't already registered
+      // and now is. This point is only reached if the default app was already
+      // registered and we're looking for a custom app to use alongside it.
+      //
+      // Therefore, Firebase.apps will never crash on web at this point in the
+      // code.
+      existingApp = Firebase.apps.firstWhereOrNull((app) => app.name == name);
 
       if (existingApp != null) {
-        log('Reusing existing Firebase app instance. name: [${existingApp.name}]');
+        log('Found an existing Firebase app instance with name: [$name]. Using it.');
         _firebaseApp = existingApp;
       } else {
         // Create a new Firebase app instance if none exists
-        log('Creating new Firebase app instance with name: [$name]');
+        log('No existing Firebase app instance found with name: [$name]. Registering a new one.');
         _firebaseApp =
             await Firebase.initializeApp(name: name, options: firebaseOptions);
       }
 
       // Initialize Firestore and FirebaseAuth instances.
       _firebaseFirestore = FirebaseFirestore.instanceFor(app: _firebaseApp!);
-
       _firebaseAuth = FirebaseAuth.instanceFor(app: _firebaseApp!);
+
+      _didInitializeFirebase = true;
+
+      log('Firebase instance initialized successfully [${_firebaseApp?.name}].');
     } catch (e, str) {
-      _didInitializeFirebase = false;
       initErrorHandler(
         automaticallySendCrashReports: false,
       );
@@ -716,5 +707,43 @@ class Codelessly {
     }
 
     return _status;
+  }
+
+  /// Calls navigation listeners when navigation happens.
+  /// Provided [context] must be of the destination widget. This context
+  /// can be used to retrieve new [CodelesslyContext].
+  void notifyNavigationListeners(BuildContext context) {
+    _navigationListeners.forEach((listener) => listener(context));
+  }
+
+  /// Adds a global listener for navigation.
+  void addNavigationListener(NavigationListener callback) {
+    if (!_navigationListeners.contains(callback)) {
+      _navigationListeners.add(callback);
+    }
+  }
+
+  /// Removes a global navigation listener.
+  void removeNavigationListener(NavigationListener callback) {
+    _navigationListeners.remove(callback);
+  }
+
+  /// Calls navigation listeners when navigation happens.
+  /// Provided [context] must be of the destination widget. This context
+  /// can be used to retrieve new [CodelesslyContext].
+  void notifyBreakpointsListener(BuildContext context, Breakpoint breakpoint) {
+    _breakpointsListeners.forEach((listener) => listener(context, breakpoint));
+  }
+
+  /// Adds a global listener for navigation.
+  void addBreakpointsListener(BreakpointsListener callback) {
+    if (!_breakpointsListeners.contains(callback)) {
+      _breakpointsListeners.add(callback);
+    }
+  }
+
+  /// Removes a global navigation listener.
+  void removeBreakpointsListener(BreakpointsListener callback) {
+    _breakpointsListeners.remove(callback);
   }
 }
