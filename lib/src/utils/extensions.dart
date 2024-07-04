@@ -1808,3 +1808,12 @@ extension TextFieldFormatterExt on TextInputFormatterModel {
     };
   }
 }
+
+extension AutovalidateModeCExt on AutovalidateModeC {
+  AutovalidateMode get flutterAutovalidateMode => switch (this) {
+        AutovalidateModeC.disabled => AutovalidateMode.disabled,
+        AutovalidateModeC.always => AutovalidateMode.always,
+        AutovalidateModeC.onUserInteraction =>
+          AutovalidateMode.onUserInteraction,
+      };
+}
