@@ -96,6 +96,8 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final Function(BuildContext context, List<Reaction> reactions, String value)?
       onIconTap;
   final bool useIconFonts;
+  final AutovalidateMode? autovalidateMode;
+  final FormFieldValidator<String>? validator;
 
   PassiveTextFieldWidget({
     super.key,
@@ -107,6 +109,8 @@ class PassiveTextFieldWidget extends StatefulWidget {
     this.useIconFonts = false,
     this.onIconTap,
     List<VariableData>? variables,
+    this.autovalidateMode,
+    this.validator,
   }) : variablesOverrides = variables ?? [];
 
   @override
@@ -220,6 +224,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
                 signed: widget.node.properties.showSignKey)
             : widget.node.properties.keyboardType.toFlutter();
 
+    final TextInputValidatorModel validatorModel =
+        widget.node.properties.validator;
+    final FormFieldValidator<String> validator =
+        widget.validator ?? validatorModel.validate;
+
     Widget field = TextFormField(
       focusNode: focusNode,
       autocorrect: widget.node.properties.autoCorrect,
@@ -245,7 +254,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       cursorWidth: widget.node.properties.cursorWidth,
       cursorRadius: Radius.circular(widget.node.properties.cursorRadius),
       maxLength: maxLength,
-      validator: widget.node.properties.validator,
+      validator: validator,
+      autovalidateMode: widget.autovalidateMode ??
+          widget.node.properties.autovalidateMode.flutterAutovalidateMode,
       autofillHints:
           widget.node.properties.autofillHints.map((hint) => hint.code),
       inputFormatters: [
