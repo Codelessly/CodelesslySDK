@@ -121,7 +121,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   late final TextEditingController controller =
       TextEditingController(text: getInitialText(widget.node.initialText));
 
-  late final FocusNode focusNode = FocusNode();
+  final FocusNode focusNode = FocusNode();
 
   String getInitialText(String text) {
     return PropertyValueDelegate.substituteVariables(
@@ -176,7 +176,10 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     }
   }
 
-  ///
+  /// The purpose of this function is to find the indexed value of the variable
+  /// 'item' if it is applied to the initial text. This is used to determine if
+  /// the controller text needs to be updated when the variable 'inputValue' is
+  /// not specified.
   String? findIndexedValueIfApplied(ScopedValues scopedValues) {
     if (scopedValues.indexedItem == null) return null;
     if (widget.node.initialText.isEmpty) return null;
