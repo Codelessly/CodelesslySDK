@@ -136,8 +136,8 @@ class PassiveRadioWidget extends StatelessWidget {
           onChanged: (value) => onChanged?.call(context, value),
           toggleable: node.properties.toggleable,
           splashRadius: node.properties.splashRadius,
-          fillColor: MaterialStateProperty.resolveWith((states) {
-            if (states.contains(MaterialState.selected)) {
+          fillColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
               return node.properties.activeColor.toFlutterColor();
             }
             return node.properties.inactiveColor.toFlutterColor();

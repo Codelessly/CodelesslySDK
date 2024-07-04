@@ -165,8 +165,8 @@ class _PassiveNavigationBarWidgetState
       data: NavigationBarThemeData(
         backgroundColor: bgColor,
         indicatorColor: style.indicatorColor?.toFlutterColor(),
-        iconTheme: MaterialStateProperty.resolveWith<IconThemeData>((states) {
-          if (states.contains(MaterialState.selected)) {
+        iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((states) {
+          if (states.contains(WidgetState.selected)) {
             return IconThemeData(
               color: style.selectedIconColor?.toFlutterColor(),
               size: style.selectedIconSize,
@@ -178,8 +178,8 @@ class _PassiveNavigationBarWidgetState
           );
         }),
         labelBehavior: style.labelBehavior.flutterLabelBehavior,
-        labelTextStyle: MaterialStateProperty.resolveWith<TextStyle?>((states) {
-          if (states.contains(MaterialState.selected)) {
+        labelTextStyle: WidgetStateProperty.resolveWith<TextStyle?>((states) {
+          if (states.contains(WidgetState.selected)) {
             return TextUtils.retrieveTextStyleFromProp(
                 style.selectedLabelStyle);
           }

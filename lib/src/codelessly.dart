@@ -8,7 +8,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 
 import '../codelessly_sdk.dart';
-import 'logging/error_handler.dart';
 import 'logging/reporter.dart';
 
 typedef NavigationListener = void Function(BuildContext context);

@@ -118,9 +118,7 @@ class PassiveSwitchWidget extends StatelessWidget {
       child: Transform.scale(
         scale: scale,
         child: Theme(
-          data: Theme.of(context).copyWith(
-            useMaterial3: node.properties.useMaterial3,
-          ),
+          data: Theme.of(context).copyWith(),
           child: Switch(
             value: value,
             onChanged: (value) => onChanged?.call(context, value),
@@ -134,14 +132,14 @@ class PassiveSwitchWidget extends StatelessWidget {
             hoverColor: node.properties.hoverColor.toFlutterColor(),
             focusColor: node.properties.focusColor.toFlutterColor(),
             splashRadius: node.properties.splashRadius,
-            trackOutlineColor: MaterialStateProperty.resolveWith((states) {
-              if (states.contains(MaterialState.selected)) {
+            trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
                 return node.properties.activeTrackBorderColor?.toFlutterColor();
               }
               return node.properties.inactiveTrackBorderColor?.toFlutterColor();
             }),
             trackOutlineWidth:
-                MaterialStateProperty.all(node.properties.trackOutlineWidth),
+                WidgetStateProperty.all(node.properties.trackOutlineWidth),
           ),
         ),
       ),

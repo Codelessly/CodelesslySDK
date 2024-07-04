@@ -220,7 +220,7 @@ ButtonStyle createMasterButtonStyle(ButtonNode node,
   }
   return buttonStyle.copyWith(
       elevation:
-          MaterialStateProperty.all(elevation ?? node.properties.elevation));
+          WidgetStateProperty.all(elevation ?? node.properties.elevation));
 }
 
 OutlinedBorder? getButtonShape(ButtonNode node, ScopedValues scopedValues) {
