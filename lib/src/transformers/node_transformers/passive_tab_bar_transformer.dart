@@ -160,12 +160,11 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
       width: width,
       height: height,
       child: Theme(
-        data: Theme.of(context)
-            .copyWith(useMaterial3: widget.node.properties.showDivider),
+        data: Theme.of(context).copyWith(),
         child: TabBar(
           controller: controller,
           padding: widget.node.padding.flutterEdgeInsets,
-          overlayColor: MaterialStateProperty.all(
+          overlayColor: WidgetStateProperty.all(
               widget.node.properties.overlayColor?.toFlutterColor()),
           dividerColor: widget.node.properties.dividerColor?.toFlutterColor(),
           indicatorColor:

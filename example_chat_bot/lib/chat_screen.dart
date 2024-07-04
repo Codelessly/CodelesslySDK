@@ -345,7 +345,7 @@ class _ChatScreenState extends State<ChatScreen>
                   // Background
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      color: context.colorScheme.background.withOpacity(0.75),
+                      color: context.colorScheme.surface.withOpacity(0.75),
                     ),
                     position: DecorationPosition.foreground,
                     child: AnimatedBuilder(

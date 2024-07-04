@@ -250,7 +250,7 @@ List<Widget> wrapWithInkWell(
               ),
       borderRadius: getBorderRadius(node),
       overlayColor: inkWell.overlayColor != null
-          ? MaterialStatePropertyAll<Color>(
+          ? WidgetStatePropertyAll<Color>(
               inkWell.overlayColor!.toFlutterColor(),
             )
           : null,

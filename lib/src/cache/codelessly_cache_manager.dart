@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/error_handler.dart';
 
 const String _label = 'Cache Manager';
 
