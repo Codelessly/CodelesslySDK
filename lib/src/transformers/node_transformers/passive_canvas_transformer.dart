@@ -285,6 +285,12 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         reactions: node.properties.floatingActionButton?.reactions);
   }
 
+  Widget wrapWithFormAndAutofill({required Widget child}) => AutofillGroup(
+        child: Form(
+          child: child,
+        ),
+      );
+
   @override
   Widget buildWidget(
     CanvasNode node,
@@ -294,18 +300,20 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     return PassiveCanvasWidget(
       node: node,
       settings: settings,
-      builder: (context) => switch (node.scaleMode) {
-        ScaleMode.responsive => _wrapInScaffoldForResponsive(
-            context: context,
-            node: node,
-            settings: settings,
-          ),
-        ScaleMode.autoScale => _wrapInScaffoldForAutoScale(
-            context: context,
-            node: node,
-            settings: settings,
-          )
-      },
+      builder: (context) => wrapWithFormAndAutofill(
+        child: switch (node.scaleMode) {
+          ScaleMode.responsive => _wrapInScaffoldForResponsive(
+              context: context,
+              node: node,
+              settings: settings,
+            ),
+          ScaleMode.autoScale => _wrapInScaffoldForAutoScale(
+              context: context,
+              node: node,
+              settings: settings,
+            )
+        },
+      ),
     );
   }
 
