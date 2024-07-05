@@ -285,6 +285,9 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         reactions: node.properties.floatingActionButton?.reactions);
   }
 
+  /// This would not work if the canvas is expected to have 2 different forms.
+  /// For that to work, a custom Form node is required. However, that's rarely
+  /// the case most of the time, so this should work for most cases!
   Widget wrapWithFormAndAutofill({required Widget child}) => AutofillGroup(
         child: Form(
           child: child,
