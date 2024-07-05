@@ -1811,7 +1811,7 @@ extension VariableDataExt on VariableData {
 extension TextFieldFormatterExt on TextInputFormatterModel {
   TextInputFormatter? toFlutterFormatter() {
     switch (this) {
-      case NoneTextInputFormatter():
+      case NoneTextInputFormatterModel():
         return null;
       case RegexTextInputFormatterModel formatter:
         if (!formatter.pattern.isRegex || formatter.pattern.isEmpty)
