@@ -457,7 +457,17 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
       // suffixIconConstraints:
       //     decoration.suffixIconConstraints.flutterConstraints,
-      counter: decoration.showCounter ? counterText : null,
+      counter: decoration.showCounter
+          ? decoration.counterText?.isNotEmpty == true
+              ? counterText
+              : null
+          : null,
+      counterText: decoration.showCounter ? null : '',
+      // counterText: decoration.showCounter
+      //     ? decoration.counterText?.isNotEmpty == true
+      //         ? decoration.counterText
+      //         : null
+      //     : '',
       counterStyle:
           TextUtils.retrieveTextStyleFromProp(decoration.counterStyle),
       filled: decoration.filled,

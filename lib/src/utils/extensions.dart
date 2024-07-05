@@ -1814,7 +1814,8 @@ extension TextFieldFormatterExt on TextInputFormatterModel {
       case NoneTextInputFormatter():
         return null;
       case RegexTextInputFormatterModel formatter:
-        if (!formatter.pattern.isRegex) return null;
+        if (!formatter.pattern.isRegex || formatter.pattern.isEmpty)
+          return null;
         return FilteringTextInputFormatter(
           RegExp(
             formatter.pattern,
