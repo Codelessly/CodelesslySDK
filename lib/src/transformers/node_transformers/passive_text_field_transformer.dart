@@ -264,7 +264,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
           widget.node.properties.autofillHints.map((hint) => hint.code),
       inputFormatters: [
         if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
-        if (widget.node.properties.formatter.flutterFormatter
+        if (widget.node.properties.formatter.toFlutterFormatter()
             case var formatter?)
           formatter,
       ],
