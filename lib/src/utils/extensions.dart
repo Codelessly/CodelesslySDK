@@ -1365,6 +1365,16 @@ extension StringExt on String {
     final formatted = tokens.map((e) => e.replaceAll(']', '')).join('/');
     return '/$formatted';
   }
+
+  /// Whether the string is a valid regular expression.
+  bool get isRegex {
+    try {
+      RegExp(this);
+    } on FormatException catch (_) {
+      return false;
+    }
+    return true;
+  }
 }
 
 /// Can match:
@@ -1799,13 +1809,24 @@ extension VariableDataExt on VariableData {
 }
 
 extension TextFieldFormatterExt on TextInputFormatterModel {
-  TextInputFormatter? get flutterFormatter {
-    return switch (this) {
-      TextInputFormatterModel.none => null,
-      TextInputFormatterModel.digitsOnly =>
-        FilteringTextInputFormatter.digitsOnly,
-      _ => FilteringTextInputFormatter.allow(RegExp(pattern)),
-    };
+  TextInputFormatter? toFlutterFormatter() {
+    switch (this) {
+      case NoneTextInputFormatter():
+        return null;
+      case RegexTextInputFormatterModel formatter:
+        if (!formatter.pattern.isRegex) return null;
+        return FilteringTextInputFormatter(
+          RegExp(
+            formatter.pattern,
+            unicode: formatter.unicode,
+            caseSensitive: formatter.caseSensitive,
+            multiLine: formatter.multiLine,
+            dotAll: formatter.dotAll,
+          ),
+          allow: formatter.allow,
+          replacementString: formatter.replacementString,
+        );
+    }
   }
 }
 
