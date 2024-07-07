@@ -383,21 +383,12 @@ class Codelessly {
         }
       } on FirebaseException catch (_) {
         // On web, Firebase.apps crashes with error [core/not-initialized] if
-        // the list is empty and no app is registered, so we catch the error
-        // here and ignore it.
+        // the list is empty and no app is registered. Catch the error here and ignore it.
         _firebaseApp = await Firebase.initializeApp(options: firebaseOptions);
       } finally {
         if (_firebaseApp != null) {
           log(
-            'Since no default Firebase app was found registered, IE: You did '
-            'not call Firebase.initializeApp() before initializing the '
-            'CodelesslySDK, the SDK will instead be initialized using the '
-            'default Firebase instance. Firebase crashes if no default app is '
-            'registered otherwise.\n\n'
-            'If your project requires its own Firebase instance, please call '
-            'Firebase.initializeApp() before initializing the CodelesslySDK. '
-            "The SDK will automatically use a custom Firebase instance that's "
-            'separate from your active default Firebase instance.',
+            'Firebase default app not initialized. Call Firebase.initializeApp() before initializing the CodelesslySDK.',
             largePrint: true,
           );
         }
@@ -418,12 +409,9 @@ class Codelessly {
       FirebaseApp? existingApp;
 
       // Check if an existing Firebase app instance can be reused.
-      // We do not reach this point if the default app wasn't already registered
-      // and now is. This point is only reached if the default app was already
-      // registered and we're looking for a custom app to use alongside it.
       //
-      // Therefore, Firebase.apps will never crash on web at this point in the
-      // code.
+      // This code is only run if a default Firebase app was already registered.
+      // Otherwise, calling Firebase.apps crashes on web.
       existingApp = Firebase.apps.firstWhereOrNull((app) => app.name == name);
 
       if (existingApp != null) {
