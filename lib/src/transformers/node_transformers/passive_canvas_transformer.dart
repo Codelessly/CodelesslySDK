@@ -288,11 +288,18 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   /// This would not work if the canvas is expected to have 2 different forms.
   /// For that to work, a custom Form node is required. However, that's rarely
   /// the case most of the time, so this should work for most cases!
-  Widget wrapWithFormAndAutofill({required Widget child}) => AutofillGroup(
-        child: Form(
-          child: child,
-        ),
-      );
+  Widget wrapWithFormAndAutofill({
+    required CanvasNode node,
+    required Widget child,
+    required WidgetBuildSettings settings,
+  }) {
+    final Widget widget = Form(child: child);
+    if (settings.isPreview) return widget;
+    return AutofillGroup(
+      key: ValueKey('autofill-group-${node.id}'),
+      child: widget,
+    );
+  }
 
   @override
   Widget buildWidget(
@@ -304,6 +311,8 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       node: node,
       settings: settings,
       builder: (context) => wrapWithFormAndAutofill(
+        node: node,
+        settings: settings,
         child: switch (node.scaleMode) {
           ScaleMode.responsive => _wrapInScaffoldForResponsive(
               context: context,

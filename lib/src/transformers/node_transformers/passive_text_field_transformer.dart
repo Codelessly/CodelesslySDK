@@ -261,7 +261,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       autovalidateMode: widget.autovalidateMode ??
           widget.node.properties.autovalidateMode.flutterAutovalidateMode,
       autofillHints:
-          widget.node.properties.autofillHints.map((hint) => hint.code),
+          AutofillGroup.maybeOf(context) != null && !widget.settings.isPreview
+              ? widget.node.properties.autofillHints.map((hint) => hint.code)
+              : null,
       inputFormatters: [
         if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
         if (widget.node.properties.formatter.toFlutterFormatter()
