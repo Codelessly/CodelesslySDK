@@ -96,6 +96,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final Function(BuildContext context, List<Reaction> reactions, String value)?
       onIconTap;
   final bool useIconFonts;
+  final bool withAutofill;
   final AutovalidateMode? autovalidateMode;
   final FormFieldValidator<String>? validator;
 
@@ -107,6 +108,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.useIconFonts = false,
+    this.withAutofill = true,
     this.onIconTap,
     List<VariableData>? variables,
     this.autovalidateMode,
@@ -205,39 +207,38 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final bool enabled = context.getNodeValue(widget.node.id, 'enabled') ??
-        widget.node.properties.enabled;
+    final TextFieldNode node = widget.node;
+    final TextFieldProperties properties = node.properties;
+
+    final bool enabled =
+        context.getNodeValue(node.id, 'enabled') ?? properties.enabled;
     final bool obscureText =
-        context.getNodeValue(widget.node.id, 'obscureText') ??
-            widget.node.properties.obscureText;
-    final bool readOnly = context.getNodeValue(widget.node.id, 'readOnly') ??
-        widget.node.properties.readOnly;
+        context.getNodeValue(node.id, 'obscureText') ?? properties.obscureText;
+    final bool readOnly =
+        context.getNodeValue(node.id, 'readOnly') ?? properties.readOnly;
     final bool showCursor =
-        context.getNodeValue(widget.node.id, 'showCursor') ??
-            widget.node.properties.showCursor;
-    final int? maxLength = context.getNodeValue(widget.node.id, 'maxLength') ??
-        widget.node.properties.maxLength;
+        context.getNodeValue(node.id, 'showCursor') ?? properties.showCursor;
+    final int? maxLength =
+        context.getNodeValue(node.id, 'maxLength') ?? properties.maxLength;
 
     final ScopedValues scopedValues = ScopedValues.of(context);
 
     final TextInputType keyboardType =
-        widget.node.properties.keyboardType == TextInputTypeEnum.number
+        properties.keyboardType == TextInputTypeEnum.number
             ? TextInputType.numberWithOptions(
-                decimal: widget.node.properties.showDecimalKey,
-                signed: widget.node.properties.showSignKey)
-            : widget.node.properties.keyboardType.toFlutter();
+                decimal: properties.showDecimalKey,
+                signed: properties.showSignKey)
+            : properties.keyboardType.toFlutter();
 
-    final TextInputValidatorModel validatorModel =
-        widget.node.properties.validator;
+    final TextInputValidatorModel validatorModel = properties.validator;
     final FormFieldValidator<String> validator =
         widget.validator ?? validatorModel.validate;
 
     Widget field = TextFormField(
       focusNode: focusNode,
-      autocorrect: widget.node.properties.autoCorrect,
-      autofocus: !widget.settings.isPreview && widget.node.properties.autoFocus,
-      enableInteractiveSelection:
-          widget.node.properties.enableInteractiveSelection,
+      autocorrect: properties.autoCorrect,
+      autofocus: !widget.settings.isPreview && properties.autoFocus,
+      enableInteractiveSelection: properties.enableInteractiveSelection,
       enabled: enabled,
       controller: controller,
       obscureText: widget.node.properties.maxLines == 1 &&
@@ -246,18 +247,14 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       readOnly: readOnly,
       showCursor: showCursor,
       keyboardType: keyboardType,
-      selectionHeightStyle:
-          widget.node.properties.selectionHeightStyle.toFlutter(),
-      selectionWidthStyle:
-          widget.node.properties.selectionWidthStyle.toFlutter(),
-      textAlign: widget.node.properties.textAlign.toFlutter(),
-      textAlignVertical:
-          widget.node.properties.textAlignVertical.flutterTextAlignVertical,
-      cursorColor:
-          widget.node.properties.cursorColor.toFlutterColor(opacity: 1),
-      cursorHeight: widget.node.properties.cursorHeight,
-      cursorWidth: widget.node.properties.cursorWidth,
-      cursorRadius: Radius.circular(widget.node.properties.cursorRadius),
+      selectionHeightStyle: properties.selectionHeightStyle.toFlutter(),
+      selectionWidthStyle: properties.selectionWidthStyle.toFlutter(),
+      textAlign: properties.textAlign.toFlutter(),
+      textAlignVertical: properties.textAlignVertical.flutterTextAlignVertical,
+      cursorColor: properties.cursorColor.toFlutterColor(opacity: 1),
+      cursorHeight: properties.cursorHeight,
+      cursorWidth: properties.cursorWidth,
+      cursorRadius: Radius.circular(properties.cursorRadius),
       maxLength: maxLength,
       validator: validator,
       autovalidateMode: widget.autovalidateMode ??
@@ -268,8 +265,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
               : null,
       inputFormatters: [
         if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
-        if (widget.node.properties.formatter.toFlutterFormatter()
-            case var formatter?)
+        if (properties.formatter.toFlutterFormatter() case var formatter?)
           formatter,
       ],
       maxLines:
@@ -288,23 +284,23 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       },
       decoration: getDecoration(
         context,
-        widget.node,
-        widget.node.properties.decoration,
+        node,
+        properties.decoration,
         widget.useIconFonts,
         widget.settings,
         scopedValues,
       ),
     );
 
-    if (widget.node.isHorizontalWrap) {
+    if (node.isHorizontalWrap) {
       field = IntrinsicWidth(child: field);
     }
-    if (widget.node.isVerticalWrap) {
+    if (node.isVerticalWrap) {
       field = IntrinsicHeight(child: field);
     }
 
     field = AdaptiveNodeBox(
-      node: widget.node,
+      node: node,
       child: field,
     );
 
