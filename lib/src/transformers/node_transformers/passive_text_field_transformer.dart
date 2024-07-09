@@ -240,7 +240,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
           widget.node.properties.enableInteractiveSelection,
       enabled: enabled,
       controller: controller,
-      obscureText: obscureText,
+      obscureText: widget.node.properties.maxLines == 1 &&
+          widget.node.isVerticalWrap &&
+          obscureText,
       readOnly: readOnly,
       showCursor: showCursor,
       keyboardType: keyboardType,
