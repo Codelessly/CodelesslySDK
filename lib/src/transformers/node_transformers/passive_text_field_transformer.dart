@@ -247,6 +247,8 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       readOnly: readOnly,
       showCursor: showCursor,
       keyboardType: keyboardType,
+      textInputAction:
+          widget.node.properties.textInputAction.flutterTextInputAction,
       selectionHeightStyle: properties.selectionHeightStyle.toFlutter(),
       selectionWidthStyle: properties.selectionWidthStyle.toFlutter(),
       textAlign: properties.textAlign.toFlutter(),

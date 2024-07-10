@@ -1839,3 +1839,21 @@ extension AutovalidateModeCExt on AutovalidateModeC {
           AutovalidateMode.onUserInteraction,
       };
 }
+
+extension TextInputActionCExt on TextInputActionC {
+  TextInputAction get flutterTextInputAction => switch (this) {
+        TextInputActionC.none => TextInputAction.none,
+        TextInputActionC.unspecified => TextInputAction.unspecified,
+        TextInputActionC.done => TextInputAction.done,
+        TextInputActionC.go => TextInputAction.go,
+        TextInputActionC.search => TextInputAction.search,
+        TextInputActionC.send => TextInputAction.send,
+        TextInputActionC.next => TextInputAction.next,
+        TextInputActionC.previous => TextInputAction.previous,
+        TextInputActionC.continueAction => TextInputAction.continueAction,
+        TextInputActionC.join => TextInputAction.join,
+        TextInputActionC.route => TextInputAction.route,
+        TextInputActionC.emergencyCall => TextInputAction.emergencyCall,
+        TextInputActionC.newline => TextInputAction.newline,
+      };
+}
