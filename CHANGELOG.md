@@ -1,3 +1,7 @@
+## 2.1.1
+- Fix Firebase exception on web.
+- Fix Text Input `Set Value` action not working.
+
 ## 2.1.0
 - New TextInputField features! This is the first batch of improvements to the TextInput component and includes the following:
   - Added Autofill Hints support.
