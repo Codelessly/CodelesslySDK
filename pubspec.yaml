@@ -20,9 +20,9 @@ dependencies:
     sdk: flutter
   codelessly_api: 2.0.2
   codelessly_json_annotation: 4.8.1
-  firebase_core: ^3.1.1
-  firebase_auth: ^5.1.1
-  cloud_firestore: ^5.0.2
+  firebase_core: ^3.2.0
+  firebase_auth: ^5.1.2
+  cloud_firestore: ^5.1.0
   firebase_ui_firestore: ^1.6.4
   equatable: ^2.0.5
   google_fonts: ^6.2.1
