@@ -163,7 +163,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
             'inputValue',
             scopedValues: scopedValues,
           )
-        : findIndexedValueIfApplied(scopedValues);
+        : findIndexedValueIfApplied(scopedValues) ??
+            PropertyValueDelegate.getPropertyValueFromNodeValues<String>(
+              widget.node,
+              'inputValue',
+              scopedValues: scopedValues,
+            );
     if (currentPropertyValue != null) {
       currentPropertyValue = PropertyValueDelegate.substituteVariables(
         currentPropertyValue,
