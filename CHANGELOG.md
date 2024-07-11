@@ -1,3 +1,13 @@
+## 2.1.0
+- New TextInputField features! This is the first batch of improvements to the TextInput component and includes the following:
+  - Added Autofill Hints support.
+  - Added Text Input Validator.
+  - Added Text Input Formatter.
+  - Added Submit Keyboard Action selector.
+- New Editor layout rendering pipeline! 
+  - Huge improvements to TextInputField rendering accuracy.
+- Fix website publishing error that occurs when using an empty Navigate Action.
+
 ## 2.0.2
 - Update CodelesslyException to display better errors during development.
 - Update external components with reactions.
