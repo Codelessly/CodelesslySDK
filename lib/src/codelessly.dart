@@ -381,7 +381,7 @@ class Codelessly {
         if (Firebase.apps.isEmpty) {
           _firebaseApp = await Firebase.initializeApp(options: firebaseOptions);
         }
-      } on FirebaseException catch (_) {
+      } catch (e) {
         // On web, Firebase.apps crashes with error [core/not-initialized] if
         // the list is empty and no app is registered. Catch the error here and ignore it.
         _firebaseApp = await Firebase.initializeApp(options: firebaseOptions);
