@@ -151,4 +151,7 @@ class PrivacyBaseImpl extends PrivacyBase {
 
   @override
   Map toJson() => _$PrivacyBaseImplToJson(this);
+
+  factory PrivacyBaseImpl.fromJson(Map<String, dynamic> json) =>
+      _$PrivacyBaseImplFromJson(json);
 }
