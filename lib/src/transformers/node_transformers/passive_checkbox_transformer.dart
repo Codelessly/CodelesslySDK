@@ -98,7 +98,8 @@ class PassiveCheckboxWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scale = node.basicBoxLocal.width / (node.properties.compact ? Checkbox.width : kCheckboxDefaultSize);
+    final double scale = node.basicBoxLocal.width /
+        (node.properties.compact ? Checkbox.width : kCheckboxDefaultSize);
 
     final bool? value = PropertyValueDelegate.getPropertyValue<bool>(
           node,

@@ -34,7 +34,7 @@ class _MyAppState extends State<MyApp> {
         showPanel: true,
         wrapperBuilder: (context, child) {
           return MaterialApp(
-            home: child,
+            home: Container(color: Colors.white, child: child),
           );
         },
         stories: [

@@ -1,5 +1,8 @@
+## 2.2.1
+- Set target platforms.
+
 ## 2.2.0
-- Restore Windows support! Codelessly CloudUI™ now works on all Flutter platforms.
+- Restored Windows support. Codelessly CloudUI™ now supports all Flutter platforms!
 
 ## 2.1.1
 - Fix Firebase exception on web.
