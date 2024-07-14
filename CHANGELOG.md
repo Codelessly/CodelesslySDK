@@ -1,3 +1,6 @@
+## 2.2.0
+- Restore Windows support! Codelessly CloudUI™ now works on all Flutter platforms.
+
 ## 2.1.1
 - Fix Firebase exception on web.
 - Fix Text Input `Set Value` action not working.
