@@ -9,6 +9,8 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../codelessly_sdk.dart';
 
+const String clientType = String.fromEnvironment('client_type');
+
 const String _label = 'Auth Manager';
 
 /// An implementation of that uses Firebase auth.
@@ -382,6 +384,7 @@ class CodelesslyAuthManager extends AuthManager {
         body: jsonEncode({
           'token': config.authToken,
           'slug': config.slug,
+          'clientType': clientType,
         }),
       );
 
