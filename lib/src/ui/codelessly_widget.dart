@@ -504,6 +504,10 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                 const CodelesslyLoadingScreen();
           }
 
+          if (model.disabledLayouts.contains(effectiveLayoutID)) {
+            return const SizedBox.shrink();
+          }
+
           // Set the canvas ID if it is not already set. (This is for the first
           // time the layout is loaded. For subsequent loads, the canvas ID is
           // set in the didChangeDependencies method.) e.g. when media query

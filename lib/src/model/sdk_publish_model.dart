@@ -167,6 +167,9 @@ class SDKPublishModel extends PrivacyBase {
   /// a custom id. This map will modify that usage without being destructive.
   final Map<String, String> layoutIDMap;
 
+  /// A list of layout ids that are explicitly disabled from the server's side.
+  final List<String> disabledLayouts;
+
   static Map<String, dynamic> serializeLookupMapFonts(
           LookupMap<SDKPublishFont> map) =>
       map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
@@ -260,6 +263,7 @@ class SDKPublishModel extends PrivacyBase {
     this.entryPageId,
     this.entryCanvasId,
     DateTime? lastUpdated,
+    List<String>? disabledLayouts,
 
     // Privacy
     required super.teams,
@@ -286,7 +290,8 @@ class SDKPublishModel extends PrivacyBase {
               (lookupMap: layoutIDMap ?? {}, dataMap: {}),
             ),
         apis = apis ?? {},
-        lastUpdated = lastUpdated ?? DateTime.now();
+        lastUpdated = lastUpdated ?? DateTime.now(),
+        disabledLayouts = disabledLayouts ?? [];
 
   /// Creates a new instance of [SDKPublishModel] with privacy inherited from
   /// another [PrivacyBase].
@@ -306,6 +311,7 @@ class SDKPublishModel extends PrivacyBase {
     this.entryPageId,
     this.entryCanvasId,
     DateTime? lastUpdated,
+    List<String>? disabledLayouts,
 
     // Privacy
     required super.privacy,
@@ -326,6 +332,7 @@ class SDKPublishModel extends PrivacyBase {
         ),
         lastUpdated = lastUpdated ?? DateTime.now(),
         apis = apis ?? {},
+        disabledLayouts = disabledLayouts ?? [],
         super.private();
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
@@ -360,6 +367,7 @@ class SDKPublishModel extends PrivacyBase {
     String? entryPageId,
     String? entryCanvasId,
     DateTime? lastUpdated,
+    List<String>? disabledLayouts,
 
     // Privacy
     PrivacyBase? privacy,
@@ -378,6 +386,7 @@ class SDKPublishModel extends PrivacyBase {
       entryPageId: entryPageId ?? this.entryPageId,
       entryCanvasId: entryCanvasId ?? this.entryCanvasId,
       lastUpdated: lastUpdated ?? this.lastUpdated,
+      disabledLayouts: disabledLayouts ?? this.disabledLayouts,
 
       // Privacy
       privacy: privacy ?? this,
@@ -400,6 +409,7 @@ class SDKPublishModel extends PrivacyBase {
         entryPageId,
         entryCanvasId,
         lastUpdated,
+        disabledLayouts,
       ];
 }
 
