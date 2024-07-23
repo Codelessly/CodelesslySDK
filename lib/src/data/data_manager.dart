@@ -656,6 +656,14 @@ class DataManager {
       log('Layout ID map changed. Updating...');
     }
 
+    final bool disabledLayoutsChanged = !(const ListEquality()
+        .equals(localModel.disabledLayouts, serverModel.disabledLayouts));
+    if (disabledLayoutsChanged) {
+      localModel =
+          localModel.copyWith(disabledLayouts: serverModel.disabledLayouts);
+      log('Disabled layouts changed. Updating...');
+    }
+
     if (layoutUpdates.isEmpty &&
         fontUpdates.isEmpty &&
         apiUpdates.isEmpty &&
@@ -663,7 +671,8 @@ class DataManager {
         conditionUpdates.isEmpty &&
         !templateChanged &&
         !entryChanged &&
-        !didLayoutIDMapChange) {
+        !didLayoutIDMapChange &&
+        !disabledLayoutsChanged) {
       log('No updates to process.');
       return;
     } else {
@@ -675,6 +684,8 @@ class DataManager {
       log('      | ${conditionUpdates.length} condition updates.');
       log('      | ${templateChanged ? 1 : 0} template update${templateChanged ? '' : 's'}.');
       log('      | ${entryChanged ? 1 : 0} entry id update${entryChanged ? '' : 's'}.');
+      log('      | ${didLayoutIDMapChange ? 'Layout ID map changed.' : 'No layout ID map changes.'}');
+      log('      | ${disabledLayoutsChanged ? 'Disabled layout IDs changed.' : 'No disabled layout IDs changed.'}');
     }
 
     for (final String layoutID in layoutUpdates.keys) {

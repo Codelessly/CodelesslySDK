@@ -446,6 +446,34 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     super.dispose();
   }
 
+  /// Retrieves a canvas ID for a layout group based on the current screen size.
+  /// Returns null if the layout group does not have a canvas for the current
+  /// screen size or if the layout group does not exist.
+  String? _getCanvasIDForLayoutGroup(
+      String? layoutID, SDKPublishModel model, Size screenSize) {
+    if (layoutID != null && model.layouts.containsKey(layoutID)) {
+      final SDKPublishLayout? layout = model.layouts[layoutID];
+      if (layout != null) {
+        if (layout.canvases.length == 1) {
+          // standalone layout. No need to check breakpoints.
+          return layout.canvases.keys.first;
+        }
+        // this layout belongs to a layout group. Load correct layout
+        // for the current breakpoint.
+        final width = screenSize.width;
+        final breakpoints = layout.breakpoints;
+        // Get a breakpoint for the current width.
+        final breakpoint = breakpoints.findForWidth(width);
+        if (breakpoint != null) {
+          // print(
+          //     'Found breakpoint for width ${width.toInt()}: ${breakpoint.nodeId}');
+          return breakpoint.nodeId;
+        }
+      }
+    }
+    return null;
+  }
+
   /// Once the SDK is successfully initialized, we can build the layout.
   /// A [StreamBuilder] is used to listen to layout changes whenever a user
   /// publishes a new update through the Codelessly publish menu, the changes
@@ -640,32 +668,4 @@ class _NavigationBuilderState extends State<_NavigationBuilder> {
 
   @override
   Widget build(BuildContext context) => widget.builder(context);
-}
-
-/// Retrieves a canvas ID for a layout group based on the current screen size.
-/// Returns null if the layout group does not have a canvas for the current
-/// screen size or if the layout group does not exist.
-String? _getCanvasIDForLayoutGroup(
-    String? layoutID, SDKPublishModel model, Size screenSize) {
-  if (layoutID != null && model.layouts.containsKey(layoutID)) {
-    final SDKPublishLayout? layout = model.layouts[layoutID];
-    if (layout != null) {
-      if (layout.canvases.length == 1) {
-        // standalone layout. No need to check breakpoints.
-        return layout.canvases.keys.first;
-      }
-      // this layout belongs to a layout group. Load correct layout
-      // for the current breakpoint.
-      final width = screenSize.width;
-      final breakpoints = layout.breakpoints;
-      // Get a breakpoint for the current width.
-      final breakpoint = breakpoints.findForWidth(width);
-      if (breakpoint != null) {
-        // print(
-        //     'Found breakpoint for width ${width.toInt()}: ${breakpoint.nodeId}');
-        return breakpoint.nodeId;
-      }
-    }
-  }
-  return null;
 }
