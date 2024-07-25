@@ -53,7 +53,7 @@ class FirestoreErrorReporter extends ErrorReporter {
           ? throwable.message
           : throwable.toString(),
       stacktrace: throwable is CodelesslyException
-          ? throwable.stacktrace?.toString() ?? stacktrace?.toString()
+          ? stacktrace?.toString()
           : stacktrace?.toString(),
       tags: ['error'],
     );

@@ -267,8 +267,11 @@ class Codelessly {
 
   /// Internally updates the status of this instance of the SDK and emits a
   /// status update event to the [statusStream].
-  void _updateStatus(CStatus status) {
+  void _updateStatus(CStatus status, {bool overrideError = true}) {
     if (_status == status) {
+      return;
+    }
+    if (status is! CError && _status is CError && !overrideError) {
       return;
     }
     _status = status;
@@ -437,7 +440,7 @@ class Codelessly {
       );
       errorHandler.captureException(
         e,
-        stacktrace: str,
+        trace: str,
       );
     }
 
@@ -461,12 +464,11 @@ class Codelessly {
       reporter: automaticallySendCrashReports
           ? FirestoreErrorReporter(_firebaseApp!, _firebaseFirestore!)
           : null,
-      onException: (CodelesslyException exception) {
-        // Layout errors are not SDK errors.
-        if (exception.layoutID != null) {
+      onException: (exception, str) {
+        if (!exception.blockAllLayouts) {
           return;
         }
-        _updateStatus(CStatus.error(exception));
+        _updateStatus(CStatus.error(exception, str));
         log('Error received. Status is now $status');
       },
     );
@@ -596,13 +598,19 @@ class Codelessly {
             errorHandler: errorHandler,
           );
 
-      _updateStatus(CStatus.loading(CLoadingState.createdManagers));
+      _updateStatus(
+        CStatus.loading(CLoadingState.createdManagers),
+        overrideError: false,
+      );
 
       log('Initializing cache manager');
       // The cache manager initializes first to load the local cache.
       await _cacheManager!.init();
 
-      _updateStatus(CStatus.loading(CLoadingState.initializedCache));
+      _updateStatus(
+        CStatus.loading(CLoadingState.initializedCache),
+        overrideError: false,
+      );
 
       // The auth manager initializes second to look up cached auth data
       // from the cache manager. If no auth data is available, it halts the
@@ -618,7 +626,10 @@ class Codelessly {
         await _authManager!.init();
         _config!.publishSource = _authManager!.getBestPublishSource(_config!);
 
-        _updateStatus(CStatus.loading(CLoadingState.initializedAuth));
+        _updateStatus(
+          CStatus.loading(CLoadingState.initializedAuth),
+          overrideError: false,
+        );
       } else {
         log('A slug was provided. Acutely skipping authentication.');
       }
@@ -643,7 +654,10 @@ class Codelessly {
         }
 
         log('Data manager initialized.');
-        _updateStatus(CStatus.loading(CLoadingState.initializedDataManagers));
+        _updateStatus(
+          CStatus.loading(CLoadingState.initializedDataManagers),
+          overrideError: false,
+        );
       } else {
         if (!initializeDataManagers) {
           log(
@@ -675,19 +689,25 @@ class Codelessly {
           log('[POST-INIT] Background authentication failed.');
           errorHandler.captureException(
             e,
-            stacktrace: str,
+            trace: str,
           );
         });
-        _updateStatus(CStatus.loading(CLoadingState.initializedSlug));
+        _updateStatus(
+          CStatus.loading(CLoadingState.initializedSlug),
+          overrideError: false,
+        );
       }
 
       log('Codelessly ${_instance == this ? 'global' : 'local'} instance initialization complete.');
 
-      _updateStatus(CStatus.loaded());
+      _updateStatus(
+        CStatus.loaded(),
+        overrideError: false,
+      );
     } catch (error, stacktrace) {
       errorHandler.captureException(
         error,
-        stacktrace: stacktrace,
+        trace: stacktrace,
       );
     } finally {
       stopwatch.stop();

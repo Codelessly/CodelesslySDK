@@ -149,7 +149,7 @@ class DataManager {
     queuingDone = false;
 
     // Initialize all locally cached data.
-    final cachedModel = localDataRepository.fetchPublishModel(
+    final SDKPublishModel? cachedModel = localDataRepository.fetchPublishModel(
       source: config.publishSource,
     );
 
@@ -160,72 +160,59 @@ class DataManager {
       await emitPublishModel();
 
       loadFontsFromPublishModel();
+    } else {
+      log('Publish model is not cached locally. Proceeding with init...');
     }
 
-    // A slug was specified. We need a layout FAST.
-    // No authentication is required; let's download a complete publish bundle.
+    // A slug was specified. We need a layout, fast.
+    // No authentication is required; download a complete publish bundle.
     if (config.slug case String slug) {
       log('[slug] Slug was specified [$slug]. Going through slug flow...');
 
       final Stopwatch bundleStopWatch = Stopwatch()..start();
-      try {
-        log('[slug] Downloading complete publish bundle for slug $slug.');
 
-        if (_publishModel == null) {
-          log('[slug] Publish model is not cached locally. Downloading complete publish bundle for slug $slug in foreground.');
+      log('[slug] Downloading complete publish bundle for slug $slug.');
+
+      if (_publishModel == null) {
+        log('[slug] Publish model is not cached locally. Downloading complete publish bundle for slug $slug in foreground.');
+      } else {
+        log('[slug] Publish model is already cached locally. Downloading complete publish bundle for slug $slug in background.');
+      }
+
+      final Future<bool> publishBundleFuture = fetchCompletePublishBundle(
+        slug: slug,
+        source: config.publishSource,
+      ).then((bool success) {
+        if (success) {
+          log('[slug] Complete publish model from slug is downloaded in background. Emitting.');
+          log('[slug] Loading fonts from publish model.');
+          loadFontsFromPublishModel();
         } else {
-          log('[slug] Publish model is already cached locally. Downloading complete publish bundle for slug $slug in background.');
+          // If the download failed, we need to show an error message to the
+          // client. The only reasons this is allowed to fail is either
+          // network issues or a slug that doesn't exist.
+          //
+          // Either way, no need to stop the data manager, as it can still
+          // function offline and wait for the next publish model to arrive.
+          log('[slug] Failed to download complete publish bundle for slug $slug.');
         }
 
-        final publishBundleFuture = fetchCompletePublishBundle(
-          slug: slug,
-          source: config.publishSource,
-        ).then((success) {
-          if (success) {
-            log('[slug] Complete publish model from slug is downloaded in background. Emitting.');
+        _logTime(bundleStopWatch);
+        return success;
+      });
 
-            loadFontsFromPublishModel();
-          } else {
-            errorHandler.captureException(CodelesslyException.networkException(
-              message:
-                  'Failed to download complete publish bundle for slug $slug.',
-            ));
-          }
-        });
-
-        if (_publishModel == null) {
-          await publishBundleFuture;
-        }
-
-        _logTime(stopwatch);
-      } catch (e, stackTrace) {
-        logError('Error trying to download complete publish model from slug',
-            error: e, stackTrace: stackTrace);
-        log('[slug] Failed to download complete publish bundle for slug $slug.');
-        log('[slug] Since no publish model is cached, this is a complete stop to the data manager.');
-
-        _logTime(stopwatch);
-
-        if (e is CodelesslyException) {
-          rethrow;
-        } else {
-          throw CodelesslyException.networkException(
-            message:
-                'Failed to download complete publish bundle for slug $slug.',
-            originalException: e,
-            stacktrace: stackTrace,
-          );
-        }
-      } finally {
-        bundleStopWatch.stop();
-        log('[slug] Publish bundle flow took ${bundleStopWatch.elapsedMilliseconds}ms or ${bundleStopWatch.elapsed.inSeconds}s.');
+      // If the publish model is null, we need to wait for the first publish
+      // bundle to arrive from the server instead of waiting for it in
+      // the background.
+      if (_publishModel == null) {
+        await publishBundleFuture;
       }
     } else {
-      log('[slug] Slug is ${config.slug}. Skipping slug flow.');
+      log('[slug] No slug specified. Skipping slug flow.');
     }
 
     if (authManager.authData == null) {
-      log('No auth data is available. Continuing as if offline.');
+      log('No auth data is available. Discontinuing as if offline.');
       _logTime(stopwatch);
       return;
     }
@@ -240,7 +227,7 @@ class DataManager {
     //
     // Once a publish model is available in the future, if a [layoutID] is
     // specified, we try to download that layout then instead of here.
-    final bool didPrepareLayout;
+    bool didPrepareLayout = false;
     if (_publishModel != null && layoutID != null) {
       if (!_publishModel!.layouts.containsKey(layoutID)) {
         log('Layout [$layoutID] during init is not cached locally. Downloading...');
@@ -249,17 +236,16 @@ class DataManager {
           didPrepareLayout = await getOrFetchPopulatedLayout(
             layoutID: layoutID,
           );
+        } on CodelesslyException catch (e, str) {
+          errorHandler.captureException(e, trace: str);
         } catch (e, str) {
-          final exception = CodelesslyException(
-            'Failed to download layout [$layoutID] during init.',
+          final exception = CodelesslyException.layout(
+            ErrorType.layoutFailed,
+            message: 'Failed to download layout [$layoutID] during init.',
             originalException: e,
-            stacktrace: str,
             layoutID: layoutID,
           );
-          errorHandler.captureException(exception, stacktrace: str);
-
-          _logTime(stopwatch);
-          return;
+          errorHandler.captureException(exception, trace: str);
         }
         log('Layout in init [$layoutID] fetch complete.');
       } else {
@@ -280,12 +266,13 @@ class DataManager {
     // Listen the publish model document.
     // It's either going to be fetched for the first time if it doesn't exist
     // in cache, or it's going to be updated with new data.
+    log('Listening to publish model doc...');
     final Future<SDKPublishModel> firstPublishEvent =
         listenToPublishModel(authData.projectId);
 
     // If the publish model is still null, then we need to wait for the first
     // publish model to arrive from the server via the stream above.
-    if (_publishModel == null) {
+    if (_publishModel == null || !didPrepareLayout) {
       log('Publish model is still null during init. Waiting for the first publish model from the server.');
       final model = await firstPublishEvent;
       _publishModel = model;
@@ -310,32 +297,30 @@ class DataManager {
     // If we could not download it earlier, that would be because we did not
     // have a publish model available and needed to wait for one to arrive
     // from the server for the first time or that it failed to download for
-    // some unknown reason.
-    //
-    // Perhaps the publish model was simply out of date locally,
-    // but now that we fetched a new one, and [didPrepareLayout] is still
-    // false, we can try to download the layout again with the new publish
-    // model.
+    // some reason, like the cached layout ID map in the SDKPublishModel being
+    // out of date and requiring an update in the following steps to mapped
+    // the provided layoutID into a layoutID that can be downloaded.
     //
     // At this stage of the function, we can be sure that a publish model
-    // exists and can safely download the desired [layoutID], because if a
-    // publish model is still null, we cannot proceed further and this
-    // function terminates earlier.
+    // exists and can safely download the desired [layoutID], even if it's the
+    // second time, because if a publish model is still null, we cannot proceed
+    // further and this function terminates earlier.
     if (!didPrepareLayout && layoutID != null) {
-      log('We can safely download layout [$layoutID] now.');
+      log('Safely downloading layout [$layoutID] now.');
       try {
         await getOrFetchPopulatedLayout(layoutID: layoutID);
         log('Layout [$layoutID] downloaded from init successfully.');
+      } on CodelesslyException catch (e, str) {
+        errorHandler.captureException(e, trace: str);
       } catch (e, str) {
-        final exception = CodelesslyException(
-          'Failed to download layout [$layoutID] during init.',
+        final exception = CodelesslyException.layout(
+          ErrorType.layoutFailed,
+          message: 'Failed to download layout [$layoutID] during init.',
           originalException: e,
-          stacktrace: str,
           layoutID: layoutID,
         );
-        errorHandler.captureException(exception, stacktrace: str);
-        // _logTime(stopwatch);
-        // return;
+
+        errorHandler.captureException(exception, trace: str);
       }
     }
 
@@ -373,15 +358,18 @@ class DataManager {
         await getOrFetchPopulatedLayout(layoutID: layoutID);
 
         log('\tLayout [$layoutID] downloaded from download queue complete.');
+      } on CodelesslyException catch (e, str) {
+        errorHandler.captureException(e, trace: str);
       } catch (e, str) {
         log('\tLayout [$layoutID] failed to download in download queue.');
-        final exception = CodelesslyException(
-          'Failed to download layout [$layoutID] during download queue.',
+        final exception = CodelesslyException.layout(
+          ErrorType.layoutFailed,
+          message:
+              'Failed to download layout [$layoutID] during download queue.',
           originalException: e,
-          stacktrace: str,
           layoutID: layoutID,
         );
-        errorHandler.captureException(exception, stacktrace: str);
+        errorHandler.captureException(exception, trace: str);
       }
     }
 
@@ -493,60 +481,62 @@ class DataManager {
       projectID: projectId,
       source: config.publishSource,
     )
-        .listen((SDKPublishModel? serverModel) {
-      if (serverModel == null) return;
+        .listen(
+      (SDKPublishModel? serverModel) {
+        if (serverModel == null) return;
 
-      log('Publish model stream event received.');
+        log('Publish model stream event received.');
 
-      final bool isFirstEvent = !completer.isCompleted;
+        final bool isFirstEvent = !completer.isCompleted;
 
-      // If the completer has not completed yet, it needs to be
-      // completed with the first available publish model form the server.
-      if (isFirstEvent) {
-        log(
-          'Completing publish model stream completer since this is the first event.',
+        // If the completer has not completed yet, it needs to be
+        // completed with the first available publish model form the server.
+        if (isFirstEvent) {
+          log(
+            'Completing publish model stream completer since this is the first event.',
+          );
+          completer.complete(serverModel);
+        }
+
+        // If the publish model is null, meaning no publish model was previously
+        // cached, then this is the first available publish model we have that
+        // just arrived from the server.
+        //
+        // We can skip publish model comparison as there is nothing to compare
+        // to yet.
+        //
+        // Since it is null, it will be hydrated with a value outside of this
+        // listener when the completer completes. The publish model is emitted
+        // once that happens, therefore we don't need to emit it here, nor
+        // compare.
+        if (_publishModel == null) {
+          log(
+            'Publish model is null during init and received the first publish model from the server. Skipping comparison in stream.',
+          );
+          return;
+        }
+
+        if (config.slug != null) {
+          log('Initialized using the slug, this event is not essential for initial loading.');
+        } else if (isFirstEvent) {
+          log('Publish model during init was not null, and we received a new publish model from the server. Comparing...');
+        } else {
+          log('Received a second publish model from the server. Comparing...');
+        }
+        final SDKPublishModel localModel = _publishModel!;
+
+        // Comparison should always be a background process.
+        processPublishDifference(
+          serverModel: serverModel,
+          localModel: localModel,
         );
-        completer.complete(serverModel);
-      }
 
-      // If the publish model is null, meaning no publish model was previously
-      // cached, then this is the first available publish model we have that
-      // just arrived from the server.
-      //
-      // We can skip publish model comparison as there is nothing to compare
-      // to yet.
-      //
-      // Since it is null, it will be hydrated with a value outside of this
-      // listener when the completer completes. The publish model is emitted
-      // once that happens, therefore we don't need to emit it here, nor
-      // compare.
-      if (_publishModel == null) {
-        log(
-          'Publish model is null during init and received the first publish model from the server. Skipping comparison in stream.',
-        );
-        return;
-      }
-
-      if (config.slug != null) {
-        log('Initialized using the slug, this event is not essential for initial loading.');
-      } else if (isFirstEvent) {
-        log('Publish model during init was not null, and we received a new publish model from the server. Comparing...');
-      } else {
-        log('Received a second publish model from the server. Comparing...');
-      }
-      final SDKPublishModel localModel = _publishModel!;
-
-      // Comparison should always be a background process.
-      processPublishDifference(
-        serverModel: serverModel,
-        localModel: localModel,
-      );
-
-      log('Publish model comparison complete.');
-    })
-      ..onError((error, str) {
-        errorHandler.captureException(error, stacktrace: str);
-      });
+        log('Publish model comparison complete.');
+      },
+      onError: (error, str) {
+        errorHandler.captureException(error, trace: str);
+      },
+    );
 
     return completer.future;
   }
@@ -647,10 +637,10 @@ class DataManager {
             localModel.entryCanvasId != serverModel.entryCanvasId ||
             localModel.entryPageId != serverModel.entryPageId;
 
-    final bool didLayoutIDMapChange = const MapEquality().equals(
+    final bool didLayoutIDMapChange = !(const MapEquality().equals(
       localModel.layoutIDMap,
       serverModel.layoutIDMap,
-    );
+    ));
     if (didLayoutIDMapChange) {
       localModel = localModel.copyWith(layoutIDMap: serverModel.layoutIDMap);
       log('Layout ID map changed. Updating...');
@@ -1004,16 +994,18 @@ class DataManager {
       try {
         await getOrFetchPopulatedLayout(layoutID: layoutID);
         log('[queueLayout] Layout [$layoutID] download complete.');
+      } on CodelesslyException catch (e, str) {
+        log('[queueLayout] Layout [$layoutID] failed to download immediately. CodelesslyException thrown.');
+        errorHandler.captureException(e, trace: str);
       } catch (e, str) {
         log('[queueLayout] Layout [$layoutID] failed to download immediately.');
-        final exception = CodelesslyException(
-          'Failed to download layout [$layoutID].',
+        final exception = CodelesslyException.layout(
+          ErrorType.layoutFailed,
+          message: 'Failed to download layout [$layoutID].',
           originalException: e,
-          stacktrace: str,
           layoutID: layoutID,
-          type: ErrorType.layoutFailed,
         );
-        errorHandler.captureException(exception, stacktrace: str);
+        errorHandler.captureException(exception, trace: str);
       }
     } else {
       if (_downloadQueue.contains(layoutID)) {
@@ -1212,35 +1204,45 @@ class DataManager {
     return true;
   }
 
+  /// Downloads a complete publish bundle json from Codelessly's Firebase
+  /// storage based on the given [slug] and [source].
+  ///
+  /// If the download is successful, the publish model is updated and emitted.
+  /// The updated publish model is also saved to the local cache.
+  ///
+  /// If the download fails, this function gracefully exits and returns false.
+  ///
+  /// [returns] true if the download was successful, false otherwise.
   Future<bool> fetchCompletePublishBundle({
     required String slug,
     required PublishSource source,
   }) async {
     final Stopwatch stopwatch = Stopwatch()..start();
 
-    SDKPublishModel? model;
     try {
-      model = await networkDataRepository.downloadCompletePublishBundle(
+      final SDKPublishModel? model =
+          await networkDataRepository.downloadCompletePublishBundle(
         slug: slug,
         source: source,
       );
-    } catch (e) {
-      log('Failed to download complete publish bundle.');
-      rethrow;
+
+      if (model != null) {
+        log('Successfully downloaded complete publish bundle. Emitting it.');
+        _publishModel = model;
+        await emitPublishModel();
+        savePublishModel();
+        return true;
+      }
+    } catch (e, str) {
+      logError(
+        'Failed to download complete publish bundle.',
+        error: e,
+        stackTrace: str,
+      );
     } finally {
       stopwatch.stop();
-      log('Publish bundle download stopwatch done in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.');
     }
 
-    if (model != null) {
-      log('Successfully downloaded complete publish bundle. Emitting it.');
-      _publishModel = model;
-      await emitPublishModel();
-      savePublishModel();
-      return true;
-    }
-
-    log('Failed to download complete publish bundle in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.');
     return false;
   }
 

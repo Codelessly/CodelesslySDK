@@ -164,7 +164,11 @@ sealed class CStatus {
 
   factory CStatus.loaded() => CLoaded();
 
-  factory CStatus.error(CodelesslyException exception) => CError(exception);
+  factory CStatus.error(
+    CodelesslyException exception,
+    StackTrace trace,
+  ) =>
+      CError(exception, trace);
 }
 
 class CEmpty extends CStatus {
@@ -193,6 +197,7 @@ class CLoaded extends CStatus {
 
 class CError extends CStatus {
   final CodelesslyException exception;
+  final StackTrace stackTrace;
 
-  const CError(this.exception);
+  const CError(this.exception, this.stackTrace);
 }

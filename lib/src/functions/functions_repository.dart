@@ -119,11 +119,13 @@ class FunctionsRepository {
 
     if (apiData == null) {
       codelessly.errorHandler.captureException(
-        CodelesslyException.apiNotFound(
-          apiId: action.apiId,
-          message: 'Api with id [${action.apiId}] does not exist.',
-          layoutID: context.read<CodelesslyWidgetController>().layoutID,
+        CodelesslyException.api(
+          ErrorType.apiNotFound,
+          apiID: action.apiId ?? 'Unknown',
+          message:
+              'Api with id [${action.apiId}] does not exist, accessed from layout [${context.read<CodelesslyWidgetController>().layoutID}]',
         ),
+        trace: StackTrace.current,
       );
       return Future.error('Api with id [${action.apiId}] does not exist.');
     }
@@ -255,11 +257,13 @@ class FunctionsRepository {
       if (layoutId == null) {
         final Codelessly codelessly = context.read<Codelessly>();
         codelessly.errorHandler.captureException(
-          CodelesslyException.layoutNotFound(
+          CodelesslyException.layout(
+            ErrorType.layoutFailed,
             message:
                 'Could not find a layout with a canvas id of [${action.destinationId}]',
-            layoutID: layoutId,
+            layoutID: action.destinationId,
           ),
+          trace: StackTrace.current,
         );
         return;
       }
@@ -323,11 +327,13 @@ class FunctionsRepository {
     if (layoutId == null) {
       final Codelessly codelessly = context.read<Codelessly>();
       codelessly.errorHandler.captureException(
-        CodelesslyException.layoutNotFound(
+        CodelesslyException.layout(
+          ErrorType.layoutFailed,
           message:
               'Could not find a layout with a canvas id of [${action.destinationId}]',
-          layoutID: layoutId,
+          layoutID: action.destinationId,
         ),
+        trace: StackTrace.current,
       );
       return;
     }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -153,11 +152,7 @@ class CodelesslyAuthManager extends AuthManager {
       await authenticate();
     } else {
       log('Token already authenticated! Verifying in the background...');
-      authenticate().catchError((error) {
-        // Error handling needs to be done here because this will not be caught
-        // by SDK initialization.
-        errorHandler.captureException(error);
-      });
+      authenticate();
     }
 
     stopwatch.stop();
@@ -304,42 +299,41 @@ class CodelesslyAuthManager extends AuthManager {
     try {
       log('Authenticating token...');
 
-      final AuthData? authData = await verifyProjectAuthToken(
+      final AuthData authData = await verifyProjectAuthToken(
         userToken: _idTokenResult!.token!,
         config: config,
         postSuccess: postAuthSuccess,
       );
 
+      // If the instance has been disposed, we need to abort the authentication
+      // process, even if it was successful.
       if (_disposed) {
         log('Auth manager was disposed. Aborting authentication.');
         return;
       }
 
-      if (authData != null) {
-        _authData = authData;
-        _authStreamController.add(_authData!);
+      _authData = authData;
+      _authStreamController.add(_authData!);
 
-        await cacheManager.store(authCacheKey, _authData!.toJson());
-        log('Stored auth data in cache');
-        log('Authentication successfully!');
-      } else {
-        _authData = null;
-        _authStreamController.add(_authData);
-        await cacheManager.delete(authCacheKey);
-        log('Failed to authenticate token.');
-
-        throw CodelesslyException.notAuthenticated();
-      }
-    } on CodelesslyException {
-      rethrow;
-    } on SocketException {
-      throw CodelesslyException.networkException();
+      await cacheManager.store(authCacheKey, _authData!.toJson());
+      log('Stored auth data in cache.');
+      log('Authentication successfully!');
     } catch (e, str) {
-      throw CodelesslyException.other(
-        message: 'Failed to authenticate token.\nError: $e',
-        originalException: e,
-        stacktrace: str,
-      );
+      // If token verification crashes after the async operation, we need to
+      // check if the instance has been disposed before proceeding.
+      if (_disposed) {
+        log('Auth manager was disposed. Aborting authentication.');
+        return;
+      }
+
+      // Since authentication failed, delete the auth data and notify the
+      // stream listeners that there is no auth data anymore.
+      _authData = null;
+      _authStreamController.add(_authData);
+      await cacheManager.delete(authCacheKey);
+
+      log('Failed to authenticate token.');
+      errorHandler.captureException(e, trace: str);
     }
   }
 
@@ -357,7 +351,7 @@ class CodelesslyAuthManager extends AuthManager {
   ///
   /// [returns] a Future that resolves to an instance of [AuthData] if the
   /// authentication is successful and `null` otherwise.
-  static Future<AuthData?> verifyProjectAuthToken({
+  static Future<AuthData> verifyProjectAuthToken({
     required String userToken,
     required CodelesslyConfig config,
     required Future<void> Function(AuthData authData) postSuccess,
@@ -372,70 +366,61 @@ class CodelesslyAuthManager extends AuthManager {
       largePrint: true,
     );
 
-    try {
-      // Make a POST request to the server to verify the token.
-      final Response result = await post(
-        Uri.parse(
-            '${config.firebaseCloudFunctionsBaseURL}/api/verifyProjectAuthToken'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $userToken',
-        },
-        body: jsonEncode({
-          'token': config.authToken,
-          'slug': config.slug,
-          'clientType': clientType,
-        }),
-      );
+    // Make a POST request to the server to verify the token.
+    final Response result = await post(
+      Uri.parse(
+          '${config.firebaseCloudFunctionsBaseURL}/api/verifyProjectAuthToken'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $userToken',
+      },
+      body: jsonEncode({
+        'token': config.authToken,
+        'slug': config.slug,
+        'clientType': clientType,
+      }),
+    );
 
-      // If the status code of the response is 200, the authentication was
-      // successful.
-      if (result.statusCode == 200) {
-        logger.log(
-          label,
-          'Successful auth token verification response received.',
-          largePrint: true,
-        );
-
-        // Parse the body of the response to JSON.
-        final jsonBody = jsonDecode(result.body);
-
-        // Create an instance of AuthData from the JSON body.
-        final AuthData authData = AuthData.fromJson(jsonBody);
-
-        // Call the postSuccess callback function and wait for it to decide
-        // success.
-        await postSuccess(authData);
-
-        logger.log(label, 'Auth token response:\n${result.body}',
-            largePrint: true);
-
-        return authData;
-      }
-      // If the status code of the response is not 200, the authentication failed.
-      // Log the status code, reason, and body of the response.
-      else {
-        logger.log(
-          label,
-          'Failed to authenticate token.\nStatus Code: ${result.statusCode}.\nReason: ${result.reasonPhrase}\nBody: ${result.body}',
-          largePrint: true,
-        );
-      }
-    } catch (e, stacktrace) {
+    // If the status code of the response is 200, the authentication was
+    // successful.
+    if (result.statusCode == 200) {
       logger.log(
         label,
-        'Error trying to authenticate token.\nError: $e',
+        'Successful auth token verification response received.',
         largePrint: true,
       );
+
+      // Parse the body of the response to JSON.
+      final jsonBody = jsonDecode(result.body);
+
+      // Create an instance of AuthData from the JSON body.
+      final AuthData authData = AuthData.fromJson(jsonBody);
+
+      // Call the postSuccess callback function and wait for it to decide
+      // success.
+      await postSuccess(authData);
+
+      logger.log(label, 'Auth token response:\n${result.body}',
+          largePrint: true);
+
+      return authData;
+    }
+    // If the status code of the response is not 200, the authentication failed.
+    // Log the status code, reason, and body of the response.
+    else {
       logger.log(
         label,
-        '$stacktrace',
+        'Failed to authenticate token.\nStatus Code: ${result.statusCode}.\nReason: ${result.reasonPhrase}\nBody: ${result.body}',
         largePrint: true,
+      );
+
+      final String? code = jsonDecode(result.body)['code'];
+      throw CodelesslyException.fromCode(
+        code,
+        message:
+            'Failed to authenticate token. Are you sure the auth token is correct?',
+        blockAllLayouts: true,
       );
     }
-
-    // If the function has not returned by this point, return null.
-    // Live authentication has failed.
-    return null;
   }
 }

@@ -39,8 +39,8 @@ abstract class NetworkDataRepository {
         logger.log(_label, 'Status code: ${result.statusCode}');
         logger.log(_label, 'Message: ${result.body}');
         throw CodelesslyException(
-          'Error downloading publish bundle from slug [$slug]',
-          stacktrace: StackTrace.current,
+          ErrorType.networkException,
+          message: 'Error downloading publish bundle from slug [$slug]',
         );
       }
 

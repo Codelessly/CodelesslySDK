@@ -627,7 +627,7 @@ class _CodelesslyChatBubbleState extends State<CodelesslyChatBubble> {
               ),
             );
           },
-          errorBuilder: (context, exception) {
+          errorBuilder: (context, exception, trace) {
             return Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
