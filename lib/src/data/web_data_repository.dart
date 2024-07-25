@@ -35,9 +35,9 @@ class WebDataRepository extends NetworkDataRepository {
       log('[WebDataRepo] Error downloading publish model.');
       log('[WebDataRepo] Status code: ${result.statusCode}');
       log('[WebDataRepo] Message: ${result.body}');
-      throw CodelesslyException(
-        'Error downloading publish model.',
-        stacktrace: StackTrace.current,
+      throw const CodelesslyException(
+        ErrorType.networkException,
+        message: 'Error downloading publish model.',
       );
     }
 
@@ -69,10 +69,10 @@ class WebDataRepository extends NetworkDataRepository {
       log('[WebDataRepo] Error downloading layout model. [${source.serverPath}]');
       log('[WebDataRepo] Status code: ${result.statusCode}');
       log('[WebDataRepo] Message: ${result.body}');
-      throw CodelesslyException(
-        'Error downloading layout model [$layoutID]',
+      throw CodelesslyException.layout(
+        ErrorType.networkException,
+        message: 'Error downloading layout model [$layoutID]',
         layoutID: layoutID,
-        stacktrace: StackTrace.current,
       );
     }
 
@@ -105,9 +105,9 @@ class WebDataRepository extends NetworkDataRepository {
         log('[WebDataRepo] Error downloading font model.');
         log('[WebDataRepo] Status code: ${result.statusCode}');
         log('[WebDataRepo] Message: ${result.body}');
-        throw CodelesslyException(
-          'Error downloading font model.',
-          stacktrace: StackTrace.current,
+        throw const CodelesslyException(
+          ErrorType.networkException,
+          message: 'Error downloading font model.',
         );
       }
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
@@ -142,9 +142,9 @@ class WebDataRepository extends NetworkDataRepository {
         log('[WebDataRepo] Error downloading api.');
         log('[WebDataRepo] Status code: ${result.statusCode}');
         log('[WebDataRepo] Message: ${result.body}');
-        throw CodelesslyException(
-          'Error downloading api.',
-          stacktrace: StackTrace.current,
+        throw const CodelesslyException(
+          ErrorType.networkException,
+          message: 'Error downloading api.',
         );
       }
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
@@ -181,9 +181,9 @@ class WebDataRepository extends NetworkDataRepository {
         log('[WebDataRepo] Error downloading variables.');
         log('[WebDataRepo] Status code: ${result.statusCode}');
         log('[WebDataRepo] Message: ${result.body}');
-        throw CodelesslyException(
-          'Error downloading variables.',
-          stacktrace: StackTrace.current,
+        throw const CodelesslyException(
+          ErrorType.networkException,
+          message: 'Error downloading variables.',
         );
       }
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
@@ -222,9 +222,9 @@ class WebDataRepository extends NetworkDataRepository {
         log('[WebDataRepo] Error downloading conditions.');
         log('[WebDataRepo] Status code: ${result.statusCode}');
         log('[WebDataRepo] Message: ${result.body}');
-        throw CodelesslyException(
-          'Error downloading conditions.',
-          stacktrace: StackTrace.current,
+        throw const CodelesslyException(
+          ErrorType.networkException,
+          message: 'Error downloading conditions.',
         );
       }
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);

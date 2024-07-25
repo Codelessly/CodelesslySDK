@@ -35,16 +35,11 @@ class CodelesslyCacheManager extends CacheManager {
       filesBox = await Hive.openBox(
         '${cacheFilesBoxName}_${config.uniqueID.replaceAll('/', '')}',
       );
-    } on HiveError catch (e, stacktrace) {
+    } catch (e, _) {
       throw CodelesslyException(
-        'Failed to initialize cache manager.\n${e.message}',
-        stacktrace: stacktrace,
-      );
-    } catch (e, stacktrace) {
-      throw CodelesslyException(
-        'Failed to initialize cache manager',
+        ErrorType.cacheInitException,
+        message: 'Failed to initialize cache manager',
         originalException: e,
-        stacktrace: stacktrace,
       );
     } finally {
       stopwatch.stop();
@@ -62,11 +57,11 @@ class CodelesslyCacheManager extends CacheManager {
     try {
       await box.clear();
       logger.log(_label, 'Cache cleared successfully!');
-    } catch (e, stacktrace) {
-      throw CodelesslyException.cacheClearException(
-        message: 'Failed to clear cache. $e',
+    } catch (e, _) {
+      throw CodelesslyException(
+        ErrorType.cacheClearException,
+        message: 'Failed to clear cache',
         originalException: e,
-        stacktrace: stacktrace,
       );
     }
   }
@@ -87,11 +82,11 @@ class CodelesslyCacheManager extends CacheManager {
         return box.put(key, value);
       }
       return box.put(key, jsonEncode(value));
-    } catch (e, stacktrace) {
-      throw CodelesslyException.cacheStoreException(
+    } catch (e, _) {
+      throw CodelesslyException(
+        ErrorType.cacheStoreException,
         message: 'Failed to store value of $key\nValue: $value',
         originalException: e,
-        stacktrace: stacktrace,
       );
     }
   }
@@ -106,11 +101,11 @@ class CodelesslyCacheManager extends CacheManager {
       } else {
         return value as T;
       }
-    } catch (e, stacktrace) {
-      throw CodelesslyException.cacheLookupException(
+    } catch (e, _) {
+      throw CodelesslyException(
+        ErrorType.cacheLookupException,
         message: 'Failed to get value of $key from cache',
         originalException: e,
-        stacktrace: stacktrace,
       );
     }
   }
@@ -119,7 +114,17 @@ class CodelesslyCacheManager extends CacheManager {
   bool isCached(String key) => box.containsKey(key);
 
   @override
-  Future<void> delete(String key) => box.delete(key);
+  Future<void> delete(String key) {
+    try {
+      return box.delete(key);
+    } catch (e, _) {
+      throw CodelesslyException(
+        ErrorType.cacheClearException,
+        message: 'Failed to delete value of $key from cache',
+        originalException: e,
+      );
+    }
+  }
 
   @override
   Future<void> deleteAllByteData() async {
@@ -127,11 +132,11 @@ class CodelesslyCacheManager extends CacheManager {
     try {
       filesBox.clear();
       logger.log(_label, 'Cache bytes deleted successfully!');
-    } catch (e, stacktrace) {
-      throw CodelesslyException.fileIoException(
-        message: 'Failed to clear files.\n$e',
+    } catch (e, _) {
+      throw CodelesslyException(
+        ErrorType.fileIoException,
+        message: 'Failed to clear files.',
         originalException: e,
-        stacktrace: stacktrace,
       );
     }
   }
@@ -141,11 +146,11 @@ class CodelesslyCacheManager extends CacheManager {
     try {
       final key = '$pathKey/$name';
       await filesBox.delete(key);
-    } catch (e, stacktrace) {
-      throw CodelesslyException.fileIoException(
+    } catch (e, _) {
+      throw CodelesslyException(
+        ErrorType.fileIoException,
         message: 'Failed to delete file $pathKey/$name',
         originalException: e,
-        stacktrace: stacktrace,
       );
     }
   }
@@ -156,7 +161,8 @@ class CodelesslyCacheManager extends CacheManager {
     if (filesBox.containsKey(key)) {
       return filesBox.get(key);
     }
-    throw CodelesslyException.fileIoException(
+    throw CodelesslyException(
+      ErrorType.fileIoException,
       message: 'File $pathKey/$name does not exist',
     );
   }
@@ -166,11 +172,11 @@ class CodelesslyCacheManager extends CacheManager {
     try {
       final key = '$pathKey/$name';
       return filesBox.containsKey(key);
-    } catch (e, stacktrace) {
-      throw CodelesslyException.fileIoException(
+    } catch (e, _) {
+      throw CodelesslyException(
+        ErrorType.fileIoException,
         message: 'Failed to check if file $pathKey/$name is cached',
         originalException: e,
-        stacktrace: stacktrace,
       );
     }
   }
@@ -205,11 +211,11 @@ class CodelesslyCacheManager extends CacheManager {
       } else {
         logger.log(_label, 'No files were purged.');
       }
-    } catch (e, stacktrace) {
-      throw CodelesslyException.fileIoException(
+    } catch (e, _) {
+      throw CodelesslyException(
+        ErrorType.fileIoException,
         message: 'Failed to purge files in $pathKey.\nError: $e',
         originalException: e,
-        stacktrace: stacktrace,
       );
     }
   }
@@ -220,11 +226,11 @@ class CodelesslyCacheManager extends CacheManager {
       final key = '$pathKey/$name';
       await filesBox.put(key, bytes);
       logger.log(_label, 'Successfully saved file $pathKey/$name');
-    } catch (e, stacktrace) {
-      throw CodelesslyException.fileIoException(
+    } catch (e, _) {
+      throw CodelesslyException(
+        ErrorType.fileIoException,
         message: 'Failed to save file $pathKey/$name',
         originalException: e,
-        stacktrace: stacktrace,
       );
     }
   }

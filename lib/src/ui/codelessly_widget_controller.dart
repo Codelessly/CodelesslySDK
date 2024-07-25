@@ -84,6 +84,20 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// behavior.
   final CacheManager? cacheManager;
 
+  /// Optional placeholder widget to show while the layout is loading.
+  final WidgetBuilder? loadingBuilder;
+
+  /// Optional placeholder widget to show if the layout fails to load.
+  final CodelesslyWidgetErrorBuilder? errorBuilder;
+
+  /// Optional widget builder to wrap the rendered layout widget with for
+  /// advanced control over the layout's behavior.
+  final CodelesslyWidgetLayoutBuilder? layoutBuilder;
+
+  /// Returns a widget that decides how to load nested layouts of a rendered
+  /// node.
+  final LayoutRetrieverBuilder? layoutRetrievalBuilder;
+
   /// Listens to the SDK's status to figure out if it needs to manually
   /// initialize the opposite data manager if needed.
   StreamSubscription<CStatus>? _sdkStatusListener;
@@ -105,23 +119,24 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// the [Codelessly] instance.
   PublishSource get publishSource => effectiveCodelessly.config!.publishSource;
 
-  /// A boolean that helps keep track of the state of this controller's
-  /// initialization.
-  bool didInitialize = false;
+  /// Listens to exceptions thrown by the SDK and updates the state of this
+  /// controller if the exception is for this layout.
+  StreamSubscription<(CodelesslyException, StackTrace)>? _exceptionSubscription;
 
-  /// Optional placeholder widget to show while the layout is loading.
-  final WidgetBuilder? loadingBuilder;
+  /// The last exception that was thrown by the SDK that is relevant to this
+  /// specific layout. Used by the CodelesslyWidget attached to this controller
+  /// to figure out whether it needs to show an error screen for itself or not.
+  CodelesslyException? lastException;
 
-  /// Optional placeholder widget to show if the layout fails to load.
-  final CodelesslyWidgetErrorBuilder? errorBuilder;
+  /// The last trace that was thrown by the SDK that is relevant to this
+  /// specific layout. Used by the CodelesslyWidget attached to this controller
+  /// to figure out whether it needs to show an error screen for itself or not.
+  StackTrace? lastTrace;
 
-  /// Optional widget builder to wrap the rendered layout widget with for
-  /// advanced control over the layout's behavior.
-  final CodelesslyWidgetLayoutBuilder? layoutBuilder;
-
-  /// Returns a widget that decides how to load nested layouts of a rendered
-  /// node.
-  final LayoutRetrieverBuilder? layoutRetrievalBuilder;
+  /// Listens to the publish model stream to figure out if the layout is
+  /// available in the publish model. If not, then the layout is not published
+  /// and the data manager needs to be notified to download it.
+  StreamSubscription<SDKPublishModel?>? _publishModelListener;
 
   /// Creates a [CodelesslyWidgetController].
   ///
@@ -219,6 +234,8 @@ class CodelesslyWidgetController extends ChangeNotifier {
       codelessly?.dispose(sealCache: false);
     }
     _sdkStatusListener?.cancel();
+    _exceptionSubscription?.cancel();
+    _publishModelListener?.cancel();
     super.dispose();
   }
 
@@ -230,8 +247,6 @@ class CodelesslyWidgetController extends ChangeNotifier {
     if (layoutID != null) {
       this.layoutID = layoutID;
     }
-
-    didInitialize = true;
 
     try {
       CStatus status = effectiveCodelessly.status;
@@ -283,8 +298,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
             effectiveCodelessly.config?.automaticallySendCrashReports ?? false,
       );
 
-      effectiveCodelessly.errorHandler
-          .captureException(exception, stacktrace: str);
+      effectiveCodelessly.errorHandler.captureException(exception, trace: str);
     }
 
     // First event.
@@ -295,7 +309,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
         // created yet, Firebase may still be initializing.
         log('[${this.layoutID}]: Codelessly SDK is loading with step $state.');
         if (state.hasPassed(CLoadingState.createdManagers)) {
-          log('[${this.layoutID}]: Checking layout because it passed the created managers step.');
+          log('[${this.layoutID}]: Checking layout because it passed the create managers step.');
           _checkLayout();
         } else {
           log('[${this.layoutID}]: Waiting for data manager to be created. Skipping for now.');
@@ -320,7 +334,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
           // Listen to data manager after it has been created. If it hasn't been
           // created yet, Firebase may still be initializing.
           if (state.hasPassed(CLoadingState.createdManagers)) {
-            log('[${this.layoutID}]: (Listener) Checking layout because it passed the created managers step.');
+            log('[${this.layoutID}]: (Listener) Checking layout because it passed the create managers step.');
 
             _checkLayout();
           } else {
@@ -336,11 +350,96 @@ class CodelesslyWidgetController extends ChangeNotifier {
     });
   }
 
+  bool didListenToDataManager = false;
+
+  /// If the data manager changes and this layout id does not yet exist, request
+  /// it again.
+  void _listenToDataManager() {
+    if (didListenToDataManager) return;
+    didListenToDataManager = true;
+
+    _publishModelListener?.cancel();
+    _publishModelListener = publishModelStream.listen((model) {
+      if (model == null) return;
+      if (layoutID == null) return;
+
+      log('[$layoutID]: (Data manager listener) Publish model changed, checking if layout still exists in it.');
+
+      if (!model.layouts.containsKey(layoutID!)) {
+        log('[$layoutID]: (Data manager listener) Publish model changed, but layout [$layoutID] does not exist in it anymore. Forcing a re-check.');
+        _checkLayout();
+      } else {
+        log('[$layoutID]: (Data manager listener) Publish model changed, [$layoutID] exists in the publish model. Clearing exceptions if any.');
+        clearExceptions();
+      }
+    });
+  }
+
+  bool didInitExceptionNotifications = false;
+
+  /// Listens to exceptions thrown by the SDK and updates the state of this
+  /// controller if the exception is for this layout.
+  ///
+  /// The reason this function is separate from initialize is because
+  /// the CodelesslySDK may not have initialized it's error handler just yet.
+  void _initExceptionNotifications() {
+    if (didInitExceptionNotifications) return;
+    didInitExceptionNotifications = true;
+
+    // When this function is first called, the last events of the exception
+    // controller will not be buffered and emitted here. Therefore, before this
+    // listener is first attached, we check the current exceptions that have
+    // last been thrown by the SDK for relevance.
+    final exception = effectiveCodelessly.errorHandler.lastException;
+    final trace = effectiveCodelessly.errorHandler.lastTrace;
+
+    if (exception != null && trace != null) {
+      if (exception.identifier == layoutID) {
+        lastException = exception;
+        lastTrace = trace;
+
+        if (hasListeners) {
+          notifyListeners();
+        }
+      }
+    }
+
+    // Listen to future exceptions.
+    _exceptionSubscription?.cancel();
+    _exceptionSubscription =
+        effectiveCodelessly.errorHandler.exceptionStream.listen((event) {
+      final exception = event.$1;
+      final trace = event.$2;
+
+      if (exception.identifier == layoutID) {
+        lastException = exception;
+        lastTrace = trace;
+
+        if (hasListeners) {
+          notifyListeners();
+        }
+      }
+    });
+  }
+
+  void clearExceptions() {
+    if (lastException != null || lastTrace != null) {
+      lastException = null;
+      lastTrace = null;
+
+      if (hasListeners) {
+        notifyListeners();
+      }
+    }
+  }
+
   /// Listens to the data manager's status. If the data manager is initialized,
   /// then we can signal to the manager that the desired layout passed to this
   /// widget is ready to be rendered and needs to be downloaded and prepared.
   void _checkLayout() {
     log('[$layoutID]: (Check) Checking layout...');
+    _initExceptionNotifications();
+    _listenToDataManager();
 
     // If this CodelesslyWidget wants to preview a layout but the SDK is
     // configured to load published layouts, then we need to initialize the
@@ -352,11 +451,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
       log('[$layoutID]: (Check) Initializing data manager for the first time with a publish source of $publishSource because the SDK is configured to load ${publishSource == PublishSource.publish ? 'published' : 'preview'} layouts.');
 
       dataManager.init(layoutID: layoutID).catchError((error, str) {
-        effectiveCodelessly.errorHandler.captureException(
-          error,
-          stacktrace: str,
-          layoutID: layoutID,
-        );
+        effectiveCodelessly.errorHandler.captureException(error, trace: str);
       });
     }
     // If the config has a slug specified and the data manager doesn't have
@@ -365,19 +460,10 @@ class CodelesslyWidgetController extends ChangeNotifier {
     else if (config.slug != null && dataManager.publishModel == null) {
       log('[$layoutID]: (Check) A slug is specified and publish model is null.');
       log('[$layoutID]: (Check) Fetching complete publish bundle from data manager.');
-      dataManager
-          .fetchCompletePublishBundle(
+      dataManager.fetchCompletePublishBundle(
         slug: config.slug!,
         source: publishSource,
-      )
-          .catchError((error, str) {
-        effectiveCodelessly.errorHandler.captureException(
-          error,
-          stacktrace: str,
-          layoutID: layoutID,
-        );
-        return false;
-      });
+      );
     }
     // DataManager is initialized or downloading a publish bundle. If the
     // layoutID is not null, then we need to signal to the data manager that we
@@ -386,25 +472,18 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // If the config has preloading set to true, then the DataManager is already
     // taking care of this layout and we just need to tell it to prioritize it.
     else if (layoutID != null) {
-      log('[$layoutID]: (Check) Queuing layout [$layoutID] in data manager.');
+      log('[$layoutID]: (Check) Queuing layout [$layoutID] in data manager. ${lastException != null ? 'Clearing current exceptions.' : ''}');
       log('[$layoutID]: (Check) Using publish source $publishSource.');
 
-      dataManager
-          .queueLayout(layoutID: layoutID!, prioritize: true)
-          .catchError((error, str) {
-        effectiveCodelessly.errorHandler.captureException(
-          error,
-          stacktrace: str,
-          layoutID: layoutID,
-        );
-      });
+      clearExceptions();
+      dataManager.queueLayout(layoutID: layoutID!, prioritize: true);
     }
 
     // At this point in the execution, layoutID is null, slug is not specified.
     // Preloading must be true, so this controller can only wait...
     else {
       if (layoutID != null) {
-        log('[$layoutID]: (Check) LayoutID specified, but preload is set to ${config.preload}, skipping to let data manager to download everything');
+        log('[$layoutID]: (Check) LayoutID specified, but preload is set to ${config.preload}, skipping to let data manager download everything.');
       } else {
         log('[$layoutID]: (Check) LayoutID is null, skipping to let data manager to download everything.');
       }
