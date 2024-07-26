@@ -224,5 +224,5 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [layoutID, data, functions];
+  List<Object?> get props => [layoutID, data, functions, variables, conditions];
 }
