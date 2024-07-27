@@ -6,65 +6,106 @@ import 'reporter.dart';
 
 const String _label = 'Error Reporter';
 
-/// A [typedef] that defines the callback for [CodelesslyErrorHandler].
+/// A typedef that defines the callback for [CodelesslyErrorHandler].
 /// It allows supplementary handling of any captured exceptions that the SDK
 /// throws.
-typedef ExceptionCallback = void Function(CodelesslyException e);
+typedef ExceptionCallback = void Function(
+  CodelesslyException exception,
+  StackTrace stackTrace,
+);
 
 /// An enum to specify the type of error.
 enum ErrorType {
-  /// The token was rejected for some reason.
-  invalidAuthToken('Invalid auth token'),
+  invalidAuthToken(
+    'invalid-token',
+    'Invalid auth token',
+  ),
+  noTokenForProject(
+    'no-token-for-project',
+    'No token found for the associated project',
+  ),
+  noProjectForSlug(
+    'no-project-for-slug',
+    'No project found for the provided slug',
+  ),
+  notAuthenticated(
+    'not-authenticated',
+    'The app has not been authenticated',
+  ),
+  layoutFailed(
+    'layout-failed',
+    'Layout failed',
+  ),
+  cacheInitException(
+    'cache-init-exception',
+    'Failed to initialize cache',
+  ),
+  cacheStoreException(
+    'cache-store-exception',
+    'Failed to store value in cache',
+  ),
+  cacheLookupException(
+    'cache-lookup-exception',
+    'Failed to look up a value in cache',
+  ),
+  cacheClearException(
+    'cache-clear-exception',
+    'Failed to clear cache',
+  ),
+  fontDownloadException(
+    'font-download-exception',
+    'Failed to download font',
+  ),
+  fontLoadException(
+    'font-load-exception',
+    'Failed to load font',
+  ),
+  fileIoException(
+    'file-io-exception',
+    'Failed to read/write to storage',
+  ),
+  networkException(
+    'network-exception',
+    'Connection failed',
+  ),
+  assertionError(
+    'assertion-error',
+    'Assertion error',
+  ),
+  notInitializedError(
+    'not-initialized-error',
+    'The Codelessly SDK has not been initialized',
+  ),
+  apiNotFound(
+    'api-not-found',
+    'The API endpoint was not found',
+  ),
+  other(
+    'other',
+    'Unknown error',
+  );
 
-  /// The app has not been authenticated yet.
-  notAuthenticated('Not authenticated'),
+  final String code;
+  final String title;
 
-  /// The project was not found in the database.
-  projectNotFound('Project not found'),
+  const ErrorType(this.code, this.title);
 
-  /// The layout was not found in the database.
-  layoutFailed('Layout failed'),
-
-  /// Failed to store an object in cache.
-  cacheStoreException('Failed to store value in cache'),
-
-  /// Failed to retrieve an object from cache.
-  cacheLookupException('Failed to lookup value in cache'),
-
-  /// Failed to clear cache.
-  cacheClearException('Failed to clear cache'),
-
-  /// Failed to download a font.
-  fontDownloadException('Failed to download font'),
-
-  /// Failed to load a font.
-  fontLoadException('Failed to load font'),
-
-  /// Failed to manipulate file system.
-  fileIoException('Failed to read/write to storage'),
-
-  /// Network error.
-  networkException('Network error'),
-
-  /// An assert failed.
-  assertionError('Assertion error'),
-
-  /// Not initialized.
-  notInitializedError('Not initialized'),
-
-  /// Any other error that is not defined in this enum.
-  other('Unknown error');
-
-  final String label;
-
-  const ErrorType(this.label);
+  static ErrorType fromCode(String? code) => code == null
+      ? ErrorType.other
+      : ErrorType.values.firstWhere(
+          (ErrorType e) => e.code == code,
+          orElse: () => ErrorType.other,
+        );
 }
 
 /// Abstraction for handling any error that the SDK throws.
 abstract class BaseErrorHandler {
   /// Allows to catch exceptions in the SDK.
   /// Also allows to specify optional [stacktrace] to stack back the exception.
-  Future<void> captureException(Exception throwable, {StackTrace? stacktrace});
+  Future<void> captureException(
+    dynamic throwable, {
+    required StackTrace trace,
+  });
 
   /// Allows to catch an event in the SDK. This could hold so much more data
   /// than [captureException]. This also can be use for logging non-throwing
@@ -86,24 +127,22 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
   final ExceptionCallback? onException;
 
   /// A stream controller that will be used to broadcast exceptions.
-  final StreamController<CodelesslyException> _exceptionStreamController =
-      StreamController<CodelesslyException>.broadcast();
+  final StreamController<(CodelesslyException, StackTrace)>
+      exceptionController =
+      StreamController<(CodelesslyException, StackTrace)>.broadcast();
 
   /// A stream that will be used to broadcast exceptions.
-  Stream<CodelesslyException> get exceptionStream =>
-      _exceptionStreamController.stream;
+  Stream<(CodelesslyException, StackTrace)> get exceptionStream =>
+      exceptionController.stream;
+
+  CodelesslyException? lastException;
+  StackTrace? lastTrace;
 
   /// Initializes an instance of this with given [reporter].
   CodelesslyErrorHandler({
     required ErrorReporter? reporter,
     this.onException,
   }) : _reporter = reporter;
-
-  /// The last exception that was thrown.
-  CodelesslyException? _lastException;
-
-  /// Returns the last exception that was thrown.
-  CodelesslyException? get lastException => _lastException;
 
   @override
   Future<void> captureEvent(CodelesslyEvent event) async {
@@ -114,298 +153,90 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
   @override
   Future<void> captureException(
     dynamic throwable, {
-    StackTrace? stacktrace,
-    String? message,
-    String? layoutID,
-    bool markForUI = true,
+    required StackTrace trace,
   }) async {
     final bool isAssertionError = throwable is AssertionError;
     final CodelesslyException exception = throwable is CodelesslyException
         ? throwable
         : isAssertionError
-            ? CodelesslyException.assertionError(
+            ? CodelesslyException(
+                ErrorType.assertionError,
                 message: throwable.message.toString(),
-                layoutID: layoutID,
                 originalException: throwable,
-                stacktrace: stacktrace ?? StackTrace.current,
               )
             : CodelesslyException(
-                message ?? throwable.toString(),
-                layoutID: layoutID,
+                ErrorType.other,
+                message: throwable.toString(),
                 originalException: throwable,
-                stacktrace: stacktrace ?? StackTrace.current,
               );
 
-    _lastException = exception;
-    onException?.call(exception);
+    onException?.call(exception, trace);
+    exceptionController.add((exception, trace));
+    lastException = exception;
+    lastTrace = trace;
 
     logger.error(
       _label,
-      message ?? exception.message ?? 'Unknown error',
+      exception.message,
       error: exception,
-      stackTrace: exception.stacktrace ?? StackTrace.current,
+      stackTrace: trace,
     );
 
     _reporter?.captureException(
       exception,
-      stacktrace: exception.stacktrace ?? StackTrace.current,
+      stacktrace: trace,
     );
-    _exceptionStreamController.add(exception);
   }
 }
 
 /// A generic exception intended to be used inside the SDK to throw exceptions
 /// to user facing interfaces.
 class CodelesslyException implements Exception {
-  final String? message;
-  final String? layoutID;
-  final String? apiId;
-  final StackTrace? stacktrace;
-  final dynamic originalException;
-
-  /// This could be a link to our documentation for a possible cause and fix.
-  final String? url;
   final ErrorType type;
+  final String message;
+  final Object? originalException;
+  final Object? identifier;
+  final bool blockAllLayouts;
 
-  const CodelesslyException(
-    this.message, {
-    this.url,
-    this.layoutID,
-    this.apiId,
+  const CodelesslyException(this.type, {
+    required this.message,
+    this.identifier,
     this.originalException,
-    this.stacktrace,
-    this.type = ErrorType.other,
+    this.blockAllLayouts = false,
   });
 
-  CodelesslyException.invalidAuthToken({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.invalidAuthToken,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
+  const CodelesslyException.layout(
+    this.type, {
+    required String layoutID,
+    required this.message,
+    this.originalException,
+    this.blockAllLayouts = false,
+  }) : identifier = layoutID;
 
-  CodelesslyException.notAuthenticated({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.notAuthenticated,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
+  const CodelesslyException.api(
+    this.type, {
+    required String apiID,
+    required this.message,
+    this.originalException,
+    this.blockAllLayouts = false,
+  }) : identifier = apiID;
 
-  CodelesslyException.projectNotFound({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.projectNotFound,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
+  const CodelesslyException.wrap(
+    this.type,
+    this.originalException, {
+    required this.message,
+    this.identifier,
+    this.blockAllLayouts = false,
+  });
 
-  CodelesslyException.layoutNotFound({
-    String? message,
-    required String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.layoutFailed,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
-
-  CodelesslyException.apiNotFound({
-    String? message,
-    String? layoutID,
-    String? apiId,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.layoutFailed,
-          apiId: apiId,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-          layoutID: layoutID,
-        );
-
-  CodelesslyException.cacheStoreException({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.cacheStoreException,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
-
-  CodelesslyException.cacheLookupException({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.cacheLookupException,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
-
-  CodelesslyException.cacheClearException({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.cacheClearException,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
-
-  CodelesslyException.fontDownloadException({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.fontDownloadException,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
-
-  CodelesslyException.fontLoadException({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.fontLoadException,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
-
-  CodelesslyException.fileIoException({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.fileIoException,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
-
-  CodelesslyException.networkException({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.networkException,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
-
-  CodelesslyException.assertionError({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.assertionError,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
-
-  CodelesslyException.notInitializedError({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.notInitializedError,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
-
-  CodelesslyException.other({
-    String? message,
-    String? layoutID,
-    String? url,
-    dynamic originalException,
-    StackTrace? stacktrace,
-  }) : this(
-          message,
-          type: ErrorType.other,
-          layoutID: layoutID,
-          url: url,
-          originalException: originalException,
-          stacktrace: stacktrace,
-        );
+  CodelesslyException.fromCode(
+    String? code, {
+    required this.message,
+    this.identifier,
+    this.originalException,
+    this.blockAllLayouts = false,
+  }) : type = ErrorType.fromCode(code);
 
   @override
-  String toString() {
-    return 'CodelesslyException: $message';
-  }
+  String toString() => '${type.title}\n$message';
 }

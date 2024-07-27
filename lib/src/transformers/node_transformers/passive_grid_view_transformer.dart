@@ -89,6 +89,7 @@ class PassiveGridViewWidget extends StatelessWidget {
               return codelesslyController.errorBuilder?.call(
                     context,
                     snapshot.error,
+                    snapshot.stackTrace ?? StackTrace.current,
                   ) ??
                   const Center(child: Text('Error'));
             }

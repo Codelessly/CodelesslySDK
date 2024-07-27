@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +20,8 @@ typedef CodelesslyWidgetLayoutBuilder = Widget Function(
 /// fails to load.
 typedef CodelesslyWidgetErrorBuilder = Widget Function(
   BuildContext context,
-  dynamic exception,
+  Object? exception,
+  StackTrace trace,
 );
 
 Widget _defaultLayoutBuilder(context, layout) => layout;
@@ -233,9 +232,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   CodelesslyWidgetController get _effectiveController =>
       widget.controller ?? _controller!;
 
-  Codelessly get _effectiveCodelessly =>
-      _effectiveController.effectiveCodelessly;
-
   /// The [CodelesslyContext] that will hold the data and functions that will be
   /// used to render the layout.
   ///
@@ -261,15 +257,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   CodelesslyWidgetErrorBuilder? get _effectiveErrorBuilder =>
       widget.errorBuilder ?? _effectiveController.errorBuilder;
 
-  StreamSubscription<CodelesslyException?>? _exceptionSubscription;
-  CodelesslyException? _lastException;
-
-  // Saved in the state for the didChangeDependencies method to use to compare
-  // with the new canvas ID to determine if the layout needs to be reloaded
-  // when the media query changes resulting into a new breakpoint.
+  /// Saved in the state for the didChangeDependencies method to compare with
+  /// a potentially new canvas ID to determine if the layout needs to be
+  /// reloaded when the media query changes resulting in a new breakpoint.
   String? canvasID;
 
-  // Saved in the state for the didChangeDependencies method to use.
+  /// Saved in the state for the didChangeDependencies method to compare with
+  /// a potentially new canvas ID to determine if the layout needs to be
+  /// reloaded when the media query changes resulting in a new breakpoint.
   String? effectiveLayoutID;
 
   @override
@@ -288,19 +283,13 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           _effectiveController.config.automaticallySendCrashReports,
     );
 
-    _exceptionSubscription =
-        _effectiveCodelessly.errorHandler.exceptionStream.listen(
-      (CodelesslyException event) {
-        if (event.layoutID == _effectiveController.layoutID) {
-          _lastException = event;
-          setState(() {});
-        }
-      },
-    );
+    _effectiveController.addListener(onControllerUpdate);
 
     if (widget.codelesslyContext != null) {
       logger.log(
-          _label, 'A CodelesslyContext was provided explicitly by the widget.');
+        _label,
+        'A CodelesslyContext was provided explicitly by the widget.',
+      );
     }
 
     codelesslyContext = widget.codelesslyContext ??
@@ -396,7 +385,10 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     }
 
     if (widget.controller == null && oldWidget.controller != null) {
+      oldWidget.controller?.removeListener(onControllerUpdate);
+
       _controller = oldWidget.controller ?? createDefaultController();
+      _effectiveController.addListener(onControllerUpdate);
     } else if (widget.controller != null && oldWidget.controller == null) {
       _controller!.dispose();
       _controller = null;
@@ -408,13 +400,20 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       if (widget.publishSource != oldWidget.publishSource ||
           widget.layoutID != oldWidget.layoutID ||
           widget.codelessly != oldWidget.codelessly) {
+        _controller?.removeListener(onControllerUpdate);
         _controller?.dispose();
+
         _controller = createDefaultController();
+        _effectiveController.addListener(onControllerUpdate);
+
         _effectiveController.initialize();
         codelesslyContext.layoutID = _effectiveController.layoutID;
       }
     }
   }
+
+  /// This primarily updates the UI for exception-related changes.
+  void onControllerUpdate() => setState(() {});
 
   /// Creates a default controller if one was not provided in the constructor.
   CodelesslyWidgetController createDefaultController() =>
@@ -436,7 +435,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
   @override
   void dispose() {
-    _exceptionSubscription?.cancel();
     _controller?.dispose();
     _stopwatch?.stop();
 
@@ -483,112 +481,131 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       stream: _effectiveController.publishModelStream,
       initialData: _effectiveController.publishModel,
       builder: (context, AsyncSnapshot<SDKPublishModel?> snapshot) {
-        final status = _effectiveController.dataManager.status;
-        try {
-          if (snapshot.hasError || status is CError) {
-            return _effectiveErrorBuilder?.call(context, snapshot.error) ??
-                CodelesslyErrorScreen(
-                  exception: snapshot.error ?? (status as CError).exception,
-                  publishSource: _effectiveController.publishSource,
-                );
-          }
-
-          if (_lastException != null) {
-            return _effectiveErrorBuilder?.call(
-                  context,
-                  _lastException,
-                ) ??
-                CodelesslyErrorScreen(
-                  exception: _lastException,
-                  publishSource: _effectiveController.publishSource,
-                );
-          }
-
-          if (!snapshot.hasData || status is! CLoaded) {
-            return _effectiveLoadingBuilder?.call(context) ??
-                const CodelesslyLoadingScreen();
-          }
-
-          final SDKPublishModel model = snapshot.data!;
-          effectiveLayoutID =
-              _effectiveController.layoutID ?? model.entryLayoutId;
-
-          if (effectiveLayoutID == null) {
-            return _effectiveErrorBuilder?.call(
-                  context,
-                  CodelesslyException.notInitializedError(
-                    message:
-                        'A layoutID was not specified and the model does not have an entry layoutID specified.',
-                  ),
-                ) ??
-                CodelesslyErrorScreen(
-                  publishSource: _effectiveController.publishSource,
-                  exception: null,
-                );
-          }
-
-          if (!model.layouts.containsKey(effectiveLayoutID!)) {
-            return _effectiveLoadingBuilder?.call(context) ??
-                const CodelesslyLoadingScreen();
-          }
-
-          if (model.disabledLayouts.contains(effectiveLayoutID)) {
-            return const SizedBox.shrink();
-          }
-
-          // Set the canvas ID if it is not already set. (This is for the first
-          // time the layout is loaded. For subsequent loads, the canvas ID is
-          // set in the didChangeDependencies method.) e.g. when media query
-          // changes.
-          // We do this so that the layout is reloaded when the media query
-          // changes resulting into a new breakpoint only from
-          // didChangeDependencies method since doing it here is not ideal
-          // since build method is called multiple times and we don't want to
-          // reload the layout multiple times.
-          canvasID ??= _getCanvasIDForLayoutGroup(
-              effectiveLayoutID, model, MediaQuery.sizeOf(context));
-
-          final layoutWidget = Material(
-            clipBehavior: Clip.none,
-            type: MaterialType.transparency,
-            child: CodelesslyLayoutBuilder(
-              // This key is important to ensure that the layout is rebuilt
-              // from scratch whenever the layout ID changes, not when the
-              // canvas ID changes. This is because when the layout ID changes,
-              // the controller changes too and everything is reinitialized. So
-              // it makes sense to rebuild the layout from scratch. However,
-              // when the canvas ID changes, we don't reinitialize the
-              // controller, only the widget needs to reload the layout,
-              // conditions, and variables which is done in the [loadLayout]
-              // method of the this widget. It uses the passed [canvasId] to
-              // reload necessary data for given canvas ID.
-              key: ValueKey(effectiveLayoutID),
-              controller: _effectiveController,
-              layout: model.layouts[effectiveLayoutID!]!,
-              // ID of the canvas to load for current breakpoint.
-              canvasId: canvasID!,
-              layoutRetrievalBuilder: _effectiveLayoutRetrieverBuilder,
-            ),
-          );
-
-          if (_stopwatch != null && _stopwatch!.isRunning) {
-            final millis = _stopwatch!.elapsedMilliseconds;
-            _stopwatch?.stop();
-            logger.log(
-                _label, 'Layout loaded in ${millis}ms or ${millis / 1000}s');
-          }
-
-          return _effectiveLayoutBuilder(context, layoutWidget);
-        } catch (e, str) {
-          print(e);
-          print(str);
-          _stopwatch?.stop();
-          return _effectiveErrorBuilder?.call(context, e) ??
+        final lastException = _effectiveController.lastException;
+        final lastTrace = _effectiveController.lastTrace;
+        if (lastException != null && lastTrace != null) {
+          return _effectiveErrorBuilder?.call(
+                context,
+                lastException,
+                lastTrace,
+              ) ??
               CodelesslyErrorScreen(
-                exception: e,
+                exception: lastException,
+                trace: lastTrace,
                 publishSource: _effectiveController.publishSource,
               );
         }
+
+        final status = _effectiveController.dataManager.status;
+
+        if (snapshot.hasError || status is CError) {
+          final exception = snapshot.error ?? (status as CError).exception;
+          final trace = snapshot.stackTrace ?? (status as CError).stackTrace;
+          return _effectiveErrorBuilder?.call(context, exception, trace) ??
+              CodelesslyErrorScreen(
+                exception: exception,
+                trace: trace,
+                publishSource: _effectiveController.publishSource,
+              );
+        }
+
+        if (!snapshot.hasData || status is! CLoaded) {
+          return _effectiveLoadingBuilder?.call(context) ??
+              const CodelesslyLoadingScreen();
+        }
+
+        final SDKPublishModel model = snapshot.data!;
+        effectiveLayoutID =
+            _effectiveController.layoutID ?? model.entryLayoutId;
+
+        if (effectiveLayoutID == null) {
+          const exception = CodelesslyException(
+            ErrorType.notInitializedError,
+            message:
+                'A layoutID was not specified and the model does not have an entry layoutID specified.',
+          );
+          final trace = StackTrace.current;
+          return _effectiveErrorBuilder?.call(context, exception, trace) ??
+              CodelesslyErrorScreen(
+                exception: exception,
+                trace: trace,
+                publishSource: _effectiveController.publishSource,
+              );
+        }
+
+        // final String? mappedLayoutID = model.layoutIDMap[effectiveLayoutID];
+        //
+        // // A layout id was definitely specified, but it couldn't be resolved,
+        // // even when mapped. It's not been found.
+        // if (mappedLayoutID == null) {
+        //   final exception = CodelesslyException(
+        //     ErrorType.layoutFailed,
+        //     message: 'The layout with id [$effectiveLayoutID] does not exist.',
+        //   );
+        //   final trace = StackTrace.current;
+        //   return _effectiveErrorBuilder?.call(context, exception, trace) ??
+        //       CodelesslyErrorScreen(
+        //         exception: exception,
+        //         trace: trace,
+        //         publishSource: _effectiveController.publishSource,
+        //       );
+        // }
+
+        if (!model.layouts.containsKey(effectiveLayoutID!)) {
+          return _effectiveLoadingBuilder?.call(context) ??
+              const CodelesslyLoadingScreen();
+        }
+
+        if (model.disabledLayouts.contains(effectiveLayoutID)) {
+          return const SizedBox.shrink();
+        }
+
+        // Set the canvas ID if it is not already set. (This is for the first
+        // time the layout is loaded. For subsequent loads, the canvas ID is
+        // set in the didChangeDependencies method.) e.g. when media query
+        // changes.
+        // We do this so that the layout is reloaded when the media query
+        // changes resulting into a new breakpoint only from
+        // didChangeDependencies method since doing it here is not ideal
+        // since build method is called multiple times and we don't want to
+        // reload the layout multiple times.
+        canvasID ??= _getCanvasIDForLayoutGroup(
+          effectiveLayoutID,
+          model,
+          MediaQuery.sizeOf(context),
+        );
+
+        final layoutWidget = Material(
+          clipBehavior: Clip.none,
+          type: MaterialType.transparency,
+          child: CodelesslyLayoutBuilder(
+            // This key is important to ensure that the layout is rebuilt
+            // from scratch whenever the layout ID changes, not when the
+            // canvas ID changes. This is because when the layout ID changes,
+            // the controller changes too and everything is reinitialized. So
+            // it makes sense to rebuild the layout from scratch. However,
+            // when the canvas ID changes, we don't reinitialize the
+            // controller, only the widget needs to reload the layout,
+            // conditions, and variables which is done in the [loadLayout]
+            // method of the this widget. It uses the passed [canvasId] to
+            // reload necessary data for given canvas ID.
+            key: ValueKey(effectiveLayoutID),
+            controller: _effectiveController,
+            layout: model.layouts[effectiveLayoutID!]!,
+            // ID of the canvas to load for current breakpoint.
+            canvasId: canvasID!,
+            layoutRetrievalBuilder: _effectiveLayoutRetrieverBuilder,
+          ),
+        );
+
+        if (_stopwatch != null && _stopwatch!.isRunning) {
+          final millis = _stopwatch!.elapsedMilliseconds;
+          _stopwatch?.stop();
+          logger.log(
+              _label, 'Layout loaded in ${millis}ms or ${millis / 1000}s');
+        }
+
+        return _effectiveLayoutBuilder(context, layoutWidget);
       },
     );
   }
@@ -619,22 +636,32 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                 Widget loading() =>
                     _effectiveLoadingBuilder?.call(context) ??
                     const CodelesslyLoadingScreen();
-                Widget error(Object? exception) {
+                Widget error(Object? exception, StackTrace stackTrace) {
                   final error = exception ?? snapshot.error;
-                  return _effectiveErrorBuilder?.call(context, error) ??
+                  return _effectiveErrorBuilder?.call(
+                        context,
+                        error,
+                        stackTrace,
+                      ) ??
                       CodelesslyErrorScreen(
                         exception: error,
+                        trace: stackTrace,
                         publishSource: _effectiveController.publishSource,
                       );
                 }
 
-                if (snapshot.hasError) return error(snapshot.error);
+                if (snapshot.hasError) {
+                  return error(
+                    snapshot.error,
+                    snapshot.stackTrace ?? StackTrace.current,
+                  );
+                }
                 if (!snapshot.hasData) return loading();
 
                 final CStatus status = snapshot.data!;
                 return switch (status) {
                   CEmpty() || CConfigured() => loading(),
-                  CError() => error(status.exception),
+                  CError() => error(status.exception, status.stackTrace),
                   CLoading(state: CLoadingState state) =>
                     state.hasPassed(CLoadingState.createdManagers)
                         ? buildStreamedLayout()
