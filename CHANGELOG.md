@@ -1,3 +1,7 @@
+## 2.3.0
+- New guided setup flow for getting started with CloudUI.
+- Add support for toggling CloudUIs on and off. They're like feature flags, except much more powerful!
+
 ## 2.2.1
 - Set target platforms.
 
