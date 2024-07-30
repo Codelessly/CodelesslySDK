@@ -37,6 +37,9 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
       disabledLayouts: (json['disabledLayouts'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      hiddenLayouts: (json['hiddenLayouts'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
@@ -82,6 +85,7 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
       const DateTimeConverter().toJson(instance.lastUpdated), null);
   val['layoutIDMap'] = instance.layoutIDMap;
   val['disabledLayouts'] = instance.disabledLayouts;
+  val['hiddenLayouts'] = instance.hiddenLayouts;
   return val;
 }
 
