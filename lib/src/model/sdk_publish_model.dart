@@ -170,6 +170,9 @@ class SDKPublishModel extends PrivacyBase {
   /// A list of layout ids that are explicitly disabled from the server's side.
   final List<String> disabledLayouts;
 
+  /// A list of layout ids that are hidden from developer view.
+  final List<String> hiddenLayouts;
+
   static Map<String, dynamic> serializeLookupMapFonts(
           LookupMap<SDKPublishFont> map) =>
       map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
@@ -264,6 +267,7 @@ class SDKPublishModel extends PrivacyBase {
     this.entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
+    List<String>? hiddenLayouts,
 
     // Privacy
     required super.teams,
@@ -291,7 +295,8 @@ class SDKPublishModel extends PrivacyBase {
             ),
         apis = apis ?? {},
         lastUpdated = lastUpdated ?? DateTime.now(),
-        disabledLayouts = disabledLayouts ?? [];
+        disabledLayouts = disabledLayouts ?? [],
+        hiddenLayouts = hiddenLayouts ?? [];
 
   /// Creates a new instance of [SDKPublishModel] with privacy inherited from
   /// another [PrivacyBase].
@@ -312,6 +317,7 @@ class SDKPublishModel extends PrivacyBase {
     this.entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
+    List<String>? hiddenLayouts,
 
     // Privacy
     required super.privacy,
@@ -333,6 +339,7 @@ class SDKPublishModel extends PrivacyBase {
         lastUpdated = lastUpdated ?? DateTime.now(),
         apis = apis ?? {},
         disabledLayouts = disabledLayouts ?? [],
+        hiddenLayouts = hiddenLayouts ?? [],
         super.private();
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
@@ -368,6 +375,7 @@ class SDKPublishModel extends PrivacyBase {
     String? entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
+    List<String>? hiddenLayouts,
 
     // Privacy
     PrivacyBase? privacy,
@@ -387,6 +395,7 @@ class SDKPublishModel extends PrivacyBase {
       entryCanvasId: entryCanvasId ?? this.entryCanvasId,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       disabledLayouts: disabledLayouts ?? this.disabledLayouts,
+      hiddenLayouts: hiddenLayouts ?? this.hiddenLayouts,
 
       // Privacy
       privacy: privacy ?? this,
@@ -410,6 +419,7 @@ class SDKPublishModel extends PrivacyBase {
         entryCanvasId,
         lastUpdated,
         disabledLayouts,
+        hiddenLayouts,
       ];
 }
 
@@ -429,6 +439,8 @@ class SDKPublishLayout extends PrivacyBase {
   @CanvasesMapConverter()
   final Map<String, Map<String, BaseNode>> canvases;
 
+  /// A list of breakpoints that are used in this layout, indicating to the
+  /// UI at what width the layout should change to a different canvas.
   final List<Breakpoint> breakpoints;
 
   /// The last time this layout was updated. Used for cache validation.
