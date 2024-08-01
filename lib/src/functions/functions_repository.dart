@@ -725,6 +725,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     final Object? updatedValue = switch (variableNotifier.value.type) {
       VariableType.text => newValue,
+      VariableType.image => newValue,
       VariableType.color => ColorRGBA.fromHex(newValue),
       VariableType.integer => _performIntOperation(action.numberOperation,
           currentValue?.toInt(), newValue, scopedValues),
@@ -997,6 +998,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
       final Object? value = switch (action.variableType) {
         VariableType.text => newValue,
+        VariableType.image => newValue,
         VariableType.color => ColorRGBA.fromHex(newValue),
         VariableType.integer => _performIntOperation(action.numberOperation,
             currentValue?.toInt(), newValue, scopedValues),
@@ -1345,6 +1347,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
       final Object? value = switch (subAction.variableType) {
         VariableType.text => newValue,
+        VariableType.image => newValue,
         VariableType.color => ColorRGBA.fromHex(newValue),
         VariableType.integer => _performIntOperation(subAction.numberOperation,
             currentValue?.toInt(), newValue, scopedValues),
