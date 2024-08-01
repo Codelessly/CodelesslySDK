@@ -1634,6 +1634,8 @@ extension ActionModelExt on ActionModel {
         .map((text) => VariableMatch.parseAll(text))
         .expand((matches) => matches)
         .map((match) => match.name)
+        .where((name) =>
+            includePredefined || !predefinedVariableNames.contains(name))
         .toSet();
   }
 }
@@ -1866,15 +1868,15 @@ extension BaseNodeExt on BaseNode {
     // Get variables from actions
     if (this is ReactionMixin) {
       for (final reaction in (this as ReactionMixin).reactions) {
-        final Set<String> reactionVariables =
-            reaction.action.getUsedVariableNames();
+        final Set<String> reactionVariables = reaction.action
+            .getUsedVariableNames(includePredefined: includePredefined);
         usedVariables.addAll(reactionVariables);
       }
     } else if (this is ParentReactionMixin) {
       for (final child in (this as ParentReactionMixin).reactiveChildren) {
         for (final reaction in child.reactions) {
-          final Set<String> reactionVariables =
-              reaction.action.getUsedVariableNames();
+          final Set<String> reactionVariables = reaction.action
+              .getUsedVariableNames(includePredefined: includePredefined);
           usedVariables.addAll(reactionVariables);
         }
       }
