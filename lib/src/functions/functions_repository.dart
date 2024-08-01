@@ -353,10 +353,16 @@ class FunctionsRepository {
   static void launchURL(BuildContext context, LinkAction action) {
     final url = PropertyValueDelegate.substituteVariables(
       action.url,
-      nullSubstitutionMode: NullSubstitutionMode.nullValue,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
       scopedValues: ScopedValues.of(context),
-    );
-    launchUrl(Uri.parse(url));
+    ).trim();
+    final Uri? uri = Uri.tryParse(url);
+    if (uri == null || url.isEmpty) {
+      _log('Invalid URL: $url, Skipping...');
+      return;
+    }
+    _log('Launching URL: $uri');
+    launchUrl(uri);
   }
 
   static Future<http.Response> makeApiRequest({
