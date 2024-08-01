@@ -537,6 +537,7 @@ class PropertyValueDelegate {
 /// Defines accessors for a variable based on its type.
 List<Accessor> getAccessorsForType(VariableType type) {
   switch (type) {
+    case VariableType.image:
     case VariableType.text:
       return [
         Accessor(
