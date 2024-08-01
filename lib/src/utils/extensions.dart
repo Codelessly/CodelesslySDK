@@ -1277,13 +1277,36 @@ extension StringExt on String {
   bool get containsUncheckedVariablePath =>
       variableSyntaxIdentifierRegex.hasMatch(this);
 
+  bool get isUpperCase => this == toUpperCase();
+
+  bool get isLowerCase => this == toLowerCase();
+
+  bool get isDigit => int.tryParse(this) != null;
+
+  bool get isDashOrUnderScoreOrSpace =>
+      this == '-' || this == '_' || this == ' ';
+
   String get camelToSentenceCase {
-    // Split camel case string into words.
-    final String splitWords = replaceAll(RegExp(r'(?<!^)(?=[A-Z])'), r' ');
-    // Capitalize first character.
-    final String capitalized =
-        splitWords[0].toUpperCase() + splitWords.substring(1);
-    return capitalized;
+    List<String> tokens = [];
+    for (final (index, character) in characters.indexed) {
+      if (index == 0 && !character.isDashOrUnderScoreOrSpace) {
+        tokens.add(character.toUpperCase());
+        continue;
+      }
+      if (character.isDashOrUnderScoreOrSpace) {
+        tokens.add(' ');
+        continue;
+      }
+      final String previous = characters.elementAt(index - 1);
+      if (character.isUpperCase &&
+          (previous.isLowerCase && !previous.isDigit)) {
+        tokens.add(' ');
+        tokens.add(character);
+      } else {
+        tokens.add(character);
+      }
+    }
+    return tokens.join();
   }
 
   String wrapWithVariableSyntax() {
@@ -1510,6 +1533,122 @@ extension ActionModelExt on ActionModel {
     }
     return action;
   }
+
+  Set<String> getUsedVariableNames({bool includePredefined = false}) {
+    List<String> strings = [];
+    switch (type) {
+      case ActionType.setVariant:
+        final SetVariantAction action = this as SetVariantAction;
+        strings.addAll([action.nodeID, action.variantID]);
+      case ActionType.navigation:
+        final NavigationAction action = this as NavigationAction;
+        strings.addAll([action.destinationId]);
+        for (final params in action.params.entries) {
+          strings
+              .addAll([params.key, if (params.value is String) params.value]);
+        }
+      case ActionType.showDialog:
+        final ShowDialogAction action = this as ShowDialogAction;
+        strings.addAll([action.destinationId]);
+        for (final params in action.params.entries) {
+          strings
+              .addAll([params.key, if (params.value is String) params.value]);
+        }
+      case ActionType.link:
+        final LinkAction action = this as LinkAction;
+        strings.addAll([action.url]);
+      case ActionType.submit:
+        final SubmitAction action = this as SubmitAction;
+        strings.addAll([action.apiKey, action.primaryTextField]);
+        switch (action.service) {
+          case SubmitActionService.mailchimp:
+            final MailchimpSubmitAction action = this as MailchimpSubmitAction;
+            strings.addAll([
+              action.dataCenter,
+              action.listID,
+              action.firstNameField,
+              action.lastNameField,
+            ]);
+        }
+      case ActionType.setValue:
+        final SetValueAction action = this as SetValueAction;
+        strings.addAll(action.values
+            .map(
+                (value) => value.value is String ? value.value as String : null)
+            .whereNotNull());
+      case ActionType.setVariable:
+        final SetVariableAction action = this as SetVariableAction;
+        strings.addAll([action.index, action.mapKey, action.newValue]);
+      case ActionType.callFunction:
+        final CallFunctionAction action = this as CallFunctionAction;
+        strings.add(action.name);
+        for (final MapEntry(:key, :value) in action.params.entries) {
+          strings.addAll([key, if (value is String) value]);
+        }
+      case ActionType.callApi:
+        final ApiCallAction action = this as ApiCallAction;
+        strings.addAll(action.parameters.values);
+      case ActionType.setStorage:
+        final SetStorageAction action = this as SetStorageAction;
+        strings
+            .addAll([action.key, action.index, action.mapKey, action.newValue]);
+      case ActionType.setCloudStorage:
+        final SetCloudStorageAction action = this as SetCloudStorageAction;
+        switch (action.subAction) {
+          case AddDocumentSubAction action:
+            strings.addAll([
+              action.path,
+              action.documentId,
+              if (action.useRawValue) action.rawValue,
+              if (!action.useRawValue) action.newValue,
+            ]);
+          case RemoveDocumentSubAction action:
+            strings.addAll([
+              action.path,
+              action.documentId,
+            ]);
+          case UpdateDocumentSubAction action:
+            strings.addAll([
+              action.path,
+              action.documentId,
+              action.key,
+              action.mapKey,
+              action.index,
+              if (action.useRawValue) action.rawValue,
+              if (!action.useRawValue) action.newValue,
+            ]);
+        }
+      case ActionType.loadFromCloudStorage:
+        final LoadFromCloudStorageAction action =
+            this as LoadFromCloudStorageAction;
+        strings.addAll([action.path, action.documentId]);
+        strings.addAll(action.whereFilters
+            .map((filter) => filter.getUsedVariableNames())
+            .expand((e) => e));
+        strings.addAll(action.orderByFilters
+            .map((filter) => filter.getUsedVariableNames())
+            .expand((e) => e));
+    }
+
+    return strings
+        .map((text) => VariableMatch.parseAll(text))
+        .expand((matches) => matches)
+        .map((match) => match.name)
+        .toSet();
+  }
+}
+
+extension QueryFilterExt on QueryFilter {
+  Set<String> getUsedVariableNames() {
+    final Set<String> strings = {};
+    switch (this) {
+      case WhereQueryFilter filter:
+        strings.addAll([filter.field, filter.value]);
+      case OrderByQueryFilter filter:
+        strings.add(filter.field);
+    }
+    return strings;
+  }
 }
 
 extension BaseConditionExt on BaseCondition {
@@ -1723,6 +1862,24 @@ extension BaseNodeExt on BaseNode {
         usedVariables.add(match.name);
       }
     }
+
+    // Get variables from actions
+    if (this is ReactionMixin) {
+      for (final reaction in (this as ReactionMixin).reactions) {
+        final Set<String> reactionVariables =
+            reaction.action.getUsedVariableNames();
+        usedVariables.addAll(reactionVariables);
+      }
+    } else if (this is ParentReactionMixin) {
+      for (final child in (this as ParentReactionMixin).reactiveChildren) {
+        for (final reaction in child.reactions) {
+          final Set<String> reactionVariables =
+              reaction.action.getUsedVariableNames();
+          usedVariables.addAll(reactionVariables);
+        }
+      }
+    }
+
     return usedVariables;
   }
 }
