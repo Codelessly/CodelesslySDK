@@ -1,3 +1,8 @@
+## 3.0.0
+- Wasm Web support.
+- Codelessly v10 release.
+- Update Firebase v3.3.0.
+
 ## 2.3.0
 - New guided setup flow for getting started with CloudUI.
 - Add support for toggling CloudUIs on and off. They're like feature flags, except much more powerful!
