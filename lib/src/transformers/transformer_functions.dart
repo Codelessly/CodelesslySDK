@@ -3,7 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:universal_html/html.dart' as html;
+import 'package:web/web.dart' as web;
 
 import '../utils/extensions.dart';
 import 'transformers.dart';
@@ -387,7 +387,7 @@ String getVideoUrl(EmbeddedVideoSource source, String baseUrl) {
   String updatedBaseUrl = baseUrl;
   if (kIsWeb && !kReleaseMode) {
     // This allows to test and debug video player scripts in local environment.
-    var url = Uri.parse(html.window.location.href);
+    var url = Uri.parse(web.window.location.href);
     updatedBaseUrl = url.origin;
   }
 
