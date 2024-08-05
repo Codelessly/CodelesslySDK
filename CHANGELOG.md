@@ -1,3 +1,6 @@
+## 3.0.1
+- Migrate Wasm dependencies.
+
 ## 3.0.0
 - Wasm Web support.
 - Codelessly v10 release.
