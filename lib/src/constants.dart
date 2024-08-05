@@ -19,6 +19,7 @@ const String prodFirebaseProjectId = 'codeless-app';
 const String prodFirebaseCloudFunctionsBaseURL =
     'https://us-central1-codeless-app.cloudfunctions.net';
 const String prodBaseUrl = 'https://app.codelessly.com';
+const String kCodelesslyEditor = 'codelessly_editor';
 
 const defaultErrorMessage =
     'We encountered some error while rendering this page! '

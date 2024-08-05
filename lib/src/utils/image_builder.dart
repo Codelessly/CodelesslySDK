@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -20,8 +19,7 @@ class UltimateImageBuilder extends StatefulWidget {
   final ImageRepeat? repeat;
   final Color? color;
   final WidgetBuilder? errorBuilder;
-  final Widget Function(BuildContext context, DownloadProgress? progress)?
-      loadingBuilder;
+  final Widget Function(BuildContext context, Widget? child)? loadingBuilder;
   final PaintModel? paint;
   final BaseNode? node;
   final BlendMode? blendMode;
@@ -68,8 +66,8 @@ class UltimateImageBuilder extends StatefulWidget {
     properties.add(
         ObjectFlagProperty<WidgetBuilder>.has('errorBuilder', errorBuilder));
     properties.add(ObjectFlagProperty<
-        Widget Function(BuildContext context,
-            DownloadProgress? progress)>.has('loadingBuilder', loadingBuilder));
+            Widget Function(BuildContext context, Widget? child)>.has(
+        'loadingBuilder', loadingBuilder));
     properties.add(DiagnosticsProperty<PaintModel>('paint', paint));
     properties.add(DiagnosticsProperty<BaseNode>('node', node));
     properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
@@ -210,8 +208,10 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
 
     if (url.containsUncheckedVariablePath) return jsonPathBuilder(url);
 
+    Widget child;
+
     if (url.isSvgUrl) {
-      return SvgPicture.network(
+      child = SvgPicture.network(
         url,
         fit: fit,
         alignment: alignment,
@@ -225,7 +225,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
     }
 
     if (url.isBase64Blob) {
-      return Image.memory(
+      child = Image.memory(
         url.base64Data,
         fit: fit,
         alignment: alignment,
@@ -240,48 +240,35 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
       );
     }
 
-    return CachedNetworkImage(
-      imageUrl: url,
+    child = Image.network(
+      url,
       fit: fit,
       alignment: alignment,
       width: width,
       height: height,
       repeat: repeat,
       color: widget.color,
+      opacity: AlwaysStoppedAnimation(widget.paint?.opacity ?? 1),
       filterQuality: FilterQuality.medium,
-      fadeInDuration: const Duration(milliseconds: 300),
-      fadeOutDuration: const Duration(milliseconds: 300),
       colorBlendMode: colorBlendMode,
-      placeholder: widget.loadingBuilder != null
-          ? (context, _) => widget.loadingBuilder!(context, null)
+      loadingBuilder: widget.loadingBuilder != null
+          ? (context, child, loadingProgress) =>
+              widget.loadingBuilder!(context, child)
           : null,
-      errorWidget: (context, _, __) =>
-          (widget.errorBuilder ?? _defaultErrorBuilder)(context),
-      imageBuilder: (context, imageProvider) {
-        return decorateImageProvider(imageProvider);
+      errorBuilder: (context, error, stackTrace) {
+        print('Image Loading Error:' + error.toString());
+        return (widget.errorBuilder ?? _defaultErrorBuilder)(context);
       },
     );
-  }
 
-  Widget decorateImageProvider(ImageProvider imageProvider) {
-    final decoration = BoxDecoration(
+    final BoxDecoration decoration = BoxDecoration(
       borderRadius: widget.node is CornerMixin
           ? (widget.node as CornerMixin).cornerRadius.borderRadius
           : null,
-      image: DecorationImage(
-        image: imageProvider,
-        fit: fit,
-        repeat: repeat,
-        alignment: alignment,
-        opacity: widget.paint?.opacity ?? 1,
-        scale: scale,
-        colorFilter: colorFilter,
-        filterQuality: FilterQuality.medium,
-      ),
     );
-    Widget child = switch (widget.useInk) {
-      true => Ink(decoration: decoration),
-      false => DecoratedBox(decoration: decoration),
+    child = switch (widget.useInk) {
+      true => Ink(decoration: decoration, child: child),
+      false => DecoratedBox(decoration: decoration, child: child),
     };
 
     if (widget.paint?.hasFlippedAxis ?? false) {
@@ -291,6 +278,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         child: child,
       );
     }
+
     return child;
   }
 
