@@ -37,9 +37,6 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
       disabledLayouts: (json['disabledLayouts'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
-      hiddenLayouts: (json['hiddenLayouts'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
@@ -85,7 +82,6 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
       const DateTimeConverter().toJson(instance.lastUpdated), null);
   val['layoutIDMap'] = instance.layoutIDMap;
   val['disabledLayouts'] = instance.disabledLayouts;
-  val['hiddenLayouts'] = instance.hiddenLayouts;
   return val;
 }
 
@@ -106,6 +102,7 @@ SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
       breakpoints: (json['breakpoints'] as List<dynamic>?)
           ?.map((e) => Breakpoint.fromJson(e as Map))
           .toList(),
+      hidden: json['hidden'] as bool?,
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
@@ -139,6 +136,7 @@ Map<String, dynamic> _$SDKPublishLayoutToJson(SDKPublishLayout instance) {
 
   writeNotNull('lastUpdated', instance.lastUpdated,
       const DateTimeConverter().toJson(instance.lastUpdated), null);
+  val['hidden'] = instance.hidden;
   return val;
 }
 

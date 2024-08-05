@@ -170,9 +170,6 @@ class SDKPublishModel extends PrivacyBase {
   /// A list of layout ids that are explicitly disabled from the server's side.
   final List<String> disabledLayouts;
 
-  /// A list of layout ids that are hidden from developer view.
-  final List<String> hiddenLayouts;
-
   static Map<String, dynamic> serializeLookupMapFonts(
           LookupMap<SDKPublishFont> map) =>
       map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
@@ -295,8 +292,7 @@ class SDKPublishModel extends PrivacyBase {
             ),
         apis = apis ?? {},
         lastUpdated = lastUpdated ?? DateTime.now(),
-        disabledLayouts = disabledLayouts ?? [],
-        hiddenLayouts = hiddenLayouts ?? [];
+        disabledLayouts = disabledLayouts ?? [];
 
   /// Creates a new instance of [SDKPublishModel] with privacy inherited from
   /// another [PrivacyBase].
@@ -339,7 +335,6 @@ class SDKPublishModel extends PrivacyBase {
         lastUpdated = lastUpdated ?? DateTime.now(),
         apis = apis ?? {},
         disabledLayouts = disabledLayouts ?? [],
-        hiddenLayouts = hiddenLayouts ?? [],
         super.private();
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
@@ -375,7 +370,6 @@ class SDKPublishModel extends PrivacyBase {
     String? entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
-    List<String>? hiddenLayouts,
 
     // Privacy
     PrivacyBase? privacy,
@@ -395,7 +389,6 @@ class SDKPublishModel extends PrivacyBase {
       entryCanvasId: entryCanvasId ?? this.entryCanvasId,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       disabledLayouts: disabledLayouts ?? this.disabledLayouts,
-      hiddenLayouts: hiddenLayouts ?? this.hiddenLayouts,
 
       // Privacy
       privacy: privacy ?? this,
@@ -419,7 +412,6 @@ class SDKPublishModel extends PrivacyBase {
         entryCanvasId,
         lastUpdated,
         disabledLayouts,
-        hiddenLayouts,
       ];
 }
 
@@ -451,6 +443,9 @@ class SDKPublishLayout extends PrivacyBase {
   /// convenience. Do not modify this set directly.
   final Set<String> canvasIds;
 
+  /// Returns true if the layout is hidden from Codelessly's CloudUI dashboard.
+  final bool hidden;
+
   /// Creates a new instance of [SDKPublishLayout].
   SDKPublishLayout({
     required this.id,
@@ -459,6 +454,7 @@ class SDKPublishLayout extends PrivacyBase {
     required this.canvases,
     required this.lastUpdated,
     List<Breakpoint>? breakpoints,
+    bool? hidden,
 
     // Privacy
     required super.teams,
@@ -466,7 +462,8 @@ class SDKPublishLayout extends PrivacyBase {
     required super.roles,
     required super.public,
   })  : breakpoints = breakpoints ?? [],
-        canvasIds = canvases.keys.toSet();
+        canvasIds = canvases.keys.toSet(),
+        hidden = hidden ?? false;
 
   /// Creates a new instance of [SDKPublishLayout] with privacy inherited from
   /// another [PrivacyBase].
@@ -477,11 +474,13 @@ class SDKPublishLayout extends PrivacyBase {
     required this.canvases,
     required this.lastUpdated,
     List<Breakpoint>? breakpoints,
+    bool? hidden,
 
     // Privacy
     required super.privacy,
   })  : breakpoints = breakpoints ?? [],
         canvasIds = canvases.keys.toSet(),
+        hidden = hidden ?? false,
         super.private();
 
   /// Returns true if the layout is expired.
@@ -505,6 +504,7 @@ class SDKPublishLayout extends PrivacyBase {
     Map<String, Map<String, BaseNode>>? canvases,
     DateTime? lastUpdated,
     List<Breakpoint>? breakpoints,
+    bool? hidden,
 
     // Privacy
     PrivacyBase? privacy,
@@ -516,6 +516,7 @@ class SDKPublishLayout extends PrivacyBase {
       canvases: canvases ?? this.canvases,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       breakpoints: breakpoints ?? this.breakpoints,
+      hidden: hidden ?? this.hidden,
       // Privacy
       privacy: privacy ?? this,
     );
@@ -530,6 +531,7 @@ class SDKPublishLayout extends PrivacyBase {
         canvases,
         lastUpdated,
         breakpoints,
+        hidden,
       ];
 }
 
