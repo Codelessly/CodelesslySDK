@@ -10,6 +10,8 @@ import 'package:flutter/widgets.dart';
 import '../codelessly_sdk.dart';
 import 'logging/reporter.dart';
 
+const String clientType = String.fromEnvironment('client_type');
+
 typedef NavigationListener = void Function(BuildContext context);
 typedef BreakpointsListener = void Function(
     BuildContext context, Breakpoint breakpoint);
