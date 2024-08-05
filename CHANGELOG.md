@@ -1,3 +1,6 @@
+## 3.0.3
+- Revert Hive CE dependency.
+
 ## 3.0.2
 - Remove direct `package:web` dependency.
 
