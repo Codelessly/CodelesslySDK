@@ -54,9 +54,8 @@ dependencies:
   path_provider: ^2.1.4
 
   # Storage and Caching
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
   cached_network_image: ^3.4.0
+  hive_ce_flutter: ^2.0.0
 
   # JSON
   json_path: ^0.7.4
