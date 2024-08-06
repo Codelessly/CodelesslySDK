@@ -264,7 +264,6 @@ class SDKPublishModel extends PrivacyBase {
     this.entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
-    List<String>? hiddenLayouts,
 
     // Privacy
     required super.teams,
@@ -313,7 +312,6 @@ class SDKPublishModel extends PrivacyBase {
     this.entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
-    List<String>? hiddenLayouts,
 
     // Privacy
     required super.privacy,
