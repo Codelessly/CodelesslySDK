@@ -65,7 +65,7 @@ class CustomComponent with EquatableMixin, SerializableMixin {
       _$CustomComponentFromJson(json);
 
   @override
-  Map toJson() => _$CustomComponentToJson(this);
+  Map<String, dynamic> toJson() => _$CustomComponentToJson(this);
 
   @override
   List<Object?> get props => [
