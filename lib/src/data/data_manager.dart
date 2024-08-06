@@ -243,25 +243,33 @@ class DataManager {
     final bool didPrepareLayout;
     if (_publishModel != null && layoutID != null) {
       if (!_publishModel!.layouts.containsKey(layoutID)) {
-        log('Layout [$layoutID] during init is not cached locally. Downloading...');
-
-        try {
-          didPrepareLayout = await getOrFetchPopulatedLayout(
-            layoutID: layoutID,
-          );
-        } catch (e, str) {
-          final exception = CodelesslyException(
-            'Failed to download layout [$layoutID] during init.',
-            originalException: e,
-            stacktrace: str,
-            layoutID: layoutID,
-          );
-          errorHandler.captureException(exception, stacktrace: str);
-
+        // If the layout is disabled, we skip it.
+        if (publishModel!.disabledLayouts.contains(layoutID)) {
+          log('Layout [$layoutID] is marked as disabled. Skipping it during init.');
+          didPrepareLayout = false;
           _logTime(stopwatch);
-          return;
+        } else {
+          log('Layout [$layoutID] during init is not cached locally. Downloading...');
+
+          try {
+            didPrepareLayout = await getOrFetchPopulatedLayout(
+              layoutID: layoutID,
+            );
+            log('Layout in init [$layoutID] fetch complete.');
+          } catch (e, str) {
+            log('Layout [$layoutID] failed to download during init.');
+            final exception = CodelesslyException(
+              'Failed to download layout [$layoutID] during init.',
+              originalException: e,
+              stacktrace: str,
+              layoutID: layoutID,
+            );
+            errorHandler.captureException(exception, stacktrace: str);
+
+            _logTime(stopwatch);
+            return;
+          }
         }
-        log('Layout in init [$layoutID] fetch complete.');
       } else {
         log('Layout [$layoutID] during init is already cached locally. Skipping layout download.');
         didPrepareLayout = true;
@@ -323,6 +331,10 @@ class DataManager {
     // function terminates earlier.
     if (!didPrepareLayout && layoutID != null) {
       log('We can safely download layout [$layoutID] now.');
+
+      if (publishModel!.disabledLayouts.contains(layoutID)) {
+        log('Layout [$layoutID] is disabled. Skipping it during init.');
+      }
       try {
         await getOrFetchPopulatedLayout(layoutID: layoutID);
         log('Layout [$layoutID] downloaded from init successfully.');
@@ -362,12 +374,20 @@ class DataManager {
       await processDownloadQueue();
     }
 
+    purgeDisabledLayouts(notify: true);
+
     _logTime(stopwatch);
   }
 
   Future<void> processDownloadQueue() async {
     while (_downloadQueue.isNotEmpty) {
       final String layoutID = _downloadQueue.removeAt(0);
+
+      if (publishModel!.disabledLayouts.contains(layoutID)) {
+        log('\tLayout [$layoutID] is disabled. Skipping it in download queue...');
+        continue;
+      }
+
       log('\tDownloading layout [$layoutID] in download queue...');
       try {
         await getOrFetchPopulatedLayout(layoutID: layoutID);
@@ -387,6 +407,27 @@ class DataManager {
 
     log('Download queue is now empty. All layouts during init have been downloaded.');
     queuingDone = true;
+  }
+
+  Future<void> purgeDisabledLayouts({required bool notify}) async {
+    bool didChange = false;
+    for (final String layoutID in publishModel!.disabledLayouts) {
+      if (!publishModel!.layouts.containsKey(layoutID)) {
+        continue;
+      }
+      log('Purging disabled layout [$layoutID]...');
+      localDataRepository.deletePublishLayout(
+        layoutID: layoutID,
+        source: config.publishSource,
+      );
+      publishModel!.layouts.remove(layoutID);
+      didChange = true;
+    }
+
+    if (didChange && notify) {
+      await emitPublishModel();
+      savePublishModel();
+    }
   }
 
   /// Called when the publish model is loaded.
@@ -532,7 +573,7 @@ class DataManager {
       } else if (isFirstEvent) {
         log('Publish model during init was not null, and we received a new publish model from the server. Comparing...');
       } else {
-        log('Received a second publish model from the server. Comparing...');
+        log('Received a new publish model from the server. Comparing...');
       }
       final SDKPublishModel localModel = _publishModel!;
 
@@ -653,7 +694,7 @@ class DataManager {
     );
     if (didLayoutIDMapChange) {
       localModel = localModel.copyWith(layoutIDMap: serverModel.layoutIDMap);
-      log('Layout ID map changed. Updating...');
+      log('DIFF: Layout ID map changed. Updating...');
     }
 
     final bool disabledLayoutsChanged = !(const ListEquality()
@@ -661,7 +702,7 @@ class DataManager {
     if (disabledLayoutsChanged) {
       localModel =
           localModel.copyWith(disabledLayouts: serverModel.disabledLayouts);
-      log('Disabled layouts changed. Updating...');
+      log('DIFF: Disabled layouts changed. Updating...');
     }
 
     if (layoutUpdates.isEmpty &&
@@ -673,10 +714,10 @@ class DataManager {
         !entryChanged &&
         !didLayoutIDMapChange &&
         !disabledLayoutsChanged) {
-      log('No updates to process.');
+      log('DIFF: No updates to process.');
       return;
     } else {
-      log('Processing updates:');
+      log('DIFF: Processing updates:');
       log('      | ${layoutUpdates.length} layout updates.');
       log('      | ${fontUpdates.length} font updates.');
       log('      | ${apiUpdates.length} api updates.');
@@ -693,6 +734,7 @@ class DataManager {
 
       switch (updateType) {
         case UpdateType.delete:
+          log('DIFF: Deleting layout [$layoutID]...');
           localModel.layouts.remove(layoutID);
           localDataRepository.deletePublishLayout(
             layoutID: layoutID,
@@ -700,6 +742,7 @@ class DataManager {
           );
         case UpdateType.add:
         case UpdateType.update:
+          log('DIFF: Downloading layout [$layoutID]...');
           final SDKPublishLayout? layout =
               await networkDataRepository.downloadLayoutModel(
             projectID: authManager.authData!.projectId,
@@ -717,6 +760,7 @@ class DataManager {
 
       switch (updateType) {
         case UpdateType.delete:
+          log('DIFF: Deleting font [$fontID]...');
           localModel.fonts.remove(fontID);
           localDataRepository.deleteFontBytes(
             fontID: fontID,
@@ -724,6 +768,7 @@ class DataManager {
           );
         case UpdateType.add:
         case UpdateType.update:
+          log('DIFF: Downloading font [$fontID]...');
           final SDKPublishFont? font =
               await networkDataRepository.downloadFontModel(
             projectID: authManager.authData!.projectId,
@@ -743,6 +788,7 @@ class DataManager {
 
       switch (updateType) {
         case UpdateType.delete:
+          log('DIFF: Deleting api [$apiId]...');
           localModel.apis.remove(apiId);
           localDataRepository.deletePublishApi(
             apiId: apiId,
@@ -750,6 +796,7 @@ class DataManager {
           );
         case UpdateType.add:
         case UpdateType.update:
+          log('DIFF: Downloading api [$apiId]...');
           final HttpApiData? api = await networkDataRepository.downloadApi(
             projectID: authManager.authData!.projectId,
             apiId: apiId,
@@ -766,6 +813,7 @@ class DataManager {
 
       switch (updateType) {
         case UpdateType.delete:
+          log('DIFF: Deleting variables for layout [$layoutId]...');
           localModel.variables.remove(layoutId);
           localDataRepository.deletePublishVariables(
             layoutID: layoutId,
@@ -773,6 +821,7 @@ class DataManager {
           );
         case UpdateType.add:
         case UpdateType.update:
+          log('DIFF: Downloading variables for layout [$layoutId]...');
           final SDKLayoutVariables? layoutVariables =
               await networkDataRepository.downloadLayoutVariables(
             projectID: authManager.authData!.projectId,
@@ -790,6 +839,7 @@ class DataManager {
 
       switch (updateType) {
         case UpdateType.delete:
+          log('DIFF: Deleting conditions for layout [$layoutID]...');
           localModel.variables.remove(layoutID);
           localDataRepository.deletePublishConditions(
             layoutID: layoutID,
@@ -797,6 +847,7 @@ class DataManager {
           );
         case UpdateType.add:
         case UpdateType.update:
+          log('DIFF: Downloading conditions for layout [$layoutID]...');
           final SDKLayoutConditions? layoutConditions =
               await networkDataRepository.downloadLayoutConditions(
             projectID: authManager.authData!.projectId,
@@ -809,6 +860,7 @@ class DataManager {
       }
     }
 
+    log('DIFF: Done processing updates.');
     _publishModel = localModel.copyWith(
       updates: serverModel.updates,
       entryPageId: serverModel.entryPageId,
@@ -835,16 +887,22 @@ class DataManager {
   ///
   /// - If a layout existed in the previous model, but was deleted in the
   /// updated model, it is marked as deleted.
+  ///
+  /// - If a layout existed in the previous model, but was disabled in the
+  /// updated model, it is marked as deleted.
+  ///
+  /// - If a layout existed in the previous model, but was enabled in the
+  /// updated model, it is marked as added.
   Map<String, UpdateType> _collectLayoutUpdates({
     required SDKPublishModel serverModel,
     required SDKPublishModel localModel,
   }) {
     final Map<String, DateTime> serverLayouts = serverModel.updates.layouts;
-    final Map<String, DateTime> currentLayouts = localModel.updates.layouts;
+    final Map<String, DateTime> localLayouts = localModel.updates.layouts;
     final Map<String, UpdateType> layoutUpdates = {};
 
     // Check for deleted layouts.
-    for (final String layoutID in currentLayouts.keys) {
+    for (final String layoutID in localLayouts.keys) {
       if (!serverLayouts.containsKey(layoutID)) {
         layoutUpdates[layoutID] = UpdateType.delete;
       }
@@ -852,13 +910,25 @@ class DataManager {
 
     // Check for added or updated layouts.
     for (final String layoutID in serverLayouts.keys) {
-      if (!currentLayouts.containsKey(layoutID)) {
+      if (!localLayouts.containsKey(layoutID)) {
         layoutUpdates[layoutID] = UpdateType.add;
       } else {
-        final DateTime lastUpdated = currentLayouts[layoutID]!;
+        final DateTime lastUpdated = localLayouts[layoutID]!;
         final DateTime newlyUpdated = serverLayouts[layoutID]!;
+
+        // Check if the publish date is after the last updated date.
         if (newlyUpdated.isAfter(lastUpdated)) {
           layoutUpdates[layoutID] = UpdateType.update;
+        }
+        // Check if the layout got enabled to add it.
+        else if (!serverModel.disabledLayouts.contains(layoutID) &&
+            localModel.disabledLayouts.contains(layoutID)) {
+          layoutUpdates[layoutID] = UpdateType.add;
+        }
+        // Check if the layout got disabled to remove it.
+        else if (serverModel.disabledLayouts.contains(layoutID) &&
+            !localModel.disabledLayouts.contains(layoutID)) {
+          layoutUpdates[layoutID] = UpdateType.delete;
         }
       }
     }

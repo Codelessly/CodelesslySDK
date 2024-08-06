@@ -527,13 +527,13 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                 );
           }
 
+          if (model.disabledLayouts.contains(effectiveLayoutID)) {
+            return const SizedBox.shrink();
+          }
+
           if (!model.layouts.containsKey(effectiveLayoutID!)) {
             return _effectiveLoadingBuilder?.call(context) ??
                 const CodelesslyLoadingScreen();
-          }
-
-          if (model.disabledLayouts.contains(effectiveLayoutID)) {
-            return const SizedBox.shrink();
           }
 
           // Set the canvas ID if it is not already set. (This is for the first
