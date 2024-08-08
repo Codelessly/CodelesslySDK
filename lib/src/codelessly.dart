@@ -128,6 +128,11 @@ class Codelessly {
   final StreamController<CStatus> _statusStreamController =
       StreamController.broadcast()..add(CStatus.empty());
 
+  final StatTracker _tracker = FirestoreStatTracker();
+
+  /// Tracks statistics of various operations in the SDK.
+  StatTracker get tracker => _tracker;
+
   /// Returns a stream of status updates for this SDK instance.
   Stream<CStatus> get statusStream => _statusStreamController.stream;
 
@@ -557,11 +562,16 @@ class Codelessly {
             cacheManager: _cacheManager!,
             authManager: _authManager!,
             networkDataRepository: FirebaseDataRepository(
-                firestore: firebaseFirestore, config: _config!),
-            localDataRepository:
-                LocalDataRepository(cacheManager: _cacheManager!),
+              firestore: firebaseFirestore,
+              tracker: tracker,
+              config: _config!,
+            ),
+            localDataRepository: LocalDataRepository(
+              cacheManager: _cacheManager!,
+            ),
             firebaseFirestore: firebaseFirestore,
             errorHandler: errorHandler,
+            tracker: tracker,
           );
 
       // Create the preview data manager.
@@ -572,11 +582,16 @@ class Codelessly {
             cacheManager: _cacheManager!,
             authManager: _authManager!,
             networkDataRepository: FirebaseDataRepository(
-                firestore: firebaseFirestore, config: _config!),
-            localDataRepository:
-                LocalDataRepository(cacheManager: _cacheManager!),
+              firestore: firebaseFirestore,
+              config: _config!,
+              tracker: tracker,
+            ),
+            localDataRepository: LocalDataRepository(
+              cacheManager: _cacheManager!,
+            ),
             firebaseFirestore: firebaseFirestore,
             errorHandler: errorHandler,
+            tracker: tracker,
           );
 
       // Create the template data manager. This is always automatically
@@ -591,11 +606,16 @@ class Codelessly {
             cacheManager: _cacheManager!,
             authManager: _authManager!,
             networkDataRepository: FirebaseDataRepository(
-                firestore: firebaseFirestore, config: _config!),
-            localDataRepository:
-                LocalDataRepository(cacheManager: _cacheManager!),
+              firestore: firebaseFirestore,
+              config: _config!,
+              tracker: tracker,
+            ),
+            localDataRepository: LocalDataRepository(
+              cacheManager: _cacheManager!,
+            ),
             firebaseFirestore: firebaseFirestore,
             errorHandler: errorHandler,
+            tracker: tracker,
           );
 
       _updateStatus(CStatus.loading(CLoadingState.createdManagers));
@@ -619,6 +639,10 @@ class Codelessly {
         log('Initializing auth manager.');
         await _authManager!.init();
         _config!.publishSource = _authManager!.getBestPublishSource(_config!);
+
+        if (_authManager?.authData?.projectId case String projectId) {
+          tracker.init(projectId);
+        }
 
         _updateStatus(CStatus.loading(CLoadingState.initializedAuth));
       } else {
@@ -666,6 +690,10 @@ class Codelessly {
         log('Since a slug was provided & data manager finished, authenticating in the background...');
         _authManager!.init().then((_) async {
           if (_authManager!.authData == null) return;
+
+          if (_authManager?.authData?.projectId case String projectId) {
+            tracker.init(projectId);
+          }
 
           log('[POST-INIT] Background authentication succeeded. Initializing layout storage.');
           await dataManager

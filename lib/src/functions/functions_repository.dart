@@ -65,6 +65,10 @@ class FunctionsRepository {
       return true;
     }
     _log('Performing action: $action');
+
+    final Codelessly codelessly = context.read<Codelessly>();
+    codelessly.tracker.trackAction(action);
+
     switch (action.type) {
       case ActionType.navigation:
         return navigate(context, action as NavigationAction);

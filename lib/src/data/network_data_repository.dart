@@ -15,8 +15,14 @@ abstract class NetworkDataRepository {
   /// The [CodelesslyConfig] instance that is used to configure the SDK.
   final CodelesslyConfig config;
 
+  /// The [FirestoreStatTracker] instance to track the statistics of the data repository.
+  final StatTracker tracker;
+
   /// Creates a new instance of [NetworkDataRepository].
-  NetworkDataRepository({required this.config});
+  NetworkDataRepository({
+    required this.config,
+    required this.tracker,
+  });
 
   /// Calls a cloud function that searches for the project associated with the
   /// given unique slug and returns a completely populated [SDKPublishModel]
@@ -43,6 +49,8 @@ abstract class NetworkDataRepository {
           stacktrace: StackTrace.current,
         );
       }
+
+      tracker.trackBundleDownload();
 
       final Map<String, dynamic> modelDoc =
           jsonDecode(utf8.decode(result.bodyBytes));
@@ -179,6 +187,7 @@ abstract class NetworkDataRepository {
     try {
       final http.Response response = await http.get(Uri.parse(url));
       if (response.statusCode != 200) return null;
+      tracker.trackFontDownload();
 
       return Uint8List.view(response.bodyBytes.buffer);
     } catch (e, str) {

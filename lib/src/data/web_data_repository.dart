@@ -14,7 +14,10 @@ import '../../codelessly_sdk.dart';
 @Deprecated('Use [FirebaseDataRepository] instead.')
 class WebDataRepository extends NetworkDataRepository {
   /// Creates a [WebDataRepository] instance.
-  WebDataRepository({required super.config});
+  WebDataRepository({
+    required super.config,
+    required super.tracker,
+  });
 
   @override
   Stream<SDKPublishModel?> streamPublishModel({

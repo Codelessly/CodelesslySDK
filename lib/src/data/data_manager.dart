@@ -46,16 +46,32 @@ class DataManager {
   /// The auth manager to use. By default, it is [CodelesslyAuthManager].
   final AuthManager authManager;
 
+  // TODO(Saad): This is only used to initialize CloudDatabase. We may be able
+  //  to decouple it.
   /// The firestore instance to use.
   final FirebaseFirestore firebaseFirestore;
 
   /// The error handler to use.
   final CodelesslyErrorHandler errorHandler;
 
+  // TODO(Saad): This is only used to initialize CloudDatabase. We may be able
+  //  to decouple it.
+  /// The stat tracker to use, used to track various reads and writes in this
+  /// data manager.
+  final StatTracker tracker;
+
   SDKPublishModel? _publishModel;
 
+  // TODO(Saad): LocalDatabase is only initialized and never truly accessed by
+  //  the DataManager itself. We can decouple it by moving it to the
+  //  [Codelessly] level. Maybe through a new shared manager for it and
+  //  CloudDatabase.
   LocalDatabase? _localDatabase;
 
+  // TODO(Saad): CloudDatabase is only initialized and never truly accessed by
+  //  the DataManager itself. We can decouple it by moving it to the
+  //  [Codelessly] level. Maybe through a new shared manager for it and
+  //  LocalDatabase.
   CloudDatabase? _cloudDatabase;
 
   /// The local storage instance used by this data manager.
@@ -102,6 +118,7 @@ class DataManager {
     required this.localDataRepository,
     required this.firebaseFirestore,
     required this.errorHandler,
+    required this.tracker,
     SDKPublishModel? publishModel,
   }) : _publishModel = publishModel;
 
@@ -479,12 +496,17 @@ class DataManager {
     return HiveLocalDatabase(box, identifier: projectId);
   }
 
+  // TODO(Saad): We can de-couple [firebaseFirestore] and [tracker] from
+  //  [DataManager] by delegating this initialization to the creator of
+  //  [DataManager], maybe through a callback so that DataManager can decide
+  //  exactly when to initialize this.
   Future<CloudDatabase> initializeCloudStorage(
       {required String projectId}) async {
     final instance = FirestoreCloudDatabase(
       projectId,
-      firebaseFirestore,
       config.publishSource,
+      firestore: firebaseFirestore,
+      tracker: tracker,
     );
     // initialize cloud storage.
     await instance.init();
