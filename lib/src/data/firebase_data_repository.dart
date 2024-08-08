@@ -11,7 +11,11 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
   /// Creates a new [FirebaseDataRepository] instance with the given [firestore]
   /// instance.
-  FirebaseDataRepository({required this.firestore, required super.config});
+  FirebaseDataRepository({
+    required this.firestore,
+    required super.config,
+    required super.tracker,
+  });
 
   @override
   Stream<SDKPublishModel?> streamPublishModel({
@@ -22,6 +26,8 @@ class FirebaseDataRepository extends NetworkDataRepository {
         firestore.collection(source.serverPath).doc(projectID);
 
     return publishModelDoc.snapshots().map((event) {
+      tracker.trackRead();
+
       final Map<String, dynamic>? data = event.data();
       if (data == null || data.isEmpty) {
         throw CodelesslyException(
@@ -47,6 +53,8 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(layoutID);
 
     return layoutDoc.get().then((value) {
+      tracker.trackRead();
+
       final Map<String, dynamic> data = value.data() ?? {};
 
       // Layout does not exist or there's a network error.
@@ -74,6 +82,8 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(fontID);
 
     return fontDoc.get().then((value) {
+      tracker.trackRead();
+
       final Map<String, dynamic> data = value.data() ?? {};
 
       // Font does not exist or there's a network error.
@@ -101,6 +111,8 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(apiId);
 
     return apiDoc.get().then((value) {
+      tracker.trackRead();
+
       final Map<String, dynamic> data = value.data() ?? {};
 
       // Api does not exist or there's a network error.
@@ -128,6 +140,8 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(layoutID);
 
     return variablesDoc.get().then((value) {
+      tracker.trackRead();
+
       final Map<String, dynamic> data = value.data() ?? {};
 
       // Variables do not exist or there's a network error.
@@ -156,6 +170,8 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(layoutID);
 
     return conditionsDoc.get().then((value) {
+      tracker.trackRead();
+
       final Map<String, dynamic> data = value.data() ?? {};
 
       // Conditions do not exist or there's a network error.
