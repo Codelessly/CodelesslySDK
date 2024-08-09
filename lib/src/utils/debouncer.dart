@@ -74,9 +74,8 @@ final class DeBouncer {
 
     _counter++;
 
-    if (((forceRunAfter != null && forceRunAfter < _counter) ||
-            immediateFirstRun) &&
-        !isRunning) {
+    if ((forceRunAfter != null && forceRunAfter <= _counter) ||
+        (immediateFirstRun && !isRunning)) {
       // Reset the counter for forced runs.
       if (forceRunAfter != null) _counter = 0;
 
@@ -106,7 +105,9 @@ final class DeBouncer {
 
     // action is sync and returns a value.
     completer.complete(result);
-    return completer.future;
+    return completer.future.whenComplete(() {
+      _counter = 0;
+    });
   }
 
   /// alias for [run]. This also makes it so that you can use the instance
