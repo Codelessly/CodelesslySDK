@@ -223,14 +223,14 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
     // Create project doc if missing.
     final snapshot = await rootRef.get();
-    tracker.trackRead();
+    tracker.trackRead('cloudDatabase/init');
 
     // Do nothing if project doc exists.
     if (snapshot.exists) return;
 
     // Create project doc if it does not exist.
     await rootRef.set({'project': identifier});
-    tracker.trackWrite();
+    tracker.trackWrite('cloudDatabase/init');
 
     logger.log(_label, 'Done initializing for $identifier');
   }
@@ -307,7 +307,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
     if (autoGenerateId) {
       // if autoGenerateId is true, then skipCreationIfDocumentExists and docId is ignored.
       final document = await rootRef.collection(path).add(value);
-      tracker.trackWrite();
+      tracker.trackWrite('cloudDatabase/addDocument');
 
       logger.log(_label, 'Document added: ${document.path}');
 
@@ -327,7 +327,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
     // Get snapshot to check if document exists.
     final snapshot = await docRef.get();
-    tracker.trackRead();
+    tracker.trackRead('cloudDatabase/addDocument');
 
     if (skipCreationIfDocumentExists && snapshot.exists) {
       // if skipCreationIfDocumentExists is true, check if document exists.
@@ -338,7 +338,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
     // Set document.
     await docRef.set(value);
-    tracker.trackWrite();
+    tracker.trackWrite('cloudDatabase/addDocument');
 
     logger.log(_label, 'Document added: ${docRef.path}/$documentId');
     return true;
@@ -362,7 +362,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
     // TODO: Should we do update instead of set?
     await docRef.set(value, SetOptions(merge: true));
-    tracker.trackWrite();
+    tracker.trackWrite('cloudDatabase/updateDocument');
 
     logger.log(_label, 'Document updated: ${docRef.path}');
     return true;
@@ -373,13 +373,13 @@ class FirestoreCloudDatabase extends CloudDatabase {
     final docRef = getDocPath(path, documentId);
 
     final snapshot = await docRef.get();
-    tracker.trackRead();
+    tracker.trackRead('cloudDatabase/removeDocument');
 
     // TODO: Do we have to check for existence?
     if (!snapshot.exists) return false;
 
     await docRef.delete();
-    tracker.trackWrite();
+    tracker.trackWrite('cloudDatabase/removeDocument');
 
     return true;
   }
@@ -390,7 +390,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
     final docRef = getDocPath(path, documentId);
 
     final snapshot = await docRef.get();
-    tracker.trackRead();
+    tracker.trackRead('cloudDatabase/getDocumentData');
 
     final data = snapshot.data() ?? {};
     return sanitizeCloudDataForUse(data, docId: snapshot.id);
@@ -400,7 +400,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
   Stream<Map<String, dynamic>> streamDocument(String path, String documentId) {
     final docRef = getDocPath(path, documentId);
     return docRef.snapshots().map((snapshot) {
-      tracker.trackRead();
+      tracker.trackRead('cloudDatabase/streamDocument');
 
       return snapshot.data()?.let(
               (value) => sanitizeCloudDataForUse(value, docId: snapshot.id)) ??
@@ -423,7 +423,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
     // Listen to the stream and update the variable.
     final subscription = stream.listen(
       (data) {
-        tracker.trackRead();
+        tracker.trackRead('cloudDatabase/streamDocumentToVariable');
 
         logger.log(_label,
             'Document stream update from cloud storage: $path/$documentId');
@@ -500,7 +500,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
     // Listen to the stream and update the variable.
     final subscription = stream.listen(
       (snapshot) {
-        tracker.trackRead();
+        tracker.trackRead('cloudDatabase/streamCollectionToVariable');
 
         final docs = snapshot.docs
             .map((doc) => sanitizeCloudDataForUse(doc.data(), docId: doc.id))

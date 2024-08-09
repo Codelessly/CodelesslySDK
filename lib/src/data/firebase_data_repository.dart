@@ -26,7 +26,7 @@ class FirebaseDataRepository extends NetworkDataRepository {
         firestore.collection(source.serverPath).doc(projectID);
 
     return publishModelDoc.snapshots().map((event) {
-      tracker.trackRead();
+      tracker.trackRead('${source.serverPath}/streamPublishModel');
 
       final Map<String, dynamic>? data = event.data();
       if (data == null || data.isEmpty) {
@@ -53,7 +53,7 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(layoutID);
 
     return layoutDoc.get().then((value) {
-      tracker.trackRead();
+      tracker.trackRead('${source.serverPath}/downloadLayoutModel');
 
       final Map<String, dynamic> data = value.data() ?? {};
 
@@ -82,7 +82,7 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(fontID);
 
     return fontDoc.get().then((value) {
-      tracker.trackRead();
+      tracker.trackRead('${source.serverPath}/downloadFontModel');
 
       final Map<String, dynamic> data = value.data() ?? {};
 
@@ -111,7 +111,7 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(apiId);
 
     return apiDoc.get().then((value) {
-      tracker.trackRead();
+      tracker.trackRead('${source.serverPath}/downloadApi');
 
       final Map<String, dynamic> data = value.data() ?? {};
 
@@ -140,7 +140,7 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(layoutID);
 
     return variablesDoc.get().then((value) {
-      tracker.trackRead();
+      tracker.trackRead('${source.serverPath}/downloadLayoutVariables');
 
       final Map<String, dynamic> data = value.data() ?? {};
 
@@ -170,7 +170,7 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(layoutID);
 
     return conditionsDoc.get().then((value) {
-      tracker.trackRead();
+      tracker.trackRead('${source.serverPath}/downloadLayoutConditions');
 
       final Map<String, dynamic> data = value.data() ?? {};
 
