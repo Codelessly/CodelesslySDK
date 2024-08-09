@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:collection/collection.dart';
 
 import '../constants.dart';
 import '../utils/debouncer.dart';
@@ -15,10 +14,10 @@ abstract class StatTracker {
   void init(String projectId) => this.projectId = projectId;
 
   /// Tracks one document read operation.
-  Future<void> trackRead();
+  Future<void> trackRead(String label);
 
   /// Tracks one document write operation.
-  Future<void> trackWrite();
+  Future<void> trackWrite(String label);
 
   /// Tracks one bundle download operation from the CDN.
   Future<void> trackBundleDownload();
@@ -48,21 +47,19 @@ final class FirestoreStatTracker extends StatTracker {
   /// with too many writes.
   final DeBouncer debouncer = DeBouncer(const Duration(seconds: 1));
 
+  /// Sends the batch of stats to the Firestore.
   Future<void> sendBatch() => debouncer.run(
         () async {
-          print('Sending stat batch: $statBatch');
           // No need to await it. Send it and immediately start collecting more
           // stats.
           ref.set(
             {
-              for (final entry in statBatch.entries
-                  .whereNot((entry) => entry.key == writesField))
+              for (final entry in statBatch.entries)
                 entry.key: FieldValue.increment(entry.value),
 
               // Account for this stat tracking operation as an additional write
               // operation.
-              writesField:
-                  FieldValue.increment((statBatch[writesField] ?? 0) + 1),
+              '$writesField/stats': FieldValue.increment(1),
             },
             SetOptions(merge: true),
           );
@@ -76,14 +73,14 @@ final class FirestoreStatTracker extends StatTracker {
   }
 
   @override
-  Future<void> trackRead() {
-    incrementField(readsField);
+  Future<void> trackRead(String label) {
+    incrementField('$readsField/$label');
     return sendBatch();
   }
 
   @override
-  Future<void> trackWrite() {
-    incrementField(writesField);
+  Future<void> trackWrite(String label) {
+    incrementField('$writesField/$label');
     return sendBatch();
   }
 
