@@ -46,7 +46,6 @@ class CustomComponent with EquatableMixin, SerializableMixin {
     String? id,
     String? name,
     ComponentData? data,
-    bool? deleted,
     String? previewUrl,
     String? blurhash,
   }) =>
