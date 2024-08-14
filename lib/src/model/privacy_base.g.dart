@@ -6,22 +6,28 @@ part of 'privacy_base.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-PrivacyBaseImpl _$PrivacyBaseImplFromJson(Map json) => PrivacyBaseImpl._(
-      teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      roles: (json['roles'] as Map).map(
-        (k, e) => MapEntry(k as String, $enumDecode(_$RoleEnumMap, e)),
-      ),
-      public: json['public'] as bool?,
-    );
+Map<String, dynamic> _$PrivacyBaseImplToJson(_PrivacyBaseImpl instance) {
+  final val = <String, dynamic>{};
 
-Map<String, dynamic> _$PrivacyBaseImplToJson(PrivacyBaseImpl instance) =>
-    <String, dynamic>{
-      'users': instance.users.toList(),
-      'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
-      'teams': instance.teams.toList(),
-      'public': instance.public,
-    };
+  void writeNotNull(
+      String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
+    final bool serialize =
+        shouldSerialize(key, value, jsonValue, defaultValue, true);
+
+    if (serialize) {
+      val[key] = jsonValue;
+    }
+  }
+
+  writeNotNull('stringify', instance.stringify, instance.stringify, null);
+  val['hashCode'] = instance.hashCode;
+  val['users'] = instance.users.toList();
+  val['roles'] = instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!));
+  val['teams'] = instance.teams.toList();
+  val['public'] = instance.public;
+  val['props'] = instance.props;
+  return val;
+}
 
 const _$RoleEnumMap = {
   Role.owner: 'owner',
