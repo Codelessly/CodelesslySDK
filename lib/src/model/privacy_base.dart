@@ -74,6 +74,19 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
   /// it is accessible to read by anyone on the platform.
   final bool public;
 
+  factory PrivacyBase.from({
+    required Set<String> teams,
+    required Set<String> users,
+    required Map<String, Role> roles,
+    required bool public,
+  }) =>
+      _PrivacyBaseImpl(
+        teams: teams,
+        users: users,
+        roles: roles,
+        public: public,
+      );
+
   /// An owner ID must always exist in the roles map. It's an error
   /// if it doesn't.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -105,12 +118,12 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
         public = public ?? false;
 
   /// Creates a new [PrivacyBase] derived from another [PrivacyBase].
-  PrivacyBase.private({required PrivacyBase privacy})
+  PrivacyBase.private({required PrivacyBase privacy, bool? public})
       : this(
           teams: privacy.teams,
           users: privacy.users,
           roles: privacy.roles,
-          public: privacy.public,
+          public: public ?? privacy.public,
         );
 
   /// While this PrivacyBase object is extended by other models, calling
@@ -126,7 +139,7 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
   ///   ...privacyBase.privacy.toJson(),
   /// }
   @JsonKey(includeFromJson: false, includeToJson: false)
-  PrivacyBaseImpl get privacy => PrivacyBaseImpl._(
+  PrivacyBase get privacy => _PrivacyBaseImpl(
         teams: teams,
         users: users,
         roles: roles,
@@ -140,9 +153,9 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
 /// A base implementation of the [PrivacyBase] to extract privacy fields from
 /// an inherited model without worrying about the other fields that may be
 /// present in the model.
-@JsonSerializable(constructor: '_')
-class PrivacyBaseImpl extends PrivacyBase {
-  const PrivacyBaseImpl._({
+@JsonSerializable(createFactory: false)
+final class _PrivacyBaseImpl extends PrivacyBase {
+  const _PrivacyBaseImpl({
     required super.teams,
     required super.users,
     required super.roles,
@@ -151,7 +164,4 @@ class PrivacyBaseImpl extends PrivacyBase {
 
   @override
   Map toJson() => _$PrivacyBaseImplToJson(this);
-
-  factory PrivacyBaseImpl.fromJson(Map<String, dynamic> json) =>
-      _$PrivacyBaseImplFromJson(json);
 }
