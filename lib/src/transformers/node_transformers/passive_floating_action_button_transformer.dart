@@ -14,24 +14,31 @@ class PassiveFloatingActionButtonTransformer
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return buildFromNode(context, node, useFonts: false);
+    return buildFromNode(context, node);
   }
 
   Widget buildFromProps(
     BuildContext context, {
     required FloatingActionButtonProperties props,
     double? width,
-    required bool useFonts,
+    double? height,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildFromProps'),
   }) {
     final node = FloatingActionButtonNode(
       id: '',
       name: 'FAB',
-      basicBoxLocal: NodeBox(0, 0, width ?? props.type.size, props.type.size),
+      basicBoxLocal:
+          NodeBox(0, 0, width ?? props.type.size, height ?? props.type.size),
       retainedOuterBoxLocal:
           NodeBox(0, 0, width ?? props.type.size, props.type.size),
       properties: props,
     );
-    return buildFromNode(context, node, useFonts: useFonts);
+    return buildFromNode(
+      context,
+      node,
+      settings: settings,
+    );
   }
 
   Widget buildPreview({
@@ -39,6 +46,8 @@ class PassiveFloatingActionButtonTransformer
     FloatingActionButtonNode? node,
     double? width,
     VoidCallback? onPressed,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     properties =
         properties ?? node?.properties ?? FloatingActionButtonProperties();
@@ -54,19 +63,20 @@ class PassiveFloatingActionButtonTransformer
     return PassiveFloatingActionButtonWidget(
       node: previewNode,
       onPressed: onPressed,
-      useFonts: true,
+      settings: settings,
     );
   }
 
   Widget buildFromNode(
     BuildContext context,
     FloatingActionButtonNode node, {
-    required bool useFonts,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildFromNode'),
   }) {
     return PassiveFloatingActionButtonWidget(
       node: node,
       onPressed: () => onPressed(context, node.reactions),
-      useFonts: useFonts,
+      settings: settings,
     );
   }
 
@@ -79,14 +89,14 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
   final FloatingActionButtonNode node;
   final VoidCallback? onPressed;
   final double? elevation;
-  final bool useFonts;
+  final WidgetBuildSettings settings;
 
   const PassiveFloatingActionButtonWidget({
     super.key,
     required this.node,
     this.onPressed,
     this.elevation,
-    required this.useFonts,
+    required this.settings,
   });
 
   @override
@@ -100,7 +110,6 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
         fab,
         onPressed: onPressed,
         elevation: elevation,
-        useFonts: useFonts,
       ),
     );
   }
@@ -110,7 +119,6 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
     FloatingActionButtonProperties fab, {
     VoidCallback? onPressed,
     double? elevation,
-    required bool useFonts,
   }) {
     final ShapeBorder? shape = getFABShape(fab);
     switch (fab.type) {
@@ -128,7 +136,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
           hoverColor: fab.hoverColor?.toFlutterColor(),
           splashColor: fab.splashColor?.toFlutterColor(),
           shape: shape,
-          child: getFABIcon(fab, useFonts: useFonts),
+          child: getFABIcon(fab),
         );
       case FloatingActionButtonType.regular:
         return FloatingActionButton(
@@ -144,7 +152,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
           hoverColor: fab.hoverColor?.toFlutterColor(),
           splashColor: fab.splashColor?.toFlutterColor(),
           shape: shape,
-          child: getFABIcon(fab, useFonts: useFonts),
+          child: getFABIcon(fab),
         );
       case FloatingActionButtonType.large:
         return FloatingActionButton.large(
@@ -160,7 +168,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
           hoverColor: fab.hoverColor?.toFlutterColor(),
           splashColor: fab.splashColor?.toFlutterColor(),
           shape: shape,
-          child: getFABIcon(fab, useFonts: useFonts),
+          child: getFABIcon(fab),
         );
       case FloatingActionButtonType.extended:
         return FloatingActionButton.extended(
@@ -181,20 +189,16 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
           extendedTextStyle:
               TextUtils.retrieveTextStyleFromProp(fab.labelStyle),
           shape: shape,
-          icon: !fab.icon.show ? null : getFABIcon(fab, useFonts: useFonts),
+          icon: !fab.icon.show ? null : getFABIcon(fab),
           label: Text(fab.label),
         );
     }
   }
 
-  static Widget? getFABIcon(
-    FloatingActionButtonProperties fab, {
-    required bool useFonts,
-  }) {
+  static Widget? getFABIcon(FloatingActionButtonProperties fab) {
     return retrieveIconWidget(
       fab.icon,
       null,
-      useFonts,
       fab.foregroundColor.toFlutterColor(),
     );
   }

@@ -21,7 +21,7 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
     );
   }
 
-  Widget buildButtonWidgetFromProps(
+  Widget buildFromProps(
     BuildContext context, {
     required ButtonProperties props,
     required double height,
@@ -74,7 +74,6 @@ class PassiveButtonWidget extends StatelessWidget {
   final void Function(BuildContext context)? onPressed;
   final void Function(BuildContext context)? onLongPress;
   final double? elevation;
-  final bool useIconFonts;
 
   PassiveButtonWidget({
     super.key,
@@ -84,7 +83,6 @@ class PassiveButtonWidget extends StatelessWidget {
     this.onPressed,
     this.onLongPress,
     this.elevation,
-    this.useIconFonts = false,
   }) : variablesOverrides = variables ?? [];
 
   @override
@@ -98,8 +96,8 @@ class PassiveButtonWidget extends StatelessWidget {
     );
     final double effectiveIconSize =
         min(node.properties.icon.size ?? 24, node.basicBoxLocal.height);
-    Widget? iconWidget = retrieveIconWidget(
-        node.properties.icon, effectiveIconSize, useIconFonts);
+    Widget? iconWidget =
+        retrieveIconWidget(node.properties.icon, effectiveIconSize);
 
     final bool enabled = PropertyValueDelegate.getPropertyValue<bool>(
           node,

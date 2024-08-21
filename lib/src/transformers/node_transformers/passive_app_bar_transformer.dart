@@ -31,8 +31,11 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
     if (!executed && context.mounted) Navigator.of(context).maybePop();
   }
 
-  PreferredSizeWidget buildAppBarWidgetFromProps({
+  PreferredSizeWidget buildFromProps(
+    BuildContext context, {
     required AppBarProperties props,
+    double width = 250,
+    double height = kAppBarDefaultHeight,
     WidgetBuildSettings settings = const WidgetBuildSettings(
       debugLabel: 'buildPreview',
       replaceVariablesWithSymbols: true,
@@ -41,7 +44,7 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
     final node = AppBarNode(
       id: '',
       name: 'AppBar',
-      basicBoxLocal: NodeBox(0, 0, 250, kAppBarDefaultHeight),
+      basicBoxLocal: NodeBox(0, 0, width, height),
       properties: props,
     );
     return PassiveAppBarWidget(
@@ -84,7 +87,6 @@ class PassiveAppBarWidget extends StatelessWidget
     implements PreferredSizeWidget {
   final AppBarNode node;
   final double? elevation;
-  final bool useIconFonts;
   final WidgetBuildSettings settings;
   final Function(BuildContext context, List<Reaction> reactions)?
       onLeadingPressed;
@@ -96,7 +98,6 @@ class PassiveAppBarWidget extends StatelessWidget
     super.key,
     required this.node,
     this.elevation,
-    this.useIconFonts = false,
     required this.settings,
     this.onLeadingPressed,
     this.onActionPressed,
@@ -107,7 +108,7 @@ class PassiveAppBarWidget extends StatelessWidget
   Widget build(BuildContext context) {
     final Widget? leading = node.properties.leading.icon.show &&
             !node.properties.automaticallyImplyLeading
-        ? retrieveIconWidget(node.properties.leading.icon, null, useIconFonts)
+        ? retrieveIconWidget(node.properties.leading.icon, null)
         : null;
 
     final Widget? title = node.properties.title.trim().isEmpty
@@ -156,9 +157,8 @@ class PassiveAppBarWidget extends StatelessWidget
               // splashRadius: 20,
               iconSize: item.icon.size,
               tooltip: item.tooltip,
-              icon:
-                  retrieveIconWidget(item.icon, item.icon.size, useIconFonts) ??
-                      const SizedBox.shrink(),
+              icon: retrieveIconWidget(item.icon, item.icon.size) ??
+                  const SizedBox.shrink(),
             ),
         ],
       ),

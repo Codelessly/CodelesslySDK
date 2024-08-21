@@ -83,7 +83,6 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     return PassiveFloatingActionButtonWidget.buildFAB(
       node.id,
       node.properties.floatingActionButton!,
-      useFonts: false,
       onPressed: () => onFaBPressed(context, node),
     );
   }

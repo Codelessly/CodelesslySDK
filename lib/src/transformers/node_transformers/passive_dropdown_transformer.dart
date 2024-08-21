@@ -65,7 +65,6 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
 class PassiveDropdownWidget extends StatelessWidget {
   final DropdownNode node;
   final VoidCallback? onTap;
-  final bool useIconFonts;
   final ValueChanged<int>? onChanged;
   final int? initialValue;
   final WidgetBuildSettings settings;
@@ -74,7 +73,6 @@ class PassiveDropdownWidget extends StatelessWidget {
     super.key,
     required this.node,
     this.onTap,
-    this.useIconFonts = false,
     this.onChanged,
     this.initialValue,
     required this.settings,
@@ -214,7 +212,7 @@ class PassiveDropdownWidget extends StatelessWidget {
           iconEnabledColor: node.properties.iconEnabledColor.toFlutterColor(),
           iconSize: node.properties.iconSize,
           icon: retrieveIconWidget(
-              node.properties.icon, node.properties.iconSize, useIconFonts),
+              node.properties.icon, node.properties.iconSize),
           dropdownColor: node.properties.dropdownColor.toFlutterColor(),
           focusColor: node.properties.focusColor.toFlutterColor(),
           elevation: node.properties.elevation,

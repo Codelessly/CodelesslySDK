@@ -87,14 +87,12 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
 class PassiveTabBarWidget extends StatefulWidget {
   final TabBarNode node;
   final WidgetBuildSettings settings;
-  final bool useIconFonts;
   final ValueChanged<int>? onChanged;
 
   const PassiveTabBarWidget({
     super.key,
     required this.node,
     required this.settings,
-    this.useIconFonts = false,
     this.onChanged,
   });
 
@@ -219,9 +217,7 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
             tab.icon.color != null || !tab.icon.isSvgImage
                 ? tab.icon
                 : tab.icon.copyWith(color: ColorRGBA.transparent),
-            effectiveIconSize,
-            widget.useIconFonts,
-          )
+            effectiveIconSize)
         : null;
 
     if (iconWidget == null) return Tab(text: label);

@@ -258,7 +258,6 @@ String? getSliderLabel(SliderNode node, double value) {
 Widget? retrieveIconWidget(
   MultiSourceIconModel icon, [
   double? size,
-  bool useIconFonts = false,
   Color? themeColor,
 ]) {
   if (!icon.show) return null;
@@ -314,11 +313,9 @@ Widget? retrieveIconWidget(
 Widget retrieveNavBarItemIconWidget(
   MultiSourceIconModel icon, [
   double? size,
-  bool useIconFonts = false,
   Color? themeColor,
 ]) =>
-    retrieveIconWidget(icon, size, useIconFonts, themeColor) ??
-    const SizedBox.shrink();
+    retrieveIconWidget(icon, size, themeColor) ?? const SizedBox.shrink();
 
 String buildYoutubeEmbedUrl({
   required EmbeddedYoutubeVideoProperties properties,

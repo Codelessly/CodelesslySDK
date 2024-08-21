@@ -27,7 +27,8 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     );
   }
 
-  Widget buildTextFieldWidgetFromProps({
+  Widget buildFromProps(
+    BuildContext context, {
     required TextFieldProperties props,
     required double height,
     required double width,
@@ -95,7 +96,6 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final Function(BuildContext context, String value)? onSubmitted;
   final Function(BuildContext context, List<Reaction> reactions, String value)?
       onIconTap;
-  final bool useIconFonts;
   final bool withAutofill;
   final AutovalidateMode? autovalidateMode;
   final FormFieldValidator<String>? validator;
@@ -107,7 +107,6 @@ class PassiveTextFieldWidget extends StatefulWidget {
     this.onTap,
     this.onChanged,
     this.onSubmitted,
-    this.useIconFonts = false,
     this.withAutofill = true,
     this.onIconTap,
     List<VariableData>? variables,
@@ -293,7 +292,6 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         context,
         node,
         properties.decoration,
-        widget.useIconFonts,
         widget.settings,
         scopedValues,
       ),
@@ -318,7 +316,6 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     BuildContext context,
     TextFieldNode node,
     InputDecorationModel decoration,
-    bool useIconFonts,
     WidgetBuildSettings settings,
     ScopedValues scopedValues,
   ) {
@@ -421,7 +418,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     return InputDecoration(
       icon: !decoration.icon.show || decoration.icon.isEmpty
           ? null
-          : retrieveIconWidget(decoration.icon, null, useIconFonts),
+          : retrieveIconWidget(decoration.icon, null),
       label: labelText,
       floatingLabelStyle:
           TextUtils.retrieveTextStyleFromProp(decoration.floatingLabelStyle),
@@ -445,7 +442,6 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
               onTap: () => widget.onIconTap?.call(
                   context, decoration.prefixIcon.reactions, controller.text),
               iconModel: decoration.prefixIcon,
-              useIconFonts: useIconFonts,
             ),
       // prefixIconConstraints:
       //     decoration.prefixIconConstraints.flutterConstraints,
@@ -458,7 +454,6 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
               onTap: () => widget.onIconTap?.call(
                   context, decoration.suffixIcon.reactions, controller.text),
               iconModel: decoration.suffixIcon,
-              useIconFonts: useIconFonts,
             ),
       suffix: suffixText,
       suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
@@ -579,12 +574,10 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 class _ReactiveIcon extends StatelessWidget {
   final VoidCallback onTap;
   final ReactiveIconModel iconModel;
-  final bool useIconFonts;
 
   const _ReactiveIcon({
     required this.onTap,
     required this.iconModel,
-    required this.useIconFonts,
   });
 
   @override
@@ -592,7 +585,7 @@ class _ReactiveIcon extends StatelessWidget {
     final icon = Align(
       widthFactor: 1,
       heightFactor: 1,
-      child: retrieveIconWidget(iconModel.icon, null, useIconFonts)!,
+      child: retrieveIconWidget(iconModel.icon, null)!,
     );
 
     if (iconModel.reactions.isEmpty) return icon;
