@@ -37,8 +37,9 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
       FunctionsRepository.triggerAction(context, TriggerType.longPress,
           reactions: reactions);
 
-  Widget buildPreview({
-    ListTileProperties? properties,
+  Widget buildPreview(
+    BuildContext context, {
+    ListTileProperties? props,
     ListTileNode? node,
     double height = kDefaultListTileHeight,
     double width = kDefaultListTileWidth,
@@ -58,7 +59,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
           basicBoxLocal: NodeBox(0, 0, width, height),
           retainedOuterBoxLocal: NodeBox(0, 0, width, height),
           verticalFit: SizeFit.shrinkWrap,
-          properties: properties ?? node?.properties ?? ListTileProperties(),
+          properties: props ?? node?.properties ?? ListTileProperties(),
           children: [
             if (leading != null) leading.id,
             if (title != null) title.id,

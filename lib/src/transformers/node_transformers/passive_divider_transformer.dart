@@ -16,10 +16,13 @@ class PassiveDividerTransformer extends NodeWidgetTransformer<DividerNode> {
     return buildFromNode(node);
   }
 
-  Widget buildFromProps({
+  Widget buildFromProps(
+    BuildContext context, {
     required DividerProperties props,
     required double height,
     required double width,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildFromProps'),
   }) {
     final node = DividerNode(
       id: '',
@@ -28,7 +31,7 @@ class PassiveDividerTransformer extends NodeWidgetTransformer<DividerNode> {
       retainedOuterBoxLocal: NodeBox(0, 0, width, height),
       properties: props,
     );
-    return buildFromNode(node);
+    return buildFromNode(node, settings: settings);
   }
 
   Widget buildPreview({
@@ -37,6 +40,8 @@ class PassiveDividerTransformer extends NodeWidgetTransformer<DividerNode> {
     double? height,
     double? width,
     ValueChanged<bool>? onChanged,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final previewNode = DividerNode(
       properties: properties ?? node?.properties ?? DividerProperties(),
@@ -48,13 +53,19 @@ class PassiveDividerTransformer extends NodeWidgetTransformer<DividerNode> {
     return PassiveDividerWidget(
       node: previewNode,
       onChanged: onChanged,
+      settings: settings,
     );
   }
 
-  Widget buildFromNode(DividerNode node) {
+  Widget buildFromNode(
+    DividerNode node, {
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildFromNode'),
+  }) {
     return PassiveDividerWidget(
       node: node,
       onChanged: (value) => onChanged(node.reactions),
+      settings: settings,
     );
   }
 
@@ -76,12 +87,14 @@ class PassiveDividerWidget extends StatelessWidget {
   final DividerNode node;
   final List<VariableData> variables;
   final ValueChanged<bool>? onChanged;
+  final WidgetBuildSettings settings;
 
   const PassiveDividerWidget({
     super.key,
     required this.node,
     required this.onChanged,
     this.variables = const [],
+    required this.settings,
   });
 
   @override

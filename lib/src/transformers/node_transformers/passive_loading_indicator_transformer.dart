@@ -15,13 +15,17 @@ class PassiveLoadingIndicatorTransformer
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return buildFromNode(node);
+    return buildFromNode(node, settings: settings);
   }
 
-  Widget buildFromProps({
+  Widget buildFromProps(
+    BuildContext context, {
     required LoadingIndicatorProperties props,
     required double height,
     required double width,
+    bool animate = true,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildFromProps'),
   }) {
     final node = LoadingIndicatorNode(
       id: '',
@@ -30,7 +34,7 @@ class PassiveLoadingIndicatorTransformer
       retainedOuterBoxLocal: NodeBox(0, 0, width, height),
       properties: props,
     );
-    return buildFromNode(node);
+    return buildFromNode(node, animate: animate, settings: settings);
   }
 
   Widget buildPreview({
@@ -40,6 +44,8 @@ class PassiveLoadingIndicatorTransformer
     double? width,
     ValueChanged<bool>? onChanged,
     bool animate = false,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final previewNode = LoadingIndicatorNode(
       properties: node?.properties ?? properties!,
@@ -52,12 +58,20 @@ class PassiveLoadingIndicatorTransformer
       node: previewNode,
       onChanged: onChanged,
       animate: animate,
+      settings: settings,
     );
   }
 
-  Widget buildFromNode(LoadingIndicatorNode node) {
+  Widget buildFromNode(
+    LoadingIndicatorNode node, {
+    bool animate = true,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildFromNode'),
+  }) {
     return PassiveLoadingIndicatorWidget(
       node: node,
+      settings: settings,
+      animate: animate,
       onChanged: (value) => onChanged(node.reactions),
     );
   }
@@ -81,6 +95,7 @@ class PassiveLoadingIndicatorWidget extends StatelessWidget {
   final List<VariableData> variables;
   final ValueChanged<bool>? onChanged;
   final bool animate;
+  final WidgetBuildSettings settings;
 
   const PassiveLoadingIndicatorWidget({
     super.key,
@@ -88,6 +103,7 @@ class PassiveLoadingIndicatorWidget extends StatelessWidget {
     required this.onChanged,
     this.animate = true,
     this.variables = const [],
+    required this.settings,
   });
 
   @override

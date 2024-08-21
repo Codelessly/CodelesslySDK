@@ -19,6 +19,7 @@ class PassiveNavigationBarTransformer
     return PassiveNavigationBarWidget(
       node: node,
       onChanged: (index) => onChanged(node, context, index),
+      settings: settings,
     );
   }
 
@@ -29,18 +30,24 @@ class PassiveNavigationBarTransformer
         reactions: item.reactions);
   }
 
-  Widget buildNavigationBarWidgetFromProps({
-    required NavigationBarProperties style,
+  Widget buildFromProps(
+    BuildContext context, {
+    double width = 250,
+    double height = kBottomNavigationBarHeight,
+    required NavigationBarProperties props,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildFromProps'),
   }) {
     final node = NavigationBarNode(
       id: '',
       name: 'NavigationBar',
-      basicBoxLocal: NodeBox(0, 0, 100, kBottomNavigationBarHeight),
-      properties: style,
+      basicBoxLocal: NodeBox(0, 0, width, height),
+      properties: props,
     );
     return PassiveNavigationBarWidget(
       node: node,
       applyBottomPadding: false,
+      settings: settings,
     );
   }
 
@@ -51,6 +58,8 @@ class PassiveNavigationBarTransformer
     double? width,
     int currentIndex = 0,
     ValueChanged<int>? onChanged,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final previewNode = NavigationBarNode(
       properties: properties ?? node!.properties,
@@ -67,6 +76,7 @@ class PassiveNavigationBarTransformer
       node: previewNode,
       applyBottomPadding: false,
       onChanged: onChanged,
+      settings: settings,
     );
   }
 }
@@ -75,15 +85,15 @@ class PassiveNavigationBarWidget extends StatefulWidget
     implements PreferredSizeWidget {
   final NavigationBarNode node;
   final ValueChanged<int>? onChanged;
-  final bool useIconFonts;
   final bool applyBottomPadding;
+  final WidgetBuildSettings settings;
 
   const PassiveNavigationBarWidget({
     super.key,
     required this.node,
     this.onChanged,
-    this.useIconFonts = false,
     this.applyBottomPadding = true,
+    required this.settings,
   });
 
   @override
@@ -291,7 +301,6 @@ class _PassiveNavigationBarWidgetState
       itemModel.icon,
       null,
       // style.unselectedIconSize,
-      widget.useIconFonts,
     );
 
     final Widget? selectedIconDj =
@@ -300,7 +309,6 @@ class _PassiveNavigationBarWidgetState
                 itemModel.selectedIcon!,
                 null,
                 // style.selectedIconSize,
-                widget.useIconFonts,
               )
             : null;
     return BottomNavigationBarItem(
@@ -327,7 +335,6 @@ class _PassiveNavigationBarWidgetState
       itemModel.icon,
       null,
       // style.unselectedIconSize,
-      widget.useIconFonts,
     );
 
     final Widget? selectedIconDj =
@@ -336,7 +343,6 @@ class _PassiveNavigationBarWidgetState
                 itemModel.selectedIcon!,
                 null,
                 // style.selectedIconSize,
-                widget.useIconFonts,
               )
             : null;
     return NavigationDestination(
