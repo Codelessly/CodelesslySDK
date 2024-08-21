@@ -23,7 +23,8 @@ class PassiveExpansionTileTransformer
     );
   }
 
-  Widget buildFromProps({
+  Widget buildFromProps(
+    BuildContext context, {
     required ExpansionTileProperties props,
     required double height,
     required double width,
@@ -40,8 +41,9 @@ class PassiveExpansionTileTransformer
     return buildFromNode(node, settings: settings);
   }
 
-  Widget buildPreview({
-    ExpansionTileProperties? properties,
+  Widget buildPreview(
+    BuildContext context, {
+    ExpansionTileProperties? props,
     ExpansionTileNode? node,
     double height = kDefaultListTileHeight * 2,
     double width = kDefaultListTileWidth,
@@ -74,7 +76,7 @@ class PassiveExpansionTileTransformer
           basicBoxLocal: NodeBox(0, 0, width, height),
           retainedOuterBoxLocal: NodeBox(0, 0, width, height),
           verticalFit: SizeFit.shrinkWrap,
-          properties: (properties ??
+          properties: (props ??
               node?.properties ??
               ExpansionTileProperties(
                 controlAffinity: controlAffinity,

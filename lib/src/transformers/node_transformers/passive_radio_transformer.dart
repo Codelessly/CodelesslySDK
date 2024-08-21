@@ -15,7 +15,7 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return buildFromNode(context, node);
+    return buildFromNode(context, node, settings);
   }
 
   Widget buildFromProps(
@@ -25,6 +25,8 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
     required double width,
     String value = '',
     String? groupValue,
+    WidgetBuildSettings settings =
+        const WidgetBuildSettings(debugLabel: 'buildPreview'),
   }) {
     final node = RadioNode(
       id: '',
@@ -35,7 +37,7 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
       value: value,
       groupValue: groupValue,
     );
-    return buildFromNode(context, node);
+    return buildFromNode(context, node, settings);
   }
 
   Widget buildPreview({
@@ -46,6 +48,10 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
     String value = '',
     String? groupValue,
     ValueChanged<String?>? onChanged,
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+      replaceVariablesWithSymbols: true,
+    ),
   }) {
     final previewNode = RadioNode(
       properties: properties ?? node?.properties ?? RadioProperties(),
@@ -58,13 +64,16 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
     previewNode.groupValue = groupValue;
     return PassiveRadioWidget(
       node: previewNode,
+      settings: settings,
       onChanged: (context, value) => onChanged?.call(value),
     );
   }
 
-  Widget buildFromNode(BuildContext context, RadioNode node) {
+  Widget buildFromNode(
+      BuildContext context, RadioNode node, WidgetBuildSettings settings) {
     return PassiveRadioWidget(
       node: node,
+      settings: settings,
       onChanged: (context, value) => onChanged(context, node, value),
     );
   }
@@ -92,12 +101,14 @@ class PassiveRadioWidget extends StatelessWidget {
   final RadioNode node;
   final List<VariableData> variablesOverrides;
   final void Function(BuildContext context, String? value)? onChanged;
+  final WidgetBuildSettings settings;
 
   const PassiveRadioWidget({
     super.key,
     required this.node,
     required this.onChanged,
     this.variablesOverrides = const [],
+    required this.settings,
   });
 
   @override
