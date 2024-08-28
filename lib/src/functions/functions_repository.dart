@@ -67,7 +67,12 @@ class FunctionsRepository {
     _log('Performing action: $action');
 
     final Codelessly codelessly = context.read<Codelessly>();
-    codelessly.tracker.trackAction(action);
+    switch (action.type) {
+      case ActionType.loadFromCloudStorage || ActionType.setCloudStorage:
+        codelessly.tracker.trackCloudAction(action);
+      default:
+        codelessly.tracker.trackAction(action);
+    }
 
     switch (action.type) {
       case ActionType.navigation:
