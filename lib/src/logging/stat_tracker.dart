@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 
 import '../constants.dart';
@@ -35,10 +34,6 @@ abstract class StatTracker {
 /// A [StatTracker] implementation that utilizes Firestore to track the
 /// statistics.
 final class FirestoreStatTracker extends StatTracker {
-  /// The Firestore document reference to track the statistics.
-  DocumentReference get ref => FirebaseFirestore.instance
-      .collection(statsCollection)
-      .doc(projectId ?? lostStatsDoc);
 
   /// The field name to track the number of each operation.
   final Map<String, int> statBatch = {};
@@ -50,19 +45,7 @@ final class FirestoreStatTracker extends StatTracker {
   /// Sends the batch of stats to the Firestore.
   Future<void> sendBatch() => debouncer.run(
         () async {
-          // No need to await it. Send it and immediately start collecting more
-          // stats.
-          ref.set(
-            {
-              for (final entry in statBatch.entries)
-                entry.key: FieldValue.increment(entry.value),
-
-              // Account for this stat tracking operation as an additional write
-              // operation.
-              '$writesField/stats': FieldValue.increment(1),
-            },
-            SetOptions(merge: true),
-          );
+          // TODO: call api endpoint.
           statBatch.clear();
         },
         forceRunAfter: 20,
