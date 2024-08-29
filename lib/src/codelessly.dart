@@ -10,8 +10,6 @@ import 'package:flutter/widgets.dart';
 import '../codelessly_sdk.dart';
 import 'logging/reporter.dart';
 
-const String clientType = String.fromEnvironment('client_type');
-
 typedef NavigationListener = void Function(BuildContext context);
 typedef BreakpointsListener = void Function(
     BuildContext context, Breakpoint breakpoint);
@@ -128,7 +126,7 @@ class Codelessly {
   final StreamController<CStatus> _statusStreamController =
       StreamController.broadcast()..add(CStatus.empty());
 
-  final StatTracker _tracker = FirestoreStatTracker();
+  final StatTracker _tracker = CodelesslyStatTracker();
 
   /// Tracks statistics of various operations in the SDK.
   StatTracker get tracker => _tracker;
@@ -641,7 +639,10 @@ class Codelessly {
         _config!.publishSource = _authManager!.getBestPublishSource(_config!);
 
         if (_authManager?.authData?.projectId case String projectId) {
-          tracker.init(projectId);
+          tracker.init(
+            projectId: projectId,
+            serverUrl: Uri.parse(_config!.firebaseCloudFunctionsBaseURL),
+          );
         }
 
         _updateStatus(CStatus.loading(CLoadingState.initializedAuth));
@@ -692,7 +693,10 @@ class Codelessly {
           if (_authManager!.authData == null) return;
 
           if (_authManager?.authData?.projectId case String projectId) {
-            tracker.init(projectId);
+            tracker.init(
+              projectId: projectId,
+              serverUrl: Uri.parse(_config!.firebaseCloudFunctionsBaseURL),
+            );
           }
 
           log('[POST-INIT] Background authentication succeeded. Initializing layout storage.');
