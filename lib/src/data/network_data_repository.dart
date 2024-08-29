@@ -15,7 +15,7 @@ abstract class NetworkDataRepository {
   /// The [CodelesslyConfig] instance that is used to configure the SDK.
   final CodelesslyConfig config;
 
-  /// The [FirestoreStatTracker] instance to track the statistics of the data repository.
+  /// The [StatTracker] instance to track the statistics of the data repository.
   final StatTracker tracker;
 
   /// Creates a new instance of [NetworkDataRepository].
@@ -68,40 +68,6 @@ abstract class NetworkDataRepository {
       return null;
     }
   }
-
-  /// Calls a cloud function that searches for the project associated with the
-  /// given unique slug and returns a completely populated [SDKPublishModel]
-  /// instance.
-  // Future<SDKPublishModel?> downloadCompletePublishBundle({
-  //   required String slug,
-  //   required PublishSource source,
-  // }) async {
-  //   logger.log(_label, 'Downloading publish bundle with slug: $slug and source: $source');
-  //   final http.Response result = await http.post(
-  //     Uri.parse(
-  //         '${config.firebaseCloudFunctionsBaseURL}/getPublishBundleBySlugRequest'),
-  //     headers: <String, String>{'Content-Type': 'application/json'},
-  //     body: jsonEncode({'slug': slug, 'source': source.serverPath}),
-  //     encoding: utf8,
-  //   );
-  //
-  //   if (result.statusCode != 200) {
-  //     logger.log(_label, 'Error downloading publish bundle.');
-  //     logger.log(_label, 'Status code: ${result.statusCode}');
-  //     logger.log(_label, 'Message: ${result.body}');
-  //     CodelesslyErrorHandler.instance.captureException(CodelesslyException(
-  //       'Error downloading publish bundle from slug [$slug]',
-  //       stacktrace: StackTrace.current,
-  //     ));
-  //     return null;
-  //   }
-  //
-  //   final Map<String, dynamic> modelDoc = jsonDecode(result.body);
-  //   final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
-  //
-  //   logger.log(_label, 'Finished downloading publish bundle with slug: $slug and source: $source.');
-  //   return model;
-  // }
 
   /// Streams a given [projectID]'s associated [SDKPublishModel] from the
   /// network with preferably live updates.

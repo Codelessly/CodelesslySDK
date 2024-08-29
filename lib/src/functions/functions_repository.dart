@@ -422,6 +422,7 @@ class FunctionsRepository {
           reasonPhrase: actualResponse['reasonPhrase']?.toString(),
         );
       } else {
+        // TODO(Saad): Use an HTTP client.
         final Uri uri = Uri.parse(url);
         response = switch (method) {
           HttpMethod.get => await http.get(uri, headers: headers),
@@ -522,6 +523,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     required Object? body,
     required String cloudFunctionsURL,
   }) async {
+    // TODO(Saad): Use an HTTP client.
     return http.post(
       Uri.parse('$cloudFunctionsURL/makeApiRequest'),
       headers: {'content-type': 'application/json'},
