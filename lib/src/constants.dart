@@ -1,3 +1,5 @@
+const String clientType = String.fromEnvironment('client_type');
+
 const String kCodelesslyFirebaseApp = 'codelessly';
 
 const String defaultFirebaseProjectId = String.fromEnvironment(

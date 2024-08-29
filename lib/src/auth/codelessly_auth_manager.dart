@@ -371,6 +371,7 @@ class CodelesslyAuthManager extends AuthManager {
     );
 
     try {
+      // TODO(Saad): Use an HTTP client.
       // Make a POST request to the server to verify the token.
       final Response result = await post(
         Uri.parse(
