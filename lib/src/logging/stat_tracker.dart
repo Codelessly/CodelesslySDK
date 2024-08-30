@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:collection/collection.dart';
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 
@@ -31,6 +30,13 @@ abstract class StatTracker {
 
   /// Tracks one document write operation.
   Future<void> trackWrite(String label);
+
+  /// Tracks one complete populated layout download operation.
+  Future<void> trackPopulatedLayoutDownload(String label);
+
+  /// Tracks a layout as being viewed, determined by the life cycle of the
+  /// CodelesslyWidget.
+  Future<void> trackLayoutView(String label);
 
   /// Tracks one bundle download operation from the CDN.
   Future<void> trackBundleDownload();
@@ -74,19 +80,12 @@ final class CodelesslyStatTracker extends StatTracker {
   Future<void> sendBatch() => debouncer.run(
         () async {
           // TODO(Saad): Use an HTTP client.
-          post(
+          await post(
             serverUrl!,
+            headers: <String, String>{'Content-Type': 'application/json'},
             body: jsonEncode({
               'projectId': projectId,
-              'stats': {
-                for (final entry in statBatch.entries
-                    .whereNot((entry) => entry.key == writesField))
-                  entry.key: entry.value,
-
-                // Account for this stat tracking operation as an additional write
-                // operation.
-                writesField: (statBatch[writesField] ?? 0) + 1,
-              },
+              'stats': statBatch,
             }),
           );
           statBatch.clear();
@@ -111,6 +110,22 @@ final class CodelesslyStatTracker extends StatTracker {
     if (disabled) return Future.value();
 
     incrementField('$writesField/$label');
+    return sendBatch();
+  }
+
+  @override
+  Future<void> trackPopulatedLayoutDownload(String label) {
+    if (disabled) return Future.value();
+
+    incrementField('$populatedLayoutDownloadsField/$label');
+    return sendBatch();
+  }
+
+  @override
+  Future<void> trackLayoutView(String label) {
+    if (disabled) return Future.value();
+
+    incrementField('$layoutViewsField/$label');
     return sendBatch();
   }
 

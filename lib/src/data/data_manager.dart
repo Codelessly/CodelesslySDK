@@ -54,8 +54,6 @@ class DataManager {
   /// The error handler to use.
   final CodelesslyErrorHandler errorHandler;
 
-  // TODO(Saad): This is only used to initialize CloudDatabase. We may be able
-  //  to decouple it.
   /// The stat tracker to use, used to track various reads and writes in this
   /// data manager.
   final StatTracker tracker;
@@ -1301,6 +1299,7 @@ class DataManager {
       log('\tLayout [$layoutID] has no fonts.');
     }
 
+    tracker.trackPopulatedLayoutDownload(layoutID);
     return true;
   }
 
