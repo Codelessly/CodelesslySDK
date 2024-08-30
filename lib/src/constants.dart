@@ -64,6 +64,8 @@ const String bundleDownloadsField = 'bundle_downloads';
 const String fontDownloadsField = 'font_downloads';
 const String actionsField = 'actions';
 const String cloudActionsField = 'cloud_actions';
+const String populatedLayoutDownloadsField = 'populated_layout_downloads';
+const String layoutViewsField = 'layout_views';
 
 /// The template url for the svg icons.
 /// {{style}}: The style of the icon. e.g. materialiconsoutlined

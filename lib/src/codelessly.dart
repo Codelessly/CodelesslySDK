@@ -641,7 +641,8 @@ class Codelessly {
         if (_authManager?.authData?.projectId case String projectId) {
           tracker.init(
             projectId: projectId,
-            serverUrl: Uri.parse(_config!.firebaseCloudFunctionsBaseURL),
+            serverUrl: Uri.parse(
+                '${_config!.firebaseCloudFunctionsBaseURL}/api/trackStatsRequest'),
           );
         }
 
@@ -695,7 +696,8 @@ class Codelessly {
           if (_authManager?.authData?.projectId case String projectId) {
             tracker.init(
               projectId: projectId,
-              serverUrl: Uri.parse(_config!.firebaseCloudFunctionsBaseURL),
+              serverUrl: Uri.parse(
+                  '${_config!.firebaseCloudFunctionsBaseURL}/api/trackStatsRequest'),
             );
           }
 
