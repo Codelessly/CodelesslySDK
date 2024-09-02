@@ -7,6 +7,8 @@ import 'package:meta/meta.dart';
 import '../../codelessly_sdk.dart';
 import '../utils/debouncer.dart';
 
+const _kDisableStatReporting = true;
+
 /// A class that tracks statistics of various operations in the SDK.
 abstract class StatTracker {
   Uri? serverUrl;
@@ -79,6 +81,11 @@ final class CodelesslyStatTracker extends StatTracker {
   /// Sends the batch of stats to the server.
   Future<void> sendBatch() => debouncer.run(
         () async {
+          if (_kDisableStatReporting) {
+            statBatch.clear();
+            return;
+          }
+
           // TODO(Saad): Use an HTTP client.
           await post(
             serverUrl!,
