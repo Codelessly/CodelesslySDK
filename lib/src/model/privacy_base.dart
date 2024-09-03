@@ -153,7 +153,7 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
 /// A base implementation of the [PrivacyBase] to extract privacy fields from
 /// an inherited model without worrying about the other fields that may be
 /// present in the model.
-@JsonSerializable(createFactory: false)
+@JsonSerializable()
 final class _PrivacyBaseImpl extends PrivacyBase {
   const _PrivacyBaseImpl({
     required super.teams,
