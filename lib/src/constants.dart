@@ -58,6 +58,7 @@ const String templatesPath = 'templates';
 /// STAT TRACKING
 const String statsCollection = 'stats';
 const String lostStatsDoc = '_lost';
+const String loadsField = 'loads';
 const String writesField = 'writes';
 const String readsField = 'reads';
 const String bundleDownloadsField = 'bundle_downloads';

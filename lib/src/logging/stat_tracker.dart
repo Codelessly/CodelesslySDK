@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -7,7 +8,7 @@ import 'package:meta/meta.dart';
 import '../../codelessly_sdk.dart';
 import '../utils/debouncer.dart';
 
-const _kDisableStatReporting = true;
+const _kDisableStatReporting = false;
 
 /// A class that tracks statistics of various operations in the SDK.
 abstract class StatTracker {
@@ -26,6 +27,9 @@ abstract class StatTracker {
     this.projectId = projectId;
     this.serverUrl = serverUrl;
   }
+
+  /// Tracks one complete visual view of a Codelessly CloudUI Layout.
+  Future<void> trackLoad();
 
   /// Tracks one document read operation.
   Future<void> trackRead(String label);
@@ -87,14 +91,14 @@ final class CodelesslyStatTracker extends StatTracker {
           }
 
           // TODO(Saad): Use an HTTP client.
-          await post(
+          unawaited(post(
             serverUrl!,
             headers: <String, String>{'Content-Type': 'application/json'},
             body: jsonEncode({
               'projectId': projectId,
               'stats': statBatch,
             }),
-          );
+          ));
           statBatch.clear();
         },
         forceRunAfter: 20,
@@ -102,6 +106,14 @@ final class CodelesslyStatTracker extends StatTracker {
 
   void incrementField(String field) {
     statBatch[field] = (statBatch[field] ?? 0) + 1;
+  }
+
+  @override
+  Future<void> trackLoad() {
+    if (disabled) return Future.value();
+
+    incrementField(loadsField);
+    return sendBatch();
   }
 
   @override

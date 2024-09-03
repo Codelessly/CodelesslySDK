@@ -264,13 +264,17 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   StreamSubscription<CodelesslyException?>? _exceptionSubscription;
   CodelesslyException? _lastException;
 
-  // Saved in the state for the didChangeDependencies method to use to compare
-  // with the new canvas ID to determine if the layout needs to be reloaded
-  // when the media query changes resulting into a new breakpoint.
+  /// Saved in the state for the didChangeDependencies method to use to compare
+  /// with the new canvas ID to determine if the layout needs to be reloaded
+  /// when the media query changes resulting into a new breakpoint.
   String? canvasID;
 
-  // Saved in the state for the didChangeDependencies method to use.
+  /// Saved in the state for the didChangeDependencies method to use.
   String? effectiveLayoutID;
+
+  /// Tracks whether this widget went through a full layout load and was made
+  /// visible to the user successfully at least once.
+  bool didView = false;
 
   @override
   void initState() {
@@ -547,6 +551,11 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           // reload the layout multiple times.
           canvasID ??= _getCanvasIDForLayoutGroup(
               effectiveLayoutID, model, MediaQuery.sizeOf(context));
+
+          if (!didView) {
+            didView = true;
+            _effectiveCodelessly.tracker.trackLoad();
+          }
 
           final layoutWidget = Material(
             clipBehavior: Clip.none,
