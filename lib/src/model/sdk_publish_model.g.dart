@@ -37,6 +37,7 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
       disabledLayouts: (json['disabledLayouts'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      owner: json['owner'] as String,
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
@@ -47,6 +48,7 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
 
 Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
   final val = <String, dynamic>{
+    'owner': instance.owner,
     'users': instance.users.toList(),
     'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
     'teams': instance.teams.toList(),
@@ -86,7 +88,7 @@ Map<String, dynamic> _$SDKPublishModelToJson(SDKPublishModel instance) {
 }
 
 const _$RoleEnumMap = {
-  Role.owner: 'owner',
+  Role.admin: 'admin',
   Role.editor: 'editor',
   Role.viewer: 'viewer',
 };
@@ -103,6 +105,7 @@ SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
           ?.map((e) => Breakpoint.fromJson(e as Map))
           .toList(),
       hidden: json['hidden'] as bool?,
+      owner: json['owner'] as String,
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
@@ -113,6 +116,7 @@ SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
 
 Map<String, dynamic> _$SDKPublishLayoutToJson(SDKPublishLayout instance) {
   final val = <String, dynamic>{
+    'owner': instance.owner,
     'users': instance.users.toList(),
     'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
     'teams': instance.teams.toList(),
@@ -146,6 +150,7 @@ SDKPublishFont _$SDKPublishFontFromJson(Map json) => SDKPublishFont(
       family: json['family'] as String,
       weight: json['weight'] as String,
       style: json['style'] as String?,
+      owner: json['owner'] as String,
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
@@ -156,6 +161,7 @@ SDKPublishFont _$SDKPublishFontFromJson(Map json) => SDKPublishFont(
 
 Map<String, dynamic> _$SDKPublishFontToJson(SDKPublishFont instance) {
   final val = <String, dynamic>{
+    'owner': instance.owner,
     'users': instance.users.toList(),
     'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
     'teams': instance.teams.toList(),
@@ -253,6 +259,7 @@ SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
                   VariableData.fromJson(Map<String, dynamic>.from(e as Map))),
             )),
       ),
+      owner: json['owner'] as String,
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
@@ -263,6 +270,7 @@ SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
 
 Map<String, dynamic> _$SDKLayoutVariablesToJson(SDKLayoutVariables instance) =>
     <String, dynamic>{
+      'owner': instance.owner,
       'users': instance.users.toList(),
       'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
       'teams': instance.teams.toList(),
@@ -283,6 +291,7 @@ SDKLayoutConditions _$SDKLayoutConditionsFromJson(Map json) =>
                   BaseCondition.fromJson(Map<String, dynamic>.from(e as Map))),
             )),
       ),
+      owner: json['owner'] as String,
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
@@ -294,6 +303,7 @@ SDKLayoutConditions _$SDKLayoutConditionsFromJson(Map json) =>
 Map<String, dynamic> _$SDKLayoutConditionsToJson(
         SDKLayoutConditions instance) =>
     <String, dynamic>{
+      'owner': instance.owner,
       'users': instance.users.toList(),
       'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
       'teams': instance.teams.toList(),
