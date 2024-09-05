@@ -266,6 +266,7 @@ class SDKPublishModel extends PrivacyBase {
     List<String>? disabledLayouts,
 
     // Privacy
+    required super.owner,
     required super.teams,
     required super.users,
     required super.roles,
@@ -455,6 +456,7 @@ class SDKPublishLayout extends PrivacyBase {
     bool? hidden,
 
     // Privacy
+    required super.owner,
     required super.teams,
     required super.users,
     required super.roles,
@@ -570,6 +572,7 @@ class SDKPublishFont extends PrivacyBase {
     this.style,
 
     // Privacy
+    required super.owner,
     required super.teams,
     required super.users,
     required super.roles,
@@ -746,6 +749,7 @@ class SDKLayoutVariables extends PrivacyBase {
     required this.variables,
 
     // Privacy
+    required super.owner,
     required super.teams,
     required super.users,
     required super.roles,
@@ -806,6 +810,7 @@ class SDKLayoutConditions extends PrivacyBase {
     required this.conditions,
 
     // Privacy
+    required super.owner,
     required super.teams,
     required super.users,
     required super.roles,

@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 part 'privacy_base.g.dart';
 
 enum Role {
-  owner('Admin'),
+  admin('Admin'),
   editor('Editor'),
   viewer('Viewer');
 
@@ -16,7 +16,7 @@ enum Role {
   /// ----------------- POWER HIERARCHY -----------------
 
   bool isHigherLevelThan(Role other) => switch (this) {
-        owner => other != owner,
+        admin => other != admin,
         editor => other == viewer,
         viewer => false,
       };
@@ -31,25 +31,25 @@ enum Role {
 
   bool get isLowestLevel => this == viewer;
 
-  bool get isHighestLevel => this == owner;
+  bool get isHighestLevel => this == admin;
 
   /// ----------------- PERMISSIONS -----------------
 
-  /// Only owners can modify project metadata.
+  /// Only admins can modify project metadata.
   bool get canManageProject => switch (this) {
-        owner => true,
+        admin => true,
         editor || viewer => false,
       };
 
-  /// Only owners and editors can edit projects.
+  /// Only admins and editors can edit projects.
   bool get canEditProject => switch (this) {
-        owner || editor => true,
+        admin || editor => true,
         viewer => false,
       };
 
-  /// Only owners and editors can manage team members.
+  /// Only admins and editors can manage team members.
   bool get canManageTeam => switch (this) {
-        owner || editor => true,
+        admin || editor => true,
         viewer => false,
       };
 
@@ -60,6 +60,12 @@ enum Role {
 /// Represents the privacy controls of a given model that this mixin
 /// is applied to.
 abstract class PrivacyBase with SerializableMixin, EquatableMixin {
+  /// The owner of the document. The owner is the user who is responsible for
+  /// the document and has the highest level of access to it. In terms of
+  /// permissions, it's equivalent to the [Role.admin] role, however this owner
+  /// is responsible for billing and other administrative tasks.
+  final String owner;
+
   /// A set of user ids that are allowed to access the project in some way
   /// defined by the [roles] map.
   final Set<String> users;
@@ -74,13 +80,16 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
   /// it is accessible to read by anyone on the platform.
   final bool public;
 
+  /// Creates a new [PrivacyBase] with the given parameters.
   factory PrivacyBase.from({
+    required String owner,
     required Set<String> teams,
     required Set<String> users,
     required Map<String, Role> roles,
     required bool public,
   }) =>
       _PrivacyBaseImpl(
+        owner: owner,
         teams: teams,
         users: users,
         roles: roles,
@@ -90,8 +99,8 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
   /// An owner ID must always exist in the roles map. It's an error
   /// if it doesn't.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  Set<String> get owners =>
-      roles.keys.where((id) => roles[id] == Role.owner).toSet();
+  Set<String> get admins =>
+      roles.keys.where((id) => roles[id] == Role.admin).toSet();
 
   /// A list of user ids that are editors of this object.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -109,6 +118,7 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
 
   /// Creates a new [PrivacyBase] with the given parameters.
   const PrivacyBase({
+    required this.owner,
     required Set<String>? teams,
     required Set<String>? users,
     required this.roles,
@@ -120,6 +130,7 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
   /// Creates a new [PrivacyBase] derived from another [PrivacyBase].
   PrivacyBase.private({required PrivacyBase privacy, bool? public})
       : this(
+          owner: privacy.owner,
           teams: privacy.teams,
           users: privacy.users,
           roles: privacy.roles,
@@ -140,6 +151,7 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
   /// }
   @JsonKey(includeFromJson: false, includeToJson: false)
   PrivacyBase get privacy => _PrivacyBaseImpl(
+        owner: owner,
         teams: teams,
         users: users,
         roles: roles,
@@ -156,6 +168,7 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
 @JsonSerializable()
 final class _PrivacyBaseImpl extends PrivacyBase {
   const _PrivacyBaseImpl({
+    required super.owner,
     required super.teams,
     required super.users,
     required super.roles,

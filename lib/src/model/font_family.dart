@@ -30,6 +30,7 @@ class FontFamilyModel extends PrivacyBase {
     required this.fontVariants,
 
     // Privacy
+    required super.owner,
     required super.teams,
     required super.users,
     required super.roles,

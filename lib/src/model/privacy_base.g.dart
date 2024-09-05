@@ -7,6 +7,7 @@ part of 'privacy_base.dart';
 // **************************************************************************
 
 _PrivacyBaseImpl _$PrivacyBaseImplFromJson(Map json) => _PrivacyBaseImpl(
+      owner: json['owner'] as String,
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
@@ -17,6 +18,7 @@ _PrivacyBaseImpl _$PrivacyBaseImplFromJson(Map json) => _PrivacyBaseImpl(
 
 Map<String, dynamic> _$PrivacyBaseImplToJson(_PrivacyBaseImpl instance) =>
     <String, dynamic>{
+      'owner': instance.owner,
       'users': instance.users.toList(),
       'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
       'teams': instance.teams.toList(),
@@ -24,7 +26,7 @@ Map<String, dynamic> _$PrivacyBaseImplToJson(_PrivacyBaseImpl instance) =>
     };
 
 const _$RoleEnumMap = {
-  Role.owner: 'owner',
+  Role.admin: 'admin',
   Role.editor: 'editor',
   Role.viewer: 'viewer',
 };
