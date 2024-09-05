@@ -45,6 +45,7 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
               _$RequestBodyTextTypeEnumMap, json['requestBodyContentType']) ??
           RequestBodyTextType.json,
       created: const DateTimeConverter().fromJson(json['created'] as int?),
+      owner: json['owner'] as String,
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
@@ -55,6 +56,7 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
 
 Map<String, dynamic> _$HttpApiDataToJson(HttpApiData instance) {
   final val = <String, dynamic>{
+    'owner': instance.owner,
     'users': instance.users.toList(),
     'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
     'teams': instance.teams.toList(),
@@ -131,7 +133,7 @@ const _$RequestBodyTextTypeEnumMap = {
 };
 
 const _$RoleEnumMap = {
-  Role.owner: 'owner',
+  Role.admin: 'admin',
   Role.editor: 'editor',
   Role.viewer: 'viewer',
 };
