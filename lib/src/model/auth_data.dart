@@ -31,6 +31,7 @@ class AuthData extends PrivacyBase {
     this.isTemplate = false,
 
     // Privacy
+    required super.owner,
     required super.teams,
     required super.users,
     required super.roles,

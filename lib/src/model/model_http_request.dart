@@ -93,6 +93,7 @@ class HttpApiData extends PrivacyBase {
     DateTime? created,
 
     // Privacy
+    required super.owner,
     required super.teams,
     required super.users,
     required super.roles,
