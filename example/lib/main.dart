@@ -1,23 +1,17 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:storybook_flutter/storybook_flutter.dart';
-
-import 'firebase_options_dev.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   Codelessly.instance.initialize(
     config: CodelesslyConfig(
-      authToken: 'fC9IZE0jL2kzME03bXEwIzE+LD04Z093ci1xMTJaJjMlI3hT',
-      isPreview: false,
+      authToken: "cSlMIT93cj1lXkBuYk5QNmImSTUsTHw2MDQ4VkdlOCZFLHc7",
+      isPreview: kDebugMode,
       preload: true,
-      firebaseOptions: DefaultFirebaseOptionsDev.currentPlatform,
-      firebaseCloudFunctionsBaseURL:
-          'https://us-central1-codeless-dev.cloudfunctions.net',
-      baseURL: 'https://dev.codelessly.com',
-      firebaseInstanceName: 'codelessly-sdk-dev',
     ),
   );
 
@@ -48,7 +42,7 @@ class _MyAppState extends State<MyApp> {
             name: 'Hello World',
             builder: (context) {
               return CodelesslyWidget(
-                layoutID: "0R0PZ0qWewZyKqYrSjNq",
+                layoutID: "0R0yRfzR23SQfDGrbg3h",
                 loadingBuilder: (context) {
                   return const CupertinoActivityIndicator();
                 },
@@ -59,7 +53,7 @@ class _MyAppState extends State<MyApp> {
               name: 'License UI',
               builder: (context) {
                 return CodelesslyWidget(
-                  layoutID: "0R0PYsM6kNpkBMr93LS7",
+                  layoutID: "0R0yeUx1iGDe9kgW5xwn",
                   data: licenseData,
                   functions: {
                     'onFreeSelected': (context, reference, params) {
@@ -84,7 +78,7 @@ class _MyAppState extends State<MyApp> {
               name: 'Pricing UI',
               builder: (context) {
                 return CodelesslyWidget(
-                  layoutID: "0R0QijsF87BJvWfbiezE",
+                  layoutID: "0R0yedXWbqOrI_W7PBlo",
                   loadingBuilder: (context) {
                     return const CupertinoActivityIndicator();
                   },
@@ -94,7 +88,7 @@ class _MyAppState extends State<MyApp> {
             name: 'Pricing Card',
             builder: (context) {
               return CodelesslyWidget(
-                layoutID: '0RbIfjMG9TmGHNt4FmNI',
+                layoutID: '0R1xmqF5lXMr6LpLA9h5',
                 loadingBuilder: (context) {
                   return const CupertinoActivityIndicator();
                 },
@@ -105,7 +99,7 @@ class _MyAppState extends State<MyApp> {
             name: 'Fruit Product Card',
             builder: (context) {
               return CodelesslyWidget(
-                layoutID: '0R4zDBmdIi9LAUC62qnM',
+                layoutID: '0R5hf4ABTQmzDb6e8XyR',
                 data: const {
                   'name': 'Mango',
                   'price': 5.99,
