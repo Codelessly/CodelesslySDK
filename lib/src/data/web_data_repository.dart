@@ -2,21 +2,21 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 import '../../codelessly_sdk.dart';
 
 /// A [NetworkDataRepository] implementation that utilizes the Firebase Cloud
 /// Functions to retrieve the relevant data.
-///
-/// Since Firedart is not compatible with Flutter Web, this implementation
-/// utilizes the http package instead.
 @Deprecated('Use [FirebaseDataRepository] instead.')
 class WebDataRepository extends NetworkDataRepository {
+  final http.Client client;
+
   /// Creates a [WebDataRepository] instance.
   WebDataRepository({
     required super.config,
     required super.tracker,
+    required this.client,
   });
 
   @override
@@ -24,8 +24,7 @@ class WebDataRepository extends NetworkDataRepository {
     required String projectID,
     required PublishSource source,
   }) async* {
-    // TODO(Saad): Use an HTTP client.
-    final Response result = await post(
+    final http.Response result = await client.post(
       Uri.parse(
           '${config.firebaseCloudFunctionsBaseURL}/api/getPublishModelRequest'),
       headers: <String, String>{'Content-Type': 'application/json'},
@@ -57,8 +56,7 @@ class WebDataRepository extends NetworkDataRepository {
     required String layoutID,
     required PublishSource source,
   }) async {
-    // TODO(Saad): Use an HTTP client.
-    final Response result = await post(
+    final http.Response result = await client.post(
       Uri.parse(
           '${config.firebaseCloudFunctionsBaseURL}/api/getLayoutModelRequest'),
       headers: <String, String>{'Content-Type': 'application/json'},
@@ -94,8 +92,7 @@ class WebDataRepository extends NetworkDataRepository {
     required PublishSource source,
   }) async {
     try {
-      // TODO(Saad): Use an HTTP client.
-      final Response result = await post(
+      final http.Response result = await client.post(
         Uri.parse(
             '${config.firebaseCloudFunctionsBaseURL}/api/getFontModelRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},
@@ -132,8 +129,7 @@ class WebDataRepository extends NetworkDataRepository {
     required PublishSource source,
   }) async {
     try {
-      // TODO(Saad): Use an HTTP client.
-      final Response result = await post(
+      final http.Response result = await client.post(
         Uri.parse(
             '${config.firebaseCloudFunctionsBaseURL}/api/getPublishedApiRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},
@@ -172,8 +168,7 @@ class WebDataRepository extends NetworkDataRepository {
     required PublishSource source,
   }) async {
     try {
-      // TODO(Saad): Use an HTTP client.
-      final Response result = await post(
+      final http.Response result = await client.post(
         Uri.parse(
             '${config.firebaseCloudFunctionsBaseURL}/api/getPublishedLayoutVariablesRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},
@@ -214,8 +209,7 @@ class WebDataRepository extends NetworkDataRepository {
   }) async {
     log('[WebDataRepo] Downloading conditions for $layoutID');
     try {
-      // TODO(Saad): Use an HTTP client.
-      final Response result = await post(
+      final http.Response result = await client.post(
         Uri.parse(
             '${config.firebaseCloudFunctionsBaseURL}/api/getPublishedLayoutConditionsRequest'),
         headers: <String, String>{'Content-Type': 'application/json'},

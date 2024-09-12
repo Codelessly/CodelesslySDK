@@ -53,13 +53,17 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(layoutID);
 
     return layoutDoc.get().then((value) {
+      if (!value.exists) {
+        throw CodelesslyException('Layout [$layoutID] does not exist.');
+      }
       tracker.trackRead('${source.serverPath}/downloadLayoutModel');
 
       final Map<String, dynamic> data = value.data() ?? {};
 
       // Layout does not exist or there's a network error.
       if (data.isEmpty) {
-        throw CodelesslyException('Failed to download layout [$layoutID].');
+        throw CodelesslyException(
+            'Failed to download layout [$layoutID], no data found.');
       }
 
       final SDKPublishLayout layout = SDKPublishLayout.fromJson(

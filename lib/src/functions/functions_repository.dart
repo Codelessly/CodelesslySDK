@@ -403,14 +403,17 @@ class FunctionsRepository {
     try {
       final http.Response response;
       if (kIsWeb && useCloudFunctionForWeb) {
+        final codelessly = context.read<Codelessly>();
+        final client = codelessly.client;
         final String cloudFunctionsURL =
-            context.read<Codelessly>().config!.firebaseCloudFunctionsBaseURL;
+            codelessly.config!.firebaseCloudFunctionsBaseURL;
         final receivedResponse = await makeApiRequestWeb(
           method: method,
           url: url,
           headers: headers,
           body: body,
           cloudFunctionsURL: cloudFunctionsURL,
+          client: client,
         );
 
         // cloud function returns actual response in body.
@@ -422,14 +425,16 @@ class FunctionsRepository {
           reasonPhrase: actualResponse['reasonPhrase']?.toString(),
         );
       } else {
-        // TODO(Saad): Use an HTTP client.
+        final codelessly = context.read<Codelessly>();
+        final client = codelessly.client;
         final Uri uri = Uri.parse(url);
         response = switch (method) {
-          HttpMethod.get => await http.get(uri, headers: headers),
-          HttpMethod.post => await http.post(uri, headers: headers, body: body),
+          HttpMethod.get => await client.get(uri, headers: headers),
+          HttpMethod.post =>
+            await client.post(uri, headers: headers, body: body),
           HttpMethod.delete =>
-            await http.delete(uri, headers: headers, body: body),
-          HttpMethod.put => await http.put(uri, headers: headers, body: body)
+            await client.delete(uri, headers: headers, body: body),
+          HttpMethod.put => await client.put(uri, headers: headers, body: body)
         };
       }
 
@@ -522,9 +527,9 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     required Map<String, dynamic> headers,
     required Object? body,
     required String cloudFunctionsURL,
+    required http.Client client,
   }) async {
-    // TODO(Saad): Use an HTTP client.
-    return http.post(
+    return client.post(
       Uri.parse('$cloudFunctionsURL/makeApiRequest'),
       headers: {'content-type': 'application/json'},
       body: jsonEncode({

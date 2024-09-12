@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
 import '../../codelessly_sdk.dart';
@@ -12,11 +12,16 @@ const _kDisableStatReporting = false;
 
 /// A class that tracks statistics of various operations in the SDK.
 abstract class StatTracker {
+  final http.Client client;
+
+  StatTracker({required this.client});
+
   Uri? serverUrl;
 
   /// The project ID to track the statistics for.
   String? projectId;
 
+  /// Determines whether this tracker has been initialized.
   bool get didInitialize => projectId != null;
 
   @mustCallSuper
@@ -29,7 +34,7 @@ abstract class StatTracker {
   }
 
   /// Tracks one complete visual view of a Codelessly CloudUI Layout.
-  Future<void> trackLoad();
+  Future<void> trackView();
 
   /// Tracks one document read operation.
   Future<void> trackRead(String label);
@@ -59,6 +64,8 @@ abstract class StatTracker {
 
 /// A [StatTracker] implementation that sends the stats to Codelessly's server.
 final class CodelesslyStatTracker extends StatTracker {
+  CodelesslyStatTracker({required super.client});
+
   @override
   void init({
     required String projectId,
@@ -80,18 +87,15 @@ final class CodelesslyStatTracker extends StatTracker {
   final DeBouncer debouncer = DeBouncer(const Duration(seconds: 1));
 
   bool get disabled =>
-      clientType == kCodelesslyEditor || projectId == null || serverUrl == null;
+      _kDisableStatReporting ||
+      clientType == kCodelesslyEditor ||
+      projectId == null ||
+      serverUrl == null;
 
   /// Sends the batch of stats to the server.
   Future<void> sendBatch() => debouncer.run(
         () async {
-          if (_kDisableStatReporting) {
-            statBatch.clear();
-            return;
-          }
-
-          // TODO(Saad): Use an HTTP client.
-          unawaited(post(
+          unawaited(client.post(
             serverUrl!,
             headers: <String, String>{'Content-Type': 'application/json'},
             body: jsonEncode({
@@ -109,10 +113,10 @@ final class CodelesslyStatTracker extends StatTracker {
   }
 
   @override
-  Future<void> trackLoad() {
+  Future<void> trackView() {
     if (disabled) return Future.value();
 
-    incrementField(loadsField);
+    incrementField(viewsField);
     return sendBatch();
   }
 
