@@ -17,7 +17,7 @@ FontFamilyModel _$FontFamilyModelFromJson(Map json) => FontFamilyModel(
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
-        (k, e) => MapEntry(k as String, $enumDecode(_$RoleEnumMap, e)),
+        (k, e) => MapEntry(k as String, Role.fromJson(e as String)),
       ),
       public: json['public'] as bool?,
     );
@@ -26,19 +26,13 @@ Map<String, dynamic> _$FontFamilyModelToJson(FontFamilyModel instance) =>
     <String, dynamic>{
       'owner': instance.owner,
       'users': instance.users.toList(),
-      'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
+      'roles': instance.roles.map((k, e) => MapEntry(k, e.toJson())),
       'teams': instance.teams.toList(),
       'public': instance.public,
       'id': instance.id,
       'name': instance.name,
       'fontVariants': instance.fontVariants.map((e) => e.toJson()).toList(),
     };
-
-const _$RoleEnumMap = {
-  Role.admin: 'admin',
-  Role.editor: 'editor',
-  Role.viewer: 'viewer',
-};
 
 FontVariantModel _$FontVariantModelFromJson(Map json) => FontVariantModel(
       name: json['name'] as String? ?? 'regular',
