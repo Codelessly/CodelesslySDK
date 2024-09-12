@@ -1,3 +1,13 @@
+## 4.0.0
+
+- Teams V2 support. Owner field & admin Role migration.
+- New SDK usage and stat tracking.
+- Skip downloading disabled layouts.
+- Add open URL error handling.
+- Create `where` query API.
+- Create new `image` variable type.
+- Add Date decoder.
+
 ## 3.0.3
 
 - Revert Hive CE dependency.
