@@ -6,9 +6,11 @@ import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart';
 
 import '../codelessly_sdk.dart';
 import 'logging/reporter.dart';
+import 'utils/codelessly_http_client.dart';
 
 typedef NavigationListener = void Function(BuildContext context);
 typedef BreakpointsListener = void Function(
@@ -33,6 +35,11 @@ class Codelessly {
   /// Returns the global singleton instance of the SDK.
   /// Initialization is needed before usage.
   static Codelessly get instance => _instance;
+
+  final Client _client = CodelesslyHttpClient();
+
+  /// Returns the HTTP client used by this SDK instance.
+  Client get client => _client;
 
   CodelesslyConfig? _config;
 
@@ -126,7 +133,7 @@ class Codelessly {
   final StreamController<CStatus> _statusStreamController =
       StreamController.broadcast()..add(CStatus.empty());
 
-  final StatTracker _tracker = CodelesslyStatTracker();
+  late final StatTracker _tracker = CodelesslyStatTracker(client: _client);
 
   /// Tracks statistics of various operations in the SDK.
   StatTracker get tracker => _tracker;
@@ -229,6 +236,7 @@ class Codelessly {
     _previewDataManager = null;
     _config = null;
     _navigationListeners.clear();
+    _client.close();
   }
 
   /// Resets the state of the SDK. This is useful for resetting the data without
@@ -549,6 +557,7 @@ class Codelessly {
             config: _config!,
             cacheManager: _cacheManager!,
             firebaseAuth: _firebaseAuth!,
+            client: _client,
             errorHandler: errorHandler,
           );
 
@@ -561,7 +570,7 @@ class Codelessly {
             authManager: _authManager!,
             networkDataRepository: FirebaseDataRepository(
               firestore: firebaseFirestore,
-              tracker: tracker,
+              tracker: _tracker,
               config: _config!,
             ),
             localDataRepository: LocalDataRepository(
@@ -569,7 +578,7 @@ class Codelessly {
             ),
             firebaseFirestore: firebaseFirestore,
             errorHandler: errorHandler,
-            tracker: tracker,
+            tracker: _tracker,
           );
 
       // Create the preview data manager.
@@ -582,14 +591,14 @@ class Codelessly {
             networkDataRepository: FirebaseDataRepository(
               firestore: firebaseFirestore,
               config: _config!,
-              tracker: tracker,
+              tracker: _tracker,
             ),
             localDataRepository: LocalDataRepository(
               cacheManager: _cacheManager!,
             ),
             firebaseFirestore: firebaseFirestore,
             errorHandler: errorHandler,
-            tracker: tracker,
+            tracker: _tracker,
           );
 
       // Create the template data manager. This is always automatically
@@ -606,14 +615,14 @@ class Codelessly {
             networkDataRepository: FirebaseDataRepository(
               firestore: firebaseFirestore,
               config: _config!,
-              tracker: tracker,
+              tracker: _tracker,
             ),
             localDataRepository: LocalDataRepository(
               cacheManager: _cacheManager!,
             ),
             firebaseFirestore: firebaseFirestore,
             errorHandler: errorHandler,
-            tracker: tracker,
+            tracker: _tracker,
           );
 
       _updateStatus(CStatus.loading(CLoadingState.createdManagers));

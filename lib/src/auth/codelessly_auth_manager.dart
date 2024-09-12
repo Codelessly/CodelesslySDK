@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../codelessly_sdk.dart';
@@ -15,6 +15,9 @@ class CodelesslyAuthManager extends AuthManager {
 
   /// The configuration used to authenticate the token.
   final CodelesslyConfig config;
+
+  /// The client used to make HTTP requests.
+  final http.Client client;
 
   /// The cache manager used to store the auth data after authentication.
   final CacheManager cacheManager;
@@ -63,6 +66,7 @@ class CodelesslyAuthManager extends AuthManager {
     required this.cacheManager,
     required this.firebaseAuth,
     required this.errorHandler,
+    required this.client,
     AuthData? authData,
   }) : _authData = authData {
     if (_authData != null) {
@@ -305,6 +309,7 @@ class CodelesslyAuthManager extends AuthManager {
       final AuthData? authData = await verifyProjectAuthToken(
         userToken: _idTokenResult!.token!,
         config: config,
+        client: client,
         postSuccess: postAuthSuccess,
       );
 
@@ -358,6 +363,7 @@ class CodelesslyAuthManager extends AuthManager {
   static Future<AuthData?> verifyProjectAuthToken({
     required String userToken,
     required CodelesslyConfig config,
+    required http.Client client,
     required Future<void> Function(AuthData authData) postSuccess,
   }) async {
     const String label = 'verifyProjectAuthToken';
@@ -371,9 +377,8 @@ class CodelesslyAuthManager extends AuthManager {
     );
 
     try {
-      // TODO(Saad): Use an HTTP client.
       // Make a POST request to the server to verify the token.
-      final Response result = await post(
+      final http.Response result = await client.post(
         Uri.parse(
             '${config.firebaseCloudFunctionsBaseURL}/api/verifyProjectAuthToken'),
         headers: <String, String>{

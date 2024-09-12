@@ -550,11 +550,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           // since build method is called multiple times and we don't want to
           // reload the layout multiple times.
           canvasID ??= _getCanvasIDForLayoutGroup(
-              effectiveLayoutID, model, MediaQuery.sizeOf(context));
+            effectiveLayoutID,
+            model,
+            MediaQuery.sizeOf(context),
+          );
 
           if (!didView) {
             didView = true;
-            _effectiveCodelessly.tracker.trackLoad();
+            _effectiveCodelessly.tracker.trackView();
           }
 
           final layoutWidget = Material(
