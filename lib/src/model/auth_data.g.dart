@@ -15,7 +15,7 @@ AuthData _$AuthDataFromJson(Map json) => AuthData(
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       roles: (json['roles'] as Map).map(
-        (k, e) => MapEntry(k as String, $enumDecode(_$RoleEnumMap, e)),
+        (k, e) => MapEntry(k as String, Role.fromJson(e as String)),
       ),
     );
 
@@ -23,7 +23,7 @@ Map<String, dynamic> _$AuthDataToJson(AuthData instance) {
   final val = <String, dynamic>{
     'owner': instance.owner,
     'users': instance.users.toList(),
-    'roles': instance.roles.map((k, e) => MapEntry(k, _$RoleEnumMap[e]!)),
+    'roles': instance.roles.map((k, e) => MapEntry(k, e.toJson())),
     'teams': instance.teams.toList(),
     'authToken': instance.authToken,
     'projectId': instance.projectId,
@@ -44,9 +44,3 @@ Map<String, dynamic> _$AuthDataToJson(AuthData instance) {
       const DateTimeConverter().toJson(instance.timestamp), null);
   return val;
 }
-
-const _$RoleEnumMap = {
-  Role.admin: 'admin',
-  Role.editor: 'editor',
-  Role.viewer: 'viewer',
-};

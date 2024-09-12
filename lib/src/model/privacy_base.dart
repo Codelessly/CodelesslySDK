@@ -55,6 +55,17 @@ enum Role {
 
   /// Anyone can manage project members.
   bool get canManageProjectMembers => true;
+
+  factory Role.fromJson(String value) => switch (value) {
+        'owner' || 'admin' => admin,
+        'editor' => editor,
+        _ => viewer,
+      };
+
+  String toJson() => switch (this) {
+        Role.admin => 'owner',
+        _ => name,
+      };
 }
 
 /// Represents the privacy controls of a given model that this mixin
