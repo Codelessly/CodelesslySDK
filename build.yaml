@@ -3,7 +3,6 @@ targets:
     sources:
       exclude:
         - example/**
-        - example_chat_bot/**
     builders:
       codelessly_json_serializable:
         options:
