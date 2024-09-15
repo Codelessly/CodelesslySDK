@@ -1,9 +1,13 @@
+## 5.0.0
+- Restore Wasm Web support.
+- Require Flutter v3.24.0 and Dart SDK v3.5.0.
+
 ## 4.0.0
 
 - Teams V2 support. Owner field & admin Role migration.
 - New SDK usage and stat tracking.
 - Skip downloading disabled layouts.
-- Add open URL error handling.
+- Add Open URL error handling.
 - Create `where` query API.
 - Create new `image` variable type.
 - Add Date decoder.

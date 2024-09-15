@@ -6,8 +6,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=3.10.0"
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.24.0"
 
 dependencies:
   flutter:
@@ -15,10 +15,6 @@ dependencies:
   storybook_flutter: ^0.14.1
   codelessly_sdk:
     path: ../
-
-dependency_overrides:
-  archive: ^3.6.1
-  win32: ^5.5.3
 
 dev_dependencies:
   flutter_test:
