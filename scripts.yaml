@@ -1,7 +1,6 @@
 deps:
   - flutter pub get
   - cd example && flutter pub get
-  - cd example_chat_bot && flutter pub get
 format: dart format --fix .
 codegen: flutter pub run build_runner build --delete-conflicting-outputs
 test: flutter test

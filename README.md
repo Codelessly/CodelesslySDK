@@ -302,13 +302,6 @@ Codelessly.instance.initialize(
 );
 ```
 
-## Demo
-
-### [CodelesslyGPT](https://sdk-chat-bot.web.app/#/)
-
-A demo chat-bot interface built with the Codelessly
-SDK. [View Code](https://github.com/Codelessly/CodelesslySDK/tree/main/example_chat_bot)
-
 ## Additional Resources
 
 Additional resources and tutorials are on
