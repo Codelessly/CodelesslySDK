@@ -1,3 +1,7 @@
+## 5.1.0
+- Fix Hive CE duplicate initialization error.
+- Update Firestore v3.5.0.
+
 ## 5.0.0
 - Restore Wasm Web support.
 - Require Flutter v3.24.0 and Dart SDK v3.5.0.
