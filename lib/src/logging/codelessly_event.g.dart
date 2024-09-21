@@ -8,7 +8,8 @@ part of 'codelessly_event.dart';
 
 CodelesslyEvent _$CodelesslyEventFromJson(Map json) => CodelesslyEvent(
       message: json['message'] as String?,
-      timestamp: const DateTimeConverter().fromJson(json['timestamp'] as int?),
+      timestamp: const DateTimeConverter()
+          .fromJson((json['timestamp'] as num?)?.toInt()),
       stacktrace: json['stacktrace'] as String?,
       tags:
           (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??

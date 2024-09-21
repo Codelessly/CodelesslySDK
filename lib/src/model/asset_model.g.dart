@@ -13,7 +13,8 @@ AssetModel _$AssetModelFromJson(Map json) => AssetModel(
       blurHash: json['blurHash'] as String? ?? '',
       sourceWidth: (json['sourceWidth'] as num).toDouble(),
       sourceHeight: (json['sourceHeight'] as num).toDouble(),
-      createdAt: const DateTimeConverter().fromJson(json['createdAt'] as int?),
+      createdAt: const DateTimeConverter()
+          .fromJson((json['createdAt'] as num?)?.toInt()),
     );
 
 Map<String, dynamic> _$AssetModelToJson(AssetModel instance) {

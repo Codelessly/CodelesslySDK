@@ -11,7 +11,8 @@ CustomComponent _$CustomComponentFromJson(Map json) => CustomComponent(
       name: json['name'] as String? ?? '',
       data: ComponentData.fromJson(
           Map<String, dynamic>.from(json['data'] as Map)),
-      createdAt: const DateTimeConverter().fromJson(json['createdAt'] as int?),
+      createdAt: const DateTimeConverter()
+          .fromJson((json['createdAt'] as num?)?.toInt()),
       previewUrl: json['previewUrl'] as String?,
       blurhash: json['blurhash'] as String? ?? '',
     );

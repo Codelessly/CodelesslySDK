@@ -9,7 +9,8 @@ part of 'auth_data.dart';
 AuthData _$AuthDataFromJson(Map json) => AuthData(
       authToken: json['authToken'] as String,
       projectId: json['projectId'] as String,
-      timestamp: const DateTimeConverter().fromJson(json['timestamp'] as int?),
+      timestamp: const DateTimeConverter()
+          .fromJson((json['timestamp'] as num?)?.toInt()),
       isTemplate: json['isTemplate'] as bool? ?? false,
       owner: json['owner'] as String,
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),

@@ -32,8 +32,8 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
       entryLayoutId: json['entryLayoutId'] as String?,
       entryPageId: json['entryPageId'] as String?,
       entryCanvasId: json['entryCanvasId'] as String?,
-      lastUpdated:
-          const DateTimeConverter().fromJson(json['lastUpdated'] as int?),
+      lastUpdated: const DateTimeConverter()
+          .fromJson((json['lastUpdated'] as num?)?.toInt()),
       disabledLayouts: (json['disabledLayouts'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
@@ -93,8 +93,8 @@ SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
       projectId: json['projectId'] as String,
       canvases: const CanvasesMapConverter()
           .fromJson(json['canvases'] as Map<String, dynamic>),
-      lastUpdated:
-          const DateTimeConverter().fromJson(json['lastUpdated'] as int?),
+      lastUpdated: const DateTimeConverter()
+          .fromJson((json['lastUpdated'] as num?)?.toInt()),
       breakpoints: (json['breakpoints'] as List<dynamic>?)
           ?.map((e) => Breakpoint.fromJson(e as Map))
           .toList(),
