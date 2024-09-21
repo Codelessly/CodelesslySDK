@@ -1,3 +1,7 @@
+## 5.2.0
+
+- Update codelessly_json_serializable to v4.9.0.
+
 ## 5.1.0
 - Fix Hive CE duplicate initialization error.
 - Update Firestore v3.5.0.
