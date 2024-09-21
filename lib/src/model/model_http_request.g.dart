@@ -39,12 +39,13 @@ HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
               .toList() ??
           [],
       isDeleted: json['deleted'] as bool? ?? false,
-      lastUpdated:
-          const DateTimeConverter().fromJson(json['lastUpdated'] as int?),
+      lastUpdated: const DateTimeConverter()
+          .fromJson((json['lastUpdated'] as num?)?.toInt()),
       requestBodyContentType: $enumDecodeNullable(
               _$RequestBodyTextTypeEnumMap, json['requestBodyContentType']) ??
           RequestBodyTextType.json,
-      created: const DateTimeConverter().fromJson(json['created'] as int?),
+      created: const DateTimeConverter()
+          .fromJson((json['created'] as num?)?.toInt()),
       owner: json['owner'] as String,
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
       users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
