@@ -256,7 +256,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
               widget.loadingBuilder!(context, child)
           : null,
       errorBuilder: (context, error, stackTrace) {
-        print('Image Loading Error:' + error.toString());
+        print('Image Loading Error: $error');
         return (widget.errorBuilder ?? _defaultErrorBuilder)(context);
       },
     );

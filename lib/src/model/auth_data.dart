@@ -1,4 +1,3 @@
-import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
 
 import '../../codelessly_sdk.dart';
