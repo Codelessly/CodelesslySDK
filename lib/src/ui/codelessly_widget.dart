@@ -353,7 +353,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
         // Notify breakpoints listeners.
         _effectiveController.effectiveCodelessly
-            .notifyBreakpointsListener(context, breakpoint);
+            .notifyBreakpointsListeners(context, breakpoint);
       }
     }
   }
@@ -674,6 +674,7 @@ class _NavigationBuilderState extends State<_NavigationBuilder> {
   void initState() {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      if (!context.mounted) return;
       context.read<Codelessly>().notifyNavigationListeners(context);
     });
   }
