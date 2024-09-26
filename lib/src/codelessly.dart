@@ -148,9 +148,9 @@ class Codelessly {
   /// If it is null, it means it has not yet been initialized.
   CloudDatabase? get cloudDatabase => dataManager.cloudDatabase;
 
-  final List<NavigationListener> _navigationListeners = [];
+  final Map<String, NavigationListener> _navigationListeners = {};
 
-  final List<BreakpointsListener> _breakpointsListeners = [];
+  final Map<String, BreakpointsListener> _breakpointsListeners = {};
 
   /// Creates a new instance of [Codelessly].
   Codelessly({
@@ -236,6 +236,7 @@ class Codelessly {
     _previewDataManager = null;
     _config = null;
     _navigationListeners.clear();
+    _breakpointsListeners.clear();
     _client.close();
   }
 
@@ -746,37 +747,37 @@ class Codelessly {
   /// Provided [context] must be of the destination widget. This context
   /// can be used to retrieve new [CodelesslyContext].
   void notifyNavigationListeners(BuildContext context) {
-    _navigationListeners.forEach((listener) => listener(context));
-  }
-
-  /// Adds a global listener for navigation.
-  void addNavigationListener(NavigationListener callback) {
-    if (!_navigationListeners.contains(callback)) {
-      _navigationListeners.add(callback);
+    for (final listener in [..._navigationListeners.values]) {
+      listener(context);
     }
   }
 
+  /// Adds a global listener for navigation.
+  void addNavigationListener(String label, NavigationListener callback) {
+    _navigationListeners[label] = callback;
+  }
+
   /// Removes a global navigation listener.
-  void removeNavigationListener(NavigationListener callback) {
-    _navigationListeners.remove(callback);
+  void removeNavigationListener(String label) {
+    _navigationListeners.remove(label);
   }
 
   /// Calls navigation listeners when navigation happens.
   /// Provided [context] must be of the destination widget. This context
   /// can be used to retrieve new [CodelesslyContext].
-  void notifyBreakpointsListener(BuildContext context, Breakpoint breakpoint) {
-    _breakpointsListeners.forEach((listener) => listener(context, breakpoint));
-  }
-
-  /// Adds a global listener for navigation.
-  void addBreakpointsListener(BreakpointsListener callback) {
-    if (!_breakpointsListeners.contains(callback)) {
-      _breakpointsListeners.add(callback);
+  void notifyBreakpointsListeners(BuildContext context, Breakpoint breakpoint) {
+    for (final listener in [..._breakpointsListeners.values]) {
+      listener(context, breakpoint);
     }
   }
 
+  /// Adds a global listener for navigation.
+  void addBreakpointsListener(String label, BreakpointsListener callback) {
+    _breakpointsListeners[label] = callback;
+  }
+
   /// Removes a global navigation listener.
-  void removeBreakpointsListener(BreakpointsListener callback) {
-    _breakpointsListeners.remove(callback);
+  void removeBreakpointsListener(String label) {
+    _breakpointsListeners.remove(label);
   }
 }

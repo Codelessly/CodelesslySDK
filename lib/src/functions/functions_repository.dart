@@ -242,10 +242,13 @@ class FunctionsRepository {
 
     _log('Performing navigation action with params: $parsedParams');
 
+    final Codelessly codelessly = context.read<Codelessly>();
     if (action.navigationType == NavigationType.pop) {
       await Navigator.maybePop(context, parsedParams);
+      if (context.mounted) {
+        codelessly.notifyNavigationListeners(context);
+      }
     } else {
-      final Codelessly codelessly = context.read<Codelessly>();
       // Check if a layout exists for the action's [destinationId].
       final String? layoutId = codelessly
               .dataManager.publishModel?.layouts[action.destinationId]?.id ??
@@ -289,8 +292,9 @@ class FunctionsRepository {
             ),
           ),
         );
-        // ignore: use_build_context_synchronously
-        codelessly.notifyNavigationListeners(context);
+        if (context.mounted) {
+          codelessly.notifyNavigationListeners(context);
+        }
       } else if (action.navigationType == NavigationType.replace) {
         await Navigator.pushReplacement(
           context,
@@ -301,8 +305,9 @@ class FunctionsRepository {
             ),
           ),
         );
-        // ignore: use_build_context_synchronously
-        codelessly.notifyNavigationListeners(context);
+        if (context.mounted) {
+          codelessly.notifyNavigationListeners(context);
+        }
       }
     }
   }
@@ -355,8 +360,9 @@ class FunctionsRepository {
         ),
       ),
     );
-    // ignore: use_build_context_synchronously
-    codelessly.notifyNavigationListeners(context);
+    if (context.mounted) {
+      codelessly.notifyNavigationListeners(context);
+    }
   }
 
   static void launchURL(BuildContext context, LinkAction action) {
@@ -897,7 +903,6 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     if (filteredReactions.isEmpty) return false;
 
     for (final reaction in filteredReactions) {
-      // ignore: use_build_context_synchronously
       if (!context.mounted) continue;
       final future = FunctionsRepository.performAction(
         context,
