@@ -74,10 +74,10 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
 
     final ScopedValues scopedValues = ScopedValues.of(context);
 
-    // Get the value of bound variable and update the controller text if it's
-    // different from the current controller text.
-    // widget.node.variables['inputValue'] only works when a sync variable is specified. If it is not then
-    // we rely on initial text to be able to see if controller text needs to be updated.
+    // Get the value of bound variable and update the controller page index if
+    // it's different from the current controller page index.
+    // widget.node.variables['indexValue'] only works when a sync variable is
+    // specified.
     if (widget.node.variables['indexValue'] != null) {
       final int? currentPropertyValue =
           PropertyValueDelegate.getPropertyValue<int>(
