@@ -71,6 +71,25 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
         oldWidget.node.properties.initialPage) {
       controller.jumpToPage(widget.node.properties.initialPage);
     }
+
+    final ScopedValues scopedValues = ScopedValues.of(context);
+
+    // Get the value of bound variable and update the controller text if it's
+    // different from the current controller text.
+    // widget.node.variables['inputValue'] only works when a sync variable is specified. If it is not then
+    // we rely on initial text to be able to see if controller text needs to be updated.
+    if (widget.node.variables['indexValue'] != null) {
+      final int? currentPropertyValue =
+          PropertyValueDelegate.getPropertyValue<int>(
+        widget.node,
+        'indexValue',
+        scopedValues: scopedValues,
+      );
+      if (currentPropertyValue != null &&
+          controller.page?.round() != currentPropertyValue) {
+        controller.jumpToPage(currentPropertyValue);
+      }
+    }
   }
 
   @override
