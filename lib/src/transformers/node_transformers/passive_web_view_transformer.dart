@@ -264,10 +264,9 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
       case WebViewType.webpage:
         child = buildWebpageWebView(context, props as WebPageWebViewProperties);
       case WebViewType.googleMaps:
-        child = buildGoogleMapsWebView(
-            context, props as GoogleMapsWebViewProperties);
+        child = buildWebView(props as GoogleMapsWebViewProperties);
       case WebViewType.twitter:
-        child = buildTwitterWebView(context, props as TwitterWebViewProperties);
+        child = buildWebView(props as TwitterWebViewProperties);
     }
 
     return child;
@@ -304,17 +303,6 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
     return content;
   }
 
-  Widget buildGoogleMapsWebView(
-      BuildContext context, GoogleMapsWebViewProperties properties) {
-    if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      return const WebViewPreviewWidget(
-        icon: Icon(Icons.map_outlined),
-      );
-    }
-
-    return buildWebView(properties);
-  }
-
   String buildTwitterURL(
       TwitterWebViewProperties properties, ScopedValues scopedValues) {
     final String? originalSrc = properties.src;
@@ -324,18 +312,6 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
             originalSrc
         : null;
     return _buildHtmlContent(updatedSrc);
-  }
-
-  Widget buildTwitterWebView(
-      BuildContext context, TwitterWebViewProperties properties) {
-    if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      return const WebViewPreviewWidget(
-        icon: ImageIcon(
-            NetworkImage('https://img.icons8.com/color/344/twitter--v2.png')),
-      );
-    }
-
-    return buildWebView(properties);
   }
 
   Widget buildWebView(WebViewProperties properties) {
