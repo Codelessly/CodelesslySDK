@@ -1,3 +1,7 @@
+## 5.2.2
+
+- Use conditional WebViews based on platform.
+
 ## 5.2.1
 
 - Add WebView Web Wasm support.
