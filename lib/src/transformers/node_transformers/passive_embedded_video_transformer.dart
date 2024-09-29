@@ -78,6 +78,7 @@ class PassiveEmbeddedVideoWidget extends StatefulWidget {
   static const Set<TargetPlatform> supportedPlatforms = {
     TargetPlatform.android,
     TargetPlatform.iOS,
+    TargetPlatform.macOS,
   };
 
   @override
