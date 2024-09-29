@@ -1,12 +1,19 @@
+## 5.2.1
+
+- Add WebView Web Wasm support.
+- Update Firebase v3.6.0.
+
 ## 5.2.0
 
 - Update codelessly_json_serializable to v4.9.0.
 
 ## 5.1.0
+
 - Fix Hive CE duplicate initialization error.
 - Update Firestore v3.5.0.
 
 ## 5.0.0
+
 - Restore Wasm Web support.
 - Require Flutter v3.24.0 and Dart SDK v3.5.0.
 
