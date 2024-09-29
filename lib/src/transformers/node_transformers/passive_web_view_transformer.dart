@@ -1,17 +1,18 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:ui_web';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:web/web.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../web/web_webview_platform.dart';
 
 class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
   PassiveWebViewTransformer(super.getNode, super.manager);
@@ -169,8 +170,8 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
     if (kIsWeb) {
       // WebView on web only supports loadRequest. Any other method invocation
       // on the controller will result in an exception. Be aware!!
-      WebViewPlatform.instance = WebWebViewPlatform();
-      _controller = WebViewController();
+      // WebViewPlatform.instance = WebWebViewPlatform();
+      // _controller = WebViewController();
     } else {
       final PlatformWebViewControllerCreationParams params;
       if (WebViewPlatform.instance is WebKitWebViewPlatform) {
@@ -200,11 +201,6 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
                     WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia);
       }
 
-      // Using this user-agent string to force the video to play in the webview
-      // on Android. This is a hack, but it works.
-      // _controller.setUserAgent(
-      //     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
-
       _controller.setBackgroundColor(
           props.backgroundColor?.toFlutterColor() ?? Colors.transparent);
     }
@@ -212,33 +208,70 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
 
   Future<void> _loadData() {
     final ScopedValues scopedValues = ScopedValues.of(context);
-    final props = widget.properties;
+    final WebViewProperties props = widget.properties;
     switch (props.webviewType) {
       case WebViewType.webpage:
-        final properties = props as WebPageWebViewProperties;
+        final WebPageWebViewProperties properties =
+            props as WebPageWebViewProperties;
         final String input =
             PropertyValueDelegate.getVariableValueFromPath<String>(
                     properties.input,
                     scopedValues: scopedValues) ??
                 properties.input;
+        if (kIsWeb) {
+          // Use the underlying WebView directly on web.
+          platformViewRegistry.registerViewFactory(
+            'html-iframe',
+            (int viewId) => HTMLIFrameElement()
+              ..setAttribute('credentialless', 'true')
+              ..width = '100%'
+              ..height = '100%'
+              ..src = input
+              ..style.border = 'none',
+          );
+          return Future.value();
+        }
         switch (properties.pageSourceType) {
           case WebViewWebpageSourceType.url:
-            print('Loading URL: $input');
             return _controller.loadRequest(Uri.parse(input));
           case WebViewWebpageSourceType.html:
-            final content = _buildHtmlContent(input);
+            final String content = _buildHtmlContent(input);
             return _controller.loadRequest(Uri.parse(content));
           case WebViewWebpageSourceType.asset:
             // provided from onWebViewCreated callback.
             return _controller.loadFlutterAsset(input);
         }
       case WebViewType.googleMaps:
-        final content = buildGoogleMapsURL(
+        final String content = buildGoogleMapsURL(
             props as GoogleMapsWebViewProperties, scopedValues);
+        if (kIsWeb) {
+          // Use the underlying WebView directly on web.
+          platformViewRegistry.registerViewFactory(
+            'html-iframe',
+            (int viewId) => HTMLIFrameElement()
+              ..setAttribute('credentialless', 'true')
+              ..width = '100%'
+              ..src = content
+              ..style.border = 'none',
+          );
+          return Future.value();
+        }
         return _controller.loadRequest(Uri.parse(content));
       case WebViewType.twitter:
-        final content =
+        final String content =
             buildTwitterURL(props as TwitterWebViewProperties, scopedValues);
+        if (kIsWeb) {
+          // Use the underlying WebView directly on web.
+          platformViewRegistry.registerViewFactory(
+            'html-iframe',
+            (int viewId) => HTMLIFrameElement()
+              ..setAttribute('credentialless', 'true')
+              ..width = '100%'
+              ..src = content
+              ..style.border = 'none',
+          );
+          return Future.value();
+        }
         return _controller.loadRequest(Uri.parse(content));
     }
   }
@@ -258,14 +291,30 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final props = widget.properties;
+    final WebViewProperties props = widget.properties;
     Widget child;
     switch (props.webviewType) {
       case WebViewType.webpage:
+        if (kIsWeb) {
+          return const HtmlElementView(viewType: 'html-iframe');
+        }
         child = buildWebpageWebView(context, props as WebPageWebViewProperties);
       case WebViewType.googleMaps:
+        if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
+          return const WebViewPreviewWidget(
+            icon: Icon(Icons.map_outlined),
+          );
+        }
+
         child = buildWebView(props as GoogleMapsWebViewProperties);
       case WebViewType.twitter:
+        if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
+          return const WebViewPreviewWidget(
+            icon: ImageIcon(NetworkImage(
+                'https://img.icons8.com/color/344/twitter--v2.png')),
+          );
+        }
+
         child = buildWebView(props as TwitterWebViewProperties);
     }
 
