@@ -1,4 +1,4 @@
-library codelessly_sdk;
+library;
 
 export 'src/auth/auth_manager.dart';
 export 'src/auth/codelessly_auth_manager.dart';
