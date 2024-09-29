@@ -1,4 +1,4 @@
-library transparent_image;
+library;
 
 import 'dart:typed_data';
 
