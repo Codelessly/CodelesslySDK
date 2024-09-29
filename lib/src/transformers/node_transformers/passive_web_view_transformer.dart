@@ -156,6 +156,7 @@ class RawWebViewWidget extends StatefulWidget {
 class _RawWebViewWidgetState extends State<RawWebViewWidget> {
   late WebViewController _controller;
 
+  String url = '';
   bool _isDataLoaded = false;
 
   @override
@@ -206,76 +207,6 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
     }
   }
 
-  Future<void> _loadData() {
-    final ScopedValues scopedValues = ScopedValues.of(context);
-    final WebViewProperties props = widget.properties;
-    switch (props.webviewType) {
-      case WebViewType.webpage:
-        final WebPageWebViewProperties properties =
-            props as WebPageWebViewProperties;
-        final String input =
-            PropertyValueDelegate.getVariableValueFromPath<String>(
-                    properties.input,
-                    scopedValues: scopedValues) ??
-                properties.input;
-        if (kIsWeb) {
-          // Use the underlying WebView directly on web.
-          platformViewRegistry.registerViewFactory(
-            'html-iframe',
-            (int viewId) => HTMLIFrameElement()
-              ..setAttribute('credentialless', 'true')
-              ..width = '100%'
-              ..height = '100%'
-              ..src = input
-              ..style.border = 'none',
-          );
-          return Future.value();
-        }
-        switch (properties.pageSourceType) {
-          case WebViewWebpageSourceType.url:
-            return _controller.loadRequest(Uri.parse(input));
-          case WebViewWebpageSourceType.html:
-            final String content = _buildHtmlContent(input);
-            return _controller.loadRequest(Uri.parse(content));
-          case WebViewWebpageSourceType.asset:
-            // provided from onWebViewCreated callback.
-            return _controller.loadFlutterAsset(input);
-        }
-      case WebViewType.googleMaps:
-        final String content = buildGoogleMapsURL(
-            props as GoogleMapsWebViewProperties, scopedValues);
-        if (kIsWeb) {
-          // Use the underlying WebView directly on web.
-          platformViewRegistry.registerViewFactory(
-            'html-iframe',
-            (int viewId) => HTMLIFrameElement()
-              ..setAttribute('credentialless', 'true')
-              ..width = '100%'
-              ..src = content
-              ..style.border = 'none',
-          );
-          return Future.value();
-        }
-        return _controller.loadRequest(Uri.parse(content));
-      case WebViewType.twitter:
-        final String content =
-            buildTwitterURL(props as TwitterWebViewProperties, scopedValues);
-        if (kIsWeb) {
-          // Use the underlying WebView directly on web.
-          platformViewRegistry.registerViewFactory(
-            'html-iframe',
-            (int viewId) => HTMLIFrameElement()
-              ..setAttribute('credentialless', 'true')
-              ..width = '100%'
-              ..src = content
-              ..style.border = 'none',
-          );
-          return Future.value();
-        }
-        return _controller.loadRequest(Uri.parse(content));
-    }
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -289,6 +220,76 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
     }
   }
 
+  Future<void> _loadData() {
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    final WebViewProperties props = widget.properties;
+    switch (props.webviewType) {
+      case WebViewType.webpage:
+        final WebPageWebViewProperties properties =
+            props as WebPageWebViewProperties;
+        url =
+            PropertyValueDelegate.getVariableValueFromPath<String>(
+                    properties.input,
+                    scopedValues: scopedValues) ??
+                properties.input;
+        if (kIsWeb) {
+          // Use the underlying WebView directly on web.
+          platformViewRegistry.registerViewFactory(
+            url,
+            (int viewId) => HTMLIFrameElement()
+              ..setAttribute('credentialless', 'true')
+              ..width = '100%'
+              ..height = '100%'
+              ..src = url
+              ..style.border = 'none',
+          );
+          return Future.value();
+        }
+        switch (properties.pageSourceType) {
+          case WebViewWebpageSourceType.url:
+            return _controller.loadRequest(Uri.parse(url));
+          case WebViewWebpageSourceType.html:
+            final String content = _buildHtmlContent(properties.input);
+            return _controller.loadRequest(Uri.parse(content));
+          case WebViewWebpageSourceType.asset:
+            // provided from onWebViewCreated callback.
+            return _controller.loadFlutterAsset(properties.input);
+        }
+      case WebViewType.googleMaps:
+        url = buildGoogleMapsURL(
+            props as GoogleMapsWebViewProperties, scopedValues);
+        if (kIsWeb) {
+          // Use the underlying WebView directly on web.
+          platformViewRegistry.registerViewFactory(
+            url,
+            (int viewId) => HTMLIFrameElement()
+              ..setAttribute('credentialless', 'true')
+              ..width = '100%'
+              ..src = url
+              ..style.border = 'none',
+          );
+          return Future.value();
+        }
+        return _controller.loadRequest(Uri.parse(url));
+      case WebViewType.twitter:
+        url =
+            buildTwitterURL(props as TwitterWebViewProperties, scopedValues);
+        if (kIsWeb) {
+          // Use the underlying WebView directly on web.
+          platformViewRegistry.registerViewFactory(
+            url,
+            (int viewId) => HTMLIFrameElement()
+              ..setAttribute('credentialless', 'true')
+              ..width = '100%'
+              ..src = url
+              ..style.border = 'none',
+          );
+          return Future.value();
+        }
+        return _controller.loadRequest(Uri.parse(url));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final WebViewProperties props = widget.properties;
@@ -296,7 +297,7 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
     switch (props.webviewType) {
       case WebViewType.webpage:
         if (kIsWeb) {
-          return const HtmlElementView(viewType: 'html-iframe');
+          return HtmlElementView(viewType: url);
         }
         child = buildWebpageWebView(context, props as WebPageWebViewProperties);
       case WebViewType.googleMaps:
