@@ -40,6 +40,7 @@ dependencies:
   webview_flutter_android: ^3.16.7
   webview_flutter_wkwebview: ^3.15.0
   webview_flutter_web: ^0.2.3+2
+  web: ^1.1.0
 
   # 3rd Party Core Framework
   equatable: ^2.0.5
