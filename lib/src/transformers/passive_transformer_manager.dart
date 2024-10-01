@@ -65,6 +65,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     BuildContext context, {
     required WidgetBuildSettings settings,
   }) {
+    if (settings.buildRawWidget) {
+      return getTransformerByNode(node).buildWidget(node, context, settings);
+    }
+
     return _wrapWithListener(
       context,
       node: node,

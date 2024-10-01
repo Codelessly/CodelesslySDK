@@ -9,16 +9,85 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
   PassiveAppBarTransformer(super.getNode, super.manager);
 
   @override
-  Widget buildWidget(
+  PreferredSizeWidget buildWidget(
     AppBarNode node,
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
+    if (settings.buildRawWidget) {
+      return buildRawAppBar(context, node: node, settings: settings);
+    }
+
     return PassiveAppBarWidget(
       node: node,
       settings: settings,
       onLeadingPressed: onTriggerAction,
       onActionPressed: onTriggerAction,
+    );
+  }
+
+  PreferredSizeWidget buildRawAppBar(
+    BuildContext context, {
+    required AppBarNode node,
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+      replaceVariablesWithSymbols: true,
+    ),
+    List<VariableData> variablesOverrides = const [],
+  }) {
+    final Widget? leading = node.properties.leading.icon.show &&
+            !node.properties.automaticallyImplyLeading
+        ? retrieveIconWidget(node.properties.leading.icon, null)
+        : null;
+
+    final Widget? title = node.properties.title.trim().isEmpty
+        ? null
+        : TextUtils.buildText(
+            context,
+            node.properties.title,
+            textAlignHorizontal: null,
+            maxLines: null,
+            overflow: null,
+            node: node,
+            variablesOverrides: variablesOverrides,
+            nullSubstitutionMode: settings.nullSubstitutionMode,
+            replaceVariablesWithSymbol: settings.replaceVariablesWithSymbols,
+          );
+    return AppBar(
+      centerTitle: node.properties.centerTitle,
+      leading: leading != null
+          ? IconButton(
+              onPressed: () => onTriggerAction.call(
+                  context, node.properties.leading.reactions),
+              icon: leading,
+            )
+          : null,
+      titleTextStyle: TextUtils.retrieveTextStyleFromProp(
+        node.properties.titleStyle,
+        effects: const [],
+      ),
+      backgroundColor: node.properties.backgroundColor.toFlutterColor(),
+      elevation: node.properties.elevation,
+      automaticallyImplyLeading: node.properties.leading.icon.show
+          ? node.properties.automaticallyImplyLeading
+          : false,
+      title: title,
+      foregroundColor:
+          node.properties.titleStyle.fills.firstOrNull?.toFlutterColor(),
+      titleSpacing: node.properties.titleSpacing,
+      shadowColor: node.properties.shadowColor.toFlutterColor(),
+      actions: [
+        for (final item
+            in node.properties.actions.whereType<IconAppBarActionItem>())
+          IconButton(
+            onPressed: () => onTriggerAction.call(context, item.reactions),
+            // splashRadius: 20,
+            iconSize: item.icon.size,
+            tooltip: item.tooltip,
+            icon: retrieveIconWidget(item.icon, item.icon.size) ??
+                const SizedBox.shrink(),
+          ),
+      ],
     );
   }
 
@@ -83,6 +152,8 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
   }
 }
 
+typedef AppBarBuilder = PreferredSizeWidget Function(BuildContext context);
+
 class PassiveAppBarWidget extends StatelessWidget
     implements PreferredSizeWidget {
   final AppBarNode node;
@@ -97,12 +168,15 @@ class PassiveAppBarWidget extends StatelessWidget
   const PassiveAppBarWidget({
     super.key,
     required this.node,
-    this.elevation,
     required this.settings,
+    this.elevation,
     this.onLeadingPressed,
     this.onActionPressed,
     this.variablesOverrides = const [],
   });
+
+  @override
+  Size get preferredSize => node.outerBoxLocal.size.flutterSize;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +238,4 @@ class PassiveAppBarWidget extends StatelessWidget
       ),
     );
   }
-
-  @override
-  Size get preferredSize => node.basicBoxLocal.size.flutterSize;
 }
