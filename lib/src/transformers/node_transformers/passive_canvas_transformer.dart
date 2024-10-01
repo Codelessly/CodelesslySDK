@@ -28,22 +28,38 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
 
     final BaseNode appBarNode = getNode(childId);
 
-    Widget? appBarChild = manager.buildWidgetByID(
-      appBarPlaceholderNode.id,
-      context,
-      settings: settings,
-    );
+    final NodeWidgetTransformer<BaseNode> transformer =
+        manager.getTransformerByNode(appBarNode);
 
-    if (appBarNode is! AppBarNode) {
-      // wrap with SafeArea if not an AppBarNode.
-      appBarChild = SafeArea(child: appBarChild);
+    if (transformer is PassiveAppBarTransformer) {
+      final Widget appBarChild = manager.buildWidgetFromNode(
+        appBarNode as AppBarNode,
+        context,
+        settings: settings.copyWith(
+          // Passes through to build a PreferredSizeWidget directly.
+          buildRawWidget: true,
+        ),
+      );
+
+      assert(
+        appBarChild is PreferredSizeWidget,
+        'PassiveAppBarTransformer must return a PreferredSizeWidget',
+      );
+
+      return appBarChild as PreferredSizeWidget;
+    } else {
+      final Widget appBarChild = manager.buildWidgetFromNode(
+        appBarNode,
+        context,
+        settings: settings,
+      );
+
+      return PreferredSize(
+        preferredSize:
+            Size.fromHeight(appBarPlaceholderNode.outerBoxLocal.height),
+        child: SafeArea(child: appBarChild),
+      );
     }
-
-    return PreferredSize(
-      preferredSize:
-          Size.fromHeight(appBarPlaceholderNode.outerBoxLocal.height),
-      child: SafeArea(child: appBarChild),
-    );
   }
 
   Widget? getNavigationBar(

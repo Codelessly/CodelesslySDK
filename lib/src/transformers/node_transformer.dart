@@ -78,6 +78,11 @@ class WidgetBuildSettings extends BuildSettings {
   /// Defines what to do when a variable path results in a null value.
   final NullSubstitutionMode nullSubstitutionMode;
 
+  /// Determines whether the transformer manager should skip wrapping the widget
+  /// with any additional widgets such as listeners, rotation, margin,
+  /// constraints, etc.
+  final bool buildRawWidget;
+
   /// Creates a [WidgetBuildSettings] instance.
   const WidgetBuildSettings({
     super.withOpacity,
@@ -93,6 +98,7 @@ class WidgetBuildSettings extends BuildSettings {
     required this.debugLabel,
     this.nullSubstitutionMode = NullSubstitutionMode.noChange,
     this.replaceVariablesWithSymbols = false,
+    this.buildRawWidget = false,
   });
 
   /// Creates a copy of this [WidgetBuildSettings] instance.
@@ -110,6 +116,7 @@ class WidgetBuildSettings extends BuildSettings {
     String? debugLabel,
     NullSubstitutionMode? nullSubstitutionMode,
     bool? replaceVariablesWithSymbols,
+    bool? buildRawWidget,
   }) {
     return WidgetBuildSettings(
       withOpacity: withOpacity ?? this.withOpacity,
@@ -126,6 +133,7 @@ class WidgetBuildSettings extends BuildSettings {
       nullSubstitutionMode: nullSubstitutionMode ?? this.nullSubstitutionMode,
       replaceVariablesWithSymbols:
           replaceVariablesWithSymbols ?? this.replaceVariablesWithSymbols,
+      buildRawWidget: buildRawWidget ?? this.buildRawWidget,
     );
   }
 
@@ -135,6 +143,7 @@ class WidgetBuildSettings extends BuildSettings {
         debugLabel,
         nullSubstitutionMode,
         replaceVariablesWithSymbols,
+        buildRawWidget,
       ];
 }
 
