@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/functions_repository.dart';
@@ -38,6 +40,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         settings: settings.copyWith(
           // Passes through to build a PreferredSizeWidget directly.
           buildRawWidget: true,
+          brightness: node.properties.brightness,
         ),
       );
 
@@ -51,7 +54,9 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       final Widget appBarChild = manager.buildWidgetFromNode(
         appBarNode,
         context,
-        settings: settings,
+        settings: settings.copyWith(
+          brightness: node.properties.brightness,
+        ),
       );
 
       return PreferredSize(
@@ -386,6 +391,39 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
 
   bool didPerformOnLoadActions = false;
 
+  Codelessly? codelessly;
+
+  @override
+  void initState() {
+    super.initState();
+
+    codelessly = context.read<Codelessly>();
+    final String? myLayoutId = codelessly!
+        .dataManager.publishModel?.layouts.dataMap.entries
+        .firstWhere((entry) {
+      return entry.value.canvasIds.contains(widget.node.id);
+    }).key;
+
+    // Set the system UI brightness to the canvas brightness.
+    codelessly!.setSystemUIBrightness(widget.node.properties.brightness);
+
+    // Listen for navigation events to update the system UI brightness back
+    // again, such as if this canvas was navigated away from, but then the view
+    // pops and goes back to this canvas.
+    codelessly!.addNavigationListener('canvas-${widget.node.id}',
+        (event, layoutId) {
+      if (myLayoutId == layoutId) {
+        codelessly!.setSystemUIBrightness(widget.node.properties.brightness);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    codelessly?.removeNavigationListener('canvas-${widget.node.id}');
+    super.dispose();
+  }
+
   @override
   void didUpdateWidget(covariant PassiveCanvasWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -456,5 +494,26 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.builder(context);
+  Widget build(BuildContext context) {
+    final Brightness brightness =
+        widget.node.properties.brightness.toFlutterBrightness(context);
+    final SystemUiOverlayStyle? systemOverlayStyle =
+        Theme.of(context).appBarTheme.systemOverlayStyle;
+    return Theme(
+      data: Theme.of(context).copyWith(
+        appBarTheme: systemOverlayStyle != null
+            ? null
+            : Theme.of(context).appBarTheme.copyWith(
+                  systemOverlayStyle: SystemUiOverlayStyle(
+                    statusBarColor: brightness == Brightness.light
+                        ? Colors.black
+                        : Colors.white,
+                    statusBarIconBrightness: brightness,
+                    statusBarBrightness: brightness,
+                  ),
+                ),
+      ),
+      child: widget.builder(context),
+    );
+  }
 }
