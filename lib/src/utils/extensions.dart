@@ -330,6 +330,19 @@ extension ColorHelper on flutter.Color {
       );
 }
 
+extension BrightnessModelHelper on BrightnessModel {
+  Brightness toFlutterBrightness(BuildContext context) {
+    switch (this) {
+      case BrightnessModel.dark:
+        return Brightness.dark;
+      case BrightnessModel.light:
+        return Brightness.light;
+      case BrightnessModel.system:
+        return MediaQuery.of(context).platformBrightness;
+    }
+  }
+}
+
 extension ColorRGBAHelper on ColorRGBA {
   Color toFlutterColor() {
     var ir = (r * 255).toInt();

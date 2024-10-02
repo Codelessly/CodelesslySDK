@@ -623,6 +623,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       ],
       child: _NavigationBuilder(
           key: ValueKey(_effectiveController.layoutID),
+          // TODO(Saad): Ensure this is not null on first load in non-simulated cases.
+          layoutId: _effectiveController.layoutID,
           builder: (context) {
             return StreamBuilder<CStatus>(
               stream: codelessly.statusStream,
@@ -662,8 +664,13 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
 class _NavigationBuilder extends StatefulWidget {
   final WidgetBuilder builder;
+  final String? layoutId;
 
-  const _NavigationBuilder({super.key, required this.builder});
+  const _NavigationBuilder({
+    super.key,
+    required this.builder,
+    required this.layoutId,
+  });
 
   @override
   State<_NavigationBuilder> createState() => _NavigationBuilderState();
@@ -675,7 +682,10 @@ class _NavigationBuilderState extends State<_NavigationBuilder> {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       if (!context.mounted) return;
-      context.read<Codelessly>().notifyNavigationListeners(context);
+      context.read<Codelessly>().notifyNavigationListeners(
+            context,
+            widget.layoutId,
+          );
     });
   }
 

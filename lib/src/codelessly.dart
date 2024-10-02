@@ -12,7 +12,10 @@ import '../codelessly_sdk.dart';
 import 'logging/reporter.dart';
 import 'utils/codelessly_http_client.dart';
 
-typedef NavigationListener = void Function(BuildContext context);
+typedef NavigationListener = void Function(
+  BuildContext context,
+  String? layoutId,
+);
 typedef BreakpointsListener = void Function(
     BuildContext context, Breakpoint breakpoint);
 
@@ -148,9 +151,21 @@ class Codelessly {
   /// If it is null, it means it has not yet been initialized.
   CloudDatabase? get cloudDatabase => dataManager.cloudDatabase;
 
+  String? _currentNavigatedLayoutId;
+
+  String? get currentNavigatedLayoutId => _currentNavigatedLayoutId;
+
   final Map<String, NavigationListener> _navigationListeners = {};
 
   final Map<String, BreakpointsListener> _breakpointsListeners = {};
+
+  final StreamController<BrightnessModel> _systemUIBrightnessStreamController =
+      StreamController.broadcast()..add(BrightnessModel.system);
+
+  /// A stream that produces events whenever a canvas node issues a system UI
+  /// brightness change. Used for simulation purposes.
+  Stream<BrightnessModel> get systemUIBrightnessStream =>
+      _systemUIBrightnessStreamController.stream;
 
   /// Creates a new instance of [Codelessly].
   Codelessly({
@@ -238,6 +253,8 @@ class Codelessly {
     _navigationListeners.clear();
     _breakpointsListeners.clear();
     _client.close();
+
+    _systemUIBrightnessStreamController.close();
   }
 
   /// Resets the state of the SDK. This is useful for resetting the data without
@@ -746,9 +763,11 @@ class Codelessly {
   /// Calls navigation listeners when navigation happens.
   /// Provided [context] must be of the destination widget. This context
   /// can be used to retrieve new [CodelesslyContext].
-  void notifyNavigationListeners(BuildContext context) {
+  void notifyNavigationListeners(BuildContext context, String? layoutId) {
+    _currentNavigatedLayoutId = layoutId;
+
     for (final listener in [..._navigationListeners.values]) {
-      listener(context);
+      listener(context, layoutId);
     }
   }
 
@@ -779,5 +798,11 @@ class Codelessly {
   /// Removes a global navigation listener.
   void removeBreakpointsListener(String label) {
     _breakpointsListeners.remove(label);
+  }
+
+  /// Sets the system UI brightness to the provided [brightness]. Used for
+  /// simulation purposes.
+  void setSystemUIBrightness(BrightnessModel brightness) {
+    _systemUIBrightnessStreamController.add(brightness);
   }
 }
