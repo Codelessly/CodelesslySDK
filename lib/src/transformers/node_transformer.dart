@@ -83,6 +83,9 @@ class WidgetBuildSettings extends BuildSettings {
   /// constraints, etc.
   final bool buildRawWidget;
 
+  /// Determines the brightness of the current screen for the system UI.
+  final BrightnessModel brightness;
+
   /// Creates a [WidgetBuildSettings] instance.
   const WidgetBuildSettings({
     super.withOpacity,
@@ -99,6 +102,7 @@ class WidgetBuildSettings extends BuildSettings {
     this.nullSubstitutionMode = NullSubstitutionMode.noChange,
     this.replaceVariablesWithSymbols = false,
     this.buildRawWidget = false,
+    this.brightness = BrightnessModel.system,
   });
 
   /// Creates a copy of this [WidgetBuildSettings] instance.
@@ -117,6 +121,7 @@ class WidgetBuildSettings extends BuildSettings {
     NullSubstitutionMode? nullSubstitutionMode,
     bool? replaceVariablesWithSymbols,
     bool? buildRawWidget,
+    BrightnessModel? brightness,
   }) {
     return WidgetBuildSettings(
       withOpacity: withOpacity ?? this.withOpacity,
@@ -134,6 +139,7 @@ class WidgetBuildSettings extends BuildSettings {
       replaceVariablesWithSymbols:
           replaceVariablesWithSymbols ?? this.replaceVariablesWithSymbols,
       buildRawWidget: buildRawWidget ?? this.buildRawWidget,
+      brightness: brightness ?? this.brightness,
     );
   }
 
@@ -144,6 +150,7 @@ class WidgetBuildSettings extends BuildSettings {
         nullSubstitutionMode,
         replaceVariablesWithSymbols,
         buildRawWidget,
+        brightness,
       ];
 }
 

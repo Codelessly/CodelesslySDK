@@ -243,11 +243,10 @@ class FunctionsRepository {
     _log('Performing navigation action with params: $parsedParams');
 
     final Codelessly codelessly = context.read<Codelessly>();
+    final String myLayoutId = codelessly.currentNavigatedLayoutId!;
+
     if (action.navigationType == NavigationType.pop) {
       await Navigator.maybePop(context, parsedParams);
-      if (context.mounted) {
-        codelessly.notifyNavigationListeners(context);
-      }
     } else {
       // Check if a layout exists for the action's [destinationId].
       final String? layoutId = codelessly
@@ -292,8 +291,11 @@ class FunctionsRepository {
             ),
           ),
         );
+        // Notify navigation listeners that this screen has been navigated back
+        // to, because the Navigator.push future has completed and came
+        // back to this screen.
         if (context.mounted) {
-          codelessly.notifyNavigationListeners(context);
+          codelessly.notifyNavigationListeners(context, myLayoutId);
         }
       } else if (action.navigationType == NavigationType.replace) {
         await Navigator.pushReplacement(
@@ -305,8 +307,12 @@ class FunctionsRepository {
             ),
           ),
         );
+
+        // Notify navigation listeners that this screen has been navigated back
+        // to, because the Navigator.push future has completed and came
+        // back to this screen.
         if (context.mounted) {
-          codelessly.notifyNavigationListeners(context);
+          codelessly.notifyNavigationListeners(context, myLayoutId);
         }
       }
     }
@@ -322,6 +328,8 @@ class FunctionsRepository {
     _log('Performing show dialog action with params: $parsedParams');
 
     final Codelessly codelessly = context.read<Codelessly>();
+    final myLayoutId = codelessly.currentNavigatedLayoutId!;
+
     // Check if a layout exists for the action's [destinationId].
     final String? layoutId = codelessly.dataManager.publishModel?.layouts.values
         .firstWhereOrNull(
@@ -361,7 +369,7 @@ class FunctionsRepository {
       ),
     );
     if (context.mounted) {
-      codelessly.notifyNavigationListeners(context);
+      codelessly.notifyNavigationListeners(context, myLayoutId);
     }
   }
 
