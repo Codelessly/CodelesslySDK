@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
@@ -397,24 +398,28 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   void initState() {
     super.initState();
 
-    codelessly = context.read<Codelessly>();
-    final String? myLayoutId = codelessly!
-        .dataManager.publishModel?.layouts.dataMap.entries
-        .firstWhere((entry) {
-      return entry.value.canvasIds.contains(widget.node.id);
-    }).key;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
 
-    // Set the system UI brightness to the canvas brightness.
-    codelessly!.setSystemUIBrightness(widget.node.properties.brightness);
+      codelessly = context.read<Codelessly>();
+      final String? myLayoutId = codelessly!
+          .dataManager.publishModel?.layouts.dataMap.entries
+          .firstWhere((entry) {
+        return entry.value.canvasIds.contains(widget.node.id);
+      }).key;
 
-    // Listen for navigation events to update the system UI brightness back
-    // again, such as if this canvas was navigated away from, but then the view
-    // pops and goes back to this canvas.
-    codelessly!.addNavigationListener('canvas-${widget.node.id}',
-        (event, layoutId) {
-      if (myLayoutId == layoutId) {
-        codelessly!.setSystemUIBrightness(widget.node.properties.brightness);
-      }
+      // Set the system UI brightness to the canvas brightness.
+      codelessly!.setSystemUIBrightness(widget.node.properties.brightness);
+
+      // Listen for navigation events to update the system UI brightness back
+      // again, such as if this canvas was navigated away from, but then the view
+      // pops and goes back to this canvas.
+      codelessly!.addNavigationListener('canvas-${widget.node.id}',
+          (event, layoutId) {
+        if (myLayoutId == layoutId) {
+          codelessly!.setSystemUIBrightness(widget.node.properties.brightness);
+        }
+      });
     });
   }
 
