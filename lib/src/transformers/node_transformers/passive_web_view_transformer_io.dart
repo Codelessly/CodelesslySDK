@@ -193,9 +193,11 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
               WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia);
     }
 
+    // Not yet supported on MacOS. Throws an exception.
     if (defaultTargetPlatform != TargetPlatform.macOS) {
       _controller.setBackgroundColor(
-          props.backgroundColor?.toFlutterColor() ?? Colors.transparent);
+        props.backgroundColor?.toFlutterColor() ?? Colors.transparent,
+      );
     }
   }
 
@@ -212,7 +214,7 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
     }
   }
 
-  Future<void> _loadData() {
+  Future<void> _loadData() async {
     final ScopedValues scopedValues = ScopedValues.of(context);
     final WebViewProperties props = widget.properties;
     switch (props.webviewType) {
@@ -261,8 +263,11 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
       case WebViewType.twitter:
         if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
           return const WebViewPreviewWidget(
-            icon: ImageIcon(NetworkImage(
-                'https://img.icons8.com/color/344/twitter--v2.png')),
+            icon: ImageIcon(
+              NetworkImage(
+                'https://img.icons8.com/color/344/twitter--v2.png',
+              ),
+            ),
           );
         }
 
@@ -335,6 +340,10 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
         if (properties.controlForcePressGesture == true)
           const Factory<ForcePressGestureRecognizer>(
               ForcePressGestureRecognizer.new),
+        // const Factory<TapAndPanGestureRecognizer>(
+        //     TapAndPanGestureRecognizer.new),
+        // const Factory<PanGestureRecognizer>(PanGestureRecognizer.new),
+        // const Factory<EagerGestureRecognizer>(EagerGestureRecognizer.new),
       },
     );
   }
