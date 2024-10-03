@@ -1211,11 +1211,12 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
   ) async {
     final ScopedValues scopedValues = ScopedValues.of(context);
     return await switch (action.subAction) {
-      AddDocumentSubAction action => addDocumentToCloud(action, scopedValues),
-      UpdateDocumentSubAction action =>
-        updateDocumentOnCloud(action, scopedValues),
-      RemoveDocumentSubAction action =>
-        removeDocumentFromCloud(action, scopedValues),
+      AddDocumentSubAction addDocumentSubAction =>
+        addDocumentToCloud(addDocumentSubAction, scopedValues),
+      UpdateDocumentSubAction updateDocumentSubAction =>
+        updateDocumentOnCloud(updateDocumentSubAction, scopedValues),
+      RemoveDocumentSubAction removeDocumentSubAction =>
+        removeDocumentFromCloud(removeDocumentSubAction, scopedValues),
     };
   }
 
