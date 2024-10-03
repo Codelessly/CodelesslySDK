@@ -1,6 +1,6 @@
 name: codelessly_sdk
 description: Codelessly CloudUI™ - Server-driven UI for Flutter. Supercharge your Flutter apps with dynamic UI and real-time updates. Build and publish UI without code!
-version: 5.2.2
+version: 5.2.3
 homepage: https://codelessly.com/
 repository: https://github.com/Codelessly/CodelesslySDK
 
@@ -27,7 +27,7 @@ dependencies:
   firebase_core: ^3.6.0
   firebase_auth: ^5.3.1
   cloud_firestore: ^5.4.3
-  firebase_ui_firestore: ^1.6.4
+  firebase_ui_firestore: ^1.7.0
   google_fonts: ^6.2.1
 
   # Core Flutter
@@ -37,7 +37,7 @@ dependencies:
   meta: ">=1.9.0 <2.0.0"
   url_launcher: ^6.3.0
   webview_flutter: ^4.9.0
-  webview_flutter_android: ^3.16.7
+  webview_flutter_android: ^3.16.8
   webview_flutter_wkwebview: ^3.15.0
   webview_flutter_web: ^0.2.3+2
   web: ^1.1.0
@@ -69,7 +69,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   codelessly_json_serializable: 6.8.0
-  build_runner: ^2.4.12
+  build_runner: ^2.4.13
   flutter_lints: ^5.0.0
 
 flutter:

@@ -1,3 +1,7 @@
+## 5.2.3
+
+- Fix Actions DartToJS compilation error.
+
 ## 5.2.2
 
 - Use conditional WebViews based on platform.
