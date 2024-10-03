@@ -193,8 +193,10 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
               WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia);
     }
 
-    _controller.setBackgroundColor(
-        props.backgroundColor?.toFlutterColor() ?? Colors.transparent);
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      _controller.setBackgroundColor(
+          props.backgroundColor?.toFlutterColor() ?? Colors.transparent);
+    }
   }
 
   @override
