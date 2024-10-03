@@ -150,6 +150,9 @@ class CodelesslyAuthManager extends AuthManager {
     // however, we also authenticate in the background to ensure the token
     // is still valid. We do this so as to not block the UI, we load whatever
     // is there immediately while we run our security in the background.
+
+    if (_disposed) return;
+
     if (!isAuthenticated()) {
       log('Token is not authenticated. Authenticating...');
       await authenticate();
