@@ -15,7 +15,9 @@ import 'utils/codelessly_http_client.dart';
 typedef NavigationListener = void Function(
   BuildContext context,
   String? layoutId,
+  String? canvasId,
 );
+
 typedef BreakpointsListener = void Function(
     BuildContext context, Breakpoint breakpoint);
 
@@ -154,6 +156,10 @@ class Codelessly {
   String? _currentNavigatedLayoutId;
 
   String? get currentNavigatedLayoutId => _currentNavigatedLayoutId;
+
+  String? _currentNavigatedCanvasId;
+
+  String? get currentNavigatedCanvasId => _currentNavigatedCanvasId;
 
   final Map<String, NavigationListener> _navigationListeners = {};
 
@@ -763,11 +769,15 @@ class Codelessly {
   /// Calls navigation listeners when navigation happens.
   /// Provided [context] must be of the destination widget. This context
   /// can be used to retrieve new [CodelesslyContext].
-  void notifyNavigationListeners(BuildContext context, String? layoutId) {
+  void notifyNavigationListeners(
+    BuildContext context, {
+    required String? layoutId,
+    required String? canvasId,
+  }) {
     _currentNavigatedLayoutId = layoutId;
-
+    _currentNavigatedCanvasId = canvasId;
     for (final listener in [..._navigationListeners.values]) {
-      listener(context, layoutId);
+      listener(context, layoutId, canvasId);
     }
   }
 

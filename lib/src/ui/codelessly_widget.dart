@@ -593,6 +593,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           return _NavigationBuilder(
             key: ValueKey(effectiveLayoutID),
             layoutId: effectiveLayoutID,
+            canvasId: canvasID,
             builder: (context) {
               return _effectiveLayoutBuilder(context, layoutWidget);
             },
@@ -665,11 +666,13 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 class _NavigationBuilder extends StatefulWidget {
   final WidgetBuilder builder;
   final String? layoutId;
+  final String? canvasId;
 
   const _NavigationBuilder({
     super.key,
     required this.builder,
     required this.layoutId,
+    required this.canvasId,
   });
 
   @override
@@ -684,7 +687,8 @@ class _NavigationBuilderState extends State<_NavigationBuilder> {
       if (!context.mounted) return;
       context.read<Codelessly>().notifyNavigationListeners(
             context,
-            widget.layoutId,
+            layoutId: widget.layoutId,
+            canvasId: widget.canvasId,
           );
     });
   }
