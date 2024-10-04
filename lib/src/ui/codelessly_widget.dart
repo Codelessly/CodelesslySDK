@@ -590,7 +590,13 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                 _label, 'Layout loaded in ${millis}ms or ${millis / 1000}s');
           }
 
-          return _effectiveLayoutBuilder(context, layoutWidget);
+          return _NavigationBuilder(
+            key: ValueKey(effectiveLayoutID),
+            layoutId: effectiveLayoutID,
+            builder: (context) {
+              return _effectiveLayoutBuilder(context, layoutWidget);
+            },
+          );
         } catch (e, str) {
           print(e);
           print(str);
@@ -621,43 +627,37 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           value: codelessly,
         ),
       ],
-      child: _NavigationBuilder(
-          key: ValueKey(_effectiveController.layoutID),
-          // TODO(Saad): Ensure this is not null on first load in non-simulated cases.
-          layoutId: _effectiveController.layoutID,
-          builder: (context) {
-            return StreamBuilder<CStatus>(
-              stream: codelessly.statusStream,
-              initialData: codelessly.status,
-              builder: (context, snapshot) {
-                Widget loading() =>
-                    _effectiveLoadingBuilder?.call(context) ??
-                    const CodelesslyLoadingScreen();
-                Widget error(Object? exception) {
-                  final error = exception ?? snapshot.error;
-                  return _effectiveErrorBuilder?.call(context, error) ??
-                      CodelesslyErrorScreen(
-                        exception: error,
-                        publishSource: _effectiveController.publishSource,
-                      );
-                }
+      child: StreamBuilder<CStatus>(
+        stream: codelessly.statusStream,
+        initialData: codelessly.status,
+        builder: (context, snapshot) {
+          Widget loading() =>
+              _effectiveLoadingBuilder?.call(context) ??
+              const CodelesslyLoadingScreen();
+          Widget error(Object? exception) {
+            final error = exception ?? snapshot.error;
+            return _effectiveErrorBuilder?.call(context, error) ??
+                CodelesslyErrorScreen(
+                  exception: error,
+                  publishSource: _effectiveController.publishSource,
+                );
+          }
 
-                if (snapshot.hasError) return error(snapshot.error);
-                if (!snapshot.hasData) return loading();
+          if (snapshot.hasError) return error(snapshot.error);
+          if (!snapshot.hasData) return loading();
 
-                final CStatus status = snapshot.data!;
-                return switch (status) {
-                  CEmpty() || CConfigured() => loading(),
-                  CError() => error(status.exception),
-                  CLoading(state: CLoadingState state) =>
-                    state.hasPassed(CLoadingState.createdManagers)
-                        ? buildStreamedLayout()
-                        : loading(),
-                  CLoaded() => buildStreamedLayout(),
-                };
-              },
-            );
-          }),
+          final CStatus status = snapshot.data!;
+          return switch (status) {
+            CEmpty() || CConfigured() => loading(),
+            CError() => error(status.exception),
+            CLoading(state: CLoadingState state) =>
+              state.hasPassed(CLoadingState.createdManagers)
+                  ? buildStreamedLayout()
+                  : loading(),
+            CLoaded() => buildStreamedLayout(),
+          };
+        },
+      ),
     );
   }
 }
