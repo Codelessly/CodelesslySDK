@@ -243,7 +243,7 @@ class FunctionsRepository {
     _log('Performing navigation action with params: $parsedParams');
 
     final Codelessly codelessly = context.read<Codelessly>();
-    final String myLayoutId = codelessly.currentNavigatedLayoutId!;
+    final String? myLayoutId = codelessly.currentNavigatedLayoutId;
 
     if (action.navigationType == NavigationType.pop) {
       await Navigator.maybePop(context, parsedParams);
@@ -328,7 +328,7 @@ class FunctionsRepository {
     _log('Performing show dialog action with params: $parsedParams');
 
     final Codelessly codelessly = context.read<Codelessly>();
-    final myLayoutId = codelessly.currentNavigatedLayoutId!;
+    final String? myLayoutId = codelessly.currentNavigatedLayoutId;
 
     // Check if a layout exists for the action's [destinationId].
     final String? layoutId = codelessly.dataManager.publishModel?.layouts.values
