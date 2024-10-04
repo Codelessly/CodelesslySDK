@@ -219,6 +219,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     return NodeStateProviderWidget(
       key: ValueKey(node.id),
       node: node,
+      codelesslyContext: codelesslyContext,
       child: Builder(builder: (context) {
         if (listenables.isNotEmpty) {
           return ManagedListenableBuilder(
@@ -308,9 +309,14 @@ class _ManagedListenableBuilderState extends State<ManagedListenableBuilder> {
 class NodeStateProviderWidget extends StatefulWidget {
   final Widget child;
   final BaseNode node;
+  final CodelesslyContext codelesslyContext;
 
-  const NodeStateProviderWidget(
-      {super.key, required this.child, required this.node});
+  const NodeStateProviderWidget({
+    super.key,
+    required this.child,
+    required this.node,
+    required this.codelesslyContext,
+  });
 
   @override
   State<NodeStateProviderWidget> createState() =>
@@ -320,6 +326,26 @@ class NodeStateProviderWidget extends StatefulWidget {
 class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
     with AutomaticKeepAliveClientMixin {
   final NodeStateWrapper nodeState = NodeStateWrapper();
+
+  @override
+  void initState() {
+    super.initState();
+    widget.codelesslyContext.nodeRebuildNotifier
+        .addListener(onNodeNotification);
+  }
+
+  @override
+  void dispose() {
+    widget.codelesslyContext.nodeRebuildNotifier
+        .removeListener(onNodeNotification);
+    super.dispose();
+  }
+
+  void onNodeNotification() {
+    if (widget.codelesslyContext.nodeRebuildNotifier.value == widget.node.id) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
