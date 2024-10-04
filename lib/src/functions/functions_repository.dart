@@ -244,6 +244,7 @@ class FunctionsRepository {
 
     final Codelessly codelessly = context.read<Codelessly>();
     final String? myLayoutId = codelessly.currentNavigatedLayoutId;
+    final String? myCanvasId = codelessly.currentNavigatedCanvasId;
 
     if (action.navigationType == NavigationType.pop) {
       await Navigator.maybePop(context, parsedParams);
@@ -295,7 +296,11 @@ class FunctionsRepository {
         // to, because the Navigator.push future has completed and came
         // back to this screen.
         if (context.mounted) {
-          codelessly.notifyNavigationListeners(context, myLayoutId);
+          codelessly.notifyNavigationListeners(
+            context,
+            layoutId: myLayoutId,
+            canvasId: myCanvasId,
+          );
         }
       } else if (action.navigationType == NavigationType.replace) {
         await Navigator.pushReplacement(
@@ -312,7 +317,11 @@ class FunctionsRepository {
         // to, because the Navigator.push future has completed and came
         // back to this screen.
         if (context.mounted) {
-          codelessly.notifyNavigationListeners(context, myLayoutId);
+          codelessly.notifyNavigationListeners(
+            context,
+            layoutId: myLayoutId,
+            canvasId: myCanvasId,
+          );
         }
       }
     }
@@ -329,6 +338,7 @@ class FunctionsRepository {
 
     final Codelessly codelessly = context.read<Codelessly>();
     final String? myLayoutId = codelessly.currentNavigatedLayoutId;
+    final String? myCanvasId = codelessly.currentNavigatedCanvasId;
 
     // Check if a layout exists for the action's [destinationId].
     final String? layoutId = codelessly.dataManager.publishModel?.layouts.values
@@ -369,7 +379,11 @@ class FunctionsRepository {
       ),
     );
     if (context.mounted) {
-      codelessly.notifyNavigationListeners(context, myLayoutId);
+      codelessly.notifyNavigationListeners(
+        context,
+        layoutId: myLayoutId,
+        canvasId: myCanvasId,
+      );
     }
   }
 

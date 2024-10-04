@@ -402,11 +402,6 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       if (!mounted) return;
 
       codelessly = context.read<Codelessly>();
-      final String? myLayoutId = codelessly!
-          .dataManager.publishModel?.layouts.dataMap.entries
-          .firstWhere((entry) {
-        return entry.value.canvasIds.contains(widget.node.id);
-      }).key;
 
       // Set the system UI brightness to the canvas brightness.
       codelessly!.setSystemUIBrightness(widget.node.properties.brightness);
@@ -415,8 +410,8 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       // again, such as if this canvas was navigated away from, but then the view
       // pops and goes back to this canvas.
       codelessly!.addNavigationListener('canvas-${widget.node.id}',
-          (event, layoutId) {
-        if (myLayoutId == layoutId) {
+          (event, layoutId, canvasId) {
+        if (canvasId == widget.node.id) {
           codelessly!.setSystemUIBrightness(widget.node.properties.brightness);
         }
       });
