@@ -59,6 +59,9 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   /// The key is the condition's id.
   final Map<String, BaseCondition> conditions;
 
+  /// A notifier that is used to rebuild individual nodes.
+  final ValueNotifier<String> nodeRebuildNotifier = ValueNotifier('');
+
   /// Creates a [CodelesslyContext] with the given [data], [functions], and
   /// [nodeValues].
   CodelesslyContext({
@@ -80,6 +83,12 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
         nodeValues = {},
         variables = {},
         conditions = {};
+
+  @override
+  void dispose() {
+    nodeRebuildNotifier.dispose();
+    super.dispose();
+  }
 
   /// Returns a map of all of the [VariableData]s in [variables] mapped by their
   /// name.
@@ -108,6 +117,10 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
       layoutID: forceLayoutID ? layoutID : layoutID ?? this.layoutID,
       conditions: conditions ?? this.conditions,
     );
+  }
+
+  void rebuildNode(String nodeId) {
+    nodeRebuildNotifier.value = nodeId;
   }
 
   /// Used for actions that are connected to one or more nodes.

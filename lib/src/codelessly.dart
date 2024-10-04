@@ -153,10 +153,12 @@ class Codelessly {
   /// If it is null, it means it has not yet been initialized.
   CloudDatabase? get cloudDatabase => dataManager.cloudDatabase;
 
+  // TODO(Saad): Move to [CodelesslyContext]
   String? _currentNavigatedLayoutId;
 
   String? get currentNavigatedLayoutId => _currentNavigatedLayoutId;
 
+  // TODO(Saad): Move to [CodelesslyContext]
   String? _currentNavigatedCanvasId;
 
   String? get currentNavigatedCanvasId => _currentNavigatedCanvasId;
