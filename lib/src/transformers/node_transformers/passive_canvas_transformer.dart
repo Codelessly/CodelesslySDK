@@ -404,7 +404,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       codelessly = context.read<Codelessly>();
 
       // Set the system UI brightness to the canvas brightness.
-      codelessly!.setSystemUIBrightness(widget.node.properties.brightness);
+      updateSystemBrightness(context);
 
       // Listen for navigation events to update the system UI brightness back
       // again, such as if this canvas was navigated away from, but then the view
@@ -412,10 +412,14 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       codelessly!.addNavigationListener('canvas-${widget.node.id}',
           (event, layoutId, canvasId) {
         if (canvasId == widget.node.id) {
-          codelessly!.setSystemUIBrightness(widget.node.properties.brightness);
+          updateSystemBrightness(context);
         }
       });
     });
+  }
+
+  void updateSystemBrightness(BuildContext context) {
+    codelessly!.setSystemUIBrightness(widget.node.properties.brightness);
   }
 
   @override
@@ -497,23 +501,14 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   Widget build(BuildContext context) {
     final Brightness brightness =
         widget.node.properties.brightness.toFlutterBrightness(context);
-    final SystemUiOverlayStyle? systemOverlayStyle =
-        Theme.of(context).appBarTheme.systemOverlayStyle;
-    return Theme(
-      data: Theme.of(context).copyWith(
-        appBarTheme: systemOverlayStyle != null
-            ? null
-            : Theme.of(context).appBarTheme.copyWith(
-                  systemOverlayStyle: SystemUiOverlayStyle(
-                    statusBarColor: brightness == Brightness.light
-                        ? Colors.black
-                        : Colors.white,
-                    statusBarIconBrightness: brightness,
-                    statusBarBrightness: brightness,
-                  ),
-                ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor:
+            brightness == Brightness.light ? Colors.black : Colors.white,
+        statusBarIconBrightness: brightness,
+        statusBarBrightness: brightness,
       ),
-      child: widget.builder(context),
+      child: Builder(builder: widget.builder),
     );
   }
 }

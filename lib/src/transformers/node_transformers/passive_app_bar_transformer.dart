@@ -58,6 +58,7 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
             nullSubstitutionMode: settings.nullSubstitutionMode,
             replaceVariablesWithSymbol: settings.replaceVariablesWithSymbols,
           );
+
     return AppBar(
       centerTitle: node.properties.centerTitle,
       automaticallyImplyLeading: node.properties.leading.icon.show
