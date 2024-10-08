@@ -7,7 +7,7 @@ import 'package:storybook_flutter/storybook_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  Codelessly.instance.initialize(
+  await Codelessly.instance.initialize(
     config: CodelesslyConfig(
       authToken: "cSlMIT93cj1lXkBuYk5QNmImSTUsTHw2MDQ4VkdlOCZFLHc7",
       isPreview: kDebugMode,
