@@ -235,38 +235,43 @@ class FunctionsRepository {
 
   static Future<void> navigate(
     BuildContext context,
-    NavigationAction action,
-  ) async {
-    final ScopedValues scopedValues = ScopedValues.of(context);
-    final parsedParams = substituteVariablesInMap(action.params, scopedValues);
+    NavigationAction action, {
+    Codelessly? codelessly,
+    CodelesslyWidgetController? codelesslyController,
+    ScopedValues? scopedValues,
+  }) async {
+    final ScopedValues effectiveScopedValues =
+        scopedValues ?? ScopedValues.of(context);
+    final parsedParams =
+        substituteVariablesInMap(action.params, effectiveScopedValues);
 
     _log('Performing navigation action with params: $parsedParams');
 
-    final Codelessly codelessly = context.read<Codelessly>();
-    final String? myLayoutId = codelessly.currentNavigatedLayoutId;
-    final String? myCanvasId = codelessly.currentNavigatedCanvasId;
+    final Codelessly effectiveCodelessly =
+        codelessly ?? context.read<Codelessly>();
+    final String? myLayoutId = effectiveCodelessly.currentNavigatedLayoutId;
+    final String? myCanvasId = effectiveCodelessly.currentNavigatedCanvasId;
 
     if (action.navigationType == NavigationType.pop) {
       await Navigator.maybePop(context, parsedParams);
     } else {
       // Check if a layout exists for the action's [destinationId].
-      final String? layoutId = codelessly
+      final String? layoutId = effectiveCodelessly
               .dataManager.publishModel?.layouts[action.destinationId]?.id ??
-          codelessly.dataManager.publishModel?.layouts.values
+          effectiveCodelessly.dataManager.publishModel?.layouts.values
               .firstWhereOrNull(
                   (layout) => layout.canvasIds.contains(action.destinationId))
               ?.id;
 
       _log('looking for layout with canvas id: [${action.destinationId}]');
       for (final layout
-          in codelessly.dataManager.publishModel!.layouts.values) {
+          in effectiveCodelessly.dataManager.publishModel!.layouts.values) {
         _log(
             'layout [${layout.id}] canvas ids: [${layout.canvasIds.join(', ')}]');
       }
 
       if (layoutId == null) {
-        final Codelessly codelessly = context.read<Codelessly>();
-        codelessly.errorHandler.captureException(
+        effectiveCodelessly.errorHandler.captureException(
           CodelesslyException.layoutNotFound(
             message:
                 'Could not find a layout with a canvas id of [${action.destinationId}]',
@@ -276,10 +281,11 @@ class FunctionsRepository {
         return;
       }
 
-      final parentController = context.read<CodelesslyWidgetController>();
+      final parentController =
+          codelesslyController ?? context.read<CodelesslyWidgetController>();
       final effectiveController = parentController.copyWith(
         layoutID: layoutId,
-        codelessly: codelessly,
+        codelessly: effectiveCodelessly,
       );
 
       if (action.navigationType == NavigationType.push) {
@@ -296,7 +302,7 @@ class FunctionsRepository {
         // to, because the Navigator.push future has completed and came
         // back to this screen.
         if (context.mounted) {
-          codelessly.notifyNavigationListeners(
+          effectiveCodelessly.notifyNavigationListeners(
             context,
             layoutId: myLayoutId,
             canvasId: myCanvasId,
@@ -317,7 +323,7 @@ class FunctionsRepository {
         // to, because the Navigator.push future has completed and came
         // back to this screen.
         if (context.mounted) {
-          codelessly.notifyNavigationListeners(
+          effectiveCodelessly.notifyNavigationListeners(
             context,
             layoutId: myLayoutId,
             canvasId: myCanvasId,
