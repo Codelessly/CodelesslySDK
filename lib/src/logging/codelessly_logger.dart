@@ -1,5 +1,3 @@
-import 'dart:developer' as dev;
-
 import 'package:flutter/foundation.dart';
 
 const logger = CodelesslyLogger._();
@@ -15,10 +13,7 @@ class CodelesslyLogger {
     if (largePrint && kIsWeb) {
       debugPrint('[$label] ${message.toString()}');
     } else {
-      dev.log(
-        message.toString(),
-        name: label,
-      );
+      debugPrint(message.toString());
     }
   }
 
@@ -35,12 +30,7 @@ class CodelesslyLogger {
         maxFrames: 100,
       );
     } else {
-      dev.log(
-        message.toString(),
-        name: label,
-        error: error,
-        stackTrace: stackTrace,
-      );
+      debugPrint(message.toString());
     }
   }
 }
