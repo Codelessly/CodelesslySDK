@@ -1,3 +1,6 @@
+## 5.2.4
+- Update `webview_flutter_android` v4.0.0.
+
 ## 5.2.3
 
 - Fix Actions DartToJS compilation error.
