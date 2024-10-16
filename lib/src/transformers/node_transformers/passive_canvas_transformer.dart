@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../../functions/functions_repository.dart';
 
 class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   PassiveCanvasTransformer(super.getNode, super.manager);
@@ -401,7 +400,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      codelessly = context.read<Codelessly>();
+      codelessly = context.read<Codelessly?>();
 
       // Set the system UI brightness to the canvas brightness.
       updateSystemBrightness(context);
@@ -409,7 +408,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       // Listen for navigation events to update the system UI brightness back
       // again, such as if this canvas was navigated away from, but then the view
       // pops and goes back to this canvas.
-      codelessly!.addNavigationListener('canvas-${widget.node.id}',
+      codelessly?.addNavigationListener('canvas-${widget.node.id}',
           (event, layoutId, canvasId) {
         if (canvasId == widget.node.id) {
           updateSystemBrightness(context);
@@ -419,7 +418,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   }
 
   void updateSystemBrightness(BuildContext context) {
-    codelessly!.setSystemUIBrightness(widget.node.properties.brightness);
+    codelessly?.setSystemUIBrightness(widget.node.properties.brightness);
   }
 
   @override
