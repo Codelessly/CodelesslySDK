@@ -1,4 +1,11 @@
+## 5.3.0
+
+- Add support for Codelessly Simulator! With Codelessly Simulator, you can easily preview your app in the browser as if it was running on a real device.
+- Add device `Brightness` property for light and dark theme support.
+- Fix AppBar constraints.
+
 ## 5.2.4
+
 - Update `webview_flutter_android` v4.0.0.
 
 ## 5.2.3
