@@ -3,7 +3,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../../functions/functions_repository.dart';
 
 typedef TriggerAction = void Function(
   BuildContext context,

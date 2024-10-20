@@ -4,7 +4,6 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../../functions/functions_repository.dart';
 
 class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
   PassiveButtonTransformer(super.getNode, super.manager);

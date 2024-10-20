@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' as vec_math;
 
 import '../../../codelessly_sdk.dart';
-import '../../functions/functions_repository.dart';
 
 class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
   PassiveRectangleTransformer(super.getNode, super.manager);
