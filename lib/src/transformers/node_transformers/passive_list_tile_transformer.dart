@@ -2,7 +2,6 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../../functions/functions_repository.dart';
 import '../utils/placeholder_painter.dart';
 
 class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {

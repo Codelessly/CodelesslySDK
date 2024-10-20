@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
-import '../functions/functions_repository.dart';
 
 const String _label = 'Layout Builder';
 

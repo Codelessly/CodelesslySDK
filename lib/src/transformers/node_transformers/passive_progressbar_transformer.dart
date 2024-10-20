@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../../functions/functions_repository.dart';
 
 class PassiveProgressBarTransformer
     extends NodeWidgetTransformer<ProgressBarNode> {
