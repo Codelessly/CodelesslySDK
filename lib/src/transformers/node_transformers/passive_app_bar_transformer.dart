@@ -139,7 +139,7 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
     BuildContext context, {
     required AppBarProperties props,
     double width = 250,
-    double height = kAppBarDefaultHeight,
+    double height = kDefaultAppBarHeight,
     WidgetBuildSettings settings = const WidgetBuildSettings(
       debugLabel: 'buildPreview',
       replaceVariablesWithSymbols: true,
@@ -173,9 +173,9 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
       id: '',
       name: 'AppBar',
       basicBoxLocal:
-          NodeBox(0, 0, width ?? 250, height ?? kAppBarDefaultHeight),
+          NodeBox(0, 0, width ?? 250, height ?? kDefaultAppBarHeight),
       retainedOuterBoxLocal:
-          NodeBox(0, 0, width ?? 250, height ?? kAppBarDefaultHeight),
+          NodeBox(0, 0, width ?? 250, height ?? kDefaultAppBarHeight),
     );
     return Theme(
       data: Theme.of(context).copyWith(platform: TargetPlatform.android),
