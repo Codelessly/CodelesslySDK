@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 
 import '../codelessly_sdk.dart';
+import 'logging/debug_logger.dart';
 import 'logging/reporter.dart';
 import 'utils/codelessly_http_client.dart';
 
@@ -34,6 +35,8 @@ typedef BreakpointsListener = void Function(
 /// Look at [CodelesslyConfig] for more information on available configuration
 /// options.
 class Codelessly {
+  static const String name = 'Codelessly';
+
   /// Internal singleton instance
   static final Codelessly _instance = Codelessly();
 
@@ -212,28 +215,6 @@ class Codelessly {
     }
   }
 
-  void log(
-    String message, {
-    bool largePrint = false,
-  }) =>
-      logger.log(
-        'Codelessly SDK',
-        message,
-        largePrint: largePrint,
-      );
-
-  void logError(
-    String message, {
-    required Object? error,
-    required StackTrace? stackTrace,
-  }) =>
-      logger.error(
-        'Codelessly SDK',
-        message,
-        error: error,
-        stackTrace: stackTrace,
-      );
-
   /// Disposes this instance of the SDK permanently along with all of its
   /// managers.
   ///
@@ -241,7 +222,10 @@ class Codelessly {
   /// disposed. This is useful for [CodelesslyCacheManager] to keep the [Hive]
   /// boxes open for other instances of the SDK that are still running.
   void dispose({bool sealCache = true}) {
-    log('Disposing SDK. ${sealCache ? 'Sealing cache.' : 'Keeping cache open.'}');
+    DebugLogger.instance.printFunction('dispose()', name: name);
+    DebugLogger.instance.printInfo(
+        'Disposing SDK. ${sealCache ? 'Sealing cache.' : 'Keeping cache open.'}',
+        name: name);
     _status = CStatus.empty();
     _statusStreamController.close();
 
@@ -271,7 +255,10 @@ class Codelessly {
   /// This does not close the status stream, and instead sets the SDK back to
   /// idle mode.
   FutureOr<void> reset({bool clearCache = false}) async {
-    log('Resetting SDK. ${clearCache ? 'Clearing cache.' : 'Keeping cache.'}');
+    DebugLogger.instance.printFunction('reset()', name: name);
+    DebugLogger.instance.printInfo(
+        'Resetting SDK. ${clearCache ? 'Clearing cache.' : 'Keeping cache.'}',
+        name: name);
     _cacheManager?.reset();
     _publishDataManager?.reset();
     _previewDataManager?.reset();
@@ -285,20 +272,18 @@ class Codelessly {
       try {
         await _cacheManager?.clearAll();
       } catch (e, str) {
-        logError(
-          'Error clearing cache.',
-          error: e,
-          stackTrace: str,
+        errorHandler.captureException(
+          e,
+          stacktrace: str,
         );
       }
 
       try {
         await _cacheManager?.deleteAllByteData();
       } catch (e, str) {
-        logError(
-          'Error deleting cached bytes.',
-          error: e,
-          stackTrace: str,
+        errorHandler.captureException(
+          e,
+          stacktrace: str,
         );
       }
     }
@@ -393,6 +378,8 @@ class Codelessly {
   /// instance exists with the same [CodelesslyConfig.firebaseInstanceName]
   /// and use that to avoid duplicate initialization.
   Future<void> initFirebase({required CodelesslyConfig config}) async {
+    DebugLogger.instance.printFunction('initFirebase()', name: name);
+
     // Early return if Firebase is already initialized. This is important
     // because this function is asynchronous and there may be an attempt at
     // initialization twice.
@@ -405,10 +392,12 @@ class Codelessly {
       return;
     }
 
-    final String name = config.firebaseInstanceName;
+    final String firebaseInstanceName = config.firebaseInstanceName;
     final FirebaseOptions firebaseOptions = config.firebaseOptions;
 
-    log('Initializing Firebase instance with project ID: [${firebaseOptions.projectId}] and Firebase instance name [$name]');
+    DebugLogger.instance.printInfo(
+        'Initializing Firebase instance with project ID: [${firebaseOptions.projectId}] and Firebase instance name [$firebaseInstanceName]',
+        name: name);
 
     final Stopwatch stopwatch = Stopwatch()..start();
     try {
@@ -426,10 +415,9 @@ class Codelessly {
         _firebaseApp = await Firebase.initializeApp(options: firebaseOptions);
       } finally {
         if (_firebaseApp != null) {
-          log(
-            'Firebase default app not initialized. Call Firebase.initializeApp() before initializing the CodelesslySDK.',
-            largePrint: true,
-          );
+          DebugLogger.instance.printInfo(
+              'Firebase default app not initialized. Call Firebase.initializeApp() before initializing the CodelesslySDK.',
+              name: name);
         }
       }
 
@@ -439,28 +427,34 @@ class Codelessly {
         _firebaseAuth = FirebaseAuth.instanceFor(app: _firebaseApp!);
         _didInitializeFirebase = true;
 
-        log('Codelessly successfully initialized the default Firebase app.');
+        DebugLogger.instance.printInfo(
+            'Codelessly successfully initialized the default Firebase app.',
+            name: name);
         return;
       }
 
-      log('A default Firebase app was found already registered. Checking for an existing [$name] Firebase app.');
+      DebugLogger.instance.printInfo(
+          'A default Firebase app was found already registered. Checking for an existing [$firebaseInstanceName] Firebase app.',
+          name: name);
 
       FirebaseApp? existingApp;
 
       // Check if an existing Firebase app instance can be reused.
-      //
-      // This code is only run if a default Firebase app was already registered.
-      // Otherwise, calling Firebase.apps crashes on web.
-      existingApp = Firebase.apps.firstWhereOrNull((app) => app.name == name);
+      existingApp = Firebase.apps
+          .firstWhereOrNull((app) => app.name == firebaseInstanceName);
 
       if (existingApp != null) {
-        log('Found an existing Firebase app instance with name: [$name]. Using it.');
+        DebugLogger.instance.printInfo(
+            'Found an existing Firebase app instance with name: [$firebaseInstanceName]. Using it.',
+            name: name);
         _firebaseApp = existingApp;
       } else {
         // Create a new Firebase app instance if none exists
-        log('No existing Firebase app instance found with name: [$name]. Registering a new one.');
-        _firebaseApp =
-            await Firebase.initializeApp(name: name, options: firebaseOptions);
+        DebugLogger.instance.printInfo(
+            'No existing Firebase app instance found with name: [$firebaseInstanceName]. Registering a new one.',
+            name: name);
+        _firebaseApp = await Firebase.initializeApp(
+            name: firebaseInstanceName, options: firebaseOptions);
       }
 
       // Initialize Firestore and FirebaseAuth instances.
@@ -469,7 +463,9 @@ class Codelessly {
 
       _didInitializeFirebase = true;
 
-      log('Firebase instance initialized successfully [${_firebaseApp?.name}].');
+      DebugLogger.instance.printInfo(
+          'Firebase instance initialized successfully [${_firebaseApp?.name}].',
+          name: name);
     } catch (e, str) {
       initErrorHandler(
         automaticallySendCrashReports: false,
@@ -481,7 +477,9 @@ class Codelessly {
     }
 
     stopwatch.stop();
-    log('Firebase initialized in ${stopwatch.elapsed.inMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s');
+    DebugLogger.instance.printInfo(
+        'Firebase initialized in ${stopwatch.elapsed.inMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s',
+        name: name);
   }
 
   /// Initializes the internal Firestore instance used by this SDK and
@@ -494,6 +492,7 @@ class Codelessly {
   void initErrorHandler({
     required bool automaticallySendCrashReports,
   }) {
+    DebugLogger.instance.printFunction('initErrorHandler()', name: name);
     if (_errorHandler != null) return;
 
     _errorHandler = CodelesslyErrorHandler(
@@ -506,7 +505,10 @@ class Codelessly {
           return;
         }
         _updateStatus(CStatus.error(exception));
-        log('Error received. Status is now $status');
+        DebugLogger.instance.printInfo(
+          'Error received. Status is now $status',
+          name: name,
+        );
       },
     );
   }
@@ -535,6 +537,8 @@ class Codelessly {
     DataManager? templateDataManager,
     bool initializeDataManagers = true,
   }) async {
+    DebugLogger.instance.printFunction('initialize()', name: name);
+
     if (_status is CLoading) {
       return _status;
     }
@@ -551,8 +555,14 @@ class Codelessly {
       'Make sure you are correctly passing a [CodelesslyConfig] to the SDK.',
     );
 
-    log('Initializing Codelessly with firebase project ID: ${_config!.firebaseOptions.projectId}');
-    log('Cloud Functions Base URL: ${_config!.firebaseCloudFunctionsBaseURL}');
+    DebugLogger.instance.printInfo(
+      'Initializing Codelessly with firebase project ID: ${_config!.firebaseOptions.projectId}',
+      name: name,
+    );
+    DebugLogger.instance.printInfo(
+      'Cloud Functions Base URL: ${_config!.firebaseCloudFunctionsBaseURL}',
+      name: name,
+    );
 
     final Stopwatch stopwatch = Stopwatch()..start();
 
@@ -653,23 +663,19 @@ class Codelessly {
 
       _updateStatus(CStatus.loading(CLoadingState.createdManagers));
 
-      log('Initializing cache manager');
-      // The cache manager initializes first to load the local cache.
+      DebugLogger.instance.printInfo(
+        'Initializing cache manager',
+        name: name,
+      );
       await _cacheManager!.init();
 
       _updateStatus(CStatus.loading(CLoadingState.initializedCache));
 
-      // The auth manager initializes second to look up cached auth data
-      // from the cache manager. If no auth data is available, it halts the
-      // entire process and awaits to authenticate with the server.
-      //
-      // After either of those is done, the relevant auth data is immediately
-      // emitted to the internal stream controller, ready for immediate usage.
-      //
-      // If the slug is specified, the SDK can skip all authentication and
-      // immediately jump to loading the data manager.
       if (_config!.slug == null) {
-        log('Initializing auth manager.');
+        DebugLogger.instance.printInfo(
+          'Initializing auth manager.',
+          name: name,
+        );
         await _authManager!.init();
         _config!.publishSource = _authManager!.getBestPublishSource(_config!);
 
@@ -683,48 +689,47 @@ class Codelessly {
 
         _updateStatus(CStatus.loading(CLoadingState.initializedAuth));
       } else {
-        log('A slug was provided. Acutely skipping authentication.');
+        DebugLogger.instance.printInfo(
+          'A slug was provided. Acutely skipping authentication.',
+          name: name,
+        );
       }
 
-      // The data manager initializes last to load the last stored publish
-      // model, or, if it doesn't exist, halts the entire process and awaits
-      // to fetch the latest publish model from the server.
-      //
-      // The config sets the default data manager to initialize. If the
-      // [CodelesslyWidget] wants to load the opposite manager, the other will
-      // lazily initialize.
       if (initializeDataManagers &&
           (_config!.preload || _config!.slug != null)) {
-        log(
-          'Initializing data managers with publish source '
-          '${_config!.publishSource}'
-          ' ${_config!.slug != null ? 'and slug ${_config!.slug}' : ''}',
+        DebugLogger.instance.printInfo(
+          'Initializing data managers with publish source ${_config!.publishSource} ${_config!.slug != null ? 'and slug ${_config!.slug}' : ''}',
+          name: name,
         );
 
         if (dataManager.status is! CLoaded && dataManager.status is! CLoaded) {
           await dataManager.init(layoutID: null);
         }
 
-        log('Data manager initialized.');
+        DebugLogger.instance.printInfo(
+          'Data manager initialized.',
+          name: name,
+        );
         _updateStatus(CStatus.loading(CLoadingState.initializedDataManagers));
       } else {
         if (!initializeDataManagers) {
-          log(
+          DebugLogger.instance.printInfo(
             'Skipping data manager loading because [initializeDataManagers] is set to false.',
+            name: name,
           );
         } else {
-          log(
+          DebugLogger.instance.printInfo(
             'Skipping data manager loading because preload is ${_config!.preload} & slug is ${_config!.slug}.',
+            name: name,
           );
         }
       }
 
-      // If the slug is specified, the SDK can skip all authentication for
-      // initial layout as it will use the slug to fetch a complete publish
-      // bundle. After that though, we can safely authenticate in the
-      // background to keep listening for updates to the publish model.
       if (_config!.slug != null) {
-        log('Since a slug was provided & data manager finished, authenticating in the background...');
+        DebugLogger.instance.printInfo(
+          'Since a slug was provided & data manager finished, authenticating in the background...',
+          name: name,
+        );
         _authManager!.init().then((_) async {
           if (_authManager!.authData == null) return;
 
@@ -736,14 +741,23 @@ class Codelessly {
             );
           }
 
-          log('[POST-INIT] Background authentication succeeded. Initializing layout storage.');
+          DebugLogger.instance.printInfo(
+            '[POST-INIT] Background authentication succeeded. Initializing layout storage.',
+            name: name,
+          );
           await dataManager
               .onPublishModelLoaded(_authManager!.authData!.projectId);
 
-          log('[POST-INIT] Layout storage initialized. Listening to publish model.');
+          DebugLogger.instance.printInfo(
+            '[POST-INIT] Layout storage initialized. Listening to publish model.',
+            name: name,
+          );
           dataManager.listenToPublishModel(_authManager!.authData!.projectId);
         }).catchError((e, str) {
-          log('[POST-INIT] Background authentication failed.');
+          DebugLogger.instance.printInfo(
+            '[POST-INIT] Background authentication failed.',
+            name: name,
+          );
           errorHandler.captureException(
             e,
             stacktrace: str,
@@ -752,7 +766,10 @@ class Codelessly {
         _updateStatus(CStatus.loading(CLoadingState.initializedSlug));
       }
 
-      log('Codelessly ${_instance == this ? 'global' : 'local'} instance initialization complete.');
+      DebugLogger.instance.printInfo(
+        'Codelessly ${_instance == this ? 'global' : 'local'} instance initialization complete.',
+        name: name,
+      );
 
       _updateStatus(CStatus.loaded());
     } catch (error, stacktrace) {
@@ -762,7 +779,10 @@ class Codelessly {
       );
     } finally {
       stopwatch.stop();
-      log('Initialization took ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s');
+      DebugLogger.instance.printInfo(
+        'Initialization took ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s',
+        name: name,
+      );
     }
 
     return _status;
