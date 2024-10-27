@@ -79,6 +79,7 @@ class AuthManager {
 
   /// Initializes the [AuthManager].
   Future<void> init() async {
+    DebugLogger.instance.printFunction('init()', name: name);
     final Stopwatch stopwatch = Stopwatch()..start();
 
     if (firebaseAuth.currentUser == null) {
@@ -178,6 +179,7 @@ class AuthManager {
 
   /// Disposes this instance of the [AuthManager].
   void dispose() {
+    DebugLogger.instance.printFunction('dispose()', name: name);
     DebugLogger.instance.printInfo('Disposing...', name: name);
     _idTokenChangeListener?.cancel();
     _authStateChangesSubscription?.cancel();
@@ -187,6 +189,7 @@ class AuthManager {
 
   /// Sets the [AuthData] to null and emits a null value to the stream.
   void reset() {
+    DebugLogger.instance.printFunction('reset()', name: name);
     DebugLogger.instance.printInfo('Invalidating...', name: name);
     _authData = null;
     _authStreamController.add(_authData);
@@ -217,8 +220,13 @@ class AuthManager {
   /// access.
   bool checkClaimsForProject(IdTokenResult? result, String projectId) {
     DebugLogger.instance.printFunction(
-        'Checking claims for user for a project id [$projectId]',
-        name: name);
+      'checkClaimsForProject(result: ${result != null}, projectId: $projectId)',
+      name: name,
+    );
+    DebugLogger.instance.printInfo(
+      'Checking claims for user for a project id [$projectId]',
+      name: name,
+    );
 
     if (result == null) {
       DebugLogger.instance.printInfo(
@@ -277,6 +285,10 @@ class AuthManager {
   ///
   /// [authData] is the data provided after successful authentication.
   Future<void> postAuthSuccess(AuthData authData) async {
+    DebugLogger.instance.printFunction(
+      'postAuthSuccess(projectId: ${authData.projectId})',
+      name: name,
+    );
     // Check if the instance of the auth manager has been disposed.
     if (_disposed) return;
 
@@ -346,6 +358,7 @@ class AuthManager {
   /// Makes a network request to verify the auth token and retrieve project access.
   /// Throws [CodelesslyException] if authentication fails.
   Future<void> authenticate() async {
+    DebugLogger.instance.printFunction('authenticate()', name: name);
     try {
       DebugLogger.instance.printInfo('Authenticating token...', name: name);
 
@@ -413,13 +426,10 @@ class AuthManager {
     required http.Client client,
     required Future<void> Function(AuthData authData) postSuccess,
   }) async {
-    const String label = 'verifyProjectAuthToken';
-
-    // Function to log messages. Uses different methods depending on whether
-    // the platform is web or not.
     DebugLogger.instance.printFunction(
-        'About to verify token with: authToken: ${config.authToken}, slug: ${config.slug}',
-        name: name);
+      'verifyProjectAuthToken(authToken: ${config.authToken}, slug: ${config.slug})',
+      name: name,
+    );
 
     try {
       // Make a POST request to the server to verify the token.
@@ -440,11 +450,10 @@ class AuthManager {
       // If the status code of the response is 200, the authentication was
       // successful.
       if (result.statusCode == 200) {
-        DebugLogger.instance.printFunction(
+        DebugLogger.instance.printInfo(
             'Successful auth token verification response received.',
             name: name);
 
-        // Parse the body of the response to JSON.
         final jsonBody = jsonDecode(result.body);
 
         // Create an instance of AuthData from the JSON body.
@@ -455,22 +464,21 @@ class AuthManager {
         await postSuccess(authData);
 
         DebugLogger.instance
-            .printFunction('Auth token response:\n${result.body}', name: name);
+            .printInfo('Auth token response:\n${result.body}', name: name);
 
         return authData;
-      }
-      // If the status code of the response is not 200, the authentication failed.
-      // Log the status code, reason, and body of the response.
-      else {
-        DebugLogger.instance.printFunction(
+      } else {
+        // If the status code of the response is not 200, the authentication failed.
+        // Log the status code, reason, and body of the response.
+        DebugLogger.instance.printInfo(
             'Failed to authenticate token.\nStatus Code: ${result.statusCode}.\nReason: ${result.reasonPhrase}\nBody: ${result.body}',
             name: name);
       }
     } catch (e, stacktrace) {
-      DebugLogger.instance.printFunction(
+      DebugLogger.instance.printInfo(
           'Error trying to authenticate token.\nError: $e',
           name: name);
-      DebugLogger.instance.printFunction('$stacktrace', name: name);
+      DebugLogger.instance.printInfo('$stacktrace', name: name);
     }
 
     // If the function has not returned by this point, return null.
