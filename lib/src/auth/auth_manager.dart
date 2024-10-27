@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../codelessly_sdk.dart';
+import '../logging/debug_logger.dart';
 
 /// An implementation that uses Firebase auth to authenticate users and manage
 /// authentication state. Handles anonymous authentication, token verification,
@@ -76,27 +77,20 @@ class AuthManager {
     }
   }
 
-  /// A helper function to log messages.
-  void log(
-    String message, {
-    bool largePrint = false,
-  }) =>
-      logger.log(
-        name,
-        message,
-        largePrint: largePrint,
-      );
-
   /// Initializes the [AuthManager].
   Future<void> init() async {
     final Stopwatch stopwatch = Stopwatch()..start();
 
     if (firebaseAuth.currentUser == null) {
-      log('Authenticating anonymously...');
+      DebugLogger.instance
+          .printInfo('Authenticating anonymously...', name: name);
       await firebaseAuth.signInAnonymously();
-      log('Anonymous authentication successful!');
+      DebugLogger.instance
+          .printInfo('Anonymous authentication successful!', name: name);
     } else {
-      log('Already authenticated ${firebaseAuth.currentUser!.isAnonymous ? 'anonymously' : 'with email ${firebaseAuth.currentUser!.email}'}');
+      DebugLogger.instance.printInfo(
+          'Already authenticated ${firebaseAuth.currentUser!.isAnonymous ? 'anonymously' : 'with email ${firebaseAuth.currentUser!.email}'}',
+          name: name);
     }
 
     // This step is mandatory to compare claims for auth. If re-auth is
@@ -126,9 +120,13 @@ class AuthManager {
           _authStreamController.add(_authData);
         } else {
           if (cachedAuthData.authToken != config.authToken) {
-            log('Auth token mismatch. Cache invalidated.');
+            DebugLogger.instance.printInfo(
+                'Auth token mismatch. Cache invalidated.',
+                name: name);
           } else {
-            log('Project ID is not in user claims. Cache invalidated.');
+            DebugLogger.instance.printInfo(
+                'Project ID is not in user claims. Cache invalidated.',
+                name: name);
           }
           await cacheManager.clearAll();
           await cacheManager.deleteAllByteData();
@@ -141,7 +139,8 @@ class AuthManager {
         await cacheManager.deleteAllByteData();
       }
     } else {
-      log('Auth data is not cached in cache manager.');
+      DebugLogger.instance
+          .printInfo('Auth data is not cached in cache manager.', name: name);
     }
 
     // We verify the auth token. If it the user is NOT already authenticated
@@ -156,10 +155,14 @@ class AuthManager {
     if (_disposed) return;
 
     if (!isAuthenticated()) {
-      log('Token is not authenticated. Authenticating...');
+      DebugLogger.instance.printInfo(
+          'Token is not authenticated. Authenticating...',
+          name: name);
       await authenticate();
     } else {
-      log('Token already authenticated! Verifying in the background...');
+      DebugLogger.instance.printInfo(
+          'Token already authenticated! Verifying in the background...',
+          name: name);
       authenticate().catchError((error) {
         // Error handling needs to be done here because this will not be caught
         // by SDK initialization.
@@ -168,12 +171,14 @@ class AuthManager {
     }
 
     stopwatch.stop();
-    log('Auth manager initialized took ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s');
+    DebugLogger.instance.printInfo(
+        'Auth manager initialized took ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s',
+        name: name);
   }
 
   /// Disposes this instance of the [AuthManager].
   void dispose() {
-    log('Disposing...');
+    DebugLogger.instance.printInfo('Disposing...', name: name);
     _idTokenChangeListener?.cancel();
     _authStateChangesSubscription?.cancel();
     _authStreamController.close();
@@ -182,7 +187,7 @@ class AuthManager {
 
   /// Sets the [AuthData] to null and emits a null value to the stream.
   void reset() {
-    log('Invalidating...');
+    DebugLogger.instance.printInfo('Invalidating...', name: name);
     _authData = null;
     _authStreamController.add(_authData);
     _idTokenChangeListener?.cancel();
@@ -211,10 +216,14 @@ class AuthManager {
   /// [result] from [getIdTokenResult] and the [projectId] they're trying to
   /// access.
   bool checkClaimsForProject(IdTokenResult? result, String projectId) {
-    log('Checking claims for user for a project id [$projectId]');
+    DebugLogger.instance.printFunction(
+        'Checking claims for user for a project id [$projectId]',
+        name: name);
 
     if (result == null) {
-      log('Id token result is null. Cannot check claims for project id [$projectId]');
+      DebugLogger.instance.printInfo(
+          'Id token result is null. Cannot check claims for project id [$projectId]',
+          name: name);
       return false;
     }
 
@@ -228,23 +237,30 @@ class AuthManager {
       claims = result.claims ?? {};
     }
 
-    log('User claims: $claims', largePrint: true);
+    DebugLogger.instance.printInfo('User claims: $claims', name: name);
     if (claims.isEmpty) {
-      log('User claims is null. Cannot check claims for project id [$projectId]');
+      DebugLogger.instance.printInfo(
+          'User claims is null. Cannot check claims for project id [$projectId]',
+          name: name);
       return false;
     }
     if (!claims.containsKey('project_ids')) {
-      log('User claims does not contain project_ids. Cannot check claims for project id [$projectId]');
+      DebugLogger.instance.printInfo(
+          'User claims does not contain project_ids. Cannot check claims for project id [$projectId]',
+          name: name);
       return false;
     }
     if (claims['project_ids'] is! List) {
-      log('User claims project_ids is not a list. Cannot check claims for project id [$projectId]');
+      DebugLogger.instance.printInfo(
+          'User claims project_ids is not a list. Cannot check claims for project id [$projectId]',
+          name: name);
       return false;
     }
 
     final projectIds = claims['project_ids'] as List;
 
-    log('User project id claims: $projectIds', largePrint: true);
+    DebugLogger.instance
+        .printInfo('User project id claims: $projectIds', name: name);
 
     return projectIds.contains(projectId);
   }
@@ -266,18 +282,24 @@ class AuthManager {
 
     // Check if the user already has access to the project.
     if (checkClaimsForProject(_idTokenResult, authData.projectId)) {
-      log('User has access to project since the claim exists already. Completing Firebase Auth process.');
+      DebugLogger.instance.printInfo(
+          'User has access to project since the claim exists already. Completing Firebase Auth process.',
+          name: name);
       return;
     }
 
     // Force refresh the token immediately to check if the claim exists.
     _idTokenResult = await firebaseAuth.currentUser?.getIdTokenResult(true);
     if (checkClaimsForProject(_idTokenResult, authData.projectId)) {
-      log('User has access to project since the claim exists already after force-refreshing. Completing Firebase Auth process.');
+      DebugLogger.instance.printInfo(
+          'User has access to project since the claim exists already after force-refreshing. Completing Firebase Auth process.',
+          name: name);
       return;
     }
 
-    log('Listening & waiting for Firebase Auth state changes to proceed since user token does not have desired claims for project access...');
+    DebugLogger.instance.printInfo(
+        'Listening & waiting for Firebase Auth state changes to proceed since user token does not have desired claims for project access...',
+        name: name);
 
     // Create a completer to handle the completion of the Firebase Auth process.
     final Completer completer = Completer();
@@ -290,7 +312,9 @@ class AuthManager {
       // and this userChanges() event may have already triggered a new event.
       if (completer.isCompleted) return;
 
-      log('Firebase Auth state changed. Checking claims...');
+      DebugLogger.instance.printInfo(
+          'Firebase Auth state changed. Checking claims...',
+          name: name);
       _idTokenResult = await event?.getIdTokenResult(true);
 
       // If the completer is already completed, return.
@@ -300,7 +324,9 @@ class AuthManager {
 
       // Check if the user has access to the project.
       if (checkClaimsForProject(_idTokenResult, authData.projectId)) {
-        log('User has access to project since the claim exists. Completing Firebase Auth process.');
+        DebugLogger.instance.printInfo(
+            'User has access to project since the claim exists. Completing Firebase Auth process.',
+            name: name);
         completer.complete(event);
       }
     });
@@ -311,7 +337,9 @@ class AuthManager {
     // Cancel the listener for Firebase Auth state changes.
     _idTokenChangeListener?.cancel();
 
-    log('Auth state changed successfully as expected. Firebase Auth complete.');
+    DebugLogger.instance.printInfo(
+        'Auth state changed successfully as expected. Firebase Auth complete.',
+        name: name);
   }
 
   /// Performs a handshake with the server to authenticate the token.
@@ -319,7 +347,7 @@ class AuthManager {
   /// Throws [CodelesslyException] if authentication fails.
   Future<void> authenticate() async {
     try {
-      log('Authenticating token...');
+      DebugLogger.instance.printInfo('Authenticating token...', name: name);
 
       final AuthData? authData = await verifyProjectAuthToken(
         userToken: _idTokenResult!.token!,
@@ -329,7 +357,9 @@ class AuthManager {
       );
 
       if (_disposed) {
-        log('Auth manager was disposed. Aborting authentication.');
+        DebugLogger.instance.printInfo(
+            'Auth manager was disposed. Aborting authentication.',
+            name: name);
         return;
       }
 
@@ -338,13 +368,15 @@ class AuthManager {
         _authStreamController.add(_authData!);
 
         await cacheManager.store(authCacheKey, _authData!.toJson());
-        log('Stored auth data in cache');
-        log('Authentication successfully!');
+        DebugLogger.instance.printInfo('Stored auth data in cache', name: name);
+        DebugLogger.instance
+            .printInfo('Authentication successfully!', name: name);
       } else {
         _authData = null;
         _authStreamController.add(_authData);
         await cacheManager.delete(authCacheKey);
-        log('Failed to authenticate token.');
+        DebugLogger.instance
+            .printInfo('Failed to authenticate token.', name: name);
 
         throw CodelesslyException.notAuthenticated();
       }
@@ -385,11 +417,9 @@ class AuthManager {
 
     // Function to log messages. Uses different methods depending on whether
     // the platform is web or not.
-    logger.log(
-      label,
-      'About to verify token with: authToken: ${config.authToken}, slug: ${config.slug}',
-      largePrint: true,
-    );
+    DebugLogger.instance.printFunction(
+        'About to verify token with: authToken: ${config.authToken}, slug: ${config.slug}',
+        name: name);
 
     try {
       // Make a POST request to the server to verify the token.
@@ -410,11 +440,9 @@ class AuthManager {
       // If the status code of the response is 200, the authentication was
       // successful.
       if (result.statusCode == 200) {
-        logger.log(
-          label,
-          'Successful auth token verification response received.',
-          largePrint: true,
-        );
+        DebugLogger.instance.printFunction(
+            'Successful auth token verification response received.',
+            name: name);
 
         // Parse the body of the response to JSON.
         final jsonBody = jsonDecode(result.body);
@@ -426,31 +454,23 @@ class AuthManager {
         // success.
         await postSuccess(authData);
 
-        logger.log(label, 'Auth token response:\n${result.body}',
-            largePrint: true);
+        DebugLogger.instance
+            .printFunction('Auth token response:\n${result.body}', name: name);
 
         return authData;
       }
       // If the status code of the response is not 200, the authentication failed.
       // Log the status code, reason, and body of the response.
       else {
-        logger.log(
-          label,
-          'Failed to authenticate token.\nStatus Code: ${result.statusCode}.\nReason: ${result.reasonPhrase}\nBody: ${result.body}',
-          largePrint: true,
-        );
+        DebugLogger.instance.printFunction(
+            'Failed to authenticate token.\nStatus Code: ${result.statusCode}.\nReason: ${result.reasonPhrase}\nBody: ${result.body}',
+            name: name);
       }
     } catch (e, stacktrace) {
-      logger.log(
-        label,
-        'Error trying to authenticate token.\nError: $e',
-        largePrint: true,
-      );
-      logger.log(
-        label,
-        '$stacktrace',
-        largePrint: true,
-      );
+      DebugLogger.instance.printFunction(
+          'Error trying to authenticate token.\nError: $e',
+          name: name);
+      DebugLogger.instance.printFunction('$stacktrace', name: name);
     }
 
     // If the function has not returned by this point, return null.
