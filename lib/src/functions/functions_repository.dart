@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../codelessly_sdk.dart';
 import '../ui/codelessly_dialog_widget.dart';
+import '../logging/debug_logger.dart';
 
 /// Enum representing the types of API requests.
 enum ApiRequestType {
@@ -47,13 +48,9 @@ enum ApiRequestType {
   }
 }
 
-const String _label = 'Functions Repository';
-
 class FunctionsRepository {
-  static void _log(String message, {bool largePrint = false}) =>
-      logger.log(_label, message, largePrint: largePrint);
+  static const String name = 'FunctionsRepository';
 
-  // Avoid using this method directly in favor of [triggerAction] if possible.
   static FutureOr performAction(
     BuildContext context,
     ActionModel action, {
@@ -61,10 +58,13 @@ class FunctionsRepository {
     bool notify = true,
   }) {
     if (!action.enabled) {
-      _log('Action ${action.type} is disabled. Skipping...');
+      DebugLogger.instance.printInfo(
+        'Action ${action.type} is disabled. Skipping...',
+        name: name,
+      );
       return true;
     }
-    _log('Performing action: $action');
+    DebugLogger.instance.printInfo('Performing action: $action', name: name);
 
     final Codelessly codelessly = context.read<Codelessly>();
     switch (action.type) {
@@ -194,7 +194,10 @@ class FunctionsRepository {
       final MapEntry<String, String>? parameter = parameters.entries
           .firstWhereOrNull((entry) => entry.key == match.group(1));
       if (parameter == null) {
-        _log('parameter ${match.group(1)} not found');
+        DebugLogger.instance.printInfo(
+          'parameter ${match.group(1)} not found',
+          name: name,
+        );
         return match[0]!;
       }
       // Substitute variables in parameter value.
@@ -245,7 +248,10 @@ class FunctionsRepository {
     final parsedParams =
         substituteVariablesInMap(action.params, effectiveScopedValues);
 
-    _log('Performing navigation action with params: $parsedParams');
+    DebugLogger.instance.printInfo(
+      'Performing navigation action with params: $parsedParams',
+      name: name,
+    );
 
     final Codelessly effectiveCodelessly =
         codelessly ?? context.read<Codelessly>();
@@ -263,11 +269,16 @@ class FunctionsRepository {
                   (layout) => layout.canvasIds.contains(action.destinationId))
               ?.id;
 
-      _log('looking for layout with canvas id: [${action.destinationId}]');
+      DebugLogger.instance.printInfo(
+        'looking for layout with canvas id: [${action.destinationId}]',
+        name: name,
+      );
       for (final layout
           in effectiveCodelessly.dataManager.publishModel!.layouts.values) {
-        _log(
-            'layout [${layout.id}] canvas ids: [${layout.canvasIds.join(', ')}]');
+        DebugLogger.instance.printInfo(
+          'layout [${layout.id}] canvas ids: [${layout.canvasIds.join(', ')}]',
+          name: name,
+        );
       }
 
       if (layoutId == null) {
@@ -340,7 +351,10 @@ class FunctionsRepository {
     final ScopedValues scopedValues = ScopedValues.of(context);
     final parsedParams = substituteVariablesInMap(action.params, scopedValues);
 
-    _log('Performing show dialog action with params: $parsedParams');
+    DebugLogger.instance.printInfo(
+      'Performing show dialog action with params: $parsedParams',
+      name: name,
+    );
 
     final Codelessly codelessly = context.read<Codelessly>();
     final String? myLayoutId = codelessly.currentNavigatedLayoutId;
@@ -352,10 +366,15 @@ class FunctionsRepository {
             (layout) => layout.canvasIds.contains(action.destinationId))
         ?.id;
 
-    _log('looking for layout with canvas id: [${action.destinationId}]');
+    DebugLogger.instance.printInfo(
+      'looking for layout with canvas id: [${action.destinationId}]',
+      name: name,
+    );
     for (final layout in codelessly.dataManager.publishModel!.layouts.values) {
-      _log(
-          'layout [${layout.id}] canvas ids: [${layout.canvasIds.join(', ')}]');
+      DebugLogger.instance.printInfo(
+        'layout [${layout.id}] canvas ids: [${layout.canvasIds.join(', ')}]',
+        name: name,
+      );
     }
 
     if (layoutId == null) {
@@ -401,10 +420,16 @@ class FunctionsRepository {
     ).trim();
     final Uri? uri = Uri.tryParse(url);
     if (uri == null || url.isEmpty) {
-      _log('Invalid URL: $url, Skipping...');
+      DebugLogger.instance.printInfo(
+        'Invalid URL: $url, Skipping...',
+        name: name,
+      );
       return;
     }
-    _log('Launching URL: $uri');
+    DebugLogger.instance.printInfo(
+      'Launching URL: $uri',
+      name: name,
+    );
     launchUrl(uri);
   }
 
@@ -429,9 +454,15 @@ class FunctionsRepository {
       variable.value = variable.value.copyWith(
         value: ApiResponseVariableUtils.loading(url, data: existingData),
       );
-      _log('${variable.value.name} updated with loading state.');
+      DebugLogger.instance.printInfo(
+        '${variable.value.name} updated with loading state.',
+        name: name,
+      );
     } else {
-      _log('No variable provided for api call.');
+      DebugLogger.instance.printInfo(
+        'No variable provided for api call.',
+        name: name,
+      );
     }
 
     try {
@@ -478,15 +509,27 @@ class FunctionsRepository {
         variable.value = variable.value.copyWith(
           value: ApiResponseVariableUtils.fromResponse(response),
         );
-        _log('${variable.value.name} updated with success state.');
+        DebugLogger.instance.printInfo(
+          '${variable.value.name} updated with success state.',
+          name: name,
+        );
       } else {
-        _log('No variable provided for api call.');
+        DebugLogger.instance.printInfo(
+          'No variable provided for api call.',
+          name: name,
+        );
       }
 
       return response;
     } catch (error, stackTrace) {
-      _log(error.toString());
-      _log(stackTrace.toString());
+      DebugLogger.instance.printInfo(
+        error.toString(),
+        name: name,
+      );
+      DebugLogger.instance.printInfo(
+        stackTrace.toString(),
+        name: name,
+      );
       if (variable != null) {
         variable.value = variable.value.copyWith(
           value: ApiResponseVariableUtils.error(
@@ -495,9 +538,15 @@ class FunctionsRepository {
             data: existingData,
           ),
         );
-        _log('${variable.value.name} updated with error state.');
+        DebugLogger.instance.printInfo(
+          '${variable.value.name} updated with error state.',
+          name: name,
+        );
       } else {
-        _log('No variable provided for api call.');
+        DebugLogger.instance.printInfo(
+          'No variable provided for api call.',
+          name: name,
+        );
       }
       return Future.error(error);
     }
@@ -510,34 +559,63 @@ class FunctionsRepository {
     required Object? body,
   }) {
     if (kReleaseMode) return;
-    _log(
-        '--------------------------------------------------------------------');
-    _log('API Request:');
-    _log(
-        '--------------------------------------------------------------------');
-    _log('${method.shortName} $url');
-    _log('Headers: ${headers.isEmpty ? 'None' : ''}');
+    DebugLogger.instance.printInfo(
+      '--------------------------------------------------------------------',
+      name: name,
+    );
+    DebugLogger.instance.printInfo(
+      'API Request:',
+      name: name,
+    );
+    DebugLogger.instance.printInfo(
+      '--------------------------------------------------------------------',
+      name: name,
+    );
+    DebugLogger.instance.printInfo(
+      '${method.shortName} $url',
+      name: name,
+    );
+    DebugLogger.instance.printInfo(
+      'Headers: ${headers.isEmpty ? 'None' : ''}',
+      name: name,
+    );
     if (headers.isNotEmpty) {
-      _log(const JsonEncoder.withIndent('  ').convert(headers));
-      _log('');
+      DebugLogger.instance.printInfo(
+        const JsonEncoder.withIndent('  ').convert(headers),
+        name: name,
+      );
+      DebugLogger.instance.printInfo(
+        '',
+        name: name,
+      );
     }
-    _log(
-        'Body: ${body == null || body.toString().trim().isEmpty ? 'None' : ''}');
+    DebugLogger.instance.printInfo(
+      'Body: ${body == null || body.toString().trim().isEmpty ? 'None' : ''}',
+      name: name,
+    );
     if (body != null && body.toString().trim().isNotEmpty) {
       try {
         final parsed = json.decode(body.toString());
-        _log(const JsonEncoder.withIndent('  ').convert(parsed));
+        DebugLogger.instance.printInfo(
+          const JsonEncoder.withIndent('  ').convert(parsed),
+          name: name,
+        );
       } catch (e) {
-        _log(body.toString());
+        DebugLogger.instance.printInfo(
+          body.toString(),
+          name: name,
+        );
       }
     }
-    _log(
-        '--------------------------------------------------------------------');
+    DebugLogger.instance.printInfo(
+      '--------------------------------------------------------------------',
+      name: name,
+    );
   }
 
   static void printResponse(http.Response response) {
     if (kReleaseMode) return;
-    _log(
+    DebugLogger.instance.printInfo(
       '''
 --------------------------------------------------------------------
 Response:
@@ -550,7 +628,7 @@ Body:
 ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.decode(response.body)) : response.body}
 --------------------------------------------------------------------
 ''',
-      largePrint: true,
+      name: name
     );
   }
 
@@ -942,8 +1020,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         // awaited if it is non-blocking.
         await future;
       } else {
-        _log(
-            'Skipping awaiting for action ${reaction.name} as it is non-blocking...');
+        DebugLogger.instance.printInfo(
+          'Skipping awaiting for action ${reaction.name} as it is non-blocking...',
+          name: name,
+        );
       }
     }
 
@@ -961,8 +1041,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final Map<String, dynamic> parsedParams =
         substituteVariablesInMap(action.params, scopedValues);
 
-    _log(
-        'Calling function ${action.name}(${parsedParams.entries.map((e) => '${e.key}: ${e.value}').join(', ')}).');
+    DebugLogger.instance.printInfo(
+      'Calling function ${action.name}(${parsedParams.entries.map((e) => '${e.key}: ${e.value}').join(', ')}).',
+      name: name,
+    );
 
     function?.call(context, codelesslyContext, Map.unmodifiable(parsedParams));
   }
@@ -986,14 +1068,23 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     try {
       final LocalDatabase? storage = scopedValues.localStorage;
       if (storage == null) {
-        _log('Storage is null.');
+        DebugLogger.instance.printInfo(
+          'Storage is null.',
+          name: name,
+        );
         return false;
       }
       await storage.clear();
       return true;
     } catch (error, stackTrace) {
-      _log(error.toString());
-      _log(stackTrace.toString());
+      DebugLogger.instance.printInfo(
+        error.toString(),
+        name: name,
+      );
+      DebugLogger.instance.printInfo(
+        stackTrace.toString(),
+        name: name,
+      );
       return false;
     }
   }
@@ -1006,7 +1097,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       final LocalDatabase? storage = scopedValues.localStorage;
 
       if (storage == null) {
-        _log('Storage is null.');
+        DebugLogger.instance.printInfo(
+          'Storage is null.',
+          name: name,
+        );
         return false;
       }
 
@@ -1041,7 +1135,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       }
 
       if (currentValue != null && action.skipIfAlreadyExists) {
-        _log('Storage key [$storageKey] already exists. Skipping.');
+        DebugLogger.instance.printInfo(
+          'Storage key [$storageKey] already exists. Skipping.',
+          name: name,
+        );
         return false;
       }
 
@@ -1074,8 +1171,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         // This means the key is a simple key without any path or accessor. So
         // we can set it directly.
 
-        _log(
-            '[_updateStorage 1] Setting storage key [$storageKey] to value [$value].');
+        DebugLogger.instance.printInfo(
+          '[_updateStorage 1] Setting storage key [$storageKey] to value [$value].',
+          name: name,
+        );
         await storage.put(storageKey, value);
         return false;
       }
@@ -1094,14 +1193,22 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         storageData = Map<String, dynamic>.from(result as Map);
       }
 
-      _log(
-          '[_updateStorage 2] Setting storage key [$storageKey] to value [$value].');
+      DebugLogger.instance.printInfo(
+        '[_updateStorage 2] Setting storage key [$storageKey] to value [$value].',
+        name: name,
+      );
       await storage.put(match.name, storageData[match.name]);
 
       return true;
     } catch (error, stackTrace) {
-      _log(error.toString());
-      _log(stackTrace.toString());
+      DebugLogger.instance.printInfo(
+        error.toString(),
+        name: name,
+      );
+      DebugLogger.instance.printInfo(
+        stackTrace.toString(),
+        name: name,
+      );
       return false;
     }
   }
@@ -1113,7 +1220,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     try {
       final LocalDatabase? storage = scopedValues.localStorage;
       if (storage == null) {
-        _log('Storage is null.');
+        DebugLogger.instance.printInfo(
+          'Storage is null.',
+          name: name,
+        );
         return false;
       }
 
@@ -1128,7 +1238,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         // This means the key is a simple key without any path or accessor. So
         // we can remove it directly.
         await storage.remove(storageKey);
-        _log('Removed storage key [$storageKey].');
+        DebugLogger.instance.printInfo(
+          'Removed storage key [$storageKey].',
+          name: name,
+        );
         return true;
       }
 
@@ -1144,13 +1257,22 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         storageData = Map<String, dynamic>.from(result as Map);
       }
 
-      _log('Removed storage key [$storageKey].');
+      DebugLogger.instance.printInfo(
+        'Removed storage key [$storageKey].',
+        name: name,
+      );
       await storage.put(match.name, storageData[match.name]);
 
       return true;
     } catch (error, stackTrace) {
-      _log(error.toString());
-      _log(stackTrace.toString());
+      DebugLogger.instance.printInfo(
+        error.toString(),
+        name: name,
+      );
+      DebugLogger.instance.printInfo(
+        stackTrace.toString(),
+        name: name,
+      );
       return false;
     }
   }
@@ -1205,7 +1327,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
     final index = int.tryParse(substitutedIndex);
     if (index == null) {
-      _log('Invalid index: $substitutedIndex');
+      DebugLogger.instance.printInfo(
+        'Invalid index: $substitutedIndex',
+        name: name,
+      );
       return currentValue;
     }
 
@@ -1261,7 +1386,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
 
       if (cloudDatabase == null) {
-        _log('Cloud storage is null.');
+        DebugLogger.instance.printInfo(
+          'Cloud storage is null.',
+          name: name,
+        );
         return false;
       }
 
@@ -1315,8 +1443,14 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         skipCreationIfDocumentExists: subAction.skipCreationIfDocumentExists,
       );
     } catch (error, stackTrace) {
-      _log(error.toString());
-      _log(stackTrace.toString());
+      DebugLogger.instance.printInfo(
+        error.toString(),
+        name: name,
+      );
+      DebugLogger.instance.printInfo(
+        stackTrace.toString(),
+        name: name,
+      );
       return false;
     }
   }
@@ -1328,7 +1462,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
 
     if (cloudDatabase == null) {
-      _log('Cloud storage is null.');
+      DebugLogger.instance.printInfo(
+        'Cloud storage is null.',
+        name: name,
+      );
       return false;
     }
 
@@ -1427,8 +1564,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         // This means the key is a simple key without any path or accessor. So
         // we can set it directly.
 
-        _log(
-            '[updateDocumentOnCloud 1] Setting storage key [$storageKey] to value [$value].');
+        DebugLogger.instance.printInfo(
+          '[updateDocumentOnCloud 1] Setting storage key [$storageKey] to value [$value].',
+          name: name,
+        );
         docData[storageKey] = value;
         return await cloudDatabase.updateDocument(
           evaluatedPath,
@@ -1452,8 +1591,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         storageData = Map<String, dynamic>.from(result as Map);
       }
 
-      _log(
-          '[updateDocumentOnCloud 2] Setting storage key [$storageKey] to value [$value].');
+      DebugLogger.instance.printInfo(
+        '[updateDocumentOnCloud 2] Setting storage key [$storageKey] to value [$value].',
+        name: name,
+      );
       docData[match.name] = storageData[match.name];
 
       return await cloudDatabase.updateDocument(
@@ -1463,8 +1604,14 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         value: {match.name: docData[match.name]},
       );
     } catch (error, stackTrace) {
-      _log(error.toString());
-      _log(stackTrace.toString());
+      DebugLogger.instance.printInfo(
+        error.toString(),
+        name: name,
+      );
+      DebugLogger.instance.printInfo(
+        stackTrace.toString(),
+        name: name,
+      );
       return false;
     }
   }
@@ -1477,7 +1624,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
 
       if (cloudDatabase == null) {
-        _log('Cloud storage is null.');
+        DebugLogger.instance.printInfo(
+          'Cloud storage is null.',
+          name: name,
+        );
         return false;
       }
 
@@ -1497,8 +1647,14 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         evaluatedDocumentId,
       );
     } catch (error, stackTrace) {
-      _log(error.toString());
-      _log(stackTrace.toString());
+      DebugLogger.instance.printInfo(
+        error.toString(),
+        name: name,
+      );
+      DebugLogger.instance.printInfo(
+        stackTrace.toString(),
+        name: name,
+      );
       return false;
     }
   }
@@ -1534,7 +1690,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
 
     if (cloudDatabase == null) {
-      _log('Cloud storage is null. Waiting for it to initialize...');
+      DebugLogger.instance.printInfo(
+        'Cloud storage is null. Waiting for it to initialize...',
+        name: name,
+      );
       return;
     }
 
@@ -1544,12 +1703,17 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         nullSubstitutionMode: NullSubstitutionMode.emptyString,
         scopedValues: scopedValues,
       );
-      _log(
-          'Streaming document from cloud storage: $evaluatedPath/$evaluatedDocumentId');
+      DebugLogger.instance.printInfo(
+        'Streaming document from cloud storage: $evaluatedPath/$evaluatedDocumentId',
+        name: name,
+      );
       cloudDatabase.streamDocumentToVariable(
           evaluatedPath, evaluatedDocumentId, variable);
     } else {
-      _log('Streaming collection from cloud storage: $evaluatedPath');
+      DebugLogger.instance.printInfo(
+        'Streaming collection from cloud storage: $evaluatedPath',
+        name: name,
+      );
 
       cloudDatabase.streamCollectionToVariable(
         evaluatedPath,
@@ -1578,7 +1742,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final int? parsedValue = int.tryParse(substitutedValue);
 
     if (parsedValue == null) {
-      _log('Invalid value: $substitutedValue');
+      DebugLogger.instance.printInfo(
+        'Invalid value: $substitutedValue',
+        name: name,
+      );
       return currentValue;
     }
 
@@ -1606,7 +1773,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final double? parsedValue = double.tryParse(substitutedValue);
 
     if (parsedValue == null) {
-      _log('Invalid value: $substitutedValue');
+      DebugLogger.instance.printInfo(
+        'Invalid value: $substitutedValue',
+        name: name,
+      );
       return currentValue;
     }
 
