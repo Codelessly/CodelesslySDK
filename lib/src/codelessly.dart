@@ -579,7 +579,7 @@ class Codelessly {
 
       // Create the auth manager.
       _authManager = authManager ??
-          CodelesslyAuthManager(
+          AuthManager(
             config: _config!,
             cacheManager: _cacheManager!,
             firebaseAuth: _firebaseAuth!,

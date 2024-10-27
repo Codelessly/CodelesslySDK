@@ -43,7 +43,7 @@ class DataManager {
   /// which uses Hive.
   final CacheManager cacheManager;
 
-  /// The auth manager to use. By default, it is [CodelesslyAuthManager].
+  /// The auth manager to use. By default, it is [AuthManager].
   final AuthManager authManager;
 
   // TODO(Saad): This is only used to initialize CloudDatabase. We may be able
