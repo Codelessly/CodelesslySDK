@@ -1,4 +1,6 @@
-/// DebugLogger V3 (20241006)
+/// DebugLogger v3.1 (20241027)
+library;
+
 import 'package:logging/logging.dart';
 
 /// A robust logging utility for managing extensive logs in Dart applications.
@@ -9,7 +11,8 @@ import 'package:logging/logging.dart';
 /// Specialized logging functions.
 /// - `printRebuild`: Logs widget rebuilds to assist in identifying performance issues.
 /// - `printAction`: Logs user actions, useful for tracking user interactions and behaviors.
-/// - `printFunction`: Logs detailed function call information, aiding in debugging complex operations.
+/// - `printFunction`: Logs the execution of a function. Should be placed at the start
+///   of the function to track when it's called.
 /// - `printInfo`: Provides a general-purpose logging method for informational messages.
 ///
 /// Example:
@@ -156,6 +159,9 @@ class DebugLogger {
 
   /// [Level.FINEST] Logs detailed information about function executions, including function name and passed parameters.
   /// This method is particularly useful for debugging and tracing the flow of data through complex operations.
+  /// Should be placed at the start of the function to track when it's called.
+  /// Note: This should NOT be used for logging general function results or state changes
+  /// (use printInfo for that). It's specifically for tracking function execution flow.
   ///
   /// Example:
   /// ```dart
