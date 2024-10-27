@@ -1416,7 +1416,7 @@ class DataManager {
           await Future.wait(apiModels.map((future) async {
         try {
           return await future;
-        } catch (e, stacktrace) {
+        } catch (e) {
           DebugLogger.instance.log(
             'Error while fetching apis.\nError: $e',
             category: DebugCategory.error,
@@ -1446,7 +1446,7 @@ class DataManager {
         if (variables != null) {
           model.variables[layoutID] = variables;
         }
-      } catch (e, stacktrace) {
+      } catch (e) {
         DebugLogger.instance.log(
           'Error while fetching variables.\nError: $e',
           category: DebugCategory.error,
@@ -1469,7 +1469,7 @@ class DataManager {
         if (conditions != null) {
           model.conditions[layoutID] = conditions;
         }
-      } catch (e, stacktrace) {
+      } catch (e) {
         DebugLogger.instance.log(
           'Error while fetching conditions.\nError: $e',
           category: DebugCategory.error,

@@ -170,7 +170,7 @@ abstract class NetworkDataRepository {
       tracker.trackFontDownload();
 
       return Uint8List.view(response.bodyBytes.buffer);
-    } catch (e, str) {
+    } catch (e) {
       DebugLogger.instance.log(
         'Error downloading font bytes.\nError: $e',
         category: DebugCategory.error,
