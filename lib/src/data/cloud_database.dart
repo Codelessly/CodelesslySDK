@@ -5,6 +5,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../codelessly_sdk.dart';
+import '../logging/debug_logger.dart';
 import '../utils/constants.dart';
 
 const String _label = 'Cloud Database';
@@ -184,6 +185,8 @@ abstract class CloudDatabase extends ChangeNotifier {
 /// A implementation that uses Firestore as the backend.
 /// This is used to store data via actions for the SDK.
 class FirestoreCloudDatabase extends CloudDatabase {
+  static const String name = 'CloudDatabase';
+
   /// Reference to the root document for this session.
   late final DocumentReference<Map<String, dynamic>> rootRef =
       firestore.collection(_rootCollection).doc(identifier);
@@ -212,14 +215,18 @@ class FirestoreCloudDatabase extends CloudDatabase {
     required this.tracker,
   });
 
-  void log(String message) => logger.log(_label, message);
-
   /// Initializes the cloud storage for the given [identifier]. This must be
   /// called and awaited before using the cloud storage.
   Future<void> init() async {
-    logger.log(_label, 'Initializing for $identifier at [${rootRef.path}]');
-    logger.log(_label,
-        'PublishSource: $publishSource | rootCollection: $_rootCollection');
+    DebugLogger.instance.printFunction('init()', name: name);
+    DebugLogger.instance.printInfo(
+      'Initializing for $identifier at [${rootRef.path}]',
+      name: name,
+    );
+    DebugLogger.instance.printInfo(
+      'PublishSource: $publishSource | rootCollection: $_rootCollection',
+      name: name,
+    );
 
     // Create project doc if missing.
     final snapshot = await rootRef.get();
@@ -232,7 +239,8 @@ class FirestoreCloudDatabase extends CloudDatabase {
     await rootRef.set({'project': identifier});
     tracker.trackWrite('cloudDatabase/init');
 
-    logger.log(_label, 'Done initializing for $identifier');
+    DebugLogger.instance
+        .printInfo('Done initializing for $identifier', name: name);
   }
 
   /// Gives a collection reference for the given [path].
@@ -303,13 +311,20 @@ class FirestoreCloudDatabase extends CloudDatabase {
     bool skipCreationIfDocumentExists = true,
     required Map<String, dynamic> value,
   }) async {
+    DebugLogger.instance.printFunction(
+      'addDocument(path: $path, documentId: $documentId, autoGenerateId: $autoGenerateId)',
+      name: name,
+    );
+
     // Auto generate id if desired.
     if (autoGenerateId) {
-      // if autoGenerateId is true, then skipCreationIfDocumentExists and docId is ignored.
       final document = await rootRef.collection(path).add(value);
       tracker.trackWrite('cloudDatabase/addDocument');
 
-      logger.log(_label, 'Document added: ${document.path}');
+      DebugLogger.instance.printInfo(
+        'Document added: ${document.path}',
+        name: name,
+      );
 
       // Sanitize data afterwards because we didn't have the docId before.
       value = sanitizeCloudDataToSend(value, docId: document.id);
@@ -330,9 +345,10 @@ class FirestoreCloudDatabase extends CloudDatabase {
     tracker.trackRead('cloudDatabase/addDocument');
 
     if (skipCreationIfDocumentExists && snapshot.exists) {
-      // if skipCreationIfDocumentExists is true, check if document exists.
-      // if document exists, then return.
-      logger.log(_label, 'Document already exists: ${docRef.path}');
+      DebugLogger.instance.printInfo(
+        'Document already exists: ${docRef.path}',
+        name: name,
+      );
       return true;
     }
 
@@ -340,7 +356,10 @@ class FirestoreCloudDatabase extends CloudDatabase {
     await docRef.set(value);
     tracker.trackWrite('cloudDatabase/addDocument');
 
-    logger.log(_label, 'Document added: ${docRef.path}/$documentId');
+    DebugLogger.instance.printInfo(
+      'Document added: ${docRef.path}/$documentId',
+      name: name,
+    );
     return true;
   }
 
@@ -350,6 +369,11 @@ class FirestoreCloudDatabase extends CloudDatabase {
     required String documentId,
     required Map<String, dynamic> value,
   }) async {
+    DebugLogger.instance.printFunction(
+      'updateDocument(path: $path, documentId: $documentId)',
+      name: name,
+    );
+
     final DocumentReference docRef = getDocPath(path, documentId);
     // final snapshot = await docRef.get();
     // if (!snapshot.exists) {
@@ -364,7 +388,10 @@ class FirestoreCloudDatabase extends CloudDatabase {
     await docRef.set(value, SetOptions(merge: true));
     tracker.trackWrite('cloudDatabase/updateDocument');
 
-    logger.log(_label, 'Document updated: ${docRef.path}');
+    DebugLogger.instance.printInfo(
+      'Document updated: ${docRef.path}',
+      name: name,
+    );
     return true;
   }
 
@@ -414,6 +441,11 @@ class FirestoreCloudDatabase extends CloudDatabase {
     String documentId,
     Observable<VariableData> variable,
   ) {
+    DebugLogger.instance.printFunction(
+      'streamDocumentToVariable(path: $path, documentId: $documentId)',
+      name: name,
+    );
+
     // Get doc reference.
     final docRef = getDocPath(path, documentId);
 
@@ -425,10 +457,14 @@ class FirestoreCloudDatabase extends CloudDatabase {
       (data) {
         tracker.trackRead('cloudDatabase/streamDocumentToVariable');
 
-        logger.log(_label,
-            'Document stream update from cloud storage: $path/$documentId');
-        logger.log(_label,
-            'Updating variable ${variable.value.name} with success state.');
+        DebugLogger.instance.printInfo(
+          'Document stream update from cloud storage: $path/$documentId',
+          name: name,
+        );
+        DebugLogger.instance.printInfo(
+          'Updating variable ${variable.value.name} with success state.',
+          name: name,
+        );
 
         data = sanitizeCloudDataForUse(data, docId: documentId);
 
@@ -439,8 +475,10 @@ class FirestoreCloudDatabase extends CloudDatabase {
         );
       },
       onError: (error) {
-        logger.log(_label,
-            'Error loading document from cloud storage: $path/$documentId');
+        DebugLogger.instance.printInfo(
+          'Error loading document from cloud storage: $path/$documentId',
+          name: name,
+        );
         // Set the variable with error state.
         variable.set(
           variable.value.copyWith(
@@ -505,9 +543,14 @@ class FirestoreCloudDatabase extends CloudDatabase {
         final docs = snapshot.docs
             .map((doc) => sanitizeCloudDataForUse(doc.data(), docId: doc.id))
             .toList();
-        logger.log(_label, 'Document stream update from cloud storage: $path');
-        logger.log(_label,
-            'Updating variable ${variable.value.name} with success state.');
+        DebugLogger.instance.printInfo(
+          'Document stream update from cloud storage: $path',
+          name: name,
+        );
+        DebugLogger.instance.printInfo(
+          'Updating variable ${variable.value.name} with success state.',
+          name: name,
+        );
         // Set the variable with success state.
         variable.set(
           variable.value
@@ -515,7 +558,10 @@ class FirestoreCloudDatabase extends CloudDatabase {
         );
       },
       onError: (error) {
-        logger.log(_label, 'Error loading document from cloud storage: $path');
+        DebugLogger.instance.printInfo(
+          'Error loading document from cloud storage: $path',
+          name: name,
+        );
         // Set the variable with error state.
         variable.set(
           variable.value.copyWith(
