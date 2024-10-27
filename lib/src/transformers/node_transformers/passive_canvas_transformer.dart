@@ -7,8 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../logging/debug_logger.dart';
 
 class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
+  static const String name = 'PassiveCanvasWidget';
+
   PassiveCanvasTransformer(super.getNode, super.manager);
 
   static List<String> getBodyChildren(CanvasNode node) =>
@@ -387,8 +390,6 @@ class PassiveCanvasWidget extends StatefulWidget {
 class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   late List<ActionModel> onLoadActions = collectOnLoadActions();
 
-  // StreamSubscription? _subscription;
-
   bool didPerformOnLoadActions = false;
 
   Codelessly? codelessly;
@@ -444,17 +445,6 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     didPerformOnLoadActions = true;
 
     triggerOnLoadActions(context);
-
-    // _subscription?.cancel();
-    // _subscription = context
-    //     .read<Codelessly>()
-    //     .dataManager
-    //     .publishModelStream
-    //     .listen((event) {
-    //   logger.log('PassiveCanvasWidget',
-    //       'Received publish event for canvas ${widget.node.id}');
-    //   triggerOnLoadActions(context);
-    // });
   }
 
   List<ActionModel> collectOnLoadActions() => widget.node.reactions
@@ -471,11 +461,16 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
 
   void triggerOnLoadActions(BuildContext context) {
     if (onLoadActions.isEmpty) {
-      logger.log('PassiveCanvasWidget',
-          'No onLoad actions found for canvas ${widget.node.id}');
+      DebugLogger.instance.printInfo(
+        'No onLoad actions found for canvas ${widget.node.id}',
+        name: PassiveCanvasTransformer.name,
+      );
     }
 
-    logger.log('PassiveCanvasWidget', 'Performing actions on canvas load');
+    DebugLogger.instance.printInfo(
+      'Performing actions on canvas load',
+      name: PassiveCanvasTransformer.name,
+    );
     executeActionAt(0, onLoadActions);
   }
 

@@ -5,11 +5,10 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../logging/debug_logger.dart';
 import 'codelessly_error_screen.dart';
 import 'codelessly_loading_screen.dart';
 import 'layout_builder.dart';
-
-const String _label = 'Codelessly Widget';
 
 /// Allows wrapping a loaded [Codelessly] layout with any widget for additional
 /// control over the rendering.
@@ -44,6 +43,8 @@ Widget _defaultLayoutBuilder(context, layout) => layout;
 /// 4. Using a [controller], which can be customized in any of the ways
 ///    described above but with explicit control over the state.
 class CodelesslyWidget extends StatefulWidget {
+  static const String name = 'CodelesslyWidget';
+
   /// An external [CodelesslyWidgetController] to use. If this is not provided,
   /// an internal one will be created.
   final CodelesslyWidgetController? controller;
@@ -303,8 +304,10 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     );
 
     if (widget.codelesslyContext != null) {
-      logger.log(
-          _label, 'A CodelesslyContext was provided explicitly by the widget.');
+      DebugLogger.instance.printInfo(
+        'A CodelesslyContext was provided explicitly by the widget.',
+        name: CodelesslyWidget.name,
+      );
     }
 
     codelesslyContext = widget.codelesslyContext ??
@@ -586,8 +589,10 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           if (_stopwatch != null && _stopwatch!.isRunning) {
             final millis = _stopwatch!.elapsedMilliseconds;
             _stopwatch?.stop();
-            logger.log(
-                _label, 'Layout loaded in ${millis}ms or ${millis / 1000}s');
+            DebugLogger.instance.printInfo(
+              'Layout loaded in ${millis}ms or ${millis / 1000}s',
+              name: CodelesslyWidget.name,
+            );
           }
 
           return _NavigationBuilder(
