@@ -5,11 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 import '../../codelessly_sdk.dart';
-
-const String _label = 'Cache Manager';
+import '../logging/debug_logger.dart';
 
 /// Handles caching of any data that needs to be cached via Hive.
 class CodelesslyCacheManager extends CacheManager {
+  static const String name = 'CacheManager';
+
   /// The configuration used by the [Codelessly] SDK.
   final CodelesslyConfig config;
 
@@ -26,6 +27,7 @@ class CodelesslyCacheManager extends CacheManager {
 
   @override
   Future<void> init() async {
+    DebugLogger.instance.printFunction('init()', name: name);
     final Stopwatch stopwatch = Stopwatch()..start();
     try {
       await Hive.initFlutter('codelessly_sdk');
@@ -49,19 +51,20 @@ class CodelesslyCacheManager extends CacheManager {
     } finally {
       stopwatch.stop();
 
-      logger.log(
-        _label,
+      DebugLogger.instance.printInfo(
         'Initialized Hive in ${stopwatch.elapsed.inMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s',
+        name: name,
       );
     }
   }
 
   @override
   Future<void> clearAll() async {
-    logger.log(_label, 'Clearing cache...');
+    DebugLogger.instance.printFunction('clearAll()', name: name);
+    DebugLogger.instance.printInfo('Clearing cache...', name: name);
     try {
       await box.clear();
-      logger.log(_label, 'Cache cleared successfully!');
+      DebugLogger.instance.printInfo('Cache cleared successfully!', name: name);
     } catch (e, stacktrace) {
       throw CodelesslyException.cacheClearException(
         message: 'Failed to clear cache. $e',
@@ -72,16 +75,20 @@ class CodelesslyCacheManager extends CacheManager {
   }
 
   @override
-  void reset() {}
+  void reset() {
+    DebugLogger.instance.printFunction('reset()', name: name);
+  }
 
   @override
   void dispose() async {
+    DebugLogger.instance.printFunction('dispose()', name: name);
     box.close();
     filesBox.close();
   }
 
   @override
-  Future<void> store(String key, dynamic value) {
+  Future<void> store(String key, dynamic value) async {
+    DebugLogger.instance.printFunction('store(key: $key)', name: name);
     try {
       if (value is String || value is num || value is bool || value is List) {
         return box.put(key, value);
@@ -98,6 +105,7 @@ class CodelesslyCacheManager extends CacheManager {
 
   @override
   T get<T>(String key, {T Function(Map<String, dynamic> value)? decode}) {
+    DebugLogger.instance.printFunction('get<$T>(key: $key)', name: name);
     try {
       final dynamic value = box.get(key);
       if (decode != null && value is String) {
@@ -116,17 +124,25 @@ class CodelesslyCacheManager extends CacheManager {
   }
 
   @override
-  bool isCached(String key) => box.containsKey(key);
+  bool isCached(String key) {
+    DebugLogger.instance.printFunction('isCached(key: $key)', name: name);
+    return box.containsKey(key);
+  }
 
   @override
-  Future<void> delete(String key) => box.delete(key);
+  Future<void> delete(String key) {
+    DebugLogger.instance.printFunction('delete(key: $key)', name: name);
+    return box.delete(key);
+  }
 
   @override
   Future<void> deleteAllByteData() async {
-    logger.log(_label, 'Deleting all byte data...');
+    DebugLogger.instance.printFunction('deleteAllByteData()', name: name);
+    DebugLogger.instance.printInfo('Deleting all byte data...', name: name);
     try {
       filesBox.clear();
-      logger.log(_label, 'Cache bytes deleted successfully!');
+      DebugLogger.instance
+          .printInfo('Cache bytes deleted successfully!', name: name);
     } catch (e, stacktrace) {
       throw CodelesslyException.fileIoException(
         message: 'Failed to clear files.\n$e',
@@ -138,6 +154,10 @@ class CodelesslyCacheManager extends CacheManager {
 
   @override
   Future<void> deleteBytes(String pathKey, String name) async {
+    DebugLogger.instance.printFunction(
+      'deleteBytes(pathKey: $pathKey, name: $name)',
+      name: name,
+    );
     try {
       final key = '$pathKey/$name';
       await filesBox.delete(key);
@@ -152,6 +172,10 @@ class CodelesslyCacheManager extends CacheManager {
 
   @override
   Uint8List getBytes(String pathKey, String name) {
+    DebugLogger.instance.printFunction(
+      'getBytes(pathKey: $pathKey, name: $name)',
+      name: name,
+    );
     final key = '$pathKey/$name';
     if (filesBox.containsKey(key)) {
       return filesBox.get(key);
@@ -163,6 +187,10 @@ class CodelesslyCacheManager extends CacheManager {
 
   @override
   Future<bool> areBytesCached(String pathKey, String name) async {
+    DebugLogger.instance.printFunction(
+      'areBytesCached(pathKey: $pathKey, name: $name)',
+      name: name,
+    );
     try {
       final key = '$pathKey/$name';
       return filesBox.containsKey(key);
@@ -180,8 +208,14 @@ class CodelesslyCacheManager extends CacheManager {
     String pathKey, {
     Iterable<String> excludedFileNames = const [],
   }) async {
-    logger.log(_label,
-        'Purging outdated files. (excluding: ${excludedFileNames.join(', ')})');
+    DebugLogger.instance.printFunction(
+      'purgeBytes(pathKey: $pathKey, excludedFileNames: ${excludedFileNames.join(', ')})',
+      name: name,
+    );
+    DebugLogger.instance.printInfo(
+      'Purging outdated files. (excluding: ${excludedFileNames.join(', ')})',
+      name: name,
+    );
     int purgedFiles = 0;
     try {
       for (final String path in filesBox.keys) {
@@ -190,20 +224,25 @@ class CodelesslyCacheManager extends CacheManager {
         }
         final String fileName = path.split('/').last;
         if (!excludedFileNames.contains(fileName)) {
-          logger.log(_label, '\t\tDeleting file: $path');
+          DebugLogger.instance
+              .printInfo('\t\tDeleting file: $path', name: name);
 
           await filesBox.delete(path);
 
-          logger.log(_label, '\t\tSuccessfully deleted.');
+          DebugLogger.instance
+              .printInfo('\t\tSuccessfully deleted.', name: name);
 
           purgedFiles++;
         }
       }
 
       if (purgedFiles > 0) {
-        logger.log(_label, 'Successfully purged $purgedFiles files.');
+        DebugLogger.instance.printInfo(
+          'Successfully purged $purgedFiles files.',
+          name: name,
+        );
       } else {
-        logger.log(_label, 'No files were purged.');
+        DebugLogger.instance.printInfo('No files were purged.', name: name);
       }
     } catch (e, stacktrace) {
       throw CodelesslyException.fileIoException(
@@ -216,10 +255,17 @@ class CodelesslyCacheManager extends CacheManager {
 
   @override
   Future<void> storeBytes(String pathKey, String name, Uint8List bytes) async {
+    DebugLogger.instance.printFunction(
+      'storeBytes(pathKey: $pathKey, name: $name)',
+      name: name,
+    );
     try {
       final key = '$pathKey/$name';
       await filesBox.put(key, bytes);
-      logger.log(_label, 'Successfully saved file $pathKey/$name');
+      DebugLogger.instance.printInfo(
+        'Successfully saved file $pathKey/$name',
+        name: name,
+      );
     } catch (e, stacktrace) {
       throw CodelesslyException.fileIoException(
         message: 'Failed to save file $pathKey/$name',
