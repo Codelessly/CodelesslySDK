@@ -1,10 +1,9 @@
 import 'dart:async';
+import 'package:logging/logging.dart';
 
 import 'codelessly_event.dart';
-import 'codelessly_logger.dart';
+import '../logging/debug_logger.dart';
 import 'reporter.dart';
-
-const String _label = 'Error Reporter';
 
 /// A [typedef] that defines the callback for [CodelesslyErrorHandler].
 /// It allows supplementary handling of any captured exceptions that the SDK
@@ -79,6 +78,8 @@ abstract class BaseErrorHandler {
 /// [CodelesslyErrorHandler.init] before using it.
 ///
 class CodelesslyErrorHandler extends BaseErrorHandler {
+  static const String name = 'Error Reporter';
+
   /// The reporter that will be used to report errors.
   final ErrorReporter? _reporter;
 
@@ -107,7 +108,7 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
 
   @override
   Future<void> captureEvent(CodelesslyEvent event) async {
-    logger.log(_label, event.toString(), largePrint: true);
+    DebugLogger.instance.printInfo(event.toString(), name: name);
     _reporter?.captureEvent(event);
   }
 
@@ -139,11 +140,11 @@ class CodelesslyErrorHandler extends BaseErrorHandler {
     _lastException = exception;
     onException?.call(exception);
 
-    logger.error(
-      _label,
+    DebugLogger.instance.log(
       message ?? exception.message ?? 'Unknown error',
-      error: exception,
-      stackTrace: exception.stacktrace ?? StackTrace.current,
+      category: DebugCategory.error,
+      name: name,
+      level: Level.WARNING,
     );
 
     _reporter?.captureException(

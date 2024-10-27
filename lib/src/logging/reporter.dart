@@ -2,10 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'codelessly_event.dart';
-import 'codelessly_logger.dart';
+import 'debug_logger.dart';
 import 'error_handler.dart';
-
-const String _label = 'Firestore Error Reporter';
 
 /// Abstraction for reporting exceptions and event to remote server.
 abstract class ErrorReporter {
@@ -22,6 +20,8 @@ abstract class ErrorReporter {
 
 /// Responsible for uploading events and exceptions to firestore database.
 class FirestoreErrorReporter extends ErrorReporter {
+  static const String name = 'FirestoreErrorReporter';
+
   /// The firestore instance to use for uploading events and exceptions.
   final FirebaseFirestore _firestore;
   final FirebaseApp _firebaseApp;
@@ -34,12 +34,13 @@ class FirestoreErrorReporter extends ErrorReporter {
 
   @override
   Future<void> captureEvent(CodelesslyEvent event) async {
+    DebugLogger.instance.printFunction('captureEvent()', name: name);
     await event.populateDeviceMetadata();
     await _firestore
         .collection(_collection)
         .add(event.toJson())
         .whenComplete(() {
-      print('Event captured');
+      DebugLogger.instance.printInfo('Event captured', name: name);
     });
   }
 
@@ -48,6 +49,7 @@ class FirestoreErrorReporter extends ErrorReporter {
     Exception throwable, {
     StackTrace? stacktrace,
   }) async {
+    DebugLogger.instance.printFunction('captureException()', name: name);
     final CodelesslyEvent event = CodelesslyEvent(
       message: throwable is CodelesslyException
           ? throwable.message
@@ -57,12 +59,18 @@ class FirestoreErrorReporter extends ErrorReporter {
           : stacktrace?.toString(),
       tags: ['error'],
     );
-    print('Stacktrace:\n${event.stacktrace}');
+    DebugLogger.instance
+        .printInfo('Stacktrace:\n${event.stacktrace}', name: name);
     await event.populateDeviceMetadata();
     await _firestore.collection(_collection).add(event.toJson()).then((doc) {
-      logger.log(_label, 'Exception captured. ID: [${doc.id}]');
-      logger.log(_label,
-          'Exception URL: https://console.firebase.google.com/u/1/project/${_firebaseApp.options.projectId}/firestore/data/~2Fsdk_errors~2F${doc.id}');
+      DebugLogger.instance.printInfo(
+        'Exception captured. ID: [${doc.id}]',
+        name: name,
+      );
+      DebugLogger.instance.printInfo(
+        'Exception URL: https://console.firebase.google.com/u/1/project/${_firebaseApp.options.projectId}/firestore/data/~2Fsdk_errors~2F${doc.id}',
+        name: name,
+      );
     });
   }
 
@@ -71,6 +79,7 @@ class FirestoreErrorReporter extends ErrorReporter {
     String message, {
     StackTrace? stacktrace,
   }) async {
+    DebugLogger.instance.printFunction('captureMessage()', name: name);
     final event = CodelesslyEvent(
       message: message,
       stacktrace: stacktrace?.toString(),
@@ -82,7 +91,7 @@ class FirestoreErrorReporter extends ErrorReporter {
         .collection(_collection)
         .add(event.toJson())
         .whenComplete(() {
-      logger.log(_label, 'Message captured');
+      DebugLogger.instance.printInfo('Message captured', name: name);
     });
   }
 }
