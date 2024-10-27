@@ -3,9 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
-import '../logging/codelessly_logger.dart';
-
-const String _label = 'Local Storage';
+import '../logging/debug_logger.dart';
 
 /// Allows access to local storage on the device. Implementations of this class
 /// should be able to store and retrieve data from the device's local storage.
@@ -16,6 +14,8 @@ const String _label = 'Local Storage';
 /// primitive type or a list or map of primitive types depending on the
 /// implementation.
 abstract class LocalDatabase extends ChangeNotifier {
+  static const String name = 'LocalStorage';
+
   /// A map of notifiers for a key in the storage. This is used to notify
   /// listeners when the value for a key in the storage changes.
   final Map<String, _StorageListenable> _notifiers = {};
@@ -84,7 +84,10 @@ class HiveLocalDatabase extends LocalDatabase {
   /// given [key] in the storage. This also notifies the listeners for the
   /// storage itself.
   void _onBoxChanged(BoxEvent event) {
-    logger.log(_label, 'Storage changed for key: ${event.key}');
+    DebugLogger.instance.printInfo(
+      'Storage changed for key: ${event.key}',
+      name: LocalDatabase.name,
+    );
 
     // Get the notifier for the given key.
     final notifier = _notifiers[event.key.toString()];
@@ -136,11 +139,13 @@ class HiveLocalDatabase extends LocalDatabase {
 
   @override
   void reset() {
+    DebugLogger.instance.printFunction('reset()', name: LocalDatabase.name);
     _subscription?.cancel();
   }
 
   @override
   void dispose() async {
+    DebugLogger.instance.printFunction('dispose()', name: LocalDatabase.name);
     // Cancel the subscription to the storage updates.
     _subscription?.cancel();
 
@@ -157,6 +162,8 @@ class HiveLocalDatabase extends LocalDatabase {
 /// A [Listenable] that notifies when the value for the given [key] in the
 /// storage changes.
 class _StorageListenable extends ChangeNotifier {
+  static const String name = 'Local Storage Listenable';
+
   final String? _key;
 
   _StorageListenable._(this._key);
@@ -164,8 +171,10 @@ class _StorageListenable extends ChangeNotifier {
   /// Notifies the listeners that the value for the given [key] in the storage
   /// has changed.
   void notify() {
-    logger.log(
-        'Local Storage Listenable', 'Notifying storage changed for key: $_key');
+    DebugLogger.instance.printInfo(
+      'Notifying storage changed for key: $_key',
+      name: name,
+    );
     notifyListeners();
   }
 }
