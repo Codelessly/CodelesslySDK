@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../logging/debug_logger.dart';
 
-const String _label = 'Layout Builder';
-
+/// A widget that retrieves a layout from a [CodelesslyWidgetController].
 class CodelesslyLayoutRetriever extends StatefulWidget {
+  static const String name = 'LayoutBuilder';
+
   final CodelesslyWidgetController controller;
   final SizeC bounds;
   final String layoutID;
@@ -278,7 +280,10 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
 
       // Make api request right away if it is a canvas action.
       if (canvasAction != null) {
-        logger.log(_label, 'Making api request for onLoad canvas action');
+        DebugLogger.instance.printInfo(
+          'Making api request for onLoad canvas action',
+          name: CodelesslyLayoutRetriever.name,
+        );
         FunctionsRepository.makeApiRequestFromAction(
             canvasAction, context, notifier);
       }
@@ -304,8 +309,10 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
           codelesslyContext.findVariableByName(action.variable!.name);
 
       if (variable == null) {
-        logger.log(_label,
-            'Variable with name ${action.variable!.name} does not exist');
+        DebugLogger.instance.printInfo(
+          'Variable with name ${action.variable!.name} does not exist',
+          name: CodelesslyLayoutRetriever.name,
+        );
         continue;
       }
 
