@@ -8,8 +8,6 @@ import '../../codelessly_sdk.dart';
 import '../logging/debug_logger.dart';
 import '../utils/constants.dart';
 
-const String _label = 'Cloud Database';
-
 const List<String> privateDocumentFields = [
   SDKConstants.id,
   SDKConstants.createdAt,
