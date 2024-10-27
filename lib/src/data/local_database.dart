@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../logging/debug_logger.dart';
 
@@ -176,5 +177,109 @@ class _StorageListenable extends ChangeNotifier {
       name: name,
     );
     notifyListeners();
+  }
+}
+
+class SharedPreferencesLocalDatabase extends LocalDatabase {
+  static const String _prefix = 'codelessly_';
+  SharedPreferences? _prefsInstance;
+
+  SharedPreferencesLocalDatabase({required super.identifier}) {
+    _init();
+  }
+
+  Future<void> _init() async {
+    _prefsInstance = await SharedPreferences.getInstance();
+  }
+
+  @override
+  bool containsKey(String key) {
+    return _prefsInstance?.containsKey(_prefix + key) ?? false;
+  }
+
+  @override
+  Map<String, dynamic> getAll() {
+    if (_prefsInstance == null) return {};
+
+    return _prefsInstance!
+        .getKeys()
+        .where((key) => key.startsWith(_prefix))
+        .fold<Map<String, dynamic>>({}, (map, key) {
+      map[key.substring(_prefix.length)] = _prefsInstance!.get(key);
+      return map;
+    });
+  }
+
+  @override
+  Future<void> put(String key, Object? value) async {
+    if (_prefsInstance == null) return;
+
+    final fullKey = _prefix + key;
+
+    if (value == null) {
+      await _prefsInstance!.remove(fullKey);
+    } else if (value is int) {
+      await _prefsInstance!.setInt(fullKey, value);
+    } else if (value is double) {
+      await _prefsInstance!.setDouble(fullKey, value);
+    } else if (value is bool) {
+      await _prefsInstance!.setBool(fullKey, value);
+    } else if (value is String) {
+      await _prefsInstance!.setString(fullKey, value);
+    } else if (value is List<String>) {
+      await _prefsInstance!.setStringList(fullKey, value);
+    } else {
+      throw ArgumentError('Unsupported value type: ${value.runtimeType}');
+    }
+    
+    // Notify listeners after value changes
+    notifyListeners();
+    _notifiers[key]?.notify();
+  }
+
+  @override
+  Object? get(String key, {Object? defaultValue}) {
+    return _prefsInstance?.get(_prefix + key) ?? defaultValue;
+  }
+
+  @override
+  Future<void> remove(String key) async {
+    await _prefsInstance?.remove(_prefix + key);
+    notifyListeners();
+    _notifiers[key]?.notify();
+  }
+
+  @override
+  Future<void> clear() async {
+    if (_prefsInstance == null) return;
+
+    for (String key in _prefsInstance!.getKeys()) {
+      if (key.startsWith(_prefix)) {
+        await _prefsInstance!.remove(key);
+      }
+    }
+    notifyListeners();
+  }
+
+  @override
+  Listenable getNotifier(String? key) {
+    if (key == null) return this;
+    
+    if (_notifiers.containsKey(key)) return _notifiers[key]!;
+    
+    final notifier = _StorageListenable._(key);
+    _notifiers[key] = notifier;
+    return notifier;
+  }
+
+  @override
+  void reset() {
+    DebugLogger.instance.printFunction('reset()', name: LocalDatabase.name);
+  }
+
+  @override
+  void dispose() {
+    DebugLogger.instance.printFunction('dispose()', name: LocalDatabase.name);
+    super.dispose();
   }
 }
