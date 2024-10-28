@@ -882,31 +882,16 @@ class DataManager {
           .printInfo('DIFF: No updates to process.', name: name);
       return;
     } else {
-      DebugLogger.instance.printInfo('DIFF: Processing updates:', name: name);
-      DebugLogger.instance.printInfo(
-          '      | ${layoutUpdates.length} layout updates.',
-          name: name);
-      DebugLogger.instance
-          .printInfo('      | ${fontUpdates.length} font updates.', name: name);
-      DebugLogger.instance
-          .printInfo('      | ${apiUpdates.length} api updates.', name: name);
-      DebugLogger.instance.printInfo(
-          '      | ${variableUpdates.length} variable updates.',
-          name: name);
-      DebugLogger.instance.printInfo(
-          '      | ${conditionUpdates.length} condition updates.',
-          name: name);
-      DebugLogger.instance.printInfo(
-          '      | ${templateChanged ? 1 : 0} template update${templateChanged ? '' : 's'}.',
-          name: name);
-      DebugLogger.instance.printInfo(
-          '      | ${entryChanged ? 1 : 0} entry id update${entryChanged ? '' : 's'}.',
-          name: name);
-      DebugLogger.instance.printInfo(
-          '      | ${didLayoutIDMapChange ? 'Layout ID map changed.' : 'No layout ID map changes.'}',
-          name: name);
-      DebugLogger.instance.printInfo(
-          '      | ${disabledLayoutsChanged ? 'Disabled layout IDs changed.' : 'No disabled layout IDs changed.'}',
+      DebugLogger.instance.printInfo('''DIFF: Processing updates:
+      | ${layoutUpdates.length} layout updates.
+      | ${fontUpdates.length} font updates.
+      | ${apiUpdates.length} api updates.
+      | ${variableUpdates.length} variable updates.
+      | ${conditionUpdates.length} condition updates.
+      | ${templateChanged ? 1 : 0} template update${templateChanged ? '' : 's'}.
+      | ${entryChanged ? 1 : 0} entry id update${entryChanged ? '' : 's'}.
+      | ${didLayoutIDMapChange ? 'Layout ID map changed.' : 'No layout ID map changes.'}
+      | ${disabledLayoutsChanged ? 'Disabled layout IDs changed.' : 'No disabled layout IDs changed.'}''',
           name: name);
     }
 
