@@ -1,4 +1,4 @@
-/// DebugLogger v3.1 (20241027)
+/// DebugLogger v3.2 (20241027)
 library;
 
 import 'package:logging/logging.dart';
@@ -67,6 +67,11 @@ class DebugLogger {
   void log(Object? message,
       {String? category, String? name, Level level = Level.INFO}) {
     try {
+      // Check if debug logging is enabled
+      if (!config.debugLog) {
+        return;
+      }
+
       // Print only highlighted and enabled category messages.
       if (config.highlights.isNotEmpty) {
         if (config.isHighlighted(category: category, name: name)) {
@@ -193,7 +198,10 @@ class DebugLoggerConfig {
   Set<String> disabledCategories = <String>{};
   Set<String> highlights = <String>{};
 
-  DebugLoggerConfig();
+  /// Enable or disable all logging.
+  bool debugLog = true;
+
+  DebugLoggerConfig({this.debugLog = true});
 
   /// Checks if a category is enabled for logging.
   bool isCategoryEnabled(String? category) {
