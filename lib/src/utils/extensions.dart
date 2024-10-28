@@ -720,6 +720,16 @@ extension FitsExtension on BaseNode {
 
   bool canFillParent(BaseNode parent) =>
       edgePins.inner(parent).isBothExpanded || isBothExpanded;
+
+  bool isWrapOnAxis(AxisC axis) => switch (axis) {
+        AxisC.horizontal => isHorizontalWrap,
+        AxisC.vertical => isVerticalWrap,
+      };
+
+  bool doesFlexOnAxis(AxisC axis) => switch (axis) {
+        AxisC.horizontal => isHorizontalExpanded || isHorizontalFlexible,
+        AxisC.vertical => isVerticalExpanded || isVerticalFlexible,
+      };
 }
 
 extension RowColumnMixinExtensions on RowColumnMixin {
