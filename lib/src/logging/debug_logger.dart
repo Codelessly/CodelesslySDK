@@ -1,4 +1,4 @@
-/// DebugLogger v3.2 (20241027)
+/// DebugLogger v4.1 (20241027)
 library;
 
 import 'package:logging/logging.dart';
@@ -49,11 +49,21 @@ class DebugLogger {
     return _instance!;
   }
 
+  late final Logger _logger;
+
   DebugLoggerConfig _config = DebugLoggerConfig();
   DebugLoggerConfig get config => _config;
 
-  DebugLogger({DebugLoggerConfig? config}) {
+  DebugLogger({String? name, DebugLoggerConfig? config}) {
+    _logger = (name != null) ? Logger(name) : Logger.root;
+    if (name != null) {
+      hierarchicalLoggingEnabled = true;
+    }
     if (config != null) _config = config;
+  }
+
+  void initialize({String? name, DebugLoggerConfig? config}) {
+    _instance = DebugLogger(name: name, config: config);
   }
 
   void setConfig(DebugLoggerConfig config) {
@@ -75,13 +85,13 @@ class DebugLogger {
       // Print only highlighted and enabled category messages.
       if (config.highlights.isNotEmpty) {
         if (config.isHighlighted(category: category, name: name)) {
-          print(message, category: category, name: name, level: level);
+          _log(message, category: category, name: name, level: level);
           return;
         }
 
         if (_config.enabledCategories.isNotEmpty) {
           if (_config.isCategoryEnabled(category ?? '')) {
-            print(message, category: category, name: name, level: level);
+            _log(message, category: category, name: name, level: level);
             return;
           }
         }
@@ -94,7 +104,7 @@ class DebugLogger {
       }
 
       if (_config.isCategoryEnabled(category ?? '')) {
-        print(message, category: category, name: name, level: level);
+        _log(message, category: category, name: name, level: level);
         return;
       }
 
@@ -104,14 +114,14 @@ class DebugLogger {
       }
 
       // Print all by default.
-      print(message, category: category, name: name, level: level);
+      _log(message, category: category, name: name, level: level);
     } catch (e) {
-      print(e, category: DebugCategory.error, level: Level.WARNING);
+      _log(e, category: DebugCategory.error, level: Level.WARNING);
     }
   }
 
   /// Prints a log message to the console using the [Logger] library.
-  void print(Object? message,
+  void _log(Object? message,
       {String? category, String? name, Level level = Level.INFO}) {
     StringBuffer logMessage = StringBuffer();
     if (name?.isNotEmpty ?? false) {
@@ -119,7 +129,7 @@ class DebugLogger {
     }
     logMessage.write(message);
 
-    Logger.root.log(level, logMessage.toString());
+    _logger.log(level, logMessage.toString());
   }
 
   /// [Level.FINEST] Specialized logging function used to trace widget rebuilds in Flutter applications.
