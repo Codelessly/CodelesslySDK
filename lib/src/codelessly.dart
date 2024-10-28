@@ -537,6 +537,12 @@ class Codelessly {
     DataManager? templateDataManager,
     bool initializeDataManagers = true,
   }) async {
+    DebugLogger.instance.initialize(
+      name: name,
+      config: DebugLoggerConfig(
+        debugLog: config?.debugLog ?? false,
+      ),
+    );
     DebugLogger.instance.printFunction('initialize()', name: name);
 
     if (_status is CLoading) {

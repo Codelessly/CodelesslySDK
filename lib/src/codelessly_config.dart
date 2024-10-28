@@ -63,6 +63,22 @@ class CodelesslyConfig with EquatableMixin {
   /// [kCodelesslyFirebaseApp].
   final String firebaseInstanceName;
 
+  /// Enable or disable console logs.
+  ///
+  /// **DebugLogger**
+  /// For further log customization, set DebugLogger.instance behavior.
+  /// For example, to highlight specific logs, use `DebugLogger.instance.highlight`.
+  ///  ```dart
+  ///  DebugLogger.instance.highlight(name: DataManager.name);
+  ///  ```
+  ///
+  /// **Logging Package**
+  /// This library uses the logging package. Set the package logger's logging level directly.
+  ///  ```dart
+  ///  logging.Logger(Codelessly.name).level = logging.Level.ALL;
+  ///  ```
+  final bool debugLog;
+
   /// Creates a new instance of [CodelesslyConfig].
   ///
   /// [authToken] is the token required to authenticate and initialize the SDK.
@@ -85,6 +101,7 @@ class CodelesslyConfig with EquatableMixin {
     this.firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
     this.baseURL = defaultBaseURL,
     PublishSource? publishSource,
+    this.debugLog = false,
   })  : firebaseOptions =
             firebaseOptions ?? DefaultFirebaseOptionsProd.currentPlatform,
         publishSource = publishSource ??
