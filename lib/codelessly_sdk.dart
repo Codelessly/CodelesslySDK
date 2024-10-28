@@ -15,7 +15,6 @@ export 'src/data/network_data_repository.dart';
 export 'src/data/web_data_repository.dart';
 export 'src/functions/functions.dart';
 export 'src/functions/functions_repository.dart';
-export 'src/logging/debug_logger.dart';
 export 'src/logging/error_handler.dart';
 export 'src/logging/stat_tracker.dart';
 export 'src/model/asset_model.dart';
