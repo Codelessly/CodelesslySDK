@@ -11,10 +11,23 @@ import '../utils/debouncer.dart';
 const _kDisableStatReporting = false;
 
 /// A class that tracks statistics of various operations in the SDK.
-abstract class StatTracker {
+///
+/// This tracker sends stats to Codelessly's server to help monitor usage and performance.
+/// Stats are batched and debounced to prevent overwhelming the server with requests.
+///
+/// Tracking can be disabled globally via [_kDisableStatReporting], per instance via [enabled],
+/// or automatically when running in the editor via [clientType].
+class StatTracker {
   final http.Client client;
 
-  StatTracker({required this.client});
+  /// Whether this tracker should collect and send stats.
+  /// Defaults to true. Set to false to disable all tracking for this instance.
+  final bool enabled;
+
+  StatTracker({
+    required this.client,
+    this.enabled = true,
+  });
 
   Uri? serverUrl;
 
@@ -24,61 +37,6 @@ abstract class StatTracker {
   /// Determines whether this tracker has been initialized.
   bool get didInitialize => projectId != null;
 
-  @mustCallSuper
-  void init({
-    required String projectId,
-    required Uri serverUrl,
-  }) {
-    this.projectId = projectId;
-    this.serverUrl = serverUrl;
-  }
-
-  /// Tracks one complete visual view of a Codelessly CloudUI Layout.
-  Future<void> trackView();
-
-  /// Tracks one document read operation.
-  Future<void> trackRead(String label);
-
-  /// Tracks one document write operation.
-  Future<void> trackWrite(String label);
-
-  /// Tracks one complete populated layout download operation.
-  Future<void> trackPopulatedLayoutDownload(String label);
-
-  /// Tracks a layout as being viewed, determined by the life cycle of the
-  /// CodelesslyWidget.
-  Future<void> trackLayoutView(String label);
-
-  /// Tracks one bundle download operation from the CDN.
-  Future<void> trackBundleDownload();
-
-  /// Tracks one font download operation from the CDN.
-  Future<void> trackFontDownload();
-
-  /// Tracks one action operation.
-  Future<void> trackAction(ActionModel action);
-
-  /// Tracks one cloud action operation.
-  Future<void> trackCloudAction(ActionModel action);
-}
-
-/// A [StatTracker] implementation that sends the stats to Codelessly's server.
-final class CodelesslyStatTracker extends StatTracker {
-  CodelesslyStatTracker({required super.client});
-
-  @override
-  void init({
-    required String projectId,
-    required Uri serverUrl,
-  }) {
-    super.init(projectId: projectId, serverUrl: serverUrl);
-
-    // Send a batch if stats were tracked while this wasn't initialized yet.
-    if (statBatch.isNotEmpty && !disabled) {
-      sendBatch();
-    }
-  }
-
   /// The field name to track the number of each operation.
   final Map<String, int> statBatch = {};
 
@@ -87,10 +45,25 @@ final class CodelesslyStatTracker extends StatTracker {
   final DeBouncer debouncer = DeBouncer(const Duration(seconds: 1));
 
   bool get disabled =>
+      !enabled ||
       _kDisableStatReporting ||
       clientType == kCodelesslyEditor ||
       projectId == null ||
       serverUrl == null;
+
+  @mustCallSuper
+  void init({
+    required String projectId,
+    required Uri serverUrl,
+  }) {
+    this.projectId = projectId;
+    this.serverUrl = serverUrl;
+
+    // Send a batch if stats were tracked while this wasn't initialized yet.
+    if (statBatch.isNotEmpty && !disabled) {
+      sendBatch();
+    }
+  }
 
   /// Sends the batch of stats to the server.
   Future<void> sendBatch() => debouncer.run(
@@ -112,7 +85,7 @@ final class CodelesslyStatTracker extends StatTracker {
     statBatch[field] = (statBatch[field] ?? 0) + 1;
   }
 
-  @override
+  /// Tracks one complete visual view of a Codelessly CloudUI Layout.
   Future<void> trackView() {
     if (disabled) return Future.value();
 
@@ -120,7 +93,7 @@ final class CodelesslyStatTracker extends StatTracker {
     return sendBatch();
   }
 
-  @override
+  /// Tracks one document read operation.
   Future<void> trackRead(String label) {
     if (disabled) return Future.value();
 
@@ -128,7 +101,7 @@ final class CodelesslyStatTracker extends StatTracker {
     return sendBatch();
   }
 
-  @override
+  /// Tracks one document write operation.
   Future<void> trackWrite(String label) {
     if (disabled) return Future.value();
 
@@ -136,7 +109,7 @@ final class CodelesslyStatTracker extends StatTracker {
     return sendBatch();
   }
 
-  @override
+  /// Tracks one complete populated layout download operation.
   Future<void> trackPopulatedLayoutDownload(String label) {
     if (disabled) return Future.value();
 
@@ -144,7 +117,8 @@ final class CodelesslyStatTracker extends StatTracker {
     return sendBatch();
   }
 
-  @override
+  /// Tracks a layout as being viewed, determined by the life cycle of the
+  /// CodelesslyWidget.
   Future<void> trackLayoutView(String label) {
     if (disabled) return Future.value();
 
@@ -152,7 +126,7 @@ final class CodelesslyStatTracker extends StatTracker {
     return sendBatch();
   }
 
-  @override
+  /// Tracks one bundle download operation from the CDN.
   Future<void> trackBundleDownload() {
     if (disabled) return Future.value();
 
@@ -160,7 +134,7 @@ final class CodelesslyStatTracker extends StatTracker {
     return sendBatch();
   }
 
-  @override
+  /// Tracks one font download operation from the CDN.
   Future<void> trackFontDownload() {
     if (disabled) return Future.value();
 
@@ -168,7 +142,7 @@ final class CodelesslyStatTracker extends StatTracker {
     return sendBatch();
   }
 
-  @override
+  /// Tracks one action operation.
   Future<void> trackAction(ActionModel action) {
     if (disabled) return Future.value();
 
@@ -176,7 +150,7 @@ final class CodelesslyStatTracker extends StatTracker {
     return sendBatch();
   }
 
-  @override
+  /// Tracks one cloud action operation.
   Future<void> trackCloudAction(ActionModel action) {
     if (disabled) return Future.value();
 
