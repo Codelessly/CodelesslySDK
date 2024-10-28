@@ -141,7 +141,7 @@ class Codelessly {
   final StreamController<CStatus> _statusStreamController =
       StreamController.broadcast()..add(CStatus.empty());
 
-  late final StatTracker _tracker = CodelesslyStatTracker(client: _client);
+  late final StatTracker _tracker = StatTracker(client: _client);
 
   /// Tracks statistics of various operations in the SDK.
   StatTracker get tracker => _tracker;

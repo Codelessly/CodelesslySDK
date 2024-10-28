@@ -78,7 +78,7 @@ abstract class BaseErrorHandler {
 /// [CodelesslyErrorHandler.init] before using it.
 ///
 class CodelesslyErrorHandler extends BaseErrorHandler {
-  static const String name = 'Error Reporter';
+  static const String name = 'ErrorReporter';
 
   /// The reporter that will be used to report errors.
   final ErrorReporter? _reporter;
