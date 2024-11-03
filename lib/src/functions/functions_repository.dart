@@ -127,12 +127,11 @@ class FunctionsRepository {
     final Codelessly codelessly = context.read<Codelessly>();
 
     if (apiData == null) {
-      codelessly.errorHandler.captureException(
-        CodelesslyException.apiNotFound(
-          apiId: action.apiId,
-          message: 'Api with id [${action.apiId}] does not exist.',
-          layoutID: context.read<CodelesslyWidgetController>().layoutID,
-        ),
+      codelessly.errorLogger.captureException(
+        'Api not found',
+        message: 'Api with id [${action.apiId}] does not exist.',
+        type: 'api_not_found',
+        layoutID: context.read<CodelesslyWidgetController>().layoutID,
       );
       return Future.error('Api with id [${action.apiId}] does not exist.');
     }
@@ -282,12 +281,12 @@ class FunctionsRepository {
       }
 
       if (layoutId == null) {
-        effectiveCodelessly.errorHandler.captureException(
-          CodelesslyException.layoutNotFound(
-            message:
-                'Could not find a layout with a canvas id of [${action.destinationId}]',
-            layoutID: layoutId,
-          ),
+        effectiveCodelessly.errorLogger.captureException(
+          'Layout not found',
+          message:
+              'Could not find a layout with a canvas id of [${action.destinationId}]',
+          type: 'layout_not_found',
+          layoutID: layoutId,
         );
         return;
       }
@@ -378,13 +377,12 @@ class FunctionsRepository {
     }
 
     if (layoutId == null) {
-      final Codelessly codelessly = context.read<Codelessly>();
-      codelessly.errorHandler.captureException(
-        CodelesslyException.layoutNotFound(
-          message:
-              'Could not find a layout with a canvas id of [${action.destinationId}]',
-          layoutID: layoutId,
-        ),
+      codelessly.errorLogger.captureException(
+        'Layout not found',
+        message:
+            'Could not find a layout with a canvas id of [${action.destinationId}]',
+        type: 'layout_not_found',
+        layoutID: layoutId,
       );
       return;
     }
@@ -615,8 +613,7 @@ class FunctionsRepository {
 
   static void printResponse(http.Response response) {
     if (kReleaseMode) return;
-    DebugLogger.instance.printInfo(
-      '''
+    DebugLogger.instance.printInfo('''
 --------------------------------------------------------------------
 Response:
 --------------------------------------------------------------------
@@ -627,9 +624,7 @@ ${const JsonEncoder.withIndent('  ').convert(response.headers)}
 Body:
 ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.decode(response.body)) : response.body}
 --------------------------------------------------------------------
-''',
-      name: name
-    );
+''', name: name);
   }
 
   /// Makes API request using cloud function to prevent any CORS issues.

@@ -3,13 +3,13 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'codelessly_event.dart';
 import 'debug_logger.dart';
-import 'error_handler.dart';
+import 'error_logger.dart';
 
 /// Abstraction for reporting exceptions and event to remote server.
 abstract class ErrorReporter {
   /// Handles a single exception with an optional stacktrace.
   /// If [stacktrace] is not provided, the current stacktrace will be used.
-  Future<void> captureException(Exception throwable, {StackTrace? stacktrace});
+  Future<void> captureException(dynamic throwable, {StackTrace? stacktrace});
 
   /// Handles a single event.
   Future<void> captureEvent(CodelesslyEvent event);
@@ -46,17 +46,13 @@ class FirestoreErrorReporter extends ErrorReporter {
 
   @override
   Future<void> captureException(
-    Exception throwable, {
+    dynamic throwable, {
     StackTrace? stacktrace,
   }) async {
     DebugLogger.instance.printFunction('captureException()', name: name);
     final CodelesslyEvent event = CodelesslyEvent(
-      message: throwable is CodelesslyException
-          ? throwable.message
-          : throwable.toString(),
-      stacktrace: throwable is CodelesslyException
-          ? throwable.stacktrace?.toString() ?? stacktrace?.toString()
-          : stacktrace?.toString(),
+      message: throwable.toString(),
+      stacktrace: stacktrace?.toString(),
       tags: ['error'],
     );
     DebugLogger.instance

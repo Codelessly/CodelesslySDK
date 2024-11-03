@@ -9,6 +9,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/debug_logger.dart';
+import '../logging/error_logger.dart';
 
 /// An implementation that uses Firebase auth to authenticate users and manage
 /// authentication state. Handles anonymous authentication, token verification,
@@ -27,9 +28,6 @@ class AuthManager {
 
   /// The firebase auth instance used to authenticate the device anonymously.
   final FirebaseAuth firebaseAuth;
-
-  /// The error handler used to report errors.
-  final CodelesslyErrorHandler errorHandler;
 
   /// The stream controller that broadcasts auth data changes.
   final StreamController<AuthData?> _authStreamController =
@@ -68,7 +66,6 @@ class AuthManager {
     required this.config,
     required this.cacheManager,
     required this.firebaseAuth,
-    required this.errorHandler,
     required this.client,
     AuthData? authData,
   }) : _authData = authData {
@@ -167,7 +164,7 @@ class AuthManager {
       authenticate().catchError((error) {
         // Error handling needs to be done here because this will not be caught
         // by SDK initialization.
-        errorHandler.captureException(error);
+        ErrorLogger.instance.captureException(error);
       });
     }
 
@@ -356,7 +353,6 @@ class AuthManager {
 
   /// Performs a handshake with the server to authenticate the token.
   /// Makes a network request to verify the auth token and retrieve project access.
-  /// Throws [CodelesslyException] if authentication fails.
   Future<void> authenticate() async {
     DebugLogger.instance.printFunction('authenticate()', name: name);
     try {
@@ -391,18 +387,22 @@ class AuthManager {
         DebugLogger.instance
             .printInfo('Failed to authenticate token.', name: name);
 
-        throw CodelesslyException.notAuthenticated();
+        ErrorLogger.instance.captureException('Authentication failed',
+            message: 'Failed to authenticate token', type: 'auth_failed');
+        return;
       }
-    } on CodelesslyException {
+    } on SocketException catch (e, str) {
+      ErrorLogger.instance.captureException(e,
+          message: 'Network error during authentication',
+          type: 'network_error',
+          stackTrace: str);
       rethrow;
-    } on SocketException {
-      throw CodelesslyException.networkException();
     } catch (e, str) {
-      throw CodelesslyException.other(
-        message: 'Failed to authenticate token.\nError: $e',
-        originalException: e,
-        stacktrace: str,
-      );
+      ErrorLogger.instance.captureException(e,
+          message: 'Failed to authenticate token',
+          type: 'auth_error',
+          stackTrace: str);
+      rethrow;
     }
   }
 

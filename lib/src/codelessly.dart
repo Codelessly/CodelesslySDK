@@ -10,6 +10,7 @@ import 'package:http/http.dart';
 
 import '../codelessly_sdk.dart';
 import 'logging/debug_logger.dart';
+import 'logging/error_logger.dart';
 import 'logging/reporter.dart';
 import 'utils/codelessly_http_client.dart';
 
@@ -92,11 +93,11 @@ class Codelessly {
   /// to the local device's cache.
   CacheManager get cacheManager => _cacheManager!;
 
-  CodelesslyErrorHandler? _errorHandler;
+  ErrorLogger? _errorLogger;
 
-  /// Returns the error handler that is responsible for capturing and reporting
+  /// Returns the error logger that is responsible for capturing and reporting
   /// errors to the Codelessly servers for this instance of the SDK.
-  CodelesslyErrorHandler get errorHandler => _errorHandler!;
+  ErrorLogger get errorLogger => _errorLogger!;
 
   FirebaseApp? _firebaseApp;
   FirebaseFirestore? _firebaseFirestore;
@@ -137,6 +138,15 @@ class Codelessly {
 
   /// Returns the current status of this SDK instance.
   CStatus get status => _status;
+
+  /// Sets the status of this SDK instance and emits a status update event.
+  set status(CStatus newStatus) {
+    if (_status == newStatus) {
+      return;
+    }
+    _status = newStatus;
+    _statusStreamController.add(_status);
+  }
 
   final StreamController<CStatus> _statusStreamController =
       StreamController.broadcast()..add(CStatus.empty());
@@ -211,7 +221,7 @@ class Codelessly {
 
     // If the config is not null, update the status to configured.
     if (_config != null) {
-      _updateStatus(CStatus.configured());
+      status = CStatus.configured();
     }
   }
 
@@ -226,7 +236,7 @@ class Codelessly {
     DebugLogger.instance.printInfo(
         'Disposing SDK. ${sealCache ? 'Sealing cache.' : 'Keeping cache open.'}',
         name: name);
-    _status = CStatus.empty();
+    status = CStatus.empty();
     _statusStreamController.close();
 
     if (sealCache) {
@@ -265,38 +275,32 @@ class Codelessly {
     _templateDataManager?.reset();
     _authManager?.reset();
 
-    _status = config == null ? CStatus.empty() : CStatus.configured();
+    status = config == null ? CStatus.empty() : CStatus.configured();
     _statusStreamController.add(_status);
 
     if (clearCache) {
       try {
         await _cacheManager?.clearAll();
       } catch (e, str) {
-        errorHandler.captureException(
+        ErrorLogger.instance.captureException(
           e,
-          stacktrace: str,
+          message: 'Failed to clear cache',
+          type: 'cache_clear_failed',
+          stackTrace: str,
         );
       }
 
       try {
         await _cacheManager?.deleteAllByteData();
       } catch (e, str) {
-        errorHandler.captureException(
+        ErrorLogger.instance.captureException(
           e,
-          stacktrace: str,
+          message: 'Failed to delete cache',
+          type: 'cache_delete_failed',
+          stackTrace: str,
         );
       }
     }
-  }
-
-  /// Internally updates the status of this instance of the SDK and emits a
-  /// status update event to the [statusStream].
-  void _updateStatus(CStatus status) {
-    if (_status == status) {
-      return;
-    }
-    _status = status;
-    _statusStreamController.add(_status);
   }
 
   /// Configures this instance of the SDK with the provided configuration
@@ -328,7 +332,7 @@ class Codelessly {
   }) {
     _config ??= config;
 
-    initErrorHandler(
+    initErrorLogger(
       automaticallySendCrashReports: _config!.automaticallySendCrashReports,
     );
 
@@ -366,7 +370,7 @@ class Codelessly {
       this.functions.addAll(functions);
     }
 
-    _updateStatus(CStatus.configured());
+    status = CStatus.configured();
     return status;
   }
 
@@ -467,12 +471,11 @@ class Codelessly {
           'Firebase instance initialized successfully [${_firebaseApp?.name}].',
           name: name);
     } catch (e, str) {
-      initErrorHandler(
-        automaticallySendCrashReports: false,
-      );
-      errorHandler.captureException(
+      ErrorLogger.instance.captureException(
         e,
-        stacktrace: str,
+        message: 'Failed to initialize Firebase',
+        type: 'firebase_init_failed',
+        stackTrace: str,
       );
     }
 
@@ -483,33 +486,22 @@ class Codelessly {
   }
 
   /// Initializes the internal Firestore instance used by this SDK and
-  /// configures the error handler to use it.
+  /// configures the error logger to use it.
   ///
   /// This will only fully run once if the [Firestore] instance is not already
   /// initialized. If it is initialized, this is ignored.
   ///
   /// If the SDK is running on web platform, this will be ignored.
-  void initErrorHandler({
+  void initErrorLogger({
     required bool automaticallySendCrashReports,
   }) {
-    DebugLogger.instance.printFunction('initErrorHandler()', name: name);
-    if (_errorHandler != null) return;
+    DebugLogger.instance.printFunction('initErrorLogger()', name: name);
+    if (_errorLogger != null) return;
 
-    _errorHandler = CodelesslyErrorHandler(
+    _errorLogger = ErrorLogger(
       reporter: automaticallySendCrashReports
           ? FirestoreErrorReporter(_firebaseApp!, _firebaseFirestore!)
           : null,
-      onException: (CodelesslyException exception) {
-        // Layout errors are not SDK errors.
-        if (exception.layoutID != null) {
-          return;
-        }
-        _updateStatus(CStatus.error(exception));
-        DebugLogger.instance.printInfo(
-          'Error received. Status is now $status',
-          name: name,
-        );
-      },
     );
   }
 
@@ -545,11 +537,11 @@ class Codelessly {
     );
     DebugLogger.instance.printFunction('initialize()', name: name);
 
-    if (_status is CLoading) {
-      return _status;
+    if (status is CLoading) {
+      return status;
     }
 
-    _updateStatus(CStatus.loading(CLoadingState.initializing));
+    status = CStatus.loading(CLoadingState.initializing);
 
     if (config != null) {
       _config = config;
@@ -574,12 +566,12 @@ class Codelessly {
 
     await initFirebase(config: _config!);
 
-    initErrorHandler(
+    initErrorLogger(
       automaticallySendCrashReports: _config!.automaticallySendCrashReports,
     );
 
     try {
-      _updateStatus(CStatus.loading(CLoadingState.initializedFirebase));
+      status = CStatus.loading(CLoadingState.initializedFirebase);
 
       // Clean up.
       if (cacheManager != null) _cacheManager?.dispose();
@@ -600,7 +592,6 @@ class Codelessly {
             cacheManager: _cacheManager!,
             firebaseAuth: _firebaseAuth!,
             client: _client,
-            errorHandler: errorHandler,
           );
 
       // Create the publish data manager.
@@ -619,7 +610,7 @@ class Codelessly {
               cacheManager: _cacheManager!,
             ),
             firebaseFirestore: firebaseFirestore,
-            errorHandler: errorHandler,
+            errorLogger: errorLogger,
             tracker: _tracker,
           );
 
@@ -639,7 +630,7 @@ class Codelessly {
               cacheManager: _cacheManager!,
             ),
             firebaseFirestore: firebaseFirestore,
-            errorHandler: errorHandler,
+            errorLogger: errorLogger,
             tracker: _tracker,
           );
 
@@ -663,11 +654,11 @@ class Codelessly {
               cacheManager: _cacheManager!,
             ),
             firebaseFirestore: firebaseFirestore,
-            errorHandler: errorHandler,
+            errorLogger: errorLogger,
             tracker: _tracker,
           );
 
-      _updateStatus(CStatus.loading(CLoadingState.createdManagers));
+      status = CStatus.loading(CLoadingState.createdManagers);
 
       DebugLogger.instance.printInfo(
         'Initializing cache manager',
@@ -675,7 +666,7 @@ class Codelessly {
       );
       await _cacheManager!.init();
 
-      _updateStatus(CStatus.loading(CLoadingState.initializedCache));
+      status = CStatus.loading(CLoadingState.initializedCache);
 
       if (_config!.slug == null) {
         DebugLogger.instance.printInfo(
@@ -693,7 +684,7 @@ class Codelessly {
           );
         }
 
-        _updateStatus(CStatus.loading(CLoadingState.initializedAuth));
+        status = CStatus.loading(CLoadingState.initializedAuth);
       } else {
         DebugLogger.instance.printInfo(
           'A slug was provided. Acutely skipping authentication.',
@@ -716,7 +707,7 @@ class Codelessly {
           'Data manager initialized.',
           name: name,
         );
-        _updateStatus(CStatus.loading(CLoadingState.initializedDataManagers));
+        status = CStatus.loading(CLoadingState.initializedDataManagers);
       } else {
         if (!initializeDataManagers) {
           DebugLogger.instance.printInfo(
@@ -764,12 +755,14 @@ class Codelessly {
             '[POST-INIT] Background authentication failed.',
             name: name,
           );
-          errorHandler.captureException(
+          ErrorLogger.instance.captureException(
             e,
-            stacktrace: str,
+            message: 'Failed to authenticate',
+            type: 'authentication_failed',
+            stackTrace: str,
           );
         });
-        _updateStatus(CStatus.loading(CLoadingState.initializedSlug));
+        status = CStatus.loading(CLoadingState.initializedSlug);
       }
 
       DebugLogger.instance.printInfo(
@@ -777,11 +770,13 @@ class Codelessly {
         name: name,
       );
 
-      _updateStatus(CStatus.loaded());
+      status = CStatus.loaded();
     } catch (error, stacktrace) {
-      errorHandler.captureException(
+      ErrorLogger.instance.captureException(
         error,
-        stacktrace: stacktrace,
+        message: 'Failed to initialize SDK',
+        type: 'sdk_init_failed',
+        stackTrace: stacktrace,
       );
     } finally {
       stopwatch.stop();
@@ -791,7 +786,7 @@ class Codelessly {
       );
     }
 
-    return _status;
+    return status;
   }
 
   /// Calls navigation listeners when navigation happens.

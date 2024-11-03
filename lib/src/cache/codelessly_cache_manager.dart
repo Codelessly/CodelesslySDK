@@ -6,6 +6,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/debug_logger.dart';
+import '../logging/error_logger.dart';
 
 /// Handles caching of any data that needs to be cached via Hive.
 class CodelesslyCacheManager extends CacheManager {
@@ -37,20 +38,16 @@ class CodelesslyCacheManager extends CacheManager {
       filesBox = await Hive.openBox(
         '${cacheFilesBoxName}_${config.uniqueID.replaceAll('/', '')}',
       );
-    } on HiveError catch (e, stacktrace) {
-      throw CodelesslyException(
-        'Failed to initialize cache manager.\n${e.message}',
-        stacktrace: stacktrace,
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to initialize cache manager',
+        type: 'cache_init_failed',
+        stackTrace: str,
       );
-    } catch (e, stacktrace) {
-      throw CodelesslyException(
-        'Failed to initialize cache manager',
-        originalException: e,
-        stacktrace: stacktrace,
-      );
+      rethrow;
     } finally {
       stopwatch.stop();
-
       DebugLogger.instance.printInfo(
         'Initialized Hive in ${stopwatch.elapsed.inMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s',
         name: name,
@@ -65,12 +62,14 @@ class CodelesslyCacheManager extends CacheManager {
     try {
       await box.clear();
       DebugLogger.instance.printInfo('Cache cleared successfully!', name: name);
-    } catch (e, stacktrace) {
-      throw CodelesslyException.cacheClearException(
-        message: 'Failed to clear cache. $e',
-        originalException: e,
-        stacktrace: stacktrace,
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to clear cache',
+        type: 'cache_clear_failed',
+        stackTrace: str,
       );
+      rethrow;
     }
   }
 
@@ -94,12 +93,14 @@ class CodelesslyCacheManager extends CacheManager {
         return box.put(key, value);
       }
       return box.put(key, jsonEncode(value));
-    } catch (e, stacktrace) {
-      throw CodelesslyException.cacheStoreException(
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
         message: 'Failed to store value of $key\nValue: $value',
-        originalException: e,
-        stacktrace: stacktrace,
+        type: 'cache_store_failed',
+        stackTrace: str,
       );
+      rethrow;
     }
   }
 
@@ -114,12 +115,14 @@ class CodelesslyCacheManager extends CacheManager {
       } else {
         return value as T;
       }
-    } catch (e, stacktrace) {
-      throw CodelesslyException.cacheLookupException(
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
         message: 'Failed to get value of $key from cache',
-        originalException: e,
-        stacktrace: stacktrace,
+        type: 'cache_lookup_failed',
+        stackTrace: str,
       );
+      rethrow;
     }
   }
 
@@ -143,12 +146,14 @@ class CodelesslyCacheManager extends CacheManager {
       filesBox.clear();
       DebugLogger.instance
           .printInfo('Cache bytes deleted successfully!', name: name);
-    } catch (e, stacktrace) {
-      throw CodelesslyException.fileIoException(
-        message: 'Failed to clear files.\n$e',
-        originalException: e,
-        stacktrace: stacktrace,
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to clear files',
+        type: 'file_clear_failed',
+        stackTrace: str,
       );
+      rethrow;
     }
   }
 
@@ -161,12 +166,14 @@ class CodelesslyCacheManager extends CacheManager {
     try {
       final key = '$pathKey/$name';
       await filesBox.delete(key);
-    } catch (e, stacktrace) {
-      throw CodelesslyException.fileIoException(
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
         message: 'Failed to delete file $pathKey/$name',
-        originalException: e,
-        stacktrace: stacktrace,
+        type: 'file_delete_failed',
+        stackTrace: str,
       );
+      rethrow;
     }
   }
 
@@ -180,9 +187,12 @@ class CodelesslyCacheManager extends CacheManager {
     if (filesBox.containsKey(key)) {
       return filesBox.get(key);
     }
-    throw CodelesslyException.fileIoException(
+    ErrorLogger.instance.captureException(
+      'File not found',
       message: 'File $pathKey/$name does not exist',
+      type: 'file_not_found',
     );
+    throw Exception('File $pathKey/$name does not exist');
   }
 
   @override
@@ -194,12 +204,14 @@ class CodelesslyCacheManager extends CacheManager {
     try {
       final key = '$pathKey/$name';
       return filesBox.containsKey(key);
-    } catch (e, stacktrace) {
-      throw CodelesslyException.fileIoException(
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
         message: 'Failed to check if file $pathKey/$name is cached',
-        originalException: e,
-        stacktrace: stacktrace,
+        type: 'file_check_failed',
+        stackTrace: str,
       );
+      rethrow;
     }
   }
 
@@ -244,12 +256,14 @@ class CodelesslyCacheManager extends CacheManager {
       } else {
         DebugLogger.instance.printInfo('No files were purged.', name: name);
       }
-    } catch (e, stacktrace) {
-      throw CodelesslyException.fileIoException(
-        message: 'Failed to purge files in $pathKey.\nError: $e',
-        originalException: e,
-        stacktrace: stacktrace,
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to purge files in $pathKey',
+        type: 'file_purge_failed',
+        stackTrace: str,
       );
+      rethrow;
     }
   }
 
@@ -266,12 +280,14 @@ class CodelesslyCacheManager extends CacheManager {
         'Successfully saved file $pathKey/$name',
         name: name,
       );
-    } catch (e, stacktrace) {
-      throw CodelesslyException.fileIoException(
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
         message: 'Failed to save file $pathKey/$name',
-        originalException: e,
-        stacktrace: stacktrace,
+        type: 'file_save_failed',
+        stackTrace: str,
       );
+      rethrow;
     }
   }
 }

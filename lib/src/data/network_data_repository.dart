@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/debug_logger.dart';
+import '../logging/error_logger.dart';
 
 /// An abstract class that represents the operations that a [DataManager] will
 /// need to utilize to offer a complete usage experience of a [Codelessly]
@@ -51,10 +52,14 @@ abstract class NetworkDataRepository {
         DebugLogger.instance
             .printInfo('Status code: ${result.statusCode}', name: name);
         DebugLogger.instance.printInfo('Message: ${result.body}', name: name);
-        throw CodelesslyException(
-          'Error downloading publish bundle from slug [$slug]',
-          stacktrace: StackTrace.current,
+
+        ErrorLogger.instance.captureException(
+          'Failed to download publish bundle',
+          message: 'Error downloading publish bundle from slug [$slug]',
+          type: 'bundle_download_failed',
+          stackTrace: StackTrace.current,
         );
+        return null;
       }
 
       tracker.trackBundleDownload();
@@ -75,8 +80,13 @@ abstract class NetworkDataRepository {
         name: name,
         level: Level.WARNING,
       );
-      print(e);
-      print(str);
+
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to download publish bundle',
+        type: 'bundle_download_failed',
+        stackTrace: str,
+      );
       return null;
     }
   }

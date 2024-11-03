@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'constants.dart';
 import 'firebase_options_prod.dart';
-import 'logging/error_handler.dart';
 import 'model/publish_source.dart';
 
 /// Holds initialization configuration options for the SDK.
@@ -181,7 +180,7 @@ sealed class CStatus {
 
   factory CStatus.loaded() => CLoaded();
 
-  factory CStatus.error(CodelesslyException exception) => CError(exception);
+  factory CStatus.error(String message) => CError(message);
 }
 
 class CEmpty extends CStatus {
@@ -209,7 +208,7 @@ class CLoaded extends CStatus {
 }
 
 class CError extends CStatus {
-  final CodelesslyException exception;
+  final String message;
 
-  const CError(this.exception);
+  const CError(this.message);
 }

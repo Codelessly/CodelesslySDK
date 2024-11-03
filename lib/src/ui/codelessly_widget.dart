@@ -9,6 +9,7 @@ import '../logging/debug_logger.dart';
 import 'codelessly_error_screen.dart';
 import 'codelessly_loading_screen.dart';
 import 'layout_builder.dart';
+import '../logging/error_logger.dart';
 
 /// Allows wrapping a loaded [Codelessly] layout with any widget for additional
 /// control over the rendering.
@@ -262,8 +263,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   CodelesslyWidgetErrorBuilder? get _effectiveErrorBuilder =>
       widget.errorBuilder ?? _effectiveController.errorBuilder;
 
-  StreamSubscription<CodelesslyException?>? _exceptionSubscription;
-  CodelesslyException? _lastException;
+  StreamSubscription<ErrorLog>? _errorSubscription;
+  ErrorLog? _lastError;
 
   /// Saved in the state for the didChangeDependencies method to use to compare
   /// with the new canvas ID to determine if the layout needs to be reloaded
@@ -288,17 +289,12 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       _effectiveController.initialize();
     }
 
-    _effectiveController.effectiveCodelessly.initErrorHandler(
-      automaticallySendCrashReports:
-          _effectiveController.config.automaticallySendCrashReports,
-    );
-
-    _exceptionSubscription =
-        _effectiveCodelessly.errorHandler.exceptionStream.listen(
-      (CodelesslyException event) {
-        if (event.layoutID == _effectiveController.layoutID) {
-          _lastException = event;
-          setState(() {});
+    _errorSubscription = ErrorLogger.instance.errorStream.listen(
+      (ErrorLog error) {
+        if (error.layoutID == _effectiveController.layoutID) {
+          setState(() {
+            _lastError = error;
+          });
         }
       },
     );
@@ -443,7 +439,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
   @override
   void dispose() {
-    _exceptionSubscription?.cancel();
+    _errorSubscription?.cancel();
     _controller?.dispose();
     _stopwatch?.stop();
 
@@ -493,20 +489,21 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         final status = _effectiveController.dataManager.status;
         try {
           if (snapshot.hasError || status is CError) {
+            final List<ErrorLog> errors = [];
+            if (snapshot.error != null) {
+              errors.add(ErrorLog(
+                timestamp: DateTime.now(),
+                message: snapshot.error.toString(),
+                type: 'stream_error',
+              ));
+            }
+            if (_lastError != null) {
+              errors.add(_lastError!);
+            }
+
             return _effectiveErrorBuilder?.call(context, snapshot.error) ??
                 CodelesslyErrorScreen(
-                  exception: snapshot.error ?? (status as CError).exception,
-                  publishSource: _effectiveController.publishSource,
-                );
-          }
-
-          if (_lastException != null) {
-            return _effectiveErrorBuilder?.call(
-                  context,
-                  _lastException,
-                ) ??
-                CodelesslyErrorScreen(
-                  exception: _lastException,
+                  errors: errors,
                   publishSource: _effectiveController.publishSource,
                 );
           }
@@ -521,16 +518,20 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
               _effectiveController.layoutID ?? model.entryLayoutId;
 
           if (effectiveLayoutID == null) {
+            final errorLog = ErrorLog(
+              timestamp: DateTime.now(),
+              message:
+                  'A layoutID was not specified and the model does not have an entry layoutID specified.',
+              type: 'layout_not_initialized',
+            );
+
             return _effectiveErrorBuilder?.call(
                   context,
-                  CodelesslyException.notInitializedError(
-                    message:
-                        'A layoutID was not specified and the model does not have an entry layoutID specified.',
-                  ),
+                  errorLog,
                 ) ??
                 CodelesslyErrorScreen(
+                  errors: [errorLog],
                   publishSource: _effectiveController.publishSource,
-                  exception: null,
                 );
           }
 
@@ -604,12 +605,24 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             },
           );
         } catch (e, str) {
-          print(e);
-          print(str);
-          _stopwatch?.stop();
+          ErrorLogger.instance.captureException(
+            e,
+            message: 'Error building layout',
+            type: 'layout_build_failed',
+            layoutID: _effectiveController.layoutID,
+            stackTrace: str,
+          );
+
           return _effectiveErrorBuilder?.call(context, e) ??
               CodelesslyErrorScreen(
-                exception: e,
+                errors: [
+                  ErrorLog(
+                    timestamp: DateTime.now(),
+                    message: e.toString(),
+                    type: 'build_error',
+                    stackTrace: str,
+                  )
+                ],
                 publishSource: _effectiveController.publishSource,
               );
         }
@@ -621,17 +634,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   Widget build(BuildContext context) {
     _stopwatch ??= Stopwatch()..start();
     final Codelessly codelessly = _effectiveController.effectiveCodelessly;
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<CodelesslyContext>.value(
-          value: codelesslyContext,
-        ),
+            value: codelesslyContext),
         ChangeNotifierProvider<CodelesslyWidgetController>.value(
-          value: _effectiveController,
-        ),
-        Provider<Codelessly>.value(
-          value: codelessly,
-        ),
+            value: _effectiveController),
+        Provider<Codelessly>.value(value: codelessly),
       ],
       child: StreamBuilder<CStatus>(
         stream: codelessly.statusStream,
@@ -640,11 +650,23 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           Widget loading() =>
               _effectiveLoadingBuilder?.call(context) ??
               const CodelesslyLoadingScreen();
-          Widget error(Object? exception) {
-            final error = exception ?? snapshot.error;
+
+          Widget error(Object? error) {
+            final List<ErrorLog> errors = [];
+            if (error != null) {
+              errors.add(ErrorLog(
+                timestamp: DateTime.now(),
+                message: error.toString(),
+                type: 'build_error',
+              ));
+            }
+            if (_lastError != null) {
+              errors.add(_lastError!);
+            }
+
             return _effectiveErrorBuilder?.call(context, error) ??
                 CodelesslyErrorScreen(
-                  exception: error,
+                  errors: errors,
                   publishSource: _effectiveController.publishSource,
                 );
           }
@@ -655,7 +677,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           final CStatus status = snapshot.data!;
           return switch (status) {
             CEmpty() || CConfigured() => loading(),
-            CError() => error(status.exception),
+            CError(message: final msg) => error(msg),
             CLoading(state: CLoadingState state) =>
               state.hasPassed(CLoadingState.createdManagers)
                   ? buildStreamedLayout()

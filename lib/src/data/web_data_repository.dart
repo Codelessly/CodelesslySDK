@@ -5,6 +5,8 @@ import 'dart:developer';
 import 'package:http/http.dart' as http;
 
 import '../../codelessly_sdk.dart';
+import '../logging/debug_logger.dart';
+import '../logging/error_logger.dart';
 
 /// A [NetworkDataRepository] implementation that utilizes the Firebase Cloud
 /// Functions to retrieve the relevant data.
@@ -24,30 +26,40 @@ class WebDataRepository extends NetworkDataRepository {
     required String projectID,
     required PublishSource source,
   }) async* {
-    final http.Response result = await client.post(
-      Uri.parse(
-          '${config.firebaseCloudFunctionsBaseURL}/api/getPublishModelRequest'),
-      headers: <String, String>{'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'projectID': projectID,
-        'source': source.serverPath,
-      }),
-    );
-
-    if (result.statusCode != 200) {
-      log('[WebDataRepo] Error downloading publish model.');
-      log('[WebDataRepo] Status code: ${result.statusCode}');
-      log('[WebDataRepo] Message: ${result.body}');
-      throw CodelesslyException(
-        'Error downloading publish model.',
-        stacktrace: StackTrace.current,
+    try {
+      final http.Response result = await client.post(
+        Uri.parse(
+            '${config.firebaseCloudFunctionsBaseURL}/api/getPublishModelRequest'),
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'projectID': projectID,
+          'source': source.serverPath,
+        }),
       );
+
+      if (result.statusCode != 200) {
+        ErrorLogger.instance.captureException(
+          'Failed to download publish model',
+          message:
+              'Error downloading publish model. Status: ${result.statusCode}',
+          type: 'publish_model_download_failed',
+        );
+        return;
+      }
+
+      final Map<String, dynamic> modelDoc = jsonDecode(result.body);
+      final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
+
+      yield model;
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to stream publish model',
+        type: 'publish_model_stream_failed',
+        stackTrace: str,
+      );
+      rethrow;
     }
-
-    final Map<String, dynamic> modelDoc = jsonDecode(result.body);
-    final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
-
-    yield model;
   }
 
   @override
@@ -56,33 +68,44 @@ class WebDataRepository extends NetworkDataRepository {
     required String layoutID,
     required PublishSource source,
   }) async {
-    final http.Response result = await client.post(
-      Uri.parse(
-          '${config.firebaseCloudFunctionsBaseURL}/api/getLayoutModelRequest'),
-      headers: <String, String>{'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'projectID': projectID,
-        'layoutID': layoutID,
-        'source': source.serverPath,
-      }),
-      encoding: utf8,
-    );
-
-    if (result.statusCode != 200) {
-      log('[WebDataRepo] Error downloading layout model. [${source.serverPath}]');
-      log('[WebDataRepo] Status code: ${result.statusCode}');
-      log('[WebDataRepo] Message: ${result.body}');
-      throw CodelesslyException(
-        'Error downloading layout model [$layoutID]',
-        layoutID: layoutID,
-        stacktrace: StackTrace.current,
+    try {
+      final http.Response result = await client.post(
+        Uri.parse(
+            '${config.firebaseCloudFunctionsBaseURL}/api/getLayoutModelRequest'),
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'projectID': projectID,
+          'layoutID': layoutID,
+          'source': source.serverPath,
+        }),
+        encoding: utf8,
       );
+
+      if (result.statusCode != 200) {
+        ErrorLogger.instance.captureException(
+          'Failed to download layout model',
+          message:
+              'Error downloading layout model [${source.serverPath}]. Status: ${result.statusCode}',
+          type: 'layout_download_failed',
+          layoutID: layoutID,
+        );
+        return null;
+      }
+
+      final Map<String, dynamic> modelDoc = jsonDecode(result.body);
+      final SDKPublishLayout layout = SDKPublishLayout.fromJson(modelDoc);
+
+      return layout;
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to download layout model',
+        type: 'layout_download_failed',
+        layoutID: layoutID,
+        stackTrace: str,
+      );
+      return null;
     }
-
-    final Map<String, dynamic> modelDoc = jsonDecode(result.body);
-    final SDKPublishLayout layout = SDKPublishLayout.fromJson(modelDoc);
-
-    return layout;
   }
 
   @override
@@ -105,19 +128,25 @@ class WebDataRepository extends NetworkDataRepository {
       );
 
       if (result.statusCode != 200) {
-        log('[WebDataRepo] Error downloading font model.');
-        log('[WebDataRepo] Status code: ${result.statusCode}');
-        log('[WebDataRepo] Message: ${result.body}');
-        throw CodelesslyException(
-          'Error downloading font model.',
-          stacktrace: StackTrace.current,
+        ErrorLogger.instance.captureException(
+          'Failed to download font model',
+          message: 'Error downloading font model. Status: ${result.statusCode}',
+          type: 'font_download_failed',
         );
+        return null;
       }
+
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
       final SDKPublishFont font = SDKPublishFont.fromJson(modelDoc);
 
       return font;
-    } catch (e) {
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to download font model',
+        type: 'font_download_failed',
+        stackTrace: str,
+      );
       return null;
     }
   }
@@ -142,21 +171,25 @@ class WebDataRepository extends NetworkDataRepository {
       );
 
       if (result.statusCode != 200) {
-        log('[WebDataRepo] Error downloading api.');
-        log('[WebDataRepo] Status code: ${result.statusCode}');
-        log('[WebDataRepo] Message: ${result.body}');
-        throw CodelesslyException(
-          'Error downloading api.',
-          stacktrace: StackTrace.current,
+        ErrorLogger.instance.captureException(
+          'Failed to download API',
+          message: 'Error downloading API. Status: ${result.statusCode}',
+          type: 'api_download_failed',
         );
+        return null;
       }
+
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
       final HttpApiData api = HttpApiData.fromJson(modelDoc);
 
       return api;
-    } catch (e, stacktrace) {
-      print(e);
-      print(stacktrace);
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to download API',
+        type: 'api_download_failed',
+        stackTrace: str,
+      );
       return null;
     }
   }
@@ -181,22 +214,28 @@ class WebDataRepository extends NetworkDataRepository {
       );
 
       if (result.statusCode != 200) {
-        log('[WebDataRepo] Error downloading variables.');
-        log('[WebDataRepo] Status code: ${result.statusCode}');
-        log('[WebDataRepo] Message: ${result.body}');
-        throw CodelesslyException(
-          'Error downloading variables.',
-          stacktrace: StackTrace.current,
+        ErrorLogger.instance.captureException(
+          'Failed to download variables',
+          message: 'Error downloading variables. Status: ${result.statusCode}',
+          type: 'variables_download_failed',
+          layoutID: layoutID,
         );
+        return null;
       }
+
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
       final SDKLayoutVariables variables =
           SDKLayoutVariables.fromJson({...modelDoc, 'id': layoutID});
 
       return variables;
-    } catch (e, stacktrace) {
-      print(e);
-      print(stacktrace);
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to download variables',
+        type: 'variables_download_failed',
+        layoutID: layoutID,
+        stackTrace: str,
+      );
       return null;
     }
   }
@@ -207,7 +246,6 @@ class WebDataRepository extends NetworkDataRepository {
     required String layoutID,
     required PublishSource source,
   }) async {
-    log('[WebDataRepo] Downloading conditions for $layoutID');
     try {
       final http.Response result = await client.post(
         Uri.parse(
@@ -222,25 +260,28 @@ class WebDataRepository extends NetworkDataRepository {
       );
 
       if (result.statusCode != 200) {
-        log('[WebDataRepo] Error downloading conditions.');
-        log('[WebDataRepo] Status code: ${result.statusCode}');
-        log('[WebDataRepo] Message: ${result.body}');
-        throw CodelesslyException(
-          'Error downloading conditions.',
-          stacktrace: StackTrace.current,
+        ErrorLogger.instance.captureException(
+          'Failed to download conditions',
+          message: 'Error downloading conditions. Status: ${result.statusCode}',
+          type: 'conditions_download_failed',
+          layoutID: layoutID,
         );
+        return null;
       }
+
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
       final SDKLayoutConditions conditions =
           SDKLayoutConditions.fromJson({...modelDoc, 'id': layoutID});
 
-      log('[WebDataRepo] Layout Conditions [${conditions.id}]: ${conditions.conditions.length}');
-
       return conditions;
-    } catch (e, stacktrace) {
-      log('[WebDataRepo] Error downloading conditions for $layoutID');
-      print(e);
-      print(stacktrace);
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to download conditions',
+        type: 'conditions_download_failed',
+        layoutID: layoutID,
+        stackTrace: str,
+      );
       return null;
     }
   }
