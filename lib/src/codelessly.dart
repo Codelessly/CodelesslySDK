@@ -11,7 +11,6 @@ import 'package:http/http.dart';
 import '../codelessly_sdk.dart';
 import 'logging/debug_logger.dart';
 import 'logging/error_logger.dart';
-import 'logging/reporter.dart';
 import 'utils/codelessly_http_client.dart';
 
 typedef NavigationListener = void Function(
@@ -332,9 +331,7 @@ class Codelessly {
   }) {
     _config ??= config;
 
-    initErrorLogger(
-      automaticallySendCrashReports: _config!.automaticallySendCrashReports,
-    );
+    initErrorLogger();
 
     assert(
       status is! CEmpty,
@@ -492,17 +489,11 @@ class Codelessly {
   /// initialized. If it is initialized, this is ignored.
   ///
   /// If the SDK is running on web platform, this will be ignored.
-  void initErrorLogger({
-    required bool automaticallySendCrashReports,
-  }) {
+  void initErrorLogger() {
     DebugLogger.instance.printFunction('initErrorLogger()', name: name);
     if (_errorLogger != null) return;
 
-    _errorLogger = ErrorLogger(
-      reporter: automaticallySendCrashReports
-          ? FirestoreErrorReporter(_firebaseApp!, _firebaseFirestore!)
-          : null,
-    );
+    _errorLogger = ErrorLogger();
   }
 
   /// Initializes this instance of the SDK.
@@ -566,9 +557,7 @@ class Codelessly {
 
     await initFirebase(config: _config!);
 
-    initErrorLogger(
-      automaticallySendCrashReports: _config!.automaticallySendCrashReports,
-    );
+    initErrorLogger();
 
     try {
       status = CStatus.loading(CLoadingState.initializedFirebase);
