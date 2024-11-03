@@ -100,11 +100,12 @@ class CodelesslyConfig with EquatableMixin {
     this.isPreview = false,
     this.preload = true,
     FirebaseOptions? firebaseOptions,
-    this.firebaseInstanceName = kCodelesslyFirebaseApp,
-    this.firebaseCloudFunctionsBaseURL = kProdCloudFunctionsBaseURL,
-    this.baseURL = kProdBaseURL,
+    this.firebaseInstanceName = CodelesslyConstants.kCodelesslyFirebaseApp,
+    this.firebaseCloudFunctionsBaseURL =
+        CodelesslyConstants.kProdCloudFunctionsBaseURL,
+    this.baseURL = CodelesslyConstants.kProdBaseURL,
     this.clientType = 'default_client',
-    this.firebaseProjectId = kProdFirebaseProjectId,
+    this.firebaseProjectId = CodelesslyConstants.kProdFirebaseProjectId,
     PublishSource? publishSource,
     this.debugLog = false,
   })  : firebaseOptions =

@@ -1133,8 +1133,12 @@ extension IconModelExt on IconModel {
     if (this is MaterialIcon) {
       final icon = this as MaterialIcon;
       // e.g https://fonts.gstatic.com/s/i/materialiconsoutlined/home/v16/24px.svg
-      // TODO: how to get the right version?
-      return kSvgIconBaseUrlTemplate
+      /// The template url for the svg icons.
+      /// {{style}}: The style of the icon. e.g. materialiconsoutlined
+      /// {{name}}: The name of the icon. e.g. home
+      /// {{version}}: The version of the icon. e.g. 16
+      /// {{size}}: The size of the icon. e.g. 24
+      return 'https://fonts.gstatic.com/s/i/{{style}}/{{name}}/v{{version}}/{{size}}px.svg'
           .replaceAll(
               '{{style}}', 'materialicons${icon.style.styleName.toLowerCase()}')
           .replaceAll('{{name}}', icon.name.toLowerCase())

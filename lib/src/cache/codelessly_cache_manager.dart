@@ -33,10 +33,10 @@ class CodelesslyCacheManager extends CacheManager {
     try {
       await Hive.initFlutter('codelessly_sdk');
       box = await Hive.openBox(
-        '${cacheBoxName}_${config.uniqueID.replaceAll('/', '')}',
+        'cache_${config.uniqueID.replaceAll('/', '')}',
       );
       filesBox = await Hive.openBox(
-        '${cacheFilesBoxName}_${config.uniqueID.replaceAll('/', '')}',
+        'cache_files_${config.uniqueID.replaceAll('/', '')}',
       );
     } catch (e, str) {
       ErrorLogger.instance.captureException(
