@@ -59,7 +59,7 @@ abstract class NetworkDataRepository {
         return null;
       }
 
-      StatTracker.instance.trackBundleDownload();
+      StatTracker.instance.track(StatType.bundleDownload);
 
       final Map<String, dynamic> modelDoc =
           jsonDecode(utf8.decode(result.bodyBytes));
@@ -174,7 +174,7 @@ abstract class NetworkDataRepository {
     try {
       final http.Response response = await http.get(Uri.parse(url));
       if (response.statusCode != 200) return null;
-      StatTracker.instance.trackFontDownload();
+      StatTracker.instance.track(StatType.fontDownload);
 
       return Uint8List.view(response.bodyBytes.buffer);
     } catch (e) {

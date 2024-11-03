@@ -1516,7 +1516,7 @@ class DataManager {
           .printInfo('\tLayout [$layoutID] has no fonts.', name: name);
     }
 
-    StatTracker.instance.trackPopulatedLayoutDownload(layoutID);
+    StatTracker.instance.track(StatType.populatedLayoutDownload, layoutID);
     return true;
   }
 

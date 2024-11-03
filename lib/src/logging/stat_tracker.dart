@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
-import '../../codelessly_sdk.dart';
 import '../utils/debouncer.dart';
 
 /// A class that tracks statistics of various operations in the SDK.
@@ -75,80 +73,40 @@ class StatTracker {
         forceRunAfter: 20,
       );
 
-  void incrementField(String field) {
-    statBatch[field] = (statBatch[field] ?? 0) + 1;
-  }
-
-  /// Tracks one complete visual view of a Codelessly CloudUI Layout.
-  Future<void> trackView() {
+  /// Tracks a stat with optional sublabel and count
+  ///
+  /// Example usages:
+  /// ```dart
+  /// // Track view
+  /// track(StatType.view);
+  ///
+  /// // Track read with label
+  /// track(StatType.read, 'cloudDatabase/init');
+  ///
+  /// // Track multiple downloads
+  /// track(StatType.bundleDownload, null, 5);
+  /// ```
+  Future<void> track(StatType type, [String? sublabel, int count = 1]) {
     if (disabled) return Future.value();
 
-    incrementField(viewsField);
+    final field = sublabel != null ? '${type.path}/$sublabel' : type.path;
+    statBatch[field] = (statBatch[field] ?? 0) + count;
     return sendBatch();
   }
+}
 
-  /// Tracks one document read operation.
-  Future<void> trackRead(String label) {
-    if (disabled) return Future.value();
+/// Types of statistics that can be tracked
+enum StatType {
+  view('views'),
+  read('reads'),
+  write('writes'),
+  bundleDownload('bundle_downloads'),
+  fontDownload('font_downloads'),
+  action('actions'),
+  cloudAction('cloud_actions'),
+  populatedLayoutDownload('populated_layout_downloads'),
+  layoutView('layout_views');
 
-    incrementField('$readsField/$label');
-    return sendBatch();
-  }
-
-  /// Tracks one document write operation.
-  Future<void> trackWrite(String label) {
-    if (disabled) return Future.value();
-
-    incrementField('$writesField/$label');
-    return sendBatch();
-  }
-
-  /// Tracks one complete populated layout download operation.
-  Future<void> trackPopulatedLayoutDownload(String label) {
-    if (disabled) return Future.value();
-
-    incrementField('$populatedLayoutDownloadsField/$label');
-    return sendBatch();
-  }
-
-  /// Tracks a layout as being viewed, determined by the life cycle of the
-  /// CodelesslyWidget.
-  Future<void> trackLayoutView(String label) {
-    if (disabled) return Future.value();
-
-    incrementField('$layoutViewsField/$label');
-    return sendBatch();
-  }
-
-  /// Tracks one bundle download operation from the CDN.
-  Future<void> trackBundleDownload() {
-    if (disabled) return Future.value();
-
-    incrementField(bundleDownloadsField);
-    return sendBatch();
-  }
-
-  /// Tracks one font download operation from the CDN.
-  Future<void> trackFontDownload() {
-    if (disabled) return Future.value();
-
-    incrementField(fontDownloadsField);
-    return sendBatch();
-  }
-
-  /// Tracks one action operation.
-  Future<void> trackAction(ActionModel action) {
-    if (disabled) return Future.value();
-
-    incrementField('$actionsField/${action.type.name}');
-    return sendBatch();
-  }
-
-  /// Tracks one cloud action operation.
-  Future<void> trackCloudAction(ActionModel action) {
-    if (disabled) return Future.value();
-
-    incrementField('$cloudActionsField/${action.type.name}');
-    return sendBatch();
-  }
+  final String path;
+  const StatType(this.path);
 }
