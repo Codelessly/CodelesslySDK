@@ -8,8 +8,6 @@ import 'package:meta/meta.dart';
 import '../../codelessly_sdk.dart';
 import '../utils/debouncer.dart';
 
-const _kDisableStatReporting = false;
-
 /// A class that tracks statistics of various operations in the SDK.
 ///
 /// This tracker sends stats to Codelessly's server to help monitor usage and performance.
@@ -44,12 +42,7 @@ class StatTracker {
   /// with too many writes.
   final DeBouncer debouncer = DeBouncer(const Duration(seconds: 1));
 
-  bool get disabled =>
-      !enabled ||
-      _kDisableStatReporting ||
-      clientType == kCodelesslyEditor ||
-      projectId == null ||
-      serverUrl == null;
+  bool get disabled => !enabled || projectId == null || serverUrl == null;
 
   @mustCallSuper
   void init({
