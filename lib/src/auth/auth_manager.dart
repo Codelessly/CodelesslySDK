@@ -443,7 +443,7 @@ class AuthManager {
         body: jsonEncode({
           'token': config.authToken,
           'slug': config.slug,
-          'clientType': clientType,
+          'clientType': config.clientType,
         }),
       );
 
