@@ -1,5 +1,3 @@
-import '../../codelessly_sdk.dart';
-
 /// Defines the server-sided source a publish model should be retrieved from.
 enum PublishSource {
   /// The publish collection.
@@ -29,50 +27,50 @@ enum PublishSource {
 
   /// The path to the publish model collection.
   String get serverPath => switch (this) {
-        PublishSource.publish => publishPath,
-        PublishSource.preview => previewPath,
-        PublishSource.template => templatesPath,
+        PublishSource.publish => 'publish',
+        PublishSource.preview => 'publish_preview',
+        PublishSource.template => 'templates',
       };
 
   /// The path to the mirrored or opposite collection.
   String get mirroredServerPath => switch (this) {
-        PublishSource.publish => previewPath,
-        PublishSource.preview => publishPath,
-        PublishSource.template => publishPath,
+        PublishSource.publish => 'publish_preview',
+        PublishSource.preview => 'publish',
+        PublishSource.template => 'publish',
       };
 
   /// The cache key for the published model.
   String get modelCacheKey => switch (this) {
-        PublishSource.publish => publishModelCacheKey,
-        PublishSource.preview => previewModelCacheKey,
-        PublishSource.template => templateModelCacheKey,
+        PublishSource.publish => 'publish_layout_model',
+        PublishSource.preview => 'preview_layout_model',
+        PublishSource.template => 'template_layout_model',
       };
 
   /// The cache key for the font files.
   String get fontsCacheKey => switch (this) {
-        PublishSource.publish => publishFontsCacheKey,
-        PublishSource.preview => previewFontsCacheKey,
-        PublishSource.template => templateFontsCacheKey,
+        PublishSource.publish => 'publish_fonts',
+        PublishSource.preview => 'preview_fonts',
+        PublishSource.template => 'template_fonts',
       };
 
   /// The cache key for the APIs.
   String get apisCacheKey => switch (this) {
-        PublishSource.publish => publishApisCacheKey,
-        PublishSource.preview => previewApisCacheKey,
-        PublishSource.template => templateApisCacheKey,
+        PublishSource.publish => 'publish_apis',
+        PublishSource.preview => 'preview_apis',
+        PublishSource.template => 'template_apis',
       };
 
   /// The cache key for the APIs.
   String get variablesCacheKey => switch (this) {
-        PublishSource.publish => publishVariablesCacheKey,
-        PublishSource.preview => previewVariablesCacheKey,
-        PublishSource.template => templateVariablesCacheKey,
+        PublishSource.publish => 'publish_variables',
+        PublishSource.preview => 'preview_variables',
+        PublishSource.template => 'template_variables',
       };
 
   /// The cache key for the APIs.
   String get conditionsCacheKey => switch (this) {
-        PublishSource.publish => publishConditionsCacheKey,
-        PublishSource.preview => previewConditionsCacheKey,
-        PublishSource.template => templateConditionsCacheKey,
+        PublishSource.publish => 'publish_conditions',
+        PublishSource.preview => 'preview_conditions',
+        PublishSource.template => 'template_conditions',
       };
 }

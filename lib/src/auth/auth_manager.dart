@@ -97,10 +97,10 @@ class AuthManager {
     // Codelessly Cloud Data to work.
     _idTokenResult = await firebaseAuth.currentUser!.getIdTokenResult(true);
 
-    if (cacheManager.isCached(authCacheKey)) {
+    if (cacheManager.isCached('auth')) {
       try {
         final AuthData cachedAuthData = cacheManager.get<AuthData>(
-          authCacheKey,
+          'auth',
           decode: AuthData.fromJson,
         );
 
@@ -376,14 +376,14 @@ class AuthManager {
         _authData = authData;
         _authStreamController.add(_authData!);
 
-        await cacheManager.store(authCacheKey, _authData!.toJson());
+        await cacheManager.store('auth', _authData!.toJson());
         DebugLogger.instance.printInfo('Stored auth data in cache', name: name);
         DebugLogger.instance
             .printInfo('Authentication successfully!', name: name);
       } else {
         _authData = null;
         _authStreamController.add(_authData);
-        await cacheManager.delete(authCacheKey);
+        await cacheManager.delete('auth');
         DebugLogger.instance
             .printInfo('Failed to authenticate token.', name: name);
 
