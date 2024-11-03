@@ -11,6 +11,7 @@ import 'package:rfc_6901/rfc_6901.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../codelessly_sdk.dart';
+import '../logging/stat_tracker.dart';
 import '../ui/codelessly_dialog_widget.dart';
 import '../logging/debug_logger.dart';
 
@@ -69,9 +70,9 @@ class FunctionsRepository {
     final Codelessly codelessly = context.read<Codelessly>();
     switch (action.type) {
       case ActionType.loadFromCloudStorage || ActionType.setCloudStorage:
-        codelessly.tracker.trackCloudAction(action);
+        StatTracker.instance.trackCloudAction(action);
       default:
-        codelessly.tracker.trackAction(action);
+        StatTracker.instance.trackAction(action);
     }
 
     switch (action.type) {

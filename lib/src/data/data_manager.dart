@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import '../../codelessly_sdk.dart';
 import '../logging/debug_logger.dart';
 import '../logging/error_logger.dart';
+import '../logging/stat_tracker.dart';
 
 /// Orchestrates the data flow for the SDK.
 class DataManager {
@@ -58,10 +59,6 @@ class DataManager {
 
   /// The error handler to use.
   final ErrorLogger errorLogger;
-
-  /// The stat tracker to use, used to track various reads and writes in this
-  /// data manager.
-  final StatTracker tracker;
 
   SDKPublishModel? _publishModel;
 
@@ -121,7 +118,6 @@ class DataManager {
     required this.localDataRepository,
     required this.firebaseFirestore,
     required this.errorLogger,
-    required this.tracker,
     SDKPublishModel? publishModel,
   }) : _publishModel = publishModel;
 
@@ -617,7 +613,6 @@ class DataManager {
       projectId,
       config.publishSource,
       firestore: firebaseFirestore,
-      tracker: tracker,
     );
     // initialize cloud storage.
     await instance.init();
@@ -1521,7 +1516,7 @@ class DataManager {
           .printInfo('\tLayout [$layoutID] has no fonts.', name: name);
     }
 
-    tracker.trackPopulatedLayoutDownload(layoutID);
+    StatTracker.instance.trackPopulatedLayoutDownload(layoutID);
     return true;
   }
 

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/debug_logger.dart';
+import '../logging/stat_tracker.dart';
 import 'codelessly_error_screen.dart';
 import 'codelessly_loading_screen.dart';
 import 'layout_builder.dart';
@@ -560,7 +561,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
           if (!didView) {
             didView = true;
-            _effectiveCodelessly.tracker.trackView();
+            StatTracker.instance.trackView();
           }
 
           final layoutWidget = Material(

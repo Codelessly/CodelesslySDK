@@ -11,6 +11,7 @@ import 'package:http/http.dart';
 import '../codelessly_sdk.dart';
 import 'logging/debug_logger.dart';
 import 'logging/error_logger.dart';
+import 'logging/stat_tracker.dart';
 import 'utils/codelessly_http_client.dart';
 
 typedef NavigationListener = void Function(
@@ -149,11 +150,6 @@ class Codelessly {
 
   final StreamController<CStatus> _statusStreamController =
       StreamController.broadcast()..add(CStatus.empty());
-
-  late final StatTracker _tracker = StatTracker(client: _client);
-
-  /// Tracks statistics of various operations in the SDK.
-  StatTracker get tracker => _tracker;
 
   /// Returns a stream of status updates for this SDK instance.
   Stream<CStatus> get statusStream => _statusStreamController.stream;
@@ -592,7 +588,6 @@ class Codelessly {
             authManager: _authManager!,
             networkDataRepository: FirebaseDataRepository(
               firestore: firebaseFirestore,
-              tracker: _tracker,
               config: _config!,
             ),
             localDataRepository: LocalDataRepository(
@@ -600,7 +595,6 @@ class Codelessly {
             ),
             firebaseFirestore: firebaseFirestore,
             errorLogger: errorLogger,
-            tracker: _tracker,
           );
 
       // Create the preview data manager.
@@ -613,14 +607,12 @@ class Codelessly {
             networkDataRepository: FirebaseDataRepository(
               firestore: firebaseFirestore,
               config: _config!,
-              tracker: _tracker,
             ),
             localDataRepository: LocalDataRepository(
               cacheManager: _cacheManager!,
             ),
             firebaseFirestore: firebaseFirestore,
             errorLogger: errorLogger,
-            tracker: _tracker,
           );
 
       // Create the template data manager. This is always automatically
@@ -637,14 +629,12 @@ class Codelessly {
             networkDataRepository: FirebaseDataRepository(
               firestore: firebaseFirestore,
               config: _config!,
-              tracker: _tracker,
             ),
             localDataRepository: LocalDataRepository(
               cacheManager: _cacheManager!,
             ),
             firebaseFirestore: firebaseFirestore,
             errorLogger: errorLogger,
-            tracker: _tracker,
           );
 
       status = CStatus.loading(CLoadingState.createdManagers);
@@ -666,7 +656,7 @@ class Codelessly {
         _config!.publishSource = _authManager!.getBestPublishSource(_config!);
 
         if (_authManager?.authData?.projectId case String projectId) {
-          tracker.init(
+          StatTracker.instance.init(
             projectId: projectId,
             serverUrl: Uri.parse(
                 '${_config!.firebaseCloudFunctionsBaseURL}/api/trackStatsRequest'),
@@ -720,7 +710,7 @@ class Codelessly {
           if (_authManager!.authData == null) return;
 
           if (_authManager?.authData?.projectId case String projectId) {
-            tracker.init(
+            StatTracker.instance.init(
               projectId: projectId,
               serverUrl: Uri.parse(
                   '${_config!.firebaseCloudFunctionsBaseURL}/api/trackStatsRequest'),
