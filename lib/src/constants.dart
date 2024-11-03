@@ -1,5 +1,3 @@
-const String clientType = String.fromEnvironment('client_type');
-
 /// The unique identifier for the Codelessly Firebase app instance.
 const String kCodelesslyFirebaseApp = 'codelessly';
 
