@@ -1,61 +1,56 @@
 const String clientType = String.fromEnvironment('client_type');
 
+/// The unique identifier for the Codelessly Firebase app instance.
 const String kCodelesslyFirebaseApp = 'codelessly';
 
-const String defaultFirebaseProjectId = String.fromEnvironment(
-  'firebase_project_id',
-  defaultValue: prodFirebaseProjectId,
-);
-
-const String defaultFirebaseCloudFunctionsBaseURL = String.fromEnvironment(
-  'cloud_functions_base_url',
-  defaultValue: prodFirebaseCloudFunctionsBaseURL,
-);
-
-const String defaultBaseURL = String.fromEnvironment(
-  'base_url',
-  defaultValue: prodBaseUrl,
-);
-
-const String prodFirebaseProjectId = 'codeless-app';
-const String prodFirebaseCloudFunctionsBaseURL =
+/// Production environment constants
+const String kProdFirebaseProjectId = 'codeless-app';
+const String kProdCloudFunctionsBaseURL =
     'https://us-central1-codeless-app.cloudfunctions.net';
-const String prodBaseUrl = 'https://app.codelessly.com';
+const String kProdBaseURL = 'https://app.codelessly.com';
+
+/// Editor identifier constant
 const String kCodelesslyEditor = 'codelessly_editor';
 
-const defaultErrorMessage =
-    'We encountered some error while rendering this page! '
-    'We are working on it to fix it as soon as possible.';
+/// Default error message for rendering failures
+const String defaultErrorMessage = 'Error rendering page.';
 
+/// Cache-related constants
 const String cacheBoxName = 'cache';
 const String cacheFilesBoxName = 'cache_files';
 const String authCacheKey = 'auth';
 
+/// Model cache keys
 const String publishModelCacheKey = 'publish_layout_model';
 const String previewModelCacheKey = 'preview_layout_model';
 const String templateModelCacheKey = 'template_layout_model';
 
+/// Font cache keys
 const String publishFontsCacheKey = 'publish_fonts';
 const String previewFontsCacheKey = 'preview_fonts';
 const String templateFontsCacheKey = 'template_fonts';
 
+/// API cache keys
 const String publishApisCacheKey = 'publish_apis';
 const String previewApisCacheKey = 'preview_apis';
 const String templateApisCacheKey = 'template_apis';
 
+/// Variable cache keys
 const String publishVariablesCacheKey = 'publish_variables';
 const String previewVariablesCacheKey = 'preview_variables';
 const String templateVariablesCacheKey = 'template_variables';
 
+/// Condition cache keys
 const String publishConditionsCacheKey = 'publish_conditions';
 const String previewConditionsCacheKey = 'preview_conditions';
 const String templateConditionsCacheKey = 'template_conditions';
 
+/// Path constants
 const String publishPath = 'publish';
 const String previewPath = 'publish_preview';
 const String templatesPath = 'templates';
 
-/// STAT TRACKING
+/// Stats tracking constants
 const String statsCollection = 'stats';
 const String lostStatsDoc = '_lost';
 const String viewsField = 'views';
