@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import '../logging/debug_logger.dart';
-import 'reporter.dart';
 import 'codelessly_event.dart';
 
 /// Represents a logged error with context
@@ -36,7 +35,6 @@ class ErrorLogger {
   static ErrorLogger get instance => _instance ??= ErrorLogger._();
 
   final List<ErrorLog> _errorLogs = [];
-  ErrorReporter? _reporter;
 
   final StreamController<ErrorLog> _errorStreamController =
       StreamController<ErrorLog>.broadcast();
@@ -46,10 +44,9 @@ class ErrorLogger {
 
   ErrorLogger._();
 
-  /// Factory constructor that initializes the singleton instance with a reporter
-  factory ErrorLogger({ErrorReporter? reporter}) {
+  /// Factory constructor that initializes the singleton instance
+  factory ErrorLogger() {
     _instance ??= ErrorLogger._();
-    _instance!._reporter = reporter;
     return _instance!;
   }
 
@@ -78,21 +75,15 @@ class ErrorLogger {
       name: name,
       level: Level.WARNING,
     );
-
-    if (_reporter != null) {
-      _reporter!.captureException(error);
-    }
   }
 
   Future<void> captureEvent(CodelesslyEvent event) async {
     DebugLogger.instance.printInfo(event.toString(), name: name);
-    _reporter?.captureEvent(event);
   }
 
   void dispose() {
     _errorStreamController.close();
     _errorLogs.clear();
-    _reporter = null;
     _instance = null;
   }
 
