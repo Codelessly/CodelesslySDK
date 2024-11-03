@@ -22,7 +22,7 @@ typedef CodelesslyWidgetLayoutBuilder = Widget Function(
 /// fails to load.
 typedef CodelesslyWidgetErrorBuilder = Widget Function(
   BuildContext context,
-  dynamic exception,
+  ErrorLog error,
 );
 
 Widget _defaultLayoutBuilder(context, layout) => layout;
@@ -489,21 +489,20 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         final status = _effectiveController.dataManager.status;
         try {
           if (snapshot.hasError || status is CError) {
-            final List<ErrorLog> errors = [];
-            if (snapshot.error != null) {
-              errors.add(ErrorLog(
-                timestamp: DateTime.now(),
-                message: snapshot.error.toString(),
-                type: 'stream_error',
-              ));
-            }
+            final ErrorLog error;
             if (_lastError != null) {
-              errors.add(_lastError!);
+              error = _lastError!;
+            } else {
+              error = ErrorLog(
+                timestamp: DateTime.now(),
+                message: snapshot.error?.toString() ?? 'Unknown error',
+                type: 'stream_error',
+              );
             }
 
-            return _effectiveErrorBuilder?.call(context, snapshot.error) ??
+            return _effectiveErrorBuilder?.call(context, error) ??
                 CodelesslyErrorScreen(
-                  errors: errors,
+                  errors: [error],
                   publishSource: _effectiveController.publishSource,
                 );
           }
@@ -605,6 +604,13 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             },
           );
         } catch (e, str) {
+          final errorLog = ErrorLog(
+            timestamp: DateTime.now(),
+            message: e.toString(),
+            type: 'build_error',
+            stackTrace: str,
+          );
+
           ErrorLogger.instance.captureException(
             e,
             message: 'Error building layout',
@@ -613,16 +619,9 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             stackTrace: str,
           );
 
-          return _effectiveErrorBuilder?.call(context, e) ??
+          return _effectiveErrorBuilder?.call(context, errorLog) ??
               CodelesslyErrorScreen(
-                errors: [
-                  ErrorLog(
-                    timestamp: DateTime.now(),
-                    message: e.toString(),
-                    type: 'build_error',
-                    stackTrace: str,
-                  )
-                ],
+                errors: [errorLog],
                 publishSource: _effectiveController.publishSource,
               );
         }
@@ -652,21 +651,20 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
               const CodelesslyLoadingScreen();
 
           Widget error(Object? error) {
-            final List<ErrorLog> errors = [];
-            if (error != null) {
-              errors.add(ErrorLog(
-                timestamp: DateTime.now(),
-                message: error.toString(),
-                type: 'build_error',
-              ));
-            }
+            final ErrorLog errorLog;
             if (_lastError != null) {
-              errors.add(_lastError!);
+              errorLog = _lastError!;
+            } else {
+              errorLog = ErrorLog(
+                timestamp: DateTime.now(),
+                message: error?.toString() ?? 'Unknown error',
+                type: 'build_error',
+              );
             }
 
-            return _effectiveErrorBuilder?.call(context, error) ??
+            return _effectiveErrorBuilder?.call(context, errorLog) ??
                 CodelesslyErrorScreen(
-                  errors: errors,
+                  errors: [errorLog],
                   publishSource: _effectiveController.publishSource,
                 );
           }

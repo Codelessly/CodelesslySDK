@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../logging/error_logger.dart';
 import '../../ui/draggable_scroll_configuration.dart';
 
 class PassiveListViewTransformer extends NodeWidgetTransformer<ListViewNode> {
@@ -89,7 +90,11 @@ class PassiveListViewWidget extends StatelessWidget {
             if (snapshot.hasError) {
               return codelesslyController.errorBuilder?.call(
                     context,
-                    snapshot.error,
+                    ErrorLog(
+                      timestamp: DateTime.now(),
+                      message: snapshot.error?.toString() ?? 'Unknown error',
+                      type: 'firestore_query_error',
+                    ),
                   ) ??
                   const Center(child: Text('Error'));
             }
