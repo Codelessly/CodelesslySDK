@@ -13,19 +13,20 @@ import '../utils/debouncer.dart';
 /// This tracker sends stats to Codelessly's server to help monitor usage and performance.
 /// Stats are batched and debounced to prevent overwhelming the server with requests.
 ///
-/// Tracking can be disabled globally via [_kDisableStatReporting], per instance via [enabled],
-/// or automatically when running in the editor via [clientType].
+/// Tracking can be disabled per instance via [enabled].
 class StatTracker {
-  final http.Client client;
+  static final StatTracker _instance = StatTracker._();
+
+  /// The global instance of the StatTracker
+  static StatTracker get instance => _instance;
+
+  final http.Client client = http.Client();
 
   /// Whether this tracker should collect and send stats.
   /// Defaults to true. Set to false to disable all tracking for this instance.
   final bool enabled;
 
-  StatTracker({
-    required this.client,
-    this.enabled = true,
-  });
+  StatTracker._({this.enabled = true});
 
   Uri? serverUrl;
 

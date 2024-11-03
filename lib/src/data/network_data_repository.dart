@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import '../../codelessly_sdk.dart';
 import '../logging/debug_logger.dart';
 import '../logging/error_logger.dart';
+import '../logging/stat_tracker.dart';
 
 /// An abstract class that represents the operations that a [DataManager] will
 /// need to utilize to offer a complete usage experience of a [Codelessly]
@@ -18,13 +19,9 @@ abstract class NetworkDataRepository {
   /// The [CodelesslyConfig] instance that is used to configure the SDK.
   final CodelesslyConfig config;
 
-  /// The [StatTracker] instance to track the statistics of the data repository.
-  final StatTracker tracker;
-
   /// Creates a new instance of [NetworkDataRepository].
   NetworkDataRepository({
     required this.config,
-    required this.tracker,
   });
 
   /// Calls a cloud function that searches for the project associated with the
@@ -62,7 +59,7 @@ abstract class NetworkDataRepository {
         return null;
       }
 
-      tracker.trackBundleDownload();
+      StatTracker.instance.trackBundleDownload();
 
       final Map<String, dynamic> modelDoc =
           jsonDecode(utf8.decode(result.bodyBytes));
@@ -177,7 +174,7 @@ abstract class NetworkDataRepository {
     try {
       final http.Response response = await http.get(Uri.parse(url));
       if (response.statusCode != 200) return null;
-      tracker.trackFontDownload();
+      StatTracker.instance.trackFontDownload();
 
       return Uint8List.view(response.bodyBytes.buffer);
     } catch (e) {
