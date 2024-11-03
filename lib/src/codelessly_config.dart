@@ -78,6 +78,12 @@ class CodelesslyConfig with EquatableMixin {
   ///  ```
   final bool debugLog;
 
+  /// The client type identifier for this instance.
+  final String clientType;
+
+  /// The Firebase project ID for this instance.
+  final String firebaseProjectId;
+
   /// Creates a new instance of [CodelesslyConfig].
   ///
   /// [authToken] is the token required to authenticate and initialize the SDK.
@@ -93,12 +99,12 @@ class CodelesslyConfig with EquatableMixin {
     this.automaticallySendCrashReports = false,
     this.isPreview = false,
     this.preload = true,
-
-    // Firebase.
     FirebaseOptions? firebaseOptions,
     this.firebaseInstanceName = kCodelesslyFirebaseApp,
-    this.firebaseCloudFunctionsBaseURL = defaultFirebaseCloudFunctionsBaseURL,
-    this.baseURL = defaultBaseURL,
+    this.firebaseCloudFunctionsBaseURL = kProdCloudFunctionsBaseURL,
+    this.baseURL = kProdBaseURL,
+    this.clientType = 'default_client',
+    this.firebaseProjectId = kProdFirebaseProjectId,
     PublishSource? publishSource,
     this.debugLog = false,
   })  : firebaseOptions =
@@ -119,6 +125,8 @@ class CodelesslyConfig with EquatableMixin {
     String? firebaseCloudFunctionsBaseURL,
     String? baseURL,
     String? firebaseInstanceName,
+    String? clientType,
+    String? firebaseProjectId,
     PublishSource? publishSource,
   }) =>
       CodelesslyConfig(
@@ -133,6 +141,8 @@ class CodelesslyConfig with EquatableMixin {
             firebaseCloudFunctionsBaseURL ?? this.firebaseCloudFunctionsBaseURL,
         baseURL: baseURL ?? this.baseURL,
         firebaseInstanceName: firebaseInstanceName ?? this.firebaseInstanceName,
+        clientType: clientType ?? this.clientType,
+        firebaseProjectId: firebaseProjectId ?? this.firebaseProjectId,
         publishSource: publishSource ?? this.publishSource,
       );
 
@@ -147,6 +157,8 @@ class CodelesslyConfig with EquatableMixin {
         firebaseCloudFunctionsBaseURL,
         baseURL,
         firebaseInstanceName,
+        clientType,
+        firebaseProjectId,
         publishSource,
       ];
 }
