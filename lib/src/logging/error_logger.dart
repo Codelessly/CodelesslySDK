@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import '../logging/debug_logger.dart';
-import 'codelessly_event.dart';
 
 /// Represents a logged error with context
 class ErrorLog {
@@ -75,10 +74,6 @@ class ErrorLogger {
       name: name,
       level: Level.WARNING,
     );
-  }
-
-  Future<void> captureEvent(CodelesslyEvent event) async {
-    DebugLogger.instance.printInfo(event.toString(), name: name);
   }
 
   void dispose() {
