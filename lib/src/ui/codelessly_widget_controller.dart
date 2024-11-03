@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/debug_logger.dart';
+import '../logging/error_logger.dart';
 
 Widget _defaultLayoutBuilder(context, layout) => layout;
 
@@ -266,6 +267,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
             cacheManager: cacheManager,
           );
         }
+
         status = effectiveCodelessly.status;
         if (status is CConfigured) {
           DebugLogger.instance.printInfo(
@@ -273,26 +275,18 @@ class CodelesslyWidgetController extends ChangeNotifier {
               name: name);
           effectiveCodelessly.initialize();
         }
-      } else {
-        DebugLogger.instance.printInfo(
-            'Codelessly SDK is already configured and initialized.',
-            name: name);
       }
-    } catch (exception, str) {
-      // Makes sure the error handler is initialized before capturing.
-      // There are cases (like the above asserts and throws) that can
-      // trigger unhandled widget/flutter errors that are not handled
-      // from the Codelessly instance.
-      //
-      // We need to handle them, and if the codelessly instance is not
-      // configured yet, we need to initialize the error handler regardless.
-      effectiveCodelessly.initErrorHandler(
-        automaticallySendCrashReports:
-            effectiveCodelessly.config?.automaticallySendCrashReports ?? false,
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to initialize widget controller',
+        type: 'widget_init_failed',
+        layoutID: layoutID,
+        stackTrace: str,
       );
 
-      effectiveCodelessly.errorHandler
-          .captureException(exception, stacktrace: str);
+      effectiveCodelessly.status =
+          CStatus.error('Failed to initialize widget controller');
     }
 
     // First event.
@@ -373,90 +367,111 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// widget is ready to be rendered and needs to be downloaded and prepared.
   void _checkLayout() {
     DebugLogger.instance.printFunction('_checkLayout()', name: name);
-    DebugLogger.instance
-        .printInfo('[$layoutID]: (Check) Checking layout...', name: name);
 
-    // If this CodelesslyWidget wants to preview a layout but the SDK is
-    // configured to load published layouts, then we need to initialize the
-    // preview data manager.
-    // Vice versa for published layouts if the SDK is configured to load preview
-    // layouts.
-    if ((dataManager.status is! CLoaded && dataManager.status is! CLoading) &&
-        effectiveCodelessly.authManager.isAuthenticated()) {
-      DebugLogger.instance.printInfo(
-        '[$layoutID]: (Check) Initializing data manager for the first time with a publish source of $publishSource because the SDK is configured to load ${publishSource == PublishSource.publish ? 'published' : 'preview'} layouts.',
-        name: name,
+    try {
+      if ((dataManager.status is! CLoaded && dataManager.status is! CLoading) &&
+          effectiveCodelessly.authManager.isAuthenticated()) {
+        DebugLogger.instance.printInfo(
+          '[$layoutID]: (Check) Initializing data manager for the first time with a publish source of $publishSource.',
+          name: name,
+        );
+
+        dataManager.init(layoutID: layoutID).catchError((error, str) {
+          ErrorLogger.instance.captureException(
+            error,
+            message: 'Failed to initialize data manager',
+            type: 'data_manager_init_failed',
+            layoutID: layoutID,
+            stackTrace: str,
+          );
+
+          effectiveCodelessly.status =
+              CStatus.error('Failed to initialize data manager');
+        });
+      }
+
+      // If the config has a slug specified and the data manager doesn't have
+      // a publish model yet, then we need to fetch the publish model from the
+      // data manager.
+      else if (config.slug != null && dataManager.publishModel == null) {
+        DebugLogger.instance.printInfo(
+            '[$layoutID]: (Check) A slug is specified and publish model is null.',
+            name: name);
+        DebugLogger.instance.printInfo(
+            '[$layoutID]: (Check) Fetching complete publish bundle from data manager.',
+            name: name);
+        dataManager
+            .fetchCompletePublishBundle(
+          slug: config.slug!,
+          source: publishSource,
+        )
+            .catchError((error, str) {
+          ErrorLogger.instance.captureException(
+            error,
+            message: 'Failed to fetch publish bundle',
+            type: 'publish_bundle_fetch_failed',
+            layoutID: layoutID,
+            stackTrace: str,
+          );
+
+          effectiveCodelessly.status =
+              CStatus.error('Failed to fetch publish bundle');
+          return false;
+        });
+      }
+      // DataManager is initialized or downloading a publish bundle. If the
+      // layoutID is not null, then we need to signal to the data manager that we
+      // want to download the layout.
+      //
+      // If the config has preloading set to true, then the DataManager is already
+      // taking care of this layout and we just need to tell it to prioritize it.
+      else if (layoutID != null) {
+        DebugLogger.instance.printInfo(
+            '[$layoutID]: (Check) Queuing layout [$layoutID] in data manager.',
+            name: name);
+        DebugLogger.instance.printInfo(
+            '[$layoutID]: (Check) Using publish source $publishSource.',
+            name: name);
+
+        dataManager
+            .queueLayout(layoutID: layoutID!, prioritize: true)
+            .catchError((error, str) {
+          ErrorLogger.instance.captureException(
+            error,
+            message: 'Failed to queue layout',
+            type: 'layout_queue_failed',
+            layoutID: layoutID,
+            stackTrace: str,
+          );
+
+          // Set error status
+          effectiveCodelessly.status = CStatus.error('Failed to queue layout');
+        });
+      }
+
+      // At this point in the execution, layoutID is null, slug is not specified.
+      // Preloading must be true, so this controller can only wait...
+      else {
+        if (layoutID != null) {
+          DebugLogger.instance.printInfo(
+              '[$layoutID]: (Check) LayoutID specified, but preload is set to ${config.preload}, skipping to let data manager to download everything',
+              name: name);
+        } else {
+          DebugLogger.instance.printInfo(
+              '[$layoutID]: (Check) LayoutID is null, skipping to let data manager to download everything.',
+              name: name);
+        }
+      }
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to check layout',
+        type: 'layout_check_failed',
+        layoutID: layoutID,
+        stackTrace: str,
       );
 
-      dataManager.init(layoutID: layoutID).catchError((error, str) {
-        effectiveCodelessly.errorHandler.captureException(
-          error,
-          stacktrace: str,
-          layoutID: layoutID,
-        );
-      });
-    }
-    // If the config has a slug specified and the data manager doesn't have
-    // a publish model yet, then we need to fetch the publish model from the
-    // data manager.
-    else if (config.slug != null && dataManager.publishModel == null) {
-      DebugLogger.instance.printInfo(
-          '[$layoutID]: (Check) A slug is specified and publish model is null.',
-          name: name);
-      DebugLogger.instance.printInfo(
-          '[$layoutID]: (Check) Fetching complete publish bundle from data manager.',
-          name: name);
-      dataManager
-          .fetchCompletePublishBundle(
-        slug: config.slug!,
-        source: publishSource,
-      )
-          .catchError((error, str) {
-        effectiveCodelessly.errorHandler.captureException(
-          error,
-          stacktrace: str,
-          layoutID: layoutID,
-        );
-        return false;
-      });
-    }
-    // DataManager is initialized or downloading a publish bundle. If the
-    // layoutID is not null, then we need to signal to the data manager that we
-    // want to download the layout.
-    //
-    // If the config has preloading set to true, then the DataManager is already
-    // taking care of this layout and we just need to tell it to prioritize it.
-    else if (layoutID != null) {
-      DebugLogger.instance.printInfo(
-          '[$layoutID]: (Check) Queuing layout [$layoutID] in data manager.',
-          name: name);
-      DebugLogger.instance.printInfo(
-          '[$layoutID]: (Check) Using publish source $publishSource.',
-          name: name);
-
-      dataManager
-          .queueLayout(layoutID: layoutID!, prioritize: true)
-          .catchError((error, str) {
-        effectiveCodelessly.errorHandler.captureException(
-          error,
-          stacktrace: str,
-          layoutID: layoutID,
-        );
-      });
-    }
-
-    // At this point in the execution, layoutID is null, slug is not specified.
-    // Preloading must be true, so this controller can only wait...
-    else {
-      if (layoutID != null) {
-        DebugLogger.instance.printInfo(
-            '[$layoutID]: (Check) LayoutID specified, but preload is set to ${config.preload}, skipping to let data manager to download everything',
-            name: name);
-      } else {
-        DebugLogger.instance.printInfo(
-            '[$layoutID]: (Check) LayoutID is null, skipping to let data manager to download everything.',
-            name: name);
-      }
+      effectiveCodelessly.status = CStatus.error('Failed to check layout');
     }
   }
 }

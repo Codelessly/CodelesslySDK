@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../codelessly_sdk.dart';
+import '../logging/error_logger.dart';
 
 /// Handles the data flow of [SDKPublishModel] from the server.
 class FirebaseDataRepository extends NetworkDataRepository {
@@ -30,8 +31,14 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
       final Map<String, dynamic>? data = event.data();
       if (data == null || data.isEmpty) {
-        throw CodelesslyException(
-            'Failed to stream publish model for [$projectID] with source [${source.name}].');
+        ErrorLogger.instance.captureException(
+          'No data found',
+          message:
+              'Failed to stream publish model for [$projectID] with source [${source.name}]',
+          type: 'publish_model_stream_failed',
+          layoutID: projectID,
+        );
+        return null;
       }
       final SDKPublishModel model = SDKPublishModel.fromJson(
         {...data, 'id': event.id},
@@ -54,7 +61,13 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
     return layoutDoc.get().then((value) {
       if (!value.exists) {
-        throw CodelesslyException('Layout [$layoutID] does not exist.');
+        ErrorLogger.instance.captureException(
+          'Layout not found',
+          message: 'Layout [$layoutID] does not exist',
+          type: 'layout_not_found',
+          layoutID: layoutID,
+        );
+        return null;
       }
       tracker.trackRead('${source.serverPath}/downloadLayoutModel');
 
@@ -62,8 +75,13 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
       // Layout does not exist or there's a network error.
       if (data.isEmpty) {
-        throw CodelesslyException(
-            'Failed to download layout [$layoutID], no data found.');
+        ErrorLogger.instance.captureException(
+          'No data found',
+          message: 'Failed to download layout [$layoutID], no data found',
+          type: 'layout_download_failed',
+          layoutID: layoutID,
+        );
+        return null;
       }
 
       final SDKPublishLayout layout = SDKPublishLayout.fromJson(
@@ -92,7 +110,12 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
       // Font does not exist or there's a network error.
       if (data.isEmpty) {
-        throw CodelesslyException('Failed to download font [$fontID].');
+        ErrorLogger.instance.captureException(
+          'No data found',
+          message: 'Failed to download font [$fontID]',
+          type: 'font_download_failed',
+        );
+        return null;
       }
 
       final SDKPublishFont font = SDKPublishFont.fromJson(
@@ -121,7 +144,12 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
       // Api does not exist or there's a network error.
       if (data.isEmpty) {
-        throw CodelesslyException('Failed to download api [$apiId].');
+        ErrorLogger.instance.captureException(
+          'No data found',
+          message: 'Failed to download api [$apiId]',
+          type: 'api_download_failed',
+        );
+        return null;
       }
 
       final HttpApiData api = HttpApiData.fromJson(
@@ -150,8 +178,13 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
       // Variables do not exist or there's a network error.
       if (data.isEmpty) {
-        throw CodelesslyException(
-            'Failed to download variables for layout/canvas [$layoutID].');
+        ErrorLogger.instance.captureException(
+          'No data found',
+          message: 'Failed to download variables for layout/canvas [$layoutID]',
+          type: 'variables_download_failed',
+          layoutID: layoutID,
+        );
+        return null;
       }
 
       final SDKLayoutVariables layoutVariables = SDKLayoutVariables.fromJson(
@@ -180,8 +213,14 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
       // Conditions do not exist or there's a network error.
       if (data.isEmpty) {
-        throw CodelesslyException(
-            'Failed to download conditions for canvas/layout [$layoutID].');
+        ErrorLogger.instance.captureException(
+          'No data found',
+          message:
+              'Failed to download conditions for canvas/layout [$layoutID]',
+          type: 'conditions_download_failed',
+          layoutID: layoutID,
+        );
+        return null;
       }
 
       final SDKLayoutConditions layoutConditions = SDKLayoutConditions.fromJson(

@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/debug_logger.dart';
+import '../logging/error_logger.dart';
 
 /// Orchestrates the data flow for the SDK.
 class DataManager {
@@ -56,7 +57,7 @@ class DataManager {
   final FirebaseFirestore firebaseFirestore;
 
   /// The error handler to use.
-  final CodelesslyErrorHandler errorHandler;
+  final ErrorLogger errorLogger;
 
   /// The stat tracker to use, used to track various reads and writes in this
   /// data manager.
@@ -119,7 +120,7 @@ class DataManager {
     required this.networkDataRepository,
     required this.localDataRepository,
     required this.firebaseFirestore,
-    required this.errorHandler,
+    required this.errorLogger,
     required this.tracker,
     SDKPublishModel? publishModel,
   }) : _publishModel = publishModel;
@@ -200,10 +201,12 @@ class DataManager {
 
             loadFontsFromPublishModel();
           } else {
-            errorHandler.captureException(CodelesslyException.networkException(
+            errorLogger.captureException(
+              'Failed to download complete publish bundle',
               message:
                   'Failed to download complete publish bundle for slug $slug.',
-            ));
+              type: 'bundle_download_failed',
+            );
           }
         });
 
@@ -226,15 +229,15 @@ class DataManager {
 
         _logTime(stopwatch);
 
-        if (e is CodelesslyException) {
-          rethrow;
-        } else {
-          throw CodelesslyException.networkException(
+        if (e is Exception) {
+          ErrorLogger.instance.captureException(
+            e,
             message:
                 'Failed to download complete publish bundle for slug $slug.',
-            originalException: e,
-            stacktrace: stackTrace,
+            type: 'bundle_download_failed',
+            stackTrace: stackTrace,
           );
+          rethrow;
         }
       } finally {
         bundleStopWatch.stop();
@@ -301,13 +304,13 @@ class DataManager {
               name: name,
               level: Level.WARNING,
             );
-            final exception = CodelesslyException(
-              'Failed to download layout [$layoutID] during init.',
-              originalException: e,
-              stacktrace: str,
+            ErrorLogger.instance.captureException(
+              e,
+              message: 'Failed to download layout [$layoutID] during init.',
+              type: 'layout_download_failed',
               layoutID: layoutID,
+              stackTrace: str,
             );
-            errorHandler.captureException(exception, stacktrace: str);
 
             _logTime(stopwatch);
             return;
@@ -410,13 +413,13 @@ class DataManager {
           name: name,
         );
       } catch (e, str) {
-        final exception = CodelesslyException(
-          'Failed to download layout [$layoutID] during init.',
-          originalException: e,
-          stacktrace: str,
+        ErrorLogger.instance.captureException(
+          e,
+          message: 'Failed to download layout [$layoutID] during init.',
+          type: 'layout_download_failed',
           layoutID: layoutID,
+          stackTrace: str,
         );
-        errorHandler.captureException(exception, stacktrace: str);
         // _logTime(stopwatch);
         // return;
       }
@@ -492,13 +495,14 @@ class DataManager {
           name: name,
           level: Level.WARNING,
         );
-        final exception = CodelesslyException(
-          'Failed to download layout [$layoutID] during download queue.',
-          originalException: e,
-          stacktrace: str,
+        ErrorLogger.instance.captureException(
+          e,
+          message:
+              'Failed to download layout [$layoutID] during download queue.',
+          type: 'layout_download_failed',
           layoutID: layoutID,
+          stackTrace: str,
         );
-        errorHandler.captureException(exception, stacktrace: str);
       }
     }
 
@@ -745,7 +749,12 @@ class DataManager {
       );
     })
       ..onError((error, str) {
-        errorHandler.captureException(error, stacktrace: str);
+        ErrorLogger.instance.captureException(
+          error,
+          message: 'Failed to listen to publish model',
+          type: 'publish_model_stream_failed',
+          stackTrace: str,
+        );
       });
 
     return completer.future;
@@ -1266,14 +1275,13 @@ class DataManager {
           name: name,
           level: Level.WARNING,
         );
-        final exception = CodelesslyException(
-          'Failed to download layout [$layoutID].',
-          originalException: e,
-          stacktrace: str,
+        ErrorLogger.instance.captureException(
+          e,
+          message: 'Failed to download layout [$layoutID].',
+          type: 'layout_failed',
           layoutID: layoutID,
-          type: ErrorType.layoutFailed,
+          stackTrace: str,
         );
-        errorHandler.captureException(exception, stacktrace: str);
       }
     } else {
       if (_downloadQueue.contains(layoutID)) {
@@ -1534,14 +1542,14 @@ class DataManager {
         slug: slug,
         source: source,
       );
-    } catch (e) {
-      DebugLogger.instance.log(
-        'Failed to download complete publish bundle.\nError: $e',
-        category: DebugCategory.error,
-        name: name,
-        level: Level.WARNING,
+    } catch (e, str) {
+      ErrorLogger.instance.captureException(
+        e,
+        message: 'Failed to download complete publish bundle for slug $slug',
+        type: 'bundle_download_failed',
+        stackTrace: str,
       );
-      rethrow;
+      return false;
     } finally {
       stopwatch.stop();
       DebugLogger.instance.printInfo(
