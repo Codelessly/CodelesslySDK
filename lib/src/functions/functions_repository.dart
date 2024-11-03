@@ -70,9 +70,9 @@ class FunctionsRepository {
     final Codelessly codelessly = context.read<Codelessly>();
     switch (action.type) {
       case ActionType.loadFromCloudStorage || ActionType.setCloudStorage:
-        StatTracker.instance.trackCloudAction(action);
+        StatTracker.instance.track(StatType.cloudAction, action.type.name);
       default:
-        StatTracker.instance.trackAction(action);
+        StatTracker.instance.track(StatType.action, action.type.name);
     }
 
     switch (action.type) {

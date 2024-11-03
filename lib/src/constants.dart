@@ -48,19 +48,6 @@ const String publishPath = 'publish';
 const String previewPath = 'publish_preview';
 const String templatesPath = 'templates';
 
-/// Stats tracking constants
-const String statsCollection = 'stats';
-const String lostStatsDoc = '_lost';
-const String viewsField = 'views';
-const String writesField = 'writes';
-const String readsField = 'reads';
-const String bundleDownloadsField = 'bundle_downloads';
-const String fontDownloadsField = 'font_downloads';
-const String actionsField = 'actions';
-const String cloudActionsField = 'cloud_actions';
-const String populatedLayoutDownloadsField = 'populated_layout_downloads';
-const String layoutViewsField = 'layout_views';
-
 /// The template url for the svg icons.
 /// {{style}}: The style of the icon. e.g. materialiconsoutlined
 /// {{name}}: The name of the icon. e.g. home

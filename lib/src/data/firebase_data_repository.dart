@@ -27,7 +27,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
         firestore.collection(source.serverPath).doc(projectID);
 
     return publishModelDoc.snapshots().map((event) {
-      StatTracker.instance.trackRead('${source.serverPath}/streamPublishModel');
+      StatTracker.instance.track(
+        StatType.read,
+        '${source.serverPath}/streamPublishModel',
+      );
 
       final Map<String, dynamic>? data = event.data();
       if (data == null || data.isEmpty) {
@@ -69,8 +72,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
         );
         return null;
       }
-      StatTracker.instance
-          .trackRead('${source.serverPath}/downloadLayoutModel');
+      StatTracker.instance.track(
+        StatType.read,
+        '${source.serverPath}/downloadLayoutModel',
+      );
 
       final Map<String, dynamic> data = value.data() ?? {};
 
@@ -105,7 +110,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(fontID);
 
     return fontDoc.get().then((value) {
-      StatTracker.instance.trackRead('${source.serverPath}/downloadFontModel');
+      StatTracker.instance.track(
+        StatType.read,
+        '${source.serverPath}/downloadFontModel',
+      );
 
       final Map<String, dynamic> data = value.data() ?? {};
 
@@ -139,7 +147,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(apiId);
 
     return apiDoc.get().then((value) {
-      StatTracker.instance.trackRead('${source.serverPath}/downloadApi');
+      StatTracker.instance.track(
+        StatType.read,
+        '${source.serverPath}/downloadApi',
+      );
 
       final Map<String, dynamic> data = value.data() ?? {};
 
@@ -173,8 +184,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(layoutID);
 
     return variablesDoc.get().then((value) {
-      StatTracker.instance
-          .trackRead('${source.serverPath}/downloadLayoutVariables');
+      StatTracker.instance.track(
+        StatType.read,
+        '${source.serverPath}/downloadLayoutVariables',
+      );
 
       final Map<String, dynamic> data = value.data() ?? {};
 
@@ -209,8 +222,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
         .doc(layoutID);
 
     return conditionsDoc.get().then((value) {
-      StatTracker.instance
-          .trackRead('${source.serverPath}/downloadLayoutConditions');
+      StatTracker.instance.track(
+        StatType.read,
+        '${source.serverPath}/downloadLayoutConditions',
+      );
 
       final Map<String, dynamic> data = value.data() ?? {};
 

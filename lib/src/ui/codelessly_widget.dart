@@ -561,7 +561,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
           if (!didView) {
             didView = true;
-            StatTracker.instance.trackView();
+            StatTracker.instance.track(StatType.view);
           }
 
           final layoutWidget = Material(

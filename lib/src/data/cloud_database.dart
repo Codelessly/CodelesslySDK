@@ -225,14 +225,14 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
     // Create project doc if missing.
     final snapshot = await rootRef.get();
-    StatTracker.instance.trackRead('cloudDatabase/init');
+    StatTracker.instance.track(StatType.read, 'cloudDatabase/init');
 
     // Do nothing if project doc exists.
     if (snapshot.exists) return;
 
     // Create project doc if it does not exist.
     await rootRef.set({'project': identifier});
-    StatTracker.instance.trackWrite('cloudDatabase/init');
+    StatTracker.instance.track(StatType.write, 'cloudDatabase/init');
 
     DebugLogger.instance
         .printInfo('Done initializing for $identifier', name: name);
@@ -314,7 +314,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
     // Auto generate id if desired.
     if (autoGenerateId) {
       final document = await rootRef.collection(path).add(value);
-      StatTracker.instance.trackWrite('cloudDatabase/addDocument');
+      StatTracker.instance.track(StatType.write, 'cloudDatabase/addDocument');
 
       DebugLogger.instance.printInfo(
         'Document added: ${document.path}',
@@ -337,7 +337,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
     // Get snapshot to check if document exists.
     final snapshot = await docRef.get();
-    StatTracker.instance.trackRead('cloudDatabase/addDocument');
+    StatTracker.instance.track(StatType.read, 'cloudDatabase/addDocument');
 
     if (skipCreationIfDocumentExists && snapshot.exists) {
       DebugLogger.instance.printInfo(
@@ -349,7 +349,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
     // Set document.
     await docRef.set(value);
-    StatTracker.instance.trackWrite('cloudDatabase/addDocument');
+    StatTracker.instance.track(StatType.write, 'cloudDatabase/addDocument');
 
     DebugLogger.instance.printInfo(
       'Document added: ${docRef.path}/$documentId',
@@ -381,7 +381,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
     // TODO: Should we do update instead of set?
     await docRef.set(value, SetOptions(merge: true));
-    StatTracker.instance.trackWrite('cloudDatabase/updateDocument');
+    StatTracker.instance.track(StatType.write, 'cloudDatabase/updateDocument');
 
     DebugLogger.instance.printInfo(
       'Document updated: ${docRef.path}',
@@ -395,13 +395,13 @@ class FirestoreCloudDatabase extends CloudDatabase {
     final docRef = getDocPath(path, documentId);
 
     final snapshot = await docRef.get();
-    StatTracker.instance.trackRead('cloudDatabase/removeDocument');
+    StatTracker.instance.track(StatType.read, 'cloudDatabase/removeDocument');
 
     // TODO: Do we have to check for existence?
     if (!snapshot.exists) return false;
 
     await docRef.delete();
-    StatTracker.instance.trackWrite('cloudDatabase/removeDocument');
+    StatTracker.instance.track(StatType.write, 'cloudDatabase/removeDocument');
 
     return true;
   }
@@ -412,7 +412,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
     final docRef = getDocPath(path, documentId);
 
     final snapshot = await docRef.get();
-    StatTracker.instance.trackRead('cloudDatabase/getDocumentData');
+    StatTracker.instance.track(StatType.read, 'cloudDatabase/getDocumentData');
 
     final data = snapshot.data() ?? {};
     return sanitizeCloudDataForUse(data, docId: snapshot.id);
@@ -422,7 +422,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
   Stream<Map<String, dynamic>> streamDocument(String path, String documentId) {
     final docRef = getDocPath(path, documentId);
     return docRef.snapshots().map((snapshot) {
-      StatTracker.instance.trackRead('cloudDatabase/streamDocument');
+      StatTracker.instance.track(StatType.read, 'cloudDatabase/streamDocument');
 
       return snapshot.data()?.let(
               (value) => sanitizeCloudDataForUse(value, docId: snapshot.id)) ??
@@ -450,8 +450,10 @@ class FirestoreCloudDatabase extends CloudDatabase {
     // Listen to the stream and update the variable.
     final subscription = stream.listen(
       (data) {
-        StatTracker.instance
-            .trackRead('cloudDatabase/streamDocumentToVariable');
+        StatTracker.instance.track(
+          StatType.read,
+          'cloudDatabase/streamDocumentToVariable',
+        );
 
         DebugLogger.instance.printInfo(
           'Document stream update from cloud storage: $path/$documentId',
@@ -534,8 +536,10 @@ class FirestoreCloudDatabase extends CloudDatabase {
     // Listen to the stream and update the variable.
     final subscription = stream.listen(
       (snapshot) {
-        StatTracker.instance
-            .trackRead('cloudDatabase/streamCollectionToVariable');
+        StatTracker.instance.track(
+          StatType.read,
+          'cloudDatabase/streamCollectionToVariable',
+        );
 
         final docs = snapshot.docs
             .map((doc) => sanitizeCloudDataForUse(doc.data(), docId: doc.id))
