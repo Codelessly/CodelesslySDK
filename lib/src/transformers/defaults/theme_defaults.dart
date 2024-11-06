@@ -67,7 +67,7 @@ class ButtonDefaults {
   static const IconPlacementEnum placement = IconPlacementEnum.start;
   static const double gap = 8;
 
-  static StartEndProp get labelStyle => StartEndProp.general(fontSize: 13);
+  static TextProp get labelStyle => TextProp.general(fontSize: 13);
   static const MultiSourceIconModel icon = MultiSourceIconModel(size: 20);
 
   const ButtonDefaults._();
@@ -95,7 +95,7 @@ class TextFieldDefaults {
   static const int maxLines = 1;
   static const String obscuringCharacter = '•';
 
-  static StartEndProp get style => StartEndProp.general(
+  static TextProp get style => TextProp.general(
         fontSize: 14,
         fills: [PaintModel.blackPaint],
       );
@@ -154,7 +154,7 @@ class AppBarDefaults {
       MultiSourceIconModel.icon(color: null);
   static const bool automaticallyImplyLeading = false;
 
-  static StartEndProp get titleStyle => StartEndProp.general(fontSize: 18);
+  static TextProp get titleStyle => TextProp.general(fontSize: 18);
   static const Color backgroundColor = kDefaultPrimaryColor;
   static const String title = 'App Bar';
   static const double titleSpacing = 16;
