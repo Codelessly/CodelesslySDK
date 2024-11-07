@@ -241,7 +241,7 @@ class AdaptiveNodeBox extends StatelessWidget {
   /// Creates a [AdaptiveNodeBox] that will fit its [child] to the size of the
   /// [node], taking into account the node's [BaseNode.horizontalFit] and
   /// [BaseNode.verticalFit].
-  const AdaptiveNodeBox({super.key, required this.node, required this.child});
+  const AdaptiveNodeBox({super.key, required this.node, this.child});
 
   @override
   Widget build(BuildContext context) {
