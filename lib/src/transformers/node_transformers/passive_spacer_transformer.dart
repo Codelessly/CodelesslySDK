@@ -1,7 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
-import '../node_transformer.dart';
+import '../../../codelessly_sdk.dart';
 
 class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
   PassiveSpacerTransformer(super.getNode, super.manager);
@@ -10,9 +10,8 @@ class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
     final BaseNode parentNode = getNode(node.parentID);
 
     if (parentNode is! RowColumnMixin) {
-      throw Exception(
-        'SpacerNode must be a child of a RowColumnNode to be rendered.'
-        ' ${node.name} is a child of [${parentNode.id}](${parentNode.name})',
+      return AdaptiveNodeBox(
+        node: node,
       );
     }
 
