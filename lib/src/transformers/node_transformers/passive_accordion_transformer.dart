@@ -36,6 +36,7 @@ class PassiveAccordionTransformer extends NodeWidgetTransformer<AccordionNode> {
       basicBoxLocal: NodeBox(0, 0, 0, 0),
       name: 'AccordionNode',
       id: 'accordion_node',
+      properties: AccordionProperties(isExpanded: true),
     );
     return PassiveAccordionWidget(
       enabled: enabled,

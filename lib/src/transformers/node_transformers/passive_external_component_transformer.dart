@@ -33,7 +33,7 @@ class PassiveExternalComponentWidget extends StatelessWidget {
     final CodelesslyContext codelesslyContext =
         context.watch<CodelesslyContext>();
     final WidgetBuilder? builder =
-        codelesslyContext.externalComponentBuilders[node.builderID];
+        codelesslyContext.externalComponentBuilders[node.properties.builderID];
 
     return AdaptiveNodeBox(
       node: node,

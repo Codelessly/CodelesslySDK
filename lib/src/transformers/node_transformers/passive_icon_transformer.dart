@@ -37,7 +37,7 @@ class PassiveIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final IconModel icon = node.icon;
+    final IconModel icon = node.properties.icon;
 
     final iconWidget = SvgIcon(
       icon: icon,
