@@ -1,5 +1,4 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:collection/collection.dart';
 
 /// A visitor that returns the list of variable names used in a condition.
 class ConditionVariablesVisitor
@@ -67,7 +66,7 @@ class ConditionVariablesVisitor
     return variablePathRegex
         .allMatches(part.valueString)
         .map((match) => match.namedGroup('name'))
-        .whereNotNull()
+        .nonNulls
         .where((element) => !excludedVariableNames.contains(element))
         .toSet();
   }
@@ -101,7 +100,7 @@ class ConditionVariablesVisitor
           (value) => variablePathRegex
               .allMatches(value.value.toString())
               .map((match) => match.namedGroup('name'))
-              .whereNotNull()
+              .nonNulls
               .where((element) => !excludedVariableNames.contains(element)),
         )
         .toSet();
@@ -137,7 +136,7 @@ class ConditionNodesVisitor
   Set<String>? visitCondition(Condition condition) => {
         ...condition.actions
             .map((action) => action.accept<String>(this))
-            .whereNotNull()
+            .nonNulls
             .toSet(),
       };
 
@@ -146,13 +145,13 @@ class ConditionNodesVisitor
         ...condition.ifCondition.actions,
         ...condition.elseIfConditions.expand((condition) => condition.actions),
         ...condition.elseCondition?.actions ?? [],
-      }.map((action) => action.accept<String>(this)).whereNotNull().toSet();
+      }.map((action) => action.accept<String>(this)).nonNulls.toSet();
 
   @override
   Set<String>? visitElseCondition(ElseCondition condition) {
     return condition.actions
         .map((action) => action.accept<String>(this))
-        .whereNotNull()
+        .nonNulls
         .toSet();
   }
 

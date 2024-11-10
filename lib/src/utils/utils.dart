@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -331,7 +330,7 @@ Set<String> getApisToLoadForCanvas(CanvasNode canvasNode) {
       .map((e) => e.action)
       .whereType<ApiCallAction>()
       .map((e) => e.apiId)
-      .whereNotNull()
+      .nonNulls
       .toSet();
 }
 

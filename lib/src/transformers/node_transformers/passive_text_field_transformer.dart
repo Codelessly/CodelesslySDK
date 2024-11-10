@@ -504,8 +504,6 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
           borderRadius: inputBorder.cornerRadius.borderRadius,
           borderSide: inputBorder.borderSide.toFlutter(),
         );
-      default:
-        return null;
     }
   }
 

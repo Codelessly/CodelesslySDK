@@ -269,8 +269,6 @@ extension TextOverflowHelper on TextOverflowC {
         return TextOverflow.ellipsis;
       case TextOverflowC.visible:
         return TextOverflow.visible;
-      default:
-        throw Exception('Unknown TextOverflowc value: $this');
     }
   }
 
@@ -462,8 +460,6 @@ extension CMainAxisAlignmentHelper on MainAxisAlignmentC {
         return flutter.MainAxisAlignment.spaceAround;
       case MainAxisAlignmentC.spaceEvenly:
         return flutter.MainAxisAlignment.spaceEvenly;
-      default:
-        return flutter.MainAxisAlignment.start;
     }
   }
 }
@@ -481,8 +477,6 @@ extension CCrossAxisAlignmentHelper on CrossAxisAlignmentC {
         return flutter.CrossAxisAlignment.stretch;
       case CrossAxisAlignmentC.baseline:
         return flutter.CrossAxisAlignment.baseline;
-      default:
-        return flutter.CrossAxisAlignment.start;
     }
   }
 }
@@ -661,15 +655,12 @@ extension VariableDataListExtensions<T extends VariableData> on Iterable<T> {
 
   List<String> nameToId(List<String> names) => names
       .map((name) => findByNameOrNull(name))
-      .whereNotNull()
+      .nonNulls
       .map((e) => e.id)
       .toList();
 
-  List<String> idToName(List<String> ids) => ids
-      .map((id) => findByIdOrNull(id))
-      .whereNotNull()
-      .map((e) => e.name)
-      .toList();
+  List<String> idToName(List<String> ids) =>
+      ids.map((id) => findByIdOrNull(id)).nonNulls.map((e) => e.name).toList();
 
   List<String> toIds() => map((e) => e.id).toList();
 
@@ -827,8 +818,6 @@ extension FitExtension on Fit {
         return BoxFit.none;
       case Fit.scaleDown:
         return BoxFit.scaleDown;
-      default:
-        return BoxFit.contain;
     }
   }
 }
@@ -1074,8 +1063,6 @@ extension BoxHeightStyleEnumExtensions on BoxHeightStyleEnum {
         return BoxHeightStyle.strut;
       case BoxHeightStyleEnum.tight:
         return BoxHeightStyle.tight;
-      default:
-        return BoxHeightStyle.tight;
     }
   }
 }
@@ -1086,8 +1073,6 @@ extension BoxWidthStyleEnumExtensions on BoxWidthStyleEnum {
       case BoxWidthStyleEnum.max:
         return BoxWidthStyle.max;
       case BoxWidthStyleEnum.tight:
-        return BoxWidthStyle.tight;
-      default:
         return BoxWidthStyle.tight;
     }
   }
@@ -1592,7 +1577,7 @@ extension ActionModelExt on ActionModel {
         strings.addAll(action.values
             .map(
                 (value) => value.value is String ? value.value as String : null)
-            .whereNotNull());
+            .nonNulls);
       case ActionType.setVariable:
         final SetVariableAction action = this as SetVariableAction;
         strings.addAll([action.index, action.mapKey, action.newValue]);
