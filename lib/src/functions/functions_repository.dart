@@ -67,7 +67,6 @@ class FunctionsRepository {
     }
     DebugLogger.instance.printInfo('Performing action: $action', name: name);
 
-    final Codelessly codelessly = context.read<Codelessly>();
     switch (action.type) {
       case ActionType.loadFromCloudStorage || ActionType.setCloudStorage:
         StatTracker.instance.track(StatType.cloudAction, action.type.name);

@@ -6,11 +6,11 @@ import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/debug_logger.dart';
+import '../logging/error_logger.dart';
 import '../logging/stat_tracker.dart';
 import 'codelessly_error_screen.dart';
 import 'codelessly_loading_screen.dart';
 import 'layout_builder.dart';
-import '../logging/error_logger.dart';
 
 /// Allows wrapping a loaded [Codelessly] layout with any widget for additional
 /// control over the rendering.
@@ -235,9 +235,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   /// one was not provided in the constructor of the [CodelesslyWidget].
   CodelesslyWidgetController get _effectiveController =>
       widget.controller ?? _controller!;
-
-  Codelessly get _effectiveCodelessly =>
-      _effectiveController.effectiveCodelessly;
 
   /// The [CodelesslyContext] that will hold the data and functions that will be
   /// used to render the layout.

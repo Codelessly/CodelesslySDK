@@ -22,9 +22,9 @@ class StatTracker {
 
   /// Whether this tracker should collect and send stats.
   /// Defaults to true. Set to false to disable all tracking for this instance.
-  final bool enabled;
+  bool enabled = true;
 
-  StatTracker._({this.enabled = true});
+  StatTracker._();
 
   Uri? serverUrl;
 
@@ -47,9 +47,11 @@ class StatTracker {
   void init({
     required String projectId,
     required Uri serverUrl,
+    bool enabled = true,
   }) {
     this.projectId = projectId;
     this.serverUrl = serverUrl;
+    this.enabled = enabled;
 
     // Send a batch if stats were tracked while this wasn't initialized yet.
     if (statBatch.isNotEmpty && !disabled) {
