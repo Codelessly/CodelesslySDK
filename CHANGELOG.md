@@ -1,3 +1,12 @@
+## 6.0.0
+
+- Fall cleanup! A large refresh and cleanup of SDK internals. 
+- Use the new DebugLogger for printing and debugging.
+- Migrate to `logging` library and support package scoped logs.
+- New ErrorHandler for better error handling.
+- Updated usage and stats tracking.
+- Fix lint issues.
+
 ## 5.3.0
 
 - Add support for Codelessly Simulator! With Codelessly Simulator, you can easily preview your app in the browser as if it was running on a real device.
