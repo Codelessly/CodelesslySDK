@@ -294,29 +294,32 @@ extension CornerRadiusHelper on CornerRadius {
 }
 
 extension ColorHelper on flutter.Color {
-  ColorRGB get colorRGB =>
-      ColorRGB(r: red / 255.0, g: green / 255.0, b: blue / 255.0);
+  ColorRGB get colorRGB => ColorRGB(r: r, g: g, b: b);
 
-  ColorRGBA get colorRGBA => ColorRGBA(
-      r: red / 255.0, g: green / 255.0, b: blue / 255.0, a: alpha / 255.0);
+  ColorRGBA get colorRGBA => ColorRGBA(r: r, g: g, b: b, a: a);
 
   Color darken([double percent = 10]) {
     assert(1 <= percent && percent <= 100);
     var f = 1 - percent / 100;
-    return Color.fromARGB(
-        alpha, (red * f).round(), (green * f).round(), (blue * f).round());
+    return Color.from(
+      alpha: a,
+      red: r * f,
+      green: g * f,
+      blue: b * f,
+    );
   }
 
   ColorRGB toColorRGB() => colorRGB;
 
   ColorRGBA toColorRGBA() => colorRGBA;
 
+  // ignore: deprecated_member_use
   String get hex => value.toRadixString(16).padLeft(8, '0').toUpperCase();
 
   PaintModel toPaint([String? id]) => PaintModel.solid(
         id: id ?? generateId(),
         visible: true,
-        opacity: opacity,
+        opacity: a,
         color: toColorRGB(),
       );
 
@@ -357,7 +360,7 @@ extension ColorRGBAHelper on ColorRGBA {
   PaintModel toPaint([String? id]) => PaintModel.solid(
       id: id ?? generateId(),
       visible: true,
-      opacity: toFlutterColor().opacity,
+      opacity: toFlutterColor().a,
       color: toRGB());
 }
 

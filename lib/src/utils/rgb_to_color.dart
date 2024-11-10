@@ -7,9 +7,9 @@ import 'extensions.dart';
 /// Converts a Flutter [Color] to a [ColorRGB] object.
 ColorRGB colorToRGB(Color color) {
   return ColorRGB(
-    r: color.red / 255,
-    g: color.green / 255,
-    b: color.blue / 255,
+    r: color.r,
+    g: color.g,
+    b: color.b,
     // a: 1.0,
   );
 }
@@ -17,10 +17,10 @@ ColorRGB colorToRGB(Color color) {
 /// Converts a Flutter [Color] to a [ColorRGBA] object.
 ColorRGBA colorToRGBA(Color color) {
   return ColorRGBA(
-    r: color.red / 255,
-    g: color.green / 255,
-    b: color.blue / 255,
-    a: color.opacity,
+    r: color.r,
+    g: color.g,
+    b: color.b,
+    a: color.a,
   );
 }
 

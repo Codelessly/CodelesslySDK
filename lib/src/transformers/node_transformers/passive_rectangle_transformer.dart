@@ -278,7 +278,7 @@ class PortalPreviewWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: StripePainter(
-        bgColor: const Color(0xFFBA79F4).withOpacity(0.1),
+        bgColor: const Color(0xFFBA79F4).withValues(alpha: 0.1),
         stripeColor: const Color(0xFFBA79F4),
         nbOfStripes: (node.outerBoxGlobal.size.longestSide / 10).round(),
       ),

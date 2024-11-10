@@ -175,7 +175,7 @@ class PassiveExpansionTileWidget extends StatelessWidget {
           painter: PlaceholderPainter(
             scale: 1,
             scaleInverse: 1,
-            bgColor: kDefaultPrimaryColor.withOpacity(0.15),
+            bgColor: kDefaultPrimaryColor.withValues(alpha: 0.15),
             dashColor: const Color(0xFFADB3F1),
             textSpan: TextSpan(
               text: node.type.camelToSentenceCase,
