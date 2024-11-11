@@ -222,9 +222,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
             ? (context) => widget.loadingBuilder!(context, null)
             : null,
       );
-    }
-
-    if (url.isBase64Blob) {
+    } else if (url.isBase64Blob) {
       child = Image.memory(
         url.base64Data,
         fit: fit,
@@ -238,28 +236,28 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         errorBuilder: (context, _, __) =>
             (widget.errorBuilder ?? _defaultErrorBuilder)(context),
       );
+    } else {
+      child = Image.network(
+        url,
+        fit: fit,
+        alignment: alignment,
+        width: width,
+        height: height,
+        repeat: repeat,
+        color: widget.color,
+        opacity: AlwaysStoppedAnimation(widget.paint?.opacity ?? 1),
+        filterQuality: FilterQuality.medium,
+        colorBlendMode: colorBlendMode,
+        loadingBuilder: widget.loadingBuilder != null
+            ? (context, child, loadingProgress) =>
+                widget.loadingBuilder!(context, child)
+            : null,
+        errorBuilder: (context, error, stackTrace) {
+          print('Image Loading Error: $error');
+          return (widget.errorBuilder ?? _defaultErrorBuilder)(context);
+        },
+      );
     }
-
-    child = Image.network(
-      url,
-      fit: fit,
-      alignment: alignment,
-      width: width,
-      height: height,
-      repeat: repeat,
-      color: widget.color,
-      opacity: AlwaysStoppedAnimation(widget.paint?.opacity ?? 1),
-      filterQuality: FilterQuality.medium,
-      colorBlendMode: colorBlendMode,
-      loadingBuilder: widget.loadingBuilder != null
-          ? (context, child, loadingProgress) =>
-              widget.loadingBuilder!(context, child)
-          : null,
-      errorBuilder: (context, error, stackTrace) {
-        print('Image Loading Error: $error');
-        return (widget.errorBuilder ?? _defaultErrorBuilder)(context);
-      },
-    );
 
     final BoxDecoration decoration = BoxDecoration(
       borderRadius: widget.node is CornerMixin
