@@ -31,6 +31,8 @@ class CustomComponent with EquatableMixin, SerializableMixin {
   /// Blur-hash for the thumbnail preview.
   final String blurhash;
 
+  late final String parentID = getTopMostParentIDs(data.nodes).first;
+
   /// Default constructor to create a new component.
   CustomComponent({
     required this.id,
