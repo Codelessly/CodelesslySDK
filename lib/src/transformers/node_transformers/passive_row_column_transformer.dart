@@ -13,6 +13,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     required List<Widget> childrenWidgets,
     required List<BaseNode> childrenNodes,
     required bool withScroll,
+    required GetNode getNode,
   }) {
     assert(rowColumnNode is RowColumnMixin);
 
@@ -27,8 +28,22 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     } else if (rowColumnNode.verticalFit == SizeFit.shrinkWrap) {
       fixHeight = rowColumnNode.constraints.minHeight;
     } else {
-      fixHeight = rowColumnNode.constraints.maxHeight ?? double.infinity;
+      // If the node is a canvas node's body, it is likely a placeholder that
+      // expands to fill all available space, while the canvas is already meant
+      // to do that as a scroll view. In this case, we avoid setting the height
+      // to infinity at all costs.
+      final BaseNode? parent = rowColumnNode.parentID == kRootNode
+          ? null
+          : getNode(rowColumnNode.parentID);
+      bool isPlaceholder =
+          parent is CanvasNode && parent.properties.bodyId == rowColumnNode.id;
+      if (isPlaceholder) {
+        fixHeight = rowColumnNode.constraints.minHeight;
+      } else {
+        fixHeight = rowColumnNode.constraints.maxHeight ?? double.infinity;
+      }
     }
+
     if (rowColumnNode.horizontalFit == SizeFit.locked ||
         rowColumnNode.horizontalFit == SizeFit.fixed) {
       fixWidth = rowColumnNode.outerBoxLocal.width;
@@ -302,6 +317,7 @@ class PassiveRowColumnWidget extends StatelessWidget {
                   childrenWidgets: widgetChildren,
                   childrenNodes: children,
                   withScroll: true,
+                  getNode: manager.getNode,
                 )
               ],
               settings: settings,
@@ -311,6 +327,7 @@ class PassiveRowColumnWidget extends StatelessWidget {
             childrenWidgets: widgetChildren,
             childrenNodes: children,
             withScroll: true,
+            getNode: manager.getNode,
           );
 
     if (kIsTestLayout) {
