@@ -25,7 +25,7 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
     return PassiveDropdownWidget(
       node: node,
       onTap: () => onTap(context, node),
-      onChanged: (value) => onChanged(context, node, value),
+      onChanged: (index, value) => onChanged(context, node, index, value),
       settings: settings,
     );
   }
@@ -51,7 +51,8 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
   void onTap(context, DropdownNode node) =>
       FunctionsRepository.triggerAction(context, node: node, TriggerType.click);
 
-  void onChanged(BuildContext context, DropdownNode node, int internalValue) {
+  void onChanged(BuildContext context, DropdownNode node, int index,
+      Object internalValue) {
     NodeStateProvider.setState(context, internalValue);
     FunctionsRepository.setPropertyValue(context,
         node: node, property: 'value', value: internalValue);
@@ -64,7 +65,7 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
 class PassiveDropdownWidget extends StatelessWidget {
   final DropdownNode node;
   final VoidCallback? onTap;
-  final ValueChanged<int>? onChanged;
+  final Function(int index, Object value)? onChanged;
   final int? initialValue;
   final WidgetBuildSettings settings;
 
@@ -77,11 +78,11 @@ class PassiveDropdownWidget extends StatelessWidget {
     required this.settings,
   });
 
-  List<DropdownMenuItem<int>> buildItems(BuildContext context, List items) {
+  List<DropdownMenuItem<Object>> buildItems(BuildContext context, List items) {
     return [
       for (final (index, value) in items.indexed)
-        DropdownMenuItem<int>(
-          value: index,
+        DropdownMenuItem<Object>(
+          value: value,
           alignment: node.properties.itemAlignment.flutterAlignmentGeometry ??
               AlignmentDirectional.centerStart,
           child: ChangeNotifierProvider<CodelesslyContext>.value(
@@ -121,8 +122,8 @@ class PassiveDropdownWidget extends StatelessWidget {
   List<Widget> selectedItemBuilder(BuildContext context, List items) {
     return [
       for (final (index, value) in items.indexed)
-        DropdownMenuItem<int>(
-          value: index,
+        DropdownMenuItem<Object>(
+          value: Object,
           alignment: node.properties.itemAlignment.flutterAlignmentGeometry ??
               AlignmentDirectional.centerStart,
           child: IndexedItemProvider(
@@ -173,14 +174,12 @@ class PassiveDropdownWidget extends StatelessWidget {
             []
         : node.properties.items;
 
-    int? value = PropertyValueDelegate.getPropertyValue<int>(
+    Object? value = PropertyValueDelegate.getPropertyValue<Object>(
           node,
           'value',
           scopedValues: scopedValues,
         ) ??
         node.value;
-
-    if (value == -1) value = null;
 
     return AdaptiveNodeBox(
       node: node,
@@ -189,7 +188,7 @@ class PassiveDropdownWidget extends StatelessWidget {
           hoverColor: node.properties.hoverColor?.toFlutterColor(),
           splashColor: node.properties.splashColor?.toFlutterColor(),
         ),
-        child: DropdownButton<int>(
+        child: DropdownButton<Object>(
           value: value,
           isDense: node.properties.dense,
           isExpanded: node.properties.expanded,
@@ -219,7 +218,11 @@ class PassiveDropdownWidget extends StatelessWidget {
           onTap: onTap,
           padding: node.padding.flutterEdgeInsets,
           onChanged: node.properties.enabled
-              ? (value) => onChanged?.call(value ?? 0)
+              ? (value) {
+                  if (value == null) return;
+                  final index = items.indexOf(value);
+                  onChanged?.call(index, value);
+                }
               : null,
           underline: node.properties.underline ? null : const SizedBox.shrink(),
           items: buildItems(context, items),
