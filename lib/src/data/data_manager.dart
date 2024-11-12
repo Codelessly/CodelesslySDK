@@ -767,6 +767,12 @@ class DataManager {
     _publishModelStreamController.add(_publishModel);
   }
 
+  Future<void> setPublishModel(SDKPublishModel model) async {
+    _publishModel = model;
+    await emitPublishModel();
+    savePublishModel();
+  }
+
   /// Saves the current [_publishModel] if it is not null to the local cache
   /// using [localDataRepository].
   void savePublishModel() {
