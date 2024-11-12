@@ -73,13 +73,16 @@ class PassiveRectangleWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final ScopedValues scopedValues = ScopedValues.of(context);
 
-    // final BaseNode? parent = node.id == kRootNode || node.parentID == kRootNode
-    //     ? null
-    //     : getNode(node.parentID);
+    final BaseNode? parent = node.id == kRootNode || node.parentID == kRootNode
+        ? null
+        : manager.getNode(node.parentID);
+    bool isPlaceholder =
+        parent is CanvasNode && parent.properties.bodyId == node.id;
 
     /// TODO Birju / Saad. Why does the commented out parent code below break published layouts only?
     /// Saad's note: The below code looks like AdaptiveNodeBox
-    final double? width = (node.horizontalFit == SizeFit.shrinkWrap)
+    final double? width = (node.horizontalFit == SizeFit.shrinkWrap ||
+            isPlaceholder)
         ? null
         : (node.horizontalFit ==
                 SizeFit
@@ -89,7 +92,8 @@ class PassiveRectangleWidget extends StatelessWidget {
             ? double.infinity
             : node.basicBoxLocal.width;
 
-    final double? height = (node.verticalFit == SizeFit.shrinkWrap)
+    final double? height = (node.verticalFit == SizeFit.shrinkWrap ||
+            isPlaceholder)
         ? null
         : (node.verticalFit ==
                 SizeFit
@@ -138,25 +142,11 @@ class PassiveRectangleWidget extends StatelessWidget {
           ...buildFills(
             node,
             useInk: false,
-            // useInk: node is BlendMixin &&
-            //     (node as BlendMixin).inkWell != null &&
-            //     settings.useInk,
             obscureImages: settings.obscureImages,
             settings: settings,
             scopedValues: scopedValues,
           ),
           ...buildStrokes(node, scopedValues),
-          // old
-          // ...wrapWithPaddingAndScroll(
-          //   node,
-          //   [
-          //     ...children,
-          //     if (portalWidget != null) portalWidget,
-          //   ],
-          //   stackAlignment: stackAlignment,
-          //   applyPadding: applyPadding,
-          // ),
-
           ...wrapWithInkWell(
             context,
             node,
@@ -170,37 +160,6 @@ class PassiveRectangleWidget extends StatelessWidget {
               applyPadding: applyPadding,
             ),
           ),
-
-          // Builder(builder: (context) {
-          //   final child = Stack(
-          //     children: [
-          //       ...wrapWithPaddingAndScroll(
-          //         node,
-          //         [
-          //           ...children,
-          //           if (portalWidget != null) portalWidget,
-          //         ],
-          //         stackAlignment: stackAlignment,
-          //         applyPadding: applyPadding,
-          //       ),
-          //     ],
-          //   );
-          //
-          //   if (node is BlendMixin && (node as BlendMixin).inkWell != null) {
-          //     return Material(
-          //       type: MaterialType.transparency,
-          //       child: InkWell(
-          //         onLongPress: () {},
-          //         onTap: () {
-          //           // TODO:
-          //         },
-          //         child: child,
-          //       ),
-          //     );
-          //   }
-          //
-          //   return child;
-          // }),
         ],
       ),
     );
