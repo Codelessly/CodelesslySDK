@@ -1831,6 +1831,8 @@ extension IterableExt<V> on Iterable<V> {
   Map<K, V> mapBy<K>(K Function(V) key) => <K, V>{
         for (final value in this) key(value): value,
       };
+
+  int count(V item) => where((e) => e == item).length;
 }
 
 extension TabBarIndicatorSizeExtensions on TabBarIndicatorSizeEnum {

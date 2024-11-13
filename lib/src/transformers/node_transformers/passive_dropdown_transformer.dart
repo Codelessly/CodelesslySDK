@@ -189,7 +189,7 @@ class PassiveDropdownWidget extends StatelessWidget {
           splashColor: node.properties.splashColor?.toFlutterColor(),
         ),
         child: DropdownButton<Object>(
-          value: items.isEmpty || !items.contains(value) ? null : value,
+          value: items.isEmpty || items.count(value) != 1 ? null : value,
           isDense: node.properties.dense,
           isExpanded: node.properties.expanded,
           autofocus: node.properties.autoFocus,
