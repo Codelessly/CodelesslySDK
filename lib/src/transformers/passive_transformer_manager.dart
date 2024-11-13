@@ -73,6 +73,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       context,
       node: node,
       builder: (context) {
+        if (!node.enabled) return const SizedBox.shrink();
+
         Widget widget =
             getTransformerByNode(node).buildWidget(node, context, settings);
 
