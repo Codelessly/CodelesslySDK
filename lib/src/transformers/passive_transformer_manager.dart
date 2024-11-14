@@ -101,7 +101,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             context,
             node,
             widget,
-            maintainState: false,
+            maintainState: true,
           );
         }
 
@@ -126,6 +126,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     required BaseNode node,
     required Widget Function(BuildContext context) builder,
   }) {
+    if (!node.enabled) return const SizedBox.shrink();
+
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
 
