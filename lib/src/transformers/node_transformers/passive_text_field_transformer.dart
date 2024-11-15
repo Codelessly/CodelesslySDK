@@ -98,6 +98,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final bool withAutofill;
   final AutovalidateMode? autovalidateMode;
   final FormFieldValidator<String>? validator;
+  final bool? autofocus;
 
   PassiveTextFieldWidget({
     super.key,
@@ -111,6 +112,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
     List<VariableData>? variables,
     this.autovalidateMode,
     this.validator,
+    this.autofocus,
   }) : variablesOverrides = variables ?? [];
 
   @override
@@ -237,10 +239,16 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     final FormFieldValidator<String> validator =
         widget.validator ?? validatorModel.validate;
 
+    final bool autofocus = !widget.settings.isPreview &&
+        (widget.autofocus ?? properties.autoFocus);
+
+    print('TextField Autofocus: $autofocus | isPreview: ${widget.settings.isPreview} | prop autofocus: ${properties.autoFocus} | widget autofocus: ${widget.autofocus}');
+    assert(!(autofocus == true), 'Autofocus: $autofocus is not supported in passive text fields.');
+
     Widget field = TextFormField(
       focusNode: focusNode,
       autocorrect: properties.autoCorrect,
-      autofocus: !widget.settings.isPreview && properties.autoFocus,
+      autofocus: autofocus,
       enableInteractiveSelection: properties.enableInteractiveSelection,
       enabled: enabled,
       controller: controller,
