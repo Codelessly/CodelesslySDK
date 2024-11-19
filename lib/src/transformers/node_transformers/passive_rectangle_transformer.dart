@@ -1,8 +1,10 @@
 import 'dart:math' hide log;
+import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' as vec_math;
 
 import '../../../codelessly_sdk.dart';
@@ -567,136 +569,226 @@ List<Widget> buildFills(
 }) {
   if (node is! GeometryMixin) return [];
 
+  List<Widget> raster = [];
+
+  // fills that have BlendMode-fills above them in the index list (smaller
+  // indices) will recur the list of fills to recursively collect the blend-mode
+  // layers above it, and then consume/apply the blendmodes by wrapping itself
+  // with ShaderMasks until a non-blendmode fill is found. This is done to
+  // ensure that the blendmodes are applied in the correct order.
+  Map<int, PaintModel> lastBlendTree = {};
+  for (final (i, model) in node.fills.reversed.indexed) {
+    if (!model.visible) continue;
+    if (model.blendMode != BlendModeC.srcOver) {
+      lastBlendTree[i] = model;
+      continue;
+    }
+
+    // At this point, we have reached a non-blendmode fill. We need to apply the
+    // blendmodes in the correct order to this fill.
+    Widget fill = buildFill(
+      node,
+      index: node.fills.indexOf(model),
+      imageBytes: imageBytes,
+      imageOpacity: imageOpacity,
+      imageRotation: imageRotation,
+      imageFillBuilder: imageFillBuilder,
+      useInk: useInk,
+      obscureImages: obscureImages,
+      settings: settings,
+      scopedValues: scopedValues,
+    );
+
+    // for (final MapEntry(key: i, value: paint)
+    //     in lastBlendTree.entries.toList().reversed) {
+    //   // fill = BlendMask(
+    //   //   model: paint,
+    //   //   image: null,
+    //   //   child: fill,
+    //   // );
+    //   fill = Stack(
+    //     children: [
+    //       fill,
+    //       Positioned.fill(
+    //         child: PaintBlendMask(
+    //           model: paint,
+    //           image: null,
+    //           child: buildFill(
+    //             node,
+    //             index: i,
+    //             settings: settings,
+    //             scopedValues: scopedValues,
+    //           ),
+    //         ),
+    //       ),
+    //     ],
+    //   );
+    // }
+
+    lastBlendTree.clear();
+    raster.add(wrapFillWithPositioned(
+      node: node,
+      fill: fill,
+      paint: model,
+    ));
+  }
+
+  return raster.reversed.toList();
+}
+
+Widget wrapFillWithPositioned({
+  required GeometryMixin node,
+  required Widget fill,
+  required PaintModel paint,
+}) =>
+    switch (paint.type) {
+      PaintType.solid => Positioned.fill(child: fill),
+      PaintType.gradientLinear ||
+      PaintType.gradientRadial ||
+      PaintType.gradientAngular ||
+      PaintType.gradientDiamond =>
+        Positioned.fill(child: fill),
+      PaintType.image => node.isHorizontalWrap || node.isVerticalWrap
+          ? Positioned(child: fill)
+          : Positioned.fill(child: fill),
+      PaintType.emoji => fill,
+    };
+
+Widget buildFill(
+  GeometryMixin node, {
+  required int index,
+  Map<int, TypedBytes> imageBytes = const {},
+  double? imageOpacity,
+  double? imageRotation,
+  ImageFillBuilder? imageFillBuilder,
+  bool useInk = true,
+  bool obscureImages = false,
+  required WidgetBuildSettings settings,
+  required ScopedValues scopedValues,
+}) {
+  final paint = node.fills[index];
   final BorderRadius? borderRadius = getBorderRadius(node);
-  return [
-    ...node.fills.where((paint) => paint.visible).mapIndexed((index, paint) {
-      switch (paint.type) {
-        case PaintType.solid:
-          final propertyValue =
-              PropertyValueDelegate.getPropertyValue<PaintModel>(
+
+  switch (paint.type) {
+    case PaintType.solid:
+      final propertyValue = PropertyValueDelegate.getPropertyValue<PaintModel>(
+        node,
+        'fill-${paint.id}',
+        scopedValues: scopedValues,
+      );
+      final decoration = BoxDecoration(
+        borderRadius: borderRadius,
+        color: (propertyValue ?? paint).toFlutterColor()!,
+      );
+      return useInk
+          ? Ink(decoration: decoration)
+          : DecoratedBox(decoration: decoration);
+    case PaintType.gradientLinear:
+    case PaintType.gradientRadial:
+    case PaintType.gradientAngular:
+    case PaintType.gradientDiamond:
+      final decoration = BoxDecoration(
+        borderRadius: borderRadius,
+        gradient: retrieveGradient(paint),
+      );
+      return useInk
+          ? Ink(decoration: decoration)
+          : DecoratedBox(decoration: decoration);
+    case PaintType.image:
+      final TypedBytes? bytes = imageBytes[index];
+      final double modifiedOpacity = (imageOpacity ?? 1) * paint.opacity;
+
+      // Substitute URL value from [CodelesslyContext]'s [data] map if
+      // [imageURL] represents a JSON path.
+      String? imageURL = paint.croppedImageURL ?? paint.downloadUrl!;
+      final imageURLValue = PropertyValueDelegate.getPropertyValue<String>(
             node,
-            'fill-${paint.id}',
+            'fill-image-${paint.id}',
             scopedValues: scopedValues,
+          ) ??
+          imageURL;
+      imageURL = PropertyValueDelegate.substituteVariables(
+        imageURLValue,
+        nullSubstitutionMode: settings.nullSubstitutionMode,
+        scopedValues: scopedValues,
+      );
+      Widget child;
+
+      if (imageFillBuilder != null) {
+        child = imageFillBuilder(
+          imageURL,
+          node.basicBoxLocal.width,
+          node.basicBoxLocal.height,
+          paint,
+          bytes,
+          useInk,
+          obscureImages,
+        );
+      } else {
+        if (obscureImages) {
+          child = SizedBox(
+            width: node.basicBoxLocal.width,
+            height: node.basicBoxLocal.height,
+            child: const Placeholder(),
           );
-          final decoration = BoxDecoration(
-            borderRadius: borderRadius,
-            color: (propertyValue ?? paint).toFlutterColor()!,
+        } else {
+          child = UltimateImageBuilder(
+            url: imageURL,
+            width: (node.horizontalFit == SizeFit.shrinkWrap)
+                ? null
+                : (node.horizontalFit == SizeFit.expanded)
+                    ? double.infinity
+                    : node.basicBoxLocal.width,
+            height: (node.verticalFit == SizeFit.shrinkWrap)
+                ? null
+                : (node.verticalFit == SizeFit.expanded)
+                    ? double.infinity
+                    : node.basicBoxLocal.height,
+            paint: paint,
+            node: node,
+            bytes: bytes,
+            useInk: useInk,
           );
-          return Positioned.fill(
-            child: useInk
-                ? Ink(decoration: decoration)
-                : DecoratedBox(decoration: decoration),
-          );
-        case PaintType.gradientLinear:
-        case PaintType.gradientRadial:
-        case PaintType.gradientAngular:
-        case PaintType.gradientDiamond:
-          final decoration = BoxDecoration(
-            borderRadius: borderRadius,
-            gradient: retrieveGradient(paint),
-          );
-          return Positioned.fill(
-            child: useInk
-                ? Ink(decoration: decoration)
-                : DecoratedBox(decoration: decoration),
-          );
-        case PaintType.image:
-          final TypedBytes? bytes = imageBytes[index];
-          final double modifiedOpacity = (imageOpacity ?? 1) * paint.opacity;
-
-          // Substitute URL value from [CodelesslyContext]'s [data] map if
-          // [imageURL] represents a JSON path.
-          String? imageURL = paint.croppedImageURL ?? paint.downloadUrl!;
-          final imageURLValue = PropertyValueDelegate.getPropertyValue<String>(
-                node,
-                'fill-image-${paint.id}',
-                scopedValues: scopedValues,
-              ) ??
-              imageURL;
-          imageURL = PropertyValueDelegate.substituteVariables(
-            imageURLValue,
-            nullSubstitutionMode: settings.nullSubstitutionMode,
-            scopedValues: scopedValues,
-          );
-          Widget child;
-
-          if (imageFillBuilder != null) {
-            child = imageFillBuilder(
-              imageURL,
-              node.basicBoxLocal.width,
-              node.basicBoxLocal.height,
-              paint,
-              bytes,
-              useInk,
-              obscureImages,
-            );
-          } else {
-            if (obscureImages) {
-              child = SizedBox(
-                width: node.basicBoxLocal.width,
-                height: node.basicBoxLocal.height,
-                child: const Placeholder(),
-              );
-            } else {
-              child = UltimateImageBuilder(
-                url: imageURL,
-                width: (node.horizontalFit == SizeFit.shrinkWrap)
-                    ? null
-                    : (node.horizontalFit == SizeFit.expanded)
-                        ? double.infinity
-                        : node.basicBoxLocal.width,
-                height: (node.verticalFit == SizeFit.shrinkWrap)
-                    ? null
-                    : (node.verticalFit == SizeFit.expanded)
-                        ? double.infinity
-                        : node.basicBoxLocal.height,
-                paint: paint,
-                node: node,
-                bytes: bytes,
-                useInk: useInk,
-              );
-            }
-          }
-
-          if (modifiedOpacity != 1) {
-            child = Opacity(
-              opacity: modifiedOpacity,
-              child: child,
-            );
-          }
-          if (imageRotation != null) {
-            child = Transform.rotate(
-              angle: imageRotation,
-              child: child,
-            );
-          }
-
-          if (node.isHorizontalWrap || node.isVerticalWrap) {
-            // if the node is shrink-wrapping on one or both axes, then we
-            // need to wrap the image in a Positioned widget so that it
-            // doesn't expand to the size of the parent.
-            return Positioned(child: child);
-          }
-
-          return Positioned.fill(child: child);
-
-        // if (node.childrenOrEmpty.isEmpty) {
-        //   // If we don't do this then shrink-wrapping images will not work.
-        //   // They will expand to the size of the parent.
-        //   return child;
-        // } else {
-        //   // This was Positioned.fill before. If this is breaking something,
-        //   // then we need to figure out a way to make it work with
-        //   // Positioned.fill and Positioned because Positioned.fill breaks
-        //   // shrink-wrapping.
-        //   return Positioned(child: child);
-        // }
-
-        case PaintType.emoji:
-          return const SizedBox.shrink();
+        }
       }
-    }),
-  ];
+
+      if (modifiedOpacity != 1) {
+        child = Opacity(
+          opacity: modifiedOpacity,
+          child: child,
+        );
+      }
+      if (imageRotation != null) {
+        child = Transform.rotate(
+          angle: imageRotation,
+          child: child,
+        );
+      }
+
+      if (node.isHorizontalWrap || node.isVerticalWrap) {
+        // if the node is shrink-wrapping on one or both axes, then we
+        // need to wrap the image in a Positioned widget so that it
+        // doesn't expand to the size of the parent.
+        return child;
+      }
+
+      return child;
+
+    // if (node.childrenOrEmpty.isEmpty) {
+    //   // If we don't do this then shrink-wrapping images will not work.
+    //   // They will expand to the size of the parent.
+    //   return child;
+    // } else {
+    //   // This was Positioned.fill before. If this is breaking something,
+    //   // then we need to figure out a way to make it work with
+    //   // Positioned.fill and Positioned because Positioned.fill breaks
+    //   // shrink-wrapping.
+    //   return Positioned(child: child);
+    // }
+
+    case PaintType.emoji:
+      return const SizedBox.shrink();
+  }
 }
 
 class RelativeTransform {
@@ -730,4 +822,129 @@ class RelativeTransform {
         scale: scale ?? this.scale,
         skew: skew ?? this.skew,
       );
+}
+
+// Applies a BlendMode to its child.
+class BlendMask extends SingleChildRenderObjectWidget {
+  final List<BlendMode> blendModes;
+  final double opacity;
+
+  const BlendMask({
+    required this.blendModes,
+    this.opacity = 1.0,
+    super.key,
+    required Widget super.child,
+  });
+
+  @override
+  RenderObject createRenderObject(context) =>
+      RenderBlendMask(blendModes, opacity);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderBlendMask renderObject) {
+    renderObject.blendModes = blendModes;
+    renderObject.opacity = opacity;
+  }
+}
+
+class RenderBlendMask extends RenderProxyBox {
+  List<BlendMode> blendModes;
+  double opacity;
+
+  RenderBlendMask(this.blendModes, this.opacity);
+
+  @override
+  void paint(context, offset) {
+    // Complex blend modes can be raster cached incorrectly on the Skia backend.
+    context.setWillChangeHint();
+    for (var blend in blendModes) {
+      context.canvas.saveLayer(
+        offset & size,
+        Paint()
+          ..blendMode = blend
+          ..color = Color.fromARGB((opacity * 255).round(), 255, 255, 255),
+      );
+    }
+    super.paint(context, offset);
+    context.canvas.restore();
+  }
+}
+
+class PaintBlendMask extends SingleChildRenderObjectWidget {
+  final PaintModel _model;
+  final ui.Image? _image;
+
+  const PaintBlendMask({
+    required PaintModel model,
+    ui.Image? image,
+    super.key,
+    super.child,
+  })  : _model = model,
+        _image = image;
+
+  @override
+  RenderObject createRenderObject(context) {
+    return RenderPaintBlendMask(_model, _image);
+  }
+
+  @override
+  void updateRenderObject(
+      BuildContext context, RenderPaintBlendMask renderObject) {
+    renderObject._model = _model;
+    renderObject._image = _image;
+  }
+}
+
+class RenderPaintBlendMask extends RenderProxyBox {
+  PaintModel _model;
+  ui.Image? _image;
+
+  RenderPaintBlendMask(PaintModel model, ui.Image? image)
+      : _model = model,
+        _image = image;
+
+  Paint makePaint(Rect bounds) {
+    Paint paint = Paint()..blendMode = _model.blendMode.flutterBlendMode;
+    paint.color = Colors.white;
+    return paint;
+
+    switch (_model.type) {
+      case PaintType.solid:
+        Color? color = _model.toFlutterColor();
+        if (color != null) {
+          paint.color = color;
+        }
+      case PaintType.gradientLinear:
+      case PaintType.gradientRadial:
+      case PaintType.gradientAngular:
+      case PaintType.gradientDiamond:
+        paint.shader = retrieveGradient(_model)?.createShader(bounds);
+      case PaintType.image:
+        if (_image case ui.Image image) {
+          paint.shader = ImageShader(
+            image,
+            TileMode.clamp,
+            TileMode.clamp,
+            Matrix4.identity().storage,
+          );
+        }
+      case PaintType.emoji:
+        break;
+    }
+
+    return paint;
+  }
+
+  @override
+  void paint(context, offset) {
+    context.setWillChangeHint();
+    context.canvas.saveLayer(
+      offset & size,
+      makePaint(offset & size),
+    );
+
+    super.paint(context, offset);
+
+    context.canvas.restore();
+  }
 }

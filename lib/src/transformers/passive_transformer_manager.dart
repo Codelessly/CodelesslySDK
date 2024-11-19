@@ -76,6 +76,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         Widget widget =
             getTransformerByNode(node).buildWidget(node, context, settings);
 
+        if (settings.withBlendModes) {
+          widget = applyWidgetBlendMode(node, widget);
+        }
         if (settings.withOpacity) {
           widget = applyWidgetOpacity(node, widget);
         }

@@ -12,6 +12,9 @@ abstract class BuildSettings with EquatableMixin {
   /// Whether to internally handle the node's visibility.
   final bool withVisibility;
 
+  /// Whether to internally handle the node's blend modes.
+  final bool withBlendModes;
+
   /// Whether to internally handle the node's rotation.
   final bool withRotation;
 
@@ -40,6 +43,7 @@ abstract class BuildSettings with EquatableMixin {
   const BuildSettings({
     this.withOpacity = true,
     this.withVisibility = true,
+    this.withBlendModes = true,
     this.withRotation = true,
     this.withMargins = true,
     this.withConstraints = true,
@@ -54,6 +58,7 @@ abstract class BuildSettings with EquatableMixin {
   List<Object?> get props => [
         withOpacity,
         withVisibility,
+        withBlendModes,
         withRotation,
         withMargins,
         withConstraints,
@@ -90,6 +95,7 @@ class WidgetBuildSettings extends BuildSettings {
   const WidgetBuildSettings({
     super.withOpacity,
     super.withVisibility,
+    super.withBlendModes,
     super.withRotation,
     super.withMargins,
     super.withConstraints,
@@ -109,6 +115,7 @@ class WidgetBuildSettings extends BuildSettings {
   WidgetBuildSettings copyWith({
     bool? withOpacity,
     bool? withVisibility,
+    bool? withBlendModes,
     bool? withRotation,
     bool? withMargins,
     bool? withConstraints,
@@ -126,6 +133,7 @@ class WidgetBuildSettings extends BuildSettings {
     return WidgetBuildSettings(
       withOpacity: withOpacity ?? this.withOpacity,
       withVisibility: withVisibility ?? this.withVisibility,
+      withBlendModes: withBlendModes ?? this.withBlendModes,
       withRotation: withRotation ?? this.withRotation,
       withMargins: withMargins ?? this.withMargins,
       withConstraints: withConstraints ?? this.withConstraints,
