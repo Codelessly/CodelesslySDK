@@ -188,46 +188,55 @@ class PassiveDropdownWidget extends StatelessWidget {
           hoverColor: node.properties.hoverColor?.toFlutterColor(),
           splashColor: node.properties.splashColor?.toFlutterColor(),
         ),
-        child: DropdownButton<Object>(
-          value: items.isEmpty || items.count(value) != 1 ? null : value,
-          isDense: node.properties.dense,
-          isExpanded: node.properties.expanded,
-          autofocus: node.properties.autoFocus,
-          enableFeedback: node.properties.enableFeedback,
-          alignment:
-              node.properties.selectedItemAlignment.flutterAlignmentGeometry ??
-                  Alignment.centerLeft,
-          hint: node.properties.hint.isNotEmpty
-              ? Text(
-                  node.properties.hint,
-                  style: TextUtils.retrieveTextStyleFromProp(
-                    node.properties.hintStyle,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                )
-              : null,
-          iconDisabledColor: node.properties.iconDisabledColor.toFlutterColor(),
-          iconEnabledColor: node.properties.iconEnabledColor.toFlutterColor(),
-          iconSize: node.properties.iconSize,
-          icon: retrieveIconWidget(
-              node.properties.icon, node.properties.iconSize),
-          dropdownColor: node.properties.dropdownColor.toFlutterColor(),
-          focusColor: node.properties.focusColor.toFlutterColor(),
-          elevation: node.properties.elevation,
-          borderRadius: node.properties.borderRadius.borderRadius,
-          onTap: onTap,
-          padding: node.padding.flutterEdgeInsets,
-          onChanged: node.properties.enabled
-              ? (value) {
-                  if (value == null) return;
-                  final index = items.indexOf(value);
-                  onChanged?.call(index, value);
-                }
-              : null,
-          underline: node.properties.underline ? null : const SizedBox.shrink(),
-          items: buildItems(context, items),
-          selectedItemBuilder: (context) => selectedItemBuilder(context, items),
-        ),
+        child: Builder(builder: (context) {
+          final child = DropdownButton<Object>(
+            value: items.isEmpty || items.count(value) != 1 ? null : value,
+            isDense: node.properties.dense,
+            isExpanded: node.properties.expanded,
+            autofocus: node.properties.autoFocus,
+            enableFeedback: node.properties.enableFeedback,
+            alignment: node.properties.selectedItemAlignment
+                    .flutterAlignmentGeometry ??
+                Alignment.centerLeft,
+            hint: node.properties.hint.isNotEmpty
+                ? Text(
+                    node.properties.hint,
+                    style: TextUtils.retrieveTextStyleFromProp(
+                      node.properties.hintStyle,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : null,
+            iconDisabledColor:
+                node.properties.iconDisabledColor.toFlutterColor(),
+            iconEnabledColor: node.properties.iconEnabledColor.toFlutterColor(),
+            iconSize: node.properties.iconSize,
+            icon: retrieveIconWidget(
+                node.properties.icon, node.properties.iconSize),
+            dropdownColor: node.properties.dropdownColor.toFlutterColor(),
+            focusColor: node.properties.focusColor.toFlutterColor(),
+            elevation: node.properties.elevation,
+            borderRadius: node.properties.borderRadius.borderRadius,
+            onTap: onTap,
+            padding: node.padding.flutterEdgeInsets,
+            onChanged: node.properties.enabled
+                ? (value) {
+                    if (value == null) return;
+                    final index = items.indexOf(value);
+                    onChanged?.call(index, value);
+                  }
+                : null,
+            underline:
+                node.properties.underline ? null : const SizedBox.shrink(),
+            items: buildItems(context, items),
+            selectedItemBuilder: (context) =>
+                selectedItemBuilder(context, items),
+          );
+          if (node.horizontalFit.isWrap) {
+            return IntrinsicWidth(child: child);
+          }
+          return child;
+        }),
       ),
     );
   }
