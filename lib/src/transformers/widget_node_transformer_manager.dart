@@ -71,17 +71,10 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     BaseNode node,
     Widget widget,
   ) {
-    // if (node is BlendMixin && node.blendMode != BlendModeC.srcOver) {
     return BlendMask(
-      // blendMode: node.blendMode.flutterBlendMode,
-      blendModes: [
-        node is BlendMixin ? node.blendMode.flutterBlendMode : BlendMode.srcOver
-      ],
+      blendModes: [BlendMode.srcOver],
       child: widget,
     );
-    // }
-
-    return widget;
   }
 
   /// Convenience method to handle widget rotation.

@@ -556,6 +556,19 @@ typedef ImageFillBuilder = Widget Function(
   bool obscureImages,
 );
 
+String getColorHex2(
+  Color color, {
+  bool withAlpha = false,
+  bool withHashtag = false,
+}) {
+  String colorHex =
+      (color.value - (color.alpha << 24)).toRadixString(16).padLeft(6, '0');
+  String alphaHex = '';
+  if (withAlpha) alphaHex = (color.alpha).toRadixString(16).padLeft(2, 'F');
+  String hashtag = withHashtag ? '#' : '';
+  return (hashtag + alphaHex + colorHex).toUpperCase();
+}
+
 List<Widget> buildFills(
   BaseNode node, {
   Map<int, TypedBytes> imageBytes = const {},
@@ -576,11 +589,12 @@ List<Widget> buildFills(
   // layers above it, and then consume/apply the blendmodes by wrapping itself
   // with ShaderMasks until a non-blendmode fill is found. This is done to
   // ensure that the blendmodes are applied in the correct order.
-  Map<int, PaintModel> lastBlendTree = {};
-  for (final (i, model) in node.fills.reversed.indexed) {
+  List<PaintModel> lastBlendTree = [];
+  for (final model in node.fills.reversed) {
+    final index = node.fills.indexOf(model);
     if (!model.visible) continue;
     if (model.blendMode != BlendModeC.srcOver) {
-      lastBlendTree[i] = model;
+      lastBlendTree.add(model);
       continue;
     }
 
@@ -588,7 +602,7 @@ List<Widget> buildFills(
     // blendmodes in the correct order to this fill.
     Widget fill = buildFill(
       node,
-      index: i,
+      index: index,
       imageBytes: imageBytes,
       imageOpacity: imageOpacity,
       imageRotation: imageRotation,
@@ -599,38 +613,34 @@ List<Widget> buildFills(
       scopedValues: scopedValues,
     );
 
-    // fill = BlendMask(
-    //   model: paint,
-    //   image: null,
-    //   child: fill,
-    // );
-    fill = Stack(
-      fit: StackFit.expand,
-      children: [
-        fill,
-        for (final MapEntry(key: i, value: paint)
-            in lastBlendTree.entries.toList().reversed)
-          if (paint.visible)
-            Positioned.fill(
-              child: PaintBlendMask(
-                model: paint,
-                image: null,
-                child: buildFill(
-                  node,
-                  index: i,
-                  imageBytes: imageBytes,
-                  imageOpacity: imageOpacity,
-                  imageRotation: imageRotation,
-                  imageFillBuilder: imageFillBuilder,
-                  useInk: useInk,
-                  obscureImages: obscureImages,
-                  settings: settings,
-                  scopedValues: scopedValues,
+    if (lastBlendTree.isNotEmpty) {
+      fill = Stack(
+        fit: StackFit.expand,
+        children: [
+          fill,
+          for (final paint in lastBlendTree.reversed)
+            if (paint.visible)
+              Positioned.fill(
+                child: PaintBlendMask(
+                  model: paint,
+                  image: null,
+                  child: buildFill(
+                    node,
+                    index: node.fills.indexOf(paint),
+                    imageBytes: imageBytes,
+                    imageOpacity: imageOpacity,
+                    imageRotation: imageRotation,
+                    imageFillBuilder: imageFillBuilder,
+                    useInk: useInk,
+                    obscureImages: obscureImages,
+                    settings: settings,
+                    scopedValues: scopedValues,
+                  ),
                 ),
               ),
-            ),
-      ],
-    );
+        ],
+      );
+    }
 
     lastBlendTree.clear();
     raster.add(wrapFillWithPositioned(
@@ -831,7 +841,6 @@ class RelativeTransform {
       );
 }
 
-// Applies a BlendMode to its child.
 class BlendMask extends SingleChildRenderObjectWidget {
   final List<BlendMode> blendModes;
   final double opacity;
@@ -863,7 +872,7 @@ class RenderBlendMask extends RenderProxyBox {
   @override
   void paint(context, offset) {
     // Complex blend modes can be raster cached incorrectly on the Skia backend.
-    context.setWillChangeHint();
+    // context.setWillChangeHint();
     for (var blend in blendModes) {
       context.canvas.saveLayer(
         offset & size,
@@ -912,8 +921,6 @@ class RenderPaintBlendMask extends RenderProxyBox {
 
   Paint makePaint(Rect bounds) {
     Paint paint = Paint()..blendMode = _model.blendMode.flutterBlendMode;
-    // paint.color = Colors.white;
-    // return paint;
 
     switch (_model.type) {
       case PaintType.solid:
@@ -945,10 +952,13 @@ class RenderPaintBlendMask extends RenderProxyBox {
   @override
   void paint(context, offset) {
     // Complex blend modes can be raster cached incorrectly on the Skia backend.
-    context.setWillChangeHint();
+    // context.setWillChangeHint();
     context.canvas.saveLayer(
       offset & size,
-      makePaint(offset & size),
+      // makePaint(offset & size),
+      Paint()
+        ..blendMode = _model.blendMode.flutterBlendMode
+        ..color = Colors.white,
     );
 
     super.paint(context, offset);
