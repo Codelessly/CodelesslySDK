@@ -556,19 +556,6 @@ typedef ImageFillBuilder = Widget Function(
   bool obscureImages,
 );
 
-String getColorHex2(
-  Color color, {
-  bool withAlpha = false,
-  bool withHashtag = false,
-}) {
-  String colorHex =
-      (color.value - (color.alpha << 24)).toRadixString(16).padLeft(6, '0');
-  String alphaHex = '';
-  if (withAlpha) alphaHex = (color.alpha).toRadixString(16).padLeft(2, 'F');
-  String hashtag = withHashtag ? '#' : '';
-  return (hashtag + alphaHex + colorHex).toUpperCase();
-}
-
 List<Widget> buildFills(
   BaseNode node, {
   Map<int, TypedBytes> imageBytes = const {},
