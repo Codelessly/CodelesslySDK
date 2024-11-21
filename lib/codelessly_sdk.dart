@@ -25,6 +25,7 @@ export 'src/model/privacy_base.dart';
 export 'src/model/publish_source.dart';
 export 'src/model/sdk_publish_model.dart';
 export 'src/transformers/transformers.dart';
+export 'src/transformers/utils/blend_mask.dart';
 export 'src/ui/codelessly_context.dart';
 export 'src/ui/codelessly_widget.dart';
 export 'src/ui/codelessly_widget_controller.dart';
