@@ -1,10 +1,8 @@
 import 'dart:math' hide log;
-import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' as vec_math;
 
 import '../../../codelessly_sdk.dart';
@@ -580,7 +578,7 @@ List<Widget> buildFills(
   for (final model in node.fills.reversed) {
     final index = node.fills.indexOf(model);
     if (!model.visible) continue;
-    if (model.blendMode != BlendModeC.srcOver) {
+    if (settings.withBlendModes && model.blendMode != BlendModeC.srcOver) {
       lastBlendTree.add(model);
       continue;
     }
@@ -608,9 +606,9 @@ List<Widget> buildFills(
           for (final paint in lastBlendTree.reversed)
             if (paint.visible)
               Positioned.fill(
-                child: PaintBlendMask(
-                  model: paint,
-                  image: null,
+                child: BlendMask(
+                  key: ObjectKey(paint.blendMode),
+                  blendMode: paint.blendMode.flutterBlendMode,
                   child: buildFill(
                     node,
                     index: node.fills.indexOf(paint),
@@ -826,130 +824,4 @@ class RelativeTransform {
         scale: scale ?? this.scale,
         skew: skew ?? this.skew,
       );
-}
-
-class BlendMask extends SingleChildRenderObjectWidget {
-  final List<BlendMode> blendModes;
-  final double opacity;
-
-  const BlendMask({
-    required this.blendModes,
-    this.opacity = 1.0,
-    super.key,
-    required Widget super.child,
-  });
-
-  @override
-  RenderObject createRenderObject(context) =>
-      RenderBlendMask(blendModes, opacity);
-
-  @override
-  void updateRenderObject(BuildContext context, RenderBlendMask renderObject) {
-    renderObject.blendModes = blendModes;
-    renderObject.opacity = opacity;
-  }
-}
-
-class RenderBlendMask extends RenderProxyBox {
-  List<BlendMode> blendModes;
-  double opacity;
-
-  RenderBlendMask(this.blendModes, this.opacity);
-
-  @override
-  void paint(context, offset) {
-    // Complex blend modes can be raster cached incorrectly on the Skia backend.
-    // context.setWillChangeHint();
-    for (var blend in blendModes) {
-      context.canvas.saveLayer(
-        offset & size,
-        Paint()
-          ..blendMode = blend
-          ..color = Color.fromARGB((opacity * 255).round(), 255, 255, 255),
-      );
-    }
-    super.paint(context, offset);
-    context.canvas.restore();
-  }
-}
-
-class PaintBlendMask extends SingleChildRenderObjectWidget {
-  final PaintModel _model;
-  final ui.Image? _image;
-
-  const PaintBlendMask({
-    required PaintModel model,
-    ui.Image? image,
-    super.key,
-    super.child,
-  })  : _model = model,
-        _image = image;
-
-  @override
-  RenderObject createRenderObject(context) {
-    return RenderPaintBlendMask(_model, _image);
-  }
-
-  @override
-  void updateRenderObject(
-      BuildContext context, RenderPaintBlendMask renderObject) {
-    renderObject._model = _model;
-    renderObject._image = _image;
-  }
-}
-
-class RenderPaintBlendMask extends RenderProxyBox {
-  PaintModel _model;
-  ui.Image? _image;
-
-  RenderPaintBlendMask(PaintModel model, ui.Image? image)
-      : _model = model,
-        _image = image;
-
-  Paint makePaint(Rect bounds) {
-    Paint paint = Paint()..blendMode = _model.blendMode.flutterBlendMode;
-
-    switch (_model.type) {
-      case PaintType.solid:
-        Color? color = _model.toFlutterColor();
-        if (color != null) {
-          paint.color = color;
-        }
-      case PaintType.gradientLinear:
-      case PaintType.gradientRadial:
-      case PaintType.gradientAngular:
-      case PaintType.gradientDiamond:
-        paint.shader = retrieveGradient(_model)?.createShader(bounds);
-      case PaintType.image:
-        if (_image case ui.Image image) {
-          paint.shader = ImageShader(
-            image,
-            TileMode.clamp,
-            TileMode.clamp,
-            Matrix4.identity().storage,
-          );
-        }
-      case PaintType.emoji:
-        break;
-    }
-
-    return paint;
-  }
-
-  @override
-  void paint(context, offset) {
-    // Complex blend modes can be raster cached incorrectly on the Skia backend.
-    // context.setWillChangeHint();
-    context.canvas.saveLayer(
-      offset & size,
-      // makePaint(offset & size),
-      Paint()
-        ..blendMode = _model.blendMode.flutterBlendMode
-        ..color = Colors.white,
-    );
-
-    super.paint(context, offset);
-
-    context.canvas.restore();
-  }
 }
