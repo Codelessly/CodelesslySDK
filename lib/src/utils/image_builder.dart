@@ -244,6 +244,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         width: width,
         height: height,
         repeat: repeat,
+        scale: scale,
         color: widget.color,
         opacity: AlwaysStoppedAnimation(widget.paint?.opacity ?? 1),
         filterQuality: FilterQuality.medium,
