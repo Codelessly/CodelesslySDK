@@ -67,17 +67,6 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     );
   }
 
-  /// Applies a blending mask to the widget, which saves the widget's
-  /// rendered layer to the canvas, allowing other blend masks to be applied
-  /// on top of it.
-  Widget applyWidgetBlendMode(
-    BaseNode node,
-    Widget widget,) =>
-      BlendMask(
-        blendMode: BlendMode.srcOver,
-        child: widget,
-      );
-
   /// Convenience method to handle widget rotation.
   ///
   /// Takes into account margin and padding to figure out the origin of
