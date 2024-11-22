@@ -32,7 +32,7 @@ class BlendMask extends SingleChildRenderObjectWidget {
   ///
   /// The [blendMode] argument must not be null.
   const BlendMask({
-    required this.blendMode,
+    this.blendMode = BlendMode.srcOver,
     super.key,
     super.child,
   });
@@ -87,7 +87,10 @@ class RenderBlendMask extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     // Complex blend modes can be raster cached incorrectly on the Skia backend.
-    context.setWillChangeHint();
+    if (blendMode != BlendMode.srcOver) {
+      context.setWillChangeHint();
+    }
+
     context.canvas.saveLayer(offset & size, blender);
 
     super.paint(context, offset);

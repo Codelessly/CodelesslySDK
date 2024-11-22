@@ -125,6 +125,44 @@ class PassiveRectangleWidget extends StatelessWidget {
       }
     }
 
+    Widget child = Stack(
+      clipBehavior: Clip.none,
+      alignment:
+          stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
+      children: [
+        ...buildFills(
+          node,
+          useInk: false,
+          obscureImages: settings.obscureImages,
+          settings: settings,
+          scopedValues: scopedValues,
+        ),
+        ...buildStrokes(node, scopedValues),
+        ...wrapWithInkWell(
+          context,
+          node,
+          wrapWithPaddingAndScroll(
+            node,
+            [
+              ...children,
+              if (portalWidget != null) portalWidget,
+            ],
+            stackAlignment: stackAlignment,
+            applyPadding: applyPadding,
+          ),
+        ),
+      ],
+    );
+
+    bool hasComplexRendering = node is GeometryMixin &&
+        (node as GeometryMixin).fills.any(
+              (PaintModel fill) => fill.blendMode != BlendModeC.srcOver,
+            );
+
+    if (hasComplexRendering) {
+      child = BlendMask(child: child);
+    }
+
     Widget data = Container(
       key: ValueKey('Rectangle Transformer of ${node.debugLabel}'),
       clipBehavior: getClipBehavior(node),
@@ -134,34 +172,7 @@ class PassiveRectangleWidget extends StatelessWidget {
         boxShadow: retrieveBoxShadow(node, scopedValues),
         borderRadius: getBorderRadius(node),
       ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment:
-            stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-        children: [
-          ...buildFills(
-            node,
-            useInk: false,
-            obscureImages: settings.obscureImages,
-            settings: settings,
-            scopedValues: scopedValues,
-          ),
-          ...buildStrokes(node, scopedValues),
-          ...wrapWithInkWell(
-            context,
-            node,
-            wrapWithPaddingAndScroll(
-              node,
-              [
-                ...children,
-                if (portalWidget != null) portalWidget,
-              ],
-              stackAlignment: stackAlignment,
-              applyPadding: applyPadding,
-            ),
-          ),
-        ],
-      ),
+      child: child,
     );
 
     return data;
@@ -599,32 +610,29 @@ List<Widget> buildFills(
     );
 
     if (lastBlendTree.isNotEmpty) {
-      fill = Stack(
-        fit: StackFit.expand,
-        children: [
-          fill,
-          for (final paint in lastBlendTree.reversed)
-            if (paint.visible)
-              Positioned.fill(
-                child: BlendMask(
-                  key: ObjectKey(paint.blendMode),
-                  blendMode: paint.blendMode.flutterBlendMode,
-                  child: buildFill(
-                    node,
-                    index: node.fills.indexOf(paint),
-                    imageBytes: imageBytes,
-                    imageOpacity: imageOpacity,
-                    imageRotation: imageRotation,
-                    imageFillBuilder: imageFillBuilder,
-                    useInk: useInk,
-                    obscureImages: obscureImages,
-                    settings: settings,
-                    scopedValues: scopedValues,
-                  ),
-                ),
+      for (final paint in lastBlendTree) {
+        if (!paint.visible) continue;
+        raster.add(
+          Positioned.fill(
+            child: BlendMask(
+              key: ObjectKey(paint.blendMode),
+              blendMode: paint.blendMode.flutterBlendMode,
+              child: buildFill(
+                node,
+                index: node.fills.indexOf(paint),
+                imageBytes: imageBytes,
+                imageOpacity: imageOpacity,
+                imageRotation: imageRotation,
+                imageFillBuilder: imageFillBuilder,
+                useInk: useInk,
+                obscureImages: obscureImages,
+                settings: settings,
+                scopedValues: scopedValues,
               ),
-        ],
-      );
+            ),
+          ),
+        );
+      }
     }
 
     lastBlendTree.clear();
@@ -766,28 +774,7 @@ Widget buildFill(
           child: child,
         );
       }
-
-      if (node.isHorizontalWrap || node.isVerticalWrap) {
-        // if the node is shrink-wrapping on one or both axes, then we
-        // need to wrap the image in a Positioned widget so that it
-        // doesn't expand to the size of the parent.
-        return child;
-      }
-
       return child;
-
-    // if (node.childrenOrEmpty.isEmpty) {
-    //   // If we don't do this then shrink-wrapping images will not work.
-    //   // They will expand to the size of the parent.
-    //   return child;
-    // } else {
-    //   // This was Positioned.fill before. If this is breaking something,
-    //   // then we need to figure out a way to make it work with
-    //   // Positioned.fill and Positioned because Positioned.fill breaks
-    //   // shrink-wrapping.
-    //   return Positioned(child: child);
-    // }
-
     case PaintType.emoji:
       return const SizedBox.shrink();
   }
