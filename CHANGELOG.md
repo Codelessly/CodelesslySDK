@@ -1,3 +1,18 @@
+## 6.1.0
+
+- Create new Placeholders node.
+- Add enable and disable node feature.
+- Add new BlendModes support.
+- Enable simulator hot reloading.
+- Enable RenderedLayoutModel for buttons and dropdowns.
+- Dropdown improvements:
+  - Fix dropdown onChanged callback value.
+  - Fix dropdown crashing on list having duplicate items.
+  - Fix dropdown value not found crash
+- Fix image builder not rendering svg correctly.
+- Fix TextInput settings panel not updating properly.
+- Fix auto canvas placeholder crashing in fixed-height scrollable canvases.
+
 ## 6.0.0
 
 - Fall cleanup! A large refresh and cleanup of SDK internals. 
