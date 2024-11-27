@@ -13,71 +13,24 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return buildFromNode(context, node, settings: settings);
-  }
-
-  Widget buildFromProps(
-    BuildContext context, {
-    required CheckboxProperties props,
-    required double height,
-    required double width,
-    bool? value,
-    required WidgetBuildSettings settings,
-  }) {
-    final node = CheckboxNode(
-      id: '',
-      name: 'Checkbox',
-      basicBoxLocal: NodeBox(0, 0, width, height),
-      alignment: AlignmentModel.none,
-      properties: props,
-    )..value = value;
-    return buildFromNode(context, node, settings: settings);
-  }
-
-  Widget buildPreview({
-    CheckboxProperties? properties,
-    CheckboxNode? node,
-    double? height,
-    double? width,
-    bool? value,
-    ValueChanged<bool?>? onChanged,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
-  }) {
-    final previewNode = CheckboxNode(
-      properties: properties ?? node?.properties ?? CheckboxProperties(),
-      id: '',
-      name: 'Checkbox',
-      basicBoxLocal: NodeBox(0, 0, width ?? 32, height ?? 32),
-      retainedOuterBoxLocal: NodeBox(0, 0, width ?? 32, height ?? 32),
-    );
-    previewNode.value = value;
-    return PassiveCheckboxWidget(
-      node: previewNode,
-      onChanged: (context, value) => onChanged?.call(value),
-      settings: settings,
-    );
-  }
-
-  Widget buildFromNode(
-    BuildContext context,
-    CheckboxNode node, {
-    required WidgetBuildSettings settings,
-  }) {
-    return PassiveCheckboxWidget(
-      node: node,
-      settings: settings,
-      onChanged: (context, value) => onChanged(context, node, value),
-    );
-  }
-
-  void onChanged(BuildContext context, CheckboxNode node, bool? internalValue) {
-    NodeStateProvider.setState(context, internalValue);
-    FunctionsRepository.setPropertyValue(context,
-        node: node, property: 'value', value: internalValue);
-
-    FunctionsRepository.triggerAction(
-        context, node: node, TriggerType.changed, value: internalValue);
+    if (settings.isPreview) {
+      bool? effectiveValue = node.value;
+      return StatefulBuilder(
+        builder: (context, setState) => TransformerCheckbox(
+          node: node,
+          settings: settings,
+          onChanged: (context, value) => setState(() {
+            effectiveValue = value;
+          }),
+          value: effectiveValue,
+        ),
+      );
+    } else {
+      return PassiveCheckboxWidget(
+        node: node,
+        settings: settings,
+      );
+    }
   }
 }
 
@@ -85,21 +38,25 @@ class PassiveCheckboxWidget extends StatelessWidget {
   final CheckboxNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variables;
-  final void Function(BuildContext context, bool? value)? onChanged;
 
   const PassiveCheckboxWidget({
     super.key,
     required this.node,
     required this.settings,
-    required this.onChanged,
     this.variables = const [],
   });
 
+  void onChanged(BuildContext context, bool? internalValue) {
+    NodeStateProvider.setState(context, internalValue);
+
+    FunctionsRepository.setPropertyValue(context,
+        node: node, property: 'value', value: internalValue);
+    FunctionsRepository.triggerAction(
+        context, node: node, TriggerType.changed, value: internalValue);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final double scale = node.basicBoxLocal.width /
-        (node.properties.compact ? Checkbox.width : kCheckboxDefaultSize);
-
     final bool? value = PropertyValueDelegate.getPropertyValue<bool>(
           node,
           'value',
@@ -107,29 +64,69 @@ class PassiveCheckboxWidget extends StatelessWidget {
         ) ??
         node.value;
 
+    return TransformerCheckbox(
+      node: node,
+      settings: settings,
+      value: value,
+      onChanged: onChanged,
+      variables: variables,
+    );
+  }
+}
+
+class TransformerCheckbox extends StatefulWidget {
+  final CheckboxNode node;
+  final WidgetBuildSettings settings;
+  final List<VariableData> variables;
+  final void Function(BuildContext context, bool? value)? onChanged;
+  final bool? value;
+
+  const TransformerCheckbox({
+    super.key,
+    required this.node,
+    required this.settings,
+    required this.onChanged,
+    required this.value,
+    this.variables = const [],
+  });
+
+  @override
+  State<TransformerCheckbox> createState() => _TransformerCheckboxState();
+}
+
+class _TransformerCheckboxState extends State<TransformerCheckbox> {
+  @override
+  Widget build(BuildContext context) {
+    final double scale = widget.node.basicBoxLocal.width /
+        (widget.node.properties.compact
+            ? Checkbox.width
+            : kCheckboxDefaultSize);
+
     return SizedBox.fromSize(
-      size: node.basicBoxLocal.size.flutterSize,
+      size: widget.node.basicBoxLocal.size.flutterSize,
       child: Transform.scale(
         scale: scale,
         child: Checkbox(
           key: ValueKey(
-              '${node.id}-${IndexedItemProvider.maybeOf(context)?.index ?? ''}'),
-          value: node.properties.tristate ? value : (value ?? false),
-          tristate: node.properties.tristate,
-          autofocus: node.properties.autofocus,
-          checkColor: node.properties.checkColor.toFlutterColor(),
-          activeColor: node.properties.activeColor.toFlutterColor(),
-          hoverColor: node.properties.hoverColor.toFlutterColor(),
-          focusColor: node.properties.focusColor.toFlutterColor(),
-          onChanged: (value) => onChanged?.call(context, value),
+              '${widget.node.id}-${IndexedItemProvider.maybeOf(context)?.index ?? ''}'),
+          value: widget.node.properties.tristate
+              ? widget.value
+              : (widget.value ?? false),
+          tristate: widget.node.properties.tristate,
+          autofocus: widget.node.properties.autofocus,
+          checkColor: widget.node.properties.checkColor.toFlutterColor(),
+          activeColor: widget.node.properties.activeColor.toFlutterColor(),
+          hoverColor: widget.node.properties.hoverColor.toFlutterColor(),
+          focusColor: widget.node.properties.focusColor.toFlutterColor(),
+          onChanged: (value) => widget.onChanged?.call(context, value),
           visualDensity: VisualDensity.standard,
-          splashRadius: node.properties.splashRadius,
+          splashRadius: widget.node.properties.splashRadius,
           shape: RoundedRectangleBorder(
-            borderRadius: node.properties.cornerRadius.borderRadius,
+            borderRadius: widget.node.properties.cornerRadius.borderRadius,
           ),
           side: BorderSide(
-            color: node.properties.borderColor.toFlutterColor(),
-            width: node.properties.borderWidth,
+            color: widget.node.properties.borderColor.toFlutterColor(),
+            width: widget.node.properties.borderWidth,
           ),
         ),
       ),

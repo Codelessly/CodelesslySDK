@@ -13,72 +13,24 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return buildFromNode(context, node, settings);
-  }
-
-  Widget buildFromProps(
-    BuildContext context, {
-    required SwitchProperties props,
-    required double height,
-    required double width,
-    bool value = false,
-    required WidgetBuildSettings settings,
-  }) {
-    final node = SwitchNode(
-      id: '',
-      name: 'Switch',
-      basicBoxLocal: NodeBox(0, 0, width, height),
-      retainedOuterBoxLocal: NodeBox(0, 0, width, height),
-      properties: props,
-      value: value,
-    );
-    return buildFromNode(context, node, settings);
-  }
-
-  Widget buildPreview({
-    SwitchProperties? properties,
-    SwitchNode? node,
-    double? height,
-    double? width,
-    bool value = false,
-    ValueChanged<bool>? onChanged,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
-  }) {
-    final previewNode = SwitchNode(
-      properties: properties ?? node?.properties ?? SwitchProperties(),
-      id: '',
-      name: 'Switch',
-      basicBoxLocal: NodeBox(0, 0, width ?? 32, height ?? 32),
-      retainedOuterBoxLocal: NodeBox(0, 0, width ?? 32, height ?? 32),
-    );
-    previewNode.value = value;
-    return PassiveSwitchWidget(
-      node: previewNode,
-      onChanged: (context, value) => onChanged?.call(value),
-      settings: settings,
-    );
-  }
-
-  Widget buildFromNode(
-    BuildContext context,
-    SwitchNode node,
-    WidgetBuildSettings settings,
-  ) {
-    return PassiveSwitchWidget(
-      node: node,
-      settings: settings,
-      onChanged: (context, value) => onChanged(context, node, value),
-    );
-  }
-
-  void onChanged(BuildContext context, SwitchNode node, bool internalValue) {
-    NodeStateProvider.setState(context, internalValue);
-    FunctionsRepository.setPropertyValue(context,
-        node: node, property: 'value', value: internalValue);
-
-    FunctionsRepository.triggerAction(
-        context, node: node, TriggerType.changed, value: internalValue);
+    if (settings.isPreview) {
+      bool effectiveValue = node.value;
+      return StatefulBuilder(
+        builder: (context, setState) => TransformerSwitch(
+          node: node,
+          settings: settings,
+          onChanged: (context, value) => setState(() {
+            effectiveValue = value;
+          }),
+          value: effectiveValue,
+        ),
+      );
+    } else {
+      return PassiveSwitchWidget(
+        node: node,
+        settings: settings,
+      );
+    }
   }
 }
 
@@ -86,15 +38,22 @@ class PassiveSwitchWidget extends StatelessWidget {
   final SwitchNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
-  final void Function(BuildContext context, bool value)? onChanged;
 
   const PassiveSwitchWidget({
     super.key,
     required this.node,
     required this.settings,
-    this.onChanged,
     this.variablesOverrides = const [],
   });
+
+  void onChanged(BuildContext context, bool internalValue) {
+    NodeStateProvider.setState(context, internalValue);
+
+    FunctionsRepository.setPropertyValue(context,
+        node: node, property: 'value', value: internalValue);
+    FunctionsRepository.triggerAction(
+        context, node: node, TriggerType.changed, value: internalValue);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,12 +67,39 @@ class PassiveSwitchWidget extends StatelessWidget {
           scopedValues: scopedValues,
         ) ??
         node.value;
-    // final bool value = variables.getBooleanById(node.variables['value'] ?? '',
-    //     defaultValue: node.value);
+
+    return TransformerSwitch(
+      node: node,
+      settings: settings,
+      variablesOverrides: variablesOverrides,
+      value: value,
+      onChanged: onChanged,
+    );
+  }
+}
+
+class TransformerSwitch extends StatelessWidget {
+  final SwitchNode node;
+  final WidgetBuildSettings settings;
+  final List<VariableData> variablesOverrides;
+  final void Function(BuildContext context, bool value)? onChanged;
+  final bool value;
+
+  const TransformerSwitch({
+    super.key,
+    required this.node,
+    required this.settings,
+    required this.onChanged,
+    required this.value,
+    this.variablesOverrides = const [],
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final scale = node.basicBoxLocal.width / kSwitchDefaultWidth;
-    return SizedBox(
-      width: node.basicBoxLocal.width,
-      height: node.basicBoxLocal.height,
+
+    return AdaptiveNodeBox(
+      node: node,
       child: Transform.scale(
         scale: scale,
         child: Theme(
