@@ -31,7 +31,16 @@ class CustomComponent with EquatableMixin, SerializableMixin {
   /// Blur-hash for the thumbnail preview.
   final String blurhash;
 
-  late final String parentID = getTopMostParentIDs(data.nodes).first;
+  // TODO[Component]: Run a migration to add parentID to all components.
+  // TODO[Component]: Should only allow 1 parent ID?
+  /// The ID of the parent node of all the nodes that make up this component.
+  final String parentId;
+
+  // TODO[Component]: Run a migration to add projectId to all components.
+  final String projectId;
+
+  // TODO[Component]: Run a migration to add pageId to all components.
+  final String pageId;
 
   /// Default constructor to create a new component.
   CustomComponent({
@@ -41,7 +50,11 @@ class CustomComponent with EquatableMixin, SerializableMixin {
     DateTime? createdAt,
     this.previewUrl,
     this.blurhash = '',
-  }) : createdAt = createdAt ?? DateTime.now();
+    required this.projectId,
+    required this.pageId,
+    String? parentId,
+  })  : createdAt = createdAt ?? DateTime.now(),
+        parentId = parentId ?? getTopMostParentIDs(data.nodes).first;
 
   /// Duplicate this [CustomComponent] instance with the given data overrides.
   CustomComponent copyWith({
@@ -50,6 +63,9 @@ class CustomComponent with EquatableMixin, SerializableMixin {
     ComponentData? data,
     String? previewUrl,
     String? blurhash,
+    String? parentId,
+    String? pageId,
+    String? projectId,
   }) =>
       CustomComponent(
         id: id ?? this.id,
@@ -58,6 +74,9 @@ class CustomComponent with EquatableMixin, SerializableMixin {
         createdAt: DateTime.now(),
         previewUrl: previewUrl ?? this.previewUrl,
         blurhash: blurhash ?? this.blurhash,
+        parentId: parentId ?? this.parentId,
+        projectId: projectId ?? this.projectId,
+        pageId: pageId ?? this.pageId,
       );
 
   /// Factory constructor for creating a new instance of this class from
@@ -76,6 +95,9 @@ class CustomComponent with EquatableMixin, SerializableMixin {
         createdAt,
         previewUrl,
         blurhash,
+        parentId,
+        projectId,
+        pageId,
       ];
 }
 
