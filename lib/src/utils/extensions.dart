@@ -212,6 +212,14 @@ extension BaseNodeHelper on BaseNode {
         return localPosFromBoundary(type);
     }
   }
+
+  bool get isMarkedComponent =>
+      this is SceneNode &&
+      (this as SceneNode).markerType == ComponentMarkerType.component;
+
+  bool get isMarkedInstance =>
+      this is SceneNode &&
+      (this as SceneNode).markerType == ComponentMarkerType.instance;
 }
 
 extension KeyboardDismissBehaviorHelper on ScrollViewKeyboardDismissBehaviorC {
