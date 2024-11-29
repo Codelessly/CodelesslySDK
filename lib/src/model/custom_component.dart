@@ -31,16 +31,17 @@ class CustomComponent with EquatableMixin, SerializableMixin {
   /// Blur-hash for the thumbnail preview.
   final String blurhash;
 
-  // TODO[Component]: Run a migration to add parentID to all components.
-  // TODO[Component]: Should only allow 1 parent ID?
   /// The ID of the parent node of all the nodes that make up this component.
   final String parentId;
 
-  // TODO[Component]: Run a migration to add projectId to all components.
+  /// The ID of the project where this component is located.
   final String projectId;
 
-  // TODO[Component]: Run a migration to add pageId to all components.
+  /// The ID of the page where this component is located.
   final String pageId;
+
+  /// JSON schema for the customizable properties of the component.
+  final Map<String, dynamic> schema;
 
   /// Default constructor to create a new component.
   CustomComponent({
@@ -52,9 +53,11 @@ class CustomComponent with EquatableMixin, SerializableMixin {
     this.blurhash = '',
     required this.projectId,
     required this.pageId,
-    String? parentId,
+    required this.parentId,
+    Map<String, dynamic>? schema,
   })  : createdAt = createdAt ?? DateTime.now(),
-        parentId = parentId ?? getTopMostParentIDs(data.nodes).first;
+        // parentId = parentId ?? getTopMostParentIDs(data.nodes).first,
+        schema = schema ?? {};
 
   /// Duplicate this [CustomComponent] instance with the given data overrides.
   CustomComponent copyWith({
