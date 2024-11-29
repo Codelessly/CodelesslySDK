@@ -13,75 +13,47 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return buildFromNode(context, node, settings);
+    if (settings.isPreview) {
+      return PreviewSliderWidget(
+        node: node,
+        settings: settings,
+      );
+    } else {
+      return PassiveSliderWidget(
+        node: node,
+        settings: settings,
+      );
+    }
   }
+}
 
-  Widget buildFromProps(
-    BuildContext context, {
-    required SliderProperties props,
-    required double height,
-    required double width,
-    double value = 0,
-    required WidgetBuildSettings settings,
-  }) {
-    final node = SliderNode(
-      id: '',
-      name: 'Slider',
-      basicBoxLocal: NodeBox(0, 0, width, height),
-      retainedOuterBoxLocal: NodeBox(0, 0, width, height),
-      properties: props,
-      value: value,
+class PreviewSliderWidget extends StatefulWidget {
+  const PreviewSliderWidget({
+    super.key,
+    required this.node,
+    required this.settings,
+  });
+
+  final SliderNode node;
+  final WidgetBuildSettings settings;
+
+  @override
+  State<PreviewSliderWidget> createState() => _PreviewSliderWidgetState();
+}
+
+class _PreviewSliderWidgetState extends State<PreviewSliderWidget> {
+  double effectiveValue = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return TransformerSlider(
+      node: widget.node,
+      settings: widget.settings,
+      onChanged: (value) => setState(() {
+        effectiveValue = value;
+      }),
+      value: effectiveValue,
     );
-    return buildFromNode(context, node, settings);
-  }
-
-  Widget buildPreview({
-    SliderProperties? properties,
-    SliderNode? node,
-    double height = kSliderDefaultHeight,
-    double width = kSliderDefaultWidth,
-    double value = 0,
-    ValueChanged<double>? onChanged,
-    WidgetBuildSettings settings = const WidgetBuildSettings(
-      debugLabel: 'buildPreview',
-      replaceVariablesWithSymbols: true,
-    ),
-  }) {
-    final previewNode = SliderNode(
-      properties: properties ?? node?.properties ?? SliderProperties(),
-      id: '',
-      name: 'Slider',
-      value: value,
-      basicBoxLocal: NodeBox(0, 0, width, height),
-      retainedOuterBoxLocal: NodeBox(0, 0, width, height),
-    );
-    previewNode.value = value;
-    return PassiveSliderWidget(
-      node: previewNode,
-      onChanged: (context, value) => onChanged?.call(value),
-      settings: settings,
-    );
-  }
-
-  Widget buildFromNode(
-    BuildContext context,
-    SliderNode node,
-    WidgetBuildSettings settings,
-  ) {
-    return PassiveSliderWidget(
-      node: node,
-      settings: settings,
-      onChanged: (context, value) => onChanged(context, node, value),
-    );
-  }
-
-  void onChanged(BuildContext context, SliderNode node, double internalValue) {
-    NodeStateProvider.setState(context, internalValue);
-    FunctionsRepository.setPropertyValue(context,
-        node: node, property: 'value', value: internalValue);
-
-    FunctionsRepository.triggerAction(
-        context, node: node, TriggerType.changed, value: internalValue);
   }
 }
 
@@ -89,15 +61,31 @@ class PassiveSliderWidget extends StatelessWidget {
   final SliderNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
-  final void Function(BuildContext context, double value)? onChanged;
 
   const PassiveSliderWidget({
     super.key,
     required this.node,
     required this.settings,
-    required this.onChanged,
     this.variablesOverrides = const [],
   });
+
+  void onChanged(BuildContext context, double internalValue) {
+    NodeStateProvider.setState(context, internalValue);
+
+    FunctionsRepository.setPropertyValue(
+      context,
+      node: node,
+      property: 'value',
+      value: internalValue,
+    );
+
+    FunctionsRepository.triggerAction(
+      context,
+      node: node,
+      TriggerType.changed,
+      value: internalValue,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,8 +100,34 @@ class PassiveSliderWidget extends StatelessWidget {
         ) ??
         node.value;
 
-    // final double value = variables.getDoubleById(node.variables['value'] ?? '',
-    //     defaultValue: node.value);
+    return TransformerSlider(
+      node: node,
+      settings: settings,
+      variablesOverrides: variablesOverrides,
+      onChanged: (value) => onChanged(context, value),
+      value: value,
+    );
+  }
+}
+
+class TransformerSlider extends StatelessWidget {
+  const TransformerSlider({
+    super.key,
+    required this.node,
+    required this.settings,
+    required this.onChanged,
+    required this.value,
+    this.variablesOverrides = const [],
+  });
+
+  final SliderNode node;
+  final WidgetBuildSettings settings;
+  final List<VariableData> variablesOverrides;
+  final ValueChanged<double>? onChanged;
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
     final SliderTrackShape trackShape;
     if (node.properties.trackShape == SliderTrackShapeEnum.rectangle) {
       trackShape = const RectangularSliderTrackShape();
@@ -170,7 +184,7 @@ class PassiveSliderWidget extends StatelessWidget {
         ),
         child: Slider(
           value: value,
-          onChanged: (value) => onChanged?.call(context, value),
+          onChanged: onChanged,
           autofocus: node.properties.autofocus,
           min: node.properties.min,
           max: node.properties.max,
