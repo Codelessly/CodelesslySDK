@@ -15,6 +15,12 @@ CustomComponent _$CustomComponentFromJson(Map json) => CustomComponent(
           .fromJson((json['createdAt'] as num?)?.toInt()),
       previewUrl: json['previewUrl'] as String?,
       blurhash: json['blurhash'] as String? ?? '',
+      projectId: json['projectId'] as String,
+      pageId: json['pageId'] as String,
+      parentId: json['parentId'] as String,
+      schema: (json['schema'] as Map?)?.map(
+        (k, e) => MapEntry(k as String, e),
+      ),
     );
 
 Map<String, dynamic> _$CustomComponentToJson(CustomComponent instance) {
@@ -38,6 +44,10 @@ Map<String, dynamic> _$CustomComponentToJson(CustomComponent instance) {
       const DateTimeConverter().toJson(instance.createdAt), null);
   writeNotNull('previewUrl', instance.previewUrl, instance.previewUrl, null);
   writeNotNull('blurhash', instance.blurhash, instance.blurhash, '');
+  val['parentId'] = instance.parentId;
+  val['projectId'] = instance.projectId;
+  val['pageId'] = instance.pageId;
+  val['schema'] = instance.schema;
   return val;
 }
 

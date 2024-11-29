@@ -31,7 +31,17 @@ class CustomComponent with EquatableMixin, SerializableMixin {
   /// Blur-hash for the thumbnail preview.
   final String blurhash;
 
-  late final String parentID = getTopMostParentIDs(data.nodes).first;
+  /// The ID of the parent node of all the nodes that make up this component.
+  final String parentId;
+
+  /// The ID of the project where this component is located.
+  final String projectId;
+
+  /// The ID of the page where this component is located.
+  final String pageId;
+
+  /// JSON schema for the customizable properties of the component.
+  final Map<String, dynamic> schema;
 
   /// Default constructor to create a new component.
   CustomComponent({
@@ -41,7 +51,13 @@ class CustomComponent with EquatableMixin, SerializableMixin {
     DateTime? createdAt,
     this.previewUrl,
     this.blurhash = '',
-  }) : createdAt = createdAt ?? DateTime.now();
+    required this.projectId,
+    required this.pageId,
+    required this.parentId,
+    Map<String, dynamic>? schema,
+  })  : createdAt = createdAt ?? DateTime.now(),
+        // parentId = parentId ?? getTopMostParentIDs(data.nodes).first,
+        schema = schema ?? {};
 
   /// Duplicate this [CustomComponent] instance with the given data overrides.
   CustomComponent copyWith({
@@ -50,6 +66,9 @@ class CustomComponent with EquatableMixin, SerializableMixin {
     ComponentData? data,
     String? previewUrl,
     String? blurhash,
+    String? parentId,
+    String? pageId,
+    String? projectId,
   }) =>
       CustomComponent(
         id: id ?? this.id,
@@ -58,6 +77,9 @@ class CustomComponent with EquatableMixin, SerializableMixin {
         createdAt: DateTime.now(),
         previewUrl: previewUrl ?? this.previewUrl,
         blurhash: blurhash ?? this.blurhash,
+        parentId: parentId ?? this.parentId,
+        projectId: projectId ?? this.projectId,
+        pageId: pageId ?? this.pageId,
       );
 
   /// Factory constructor for creating a new instance of this class from
@@ -76,6 +98,9 @@ class CustomComponent with EquatableMixin, SerializableMixin {
         createdAt,
         previewUrl,
         blurhash,
+        parentId,
+        projectId,
+        pageId,
       ];
 }
 
