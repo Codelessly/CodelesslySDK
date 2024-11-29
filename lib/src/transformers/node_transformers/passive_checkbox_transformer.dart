@@ -14,16 +14,9 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
     WidgetBuildSettings settings,
   ) {
     if (settings.isPreview) {
-      bool? effectiveValue = node.value;
-      return StatefulBuilder(
-        builder: (context, setState) => TransformerCheckbox(
-          node: node,
-          settings: settings,
-          onChanged: (context, value) => setState(() {
-            effectiveValue = value;
-          }),
-          value: effectiveValue,
-        ),
+      return PreviewCheckboxWidget(
+        node: node,
+        settings: settings,
       );
     } else {
       return PassiveCheckboxWidget(
@@ -34,16 +27,46 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
   }
 }
 
+class PreviewCheckboxWidget extends StatefulWidget {
+  const PreviewCheckboxWidget({
+    super.key,
+    required this.node,
+    required this.settings,
+  });
+
+  final CheckboxNode node;
+  final WidgetBuildSettings settings;
+
+  @override
+  State<PreviewCheckboxWidget> createState() => _PreviewCheckboxWidgetState();
+}
+
+class _PreviewCheckboxWidgetState extends State<PreviewCheckboxWidget> {
+  bool? effectiveValue = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return TransformerCheckbox(
+      node: widget.node,
+      settings: widget.settings,
+      onChanged: (context, value) => setState(() {
+        effectiveValue = value;
+      }),
+      value: effectiveValue,
+    );
+  }
+}
+
 class PassiveCheckboxWidget extends StatelessWidget {
   final CheckboxNode node;
   final WidgetBuildSettings settings;
-  final List<VariableData> variables;
+  final List<VariableData> variablesOverrides;
 
   const PassiveCheckboxWidget({
     super.key,
     required this.node,
     required this.settings,
-    this.variables = const [],
+    this.variablesOverrides = const [],
   });
 
   void onChanged(BuildContext context, bool? internalValue) {
@@ -60,7 +83,10 @@ class PassiveCheckboxWidget extends StatelessWidget {
     final bool? value = PropertyValueDelegate.getPropertyValue<bool>(
           node,
           'value',
-          scopedValues: ScopedValues.of(context, variablesOverrides: variables),
+          scopedValues: ScopedValues.of(
+            context,
+            variablesOverrides: variablesOverrides,
+          ),
         ) ??
         node.value;
 
@@ -69,7 +95,7 @@ class PassiveCheckboxWidget extends StatelessWidget {
       settings: settings,
       value: value,
       onChanged: onChanged,
-      variables: variables,
+      variables: variablesOverrides,
     );
   }
 }

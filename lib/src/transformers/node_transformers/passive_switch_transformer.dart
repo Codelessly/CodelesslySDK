@@ -14,16 +14,9 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
     WidgetBuildSettings settings,
   ) {
     if (settings.isPreview) {
-      bool effectiveValue = node.value;
-      return StatefulBuilder(
-        builder: (context, setState) => TransformerSwitch(
-          node: node,
-          settings: settings,
-          onChanged: (context, value) => setState(() {
-            effectiveValue = value;
-          }),
-          value: effectiveValue,
-        ),
+      return PreviewSwitchWidget(
+        node: node,
+        settings: settings,
       );
     } else {
       return PassiveSwitchWidget(
@@ -31,6 +24,36 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
         settings: settings,
       );
     }
+  }
+}
+
+class PreviewSwitchWidget extends StatefulWidget {
+  const PreviewSwitchWidget({
+    super.key,
+    required this.node,
+    required this.settings,
+  });
+
+  final SwitchNode node;
+  final WidgetBuildSettings settings;
+
+  @override
+  State<PreviewSwitchWidget> createState() => _PreviewSwitchWidgetState();
+}
+
+class _PreviewSwitchWidgetState extends State<PreviewSwitchWidget> {
+  bool effectiveValue = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return TransformerSwitch(
+      node: widget.node,
+      settings: widget.settings,
+      onChanged: (context, value) => setState(() {
+        effectiveValue = value;
+      }),
+      value: effectiveValue,
+    );
   }
 }
 
