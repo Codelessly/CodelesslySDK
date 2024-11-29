@@ -1717,7 +1717,7 @@ extension BaseConditionExt on BaseCondition {
             ..removeAll(predefinedListenableVariableNames))) ??
       {};
 
-  /// [variables] is a map of variable name to variable value.
+  /// [variablesOverrides] is a map of variable name to variable value.
   R? evaluate<R extends Object>(ScopedValues scopedValues) => accept<R>(
         ConditionEvaluator<R>(scopedValues: scopedValues),
       );
@@ -1808,13 +1808,13 @@ extension CanvasConditionsExt on CanvasConditions {
 }
 
 extension ExpressionExt on BaseExpression {
-  /// [variables] is a map of variable names and their values.
+  /// [variablesOverrides] is a map of variable names and their values.
   bool evaluate(ScopedValues scopedValues) =>
       accept<bool>(ConditionEvaluator<bool>(scopedValues: scopedValues))!;
 }
 
 extension ExpressionPartExt on ExpressionPart {
-  /// [variables] is a map of variable name and its value.
+  /// [variablesOverrides] is a map of variable name and its value.
   dynamic evaluate(ScopedValues scopedValues) =>
       accept(ConditionEvaluator(scopedValues: scopedValues));
 }
