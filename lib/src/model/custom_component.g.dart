@@ -21,6 +21,7 @@ CustomComponent _$CustomComponentFromJson(Map json) => CustomComponent(
       schema: (json['schema'] as Map?)?.map(
         (k, e) => MapEntry(k as String, e),
       ),
+      version: (json['version'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$CustomComponentToJson(CustomComponent instance) {
@@ -48,6 +49,7 @@ Map<String, dynamic> _$CustomComponentToJson(CustomComponent instance) {
   val['projectId'] = instance.projectId;
   val['pageId'] = instance.pageId;
   val['schema'] = instance.schema;
+  val['version'] = instance.version;
   return val;
 }
 
