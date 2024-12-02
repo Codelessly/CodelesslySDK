@@ -43,6 +43,8 @@ class CustomComponent with EquatableMixin, SerializableMixin {
   /// JSON schema for the customizable properties of the component.
   final Map<String, dynamic> schema;
 
+  final int version;
+
   /// Default constructor to create a new component.
   CustomComponent({
     required this.id,
@@ -55,8 +57,10 @@ class CustomComponent with EquatableMixin, SerializableMixin {
     required this.pageId,
     required this.parentId,
     Map<String, dynamic>? schema,
+    required int? version,
   })  : createdAt = createdAt ?? DateTime.now(),
         // parentId = parentId ?? getTopMostParentIDs(data.nodes).first,
+        version = version ?? 1,
         schema = schema ?? {};
 
   /// Duplicate this [CustomComponent] instance with the given data overrides.
@@ -69,6 +73,7 @@ class CustomComponent with EquatableMixin, SerializableMixin {
     String? parentId,
     String? pageId,
     String? projectId,
+    int? version,
   }) =>
       CustomComponent(
         id: id ?? this.id,
@@ -80,6 +85,7 @@ class CustomComponent with EquatableMixin, SerializableMixin {
         parentId: parentId ?? this.parentId,
         projectId: projectId ?? this.projectId,
         pageId: pageId ?? this.pageId,
+        version: version ?? this.version,
       );
 
   /// Factory constructor for creating a new instance of this class from
@@ -101,6 +107,7 @@ class CustomComponent with EquatableMixin, SerializableMixin {
         parentId,
         projectId,
         pageId,
+        version,
       ];
 }
 
