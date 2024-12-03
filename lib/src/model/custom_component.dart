@@ -31,9 +31,6 @@ class CustomComponent with EquatableMixin, SerializableMixin {
   /// Blur-hash for the thumbnail preview.
   final String blurhash;
 
-  /// The ID of the parent node of all the nodes that make up this component.
-  final String parentId;
-
   /// The ID of the project where this component is located.
   final String projectId;
 
@@ -55,7 +52,6 @@ class CustomComponent with EquatableMixin, SerializableMixin {
     this.blurhash = '',
     required this.projectId,
     required this.pageId,
-    required this.parentId,
     Map<String, dynamic>? schema,
     required int? version,
   })  : createdAt = createdAt ?? DateTime.now(),
@@ -82,7 +78,6 @@ class CustomComponent with EquatableMixin, SerializableMixin {
         createdAt: DateTime.now(),
         previewUrl: previewUrl ?? this.previewUrl,
         blurhash: blurhash ?? this.blurhash,
-        parentId: parentId ?? this.parentId,
         projectId: projectId ?? this.projectId,
         pageId: pageId ?? this.pageId,
         version: version ?? this.version,
@@ -104,7 +99,6 @@ class CustomComponent with EquatableMixin, SerializableMixin {
         createdAt,
         previewUrl,
         blurhash,
-        parentId,
         projectId,
         pageId,
         version,
@@ -137,6 +131,19 @@ class ComponentData with EquatableMixin, SerializableMixin {
   /// Returns aspect ratio of the component.
   double get aspectRatio => width / height;
 
+  /// Effective parent ID of the component. This represents the top-most
+  /// parent node of all the nodes that make up this component.
+  final String parentId;
+
+  /// Represents the original node that got marked as a component in the editor.
+  /// This is used to identify the original node that got converted to a
+  /// component.
+  /// Typically this will be the same as [parentId] but in some cases, when
+  /// a component is unwrapped before creation, this will be different.
+  ///
+  /// Note that the original node may not longer exist in the component data.
+  final String originalParentId;
+
   /// Default constructor to create new instances.
   ComponentData({
     required this.width,
@@ -144,10 +151,20 @@ class ComponentData with EquatableMixin, SerializableMixin {
     required this.nodes,
     this.variables = const {},
     this.conditions = const {},
+    required this.parentId,
+    required this.originalParentId,
   }) : assert(width > 0 && height > 0);
 
   @override
-  List<Object?> get props => [width, height, nodes, variables, conditions];
+  List<Object?> get props => [
+        width,
+        height,
+        nodes,
+        variables,
+        conditions,
+        parentId,
+        originalParentId,
+      ];
 
   @override
   Map toJson() => _$ComponentDataToJson(this);
@@ -164,6 +181,8 @@ class ComponentData with EquatableMixin, SerializableMixin {
     Map<String, dynamic>? nodes,
     Map<String, Set<VariableData>>? variables,
     Map<String, Set<BaseCondition>>? conditions,
+    String? parentId,
+    String? originalParentId,
   }) =>
       ComponentData(
         width: width ?? this.width,
@@ -171,5 +190,7 @@ class ComponentData with EquatableMixin, SerializableMixin {
         nodes: nodes ?? this.nodes,
         variables: variables ?? this.variables,
         conditions: conditions ?? this.conditions,
+        parentId: parentId ?? this.parentId,
+        originalParentId: originalParentId ?? this.originalParentId,
       );
 }
