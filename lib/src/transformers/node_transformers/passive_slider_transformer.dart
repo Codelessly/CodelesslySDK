@@ -183,7 +183,7 @@ class TransformerSlider extends StatelessWidget {
           ),
         ),
         child: Slider(
-          value: value,
+          value: value.clamp(node.properties.min, node.properties.max),
           onChanged: onChanged,
           autofocus: node.properties.autofocus,
           min: node.properties.min,
