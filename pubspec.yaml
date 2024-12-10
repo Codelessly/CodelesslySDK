@@ -24,9 +24,9 @@ dependencies:
   codelessly_json_annotation: 4.9.0+2
 
   # Firebase
-  firebase_core: ^3.8.0
-  firebase_auth: ^5.3.3
-  cloud_firestore: ^5.5.0
+  firebase_core: ^3.8.1
+  firebase_auth: ^5.3.4
+  cloud_firestore: ^5.5.1
   firebase_ui_firestore: ^1.7.0
   google_fonts: ^6.2.1
 
@@ -49,14 +49,14 @@ dependencies:
   vector_math: ^2.1.4
   provider: ^6.1.2
   uuid: ^4.5.1
-  flutter_svg: ^2.0.15
+  flutter_svg: ^2.0.16
 
   # File and Image
   path: ^1.9.0
   path_provider: ^2.1.5
 
   # Storage and Caching
-  hive_ce: ^2.8.0+1
+  hive_ce: ^2.8.0+2
   hive_ce_flutter: ^2.1.0
 
   # JSON
