@@ -145,8 +145,12 @@ class PassiveButtonWidget extends StatelessWidget {
     switch (node.properties.buttonType) {
       case ButtonTypeEnum.elevated:
         buttonWidget = ElevatedButton(
-          onPressed: enabled ? () => onPressed?.call(context) : null,
-          onLongPress: enabled ? () => onLongPress?.call(context) : null,
+          onPressed: enabled && onPressed != null
+              ? () => onPressed?.call(context)
+              : null,
+          onLongPress: enabled && onLongPress != null
+              ? () => onLongPress?.call(context)
+              : null,
           style: buttonStyle,
           child: iconWidget != null
               ? Row(
@@ -171,8 +175,12 @@ class PassiveButtonWidget extends StatelessWidget {
         );
       case ButtonTypeEnum.text:
         buttonWidget = TextButton(
-          onPressed: () => onPressed?.call(context),
-          onLongPress: () => onLongPress?.call(context),
+          onPressed: enabled && onPressed != null
+              ? () => onPressed?.call(context)
+              : null,
+          onLongPress: enabled && onLongPress != null
+              ? () => onLongPress?.call(context)
+              : null,
           style: buttonStyle,
           child: iconWidget != null
               ? Row(
@@ -195,8 +203,12 @@ class PassiveButtonWidget extends StatelessWidget {
         );
       case ButtonTypeEnum.outlined:
         buttonWidget = OutlinedButton(
-          onPressed: enabled ? () => onPressed?.call(context) : null,
-          onLongPress: enabled ? () => onLongPress?.call(context) : null,
+          onPressed: enabled && onPressed != null
+              ? () => onPressed?.call(context)
+              : null,
+          onLongPress: enabled && onLongPress != null
+              ? () => onLongPress?.call(context)
+              : null,
           style: buttonStyle,
           child: iconWidget != null
               ? Row(
@@ -222,7 +234,12 @@ class PassiveButtonWidget extends StatelessWidget {
           style: buttonStyle.copyWith(
             textStyle: WidgetStateProperty.all(const TextStyle()),
           ),
-          onPressed: enabled ? () => onPressed?.call(context) : null,
+          onPressed: enabled && onPressed != null
+              ? () => onPressed?.call(context)
+              : null,
+          onLongPress: enabled && onLongPress != null
+              ? () => onLongPress?.call(context)
+              : null,
           child: iconWidget,
         );
     }

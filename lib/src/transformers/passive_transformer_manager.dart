@@ -124,7 +124,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   }) {
     final bool enabled = PropertyValueDelegate.getPropertyValue<bool>(
           node,
-          'enabled',
+          'node_enabled',
           scopedValues: ScopedValues.of(context),
         ) ??
         node.enabled;
