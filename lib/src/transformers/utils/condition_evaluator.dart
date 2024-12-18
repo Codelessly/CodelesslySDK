@@ -1,5 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -273,15 +275,23 @@ class ConditionPrinter
   final StringBuffer _buffer = StringBuffer();
 
   void printCondition(BaseCondition condition) {
+    _buffer.clear();
     condition.accept(this);
     print('\n${_buffer.toString()}');
+  }
+
+  String prettify(BaseCondition condition) {
+    printCondition(condition);
+    return _buffer.toString();
   }
 
   @override
   void visitApiCall(ApiCallAction action) {}
 
   @override
-  void visitCallFunctionAction(CallFunctionAction action) {}
+  void visitCallFunctionAction(CallFunctionAction action) {
+    _buffer.writeln('\tCall Function ${action.name} with ${action.params}');
+  }
 
   @override
   void visitCondition(Condition condition) {

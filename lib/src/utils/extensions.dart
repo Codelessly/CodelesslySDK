@@ -10,8 +10,6 @@ import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
-import '../transformers/utils/condition_evaluator.dart';
-import '../transformers/utils/condition_visitors.dart';
 import 'constants.dart';
 
 extension FABLocationHelper on FABLocation {
@@ -212,6 +210,12 @@ extension BaseNodeHelper on BaseNode {
         return localPosFromBoundary(type);
     }
   }
+
+  bool get isMarkedComponent =>
+      componentId != null && markerType == ComponentMarkerType.component;
+
+  bool get isMarkedInstance =>
+      componentId != null && markerType == ComponentMarkerType.instance;
 }
 
 extension KeyboardDismissBehaviorHelper on ScrollViewKeyboardDismissBehaviorC {
@@ -1283,6 +1287,13 @@ extension StringExt on String {
   /// Whether the string contains all the valid variable paths inside it.
   /// This will also evaluate the path inside the ${} to be valid.
   bool get isValidVariablePath => variablePathRegex.hasMatch(this);
+
+  String unwrapVariablePath() => isValidVariablePath
+      ? variablePathRegex
+          .allMatches(this)
+          .map((match) => match.namedGroup('value'))
+          .join(' ')
+      : this;
 
   /// Whether the string contains a variable path that is not checked for
   /// validity. This will only check for ${...} and not the path inside.
