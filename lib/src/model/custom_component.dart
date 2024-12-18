@@ -38,7 +38,7 @@ class CustomComponent with EquatableMixin, SerializableMixin {
   final String pageId;
 
   /// JSON schema for the customizable properties of the component.
-  final Map<String, dynamic> schema;
+  Map<String, dynamic> get schema => data.parentNode['componentSchema'] ?? {};
 
   final int version;
 
@@ -52,12 +52,10 @@ class CustomComponent with EquatableMixin, SerializableMixin {
     this.blurhash = '',
     required this.projectId,
     required this.pageId,
-    Map<String, dynamic>? schema,
     required int? version,
   })  : createdAt = createdAt ?? DateTime.now(),
         // parentId = parentId ?? getTopMostParentIDs(data.nodes).first,
-        version = version ?? 1,
-        schema = schema ?? {};
+        version = version ?? 1;
 
   /// Duplicate this [CustomComponent] instance with the given data overrides.
   CustomComponent copyWith({
@@ -103,6 +101,12 @@ class CustomComponent with EquatableMixin, SerializableMixin {
         pageId,
         version,
       ];
+
+  void setParentAsInstance() => data.setParentAsInstance(
+        componentId: id,
+        componentSchema: schema,
+        componentVersion: version,
+      );
 }
 
 /// Holds component's node data and containing rect size data.
@@ -134,6 +138,8 @@ class ComponentData with EquatableMixin, SerializableMixin {
   /// Effective parent ID of the component. This represents the top-most
   /// parent node of all the nodes that make up this component.
   final String parentId;
+
+  Map<String, dynamic> get parentNode => nodes[parentId];
 
   /// Represents the original node that got marked as a component in the editor.
   /// This is used to identify the original node that got converted to a
@@ -193,4 +199,19 @@ class ComponentData with EquatableMixin, SerializableMixin {
         parentId: parentId ?? this.parentId,
         originalParentId: originalParentId ?? this.originalParentId,
       );
+
+  void setParentAsInstance({
+    required String componentId,
+    required Map<String, dynamic> componentSchema,
+    required int componentVersion,
+  }) {
+    final BaseNode node = NodeJsonConverter().fromJson(nodes[parentId])!;
+    node.setComponentMixin(
+      componentId: componentId,
+      componentSchema: componentSchema,
+      componentVersion: componentVersion,
+      markerType: ComponentMarkerType.instance,
+    );
+    nodes[parentId] = node.toJson();
+  }
 }
