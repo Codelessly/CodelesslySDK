@@ -84,5 +84,3 @@ false_secrets:
   - /lib/src/firebase_options_prod.dart
 
 scripts: scripts.yaml
-
-resolution: workspace
