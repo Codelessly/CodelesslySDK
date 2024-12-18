@@ -1,7 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../codelessly_sdk.dart';
 
