@@ -1,3 +1,8 @@
+## 6.2.0
+
+- Create dynamic settings architecture.
+- Migrate Slider and Switch to dynamic settings.
+
 ## 6.1.0
 
 - Create new Placeholders node.
