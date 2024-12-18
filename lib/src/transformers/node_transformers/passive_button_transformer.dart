@@ -9,19 +9,16 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
   PassiveButtonTransformer(super.getNode, super.manager);
 
   @override
-  Widget buildWidget(
-    ButtonNode node,
-    BuildContext context,
-    WidgetBuildSettings settings,
-  ) {
+  Widget buildWidget(ButtonNode node,
+      BuildContext context,
+      WidgetBuildSettings settings,) {
     return buildButtonFromNode(
       node,
       settings: settings,
     );
   }
 
-  Widget buildFromProps(
-    BuildContext context, {
+  Widget buildFromProps(BuildContext context, {
     required ButtonProperties props,
     required double height,
     required double width,
@@ -39,8 +36,7 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
     return buildButtonFromNode(node, settings: settings);
   }
 
-  Widget buildButtonFromNode(
-    ButtonNode node, {
+  Widget buildButtonFromNode(ButtonNode node, {
     required WidgetBuildSettings settings,
   }) {
     return PassiveButtonWidget(
@@ -87,22 +83,22 @@ class PassiveButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScopedValues scopedValues =
-        ScopedValues.of(context, variablesOverrides: variablesOverrides);
+    ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final ButtonStyle buttonStyle = createMasterButtonStyle(
       node,
       elevation: elevation,
       scopedValues: scopedValues,
     );
     final double effectiveIconSize =
-        min(node.properties.icon.size ?? 24, node.basicBoxLocal.height);
+    min(node.properties.icon.size ?? 24, node.basicBoxLocal.height);
     Widget? iconWidget =
-        retrieveIconWidget(node.properties.icon, effectiveIconSize);
+    retrieveIconWidget(node.properties.icon, effectiveIconSize);
 
     final bool enabled = PropertyValueDelegate.getPropertyValue<bool>(
-          node,
-          'enabled',
-          scopedValues: scopedValues,
-        ) ??
+      node,
+      'enabled',
+      scopedValues: scopedValues,
+    ) ??
         node.properties.enabled;
 
     final Text label;
@@ -112,13 +108,14 @@ class PassiveButtonWidget extends StatelessWidget {
     if (settings.replaceVariablesWithSymbols) {
       final List<TextSpan> spans = node.properties.label
           .splitMap(
-            variablePathRegex,
-            onMatch: (match) => VariableSpan(
+        variablePathRegex,
+        onMatch: (match) =>
+            VariableSpan(
               variable: match[0]!,
               style: const TextStyle(),
             ),
-            onNonMatch: (text) => TextSpan(text: text),
-          )
+        onNonMatch: (text) => TextSpan(text: text),
+      )
           .toList();
       label = Text.rich(
         TextSpan(children: spans),
@@ -126,10 +123,10 @@ class PassiveButtonWidget extends StatelessWidget {
       );
     } else {
       final String value = PropertyValueDelegate.getPropertyValue<String>(
-            node,
-            'label',
-            scopedValues: scopedValues,
-          ) ??
+        node,
+        'label',
+        scopedValues: scopedValues,
+      ) ??
           PropertyValueDelegate.substituteVariables(
             node.properties.label,
             scopedValues: scopedValues,
@@ -154,23 +151,23 @@ class PassiveButtonWidget extends StatelessWidget {
           style: buttonStyle,
           child: iconWidget != null
               ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  verticalDirection: VerticalDirection.down,
-                  children: [
-                    if (node.properties.placement ==
-                        IconPlacementEnum.start) ...{
-                      iconWidget,
-                      if (node.properties.icon.show)
-                        SizedBox(width: node.properties.gap),
-                    },
-                    Flexible(child: label),
-                    if (node.properties.placement == IconPlacementEnum.end) ...{
-                      if (node.properties.icon.show)
-                        SizedBox(width: node.properties.gap),
-                      iconWidget,
-                    }
-                  ],
-                )
+            mainAxisSize: MainAxisSize.min,
+            verticalDirection: VerticalDirection.down,
+            children: [
+              if (node.properties.placement ==
+                  IconPlacementEnum.start) ...{
+                iconWidget,
+                if (node.properties.icon.show)
+                  SizedBox(width: node.properties.gap),
+              },
+              Flexible(child: label),
+              if (node.properties.placement == IconPlacementEnum.end) ...{
+                if (node.properties.icon.show)
+                  SizedBox(width: node.properties.gap),
+                iconWidget,
+              }
+            ],
+          )
               : label,
         );
       case ButtonTypeEnum.text:
@@ -184,21 +181,21 @@ class PassiveButtonWidget extends StatelessWidget {
           style: buttonStyle,
           child: iconWidget != null
               ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  verticalDirection: VerticalDirection.down,
-                  children: [
-                    if (node.properties.placement ==
-                        IconPlacementEnum.start) ...{
-                      iconWidget,
-                      SizedBox(width: node.properties.gap),
-                    },
-                    Flexible(child: label),
-                    if (node.properties.placement == IconPlacementEnum.end) ...{
-                      SizedBox(width: node.properties.gap),
-                      iconWidget,
-                    }
-                  ],
-                )
+            mainAxisSize: MainAxisSize.min,
+            verticalDirection: VerticalDirection.down,
+            children: [
+              if (node.properties.placement ==
+                  IconPlacementEnum.start) ...{
+                iconWidget,
+                SizedBox(width: node.properties.gap),
+              },
+              Flexible(child: label),
+              if (node.properties.placement == IconPlacementEnum.end) ...{
+                SizedBox(width: node.properties.gap),
+                iconWidget,
+              }
+            ],
+          )
               : label,
         );
       case ButtonTypeEnum.outlined:
@@ -212,21 +209,21 @@ class PassiveButtonWidget extends StatelessWidget {
           style: buttonStyle,
           child: iconWidget != null
               ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  verticalDirection: VerticalDirection.down,
-                  children: [
-                    if (node.properties.placement ==
-                        IconPlacementEnum.start) ...{
-                      iconWidget,
-                      SizedBox(width: node.properties.gap),
-                    },
-                    Flexible(child: label),
-                    if (node.properties.placement == IconPlacementEnum.end) ...{
-                      SizedBox(width: node.properties.gap),
-                      iconWidget,
-                    }
-                  ],
-                )
+            mainAxisSize: MainAxisSize.min,
+            verticalDirection: VerticalDirection.down,
+            children: [
+              if (node.properties.placement ==
+                  IconPlacementEnum.start) ...{
+                iconWidget,
+                SizedBox(width: node.properties.gap),
+              },
+              Flexible(child: label),
+              if (node.properties.placement == IconPlacementEnum.end) ...{
+                SizedBox(width: node.properties.gap),
+                iconWidget,
+              }
+            ],
+          )
               : label,
         );
       case ButtonTypeEnum.icon:

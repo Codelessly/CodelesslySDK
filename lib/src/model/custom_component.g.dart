@@ -17,9 +17,6 @@ CustomComponent _$CustomComponentFromJson(Map json) => CustomComponent(
       blurhash: json['blurhash'] as String? ?? '',
       projectId: json['projectId'] as String,
       pageId: json['pageId'] as String,
-      schema: (json['schema'] as Map?)?.map(
-        (k, e) => MapEntry(k as String, e),
-      ),
       version: (json['version'] as num?)?.toInt(),
     );
 
@@ -46,7 +43,6 @@ Map<String, dynamic> _$CustomComponentToJson(CustomComponent instance) {
   writeNotNull('blurhash', instance.blurhash, instance.blurhash, '');
   val['projectId'] = instance.projectId;
   val['pageId'] = instance.pageId;
-  val['schema'] = instance.schema;
   val['version'] = instance.version;
   return val;
 }
