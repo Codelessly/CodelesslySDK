@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
@@ -37,20 +35,8 @@ class PassiveIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final IconModel icon = node.properties.icon;
-
-    final iconWidget = SvgIcon(
-      icon: icon,
-      color: node.color?.toFlutterColor(),
-      size: min(node.basicBoxLocal.width, node.basicBoxLocal.height),
-    );
-
-    // final iconWidget = Icon(
-    //   useFonts ? icon.toFontIconData() : icon.toFlutterIconData(),
-    //   size: min(node.basicBoxLocal.width, node.basicBoxLocal.height),
-    //   color: node.color?.toFlutterColor(),
-    // );
-
-    return iconWidget;
+    return retrieveIconWidget(node.properties.icon, node.basicBoxLocal.width) ??
+        SizedBox(
+            width: node.basicBoxLocal.width, height: node.basicBoxLocal.height);
   }
 }

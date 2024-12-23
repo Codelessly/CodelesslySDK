@@ -242,8 +242,6 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     final bool autofocus = !widget.settings.isPreview &&
         (widget.autofocus ?? properties.autoFocus);
 
-    assert(!(autofocus == true), 'Autofocus: $autofocus is not supported in passive text fields.');
-
     Widget field = TextFormField(
       focusNode: focusNode,
       autocorrect: properties.autoCorrect,

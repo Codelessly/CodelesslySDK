@@ -31,7 +31,16 @@ class CustomComponent with EquatableMixin, SerializableMixin {
   /// Blur-hash for the thumbnail preview.
   final String blurhash;
 
-  late final String parentID = getTopMostParentIDs(data.nodes).first;
+  /// The ID of the project where this component is located.
+  final String projectId;
+
+  /// The ID of the page where this component is located.
+  final String pageId;
+
+  /// JSON schema for the customizable properties of the component.
+  Map<String, dynamic> get schema => data.parentNode['componentSchema'] ?? {};
+
+  final int version;
 
   /// Default constructor to create a new component.
   CustomComponent({
@@ -41,7 +50,12 @@ class CustomComponent with EquatableMixin, SerializableMixin {
     DateTime? createdAt,
     this.previewUrl,
     this.blurhash = '',
-  }) : createdAt = createdAt ?? DateTime.now();
+    required this.projectId,
+    required this.pageId,
+    required int? version,
+  })  : createdAt = createdAt ?? DateTime.now(),
+        // parentId = parentId ?? getTopMostParentIDs(data.nodes).first,
+        version = version ?? 1;
 
   /// Duplicate this [CustomComponent] instance with the given data overrides.
   CustomComponent copyWith({
@@ -50,6 +64,10 @@ class CustomComponent with EquatableMixin, SerializableMixin {
     ComponentData? data,
     String? previewUrl,
     String? blurhash,
+    String? parentId,
+    String? pageId,
+    String? projectId,
+    int? version,
   }) =>
       CustomComponent(
         id: id ?? this.id,
@@ -58,6 +76,9 @@ class CustomComponent with EquatableMixin, SerializableMixin {
         createdAt: DateTime.now(),
         previewUrl: previewUrl ?? this.previewUrl,
         blurhash: blurhash ?? this.blurhash,
+        projectId: projectId ?? this.projectId,
+        pageId: pageId ?? this.pageId,
+        version: version ?? this.version,
       );
 
   /// Factory constructor for creating a new instance of this class from
@@ -76,7 +97,16 @@ class CustomComponent with EquatableMixin, SerializableMixin {
         createdAt,
         previewUrl,
         blurhash,
+        projectId,
+        pageId,
+        version,
       ];
+
+  void setParentAsInstance() => data.setParentAsInstance(
+        componentId: id,
+        componentSchema: schema,
+        componentVersion: version,
+      );
 }
 
 /// Holds component's node data and containing rect size data.
@@ -105,6 +135,21 @@ class ComponentData with EquatableMixin, SerializableMixin {
   /// Returns aspect ratio of the component.
   double get aspectRatio => width / height;
 
+  /// Effective parent ID of the component. This represents the top-most
+  /// parent node of all the nodes that make up this component.
+  final String parentId;
+
+  Map<String, dynamic> get parentNode => nodes[parentId];
+
+  /// Represents the original node that got marked as a component in the editor.
+  /// This is used to identify the original node that got converted to a
+  /// component.
+  /// Typically this will be the same as [parentId] but in some cases, when
+  /// a component is unwrapped before creation, this will be different.
+  ///
+  /// Note that the original node may not longer exist in the component data.
+  final String originalParentId;
+
   /// Default constructor to create new instances.
   ComponentData({
     required this.width,
@@ -112,10 +157,20 @@ class ComponentData with EquatableMixin, SerializableMixin {
     required this.nodes,
     this.variables = const {},
     this.conditions = const {},
+    required this.parentId,
+    required this.originalParentId,
   }) : assert(width > 0 && height > 0);
 
   @override
-  List<Object?> get props => [width, height, nodes, variables, conditions];
+  List<Object?> get props => [
+        width,
+        height,
+        nodes,
+        variables,
+        conditions,
+        parentId,
+        originalParentId,
+      ];
 
   @override
   Map toJson() => _$ComponentDataToJson(this);
@@ -132,6 +187,8 @@ class ComponentData with EquatableMixin, SerializableMixin {
     Map<String, dynamic>? nodes,
     Map<String, Set<VariableData>>? variables,
     Map<String, Set<BaseCondition>>? conditions,
+    String? parentId,
+    String? originalParentId,
   }) =>
       ComponentData(
         width: width ?? this.width,
@@ -139,5 +196,22 @@ class ComponentData with EquatableMixin, SerializableMixin {
         nodes: nodes ?? this.nodes,
         variables: variables ?? this.variables,
         conditions: conditions ?? this.conditions,
+        parentId: parentId ?? this.parentId,
+        originalParentId: originalParentId ?? this.originalParentId,
       );
+
+  void setParentAsInstance({
+    required String componentId,
+    required Map<String, dynamic> componentSchema,
+    required int componentVersion,
+  }) {
+    final BaseNode node = NodeJsonConverter().fromJson(nodes[parentId])!;
+    node.setComponentMixin(
+      componentId: componentId,
+      componentSchema: componentSchema,
+      componentVersion: componentVersion,
+      markerType: ComponentMarkerType.instance,
+    );
+    nodes[parentId] = node.toJson();
+  }
 }
