@@ -160,7 +160,7 @@ class TextUtils {
   static Text buildTextForProps(
     BuildContext context,
     String rawText, {
-    required BaseNode? node,
+    BaseNode? node,
     required List<TextProp> props,
     required List<VariableData> variablesOverrides,
     required NullSubstitutionMode nullSubstitutionMode,
