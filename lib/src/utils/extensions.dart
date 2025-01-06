@@ -309,6 +309,17 @@ extension ColorHelper on flutter.Color {
         alpha, (red * f).round(), (green * f).round(), (blue * f).round());
   }
 
+  // lighten
+  Color lighten([double percent = 10]) {
+    assert(1 <= percent && percent <= 100);
+    var p = percent / 100;
+    return Color.fromARGB(
+        alpha,
+        red + ((255 - red) * p).round(),
+        green + ((255 - green) * p).round(),
+        blue + ((255 - blue) * p).round());
+  }
+
   ColorRGB toColorRGB() => colorRGB;
 
   ColorRGBA toColorRGBA() => colorRGBA;
