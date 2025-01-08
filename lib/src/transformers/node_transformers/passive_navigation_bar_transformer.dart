@@ -156,6 +156,16 @@ class _PassiveNavigationBarWidgetState
       node: widget.node,
       child: navBar,
     );
+
+    // BottomAppBars have a hard requirement for a scaffold, and scaffolds
+    // have a hard requirement for a size.
+    if (Scaffold.maybeOf(context) == null) {
+      return StrictNodeBox(
+        node: widget.node,
+        child: Scaffold(body: navBar),
+      );
+    }
+
     return navBar;
   }
 
