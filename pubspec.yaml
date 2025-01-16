@@ -21,13 +21,13 @@ dependencies:
     sdk: flutter
   # Codelessly
   codelessly_api: 4.4.0
-  codelessly_json_annotation: 4.9.0+2
+  codelessly_json_annotation: 4.9.0+3
 
   # Firebase
-  firebase_core: ^3.9.0
-  firebase_auth: ^5.3.4
-  cloud_firestore: ^5.6.0
-  firebase_ui_firestore: ^1.7.0
+  firebase_core: ^3.10.0
+  firebase_auth: ^5.4.0
+  cloud_firestore: ^5.6.1
+  firebase_ui_firestore: ^1.7.1
   google_fonts: ^6.2.1
 
   # Core Flutter
@@ -36,11 +36,11 @@ dependencies:
   intl: '>=0.17.0 <1.0.0'
   logging: ^1.3.0
   meta: ">=1.9.0 <2.0.0"
-  shared_preferences: ^2.3.4
+  shared_preferences: ^2.3.5
   url_launcher: ^6.3.1
   webview_flutter: ^4.10.0
-  webview_flutter_android: ^4.2.0
-  webview_flutter_wkwebview: ^3.16.3
+  webview_flutter_android: ^4.3.0
+  webview_flutter_wkwebview: ^3.17.0
   webview_flutter_web: ^0.2.3+4
   web: ^1.1.0
 
@@ -49,15 +49,15 @@ dependencies:
   vector_math: ^2.1.4
   provider: ^6.1.2
   uuid: ^4.5.1
-  flutter_svg: ^2.0.16
+  flutter_svg: ^2.0.17
 
   # File and Image
   path: ^1.9.0
   path_provider: ^2.1.5
 
   # Storage and Caching
-  hive_ce: ^2.8.0+2
-  hive_ce_flutter: ^2.1.0
+  hive_ce: ^2.9.0
+  hive_ce_flutter: ^2.2.0
 
   # JSON
   json_path: ^0.7.4
@@ -70,7 +70,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  codelessly_json_serializable: 6.8.0
+  codelessly_json_serializable: 6.8.0+1
   build_runner: ^2.4.14
   flutter_lints: ^5.0.0
 
