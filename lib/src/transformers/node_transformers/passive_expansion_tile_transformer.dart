@@ -247,7 +247,7 @@ class PassiveExpansionTileWidget extends StatelessWidget {
           expandedCrossAxisAlignment:
               node.properties.expandedCrossAxisAlignment.flutterAxis,
           expandedAlignment:
-              node.properties.expandedAlignment?.flutterAlignment,
+              node.properties.expandedAlignment.flutterAlignment,
           childrenPadding: node.properties.childrenPadding?.flutterEdgeInsets,
           backgroundColor: node.properties.backgroundColor?.toFlutterColor(),
           collapsedBackgroundColor:
