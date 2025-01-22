@@ -329,7 +329,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
             child: Center(
               child: ColorFiltered(
                 colorFilter: ColorFilter.mode(
-                  Colors.white.withOpacity(0.1),
+                  Colors.white.withValues(alpha: 0.1),
                   BlendMode.srcATop,
                 ),
                 child: Column(
@@ -378,13 +378,13 @@ Widget _defaultErrorBuilder(BuildContext context) {
     child: Center(
       child: ColorFiltered(
         colorFilter: ColorFilter.mode(
-          Colors.white.withOpacity(0.1),
+          Colors.white.withValues(alpha: 0.1),
           BlendMode.srcATop,
         ),
         child: Icon(
           Icons.broken_image_outlined,
           size: 200,
-          color: Colors.grey.withOpacity(0.2),
+          color: Colors.grey.withValues(alpha: 0.2),
         ),
       ),
     ),
