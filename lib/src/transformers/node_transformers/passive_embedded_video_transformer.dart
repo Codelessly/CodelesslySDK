@@ -335,7 +335,7 @@ class YoutubeVideoPreviewUI extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.8),
+                    Colors.black.withValues(alpha: 0.8),
                     Colors.transparent,
                   ],
                 ),
@@ -355,12 +355,12 @@ class YoutubeVideoPreviewUI extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.roboto(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         fontWeight: FontWeight.w300,
                         fontSize: 18,
                         shadows: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.5),
+                            color: Colors.black.withValues(alpha: 0.5),
                             offset: const Offset(0, 2),
                           ),
                         ],
@@ -370,7 +370,7 @@ class YoutubeVideoPreviewUI extends StatelessWidget {
                   const SizedBox(width: 8),
                   Icon(
                     Icons.more_vert_rounded,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                   ),
                   const SizedBox(width: 8),
                 ],
@@ -437,7 +437,7 @@ class VimeoVideoPreviewUI extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -456,7 +456,7 @@ class VimeoVideoPreviewUI extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -482,7 +482,7 @@ class VimeoVideoPreviewUI extends StatelessWidget {
               height: 40,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.8),
+                color: Colors.black.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: const Icon(
@@ -498,7 +498,7 @@ class VimeoVideoPreviewUI extends StatelessWidget {
             child: Container(
               height: 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              color: Colors.black.withOpacity(0.8),
+              color: Colors.black.withValues(alpha: 0.8),
               child: Row(
                 children: [
                   Expanded(
