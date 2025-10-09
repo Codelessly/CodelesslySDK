@@ -1,4 +1,5 @@
-import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
+import 'package:codelessly_api/codelessly_api.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
 part 'asset_model.g.dart';
@@ -72,12 +73,12 @@ class AssetModel with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        url,
-        blurHash,
-        sourceWidth,
-        sourceHeight,
-        createdAt,
-      ];
+    id,
+    name,
+    url,
+    blurHash,
+    sourceWidth,
+    sourceHeight,
+    createdAt,
+  ];
 }

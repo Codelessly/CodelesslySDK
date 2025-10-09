@@ -1,5 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
 part 'privacy_base.g.dart';
@@ -16,10 +16,10 @@ enum Role {
   /// ----------------- POWER HIERARCHY -----------------
 
   bool isHigherLevelThan(Role other) => switch (this) {
-        admin => other != admin,
-        editor => other == viewer,
-        viewer => false,
-      };
+    admin => other != admin,
+    editor => other == viewer,
+    viewer => false,
+  };
 
   bool isHigherOrEqualLevelThan(Role other) =>
       isHigherLevelThan(other) || this == other;
@@ -37,35 +37,35 @@ enum Role {
 
   /// Only admins can modify project metadata.
   bool get canManageProject => switch (this) {
-        admin => true,
-        editor || viewer => false,
-      };
+    admin => true,
+    editor || viewer => false,
+  };
 
   /// Only admins and editors can edit projects.
   bool get canEditProject => switch (this) {
-        admin || editor => true,
-        viewer => false,
-      };
+    admin || editor => true,
+    viewer => false,
+  };
 
   /// Only admins and editors can manage team members.
   bool get canManageTeam => switch (this) {
-        admin || editor => true,
-        viewer => false,
-      };
+    admin || editor => true,
+    viewer => false,
+  };
 
   /// Anyone can manage project members.
   bool get canManageProjectMembers => true;
 
   factory Role.fromJson(String value) => switch (value) {
-        'owner' || 'admin' => admin,
-        'editor' => editor,
-        _ => viewer,
-      };
+    'owner' || 'admin' => admin,
+    'editor' => editor,
+    _ => viewer,
+  };
 
   String toJson() => switch (this) {
-        Role.admin => 'owner',
-        _ => name,
-      };
+    Role.admin => 'owner',
+    _ => name,
+  };
 }
 
 /// Represents the privacy controls of a given model that this mixin
@@ -98,14 +98,13 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
     required Set<String> users,
     required Map<String, Role> roles,
     required bool public,
-  }) =>
-      _PrivacyBaseImpl(
-        owner: owner,
-        teams: teams,
-        users: users,
-        roles: roles,
-        public: public,
-      );
+  }) => _PrivacyBaseImpl(
+    owner: owner,
+    teams: teams,
+    users: users,
+    roles: roles,
+    public: public,
+  );
 
   /// An owner ID must always exist in the roles map. It's an error
   /// if it doesn't.
@@ -134,19 +133,19 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
     required Set<String>? users,
     required this.roles,
     required bool? public,
-  })  : teams = teams ?? const {},
-        users = users ?? const {},
-        public = public ?? false;
+  }) : teams = teams ?? const {},
+       users = users ?? const {},
+       public = public ?? false;
 
   /// Creates a new [PrivacyBase] derived from another [PrivacyBase].
   PrivacyBase.private({required PrivacyBase privacy, bool? public})
-      : this(
-          owner: privacy.owner,
-          teams: privacy.teams,
-          users: privacy.users,
-          roles: privacy.roles,
-          public: public ?? privacy.public,
-        );
+    : this(
+        owner: privacy.owner,
+        teams: privacy.teams,
+        users: privacy.users,
+        roles: privacy.roles,
+        public: public ?? privacy.public,
+      );
 
   /// While this PrivacyBase object is extended by other models, calling
   /// toJson on those models will return data in addition to these core
@@ -162,12 +161,12 @@ abstract class PrivacyBase with SerializableMixin, EquatableMixin {
   /// }
   @JsonKey(includeFromJson: false, includeToJson: false)
   PrivacyBase get privacy => _PrivacyBaseImpl(
-        owner: owner,
-        teams: teams,
-        users: users,
-        roles: roles,
-        public: public,
-      );
+    owner: owner,
+    teams: teams,
+    users: users,
+    roles: roles,
+    public: public,
+  );
 
   @override
   List<Object?> get props => [users, roles, teams, public];

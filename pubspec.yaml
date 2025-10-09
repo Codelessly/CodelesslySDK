@@ -5,8 +5,8 @@ homepage: https://codelessly.com/
 repository: https://github.com/Codelessly/CodelesslySDK
 
 environment:
-  sdk: ">=3.5.0 <4.0.0"
-  flutter: ">=3.24.0"
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.32.0"
 
 platforms:
   android:
@@ -21,46 +21,46 @@ dependencies:
     sdk: flutter
   # Codelessly
   codelessly_api: 4.4.0
-  codelessly_json_annotation: 4.9.0+3
+  json_annotation: ^4.9.0
 
   # Firebase
-  firebase_core: ^3.10.0
-  firebase_auth: ^5.4.0
-  cloud_firestore: ^5.6.1
-  firebase_ui_firestore: ^1.7.1
-  google_fonts: ^6.2.1
+  firebase_core: ^4.1.1
+  firebase_auth: ^6.1.0
+  cloud_firestore: ^6.0.2
+  firebase_ui_firestore: ^2.0.0
+  google_fonts: ^6.3.2
 
   # Core Flutter
   collection: '>=1.17.0 <2.0.0'
   http: '>=1.1.2 <2.0.0'
   intl: '>=0.17.0 <1.0.0'
-  logging: ^1.3.0
-  meta: ">=1.9.0 <2.0.0"
-  shared_preferences: ^2.3.5
-  url_launcher: ^6.3.1
-  webview_flutter: ^4.10.0
-  webview_flutter_android: ^4.3.0
-  webview_flutter_wkwebview: ^3.17.0
+  logging: '>=1.3.0 <2.0.0'
+  meta: '>=1.17.0 <2.0.0'
+  shared_preferences: ^2.5.3
+  url_launcher: ^6.3.2
+  webview_flutter: ^4.13.0
+  webview_flutter_android: ^4.10.5
+  webview_flutter_wkwebview: ^3.23.1
   webview_flutter_web: ^0.2.3+4
-  web: ^1.1.0
+  web: ^1.1.1
 
   # 3rd Party Core Framework
   equatable: '>=2.0.0 <3.0.0'
-  vector_math: ^2.1.4
-  provider: ^6.1.2
+  vector_math: ^2.2.0
+  provider: ^6.1.5+1
   uuid: ^4.5.1
-  flutter_svg: ^2.0.17
+  flutter_svg: ^2.2.1
 
   # File and Image
-  path: ^1.9.0
+  path: ^1.9.1
   path_provider: ^2.1.5
 
   # Storage and Caching
-  hive_ce: ^2.9.0
-  hive_ce_flutter: ^2.2.0
+  hive_ce: ^2.14.0
+  hive_ce_flutter: ^2.3.2
 
   # JSON
-  json_path: ^0.7.4
+  json_path: ^0.8.0
   rfc_6901: ^0.2.0 # JSON pointer spec
   jwt_decoder: ^2.0.1
 
@@ -70,9 +70,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  codelessly_json_serializable: 6.8.0+1
+  json_serializable: ^6.11.1
   build_runner: ^2.4.14
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

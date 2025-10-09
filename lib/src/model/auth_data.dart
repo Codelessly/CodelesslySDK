@@ -1,4 +1,5 @@
-import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
+import 'package:codelessly_api/codelessly_api.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 import '../../codelessly_sdk.dart';
 
@@ -58,10 +59,10 @@ class AuthData extends PrivacyBase {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        authToken,
-        projectId,
-        timestamp,
-        isTemplate,
-      ];
+    ...super.props,
+    authToken,
+    projectId,
+    timestamp,
+    isTemplate,
+  ];
 }
