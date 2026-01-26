@@ -7,6 +7,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../codelessly_sdk.dart';
+import '../utils/json_serialization_helpers.dart';
 import 'privacy_base.dart';
 
 part 'font_family.g.dart';
@@ -61,21 +62,29 @@ class FontFamilyModel extends PrivacyBase {
 }
 
 /// Holds information about a font variant in a font family.
+///
+/// Uses optimized JSON serialization that excludes default values to save
+/// Firebase storage. See [json_serialization_helpers.dart] for details.
 @JsonSerializable()
 class FontVariantModel extends Equatable {
   /// Name of the variant. Ex. regular, thin, bold, etc.
+  @JsonKey(toJson: _nameToJson)
   final String name;
 
   /// Font weight for this variant.
+  @JsonKey(toJson: _weightToJson)
   final FontWeightNumeric weight;
 
   /// Font style for this variant.
+  @JsonKey(toJson: _styleToJson)
   final String style;
 
   /// Source URL of this font from where it can be downloaded/accessed.
+  @JsonKey(toJson: emptyStringToNull)
   final String fontURL;
 
   /// A URL for the preview image for this font.
+  @JsonKey(toJson: emptyStringToNull)
   final String previewURL;
 
   /// Creates an instance of [FontVariantModel] with given data.
@@ -86,6 +95,14 @@ class FontVariantModel extends Equatable {
     this.fontURL = '',
     this.previewURL = '',
   });
+
+  // Serialization helpers - convert default values to null for exclusion.
+  static String? _nameToJson(String value) =>
+      value == 'regular' ? null : value;
+  static String? _weightToJson(FontWeightNumeric value) =>
+      value == FontWeightNumeric.w400 ? null : value.name;
+  static String? _styleToJson(String value) =>
+      value == 'Normal' ? null : value;
 
   /// Factory constructor for creating a new [FontVariantModel] instance from
   /// JSON data.

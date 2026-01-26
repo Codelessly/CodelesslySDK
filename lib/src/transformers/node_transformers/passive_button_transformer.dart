@@ -226,6 +226,58 @@ class PassiveButtonWidget extends StatelessWidget {
           onLongPress: enabled ? () => onLongPress?.call(context) : null,
           child: iconWidget,
         );
+      case ButtonTypeEnum.filled:
+        buttonWidget = FilledButton(
+          onPressed: enabled ? () => onPressed?.call(context) : null,
+          onLongPress: enabled ? () => onLongPress?.call(context) : null,
+          style: buttonStyle,
+          child: iconWidget != null
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  verticalDirection: VerticalDirection.down,
+                  children: [
+                    if (node.properties.placement ==
+                        IconPlacementEnum.start) ...{
+                      iconWidget,
+                      if (node.properties.icon.show)
+                        SizedBox(width: node.properties.gap),
+                    },
+                    Flexible(child: label),
+                    if (node.properties.placement == IconPlacementEnum.end) ...{
+                      if (node.properties.icon.show)
+                        SizedBox(width: node.properties.gap),
+                      iconWidget,
+                    }
+                  ],
+                )
+              : label,
+        );
+      case ButtonTypeEnum.filledTonal:
+        buttonWidget = FilledButton.tonal(
+          onPressed: enabled ? () => onPressed?.call(context) : null,
+          onLongPress: enabled ? () => onLongPress?.call(context) : null,
+          style: buttonStyle,
+          child: iconWidget != null
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  verticalDirection: VerticalDirection.down,
+                  children: [
+                    if (node.properties.placement ==
+                        IconPlacementEnum.start) ...{
+                      iconWidget,
+                      if (node.properties.icon.show)
+                        SizedBox(width: node.properties.gap),
+                    },
+                    Flexible(child: label),
+                    if (node.properties.placement == IconPlacementEnum.end) ...{
+                      if (node.properties.icon.show)
+                        SizedBox(width: node.properties.gap),
+                      iconWidget,
+                    }
+                  ],
+                )
+              : label,
+        );
     }
 
     return AdaptiveNodeBox(node: node, child: buttonWidget);

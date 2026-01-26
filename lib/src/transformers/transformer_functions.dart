@@ -73,6 +73,42 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
         ..elevation = 2
         ..borderColor = null
         ..borderWidth = null;
+    case ButtonTypeEnum.filled:
+      final brightness = ThemeData.estimateBrightnessForColor(
+          node.properties.buttonColor.toFlutterColor());
+      final color =
+          (brightness == Brightness.light ? Colors.black : Colors.white)
+              .toColorRGBA();
+      node.properties
+        ..labelStyle = node.properties.labelStyle.copyWith(fills: [
+          color.toPaint(node.properties.labelStyle.fills.firstOrNull?.id)
+        ])
+        ..icon = node.properties.icon
+            .copyWith(color: color.toFlutterColor().toColorRGBA())
+        ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
+        ..elevation = 0
+        ..gap = node.properties.icon.show ? 8 : 0
+        ..shape = CShapeBorder.roundedRectangle
+        ..borderColor = null
+        ..borderWidth = null;
+    case ButtonTypeEnum.filledTonal:
+      final brightness = ThemeData.estimateBrightnessForColor(
+          node.properties.buttonColor.toFlutterColor());
+      final color =
+          (brightness == Brightness.light ? Colors.black : Colors.white)
+              .toColorRGBA();
+      node.properties
+        ..labelStyle = node.properties.labelStyle.copyWith(fills: [
+          color.toPaint(node.properties.labelStyle.fills.firstOrNull?.id)
+        ])
+        ..icon = node.properties.icon
+            .copyWith(color: color.toFlutterColor().toColorRGBA())
+        ..buttonColor = node.properties.buttonColor.copyWith(a: 0.3)
+        ..elevation = 0
+        ..gap = node.properties.icon.show ? 8 : 0
+        ..shape = CShapeBorder.roundedRectangle
+        ..borderColor = null
+        ..borderWidth = null;
   }
   if (node.properties.buttonType == ButtonTypeEnum.icon) {
     transformNodeFromIconButton(node);
@@ -213,6 +249,30 @@ ButtonStyle createMasterButtonStyle(ButtonNode node,
         padding: node.padding.flutterEdgeInsets,
         minimumSize: Size.zero,
         backgroundColor: buttonColor.toFlutterColor(),
+        shadowColor: shadowColor.toFlutterColor(),
+        shape: getButtonShape(node, scopedValues),
+      );
+    case ButtonTypeEnum.filled:
+      buttonStyle = FilledButton.styleFrom(
+        foregroundColor: labelColor,
+        elevation: elevation ?? node.properties.elevation,
+        backgroundColor: buttonColor.toFlutterColor(),
+        visualDensity: VisualDensity.standard,
+        padding: node.padding.flutterEdgeInsets,
+        textStyle: textStyle,
+        minimumSize: Size.zero,
+        shadowColor: shadowColor.toFlutterColor(),
+        shape: getButtonShape(node, scopedValues),
+      );
+    case ButtonTypeEnum.filledTonal:
+      buttonStyle = FilledButton.styleFrom(
+        foregroundColor: labelColor,
+        elevation: elevation ?? node.properties.elevation,
+        backgroundColor: buttonColor.toFlutterColor(),
+        visualDensity: VisualDensity.standard,
+        padding: node.padding.flutterEdgeInsets,
+        textStyle: textStyle,
+        minimumSize: Size.zero,
         shadowColor: shadowColor.toFlutterColor(),
         shape: getButtonShape(node, scopedValues),
       );

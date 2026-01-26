@@ -25,7 +25,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'button': PassiveButtonTransformer(getNode, this),
       'textField': PassiveTextFieldTransformer(getNode, this),
       'checkbox': PassiveCheckboxTransformer(getNode, this),
+      'chip': PassiveChipTransformer(getNode, this),
       'appBar': PassiveAppBarTransformer(getNode, this),
+      'badge': PassiveBadgeTransformer(getNode, this),
       'navigationBar': PassiveNavigationBarTransformer(getNode, this),
       'switch': PassiveSwitchTransformer(getNode, this),
       'slider': PassiveSliderTransformer(getNode, this),
@@ -55,6 +57,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'gridView': PassiveGridViewTransformer(getNode, this),
       'pageView': PassivePageViewTransformer(getNode, this),
       'tabBar': PassiveTabBarTransformer(getNode, this),
+      'segmentedButton': PassiveSegmentedButtonTransformer(getNode, this),
       'external': PassiveExternalComponentTransformer(getNode, this),
     });
   }

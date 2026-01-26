@@ -32,6 +32,7 @@ export 'src/ui/codelessly_widget_controller.dart';
 export 'src/ui/stripe_painter.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/flutter_icons_data_map.dart';
+export 'src/utils/json_serialization_helpers.dart';
 export 'src/utils/flutter_icons_names_map.dart';
 export 'src/utils/font_parser.dart';
 export 'src/utils/image_builder.dart';
