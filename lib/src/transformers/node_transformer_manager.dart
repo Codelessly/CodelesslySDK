@@ -32,8 +32,12 @@ import '../../codelessly_sdk.dart';
 /// `NT` is the node transformer type, probably a [NodeWidgetTransformer].
 ///
 /// Codegen uses different O, BC, BS, and NT types for its transformers.
-abstract class NodeTransformerManager<O, BC, BS extends BuildSettings,
-    NT extends NodeTypeTransformer> {
+abstract class NodeTransformerManager<
+  O,
+  BC,
+  BS extends BuildSettings,
+  NT extends NodeTypeTransformer
+> {
   final GetNode getNode;
 
   NodeTransformerManager(this.getNode);
@@ -44,10 +48,7 @@ abstract class NodeTransformerManager<O, BC, BS extends BuildSettings,
   /// Registers a transformer in the registry.
   /// The key must match the node [BaseNode.type].
   /// NT is an instance of the [NodeTypeTransformer] to register.
-  void registerTransformer(
-    String key,
-    NT transformer,
-  ) {
+  void registerTransformer(String key, NT transformer) {
     _registry[key] = transformer;
   }
 
@@ -84,11 +85,7 @@ abstract class NodeTransformerManager<O, BC, BS extends BuildSettings,
   /// (probably a [WidgetBuildSettings].
   ///
   /// [returns] A Flutter widget.
-  O buildWidgetFromNode(
-    BaseNode node,
-    BC context, {
-    required BS settings,
-  });
+  O buildWidgetFromNode(BaseNode node, BC context, {required BS settings});
 
   /// Will convert a `T` (probably [BaseNode]) to a `K` (probably [Widget]).
   /// Managers can do whatever they want here. This is where they normally
@@ -96,11 +93,7 @@ abstract class NodeTransformerManager<O, BC, BS extends BuildSettings,
   ///
   /// The `context` is the context of the widget that is being built (probably
   /// a [BuildContext]).
-  O buildWidgetByID(
-    String id,
-    BC context, {
-    required BS settings,
-  }) {
+  O buildWidgetByID(String id, BC context, {required BS settings}) {
     final BaseNode node = getNode(id);
     return buildWidgetFromNode(node, context, settings: settings);
   }

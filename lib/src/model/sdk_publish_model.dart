@@ -16,7 +16,7 @@ part 'sdk_publish_model.g.dart';
 /// The [dataMap] is the actual data map that holds the data.
 typedef LookupMapRecord<T> = ({
   Map<String, String> lookupMap,
-  Map<String, T> dataMap
+  Map<String, T> dataMap,
 });
 
 /// An extension type that allows for automatic correction of custom ids to
@@ -171,20 +171,20 @@ class SDKPublishModel extends PrivacyBase {
   final List<String> disabledLayouts;
 
   static Map<String, dynamic> serializeLookupMapFonts(
-          LookupMap<SDKPublishFont> map) =>
-      map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
+    LookupMap<SDKPublishFont> map,
+  ) => map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
 
   static Map<String, dynamic> serializeLookupMapLayouts(
-          LookupMap<SDKPublishLayout> map) =>
-      map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
+    LookupMap<SDKPublishLayout> map,
+  ) => map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
 
   static Map<String, dynamic> serializeLookupMapConditions(
-          LookupMap<SDKLayoutConditions> map) =>
-      map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
+    LookupMap<SDKLayoutConditions> map,
+  ) => map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
 
   static Map<String, dynamic> serializeLookupMapVariables(
-          LookupMap<SDKLayoutVariables> map) =>
-      map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
+    LookupMap<SDKLayoutVariables> map,
+  ) => map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
 
   static Object? readLookupMap(Map json, String key) {
     return {'layoutIDMap': json['layoutIDMap'], key: json[key]};
@@ -203,8 +203,8 @@ class SDKPublishModel extends PrivacyBase {
       lookupMap: layoutIDMap,
       dataMap: {
         for (final item in data.entries)
-          item.key: SDKPublishLayout.fromJson(item.value)
-      }
+          item.key: SDKPublishLayout.fromJson(item.value),
+      },
     ));
   }
 
@@ -215,8 +215,8 @@ class SDKPublishModel extends PrivacyBase {
       lookupMap: layoutIDMap,
       dataMap: {
         for (final item in data.entries)
-          item.key: SDKPublishFont.fromJson(item.value)
-      }
+          item.key: SDKPublishFont.fromJson(item.value),
+      },
     ));
   }
 
@@ -228,8 +228,8 @@ class SDKPublishModel extends PrivacyBase {
       lookupMap: layoutIDMap,
       dataMap: {
         for (final item in data.entries)
-          item.key: SDKLayoutVariables.fromJson(item.value)
-      }
+          item.key: SDKLayoutVariables.fromJson(item.value),
+      },
     ));
   }
 
@@ -241,8 +241,8 @@ class SDKPublishModel extends PrivacyBase {
       lookupMap: layoutIDMap,
       dataMap: {
         for (final item in data.entries)
-          item.key: SDKLayoutConditions.fromJson(item.value)
-      }
+          item.key: SDKLayoutConditions.fromJson(item.value),
+      },
     ));
   }
 
@@ -271,28 +271,36 @@ class SDKPublishModel extends PrivacyBase {
     required super.users,
     required super.roles,
     required super.public,
-  })  : layoutIDMap = layoutIDMap ?? {},
-        pages = pages ?? [],
-        updates = updates ?? SDKPublishUpdates(),
-        layouts = layouts ??
-            LookupMap<SDKPublishLayout>(
-              (lookupMap: layoutIDMap ?? {}, dataMap: {}),
-            ),
-        fonts = fonts ??
-            LookupMap<SDKPublishFont>(
-              (lookupMap: layoutIDMap ?? {}, dataMap: {}),
-            ),
-        variables = variables ??
-            LookupMap<SDKLayoutVariables>(
-              (lookupMap: layoutIDMap ?? {}, dataMap: {}),
-            ),
-        conditions = conditions ??
-            LookupMap<SDKLayoutConditions>(
-              (lookupMap: layoutIDMap ?? {}, dataMap: {}),
-            ),
-        apis = apis ?? {},
-        lastUpdated = lastUpdated ?? DateTime.now(),
-        disabledLayouts = disabledLayouts ?? [];
+  }) : layoutIDMap = layoutIDMap ?? {},
+       pages = pages ?? [],
+       updates = updates ?? SDKPublishUpdates(),
+       layouts =
+           layouts ??
+           LookupMap<SDKPublishLayout>((
+             lookupMap: layoutIDMap ?? {},
+             dataMap: {},
+           )),
+       fonts =
+           fonts ??
+           LookupMap<SDKPublishFont>((
+             lookupMap: layoutIDMap ?? {},
+             dataMap: {},
+           )),
+       variables =
+           variables ??
+           LookupMap<SDKLayoutVariables>((
+             lookupMap: layoutIDMap ?? {},
+             dataMap: {},
+           )),
+       conditions =
+           conditions ??
+           LookupMap<SDKLayoutConditions>((
+             lookupMap: layoutIDMap ?? {},
+             dataMap: {},
+           )),
+       apis = apis ?? {},
+       lastUpdated = lastUpdated ?? DateTime.now(),
+       disabledLayouts = disabledLayouts ?? [];
 
   /// Creates a new instance of [SDKPublishModel] with privacy inherited from
   /// another [PrivacyBase].
@@ -316,25 +324,29 @@ class SDKPublishModel extends PrivacyBase {
 
     // Privacy
     required super.privacy,
-  })  : layoutIDMap = layoutIDMap ?? {},
-        pages = pages ?? [],
-        updates = updates ?? SDKPublishUpdates(),
-        layouts = LookupMap<SDKPublishLayout>(
-          (lookupMap: layoutIDMap ?? {}, dataMap: layouts ?? {}),
-        ),
-        fonts = LookupMap<SDKPublishFont>(
-          (lookupMap: layoutIDMap ?? {}, dataMap: fonts ?? {}),
-        ),
-        variables = LookupMap<SDKLayoutVariables>(
-          (lookupMap: layoutIDMap ?? {}, dataMap: variables ?? {}),
-        ),
-        conditions = LookupMap<SDKLayoutConditions>(
-          (lookupMap: layoutIDMap ?? {}, dataMap: conditions ?? {}),
-        ),
-        lastUpdated = lastUpdated ?? DateTime.now(),
-        apis = apis ?? {},
-        disabledLayouts = disabledLayouts ?? [],
-        super.private();
+  }) : layoutIDMap = layoutIDMap ?? {},
+       pages = pages ?? [],
+       updates = updates ?? SDKPublishUpdates(),
+       layouts = LookupMap<SDKPublishLayout>((
+         lookupMap: layoutIDMap ?? {},
+         dataMap: layouts ?? {},
+       )),
+       fonts = LookupMap<SDKPublishFont>((
+         lookupMap: layoutIDMap ?? {},
+         dataMap: fonts ?? {},
+       )),
+       variables = LookupMap<SDKLayoutVariables>((
+         lookupMap: layoutIDMap ?? {},
+         dataMap: variables ?? {},
+       )),
+       conditions = LookupMap<SDKLayoutConditions>((
+         lookupMap: layoutIDMap ?? {},
+         dataMap: conditions ?? {},
+       )),
+       lastUpdated = lastUpdated ?? DateTime.now(),
+       apis = apis ?? {},
+       disabledLayouts = disabledLayouts ?? [],
+       super.private();
 
   /// Creates a new instance of [SDKPublishModel] from a JSON map.
   factory SDKPublishModel.fromJson(Map<String, dynamic> json) {
@@ -396,22 +408,22 @@ class SDKPublishModel extends PrivacyBase {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        projectId,
-        fonts,
-        pages,
-        updates,
-        layoutIDMap,
-        layouts,
-        apis,
-        variables,
-        conditions,
-        entryLayoutId,
-        entryPageId,
-        entryCanvasId,
-        lastUpdated,
-        disabledLayouts,
-      ];
+    ...super.props,
+    projectId,
+    fonts,
+    pages,
+    updates,
+    layoutIDMap,
+    layouts,
+    apis,
+    variables,
+    conditions,
+    entryLayoutId,
+    entryPageId,
+    entryCanvasId,
+    lastUpdated,
+    disabledLayouts,
+  ];
 }
 
 @JsonSerializable()
@@ -461,9 +473,9 @@ class SDKPublishLayout extends PrivacyBase {
     required super.users,
     required super.roles,
     required super.public,
-  })  : breakpoints = breakpoints ?? [],
-        canvasIds = canvases.keys.toSet(),
-        hidden = hidden ?? false;
+  }) : breakpoints = breakpoints ?? [],
+       canvasIds = canvases.keys.toSet(),
+       hidden = hidden ?? false;
 
   /// Creates a new instance of [SDKPublishLayout] with privacy inherited from
   /// another [PrivacyBase].
@@ -478,10 +490,10 @@ class SDKPublishLayout extends PrivacyBase {
 
     // Privacy
     required super.privacy,
-  })  : breakpoints = breakpoints ?? [],
-        canvasIds = canvases.keys.toSet(),
-        hidden = hidden ?? false,
-        super.private();
+  }) : breakpoints = breakpoints ?? [],
+       canvasIds = canvases.keys.toSet(),
+       hidden = hidden ?? false,
+       super.private();
 
   /// Returns true if the layout is expired.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -524,15 +536,15 @@ class SDKPublishLayout extends PrivacyBase {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        id,
-        pageId,
-        projectId,
-        canvases,
-        lastUpdated,
-        breakpoints,
-        hidden,
-      ];
+    ...super.props,
+    id,
+    pageId,
+    projectId,
+    canvases,
+    lastUpdated,
+    breakpoints,
+    hidden,
+  ];
 }
 
 /// Represents a single variation of a common font.
@@ -581,17 +593,17 @@ class SDKPublishFont extends PrivacyBase {
 
   /// Creates a new instance of [SDKPublishFont] with privacy inherited from
   /// another [PrivacyBase].
-  SDKPublishFont.private(
-      {String? id,
-      required this.url,
-      required this.family,
-      required this.weight,
-      this.style,
+  SDKPublishFont.private({
+    String? id,
+    required this.url,
+    required this.family,
+    required this.weight,
+    this.style,
 
-      // Privacy
-      required super.privacy})
-      : id = id ?? family,
-        super.private();
+    // Privacy
+    required super.privacy,
+  }) : id = id ?? family,
+       super.private();
 
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishFont copyWith({
@@ -623,24 +635,14 @@ class SDKPublishFont extends PrivacyBase {
   Map<String, dynamic> toJson() => _$SDKPublishFontToJson(this);
 
   @override
-  List<Object?> get props => [
-        ...super.props,
-        url,
-        family,
-        weight,
-        style,
-      ];
+  List<Object?> get props => [...super.props, url, family, weight, style];
 }
 
 /// Defines an interpretation of what kind of update has been made to a given
 /// layout or font.
 ///
 /// This is used inside the data managers directly.
-enum UpdateType {
-  delete,
-  add,
-  update,
-}
+enum UpdateType { delete, add, update }
 
 @JsonSerializable()
 class SDKPublishUpdates with Equatable {
@@ -716,14 +718,14 @@ class SDKPublishUpdates with Equatable {
 
   @override
   List<Object?> get props => [
-        fonts,
-        layouts,
-        apis,
-        variables,
-        conditions,
-        layoutFonts,
-        layoutApis,
-      ];
+    fonts,
+    layouts,
+    apis,
+    variables,
+    conditions,
+    layoutFonts,
+    layoutApis,
+  ];
 
   /// Creates a new instance of [SDKPublishUpdates] from a JSON map.
   factory SDKPublishUpdates.fromJson(Map<String, dynamic> json) =>

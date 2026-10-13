@@ -37,6 +37,8 @@ class PassiveIconWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return retrieveIconWidget(node.properties.icon, node.basicBoxLocal.width) ??
         SizedBox(
-            width: node.basicBoxLocal.width, height: node.basicBoxLocal.height);
+          width: node.basicBoxLocal.width,
+          height: node.basicBoxLocal.height,
+        );
   }
 }

@@ -14,15 +14,9 @@ class PassiveSliderTransformer extends NodeWidgetTransformer<SliderNode> {
     WidgetBuildSettings settings,
   ) {
     if (settings.isPreview) {
-      return PreviewSliderWidget(
-        node: node,
-        settings: settings,
-      );
+      return PreviewSliderWidget(node: node, settings: settings);
     } else {
-      return PassiveSliderWidget(
-        node: node,
-        settings: settings,
-      );
+      return PassiveSliderWidget(node: node, settings: settings);
     }
   }
 }
@@ -93,7 +87,8 @@ class PassiveSliderWidget extends StatelessWidget {
       context,
       variablesOverrides: variablesOverrides,
     );
-    final double value = PropertyValueDelegate.getPropertyValue<double>(
+    final double value =
+        PropertyValueDelegate.getPropertyValue<double>(
           node,
           'value',
           scopedValues: scopedValues,
@@ -135,8 +130,9 @@ class TransformerSlider extends StatelessWidget {
       SliderTrackShapeEnum.gapped => const GappedSliderTrackShape(),
     };
 
-    final SliderComponentShape valueIndicatorShape =
-        switch (node.properties.valueIndicatorShape) {
+    final SliderComponentShape valueIndicatorShape = switch (node
+        .properties
+        .valueIndicatorShape) {
       SliderValueIndicatorShape.rectangle =>
         const RectangularSliderValueIndicatorShape(),
       SliderValueIndicatorShape.paddle =>
@@ -146,11 +142,13 @@ class TransformerSlider extends StatelessWidget {
         const RoundedRectSliderValueIndicatorShape(),
     };
 
-    final ShowValueIndicator showValueIndicator =
-        switch (node.properties.showValueIndicator) {
-      null => node.properties.showLabel
-          ? ShowValueIndicator.onDrag
-          : ShowValueIndicator.never,
+    final ShowValueIndicator showValueIndicator = switch (node
+        .properties
+        .showValueIndicator) {
+      null =>
+        node.properties.showLabel
+            ? ShowValueIndicator.onDrag
+            : ShowValueIndicator.never,
       ShowValueIndicatorC.onlyForDiscrete => ShowValueIndicator.onlyForDiscrete,
       ShowValueIndicatorC.onlyForContinuous =>
         ShowValueIndicator.onlyForContinuous,
@@ -158,8 +156,7 @@ class TransformerSlider extends StatelessWidget {
       ShowValueIndicatorC.alwaysVisible => ShowValueIndicator.alwaysVisible,
       ShowValueIndicatorC.never => ShowValueIndicator.never,
     };
-    final bool showsLabel =
-        showValueIndicator != ShowValueIndicator.never;
+    final bool showsLabel = showValueIndicator != ShowValueIndicator.never;
 
     return SizedBox(
       width: node.basicBoxLocal.width,
@@ -171,12 +168,13 @@ class TransformerSlider extends StatelessWidget {
               ? node.properties.overlayColor.toFlutterColor()
               : Colors.transparent,
           activeTrackColor: node.properties.activeTrackColor.toFlutterColor(),
-          inactiveTrackColor:
-              node.properties.inactiveTrackColor.toFlutterColor(),
+          inactiveTrackColor: node.properties.inactiveTrackColor
+              .toFlutterColor(),
           thumbColor: node.properties.thumbColor.toFlutterColor(),
           thumbShape: RoundSliderThumbShape(
-            enabledThumbRadius:
-                node.properties.showThumb ? node.properties.thumbRadius : 0,
+            enabledThumbRadius: node.properties.showThumb
+                ? node.properties.thumbRadius
+                : 0,
           ),
           trackShape: trackShape,
           // GappedSliderTrackShape requires a gap; 6 is the Material 3
@@ -190,22 +188,23 @@ class TransformerSlider extends StatelessWidget {
                 )
               : null,
           showValueIndicator: showValueIndicator,
-          secondaryActiveTrackColor:
-              node.properties.secondaryActiveTrackColor?.toFlutterColor(),
-          activeTickMarkColor:
-              node.properties.activeTickMarkColor.toFlutterColor(),
-          inactiveTickMarkColor:
-              node.properties.inactiveTickMarkColor.toFlutterColor(),
-          valueIndicatorColor:
-              node.properties.valueIndicatorColor.toFlutterColor(),
+          secondaryActiveTrackColor: node.properties.secondaryActiveTrackColor
+              ?.toFlutterColor(),
+          activeTickMarkColor: node.properties.activeTickMarkColor
+              .toFlutterColor(),
+          inactiveTickMarkColor: node.properties.inactiveTickMarkColor
+              .toFlutterColor(),
+          valueIndicatorColor: node.properties.valueIndicatorColor
+              .toFlutterColor(),
           valueIndicatorTextStyle: TextStyle(
             color: node.properties.valueIndicatorTextColor.toFlutterColor(),
             fontSize: node.properties.valueIndicatorFontSize,
           ),
           valueIndicatorShape: valueIndicatorShape,
           overlayShape: RoundSliderOverlayShape(
-            overlayRadius:
-                node.properties.showThumb ? node.properties.overlayRadius : 0,
+            overlayRadius: node.properties.showThumb
+                ? node.properties.overlayRadius
+                : 0,
           ),
         ),
         child: Slider(
@@ -214,11 +213,14 @@ class TransformerSlider extends StatelessWidget {
           autofocus: node.properties.autofocus,
           min: node.properties.min,
           max: node.properties.max,
-          divisions:
-              node.properties.isDiscrete ? node.properties.divisions : null,
+          divisions: node.properties.isDiscrete
+              ? node.properties.divisions
+              : null,
           label: showsLabel ? getSliderLabel(node, value) : null,
-          secondaryTrackValue: node.properties.secondaryTrackValue
-              ?.clamp(node.properties.min, node.properties.max),
+          secondaryTrackValue: node.properties.secondaryTrackValue?.clamp(
+            node.properties.min,
+            node.properties.max,
+          ),
           padding: node.properties.padding?.flutterEdgeInsets,
         ),
       ),

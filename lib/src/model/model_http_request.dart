@@ -6,12 +6,7 @@ import '../../codelessly_sdk.dart';
 
 part 'model_http_request.g.dart';
 
-enum HttpMethod {
-  get,
-  post,
-  put,
-  delete,
-}
+enum HttpMethod { get, post, put, delete }
 
 enum RequestBodyType { text, form }
 
@@ -98,9 +93,9 @@ class HttpApiData extends PrivacyBase {
     required super.users,
     required super.roles,
     required super.public,
-  })  : variables = List.of(variables),
-        lastUpdated = lastUpdated ?? DateTime.now(),
-        created = created ?? DateTime.now();
+  }) : variables = List.of(variables),
+       lastUpdated = lastUpdated ?? DateTime.now(),
+       created = created ?? DateTime.now();
 
   HttpApiData.private({
     required this.directory,
@@ -123,10 +118,10 @@ class HttpApiData extends PrivacyBase {
 
     // Privacy
     required super.privacy,
-  })  : variables = List.of(variables),
-        lastUpdated = lastUpdated ?? DateTime.now(),
-        created = created ?? DateTime.now(),
-        super.private();
+  }) : variables = List.of(variables),
+       lastUpdated = lastUpdated ?? DateTime.now(),
+       created = created ?? DateTime.now(),
+       super.private();
 
   HttpApiData copyWith({
     HttpMethod? method,
@@ -150,28 +145,27 @@ class HttpApiData extends PrivacyBase {
 
     // Privacy
     PrivacyBase? privacy,
-  }) =>
-      HttpApiData.private(
-        method: method ?? this.method,
-        url: url ?? this.url,
-        headers: headers ?? this.headers,
-        queryParams: queryParams ?? this.queryParams,
-        body: body ?? this.body,
-        formFields: formFields ?? this.formFields,
-        variables: variables ?? this.variables,
-        name: name ?? this.name,
-        project: project ?? this.project,
-        id: id ?? this.id,
-        isDeleted: isDeleted ?? this.isDeleted,
-        lastUpdated: lastUpdated ?? this.lastUpdated,
-        created: created ?? this.created,
-        bodyType: bodyType ?? this.bodyType,
-        isDraft: isDraft ?? this.isDraft,
-        directory: directory ?? this.directory,
-        requestBodyContentType:
-            requestBodyContentType ?? this.requestBodyContentType,
-        privacy: privacy ?? this,
-      );
+  }) => HttpApiData.private(
+    method: method ?? this.method,
+    url: url ?? this.url,
+    headers: headers ?? this.headers,
+    queryParams: queryParams ?? this.queryParams,
+    body: body ?? this.body,
+    formFields: formFields ?? this.formFields,
+    variables: variables ?? this.variables,
+    name: name ?? this.name,
+    project: project ?? this.project,
+    id: id ?? this.id,
+    isDeleted: isDeleted ?? this.isDeleted,
+    lastUpdated: lastUpdated ?? this.lastUpdated,
+    created: created ?? this.created,
+    bodyType: bodyType ?? this.bodyType,
+    isDraft: isDraft ?? this.isDraft,
+    directory: directory ?? this.directory,
+    requestBodyContentType:
+        requestBodyContentType ?? this.requestBodyContentType,
+    privacy: privacy ?? this,
+  );
 
   factory HttpApiData.fromJson(Map<String, dynamic> json) =>
       _$HttpApiDataFromJson(json);

@@ -38,7 +38,8 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
     ),
     List<VariableData> variablesOverrides = const [],
   }) {
-    final Widget? leading = node.properties.leading.icon.show &&
+    final Widget? leading =
+        node.properties.leading.icon.show &&
             !node.properties.automaticallyImplyLeading
         ? retrieveIconWidget(
             node.properties.leading.icon,
@@ -84,7 +85,8 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
       surfaceTintColor: node.properties.backgroundColor.toFlutterColor(),
       backgroundColor: node.properties.backgroundColor.toFlutterColor(),
       elevation: node.properties.elevation,
-      foregroundColor: node.properties.foregroundColor?.toFlutterColor() ??
+      foregroundColor:
+          node.properties.foregroundColor?.toFlutterColor() ??
           node.properties.titleStyle.fills.firstOrNull?.toFlutterColor(),
       scrolledUnderElevation: node.properties.scrolledUnderElevation,
       shadowColor: node.properties.shadowColor.toFlutterColor(),
@@ -93,7 +95,8 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
             in node.properties.actions.whereType<IconAppBarActionItem>())
           buildIconOrButton(
             context,
-            icon: retrieveIconWidget(item.icon, item.icon.size) ??
+            icon:
+                retrieveIconWidget(item.icon, item.icon.size) ??
                 const SizedBox.shrink(),
             size: item.icon.size,
             tooltip: item.tooltip,
@@ -111,9 +114,7 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
     required List<Reaction> reactions,
   }) {
     final bool hasReactions = reactions
-        .where(
-          (reaction) => reaction.trigger.type == TriggerType.click,
-        )
+        .where((reaction) => reaction.trigger.type == TriggerType.click)
         .isNotEmpty;
     if (hasReactions) {
       return IconButton(
@@ -129,7 +130,10 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
 
   void onTriggerAction(BuildContext context, List<Reaction> reactions) async {
     final bool executed = await FunctionsRepository.triggerAction(
-        context, reactions: reactions, TriggerType.click);
+      context,
+      reactions: reactions,
+      TriggerType.click,
+    );
 
     // only navigate back by default if no actions are defined on the leading
     // icon.
@@ -152,10 +156,7 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
       basicBoxLocal: NodeBox(0, 0, width, height),
       properties: props,
     );
-    return PassiveAppBarWidget(
-      node: node,
-      settings: settings,
-    );
+    return PassiveAppBarWidget(node: node, settings: settings);
   }
 
   Widget buildPreview(
@@ -173,17 +174,22 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
       properties: properties ?? node!.properties,
       id: '',
       name: 'AppBar',
-      basicBoxLocal:
-          NodeBox(0, 0, width ?? 250, height ?? kDefaultAppBarHeight),
-      retainedOuterBoxLocal:
-          NodeBox(0, 0, width ?? 250, height ?? kDefaultAppBarHeight),
+      basicBoxLocal: NodeBox(
+        0,
+        0,
+        width ?? 250,
+        height ?? kDefaultAppBarHeight,
+      ),
+      retainedOuterBoxLocal: NodeBox(
+        0,
+        0,
+        width ?? 250,
+        height ?? kDefaultAppBarHeight,
+      ),
     );
     return Theme(
       data: Theme.of(context).copyWith(platform: TargetPlatform.android),
-      child: PassiveAppBarWidget(
-        node: previewNode,
-        settings: settings,
-      ),
+      child: PassiveAppBarWidget(node: previewNode, settings: settings),
     );
   }
 }
@@ -218,9 +224,7 @@ class PassiveAppBarWidget extends StatelessWidget
     required List<Reaction> reactions,
   }) {
     final bool hasReactions = reactions
-        .where(
-          (reaction) => reaction.trigger.type == TriggerType.click,
-        )
+        .where((reaction) => reaction.trigger.type == TriggerType.click)
         .isNotEmpty;
     if (hasReactions && onTriggerAction != null) {
       return IconButton(
@@ -236,7 +240,8 @@ class PassiveAppBarWidget extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    final Widget? leading = node.properties.leading.icon.show &&
+    final Widget? leading =
+        node.properties.leading.icon.show &&
             !node.properties.automaticallyImplyLeading
         ? retrieveIconWidget(node.properties.leading.icon, null)
         : null;
@@ -281,7 +286,8 @@ class PassiveAppBarWidget extends StatelessWidget
             ? node.properties.automaticallyImplyLeading
             : false,
         title: title,
-        foregroundColor: node.properties.foregroundColor?.toFlutterColor() ??
+        foregroundColor:
+            node.properties.foregroundColor?.toFlutterColor() ??
             node.properties.titleStyle.fills.firstOrNull?.toFlutterColor(),
         scrolledUnderElevation: node.properties.scrolledUnderElevation,
         titleSpacing: node.properties.titleSpacing,
@@ -291,7 +297,8 @@ class PassiveAppBarWidget extends StatelessWidget
               in node.properties.actions.whereType<IconAppBarActionItem>())
             buildIconOrButton(
               context,
-              icon: retrieveIconWidget(item.icon, item.icon.size) ??
+              icon:
+                  retrieveIconWidget(item.icon, item.icon.size) ??
                   const SizedBox.shrink(),
               size: item.icon.size,
               tooltip: item.tooltip,

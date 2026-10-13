@@ -29,12 +29,18 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
   }
 
   void onTap(BuildContext context, List<Reaction> reactions) =>
-      FunctionsRepository.triggerAction(context, TriggerType.click,
-          reactions: reactions);
+      FunctionsRepository.triggerAction(
+        context,
+        TriggerType.click,
+        reactions: reactions,
+      );
 
   void onLongPress(BuildContext context, List<Reaction> reactions) =>
-      FunctionsRepository.triggerAction(context, TriggerType.longPress,
-          reactions: reactions);
+      FunctionsRepository.triggerAction(
+        context,
+        TriggerType.longPress,
+        reactions: reactions,
+      );
 
   Widget buildPreview(
     BuildContext context, {
@@ -51,7 +57,8 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
       replaceVariablesWithSymbols: true,
     ),
   }) {
-    final previewNode = node ??
+    final previewNode =
+        node ??
         ListTileNode(
           id: 'list_tile',
           name: 'List Tile',
@@ -128,7 +135,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
           end: titleText.length,
           fills: [PaintModel.blackPaint],
           fontSize: 16,
-        )
+        ),
       ],
     );
 
@@ -146,7 +153,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
           end: subtitleText.length,
           fills: [PaintModel.blackPaint],
           fontSize: 14,
-        )
+        ),
       ],
     );
 
@@ -156,12 +163,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
       basicBoxLocal: NodeBox(0, 0, width, height),
       retainedOuterBoxLocal: NodeBox(0, 0, width, height),
       properties: properties,
-      children: [
-        leading.id,
-        title.id,
-        subtitle.id,
-        trailing.id,
-      ],
+      children: [leading.id, title.id, subtitle.id, trailing.id],
       leading: leading.id,
       title: title.id,
       subtitle: subtitle.id,
@@ -278,8 +280,8 @@ class PassiveListTileWidget extends StatelessWidget {
           isThreeLine: node.properties.isThreeLine,
           shape: getShapeFromMixin(node.properties),
           selected: node.properties.selected,
-          selectedTileColor:
-              node.properties.selectedTileColor?.toFlutterColor(),
+          selectedTileColor: node.properties.selectedTileColor
+              ?.toFlutterColor(),
           hoverColor: node.properties.hoverColor?.toFlutterColor(),
           focusColor: node.properties.focusColor?.toFlutterColor(),
           enabled: node.properties.enabled,
@@ -297,35 +299,35 @@ class PassiveListTileWidget extends StatelessWidget {
           title: title == null
               ? null
               : titleWidget ??
-                  SizedBox(
-                    width: title.basicBoxLocal.width,
-                    height: title.basicBoxLocal.height,
-                    child: buildWidgetFromNode(title, context),
-                  ),
+                    SizedBox(
+                      width: title.basicBoxLocal.width,
+                      height: title.basicBoxLocal.height,
+                      child: buildWidgetFromNode(title, context),
+                    ),
           subtitle: subtitle == null
               ? null
               : subtitleWidget ??
-                  SizedBox(
-                    width: subtitle.basicBoxLocal.width,
-                    height: subtitle.basicBoxLocal.height,
-                    child: buildWidgetFromNode(subtitle, context),
-                  ),
+                    SizedBox(
+                      width: subtitle.basicBoxLocal.width,
+                      height: subtitle.basicBoxLocal.height,
+                      child: buildWidgetFromNode(subtitle, context),
+                    ),
           leading: leading == null
               ? null
               : leadingWidget ??
-                  SizedBox(
-                    width: leading.basicBoxLocal.width,
-                    height: leading.basicBoxLocal.height,
-                    child: buildWidgetFromNode(leading, context),
-                  ),
+                    SizedBox(
+                      width: leading.basicBoxLocal.width,
+                      height: leading.basicBoxLocal.height,
+                      child: buildWidgetFromNode(leading, context),
+                    ),
           trailing: trailing == null
               ? null
               : trailingWidget ??
-                  SizedBox(
-                    width: trailing.basicBoxLocal.width,
-                    height: trailing.basicBoxLocal.height,
-                    child: buildWidgetFromNode(trailing, context),
-                  ),
+                    SizedBox(
+                      width: trailing.basicBoxLocal.width,
+                      height: trailing.basicBoxLocal.height,
+                      child: buildWidgetFromNode(trailing, context),
+                    ),
         ),
       ),
     );

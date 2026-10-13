@@ -69,14 +69,16 @@ class PassiveExpansionTileTransformer
           )
         : null;
 
-    final ExpansionTileNode previewNode = node ??
+    final ExpansionTileNode previewNode =
+        node ??
         ExpansionTileNode(
           id: 'expansion_tile',
           name: 'Expansion Tile',
           basicBoxLocal: NodeBox(0, 0, width, height),
           retainedOuterBoxLocal: NodeBox(0, 0, width, height),
           verticalFit: SizeFit.shrinkWrap,
-          properties: (props ??
+          properties:
+              (props ??
               node?.properties ??
               ExpansionTileProperties(
                 controlAffinity: controlAffinity,
@@ -99,11 +101,8 @@ class PassiveExpansionTileTransformer
       trailingNode: trailingNode,
       initiallyExpanded: initiallyExpanded,
       getNode: getNode,
-      buildWidgetFromNode: (node, context) => manager.buildWidgetFromNode(
-        node,
-        context,
-        settings: settings,
-      ),
+      buildWidgetFromNode: (node, context) =>
+          manager.buildWidgetFromNode(node, context, settings: settings),
     );
   }
 
@@ -153,16 +152,18 @@ class PassiveExpansionTileWidget extends StatelessWidget {
   /// Defines whether the ExpansionTile should render its internal rotating
   /// chevron icon on the leading part.
   bool shouldBuildLeading() {
-    final effectiveAffinity =
-        node.properties.effectiveAffinity(node.properties.controlAffinity);
+    final effectiveAffinity = node.properties.effectiveAffinity(
+      node.properties.controlAffinity,
+    );
     return effectiveAffinity == ListTileControlAffinityC.leading;
   }
 
   /// Defines whether the ExpansionTile should render its internal trailing
   /// icon on the trailing part.
   bool shouldBuildTrailing() {
-    final effectiveAffinity =
-        node.properties.effectiveAffinity(node.properties.controlAffinity);
+    final effectiveAffinity = node.properties.effectiveAffinity(
+      node.properties.controlAffinity,
+    );
     return effectiveAffinity == ListTileControlAffinityC.trailing;
   }
 
@@ -235,8 +236,9 @@ class PassiveExpansionTileWidget extends StatelessWidget {
       child: Theme(
         data: Theme.of(context).copyWith(
           visualDensity: node.properties.visualDensity.flutterVisualDensity,
-          dividerColor:
-              node.properties.showDividers ? null : Colors.transparent,
+          dividerColor: node.properties.showDividers
+              ? null
+              : Colors.transparent,
         ),
         child: ExpansionTile(
           key: ValueKey(node.id),
@@ -259,18 +261,17 @@ class PassiveExpansionTileWidget extends StatelessWidget {
           tilePadding: node.properties.tilePadding?.flutterEdgeInsets,
           expandedCrossAxisAlignment:
               node.properties.expandedCrossAxisAlignment.flutterAxis,
-          expandedAlignment:
-              node.properties.expandedAlignment.flutterAlignment,
+          expandedAlignment: node.properties.expandedAlignment.flutterAlignment,
           childrenPadding: node.properties.childrenPadding?.flutterEdgeInsets,
           backgroundColor: node.properties.backgroundColor?.toFlutterColor(),
-          collapsedBackgroundColor:
-              node.properties.collapsedBackgroundColor?.toFlutterColor(),
+          collapsedBackgroundColor: node.properties.collapsedBackgroundColor
+              ?.toFlutterColor(),
           iconColor: node.properties.iconColor?.toFlutterColor(),
           textColor: node.properties.textColor?.toFlutterColor(),
-          collapsedTextColor:
-              node.properties.collapsedTextColor?.toFlutterColor(),
-          collapsedIconColor:
-              node.properties.collapsedIconColor?.toFlutterColor(),
+          collapsedTextColor: node.properties.collapsedTextColor
+              ?.toFlutterColor(),
+          collapsedIconColor: node.properties.collapsedIconColor
+              ?.toFlutterColor(),
           controlAffinity: node.properties
               .effectiveAffinity(node.properties.controlAffinity)
               .flutterControlAffinity,
@@ -287,30 +288,25 @@ class PassiveExpansionTileWidget extends StatelessWidget {
           leading: leading == null
               ? null
               : leading is SinglePlaceholderNode &&
-                      leading.children.isEmpty &&
-                      shouldBuildLeading()
-                  ? null
-                  : StrictNodeBox(
-                      node: leading,
-                      child: Stack(
-                        children: [
-                          buildWidgetFromNode(leading, context),
-                        ],
-                      ),
-                    ),
+                    leading.children.isEmpty &&
+                    shouldBuildLeading()
+              ? null
+              : StrictNodeBox(
+                  node: leading,
+                  child: Stack(
+                    children: [buildWidgetFromNode(leading, context)],
+                  ),
+                ),
           trailing: trailing == null
               ? null
               : trailing is SinglePlaceholderNode &&
-                      trailing.children.isEmpty &&
-                      shouldBuildTrailing()
-                  ? null
-                  : StrictNodeBox(
-                      node: trailing,
-                      child: buildWidgetFromNode(
-                        trailing,
-                        context,
-                      ),
-                    ),
+                    trailing.children.isEmpty &&
+                    shouldBuildTrailing()
+              ? null
+              : StrictNodeBox(
+                  node: trailing,
+                  child: buildWidgetFromNode(trailing, context),
+                ),
           children: children
               .map((id) => buildWidgetFromNode(getNode(id), context))
               .toList(),

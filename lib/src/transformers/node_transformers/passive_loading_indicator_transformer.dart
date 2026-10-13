@@ -23,8 +23,9 @@ class PassiveLoadingIndicatorTransformer
     required double height,
     required double width,
     bool animate = true,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildFromProps'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildFromProps',
+    ),
   }) {
     final node = LoadingIndicatorNode(
       id: '',
@@ -43,8 +44,9 @@ class PassiveLoadingIndicatorTransformer
     double? width,
     ValueChanged<bool>? onChanged,
     bool animate = false,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+    ),
   }) {
     final previewNode = LoadingIndicatorNode(
       properties: node?.properties ?? properties!,
@@ -64,8 +66,9 @@ class PassiveLoadingIndicatorTransformer
   Widget buildFromNode(
     LoadingIndicatorNode node, {
     bool animate = true,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildFromNode'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildFromNode',
+    ),
   }) {
     return PassiveLoadingIndicatorWidget(
       node: node,
@@ -108,8 +111,8 @@ class PassiveLoadingIndicatorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (node.properties.isMaterial) {
-      final MaterialLoadingIndicatorProperties props =
-          node.properties.asMaterial();
+      final MaterialLoadingIndicatorProperties props = node.properties
+          .asMaterial();
 
       return Center(
         child: SizedBox.square(
@@ -126,8 +129,8 @@ class PassiveLoadingIndicatorWidget extends StatelessWidget {
         ),
       );
     } else if (node.properties.isCupertino) {
-      final CupertinoLoadingIndicatorProperties props =
-          node.properties.asCupertino();
+      final CupertinoLoadingIndicatorProperties props = node.properties
+          .asCupertino();
       return CupertinoActivityIndicator(
         radius: (node.basicBoxLocal.width ~/ 2).toDouble(),
         color: props.color.toFlutterColor(),

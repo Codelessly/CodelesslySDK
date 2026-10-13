@@ -14,15 +14,9 @@ class PassiveCheckboxTransformer extends NodeWidgetTransformer<CheckboxNode> {
     WidgetBuildSettings settings,
   ) {
     if (settings.isPreview) {
-      return PreviewCheckboxWidget(
-        node: node,
-        settings: settings,
-      );
+      return PreviewCheckboxWidget(node: node, settings: settings);
     } else {
-      return PassiveCheckboxWidget(
-        node: node,
-        settings: settings,
-      );
+      return PassiveCheckboxWidget(node: node, settings: settings);
     }
   }
 }
@@ -72,15 +66,24 @@ class PassiveCheckboxWidget extends StatelessWidget {
   void onChanged(BuildContext context, bool? internalValue) {
     NodeStateProvider.setState(context, internalValue);
 
-    FunctionsRepository.setPropertyValue(context,
-        node: node, property: 'value', value: internalValue);
+    FunctionsRepository.setPropertyValue(
+      context,
+      node: node,
+      property: 'value',
+      value: internalValue,
+    );
     FunctionsRepository.triggerAction(
-        context, node: node, TriggerType.changed, value: internalValue);
+      context,
+      node: node,
+      TriggerType.changed,
+      value: internalValue,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool? value = PropertyValueDelegate.getPropertyValue<bool>(
+    final bool? value =
+        PropertyValueDelegate.getPropertyValue<bool>(
           node,
           'value',
           scopedValues: ScopedValues.of(
@@ -123,7 +126,8 @@ class TransformerCheckbox extends StatefulWidget {
 class _TransformerCheckboxState extends State<TransformerCheckbox> {
   @override
   Widget build(BuildContext context) {
-    final double scale = widget.node.basicBoxLocal.width /
+    final double scale =
+        widget.node.basicBoxLocal.width /
         (widget.node.properties.compact
             ? Checkbox.width
             : kCheckboxDefaultSize);
@@ -134,7 +138,8 @@ class _TransformerCheckboxState extends State<TransformerCheckbox> {
         scale: scale,
         child: Checkbox(
           key: ValueKey(
-              '${widget.node.id}-${IndexedItemProvider.maybeOf(context)?.index ?? ''}'),
+            '${widget.node.id}-${IndexedItemProvider.maybeOf(context)?.index ?? ''}',
+          ),
           value: widget.node.properties.tristate
               ? widget.value
               : (widget.value ?? false),

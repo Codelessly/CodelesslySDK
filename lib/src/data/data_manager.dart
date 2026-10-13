@@ -150,8 +150,10 @@ class DataManager {
     _publishModel ??= cachedModel;
 
     if (_publishModel != null) {
-      DebugLogger.instance
-          .printInfo('Publish model is cached locally. Emitting.', name: name);
+      DebugLogger.instance.printInfo(
+        'Publish model is cached locally. Emitting.',
+        name: name,
+      );
       await emitPublishModel();
 
       loadFontsFromPublishModel();
@@ -183,41 +185,44 @@ class DataManager {
           );
         }
 
-        final publishBundleFuture = fetchCompletePublishBundle(
-          slug: slug,
-          source: config.publishSource,
-        ).then((success) {
-          if (success) {
-            DebugLogger.instance.printInfo(
-              '[slug] Complete publish model from slug is downloaded in background. Emitting.',
-              name: name,
-            );
+        final publishBundleFuture =
+            fetchCompletePublishBundle(
+              slug: slug,
+              source: config.publishSource,
+            ).then((success) {
+              if (success) {
+                DebugLogger.instance.printInfo(
+                  '[slug] Complete publish model from slug is downloaded in background. Emitting.',
+                  name: name,
+                );
 
-            loadFontsFromPublishModel();
-          } else {
-            errorLogger.captureException(
-              'Failed to download complete publish bundle',
-              message:
-                  'Failed to download complete publish bundle for slug $slug.',
-              type: 'bundle_download_failed',
-            );
-          }
-        });
+                loadFontsFromPublishModel();
+              } else {
+                errorLogger.captureException(
+                  'Failed to download complete publish bundle',
+                  message:
+                      'Failed to download complete publish bundle for slug $slug.',
+                  type: 'bundle_download_failed',
+                );
+              }
+            });
 
         if (_publishModel == null) {
           await publishBundleFuture;
         } else {
           // Background refresh: report failures instead of leaving them as
           // unhandled async errors.
-          unawaited(publishBundleFuture.catchError((Object e, StackTrace st) {
-            errorLogger.captureException(
-              e,
-              message:
-                  'Failed to refresh publish bundle for slug $slug in background.',
-              type: 'bundle_download_failed',
-              stackTrace: st,
-            );
-          }));
+          unawaited(
+            publishBundleFuture.catchError((Object e, StackTrace st) {
+              errorLogger.captureException(
+                e,
+                message:
+                    'Failed to refresh publish bundle for slug $slug in background.',
+                type: 'bundle_download_failed',
+                stackTrace: st,
+              );
+            }),
+          );
         }
 
         _logTime(stopwatch);
@@ -352,8 +357,9 @@ class DataManager {
     // Listen the publish model document.
     // It's either going to be fetched for the first time if it doesn't exist
     // in cache, or it's going to be updated with new data.
-    final Future<SDKPublishModel> firstPublishEvent =
-        listenToPublishModel(authData.projectId);
+    final Future<SDKPublishModel> firstPublishEvent = listenToPublishModel(
+      authData.projectId,
+    );
     if (_publishModel != null) {
       // The cached model is used and the first event is not awaited. Its
       // errors are already reported by the stream listener.
@@ -563,10 +569,7 @@ class DataManager {
       _localDatabase?.reset();
       _localDatabase = await initializeLocalStorage(projectId: projectId);
       didChange = true;
-      DebugLogger.instance.printInfo(
-        'Local storage initialized.',
-        name: name,
-      );
+      DebugLogger.instance.printInfo('Local storage initialized.', name: name);
     } else {
       DebugLogger.instance.printInfo(
         'Local storage already initialized correctly. Skipping.',
@@ -574,12 +577,14 @@ class DataManager {
       );
     }
 
-    final bool shouldInitCloudStorage = _cloudDatabase == null ||
+    final bool shouldInitCloudStorage =
+        _cloudDatabase == null ||
         (cloudDatabase!.publishSource != config.publishSource ||
             cloudDatabase!.identifier != projectId);
     bool isAuthenticated = false;
     if (shouldInitCloudStorage) {
-      isAuthenticated = authManager.isAuthenticated() &&
+      isAuthenticated =
+          authManager.isAuthenticated() &&
           authManager.hasCloudStorageAccess(projectId);
     }
     if (shouldInitCloudStorage && isAuthenticated) {
@@ -591,10 +596,7 @@ class DataManager {
       _cloudDatabase = await initializeCloudStorage(projectId: projectId);
       _publishModelStreamController.add(_publishModel);
       didChange = true;
-      DebugLogger.instance.printInfo(
-        'Cloud storage initialized.',
-        name: name,
-      );
+      DebugLogger.instance.printInfo('Cloud storage initialized.', name: name);
     } else {
       if (shouldInitCloudStorage) {
         DebugLogger.instance.printInfo(
@@ -612,8 +614,9 @@ class DataManager {
     return didChange;
   }
 
-  Future<LocalDatabase> initializeLocalStorage(
-      {required String projectId}) async {
+  Future<LocalDatabase> initializeLocalStorage({
+    required String projectId,
+  }) async {
     final Box box = await Hive.openBox(projectId);
     return HiveLocalDatabase(box, identifier: projectId);
   }
@@ -622,8 +625,9 @@ class DataManager {
   //  [DataManager] by delegating this initialization to the creator of
   //  [DataManager], maybe through a callback so that DataManager can decide
   //  exactly when to initialize this.
-  Future<CloudDatabase> initializeCloudStorage(
-      {required String projectId}) async {
+  Future<CloudDatabase> initializeCloudStorage({
+    required String projectId,
+  }) async {
     final instance = FirestoreCloudDatabase(
       projectId,
       config.publishSource,
@@ -660,10 +664,7 @@ class DataManager {
         name: name,
       );
     } else {
-      DebugLogger.instance.printInfo(
-        'No fonts to load.',
-        name: name,
-      );
+      DebugLogger.instance.printInfo('No fonts to load.', name: name);
     }
 
     for (final SDKPublishFont font in _publishModel!.fonts.values) {
@@ -685,90 +686,91 @@ class DataManager {
     final Completer<SDKPublishModel> completer = Completer();
     _publishModelDocumentListener?.cancel();
 
-    _publishModelDocumentListener = networkDataRepository
-        .streamPublishModel(
-      projectID: projectId,
-      source: config.publishSource,
-    )
-        .listen((SDKPublishModel? serverModel) {
-      if (serverModel == null) return;
+    _publishModelDocumentListener =
+        networkDataRepository
+            .streamPublishModel(
+              projectID: projectId,
+              source: config.publishSource,
+            )
+            .listen((SDKPublishModel? serverModel) {
+              if (serverModel == null) return;
 
-      DebugLogger.instance.printInfo(
-        'Publish model stream event received.',
-        name: name,
-      );
+              DebugLogger.instance.printInfo(
+                'Publish model stream event received.',
+                name: name,
+              );
 
-      final bool isFirstEvent = !completer.isCompleted;
+              final bool isFirstEvent = !completer.isCompleted;
 
-      // If the completer has not completed yet, it needs to be
-      // completed with the first available publish model form the server.
-      if (isFirstEvent) {
-        DebugLogger.instance.printInfo(
-          'Completing publish model stream completer since this is the first event.',
-          name: name,
-        );
-        completer.complete(serverModel);
-      }
+              // If the completer has not completed yet, it needs to be
+              // completed with the first available publish model form the server.
+              if (isFirstEvent) {
+                DebugLogger.instance.printInfo(
+                  'Completing publish model stream completer since this is the first event.',
+                  name: name,
+                );
+                completer.complete(serverModel);
+              }
 
-      // If the publish model is null, meaning no publish model was previously
-      // cached, then this is the first available publish model we have that
-      // just arrived from the server.
-      //
-      // We can skip publish model comparison as there is nothing to compare
-      // to yet.
-      //
-      // Since it is null, it will be hydrated with a value outside of this
-      // listener when the completer completes. The publish model is emitted
-      // once that happens, therefore we don't need to emit it here, nor
-      // compare.
-      if (_publishModel == null) {
-        DebugLogger.instance.printInfo(
-          'Publish model is null during init and received the first publish model from the server. Skipping comparison in stream.',
-          name: name,
-        );
-        return;
-      }
+              // If the publish model is null, meaning no publish model was previously
+              // cached, then this is the first available publish model we have that
+              // just arrived from the server.
+              //
+              // We can skip publish model comparison as there is nothing to compare
+              // to yet.
+              //
+              // Since it is null, it will be hydrated with a value outside of this
+              // listener when the completer completes. The publish model is emitted
+              // once that happens, therefore we don't need to emit it here, nor
+              // compare.
+              if (_publishModel == null) {
+                DebugLogger.instance.printInfo(
+                  'Publish model is null during init and received the first publish model from the server. Skipping comparison in stream.',
+                  name: name,
+                );
+                return;
+              }
 
-      if (config.slug != null) {
-        DebugLogger.instance.printInfo(
-          'Initialized using the slug, this event is not essential for initial loading.',
-          name: name,
-        );
-      } else if (isFirstEvent) {
-        DebugLogger.instance.printInfo(
-          'Publish model during init was not null, and we received a new publish model from the server. Comparing...',
-          name: name,
-        );
-      } else {
-        DebugLogger.instance.printInfo(
-          'Received a new publish model from the server. Comparing...',
-          name: name,
-        );
-      }
-      final SDKPublishModel localModel = _publishModel!;
+              if (config.slug != null) {
+                DebugLogger.instance.printInfo(
+                  'Initialized using the slug, this event is not essential for initial loading.',
+                  name: name,
+                );
+              } else if (isFirstEvent) {
+                DebugLogger.instance.printInfo(
+                  'Publish model during init was not null, and we received a new publish model from the server. Comparing...',
+                  name: name,
+                );
+              } else {
+                DebugLogger.instance.printInfo(
+                  'Received a new publish model from the server. Comparing...',
+                  name: name,
+                );
+              }
+              final SDKPublishModel localModel = _publishModel!;
 
-      // Comparison should always be a background process.
-      processPublishDifference(
-        serverModel: serverModel,
-        localModel: localModel,
-      );
+              // Comparison should always be a background process.
+              processPublishDifference(
+                serverModel: serverModel,
+                localModel: localModel,
+              );
 
-      DebugLogger.instance.printInfo(
-        'Publish model comparison complete.',
-        name: name,
-      );
-    })
-      ..onError((error, str) {
-        ErrorLogger.instance.captureException(
-          error,
-          message: 'Failed to listen to publish model',
-          type: 'publish_model_stream_failed',
-          stackTrace: str,
-        );
-        // Without this, initialization would wait forever for a first event
-        // that never comes, e.g. on a Firestore permission error.
-        if (!completer.isCompleted) completer.completeError(error, str);
-      });
+              DebugLogger.instance.printInfo(
+                'Publish model comparison complete.',
+                name: name,
+              );
+            })
+          ..onError((error, str) {
+            ErrorLogger.instance.captureException(
+              error,
+              message: 'Failed to listen to publish model',
+              type: 'publish_model_stream_failed',
+              stackTrace: str,
+            );
+            // Without this, initialization would wait forever for a first event
+            // that never comes, e.g. on a Firestore permission error.
+            if (!completer.isCompleted) completer.completeError(error, str);
+          });
 
     return completer.future;
   }
@@ -875,8 +877,8 @@ class DataManager {
 
     final bool entryChanged =
         localModel.entryLayoutId != serverModel.entryLayoutId ||
-            localModel.entryCanvasId != serverModel.entryCanvasId ||
-            localModel.entryPageId != serverModel.entryPageId;
+        localModel.entryCanvasId != serverModel.entryCanvasId ||
+        localModel.entryPageId != serverModel.entryPageId;
 
     final bool didLayoutIDMapChange = const MapEquality().equals(
       localModel.layoutIDMap,
@@ -884,17 +886,24 @@ class DataManager {
     );
     if (didLayoutIDMapChange) {
       localModel = localModel.copyWith(layoutIDMap: serverModel.layoutIDMap);
-      DebugLogger.instance
-          .printInfo('DIFF: Layout ID map changed. Updating...', name: name);
+      DebugLogger.instance.printInfo(
+        'DIFF: Layout ID map changed. Updating...',
+        name: name,
+      );
     }
 
-    final bool disabledLayoutsChanged = !(const ListEquality()
-        .equals(localModel.disabledLayouts, serverModel.disabledLayouts));
+    final bool disabledLayoutsChanged = !(const ListEquality().equals(
+      localModel.disabledLayouts,
+      serverModel.disabledLayouts,
+    ));
     if (disabledLayoutsChanged) {
-      localModel =
-          localModel.copyWith(disabledLayouts: serverModel.disabledLayouts);
-      DebugLogger.instance
-          .printInfo('DIFF: Disabled layouts changed. Updating...', name: name);
+      localModel = localModel.copyWith(
+        disabledLayouts: serverModel.disabledLayouts,
+      );
+      DebugLogger.instance.printInfo(
+        'DIFF: Disabled layouts changed. Updating...',
+        name: name,
+      );
     }
 
     if (layoutUpdates.isEmpty &&
@@ -906,11 +915,14 @@ class DataManager {
         !entryChanged &&
         !didLayoutIDMapChange &&
         !disabledLayoutsChanged) {
-      DebugLogger.instance
-          .printInfo('DIFF: No updates to process.', name: name);
+      DebugLogger.instance.printInfo(
+        'DIFF: No updates to process.',
+        name: name,
+      );
       return;
     } else {
-      DebugLogger.instance.printInfo('''DIFF: Processing updates:
+      DebugLogger.instance.printInfo(
+        '''DIFF: Processing updates:
       | ${layoutUpdates.length} layout updates.
       | ${fontUpdates.length} font updates.
       | ${apiUpdates.length} api updates.
@@ -920,7 +932,8 @@ class DataManager {
       | ${entryChanged ? 1 : 0} entry id update${entryChanged ? '' : 's'}.
       | ${didLayoutIDMapChange ? 'Layout ID map changed.' : 'No layout ID map changes.'}
       | ${disabledLayoutsChanged ? 'Disabled layout IDs changed.' : 'No disabled layout IDs changed.'}''',
-          name: name);
+        name: name,
+      );
     }
 
     for (final String layoutID in layoutUpdates.keys) {
@@ -928,8 +941,10 @@ class DataManager {
 
       switch (updateType) {
         case UpdateType.delete:
-          DebugLogger.instance
-              .printInfo('DIFF: Deleting layout [$layoutID]...', name: name);
+          DebugLogger.instance.printInfo(
+            'DIFF: Deleting layout [$layoutID]...',
+            name: name,
+          );
           localModel.layouts.remove(layoutID);
           localDataRepository.deletePublishLayout(
             layoutID: layoutID,
@@ -937,14 +952,16 @@ class DataManager {
           );
         case UpdateType.add:
         case UpdateType.update:
-          DebugLogger.instance
-              .printInfo('DIFF: Downloading layout [$layoutID]...', name: name);
-          final SDKPublishLayout? layout =
-              await networkDataRepository.downloadLayoutModel(
-            projectID: authManager.authData!.projectId,
-            layoutID: layoutID,
-            source: config.publishSource,
+          DebugLogger.instance.printInfo(
+            'DIFF: Downloading layout [$layoutID]...',
+            name: name,
           );
+          final SDKPublishLayout? layout = await networkDataRepository
+              .downloadLayoutModel(
+                projectID: authManager.authData!.projectId,
+                layoutID: layoutID,
+                source: config.publishSource,
+              );
           if (layout != null) {
             localModel.layouts[layoutID] = layout;
           }
@@ -956,8 +973,10 @@ class DataManager {
 
       switch (updateType) {
         case UpdateType.delete:
-          DebugLogger.instance
-              .printInfo('DIFF: Deleting font [$fontID]...', name: name);
+          DebugLogger.instance.printInfo(
+            'DIFF: Deleting font [$fontID]...',
+            name: name,
+          );
           localModel.fonts.remove(fontID);
           localDataRepository.deleteFontBytes(
             fontID: fontID,
@@ -965,14 +984,16 @@ class DataManager {
           );
         case UpdateType.add:
         case UpdateType.update:
-          DebugLogger.instance
-              .printInfo('DIFF: Downloading font [$fontID]...', name: name);
-          final SDKPublishFont? font =
-              await networkDataRepository.downloadFontModel(
-            projectID: authManager.authData!.projectId,
-            fontID: fontID,
-            source: config.publishSource,
+          DebugLogger.instance.printInfo(
+            'DIFF: Downloading font [$fontID]...',
+            name: name,
           );
+          final SDKPublishFont? font = await networkDataRepository
+              .downloadFontModel(
+                projectID: authManager.authData!.projectId,
+                fontID: fontID,
+                source: config.publishSource,
+              );
 
           if (font != null) {
             localModel.fonts[fontID] = font;
@@ -986,8 +1007,10 @@ class DataManager {
 
       switch (updateType) {
         case UpdateType.delete:
-          DebugLogger.instance
-              .printInfo('DIFF: Deleting api [$apiId]...', name: name);
+          DebugLogger.instance.printInfo(
+            'DIFF: Deleting api [$apiId]...',
+            name: name,
+          );
           localModel.apis.remove(apiId);
           localDataRepository.deletePublishApi(
             apiId: apiId,
@@ -995,8 +1018,10 @@ class DataManager {
           );
         case UpdateType.add:
         case UpdateType.update:
-          DebugLogger.instance
-              .printInfo('DIFF: Downloading api [$apiId]...', name: name);
+          DebugLogger.instance.printInfo(
+            'DIFF: Downloading api [$apiId]...',
+            name: name,
+          );
           final HttpApiData? api = await networkDataRepository.downloadApi(
             projectID: authManager.authData!.projectId,
             apiId: apiId,
@@ -1014,8 +1039,9 @@ class DataManager {
       switch (updateType) {
         case UpdateType.delete:
           DebugLogger.instance.printInfo(
-              'DIFF: Deleting variables for layout [$layoutId]...',
-              name: name);
+            'DIFF: Deleting variables for layout [$layoutId]...',
+            name: name,
+          );
           localModel.variables.remove(layoutId);
           localDataRepository.deletePublishVariables(
             layoutID: layoutId,
@@ -1024,14 +1050,15 @@ class DataManager {
         case UpdateType.add:
         case UpdateType.update:
           DebugLogger.instance.printInfo(
-              'DIFF: Downloading variables for layout [$layoutId]...',
-              name: name);
+            'DIFF: Downloading variables for layout [$layoutId]...',
+            name: name,
+          );
           final SDKLayoutVariables? layoutVariables =
               await networkDataRepository.downloadLayoutVariables(
-            projectID: authManager.authData!.projectId,
-            layoutID: layoutId,
-            source: config.publishSource,
-          );
+                projectID: authManager.authData!.projectId,
+                layoutID: layoutId,
+                source: config.publishSource,
+              );
           if (layoutVariables != null) {
             localModel.variables[layoutId] = layoutVariables;
           }
@@ -1044,8 +1071,9 @@ class DataManager {
       switch (updateType) {
         case UpdateType.delete:
           DebugLogger.instance.printInfo(
-              'DIFF: Deleting conditions for layout [$layoutID]...',
-              name: name);
+            'DIFF: Deleting conditions for layout [$layoutID]...',
+            name: name,
+          );
           localModel.variables.remove(layoutID);
           localDataRepository.deletePublishConditions(
             layoutID: layoutID,
@@ -1054,22 +1082,25 @@ class DataManager {
         case UpdateType.add:
         case UpdateType.update:
           DebugLogger.instance.printInfo(
-              'DIFF: Downloading conditions for layout [$layoutID]...',
-              name: name);
+            'DIFF: Downloading conditions for layout [$layoutID]...',
+            name: name,
+          );
           final SDKLayoutConditions? layoutConditions =
               await networkDataRepository.downloadLayoutConditions(
-            projectID: authManager.authData!.projectId,
-            layoutID: layoutID,
-            source: config.publishSource,
-          );
+                projectID: authManager.authData!.projectId,
+                layoutID: layoutID,
+                source: config.publishSource,
+              );
           if (layoutConditions != null) {
             localModel.conditions[layoutID] = layoutConditions;
           }
       }
     }
 
-    DebugLogger.instance
-        .printInfo('DIFF: Done processing updates.', name: name);
+    DebugLogger.instance.printInfo(
+      'DIFF: Done processing updates.',
+      name: name,
+    );
     _publishModel = localModel.copyWith(
       updates: serverModel.updates,
       entryPageId: serverModel.entryPageId,
@@ -1280,13 +1311,15 @@ class DataManager {
   }) async {
     if (_publishModel != null && queuingDone) {
       DebugLogger.instance.printInfo(
-          '[queueLayout] No longer queuing. Downloading layout [$layoutID] immediately...',
-          name: name);
+        '[queueLayout] No longer queuing. Downloading layout [$layoutID] immediately...',
+        name: name,
+      );
       try {
         await getOrFetchPopulatedLayout(layoutID: layoutID);
         DebugLogger.instance.printInfo(
-            '[queueLayout] Layout [$layoutID] download complete.',
-            name: name);
+          '[queueLayout] Layout [$layoutID] download complete.',
+          name: name,
+        );
       } catch (e, str) {
         DebugLogger.instance.log(
           '[queueLayout] Layout [$layoutID] failed to download immediately.\nError: $e',
@@ -1307,32 +1340,37 @@ class DataManager {
         if (prioritize) {
           if (_downloadQueue.first == layoutID) {
             DebugLogger.instance.printInfo(
-                '[queueLayout] Layout [$layoutID] is already at the front of the queue. Skipping.',
-                name: name);
+              '[queueLayout] Layout [$layoutID] is already at the front of the queue. Skipping.',
+              name: name,
+            );
             return;
           } else {
             DebugLogger.instance.printInfo(
-                '[queueLayout] Layout [$layoutID] is already in the queue. Moving it to the front to prioritize it.',
-                name: name);
+              '[queueLayout] Layout [$layoutID] is already in the queue. Moving it to the front to prioritize it.',
+              name: name,
+            );
             _downloadQueue.remove(layoutID);
           }
         } else {
           DebugLogger.instance.printInfo(
-              '[queueLayout] Layout [$layoutID] is already in the queue. Skipping.',
-              name: name);
+            '[queueLayout] Layout [$layoutID] is already in the queue. Skipping.',
+            name: name,
+          );
           return;
         }
       }
 
       if (prioritize) {
         DebugLogger.instance.printInfo(
-            '[queueLayout] Prioritizing this layout. Inserting [$layoutID] to the front of the queue.',
-            name: name);
+          '[queueLayout] Prioritizing this layout. Inserting [$layoutID] to the front of the queue.',
+          name: name,
+        );
         _downloadQueue.insert(0, layoutID);
       } else {
         DebugLogger.instance.printInfo(
-            '[queueLayout] Adding [$layoutID] to the back of the queue.',
-            name: name);
+          '[queueLayout] Adding [$layoutID] to the back of the queue.',
+          name: name,
+        );
         _downloadQueue.add(layoutID);
       }
     }
@@ -1360,9 +1398,7 @@ class DataManager {
   ///
   /// Will return `true` if the layout and its associated fonts were fetched
   /// successfully, `false` otherwise.
-  Future<bool> getOrFetchPopulatedLayout({
-    required String layoutID,
-  }) async {
+  Future<bool> getOrFetchPopulatedLayout({required String layoutID}) async {
     DebugLogger.instance.printFunction(
       'getOrFetchPopulatedLayout(layoutID: $layoutID)',
       name: name,
@@ -1370,10 +1406,7 @@ class DataManager {
 
     final SDKPublishModel? model = _publishModel;
     final AuthData? auth = authManager.authData;
-    assert(
-      model != null,
-      'Data manager has not been initialized yet.',
-    );
+    assert(model != null, 'Data manager has not been initialized yet.');
 
     // If the user is not authenticated, then they get whatever is cached and
     // nothing else.
@@ -1387,13 +1420,15 @@ class DataManager {
     SDKPublishLayout? layout;
     if (model!.layouts.containsKey(layoutID)) {
       DebugLogger.instance.printInfo(
-          '\tLayout [$layoutID] is already cached. Skipping download.',
-          name: name);
+        '\tLayout [$layoutID] is already cached. Skipping download.',
+        name: name,
+      );
       layout = model.layouts[layoutID];
     } else {
       DebugLogger.instance.printInfo(
-          '\tLayout [$layoutID] is not cached. Downloading...',
-          name: name);
+        '\tLayout [$layoutID] is not cached. Downloading...',
+        name: name,
+      );
       layout = await networkDataRepository.downloadLayoutModel(
         layoutID: layoutID,
         projectID: auth.projectId,
@@ -1401,13 +1436,15 @@ class DataManager {
       );
       if (layout == null) {
         DebugLogger.instance.printInfo(
-            '\tLayout [$layoutID] could not be downloaded.',
-            name: name);
+          '\tLayout [$layoutID] could not be downloaded.',
+          name: name,
+        );
         return false;
       } else {
         DebugLogger.instance.printInfo(
-            '\tLayout [$layoutID] downloaded successfully.',
-            name: name);
+          '\tLayout [$layoutID] downloaded successfully.',
+          name: name,
+        );
       }
 
       model.layouts[layoutID] = layout;
@@ -1418,43 +1455,50 @@ class DataManager {
     // Process APIs
     if (model.updates.layoutApis.containsKey(layoutID)) {
       DebugLogger.instance.printInfo(
-          '\tLayout [$layoutID] has ${model.updates.layoutApis[layoutID]!.length} apis.',
-          name: name);
+        '\tLayout [$layoutID] has ${model.updates.layoutApis[layoutID]!.length} apis.',
+        name: name,
+      );
       final Set<Future<HttpApiData?>> apiModels = getOrFetchApis(
         apiIds: model.updates.layoutApis[layoutID]!,
       );
 
-      final List<HttpApiData?> results =
-          await Future.wait(apiModels.map((future) async {
-        try {
-          return await future;
-        } catch (e) {
-          DebugLogger.instance.log(
-            'Error while fetching apis.\nError: $e',
-            category: DebugCategory.error,
-            name: name,
-            level: Level.WARNING,
-          );
-          return null;
-        }
-      }));
+      final List<HttpApiData?> results = await Future.wait(
+        apiModels.map((future) async {
+          try {
+            return await future;
+          } catch (e) {
+            DebugLogger.instance.log(
+              'Error while fetching apis.\nError: $e',
+              category: DebugCategory.error,
+              name: name,
+              level: Level.WARNING,
+            );
+            return null;
+          }
+        }),
+      );
 
       for (final api in results) {
         if (api == null) continue;
         model.apis[api.id] = api;
       }
     } else {
-      DebugLogger.instance
-          .printInfo('\tLayout [$layoutID] has no apis.', name: name);
+      DebugLogger.instance.printInfo(
+        '\tLayout [$layoutID] has no apis.',
+        name: name,
+      );
     }
 
     // Process Variables
     if (model.updates.variables.containsKey(layoutID)) {
-      DebugLogger.instance
-          .printInfo('\tLayout [$layoutID] has variables.', name: name);
+      DebugLogger.instance.printInfo(
+        '\tLayout [$layoutID] has variables.',
+        name: name,
+      );
       try {
-        final SDKLayoutVariables? variables =
-            await getOrFetchVariables(layoutID);
+        final SDKLayoutVariables? variables = await getOrFetchVariables(
+          layoutID,
+        );
         if (variables != null) {
           model.variables[layoutID] = variables;
         }
@@ -1467,17 +1511,22 @@ class DataManager {
         );
       }
     } else {
-      DebugLogger.instance
-          .printInfo('Layout [$layoutID] has no variables.', name: name);
+      DebugLogger.instance.printInfo(
+        'Layout [$layoutID] has no variables.',
+        name: name,
+      );
     }
 
     // Process Conditions
     if (model.updates.conditions.containsKey(layoutID)) {
-      DebugLogger.instance
-          .printInfo('\tLayout [$layoutID] has conditions.', name: name);
+      DebugLogger.instance.printInfo(
+        '\tLayout [$layoutID] has conditions.',
+        name: name,
+      );
       try {
-        final SDKLayoutConditions? conditions =
-            await getOrFetchConditions(layoutID);
+        final SDKLayoutConditions? conditions = await getOrFetchConditions(
+          layoutID,
+        );
         if (conditions != null) {
           model.conditions[layoutID] = conditions;
         }
@@ -1490,54 +1539,64 @@ class DataManager {
         );
       }
     } else {
-      DebugLogger.instance
-          .printInfo('\tLayout [$layoutID] has no conditions.', name: name);
+      DebugLogger.instance.printInfo(
+        '\tLayout [$layoutID] has no conditions.',
+        name: name,
+      );
     }
 
     await emitPublishModel();
     savePublishModel();
 
-    DebugLogger.instance
-        .printInfo('\tLayout [$layoutID] ready, time for fonts...', name: name);
+    DebugLogger.instance.printInfo(
+      '\tLayout [$layoutID] ready, time for fonts...',
+      name: name,
+    );
 
     // Process Fonts
     if (model.updates.layoutFonts.containsKey(layoutID)) {
       DebugLogger.instance.printInfo(
-          '\tLayout [$layoutID] has ${model.updates.layoutFonts[layoutID]!.length} fonts.',
-          name: name);
+        '\tLayout [$layoutID] has ${model.updates.layoutFonts[layoutID]!.length} fonts.',
+        name: name,
+      );
 
       // Download or load fonts in the background.
-      getOrFetchFontModels(
-        fontIDs: model.updates.layoutFonts[layoutID]!,
-      ).then((Set<SDKPublishFont> fontModels) async {
-        DebugLogger.instance.printInfo(
-            '\tFound ${fontModels.length} fonts to fetch for layout [$layoutID].',
-            name: name);
-
-        for (final SDKPublishFont fontModel in fontModels) {
-          DebugLogger.instance.printInfo(
-              '\t\tFontModel [${fontModel.id}] ready. Fetching bytes & loading...',
-              name: name);
-
-          model.fonts[fontModel.id] = fontModel;
-
-          await getOrFetchFontBytesAndSaveAndLoad(fontModel).then((_) {
+      getOrFetchFontModels(fontIDs: model.updates.layoutFonts[layoutID]!)
+          .then((Set<SDKPublishFont> fontModels) async {
             DebugLogger.instance.printInfo(
-                '\t\tFontModel [${fontModel.id}] loaded. Done!\n',
-                name: name);
+              '\tFound ${fontModels.length} fonts to fetch for layout [$layoutID].',
+              name: name,
+            );
+
+            for (final SDKPublishFont fontModel in fontModels) {
+              DebugLogger.instance.printInfo(
+                '\t\tFontModel [${fontModel.id}] ready. Fetching bytes & loading...',
+                name: name,
+              );
+
+              model.fonts[fontModel.id] = fontModel;
+
+              await getOrFetchFontBytesAndSaveAndLoad(fontModel).then((_) {
+                DebugLogger.instance.printInfo(
+                  '\t\tFontModel [${fontModel.id}] loaded. Done!\n',
+                  name: name,
+                );
+              });
+            }
+          })
+          .catchError((error, stack) {
+            DebugLogger.instance.log(
+              'Error while fetching fonts.\nError: $error',
+              category: DebugCategory.error,
+              name: name,
+              level: Level.WARNING,
+            );
           });
-        }
-      }).catchError((error, stack) {
-        DebugLogger.instance.log(
-          'Error while fetching fonts.\nError: $error',
-          category: DebugCategory.error,
-          name: name,
-          level: Level.WARNING,
-        );
-      });
     } else {
-      DebugLogger.instance
-          .printInfo('\tLayout [$layoutID] has no fonts.', name: name);
+      DebugLogger.instance.printInfo(
+        '\tLayout [$layoutID] has no fonts.',
+        name: name,
+      );
     }
 
     StatTracker.instance.track(StatType.populatedLayoutDownload, layoutID);
@@ -1572,14 +1631,16 @@ class DataManager {
     } finally {
       stopwatch.stop();
       DebugLogger.instance.printInfo(
-          'Publish bundle download stopwatch done in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.',
-          name: name);
+        'Publish bundle download stopwatch done in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.',
+        name: name,
+      );
     }
 
     if (model != null) {
       DebugLogger.instance.printInfo(
-          'Successfully downloaded complete publish bundle. Emitting it.',
-          name: name);
+        'Successfully downloaded complete publish bundle. Emitting it.',
+        name: name,
+      );
       _publishModel = model;
       await emitPublishModel();
       savePublishModel();
@@ -1587,8 +1648,9 @@ class DataManager {
     }
 
     DebugLogger.instance.printInfo(
-        'Failed to download complete publish bundle in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.',
-        name: name);
+      'Failed to download complete publish bundle in ${stopwatch.elapsedMilliseconds}ms or ${stopwatch.elapsed.inSeconds}s.',
+      name: name,
+    );
     return false;
   }
 
@@ -1604,16 +1666,18 @@ class DataManager {
   /// Loads a [font] with its associated [fontBytes] into the Flutter engine.
   Future<void> loadFont(SDKPublishFont font, Uint8List fontBytes) async {
     DebugLogger.instance.printInfo(
-        '[FLUTTER] Loading font [${font.id}](${font.fullFontName}) into Flutter framework.',
-        name: name);
+      '[FLUTTER] Loading font [${font.id}](${font.fullFontName}) into Flutter framework.',
+      name: name,
+    );
     final FontLoader fontLoader = FontLoader(font.fullFontName);
 
     fontLoader.addFont(Future.value(ByteData.sublistView(fontBytes)));
 
     return fontLoader.load().then((_) {
       DebugLogger.instance.printInfo(
-          '[FLUTTER] Successfully loaded font [${font.id}](${font.fullFontName}) into Flutter framework.',
-          name: name);
+        '[FLUTTER] Successfully loaded font [${font.id}](${font.fullFontName}) into Flutter framework.',
+        name: name,
+      );
     });
   }
 
@@ -1621,34 +1685,38 @@ class DataManager {
   /// them.
   Future<Uint8List?> getOrFetchFontBytesAndSave(SDKPublishFont font) async {
     DebugLogger.instance.printInfo(
-        '\t\tChecking bytes for [${font.id}](${font.fullFontName}).',
-        name: name);
+      '\t\tChecking bytes for [${font.id}](${font.fullFontName}).',
+      name: name,
+    );
     final Uint8List? fontBytes = localDataRepository.fetchFontBytes(
       fontID: font.id,
       source: config.publishSource,
     );
     if (fontBytes != null) {
-      DebugLogger.instance
-          .printInfo('\t\tFont [${font.id}] bytes already cached.', name: name);
+      DebugLogger.instance.printInfo(
+        '\t\tFont [${font.id}] bytes already cached.',
+        name: name,
+      );
       return Future.value(fontBytes);
     } else {
       DebugLogger.instance.printInfo(
-          '\t\tFont [${font.id}] bytes not cached. Downloading...',
-          name: name);
+        '\t\tFont [${font.id}] bytes not cached. Downloading...',
+        name: name,
+      );
       return downloadFontBytesAndSave(font);
     }
   }
 
   /// Downloads the bytes of a [font] and saves them to cache.
   Future<Uint8List?> downloadFontBytesAndSave(SDKPublishFont font) async =>
-      networkDataRepository.downloadFontBytes(url: font.url).then(
-        (Uint8List? fontBytes) {
-          // Save the font bytes to cache.
-          if (fontBytes == null) return null;
-          saveFontBytes(font, fontBytes);
-          return fontBytes;
-        },
-      );
+      networkDataRepository.downloadFontBytes(url: font.url).then((
+        Uint8List? fontBytes,
+      ) {
+        // Save the font bytes to cache.
+        if (fontBytes == null) return null;
+        saveFontBytes(font, fontBytes);
+        return fontBytes;
+      });
 
   /// Gets all [SDKPublishFont] models of a given set of [fontIDs] either from
   /// local cache or downloads them from the network.
@@ -1666,19 +1734,20 @@ class DataManager {
         if (auth == null) continue;
 
         try {
-          final SDKPublishFont? downloadedFont =
-              await networkDataRepository.downloadFontModel(
-            projectID: auth.projectId,
-            fontID: fontID,
-            source: config.publishSource,
-          );
+          final SDKPublishFont? downloadedFont = await networkDataRepository
+              .downloadFontModel(
+                projectID: auth.projectId,
+                fontID: fontID,
+                source: config.publishSource,
+              );
           if (downloadedFont != null) {
             fonts.add(downloadedFont);
           }
         } catch (e) {
           DebugLogger.instance.printInfo(
-              '\t\tFont [$fontID] could not be downloaded.',
-              name: name);
+            '\t\tFont [$fontID] could not be downloaded.',
+            name: name,
+          );
         }
       }
     }
@@ -1687,9 +1756,7 @@ class DataManager {
 
   /// Gets all [SDKPublishFont] models of a given set of [fontIDs] either from
   /// local cache or downloads them from the network.
-  Set<Future<HttpApiData?>> getOrFetchApis({
-    required Set<String> apiIds,
-  }) {
+  Set<Future<HttpApiData?>> getOrFetchApis({required Set<String> apiIds}) {
     final AuthData? auth = authManager.authData;
 
     final Set<Future<HttpApiData?>> apis = {};
@@ -1700,12 +1767,12 @@ class DataManager {
       } else {
         if (auth == null) continue;
 
-        final Future<HttpApiData?> apiFuture =
-            networkDataRepository.downloadApi(
-          projectID: auth.projectId,
-          apiId: apiId,
-          source: config.publishSource,
-        );
+        final Future<HttpApiData?> apiFuture = networkDataRepository
+            .downloadApi(
+              projectID: auth.projectId,
+              apiId: apiId,
+              source: config.publishSource,
+            );
         apis.add(apiFuture);
       }
     }

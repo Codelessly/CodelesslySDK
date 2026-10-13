@@ -45,10 +45,7 @@ class _CodelesslyErrorScreenState extends State<CodelesslyErrorScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Uh oh!',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              Text('Uh oh!', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 16),
               if (widget.errors.length > 1) ...[
                 Row(
@@ -81,8 +78,10 @@ class _CodelesslyErrorScreenState extends State<CodelesslyErrorScreen> {
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                constraints:
-                    const BoxConstraints(maxWidth: 500, maxHeight: 500),
+                constraints: const BoxConstraints(
+                  maxWidth: 500,
+                  maxHeight: 500,
+                ),
                 child: SingleChildScrollView(
                   primary: false,
                   padding: EdgeInsets.zero,
@@ -145,7 +144,7 @@ class _CodelesslyErrorScreenState extends State<CodelesslyErrorScreen> {
                                           detailsVisible = !detailsVisible;
                                         });
                                       },
-                                    )
+                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 8),
@@ -175,7 +174,7 @@ class _CodelesslyErrorScreenState extends State<CodelesslyErrorScreen> {
                               ],
                             ),
                           ),
-                        ]
+                        ],
                       ],
                     ),
                   ),

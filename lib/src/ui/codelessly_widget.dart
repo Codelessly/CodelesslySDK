@@ -185,38 +185,38 @@ class CodelesslyWidget extends StatefulWidget {
 
     // Additional parameters.
     this.codelesslyContext,
-  })  : data = {...data},
-        functions = {...functions},
-        externalComponentBuilders = {...externalComponentBuilders},
-        assert(
-          ((config ??
-                  (codelessly ?? Codelessly.instance).config ??
-                  (controller?.config)) !=
-              null),
-          controller != null
-              ? 'You must provide a [config] inside of your [controller] or configure the provided codelessly instance with one.'
-              : 'You must provide a [config] inside of your CodelesslyWidget or through the Codelessly instance.',
-        ),
-        assert(
-          ((layoutID != null) != (controller != null)) ||
-              ((config ??
-                          (codelessly ?? Codelessly.instance).config ??
-                          (controller?.config)))!
-                      .slug !=
-                  null,
-          'You must provide either a [layoutID] or a [controller]. One must be specified, and both cannot be specified at the same time.'
-          '\nIf you provided neither, then a slug must be configured in the config.',
-        ),
-        assert(
-          (publishSource == null && controller == null) ||
-              (publishSource != null) != (controller != null),
-          'You must provide either an [publishSource] or a [controller]. One must be specified, and both cannot be specified at the same time.',
-        ),
-        assert(
-          (codelessly == null && controller == null) ||
-              (codelessly != null) != (controller != null),
-          'You must provide either a [codelessly] or a [controller]. One may be specified, and both cannot be specified at the same time.',
-        );
+  }) : data = {...data},
+       functions = {...functions},
+       externalComponentBuilders = {...externalComponentBuilders},
+       assert(
+         ((config ??
+                 (codelessly ?? Codelessly.instance).config ??
+                 (controller?.config)) !=
+             null),
+         controller != null
+             ? 'You must provide a [config] inside of your [controller] or configure the provided codelessly instance with one.'
+             : 'You must provide a [config] inside of your CodelesslyWidget or through the Codelessly instance.',
+       ),
+       assert(
+         ((layoutID != null) != (controller != null)) ||
+             ((config ??
+                         (codelessly ?? Codelessly.instance).config ??
+                         (controller?.config)))!
+                     .slug !=
+                 null,
+         'You must provide either a [layoutID] or a [controller]. One must be specified, and both cannot be specified at the same time.'
+         '\nIf you provided neither, then a slug must be configured in the config.',
+       ),
+       assert(
+         (publishSource == null && controller == null) ||
+             (publishSource != null) != (controller != null),
+         'You must provide either an [publishSource] or a [controller]. One must be specified, and both cannot be specified at the same time.',
+       ),
+       assert(
+         (codelessly == null && controller == null) ||
+             (codelessly != null) != (controller != null),
+         'You must provide either a [codelessly] or a [controller]. One may be specified, and both cannot be specified at the same time.',
+       );
 
   @override
   State<CodelesslyWidget> createState() => _CodelesslyWidgetState();
@@ -286,15 +286,15 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       _effectiveController.initialize();
     }
 
-    _errorSubscription = ErrorLogger.instance.errorStream.listen(
-      (ErrorLog error) {
-        if (error.layoutID == _effectiveController.layoutID) {
-          setState(() {
-            _lastError = error;
-          });
-        }
-      },
-    );
+    _errorSubscription = ErrorLogger.instance.errorStream.listen((
+      ErrorLog error,
+    ) {
+      if (error.layoutID == _effectiveController.layoutID) {
+        setState(() {
+          _lastError = error;
+        });
+      }
+    });
 
     if (widget.codelesslyContext != null) {
       DebugLogger.instance.printInfo(
@@ -303,7 +303,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       );
     }
 
-    codelesslyContext = widget.codelesslyContext ??
+    codelesslyContext =
+        widget.codelesslyContext ??
         CodelesslyContext(
           data: widget.data,
           functions: widget.functions,
@@ -338,19 +339,26 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         effectiveLayoutID != null) {
       // Get the canvas ID from layout group for the current screen size.
       final newCanvasID = _getCanvasIDForLayoutGroup(
-          effectiveLayoutID, _effectiveController.publishModel!, screenSize);
+        effectiveLayoutID,
+        _effectiveController.publishModel!,
+        screenSize,
+      );
 
       if (newCanvasID != canvasID) {
         // Breakpoint changed. Everything needs to be reloaded.
         canvasID = newCanvasID;
         final breakpoint = _effectiveController
-            .publishModel!.layouts[effectiveLayoutID!]?.breakpoints
+            .publishModel!
+            .layouts[effectiveLayoutID!]
+            ?.breakpoints
             .firstWhereOrNull((breakpoint) => breakpoint.nodeId == canvasID);
 
         // Notify breakpoints listeners.
         if (breakpoint != null) {
-          _effectiveController.effectiveCodelessly
-              .notifyBreakpointsListeners(context, breakpoint);
+          _effectiveController.effectiveCodelessly.notifyBreakpointsListeners(
+            context,
+            breakpoint,
+          );
         }
       }
     }
@@ -379,8 +387,9 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         if (!mounted) return;
         for (final notifier in codelesslyContext.variables.values) {
-          notifier.value =
-              notifier.value.copyWith(value: widget.data[notifier.value.name]);
+          notifier.value = notifier.value.copyWith(
+            value: widget.data[notifier.value.name],
+          );
         }
       });
     }
@@ -452,7 +461,10 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   /// Returns null if the layout group does not have a canvas for the current
   /// screen size or if the layout group does not exist.
   String? _getCanvasIDForLayoutGroup(
-      String? layoutID, SDKPublishModel model, Size screenSize) {
+    String? layoutID,
+    SDKPublishModel model,
+    Size screenSize,
+  ) {
     if (layoutID != null && model.layouts.containsKey(layoutID)) {
       final SDKPublishLayout? layout = model.layouts[layoutID];
       if (layout != null) {
@@ -518,15 +530,11 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           if (effectiveLayoutID == null) {
             final errorLog = ErrorLog(
               timestamp: DateTime.now(),
-              message:
-                  'A layoutID was not specified and the model does not have an entry layoutID specified.',
+              message: 'A layoutID was not specified and the model does not have an entry layoutID specified.',
               type: 'layout_not_initialized',
             );
 
-            return _effectiveErrorBuilder?.call(
-                  context,
-                  errorLog,
-                ) ??
+            return _effectiveErrorBuilder?.call(context, errorLog) ??
                 CodelesslyErrorScreen(
                   errors: [errorLog],
                   publishSource: _effectiveController.publishSource,
@@ -636,9 +644,11 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<CodelesslyContext>.value(
-            value: codelesslyContext),
+          value: codelesslyContext,
+        ),
         ChangeNotifierProvider<CodelesslyWidgetController>.value(
-            value: _effectiveController),
+          value: _effectiveController,
+        ),
         Provider<Codelessly>.value(value: codelessly),
       ],
       child: StreamBuilder<CStatus>(
@@ -710,10 +720,10 @@ class _NavigationBuilderState extends State<_NavigationBuilder> {
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       if (!context.mounted) return;
       context.read<Codelessly>().notifyNavigationListeners(
-            context,
-            layoutId: widget.layoutId,
-            canvasId: widget.canvasId,
-          );
+        context,
+        layoutId: widget.layoutId,
+        canvasId: widget.canvasId,
+      );
     });
   }
 

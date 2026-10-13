@@ -12,10 +12,7 @@ class WebDataRepository extends NetworkDataRepository {
   final http.Client client;
 
   /// Creates a [WebDataRepository] instance.
-  WebDataRepository({
-    required super.config,
-    required this.client,
-  });
+  WebDataRepository({required super.config, required this.client});
 
   @override
   Stream<SDKPublishModel?> streamPublishModel({
@@ -25,12 +22,10 @@ class WebDataRepository extends NetworkDataRepository {
     try {
       final http.Response result = await client.post(
         Uri.parse(
-            '${config.firebaseCloudFunctionsBaseURL}/api/getPublishModelRequest'),
+          '${config.firebaseCloudFunctionsBaseURL}/api/getPublishModelRequest',
+        ),
         headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'projectID': projectID,
-          'source': source.serverPath,
-        }),
+        body: jsonEncode({'projectID': projectID, 'source': source.serverPath}),
       );
 
       if (result.statusCode != 200) {
@@ -67,7 +62,8 @@ class WebDataRepository extends NetworkDataRepository {
     try {
       final http.Response result = await client.post(
         Uri.parse(
-            '${config.firebaseCloudFunctionsBaseURL}/api/getLayoutModelRequest'),
+          '${config.firebaseCloudFunctionsBaseURL}/api/getLayoutModelRequest',
+        ),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
@@ -113,7 +109,8 @@ class WebDataRepository extends NetworkDataRepository {
     try {
       final http.Response result = await client.post(
         Uri.parse(
-            '${config.firebaseCloudFunctionsBaseURL}/api/getFontModelRequest'),
+          '${config.firebaseCloudFunctionsBaseURL}/api/getFontModelRequest',
+        ),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
@@ -156,7 +153,8 @@ class WebDataRepository extends NetworkDataRepository {
     try {
       final http.Response result = await client.post(
         Uri.parse(
-            '${config.firebaseCloudFunctionsBaseURL}/api/getPublishedApiRequest'),
+          '${config.firebaseCloudFunctionsBaseURL}/api/getPublishedApiRequest',
+        ),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
@@ -199,7 +197,8 @@ class WebDataRepository extends NetworkDataRepository {
     try {
       final http.Response result = await client.post(
         Uri.parse(
-            '${config.firebaseCloudFunctionsBaseURL}/api/getPublishedLayoutVariablesRequest'),
+          '${config.firebaseCloudFunctionsBaseURL}/api/getPublishedLayoutVariablesRequest',
+        ),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
@@ -220,8 +219,10 @@ class WebDataRepository extends NetworkDataRepository {
       }
 
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
-      final SDKLayoutVariables variables =
-          SDKLayoutVariables.fromJson({...modelDoc, 'id': layoutID});
+      final SDKLayoutVariables variables = SDKLayoutVariables.fromJson({
+        ...modelDoc,
+        'id': layoutID,
+      });
 
       return variables;
     } catch (e, str) {
@@ -245,7 +246,8 @@ class WebDataRepository extends NetworkDataRepository {
     try {
       final http.Response result = await client.post(
         Uri.parse(
-            '${config.firebaseCloudFunctionsBaseURL}/api/getPublishedLayoutConditionsRequest'),
+          '${config.firebaseCloudFunctionsBaseURL}/api/getPublishedLayoutConditionsRequest',
+        ),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({
           'projectID': projectID,
@@ -266,8 +268,10 @@ class WebDataRepository extends NetworkDataRepository {
       }
 
       final Map<String, dynamic> modelDoc = jsonDecode(result.body);
-      final SDKLayoutConditions conditions =
-          SDKLayoutConditions.fromJson({...modelDoc, 'id': layoutID});
+      final SDKLayoutConditions conditions = SDKLayoutConditions.fromJson({
+        ...modelDoc,
+        'id': layoutID,
+      });
 
       return conditions;
     } catch (e, str) {

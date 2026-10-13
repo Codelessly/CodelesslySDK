@@ -59,10 +59,10 @@ class AuthData extends PrivacyBase {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        authToken,
-        projectId,
-        timestamp,
-        isTemplate,
-      ];
+    ...super.props,
+    authToken,
+    projectId,
+    timestamp,
+    isTemplate,
+  ];
 }

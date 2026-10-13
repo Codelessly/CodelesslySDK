@@ -153,11 +153,11 @@ class CodelesslyWidgetController extends ChangeNotifier {
     this.previewDataManager,
     this.templateDataManager,
     this.cacheManager,
-  })  : assert(
-          (config ?? (codelessly ?? Codelessly.instance).config) != null,
-          'A [config] must be provided. Please provide one either in the constructor of this controller, or in the passed Codelessly instance.',
-        ),
-        config = config ?? (codelessly ?? Codelessly.instance).config! {
+  }) : assert(
+         (config ?? (codelessly ?? Codelessly.instance).config) != null,
+         'A [config] must be provided. Please provide one either in the constructor of this controller, or in the passed Codelessly instance.',
+       ),
+       config = config ?? (codelessly ?? Codelessly.instance).config! {
     // If this controller is configured with its own Codelessly config but
     // wants to use the global instance, and the global instance is already
     // configured with a different config, then we need to create a custom
@@ -227,8 +227,10 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// Listens to the SDK's status. If the SDK is done, then we can start
   /// listening to the data manager's status for layout updates.
   void initialize({String? layoutID}) {
-    DebugLogger.instance
-        .printFunction('initialize(layoutID: $layoutID)', name: name);
+    DebugLogger.instance.printFunction(
+      'initialize(layoutID: $layoutID)',
+      name: name,
+    );
     if (layoutID != null) {
       this.layoutID = layoutID;
     }
@@ -255,8 +257,10 @@ class CodelesslyWidgetController extends ChangeNotifier {
       // here.
       if (isGlobalInstance || createdIntrinsicCodelessly) {
         if (status is CEmpty) {
-          DebugLogger.instance
-              .printInfo('Codelessly SDK is idle, configuring...', name: name);
+          DebugLogger.instance.printInfo(
+            'Codelessly SDK is idle, configuring...',
+            name: name,
+          );
           effectiveCodelessly.configure(
             config: config,
             authManager: authManager,
@@ -269,8 +273,9 @@ class CodelesslyWidgetController extends ChangeNotifier {
         status = effectiveCodelessly.status;
         if (status is CConfigured) {
           DebugLogger.instance.printInfo(
-              'Codelessly SDK is configured, initializing...',
-              name: name);
+            'Codelessly SDK is configured, initializing...',
+            name: name,
+          );
           effectiveCodelessly.initialize();
         }
       }
@@ -283,79 +288,93 @@ class CodelesslyWidgetController extends ChangeNotifier {
         stackTrace: str,
       );
 
-      effectiveCodelessly.status =
-          CStatus.error('Failed to initialize widget controller');
+      effectiveCodelessly.status = CStatus.error(
+        'Failed to initialize widget controller',
+      );
     }
 
     // First event.
     if (effectiveCodelessly.status case CLoaded() || CLoading()) {
-      if (effectiveCodelessly.status
-          case CLoading(state: CLoadingState state)) {
+      if (effectiveCodelessly.status case CLoading(
+        state: CLoadingState state,
+      )) {
         // Listen to data manager after it has been created. If it hasn't been
         // created yet, Firebase may still be initializing.
         DebugLogger.instance.printInfo(
-            '[${this.layoutID}]: Codelessly SDK is loading with step $state.',
-            name: name);
+          '[${this.layoutID}]: Codelessly SDK is loading with step $state.',
+          name: name,
+        );
         if (state.hasPassed(CLoadingState.createdManagers)) {
           DebugLogger.instance.printInfo(
-              '[${this.layoutID}]: Checking layout because it passed the created managers step.',
-              name: name);
+            '[${this.layoutID}]: Checking layout because it passed the created managers step.',
+            name: name,
+          );
           _checkLayout();
         } else {
           DebugLogger.instance.printInfo(
-              '[${this.layoutID}]: Waiting for data manager to be created. Skipping for now.',
-              name: name);
+            '[${this.layoutID}]: Waiting for data manager to be created. Skipping for now.',
+            name: name,
+          );
         }
       } else {
         DebugLogger.instance.printInfo(
-            '[${this.layoutID}]: Codelessly SDK is already loaded, checking layout.',
-            name: name);
+          '[${this.layoutID}]: Codelessly SDK is already loaded, checking layout.',
+          name: name,
+        );
         _checkLayout();
       }
     }
 
     DebugLogger.instance.printInfo(
-        '[${this.layoutID}]: Listening to sdk status stream.',
-        name: name);
+      '[${this.layoutID}]: Listening to sdk status stream.',
+      name: name,
+    );
     DebugLogger.instance.printInfo(
-        '[${this.layoutID}]: Initial sdk status is: ${effectiveCodelessly.status}',
-        name: name);
+      '[${this.layoutID}]: Initial sdk status is: ${effectiveCodelessly.status}',
+      name: name,
+    );
 
     _sdkStatusListener?.cancel();
     _sdkStatusListener = effectiveCodelessly.statusStream.listen((status) {
       DebugLogger.instance.printInfo(
-          '[${this.layoutID}]: (Listener) SDK status changed to $status.',
-          name: name);
+        '[${this.layoutID}]: (Listener) SDK status changed to $status.',
+        name: name,
+      );
 
       if (status case CLoaded() || CLoading()) {
         if (status case CLoading(state: CLoadingState state)) {
           DebugLogger.instance.printInfo(
-              '[${this.layoutID}]: (Listener) Codelessly SDK is loading with step $state.',
-              name: name);
+            '[${this.layoutID}]: (Listener) Codelessly SDK is loading with step $state.',
+            name: name,
+          );
 
           // Listen to data manager after it has been created. If it hasn't been
           // created yet, Firebase may still be initializing.
           if (state.hasPassed(CLoadingState.createdManagers)) {
             DebugLogger.instance.printInfo(
-                '[${this.layoutID}]: (Listener) Checking layout because it passed the created managers step.',
-                name: name);
+              '[${this.layoutID}]: (Listener) Checking layout because it passed the created managers step.',
+              name: name,
+            );
 
             _checkLayout();
           } else {
             DebugLogger.instance.printInfo(
-                '[${this.layoutID}]: (Listener) Waiting for data manager to be created. Skipping for now.',
-                name: name);
+              '[${this.layoutID}]: (Listener) Waiting for data manager to be created. Skipping for now.',
+              name: name,
+            );
           }
         } else {
           DebugLogger.instance.printInfo(
-              '[${this.layoutID}]: (Listener) Codelessly SDK is already loaded, checking layout.',
-              name: name);
+            '[${this.layoutID}]: (Listener) Codelessly SDK is already loaded, checking layout.',
+            name: name,
+          );
           _checkLayout();
         }
       } else {
         DebugLogger.instance.printInfo(
-            '[${this.layoutID}]: (Listener) Codelessly SDK is not loaded, skipping layout check.',
-            name: name);
+          '[${this.layoutID}]: (Listener) Codelessly SDK is not loaded, skipping layout check.',
+          name: name,
+        );
       }
     });
   }
@@ -383,39 +402,42 @@ class CodelesslyWidgetController extends ChangeNotifier {
             stackTrace: str,
           );
 
-          effectiveCodelessly.status =
-              CStatus.error('Failed to initialize data manager');
+          effectiveCodelessly.status = CStatus.error(
+            'Failed to initialize data manager',
+          );
         });
       }
-
       // If the config has a slug specified and the data manager doesn't have
       // a publish model yet, then we need to fetch the publish model from the
       // data manager.
       else if (config.slug != null && dataManager.publishModel == null) {
         DebugLogger.instance.printInfo(
-            '[$layoutID]: (Check) A slug is specified and publish model is null.',
-            name: name);
+          '[$layoutID]: (Check) A slug is specified and publish model is null.',
+          name: name,
+        );
         DebugLogger.instance.printInfo(
-            '[$layoutID]: (Check) Fetching complete publish bundle from data manager.',
-            name: name);
+          '[$layoutID]: (Check) Fetching complete publish bundle from data manager.',
+          name: name,
+        );
         dataManager
             .fetchCompletePublishBundle(
-          slug: config.slug!,
-          source: publishSource,
-        )
+              slug: config.slug!,
+              source: publishSource,
+            )
             .catchError((error, str) {
-          ErrorLogger.instance.captureException(
-            error,
-            message: 'Failed to fetch publish bundle',
-            type: 'publish_bundle_fetch_failed',
-            layoutID: layoutID,
-            stackTrace: str,
-          );
+              ErrorLogger.instance.captureException(
+                error,
+                message: 'Failed to fetch publish bundle',
+                type: 'publish_bundle_fetch_failed',
+                layoutID: layoutID,
+                stackTrace: str,
+              );
 
-          effectiveCodelessly.status =
-              CStatus.error('Failed to fetch publish bundle');
-          return false;
-        });
+              effectiveCodelessly.status = CStatus.error(
+                'Failed to fetch publish bundle',
+              );
+              return false;
+            });
       }
       // DataManager is initialized or downloading a publish bundle. If the
       // layoutID is not null, then we need to signal to the data manager that we
@@ -425,39 +447,44 @@ class CodelesslyWidgetController extends ChangeNotifier {
       // taking care of this layout and we just need to tell it to prioritize it.
       else if (layoutID != null) {
         DebugLogger.instance.printInfo(
-            '[$layoutID]: (Check) Queuing layout [$layoutID] in data manager.',
-            name: name);
+          '[$layoutID]: (Check) Queuing layout [$layoutID] in data manager.',
+          name: name,
+        );
         DebugLogger.instance.printInfo(
-            '[$layoutID]: (Check) Using publish source $publishSource.',
-            name: name);
+          '[$layoutID]: (Check) Using publish source $publishSource.',
+          name: name,
+        );
 
         dataManager
             .queueLayout(layoutID: layoutID!, prioritize: true)
             .catchError((error, str) {
-          ErrorLogger.instance.captureException(
-            error,
-            message: 'Failed to queue layout',
-            type: 'layout_queue_failed',
-            layoutID: layoutID,
-            stackTrace: str,
-          );
+              ErrorLogger.instance.captureException(
+                error,
+                message: 'Failed to queue layout',
+                type: 'layout_queue_failed',
+                layoutID: layoutID,
+                stackTrace: str,
+              );
 
-          // Set error status
-          effectiveCodelessly.status = CStatus.error('Failed to queue layout');
-        });
+              // Set error status
+              effectiveCodelessly.status = CStatus.error(
+                'Failed to queue layout',
+              );
+            });
       }
-
       // At this point in the execution, layoutID is null, slug is not specified.
       // Preloading must be true, so this controller can only wait...
       else {
         if (layoutID != null) {
           DebugLogger.instance.printInfo(
-              '[$layoutID]: (Check) LayoutID specified, but preload is set to ${config.preload}, skipping to let data manager to download everything',
-              name: name);
+            '[$layoutID]: (Check) LayoutID specified, but preload is set to ${config.preload}, skipping to let data manager to download everything',
+            name: name,
+          );
         } else {
           DebugLogger.instance.printInfo(
-              '[$layoutID]: (Check) LayoutID is null, skipping to let data manager to download everything.',
-              name: name);
+            '[$layoutID]: (Check) LayoutID is null, skipping to let data manager to download everything.',
+            name: name,
+          );
         }
       }
     } catch (e, str) {

@@ -15,7 +15,10 @@ class PassiveListViewTransformer extends NodeWidgetTransformer<ListViewNode> {
 
   @override
   Widget buildWidget(
-      ListViewNode node, BuildContext context, WidgetBuildSettings settings) {
+    ListViewNode node,
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveListViewWidget(
       node: node,
       manager: manager,
@@ -37,7 +40,9 @@ class PassiveListViewWidget extends StatelessWidget {
   });
 
   Query<Map<String, dynamic>> constructQuery(
-      BuildContext context, Codelessly codelessly) {
+    BuildContext context,
+    Codelessly codelessly,
+  ) {
     final PublishSource source =
         codelessly.config?.publishSource ?? PublishSource.preview;
 
@@ -112,8 +117,9 @@ class PassiveListViewWidget extends StatelessWidget {
               padding: node.padding.flutterEdgeInsets,
               keyboardDismissBehavior:
                   node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-              physics:
-                  node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
+              physics: node.physics.flutterScrollPhysics(
+                node.shouldAlwaysScroll,
+              ),
               scrollDirection: node.scrollDirection.flutterAxis,
               cacheExtent: node.properties.cacheExtent,
               reverse: node.reverse,
@@ -121,9 +127,9 @@ class PassiveListViewWidget extends StatelessWidget {
               clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
               separatedBuilder: node.properties.hasSeparator
                   ? (context, index) => ListViewItemSeparator(
-                        scrollDirection: node.scrollDirection,
-                        properties: node.properties,
-                      )
+                      scrollDirection: node.scrollDirection,
+                      properties: node.properties,
+                    )
                   : null,
               itemBuilder: (context, index) {
                 final doc = docs.elementAtOrNull(index);
@@ -131,22 +137,21 @@ class PassiveListViewWidget extends StatelessWidget {
                 final data = doc?.data();
                 return IndexedItemProvider(
                   key: ValueKey(index),
-                  item: IndexedItem(
-                    index,
-                    {'id': ?id, ...?data},
+                  item: IndexedItem(index, {'id': ?id, ...?data}),
+                  child: Builder(
+                    builder: (context) {
+                      // This builder is important to pass a context that has
+                      // the IndexedItemProvider.
+                      return KeyedSubtree(
+                        key: ValueKey(index),
+                        child: manager.buildWidgetByID(
+                          itemNode,
+                          context,
+                          settings: settings,
+                        ),
+                      );
+                    },
                   ),
-                  child: Builder(builder: (context) {
-                    // This builder is important to pass a context that has
-                    // the IndexedItemProvider.
-                    return KeyedSubtree(
-                      key: ValueKey(index),
-                      child: manager.buildWidgetByID(
-                        itemNode,
-                        context,
-                        settings: settings,
-                      ),
-                    );
-                  }),
                 );
               },
             );
@@ -155,7 +160,8 @@ class PassiveListViewWidget extends StatelessWidget {
       );
     }
 
-    final List? data = PropertyValueDelegate.getVariableValueFromPath<List>(
+    final List? data =
+        PropertyValueDelegate.getVariableValueFromPath<List>(
           node.variables['data'] ?? '',
           scopedValues: ScopedValues.of(context),
         ) ??
@@ -180,9 +186,9 @@ class PassiveListViewWidget extends StatelessWidget {
     final bool shrinkWrap = parentScrollable != null
         ? true
         : node.properties.itemCount != null &&
-            (node.scrollDirection == AxisC.horizontal
-                ? node.isHorizontalWrap
-                : node.isVerticalWrap);
+              (node.scrollDirection == AxisC.horizontal
+                  ? node.isHorizontalWrap
+                  : node.isVerticalWrap);
 
     return AdaptiveNodeBox(
       node: node,
@@ -199,28 +205,31 @@ class PassiveListViewWidget extends StatelessWidget {
         reverse: node.reverse,
         itemExtent: node.properties.itemExtent,
         clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
-        separatedBuilder: (node.properties.itemCount != null || data != null) &&
+        separatedBuilder:
+            (node.properties.itemCount != null || data != null) &&
                 node.properties.hasSeparator
             ? (context, index) => ListViewItemSeparator(
-                  scrollDirection: node.scrollDirection,
-                  properties: node.properties,
-                )
+                scrollDirection: node.scrollDirection,
+                properties: node.properties,
+              )
             : null,
         itemBuilder: (context, index) => IndexedItemProvider(
           key: ValueKey(index),
           item: IndexedItem(index, data?.elementAtOrNull(index)),
-          child: Builder(builder: (context) {
-            // This builder is important to pass a context that has
-            // the IndexedItemProvider.
-            return KeyedSubtree(
-              key: ValueKey(index),
-              child: manager.buildWidgetByID(
-                itemNode,
-                context,
-                settings: settings,
-              ),
-            );
-          }),
+          child: Builder(
+            builder: (context) {
+              // This builder is important to pass a context that has
+              // the IndexedItemProvider.
+              return KeyedSubtree(
+                key: ValueKey(index),
+                child: manager.buildWidgetByID(
+                  itemNode,
+                  context,
+                  settings: settings,
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -337,10 +346,12 @@ class ListViewItemSeparator extends StatelessWidget {
         );
       case ListItemSeparator.space:
         return SizedBox(
-          width:
-              scrollDirection.isHorizontal ? properties.separatorSpacing : null,
-          height:
-              scrollDirection.isVertical ? properties.separatorSpacing : null,
+          width: scrollDirection.isHorizontal
+              ? properties.separatorSpacing
+              : null,
+          height: scrollDirection.isVertical
+              ? properties.separatorSpacing
+              : null,
         );
     }
   }

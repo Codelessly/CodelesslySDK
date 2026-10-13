@@ -50,17 +50,22 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
       id: '',
       name: 'tabBar',
       basicBoxLocal: NodeBox(
-          0, 0, width ?? 32, height ?? node?.basicBoxLocal.height ?? 56),
+        0,
+        0,
+        width ?? 32,
+        height ?? node?.basicBoxLocal.height ?? 56,
+      ),
       retainedOuterBoxLocal: NodeBox(
-          0, 0, width ?? 32, height ?? node?.basicBoxLocal.height ?? 56),
+        0,
+        0,
+        width ?? 32,
+        height ?? node?.basicBoxLocal.height ?? 56,
+      ),
       initialIndex: node?.initialIndex ?? 0,
       isScrollable: node?.isScrollable ?? false,
       physics: node?.physics ?? ScrollPhysicsC.platformDependent,
     );
-    return PassiveTabBarWidget(
-      node: previewNode,
-      settings: settings,
-    );
+    return PassiveTabBarWidget(node: previewNode, settings: settings);
   }
 
   Widget buildFromNode(
@@ -78,8 +83,12 @@ class PassiveTabBarTransformer extends NodeWidgetTransformer<TabBarNode> {
   void onChanged(BuildContext context, TabBarNode node, int index) {
     NodeStateProvider.setState(context, index);
     final tab = node.properties.tabs[index];
-    FunctionsRepository.triggerAction(context, TriggerType.changed,
-        reactions: tab.reactions, value: index);
+    FunctionsRepository.triggerAction(
+      context,
+      TriggerType.changed,
+      reactions: tab.reactions,
+      value: index,
+    );
   }
 }
 
@@ -143,17 +152,19 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
     final ScopedValues scopedValues = ScopedValues.of(context);
     final width =
         widget.node.isHorizontalExpanded || widget.node.isHorizontalWrap
-            ? null
-            : widget.node.basicBoxLocal.width;
+        ? null
+        : widget.node.basicBoxLocal.width;
     final height = widget.node.isVerticalExpanded || widget.node.isVerticalWrap
         ? null
         : widget.node.basicBoxLocal.height;
 
-    final TextStyle labelStyle =
-        TextUtils.retrieveTextStyleFromProp(widget.node.properties.labelStyle);
+    final TextStyle labelStyle = TextUtils.retrieveTextStyleFromProp(
+      widget.node.properties.labelStyle,
+    );
 
     final TextStyle unselectedLabelStyle = TextUtils.retrieveTextStyleFromProp(
-        widget.node.properties.unselectedLabelStyle);
+      widget.node.properties.unselectedLabelStyle,
+    );
 
     final Decoration? indicator = getIndicator();
 
@@ -166,23 +177,26 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
           controller: controller,
           padding: widget.node.padding.flutterEdgeInsets,
           overlayColor: WidgetStateProperty.all(
-              widget.node.properties.overlayColor?.toFlutterColor()),
+            widget.node.properties.overlayColor?.toFlutterColor(),
+          ),
           dividerColor: widget.node.properties.showDivider
               ? widget.node.properties.dividerColor?.toFlutterColor()
               : Colors.transparent,
           dividerHeight: widget.node.properties.showDivider
               ? widget.node.properties.dividerHeight
               : 0,
-          tabAlignment: widget.node.properties.tabAlignment
-              ?.toFlutter(isScrollable: widget.node.isScrollable),
-          indicatorColor:
-              widget.node.properties.indicatorColor.toFlutterColor(),
+          tabAlignment: widget.node.properties.tabAlignment?.toFlutter(
+            isScrollable: widget.node.isScrollable,
+          ),
+          indicatorColor: widget.node.properties.indicatorColor
+              .toFlutterColor(),
           indicatorPadding:
               widget.node.properties.indicatorPadding.flutterEdgeInsets,
           indicatorSize: widget.node.properties.indicatorSize.toFlutter(),
           isScrollable: widget.node.isScrollable,
-          indicatorWeight:
-              indicator != null ? 0 : widget.node.properties.indicatorWeight,
+          indicatorWeight: indicator != null
+              ? 0
+              : widget.node.properties.indicatorWeight,
           labelStyle: labelStyle,
           indicator: indicator,
           splashBorderRadius:
@@ -190,11 +204,12 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
           splashFactory: NoSplash.splashFactory,
           labelColor: widget.node.properties.labelColor?.toFlutterColor(),
           labelPadding: widget.node.properties.labelPadding.flutterEdgeInsets,
-          unselectedLabelColor:
-              widget.node.properties.unselectedLabelColor?.toFlutterColor(),
+          unselectedLabelColor: widget.node.properties.unselectedLabelColor
+              ?.toFlutterColor(),
           unselectedLabelStyle: unselectedLabelStyle,
-          physics: widget.node.physics
-              .flutterScrollPhysics(widget.node.shouldAlwaysScroll),
+          physics: widget.node.physics.flutterScrollPhysics(
+            widget.node.shouldAlwaysScroll,
+          ),
           onTap: widget.onChanged,
           tabs: [
             for (final (index, tab) in widget.node.properties.tabs.indexed)
@@ -209,9 +224,12 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
   }
 
   Widget getTab(TabItem tab, ScopedValues scopedValues) {
-    final String rawLabel = PropertyValueDelegate.getPropertyValue<String>(
-            widget.node, 'tab-label-${tab.id}',
-            scopedValues: scopedValues) ??
+    final String rawLabel =
+        PropertyValueDelegate.getPropertyValue<String>(
+          widget.node,
+          'tab-label-${tab.id}',
+          scopedValues: scopedValues,
+        ) ??
         tab.label;
 
     String label = PropertyValueDelegate.substituteVariables(
@@ -219,15 +237,18 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
       nullSubstitutionMode: widget.settings.nullSubstitutionMode,
       scopedValues: scopedValues,
     );
-    final double effectiveIconSize =
-        min(tab.icon.size ?? 24, widget.node.basicBoxLocal.height);
+    final double effectiveIconSize = min(
+      tab.icon.size ?? 24,
+      widget.node.basicBoxLocal.height,
+    );
 
     Widget? iconWidget = widget.node.properties.contentType.showIcon
         ? retrieveIconWidget(
             tab.icon.color != null || !tab.icon.isSvgImage
                 ? tab.icon
                 : tab.icon.copyWith(color: ColorRGBA.transparent),
-            effectiveIconSize)
+            effectiveIconSize,
+          )
         : null;
 
     if (iconWidget == null) return Tab(text: label);
@@ -268,8 +289,10 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
             color: widget.node.properties.indicatorColor.toFlutterColor(),
             width: widget.node.properties.indicatorWeight,
           ),
-        ).orNullIf(widget.node.properties.indicatorCornerRadius.isUniform &&
-            widget.node.properties.indicatorCornerRadius == CornerRadius.zero);
+        ).orNullIf(
+          widget.node.properties.indicatorCornerRadius.isUniform &&
+              widget.node.properties.indicatorCornerRadius == CornerRadius.zero,
+        );
       case TabIndicatorStyle.filled:
         return ShapeDecoration(
           color: widget.node.properties.indicatorColor.toFlutterColor(),
@@ -277,7 +300,8 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
             shape: widget.node.properties.indicatorShape,
             radius: widget.node.properties.indicatorCornerRadius,
             borderColor: widget.node.properties.indicatorColor,
-            borderWidth: widget.node.properties.indicatorStyle ==
+            borderWidth:
+                widget.node.properties.indicatorStyle ==
                     TabIndicatorStyle.border
                 ? widget.node.properties.indicatorWeight
                 : 0,
@@ -289,7 +313,8 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
             shape: widget.node.properties.indicatorShape,
             radius: widget.node.properties.indicatorCornerRadius,
             borderColor: widget.node.properties.indicatorColor,
-            borderWidth: widget.node.properties.indicatorStyle ==
+            borderWidth:
+                widget.node.properties.indicatorStyle ==
                     TabIndicatorStyle.border
                 ? widget.node.properties.indicatorWeight
                 : 0,

@@ -40,10 +40,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
       properties: props,
       edgePins: EdgePinsModel.standard,
     );
-    return PassiveTextFieldWidget(
-      node: node,
-      settings: settings,
-    );
+    return PassiveTextFieldWidget(node: node, settings: settings);
   }
 
   void onTap(BuildContext context, TextFieldNode node, String inputValue) {
@@ -53,14 +50,26 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
 
   void onChanged(BuildContext context, TextFieldNode node, String inputValue) {
     NodeStateProvider.setState(context, inputValue);
-    FunctionsRepository.setNodeValue(context,
-        node: node, property: 'inputValue', value: inputValue);
+    FunctionsRepository.setNodeValue(
+      context,
+      node: node,
+      property: 'inputValue',
+      value: inputValue,
+    );
 
-    FunctionsRepository.setPropertyVariable(context,
-        node: node, property: 'inputValue', value: inputValue);
+    FunctionsRepository.setPropertyVariable(
+      context,
+      node: node,
+      property: 'inputValue',
+      value: inputValue,
+    );
 
     FunctionsRepository.triggerAction(
-        context, node: node, TriggerType.changed, value: inputValue);
+      context,
+      node: node,
+      TriggerType.changed,
+      value: inputValue,
+    );
   }
 
   void onSubmitted(
@@ -70,11 +79,19 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
   ) {
     NodeStateProvider.setState(context, inputValue);
     FunctionsRepository.triggerAction(
-        context, node: node, TriggerType.submitted, value: inputValue);
+      context,
+      node: node,
+      TriggerType.submitted,
+      value: inputValue,
+    );
   }
 
-  void onIconTap(BuildContext context, TextFieldNode node,
-      List<Reaction> reactions, String inputValue) {
+  void onIconTap(
+    BuildContext context,
+    TextFieldNode node,
+    List<Reaction> reactions,
+    String inputValue,
+  ) {
     NodeStateProvider.setState(context, inputValue);
     FunctionsRepository.triggerAction(
       context,
@@ -94,7 +111,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final Function(BuildContext context, String value)? onChanged;
   final Function(BuildContext context, String value)? onSubmitted;
   final Function(BuildContext context, List<Reaction> reactions, String value)?
-      onIconTap;
+  onIconTap;
   final bool withAutofill;
   final AutovalidateMode? autovalidateMode;
   final FormFieldValidator<String>? validator;
@@ -120,8 +137,9 @@ class PassiveTextFieldWidget extends StatefulWidget {
 }
 
 class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
-  late final TextEditingController controller =
-      TextEditingController(text: getInitialText(widget.node.initialText));
+  late final TextEditingController controller = TextEditingController(
+    text: getInitialText(widget.node.initialText),
+  );
 
   final FocusNode focusNode = FocusNode();
 
@@ -164,11 +182,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
             scopedValues: scopedValues,
           )
         : findIndexedValueIfApplied(scopedValues) ??
-            PropertyValueDelegate.getPropertyValueFromNodeValues<String>(
-              widget.node,
-              'inputValue',
-              scopedValues: scopedValues,
-            );
+              PropertyValueDelegate.getPropertyValueFromNodeValues<String>(
+                widget.node,
+                'inputValue',
+                scopedValues: scopedValues,
+              );
     if (currentPropertyValue != null) {
       currentPropertyValue = PropertyValueDelegate.substituteVariables(
         currentPropertyValue,
@@ -230,16 +248,18 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
     final TextInputType keyboardType =
         properties.keyboardType == TextInputTypeEnum.number
-            ? TextInputType.numberWithOptions(
-                decimal: properties.showDecimalKey,
-                signed: properties.showSignKey)
-            : properties.keyboardType.toFlutter();
+        ? TextInputType.numberWithOptions(
+            decimal: properties.showDecimalKey,
+            signed: properties.showSignKey,
+          )
+        : properties.keyboardType.toFlutter();
 
     final TextInputValidatorModel validatorModel = properties.validator;
     final FormFieldValidator<String> validator =
         widget.validator ?? validatorModel.validate;
 
-    final bool autofocus = !widget.settings.isPreview &&
+    final bool autofocus =
+        !widget.settings.isPreview &&
         (widget.autofocus ?? properties.autoFocus);
 
     Widget field = TextFormField(
@@ -249,7 +269,8 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       enableInteractiveSelection: properties.enableInteractiveSelection,
       enabled: enabled,
       controller: controller,
-      obscureText: widget.node.properties.maxLines == 1 &&
+      obscureText:
+          widget.node.properties.maxLines == 1 &&
           widget.node.isVerticalWrap &&
           obscureText,
       readOnly: readOnly,
@@ -267,24 +288,28 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       cursorRadius: Radius.circular(properties.cursorRadius),
       maxLength: maxLength,
       validator: validator,
-      autovalidateMode: widget.autovalidateMode ??
+      autovalidateMode:
+          widget.autovalidateMode ??
           widget.node.properties.autovalidateMode.flutterAutovalidateMode,
       autofillHints:
           AutofillGroup.maybeOf(context) != null && !widget.settings.isPreview
-              ? widget.node.properties.autofillHints.map((hint) => hint.code)
-              : null,
+          ? widget.node.properties.autofillHints.map((hint) => hint.code)
+          : null,
       inputFormatters: [
         if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
         ?properties.formatter.toFlutterFormatter(),
       ],
-      maxLines:
-          widget.node.properties.maxLines.orNullIf(!widget.node.isVerticalWrap),
-      minLines:
-          widget.node.properties.minLines.orNullIf(!widget.node.isVerticalWrap),
+      maxLines: widget.node.properties.maxLines.orNullIf(
+        !widget.node.isVerticalWrap,
+      ),
+      minLines: widget.node.properties.minLines.orNullIf(
+        !widget.node.isVerticalWrap,
+      ),
       expands: !widget.node.isVerticalWrap,
       obscuringCharacter: widget.node.properties.obscuringCharacter,
       style: TextUtils.retrieveTextStyleFromProp(
-          widget.node.properties.inputStyle),
+        widget.node.properties.inputStyle,
+      ),
       onTap: () => widget.onTap?.call(context, controller.text),
       onChanged: (value) => widget.onChanged?.call(context, value),
       onEditingComplete: () {},
@@ -307,10 +332,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       field = IntrinsicHeight(child: field);
     }
 
-    field = AdaptiveNodeBox(
-      node: node,
-      child: field,
-    );
+    field = AdaptiveNodeBox(node: node, child: field);
 
     return field;
   }
@@ -423,8 +445,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
           ? null
           : retrieveIconWidget(decoration.icon, null),
       label: labelText,
-      floatingLabelStyle:
-          TextUtils.retrieveTextStyleFromProp(decoration.floatingLabelStyle),
+      floatingLabelStyle: TextUtils.retrieveTextStyleFromProp(
+        decoration.floatingLabelStyle,
+      ),
       helperText: helperText,
       helperStyle: TextUtils.retrieveTextStyleFromProp(decoration.helperStyle),
       helperMaxLines: decoration.helperMaxLines,
@@ -438,24 +461,30 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       isCollapsed: isCollapsed,
       isDense: isDense,
       contentPadding: node.padding.flutterEdgeInsets,
-      prefixIcon: !decoration.prefixIcon.icon.show ||
-              decoration.prefixIcon.icon.isEmpty
+      prefixIcon:
+          !decoration.prefixIcon.icon.show || decoration.prefixIcon.icon.isEmpty
           ? null
           : _ReactiveIcon(
               onTap: () => widget.onIconTap?.call(
-                  context, decoration.prefixIcon.reactions, controller.text),
+                context,
+                decoration.prefixIcon.reactions,
+                controller.text,
+              ),
               iconModel: decoration.prefixIcon,
             ),
       // prefixIconConstraints:
       //     decoration.prefixIconConstraints.flutterConstraints,
       prefix: prefixText,
       prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
-      suffixIcon: !decoration.suffixIcon.icon.show ||
-              decoration.suffixIcon.icon.isEmpty
+      suffixIcon:
+          !decoration.suffixIcon.icon.show || decoration.suffixIcon.icon.isEmpty
           ? null
           : _ReactiveIcon(
               onTap: () => widget.onIconTap?.call(
-                  context, decoration.suffixIcon.reactions, controller.text),
+                context,
+                decoration.suffixIcon.reactions,
+                controller.text,
+              ),
               iconModel: decoration.suffixIcon,
             ),
       suffix: suffixText,
@@ -464,8 +493,8 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       //     decoration.suffixIconConstraints.flutterConstraints,
       counter: decoration.showCounter
           ? decoration.counterText?.isNotEmpty == true
-              ? counterText
-              : null
+                ? counterText
+                : null
           : null,
       counterText: decoration.showCounter ? null : '',
       // counterText: decoration.showCounter
@@ -473,8 +502,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       //         ? decoration.counterText
       //         : null
       //     : '',
-      counterStyle:
-          TextUtils.retrieveTextStyleFromProp(decoration.counterStyle),
+      counterStyle: TextUtils.retrieveTextStyleFromProp(
+        decoration.counterStyle,
+      ),
       filled: decoration.filled,
       fillColor: decoration.fillColor.toFlutterColor(),
       focusColor: decoration.focusColor.toFlutterColor(),
@@ -576,10 +606,7 @@ class _ReactiveIcon extends StatelessWidget {
   final VoidCallback onTap;
   final ReactiveIconModel iconModel;
 
-  const _ReactiveIcon({
-    required this.onTap,
-    required this.iconModel,
-  });
+  const _ReactiveIcon({required this.onTap, required this.iconModel});
 
   @override
   Widget build(BuildContext context) {
@@ -593,10 +620,7 @@ class _ReactiveIcon extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: icon,
-      ),
+      child: MouseRegion(cursor: SystemMouseCursors.click, child: icon),
     );
   }
 }

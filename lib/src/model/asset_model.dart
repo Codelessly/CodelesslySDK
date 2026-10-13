@@ -73,12 +73,12 @@ class AssetModel with Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        url,
-        blurHash,
-        sourceWidth,
-        sourceHeight,
-        createdAt,
-      ];
+    id,
+    name,
+    url,
+    blurHash,
+    sourceWidth,
+    sourceHeight,
+    createdAt,
+  ];
 }

@@ -20,8 +20,9 @@ class PassiveDividerTransformer extends NodeWidgetTransformer<DividerNode> {
     required DividerProperties props,
     required double height,
     required double width,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildFromProps'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildFromProps',
+    ),
   }) {
     final node = DividerNode(
       id: '',
@@ -39,8 +40,9 @@ class PassiveDividerTransformer extends NodeWidgetTransformer<DividerNode> {
     double? height,
     double? width,
     ValueChanged<bool>? onChanged,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+    ),
   }) {
     final previewNode = DividerNode(
       properties: properties ?? node?.properties ?? DividerProperties(),
@@ -58,8 +60,9 @@ class PassiveDividerTransformer extends NodeWidgetTransformer<DividerNode> {
 
   Widget buildFromNode(
     DividerNode node, {
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildFromNode'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildFromNode',
+    ),
   }) {
     return PassiveDividerWidget(
       node: node,

@@ -58,7 +58,7 @@ abstract class CloudDatabase extends ChangeNotifier {
   ///
   /// It will throw an [AssertionError] if the [identifier] is empty.
   CloudDatabase(this.identifier, this.publishSource)
-      : assert(identifier.isNotEmpty, 'identifier cannot be empty');
+    : assert(identifier.isNotEmpty, 'identifier cannot be empty');
 
   /// Adds a document to the cloud storage at the given [path].
   ///
@@ -194,14 +194,15 @@ class FirestoreCloudDatabase extends CloudDatabase {
   static const String name = 'CloudDatabase';
 
   /// Reference to the root document for this session.
-  late final DocumentReference<Map<String, dynamic>> rootRef =
-      firestore.collection(_rootCollection).doc(identifier);
+  late final DocumentReference<Map<String, dynamic>> rootRef = firestore
+      .collection(_rootCollection)
+      .doc(identifier);
 
   String get _rootCollection => switch (publishSource) {
-        PublishSource.publish => 'data',
-        PublishSource.preview => 'preview_data',
-        PublishSource.template => 'template_data',
-      };
+    PublishSource.publish => 'data',
+    PublishSource.preview => 'preview_data',
+    PublishSource.template => 'template_data',
+  };
 
   /// Reference to the Firestore instance.
   final FirebaseFirestore firestore;
@@ -258,8 +259,10 @@ class FirestoreCloudDatabase extends CloudDatabase {
     await rootRef.set({'project': identifier});
     StatTracker.instance.track(StatType.write, 'cloudDatabase/init');
 
-    DebugLogger.instance
-        .printInfo('Done initializing for $identifier', name: name);
+    DebugLogger.instance.printInfo(
+      'Done initializing for $identifier',
+      name: name,
+    );
   }
 
   /// Gives a collection reference for the given [path].
@@ -292,8 +295,9 @@ class FirestoreCloudDatabase extends CloudDatabase {
       } else {
         // this means the ref represents a collection, so we add a collection
         // with the first part of the path as the id.
-        final String id =
-            pathParts.isNotEmpty ? pathParts.removeAt(0) : 'default';
+        final String id = pathParts.isNotEmpty
+            ? pathParts.removeAt(0)
+            : 'default';
         ref = ref.doc(part).collection(id);
       }
     }
@@ -313,7 +317,9 @@ class FirestoreCloudDatabase extends CloudDatabase {
   /// [documentId] is the id of the document. If [documentId] is null or empty,
   /// then "default" is used as the document id.
   DocumentReference<Map<String, dynamic>> getDocPath(
-      String path, String? documentId) {
+    String path,
+    String? documentId,
+  ) {
     // Use default if null.
     documentId ??= 'default';
 
@@ -432,7 +438,9 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
   @override
   Future<Map<String, dynamic>> getDocumentData(
-      String path, String documentId) async {
+    String path,
+    String documentId,
+  ) async {
     final docRef = getDocPath(path, documentId);
 
     final snapshot = await docRef.get();
@@ -449,7 +457,8 @@ class FirestoreCloudDatabase extends CloudDatabase {
       StatTracker.instance.track(StatType.read, 'cloudDatabase/streamDocument');
 
       return snapshot.data()?.let(
-              (value) => sanitizeCloudDataForUse(value, docId: snapshot.id)) ??
+            (value) => sanitizeCloudDataForUse(value, docId: snapshot.id),
+          ) ??
           {};
     });
   }
@@ -492,8 +501,9 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
         // Set the variable with success state.
         variable.set(
-          variable.value
-              .copyWith(value: CloudDatabaseVariableUtils.success(data)),
+          variable.value.copyWith(
+            value: CloudDatabaseVariableUtils.success(data),
+          ),
         );
       },
       onError: (error) {
@@ -575,8 +585,9 @@ class FirestoreCloudDatabase extends CloudDatabase {
         );
         // Set the variable with success state.
         variable.set(
-          variable.value
-              .copyWith(value: CloudDatabaseVariableUtils.success(docs)),
+          variable.value.copyWith(
+            value: CloudDatabaseVariableUtils.success(docs),
+          ),
         );
       },
       onError: (error) {
@@ -609,10 +620,12 @@ Map<String, dynamic> sanitizeCloudDataForUse(
   // breaks reference and allows to modify the data.
   data = {...data};
 
-  data[SDKConstants.createdAt] =
-      deserializeCosmicValue(data[SDKConstants.createdAt]);
-  data[SDKConstants.updatedAt] =
-      deserializeCosmicValue(data[SDKConstants.updatedAt]);
+  data[SDKConstants.createdAt] = deserializeCosmicValue(
+    data[SDKConstants.createdAt],
+  );
+  data[SDKConstants.updatedAt] = deserializeCosmicValue(
+    data[SDKConstants.updatedAt],
+  );
   data[SDKConstants.id] = docId;
 
   // Sort private fields to the bottom.
@@ -651,8 +664,9 @@ Map<String, dynamic> sanitizeCloudDataToSend(
     late final DateTime now = DateTime.now().toUtc();
 
     if (autoChangeUpdatedAt) {
-      data[SDKConstants.createdAt] =
-          serializedCosmicValue(data[SDKConstants.createdAt] ?? now);
+      data[SDKConstants.createdAt] = serializedCosmicValue(
+        data[SDKConstants.createdAt] ?? now,
+      );
       data[SDKConstants.updatedAt] = serializedCosmicValue(now);
     }
 
@@ -682,10 +696,9 @@ String? serializedCosmicValue(Object? value) {
     Timestamp timestamp => timestamp.toDate().toUtc().toIso8601String(),
     DateTime dateTime => dateTime.toUtc().toIso8601String(),
     String string => DateTime.tryParse(string)?.toUtc().toIso8601String(),
-    int millisecondsSinceEpoch =>
-      DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch)
-          .toUtc()
-          .toIso8601String(),
+    int millisecondsSinceEpoch => DateTime.fromMillisecondsSinceEpoch(
+      millisecondsSinceEpoch,
+    ).toUtc().toIso8601String(),
     _ => null,
   };
 }
@@ -695,8 +708,9 @@ DateTime? deserializeCosmicValue(Object? value) {
     Timestamp timestamp => timestamp.toDate().toUtc(),
     DateTime dateTime => dateTime.toUtc(),
     String string => DateTime.tryParse(string)?.toUtc(),
-    int millisecondsSinceEpoch =>
-      DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch).toUtc(),
+    int millisecondsSinceEpoch => DateTime.fromMillisecondsSinceEpoch(
+      millisecondsSinceEpoch,
+    ).toUtc(),
     _ => null,
   };
 }

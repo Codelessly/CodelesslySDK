@@ -32,8 +32,11 @@ Color retrieveFillColor(GeometryMixin node) {
 }
 
 /// Converts the strokes of a given [node] to a single [Color] object.
-Color retrieveStrokeColor(GeometryMixin node,
-    [int index = 0, bool all = false]) {
+Color retrieveStrokeColor(
+  GeometryMixin node, [
+  int index = 0,
+  bool all = false,
+]) {
   final strokes = node.strokes.visible();
   if (strokes.isEmpty) {
     // Some methods expect a non-null color.
@@ -59,9 +62,11 @@ Color retrieveStrokeColor(GeometryMixin node,
 
     if (stroke == null) {
       final List<PaintModel> gradients = strokes
-          .where((element) =>
-              element.gradientStops != null &&
-              element.gradientStops!.isNotEmpty)
+          .where(
+            (element) =>
+                element.gradientStops != null &&
+                element.gradientStops!.isNotEmpty,
+          )
           .toList();
 
       if (gradients.isNotEmpty) {
@@ -94,7 +99,9 @@ Color retrieveStrokeColor(GeometryMixin node,
 
 /// Converts a [PaintModel] to a [Color] object.
 Color retrieveColorFromPaint(PaintModel paint) {
-  assert(paint.type == PaintType.solid,
-      'retrieveColorFromPaint() only accepts Paints that are PaintType.SOLID');
+  assert(
+    paint.type == PaintType.solid,
+    'retrieveColorFromPaint() only accepts Paints that are PaintType.SOLID',
+  );
   return paint.toFlutterColor()!;
 }

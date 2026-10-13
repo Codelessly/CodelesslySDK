@@ -153,14 +153,16 @@ class HiveLocalDatabase extends LocalDatabase {
 
     // Close the box itself. ChangeNotifier.dispose is synchronous, so report
     // close failures instead of leaving them unhandled.
-    unawaited(_box.close().catchError((Object e, StackTrace stackTrace) {
-      ErrorLogger.instance.captureException(
-        e,
-        message: 'Failed to close local database',
-        type: 'local_database_close_failed',
-        stackTrace: stackTrace,
-      );
-    }));
+    unawaited(
+      _box.close().catchError((Object e, StackTrace stackTrace) {
+        ErrorLogger.instance.captureException(
+          e,
+          message: 'Failed to close local database',
+          type: 'local_database_close_failed',
+          stackTrace: stackTrace,
+        );
+      }),
+    );
 
     super.dispose();
   }
@@ -214,9 +216,9 @@ class SharedPreferencesLocalDatabase extends LocalDatabase {
         .getKeys()
         .where((key) => key.startsWith(_prefix))
         .fold<Map<String, dynamic>>({}, (map, key) {
-      map[key.substring(_prefix.length)] = _prefsInstance!.get(key);
-      return map;
-    });
+          map[key.substring(_prefix.length)] = _prefsInstance!.get(key);
+          return map;
+        });
   }
 
   @override
@@ -240,7 +242,7 @@ class SharedPreferencesLocalDatabase extends LocalDatabase {
     } else {
       throw ArgumentError('Unsupported value type: ${value.runtimeType}');
     }
-    
+
     // Notify listeners after value changes
     notifyListeners();
     _notifiers[key]?.notify();
@@ -273,9 +275,9 @@ class SharedPreferencesLocalDatabase extends LocalDatabase {
   @override
   Listenable getNotifier(String? key) {
     if (key == null) return this;
-    
+
     if (_notifiers.containsKey(key)) return _notifiers[key]!;
-    
+
     final notifier = _StorageListenable._(key);
     _notifiers[key] = notifier;
     return notifier;

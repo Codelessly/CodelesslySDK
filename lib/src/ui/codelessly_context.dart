@@ -72,16 +72,16 @@ class CodelesslyContext with ChangeNotifier, Equatable {
     required this.variables,
     required this.conditions,
     required this.layoutID,
-  })  : _externalComponentBuilders = externalComponentBuilders ?? {};
+  }) : _externalComponentBuilders = externalComponentBuilders ?? {};
 
   /// Creates a [CodelesslyContext] with empty an empty map of each property.
   CodelesslyContext.empty({String? layoutID})
-      : _data = {},
-        functions = {},
-        _externalComponentBuilders = {},
-        nodeValues = {},
-        variables = {},
-        conditions = {};
+    : _data = {},
+      functions = {},
+      _externalComponentBuilders = {},
+      nodeValues = {},
+      variables = {},
+      conditions = {};
 
   @override
   void dispose() {
@@ -150,11 +150,14 @@ class CodelesslyContext with ChangeNotifier, Equatable {
         // Populate node values with node's values, not action's values.
         if (connectedNode != null) {
           addToNodeValues(
-              connectedNode,
-              connectedNode.propertyVariables
-                  .where((property) =>
-                      action.values.any((value) => property.name == value.name))
-                  .toList());
+            connectedNode,
+            connectedNode.propertyVariables
+                .where(
+                  (property) =>
+                      action.values.any((value) => property.name == value.name),
+                )
+                .toList(),
+          );
         }
       case ActionType.setVariant:
         final action = actionModel as SetVariantAction;
@@ -167,7 +170,7 @@ class CodelesslyContext with ChangeNotifier, Equatable {
             StringValue(
               name: 'currentVariantId',
               value: connectedNode.currentVariantId,
-            )
+            ),
           ]);
         }
       default:
@@ -184,8 +187,9 @@ class CodelesslyContext with ChangeNotifier, Equatable {
     final List<ValueModel> newValues = [];
     // Filter out and populate new values.
     for (final ValueModel value in values) {
-      if (!currentValues
-          .any((currentValue) => currentValue.name == value.name)) {
+      if (!currentValues.any(
+        (currentValue) => currentValue.name == value.name,
+      )) {
         newValues.add(value);
       }
     }
@@ -216,7 +220,9 @@ class CodelesslyContext with ChangeNotifier, Equatable {
     // If the value is the same, then the underlying value notifier will not
     // notify listeners, so we need to return false.
     if (variable.value.value == newValue) {
-      log('[CodelesslyContext] Variable with name $name already has the value $newValue.');
+      log(
+        '[CodelesslyContext] Variable with name $name already has the value $newValue.',
+      );
       return false;
     }
     variable.value = variable.value.copyWith(value: newValue);

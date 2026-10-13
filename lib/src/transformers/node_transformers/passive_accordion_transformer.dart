@@ -8,7 +8,10 @@ class PassiveAccordionTransformer extends NodeWidgetTransformer<AccordionNode> {
 
   @override
   Widget buildWidget(
-      AccordionNode node, BuildContext context, WidgetBuildSettings settings) {
+    AccordionNode node,
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveAccordionWidget(
       node: node,
       isInitiallyExpanded: node.properties.isExpanded,
@@ -27,8 +30,11 @@ class PassiveAccordionTransformer extends NodeWidgetTransformer<AccordionNode> {
   ) {
     final String? childId = node.children.elementAtOrNull(index);
     if (childId == null) return const SizedBox.shrink();
-    return manager.buildWidgetFromNode(getNode(childId), context,
-        settings: settings);
+    return manager.buildWidgetFromNode(
+      getNode(childId),
+      context,
+      settings: settings,
+    );
   }
 
   Widget buildPreview({

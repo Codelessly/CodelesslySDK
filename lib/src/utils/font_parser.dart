@@ -29,8 +29,10 @@ int _computeMatch(FontVariantModel a, FontVariantModel b) {
 ///
 /// The [FontVariantModel] with the lowest score is returned.
 // ignore: unused_element
-FontVariantModel _closestMatch(FontVariantModel sourceVariant,
-    Iterable<FontVariantModel> variantsToCompare) {
+FontVariantModel _closestMatch(
+  FontVariantModel sourceVariant,
+  Iterable<FontVariantModel> variantsToCompare,
+) {
   int? bestScore;
   late FontVariantModel bestMatch;
   for (final variantToCompare in variantsToCompare) {
@@ -50,8 +52,9 @@ String getFontFamilyNameAndVariant(
 }) {
   FontWeightNumeric weight = fontName.weight ?? FontWeightNumeric.w400;
   String family = fontName.family;
-  String style =
-      fontName.style.toLowerCase().contains('italic') ? 'Italic' : 'Normal';
+  String style = fontName.style.toLowerCase().contains('italic')
+      ? 'Italic'
+      : 'Normal';
 
   if (familyModel != null) {
     /// If [familyModel] is not null, then this is running from the editor. In
@@ -73,11 +76,7 @@ String getFontFamilyNameAndVariant(
   }
   // If [familyModel] is null, then this is running from the SDK. In this case,
   // we don't need to derive the font family name since it is already processed.
-  return deriveFontFamily(
-    family: family,
-    style: style,
-    weight: weight,
-  );
+  return deriveFontFamily(family: family, style: style, weight: weight);
 }
 
 String deriveFontFamily({
@@ -236,7 +235,7 @@ class FontParser {
       'wwsFamilyName',
       'wwsSubfamilyName',
       'lightPalette',
-      'darkPalette'
+      'darkPalette',
     ];
 
     var offset0 = offset;
@@ -274,7 +273,8 @@ class FontParser {
         str = bin.readASCII(data, soff, slen);
       } else {
         throw Exception(
-            'unknown encoding $encodingID, platformID: $platformID');
+          'unknown encoding $encodingID, platformID: $platformID',
+        );
       }
 
       var tid = 'p$platformID,${languageID.toRadixString(16)}';

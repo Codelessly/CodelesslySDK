@@ -44,8 +44,8 @@ class FontFamilyModel extends PrivacyBase {
 
     // Privacy
     required super.privacy,
-  })  : id = id ?? name,
-        super.private();
+  }) : id = id ?? name,
+       super.private();
 
   /// Factory constructor for creating a new [FontFamilyModel] instance from
   /// JSON data.
@@ -100,14 +100,19 @@ class FontVariantModel extends Equatable {
 
   /// A factory constructor that creates an instance of [FontVariantModel] by
   /// parsing given [name].
-  factory FontVariantModel.fromName(String name,
-      {String fontURL = '', String previewURL = ''}) {
+  factory FontVariantModel.fromName(
+    String name, {
+    String fontURL = '',
+    String previewURL = '',
+  }) {
     FontWeightNumeric fileFontWeight = FontWeightNumeric.w400;
     String fileFontStyle = 'Normal';
 
     // Convert 'extra-bold' or 'extra bold' into 'extrabold'.
-    final String modifiedName =
-        name.toLowerCase().replaceAll('-', '').replaceAll(' ', '');
+    final String modifiedName = name
+        .toLowerCase()
+        .replaceAll('-', '')
+        .replaceAll(' ', '');
 
     // Check font weight.
     if (modifiedName.contains('thin')) {

@@ -18,9 +18,7 @@ abstract class NetworkDataRepository {
   final CodelesslyConfig config;
 
   /// Creates a new instance of [NetworkDataRepository].
-  NetworkDataRepository({
-    required this.config,
-  });
+  NetworkDataRepository({required this.config});
 
   /// Calls a cloud function that searches for the project associated with the
   /// given unique slug and returns a completely populated [SDKPublishModel]
@@ -42,10 +40,14 @@ abstract class NetworkDataRepository {
       final http.Response result = await http.get(Uri.parse(url));
 
       if (result.statusCode != 200) {
-        DebugLogger.instance
-            .printInfo('Error downloading publish bundle.', name: name);
-        DebugLogger.instance
-            .printInfo('Status code: ${result.statusCode}', name: name);
+        DebugLogger.instance.printInfo(
+          'Error downloading publish bundle.',
+          name: name,
+        );
+        DebugLogger.instance.printInfo(
+          'Status code: ${result.statusCode}',
+          name: name,
+        );
         DebugLogger.instance.printInfo('Message: ${result.body}', name: name);
 
         ErrorLogger.instance.captureException(
@@ -59,14 +61,16 @@ abstract class NetworkDataRepository {
 
       StatTracker.instance.track(StatType.bundleDownload);
 
-      final Map<String, dynamic> modelDoc =
-          jsonDecode(utf8.decode(result.bodyBytes));
+      final Map<String, dynamic> modelDoc = jsonDecode(
+        utf8.decode(result.bodyBytes),
+      );
 
       final SDKPublishModel model = SDKPublishModel.fromJson(modelDoc);
 
       DebugLogger.instance.printInfo(
-          'Finished downloading publish bundle with slug: $slug and source: $source.',
-          name: name);
+        'Finished downloading publish bundle with slug: $slug and source: $source.',
+        name: name,
+      );
       return model;
     } catch (e, str) {
       DebugLogger.instance.log(
@@ -139,15 +143,10 @@ abstract class NetworkDataRepository {
     required String projectID,
     required Set<String> fontIDs,
     required PublishSource source,
-  }) =>
-      {
-        for (final fontID in fontIDs)
-          downloadFontModel(
-            projectID: projectID,
-            fontID: fontID,
-            source: source,
-          )
-      };
+  }) => {
+    for (final fontID in fontIDs)
+      downloadFontModel(projectID: projectID, fontID: fontID, source: source),
+  };
 
   /// Fetches the relevant [SDKPublishLayout]s from the server based on the
   /// configurations of the implementation.
@@ -155,20 +154,21 @@ abstract class NetworkDataRepository {
     required String projectID,
     required Set<String> layoutIDs,
     required PublishSource source,
-  }) =>
-      {
-        for (final layoutID in layoutIDs)
-          downloadLayoutModel(
-            projectID: projectID,
-            layoutID: layoutID,
-            source: source,
-          )
-      };
+  }) => {
+    for (final layoutID in layoutIDs)
+      downloadLayoutModel(
+        projectID: projectID,
+        layoutID: layoutID,
+        source: source,
+      ),
+  };
 
   /// Downloads the bytes of a font from the server given a [url].
   Future<Uint8List?> downloadFontBytes({required String url}) async {
-    DebugLogger.instance
-        .printFunction('downloadFontBytes(url: $url)', name: name);
+    DebugLogger.instance.printFunction(
+      'downloadFontBytes(url: $url)',
+      name: name,
+    );
     try {
       final http.Response response = await http.get(Uri.parse(url));
       if (response.statusCode != 200) return null;

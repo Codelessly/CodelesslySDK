@@ -75,9 +75,9 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
     widget.node.textMixedProps.forEach((property) {
       String link = property.link;
       if (link.isNotEmpty) {
-        TapGestureRecognizer tapGestureRecognizer =
-            TapGestureRecognizer(debugOwner: link)
-              ..onTap = () => FunctionsRepository.openLink(link);
+        TapGestureRecognizer tapGestureRecognizer = TapGestureRecognizer(
+          debugOwner: link,
+        )..onTap = () => FunctionsRepository.openLink(link);
         tapGestureRecognizerRegistry[link] = tapGestureRecognizer;
       }
     });
@@ -87,7 +87,8 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
   void disposeTapGestureRecognizers() {
     if (!widget.clickable) return;
     tapGestureRecognizerRegistry.forEach(
-        (link, tapGestureRecognizer) => tapGestureRecognizer.dispose());
+      (link, tapGestureRecognizer) => tapGestureRecognizer.dispose(),
+    );
     tapGestureRecognizerRegistry = {};
   }
 

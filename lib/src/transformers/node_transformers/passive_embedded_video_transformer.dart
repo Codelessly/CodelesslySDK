@@ -29,11 +29,14 @@ class PassiveEmbeddedVideoTransformer
     String url = '',
     EmbeddedVideoSource source = EmbeddedVideoSource.youtube,
     required String baseUrl,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview', isPreview: true),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+      isPreview: true,
+    ),
   }) {
     final previewNode = EmbeddedVideoNode(
-      properties: properties ??
+      properties:
+          properties ??
           node?.properties ??
           (source == EmbeddedVideoSource.youtube
               ? EmbeddedYoutubeVideoProperties(url: url)
@@ -133,10 +136,14 @@ class _PassiveEmbeddedVideoWidgetState
     switch (widget.node.properties.source) {
       case EmbeddedVideoSource.youtube:
         videoWidget = buildEmbeddedYoutubeVideo(
-            context, widget.node.properties as EmbeddedYoutubeVideoProperties);
+          context,
+          widget.node.properties as EmbeddedYoutubeVideoProperties,
+        );
       case EmbeddedVideoSource.vimeo:
         videoWidget = buildEmbeddedVimeoVideo(
-            context, widget.node.properties as EmbeddedVimeoVideoProperties);
+          context,
+          widget.node.properties as EmbeddedVimeoVideoProperties,
+        );
     }
 
     return AdaptiveNodeBox(node: widget.node, child: videoWidget);
@@ -147,10 +154,7 @@ class _PassiveEmbeddedVideoWidgetState
     EmbeddedYoutubeVideoProperties properties,
   ) {
     if (isPlatformSupportedForWebView && !widget.settings.isPreview) {
-      return WebViewWidget(
-        controller: _controller,
-        key: ValueKey(properties),
-      );
+      return WebViewWidget(controller: _controller, key: ValueKey(properties));
     }
     if (properties.metadata != null) {
       return AdaptiveNodeBox(
@@ -166,9 +170,10 @@ class _PassiveEmbeddedVideoWidgetState
         child: Container(
           decoration: BoxDecoration(
             image: const DecorationImage(
-                image: AssetImage('assets/images/image_youtube_video.png'),
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter),
+              image: AssetImage('assets/images/image_youtube_video.png'),
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
             borderRadius: BorderRadius.circular(4),
             border: Border.all(color: Theme.of(context).colorScheme.secondary),
           ),
@@ -189,18 +194,18 @@ class _PassiveEmbeddedVideoWidgetState
   }
 
   Widget buildEmbeddedVimeoVideo(
-      BuildContext context, EmbeddedVimeoVideoProperties properties) {
+    BuildContext context,
+    EmbeddedVimeoVideoProperties properties,
+  ) {
     if (isPlatformSupportedForWebView && !widget.settings.isPreview) {
-      return WebViewWidget(
-        key: ValueKey(properties),
-        controller: _controller,
-      );
+      return WebViewWidget(key: ValueKey(properties), controller: _controller);
     }
     if (properties.metadata != null) {
       return AdaptiveNodeBox(
         node: widget.node,
-        child:
-            Center(child: VimeoVideoPreviewUI(metadata: properties.metadata!)),
+        child: Center(
+          child: VimeoVideoPreviewUI(metadata: properties.metadata!),
+        ),
       );
     }
 
@@ -211,9 +216,10 @@ class _PassiveEmbeddedVideoWidgetState
         child: Container(
           decoration: BoxDecoration(
             image: const DecorationImage(
-                image: AssetImage('assets/images/image_vimeo_video.png'),
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter),
+              image: AssetImage('assets/images/image_vimeo_video.png'),
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
             borderRadius: BorderRadius.circular(4),
             border: Border.all(color: Theme.of(context).colorScheme.secondary),
           ),
@@ -264,24 +270,26 @@ class YoutubeVideoPreviewUI extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Builder(builder: (context) {
-              if (isEmpty) {
-                return Container(
-                  color: Colors.black,
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Video Unavailable',
-                    style: TextStyle(color: Colors.grey),
-                  ),
+            child: Builder(
+              builder: (context) {
+                if (isEmpty) {
+                  return Container(
+                    color: Colors.black,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Video Unavailable',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  );
+                }
+                return Image.network(
+                  metadata.cloudThumbnailUrl.isNotEmpty
+                      ? metadata.cloudThumbnailUrl
+                      : metadata.thumbnailUrl,
+                  fit: BoxFit.cover,
                 );
-              }
-              return Image.network(
-                metadata.cloudThumbnailUrl.isNotEmpty
-                    ? metadata.cloudThumbnailUrl
-                    : metadata.thumbnailUrl,
-                fit: BoxFit.cover,
-              );
-            }),
+              },
+            ),
           ),
           Positioned(
             left: 0,
@@ -365,24 +373,26 @@ class VimeoVideoPreviewUI extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Builder(builder: (context) {
-              if (isEmpty) {
-                return Container(
-                  color: Colors.black,
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Video Unavailable',
-                    style: TextStyle(color: Colors.grey),
-                  ),
+            child: Builder(
+              builder: (context) {
+                if (isEmpty) {
+                  return Container(
+                    color: Colors.black,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Video Unavailable',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  );
+                }
+                return Image.network(
+                  metadata.cloudThumbnailUrl.isNotEmpty
+                      ? metadata.cloudThumbnailUrl
+                      : metadata.thumbnailUrl,
+                  fit: BoxFit.cover,
                 );
-              }
-              return Image.network(
-                metadata.cloudThumbnailUrl.isNotEmpty
-                    ? metadata.cloudThumbnailUrl
-                    : metadata.thumbnailUrl,
-                fit: BoxFit.cover,
-              );
-            }),
+              },
+            ),
           ),
           Positioned(
             left: 0,
@@ -393,8 +403,10 @@ class VimeoVideoPreviewUI extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(6),
@@ -412,8 +424,10 @@ class VimeoVideoPreviewUI extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(6),
@@ -444,10 +458,7 @@ class VimeoVideoPreviewUI extends StatelessWidget {
                 color: Colors.black.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: const Icon(
-                Icons.play_arrow,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.play_arrow, color: Colors.white),
             ),
           ),
           Positioned(
@@ -464,9 +475,7 @@ class VimeoVideoPreviewUI extends StatelessWidget {
                     child: Container(
                       height: 10,
                       decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey,
-                        ),
+                        border: Border.all(color: Colors.grey),
                       ),
                     ),
                   ),
@@ -477,11 +486,7 @@ class VimeoVideoPreviewUI extends StatelessWidget {
                     color: Colors.white,
                   ),
                   const SizedBox(width: 4),
-                  const Icon(
-                    Icons.settings,
-                    size: 14,
-                    color: Colors.white,
-                  ),
+                  const Icon(Icons.settings, size: 14, color: Colors.white),
                   const SizedBox(width: 4),
                   Image.asset(
                     'assets/images/vimeo_logo.png',

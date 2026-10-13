@@ -9,7 +9,6 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
-
 import '../../../codelessly_sdk.dart';
 
 class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
@@ -41,10 +40,7 @@ class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
   }
 
   Widget buildFromNode(WebViewNode node, WidgetBuildSettings settings) {
-    return PassiveWebViewWidget(
-      node: node,
-      settings: settings,
-    );
+    return PassiveWebViewWidget(node: node, settings: settings);
   }
 
   void onChanged(List<Reaction> reactions) => reactions
@@ -118,15 +114,17 @@ class WebViewPreviewWidget extends StatelessWidget {
         child: FractionallySizedBox(
           widthFactor: aspectRatio > 1 ? 0.2 : null,
           heightFactor: aspectRatio < 1 ? 0.2 : null,
-          child: LayoutBuilder(builder: (context, constraints) {
-            return IconTheme(
-              data: IconThemeData(
-                color: Colors.blue,
-                size: min(constraints.maxWidth, constraints.maxHeight),
-              ),
-              child: icon,
-            );
-          }),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return IconTheme(
+                data: IconThemeData(
+                  color: Colors.blue,
+                  size: min(constraints.maxWidth, constraints.maxHeight),
+                ),
+                child: icon,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -192,8 +190,10 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
 
     if (_controller.platform is AndroidWebViewController) {
       (_controller.platform as AndroidWebViewController)
-          .setMediaPlaybackRequiresUserGesture(props.mediaAutoPlaybackPolicy !=
-              WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia);
+          .setMediaPlaybackRequiresUserGesture(
+            props.mediaAutoPlaybackPolicy !=
+                WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia,
+          );
     }
 
     // Not yet supported on MacOS. Throws an exception.
@@ -241,7 +241,8 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
         switch (properties.pageSourceType) {
           case WebViewWebpageSourceType.url:
             return (
-              source: PropertyValueDelegate.getVariableValueFromPath<String>(
+              source:
+                  PropertyValueDelegate.getVariableValueFromPath<String>(
                     properties.input,
                     scopedValues: scopedValues,
                   ) ??
@@ -259,13 +260,17 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
       case WebViewType.googleMaps:
         return (
           source: buildGoogleMapsURL(
-              props as GoogleMapsWebViewProperties, scopedValues),
+            props as GoogleMapsWebViewProperties,
+            scopedValues,
+          ),
           isAsset: false,
         );
       case WebViewType.twitter:
         return (
-          source:
-              buildTwitterURL(props as TwitterWebViewProperties, scopedValues),
+          source: buildTwitterURL(
+            props as TwitterWebViewProperties,
+            scopedValues,
+          ),
           isAsset: false,
         );
     }
@@ -289,9 +294,7 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
         child = buildWebpageWebView(context, props as WebPageWebViewProperties);
       case WebViewType.googleMaps:
         if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-          return const WebViewPreviewWidget(
-            icon: Icon(Icons.map_outlined),
-          );
+          return const WebViewPreviewWidget(icon: Icon(Icons.map_outlined));
         }
 
         child = buildWebView(props as GoogleMapsWebViewProperties);
@@ -299,9 +302,7 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
         if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
           return const WebViewPreviewWidget(
             icon: ImageIcon(
-              NetworkImage(
-                'https://img.icons8.com/color/344/twitter--v2.png',
-              ),
+              NetworkImage('https://img.icons8.com/color/344/twitter--v2.png'),
             ),
           );
         }
@@ -313,43 +314,52 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
   }
 
   Widget buildWebpageWebView(
-      BuildContext context, WebPageWebViewProperties properties) {
+    BuildContext context,
+    WebPageWebViewProperties properties,
+  ) {
     if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      return const WebViewPreviewWidget(
-        icon: Icon(Icons.language_rounded),
-      );
+      return const WebViewPreviewWidget(icon: Icon(Icons.language_rounded));
     }
 
     return buildWebView(properties);
   }
 
   String buildGoogleMapsURL(
-      GoogleMapsWebViewProperties properties, ScopedValues scopedValues) {
+    GoogleMapsWebViewProperties properties,
+    ScopedValues scopedValues,
+  ) {
     final String? originalSrc = properties.src;
     final String? updatedSrc = originalSrc != null
-        ? PropertyValueDelegate.getVariableValueFromPath<String>(originalSrc,
-                scopedValues: scopedValues) ??
-            originalSrc
+        ? PropertyValueDelegate.getVariableValueFromPath<String>(
+                originalSrc,
+                scopedValues: scopedValues,
+              ) ??
+              originalSrc
         : null;
     return _buildHtmlContent(updatedSrc);
   }
 
   String _buildHtmlContent(String? src) {
     final String html = src?.replaceAll('\n', '') ?? 'about:blank';
-    final String contentBase64 =
-        base64Encode(const Utf8Encoder().convert(html));
+    final String contentBase64 = base64Encode(
+      const Utf8Encoder().convert(html),
+    );
     final String content = 'data:text/html;base64,$contentBase64';
 
     return content;
   }
 
   String buildTwitterURL(
-      TwitterWebViewProperties properties, ScopedValues scopedValues) {
+    TwitterWebViewProperties properties,
+    ScopedValues scopedValues,
+  ) {
     final String? originalSrc = properties.src;
     final String? updatedSrc = originalSrc != null
-        ? PropertyValueDelegate.getVariableValueFromPath<String>(originalSrc,
-                scopedValues: scopedValues) ??
-            originalSrc
+        ? PropertyValueDelegate.getVariableValueFromPath<String>(
+                originalSrc,
+                scopedValues: scopedValues,
+              ) ??
+              originalSrc
         : null;
     return _buildHtmlContent(updatedSrc);
   }
@@ -361,20 +371,24 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
       gestureRecognizers: {
         if (properties.controlVerticalScrollGesture == true)
           const Factory<VerticalDragGestureRecognizer>(
-              VerticalDragGestureRecognizer.new),
+            VerticalDragGestureRecognizer.new,
+          ),
         if (properties.controlHorizontalScrollGesture == true)
           const Factory<HorizontalDragGestureRecognizer>(
-              HorizontalDragGestureRecognizer.new),
+            HorizontalDragGestureRecognizer.new,
+          ),
         if (properties.controlScaleGesture == true)
           const Factory<ScaleGestureRecognizer>(ScaleGestureRecognizer.new),
         if (properties.controlTapGesture == true)
           const Factory<TapGestureRecognizer>(TapGestureRecognizer.new),
         if (properties.controlLongPressGesture == true)
           const Factory<LongPressGestureRecognizer>(
-              LongPressGestureRecognizer.new),
+            LongPressGestureRecognizer.new,
+          ),
         if (properties.controlForcePressGesture == true)
           const Factory<ForcePressGestureRecognizer>(
-              ForcePressGestureRecognizer.new),
+            ForcePressGestureRecognizer.new,
+          ),
         // const Factory<TapAndPanGestureRecognizer>(
         //     TapAndPanGestureRecognizer.new),
         // const Factory<PanGestureRecognizer>(PanGestureRecognizer.new),

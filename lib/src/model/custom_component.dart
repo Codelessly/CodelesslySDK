@@ -53,9 +53,9 @@ class CustomComponent with Equatable, SerializableMixin {
     required this.projectId,
     required this.pageId,
     required int? version,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        // parentId = parentId ?? getTopMostParentIDs(data.nodes).first,
-        version = version ?? 1;
+  }) : createdAt = createdAt ?? DateTime.now(),
+       // parentId = parentId ?? getTopMostParentIDs(data.nodes).first,
+       version = version ?? 1;
 
   /// Duplicate this [CustomComponent] instance with the given data overrides.
   CustomComponent copyWith({
@@ -68,18 +68,17 @@ class CustomComponent with Equatable, SerializableMixin {
     String? pageId,
     String? projectId,
     int? version,
-  }) =>
-      CustomComponent(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        data: data ?? this.data,
-        createdAt: DateTime.now(),
-        previewUrl: previewUrl ?? this.previewUrl,
-        blurhash: blurhash ?? this.blurhash,
-        projectId: projectId ?? this.projectId,
-        pageId: pageId ?? this.pageId,
-        version: version ?? this.version,
-      );
+  }) => CustomComponent(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    data: data ?? this.data,
+    createdAt: DateTime.now(),
+    previewUrl: previewUrl ?? this.previewUrl,
+    blurhash: blurhash ?? this.blurhash,
+    projectId: projectId ?? this.projectId,
+    pageId: pageId ?? this.pageId,
+    version: version ?? this.version,
+  );
 
   /// Factory constructor for creating a new instance of this class from
   /// a JSON object.
@@ -91,22 +90,22 @@ class CustomComponent with Equatable, SerializableMixin {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        data,
-        createdAt,
-        previewUrl,
-        blurhash,
-        projectId,
-        pageId,
-        version,
-      ];
+    id,
+    name,
+    data,
+    createdAt,
+    previewUrl,
+    blurhash,
+    projectId,
+    pageId,
+    version,
+  ];
 
   void setParentAsInstance() => data.setParentAsInstance(
-        componentId: id,
-        componentSchema: schema,
-        componentVersion: version,
-      );
+    componentId: id,
+    componentSchema: schema,
+    componentVersion: version,
+  );
 }
 
 /// Holds component's node data and containing rect size data.
@@ -163,14 +162,14 @@ class ComponentData with Equatable, SerializableMixin {
 
   @override
   List<Object?> get props => [
-        width,
-        height,
-        nodes,
-        variables,
-        conditions,
-        parentId,
-        originalParentId,
-      ];
+    width,
+    height,
+    nodes,
+    variables,
+    conditions,
+    parentId,
+    originalParentId,
+  ];
 
   @override
   Map toJson() => _$ComponentDataToJson(this);
@@ -189,16 +188,15 @@ class ComponentData with Equatable, SerializableMixin {
     Map<String, Set<BaseCondition>>? conditions,
     String? parentId,
     String? originalParentId,
-  }) =>
-      ComponentData(
-        width: width ?? this.width,
-        height: height ?? this.height,
-        nodes: nodes ?? this.nodes,
-        variables: variables ?? this.variables,
-        conditions: conditions ?? this.conditions,
-        parentId: parentId ?? this.parentId,
-        originalParentId: originalParentId ?? this.originalParentId,
-      );
+  }) => ComponentData(
+    width: width ?? this.width,
+    height: height ?? this.height,
+    nodes: nodes ?? this.nodes,
+    variables: variables ?? this.variables,
+    conditions: conditions ?? this.conditions,
+    parentId: parentId ?? this.parentId,
+    originalParentId: originalParentId ?? this.originalParentId,
+  );
 
   void setParentAsInstance({
     required String componentId,

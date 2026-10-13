@@ -11,7 +11,10 @@ class PassivePageViewTransformer extends NodeWidgetTransformer<PageViewNode> {
 
   @override
   Widget buildWidget(
-      PageViewNode node, BuildContext context, WidgetBuildSettings settings) {
+    PageViewNode node,
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassivePageViewWidget(
       node: node,
       manager: manager,
@@ -21,14 +24,26 @@ class PassivePageViewTransformer extends NodeWidgetTransformer<PageViewNode> {
   }
 
   void onPageChanged(BuildContext context, int index, PageViewNode node) {
-    FunctionsRepository.setNodeValue(context,
-        node: node, property: 'indexValue', value: index);
+    FunctionsRepository.setNodeValue(
+      context,
+      node: node,
+      property: 'indexValue',
+      value: index,
+    );
 
-    FunctionsRepository.setPropertyVariable(context,
-        node: node, property: 'indexValue', value: '$index');
+    FunctionsRepository.setPropertyVariable(
+      context,
+      node: node,
+      property: 'indexValue',
+      value: '$index',
+    );
 
-    FunctionsRepository.triggerAction(context, TriggerType.changed,
-        node: node, value: index);
+    FunctionsRepository.triggerAction(
+      context,
+      TriggerType.changed,
+      node: node,
+      value: index,
+    );
   }
 }
 
@@ -81,10 +96,10 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
     if (widget.node.variables['indexValue'] != null) {
       final int? currentPropertyValue =
           PropertyValueDelegate.getPropertyValue<int>(
-        widget.node,
-        'indexValue',
-        scopedValues: scopedValues,
-      );
+            widget.node,
+            'indexValue',
+            scopedValues: scopedValues,
+          );
       if (currentPropertyValue != null &&
           controller.page?.round() != currentPropertyValue) {
         _jumpToPage(currentPropertyValue);
@@ -128,14 +143,14 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
       child: DraggableScrollConfiguration(
         child: PageView.builder(
           itemCount: itemCount,
-          physics: widget.node.physics
-              .flutterScrollPhysics(widget.node.shouldAlwaysScroll),
+          physics: widget.node.physics.flutterScrollPhysics(
+            widget.node.shouldAlwaysScroll,
+          ),
           scrollDirection: widget.node.scrollDirection.flutterAxis,
           reverse: widget.node.reverse,
           clipBehavior: widget.node.clipsContent ? Clip.hardEdge : Clip.none,
           padEnds: widget.node.properties.padEnds,
-          allowImplicitScrolling:
-              widget.node.properties.allowImplicitScrolling,
+          allowImplicitScrolling: widget.node.properties.allowImplicitScrolling,
           pageSnapping: widget.node.properties.pageSnapping,
           controller: controller,
           onPageChanged: (index) => widget.onPageChanged?.call(context, index),

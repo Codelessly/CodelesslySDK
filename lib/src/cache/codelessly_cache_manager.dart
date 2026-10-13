@@ -30,9 +30,7 @@ class CodelesslyCacheManager extends CacheManager {
     final Stopwatch stopwatch = Stopwatch()..start();
     try {
       await Hive.initFlutter('codelessly_sdk');
-      box = await Hive.openBox(
-        'cache_${config.uniqueID.replaceAll('/', '')}',
-      );
+      box = await Hive.openBox('cache_${config.uniqueID.replaceAll('/', '')}');
       filesBox = await Hive.openBox(
         'cache_files_${config.uniqueID.replaceAll('/', '')}',
       );
@@ -80,17 +78,16 @@ class CodelesslyCacheManager extends CacheManager {
   void dispose() {
     DebugLogger.instance.printFunction('dispose()', name: name);
     unawaited(
-      Future.wait([box.close(), filesBox.close()]).catchError(
-        (Object e, StackTrace stackTrace) {
-          ErrorLogger.instance.captureException(
-            e,
-            message: 'Failed to close cache',
-            type: 'cache_close_failed',
-            stackTrace: stackTrace,
-          );
-          return <void>[];
-        },
-      ),
+      Future.wait([box.close(), filesBox.close()])
+          .catchError((Object e, StackTrace stackTrace) {
+            ErrorLogger.instance.captureException(
+              e,
+              message: 'Failed to close cache',
+              type: 'cache_close_failed',
+              stackTrace: stackTrace,
+            );
+            return <void>[];
+          }),
     );
   }
 
@@ -153,8 +150,10 @@ class CodelesslyCacheManager extends CacheManager {
     DebugLogger.instance.printInfo('Deleting all byte data...', name: name);
     try {
       filesBox.clear();
-      DebugLogger.instance
-          .printInfo('Cache bytes deleted successfully!', name: name);
+      DebugLogger.instance.printInfo(
+        'Cache bytes deleted successfully!',
+        name: name,
+      );
     } catch (e, str) {
       ErrorLogger.instance.captureException(
         e,
@@ -245,13 +244,17 @@ class CodelesslyCacheManager extends CacheManager {
         }
         final String fileName = path.split('/').last;
         if (!excludedFileNames.contains(fileName)) {
-          DebugLogger.instance
-              .printInfo('\t\tDeleting file: $path', name: name);
+          DebugLogger.instance.printInfo(
+            '\t\tDeleting file: $path',
+            name: name,
+          );
 
           await filesBox.delete(path);
 
-          DebugLogger.instance
-              .printInfo('\t\tSuccessfully deleted.', name: name);
+          DebugLogger.instance.printInfo(
+            '\t\tSuccessfully deleted.',
+            name: name,
+          );
 
           purgedFiles++;
         }

@@ -78,21 +78,21 @@ class TextUtils {
 
     final TextStyle style = switch (hasMissingFont) {
       false => retrieveTextStyle(
-          fontSize: fontSize,
-          fontName: fontName,
-          textDecoration: textDecoration,
-          lineHeight: lineHeight,
-          letterSpacing: letterSpacing,
-          color: color,
-          effects: effects ?? (node is BlendMixin ? node.effects : const []),
-        ),
+        fontSize: fontSize,
+        fontName: fontName,
+        textDecoration: textDecoration,
+        lineHeight: lineHeight,
+        letterSpacing: letterSpacing,
+        color: color,
+        effects: effects ?? (node is BlendMixin ? node.effects : const []),
+      ),
       true => TextStyle(
-          color: Colors.red,
-          fontSize: fontSize,
-          fontWeight: FontWeight.bold,
-          decorationColor: Colors.yellow,
-          decoration: TextDecoration.underline,
-        ),
+        color: Colors.red,
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
+        decorationColor: Colors.yellow,
+        decoration: TextDecoration.underline,
+      ),
     };
 
     // Replace with fx symbol if required.
@@ -291,38 +291,33 @@ class TextUtils {
   static double retrieveLetterSpacing(
     LetterSpacing letterSpacing,
     double fontSize,
-  ) =>
-      switch (letterSpacing.unit) {
-        LetterSpacingUnitEnum.pixels => letterSpacing.value,
-        LetterSpacingUnitEnum.percent => (letterSpacing.value * fontSize) / 100,
-      };
+  ) => switch (letterSpacing.unit) {
+    LetterSpacingUnitEnum.pixels => letterSpacing.value,
+    LetterSpacingUnitEnum.percent => (letterSpacing.value * fontSize) / 100,
+  };
 
   /// Convert LineHeight from Figma values into Flutter.
-  static double? retrieveLineHeight(
-    LineHeight lineHeight,
-    double fontSize,
-  ) =>
+  static double? retrieveLineHeight(LineHeight lineHeight, double fontSize) =>
       lineHeight.value == null || lineHeight.value! <= 0
-          ? null
-          : switch (lineHeight.unit) {
-              LineHeightUnitEnum.pixels => lineHeight.value! / fontSize,
-              LineHeightUnitEnum.percent => lineHeight.value! / 100,
-              LineHeightUnitEnum.auto => null,
-            };
+      ? null
+      : switch (lineHeight.unit) {
+          LineHeightUnitEnum.pixels => lineHeight.value! / fontSize,
+          LineHeightUnitEnum.percent => lineHeight.value! / 100,
+          LineHeightUnitEnum.auto => null,
+        };
 
   static TextStyle retrieveTextStyleFromProp(
     TextProp prop, {
     List<Effect> effects = const [],
-  }) =>
-      retrieveTextStyle(
-        fontSize: prop.fontSize,
-        fontName: prop.fontName,
-        textDecoration: prop.textDecoration,
-        lineHeight: prop.lineHeight,
-        letterSpacing: prop.letterSpacing,
-        color: retrievePropColor(prop),
-        effects: effects,
-      );
+  }) => retrieveTextStyle(
+    fontSize: prop.fontSize,
+    fontName: prop.fontName,
+    textDecoration: prop.textDecoration,
+    lineHeight: prop.lineHeight,
+    letterSpacing: prop.letterSpacing,
+    color: retrievePropColor(prop),
+    effects: effects,
+  );
 
   /// Sets default values.
   static TextStyle retrieveTextStyle({
@@ -345,8 +340,8 @@ class TextUtils {
     final FontWeight? fontWeightProp = fontName?.flutterFontWeight;
     final FontStyle? fontStyle = fontName != null
         ? (fontName.style.toLowerCase().contains('italic'))
-            ? FontStyle.italic
-            : FontStyle.normal
+              ? FontStyle.italic
+              : FontStyle.normal
         : null;
 
     // Not supported yet but good to have.
@@ -377,8 +372,9 @@ class TextUtils {
         shadows: shadows,
       );
     } else {
-      final String? fontFamily =
-          fontName == null ? null : getFontFamilyNameAndVariant(fontName);
+      final String? fontFamily = fontName == null
+          ? null
+          : getFontFamilyNameAndVariant(fontName);
 
       // Enable this for fonts debugging.
       // print('Transformer is using fontFamily: $fontFamily');

@@ -94,7 +94,8 @@ extension M3NavigationDestinationLabelBehaviorHelper
         return NavigationDestinationLabelBehavior.onlyShowSelected;
       case MaterialNavigationBarLabelBehavior.onlyShowUnselected:
         throw UnsupportedError(
-            'MaterialNavigationBarLabelBehavior.onlyShowUnselected is not supported for material 2.');
+          'MaterialNavigationBarLabelBehavior.onlyShowUnselected is not supported for material 2.',
+        );
     }
   }
 }
@@ -193,8 +194,10 @@ extension BaseNodeHelper on BaseNode {
     }
   }
 
-  RectC rectFromBoundary(NodeBoundaryType type,
-      {required PositioningSpace space}) {
+  RectC rectFromBoundary(
+    NodeBoundaryType type, {
+    required PositioningSpace space,
+  }) {
     switch (space) {
       case PositioningSpace.local:
         return localRectFromBoundary(type);
@@ -203,8 +206,10 @@ extension BaseNodeHelper on BaseNode {
     }
   }
 
-  Vec posFromBoundary(NodeBoundaryType type,
-      {required PositioningSpace space}) {
+  Vec posFromBoundary(
+    NodeBoundaryType type, {
+    required PositioningSpace space,
+  }) {
     switch (space) {
       case PositioningSpace.global:
         return globalPosFromBoundary(type);
@@ -240,7 +245,7 @@ extension ScrollPhysicsHelper on ScrollPhysicsC {
       ScrollPhysicsC.rangeMaintainingScrollPhysics =>
         const RangeMaintainingScrollPhysics(),
       ScrollPhysicsC.neverScrollableScrollPhysics =>
-        const NeverScrollableScrollPhysics()
+        const NeverScrollableScrollPhysics(),
     };
     if (shouldAlwaysScroll) {
       return AlwaysScrollableScrollPhysics(parent: parent);
@@ -294,11 +299,11 @@ extension RowColumnTypeHelper on RowColumnType {
 
 extension CornerRadiusHelper on CornerRadius {
   flutter.BorderRadius get borderRadius => flutter.BorderRadius.only(
-        topLeft: Radius.elliptical(tl.x, tl.y),
-        topRight: Radius.elliptical(tr.x, tr.y),
-        bottomLeft: Radius.elliptical(bl.x, bl.y),
-        bottomRight: Radius.elliptical(br.x, br.y),
-      );
+    topLeft: Radius.elliptical(tl.x, tl.y),
+    topRight: Radius.elliptical(tr.x, tr.y),
+    bottomLeft: Radius.elliptical(bl.x, bl.y),
+    bottomRight: Radius.elliptical(br.x, br.y),
+  );
 }
 
 extension ColorHelper on flutter.Color {
@@ -331,20 +336,20 @@ extension ColorHelper on flutter.Color {
   String get hex => toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase();
 
   PaintModel toPaint([String? id]) => PaintModel.solid(
-        id: id ?? generateId(),
-        visible: true,
-        opacity: a,
-        color: toColorRGB(),
-      );
+    id: id ?? generateId(),
+    visible: true,
+    opacity: a,
+    color: toColorRGB(),
+  );
 
   Effect toShadow() => Effect(
-        id: generateId(),
-        type: EffectType.dropShadow,
-        color: colorToRGBA(this),
-        offset: const Vec(0, 4),
-        radius: 8,
-        spread: 0,
-      );
+    id: generateId(),
+    type: EffectType.dropShadow,
+    color: colorToRGBA(this),
+    offset: const Vec(0, 4),
+    radius: 8,
+    spread: 0,
+  );
 }
 
 extension BrightnessModelHelper on BrightnessModel {
@@ -372,10 +377,11 @@ extension ColorRGBAHelper on ColorRGBA {
   ColorRGB toRGB() => toFlutterColor().colorRGB;
 
   PaintModel toPaint([String? id]) => PaintModel.solid(
-      id: id ?? generateId(),
-      visible: true,
-      opacity: toFlutterColor().a,
-      color: toRGB());
+    id: id ?? generateId(),
+    visible: true,
+    opacity: toFlutterColor().a,
+    color: toRGB(),
+  );
 }
 
 extension PaintModelExt on PaintModel {
@@ -396,7 +402,11 @@ extension PaintModelExt on PaintModel {
 
 extension ColorRGBHelper on ColorRGB {
   flutter.Color get flutterColor => flutter.Color.fromRGBO(
-      (r * 255).toInt(), (g * 255).toInt(), (b * 255).toInt(), 1);
+    (r * 255).toInt(),
+    (g * 255).toInt(),
+    (b * 255).toInt(),
+    1,
+  );
 
   Color toFlutterColor({required double opacity}) {
     var ir = (r * 255).toInt();
@@ -412,11 +422,11 @@ extension ColorRGBHelper on ColorRGB {
 
 extension BoxConstraintsModelHelper on BoxConstraintsModel {
   flutter.BoxConstraints get flutterConstraints => flutter.BoxConstraints(
-        minWidth: minWidth ?? 0.0,
-        maxWidth: maxWidth ?? double.infinity,
-        minHeight: minHeight ?? 0.0,
-        maxHeight: maxHeight ?? double.infinity,
-      );
+    minWidth: minWidth ?? 0.0,
+    maxWidth: maxWidth ?? double.infinity,
+    minHeight: minHeight ?? 0.0,
+    maxHeight: maxHeight ?? double.infinity,
+  );
 }
 
 extension AlignmentDataHelper on AlignmentData {
@@ -741,14 +751,14 @@ extension FitsExtension on BaseNode {
       edgePins.inner(parent).isBothExpanded || isBothExpanded;
 
   bool isWrapOnAxis(AxisC axis) => switch (axis) {
-        AxisC.horizontal => isHorizontalWrap,
-        AxisC.vertical => isVerticalWrap,
-      };
+    AxisC.horizontal => isHorizontalWrap,
+    AxisC.vertical => isVerticalWrap,
+  };
 
   bool doesFlexOnAxis(AxisC axis) => switch (axis) {
-        AxisC.horizontal => isHorizontalExpanded || isHorizontalFlexible,
-        AxisC.vertical => isVerticalExpanded || isVerticalFlexible,
-      };
+    AxisC.horizontal => isHorizontalExpanded || isHorizontalFlexible,
+    AxisC.vertical => isVerticalExpanded || isVerticalFlexible,
+  };
 }
 
 extension RowColumnMixinExtensions on RowColumnMixin {
@@ -781,11 +791,11 @@ extension RowColumnMixinExtensions on RowColumnMixin {
 
 extension EdgePinsExtensions on EdgePinsModel {
   EdgePinsModel inner(BaseNode? parent) => EdgePinsModel(
-        left: effectiveLeft(parent),
-        top: effectiveTop(parent),
-        right: effectiveRight(parent),
-        bottom: effectiveBottom(parent),
-      );
+    left: effectiveLeft(parent),
+    top: effectiveTop(parent),
+    right: effectiveRight(parent),
+    bottom: effectiveBottom(parent),
+  );
 
   double? effectiveLeft(BaseNode? parent) {
     if (parent == null || left == null) return left;
@@ -853,11 +863,11 @@ extension FitExtension on Fit {
 
 extension BoxFitExt on BoxFit {
   bool get supportsAlignment => {
-        BoxFit.fitHeight,
-        BoxFit.fitWidth,
-        BoxFit.scaleDown,
-        BoxFit.none,
-      }.contains(this);
+    BoxFit.fitHeight,
+    BoxFit.fitWidth,
+    BoxFit.scaleDown,
+    BoxFit.none,
+  }.contains(this);
 }
 
 extension AlignmentModelExtensions on AlignmentModel {
@@ -984,8 +994,10 @@ extension FontNameExtensions on FontName {
     // Deprecated
 
     // Convert 'extra-bold' or 'extra bold' into 'extrabold'.
-    final String style =
-        this.style.toLowerCase().replaceAll('-', '').replaceAll(' ', '');
+    final String style = this.style
+        .toLowerCase()
+        .replaceAll('-', '')
+        .replaceAll(' ', '');
 
     // String might contain 'italic', which is why it uses [contains] for the
     // comparison.
@@ -1166,8 +1178,10 @@ extension IconModelExt on IconModel {
     final IconModel icon = this;
     if (icon is MaterialIcon) {
       // e.g. https://fonts.gstatic.com/s/i/materialiconsoutlined/home/v16/24px.svg
-      final String style =
-          icon.style.styleName.toLowerCase().replaceAll(' ', '');
+      final String style = icon.style.styleName.toLowerCase().replaceAll(
+        ' ',
+        '',
+      );
       return 'https://fonts.gstatic.com/s/i/materialicons$style/'
           '${icon.name.toLowerCase()}/v${icon.version ?? 1}/24px.svg';
     }
@@ -1185,8 +1199,9 @@ extension IconModelExt on IconModel {
 /// The path segment naming a Material Symbols SVG variant, e.g.
 /// `wght700grad200fill1`, or `default` when every axis is at its default.
 String materialSymbolVariant({double? fill, double? weight, double? grade}) {
-  final int w =
-      weight == null ? 400 : ((weight / 100).round() * 100).clamp(100, 700);
+  final int w = weight == null
+      ? 400
+      : ((weight / 100).round() * 100).clamp(100, 700);
   final int g = grade == null ? 0 : _nearest(grade, const [-25, 0, 200]);
   final bool filled = (fill ?? 0) >= 0.5;
   final String variant = [
@@ -1197,9 +1212,8 @@ String materialSymbolVariant({double? fill, double? weight, double? grade}) {
   return variant.isEmpty ? 'default' : variant;
 }
 
-int _nearest(double value, List<int> options) => options.reduce(
-      (a, b) => (a - value).abs() <= (b - value).abs() ? a : b,
-    );
+int _nearest(double value, List<int> options) =>
+    options.reduce((a, b) => (a - value).abs() <= (b - value).abs() ? a : b);
 
 extension MaterialIconExt on MaterialIcon {
   String? get flutterID => flutterIconNames[styledName];
@@ -1288,10 +1302,7 @@ extension VisualDensityModelExt on VisualDensityModel {
           vertical: VisualDensity.maximumDensity,
         );
       case VisualDensityType.custom:
-        return VisualDensity(
-          horizontal: horizontal,
-          vertical: vertical,
-        );
+        return VisualDensity(horizontal: horizontal, vertical: vertical);
     }
   }
 }
@@ -1335,7 +1346,7 @@ extension StringExt on String {
   String get capitalized => characters.isEmpty
       ? this
       : characters.first.toUpperCase() +
-          characters.skip(1).string.toLowerCase();
+            characters.skip(1).string.toLowerCase();
 
   /// Whether the string contains all the valid variable paths inside it.
   /// This will also evaluate the path inside the ${} to be valid.
@@ -1343,9 +1354,9 @@ extension StringExt on String {
 
   String unwrapVariablePath() => isValidVariablePath
       ? variablePathRegex
-          .allMatches(this)
-          .map((match) => match.namedGroup('value'))
-          .join(' ')
+            .allMatches(this)
+            .map((match) => match.namedGroup('value'))
+            .join(' ')
       : this;
 
   /// Whether the string contains a variable path that is not checked for
@@ -1481,11 +1492,13 @@ extension StringExt on String {
 ///   2. [https://www.youtube.com/embed/<video_id>]
 ///   3. [https://youtube.com/embed/<video_id>]
 RegExp youtubeShareUrlRegex = RegExp(
-    'https://(www.)?(youtu.be|((youtube.com)(?:/embed)))/(?<video_id>[a-zA-Z_0-9]+)');
+  'https://(www.)?(youtu.be|((youtube.com)(?:/embed)))/(?<video_id>[a-zA-Z_0-9]+)',
+);
 
 /// Can match: [https://www.youtube.com/watch?v=<video_id>]
 RegExp youtubeWatchUrlRegex = RegExp(
-    '^https://(www.)?(youtube.com/watch)?.*v=(?<video_id>[a-zA-Z_0-9]+)');
+  '^https://(www.)?(youtube.com/watch)?.*v=(?<video_id>[a-zA-Z_0-9]+)',
+);
 
 RegExp vimeoUrlRegex = RegExp('^https://vimeo.com/(?<video_id>[a-zA-Z0-9]+)');
 
@@ -1553,8 +1566,9 @@ extension BuildContextExt on BuildContext {
 
   T? getNodeValue<T>(String nodeId, String key) {
     return nodeValues(nodeId)
-        .firstWhereOrNull((value) => value.name == key)
-        ?.value as T?;
+            .firstWhereOrNull((value) => value.name == key)
+            ?.value
+        as T?;
   }
 }
 
@@ -1620,15 +1634,19 @@ extension ActionModelExt on ActionModel {
         final NavigationAction action = this as NavigationAction;
         strings.addAll([action.destinationId]);
         for (final params in action.params.entries) {
-          strings
-              .addAll([params.key, if (params.value is String) params.value]);
+          strings.addAll([
+            params.key,
+            if (params.value is String) params.value,
+          ]);
         }
       case ActionType.showDialog:
         final ShowDialogAction action = this as ShowDialogAction;
         strings.addAll([action.destinationId]);
         for (final params in action.params.entries) {
-          strings
-              .addAll([params.key, if (params.value is String) params.value]);
+          strings.addAll([
+            params.key,
+            if (params.value is String) params.value,
+          ]);
         }
       case ActionType.link:
         final LinkAction action = this as LinkAction;
@@ -1648,10 +1666,13 @@ extension ActionModelExt on ActionModel {
         }
       case ActionType.setValue:
         final SetValueAction action = this as SetValueAction;
-        strings.addAll(action.values
-            .map(
-                (value) => value.value is String ? value.value as String : null)
-            .nonNulls);
+        strings.addAll(
+          action.values
+              .map(
+                (value) => value.value is String ? value.value as String : null,
+              )
+              .nonNulls,
+        );
       case ActionType.setVariable:
         final SetVariableAction action = this as SetVariableAction;
         strings.addAll([action.index, action.mapKey, action.newValue]);
@@ -1666,8 +1687,12 @@ extension ActionModelExt on ActionModel {
         strings.addAll(action.parameters.values);
       case ActionType.setStorage:
         final SetStorageAction action = this as SetStorageAction;
-        strings
-            .addAll([action.key, action.index, action.mapKey, action.newValue]);
+        strings.addAll([
+          action.key,
+          action.index,
+          action.mapKey,
+          action.newValue,
+        ]);
       case ActionType.setCloudStorage:
         final SetCloudStorageAction action = this as SetCloudStorageAction;
         switch (action.subAction) {
@@ -1679,10 +1704,7 @@ extension ActionModelExt on ActionModel {
               if (!action.useRawValue) action.newValue,
             ]);
           case RemoveDocumentSubAction action:
-            strings.addAll([
-              action.path,
-              action.documentId,
-            ]);
+            strings.addAll([action.path, action.documentId]);
           case UpdateDocumentSubAction action:
             strings.addAll([
               action.path,
@@ -1698,20 +1720,26 @@ extension ActionModelExt on ActionModel {
         final LoadFromCloudStorageAction action =
             this as LoadFromCloudStorageAction;
         strings.addAll([action.path, action.documentId]);
-        strings.addAll(action.whereFilters
-            .map((filter) => filter.getUsedVariableNames())
-            .expand((e) => e));
-        strings.addAll(action.orderByFilters
-            .map((filter) => filter.getUsedVariableNames())
-            .expand((e) => e));
+        strings.addAll(
+          action.whereFilters
+              .map((filter) => filter.getUsedVariableNames())
+              .expand((e) => e),
+        );
+        strings.addAll(
+          action.orderByFilters
+              .map((filter) => filter.getUsedVariableNames())
+              .expand((e) => e),
+        );
     }
 
     return strings
         .map((text) => VariableMatch.parseAll(text))
         .expand((matches) => matches)
         .map((match) => match.name)
-        .where((name) =>
-            includePredefined || !predefinedVariableNames.contains(name))
+        .where(
+          (name) =>
+              includePredefined || !predefinedVariableNames.contains(name),
+        )
         .toSet();
   }
 }
@@ -1734,18 +1762,21 @@ extension BaseConditionExt on BaseCondition {
     final condition = this;
     if (condition is Condition) {
       final condition = this as Condition;
-      return condition.actions
-          .any((action) => action.hasProperty(nodeId, name));
+      return condition.actions.any(
+        (action) => action.hasProperty(nodeId, name),
+      );
     }
     if (condition is ConditionGroup) {
       return condition.ifCondition.hasProperty(nodeId, name) ||
           condition.elseCondition?.hasProperty(nodeId, name) == true ||
-          condition.elseIfConditions
-              .any((condition) => condition.hasProperty(nodeId, name));
+          condition.elseIfConditions.any(
+            (condition) => condition.hasProperty(nodeId, name),
+          );
     }
     if (condition is ElseCondition) {
-      return condition.actions
-          .any((action) => action.hasProperty(nodeId, name));
+      return condition.actions.any(
+        (action) => action.hasProperty(nodeId, name),
+      );
     }
     return false;
   }
@@ -1759,8 +1790,9 @@ extension BaseConditionExt on BaseCondition {
     if (condition is ConditionGroup) {
       return condition.ifCondition.hasNode(nodeId) ||
           condition.elseCondition?.hasNode(nodeId) == true ||
-          condition.elseIfConditions
-              .any((condition) => condition.hasNode(nodeId));
+          condition.elseIfConditions.any(
+            (condition) => condition.hasNode(nodeId),
+          );
     }
     if (condition is ElseCondition) {
       return condition.actions.any((action) => action.hasNode(nodeId));
@@ -1776,15 +1808,17 @@ extension BaseConditionExt on BaseCondition {
   /// Returns all the variables used in this condition except the predefined
   /// variables. Returns names of the variables.
   Set<String> getReactiveVariables() =>
-      accept<Set<String>>(ConditionVariablesVisitor(
+      accept<Set<String>>(
+        ConditionVariablesVisitor(
           excludedVariableNames: {...predefinedVariableNames}
-            ..removeAll(predefinedListenableVariableNames))) ??
+            ..removeAll(predefinedListenableVariableNames),
+        ),
+      ) ??
       {};
 
   /// [variablesOverrides] is a map of variable name to variable value.
-  R? evaluate<R extends Object>(ScopedValues scopedValues) => accept<R>(
-        ConditionEvaluator<R>(scopedValues: scopedValues),
-      );
+  R? evaluate<R extends Object>(ScopedValues scopedValues) =>
+      accept<R>(ConditionEvaluator<R>(scopedValues: scopedValues));
 
   void prettyPrint() => ConditionPrinter().printCondition(this);
 
@@ -1795,29 +1829,32 @@ extension BaseConditionExt on BaseCondition {
     final condition = this;
     return switch (condition) {
       ElseCondition() => condition.copyWith(
-          actions: condition.actions
-              .map((action) => action.withUpdatedNodeId(oldNodeId, newNodeId))
-              .toList()),
+        actions: condition.actions
+            .map((action) => action.withUpdatedNodeId(oldNodeId, newNodeId))
+            .toList(),
+      ),
       Condition() => condition.copyWith(
-          actions: condition.actions
-              .map((action) => action.withUpdatedNodeId(oldNodeId, newNodeId))
-              .toList()),
+        actions: condition.actions
+            .map((action) => action.withUpdatedNodeId(oldNodeId, newNodeId))
+            .toList(),
+      ),
       ConditionGroup() => condition.copyWith(
-          elseCondition: condition.elseCondition?.withUpdatedNodeId(
-            oldNodeId,
-            newNodeId,
-          ) as ElseCondition?,
-          elseIfConditions: condition.elseIfConditions
-              .map((condition) => condition.withUpdatedNodeId(
-                    oldNodeId,
-                    newNodeId,
-                  ) as Condition)
-              .toList(),
-          ifCondition: condition.ifCondition.withUpdatedNodeId(
-            oldNodeId,
-            newNodeId,
-          ) as Condition,
-        ),
+        elseCondition: condition.elseCondition?.withUpdatedNodeId(
+          oldNodeId,
+          newNodeId,
+        ) as ElseCondition?,
+        elseIfConditions: condition.elseIfConditions
+            .map(
+              (condition) =>
+                  condition.withUpdatedNodeId(oldNodeId, newNodeId)
+                      as Condition,
+            )
+            .toList(),
+        ifCondition: condition.ifCondition.withUpdatedNodeId(
+          oldNodeId,
+          newNodeId,
+        ) as Condition,
+      ),
     };
   }
 }
@@ -1866,8 +1903,9 @@ extension ConditionsMapExt on Map<String, BaseCondition> {
 
 extension CanvasConditionsExt on CanvasConditions {
   bool hasCondition(String nodeId, String name) {
-    return conditions.values
-        .any((condition) => condition.hasProperty(nodeId, name));
+    return conditions.values.any(
+      (condition) => condition.hasProperty(nodeId, name),
+    );
   }
 }
 
@@ -1893,8 +1931,8 @@ extension VariantIterable on Iterable<Variant> {
 
 extension IterableExt<V> on Iterable<V> {
   Map<K, V> mapBy<K>(K Function(V) key) => <K, V>{
-        for (final value in this) key(value): value,
-      };
+    for (final value in this) key(value): value,
+  };
 
   int count(V item) => where((e) => e == item).length;
 }
@@ -1910,25 +1948,23 @@ extension TabBarIndicatorSizeExtensions on TabBarIndicatorSizeEnum {
 
 extension ListTileTitleAlignmentCExtensions on ListTileTitleAlignmentC {
   ListTileTitleAlignment toFlutter() => switch (this) {
-        ListTileTitleAlignmentC.threeLine => ListTileTitleAlignment.threeLine,
-        ListTileTitleAlignmentC.titleHeight =>
-          ListTileTitleAlignment.titleHeight,
-        ListTileTitleAlignmentC.top => ListTileTitleAlignment.top,
-        ListTileTitleAlignmentC.center => ListTileTitleAlignment.center,
-        ListTileTitleAlignmentC.bottom => ListTileTitleAlignment.bottom,
-      };
+    ListTileTitleAlignmentC.threeLine => ListTileTitleAlignment.threeLine,
+    ListTileTitleAlignmentC.titleHeight => ListTileTitleAlignment.titleHeight,
+    ListTileTitleAlignmentC.top => ListTileTitleAlignment.top,
+    ListTileTitleAlignmentC.center => ListTileTitleAlignment.center,
+    ListTileTitleAlignmentC.bottom => ListTileTitleAlignment.bottom,
+  };
 }
 
 extension TabAlignmentCExtensions on TabAlignmentC {
   /// Returns null for alignments that Flutter's [TabBar] rejects for the
   /// given scrollability, so it falls back to its default.
   TabAlignment? toFlutter({required bool isScrollable}) => switch (this) {
-        TabAlignmentC.start => isScrollable ? TabAlignment.start : null,
-        TabAlignmentC.startOffset =>
-          isScrollable ? TabAlignment.startOffset : null,
-        TabAlignmentC.fill => isScrollable ? null : TabAlignment.fill,
-        TabAlignmentC.center => TabAlignment.center,
-      };
+    TabAlignmentC.start => isScrollable ? TabAlignment.start : null,
+    TabAlignmentC.startOffset => isScrollable ? TabAlignment.startOffset : null,
+    TabAlignmentC.fill => isScrollable ? null : TabAlignment.fill,
+    TabAlignmentC.center => TabAlignment.center,
+  };
 }
 
 extension TextAlignVerticalEnumExt on TextAlignVerticalEnum {
@@ -1989,44 +2025,44 @@ extension BaseNodeExt on BaseNode {
 
 extension StrokeCapEnumExt on StrokeCapEnum {
   StrokeCap get flutterStrokeCap => switch (this) {
-        StrokeCapEnum.round => StrokeCap.round,
-        StrokeCapEnum.none => StrokeCap.butt,
-        StrokeCapEnum.square => StrokeCap.square,
-      };
+    StrokeCapEnum.round => StrokeCap.round,
+    StrokeCapEnum.none => StrokeCap.butt,
+    StrokeCapEnum.square => StrokeCap.square,
+  };
 }
 
 extension BlendModeCExt on BlendModeC {
   BlendMode get flutterBlendMode => switch (this) {
-        BlendModeC.src => BlendMode.src,
-        BlendModeC.srcOver => BlendMode.srcOver,
-        BlendModeC.srcATop => BlendMode.srcATop,
-        BlendModeC.srcIn => BlendMode.srcIn,
-        BlendModeC.srcOut => BlendMode.srcOut,
-        BlendModeC.dst => BlendMode.dst,
-        BlendModeC.dstOver => BlendMode.dstOver,
-        BlendModeC.dstIn => BlendMode.dstIn,
-        BlendModeC.dstOut => BlendMode.dstOut,
-        BlendModeC.dstATop => BlendMode.dstATop,
-        BlendModeC.clear => BlendMode.clear,
-        BlendModeC.multiply => BlendMode.multiply,
-        BlendModeC.screen => BlendMode.screen,
-        BlendModeC.overlay => BlendMode.overlay,
-        BlendModeC.darken => BlendMode.darken,
-        BlendModeC.lighten => BlendMode.lighten,
-        BlendModeC.colorDodge => BlendMode.colorDodge,
-        BlendModeC.colorBurn => BlendMode.colorBurn,
-        BlendModeC.hardLight => BlendMode.hardLight,
-        BlendModeC.softLight => BlendMode.softLight,
-        BlendModeC.difference => BlendMode.difference,
-        BlendModeC.exclusion => BlendMode.exclusion,
-        BlendModeC.hue => BlendMode.hue,
-        BlendModeC.saturation => BlendMode.saturation,
-        BlendModeC.color => BlendMode.color,
-        BlendModeC.luminosity => BlendMode.luminosity,
-        BlendModeC.xor => BlendMode.xor,
-        BlendModeC.plus => BlendMode.plus,
-        BlendModeC.modulate => BlendMode.modulate,
-      };
+    BlendModeC.src => BlendMode.src,
+    BlendModeC.srcOver => BlendMode.srcOver,
+    BlendModeC.srcATop => BlendMode.srcATop,
+    BlendModeC.srcIn => BlendMode.srcIn,
+    BlendModeC.srcOut => BlendMode.srcOut,
+    BlendModeC.dst => BlendMode.dst,
+    BlendModeC.dstOver => BlendMode.dstOver,
+    BlendModeC.dstIn => BlendMode.dstIn,
+    BlendModeC.dstOut => BlendMode.dstOut,
+    BlendModeC.dstATop => BlendMode.dstATop,
+    BlendModeC.clear => BlendMode.clear,
+    BlendModeC.multiply => BlendMode.multiply,
+    BlendModeC.screen => BlendMode.screen,
+    BlendModeC.overlay => BlendMode.overlay,
+    BlendModeC.darken => BlendMode.darken,
+    BlendModeC.lighten => BlendMode.lighten,
+    BlendModeC.colorDodge => BlendMode.colorDodge,
+    BlendModeC.colorBurn => BlendMode.colorBurn,
+    BlendModeC.hardLight => BlendMode.hardLight,
+    BlendModeC.softLight => BlendMode.softLight,
+    BlendModeC.difference => BlendMode.difference,
+    BlendModeC.exclusion => BlendMode.exclusion,
+    BlendModeC.hue => BlendMode.hue,
+    BlendModeC.saturation => BlendMode.saturation,
+    BlendModeC.color => BlendMode.color,
+    BlendModeC.luminosity => BlendMode.luminosity,
+    BlendModeC.xor => BlendMode.xor,
+    BlendModeC.plus => BlendMode.plus,
+    BlendModeC.modulate => BlendMode.modulate,
+  };
 }
 
 extension GenericExt<T extends Object> on T? {
@@ -2040,17 +2076,21 @@ extension GenericExt<T extends Object> on T? {
 
 extension BreakpointExt on Iterable<Breakpoint> {
   /// Retrieves the breakpoint applicable for the given width.
-  Breakpoint? findForWidth(double width) => firstWhereOrNull((breakpoint) =>
-      width >= breakpoint.lowerBound && width < breakpoint.upperBound);
+  Breakpoint? findForWidth(double width) => firstWhereOrNull(
+    (breakpoint) =>
+        width >= breakpoint.lowerBound && width < breakpoint.upperBound,
+  );
 }
 
 extension LayoutGroupsExt on Map<String, List<Breakpoint>> {
   /// Finds the layout group and breakpoint for the given canvas id.
   ({String? layoutGroupId, Breakpoint? breakpoint}) findByCanvasId(
-      String canvasId) {
+    String canvasId,
+  ) {
     for (final MapEntry(key: groupId, value: breakpoints) in entries) {
-      final breakpoint = breakpoints
-          .firstWhereOrNull((breakpoint) => breakpoint.nodeId == canvasId);
+      final breakpoint = breakpoints.firstWhereOrNull(
+        (breakpoint) => breakpoint.nodeId == canvasId,
+      );
       if (breakpoint != null) {
         return (layoutGroupId: groupId, breakpoint: breakpoint);
       }
@@ -2059,8 +2099,12 @@ extension LayoutGroupsExt on Map<String, List<Breakpoint>> {
   }
 
   Map toJson() {
-    return map((key, value) =>
-        MapEntry(key, value.map((breakpoint) => breakpoint.toJson()).toList()));
+    return map(
+      (key, value) => MapEntry(
+        key,
+        value.map((breakpoint) => breakpoint.toJson()).toList(),
+      ),
+    );
   }
 }
 
@@ -2094,30 +2138,29 @@ extension TextFieldFormatterExt on TextInputFormatterModel {
 
 extension AutovalidateModeCExt on AutovalidateModeC {
   AutovalidateMode get flutterAutovalidateMode => switch (this) {
-        AutovalidateModeC.disabled => AutovalidateMode.disabled,
-        AutovalidateModeC.always => AutovalidateMode.always,
-        AutovalidateModeC.onUserInteraction =>
-          AutovalidateMode.onUserInteraction,
-        AutovalidateModeC.onUnfocus => AutovalidateMode.onUnfocus,
-        AutovalidateModeC.onUserInteractionIfError =>
-          AutovalidateMode.onUserInteractionIfError,
-      };
+    AutovalidateModeC.disabled => AutovalidateMode.disabled,
+    AutovalidateModeC.always => AutovalidateMode.always,
+    AutovalidateModeC.onUserInteraction => AutovalidateMode.onUserInteraction,
+    AutovalidateModeC.onUnfocus => AutovalidateMode.onUnfocus,
+    AutovalidateModeC.onUserInteractionIfError =>
+      AutovalidateMode.onUserInteractionIfError,
+  };
 }
 
 extension TextInputActionCExt on TextInputActionC {
   TextInputAction get flutterTextInputAction => switch (this) {
-        TextInputActionC.none => TextInputAction.none,
-        TextInputActionC.unspecified => TextInputAction.unspecified,
-        TextInputActionC.done => TextInputAction.done,
-        TextInputActionC.go => TextInputAction.go,
-        TextInputActionC.search => TextInputAction.search,
-        TextInputActionC.send => TextInputAction.send,
-        TextInputActionC.next => TextInputAction.next,
-        TextInputActionC.previous => TextInputAction.previous,
-        TextInputActionC.continueAction => TextInputAction.continueAction,
-        TextInputActionC.join => TextInputAction.join,
-        TextInputActionC.route => TextInputAction.route,
-        TextInputActionC.emergencyCall => TextInputAction.emergencyCall,
-        TextInputActionC.newline => TextInputAction.newline,
-      };
+    TextInputActionC.none => TextInputAction.none,
+    TextInputActionC.unspecified => TextInputAction.unspecified,
+    TextInputActionC.done => TextInputAction.done,
+    TextInputActionC.go => TextInputAction.go,
+    TextInputActionC.search => TextInputAction.search,
+    TextInputActionC.send => TextInputAction.send,
+    TextInputActionC.next => TextInputAction.next,
+    TextInputActionC.previous => TextInputAction.previous,
+    TextInputActionC.continueAction => TextInputAction.continueAction,
+    TextInputActionC.join => TextInputAction.join,
+    TextInputActionC.route => TextInputAction.route,
+    TextInputActionC.emergencyCall => TextInputAction.emergencyCall,
+    TextInputActionC.newline => TextInputAction.newline,
+  };
 }
