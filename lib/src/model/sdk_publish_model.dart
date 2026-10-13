@@ -426,7 +426,7 @@ class SDKPublishLayout extends PrivacyBase {
   final String projectId;
 
   /// A list of the nodes that makes up this layout.
-  /// CanvasID -> <NodeID -> Node>
+  /// `CanvasID -> <NodeID -> Node>`
   @CanvasesMapConverter()
   final Map<String, Map<String, BaseNode>> canvases;
 

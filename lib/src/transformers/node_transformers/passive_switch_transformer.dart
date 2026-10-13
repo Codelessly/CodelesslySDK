@@ -134,7 +134,7 @@ class TransformerSwitch extends StatelessWidget {
             activeTrackColor: node.properties.activeTrackColor.toFlutterColor(),
             inactiveTrackColor:
                 node.properties.inactiveTrackColor.toFlutterColor(),
-            activeColor: node.properties.activeThumbColor.toFlutterColor(),
+            activeThumbColor: node.properties.activeThumbColor.toFlutterColor(),
             inactiveThumbColor:
                 node.properties.inactiveThumbColor.toFlutterColor(),
             hoverColor: node.properties.hoverColor.toFlutterColor(),

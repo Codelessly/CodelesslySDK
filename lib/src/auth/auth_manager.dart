@@ -67,8 +67,8 @@ class AuthManager {
     required this.cacheManager,
     required this.firebaseAuth,
     required this.client,
-    AuthData? authData,
-  }) : _authData = authData {
+    this._authData,
+  }) {
     if (_authData != null) {
       _authStreamController.add(_authData);
     }

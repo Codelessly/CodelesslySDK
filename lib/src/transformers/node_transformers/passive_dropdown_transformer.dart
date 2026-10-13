@@ -48,7 +48,7 @@ class PassiveDropdownTransformer extends NodeWidgetTransformer<DropdownNode> {
     return buildDropdownFromNode(context, node, settings);
   }
 
-  void onTap(context, DropdownNode node) =>
+  void onTap(BuildContext context, DropdownNode node) =>
       FunctionsRepository.triggerAction(context, node: node, TriggerType.click);
 
   void onChanged(BuildContext context, DropdownNode node, int index,

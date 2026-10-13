@@ -164,7 +164,7 @@ class TransformerSlider extends StatelessWidget {
                 )
               : null,
           showValueIndicator: node.properties.showLabel
-              ? ShowValueIndicator.always
+              ? ShowValueIndicator.onDrag
               : ShowValueIndicator.never,
           activeTickMarkColor:
               node.properties.activeTickMarkColor.toFlutterColor(),

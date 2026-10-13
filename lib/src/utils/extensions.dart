@@ -302,40 +302,38 @@ extension CornerRadiusHelper on CornerRadius {
 }
 
 extension ColorHelper on flutter.Color {
-  ColorRGB get colorRGB =>
-      ColorRGB(r: red / 255.0, g: green / 255.0, b: blue / 255.0);
+  ColorRGB get colorRGB => ColorRGB(r: r, g: g, b: b);
 
-  ColorRGBA get colorRGBA => ColorRGBA(
-      r: red / 255.0, g: green / 255.0, b: blue / 255.0, a: alpha / 255.0);
+  ColorRGBA get colorRGBA => ColorRGBA(r: r, g: g, b: b, a: a);
 
   Color darken([double percent = 10]) {
     assert(1 <= percent && percent <= 100);
     var f = 1 - percent / 100;
-    return Color.fromARGB(
-        alpha, (red * f).round(), (green * f).round(), (blue * f).round());
+    return Color.from(alpha: a, red: r * f, green: g * f, blue: b * f);
   }
 
   // lighten
   Color lighten([double percent = 10]) {
     assert(1 <= percent && percent <= 100);
     var p = percent / 100;
-    return Color.fromARGB(
-        alpha,
-        red + ((255 - red) * p).round(),
-        green + ((255 - green) * p).round(),
-        blue + ((255 - blue) * p).round());
+    return Color.from(
+      alpha: a,
+      red: r + (1 - r) * p,
+      green: g + (1 - g) * p,
+      blue: b + (1 - b) * p,
+    );
   }
 
   ColorRGB toColorRGB() => colorRGB;
 
   ColorRGBA toColorRGBA() => colorRGBA;
 
-  String get hex => value.toRadixString(16).padLeft(8, '0').toUpperCase();
+  String get hex => toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase();
 
   PaintModel toPaint([String? id]) => PaintModel.solid(
         id: id ?? generateId(),
         visible: true,
-        opacity: opacity,
+        opacity: a,
         color: toColorRGB(),
       );
 
@@ -376,7 +374,7 @@ extension ColorRGBAHelper on ColorRGBA {
   PaintModel toPaint([String? id]) => PaintModel.solid(
       id: id ?? generateId(),
       visible: true,
-      opacity: toFlutterColor().opacity,
+      opacity: toFlutterColor().a,
       color: toRGB());
 }
 

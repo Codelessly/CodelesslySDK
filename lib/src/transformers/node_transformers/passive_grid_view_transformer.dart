@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
@@ -126,7 +127,7 @@ class PassiveGridViewWidget extends StatelessWidget {
                   key: ValueKey(index),
                   item: IndexedItem(
                     index,
-                    {if (id != null) 'id': id, ...?data},
+                    {'id': ?id, ...?data},
                   ),
                   child: Builder(
                     builder: (context) {
@@ -244,7 +245,8 @@ class GridViewBuilder extends StatelessWidget {
         padding: padding,
         physics: physics,
         scrollDirection: scrollDirection,
-        cacheExtent: cacheExtent,
+        scrollCacheExtent:
+            cacheExtent == null ? null : ScrollCacheExtent.pixels(cacheExtent!),
         reverse: reverse,
         clipBehavior: clipBehavior,
         itemBuilder: itemBuilder!,

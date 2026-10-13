@@ -239,10 +239,10 @@ ButtonStyle createMasterButtonStyle(ButtonNode node,
       );
     case ButtonTypeEnum.icon:
       Color? primary;
-      if (buttonColor.toFlutterColor().opacity > 0 &&
-          buttonColor.toFlutterColor().opacity < 0.7) {
+      if (buttonColor.toFlutterColor().a > 0 &&
+          buttonColor.toFlutterColor().a < 0.7) {
         primary = buttonColor.toFlutterColor().withValues(alpha: 0.1);
-      } else if (buttonColor.toFlutterColor().opacity == 0) {
+      } else if (buttonColor.toFlutterColor().a == 0) {
         final iconColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
               node,
               'iconColor',
@@ -319,7 +319,7 @@ Widget? retrieveIconWidget(
       );
     case IconTypeEnum.image:
       if (icon.iconImage == null) return null;
-      if (color != null && color.opacity == 0) {
+      if (color != null && color.a == 0) {
         // when opacity is zero, we need to display original colors of
         // the image icon which `ImageIcon` widget cannot do. So we
         // use the raw Image widget.

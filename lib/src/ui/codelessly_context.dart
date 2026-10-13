@@ -62,18 +62,17 @@ class CodelesslyContext with ChangeNotifier, Equatable {
   /// A notifier that is used to rebuild individual nodes.
   final ValueNotifier<String> nodeRebuildNotifier = ValueNotifier('');
 
-  /// Creates a [CodelesslyContext] with the given [data], [functions], and
+  /// Creates a [CodelesslyContext] with the given [_data], [functions], and
   /// [nodeValues].
   CodelesslyContext({
-    required Map<String, dynamic> data,
+    required this._data,
     required this.functions,
     required Map<String, WidgetBuilder>? externalComponentBuilders,
     required this.nodeValues,
     required this.variables,
     required this.conditions,
     required this.layoutID,
-  })  : _data = data,
-        _externalComponentBuilders = externalComponentBuilders ?? {};
+  })  : _externalComponentBuilders = externalComponentBuilders ?? {};
 
   /// Creates a [CodelesslyContext] with empty an empty map of each property.
   CodelesslyContext.empty({String? layoutID})

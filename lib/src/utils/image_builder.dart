@@ -233,7 +233,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         repeat: repeat,
         color: widget.color,
         colorBlendMode: colorBlendMode,
-        errorBuilder: (context, _, __) =>
+        errorBuilder: (context, _, _) =>
             (widget.errorBuilder ?? _defaultErrorBuilder)(context),
       );
     } else {
@@ -307,7 +307,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
       repeat: repeat,
       color: widget.color,
       colorBlendMode: colorBlendMode,
-      errorBuilder: (context, _, __) =>
+      errorBuilder: (context, _, _) =>
           (widget.errorBuilder ?? _defaultErrorBuilder)(context),
     );
   }

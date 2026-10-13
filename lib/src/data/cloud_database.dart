@@ -9,8 +9,6 @@ import '../logging/debug_logger.dart';
 import '../logging/stat_tracker.dart';
 import '../utils/constants.dart';
 
-const String _label = 'Cloud Database';
-
 abstract final class PrivateDocumentFields {
   PrivateDocumentFields._();
 

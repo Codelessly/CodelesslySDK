@@ -26,7 +26,7 @@ typedef CodelesslyWidgetErrorBuilder = Widget Function(
   ErrorLog error,
 );
 
-Widget _defaultLayoutBuilder(context, layout) => layout;
+Widget _defaultLayoutBuilder(BuildContext context, Widget layout) => layout;
 
 /// SDK widget that requires the SDK to be initialized beforehand.
 ///

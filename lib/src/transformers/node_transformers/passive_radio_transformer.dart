@@ -24,8 +24,9 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
     required double width,
     String value = '',
     String? groupValue,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+    ),
   }) {
     final node = RadioNode(
       id: '',
@@ -69,7 +70,10 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
   }
 
   Widget buildFromNode(
-      BuildContext context, RadioNode node, WidgetBuildSettings settings) {
+    BuildContext context,
+    RadioNode node,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveRadioWidget(
       node: node,
       settings: settings,
@@ -79,11 +83,19 @@ class PassiveRadioTransformer extends NodeWidgetTransformer<RadioNode> {
 
   void onChanged(BuildContext context, RadioNode node, String? value) {
     NodeStateProvider.setState(context, value);
-    FunctionsRepository.setPropertyValue(context,
-        node: node, property: 'groupValue', value: value);
+    FunctionsRepository.setPropertyValue(
+      context,
+      node: node,
+      property: 'groupValue',
+      value: value,
+    );
 
     FunctionsRepository.triggerAction(
-        context, node: node, TriggerType.click, value: value);
+      context,
+      node: node,
+      TriggerType.click,
+      value: value,
+    );
   }
 
   void onAction(Reaction reaction) {
@@ -116,13 +128,15 @@ class PassiveRadioWidget extends StatelessWidget {
       context,
       variablesOverrides: variablesOverrides,
     );
-    final value = PropertyValueDelegate.getPropertyValue<String>(
+    final value =
+        PropertyValueDelegate.getPropertyValue<String>(
           node,
           'value',
           scopedValues: scopedValues,
         ) ??
         node.value;
-    final groupValue = PropertyValueDelegate.getPropertyValue<String>(
+    final groupValue =
+        PropertyValueDelegate.getPropertyValue<String>(
           node,
           'groupValue',
           scopedValues: scopedValues,
@@ -136,22 +150,25 @@ class PassiveRadioWidget extends StatelessWidget {
       height: node.basicBoxLocal.height,
       child: Transform.scale(
         scale: scale,
-        child: Radio<String>(
-          value: value,
+        child: RadioGroup<String>(
           groupValue: groupValue,
-          autofocus: node.properties.autofocus,
-          activeColor: node.properties.activeColor.toFlutterColor(),
-          hoverColor: node.properties.hoverColor.toFlutterColor(),
-          focusColor: node.properties.focusColor.toFlutterColor(),
           onChanged: (value) => onChanged?.call(context, value),
-          toggleable: node.properties.toggleable,
-          splashRadius: node.properties.splashRadius,
-          fillColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return node.properties.activeColor.toFlutterColor();
-            }
-            return node.properties.inactiveColor.toFlutterColor();
-          }),
+          child: Radio<String>(
+            value: value,
+            enabled: onChanged != null,
+            autofocus: node.properties.autofocus,
+            activeColor: node.properties.activeColor.toFlutterColor(),
+            hoverColor: node.properties.hoverColor.toFlutterColor(),
+            focusColor: node.properties.focusColor.toFlutterColor(),
+            toggleable: node.properties.toggleable,
+            splashRadius: node.properties.splashRadius,
+            fillColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return node.properties.activeColor.toFlutterColor();
+              }
+              return node.properties.inactiveColor.toFlutterColor();
+            }),
+          ),
         ),
       ),
     );

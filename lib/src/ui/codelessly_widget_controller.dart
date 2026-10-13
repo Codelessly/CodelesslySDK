@@ -7,7 +7,7 @@ import '../../codelessly_sdk.dart';
 import '../logging/debug_logger.dart';
 import '../logging/error_logger.dart';
 
-Widget _defaultLayoutBuilder(context, layout) => layout;
+Widget _defaultLayoutBuilder(BuildContext context, Widget layout) => layout;
 
 /// The provides advanced explicit control over
 /// the state of the instantiated [CodelesslyWidget] that it is attached to.

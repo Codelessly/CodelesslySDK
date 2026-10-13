@@ -118,8 +118,8 @@ class DataManager {
     required this.localDataRepository,
     required this.firebaseFirestore,
     required this.errorLogger,
-    SDKPublishModel? publishModel,
-  }) : _publishModel = publishModel;
+    this._publishModel,
+  });
 
   /// Initializes the instance.
   ///

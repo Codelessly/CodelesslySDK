@@ -145,7 +145,7 @@ class PassiveRectangleWidget extends StatelessWidget {
             node,
             [
               ...children,
-              if (portalWidget != null) portalWidget,
+              ?portalWidget,
             ],
             stackAlignment: stackAlignment,
             applyPadding: applyPadding,

@@ -90,9 +90,9 @@ class CodelesslyCacheManager extends CacheManager {
     DebugLogger.instance.printFunction('store(key: $key)', name: name);
     try {
       if (value is String || value is num || value is bool || value is List) {
-        return box.put(key, value);
+        return await box.put(key, value);
       }
-      return box.put(key, jsonEncode(value));
+      return await box.put(key, jsonEncode(value));
     } catch (e, str) {
       ErrorLogger.instance.captureException(
         e,
