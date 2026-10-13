@@ -310,6 +310,11 @@ class TransformerChip extends StatelessWidget {
       ),
     };
 
-    return AdaptiveNodeBox(node: node, child: chip);
+    // Chips draw ink and need a Material ancestor, which a layout may not
+    // provide (e.g. when measured offscreen).
+    return AdaptiveNodeBox(
+      node: node,
+      child: Material(type: MaterialType.transparency, child: chip),
+    );
   }
 }
