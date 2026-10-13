@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -189,7 +188,7 @@ class AuthManager {
     DebugLogger.instance.printFunction('reset()', name: name);
     DebugLogger.instance.printInfo('Invalidating...', name: name);
     _authData = null;
-    _authStreamController.add(_authData);
+    if (!_disposed) _authStreamController.add(_authData);
     _idTokenChangeListener?.cancel();
   }
 
@@ -237,7 +236,8 @@ class AuthManager {
     // https://github.com/firebase/flutterfire/issues/11768#issuecomment-1888363494
     // A temporary fix for windows platform until the issue is resolved.
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
-      claims = JwtDecoder.decode(result.toString());
+      final String? token = result.token;
+      claims = token == null ? {} : JwtDecoder.decode(token);
     } else {
       claims = result.claims ?? {};
     }
@@ -269,6 +269,10 @@ class AuthManager {
 
     return projectIds.contains(projectId);
   }
+
+  /// How long [postAuthSuccess] waits for the project claim to appear on the
+  /// user's token before failing authentication.
+  static const Duration claimsPropagationTimeout = Duration(seconds: 30);
 
   /// This method is called after successful authentication of the token.
   /// It checks if the user has access to the project via token claims and if
@@ -314,37 +318,50 @@ class AuthManager {
     final Completer completer = Completer();
 
     // Listen to Firebase Auth state changes.
-    _idTokenChangeListener =
-        firebaseAuth.userChanges().listen((User? event) async {
-      // If the completer is already completed, return.
-      // We check this because getIdTokenResult may take a while to complete
-      // and this userChanges() event may have already triggered a new event.
-      if (completer.isCompleted) return;
+    _idTokenChangeListener = firebaseAuth.userChanges().listen(
+      (User? event) async {
+        // If the completer is already completed, return.
+        // We check this because getIdTokenResult may take a while to complete
+        // and this userChanges() event may have already triggered a new event.
+        if (completer.isCompleted) return;
 
-      DebugLogger.instance.printInfo(
-          'Firebase Auth state changed. Checking claims...',
-          name: name);
-      _idTokenResult = await event?.getIdTokenResult(true);
-
-      // If the completer is already completed, return.
-      // We check this because getIdTokenResult may take a while to complete
-      // and this userChanges() event may have already triggered a new event.
-      if (completer.isCompleted) return;
-
-      // Check if the user has access to the project.
-      if (checkClaimsForProject(_idTokenResult, authData.projectId)) {
         DebugLogger.instance.printInfo(
-            'User has access to project since the claim exists. Completing Firebase Auth process.',
+            'Firebase Auth state changed. Checking claims...',
             name: name);
-        completer.complete(event);
-      }
-    });
+        try {
+          _idTokenResult = await event?.getIdTokenResult(true);
+        } catch (e, stackTrace) {
+          if (!completer.isCompleted) completer.completeError(e, stackTrace);
+          return;
+        }
 
-    // Wait for the completer to complete.
-    await completer.future;
+        // If the completer is already completed, return.
+        // We check this because getIdTokenResult may take a while to complete
+        // and this userChanges() event may have already triggered a new event.
+        if (completer.isCompleted) return;
 
-    // Cancel the listener for Firebase Auth state changes.
-    _idTokenChangeListener?.cancel();
+        // Check if the user has access to the project.
+        if (checkClaimsForProject(_idTokenResult, authData.projectId)) {
+          DebugLogger.instance.printInfo(
+              'User has access to project since the claim exists. Completing Firebase Auth process.',
+              name: name);
+          completer.complete(event);
+        }
+      },
+      onError: (Object e, StackTrace stackTrace) {
+        if (!completer.isCompleted) completer.completeError(e, stackTrace);
+      },
+    );
+
+    // Wait for the claim to arrive, but not forever: a failure here must
+    // surface as an authentication error instead of hanging initialization.
+    try {
+      await completer.future.timeout(claimsPropagationTimeout);
+    } finally {
+      // Cancel the listener for Firebase Auth state changes.
+      await _idTokenChangeListener?.cancel();
+      _idTokenChangeListener = null;
+    }
 
     DebugLogger.instance.printInfo(
         'Auth state changed successfully as expected. Firebase Auth complete.',
@@ -358,8 +375,12 @@ class AuthManager {
     try {
       DebugLogger.instance.printInfo('Authenticating token...', name: name);
 
+      final String? userToken = _idTokenResult?.token;
+      if (userToken == null) {
+        throw StateError('Cannot authenticate without a Firebase ID token.');
+      }
       final AuthData? authData = await verifyProjectAuthToken(
-        userToken: _idTokenResult!.token!,
+        userToken: userToken,
         config: config,
         client: client,
         postSuccess: postAuthSuccess,
@@ -391,7 +412,7 @@ class AuthManager {
             message: 'Failed to authenticate token', type: 'auth_failed');
         return;
       }
-    } on SocketException catch (e, str) {
+    } on http.ClientException catch (e, str) {
       ErrorLogger.instance.captureException(e,
           message: 'Network error during authentication',
           type: 'network_error',
@@ -427,7 +448,7 @@ class AuthManager {
     required Future<void> Function(AuthData authData) postSuccess,
   }) async {
     DebugLogger.instance.printFunction(
-      'verifyProjectAuthToken(authToken: ${config.authToken}, slug: ${config.slug})',
+      'verifyProjectAuthToken(slug: ${config.slug})',
       name: name,
     );
 
@@ -463,15 +484,13 @@ class AuthManager {
         // success.
         await postSuccess(authData);
 
-        DebugLogger.instance
-            .printInfo('Auth token response:\n${result.body}', name: name);
 
         return authData;
       } else {
         // If the status code of the response is not 200, the authentication failed.
         // Log the status code, reason, and body of the response.
         DebugLogger.instance.printInfo(
-            'Failed to authenticate token.\nStatus Code: ${result.statusCode}.\nReason: ${result.reasonPhrase}\nBody: ${result.body}',
+            'Failed to authenticate token.\nStatus Code: ${result.statusCode}.\nReason: ${result.reasonPhrase}',
             name: name);
       }
     } catch (e, stacktrace) {

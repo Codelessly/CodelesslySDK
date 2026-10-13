@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
 import '../logging/debug_logger.dart';
+import '../logging/error_logger.dart';
 
 /// A widget that retrieves a layout from a [CodelesslyWidgetController].
 class CodelesslyLayoutRetriever extends StatefulWidget {
@@ -284,8 +287,24 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
           'Making api request for onLoad canvas action',
           name: CodelesslyLayoutRetriever.name,
         );
-        FunctionsRepository.makeApiRequestFromAction(
-            canvasAction, context, notifier);
+        // The variable carries the error state; report the failure instead
+        // of leaving it as an unhandled async error.
+        unawaited(
+          FunctionsRepository.makeApiRequestFromAction(
+            canvasAction,
+            context,
+            notifier,
+          ).then<void>(
+            (_) {},
+            onError: (Object e, StackTrace stackTrace) =>
+                ErrorLogger.instance.captureException(
+              e,
+              message: 'onLoad API call failed',
+              type: 'api_call_failed',
+              stackTrace: stackTrace,
+            ),
+          ),
+        );
       }
     }
   }

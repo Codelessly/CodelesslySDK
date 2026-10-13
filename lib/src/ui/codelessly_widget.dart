@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
@@ -345,12 +346,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         // Breakpoint changed. Everything needs to be reloaded.
         canvasID = newCanvasID;
         final breakpoint = _effectiveController
-            .publishModel!.layouts[effectiveLayoutID!]!.breakpoints
-            .firstWhere((breakpoint) => breakpoint.nodeId == canvasID);
+            .publishModel!.layouts[effectiveLayoutID!]?.breakpoints
+            .firstWhereOrNull((breakpoint) => breakpoint.nodeId == canvasID);
 
         // Notify breakpoints listeners.
-        _effectiveController.effectiveCodelessly
-            .notifyBreakpointsListeners(context, breakpoint);
+        if (breakpoint != null) {
+          _effectiveController.effectiveCodelessly
+              .notifyBreakpointsListeners(context, breakpoint);
+        }
       }
     }
   }
@@ -364,13 +367,10 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           widget.codelesslyContext == null) {
         // explicitly provided context is removed
         codelesslyContext = codelesslyContext.copyWith();
-      } else if (oldWidget.codelesslyContext == null &&
-          widget.codelesslyContext != null) {
-        // explicitly provided context is added
+      } else {
+        // explicitly provided context is added or replaced
         codelesslyContext = widget.codelesslyContext!;
       }
-      // explicitly provided context is updated
-      codelesslyContext = widget.codelesslyContext!;
     }
 
     if (widget.data != codelesslyContext.data) {
@@ -379,6 +379,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       // the build method is called since setting the data will trigger a
       // rebuild and it will crash if this happens when a rebuild is ongoing.
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        if (!mounted) return;
         for (final notifier in codelesslyContext.variables.values) {
           notifier.value =
               notifier.value.copyWith(value: widget.data[notifier.value.name]);
@@ -397,15 +398,17 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     }
 
     if (widget.controller == null && oldWidget.controller != null) {
-      _controller = oldWidget.controller ?? createDefaultController();
+      // The external controller was removed. It belongs to the caller, so
+      // create and own a new internal one instead of adopting it.
+      _controller = createDefaultController();
+      _effectiveController.initialize();
+      codelesslyContext.layoutID = _effectiveController.layoutID;
     } else if (widget.controller != null && oldWidget.controller == null) {
       _controller!.dispose();
       _controller = null;
-    }
-
-    // If the controller is intrinsic, then we need to dispose of the old one
-    // and create a new one if any of the values change.
-    if (widget.controller == null) {
+    } else if (widget.controller == null) {
+      // If the controller is intrinsic, then we need to dispose of the old one
+      // and create a new one if any of the values change.
       if (widget.publishSource != oldWidget.publishSource ||
           widget.layoutID != oldWidget.layoutID ||
           widget.codelessly != oldWidget.codelessly) {

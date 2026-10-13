@@ -208,6 +208,18 @@ class DataManager {
 
         if (_publishModel == null) {
           await publishBundleFuture;
+        } else {
+          // Background refresh: report failures instead of leaving them as
+          // unhandled async errors.
+          unawaited(publishBundleFuture.catchError((Object e, StackTrace st) {
+            errorLogger.captureException(
+              e,
+              message:
+                  'Failed to refresh publish bundle for slug $slug in background.',
+              type: 'bundle_download_failed',
+              stackTrace: st,
+            );
+          }));
         }
 
         _logTime(stopwatch);
@@ -344,6 +356,11 @@ class DataManager {
     // in cache, or it's going to be updated with new data.
     final Future<SDKPublishModel> firstPublishEvent =
         listenToPublishModel(authData.projectId);
+    if (_publishModel != null) {
+      // The cached model is used and the first event is not awaited. Its
+      // errors are already reported by the stream listener.
+      firstPublishEvent.ignore();
+    }
 
     // If the publish model is still null, then we need to wait for the first
     // publish model to arrive from the server via the stream above.
@@ -750,6 +767,9 @@ class DataManager {
           type: 'publish_model_stream_failed',
           stackTrace: str,
         );
+        // Without this, initialization would wait forever for a first event
+        // that never comes, e.g. on a Firestore permission error.
+        if (!completer.isCompleted) completer.completeError(error, str);
       });
 
     return completer.future;
@@ -1590,7 +1610,7 @@ class DataManager {
         name: name);
     final FontLoader fontLoader = FontLoader(font.fullFontName);
 
-    fontLoader.addFont(Future.value(ByteData.view(fontBytes.buffer)));
+    fontLoader.addFont(Future.value(ByteData.sublistView(fontBytes)));
 
     return fontLoader.load().then((_) {
       DebugLogger.instance.printInfo(

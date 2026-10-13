@@ -207,8 +207,25 @@ class FirestoreCloudDatabase extends CloudDatabase {
   /// Reference to the Firestore instance.
   final FirebaseFirestore firestore;
 
-  /// Subscriptions to the streams that are being listened to.
-  final List<StreamSubscription> _subscriptions = [];
+  /// Active cloud streams keyed by the id of the variable they update. A
+  /// variable only follows its latest query, so starting a new stream for it
+  /// cancels the previous one.
+  final Map<String, StreamSubscription> _subscriptions = {};
+
+  void _replaceSubscription(
+    Observable<VariableData> variable,
+    StreamSubscription subscription,
+  ) {
+    _subscriptions.remove(variable.value.id)?.cancel();
+    _subscriptions[variable.value.id] = subscription;
+  }
+
+  void _cancelSubscriptions() {
+    for (final subscription in _subscriptions.values) {
+      subscription.cancel();
+    }
+    _subscriptions.clear();
+  }
 
   /// Creates a [FirestoreCloudDatabase] with the given [identifier] and
   /// [firestore] instance.
@@ -494,20 +511,17 @@ class FirestoreCloudDatabase extends CloudDatabase {
       },
     );
 
-    // Add subscription to the list of subscriptions.
-    _subscriptions.add(subscription);
+    _replaceSubscription(variable, subscription);
   }
 
   @override
   void reset() {
-    // Cancel all subscriptions.
-    _subscriptions.forEach((sub) => sub.cancel());
+    _cancelSubscriptions();
   }
 
   @override
   void dispose() {
-    // Cancel all subscriptions.
-    _subscriptions.forEach((sub) => sub.cancel());
+    _cancelSubscriptions();
     super.dispose();
   }
 
@@ -580,8 +594,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
       },
     );
 
-    // Add subscription to the list of subscriptions.
-    _subscriptions.add(subscription);
+    _replaceSubscription(variable, subscription);
   }
 }
 

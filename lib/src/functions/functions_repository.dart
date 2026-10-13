@@ -14,6 +14,7 @@ import '../../codelessly_sdk.dart';
 import '../logging/stat_tracker.dart';
 import '../ui/codelessly_dialog_widget.dart';
 import '../logging/debug_logger.dart';
+import '../logging/error_logger.dart';
 
 /// Enum representing the types of API requests.
 enum ApiRequestType {
@@ -1012,17 +1013,45 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       );
       if (!reaction.action.nonBlocking) {
         // Await only if this action is not a non-blocking. It must not be
-        // awaited if it is non-blocking.
-        await future;
+        // awaited if it is non-blocking. A failed action stops the chain,
+        // since later actions usually depend on it.
+        try {
+          await future;
+        } catch (e, stackTrace) {
+          _reportActionError(reaction, e, stackTrace);
+          return true;
+        }
       } else {
         DebugLogger.instance.printInfo(
           'Skipping awaiting for action ${reaction.name} as it is non-blocking...',
           name: name,
         );
+        if (future is Future) {
+          unawaited(
+            future.then<void>(
+              (_) {},
+              onError: (Object e, StackTrace stackTrace) =>
+                  _reportActionError(reaction, e, stackTrace),
+            ),
+          );
+        }
       }
     }
 
     return true;
+  }
+
+  static void _reportActionError(
+    Reaction reaction,
+    Object error,
+    StackTrace stackTrace,
+  ) {
+    ErrorLogger.instance.captureException(
+      error,
+      message: 'Action ${reaction.name} failed',
+      type: 'action_failed',
+      stackTrace: stackTrace,
+    );
   }
 
   static void callFunction(BuildContext context, CallFunctionAction action) {

@@ -106,6 +106,10 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
   late int initialIndex;
   late int length;
 
+  /// TabController asserts on an index outside the tabs, which happens when
+  /// data-bound tabs shrink below the configured initial index.
+  int get _clampedIndex => length == 0 ? 0 : initialIndex.clamp(0, length - 1);
+
   @override
   void initState() {
     super.initState();
@@ -114,7 +118,7 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
     controller = TabController(
       length: widget.node.properties.tabs.length,
       vsync: this,
-      initialIndex: initialIndex,
+      initialIndex: _clampedIndex,
     );
   }
 

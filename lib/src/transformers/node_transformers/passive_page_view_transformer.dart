@@ -69,7 +69,7 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
     super.didUpdateWidget(oldWidget);
     if (widget.node.properties.initialPage !=
         oldWidget.node.properties.initialPage) {
-      controller.jumpToPage(widget.node.properties.initialPage);
+      _jumpToPage(widget.node.properties.initialPage);
     }
 
     final ScopedValues scopedValues = ScopedValues.of(context);
@@ -87,9 +87,21 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
       );
       if (currentPropertyValue != null &&
           controller.page?.round() != currentPropertyValue) {
-        controller.jumpToPage(currentPropertyValue);
+        _jumpToPage(currentPropertyValue);
       }
     }
+  }
+
+  /// Jumps once the controller is attached; didUpdateWidget can run before
+  /// the page view has laid out, when jumpToPage would throw.
+  void _jumpToPage(int page) {
+    if (controller.hasClients) {
+      controller.jumpToPage(page);
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && controller.hasClients) controller.jumpToPage(page);
+    });
   }
 
   @override
