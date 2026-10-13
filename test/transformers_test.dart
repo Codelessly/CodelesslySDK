@@ -34,6 +34,10 @@ List<BaseNode> standaloneNodes() => [
     basicBoxLocal: NodeBox(0, 0, 100, 20),
     characters: 'Hello',
   ),
+  BadgeNode.empty(),
+  for (final type in ChipType.values)
+    ChipNode.fromProperties(ChipProperties(chipType: type)),
+  SegmentedButtonNode.empty(),
   AccordionNode(
     id: 'accordion',
     name: 'Accordion',

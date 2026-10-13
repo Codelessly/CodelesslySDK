@@ -1,3 +1,22 @@
+## 7.1.0
+
+- Require codelessly_api 5.1.0.
+- Render the new badge, chip and segmented button nodes:
+  - `PassiveBadgeTransformer` builds a Material 3 `Badge` as a dot, label
+    or count (capped at `maxCount` like `Badge.count`), around the node
+    named by `childID` when it exists. `label` and `isLabelVisible` can be
+    bound to variables, and click reactions work like on other nodes.
+  - `PassiveChipTransformer` builds a `Chip`, `ActionChip`, `ChoiceChip`,
+    `FilterChip` or `InputChip`. Presses and delete-icon presses fire click
+    reactions; selecting a choice or filter chip updates its `selected`
+    value and fires changed (and click) reactions with the new value.
+  - `PassiveSegmentedButtonTransformer` builds a `SegmentedButton<String>`.
+    Selecting segments updates its `selected` value and fires changed
+    reactions with the list of selected values. Selections it cannot show
+    (unknown values, several values without multi-selection) are dropped
+    instead of failing Flutter's assertions.
+  - Previews keep chip and segmented button selection as local state.
+
 ## 7.0.1
 
 - Fix published layouts failing with "Node with id  not found" on web
