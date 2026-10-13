@@ -1,3 +1,9 @@
+## 7.1.1
+
+- A badge with no child no longer fills loose constraints, so a badge set
+  to wrap its content sizes to the badge.
+- Chips no longer throw when no `Material` ancestor is present.
+
 ## 7.1.0
 
 - Require codelessly_api 5.1.0.

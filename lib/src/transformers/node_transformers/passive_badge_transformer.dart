@@ -107,9 +107,15 @@ class PassiveBadgeWidget extends StatelessWidget {
     return AdaptiveNodeBox(
       node: node,
       // Without a child, the badge keeps its own size and sits at its
-      // alignment inside the node's box.
+      // alignment inside the node's box. The size factors keep it from
+      // filling loose constraints when the node wraps its content.
       child: childNode == null
-          ? Align(alignment: alignment, child: badge)
+          ? Align(
+              alignment: alignment,
+              widthFactor: 1,
+              heightFactor: 1,
+              child: badge,
+            )
           : badge,
     );
   }

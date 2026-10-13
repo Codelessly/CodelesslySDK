@@ -362,4 +362,79 @@ void main() {
     expect(PassiveSegmentedButtonWidget.parseSelection('[]'), isEmpty);
     expect(PassiveSegmentedButtonWidget.parseSelection('a'), {'a'});
   });
+
+  // The editor measures wrap-content nodes offscreen, under loose constraints
+  // and without a Material ancestor.
+  testWidgets('badge, chip and segmented button wrap their content', (
+    tester,
+  ) async {
+    const measure = WidgetBuildSettings(
+      debugLabel: 'test',
+      withMargins: false,
+      withConstraints: false,
+      withAlignment: false,
+      isPreview: true,
+    );
+    final nodes = <BaseNode>[
+      BadgeNode(
+        id: 'badge',
+        name: 'Badge',
+        basicBoxLocal: NodeBox(0, 0, 48, 48),
+        horizontalFit: SizeFit.shrinkWrap,
+        verticalFit: SizeFit.shrinkWrap,
+        properties: BadgeProperties(label: '3'),
+      ),
+      for (final type in ChipType.values)
+        ChipNode(
+          id: 'chip-${type.name}',
+          name: 'Chip',
+          basicBoxLocal: NodeBox(0, 0, 100, 32),
+          horizontalFit: SizeFit.shrinkWrap,
+          verticalFit: SizeFit.shrinkWrap,
+          properties: ChipProperties(chipType: type, label: 'Label'),
+        ),
+      SegmentedButtonNode(
+        id: 'segmented',
+        name: 'Segmented',
+        basicBoxLocal: NodeBox(0, 0, 200, 40),
+        horizontalFit: SizeFit.shrinkWrap,
+        verticalFit: SizeFit.shrinkWrap,
+        properties: SegmentedButtonProperties(
+          segments: const [
+            ButtonSegmentModel(value: 'a', label: 'A'),
+            ButtonSegmentModel(value: 'b', label: 'B'),
+          ],
+          selected: const ['a'],
+        ),
+      ),
+    ];
+    final manager = managerFor(nodes);
+    for (final node in nodes) {
+      final key = GlobalKey();
+      await tester.pumpWidget(
+        ChangeNotifierProvider<CodelesslyContext>.value(
+          value: CodelesslyContext.empty(),
+          // MaterialApp without a Scaffold: localizations but no Material.
+          child: MaterialApp(
+            home: Center(
+              child: Builder(
+                builder: (context) => KeyedSubtree(
+                  key: key,
+                  child: manager.buildWidgetByID(
+                    node.id,
+                    context,
+                    settings: measure,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull, reason: node.id);
+      final size = tester.getSize(find.byKey(key));
+      expect(size.width, lessThan(300), reason: '${node.id} $size');
+      expect(size.height, lessThan(100), reason: '${node.id} $size');
+    }
+  });
 }
