@@ -244,6 +244,18 @@ class PassiveExpansionTileWidget extends StatelessWidget {
               initiallyExpanded ?? node.properties.initiallyExpanded,
           maintainState: node.properties.maintainState,
           showTrailingIcon: node.properties.showTrailingIcon,
+          shape: node.properties.shape == null
+              ? null
+              : getShape(
+                  shape: node.properties.shape!,
+                  radius: node.properties.cornerRadius,
+                ),
+          collapsedShape: node.properties.collapsedShape == null
+              ? null
+              : getShape(
+                  shape: node.properties.collapsedShape!,
+                  radius: node.properties.cornerRadius,
+                ),
           tilePadding: node.properties.tilePadding?.flutterEdgeInsets,
           expandedCrossAxisAlignment:
               node.properties.expandedCrossAxisAlignment.flutterAxis,
