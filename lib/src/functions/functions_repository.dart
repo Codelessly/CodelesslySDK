@@ -417,6 +417,12 @@ class FunctionsRepository {
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
       scopedValues: ScopedValues.of(context),
     ).trim();
+    openLink(url);
+  }
+
+  /// Opens [url] with the platform, logging instead of throwing when it is
+  /// malformed or cannot be launched.
+  static void openLink(String url) {
     final Uri? uri = Uri.tryParse(url);
     if (uri == null || url.isEmpty) {
       DebugLogger.instance.printInfo(
@@ -429,7 +435,18 @@ class FunctionsRepository {
       'Launching URL: $uri',
       name: name,
     );
-    launchUrl(uri);
+    unawaited(
+      launchUrl(uri).then<void>(
+        (_) {},
+        onError: (Object e, StackTrace stackTrace) =>
+            ErrorLogger.instance.captureException(
+          e,
+          message: 'Failed to launch $url',
+          type: 'launch_url_failed',
+          stackTrace: stackTrace,
+        ),
+      ),
+    );
   }
 
   static Future<http.Response> makeApiRequest({

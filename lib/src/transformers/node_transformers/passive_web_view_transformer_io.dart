@@ -5,7 +5,6 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
@@ -56,7 +55,7 @@ class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
   void onAction(Reaction reaction) {
     switch (reaction.action.type) {
       case ActionType.link:
-        launchUrl(Uri.parse((reaction.action as LinkAction).url));
+        FunctionsRepository.openLink((reaction.action as LinkAction).url);
       default:
         break;
     }

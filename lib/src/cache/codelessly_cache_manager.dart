@@ -79,10 +79,21 @@ class CodelesslyCacheManager extends CacheManager {
   }
 
   @override
-  void dispose() async {
+  void dispose() {
     DebugLogger.instance.printFunction('dispose()', name: name);
-    box.close();
-    filesBox.close();
+    unawaited(
+      Future.wait([box.close(), filesBox.close()]).catchError(
+        (Object e, StackTrace stackTrace) {
+          ErrorLogger.instance.captureException(
+            e,
+            message: 'Failed to close cache',
+            type: 'cache_close_failed',
+            stackTrace: stackTrace,
+          );
+          return <void>[];
+        },
+      ),
+    );
   }
 
   @override

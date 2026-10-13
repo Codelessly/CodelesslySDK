@@ -1,7 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -78,7 +77,7 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
       if (link.isNotEmpty) {
         TapGestureRecognizer tapGestureRecognizer =
             TapGestureRecognizer(debugOwner: link)
-              ..onTap = () => launchUrl(Uri.parse(link));
+              ..onTap = () => FunctionsRepository.openLink(link);
         tapGestureRecognizerRegistry[link] = tapGestureRecognizer;
       }
     });

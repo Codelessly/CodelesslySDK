@@ -4,7 +4,6 @@ import 'dart:ui_web';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:web/web.dart' as web;
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -52,7 +51,7 @@ class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
   void onAction(Reaction reaction) {
     switch (reaction.action.type) {
       case ActionType.link:
-        launchUrl(Uri.parse((reaction.action as LinkAction).url));
+        FunctionsRepository.openLink((reaction.action as LinkAction).url);
       default:
         break;
     }
