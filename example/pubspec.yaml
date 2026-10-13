@@ -29,4 +29,4 @@ dependency_overrides:
   codelessly_api:
     git:
       url: https://github.com/Codelessly/CodelesslyAPI.git
-      ref: claude/hopeful-brown-c8o8x7
+      ref: master
