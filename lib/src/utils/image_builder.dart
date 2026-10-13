@@ -5,7 +5,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/debug_logger.dart';
 
 /// Ultimate widget to build image from url, bytes or paint. Supports Gifs and
 /// SVGs too!

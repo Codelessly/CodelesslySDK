@@ -9,8 +9,6 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 
 import '../codelessly_sdk.dart';
-import 'logging/debug_logger.dart';
-import 'logging/error_logger.dart';
 import 'logging/stat_tracker.dart';
 import 'utils/codelessly_http_client.dart';
 

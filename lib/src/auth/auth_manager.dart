@@ -7,8 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/debug_logger.dart';
-import '../logging/error_logger.dart';
 
 /// An implementation that uses Firebase auth to authenticate users and manage
 /// authentication state. Handles anonymous authentication, token verification,
@@ -67,6 +65,7 @@ class AuthManager {
     required this.firebaseAuth,
     required this.client,
     this._authData,
+    this.claimsPropagationTimeout = const Duration(seconds: 30),
   }) {
     if (_authData != null) {
       _authStreamController.add(_authData);
@@ -272,7 +271,7 @@ class AuthManager {
 
   /// How long [postAuthSuccess] waits for the project claim to appear on the
   /// user's token before failing authentication.
-  static const Duration claimsPropagationTimeout = Duration(seconds: 30);
+  final Duration claimsPropagationTimeout;
 
   /// This method is called after successful authentication of the token.
   /// It checks if the user has access to the project via token claims and if

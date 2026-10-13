@@ -9,7 +9,6 @@ import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../web/web_webview_platform.dart';
-import '../../logging/debug_logger.dart';
 
 class PassiveEmbeddedVideoTransformer
     extends NodeWidgetTransformer<EmbeddedVideoNode> {

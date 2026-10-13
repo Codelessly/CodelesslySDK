@@ -13,6 +13,9 @@
 - Material Symbols render, including fill, weight, grade and optical size.
   Cupertino icons render from the cupertino_icons font. Two-tone Material
   icons load again.
+- `DebugLogger` and `ErrorLogger` are exported; `DataManager`'s public
+  constructor already required an `ErrorLogger`.
+- `AuthManager` takes a `claimsPropagationTimeout`.
 - `CodelesslyConfig.useHostTheme` and `maxTextScaleFactor` let layouts
   follow the app's theme and, within a bound, the system text size.
 - Web views reload when their bound URL changes.

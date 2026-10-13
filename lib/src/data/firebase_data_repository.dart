@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/error_logger.dart';
 import '../logging/stat_tracker.dart';
 
 /// Handles the data flow of [SDKPublishModel] from the server.

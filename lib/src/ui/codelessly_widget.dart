@@ -6,8 +6,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/debug_logger.dart';
-import '../logging/error_logger.dart';
 import '../logging/stat_tracker.dart';
 import 'codelessly_error_screen.dart';
 import 'codelessly_loading_screen.dart';

@@ -5,7 +5,6 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/debug_logger.dart';
 import '../logging/stat_tracker.dart';
 import '../utils/constants.dart';
 

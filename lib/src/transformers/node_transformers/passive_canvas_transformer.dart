@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../../logging/debug_logger.dart';
 
 class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   static const String name = 'PassiveCanvasWidget';

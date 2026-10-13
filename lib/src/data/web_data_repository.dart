@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../codelessly_sdk.dart';
-import '../logging/error_logger.dart';
 
 /// A [NetworkDataRepository] implementation that utilizes the Firebase Cloud
 /// Functions to retrieve the relevant data.

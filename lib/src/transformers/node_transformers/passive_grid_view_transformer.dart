@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../../logging/error_logger.dart';
 import '../../ui/draggable_scroll_configuration.dart';
 
 class PassiveGridViewTransformer extends NodeWidgetTransformer<GridViewNode> {

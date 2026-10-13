@@ -5,8 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/debug_logger.dart';
-import '../logging/error_logger.dart';
 
 /// Handles caching of any data that needs to be cached via Hive.
 class CodelesslyCacheManager extends CacheManager {
