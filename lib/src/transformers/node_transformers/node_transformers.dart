@@ -1,8 +1,10 @@
 export 'passive_accordion_transformer.dart';
 export 'passive_app_bar_transformer.dart';
+export 'passive_badge_transformer.dart';
 export 'passive_button_transformer.dart';
 export 'passive_canvas_transformer.dart';
 export 'passive_checkbox_transformer.dart';
+export 'passive_chip_transformer.dart';
 export 'passive_divider_transformer.dart';
 export 'passive_dropdown_transformer.dart';
 export 'passive_embedded_video_transformer.dart';
@@ -21,6 +23,7 @@ export 'passive_progressbar_transformer.dart';
 export 'passive_radio_transformer.dart';
 export 'passive_rectangle_transformer.dart';
 export 'passive_row_column_transformer.dart';
+export 'passive_segmented_button_transformer.dart';
 export 'passive_single_placeholder_transformer.dart';
 export 'passive_slider_transformer.dart';
 export 'passive_spacer_transformer.dart';
