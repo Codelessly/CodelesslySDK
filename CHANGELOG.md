@@ -30,6 +30,9 @@
   accumulating them, so earlier queries can't overwrite newer results.
 - Failed onLoad API calls and non-blocking actions are reported instead of
   surfacing as uncaught errors.
+- Call Function actions now wait for the app's function (unless marked
+  non-blocking) and report its errors; before, the next action started
+  immediately and async errors went uncaught.
 - `CodelesslyWidget` handles removing an explicit context or controller,
   and a missing breakpoint, without throwing.
 - PageView, TabBar and Accordion edge cases that threw are fixed;

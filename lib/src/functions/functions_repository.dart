@@ -98,7 +98,9 @@ class FunctionsRepository {
         return setVariableFromAction(context, action as SetVariableAction,
             notify: notify);
       case ActionType.callFunction:
-        callFunction(context, action as CallFunctionAction);
+        final result = callFunction(context, action as CallFunctionAction);
+        // Blocking actions wait for the app's function to finish.
+        if (result is Future) return result.then((_) => true);
         return true;
       case ActionType.callApi:
         return makeApiRequestFromAction(action as ApiCallAction, context);
@@ -1021,11 +1023,17 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     for (final reaction in filteredReactions) {
       if (!context.mounted) continue;
-      final future = FunctionsRepository.performAction(
-        context,
-        reaction.action,
-        internalValue: value,
-      );
+      final FutureOr future;
+      try {
+        future = FunctionsRepository.performAction(
+          context,
+          reaction.action,
+          internalValue: value,
+        );
+      } catch (e, stackTrace) {
+        _reportActionError(reaction, e, stackTrace);
+        return true;
+      }
       if (!reaction.action.nonBlocking) {
         // Await only if this action is not a non-blocking. It must not be
         // awaited if it is non-blocking. A failed action stops the chain,
@@ -1069,7 +1077,12 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
   }
 
-  static void callFunction(BuildContext context, CallFunctionAction action) {
+  /// Calls the app's function named by [action], returning its result so
+  /// callers can wait for it and see its errors.
+  static FutureOr<void> callFunction(
+    BuildContext context,
+    CallFunctionAction action,
+  ) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext codelesslyContext =
         context.read<CodelesslyContext>();
@@ -1085,7 +1098,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       name: name,
     );
 
-    function?.call(context, codelesslyContext, Map.unmodifiable(parsedParams));
+    return function?.call(
+      context,
+      codelesslyContext,
+      Map.unmodifiable(parsedParams),
+    );
   }
 
   static Future<bool> setStorageFromAction(
