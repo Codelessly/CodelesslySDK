@@ -1,4 +1,4 @@
-![Codelessly Logo](packages/Codelessly-Logo-Text.png)
+![Codelessly Logo](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/Codelessly-Logo-Text.png)
 
 # Codelessly CloudUI™ SDK
 
@@ -6,7 +6,7 @@
 
 > ### Dynamic UI and real-time updates for Flutter apps
 
-![Codelessly Publish UI](packages/Codelessly-Cover.png)
+![Codelessly Publish UI](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/Codelessly-Cover.png)
 
 Supercharge your Flutter apps with dynamic UI and real-time updates. Build and publish UI without code!
 
@@ -60,10 +60,10 @@ CodelesslyWidget(
 **How to obtain a Layout ID**
 
 1. In the Codelessly Editor, select the **canvas** of your layout.
-2. Press the **Preview Icon** in the toolbar. ![CloudUI Preview Icon](packages/preview_icon.png)
+2. Press the **Preview Icon** in the toolbar. ![CloudUI Preview Icon](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/preview_icon.png)
 3. Copy the **layoutID**.
 
-![Codelessly Widget Code](packages/codelessly_widget_code.png)
+![Codelessly Widget Code](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/codelessly_widget_code.png)
 
 ### Complete Example
 
@@ -73,7 +73,7 @@ Here is a complete example:
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +114,7 @@ CodelesslyWidget(
 
 Use the `${}` templating syntax in input fields to link data from the Codelessly editor to layouts as shown below.
 
-![Data](packages/ui_with_data_linking.png)
+![Data](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/ui_with_data_linking.png)
 
 To link the title of a text widget to the `title` variable in the Codelessly editor, put `${title}` in the text widget’s
 text field.
@@ -144,7 +144,7 @@ the `data` is updated.
 
 This how it looks with populated data:
 
-![Data](packages/ui_with_populated_data.png)
+![Data](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/ui_with_populated_data.png)
 
 ## Functions
 
@@ -156,7 +156,7 @@ CodelesslyWidget(
   functions: {
     'functionName': (context, reference, params) {
       // TODO: Implement your function here
-    }),
+    },
   },
 ),
 ```
@@ -165,7 +165,7 @@ CodelesslyWidget(
 
 Here, we tell the button to call the native `onNextButtonClicked` function when pressed.
 
-![Defining call function action](packages/defining_call_function_action.png)
+![Defining call function action](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/defining_call_function_action.png)
 
 In the Codelessly Editor, you can easily add an Action to a widget. Use the `Call Function` action to invoke
 `onNextButtonClicked`.
@@ -187,10 +187,10 @@ to all `CodelesslyWidget`s.
 
 ```dart
 CodelesslyWidget(
-  layoutID: '0R0Qe7wgeAJMnj3MGW4l',
-  isPreview: kDebugMode,
+  layoutID: LAYOUT_ID,
+  publishSource: kDebugMode ? PublishSource.preview : PublishSource.publish,
   config: CodelesslyConfig(
-  authToken: 'LCVyNTxyLCVxQXh3WDc5MFowLjApQXJfWyNdSnlAQjphLyN1',
+    authToken: AUTH_TOKEN,
   ),
 )
 ```
@@ -198,11 +198,11 @@ CodelesslyWidget(
 - `layoutID`: The ID of the published canvas. The ID can be found in Quick Preview or under
   `Publish > Settings > Published Layouts`.
 
-![Codelessly Published Layout ID](packages/codelessly_published_layout_id.png)
+![Codelessly Published Layout ID](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/codelessly_published_layout_id.png)
 
-- `isPreview`: Whether the layout is in preview or production mode. Preview mode is meant for debugging the layout and
-  syncs with the changes made in the editor. Widgets in production mode are only updated when published using the
-  Publish button.
+- `publishSource`: Whether the layout loads from preview or production. Preview mode is meant for debugging the layout
+  and syncs with the changes made in the editor. Widgets in production mode are only updated when published using the
+  Publish button. Defaults to the global config's setting.
 - `config`: An optional `CodelesslyConfig` that holds the information required to authenticate your layout from the
   server.
 
@@ -211,7 +211,8 @@ lets you embed layouts from other projects with different auth tokens.
 
 ## Environment Configuration
 
-The CodelesslyWidget supports **Preview** and **Published** environments via the `isPreview` boolean.
+The CodelesslyWidget supports **Preview** and **Published** environments, set globally with `isPreview` or per widget
+with `publishSource`.
 
 ```dart
 // Global config.
@@ -223,7 +224,8 @@ Codelessly.instance.initialize(
 
 // Widget level. Overrides global settings for this widget.
 CodelesslyWidget(
-  isPreview: true
+  layoutID: LAYOUT_ID,
+  publishSource: PublishSource.preview,
 );
 ```
 
@@ -275,7 +277,7 @@ Codelessly.instance.initialize(
     authToken: AUTH_TOKEN,
     isPreview: kDebugMode,
     preload: true,
-    automaticallyCollectCrashReports: true,
+    automaticallySendCrashReports: true,
   ),
 );
 ```
@@ -285,8 +287,12 @@ CodelesslyConfig supports the following configuration capabilities.
 * `isPreview`: Global enable or disable preview-mode setting.
 * `preload`: Preload layouts to improve performance. When layouts are preloaded, they load instantly and behave like
   local widgets. `true` by default.
-* `automaticallyCollectCrashReports`: Report SDK crashes to Codelessly. `true` by default. You can optionally disable
-  this behavior.
+* `automaticallySendCrashReports`: Report SDK crashes to Codelessly. `false` by default. Only the error and stack trace
+  are sent, no device data.
+* `useHostTheme`: Render layouts with your app's `Theme` instead of a default `ThemeData`. Layouts are styled in the
+  editor, so they use a default theme by default to look exactly as designed.
+* `maxTextScaleFactor`: The largest system text scale layouts follow. `1` by default, which keeps layouts at their
+  designed size; raise it to let text grow with the user's accessibility settings.
 
 ### Global Data and Functions
 
@@ -296,8 +302,8 @@ Data and functions registered in the global `Codelessly.instance` are available 
 Codelessly.instance.initialize(
   data: {'username': 'Sample User', 'paid': false},
   functions: {
-    'openPurchasePage': CodelesslyFunction(
-      (context) => Navigator.pushNamed(context, "PurchasePage")),
+    'openPurchasePage': (context, reference, params) =>
+        Navigator.pushNamed(context, 'PurchasePage'),
   },
 );
 ```
