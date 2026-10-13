@@ -23,10 +23,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
-# codelessly_api 5.0.0 is not on pub.dev yet. Remove once it is published.
-dependency_overrides:
-  codelessly_api:
-    git:
-      url: https://github.com/Codelessly/CodelesslyAPI.git
-      ref: master
