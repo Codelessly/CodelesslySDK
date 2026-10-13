@@ -1,12 +1,13 @@
-import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
+import 'package:codelessly_api/codelessly_api.dart';
 
 part 'asset_model.g.dart';
 
 /// Defines an asset that is utilized throughout node data as an id and
 /// looked up for information about the asset based on that id.
 @JsonSerializable()
-class AssetModel with EquatableMixin {
+class AssetModel with Equatable {
   /// The id of the asset.
   final String id;
 

@@ -55,6 +55,38 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
         ..shape = CShapeBorder.roundedRectangle
         ..borderWidth = 1
         ..borderColor = null;
+    case ButtonTypeEnum.filled:
+      final brightness = ThemeData.estimateBrightnessForColor(
+          node.properties.buttonColor.toFlutterColor());
+      final color =
+          (brightness == Brightness.light ? Colors.black : Colors.white)
+              .toColorRGBA();
+      node.properties
+        ..labelStyle = node.properties.labelStyle.copyWith(fills: [
+          color.toPaint(node.properties.labelStyle.fills.firstOrNull?.id)
+        ])
+        ..icon = node.properties.icon.copyWith(color: color)
+        ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
+        ..elevation = 0
+        ..gap = node.properties.icon.show ? 8 : 0
+        ..shape = CShapeBorder.stadium
+        ..borderColor = null
+        ..borderWidth = null;
+    case ButtonTypeEnum.filledTonal:
+      node.properties
+        ..buttonColor = node.properties.buttonColor.copyWith(a: 0.2)
+        ..labelStyle = node.properties.labelStyle.copyWith(fills: [
+          node.properties.buttonColor
+              .copyWith(a: 1)
+              .toPaint(node.properties.labelStyle.fills.firstOrNull?.id)
+        ])
+        ..icon = node.properties.icon
+            .copyWith(color: node.properties.buttonColor.copyWith(a: 1))
+        ..elevation = 0
+        ..gap = node.properties.icon.show ? 8 : 0
+        ..shape = CShapeBorder.stadium
+        ..borderColor = null
+        ..borderWidth = null;
     case ButtonTypeEnum.icon:
       final brightness = ThemeData.estimateBrightnessForColor(
           node.properties.buttonColor.toFlutterColor());
@@ -177,6 +209,19 @@ ButtonStyle createMasterButtonStyle(ButtonNode node,
         textStyle: textStyle,
         minimumSize: Size.zero,
         shadowColor: shadowColor.toFlutterColor(),
+        shape: getButtonShape(node, scopedValues),
+      );
+    case ButtonTypeEnum.filled:
+    case ButtonTypeEnum.filledTonal:
+      buttonStyle = FilledButton.styleFrom(
+        foregroundColor: labelColor,
+        elevation: elevation ?? node.properties.elevation,
+        shadowColor: shadowColor.toFlutterColor(),
+        backgroundColor: buttonColor.toFlutterColor(),
+        visualDensity: VisualDensity.standard,
+        padding: node.padding.flutterEdgeInsets,
+        textStyle: textStyle,
+        minimumSize: Size.zero,
         shape: getButtonShape(node, scopedValues),
       );
     case ButtonTypeEnum.outlined:
@@ -445,6 +490,11 @@ OutlinedBorder getShape({
       );
     case CShapeBorder.beveledRectangle:
       return BeveledRectangleBorder(
+        borderRadius: radius.borderRadius,
+        side: side,
+      );
+    case CShapeBorder.roundedSuperellipse:
+      return RoundedSuperellipseBorder(
         borderRadius: radius.borderRadius,
         side: side,
       );

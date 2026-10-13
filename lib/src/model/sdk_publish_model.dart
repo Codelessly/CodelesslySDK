@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
 import 'model_http_request.dart';
@@ -643,7 +643,7 @@ enum UpdateType {
 }
 
 @JsonSerializable()
-class SDKPublishUpdates with EquatableMixin {
+class SDKPublishUpdates with Equatable {
   /// The last time the fonts collection received an update.
   @DateTimeMapConverter()
   final Map<String, DateTime> fonts;

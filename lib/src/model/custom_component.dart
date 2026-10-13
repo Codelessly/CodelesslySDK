@@ -3,14 +3,14 @@
 // license that can be found in the LICENSE.md file.
 
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
 part 'custom_component.g.dart';
 
 /// A model to hold custom component data.
 @JsonSerializable()
-class CustomComponent with EquatableMixin, SerializableMixin {
+class CustomComponent with Equatable, SerializableMixin {
   /// Unique identifier for the component.
   final String id;
 
@@ -111,7 +111,7 @@ class CustomComponent with EquatableMixin, SerializableMixin {
 
 /// Holds component's node data and containing rect size data.
 @JsonSerializable()
-class ComponentData with EquatableMixin, SerializableMixin {
+class ComponentData with Equatable, SerializableMixin {
   /// Width of the containing rect for [nodes].
   final double width;
 

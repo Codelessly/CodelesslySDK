@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import '../../codelessly_sdk.dart';
 
 /// A class that holds information about how to build a node.
-abstract class BuildSettings with EquatableMixin {
+abstract class BuildSettings with Equatable {
   /// Whether to internally handle the node's opacity.
   final bool withOpacity;
 

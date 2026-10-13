@@ -9,7 +9,7 @@ import '../../codelessly_sdk.dart';
 
 /// Holds data passed from the Codelessly instance down the widget tree where
 /// all of the [WidgetNodeTransformer]s have access to it.
-class CodelesslyContext with ChangeNotifier, EquatableMixin {
+class CodelesslyContext with ChangeNotifier, Equatable {
   /// A map of data that is passed to loaded layouts for nodes to replace their
   /// values with.
   Map<String, dynamic> _data;

@@ -1,5 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:codelessly_json_annotation/codelessly_json_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
 part 'privacy_base.g.dart';
@@ -70,7 +70,7 @@ enum Role {
 
 /// Represents the privacy controls of a given model that this mixin
 /// is applied to.
-abstract class PrivacyBase with SerializableMixin, EquatableMixin {
+abstract class PrivacyBase with SerializableMixin, Equatable {
   /// The owner of the document. The owner is the user who is responsible for
   /// the document and has the highest level of access to it. In terms of
   /// permissions, it's equivalent to the [Role.admin] role, however this owner

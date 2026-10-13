@@ -89,7 +89,7 @@ enum AlignmentEnum {
 }
 
 /// Parsed data from a variable path using [variablePathRegex].
-class VariableMatch with EquatableMixin {
+class VariableMatch with Equatable {
   final String text;
   final String name;
   final String? path;

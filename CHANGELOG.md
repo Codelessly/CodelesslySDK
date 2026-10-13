@@ -1,3 +1,15 @@
+## Unreleased
+
+- Require Dart 3.13 and Flutter 3.47.
+- Migrate to codelessly_api 5.0.0, json_annotation and json_serializable,
+  replacing the forked codegen that no longer builds on current Dart.
+- Upgrade dependencies, including Firebase, google_fonts, equatable 3 and
+  json_path.
+- Render the new API values: FilledButton and FilledButton.tonal buttons,
+  RoundedSuperellipseBorder shapes, TextAlign start/end, the
+  `endContained` FAB location, `webSearch`/`twitter` keyboards, and the
+  `onUnfocus`/`onUserInteractionIfError` autovalidate modes.
+
 ## 6.2.0
 
 - Create dynamic settings architecture.

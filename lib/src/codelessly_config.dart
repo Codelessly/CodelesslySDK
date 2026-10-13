@@ -6,7 +6,7 @@ import 'firebase_options_prod.dart';
 import 'model/publish_source.dart';
 
 /// Holds initialization configuration options for the SDK.
-class CodelesslyConfig with EquatableMixin {
+class CodelesslyConfig with Equatable {
   /// The SDK auth token used to authenticate the SDK with the Codelessly
   /// servers.
   final String authToken;

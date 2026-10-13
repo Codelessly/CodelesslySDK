@@ -51,6 +51,8 @@ extension FABLocationHelper on FABLocation {
         return FloatingActionButtonLocation.endDocked;
       case FABLocation.miniEndDocked:
         return FloatingActionButtonLocation.miniEndDocked;
+      case FABLocation.endContained:
+        return FloatingActionButtonLocation.endContained;
     }
   }
 }
@@ -258,6 +260,10 @@ extension TextModelEnumHelper on TextAlignHorizontalEnum {
         return TextAlign.right;
       case TextAlignHorizontalEnum.justified:
         return TextAlign.justify;
+      case TextAlignHorizontalEnum.start:
+        return TextAlign.start;
+      case TextAlignHorizontalEnum.end:
+        return TextAlign.end;
     }
   }
 }
@@ -936,6 +942,10 @@ extension TextAlignHorizontalEnumExtensions on TextAlignHorizontalEnum {
         return TextAlign.right;
       case TextAlignHorizontalEnum.justified:
         return TextAlign.justify;
+      case TextAlignHorizontalEnum.start:
+        return TextAlign.start;
+      case TextAlignHorizontalEnum.end:
+        return TextAlign.end;
     }
   }
 }
@@ -1069,6 +1079,10 @@ extension TextInputTypeEnumExtensions on TextInputTypeEnum {
         return TextInputType.url;
       case TextInputTypeEnum.visiblePassword:
         return TextInputType.visiblePassword;
+      case TextInputTypeEnum.webSearch:
+        return TextInputType.webSearch;
+      case TextInputTypeEnum.twitter:
+        return TextInputType.twitter;
     }
   }
 }
@@ -2033,6 +2047,9 @@ extension AutovalidateModeCExt on AutovalidateModeC {
         AutovalidateModeC.always => AutovalidateMode.always,
         AutovalidateModeC.onUserInteraction =>
           AutovalidateMode.onUserInteraction,
+        AutovalidateModeC.onUnfocus => AutovalidateMode.onUnfocus,
+        AutovalidateModeC.onUserInteractionIfError =>
+          AutovalidateMode.onUserInteractionIfError,
       };
 }
 
