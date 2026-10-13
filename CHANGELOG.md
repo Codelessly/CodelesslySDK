@@ -1,3 +1,77 @@
+## 7.0.0
+
+### Breaking changes
+
+- Require Dart 3.13 and Flutter 3.47.
+- Migrate to codelessly_api 5.0.0, json_annotation and json_serializable,
+  replacing the forked codegen that no longer builds on current Dart.
+- Remove the `staggerDownloadQueue` argument of `CodelesslyConfig.copyWith`,
+  which had no effect, and the font parser's command-line `main()`.
+
+### New
+
+- Material Symbols render, including fill, weight, grade and optical size.
+  Cupertino icons render from the cupertino_icons font. Two-tone Material
+  icons load again.
+- `DebugLogger` and `ErrorLogger` are exported; `DataManager`'s public
+  constructor already required an `ErrorLogger`.
+- `AuthManager` takes a `claimsPropagationTimeout`.
+- `CodelesslyConfig.useHostTheme` and `maxTextScaleFactor` let layouts
+  follow the app's theme and, within a bound, the system text size.
+- Web views reload when their bound URL changes.
+- Placeholder nodes deserialize (codelessly_api 5).
+
+### Fixes
+
+- Authentication no longer hangs when project claims never arrive or the
+  token refresh fails, and works on Windows (it decoded the wrong string).
+- Initialization no longer hangs when the publish model stream errors.
+- Cloud database variables keep one Firestore listener each instead of
+  accumulating them, so earlier queries can't overwrite newer results.
+- Failed onLoad API calls and non-blocking actions are reported instead of
+  surfacing as uncaught errors.
+- Call Function actions now wait for the app's function (unless marked
+  non-blocking) and report its errors; before, the next action started
+  immediately and async errors went uncaught.
+- `CodelesslyWidget` handles removing an explicit context or controller,
+  and a missing breakpoint, without throwing.
+- PageView, TabBar and Accordion edge cases that threw are fixed;
+  Accordion respects `isExpanded` and `enabled`, and TabBar `showDivider`.
+- Malformed links and failed SVG downloads no longer throw.
+- The web view works in WebAssembly builds, and embedded video no longer
+  pulls native web view plugins into web builds; the package is fully
+  WebAssembly-compatible.
+- The auth token and auth response body are no longer logged, and library
+  code logs through `DebugLogger` instead of `print`.
+
+### Other changes
+
+- Require Dart 3.13 and Flutter 3.47.
+- Migrate to codelessly_api 5.0.0, json_annotation and json_serializable,
+  replacing the forked codegen that no longer builds on current Dart.
+- Upgrade dependencies, including Firebase, google_fonts, equatable 3 and
+  json_path.
+- Render the new API values: FilledButton and FilledButton.tonal buttons,
+  RoundedSuperellipseBorder shapes, TextAlign start/end, the
+  `endContained` FAB location, `webSearch`/`twitter` keyboards, and the
+  `onUnfocus`/`onUserInteractionIfError` autovalidate modes.
+- Render the new AppBar `foregroundColor`/`scrolledUnderElevation` and
+  TabBar `tabAlignment`/`dividerHeight` properties.
+- Render the other parameters added in codelessly_api 5: Radio side,
+  inner radius and background, Slider value indicator modes, secondary
+  track and padding, ListTile minimum height and title alignment,
+  CircularProgressIndicator stroke alignment and track gap, ExpansionTile
+  trailing icon visibility and shapes, Text soft wrapping and scaling, and
+  PageView implicit scrolling.
+- Render the gapped slider track and the drop and rounded rectangle value
+  indicators; these previously fell back to other shapes.
+- Replace deprecated Flutter APIs: scrollCacheExtent, RadioGroup,
+  ShowValueIndicator.onDrag, Switch activeThumbColor and the new Color
+  component accessors.
+- Fix a LateInitializationError when a node widget is built without a
+  CodelesslyContext above it.
+- Fix cache writes whose failures escaped the error handler.
+
 ## 6.2.0
 
 - Create dynamic settings architecture.

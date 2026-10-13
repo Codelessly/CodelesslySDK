@@ -13,6 +13,7 @@ analyzer:
   exclude:
     - lib/**/*.pb*.dart
     - lib/**/*.g.dart
+    - build/**
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
@@ -20,6 +21,9 @@ analyzer:
     missing_return: warning
     # allow having TODOs in the code
     todo: ignore
+    # Models are mutable by design. Equatable 3 marks itself @immutable,
+    # which would flag every one of them.
+    must_be_immutable: ignore
 
 linter:
   rules:

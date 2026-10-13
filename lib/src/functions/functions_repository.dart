@@ -13,7 +13,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../codelessly_sdk.dart';
 import '../logging/stat_tracker.dart';
 import '../ui/codelessly_dialog_widget.dart';
-import '../logging/debug_logger.dart';
 
 /// Enum representing the types of API requests.
 enum ApiRequestType {
@@ -96,10 +95,15 @@ class FunctionsRepository {
         setVariant(context, action as SetVariantAction, notify: notify);
         return true;
       case ActionType.setVariable:
-        return setVariableFromAction(context, action as SetVariableAction,
-            notify: notify);
+        return setVariableFromAction(
+          context,
+          action as SetVariableAction,
+          notify: notify,
+        );
       case ActionType.callFunction:
-        callFunction(context, action as CallFunctionAction);
+        final result = callFunction(context, action as CallFunctionAction);
+        // Blocking actions wait for the app's function to finish.
+        if (result is Future) return result.then((_) => true);
         return true;
       case ActionType.callApi:
         return makeApiRequestFromAction(action as ApiCallAction, context);
@@ -107,10 +111,14 @@ class FunctionsRepository {
         return setStorageFromAction(context, action as SetStorageAction);
       case ActionType.setCloudStorage:
         return setCloudDatabaseFromAction(
-            context, action as SetCloudStorageAction);
+          context,
+          action as SetCloudStorageAction,
+        );
       case ActionType.loadFromCloudStorage:
         return loadFromStorageAction(
-            context, action as LoadFromCloudStorageAction);
+          context,
+          action as LoadFromCloudStorageAction,
+        );
     }
   }
 
@@ -119,8 +127,11 @@ class FunctionsRepository {
     BuildContext context, [
     Observable<VariableData>? variable,
   ]) {
-    final Map<String, HttpApiData> apis =
-        context.read<Codelessly>().dataManager.publishModel!.apis;
+    final Map<String, HttpApiData> apis = context
+        .read<Codelessly>()
+        .dataManager
+        .publishModel!
+        .apis;
 
     final HttpApiData? apiData = apis[action.apiId];
 
@@ -154,8 +165,9 @@ class FunctionsRepository {
       }
       // fetch default value from api data.
       final param = apiData.variables.findByNameOrNull(name);
-      final paramValue =
-          param != null && param.value.isNotEmpty ? param.value : '';
+      final paramValue = param != null && param.value.isNotEmpty
+          ? param.value
+          : '';
       params[name] = paramValue;
     }
 
@@ -173,15 +185,21 @@ class FunctionsRepository {
     );
   }
 
-  static Map<String, String> _generateMapFromPairs(List<HttpKeyValuePair> pairs,
-      Map<String, String> parameters, ScopedValues scopedValues) {
+  static Map<String, String> _generateMapFromPairs(
+    List<HttpKeyValuePair> pairs,
+    Map<String, String> parameters,
+    ScopedValues scopedValues,
+  ) {
     return pairs
         .where((pair) => pair.isUsed && pair.key.isNotEmpty)
         .toList()
         .asMap()
-        .map((key, pair) => MapEntry(
+        .map(
+          (key, pair) => MapEntry(
             _applyApiInputs(pair.key, parameters, scopedValues),
-            _applyApiInputs(pair.value, parameters, scopedValues)));
+            _applyApiInputs(pair.value, parameters, scopedValues),
+          ),
+        );
   }
 
   static String _applyApiInputs(
@@ -244,8 +262,10 @@ class FunctionsRepository {
   }) async {
     final ScopedValues effectiveScopedValues =
         scopedValues ?? ScopedValues.of(context);
-    final parsedParams =
-        substituteVariablesInMap(action.params, effectiveScopedValues);
+    final parsedParams = substituteVariablesInMap(
+      action.params,
+      effectiveScopedValues,
+    );
 
     DebugLogger.instance.printInfo(
       'Performing navigation action with params: $parsedParams',
@@ -261,11 +281,16 @@ class FunctionsRepository {
       await Navigator.maybePop(context, parsedParams);
     } else {
       // Check if a layout exists for the action's [destinationId].
-      final String? layoutId = effectiveCodelessly
-              .dataManager.publishModel?.layouts[action.destinationId]?.id ??
+      final String? layoutId =
+          effectiveCodelessly
+              .dataManager
+              .publishModel
+              ?.layouts[action.destinationId]
+              ?.id ??
           effectiveCodelessly.dataManager.publishModel?.layouts.values
               .firstWhereOrNull(
-                  (layout) => layout.canvasIds.contains(action.destinationId))
+                (layout) => layout.canvasIds.contains(action.destinationId),
+              )
               ?.id;
 
       DebugLogger.instance.printInfo(
@@ -303,9 +328,8 @@ class FunctionsRepository {
           context,
           MaterialPageRoute(
             settings: RouteSettings(arguments: parsedParams),
-            builder: (context) => CodelesslyWidget(
-              controller: effectiveController,
-            ),
+            builder: (context) =>
+                CodelesslyWidget(controller: effectiveController),
           ),
         );
         // Notify navigation listeners that this screen has been navigated back
@@ -323,9 +347,8 @@ class FunctionsRepository {
           context,
           MaterialPageRoute(
             settings: RouteSettings(arguments: parsedParams),
-            builder: (context) => CodelesslyWidget(
-              controller: effectiveController,
-            ),
+            builder: (context) =>
+                CodelesslyWidget(controller: effectiveController),
           ),
         );
 
@@ -362,7 +385,8 @@ class FunctionsRepository {
     // Check if a layout exists for the action's [destinationId].
     final String? layoutId = codelessly.dataManager.publishModel?.layouts.values
         .firstWhereOrNull(
-            (layout) => layout.canvasIds.contains(action.destinationId))
+          (layout) => layout.canvasIds.contains(action.destinationId),
+        )
         ?.id;
 
     DebugLogger.instance.printInfo(
@@ -395,10 +419,8 @@ class FunctionsRepository {
       routeSettings: RouteSettings(arguments: parsedParams),
       builder: (context) => CodelesslyDialogWidget(
         showCloseButton: action.showCloseButton,
-        builder: (context) => CodelesslyWidget(
-          codelessly: codelessly,
-          layoutID: layoutId,
-        ),
+        builder: (context) =>
+            CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
       ),
     );
     if (context.mounted) {
@@ -416,6 +438,12 @@ class FunctionsRepository {
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
       scopedValues: ScopedValues.of(context),
     ).trim();
+    openLink(url);
+  }
+
+  /// Opens [url] with the platform, logging instead of throwing when it is
+  /// malformed or cannot be launched.
+  static void openLink(String url) {
     final Uri? uri = Uri.tryParse(url);
     if (uri == null || url.isEmpty) {
       DebugLogger.instance.printInfo(
@@ -424,11 +452,19 @@ class FunctionsRepository {
       );
       return;
     }
-    DebugLogger.instance.printInfo(
-      'Launching URL: $uri',
-      name: name,
+    DebugLogger.instance.printInfo('Launching URL: $uri', name: name);
+    unawaited(
+      launchUrl(uri).then<void>(
+        (_) {},
+        onError: (Object e, StackTrace stackTrace) =>
+            ErrorLogger.instance.captureException(
+              e,
+              message: 'Failed to launch $url',
+              type: 'launch_url_failed',
+              stackTrace: stackTrace,
+            ),
+      ),
     );
-    launchUrl(uri);
   }
 
   static Future<http.Response> makeApiRequest({
@@ -440,8 +476,10 @@ class FunctionsRepository {
     bool useCloudFunctionForWeb = false,
     Observable<VariableData>? variable,
   }) async {
-    assert(variable == null || variable.value.type.isMap,
-        'Provided variable for api call must be of type map. Found ${variable.value.type}');
+    assert(
+      variable == null || variable.value.type.isMap,
+      'Provided variable for api call must be of type map. Found ${variable.value.type}',
+    );
 
     printApiDetails(method: method, url: url, headers: headers, body: body);
 
@@ -493,11 +531,17 @@ class FunctionsRepository {
         final Uri uri = Uri.parse(url);
         response = switch (method) {
           HttpMethod.get => await client.get(uri, headers: headers),
-          HttpMethod.post =>
-            await client.post(uri, headers: headers, body: body),
-          HttpMethod.delete =>
-            await client.delete(uri, headers: headers, body: body),
-          HttpMethod.put => await client.put(uri, headers: headers, body: body)
+          HttpMethod.post => await client.post(
+            uri,
+            headers: headers,
+            body: body,
+          ),
+          HttpMethod.delete => await client.delete(
+            uri,
+            headers: headers,
+            body: body,
+          ),
+          HttpMethod.put => await client.put(uri, headers: headers, body: body),
         };
       }
 
@@ -520,21 +564,11 @@ class FunctionsRepository {
 
       return response;
     } catch (error, stackTrace) {
-      DebugLogger.instance.printInfo(
-        error.toString(),
-        name: name,
-      );
-      DebugLogger.instance.printInfo(
-        stackTrace.toString(),
-        name: name,
-      );
+      DebugLogger.instance.printInfo(error.toString(), name: name);
+      DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
       if (variable != null) {
         variable.value = variable.value.copyWith(
-          value: ApiResponseVariableUtils.error(
-            url,
-            error,
-            data: existingData,
-          ),
+          value: ApiResponseVariableUtils.error(url, error, data: existingData),
         );
         DebugLogger.instance.printInfo(
           '${variable.value.name} updated with error state.',
@@ -561,18 +595,12 @@ class FunctionsRepository {
       '--------------------------------------------------------------------',
       name: name,
     );
-    DebugLogger.instance.printInfo(
-      'API Request:',
-      name: name,
-    );
+    DebugLogger.instance.printInfo('API Request:', name: name);
     DebugLogger.instance.printInfo(
       '--------------------------------------------------------------------',
       name: name,
     );
-    DebugLogger.instance.printInfo(
-      '${method.shortName} $url',
-      name: name,
-    );
+    DebugLogger.instance.printInfo('${method.shortName} $url', name: name);
     DebugLogger.instance.printInfo(
       'Headers: ${headers.isEmpty ? 'None' : ''}',
       name: name,
@@ -582,10 +610,7 @@ class FunctionsRepository {
         const JsonEncoder.withIndent('  ').convert(headers),
         name: name,
       );
-      DebugLogger.instance.printInfo(
-        '',
-        name: name,
-      );
+      DebugLogger.instance.printInfo('', name: name);
     }
     DebugLogger.instance.printInfo(
       'Body: ${body == null || body.toString().trim().isEmpty ? 'None' : ''}',
@@ -599,10 +624,7 @@ class FunctionsRepository {
           name: name,
         );
       } catch (e) {
-        DebugLogger.instance.printInfo(
-          body.toString(),
-          name: name,
-        );
+        DebugLogger.instance.printInfo(body.toString(), name: name);
       }
     }
     DebugLogger.instance.printInfo(
@@ -649,7 +671,9 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
   }
 
   static Future<void> submitToNewsletter(
-      BuildContext context, SubmitAction action) async {
+    BuildContext context,
+    SubmitAction action,
+  ) async {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
     // Get primary linked text field ID.
     final String primaryTextField = action.primaryTextField;
@@ -657,7 +681,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final List<ValueModel> primaryFieldValues =
         payload.nodeValues[primaryTextField]?.value ?? [];
     // Email ID would be primary field's input value.
-    final String emailID = primaryFieldValues
+    final String emailID =
+        primaryFieldValues
             .firstWhereOrNull((value) => value.name == 'inputValue')
             ?.value
             .typedValue<String>() ??
@@ -686,12 +711,14 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final List<ValueModel> lastNameFieldValues =
         payload.nodeValues[lastNameField]?.value ?? [];
     // Get first and last names.
-    final String firstName = firstNameFieldValues
+    final String firstName =
+        firstNameFieldValues
             .firstWhereOrNull((value) => value.name == 'inputValue')
             ?.value
             .typedValue<String>() ??
         '';
-    final String lastName = lastNameFieldValues
+    final String lastName =
+        lastNameFieldValues
             .firstWhereOrNull((value) => value.name == 'inputValue')
             ?.value
             .typedValue<String>() ??
@@ -709,15 +736,15 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
           'email_address': emailID,
           'status': 'subscribed',
           'merge_fields': mergeFields,
-        }
-      ]
+        },
+      ],
     };
     // Mailchimp's endpoint to submit data.
     final String url =
         'https://${action.dataCenter}.api.mailchimp.com/3.0/lists/${action.listID}';
     // Headers to authenticate request.
     final Map<String, String> headers = {
-      'Authorization': 'auth ${action.apiKey}'
+      'Authorization': 'auth ${action.apiKey}',
     };
     // Submit data to Mailchimp.
     return makeApiRequest(
@@ -770,8 +797,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     V Function()? syncValue,
     bool notify = true,
   }) {
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
+    final CodelesslyContext codelesslyContext = context
+        .read<CodelesslyContext>();
     final List<ValueModel> values =
         codelesslyContext.nodeValues[action.nodeID]!.value;
     // Get new value.
@@ -789,15 +816,18 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     }
     if (newValue != null) {
       // Get old value by name.
-      final ValueModel oldValue =
-          values.firstWhere((value) => value.name == newValue!.name);
+      final ValueModel oldValue = values.firstWhere(
+        (value) => value.name == newValue!.name,
+      );
       // Replace old value with new.
       final List<ValueModel> updateValues = [...values]
         ..remove(oldValue)
         ..add(newValue);
       // Update values list.
-      codelesslyContext.nodeValues[action.nodeID]!
-          .set(updateValues, notify: notify);
+      codelesslyContext.nodeValues[action.nodeID]!.set(
+        updateValues,
+        notify: notify,
+      );
     }
   }
 
@@ -810,11 +840,14 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     // Get node's values.
     final List<ValueModel> values = payload.nodeValues[action.nodeID]!.value;
     // Get new variant value.
-    final ValueModel newValue =
-        StringValue(name: 'currentVariantId', value: action.variantID);
+    final ValueModel newValue = StringValue(
+      name: 'currentVariantId',
+      value: action.variantID,
+    );
     // Get old value by name.
-    final ValueModel oldValue =
-        values.firstWhere((value) => value.name == newValue.name);
+    final ValueModel oldValue = values.firstWhere(
+      (value) => value.name == newValue.name,
+    );
     // Replace old value with new.
     final List<ValueModel> updateValues = [...values]
       ..remove(oldValue)
@@ -832,10 +865,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     bool notify = true,
   }) {
     final ScopedValues scopedValues = ScopedValues.of(context);
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
-    final variableNotifier =
-        codelesslyContext.findVariableByName(action.variable.name);
+    final CodelesslyContext codelesslyContext = context
+        .read<CodelesslyContext>();
+    final variableNotifier = codelesslyContext.findVariableByName(
+      action.variable.name,
+    );
     if (variableNotifier == null) return false;
 
     String newValue = PropertyValueDelegate.substituteVariables(
@@ -850,29 +884,39 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       VariableType.text => newValue,
       VariableType.image => newValue,
       VariableType.color => ColorRGBA.fromHex(newValue),
-      VariableType.integer => _performIntOperation(action.numberOperation,
-          currentValue?.toInt(), newValue, scopedValues),
-      VariableType.decimal => _performDecimalOperation(action.numberOperation,
-          currentValue?.toDouble(), newValue, scopedValues),
-      VariableType.boolean => action.toggled
-          ? !(bool.tryParse(currentValue.toString()) ?? false)
-          : bool.tryParse(newValue),
+      VariableType.integer => _performIntOperation(
+        action.numberOperation,
+        currentValue?.toInt(),
+        newValue,
+        scopedValues,
+      ),
+      VariableType.decimal => _performDecimalOperation(
+        action.numberOperation,
+        currentValue?.toDouble(),
+        newValue,
+        scopedValues,
+      ),
+      VariableType.boolean =>
+        action.toggled
+            ? !(bool.tryParse(currentValue.toString()) ?? false)
+            : bool.tryParse(newValue),
       VariableType.list => _performListOperation(
-          action,
-          currentValue?.toList(),
-          newValue,
-          scopedValues,
-        ),
+        action,
+        currentValue?.toList(),
+        newValue,
+        scopedValues,
+      ),
       VariableType.map => _performMapOperation(
-          action,
-          currentValue?.toMap(),
-          newValue,
-          scopedValues,
-        ),
+        action,
+        currentValue?.toMap(),
+        newValue,
+        scopedValues,
+      ),
     };
 
-    final VariableData updatedVariable =
-        variableNotifier.value.copyWith(value: updatedValue);
+    final VariableData updatedVariable = variableNotifier.value.copyWith(
+      value: updatedValue,
+    );
 
     variableNotifier.set(updatedVariable, notify: notify);
     return true;
@@ -915,8 +959,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     if (match == null) return false;
 
-    final ValueNotifier<VariableData>? propertyNotifier =
-        payload.findVariableByName(match.name);
+    final ValueNotifier<VariableData>? propertyNotifier = payload
+        .findVariableByName(match.name);
 
     if (propertyNotifier == null) return false;
 
@@ -948,8 +992,9 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     if (payload.nodeValues[node.id] == null) return false;
 
     final List<ValueModel> values = payload.nodeValues[node.id]?.value ?? [];
-    final ValueModel? valueModel =
-        values.firstWhereOrNull((val) => val.name == property);
+    final ValueModel? valueModel = values.firstWhereOrNull(
+      (val) => val.name == property,
+    );
 
     if (valueModel == null) return false;
 
@@ -979,12 +1024,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
           property: property,
           value: value.toString(),
         ) ||
-        setNodeValue(
-          context,
-          node: node,
-          property: property,
-          value: value,
-        );
+        setNodeValue(context, node: node, property: property, value: value);
   }
 
   /// Triggers actions on given [node] or [reactions] with given [type].
@@ -998,50 +1038,96 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     dynamic value,
     List<Reaction>? reactions,
   }) async {
-    final filteredReactions = (reactions ?? node?.reactions ?? [])
-        .where((reaction) => reaction.trigger.type == type);
+    final filteredReactions = (reactions ?? node?.reactions ?? []).where(
+      (reaction) => reaction.trigger.type == type,
+    );
 
     if (filteredReactions.isEmpty) return false;
 
     for (final reaction in filteredReactions) {
       if (!context.mounted) continue;
-      final future = FunctionsRepository.performAction(
-        context,
-        reaction.action,
-        internalValue: value,
-      );
+      final FutureOr future;
+      try {
+        future = FunctionsRepository.performAction(
+          context,
+          reaction.action,
+          internalValue: value,
+        );
+      } catch (e, stackTrace) {
+        _reportActionError(reaction, e, stackTrace);
+        return true;
+      }
       if (!reaction.action.nonBlocking) {
         // Await only if this action is not a non-blocking. It must not be
-        // awaited if it is non-blocking.
-        await future;
+        // awaited if it is non-blocking. A failed action stops the chain,
+        // since later actions usually depend on it.
+        try {
+          await future;
+        } catch (e, stackTrace) {
+          _reportActionError(reaction, e, stackTrace);
+          return true;
+        }
       } else {
         DebugLogger.instance.printInfo(
           'Skipping awaiting for action ${reaction.name} as it is non-blocking...',
           name: name,
         );
+        if (future is Future) {
+          unawaited(
+            future.then<void>(
+              (_) {},
+              onError: (Object e, StackTrace stackTrace) =>
+                  _reportActionError(reaction, e, stackTrace),
+            ),
+          );
+        }
       }
     }
 
     return true;
   }
 
-  static void callFunction(BuildContext context, CallFunctionAction action) {
+  static void _reportActionError(
+    Reaction reaction,
+    Object error,
+    StackTrace stackTrace,
+  ) {
+    ErrorLogger.instance.captureException(
+      error,
+      message: 'Action ${reaction.name} failed',
+      type: 'action_failed',
+      stackTrace: stackTrace,
+    );
+  }
+
+  /// Calls the app's function named by [action], returning its result so
+  /// callers can wait for it and see its errors.
+  static FutureOr<void> callFunction(
+    BuildContext context,
+    CallFunctionAction action,
+  ) {
     final ScopedValues scopedValues = ScopedValues.of(context);
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
+    final CodelesslyContext codelesslyContext = context
+        .read<CodelesslyContext>();
     final CodelesslyFunction? function =
         codelesslyContext.functions[action.name];
 
     // Substitute variables in params.
-    final Map<String, dynamic> parsedParams =
-        substituteVariablesInMap(action.params, scopedValues);
+    final Map<String, dynamic> parsedParams = substituteVariablesInMap(
+      action.params,
+      scopedValues,
+    );
 
     DebugLogger.instance.printInfo(
       'Calling function ${action.name}(${parsedParams.entries.map((e) => '${e.key}: ${e.value}').join(', ')}).',
       name: name,
     );
 
-    function?.call(context, codelesslyContext, Map.unmodifiable(parsedParams));
+    return function?.call(
+      context,
+      codelesslyContext,
+      Map.unmodifiable(parsedParams),
+    );
   }
 
   static Future<bool> setStorageFromAction(
@@ -1063,23 +1149,14 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     try {
       final LocalDatabase? storage = scopedValues.localStorage;
       if (storage == null) {
-        DebugLogger.instance.printInfo(
-          'Storage is null.',
-          name: name,
-        );
+        DebugLogger.instance.printInfo('Storage is null.', name: name);
         return false;
       }
       await storage.clear();
       return true;
     } catch (error, stackTrace) {
-      DebugLogger.instance.printInfo(
-        error.toString(),
-        name: name,
-      );
-      DebugLogger.instance.printInfo(
-        stackTrace.toString(),
-        name: name,
-      );
+      DebugLogger.instance.printInfo(error.toString(), name: name);
+      DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
       return false;
     }
   }
@@ -1092,10 +1169,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       final LocalDatabase? storage = scopedValues.localStorage;
 
       if (storage == null) {
-        DebugLogger.instance.printInfo(
-          'Storage is null.',
-          name: name,
-        );
+        DebugLogger.instance.printInfo('Storage is null.', name: name);
         return false;
       }
 
@@ -1141,25 +1215,34 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         VariableType.text => newValue,
         VariableType.image => newValue,
         VariableType.color => ColorRGBA.fromHex(newValue),
-        VariableType.integer => _performIntOperation(action.numberOperation,
-            currentValue?.toInt(), newValue, scopedValues),
-        VariableType.decimal => _performDecimalOperation(action.numberOperation,
-            currentValue?.toDouble(), newValue, scopedValues),
-        VariableType.boolean => action.toggled
-            ? !(bool.tryParse(currentValue.toString()) ?? false)
-            : bool.tryParse(newValue),
+        VariableType.integer => _performIntOperation(
+          action.numberOperation,
+          currentValue?.toInt(),
+          newValue,
+          scopedValues,
+        ),
+        VariableType.decimal => _performDecimalOperation(
+          action.numberOperation,
+          currentValue?.toDouble(),
+          newValue,
+          scopedValues,
+        ),
+        VariableType.boolean =>
+          action.toggled
+              ? !(bool.tryParse(currentValue.toString()) ?? false)
+              : bool.tryParse(newValue),
         VariableType.list => _performListOperation(
-            action,
-            currentValue?.toList(),
-            newValue,
-            scopedValues,
-          ),
+          action,
+          currentValue?.toList(),
+          newValue,
+          scopedValues,
+        ),
         VariableType.map => _performMapOperation(
-            action,
-            currentValue?.toMap(),
-            newValue,
-            scopedValues,
-          ),
+          action,
+          currentValue?.toMap(),
+          newValue,
+          scopedValues,
+        ),
       };
 
       if (match == null || pointer == null) {
@@ -1177,10 +1260,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       final defaultValue = action.variableType.isList
           ? []
           : action.variableType.isMap
-              ? {}
-              : null;
+          ? {}
+          : null;
       Map<String, dynamic> storageData = {
-        match.name: storage.get(match.name, defaultValue: defaultValue)
+        match.name: storage.get(match.name, defaultValue: defaultValue),
       };
 
       final result = pointer.write(storageData, value);
@@ -1196,14 +1279,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
       return true;
     } catch (error, stackTrace) {
-      DebugLogger.instance.printInfo(
-        error.toString(),
-        name: name,
-      );
-      DebugLogger.instance.printInfo(
-        stackTrace.toString(),
-        name: name,
-      );
+      DebugLogger.instance.printInfo(error.toString(), name: name);
+      DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
       return false;
     }
   }
@@ -1211,14 +1288,13 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
   /// Performs remove operation on given storage [action] and returns `true` if
   /// the operation was successful, `false` otherwise.
   static Future<bool> _removeFromStorage(
-      SetStorageAction action, ScopedValues scopedValues) async {
+    SetStorageAction action,
+    ScopedValues scopedValues,
+  ) async {
     try {
       final LocalDatabase? storage = scopedValues.localStorage;
       if (storage == null) {
-        DebugLogger.instance.printInfo(
-          'Storage is null.',
-          name: name,
-        );
+        DebugLogger.instance.printInfo('Storage is null.', name: name);
         return false;
       }
 
@@ -1260,14 +1336,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
       return true;
     } catch (error, stackTrace) {
-      DebugLogger.instance.printInfo(
-        error.toString(),
-        name: name,
-      );
-      DebugLogger.instance.printInfo(
-        stackTrace.toString(),
-        name: name,
-      );
+      DebugLogger.instance.printInfo(error.toString(), name: name);
+      DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
       return false;
     }
   }
@@ -1364,10 +1434,14 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
   ) async {
     final ScopedValues scopedValues = ScopedValues.of(context);
     return await switch (action.subAction) {
-      AddDocumentSubAction addDocumentSubAction =>
-        addDocumentToCloud(addDocumentSubAction, scopedValues),
-      UpdateDocumentSubAction updateDocumentSubAction =>
-        updateDocumentOnCloud(updateDocumentSubAction, scopedValues),
+      AddDocumentSubAction addDocumentSubAction => addDocumentToCloud(
+        addDocumentSubAction,
+        scopedValues,
+      ),
+      UpdateDocumentSubAction updateDocumentSubAction => updateDocumentOnCloud(
+        updateDocumentSubAction,
+        scopedValues,
+      ),
       RemoveDocumentSubAction removeDocumentSubAction =>
         removeDocumentFromCloud(removeDocumentSubAction, scopedValues),
     };
@@ -1381,10 +1455,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
 
       if (cloudDatabase == null) {
-        DebugLogger.instance.printInfo(
-          'Cloud storage is null.',
-          name: name,
-        );
+        DebugLogger.instance.printInfo('Cloud storage is null.', name: name);
         return false;
       }
 
@@ -1438,14 +1509,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         skipCreationIfDocumentExists: subAction.skipCreationIfDocumentExists,
       );
     } catch (error, stackTrace) {
-      DebugLogger.instance.printInfo(
-        error.toString(),
-        name: name,
-      );
-      DebugLogger.instance.printInfo(
-        stackTrace.toString(),
-        name: name,
-      );
+      DebugLogger.instance.printInfo(error.toString(), name: name);
+      DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
       return false;
     }
   }
@@ -1457,10 +1522,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
 
     if (cloudDatabase == null) {
-      DebugLogger.instance.printInfo(
-        'Cloud storage is null.',
-        name: name,
-      );
+      DebugLogger.instance.printInfo('Cloud storage is null.', name: name);
       return false;
     }
 
@@ -1507,7 +1569,9 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
       final match = VariableMatch.parse(storageKey.wrapWithVariableSyntax());
       final docData = await cloudDatabase.getDocumentData(
-          subAction.path, evaluatedDocumentId);
+        subAction.path,
+        evaluatedDocumentId,
+      );
 
       final Object? currentValue;
       JsonPointer? pointer;
@@ -1531,28 +1595,34 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         VariableType.text => newValue,
         VariableType.image => newValue,
         VariableType.color => ColorRGBA.fromHex(newValue),
-        VariableType.integer => _performIntOperation(subAction.numberOperation,
-            currentValue?.toInt(), newValue, scopedValues),
+        VariableType.integer => _performIntOperation(
+          subAction.numberOperation,
+          currentValue?.toInt(),
+          newValue,
+          scopedValues,
+        ),
         VariableType.decimal => _performDecimalOperation(
-            subAction.numberOperation,
-            currentValue?.toDouble(),
-            newValue,
-            scopedValues),
-        VariableType.boolean => subAction.toggled
-            ? !(bool.tryParse(currentValue.toString()) ?? false)
-            : bool.tryParse(newValue),
+          subAction.numberOperation,
+          currentValue?.toDouble(),
+          newValue,
+          scopedValues,
+        ),
+        VariableType.boolean =>
+          subAction.toggled
+              ? !(bool.tryParse(currentValue.toString()) ?? false)
+              : bool.tryParse(newValue),
         VariableType.list => _performListOperation(
-            subAction,
-            currentValue?.toList(),
-            newValue,
-            scopedValues,
-          ),
+          subAction,
+          currentValue?.toList(),
+          newValue,
+          scopedValues,
+        ),
         VariableType.map => _performMapOperation(
-            subAction,
-            currentValue?.toMap(),
-            newValue,
-            scopedValues,
-          ),
+          subAction,
+          currentValue?.toMap(),
+          newValue,
+          scopedValues,
+        ),
       };
 
       if (match == null || pointer == null) {
@@ -1575,8 +1645,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       final defaultValue = subAction.variableType.isList
           ? []
           : subAction.variableType.isMap
-              ? {}
-              : null;
+          ? {}
+          : null;
       Map<String, dynamic> storageData = {
         match.name: docData[match.name] ?? defaultValue,
       };
@@ -1599,14 +1669,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         value: {match.name: docData[match.name]},
       );
     } catch (error, stackTrace) {
-      DebugLogger.instance.printInfo(
-        error.toString(),
-        name: name,
-      );
-      DebugLogger.instance.printInfo(
-        stackTrace.toString(),
-        name: name,
-      );
+      DebugLogger.instance.printInfo(error.toString(), name: name);
+      DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
       return false;
     }
   }
@@ -1619,10 +1683,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
 
       if (cloudDatabase == null) {
-        DebugLogger.instance.printInfo(
-          'Cloud storage is null.',
-          name: name,
-        );
+        DebugLogger.instance.printInfo('Cloud storage is null.', name: name);
         return false;
       }
 
@@ -1642,14 +1703,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         evaluatedDocumentId,
       );
     } catch (error, stackTrace) {
-      DebugLogger.instance.printInfo(
-        error.toString(),
-        name: name,
-      );
-      DebugLogger.instance.printInfo(
-        stackTrace.toString(),
-        name: name,
-      );
+      DebugLogger.instance.printInfo(error.toString(), name: name);
+      DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
       return false;
     }
   }
@@ -1703,7 +1758,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         name: name,
       );
       cloudDatabase.streamDocumentToVariable(
-          evaluatedPath, evaluatedDocumentId, variable);
+        evaluatedPath,
+        evaluatedDocumentId,
+        variable,
+      );
     } else {
       DebugLogger.instance.printInfo(
         'Streaming collection from cloud storage: $evaluatedPath',

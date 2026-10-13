@@ -1,7 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -76,9 +75,9 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
     widget.node.textMixedProps.forEach((property) {
       String link = property.link;
       if (link.isNotEmpty) {
-        TapGestureRecognizer tapGestureRecognizer =
-            TapGestureRecognizer(debugOwner: link)
-              ..onTap = () => launchUrl(Uri.parse(link));
+        TapGestureRecognizer tapGestureRecognizer = TapGestureRecognizer(
+          debugOwner: link,
+        )..onTap = () => FunctionsRepository.openLink(link);
         tapGestureRecognizerRegistry[link] = tapGestureRecognizer;
       }
     });
@@ -88,7 +87,8 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
   void disposeTapGestureRecognizers() {
     if (!widget.clickable) return;
     tapGestureRecognizerRegistry.forEach(
-        (link, tapGestureRecognizer) => tapGestureRecognizer.dispose());
+      (link, tapGestureRecognizer) => tapGestureRecognizer.dispose(),
+    );
     tapGestureRecognizerRegistry = {};
   }
 

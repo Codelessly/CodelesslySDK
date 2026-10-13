@@ -4,7 +4,6 @@ import 'dart:ui_web';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:web/web.dart' as web;
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -39,10 +38,7 @@ class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
   }
 
   Widget buildFromNode(WebViewNode node, WidgetBuildSettings settings) {
-    return PassiveWebViewWidget(
-      node: node,
-      settings: settings,
-    );
+    return PassiveWebViewWidget(node: node, settings: settings);
   }
 
   void onChanged(List<Reaction> reactions) => reactions
@@ -52,7 +48,7 @@ class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
   void onAction(Reaction reaction) {
     switch (reaction.action.type) {
       case ActionType.link:
-        launchUrl(Uri.parse((reaction.action as LinkAction).url));
+        FunctionsRepository.openLink((reaction.action as LinkAction).url);
       default:
         break;
     }
@@ -116,15 +112,17 @@ class WebViewPreviewWidget extends StatelessWidget {
         child: FractionallySizedBox(
           widthFactor: aspectRatio > 1 ? 0.2 : null,
           heightFactor: aspectRatio < 1 ? 0.2 : null,
-          child: LayoutBuilder(builder: (context, constraints) {
-            return IconTheme(
-              data: IconThemeData(
-                color: Colors.blue,
-                size: min(constraints.maxWidth, constraints.maxHeight),
-              ),
-              child: icon,
-            );
-          }),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return IconTheme(
+                data: IconThemeData(
+                  color: Colors.blue,
+                  size: min(constraints.maxWidth, constraints.maxHeight),
+                ),
+                child: icon,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -156,19 +154,13 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.settings.isPreview) {
-      print('Preview mode for WebView.');
-      return;
-    }
+    if (widget.settings.isPreview) return;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (widget.settings.isPreview) {
-      print('Preview mode for WebView.');
-      return;
-    }
+    if (widget.settings.isPreview) return;
     if (!_isDataLoaded) {
       _isDataLoaded = true;
       _loadData();
@@ -182,13 +174,17 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
       case WebViewType.webpage:
         final WebPageWebViewProperties properties =
             props as WebPageWebViewProperties;
-        url = PropertyValueDelegate.getVariableValueFromPath<String>(
-                properties.input,
-                scopedValues: scopedValues) ??
+        url =
+            PropertyValueDelegate.getVariableValueFromPath<String>(
+              properties.input,
+              scopedValues: scopedValues,
+            ) ??
             properties.input;
       case WebViewType.googleMaps:
         url = buildGoogleMapsURL(
-            props as GoogleMapsWebViewProperties, scopedValues);
+          props as GoogleMapsWebViewProperties,
+          scopedValues,
+        );
       case WebViewType.twitter:
         url = buildTwitterURL(props as TwitterWebViewProperties, scopedValues);
     }
@@ -206,31 +202,40 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
   }
 
   String buildGoogleMapsURL(
-      GoogleMapsWebViewProperties properties, ScopedValues scopedValues) {
+    GoogleMapsWebViewProperties properties,
+    ScopedValues scopedValues,
+  ) {
     final String? originalSrc = properties.src;
     final String? updatedSrc = originalSrc != null
-        ? PropertyValueDelegate.getVariableValueFromPath<String>(originalSrc,
-                scopedValues: scopedValues) ??
-            originalSrc
+        ? PropertyValueDelegate.getVariableValueFromPath<String>(
+                originalSrc,
+                scopedValues: scopedValues,
+              ) ??
+              originalSrc
         : null;
     return _buildHtmlContent(updatedSrc);
   }
 
   String buildTwitterURL(
-      TwitterWebViewProperties properties, ScopedValues scopedValues) {
+    TwitterWebViewProperties properties,
+    ScopedValues scopedValues,
+  ) {
     final String? originalSrc = properties.src;
     final String? updatedSrc = originalSrc != null
-        ? PropertyValueDelegate.getVariableValueFromPath<String>(originalSrc,
-                scopedValues: scopedValues) ??
-            originalSrc
+        ? PropertyValueDelegate.getVariableValueFromPath<String>(
+                originalSrc,
+                scopedValues: scopedValues,
+              ) ??
+              originalSrc
         : null;
     return _buildHtmlContent(updatedSrc);
   }
 
   String _buildHtmlContent(String? src) {
     final String html = src?.replaceAll('\n', '') ?? 'about:blank';
-    final String contentBase64 =
-        base64Encode(const Utf8Encoder().convert(html));
+    final String contentBase64 = base64Encode(
+      const Utf8Encoder().convert(html),
+    );
     final String content = 'data:text/html;base64,$contentBase64';
 
     return content;
@@ -242,17 +247,14 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
     if (widget.settings.isPreview) {
       switch (props.webviewType) {
         case WebViewType.webpage:
-          return const WebViewPreviewWidget(
-            icon: Icon(Icons.language_rounded),
-          );
+          return const WebViewPreviewWidget(icon: Icon(Icons.language_rounded));
         case WebViewType.googleMaps:
-          return const WebViewPreviewWidget(
-            icon: Icon(Icons.map_outlined),
-          );
+          return const WebViewPreviewWidget(icon: Icon(Icons.map_outlined));
         case WebViewType.twitter:
           return const WebViewPreviewWidget(
-            icon: ImageIcon(NetworkImage(
-                'https://img.icons8.com/color/344/twitter--v2.png')),
+            icon: ImageIcon(
+              NetworkImage('https://img.icons8.com/color/344/twitter--v2.png'),
+            ),
           );
       }
     }

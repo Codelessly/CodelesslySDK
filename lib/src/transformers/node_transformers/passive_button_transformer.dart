@@ -14,10 +14,7 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return buildButtonFromNode(
-      node,
-      settings: settings,
-    );
+    return buildButtonFromNode(node, settings: settings);
   }
 
   Widget buildFromProps(
@@ -86,19 +83,26 @@ class PassiveButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues =
-        ScopedValues.of(context, variablesOverrides: variablesOverrides);
+    final ScopedValues scopedValues = ScopedValues.of(
+      context,
+      variablesOverrides: variablesOverrides,
+    );
     final ButtonStyle buttonStyle = createMasterButtonStyle(
       node,
       elevation: elevation,
       scopedValues: scopedValues,
     );
-    final double effectiveIconSize =
-        min(node.properties.icon.size ?? 24, node.basicBoxLocal.height);
-    Widget? iconWidget =
-        retrieveIconWidget(node.properties.icon, effectiveIconSize);
+    final double effectiveIconSize = min(
+      node.properties.icon.size ?? 24,
+      node.basicBoxLocal.height,
+    );
+    Widget? iconWidget = retrieveIconWidget(
+      node.properties.icon,
+      effectiveIconSize,
+    );
 
-    final bool enabled = PropertyValueDelegate.getPropertyValue<bool>(
+    final bool enabled =
+        PropertyValueDelegate.getPropertyValue<bool>(
           node,
           'enabled',
           scopedValues: scopedValues,
@@ -113,10 +117,8 @@ class PassiveButtonWidget extends StatelessWidget {
       final List<TextSpan> spans = node.properties.label
           .splitMap(
             variablePathRegex,
-            onMatch: (match) => VariableSpan(
-              variable: match[0]!,
-              style: const TextStyle(),
-            ),
+            onMatch: (match) =>
+                VariableSpan(variable: match[0]!, style: const TextStyle()),
             onNonMatch: (text) => TextSpan(text: text),
           )
           .toList();
@@ -125,7 +127,8 @@ class PassiveButtonWidget extends StatelessWidget {
         textAlign: node.properties.labelAlignment.flutterTextAlignment,
       );
     } else {
-      final String value = PropertyValueDelegate.getPropertyValue<String>(
+      final String value =
+          PropertyValueDelegate.getPropertyValue<String>(
             node,
             'label',
             scopedValues: scopedValues,
@@ -164,7 +167,59 @@ class PassiveButtonWidget extends StatelessWidget {
                       if (node.properties.icon.show)
                         SizedBox(width: node.properties.gap),
                       iconWidget,
-                    }
+                    },
+                  ],
+                )
+              : label,
+        );
+      case ButtonTypeEnum.filled:
+        buttonWidget = FilledButton(
+          onPressed: enabled ? () => onPressed?.call(context) : null,
+          onLongPress: enabled ? () => onLongPress?.call(context) : null,
+          style: buttonStyle,
+          child: iconWidget != null
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  verticalDirection: VerticalDirection.down,
+                  children: [
+                    if (node.properties.placement ==
+                        IconPlacementEnum.start) ...{
+                      iconWidget,
+                      if (node.properties.icon.show)
+                        SizedBox(width: node.properties.gap),
+                    },
+                    Flexible(child: label),
+                    if (node.properties.placement == IconPlacementEnum.end) ...{
+                      if (node.properties.icon.show)
+                        SizedBox(width: node.properties.gap),
+                      iconWidget,
+                    },
+                  ],
+                )
+              : label,
+        );
+      case ButtonTypeEnum.filledTonal:
+        buttonWidget = FilledButton.tonal(
+          onPressed: enabled ? () => onPressed?.call(context) : null,
+          onLongPress: enabled ? () => onLongPress?.call(context) : null,
+          style: buttonStyle,
+          child: iconWidget != null
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  verticalDirection: VerticalDirection.down,
+                  children: [
+                    if (node.properties.placement ==
+                        IconPlacementEnum.start) ...{
+                      iconWidget,
+                      if (node.properties.icon.show)
+                        SizedBox(width: node.properties.gap),
+                    },
+                    Flexible(child: label),
+                    if (node.properties.placement == IconPlacementEnum.end) ...{
+                      if (node.properties.icon.show)
+                        SizedBox(width: node.properties.gap),
+                      iconWidget,
+                    },
                   ],
                 )
               : label,
@@ -188,7 +243,7 @@ class PassiveButtonWidget extends StatelessWidget {
                     if (node.properties.placement == IconPlacementEnum.end) ...{
                       SizedBox(width: node.properties.gap),
                       iconWidget,
-                    }
+                    },
                   ],
                 )
               : label,
@@ -212,7 +267,7 @@ class PassiveButtonWidget extends StatelessWidget {
                     if (node.properties.placement == IconPlacementEnum.end) ...{
                       SizedBox(width: node.properties.gap),
                       iconWidget,
-                    }
+                    },
                   ],
                 )
               : label,

@@ -42,8 +42,10 @@ class UltimateImageBuilder extends StatefulWidget {
     this.node,
     this.blendMode,
     this.useInk = false,
-  }) : assert(url != null || bytes != null || paint != null,
-            'url or bytes or paint must be provided')
+  }) : assert(
+         url != null || bytes != null || paint != null,
+         'url or bytes or paint must be provided',
+       )
   /*assert(
             paint == null || (width != null && height != null && node != null),
             'width, height and node must be provided when paint is provided')*/
@@ -64,10 +66,13 @@ class UltimateImageBuilder extends StatefulWidget {
     properties.add(EnumProperty<ImageRepeat>('repeat', repeat));
     properties.add(ColorProperty('color', color));
     properties.add(
-        ObjectFlagProperty<WidgetBuilder>.has('errorBuilder', errorBuilder));
-    properties.add(ObjectFlagProperty<
-            Widget Function(BuildContext context, Widget? child)>.has(
-        'loadingBuilder', loadingBuilder));
+      ObjectFlagProperty<WidgetBuilder>.has('errorBuilder', errorBuilder),
+    );
+    properties.add(
+      ObjectFlagProperty<
+        Widget Function(BuildContext context, Widget? child)
+      >.has('loadingBuilder', loadingBuilder),
+    );
     properties.add(DiagnosticsProperty<PaintModel>('paint', paint));
     properties.add(DiagnosticsProperty<BaseNode>('node', node));
     properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
@@ -103,7 +108,8 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
           widget.color!,
           widget.blendMode ??
               widget.paint?.blendMode.flutterBlendMode ??
-              BlendMode.srcIn)
+              BlendMode.srcIn,
+        )
       : null;
 
   double? get width {
@@ -156,9 +162,13 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
       return;
     }
     if (isCustomPositionRequiredForImage(
-        widget.paint!, SizeC(widget.width!, widget.height!))) {
-      effectiveChildSize =
-          getEffectiveChildSizeForImage(widget.node!, widget.paint!);
+      widget.paint!,
+      SizeC(widget.width!, widget.height!),
+    )) {
+      effectiveChildSize = getEffectiveChildSizeForImage(
+        widget.node!,
+        widget.paint!,
+      );
 
       position = convertAlignmentToPosition(
         parentWidth: widget.node!.basicBoxGlobal.width,
@@ -185,7 +195,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
             width: effectiveChildSize!.width,
             height: effectiveChildSize!.height,
             child: buildImage(withAlignment: false),
-          )
+          ),
         ],
       );
     }
@@ -202,7 +212,8 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
 
   /// TODO: Decorate the rest of the image widgets, not just CachedNetworkImage.
   Widget buildFromUrl({required bool withAlignment}) {
-    final String url = widget.url ??
+    final String url =
+        widget.url ??
         widget.paint!.croppedImageURL ??
         widget.paint!.downloadUrl!;
 
@@ -221,6 +232,8 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         placeholderBuilder: widget.loadingBuilder != null
             ? (context) => widget.loadingBuilder!(context, null)
             : null,
+        errorBuilder: (context, error, stackTrace) =>
+            (widget.errorBuilder ?? _defaultErrorBuilder)(context),
       );
     } else if (url.isBase64Blob) {
       child = Image.memory(
@@ -233,7 +246,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         repeat: repeat,
         color: widget.color,
         colorBlendMode: colorBlendMode,
-        errorBuilder: (context, _, __) =>
+        errorBuilder: (context, _, _) =>
             (widget.errorBuilder ?? _defaultErrorBuilder)(context),
       );
     } else {
@@ -251,10 +264,13 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         colorBlendMode: colorBlendMode,
         loadingBuilder: widget.loadingBuilder != null
             ? (context, child, loadingProgress) =>
-                widget.loadingBuilder!(context, child)
+                  widget.loadingBuilder!(context, child)
             : null,
         errorBuilder: (context, error, stackTrace) {
-          print('Image Loading Error: $error');
+          DebugLogger.instance.printInfo(
+            'Image Loading Error: $error',
+            name: 'ImageBuilder',
+          );
           return (widget.errorBuilder ?? _defaultErrorBuilder)(context);
         },
       );
@@ -307,7 +323,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
       repeat: repeat,
       color: widget.color,
       colorBlendMode: colorBlendMode,
-      errorBuilder: (context, _, __) =>
+      errorBuilder: (context, _, _) =>
           (widget.errorBuilder ?? _defaultErrorBuilder)(context),
     );
   }
@@ -317,9 +333,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
       builder: (context, constraints) {
         if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
           return const FittedBox(
-            child: Center(
-              child: Icon(Icons.image_outlined),
-            ),
+            child: Center(child: Icon(Icons.image_outlined)),
           );
         }
         return FractionallySizedBox(
@@ -336,29 +350,26 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.image_outlined,
-                      size: 100,
-                    ),
+                    const Icon(Icons.image_outlined, size: 100),
                     Text(
                       'Variable Image',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.merge(
-                            GoogleFonts.sourceCodePro(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                        GoogleFonts.sourceCodePro(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                     Text(
                       path,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.merge(
-                            GoogleFonts.sourceCodePro(
-                              color: Colors.greenAccent.shade700,
-                              fontSize: 24,
-                            ),
-                          ),
+                        GoogleFonts.sourceCodePro(
+                          color: Colors.greenAccent.shade700,
+                          fontSize: 24,
+                        ),
+                      ),
                     ),
                   ],
                 ),

@@ -4,10 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../../logging/error_logger.dart';
 import '../../ui/draggable_scroll_configuration.dart';
 
 class PassiveGridViewTransformer extends NodeWidgetTransformer<GridViewNode> {
@@ -15,7 +15,10 @@ class PassiveGridViewTransformer extends NodeWidgetTransformer<GridViewNode> {
 
   @override
   Widget buildWidget(
-      GridViewNode node, BuildContext context, WidgetBuildSettings settings) {
+    GridViewNode node,
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveGridViewWidget(
       node: node,
       manager: manager,
@@ -37,7 +40,9 @@ class PassiveGridViewWidget extends StatelessWidget {
   });
 
   Query<Map<String, dynamic>> constructQuery(
-      BuildContext context, Codelessly codelessly) {
+    BuildContext context,
+    Codelessly codelessly,
+  ) {
     final PublishSource source =
         codelessly.config?.publishSource ?? PublishSource.preview;
 
@@ -104,7 +109,8 @@ class PassiveGridViewWidget extends StatelessWidget {
             return GridViewBuilder(
               primary: node.primary,
               gridDelegate: node.properties.gridDelegate,
-              shrinkWrap: node.properties.itemCount != null &&
+              shrinkWrap:
+                  node.properties.itemCount != null &&
                   (node.scrollDirection == AxisC.horizontal
                       ? node.isHorizontalWrap
                       : node.isVerticalWrap),
@@ -112,8 +118,9 @@ class PassiveGridViewWidget extends StatelessWidget {
               padding: node.padding.flutterEdgeInsets,
               keyboardDismissBehavior:
                   node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-              physics:
-                  node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
+              physics: node.physics.flutterScrollPhysics(
+                node.shouldAlwaysScroll,
+              ),
               scrollDirection: node.scrollDirection.flutterAxis,
               cacheExtent: node.properties.cacheExtent,
               reverse: node.reverse,
@@ -124,10 +131,7 @@ class PassiveGridViewWidget extends StatelessWidget {
                 final data = doc?.data();
                 return IndexedItemProvider(
                   key: ValueKey(index),
-                  item: IndexedItem(
-                    index,
-                    {if (id != null) 'id': id, ...?data},
-                  ),
+                  item: IndexedItem(index, {'id': ?id, ...?data}),
                   child: Builder(
                     builder: (context) {
                       // This builder is important to pass a context that has
@@ -150,7 +154,8 @@ class PassiveGridViewWidget extends StatelessWidget {
       );
     }
 
-    final List? data = PropertyValueDelegate.getVariableValueFromPath<List>(
+    final List? data =
+        PropertyValueDelegate.getVariableValueFromPath<List>(
           node.variables['data'] ?? '',
           scopedValues: ScopedValues.of(context),
         ) ??
@@ -168,7 +173,8 @@ class PassiveGridViewWidget extends StatelessWidget {
       child: GridViewBuilder(
         primary: node.primary,
         gridDelegate: node.properties.gridDelegate,
-        shrinkWrap: node.properties.itemCount != null &&
+        shrinkWrap:
+            node.properties.itemCount != null &&
             (node.scrollDirection == AxisC.horizontal
                 ? node.isHorizontalWrap
                 : node.isVerticalWrap),
@@ -244,7 +250,9 @@ class GridViewBuilder extends StatelessWidget {
         padding: padding,
         physics: physics,
         scrollDirection: scrollDirection,
-        cacheExtent: cacheExtent,
+        scrollCacheExtent: cacheExtent == null
+            ? null
+            : ScrollCacheExtent.pixels(cacheExtent!),
         reverse: reverse,
         clipBehavior: clipBehavior,
         itemBuilder: itemBuilder!,

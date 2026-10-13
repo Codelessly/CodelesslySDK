@@ -89,7 +89,7 @@ enum AlignmentEnum {
 }
 
 /// Parsed data from a variable path using [variablePathRegex].
-class VariableMatch with EquatableMixin {
+class VariableMatch with Equatable {
   final String text;
   final String name;
   final String? path;
@@ -150,11 +150,15 @@ class VariableMatch with EquatableMixin {
 }
 
 /// Supported image file types that can be dropped on the canvas.
-final RegExp supportedAssetTypesRegex =
-    RegExp('jpg|jpeg|png|webp|gif|svg', caseSensitive: false);
+final RegExp supportedAssetTypesRegex = RegExp(
+  'jpg|jpeg|png|webp|gif|svg',
+  caseSensitive: false,
+);
 
-final RegExp staticImageTypesRegex =
-    RegExp('jpg|jpeg|png|webp', caseSensitive: false);
+final RegExp staticImageTypesRegex = RegExp(
+  'jpg|jpeg|png|webp',
+  caseSensitive: false,
+);
 
 /// Returns the most common value in a list.
 /// Returns null for ties.
@@ -228,27 +232,33 @@ BaseNode? getTallestNode(Iterable<BaseNode> siblings) {
 /// largest child by multiplying its width and height as a sort of best
 /// approximation.
 BaseNode? getLargestNodeForWrappingStack(
-    BaseNode parent, List<BaseNode> sibling) {
+  BaseNode parent,
+  List<BaseNode> sibling,
+) {
   if (sibling.isEmpty) return null;
 
   // Only horizontal wrap.
   if (parent.isHorizontalWrap && !parent.isVerticalWrap) {
     return sibling.reduce(
-        (a, b) => a.outerBoxLocal.width > b.outerBoxLocal.width ? a : b);
+      (a, b) => a.outerBoxLocal.width > b.outerBoxLocal.width ? a : b,
+    );
   }
 
   // Only vertical wrap, compare heights.
   if (parent.isVerticalWrap && !parent.isHorizontalWrap) {
     return sibling.reduce(
-        (a, b) => a.outerBoxLocal.height > b.outerBoxLocal.height ? a : b);
+      (a, b) => a.outerBoxLocal.height > b.outerBoxLocal.height ? a : b,
+    );
   }
 
   // Both wrap.
-  return sibling.reduce((a, b) =>
-      a.outerBoxLocal.height * a.outerBoxLocal.width >
-              b.outerBoxLocal.height * b.outerBoxLocal.width
-          ? a
-          : b);
+  return sibling.reduce(
+    (a, b) =>
+        a.outerBoxLocal.height * a.outerBoxLocal.width >
+            b.outerBoxLocal.height * b.outerBoxLocal.width
+        ? a
+        : b,
+  );
 }
 
 AlignmentModel retrieveCommonStackAlignment(
@@ -313,12 +323,14 @@ String apiNameToVariableName(String name) {
   if (name.startsWith(RegExp(r'\d+'))) {
     name = name.replaceFirst(RegExp(r'\d+'), '').trim();
   }
-  name =
-      name.replaceAll(RegExp(r'\s+'), '_').replaceAll(RegExp(r'\W'), '').trim();
+  name = name
+      .replaceAll(RegExp(r'\s+'), '_')
+      .replaceAll(RegExp(r'\W'), '')
+      .trim();
   final tokens = name.split(RegExp(r'_+'));
   final sanitizedName = [
     SDKConstants.apiVariablePrefix,
-    ...tokens.map((e) => e.capitalized)
+    ...tokens.map((e) => e.capitalized),
   ].join('');
   return sanitizedName;
 }
@@ -340,62 +352,60 @@ class ApiResponseVariableUtils {
   ApiResponseVariableUtils._();
 
   static Map idle(String url) => {
-        'url': url,
-        'isIdle': true,
-        'isLoading': false,
-        'isError': false,
-        'isSuccess': false,
-        'status': 'idle',
-      };
+    'url': url,
+    'isIdle': true,
+    'isLoading': false,
+    'isError': false,
+    'isSuccess': false,
+    'status': 'idle',
+  };
 
   static Map loading(String url, {Object? data}) => {
-        'url': url,
-        'isIdle': false,
-        'isLoading': true,
-        'isError': false,
-        'isSuccess': false,
-        'status': 'loading',
-        'data': data,
-        'hasData': data != null,
-      };
+    'url': url,
+    'isIdle': false,
+    'isLoading': true,
+    'isError': false,
+    'isSuccess': false,
+    'status': 'loading',
+    'data': data,
+    'hasData': data != null,
+  };
 
   static Map error(
     String url,
     Object? error, {
     Object? data,
     Map<String, String>? headers,
-  }) =>
-      {
-        'url': url,
-        'isIdle': false,
-        'isLoading': false,
-        'isError': true,
-        'isSuccess': false,
-        'error': error is Map || error is List ? error : error.toString(),
-        'status': 'error',
-        'headers': headers,
-        'hasData': data != null,
-        'data': data is Map || data is List ? data : data.toString(),
-      };
+  }) => {
+    'url': url,
+    'isIdle': false,
+    'isLoading': false,
+    'isError': true,
+    'isSuccess': false,
+    'error': error is Map || error is List ? error : error.toString(),
+    'status': 'error',
+    'headers': headers,
+    'hasData': data != null,
+    'data': data is Map || data is List ? data : data.toString(),
+  };
 
   static Map success(
     String url,
     Object? data, {
     int statusCode = 200,
     Map<String, String>? headers,
-  }) =>
-      {
-        'url': url,
-        'isIdle': false,
-        'isLoading': false,
-        'isError': false,
-        'isSuccess': true,
-        'data': data,
-        'status': 'error',
-        'headers': headers,
-        'statusCode': statusCode,
-        'hasData': data != null,
-      };
+  }) => {
+    'url': url,
+    'isIdle': false,
+    'isLoading': false,
+    'isError': false,
+    'isSuccess': true,
+    'data': data,
+    'status': 'error',
+    'headers': headers,
+    'statusCode': statusCode,
+    'hasData': data != null,
+  };
 
   static Map fromResponse(http.Response response, {Object? existingData}) {
     final bool isSuccess =
@@ -421,15 +431,15 @@ class ApiResponseVariableUtils {
     };
   }
 
-// static Object? sanitizeValueForJson(Object? value) {
-//   return switch (value) {
-//     String() || int() || double() || bool() => value,
-//     List() => value.map(sanitizeValueForJson).toList(),
-//     Map() => value.map((key, value) =>
-//         MapEntry(key.toString(), sanitizeValueForJson(value))),
-//     _ => value?.toString(),
-//   };
-// }
+  // static Object? sanitizeValueForJson(Object? value) {
+  //   return switch (value) {
+  //     String() || int() || double() || bool() => value,
+  //     List() => value.map(sanitizeValueForJson).toList(),
+  //     Map() => value.map((key, value) =>
+  //         MapEntry(key.toString(), sanitizeValueForJson(value))),
+  //     _ => value?.toString(),
+  //   };
+  // }
 }
 
 /// Helper utility class to easily update different statuses for cloud storage variable
@@ -437,52 +447,44 @@ class CloudDatabaseVariableUtils {
   CloudDatabaseVariableUtils._();
 
   static Map idle() => {
-        'isIdle': true,
-        'isLoading': false,
-        'isError': false,
-        'isSuccess': false,
-        'status': 'idle',
-      };
+    'isIdle': true,
+    'isLoading': false,
+    'isError': false,
+    'isSuccess': false,
+    'status': 'idle',
+  };
 
   static Map loading({Object? data}) => {
-        'isIdle': false,
-        'isLoading': true,
-        'isError': false,
-        'isSuccess': false,
-        'status': 'loading',
-        'data': data,
-        'hasData': data != null,
-      };
+    'isIdle': false,
+    'isLoading': true,
+    'isError': false,
+    'isSuccess': false,
+    'status': 'loading',
+    'data': data,
+    'hasData': data != null,
+  };
 
-  static Map error(
-    Object? error, {
-    Object? data,
-  }) =>
-      {
-        'isIdle': false,
-        'isLoading': false,
-        'isError': true,
-        'isSuccess': false,
-        'error': error is Map || error is List ? error : error.toString(),
-        'status': 'error',
-        'hasData': data != null,
-        'data': data is Map || data is List ? data : data.toString(),
-      };
+  static Map error(Object? error, {Object? data}) => {
+    'isIdle': false,
+    'isLoading': false,
+    'isError': true,
+    'isSuccess': false,
+    'error': error is Map || error is List ? error : error.toString(),
+    'status': 'error',
+    'hasData': data != null,
+    'data': data is Map || data is List ? data : data.toString(),
+  };
 
-  static Map success(
-    Object? data, {
-    String? docId,
-  }) =>
-      {
-        'id': docId,
-        'isIdle': false,
-        'isLoading': false,
-        'isError': false,
-        'isSuccess': true,
-        'data': data,
-        'status': 'error',
-        'hasData': data != null,
-      };
+  static Map success(Object? data, {String? docId}) => {
+    'id': docId,
+    'isIdle': false,
+    'isLoading': false,
+    'isError': false,
+    'isSuccess': true,
+    'data': data,
+    'status': 'error',
+    'hasData': data != null,
+  };
 }
 
 /// Constructs a [Query] on top of given [Query] reference using given [whereFilters]
@@ -515,7 +517,8 @@ Query<Map<String, dynamic>> constructQueryFromRef(
       scopedValues: scopedValues,
       nullSubstitutionMode: nullSubstitutionMode,
     );
-    final Object value = PropertyValueDelegate.substituteVariables(
+    final Object value =
+        PropertyValueDelegate.substituteVariables(
           whereFilter.value,
           scopedValues: scopedValues,
           nullSubstitutionMode: nullSubstitutionMode,
@@ -523,46 +526,37 @@ Query<Map<String, dynamic>> constructQueryFromRef(
         '';
 
     query = switch (whereFilter.operator) {
-      WhereQueryOperator.equal => query.where(
-          field,
-          isEqualTo: value,
-        ),
-      WhereQueryOperator.notEqual => query.where(
-          field,
-          isNotEqualTo: value,
-        ),
+      WhereQueryOperator.equal => query.where(field, isEqualTo: value),
+      WhereQueryOperator.notEqual => query.where(field, isNotEqualTo: value),
       WhereQueryOperator.arrayContains => query.where(
-          field,
-          arrayContains: value,
-        ),
+        field,
+        arrayContains: value,
+      ),
       WhereQueryOperator.greaterThan => query.where(
-          field,
-          isGreaterThan: value,
-        ),
+        field,
+        isGreaterThan: value,
+      ),
       WhereQueryOperator.greaterThanOrEqual => query.where(
-          field,
-          isGreaterThanOrEqualTo: value,
-        ),
-      WhereQueryOperator.lessThan => query.where(
-          field,
-          isLessThan: value,
-        ),
+        field,
+        isGreaterThanOrEqualTo: value,
+      ),
+      WhereQueryOperator.lessThan => query.where(field, isLessThan: value),
       WhereQueryOperator.lessThanOrEqual => query.where(
-          field,
-          isLessThanOrEqualTo: value,
-        ),
+        field,
+        isLessThanOrEqualTo: value,
+      ),
       WhereQueryOperator.arrayContainsAny => query.where(
-          field,
-          arrayContainsAny: value.typedValue<List>(),
-        ),
+        field,
+        arrayContainsAny: value.typedValue<List>(),
+      ),
       WhereQueryOperator.inArray => query.where(
-          field,
-          whereIn: value.typedValue<List>(),
-        ),
+        field,
+        whereIn: value.typedValue<List>(),
+      ),
       WhereQueryOperator.notInArray => query.where(
-          field,
-          whereNotIn: value.typedValue<List>(),
-        ),
+        field,
+        whereNotIn: value.typedValue<List>(),
+      ),
     };
   }
 

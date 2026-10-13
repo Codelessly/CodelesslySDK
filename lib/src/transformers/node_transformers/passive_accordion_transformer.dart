@@ -8,14 +8,32 @@ class PassiveAccordionTransformer extends NodeWidgetTransformer<AccordionNode> {
 
   @override
   Widget buildWidget(
-      AccordionNode node, BuildContext context, WidgetBuildSettings settings) {
+    AccordionNode node,
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
     return PassiveAccordionWidget(
       node: node,
-      topWidget: manager.buildWidgetFromNode(getNode(node.children[0]), context,
-          settings: settings),
-      bottomWidget: manager.buildWidgetFromNode(
-          getNode(node.children[1]), context,
-          settings: settings),
+      isInitiallyExpanded: node.properties.isExpanded,
+      topWidget: _buildChild(node, 0, context, settings),
+      bottomWidget: _buildChild(node, 1, context, settings),
+    );
+  }
+
+  /// Builds the accordion's [index]th child, or nothing while the accordion
+  /// is still missing it.
+  Widget _buildChild(
+    AccordionNode node,
+    int index,
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) {
+    final String? childId = node.children.elementAtOrNull(index);
+    if (childId == null) return const SizedBox.shrink();
+    return manager.buildWidgetFromNode(
+      getNode(childId),
+      context,
+      settings: settings,
     );
   }
 
@@ -40,12 +58,9 @@ class PassiveAccordionTransformer extends NodeWidgetTransformer<AccordionNode> {
     );
     return PassiveAccordionWidget(
       enabled: enabled,
-      topWidget: title ??
-          manager.buildWidgetFromNode(getNode(node.children[0]), context,
-              settings: settings),
-      bottomWidget: content ??
-          manager.buildWidgetFromNode(getNode(node.children[1]), context,
-              settings: settings),
+      isInitiallyExpanded: node.properties.isExpanded,
+      topWidget: title ?? _buildChild(node, 0, context, settings),
+      bottomWidget: content ?? _buildChild(node, 1, context, settings),
       node: node,
     );
   }
@@ -104,7 +119,7 @@ class _AccordionWidgetState extends State<PassiveAccordionWidget> {
                     height: 48,
                     child: TextButton(
                       onPressed: () {
-                        if (widget.enabled) return;
+                        if (!widget.enabled) return;
                         setState(() => isExpanded = !isExpanded);
                       },
                       child: Icon(

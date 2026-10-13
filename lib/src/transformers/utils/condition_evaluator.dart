@@ -59,15 +59,17 @@ class ConditionEvaluator<R extends Object>
 
   @override
   Object? visitVariablePart(VariablePart part) {
-    final value =
-        part.valueString.splitMapJoinRegex(variablePathRegex, onMatch: (match) {
-      final Object? value = PropertyValueDelegate.getVariableValueFromPath(
-        match[0]!,
-        scopedValues: scopedValues,
-      );
+    final value = part.valueString.splitMapJoinRegex(
+      variablePathRegex,
+      onMatch: (match) {
+        final Object? value = PropertyValueDelegate.getVariableValueFromPath(
+          match[0]!,
+          scopedValues: scopedValues,
+        );
 
-      return value?.typedValue<String>() ?? 'null';
-    });
+        return value?.typedValue<String>() ?? 'null';
+      },
+    );
     return _visitRawValue(value);
   }
 
@@ -108,10 +110,9 @@ class ConditionEvaluator<R extends Object>
     if (left == null || right == null) return false;
 
     // This is required since we have loose type checking.
-    return left
-            .toString()
-            .toLowerCase()
-            .compareTo(right.toString().toLowerCase()) >
+    return left.toString().toLowerCase().compareTo(
+          right.toString().toLowerCase(),
+        ) >
         0;
   }
 
@@ -122,10 +123,9 @@ class ConditionEvaluator<R extends Object>
     if (left == null || right == null) return false;
 
     // This is required since we have loose type checking.
-    return left
-            .toString()
-            .toLowerCase()
-            .compareTo(right.toString().toLowerCase()) <
+    return left.toString().toLowerCase().compareTo(
+          right.toString().toLowerCase(),
+        ) <
         0;
   }
 
@@ -136,10 +136,9 @@ class ConditionEvaluator<R extends Object>
     if (left == null || right == null) return false;
 
     // This is required since we have loose type checking.
-    return left
-            .toString()
-            .toLowerCase()
-            .compareTo(right.toString().toLowerCase()) >=
+    return left.toString().toLowerCase().compareTo(
+          right.toString().toLowerCase(),
+        ) >=
         0;
   }
 
@@ -150,10 +149,9 @@ class ConditionEvaluator<R extends Object>
     if (left == null || right == null) return false;
 
     // This is required since we have loose type checking.
-    return left
-            .toString()
-            .toLowerCase()
-            .compareTo(right.toString().toLowerCase()) <=
+    return left.toString().toLowerCase().compareTo(
+          right.toString().toLowerCase(),
+        ) <=
         0;
   }
 
@@ -273,13 +271,15 @@ class ConditionPrinter
   final StringBuffer _buffer = StringBuffer();
 
   void printCondition(BaseCondition condition) {
-    _buffer.clear();
-    condition.accept(this);
-    print('\n${_buffer.toString()}');
+    DebugLogger.instance.printInfo(
+      '\n${prettify(condition)}',
+      name: 'ConditionPrinter',
+    );
   }
 
   String prettify(BaseCondition condition) {
-    printCondition(condition);
+    _buffer.clear();
+    condition.accept(this);
     return _buffer.toString();
   }
 
@@ -320,8 +320,9 @@ class ConditionPrinter
   void visitExpression(Expression expression) {
     _buffer.write('( ');
     expression.leftPart.accept(this);
-    _buffer
-        .write(' ${expression.operator.sign ?? expression.operator.sentence} ');
+    _buffer.write(
+      ' ${expression.operator.sign ?? expression.operator.sentence} ',
+    );
     expression.rightPart.accept(this);
     _buffer.write(' )');
   }
@@ -347,7 +348,8 @@ class ConditionPrinter
   @override
   void visitSetValueAction(SetValueAction action) {
     _buffer.writeln(
-        '\tSet Value of ${action.values.first.name} to ${valueModelToString(action.values.first)}');
+      '\tSet Value of ${action.values.first.name} to ${valueModelToString(action.values.first)}',
+    );
   }
 
   String valueModelToString(ValueModel model) {
@@ -364,7 +366,8 @@ class ConditionPrinter
   @override
   void visitSetVariableAction(SetVariableAction action) {
     _buffer.writeln(
-        '\tSet Variable ${action.variable.name} to ${action.variable.value}');
+      '\tSet Variable ${action.variable.name} to ${action.variable.value}',
+    );
   }
 
   @override

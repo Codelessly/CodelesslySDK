@@ -5,7 +5,6 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
@@ -41,10 +40,7 @@ class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
   }
 
   Widget buildFromNode(WebViewNode node, WidgetBuildSettings settings) {
-    return PassiveWebViewWidget(
-      node: node,
-      settings: settings,
-    );
+    return PassiveWebViewWidget(node: node, settings: settings);
   }
 
   void onChanged(List<Reaction> reactions) => reactions
@@ -54,7 +50,7 @@ class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
   void onAction(Reaction reaction) {
     switch (reaction.action.type) {
       case ActionType.link:
-        launchUrl(Uri.parse((reaction.action as LinkAction).url));
+        FunctionsRepository.openLink((reaction.action as LinkAction).url);
       default:
         break;
     }
@@ -118,15 +114,17 @@ class WebViewPreviewWidget extends StatelessWidget {
         child: FractionallySizedBox(
           widthFactor: aspectRatio > 1 ? 0.2 : null,
           heightFactor: aspectRatio < 1 ? 0.2 : null,
-          child: LayoutBuilder(builder: (context, constraints) {
-            return IconTheme(
-              data: IconThemeData(
-                color: Colors.blue,
-                size: min(constraints.maxWidth, constraints.maxHeight),
-              ),
-              child: icon,
-            );
-          }),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return IconTheme(
+                data: IconThemeData(
+                  color: Colors.blue,
+                  size: min(constraints.maxWidth, constraints.maxHeight),
+                ),
+                child: icon,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -161,7 +159,10 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
   void initState() {
     super.initState();
     if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      print('Unsupported platform: $defaultTargetPlatform for WebView.');
+      DebugLogger.instance.printInfo(
+        'Unsupported platform: $defaultTargetPlatform for WebView.',
+        name: 'RawWebViewWidget',
+      );
       return;
     }
 
@@ -189,8 +190,10 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
 
     if (_controller.platform is AndroidWebViewController) {
       (_controller.platform as AndroidWebViewController)
-          .setMediaPlaybackRequiresUserGesture(props.mediaAutoPlaybackPolicy !=
-              WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia);
+          .setMediaPlaybackRequiresUserGesture(
+            props.mediaAutoPlaybackPolicy !=
+                WebViewMediaAutoPlaybackPolicy.alwaysPlayAllMedia,
+          );
     }
 
     // Not yet supported on MacOS. Throws an exception.
@@ -205,7 +208,10 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      print('Unsupported platform: $defaultTargetPlatform for WebView.');
+      DebugLogger.instance.printInfo(
+        'Unsupported platform: $defaultTargetPlatform for WebView.',
+        name: 'RawWebViewWidget',
+      );
       return;
     }
     if (!_isDataLoaded) {
@@ -214,35 +220,69 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
     }
   }
 
-  Future<void> _loadData() async {
+  /// The source most recently loaded into [_controller].
+  String? _loadedSource;
+
+  @override
+  void didUpdateWidget(covariant RawWebViewWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reload when the properties or the variables they read changed.
+    if (_isDataLoaded) _loadData();
+  }
+
+  /// The URL (or Flutter asset path) the properties currently point to.
+  ({String source, bool isAsset}) _resolveSource() {
     final ScopedValues scopedValues = ScopedValues.of(context);
     final WebViewProperties props = widget.properties;
     switch (props.webviewType) {
       case WebViewType.webpage:
         final WebPageWebViewProperties properties =
             props as WebPageWebViewProperties;
-        url = PropertyValueDelegate.getVariableValueFromPath<String>(
-                properties.input,
-                scopedValues: scopedValues) ??
-            properties.input;
         switch (properties.pageSourceType) {
           case WebViewWebpageSourceType.url:
-            return _controller.loadRequest(Uri.parse(url));
+            return (
+              source:
+                  PropertyValueDelegate.getVariableValueFromPath<String>(
+                    properties.input,
+                    scopedValues: scopedValues,
+                  ) ??
+                  properties.input,
+              isAsset: false,
+            );
           case WebViewWebpageSourceType.html:
-            final String content = _buildHtmlContent(properties.input);
-            return _controller.loadRequest(Uri.parse(content));
+            return (
+              source: _buildHtmlContent(properties.input),
+              isAsset: false,
+            );
           case WebViewWebpageSourceType.asset:
-            // provided from onWebViewCreated callback.
-            return _controller.loadFlutterAsset(properties.input);
+            return (source: properties.input, isAsset: true);
         }
       case WebViewType.googleMaps:
-        url = buildGoogleMapsURL(
-            props as GoogleMapsWebViewProperties, scopedValues);
-        return _controller.loadRequest(Uri.parse(url));
+        return (
+          source: buildGoogleMapsURL(
+            props as GoogleMapsWebViewProperties,
+            scopedValues,
+          ),
+          isAsset: false,
+        );
       case WebViewType.twitter:
-        url = buildTwitterURL(props as TwitterWebViewProperties, scopedValues);
-        return _controller.loadRequest(Uri.parse(url));
+        return (
+          source: buildTwitterURL(
+            props as TwitterWebViewProperties,
+            scopedValues,
+          ),
+          isAsset: false,
+        );
     }
+  }
+
+  Future<void> _loadData() async {
+    final (:source, :isAsset) = _resolveSource();
+    if (source == _loadedSource) return;
+    _loadedSource = source;
+    if (isAsset) return _controller.loadFlutterAsset(source);
+    url = source;
+    return _controller.loadRequest(Uri.parse(source));
   }
 
   @override
@@ -254,9 +294,7 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
         child = buildWebpageWebView(context, props as WebPageWebViewProperties);
       case WebViewType.googleMaps:
         if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-          return const WebViewPreviewWidget(
-            icon: Icon(Icons.map_outlined),
-          );
+          return const WebViewPreviewWidget(icon: Icon(Icons.map_outlined));
         }
 
         child = buildWebView(props as GoogleMapsWebViewProperties);
@@ -264,9 +302,7 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
         if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
           return const WebViewPreviewWidget(
             icon: ImageIcon(
-              NetworkImage(
-                'https://img.icons8.com/color/344/twitter--v2.png',
-              ),
+              NetworkImage('https://img.icons8.com/color/344/twitter--v2.png'),
             ),
           );
         }
@@ -278,43 +314,52 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
   }
 
   Widget buildWebpageWebView(
-      BuildContext context, WebPageWebViewProperties properties) {
+    BuildContext context,
+    WebPageWebViewProperties properties,
+  ) {
     if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      return const WebViewPreviewWidget(
-        icon: Icon(Icons.language_rounded),
-      );
+      return const WebViewPreviewWidget(icon: Icon(Icons.language_rounded));
     }
 
     return buildWebView(properties);
   }
 
   String buildGoogleMapsURL(
-      GoogleMapsWebViewProperties properties, ScopedValues scopedValues) {
+    GoogleMapsWebViewProperties properties,
+    ScopedValues scopedValues,
+  ) {
     final String? originalSrc = properties.src;
     final String? updatedSrc = originalSrc != null
-        ? PropertyValueDelegate.getVariableValueFromPath<String>(originalSrc,
-                scopedValues: scopedValues) ??
-            originalSrc
+        ? PropertyValueDelegate.getVariableValueFromPath<String>(
+                originalSrc,
+                scopedValues: scopedValues,
+              ) ??
+              originalSrc
         : null;
     return _buildHtmlContent(updatedSrc);
   }
 
   String _buildHtmlContent(String? src) {
     final String html = src?.replaceAll('\n', '') ?? 'about:blank';
-    final String contentBase64 =
-        base64Encode(const Utf8Encoder().convert(html));
+    final String contentBase64 = base64Encode(
+      const Utf8Encoder().convert(html),
+    );
     final String content = 'data:text/html;base64,$contentBase64';
 
     return content;
   }
 
   String buildTwitterURL(
-      TwitterWebViewProperties properties, ScopedValues scopedValues) {
+    TwitterWebViewProperties properties,
+    ScopedValues scopedValues,
+  ) {
     final String? originalSrc = properties.src;
     final String? updatedSrc = originalSrc != null
-        ? PropertyValueDelegate.getVariableValueFromPath<String>(originalSrc,
-                scopedValues: scopedValues) ??
-            originalSrc
+        ? PropertyValueDelegate.getVariableValueFromPath<String>(
+                originalSrc,
+                scopedValues: scopedValues,
+              ) ??
+              originalSrc
         : null;
     return _buildHtmlContent(updatedSrc);
   }
@@ -326,20 +371,24 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
       gestureRecognizers: {
         if (properties.controlVerticalScrollGesture == true)
           const Factory<VerticalDragGestureRecognizer>(
-              VerticalDragGestureRecognizer.new),
+            VerticalDragGestureRecognizer.new,
+          ),
         if (properties.controlHorizontalScrollGesture == true)
           const Factory<HorizontalDragGestureRecognizer>(
-              HorizontalDragGestureRecognizer.new),
+            HorizontalDragGestureRecognizer.new,
+          ),
         if (properties.controlScaleGesture == true)
           const Factory<ScaleGestureRecognizer>(ScaleGestureRecognizer.new),
         if (properties.controlTapGesture == true)
           const Factory<TapGestureRecognizer>(TapGestureRecognizer.new),
         if (properties.controlLongPressGesture == true)
           const Factory<LongPressGestureRecognizer>(
-              LongPressGestureRecognizer.new),
+            LongPressGestureRecognizer.new,
+          ),
         if (properties.controlForcePressGesture == true)
           const Factory<ForcePressGestureRecognizer>(
-              ForcePressGestureRecognizer.new),
+            ForcePressGestureRecognizer.new,
+          ),
         // const Factory<TapAndPanGestureRecognizer>(
         //     TapAndPanGestureRecognizer.new),
         // const Factory<PanGestureRecognizer>(PanGestureRecognizer.new),

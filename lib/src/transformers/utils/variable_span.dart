@@ -15,7 +15,7 @@ class VariableSpan extends TextSpan {
     super.onEnter,
     super.onExit,
   }) : super(
-          text: 'fx',
-          style: style?.merge(GoogleFonts.unna(fontStyle: FontStyle.italic)),
-        );
+         text: 'fx',
+         style: style?.merge(GoogleFonts.unna(fontStyle: FontStyle.italic)),
+       );
 }

@@ -38,8 +38,6 @@ class CodelesslyDialogWidget extends StatelessWidget {
       );
     }
 
-    return Center(
-      child: builder(context),
-    );
+    return Center(child: builder(context));
   }
 }

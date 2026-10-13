@@ -1,7 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -24,8 +23,9 @@ class PassiveLoadingIndicatorTransformer
     required double height,
     required double width,
     bool animate = true,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildFromProps'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildFromProps',
+    ),
   }) {
     final node = LoadingIndicatorNode(
       id: '',
@@ -44,8 +44,9 @@ class PassiveLoadingIndicatorTransformer
     double? width,
     ValueChanged<bool>? onChanged,
     bool animate = false,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+    ),
   }) {
     final previewNode = LoadingIndicatorNode(
       properties: node?.properties ?? properties!,
@@ -65,8 +66,9 @@ class PassiveLoadingIndicatorTransformer
   Widget buildFromNode(
     LoadingIndicatorNode node, {
     bool animate = true,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildFromNode'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildFromNode',
+    ),
   }) {
     return PassiveLoadingIndicatorWidget(
       node: node,
@@ -83,7 +85,7 @@ class PassiveLoadingIndicatorTransformer
   void onAction(Reaction reaction) {
     switch (reaction.action.type) {
       case ActionType.link:
-        launchUrl(Uri.parse((reaction.action as LinkAction).url));
+        FunctionsRepository.openLink((reaction.action as LinkAction).url);
       default:
         break;
     }
@@ -109,8 +111,8 @@ class PassiveLoadingIndicatorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (node.properties.isMaterial) {
-      final MaterialLoadingIndicatorProperties props =
-          node.properties.asMaterial();
+      final MaterialLoadingIndicatorProperties props = node.properties
+          .asMaterial();
 
       return Center(
         child: SizedBox.square(
@@ -121,12 +123,14 @@ class PassiveLoadingIndicatorWidget extends StatelessWidget {
             color: props.color.toFlutterColor(),
             backgroundColor: props.backgroundColor.toFlutterColor(),
             strokeCap: props.strokeCap.flutterStrokeCap,
+            strokeAlign: props.strokeAlign,
+            trackGap: props.trackGap,
           ),
         ),
       );
     } else if (node.properties.isCupertino) {
-      final CupertinoLoadingIndicatorProperties props =
-          node.properties.asCupertino();
+      final CupertinoLoadingIndicatorProperties props = node.properties
+          .asCupertino();
       return CupertinoActivityIndicator(
         radius: (node.basicBoxLocal.width ~/ 2).toDouble(),
         color: props.color.toFlutterColor(),

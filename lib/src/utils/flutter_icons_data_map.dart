@@ -8823,5 +8823,5 @@ const Map<String, int> flutterIconsDataMap = {
   'zoom_out_map': 0xe6ff,
   'zoom_out_map_sharp': 0xedf0,
   'zoom_out_map_rounded': 0xf02cf,
-  'zoom_out_map_outlined': 0xf4dd
+  'zoom_out_map_outlined': 0xf4dd,
 };

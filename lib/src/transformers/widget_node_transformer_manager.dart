@@ -22,8 +22,14 @@ typedef LayoutRetrieverBuilder = Widget Function(
 /// [ActiveNodeTransformerManager].
 ///
 /// Helps separate the functions that are common between them into one place.
-abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
-    Widget, BuildContext, WidgetBuildSettings, NodeWidgetTransformer> {
+abstract class WidgetNodeTransformerManager
+    extends
+        NodeTransformerManager<
+          Widget,
+          BuildContext,
+          WidgetBuildSettings,
+          NodeWidgetTransformer
+        > {
   /// Returns a widget that decides how to load nested layouts of a rendered
   /// node.
   final LayoutRetrieverBuilder layoutRetrievalBuilder;
@@ -47,7 +53,8 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     Widget widget, {
     required bool maintainState,
   }) {
-    final bool visible = PropertyValueDelegate.getPropertyValue<bool>(
+    final bool visible =
+        PropertyValueDelegate.getPropertyValue<bool>(
           node,
           'visible',
           scopedValues: ScopedValues.of(context),
@@ -72,13 +79,17 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
   /// Takes into account margin and padding to figure out the origin of
   /// the rotation.
   Widget applyWidgetRotation(
-      BuildContext context, BaseNode node, Widget widget) {
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
     // Get node's values.
     final List<ValueModel> nodeValues =
         payload.nodeValues[node.id]?.value ?? [];
     // Get local rotation value if it exists, else use node's rotation value.
-    final int rotationDegrees = nodeValues
+    final int rotationDegrees =
+        nodeValues
             .firstWhereOrNull((value) => value.name == 'rotationDegrees')
             ?.value
             .typedValue<int>() ??
@@ -99,10 +110,7 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
   /// Convenience method to handle widget margins.
   Widget applyWidgetMargins(BaseNode node, Widget widget) {
     if (node.margin == EdgeInsetsModel.zero) return widget;
-    return Padding(
-      padding: node.margin.flutterEdgeInsets,
-      child: widget,
-    );
+    return Padding(padding: node.margin.flutterEdgeInsets, child: widget);
   }
 
   /// Convenience method to handle widget constraints.
@@ -132,18 +140,21 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     // because then it has fills that obscure the inkwell effect.
     if (node is DefaultShapeNode && inkWell != null) return widget;
 
-    final List<Reaction> onClickReactions = (node as ReactionMixin)
-        .reactions
-        .where((reaction) =>
-            reaction.trigger.type == TriggerType.click &&
-            reaction.action.enabled)
+    final List<Reaction> onClickReactions = (node as ReactionMixin).reactions
+        .where(
+          (reaction) =>
+              reaction.trigger.type == TriggerType.click &&
+              reaction.action.enabled,
+        )
         .toList();
 
     final List<Reaction> onLongPressReactions = (node as ReactionMixin)
         .reactions
-        .where((reaction) =>
-            reaction.trigger.type == TriggerType.longPress &&
-            reaction.action.enabled)
+        .where(
+          (reaction) =>
+              reaction.trigger.type == TriggerType.longPress &&
+              reaction.action.enabled,
+        )
         .toList();
 
     if (inkWell != null) {
@@ -163,7 +174,8 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
           borderRadius: getBorderRadius(node),
           overlayColor: inkWell.overlayColor != null
               ? WidgetStatePropertyAll<Color>(
-                  inkWell.overlayColor!.toFlutterColor())
+                  inkWell.overlayColor!.toFlutterColor(),
+                )
               : null,
           splashColor: inkWell.splashColor?.toFlutterColor(),
           highlightColor: inkWell.highlightColor?.toFlutterColor(),
@@ -202,8 +214,12 @@ abstract class WidgetNodeTransformerManager extends NodeTransformerManager<
     if (node is CornerMixin) {
       if (node.cornerRadius.linked &&
           node.cornerRadius.type == RadiusType.elliptical) {
-        return BorderRadius.all(Radius.elliptical(
-            node.basicBoxLocal.width, node.basicBoxLocal.height));
+        return BorderRadius.all(
+          Radius.elliptical(
+            node.basicBoxLocal.width,
+            node.basicBoxLocal.height,
+          ),
+        );
       }
       return node.cornerRadius.borderRadius;
     } else {
@@ -324,23 +340,31 @@ class AdaptiveSizeFitBox extends StatelessWidget {
       width: (horizontalFit == SizeFit.shrinkWrap)
           ? null
           : (horizontalFit == SizeFit.expanded)
-              ? double.infinity
-              : size.width,
+          ? double.infinity
+          : size.width,
       height: (verticalFit == SizeFit.shrinkWrap)
           ? null
           : (verticalFit == SizeFit.expanded)
-              ? double.infinity
-              : size.height,
+          ? double.infinity
+          : size.height,
       child: child,
     );
   }
 }
 
+/// Renders an [IconModel]: Material icons and symbols from Google's prebuilt
+/// SVGs, Cupertino icons from the cupertino_icons font.
 class SvgIcon extends StatelessWidget {
   final IconModel icon;
   final Color? color;
   final double? size;
   final BoxFit fit;
+
+  /// Material Symbols axes; see [IconModelExt.toSvgUrl].
+  final double? fill;
+  final double? weight;
+  final double? grade;
+  final double? opticalSize;
 
   const SvgIcon({
     super.key,
@@ -348,6 +372,10 @@ class SvgIcon extends StatelessWidget {
     this.color,
     this.size,
     this.fit = BoxFit.contain,
+    this.fill,
+    this.weight,
+    this.grade,
+    this.opticalSize,
   });
 
   @override
@@ -364,27 +392,43 @@ class SvgIcon extends StatelessWidget {
     final Color iconColor = switch (icon) {
       _ when color != null => color!,
       _ when iconTheme.color != null => iconTheme.color!,
-      _ => Theme.of(context).brightness == Brightness.light
-          ? Colors.black
-          : Colors.white,
+      _ =>
+        Theme.of(context).brightness == Brightness.light
+            ? Colors.black
+            : Colors.white,
     };
-    final url = icon.toSvgUrl();
+    final double dimension = size ?? Theme.of(context).iconTheme.size ?? 24;
 
-    if (url != null) {
-      // log('SVG ICON URL: $url');
-    } else {
-      log('SVG ICON URL: 404 | name: ${icon.name} | type: ${icon.type} | '
-          'codepoint: ${icon.codepoint} | fontFamily: ${icon.fontFamily} | '
-          'fontPackage: ${icon.fontPackage}${icon is MaterialIcon ? ' | '
-              'style: ${(icon as MaterialIcon).style}' : ''}');
+    final IconData? cupertinoIcon = icon is CupertinoIcon
+        ? cupertinoIconsByCodepoint[icon.codepoint]
+        : null;
+    if (cupertinoIcon != null) {
+      return Icon(cupertinoIcon, size: dimension, color: iconColor);
+    }
+
+    final url = icon.toSvgUrl(
+      fill: fill,
+      weight: weight,
+      grade: grade,
+      opticalSize: opticalSize,
+    );
+    if (url == null) {
+      log(
+        'No icon source | name: ${icon.name} | type: ${icon.type} | '
+        'codepoint: ${icon.codepoint} | fontFamily: ${icon.fontFamily} | '
+        'fontPackage: ${icon.fontPackage}',
+      );
+      return SizedBox.square(dimension: dimension);
     }
 
     return SizedBox.square(
-      dimension: size ?? Theme.of(context).iconTheme.size ?? 24,
+      dimension: dimension,
       child: SvgPicture.network(
-        url ?? '',
+        url,
         fit: fit,
         colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+        // Offline or unavailable icons leave their space empty.
+        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
       ),
     );
   }
@@ -404,8 +448,10 @@ class SvgIconImage extends StatelessWidget {
     this.color,
     this.size,
     this.fit = BoxFit.contain,
-  }) : assert(url != null || bytes != null,
-            'Either url or bytes must be provided');
+  }) : assert(
+         url != null || bytes != null,
+         'Either url or bytes must be provided',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -421,9 +467,10 @@ class SvgIconImage extends StatelessWidget {
     final Color iconColor = switch (url) {
       _ when color != null => color!,
       _ when iconTheme.color != null => iconTheme.color!,
-      _ => Theme.of(context).brightness == Brightness.light
-          ? Colors.black
-          : Colors.white,
+      _ =>
+        Theme.of(context).brightness == Brightness.light
+            ? Colors.black
+            : Colors.white,
     };
 
     return SizedBox.square(
@@ -438,6 +485,8 @@ class SvgIconImage extends StatelessWidget {
               url!,
               fit: fit,
               colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+              errorBuilder: (context, error, stackTrace) =>
+                  const SizedBox.shrink(),
             ),
     );
   }

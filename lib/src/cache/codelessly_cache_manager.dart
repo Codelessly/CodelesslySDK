@@ -5,8 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/debug_logger.dart';
-import '../logging/error_logger.dart';
 
 /// Handles caching of any data that needs to be cached via Hive.
 class CodelesslyCacheManager extends CacheManager {
@@ -32,9 +30,7 @@ class CodelesslyCacheManager extends CacheManager {
     final Stopwatch stopwatch = Stopwatch()..start();
     try {
       await Hive.initFlutter('codelessly_sdk');
-      box = await Hive.openBox(
-        'cache_${config.uniqueID.replaceAll('/', '')}',
-      );
+      box = await Hive.openBox('cache_${config.uniqueID.replaceAll('/', '')}');
       filesBox = await Hive.openBox(
         'cache_files_${config.uniqueID.replaceAll('/', '')}',
       );
@@ -79,10 +75,20 @@ class CodelesslyCacheManager extends CacheManager {
   }
 
   @override
-  void dispose() async {
+  void dispose() {
     DebugLogger.instance.printFunction('dispose()', name: name);
-    box.close();
-    filesBox.close();
+    unawaited(
+      Future.wait([box.close(), filesBox.close()])
+          .catchError((Object e, StackTrace stackTrace) {
+            ErrorLogger.instance.captureException(
+              e,
+              message: 'Failed to close cache',
+              type: 'cache_close_failed',
+              stackTrace: stackTrace,
+            );
+            return <void>[];
+          }),
+    );
   }
 
   @override
@@ -90,9 +96,9 @@ class CodelesslyCacheManager extends CacheManager {
     DebugLogger.instance.printFunction('store(key: $key)', name: name);
     try {
       if (value is String || value is num || value is bool || value is List) {
-        return box.put(key, value);
+        return await box.put(key, value);
       }
-      return box.put(key, jsonEncode(value));
+      return await box.put(key, jsonEncode(value));
     } catch (e, str) {
       ErrorLogger.instance.captureException(
         e,
@@ -144,8 +150,10 @@ class CodelesslyCacheManager extends CacheManager {
     DebugLogger.instance.printInfo('Deleting all byte data...', name: name);
     try {
       filesBox.clear();
-      DebugLogger.instance
-          .printInfo('Cache bytes deleted successfully!', name: name);
+      DebugLogger.instance.printInfo(
+        'Cache bytes deleted successfully!',
+        name: name,
+      );
     } catch (e, str) {
       ErrorLogger.instance.captureException(
         e,
@@ -236,13 +244,17 @@ class CodelesslyCacheManager extends CacheManager {
         }
         final String fileName = path.split('/').last;
         if (!excludedFileNames.contains(fileName)) {
-          DebugLogger.instance
-              .printInfo('\t\tDeleting file: $path', name: name);
+          DebugLogger.instance.printInfo(
+            '\t\tDeleting file: $path',
+            name: name,
+          );
 
           await filesBox.delete(path);
 
-          DebugLogger.instance
-              .printInfo('\t\tSuccessfully deleted.', name: name);
+          DebugLogger.instance.printInfo(
+            '\t\tSuccessfully deleted.',
+            name: name,
+          );
 
           purgedFiles++;
         }
