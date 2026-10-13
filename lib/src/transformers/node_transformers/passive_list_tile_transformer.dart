@@ -292,6 +292,8 @@ class PassiveListTileWidget extends StatelessWidget {
           horizontalTitleGap: node.properties.horizontalTitleGap,
           minVerticalPadding: node.properties.minVerticalPadding,
           minLeadingWidth: node.properties.minLeadingWidth,
+          minTileHeight: node.properties.minTileHeight,
+          titleAlignment: node.properties.titleAlignment?.toFlutter(),
           title: title == null
               ? null
               : titleWidget ??

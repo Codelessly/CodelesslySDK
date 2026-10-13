@@ -11,6 +11,19 @@
   `onUnfocus`/`onUserInteractionIfError` autovalidate modes.
 - Render the new AppBar `foregroundColor`/`scrolledUnderElevation` and
   TabBar `tabAlignment`/`dividerHeight` properties.
+- Render the other parameters added in codelessly_api 5: Radio side,
+  inner radius and background, Slider value indicator modes, secondary
+  track and padding, ListTile minimum height and title alignment,
+  CircularProgressIndicator stroke alignment and track gap, ExpansionTile
+  trailing icon visibility, and Text soft wrapping.
+- Render the gapped slider track and the drop and rounded rectangle value
+  indicators; these previously fell back to other shapes.
+- Replace deprecated Flutter APIs: scrollCacheExtent, RadioGroup,
+  ShowValueIndicator.onDrag, Switch activeThumbColor and the new Color
+  component accessors.
+- Fix a LateInitializationError when a node widget is built without a
+  CodelesslyContext above it.
+- Fix cache writes whose failures escaped the error handler.
 
 ## 6.2.0
 

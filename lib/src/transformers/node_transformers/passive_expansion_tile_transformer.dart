@@ -243,6 +243,7 @@ class PassiveExpansionTileWidget extends StatelessWidget {
           initiallyExpanded:
               initiallyExpanded ?? node.properties.initiallyExpanded,
           maintainState: node.properties.maintainState,
+          showTrailingIcon: node.properties.showTrailingIcon,
           tilePadding: node.properties.tilePadding?.flutterEdgeInsets,
           expandedCrossAxisAlignment:
               node.properties.expandedCrossAxisAlignment.flutterAxis,

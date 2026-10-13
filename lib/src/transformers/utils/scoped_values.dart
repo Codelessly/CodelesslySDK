@@ -73,9 +73,8 @@ class ScopedValues {
     _variablesOverrides = variablesOverrides;
     _dataOverrides = dataOverrides;
     final codelesslyContext = context.read<CodelesslyContext?>();
-    if (codelesslyContext != null) {
-      _codelesslyContextRef = WeakReference(codelesslyContext);
-    }
+    _codelesslyContextRef =
+        codelesslyContext == null ? null : WeakReference(codelesslyContext);
     indexedItem = IndexedItemProvider.maybeOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     routeParams =

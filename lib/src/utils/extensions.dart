@@ -1878,6 +1878,17 @@ extension TabBarIndicatorSizeExtensions on TabBarIndicatorSizeEnum {
   }
 }
 
+extension ListTileTitleAlignmentCExtensions on ListTileTitleAlignmentC {
+  ListTileTitleAlignment toFlutter() => switch (this) {
+        ListTileTitleAlignmentC.threeLine => ListTileTitleAlignment.threeLine,
+        ListTileTitleAlignmentC.titleHeight =>
+          ListTileTitleAlignment.titleHeight,
+        ListTileTitleAlignmentC.top => ListTileTitleAlignment.top,
+        ListTileTitleAlignmentC.center => ListTileTitleAlignment.center,
+        ListTileTitleAlignmentC.bottom => ListTileTitleAlignment.bottom,
+      };
+}
+
 extension TabAlignmentCExtensions on TabAlignmentC {
   /// Returns null for alignments that Flutter's [TabBar] rejects for the
   /// given scrollability, so it falls back to its default.

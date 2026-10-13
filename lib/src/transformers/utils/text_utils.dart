@@ -215,6 +215,7 @@ class TextUtils {
       textAlign: textNode.textAlignHorizontal.toFlutter(),
       maxLines: textNode.maxLines,
       overflow: textNode.overflow.flutterOverflow,
+      softWrap: textNode.softWrap,
     );
   }
 

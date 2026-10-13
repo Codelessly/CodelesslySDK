@@ -128,17 +128,38 @@ class TransformerSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SliderTrackShape trackShape;
-    if (node.properties.trackShape == SliderTrackShapeEnum.rectangle) {
-      trackShape = const RectangularSliderTrackShape();
-    } else {
-      trackShape = const RoundedRectSliderTrackShape();
-    }
+    final SliderTrackShape trackShape = switch (node.properties.trackShape) {
+      SliderTrackShapeEnum.rectangle => const RectangularSliderTrackShape(),
+      SliderTrackShapeEnum.roundedRectangle =>
+        const RoundedRectSliderTrackShape(),
+      SliderTrackShapeEnum.gapped => const GappedSliderTrackShape(),
+    };
 
-    final valueIndicatorShape = node.properties.valueIndicatorShape ==
-            SliderValueIndicatorShape.rectangle
-        ? const RectangularSliderValueIndicatorShape()
-        : const PaddleSliderValueIndicatorShape();
+    final SliderComponentShape valueIndicatorShape =
+        switch (node.properties.valueIndicatorShape) {
+      SliderValueIndicatorShape.rectangle =>
+        const RectangularSliderValueIndicatorShape(),
+      SliderValueIndicatorShape.paddle =>
+        const PaddleSliderValueIndicatorShape(),
+      SliderValueIndicatorShape.drop => const DropSliderValueIndicatorShape(),
+      SliderValueIndicatorShape.roundedRectangle =>
+        const RoundedRectSliderValueIndicatorShape(),
+    };
+
+    final ShowValueIndicator showValueIndicator =
+        switch (node.properties.showValueIndicator) {
+      null => node.properties.showLabel
+          ? ShowValueIndicator.onDrag
+          : ShowValueIndicator.never,
+      ShowValueIndicatorC.onlyForDiscrete => ShowValueIndicator.onlyForDiscrete,
+      ShowValueIndicatorC.onlyForContinuous =>
+        ShowValueIndicator.onlyForContinuous,
+      ShowValueIndicatorC.onDrag => ShowValueIndicator.onDrag,
+      ShowValueIndicatorC.alwaysVisible => ShowValueIndicator.alwaysVisible,
+      ShowValueIndicatorC.never => ShowValueIndicator.never,
+    };
+    final bool showsLabel =
+        showValueIndicator != ShowValueIndicator.never;
 
     return SizedBox(
       width: node.basicBoxLocal.width,
@@ -158,14 +179,19 @@ class TransformerSlider extends StatelessWidget {
                 node.properties.showThumb ? node.properties.thumbRadius : 0,
           ),
           trackShape: trackShape,
+          // GappedSliderTrackShape requires a gap; 6 is the Material 3
+          // (2024) default.
+          trackGap: node.properties.trackShape == SliderTrackShapeEnum.gapped
+              ? 6
+              : null,
           tickMarkShape: node.properties.isDiscrete
               ? RoundSliderTickMarkShape(
                   tickMarkRadius: node.properties.tickMarkRadius,
                 )
               : null,
-          showValueIndicator: node.properties.showLabel
-              ? ShowValueIndicator.onDrag
-              : ShowValueIndicator.never,
+          showValueIndicator: showValueIndicator,
+          secondaryActiveTrackColor:
+              node.properties.secondaryActiveTrackColor?.toFlutterColor(),
           activeTickMarkColor:
               node.properties.activeTickMarkColor.toFlutterColor(),
           inactiveTickMarkColor:
@@ -190,7 +216,10 @@ class TransformerSlider extends StatelessWidget {
           max: node.properties.max,
           divisions:
               node.properties.isDiscrete ? node.properties.divisions : null,
-          label: node.properties.showLabel ? getSliderLabel(node, value) : null,
+          label: showsLabel ? getSliderLabel(node, value) : null,
+          secondaryTrackValue: node.properties.secondaryTrackValue
+              ?.clamp(node.properties.min, node.properties.max),
+          padding: node.properties.padding?.flutterEdgeInsets,
         ),
       ),
     );

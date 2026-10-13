@@ -292,7 +292,9 @@ OutlinedBorder? getButtonShape(ButtonNode node, ScopedValues scopedValues) {
 }
 
 String? getSliderLabel(SliderNode node, double value) {
-  if (!node.properties.showLabel) return null;
+  final showValueIndicator = node.properties.showValueIndicator;
+  if (showValueIndicator == ShowValueIndicatorC.never) return null;
+  if (showValueIndicator == null && !node.properties.showLabel) return null;
   if (node.properties.label.trim().isEmpty) return kSliderDefaultLabel;
   final String valueString = node.properties.allowFractionalPoints
       ? value.toStringAsFixed(1)

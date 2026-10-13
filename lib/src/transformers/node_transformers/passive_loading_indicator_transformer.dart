@@ -121,6 +121,8 @@ class PassiveLoadingIndicatorWidget extends StatelessWidget {
             color: props.color.toFlutterColor(),
             backgroundColor: props.backgroundColor.toFlutterColor(),
             strokeCap: props.strokeCap.flutterStrokeCap,
+            strokeAlign: props.strokeAlign,
+            trackGap: props.trackGap,
           ),
         ),
       );
