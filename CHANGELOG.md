@@ -38,7 +38,9 @@
 - PageView, TabBar and Accordion edge cases that threw are fixed;
   Accordion respects `isExpanded` and `enabled`, and TabBar `showDivider`.
 - Malformed links and failed SVG downloads no longer throw.
-- The web view works in WebAssembly builds.
+- The web view works in WebAssembly builds, and embedded video no longer
+  pulls native web view plugins into web builds; the package is fully
+  WebAssembly-compatible.
 - The auth token and auth response body are no longer logged, and library
   code logs through `DebugLogger` instead of `print`.
 
