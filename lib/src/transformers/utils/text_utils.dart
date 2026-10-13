@@ -216,6 +216,9 @@ class TextUtils {
       maxLines: textNode.maxLines,
       overflow: textNode.overflow.flutterOverflow,
       softWrap: textNode.softWrap,
+      textScaler: textNode.textScaleFactor == null
+          ? null
+          : TextScaler.linear(textNode.textScaleFactor!),
     );
   }
 

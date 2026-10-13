@@ -15,7 +15,8 @@
   inner radius and background, Slider value indicator modes, secondary
   track and padding, ListTile minimum height and title alignment,
   CircularProgressIndicator stroke alignment and track gap, ExpansionTile
-  trailing icon visibility and shapes, and Text soft wrapping.
+  trailing icon visibility and shapes, Text soft wrapping and scaling, and
+  PageView implicit scrolling.
 - Render the gapped slider track and the drop and rounded rectangle value
   indicators; these previously fell back to other shapes.
 - Replace deprecated Flutter APIs: scrollCacheExtent, RadioGroup,
