@@ -318,6 +318,10 @@ Widget? retrieveIconWidget(
         icon: icon.icon!,
         size: size ?? icon.size ?? kDefaultIconSize,
         color: color,
+        fill: icon.fill,
+        weight: icon.weight,
+        grade: icon.grade,
+        opticalSize: icon.opticalSize,
       );
     case IconTypeEnum.image:
       if (icon.iconImage == null) return null;

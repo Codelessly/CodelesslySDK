@@ -49,6 +49,7 @@ dependencies:
   vector_math: ^2.1.4
   provider: ^6.1.2
   uuid: ^4.5.1
+  cupertino_icons: ^1.0.9
   flutter_svg: ^2.0.17
 
   # File and Image

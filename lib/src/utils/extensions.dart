@@ -1151,25 +1151,55 @@ extension IconModelExt on IconModel {
     return null;
   }
 
-  String? toSvgUrl() {
-    if (this is MaterialIcon) {
-      final icon = this as MaterialIcon;
-      // e.g https://fonts.gstatic.com/s/i/materialiconsoutlined/home/v16/24px.svg
-      /// The template url for the svg icons.
-      /// {{style}}: The style of the icon. e.g. materialiconsoutlined
-      /// {{name}}: The name of the icon. e.g. home
-      /// {{version}}: The version of the icon. e.g. 16
-      /// {{size}}: The size of the icon. e.g. 24
-      return 'https://fonts.gstatic.com/s/i/{{style}}/{{name}}/v{{version}}/{{size}}px.svg'
-          .replaceAll(
-              '{{style}}', 'materialicons${icon.style.styleName.toLowerCase()}')
-          .replaceAll('{{name}}', icon.name.toLowerCase())
-          .replaceAll('{{version}}', '${icon.version ?? 1}')
-          .replaceAll('{{size}}', '24');
+  /// URL of Google's prebuilt SVG for this icon, or null when there is
+  /// none (Cupertino and custom font icons).
+  ///
+  /// Material Symbols are variable fonts; their SVGs exist only for some
+  /// axis values, so [fill], [weight], [grade] and [opticalSize] are snapped
+  /// to the nearest available variant.
+  String? toSvgUrl({
+    double? fill,
+    double? weight,
+    double? grade,
+    double? opticalSize,
+  }) {
+    final IconModel icon = this;
+    if (icon is MaterialIcon) {
+      // e.g. https://fonts.gstatic.com/s/i/materialiconsoutlined/home/v16/24px.svg
+      final String style =
+          icon.style.styleName.toLowerCase().replaceAll(' ', '');
+      return 'https://fonts.gstatic.com/s/i/materialicons$style/'
+          '${icon.name.toLowerCase()}/v${icon.version ?? 1}/24px.svg';
+    }
+    if (icon is MaterialSymbol) {
+      // e.g. https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/home/wght300gradN25fill1/40px.svg
+      return 'https://fonts.gstatic.com/s/i/short-term/release/'
+          'materialsymbols${icon.style.name}/${icon.name.toLowerCase()}/'
+          '${materialSymbolVariant(fill: fill, weight: weight, grade: grade)}/'
+          '${_nearest(opticalSize ?? 24, const [20, 24, 40, 48])}px.svg';
     }
     return null;
   }
 }
+
+/// The path segment naming a Material Symbols SVG variant, e.g.
+/// `wght700grad200fill1`, or `default` when every axis is at its default.
+String materialSymbolVariant({double? fill, double? weight, double? grade}) {
+  final int w =
+      weight == null ? 400 : ((weight / 100).round() * 100).clamp(100, 700);
+  final int g = grade == null ? 0 : _nearest(grade, const [-25, 0, 200]);
+  final bool filled = (fill ?? 0) >= 0.5;
+  final String variant = [
+    if (w != 400) 'wght$w',
+    if (g != 0) 'grad${g < 0 ? 'N${-g}' : g}',
+    if (filled) 'fill1',
+  ].join();
+  return variant.isEmpty ? 'default' : variant;
+}
+
+int _nearest(double value, List<int> options) => options.reduce(
+      (a, b) => (a - value).abs() <= (b - value).abs() ? a : b,
+    );
 
 extension MaterialIconExt on MaterialIcon {
   String? get flutterID => flutterIconNames[styledName];

@@ -336,11 +336,19 @@ class AdaptiveSizeFitBox extends StatelessWidget {
   }
 }
 
+/// Renders an [IconModel]: Material icons and symbols from Google's prebuilt
+/// SVGs, Cupertino icons from the cupertino_icons font.
 class SvgIcon extends StatelessWidget {
   final IconModel icon;
   final Color? color;
   final double? size;
   final BoxFit fit;
+
+  /// Material Symbols axes; see [IconModelExt.toSvgUrl].
+  final double? fill;
+  final double? weight;
+  final double? grade;
+  final double? opticalSize;
 
   const SvgIcon({
     super.key,
@@ -348,6 +356,10 @@ class SvgIcon extends StatelessWidget {
     this.color,
     this.size,
     this.fit = BoxFit.contain,
+    this.fill,
+    this.weight,
+    this.grade,
+    this.opticalSize,
   });
 
   @override
@@ -368,21 +380,32 @@ class SvgIcon extends StatelessWidget {
           ? Colors.black
           : Colors.white,
     };
-    final url = icon.toSvgUrl();
+    final double dimension = size ?? Theme.of(context).iconTheme.size ?? 24;
 
-    if (url != null) {
-      // log('SVG ICON URL: $url');
-    } else {
-      log('SVG ICON URL: 404 | name: ${icon.name} | type: ${icon.type} | '
+    final IconData? cupertinoIcon = icon is CupertinoIcon
+        ? cupertinoIconsByCodepoint[icon.codepoint]
+        : null;
+    if (cupertinoIcon != null) {
+      return Icon(cupertinoIcon, size: dimension, color: iconColor);
+    }
+
+    final url = icon.toSvgUrl(
+      fill: fill,
+      weight: weight,
+      grade: grade,
+      opticalSize: opticalSize,
+    );
+    if (url == null) {
+      log('No icon source | name: ${icon.name} | type: ${icon.type} | '
           'codepoint: ${icon.codepoint} | fontFamily: ${icon.fontFamily} | '
-          'fontPackage: ${icon.fontPackage}${icon is MaterialIcon ? ' | '
-              'style: ${(icon as MaterialIcon).style}' : ''}');
+          'fontPackage: ${icon.fontPackage}');
+      return SizedBox.square(dimension: dimension);
     }
 
     return SizedBox.square(
-      dimension: size ?? Theme.of(context).iconTheme.size ?? 24,
+      dimension: dimension,
       child: SvgPicture.network(
-        url ?? '',
+        url,
         fit: fit,
         colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
       ),
