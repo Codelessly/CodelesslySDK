@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import '../../codelessly_sdk.dart';
 
 /// A class that holds information about how to build a node.
-abstract class BuildSettings with EquatableMixin {
+abstract class BuildSettings with Equatable {
   /// Whether to internally handle the node's opacity.
   final bool withOpacity;
 
@@ -56,18 +56,18 @@ abstract class BuildSettings with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        withOpacity,
-        withVisibility,
-        withBlendModes,
-        withRotation,
-        withMargins,
-        withConstraints,
-        withReactions,
-        withAlignment,
-        isPreview,
-        useInk,
-        obscureImages,
-      ];
+    withOpacity,
+    withVisibility,
+    withBlendModes,
+    withRotation,
+    withMargins,
+    withConstraints,
+    withReactions,
+    withAlignment,
+    isPreview,
+    useInk,
+    obscureImages,
+  ];
 }
 
 /// A class that holds information about how to build a node that is to be
@@ -153,13 +153,13 @@ class WidgetBuildSettings extends BuildSettings {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        debugLabel,
-        nullSubstitutionMode,
-        replaceVariablesWithSymbols,
-        buildRawWidget,
-        brightness,
-      ];
+    ...super.props,
+    debugLabel,
+    nullSubstitutionMode,
+    replaceVariablesWithSymbols,
+    buildRawWidget,
+    brightness,
+  ];
 }
 
 /// This is the base class for all transformers.
@@ -175,8 +175,12 @@ class WidgetBuildSettings extends BuildSettings {
 /// [WidgetNodeTransformerManager].
 ///
 /// Codegen uses different `O`, `BX`, and `BS` types.
-abstract class NodeTypeTransformer<N extends BaseNode, O, BX,
-    BS extends BuildSettings> {
+abstract class NodeTypeTransformer<
+  N extends BaseNode,
+  O,
+  BX,
+  BS extends BuildSettings
+> {
   /// Creates a new instance of the transformer.
   ///
   /// [getNode] is a function that returns a node by its id.
@@ -192,11 +196,7 @@ abstract class NodeTypeTransformer<N extends BaseNode, O, BX,
   final NodeTransformerManager manager;
 
   /// Transforms a node into some output.
-  O buildWidget(
-    N node,
-    BX context,
-    BS settings,
-  );
+  O buildWidget(N node, BX context, BS settings);
 }
 
 /// This is the base class for all widget transformers, transforming
@@ -208,5 +208,5 @@ abstract class NodeWidgetTransformer<N extends BaseNode>
 
   /// Creates a new instance of the transformer.
   NodeWidgetTransformer(GetNode getNode, this.manager)
-      : super(getNode, manager);
+    : super(getNode, manager);
 }

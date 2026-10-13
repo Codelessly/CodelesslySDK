@@ -9,7 +9,7 @@ import '../../codelessly_sdk.dart';
 
 /// Holds data passed from the Codelessly instance down the widget tree where
 /// all of the [WidgetNodeTransformer]s have access to it.
-class CodelesslyContext with ChangeNotifier, EquatableMixin {
+class CodelesslyContext with ChangeNotifier, Equatable {
   /// A map of data that is passed to loaded layouts for nodes to replace their
   /// values with.
   Map<String, dynamic> _data;
@@ -62,27 +62,26 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
   /// A notifier that is used to rebuild individual nodes.
   final ValueNotifier<String> nodeRebuildNotifier = ValueNotifier('');
 
-  /// Creates a [CodelesslyContext] with the given [data], [functions], and
+  /// Creates a [CodelesslyContext] with the given [_data], [functions], and
   /// [nodeValues].
   CodelesslyContext({
-    required Map<String, dynamic> data,
+    required this._data,
     required this.functions,
     required Map<String, WidgetBuilder>? externalComponentBuilders,
     required this.nodeValues,
     required this.variables,
     required this.conditions,
     required this.layoutID,
-  })  : _data = data,
-        _externalComponentBuilders = externalComponentBuilders ?? {};
+  }) : _externalComponentBuilders = externalComponentBuilders ?? {};
 
   /// Creates a [CodelesslyContext] with empty an empty map of each property.
   CodelesslyContext.empty({String? layoutID})
-      : _data = {},
-        functions = {},
-        _externalComponentBuilders = {},
-        nodeValues = {},
-        variables = {},
-        conditions = {};
+    : _data = {},
+      functions = {},
+      _externalComponentBuilders = {},
+      nodeValues = {},
+      variables = {},
+      conditions = {};
 
   @override
   void dispose() {
@@ -151,11 +150,14 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
         // Populate node values with node's values, not action's values.
         if (connectedNode != null) {
           addToNodeValues(
-              connectedNode,
-              connectedNode.propertyVariables
-                  .where((property) =>
-                      action.values.any((value) => property.name == value.name))
-                  .toList());
+            connectedNode,
+            connectedNode.propertyVariables
+                .where(
+                  (property) =>
+                      action.values.any((value) => property.name == value.name),
+                )
+                .toList(),
+          );
         }
       case ActionType.setVariant:
         final action = actionModel as SetVariantAction;
@@ -168,7 +170,7 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
             StringValue(
               name: 'currentVariantId',
               value: connectedNode.currentVariantId,
-            )
+            ),
           ]);
         }
       default:
@@ -185,8 +187,9 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     final List<ValueModel> newValues = [];
     // Filter out and populate new values.
     for (final ValueModel value in values) {
-      if (!currentValues
-          .any((currentValue) => currentValue.name == value.name)) {
+      if (!currentValues.any(
+        (currentValue) => currentValue.name == value.name,
+      )) {
         newValues.add(value);
       }
     }
@@ -217,7 +220,9 @@ class CodelesslyContext with ChangeNotifier, EquatableMixin {
     // If the value is the same, then the underlying value notifier will not
     // notify listeners, so we need to return false.
     if (variable.value.value == newValue) {
-      log('[CodelesslyContext] Variable with name $name already has the value $newValue.');
+      log(
+        '[CodelesslyContext] Variable with name $name already has the value $newValue.',
+      );
       return false;
     }
     variable.value = variable.value.copyWith(value: newValue);

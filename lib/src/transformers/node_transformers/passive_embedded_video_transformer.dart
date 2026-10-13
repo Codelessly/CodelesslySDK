@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_android/webview_flutter_android.dart';
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../web/web_webview_platform.dart';
+import 'embedded_video_controller.dart';
 
 class PassiveEmbeddedVideoTransformer
     extends NodeWidgetTransformer<EmbeddedVideoNode> {
@@ -31,11 +29,14 @@ class PassiveEmbeddedVideoTransformer
     String url = '',
     EmbeddedVideoSource source = EmbeddedVideoSource.youtube,
     required String baseUrl,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview', isPreview: true),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+      isPreview: true,
+    ),
   }) {
     final previewNode = EmbeddedVideoNode(
-      properties: properties ??
+      properties:
+          properties ??
           node?.properties ??
           (source == EmbeddedVideoSource.youtube
               ? EmbeddedYoutubeVideoProperties(url: url)
@@ -94,55 +95,16 @@ class _PassiveEmbeddedVideoWidgetState
   void initState() {
     super.initState();
     if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      print('Unsupported platform: $defaultTargetPlatform for embedded '
-          'video.');
+      DebugLogger.instance.printInfo(
+        'Unsupported platform: $defaultTargetPlatform for embedded video.',
+        name: 'EmbeddedVideo',
+      );
       return;
     }
-    final PlatformWebViewControllerCreationParams params;
-    if (kIsWeb) {
-      // WebView on web only supports loadRequest. Any other method invocation
-      // on the controller will result in an exception. Be aware!!
-      WebViewPlatform.instance = WebWebViewPlatform();
-      _controller = WebViewController();
-    } else {
-      if (WebViewPlatform.instance is WebKitWebViewPlatform) {
-        params = WebKitWebViewControllerCreationParams(
-          allowsInlineMediaPlayback: true,
-          mediaTypesRequiringUserAction: {
-            if (!widget.node.properties.autoPlay) ...{
-              PlaybackMediaTypes.audio,
-              PlaybackMediaTypes.video,
-            },
-          },
-        );
-      } else if (WebViewPlatform.instance is AndroidWebViewPlatform) {
-        params = AndroidWebViewControllerCreationParams();
-      } else {
-        params = const PlatformWebViewControllerCreationParams();
-      }
-
-      _controller = WebViewController.fromPlatformCreationParams(params);
-      _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
-    }
-    // _controller.setUserAgent('chrome');
-    if (_controller.platform is AndroidWebViewController) {
-      print('setting android config');
-      final controller = _controller.platform as AndroidWebViewController;
-      controller.setMediaPlaybackRequiresUserGesture(
-          !widget.node.properties.autoPlay);
-      // Using this user-agent string to force the video to play in the webview
-      // on Android. This is a hack, but it works.
-      controller.setUserAgent(
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
-    } else if (_controller.platform is WebKitWebViewController) {
-      print('setting webkit config');
-      final controller = _controller.platform as WebKitWebViewController;
-      if (widget.node.properties.source == EmbeddedVideoSource.youtube) {
-        controller.setUserAgent(
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
-        // controller.setUserAgent('chrome');
-      }
-    }
+    _controller = createEmbeddedVideoController(
+      autoPlay: widget.node.properties.autoPlay,
+      isYoutube: widget.node.properties.source == EmbeddedVideoSource.youtube,
+    );
 
     final config = context.read<Codelessly>().config!;
 
@@ -163,7 +125,7 @@ class _PassiveEmbeddedVideoWidgetState
           baseUrl: config.baseURL,
         );
     }
-    print('Loading $embedUrl');
+    DebugLogger.instance.printInfo('Loading $embedUrl', name: 'EmbeddedVideo');
     _controller.loadRequest(Uri.parse(embedUrl));
   }
 
@@ -174,10 +136,14 @@ class _PassiveEmbeddedVideoWidgetState
     switch (widget.node.properties.source) {
       case EmbeddedVideoSource.youtube:
         videoWidget = buildEmbeddedYoutubeVideo(
-            context, widget.node.properties as EmbeddedYoutubeVideoProperties);
+          context,
+          widget.node.properties as EmbeddedYoutubeVideoProperties,
+        );
       case EmbeddedVideoSource.vimeo:
         videoWidget = buildEmbeddedVimeoVideo(
-            context, widget.node.properties as EmbeddedVimeoVideoProperties);
+          context,
+          widget.node.properties as EmbeddedVimeoVideoProperties,
+        );
     }
 
     return AdaptiveNodeBox(node: widget.node, child: videoWidget);
@@ -188,10 +154,7 @@ class _PassiveEmbeddedVideoWidgetState
     EmbeddedYoutubeVideoProperties properties,
   ) {
     if (isPlatformSupportedForWebView && !widget.settings.isPreview) {
-      return WebViewWidget(
-        controller: _controller,
-        key: ValueKey(properties),
-      );
+      return WebViewWidget(controller: _controller, key: ValueKey(properties));
     }
     if (properties.metadata != null) {
       return AdaptiveNodeBox(
@@ -207,9 +170,10 @@ class _PassiveEmbeddedVideoWidgetState
         child: Container(
           decoration: BoxDecoration(
             image: const DecorationImage(
-                image: AssetImage('assets/images/image_youtube_video.png'),
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter),
+              image: AssetImage('assets/images/image_youtube_video.png'),
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
             borderRadius: BorderRadius.circular(4),
             border: Border.all(color: Theme.of(context).colorScheme.secondary),
           ),
@@ -230,18 +194,18 @@ class _PassiveEmbeddedVideoWidgetState
   }
 
   Widget buildEmbeddedVimeoVideo(
-      BuildContext context, EmbeddedVimeoVideoProperties properties) {
+    BuildContext context,
+    EmbeddedVimeoVideoProperties properties,
+  ) {
     if (isPlatformSupportedForWebView && !widget.settings.isPreview) {
-      return WebViewWidget(
-        key: ValueKey(properties),
-        controller: _controller,
-      );
+      return WebViewWidget(key: ValueKey(properties), controller: _controller);
     }
     if (properties.metadata != null) {
       return AdaptiveNodeBox(
         node: widget.node,
-        child:
-            Center(child: VimeoVideoPreviewUI(metadata: properties.metadata!)),
+        child: Center(
+          child: VimeoVideoPreviewUI(metadata: properties.metadata!),
+        ),
       );
     }
 
@@ -252,9 +216,10 @@ class _PassiveEmbeddedVideoWidgetState
         child: Container(
           decoration: BoxDecoration(
             image: const DecorationImage(
-                image: AssetImage('assets/images/image_vimeo_video.png'),
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter),
+              image: AssetImage('assets/images/image_vimeo_video.png'),
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
             borderRadius: BorderRadius.circular(4),
             border: Border.all(color: Theme.of(context).colorScheme.secondary),
           ),
@@ -305,24 +270,26 @@ class YoutubeVideoPreviewUI extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Builder(builder: (context) {
-              if (isEmpty) {
-                return Container(
-                  color: Colors.black,
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Video Unavailable',
-                    style: TextStyle(color: Colors.grey),
-                  ),
+            child: Builder(
+              builder: (context) {
+                if (isEmpty) {
+                  return Container(
+                    color: Colors.black,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Video Unavailable',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  );
+                }
+                return Image.network(
+                  metadata.cloudThumbnailUrl.isNotEmpty
+                      ? metadata.cloudThumbnailUrl
+                      : metadata.thumbnailUrl,
+                  fit: BoxFit.cover,
                 );
-              }
-              return Image.network(
-                metadata.cloudThumbnailUrl.isNotEmpty
-                    ? metadata.cloudThumbnailUrl
-                    : metadata.thumbnailUrl,
-                fit: BoxFit.cover,
-              );
-            }),
+              },
+            ),
           ),
           Positioned(
             left: 0,
@@ -406,24 +373,26 @@ class VimeoVideoPreviewUI extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Builder(builder: (context) {
-              if (isEmpty) {
-                return Container(
-                  color: Colors.black,
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Video Unavailable',
-                    style: TextStyle(color: Colors.grey),
-                  ),
+            child: Builder(
+              builder: (context) {
+                if (isEmpty) {
+                  return Container(
+                    color: Colors.black,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Video Unavailable',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  );
+                }
+                return Image.network(
+                  metadata.cloudThumbnailUrl.isNotEmpty
+                      ? metadata.cloudThumbnailUrl
+                      : metadata.thumbnailUrl,
+                  fit: BoxFit.cover,
                 );
-              }
-              return Image.network(
-                metadata.cloudThumbnailUrl.isNotEmpty
-                    ? metadata.cloudThumbnailUrl
-                    : metadata.thumbnailUrl,
-                fit: BoxFit.cover,
-              );
-            }),
+              },
+            ),
           ),
           Positioned(
             left: 0,
@@ -434,8 +403,10 @@ class VimeoVideoPreviewUI extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(6),
@@ -453,8 +424,10 @@ class VimeoVideoPreviewUI extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(6),
@@ -485,10 +458,7 @@ class VimeoVideoPreviewUI extends StatelessWidget {
                 color: Colors.black.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: const Icon(
-                Icons.play_arrow,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.play_arrow, color: Colors.white),
             ),
           ),
           Positioned(
@@ -505,9 +475,7 @@ class VimeoVideoPreviewUI extends StatelessWidget {
                     child: Container(
                       height: 10,
                       decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey,
-                        ),
+                        border: Border.all(color: Colors.grey),
                       ),
                     ),
                   ),
@@ -518,11 +486,7 @@ class VimeoVideoPreviewUI extends StatelessWidget {
                     color: Colors.white,
                   ),
                   const SizedBox(width: 4),
-                  const Icon(
-                    Icons.settings,
-                    size: 14,
-                    color: Colors.white,
-                  ),
+                  const Icon(Icons.settings, size: 14, color: Colors.white),
                   const SizedBox(width: 4),
                   Image.asset(
                     'assets/images/vimeo_logo.png',

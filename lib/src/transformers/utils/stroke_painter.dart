@@ -71,21 +71,21 @@ class StrokePainter extends CustomPainter {
     this.strokeAlign = StrokeAlignC.inside,
     this.strokeCap = StrokeCapEnum.square,
     this.borderRadius = BorderRadius.zero,
-  })  : dashArray = LoopingList(dashPattern),
-        border = Border(
-          left: strokeSide == StrokeSide.left
-              ? BorderSide(color: color, width: strokeWidth)
-              : BorderSide.none,
-          right: strokeSide == StrokeSide.right
-              ? BorderSide(color: color, width: strokeWidth)
-              : BorderSide.none,
-          bottom: strokeSide == StrokeSide.bottom
-              ? BorderSide(color: color, width: strokeWidth)
-              : BorderSide.none,
-          top: strokeSide == StrokeSide.top
-              ? BorderSide(color: color, width: strokeWidth)
-              : BorderSide.none,
-        );
+  }) : dashArray = LoopingList(dashPattern),
+       border = Border(
+         left: strokeSide == StrokeSide.left
+             ? BorderSide(color: color, width: strokeWidth)
+             : BorderSide.none,
+         right: strokeSide == StrokeSide.right
+             ? BorderSide(color: color, width: strokeWidth)
+             : BorderSide.none,
+         bottom: strokeSide == StrokeSide.bottom
+             ? BorderSide(color: color, width: strokeWidth)
+             : BorderSide.none,
+         top: strokeSide == StrokeSide.top
+             ? BorderSide(color: color, width: strokeWidth)
+             : BorderSide.none,
+       );
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -127,9 +127,10 @@ class StrokePainter extends CustomPainter {
         if (boxShape == BoxShape.circle) {
           final double circleDiameter = min(size.width, size.height);
           final Rect basicRect = Rect.fromCenter(
-              center: Offset(size.width / 2, size.height / 2),
-              width: circleDiameter,
-              height: circleDiameter);
+            center: Offset(size.width / 2, size.height / 2),
+            width: circleDiameter,
+            height: circleDiameter,
+          );
           path.addOval(basicRect);
         } else {
           final Rect basicRect = Rect.fromLTWH(0, 0, size.width, size.height);
@@ -174,14 +175,14 @@ class StrokePainter extends CustomPainter {
               // the vector's direction between (-y, x) or (y, -x), flipping
               // the direction for our convenience.
               final Offset parallelTangentVector = tangent.vector;
-              final Offset normal = Offset(
+              final Offset normal =
+                  Offset(
                     parallelTangentVector.dy * isInside * isCenter,
                     parallelTangentVector.dx * isOutside,
                   ) *
                   // Multiply by the stroke thickness to figure out the distance
                   // needed from the start position to the stroke.
                   strokeWidth *
-
                   // If it's a center stroke, we need to divide the normal by 2.
                   // It will be rendered twice, once inside, once outside,
                   // achieving the center stroke effect.
@@ -227,8 +228,10 @@ class StrokePainter extends CustomPainter {
           realSize = Size(size.width + strokeWidth, size.height + strokeWidth);
         case StrokeAlignC.outside:
           topLeft = Offset(-strokeWidth, -strokeWidth);
-          realSize =
-              Size(size.width + strokeWidth * 2, size.height + strokeWidth * 2);
+          realSize = Size(
+            size.width + strokeWidth * 2,
+            size.height + strokeWidth * 2,
+          );
         case StrokeAlignC.inside:
           break;
       }
@@ -245,9 +248,10 @@ class StrokePainter extends CustomPainter {
         if (boxShape == BoxShape.circle) {
           final double circleDiameter = min(size.width, size.height);
           final Rect basicRect = Rect.fromCenter(
-              center: Offset(size.width / 2, size.height / 2),
-              width: circleDiameter,
-              height: circleDiameter);
+            center: Offset(size.width / 2, size.height / 2),
+            width: circleDiameter,
+            height: circleDiameter,
+          );
           innerPath.addOval(basicRect);
           outerPath.addOval(basicRect.inflate(strokeWidth));
         } else {
@@ -273,26 +277,31 @@ class StrokePainter extends CustomPainter {
           //
           // We get a really nice and seamless outside border transition this
           // way.
-          outerPath.addRRect((borderRadius.add(
-            BorderRadius.only(
-              topRight: Radius.circular(
-                  strokeWidth * (min(borderRadius.topRight.x, 10) / 10)),
-              topLeft: Radius.circular(
-                  strokeWidth * (min(borderRadius.topLeft.x, 10) / 10)),
-              bottomLeft: Radius.circular(
-                  strokeWidth * (min(borderRadius.bottomLeft.x, 10) / 10)),
-              bottomRight: Radius.circular(
-                  strokeWidth * (min(borderRadius.bottomRight.x, 10) / 10)),
+          outerPath.addRRect(
+            (borderRadius.add(
+              BorderRadius.only(
+                topRight: Radius.circular(
+                  strokeWidth * (min(borderRadius.topRight.x, 10) / 10),
+                ),
+                topLeft: Radius.circular(
+                  strokeWidth * (min(borderRadius.topLeft.x, 10) / 10),
+                ),
+                bottomLeft: Radius.circular(
+                  strokeWidth * (min(borderRadius.bottomLeft.x, 10) / 10),
+                ),
+                bottomRight: Radius.circular(
+                  strokeWidth * (min(borderRadius.bottomRight.x, 10) / 10),
+                ),
+              ),
+            ) as BorderRadius).toRRect(
+              Rect.fromLTWH(
+                topLeft.dx,
+                topLeft.dy,
+                realSize.width,
+                realSize.height,
+              ),
             ),
-          ) as BorderRadius)
-              .toRRect(
-            Rect.fromLTWH(
-              topLeft.dx,
-              topLeft.dy,
-              realSize.width,
-              realSize.height,
-            ),
-          ));
+          );
         }
 
         // This is where the magic happens. We want to fill the area
@@ -303,13 +312,14 @@ class StrokePainter extends CustomPainter {
         dest.addPath(innerPath, Offset.zero);
         dest.addPath(outerPath, Offset.zero);
 
-        canvas.drawPath(
-          dest..close(),
-          paint..style = PaintingStyle.fill,
-        );
+        canvas.drawPath(dest..close(), paint..style = PaintingStyle.fill);
       } else {
         final Rect rect = Rect.fromLTWH(
-            topLeft.dx, topLeft.dy, realSize.width, realSize.height);
+          topLeft.dx,
+          topLeft.dy,
+          realSize.width,
+          realSize.height,
+        );
 
         // For any other border, we can just use Flutter's built in painter.
         // No special handling required here.

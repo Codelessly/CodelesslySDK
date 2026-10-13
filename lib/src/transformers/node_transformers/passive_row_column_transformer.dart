@@ -85,11 +85,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
 
       if (fixWidth == null && fixHeight == null) return res;
 
-      return SizedBox(
-        width: fixWidth,
-        height: fixHeight,
-        child: res,
-      );
+      return SizedBox(width: fixWidth, height: fixHeight, child: res);
     } else {
       Widget res = Column(
         mainAxisAlignment: rowColumnNode.mainAxisAlignment.flutterAxis,
@@ -122,11 +118,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
 
       if (fixWidth == null && fixHeight == null) return res;
 
-      return SizedBox(
-        width: fixWidth,
-        height: fixHeight,
-        child: res,
-      );
+      return SizedBox(width: fixWidth, height: fixHeight, child: res);
     }
   }
 
@@ -148,10 +140,11 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
 
     final AxisC mainAxis =
         ((parentRowColumn as RowColumnMixin).rowColumnType == RowColumnType.row
-            ? AxisC.horizontal
-            : AxisC.vertical);
-    final SizeFit mainAxisFit =
-        (mainAxis == AxisC.horizontal ? node.horizontalFit : node.verticalFit);
+        ? AxisC.horizontal
+        : AxisC.vertical);
+    final SizeFit mainAxisFit = (mainAxis == AxisC.horizontal
+        ? node.horizontalFit
+        : node.verticalFit);
     // final SizeFit crossAxisFit =
     //     (mainAxis == AxisC.horizontal ? node.verticalFit : node.horizontalFit);
 
@@ -232,10 +225,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         // We can do this because children on cross axis get restricted bounds.
         if (mainAxisFit.isFlex) {
           if (mainAxisFit == SizeFit.flexible) {
-            childWidget = Flexible(
-              flex: flex,
-              child: childWidget,
-            );
+            childWidget = Flexible(flex: flex, child: childWidget);
           } else {
             if (mainAxisMaxConstraint != null) {
               // When there's constraints on the main axis, we need to use
@@ -269,13 +259,12 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     BaseNode node,
     BuildContext context,
     WidgetBuildSettings settings,
-  ) =>
-      PassiveRowColumnWidget(
-        node: node,
-        children: node.childrenOrEmpty.map(getNode).toList(),
-        manager: manager,
-        settings: settings,
-      );
+  ) => PassiveRowColumnWidget(
+    node: node,
+    children: node.childrenOrEmpty.map(getNode).toList(),
+    manager: manager,
+    settings: settings,
+  );
 }
 
 class PassiveRowColumnWidget extends StatelessWidget {
@@ -295,8 +284,11 @@ class PassiveRowColumnWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> widgetChildren = children.map((child) {
-      final Widget builtWidget =
-          manager.buildWidgetByID(child.id, context, settings: settings);
+      final Widget builtWidget = manager.buildWidgetByID(
+        child.id,
+        context,
+        settings: settings,
+      );
 
       return PassiveRowColumnTransformer.wrapChildWithSizeFits(
         child,
@@ -308,20 +300,21 @@ class PassiveRowColumnWidget extends StatelessWidget {
 
     final Widget child = (node is DefaultShapeNode)
         ? manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
-              node as DefaultShapeNode,
-              applyPadding: node is! ScrollableMixin ||
-                  !(node as ScrollableMixin).isScrollable,
-              children: [
-                PassiveRowColumnTransformer.buildRowColumnWidget(
-                  node,
-                  childrenWidgets: widgetChildren,
-                  childrenNodes: children,
-                  withScroll: true,
-                  getNode: manager.getNode,
-                )
-              ],
-              settings: settings,
-            )
+            node as DefaultShapeNode,
+            applyPadding:
+                node is! ScrollableMixin ||
+                !(node as ScrollableMixin).isScrollable,
+            children: [
+              PassiveRowColumnTransformer.buildRowColumnWidget(
+                node,
+                childrenWidgets: widgetChildren,
+                childrenNodes: children,
+                withScroll: true,
+                getNode: manager.getNode,
+              ),
+            ],
+            settings: settings,
+          )
         : PassiveRowColumnTransformer.buildRowColumnWidget(
             node,
             childrenWidgets: widgetChildren,

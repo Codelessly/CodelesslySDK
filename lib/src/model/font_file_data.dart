@@ -18,6 +18,11 @@ class FontFileData extends Equatable {
   });
 
   @override
-  List<Object?> get props =>
-      [fileName, fileExtension, familyName, style, bytes];
+  List<Object?> get props => [
+    fileName,
+    fileExtension,
+    familyName,
+    style,
+    bytes,
+  ];
 }

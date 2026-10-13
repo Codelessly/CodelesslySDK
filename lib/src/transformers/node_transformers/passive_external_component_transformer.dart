@@ -30,8 +30,8 @@ class PassiveExternalComponentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CodelesslyContext codelesslyContext =
-        context.watch<CodelesslyContext>();
+    final CodelesslyContext codelesslyContext = context
+        .watch<CodelesslyContext>();
     final WidgetBuilder? builder =
         codelesslyContext.externalComponentBuilders[node.properties.builderID];
 

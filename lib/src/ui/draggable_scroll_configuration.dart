@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 class DraggableScrollConfiguration extends StatelessWidget {
   final Widget child;
 
-  const DraggableScrollConfiguration({
-    super.key,
-    required this.child,
-  });
+  const DraggableScrollConfiguration({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {

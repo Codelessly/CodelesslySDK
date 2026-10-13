@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/error_logger.dart';
 import '../logging/stat_tracker.dart';
 
 /// Handles the data flow of [SDKPublishModel] from the server.
@@ -13,18 +12,16 @@ class FirebaseDataRepository extends NetworkDataRepository {
 
   /// Creates a new [FirebaseDataRepository] instance with the given [firestore]
   /// instance.
-  FirebaseDataRepository({
-    required this.firestore,
-    required super.config,
-  });
+  FirebaseDataRepository({required this.firestore, required super.config});
 
   @override
   Stream<SDKPublishModel?> streamPublishModel({
     required String projectID,
     required PublishSource source,
   }) {
-    final publishModelDoc =
-        firestore.collection(source.serverPath).doc(projectID);
+    final publishModelDoc = firestore
+        .collection(source.serverPath)
+        .doc(projectID);
 
     return publishModelDoc.snapshots().map((event) {
       StatTracker.instance.track(
@@ -43,9 +40,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
         );
         return null;
       }
-      final SDKPublishModel model = SDKPublishModel.fromJson(
-        {...data, 'id': event.id},
-      );
+      final SDKPublishModel model = SDKPublishModel.fromJson({
+        ...data,
+        'id': event.id,
+      });
       return model;
     });
   }
@@ -90,9 +88,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
         return null;
       }
 
-      final SDKPublishLayout layout = SDKPublishLayout.fromJson(
-        {...data, 'id': value.id},
-      );
+      final SDKPublishLayout layout = SDKPublishLayout.fromJson({
+        ...data,
+        'id': value.id,
+      });
       return layout;
     });
   }
@@ -127,9 +126,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
         return null;
       }
 
-      final SDKPublishFont font = SDKPublishFont.fromJson(
-        {...data, 'id': value.id},
-      );
+      final SDKPublishFont font = SDKPublishFont.fromJson({
+        ...data,
+        'id': value.id,
+      });
       return font;
     });
   }
@@ -164,9 +164,7 @@ class FirebaseDataRepository extends NetworkDataRepository {
         return null;
       }
 
-      final HttpApiData api = HttpApiData.fromJson(
-        {...data, 'id': value.id},
-      );
+      final HttpApiData api = HttpApiData.fromJson({...data, 'id': value.id});
       return api;
     });
   }
@@ -202,9 +200,10 @@ class FirebaseDataRepository extends NetworkDataRepository {
         return null;
       }
 
-      final SDKLayoutVariables layoutVariables = SDKLayoutVariables.fromJson(
-        {...data, 'id': value.id},
-      );
+      final SDKLayoutVariables layoutVariables = SDKLayoutVariables.fromJson({
+        ...data,
+        'id': value.id,
+      });
       return layoutVariables;
     });
   }

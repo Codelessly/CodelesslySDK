@@ -7,9 +7,7 @@ class ConditionVariablesVisitor
         ExpressionVisitor<Set<String>>,
         ExpressionPartVisitor<Set<String>>,
         ActionVisitor<Set<String>> {
-  const ConditionVariablesVisitor({
-    this.excludedVariableNames = const {},
-  });
+  const ConditionVariablesVisitor({this.excludedVariableNames = const {}});
 
   final Set<String> excludedVariableNames;
 
@@ -17,8 +15,9 @@ class ConditionVariablesVisitor
   Set<String> visitCondition(Condition condition) {
     return {
       ...condition.expression.accept<Set<String>>(this) ?? {},
-      ...condition.actions
-          .expand((action) => action.accept<Set<String>>(this) ?? <String>{}),
+      ...condition.actions.expand(
+        (action) => action.accept<Set<String>>(this) ?? <String>{},
+      ),
     };
   }
 
@@ -117,8 +116,8 @@ class ConditionVariablesVisitor
 
   @override
   Set<String>? visitLoadFromCloudStorageAction(
-          LoadFromCloudStorageAction action) =>
-      {};
+    LoadFromCloudStorageAction action,
+  ) => {};
 }
 
 /// A visitor that returns the list of node IDs used in a condition's actions.
@@ -134,18 +133,18 @@ class ConditionNodesVisitor
 
   @override
   Set<String>? visitCondition(Condition condition) => {
-        ...condition.actions
-            .map((action) => action.accept<String>(this))
-            .nonNulls
-            .toSet(),
-      };
+    ...condition.actions
+        .map((action) => action.accept<String>(this))
+        .nonNulls
+        .toSet(),
+  };
 
   @override
   Set<String>? visitConditionGroup(ConditionGroup condition) => {
-        ...condition.ifCondition.actions,
-        ...condition.elseIfConditions.expand((condition) => condition.actions),
-        ...condition.elseCondition?.actions ?? [],
-      }.map((action) => action.accept<String>(this)).nonNulls.toSet();
+    ...condition.ifCondition.actions,
+    ...condition.elseIfConditions.expand((condition) => condition.actions),
+    ...condition.elseCondition?.actions ?? [],
+  }.map((action) => action.accept<String>(this)).nonNulls.toSet();
 
   @override
   Set<String>? visitElseCondition(ElseCondition condition) {

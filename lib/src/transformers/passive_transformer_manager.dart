@@ -39,8 +39,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'radio': PassiveRadioTransformer(getNode, this),
       'icon': PassiveIconTransformer(getNode, this),
       'spacer': PassiveSpacerTransformer(getNode, this),
-      'floatingActionButton':
-          PassiveFloatingActionButtonTransformer(getNode, this),
+      'floatingActionButton': PassiveFloatingActionButtonTransformer(
+        getNode,
+        this,
+      ),
       'expansionTile': PassiveExpansionTileTransformer(getNode, this),
       'accordion': PassiveAccordionTransformer(getNode, this),
       'listTile': PassiveListTileTransformer(getNode, this),
@@ -73,8 +75,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       context,
       node: node,
       builder: (context) {
-        Widget widget =
-            getTransformerByNode(node).buildWidget(node, context, settings);
+        Widget widget = getTransformerByNode(node)
+            .buildWidget(node, context, settings);
 
         if (settings.withOpacity) {
           widget = applyWidgetOpacity(node, widget);
@@ -122,7 +124,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     required BaseNode node,
     required Widget Function(BuildContext context) builder,
   }) {
-    final bool enabled = PropertyValueDelegate.getPropertyValue<bool>(
+    final bool enabled =
+        PropertyValueDelegate.getPropertyValue<bool>(
           node,
           'node_enabled',
           scopedValues: ScopedValues.of(context),
@@ -131,8 +134,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     if (!enabled) return const SizedBox.shrink();
 
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
+    final CodelesslyContext codelesslyContext = context
+        .read<CodelesslyContext>();
 
     // List of value notifiers that the widget listens to. This includes node's
     // local values and the variables attached to node properties.
@@ -164,8 +167,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       }
 
       // Get corresponding variable data from codelessly context.
-      final ValueNotifier<VariableData>? listenableVariable =
-          codelesslyContext.findVariableByName(match.name);
+      final ValueNotifier<VariableData>? listenableVariable = codelesslyContext
+          .findVariableByName(match.name);
       // Add variable to [listenables].
       if (listenableVariable != null) listenables.add(listenableVariable);
     }
@@ -191,8 +194,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       }
 
       // Get corresponding variable data from codelessly context.
-      final ValueNotifier<VariableData>? listenableVariable =
-          codelesslyContext.findVariableByName(match.name);
+      final ValueNotifier<VariableData>? listenableVariable = codelesslyContext
+          .findVariableByName(match.name);
       // Add variable to [listenables].
       if (listenableVariable != null) listenables.add(listenableVariable);
     }
@@ -201,23 +204,27 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     for (final BaseCondition condition in codelesslyContext.conditions.values) {
       if (!condition.hasNode(node.id)) continue;
 
-      final Set<String> variableNames =
-          condition.getReactiveVariables().toSet();
+      final Set<String> variableNames = condition
+          .getReactiveVariables()
+          .toSet();
 
       for (final name in variableNames) {
         if (predefinedListenableVariableNames.contains(name)) {
           switch (name) {
             case 'storage':
               final notifier = getStorageListenerFor(
-                  VariableMatch.parse(name.wrapWithVariableSyntax())!, context);
+                VariableMatch.parse(name.wrapWithVariableSyntax())!,
+                context,
+              );
               if (notifier != null) listenables.add(notifier);
           }
           continue;
         }
         // Get corresponding variable data from codelessly context.
         final ValueNotifier<VariableData>? listenableVariable =
-            codelesslyContext.variables.values
-                .firstWhereOrNull((notifier) => notifier.value.name == name);
+            codelesslyContext.variables.values.firstWhereOrNull(
+              (notifier) => notifier.value.name == name,
+            );
         // Add variable to [listenables].
         if (listenableVariable != null) listenables.add(listenableVariable);
       }
@@ -227,17 +234,19 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       key: ValueKey(node.id),
       node: node,
       codelesslyContext: codelesslyContext,
-      child: Builder(builder: (context) {
-        if (listenables.isNotEmpty) {
-          return ManagedListenableBuilder(
-            key: ValueKey(node.id),
-            listenables: listenables,
-            builder: (context) => builder(context),
-          );
-        } else {
-          return builder(context);
-        }
-      }),
+      child: Builder(
+        builder: (context) {
+          if (listenables.isNotEmpty) {
+            return ManagedListenableBuilder(
+              key: ValueKey(node.id),
+              listenables: listenables,
+              builder: (context) => builder(context),
+            );
+          } else {
+            return builder(context);
+          }
+        },
+      ),
     );
   }
 
@@ -245,8 +254,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     final localStorage = context.read<Codelessly?>()?.localDatabase;
     if (localStorage == null) return null;
     if (match.hasPath) {
-      final pathMatch =
-          VariableMatch.parse(match.path!.wrapWithVariableSyntax());
+      final pathMatch = VariableMatch.parse(
+        match.path!.wrapWithVariableSyntax(),
+      );
       if (pathMatch == null) return null;
       final key = pathMatch.name;
       return localStorage.getNotifier(key);
@@ -287,8 +297,10 @@ class _ManagedListenableBuilderState extends State<ManagedListenableBuilder> {
   @override
   void didUpdateWidget(covariant ManagedListenableBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!const ListEquality<Listenable>()
-        .equals(oldWidget.listenables, widget.listenables)) {
+    if (!const ListEquality<Listenable>().equals(
+      oldWidget.listenables,
+      widget.listenables,
+    )) {
       // ValueNotifier objects are equatable by object identity, so we check
       // if those objects are the same or not.
       listenable?.removeListener(onChanged);
@@ -337,14 +349,16 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
   @override
   void initState() {
     super.initState();
-    widget.codelesslyContext.nodeRebuildNotifier
-        .addListener(onNodeNotification);
+    widget.codelesslyContext.nodeRebuildNotifier.addListener(
+      onNodeNotification,
+    );
   }
 
   @override
   void dispose() {
-    widget.codelesslyContext.nodeRebuildNotifier
-        .removeListener(onNodeNotification);
+    widget.codelesslyContext.nodeRebuildNotifier.removeListener(
+      onNodeNotification,
+    );
     super.dispose();
   }
 

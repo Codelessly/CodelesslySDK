@@ -11,16 +11,20 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
   switch (type) {
     case ButtonTypeEnum.elevated:
       final brightness = ThemeData.estimateBrightnessForColor(
-          node.properties.buttonColor.toFlutterColor());
+        node.properties.buttonColor.toFlutterColor(),
+      );
       final color =
           (brightness == Brightness.light ? Colors.black : Colors.white)
               .toColorRGBA();
       node.properties
-        ..labelStyle = node.properties.labelStyle.copyWith(fills: [
-          color.toPaint(node.properties.labelStyle.fills.firstOrNull?.id)
-        ])
-        ..icon = node.properties.icon
-            .copyWith(color: color.toFlutterColor().toColorRGBA())
+        ..labelStyle = node.properties.labelStyle.copyWith(
+          fills: [
+            color.toPaint(node.properties.labelStyle.fills.firstOrNull?.id),
+          ],
+        )
+        ..icon = node.properties.icon.copyWith(
+          color: color.toFlutterColor().toColorRGBA(),
+        )
         ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
         ..elevation = 8
         ..gap = node.properties.icon.show ? 8 : 0
@@ -30,13 +34,16 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
     case ButtonTypeEnum.text:
       node.properties
         ..buttonColor = node.properties.buttonColor.copyWith(a: 0.1)
-        ..labelStyle = node.properties.labelStyle.copyWith(fills: [
-          node.properties.buttonColor
-              .copyWith(a: 1)
-              .toPaint(node.properties.labelStyle.fills.firstOrNull?.id)
-        ])
-        ..icon = node.properties.icon
-            .copyWith(color: node.properties.buttonColor.copyWith(a: 1))
+        ..labelStyle = node.properties.labelStyle.copyWith(
+          fills: [
+            node.properties.buttonColor
+                .copyWith(a: 1)
+                .toPaint(node.properties.labelStyle.fills.firstOrNull?.id),
+          ],
+        )
+        ..icon = node.properties.icon.copyWith(
+          color: node.properties.buttonColor.copyWith(a: 1),
+        )
         ..elevation = 0
         ..shape = CShapeBorder.roundedRectangle
         ..borderWidth = null
@@ -44,27 +51,71 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
     case ButtonTypeEnum.outlined:
       node.properties
         ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
-        ..labelStyle = node.properties.labelStyle.copyWith(fills: [
-          node.properties.buttonColor
-              .copyWith(a: 1)
-              .toPaint(node.properties.labelStyle.fills.firstOrNull?.id)
-        ])
-        ..icon = node.properties.icon
-            .copyWith(color: node.properties.buttonColor.copyWith(a: 1))
+        ..labelStyle = node.properties.labelStyle.copyWith(
+          fills: [
+            node.properties.buttonColor
+                .copyWith(a: 1)
+                .toPaint(node.properties.labelStyle.fills.firstOrNull?.id),
+          ],
+        )
+        ..icon = node.properties.icon.copyWith(
+          color: node.properties.buttonColor.copyWith(a: 1),
+        )
         ..elevation = 0
         ..shape = CShapeBorder.roundedRectangle
         ..borderWidth = 1
         ..borderColor = null;
-    case ButtonTypeEnum.icon:
+    case ButtonTypeEnum.filled:
       final brightness = ThemeData.estimateBrightnessForColor(
-          node.properties.buttonColor.toFlutterColor());
+        node.properties.buttonColor.toFlutterColor(),
+      );
       final color =
           (brightness == Brightness.light ? Colors.black : Colors.white)
               .toColorRGBA();
       node.properties
-        ..labelStyle = node.properties.labelStyle.copyWith(fills: [
-          color.toPaint(node.properties.labelStyle.fills.firstOrNull?.id)
-        ])
+        ..labelStyle = node.properties.labelStyle.copyWith(
+          fills: [
+            color.toPaint(node.properties.labelStyle.fills.firstOrNull?.id),
+          ],
+        )
+        ..icon = node.properties.icon.copyWith(color: color)
+        ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
+        ..elevation = 0
+        ..gap = node.properties.icon.show ? 8 : 0
+        ..shape = CShapeBorder.stadium
+        ..borderColor = null
+        ..borderWidth = null;
+    case ButtonTypeEnum.filledTonal:
+      node.properties
+        ..buttonColor = node.properties.buttonColor.copyWith(a: 0.2)
+        ..labelStyle = node.properties.labelStyle.copyWith(
+          fills: [
+            node.properties.buttonColor
+                .copyWith(a: 1)
+                .toPaint(node.properties.labelStyle.fills.firstOrNull?.id),
+          ],
+        )
+        ..icon = node.properties.icon.copyWith(
+          color: node.properties.buttonColor.copyWith(a: 1),
+        )
+        ..elevation = 0
+        ..gap = node.properties.icon.show ? 8 : 0
+        ..shape = CShapeBorder.stadium
+        ..borderColor = null
+        ..borderWidth = null;
+    case ButtonTypeEnum.icon:
+      final brightness = ThemeData.estimateBrightnessForColor(
+        node.properties.buttonColor.toFlutterColor(),
+      );
+      final color =
+          (brightness == Brightness.light ? Colors.black : Colors.white)
+              .toColorRGBA();
+      node.properties
+        ..labelStyle = node.properties.labelStyle.copyWith(
+          fills: [
+            color.toPaint(node.properties.labelStyle.fills.firstOrNull?.id),
+          ],
+        )
         ..icon = node.properties.icon.copyWith(color: color)
         ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
         ..icon = node.properties.icon.copyWith(show: true)
@@ -103,10 +154,7 @@ void transformNodeFromIconButton(ButtonNode node) {
   }
   double height = painter.height + (10 * 2);
   node.update(
-    middleBoxLocal: node.basicBoxLocal.copyWith(
-      width: width,
-      height: height,
-    ),
+    middleBoxLocal: node.basicBoxLocal.copyWith(width: width, height: height),
     padding: defaultButtonPadding,
   );
   node.properties.icon = node.properties.icon.copyWith(size: painter.height);
@@ -115,10 +163,7 @@ void transformNodeFromIconButton(ButtonNode node) {
 
 void transformNodeToIconButton(ButtonNode node) {
   node.update(
-    middleBoxLocal: node.basicBoxLocal.copyWith(
-      width: 48,
-      height: 48,
-    ),
+    middleBoxLocal: node.basicBoxLocal.copyWith(width: 48, height: 48),
     padding: EdgeInsetsModel.zero,
   );
   node.properties.icon = node.properties.icon.copyWith(size: 20);
@@ -128,25 +173,32 @@ void transformNodeToIconButton(ButtonNode node) {
 
 /// Flutter's ButtonStyle parameters do different things depending on the button
 /// type. So we have to manually change them.
-ButtonStyle createMasterButtonStyle(ButtonNode node,
-    {double? elevation, required ScopedValues scopedValues}) {
-  final TextStyle textStyle =
-      TextUtils.retrieveTextStyleFromProp(node.properties.labelStyle);
-  final Color? labelColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+ButtonStyle createMasterButtonStyle(
+  ButtonNode node, {
+  double? elevation,
+  required ScopedValues scopedValues,
+}) {
+  final TextStyle textStyle = TextUtils.retrieveTextStyleFromProp(
+    node.properties.labelStyle,
+  );
+  final Color? labelColor =
+      PropertyValueDelegate.getPropertyValue<ColorRGBA>(
         node,
         'labelColor',
         scopedValues: scopedValues,
       )?.toFlutterColor() ??
       TextUtils.retrievePropColor(node.properties.labelStyle);
 
-  final buttonColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+  final buttonColor =
+      PropertyValueDelegate.getPropertyValue<ColorRGBA>(
         node,
         'buttonColor',
         scopedValues: scopedValues,
       ) ??
       node.properties.buttonColor;
 
-  final shadowColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+  final shadowColor =
+      PropertyValueDelegate.getPropertyValue<ColorRGBA>(
         node,
         'shadowColor',
         scopedValues: scopedValues,
@@ -179,6 +231,19 @@ ButtonStyle createMasterButtonStyle(ButtonNode node,
         shadowColor: shadowColor.toFlutterColor(),
         shape: getButtonShape(node, scopedValues),
       );
+    case ButtonTypeEnum.filled:
+    case ButtonTypeEnum.filledTonal:
+      buttonStyle = FilledButton.styleFrom(
+        foregroundColor: labelColor,
+        elevation: elevation ?? node.properties.elevation,
+        shadowColor: shadowColor.toFlutterColor(),
+        backgroundColor: buttonColor.toFlutterColor(),
+        visualDensity: VisualDensity.standard,
+        padding: node.padding.flutterEdgeInsets,
+        textStyle: textStyle,
+        minimumSize: Size.zero,
+        shape: getButtonShape(node, scopedValues),
+      );
     case ButtonTypeEnum.outlined:
       buttonStyle = OutlinedButton.styleFrom(
         foregroundColor: labelColor,
@@ -194,11 +259,12 @@ ButtonStyle createMasterButtonStyle(ButtonNode node,
       );
     case ButtonTypeEnum.icon:
       Color? primary;
-      if (buttonColor.toFlutterColor().opacity > 0 &&
-          buttonColor.toFlutterColor().opacity < 0.7) {
+      if (buttonColor.toFlutterColor().a > 0 &&
+          buttonColor.toFlutterColor().a < 0.7) {
         primary = buttonColor.toFlutterColor().withValues(alpha: 0.1);
-      } else if (buttonColor.toFlutterColor().opacity == 0) {
-        final iconColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+      } else if (buttonColor.toFlutterColor().a == 0) {
+        final iconColor =
+            PropertyValueDelegate.getPropertyValue<ColorRGBA>(
               node,
               'iconColor',
               scopedValues: scopedValues,
@@ -218,18 +284,20 @@ ButtonStyle createMasterButtonStyle(ButtonNode node,
       );
   }
   return buttonStyle.copyWith(
-      elevation:
-          WidgetStateProperty.all(elevation ?? node.properties.elevation));
+    elevation: WidgetStateProperty.all(elevation ?? node.properties.elevation),
+  );
 }
 
 OutlinedBorder? getButtonShape(ButtonNode node, ScopedValues scopedValues) {
-  final buttonColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+  final buttonColor =
+      PropertyValueDelegate.getPropertyValue<ColorRGBA>(
         node,
         'buttonColor',
         scopedValues: scopedValues,
       ) ??
       node.properties.buttonColor;
-  final borderColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+  final borderColor =
+      PropertyValueDelegate.getPropertyValue<ColorRGBA>(
         node,
         'borderColor',
         scopedValues: scopedValues,
@@ -247,7 +315,9 @@ OutlinedBorder? getButtonShape(ButtonNode node, ScopedValues scopedValues) {
 }
 
 String? getSliderLabel(SliderNode node, double value) {
-  if (!node.properties.showLabel) return null;
+  final showValueIndicator = node.properties.showValueIndicator;
+  if (showValueIndicator == ShowValueIndicatorC.never) return null;
+  if (showValueIndicator == null && !node.properties.showLabel) return null;
   if (node.properties.label.trim().isEmpty) return kSliderDefaultLabel;
   final String valueString = node.properties.allowFractionalPoints
       ? value.toStringAsFixed(1)
@@ -271,10 +341,14 @@ Widget? retrieveIconWidget(
         icon: icon.icon!,
         size: size ?? icon.size ?? kDefaultIconSize,
         color: color,
+        fill: icon.fill,
+        weight: icon.weight,
+        grade: icon.grade,
+        opticalSize: icon.opticalSize,
       );
     case IconTypeEnum.image:
       if (icon.iconImage == null) return null;
-      if (color != null && color.opacity == 0) {
+      if (color != null && color.a == 0) {
         // when opacity is zero, we need to display original colors of
         // the image icon which `ImageIcon` widget cannot do. So we
         // use the raw Image widget.
@@ -283,6 +357,9 @@ Widget? retrieveIconWidget(
             icon.iconImage!,
             width: size ?? icon.size ?? kDefaultIconSize,
             height: size ?? icon.size ?? kDefaultIconSize,
+            errorBuilder: (context, error, stackTrace) => SizedBox.square(
+              dimension: size ?? icon.size ?? kDefaultIconSize,
+            ),
           );
         }
         return SizedBox.square(
@@ -314,8 +391,7 @@ Widget retrieveNavBarItemIconWidget(
   MultiSourceIconModel icon, [
   double? size,
   Color? themeColor,
-]) =>
-    retrieveIconWidget(icon, size, themeColor) ?? const SizedBox.shrink();
+]) => retrieveIconWidget(icon, size, themeColor) ?? const SizedBox.shrink();
 
 String buildYoutubeEmbedUrl({
   required EmbeddedYoutubeVideoProperties properties,
@@ -403,14 +479,15 @@ String getVideoUrl(EmbeddedVideoSource source, String baseUrl) {
   }
 }
 
-OutlinedBorder? getShapeFromMixin(ShapeBorderMixin mixin,
-        {bool onlyShape = false}) =>
-    getShape(
-      shape: mixin.shape,
-      radius: mixin.cornerRadius,
-      borderColor: onlyShape ? null : mixin.borderColor,
-      borderWidth: onlyShape ? null : mixin.borderWidth,
-    );
+OutlinedBorder? getShapeFromMixin(
+  ShapeBorderMixin mixin, {
+  bool onlyShape = false,
+}) => getShape(
+  shape: mixin.shape,
+  radius: mixin.cornerRadius,
+  borderColor: onlyShape ? null : mixin.borderColor,
+  borderWidth: onlyShape ? null : mixin.borderWidth,
+);
 
 OutlinedBorder getShape({
   required CShapeBorder shape,
@@ -420,11 +497,8 @@ OutlinedBorder getShape({
 }) {
   final BorderSide side =
       borderColor != null && borderWidth != null && borderWidth > 0
-          ? BorderSide(
-              color: borderColor.toFlutterColor(),
-              width: borderWidth,
-            )
-          : BorderSide.none;
+      ? BorderSide(color: borderColor.toFlutterColor(), width: borderWidth)
+      : BorderSide.none;
 
   switch (shape) {
     case CShapeBorder.rectangle:
@@ -448,6 +522,11 @@ OutlinedBorder getShape({
         borderRadius: radius.borderRadius,
         side: side,
       );
+    case CShapeBorder.roundedSuperellipse:
+      return RoundedSuperellipseBorder(
+        borderRadius: radius.borderRadius,
+        side: side,
+      );
   }
 }
 
@@ -468,8 +547,12 @@ OutlinedBorder getShape({
 /// This method must be called before calling [convertAlignmentToPosition]
 /// and [convertPositionToAlignment] to get the correct childWidth and
 /// childHeight for these methods.
-SizeC getEffectiveChildSizeForImage(BaseNode node, PaintModel paint,
-    {double? scaleX, double? scaleY}) {
+SizeC getEffectiveChildSizeForImage(
+  BaseNode node,
+  PaintModel paint, {
+  double? scaleX,
+  double? scaleY,
+}) {
   final double modifiedScaleX = (scaleX ?? paint.scaleX).abs();
   final double modifiedScaleY = (scaleY ?? paint.scaleY).abs();
 
@@ -538,7 +621,8 @@ bool isCustomPositionRequiredForImage(PaintModel paint, SizeC nodeSize) {
   if (paint.sourceWidth == null || paint.sourceHeight == null) return false;
   if (paint.isNonUniformScale) return true;
   if (paint.fit == Fit.fitWidth || paint.fit == Fit.fitHeight) {
-    final diff = (paint.sourceWidth! / paint.sourceHeight!) -
+    final diff =
+        (paint.sourceWidth! / paint.sourceHeight!) -
         (nodeSize.width / nodeSize.height);
     if (diff.closeTo(0)) return true;
   }
@@ -560,13 +644,13 @@ Widget wrapWithPaddedScrollable({
     width: (node.horizontalFit == SizeFit.shrinkWrap)
         ? null
         : (node.horizontalFit == SizeFit.expanded)
-            ? double.infinity
-            : node.basicBoxLocal.width,
+        ? double.infinity
+        : node.basicBoxLocal.width,
     height: (node.verticalFit == SizeFit.shrinkWrap)
         ? null
         : (node.verticalFit == SizeFit.expanded)
-            ? double.infinity
-            : node.basicBoxLocal.height,
+        ? double.infinity
+        : node.basicBoxLocal.height,
     child: SingleChildScrollView(
       scrollDirection: node.scrollDirection.flutterAxis,
       reverse: node.reverse,
@@ -583,5 +667,6 @@ Widget wrapWithPaddedScrollable({
 
 bool get isPlatformSupportedForWebView =>
     kIsWeb ||
-    PassiveEmbeddedVideoWidget.supportedPlatforms
-        .contains(defaultTargetPlatform);
+    PassiveEmbeddedVideoWidget.supportedPlatforms.contains(
+      defaultTargetPlatform,
+    );

@@ -25,8 +25,11 @@ class PassiveNavigationBarTransformer
   void onChanged(NavigationBarNode node, BuildContext context, int index) {
     NodeStateProvider.setState(context, index);
     final item = node.properties.items[index];
-    FunctionsRepository.triggerAction(context, TriggerType.changed,
-        reactions: item.reactions);
+    FunctionsRepository.triggerAction(
+      context,
+      TriggerType.changed,
+      reactions: item.reactions,
+    );
   }
 
   Widget buildFromProps(
@@ -34,8 +37,9 @@ class PassiveNavigationBarTransformer
     double width = 250,
     double height = kBottomNavigationBarHeight,
     required NavigationBarProperties props,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildFromProps'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildFromProps',
+    ),
   }) {
     final node = NavigationBarNode(
       id: '',
@@ -57,17 +61,26 @@ class PassiveNavigationBarTransformer
     double? width,
     int currentIndex = 0,
     ValueChanged<int>? onChanged,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+    ),
   }) {
     final previewNode = NavigationBarNode(
       properties: properties ?? node!.properties,
       id: '',
       name: 'NavigationBar',
-      basicBoxLocal:
-          NodeBox(0, 0, width ?? 300, height ?? kBottomNavigationBarHeight),
-      retainedOuterBoxLocal:
-          NodeBox(0, 0, width ?? 300, height ?? kBottomNavigationBarHeight),
+      basicBoxLocal: NodeBox(
+        0,
+        0,
+        width ?? 300,
+        height ?? kBottomNavigationBarHeight,
+      ),
+      retainedOuterBoxLocal: NodeBox(
+        0,
+        0,
+        width ?? 300,
+        height ?? kBottomNavigationBarHeight,
+      ),
       currentIndex: currentIndex,
       verticalFit: SizeFit.shrinkWrap,
     );
@@ -109,7 +122,8 @@ class _PassiveNavigationBarWidgetState
 
   @override
   void initState() {
-    currentIndex = context.getNodeValue(widget.node.id, 'currentIndex') ??
+    currentIndex =
+        context.getNodeValue(widget.node.id, 'currentIndex') ??
         widget.node.currentIndex;
     super.initState();
   }
@@ -152,10 +166,7 @@ class _PassiveNavigationBarWidgetState
         child: navBar,
       );
     }
-    navBar = AdaptiveNodeBox(
-      node: widget.node,
-      child: navBar,
-    );
+    navBar = AdaptiveNodeBox(node: widget.node, child: navBar);
 
     // BottomAppBars have a hard requirement for a scaffold, and scaffolds
     // have a hard requirement for a size.
@@ -200,16 +211,18 @@ class _PassiveNavigationBarWidgetState
         labelTextStyle: WidgetStateProperty.resolveWith<TextStyle?>((states) {
           if (states.contains(WidgetState.selected)) {
             return TextUtils.retrieveTextStyleFromProp(
-                style.selectedLabelStyle);
+              style.selectedLabelStyle,
+            );
           }
           return TextUtils.retrieveTextStyleFromProp(
-              style.unselectedLabelStyle);
+            style.unselectedLabelStyle,
+          );
         }),
       ),
       child: MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          padding: widget.applyBottomPadding ? null : EdgeInsets.zero,
-        ),
+        data: MediaQuery.of(
+          context,
+        ).copyWith(padding: widget.applyBottomPadding ? null : EdgeInsets.zero),
         child: NavigationBar(
           selectedIndex: currentIndex,
           onDestinationSelected: onChanged,
@@ -218,7 +231,7 @@ class _PassiveNavigationBarWidgetState
           height: node.basicBoxLocal.height,
           labelBehavior: style.labelBehavior.flutterLabelBehavior,
           destinations: [
-            for (final itemModel in style.items) getM3Item(itemModel, style)
+            for (final itemModel in style.items) getM3Item(itemModel, style),
           ],
         ),
       ),
@@ -233,10 +246,13 @@ class _PassiveNavigationBarWidgetState
     final M2NavigationBarProperties style =
         node.properties as M2NavigationBarProperties;
 
-    final Color? selectedLabelColor =
-        style.selectedLabelStyle.fills.firstOrNull?.toFlutterColor();
-    final Color? unselectedLabelColor =
-        style.unselectedLabelStyle.fills.firstOrNull?.toFlutterColor();
+    final Color? selectedLabelColor = style.selectedLabelStyle.fills.firstOrNull
+        ?.toFlutterColor();
+    final Color? unselectedLabelColor = style
+        .unselectedLabelStyle
+        .fills
+        .firstOrNull
+        ?.toFlutterColor();
 
     final IconThemeData selectedIconTheme = IconThemeData(
       color: style.selectedIconColor?.toFlutterColor(),
@@ -249,9 +265,11 @@ class _PassiveNavigationBarWidgetState
     );
 
     final TextStyle selectedLabelStyle = TextUtils.retrieveTextStyleFromProp(
-        style.selectedLabelStyle.copyWith(fills: []));
+      style.selectedLabelStyle.copyWith(fills: []),
+    );
     final unselectedLabelStyle = TextUtils.retrieveTextStyleFromProp(
-        style.unselectedLabelStyle.copyWith(fills: []));
+      style.unselectedLabelStyle.copyWith(fills: []),
+    );
 
     final double elevation = style.makeNotched ? 0 : style.elevation;
 
@@ -276,9 +294,9 @@ class _PassiveNavigationBarWidgetState
     ///
     ///  We don't want that. We disable it here.
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        padding: widget.applyBottomPadding ? null : EdgeInsets.zero,
-      ),
+      data: MediaQuery.of(
+        context,
+      ).copyWith(padding: widget.applyBottomPadding ? null : EdgeInsets.zero),
       child: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: onChanged,
@@ -296,7 +314,7 @@ class _PassiveNavigationBarWidgetState
         showUnselectedLabels: style.labelBehavior.showForUnselected(),
         iconSize: style.unselectedIconSize,
         items: [
-          for (final itemModel in style.items) getM2Item(itemModel, style)
+          for (final itemModel in style.items) getM2Item(itemModel, style),
         ],
       ),
     );
@@ -314,12 +332,12 @@ class _PassiveNavigationBarWidgetState
 
     final Widget? selectedIconDj =
         itemModel.differSelectedIcon && itemModel.selectedIcon != null
-            ? retrieveNavBarItemIconWidget(
-                itemModel.selectedIcon!,
-                null,
-                // style.selectedIconSize,
-              )
-            : null;
+        ? retrieveNavBarItemIconWidget(
+            itemModel.selectedIcon!,
+            null,
+            // style.selectedIconSize,
+          )
+        : null;
     return BottomNavigationBarItem(
       icon: unselectedIconDj,
       activeIcon: selectedIconDj,
@@ -328,9 +346,11 @@ class _PassiveNavigationBarWidgetState
       // bottom navigation bar when it is shifting type and color per item
       // is not provided.
       // Detailed explanation: https://codelessly.slack.com/archives/C018XK7431R/p1659077643469429
-      backgroundColor: itemModel.backgroundColor?.toFlutterColor() ??
+      backgroundColor:
+          itemModel.backgroundColor?.toFlutterColor() ??
           style.backgroundColor?.toFlutterColor().orNullIf(
-              style.navigationBarType != M2NavigationBarType.shifting),
+            style.navigationBarType != M2NavigationBarType.shifting,
+          ),
       label: itemModel.label,
       tooltip: itemModel.tooltip.orNullIf(itemModel.label == itemModel.tooltip),
     );
@@ -348,12 +368,12 @@ class _PassiveNavigationBarWidgetState
 
     final Widget? selectedIconDj =
         itemModel.differSelectedIcon && itemModel.selectedIcon != null
-            ? retrieveNavBarItemIconWidget(
-                itemModel.selectedIcon!,
-                null,
-                // style.selectedIconSize,
-              )
-            : null;
+        ? retrieveNavBarItemIconWidget(
+            itemModel.selectedIcon!,
+            null,
+            // style.selectedIconSize,
+          )
+        : null;
     return NavigationDestination(
       icon: unselectedIcon,
       selectedIcon: selectedIconDj,

@@ -8866,5 +8866,5 @@ const Map<String, String> flutterIconNames = {
   "zoom_out_rounded": "zoom_out_rounded",
   "zoom_in_rounded": "zoom_in_rounded",
   "zoom_out_sharp": "zoom_out_sharp",
-  "zoom_in_sharp": "zoom_in_sharp"
+  "zoom_in_sharp": "zoom_in_sharp",
 };

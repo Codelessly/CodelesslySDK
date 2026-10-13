@@ -10,16 +10,15 @@ class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
     final BaseNode parentNode = getNode(node.parentID);
 
     if (parentNode is! RowColumnMixin) {
-      return AdaptiveNodeBox(
-        node: node,
-      );
+      return AdaptiveNodeBox(node: node);
     }
 
     final AxisC mainAxis = parentNode.mainAxis;
     final SizeFit horizontalFit = node.horizontalFit;
     final SizeFit verticalFit = node.verticalFit;
-    final SizeFit mainFit =
-        (mainAxis == AxisC.horizontal ? horizontalFit : verticalFit);
+    final SizeFit mainFit = (mainAxis == AxisC.horizontal
+        ? horizontalFit
+        : verticalFit);
 
     final Widget spacerWidget;
     if (mainFit.isFlex) {

@@ -59,8 +59,9 @@ class ButtonDefaults {
   static const Color shadowColor = Color(0xFFA5A5A5);
   static const String label = 'Button';
   static const double elevation = 0;
-  static const CornerRadius cornerRadius =
-      CornerRadius.all(RadiusModel.circular(4));
+  static const CornerRadius cornerRadius = CornerRadius.all(
+    RadiusModel.circular(4),
+  );
   static const bool enabled = true;
   static const TextAlignHorizontalEnum labelAlignment =
       TextAlignHorizontalEnum.center;
@@ -95,10 +96,8 @@ class TextFieldDefaults {
   static const int maxLines = 1;
   static const String obscuringCharacter = '•';
 
-  static TextProp get style => TextProp.general(
-        fontSize: 14,
-        fills: [PaintModel.blackPaint],
-      );
+  static TextProp get style =>
+      TextProp.general(fontSize: 14, fills: [PaintModel.blackPaint]);
 
   static InputDecorationModel get decoration => InputDecorationModel();
   static const Color fillColor = Color(0xffeeeeee);
@@ -116,8 +115,9 @@ class CheckBoxDefaults {
   static const bool autofocus = false;
   static const bool tristate = false;
   static const double borderWidth = 1.5;
-  static const CornerRadius cornerRadius =
-      CornerRadius.all(RadiusModel.circular(3));
+  static const CornerRadius cornerRadius = CornerRadius.all(
+    RadiusModel.circular(3),
+  );
 
   CheckBoxDefaults._();
 }
@@ -150,8 +150,9 @@ class RadioDefaults {
 class AppBarDefaults {
   static const bool centerTitle = false;
   static const double elevation = 0;
-  static const MultiSourceIconModel leading =
-      MultiSourceIconModel.icon(color: null);
+  static const MultiSourceIconModel leading = MultiSourceIconModel.icon(
+    color: null,
+  );
   static const bool automaticallyImplyLeading = false;
 
   static TextProp get titleStyle => TextProp.general(fontSize: 18);
@@ -191,13 +192,13 @@ class M3NavigationBarDefaults {
   static const double elevation = 0;
 
   static TextProp get selectedLabelStyle => TextProp(
-        fontSize: 13,
-        fontName: const FontName(
-          family: 'Roboto',
-          style: 'Normal',
-          weight: FontWeightNumeric.w600,
-        ),
-      );
+    fontSize: 13,
+    fontName: const FontName(
+      family: 'Roboto',
+      style: 'Normal',
+      weight: FontWeightNumeric.w600,
+    ),
+  );
 
   static TextProp get unselectedLabelStyle => TextProp(fontSize: 13);
   static const Color unselectedIconColor = Colors.black;
@@ -271,8 +272,10 @@ class FloatingActionButtonDefaults {
   static const double highlightElevation = 12;
   static const double hoverElevation = 8;
   static const FloatingActionButtonType type = FloatingActionButtonType.regular;
-  static const MultiSourceIconModel icon =
-      MultiSourceIconModel.icon(size: 24, color: null);
+  static const MultiSourceIconModel icon = MultiSourceIconModel.icon(
+    size: 24,
+    color: null,
+  );
   static const String label = 'Button';
 
   static TextProp get labelStyle =>
@@ -306,8 +309,9 @@ class ProgressBarDefaults {
   static const double maxValue = 100;
   static const bool animate = true;
   static const int animationDurationInMillis = 300;
-  static const CornerRadius cornerRadius =
-      CornerRadius.all(RadiusModel.circular(8));
+  static const CornerRadius cornerRadius = CornerRadius.all(
+    RadiusModel.circular(8),
+  );
 }
 
 class TabBarDefaults {
@@ -326,7 +330,9 @@ class TabBarDefaults {
   static const EdgeInsetsModel indicatorPadding = EdgeInsetsModel.zero;
   static const AxisC tabItemDirection = AxisC.horizontal;
   static const double gap = 10;
-  static const EdgeInsetsModel labelPadding =
-      EdgeInsetsModel.symmetric(horizontal: 16, vertical: 12);
+  static const EdgeInsetsModel labelPadding = EdgeInsetsModel.symmetric(
+    horizontal: 16,
+    vertical: 12,
+  );
   static const Color dividerColor = Colors.grey;
 }

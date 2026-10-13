@@ -31,11 +31,7 @@ class BlendMask extends SingleChildRenderObjectWidget {
   /// Creates a widget that blends its child using the given [blendMode].
   ///
   /// The [blendMode] argument must not be null.
-  const BlendMask({
-    this.blendMode = BlendMode.srcOver,
-    super.key,
-    super.child,
-  });
+  const BlendMask({this.blendMode = BlendMode.srcOver, super.key, super.child});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -79,10 +75,10 @@ class RenderBlendMask extends RenderProxyBox {
   ///
   /// The [blendMode] must not be null.
   RenderBlendMask(BlendMode blendMode)
-      : _blendMode = blendMode,
-        blender = Paint()
-          ..blendMode = blendMode
-          ..color = Colors.white;
+    : _blendMode = blendMode,
+      blender = Paint()
+        ..blendMode = blendMode
+        ..color = Colors.white;
 
   @override
   void paint(PaintingContext context, Offset offset) {

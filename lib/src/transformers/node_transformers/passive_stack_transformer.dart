@@ -17,15 +17,18 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     required AlignmentModel commonAlignment,
     required WidgetBuildSettings settings,
   }) {
-    assert(childWidget != null || manager != null,
-        'Either childWidget or manager must be provided.');
+    assert(
+      childWidget != null || manager != null,
+      'Either childWidget or manager must be provided.',
+    );
 
-    Widget child = childWidget ??
+    Widget child =
+        childWidget ??
         manager!.buildWidgetFromNode(node, context, settings: settings);
 
     final bool potentiallyPositionable =
         node.alignment == AlignmentModel.none ||
-            (parent.isOneOrBothWrap && node.alignment != commonAlignment);
+        (parent.isOneOrBothWrap && node.alignment != commonAlignment);
 
     if (potentiallyPositionable) {
       // You cannot use the Align widget when inside a shrink-wrapping Stack.
@@ -46,14 +49,14 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
               : null,
           right: align.x >= 0
               ? (parent.innerBoxLocal.width - node.outerBoxLocal.right) +
-                  parent.innerBoxLocal.edgeRight
+                    parent.innerBoxLocal.edgeRight
               : null,
           top: align.y <= 0
               ? node.outerBoxLocal.top - parent.innerBoxLocal.edgeTop
               : null,
           bottom: align.y >= 0
               ? (parent.innerBoxLocal.height - node.outerBoxLocal.bottom) +
-                  parent.innerBoxLocal.edgeBottom
+                    parent.innerBoxLocal.edgeBottom
               : null,
           child: child,
         );
@@ -100,29 +103,31 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     final double? left = horizontallyExpands
         ? 0
         : node.edgePins.left != null
-            ? node.outerBoxLocal.x - parent.innerBoxGlobal.edgeLeft
-            : null;
+        ? node.outerBoxLocal.x - parent.innerBoxGlobal.edgeLeft
+        : null;
     final double? right = horizontallyExpands
         ? 0
         : node.edgePins.right != null
-            ? node.edgePins.right! - parent.innerBoxGlobal.edgeRight
-            : null;
+        ? node.edgePins.right! - parent.innerBoxGlobal.edgeRight
+        : null;
     final double? top = verticallyExpands
         ? 0
         : node.edgePins.top != null
-            ? node.outerBoxLocal.y - parent.innerBoxGlobal.edgeTop
-            : null;
+        ? node.outerBoxLocal.y - parent.innerBoxGlobal.edgeTop
+        : null;
     final double? bottom = verticallyExpands
         ? 0
         : node.edgePins.bottom != null
-            ? node.edgePins.bottom! - parent.innerBoxGlobal.edgeBottom
-            : null;
-    final double? width = horizontallyExpands ||
+        ? node.edgePins.bottom! - parent.innerBoxGlobal.edgeBottom
+        : null;
+    final double? width =
+        horizontallyExpands ||
             node.isHorizontalWrap ||
             node.edgePins.isHorizontallyExpanded
         ? null
         : node.outerBoxLocal.width;
-    final double? height = verticallyExpands ||
+    final double? height =
+        verticallyExpands ||
             node.isVerticalWrap ||
             node.edgePins.isVerticallyExpanded
         ? null
@@ -182,8 +187,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     BaseNode node,
     BuildContext context,
     WidgetBuildSettings settings,
-  ) =>
-      buildWidgetForChildren(node, context, settings: settings);
+  ) => buildWidgetForChildren(node, context, settings: settings);
 
   Widget buildWidgetForChildren(
     BaseNode node,
@@ -205,10 +209,13 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         for (final String childId in node.children) getNode(childId),
     ];
 
-    final AlignmentModel commonAlignment =
-        retrieveCommonStackAlignment(node, children);
-    final Set<BaseNode> potentiallyPositionableChildren =
-        children.where((child) {
+    final AlignmentModel commonAlignment = retrieveCommonStackAlignment(
+      node,
+      children,
+    );
+    final Set<BaseNode> potentiallyPositionableChildren = children.where((
+      child,
+    ) {
       return child.alignment == AlignmentModel.none ||
           (node.isOneOrBothWrap && child.alignment != commonAlignment);
     }).toSet();
@@ -236,13 +243,14 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       childrenWidgets.add(child);
     }
 
-    Widget stack =
-        manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
-              node,
-              stackAlignment: commonAlignment,
-              children: childrenWidgets,
-              settings: settings,
-            );
+    Widget stack = manager
+        .getTransformer<PassiveRectangleTransformer>()
+        .buildRectangle(
+          node,
+          stackAlignment: commonAlignment,
+          children: childrenWidgets,
+          settings: settings,
+        );
 
     // // This makes sure that children stay positioned correctly even if the stack
     // // is shrink wrapping. It makes it so the stack sizes itself to its tallest

@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../../logging/debug_logger.dart';
 
 class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   static const String name = 'PassiveCanvasWidget';
@@ -25,16 +24,16 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     WidgetBuildSettings settings,
   ) {
     if (node.properties.topAppBarPlaceholderId == null) return null;
-    SinglePlaceholderNode appBarPlaceholderNode =
-        getNode(node.properties.topAppBarPlaceholderId!)
-            as SinglePlaceholderNode;
+    SinglePlaceholderNode appBarPlaceholderNode = getNode(
+      node.properties.topAppBarPlaceholderId!,
+    ) as SinglePlaceholderNode;
     final childId = appBarPlaceholderNode.childrenOrEmpty.firstOrNull;
     if (childId == null) return null;
 
     final BaseNode appBarNode = getNode(childId);
 
-    final NodeWidgetTransformer<BaseNode> transformer =
-        manager.getTransformerByNode(appBarNode);
+    final NodeWidgetTransformer<BaseNode> transformer = manager
+        .getTransformerByNode(appBarNode);
 
     if (transformer is PassiveAppBarTransformer) {
       final Widget appBarChild = manager.buildWidgetFromNode(
@@ -57,14 +56,13 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       final Widget appBarChild = manager.buildWidgetFromNode(
         appBarNode,
         context,
-        settings: settings.copyWith(
-          brightness: node.properties.brightness,
-        ),
+        settings: settings.copyWith(brightness: node.properties.brightness),
       );
 
       return PreferredSize(
-        preferredSize:
-            Size.fromHeight(appBarPlaceholderNode.outerBoxLocal.height),
+        preferredSize: Size.fromHeight(
+          appBarPlaceholderNode.outerBoxLocal.height,
+        ),
         child: SafeArea(child: appBarChild),
       );
     }
@@ -76,14 +74,15 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     WidgetBuildSettings settings,
   ) {
     if (node.properties.navigationBarPlaceholderId == null) return null;
-    SinglePlaceholderNode navigationBarPlaceholderNode =
-        getNode(node.properties.navigationBarPlaceholderId!)
-            as SinglePlaceholderNode;
+    SinglePlaceholderNode navigationBarPlaceholderNode = getNode(
+      node.properties.navigationBarPlaceholderId!,
+    ) as SinglePlaceholderNode;
 
     if (navigationBarPlaceholderNode.childrenOrEmpty.isEmpty) return null;
 
-    final navigationBarNode =
-        getNode(navigationBarPlaceholderNode.childrenOrEmpty.first);
+    final navigationBarNode = getNode(
+      navigationBarPlaceholderNode.childrenOrEmpty.first,
+    );
 
     Widget navBar = manager.buildWidgetByID(
       node.properties.navigationBarPlaceholderId!,
@@ -152,7 +151,8 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       );
     }
 
-    final bool needsAScaffold = appBar != null ||
+    final bool needsAScaffold =
+        appBar != null ||
         floatingActionButton != null ||
         bottomNavigationBar != null;
 
@@ -182,10 +182,10 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     }
 
     return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
-          node,
-          children: [scaffold],
-          settings: settings,
-        );
+      node,
+      children: [scaffold],
+      settings: settings,
+    );
   }
 
   Widget _wrapInScaffoldForAutoScale({
@@ -221,8 +221,9 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
           Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints:
-                  BoxConstraints(maxWidth: node.resolvedConstraints.maxWidth!),
+              constraints: BoxConstraints(
+                maxWidth: node.resolvedConstraints.maxWidth!,
+              ),
               child: body,
             ),
           ),
@@ -242,7 +243,8 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       );
     }
 
-    final bool needsAScaffold = appBar != null ||
+    final bool needsAScaffold =
+        appBar != null ||
         floatingActionButton != null ||
         bottomNavigationBar != null;
 
@@ -294,18 +296,19 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     }
 
     return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
-          node,
-          children: [scaffold],
-          settings: settings,
-        );
+      node,
+      children: [scaffold],
+      settings: settings,
+    );
   }
 
   void onFaBPressed(BuildContext context, CanvasNode node) {
     FunctionsRepository.triggerAction(
-        context,
-        node: node,
-        TriggerType.click,
-        reactions: node.properties.floatingActionButton?.reactions);
+      context,
+      node: node,
+      TriggerType.click,
+      reactions: node.properties.floatingActionButton?.reactions,
+    );
   }
 
   /// This would not work if the canvas is expected to have 2 different forms.
@@ -335,15 +338,15 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       settings: settings,
       builder: (context) => switch (node.scaleMode) {
         ScaleMode.responsive => _wrapInScaffoldForResponsive(
-            context: context,
-            node: node,
-            settings: settings,
-          ),
+          context: context,
+          node: node,
+          settings: settings,
+        ),
         ScaleMode.autoScale => _wrapInScaffoldForAutoScale(
-            context: context,
-            node: node,
-            settings: settings,
-          )
+          context: context,
+          node: node,
+          settings: settings,
+        ),
       },
     );
   }
@@ -356,7 +359,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
               'fill-${fill.id}',
               scopedValues: ScopedValues.of(context),
             ) ??
-            fill
+            fill,
     ];
     if (fills.length == 1 &&
         fills[0].type == PaintType.solid &&
@@ -405,8 +408,11 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       // Listen for navigation events to update the system UI brightness back
       // again, such as if this canvas was navigated away from, but then the view
       // pops and goes back to this canvas.
-      codelessly?.addNavigationListener('canvas-${widget.node.id}',
-          (event, layoutId, canvasId) {
+      codelessly?.addNavigationListener('canvas-${widget.node.id}', (
+        event,
+        layoutId,
+        canvasId,
+      ) {
         if (canvasId == widget.node.id) {
           updateSystemBrightness(context);
         }
@@ -446,13 +452,15 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   List<ActionModel> collectOnLoadActions() => widget.node.reactions
       .whereTriggerType(TriggerType.load)
       .map((e) => e.action)
-      .where((action) =>
-          action.enabled &&
-          // Because calling api is handled in LayoutBuilder.
-          action.type != ActionType.callApi &&
-          action.type != ActionType.navigation &&
-          action.type != ActionType.submit &&
-          action.type != ActionType.link)
+      .where(
+        (action) =>
+            action.enabled &&
+            // Because calling api is handled in LayoutBuilder.
+            action.type != ActionType.callApi &&
+            action.type != ActionType.navigation &&
+            action.type != ActionType.submit &&
+            action.type != ActionType.link,
+      )
       .toList();
 
   void triggerOnLoadActions(BuildContext context) {
@@ -489,12 +497,13 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final Brightness brightness =
-        widget.node.properties.brightness.toFlutterBrightness(context);
+    final Brightness brightness = widget.node.properties.brightness
+        .toFlutterBrightness(context);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
-        statusBarColor:
-            brightness == Brightness.light ? Colors.black : Colors.white,
+        statusBarColor: brightness == Brightness.light
+            ? Colors.black
+            : Colors.white,
         statusBarIconBrightness: brightness,
         statusBarBrightness: brightness,
       ),

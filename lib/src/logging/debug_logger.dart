@@ -74,8 +74,12 @@ class DebugLogger {
   ///
   /// Filters messages based on the configuration settings such as enabled and
   /// disabled categories, and highlights.
-  void log(Object? message,
-      {String? category, String? name, Level level = Level.INFO}) {
+  void log(
+    Object? message, {
+    String? category,
+    String? name,
+    Level level = Level.INFO,
+  }) {
     try {
       // Check if debug logging is enabled
       if (!config.debugLog) {
@@ -121,8 +125,12 @@ class DebugLogger {
   }
 
   /// Prints a log message to the console using the [Logger] library.
-  void _log(Object? message,
-      {String? category, String? name, Level level = Level.INFO}) {
+  void _log(
+    Object? message, {
+    String? category,
+    String? name,
+    Level level = Level.INFO,
+  }) {
     StringBuffer logMessage = StringBuffer();
     if (name?.isNotEmpty ?? false) {
       logMessage.write('[$name] ');
@@ -149,8 +157,12 @@ class DebugLogger {
   /// }
   /// ```
   void printRebuild(String name) {
-    log('Rebuild',
-        category: DebugCategory.rebuild, name: name, level: Level.FINEST);
+    log(
+      'Rebuild',
+      category: DebugCategory.rebuild,
+      name: name,
+      level: Level.FINEST,
+    );
   }
 
   /// [Level.FINEST] Specialized logging function used for tracing user actions within an application.
@@ -168,8 +180,12 @@ class DebugLogger {
   /// )
   /// ```
   void printAction(Object? message, {String? name}) {
-    log(message,
-        category: DebugCategory.action, name: name, level: Level.FINEST);
+    log(
+      message,
+      category: DebugCategory.action,
+      name: name,
+      level: Level.FINEST,
+    );
   }
 
   /// [Level.FINEST] Logs detailed information about function executions, including function name and passed parameters.
@@ -191,8 +207,12 @@ class DebugLogger {
   /// }
   /// ```
   void printFunction(Object? message, {required String name}) {
-    log(message,
-        category: DebugCategory.function, name: name, level: Level.FINEST);
+    log(
+      message,
+      category: DebugCategory.function,
+      name: name,
+      level: Level.FINEST,
+    );
   }
 
   /// [Level.INFO] Default log method.
@@ -262,19 +282,23 @@ class DebugLoggerConfig {
   bool isHighlighted({String? category, String? name}) {
     if (highlights.isEmpty) return false;
 
-    return highlights.any((String highlight) => highlight.contains('-')
-        ? (highlight ==
-            <String?>[category, name]
-                .where((String? item) => item != null)
-                .join('-'))
-        : (highlight == category || highlight == name));
+    return highlights.any(
+      (String highlight) => highlight.contains('-')
+          ? (highlight ==
+                <String?>[
+                  category,
+                  name,
+                ].where((String? item) => item != null).join('-'))
+          : (highlight == category || highlight == name),
+    );
   }
 
   /// Sets a highlight for a specific category and name.
   DebugLoggerConfig setHighlight({String? category, String? name}) {
-    String highlight = <String?>[category, name]
-        .where((String? item) => item != null)
-        .join('-');
+    String highlight = <String?>[
+      category,
+      name,
+    ].where((String? item) => item != null).join('-');
     if (highlight.isNotEmpty) {
       highlights.add(highlight);
     }

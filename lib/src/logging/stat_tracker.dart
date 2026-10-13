@@ -60,36 +60,30 @@ class StatTracker {
   }
 
   /// Sends the batch of stats to the server with retry logic.
-  Future<void> sendBatch() => debouncer.run(
-        () async {
-          int maxRetries = 3;
-          int baseDelaySeconds = 2;
+  Future<void> sendBatch() => debouncer.run(() async {
+    int maxRetries = 3;
+    int baseDelaySeconds = 2;
 
-          for (int attempt = 0; attempt < maxRetries; attempt++) {
-            try {
-              final response = await client.post(
-                serverUrl!,
-                headers: <String, String>{'Content-Type': 'application/json'},
-                body: jsonEncode({
-                  'projectId': projectId,
-                  'stats': statBatch,
-                }),
-              );
+    for (int attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        final response = await client.post(
+          serverUrl!,
+          headers: <String, String>{'Content-Type': 'application/json'},
+          body: jsonEncode({'projectId': projectId, 'stats': statBatch}),
+        );
 
-              if (response.statusCode == 200) {
-                statBatch.clear();
-                return; // Exit the function if successful
-              }
-            } catch (e) {
-              // Handle exception silently
-            }
-            await Future.delayed(Duration(
-                seconds:
-                    baseDelaySeconds * (1 << attempt))); // Exponential backoff
-          }
-        },
-        forceRunAfter: 20,
-      );
+        if (response.statusCode == 200) {
+          statBatch.clear();
+          return; // Exit the function if successful
+        }
+      } catch (e) {
+        // Handle exception silently
+      }
+      await Future.delayed(
+        Duration(seconds: baseDelaySeconds * (1 << attempt)),
+      ); // Exponential backoff
+    }
+  }, forceRunAfter: 20);
 
   /// Tracks a stat with optional sublabel and count
   ///

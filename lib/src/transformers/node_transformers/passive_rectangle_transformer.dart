@@ -19,16 +19,15 @@ class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
     final List<Widget> children = [];
 
     for (String childID in node.childrenOrEmpty) {
-      final Widget builtWidget =
-          manager.buildWidgetByID(childID, context, settings: settings);
+      final Widget builtWidget = manager.buildWidgetByID(
+        childID,
+        context,
+        settings: settings,
+      );
 
       children.add(builtWidget);
     }
-    return buildRectangle(
-      node,
-      settings: settings,
-      children: children,
-    );
+    return buildRectangle(node, settings: settings, children: children);
   }
 
   Widget buildRectangle(
@@ -81,27 +80,25 @@ class PassiveRectangleWidget extends StatelessWidget {
 
     /// TODO Birju / Saad. Why does the commented out parent code below break published layouts only?
     /// Saad's note: The below code looks like AdaptiveNodeBox
-    final double? width = (node.horizontalFit == SizeFit.shrinkWrap ||
-            isPlaceholder)
+    final double? width =
+        (node.horizontalFit == SizeFit.shrinkWrap || isPlaceholder)
         ? null
         : (node.horizontalFit ==
-                SizeFit
-                    .expanded /* &&
-                (parent is! CanvasNode || parent.properties.bodyId != node.id)*/
-            )
-            ? double.infinity
-            : node.basicBoxLocal.width;
+              SizeFit
+                  .expanded /* &&
+                (parent is! CanvasNode || parent.properties.bodyId != node.id)*/ )
+        ? double.infinity
+        : node.basicBoxLocal.width;
 
-    final double? height = (node.verticalFit == SizeFit.shrinkWrap ||
-            isPlaceholder)
+    final double? height =
+        (node.verticalFit == SizeFit.shrinkWrap || isPlaceholder)
         ? null
         : (node.verticalFit ==
-                SizeFit
-                    .expanded /*&&
-                (parent is! CanvasNode || parent.properties.bodyId != node.id)*/
-            )
-            ? double.infinity
-            : node.basicBoxLocal.height;
+              SizeFit
+                  .expanded /*&&
+                (parent is! CanvasNode || parent.properties.bodyId != node.id)*/ )
+        ? double.infinity
+        : node.basicBoxLocal.height;
 
     Widget? portalWidget;
     if (node case PortalMixin portal) {
@@ -143,10 +140,7 @@ class PassiveRectangleWidget extends StatelessWidget {
           node,
           wrapWithPaddingAndScroll(
             node,
-            [
-              ...children,
-              if (portalWidget != null) portalWidget,
-            ],
+            [...children, ?portalWidget],
             stackAlignment: stackAlignment,
             applyPadding: applyPadding,
           ),
@@ -154,10 +148,11 @@ class PassiveRectangleWidget extends StatelessWidget {
       ],
     );
 
-    bool hasComplexRendering = node is GeometryMixin &&
+    bool hasComplexRendering =
+        node is GeometryMixin &&
         (node as GeometryMixin).fills.any(
-              (PaintModel fill) => fill.blendMode != BlendModeC.srcOver,
-            );
+          (PaintModel fill) => fill.blendMode != BlendModeC.srcOver,
+        );
 
     if (hasComplexRendering) {
       child = BlendMask(child: child);
@@ -190,13 +185,11 @@ List<Widget> wrapWithInkWell(
 
   if (inkWell == null) return children;
 
-  final List<Reaction> onClickReactions = (node as ReactionMixin)
-      .reactions
+  final List<Reaction> onClickReactions = (node as ReactionMixin).reactions
       .where((reaction) => reaction.trigger.type == TriggerType.click)
       .toList();
 
-  final List<Reaction> onLongPressReactions = (node as ReactionMixin)
-      .reactions
+  final List<Reaction> onLongPressReactions = (node as ReactionMixin).reactions
       .where((reaction) => reaction.trigger.type == TriggerType.longPress)
       .toList();
 
@@ -206,17 +199,17 @@ List<Widget> wrapWithInkWell(
       onTap: onClickReactions.isEmpty
           ? null
           : () => FunctionsRepository.triggerAction(
-                context,
-                TriggerType.click,
-                reactions: onClickReactions,
-              ),
+              context,
+              TriggerType.click,
+              reactions: onClickReactions,
+            ),
       onLongPress: onLongPressReactions.isEmpty
           ? null
           : () => FunctionsRepository.triggerAction(
-                context,
-                TriggerType.longPress,
-                reactions: onLongPressReactions,
-              ),
+              context,
+              TriggerType.longPress,
+              reactions: onLongPressReactions,
+            ),
       borderRadius: getBorderRadius(node),
       overlayColor: inkWell.overlayColor != null
           ? WidgetStatePropertyAll<Color>(
@@ -227,9 +220,7 @@ List<Widget> wrapWithInkWell(
       highlightColor: inkWell.highlightColor?.toFlutterColor(),
       hoverColor: inkWell.hoverColor?.toFlutterColor(),
       focusColor: inkWell.focusColor?.toFlutterColor(),
-      child: Stack(
-        children: children,
-      ),
+      child: Stack(children: children),
     ),
   );
 
@@ -239,10 +230,7 @@ List<Widget> wrapWithInkWell(
 class PortalPreviewWidget extends StatelessWidget {
   final BaseNode node;
 
-  const PortalPreviewWidget({
-    super.key,
-    required this.node,
-  });
+  const PortalPreviewWidget({super.key, required this.node});
 
   @override
   Widget build(BuildContext context) {
@@ -330,32 +318,34 @@ List<BoxShadow> retrieveBoxShadow(BaseNode node, ScopedValues scopedValues) {
   if (node is! DefaultShapeNode) return [];
   return node.effects
       .where((effect) => effect.type == EffectType.dropShadow && effect.visible)
-      .map(
-    (effect) {
-      final ColorRGBA? color =
-          PropertyValueDelegate.getPropertyValue<ColorRGBA>(
-                node,
-                'shadow-color-${effect.id}',
-                scopedValues: scopedValues,
-              ) ??
-              effect.color;
-      return BoxShadow(
-        spreadRadius: effect.spread!,
-        offset:
-            Offset(effect.offset!.x.toDouble(), effect.offset!.y.toDouble()),
-        blurRadius: effect.radius,
-        color: color!.toFlutterColor(),
-      );
-    },
-  ).toList();
+      .map((effect) {
+        final ColorRGBA? color =
+            PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+              node,
+              'shadow-color-${effect.id}',
+              scopedValues: scopedValues,
+            ) ??
+            effect.color;
+        return BoxShadow(
+          spreadRadius: effect.spread!,
+          offset: Offset(
+            effect.offset!.x.toDouble(),
+            effect.offset!.y.toDouble(),
+          ),
+          blurRadius: effect.radius,
+          color: color!.toFlutterColor(),
+        );
+      })
+      .toList();
 }
 
 BorderRadius? getBorderRadius(BaseNode node) {
   if (node is CornerMixin) {
     if (node.cornerRadius.linked &&
         node.cornerRadius.type == RadiusType.elliptical) {
-      return BorderRadius.all(Radius.elliptical(
-          node.basicBoxLocal.width, node.basicBoxLocal.height));
+      return BorderRadius.all(
+        Radius.elliptical(node.basicBoxLocal.width, node.basicBoxLocal.height),
+      );
     }
     return node.cornerRadius.borderRadius;
   } else {
@@ -397,12 +387,13 @@ void getLinearGradientAlignment(double rotationDeg) {}
 
 Gradient? retrieveGradient(PaintModel paint) {
   try {
-    final double rotation =
-        decomposeRelativeTransform(paint.gradientTransform).rotation;
+    final double rotation = decomposeRelativeTransform(paint.gradientTransform)
+        .rotation;
 
     // We sort the colors to mimic the way Figma changes the order.
-    final gradientStops = paint.gradientStops!
-        .sorted((g1, g2) => g1.position.compareTo(g2.position));
+    final gradientStops = paint.gradientStops!.sorted(
+      (g1, g2) => g1.position.compareTo(g2.position),
+    );
     final radians = rotation * pi / 180;
 
     if (paint.type == PaintType.gradientLinear) {
@@ -433,8 +424,10 @@ Gradient? retrieveGradient(PaintModel paint) {
 
     return null;
   } catch (error, stacktrace) {
-    print(error);
-    print(stacktrace);
+    DebugLogger.instance.printInfo(
+      'Failed to build gradient: $error\n$stacktrace',
+      name: 'PassiveRectangleTransformer',
+    );
     return null;
   }
 }
@@ -494,8 +487,17 @@ List<num> applyGradientRotation(List<num>? t1, double angle) {
   final cosA = cos(rads);
   final sinA = sin(rads);
 
-  final vec_math.Matrix3 matrix =
-      vec_math.Matrix3(cosA, sinA, tx, -sinA, cosA, ty, 0, 0, 1);
+  final vec_math.Matrix3 matrix = vec_math.Matrix3(
+    cosA,
+    sinA,
+    tx,
+    -sinA,
+    cosA,
+    ty,
+    0,
+    0,
+    1,
+  );
 
   final List<num> list = List.filled(9, 0);
   matrix.copyIntoArray(list);
@@ -636,11 +638,7 @@ List<Widget> buildFills(
     }
 
     lastBlendTree.clear();
-    raster.add(wrapFillWithPositioned(
-      node: node,
-      fill: fill,
-      paint: model,
-    ));
+    raster.add(wrapFillWithPositioned(node: node, fill: fill, paint: model));
   }
 
   return raster.reversed.toList();
@@ -650,19 +648,18 @@ Widget wrapFillWithPositioned({
   required GeometryMixin node,
   required Widget fill,
   required PaintModel paint,
-}) =>
-    switch (paint.type) {
-      PaintType.solid => Positioned.fill(child: fill),
-      PaintType.gradientLinear ||
-      PaintType.gradientRadial ||
-      PaintType.gradientAngular ||
-      PaintType.gradientDiamond =>
-        Positioned.fill(child: fill),
-      PaintType.image => node.isHorizontalWrap || node.isVerticalWrap
-          ? Positioned(child: fill)
-          : Positioned.fill(child: fill),
-      PaintType.emoji => fill,
-    };
+}) => switch (paint.type) {
+  PaintType.solid => Positioned.fill(child: fill),
+  PaintType.gradientLinear ||
+  PaintType.gradientRadial ||
+  PaintType.gradientAngular ||
+  PaintType.gradientDiamond => Positioned.fill(child: fill),
+  PaintType.image =>
+    node.isHorizontalWrap || node.isVerticalWrap
+        ? Positioned(child: fill)
+        : Positioned.fill(child: fill),
+  PaintType.emoji => fill,
+};
 
 Widget buildFill(
   GeometryMixin node, {
@@ -711,7 +708,8 @@ Widget buildFill(
       // Substitute URL value from [CodelesslyContext]'s [data] map if
       // [imageURL] represents a JSON path.
       String? imageURL = paint.croppedImageURL ?? paint.downloadUrl!;
-      final imageURLValue = PropertyValueDelegate.getPropertyValue<String>(
+      final imageURLValue =
+          PropertyValueDelegate.getPropertyValue<String>(
             node,
             'fill-image-${paint.id}',
             scopedValues: scopedValues,
@@ -747,13 +745,13 @@ Widget buildFill(
             width: (node.horizontalFit == SizeFit.shrinkWrap)
                 ? null
                 : (node.horizontalFit == SizeFit.expanded)
-                    ? double.infinity
-                    : node.basicBoxLocal.width,
+                ? double.infinity
+                : node.basicBoxLocal.width,
             height: (node.verticalFit == SizeFit.shrinkWrap)
                 ? null
                 : (node.verticalFit == SizeFit.expanded)
-                    ? double.infinity
-                    : node.basicBoxLocal.height,
+                ? double.infinity
+                : node.basicBoxLocal.height,
             paint: paint,
             node: node,
             bytes: bytes,
@@ -763,16 +761,10 @@ Widget buildFill(
       }
 
       if (modifiedOpacity != 1) {
-        child = Opacity(
-          opacity: modifiedOpacity,
-          child: child,
-        );
+        child = Opacity(opacity: modifiedOpacity, child: child);
       }
       if (imageRotation != null) {
-        child = Transform.rotate(
-          angle: imageRotation,
-          child: child,
-        );
+        child = Transform.rotate(angle: imageRotation, child: child);
       }
       return child;
     case PaintType.emoji:
@@ -794,21 +786,20 @@ class RelativeTransform {
   });
 
   const RelativeTransform.empty()
-      : translation = const [0, 0],
-        rotation = 0,
-        scale = const [0, 0],
-        skew = const [0, 0];
+    : translation = const [0, 0],
+      rotation = 0,
+      scale = const [0, 0],
+      skew = const [0, 0];
 
   RelativeTransform copyWith({
     List<double>? translation,
     double? rotation,
     List<double>? scale,
     List<double>? skew,
-  }) =>
-      RelativeTransform(
-        translation: translation ?? this.translation,
-        rotation: rotation ?? this.rotation,
-        scale: scale ?? this.scale,
-        skew: skew ?? this.skew,
-      );
+  }) => RelativeTransform(
+    translation: translation ?? this.translation,
+    rotation: rotation ?? this.rotation,
+    scale: scale ?? this.scale,
+    skew: skew ?? this.skew,
+  );
 }

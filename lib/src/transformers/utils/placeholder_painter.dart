@@ -40,13 +40,14 @@ class PlaceholderPainter extends CustomPainter {
       outerLeft = 0;
     }
 
-    final Rect outerRect =
-        Rect.fromLTWH(outerLeft, outerTop, outerWidth, outerHeight);
-
-    canvas.drawRect(
-      outerRect,
-      bgPaint,
+    final Rect outerRect = Rect.fromLTWH(
+      outerLeft,
+      outerTop,
+      outerWidth,
+      outerHeight,
     );
+
+    canvas.drawRect(outerRect, bgPaint);
 
     gap = 4;
     double innerWidth = size.width - gap * 4;
@@ -62,8 +63,12 @@ class PlaceholderPainter extends CustomPainter {
     //   innerTop = outerTop;
     // }
 
-    final Rect innerRect =
-        Rect.fromLTWH(innerLeft, innerTop, innerWidth, innerHeight);
+    final Rect innerRect = Rect.fromLTWH(
+      innerLeft,
+      innerTop,
+      innerWidth,
+      innerHeight,
+    );
 
     canvas.drawRect(innerRect, bgPaint);
 
@@ -101,27 +106,15 @@ class PlaceholderPainter extends CustomPainter {
     // Scale the text to always fit inside the box.
     final double textScale = min(
       1.0,
-      min(
-        maxWidth / textWidth,
-        maxHeight / textHeight,
-      ),
+      min(maxWidth / textWidth, maxHeight / textHeight),
     );
     canvas.scale(textScale);
 
-    canvas.translate(
-      -textPainter.width / 2,
-      -textPainter.height / 2,
-    );
+    canvas.translate(-textPainter.width / 2, -textPainter.height / 2);
 
-    textPainter.paint(
-      canvas,
-      Offset.zero,
-    );
+    textPainter.paint(canvas, Offset.zero);
 
-    canvas.translate(
-      textPainter.width / 2,
-      textPainter.height / 2,
-    );
+    canvas.translate(textPainter.width / 2, textPainter.height / 2);
     canvas.scale(1 / textScale);
 
     canvas.translate(-size.width / 2, -size.height / 2);

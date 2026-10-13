@@ -17,9 +17,7 @@ class LocalDataRepository {
   LocalDataRepository({required this.cacheManager});
 
   /// Returns the [SDKPublishModel] from the cache.
-  SDKPublishModel? fetchPublishModel({
-    required PublishSource source,
-  }) {
+  SDKPublishModel? fetchPublishModel({required PublishSource source}) {
     try {
       return cacheManager.get(
         source.modelCacheKey,
@@ -46,60 +44,46 @@ class LocalDataRepository {
   Future<void> savePublishModel({
     required SDKPublishModel model,
     required PublishSource source,
-  }) =>
-      cacheManager.store(
-        source.modelCacheKey,
-        model.toFullJson(),
-      );
+  }) => cacheManager.store(source.modelCacheKey, model.toFullJson());
 
   /// Stores the given [bytes] of a [fontID] in the cache.
   Future<void> saveFontBytes({
     required String fontID,
     required Uint8List bytes,
     required PublishSource source,
-  }) =>
-      cacheManager
-          .storeBytes(
-        source.fontsCacheKey,
-        fontID,
-        bytes,
-      )
-          .catchError((e, str) {
-        debugPrintStack(label: '$e', stackTrace: str);
-      });
+  }) => cacheManager.storeBytes(source.fontsCacheKey, fontID, bytes).catchError(
+    (e, str) {
+      debugPrintStack(label: '$e', stackTrace: str);
+    },
+  );
 
   /// Deletes a given layout associated with a [layoutID] from the cache.
   void deletePublishLayout({
     required String layoutID,
     required PublishSource source,
-  }) =>
-      cacheManager.delete(source.modelCacheKey);
+  }) => cacheManager.delete(source.modelCacheKey);
 
   /// Deletes a given api associated with a [apiId] from the cache.
   void deletePublishApi({
     required String apiId,
     required PublishSource source,
-  }) =>
-      cacheManager.delete(source.apisCacheKey);
+  }) => cacheManager.delete(source.apisCacheKey);
 
   /// Deletes a given api associated with a [apiId] from the cache.
   void deletePublishVariables({
     required String layoutID,
     required PublishSource source,
-  }) =>
-      cacheManager.delete(source.variablesCacheKey);
+  }) => cacheManager.delete(source.variablesCacheKey);
 
   /// Deletes a given api associated with a [apiId] from the cache.
   void deletePublishConditions({
     required String layoutID,
     required PublishSource source,
-  }) =>
-      cacheManager.delete(source.conditionsCacheKey);
+  }) => cacheManager.delete(source.conditionsCacheKey);
 
   /// Deletes the stored bytes of a given [fontID] from the cache.
   void deleteFontBytes({
     required String fontID,
     required PublishSource source,
-  }) =>
-      cacheManager.deleteBytes(source.fontsCacheKey, fontID);
+  }) => cacheManager.deleteBytes(source.fontsCacheKey, fontID);
 }

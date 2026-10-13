@@ -39,13 +39,14 @@ class PassiveVarianceWidget extends StatelessWidget {
     if (settings.isPreview) return node.currentVariant.children;
     final String variantIdOrName =
         PropertyValueDelegate.getPropertyValue<String>(
-              node,
-              'currentVariantId',
-              scopedValues: scopedValues,
-            ) ??
-            node.currentVariantId;
+          node,
+          'currentVariantId',
+          scopedValues: scopedValues,
+        ) ??
+        node.currentVariantId;
 
-    final Variant variant = node.variants.findById(variantIdOrName) ??
+    final Variant variant =
+        node.variants.findById(variantIdOrName) ??
         node.variants.findByName(variantIdOrName) ??
         node.currentVariant;
     return variant.children;

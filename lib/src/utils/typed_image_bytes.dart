@@ -25,13 +25,13 @@ enum ResourceType {
   bool get isStandardImage => isPng || isJpg || isWebp;
 
   factory ResourceType.fromExtension(String type) => switch (type) {
-        'svg' || '.svg' => ResourceType.svg,
-        'png' || '.png' => ResourceType.png,
-        'jpg' || '.jpg' || 'jpeg' || '.jpeg' => ResourceType.jpg,
-        'gif' || '.gif' => ResourceType.gif,
-        'webp' || '.webp' => ResourceType.webp,
-        _ => ResourceType.unknown,
-      };
+    'svg' || '.svg' => ResourceType.svg,
+    'png' || '.png' => ResourceType.png,
+    'jpg' || '.jpg' || 'jpeg' || '.jpeg' => ResourceType.jpg,
+    'gif' || '.gif' => ResourceType.gif,
+    'webp' || '.webp' => ResourceType.webp,
+    _ => ResourceType.unknown,
+  };
 
   factory ResourceType.fromUrl(String url) =>
       ResourceType.fromExtension(path.extension(Uri.parse(url).path));

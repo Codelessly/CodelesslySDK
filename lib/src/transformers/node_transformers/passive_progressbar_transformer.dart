@@ -42,17 +42,26 @@ class PassiveProgressBarTransformer
     double? currentValue,
     ValueChanged<bool>? onChanged,
     bool animate = false,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+    ),
   }) {
     final previewNode = ProgressBarNode(
       properties: properties ?? node?.properties ?? ProgressBarProperties(),
       id: '',
       name: 'ProgressBar',
-      basicBoxLocal: NodeBox(0, 0, width ?? kProgressBarDefaultWidth,
-          height ?? kProgressBarDefaultHeight),
-      retainedOuterBoxLocal: NodeBox(0, 0, width ?? kProgressBarDefaultWidth,
-          height ?? kProgressBarDefaultHeight),
+      basicBoxLocal: NodeBox(
+        0,
+        0,
+        width ?? kProgressBarDefaultWidth,
+        height ?? kProgressBarDefaultHeight,
+      ),
+      retainedOuterBoxLocal: NodeBox(
+        0,
+        0,
+        width ?? kProgressBarDefaultWidth,
+        height ?? kProgressBarDefaultHeight,
+      ),
       currentValue: currentValue ?? node?.currentValue ?? 0,
     );
     return PassiveProgressBarWidget(
@@ -75,11 +84,19 @@ class PassiveProgressBarTransformer
   }
 
   void onChanged(BuildContext context, ProgressBarNode node, double value) {
-    FunctionsRepository.setPropertyValue(context,
-        node: node, property: 'currentValue', value: value);
+    FunctionsRepository.setPropertyValue(
+      context,
+      node: node,
+      property: 'currentValue',
+      value: value,
+    );
 
     FunctionsRepository.triggerAction(
-        context, node: node, TriggerType.changed, value: value);
+      context,
+      node: node,
+      TriggerType.changed,
+      value: value,
+    );
   }
 }
 
@@ -105,7 +122,8 @@ class PassiveProgressBarWidget extends StatelessWidget {
       context,
       variablesOverrides: variablesOverrides,
     );
-    final double currentValue = PropertyValueDelegate.getPropertyValue<double>(
+    final double currentValue =
+        PropertyValueDelegate.getPropertyValue<double>(
           node,
           'currentValue',
           scopedValues: scopedValues,
@@ -114,11 +132,11 @@ class PassiveProgressBarWidget extends StatelessWidget {
 
     final Color progressColor =
         PropertyValueDelegate.getPropertyValue<ColorRGBA>(
-              node,
-              'progressColor',
-              scopedValues: scopedValues,
-            )?.toFlutterColor() ??
-            node.properties.progressColor.toFlutterColor();
+          node,
+          'progressColor',
+          scopedValues: scopedValues,
+        )?.toFlutterColor() ??
+        node.properties.progressColor.toFlutterColor();
 
     return AdaptiveNodeBox(
       node: node,

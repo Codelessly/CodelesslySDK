@@ -56,8 +56,7 @@ class DefaultFirebaseOptionsProd {
     projectId: 'codeless-app',
     databaseURL: 'https://codeless-app-default-rtdb.firebaseio.com',
     storageBucket: 'codeless-app.appspot.com',
-    iosClientId:
-        '1008464357540-quq84tmv8e0b7qo3jo2r3148pd9snfni.apps.googleusercontent.com',
+    iosClientId: '1008464357540-quq84tmv8e0b7qo3jo2r3148pd9snfni.apps.googleusercontent.com',
     iosBundleId: 'com.codelessly',
   );
 
@@ -68,8 +67,7 @@ class DefaultFirebaseOptionsProd {
     projectId: 'codeless-app',
     databaseURL: 'https://codeless-app-default-rtdb.firebaseio.com',
     storageBucket: 'codeless-app.appspot.com',
-    iosClientId:
-        '1008464357540-quq84tmv8e0b7qo3jo2r3148pd9snfni.apps.googleusercontent.com',
+    iosClientId: '1008464357540-quq84tmv8e0b7qo3jo2r3148pd9snfni.apps.googleusercontent.com',
     iosBundleId: 'com.codelessly',
   );
 

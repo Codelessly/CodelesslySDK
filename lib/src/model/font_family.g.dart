@@ -7,20 +7,21 @@ part of 'font_family.dart';
 // **************************************************************************
 
 FontFamilyModel _$FontFamilyModelFromJson(Map json) => FontFamilyModel(
-      id: json['id'] as String?,
-      name: json['name'] as String,
-      fontVariants: (json['fontVariants'] as List<dynamic>)
-          .map((e) =>
-              FontVariantModel.fromJson(Map<String, dynamic>.from(e as Map)))
-          .toList(),
-      owner: json['owner'] as String,
-      teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
-      roles: (json['roles'] as Map).map(
-        (k, e) => MapEntry(k as String, Role.fromJson(e as String)),
-      ),
-      public: json['public'] as bool?,
-    );
+  id: json['id'] as String?,
+  name: json['name'] as String,
+  fontVariants: (json['fontVariants'] as List<dynamic>)
+      .map(
+        (e) => FontVariantModel.fromJson(Map<String, dynamic>.from(e as Map)),
+      )
+      .toList(),
+  owner: json['owner'] as String,
+  teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+  users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
+  roles: (json['roles'] as Map).map(
+    (k, e) => MapEntry(k as String, Role.fromJson(e as String)),
+  ),
+  public: json['public'] as bool?,
+);
 
 Map<String, dynamic> _$FontFamilyModelToJson(FontFamilyModel instance) =>
     <String, dynamic>{
@@ -35,35 +36,23 @@ Map<String, dynamic> _$FontFamilyModelToJson(FontFamilyModel instance) =>
     };
 
 FontVariantModel _$FontVariantModelFromJson(Map json) => FontVariantModel(
-      name: json['name'] as String? ?? 'regular',
-      weight: $enumDecodeNullable(_$FontWeightNumericEnumMap, json['weight']) ??
-          FontWeightNumeric.w400,
-      style: json['style'] as String? ?? 'Normal',
-      fontURL: json['fontURL'] as String? ?? '',
-      previewURL: json['previewURL'] as String? ?? '',
-    );
+  name: json['name'] as String? ?? 'regular',
+  weight:
+      $enumDecodeNullable(_$FontWeightNumericEnumMap, json['weight']) ??
+      FontWeightNumeric.w400,
+  style: json['style'] as String? ?? 'Normal',
+  fontURL: json['fontURL'] as String? ?? '',
+  previewURL: json['previewURL'] as String? ?? '',
+);
 
-Map<String, dynamic> _$FontVariantModelToJson(FontVariantModel instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(
-      String key, dynamic value, dynamic jsonValue, dynamic defaultValue) {
-    final bool serialize =
-        shouldSerialize(key, value, jsonValue, defaultValue, true);
-
-    if (serialize) {
-      val[key] = jsonValue;
-    }
-  }
-
-  writeNotNull('name', instance.name, instance.name, 'regular');
-  writeNotNull('weight', instance.weight,
-      _$FontWeightNumericEnumMap[instance.weight]!, FontWeightNumeric.w400);
-  writeNotNull('style', instance.style, instance.style, 'Normal');
-  writeNotNull('fontURL', instance.fontURL, instance.fontURL, '');
-  writeNotNull('previewURL', instance.previewURL, instance.previewURL, '');
-  return val;
-}
+Map<String, dynamic> _$FontVariantModelToJson(FontVariantModel instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'weight': _$FontWeightNumericEnumMap[instance.weight]!,
+      'style': instance.style,
+      'fontURL': instance.fontURL,
+      'previewURL': instance.previewURL,
+    };
 
 const _$FontWeightNumericEnumMap = {
   FontWeightNumeric.w100: 'w100',

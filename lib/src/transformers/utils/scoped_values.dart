@@ -38,31 +38,31 @@ class ScopedValues {
 
   /// Variable name -> Variable.
   Map<String, VariableData> get variables => {
-        ...codelesslyContext?.variableNamesMap() ?? const {},
-        for (final variable in _variablesOverrides ?? const [])
-          variable.id: variable,
-      };
+    ...codelesslyContext?.variableNamesMap() ?? const {},
+    for (final variable in _variablesOverrides ?? const [])
+      variable.id: variable,
+  };
 
   /// A map of data that is passed to loaded layouts for nodes to replace their
   /// values with.
   Map<String, dynamic> get data => {
-        ...codelesslyContext?.data ?? const {},
-        ..._dataOverrides ?? const {},
-      };
+    ...codelesslyContext?.data ?? const {},
+    ..._dataOverrides ?? const {},
+  };
 
   Map<String, Observable<List<ValueModel>>> get nodeValues =>
       codelesslyContext?.nodeValues ?? {};
 
   /// Creates a new scoped values instance with empty values.
   ScopedValues.empty()
-      : _codelesslyContextRef = null,
-        _localStorageRef = null,
-        _cloudDatabaseRef = null,
-        _variablesOverrides = null,
-        _dataOverrides = null,
-        indexedItem = null,
-        nodeState = null,
-        routeParams = {};
+    : _codelesslyContextRef = null,
+      _localStorageRef = null,
+      _cloudDatabaseRef = null,
+      _variablesOverrides = null,
+      _dataOverrides = null,
+      indexedItem = null,
+      nodeState = null,
+      routeParams = {};
 
   /// Creates a new scoped values instance from a given context.
   ScopedValues.of(
@@ -73,14 +73,14 @@ class ScopedValues {
     _variablesOverrides = variablesOverrides;
     _dataOverrides = dataOverrides;
     final codelesslyContext = context.read<CodelesslyContext?>();
-    if (codelesslyContext != null) {
-      _codelesslyContextRef = WeakReference(codelesslyContext);
-    }
+    _codelesslyContextRef = codelesslyContext == null
+        ? null
+        : WeakReference(codelesslyContext);
     indexedItem = IndexedItemProvider.maybeOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     routeParams =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
-            {};
+        {};
     final instance = context.read<Codelessly?>();
     if (instance != null) {
       _localStorageRef = WeakReference(instance.localDatabase);

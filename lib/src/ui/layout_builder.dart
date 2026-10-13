@@ -1,10 +1,11 @@
+import 'dart:async';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
-import '../logging/debug_logger.dart';
 
 /// A widget that retrieves a layout from a [CodelesslyWidgetController].
 class CodelesslyLayoutRetriever extends StatefulWidget {
@@ -56,9 +57,7 @@ class _CodelesslyLayoutRetrieverState extends State<CodelesslyLayoutRetriever> {
     return SizedBox(
       width: widget.bounds.width,
       height: widget.bounds.height,
-      child: CodelesslyWidget(
-        controller: controller,
-      ),
+      child: CodelesslyWidget(controller: controller),
     );
   }
 }
@@ -114,17 +113,22 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
   /// delegates the node lookup to it.
   late final PassiveNodeTransformerManager transformerManager =
       PassiveNodeTransformerManager(
-    nodeRegistry.getNodeByID,
-    (context, bounds, pageID, layoutID, canvasID) =>
-        widget.layoutRetrievalBuilder
-            ?.call(context, bounds, pageID, layoutID, canvasID) ??
-        CodelesslyLayoutRetriever(
-          controller: widget.controller,
-          pageID: pageID,
-          layoutID: layoutID,
-          bounds: bounds,
-        ),
-  );
+        nodeRegistry.getNodeByID,
+        (context, bounds, pageID, layoutID, canvasID) =>
+            widget.layoutRetrievalBuilder?.call(
+              context,
+              bounds,
+              pageID,
+              layoutID,
+              canvasID,
+            ) ??
+            CodelesslyLayoutRetriever(
+              controller: widget.controller,
+              pageID: pageID,
+              layoutID: layoutID,
+              bounds: bounds,
+            ),
+      );
 
   CanvasNode get canvasNode =>
       widget.layout.canvases[widget.canvasId]![widget.canvasId] as CanvasNode;
@@ -157,8 +161,8 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
   /// Loads the layout into the [nodeRegistry] and updates the
   /// [CodelesslyContext] with the node values.
   void loadLayout(BuildContext context) {
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
+    final CodelesslyContext codelesslyContext = context
+        .read<CodelesslyContext>();
     nodeRegistry.clear();
     nodeRegistry.setNodes(widget.layout.canvases[widget.canvasId]!);
     final List<BaseNode> allNodes = nodeRegistry.getNodes().values.toList();
@@ -172,8 +176,8 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         .toList();
     for (final node in nodesWithInternalValue) {
       final ValueModel? value = node.propertyVariables.firstWhereOrNull(
-          (property) =>
-              property.name == 'value' || property.name == 'inputValue');
+        (property) => property.name == 'value' || property.name == 'inputValue',
+      );
       if (value == null) continue;
       codelesslyContext.addToNodeValues(node, [value]);
     }
@@ -186,7 +190,9 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         for (final Reaction reaction in (node as ReactionMixin).reactions) {
           final ActionModel actionModel = reaction.action;
           codelesslyContext.handleActionConnections(
-              actionModel, nodeRegistry.getNodes());
+            actionModel,
+            nodeRegistry.getNodes(),
+          );
         }
       }
 
@@ -197,7 +203,9 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
           for (final Reaction reaction in reactiveChild.reactions) {
             final ActionModel actionModel = reaction.action;
             codelesslyContext.handleActionConnections(
-                actionModel, nodeRegistry.getNodes());
+              actionModel,
+              nodeRegistry.getNodes(),
+            );
           }
         }
       }
@@ -206,23 +214,25 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
 
     final Map<String, VariableData> variablesMap =
         publishModel.variables[widget.layout.id]?.variables[widget.canvasId] ??
-            {};
+        {};
 
     // Clear all the variables that are not api variables. We persist api
     // variables across canvases from the same layout group so that the
     // api request is not made again.
-    codelesslyContext.variables
-        .removeWhere((key, value) => !value.value.isApiVariable);
+    codelesslyContext.variables.removeWhere(
+      (key, value) => !value.value.isApiVariable,
+    );
     for (final variable in variablesMap.values) {
       // Override default values of variables with values provided in data.
-      final notifier = Observable(variable.copyWith(
-        value: codelesslyContext.data[variable.name],
-      ));
+      final notifier = Observable(
+        variable.copyWith(value: codelesslyContext.data[variable.name]),
+      );
       codelesslyContext.variables[variable.id] = notifier;
     }
 
-    final conditions = publishModel
-            .conditions[widget.layout.id]?.conditions[widget.canvasId] ??
+    final conditions =
+        publishModel.conditions[widget.layout.id]?.conditions[widget
+            .canvasId] ??
         {};
     codelesslyContext.conditions.clear();
     codelesslyContext.conditions.addAll(conditions);
@@ -247,14 +257,15 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         .where((action) => action.enabled && action.apiId != null)
         .toList();
 
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
+    final CodelesslyContext codelesslyContext = context
+        .read<CodelesslyContext>();
 
     final apisMap = context.read<Codelessly>().dataManager.publishModel!.apis;
 
     for (final api in apisMap.values) {
-      final ApiCallAction? canvasAction =
-          apiCallActions.firstWhereOrNull((action) => action.apiId == api.id);
+      final ApiCallAction? canvasAction = apiCallActions.firstWhereOrNull(
+        (action) => action.apiId == api.id,
+      );
 
       final variableName = apiNameToVariableName(api.name);
 
@@ -262,17 +273,17 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
           ? ApiResponseVariableUtils.loading(api.url)
           : ApiResponseVariableUtils.idle(api.url);
 
-      final existingVariable =
-          codelesslyContext.variableNamesMap()[variableName];
+      final existingVariable = codelesslyContext
+          .variableNamesMap()[variableName];
 
       final RuntimeVariableData variable =
           existingVariable is RuntimeVariableData
-              ? existingVariable
-              : RuntimeVariableData(
-                  name: variableName,
-                  type: VariableType.map,
-                  value: data,
-                );
+          ? existingVariable
+          : RuntimeVariableData(
+              name: variableName,
+              type: VariableType.map,
+              value: data,
+            );
 
       // Override default values of variables with values provided in data.
       final notifier = Observable(variable);
@@ -284,8 +295,24 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
           'Making api request for onLoad canvas action',
           name: CodelesslyLayoutRetriever.name,
         );
-        FunctionsRepository.makeApiRequestFromAction(
-            canvasAction, context, notifier);
+        // The variable carries the error state; report the failure instead
+        // of leaving it as an unhandled async error.
+        unawaited(
+          FunctionsRepository.makeApiRequestFromAction(
+            canvasAction,
+            context,
+            notifier,
+          ).then<void>(
+            (_) {},
+            onError: (Object e, StackTrace stackTrace) =>
+                ErrorLogger.instance.captureException(
+                  e,
+                  message: 'onLoad API call failed',
+                  type: 'api_call_failed',
+                  stackTrace: stackTrace,
+                ),
+          ),
+        );
       }
     }
   }
@@ -299,14 +326,15 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         .where((action) => action.enabled && action.variable != null)
         .toList();
 
-    final CodelesslyContext codelesslyContext =
-        context.read<CodelesslyContext>();
+    final CodelesslyContext codelesslyContext = context
+        .read<CodelesslyContext>();
 
     for (final action in loadFromStorageActions) {
       final data = CloudDatabaseVariableUtils.idle();
 
-      final variable =
-          codelesslyContext.findVariableByName(action.variable!.name);
+      final variable = codelesslyContext.findVariableByName(
+        action.variable!.name,
+      );
 
       if (variable == null) {
         DebugLogger.instance.printInfo(
@@ -322,10 +350,18 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
 
   @override
   Widget build(BuildContext context) {
+    final CodelesslyConfig config = widget.controller.config;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+      data: mediaQuery.copyWith(
+        textScaler: config.maxTextScaleFactor <= 1
+            ? TextScaler.noScaling
+            : mediaQuery.textScaler.clamp(
+                maxScaleFactor: config.maxTextScaleFactor,
+              ),
+      ),
       child: Theme(
-        data: ThemeData(),
+        data: config.useHostTheme ? Theme.of(context) : ThemeData(),
         child: transformerManager.buildWidgetFromNode(
           canvasNode,
           context,

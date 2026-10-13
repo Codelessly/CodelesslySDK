@@ -11,14 +11,14 @@ final class DeBouncer {
   /// Allows to create an instance with optional [Duration] with
   /// immediateFirstRun set to false. See [immediateFirstRun] for more details.
   DeBouncer([Duration? duration])
-      : duration = duration ?? const Duration(milliseconds: 300),
-        immediateFirstRun = false;
+    : duration = duration ?? const Duration(milliseconds: 300),
+      immediateFirstRun = false;
 
   /// Allows to create an instance with optional [Duration] with
   /// immediateFirstRun set to true. See [immediateFirstRun] for more details.
   DeBouncer.immediate([Duration? duration])
-      : duration = duration ?? const Duration(milliseconds: 300),
-        immediateFirstRun = true;
+    : duration = duration ?? const Duration(milliseconds: 300),
+      immediateFirstRun = true;
 
   /// de-bounce period. Default is 300 milliseconds.
   /// It will ignore any calls to [run] until [duration] has passed since the
@@ -191,6 +191,7 @@ final DeBouncer debouncer = DeBouncer();
 ///
 /// This will run the action immediately for the first call and then it will
 /// wait for 300 milliseconds to run the next call if there's any.
-Future<R> debounce<R>(DeBounceAction<R> action,
-        {bool immediateFirstRun = false}) =>
-    debouncer.run<R>(action, immediateFirstRun: immediateFirstRun);
+Future<R> debounce<R>(
+  DeBounceAction<R> action, {
+  bool immediateFirstRun = false,
+}) => debouncer.run<R>(action, immediateFirstRun: immediateFirstRun);

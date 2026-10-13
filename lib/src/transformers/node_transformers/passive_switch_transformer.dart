@@ -14,15 +14,9 @@ class PassiveSwitchTransformer extends NodeWidgetTransformer<SwitchNode> {
     WidgetBuildSettings settings,
   ) {
     if (settings.isPreview) {
-      return PreviewSwitchWidget(
-        node: node,
-        settings: settings,
-      );
+      return PreviewSwitchWidget(node: node, settings: settings);
     } else {
-      return PassiveSwitchWidget(
-        node: node,
-        settings: settings,
-      );
+      return PassiveSwitchWidget(node: node, settings: settings);
     }
   }
 }
@@ -72,10 +66,18 @@ class PassiveSwitchWidget extends StatelessWidget {
   void onChanged(BuildContext context, bool internalValue) {
     NodeStateProvider.setState(context, internalValue);
 
-    FunctionsRepository.setPropertyValue(context,
-        node: node, property: 'value', value: internalValue);
+    FunctionsRepository.setPropertyValue(
+      context,
+      node: node,
+      property: 'value',
+      value: internalValue,
+    );
     FunctionsRepository.triggerAction(
-        context, node: node, TriggerType.changed, value: internalValue);
+      context,
+      node: node,
+      TriggerType.changed,
+      value: internalValue,
+    );
   }
 
   @override
@@ -84,7 +86,8 @@ class PassiveSwitchWidget extends StatelessWidget {
       context,
       variablesOverrides: variablesOverrides,
     );
-    final bool value = PropertyValueDelegate.getPropertyValue<bool>(
+    final bool value =
+        PropertyValueDelegate.getPropertyValue<bool>(
           node,
           'value',
           scopedValues: scopedValues,
@@ -132,11 +135,11 @@ class TransformerSwitch extends StatelessWidget {
             onChanged: (value) => onChanged?.call(context, value),
             autofocus: node.properties.autofocus,
             activeTrackColor: node.properties.activeTrackColor.toFlutterColor(),
-            inactiveTrackColor:
-                node.properties.inactiveTrackColor.toFlutterColor(),
-            activeColor: node.properties.activeThumbColor.toFlutterColor(),
-            inactiveThumbColor:
-                node.properties.inactiveThumbColor.toFlutterColor(),
+            inactiveTrackColor: node.properties.inactiveTrackColor
+                .toFlutterColor(),
+            activeThumbColor: node.properties.activeThumbColor.toFlutterColor(),
+            inactiveThumbColor: node.properties.inactiveThumbColor
+                .toFlutterColor(),
             hoverColor: node.properties.hoverColor.toFlutterColor(),
             focusColor: node.properties.focusColor.toFlutterColor(),
             splashRadius: node.properties.splashRadius,
@@ -146,8 +149,9 @@ class TransformerSwitch extends StatelessWidget {
               }
               return node.properties.inactiveTrackBorderColor?.toFlutterColor();
             }),
-            trackOutlineWidth:
-                WidgetStateProperty.all(node.properties.trackOutlineWidth),
+            trackOutlineWidth: WidgetStateProperty.all(
+              node.properties.trackOutlineWidth,
+            ),
           ),
         ),
       ),

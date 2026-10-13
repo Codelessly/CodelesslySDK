@@ -6,7 +6,7 @@ import 'firebase_options_prod.dart';
 import 'model/publish_source.dart';
 
 /// Holds initialization configuration options for the SDK.
-class CodelesslyConfig with EquatableMixin {
+class CodelesslyConfig with Equatable {
   /// The SDK auth token used to authenticate the SDK with the Codelessly
   /// servers.
   final String authToken;
@@ -84,6 +84,23 @@ class CodelesslyConfig with EquatableMixin {
   /// The Firebase project ID for this instance.
   final String firebaseProjectId;
 
+  /// Whether layouts render with the app's [Theme] instead of a default
+  /// [ThemeData].
+  ///
+  /// Layouts are styled explicitly in the Codelessly editor, so by default
+  /// they render with a default theme to look exactly as designed. Enable this
+  /// to let theme-derived defaults (color scheme, typography, brightness)
+  /// follow the app.
+  final bool useHostTheme;
+
+  /// The largest text scale factor layouts follow from the platform's text
+  /// size setting.
+  ///
+  /// Layouts are designed at fixed sizes, so the default of 1 ignores the
+  /// setting. Raise it to let text grow for accessibility, at the risk of
+  /// text overflowing fixed-size boxes.
+  final double maxTextScaleFactor;
+
   /// Creates a new instance of [CodelesslyConfig].
   ///
   /// [authToken] is the token required to authenticate and initialize the SDK.
@@ -108,10 +125,14 @@ class CodelesslyConfig with EquatableMixin {
     this.firebaseProjectId = CodelesslyConstants.kProdFirebaseProjectId,
     PublishSource? publishSource,
     this.debugLog = false,
-  })  : firebaseOptions =
-            firebaseOptions ?? DefaultFirebaseOptionsProd.currentPlatform,
-        publishSource = publishSource ??
-            (isPreview ? PublishSource.preview : PublishSource.publish);
+    this.useHostTheme = false,
+    this.maxTextScaleFactor = 1,
+  }) : assert(maxTextScaleFactor >= 1),
+       firebaseOptions =
+           firebaseOptions ?? DefaultFirebaseOptionsProd.currentPlatform,
+       publishSource =
+           publishSource ??
+           (isPreview ? PublishSource.preview : PublishSource.publish);
 
   /// Creates a new instance of [CodelesslyConfig] with the provided optional
   /// parameters.
@@ -121,7 +142,6 @@ class CodelesslyConfig with EquatableMixin {
     bool? automaticallySendCrashReports,
     bool? isPreview,
     bool? preload,
-    bool? staggerDownloadQueue,
     FirebaseOptions? firebaseOptions,
     String? firebaseCloudFunctionsBaseURL,
     String? baseURL,
@@ -129,39 +149,47 @@ class CodelesslyConfig with EquatableMixin {
     String? clientType,
     String? firebaseProjectId,
     PublishSource? publishSource,
-  }) =>
-      CodelesslyConfig(
-        authToken: authToken ?? this.authToken,
-        slug: slug ?? this.slug,
-        automaticallySendCrashReports:
-            automaticallySendCrashReports ?? this.automaticallySendCrashReports,
-        isPreview: isPreview ?? this.isPreview,
-        preload: preload ?? this.preload,
-        firebaseOptions: firebaseOptions ?? this.firebaseOptions,
-        firebaseCloudFunctionsBaseURL:
-            firebaseCloudFunctionsBaseURL ?? this.firebaseCloudFunctionsBaseURL,
-        baseURL: baseURL ?? this.baseURL,
-        firebaseInstanceName: firebaseInstanceName ?? this.firebaseInstanceName,
-        clientType: clientType ?? this.clientType,
-        firebaseProjectId: firebaseProjectId ?? this.firebaseProjectId,
-        publishSource: publishSource ?? this.publishSource,
-      );
+    bool? debugLog,
+    bool? useHostTheme,
+    double? maxTextScaleFactor,
+  }) => CodelesslyConfig(
+    authToken: authToken ?? this.authToken,
+    slug: slug ?? this.slug,
+    automaticallySendCrashReports:
+        automaticallySendCrashReports ?? this.automaticallySendCrashReports,
+    isPreview: isPreview ?? this.isPreview,
+    preload: preload ?? this.preload,
+    firebaseOptions: firebaseOptions ?? this.firebaseOptions,
+    firebaseCloudFunctionsBaseURL:
+        firebaseCloudFunctionsBaseURL ?? this.firebaseCloudFunctionsBaseURL,
+    baseURL: baseURL ?? this.baseURL,
+    firebaseInstanceName: firebaseInstanceName ?? this.firebaseInstanceName,
+    clientType: clientType ?? this.clientType,
+    firebaseProjectId: firebaseProjectId ?? this.firebaseProjectId,
+    publishSource: publishSource ?? this.publishSource,
+    debugLog: debugLog ?? this.debugLog,
+    useHostTheme: useHostTheme ?? this.useHostTheme,
+    maxTextScaleFactor: maxTextScaleFactor ?? this.maxTextScaleFactor,
+  );
 
   @override
   List<Object?> get props => [
-        authToken,
-        slug,
-        automaticallySendCrashReports,
-        isPreview,
-        preload,
-        firebaseOptions,
-        firebaseCloudFunctionsBaseURL,
-        baseURL,
-        firebaseInstanceName,
-        clientType,
-        firebaseProjectId,
-        publishSource,
-      ];
+    authToken,
+    slug,
+    automaticallySendCrashReports,
+    isPreview,
+    preload,
+    firebaseOptions,
+    firebaseCloudFunctionsBaseURL,
+    baseURL,
+    firebaseInstanceName,
+    clientType,
+    firebaseProjectId,
+    publishSource,
+    debugLog,
+    useHostTheme,
+    maxTextScaleFactor,
+  ];
 }
 
 enum CLoadingState {

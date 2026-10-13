@@ -101,8 +101,8 @@ class PropertyValueDelegate {
 
     if (codelesslyContext == null) return null;
 
-    final BaseCondition? condition =
-        codelesslyContext.conditions.findByNodeProperty(node.id, property);
+    final BaseCondition? condition = codelesslyContext.conditions
+        .findByNodeProperty(node.id, property);
 
     // if (condition != null) {
     //   print('----------------------------------------------------------------');
@@ -214,8 +214,9 @@ class PropertyValueDelegate {
 
     if (variable == null) return null;
 
-    VariableType accessorType =
-        match.hasAccessor ? VariableType.fromObjectType(value) : variable.type;
+    VariableType accessorType = match.hasAccessor
+        ? VariableType.fromObjectType(value)
+        : variable.type;
     List<Accessor> accessors = variable.name.startsWith('api')
         ? getApiResponseAccessorsForType(VariableType.map)
         : getAccessorsForType(accessorType);
@@ -224,8 +225,9 @@ class PropertyValueDelegate {
       if (value == null) return null;
       String accessor = segments.removeAt(0);
 
-      final Accessor? matchedAccessor =
-          accessors.firstWhereOrNull((element) => element.name == accessor);
+      final Accessor? matchedAccessor = accessors.firstWhereOrNull(
+        (element) => element.name == accessor,
+      );
 
       if (matchedAccessor == null) {
         // If the accessor is not found, it means that the path is invalid. But
@@ -258,8 +260,10 @@ class PropertyValueDelegate {
     if (match == null) return null;
 
     if (match.isPredefinedVariable) {
-      final Object? value =
-          retrievePredefinedVariableValue(match, scopedValues);
+      final Object? value = retrievePredefinedVariableValue(
+        match,
+        scopedValues,
+      );
       return value;
     }
 
@@ -268,29 +272,34 @@ class PropertyValueDelegate {
     if (match.hasAccessor) {
       if (variable.type.isText) {
         final characters = variable.getValue().toString().characters.toList();
-        final (Object? value, _) =
-            substituteJsonPath(match.fullPath, {match.name: characters});
+        final (Object? value, _) = substituteJsonPath(match.fullPath, {
+          match.name: characters,
+        });
         return value;
       }
       if (!variable.type.isList) return null;
-      final (Object? value, _) =
-          substituteJsonPath(match.fullPath, {match.name: variable.getValue()});
+      final (Object? value, _) = substituteJsonPath(match.fullPath, {
+        match.name: variable.getValue(),
+      });
 
       return value;
     }
 
     if (!match.hasPath) return variable.getValue();
 
-    final variableProps =
-        getVariableProperties(variable.getValue(), variable.type);
+    final variableProps = getVariableProperties(
+      variable.getValue(),
+      variable.type,
+    );
     final Object? variableValue = variable.getValue();
     final Map<String, dynamic> values = {
       ...variableProps,
       if (variable.type.isMap && variableValue is Map<String, dynamic>)
         ...variableValue,
     };
-    final (Object? value, _) =
-        substituteJsonPath(match.fullPath, {match.name: values});
+    final (Object? value, _) = substituteJsonPath(match.fullPath, {
+      match.name: values,
+    });
 
     return value;
   }
@@ -312,19 +321,22 @@ class PropertyValueDelegate {
 
     // substitute path with screen.
     if (variableValue == null) return null;
-    final VariableType variableType =
-        VariableType.fromObjectType(variableValue);
+    final VariableType variableType = VariableType.fromObjectType(
+      variableValue,
+    );
 
     if (match.hasAccessor) {
       if (variableType.isText) {
         final characters = variableValue.toString().characters.toList();
-        final (Object? value, _) =
-            substituteJsonPath(match.fullPath, {match.name: characters});
+        final (Object? value, _) = substituteJsonPath(match.fullPath, {
+          match.name: characters,
+        });
         return value;
       }
       if (!variableType.isList) return null;
-      final (Object? value, _) =
-          substituteJsonPath(match.text, {match.name: variableValue});
+      final (Object? value, _) = substituteJsonPath(match.text, {
+        match.name: variableValue,
+      });
       return value;
     }
 
@@ -336,8 +348,9 @@ class PropertyValueDelegate {
       if (variableType.isMap && variableValue is Map)
         ...Map.from(variableValue),
     };
-    final (Object? value, _) =
-        substituteJsonPath(match.text, {match.name: values});
+    final (Object? value, _) = substituteJsonPath(match.text, {
+      match.name: values,
+    });
     return value;
   }
 
@@ -377,8 +390,9 @@ class PropertyValueDelegate {
 
     if (nodeValues == null) return null;
 
-    final model =
-        nodeValues.firstWhereOrNull((element) => element.name == property);
+    final model = nodeValues.firstWhereOrNull(
+      (element) => element.name == property,
+    );
 
     if (model == null) return null;
 
@@ -391,7 +405,9 @@ class PropertyValueDelegate {
   ///   - data.name: will be replaced with data['name'].
   ///
   static (Object?, JsonPointer?) substituteJsonPath(
-      String text, Map<String, dynamic> data) {
+    String text,
+    Map<String, dynamic> data,
+  ) {
     // If the text represents a JSON path, get the relevant value from [data] map.
     if (data.isEmpty) return (null, null);
 
@@ -429,8 +445,9 @@ class PropertyValueDelegate {
       final match = VariableMatch.parse(token.wrapWithVariableSyntax());
       if (match != null && match.hasAccessor) {
         if (traversedValue is List) {
-          (traversedValue, _) =
-              substituteJsonPath(token, {match.name: traversedValue});
+          (traversedValue, _) = substituteJsonPath(token, {
+            match.name: traversedValue,
+          });
         } else {
           traversedValue = [];
         }
@@ -448,11 +465,14 @@ class PropertyValueDelegate {
 
     if (match != null && match.hasAccessor) {
       if (traversedValue is List) {
-        final index =
-            match.accessor!.replaceAll('[', '').replaceAll(']', '').toInt();
+        final index = match.accessor!
+            .replaceAll('[', '')
+            .replaceAll(']', '')
+            .toInt();
         if (index != null) {
-          traversedValue[index] =
-              substituteJsonPath(leafKey, {match.name: value}).$1;
+          traversedValue[index] = substituteJsonPath(leafKey, {
+            match.name: value,
+          }).$1;
         }
       }
     } else if (traversedValue is Map) {
@@ -466,69 +486,69 @@ class PropertyValueDelegate {
   @internal
   @experimental
   static Map<String, dynamic> getVariableProperties(
-      Object? value, VariableType type) {
+    Object? value,
+    VariableType type,
+  ) {
     return switch (value) {
       String() => {
-          'length': value.length,
-          'isEmpty': value.isEmpty,
-          'isNotEmpty': value.isNotEmpty,
-          'isBlank': value.trim().isEmpty,
-          'upcase': value.toUpperCase(),
-          'downcase': value.toLowerCase(),
-          'capitalize': value.capitalized,
-        },
+        'length': value.length,
+        'isEmpty': value.isEmpty,
+        'isNotEmpty': value.isNotEmpty,
+        'isBlank': value.trim().isEmpty,
+        'upcase': value.toUpperCase(),
+        'downcase': value.toLowerCase(),
+        'capitalize': value.capitalized,
+      },
       int() => {
-          'isEven': value.isEven,
-          'isOdd': value.isOdd,
-          'isFinite': value.isFinite,
-          'isInfinite': value.isInfinite,
-          'isNegative': value.isNegative,
-          'isPositive': !value.isNegative,
-        },
+        'isEven': value.isEven,
+        'isOdd': value.isOdd,
+        'isFinite': value.isFinite,
+        'isInfinite': value.isInfinite,
+        'isNegative': value.isNegative,
+        'isPositive': !value.isNegative,
+      },
       double() => {
-          'isFinite': value.isFinite,
-          'isInfinite': value.isInfinite,
-          'isNegative': value.isNegative,
-          'isPositive': !value.isNegative,
-          'isNaN': value.isNaN,
-          'whole': value.toInt(),
-          'floor': value.floor(),
-          'ceil': value.ceil(),
-        },
-      bool() => {
-          'toggled': !value,
-        },
+        'isFinite': value.isFinite,
+        'isInfinite': value.isInfinite,
+        'isNegative': value.isNegative,
+        'isPositive': !value.isNegative,
+        'isNaN': value.isNaN,
+        'whole': value.toInt(),
+        'floor': value.floor(),
+        'ceil': value.ceil(),
+      },
+      bool() => {'toggled': !value},
       Map() => {
-          'length': value.length,
-          'isEmpty': value.isEmpty,
-          'isNotEmpty': value.isNotEmpty,
-          'keys': value.keys.toList(),
-          'values': value.values.toList(),
-        },
+        'length': value.length,
+        'isEmpty': value.isEmpty,
+        'isNotEmpty': value.isNotEmpty,
+        'keys': value.keys.toList(),
+        'values': value.values.toList(),
+      },
       List() => {
-          'length': value.length,
-          'isEmpty': value.isEmpty,
-          'isNotEmpty': value.isNotEmpty
-        },
+        'length': value.length,
+        'isEmpty': value.isEmpty,
+        'isNotEmpty': value.isNotEmpty,
+      },
       ColorRGBA() => {
-          'red': value.r,
-          'green': value.g,
-          'blue': value.b,
-          'alpha': value.a,
-          'opacity': value.a / 255,
-        },
+        'red': value.r,
+        'green': value.g,
+        'blue': value.b,
+        'alpha': value.a,
+        'opacity': value.a / 255,
+      },
       ColorRGB() => {
-          'red': value.r,
-          'green': value.g,
-          'blue': value.b,
-          'alpha': 255,
-          'opacity': 1,
-        },
+        'red': value.r,
+        'green': value.g,
+        'blue': value.b,
+        'alpha': 255,
+        'opacity': 1,
+      },
       _ when type.isText => {
-          'isBlank': true,
-          'isEmpty': true,
-          'isNotEmpty': false,
-        },
+        'isBlank': true,
+        'isEmpty': true,
+        'isNotEmpty': false,
+      },
       _ => {},
     };
   }
@@ -783,108 +803,108 @@ List<Accessor> getAccessorsForType(VariableType type) {
 
 /// Defines accessors for an api variable based on the type of date it holds.
 List<Accessor> getApiResponseAccessorsForType(VariableType dataType) => [
-      Accessor(
-        name: 'url',
-        type: VariableType.text,
-        getValue: (value) => value.toMap()?['url'],
-      ),
-      Accessor(
-        name: 'status',
-        type: VariableType.text,
-        getValue: (value) => value.toMap()?['status']?.toString(),
-      ),
-      Accessor(
-        name: 'statusCode',
-        type: VariableType.integer,
-        getValue: (value) => value.toMap()?['statusCode']?.toInt(),
-      ),
-      Accessor(
-        name: 'isIdle',
-        type: VariableType.boolean,
-        getValue: (value) => value.toMap()?['isIdle']?.toBool(),
-      ),
-      Accessor(
-        name: 'isLoading',
-        type: VariableType.boolean,
-        getValue: (value) => (value.toMap()?['isLoading']).toBool(),
-      ),
-      Accessor(
-        name: 'isError',
-        type: VariableType.boolean,
-        getValue: (value) => (value.toMap()?['isError']).toBool(),
-      ),
-      Accessor(
-        name: 'isSuccess',
-        type: VariableType.boolean,
-        getValue: (value) => (value.toMap()?['isSuccess']).toBool(),
-      ),
-      Accessor(
-        name: 'hasData',
-        type: VariableType.boolean,
-        getValue: (value) => (value.toMap()?['hasData']).toBool(),
-      ),
-      Accessor(
-        name: 'data',
-        type: dataType,
-        getValue: (value) => value.toMap()?['data'],
-      ),
-      Accessor(
-        name: 'error',
-        type: dataType,
-        getValue: (value) => value.toMap()?['error'],
-      ),
-      Accessor(
-        name: 'headers',
-        type: VariableType.map,
-        getValue: (value) => value.toMap()?['headers']?.toMap(),
-      ),
-    ];
+  Accessor(
+    name: 'url',
+    type: VariableType.text,
+    getValue: (value) => value.toMap()?['url'],
+  ),
+  Accessor(
+    name: 'status',
+    type: VariableType.text,
+    getValue: (value) => value.toMap()?['status']?.toString(),
+  ),
+  Accessor(
+    name: 'statusCode',
+    type: VariableType.integer,
+    getValue: (value) => value.toMap()?['statusCode']?.toInt(),
+  ),
+  Accessor(
+    name: 'isIdle',
+    type: VariableType.boolean,
+    getValue: (value) => value.toMap()?['isIdle']?.toBool(),
+  ),
+  Accessor(
+    name: 'isLoading',
+    type: VariableType.boolean,
+    getValue: (value) => (value.toMap()?['isLoading']).toBool(),
+  ),
+  Accessor(
+    name: 'isError',
+    type: VariableType.boolean,
+    getValue: (value) => (value.toMap()?['isError']).toBool(),
+  ),
+  Accessor(
+    name: 'isSuccess',
+    type: VariableType.boolean,
+    getValue: (value) => (value.toMap()?['isSuccess']).toBool(),
+  ),
+  Accessor(
+    name: 'hasData',
+    type: VariableType.boolean,
+    getValue: (value) => (value.toMap()?['hasData']).toBool(),
+  ),
+  Accessor(
+    name: 'data',
+    type: dataType,
+    getValue: (value) => value.toMap()?['data'],
+  ),
+  Accessor(
+    name: 'error',
+    type: dataType,
+    getValue: (value) => value.toMap()?['error'],
+  ),
+  Accessor(
+    name: 'headers',
+    type: VariableType.map,
+    getValue: (value) => value.toMap()?['headers']?.toMap(),
+  ),
+];
 
 /// Defines accessors for a cloud data variable based on the type of date it holds.
 List<Accessor> getCloudDataVariableAccessorsForType(VariableType dataType) => [
-      Accessor(
-        name: 'url',
-        type: VariableType.text,
-        getValue: (value) => value.toMap()?['url'],
-      ),
-      Accessor(
-        name: 'status',
-        type: VariableType.text,
-        getValue: (value) => value.toMap()?['status']?.toString(),
-      ),
-      Accessor(
-        name: 'isIdle',
-        type: VariableType.boolean,
-        getValue: (value) => value.toMap()?['isIdle']?.toBool(),
-      ),
-      Accessor(
-        name: 'isLoading',
-        type: VariableType.boolean,
-        getValue: (value) => value.toMap()?['isLoading']?.toBool(),
-      ),
-      Accessor(
-        name: 'isError',
-        type: VariableType.boolean,
-        getValue: (value) => value.toMap()?['isError']?.toBool(),
-      ),
-      Accessor(
-        name: 'isSuccess',
-        type: VariableType.boolean,
-        getValue: (value) => value.toMap()?['isSuccess']?.toBool(),
-      ),
-      Accessor(
-        name: 'hasData',
-        type: VariableType.boolean,
-        getValue: (value) => value.toMap()?['hasData']?.toBool(),
-      ),
-      Accessor(
-        name: 'data',
-        type: dataType,
-        getValue: (value) => value.toMap()?['data'],
-      ),
-      Accessor(
-        name: 'error',
-        type: dataType,
-        getValue: (value) => value.toMap()?['error'],
-      ),
-    ];
+  Accessor(
+    name: 'url',
+    type: VariableType.text,
+    getValue: (value) => value.toMap()?['url'],
+  ),
+  Accessor(
+    name: 'status',
+    type: VariableType.text,
+    getValue: (value) => value.toMap()?['status']?.toString(),
+  ),
+  Accessor(
+    name: 'isIdle',
+    type: VariableType.boolean,
+    getValue: (value) => value.toMap()?['isIdle']?.toBool(),
+  ),
+  Accessor(
+    name: 'isLoading',
+    type: VariableType.boolean,
+    getValue: (value) => value.toMap()?['isLoading']?.toBool(),
+  ),
+  Accessor(
+    name: 'isError',
+    type: VariableType.boolean,
+    getValue: (value) => value.toMap()?['isError']?.toBool(),
+  ),
+  Accessor(
+    name: 'isSuccess',
+    type: VariableType.boolean,
+    getValue: (value) => value.toMap()?['isSuccess']?.toBool(),
+  ),
+  Accessor(
+    name: 'hasData',
+    type: VariableType.boolean,
+    getValue: (value) => value.toMap()?['hasData']?.toBool(),
+  ),
+  Accessor(
+    name: 'data',
+    type: dataType,
+    getValue: (value) => value.toMap()?['data'],
+  ),
+  Accessor(
+    name: 'error',
+    type: dataType,
+    getValue: (value) => value.toMap()?['error'],
+  ),
+];

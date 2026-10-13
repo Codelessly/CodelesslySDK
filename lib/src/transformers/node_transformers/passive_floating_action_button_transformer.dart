@@ -21,23 +21,28 @@ class PassiveFloatingActionButtonTransformer
     required FloatingActionButtonProperties props,
     double? width,
     double? height,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildFromProps'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildFromProps',
+    ),
   }) {
     final node = FloatingActionButtonNode(
       id: '',
       name: 'FAB',
-      basicBoxLocal:
-          NodeBox(0, 0, width ?? props.type.size, height ?? props.type.size),
-      retainedOuterBoxLocal:
-          NodeBox(0, 0, width ?? props.type.size, props.type.size),
+      basicBoxLocal: NodeBox(
+        0,
+        0,
+        width ?? props.type.size,
+        height ?? props.type.size,
+      ),
+      retainedOuterBoxLocal: NodeBox(
+        0,
+        0,
+        width ?? props.type.size,
+        props.type.size,
+      ),
       properties: props,
     );
-    return buildFromNode(
-      context,
-      node,
-      settings: settings,
-    );
+    return buildFromNode(context, node, settings: settings);
   }
 
   Widget buildPreview({
@@ -45,8 +50,9 @@ class PassiveFloatingActionButtonTransformer
     FloatingActionButtonNode? node,
     double? width,
     VoidCallback? onPressed,
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildPreview'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildPreview',
+    ),
   }) {
     properties =
         properties ?? node?.properties ?? FloatingActionButtonProperties();
@@ -54,10 +60,18 @@ class PassiveFloatingActionButtonTransformer
       properties: properties,
       id: '',
       name: 'FAB',
-      basicBoxLocal:
-          NodeBox(0, 0, width ?? properties.type.size, properties.type.size),
-      retainedOuterBoxLocal:
-          NodeBox(0, 0, width ?? properties.type.size, properties.type.size),
+      basicBoxLocal: NodeBox(
+        0,
+        0,
+        width ?? properties.type.size,
+        properties.type.size,
+      ),
+      retainedOuterBoxLocal: NodeBox(
+        0,
+        0,
+        width ?? properties.type.size,
+        properties.type.size,
+      ),
     );
     return PassiveFloatingActionButtonWidget(
       node: previewNode,
@@ -69,8 +83,9 @@ class PassiveFloatingActionButtonTransformer
   Widget buildFromNode(
     BuildContext context,
     FloatingActionButtonNode node, {
-    WidgetBuildSettings settings =
-        const WidgetBuildSettings(debugLabel: 'buildFromNode'),
+    WidgetBuildSettings settings = const WidgetBuildSettings(
+      debugLabel: 'buildFromNode',
+    ),
   }) {
     return PassiveFloatingActionButtonWidget(
       node: node,
@@ -80,8 +95,11 @@ class PassiveFloatingActionButtonTransformer
   }
 
   void onPressed(BuildContext context, List<Reaction> reactions) =>
-      FunctionsRepository.triggerAction(context, TriggerType.click,
-          reactions: reactions);
+      FunctionsRepository.triggerAction(
+        context,
+        TriggerType.click,
+        reactions: reactions,
+      );
 }
 
 class PassiveFloatingActionButtonWidget extends StatelessWidget {
@@ -104,12 +122,7 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
     return SizedBox(
       width: node.middleBoxLocal.width,
       height: node.middleBoxLocal.height,
-      child: buildFAB(
-        node.id,
-        fab,
-        onPressed: onPressed,
-        elevation: elevation,
-      ),
+      child: buildFAB(node.id, fab, onPressed: onPressed, elevation: elevation),
     );
   }
 
@@ -173,8 +186,10 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
         return FloatingActionButton.extended(
           heroTag: null,
           onPressed: onPressed,
-          extendedPadding:
-              const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+          extendedPadding: const EdgeInsets.symmetric(
+            vertical: 2,
+            horizontal: 10,
+          ),
           backgroundColor: fab.backgroundColor.toFlutterColor(),
           foregroundColor: fab.foregroundColor.toFlutterColor(),
           elevation: elevation ?? fab.elevation,
@@ -185,8 +200,9 @@ class PassiveFloatingActionButtonWidget extends StatelessWidget {
           hoverColor: fab.hoverColor?.toFlutterColor(),
           splashColor: fab.splashColor?.toFlutterColor(),
           extendedIconLabelSpacing: fab.extendedIconLabelSpacing,
-          extendedTextStyle:
-              TextUtils.retrieveTextStyleFromProp(fab.labelStyle),
+          extendedTextStyle: TextUtils.retrieveTextStyleFromProp(
+            fab.labelStyle,
+          ),
           shape: shape,
           icon: !fab.icon.show ? null : getFABIcon(fab),
           label: Text(fab.label),

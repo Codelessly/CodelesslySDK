@@ -18,7 +18,7 @@ class IndexedItemProvider extends InheritedWidget {
       oldWidget.item != item;
 }
 
-class IndexedItem with EquatableMixin {
+class IndexedItem with Equatable {
   final int index;
   final Object? item;
 
