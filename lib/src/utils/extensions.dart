@@ -1880,6 +1880,18 @@ extension TabBarIndicatorSizeExtensions on TabBarIndicatorSizeEnum {
   }
 }
 
+extension TabAlignmentCExtensions on TabAlignmentC {
+  /// Returns null for alignments that Flutter's [TabBar] rejects for the
+  /// given scrollability, so it falls back to its default.
+  TabAlignment? toFlutter({required bool isScrollable}) => switch (this) {
+        TabAlignmentC.start => isScrollable ? TabAlignment.start : null,
+        TabAlignmentC.startOffset =>
+          isScrollable ? TabAlignment.startOffset : null,
+        TabAlignmentC.fill => isScrollable ? null : TabAlignment.fill,
+        TabAlignmentC.center => TabAlignment.center,
+      };
+}
+
 extension TextAlignVerticalEnumExt on TextAlignVerticalEnum {
   TextAlignVertical get flutterTextAlignVertical {
     return switch (this) {

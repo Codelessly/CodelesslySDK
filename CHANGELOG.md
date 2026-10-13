@@ -9,6 +9,8 @@
   RoundedSuperellipseBorder shapes, TextAlign start/end, the
   `endContained` FAB location, `webSearch`/`twitter` keyboards, and the
   `onUnfocus`/`onUserInteractionIfError` autovalidate modes.
+- Render the new AppBar `foregroundColor`/`scrolledUnderElevation` and
+  TabBar `tabAlignment`/`dividerHeight` properties.
 
 ## 6.2.0
 

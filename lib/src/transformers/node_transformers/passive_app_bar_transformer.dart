@@ -84,8 +84,9 @@ class PassiveAppBarTransformer extends NodeWidgetTransformer<AppBarNode> {
       surfaceTintColor: node.properties.backgroundColor.toFlutterColor(),
       backgroundColor: node.properties.backgroundColor.toFlutterColor(),
       elevation: node.properties.elevation,
-      foregroundColor:
+      foregroundColor: node.properties.foregroundColor?.toFlutterColor() ??
           node.properties.titleStyle.fills.firstOrNull?.toFlutterColor(),
+      scrolledUnderElevation: node.properties.scrolledUnderElevation,
       shadowColor: node.properties.shadowColor.toFlutterColor(),
       actions: [
         for (final item
@@ -280,8 +281,9 @@ class PassiveAppBarWidget extends StatelessWidget
             ? node.properties.automaticallyImplyLeading
             : false,
         title: title,
-        foregroundColor:
+        foregroundColor: node.properties.foregroundColor?.toFlutterColor() ??
             node.properties.titleStyle.fills.firstOrNull?.toFlutterColor(),
+        scrolledUnderElevation: node.properties.scrolledUnderElevation,
         titleSpacing: node.properties.titleSpacing,
         shadowColor: node.properties.shadowColor.toFlutterColor(),
         actions: [
