@@ -408,6 +408,8 @@ class SvgIcon extends StatelessWidget {
         url,
         fit: fit,
         colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+        // Offline or unavailable icons leave their space empty.
+        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
       ),
     );
   }
@@ -461,6 +463,8 @@ class SvgIconImage extends StatelessWidget {
               url!,
               fit: fit,
               colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+              errorBuilder: (context, error, stackTrace) =>
+                  const SizedBox.shrink(),
             ),
     );
   }

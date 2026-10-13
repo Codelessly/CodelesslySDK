@@ -222,6 +222,8 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         placeholderBuilder: widget.loadingBuilder != null
             ? (context) => widget.loadingBuilder!(context, null)
             : null,
+        errorBuilder: (context, error, stackTrace) =>
+            (widget.errorBuilder ?? _defaultErrorBuilder)(context),
       );
     } else if (url.isBase64Blob) {
       child = Image.memory(

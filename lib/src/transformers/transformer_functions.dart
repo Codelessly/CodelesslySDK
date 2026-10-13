@@ -334,6 +334,9 @@ Widget? retrieveIconWidget(
             icon.iconImage!,
             width: size ?? icon.size ?? kDefaultIconSize,
             height: size ?? icon.size ?? kDefaultIconSize,
+            errorBuilder: (context, error, stackTrace) => SizedBox.square(
+              dimension: size ?? icon.size ?? kDefaultIconSize,
+            ),
           );
         }
         return SizedBox.square(
