@@ -84,6 +84,23 @@ class CodelesslyConfig with Equatable {
   /// The Firebase project ID for this instance.
   final String firebaseProjectId;
 
+  /// Whether layouts render with the app's [Theme] instead of a default
+  /// [ThemeData].
+  ///
+  /// Layouts are styled explicitly in the Codelessly editor, so by default
+  /// they render with a default theme to look exactly as designed. Enable this
+  /// to let theme-derived defaults (color scheme, typography, brightness)
+  /// follow the app.
+  final bool useHostTheme;
+
+  /// The largest text scale factor layouts follow from the platform's text
+  /// size setting.
+  ///
+  /// Layouts are designed at fixed sizes, so the default of 1 ignores the
+  /// setting. Raise it to let text grow for accessibility, at the risk of
+  /// text overflowing fixed-size boxes.
+  final double maxTextScaleFactor;
+
   /// Creates a new instance of [CodelesslyConfig].
   ///
   /// [authToken] is the token required to authenticate and initialize the SDK.
@@ -108,7 +125,10 @@ class CodelesslyConfig with Equatable {
     this.firebaseProjectId = CodelesslyConstants.kProdFirebaseProjectId,
     PublishSource? publishSource,
     this.debugLog = false,
-  })  : firebaseOptions =
+    this.useHostTheme = false,
+    this.maxTextScaleFactor = 1,
+  })  : assert(maxTextScaleFactor >= 1),
+        firebaseOptions =
             firebaseOptions ?? DefaultFirebaseOptionsProd.currentPlatform,
         publishSource = publishSource ??
             (isPreview ? PublishSource.preview : PublishSource.publish);
@@ -121,7 +141,6 @@ class CodelesslyConfig with Equatable {
     bool? automaticallySendCrashReports,
     bool? isPreview,
     bool? preload,
-    bool? staggerDownloadQueue,
     FirebaseOptions? firebaseOptions,
     String? firebaseCloudFunctionsBaseURL,
     String? baseURL,
@@ -129,6 +148,9 @@ class CodelesslyConfig with Equatable {
     String? clientType,
     String? firebaseProjectId,
     PublishSource? publishSource,
+    bool? debugLog,
+    bool? useHostTheme,
+    double? maxTextScaleFactor,
   }) =>
       CodelesslyConfig(
         authToken: authToken ?? this.authToken,
@@ -145,6 +167,9 @@ class CodelesslyConfig with Equatable {
         clientType: clientType ?? this.clientType,
         firebaseProjectId: firebaseProjectId ?? this.firebaseProjectId,
         publishSource: publishSource ?? this.publishSource,
+        debugLog: debugLog ?? this.debugLog,
+        useHostTheme: useHostTheme ?? this.useHostTheme,
+        maxTextScaleFactor: maxTextScaleFactor ?? this.maxTextScaleFactor,
       );
 
   @override
@@ -161,6 +186,9 @@ class CodelesslyConfig with Equatable {
         clientType,
         firebaseProjectId,
         publishSource,
+        debugLog,
+        useHostTheme,
+        maxTextScaleFactor,
       ];
 }
 

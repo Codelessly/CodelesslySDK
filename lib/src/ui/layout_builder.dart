@@ -341,10 +341,17 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
 
   @override
   Widget build(BuildContext context) {
+    final CodelesslyConfig config = widget.controller.config;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+      data: mediaQuery.copyWith(
+        textScaler: config.maxTextScaleFactor <= 1
+            ? TextScaler.noScaling
+            : mediaQuery.textScaler
+                .clamp(maxScaleFactor: config.maxTextScaleFactor),
+      ),
       child: Theme(
-        data: ThemeData(),
+        data: config.useHostTheme ? Theme.of(context) : ThemeData(),
         child: transformerManager.buildWidgetFromNode(
           canvasNode,
           context,

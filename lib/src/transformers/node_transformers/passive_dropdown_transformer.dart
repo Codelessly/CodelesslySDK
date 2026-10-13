@@ -184,7 +184,7 @@ class PassiveDropdownWidget extends StatelessWidget {
     return AdaptiveNodeBox(
       node: node,
       child: Theme(
-        data: ThemeData(
+        data: Theme.of(context).copyWith(
           hoverColor: node.properties.hoverColor?.toFlutterColor(),
           splashColor: node.properties.splashColor?.toFlutterColor(),
         ),
