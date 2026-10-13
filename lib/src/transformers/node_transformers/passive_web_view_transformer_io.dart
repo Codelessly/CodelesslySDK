@@ -10,6 +10,8 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
+import '../../logging/debug_logger.dart';
+
 import '../../../codelessly_sdk.dart';
 
 class PassiveWebViewTransformer extends NodeWidgetTransformer<WebViewNode> {
@@ -161,7 +163,10 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
   void initState() {
     super.initState();
     if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      print('Unsupported platform: $defaultTargetPlatform for WebView.');
+      DebugLogger.instance.printInfo(
+        'Unsupported platform: $defaultTargetPlatform for WebView.',
+        name: 'RawWebViewWidget',
+      );
       return;
     }
 
@@ -205,7 +210,10 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      print('Unsupported platform: $defaultTargetPlatform for WebView.');
+      DebugLogger.instance.printInfo(
+        'Unsupported platform: $defaultTargetPlatform for WebView.',
+        name: 'RawWebViewWidget',
+      );
       return;
     }
     if (!_isDataLoaded) {
@@ -214,35 +222,64 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
     }
   }
 
-  Future<void> _loadData() async {
+  /// The source most recently loaded into [_controller].
+  String? _loadedSource;
+
+  @override
+  void didUpdateWidget(covariant RawWebViewWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reload when the properties or the variables they read changed.
+    if (_isDataLoaded) _loadData();
+  }
+
+  /// The URL (or Flutter asset path) the properties currently point to.
+  ({String source, bool isAsset}) _resolveSource() {
     final ScopedValues scopedValues = ScopedValues.of(context);
     final WebViewProperties props = widget.properties;
     switch (props.webviewType) {
       case WebViewType.webpage:
         final WebPageWebViewProperties properties =
             props as WebPageWebViewProperties;
-        url = PropertyValueDelegate.getVariableValueFromPath<String>(
-                properties.input,
-                scopedValues: scopedValues) ??
-            properties.input;
         switch (properties.pageSourceType) {
           case WebViewWebpageSourceType.url:
-            return _controller.loadRequest(Uri.parse(url));
+            return (
+              source: PropertyValueDelegate.getVariableValueFromPath<String>(
+                    properties.input,
+                    scopedValues: scopedValues,
+                  ) ??
+                  properties.input,
+              isAsset: false,
+            );
           case WebViewWebpageSourceType.html:
-            final String content = _buildHtmlContent(properties.input);
-            return _controller.loadRequest(Uri.parse(content));
+            return (
+              source: _buildHtmlContent(properties.input),
+              isAsset: false,
+            );
           case WebViewWebpageSourceType.asset:
-            // provided from onWebViewCreated callback.
-            return _controller.loadFlutterAsset(properties.input);
+            return (source: properties.input, isAsset: true);
         }
       case WebViewType.googleMaps:
-        url = buildGoogleMapsURL(
-            props as GoogleMapsWebViewProperties, scopedValues);
-        return _controller.loadRequest(Uri.parse(url));
+        return (
+          source: buildGoogleMapsURL(
+              props as GoogleMapsWebViewProperties, scopedValues),
+          isAsset: false,
+        );
       case WebViewType.twitter:
-        url = buildTwitterURL(props as TwitterWebViewProperties, scopedValues);
-        return _controller.loadRequest(Uri.parse(url));
+        return (
+          source:
+              buildTwitterURL(props as TwitterWebViewProperties, scopedValues),
+          isAsset: false,
+        );
     }
+  }
+
+  Future<void> _loadData() async {
+    final (:source, :isAsset) = _resolveSource();
+    if (source == _loadedSource) return;
+    _loadedSource = source;
+    if (isAsset) return _controller.loadFlutterAsset(source);
+    url = source;
+    return _controller.loadRequest(Uri.parse(source));
   }
 
   @override

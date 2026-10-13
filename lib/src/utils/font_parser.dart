@@ -1,16 +1,8 @@
-import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:codelessly_api/codelessly_api.dart';
 
 import '../model/font_family.dart';
-
-void main(List<String> args) {
-  final file = File(args[0]);
-  final result = FontParser.parse(file.readAsBytesSync());
-  print('Result: ${const JsonEncoder.withIndent('  ').convert(result)}');
-}
 
 /// Compares the given [a] [FontVariantModel] with the [b] [FontVariantModel]
 /// and returns the score.
@@ -280,7 +272,6 @@ class FontParser {
         str = bin.readUnicode(data, soff, slen ~/ 2);
       } else if (platformID == 1) {
         str = bin.readASCII(data, soff, slen);
-        print('reading unknown MAC encoding $encodingID as ASCII');
       } else {
         throw Exception(
             'unknown encoding $encodingID, platformID: $platformID');
@@ -306,7 +297,6 @@ class FontParser {
       tname = p;
       break;
     }
-    print(obj);
     return obj[tname];
   }
 }

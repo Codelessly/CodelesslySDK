@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' as vec_math;
 
 import '../../../codelessly_sdk.dart';
+import '../../logging/debug_logger.dart';
 
 class PassiveRectangleTransformer extends NodeWidgetTransformer<BaseNode> {
   PassiveRectangleTransformer(super.getNode, super.manager);
@@ -433,8 +434,10 @@ Gradient? retrieveGradient(PaintModel paint) {
 
     return null;
   } catch (error, stacktrace) {
-    print(error);
-    print(stacktrace);
+    DebugLogger.instance.printInfo(
+      'Failed to build gradient: $error\n$stacktrace',
+      name: 'PassiveRectangleTransformer',
+    );
     return null;
   }
 }

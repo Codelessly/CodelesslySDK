@@ -156,19 +156,13 @@ class _RawWebViewWidgetState extends State<RawWebViewWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.settings.isPreview) {
-      print('Preview mode for WebView.');
-      return;
-    }
+    if (widget.settings.isPreview) return;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (widget.settings.isPreview) {
-      print('Preview mode for WebView.');
-      return;
-    }
+    if (widget.settings.isPreview) return;
     if (!_isDataLoaded) {
       _isDataLoaded = true;
       _loadData();

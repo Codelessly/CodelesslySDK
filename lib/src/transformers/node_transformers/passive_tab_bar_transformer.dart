@@ -167,8 +167,12 @@ class _PassiveTabBarWidgetState extends State<PassiveTabBarWidget>
           padding: widget.node.padding.flutterEdgeInsets,
           overlayColor: WidgetStateProperty.all(
               widget.node.properties.overlayColor?.toFlutterColor()),
-          dividerColor: widget.node.properties.dividerColor?.toFlutterColor(),
-          dividerHeight: widget.node.properties.dividerHeight,
+          dividerColor: widget.node.properties.showDivider
+              ? widget.node.properties.dividerColor?.toFlutterColor()
+              : Colors.transparent,
+          dividerHeight: widget.node.properties.showDivider
+              ? widget.node.properties.dividerHeight
+              : 0,
           tabAlignment: widget.node.properties.tabAlignment
               ?.toFlutter(isScrollable: widget.node.isScrollable),
           indicatorColor:

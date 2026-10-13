@@ -2,6 +2,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../logging/debug_logger.dart';
 
 class ConditionEvaluator<R extends Object>
     implements
@@ -273,13 +274,13 @@ class ConditionPrinter
   final StringBuffer _buffer = StringBuffer();
 
   void printCondition(BaseCondition condition) {
-    _buffer.clear();
-    condition.accept(this);
-    print('\n${_buffer.toString()}');
+    DebugLogger.instance
+        .printInfo('\n${prettify(condition)}', name: 'ConditionPrinter');
   }
 
   String prettify(BaseCondition condition) {
-    printCondition(condition);
+    _buffer.clear();
+    condition.accept(this);
     return _buffer.toString();
   }
 

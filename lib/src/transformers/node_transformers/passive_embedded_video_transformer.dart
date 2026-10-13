@@ -9,6 +9,7 @@ import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../web/web_webview_platform.dart';
+import '../../logging/debug_logger.dart';
 
 class PassiveEmbeddedVideoTransformer
     extends NodeWidgetTransformer<EmbeddedVideoNode> {
@@ -94,8 +95,10 @@ class _PassiveEmbeddedVideoWidgetState
   void initState() {
     super.initState();
     if (!isPlatformSupportedForWebView || widget.settings.isPreview) {
-      print('Unsupported platform: $defaultTargetPlatform for embedded '
-          'video.');
+      DebugLogger.instance.printInfo(
+        'Unsupported platform: $defaultTargetPlatform for embedded video.',
+        name: 'EmbeddedVideo',
+      );
       return;
     }
     final PlatformWebViewControllerCreationParams params;
@@ -126,7 +129,6 @@ class _PassiveEmbeddedVideoWidgetState
     }
     // _controller.setUserAgent('chrome');
     if (_controller.platform is AndroidWebViewController) {
-      print('setting android config');
       final controller = _controller.platform as AndroidWebViewController;
       controller.setMediaPlaybackRequiresUserGesture(
           !widget.node.properties.autoPlay);
@@ -135,7 +137,6 @@ class _PassiveEmbeddedVideoWidgetState
       controller.setUserAgent(
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
     } else if (_controller.platform is WebKitWebViewController) {
-      print('setting webkit config');
       final controller = _controller.platform as WebKitWebViewController;
       if (widget.node.properties.source == EmbeddedVideoSource.youtube) {
         controller.setUserAgent(
@@ -163,7 +164,7 @@ class _PassiveEmbeddedVideoWidgetState
           baseUrl: config.baseURL,
         );
     }
-    print('Loading $embedUrl');
+    DebugLogger.instance.printInfo('Loading $embedUrl', name: 'EmbeddedVideo');
     _controller.loadRequest(Uri.parse(embedUrl));
   }
 
