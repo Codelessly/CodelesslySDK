@@ -130,7 +130,15 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
             ),
       );
 
+  /// The canvas node from [nodeRegistry], whose parent links [loadLayout]
+  /// resolved.
+  ///
+  /// [widget.layout] can be replaced by a freshly decoded copy with the same
+  /// [SDKPublishLayout.lastUpdated], which [didUpdateWidget] does not reload.
+  /// Its nodes have no parent links, so building from it would look up a
+  /// parent with an empty ID.
   CanvasNode get canvasNode =>
+      nodeRegistry.getNodeByIdOrNull(widget.canvasId) as CanvasNode? ??
       widget.layout.canvases[widget.canvasId]![widget.canvasId] as CanvasNode;
 
   /// Whether the layout should be loaded. This is used to prevent the layout

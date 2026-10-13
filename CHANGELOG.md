@@ -1,3 +1,11 @@
+## 7.0.1
+
+- Fix published layouts failing with "Node with id  not found" on web
+  release builds. When the layout was replaced by a freshly decoded copy
+  with the same `lastUpdated`, the canvas was built from that copy, whose
+  nodes have no parent links. The canvas is now read from the resolved
+  node registry.
+
 ## 7.0.0
 
 ### Breaking changes
