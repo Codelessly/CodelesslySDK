@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_android/webview_flutter_android.dart';
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../../codelessly_sdk.dart';
-import '../web/web_webview_platform.dart';
+import 'embedded_video_controller.dart';
 
 class PassiveEmbeddedVideoTransformer
     extends NodeWidgetTransformer<EmbeddedVideoNode> {
@@ -100,49 +98,10 @@ class _PassiveEmbeddedVideoWidgetState
       );
       return;
     }
-    final PlatformWebViewControllerCreationParams params;
-    if (kIsWeb) {
-      // WebView on web only supports loadRequest. Any other method invocation
-      // on the controller will result in an exception. Be aware!!
-      WebViewPlatform.instance = WebWebViewPlatform();
-      _controller = WebViewController();
-    } else {
-      if (WebViewPlatform.instance is WebKitWebViewPlatform) {
-        params = WebKitWebViewControllerCreationParams(
-          allowsInlineMediaPlayback: true,
-          mediaTypesRequiringUserAction: {
-            if (!widget.node.properties.autoPlay) ...{
-              PlaybackMediaTypes.audio,
-              PlaybackMediaTypes.video,
-            },
-          },
-        );
-      } else if (WebViewPlatform.instance is AndroidWebViewPlatform) {
-        params = AndroidWebViewControllerCreationParams();
-      } else {
-        params = const PlatformWebViewControllerCreationParams();
-      }
-
-      _controller = WebViewController.fromPlatformCreationParams(params);
-      _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
-    }
-    // _controller.setUserAgent('chrome');
-    if (_controller.platform is AndroidWebViewController) {
-      final controller = _controller.platform as AndroidWebViewController;
-      controller.setMediaPlaybackRequiresUserGesture(
-          !widget.node.properties.autoPlay);
-      // Using this user-agent string to force the video to play in the webview
-      // on Android. This is a hack, but it works.
-      controller.setUserAgent(
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
-    } else if (_controller.platform is WebKitWebViewController) {
-      final controller = _controller.platform as WebKitWebViewController;
-      if (widget.node.properties.source == EmbeddedVideoSource.youtube) {
-        controller.setUserAgent(
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
-        // controller.setUserAgent('chrome');
-      }
-    }
+    _controller = createEmbeddedVideoController(
+      autoPlay: widget.node.properties.autoPlay,
+      isYoutube: widget.node.properties.source == EmbeddedVideoSource.youtube,
+    );
 
     final config = context.read<Codelessly>().config!;
 
