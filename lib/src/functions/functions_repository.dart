@@ -1528,6 +1528,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     BuildContext context,
     SetCloudStorageAction action,
   ) async {
+    await awaitCloudDatabase(context);
+    if (!context.mounted) return false;
     final ScopedValues scopedValues = ScopedValues.of(context);
     return await switch (action.subAction) {
       AddDocumentSubAction addDocumentSubAction => addDocumentToCloud(
@@ -1810,6 +1812,23 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     }
   }
 
+  /// The project's cloud database, waiting for it when an action runs
+  /// before it is ready: on a reload the app user is restored, and a screen
+  /// can load data, before the SDK has verified the project's data access.
+  static Future<CloudDatabase?> awaitCloudDatabase(
+    BuildContext context, {
+    Codelessly? codelessly,
+    Duration timeout = const Duration(seconds: 20),
+  }) async {
+    codelessly ??= context.read<Codelessly>();
+    final DateTime deadline = DateTime.now().add(timeout);
+    while (codelessly.cloudDatabase == null &&
+        DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+    return codelessly.cloudDatabase;
+  }
+
   static Future<void> loadFromStorageAction(
     BuildContext context,
     LoadFromCloudStorageAction action,
@@ -1838,12 +1857,18 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       value: CloudDatabaseVariableUtils.loading(),
     );
 
-    final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
+    final Codelessly codelessly = context.read<Codelessly>();
+    final CloudDatabase? cloudDatabase =
+        scopedValues.cloudDatabase ??
+        await awaitCloudDatabase(context, codelessly: codelessly);
 
     if (cloudDatabase == null) {
       DebugLogger.instance.printInfo(
-        'Cloud storage is null. Waiting for it to initialize...',
+        'Cloud storage did not initialize.',
         name: name,
+      );
+      variable.value = variable.value.copyWith(
+        value: CloudDatabaseVariableUtils.error('Cloud data is unavailable.'),
       );
       return;
     }
@@ -1875,7 +1900,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         whereFilters: action.whereFilters,
         orderByOperations: action.orderByFilters,
         limit: (action.limit ?? 0) > 0 ? action.limit : null,
-        scopedValues: ScopedValues.of(context),
+        scopedValues: scopedValues,
         nullSubstitutionMode: NullSubstitutionMode.emptyString,
       );
     }
