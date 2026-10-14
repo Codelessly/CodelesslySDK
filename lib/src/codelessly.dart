@@ -332,7 +332,7 @@ class Codelessly {
     initErrorLogger();
 
     assert(
-      status is! CEmpty,
+      status is CEmpty || status is CConfigured,
       'The SDK cannot be configured if it is not idle. '
       'Consider calling [Codelessly.dispose] before reconfiguring.',
     );
