@@ -1568,33 +1568,9 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
       Map<String, dynamic> data = {};
       if (subAction.useRawValue) {
-        // Substitute variables in raw value.
-        final updatedValue = PropertyValueDelegate.substituteVariables(
-          subAction.rawValue,
-          nullSubstitutionMode: NullSubstitutionMode.emptyString,
-          scopedValues: scopedValues,
-        );
-        // Parse to JSON.
-        final parsed = tryJsonDecode(updatedValue);
-        data = switch (parsed) {
-          null => {},
-          Map map => Map<String, dynamic>.from(map),
-          _ => {'data': parsed},
-        };
+        data = _jsonFromTemplate(subAction.rawValue, scopedValues);
       } else {
-        // Substitute variables in value.
-        final updatedValue = PropertyValueDelegate.substituteVariables(
-          subAction.newValue,
-          nullSubstitutionMode: NullSubstitutionMode.emptyString,
-          scopedValues: scopedValues,
-        );
-        // Parse to JSON.
-        final parsed = tryJsonDecode(updatedValue);
-        data = switch (parsed) {
-          null => {},
-          Map map => Map<String, dynamic>.from(map),
-          _ => {'data': parsed},
-        };
+        data = _jsonFromTemplate(subAction.newValue, scopedValues);
       }
 
       // Pick the id here when generating one, so `${result.id}` can tell the
@@ -1607,8 +1583,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         value: data,
         documentId: documentId,
         skipCreationIfDocumentExists:
-            !subAction.autoGenerateId &&
-            subAction.skipCreationIfDocumentExists,
+            !subAction.autoGenerateId && subAction.skipCreationIfDocumentExists,
       );
       ActionChain.setResult({'id': documentId, 'path': evaluatedPath});
       return added;
@@ -1617,6 +1592,32 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
       return false;
     }
+  }
+
+  /// The document data a JSON [template] describes once its variables are
+  /// substituted. See [PropertyValueDelegate.substituteVariablesInJson].
+  static Map<String, dynamic> _jsonFromTemplate(
+    String template,
+    ScopedValues scopedValues,
+  ) {
+    final Map<String, dynamic>? data =
+        PropertyValueDelegate.substituteVariablesInJson(
+          template,
+          scopedValues: scopedValues,
+        );
+    if (data != null) return data;
+    final Object? parsed = tryJsonDecode(
+      PropertyValueDelegate.substituteVariables(
+        template,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
+      ),
+    );
+    return switch (parsed) {
+      null => {},
+      Map map => Map<String, dynamic>.from(map),
+      _ => {'data': parsed},
+    };
   }
 
   static Future<bool> updateDocumentOnCloud(
@@ -1642,14 +1643,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
 
     if (subAction.useRawValue) {
-      // Substitute variables in raw value.
-      final updatedValue = PropertyValueDelegate.substituteVariables(
+      final Map<String, dynamic> data = _jsonFromTemplate(
         subAction.rawValue,
-        nullSubstitutionMode: NullSubstitutionMode.emptyString,
-        scopedValues: scopedValues,
+        scopedValues,
       );
-      // Parse to JSON.
-      final Map<String, dynamic> data = jsonDecode(updatedValue);
 
       return await cloudDatabase.updateDocument(
         evaluatedPath,

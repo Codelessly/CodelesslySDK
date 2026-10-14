@@ -18,12 +18,19 @@ class ActionChain {
   /// The chain the running action belongs to, if any.
   static ActionChain? get current => Zone.current[_zoneKey] as ActionChain?;
 
-  /// Sets the current chain's result, when an action runs in a chain.
-  static void setResult(Object? result) => current?.result = result;
+  /// Sets the current chain's result, when an action runs in a chain. Map
+  /// results merge into a map result, so values an earlier action produced
+  /// (e.g. an upload's `url`) stay readable after a later one adds its own.
+  static void setResult(Object? result) {
+    final ActionChain? chain = current;
+    if (chain == null) return;
+    final Object? previous = chain.result;
+    chain.result = previous is Map && result is Map
+        ? {...previous, ...result}
+        : result;
+  }
 
   /// Runs [body] in a new chain whose `${result}` starts as [result].
-  static R run<R>(R Function() body, {Object? result}) => runZoned(
-    body,
-    zoneValues: {_zoneKey: ActionChain(result: result)},
-  );
+  static R run<R>(R Function() body, {Object? result}) =>
+      runZoned(body, zoneValues: {_zoneKey: ActionChain(result: result)});
 }

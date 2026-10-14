@@ -493,7 +493,7 @@ class Codelessly {
       // Initialize Firestore and FirebaseAuth instances.
       _firebaseFirestore = FirebaseFirestore.instanceFor(app: _firebaseApp!);
       _firebaseAuth = FirebaseAuth.instanceFor(app: _firebaseApp!);
-        _listenToAppUser();
+      _listenToAppUser();
 
       _didInitializeFirebase = true;
 

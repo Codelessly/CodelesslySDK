@@ -111,9 +111,10 @@ abstract final class AppAuth {
 
       // A different user needs the project's claim before it can read or
       // write the project's data.
-      if (action.operation case AuthOperation.signIn ||
-          AuthOperation.signUp ||
-          AuthOperation.signOut) {
+      if (action.operation
+          case AuthOperation.signIn ||
+              AuthOperation.signUp ||
+              AuthOperation.signOut) {
         await codelessly.authManager.reauthenticate();
       }
     } catch (error) {
