@@ -181,8 +181,17 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     // Traverse through all the multi-variables that the node properties are attached
     // to.
-    for (final String variablePath
-        in node.multipleVariables.values.expand((path) => path).toSet()) {
+    // Text written with inline `${...}` paths listens to them too, so text
+    // stays live whether or not its multipleVariables were filled in.
+    final Set<String> multiplePaths = {
+      ...node.multipleVariables.values.expand((path) => path),
+      if (node is TextNode)
+        ...variablePathRegex
+            .allMatches(node.characters)
+            .map((match) => match.namedGroup('value'))
+            .nonNulls,
+    };
+    for (final String variablePath in multiplePaths) {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
       if (match == null) continue;
 

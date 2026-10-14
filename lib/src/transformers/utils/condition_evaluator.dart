@@ -59,6 +59,17 @@ class ConditionEvaluator<R extends Object>
 
   @override
   Object? visitVariablePart(VariablePart part) {
+    // A part that is exactly one path compares by its value as is, so lists
+    // and maps keep their type for operators like contains and isEmpty.
+    final String path = part.valueString.trim();
+    if (RegExp(r'^\$\{[^{}]+\}$').hasMatch(path)) {
+      final Object? raw =
+          PropertyValueDelegate.getVariableValueFromPath<Object>(
+            path,
+            scopedValues: scopedValues,
+          );
+      if (raw is List || raw is Map) return raw;
+    }
     final value = part.valueString.splitMapJoinRegex(
       variablePathRegex,
       onMatch: (match) {
