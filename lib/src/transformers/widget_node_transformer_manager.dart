@@ -53,23 +53,27 @@ abstract class WidgetNodeTransformerManager
     Widget widget, {
     required bool maintainState,
   }) {
-    final bool visible =
-        PropertyValueDelegate.getPropertyValue<bool>(
-          node,
-          'visible',
-          scopedValues: ScopedValues.of(context),
-        ) ??
-        node.visible;
+    final bool? runtimeVisible = PropertyValueDelegate.getPropertyValue<bool>(
+      node,
+      'visible',
+      scopedValues: ScopedValues.of(context),
+    );
+    final bool visible = runtimeVisible ?? node.visible;
 
     if (visible) return widget;
 
+    // A node hidden by a condition or variable at runtime gives up its space,
+    // so alternative content (a sign-in or sign-up title, an error line) can
+    // share a spot in a row or column. A node hidden in the editor keeps its
+    // space, matching the canvas.
+    final bool keepSize = maintainState && runtimeVisible == null;
     return Visibility(
       visible: visible,
       maintainState: maintainState,
       maintainAnimation: maintainState,
-      maintainSize: maintainState,
-      maintainSemantics: maintainState,
-      maintainInteractivity: maintainState,
+      maintainSize: keepSize,
+      maintainSemantics: keepSize,
+      maintainInteractivity: keepSize,
       child: widget,
     );
   }
