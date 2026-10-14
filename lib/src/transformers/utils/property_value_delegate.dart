@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/action_chain.dart';
 
 /// Represents what to do when a variable path evaluates to null when
 /// substituting variables in a text.
@@ -316,6 +317,8 @@ class PropertyValueDelegate {
       'value' => scopedValues.nodeState,
       'storage' => scopedValues.localStorage?.getAll(),
       'route' => scopedValues.routeParams,
+      'auth' => scopedValues.appUser,
+      'result' => ActionChain.current?.result,
       _ => null,
     };
 

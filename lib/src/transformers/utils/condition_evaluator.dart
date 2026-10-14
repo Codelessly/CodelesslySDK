@@ -260,6 +260,18 @@ class ConditionEvaluator<R extends Object>
 
   @override
   R? visitLoadFromCloudStorageAction(LoadFromCloudStorageAction action) => null;
+
+  @override
+  R? visitAuthAction(AuthAction action) => null;
+
+  @override
+  R? visitConditionalAction(ConditionalAction action) => null;
+
+  @override
+  R? visitForEachAction(ForEachAction action) => null;
+
+  @override
+  R? visitCloudFilesAction(CloudFilesAction action) => null;
 }
 
 class ConditionPrinter
@@ -392,4 +404,16 @@ class ConditionPrinter
 
   @override
   void visitLoadFromCloudStorageAction(LoadFromCloudStorageAction action) {}
+
+  @override
+  void visitAuthAction(AuthAction action) {}
+
+  @override
+  void visitConditionalAction(ConditionalAction action) {}
+
+  @override
+  void visitForEachAction(ForEachAction action) {}
+
+  @override
+  void visitCloudFilesAction(CloudFilesAction action) {}
 }

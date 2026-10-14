@@ -33,8 +33,13 @@ abstract class NetworkDataRepository {
     );
 
     try {
+      // Projects created since late 2024 use a `<id>.firebasestorage.app`
+      // bucket, so take the bucket from the options when they name one.
+      final String bucket =
+          config.firebaseOptions.storageBucket ??
+          '${config.firebaseOptions.projectId}.appspot.com';
       final String url =
-          'https://firebasestorage.googleapis.com/v0/b/${config.firebaseOptions.projectId}.appspot.com/o/${Uri.encodeComponent('${source.serverPath}/$slug.json')}?alt=media';
+          'https://firebasestorage.googleapis.com/v0/b/$bucket/o/${Uri.encodeComponent('${source.serverPath}/$slug.json')}?alt=media';
 
       DebugLogger.instance.printInfo('Publish bundle URL: $url', name: name);
       final http.Response result = await http.get(Uri.parse(url));
