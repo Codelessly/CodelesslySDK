@@ -169,7 +169,9 @@ abstract class CloudDatabase extends ChangeNotifier {
   ///
   /// [documentId] is the id of the document. If [documentId] is empty, then
   /// "default" is used as the document id.
-  void streamDocumentToVariable(
+  /// Streams a document into [variable]. Completes once the first snapshot
+  /// (or error) has been written to it.
+  Future<void> streamDocumentToVariable(
     String path,
     String documentId,
     Observable<VariableData> variable,
@@ -177,7 +179,9 @@ abstract class CloudDatabase extends ChangeNotifier {
 
   void reset();
 
-  void streamCollectionToVariable(
+  /// Streams a query into [variable]. Completes once the first snapshot
+  /// (or error) has been written to it.
+  Future<void> streamCollectionToVariable(
     String path,
     Observable<VariableData> variable, {
     required List<WhereQueryFilter> whereFilters,
@@ -343,7 +347,9 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
     // Auto generate id if desired.
     if (autoGenerateId) {
-      final document = await rootRef.collection(path).add(value);
+      final document = await rootRef
+          .collection(path)
+          .add(resolveFieldOperations(value));
       StatTracker.instance.track(StatType.write, 'cloudDatabase/addDocument');
 
       DebugLogger.instance.printInfo(
@@ -353,7 +359,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
       // Sanitize data afterwards because we didn't have the docId before.
       value = sanitizeCloudDataToSend(value, docId: document.id);
-      await document.set(value);
+      await document.set(resolveFieldOperations(value));
 
       return true;
     }
@@ -378,7 +384,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
     }
 
     // Set document.
-    await docRef.set(value);
+    await docRef.set(resolveFieldOperations(value));
     StatTracker.instance.track(StatType.write, 'cloudDatabase/addDocument');
 
     DebugLogger.instance.printInfo(
@@ -406,11 +412,15 @@ class FirestoreCloudDatabase extends CloudDatabase {
     //   await docRef.set(value);
     // }
 
-    // Sanitize data.
-    value = sanitizeCloudDataToSend(value, docId: documentId);
+    // Sanitize data. An update keeps the document's createdAt.
+    value = sanitizeCloudDataToSend(
+      value,
+      docId: documentId,
+      keepCreatedAt: true,
+    );
 
     // TODO: Should we do update instead of set?
-    await docRef.set(value, SetOptions(merge: true));
+    await docRef.set(resolveFieldOperations(value), SetOptions(merge: true));
     StatTracker.instance.track(StatType.write, 'cloudDatabase/updateDocument');
 
     DebugLogger.instance.printInfo(
@@ -464,11 +474,12 @@ class FirestoreCloudDatabase extends CloudDatabase {
   }
 
   @override
-  void streamDocumentToVariable(
+  Future<void> streamDocumentToVariable(
     String path,
     String documentId,
     Observable<VariableData> variable,
   ) {
+    final Completer<void> firstSnapshot = Completer<void>();
     DebugLogger.instance.printFunction(
       'streamDocumentToVariable(path: $path, documentId: $documentId)',
       name: name,
@@ -505,6 +516,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
             value: CloudDatabaseVariableUtils.success(data),
           ),
         );
+        if (!firstSnapshot.isCompleted) firstSnapshot.complete();
       },
       onError: (error) {
         DebugLogger.instance.printInfo(
@@ -517,10 +529,12 @@ class FirestoreCloudDatabase extends CloudDatabase {
             value: CloudDatabaseVariableUtils.error(error.toString()),
           ),
         );
+        if (!firstSnapshot.isCompleted) firstSnapshot.complete();
       },
     );
 
     _replaceSubscription(variable, subscription);
+    return firstSnapshot.future;
   }
 
   @override
@@ -535,7 +549,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
   }
 
   @override
-  void streamCollectionToVariable(
+  Future<void> streamCollectionToVariable(
     String path,
     Observable<VariableData> variable, {
     required List<WhereQueryFilter> whereFilters,
@@ -544,6 +558,8 @@ class FirestoreCloudDatabase extends CloudDatabase {
     required ScopedValues scopedValues,
     required NullSubstitutionMode nullSubstitutionMode,
   }) {
+    final Completer<void> firstSnapshot = Completer<void>();
+
     // Get doc reference.
     final collectionRef = getCollectionPath(path);
 
@@ -589,6 +605,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
             value: CloudDatabaseVariableUtils.success(docs),
           ),
         );
+        if (!firstSnapshot.isCompleted) firstSnapshot.complete();
       },
       onError: (error) {
         DebugLogger.instance.printInfo(
@@ -601,10 +618,12 @@ class FirestoreCloudDatabase extends CloudDatabase {
             value: CloudDatabaseVariableUtils.error(error.toString()),
           ),
         );
+        if (!firstSnapshot.isCompleted) firstSnapshot.complete();
       },
     );
 
     _replaceSubscription(variable, subscription);
+    return firstSnapshot.future;
   }
 }
 
@@ -649,6 +668,7 @@ Map<String, dynamic> sanitizeCloudDataToSend(
   bool hidePrivateFields = false,
   bool allowEmptyData = false,
   bool autoChangeUpdatedAt = true,
+  bool keepCreatedAt = false,
 }) {
   if (data.isEmpty && !allowEmptyData) return data;
 
@@ -664,9 +684,11 @@ Map<String, dynamic> sanitizeCloudDataToSend(
     late final DateTime now = DateTime.now().toUtc();
 
     if (autoChangeUpdatedAt) {
-      data[SDKConstants.createdAt] = serializedCosmicValue(
-        data[SDKConstants.createdAt] ?? now,
-      );
+      if (!keepCreatedAt || data.containsKey(SDKConstants.createdAt)) {
+        data[SDKConstants.createdAt] = serializedCosmicValue(
+          data[SDKConstants.createdAt] ?? now,
+        );
+      }
       data[SDKConstants.updatedAt] = serializedCosmicValue(now);
     }
 
@@ -687,6 +709,49 @@ Map<String, dynamic> sanitizeCloudDataToSend(
   data.remove('');
 
   return data;
+}
+
+/// Turns field operation markers in [data] into Firestore field values, so
+/// actions can write them from JSON:
+///
+/// * `{"$increment": 1}` adds to a number.
+/// * `{"$arrayUnion": [...]}` adds items to a list that aren't in it yet.
+/// * `{"$arrayRemove": [...]}` removes items from a list.
+/// * `{"$delete": true}` removes the field (updates only).
+/// * `{"$now": true}` writes the current time as an ISO 8601 string, the
+///   format `createdAt` and `updatedAt` use.
+Map<String, dynamic> resolveFieldOperations(Map<String, dynamic> data) => {
+  for (final MapEntry(:key, :value) in data.entries)
+    key: _resolveFieldOperation(value),
+};
+
+Object? _resolveFieldOperation(Object? value) {
+  if (value is List) return value.map(_resolveFieldOperation).toList();
+  if (value is! Map) return value;
+  if (value.length == 1) {
+    final MapEntry entry = value.entries.first;
+    List<Object?> items() =>
+        entry.value is List ? List<Object?>.from(entry.value) : [entry.value];
+    switch (entry.key) {
+      case r'$increment':
+        final num? amount = entry.value is num
+            ? entry.value
+            : num.tryParse(entry.value.toString());
+        return FieldValue.increment(amount ?? 0);
+      case r'$arrayUnion':
+        return FieldValue.arrayUnion(items());
+      case r'$arrayRemove':
+        return FieldValue.arrayRemove(items());
+      case r'$delete':
+        return FieldValue.delete();
+      case r'$now':
+        return DateTime.now().toUtc().toIso8601String();
+    }
+  }
+  return {
+    for (final MapEntry entry in value.entries)
+      entry.key.toString(): _resolveFieldOperation(entry.value),
+  };
 }
 
 /// Returns a sanitized date string from the given [value].

@@ -166,6 +166,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             // handle storage variable
             final notifier = getStorageListenerFor(match, context);
             if (notifier != null) listenables.add(notifier);
+          case 'auth':
+            final notifier = context.read<Codelessly?>()?.appUser;
+            if (notifier != null) listenables.add(notifier);
         }
       }
 
@@ -193,6 +196,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             // handle storage variable
             final notifier = getStorageListenerFor(match, context);
             if (notifier != null) listenables.add(notifier);
+          case 'auth':
+            final notifier = context.read<Codelessly?>()?.appUser;
+            if (notifier != null) listenables.add(notifier);
         }
       }
 
@@ -219,6 +225,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
                 VariableMatch.parse(name.wrapWithVariableSyntax())!,
                 context,
               );
+              if (notifier != null) listenables.add(notifier);
+            case 'auth':
+              final notifier = context.read<Codelessly?>()?.appUser;
               if (notifier != null) listenables.add(notifier);
           }
           continue;

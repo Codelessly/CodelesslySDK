@@ -14,9 +14,11 @@ const Set<String> predefinedVariableNames = {
   'item',
   'storage',
   'route',
+  'auth',
+  'result',
 };
 
-const Set<String> predefinedListenableVariableNames = {'storage'};
+const Set<String> predefinedListenableVariableNames = {'storage', 'auth'};
 
 final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'data', type: VariableType.map),
@@ -25,6 +27,8 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'value'),
   PredefinedVariableData(name: 'storage', type: VariableType.map),
   PredefinedVariableData(name: 'route', type: VariableType.map),
+  PredefinedVariableData(name: 'auth', type: VariableType.map),
+  PredefinedVariableData(name: 'result'),
 };
 
 /// Returns the greatest common divisor (gcd) of two integers using Euclid's
