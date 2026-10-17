@@ -46,6 +46,15 @@ abstract class WidgetNodeTransformerManager
     return Opacity(opacity: opacity, child: widget);
   }
 
+  /// Returns the visibility a condition or variable gives [node] at runtime,
+  /// or null when nothing overrides the node's own visibility.
+  bool? runtimeVisibility(BuildContext context, BaseNode node) =>
+      PropertyValueDelegate.getPropertyValue<bool>(
+        node,
+        'visible',
+        scopedValues: ScopedValues.of(context),
+      );
+
   /// Convenience method to handle widget visibility.
   Widget applyWidgetVisibility(
     BuildContext context,
@@ -53,11 +62,7 @@ abstract class WidgetNodeTransformerManager
     Widget widget, {
     required bool maintainState,
   }) {
-    final bool? runtimeVisible = PropertyValueDelegate.getPropertyValue<bool>(
-      node,
-      'visible',
-      scopedValues: ScopedValues.of(context),
-    );
+    final bool? runtimeVisible = runtimeVisibility(context, node);
     final bool visible = runtimeVisible ?? node.visible;
 
     if (visible) return widget;

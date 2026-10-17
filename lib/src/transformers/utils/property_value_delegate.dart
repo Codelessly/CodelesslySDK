@@ -605,6 +605,11 @@ class PropertyValueDelegate {
         'ceil': value.ceil(),
       },
       bool() => {'toggled': !value},
+      // Cloud documents carry createdAt and updatedAt as dates.
+      DateTime() => {
+        'timeAgo': formatTimeAgo(value),
+        'date': formatDate(value),
+      },
       Map() => {
         'length': value.length,
         'isEmpty': value.isEmpty,

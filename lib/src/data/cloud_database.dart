@@ -599,13 +599,22 @@ class FirestoreCloudDatabase extends CloudDatabase {
           'Updating variable ${variable.value.name} with success state.',
           name: name,
         );
-        // Set the variable with success state.
-        variable.set(
-          variable.value.copyWith(
-            value: CloudDatabaseVariableUtils.success(docs),
-          ),
-        );
-        if (!firstSnapshot.isCompleted) firstSnapshot.complete();
+        // Set the variable with success state. The chain waiting on the
+        // first snapshot continues even if a listener of the variable throws.
+        try {
+          variable.set(
+            variable.value.copyWith(
+              value: CloudDatabaseVariableUtils.success(docs),
+            ),
+          );
+        } catch (error, stackTrace) {
+          DebugLogger.instance.printInfo(
+            'Listener of ${variable.value.name} failed: $error\n$stackTrace',
+            name: name,
+          );
+        } finally {
+          if (!firstSnapshot.isCompleted) firstSnapshot.complete();
+        }
       },
       onError: (error) {
         DebugLogger.instance.printInfo(
