@@ -139,6 +139,34 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     final CodelesslyContext codelesslyContext = context
         .read<CodelesslyContext>();
+    final List<Listenable> listenables = listenablesFor(context, node);
+
+    return NodeStateProviderWidget(
+      key: ValueKey(node.id),
+      node: node,
+      codelesslyContext: codelesslyContext,
+      child: Builder(
+        builder: (context) {
+          if (listenables.isNotEmpty) {
+            return ManagedListenableBuilder(
+              key: ValueKey(node.id),
+              listenables: listenables,
+              builder: (context) => builder(context),
+            );
+          } else {
+            return builder(context);
+          }
+        },
+      ),
+    );
+  }
+
+  /// Returns what the widget of [node] rebuilds on: the node's local values,
+  /// the variables its properties use and the variables of the conditions
+  /// that affect it.
+  List<Listenable> listenablesFor(BuildContext context, BaseNode node) {
+    final CodelesslyContext codelesslyContext = context
+        .read<CodelesslyContext>();
 
     // List of value notifiers that the widget listens to. This includes node's
     // local values and the variables attached to node properties.
@@ -251,24 +279,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       }
     }
 
-    return NodeStateProviderWidget(
-      key: ValueKey(node.id),
-      node: node,
-      codelesslyContext: codelesslyContext,
-      child: Builder(
-        builder: (context) {
-          if (listenables.isNotEmpty) {
-            return ManagedListenableBuilder(
-              key: ValueKey(node.id),
-              listenables: listenables,
-              builder: (context) => builder(context),
-            );
-          } else {
-            return builder(context);
-          }
-        },
-      ),
-    );
+    return listenables;
   }
 
   Listenable? getStorageListenerFor(VariableMatch match, BuildContext context) {
