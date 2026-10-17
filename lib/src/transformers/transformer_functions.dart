@@ -310,7 +310,11 @@ OutlinedBorder? getButtonShape(ButtonNode node, ScopedValues scopedValues) {
     borderColor: node.properties.buttonType == ButtonTypeEnum.outlined
         ? borderColor ?? buttonColor
         : borderColor,
-    borderWidth: node.properties.borderWidth,
+    // An outlined button without a border width set still draws its outline,
+    // as Flutter's OutlinedButton does.
+    borderWidth: node.properties.buttonType == ButtonTypeEnum.outlined
+        ? node.properties.borderWidth ?? 1
+        : node.properties.borderWidth,
   );
 }
 

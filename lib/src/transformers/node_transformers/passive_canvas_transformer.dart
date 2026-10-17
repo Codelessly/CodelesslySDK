@@ -489,11 +489,9 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     if (index >= actions.length) return;
 
     final action = actions[index];
-    final future = FunctionsRepository.performAction(
-      context,
-      action,
-      notify: false,
-    );
+    // Notifies: the canvas has built by now, so widgets bound to a variable
+    // an action sets (a form prefilled on load) must rebuild.
+    final future = FunctionsRepository.performAction(context, action);
 
     if (future is! Future || action.nonBlocking) {
       executeActionAt(index + 1, actions);

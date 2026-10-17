@@ -138,8 +138,20 @@ class PassiveTextFieldWidget extends StatefulWidget {
 
 class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   late final TextEditingController controller = TextEditingController(
-    text: getInitialText(widget.node.initialText),
+    text: boundValue() ?? getInitialText(widget.node.initialText),
   );
+
+  /// The current value of the variable this field is bound to, if any. A
+  /// variable set before the field first builds (by a canvas load action
+  /// that prefills a form) shows up in the field.
+  String? boundValue() {
+    if (widget.node.variables['inputValue'] == null) return null;
+    return PropertyValueDelegate.getPropertyValue<String>(
+      widget.node,
+      'inputValue',
+      scopedValues: ScopedValues.of(context),
+    );
+  }
 
   final FocusNode focusNode = FocusNode();
 
