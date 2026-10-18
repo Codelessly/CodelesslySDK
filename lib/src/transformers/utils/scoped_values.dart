@@ -20,6 +20,9 @@ class ScopedValues {
   /// The route params for this route/page for given context.
   late final Map<String, dynamic> routeParams;
 
+  /// The signed-in app user, as the `auth` variable sees it.
+  late final Map<String, dynamic>? appUser;
+
   // private fields.
   late final WeakReference<CodelesslyContext>? _codelesslyContextRef;
   late final WeakReference<LocalDatabase>? _localStorageRef;
@@ -62,7 +65,8 @@ class ScopedValues {
       _dataOverrides = null,
       indexedItem = null,
       nodeState = null,
-      routeParams = {};
+      routeParams = {},
+      appUser = null;
 
   /// Creates a new scoped values instance from a given context.
   ScopedValues.of(
@@ -82,6 +86,7 @@ class ScopedValues {
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
         {};
     final instance = context.read<Codelessly?>();
+    appUser = instance?.appUser.value;
     if (instance != null) {
       _localStorageRef = WeakReference(instance.localDatabase);
       _cloudDatabaseRef = instance.cloudDatabase == null

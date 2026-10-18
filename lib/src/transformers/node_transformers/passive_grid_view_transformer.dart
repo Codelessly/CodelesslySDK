@@ -174,7 +174,7 @@ class PassiveGridViewWidget extends StatelessWidget {
         primary: node.primary,
         gridDelegate: node.properties.gridDelegate,
         shrinkWrap:
-            node.properties.itemCount != null &&
+            itemCount != null &&
             (node.scrollDirection == AxisC.horizontal
                 ? node.isHorizontalWrap
                 : node.isVerticalWrap),
