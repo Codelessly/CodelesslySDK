@@ -79,6 +79,8 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         res = wrapWithPaddedScrollable(
           padding: rowColumnNode.resolvedPadding().flutterEdgeInsets,
           node: (rowColumnNode as ScrollableMixin),
+          fillViewport:
+              rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start,
           child: res,
         );
       }
@@ -112,6 +114,8 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         res = wrapWithPaddedScrollable(
           padding: rowColumnNode.resolvedPadding().flutterEdgeInsets,
           node: (rowColumnNode as ScrollableMixin),
+          fillViewport:
+              rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start,
           child: res,
         );
       }
@@ -281,6 +285,45 @@ class PassiveRowColumnWidget extends StatelessWidget {
   final NodeTransformerManager manager;
   final WidgetBuildSettings settings;
 
+  /// A flexing child hidden at runtime gives up its share of the free space,
+  /// so a visible sibling (an empty state next to a hidden spinner) can take
+  /// all of it. The flex drops to zero rather than removing the [Flexible] so
+  /// the child keeps its state when it shows again.
+  Widget _collapseWhenHidden(
+    BuildContext context,
+    BaseNode child,
+    Widget sizedWidget,
+  ) {
+    final NodeTransformerManager manager = this.manager;
+    if (sizedWidget is! Flexible || manager is! PassiveNodeTransformerManager) {
+      return sizedWidget;
+    }
+
+    Widget buildFlexible(BuildContext context) {
+      final bool hidden = manager.runtimeVisibility(context, child) == false;
+      // Without flex the hidden child would be laid out with unbounded
+      // main-axis constraints, which a scrollable inside it can't take
+      // (a hidden grid computed NaN offsets), so it gets no space at all.
+      return Flexible(
+        flex: hidden ? 0 : sizedWidget.flex,
+        fit: sizedWidget.fit,
+        child: SizedBox(
+          width: hidden ? 0 : null,
+          height: hidden ? 0 : null,
+          child: sizedWidget.child,
+        ),
+      );
+    }
+
+    final List<Listenable> listenables = manager.listenablesFor(context, child);
+    if (listenables.isEmpty) return buildFlexible(context);
+    return ManagedListenableBuilder(
+      key: ValueKey('${child.id}-flex'),
+      listenables: listenables,
+      builder: buildFlexible,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> widgetChildren = children.map((child) {
@@ -290,12 +333,14 @@ class PassiveRowColumnWidget extends StatelessWidget {
         settings: settings,
       );
 
-      return PassiveRowColumnTransformer.wrapChildWithSizeFits(
-        child,
-        node,
-        builtWidget,
-        child.flex,
-      );
+      final Widget sizedWidget =
+          PassiveRowColumnTransformer.wrapChildWithSizeFits(
+            child,
+            node,
+            builtWidget,
+            child.flex,
+          );
+      return _collapseWhenHidden(context, child, sizedWidget);
     }).toList();
 
     final Widget child = (node is DefaultShapeNode)

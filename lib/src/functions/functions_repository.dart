@@ -13,6 +13,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../codelessly_sdk.dart';
 import '../logging/stat_tracker.dart';
 import '../ui/codelessly_dialog_widget.dart';
+import 'action_chain.dart';
+import 'app_auth.dart';
+import 'cloud_files.dart';
 
 /// Enum representing the types of API requests.
 enum ApiRequestType {
@@ -119,7 +122,90 @@ class FunctionsRepository {
           context,
           action as LoadFromCloudStorageAction,
         );
+      case ActionType.auth:
+        return AppAuth.perform(context, action as AuthAction);
+      case ActionType.conditional:
+        return runConditional(context, action as ConditionalAction);
+      case ActionType.forEach:
+        return runForEach(context, action as ForEachAction);
+      case ActionType.cloudFiles:
+        return CloudFiles.perform(
+          context,
+          action as CloudFilesAction,
+          runActions: (actions) => runActions(context, actions),
+        );
     }
+  }
+
+  /// Runs [actions] in order, like a trigger's reactions: blocking actions
+  /// are awaited and a failure stops the rest by throwing.
+  static Future<void> runActions(
+    BuildContext context,
+    List<ActionModel> actions,
+  ) async {
+    for (final ActionModel action in actions) {
+      if (!context.mounted) return;
+      final FutureOr future = performAction(context, action);
+      if (action.nonBlocking) {
+        if (future is Future) unawaited(future.then<void>((_) {}));
+      } else {
+        await future;
+      }
+    }
+  }
+
+  /// Runs the branch of [action] its expression picks.
+  static Future<bool> runConditional(
+    BuildContext context,
+    ConditionalAction action,
+  ) async {
+    final bool matches =
+        action.expression.accept<bool>(
+          ConditionEvaluator<Object>(scopedValues: ScopedValues.of(context)),
+        ) ==
+        true;
+    DebugLogger.instance.printInfo(
+      'Conditional action took the ${matches ? 'if' : 'else'} branch.',
+      name: name,
+    );
+    await runActions(context, matches ? action.actions : action.elseActions);
+    return true;
+  }
+
+  /// Runs the nested actions of [action] once per item of its list, with
+  /// `${result.item}` and `${result.index}` set.
+  static Future<bool> runForEach(
+    BuildContext context,
+    ForEachAction action,
+  ) async {
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    final String path = action.items.trim();
+    final Object? value = path.isEmpty
+        ? null
+        : PropertyValueDelegate.getVariableValueFromPath(
+            path.wrapWithVariableSyntax(),
+            scopedValues: scopedValues,
+          );
+    // A cloud variable keeps its documents under `data`.
+    final Object? items = value is Map && value['data'] is List
+        ? value['data']
+        : value;
+    if (items is! List) {
+      DebugLogger.instance.printInfo(
+        'For each: [${action.items}] is not a list. Skipping.',
+        name: name,
+      );
+      return true;
+    }
+    final List snapshot = List.of(items);
+    for (int index = 0; index < snapshot.length; index++) {
+      if (!context.mounted) break;
+      await ActionChain.run(
+        () => runActions(context, action.actions),
+        result: {'item': snapshot[index], 'index': index},
+      );
+    }
+    return true;
   }
 
   static Future<http.Response> makeApiRequestFromAction(
@@ -1044,6 +1130,16 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     if (filteredReactions.isEmpty) return false;
 
+    return ActionChain.run(
+      () => _runReactions(context, filteredReactions, value),
+    );
+  }
+
+  static Future<bool> _runReactions(
+    BuildContext context,
+    Iterable<Reaction> filteredReactions,
+    dynamic value,
+  ) async {
     for (final reaction in filteredReactions) {
       if (!context.mounted) continue;
       final FutureOr future;
@@ -1432,6 +1528,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     BuildContext context,
     SetCloudStorageAction action,
   ) async {
+    await awaitCloudDatabase(context);
+    if (!context.mounted) return false;
     final ScopedValues scopedValues = ScopedValues.of(context);
     return await switch (action.subAction) {
       AddDocumentSubAction addDocumentSubAction => addDocumentToCloud(
@@ -1472,47 +1570,56 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
       Map<String, dynamic> data = {};
       if (subAction.useRawValue) {
-        // Substitute variables in raw value.
-        final updatedValue = PropertyValueDelegate.substituteVariables(
-          subAction.rawValue,
-          nullSubstitutionMode: NullSubstitutionMode.emptyString,
-          scopedValues: scopedValues,
-        );
-        // Parse to JSON.
-        final parsed = tryJsonDecode(updatedValue);
-        data = switch (parsed) {
-          null => {},
-          Map map => Map<String, dynamic>.from(map),
-          _ => {'data': parsed},
-        };
+        data = _jsonFromTemplate(subAction.rawValue, scopedValues);
       } else {
-        // Substitute variables in value.
-        final updatedValue = PropertyValueDelegate.substituteVariables(
-          subAction.newValue,
-          nullSubstitutionMode: NullSubstitutionMode.emptyString,
-          scopedValues: scopedValues,
-        );
-        // Parse to JSON.
-        final parsed = tryJsonDecode(updatedValue);
-        data = switch (parsed) {
-          null => {},
-          Map map => Map<String, dynamic>.from(map),
-          _ => {'data': parsed},
-        };
+        data = _jsonFromTemplate(subAction.newValue, scopedValues);
       }
 
-      return await cloudDatabase.addDocument(
+      // Pick the id here when generating one, so `${result.id}` can tell the
+      // following actions which document was added.
+      final String documentId = subAction.autoGenerateId
+          ? generateId()
+          : evaluatedDocumentId;
+      final bool added = await cloudDatabase.addDocument(
         evaluatedPath,
         value: data,
-        documentId: evaluatedDocumentId,
-        autoGenerateId: subAction.autoGenerateId,
-        skipCreationIfDocumentExists: subAction.skipCreationIfDocumentExists,
+        documentId: documentId,
+        skipCreationIfDocumentExists:
+            !subAction.autoGenerateId && subAction.skipCreationIfDocumentExists,
       );
+      ActionChain.setResult({'id': documentId, 'path': evaluatedPath});
+      return added;
     } catch (error, stackTrace) {
       DebugLogger.instance.printInfo(error.toString(), name: name);
       DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
       return false;
     }
+  }
+
+  /// The document data a JSON [template] describes once its variables are
+  /// substituted. See [PropertyValueDelegate.substituteVariablesInJson].
+  static Map<String, dynamic> _jsonFromTemplate(
+    String template,
+    ScopedValues scopedValues,
+  ) {
+    final Map<String, dynamic>? data =
+        PropertyValueDelegate.substituteVariablesInJson(
+          template,
+          scopedValues: scopedValues,
+        );
+    if (data != null) return data;
+    final Object? parsed = tryJsonDecode(
+      PropertyValueDelegate.substituteVariables(
+        template,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
+      ),
+    );
+    return switch (parsed) {
+      null => {},
+      Map map => Map<String, dynamic>.from(map),
+      _ => {'data': parsed},
+    };
   }
 
   static Future<bool> updateDocumentOnCloud(
@@ -1538,14 +1645,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
 
     if (subAction.useRawValue) {
-      // Substitute variables in raw value.
-      final updatedValue = PropertyValueDelegate.substituteVariables(
+      final Map<String, dynamic> data = _jsonFromTemplate(
         subAction.rawValue,
-        nullSubstitutionMode: NullSubstitutionMode.emptyString,
-        scopedValues: scopedValues,
+        scopedValues,
       );
-      // Parse to JSON.
-      final Map<String, dynamic> data = jsonDecode(updatedValue);
 
       return await cloudDatabase.updateDocument(
         evaluatedPath,
@@ -1709,6 +1812,23 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     }
   }
 
+  /// The project's cloud database, waiting for it when an action runs
+  /// before it is ready: on a reload the app user is restored, and a screen
+  /// can load data, before the SDK has verified the project's data access.
+  static Future<CloudDatabase?> awaitCloudDatabase(
+    BuildContext context, {
+    Codelessly? codelessly,
+    Duration timeout = const Duration(seconds: 20),
+  }) async {
+    codelessly ??= context.read<Codelessly>();
+    final DateTime deadline = DateTime.now().add(timeout);
+    while (codelessly.cloudDatabase == null &&
+        DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+    return codelessly.cloudDatabase;
+  }
+
   static Future<void> loadFromStorageAction(
     BuildContext context,
     LoadFromCloudStorageAction action,
@@ -1737,12 +1857,18 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       value: CloudDatabaseVariableUtils.loading(),
     );
 
-    final CloudDatabase? cloudDatabase = scopedValues.cloudDatabase;
+    final Codelessly codelessly = context.read<Codelessly>();
+    final CloudDatabase? cloudDatabase =
+        scopedValues.cloudDatabase ??
+        await awaitCloudDatabase(context, codelessly: codelessly);
 
     if (cloudDatabase == null) {
       DebugLogger.instance.printInfo(
-        'Cloud storage is null. Waiting for it to initialize...',
+        'Cloud storage did not initialize.',
         name: name,
+      );
+      variable.value = variable.value.copyWith(
+        value: CloudDatabaseVariableUtils.error('Cloud data is unavailable.'),
       );
       return;
     }
@@ -1757,7 +1883,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         'Streaming document from cloud storage: $evaluatedPath/$evaluatedDocumentId',
         name: name,
       );
-      cloudDatabase.streamDocumentToVariable(
+      await cloudDatabase.streamDocumentToVariable(
         evaluatedPath,
         evaluatedDocumentId,
         variable,
@@ -1768,13 +1894,13 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         name: name,
       );
 
-      cloudDatabase.streamCollectionToVariable(
+      await cloudDatabase.streamCollectionToVariable(
         evaluatedPath,
         variable,
         whereFilters: action.whereFilters,
         orderByOperations: action.orderByFilters,
         limit: (action.limit ?? 0) > 0 ? action.limit : null,
-        scopedValues: ScopedValues.of(context),
+        scopedValues: scopedValues,
         nullSubstitutionMode: NullSubstitutionMode.emptyString,
       );
     }

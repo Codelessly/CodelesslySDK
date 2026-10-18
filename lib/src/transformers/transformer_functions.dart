@@ -310,7 +310,11 @@ OutlinedBorder? getButtonShape(ButtonNode node, ScopedValues scopedValues) {
     borderColor: node.properties.buttonType == ButtonTypeEnum.outlined
         ? borderColor ?? buttonColor
         : borderColor,
-    borderWidth: node.properties.borderWidth,
+    // An outlined button without a border width set still draws its outline,
+    // as Flutter's OutlinedButton does.
+    borderWidth: node.properties.buttonType == ButtonTypeEnum.outlined
+        ? node.properties.borderWidth ?? 1
+        : node.properties.borderWidth,
   );
 }
 
@@ -637,9 +641,43 @@ Widget wrapWithPaddedScrollable({
   required ScrollableMixin node,
   EdgeInsets? padding,
   Clip? clipBehavior,
+  bool fillViewport = false,
   required Widget child,
 }) {
   if (!node.isScrollable) return child;
+  Widget scrollView(Widget content) => SingleChildScrollView(
+    scrollDirection: node.scrollDirection.flutterAxis,
+    reverse: node.reverse,
+    physics: node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
+    primary: node.primary,
+    padding: padding,
+    keyboardDismissBehavior:
+        node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+    clipBehavior: clipBehavior ?? Clip.hardEdge,
+    child: content,
+  );
+  // Content at least as long as the viewport, so a column that centers or
+  // spreads its children still does while it fits and scrolls once it
+  // doesn't.
+  final Widget scrollable = !fillViewport
+      ? scrollView(child)
+      : LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final bool vertical = node.scrollDirection.isVertical;
+            final double extent = vertical
+                ? constraints.maxHeight - (padding?.vertical ?? 0)
+                : constraints.maxWidth - (padding?.horizontal ?? 0);
+            if (!extent.isFinite || extent <= 0) return scrollView(child);
+            return scrollView(
+              ConstrainedBox(
+                constraints: vertical
+                    ? BoxConstraints(minHeight: extent)
+                    : BoxConstraints(minWidth: extent),
+                child: child,
+              ),
+            );
+          },
+        );
   return SizedBox(
     width: (node.horizontalFit == SizeFit.shrinkWrap)
         ? null
@@ -651,17 +689,7 @@ Widget wrapWithPaddedScrollable({
         : (node.verticalFit == SizeFit.expanded)
         ? double.infinity
         : node.basicBoxLocal.height,
-    child: SingleChildScrollView(
-      scrollDirection: node.scrollDirection.flutterAxis,
-      reverse: node.reverse,
-      physics: node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
-      primary: node.primary,
-      padding: padding,
-      keyboardDismissBehavior:
-          node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-      clipBehavior: clipBehavior ?? Clip.hardEdge,
-      child: child,
-    ),
+    child: scrollable,
   );
 }
 

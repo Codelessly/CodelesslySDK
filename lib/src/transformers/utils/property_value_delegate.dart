@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/action_chain.dart';
 
 /// Represents what to do when a variable path evaluates to null when
 /// substituting variables in a text.
@@ -155,6 +156,55 @@ class PropertyValueDelegate {
   /// evaluates to null. See [NullSubstitutionMode] for more details.
   ///
   /// [scopedValues] is required to retrieve the data from various sources.
+  /// Substitutes variables in a JSON [template] value by value, so the
+  /// result stays valid JSON whatever the values contain: a string that is
+  /// exactly one `${path}` becomes the path's value as is (a list, a number,
+  /// null, ...), and other strings get their paths substituted as text.
+  ///
+  /// Returns null when [template] isn't JSON before substitution, e.g. when a
+  /// path stands unquoted for a number.
+  static Map<String, dynamic>? substituteVariablesInJson(
+    String template, {
+    required ScopedValues scopedValues,
+  }) {
+    final Object? parsed = tryJsonDecode(template.trim());
+    if (parsed is! Map) return null;
+    return Map<String, dynamic>.from(
+      _substituteJsonValue(parsed, scopedValues) as Map,
+    );
+  }
+
+  static Object? _substituteJsonValue(
+    Object? value,
+    ScopedValues scopedValues,
+  ) {
+    return switch (value) {
+      String() =>
+        RegExp(r'^\$\{[^{}]+\}$').hasMatch(value.trim())
+            ? _retrieveVariableValue(value.trim(), scopedValues: scopedValues)
+            : substituteVariables(
+                value,
+                scopedValues: scopedValues,
+                nullSubstitutionMode: NullSubstitutionMode.emptyString,
+              ),
+      List() => [
+        for (final item in value) _substituteJsonValue(item, scopedValues),
+      ],
+      Map() => {
+        for (final MapEntry(:key, :value) in value.entries)
+          substituteVariables(
+            key.toString(),
+            scopedValues: scopedValues,
+            nullSubstitutionMode: NullSubstitutionMode.emptyString,
+          ): _substituteJsonValue(
+            value,
+            scopedValues,
+          ),
+      },
+      _ => value,
+    };
+  }
+
   static String substituteVariables(
     String text, {
     required ScopedValues scopedValues,
@@ -214,7 +264,9 @@ class PropertyValueDelegate {
 
     if (variable == null) return null;
 
-    VariableType accessorType = match.hasAccessor
+    // Predefined variables like item hold any type, so read accessors for
+    // the value they hold (an item can be a string, a map, ...).
+    VariableType accessorType = match.hasAccessor || match.isPredefinedVariable
         ? VariableType.fromObjectType(value)
         : variable.type;
     List<Accessor> accessors = variable.name.startsWith('api')
@@ -316,6 +368,8 @@ class PropertyValueDelegate {
       'value' => scopedValues.nodeState,
       'storage' => scopedValues.localStorage?.getAll(),
       'route' => scopedValues.routeParams,
+      'auth' => scopedValues.appUser,
+      'result' => ActionChain.current?.result,
       _ => null,
     };
 
@@ -428,9 +482,35 @@ class PropertyValueDelegate {
     final JsonPath jsonPath = JsonPath(path);
     // Retrieve values from JSON that match the path.
     final values = jsonPath.read(data);
-    if (values.isEmpty) return (null, null);
+    if (values.isEmpty) return _substituteComputedProperty(text, data);
     // Return the first value.
     return (values.first.value, values.first.pointer);
+  }
+
+  /// Resolves a path that ends in a computed property of a nested value, like
+  /// `${item.memberIds.length}` or `${item.createdAt.timeAgo}`, which plain
+  /// JSON paths can't read: the rest of the path is resolved first, then the
+  /// property is read from [getVariableProperties] of that value.
+  static (Object?, JsonPointer?) _substituteComputedProperty(
+    String text,
+    Map<String, dynamic> data,
+  ) {
+    final String path = text.substring(2, text.length - 1);
+    final int dot = path.lastIndexOf('.');
+    if (dot <= 0) return (null, null);
+    final String property = path.substring(dot + 1);
+    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(property)) return (null, null);
+    final (Object? parent, _) = substituteJsonPath(
+      path.substring(0, dot),
+      data,
+    );
+    if (parent == null) return (null, null);
+    final Map<String, dynamic> properties = getVariableProperties(
+      parent,
+      VariableType.fromObjectType(parent),
+    );
+    if (!properties.containsKey(property)) return (null, null);
+    return (properties[property], null);
   }
 
   static void putValueInJsonPath(
@@ -498,6 +578,13 @@ class PropertyValueDelegate {
         'upcase': value.toUpperCase(),
         'downcase': value.toLowerCase(),
         'capitalize': value.capitalized,
+        'initial': value.trim().isEmpty
+            ? ''
+            : value.trim().characters.first.toUpperCase(),
+        if (DateTime.tryParse(value) case final DateTime date) ...{
+          'timeAgo': formatTimeAgo(date),
+          'date': formatDate(date),
+        },
       },
       int() => {
         'isEven': value.isEven,
@@ -518,6 +605,11 @@ class PropertyValueDelegate {
         'ceil': value.ceil(),
       },
       bool() => {'toggled': !value},
+      // Cloud documents carry createdAt and updatedAt as dates.
+      DateTime() => {
+        'timeAgo': formatTimeAgo(value),
+        'date': formatDate(value),
+      },
       Map() => {
         'length': value.length,
         'isEmpty': value.isEmpty,
@@ -573,7 +665,7 @@ List<Accessor> getAccessorsForType(VariableType type) {
         Accessor(
           name: 'downcase',
           type: VariableType.text,
-          getValue: (value) => value?.toString().toUpperCase(),
+          getValue: (value) => value?.toString().toLowerCase(),
         ),
         Accessor(
           name: 'capitalize',
@@ -594,6 +686,30 @@ List<Accessor> getAccessorsForType(VariableType type) {
           name: 'isBlank',
           type: VariableType.boolean,
           getValue: (value) => value?.toString().trim().isEmpty,
+        ),
+        Accessor(
+          name: 'initial',
+          type: VariableType.text,
+          getValue: (value) {
+            final String text = value?.toString().trim() ?? '';
+            return text.isEmpty ? '' : text.characters.first.toUpperCase();
+          },
+        ),
+        Accessor(
+          name: 'timeAgo',
+          type: VariableType.text,
+          getValue: (value) => switch (DateTime.tryParse('${value ?? ''}')) {
+            final DateTime date => formatTimeAgo(date),
+            null => null,
+          },
+        ),
+        Accessor(
+          name: 'date',
+          type: VariableType.text,
+          getValue: (value) => switch (DateTime.tryParse('${value ?? ''}')) {
+            final DateTime date => formatDate(date),
+            null => null,
+          },
         ),
       ];
     case VariableType.integer:
@@ -908,3 +1024,29 @@ List<Accessor> getCloudDataVariableAccessorsForType(VariableType dataType) => [
     getValue: (value) => value.toMap()?['error'],
   ),
 ];
+
+const List<String> _monthNames = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', //
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+/// Formats [date] like `Oct 14, 2026`, in local time.
+String formatDate(DateTime date) {
+  final DateTime local = date.toLocal();
+  return '${_monthNames[local.month - 1]} ${local.day}, ${local.year}';
+}
+
+/// Formats [date] relative to now: `Just now`, `5 min ago`, `2 hours ago`,
+/// `3 days ago`, then [formatDate] after a week.
+String formatTimeAgo(DateTime date, {DateTime? now}) {
+  final Duration diff = (now ?? DateTime.now()).difference(date);
+  if (diff.inMinutes < 1) return 'Just now';
+  if (diff.inHours < 1) return '${diff.inMinutes} min ago';
+  if (diff.inDays < 1) {
+    return '${diff.inHours} ${diff.inHours == 1 ? 'hour' : 'hours'} ago';
+  }
+  if (diff.inDays < 7) {
+    return '${diff.inDays} ${diff.inDays == 1 ? 'day' : 'days'} ago';
+  }
+  return formatDate(date);
+}
