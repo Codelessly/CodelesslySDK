@@ -118,6 +118,18 @@ class ConditionVariablesVisitor
   Set<String>? visitLoadFromCloudStorageAction(
     LoadFromCloudStorageAction action,
   ) => {};
+
+  @override
+  Set<String>? visitAuthAction(AuthAction action) => {};
+
+  @override
+  Set<String>? visitConditionalAction(ConditionalAction action) => {};
+
+  @override
+  Set<String>? visitForEachAction(ForEachAction action) => {};
+
+  @override
+  Set<String>? visitCloudFilesAction(CloudFilesAction action) => {};
 }
 
 /// A visitor that returns the list of node IDs used in a condition's actions.
@@ -184,4 +196,16 @@ class ConditionNodesVisitor
   @override
   String? visitLoadFromCloudStorageAction(LoadFromCloudStorageAction action) =>
       null;
+
+  @override
+  String? visitAuthAction(AuthAction action) => null;
+
+  @override
+  String? visitConditionalAction(ConditionalAction action) => null;
+
+  @override
+  String? visitForEachAction(ForEachAction action) => null;
+
+  @override
+  String? visitCloudFilesAction(CloudFilesAction action) => null;
 }
