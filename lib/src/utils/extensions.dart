@@ -1621,6 +1621,34 @@ extension ActionModelExt on ActionModel {
     if (action is SetVariantAction && action.nodeID == oldNodeId) {
       return action.copyWith(nodeID: newNodeId);
     }
+    if (action is ConditionalAction) {
+      return action.copyWith(
+        actions: [
+          for (final nested in action.actions)
+            nested.withUpdatedNodeId(oldNodeId, newNodeId),
+        ],
+        elseActions: [
+          for (final nested in action.elseActions)
+            nested.withUpdatedNodeId(oldNodeId, newNodeId),
+        ],
+      );
+    }
+    if (action is ForEachAction) {
+      return action.copyWith(
+        actions: [
+          for (final nested in action.actions)
+            nested.withUpdatedNodeId(oldNodeId, newNodeId),
+        ],
+      );
+    }
+    if (action is CloudFilesAction) {
+      return action.copyWith(
+        actions: [
+          for (final nested in action.actions)
+            nested.withUpdatedNodeId(oldNodeId, newNodeId),
+        ],
+      );
+    }
     return action;
   }
 
@@ -1730,8 +1758,59 @@ extension ActionModelExt on ActionModel {
               .map((filter) => filter.getUsedVariableNames())
               .expand((e) => e),
         );
+      case ActionType.auth:
+        final AuthAction action = this as AuthAction;
+        strings.addAll([action.email, action.password, action.displayName]);
+        if (action.errorVariable case VariableData variable) {
+          strings.add(variable.name.wrapWithVariableSyntax());
+        }
+      case ActionType.conditional:
+        final ConditionalAction action = this as ConditionalAction;
+        return {
+          ...?action.expression.accept<Set<String>>(
+            ConditionVariablesVisitor(
+              excludedVariableNames: includePredefined
+                  ? const {}
+                  : predefinedVariableNames,
+            ),
+          ),
+          for (final ActionModel nested in [
+            ...action.actions,
+            ...action.elseActions,
+          ])
+            ...nested.getUsedVariableNames(
+              includePredefined: includePredefined,
+            ),
+        };
+      case ActionType.forEach:
+        final ForEachAction action = this as ForEachAction;
+        strings.add(action.items.wrapWithVariableSyntax());
+        return {
+          ..._namesIn(strings, includePredefined),
+          for (final ActionModel nested in action.actions)
+            ...nested.getUsedVariableNames(
+              includePredefined: includePredefined,
+            ),
+        };
+      case ActionType.cloudFiles:
+        final CloudFilesAction action = this as CloudFilesAction;
+        strings.add(action.path);
+        if (action.progressVariable case VariableData variable) {
+          strings.add(variable.name.wrapWithVariableSyntax());
+        }
+        return {
+          ..._namesIn(strings, includePredefined),
+          for (final ActionModel nested in action.actions)
+            ...nested.getUsedVariableNames(
+              includePredefined: includePredefined,
+            ),
+        };
     }
 
+    return _namesIn(strings, includePredefined);
+  }
+
+  static Set<String> _namesIn(List<String> strings, bool includePredefined) {
     return strings
         .map((text) => VariableMatch.parseAll(text))
         .expand((matches) => matches)

@@ -59,6 +59,17 @@ class ConditionEvaluator<R extends Object>
 
   @override
   Object? visitVariablePart(VariablePart part) {
+    // A part that is exactly one path compares by its value as is, so lists
+    // and maps keep their type for operators like contains and isEmpty.
+    final String path = part.valueString.trim();
+    if (RegExp(r'^\$\{[^{}]+\}$').hasMatch(path)) {
+      final Object? raw =
+          PropertyValueDelegate.getVariableValueFromPath<Object>(
+            path,
+            scopedValues: scopedValues,
+          );
+      if (raw is List || raw is Map) return raw;
+    }
     final value = part.valueString.splitMapJoinRegex(
       variablePathRegex,
       onMatch: (match) {
@@ -260,6 +271,18 @@ class ConditionEvaluator<R extends Object>
 
   @override
   R? visitLoadFromCloudStorageAction(LoadFromCloudStorageAction action) => null;
+
+  @override
+  R? visitAuthAction(AuthAction action) => null;
+
+  @override
+  R? visitConditionalAction(ConditionalAction action) => null;
+
+  @override
+  R? visitForEachAction(ForEachAction action) => null;
+
+  @override
+  R? visitCloudFilesAction(CloudFilesAction action) => null;
 }
 
 class ConditionPrinter
@@ -392,4 +415,16 @@ class ConditionPrinter
 
   @override
   void visitLoadFromCloudStorageAction(LoadFromCloudStorageAction action) {}
+
+  @override
+  void visitAuthAction(AuthAction action) {}
+
+  @override
+  void visitConditionalAction(ConditionalAction action) {}
+
+  @override
+  void visitForEachAction(ForEachAction action) {}
+
+  @override
+  void visitCloudFilesAction(CloudFilesAction action) {}
 }

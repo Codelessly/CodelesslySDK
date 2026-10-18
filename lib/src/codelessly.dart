@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 
 import '../codelessly_sdk.dart';
+import 'functions/app_auth.dart';
 import 'logging/stat_tracker.dart';
 import 'utils/codelessly_http_client.dart';
 
@@ -126,6 +127,28 @@ class Codelessly {
   /// Whether this Codelessly instance already initialized firebase or not.
   bool _didInitializeFirebase = false;
 
+  /// The app user that auth actions signed in, as the `auth` variable sees
+  /// it. Layouts that use `${auth...}` rebuild when it changes.
+  final ValueNotifier<Map<String, dynamic>> appUser = ValueNotifier(
+    AppAuth.userToMap(null),
+  );
+
+  StreamSubscription<User?>? _appUserSubscription;
+
+  /// Re-reads the signed-in user into [appUser], e.g. after its display name
+  /// changed, which Firebase doesn't announce.
+  void refreshAppUser() {
+    appUser.value = AppAuth.userToMap(_firebaseAuth?.currentUser);
+  }
+
+  void _listenToAppUser() {
+    _appUserSubscription?.cancel();
+    _appUserSubscription = _firebaseAuth?.userChanges().listen(
+      (User? user) => appUser.value = AppAuth.userToMap(user),
+    );
+    refreshAppUser();
+  }
+
   /// A map of data that is passed to loaded layouts for nodes to replace their
   /// property values with.
   final Map<String, dynamic> data = {};
@@ -239,6 +262,7 @@ class Codelessly {
       _cacheManager?.dispose();
     }
     _authManager?.dispose();
+    _appUserSubscription?.cancel();
     _publishDataManager?.dispose();
     _previewDataManager?.dispose();
     _templateDataManager?.dispose();
@@ -426,6 +450,7 @@ class Codelessly {
         // Initialize Firestore and FirebaseAuth instances.
         _firebaseFirestore = FirebaseFirestore.instanceFor(app: _firebaseApp!);
         _firebaseAuth = FirebaseAuth.instanceFor(app: _firebaseApp!);
+        _listenToAppUser();
         _didInitializeFirebase = true;
 
         DebugLogger.instance.printInfo(
@@ -468,6 +493,7 @@ class Codelessly {
       // Initialize Firestore and FirebaseAuth instances.
       _firebaseFirestore = FirebaseFirestore.instanceFor(app: _firebaseApp!);
       _firebaseAuth = FirebaseAuth.instanceFor(app: _firebaseApp!);
+      _listenToAppUser();
 
       _didInitializeFirebase = true;
 

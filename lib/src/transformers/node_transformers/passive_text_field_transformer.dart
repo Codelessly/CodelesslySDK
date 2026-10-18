@@ -138,8 +138,20 @@ class PassiveTextFieldWidget extends StatefulWidget {
 
 class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   late final TextEditingController controller = TextEditingController(
-    text: getInitialText(widget.node.initialText),
+    text: boundValue() ?? getInitialText(widget.node.initialText),
   );
+
+  /// The current value of the variable this field is bound to, if any. A
+  /// variable set before the field first builds (by a canvas load action
+  /// that prefills a form) shows up in the field.
+  String? boundValue() {
+    if (widget.node.variables['inputValue'] == null) return null;
+    return PropertyValueDelegate.getPropertyValue<String>(
+      widget.node,
+      'inputValue',
+      scopedValues: ScopedValues.of(context),
+    );
+  }
 
   final FocusNode focusNode = FocusNode();
 
@@ -175,12 +187,16 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     // different from the current controller text.
     // widget.node.variables['inputValue'] only works when a sync variable is specified. If it is not then
     // we rely on initial text to be able to see if controller text needs to be updated.
-    String? currentPropertyValue = widget.node.variables['inputValue'] != null
+    final String? boundPath = widget.node.variables['inputValue'];
+    String? currentPropertyValue = boundPath != null
         ? PropertyValueDelegate.getPropertyValue<String>(
-            widget.node,
-            'inputValue',
-            scopedValues: scopedValues,
-          )
+                widget.node,
+                'inputValue',
+                scopedValues: scopedValues,
+              ) ??
+              // An empty text variable reads as null; a field bound to one
+              // still clears, e.g. after a comment is sent.
+              (_isExistingVariable(boundPath, scopedValues) ? '' : null)
         : findIndexedValueIfApplied(scopedValues) ??
               PropertyValueDelegate.getPropertyValueFromNodeValues<String>(
                 widget.node,
@@ -199,6 +215,16 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         controller.text != currentPropertyValue) {
       controller.text = currentPropertyValue;
     }
+  }
+
+  bool _isExistingVariable(String path, ScopedValues scopedValues) {
+    final VariableMatch? match = VariableMatch.parse(
+      path.wrapWithVariableSyntax(),
+    );
+    if (match == null || match.hasPath || match.isPredefinedVariable) {
+      return false;
+    }
+    return scopedValues.variables.values.findByNameOrNull(match.name) != null;
   }
 
   /// The purpose of this function is to find the indexed value of the variable

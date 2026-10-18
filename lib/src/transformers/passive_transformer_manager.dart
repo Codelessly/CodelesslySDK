@@ -139,6 +139,34 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     final CodelesslyContext codelesslyContext = context
         .read<CodelesslyContext>();
+    final List<Listenable> listenables = listenablesFor(context, node);
+
+    return NodeStateProviderWidget(
+      key: ValueKey(node.id),
+      node: node,
+      codelesslyContext: codelesslyContext,
+      child: Builder(
+        builder: (context) {
+          if (listenables.isNotEmpty) {
+            return ManagedListenableBuilder(
+              key: ValueKey(node.id),
+              listenables: listenables,
+              builder: (context) => builder(context),
+            );
+          } else {
+            return builder(context);
+          }
+        },
+      ),
+    );
+  }
+
+  /// Returns what the widget of [node] rebuilds on: the node's local values,
+  /// the variables its properties use and the variables of the conditions
+  /// that affect it.
+  List<Listenable> listenablesFor(BuildContext context, BaseNode node) {
+    final CodelesslyContext codelesslyContext = context
+        .read<CodelesslyContext>();
 
     // List of value notifiers that the widget listens to. This includes node's
     // local values and the variables attached to node properties.
@@ -166,6 +194,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             // handle storage variable
             final notifier = getStorageListenerFor(match, context);
             if (notifier != null) listenables.add(notifier);
+          case 'auth':
+            final notifier = context.read<Codelessly?>()?.appUser;
+            if (notifier != null) listenables.add(notifier);
         }
       }
 
@@ -178,8 +209,17 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     // Traverse through all the multi-variables that the node properties are attached
     // to.
-    for (final String variablePath
-        in node.multipleVariables.values.expand((path) => path).toSet()) {
+    // Text written with inline `${...}` paths listens to them too, so text
+    // stays live whether or not its multipleVariables were filled in.
+    final Set<String> multiplePaths = {
+      ...node.multipleVariables.values.expand((path) => path),
+      if (node is TextNode)
+        ...variablePathRegex
+            .allMatches(node.characters)
+            .map((match) => match.namedGroup('value'))
+            .nonNulls,
+    };
+    for (final String variablePath in multiplePaths) {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
       if (match == null) continue;
 
@@ -192,6 +232,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           case 'storage':
             // handle storage variable
             final notifier = getStorageListenerFor(match, context);
+            if (notifier != null) listenables.add(notifier);
+          case 'auth':
+            final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
         }
       }
@@ -220,6 +263,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
                 context,
               );
               if (notifier != null) listenables.add(notifier);
+            case 'auth':
+              final notifier = context.read<Codelessly?>()?.appUser;
+              if (notifier != null) listenables.add(notifier);
           }
           continue;
         }
@@ -233,24 +279,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       }
     }
 
-    return NodeStateProviderWidget(
-      key: ValueKey(node.id),
-      node: node,
-      codelesslyContext: codelesslyContext,
-      child: Builder(
-        builder: (context) {
-          if (listenables.isNotEmpty) {
-            return ManagedListenableBuilder(
-              key: ValueKey(node.id),
-              listenables: listenables,
-              builder: (context) => builder(context),
-            );
-          } else {
-            return builder(context);
-          }
-        },
-      ),
-    );
+    return listenables;
   }
 
   Listenable? getStorageListenerFor(VariableMatch match, BuildContext context) {

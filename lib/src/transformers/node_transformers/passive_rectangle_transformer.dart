@@ -144,6 +144,8 @@ class PassiveRectangleWidget extends StatelessWidget {
             stackAlignment: stackAlignment,
             applyPadding: applyPadding,
           ),
+          alignment:
+              stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
         ),
       ],
     );
@@ -177,8 +179,9 @@ class PassiveRectangleWidget extends StatelessWidget {
 List<Widget> wrapWithInkWell(
   BuildContext context,
   BaseNode node,
-  List<Widget> children,
-) {
+  List<Widget> children, {
+  AlignmentGeometry alignment = AlignmentDirectional.topStart,
+}) {
   if (node is! ReactionMixin) return children;
 
   final InkWellModel? inkWell = node is BlendMixin ? node.inkWell : null;
@@ -220,10 +223,18 @@ List<Widget> wrapWithInkWell(
       highlightColor: inkWell.highlightColor?.toFlutterColor(),
       hoverColor: inkWell.hoverColor?.toFlutterColor(),
       focusColor: inkWell.focusColor?.toFlutterColor(),
-      child: Stack(children: children),
+      child: Stack(alignment: alignment, children: children),
     ),
   );
 
+  // A node with a set size fills it with its ink and children. Otherwise the
+  // inner stack sizes to its unpositioned children, and when those are
+  // hidden (a likes badge on a photo tile) everything else in it gets no
+  // space.
+  if (node.horizontalFit != SizeFit.shrinkWrap &&
+      node.verticalFit != SizeFit.shrinkWrap) {
+    return [Positioned.fill(child: widget)];
+  }
   return [widget];
 }
 
@@ -720,6 +731,11 @@ Widget buildFill(
         nullSubstitutionMode: settings.nullSubstitutionMode,
         scopedValues: scopedValues,
       );
+      // A URL path that resolves to nothing, like a cover that isn't set
+      // yet, has no image to load.
+      if (bytes == null && imageURL.trim().isEmpty) {
+        return const SizedBox.shrink();
+      }
       Widget child;
 
       if (imageFillBuilder != null) {

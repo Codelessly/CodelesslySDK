@@ -391,6 +391,18 @@ class AuthManager {
     );
   }
 
+  /// Authenticates again for the user now signed in, after an auth action
+  /// changed it, so that user gets the project's claim before the app reads
+  /// or writes the project's data as them.
+  Future<void> reauthenticate() async {
+    DebugLogger.instance.printFunction('reauthenticate()', name: name);
+    if (_disposed) return;
+    final User? user = firebaseAuth.currentUser;
+    if (user == null) return;
+    _idTokenResult = await user.getIdTokenResult(true);
+    await authenticate();
+  }
+
   /// Performs a handshake with the server to authenticate the token.
   /// Makes a network request to verify the auth token and retrieve project access.
   Future<void> authenticate() async {

@@ -30,6 +30,12 @@ class PassiveNavigationBarTransformer
       TriggerType.changed,
       reactions: item.reactions,
     );
+    // Picking a destination is a tap on its item, so click reactions run too.
+    FunctionsRepository.triggerAction(
+      context,
+      TriggerType.click,
+      reactions: item.reactions,
+    );
   }
 
   Widget buildFromProps(

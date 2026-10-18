@@ -1,3 +1,29 @@
+## 7.2.0
+
+- Require codelessly_api 5.2.0.
+- Run the new actions: `auth` (sign up, sign in, sign out, update profile,
+  password reset), `conditional` (if/else), `forEach` and `cloudFiles`
+  (image uploads to the project's storage and file deletes).
+- New variables: `${auth.uid / email / displayName / initial / isSignedIn}`,
+  and `${result}` for what an earlier action in the chain produced (such as
+  `${result.id}` of a new document).
+- Cloud writes support field operations: `$increment`, `$arrayUnion`,
+  `$arrayRemove`, `$delete` and `$now`. Updates keep `createdAt`.
+- Variable paths and accessors follow the value's type at every level
+  (`${item.memberIds.length}`, `${item.title.initial}`); new `initial`,
+  `timeAgo` and `date` accessors.
+- Text with inline `${...}` paths rebuilds when those variables change.
+- Canvas load actions run after the first frame, in one chain, and notify,
+  so fields bound to a variable set on load show its value.
+- Nodes hidden by a condition at runtime collapse, including flexing ones.
+- Scrollable rows and columns honor center and end alignment.
+- "Load from cloud" waits for the cloud database and completes on the first
+  snapshot; documents with dates no longer stall the listener.
+- Slug bundles load from `firebaseOptions.storageBucket`.
+- Fixes: data-bound lists and grids in dialogs, navigation bar item clicks,
+  ink frame sizing, clearing text fields, empty image URLs, and outlined
+  buttons without a border width.
+
 ## 7.1.1
 
 - A badge with no child no longer fills loose constraints, so a badge set

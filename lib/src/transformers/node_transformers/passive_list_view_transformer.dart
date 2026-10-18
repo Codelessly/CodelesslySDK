@@ -183,9 +183,11 @@ class PassiveListViewWidget extends StatelessWidget {
     // https://stackoverflow.com/a/54587532/4327834
     final ScrollableState? parentScrollable = Scrollable.maybeOf(context);
 
+    // A list of a known length that wraps its content on the scroll axis
+    // sizes itself to its items, including one bound to a data variable.
     final bool shrinkWrap = parentScrollable != null
         ? true
-        : node.properties.itemCount != null &&
+        : itemCount != null &&
               (node.scrollDirection == AxisC.horizontal
                   ? node.isHorizontalWrap
                   : node.isVerticalWrap);

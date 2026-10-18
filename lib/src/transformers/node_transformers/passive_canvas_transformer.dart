@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/action_chain.dart';
 
 class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   static const String name = 'PassiveCanvasWidget';
@@ -475,18 +476,22 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       'Performing actions on canvas load',
       name: PassiveCanvasTransformer.name,
     );
-    executeActionAt(0, onLoadActions);
+    // After the first frame, so actions that navigate or show dialogs (e.g.
+    // an if/else that redirects signed out users) don't run mid-build. The
+    // actions share one chain so `${result}` flows between them.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ActionChain.run(() => executeActionAt(0, onLoadActions));
+    });
   }
 
   void executeActionAt(int index, List<ActionModel> actions) {
     if (index >= actions.length) return;
 
     final action = actions[index];
-    final future = FunctionsRepository.performAction(
-      context,
-      action,
-      notify: false,
-    );
+    // Notifies: the canvas has built by now, so widgets bound to a variable
+    // an action sets (a form prefilled on load) must rebuild.
+    final future = FunctionsRepository.performAction(context, action);
 
     if (future is! Future || action.nonBlocking) {
       executeActionAt(index + 1, actions);
