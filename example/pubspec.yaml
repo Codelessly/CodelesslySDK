@@ -23,3 +23,11 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+# Temporary: the show toast action needs codelessly_api from
+# Codelessly/CodelesslyAPI#37. Remove once that is published.
+dependency_overrides:
+  codelessly_api:
+    git:
+      url: https://github.com/Codelessly/CodelesslyAPI.git
+      ref: claude/project-thread-1mdfl3
