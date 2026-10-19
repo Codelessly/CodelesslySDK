@@ -58,7 +58,7 @@ void main() {
     test('comparisons, logic and ternary', () {
       expect(eval('qty > 1 && price < 6'), true);
       expect(eval('qty == 2'), true);
-      expect(eval("shots == 3"), true);
+      expect(eval('shots == 3'), true);
       expect(eval("name != 'Ava'"), false);
       expect(eval('!qty'), false);
       expect(eval("qty > 1 ? 'many' : 'one'"), 'many');

@@ -89,6 +89,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         }
         if (settings.withReactions) {
           widget = wrapWithReaction(context, styled, widget);
+          widget = wrapWithSemantics(styled, widget);
         }
         if (settings.withRotation) {
           widget = applyWidgetRotation(context, styled, widget);

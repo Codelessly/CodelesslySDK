@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Screen readers: a tappable frame or shape reads as a button. One with no
+  text inside (an icon button) is named after its node, or its icon when the
+  node keeps a default name like "Frame 3". Nodes no longer offer a long
+  press that does nothing.
 - Show toast action: shows a message near the bottom of the app over every
   route, with variables and formulas in the text. A new toast replaces the
   one on screen.
