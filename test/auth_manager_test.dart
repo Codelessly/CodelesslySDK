@@ -53,6 +53,7 @@ AuthManager authManager(FirebaseAuth auth) => AuthManager(
   firebaseAuth: auth,
   client: http.Client(),
   claimsPropagationTimeout: const Duration(milliseconds: 100),
+  claimsPollInterval: const Duration(milliseconds: 10),
 );
 
 AuthData authData() => AuthData(
@@ -100,6 +101,21 @@ void main() {
       };
       changes.add(user);
       await expectLater(done, completes);
+    });
+
+    test('polls for the claim when no auth event follows it', () async {
+      var calls = 0;
+      final user = _FakeUser(
+        () async => _FakeIdTokenResult(
+          calls++ < 2
+              ? {}
+              : {
+                  'project_ids': ['project'],
+                },
+        ),
+      );
+      final manager = authManager(_FakeAuth(user, const Stream.empty()));
+      await expectLater(manager.postAuthSuccess(authData()), completes);
     });
 
     test('times out when the claim never arrives', () async {
