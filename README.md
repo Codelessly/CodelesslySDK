@@ -308,6 +308,16 @@ Codelessly.instance.initialize(
 );
 ```
 
+## Platform Notes
+
+### macOS
+
+The SDK uses Firebase Auth, which stores its user in the keychain. macOS apps
+must be signed with an Apple Development team and have the Keychain Sharing
+capability (`keychain-access-groups` entitlement). Ad-hoc signed builds fail to
+sign in with `[firebase_auth/keychain-error]`, even with the app sandbox off.
+The sandboxed entitlements also need `com.apple.security.network.client`.
+
 ## Additional Resources
 
 Additional resources and tutorials are on
