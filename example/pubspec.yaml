@@ -13,6 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   storybook_flutter: ^0.14.1
+  firebase_core: ^4.15.0
   codelessly_sdk:
     path: ../
 
