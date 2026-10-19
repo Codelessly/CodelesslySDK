@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 
 class _FakeIdTokenResult extends Fake implements IdTokenResult {
   _FakeIdTokenResult(this.claims) : token = _jwt(claims);
@@ -47,11 +48,12 @@ class _FakeAuth extends Fake implements FirebaseAuth {
 
 class _NoCache extends Fake implements CacheManager {}
 
-AuthManager authManager(FirebaseAuth auth) => AuthManager(
+AuthManager authManager(FirebaseAuth auth, {http.Client? client}) =>
+    AuthManager(
   config: CodelesslyConfig(authToken: 'token'),
   cacheManager: _NoCache(),
   firebaseAuth: auth,
-  client: http.Client(),
+  client: client ?? MockClient((_) async => http.Response('', 500)),
   claimsPropagationTimeout: const Duration(milliseconds: 100),
   claimsPollInterval: const Duration(milliseconds: 10),
 );
@@ -116,6 +118,29 @@ void main() {
       );
       final manager = authManager(_FakeAuth(user, const Stream.empty()));
       await expectLater(manager.postAuthSuccess(authData()), completes);
+    });
+
+    test('verifies again when the claim was granted and then lost', () async {
+      var verified = false;
+      final client = MockClient((request) async {
+        verified = request.url.path.endsWith('/api/verifyProjectAuthToken');
+        return http.Response('', 500);
+      });
+      final user = _FakeUser(
+        () async => _FakeIdTokenResult(
+          verified
+              ? {
+                  'project_ids': ['project'],
+                }
+              : {},
+        ),
+      );
+      final manager = authManager(
+        _FakeAuth(user, const Stream.empty()),
+        client: client,
+      );
+      await expectLater(manager.postAuthSuccess(authData()), completes);
+      expect(verified, isTrue);
     });
 
     test('times out when the claim never arrives', () async {

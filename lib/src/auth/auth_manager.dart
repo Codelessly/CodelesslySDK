@@ -67,6 +67,7 @@ class AuthManager {
     this._authData,
     this.claimsPropagationTimeout = const Duration(seconds: 30),
     this.claimsPollInterval = const Duration(seconds: 2),
+    this.claimsReverifyEvery = 3,
   }) {
     if (_authData != null) {
       _authStreamController.add(_authData);
@@ -298,6 +299,10 @@ class AuthManager {
   /// has to be refreshed to see it.
   final Duration claimsPollInterval;
 
+  /// Every this many polls, [postAuthSuccess] verifies the auth token with
+  /// the server again in case the project claim was granted and then lost.
+  final int claimsReverifyEvery;
+
   /// This method is called after successful authentication of the token.
   /// It checks if the user has access to the project via token claims and if
   /// not, it listens to Firebase Auth user changes until the claim appears
@@ -348,7 +353,7 @@ class AuthManager {
     // stack refreshes on top of each other.
     bool refreshing = false;
 
-    Future<void> checkClaims(User? user) async {
+    Future<void> checkClaims(User? user, {bool reverify = false}) async {
       // If the completer is already completed, return.
       // We check this because getIdTokenResult may take a while to complete
       // and another check may have already completed it.
@@ -356,6 +361,21 @@ class AuthManager {
 
       refreshing = true;
       try {
+        // Another server write can replace the user's claims and drop the
+        // project claim after it was granted. Verifying again grants it
+        // back, just like relaunching the app does.
+        if (reverify && _idTokenResult?.token case final String token) {
+          DebugLogger.instance.printInfo(
+            'Project claim still missing. Verifying the auth token again...',
+            name: name,
+          );
+          await verifyProjectAuthToken(
+            userToken: token,
+            config: config,
+            client: client,
+            postSuccess: (_) async {},
+          );
+        }
         _idTokenResult = await user.getIdTokenResult(true);
       } catch (e, stackTrace) {
         if (!completer.isCompleted) completer.completeError(e, stackTrace);
@@ -392,12 +412,15 @@ class AuthManager {
 
     // A new user's claim is usually set moments after the first refresh, and
     // no auth event follows it, so keep refreshing until it shows up.
-    final Timer pollTimer = Timer.periodic(claimsPollInterval, (_) {
+    final Timer pollTimer = Timer.periodic(claimsPollInterval, (Timer timer) {
       DebugLogger.instance.printInfo(
         'Refreshing token to check for project claim...',
         name: name,
       );
-      checkClaims(firebaseAuth.currentUser);
+      checkClaims(
+        firebaseAuth.currentUser,
+        reverify: timer.tick % claimsReverifyEvery == 0,
+      );
     });
 
     // Wait for the claim to arrive, but not forever: a failure here must
