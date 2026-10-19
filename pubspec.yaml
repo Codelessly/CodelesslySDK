@@ -92,3 +92,12 @@ false_secrets:
   - /lib/src/firebase_options_prod.dart
 
 scripts: scripts.yaml
+
+# Temporary: the show toast action needs codelessly_api from
+# Codelessly/CodelesslyAPI#37, merged but not yet published. Remove once
+# codelessly_api is released.
+dependency_overrides:
+  codelessly_api:
+    git:
+      url: https://github.com/Codelessly/CodelesslyAPI.git
+      ref: master

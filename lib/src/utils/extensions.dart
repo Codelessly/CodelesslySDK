@@ -1679,6 +1679,9 @@ extension ActionModelExt on ActionModel {
       case ActionType.link:
         final LinkAction action = this as LinkAction;
         strings.addAll([action.url]);
+      case ActionType.showToast:
+        final ShowToastAction action = this as ShowToastAction;
+        strings.addAll([action.message]);
       case ActionType.submit:
         final SubmitAction action = this as SubmitAction;
         strings.addAll([action.apiKey, action.primaryTextField]);

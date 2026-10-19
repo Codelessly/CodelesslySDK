@@ -131,6 +131,73 @@ abstract class WidgetNodeTransformerManager
     );
   }
 
+  static final RegExp _defaultNodeName = RegExp(
+    r'^(frame|rectangle|row|column|stack|group|icon|container|ellipse|image|'
+    r'auto layout|layout|node)\s*\d*$',
+    caseSensitive: false,
+  );
+
+  /// Tells screen readers that a tappable node is a button. A node with text
+  /// inside reads as that text; one without (an icon button) reads as its
+  /// node name, or its icon's name when the node still has a default name.
+  Widget wrapWithSemantics(BaseNode node, Widget widget) {
+    if (node is! ReactionMixin) return widget;
+    if (node case CanvasNode() || SpacerNode()) return widget;
+    if (node is CustomPropertiesMixin &&
+        node.handlesDefaultReactionsInternally) {
+      return widget;
+    }
+    final bool tappable = (node as ReactionMixin).reactions.any(
+      (reaction) =>
+          reaction.trigger.type == TriggerType.click && reaction.action.enabled,
+    );
+    if (!tappable) return widget;
+
+    final List<BaseNode> descendants = [];
+    void collect(BaseNode parent) {
+      for (final String id in parent.childrenOrEmpty) {
+        final BaseNode? child = _tryGetNode(id);
+        if (child == null) continue;
+        descendants.add(child);
+        collect(child);
+      }
+    }
+
+    collect(node);
+
+    final bool hasText = descendants.any((child) => child is TextNode);
+    final String label = hasText ? '' : semanticLabelFor(node, descendants);
+    return MergeSemantics(
+      child: Semantics(
+        button: true,
+        label: label.isEmpty ? null : label,
+        child: widget,
+      ),
+    );
+  }
+
+  /// The name a screen reader announces for [node] when it has no text.
+  static String semanticLabelFor(BaseNode node, List<BaseNode> descendants) {
+    final String name = node.name.trim();
+    if (name.isNotEmpty && !_defaultNodeName.hasMatch(name)) return name;
+    for (final BaseNode child in descendants) {
+      if (child is! IconNode) continue;
+      final String? iconName = child.properties.icon.icon?.name;
+      if (iconName != null && iconName.isNotEmpty) {
+        return iconName.replaceAll('_', ' ');
+      }
+    }
+    return '';
+  }
+
+  BaseNode? _tryGetNode(String id) {
+    try {
+      return getNode(id);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
     if (node is! ReactionMixin) return widget;
@@ -175,11 +242,13 @@ abstract class WidgetNodeTransformerManager
             TriggerType.click,
             reactions: onClickReactions,
           ),
-          onLongPress: () => FunctionsRepository.triggerAction(
-            context,
-            TriggerType.longPress,
-            reactions: onLongPressReactions,
-          ),
+          onLongPress: onLongPressReactions.isEmpty
+              ? null
+              : () => FunctionsRepository.triggerAction(
+                  context,
+                  TriggerType.longPress,
+                  reactions: onLongPressReactions,
+                ),
           borderRadius: getBorderRadius(node),
           overlayColor: inkWell.overlayColor != null
               ? WidgetStatePropertyAll<Color>(
@@ -208,11 +277,13 @@ abstract class WidgetNodeTransformerManager
             TriggerType.click,
             reactions: onClickReactions,
           ),
-          onLongPress: () => FunctionsRepository.triggerAction(
-            context,
-            TriggerType.longPress,
-            reactions: onLongPressReactions,
-          ),
+          onLongPress: onLongPressReactions.isEmpty
+              ? null
+              : () => FunctionsRepository.triggerAction(
+                  context,
+                  TriggerType.longPress,
+                  reactions: onLongPressReactions,
+                ),
           child: widget,
         ),
       );

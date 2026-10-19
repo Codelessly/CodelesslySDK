@@ -1,3 +1,24 @@
+## Unreleased
+
+- Screen readers: a tappable frame or shape reads as a button. One with no
+  text inside (an icon button) is named after its node, or its icon when the
+  node keeps a default name like "Frame 3". Nodes no longer offer a long
+  press that does nothing.
+- Show toast action: shows a message near the bottom of the app over every
+  route, with variables and formulas in the text. A new toast replaces the
+  one on screen.
+- Formulas: `${= expression}` in any text, bound property, condition or
+  action value computes a result, e.g. `${= money(qty * price)}`,
+  `${= sum(storage.cart, 'total')}` or `${= count > 1 ? 'drinks' : 'drink'}`.
+  They support arithmetic, comparisons, `&& || !`, `a ? b : c`, lists, and
+  the functions money, fixed, round, floor, ceil, abs, min, max, sum, count,
+  length, if, plural, join, upper, lower, contains, number, text, isEmpty and
+  isNotEmpty. A value that is exactly one formula keeps its type. Nodes
+  rebuild when the variables a formula reads change.
+- Style properties at runtime: `fill`, `stroke`, `opacity`, `width` and
+  `height` follow conditions, variables or formulas bound to them, and set
+  value actions.
+
 ## 7.2.0
 
 - Require codelessly_api 5.2.0.
