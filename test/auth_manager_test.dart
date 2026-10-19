@@ -50,13 +50,13 @@ class _NoCache extends Fake implements CacheManager {}
 
 AuthManager authManager(FirebaseAuth auth, {http.Client? client}) =>
     AuthManager(
-  config: CodelesslyConfig(authToken: 'token'),
-  cacheManager: _NoCache(),
-  firebaseAuth: auth,
-  client: client ?? MockClient((_) async => http.Response('', 500)),
-  claimsPropagationTimeout: const Duration(milliseconds: 100),
-  claimsPollInterval: const Duration(milliseconds: 10),
-);
+      config: CodelesslyConfig(authToken: 'token'),
+      cacheManager: _NoCache(),
+      firebaseAuth: auth,
+      client: client ?? MockClient((_) async => http.Response('', 500)),
+      claimsPropagationTimeout: const Duration(milliseconds: 100),
+      claimsPollInterval: const Duration(milliseconds: 10),
+    );
 
 AuthData authData() => AuthData(
   authToken: 'token',
