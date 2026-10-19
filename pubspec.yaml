@@ -90,5 +90,6 @@ flutter:
 false_secrets:
   - /lib/src/constants.dart
   - /lib/src/firebase_options_prod.dart
+  - /example/lib/main.dart
 
 scripts: scripts.yaml
