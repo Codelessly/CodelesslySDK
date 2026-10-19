@@ -1,5 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 
+import '../../utils/formula.dart';
+
 /// A visitor that returns the list of variable names used in a condition.
 class ConditionVariablesVisitor
     implements
@@ -62,12 +64,14 @@ class ConditionVariablesVisitor
 
   @override
   Set<String> visitVariablePart(VariablePart part) {
-    return variablePathRegex
-        .allMatches(part.valueString)
-        .map((match) => match.namedGroup('name'))
-        .nonNulls
-        .where((element) => !excludedVariableNames.contains(element))
-        .toSet();
+    return {
+      ...variablePathRegex
+          .allMatches(part.valueString)
+          .map((match) => match.namedGroup('name'))
+          .nonNulls,
+      ...FormulaEvaluator.referencedPathsInText(part.valueString)
+          .map((path) => path.split(RegExp(r'[.\[]')).first),
+    }.where((element) => !excludedVariableNames.contains(element)).toSet();
   }
 
   @override

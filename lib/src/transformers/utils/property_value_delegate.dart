@@ -179,6 +179,11 @@ class PropertyValueDelegate {
     ScopedValues scopedValues,
   ) {
     return switch (value) {
+      String() when FormulaEvaluator.exactExpression(value) != null =>
+        evaluateFormula(
+          FormulaEvaluator.exactExpression(value)!,
+          scopedValues: scopedValues,
+        ),
       String() =>
         RegExp(r'^\$\{[^{}]+\}$').hasMatch(value.trim())
             ? _retrieveVariableValue(value.trim(), scopedValues: scopedValues)
@@ -211,6 +216,16 @@ class PropertyValueDelegate {
     required NullSubstitutionMode nullSubstitutionMode,
   }) {
     if (text.trim().isEmpty) return text;
+    // Formulas first, so `${= ...}` isn't read as a path.
+    text = FormulaEvaluator.substitute(
+      text,
+      (path) =>
+          getVariableValueFromPath<Object>(path, scopedValues: scopedValues),
+      nullText: switch (nullSubstitutionMode) {
+        NullSubstitutionMode.nullValue => 'null',
+        _ => '',
+      },
+    );
     return text.splitMapJoinRegex(
       variablePathRegex,
       onNonMatch: (text) => text,
@@ -232,6 +247,17 @@ class PropertyValueDelegate {
     );
   }
 
+  /// Evaluates a formula [expression] (the part after `${=`), reading its
+  /// variable paths from [scopedValues]. See [FormulaEvaluator].
+  static Object? evaluateFormula(
+    String expression, {
+    required ScopedValues scopedValues,
+  }) => FormulaEvaluator.evaluate(
+    expression,
+    (path) =>
+        getVariableValueFromPath<Object>(path, scopedValues: scopedValues),
+  );
+
   /// Retrieves the value of a variable [path]. This also supports predefined
   /// variables such as data, index, and item.
   ///
@@ -246,6 +272,15 @@ class PropertyValueDelegate {
     String path, {
     required ScopedValues scopedValues,
   }) {
+    final String? expression = FormulaEvaluator.exactExpression(path);
+    if (expression != null) {
+      final Object? value = evaluateFormula(
+        expression,
+        scopedValues: scopedValues,
+      );
+      if (R == String) return FormulaEvaluator.stringify(value) as R?;
+      return value?.typedValue<R>();
+    }
     final match = VariableMatch.parse(path.wrapWithVariableSyntax());
     if (match == null) return null;
 

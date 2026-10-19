@@ -62,6 +62,14 @@ class ConditionEvaluator<R extends Object>
     // A part that is exactly one path compares by its value as is, so lists
     // and maps keep their type for operators like contains and isEmpty.
     final String path = part.valueString.trim();
+    // A part that is exactly one formula keeps its value's type too.
+    final String? expression = FormulaEvaluator.exactExpression(path);
+    if (expression != null) {
+      return PropertyValueDelegate.evaluateFormula(
+        expression,
+        scopedValues: scopedValues,
+      );
+    }
     if (RegExp(r'^\$\{[^{}]+\}$').hasMatch(path)) {
       final Object? raw =
           PropertyValueDelegate.getVariableValueFromPath<Object>(
@@ -70,17 +78,26 @@ class ConditionEvaluator<R extends Object>
           );
       if (raw is List || raw is Map) return raw;
     }
-    final value = part.valueString.splitMapJoinRegex(
-      variablePathRegex,
-      onMatch: (match) {
-        final Object? value = PropertyValueDelegate.getVariableValueFromPath(
-          match[0]!,
-          scopedValues: scopedValues,
-        );
+    final value =
+        FormulaEvaluator.substitute(
+          part.valueString,
+          (path) => PropertyValueDelegate.getVariableValueFromPath<Object>(
+            path,
+            scopedValues: scopedValues,
+          ),
+          nullText: 'null',
+        ).splitMapJoinRegex(
+          variablePathRegex,
+          onMatch: (match) {
+            final Object? value =
+                PropertyValueDelegate.getVariableValueFromPath(
+                  match[0]!,
+                  scopedValues: scopedValues,
+                );
 
-        return value?.typedValue<String>() ?? 'null';
-      },
-    );
+            return value?.typedValue<String>() ?? 'null';
+          },
+        );
     return _visitRawValue(value);
   }
 
