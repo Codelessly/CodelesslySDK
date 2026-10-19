@@ -85,6 +85,11 @@ void main() {
       expect(eval("if(qty > 1, 'yes', 'no')"), 'yes');
       expect(eval('isEmpty(cart)'), false);
       expect(eval("number('4.5') + 1"), 5.5);
+      expect(eval("where(cart, 'qty', 2)"), [
+        {'name': 'Oat latte', 'qty': 2, 'total': 12.9},
+      ]);
+      expect(eval("length(where(cart, 'qty'))"), 2);
+      expect(eval("without(syrups, ['honey'])"), ['vanilla']);
     });
 
     test('member access', () {
@@ -185,6 +190,14 @@ void main() {
         scopedValues: values,
       ),
       true,
+    );
+    expect(
+      FunctionsRepository.substituteNewValue(
+        r'[{"name": "${item.name}", "unit": "${= item.price * qty}"}]',
+        VariableType.list,
+        values,
+      ),
+      '[{"name":"Cortado","unit":8.5}]',
     );
     expect(
       PropertyValueDelegate.substituteVariablesInJson(

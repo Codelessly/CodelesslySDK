@@ -174,6 +174,13 @@ class PropertyValueDelegate {
     );
   }
 
+  /// Substitutes variables in a decoded JSON [value]: see
+  /// [substituteVariablesInJson].
+  static Object? substituteJsonValue(
+    Object? value,
+    ScopedValues scopedValues,
+  ) => _substituteJsonValue(value, scopedValues);
+
   static Object? _substituteJsonValue(
     Object? value,
     ScopedValues scopedValues,

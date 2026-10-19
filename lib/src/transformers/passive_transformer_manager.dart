@@ -115,8 +115,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   }
 
   /// Returns [node] with the style properties that conditions, bound
-  /// variables or formulas, or set value actions give it at runtime: `fill`,
-  /// `stroke`, `opacity`, `width` and `height`. Returns [node] itself when
+  /// variables or formulas, or set value actions give it at runtime: `fill`
+  /// (a text's color for text nodes), `stroke`, `opacity`, `width` and
+  /// `height`. Returns [node] itself when
   /// nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
@@ -142,6 +143,21 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         patch['strokes'] = [
           stroke.copyWith(visible: true).toJson(),
           for (final paint in geometry.strokes.skip(1)) paint.toJson(),
+        ];
+      }
+    }
+    if (node is TextNode) {
+      // A text's fill is its color: it replaces the color of every span.
+      final PaintModel? fill = value<PaintModel>('fill');
+      final PaintModel? current =
+          node.textMixedProps.firstOrNull?.fills.firstOrNull;
+      if (fill != null && fill != current) {
+        patch['textMixedProps'] = [
+          for (final prop in node.textMixedProps)
+            {
+              ...prop.toJson(),
+              'fills': [fill.copyWith(visible: true).toJson()],
+            },
         ];
       }
     }

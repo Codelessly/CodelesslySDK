@@ -26,8 +26,8 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///  - `+ - * / %`, comparisons `== != < <= > >=`, `&& || !` and
 ///    `condition ? a : b`. `+` joins text when either side is text.
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
-///    length, if, plural, join, upper, lower, contains, number, text, isEmpty
-///    and isNotEmpty. See [FormulaEvaluator.functions].
+///    length, if, plural, join, upper, lower, contains, where, without,
+///    number, text, isEmpty and isNotEmpty. See [FormulaEvaluator.functions].
 ///
 /// Null counts as 0 in arithmetic and as empty text when joining text. An
 /// invalid expression evaluates to null.
@@ -272,6 +272,18 @@ final Map<String, _Function> _functions = {
     final Map m => m.containsKey(_arg(a, 1)),
     _ => false,
   },
+  'where': (a) => [
+    for (final item in _values(_arg(a, 0), null))
+      if (a.length < 3
+          ? _truthy(_member(item, _arg(a, 1)))
+          : _looseEquals(_member(item, _arg(a, 1)), _arg(a, 2)))
+        item,
+  ],
+  'without': (a) => [
+    for (final item in _values(_arg(a, 0), null))
+      if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
+        item,
+  ],
   'number': (a) => _toNum(_arg(a, 0)),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
