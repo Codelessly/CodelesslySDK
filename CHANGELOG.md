@@ -1,5 +1,6 @@
-## Unreleased
+## 7.3.0
 
+- Require codelessly_api 5.3.0.
 - Screen readers: a tappable frame or shape reads as a button. One with no
   text inside (an icon button) is named after its node, or its icon when the
   node keeps a default name like "Frame 3". Nodes no longer offer a long
