@@ -364,7 +364,8 @@ class AuthManager {
         // Another server write can replace the user's claims and drop the
         // project claim after it was granted. Verifying again grants it
         // back, just like relaunching the app does.
-        if (reverify && _idTokenResult?.token case final String token) {
+        final String? token = _idTokenResult?.token;
+        if (reverify && token != null) {
           DebugLogger.instance.printInfo(
             'Project claim still missing. Verifying the auth token again...',
             name: name,
