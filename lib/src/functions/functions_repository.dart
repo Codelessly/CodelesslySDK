@@ -15,6 +15,7 @@ import '../logging/stat_tracker.dart';
 import '../ui/codelessly_dialog_widget.dart';
 import 'action_chain.dart';
 import 'app_auth.dart';
+import 'app_toast.dart';
 import 'cloud_files.dart';
 
 /// Enum representing the types of API requests.
@@ -134,6 +135,8 @@ class FunctionsRepository {
           action as CloudFilesAction,
           runActions: (actions) => runActions(context, actions),
         );
+      case ActionType.showToast:
+        return AppToast.show(context, action as ShowToastAction);
     }
   }
 
@@ -942,6 +945,48 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     payload.nodeValues[action.nodeID]!.set(updateValues, notify: notify);
   }
 
+  /// Substitutes variables in the [template] of a value to set. For list and
+  /// map values written as JSON, each JSON value is substituted on its own
+  /// (see [PropertyValueDelegate.substituteJsonValue]), so text holding
+  /// quotes or newlines can't break the JSON. Everything else is substituted
+  /// as text.
+  static String substituteNewValue(
+    String template,
+    VariableType type,
+    ScopedValues scopedValues,
+  ) {
+    if (type.isList || type.isMap) {
+      // A whole-value formula such as `${= item}` keeps its list or map.
+      final String? expression = FormulaEvaluator.exactExpression(template);
+      if (expression != null) {
+        final Object? value = PropertyValueDelegate.evaluateFormula(
+          expression,
+          scopedValues: scopedValues,
+        );
+        if (value is List || value is Map) {
+          return jsonEncode(
+            value,
+            toEncodable: (value) =>
+                value is DateTime ? value.toIso8601String() : value.toString(),
+          );
+        }
+      }
+      final Object? parsed = tryJsonDecode(template.trim());
+      if (parsed is List || parsed is Map) {
+        return jsonEncode(
+          PropertyValueDelegate.substituteJsonValue(parsed, scopedValues),
+          toEncodable: (value) =>
+              value is DateTime ? value.toIso8601String() : value.toString(),
+        );
+      }
+    }
+    return PropertyValueDelegate.substituteVariables(
+      template,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
+  }
+
   /// Sets given [action.newValue] for given [action.variable] to a variable
   /// from [CodelesslyContext.variables].
   /// Returns `true` if variable was found and updated, `false` otherwise.
@@ -958,10 +1003,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
     if (variableNotifier == null) return false;
 
-    String newValue = PropertyValueDelegate.substituteVariables(
+    String newValue = substituteNewValue(
       action.newValue,
-      nullSubstitutionMode: NullSubstitutionMode.emptyString,
-      scopedValues: scopedValues,
+      variableNotifier.value.type,
+      scopedValues,
     );
 
     Object? currentValue = variableNotifier.value.getValue();
@@ -1275,10 +1320,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         scopedValues: scopedValues,
       );
 
-      final newValue = PropertyValueDelegate.substituteVariables(
+      final newValue = substituteNewValue(
         action.newValue,
-        nullSubstitutionMode: NullSubstitutionMode.emptyString,
-        scopedValues: scopedValues,
+        action.variableType,
+        scopedValues,
       );
 
       final match = VariableMatch.parse(storageKey.wrapWithVariableSyntax());

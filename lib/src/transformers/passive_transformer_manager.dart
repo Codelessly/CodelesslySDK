@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -78,29 +80,31 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       context,
       node: node,
       builder: (context) {
+        final BaseNode styled = applyStyleOverrides(context, node);
         Widget widget = getTransformerByNode(node)
-            .buildWidget(node, context, settings);
+            .buildWidget(styled, context, settings);
 
         if (settings.withOpacity) {
-          widget = applyWidgetOpacity(node, widget);
+          widget = applyWidgetOpacity(styled, widget);
         }
         if (settings.withReactions) {
-          widget = wrapWithReaction(context, node, widget);
+          widget = wrapWithReaction(context, styled, widget);
+          widget = wrapWithSemantics(styled, widget);
         }
         if (settings.withRotation) {
-          widget = applyWidgetRotation(context, node, widget);
+          widget = applyWidgetRotation(context, styled, widget);
         }
         if (settings.withConstraints) {
-          widget = applyWidgetConstraints(node, widget);
+          widget = applyWidgetConstraints(styled, widget);
         }
         if (settings.withMargins) {
-          widget = applyWidgetMargins(node, widget);
+          widget = applyWidgetMargins(styled, widget);
         }
 
         if (settings.withVisibility) {
           widget = applyWidgetVisibility(
             context,
-            node,
+            styled,
             widget,
             maintainState: true,
           );
@@ -109,6 +113,81 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         return widget;
       },
     );
+  }
+
+  /// Returns [node] with the style properties that conditions, bound
+  /// variables or formulas, or set value actions give it at runtime: `fill`
+  /// (a text's color for text nodes), `stroke`, `opacity`, `width` and
+  /// `height`. Returns [node] itself when
+  /// nothing changes it.
+  BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    T? value<T extends Object>(String property) =>
+        PropertyValueDelegate.getPropertyValue<T>(
+          node,
+          property,
+          scopedValues: scopedValues,
+        );
+
+    final Map<String, dynamic> patch = {};
+    if (node is GeometryMixin) {
+      final GeometryMixin geometry = node;
+      final PaintModel? fill = value<PaintModel>('fill');
+      if (fill != null && fill != geometry.fills.firstOrNull) {
+        patch['fills'] = [
+          fill.copyWith(visible: true).toJson(),
+          for (final paint in geometry.fills.skip(1)) paint.toJson(),
+        ];
+      }
+      final PaintModel? stroke = value<PaintModel>('stroke');
+      if (stroke != null && stroke != geometry.strokes.firstOrNull) {
+        patch['strokes'] = [
+          stroke.copyWith(visible: true).toJson(),
+          for (final paint in geometry.strokes.skip(1)) paint.toJson(),
+        ];
+      }
+    }
+    if (node is TextNode) {
+      // A text's fill is its color: it replaces the color of every span.
+      final PaintModel? fill = value<PaintModel>('fill');
+      final PaintModel? current =
+          node.textMixedProps.firstOrNull?.fills.firstOrNull;
+      if (fill != null && fill != current) {
+        patch['textMixedProps'] = [
+          for (final prop in node.textMixedProps)
+            {
+              ...prop.toJson(),
+              'fills': [fill.copyWith(visible: true).toJson()],
+            },
+        ];
+      }
+    }
+    if (node is BlendMixin) {
+      final double? opacity = value<double>('opacity');
+      if (opacity != null && opacity != node.opacity) {
+        patch['opacity'] = opacity.clamp(0, 1).toDouble();
+      }
+    }
+    final NodeBox box = node.basicBoxLocal;
+    final double? width = value<double>('width');
+    final double? height = value<double>('height');
+    if ((width != null && width != box.width) ||
+        (height != null && height != box.height)) {
+      patch['basicBoxLocal'] = NodeBox(
+        box.x,
+        box.y,
+        math.max(0, width ?? box.width),
+        math.max(0, height ?? box.height),
+      ).toJson();
+    }
+
+    if (patch.isEmpty) return node;
+    final BaseNode? styled = NodeJsonConverter().fromJson({
+      ...node.toJson(),
+      ...patch,
+    });
+    if (styled == null) return node;
+    return styled..parentID = node.parentID;
   }
 
   @override
@@ -180,7 +259,15 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     // Traverse through all the variables that the node properties are attached
     // to.
-    for (final String variablePath in node.variables.values.toSet()) {
+    // A property bound to a formula listens to the paths the formula reads.
+    final Set<String> boundPaths = {
+      for (final String path in node.variables.values)
+        if (FormulaEvaluator.exactExpression(path) case final String expression)
+          ...FormulaEvaluator.referencedPaths(expression)
+        else
+          path,
+    };
+    for (final String variablePath in boundPaths) {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
       if (match == null) continue;
 
@@ -218,6 +305,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             .allMatches(node.characters)
             .map((match) => match.namedGroup('value'))
             .nonNulls,
+      if (node is TextNode)
+        ...FormulaEvaluator.referencedPathsInText(node.characters),
     };
     for (final String variablePath in multiplePaths) {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
