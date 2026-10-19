@@ -1,5 +1,8 @@
 ## Unreleased
 
+- Show toast action: shows a message near the bottom of the app over every
+  route, with variables and formulas in the text. A new toast replaces the
+  one on screen.
 - Formulas: `${= expression}` in any text, bound property, condition or
   action value computes a result, e.g. `${= money(qty * price)}`,
   `${= sum(storage.cart, 'total')}` or `${= count > 1 ? 'drinks' : 'drink'}`.

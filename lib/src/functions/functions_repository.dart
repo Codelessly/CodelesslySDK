@@ -15,6 +15,7 @@ import '../logging/stat_tracker.dart';
 import '../ui/codelessly_dialog_widget.dart';
 import 'action_chain.dart';
 import 'app_auth.dart';
+import 'app_toast.dart';
 import 'cloud_files.dart';
 
 /// Enum representing the types of API requests.
@@ -134,6 +135,8 @@ class FunctionsRepository {
           action as CloudFilesAction,
           runActions: (actions) => runActions(context, actions),
         );
+      case ActionType.showToast:
+        return AppToast.show(context, action as ShowToastAction);
     }
   }
 

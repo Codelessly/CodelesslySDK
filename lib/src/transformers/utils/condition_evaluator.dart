@@ -269,6 +269,9 @@ class ConditionEvaluator<R extends Object>
   R? visitLinkAction(LinkAction action) => null;
 
   @override
+  R? visitShowToastAction(ShowToastAction action) => null;
+
+  @override
   R? visitNavigationAction(NavigationAction action) => null;
 
   @override
@@ -378,6 +381,9 @@ class ConditionPrinter
 
   @override
   void visitLinkAction(LinkAction action) {}
+
+  @override
+  void visitShowToastAction(ShowToastAction action) {}
 
   @override
   void visitNavigationAction(NavigationAction action) {}

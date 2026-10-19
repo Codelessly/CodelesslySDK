@@ -84,6 +84,9 @@ class ConditionVariablesVisitor
   Set<String>? visitLinkAction(LinkAction action) => {};
 
   @override
+  Set<String>? visitShowToastAction(ShowToastAction action) => {};
+
+  @override
   Set<String>? visitNavigationAction(NavigationAction action) => {};
 
   @override
@@ -172,6 +175,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitLinkAction(LinkAction action) => null;
+
+  @override
+  String? visitShowToastAction(ShowToastAction action) => null;
 
   @override
   String? visitNavigationAction(NavigationAction action) => null;
