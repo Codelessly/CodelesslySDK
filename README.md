@@ -308,6 +308,25 @@ Codelessly.instance.initialize(
 );
 ```
 
+## Platform Setup
+
+### macOS
+
+The SDK signs in to Firebase Auth anonymously, and Firebase Auth saves that user in the macOS data protection
+keychain. macOS only grants that keychain to apps signed by a development team, so the app must be team-signed:
+
+1. In Xcode, open `macos/Runner.xcworkspace`, select the **Runner** target, and under **Signing & Capabilities** pick a
+   **Team** with an **Apple Development** certificate on your Mac.
+2. Add the **Keychain Sharing** capability (`keychain-access-groups` in `DebugProfile.entitlements` and
+   `Release.entitlements`), and keep **Outgoing Connections (Client)** enabled in the App Sandbox.
+
+Ad-hoc ("Sign to Run Locally") builds have no `com.apple.application-identifier` entitlement. The keychain write fails
+with `errSecMissingEntitlement` (-34018), whether or not the App Sandbox is on, and `signInAnonymously` throws
+`[firebase_auth/keychain-error]`. The SDK reports this as a `CStatus.error`, so `CodelesslyWidget` shows its error
+builder instead of loading.
+
+iOS simulator builds don't need a team, so a layout that loads on iOS can still fail on an unsigned macOS build.
+
 ## Additional Resources
 
 Additional resources and tutorials are on
