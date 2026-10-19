@@ -800,6 +800,8 @@ class Codelessly {
         type: 'sdk_init_failed',
         stackTrace: stacktrace,
       );
+      // Surface the failure so widgets show an error instead of a spinner.
+      status = CStatus.error('Failed to initialize SDK: $error');
     } finally {
       stopwatch.stop();
       DebugLogger.instance.printInfo(
