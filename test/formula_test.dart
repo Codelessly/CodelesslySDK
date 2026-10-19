@@ -200,6 +200,14 @@ void main() {
       '[{"name":"Cortado","unit":8.5}]',
     );
     expect(
+      FunctionsRepository.substituteNewValue(
+        r'${= item}',
+        VariableType.map,
+        values,
+      ),
+      '{"price":4.25,"name":"Cortado"}',
+    );
+    expect(
       PropertyValueDelegate.substituteVariablesInJson(
         r'{"total": "${= item.price * qty}", "label": "${= item.name} x${qty}"}',
         scopedValues: values,

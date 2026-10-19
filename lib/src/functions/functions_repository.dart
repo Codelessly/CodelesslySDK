@@ -953,6 +953,21 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     ScopedValues scopedValues,
   ) {
     if (type.isList || type.isMap) {
+      // A whole-value formula such as `${= item}` keeps its list or map.
+      final String? expression = FormulaEvaluator.exactExpression(template);
+      if (expression != null) {
+        final Object? value = PropertyValueDelegate.evaluateFormula(
+          expression,
+          scopedValues: scopedValues,
+        );
+        if (value is List || value is Map) {
+          return jsonEncode(
+            value,
+            toEncodable: (value) =>
+                value is DateTime ? value.toIso8601String() : value.toString(),
+          );
+        }
+      }
       final Object? parsed = tryJsonDecode(template.trim());
       if (parsed is List || parsed is Map) {
         return jsonEncode(
