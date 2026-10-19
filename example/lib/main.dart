@@ -11,7 +11,7 @@ const String _authToken = "cSlMIT93cj1lXkBuYk5QNmImSTUsTHw2MDQ4VkdlOCZFLHc7";
 const bool _useEditorBackend =
     String.fromEnvironment('CODELESSLY_BACKEND') == 'editor';
 
-const FirebaseOptions _editorFirebaseOptions = FirebaseOptions(
+const FirebaseOptions _editorWebFirebaseOptions = FirebaseOptions(
   apiKey: 'AIzaSyCecNnIv_X-F1uFPJT2y8XPCLpxXdD3etk',
   appId: '1:945980228772:web:7d092a75773524dd5f1231',
   messagingSenderId: '945980228772',
@@ -21,6 +21,37 @@ const FirebaseOptions _editorFirebaseOptions = FirebaseOptions(
   storageBucket: 'codeless-editor.firebasestorage.app',
   measurementId: 'G-JZ7FS97GFQ',
 );
+
+/// iOS and macOS share one Apple app registered for the bundle id
+/// com.codelessly.sdk.example.
+const FirebaseOptions _editorAppleFirebaseOptions = FirebaseOptions(
+  apiKey: 'AIzaSyCCJo44CTI8YqNhX3G1HLTlHfkE38gSsTk',
+  appId: '1:945980228772:ios:f4967501ad5db1e45f1231',
+  messagingSenderId: '945980228772',
+  projectId: 'codeless-editor',
+  databaseURL: 'https://codeless-editor-default-rtdb.firebaseio.com',
+  storageBucket: 'codeless-editor.firebasestorage.app',
+  iosBundleId: 'com.codelessly.sdk.example',
+);
+
+const FirebaseOptions _editorAndroidFirebaseOptions = FirebaseOptions(
+  apiKey: 'AIzaSyAS21PXCaPfCs710MMK__KblTL4lfoCrZY',
+  appId: '1:945980228772:android:d3dc811e471d25db5f1231',
+  messagingSenderId: '945980228772',
+  projectId: 'codeless-editor',
+  databaseURL: 'https://codeless-editor-default-rtdb.firebaseio.com',
+  storageBucket: 'codeless-editor.firebasestorage.app',
+);
+
+/// Native platforms need the app registered for them; the rest use web's.
+FirebaseOptions get _editorFirebaseOptions {
+  if (kIsWeb) return _editorWebFirebaseOptions;
+  return switch (defaultTargetPlatform) {
+    TargetPlatform.iOS || TargetPlatform.macOS => _editorAppleFirebaseOptions,
+    TargetPlatform.android => _editorAndroidFirebaseOptions,
+    _ => _editorWebFirebaseOptions,
+  };
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
