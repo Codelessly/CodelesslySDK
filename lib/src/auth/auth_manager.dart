@@ -66,6 +66,8 @@ class AuthManager {
     required this.client,
     this._authData,
     this.claimsPropagationTimeout = const Duration(seconds: 30),
+    this.claimsPollInterval = const Duration(seconds: 2),
+    this.claimsReverifyEvery = 3,
   }) {
     if (_authData != null) {
       _authStreamController.add(_authData);
@@ -291,6 +293,16 @@ class AuthManager {
   /// user's token before failing authentication.
   final Duration claimsPropagationTimeout;
 
+  /// How often [postAuthSuccess] force-refreshes the user's token while
+  /// waiting for the project claim. The server sets the claim on its own
+  /// schedule and Firebase Auth emits no event when it does, so the token
+  /// has to be refreshed to see it.
+  final Duration claimsPollInterval;
+
+  /// Every this many polls, [postAuthSuccess] verifies the auth token with
+  /// the server again in case the project claim was granted and then lost.
+  final int claimsReverifyEvery;
+
   /// This method is called after successful authentication of the token.
   /// It checks if the user has access to the project via token claims and if
   /// not, it listens to Firebase Auth user changes until the claim appears
@@ -337,49 +349,87 @@ class AuthManager {
     // Create a completer to handle the completion of the Firebase Auth process.
     final Completer completer = Completer();
 
+    // Whether a token refresh is in flight, so polls and auth events don't
+    // stack refreshes on top of each other.
+    bool refreshing = false;
+
+    Future<void> checkClaims(User? user, {bool reverify = false}) async {
+      // If the completer is already completed, return.
+      // We check this because getIdTokenResult may take a while to complete
+      // and another check may have already completed it.
+      if (completer.isCompleted || refreshing || user == null) return;
+
+      refreshing = true;
+      try {
+        // Another server write can replace the user's claims and drop the
+        // project claim after it was granted. Verifying again grants it
+        // back, just like relaunching the app does.
+        final String? token = _idTokenResult?.token;
+        if (reverify && token != null) {
+          DebugLogger.instance.printInfo(
+            'Project claim still missing. Verifying the auth token again...',
+            name: name,
+          );
+          await verifyProjectAuthToken(
+            userToken: token,
+            config: config,
+            client: client,
+            postSuccess: (_) async {},
+          );
+        }
+        _idTokenResult = await user.getIdTokenResult(true);
+      } catch (e, stackTrace) {
+        if (!completer.isCompleted) completer.completeError(e, stackTrace);
+        return;
+      } finally {
+        refreshing = false;
+      }
+
+      if (completer.isCompleted) return;
+
+      // Check if the user has access to the project.
+      if (checkClaimsForProject(_idTokenResult, authData.projectId)) {
+        DebugLogger.instance.printInfo(
+          'User has access to project since the claim exists. Completing Firebase Auth process.',
+          name: name,
+        );
+        completer.complete(user);
+      }
+    }
+
     // Listen to Firebase Auth state changes.
     _idTokenChangeListener = firebaseAuth.userChanges().listen(
-      (User? event) async {
-        // If the completer is already completed, return.
-        // We check this because getIdTokenResult may take a while to complete
-        // and this userChanges() event may have already triggered a new event.
-        if (completer.isCompleted) return;
-
+      (User? event) {
         DebugLogger.instance.printInfo(
           'Firebase Auth state changed. Checking claims...',
           name: name,
         );
-        try {
-          _idTokenResult = await event?.getIdTokenResult(true);
-        } catch (e, stackTrace) {
-          if (!completer.isCompleted) completer.completeError(e, stackTrace);
-          return;
-        }
-
-        // If the completer is already completed, return.
-        // We check this because getIdTokenResult may take a while to complete
-        // and this userChanges() event may have already triggered a new event.
-        if (completer.isCompleted) return;
-
-        // Check if the user has access to the project.
-        if (checkClaimsForProject(_idTokenResult, authData.projectId)) {
-          DebugLogger.instance.printInfo(
-            'User has access to project since the claim exists. Completing Firebase Auth process.',
-            name: name,
-          );
-          completer.complete(event);
-        }
+        checkClaims(event);
       },
       onError: (Object e, StackTrace stackTrace) {
         if (!completer.isCompleted) completer.completeError(e, stackTrace);
       },
     );
 
+    // A new user's claim is usually set moments after the first refresh, and
+    // no auth event follows it, so keep refreshing until it shows up.
+    final Timer pollTimer = Timer.periodic(claimsPollInterval, (Timer timer) {
+      DebugLogger.instance.printInfo(
+        'Refreshing token to check for project claim...',
+        name: name,
+      );
+      checkClaims(
+        firebaseAuth.currentUser,
+        reverify: timer.tick % claimsReverifyEvery == 0,
+      );
+    });
+
     // Wait for the claim to arrive, but not forever: a failure here must
     // surface as an authentication error instead of hanging initialization.
     try {
       await completer.future.timeout(claimsPropagationTimeout);
     } finally {
+      pollTimer.cancel();
       // Cancel the listener for Firebase Auth state changes.
       await _idTokenChangeListener?.cancel();
       _idTokenChangeListener = null;
