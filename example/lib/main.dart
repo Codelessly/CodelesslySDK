@@ -1,9 +1,7 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:storybook_flutter/storybook_flutter.dart';
 
 const String _authToken = "cSlMIT93cj1lXkBuYk5QNmImSTUsTHw2MDQ4VkdlOCZFLHc7";
 
@@ -49,101 +47,161 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+/// Codelessly's brand indigo; Material 3 derives every color role from it.
+const Color _brandColor = Color(0xFF5C69E5);
+
+/// A Codelessly layout shown as one entry in the example gallery.
+class Story {
+  const Story({required this.name, required this.icon, required this.builder});
+
+  final String name;
+  final IconData icon;
+  final WidgetBuilder builder;
+}
+
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'Codelessly SDK Examples',
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: _brandColor)),
+    darkTheme: ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: _brandColor,
+        brightness: Brightness.dark,
+      ),
+    ),
+    home: const StoryGallery(),
+  );
 }
 
-class _MyAppState extends State<MyApp> {
-  Map<String, dynamic> licenseData = {'license': 'FREE'};
+/// Lists the example layouts in a navigation drawer (inline on wide screens,
+/// a modal drawer on narrow ones) and shows the selected one.
+///
+/// On web, `?story=<name>` opens a specific story.
+class StoryGallery extends StatefulWidget {
+  const StoryGallery({super.key});
 
   @override
-  Widget build(BuildContext context) => Storybook(
-        initialStory: 'Hello World',
-        showPanel: true,
-        wrapperBuilder: (context, child) {
-          return MaterialApp(
-            home: Container(color: Colors.white, child: child),
-          );
+  State<StoryGallery> createState() => _StoryGalleryState();
+}
+
+class _StoryGalleryState extends State<StoryGallery> {
+  Map<String, dynamic> licenseData = {'license': 'FREE'};
+
+  late int selectedIndex = _initialIndex();
+
+  int _initialIndex() {
+    final String? name = Uri.base.queryParameters['story'];
+    final int index = stories.indexWhere((story) => story.name == name);
+    return index == -1 ? 0 : index;
+  }
+
+  void setLicense(String license) =>
+      setState(() => licenseData = {'license': license});
+
+  late final List<Story> stories = [
+    Story(
+      name: 'Hello World',
+      icon: Icons.waving_hand_outlined,
+      builder: (context) => CodelesslyWidget(
+        layoutID: '0R0yRfzR23SQfDGrbg3h',
+        loadingBuilder: _loading,
+      ),
+    ),
+    Story(
+      name: 'License UI',
+      icon: Icons.verified_outlined,
+      builder: (context) => CodelesslyWidget(
+        layoutID: '0R0yeUx1iGDe9kgW5xwn',
+        data: licenseData,
+        functions: {
+          'onFreeSelected': (context, reference, params) => setLicense('FREE'),
+          'onProSelected': (context, reference, params) => setLicense('PRO'),
+          'onBusinessSelected': (context, reference, params) =>
+              setLicense('BUSINESS'),
         },
-        stories: [
-          Story(
-            name: 'Hello World',
-            builder: (context) {
-              return CodelesslyWidget(
-                layoutID: "0R0yRfzR23SQfDGrbg3h",
-                loadingBuilder: (context) {
-                  return const CupertinoActivityIndicator();
-                },
-              );
-            },
-          ),
-          Story(
-              name: 'License UI',
-              builder: (context) {
-                return CodelesslyWidget(
-                  layoutID: "0R0yeUx1iGDe9kgW5xwn",
-                  data: licenseData,
-                  functions: {
-                    'onFreeSelected': (context, reference, params) {
-                      licenseData['license'] = 'FREE';
-                      setState(() {});
-                    },
-                    'onProSelected': (context, reference, params) {
-                      licenseData['license'] = 'PRO';
-                      setState(() {});
-                    },
-                    'onBusinessSelected': (context, reference, params) {
-                      licenseData['license'] = 'BUSINESS';
-                      setState(() {});
-                    },
-                  },
-                  loadingBuilder: (context) {
-                    return const CupertinoActivityIndicator();
-                  },
-                );
-              }),
-          Story(
-              name: 'Pricing UI',
-              builder: (context) {
-                return CodelesslyWidget(
-                  layoutID: "0R0yedXWbqOrI_W7PBlo",
-                  loadingBuilder: (context) {
-                    return const CupertinoActivityIndicator();
-                  },
-                );
-              }),
-          Story(
-            name: 'Pricing Card',
-            builder: (context) {
-              return CodelesslyWidget(
-                layoutID: '0R1xmqF5lXMr6LpLA9h5',
-                loadingBuilder: (context) {
-                  return const CupertinoActivityIndicator();
-                },
-              );
-            },
-          ),
-          Story(
-            name: 'Fruit Product Card',
-            builder: (context) {
-              return CodelesslyWidget(
-                layoutID: '0R5hf4ABTQmzDb6e8XyR',
-                data: const {
-                  'name': 'Mango',
-                  'price': 5.99,
-                  'count': 1,
-                  'description':
-                      'Mangos are versatile fruits that can be enjoyed in many ways. You can eat them fresh as a snack or dessert, or add them to salads, smoothies, salsas, curries, cakes, pies, and more. You can also make mango juice, jam, chutney, or pickle.\n\nMangos are a great way to add some tropical flavor and nutrition to your diet.'
-                },
-                loadingBuilder: (context) {
-                  return const CupertinoActivityIndicator();
-                },
-              );
-            },
+        loadingBuilder: _loading,
+      ),
+    ),
+    Story(
+      name: 'Pricing UI',
+      icon: Icons.sell_outlined,
+      builder: (context) => CodelesslyWidget(
+        layoutID: '0R0yedXWbqOrI_W7PBlo',
+        loadingBuilder: _loading,
+      ),
+    ),
+    Story(
+      name: 'Pricing Card',
+      icon: Icons.credit_card_outlined,
+      builder: (context) => CodelesslyWidget(
+        layoutID: '0R1xmqF5lXMr6LpLA9h5',
+        loadingBuilder: _loading,
+      ),
+    ),
+    Story(
+      name: 'Fruit Product Card',
+      icon: Icons.shopping_basket_outlined,
+      builder: (context) => CodelesslyWidget(
+        layoutID: '0R5hf4ABTQmzDb6e8XyR',
+        data: const {
+          'name': 'Mango',
+          'price': 5.99,
+          'count': 1,
+          'description': 'Mangos are versatile fruits that can be enjoyed in many ways. You can eat them fresh as a snack or dessert, or add them to salads, smoothies, salsas, curries, cakes, pies, and more. You can also make mango juice, jam, chutney, or pickle.\n\nMangos are a great way to add some tropical flavor and nutrition to your diet.',
+        },
+        loadingBuilder: _loading,
+      ),
+    ),
+  ];
+
+  static Widget _loading(BuildContext context) =>
+      const Center(child: CircularProgressIndicator());
+
+  Widget _buildDrawer({required bool modal}) => NavigationDrawer(
+    selectedIndex: selectedIndex,
+    onDestinationSelected: (index) {
+      setState(() => selectedIndex = index);
+      if (modal) Navigator.pop(context);
+    },
+    children: [
+      const Padding(
+        padding: EdgeInsets.fromLTRB(28, 16, 16, 10),
+        child: Text('Examples'),
+      ),
+      for (final Story story in stories)
+        NavigationDrawerDestination(
+          icon: Icon(story.icon),
+          label: Text(story.name),
+        ),
+    ],
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final bool wide = MediaQuery.sizeOf(context).width >= 840;
+    final Story story = stories[selectedIndex];
+
+    return Scaffold(
+      appBar: AppBar(title: Text(story.name)),
+      drawer: wide ? null : _buildDrawer(modal: true),
+      body: Row(
+        children: [
+          if (wide) ...[
+            SizedBox(width: 280, child: _buildDrawer(modal: false)),
+            const VerticalDivider(width: 1),
+          ],
+          Expanded(
+            child: KeyedSubtree(
+              key: ValueKey(story.name),
+              child: Builder(builder: story.builder),
+            ),
           ),
         ],
-      );
+      ),
+    );
+  }
 }
