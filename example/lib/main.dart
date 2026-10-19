@@ -1,18 +1,49 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:storybook_flutter/storybook_flutter.dart';
 
+const String _authToken = "cSlMIT93cj1lXkBuYk5QNmImSTUsTHw2MDQ4VkdlOCZFLHc7";
+
+/// Loads the stories from the new Codelessly Editor's backend (codeless-editor)
+/// instead of the legacy one (codeless-app).
+/// Run with `--dart-define=CODELESSLY_BACKEND=editor`.
+const bool _useEditorBackend =
+    String.fromEnvironment('CODELESSLY_BACKEND') == 'editor';
+
+const FirebaseOptions _editorFirebaseOptions = FirebaseOptions(
+  apiKey: 'AIzaSyCecNnIv_X-F1uFPJT2y8XPCLpxXdD3etk',
+  appId: '1:945980228772:web:7d092a75773524dd5f1231',
+  messagingSenderId: '945980228772',
+  projectId: 'codeless-editor',
+  authDomain: 'codeless-editor.firebaseapp.com',
+  databaseURL: 'https://codeless-editor-default-rtdb.firebaseio.com',
+  storageBucket: 'codeless-editor.firebasestorage.app',
+  measurementId: 'G-JZ7FS97GFQ',
+);
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   Codelessly.instance.initialize(
-    config: CodelesslyConfig(
-      authToken: "cSlMIT93cj1lXkBuYk5QNmImSTUsTHw2MDQ4VkdlOCZFLHc7",
-      isPreview: kDebugMode,
-      preload: true,
-    ),
+    config: _useEditorBackend
+        ? CodelesslyConfig(
+            authToken: _authToken,
+            isPreview: kDebugMode,
+            preload: true,
+            firebaseOptions: _editorFirebaseOptions,
+            firebaseProjectId: 'codeless-editor',
+            firebaseCloudFunctionsBaseURL:
+                'https://us-central1-codeless-editor.cloudfunctions.net',
+            baseURL: 'https://codeless-editor.web.app',
+          )
+        : CodelesslyConfig(
+            authToken: _authToken,
+            isPreview: kDebugMode,
+            preload: true,
+          ),
   );
 
   runApp(const MyApp());
