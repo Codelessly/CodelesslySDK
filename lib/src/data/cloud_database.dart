@@ -60,6 +60,13 @@ abstract class CloudDatabase extends ChangeNotifier {
   CloudDatabase(this.identifier, this.publishSource)
     : assert(identifier.isNotEmpty, 'identifier cannot be empty');
 
+  /// Who can read and write each collection, kept up to date from the
+  /// project's rules document.
+  DataRules rules = const DataRules();
+
+  /// The uid of the signed-in app user, or null when nobody is signed in.
+  String? Function() currentUserId = () => null;
+
   /// Adds a document to the cloud storage at the given [path].
   ///
   /// The [path] is a string that represents the path to the document
@@ -252,6 +259,8 @@ class FirestoreCloudDatabase extends CloudDatabase {
       name: name,
     );
 
+    _listenToRules();
+
     // Create project doc if missing.
     final snapshot = await rootRef.get();
     StatTracker.instance.track(StatType.read, 'cloudDatabase/init');
@@ -267,6 +276,28 @@ class FirestoreCloudDatabase extends CloudDatabase {
       'Done initializing for $identifier',
       name: name,
     );
+  }
+
+  StreamSubscription? _rulesSubscription;
+
+  /// Follows the project's [DataRules], so rule changes made in the editor
+  /// apply without restarting the app.
+  void _listenToRules() {
+    _rulesSubscription?.cancel();
+    _rulesSubscription = firestore
+        .collection(DataRules.rulesCollection)
+        .doc(identifier)
+        .snapshots()
+        .listen(
+          (snapshot) {
+            StatTracker.instance.track(StatType.read, 'cloudDatabase/rules');
+            rules = DataRules.fromJson(snapshot.data());
+          },
+          onError: (Object error) => DebugLogger.instance.printInfo(
+            'Could not load data rules: $error',
+            name: name,
+          ),
+        );
   }
 
   /// Gives a collection reference for the given [path].
@@ -345,6 +376,8 @@ class FirestoreCloudDatabase extends CloudDatabase {
       name: name,
     );
 
+    value = rules.prepareWrite(path, value, currentUserId());
+
     // Auto generate id if desired.
     if (autoGenerateId) {
       final document = await rootRef
@@ -404,6 +437,8 @@ class FirestoreCloudDatabase extends CloudDatabase {
       'updateDocument(path: $path, documentId: $documentId)',
       name: name,
     );
+
+    value = rules.prepareWrite(path, value, currentUserId());
 
     final DocumentReference docRef = getDocPath(path, documentId);
     // final snapshot = await docRef.get();
@@ -545,6 +580,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
   @override
   void dispose() {
     _cancelSubscriptions();
+    _rulesSubscription?.cancel();
     super.dispose();
   }
 
@@ -563,13 +599,28 @@ class FirestoreCloudDatabase extends CloudDatabase {
     // Get doc reference.
     final collectionRef = getCollectionPath(path);
 
+    // Owner-only collections only return the signed-in user's documents.
+    final Query<Map<String, dynamic>>? allowedRef = rules.filterQuery(
+      collectionRef,
+      path,
+      currentUserId(),
+    );
+    if (allowedRef == null) {
+      variable.set(
+        variable.value.copyWith(
+          value: CloudDatabaseVariableUtils.success(<Map<String, dynamic>>[]),
+        ),
+      );
+      return Future<void>.value();
+    }
+
     final Stream<QuerySnapshot<Map<String, dynamic>>> stream;
     // build query if required
     if (whereFilters.isNotEmpty ||
         orderByOperations.isNotEmpty ||
         limit != null) {
       final query = constructQueryFromRef(
-        collectionRef,
+        allowedRef,
         whereFilters: whereFilters,
         orderByOperations: orderByOperations,
         limit: limit,
@@ -579,7 +630,7 @@ class FirestoreCloudDatabase extends CloudDatabase {
       stream = query.snapshots();
     } else {
       // Stream document.
-      stream = collectionRef.snapshots();
+      stream = allowedRef.snapshots();
     }
 
     // Listen to the stream and update the variable.

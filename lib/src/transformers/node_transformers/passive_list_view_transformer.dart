@@ -39,7 +39,9 @@ class PassiveListViewWidget extends StatelessWidget {
     required this.settings,
   });
 
-  Query<Map<String, dynamic>> constructQuery(
+  /// The query for the node's collection, or null when the signed-out user
+  /// may not read any of it.
+  Query<Map<String, dynamic>>? constructQuery(
     BuildContext context,
     Codelessly codelessly,
   ) {
@@ -51,6 +53,17 @@ class PassiveListViewWidget extends StatelessWidget {
     Query<Map<String, dynamic>> query = codelessly.firebaseFirestore.collection(
       '${source.rootDataCollection}/${codelessly.authManager.authData!.projectId}/$collectionPath',
     );
+
+    final CloudDatabase? database = codelessly.cloudDatabase;
+    if (database != null) {
+      final allowed = database.rules.filterQuery(
+        query,
+        collectionPath,
+        database.currentUserId(),
+      );
+      if (allowed == null) return null;
+      query = allowed;
+    }
 
     return constructQueryFromRef(
       query,
@@ -80,6 +93,9 @@ class PassiveListViewWidget extends StatelessWidget {
       }
 
       final query = constructQuery(context, codelessly);
+      if (query == null) {
+        return AdaptiveNodeBox(node: node, child: const SizedBox.shrink());
+      }
 
       return AdaptiveNodeBox(
         node: node,
