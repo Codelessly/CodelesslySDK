@@ -16,6 +16,7 @@ const Set<String> predefinedVariableNames = {
   'route',
   'auth',
   'result',
+  'screen',
 };
 
 const Set<String> predefinedListenableVariableNames = {'storage', 'auth'};
@@ -29,7 +30,37 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'route', type: VariableType.map),
   PredefinedVariableData(name: 'auth', type: VariableType.map),
   PredefinedVariableData(name: 'result'),
+  PredefinedVariableData(name: 'screen', type: VariableType.map),
 };
+
+/// Widths at which the `screen` variable's breakpoint changes: below 600 is
+/// mobile, below 1024 tablet, and anything wider desktop.
+const double kTabletMinWidth = 600;
+const double kDesktopMinWidth = 1024;
+
+/// The value of the `screen` variable for a screen of [size]: its `width`,
+/// `height`, `breakpoint` (mobile, tablet or desktop), `isMobile`,
+/// `isTablet`, `isDesktop`, `orientation` (portrait or landscape),
+/// `isPortrait` and `isLandscape`.
+Map<String, dynamic> screenVariableValue(Size size) {
+  final String breakpoint = size.width < kTabletMinWidth
+      ? 'mobile'
+      : size.width < kDesktopMinWidth
+      ? 'tablet'
+      : 'desktop';
+  final bool portrait = size.height >= size.width;
+  return {
+    'width': size.width,
+    'height': size.height,
+    'breakpoint': breakpoint,
+    'isMobile': breakpoint == 'mobile',
+    'isTablet': breakpoint == 'tablet',
+    'isDesktop': breakpoint == 'desktop',
+    'orientation': portrait ? 'portrait' : 'landscape',
+    'isPortrait': portrait,
+    'isLandscape': !portrait,
+  };
+}
 
 /// Returns the greatest common divisor (gcd) of two integers using Euclid's
 /// algorithm.

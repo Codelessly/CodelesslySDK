@@ -2157,11 +2157,20 @@ extension GenericExt<T extends Object> on T? {
 }
 
 extension BreakpointExt on Iterable<Breakpoint> {
-  /// Retrieves the breakpoint applicable for the given width.
-  Breakpoint? findForWidth(double width) => firstWhereOrNull(
-    (breakpoint) =>
-        width >= breakpoint.lowerBound && width < breakpoint.upperBound,
-  );
+  /// Retrieves the breakpoint applicable for the given width: the one with
+  /// the highest lower bound at or below [width]. Gaps between ranges (a
+  /// 511 upper bound followed by a 512 lower bound) belong to the narrower
+  /// breakpoint, and a width below every range gets the narrowest one.
+  Breakpoint? findForWidth(double width) {
+    if (isEmpty) return null;
+    final List<Breakpoint> sorted = sortedBy<num>(
+      (breakpoint) => breakpoint.lowerBound,
+    );
+    return sorted.lastWhereOrNull(
+          (breakpoint) => width >= breakpoint.lowerBound,
+        ) ??
+        sorted.first;
+  }
 }
 
 extension LayoutGroupsExt on Map<String, List<Breakpoint>> {

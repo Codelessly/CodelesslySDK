@@ -412,10 +412,10 @@ class PropertyValueDelegate {
       'route' => scopedValues.routeParams,
       'auth' => scopedValues.appUser,
       'result' => ActionChain.current?.result,
+      'screen' => scopedValues.screenSize?.let(screenVariableValue),
       _ => null,
     };
 
-    // substitute path with screen.
     if (variableValue == null) return null;
     final VariableType variableType = VariableType.fromObjectType(
       variableValue,

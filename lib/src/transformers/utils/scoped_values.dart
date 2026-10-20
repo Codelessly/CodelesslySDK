@@ -23,6 +23,9 @@ class ScopedValues {
   /// The signed-in app user, as the `auth` variable sees it.
   late final Map<String, dynamic>? appUser;
 
+  /// The size of the screen, which the `screen` variable describes.
+  late final Size? screenSize;
+
   // private fields.
   late final WeakReference<CodelesslyContext>? _codelesslyContextRef;
   late final WeakReference<LocalDatabase>? _localStorageRef;
@@ -68,7 +71,8 @@ class ScopedValues {
       indexedItem = null,
       nodeState = null,
       routeParams = {},
-      appUser = null;
+      appUser = null,
+      screenSize = null;
 
   /// Creates scoped values for a design canvas, where [variables] (by name)
   /// hold their default values and nothing is read from a running app.
@@ -76,6 +80,7 @@ class ScopedValues {
     required Map<String, VariableData> variables,
     this.indexedItem,
     this.appUser,
+    this.screenSize,
     Map<String, dynamic>? data,
   }) : _codelesslyContextRef = null,
        _localStorageRef = null,
@@ -99,6 +104,7 @@ class ScopedValues {
         ? null
         : WeakReference(codelesslyContext);
     indexedItem = IndexedItemProvider.maybeOf(context);
+    screenSize = MediaQuery.maybeSizeOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     routeParams =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
