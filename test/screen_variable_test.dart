@@ -48,9 +48,9 @@ void main() {
 
   group('findForWidth', () {
     final breakpoints = [
-      Breakpoint(nodeId: 'desktop', lowerBound: 769),
-      Breakpoint(nodeId: 'mobile', upperBound: 511),
-      Breakpoint(nodeId: 'tablet', lowerBound: 512, upperBound: 768),
+      const Breakpoint(nodeId: 'desktop', lowerBound: 769),
+      const Breakpoint(nodeId: 'mobile', upperBound: 511),
+      const Breakpoint(nodeId: 'tablet', lowerBound: 512, upperBound: 768),
     ];
 
     test('picks the range the width is in', () {

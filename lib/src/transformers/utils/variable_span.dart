@@ -64,7 +64,7 @@ abstract final class VariablePreview {
       final String code = formula.replaceAll(
         RegExp(
           r'"[^"]*"'
-          "|"
+          '|'
           r"'[^']*'",
         ),
         '',

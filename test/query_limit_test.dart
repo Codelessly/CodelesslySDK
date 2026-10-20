@@ -44,10 +44,10 @@ void main() {
   });
 
   test('limit is applied after ordering', () {
-    expect(build(limit: 3, orderBy: [OrderByQueryFilter(field: 'createdAt')]), [
-      'orderBy(createdAt)',
-      'limit(3)',
-    ]);
+    expect(
+      build(limit: 3, orderBy: [const OrderByQueryFilter(field: 'createdAt')]),
+      ['orderBy(createdAt)', 'limit(3)'],
+    );
   });
 
   test('no limit leaves the query alone', () {

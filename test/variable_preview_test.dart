@@ -67,12 +67,12 @@ void main() {
 
   test('fixed-width nodes show a compact marker', () {
     TextNode node(SizeFit fit) => TextNode(
-          id: 'text',
-          name: 'Text',
-          basicBoxLocal: NodeBox(0, 0, 40, 20),
-          horizontalFit: fit,
-          characters: r'${shots}',
-        );
+      id: 'text',
+      name: 'Text',
+      basicBoxLocal: NodeBox(0, 0, 40, 20),
+      horizontalFit: fit,
+      characters: r'${shots}',
+    );
     expect(
       VariablePreview.textFor(r'${shots}', node: node(SizeFit.fixed)),
       '…',
