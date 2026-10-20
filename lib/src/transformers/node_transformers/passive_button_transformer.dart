@@ -112,13 +112,11 @@ class PassiveButtonWidget extends StatelessWidget {
     final Text label;
 
     // TODO: refactor into TextUtils where it can be built without a style.
-    // TODO: @Birju @Saad Use FX symbol if conditions are applied.
     if (settings.replaceVariablesWithSymbols) {
       final List<TextSpan> spans = node.properties.label
           .splitMap(
-            variablePathRegex,
-            onMatch: (match) =>
-                VariableSpan(variable: match[0]!, style: const TextStyle()),
+            variableSyntaxIdentifierRegex,
+            onMatch: (match) => VariableSpan(variable: match[0]!, node: node),
             onNonMatch: (text) => TextSpan(text: text),
           )
           .toList();

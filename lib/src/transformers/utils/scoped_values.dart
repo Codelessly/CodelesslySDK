@@ -29,6 +29,7 @@ class ScopedValues {
   late final WeakReference<CloudDatabase>? _cloudDatabaseRef;
   late final List<VariableData>? _variablesOverrides;
   late final Map<String, dynamic>? _dataOverrides;
+  Map<String, VariableData>? _previewVariables;
 
   /// Codelessly context instance for the relative Codelessly instance.
   CodelesslyContext? get codelesslyContext => _codelesslyContextRef?.target;
@@ -41,6 +42,7 @@ class ScopedValues {
 
   /// Variable name -> Variable.
   Map<String, VariableData> get variables => {
+    ...?_previewVariables,
     ...codelesslyContext?.variableNamesMap() ?? const {},
     for (final variable in _variablesOverrides ?? const [])
       variable.id: variable,
@@ -67,6 +69,22 @@ class ScopedValues {
       nodeState = null,
       routeParams = {},
       appUser = null;
+
+  /// Creates scoped values for a design canvas, where [variables] (by name)
+  /// hold their default values and nothing is read from a running app.
+  ScopedValues.preview({
+    required Map<String, VariableData> variables,
+    this.indexedItem,
+    this.appUser,
+    Map<String, dynamic>? data,
+  }) : _codelesslyContextRef = null,
+       _localStorageRef = null,
+       _cloudDatabaseRef = null,
+       _variablesOverrides = null,
+       _dataOverrides = data,
+       _previewVariables = variables,
+       nodeState = null,
+       routeParams = {};
 
   /// Creates a new scoped values instance from a given context.
   ScopedValues.of(
