@@ -87,6 +87,21 @@ class PassiveListViewWidget extends StatelessWidget {
           query: query,
           pageSize: node.limit ?? 20,
           builder: (context, snapshot, child) {
+            reportQueryStatus(
+              context,
+              node.statusVariable,
+              queryStatusOf(
+                isFetching: snapshot.isFetching,
+                hasError: snapshot.hasError,
+                count: snapshot.docs.length,
+              ),
+            );
+            // A layout with a status variable shows its own loading and
+            // error states.
+            if (node.statusVariable != null &&
+                (snapshot.isFetching || snapshot.hasError)) {
+              return const SizedBox.shrink();
+            }
             if (snapshot.isFetching) {
               return codelesslyController.loadingBuilder?.call(context) ??
                   const Center(child: CircularProgressIndicator());
