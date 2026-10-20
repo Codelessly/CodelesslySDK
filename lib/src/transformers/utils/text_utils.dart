@@ -95,13 +95,13 @@ class TextUtils {
       ),
     };
 
-    // Replace with fx symbol if required.
+    // On a design canvas, show defaults or placeholders for variables.
     if (replaceVariableWithSymbol) {
       final spans = characters
           .splitMap(
             variableSyntaxIdentifierRegex,
             onMatch: (match) =>
-                VariableSpan(variable: characters, style: style),
+                VariableSpan(variable: match[0]!, node: node, style: style),
             onNonMatch: (text) => TextSpan(text: text, style: style),
           )
           .toList();
