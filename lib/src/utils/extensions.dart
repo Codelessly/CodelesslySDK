@@ -1641,6 +1641,18 @@ extension ActionModelExt on ActionModel {
         ],
       );
     }
+    if (action is ConfirmAction) {
+      return action.copyWith(
+        actions: [
+          for (final nested in action.actions)
+            nested.withUpdatedNodeId(oldNodeId, newNodeId),
+        ],
+        cancelActions: [
+          for (final nested in action.cancelActions)
+            nested.withUpdatedNodeId(oldNodeId, newNodeId),
+        ],
+      );
+    }
     if (action is CloudFilesAction) {
       return action.copyWith(
         actions: [
@@ -1780,6 +1792,24 @@ extension ActionModelExt on ActionModel {
           for (final ActionModel nested in [
             ...action.actions,
             ...action.elseActions,
+          ])
+            ...nested.getUsedVariableNames(
+              includePredefined: includePredefined,
+            ),
+        };
+      case ActionType.confirm:
+        final ConfirmAction action = this as ConfirmAction;
+        strings.addAll([
+          action.title,
+          action.message,
+          action.confirmLabel,
+          action.cancelLabel,
+        ]);
+        return {
+          ..._namesIn(strings, includePredefined),
+          for (final ActionModel nested in [
+            ...action.actions,
+            ...action.cancelActions,
           ])
             ...nested.getUsedVariableNames(
               includePredefined: includePredefined,
