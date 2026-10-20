@@ -243,9 +243,10 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     loadedVariables = publishModel.variables[widget.layout.id];
     loadedConditions = publishModel.conditions[widget.layout.id];
 
+    final Map<String, Map<String, VariableData>> layoutVariables =
+        publishModel.variables[widget.layout.id]?.variables ?? {};
     final Map<String, VariableData> variablesMap =
-        publishModel.variables[widget.layout.id]?.variables[widget.canvasId] ??
-        {};
+        layoutVariables[widget.canvasId] ?? {};
 
     // Clear all the variables that are not api variables. We persist api
     // variables across canvases from the same layout group so that the
@@ -253,6 +254,22 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     codelesslyContext.variables.removeWhere(
       (key, value) => !value.value.isApiVariable,
     );
+    // App, then page variables, so a screen's own variable of the same name
+    // wins. Their notifiers are shared by every layout of this instance.
+    final Codelessly codelessly = context.read<Codelessly>();
+    for (final String scope in [kAppVariablesScope, kPageVariablesScope]) {
+      for (final variable in (layoutVariables[scope] ?? {}).values) {
+        codelesslyContext.variables[variable.id] = codelessly.sharedVariables
+            .putIfAbsent(
+              variable.id,
+              () => Observable(
+                variable.copyWith(
+                  value: codelesslyContext.data[variable.name],
+                ),
+              ),
+            );
+      }
+    }
     for (final variable in variablesMap.values) {
       // Override default values of variables with values provided in data.
       final notifier = Observable(

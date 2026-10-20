@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -206,4 +207,76 @@ void main() {
       expect(find.byKey(const ValueKey(selectedChild)), findsWidgets);
     },
   );
+
+  testWidgets('app and page variables are shared by every layout', (
+    tester,
+  ) async {
+    final model = publishModel();
+    model.layouts['layout'] = layout();
+    final VariableData canvasRole =
+        variables().variables[canvasId]!.values.first;
+    model.variables['layout'] = variables().copyWith(
+      variables: {
+        canvasId: {canvasRole.id: canvasRole},
+        kPageVariablesScope: {
+          'pageVar': VariableData(id: 'pageVar', name: 'filter', value: 'all'),
+          // A screen's own variable wins over a page variable of its name.
+          'shadowed': VariableData(id: 'shadowed', name: 'role', value: 'x'),
+        },
+        kAppVariablesScope: {
+          'appVar': VariableData(
+            id: 'appVar',
+            name: 'cartCount',
+            value: '0',
+            type: VariableType.integer,
+          ),
+        },
+      },
+    );
+    model.conditions['layout'] = conditions();
+    final codelessly = Codelessly(
+      config: CodelesslyConfig(authToken: 'token'),
+      publishDataManager: dataManager(model: model),
+    );
+    final controller = CodelesslyWidgetController(
+      layoutID: 'layout',
+      codelessly: codelessly,
+    );
+    final first = CodelesslyContext.empty(layoutID: 'layout');
+    final second = CodelesslyContext.empty(layoutID: 'layout');
+
+    Widget screen(CodelesslyContext codelesslyContext) => MultiProvider(
+      providers: [
+        ChangeNotifierProvider<CodelesslyContext>.value(
+          value: codelesslyContext,
+        ),
+        Provider<Codelessly>.value(value: codelessly),
+      ],
+      child: CodelesslyLayoutBuilder(
+        controller: controller,
+        layout: model.layouts['layout']!,
+        canvasId: canvasId,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: [
+            Expanded(child: screen(first)),
+            Expanded(child: screen(second)),
+          ],
+        ),
+      ),
+    );
+
+    expect(first.getVariableValue<String>('filter'), 'all');
+    expect(first.variableNamesMap()['role']!.id, canvasRole.id);
+
+    first.updateVariable('cartCount', 3);
+    first.updateVariable('filter', 'mine');
+    expect(second.getVariableValue<int>('cartCount'), 3);
+    expect(second.getVariableValue<String>('filter'), 'mine');
+    expect(codelessly.sharedVariables.keys, containsAll(['appVar', 'pageVar']));
+  });
 }

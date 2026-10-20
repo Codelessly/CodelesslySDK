@@ -133,6 +133,12 @@ class Codelessly {
     AppAuth.userToMap(null),
   );
 
+  /// App and page variables (see [kAppVariablesScope] and
+  /// [kPageVariablesScope]) by variable id. Every layout this instance shows
+  /// reads and writes the same notifier, so their values are shared across
+  /// screens and survive switching between a layout's breakpoints.
+  final Map<String, Observable<VariableData>> sharedVariables = {};
+
   StreamSubscription<User?>? _appUserSubscription;
 
   /// Re-reads the signed-in user into [appUser], e.g. after its display name
