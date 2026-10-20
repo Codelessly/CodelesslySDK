@@ -139,6 +139,11 @@ class FunctionsRepository {
         return AppToast.show(context, action as ShowToastAction);
       case ActionType.confirm:
         return runConfirm(context, action as ConfirmAction);
+      case ActionType.delay:
+        return Future<bool>.delayed(
+          Duration(milliseconds: (action as DelayAction).milliseconds),
+          () => true,
+        );
     }
   }
 
