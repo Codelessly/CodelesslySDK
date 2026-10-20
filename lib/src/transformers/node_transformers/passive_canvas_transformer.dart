@@ -428,7 +428,38 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   @override
   void dispose() {
     codelessly?.removeNavigationListener('canvas-${widget.node.id}');
+    _gateUser?.removeListener(_enforceSignIn);
     super.dispose();
+  }
+
+  /// The signed-in user a screen that requires sign-in watches.
+  ValueNotifier<Map<String, dynamic>>? _gateUser;
+
+  bool _redirected = false;
+
+  /// Sends a signed-out user from a screen that requires sign-in to its
+  /// redirect screen, now or when they sign out later.
+  void _enforceSignIn() {
+    final String? redirectId = widget.node.properties.signInRedirectId;
+    if (_redirected || !mounted || redirectId == null || redirectId.isEmpty) {
+      return;
+    }
+    if (_gateUser?.value['isSignedIn'] == true) return;
+    _redirected = true;
+    DebugLogger.instance.printInfo(
+      'Canvas ${widget.node.id} requires sign-in. Redirecting to $redirectId.',
+      name: PassiveCanvasTransformer.name,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      FunctionsRepository.navigate(
+        context,
+        NavigationAction(
+          navigationType: NavigationType.replace,
+          destinationId: redirectId,
+        ),
+      );
+    });
   }
 
   @override
@@ -446,6 +477,14 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
 
     if (didPerformOnLoadActions) return;
     didPerformOnLoadActions = true;
+
+    if (widget.node.properties.requiresSignIn) {
+      _gateUser = context.read<Codelessly?>()?.appUser
+        ?..addListener(_enforceSignIn);
+      _enforceSignIn();
+      // A signed-out user leaves before the screen's load actions run.
+      if (_redirected) return;
+    }
 
     triggerOnLoadActions(context);
   }
