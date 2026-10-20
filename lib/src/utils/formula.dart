@@ -118,6 +118,112 @@ class FormulaEvaluator {
 
   /// Names of the functions formulas can call.
   static Iterable<String> get functions => _functions.keys;
+
+  /// Why [expression] can't be evaluated, such as `Unknown function "sun"`
+  /// or `Expected ")" at 12`, or null when it parses.
+  static String? errorOf(String expression) {
+    try {
+      _Parser(expression.trim()).parseAll();
+      return null;
+    } on FormatException catch (error) {
+      final int? offset = error.offset;
+      return offset == null || offset >= expression.trim().length
+          ? error.message
+          : '${error.message} at ${offset + 1}';
+    } catch (error) {
+      return error.toString();
+    }
+  }
+
+  /// How to call each function, with an example, for editors to list.
+  static const List<FormulaFunctionDoc> functionDocs = [
+    FormulaFunctionDoc(
+      'money',
+      'money(value, symbol)',
+      r'money(price) → $1,234.50',
+    ),
+    FormulaFunctionDoc(
+      'fixed',
+      'fixed(value, decimals)',
+      'fixed(4.5, 2) → 4.50',
+    ),
+    FormulaFunctionDoc(
+      'round',
+      'round(value, decimals)',
+      'round(4.567, 1) → 4.6',
+    ),
+    FormulaFunctionDoc('floor', 'floor(value)', 'floor(4.7) → 4'),
+    FormulaFunctionDoc('ceil', 'ceil(value)', 'ceil(4.2) → 5'),
+    FormulaFunctionDoc('abs', 'abs(value)', 'abs(-3) → 3'),
+    FormulaFunctionDoc('min', 'min(a, b, …) or min(list)', 'min(3, 7) → 3'),
+    FormulaFunctionDoc('max', 'max(a, b, …) or max(list)', 'max(3, 7) → 7'),
+    FormulaFunctionDoc('sum', 'sum(list, field)', 'sum(cart, "price") → 24'),
+    FormulaFunctionDoc(
+      'count',
+      'count(list, field, value)',
+      'count(tasks, "done", true) → 2',
+    ),
+    FormulaFunctionDoc('length', 'length(text or list)', 'length(cart) → 3'),
+    FormulaFunctionDoc(
+      'if',
+      'if(condition, then, else)',
+      'if(qty > 1, "items", "item")',
+    ),
+    FormulaFunctionDoc(
+      'plural',
+      'plural(count, one, many)',
+      'plural(2, "photo") → photos',
+    ),
+    FormulaFunctionDoc(
+      'join',
+      'join(list, separator, field)',
+      'join(tags, " · ")',
+    ),
+    FormulaFunctionDoc('upper', 'upper(text)', 'upper("hi") → HI'),
+    FormulaFunctionDoc('lower', 'lower(text)', 'lower("Hi") → hi'),
+    FormulaFunctionDoc(
+      'contains',
+      'contains(text or list, value)',
+      'contains(tags, "new") → true',
+    ),
+    FormulaFunctionDoc(
+      'where',
+      'where(list, field, value)',
+      'where(tasks, "done", false)',
+    ),
+    FormulaFunctionDoc(
+      'without',
+      'without(list, other)',
+      'without(all, picked)',
+    ),
+    FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
+    FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
+    FormulaFunctionDoc(
+      'isEmpty',
+      'isEmpty(text or list)',
+      'isEmpty(cart) → false',
+    ),
+    FormulaFunctionDoc(
+      'isNotEmpty',
+      'isNotEmpty(text or list)',
+      'isNotEmpty(cart) → true',
+    ),
+  ];
+}
+
+/// How to call a formula function, for editors to list.
+class FormulaFunctionDoc {
+  /// The function's name, such as `money`.
+  final String name;
+
+  /// Its arguments, such as `money(value, symbol)`.
+  final String signature;
+
+  /// A call and its result.
+  final String example;
+
+  /// Creates a [FormulaFunctionDoc].
+  const FormulaFunctionDoc(this.name, this.signature, this.example);
 }
 
 // ---------------------------------------------------------------------------
