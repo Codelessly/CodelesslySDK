@@ -1,0 +1,363 @@
+{
+ "layout": {
+  "owner": "owner",
+  "users": [
+   "owner"
+  ],
+  "roles": {
+   "owner": "owner"
+  },
+  "teams": [],
+  "public": false,
+  "id": "layout",
+  "pageId": "lhsT30U4KeVevueTi2Dw",
+  "projectId": "project",
+  "canvases": {
+   "0RA4iOShqVSy59V7Bb2w": {
+    "0RA4p4dd_3sheXfLa2Gq": {
+     "id": "0RA4p4dd_3sheXfLa2Gq",
+     "name": "Title",
+     "horizontalFit": "expanded",
+     "verticalFit": "shrinkWrap",
+     "characters": "Designer",
+     "alignment": {
+      "data": [
+       0,
+       0
+      ]
+     },
+     "textMixedProps": [
+      {
+       "fills": [
+        {
+         "id": "0RA4OxNCFDi1dhybrf9_",
+         "type": "solid",
+         "color": "#FFFFFF"
+        }
+       ],
+       "fontName": {
+        "family": "Poppins",
+        "weight": "w400"
+       },
+       "start": 0,
+       "end": 8
+      }
+     ],
+     "textAlignHorizontal": "center",
+     "basicBoxLocal": [
+      16,
+      61.5,
+      118,
+      27
+     ],
+     "type": "text"
+    },
+    "0RA4iOSkIRuraEIQ3JCQ": {
+     "reactions": [
+      {
+       "name": "Set Variable Action 0",
+       "action": {
+        "type": "setVariable",
+        "variable": {
+         "id": "MTIQQwtDf15bwJZN2iHD",
+         "name": "role",
+         "extra": {}
+        },
+        "newValue": "Designer"
+       },
+       "trigger": {
+        "type": "click"
+       },
+       "id": "0RJ9jE7c55gyxYRON_uf"
+      },
+      {
+       "name": "Set Variable Action 1",
+       "action": {
+        "type": "setVariable",
+        "variable": {
+         "id": "cDFrs37hn0cmI3XqWq20",
+         "name": "isOther",
+         "value": "false",
+         "type": "boolean",
+         "extra": {}
+        },
+        "newValue": "false"
+       },
+       "trigger": {
+        "type": "click"
+       },
+       "id": "0RJ9jE7cJc4GAAixj__E"
+      }
+     ],
+     "id": "0RA4iOSkIRuraEIQ3JCQ",
+     "name": "Unselected State",
+     "aspectRatioLock": true,
+     "alignment": {
+      "data": [
+       0,
+       0
+      ]
+     },
+     "basicBoxLocal": [
+      0,
+      0,
+      150,
+      150
+     ],
+     "padding": 16,
+     "children": [
+      "0RA4iOSk6VU9aIAf0t5Z"
+     ],
+     "inkWell": {
+      "overlayColor": "#1E5C69E5"
+     },
+     "fills": [
+      {
+       "id": "0RA4Oo8RkfluFf6Iowyv",
+       "type": "solid",
+       "opacity": 0.106,
+       "color": "#9E9E9E"
+      }
+     ],
+     "cornerRadius": [
+      12,
+      false,
+      "circular"
+     ],
+     "type": "frame"
+    },
+    "0RA4iOSkYO3SgMtPqrJq": {
+     "id": "0RA4iOSkYO3SgMtPqrJq",
+     "name": "Option",
+     "basicBoxLocal": [
+      0,
+      0,
+      150,
+      150
+     ],
+     "allowedTypes": [],
+     "deniedTypes": [],
+     "type": "variance",
+     "currentVariantId": "default",
+     "variants": [
+      {
+       "name": "unselected",
+       "id": "default",
+       "children": [
+        "0RA4iOSkIRuraEIQ3JCQ"
+       ]
+      },
+      {
+       "name": "selected",
+       "id": "0RA4PZebIlc5dVbAOoAU",
+       "children": [
+        "0RA4p4dcPLrhyyT2RYhQ"
+       ]
+      }
+     ],
+     "properties": {}
+    },
+    "0RA4iOShqVSy59V7Bb2w": {
+     "id": "0RA4iOShqVSy59V7Bb2w",
+     "name": "Onboarding Questionnaire",
+     "verticalFit": "shrinkWrap",
+     "aspectRatioLock": true,
+     "basicBoxLocal": [
+      7622.659,
+      9651.269,
+      1024,
+      724
+     ],
+     "children": [
+      "0RA4iOShsBBpHJZNdZKp"
+     ],
+     "fills": [],
+     "mainAxisAlignment": "start",
+     "crossAxisAlignment": "start",
+     "type": "canvas",
+     "createdTimestamp": 1698127870741,
+     "properties": {
+      "bodyId": "0RA4iOShsBBpHJZNdZKp"
+     }
+    },
+    "0RA4iOSk6VU9aIAf0t5Z": {
+     "id": "0RA4iOSk6VU9aIAf0t5Z",
+     "name": "Title",
+     "horizontalFit": "expanded",
+     "verticalFit": "shrinkWrap",
+     "characters": "Designer",
+     "alignment": {
+      "data": [
+       0,
+       0
+      ]
+     },
+     "textMixedProps": [
+      {
+       "fills": [
+        {
+         "id": "0RA4OxNCFDi1dhybrf9_",
+         "type": "solid",
+         "color": "#000000"
+        }
+       ],
+       "fontName": {
+        "family": "Poppins",
+        "weight": "w400"
+       },
+       "start": 0,
+       "end": 8
+      }
+     ],
+     "textAlignHorizontal": "center",
+     "basicBoxLocal": [
+      16,
+      63,
+      118,
+      24
+     ],
+     "type": "text"
+    },
+    "0RA4p4dcPLrhyyT2RYhQ": {
+     "id": "0RA4p4dcPLrhyyT2RYhQ",
+     "name": "Selected State",
+     "aspectRatioLock": true,
+     "alignment": {
+      "data": [
+       0,
+       0
+      ]
+     },
+     "basicBoxLocal": [
+      0,
+      0,
+      150,
+      150
+     ],
+     "padding": 16,
+     "children": [
+      "0RA4p4dd_3sheXfLa2Gq"
+     ],
+     "inkWell": {
+      "overlayColor": "#1E5C69E5"
+     },
+     "fills": [
+      {
+       "id": "0RA4Oo8RkfluFf6Iowyv",
+       "type": "solid",
+       "color": "#5C69E5"
+      }
+     ],
+     "cornerRadius": [
+      12,
+      false,
+      "circular"
+     ],
+     "type": "frame"
+    },
+    "0RA4iOShsBBpHJZNdZKp": {
+     "id": "0RA4iOShsBBpHJZNdZKp",
+     "name": "Placeholder (Freeform)",
+     "horizontalFit": "expanded",
+     "verticalFit": "shrinkWrap",
+     "basicBoxLocal": [
+      0,
+      0,
+      1024,
+      724
+     ],
+     "children": [
+      "0RA4iOSkYO3SgMtPqrJq"
+     ],
+     "type": "freeformPlaceholder"
+    }
+   }
+  },
+  "breakpoints": [],
+  "lastUpdated": 1707144239010,
+  "canvasIds": [
+   "0RA4iOShqVSy59V7Bb2w"
+  ]
+ },
+ "variables": {
+  "owner": "owner",
+  "users": [
+   "owner"
+  ],
+  "roles": {
+   "owner": "owner"
+  },
+  "teams": [],
+  "public": false,
+  "id": "layout",
+  "variables": {
+   "0RA4iOShqVSy59V7Bb2w": {
+    "MTIQQwtDf15bwJZN2iHD": {
+     "id": "MTIQQwtDf15bwJZN2iHD",
+     "name": "role",
+     "extra": {}
+    }
+   }
+  }
+ },
+ "conditions": {
+  "owner": "owner",
+  "users": [
+   "owner"
+  ],
+  "roles": {
+   "owner": "owner"
+  },
+  "teams": [],
+  "public": false,
+  "id": "layout",
+  "conditions": {
+   "0RA4iOShqVSy59V7Bb2w": {
+    "0RA4oxPNqnIjxANcPmqT": {
+     "id": "0RA4oxPNqnIjxANcPmqT",
+     "lastUpdated": 1698134929052,
+     "ifCondition": {
+      "id": "0RA4oxPNcyguHcHKdRan",
+      "lastUpdated": 1698134929052,
+      "expression": {
+       "leftPart": {
+        "valueString": "${role}",
+        "type": "Variable"
+       },
+       "rightPart": {
+        "valueString": "Designer",
+        "type": "Variable"
+       },
+       "operator": "equalsTo",
+       "type": "Expression"
+      },
+      "actions": [
+       {
+        "type": "setVariant",
+        "nodeID": "0RA4iOSkYO3SgMtPqrJq",
+        "variantID": "0RA4PZebIlc5dVbAOoAU"
+       }
+      ],
+      "mode": "ifMode",
+      "type": "Condition"
+     },
+     "elseIfConditions": [],
+     "elseCondition": {
+      "id": "0RA4oxPMWhAHGXHbYa40",
+      "lastUpdated": 1698134929052,
+      "actions": [
+       {
+        "type": "setVariant",
+        "nodeID": "0RA4iOSkYO3SgMtPqrJq",
+        "variantID": "default"
+       }
+      ],
+      "type": "ElseCondition"
+     },
+     "name": "currentVariantId on node 0RA4iOSkYO3SgMtPqrJq",
+     "type": "ConditionGroup"
+    }
+   }
+  }
+ }
+}
