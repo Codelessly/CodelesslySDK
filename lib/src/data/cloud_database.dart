@@ -565,7 +565,9 @@ class FirestoreCloudDatabase extends CloudDatabase {
 
     final Stream<QuerySnapshot<Map<String, dynamic>>> stream;
     // build query if required
-    if (whereFilters.isNotEmpty || orderByOperations.isNotEmpty) {
+    if (whereFilters.isNotEmpty ||
+        orderByOperations.isNotEmpty ||
+        limit != null) {
       final query = constructQueryFromRef(
         collectionRef,
         whereFilters: whereFilters,
