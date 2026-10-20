@@ -760,8 +760,15 @@ Widget buildFill(
       );
       // A URL path that resolves to nothing, like a cover that isn't set
       // yet, has no image to load.
-      if (bytes == null && imageURL.trim().isEmpty) {
-        return const SizedBox.shrink();
+      if (bytes == null &&
+          (imageURL.trim().isEmpty ||
+              (settings.replaceVariablesWithSymbols &&
+                  variableSyntaxIdentifierRegex.hasMatch(imageURL)))) {
+        // The design canvas shows where a bound image goes.
+        return settings.replaceVariablesWithSymbols &&
+                variableSyntaxIdentifierRegex.hasMatch(imageURLValue)
+            ? ImageFillPlaceholder(borderRadius: borderRadius)
+            : const SizedBox.shrink();
       }
       Widget child;
 
@@ -845,4 +852,37 @@ class RelativeTransform {
     scale: scale ?? this.scale,
     skew: skew ?? this.skew,
   );
+}
+
+/// Stands in on a design canvas for an image bound to a variable that has no
+/// value yet.
+class ImageFillPlaceholder extends StatelessWidget {
+  /// The corners of the node the image fills.
+  final BorderRadius? borderRadius;
+
+  /// Creates an [ImageFillPlaceholder].
+  const ImageFillPlaceholder({super.key, this.borderRadius});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFFE9ECEF),
+        borderRadius: borderRadius,
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final double side = constraints.biggest.shortestSide;
+          if (!side.isFinite || side < 12) return const SizedBox.expand();
+          return Center(
+            child: Icon(
+              Icons.image_outlined,
+              size: (side / 3).clamp(12, 48),
+              color: const Color(0xFFADB5BD),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
