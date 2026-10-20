@@ -1815,6 +1815,8 @@ extension ActionModelExt on ActionModel {
               includePredefined: includePredefined,
             ),
         };
+      case ActionType.delay:
+        return {};
       case ActionType.forEach:
         final ForEachAction action = this as ForEachAction;
         strings.add(action.items.wrapWithVariableSyntax());

@@ -136,6 +136,9 @@ class ConditionVariablesVisitor
   Set<String>? visitConfirmAction(ConfirmAction action) => {};
 
   @override
+  Set<String>? visitDelayAction(DelayAction action) => {};
+
+  @override
   Set<String>? visitForEachAction(ForEachAction action) => {};
 
   @override
@@ -218,6 +221,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitConfirmAction(ConfirmAction action) => null;
+
+  @override
+  String? visitDelayAction(DelayAction action) => null;
 
   @override
   String? visitForEachAction(ForEachAction action) => null;
