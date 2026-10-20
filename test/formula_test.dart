@@ -215,4 +215,25 @@ void main() {
       {'total': 8.5, 'label': 'Cortado x2'},
     );
   });
+
+  group('errorOf', () {
+    test('is null for a valid formula', () {
+      expect(FormulaEvaluator.errorOf('money(price * qty)'), isNull);
+    });
+
+    test('names an unknown function', () {
+      expect(FormulaEvaluator.errorOf('sun(cart)'), contains('"sun"'));
+    });
+
+    test('explains a missing bracket', () {
+      expect(FormulaEvaluator.errorOf('round(price'), isNotNull);
+    });
+  });
+
+  test('every function is documented', () {
+    expect(
+      FormulaEvaluator.functionDocs.map((doc) => doc.name).toSet(),
+      FormulaEvaluator.functions.toSet(),
+    );
+  });
 }
