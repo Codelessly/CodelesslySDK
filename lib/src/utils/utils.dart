@@ -405,7 +405,7 @@ class ApiResponseVariableUtils {
     'isError': false,
     'isSuccess': true,
     'data': data,
-    'status': 'error',
+    'status': 'success',
     'headers': headers,
     'statusCode': statusCode,
     'hasData': data != null,
@@ -486,7 +486,7 @@ class CloudDatabaseVariableUtils {
     'isError': false,
     'isSuccess': true,
     'data': data,
-    'status': 'error',
+    'status': 'success',
     'hasData': data != null,
   };
 }
@@ -503,9 +503,9 @@ Query<Map<String, dynamic>> constructQueryFromRef(
 }) {
   Query<Map<String, dynamic>> query = ref;
 
-  if (limit != null) query.limit(limit);
-
-  if (whereFilters.isEmpty && orderByOperations.isEmpty) return query;
+  if (whereFilters.isEmpty && orderByOperations.isEmpty) {
+    return limit != null ? query.limit(limit) : query;
+  }
 
   for (final whereFilter in whereFilters) {
     Object? field;
@@ -585,6 +585,9 @@ Query<Map<String, dynamic>> constructQueryFromRef(
       descending: orderByFilter.sortOrder == OrderByQuerySortOrder.descending,
     );
   }
+
+  // Firestore queries are immutable: limit must be applied to the result.
+  if (limit != null) query = query.limit(limit);
 
   return query;
 }
