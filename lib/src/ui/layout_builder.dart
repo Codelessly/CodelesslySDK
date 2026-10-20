@@ -156,14 +156,35 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     }
   }
 
+  /// The layout's variables and conditions that [loadLayout] last loaded.
+  SDKLayoutVariables? loadedVariables;
+  SDKLayoutConditions? loadedConditions;
+
   @override
   void didUpdateWidget(covariant CodelesslyLayoutBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.layout.id != widget.layout.id ||
         oldWidget.canvasId != widget.canvasId ||
-        oldWidget.layout.lastUpdated != widget.layout.lastUpdated) {
+        oldWidget.layout.lastUpdated != widget.layout.lastUpdated ||
+        didVariablesOrConditionsChange(context)) {
       loadLayout(context);
     }
+  }
+
+  /// Whether the publish model has different variables or conditions for
+  /// this layout than [loadLayout] last loaded. They can arrive after the
+  /// layout, e.g. when the layout was cached without them, or be published
+  /// on their own.
+  bool didVariablesOrConditionsChange(BuildContext context) {
+    final SDKPublishModel? model = context
+        .read<Codelessly>()
+        .dataManager
+        .publishModel;
+    if (model == null) return false;
+    bool changed(Object? loaded, Object? current) =>
+        !identical(loaded, current) && loaded != current;
+    return changed(loadedVariables, model.variables[widget.layout.id]) ||
+        changed(loadedConditions, model.conditions[widget.layout.id]);
   }
 
   /// Loads the layout into the [nodeRegistry] and updates the
@@ -219,6 +240,8 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
       }
     }
     final publishModel = context.read<Codelessly>().dataManager.publishModel!;
+    loadedVariables = publishModel.variables[widget.layout.id];
+    loadedConditions = publishModel.conditions[widget.layout.id];
 
     final Map<String, VariableData> variablesMap =
         publishModel.variables[widget.layout.id]?.variables[widget.canvasId] ??
