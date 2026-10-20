@@ -133,6 +133,9 @@ class ConditionVariablesVisitor
   Set<String>? visitConditionalAction(ConditionalAction action) => {};
 
   @override
+  Set<String>? visitConfirmAction(ConfirmAction action) => {};
+
+  @override
   Set<String>? visitForEachAction(ForEachAction action) => {};
 
   @override
@@ -212,6 +215,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitConditionalAction(ConditionalAction action) => null;
+
+  @override
+  String? visitConfirmAction(ConfirmAction action) => null;
 
   @override
   String? visitForEachAction(ForEachAction action) => null;

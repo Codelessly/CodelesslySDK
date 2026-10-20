@@ -137,6 +137,8 @@ class FunctionsRepository {
         );
       case ActionType.showToast:
         return AppToast.show(context, action as ShowToastAction);
+      case ActionType.confirm:
+        return runConfirm(context, action as ConfirmAction);
     }
   }
 
@@ -172,6 +174,25 @@ class FunctionsRepository {
       name: name,
     );
     await runActions(context, matches ? action.actions : action.elseActions);
+    return true;
+  }
+
+  /// Asks the user to confirm [action], then runs its actions or its cancel
+  /// actions.
+  static Future<bool> runConfirm(
+    BuildContext context,
+    ConfirmAction action,
+  ) async {
+    final bool confirmed = await AppConfirmDialog.show(context, action);
+    DebugLogger.instance.printInfo(
+      'Confirm dialog was ${confirmed ? 'confirmed' : 'cancelled'}.',
+      name: name,
+    );
+    if (!context.mounted) return true;
+    await runActions(
+      context,
+      confirmed ? action.actions : action.cancelActions,
+    );
     return true;
   }
 
