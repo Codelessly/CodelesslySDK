@@ -49,6 +49,9 @@ abstract final class VariablePreview {
         return value;
       }
     }
+    // A name can be wider than a fixed-width slot, so only nodes that grow
+    // to fit their text show one; the rest show a compact marker.
+    if (node != null && node.horizontalFit != SizeFit.shrinkWrap) return '…';
     return placeholderFor(expression);
   }
 
