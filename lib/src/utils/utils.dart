@@ -19,6 +19,20 @@ const Set<String> predefinedVariableNames = {
   'screen',
 };
 
+/// The key under which a layout's published variables hold the project's
+/// app variables, shared by every screen of the app.
+const String kAppVariablesScope = '__app__';
+
+/// The key under which a layout's published variables hold the variables of
+/// its editor page, shared by every screen on that page. The editor stores
+/// them under `'$kPageVariablesScope<pageId>'`.
+const String kPageVariablesScope = '__page__';
+
+/// Whether [scopeId], a canvas id in variable storage, holds app or page
+/// variables instead of a canvas's.
+bool isSharedVariablesScope(String scopeId) =>
+    scopeId == kAppVariablesScope || scopeId.startsWith(kPageVariablesScope);
+
 const Set<String> predefinedListenableVariableNames = {'storage', 'auth'};
 
 final Set<PredefinedVariableData> predefinedVariables = {
