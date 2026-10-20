@@ -27,6 +27,7 @@ abstract final class AppAuth {
           ? ''
           : initialSource.characters.first.toUpperCase(),
       'photoUrl': signedIn ? user.photoURL ?? '' : '',
+      'emailVerified': signedIn && user.emailVerified,
     };
   }
 
@@ -45,6 +46,7 @@ abstract final class AppAuth {
       'user-disabled' => 'This account has been disabled.',
       'too-many-requests' => 'Too many attempts. Try again later.',
       'network-request-failed' => 'Network error. Check your connection.',
+      'requires-recent-login' => 'Sign in again, then try this again.',
       _ => error.message ?? error.code,
     };
   }
