@@ -633,6 +633,10 @@ class DataManager {
       config.publishSource,
       firestore: firebaseFirestore,
     );
+    instance.currentUserId = () {
+      final user = authManager.firebaseAuth.currentUser;
+      return user == null || user.isAnonymous ? null : user.uid;
+    };
     // initialize cloud storage.
     await instance.init();
     return instance;
