@@ -1418,7 +1418,8 @@ class DataManager {
 
     // Process Layouts
     SDKPublishLayout? layout;
-    if (model!.layouts.containsKey(layoutID)) {
+    final bool isCached = model!.layouts.containsKey(layoutID);
+    if (isCached) {
       DebugLogger.instance.printInfo(
         '\tLayout [$layoutID] is already cached. Skipping download.',
         name: name,
@@ -1446,8 +1447,6 @@ class DataManager {
           name: name,
         );
       }
-
-      model.layouts[layoutID] = layout;
     }
 
     assert(layout != null, 'Layout should not be null at this point.');
@@ -1544,6 +1543,13 @@ class DataManager {
         name: name,
       );
     }
+
+    // Add a downloaded layout only once its variables and conditions are in
+    // the model. A CodelesslyWidget builds a layout as soon as the model has
+    // it, and only loads the layout's variables and conditions then, so a
+    // layout added first would render without them if anything rebuilt the
+    // widget while they were still downloading.
+    if (!isCached) model.layouts[layoutID] = layout!;
 
     await emitPublishModel();
     savePublishModel();
