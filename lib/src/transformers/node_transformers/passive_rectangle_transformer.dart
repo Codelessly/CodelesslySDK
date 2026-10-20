@@ -143,6 +143,7 @@ class PassiveRectangleWidget extends StatelessWidget {
             [...children, ?portalWidget],
             stackAlignment: stackAlignment,
             applyPadding: applyPadding,
+            getNode: manager.getNode,
           ),
           alignment:
               stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
@@ -295,6 +296,7 @@ List<Widget> wrapWithPaddingAndScroll(
   List<Widget> children, {
   required AlignmentModel stackAlignment,
   bool applyPadding = true,
+  GetNode? getNode,
 }) {
   if (children.isEmpty) return children;
 
@@ -302,16 +304,41 @@ List<Widget> wrapWithPaddingAndScroll(
       node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
 
   if (node is FrameNode && node.isScrollable) {
+    // The content reaches the farthest child along the scroll axis, and at
+    // least the viewport (fillViewport); across it, it spans the viewport.
+    // Children are positioned in it, so it cannot size itself from them.
+    final bool vertical = node.scrollDirection.isVertical;
+    final double extent = [
+      for (final String childID in node.children)
+        if (getNode?.call(childID) case final BaseNode child)
+          vertical
+              ? child.outerBoxLocal.bottom - node.innerBoxLocal.edgeTop
+              : child.outerBoxLocal.right - node.innerBoxLocal.edgeLeft,
+    ].fold(0, max);
     return [
       wrapWithPaddedScrollable(
         node: node,
         padding: applyPadding ? resolvedPadding : null,
         clipBehavior: defaultGetClipBehavior(node),
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment:
-              stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-          children: children,
+        fillViewport: true,
+        child: SizedBox(
+          width: vertical
+              ? (node.horizontalFit == SizeFit.shrinkWrap
+                    ? node.innerBoxLocal.width
+                    : null)
+              : extent,
+          height: vertical
+              ? extent
+              : (node.verticalFit == SizeFit.shrinkWrap
+                    ? node.innerBoxLocal.height
+                    : null),
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment:
+                stackAlignment.flutterAlignment ??
+                AlignmentDirectional.topStart,
+            children: children,
+          ),
         ),
       ),
     ];

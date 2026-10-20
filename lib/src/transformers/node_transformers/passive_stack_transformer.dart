@@ -136,6 +136,30 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     final bool doesParentScroll =
         parent is ScrollableMixin && parent.isScrollable;
 
+    // A scrolling parent lays its children out in a content stack as long as
+    // they need (see wrapWithPaddingAndScroll), so each child keeps its pins
+    // across the scroll axis and its designed offset and size along it.
+    if (doesParentScroll) {
+      final bool vertical = parent.scrollDirection.isVertical;
+      return Positioned(
+        left: vertical || horizontallyExpands
+            ? left
+            : node.outerBoxLocal.x - parent.innerBoxGlobal.edgeLeft,
+        right: vertical || horizontallyExpands ? right : null,
+        top: !vertical || verticallyExpands
+            ? top
+            : node.outerBoxLocal.y - parent.innerBoxGlobal.edgeTop,
+        bottom: !vertical || verticallyExpands ? bottom : null,
+        width: vertical || horizontallyExpands || node.isHorizontalWrap
+            ? width
+            : node.outerBoxLocal.width,
+        height: !vertical || verticallyExpands || node.isVerticalWrap
+            ? height
+            : node.outerBoxLocal.height,
+        child: child,
+      );
+    }
+
     // This decides whether to use a positioned widget or padding widget
     // to position the child. This makes it so if an expanded (parent) frame
     // has one child, the child won't be wrapped with a positioned widget
