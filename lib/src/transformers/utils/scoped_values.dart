@@ -76,13 +76,17 @@ class ScopedValues {
 
   /// Creates scoped values for a design canvas, where [variables] (by name)
   /// hold their default values and nothing is read from a running app.
+  /// [codelesslyContext] supplies conditions; the caller keeps it alive.
   ScopedValues.preview({
     required Map<String, VariableData> variables,
+    CodelesslyContext? codelesslyContext,
     this.indexedItem,
     this.appUser,
     this.screenSize,
     Map<String, dynamic>? data,
-  }) : _codelesslyContextRef = null,
+  }) : _codelesslyContextRef = codelesslyContext == null
+           ? null
+           : WeakReference(codelesslyContext),
        _localStorageRef = null,
        _cloudDatabaseRef = null,
        _variablesOverrides = null,
