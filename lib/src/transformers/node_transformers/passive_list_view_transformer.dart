@@ -132,6 +132,12 @@ class PassiveListViewWidget extends StatelessWidget {
                     )
                   : null,
               itemBuilder: (context, index) {
+                // Load the next page when the last loaded item shows.
+                if (index == itemCount - 1 &&
+                    snapshot.hasMore &&
+                    !snapshot.isFetchingMore) {
+                  snapshot.fetchMore();
+                }
                 final doc = docs.elementAtOrNull(index);
                 final id = doc?.id;
                 final data = doc?.data();
