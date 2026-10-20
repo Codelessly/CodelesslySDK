@@ -263,9 +263,7 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
             .putIfAbsent(
               variable.id,
               () => Observable(
-                variable.copyWith(
-                  value: codelesslyContext.data[variable.name],
-                ),
+                variable.copyWith(value: codelesslyContext.data[variable.name]),
               ),
             );
       }
