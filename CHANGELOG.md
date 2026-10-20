@@ -1,3 +1,12 @@
+## 7.3.1
+
+- Fix layouts rendering without their variables and conditions. A layout
+  could be built while its variables and conditions were still downloading,
+  or from a cache that didn't have them yet, and wasn't reloaded when they
+  arrived: conditions never applied and set variable actions did nothing.
+  A layout is now added to the publish model with its variables and
+  conditions, and reloads when they change.
+
 ## 7.3.0
 
 - Require codelessly_api 5.3.0.
