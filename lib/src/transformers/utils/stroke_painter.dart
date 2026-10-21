@@ -41,9 +41,6 @@ class StrokePainter extends CustomPainter {
   /// The border radius of the box.
   final BorderRadius borderRadius;
 
-  /// The border of the box. This is constructed from the other properties.
-  final Border border;
-
   /// A helper list to iterate the dashes cleanly for dashed or dotted borders.
   /// This is constructed from the dash pattern.
   final LoopingList<double> dashArray;
@@ -71,21 +68,7 @@ class StrokePainter extends CustomPainter {
     this.strokeAlign = StrokeAlignC.inside,
     this.strokeCap = StrokeCapEnum.square,
     this.borderRadius = BorderRadius.zero,
-  }) : dashArray = LoopingList(dashPattern),
-       border = Border(
-         left: strokeSide == StrokeSide.left
-             ? BorderSide(color: color, width: strokeWidth)
-             : BorderSide.none,
-         right: strokeSide == StrokeSide.right
-             ? BorderSide(color: color, width: strokeWidth)
-             : BorderSide.none,
-         bottom: strokeSide == StrokeSide.bottom
-             ? BorderSide(color: color, width: strokeWidth)
-             : BorderSide.none,
-         top: strokeSide == StrokeSide.top
-             ? BorderSide(color: color, width: strokeWidth)
-             : BorderSide.none,
-       );
+  }) : dashArray = LoopingList(dashPattern);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -105,7 +88,9 @@ class StrokePainter extends CustomPainter {
 
     // If the stroke is dotted, we take a completely different rendering
     // route.
-    if (dashPattern.isNotEmpty) {
+    if (dashPattern.isNotEmpty && strokeSide != StrokeSide.all) {
+      _paintDashedSide(canvas, size, paint);
+    } else if (dashPattern.isNotEmpty) {
       final Path path = Path();
 
       // Let's first create the appropriate path. If it's a circle,
@@ -217,126 +202,68 @@ class StrokePainter extends CustomPainter {
         }
       }
     } else {
-      // These variables create a new rectangle that is the "real" "visually
-      // accurate" rectangle. IE: a rectangle containing the stroke inside its
-      // borders.
-      Offset topLeft = Offset.zero;
-      Size realSize = size;
-      switch (strokeAlign) {
-        case StrokeAlignC.center:
-          topLeft = Offset(-strokeWidth / 2, -strokeWidth / 2);
-          realSize = Size(size.width + strokeWidth, size.height + strokeWidth);
-        case StrokeAlignC.outside:
-          topLeft = Offset(-strokeWidth, -strokeWidth);
-          realSize = Size(
-            size.width + strokeWidth * 2,
-            size.height + strokeWidth * 2,
-          );
-        case StrokeAlignC.inside:
-          break;
-      }
+      paintStrokeBand(
+        canvas,
+        Offset.zero & size,
+        paint: paint..style = PaintingStyle.fill,
+        width: strokeWidth,
+        side: strokeSide,
+        align: strokeAlign,
+        borderRadius: boxShape == BoxShape.circle ? null : borderRadius,
+        shape: boxShape,
+      );
+    }
+  }
 
-      // Outside strokes get tricky (yes they really do, trust me).
-      // We have to handle them in a completely different way.
-      if (strokeAlign == StrokeAlignC.outside) {
-        // We create 2 paths. One is the normal border, the other is the
-        // outer edge of the stroke. We will fill in the space between them
-        // with a color to get our desired result.
-        final Path innerPath = Path();
-        final Path outerPath = Path();
-
-        if (boxShape == BoxShape.circle) {
-          final double circleDiameter = min(size.width, size.height);
-          final Rect basicRect = Rect.fromCenter(
-            center: Offset(size.width / 2, size.height / 2),
-            width: circleDiameter,
-            height: circleDiameter,
-          );
-          innerPath.addOval(basicRect);
-          outerPath.addOval(basicRect.inflate(strokeWidth));
-        } else {
-          final Rect basicRect = Rect.fromLTWH(0, 0, size.width, size.height);
-
-          final RRect roundedBox = borderRadius.toRRect(basicRect);
-          innerPath.addRRect(roundedBox);
-
-          // The outer path is a bit tricky. You can't just inflate the rect
-          // because if it has no borders, it will add a border anyways, which
-          // really isn't nice. So to get around that, we interpolate a magic
-          // number to EASE the (manual) inflation instead.
-          //
-          // In the end of the
-          // day, you always need to make the borders larger for the outer edge
-          // of the outside strike for it to look "normal".
-          //
-          // We just don't want
-          // that inflation at no borders and we don't want it to instantly
-          // appear after a border of 1 pixel exists (it'll effectively double).
-          // So we just interpolate the first 10 pixels to ease the inflated
-          // border in as the border radius increases on each corner.
-          //
-          // We get a really nice and seamless outside border transition this
-          // way.
-          outerPath.addRRect(
-            (borderRadius.add(
-              BorderRadius.only(
-                topRight: Radius.circular(
-                  strokeWidth * (min(borderRadius.topRight.x, 10) / 10),
-                ),
-                topLeft: Radius.circular(
-                  strokeWidth * (min(borderRadius.topLeft.x, 10) / 10),
-                ),
-                bottomLeft: Radius.circular(
-                  strokeWidth * (min(borderRadius.bottomLeft.x, 10) / 10),
-                ),
-                bottomRight: Radius.circular(
-                  strokeWidth * (min(borderRadius.bottomRight.x, 10) / 10),
-                ),
-              ),
-            ) as BorderRadius).toRRect(
-              Rect.fromLTWH(
-                topLeft.dx,
-                topLeft.dy,
-                realSize.width,
-                realSize.height,
-              ),
-            ),
-          );
-        }
-
-        // This is where the magic happens. We want to fill the area
-        // between two paths. To do that, there's this magic feature in
-        // Flutter paths called FillType.evenOdd. It does the work for us.
-        // It's effectively a mask system.
-        final Path dest = Path()..fillType = PathFillType.evenOdd;
-        dest.addPath(innerPath, Offset.zero);
-        dest.addPath(outerPath, Offset.zero);
-
-        canvas.drawPath(dest..close(), paint..style = PaintingStyle.fill);
-      } else {
-        final Rect rect = Rect.fromLTWH(
-          topLeft.dx,
-          topLeft.dy,
-          realSize.width,
-          realSize.height,
-        );
-
-        // For any other border, we can just use Flutter's built in painter.
-        // No special handling required here.
-        border.paint(
-          canvas,
-          rect,
-          borderRadius: boxShape == BoxShape.circle ? null : borderRadius,
-          shape: boxShape,
+  /// Paints a dashed stroke along the one side [strokeSide] names. The dashes
+  /// run along that edge and sit inside, across or outside it as
+  /// [strokeAlign] says.
+  void _paintDashedSide(Canvas canvas, Size size, Paint paint) {
+    final double offset = switch (strokeAlign) {
+      StrokeAlignC.inside => strokeWidth / 2,
+      StrokeAlignC.center => 0,
+      StrokeAlignC.outside => -strokeWidth / 2,
+    };
+    final (Offset start, Offset end) = switch (strokeSide) {
+      StrokeSide.top => (Offset(0, offset), Offset(size.width, offset)),
+      StrokeSide.bottom => (
+        Offset(0, size.height - offset),
+        Offset(size.width, size.height - offset),
+      ),
+      StrokeSide.left => (Offset(offset, 0), Offset(offset, size.height)),
+      StrokeSide.right => (
+        Offset(size.width - offset, 0),
+        Offset(size.width - offset, size.height),
+      ),
+      StrokeSide.all => (Offset.zero, Offset.zero),
+    };
+    final double length = (end - start).distance;
+    if (length <= 0 || dashPattern.every((dash) => dash <= 0)) return;
+    final LoopingList<double> dashes = LoopingList(dashPattern);
+    final Offset direction = (end - start) / length;
+    paint
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.butt;
+    double distance = 0;
+    bool draw = true;
+    while (distance < length) {
+      final double dash = dashes.nextValue();
+      if (draw && dash > 0) {
+        canvas.drawLine(
+          start + direction * distance,
+          start + direction * min(distance + dash, length),
+          paint,
         );
       }
+      distance += dash;
+      draw = !draw;
     }
   }
 
   @override
   bool shouldRepaint(covariant StrokePainter oldDelegate) =>
       oldDelegate.borderRadius != borderRadius ||
-      oldDelegate.border != border ||
       oldDelegate.boxShape != boxShape ||
       oldDelegate.color != color ||
       oldDelegate.dashPattern != dashPattern ||
@@ -366,4 +293,98 @@ class LoopingList<T> {
     }
     return values[_index++];
   }
+}
+
+/// How far a stroke of [width] reaches into the box (`inset`) and out of it
+/// (`outset`) on each side. Only the sides [side] names get a stroke;
+/// [align] splits its width between the inside and the outside of the edge,
+/// as Figma and the editor do.
+({EdgeInsets inset, EdgeInsets outset}) strokeBandInsets({
+  required StrokeSide side,
+  required double width,
+  required StrokeAlignC align,
+}) {
+  final double inward = switch (align) {
+    StrokeAlignC.inside => width,
+    StrokeAlignC.center => width / 2,
+    StrokeAlignC.outside => 0,
+  };
+  final double outward = width - inward;
+  EdgeInsets only(double value) => switch (side) {
+    StrokeSide.all => EdgeInsets.all(value),
+    StrokeSide.left => EdgeInsets.only(left: value),
+    StrokeSide.right => EdgeInsets.only(right: value),
+    StrokeSide.top => EdgeInsets.only(top: value),
+    StrokeSide.bottom => EdgeInsets.only(bottom: value),
+  };
+  return (inset: only(inward), outset: only(outward));
+}
+
+/// Paints the band a solid stroke covers around [rect]: the area between the
+/// box's shape grown by the stroke's outset and shrunk by its inset (see
+/// [strokeBandInsets]).
+///
+/// The corners follow [borderRadius]: the outer edge of a rounded corner
+/// grows with the outset and the inner edge shrinks with the inset (never
+/// below zero), so a stroke on one side tapers into the corners next to it.
+/// A sharp corner stays sharp on both edges.
+void paintStrokeBand(
+  Canvas canvas,
+  Rect rect, {
+  required Paint paint,
+  required double width,
+  required StrokeSide side,
+  required StrokeAlignC align,
+  BorderRadius? borderRadius,
+  BoxShape shape = BoxShape.rectangle,
+}) {
+  if (width <= 0) return;
+  final RRect base = switch (shape) {
+    BoxShape.circle => RRect.fromRectAndRadius(
+      Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2),
+      Radius.circular(rect.shortestSide / 2),
+    ),
+    BoxShape.rectangle => (borderRadius ?? BorderRadius.zero).toRRect(rect),
+  };
+  final (:inset, :outset) = strokeBandInsets(
+    side: side,
+    width: width,
+    align: align,
+  );
+
+  Radius grow(Radius radius, double dx, double dy) =>
+      radius.x <= 0 || radius.y <= 0
+      ? Radius.zero
+      : Radius.elliptical(max(0, radius.x + dx), max(0, radius.y + dy));
+
+  final RRect outer = RRect.fromLTRBAndCorners(
+    base.left - outset.left,
+    base.top - outset.top,
+    base.right + outset.right,
+    base.bottom + outset.bottom,
+    topLeft: grow(base.tlRadius, outset.left, outset.top),
+    topRight: grow(base.trRadius, outset.right, outset.top),
+    bottomRight: grow(base.brRadius, outset.right, outset.bottom),
+    bottomLeft: grow(base.blRadius, outset.left, outset.bottom),
+  );
+  final double innerLeft = base.left + inset.left;
+  final double innerTop = base.top + inset.top;
+  final double innerRight = base.right - inset.right;
+  final double innerBottom = base.bottom - inset.bottom;
+  if (innerRight <= innerLeft || innerBottom <= innerTop) {
+    // The stroke covers the whole box.
+    canvas.drawRRect(outer, paint);
+    return;
+  }
+  final RRect inner = RRect.fromLTRBAndCorners(
+    innerLeft,
+    innerTop,
+    innerRight,
+    innerBottom,
+    topLeft: grow(base.tlRadius, -inset.left, -inset.top),
+    topRight: grow(base.trRadius, -inset.right, -inset.top),
+    bottomRight: grow(base.brRadius, -inset.right, -inset.bottom),
+    bottomLeft: grow(base.blRadius, -inset.left, -inset.bottom),
+  );
+  canvas.drawDRRect(outer, inner, paint);
 }
