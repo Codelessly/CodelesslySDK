@@ -21,7 +21,8 @@ const Set<String> predefinedVariableNames = {
 
 /// The key under which a layout's published variables hold the project's
 /// app variables, shared by every screen of the app.
-const String kAppVariablesScope = '__app__';
+/// Not `__app__`: Firestore rejects ids that start and end with `__`.
+const String kAppVariablesScope = 'app_variables';
 
 /// The key under which a layout's published variables hold the variables of
 /// its editor page, shared by every screen on that page. The editor stores
