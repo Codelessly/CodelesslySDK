@@ -504,18 +504,29 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
   bool get wantKeepAlive => true;
 }
 
-/// The text of [node] that its widget shows after substituting inline
-/// `${...}` variable paths and formulas: a text's characters and the labels
-/// of buttons, chips, badges, tabs and segments. The widget of [node] listens
-/// to every path these read, so it rebuilds when one of them changes.
-List<String> inlineTextTemplatesOf(BaseNode node) => switch (node) {
-  TextNode() => [node.characters],
-  ButtonNode() => [node.properties.label],
-  ChipNode() => [node.properties.label],
-  BadgeNode() => [node.properties.label],
-  TabBarNode() => [for (final tab in node.properties.tabs) tab.label],
-  SegmentedButtonNode() => [
-    for (final segment in node.properties.segments) segment.label,
-  ],
-  _ => const [],
-};
+/// The strings of [node] that can hold inline `${...}` variable paths and
+/// formulas: a text's characters and every string in a widget's properties
+/// (a button's label, a field's hint, a tab's label, ...). Reactions are left
+/// out: their actions read values when they run, not when the node builds.
+/// The widget of [node] listens to every path these read, so it rebuilds when
+/// one of them changes.
+List<String> inlineTextTemplatesOf(BaseNode node) {
+  final List<String> templates = [];
+  void collect(Object? value) {
+    switch (value) {
+      case final String text when text.contains(r'${'):
+        templates.add(text);
+      case final Map map:
+        for (final MapEntry entry in map.entries) {
+          if (entry.key == 'reactions') continue;
+          collect(entry.value);
+        }
+      case final List list:
+        list.forEach(collect);
+    }
+  }
+
+  if (node is TextNode) collect(node.characters);
+  if (node is CustomPropertiesMixin) collect(node.properties.toJson());
+  return templates;
+}
