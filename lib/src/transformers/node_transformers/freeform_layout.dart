@@ -131,10 +131,24 @@ class FreeformAxisPlacement {
   }
 
   /// How much of the container's extent this child needs on a content-sized
-  /// (shrink-wrapping or unbounded) axis, given the child's laid out
-  /// [childExtent]. Mirrors the editor: a wrapping container is as large as
-  /// its children plus their pins.
-  double contribution(double childExtent) => switch (mode) {
+  /// axis, given the child's laid out [childExtent].
+  ///
+  /// On an axis the container shrink-wraps ([wraps]), this mirrors the
+  /// editor's solved state: the container is as large as its largest child
+  /// (`FreeformLayoutModel.summarizeChildrenSizes` takes the max of the
+  /// children's sizes, not their offsets), and children are clamped inside it
+  /// (`FreeFormPositionEditor.calculateOffset`). On an unbounded axis the
+  /// container does not wrap (scroll content), it reaches the farthest
+  /// child edge.
+  double contribution(double childExtent, {required bool wraps}) =>
+      switch (mode) {
+        FreeformAxisMode.fill => 0,
+        FreeformAxisMode.stretch => math.max(0, start) + math.max(0, end),
+        _ when wraps => childExtent,
+        _ => _unwrappedContribution(childExtent),
+      };
+
+  double _unwrappedContribution(double childExtent) => switch (mode) {
     FreeformAxisMode.fill => 0,
     FreeformAxisMode.stretch => math.max(0, start) + math.max(0, end),
     FreeformAxisMode.align => childExtent,
@@ -290,8 +304,8 @@ class FreeformChild extends ParentDataWidget<FreeformParentData> {
 ///
 /// On an axis the container does not shrink-wrap and gets a bounded size, the
 /// layout takes the full size, like a [Stack] of positioned children. On an
-/// axis it shrink-wraps, it is as large as its children plus their pins, like
-/// the editor's wrapping freeform model. On an unbounded axis it does not
+/// axis it shrink-wraps, it is as large as its largest child and keeps every
+/// child inside it, like the editor's solved wrapping freeform model. On an unbounded axis it does not
 /// shrink-wrap, it keeps at least its design extent.
 class FreeformLayout extends MultiChildRenderObjectWidget {
   /// Whether the container shrink-wraps horizontally.
@@ -461,11 +475,13 @@ class RenderFreeformLayout extends RenderBox
         final FreeformPlacement placement = _placementOf(child);
         needW = math.max(
           needW,
-          placement.horizontal.contribution(size.width) + (pushX[child] ?? 0),
+          placement.horizontal.contribution(size.width, wraps: wrapsWidth) +
+              (pushX[child] ?? 0),
         );
         needH = math.max(
           needH,
-          placement.vertical.contribution(size.height) + (pushY[child] ?? 0),
+          placement.vertical.contribution(size.height, wraps: wrapsHeight) +
+              (pushY[child] ?? 0),
         );
       });
       if (contentWidth) {
@@ -608,7 +624,10 @@ class RenderFreeformLayout extends RenderBox
         FreeformAxisMode.fill || FreeformAxisMode.stretch => 0,
         _ => axis.size ?? measure(child, axis),
       };
-      need = math.max(need, axis.contribution(extent));
+      need = math.max(
+        need,
+        axis.contribution(extent, wraps: horizontal ? wrapsWidth : wrapsHeight),
+      );
       child = childAfter(child);
     }
     return need;
