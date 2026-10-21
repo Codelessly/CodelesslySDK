@@ -7,8 +7,27 @@ class NodeStateWrapper {
   /// The state object associated with the [NodeProvider] widget.
   Object? state;
 
+  /// Whether the user changed [state], so it holds something the layout
+  /// cannot rebuild: what they typed, toggled or picked.
+  bool get changedByUser => _changedByUser;
+  bool _changedByUser = false;
+
+  /// Called once, when the user first changes [state].
+  VoidCallback? onChangedByUser;
+
   /// Creates a new [NodeStateWrapper].
   NodeStateWrapper();
+
+  /// Sets [state] to [value]. [byUser] says the value comes from the user
+  /// interacting with the node rather than from building it.
+  void update(Object? value, {required bool byUser}) {
+    final bool changed = value != state;
+    state = value;
+    if (byUser && changed && !_changedByUser) {
+      _changedByUser = true;
+      onChangedByUser?.call();
+    }
+  }
 }
 
 /// A widget that provides a [BaseNode] to its descendants.
@@ -72,10 +91,19 @@ class NodeStateProvider extends InheritedWidget {
   /// [NodeStateProvider] ancestor, if any.
   ///
   /// If there is no [NodeStateProvider] ancestor, does nothing.
-  static void setState(BuildContext context, Object? state) {
+  ///
+  /// [byUser] says the value comes from the user interacting with the node
+  /// (the default). A node the user changed is kept alive when a lazy list
+  /// scrolls it away, so what they entered survives; every other node is
+  /// disposed off-screen like any list item.
+  static void setState(
+    BuildContext context,
+    Object? state, {
+    bool byUser = true,
+  }) {
     final NodeStateProvider? provider = maybeOf(context);
     if (provider == null) return;
-    provider.state = state;
+    provider._stateWrapper.update(state, byUser: byUser);
   }
 
   /// Determines whether the widget should notify its descendants.

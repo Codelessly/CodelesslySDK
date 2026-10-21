@@ -255,7 +255,7 @@ class PassiveListViewWidget extends StatelessWidget {
     Widget list(
       bool shrinkWrap,
       int? itemCount,
-      IndexedWidgetBuilder builder,
+      NullableIndexedWidgetBuilder builder,
     ) => ListViewBuilder(
       primary: node.primary,
       shrinkWrap: shrinkWrap,
@@ -280,14 +280,14 @@ class PassiveListViewWidget extends StatelessWidget {
       itemBuilder: builder,
     );
 
-    // An endless list with items of free extent gets a growing finite count,
-    // so items that take no space cannot be built without limit; see
-    // [EndlessListCount]. A fixed item extent is bounded by Flutter.
+    // An endless list with items of free extent ends after a viewport's
+    // worth of items that take no space, so they cannot be built without
+    // limit; see [EndlessList]. A fixed item extent is bounded by Flutter.
     if (itemCount == null && node.properties.itemExtent == null) {
       final Axis axis = node.scrollDirection.flutterAxis;
       return box(
         canShrinkWrap: false,
-        (context, _) => EndlessListCount(
+        (context, _) => EndlessList(
           axis: axis,
           estimatedItemExtent: node.scrollDirection == AxisC.vertical
               ? item.outerBoxLocal.height
@@ -295,15 +295,17 @@ class PassiveListViewWidget extends StatelessWidget {
           cacheExtent:
               node.properties.cacheExtent ??
               RenderAbstractViewport.defaultCacheExtent,
-          builder: (context, endlessCount, extents) => list(
+          builder: (context, endsAt, extents) => list(
             false,
-            endlessCount,
-            (context, index) => ItemExtentReporter(
-              extents: extents,
-              index: index,
-              axis: axis,
-              child: itemBuilder(context, index),
-            ),
+            null,
+            (context, index) => endsAt(index)
+                ? null
+                : ItemExtentReporter(
+                    extents: extents,
+                    index: index,
+                    axis: axis,
+                    child: itemBuilder(context, index),
+                  ),
           ),
         ),
       );
@@ -329,7 +331,7 @@ class ListViewBuilder extends StatelessWidget {
   final bool primary;
   final double? itemExtent;
   final Clip clipBehavior;
-  final IndexedWidgetBuilder? itemBuilder;
+  final NullableIndexedWidgetBuilder? itemBuilder;
   final IndexedWidgetBuilder? separatedBuilder;
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
@@ -368,7 +370,7 @@ class ListViewBuilder extends StatelessWidget {
                   : ScrollCacheExtent.pixels(cacheExtent!),
               reverse: reverse,
               clipBehavior: clipBehavior,
-              itemBuilder: itemBuilder!,
+              itemBuilder: (context, index) => itemBuilder!(context, index)!,
               separatorBuilder: separatedBuilder!,
               keyboardDismissBehavior: keyboardDismissBehavior,
             );
