@@ -74,12 +74,30 @@ class PassiveListViewWidget extends StatelessWidget {
     );
   }
 
+  /// Sizes the list by [ViewportLayout] around [builder].
+  Widget box(ViewportContentBuilder builder, {required bool canShrinkWrap}) =>
+      ViewportNodeBox(
+        node: node,
+        scrollDirection: node.scrollDirection,
+        canShrinkWrap: canShrinkWrap,
+        builder: builder,
+      );
+
+  /// Builds one item, placed as the editor lays it out; see [ListItemBox].
+  Widget buildItem(BaseNode item, BuildContext context) => ListItemBox(
+    item: item,
+    scrollDirection: node.scrollDirection,
+    itemExtent: node.properties.itemExtent,
+    child: manager.buildWidgetByID(item.id, context, settings: settings),
+  );
+
   @override
   Widget build(BuildContext context) {
     if (node.children.isEmpty) {
-      return AdaptiveNodeBox(node: node, child: const SizedBox());
+      return box(canShrinkWrap: true, (context, _) => const SizedBox());
     }
     final itemNode = node.children.first;
+    final BaseNode item = manager.getNode(itemNode);
 
     final bool useCloudDatabase = node.useCloudDatabase;
 
@@ -88,18 +106,26 @@ class PassiveListViewWidget extends StatelessWidget {
       final codelesslyController = context.read<CodelesslyWidgetController>();
 
       if (codelessly.authManager.authData == null) {
-        return codelesslyController.loadingBuilder?.call(context) ??
-            const Center(child: CircularProgressIndicator());
+        return box(
+          canShrinkWrap: true,
+          (context, _) =>
+              codelesslyController.loadingBuilder?.call(context) ??
+              const Center(child: CircularProgressIndicator()),
+        );
       }
 
       final query = constructQuery(context, codelessly);
       if (query == null) {
-        return AdaptiveNodeBox(node: node, child: const SizedBox.shrink());
+        return box(
+          canShrinkWrap: true,
+          (context, _) => const SizedBox.shrink(),
+        );
       }
 
-      return AdaptiveNodeBox(
-        node: node,
-        child: FirestoreQueryBuilder<Map<String, dynamic>>(
+      // A loaded query always has a known length, so it can shrink-wrap.
+      return box(
+        canShrinkWrap: true,
+        (context, shrinkWrap) => FirestoreQueryBuilder<Map<String, dynamic>>(
           query: query,
           pageSize: node.limit ?? 20,
           builder: (context, snapshot, child) {
@@ -126,9 +152,7 @@ class PassiveListViewWidget extends StatelessWidget {
             // Item Count always exists.
             return ListViewBuilder(
               primary: node.primary,
-              shrinkWrap: (node.scrollDirection == AxisC.horizontal
-                  ? node.isHorizontalWrap
-                  : node.isVerticalWrap),
+              shrinkWrap: shrinkWrap,
               itemCount: itemCount,
               padding: node.padding.flutterEdgeInsets,
               keyboardDismissBehavior:
@@ -166,11 +190,7 @@ class PassiveListViewWidget extends StatelessWidget {
                       // the IndexedItemProvider.
                       return KeyedSubtree(
                         key: ValueKey(index),
-                        child: manager.buildWidgetByID(
-                          itemNode,
-                          context,
-                          settings: settings,
-                        ),
+                        child: buildItem(item, context),
                       );
                     },
                   ),
@@ -196,27 +216,11 @@ class PassiveListViewWidget extends StatelessWidget {
       itemCount = data?.length ?? node.properties.itemCount;
     }
 
-    // If this ListView is inside another scrollable, Flutter will crash
-    // if shrinkWrap is false in order to enforce this ListView to take
-    // up its own space by itself since it will be inside an unbounded space.
-    // This statement remains true even if this inner ListView is wrapped with
-    // SizedBoxes and nested deeply inside other widgets, Flutter will crash
-    // regardless unless shrinkwrap is true.
-    // https://stackoverflow.com/a/54587532/4327834
-    final ScrollableState? parentScrollable = Scrollable.maybeOf(context);
-
-    // A list of a known length that wraps its content on the scroll axis
-    // sizes itself to its items, including one bound to a data variable.
-    final bool shrinkWrap = parentScrollable != null
-        ? true
-        : itemCount != null &&
-              (node.scrollDirection == AxisC.horizontal
-                  ? node.isHorizontalWrap
-                  : node.isVerticalWrap);
-
-    return AdaptiveNodeBox(
-      node: node,
-      child: ListViewBuilder(
+    // Nested in another scroll view, the list is bounded by its own fit or
+    // shrink-wraps; see [ViewportLayout].
+    return box(
+      canShrinkWrap: itemCount != null,
+      (context, shrinkWrap) => ListViewBuilder(
         primary: node.primary,
         shrinkWrap: shrinkWrap,
         itemCount: itemCount,
@@ -246,11 +250,7 @@ class PassiveListViewWidget extends StatelessWidget {
               // the IndexedItemProvider.
               return KeyedSubtree(
                 key: ValueKey(index),
-                child: manager.buildWidgetByID(
-                  itemNode,
-                  context,
-                  settings: settings,
-                ),
+                child: buildItem(item, context),
               );
             },
           ),
