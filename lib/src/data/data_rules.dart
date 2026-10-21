@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 
+import 'cloud_query.dart';
+
 /// Who can read and write a cloud database collection. Set per collection in
 /// the editor's Data panel, stored in `data_rules/{projectId}`, and enforced
 /// by Firestore security rules; the SDK stamps and filters by
@@ -87,6 +89,17 @@ class DataRules {
     return {...value, ownerField: uid};
   }
 
+  /// The filters that limit reads of [path] to what [uid] may read: none for
+  /// shared collections, the owner filter for owner-only ones. Null when the
+  /// user can't read any of it because they aren't signed in.
+  List<CloudWhereFilter>? readFilters(String path, String? uid) {
+    final DataRule rule = ruleFor(path);
+    if (!rule.readsOwnOnly && rule != DataRule.signedIn) return const [];
+    if (uid == null || uid.isEmpty) return null;
+    if (!rule.readsOwnOnly) return const [];
+    return [CloudWhereFilter(ownerField, WhereQueryOperator.equal, uid)];
+  }
+
   /// [query] on [path] limited to what [uid] may read: only their own
   /// documents in owner-only collections. Null when the user can't read any
   /// of it because they aren't signed in.
@@ -95,10 +108,8 @@ class DataRules {
     String path,
     String? uid,
   ) {
-    final DataRule rule = ruleFor(path);
-    if (!rule.readsOwnOnly && rule != DataRule.signedIn) return query;
-    if (uid == null || uid.isEmpty) return null;
-    if (!rule.readsOwnOnly) return query;
-    return query.where(ownerField, isEqualTo: uid);
+    final List<CloudWhereFilter>? filters = readFilters(path, uid);
+    if (filters == null) return null;
+    return CloudQuery(filters: filters).applyTo(query);
   }
 }
