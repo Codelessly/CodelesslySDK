@@ -394,6 +394,21 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     }
   }
 
+  FeedbackTheme? _feedbackTheme;
+  Map<String, BaseNode>? _feedbackThemeNodes;
+
+  /// The look of this layout that its confirm dialogs and toasts take, read
+  /// again when the canvas's nodes change.
+  FeedbackTheme get feedbackTheme {
+    final Map<String, BaseNode> nodes =
+        widget.layout.canvases[widget.canvasId] ?? const {};
+    if (_feedbackTheme == null || !identical(nodes, _feedbackThemeNodes)) {
+      _feedbackThemeNodes = nodes;
+      _feedbackTheme = FeedbackTheme.fromNodes(nodes.values);
+    }
+    return _feedbackTheme!;
+  }
+
   @override
   Widget build(BuildContext context) {
     final CodelesslyConfig config = widget.controller.config;
@@ -408,12 +423,15 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
       ),
       child: Theme(
         data: config.useHostTheme ? Theme.of(context) : ThemeData(),
-        child: transformerManager.buildWidgetFromNode(
-          canvasNode,
-          context,
-          settings: const WidgetBuildSettings(
-            debugLabel: 'layout builder',
-            nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        child: FeedbackThemeScope(
+          theme: feedbackTheme,
+          child: transformerManager.buildWidgetFromNode(
+            canvasNode,
+            context,
+            settings: const WidgetBuildSettings(
+              debugLabel: 'layout builder',
+              nullSubstitutionMode: NullSubstitutionMode.emptyString,
+            ),
           ),
         ),
       ),
