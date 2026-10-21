@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -141,13 +143,30 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     );
 
     if (node.isScrollable) {
-      body = SingleChildScrollView(
-        scrollDirection: node.scrollDirection.flutterAxis,
-        reverse: node.reverse,
-        primary: node.primary,
-        physics: node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
-        keyboardDismissBehavior:
-            node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+      // The editor lays the body out as a finite box of the canvas size, so
+      // a body child that flexes along the scroll axis shares the space left
+      // in the viewport. Scrolling, the body gets the same rule as a
+      // scrollable Row/Column: its length is max(viewport, content), with the
+      // flexing children sharing what the content leaves free; a body that
+      // centers or spreads its children fills the viewport while it fits.
+      bool flexContent = false;
+      bool fillViewport = false;
+      if (placeholderBody case final RowColumnMixin flex) {
+        final bool sameAxis =
+            (flex.rowColumnType == RowColumnType.column) ==
+            node.scrollDirection.isVertical;
+        if (sameAxis) {
+          flexContent = PassiveRowColumnTransformer.hasMainAxisFlexChild(
+            placeholderBody,
+            [for (final id in placeholderBody.childrenOrEmpty) getNode(id)],
+          );
+          fillViewport = flex.mainAxisAlignment != MainAxisAlignmentC.start;
+        }
+      }
+      body = buildScrollView(
+        node: node,
+        flexContent: flexContent,
+        fillViewport: fillViewport,
         child: body,
       );
     }
@@ -241,6 +260,25 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         keyboardDismissBehavior:
             node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
         child: body,
+      );
+    } else {
+      // Scaled to the width, the design can come out taller than the space
+      // it has (a 390 design on a 1440 screen is 3.7 times as tall). It
+      // scrolls then instead of being cut off below the fold. While it fits
+      // there is no scroll view, so nothing inside sees an extra Scrollable.
+      final Widget scaled = body;
+      body = LayoutBuilder(
+        builder: (context, constraints) {
+          final double height = autoScaleHeight(node, constraints.maxWidth);
+          if (!constraints.hasBoundedHeight ||
+              height <= constraints.maxHeight + _kScrollTolerance) {
+            return scaled;
+          }
+          return SingleChildScrollView(
+            key: ValueKey('Canvas overflow scroll ${node.id}'),
+            child: scaled,
+          );
+        },
       );
     }
 
@@ -337,18 +375,21 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     return PassiveCanvasWidget(
       node: node,
       settings: settings,
-      builder: (context) => switch (node.scaleMode) {
-        ScaleMode.responsive => _wrapInScaffoldForResponsive(
-          context: context,
-          node: node,
-          settings: settings,
-        ),
-        ScaleMode.autoScale => _wrapInScaffoldForAutoScale(
-          context: context,
-          node: node,
-          settings: settings,
-        ),
-      },
+      builder: (context) => CanvasViewport(
+        node: node,
+        child: switch (node.scaleMode) {
+          ScaleMode.responsive => _wrapInScaffoldForResponsive(
+            context: context,
+            node: node,
+            settings: settings,
+          ),
+          ScaleMode.autoScale => _wrapInScaffoldForAutoScale(
+            context: context,
+            node: node,
+            settings: settings,
+          ),
+        },
+      ),
     );
   }
 
@@ -368,6 +409,175 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       return fills[0].color?.toFlutterColor(opacity: fills[0].opacity);
     }
     return Colors.transparent;
+  }
+}
+
+/// How far (in logical pixels) a scaled autoScale design may exceed the
+/// viewport height before it scrolls, so rounding never adds a scroll view.
+const double _kScrollTolerance = 0.5;
+
+/// The height an autoScale [canvas] takes when scaled to [width]: its design
+/// height times the scale [BoxFit.fitWidth] applies, after the canvas's max
+/// width cap.
+double autoScaleHeight(CanvasNode canvas, double width) {
+  final double designWidth = canvas.outerBoxLocal.width;
+  final double designHeight = canvas.outerBoxLocal.height;
+  if (designWidth <= 0 || !width.isFinite) return designHeight;
+  final double? maxWidth = canvas.resolvedConstraints.maxWidth;
+  final double scaledWidth = maxWidth == null ? width : min(width, maxWidth);
+  return designHeight * scaledWidth / designWidth;
+}
+
+/// How a canvas sizes itself in the space its host gives it.
+enum CanvasSizing {
+  /// The canvas is the screen: it fills the width and height it is given.
+  /// Where an axis is unbounded it takes its design size on that axis (an
+  /// autoScale canvas takes its scaled height; a canvas that shrink-wraps
+  /// vertically takes its content's height).
+  fill,
+
+  /// The canvas keeps the size it was designed at, within the space it is
+  /// given. Used where the host only centers the layout and lets it choose
+  /// its size, such as a dialog.
+  design,
+}
+
+/// Sets the [CanvasSizing] of the canvases below it. Without one, canvases
+/// [CanvasSizing.fill].
+class CanvasSizingScope extends InheritedWidget {
+  final CanvasSizing sizing;
+
+  const CanvasSizingScope({
+    super.key,
+    required this.sizing,
+    required super.child,
+  });
+
+  static CanvasSizing of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<CanvasSizingScope>()?.sizing ??
+      CanvasSizing.fill;
+
+  @override
+  bool updateShouldNotify(CanvasSizingScope oldWidget) =>
+      sizing != oldWidget.sizing;
+}
+
+/// Gives a canvas the box it is laid out in, so its size never depends on
+/// whether the host's constraints are tight or loose.
+///
+/// The canvas's own fit is fixed by default, and a fixed box takes its design
+/// size under loose constraints (a Scaffold body, a Center, a Column): a 390
+/// canvas would render 390 wide at the top left of a 1440 screen. The
+/// editor treats the canvas as the screen, so with [CanvasSizing.fill] the
+/// canvas gets tight constraints of the full space on every bounded axis;
+/// on an unbounded axis it gets its design size (see [CanvasSizing.fill]).
+class CanvasViewport extends StatelessWidget {
+  final CanvasNode node;
+  final Widget child;
+
+  const CanvasViewport({super.key, required this.node, required this.child});
+
+  /// The canvas box for [constraints] under [sizing], per axis. A null
+  /// height leaves the height to the canvas content (see
+  /// [CanvasContentHeight]), within the incoming maximum.
+  static ({double width, double? height}) resolve(
+    CanvasNode node,
+    BoxConstraints constraints, {
+    CanvasSizing sizing = CanvasSizing.fill,
+  }) {
+    // A canvas whose height is its content's. A scaffold needs a bounded
+    // height, so a canvas with an app bar, navigation bar or FAB takes its
+    // design height instead.
+    final bool contentHeight =
+        node.verticalFit == SizeFit.shrinkWrap &&
+        node.scaleMode == ScaleMode.responsive &&
+        !node.isAScaffold;
+    if (sizing == CanvasSizing.design) {
+      final double width = constraints.constrainWidth(node.basicBoxLocal.width);
+      if (contentHeight) return (width: width, height: null);
+      final double height = node.scaleMode == ScaleMode.autoScale
+          ? autoScaleHeight(node, width)
+          : node.basicBoxLocal.height;
+      return (width: width, height: constraints.constrainHeight(height));
+    }
+    final double width = constraints.hasBoundedWidth
+        ? constraints.maxWidth
+        : node.basicBoxLocal.width;
+    final double? height;
+    if (constraints.hasBoundedHeight) {
+      height = constraints.maxHeight;
+    } else if (node.scaleMode == ScaleMode.autoScale) {
+      height = autoScaleHeight(node, width);
+    } else if (contentHeight) {
+      height = null;
+    } else {
+      height = node.basicBoxLocal.height;
+    }
+    return (width: width, height: height);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final CanvasSizing sizing = CanvasSizingScope.of(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final box = resolve(node, constraints, sizing: sizing);
+        if (box.height != null) {
+          return SizedBox(width: box.width, height: box.height, child: child);
+        }
+        return SizedBox(
+          width: box.width,
+          child: CanvasContentHeight(child: child),
+        );
+      },
+    );
+  }
+}
+
+/// Makes a canvas as tall as its content, up to the incoming maximum height.
+///
+/// The content is measured with an unbounded height (a body column then
+/// sizes to its children instead of filling the space). When it fits, the
+/// canvas is that tall; when it does not, the content is laid out again at
+/// the maximum height, as a scrollable canvas expects.
+class CanvasContentHeight extends SingleChildRenderObjectWidget {
+  const CanvasContentHeight({super.key, super.child});
+
+  @override
+  RenderCanvasContentHeight createRenderObject(BuildContext context) =>
+      RenderCanvasContentHeight();
+}
+
+/// The render object of [CanvasContentHeight].
+class RenderCanvasContentHeight extends RenderProxyBox {
+  @override
+  void performLayout() {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+    child.layout(
+      constraints.copyWith(minHeight: 0, maxHeight: double.infinity),
+      parentUsesSize: true,
+    );
+    if (child.size.height > constraints.maxHeight) {
+      child.layout(
+        constraints.tighten(height: constraints.maxHeight),
+        parentUsesSize: true,
+      );
+    }
+    size = constraints.constrain(child.size);
+  }
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    final RenderBox? child = this.child;
+    if (child == null) return constraints.smallest;
+    final Size natural = child.getDryLayout(
+      constraints.copyWith(minHeight: 0, maxHeight: double.infinity),
+    );
+    return constraints.constrain(natural);
   }
 }
 
