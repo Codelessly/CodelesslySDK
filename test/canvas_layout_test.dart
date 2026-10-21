@@ -162,24 +162,122 @@ void main() {
       expect(tester.getSize(rectOf(c)), const Size(1440, 844));
     });
 
-    testWidgets('keeps its design size in a dialog', (tester) async {
-      final c = canvas(width: 300, height: 200);
-      final body = columnBody(['a'], size: const Size(300, 200));
-      final a = box('a', 0, 0, 100, 50);
-      await pumpNodes(
-        tester,
-        c,
-        [c, body, a],
-        size: const Size(1440, 900),
-        wrap: (child) => CodelesslyDialogWidget(
-          showCloseButton: false,
-          builder: (_) => child,
+    // The SDK's show-dialog action: showDialog with a CodelesslyDialogWidget
+    // around the layout, which the dialog route centers in the screen.
+    Future<void> showInDialog(
+      WidgetTester tester,
+      CanvasNode c,
+      List<BaseNode> nodes,
+      Size size,
+    ) async {
+      await setScreen(tester, size);
+      final registry = NodeRegistry()
+        ..setNodes({for (final node in nodes) node.id: node});
+      final manager = PassiveNodeTransformerManager(
+        registry.getNodeByID,
+        (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+      );
+      await tester.pumpWidget(
+        ChangeNotifierProvider<CodelesslyContext>.value(
+          value: CodelesslyContext.empty(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => showDialog(
+                    context: context,
+                    useRootNavigator: false,
+                    builder: (context) => CodelesslyDialogWidget(
+                      showCloseButton: false,
+                      builder: (context) => manager.buildWidgetFromNode(
+                        c,
+                        context,
+                        settings: const WidgetBuildSettings(debugLabel: 'test'),
+                      ),
+                    ),
+                  ),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
         ),
       );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+    }
 
-      expect(tester.takeException(), isNull);
-      expect(tester.getSize(rectOf(c)), const Size(300, 200));
-    });
+    for (final size in screens) {
+      testWidgets('a dialog with a fixed height keeps its design size at '
+          '${size.width.toInt()}', (tester) async {
+        final c = canvas(width: 300, height: 200);
+        final body = columnBody(['a'], size: const Size(300, 200));
+        final a = box('a', 0, 0, 100, 50);
+        await showInDialog(tester, c, [c, body, a], size);
+
+        expect(tester.takeException(), isNull);
+        final Rect card = tester.getRect(rectOf(c));
+        expect(card.size, const Size(300, 200));
+        expect(card.center, size.center(Offset.zero));
+      });
+
+      testWidgets('a dialog with a shrink-wrapped height hugs its content at '
+          '${size.width.toInt()}', (tester) async {
+        final c = canvas(
+          width: 300,
+          height: 600,
+          verticalFit: SizeFit.shrinkWrap,
+        );
+        final body = columnBody(['a', 'b'], size: const Size(300, 600));
+        final a = box('a', 0, 0, 100, 50);
+        final b = box('b', 0, 50, 100, 70);
+        await showInDialog(tester, c, [c, body, a, b], size);
+
+        expect(tester.takeException(), isNull);
+        final Rect card = tester.getRect(rectOf(c));
+        expect(card.size, const Size(300, 120));
+        expect(card.center, size.center(Offset.zero));
+        expect(card.contains(tester.getRect(rectOf(b)).center), isTrue);
+      });
+    }
+  });
+
+  group('a scrollable responsive canvas', () {
+    for (final size in screens) {
+      testWidgets('shares the viewport with an expanded body child at '
+          '${size.width.toInt()}', (tester) async {
+        final c = canvas(isScrollable: true);
+        final body = columnBody(['top', 'fill']);
+        final top = box('top', 0, 0, 100, 100);
+        final fill = box('fill', 0, 100, 390, 744)
+          ..horizontalFit = SizeFit.expanded
+          ..verticalFit = SizeFit.expanded;
+        await pumpNodes(tester, c, [c, body, top, fill], size: size);
+
+        expect(tester.takeException(), isNull);
+        expect(tester.getSize(rectOf(c)), size);
+        expect(
+          tester.getSize(rectOf(fill)),
+          Size(size.width, size.height - 100),
+        );
+      });
+
+      testWidgets('scrolls a freeform body at ${size.width.toInt()}', (
+        tester,
+      ) async {
+        final c = canvas(isScrollable: true);
+        final body = freeformBody(['a']);
+        final a = box('a', 0, 2000, 100, 100)
+          ..edgePins = EdgePinsModel.standard;
+        await pumpNodes(tester, c, [c, body, a], size: size);
+
+        expect(tester.takeException(), isNull);
+        expect(tester.getSize(rectOf(a)), const Size(100, 100));
+        // The body scrolls as long as its content needs.
+        expect(tester.getSize(rectOf(body)).height, greaterThanOrEqualTo(2100));
+        expect(find.byType(SingleChildScrollView), findsOneWidget);
+      });
+    }
   });
 
   group('an autoScale canvas', () {
@@ -375,6 +473,28 @@ void main() {
       });
     }
 
+    testWidgets('its minimum intrinsic height is its text alone', (
+      tester,
+    ) async {
+      final c = canvas();
+      final body = columnBody(['text']);
+      final t = text(width: 200, height: 60, characters: 'Hi');
+      await pumpNodes(tester, c, [c, body, t], size: const Size(390, 844));
+
+      final RenderBox minHeight = tester.renderObject(
+        find.byType(TextMinHeight),
+      );
+      final RenderBox paragraph = tester.renderObject(
+        find.byType(RichText).first,
+      );
+      expect(minHeight.size.height, 60);
+      expect(
+        minHeight.getMinIntrinsicHeight(200),
+        paragraph.getMinIntrinsicHeight(200),
+      );
+      expect(minHeight.getMaxIntrinsicHeight(200), 60);
+    });
+
     testWidgets('a fixed height stays the minimum for short text', (
       tester,
     ) async {
@@ -396,8 +516,6 @@ void main() {
           width: 390,
           height: 844,
           characters: 'Centered',
-          horizontalFit: SizeFit.shrinkWrap,
-          verticalFit: SizeFit.shrinkWrap,
           h: TextAlignHorizontalEnum.center,
           v: TextAlignVerticalEnum.center,
           edgePins: const EdgePinsModel(left: 0, top: 0, right: 0, bottom: 0),
@@ -492,6 +610,15 @@ void main() {
         tester.getRect(find.byType(SizedBox).last).bottom,
         moreOrLessEquals(450),
       );
+    });
+
+    testWidgets('a child that sizes itself sets the length', (tester) async {
+      final size = await stackSize(
+        tester,
+        minExtent: 300,
+        children: const [SizedBox(width: 10, height: 700)],
+      );
+      expect(size.height, 700);
     });
 
     testWidgets('grows horizontally too', (tester) async {

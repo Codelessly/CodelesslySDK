@@ -964,13 +964,20 @@ class RenderScrollContentStack extends RenderStack {
 
   bool get _vertical => axis == Axis.vertical;
 
-  /// Lays the children out in a stack of [extent] along [axis] and returns
-  /// the stack's size.
+  /// Lays the children out in a stack at least [extent] long along [axis]
+  /// and returns the stack's size.
+  ///
+  /// A child that is not positioned (such as a freeform layout that sizes
+  /// itself from its children) gets the incoming, unbounded, main axis and
+  /// makes the stack as long as it needs. Positioned children are placed in
+  /// the resulting size.
   Size _layoutAt(double extent) {
     final BoxConstraints box = _vertical
         ? constraints.copyWith(minHeight: extent, maxHeight: extent)
         : constraints.copyWith(minWidth: extent, maxWidth: extent);
-    final BoxConstraints loose = box.loosen();
+    final BoxConstraints loose = _vertical
+        ? box.loosen().copyWith(maxHeight: constraints.maxHeight)
+        : box.loosen().copyWith(maxWidth: constraints.maxWidth);
     bool hasNonPositioned = false;
     double width = box.minWidth;
     double height = box.minHeight;
@@ -985,8 +992,11 @@ class RenderScrollContentStack extends RenderStack {
       }
       child = data.nextSibling;
     }
+    final BoxConstraints grown = _vertical
+        ? box.copyWith(maxHeight: constraints.maxHeight)
+        : box.copyWith(maxWidth: constraints.maxWidth);
     final Size size = hasNonPositioned
-        ? box.constrain(Size(width, height))
+        ? grown.constrain(Size(width, height))
         : box.biggest;
 
     final Alignment resolved = alignment.resolve(textDirection);
@@ -1044,6 +1054,7 @@ class RenderScrollContentStack extends RenderStack {
         ? _atMinExtent(constraints).maxHeight
         : _atMinExtent(constraints).maxWidth;
     size = _layoutAt(extent);
+    extent = _vertical ? size.height : size.width;
     final double needed = min(_farthestChildEdge(), maxMain);
     if (needed > extent + 0.5) {
       extent = needed;

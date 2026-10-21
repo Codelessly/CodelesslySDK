@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -166,10 +169,7 @@ class TextNodeBox extends StatelessWidget {
       child: child,
     );
     if (minHeight) {
-      box = ConstrainedBox(
-        constraints: BoxConstraints(minHeight: node.basicBoxLocal.height),
-        child: box,
-      );
+      box = TextMinHeight(minHeight: node.basicBoxLocal.height, child: box);
     }
     return SizedBox(
       width: switch (hFit) {
@@ -181,4 +181,72 @@ class TextNodeBox extends StatelessWidget {
       child: box,
     );
   }
+}
+
+/// Gives text a minimum height, its design height, that it may grow past.
+///
+/// Laid out, it is at least [minHeight] tall (within the incoming
+/// constraints) and as tall as its text. Its minimum intrinsic height is the
+/// text's alone, without [minHeight]: that is the least height the text can
+/// have without being clipped, which a parent that shrinks its children to
+/// fit (a fixed-height Column on a small screen) can take away from the
+/// design height but no further.
+class TextMinHeight extends SingleChildRenderObjectWidget {
+  final double minHeight;
+
+  const TextMinHeight({super.key, required this.minHeight, super.child});
+
+  @override
+  RenderTextMinHeight createRenderObject(BuildContext context) =>
+      RenderTextMinHeight(minHeight: minHeight);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderTextMinHeight renderObject,
+  ) {
+    renderObject.minHeight = minHeight;
+  }
+}
+
+/// The render object of [TextMinHeight].
+class RenderTextMinHeight extends RenderProxyBox {
+  RenderTextMinHeight({required double minHeight}) {
+    _minHeight = minHeight;
+  }
+
+  double get minHeight => _minHeight;
+  late double _minHeight;
+  set minHeight(double value) {
+    if (value == _minHeight) return;
+    _minHeight = value;
+    markNeedsLayout();
+  }
+
+  BoxConstraints _childConstraints(BoxConstraints constraints) =>
+      constraints.copyWith(
+        minHeight: constraints.constrainHeight(
+          math.max(constraints.minHeight, minHeight),
+        ),
+      );
+
+  @override
+  void performLayout() {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      size = _childConstraints(constraints).smallest;
+      return;
+    }
+    child.layout(_childConstraints(constraints), parentUsesSize: true);
+    size = child.size;
+  }
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) =>
+      child?.getDryLayout(_childConstraints(constraints)) ??
+      _childConstraints(constraints).smallest;
+
+  @override
+  double computeMaxIntrinsicHeight(double width) =>
+      math.max(minHeight, super.computeMaxIntrinsicHeight(width));
 }
