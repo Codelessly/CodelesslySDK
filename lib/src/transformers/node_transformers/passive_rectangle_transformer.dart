@@ -78,27 +78,15 @@ class PassiveRectangleWidget extends StatelessWidget {
     bool isPlaceholder =
         parent is CanvasNode && parent.properties.bodyId == node.id;
 
-    /// TODO Birju / Saad. Why does the commented out parent code below break published layouts only?
-    /// Saad's note: The below code looks like AdaptiveNodeBox
-    final double? width =
-        (node.horizontalFit == SizeFit.shrinkWrap || isPlaceholder)
-        ? null
-        : (node.horizontalFit ==
-              SizeFit
-                  .expanded /* &&
-                (parent is! CanvasNode || parent.properties.bodyId != node.id)*/ )
-        ? double.infinity
-        : node.basicBoxLocal.width;
-
-    final double? height =
-        (node.verticalFit == SizeFit.shrinkWrap || isPlaceholder)
-        ? null
-        : (node.verticalFit ==
-              SizeFit
-                  .expanded /*&&
-                (parent is! CanvasNode || parent.properties.bodyId != node.id)*/ )
-        ? double.infinity
-        : node.basicBoxLocal.height;
+    // The canvas body hugs; the canvas sizes the screen. Every other node
+    // follows its fits (see FitBox): an expanded axis fills when bounded and
+    // keeps its design size when not.
+    final SizeFit horizontalFit = isPlaceholder
+        ? SizeFit.shrinkWrap
+        : node.horizontalFit;
+    final SizeFit verticalFit = isPlaceholder
+        ? SizeFit.shrinkWrap
+        : node.verticalFit;
 
     Widget? portalWidget;
     if (node case PortalMixin portal) {
@@ -144,6 +132,7 @@ class PassiveRectangleWidget extends StatelessWidget {
             stackAlignment: stackAlignment,
             applyPadding: applyPadding,
             getNode: manager.getNode,
+            isPlaceholder: isPlaceholder,
           ),
           alignment:
               stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
@@ -161,19 +150,20 @@ class PassiveRectangleWidget extends StatelessWidget {
       child = BlendMask(child: child);
     }
 
-    Widget data = Container(
+    return FitBox.fromFits(
       key: ValueKey('Rectangle Transformer of ${node.debugLabel}'),
-      clipBehavior: getClipBehavior(node),
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        boxShadow: retrieveBoxShadow(node, scopedValues),
-        borderRadius: getBorderRadius(node),
+      horizontalFit: horizontalFit,
+      verticalFit: verticalFit,
+      size: node.basicBoxLocal.size,
+      child: Container(
+        clipBehavior: getClipBehavior(node),
+        decoration: BoxDecoration(
+          boxShadow: retrieveBoxShadow(node, scopedValues),
+          borderRadius: getBorderRadius(node),
+        ),
+        child: child,
       ),
-      child: child,
     );
-
-    return data;
   }
 }
 
@@ -261,6 +251,7 @@ List<Widget> wrapWithPadding(
   List<Widget> children, {
   required AlignmentModel stackAlignment,
   bool applyPadding = true,
+  bool isPlaceholder = false,
 }) {
   if (children.isEmpty || !applyPadding) return children;
 
@@ -276,8 +267,11 @@ List<Widget> wrapWithPadding(
     // associated [node]. Without it, the Stack can produce cases where it
     // wraps around its concrete child tightly instead of expanding from a
     // SizeFit.expand.
-    AdaptiveNodeBox(
-      node: node,
+    // A canvas body hugs, like its rectangle.
+    FitBox.fromFits(
+      horizontalFit: isPlaceholder ? SizeFit.shrinkWrap : node.horizontalFit,
+      verticalFit: isPlaceholder ? SizeFit.shrinkWrap : node.verticalFit,
+      size: node.basicBoxLocal.size,
       child: Padding(
         padding: resolvedPadding,
         child: Stack(
@@ -297,6 +291,7 @@ List<Widget> wrapWithPaddingAndScroll(
   required AlignmentModel stackAlignment,
   bool applyPadding = true,
   GetNode? getNode,
+  bool isPlaceholder = false,
 }) {
   if (children.isEmpty) return children;
 
@@ -349,6 +344,7 @@ List<Widget> wrapWithPaddingAndScroll(
     children,
     stackAlignment: stackAlignment,
     applyPadding: applyPadding,
+    isPlaceholder: isPlaceholder,
   );
 }
 
