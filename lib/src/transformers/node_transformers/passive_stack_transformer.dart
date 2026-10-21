@@ -14,6 +14,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     BuildContext context, {
     WidgetNodeTransformerManager? manager,
     Widget? childWidget,
+    AxisC? scrollAxis,
     required WidgetBuildSettings settings,
   }) {
     assert(
@@ -29,7 +30,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       key: ValueKey(
         'Static Stack child [${node.id}](${node.name})<${node.type}> on parent [${parent.id}](${parent.name})<${parent.type}>',
       ),
-      placement: placementFor(node, parent),
+      placement: placementFor(node, parent, scrollAxis: scrollAxis),
       child: child,
     );
   }
@@ -42,6 +43,9 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
   /// - A node expanded on an axis without a max constraint fills that axis.
   /// - A node pinned to both edges of an axis and not shrink-wrapping on it
   ///   stretches between the pins (the editor's "chained" sizing).
+  /// - A shrink-wrapping node pinned to both edges sizes itself, as in the
+  ///   editor (it is not chained), and keeps its share of the free space
+  ///   between the pins, so a node centred between them stays centred.
   /// - A node pinned only to the end edge keeps its distance from that edge.
   /// - A node pinned only to the start edge keeps its distance from it when
   ///   its [PositioningMode] is [PositioningMode.pin]. In
@@ -49,13 +53,21 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
   ///   freeform container, whose pins are just its design x/y), it keeps its
   ///   share of the free space, like [Align], so the layout spreads with a
   ///   wider parent instead of clustering at the top left.
-  /// - Along the scroll axis of a scrolling parent, children are content and
-  ///   keep their design offset.
+  /// - Along [scrollAxis] (see [scrollAxisFor]), children are content: they
+  ///   keep their design offset, and their design size is only a minimum so
+  ///   content that grows at runtime can be scrolled to.
   ///
   /// At design size every rule gives the design position and size.
-  static FreeformPlacement placementFor(BaseNode node, BaseNode parent) {
-    final bool scrolls = parent is ScrollableMixin && parent.isScrollable;
-    final bool verticalScroll = scrolls && parent.scrollDirection.isVertical;
+  static FreeformPlacement placementFor(
+    BaseNode node,
+    BaseNode parent, {
+    AxisC? scrollAxis,
+  }) {
+    if (parent is ScrollableMixin && parent.isScrollable) {
+      scrollAxis ??= parent.scrollDirection;
+    }
+    final bool scrolls = scrollAxis != null;
+    final bool verticalScroll = scrollAxis == AxisC.vertical;
     return FreeformPlacement(
       horizontal: _axisPlacement(
         node,
@@ -109,6 +121,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       alignment: alignment,
       clamp: !isScrollAxis,
       expands: expands,
+      growsWithContent: node is TextNode,
     );
 
     if (node.alignment.data case final AlignmentData alignment) {
@@ -130,6 +143,9 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     if (pinnedStart && pinnedEnd && !wraps) {
       return placement(FreeformAxisMode.stretch);
     }
+    if (pinnedStart && pinnedEnd && !parentWraps) {
+      return placement(FreeformAxisMode.relative);
+    }
     if (pinnedEnd && !pinnedStart) return placement(FreeformAxisMode.end);
     if (!pinnedEnd &&
         !parentWraps &&
@@ -137,6 +153,23 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       return placement(FreeformAxisMode.relative);
     }
     return placement(FreeformAxisMode.start);
+  }
+
+  /// The axis along which the children of [node] scroll: its own scroll
+  /// direction when it scrolls, or the canvas's when [node] is the body of a
+  /// scrolling canvas (the canvas scrolls its body as content).
+  AxisC? scrollAxisFor(BaseNode node) {
+    if (node is ScrollableMixin && node.isScrollable) {
+      return node.scrollDirection;
+    }
+    if (node.id == kRootNode || node.parentID == kRootNode) return null;
+    final BaseNode parent = getNode(node.parentID);
+    if (parent is CanvasNode &&
+        parent.properties.bodyId == node.id &&
+        parent.isScrollable) {
+      return parent.scrollDirection;
+    }
+    return null;
   }
 
   @override
@@ -166,6 +199,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         for (final String childId in node.children) getNode(childId),
     ];
 
+    final AxisC? scrollAxis = scrollAxisFor(node);
     final List<Widget> childrenWidgets = [
       FreeformLayout(
         wrapsWidth: node.isHorizontalWrap,
@@ -178,6 +212,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
               node,
               context,
               manager: manager,
+              scrollAxis: scrollAxis,
               settings: settings,
             ),
         ],

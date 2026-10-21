@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -483,6 +484,99 @@ void main() {
       }
     });
   });
+
+  testWidgets('text in a row that shrinks keeps its longest word (B1)', (
+    tester,
+  ) async {
+    final text = TextNode(
+      id: 'text',
+      name: 'text',
+      basicBoxLocal: NodeBox(0, 0, 400, 20),
+      horizontalFit: SizeFit.shrinkWrap,
+      verticalFit: SizeFit.shrinkWrap,
+      characters: 'Lorem ipsum dolor sit amet consectetur',
+      textMixedProps: [StartEndProp(start: 0, end: 38, fontSize: 14)],
+    );
+    final a = rect('a', '', width: 300, height: 40);
+    final b = rect('b', '', width: 300, height: 40);
+    final row = flex(
+      'row',
+      kRootNode,
+      [text, a, b],
+      type: RowColumnType.row,
+      width: 1000,
+      height: 40,
+      horizontalFit: SizeFit.expanded,
+      verticalFit: SizeFit.shrinkWrap,
+    );
+    await everywhere(tester, row, [text, a, b], (sizes, screen, host) {
+      final RenderParagraph paragraph = tester.renderObject(
+        find.byType(RichText),
+      );
+      final double minContent = paragraph.getMinIntrinsicWidth(double.infinity);
+      // The text squeezes and wraps, but never below its longest word,
+      // while the boxes give up the rest.
+      expect(
+        paragraph.size.width,
+        greaterThanOrEqualTo(minContent),
+        reason: '$host $screen',
+      );
+      if (sizes['row']!.width < 1000) {
+        expect(sizes['a']!.width, lessThan(300), reason: '$host $screen');
+      }
+    });
+  });
+
+  testWidgets(
+    'reflowing text in a fixed-height column keeps its lines (B2, B4)',
+    (tester) async {
+      final text = TextNode(
+        id: 'text',
+        name: 'text',
+        basicBoxLocal: NodeBox(0, 0, 1000, 20),
+        horizontalFit: SizeFit.expanded,
+        verticalFit: SizeFit.fixed,
+        characters:
+            'Lorem ipsum dolor sit amet consectetur adipiscing elit sed do '
+            'eiusmod tempor incididunt ut labore et dolore magna aliqua',
+        textMixedProps: [StartEndProp(start: 0, end: 120, fontSize: 14)],
+      );
+      final picture = rect('picture', '', width: 100, height: 100);
+      final column = flex(
+        'column',
+        kRootNode,
+        [text, picture],
+        type: RowColumnType.column,
+        width: 1000,
+        height: 120,
+        horizontalFit: SizeFit.expanded,
+      );
+      await everywhere(tester, column, [text, picture], (sizes, screen, host) {
+        final RenderParagraph paragraph = tester.renderObject(
+          find.byType(RichText),
+        );
+        final double lines = paragraph.getMinIntrinsicHeight(
+          paragraph.size.width,
+        );
+        // The text keeps every line; the picture gives up the room instead.
+        expect(
+          paragraph.size.height,
+          greaterThanOrEqualTo(lines),
+          reason: '$host $screen',
+        );
+        if (screen.width == 390) {
+          expect(lines, greaterThan(20), reason: 'the text reflows at 390');
+        }
+        if (lines > 20) {
+          expect(
+            sizes['picture']!.height,
+            lessThan(100),
+            reason: '$host $screen',
+          );
+        }
+      });
+    },
+  );
 
   testWidgets('fixed children taller than the column shrink to fit it (B2)', (
     tester,
