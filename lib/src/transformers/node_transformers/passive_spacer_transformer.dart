@@ -22,7 +22,18 @@ class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
 
     final Widget spacerWidget;
     if (mainFit.isFlex) {
-      spacerWidget = Spacer(flex: flex);
+      // Fills its share of the free space. Where the main axis is unbounded
+      // there is none, and it keeps its design size instead (see
+      // CodelesslyFlex and FitBox).
+      spacerWidget = Expanded(
+        flex: flex,
+        child: FitBox(
+          width: mainAxis.isHorizontal ? node.outerBoxLocal.width : null,
+          height: mainAxis.isVertical ? node.outerBoxLocal.height : null,
+          fillWidth: mainAxis.isHorizontal,
+          fillHeight: mainAxis.isVertical,
+        ),
+      );
     } else {
       spacerWidget = SizedBox(
         width: mainAxis.isVertical ? null : node.outerBoxLocal.width,

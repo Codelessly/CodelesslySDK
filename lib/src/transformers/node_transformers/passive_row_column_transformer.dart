@@ -20,110 +20,166 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     final bool isRow =
         (rowColumnNode as RowColumnMixin).rowColumnType == RowColumnType.row;
 
-    final double? fixWidth;
-    final double? fixHeight;
-    if (rowColumnNode.verticalFit == SizeFit.locked ||
-        rowColumnNode.verticalFit == SizeFit.fixed) {
-      fixHeight = rowColumnNode.outerBoxLocal.height;
-    } else if (rowColumnNode.verticalFit == SizeFit.shrinkWrap) {
-      fixHeight = rowColumnNode.constraints.minHeight;
-    } else {
-      // If the node is a canvas node's body, it is likely a placeholder that
-      // expands to fill all available space, while the canvas is already meant
-      // to do that as a scroll view. In this case, we avoid setting the height
-      // to infinity at all costs.
-      final BaseNode? parent = rowColumnNode.parentID == kRootNode
-          ? null
-          : getNode(rowColumnNode.parentID);
-      bool isPlaceholder =
-          parent is CanvasNode && parent.properties.bodyId == rowColumnNode.id;
-      if (isPlaceholder) {
-        fixHeight = rowColumnNode.constraints.minHeight;
-      } else {
-        fixHeight = rowColumnNode.constraints.maxHeight ?? double.infinity;
-      }
-    }
+    // If the node is a canvas node's body, it is a placeholder that expands to
+    // fill the canvas, while the canvas is already meant to do that as a
+    // scroll view. Its height follows its content (at least its min height).
+    final BaseNode? parent = rowColumnNode.parentID == kRootNode
+        ? null
+        : getNode(rowColumnNode.parentID);
+    final bool isPlaceholder =
+        parent is CanvasNode && parent.properties.bodyId == rowColumnNode.id;
 
-    if (rowColumnNode.horizontalFit == SizeFit.locked ||
-        rowColumnNode.horizontalFit == SizeFit.fixed) {
-      fixWidth = rowColumnNode.outerBoxLocal.width;
-    } else if (rowColumnNode.horizontalFit == SizeFit.shrinkWrap) {
-      fixWidth = rowColumnNode.constraints.minWidth;
-    } else {
-      fixWidth = rowColumnNode.constraints.maxWidth ?? double.infinity;
-    }
+    final FitBox outerBox = FitBox(
+      width: _outerExtent(
+        rowColumnNode.horizontalFit,
+        design: rowColumnNode.outerBoxLocal.width,
+        min: rowColumnNode.constraints.minWidth,
+        max: rowColumnNode.constraints.maxWidth,
+      ),
+      fillWidth: _fillsAxis(
+        rowColumnNode.horizontalFit,
+        max: rowColumnNode.constraints.maxWidth,
+      ),
+      height: isPlaceholder && rowColumnNode.verticalFit.isFlex
+          ? rowColumnNode.constraints.minHeight
+          : _outerExtent(
+              rowColumnNode.verticalFit,
+              design: rowColumnNode.outerBoxLocal.height,
+              min: rowColumnNode.constraints.minHeight,
+              max: rowColumnNode.constraints.maxHeight,
+            ),
+      fillHeight:
+          !(isPlaceholder && rowColumnNode.verticalFit.isFlex) &&
+          _fillsAxis(
+            rowColumnNode.verticalFit,
+            max: rowColumnNode.constraints.maxHeight,
+          ),
+    );
 
-    if (isRow) {
-      Widget res = Row(
-        mainAxisAlignment: rowColumnNode.mainAxisAlignment.flutterAxis,
-        crossAxisAlignment: rowColumnNode.crossAxisAlignment.flutterAxis,
-        mainAxisSize: (rowColumnNode.horizontalFit == SizeFit.shrinkWrap)
-            ? MainAxisSize.min
-            : MainAxisSize.max,
-        key: ValueKey(rowColumnNode.id),
-        children: childrenWidgets,
+    final SizeFit mainFit = isRow
+        ? rowColumnNode.horizontalFit
+        : rowColumnNode.verticalFit;
+    final bool crossWraps = isRow
+        ? rowColumnNode.isVerticalWrap
+        : rowColumnNode.isHorizontalWrap;
+    final double? crossMin = isRow
+        ? rowColumnNode.constraints.minHeight
+        : rowColumnNode.constraints.minWidth;
+
+    // A Row/Column that hugs its cross axis is as thick as its thickest
+    // child, as the editor sizes it. Children that align or stretch across
+    // it need that thickness first: Flutter would otherwise align them in,
+    // or stretch them to, the whole incoming cross axis (or fail when that
+    // is unbounded). An intrinsic wrapper can't measure a subtree with a
+    // viewport or LayoutBuilder in it; a stretch then falls back to start,
+    // so children keep their own thickness instead of the incoming one.
+    final bool stretches =
+        rowColumnNode.crossAxisAlignment == CrossAxisAlignmentC.stretch;
+    bool measureCross = false;
+    bool stretchFallsBack = false;
+    if (crossMin == null && crossWraps) {
+      final bool anyChildNeedsAlignment = childrenNodes.any(
+        (child) => child.alignment != AlignmentModel.none,
       );
-
-      if (fixHeight == null && rowColumnNode.isVerticalWrap) {
-        final bool anyChildNeedsAlignment = childrenNodes.any(
-          (child) => child.alignment != AlignmentModel.none,
+      if (stretches || anyChildNeedsAlignment) {
+        final bool blocked = childrenNodes.any(
+          (child) => subtreeBlocksIntrinsics(child, getNode),
         );
-        if (anyChildNeedsAlignment) {
-          res = IntrinsicHeight(child: res);
-        }
+        measureCross = !blocked;
+        stretchFallsBack = blocked && stretches;
       }
-
-      if (withScroll &&
-          rowColumnNode is ScrollableMixin &&
-          (rowColumnNode as ScrollableMixin).isScrollable) {
-        res = wrapWithPaddedScrollable(
-          padding: rowColumnNode.resolvedPadding().flutterEdgeInsets,
-          node: (rowColumnNode as ScrollableMixin),
-          fillViewport:
-              rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start,
-          child: res,
-        );
-      }
-
-      if (fixWidth == null && fixHeight == null) return res;
-
-      return SizedBox(width: fixWidth, height: fixHeight, child: res);
-    } else {
-      Widget res = Column(
-        mainAxisAlignment: rowColumnNode.mainAxisAlignment.flutterAxis,
-        crossAxisAlignment: rowColumnNode.crossAxisAlignment.flutterAxis,
-        mainAxisSize: (rowColumnNode.verticalFit == SizeFit.shrinkWrap)
-            ? MainAxisSize.min
-            : MainAxisSize.max,
-        key: ValueKey(rowColumnNode.id),
-        children: childrenWidgets,
-      );
-
-      if (fixWidth == null && rowColumnNode.isHorizontalWrap) {
-        final bool anyChildNeedsAlignment = childrenNodes.any(
-          (child) => child.alignment != AlignmentModel.none,
-        );
-        if (anyChildNeedsAlignment) {
-          res = IntrinsicWidth(child: res);
-        }
-      }
-
-      if (withScroll &&
-          rowColumnNode is ScrollableMixin &&
-          (rowColumnNode as ScrollableMixin).isScrollable) {
-        res = wrapWithPaddedScrollable(
-          padding: rowColumnNode.resolvedPadding().flutterEdgeInsets,
-          node: (rowColumnNode as ScrollableMixin),
-          fillViewport:
-              rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start,
-          child: res,
-        );
-      }
-
-      if (fixWidth == null && fixHeight == null) return res;
-
-      return SizedBox(width: fixWidth, height: fixHeight, child: res);
     }
+
+    Widget res = CodelesslyFlex(
+      direction: isRow ? Axis.horizontal : Axis.vertical,
+      mainAxisAlignment: rowColumnNode.mainAxisAlignment.flutterAxis,
+      crossAxisAlignment: stretchFallsBack
+          ? CrossAxisAlignment.start
+          : rowColumnNode.crossAxisAlignment.flutterAxis,
+      mainAxisSize: mainFit == SizeFit.shrinkWrap
+          ? MainAxisSize.min
+          : MainAxisSize.max,
+      key: ValueKey(rowColumnNode.id),
+      children: childrenWidgets,
+    );
+
+    if (measureCross) {
+      res = isRow ? IntrinsicHeight(child: res) : IntrinsicWidth(child: res);
+    }
+
+    if (withScroll &&
+        rowColumnNode is ScrollableMixin &&
+        (rowColumnNode as ScrollableMixin).isScrollable) {
+      res = wrapWithPaddedScrollable(
+        padding: rowColumnNode.resolvedPadding().flutterEdgeInsets,
+        node: (rowColumnNode as ScrollableMixin),
+        fillViewport:
+            rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start,
+        flexContent: hasMainAxisFlexChild(rowColumnNode, childrenNodes),
+        child: res,
+      );
+    }
+
+    if (outerBox.width == null &&
+        outerBox.height == null &&
+        !outerBox.fillWidth &&
+        !outerBox.fillHeight) {
+      return res;
+    }
+
+    // Without a fill this is exactly a SizedBox; the editor's design-mode
+    // scroll unwraps it to put its scroll view inside.
+    if (!outerBox.fillWidth && !outerBox.fillHeight) {
+      return SizedBox(
+        width: outerBox.width,
+        height: outerBox.height,
+        child: res,
+      );
+    }
+
+    return FitBox(
+      width: outerBox.width,
+      height: outerBox.height,
+      fillWidth: outerBox.fillWidth,
+      fillHeight: outerBox.fillHeight,
+      child: res,
+    );
+  }
+
+  /// The design extent of a Row/Column's own box on one axis, or null when it
+  /// hugs its children.
+  ///
+  /// Fixed and locked take the solved outer size. shrinkWrap hugs (at least
+  /// its min constraint). Expanded takes its max constraint when it has one,
+  /// and otherwise fills a bounded axis or takes its design size on an
+  /// unbounded one. Flexible takes its design size, as leaves do: its
+  /// [Flexible] parent lets it get smaller, never larger, matching the
+  /// editor's `min(flex share, design size)`.
+  static double? _outerExtent(
+    SizeFit fit, {
+    required double design,
+    required double? min,
+    required double? max,
+  }) => switch (fit) {
+    SizeFit.shrinkWrap => min,
+    SizeFit.expanded => max ?? design,
+    SizeFit.fixed || SizeFit.locked || SizeFit.flexible => design,
+  };
+
+  static bool _fillsAxis(SizeFit fit, {required double? max}) =>
+      fit == SizeFit.expanded && max == null;
+
+  /// Whether any of [children] flexes along [rowColumnNode]'s main axis
+  /// (expanded, flexible, or a flex spacer).
+  static bool hasMainAxisFlexChild(
+    BaseNode rowColumnNode,
+    Iterable<BaseNode> children,
+  ) {
+    final bool isRow =
+        (rowColumnNode as RowColumnMixin).rowColumnType == RowColumnType.row;
+    return children.any(
+      (child) => (isRow ? child.horizontalFit : child.verticalFit).isFlex,
+    );
   }
 
   static Widget wrapChildWithSizeFits(
@@ -140,8 +196,6 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       return childWidget;
     }
 
-    final bool hasAlignment = (alignment ?? node.alignment).data != null;
-
     final AxisC mainAxis =
         ((parentRowColumn as RowColumnMixin).rowColumnType == RowColumnType.row
         ? AxisC.horizontal
@@ -149,8 +203,21 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     final SizeFit mainAxisFit = (mainAxis == AxisC.horizontal
         ? node.horizontalFit
         : node.verticalFit);
-    // final SizeFit crossAxisFit =
-    //     (mainAxis == AxisC.horizontal ? node.verticalFit : node.horizontalFit);
+
+    final SizeFit crossAxisFit = (mainAxis == AxisC.horizontal
+        ? node.verticalFit
+        : node.horizontalFit);
+
+    // A parent that stretches its children across gives each one the full
+    // cross axis, like the editor's solver, except a child that hugs on that
+    // axis: the solver keeps its own size there and places it at the start.
+    final AlignmentGeometry? childAlignment =
+        (alignment ?? node.alignment).data?.flutterAlignmentGeometry ??
+        (parentRowColumn.crossAxisAlignment == CrossAxisAlignmentC.stretch &&
+                crossAxisFit == SizeFit.shrinkWrap
+            ? AlignmentDirectional.topStart
+            : null);
+    final bool hasAlignment = childAlignment != null;
 
     final double? mainAxisMaxConstraint = (mainAxis == AxisC.horizontal
         ? node.constraints.maxWidth
@@ -160,11 +227,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
 
     if (node.horizontalFit == node.verticalFit) {
       if (hasAlignment) {
-        childWidget = Align(
-          alignment:
-              (alignment ?? node.alignment).data!.flutterAlignmentGeometry,
-          child: childWidget,
-        );
+        childWidget = Align(alignment: childAlignment, child: childWidget);
       }
       if (flexibleSpaceBackground != null) {
         childWidget = flexibleSpaceBackground(childWidget);
@@ -213,11 +276,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         // }
 
         if (hasAlignment) {
-          childWidget = Align(
-            alignment:
-                (alignment ?? node.alignment).data!.flutterAlignmentGeometry,
-            child: childWidget,
-          );
+          childWidget = Align(alignment: childAlignment, child: childWidget);
         }
 
         if (flexibleSpaceBackground != null) {
@@ -243,11 +302,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         }
       } else {
         if (hasAlignment) {
-          childWidget = Align(
-            alignment:
-                (alignment ?? node.alignment).data!.flutterAlignmentGeometry,
-            child: childWidget,
-          );
+          childWidget = Align(alignment: childAlignment, child: childWidget);
         }
         if (flexibleSpaceBackground != null) {
           childWidget = flexibleSpaceBackground(childWidget);
