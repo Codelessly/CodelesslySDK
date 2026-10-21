@@ -326,3 +326,198 @@ bool subtreeBlocksIntrinsics(BaseNode node, GetNode getNode) {
   }
   return false;
 }
+
+/// Builds an endless list with the number of items it may build so far.
+/// Every item must be wrapped in an [ItemExtentReporter] fed by [extents].
+typedef EndlessListBuilder = Widget Function(
+  BuildContext context,
+  int itemCount,
+  ItemExtents extents,
+);
+
+/// The main-axis extents of the items an [EndlessListCount] has laid out.
+class ItemExtents {
+  final Map<int, double> _extents = {};
+
+  /// Records that item [index] was laid out [extent] long.
+  void record(int index, double extent) => _extents[index] = extent;
+
+  /// The average extent of the items laid out so far, or null before any.
+  double? get average => _extents.isEmpty
+      ? null
+      : _extents.values.fold<double>(0, (a, b) => a + b) / _extents.length;
+}
+
+/// Gives an endless list (no item count, no data) a finite item count that
+/// grows as the list scrolls.
+///
+/// A [ListView] without an item count keeps building items until they fill
+/// its viewport and cache area. Items that take no space (zero height, or
+/// hidden by a visibility formula) never fill it, so Flutter builds items
+/// without limit until it runs out of memory.
+///
+/// The rule: an endless list builds as many items as cover the furthest
+/// point it has scrolled to plus its viewport and the cache area on both
+/// sides, at an assumed extent per item. That extent is the average extent
+/// of the items laid out so far when they have one, else
+/// [estimatedItemExtent] (the item's design extent), and never below one
+/// logical pixel. Items of real size therefore always cover the viewport and
+/// the count grows ahead of the user while they scroll, as the endless list
+/// did before. Items that take no space never extend the scroll range, so
+/// the count stops at a few viewports' worth of the design extent.
+///
+/// Fixed-extent layouts (a list with an item extent, grids, page views)
+/// already place items by arithmetic and stay bounded on their own.
+class EndlessListCount extends StatefulWidget {
+  /// The list's scroll axis.
+  final Axis axis;
+
+  /// The extent assumed for an item before any is measured, or when the
+  /// measured ones take no space.
+  final double estimatedItemExtent;
+
+  /// The list's cache extent before and after the viewport.
+  final double cacheExtent;
+
+  /// Builds the list.
+  final EndlessListBuilder builder;
+
+  /// Creates an [EndlessListCount].
+  const EndlessListCount({
+    super.key,
+    required this.axis,
+    required this.estimatedItemExtent,
+    this.cacheExtent = RenderAbstractViewport.defaultCacheExtent,
+    required this.builder,
+  });
+
+  /// The item count for a list that has reached [reach] (scroll offset plus
+  /// viewport) whose laid-out items average [measuredExtent].
+  static int countFor({
+    required double reach,
+    required double cacheExtent,
+    required double estimatedItemExtent,
+    double? measuredExtent,
+  }) {
+    final double extent = measuredExtent != null && measuredExtent > 0
+        ? math.max(1.0, measuredExtent)
+        : math.max(1.0, estimatedItemExtent);
+    final double covered = math.max(0.0, reach) + 2 * math.max(0, cacheExtent);
+    return math.max(1, (covered / extent).ceil());
+  }
+
+  @override
+  State<EndlessListCount> createState() => _EndlessListCountState();
+}
+
+class _EndlessListCountState extends State<EndlessListCount> {
+  final ItemExtents _extents = ItemExtents();
+  int _count = 0;
+  double _viewport = 0;
+  double _scrolledReach = 0;
+  bool _checkScheduled = false;
+
+  int _target() => EndlessListCount.countFor(
+    reach: math.max(_viewport, _scrolledReach),
+    cacheExtent: widget.cacheExtent,
+    estimatedItemExtent: widget.estimatedItemExtent,
+    measuredExtent: _extents.average,
+  );
+
+  /// Grows the count after layout, once the laid-out items are measured.
+  void _scheduleCheck() {
+    if (_checkScheduled) return;
+    _checkScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkScheduled = false;
+      if (!mounted) return;
+      final int target = _target();
+      if (target > _count) setState(() => _count = target);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double max = widget.axis == Axis.vertical
+            ? constraints.maxHeight
+            : constraints.maxWidth;
+        _viewport = max.isFinite ? max : 0;
+        _count = math.max(_count, _target());
+        _scheduleCheck();
+        return NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            final ScrollMetrics metrics = notification.metrics;
+            if (notification.depth == 0 && metrics.axis == widget.axis) {
+              _scrolledReach = math.max(
+                _scrolledReach,
+                metrics.pixels + metrics.viewportDimension,
+              );
+              _scheduleCheck();
+            }
+            return false;
+          },
+          child: widget.builder(context, _count, _extents),
+        );
+      },
+    );
+  }
+}
+
+/// Reports the main-axis extent its child is laid out at to [extents].
+class ItemExtentReporter extends SingleChildRenderObjectWidget {
+  /// Where the extent is recorded.
+  final ItemExtents extents;
+
+  /// The item's index.
+  final int index;
+
+  /// The list's scroll axis.
+  final Axis axis;
+
+  /// Creates an [ItemExtentReporter].
+  const ItemExtentReporter({
+    super.key,
+    required this.extents,
+    required this.index,
+    required this.axis,
+    super.child,
+  });
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      RenderItemExtentReporter(extents, index, axis);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderItemExtentReporter renderObject,
+  ) {
+    renderObject
+      ..extents = extents
+      ..index = index
+      ..axis = axis;
+  }
+}
+
+/// The render object of [ItemExtentReporter].
+class RenderItemExtentReporter extends RenderProxyBox {
+  /// Creates a [RenderItemExtentReporter].
+  RenderItemExtentReporter(this.extents, this.index, this.axis);
+
+  /// Where the extent is recorded.
+  ItemExtents extents;
+
+  /// The item's index.
+  int index;
+
+  /// The list's scroll axis.
+  Axis axis;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    extents.record(index, axis == Axis.vertical ? size.height : size.width);
+  }
+}
