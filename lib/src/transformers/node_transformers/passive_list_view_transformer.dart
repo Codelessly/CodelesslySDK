@@ -237,46 +237,83 @@ class PassiveListViewWidget extends StatelessWidget {
       itemCount = data?.length ?? node.properties.itemCount;
     }
 
+    Widget itemBuilder(BuildContext context, int index) => IndexedItemProvider(
+      key: ValueKey(index),
+      item: IndexedItem(index, data?.elementAtOrNull(index)),
+      child: Builder(
+        builder: (context) {
+          // This builder is important to pass a context that has
+          // the IndexedItemProvider.
+          return KeyedSubtree(
+            key: ValueKey(index),
+            child: buildItem(item, context),
+          );
+        },
+      ),
+    );
+
+    Widget list(
+      bool shrinkWrap,
+      int? itemCount,
+      IndexedWidgetBuilder builder,
+    ) => ListViewBuilder(
+      primary: node.primary,
+      shrinkWrap: shrinkWrap,
+      itemCount: itemCount,
+      padding: node.padding.flutterEdgeInsets,
+      keyboardDismissBehavior:
+          node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+      physics: node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
+      scrollDirection: node.scrollDirection.flutterAxis,
+      cacheExtent: node.properties.cacheExtent,
+      reverse: node.reverse,
+      itemExtent: node.properties.itemExtent,
+      clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+      separatedBuilder:
+          (node.properties.itemCount != null || data != null) &&
+              node.properties.hasSeparator
+          ? (context, index) => ListViewItemSeparator(
+              scrollDirection: node.scrollDirection,
+              properties: node.properties,
+            )
+          : null,
+      itemBuilder: builder,
+    );
+
+    // An endless list with items of free extent gets a growing finite count,
+    // so items that take no space cannot be built without limit; see
+    // [EndlessListCount]. A fixed item extent is bounded by Flutter.
+    if (itemCount == null && node.properties.itemExtent == null) {
+      final Axis axis = node.scrollDirection.flutterAxis;
+      return box(
+        canShrinkWrap: false,
+        (context, _) => EndlessListCount(
+          axis: axis,
+          estimatedItemExtent: node.scrollDirection == AxisC.vertical
+              ? item.outerBoxLocal.height
+              : item.outerBoxLocal.width,
+          cacheExtent:
+              node.properties.cacheExtent ??
+              RenderAbstractViewport.defaultCacheExtent,
+          builder: (context, endlessCount, extents) => list(
+            false,
+            endlessCount,
+            (context, index) => ItemExtentReporter(
+              extents: extents,
+              index: index,
+              axis: axis,
+              child: itemBuilder(context, index),
+            ),
+          ),
+        ),
+      );
+    }
+
     // Nested in another scroll view, the list is bounded by its own fit or
     // shrink-wraps; see [ViewportLayout].
     return box(
       canShrinkWrap: itemCount != null,
-      (context, shrinkWrap) => ListViewBuilder(
-        primary: node.primary,
-        shrinkWrap: shrinkWrap,
-        itemCount: itemCount,
-        padding: node.padding.flutterEdgeInsets,
-        keyboardDismissBehavior:
-            node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-        physics: node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
-        scrollDirection: node.scrollDirection.flutterAxis,
-        cacheExtent: node.properties.cacheExtent,
-        reverse: node.reverse,
-        itemExtent: node.properties.itemExtent,
-        clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
-        separatedBuilder:
-            (node.properties.itemCount != null || data != null) &&
-                node.properties.hasSeparator
-            ? (context, index) => ListViewItemSeparator(
-                scrollDirection: node.scrollDirection,
-                properties: node.properties,
-              )
-            : null,
-        itemBuilder: (context, index) => IndexedItemProvider(
-          key: ValueKey(index),
-          item: IndexedItem(index, data?.elementAtOrNull(index)),
-          child: Builder(
-            builder: (context) {
-              // This builder is important to pass a context that has
-              // the IndexedItemProvider.
-              return KeyedSubtree(
-                key: ValueKey(index),
-                child: buildItem(item, context),
-              );
-            },
-          ),
-        ),
-      ),
+      (context, shrinkWrap) => list(shrinkWrap, itemCount, itemBuilder),
     );
   }
 }
