@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
@@ -101,8 +103,9 @@ Future<void> pump(
   Size screen,
   Host host,
   BaseNode root,
-  List<BaseNode> nodes,
-) async {
+  List<BaseNode> nodes, {
+  CodelesslyContext? codelesslyContext,
+}) async {
   tester.view.physicalSize = screen;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -124,7 +127,7 @@ Future<void> pump(
   );
   await tester.pumpWidget(
     ChangeNotifierProvider<CodelesslyContext>.value(
-      value: CodelesslyContext.empty(),
+      value: codelesslyContext ?? CodelesslyContext.empty(),
       child: MaterialApp(
         home: switch (host) {
           Host.tight => node,
@@ -549,6 +552,150 @@ void main() {
       final Size size = viewportSize(tester);
       expect(size.width, screen.width);
       expect(size.height, host == Host.scroll ? 400 : screen.height);
+    });
+  });
+
+  group('endless lists build a bounded number of items', () {
+    int built(WidgetTester tester) =>
+        find.byType(IndexedItemProvider, skipOffstage: false).evaluate().length;
+
+    /// The list's main extent as laid out: the screen in the tight host,
+    /// else the design height.
+    double viewportOf(Size screen, Host host, double design) =>
+        host == Host.tight ? screen.height : design;
+
+    test('countFor never assumes less than one pixel per item', () {
+      int count({required double estimate, double? measured}) =>
+          EndlessListCount.countFor(
+            reach: 400,
+            cacheExtent: 250,
+            estimatedItemExtent: estimate,
+            measuredExtent: measured,
+          );
+      expect(count(estimate: 50), 18);
+      expect(count(estimate: 0), 900);
+      expect(count(estimate: 50, measured: 0), 18);
+      expect(count(estimate: 50, measured: 25), 36);
+      expect(count(estimate: 50, measured: 0.01), 900);
+    });
+
+    forEachLayout('zero-height items', (tester, screen, host) async {
+      await pump(tester, screen, host, list(itemCount: null), [
+        rect('item', 'list', height: 0),
+      ]);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final double viewport = viewportOf(screen, host, 400);
+      expect(built(tester), greaterThan(0));
+      expect(built(tester), lessThanOrEqualTo(viewport + 2 * 250 + 1));
+    });
+
+    forEachLayout('items hidden by a visibility formula', (
+      tester,
+      screen,
+      host,
+    ) async {
+      final codelesslyContext = CodelesslyContext.empty()
+        ..nodeValues['item'] = Observable<List<ValueModel>>([
+          const BoolValue(name: 'visible', value: false),
+        ]);
+      await pump(tester, screen, host, list(itemCount: null), [
+        rect('item', 'list'),
+      ], codelesslyContext: codelesslyContext);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final double viewport = viewportOf(screen, host, 400);
+      // A few viewports' worth of the 50 px design extent.
+      expect(built(tester), lessThanOrEqualTo((viewport + 500) / 50 + 1));
+    });
+
+    forEachLayout('visible items keep scrolling without end', (
+      tester,
+      screen,
+      host,
+    ) async {
+      await pump(tester, screen, host, list(itemCount: null), [
+        rect('item', 'list'),
+      ]);
+      await tester.pumpAndSettle();
+      final double viewport = viewportOf(screen, host, 400);
+      // The viewport is covered.
+      expect(built(tester) * 50, greaterThanOrEqualTo(viewport));
+      // Scroll like a finger does, a little per frame.
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.byType(ListView)),
+      );
+      for (var i = 0; i < 100; i++) {
+        await gesture.moveBy(const Offset(0, -50));
+        await tester.pump();
+      }
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      // 5000 px down, items still fill the viewport.
+      final Iterable<int> indices = tester
+          .widgetList<IndexedItemProvider>(
+            find.byType(IndexedItemProvider, skipOffstage: false),
+          )
+          .map((provider) => provider.item.index);
+      expect(indices.reduce(math.max) * 50, greaterThan(5000 + viewport));
+    });
+
+    forEachLayout('grid with zero-height and hidden items', (
+      tester,
+      screen,
+      host,
+    ) async {
+      final codelesslyContext = CodelesslyContext.empty()
+        ..nodeValues['item'] = Observable<List<ValueModel>>([
+          const BoolValue(name: 'visible', value: false),
+        ]);
+      await pump(
+        tester,
+        screen,
+        host,
+        grid(itemCount: null, crossAxisCount: 2, width: 390, height: 844),
+        [rect('item', 'grid', width: 195, height: 0)],
+        codelesslyContext: codelesslyContext,
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      // Cells keep their delegate size, so only the rows that cover the
+      // viewport and cache are built.
+      final double viewport = viewportOf(screen, host, 844);
+      final double cell = screen.width / (screen.width / 195).floor();
+      final int columns = (screen.width / 195).floor();
+      expect(
+        built(tester),
+        lessThanOrEqualTo(((viewport + 500) / cell).ceil() * columns + columns),
+      );
+    });
+
+    forEachLayout('page view with zero-height and hidden items', (
+      tester,
+      screen,
+      host,
+    ) async {
+      final codelesslyContext = CodelesslyContext.empty()
+        ..nodeValues['item'] = Observable<List<ValueModel>>([
+          const BoolValue(name: 'visible', value: false),
+        ]);
+      final node = page()..properties.itemCount = null;
+      await pump(tester, screen, host, node, [
+        rect('item', 'page', height: 0),
+      ], codelesslyContext: codelesslyContext);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(built(tester), lessThanOrEqualTo(3));
+    });
+
+    forEachLayout('list with a zero item extent', (tester, screen, host) async {
+      await pump(tester, screen, host, list(itemCount: null, itemExtent: 0), [
+        rect('item', 'list', height: 0),
+      ]);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(built(tester), lessThanOrEqualTo(2));
     });
   });
 }
