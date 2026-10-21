@@ -380,14 +380,16 @@ class StrictNodeBox extends StatelessWidget {
 /// A [Widget] that will fit its child to the size of the [SizeC], taking
 /// into account the [SizeFit] values.
 ///
-/// If the [SizeFit] of an axis is [SizeFit.shrinkwrap], the size on that
-/// axis will be set to `null`.
+/// If the [SizeFit] of an axis is [SizeFit.shrinkWrap], the box hugs its child
+/// on that axis.
 ///
-/// If the [SizeFit] of an axis is [SizeFit.expanded], the size on that axis
-/// will be set to `double.infinity`.
+/// If the [SizeFit] of an axis is [SizeFit.expanded], the box fills that axis
+/// when the incoming constraints bound it, and otherwise takes the [SizeC] on
+/// that axis (see [FitBox]).
 ///
-/// If the [SizeFit] of an axis is [SizeFit.fixed] or [SizeFit.flexible], the
-/// size on that axis will be set to the value of the [SizeC] on that axis.
+/// Every other [SizeFit] (fixed, locked, flexible) takes the [SizeC] on that
+/// axis. A flexible node's parent wraps it in a [Flexible], which lets it get
+/// smaller than that but never larger.
 class AdaptiveSizeFitBox extends StatelessWidget {
   /// The child [Widget] that will be fitted to the size of the [SizeC].
   final Widget? child;
@@ -398,9 +400,7 @@ class AdaptiveSizeFitBox extends StatelessWidget {
   /// The [SizeFit] value that will be used to determine the height of the box.
   final SizeFit? verticalFit;
 
-  /// The [SizeC] that will be used to determine the size of the box, if the
-  /// [horizontalFit] and [verticalFit] values are not [SizeFit.fixed] or
-  /// [SizeFit.flexible].
+  /// The design size of the box.
   final SizeC size;
 
   /// Creates a [AdaptiveSizeFitBox] that will fit its [child] to the size of
@@ -416,17 +416,10 @@ class AdaptiveSizeFitBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: (horizontalFit == SizeFit.shrinkWrap)
-          ? null
-          : (horizontalFit == SizeFit.expanded)
-          ? double.infinity
-          : size.width,
-      height: (verticalFit == SizeFit.shrinkWrap)
-          ? null
-          : (verticalFit == SizeFit.expanded)
-          ? double.infinity
-          : size.height,
+    return FitBox.fromFits(
+      horizontalFit: horizontalFit,
+      verticalFit: verticalFit,
+      size: size,
       child: child,
     );
   }
