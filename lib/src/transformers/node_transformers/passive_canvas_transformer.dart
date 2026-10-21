@@ -462,6 +462,28 @@ class CanvasSizingScope extends InheritedWidget {
       sizing != oldWidget.sizing;
 }
 
+/// The width the canvas above is laid out at, which picks the variant a
+/// responsive [VarianceNode] shows (see [VarianceNode.variantForWidth]), the
+/// same width the editor's design canvas has.
+class CanvasWidthScope extends InheritedWidget {
+  /// The canvas width.
+  final double width;
+
+  const CanvasWidthScope({
+    super.key,
+    required this.width,
+    required super.child,
+  });
+
+  /// The width of the nearest canvas, or null outside of one.
+  static double? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<CanvasWidthScope>()?.width;
+
+  @override
+  bool updateShouldNotify(CanvasWidthScope oldWidget) =>
+      width != oldWidget.width;
+}
+
 /// Gives a canvas the box it is laid out in, so its size never depends on
 /// whether the host's constraints are tight or loose.
 ///
@@ -522,12 +544,21 @@ class CanvasViewport extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final box = resolve(node, constraints, sizing: sizing);
+        // The width the canvas content is laid out at: the canvas box for a
+        // responsive canvas, the design width for an autoScale one (its
+        // content is laid out at design size and then scaled).
+        final Widget content = CanvasWidthScope(
+          width: node.scaleMode == ScaleMode.autoScale
+              ? node.basicBoxLocal.width
+              : box.width,
+          child: child,
+        );
         if (box.height != null) {
-          return SizedBox(width: box.width, height: box.height, child: child);
+          return SizedBox(width: box.width, height: box.height, child: content);
         }
         return SizedBox(
           width: box.width,
-          child: CanvasContentHeight(child: child),
+          child: CanvasContentHeight(child: content),
         );
       },
     );

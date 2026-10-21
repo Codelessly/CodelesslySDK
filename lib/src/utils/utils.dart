@@ -55,7 +55,8 @@ final Set<PredefinedVariableData> predefinedVariables = {
 };
 
 /// Widths at which the `screen` variable's breakpoint changes: below 600 is
-/// mobile, below 1024 tablet, and anything wider desktop.
+/// mobile, below 1024 tablet, and anything wider desktop. The rule itself is
+/// [ScreenBreakpoint.forWidth], which responsive variances use too.
 const double kTabletMinWidth = 600;
 const double kDesktopMinWidth = 1024;
 
@@ -64,11 +65,7 @@ const double kDesktopMinWidth = 1024;
 /// `isTablet`, `isDesktop`, `orientation` (portrait or landscape),
 /// `isPortrait` and `isLandscape`.
 Map<String, dynamic> screenVariableValue(Size size) {
-  final String breakpoint = size.width < kTabletMinWidth
-      ? 'mobile'
-      : size.width < kDesktopMinWidth
-      ? 'tablet'
-      : 'desktop';
+  final String breakpoint = ScreenBreakpoint.forWidth(size.width).name;
   final bool portrait = size.height >= size.width;
   return {
     'width': size.width,
