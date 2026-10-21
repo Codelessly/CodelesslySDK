@@ -37,7 +37,7 @@ abstract final class VariablePreview {
   static const Set<String> _literals = {'true', 'false', 'null'};
 
   /// The text the design canvas shows for [expression], one `${...}` match.
-  static String textFor(String expression, {BaseNode? node}) {
+  static String textFor(String expression, {BaseNode? node, TextStyle? style}) {
     final ScopedValues? scopedValues = scopeResolver?.call(node);
     if (scopedValues != null) {
       final String value = PropertyValueDelegate.substituteVariables(
@@ -49,10 +49,28 @@ abstract final class VariablePreview {
         return value;
       }
     }
-    // A name can be wider than a fixed-width slot, so only nodes that grow
-    // to fit their text show one; the rest show a compact marker.
-    if (node != null && node.horizontalFit != SizeFit.shrinkWrap) return '…';
-    return placeholderFor(expression);
+    final String placeholder = placeholderFor(expression);
+    // A name can be wider than a fixed-width slot; show a compact marker
+    // only when it would not fit.
+    if (node != null &&
+        node.horizontalFit != SizeFit.shrinkWrap &&
+        !fitsWidth(placeholder, node.basicBoxLocal.width, style)) {
+      return '…';
+    }
+    return placeholder;
+  }
+
+  /// Whether [text] fits on one line within [width] in [style].
+  static bool fitsWidth(String text, double width, TextStyle? style) {
+    if (width <= 0) return false;
+    final TextPainter painter = TextPainter(
+      text: TextSpan(text: text, style: style ?? const TextStyle(fontSize: 14)),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    final bool fits = painter.width <= width + 0.5;
+    painter.dispose();
+    return fits;
   }
 
   /// A readable name for [expression]: its last meaningful path segment,
@@ -117,5 +135,7 @@ class VariableSpan extends TextSpan {
     super.mouseCursor,
     super.onEnter,
     super.onExit,
-  }) : super(text: VariablePreview.textFor(variable, node: node));
+  }) : super(
+         text: VariablePreview.textFor(variable, node: node, style: style),
+       );
 }
