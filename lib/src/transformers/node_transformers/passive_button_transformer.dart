@@ -63,6 +63,16 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
       );
 }
 
+/// The text a design canvas shows as [node]'s label: the variable or formula
+/// its `label` is bound to, or its own label text. Both can hold `${...}`
+/// paths and formulas, which the canvas shows with their default values (see
+/// [VariablePreview]), as the runtime shows the bound value.
+String buttonLabelTemplateOf(ButtonNode node) {
+  final String? binding = node.variables['label'];
+  if (binding == null || binding.trim().isEmpty) return node.properties.label;
+  return binding.wrapWithVariableSyntax();
+}
+
 class PassiveButtonWidget extends StatelessWidget {
   final ButtonNode node;
   final WidgetBuildSettings settings;
@@ -79,14 +89,19 @@ class PassiveButtonWidget extends StatelessWidget {
     this.onPressed,
     this.onLongPress,
     this.elevation,
+    this.scopedValues,
   }) : variablesOverrides = variables ?? [];
+
+  /// The values the button's bindings read. A design canvas passes its
+  /// variables' default values. Defaults to the values of the build context
+  /// with [variablesOverrides].
+  final ScopedValues? scopedValues;
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = ScopedValues.of(
-      context,
-      variablesOverrides: variablesOverrides,
-    );
+    final ScopedValues scopedValues =
+        this.scopedValues ??
+        ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final ButtonStyle buttonStyle = createMasterButtonStyle(
       node,
       elevation: elevation,
@@ -113,7 +128,7 @@ class PassiveButtonWidget extends StatelessWidget {
 
     // TODO: refactor into TextUtils where it can be built without a style.
     if (settings.replaceVariablesWithSymbols) {
-      final List<TextSpan> spans = node.properties.label
+      final List<TextSpan> spans = buttonLabelTemplateOf(node)
           .splitMap(
             variableSyntaxIdentifierRegex,
             onMatch: (match) => VariableSpan(variable: match[0]!, node: node),
