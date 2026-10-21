@@ -195,7 +195,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    NodeStateProvider.setState(context, controller.text);
+    NodeStateProvider.setState(context, controller.text, byUser: false);
   }
 
   @override

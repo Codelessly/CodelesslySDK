@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/transformers/utils/node_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -564,19 +565,28 @@ void main() {
     double viewportOf(Size screen, Host host, double design) =>
         host == Host.tight ? screen.height : design;
 
-    test('countFor never assumes less than one pixel per item', () {
-      int count({required double estimate, double? measured}) =>
-          EndlessListCount.countFor(
-            reach: 400,
-            cacheExtent: 250,
-            estimatedItemExtent: estimate,
-            measuredExtent: measured,
-          );
-      expect(count(estimate: 50), 18);
-      expect(count(estimate: 0), 900);
-      expect(count(estimate: 50, measured: 0), 18);
-      expect(count(estimate: 50, measured: 25), 36);
-      expect(count(estimate: 50, measured: 0.01), 900);
+    test('runLimit covers the viewport and cache at the design extent', () {
+      int limit(double estimate) => EndlessList.runLimit(
+        viewport: 400,
+        cacheExtent: 250,
+        estimatedItemExtent: estimate,
+      );
+      expect(limit(50), 18);
+      expect(limit(0), 900);
+      expect(limit(0.01), 900);
+    });
+
+    test('a list ends only after a full run of items under a pixel', () {
+      final extents = ItemExtents();
+      for (var i = 0; i < 6; i++) {
+        extents.record(i, i == 2 ? 30 : 0);
+      }
+      expect(EndlessList.endsAt(2, extents, 3), isFalse);
+      expect(EndlessList.endsAt(5, extents, 3), isFalse);
+      expect(EndlessList.endsAt(6, extents, 3), isTrue);
+      expect(EndlessList.endsAt(6, extents, 4), isFalse);
+      extents.forget(4);
+      expect(EndlessList.endsAt(6, extents, 3), isFalse);
     });
 
     forEachLayout('zero-height items', (tester, screen, host) async {
@@ -687,6 +697,148 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(built(tester), lessThanOrEqualTo(3));
+    });
+
+    forEachLayout('long scrolls keep only the viewport and cache built', (
+      tester,
+      screen,
+      host,
+    ) async {
+      for (final int? count in [null, 1000]) {
+        await pump(tester, screen, host, list(itemCount: count), [
+          rect('item', 'list'),
+        ]);
+        await tester.pumpAndSettle();
+        final double viewport = viewportOf(screen, host, 400);
+        final TestGesture gesture = await tester.startGesture(
+          tester.getCenter(find.byType(ListView)),
+        );
+        for (var i = 0; i < 200; i++) {
+          await gesture.moveBy(const Offset(0, -50));
+          await tester.pump();
+        }
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        // 10000 px down: the items on screen and in the 250 px cache on
+        // each side, plus one partly covered item at each edge.
+        expect(
+          built(tester),
+          lessThanOrEqualTo((viewport + 2 * 250) / 50 + 2),
+          reason: 'itemCount $count',
+        );
+        expect(
+          tester
+              .widget<IndexedItemProvider>(
+                find.byType(IndexedItemProvider).first,
+              )
+              .item
+              .index,
+          greaterThan(150),
+        );
+        await tester.pumpWidget(const SizedBox());
+      }
+    });
+
+    testWidgets('an item keeps alive once the user changed a node in it', (
+      tester,
+    ) async {
+      final codelesslyContext = CodelesslyContext.empty();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ListView.builder(
+            itemCount: 200,
+            itemBuilder: (context, index) => NodeStateProviderWidget(
+              key: ValueKey(index),
+              node: rect('item', kRootNode),
+              codelesslyContext: codelesslyContext,
+              child: Builder(
+                builder: (context) => SizedBox(
+                  height: 50,
+                  child: Row(
+                    children: [
+                      Text('item $index'),
+                      TextButton(
+                        onPressed: () =>
+                            NodeStateProvider.setState(context, 'typed $index'),
+                        child: Text('change $index'),
+                      ),
+                      TextButton(
+                        onPressed: () => NodeStateProvider.setState(
+                          context,
+                          'built $index',
+                          byUser: false,
+                        ),
+                        child: Text('build $index'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('change 1'));
+      await tester.tap(find.text('build 2'));
+      // Let the ink splashes, which keep their item alive, finish.
+      await tester.pumpAndSettle();
+      tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position
+          .jumpTo(5000);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      // The changed item stays (offstage); the others are disposed.
+      expect(find.text('item 1', skipOffstage: false), findsOneWidget);
+      expect(find.text('item 2', skipOffstage: false), findsNothing);
+      expect(find.text('item 0', skipOffstage: false), findsNothing);
+      expect(
+        tester
+            .widget<NodeStateProvider>(
+              find.ancestor(
+                of: find.text('item 1', skipOffstage: false),
+                matching: find.byType(NodeStateProvider, skipOffstage: false),
+              ),
+            )
+            .state,
+        'typed 1',
+      );
+    });
+
+    forEachLayout('a long single-frame jump does not end an endless list', (
+      tester,
+      screen,
+      host,
+    ) async {
+      await pump(tester, screen, host, list(itemCount: null), [
+        rect('item', 'list'),
+      ]);
+      await tester.pumpAndSettle();
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable).last)
+          .position;
+      for (final double jump in [600.0, 1500.0, 4000.0]) {
+        final double from = position.pixels;
+        position.jumpTo(from + jump);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        expect(position.pixels, from + jump, reason: 'jump $jump');
+        expect(position.maxScrollExtent, greaterThan(position.pixels));
+      }
+      // Dragging further a long way in one frame still scrolls the list.
+      final double from = position.pixels;
+      await tester.dragFrom(
+        tester.getCenter(find.byType(ListView)),
+        const Offset(0, -2000),
+      );
+      await tester.pump();
+      expect(position.pixels, greaterThan(from + 1000));
+      expect(position.maxScrollExtent, greaterThan(position.pixels));
+      expect(
+        built(tester),
+        lessThanOrEqualTo((viewportOf(screen, host, 400) + 500) / 50 + 2),
+      );
     });
 
     forEachLayout('list with a zero item extent', (tester, screen, host) async {
