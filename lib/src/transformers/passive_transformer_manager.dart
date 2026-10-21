@@ -296,17 +296,18 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     // Traverse through all the multi-variables that the node properties are attached
     // to.
-    // Text written with inline `${...}` paths listens to them too, so text
-    // stays live whether or not its multipleVariables were filled in.
+    // Text written with inline `${...}` paths or formulas (a text's
+    // characters, a button's label, ...) listens to them too, so it stays
+    // live whether or not its multipleVariables were filled in.
     final Set<String> multiplePaths = {
       ...node.multipleVariables.values.expand((path) => path),
-      if (node is TextNode)
+      for (final String template in inlineTextTemplatesOf(node)) ...{
         ...variablePathRegex
-            .allMatches(node.characters)
+            .allMatches(template)
             .map((match) => match.namedGroup('value'))
             .nonNulls,
-      if (node is TextNode)
-        ...FormulaEvaluator.referencedPathsInText(node.characters),
+        ...FormulaEvaluator.referencedPathsInText(template),
+      },
     };
     for (final String variablePath in multiplePaths) {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
@@ -502,3 +503,19 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
   @override
   bool get wantKeepAlive => true;
 }
+
+/// The text of [node] that its widget shows after substituting inline
+/// `${...}` variable paths and formulas: a text's characters and the labels
+/// of buttons, chips, badges, tabs and segments. The widget of [node] listens
+/// to every path these read, so it rebuilds when one of them changes.
+List<String> inlineTextTemplatesOf(BaseNode node) => switch (node) {
+  TextNode() => [node.characters],
+  ButtonNode() => [node.properties.label],
+  ChipNode() => [node.properties.label],
+  BadgeNode() => [node.properties.label],
+  TabBarNode() => [for (final tab in node.properties.tabs) tab.label],
+  SegmentedButtonNode() => [
+    for (final segment in node.properties.segments) segment.label,
+  ],
+  _ => const [],
+};
