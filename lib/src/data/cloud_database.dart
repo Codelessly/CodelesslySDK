@@ -553,15 +553,17 @@ class FirestoreCloudDatabase extends CloudDatabase {
         );
         if (!firstSnapshot.isCompleted) firstSnapshot.complete();
       },
-      onError: (error) {
+      onError: (Object error) {
+        final String message = describeCloudError(error);
         DebugLogger.instance.printInfo(
-          'Error loading document from cloud storage: $path/$documentId',
+          'Error loading document from cloud storage: $path/$documentId: '
+          '$message',
           name: name,
         );
         // Set the variable with error state.
         variable.set(
           variable.value.copyWith(
-            value: CloudDatabaseVariableUtils.error(error.toString()),
+            value: CloudDatabaseVariableUtils.error(message),
           ),
         );
         if (!firstSnapshot.isCompleted) firstSnapshot.complete();
@@ -596,16 +598,12 @@ class FirestoreCloudDatabase extends CloudDatabase {
   }) {
     final Completer<void> firstSnapshot = Completer<void>();
 
-    // Get doc reference.
-    final collectionRef = getCollectionPath(path);
-
     // Owner-only collections only return the signed-in user's documents.
-    final Query<Map<String, dynamic>>? allowedRef = rules.filterQuery(
-      collectionRef,
+    final List<CloudWhereFilter>? readFilters = rules.readFilters(
       path,
       currentUserId(),
     );
-    if (allowedRef == null) {
+    if (readFilters == null) {
       variable.set(
         variable.value.copyWith(
           value: CloudDatabaseVariableUtils.success(<Map<String, dynamic>>[]),
@@ -614,78 +612,124 @@ class FirestoreCloudDatabase extends CloudDatabase {
       return Future<void>.value();
     }
 
-    final Stream<QuerySnapshot<Map<String, dynamic>>> stream;
-    // build query if required
-    if (whereFilters.isNotEmpty ||
-        orderByOperations.isNotEmpty ||
-        limit != null) {
-      final query = constructQueryFromRef(
-        allowedRef,
-        whereFilters: whereFilters,
-        orderByOperations: orderByOperations,
-        limit: limit,
-        scopedValues: scopedValues,
-        nullSubstitutionMode: nullSubstitutionMode,
-      );
-      stream = query.snapshots();
-    } else {
-      // Stream document.
-      stream = allowedRef.snapshots();
-    }
-
-    // Listen to the stream and update the variable.
-    final subscription = stream.listen(
-      (snapshot) {
-        StatTracker.instance.track(
-          StatType.read,
-          'cloudDatabase/streamCollectionToVariable',
-        );
-
-        final docs = snapshot.docs
-            .map((doc) => sanitizeCloudDataForUse(doc.data(), docId: doc.id))
-            .toList();
-        DebugLogger.instance.printInfo(
-          'Document stream update from cloud storage: $path',
-          name: name,
-        );
-        DebugLogger.instance.printInfo(
-          'Updating variable ${variable.value.name} with success state.',
-          name: name,
-        );
-        // Set the variable with success state. The chain waiting on the
-        // first snapshot continues even if a listener of the variable throws.
-        try {
-          variable.set(
-            variable.value.copyWith(
-              value: CloudDatabaseVariableUtils.success(docs),
-            ),
-          );
-        } catch (error, stackTrace) {
-          DebugLogger.instance.printInfo(
-            'Listener of ${variable.value.name} failed: $error\n$stackTrace',
-            name: name,
-          );
-        } finally {
-          if (!firstSnapshot.isCompleted) firstSnapshot.complete();
-        }
-      },
-      onError: (error) {
-        DebugLogger.instance.printInfo(
-          'Error loading document from cloud storage: $path',
-          name: name,
-        );
-        // Set the variable with error state.
-        variable.set(
-          variable.value.copyWith(
-            value: CloudDatabaseVariableUtils.error(error.toString()),
-          ),
-        );
-        if (!firstSnapshot.isCompleted) firstSnapshot.complete();
-      },
+    final CloudQuery query = resolveCloudQuery(
+      baseFilters: readFilters,
+      whereFilters: whereFilters,
+      orderByOperations: orderByOperations,
+      limit: limit,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: nullSubstitutionMode,
     );
 
-    _replaceSubscription(variable, subscription);
+    _listenToQuery(
+      path,
+      getCollectionPath(path),
+      query,
+      variable,
+      firstSnapshot,
+    );
     return firstSnapshot.future;
+  }
+
+  /// Streams [query] on [ref] into [variable]. Queries that need a
+  /// composite index are planned to run without one up front (see
+  /// [CloudQuery.plan]); if Firestore still reports a missing index, the
+  /// query reruns once with [forceClient], so Firestore only gets its `==`
+  /// filters.
+  void _listenToQuery(
+    String path,
+    CollectionReference<Map<String, dynamic>> ref,
+    CloudQuery query,
+    Observable<VariableData> variable,
+    Completer<void> firstSnapshot, {
+    bool forceClient = false,
+  }) {
+    final CloudQueryPlan plan = query.plan(forceClient: forceClient);
+    if (plan.runsOnClient) {
+      DebugLogger.instance.printInfo(
+        'Query on $path needs a composite index; running $plan',
+        name: name,
+      );
+    }
+
+    final subscription = plan
+        .applyTo(ref)
+        .snapshots()
+        .listen(
+          (snapshot) {
+            StatTracker.instance.track(
+              StatType.read,
+              'cloudDatabase/streamCollectionToVariable',
+            );
+
+            final docs = plan
+                .finish(
+                  snapshot.docs,
+                  data: (doc) => doc.data(),
+                  id: (doc) => doc.id,
+                )
+                .map(
+                  (doc) => sanitizeCloudDataForUse(doc.data(), docId: doc.id),
+                )
+                .toList();
+            DebugLogger.instance.printInfo(
+              'Document stream update from cloud storage: $path',
+              name: name,
+            );
+            DebugLogger.instance.printInfo(
+              'Updating variable ${variable.value.name} with success state.',
+              name: name,
+            );
+            // Set the variable with success state. The chain waiting on the
+            // first snapshot continues even if a listener of the variable throws.
+            try {
+              variable.set(
+                variable.value.copyWith(
+                  value: CloudDatabaseVariableUtils.success(docs),
+                ),
+              );
+            } catch (error, stackTrace) {
+              DebugLogger.instance.printInfo(
+                'Listener of ${variable.value.name} failed: $error\n$stackTrace',
+                name: name,
+              );
+            } finally {
+              if (!firstSnapshot.isCompleted) firstSnapshot.complete();
+            }
+          },
+          onError: (Object error) {
+            final String message = describeCloudError(error);
+            if (!forceClient && isMissingIndexError(error)) {
+              DebugLogger.instance.printInfo(
+                'Query on $path needs an index Firestore does not have; '
+                'rerunning it in the app. $message',
+                name: name,
+              );
+              _listenToQuery(
+                path,
+                ref,
+                query,
+                variable,
+                firstSnapshot,
+                forceClient: true,
+              );
+              return;
+            }
+            DebugLogger.instance.printInfo(
+              'Error loading documents from cloud storage: $path: $message',
+              name: name,
+            );
+            // Set the variable with error state.
+            variable.set(
+              variable.value.copyWith(
+                value: CloudDatabaseVariableUtils.error(message),
+              ),
+            );
+            if (!firstSnapshot.isCompleted) firstSnapshot.complete();
+          },
+        );
+
+    _replaceSubscription(variable, subscription);
   }
 }
 

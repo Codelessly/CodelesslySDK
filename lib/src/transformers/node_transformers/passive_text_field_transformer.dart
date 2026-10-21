@@ -5,6 +5,28 @@ import 'package:flutter/services.dart';
 import '../../../codelessly_sdk.dart';
 import '../utils/node_state_provider.dart';
 
+/// Resolves a text field's line limits into values [TextField] accepts.
+///
+/// - A field that [expands] fills its height, so it has no line limits.
+/// - A limit below 1 means no limit (null), as the editor's panel writes 0
+///   for a cleared value.
+/// - A null [maxLines] is unlimited: the field grows with its content,
+///   starting at [minLines].
+/// - [minLines] above [maxLines] raises [maxLines] to [minLines], as the
+///   editor's panel does when min lines is set above max lines, so the field
+///   is never shorter than its minimum.
+(int? maxLines, int? minLines) resolveTextFieldLines({
+  required int? maxLines,
+  required int? minLines,
+  bool expands = false,
+}) {
+  if (expands) return (null, null);
+  int? max = maxLines != null && maxLines >= 1 ? maxLines : null;
+  final int? min = minLines != null && minLines >= 1 ? minLines : null;
+  if (max != null && min != null && min > max) max = min;
+  return (max, min);
+}
+
 class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
   PassiveTextFieldTransformer(super.getNode, super.manager);
 
@@ -288,6 +310,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         !widget.settings.isPreview &&
         (widget.autofocus ?? properties.autoFocus);
 
+    final (int? maxLines, int? minLines) = resolveTextFieldLines(
+      maxLines: properties.maxLines,
+      minLines: properties.minLines,
+      expands: !widget.node.isVerticalWrap,
+    );
+
     Widget field = TextFormField(
       focusNode: focusNode,
       autocorrect: properties.autoCorrect,
@@ -295,10 +323,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       enableInteractiveSelection: properties.enableInteractiveSelection,
       enabled: enabled,
       controller: controller,
-      obscureText:
-          widget.node.properties.maxLines == 1 &&
-          widget.node.isVerticalWrap &&
-          obscureText,
+      obscureText: maxLines == 1 && obscureText,
       readOnly: readOnly,
       showCursor: showCursor,
       keyboardType: keyboardType,
@@ -325,12 +350,8 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
         ?properties.formatter.toFlutterFormatter(),
       ],
-      maxLines: widget.node.properties.maxLines.orNullIf(
-        !widget.node.isVerticalWrap,
-      ),
-      minLines: widget.node.properties.minLines.orNullIf(
-        !widget.node.isVerticalWrap,
-      ),
+      maxLines: maxLines,
+      minLines: minLines,
       expands: !widget.node.isVerticalWrap,
       obscuringCharacter: widget.node.properties.obscuringCharacter,
       style: TextUtils.retrieveTextStyleFromProp(

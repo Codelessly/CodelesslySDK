@@ -122,7 +122,12 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
   @override
   Widget build(BuildContext context) {
     if (widget.node.children.isEmpty) {
-      return AdaptiveNodeBox(node: widget.node, child: const SizedBox());
+      return ViewportNodeBox(
+        node: widget.node,
+        scrollDirection: widget.node.scrollDirection,
+        canShrinkWrap: true,
+        builder: (context, _) => const SizedBox(),
+      );
     }
     final itemNode = widget.node.children.first;
 
@@ -138,9 +143,14 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
       itemCount = data?.length ?? widget.node.properties.itemCount;
     }
 
-    return AdaptiveNodeBox(
+    // A page view cannot size itself to its pages, so a wrapping fit, or an
+    // expanded one with nothing to fill, takes the design size; see
+    // [ViewportLayout].
+    return ViewportNodeBox(
       node: widget.node,
-      child: DraggableScrollConfiguration(
+      scrollDirection: widget.node.scrollDirection,
+      canShrinkWrap: false,
+      builder: (context, _) => DraggableScrollConfiguration(
         child: PageView.builder(
           itemCount: itemCount,
           physics: widget.node.physics.flutterScrollPhysics(
