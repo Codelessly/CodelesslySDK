@@ -65,11 +65,11 @@ void main() {
     expect(VariableSpan(variable: r'${auth.email}').text, 'Email');
   });
 
-  test('fixed-width nodes show a compact marker', () {
-    TextNode node(SizeFit fit) => TextNode(
+  test('fixed-width nodes show a compact marker only when needed', () {
+    TextNode node(SizeFit fit, {double width = 40}) => TextNode(
       id: 'text',
       name: 'Text',
-      basicBoxLocal: NodeBox(0, 0, 40, 20),
+      basicBoxLocal: NodeBox(0, 0, width, 20),
       horizontalFit: fit,
       characters: r'${shots}',
     );
@@ -79,6 +79,13 @@ void main() {
     );
     expect(
       VariablePreview.textFor(r'${shots}', node: node(SizeFit.shrinkWrap)),
+      'Shots',
+    );
+    expect(
+      VariablePreview.textFor(
+        r'${shots}',
+        node: node(SizeFit.fixed, width: 350),
+      ),
       'Shots',
     );
   });
