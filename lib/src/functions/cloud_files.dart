@@ -60,7 +60,7 @@ abstract final class CloudFiles {
     CloudFilesAction action, {
     required Future<void> Function(List<ActionModel> actions) runActions,
   }) async {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final Codelessly codelessly = context.read<Codelessly>();
     final String path = PropertyValueDelegate.substituteVariables(
       action.path,
@@ -160,7 +160,7 @@ abstract final class CloudFiles {
           name: name,
         );
 
-        if (action.actions.isEmpty || !context.mounted) continue;
+        if (action.actions.isEmpty) continue;
         await ActionChain.run(
           () => runActions(action.actions),
           result: {

@@ -149,13 +149,20 @@ class FunctionsRepository {
 
   /// Runs [actions] in order, like a trigger's reactions: blocking actions
   /// are awaited and a failure stops the rest by throwing.
+  ///
+  /// The actions keep running when [context] unmounts mid chain; see
+  /// [ActionChain.contextFor].
   static Future<void> runActions(
     BuildContext context,
     List<ActionModel> actions,
   ) async {
     for (final ActionModel action in actions) {
-      if (!context.mounted) return;
-      final FutureOr future = performAction(context, action);
+      // [context] may have unmounted while the previous action ran; the
+      // chain then runs on with another of its contexts.
+      // ignore: use_build_context_synchronously
+      final BuildContext? actionContext = _chainContext(context, action);
+      if (actionContext == null || !actionContext.mounted) return;
+      final FutureOr future = performAction(actionContext, action);
       if (action.nonBlocking) {
         if (future is Future) unawaited(future.then<void>((_) {}));
       } else {
@@ -171,7 +178,9 @@ class FunctionsRepository {
   ) async {
     final bool matches =
         action.expression.accept<bool>(
-          ConditionEvaluator<Object>(scopedValues: ScopedValues.of(context)),
+          ConditionEvaluator<Object>(
+            scopedValues: ActionChain.scopedValuesOf(context),
+          ),
         ) ==
         true;
     DebugLogger.instance.printInfo(
@@ -207,7 +216,7 @@ class FunctionsRepository {
     BuildContext context,
     ForEachAction action,
   ) async {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final String path = action.items.trim();
     final Object? value = path.isEmpty
         ? null
@@ -228,7 +237,6 @@ class FunctionsRepository {
     }
     final List snapshot = List.of(items);
     for (int index = 0; index < snapshot.length; index++) {
-      if (!context.mounted) break;
       await ActionChain.run(
         () => runActions(context, action.actions),
         result: {'item': snapshot[index], 'index': index},
@@ -286,7 +294,7 @@ class FunctionsRepository {
       params[name] = paramValue;
     }
 
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
 
     return makeApiRequest(
       context: context,
@@ -376,7 +384,7 @@ class FunctionsRepository {
     ScopedValues? scopedValues,
   }) async {
     final ScopedValues effectiveScopedValues =
-        scopedValues ?? ScopedValues.of(context);
+        scopedValues ?? ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(
       action.params,
       effectiveScopedValues,
@@ -485,7 +493,7 @@ class FunctionsRepository {
     BuildContext context,
     ShowDialogAction action,
   ) async {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(action.params, scopedValues);
 
     DebugLogger.instance.printInfo(
@@ -551,7 +559,7 @@ class FunctionsRepository {
     final url = PropertyValueDelegate.substituteVariables(
       action.url,
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
-      scopedValues: ScopedValues.of(context),
+      scopedValues: ActionChain.scopedValuesOf(context),
     ).trim();
     openLink(url);
   }
@@ -1021,7 +1029,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     SetVariableAction action, {
     bool notify = true,
   }) {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final CodelesslyContext codelesslyContext = context
         .read<CodelesslyContext>();
     final variableNotifier = codelesslyContext.findVariableByName(
@@ -1201,8 +1209,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     if (filteredReactions.isEmpty) return false;
 
+    // The chain captures the trigger's scope and host now, so its actions
+    // read the item that was tapped and still run if the row unmounts.
     return ActionChain.run(
       () => _runReactions(context, filteredReactions, value),
+      context: context,
     );
   }
 
@@ -1212,11 +1223,18 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     dynamic value,
   ) async {
     for (final reaction in filteredReactions) {
-      if (!context.mounted) continue;
+      // [context] may have unmounted while the previous action ran; the
+      // chain then runs on with another of its contexts.
+      final BuildContext? actionContext = _chainContext(
+        // ignore: use_build_context_synchronously
+        context,
+        reaction.action,
+      );
+      if (actionContext == null || !actionContext.mounted) return true;
       final FutureOr future;
       try {
         future = FunctionsRepository.performAction(
-          context,
+          actionContext,
           reaction.action,
           internalValue: value,
         );
@@ -1254,6 +1272,23 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     return true;
   }
 
+  /// The mounted context to run [action] of the current chain with (see
+  /// [ActionChain.contextFor]), or null after reporting that the chain
+  /// stopped because every context it could use has unmounted.
+  static BuildContext? _chainContext(BuildContext context, ActionModel action) {
+    final BuildContext? actionContext = ActionChain.contextFor(context);
+    if (actionContext == null) {
+      ErrorLogger.instance.captureException(
+        'Action chain detached',
+        message:
+            'Action ${action.type.name} and the ones after it did not run: '
+            'the screen that started them is gone.',
+        type: 'action_chain_detached',
+      );
+    }
+    return actionContext;
+  }
+
   static void _reportActionError(
     Reaction reaction,
     Object error,
@@ -1273,7 +1308,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     BuildContext context,
     CallFunctionAction action,
   ) {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final CodelesslyContext codelesslyContext = context
         .read<CodelesslyContext>();
     final CodelesslyFunction? function =
@@ -1301,7 +1336,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     BuildContext context,
     SetStorageAction action,
   ) async {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     return await switch (action.operation) {
       StorageOperation.addOrUpdate => _updateStorage(action, scopedValues),
       StorageOperation.remove => _removeFromStorage(action, scopedValues),
@@ -1599,9 +1634,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     BuildContext context,
     SetCloudStorageAction action,
   ) async {
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     await awaitCloudDatabase(context);
-    if (!context.mounted) return false;
-    final ScopedValues scopedValues = ScopedValues.of(context);
     return await switch (action.subAction) {
       AddDocumentSubAction addDocumentSubAction => addDocumentToCloud(
         addDocumentSubAction,
@@ -1904,7 +1938,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     BuildContext context,
     LoadFromCloudStorageAction action,
   ) async {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
 
     final evaluatedPath = PropertyValueDelegate.substituteVariables(
       action.path,
