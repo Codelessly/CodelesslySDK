@@ -267,6 +267,63 @@ void main() {
     expect(card.left / (390 - card.right), closeTo(1000 / 40, 0.01));
   });
 
+  for (final screen in screens) {
+    testWidgets('children pinned top and bottom reach both pins at $screen, '
+        'whatever their stored height', (tester) async {
+      // A shell designed taller than any screen; the stored heights do not
+      // satisfy the pins (1173 and 1000 instead of 1319 and 1303).
+      final drawer = rect(
+        'drawer',
+        NodeBox(0, 0, 300, 1173),
+        mode: PositioningMode.pin,
+        pins: const EdgePinsModel(left: 0, top: 0, right: null, bottom: 0),
+      );
+      final sheet = rect(
+        'sheet',
+        NodeBox(82, 8, 300, 1000),
+        mode: PositioningMode.pin,
+        pins: const EdgePinsModel(left: null, top: 8, right: 8, bottom: 8),
+      );
+      final root = frame('frame', NodeBox(0, 0, 390, 1319), [drawer, sheet]);
+      final rects = await pump(tester, root, [drawer, sheet], screen: screen);
+      expect(rects['drawer'], Rect.fromLTWH(0, 0, 300, screen.height));
+      expect(
+        rects['sheet'],
+        Rect.fromLTRB(
+          screen.width - 308,
+          8,
+          screen.width - 8,
+          screen.height - 8,
+        ),
+      );
+    });
+  }
+
+  testWidgets('pins give way to a min constraint, in proportion', (
+    tester,
+  ) async {
+    final child = RectangleNode(
+      id: 'min',
+      name: 'min',
+      basicBoxLocal: NodeBox(100, 0, 200, 50),
+      edgePins: const EdgePinsModel(
+        left: 100,
+        top: 0,
+        right: 300,
+        bottom: null,
+      ),
+      positioningMode: PositioningMode.pin,
+      constraints: const BoxConstraintsModel(minWidth: 150),
+    )..parentID = 'frame';
+    final root = frame('frame', NodeBox(0, 0, 600, 300), [child]);
+    final rects = await pump(tester, root, [
+      child,
+    ], screen: const Size(390, 844));
+    // 390 - 400 of pins leaves nothing: the child keeps its 150 minimum and
+    // the pins split the other 240 as 100:300.
+    expect(rects['min'], const Rect.fromLTWH(60, 0, 150, 50));
+  });
+
   testWidgets('a left-pinned child wider than the screen is kept inside', (
     tester,
   ) async {
