@@ -67,6 +67,10 @@ class FreeformAxisPlacement {
   /// Whether the child expands on this axis (needs a bounded slot).
   final bool expands;
 
+  /// The smallest outer extent the child may get when stretched between its
+  /// pins (its min constraint plus margin).
+  final double minSize;
+
   /// Whether the child's content can need more than [size] at runtime (text
   /// that reflows). Along a scroll axis ([clamp] false) such a child gets
   /// [size] only as a minimum, so the content grows and stays reachable.
@@ -82,6 +86,7 @@ class FreeformAxisPlacement {
     this.clamp = true,
     this.expands = false,
     this.growsWithContent = false,
+    this.minSize = 0,
   });
 
   /// Distance from the child's outer end edge to the container's inner end
@@ -102,24 +107,24 @@ class FreeformAxisPlacement {
   /// The size and offset of a [FreeformAxisMode.stretch] child in a container
   /// of runtime extent [s].
   ///
-  /// The pins are kept as long as the container is at least as large as at
-  /// design size, which is exactly the editor's chained sizing. When the
-  /// container is smaller, the child keeps at least its design share of the
-  /// container and the pins give up the rest in proportion, so the child
-  /// never collapses to zero (Flutter would clamp it to 0 once the pins add
-  /// up to more than the container).
+  /// The child spans the container minus its pins, exactly the editor's
+  /// chained sizing, whatever size it was stored with. Only when that leaves
+  /// less than the child's minimum ([minSize], or nothing at all) do the pins
+  /// give way, in proportion to each other, so the child never collapses to
+  /// zero (Flutter would clamp it to 0 once the pins add up to more than the
+  /// container). With no minimum it then keeps its design share of the
+  /// container.
   (double offset, double size) stretchIn(double s) {
     final double l = start;
     final double r = end;
-    double size = s - l - r;
-    if (l >= 0 && r >= 0 && l + r > 0 && parentExtent > 0) {
-      final double minSize = math.min(extent, parentExtent) * s / parentExtent;
-      if (size < minSize) {
-        size = minSize;
-        return ((s - size) * l / (l + r), size);
-      }
-    }
-    return (l, math.max(0, size));
+    final double base = s - l - r;
+    if (base > 0 && base >= minSize) return (l, base);
+    if (l < 0 || r < 0 || l + r <= 0) return (l, math.max(0, base));
+    double size = minSize > 0
+        ? minSize
+        : (parentExtent > 0 ? math.max(0, extent) * s / parentExtent : 0);
+    size = math.min(math.max(size, base), s);
+    return ((s - size) * l / (l + r), size);
   }
 
   /// The share of the free space the child sat at for
@@ -167,7 +172,7 @@ class FreeformAxisPlacement {
         final double v = s ?? extent;
         return (v, v);
       case FreeformAxisMode.stretch:
-        final double v = s == null ? extent : stretchIn(s).$2;
+        final double v = s == null ? math.max(0, extent) : stretchIn(s).$2;
         return (v, v);
       case FreeformAxisMode.align:
         final double max = s ?? incomingMax;
@@ -230,7 +235,8 @@ class FreeformAxisPlacement {
       other.alignment == alignment &&
       other.clamp == clamp &&
       other.expands == expands &&
-      other.growsWithContent == growsWithContent;
+      other.growsWithContent == growsWithContent &&
+      other.minSize == minSize;
 
   @override
   int get hashCode => Object.hash(
@@ -243,6 +249,7 @@ class FreeformAxisPlacement {
     clamp,
     expands,
     growsWithContent,
+    minSize,
   );
 
   @override
