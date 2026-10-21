@@ -54,21 +54,25 @@ abstract final class VariablePreview {
     // only when it would not fit.
     if (node != null &&
         node.horizontalFit != SizeFit.shrinkWrap &&
-        !fitsWidth(placeholder, node.basicBoxLocal.width, style)) {
+        !fitsWidth(placeholder, node.innerBoxLocal.width, style)) {
       return '…';
     }
     return placeholder;
   }
 
-  /// Whether [text] fits on one line within [width] in [style].
+  /// Whether [text] fits on one line within [width] in [style], leaving
+  /// room for glyphs such as serifs and italics that overhang their advance
+  /// width, and for a font that isn't loaded yet measuring narrower.
   static bool fitsWidth(String text, double width, TextStyle? style) {
-    if (width <= 0) return false;
+    final TextStyle effective = style ?? const TextStyle(fontSize: 14);
+    final double margin = (effective.fontSize ?? 14) * 0.25;
+    if (width - margin <= 0) return false;
     final TextPainter painter = TextPainter(
-      text: TextSpan(text: text, style: style ?? const TextStyle(fontSize: 14)),
+      text: TextSpan(text: text, style: effective),
       textDirection: TextDirection.ltr,
       maxLines: 1,
     )..layout();
-    final bool fits = painter.width <= width + 0.5;
+    final bool fits = painter.width <= width - margin;
     painter.dispose();
     return fits;
   }
