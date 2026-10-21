@@ -327,53 +327,55 @@ bool subtreeBlocksIntrinsics(BaseNode node, GetNode getNode) {
   return false;
 }
 
-/// Builds an endless list with the number of items it may build so far.
-/// Every item must be wrapped in an [ItemExtentReporter] fed by [extents].
+/// Builds an endless list whose item builder returns null where the list
+/// ends. Every item must be wrapped in an [ItemExtentReporter] fed by
+/// [extents].
 typedef EndlessListBuilder = Widget Function(
   BuildContext context,
-  int itemCount,
+  bool Function(int index) endsAt,
   ItemExtents extents,
 );
 
-/// The main-axis extents of the items an [EndlessListCount] has laid out.
+/// The main-axis extents of the items of an [EndlessList] that are laid out
+/// now.
 class ItemExtents {
   final Map<int, double> _extents = {};
 
   /// Records that item [index] was laid out [extent] long.
   void record(int index, double extent) => _extents[index] = extent;
 
-  /// The average extent of the items laid out so far, or null before any.
-  double? get average => _extents.isEmpty
-      ? null
-      : _extents.values.fold<double>(0, (a, b) => a + b) / _extents.length;
+  /// Forgets item [index], which left the list.
+  void forget(int index) => _extents.remove(index);
+
+  /// The laid-out extent of item [index], or null when it is not laid out.
+  double? operator [](int index) => _extents[index];
 }
 
-/// Gives an endless list (no item count, no data) a finite item count that
-/// grows as the list scrolls.
+/// Bounds how many items an endless list (no item count, no data) builds,
+/// without giving it an end.
 ///
-/// A [ListView] without an item count keeps building items until they fill
-/// its viewport and cache area. Items that take no space (zero height, or
-/// hidden by a visibility formula) never fill it, so Flutter builds items
-/// without limit until it runs out of memory.
+/// A [ListView] without an item count builds items until they fill its
+/// viewport and cache area. Items that take no space (zero height, or hidden
+/// by a visibility formula) never fill it, so Flutter would build items
+/// without limit until it runs out of memory. Items of real size are already
+/// bounded by Flutter.
 ///
-/// The rule: an endless list builds as many items as cover the furthest
-/// point it has scrolled to plus its viewport and the cache area on both
-/// sides, at an assumed extent per item. That extent is the average extent
-/// of the items laid out so far when they have one, else
-/// [estimatedItemExtent] (the item's design extent), and never below one
-/// logical pixel. Items of real size therefore always cover the viewport and
-/// the count grows ahead of the user while they scroll, as the endless list
-/// did before. Items that take no space never extend the scroll range, so
-/// the count stops at a few viewports' worth of the design extent.
+/// The rule: the list ends before an item when the [runLimit] items before
+/// it were all laid out shorter than one logical pixel, where [runLimit] is
+/// the number of items of the item's design extent ([estimatedItemExtent])
+/// that cover the viewport and the cache area on both sides. The list keeps
+/// no item count, so its scroll extent stays unbounded while items take
+/// space: a scroll or jump of any length in one frame never reaches an end,
+/// and the decision is made during layout from the items being laid out, not
+/// a frame later.
 ///
 /// Fixed-extent layouts (a list with an item extent, grids, page views)
 /// already place items by arithmetic and stay bounded on their own.
-class EndlessListCount extends StatefulWidget {
+class EndlessList extends StatefulWidget {
   /// The list's scroll axis.
   final Axis axis;
 
-  /// The extent assumed for an item before any is measured, or when the
-  /// measured ones take no space.
+  /// The item's design extent.
   final double estimatedItemExtent;
 
   /// The list's cache extent before and after the viewport.
@@ -382,8 +384,8 @@ class EndlessListCount extends StatefulWidget {
   /// Builds the list.
   final EndlessListBuilder builder;
 
-  /// Creates an [EndlessListCount].
-  const EndlessListCount({
+  /// Creates an [EndlessList].
+  const EndlessList({
     super.key,
     required this.axis,
     required this.estimatedItemExtent,
@@ -391,50 +393,46 @@ class EndlessListCount extends StatefulWidget {
     required this.builder,
   });
 
-  /// The item count for a list that has reached [reach] (scroll offset plus
-  /// viewport) whose laid-out items average [measuredExtent].
-  static int countFor({
-    required double reach,
+  /// How many consecutive items narrower than one pixel end a list whose
+  /// viewport is [viewport] long.
+  static int runLimit({
+    required double viewport,
     required double cacheExtent,
     required double estimatedItemExtent,
-    double? measuredExtent,
   }) {
-    final double extent = measuredExtent != null && measuredExtent > 0
-        ? math.max(1.0, measuredExtent)
-        : math.max(1.0, estimatedItemExtent);
-    final double covered = math.max(0.0, reach) + 2 * math.max(0, cacheExtent);
-    return math.max(1, (covered / extent).ceil());
+    final double covered =
+        math.max(0.0, viewport) + 2 * math.max(0.0, cacheExtent);
+    return math.max(1, (covered / math.max(1.0, estimatedItemExtent)).ceil());
+  }
+
+  /// Whether a list with [extents] ends before item [index], given
+  /// [runLimit].
+  static bool endsAt(int index, ItemExtents extents, int runLimit) {
+    if (index < runLimit) return false;
+    for (int i = index - runLimit; i < index; i++) {
+      final double? extent = extents[i];
+      if (extent == null || extent >= 1) return false;
+    }
+    return true;
   }
 
   @override
-  State<EndlessListCount> createState() => _EndlessListCountState();
+  State<EndlessList> createState() => _EndlessListState();
 }
 
-class _EndlessListCountState extends State<EndlessListCount> {
+class _EndlessListState extends State<EndlessList> {
   final ItemExtents _extents = ItemExtents();
-  int _count = 0;
   double _viewport = 0;
-  double _scrolledReach = 0;
-  bool _checkScheduled = false;
 
-  int _target() => EndlessListCount.countFor(
-    reach: math.max(_viewport, _scrolledReach),
-    cacheExtent: widget.cacheExtent,
-    estimatedItemExtent: widget.estimatedItemExtent,
-    measuredExtent: _extents.average,
+  bool _endsAt(int index) => EndlessList.endsAt(
+    index,
+    _extents,
+    EndlessList.runLimit(
+      viewport: _viewport,
+      cacheExtent: widget.cacheExtent,
+      estimatedItemExtent: widget.estimatedItemExtent,
+    ),
   );
-
-  /// Grows the count after layout, once the laid-out items are measured.
-  void _scheduleCheck() {
-    if (_checkScheduled) return;
-    _checkScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkScheduled = false;
-      if (!mounted) return;
-      final int target = _target();
-      if (target > _count) setState(() => _count = target);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -444,22 +442,7 @@ class _EndlessListCountState extends State<EndlessListCount> {
             ? constraints.maxHeight
             : constraints.maxWidth;
         _viewport = max.isFinite ? max : 0;
-        _count = math.max(_count, _target());
-        _scheduleCheck();
-        return NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            final ScrollMetrics metrics = notification.metrics;
-            if (notification.depth == 0 && metrics.axis == widget.axis) {
-              _scrolledReach = math.max(
-                _scrolledReach,
-                metrics.pixels + metrics.viewportDimension,
-              );
-              _scheduleCheck();
-            }
-            return false;
-          },
-          child: widget.builder(context, _count, _extents),
-        );
+        return widget.builder(context, _endsAt, _extents);
       },
     );
   }
@@ -519,5 +502,11 @@ class RenderItemExtentReporter extends RenderProxyBox {
   void performLayout() {
     super.performLayout();
     extents.record(index, axis == Axis.vertical ? size.height : size.width);
+  }
+
+  @override
+  void detach() {
+    extents.forget(index);
+    super.detach();
   }
 }

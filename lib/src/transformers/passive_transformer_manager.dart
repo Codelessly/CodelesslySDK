@@ -445,8 +445,14 @@ class _ManagedListenableBuilderState extends State<ManagedListenableBuilder> {
   }
 }
 
-/// Makes it so [NodeStateProvider]'s state is kept around and not recreated
-/// on every widget rebuild.
+/// Provides a [NodeStateProvider] for [node] whose state lives as long as
+/// this widget.
+///
+/// In a lazy list (ListView, GridView, PageView) the item is kept alive
+/// after it scrolls away only once the user changed this node's state (see
+/// [NodeStateProvider.setState]); otherwise items are disposed outside the
+/// viewport and cache extent like Flutter's own list items, so the number
+/// built stays bounded however far the list scrolls.
 class NodeStateProviderWidget extends StatefulWidget {
   final Widget child;
   final BaseNode node;
@@ -471,6 +477,7 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
   @override
   void initState() {
     super.initState();
+    nodeState.onChangedByUser = updateKeepAlive;
     widget.codelesslyContext.nodeRebuildNotifier.addListener(
       onNodeNotification,
     );
@@ -478,6 +485,7 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
 
   @override
   void dispose() {
+    nodeState.onChangedByUser = null;
     widget.codelesslyContext.nodeRebuildNotifier.removeListener(
       onNodeNotification,
     );
@@ -501,7 +509,7 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
   }
 
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => nodeState.changedByUser;
 }
 
 /// The strings of [node] that can hold inline `${...}` variable paths and
