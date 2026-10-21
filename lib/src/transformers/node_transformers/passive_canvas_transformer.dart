@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
@@ -242,6 +243,25 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
             node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
         child: body,
       );
+    } else {
+      // Scaled to the width, the design can come out taller than the space
+      // it has (a 390 design on a 1440 screen is 3.7 times as tall). It
+      // scrolls then instead of being cut off below the fold. While it fits
+      // there is no scroll view, so nothing inside sees an extra Scrollable.
+      final Widget scaled = body;
+      body = LayoutBuilder(
+        builder: (context, constraints) {
+          final double height = autoScaleHeight(node, constraints.maxWidth);
+          if (!constraints.hasBoundedHeight ||
+              height <= constraints.maxHeight + _kScrollTolerance) {
+            return scaled;
+          }
+          return SingleChildScrollView(
+            key: ValueKey('Canvas overflow scroll ${node.id}'),
+            child: scaled,
+          );
+        },
+      );
     }
 
     final bool needsAScaffold =
@@ -337,18 +357,21 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     return PassiveCanvasWidget(
       node: node,
       settings: settings,
-      builder: (context) => switch (node.scaleMode) {
-        ScaleMode.responsive => _wrapInScaffoldForResponsive(
-          context: context,
-          node: node,
-          settings: settings,
-        ),
-        ScaleMode.autoScale => _wrapInScaffoldForAutoScale(
-          context: context,
-          node: node,
-          settings: settings,
-        ),
-      },
+      builder: (context) => CanvasViewport(
+        node: node,
+        child: switch (node.scaleMode) {
+          ScaleMode.responsive => _wrapInScaffoldForResponsive(
+            context: context,
+            node: node,
+            settings: settings,
+          ),
+          ScaleMode.autoScale => _wrapInScaffoldForAutoScale(
+            context: context,
+            node: node,
+            settings: settings,
+          ),
+        },
+      ),
     );
   }
 
@@ -368,6 +391,105 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       return fills[0].color?.toFlutterColor(opacity: fills[0].opacity);
     }
     return Colors.transparent;
+  }
+}
+
+/// How far (in logical pixels) a scaled autoScale design may exceed the
+/// viewport height before it scrolls, so rounding never adds a scroll view.
+const double _kScrollTolerance = 0.5;
+
+/// The height an autoScale [canvas] takes when scaled to [width]: its design
+/// height times the scale [BoxFit.fitWidth] applies, after the canvas's max
+/// width cap.
+double autoScaleHeight(CanvasNode canvas, double width) {
+  final double designWidth = canvas.outerBoxLocal.width;
+  final double designHeight = canvas.outerBoxLocal.height;
+  if (designWidth <= 0 || !width.isFinite) return designHeight;
+  final double? maxWidth = canvas.resolvedConstraints.maxWidth;
+  final double scaledWidth = maxWidth == null ? width : min(width, maxWidth);
+  return designHeight * scaledWidth / designWidth;
+}
+
+/// How a canvas sizes itself in the space its host gives it.
+enum CanvasSizing {
+  /// The canvas is the screen: it fills the width and height it is given.
+  /// Where an axis is unbounded it takes its design size on that axis (an
+  /// autoScale canvas takes its scaled height; a canvas that shrink-wraps
+  /// vertically takes its content's height).
+  fill,
+
+  /// The canvas keeps the size it was designed at, within the space it is
+  /// given. Used where the host only centers the layout and lets it choose
+  /// its size, such as a dialog.
+  design,
+}
+
+/// Sets the [CanvasSizing] of the canvases below it. Without one, canvases
+/// [CanvasSizing.fill].
+class CanvasSizingScope extends InheritedWidget {
+  final CanvasSizing sizing;
+
+  const CanvasSizingScope({
+    super.key,
+    required this.sizing,
+    required super.child,
+  });
+
+  static CanvasSizing of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<CanvasSizingScope>()?.sizing ??
+      CanvasSizing.fill;
+
+  @override
+  bool updateShouldNotify(CanvasSizingScope oldWidget) =>
+      sizing != oldWidget.sizing;
+}
+
+/// Gives a canvas the box it is laid out in, so its size never depends on
+/// whether the host's constraints are tight or loose.
+///
+/// The canvas's own fit is fixed by default, and a fixed box takes its design
+/// size under loose constraints (a Scaffold body, a Center, a Column): a 390
+/// canvas would render 390 wide at the top left of a 1440 screen. The
+/// editor treats the canvas as the screen, so with [CanvasSizing.fill] the
+/// canvas gets tight constraints of the full space on every bounded axis;
+/// on an unbounded axis it gets its design size (see [CanvasSizing.fill]).
+class CanvasViewport extends StatelessWidget {
+  final CanvasNode node;
+  final Widget child;
+
+  const CanvasViewport({super.key, required this.node, required this.child});
+
+  /// The canvas box for [constraints], per axis: null leaves that axis to
+  /// the canvas content.
+  static ({double width, double? height}) resolve(
+    CanvasNode node,
+    BoxConstraints constraints,
+  ) {
+    final double width = constraints.hasBoundedWidth
+        ? constraints.maxWidth
+        : node.basicBoxLocal.width;
+    final double? height;
+    if (constraints.hasBoundedHeight) {
+      height = constraints.maxHeight;
+    } else if (node.scaleMode == ScaleMode.autoScale) {
+      height = autoScaleHeight(node, width);
+    } else if (node.verticalFit == SizeFit.shrinkWrap) {
+      height = null;
+    } else {
+      height = node.basicBoxLocal.height;
+    }
+    return (width: width, height: height);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (CanvasSizingScope.of(context) == CanvasSizing.design) return child;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final box = resolve(node, constraints);
+        return SizedBox(width: box.width, height: box.height, child: child);
+      },
+    );
   }
 }
 
