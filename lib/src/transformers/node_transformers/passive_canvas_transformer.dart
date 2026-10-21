@@ -730,7 +730,10 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     // actions share one chain so `${result}` flows between them.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ActionChain.run(() => executeActionAt(0, onLoadActions));
+      ActionChain.run(
+        () => executeActionAt(0, onLoadActions),
+        context: context,
+      );
     });
   }
 
@@ -738,9 +741,13 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     if (index >= actions.length) return;
 
     final action = actions[index];
+    // The canvas can unmount while an action is awaited; the rest of the
+    // chain then runs with its host's context.
+    final BuildContext? actionContext = ActionChain.contextFor(context);
+    if (actionContext == null) return;
     // Notifies: the canvas has built by now, so widgets bound to a variable
     // an action sets (a form prefilled on load) must rebuild.
-    final future = FunctionsRepository.performAction(context, action);
+    final future = FunctionsRepository.performAction(actionContext, action);
 
     if (future is! Future || action.nonBlocking) {
       executeActionAt(index + 1, actions);
