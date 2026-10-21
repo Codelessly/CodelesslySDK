@@ -35,23 +35,19 @@ class AppToast {
     final String message = text(action.message);
     final String actionLabel = action.hasAction ? text(action.actionLabel) : '';
     final ResolvedFeedbackTheme theme = FeedbackTheme.of(context);
-    // The button's actions run in the chain that showed the toast: they read
-    // its captured scope and its `${result}` then (e.g. the id of the item an
-    // Undo restores), and run on its host if the trigger has unmounted.
-    final Zone chainZone = Zone.current;
-    final Object? chainResult = ActionChain.current?.result;
-
-    VoidCallback? onAction;
-    if (actionLabel.trim().isNotEmpty) {
-      onAction = () => chainZone.run(
-        () => unawaited(
-          ActionChain.run(
-            () => FunctionsRepository.runActions(context, action.actions),
-            result: chainResult,
-          ),
-        ),
-      );
-    }
+    // The button's actions run on the chain that showed the toast, whenever
+    // it is pressed: with its captured scope (the `${item}` of a row that has
+    // since left the list) and its `${result}` then (e.g. the id of the item
+    // an Undo restores), on the first of its hosts still mounted. See
+    // [ActionChain.defer].
+    final VoidCallback? onAction = actionLabel.trim().isEmpty
+        ? null
+        : ActionChain.defer(
+            context,
+            (context) =>
+                FunctionsRepository.runActions(context, action.actions),
+            label: 'The toast button "$actionLabel"',
+          );
 
     hide();
     late final OverlayEntry entry;
