@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../codelessly_sdk.dart';
+
 /// A widget that wraps a canvas widget and shows it in a dialog.
 class CodelesslyDialogWidget extends StatelessWidget {
   final WidgetBuilder builder;
@@ -13,6 +15,15 @@ class CodelesslyDialogWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // A dialog is centered and sized by its layout, so its canvas keeps its
+    // design size instead of filling the screen.
+    return CanvasSizingScope(
+      sizing: CanvasSizing.design,
+      child: Builder(builder: _buildDialog),
+    );
+  }
+
+  Widget _buildDialog(BuildContext context) {
     if (showCloseButton) {
       return Center(
         child: Material(
