@@ -1,5 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
@@ -20,16 +20,22 @@ class ScopedValues {
   /// The route params for this route/page for given context.
   late final Map<String, dynamic> routeParams;
 
-  /// The signed-in app user, as the `auth` variable sees it.
-  late final Map<String, dynamic>? appUser;
+  /// The signed-in app user, as the `auth` variable sees it. It is read
+  /// live from the Codelessly instance, so an action chain that holds on to
+  /// its scope sees a sign-in that an earlier action of the chain made.
+  Map<String, dynamic>? get appUser =>
+      _instanceRef?.target?.appUser.value ?? _appUser;
+
+  late final Map<String, dynamic>? _appUser;
 
   /// The size of the screen, which the `screen` variable describes.
   late final Size? screenSize;
 
   // private fields.
   late final WeakReference<CodelesslyContext>? _codelesslyContextRef;
-  late final WeakReference<LocalDatabase>? _localStorageRef;
-  late final WeakReference<CloudDatabase>? _cloudDatabaseRef;
+  // The Codelessly instance, read live: its cloud database can become
+  // ready, and its user sign in, after the scope was captured.
+  late final WeakReference<Codelessly>? _instanceRef;
   late final List<VariableData>? _variablesOverrides;
   late final Map<String, dynamic>? _dataOverrides;
   Map<String, VariableData>? _previewVariables;
@@ -38,10 +44,10 @@ class ScopedValues {
   CodelesslyContext? get codelesslyContext => _codelesslyContextRef?.target;
 
   /// Local storage instance for the relative Codelessly instance.
-  LocalDatabase? get localStorage => _localStorageRef?.target;
+  LocalDatabase? get localStorage => _instanceRef?.target?.localDatabase;
 
   /// Cloud storage instance for the relative Codelessly instance.
-  CloudDatabase? get cloudDatabase => _cloudDatabaseRef?.target;
+  CloudDatabase? get cloudDatabase => _instanceRef?.target?.cloudDatabase;
 
   /// Variable name -> Variable.
   Map<String, VariableData> get variables => {
@@ -64,14 +70,13 @@ class ScopedValues {
   /// Creates a new scoped values instance with empty values.
   ScopedValues.empty()
     : _codelesslyContextRef = null,
-      _localStorageRef = null,
-      _cloudDatabaseRef = null,
+      _instanceRef = null,
       _variablesOverrides = null,
       _dataOverrides = null,
       indexedItem = null,
       nodeState = null,
       routeParams = {},
-      appUser = null,
+      _appUser = null,
       screenSize = null;
 
   /// Creates scoped values for a design canvas, where [variables] (by name)
@@ -81,14 +86,13 @@ class ScopedValues {
     required Map<String, VariableData> variables,
     CodelesslyContext? codelesslyContext,
     this.indexedItem,
-    this.appUser,
+    this._appUser,
     this.screenSize,
     Map<String, dynamic>? data,
   }) : _codelesslyContextRef = codelesslyContext == null
            ? null
            : WeakReference(codelesslyContext),
-       _localStorageRef = null,
-       _cloudDatabaseRef = null,
+       _instanceRef = null,
        _variablesOverrides = null,
        _dataOverrides = data,
        _previewVariables = variables,
@@ -114,15 +118,7 @@ class ScopedValues {
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
         {};
     final instance = context.read<Codelessly?>();
-    appUser = instance?.appUser.value;
-    if (instance != null) {
-      _localStorageRef = WeakReference(instance.localDatabase);
-      _cloudDatabaseRef = instance.cloudDatabase == null
-          ? null
-          : WeakReference(instance.cloudDatabase!);
-    } else {
-      _localStorageRef = null;
-      _cloudDatabaseRef = null;
-    }
+    _appUser = null;
+    _instanceRef = instance == null ? null : WeakReference(instance);
   }
 }
