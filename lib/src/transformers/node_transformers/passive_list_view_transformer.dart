@@ -2,12 +2,12 @@ import 'dart:core';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../ui/cloud_query_builder.dart';
 import '../../ui/draggable_scroll_configuration.dart';
 
 class PassiveListViewTransformer extends NodeWidgetTransformer<ListViewNode> {
@@ -39,9 +39,9 @@ class PassiveListViewWidget extends StatelessWidget {
     required this.settings,
   });
 
-  /// The query for the node's collection, or null when the signed-out user
+  /// The collection and query of the node, or null when the signed-out user
   /// may not read any of it.
-  Query<Map<String, dynamic>>? constructQuery(
+  ({Query<Map<String, dynamic>> ref, CloudQuery query})? constructQuery(
     BuildContext context,
     Codelessly codelessly,
   ) {
@@ -50,36 +50,54 @@ class PassiveListViewWidget extends StatelessWidget {
 
     final String collectionPath = node.collectionPath ?? '';
 
-    Query<Map<String, dynamic>> query = codelessly.firebaseFirestore.collection(
+    final Query<Map<String, dynamic>>
+    ref = codelessly.firebaseFirestore.collection(
       '${source.rootDataCollection}/${codelessly.authManager.authData!.projectId}/$collectionPath',
     );
 
+    // Owner-only collections only return the signed-in user's documents.
     final CloudDatabase? database = codelessly.cloudDatabase;
-    if (database != null) {
-      final allowed = database.rules.filterQuery(
-        query,
-        collectionPath,
-        database.currentUserId(),
-      );
-      if (allowed == null) return null;
-      query = allowed;
-    }
+    final List<CloudWhereFilter>? readFilters = database == null
+        ? const []
+        : database.rules.readFilters(collectionPath, database.currentUserId());
+    if (readFilters == null) return null;
 
-    return constructQueryFromRef(
-      query,
-      whereFilters: node.whereFilters,
-      orderByOperations: node.orderByFilters,
-      scopedValues: ScopedValues.of(context),
-      nullSubstitutionMode: settings.nullSubstitutionMode,
+    return (
+      ref: ref,
+      query: resolveCloudQuery(
+        baseFilters: readFilters,
+        whereFilters: node.whereFilters,
+        orderByOperations: node.orderByFilters,
+        scopedValues: ScopedValues.of(context),
+        nullSubstitutionMode: settings.nullSubstitutionMode,
+      ),
     );
   }
+
+  /// Sizes the list by [ViewportLayout] around [builder].
+  Widget box(ViewportContentBuilder builder, {required bool canShrinkWrap}) =>
+      ViewportNodeBox(
+        node: node,
+        scrollDirection: node.scrollDirection,
+        canShrinkWrap: canShrinkWrap,
+        builder: builder,
+      );
+
+  /// Builds one item, placed as the editor lays it out; see [ListItemBox].
+  Widget buildItem(BaseNode item, BuildContext context) => ListItemBox(
+    item: item,
+    scrollDirection: node.scrollDirection,
+    itemExtent: node.properties.itemExtent,
+    child: manager.buildWidgetByID(item.id, context, settings: settings),
+  );
 
   @override
   Widget build(BuildContext context) {
     if (node.children.isEmpty) {
-      return AdaptiveNodeBox(node: node, child: const SizedBox());
+      return box(canShrinkWrap: true, (context, _) => const SizedBox());
     }
     final itemNode = node.children.first;
+    final BaseNode item = manager.getNode(itemNode);
 
     final bool useCloudDatabase = node.useCloudDatabase;
 
@@ -88,19 +106,28 @@ class PassiveListViewWidget extends StatelessWidget {
       final codelesslyController = context.read<CodelesslyWidgetController>();
 
       if (codelessly.authManager.authData == null) {
-        return codelesslyController.loadingBuilder?.call(context) ??
-            const Center(child: CircularProgressIndicator());
+        return box(
+          canShrinkWrap: true,
+          (context, _) =>
+              codelesslyController.loadingBuilder?.call(context) ??
+              const Center(child: CircularProgressIndicator()),
+        );
       }
 
       final query = constructQuery(context, codelessly);
       if (query == null) {
-        return AdaptiveNodeBox(node: node, child: const SizedBox.shrink());
+        return box(
+          canShrinkWrap: true,
+          (context, _) => const SizedBox.shrink(),
+        );
       }
 
-      return AdaptiveNodeBox(
-        node: node,
-        child: FirestoreQueryBuilder<Map<String, dynamic>>(
-          query: query,
+      // A loaded query always has a known length, so it can shrink-wrap.
+      return box(
+        canShrinkWrap: true,
+        (context, shrinkWrap) => CloudQueryBuilder(
+          ref: query.ref,
+          query: query.query,
           pageSize: node.limit ?? 20,
           builder: (context, snapshot, child) {
             reportQueryStatus(
@@ -124,11 +151,16 @@ class PassiveListViewWidget extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
+              final String message = describeCloudError(snapshot.error);
+              DebugLogger.instance.printInfo(
+                'Could not load ${node.collectionPath}: $message',
+                name: node.type,
+              );
               return codelesslyController.errorBuilder?.call(
                     context,
                     ErrorLog(
                       timestamp: DateTime.now(),
-                      message: snapshot.error?.toString() ?? 'Unknown error',
+                      message: message,
                       type: 'firestore_query_error',
                     ),
                   ) ??
@@ -141,9 +173,7 @@ class PassiveListViewWidget extends StatelessWidget {
             // Item Count always exists.
             return ListViewBuilder(
               primary: node.primary,
-              shrinkWrap: (node.scrollDirection == AxisC.horizontal
-                  ? node.isHorizontalWrap
-                  : node.isVerticalWrap),
+              shrinkWrap: shrinkWrap,
               itemCount: itemCount,
               padding: node.padding.flutterEdgeInsets,
               keyboardDismissBehavior:
@@ -181,11 +211,7 @@ class PassiveListViewWidget extends StatelessWidget {
                       // the IndexedItemProvider.
                       return KeyedSubtree(
                         key: ValueKey(index),
-                        child: manager.buildWidgetByID(
-                          itemNode,
-                          context,
-                          settings: settings,
-                        ),
+                        child: buildItem(item, context),
                       );
                     },
                   ),
@@ -211,27 +237,11 @@ class PassiveListViewWidget extends StatelessWidget {
       itemCount = data?.length ?? node.properties.itemCount;
     }
 
-    // If this ListView is inside another scrollable, Flutter will crash
-    // if shrinkWrap is false in order to enforce this ListView to take
-    // up its own space by itself since it will be inside an unbounded space.
-    // This statement remains true even if this inner ListView is wrapped with
-    // SizedBoxes and nested deeply inside other widgets, Flutter will crash
-    // regardless unless shrinkwrap is true.
-    // https://stackoverflow.com/a/54587532/4327834
-    final ScrollableState? parentScrollable = Scrollable.maybeOf(context);
-
-    // A list of a known length that wraps its content on the scroll axis
-    // sizes itself to its items, including one bound to a data variable.
-    final bool shrinkWrap = parentScrollable != null
-        ? true
-        : itemCount != null &&
-              (node.scrollDirection == AxisC.horizontal
-                  ? node.isHorizontalWrap
-                  : node.isVerticalWrap);
-
-    return AdaptiveNodeBox(
-      node: node,
-      child: ListViewBuilder(
+    // Nested in another scroll view, the list is bounded by its own fit or
+    // shrink-wraps; see [ViewportLayout].
+    return box(
+      canShrinkWrap: itemCount != null,
+      (context, shrinkWrap) => ListViewBuilder(
         primary: node.primary,
         shrinkWrap: shrinkWrap,
         itemCount: itemCount,
@@ -261,11 +271,7 @@ class PassiveListViewWidget extends StatelessWidget {
               // the IndexedItemProvider.
               return KeyedSubtree(
                 key: ValueKey(index),
-                child: manager.buildWidgetByID(
-                  itemNode,
-                  context,
-                  settings: settings,
-                ),
+                child: buildItem(item, context),
               );
             },
           ),

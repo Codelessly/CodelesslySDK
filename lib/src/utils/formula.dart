@@ -28,6 +28,11 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
 ///    length, if, plural, join, upper, lower, contains, where, without,
 ///    number, text, isEmpty and isNotEmpty. See [FormulaEvaluator.functions].
+///  - date functions: now, today, parseDate, formatDate, addMinutes, addHours,
+///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
+///    hour, minute and weekday. Dates are ISO 8601 text such as
+///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
+///    milliseconds or a Firestore timestamp.
 ///
 /// Null counts as 0 in arithmetic and as empty text when joining text. An
 /// invalid expression evaluates to null.
@@ -208,6 +213,63 @@ class FormulaEvaluator {
       'isNotEmpty(text or list)',
       'isNotEmpty(cart) → true',
     ),
+    FormulaFunctionDoc('now', 'now()', 'now() → 2026-10-21T14:30:00.000'),
+    FormulaFunctionDoc('today', 'today()', 'today() → 2026-10-21T00:00:00.000'),
+    FormulaFunctionDoc(
+      'parseDate',
+      'parseDate(text or millis)',
+      'parseDate("2026-10-21") → 2026-10-21T00:00:00.000',
+    ),
+    FormulaFunctionDoc(
+      'formatDate',
+      'formatDate(date, pattern)',
+      'formatDate(now(), "EEE, MMM d · h:mm a") → Wed, Oct 21 · 2:30 PM',
+    ),
+    FormulaFunctionDoc(
+      'addMinutes',
+      'addMinutes(date, minutes)',
+      'addMinutes(start, 90)',
+    ),
+    FormulaFunctionDoc(
+      'addHours',
+      'addHours(date, hours)',
+      'addHours(now(), 2)',
+    ),
+    FormulaFunctionDoc('addDays', 'addDays(date, days)', 'addDays(today(), 7)'),
+    FormulaFunctionDoc(
+      'addMonths',
+      'addMonths(date, months)',
+      'addMonths("2026-01-31", 1) → 2026-02-28T00:00:00.000',
+    ),
+    FormulaFunctionDoc(
+      'diffMinutes',
+      'diffMinutes(from, to)',
+      'diffMinutes(start, end) → 45',
+    ),
+    FormulaFunctionDoc(
+      'diffHours',
+      'diffHours(from, to)',
+      'diffHours(start, end) → 3',
+    ),
+    FormulaFunctionDoc(
+      'diffDays',
+      'diffDays(from, to)',
+      'diffDays(today(), dueDate) → 5',
+    ),
+    FormulaFunctionDoc('year', 'year(date)', 'year("2026-10-21") → 2026'),
+    FormulaFunctionDoc('month', 'month(date)', 'month("2026-10-21") → 10'),
+    FormulaFunctionDoc('day', 'day(date)', 'day("2026-10-21") → 21'),
+    FormulaFunctionDoc('hour', 'hour(date)', 'hour("2026-10-21T14:30") → 14'),
+    FormulaFunctionDoc(
+      'minute',
+      'minute(date)',
+      'minute("2026-10-21T14:30") → 30',
+    ),
+    FormulaFunctionDoc(
+      'weekday',
+      'weekday(date)',
+      'weekday("2026-10-21") → 3 (Monday is 1)',
+    ),
   ];
 }
 
@@ -329,6 +391,182 @@ Iterable<Object?> _values(Object? list, Object? field) {
   return list.map((item) => _member(item, field));
 }
 
+// ---------------------------------------------------------------------------
+// Dates
+// ---------------------------------------------------------------------------
+
+/// Reads [value] as a date: a [DateTime], ISO 8601 text, epoch milliseconds,
+/// a Firestore timestamp (anything with `toDate()`), or a timestamp written
+/// as JSON (`{seconds, nanoseconds}` or `{_seconds, _nanoseconds}`).
+DateTime? _toDate(Object? value) {
+  switch (value) {
+    case null:
+      return null;
+    case DateTime():
+      return value;
+    case num():
+      if (!value.isFinite) return null;
+      return DateTime.fromMillisecondsSinceEpoch(value.toInt());
+    case String():
+      final String text = value.trim();
+      if (text.isEmpty) return null;
+      final int? millis = int.tryParse(text);
+      if (millis != null && text.length > 8) {
+        return DateTime.fromMillisecondsSinceEpoch(millis);
+      }
+      return DateTime.tryParse(text);
+    case Map():
+      final Object? seconds = value['seconds'] ?? value['_seconds'];
+      if (seconds is! num) return null;
+      final Object? nanos = value['nanoseconds'] ?? value['_nanoseconds'];
+      return DateTime.fromMicrosecondsSinceEpoch(
+        (seconds * 1000000).toInt() + (nanos is num ? nanos ~/ 1000 : 0),
+      );
+  }
+  try {
+    final Object? date = (value as dynamic).toDate();
+    return date is DateTime ? date : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Writes [date] as ISO 8601 text, the form formulas pass dates around in.
+String? _dateText(DateTime? date) => date?.toIso8601String();
+
+/// [date] moved by calendar amounts, keeping its wall-clock time across
+/// daylight saving changes. Months clamp to the last day of the month, so
+/// Jan 31 plus one month is Feb 28 (or 29).
+DateTime? _shift(
+  Object? value, {
+  int months = 0,
+  int days = 0,
+  int hours = 0,
+  int minutes = 0,
+}) {
+  final DateTime? date = _toDate(value);
+  if (date == null) return null;
+  int day = date.day;
+  if (months != 0) {
+    final int lastDay = DateTime.utc(date.year, date.month + months + 1, 0).day;
+    if (day > lastDay) day = lastDay;
+  }
+  final DateTime Function(int, int, int, int, int, int, int, int) make =
+      date.isUtc ? DateTime.utc : DateTime.new;
+  return make(
+    date.year,
+    date.month + months,
+    day + days,
+    date.hour + hours,
+    date.minute + minutes,
+    date.second,
+    date.millisecond,
+    date.microsecond,
+  );
+}
+
+/// Whole calendar days from [from] to [to], ignoring the time of day.
+int? _diffDays(Object? from, Object? to) {
+  final DateTime? a = _toDate(from);
+  final DateTime? b = _toDate(to);
+  if (a == null || b == null) return null;
+  return DateTime.utc(
+    b.year,
+    b.month,
+    b.day,
+  ).difference(DateTime.utc(a.year, a.month, a.day)).inDays;
+}
+
+Duration? _difference(Object? from, Object? to) {
+  final DateTime? a = _toDate(from);
+  final DateTime? b = _toDate(to);
+  if (a == null || b == null) return null;
+  return b.difference(a);
+}
+
+int _intArg(Object? value) {
+  final num n = _num(value);
+  return n.isFinite ? n.toInt() : 0;
+}
+
+const List<String> _monthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+const List<String> _weekdayNames = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+];
+
+/// Formats [value] with a date [pattern] using the common ICU letters:
+/// `yyyy` `yy` year, `M` `MM` `MMM` `MMMM` month, `d` `dd` day, `EEE` `EEEE`
+/// weekday, `H` `HH` hour (0-23), `h` `hh` hour (1-12), `m` `mm` minute,
+/// `s` `ss` second, `a` AM/PM. Text in single quotes is kept as is (`''` is
+/// a quote) and any other character is copied. English names are used.
+String? _formatDate(Object? value, Object? pattern) {
+  final DateTime? date = _toDate(value);
+  if (date == null) return null;
+  final String format = pattern == null
+      ? 'yyyy-MM-dd'
+      : FormulaEvaluator.stringify(pattern);
+  final StringBuffer out = StringBuffer();
+  String pad(int n, int width) => n.toString().padLeft(width, '0');
+  int i = 0;
+  while (i < format.length) {
+    final String char = format[i];
+    if (char == "'") {
+      final int end = format.indexOf("'", i + 1);
+      if (end == i + 1) {
+        out.write("'");
+        i += 2;
+        continue;
+      }
+      out.write(format.substring(i + 1, end < 0 ? format.length : end));
+      i = end < 0 ? format.length : end + 1;
+      continue;
+    }
+    int count = 1;
+    while (i + count < format.length && format[i + count] == char) {
+      count++;
+    }
+    final int hour12 = date.hour % 12 == 0 ? 12 : date.hour % 12;
+    out.write(switch (char) {
+      'y' when count == 2 => pad(date.year % 100, 2),
+      'y' => pad(date.year, count),
+      'M' when count >= 4 => _monthNames[date.month - 1],
+      'M' when count == 3 => _monthNames[date.month - 1].substring(0, 3),
+      'M' => pad(date.month, count),
+      'd' => pad(date.day, count),
+      'E' when count >= 4 => _weekdayNames[date.weekday - 1],
+      'E' => _weekdayNames[date.weekday - 1].substring(0, 3),
+      'H' => pad(date.hour, count),
+      'h' => pad(hour12, count),
+      'm' => pad(date.minute, count),
+      's' => pad(date.second, count),
+      'a' => date.hour < 12 ? 'AM' : 'PM',
+      _ => char * count,
+    });
+    i += count;
+  }
+  return out.toString();
+}
+
 typedef _Function = Object? Function(List<Object?> args);
 
 Object? _arg(List<Object?> args, int index) =>
@@ -394,6 +632,28 @@ final Map<String, _Function> _functions = {
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
   'isNotEmpty': (a) => _truthy(_functions['length']!(a)),
+  'now': (a) => _dateText(DateTime.now()),
+  'today': (a) {
+    final DateTime now = DateTime.now();
+    return _dateText(DateTime(now.year, now.month, now.day));
+  },
+  'parseDate': (a) => _dateText(_toDate(_arg(a, 0))),
+  'formatDate': (a) => _formatDate(_arg(a, 0), _arg(a, 1)),
+  'addMinutes': (a) =>
+      _dateText(_shift(_arg(a, 0), minutes: _intArg(_arg(a, 1)))),
+  'addHours': (a) => _dateText(_shift(_arg(a, 0), hours: _intArg(_arg(a, 1)))),
+  'addDays': (a) => _dateText(_shift(_arg(a, 0), days: _intArg(_arg(a, 1)))),
+  'addMonths': (a) =>
+      _dateText(_shift(_arg(a, 0), months: _intArg(_arg(a, 1)))),
+  'diffMinutes': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inMinutes,
+  'diffHours': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inHours,
+  'diffDays': (a) => _diffDays(_arg(a, 0), _arg(a, 1)),
+  'year': (a) => _toDate(_arg(a, 0))?.year,
+  'month': (a) => _toDate(_arg(a, 0))?.month,
+  'day': (a) => _toDate(_arg(a, 0))?.day,
+  'hour': (a) => _toDate(_arg(a, 0))?.hour,
+  'minute': (a) => _toDate(_arg(a, 0))?.minute,
+  'weekday': (a) => _toDate(_arg(a, 0))?.weekday,
 };
 
 // ---------------------------------------------------------------------------

@@ -223,7 +223,12 @@ ButtonStyle createMasterButtonStyle(
       buttonStyle = TextButton.styleFrom(
         foregroundColor: labelColor,
         elevation: elevation ?? node.properties.elevation,
-        backgroundColor: buttonColor.toFlutterColor(),
+        // A text button has no fill, as Flutter's TextButton, unless a button
+        // color is set. An unset buttonColor reads as its default, black
+        // (the JSON omits it), so black means "not set" here.
+        backgroundColor: buttonColor == ColorRGBA.black
+            ? Colors.transparent
+            : buttonColor.toFlutterColor(),
         padding: node.padding.flutterEdgeInsets,
         visualDensity: VisualDensity.standard,
         textStyle: textStyle,

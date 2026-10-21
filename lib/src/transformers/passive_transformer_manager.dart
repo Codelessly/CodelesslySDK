@@ -296,17 +296,18 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     // Traverse through all the multi-variables that the node properties are attached
     // to.
-    // Text written with inline `${...}` paths listens to them too, so text
-    // stays live whether or not its multipleVariables were filled in.
+    // Text written with inline `${...}` paths or formulas (a text's
+    // characters, a button's label, ...) listens to them too, so it stays
+    // live whether or not its multipleVariables were filled in.
     final Set<String> multiplePaths = {
       ...node.multipleVariables.values.expand((path) => path),
-      if (node is TextNode)
+      for (final String template in inlineTextTemplatesOf(node)) ...{
         ...variablePathRegex
-            .allMatches(node.characters)
+            .allMatches(template)
             .map((match) => match.namedGroup('value'))
             .nonNulls,
-      if (node is TextNode)
-        ...FormulaEvaluator.referencedPathsInText(node.characters),
+        ...FormulaEvaluator.referencedPathsInText(template),
+      },
     };
     for (final String variablePath in multiplePaths) {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
@@ -501,4 +502,31 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
 
   @override
   bool get wantKeepAlive => true;
+}
+
+/// The strings of [node] that can hold inline `${...}` variable paths and
+/// formulas: a text's characters and every string in a widget's properties
+/// (a button's label, a field's hint, a tab's label, ...). Reactions are left
+/// out: their actions read values when they run, not when the node builds.
+/// The widget of [node] listens to every path these read, so it rebuilds when
+/// one of them changes.
+List<String> inlineTextTemplatesOf(BaseNode node) {
+  final List<String> templates = [];
+  void collect(Object? value) {
+    switch (value) {
+      case final String text when text.contains(r'${'):
+        templates.add(text);
+      case final Map map:
+        for (final MapEntry entry in map.entries) {
+          if (entry.key == 'reactions') continue;
+          collect(entry.value);
+        }
+      case final List list:
+        list.forEach(collect);
+    }
+  }
+
+  if (node is TextNode) collect(node.characters);
+  if (node is CustomPropertiesMixin) collect(node.properties.toJson());
+  return templates;
 }

@@ -556,7 +556,9 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
       'stroke-paint-${paint.id}',
       scopedValues: scopedValues,
     );
-    if (node.dashPattern.isEmpty) {
+    // A solid stroke on every side is Flutter's own border. A stroke on one
+    // side, or a dashed one, is painted by [StrokePainter].
+    if (node.dashPattern.isEmpty && node.strokeSide == StrokeSide.all) {
       strokeWidgets.add(
         Positioned.fill(
           child: DecoratedBox(
