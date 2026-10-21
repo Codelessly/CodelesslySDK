@@ -185,22 +185,34 @@ class RenderFitBox extends RenderProxyBox {
     TextBaseline baseline,
   ) => child?.getDryBaseline(_childConstraints(constraints), baseline);
 
-  // A sized axis reports its design size, like a SizedBox. A fill or hug axis
-  // reports its child's, like SizedBox(double.infinity) or no box.
+  // A sized axis reports its design size as its max intrinsic, like a
+  // SizedBox, and its content's min-content size (at most the design size)
+  // as its min intrinsic: the least it can be squeezed to without clipping,
+  // which is what a Row/Column shrinking to fit a small screen asks for. A
+  // fill or hug axis reports its child's, like SizedBox(double.infinity) or
+  // no box.
   double? get _sizedWidth => _fillWidth ? null : _width;
   double? get _sizedHeight => _fillHeight ? null : _height;
 
   @override
-  double computeMinIntrinsicWidth(double height) =>
-      _sizedWidth ?? child?.getMinIntrinsicWidth(_sizedHeight ?? height) ?? 0;
+  double computeMinIntrinsicWidth(double height) {
+    final double content =
+        child?.getMinIntrinsicWidth(_sizedHeight ?? height) ?? 0;
+    final double? sized = _sizedWidth;
+    return sized == null ? content : math.min(sized, content);
+  }
 
   @override
   double computeMaxIntrinsicWidth(double height) =>
       _sizedWidth ?? child?.getMaxIntrinsicWidth(_sizedHeight ?? height) ?? 0;
 
   @override
-  double computeMinIntrinsicHeight(double width) =>
-      _sizedHeight ?? child?.getMinIntrinsicHeight(_sizedWidth ?? width) ?? 0;
+  double computeMinIntrinsicHeight(double width) {
+    final double content =
+        child?.getMinIntrinsicHeight(_sizedWidth ?? width) ?? 0;
+    final double? sized = _sizedHeight;
+    return sized == null ? content : math.min(sized, content);
+  }
 
   @override
   double computeMaxIntrinsicHeight(double width) =>
@@ -219,10 +231,11 @@ class RenderFitBox extends RenderProxyBox {
 ///   takes its design size, as the editor gives it.
 /// - **Not enough room.** The editor never lets a Row/Column get smaller
 ///   than its fixed content, but a runtime screen can be narrower than the
-///   design. When the children don't fit a bounded main axis, every non-flex
-///   child gives up room in proportion to its size (like CSS `flex-shrink`),
-///   so content squeezes and wraps instead of running offscreen. A child that
-///   cannot get smaller than its content still overflows.
+///   design. When the children don't fit a bounded main axis, the non-flex
+///   children give up room in proportion to how far each can shrink, down to
+///   its min-content size (like CSS `flex-shrink` with `min-width: auto`),
+///   so boxes squeeze and text wraps instead of running offscreen. Text never
+///   goes below its lines; content that can't fit even then overflows.
 ///
 /// When everything fits, as it does at the design size, the layout is
 /// exactly [RenderFlex]'s.
@@ -269,10 +282,6 @@ class RenderCodelesslyFlex extends RenderFlex {
     super.clipBehavior,
     super.spacing,
   });
-
-  /// How finely shrink shares are weighted: flex factors are integers, so a
-  /// child's share is its main extent in 1/64 px.
-  static const double _shrinkResolution = 64;
 
   bool _mainAxisBounded(BoxConstraints constraints) =>
       direction == Axis.horizontal
@@ -338,25 +347,67 @@ class RenderCodelesslyFlex extends RenderFlex {
     super.performLayout();
 
     // Shrink pass: only when the children overflow a bounded main axis.
-    double used = spacing * math.max(0, childCount - 1);
-    final Map<RenderBox, double> natural = {};
+    final double available =
+        _mainExtent(size) - spacing * math.max(0, childCount - 1);
+    double used = 0;
+    double capacity = 0;
+    final Map<RenderBox, (double, double)> extents = {};
     RenderBox? child = firstChild;
     while (child != null) {
-      final double extent = _mainExtent(child.size);
-      used += extent;
-      natural[child] = extent;
-      child = childAfter(child);
+      final FlexParentData data = child.parentData! as FlexParentData;
+      final double natural = _mainExtent(child.size);
+      used += natural;
+      if ((data.flex ?? 0) <= 0) {
+        final double floor = math.min(natural, _minContent(child));
+        extents[child] = (natural, floor);
+        capacity += natural - floor;
+      }
+      child = data.nextSibling;
     }
-    if (used - _mainExtent(size) <= precisionErrorTolerance) return;
+    final double overflow = used - available;
+    if (overflow <= precisionErrorTolerance) return;
+    // Content that can't fit even at its minimum stays at its natural size
+    // and overflows visibly, rather than clipping lines of text.
+    if (overflow > capacity) return;
 
+    // Each child gives up a share of the overflow in proportion to how far
+    // it can shrink, so none goes below its min-content size. Flex factors
+    // are integers, so the target sizes become weights in 1/[_resolution] px.
     _withFlex((child, data) {
       // A flex child already got no room; it keeps a token weight so it is
       // still laid out with a bounded main axis.
       if ((data.flex ?? 0) > 0) return (1, FlexFit.tight);
-      final int weight = (natural[child]! * _shrinkResolution).round();
+      final (double natural, double floor) = extents[child]!;
+      final double target = natural - (natural - floor) * overflow / capacity;
+      final int weight = (target * _resolution).round();
       if (weight <= 0) return (0, data.fit);
       return (weight, FlexFit.loose);
     }, super.performLayout);
+  }
+
+  /// Shrink weights are main extents in 1/[_resolution] px.
+  static const double _resolution = 1e6;
+
+  /// Room kept above each child's min-content size, so that rounding and
+  /// the flex children's token weights never push a text below its lines.
+  static const double _floorSlack = 1e-3;
+
+  /// The least main extent [child] takes without clipping its content (its
+  /// CSS min-content size), probed the way Flutter's own constraint checks
+  /// do, so subtrees that can't report intrinsics (layout builders,
+  /// viewports) report zero instead of throwing.
+  double _minContent(RenderBox child) {
+    final bool wasChecking = RenderObject.debugCheckingIntrinsics;
+    RenderObject.debugCheckingIntrinsics = true;
+    try {
+      final double value = direction == Axis.horizontal
+          ? child.getMinIntrinsicWidth(double.infinity)
+          : child.getMinIntrinsicHeight(child.size.width);
+      if (!value.isFinite || value <= 0) return 0;
+      return value + _floorSlack;
+    } finally {
+      RenderObject.debugCheckingIntrinsics = wasChecking;
+    }
   }
 
   @override

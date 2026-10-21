@@ -430,4 +430,179 @@ void main() {
     );
     expect(rects['frame']!.size, const Size(16, 16));
   });
+
+  group('a scrolling canvas with a freeform body', () {
+    CanvasNode scrollingCanvas(List<String> body) => CanvasNode(
+      id: 'canvas',
+      name: 'canvas',
+      basicBoxLocal: NodeBox(0, 0, 390, 844),
+      children: ['body'],
+      scaleMode: ScaleMode.responsive,
+      isScrollable: true,
+      properties: CanvasProperties(
+        bodyId: 'body',
+        safeArea: const SafeAreaModel.all(false),
+      ),
+    )..parentID = kRootNode;
+
+    FreeformPlaceholderNode body(List<String> children) =>
+        FreeformPlaceholderNode(
+          id: 'body',
+          name: 'body',
+          basicBoxLocal: NodeBox(0, 0, 390, 844),
+          children: children,
+          horizontalFit: SizeFit.expanded,
+          verticalFit: SizeFit.expanded,
+        )..parentID = 'canvas';
+
+    TextNode text(
+      String id,
+      NodeBox box, {
+      String characters =
+          'This sentence is long enough to wrap onto several lines once '
+          'the box it sits in is narrow.',
+      SizeFit fit = SizeFit.fixed,
+      EdgePinsModel? pins,
+      String parent = 'body',
+    }) => TextNode(
+      id: id,
+      name: id,
+      basicBoxLocal: box,
+      horizontalFit: fit,
+      verticalFit: fit,
+      edgePins:
+          pins ??
+          EdgePinsModel(left: box.x, top: box.y, right: null, bottom: null),
+      characters: characters,
+      textMixedProps: [
+        StartEndProp(start: 0, end: characters.length, fontSize: 16),
+      ],
+    )..parentID = parent;
+
+    Future<void> pumpCanvas(
+      WidgetTester tester,
+      List<BaseNode> nodes,
+      Size screen,
+    ) async {
+      tester.view.physicalSize = screen;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final registry = NodeRegistry()
+        ..setNodes({for (final node in nodes) node.id: node});
+      final manager = PassiveNodeTransformerManager(
+        registry.getNodeByID,
+        (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+      );
+      await tester.pumpWidget(
+        ChangeNotifierProvider<CodelesslyContext>.value(
+          value: CodelesslyContext.empty(),
+          child: MaterialApp(
+            home: Builder(
+              builder: (context) => manager.buildWidgetFromNode(
+                nodes.first,
+                context,
+                settings: const WidgetBuildSettings(debugLabel: 'test'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    }
+
+    for (final screen in screens) {
+      testWidgets('keeps a child far down reachable at $screen', (
+        tester,
+      ) async {
+        final far = rect('far', NodeBox(20, 2000, 100, 100), parent: 'body');
+        final nodes = [
+          scrollingCanvas(['body']),
+          body(['far']),
+          far,
+        ];
+        await pumpCanvas(tester, nodes, screen);
+
+        final Offset bodyOrigin = tester.getTopLeft(rectOf(nodes[1]));
+        expect(tester.getTopLeft(rectOf(far)).dy - bodyOrigin.dy, 2000);
+
+        await tester.drag(
+          find.byType(Scrollable).first,
+          const Offset(0, -4000),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expectOnScreen({'far': tester.getRect(rectOf(far))}, screen, ['far']);
+      });
+
+      testWidgets('pushes content below text that grew at $screen', (
+        tester,
+      ) async {
+        // The editor measured the text as one 20 px line; at 120 wide it
+        // wraps to several.
+        final t = text('text', NodeBox(10, 10, 120, 20));
+        final below = rect('below', NodeBox(0, 40, 100, 50), parent: 'body');
+        final beside = rect(
+          'beside',
+          NodeBox(200, 40, 100, 50),
+          parent: 'body',
+        );
+        final nodes = [
+          scrollingCanvas(['body']),
+          body(['text', 'below', 'beside']),
+          t,
+          below,
+          beside,
+        ];
+        await pumpCanvas(tester, nodes, screen);
+
+        final Rect textBox = tester.getRect(find.byType(TextNodeBox));
+        expect(textBox.height, greaterThan(20));
+        final Rect belowRect = tester.getRect(rectOf(below));
+        expect(belowRect.top, closeTo(textBox.bottom + 10, 0.01));
+        final Offset bodyOrigin = tester.getTopLeft(rectOf(nodes[1]));
+        expect(tester.getTopLeft(rectOf(beside)).dy - bodyOrigin.dy, 40);
+      });
+    }
+  });
+
+  group('shrink-wrapping text pinned to all edges', () {
+    for (final screen in screens) {
+      testWidgets('stays centred between its pins at $screen', (tester) async {
+        const String characters = 'Hi';
+        // Measure the text as the test font lays it out.
+        final painter = TextPainter(
+          text: const TextSpan(
+            text: characters,
+            style: TextStyle(fontSize: 16),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        final Size natural = painter.size;
+        painter.dispose();
+        final double x = (390 - natural.width) / 2;
+        final double y = (844 - natural.height) / 2;
+        final t = TextNode(
+          id: 'text',
+          name: 'text',
+          basicBoxLocal: NodeBox(x, y, natural.width, natural.height),
+          horizontalFit: SizeFit.shrinkWrap,
+          verticalFit: SizeFit.shrinkWrap,
+          edgePins: EdgePinsModel(left: x, top: y, right: x, bottom: y),
+          positioningMode: PositioningMode.pin,
+          characters: characters,
+          textMixedProps: [
+            StartEndProp(start: 0, end: characters.length, fontSize: 16),
+          ],
+        )..parentID = 'frame';
+        final root = frame('frame', NodeBox(0, 0, 390, 844), [t]);
+        await pump(tester, root, const [], screen: screen, extra: [t]);
+        final Rect r = tester.getRect(find.byType(TextNodeBox));
+        expect(r.center.dx, closeTo(screen.width / 2, 1));
+        // Vertically it keeps its design top plus half the extra height
+        // (its share of the free space), whatever height the font gives it.
+        expect(r.top, closeTo(y + (screen.height - 844) / 2, 0.01));
+      });
+    }
+  });
 }
