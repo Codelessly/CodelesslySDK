@@ -94,7 +94,7 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return AdaptiveNodeBox(
+    return TextNodeBox(
       node: widget.node,
       child: TextUtils.buildTextForTextNode(
         context,
@@ -104,6 +104,81 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
         nullSubstitutionMode: widget.settings.nullSubstitutionMode,
         replaceVariablesWithSymbol: widget.settings.isPreview,
       ),
+    );
+  }
+}
+
+/// Sizes a text node's box and places its text inside it.
+///
+/// Width follows the node's horizontal fit, like any other leaf
+/// ([AdaptiveSizeFitBox]).
+///
+/// Height: a fixed (or locked or flexible) height is the box's minimum, not
+/// its exact size. The editor measured the text with its fonts at the design
+/// width, but at runtime the text can wrap to more lines (a narrower screen,
+/// another font, a larger text scale). The box then grows to fit the text
+/// as far as the incoming constraints allow, and whatever contains it grows
+/// with it or reports an overflow, instead of the lines being clipped
+/// without a trace. Where the parent fixes the height (tight constraints),
+/// that height still wins. Shrink-wrap hugs the text and expanded fills the
+/// parent, as before.
+///
+/// The text sits inside that box per its horizontal and vertical text
+/// alignment, so a text box larger than its text (pinned on all sides,
+/// expanded, or a fixed size) shows it centered, at the bottom, and so on.
+class TextNodeBox extends StatelessWidget {
+  final TextNode node;
+  final Widget child;
+
+  const TextNodeBox({super.key, required this.node, required this.child});
+
+  /// Where text sits in its box for [node]'s text alignment. Start and end
+  /// follow the text direction, like [TextAlign.start] and [TextAlign.end].
+  static AlignmentGeometry alignmentOf(TextNode node) {
+    final double y = switch (node.textAlignVertical) {
+      TextAlignVerticalEnum.top => -1,
+      TextAlignVerticalEnum.center => 0,
+      TextAlignVerticalEnum.bottom => 1,
+    };
+    return switch (node.textAlignHorizontal) {
+      TextAlignHorizontalEnum.left ||
+      TextAlignHorizontalEnum.justified => Alignment(-1, y),
+      TextAlignHorizontalEnum.center => Alignment(0, y),
+      TextAlignHorizontalEnum.right => Alignment(1, y),
+      TextAlignHorizontalEnum.start => AlignmentDirectional(-1, y),
+      TextAlignHorizontalEnum.end => AlignmentDirectional(1, y),
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final SizeFit hFit = node.horizontalFit;
+    final SizeFit vFit = node.verticalFit;
+    final bool minHeight =
+        vFit != SizeFit.shrinkWrap && vFit != SizeFit.expanded;
+
+    Widget box = Align(
+      alignment: alignmentOf(node),
+      // Hug the text on an axis that does not fill its parent, so a loose
+      // parent does not stretch the box; tight constraints still size it.
+      widthFactor: hFit == SizeFit.shrinkWrap ? 1 : null,
+      heightFactor: vFit == SizeFit.expanded ? null : 1,
+      child: child,
+    );
+    if (minHeight) {
+      box = ConstrainedBox(
+        constraints: BoxConstraints(minHeight: node.basicBoxLocal.height),
+        child: box,
+      );
+    }
+    return SizedBox(
+      width: switch (hFit) {
+        SizeFit.shrinkWrap => null,
+        SizeFit.expanded => double.infinity,
+        _ => node.basicBoxLocal.width,
+      },
+      height: vFit == SizeFit.expanded ? double.infinity : null,
+      child: box,
     );
   }
 }
