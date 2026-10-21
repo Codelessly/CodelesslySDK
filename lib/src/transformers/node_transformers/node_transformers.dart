@@ -1,3 +1,4 @@
+export 'freeform_layout.dart';
 export 'passive_accordion_transformer.dart';
 export 'passive_app_bar_transformer.dart';
 export 'passive_badge_transformer.dart';

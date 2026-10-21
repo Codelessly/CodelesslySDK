@@ -6,15 +6,14 @@ import '../../../codelessly_sdk.dart';
 class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
   PassiveStackTransformer(super.getNode, super.manager);
 
+  /// Builds [node] as a child of the freeform container [parent], placed by
+  /// [placementFor].
   static Widget buildStackChild(
     BaseNode node,
     BaseNode parent,
     BuildContext context, {
     WidgetNodeTransformerManager? manager,
     Widget? childWidget,
-    required BaseNode? widestChild,
-    required BaseNode? tallestChild,
-    required AlignmentModel commonAlignment,
     required WidgetBuildSettings settings,
   }) {
     assert(
@@ -22,188 +21,122 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       'Either childWidget or manager must be provided.',
     );
 
-    Widget child =
+    final Widget child =
         childWidget ??
         manager!.buildWidgetFromNode(node, context, settings: settings);
 
-    final bool potentiallyPositionable =
-        node.alignment == AlignmentModel.none ||
-        (parent.isOneOrBothWrap && node.alignment != commonAlignment);
-
-    if (potentiallyPositionable) {
-      // You cannot use the Align widget when inside a shrink-wrapping Stack.
-      // The Align RenderBox will force the Stack to grow as much as possible.
-      // Positioned widgets are only laid out after the Stack lays out its
-      // concrete children and figures out its own size. So for wrapping stacks,
-      // we need to use Positioned instead of Align.
-      //
-      // The behavior is absolutely different, but it's the best compromise we
-      // can do.
-      if (node.alignment != AlignmentModel.none &&
-          parent.childrenOrEmpty.length > 1) {
-        final align = node.alignment.data!;
-
-        child = Positioned(
-          left: align.x <= 0
-              ? node.outerBoxLocal.left - parent.innerBoxLocal.edgeLeft
-              : null,
-          right: align.x >= 0
-              ? (parent.innerBoxLocal.width - node.outerBoxLocal.right) +
-                    parent.innerBoxLocal.edgeRight
-              : null,
-          top: align.y <= 0
-              ? node.outerBoxLocal.top - parent.innerBoxLocal.edgeTop
-              : null,
-          bottom: align.y >= 0
-              ? (parent.innerBoxLocal.height - node.outerBoxLocal.bottom) +
-                    parent.innerBoxLocal.edgeBottom
-              : null,
-          child: child,
-        );
-      } else {
-        child = wrapWithPositioned(
-          node,
-          parent,
-          child,
-          isWidest: widestChild?.id == node.id,
-          isTallest: tallestChild?.id == node.id,
-        );
-      }
-    } else {
-      if (node.alignment != commonAlignment) {
-        child = Align(
-          alignment: node.alignment.flutterAlignment!,
-          child: child,
-        );
-      }
-    }
-
-    return KeyedSubtree(
+    return FreeformChild(
       key: ValueKey(
         'Static Stack child [${node.id}](${node.name})<${node.type}> on parent [${parent.id}](${parent.name})<${parent.type}>',
       ),
+      placement: placementFor(node, parent),
       child: child,
     );
   }
 
-  /// Wraps a child with a [Positioned] widget. Does not wrap if the child
-  /// is the widest or tallest child.
-  static Widget wrapWithPositioned(
+  /// How [node] is placed inside the freeform container [parent], derived
+  /// from the same data the editor's solver uses:
+  ///
+  /// - An aligned node is aligned inside the parent's padded box
+  ///   (`FreeFormAlignmentDecorator`).
+  /// - A node expanded on an axis without a max constraint fills that axis.
+  /// - A node pinned to both edges of an axis and not shrink-wrapping on it
+  ///   stretches between the pins (the editor's "chained" sizing).
+  /// - A node pinned only to the end edge keeps its distance from that edge.
+  /// - A node pinned only to the start edge keeps its distance from it when
+  ///   its [PositioningMode] is [PositioningMode.pin]. In
+  ///   [PositioningMode.align] (the default for anything dropped into a
+  ///   freeform container, whose pins are just its design x/y), it keeps its
+  ///   share of the free space, like [Align], so the layout spreads with a
+  ///   wider parent instead of clustering at the top left.
+  /// - Along the scroll axis of a scrolling parent, children are content and
+  ///   keep their design offset.
+  ///
+  /// At design size every rule gives the design position and size.
+  static FreeformPlacement placementFor(BaseNode node, BaseNode parent) {
+    final bool scrolls = parent is ScrollableMixin && parent.isScrollable;
+    final bool verticalScroll = scrolls && parent.scrollDirection.isVertical;
+    return FreeformPlacement(
+      horizontal: _axisPlacement(
+        node,
+        parent,
+        horizontal: true,
+        isScrollAxis: scrolls && !verticalScroll,
+      ),
+      vertical: _axisPlacement(
+        node,
+        parent,
+        horizontal: false,
+        isScrollAxis: verticalScroll,
+      ),
+    );
+  }
+
+  static FreeformAxisPlacement _axisPlacement(
     BaseNode node,
-    BaseNode parent,
-    Widget child, {
-    required bool isWidest,
-    required bool isTallest,
+    BaseNode parent, {
+    required bool horizontal,
+    required bool isScrollAxis,
   }) {
-    final bool horizontallyExpands =
-        node.isHorizontalExpanded && node.resolvedConstraints.maxWidth == null;
-    final bool verticallyExpands =
-        node.isVerticalExpanded && node.resolvedConstraints.maxHeight == null;
-
-    final double? left = horizontallyExpands
-        ? 0
-        : node.edgePins.left != null
-        ? node.outerBoxLocal.x - parent.innerBoxGlobal.edgeLeft
-        : null;
-    final double? right = horizontallyExpands
-        ? 0
-        : node.edgePins.right != null
-        ? node.edgePins.right! - parent.innerBoxGlobal.edgeRight
-        : null;
-    final double? top = verticallyExpands
-        ? 0
-        : node.edgePins.top != null
-        ? node.outerBoxLocal.y - parent.innerBoxGlobal.edgeTop
-        : null;
-    final double? bottom = verticallyExpands
-        ? 0
-        : node.edgePins.bottom != null
-        ? node.edgePins.bottom! - parent.innerBoxGlobal.edgeBottom
-        : null;
-    final double? width =
-        horizontallyExpands ||
-            node.isHorizontalWrap ||
-            node.edgePins.isHorizontallyExpanded
-        ? null
-        : node.outerBoxLocal.width;
-    final double? height =
-        verticallyExpands ||
-            node.isVerticalWrap ||
-            node.edgePins.isVerticallyExpanded
-        ? null
+    final double start = horizontal
+        ? node.outerBoxLocal.x - parent.innerBoxLocal.edgeLeft
+        : node.outerBoxLocal.y - parent.innerBoxLocal.edgeTop;
+    final double extent = horizontal
+        ? node.outerBoxLocal.width
         : node.outerBoxLocal.height;
+    final double parentExtent = horizontal
+        ? parent.innerBoxLocal.width
+        : parent.innerBoxLocal.height;
+    final SizeFit fit = horizontal ? node.horizontalFit : node.verticalFit;
+    final bool expands =
+        fit == SizeFit.expanded &&
+        (horizontal
+                ? node.resolvedConstraints.maxWidth
+                : node.resolvedConstraints.maxHeight) ==
+            null;
+    final bool wraps = fit == SizeFit.shrinkWrap;
+    final double? size = wraps || expands ? null : extent;
 
-    final bool doesParentScroll =
-        parent is ScrollableMixin && parent.isScrollable;
+    FreeformAxisPlacement placement(
+      FreeformAxisMode mode, {
+      double alignment = 0,
+    }) => FreeformAxisPlacement(
+      mode: mode,
+      start: start,
+      extent: extent,
+      parentExtent: parentExtent,
+      size: size,
+      alignment: alignment,
+      clamp: !isScrollAxis,
+      expands: expands,
+    );
 
-    // A scrolling parent lays its children out in a content stack as long as
-    // they need (see wrapWithPaddingAndScroll), so each child keeps its pins
-    // across the scroll axis and its designed offset and size along it.
-    if (doesParentScroll) {
-      final bool vertical = parent.scrollDirection.isVertical;
-      return Positioned(
-        left: vertical || horizontallyExpands
-            ? left
-            : node.outerBoxLocal.x - parent.innerBoxGlobal.edgeLeft,
-        right: vertical || horizontallyExpands ? right : null,
-        top: !vertical || verticallyExpands
-            ? top
-            : node.outerBoxLocal.y - parent.innerBoxGlobal.edgeTop,
-        bottom: !vertical || verticallyExpands ? bottom : null,
-        width: vertical || horizontallyExpands || node.isHorizontalWrap
-            ? width
-            : node.outerBoxLocal.width,
-        height: !vertical || verticallyExpands || node.isVerticalWrap
-            ? height
-            : node.outerBoxLocal.height,
-        child: child,
+    if (node.alignment.data case final AlignmentData alignment) {
+      return placement(
+        FreeformAxisMode.align,
+        alignment: horizontal ? alignment.x : alignment.y,
       );
     }
+    if (expands) return placement(FreeformAxisMode.fill);
+    if (isScrollAxis) return placement(FreeformAxisMode.start);
 
-    // This decides whether to use a positioned widget or padding widget
-    // to position the child. This makes it so if an expanded (parent) frame
-    // has one child, the child won't be wrapped with a positioned widget
-    // because if it does, than the stack and SingleChildScrollView wouldn't
-    // expand and crash because the Positioned widget would give the scroll
-    // view unbounded sizing.
-    // cut off when scrolling is forced (i.e. with bouncing scroll physics).
-    final bool shouldUsePositioned =
-        (!doesParentScroll && !isTallest && !isWidest);
+    final EdgePinsModel pins = node.edgePins;
+    final bool pinnedStart = (horizontal ? pins.left : pins.top) != null;
+    final bool pinnedEnd = (horizontal ? pins.right : pins.bottom) != null;
+    final bool parentWraps = horizontal
+        ? parent.isHorizontalWrap
+        : parent.isVerticalWrap;
 
-    // This is required to make wrapping stack in a scroll view work because
-    // wrapping stack cannot figure out its size when there only positioned
-    // children.
-    if (shouldUsePositioned) {
-      return Positioned(
-        left: left,
-        right: right,
-        top: top,
-        bottom: bottom,
-        width: width,
-        height: height,
-        child: child,
-      );
-    } else if (isTallest) {
-      return Padding(
-        padding: EdgeInsets.only(left: left ?? 0, right: right ?? 0),
-        child: child,
-      );
-    } else {
-      return Padding(
-        padding: EdgeInsets.only(top: top ?? 0, bottom: bottom ?? 0),
-        child: child,
-      );
+    if (pinnedStart && pinnedEnd && !wraps) {
+      return placement(FreeformAxisMode.stretch);
     }
-
-    // return Positioned(
-    //   left: left,
-    //   right: right,
-    //   top: top,
-    //   bottom: bottom,
-    //   width: width,
-    //   height: height,
-    //   child: child,
-    // );
+    if (pinnedEnd && !pinnedStart) return placement(FreeformAxisMode.end);
+    if (!pinnedEnd &&
+        !parentWraps &&
+        node.positioningMode == PositioningMode.align) {
+      return placement(FreeformAxisMode.relative);
+    }
+    return placement(FreeformAxisMode.start);
   }
 
   @override
@@ -233,59 +166,27 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         for (final String childId in node.children) getNode(childId),
     ];
 
-    final AlignmentModel commonAlignment = retrieveCommonStackAlignment(
-      node,
-      children,
-    );
-    final Set<BaseNode> potentiallyPositionableChildren = children.where((
-      child,
-    ) {
-      return child.alignment == AlignmentModel.none ||
-          (node.isOneOrBothWrap && child.alignment != commonAlignment);
-    }).toSet();
-
-    final List<Widget> childrenWidgets = [];
-
-    final BaseNode? widestChild = node.isHorizontalWrap
-        ? getWidestNode(potentiallyPositionableChildren)
-        : null;
-    final BaseNode? tallestChild = node.isVerticalWrap
-        ? getTallestNode(potentiallyPositionableChildren)
-        : null;
-
-    for (final BaseNode childNode in children) {
-      final Widget child = buildStackChild(
-        childNode,
-        node,
-        context,
-        widestChild: widestChild,
-        tallestChild: tallestChild,
-        commonAlignment: commonAlignment,
-        manager: manager,
-        settings: settings,
-      );
-      childrenWidgets.add(child);
-    }
+    final List<Widget> childrenWidgets = [
+      FreeformLayout(
+        wrapsWidth: node.isHorizontalWrap,
+        wrapsHeight: node.isVerticalWrap,
+        designSize: node.innerBoxLocal.size.flutterSize,
+        children: [
+          for (final BaseNode childNode in children)
+            buildStackChild(
+              childNode,
+              node,
+              context,
+              manager: manager,
+              settings: settings,
+            ),
+        ],
+      ),
+    ];
 
     Widget stack = manager
         .getTransformer<PassiveRectangleTransformer>()
-        .buildRectangle(
-          node,
-          stackAlignment: commonAlignment,
-          children: childrenWidgets,
-          settings: settings,
-        );
-
-    // // This makes sure that children stay positioned correctly even if the stack
-    // // is shrink wrapping. It makes it so the stack sizes itself to its tallest
-    // // or widest child as a "best" size.
-    // if (node.isOneWrap) {
-    //   return SizedBox(
-    //     width: node.isHorizontalWrap ? widestChild?.outerBoxLocal.width : null,
-    //     height: node.isVerticalWrap ? tallestChild?.outerBoxLocal.height : null,
-    //     child: stack,
-    //   );
-    // }
+        .buildRectangle(node, children: childrenWidgets, settings: settings);
 
     if (kIsTestLayout) {
       return DecoratedBox(
