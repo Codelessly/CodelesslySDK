@@ -299,6 +299,97 @@ void main() {
     });
   }
 
+  for (final screen in screens) {
+    testWidgets('pinned axes ignore a stale stored rect at $screen', (
+      tester,
+    ) async {
+      // Stored rects left behind by a canvas resize the editor did not
+      // re-solve: none of them agrees with its pins.
+      final bottomSheet = RectangleNode(
+        id: 'bottomSheet',
+        name: 'bottomSheet',
+        basicBoxLocal: NodeBox(0, 759.333, 1193.324, 560),
+        edgePins: const EdgePinsModel(left: 0, top: null, right: 0, bottom: 0),
+      )..parentID = 'frame';
+      final sideSheet = RectangleNode(
+        id: 'sideSheet',
+        name: 'sideSheet',
+        basicBoxLocal: NodeBox(745.324, 8, 440, 1157.333),
+        edgePins: const EdgePinsModel(left: null, top: 8, right: 8, bottom: 8),
+      )..parentID = 'frame';
+      final badge = RectangleNode(
+        id: 'badge',
+        name: 'badge',
+        basicBoxLocal: NodeBox(500, 700, 40, 40),
+        edgePins: const EdgePinsModel(
+          left: 16,
+          top: 24,
+          right: null,
+          bottom: null,
+        ),
+        positioningMode: PositioningMode.pin,
+      )..parentID = 'frame';
+      final root = frame('frame', NodeBox(0, 0, 834, 1194), [
+        bottomSheet,
+        sideSheet,
+        badge,
+      ]);
+      final rects = await pump(tester, root, [
+        bottomSheet,
+        sideSheet,
+        badge,
+      ], screen: screen);
+      final Size s = screen;
+      expect(
+        rects['bottomSheet'],
+        Rect.fromLTWH(0, s.height - 560, s.width, 560),
+      );
+      expect(
+        rects['sideSheet'],
+        s.width >= 456
+            ? Rect.fromLTRB(s.width - 8 - 440, 8, s.width - 8, s.height - 8)
+            // Too wide for the phone: kept inside, as wide as the screen.
+            : Rect.fromLTRB(0, 8, s.width, s.height - 8),
+      );
+      expect(rects['badge'], const Rect.fromLTWH(16, 24, 40, 40));
+      expectOnScreen(rects, s, ['bottomSheet', 'sideSheet', 'badge']);
+    });
+  }
+
+  testWidgets('pinned axes measure the pins from the padded box', (
+    tester,
+  ) async {
+    final child = RectangleNode(
+      id: 'pinned',
+      name: 'pinned',
+      basicBoxLocal: NodeBox(3, 3, 50, 50),
+      positioningMode: PositioningMode.pin,
+      edgePins: const EdgePinsModel(
+        left: null,
+        top: 30,
+        right: 30,
+        bottom: null,
+      ),
+    )..parentID = 'frame';
+    final root = frame(
+      'frame',
+      NodeBox(0, 0, 200, 300),
+      [child],
+      horizontalFit: SizeFit.fixed,
+      verticalFit: SizeFit.fixed,
+      padding: const EdgeInsetsModel.all(20),
+    );
+    final rects = await pump(tester, root, [
+      child,
+    ], screen: const Size(390, 844));
+    final Offset origin = rects['frame']!.topLeft;
+    // 30 from the frame's right and top edges, as in the editor.
+    expect(
+      rects['pinned']!.shift(-origin),
+      const Rect.fromLTWH(120, 30, 50, 50),
+    );
+  });
+
   testWidgets('pins give way to a min constraint, in proportion', (
     tester,
   ) async {
@@ -684,10 +775,10 @@ void main() {
         final root = frame('frame', NodeBox(0, 0, 390, 844), [t]);
         await pump(tester, root, const [], screen: screen, extra: [t]);
         final Rect r = tester.getRect(find.byType(TextNodeBox));
-        expect(r.center.dx, closeTo(screen.width / 2, 1));
-        // Vertically it keeps its design top plus half the extra height
-        // (its share of the free space), whatever height the font gives it.
-        expect(r.top, closeTo(y + (screen.height - 844) / 2, 0.01));
+        expect(r.center.dx, closeTo(screen.width / 2, 0.01));
+        // Centred between equal pins on both axes, whatever size the font
+        // gives it.
+        expect(r.center.dy, closeTo(screen.height / 2, 0.01));
       });
     }
   });
