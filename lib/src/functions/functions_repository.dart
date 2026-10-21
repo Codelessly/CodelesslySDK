@@ -202,8 +202,10 @@ class FunctionsRepository {
       'Confirm dialog was ${confirmed ? 'confirmed' : 'cancelled'}.',
       name: name,
     );
-    if (!context.mounted) return true;
+    // The confirmed actions run even when the widget that asked has
+    // unmounted meanwhile; see [ActionChain.contextFor].
     await runActions(
+      // ignore: use_build_context_synchronously
       context,
       confirmed ? action.actions : action.cancelActions,
     );
