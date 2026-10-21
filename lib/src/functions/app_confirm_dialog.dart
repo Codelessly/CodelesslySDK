@@ -2,6 +2,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
+import 'action_chain.dart';
 
 /// Shows a [ConfirmAction]'s dialog.
 class AppConfirmDialog {
@@ -10,7 +11,7 @@ class AppConfirmDialog {
   /// Shows [action]'s dialog and completes with whether the user confirmed.
   /// Dismissing the dialog counts as cancelling.
   static Future<bool> show(BuildContext context, ConfirmAction action) async {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     String text(String value) => PropertyValueDelegate.substituteVariables(
       value,
       scopedValues: scopedValues,
