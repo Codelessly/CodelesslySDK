@@ -4,6 +4,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
+import 'action_chain.dart';
 
 /// Shows [ShowToastAction] messages: a pill near the bottom of the screen
 /// that fades in, stays for the action's duration and fades out. A new toast
@@ -22,7 +23,7 @@ class AppToast {
     // Read variables now: the action that follows may navigate away.
     final String message = PropertyValueDelegate.substituteVariables(
       action.message,
-      scopedValues: ScopedValues.of(context),
+      scopedValues: ActionChain.scopedValuesOf(context),
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
     );
 
