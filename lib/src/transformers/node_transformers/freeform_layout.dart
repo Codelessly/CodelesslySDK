@@ -67,6 +67,11 @@ class FreeformAxisPlacement {
   /// Whether the child expands on this axis (needs a bounded slot).
   final bool expands;
 
+  /// Whether the child's content can need more than [size] at runtime (text
+  /// that reflows). Along a scroll axis ([clamp] false) such a child gets
+  /// [size] only as a minimum, so the content grows and stays reachable.
+  final bool growsWithContent;
+
   const FreeformAxisPlacement({
     required this.mode,
     required this.start,
@@ -76,6 +81,7 @@ class FreeformAxisPlacement {
     this.alignment = 0,
     this.clamp = true,
     this.expands = false,
+    this.growsWithContent = false,
   });
 
   /// Distance from the child's outer end edge to the container's inner end
@@ -161,6 +167,7 @@ class FreeformAxisPlacement {
             : room(s);
         if (size case final double size) {
           final double v = math.min(size, max);
+          if (!clamp && growsWithContent) return (v, double.infinity);
           return (v, v);
         }
         return (0, max);
@@ -208,7 +215,8 @@ class FreeformAxisPlacement {
       other.size == size &&
       other.alignment == alignment &&
       other.clamp == clamp &&
-      other.expands == expands;
+      other.expands == expands &&
+      other.growsWithContent == growsWithContent;
 
   @override
   int get hashCode => Object.hash(
@@ -220,6 +228,7 @@ class FreeformAxisPlacement {
     alignment,
     clamp,
     expands,
+    growsWithContent,
   );
 
   @override
@@ -433,25 +442,32 @@ class RenderFreeformLayout extends RenderBox
     // First pass, only when an extent depends on the children: measure the
     // children with the extents known so far.
     if (contentWidth || contentHeight) {
-      double needW = 0;
-      double needH = 0;
+      final Map<RenderBox, Size> sizes = {};
       RenderBox? child = firstChild;
       while (child != null) {
-        final FreeformPlacement placement = _placementOf(child);
-        final Size size = layoutChild(
+        sizes[child] = layoutChild(
           child,
-          _childConstraints(placement, width, height, constraints),
+          _childConstraints(_placementOf(child), width, height, constraints),
         );
-        // A child collapsed to nothing (hidden at runtime) takes no room.
-        if (size != Size.zero) {
-          needW = math.max(
-            needW,
-            placement.horizontal.contribution(size.width),
-          );
-          needH = math.max(needH, placement.vertical.contribution(size.height));
-        }
         child = childAfter(child);
       }
+      final Map<RenderBox, double> pushX = _flowPushes(sizes, true);
+      final Map<RenderBox, double> pushY = _flowPushes(sizes, false);
+      double needW = 0;
+      double needH = 0;
+      sizes.forEach((child, size) {
+        // A child collapsed to nothing (hidden at runtime) takes no room.
+        if (size == Size.zero) return;
+        final FreeformPlacement placement = _placementOf(child);
+        needW = math.max(
+          needW,
+          placement.horizontal.contribution(size.width) + (pushX[child] ?? 0),
+        );
+        needH = math.max(
+          needH,
+          placement.vertical.contribution(size.height) + (pushY[child] ?? 0),
+        );
+      });
       if (contentWidth) {
         width = wrapsWidth ? needW : math.max(needW, designSize.width);
       }
@@ -463,28 +479,98 @@ class RenderFreeformLayout extends RenderBox
     final Size size = constraints.constrain(Size(width!, height!));
     if (positions == null) return size;
 
+    final Map<RenderBox, Size> sizes = {};
     RenderBox? child = firstChild;
     while (child != null) {
-      final FreeformPlacement placement = _placementOf(child);
-      final Size childSize = layoutChild(
+      sizes[child] = layoutChild(
         child,
-        _childConstraints(placement, size.width, size.height, constraints),
-      );
-      positions[child] = Offset(
-        placement.horizontal.offsetIn(
+        _childConstraints(
+          _placementOf(child),
           size.width,
-          childSize.width,
-          wraps: wrapsWidth,
-        ),
-        placement.vertical.offsetIn(
           size.height,
-          childSize.height,
-          wraps: wrapsHeight,
+          constraints,
         ),
       );
       child = childAfter(child);
     }
+    final Map<RenderBox, double> pushX = _flowPushes(sizes, true);
+    final Map<RenderBox, double> pushY = _flowPushes(sizes, false);
+    sizes.forEach((child, childSize) {
+      final FreeformPlacement placement = _placementOf(child);
+      positions[child] = Offset(
+        placement.horizontal.offsetIn(
+              size.width,
+              childSize.width,
+              wraps: wrapsWidth,
+            ) +
+            (pushX[child] ?? 0),
+        placement.vertical.offsetIn(
+              size.height,
+              childSize.height,
+              wraps: wrapsHeight,
+            ) +
+            (pushY[child] ?? 0),
+      );
+    });
     return size;
+  }
+
+  /// How far each child is pushed along a scroll axis by content above it
+  /// that grew at runtime.
+  ///
+  /// Along a scroll axis children are content placed at their design offsets.
+  /// When a child ends up longer than designed (text that wraps to more
+  /// lines, a list that loaded more items), every child that sat entirely
+  /// after it at design size and overlaps it across the axis moves by that
+  /// growth (plus whatever pushed the grown child), so content flows instead
+  /// of overlapping. Children beside it are left in place, and content that
+  /// comes out shorter than designed does not pull anything up. With no
+  /// growth the design offsets are unchanged.
+  Map<RenderBox, double> _flowPushes(
+    Map<RenderBox, Size> sizes,
+    bool horizontal,
+  ) {
+    FreeformAxisPlacement along(RenderBox child) => horizontal
+        ? _placementOf(child).horizontal
+        : _placementOf(child).vertical;
+    FreeformAxisPlacement across(RenderBox child) => horizontal
+        ? _placementOf(child).vertical
+        : _placementOf(child).horizontal;
+
+    final List<RenderBox> flowing = [
+      for (final child in sizes.keys)
+        if (!along(child).clamp && along(child).mode == FreeformAxisMode.start)
+          child,
+    ]..sort((a, b) => along(a).start.compareTo(along(b).start));
+    if (flowing.isEmpty) return const {};
+
+    double growth(RenderBox child) {
+      final Size size = sizes[child]!;
+      return math.max(
+        0,
+        (horizontal ? size.width : size.height) - along(child).extent,
+      );
+    }
+
+    final Map<RenderBox, double> pushes = {};
+    for (final RenderBox child in flowing) {
+      final FreeformAxisPlacement a = along(child);
+      final FreeformAxisPlacement c = across(child);
+      double push = 0;
+      for (final RenderBox before in flowing) {
+        if (identical(before, child)) break;
+        final FreeformAxisPlacement ba = along(before);
+        final FreeformAxisPlacement bc = across(before);
+        final bool after = ba.start + ba.extent <= a.start;
+        final bool overlaps =
+            bc.start < c.start + c.extent && c.start < bc.start + bc.extent;
+        if (after && overlaps) {
+          push = math.max(push, pushes[before]! + growth(before));
+        }
+      }
+      pushes[child] = push;
+    }
+    return pushes;
   }
 
   @override
