@@ -3,6 +3,7 @@ import 'dart:math' hide log;
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' as vec_math;
 
 import '../../../codelessly_sdk.dart';
@@ -301,7 +302,10 @@ List<Widget> wrapWithPaddingAndScroll(
   if (node is FrameNode && node.isScrollable) {
     // The content reaches the farthest child along the scroll axis, and at
     // least the viewport (fillViewport); across it, it spans the viewport.
-    // Children are positioned in it, so it cannot size itself from them.
+    // Children are positioned in it, so it cannot size itself from them:
+    // [extent] is where the editor placed the farthest edge, and
+    // [ScrollContentStack] grows past it when children laid out at runtime
+    // reach farther (text that wraps to more lines, data-bound lists).
     final bool vertical = node.scrollDirection.isVertical;
     final double extent = [
       for (final String childID in node.children)
@@ -317,17 +321,15 @@ List<Widget> wrapWithPaddingAndScroll(
         clipBehavior: defaultGetClipBehavior(node),
         fillViewport: true,
         child: SizedBox(
-          width: vertical
-              ? (node.horizontalFit == SizeFit.shrinkWrap
-                    ? node.innerBoxLocal.width
-                    : null)
-              : extent,
-          height: vertical
-              ? extent
-              : (node.verticalFit == SizeFit.shrinkWrap
-                    ? node.innerBoxLocal.height
-                    : null),
-          child: Stack(
+          width: vertical && node.horizontalFit == SizeFit.shrinkWrap
+              ? node.innerBoxLocal.width
+              : null,
+          height: !vertical && node.verticalFit == SizeFit.shrinkWrap
+              ? node.innerBoxLocal.height
+              : null,
+          child: ScrollContentStack(
+            axis: node.scrollDirection.flutterAxis,
+            minExtent: extent,
             clipBehavior: Clip.none,
             alignment:
                 stackAlignment.flutterAlignment ??
@@ -882,5 +884,181 @@ class ImageFillPlaceholder extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+/// The content of a scroll view that positions its children: a [Stack]
+/// that, unlike a plain one, sizes itself from its [Positioned] children
+/// along [axis].
+///
+/// Along [axis] it is [minExtent] long (and at least the incoming minimum,
+/// so it can fill the viewport). When a child laid out at that length ends
+/// past it, the stack lays its children out again at the length its
+/// farthest child needs, so everything stays reachable by scrolling. Across
+/// [axis] it sizes like a [Stack].
+class ScrollContentStack extends Stack {
+  final Axis axis;
+  final double minExtent;
+
+  const ScrollContentStack({
+    super.key,
+    required this.axis,
+    required this.minExtent,
+    super.alignment,
+    super.clipBehavior,
+    super.children,
+  });
+
+  @override
+  RenderScrollContentStack createRenderObject(BuildContext context) =>
+      RenderScrollContentStack(
+        axis: axis,
+        minExtent: minExtent,
+        alignment: alignment,
+        textDirection: textDirection ?? Directionality.maybeOf(context),
+        fit: fit,
+        clipBehavior: clipBehavior,
+      );
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderScrollContentStack renderObject,
+  ) {
+    super.updateRenderObject(context, renderObject);
+    renderObject
+      ..axis = axis
+      ..minExtent = minExtent;
+  }
+}
+
+/// The render object of [ScrollContentStack].
+class RenderScrollContentStack extends RenderStack {
+  RenderScrollContentStack({
+    required Axis axis,
+    required double minExtent,
+    super.alignment,
+    super.textDirection,
+    super.fit,
+    super.clipBehavior,
+  }) {
+    _axis = axis;
+    _minExtent = minExtent;
+  }
+
+  Axis get axis => _axis;
+  late Axis _axis;
+  set axis(Axis value) {
+    if (value == _axis) return;
+    _axis = value;
+    markNeedsLayout();
+  }
+
+  double get minExtent => _minExtent;
+  late double _minExtent;
+  set minExtent(double value) {
+    if (value == _minExtent) return;
+    _minExtent = value;
+    markNeedsLayout();
+  }
+
+  bool get _vertical => axis == Axis.vertical;
+
+  /// Lays the children out in a stack at least [extent] long along [axis]
+  /// and returns the stack's size.
+  ///
+  /// A child that is not positioned (such as a freeform layout that sizes
+  /// itself from its children) gets the incoming, unbounded, main axis and
+  /// makes the stack as long as it needs. Positioned children are placed in
+  /// the resulting size.
+  Size _layoutAt(double extent) {
+    final BoxConstraints box = _vertical
+        ? constraints.copyWith(minHeight: extent, maxHeight: extent)
+        : constraints.copyWith(minWidth: extent, maxWidth: extent);
+    final BoxConstraints loose = _vertical
+        ? box.loosen().copyWith(maxHeight: constraints.maxHeight)
+        : box.loosen().copyWith(maxWidth: constraints.maxWidth);
+    bool hasNonPositioned = false;
+    double width = box.minWidth;
+    double height = box.minHeight;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final data = child.parentData! as StackParentData;
+      if (!data.isPositioned) {
+        hasNonPositioned = true;
+        final Size childSize = ChildLayoutHelper.layoutChild(child, loose);
+        width = max(width, childSize.width);
+        height = max(height, childSize.height);
+      }
+      child = data.nextSibling;
+    }
+    final BoxConstraints grown = _vertical
+        ? box.copyWith(maxHeight: constraints.maxHeight)
+        : box.copyWith(maxWidth: constraints.maxWidth);
+    final Size size = hasNonPositioned
+        ? grown.constrain(Size(width, height))
+        : box.biggest;
+
+    final Alignment resolved = alignment.resolve(textDirection);
+    child = firstChild;
+    while (child != null) {
+      final data = child.parentData! as StackParentData;
+      if (!data.isPositioned) {
+        data.offset = resolved.alongOffset(size - child.size as Offset);
+      } else {
+        RenderStack.layoutPositionedChild(child, data, size, resolved);
+      }
+      child = data.nextSibling;
+    }
+    return size;
+  }
+
+  /// The farthest edge along [axis] that a child reaches.
+  double _farthestChildEdge() {
+    double farthest = 0;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final data = child.parentData! as StackParentData;
+      final double edge = _vertical
+          ? data.offset.dy + child.size.height
+          : data.offset.dx + child.size.width;
+      farthest = max(farthest, edge);
+      child = data.nextSibling;
+    }
+    return farthest;
+  }
+
+  /// [constraints] made tight at the starting length along [axis]:
+  /// [minExtent], within the incoming bounds.
+  BoxConstraints _atMinExtent(BoxConstraints constraints) {
+    final double extent = _vertical
+        ? constraints.constrainHeight(max(minExtent, constraints.minHeight))
+        : constraints.constrainWidth(max(minExtent, constraints.minWidth));
+    return _vertical
+        ? constraints.copyWith(minHeight: extent, maxHeight: extent)
+        : constraints.copyWith(minWidth: extent, maxWidth: extent);
+  }
+
+  // A dry layout cannot see where positioned children end, so it reports the
+  // starting length.
+  @override
+  Size computeDryLayout(BoxConstraints constraints) =>
+      super.computeDryLayout(_atMinExtent(constraints));
+
+  @override
+  void performLayout() {
+    final double maxMain = _vertical
+        ? constraints.maxHeight
+        : constraints.maxWidth;
+    double extent = _vertical
+        ? _atMinExtent(constraints).maxHeight
+        : _atMinExtent(constraints).maxWidth;
+    size = _layoutAt(extent);
+    extent = _vertical ? size.height : size.width;
+    final double needed = min(_farthestChildEdge(), maxMain);
+    if (needed > extent + 0.5) {
+      extent = needed;
+      size = _layoutAt(extent);
+    }
   }
 }
