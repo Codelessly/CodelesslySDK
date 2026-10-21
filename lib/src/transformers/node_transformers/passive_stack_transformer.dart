@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
@@ -90,9 +92,6 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     required bool horizontal,
     required bool isScrollAxis,
   }) {
-    final double start = horizontal
-        ? node.outerBoxLocal.x - parent.innerBoxLocal.edgeLeft
-        : node.outerBoxLocal.y - parent.innerBoxLocal.edgeTop;
     final double extent = horizontal
         ? node.outerBoxLocal.width
         : node.outerBoxLocal.height;
@@ -108,6 +107,46 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
             null;
     final bool wraps = fit == SizeFit.shrinkWrap;
     final double? size = wraps || expands ? null : extent;
+
+    // Pins are distances from the parent's middle box; children are laid out
+    // in its padded (inner) box.
+    final EdgePinsModel pins = node.edgePins;
+    final double? startPin = switch (horizontal ? pins.left : pins.top) {
+      final double pin =>
+        pin -
+            (horizontal
+                ? parent.innerBoxLocal.edgeLeft
+                : parent.innerBoxLocal.edgeTop),
+      null => null,
+    };
+    final double? endPin = switch (horizontal ? pins.right : pins.bottom) {
+      final double pin =>
+        pin -
+            (horizontal
+                ? parent.innerBoxLocal.edgeRight
+                : parent.innerBoxLocal.edgeBottom),
+      null => null,
+    };
+    final bool pinnedStart = startPin != null;
+    final bool pinnedEnd = endPin != null;
+
+    // Where the child starts on this axis at design size. A pinned axis is
+    // placed by its pins alone, never by the stored box, which the editor can
+    // leave stale (for example after a canvas resize it did not re-solve).
+    // The stored box origin is only used where the pins are just the design
+    // x/y: align positioning mode with no end pin, and nothing pinned.
+    final bool placedByPins =
+        pinnedEnd || node.positioningMode == PositioningMode.pin;
+    final double start;
+    if (placedByPins && startPin != null) {
+      start = startPin;
+    } else if (placedByPins && endPin != null) {
+      start = parentExtent - endPin - extent;
+    } else {
+      start = horizontal
+          ? node.outerBoxLocal.x - parent.innerBoxLocal.edgeLeft
+          : node.outerBoxLocal.y - parent.innerBoxLocal.edgeTop;
+    }
 
     FreeformAxisPlacement placement(
       FreeformAxisMode mode, {
@@ -133,25 +172,12 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     if (expands) return placement(FreeformAxisMode.fill);
     if (isScrollAxis) return placement(FreeformAxisMode.start);
 
-    final EdgePinsModel pins = node.edgePins;
-    final bool pinnedStart = (horizontal ? pins.left : pins.top) != null;
-    final bool pinnedEnd = (horizontal ? pins.right : pins.bottom) != null;
     final bool parentWraps = horizontal
         ? parent.isHorizontalWrap
         : parent.isVerticalWrap;
 
-    if (pinnedStart && pinnedEnd && !wraps) {
+    if (startPin != null && endPin != null && !wraps) {
       // Chained sizing: the pins decide the extent, not the stored box.
-      final double startPin =
-          (horizontal ? pins.left! : pins.top!) -
-          (horizontal
-              ? parent.innerBoxLocal.edgeLeft
-              : parent.innerBoxLocal.edgeTop);
-      final double endPin =
-          (horizontal ? pins.right! : pins.bottom!) -
-          (horizontal
-              ? parent.innerBoxLocal.edgeRight
-              : parent.innerBoxLocal.edgeBottom);
       final double? minConstraint = horizontal
           ? node.resolvedConstraints.minWidth
           : node.resolvedConstraints.minHeight;
@@ -170,8 +196,16 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
                       : node.outerBoxLocal.verticalEdgeSpace),
       );
     }
-    if (pinnedStart && pinnedEnd && !parentWraps) {
-      return placement(FreeformAxisMode.relative);
+    if (startPin != null && endPin != null && !parentWraps) {
+      // A shrink-wrapping child between two pins keeps the pins' ratio of
+      // the free space around its own size: centred between equal pins.
+      final double pinned = math.max(0, startPin) + math.max(0, endPin);
+      if (pinned > 0) {
+        return placement(
+          FreeformAxisMode.align,
+          alignment: 2 * math.max(0, startPin) / pinned - 1,
+        );
+      }
     }
     if (pinnedEnd && !pinnedStart) return placement(FreeformAxisMode.end);
     if (!pinnedEnd &&
