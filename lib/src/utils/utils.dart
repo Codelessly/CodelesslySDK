@@ -25,14 +25,20 @@ const Set<String> predefinedVariableNames = {
 const String kAppVariablesScope = 'app_variables';
 
 /// The key under which a layout's published variables hold the variables of
-/// its editor page, shared by every screen on that page. The editor stores
-/// them under `'$kPageVariablesScope<pageId>'`.
-const String kPageVariablesScope = '__page__';
+/// its editor page, shared by every screen on that page. Not `__page__`:
+/// Firestore rejects field names that start and end with `__`.
+const String kPageVariablesScope = 'page_variables';
 
-/// Whether [scopeId], a canvas id in variable storage, holds app or page
-/// variables instead of a canvas's.
+/// The editor stores a page's variables under
+/// `'$kPageVariablesStoragePrefix<pageId>'`.
+const String kPageVariablesStoragePrefix = '__page__';
+
+/// Whether [scopeId], a canvas id in variable storage or a published scope
+/// key, holds app or page variables instead of a canvas's.
 bool isSharedVariablesScope(String scopeId) =>
-    scopeId == kAppVariablesScope || scopeId.startsWith(kPageVariablesScope);
+    scopeId == kAppVariablesScope ||
+    scopeId == kPageVariablesScope ||
+    scopeId.startsWith(kPageVariablesStoragePrefix);
 
 const Set<String> predefinedListenableVariableNames = {'storage', 'auth'};
 
