@@ -300,18 +300,23 @@ void main() {
   });
 
   group('wrapping stacks', () {
-    testWidgets('size to their children plus the pins', (tester) async {
-      final a = rect('a', NodeBox(10, 20, 100, 40), parent: 'wrap');
+    // What the editor's solver settles on (run through the real solver in
+    // the editor's position_manager tests): a wrapping frame is as large as
+    // its largest child, and children are clamped inside it.
+    testWidgets('size to their largest child, as the editor solves them', (
+      tester,
+    ) async {
+      final a = rect('a', NodeBox(0, 0, 100, 40), parent: 'wrap');
       final b = rect('b', NodeBox(30, 5, 50, 30), parent: 'wrap');
       final c = rect(
         'c',
-        NodeBox(55, 35, 30, 30),
+        NodeBox(70, 10, 30, 30),
         parent: 'wrap',
         alignment: AlignmentModel.bottomRight,
       );
       final wrap = frame(
         'wrap',
-        NodeBox(0, 0, 110, 60),
+        NodeBox(0, 0, 100, 40),
         [a, b, c],
         horizontalFit: SizeFit.shrinkWrap,
         verticalFit: SizeFit.shrinkWrap,
@@ -325,16 +330,40 @@ void main() {
           host: Host.loose,
         );
         final Offset origin = rects['wrap']!.topLeft;
-        expect(rects['wrap']!.size, const Size(110, 60));
-        expect(
-          rects['a']!.shift(-origin),
-          const Rect.fromLTWH(10, 20, 100, 40),
-        );
+        expect(rects['wrap']!.size, const Size(100, 40));
+        expect(rects['a']!.shift(-origin), const Rect.fromLTWH(0, 0, 100, 40));
         expect(rects['b']!.shift(-origin), const Rect.fromLTWH(30, 5, 50, 30));
-        // Aligned in the wrapped size, not frozen at design offsets.
-        expect(rects['c']!.shift(-origin), const Rect.fromLTWH(80, 30, 30, 30));
+        expect(rects['c']!.shift(-origin), const Rect.fromLTWH(70, 10, 30, 30));
       }
     });
+
+    testWidgets(
+      'clamp a child whose offset would leak out, as the editor does',
+      (tester) async {
+        // The solver sizes this frame to 60x40 and moves the child from 10,10
+        // to 0,0 (FreeFormPositionEditor clamps children of wrapping frames).
+        final a = rect('a', NodeBox(10, 10, 60, 40), parent: 'wrap');
+        final wrap = frame(
+          'wrap',
+          NodeBox(0, 0, 200, 200),
+          [a],
+          horizontalFit: SizeFit.shrinkWrap,
+          verticalFit: SizeFit.shrinkWrap,
+        );
+        for (final screen in screens) {
+          final rects = await pump(
+            tester,
+            wrap,
+            [a],
+            screen: screen,
+            host: Host.loose,
+          );
+          final Offset origin = rects['wrap']!.topLeft;
+          expect(rects['wrap']!.size, const Size(60, 40));
+          expect(rects['a']!.shift(-origin), const Rect.fromLTWH(0, 0, 60, 40));
+        }
+      },
+    );
 
     testWidgets('keep the size of their visible children when the largest '
         'collapses', (tester) async {
@@ -377,7 +406,7 @@ void main() {
         ),
       );
       expect(tester.takeException(), isNull);
-      expect(tester.getSize(find.byKey(key)), const Size(60, 60));
+      expect(tester.getSize(find.byKey(key)), const Size(50, 50));
     });
   });
 
