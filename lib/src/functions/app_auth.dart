@@ -64,7 +64,7 @@ abstract final class AppAuth {
   /// Performs [action]. Throws when it fails, so the actions after it in the
   /// chain don't run, after writing the message to its error variable.
   static Future<bool> perform(BuildContext context, AuthAction action) async {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final Codelessly codelessly = context.read<Codelessly>();
     final CodelesslyContext codelesslyContext = context
         .read<CodelesslyContext>();

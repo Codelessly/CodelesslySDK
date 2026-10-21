@@ -26,13 +26,29 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///  - `+ - * / %`, comparisons `== != < <= > >=`, `&& || !` and
 ///    `condition ? a : b`. `+` joins text when either side is text.
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
-///    length, if, plural, join, upper, lower, contains, where, without,
-///    number, text, isEmpty and isNotEmpty. See [FormulaEvaluator.functions].
+///    length, if, plural, join, upper, lower, trim, contains, startsWith,
+///    endsWith, where, without, number, text, isEmpty and isNotEmpty. See
+///    [FormulaEvaluator.functions].
+///  - list functions that take a predicate or key: filter, where, count,
+///    find, any, all, map, sortBy, unique, sum and join. The predicate is a
+///    lambda, `item => expression`, or a field name, optionally with a value
+///    to match, e.g. `filter(tasks, t => contains(lower(t.title), q))`,
+///    `filter(tasks, 'done')` or `count(tasks, 'done', false)`. A lambda's
+///    parameter is read like a variable inside its body (`t.title`,
+///    `t.tags[0]`, `t.tags.length`) and hides a variable of the same name;
+///    the body can read every other variable. Lambdas are only allowed as
+///    function arguments.
 ///  - date functions: now, today, parseDate, formatDate, addMinutes, addHours,
 ///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
 ///    hour, minute and weekday. Dates are ISO 8601 text such as
 ///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
 ///    milliseconds or a Firestore timestamp.
+///  - date-aware comparisons: `== != < <= > >=` compare as dates when one
+///    side is a date (ISO 8601 text such as `2026-10-21` or
+///    `2026-10-21T09:00:00Z`, a DateTime or a timestamp) and the other reads
+///    as one, so `t.due <= today()` and `t.due == today()` work even when
+///    `t.due` is a date without a time or a Firestore timestamp. A missing
+///    date is neither before nor after a date.
 ///
 /// Null counts as 0 in arithmetic and as empty text when joining text. An
 /// invalid expression evaluates to null.
@@ -162,11 +178,15 @@ class FormulaEvaluator {
     FormulaFunctionDoc('abs', 'abs(value)', 'abs(-3) → 3'),
     FormulaFunctionDoc('min', 'min(a, b, …) or min(list)', 'min(3, 7) → 3'),
     FormulaFunctionDoc('max', 'max(a, b, …) or max(list)', 'max(3, 7) → 7'),
-    FormulaFunctionDoc('sum', 'sum(list, field)', 'sum(cart, "price") → 24'),
+    FormulaFunctionDoc(
+      'sum',
+      'sum(list, field or item => value)',
+      'sum(cart, i => i.price * i.qty) → 24',
+    ),
     FormulaFunctionDoc(
       'count',
-      'count(list, field, value)',
-      'count(tasks, "done", true) → 2',
+      'count(list, item => condition) or count(list, field, value)',
+      'count(tasks, t => !t.done) → 2',
     ),
     FormulaFunctionDoc('length', 'length(text or list)', 'length(cart) → 3'),
     FormulaFunctionDoc(
@@ -181,20 +201,66 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'join',
-      'join(list, separator, field)',
+      'join(list, separator, field or item => value)',
       'join(tags, " · ")',
     ),
     FormulaFunctionDoc('upper', 'upper(text)', 'upper("hi") → HI'),
     FormulaFunctionDoc('lower', 'lower(text)', 'lower("Hi") → hi'),
+    FormulaFunctionDoc('trim', 'trim(text)', 'trim("  hi ") → hi'),
     FormulaFunctionDoc(
       'contains',
       'contains(text or list, value)',
-      'contains(tags, "new") → true',
+      'contains(lower(title), lower(search)) → true',
+    ),
+    FormulaFunctionDoc(
+      'startsWith',
+      'startsWith(text, prefix)',
+      'startsWith("Buy milk", "Buy") → true',
+    ),
+    FormulaFunctionDoc(
+      'endsWith',
+      'endsWith(text, suffix)',
+      'endsWith("photo.png", ".png") → true',
+    ),
+    FormulaFunctionDoc(
+      'filter',
+      'filter(list, item => condition) or filter(list, field, value)',
+      'filter(tasks, t => contains(lower(t.title), lower(search)))',
     ),
     FormulaFunctionDoc(
       'where',
-      'where(list, field, value)',
+      'where(list, field, value) or where(list, item => condition)',
       'where(tasks, "done", false)',
+    ),
+    FormulaFunctionDoc(
+      'find',
+      'find(list, item => condition) or find(list, field, value)',
+      'find(users, u => u.id == userId)',
+    ),
+    FormulaFunctionDoc(
+      'any',
+      'any(list, item => condition) or any(list, field, value)',
+      'any(tasks, t => t.due < today()) → true',
+    ),
+    FormulaFunctionDoc(
+      'all',
+      'all(list, item => condition) or all(list, field, value)',
+      'all(tasks, "done") → false',
+    ),
+    FormulaFunctionDoc(
+      'map',
+      'map(list, field or item => value)',
+      'map(cart, i => i.price * i.qty) → [8, 16]',
+    ),
+    FormulaFunctionDoc(
+      'sortBy',
+      'sortBy(list, field or item => key, "desc")',
+      'sortBy(tasks, "due") (missing keys last)',
+    ),
+    FormulaFunctionDoc(
+      'unique',
+      'unique(list, field or item => key)',
+      'unique(tags) or unique(tasks, "category")',
     ),
     FormulaFunctionDoc(
       'without',
@@ -321,6 +387,9 @@ num _tidy(num value) =>
 
 bool _looseEquals(Object? a, Object? b) {
   if (a == null || b == null) return a == b;
+  if (_asDates(a, b) case (final DateTime da, final DateTime db)) {
+    return da.isAtSameMomentAs(db);
+  }
   final num? na = a is String ? num.tryParse(a) : _toNum(a);
   final num? nb = b is String ? num.tryParse(b) : _toNum(b);
   if ((a is num || b is num) && na != null && nb != null) return na == nb;
@@ -328,7 +397,16 @@ bool _looseEquals(Object? a, Object? b) {
   return a.toString() == b.toString();
 }
 
-int _compare(Object? a, Object? b) {
+/// Orders [a] and [b]: as dates when [_asDates] reads them as dates, as
+/// numbers when both read as numbers, else as text. Null when they can't be
+/// ordered: a missing value against a date.
+int? _compare(Object? a, Object? b) {
+  if (_asDates(a, b) case (final DateTime da, final DateTime db)) {
+    return da.compareTo(db);
+  }
+  if ((a == null && _isDateLike(b)) || (b == null && _isDateLike(a))) {
+    return null;
+  }
   final num? na = a is String ? num.tryParse(a) : _toNum(a);
   final num? nb = b is String ? num.tryParse(b) : _toNum(b);
   if (na != null && nb != null) return na.compareTo(nb);
@@ -384,11 +462,106 @@ num _round(Object? value, Object? digits) {
   return _tidy((v * factor).round() / factor);
 }
 
-/// Values of [list], or of each item's [field] when given.
-Iterable<Object?> _values(Object? list, Object? field) {
+/// Values of [list], or of each item's [selector] when given: a field name
+/// such as `'price'` or `'author.name'`, or a lambda such as `t => t.price`.
+Iterable<Object?> _values(Object? list, Object? selector) {
   if (list is! Iterable) return const [];
-  if (field == null) return list;
-  return list.map((item) => _member(item, field));
+  if (selector == null) return list;
+  return list.map((item) => _select(item, selector));
+}
+
+/// [item]'s value for [selector]: the item itself when null, the lambda's
+/// result for a lambda, else the field [selector] names. A field name with
+/// dots, such as `author.name`, reads nested fields.
+Object? _select(Object? item, Object? selector) {
+  if (selector == null) return item;
+  if (selector is _Closure) return selector(item);
+  final Object? value = _member(item, selector);
+  if (value != null || selector is! String || !selector.contains('.')) {
+    return value;
+  }
+  return selector.split('.').fold(item, _member);
+}
+
+/// Whether [item] matches a predicate given as function arguments [rest]:
+/// `(lambda)` or `(field)` match when truthy, `(lambda or field, value)`
+/// when the selected value equals value. No predicate matches truthy items.
+bool _matches(Object? item, List<Object?> rest) => rest.length < 2
+    ? _truthy(_select(item, _arg(rest, 0)))
+    : _looseEquals(_select(item, rest[0]), rest[1]);
+
+/// Items of `args[0]` that match the predicate in the rest of [args].
+Iterable<Object?> _matching(List<Object?> args) {
+  final List<Object?> rest = args.skip(1).toList();
+  return _values(_arg(args, 0), null).where((item) => _matches(item, rest));
+}
+
+/// Items of `args[0]` sorted by the key `args[1]`, descending when `args[2]`
+/// is `'desc'`. Equal keys keep their order and missing keys go last.
+List<Object?> _sortBy(List<Object?> args) {
+  final List<Object?> items = _values(_arg(args, 0), null).toList();
+  final Object? selector = _arg(args, 1);
+  final bool descending = switch (_arg(args, 2)) {
+    final String order => order.trim().toLowerCase().startsWith('desc'),
+    _ => false,
+  };
+  final List<(int, Object?, Object?)> keyed = [
+    for (int i = 0; i < items.length; i++)
+      (i, items[i], _select(items[i], selector)),
+  ];
+  keyed.sort((x, y) {
+    final bool xMissing = x.$3 == null || x.$3 == '';
+    final bool yMissing = y.$3 == null || y.$3 == '';
+    if (xMissing || yMissing) {
+      return xMissing == yMissing ? x.$1 - y.$1 : (xMissing ? 1 : -1);
+    }
+    final int order = _compare(x.$3, y.$3) ?? 0;
+    if (order != 0) return descending ? -order : order;
+    return x.$1 - y.$1;
+  });
+  return [for (final entry in keyed) entry.$2];
+}
+
+/// Items of `args[0]` without repeats, keeping the first of each; repeats
+/// are judged by the key `args[1]` when given.
+List<Object?> _unique(List<Object?> args) {
+  final List<Object?> keys = [];
+  final List<Object?> items = [];
+  for (final item in _values(_arg(args, 0), null)) {
+    final Object? key = _select(item, _arg(args, 1));
+    if (keys.any((seen) => _looseEquals(seen, key))) continue;
+    keys.add(key);
+    items.add(item);
+  }
+  return items;
+}
+
+/// A lambda such as `t => t.price`, ready to call with an item.
+class _Closure {
+  final String param;
+  final _Node body;
+  final FormulaPathResolver outer;
+
+  const _Closure(this.param, this.body, this.outer);
+
+  static final RegExp _part = RegExp(r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]');
+
+  Object? call(Object? value) => body.eval((path) {
+    if (path == param) return value;
+    if (path.startsWith(param) &&
+        (path.startsWith('.', param.length) ||
+            path.startsWith('[', param.length))) {
+      Object? result = value;
+      for (final Match part in _part.allMatches(path, param.length)) {
+        result = _member(result, part[1] ?? int.parse(part[2]!));
+      }
+      return result;
+    }
+    return outer(path);
+  });
+
+  @override
+  String toString() => '';
 }
 
 // ---------------------------------------------------------------------------
@@ -429,6 +602,47 @@ DateTime? _toDate(Object? value) {
   } catch (_) {
     return null;
   }
+}
+
+/// ISO 8601 dates and date-times, such as `2026-10-21`,
+/// `2026-10-21T14:30:00.000` or `2026-10-21 14:30Z`.
+final RegExp _isoDate = RegExp(
+  r'^\d{4}-\d{2}-\d{2}'
+  r'(?:[T ]\d{2}:\d{2}(?::\d{2}(?:[.,]\d+)?)?\s*(?:Z|[+-]\d{2}(?::?\d{2})?)?)?$',
+);
+
+/// Whether [value] is a date in itself: ISO 8601 text, a [DateTime] or a
+/// timestamp. Numbers aren't: they only read as dates against a date.
+bool _isDateLike(Object? value) {
+  switch (value) {
+    case null || num() || bool() || Iterable():
+      return false;
+    case DateTime():
+      return true;
+    case String():
+      return _isoDate.hasMatch(value.trim());
+    case Map():
+      return (value.containsKey('seconds') &&
+              value.containsKey('nanoseconds')) ||
+          (value.containsKey('_seconds') && value.containsKey('_nanoseconds'));
+  }
+  try {
+    return (value as dynamic).toDate() is DateTime;
+  } catch (_) {
+    return false;
+  }
+}
+
+/// [a] and [b] as dates when one is a date (see [_isDateLike]) and the other
+/// reads as one too, else null.
+(DateTime, DateTime)? _asDates(Object? a, Object? b) {
+  if (a == null || b == null) return null;
+  if (a is num && b is num) return null;
+  if (!_isDateLike(a) && !_isDateLike(b)) return null;
+  final DateTime? da = _toDate(a);
+  final DateTime? db = _toDate(b);
+  if (da == null || db == null) return null;
+  return (da, db);
 }
 
 /// Writes [date] as ISO 8601 text, the form formulas pass dates around in.
@@ -588,13 +802,8 @@ final Map<String, _Function> _functions = {
   'sum': (a) => _tidy(
     _values(_arg(a, 0), _arg(a, 1)).fold<num>(0, (s, v) => s + _num(v)),
   ),
-  'count': (a) {
-    if (a.length < 3) return _values(_arg(a, 0), null).length;
-    return _values(
-      _arg(a, 0),
-      _arg(a, 1),
-    ).where((v) => _looseEquals(v, _arg(a, 2))).length;
-  },
+  'count': (a) =>
+      a.length < 2 ? _values(_arg(a, 0), null).length : _matching(a).length,
   'length': (a) => switch (_arg(a, 0)) {
     final String s => s.length,
     final Iterable l => l.length,
@@ -610,19 +819,32 @@ final Map<String, _Function> _functions = {
       .join((_arg(a, 1) ?? ', ').toString()),
   'upper': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toUpperCase(),
   'lower': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toLowerCase(),
+  'trim': (a) => FormulaEvaluator.stringify(_arg(a, 0)).trim(),
+  'startsWith': (a) => switch (_arg(a, 0)) {
+    final String s => s.startsWith(FormulaEvaluator.stringify(_arg(a, 1))),
+    _ => false,
+  },
+  'endsWith': (a) => switch (_arg(a, 0)) {
+    final String s => s.endsWith(FormulaEvaluator.stringify(_arg(a, 1))),
+    _ => false,
+  },
   'contains': (a) => switch (_arg(a, 0)) {
     final String s => s.contains(FormulaEvaluator.stringify(_arg(a, 1))),
     final Iterable l => l.any((v) => _looseEquals(v, _arg(a, 1))),
     final Map m => m.containsKey(_arg(a, 1)),
     _ => false,
   },
-  'where': (a) => [
-    for (final item in _values(_arg(a, 0), null))
-      if (a.length < 3
-          ? _truthy(_member(item, _arg(a, 1)))
-          : _looseEquals(_member(item, _arg(a, 1)), _arg(a, 2)))
-        item,
-  ],
+  'where': (a) => _matching(a).toList(),
+  'filter': (a) => _matching(a).toList(),
+  'find': (a) => _matching(a).firstOrNull,
+  'any': (a) => _matching(a).isNotEmpty,
+  'all': (a) {
+    final List<Object?> rest = a.skip(1).toList();
+    return _values(_arg(a, 0), null).every((item) => _matches(item, rest));
+  },
+  'map': (a) => _values(_arg(a, 0), _arg(a, 1)).toList(),
+  'sortBy': _sortBy,
+  'unique': _unique,
   'without': (a) => [
     for (final item in _values(_arg(a, 0), null))
       if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
@@ -750,6 +972,34 @@ class _Call extends _Node {
   }
 }
 
+/// A lambda argument, `param => body`. Evaluates to a [_Closure] that list
+/// functions call once per item.
+class _Lambda extends _Node {
+  final String param;
+  final _Node body;
+
+  const _Lambda(this.param, this.body);
+
+  @override
+  Object? eval(FormulaPathResolver resolve) => _Closure(param, body, resolve);
+
+  /// The body's paths, except those of the parameter, which aren't
+  /// variables.
+  @override
+  void collectPaths(Set<String> paths) {
+    final Set<String> bodyPaths = {};
+    body.collectPaths(bodyPaths);
+    paths.addAll(
+      bodyPaths.where(
+        (path) =>
+            path != param &&
+            !path.startsWith('$param.') &&
+            !path.startsWith('$param['),
+      ),
+    );
+  }
+}
+
 class _Unary extends _Node {
   final String op;
   final _Node operand;
@@ -799,14 +1049,15 @@ class _Binary extends _Node {
         return _looseEquals(a, b);
       case '!=':
         return !_looseEquals(a, b);
-      case '<':
-        return _compare(a, b) < 0;
-      case '<=':
-        return _compare(a, b) <= 0;
-      case '>':
-        return _compare(a, b) > 0;
-      case '>=':
-        return _compare(a, b) >= 0;
+      case '<' || '<=' || '>' || '>=':
+        final int? order = _compare(a, b);
+        if (order == null) return false;
+        return switch (op) {
+          '<' => order < 0,
+          '<=' => order <= 0,
+          '>' => order > 0,
+          _ => order >= 0,
+        };
     }
     return null;
   }
@@ -850,6 +1101,9 @@ class _Parser {
 
   static final RegExp _number = RegExp(r'\d+(\.\d+)?|\.\d+');
   static final RegExp _identifier = RegExp(r'[a-zA-Z_][a-zA-Z0-9_]*');
+  static final RegExp _lambdaHead = RegExp(
+    r'(?:([a-zA-Z_][a-zA-Z0-9_]*)|\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\))\s*=>',
+  );
 
   _Node parseAll() {
     final _Node node = _ternary();
@@ -880,6 +1134,16 @@ class _Parser {
 
   void _expect(String token) {
     if (!_eat(token)) throw FormatException('Expected "$token"', source, pos);
+  }
+
+  /// A function argument: an expression, or a lambda `item => expression`
+  /// (also written `(item) => expression`).
+  _Node _argument() {
+    _skip();
+    final Match? head = _lambdaHead.matchAsPrefix(source, pos);
+    if (head == null) return _ternary();
+    pos = head.end;
+    return _Lambda(head[1] ?? head[2]!, _ternary());
   }
 
   _Node _ternary() {
@@ -1031,7 +1295,7 @@ class _Parser {
       final List<_Node> args = [];
       if (!_eat(')')) {
         do {
-          args.add(_ternary());
+          args.add(_argument());
         } while (_eat(','));
         _expect(')');
       }

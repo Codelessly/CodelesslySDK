@@ -6,6 +6,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../functions/action_chain.dart';
 import '../logging/stat_tracker.dart';
 import 'codelessly_error_screen.dart';
 import 'codelessly_loading_screen.dart';
@@ -626,47 +627,52 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         ),
         Provider<Codelessly>.value(value: codelessly),
       ],
-      child: StreamBuilder<CStatus>(
-        stream: codelessly.statusStream,
-        initialData: codelessly.status,
-        builder: (context, snapshot) {
-          Widget loading() =>
-              _effectiveLoadingBuilder?.call(context) ??
-              const CodelesslyLoadingScreen();
+      // Action chains started in this layout finish with this context when
+      // the widget that started them unmounts, e.g. a list row whose
+      // document the chain removed.
+      child: ActionChainHost(
+        child: StreamBuilder<CStatus>(
+          stream: codelessly.statusStream,
+          initialData: codelessly.status,
+          builder: (context, snapshot) {
+            Widget loading() =>
+                _effectiveLoadingBuilder?.call(context) ??
+                const CodelesslyLoadingScreen();
 
-          Widget error(Object? error) {
-            final ErrorLog errorLog;
-            if (_lastError != null) {
-              errorLog = _lastError!;
-            } else {
-              errorLog = ErrorLog(
-                timestamp: DateTime.now(),
-                message: error?.toString() ?? 'Unknown error',
-                type: 'build_error',
-              );
+            Widget error(Object? error) {
+              final ErrorLog errorLog;
+              if (_lastError != null) {
+                errorLog = _lastError!;
+              } else {
+                errorLog = ErrorLog(
+                  timestamp: DateTime.now(),
+                  message: error?.toString() ?? 'Unknown error',
+                  type: 'build_error',
+                );
+              }
+
+              return _effectiveErrorBuilder?.call(context, errorLog) ??
+                  CodelesslyErrorScreen(
+                    errors: [errorLog],
+                    publishSource: _effectiveController.publishSource,
+                  );
             }
 
-            return _effectiveErrorBuilder?.call(context, errorLog) ??
-                CodelesslyErrorScreen(
-                  errors: [errorLog],
-                  publishSource: _effectiveController.publishSource,
-                );
-          }
+            if (snapshot.hasError) return error(snapshot.error);
+            if (!snapshot.hasData) return loading();
 
-          if (snapshot.hasError) return error(snapshot.error);
-          if (!snapshot.hasData) return loading();
-
-          final CStatus status = snapshot.data!;
-          return switch (status) {
-            CEmpty() || CConfigured() => loading(),
-            CError(message: final msg) => error(msg),
-            CLoading(state: CLoadingState state) =>
-              state.hasPassed(CLoadingState.createdManagers)
-                  ? buildStreamedLayout()
-                  : loading(),
-            CLoaded() => buildStreamedLayout(),
-          };
-        },
+            final CStatus status = snapshot.data!;
+            return switch (status) {
+              CEmpty() || CConfigured() => loading(),
+              CError(message: final msg) => error(msg),
+              CLoading(state: CLoadingState state) =>
+                state.hasPassed(CLoadingState.createdManagers)
+                    ? buildStreamedLayout()
+                    : loading(),
+              CLoaded() => buildStreamedLayout(),
+            };
+          },
+        ),
       ),
     );
   }
