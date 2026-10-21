@@ -141,7 +141,34 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         : parent.isVerticalWrap;
 
     if (pinnedStart && pinnedEnd && !wraps) {
-      return placement(FreeformAxisMode.stretch);
+      // Chained sizing: the pins decide the extent, not the stored box.
+      final double startPin =
+          (horizontal ? pins.left! : pins.top!) -
+          (horizontal
+              ? parent.innerBoxLocal.edgeLeft
+              : parent.innerBoxLocal.edgeTop);
+      final double endPin =
+          (horizontal ? pins.right! : pins.bottom!) -
+          (horizontal
+              ? parent.innerBoxLocal.edgeRight
+              : parent.innerBoxLocal.edgeBottom);
+      final double? minConstraint = horizontal
+          ? node.resolvedConstraints.minWidth
+          : node.resolvedConstraints.minHeight;
+      return FreeformAxisPlacement(
+        mode: FreeformAxisMode.stretch,
+        start: startPin,
+        extent: parentExtent - startPin - endPin,
+        parentExtent: parentExtent,
+        clamp: !isScrollAxis,
+        growsWithContent: node is TextNode,
+        minSize: minConstraint == null
+            ? 0
+            : minConstraint +
+                  (horizontal
+                      ? node.outerBoxLocal.horizontalEdgeSpace
+                      : node.outerBoxLocal.verticalEdgeSpace),
+      );
     }
     if (pinnedStart && pinnedEnd && !parentWraps) {
       return placement(FreeformAxisMode.relative);
