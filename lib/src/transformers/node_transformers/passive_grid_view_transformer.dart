@@ -74,10 +74,26 @@ class PassiveGridViewWidget extends StatelessWidget {
     );
   }
 
+  /// Sizes the grid by [ViewportLayout] around [builder].
+  Widget box(ViewportContentBuilder builder, {required bool canShrinkWrap}) =>
+      ViewportNodeBox(
+        node: node,
+        scrollDirection: node.scrollDirection,
+        canShrinkWrap: canShrinkWrap,
+        builder: builder,
+      );
+
+  /// The cross extent of one cell as the editor drew it, the same size the
+  /// editor constrains the item node to.
+  double get designCellExtent => node.calculateCrossAxisExtent(
+    node.scrollDirection,
+    node.innerBoxLocal.size,
+  );
+
   @override
   Widget build(BuildContext context) {
     if (node.children.isEmpty) {
-      return AdaptiveNodeBox(node: node, child: const SizedBox());
+      return box(canShrinkWrap: true, (context, _) => const SizedBox());
     }
     final itemNode = node.children.first;
 
@@ -87,18 +103,26 @@ class PassiveGridViewWidget extends StatelessWidget {
       final codelesslyController = context.read<CodelesslyWidgetController>();
 
       if (codelessly.authManager.authData == null) {
-        return codelesslyController.loadingBuilder?.call(context) ??
-            const Center(child: CircularProgressIndicator());
+        return box(
+          canShrinkWrap: true,
+          (context, _) =>
+              codelesslyController.loadingBuilder?.call(context) ??
+              const Center(child: CircularProgressIndicator()),
+        );
       }
 
       final query = constructQuery(context, codelessly);
       if (query == null) {
-        return AdaptiveNodeBox(node: node, child: const SizedBox.shrink());
+        return box(
+          canShrinkWrap: true,
+          (context, _) => const SizedBox.shrink(),
+        );
       }
 
-      return AdaptiveNodeBox(
-        node: node,
-        child: FirestoreQueryBuilder<Map<String, dynamic>>(
+      // A loaded query always has a known length, so it can shrink-wrap.
+      return box(
+        canShrinkWrap: true,
+        (context, shrinkWrap) => FirestoreQueryBuilder<Map<String, dynamic>>(
           query: query,
           pageSize: node.limit ?? 20,
           builder: (context, snapshot, child) {
@@ -125,11 +149,8 @@ class PassiveGridViewWidget extends StatelessWidget {
             return GridViewBuilder(
               primary: node.primary,
               gridDelegate: node.properties.gridDelegate,
-              shrinkWrap:
-                  node.properties.itemCount != null &&
-                  (node.scrollDirection == AxisC.horizontal
-                      ? node.isHorizontalWrap
-                      : node.isVerticalWrap),
+              designCellExtent: designCellExtent,
+              shrinkWrap: shrinkWrap,
               itemCount: itemCount,
               padding: node.padding.flutterEdgeInsets,
               keyboardDismissBehavior:
@@ -190,16 +211,15 @@ class PassiveGridViewWidget extends StatelessWidget {
       itemCount = data?.length ?? node.properties.itemCount;
     }
 
-    return AdaptiveNodeBox(
-      node: node,
-      child: GridViewBuilder(
+    // Nested in another scroll view, the grid is bounded by its own fit or
+    // shrink-wraps; see [ViewportLayout].
+    return box(
+      canShrinkWrap: itemCount != null,
+      (context, shrinkWrap) => GridViewBuilder(
         primary: node.primary,
         gridDelegate: node.properties.gridDelegate,
-        shrinkWrap:
-            itemCount != null &&
-            (node.scrollDirection == AxisC.horizontal
-                ? node.isHorizontalWrap
-                : node.isVerticalWrap),
+        designCellExtent: designCellExtent,
+        shrinkWrap: shrinkWrap,
         itemCount: itemCount,
         padding: node.padding.flutterEdgeInsets,
         keyboardDismissBehavior:
@@ -246,10 +266,16 @@ class GridViewBuilder extends StatelessWidget {
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
   final GridDelegateProperties gridDelegate;
 
+  /// The cross extent of one cell at the design size. With a fixed cross
+  /// axis count, the grid keeps cells at least this wide; see
+  /// [DesignCellGridDelegate]. Null keeps the count at every size.
+  final double? designCellExtent;
+
   const GridViewBuilder({
     super.key,
     required this.shrinkWrap,
     required this.gridDelegate,
+    this.designCellExtent,
     this.itemCount,
     this.padding,
     this.physics,
@@ -281,8 +307,9 @@ class GridViewBuilder extends StatelessWidget {
         keyboardDismissBehavior: keyboardDismissBehavior,
         gridDelegate: switch (gridDelegate) {
           FixedCrossAxisCountGridDelegateProperties props =>
-            SliverGridDelegateWithFixedCrossAxisCount(
+            DesignCellGridDelegate(
               crossAxisCount: props.crossAxisCount,
+              designCellExtent: designCellExtent ?? 0,
               crossAxisSpacing: props.crossAxisSpacing,
               mainAxisSpacing: props.mainAxisSpacing,
               childAspectRatio: props.childAspectRatio,
