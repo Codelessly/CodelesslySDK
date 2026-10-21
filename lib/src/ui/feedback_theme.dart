@@ -139,7 +139,7 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
               // Buttons count more than other tappable shapes.
               vote(
                 primaryVotes,
-                properties.buttonColor.toFlutterColor().toARGB32(),
+                properties.effectiveButtonColor.toFlutterColor().toARGB32(),
                 3,
               );
             case ButtonTypeEnum.text ||
