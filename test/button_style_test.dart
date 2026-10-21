@@ -26,13 +26,15 @@ Future<void> pumpNode(
     ChangeNotifierProvider<CodelesslyContext>.value(
       value: codelesslyContext ?? CodelesslyContext.empty(),
       child: MaterialApp(
-        home: Align(
-          alignment: Alignment.topLeft,
-          child: Builder(
-            builder: (context) => manager.buildWidgetFromNode(
-              node,
-              context,
-              settings: const WidgetBuildSettings(debugLabel: 'test'),
+        home: Material(
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Builder(
+              builder: (context) => manager.buildWidgetFromNode(
+                node,
+                context,
+                settings: const WidgetBuildSettings(debugLabel: 'test'),
+              ),
             ),
           ),
         ),
@@ -79,7 +81,18 @@ void main() {
     }
   });
 
-  test('Chip, badge, tab and segment labels are listened to', () {
+  test('Every text-bearing property is listened to, reactions are not', () {
+    final ButtonNode node = button(ButtonProperties(label: r'${a} items'))
+      ..reactions.add(
+        Reaction(
+          trigger: TriggerModel(type: TriggerType.click),
+          action: SetVariableAction(
+            variable: VariableData(id: 'b', name: 'b'),
+            newValue: r'${c}',
+          ),
+        ),
+      );
+    expect(inlineTextTemplatesOf(node), [r'${a} items']);
     expect(
       inlineTextTemplatesOf(
         TabBarNode(
@@ -87,12 +100,53 @@ void main() {
           name: 'Tabs',
           basicBoxLocal: NodeBox(0, 0, 100, 40),
           properties: TabBarProperties(
-            tabs: [TabItem(id: 'a', label: r'${a}')],
+            tabs: [
+              TabItem(id: 'a', label: r'${a}'),
+              TabItem(id: 'b', label: 'Plain'),
+            ],
           ),
         ),
       ),
       [r'${a}'],
     );
+    expect(
+      inlineTextTemplatesOf(
+        TextFieldNode(
+          id: 'field',
+          name: 'Field',
+          basicBoxLocal: NodeBox(0, 0, 200, 48),
+          properties: TextFieldProperties(
+            decoration: InputDecorationModel(hintText: r'Search ${scope}'),
+          ),
+        ),
+      ),
+      [r'Search ${scope}'],
+    );
+  });
+
+  testWidgets('A text field hint with a variable re-renders', (tester) async {
+    final Observable<VariableData> scope = Observable(
+      VariableData(id: 'scope', name: 'scope', value: 'tasks'),
+    );
+    final CodelesslyContext codelesslyContext = CodelesslyContext.empty()
+      ..variables['scope'] = scope;
+    await pumpNode(
+      tester,
+      TextFieldNode(
+        id: 'field',
+        name: 'Field',
+        basicBoxLocal: NodeBox(0, 0, 200, 48),
+        properties: TextFieldProperties(
+          decoration: InputDecorationModel(hintText: r'Search ${scope}'),
+        ),
+      )..parentID = kRootNode,
+      codelesslyContext: codelesslyContext,
+    );
+    expect(find.text('Search tasks'), findsOneWidget);
+    scope.set(scope.value.copyWith(value: 'projects'));
+    await tester.pump();
+    expect(find.text('Search projects'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   group('Text button background', () {
