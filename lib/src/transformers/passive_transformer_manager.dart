@@ -505,8 +505,10 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
 }
 
 /// The strings of [node] that can hold inline `${...}` variable paths and
-/// formulas: a text's characters and every string in a widget's properties
-/// (a button's label, a field's hint, a tab's label, ...). Reactions are left
+/// formulas: a text's characters, every string in a widget's properties
+/// (a button's label, a field's hint, a tab's label, ...) and a queryable
+/// node's collection path, where filters and order-by filters, so a list
+/// re-queries when a value its query reads changes. Reactions are left
 /// out: their actions read values when they run, not when the node builds.
 /// The widget of [node] listens to every path these read, so it rebuilds when
 /// one of them changes.
@@ -528,5 +530,14 @@ List<String> inlineTextTemplatesOf(BaseNode node) {
 
   if (node is TextNode) collect(node.characters);
   if (node is CustomPropertiesMixin) collect(node.properties.toJson());
+  if (node case final QueryableMixin queryable) {
+    collect(queryable.collectionPath);
+    for (final WhereQueryFilter filter in queryable.whereFilters) {
+      collect(filter.toJson());
+    }
+    for (final OrderByQueryFilter filter in queryable.orderByFilters) {
+      collect(filter.toJson());
+    }
+  }
   return templates;
 }

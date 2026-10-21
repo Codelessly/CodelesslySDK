@@ -124,6 +124,51 @@ void main() {
     );
   });
 
+  test('A cloud list listens to the values its query reads', () {
+    final ListViewNode list =
+        ListViewNode(
+          id: 'tasks',
+          name: 'Tasks',
+          basicBoxLocal: NodeBox(0, 0, 300, 400),
+          properties: ListViewProperties(),
+          children: [],
+        )..setQueryableMixin(
+          useCloudDatabase: true,
+          collectionPath: r'projects/${projectId}/tasks',
+          limit: null,
+          whereFilters: [
+            const WhereQueryFilter(
+              field: 'projectId',
+              operator: WhereQueryOperator.equal,
+              value: r'${projectId}',
+            ),
+            const WhereQueryFilter(
+              field: 'completed',
+              operator: WhereQueryOperator.equal,
+              value: r"${= filter == 'completed'}",
+            ),
+            const WhereQueryFilter(
+              field: 'priority',
+              operator: WhereQueryOperator.equal,
+              value: 'high',
+            ),
+          ],
+          orderByFilters: [],
+        );
+    final List<String> templates = inlineTextTemplatesOf(list);
+    final Set<String> paths = {
+      for (final String template in templates) ...{
+        ...variablePathRegex
+            .allMatches(template)
+            .map((match) => match.namedGroup('value'))
+            .nonNulls,
+        ...FormulaEvaluator.referencedPathsInText(template),
+      },
+    };
+    expect(paths, containsAll(<String>['projectId', 'filter']));
+    expect(templates.any((template) => template.contains('high')), isFalse);
+  });
+
   testWidgets('A text field hint with a variable re-renders', (tester) async {
     final Observable<VariableData> scope = Observable(
       VariableData(id: 'scope', name: 'scope', value: 'tasks'),
