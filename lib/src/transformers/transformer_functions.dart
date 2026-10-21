@@ -642,14 +642,51 @@ bool isCustomPositionRequiredForImage(PaintModel paint, SizeC nodeSize) {
   return imgX == nodeSize.width || imgY == nodeSize.height;
 }
 
+/// Wraps [child] in [node]'s scroll view, sized by [node]'s fits (see
+/// [FitBox]). See [buildScrollView] for [fillViewport] and [flexContent].
 Widget wrapWithPaddedScrollable({
   required ScrollableMixin node,
   EdgeInsets? padding,
   Clip? clipBehavior,
   bool fillViewport = false,
+  bool flexContent = false,
   required Widget child,
 }) {
   if (!node.isScrollable) return child;
+  return FitBox.fromFits(
+    horizontalFit: node.horizontalFit,
+    verticalFit: node.verticalFit,
+    size: node.basicBoxLocal.size,
+    child: buildScrollView(
+      node: node,
+      padding: padding,
+      clipBehavior: clipBehavior,
+      fillViewport: fillViewport,
+      flexContent: flexContent,
+      child: child,
+    ),
+  );
+}
+
+/// The [SingleChildScrollView] of [node], with no size of its own.
+///
+/// The content's main axis is unbounded, as in any scroll view. When
+/// [fillViewport] (a Row/Column that centers or spreads its children) or
+/// [flexContent] (the content has expanded or flexible children, or flex
+/// spacers, along the scroll axis) is set, the content is instead at least as
+/// long as the viewport: `max(viewport, natural length)`, the extent the
+/// editor gives a scrolling Row/Column (see [ScrollContentExtent]). Flex
+/// children then share what is left of the viewport, and take their design
+/// size once the content scrolls.
+Widget buildScrollView({
+  required ScrollableMixin node,
+  EdgeInsets? padding,
+  Clip? clipBehavior,
+  bool fillViewport = false,
+  bool flexContent = false,
+  required Widget child,
+}) {
+  final bool vertical = node.scrollDirection.isVertical;
   Widget scrollView(Widget content) => SingleChildScrollView(
     scrollDirection: node.scrollDirection.flutterAxis,
     reverse: node.reverse,
@@ -661,40 +698,21 @@ Widget wrapWithPaddedScrollable({
     clipBehavior: clipBehavior ?? Clip.hardEdge,
     child: content,
   );
-  // Content at least as long as the viewport, so a column that centers or
-  // spreads its children still does while it fits and scrolls once it
-  // doesn't.
-  final Widget scrollable = !fillViewport
-      ? scrollView(child)
-      : LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            final bool vertical = node.scrollDirection.isVertical;
-            final double extent = vertical
-                ? constraints.maxHeight - (padding?.vertical ?? 0)
-                : constraints.maxWidth - (padding?.horizontal ?? 0);
-            if (!extent.isFinite || extent <= 0) return scrollView(child);
-            return scrollView(
-              ConstrainedBox(
-                constraints: vertical
-                    ? BoxConstraints(minHeight: extent)
-                    : BoxConstraints(minWidth: extent),
-                child: child,
-              ),
-            );
-          },
-        );
-  return SizedBox(
-    width: (node.horizontalFit == SizeFit.shrinkWrap)
-        ? null
-        : (node.horizontalFit == SizeFit.expanded)
-        ? double.infinity
-        : node.basicBoxLocal.width,
-    height: (node.verticalFit == SizeFit.shrinkWrap)
-        ? null
-        : (node.verticalFit == SizeFit.expanded)
-        ? double.infinity
-        : node.basicBoxLocal.height,
-    child: scrollable,
+  if (!fillViewport && !flexContent) return scrollView(child);
+  return LayoutBuilder(
+    builder: (BuildContext context, BoxConstraints constraints) {
+      final double extent = vertical
+          ? constraints.maxHeight - (padding?.vertical ?? 0)
+          : constraints.maxWidth - (padding?.horizontal ?? 0);
+      if (!extent.isFinite || extent <= 0) return scrollView(child);
+      return scrollView(
+        ScrollContentExtent(
+          axis: vertical ? Axis.vertical : Axis.horizontal,
+          viewportExtent: extent,
+          child: child,
+        ),
+      );
+    },
   );
 }
 
