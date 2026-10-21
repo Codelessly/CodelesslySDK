@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import '../logging/error_logger.dart';
 import '../transformers/utils/scoped_values.dart';
 
 /// The state shared by the actions of one chain: the actions a trigger runs
@@ -16,11 +17,17 @@ import '../transformers/utils/scoped_values.dart';
 ///   variables from this capture, so `${item}` stays the item that was
 ///   tapped even when the list rebuilds under the row while an action is
 ///   awaited (e.g. a cloud write that the list streams back).
-/// * the trigger's context and the context of the [ActionChainHost] above
-///   it (the [CodelesslyWidget]'s). When the trigger's widget unmounts mid
-///   chain, e.g. a row that leaves the list after the chain removed its
-///   document, the remaining actions run with the host's context, so toasts,
-///   dialogs and navigation still happen. See [contextFor].
+/// * the trigger's context and the contexts of the [ActionChainHost]s it
+///   runs in: the [CodelesslyWidget]s above it, nearest first, and, for a
+///   layout shown as a dialog or pushed as a page, the hosts of the layout
+///   that opened it (see [ActionChainOpener]). When the trigger's widget
+///   unmounts mid chain, e.g. a row that leaves the list after the chain
+///   removed its document, the remaining actions run with the first host
+///   still mounted, so toasts, dialogs and navigation still happen. See
+///   [contextFor].
+///
+/// Something the chain registers to run later, such as a toast's Undo
+/// button, runs on the same chain through [defer].
 ///
 /// Its [result] is what the `${result}` variable resolves to: the value the
 /// previous action produced (e.g. the id of a document it added), or the
@@ -31,17 +38,17 @@ class ActionChain {
     this.result,
     this.scopedValues,
     this._context,
-    this._hostContext,
+    this._hosts = const [],
   });
 
   /// Creates a chain for a trigger that fired in [context], capturing its
-  /// scope and host.
+  /// scope and hosts.
   factory ActionChain.capture(BuildContext context, {Object? result}) =>
       ActionChain(
         result: result,
         scopedValues: ScopedValues.of(context),
         context: context,
-        hostContext: ActionChainHost.maybeOf(context),
+        hosts: ActionChainHost.hostsOf(context),
       );
 
   /// What `${result}` resolves to.
@@ -53,7 +60,7 @@ class ActionChain {
   final ScopedValues? scopedValues;
 
   final BuildContext? _context;
-  final BuildContext? _hostContext;
+  final List<BuildContext> _hosts;
 
   static const Symbol _zoneKey = #codelesslyActionChain;
 
@@ -72,23 +79,69 @@ class ActionChain {
         : result;
   }
 
+  /// A chain nested in this one: same scope and contexts, its own result.
+  ActionChain _nested(Object? result) => ActionChain(
+    result: result,
+    scopedValues: scopedValues,
+    context: _context,
+    hosts: _hosts,
+  );
+
   /// Runs [body] in a new chain whose `${result}` starts as [result].
   ///
   /// With [context], the chain starts at a trigger: it captures the scope and
-  /// host of [context]. Without it, the chain nests in the current one (a
+  /// hosts of [context]. Without it, the chain nests in the current one (a
   /// for-each's or an upload's actions) and keeps its scope and contexts.
   static R run<R>(R Function() body, {Object? result, BuildContext? context}) {
-    final ActionChain? parent = current;
     final ActionChain chain = context != null
         ? ActionChain.capture(context, result: result)
-        : ActionChain(
-            result: result,
-            scopedValues: parent?.scopedValues,
-            context: parent?._context,
-            hostContext: parent?._hostContext,
-          );
+        : current?._nested(result) ?? ActionChain(result: result);
     return runZoned(body, zoneValues: {_zoneKey: chain});
   }
+
+  /// Wraps [body] as a callback to run later on the current chain, e.g. when
+  /// the user presses a toast's button: [body] then reads the chain's
+  /// captured scope and `${result}` as they were now, and gets the first of
+  /// [context], the chain's trigger and its hosts that is still mounted.
+  ///
+  /// Outside a chain, the chain is captured from [context] now. When none of
+  /// the contexts is mounted any more, the callback reports that [label] did
+  /// not run instead of running [body].
+  static VoidCallback defer(
+    BuildContext context,
+    FutureOr<void> Function(BuildContext context) body, {
+    required String label,
+  }) {
+    final ActionChain chain = current ?? ActionChain.capture(context);
+    final Object? result = chain.result;
+    return () => runZoned(() {
+      final BuildContext? actionContext = contextFor(context);
+      if (actionContext == null) {
+        reportDetached(label);
+        return;
+      }
+      unawaited(
+        Future<void>.sync(() => body(actionContext)).catchError(
+          (Object error, StackTrace stackTrace) =>
+              ErrorLogger.instance.captureException(
+                error,
+                message: '$label failed',
+                type: 'action_failed',
+                stackTrace: stackTrace,
+              ),
+        ),
+      );
+    }, zoneValues: {_zoneKey: chain._nested(result)});
+  }
+
+  /// Reports that [what] did not run because every context its chain could
+  /// run with has unmounted.
+  static void reportDetached(String what) =>
+      ErrorLogger.instance.captureException(
+        'Action chain detached',
+        message: '$what did not run: the screen that started it is gone.',
+        type: 'action_chain_detached',
+      );
 
   /// The scope the running action reads variables from: the one its chain
   /// captured when its trigger fired, or [context]'s outside a chain.
@@ -96,16 +149,14 @@ class ActionChain {
       current?.scopedValues ?? ScopedValues.of(context);
 
   /// A mounted context to run the next action with: [context] while it is
-  /// mounted, else the chain's trigger context, else its host's. Null when
-  /// all of them have unmounted, e.g. the whole screen was replaced.
+  /// mounted, else the chain's trigger context, else the first of its hosts
+  /// still mounted. Null when all of them have unmounted, e.g. the app
+  /// replaced the whole screen.
   static BuildContext? contextFor(BuildContext context) {
     if (context.mounted) return context;
     final ActionChain? chain = current;
     if (chain == null) return null;
-    for (final BuildContext? candidate in [
-      chain._context,
-      chain._hostContext,
-    ]) {
+    for (final BuildContext? candidate in [chain._context, ...chain._hosts]) {
       if (candidate != null && candidate.mounted) return candidate;
     }
     return null;
@@ -125,6 +176,52 @@ class ActionChainHost extends InheritedWidget {
   static BuildContext? maybeOf(BuildContext context) =>
       context.getElementForInheritedWidgetOfExactType<ActionChainHost>();
 
+  /// The contexts of the hosts a chain triggered in [context] can fall back
+  /// to, nearest first: every [ActionChainHost] above [context] (a layout
+  /// embedded in another has its own), then, past an [ActionChainOpener],
+  /// the hosts of the layout that opened this one as a dialog or a page.
+  static List<BuildContext> hostsOf(BuildContext context) {
+    final List<BuildContext> hosts = [];
+    context.visitAncestorElements((element) {
+      final Widget widget = element.widget;
+      if (widget is ActionChainHost) hosts.add(element);
+      if (widget is ActionChainOpener) {
+        hosts.addAll(widget.openerHosts);
+        return false;
+      }
+      return true;
+    });
+    return hosts;
+  }
+
   @override
   bool updateShouldNotify(ActionChainHost oldWidget) => false;
+}
+
+/// Links a layout shown as a dialog or pushed as a page to the context that
+/// opened it, so a chain triggered in it can finish on the opener's hosts
+/// after the dialog or page has closed (e.g. Navigate back, then a toast).
+class ActionChainOpener extends InheritedWidget {
+  /// Creates an [ActionChainOpener] above [child]. Get [openerHosts] with
+  /// [hostsFor] when the action that opens the layout runs, not in a route
+  /// builder: the opener may have unmounted by the time that builds.
+  const ActionChainOpener({
+    super.key,
+    required this.openerHosts,
+    required super.child,
+  });
+
+  /// The hosts of the layout, and of the chain, that opened this one,
+  /// nearest first.
+  final List<BuildContext> openerHosts;
+
+  /// The hosts a layout opened by an action running in [context] falls back
+  /// to: those above [context], then those of the running chain.
+  static List<BuildContext> hostsFor(BuildContext context) => {
+    if (context.mounted) ...ActionChainHost.hostsOf(context),
+    ...?ActionChain.current?._hosts,
+  }.toList();
+
+  @override
+  bool updateShouldNotify(ActionChainOpener oldWidget) => false;
 }
