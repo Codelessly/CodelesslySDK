@@ -197,7 +197,11 @@ void main() {
               final Size box = tester.getSize(
                 find
                     .byWidgetPredicate(
-                      (w) => w is Container && w.constraints != null,
+                      (w) =>
+                          w.key is ValueKey<String> &&
+                          (w.key! as ValueKey<String>).value.startsWith(
+                            'Rectangle Transformer of ',
+                          ),
                     )
                     .first,
               );
