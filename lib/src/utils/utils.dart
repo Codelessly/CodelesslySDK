@@ -544,7 +544,9 @@ class CloudDatabaseVariableUtils {
 }
 
 /// Constructs a [Query] on top of given [Query] reference using given [whereFilters]
-/// and [orderByOperations].
+/// and [orderByOperations], all of it run by Firestore. Use
+/// [resolveCloudQuery] and [CloudQuery.plan] for queries that may need a
+/// composite index.
 Query<Map<String, dynamic>> constructQueryFromRef(
   Query<Map<String, dynamic>> ref, {
   required List<WhereQueryFilter> whereFilters,
@@ -552,94 +554,72 @@ Query<Map<String, dynamic>> constructQueryFromRef(
   int? limit,
   required ScopedValues scopedValues,
   required NullSubstitutionMode nullSubstitutionMode,
+}) => resolveCloudQuery(
+  whereFilters: whereFilters,
+  orderByOperations: orderByOperations,
+  limit: limit,
+  scopedValues: scopedValues,
+  nullSubstitutionMode: nullSubstitutionMode,
+).applyTo(ref);
+
+/// The [CloudQuery] that [whereFilters], [orderByOperations] and [limit]
+/// describe, with variables in fields and values substituted. [baseFilters],
+/// such as the owner filter of [DataRules.readFilters], come first.
+CloudQuery resolveCloudQuery({
+  List<CloudWhereFilter> baseFilters = const [],
+  required List<WhereQueryFilter> whereFilters,
+  required List<OrderByQueryFilter> orderByOperations,
+  int? limit,
+  required ScopedValues scopedValues,
+  required NullSubstitutionMode nullSubstitutionMode,
 }) {
-  Query<Map<String, dynamic>> query = ref;
-
-  if (whereFilters.isEmpty && orderByOperations.isEmpty) {
-    return limit != null ? query.limit(limit) : query;
-  }
-
-  for (final whereFilter in whereFilters) {
-    Object? field;
-    final matches = VariableMatch.parseAll(whereFilter.field);
+  String resolveField(String field) {
+    final matches = VariableMatch.parseAll(field);
     if (matches.length == 1) {
       final match = matches.first;
       if (match.hasRawValue && match.name == 'documentId') {
-        field = FieldPath.documentId;
+        return cloudDocumentIdField;
       }
     }
-    field ??= PropertyValueDelegate.substituteVariables(
-      whereFilter.field,
-      scopedValues: scopedValues,
-      nullSubstitutionMode: nullSubstitutionMode,
-    );
-    final Object value =
-        PropertyValueDelegate.substituteVariables(
-          whereFilter.value,
-          scopedValues: scopedValues,
-          nullSubstitutionMode: nullSubstitutionMode,
-        ).parsedValue() ??
-        '';
-
-    query = switch (whereFilter.operator) {
-      WhereQueryOperator.equal => query.where(field, isEqualTo: value),
-      WhereQueryOperator.notEqual => query.where(field, isNotEqualTo: value),
-      WhereQueryOperator.arrayContains => query.where(
-        field,
-        arrayContains: value,
-      ),
-      WhereQueryOperator.greaterThan => query.where(
-        field,
-        isGreaterThan: value,
-      ),
-      WhereQueryOperator.greaterThanOrEqual => query.where(
-        field,
-        isGreaterThanOrEqualTo: value,
-      ),
-      WhereQueryOperator.lessThan => query.where(field, isLessThan: value),
-      WhereQueryOperator.lessThanOrEqual => query.where(
-        field,
-        isLessThanOrEqualTo: value,
-      ),
-      WhereQueryOperator.arrayContainsAny => query.where(
-        field,
-        arrayContainsAny: value.typedValue<List>(),
-      ),
-      WhereQueryOperator.inArray => query.where(
-        field,
-        whereIn: value.typedValue<List>(),
-      ),
-      WhereQueryOperator.notInArray => query.where(
-        field,
-        whereNotIn: value.typedValue<List>(),
-      ),
-    };
-  }
-
-  for (final orderByFilter in orderByOperations) {
-    Object? field;
-    final matches = VariableMatch.parseAll(orderByFilter.field);
-    if (matches.length == 1) {
-      final match = matches.first;
-      if (match.hasRawValue && match.name == 'documentId') {
-        field = FieldPath.documentId;
-      }
-    }
-
-    field ??= PropertyValueDelegate.substituteVariables(
-      orderByFilter.field,
-      scopedValues: scopedValues,
-      nullSubstitutionMode: nullSubstitutionMode,
-    );
-
-    query = query.orderBy(
+    return PropertyValueDelegate.substituteVariables(
       field,
-      descending: orderByFilter.sortOrder == OrderByQuerySortOrder.descending,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: nullSubstitutionMode,
     );
   }
 
-  // Firestore queries are immutable: limit must be applied to the result.
-  if (limit != null) query = query.limit(limit);
-
-  return query;
+  return CloudQuery(
+    filters: [
+      ...baseFilters,
+      for (final whereFilter in whereFilters)
+        () {
+          final Object value =
+              PropertyValueDelegate.substituteVariables(
+                whereFilter.value,
+                scopedValues: scopedValues,
+                nullSubstitutionMode: nullSubstitutionMode,
+              ).parsedValue() ??
+              '';
+          return CloudWhereFilter(
+            resolveField(whereFilter.field),
+            whereFilter.operator,
+            switch (whereFilter.operator) {
+              WhereQueryOperator.arrayContainsAny ||
+              WhereQueryOperator.inArray ||
+              WhereQueryOperator.notInArray => value.typedValue<List>(),
+              _ => value,
+            },
+          );
+        }(),
+    ],
+    orderBy: [
+      for (final orderByFilter in orderByOperations)
+        CloudOrderBy(
+          resolveField(orderByFilter.field),
+          descending:
+              orderByFilter.sortOrder == OrderByQuerySortOrder.descending,
+        ),
+    ],
+    limit: limit,
+  );
 }

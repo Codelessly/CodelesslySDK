@@ -2,12 +2,12 @@ import 'dart:core';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../ui/cloud_query_builder.dart';
 import '../../ui/draggable_scroll_configuration.dart';
 
 class PassiveGridViewTransformer extends NodeWidgetTransformer<GridViewNode> {
@@ -39,9 +39,9 @@ class PassiveGridViewWidget extends StatelessWidget {
     required this.settings,
   });
 
-  /// The query for the node's collection, or null when the signed-out user
+  /// The collection and query of the node, or null when the signed-out user
   /// may not read any of it.
-  Query<Map<String, dynamic>>? constructQuery(
+  ({Query<Map<String, dynamic>> ref, CloudQuery query})? constructQuery(
     BuildContext context,
     Codelessly codelessly,
   ) {
@@ -50,27 +50,27 @@ class PassiveGridViewWidget extends StatelessWidget {
 
     final String collectionPath = node.collectionPath ?? '';
 
-    Query<Map<String, dynamic>> query = codelessly.firebaseFirestore.collection(
+    final Query<Map<String, dynamic>>
+    ref = codelessly.firebaseFirestore.collection(
       '${source.rootDataCollection}/${codelessly.authManager.authData!.projectId}/$collectionPath',
     );
 
+    // Owner-only collections only return the signed-in user's documents.
     final CloudDatabase? database = codelessly.cloudDatabase;
-    if (database != null) {
-      final allowed = database.rules.filterQuery(
-        query,
-        collectionPath,
-        database.currentUserId(),
-      );
-      if (allowed == null) return null;
-      query = allowed;
-    }
+    final List<CloudWhereFilter>? readFilters = database == null
+        ? const []
+        : database.rules.readFilters(collectionPath, database.currentUserId());
+    if (readFilters == null) return null;
 
-    return constructQueryFromRef(
-      query,
-      whereFilters: node.whereFilters,
-      orderByOperations: node.orderByFilters,
-      scopedValues: ScopedValues.of(context),
-      nullSubstitutionMode: settings.nullSubstitutionMode,
+    return (
+      ref: ref,
+      query: resolveCloudQuery(
+        baseFilters: readFilters,
+        whereFilters: node.whereFilters,
+        orderByOperations: node.orderByFilters,
+        scopedValues: ScopedValues.of(context),
+        nullSubstitutionMode: settings.nullSubstitutionMode,
+      ),
     );
   }
 
@@ -122,8 +122,9 @@ class PassiveGridViewWidget extends StatelessWidget {
       // A loaded query always has a known length, so it can shrink-wrap.
       return box(
         canShrinkWrap: true,
-        (context, shrinkWrap) => FirestoreQueryBuilder<Map<String, dynamic>>(
-          query: query,
+        (context, shrinkWrap) => CloudQueryBuilder(
+          ref: query.ref,
+          query: query.query,
           pageSize: node.limit ?? 20,
           builder: (context, snapshot, child) {
             if (snapshot.isFetching) {
@@ -132,11 +133,16 @@ class PassiveGridViewWidget extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
+              final String message = describeCloudError(snapshot.error);
+              DebugLogger.instance.printInfo(
+                'Could not load ${node.collectionPath}: $message',
+                name: node.type,
+              );
               return codelesslyController.errorBuilder?.call(
                     context,
                     ErrorLog(
                       timestamp: DateTime.now(),
-                      message: snapshot.error?.toString() ?? 'Unknown error',
+                      message: message,
                       type: 'firestore_query_error',
                     ),
                   ) ??
