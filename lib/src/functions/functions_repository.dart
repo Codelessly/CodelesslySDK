@@ -455,12 +455,19 @@ class FunctionsRepository {
       );
 
       if (action.navigationType == NavigationType.push) {
+        // A chain triggered on the page can finish on this layout after
+        // the page pops.
+        final List<BuildContext> openerHosts = ActionChainOpener.hostsFor(
+          context,
+        );
         await Navigator.push(
           context,
           MaterialPageRoute(
             settings: RouteSettings(arguments: parsedParams),
-            builder: (context) =>
-                CodelesslyWidget(controller: effectiveController),
+            builder: (context) => ActionChainOpener(
+              openerHosts: openerHosts,
+              child: CodelesslyWidget(controller: effectiveController),
+            ),
           ),
         );
         // Notify navigation listeners that this screen has been navigated back
@@ -566,16 +573,22 @@ class FunctionsRepository {
       return null;
     }
 
+    // A chain triggered in the dialog can finish on this layout after the
+    // dialog closes (e.g. Navigate back, then a toast).
+    final List<BuildContext> openerHosts = ActionChainOpener.hostsFor(context);
     final Object? result = await showDialog<Object?>(
       context: context,
       useRootNavigator: false,
       barrierDismissible: barrierDismissible,
       barrierColor: barrierColor,
       routeSettings: RouteSettings(arguments: parsedParams),
-      builder: (context) => CodelesslyDialogWidget(
-        showCloseButton: showCloseButton,
-        builder: (context) =>
-            CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
+      builder: (context) => ActionChainOpener(
+        openerHosts: openerHosts,
+        child: CodelesslyDialogWidget(
+          showCloseButton: showCloseButton,
+          builder: (context) =>
+              CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
+        ),
       ),
     );
     if (context.mounted) {
@@ -1311,12 +1324,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
   static BuildContext? _chainContext(BuildContext context, ActionModel action) {
     final BuildContext? actionContext = ActionChain.contextFor(context);
     if (actionContext == null) {
-      ErrorLogger.instance.captureException(
-        'Action chain detached',
-        message:
-            'Action ${action.type.name} and the ones after it did not run: '
-            'the screen that started them is gone.',
-        type: 'action_chain_detached',
+      ActionChain.reportDetached(
+        'Action ${action.type.name} and the ones after it',
       );
     }
     return actionContext;
