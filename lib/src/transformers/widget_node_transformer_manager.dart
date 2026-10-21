@@ -48,21 +48,35 @@ abstract class WidgetNodeTransformerManager
 
   /// Returns the visibility a condition or variable gives [node] at runtime,
   /// or null when nothing overrides the node's own visibility.
-  bool? runtimeVisibility(BuildContext context, BaseNode node) =>
-      PropertyValueDelegate.getPropertyValue<bool>(
-        node,
-        'visible',
-        scopedValues: ScopedValues.of(context),
-      );
+  ///
+  /// [scopedValues] are the values the condition or variable reads; a design
+  /// canvas passes its variables' default values. They default to the values
+  /// of [context].
+  bool? runtimeVisibility(
+    BuildContext context,
+    BaseNode node, {
+    ScopedValues? scopedValues,
+  }) => PropertyValueDelegate.getPropertyValue<bool>(
+    node,
+    'visible',
+    scopedValues: scopedValues ?? ScopedValues.of(context),
+  );
 
   /// Convenience method to handle widget visibility.
+  ///
+  /// [scopedValues] are passed to [runtimeVisibility].
   Widget applyWidgetVisibility(
     BuildContext context,
     BaseNode node,
     Widget widget, {
     required bool maintainState,
+    ScopedValues? scopedValues,
   }) {
-    final bool? runtimeVisible = runtimeVisibility(context, node);
+    final bool? runtimeVisible = runtimeVisibility(
+      context,
+      node,
+      scopedValues: scopedValues,
+    );
     final bool visible = runtimeVisible ?? node.visible;
 
     if (visible) return widget;
