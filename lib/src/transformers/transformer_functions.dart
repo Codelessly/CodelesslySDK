@@ -392,6 +392,7 @@ Widget? retrieveIconWidget(
           dimension: size ?? icon.size ?? kDefaultIconSize,
           child: Image.network(
             icon.iconImage!,
+            webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
             // scale: icon.scale,
             // color: color,
           ),

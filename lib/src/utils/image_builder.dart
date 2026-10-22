@@ -262,6 +262,9 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         opacity: AlwaysStoppedAnimation(widget.paint?.opacity ?? 1),
         filterQuality: FilterQuality.medium,
         colorBlendMode: colorBlendMode,
+        // On the web, hosts that don't allow cross-origin reads (no CORS
+        // headers) still show their images, drawn by the browser.
+        webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
         loadingBuilder: widget.loadingBuilder != null
             ? (context, child, loadingProgress) =>
                   widget.loadingBuilder!(context, child)
