@@ -431,30 +431,36 @@ Gradient? retrieveGradient(PaintModel paint) {
       (g1, g2) => g1.position.compareTo(g2.position),
     );
     final radians = rotation * pi / 180;
+    final colors = gradientStops
+        .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
+        .toList();
+    final stops = gradientStops.map((e) => e.position).toList();
+    final TileMode tileMode = paint.tileMode.flutterTileMode;
+    final GradientTransform transform = retrieveGradientTransform(
+      paint,
+      radians,
+    );
 
     if (paint.type == PaintType.gradientLinear) {
       return LinearGradient(
-        colors: gradientStops
-            .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
-            .toList(),
-        stops: gradientStops.map((e) => e.position).toList(),
-        transform: GradientRotation(radians),
+        colors: colors,
+        stops: stops,
+        tileMode: tileMode,
+        transform: transform,
       );
     } else if (paint.type == PaintType.gradientRadial) {
       return RadialGradient(
-        colors: gradientStops
-            .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
-            .toList(),
-        stops: gradientStops.map((e) => e.position).toList(),
-        transform: GradientRotation(radians),
+        colors: colors,
+        stops: stops,
+        tileMode: tileMode,
+        transform: transform,
       );
     } else if (paint.type == PaintType.gradientAngular) {
       return SweepGradient(
-        colors: gradientStops
-            .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
-            .toList(),
-        stops: gradientStops.map((e) => e.position).toList(),
-        transform: GradientRotation(radians),
+        colors: colors,
+        stops: stops,
+        tileMode: tileMode,
+        transform: transform,
       );
     }
 
@@ -466,6 +472,80 @@ Gradient? retrieveGradient(PaintModel paint) {
     );
     return null;
   }
+}
+
+/// The transform of [paint]'s gradient: its rotation and, when the paint has
+/// a [PaintModel.gradientExtent], the scale that makes one run of the
+/// gradient that many pixels long.
+GradientTransform retrieveGradientTransform(PaintModel paint, double radians) {
+  final double? extent = paint.gradientExtent;
+  if (extent == null ||
+      extent <= 0 ||
+      paint.type == PaintType.gradientAngular) {
+    return GradientRotation(radians);
+  }
+  return GradientExtentTransform(
+    radians: radians,
+    extent: extent,
+    radial: paint.type == PaintType.gradientRadial,
+  );
+}
+
+extension GradientTileModeExtension on GradientTileMode {
+  /// The Flutter [TileMode] of this tile mode.
+  TileMode get flutterTileMode => switch (this) {
+    GradientTileMode.clamp => TileMode.clamp,
+    GradientTileMode.repeated => TileMode.repeated,
+    GradientTileMode.mirror => TileMode.mirror,
+  };
+}
+
+/// Rotates a gradient about the center of its box, like [GradientRotation],
+/// and scales it about that center so that one run of the gradient is
+/// [extent] pixels long: the length of a linear gradient, or the radius of a
+/// radial one. With a repeating [TileMode] the gradient then tiles across the
+/// box, for example into stripes.
+class GradientExtentTransform extends GradientTransform {
+  /// Creates a [GradientExtentTransform].
+  const GradientExtentTransform({
+    required this.radians,
+    required this.extent,
+    this.radial = false,
+  });
+
+  /// The angle of rotation in radians in the clockwise direction.
+  final double radians;
+
+  /// The length in pixels of one run of the gradient.
+  final double extent;
+
+  /// Whether the gradient is radial, whose run is its radius rather than the
+  /// width of the box.
+  final bool radial;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    // Unscaled, a linear gradient runs across the box's width and a radial
+    // one's radius is half the box's shortest side.
+    final double natural = radial ? bounds.shortestSide / 2 : bounds.width;
+    final double scale = natural > 0 ? extent / natural : 1;
+    final Offset center = bounds.center;
+    return Matrix4.identity()
+      ..translateByDouble(center.dx, center.dy, 0, 1)
+      ..rotateZ(radians)
+      ..scaleByDouble(scale, scale, 1, 1)
+      ..translateByDouble(-center.dx, -center.dy, 0, 1);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is GradientExtentTransform &&
+      other.radians == radians &&
+      other.extent == extent &&
+      other.radial == radial;
+
+  @override
+  int get hashCode => Object.hash(radians, extent, radial);
 }
 
 // from https://math.stackexchange.com/a/2888105
