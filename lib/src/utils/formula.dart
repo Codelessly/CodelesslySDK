@@ -38,7 +38,9 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `t.tags[0]`, `t.tags.length`) and hides a variable of the same name;
 ///    the body can read every other variable. Lambdas are only allowed as
 ///    function arguments.
-///  - date functions: now, today, parseDate, formatDate, addMinutes, addHours,
+///  - series and text helpers: range, interpolate, runs, minBy, maxBy, obj,
+///    slice, substring, replace and split.
+///  - date functions: now, today, wallTime, parseDate, formatDate, addMinutes, addHours,
 ///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
 ///    hour, minute and weekday. Dates are ISO 8601 text such as
 ///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
@@ -279,8 +281,67 @@ class FormulaEvaluator {
       'isNotEmpty(text or list)',
       'isNotEmpty(cart) → true',
     ),
-    FormulaFunctionDoc('now', 'now()', 'now() → 2026-10-21T14:30:00.000'),
-    FormulaFunctionDoc('today', 'today()', 'today() → 2026-10-21T00:00:00.000'),
+    FormulaFunctionDoc(
+      'now',
+      'now(utcOffset?)',
+      'now() → 2026-10-21T14:30:00.000, now("-07:00") at UTC−7',
+    ),
+    FormulaFunctionDoc(
+      'today',
+      'today(utcOffset?)',
+      'today() → 2026-10-21T00:00:00.000',
+    ),
+    FormulaFunctionDoc(
+      'wallTime',
+      'wallTime(dateWithOffset)',
+      'wallTime("2026-10-22T07:25:17-07:00") → 2026-10-22T07:25:17.000',
+    ),
+    FormulaFunctionDoc(
+      'substring',
+      'substring(text, start, end?)',
+      'substring("2026-10-22 02:58", 0, 10) → 2026-10-22',
+    ),
+    FormulaFunctionDoc(
+      'replace',
+      'replace(text, from, to)',
+      'replace("a-b", "-", " ") → a b',
+    ),
+    FormulaFunctionDoc('split', 'split(text, separator)', 'split("a,b", ",")'),
+    FormulaFunctionDoc(
+      'slice',
+      'slice(list, start, end?)',
+      'slice(items, 0, 3) or slice(items, -2)',
+    ),
+    FormulaFunctionDoc(
+      'range',
+      'range(start, end, step) (dates: step in minutes)',
+      'range(0, 6, 2) → [0, 2, 4, 6]',
+    ),
+    FormulaFunctionDoc(
+      'interpolate',
+      'interpolate(points, xField, yField, x)',
+      'interpolate(tides, "t", "v", now())',
+    ),
+    FormulaFunctionDoc(
+      'runs',
+      'runs(list, item => condition)',
+      'runs(steps, s => s.h <= 1) → [{first, last, items, count}]',
+    ),
+    FormulaFunctionDoc(
+      'minBy',
+      'minBy(list, field or item => key)',
+      'minBy(lows, "v")',
+    ),
+    FormulaFunctionDoc(
+      'maxBy',
+      'maxBy(list, field or item => key)',
+      'maxBy(highs, "v")',
+    ),
+    FormulaFunctionDoc(
+      'obj',
+      'obj(key, value, …)',
+      'obj("from", start, "to", end) → {from, to}',
+    ),
     FormulaFunctionDoc(
       'parseDate',
       'parseDate(text or millis)',
@@ -781,6 +842,183 @@ String? _formatDate(Object? value, Object? pattern) {
   return out.toString();
 }
 
+// ---------------------------------------------------------------------------
+// Series, text and object helpers
+// ---------------------------------------------------------------------------
+
+/// The most items [range] returns, so a typo can't build a huge list.
+const int _maxRange = 10000;
+
+/// Numbers from [start] through [end] by [step], or, when [start] is a date,
+/// dates from [start] through [end] every [step] minutes (default 1).
+List<Object?> _range(List<Object?> args) {
+  final Object? start = _arg(args, 0), end = _arg(args, 1);
+  if (_isDateLike(start)) {
+    final DateTime? from = _toDate(start), to = _toDate(end);
+    final num step = _num(_arg(args, 2) ?? 1);
+    if (from == null || to == null || !(step > 0)) return const [];
+    final Duration delta = Duration(microseconds: (step * 60e6).round());
+    return [
+      for (DateTime t = from; !t.isAfter(to); t = t.add(delta)) _dateText(t),
+    ].take(_maxRange).toList();
+  }
+  final num from = _num(start), to = _num(end);
+  final num step = _num(_arg(args, 2) ?? 1);
+  if (!from.isFinite || !to.isFinite || step == 0 || !step.isFinite) {
+    return const [];
+  }
+  final List<Object?> out = [];
+  for (num v = from; step > 0 ? v <= to + 1e-9 : v >= to - 1e-9; v += step) {
+    out.add(_tidy(v));
+    if (out.length >= _maxRange) break;
+  }
+  return out;
+}
+
+/// A point's x as a number: dates as epoch milliseconds.
+num? _xValue(Object? value) {
+  if (_isDateLike(value)) return _toDate(value)?.millisecondsSinceEpoch;
+  final num? n = value is String ? num.tryParse(value.trim()) : _toNum(value);
+  return n != null && n.isFinite ? n : null;
+}
+
+/// The y of the series [list] at [x], interpolated linearly between the two
+/// items whose [xField] values surround it. Items must be sorted by x. Null
+/// outside the series.
+num? _interpolate(List<Object?> args) {
+  final Object? list = _arg(args, 0);
+  final Object? xField = _arg(args, 1), yField = _arg(args, 2);
+  final num? x = _xValue(_arg(args, 3));
+  if (list is! List || list.isEmpty || x == null) return null;
+  num? xOf(int i) => _xValue(_select(list[i], xField));
+  num? yOf(int i) {
+    final Object? y = _select(list[i], yField);
+    return y is String ? num.tryParse(y.trim()) : _toNum(y);
+  }
+
+  int lo = 0, hi = list.length - 1;
+  final num? first = xOf(lo), last = xOf(hi);
+  if (first == null || last == null || x < first || x > last) return null;
+  while (hi - lo > 1) {
+    final int mid = (lo + hi) >> 1;
+    final num? m = xOf(mid);
+    if (m == null) return null;
+    if (m <= x) {
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+  }
+  final num? x0 = xOf(lo), x1 = xOf(hi), y0 = yOf(lo), y1 = yOf(hi);
+  if (x0 == null || x1 == null || y0 == null || y1 == null) return null;
+  if (x1 == x0) return y0;
+  return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+}
+
+/// Runs of consecutive items of `args[0]` that match the predicate in the
+/// rest of [args], each as `{first, last, items, count}`.
+List<Object?> _runs(List<Object?> args) {
+  final List<Object?> rest = args.skip(1).toList();
+  final List<Object?> out = [];
+  List<Object?> current = [];
+  void close() {
+    if (current.isEmpty) return;
+    out.add({
+      'first': current.first,
+      'last': current.last,
+      'items': current,
+      'count': current.length,
+    });
+    current = [];
+  }
+
+  for (final Object? item in _values(_arg(args, 0), null)) {
+    if (_matches(item, rest)) {
+      current.add(item);
+    } else {
+      close();
+    }
+  }
+  close();
+  return out;
+}
+
+/// The item of `args[0]` with the smallest ([max] false) or largest key
+/// `args[1]` (a field or lambda). Items without a key are skipped.
+Object? _extremeBy(List<Object?> args, {required bool max}) {
+  Object? best;
+  int? bestKey;
+  Object? bestValue;
+  for (final Object? item in _values(_arg(args, 0), null)) {
+    final Object? key = _select(item, _arg(args, 1));
+    if (key == null) continue;
+    if (bestKey == null) {
+      best = item;
+      bestValue = key;
+      bestKey = 0;
+      continue;
+    }
+    final int? order = _compare(key, bestValue);
+    if (order != null && (max ? order > 0 : order < 0)) {
+      best = item;
+      bestValue = key;
+    }
+  }
+  return best;
+}
+
+/// A map from key, value pairs: `obj("from", a, "to", b)`. Formulas can't
+/// contain braces, so this is how they build objects.
+Map<String, Object?> _object(List<Object?> args) => {
+  for (int i = 0; i + 1 < args.length; i += 2)
+    FormulaEvaluator.stringify(args[i]): args[i + 1],
+};
+
+/// The UTC offset [value] gives, as hours (`-7`, `5.5`) or text (`-07:00`,
+/// `+0530`, `Z`), or null.
+Duration? _offset(Object? value) {
+  if (value == null) return null;
+  if (value is num) return Duration(minutes: (value * 60).round());
+  final String text = value.toString().trim();
+  if (text == 'Z' || text.toUpperCase() == 'UTC') return Duration.zero;
+  final Match? m = RegExp(r'^([+-])(\d{1,2}):?(\d{2})?$').firstMatch(text);
+  if (m == null) {
+    final num? hours = num.tryParse(text);
+    return hours == null ? null : Duration(minutes: (hours * 60).round());
+  }
+  final int minutes = int.parse(m[2]!) * 60 + int.parse(m[3] ?? '0');
+  return Duration(minutes: m[1] == '-' ? -minutes : minutes);
+}
+
+/// The wall-clock time now at the UTC [offset] (see [_offset]), or local
+/// time without one. Returned without a zone, like other formula dates.
+DateTime _nowAt(Object? offset) {
+  final Duration? delta = _offset(offset);
+  if (delta == null) return DateTime.now();
+  final DateTime utc = DateTime.now().toUtc().add(delta);
+  return DateTime(
+    utc.year,
+    utc.month,
+    utc.day,
+    utc.hour,
+    utc.minute,
+    utc.second,
+    utc.millisecond,
+  );
+}
+
+/// The wall-clock part of an ISO date-time written with an offset, e.g.
+/// `2026-10-22T07:25:17-07:00` → `2026-10-22T07:25:17.000`, so a time an
+/// API gives in a place's zone reads as that place's local time.
+String? _wallTime(Object? value) {
+  final String text = FormulaEvaluator.stringify(value).trim();
+  final Match? m = RegExp(
+    r'^(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2}(?:[.,]\d+)?)?)',
+  ).firstMatch(text);
+  if (m == null) return _dateText(_toDate(text));
+  return _dateText(DateTime.tryParse(m[1]!.replaceFirst(' ', 'T')));
+}
+
 typedef _Function = Object? Function(List<Object?> args);
 
 Object? _arg(List<Object?> args, int index) =>
@@ -854,11 +1092,45 @@ final Map<String, _Function> _functions = {
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
   'isNotEmpty': (a) => _truthy(_functions['length']!(a)),
-  'now': (a) => _dateText(DateTime.now()),
+  'now': (a) => _dateText(_nowAt(_arg(a, 0))),
   'today': (a) {
-    final DateTime now = DateTime.now();
+    final DateTime now = _nowAt(_arg(a, 0));
     return _dateText(DateTime(now.year, now.month, now.day));
   },
+  'wallTime': (a) => _wallTime(_arg(a, 0)),
+  'substring': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final int start = _intArg(_arg(a, 1)).clamp(0, text.length);
+    final int end = _arg(a, 2) == null
+        ? text.length
+        : _intArg(_arg(a, 2)).clamp(start, text.length);
+    return text.substring(start, end);
+  },
+  'replace': (a) => FormulaEvaluator.stringify(_arg(a, 0)).replaceAll(
+    FormulaEvaluator.stringify(_arg(a, 1)),
+    FormulaEvaluator.stringify(_arg(a, 2)),
+  ),
+  'split': (a) =>
+      FormulaEvaluator.stringify(_arg(a, 0))
+          .split(FormulaEvaluator.stringify(_arg(a, 1) ?? ',')),
+  'slice': (a) {
+    final List<Object?> items = _values(_arg(a, 0), null).toList();
+    int index(Object? value, int fallback) {
+      if (value == null) return fallback;
+      final int i = _intArg(value);
+      return (i < 0 ? items.length + i : i).clamp(0, items.length);
+    }
+
+    final int start = index(_arg(a, 1), 0);
+    final int end = index(_arg(a, 2), items.length);
+    return end <= start ? <Object?>[] : items.sublist(start, end);
+  },
+  'range': _range,
+  'interpolate': _interpolate,
+  'runs': _runs,
+  'minBy': (a) => _extremeBy(a, max: false),
+  'maxBy': (a) => _extremeBy(a, max: true),
+  'obj': _object,
   'parseDate': (a) => _dateText(_toDate(_arg(a, 0))),
   'formatDate': (a) => _formatDate(_arg(a, 0), _arg(a, 1)),
   'addMinutes': (a) =>
