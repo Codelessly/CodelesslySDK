@@ -123,9 +123,11 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (settings.withOpacity) {
       widget = applyWidgetOpacity(styled, widget);
     }
+    widget = applyLoopAnimation(context, styled, widget);
     if (settings.withReactions) {
       widget = wrapWithReaction(context, styled, widget);
       widget = wrapWithSemantics(styled, widget);
+      widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
     }
     if (settings.withRotation) {
