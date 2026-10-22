@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -595,7 +596,21 @@ class FunctionsRepository {
       showCloseButton: action.showCloseButton,
       presentation: action.presentation,
       alignment: action.alignment.flutterAlignment ?? Alignment.center,
+      insets: action.insets.flutterEdgeInsets,
     );
+  }
+
+  /// The size canvas [canvasId] was designed at, if it is published.
+  static Size? canvasDesignSize(Codelessly codelessly, String canvasId) {
+    for (final layout
+        in codelessly.dataManager.publishModel?.layouts.values ??
+            const <SDKPublishLayout>[]) {
+      final BaseNode? canvas = layout.canvases[canvasId]?[canvasId];
+      if (canvas != null) {
+        return Size(canvas.basicBoxLocal.width, canvas.basicBoxLocal.height);
+      }
+    }
+    return null;
   }
 
   /// The id of the published layout that holds the canvas [canvasId], if any.
@@ -604,9 +619,10 @@ class FunctionsRepository {
           .firstWhereOrNull((layout) => layout.canvasIds.contains(canvasId))
           ?.id;
 
-  /// Shows the canvas [canvasId] as a dialog and completes with what it was
-  /// closed with: the params of the "Navigate back" action that closed it, or
-  /// null when it was dismissed.
+  /// Shows the canvas [canvasId] as a dialog, a bottom sheet or a side sheet
+  /// (see [presentCanvas]) and completes with what it was closed with: the
+  /// params of the "Navigate back" action that closed it, or null when it
+  /// was dismissed.
   static Future<Object?> showLayoutDialog(
     BuildContext context, {
     required String canvasId,
@@ -616,6 +632,7 @@ class FunctionsRepository {
     bool showCloseButton = false,
     DialogPresentation presentation = DialogPresentation.dialog,
     AlignmentGeometry alignment = Alignment.center,
+    EdgeInsets insets = EdgeInsets.zero,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -662,9 +679,11 @@ class FunctionsRepository {
       context,
       presentation: presentation,
       alignment: alignment,
+      insets: insets,
       barrierDismissible: barrierDismissible,
       barrierColor: barrierColor,
       showCloseButton: showCloseButton,
+      designSize: canvasDesignSize(codelessly, canvasId),
       routeSettings: RouteSettings(arguments: parsedParams),
       builder: (context) => ActionChainOpener(
         openerHosts: openerHosts,
@@ -681,41 +700,91 @@ class FunctionsRepository {
     return result;
   }
 
-  /// Opens what [builder] builds as a dialog at [alignment] or as a bottom
-  /// sheet, per [presentation] (adaptive: a sheet below 600 px wide), and
-  /// completes with the value it is closed with.
+  /// Opens what [builder] builds per [presentation] and completes with the
+  /// value it is closed with:
+  ///
+  /// * a dialog at [alignment], kept [insets] from the screen edges;
+  /// * a bottom sheet at the screen's width and the canvas's [designSize]
+  ///   height, at most 88% of the screen (adaptive: a sheet below 600 px
+  ///   wide, a dialog otherwise);
+  /// * a side sheet sliding in from the right at the canvas's width, as tall
+  ///   as the screen less [insets].
+  ///
+  /// The canvas draws the sheet's surface (fill, corners, grab handle).
   static Future<T?> presentCanvas<T>(
     BuildContext context, {
     required WidgetBuilder builder,
     DialogPresentation presentation = DialogPresentation.dialog,
     AlignmentGeometry alignment = Alignment.center,
+    EdgeInsets insets = EdgeInsets.zero,
     bool barrierDismissible = true,
     Color? barrierColor,
     bool showCloseButton = false,
+    Size? designSize,
     RouteSettings? routeSettings,
   }) {
     final bool asSheet = switch (presentation) {
-      DialogPresentation.dialog => false,
+      DialogPresentation.dialog || DialogPresentation.sideSheet => false,
       DialogPresentation.bottomSheet => true,
       DialogPresentation.adaptive =>
         (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < 600,
     };
-    Widget content(BuildContext context) => CodelesslyDialogWidget(
-      showCloseButton: showCloseButton,
-      alignment: asSheet ? Alignment.bottomCenter : alignment,
-      builder: builder,
-    );
+    if (presentation == DialogPresentation.sideSheet) {
+      return showGeneralDialog<T>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        barrierColor: barrierColor ?? Colors.black54,
+        routeSettings: routeSettings,
+        transitionDuration: const Duration(milliseconds: 260),
+        transitionBuilder: (context, animation, _, child) => SlideTransition(
+          position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+              .animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              ),
+          child: child,
+        ),
+        pageBuilder: (context, _, _) => SafeArea(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: insets,
+              child: CanvasSizingScope(
+                sizing: CanvasSizing.fill,
+                child: SizedBox(
+                  width: designSize?.width ?? 420,
+                  child: Builder(builder: builder),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     if (asSheet) {
       return showModalBottomSheet<T>(
         context: context,
         useRootNavigator: false,
         isScrollControlled: true,
         isDismissible: barrierDismissible,
+        enableDrag: barrierDismissible,
         barrierColor: barrierColor,
+        // The canvas draws the sheet: its fill, corners and grab handle.
         backgroundColor: Colors.transparent,
         elevation: 0,
+        constraints: const BoxConstraints(),
         routeSettings: routeSettings,
-        builder: content,
+        builder: (context) => CanvasSizingScope(
+          sizing: CanvasSizing.fill,
+          child: SizedBox(
+            height: math.min(
+              designSize?.height ?? double.infinity,
+              MediaQuery.sizeOf(context).height * 0.88,
+            ),
+            child: Builder(builder: builder),
+          ),
+        ),
       );
     }
     return showDialog<T>(
@@ -724,7 +793,12 @@ class FunctionsRepository {
       barrierDismissible: barrierDismissible,
       barrierColor: barrierColor,
       routeSettings: routeSettings,
-      builder: content,
+      builder: (context) => CodelesslyDialogWidget(
+        showCloseButton: showCloseButton,
+        alignment: alignment,
+        insets: insets,
+        builder: builder,
+      ),
     );
   }
 
