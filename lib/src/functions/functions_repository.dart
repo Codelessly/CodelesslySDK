@@ -571,6 +571,8 @@ class FunctionsRepository {
       barrierDismissible: action.barrierDismissible,
       barrierColor: action.barrierColor?.toFlutterColor(),
       showCloseButton: action.showCloseButton,
+      placement: action.placement,
+      placementGap: action.placementGap,
     );
   }
 
@@ -590,8 +592,17 @@ class FunctionsRepository {
     bool barrierDismissible = true,
     Color? barrierColor,
     bool showCloseButton = false,
+    DialogPlacement placement = DialogPlacement.center,
+    double placementGap = 8,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    // The node that opened the dialog, for a popover placed next to it.
+    final RenderObject? opener = placement == DialogPlacement.center
+        ? null
+        : context.findRenderObject();
+    final Rect? anchor = opener is RenderBox && opener.hasSize
+        ? opener.localToGlobal(Offset.zero) & opener.size
+        : null;
     final parsedParams = substituteVariablesInMap(params, scopedValues);
 
     DebugLogger.instance.printInfo(
@@ -642,6 +653,9 @@ class FunctionsRepository {
         openerHosts: openerHosts,
         child: CodelesslyDialogWidget(
           showCloseButton: showCloseButton,
+          placement: placement,
+          anchor: anchor,
+          gap: placementGap,
           builder: (context) =>
               CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
         ),
