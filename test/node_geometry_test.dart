@@ -356,7 +356,23 @@ void main() {
       expect(idsAt(const Offset(525, 525)), ['over', 'frame']);
       expect(idsAt(const Offset(425, 425)), ['under', 'frame']);
       // Inside the margin of a node, but outside its box.
-      expect(idsAt(const Offset(55, 200)), ['frame']);
+      final Offset inMargin =
+          registry
+              .geometryOf('margined', layer: NodeBuildLayer.margin)!
+              .bounds
+              .topLeft +
+          const Offset(2, 2);
+      expect(idsAt(inMargin), ['frame']);
+      expect(
+        [
+          for (final hit in registry.hitTest(
+            inMargin,
+            layer: NodeBuildLayer.margin,
+          ))
+            hit.nodeId,
+        ],
+        ['margined', 'frame'],
+      );
       // Skipping a node skips its subtree, so what is under it is hit.
       expect(
         [

@@ -293,9 +293,16 @@ class NodeGeometryRegistry extends ChangeNotifier {
   /// are still hit. Clips, scroll offsets, transforms and rotation are
   /// respected, and nodes that are hidden or not painted are never hit.
   ///
+  /// [layer] picks which box of each node must contain [position]: its own
+  /// box, or its margin box.
+  ///
   /// When [skip] returns true for a node, neither it nor its subtree is hit,
   /// so nodes under it can be (for example the nodes being dragged).
-  List<NodeHit> hitTest(Offset position, {bool Function(NodeHit hit)? skip}) {
+  List<NodeHit> hitTest(
+    Offset position, {
+    NodeBuildLayer layer = NodeBuildLayer.content,
+    bool Function(NodeHit hit)? skip,
+  }) {
     final RenderGeometryRoot? root = _root;
     if (root == null || !root.attached || !root.hasSize) return const [];
     final List<NodeHit> hits = [];
@@ -304,7 +311,9 @@ class NodeGeometryRegistry extends ChangeNotifier {
         if (!object.visible) return;
         final NodeHit hit = NodeHit(object.nodeId, object.instance);
         if (skip != null && skip(hit)) return;
-        if (object.buildLayer == NodeBuildLayer.content && object.hasSize) {
+        if (object.buildLayer == layer &&
+            object.hasSize &&
+            _contentVisible(object)) {
           final Offset? local = _toLocal(transform, position);
           if (local != null && (Offset.zero & object.size).contains(local)) {
             hits.add(hit);
@@ -327,6 +336,15 @@ class NodeGeometryRegistry extends ChangeNotifier {
 
     visit(root, Matrix4.identity());
     return hits.reversed.toList(growable: false);
+  }
+
+  /// Whether the node of [probe] is visible. A margin probe sits outside the
+  /// node's [Visibility], so it asks the node's content probe.
+  bool _contentVisible(RenderGeometryProbe probe) {
+    if (probe.buildLayer == NodeBuildLayer.content) return probe.visible;
+    return _probes[probe.nodeId]?[_key(NodeBuildLayer.content, probe.instance)]
+            ?.visible ??
+        false;
   }
 
   static Offset? _toLocal(Matrix4 transform, Offset position) {
