@@ -85,4 +85,59 @@ void main() {
     // The node itself is unchanged.
     expect(node.basicBoxLocal.height, 40);
   });
+
+  testWidgets('an image link bound to the fill shows that image', (
+    tester,
+  ) async {
+    final RectangleNode node = RectangleNode.fromJson({
+      ...RectangleNode(
+        id: 'avatar',
+        name: 'Avatar',
+        basicBoxLocal: NodeBox(0, 0, 40, 40),
+        fills: [
+          PaintModel.solid(id: 'fill', color: ColorRGB.fromHex('#DDDDDD')),
+        ],
+      ).toJson(),
+      'variables': {'fill': r'${photo}'},
+    });
+    node.parentID = kRootNode;
+    final registry = NodeRegistry()..setNodes({node.id: node});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    final CodelesslyContext codelesslyContext = CodelesslyContext.empty()
+      ..variables['photo'] = Observable(
+        VariableData(
+          id: 'photo',
+          name: 'photo',
+          type: VariableType.text,
+          value: 'https://example.com/ada.png',
+        ),
+      );
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: codelesslyContext,
+        child: MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Builder(
+              builder: (context) => manager.buildWidgetFromNode(
+                node,
+                context,
+                settings: const WidgetBuildSettings(debugLabel: 'test'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final UltimateImageBuilder image = tester.widget<UltimateImageBuilder>(
+      find.byType(UltimateImageBuilder),
+    );
+    expect(image.url, 'https://example.com/ada.png');
+    expect(image.paint?.fit, Fit.cover);
+  });
 }
