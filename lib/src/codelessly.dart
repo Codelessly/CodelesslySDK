@@ -46,7 +46,7 @@ class Codelessly {
   /// Initialization is needed before usage.
   static Codelessly get instance => _instance;
 
-  final Client _client = CodelesslyHttpClient();
+  final Client _client;
 
   /// Returns the HTTP client used by this SDK instance.
   Client get client => _client;
@@ -286,7 +286,10 @@ class Codelessly {
     DataManager? publishDataManager,
     DataManager? previewDataManager,
     DataManager? templateDataManager,
-  }) {
+
+    // The HTTP client for API calls and data loading (tests pass a mock).
+    Client? client,
+  }) : _client = client ?? CodelesslyHttpClient() {
     _config = config;
     _cacheManager = cacheManager;
     _authManager = authManager;
