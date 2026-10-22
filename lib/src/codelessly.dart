@@ -253,6 +253,15 @@ class Codelessly {
 
   final Map<String, NavigationListener> _navigationListeners = {};
 
+  /// The screen shown and its parameters, for the browser's address: a host
+  /// listens and writes [CodelesslyRoute.toPath] to the URL. Dialogs don't
+  /// change it.
+  final ValueNotifier<CodelesslyRoute?> route = ValueNotifier(null);
+
+  /// A screen to open once the app's first screen shows, e.g. the one a
+  /// reloaded URL names. Set it before the first screen loads.
+  CodelesslyRoute? pendingRoute;
+
   final Map<String, BreakpointsListener> _breakpointsListeners = {};
 
   final StreamController<BrightnessModel> _systemUIBrightnessStreamController =
@@ -880,9 +889,33 @@ class Codelessly {
   }) {
     _currentNavigatedLayoutId = layoutId;
     _currentNavigatedCanvasId = canvasId;
+    final ModalRoute? modal = ModalRoute.of(context);
+    if (canvasId != null && modal is! PopupRoute) {
+      route.value = CodelesslyRoute.of(canvasId, modal?.settings.arguments);
+      _openPendingRoute(context, canvasId);
+    }
     for (final listener in [..._navigationListeners.values]) {
       listener(context, layoutId, canvasId);
     }
+  }
+
+  /// Opens [pendingRoute] over the first screen shown, unless it is that
+  /// screen.
+  void _openPendingRoute(BuildContext context, String canvasId) {
+    final CodelesslyRoute? pending = pendingRoute;
+    if (pending == null) return;
+    pendingRoute = null;
+    if (pending.canvasId == canvasId) return;
+    unawaited(
+      FunctionsRepository.navigate(
+        context,
+        NavigationAction(
+          destinationId: pending.canvasId,
+          params: pending.params,
+        ),
+        codelessly: this,
+      ),
+    );
   }
 
   /// Adds a global listener for navigation.
