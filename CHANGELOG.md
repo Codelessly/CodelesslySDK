@@ -1,3 +1,14 @@
+## Unreleased
+
+### Repeating gradients
+
+- Gradient fills honour `PaintModel.tileMode` (clamp, repeated, mirror) and
+  `gradientExtent`, the length in pixels of one run of the gradient (the
+  radius of a radial one), so a short gradient with hard stops paints
+  stripes. `GradientExtentTransform` rotates and scales the gradient about
+  the center of its box. Needs the unreleased `codelessly_api` change that
+  adds these fields.
+
 ## 8.2.0
 
 ### States
