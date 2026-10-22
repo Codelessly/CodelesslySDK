@@ -156,6 +156,11 @@ class NodeGeometryRegistry extends ChangeNotifier {
   /// collected once after geometry changes rather than on every test.
   List<_HitEntry>? _hitIndex;
 
+  /// Probes whose paint offset changed since [_hitIndex] was collected. Only
+  /// their subtrees are collected again, so a drag doesn't walk the tree on
+  /// every move.
+  final Set<RenderGeometryProbe> _movedProbes = {};
+
   /// The render box that geometry is measured relative to, if mounted.
   RenderBox? get root => _root;
 
@@ -172,6 +177,18 @@ class NodeGeometryRegistry extends ChangeNotifier {
   /// a frame's build, layout and paint, listeners are notified once.
   void markChanged() {
     _hitIndex = null;
+    _movedProbes.clear();
+    _notify();
+  }
+
+  /// Records that [probe] paints at a new offset. Nothing lays out again, so
+  /// only its own subtree of the hit index is stale.
+  void _paintOffsetChanged(RenderGeometryProbe probe) {
+    if (_hitIndex != null) _movedProbes.add(probe);
+    _notify();
+  }
+
+  void _notify() {
     final SchedulerBinding scheduler = SchedulerBinding.instance;
     if (scheduler.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       notifyListeners();
@@ -343,6 +360,12 @@ class NodeGeometryRegistry extends ChangeNotifier {
     bool Function(NodeHit hit)? skip,
   }) {
     final List<_HitEntry> index = _hitIndex ??= _collectHitIndex();
+    if (_movedProbes.isNotEmpty) {
+      for (final probe in _movedProbes) {
+        _recollect(index, probe);
+      }
+      _movedProbes.clear();
+    }
     // Entries are in paint order, so a parent comes before its subtree and
     // a skipped parent can skip its subtree.
     final Set<_HitEntry> skipped = {};
@@ -371,45 +394,87 @@ class NodeGeometryRegistry extends ChangeNotifier {
     final RenderGeometryRoot? root = _root;
     if (root == null || !root.attached || !root.hasSize) return const [];
     final List<_HitEntry> entries = [];
-    void visit(
-      RenderObject object,
-      Matrix4 transform,
-      _ClipChain clips,
-      _HitEntry? parent,
+    _visit(root, Matrix4.identity(), const _ClipChain.none(), null, entries);
+    return entries;
+  }
+
+  /// Replaces the entries of [probe] and its subtree in [index] with fresh
+  /// ones, keeping the transform and clips above it.
+  void _recollect(List<_HitEntry> index, RenderGeometryProbe probe) {
+    final int start = index.indexWhere(
+      (entry) => identical(entry.probe, probe),
+    );
+    if (start < 0) return;
+    final _HitEntry old = index[start];
+    // Entries are in paint order, so the subtree follows its root.
+    int end = start + 1;
+    while (end < index.length && _descends(index[end], old)) {
+      end++;
+    }
+    final List<_HitEntry> fresh = [];
+    if (probe.attached) {
+      _visit(probe, old.transform, old.clips, old.parent, fresh);
+    }
+    index.replaceRange(start, end, fresh);
+  }
+
+  static bool _descends(_HitEntry entry, _HitEntry ancestor) {
+    for (
+      _HitEntry? parent = entry.parent;
+      parent != null;
+      parent = parent.parent
     ) {
-      if (object is RenderGeometryProbe) {
-        if (!object.visible || !object.hasSize) return;
+      if (identical(parent, ancestor)) return true;
+    }
+    return false;
+  }
+
+  /// Records [object] and its painted subtree into [entries]. [transform]
+  /// maps [object]'s coordinates to scope coordinates.
+  void _visit(
+    RenderObject object,
+    Matrix4 transform,
+    _ClipChain clips,
+    _HitEntry? parent,
+    List<_HitEntry> entries,
+  ) {
+    if (object is RenderGeometryProbe) {
+      if (!object.visible || !object.hasSize) return;
+      // A probe's own box moves with its paint offset, as in [_measure].
+      final Matrix4 shifted = transform.clone();
+      final Offset shift = object.paintOffset;
+      if (shift != Offset.zero) {
+        shifted.translateByDouble(shift.dx, shift.dy, 0, 1);
+      }
+      final Matrix4 inverse = Matrix4.zero();
+      if (inverse.copyInverse(shifted) == 0) return;
+      final _HitEntry entry = _HitEntry(
+        probe: object,
+        hit: NodeHit(object.nodeId, object.instance),
+        layer: object.buildLayer,
+        contentVisible: _contentVisible(object),
+        transform: transform,
+        inverse: inverse,
+        size: object.size,
+        clips: clips,
+        parent: parent,
+      );
+      entries.add(entry);
+      parent = entry;
+    }
+    object.visitChildren((child) {
+      if (!object.paintsChild(child)) return;
+      _ClipChain childClips = clips;
+      final Rect? clip = object.describeApproximatePaintClip(child);
+      if (clip != null) {
         final Matrix4 inverse = Matrix4.zero();
         if (inverse.copyInverse(transform) == 0) return;
-        final _HitEntry entry = _HitEntry(
-          hit: NodeHit(object.nodeId, object.instance),
-          layer: object.buildLayer,
-          contentVisible: _contentVisible(object),
-          inverse: inverse,
-          size: object.size,
-          clips: clips,
-          parent: parent,
-        );
-        entries.add(entry);
-        parent = entry;
+        childClips = _ClipChain(inverse, clip, clips);
       }
-      object.visitChildren((child) {
-        if (!object.paintsChild(child)) return;
-        _ClipChain childClips = clips;
-        final Rect? clip = object.describeApproximatePaintClip(child);
-        if (clip != null) {
-          final Matrix4 inverse = Matrix4.zero();
-          if (inverse.copyInverse(transform) == 0) return;
-          childClips = _ClipChain(inverse, clip, clips);
-        }
-        final Matrix4 childTransform = transform.clone();
-        object.applyPaintTransform(child, childTransform);
-        visit(child, childTransform, childClips, parent);
-      });
-    }
-
-    visit(root, Matrix4.identity(), const _ClipChain.none(), null);
-    return entries;
+      final Matrix4 childTransform = transform.clone();
+      object.applyPaintTransform(child, childTransform);
+      _visit(child, childTransform, childClips, parent, entries);
+    });
   }
 
   /// Whether the node of [probe] is visible. A margin probe sits outside the
@@ -431,11 +496,16 @@ class NodeGeometryRegistry extends ChangeNotifier {
 
 /// A probe recorded for hit testing.
 class _HitEntry {
+  final RenderGeometryProbe probe;
   final NodeHit hit;
   final NodeBuildLayer layer;
   final bool contentVisible;
 
-  /// Maps scope coordinates into the probe's own.
+  /// Maps the probe's coordinates, before its paint offset, to scope
+  /// coordinates.
+  final Matrix4 transform;
+
+  /// Maps scope coordinates into the probe's own, paint offset included.
   final Matrix4 inverse;
   final Size size;
   final _ClipChain clips;
@@ -444,9 +514,11 @@ class _HitEntry {
   final _HitEntry? parent;
 
   _HitEntry({
+    required this.probe,
     required this.hit,
     required this.layer,
     required this.contentVisible,
+    required this.transform,
     required this.inverse,
     required this.size,
     required this.clips,
@@ -718,7 +790,7 @@ class RenderGeometryProbe extends RenderProxyBox {
     if (value == _paintOffset) return;
     _paintOffset = value;
     markNeedsPaint();
-    _registry.markChanged();
+    _registry._paintOffsetChanged(this);
   }
 
   /// Whether the node is painted somewhere else instead of here. See
