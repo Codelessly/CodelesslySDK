@@ -310,20 +310,33 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         !widget.settings.isPreview &&
         (widget.autofocus ?? properties.autoFocus);
 
+    // Flutter can only obscure a single-line field, and a field that expands
+    // has no line limit, so an obscured field (a password) doesn't expand:
+    // its decoration is stretched to the box instead (see below).
+    final bool obscure = obscureText && properties.maxLines == 1;
+    final bool expands = !widget.node.isVerticalWrap && !obscure;
     final (int? maxLines, int? minLines) = resolveTextFieldLines(
       maxLines: properties.maxLines,
       minLines: properties.minLines,
-      expands: !widget.node.isVerticalWrap,
+      expands: expands,
     );
 
-    Widget field = TextFormField(
+    final InputDecoration decoration = getDecoration(
+      context,
+      node,
+      properties.decoration,
+      widget.settings,
+      scopedValues,
+    );
+
+    Widget buildField(InputDecoration decoration) => TextFormField(
       focusNode: focusNode,
       autocorrect: properties.autoCorrect,
       autofocus: autofocus,
       enableInteractiveSelection: properties.enableInteractiveSelection,
       enabled: enabled,
       controller: controller,
-      obscureText: maxLines == 1 && obscureText,
+      obscureText: obscure,
       readOnly: readOnly,
       showCursor: showCursor,
       keyboardType: keyboardType,
@@ -352,7 +365,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       ],
       maxLines: maxLines,
       minLines: minLines,
-      expands: !widget.node.isVerticalWrap,
+      expands: expands,
       obscuringCharacter: widget.node.properties.obscuringCharacter,
       style: TextUtils.retrieveTextStyleFromProp(
         widget.node.properties.inputStyle,
@@ -363,14 +376,26 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       onFieldSubmitted: (value) {
         // handled by the focus listener!
       },
-      decoration: getDecoration(
-        context,
-        node,
-        properties.decoration,
-        widget.settings,
-        scopedValues,
-      ),
+      decoration: decoration,
     );
+
+    Widget field;
+    if (obscure && !widget.node.isVerticalWrap) {
+      // Fill the box's height, as an expanding field would.
+      field = LayoutBuilder(
+        builder: (context, constraints) => buildField(
+          constraints.hasBoundedHeight
+              ? decoration.copyWith(
+                  constraints: BoxConstraints.tightFor(
+                    height: constraints.maxHeight,
+                  ),
+                )
+              : decoration,
+        ),
+      );
+    } else {
+      field = buildField(decoration);
+    }
 
     if (node.isHorizontalWrap) {
       field = IntrinsicWidth(child: field);
