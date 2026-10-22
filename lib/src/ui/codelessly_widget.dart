@@ -58,6 +58,11 @@ class CodelesslyWidget extends StatefulWidget {
   /// This cannot be null if no controller is provided.
   final String? layoutID;
 
+  /// The canvas of the layout to show first, e.g. one screen of a site opened
+  /// from a link. Null shows the layout's first canvas, or the one its
+  /// breakpoints pick for the width.
+  final String? initialCanvasId;
+
   /// The [Codelessly] instance to use.
   ///
   /// By default, if this is null, the global instance is used, which is
@@ -161,6 +166,7 @@ class CodelesslyWidget extends StatefulWidget {
   CodelesslyWidget({
     super.key,
     this.layoutID,
+    this.initialCanvasId,
     this.controller,
     this.codelessly,
     this.config,
@@ -441,6 +447,11 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     Widget Function(BuildContext context) builder,
   ) {
     final SDKPublishLayout layout = model.layouts[effectiveLayoutID!]!;
+    if (canvasID == null &&
+        widget.initialCanvasId != null &&
+        layout.canvases.containsKey(widget.initialCanvasId)) {
+      canvasID = widget.initialCanvasId;
+    }
     if (layout.canvases.length == 1) {
       canvasID = layout.canvases.keys.first;
       return builder(context);
