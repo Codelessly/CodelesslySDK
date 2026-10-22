@@ -666,8 +666,82 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     codelessly?.setSystemUIBrightness(widget.node.properties.brightness);
   }
 
+  /// Timers for the canvas's interval reactions, one per period.
+  final List<Timer> _intervalTimers = [];
+
+  /// Periods whose actions are still running, so a slow chain skips ticks
+  /// instead of piling up.
+  final Set<int> _runningIntervals = {};
+
+  /// Interval actions grouped by period, in reaction order.
+  Map<int, List<ActionModel>> collectIntervalActions() {
+    final Map<int, List<ActionModel>> groups = {};
+    for (final Reaction reaction in widget.node.reactions) {
+      if (reaction.trigger.type != TriggerType.interval) continue;
+      if (!reaction.action.enabled) continue;
+      groups
+          .putIfAbsent(reaction.trigger.effectiveIntervalMillis, () => [])
+          .add(reaction.action);
+    }
+    return groups;
+  }
+
+  /// Starts (or restarts) a periodic timer for each interval period. Each
+  /// tick runs that period's actions in order on one chain, like the load
+  /// actions.
+  void startIntervals() {
+    stopIntervals();
+    for (final MapEntry<int, List<ActionModel>> group
+        in collectIntervalActions().entries) {
+      _intervalTimers.add(
+        Timer.periodic(Duration(milliseconds: group.key), (_) {
+          if (!mounted || _runningIntervals.contains(group.key)) return;
+          _runningIntervals.add(group.key);
+          ActionChain.run(
+            () => runActions(group.value),
+            context: context,
+          ).whenComplete(() => _runningIntervals.remove(group.key));
+        }),
+      );
+    }
+  }
+
+  void stopIntervals() {
+    for (final Timer timer in _intervalTimers) {
+      timer.cancel();
+    }
+    _intervalTimers.clear();
+    _runningIntervals.clear();
+  }
+
+  /// Runs [actions] one after another, waiting on each blocking action.
+  Future<void> runActions(List<ActionModel> actions) async {
+    for (final ActionModel action in actions) {
+      // contextFor checks that the context it returns is mounted.
+      // ignore: use_build_context_synchronously
+      final BuildContext? actionContext = ActionChain.contextFor(context);
+      if (actionContext == null) return;
+      // ignore: use_build_context_synchronously
+      final result = FunctionsRepository.performAction(actionContext, action);
+      if (result is Future && !action.nonBlocking) {
+        try {
+          await result;
+        } catch (e, stackTrace) {
+          ErrorLogger.instance.captureException(
+            e,
+            message: 'Interval action failed',
+            type: 'interval_action_failed',
+            stackTrace: stackTrace,
+          );
+          return;
+        }
+      }
+    }
+  }
+
   @override
   void dispose() {
+    stopIntervals();
     codelessly?.removeNavigationListener('canvas-${widget.node.id}');
     _gateUser?.removeListener(_enforceSignIn);
     _stopWatchingValues();
@@ -758,6 +832,9 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     super.didUpdateWidget(oldWidget);
     if (widget.node != oldWidget.node) {
       onLoadActions = collectOnLoadActions();
+      if (didPerformOnLoadActions && !widget.settings.isPreview) {
+        startIntervals();
+      }
     }
   }
 
@@ -779,6 +856,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
 
     triggerOnLoadActions(context);
     _watchValues(context);
+    startIntervals();
   }
 
   List<ActionModel> collectOnLoadActions() => widget.node.reactions
