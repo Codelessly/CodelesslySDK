@@ -144,14 +144,65 @@ class Codelessly {
   /// Re-reads the signed-in user into [appUser], e.g. after its display name
   /// changed, which Firebase doesn't announce.
   void refreshAppUser() {
-    appUser.value = AppAuth.userToMap(_firebaseAuth?.currentUser);
+    appUser.value = {
+      ...AppAuth.userToMap(_firebaseAuth?.currentUser),
+      ..._profileFields,
+    };
+  }
+
+  /// `profile` (the signed-in user's `users/{uid}` document) and `role` (its
+  /// role field), added to [appUser].
+  Map<String, dynamic> _profileFields = AppAuth.profileFields(null);
+
+  StreamSubscription? _profileSubscription;
+  String? _profileUid;
+
+  /// Follows the profile document of [user], so `${auth.profile.*}` and
+  /// `${auth.role}` stay current.
+  Future<void> _followProfile(User? user) async {
+    final String? uid = user == null || user.isAnonymous ? null : user.uid;
+    if (uid == _profileUid) return;
+    _profileUid = uid;
+    await _profileSubscription?.cancel();
+    _profileSubscription = null;
+    _profileFields = AppAuth.profileFields(null);
+    refreshAppUser();
+    if (uid == null) return;
+    // The cloud database starts after the user is known.
+    final DateTime deadline = DateTime.now().add(const Duration(seconds: 20));
+    while (cloudDatabase == null && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+    final CloudDatabase? database = cloudDatabase;
+    if (database is! FirestoreCloudDatabase || uid != _profileUid) return;
+    _profileSubscription = database
+        .getCollectionPath(AppAuth.profilesCollection)
+        .doc(uid)
+        .snapshots()
+        .listen(
+          (snapshot) {
+            final Map<String, dynamic>? data = snapshot.data();
+            _profileFields = AppAuth.profileFields(
+              data == null
+                  ? null
+                  : sanitizeCloudDataForUse(data, docId: snapshot.id),
+              signedIn: true,
+            );
+            refreshAppUser();
+          },
+          onError: (Object error) => DebugLogger.instance.printInfo(
+            'Could not read the profile of $uid: $error',
+            name: name,
+          ),
+        );
   }
 
   void _listenToAppUser() {
     _appUserSubscription?.cancel();
-    _appUserSubscription = _firebaseAuth?.userChanges().listen(
-      (User? user) => appUser.value = AppAuth.userToMap(user),
-    );
+    _appUserSubscription = _firebaseAuth?.userChanges().listen((User? user) {
+      refreshAppUser();
+      unawaited(_followProfile(user));
+    });
     refreshAppUser();
   }
 
