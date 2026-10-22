@@ -33,6 +33,8 @@ Future<BuildContext> pumpContext(
 }
 
 void main() {
+  queryParamTests();
+
   testWidgets('An API call leaves its response as the chain result', (
     WidgetTester tester,
   ) async {
@@ -89,5 +91,63 @@ void main() {
       }),
     );
     expect((result! as Map)['isError'], true);
+  });
+}
+
+HttpApiData api(String url, List<HttpKeyValuePair> query) =>
+    HttpApiData.fromJson({
+      'name': 'Tides',
+      'directory': '',
+      'owner': 'o',
+      'teams': <String>[],
+      'users': <String>[],
+      'roles': <String, String>{},
+      'public': false,
+      'url': url,
+      'queryParams': [for (final q in query) q.toJson()],
+    });
+
+void queryParamTests() {
+  testWidgets('An API URL gets its query parameters and inputs', (
+    WidgetTester tester,
+  ) async {
+    final context = await pumpContext(
+      tester,
+      MockClient((request) async => http.Response('', 200)),
+    );
+    final String url = FunctionsRepository.buildApiUrl(
+      api('https://api.example.com/data?format=json', const [
+        HttpKeyValuePair(key: 'station', value: r'${station}'),
+        HttpKeyValuePair(key: 'interval', value: 'hilo'),
+        HttpKeyValuePair(key: 'unused', value: 'x', isUsed: false),
+        HttpKeyValuePair(key: '', value: 'blank key'),
+      ]),
+      {'station': '9414131'},
+      ScopedValues.of(context),
+    );
+    final Uri uri = Uri.parse(url);
+    expect(uri.path, '/data');
+    expect(uri.queryParameters, {
+      'format': 'json',
+      'station': '9414131',
+      'interval': 'hilo',
+    });
+  });
+
+  testWidgets('An API without query parameters keeps its URL', (
+    WidgetTester tester,
+  ) async {
+    final context = await pumpContext(
+      tester,
+      MockClient((request) async => http.Response('', 200)),
+    );
+    expect(
+      FunctionsRepository.buildApiUrl(
+        api(r'https://x.dev/a?d=${day}', const []),
+        {'day': '2026-10-22'},
+        ScopedValues.of(context),
+      ),
+      'https://x.dev/a?d=2026-10-22',
+    );
   });
 }
