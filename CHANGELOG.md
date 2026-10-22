@@ -1,5 +1,10 @@
 ## Unreleased
 
+### Layout
+
+- An expanded child's `flex` can be bound to data or set by a condition, so
+  bars share a row by value (a gauge, a progress split).
+
 ### Icons
 
 - An icon's `iconName` can be bound to data, set by a condition or changed by
