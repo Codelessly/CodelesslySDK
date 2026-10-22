@@ -423,8 +423,15 @@ void getLinearGradientAlignment(double rotationDeg) {}
 
 Gradient? retrieveGradient(PaintModel paint) {
   try {
-    final double rotation = decomposeRelativeTransform(paint.gradientTransform)
-        .rotation;
+    final RelativeTransform relative = decomposeRelativeTransform(
+      paint.gradientTransform,
+    );
+    final double rotation = relative.rotation;
+    final TileMode tileMode = switch (paint.gradientTileMode) {
+      GradientTileMode.clamp => TileMode.clamp,
+      GradientTileMode.repeated => TileMode.repeated,
+      GradientTileMode.mirror => TileMode.mirror,
+    };
 
     // We sort the colors to mimic the way Figma changes the order.
     final gradientStops = paint.gradientStops!.sorted(
@@ -433,11 +440,19 @@ Gradient? retrieveGradient(PaintModel paint) {
     final radians = rotation * pi / 180;
 
     if (paint.type == PaintType.gradientLinear) {
+      // A repeating gradient spans 1 / scale of the box, so the transform's
+      // scale sets how many times it repeats across it (stripes).
+      final double span = paint.gradientTileMode == GradientTileMode.clamp
+          ? 1
+          : 1 / max(relative.scale[0].abs(), 0.0001);
       return LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment(-1 + 2 * span, 0),
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
         stops: gradientStops.map((e) => e.position).toList(),
+        tileMode: tileMode,
         transform: GradientRotation(radians),
       );
     } else if (paint.type == PaintType.gradientRadial) {
@@ -446,6 +461,7 @@ Gradient? retrieveGradient(PaintModel paint) {
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
         stops: gradientStops.map((e) => e.position).toList(),
+        tileMode: tileMode,
         transform: GradientRotation(radians),
       );
     } else if (paint.type == PaintType.gradientAngular) {
@@ -454,6 +470,7 @@ Gradient? retrieveGradient(PaintModel paint) {
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
         stops: gradientStops.map((e) => e.position).toList(),
+        tileMode: tileMode,
         transform: GradientRotation(radians),
       );
     }
