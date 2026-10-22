@@ -43,9 +43,9 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    unit) for the great-circle distance in 'km' (default) or 'mi'.
 ///  - building data: object(key, value, …), merge, set, keys, values,
 ///    flatten, compact (drops nulls and empty text), and
-///    list edits that return a new list: append, setAt, insertAt, removeAt
-///    and move. Set variable actions use them to change nested data, e.g.
-///    `setAt(trip.stops, index, merge(item, object('nights', 3)))`.
+///    list edits that return a new list: append, prepend, setAt, insertAt,
+///    removeAt and move. Set variable actions use them to change nested
+///    data, e.g. `setAt(trip.stops, index, merge(item, object('nights', 3)))`.
 ///  - list slicing: first, last, slice(list, start, end), take, skip,
 ///    reverse, range(end) or range(start, end, step), and indexOf(list,
 ///    value or predicate), which is -1 when nothing matches.
@@ -367,6 +367,11 @@ class FormulaEvaluator {
       'append',
       'append(list, item, …)',
       "append(stops, object('cg', id, 'nights', 2))",
+    ),
+    FormulaFunctionDoc(
+      'prepend',
+      'prepend(list, item, …)',
+      "prepend(stops, object('cg', id)) → the list with it first",
     ),
     FormulaFunctionDoc(
       'setAt',
@@ -1091,6 +1096,7 @@ final Map<String, _Function> _functions = {
       if (item != null && item != '') item,
   ],
   'append': (a) => [..._values(_arg(a, 0), null), ...a.skip(1)],
+  'prepend': (a) => [...a.skip(1), ..._values(_arg(a, 0), null)],
   'setAt': (a) {
     final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
     final int i = _index(_arg(a, 1), items.length, -1);
