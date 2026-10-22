@@ -87,40 +87,65 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       context,
       node: node,
       builder: (context) {
-        final BaseNode styled = applyStyleOverrides(context, node);
-        Widget widget = getTransformerByNode(node)
-            .buildWidget(styled, context, settings);
-        widget = decorate(context, styled, widget, NodeBuildLayer.content);
-
-        if (settings.withOpacity) {
-          widget = applyWidgetOpacity(styled, widget);
-        }
-        if (settings.withReactions) {
-          widget = wrapWithReaction(context, styled, widget);
-          widget = wrapWithSemantics(styled, widget);
-        }
-        if (settings.withRotation) {
-          widget = applyWidgetRotation(context, styled, widget);
-        }
-        if (settings.withConstraints) {
-          widget = applyWidgetConstraints(styled, widget);
-        }
-        if (settings.withMargins) {
-          widget = applyWidgetMargins(styled, widget);
-        }
-
-        if (settings.withVisibility) {
-          widget = applyWidgetVisibility(
-            context,
-            styled,
-            widget,
-            maintainState: true,
+        if (!settings.isPreview && _usesInteractionStates(context, node)) {
+          return InteractionStatesBox(
+            node: node,
+            builder: (context) => _buildDecorated(context, node, settings),
           );
         }
-
-        return decorate(context, styled, widget, NodeBuildLayer.margin);
+        return _buildDecorated(context, node, settings);
       },
     );
+  }
+
+  /// Whether [node] has interaction states, or its `selected` or `disabled`
+  /// property is bound or set by a condition.
+  bool _usesInteractionStates(BuildContext context, BaseNode node) {
+    if (usesInteractionStates(node)) return true;
+    final conditions = context.read<CodelesslyContext>().conditions;
+    return conditions.findByNodeProperty(node.id, 'selected') != null ||
+        conditions.findByNodeProperty(node.id, 'disabled') != null;
+  }
+
+  /// Builds [node] with its runtime style and the wrappers [settings] ask
+  /// for.
+  Widget _buildDecorated(
+    BuildContext context,
+    BaseNode node,
+    WidgetBuildSettings settings,
+  ) {
+    final BaseNode styled = applyStyleOverrides(context, node);
+    Widget widget = getTransformerByNode(node)
+        .buildWidget(styled, context, settings);
+    widget = decorate(context, styled, widget, NodeBuildLayer.content);
+
+    if (settings.withOpacity) {
+      widget = applyWidgetOpacity(styled, widget);
+    }
+    if (settings.withReactions) {
+      widget = wrapWithReaction(context, styled, widget);
+      widget = wrapWithSemantics(styled, widget);
+    }
+    if (settings.withRotation) {
+      widget = applyWidgetRotation(context, styled, widget);
+    }
+    if (settings.withConstraints) {
+      widget = applyWidgetConstraints(styled, widget);
+    }
+    if (settings.withMargins) {
+      widget = applyWidgetMargins(styled, widget);
+    }
+
+    if (settings.withVisibility) {
+      widget = applyWidgetVisibility(
+        context,
+        styled,
+        widget,
+        maintainState: true,
+      );
+    }
+
+    return decorate(context, styled, widget, NodeBuildLayer.margin);
   }
 
   /// Returns [node] with the style properties that conditions, bound
@@ -189,11 +214,19 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       ).toJson();
     }
 
-    if (patch.isEmpty) return node;
-    final BaseNode? styled = NodeJsonConverter().fromJson({
-      ...node.toJson(),
-      ...patch,
-    });
+    // The states shown around the node (a property-override variant, its
+    // own or an ancestor's interaction states) win over bindings.
+    final Map<String, dynamic>? statePatch = PropertyOverrideScope.patchFor(
+      context,
+      node.id,
+    );
+    if (patch.isEmpty && statePatch == null) return node;
+    final BaseNode? styled = NodeJsonConverter().fromJson(
+      PropertyOverridePatch.apply({
+        ...node.toJson(),
+        ...patch,
+      }, statePatch ?? const {}),
+    );
     if (styled == null) return node;
     return styled..parentID = node.parentID;
   }

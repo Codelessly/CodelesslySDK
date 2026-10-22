@@ -11,6 +11,7 @@ export 'utils/dash_path.dart';
 export 'utils/fit_layout.dart';
 export 'utils/indexed_item_provider.dart';
 export 'utils/node_geometry.dart';
+export 'utils/property_overrides.dart';
 export 'utils/property_value_delegate.dart';
 export 'utils/scoped_values.dart';
 export 'utils/stroke_painter.dart';
