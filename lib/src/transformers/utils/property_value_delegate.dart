@@ -319,9 +319,12 @@ class PropertyValueDelegate {
       if (value == null) return null;
       String accessor = segments.removeAt(0);
 
-      final Accessor? matchedAccessor = accessors.firstWhereOrNull(
-        (element) => element.name == accessor,
-      );
+      // A map's own key wins over a built-in accessor of the same name, so
+      // a rig's `length` field isn't read as the number of its fields.
+      final Accessor? matchedAccessor =
+          value is Map && value.containsKey(accessor)
+          ? null
+          : accessors.firstWhereOrNull((element) => element.name == accessor);
 
       if (matchedAccessor == null) {
         // If the accessor is not found, it means that the path is invalid. But
@@ -519,7 +522,13 @@ class PropertyValueDelegate {
         ? text.substring(2, text.length - 1)
         : text;
     // Add $-sign and dot so that the expression matches JSON path standards.
-    path = '\$.$path';
+    // JSON path reads `.length` as the size of the value, which hides a field
+    // named length (a rig's length); the bracket form reads the field, and a
+    // value without one falls back to the computed length below.
+    path = '\$.$path'.replaceAllMapped(
+      RegExp(r'\.length(?=$|[.\[])'),
+      (_) => "['length']",
+    );
     // [text] represent a JSON path here. Decode it.
     final JsonPath jsonPath = JsonPath(path);
     // Retrieve values from JSON that match the path.
