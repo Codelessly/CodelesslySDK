@@ -865,3 +865,18 @@ class SDKLayoutConditions extends PrivacyBase {
   @override
   Map<String, dynamic> toJson() => _$SDKLayoutConditionsToJson(this);
 }
+
+/// Finding layouts in a published model.
+extension SDKPublishModelLayouts on SDKPublishModel {
+  /// The layout [id] names: a layout ID, or the ID of a canvas in a layout,
+  /// so a link can open a screen by its canvas. Null when [id] is null or
+  /// names neither.
+  String? resolveLayoutId(String? id) {
+    if (id == null || id.isEmpty) return null;
+    if (layouts.containsKey(id)) return id;
+    for (final SDKPublishLayout layout in layouts.values) {
+      if (layout.canvasIds.contains(id)) return layout.id;
+    }
+    return null;
+  }
+}
