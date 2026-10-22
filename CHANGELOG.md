@@ -1,3 +1,22 @@
+## 8.1.0
+
+### Node geometry
+
+- `NodeGeometryRegistry`, `NodeGeometryScope` and `GeometryProbe` record the
+  painted box of every node from the render objects that paint it: its
+  transform, size, clip and whether it is painted.
+- `NodeGeometryRegistry.hitTest` finds the nodes under a point over the
+  painted boxes, respecting clips, scrolling and rotation. Its index is
+  collected once per layout; a paint offset only collects the moved subtree
+  again.
+- `setPaintOffset` and `setLifted` shift a node's paint without a layout,
+  for dragging. `FreeformMove` turns a painted position into the pins and
+  alignment that keep it there.
+
+### Performance
+
+- A condition's raw values are parsed once instead of on every evaluation.
+
 ## 8.0.0
 
 ### Breaking changes
