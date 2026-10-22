@@ -42,17 +42,32 @@ class DataRules {
   /// Collection name -> rule. Collections not listed use [DataRule.app].
   final Map<String, DataRule> collections;
 
-  /// Creates [DataRules].
-  const DataRules([this.collections = const {}]);
+  /// Collection name -> its typed fields, defined in the editor's Data panel.
+  final Map<String, CollectionSchema> schemas;
 
-  /// Reads `{collections: {name: rule}}`, ignoring unknown rules.
+  /// Creates [DataRules].
+  const DataRules([this.collections = const {}, this.schemas = const {}]);
+
+  /// Reads `{collections: {name: rule}, schemas: {name: schema}}`, ignoring
+  /// unknown rules and unreadable schemas.
   factory DataRules.fromJson(Map? json) {
     final Map? collections = json?['collections'] as Map?;
-    return DataRules({
-      for (final MapEntry entry in (collections ?? {}).entries)
-        if (DataRule.values.asNameMap()[entry.value] case final DataRule rule)
-          entry.key.toString(): rule,
-    });
+    final Map? schemas = json?['schemas'] as Map?;
+    return DataRules(
+      {
+        for (final MapEntry entry in (collections ?? {}).entries)
+          if (DataRule.values.asNameMap()[entry.value] case final DataRule rule)
+            entry.key.toString(): rule,
+      },
+      {
+        for (final MapEntry entry in (schemas ?? {}).entries)
+          if (entry.value is Map)
+            entry.key.toString(): CollectionSchema.fromJson({
+              'name': entry.key.toString(),
+              ...entry.value as Map,
+            }),
+      },
+    );
   }
 
   /// The JSON stored in the rules document.
@@ -61,7 +76,25 @@ class DataRules {
       for (final MapEntry<String, DataRule> entry in collections.entries)
         entry.key: entry.value.name,
     },
+    if (schemas.isNotEmpty)
+      'schemas': {
+        for (final MapEntry<String, CollectionSchema> entry in schemas.entries)
+          entry.key: entry.value.toJson(),
+      },
   };
+
+  /// The schema of the collection [path] names, if it has one: the schema of
+  /// its last collection (`tasks` for `users/u1/tasks`), else of its top one.
+  CollectionSchema? schemaFor(String path) {
+    final List<String> parts = [
+      for (final String part in path.trim().split(pathSeparatorRegex))
+        if (part.trim().isNotEmpty) part.trim(),
+    ];
+    final String? last = parts.isEmpty
+        ? null
+        : parts[(parts.length - 1) - (parts.length - 1) % 2];
+    return schemas[last] ?? schemas[topCollection(path)];
+  }
 
   /// The top-level collection of [path], which is what rules are set on.
   static String topCollection(String path) {

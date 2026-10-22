@@ -139,6 +139,12 @@ class ConditionVariablesVisitor
   Set<String>? visitDelayAction(DelayAction action) => {};
 
   @override
+  Set<String>? visitCloudDataAction(CloudDataAction action) => {};
+
+  @override
+  Set<String>? visitCloudBatchAction(CloudBatchAction action) => {};
+
+  @override
   Set<String>? visitForEachAction(ForEachAction action) => {};
 
   @override
@@ -224,6 +230,12 @@ class ConditionNodesVisitor
 
   @override
   String? visitDelayAction(DelayAction action) => null;
+
+  @override
+  String? visitCloudDataAction(CloudDataAction action) => null;
+
+  @override
+  String? visitCloudBatchAction(CloudBatchAction action) => null;
 
   @override
   String? visitForEachAction(ForEachAction action) => null;
