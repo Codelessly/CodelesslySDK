@@ -670,7 +670,57 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   void dispose() {
     codelessly?.removeNavigationListener('canvas-${widget.node.id}');
     _gateUser?.removeListener(_enforceSignIn);
+    _stopWatchingValues();
     super.dispose();
+  }
+
+  /// The variables the screen's "Value Changed" actions watch, with the
+  /// listener each got.
+  final List<(Listenable, VoidCallback)> _watchedValues = [];
+
+  /// Runs the screen's "Value Changed" actions when their variable changes.
+  void _watchValues(BuildContext context) {
+    _stopWatchingValues();
+    final CodelesslyContext codelesslyContext = context
+        .read<CodelesslyContext>();
+    final Map<String, List<Reaction>> byVariable = {};
+    for (final Reaction reaction in widget.node.reactions) {
+      final String? variable = reaction.trigger.variable;
+      if (reaction.trigger.type != TriggerType.valueChanged ||
+          variable == null ||
+          variable.isEmpty ||
+          !reaction.action.enabled) {
+        continue;
+      }
+      (byVariable[variable] ??= []).add(reaction);
+    }
+    for (final MapEntry(key: name, value: reactions) in byVariable.entries) {
+      final Observable<VariableData>? notifier = codelesslyContext
+          .findVariableByName(name);
+      if (notifier == null) continue;
+      Object? last = notifier.value.value;
+      void listener() {
+        final Object value = notifier.value.value;
+        if (value == last || !mounted) return;
+        last = value;
+        FunctionsRepository.triggerAction(
+          context,
+          TriggerType.valueChanged,
+          reactions: reactions,
+          value: value,
+        );
+      }
+
+      notifier.addListener(listener);
+      _watchedValues.add((notifier, listener));
+    }
+  }
+
+  void _stopWatchingValues() {
+    for (final (Listenable notifier, VoidCallback listener) in _watchedValues) {
+      notifier.removeListener(listener);
+    }
+    _watchedValues.clear();
   }
 
   /// The signed-in user a screen that requires sign-in watches.
@@ -728,6 +778,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     }
 
     triggerOnLoadActions(context);
+    _watchValues(context);
   }
 
   List<ActionModel> collectOnLoadActions() => widget.node.reactions
