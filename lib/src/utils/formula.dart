@@ -83,6 +83,9 @@ class FormulaEvaluator {
     }
   }
 
+  /// Whether [expression] is a well-formed formula.
+  static bool parses(String expression) => _parse(expression) != null;
+
   /// The variable paths [expression] reads, e.g. `storage.cart` and `qty`.
   static Set<String> referencedPaths(String expression) {
     final _Node? node = _parse(expression);

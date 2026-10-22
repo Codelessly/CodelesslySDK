@@ -50,6 +50,13 @@ void main() {
       expect(eval("object('a', 1, 'b')"), {'a': 1});
     });
 
+    test('parses tells well-formed formulas apart', () {
+      expect(FormulaEvaluator.parses('level > limit'), isTrue);
+      expect(FormulaEvaluator.parses('null'), isTrue);
+      expect(FormulaEvaluator.parses('level >'), isFalse);
+      expect(FormulaEvaluator.parses("if(a, 'x'"), isFalse);
+    });
+
     test('math helpers', () {
       expect(eval('clamp(1.4, 0, 1)'), 1);
       expect(eval('clamp(-3, 0, 1)'), 0);
