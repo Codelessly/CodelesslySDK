@@ -49,7 +49,9 @@ class PassiveVarianceWidget extends StatelessWidget {
 
     return node.variants.findById(variantIdOrName) ??
         node.variants.findByName(variantIdOrName) ??
-        node.currentVariant;
+        // A list's status with no variant of its own (loaded) shows the
+        // default variant, whichever one the editor last showed.
+        (node.isQueryStatus ? node.defaultVariant : node.currentVariant);
   }
 
   @override
@@ -70,7 +72,40 @@ class PassiveVarianceWidget extends StatelessWidget {
         ),
       );
     }
-    return _buildVariant(context, getVariant(ScopedValues.of(context)));
+    final Variant variant = getVariant(ScopedValues.of(context));
+    if (!settings.isPreview && node.isQueryStatus) {
+      return _buildQueryStatus(context, variant);
+    }
+    return _buildVariant(context, variant);
+  }
+
+  /// Builds a node that shows a cloud list's status. The default variant,
+  /// which holds the list, stays built whatever the status, so the list
+  /// keeps its query: it is hidden while a status variant with its own
+  /// children shows over it, and painted as a skeleton while a skeleton
+  /// variant shows.
+  Widget _buildQueryStatus(BuildContext context, Variant variant) {
+    final Variant loaded = node.defaultVariant;
+    final bool ownChildren =
+        variant.id != loaded.id && !variant.sharesDefaultChildren;
+    return Stack(
+      fit: StackFit.passthrough,
+      children: [
+        Offstage(
+          key: const ValueKey('loaded'),
+          offstage: ownChildren,
+          child: Skeleton(
+            enabled: variant.skeleton,
+            child: _buildChildren(context, loaded.children),
+          ),
+        ),
+        if (ownChildren)
+          KeyedSubtree(
+            key: ValueKey(variant.id),
+            child: _buildVariant(context, variant),
+          ),
+      ],
+    );
   }
 
   /// Builds only [variant]: the other variants are never built. A
