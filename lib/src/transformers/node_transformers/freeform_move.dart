@@ -124,6 +124,8 @@ class FreeformMove {
       case FreeformAxisMode.end:
         return _AxisMove(startPin, asEndPin(end), newOrigin);
       case FreeformAxisMode.start:
+      // Data places the child at runtime; a drag moves its design box.
+      case FreeformAxisMode.fraction:
         return _AxisMove(asStartPin(start), endPin, newOrigin);
       case FreeformAxisMode.relative:
         // offsetIn: designStart + (extent - designExtent) * share, with

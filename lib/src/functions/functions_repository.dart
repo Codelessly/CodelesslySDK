@@ -1298,12 +1298,15 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
   /// Returns `true` if any action was triggered, `false` otherwise.
   /// If [reactions] is not provided, it will use [node]'s reactions.
   /// If [value] is provided, it will be passed to the action.
+  /// [event] describes the gesture, readable as `${event}` by every action
+  /// of the chain; see [tapEvent].
   static Future<bool> triggerAction(
     BuildContext context,
     TriggerType type, {
     ReactionMixin? node,
     dynamic value,
     List<Reaction>? reactions,
+    Map<String, Object?>? event,
   }) async {
     final filteredReactions = (reactions ?? node?.reactions ?? []).where(
       (reaction) => reaction.trigger.type == type,
@@ -1337,11 +1340,28 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     return ActionChain.run(
       () => _runReactions(context, filteredReactions, value),
       context: context,
+      event: event,
     );
   }
 
   /// The pending runs of debounced triggers, by target and trigger type.
   static final Map<Object, Timer> _debounceTimers = {};
+
+  /// The `${event}` of a tap that landed at [localPosition] in a box of
+  /// [size]: `x` and `y` as fractions (0..1) of the box, `localX` and
+  /// `localY` in pixels, and `width` and `height`.
+  static Map<String, Object?> tapEvent(Offset localPosition, Size? size) {
+    final double width = size?.width ?? 0;
+    final double height = size?.height ?? 0;
+    return {
+      'x': width > 0 ? localPosition.dx / width : 0.0,
+      'y': height > 0 ? localPosition.dy / height : 0.0,
+      'localX': localPosition.dx,
+      'localY': localPosition.dy,
+      'width': width,
+      'height': height,
+    };
+  }
 
   static Future<bool> _runReactions(
     BuildContext context,

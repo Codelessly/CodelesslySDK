@@ -28,12 +28,85 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         childWidget ??
         manager!.buildWidgetFromNode(node, context, settings: settings);
 
-    return FreeformChild(
-      key: ValueKey(
-        'Static Stack child [${node.id}](${node.name})<${node.type}> on parent [${parent.id}](${parent.name})<${parent.type}>',
-      ),
-      placement: placementFor(node, parent, scrollAxis: scrollAxis),
+    final Key key = ValueKey(
+      'Static Stack child [${node.id}](${node.name})<${node.type}> on parent [${parent.id}](${parent.name})<${parent.type}>',
+    );
+    final FreeformPlacement placement = placementFor(
+      node,
+      parent,
+      scrollAxis: scrollAxis,
+    );
+    if (!hasDataPosition(node)) {
+      return FreeformChild(key: key, placement: placement, child: child);
+    }
+    // The parent places the child, so the parent's slot for it rebuilds
+    // when the variables its position reads change.
+    final List<Listenable> listenables =
+        manager is PassiveNodeTransformerManager
+        ? manager.listenablesFor(context, node)
+        : const [];
+    Widget placed(BuildContext context) => FreeformChild(
+      key: key,
+      placement: withDataPosition(placement, node, context),
       child: child,
+    );
+    if (listenables.isEmpty) return placed(context);
+    return ManagedListenableBuilder(
+      key: ValueKey('${node.id}-position'),
+      listenables: listenables,
+      builder: placed,
+    );
+  }
+
+  /// Whether [node] binds `positionX` or `positionY`; see [withDataPosition].
+  static bool hasDataPosition(BaseNode node) =>
+      node.variables['positionX'] != null ||
+      node.variables['positionY'] != null;
+
+  /// [placement] with the axes that [node]'s `positionX` / `positionY`
+  /// variables bind placed by data ([FreeformAxisMode.fraction]): the
+  /// variable is a fraction (0..1) of the container, and the node's
+  /// alignment picks which point of the node sits there (its center when it
+  /// has none; bottom center for a map pin's tip).
+  static FreeformPlacement withDataPosition(
+    FreeformPlacement placement,
+    BaseNode node,
+    BuildContext context,
+  ) {
+    if (!hasDataPosition(node)) return placement;
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    double? fraction(String property) =>
+        PropertyValueDelegate.getPropertyValue<num>(
+          node,
+          property,
+          scopedValues: scopedValues,
+        )?.toDouble();
+    final AlignmentData? anchor = node.alignment.data;
+    FreeformAxisPlacement axis(
+      FreeformAxisPlacement current,
+      double? value,
+      double anchorValue,
+    ) {
+      if (value == null || !value.isFinite) return current;
+      return FreeformAxisPlacement(
+        mode: FreeformAxisMode.fraction,
+        start: current.start,
+        extent: current.extent,
+        parentExtent: current.parentExtent,
+        size: current.size ?? (current.expands ? null : current.extent),
+        alignment: anchorValue,
+        fraction: value,
+        clamp: false,
+      );
+    }
+
+    return FreeformPlacement(
+      horizontal: axis(
+        placement.horizontal,
+        fraction('positionX'),
+        anchor?.x ?? 0,
+      ),
+      vertical: axis(placement.vertical, fraction('positionY'), anchor?.y ?? 0),
     );
   }
 

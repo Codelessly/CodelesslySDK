@@ -30,6 +30,14 @@ enum FreeformAxisMode {
 
   /// Aligned with [Alignment.inscribe] semantics.
   align,
+
+  /// Placed by data: the child's anchor point ([FreeformAxisPlacement.
+  /// alignment], -1..1 across the child) sits at
+  /// [FreeformAxisPlacement.fraction] (0..1) of the container. Used for a
+  /// child whose `positionX` / `positionY` variable is bound, such as a pin
+  /// on a floor plan. The child keeps its size and may hang out of the
+  /// container.
+  fraction,
 }
 
 /// The design-size data and rule that place a child on one axis.
@@ -56,8 +64,13 @@ class FreeformAxisPlacement {
   /// [FreeformAxisMode.end] and [FreeformAxisMode.relative].
   final double? size;
 
-  /// The alignment value (-1..1) for [FreeformAxisMode.align].
+  /// The alignment value (-1..1) for [FreeformAxisMode.align], and the
+  /// child's anchor point for [FreeformAxisMode.fraction].
   final double alignment;
+
+  /// Where the child's anchor sits, as a fraction (0..1) of the container,
+  /// for [FreeformAxisMode.fraction].
+  final double fraction;
 
   /// Whether the child is kept inside the container when the container is
   /// smaller than at design size. False along a scroll axis, where children
@@ -83,6 +96,7 @@ class FreeformAxisPlacement {
     required this.parentExtent,
     this.size,
     this.alignment = 0,
+    this.fraction = 0,
     this.clamp = true,
     this.expands = false,
     this.growsWithContent = false,
@@ -156,7 +170,7 @@ class FreeformAxisPlacement {
   double _unwrappedContribution(double childExtent) => switch (mode) {
     FreeformAxisMode.fill => 0,
     FreeformAxisMode.stretch => math.max(0, start) + math.max(0, end),
-    FreeformAxisMode.align => childExtent,
+    FreeformAxisMode.align || FreeformAxisMode.fraction => childExtent,
     FreeformAxisMode.end => childExtent + math.max(0, end),
     FreeformAxisMode.start ||
     FreeformAxisMode.relative => math.max(0, start) + childExtent,
@@ -178,6 +192,9 @@ class FreeformAxisPlacement {
         final double max = s ?? incomingMax;
         if (expands && max.isInfinite) return (extent, extent);
         return (0, max);
+      case FreeformAxisMode.fraction:
+        if (size case final double size) return (size, size);
+        return (0, s ?? incomingMax);
       case FreeformAxisMode.start:
       case FreeformAxisMode.end:
       case FreeformAxisMode.relative:
@@ -204,6 +221,8 @@ class FreeformAxisPlacement {
         return stretchIn(s).$1;
       case FreeformAxisMode.align:
         return (s - childExtent) / 2 * (1 + alignment);
+      case FreeformAxisMode.fraction:
+        return s * fraction - childExtent * (1 + alignment) / 2;
       case FreeformAxisMode.start:
         offset = wraps ? math.max(0, start) : start;
       case FreeformAxisMode.end:
@@ -233,6 +252,7 @@ class FreeformAxisPlacement {
       other.parentExtent == parentExtent &&
       other.size == size &&
       other.alignment == alignment &&
+      other.fraction == fraction &&
       other.clamp == clamp &&
       other.expands == expands &&
       other.growsWithContent == growsWithContent &&
@@ -246,6 +266,7 @@ class FreeformAxisPlacement {
     parentExtent,
     size,
     alignment,
+    fraction,
     clamp,
     expands,
     growsWithContent,

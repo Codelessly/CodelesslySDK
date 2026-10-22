@@ -260,33 +260,54 @@ abstract class WidgetNodeTransformerManager
         )
         .toList();
 
+    // Where the last tap landed, for the click's `${event}`. Read through
+    // [tapContext], whose box is the tapped node's.
+    Map<String, Object?>? lastTap;
+    void recordTap(BuildContext tapContext, TapUpDetails details) {
+      final RenderObject? box = tapContext.findRenderObject();
+      lastTap = FunctionsRepository.tapEvent(
+        details.localPosition,
+        box is RenderBox && box.hasSize ? box.size : null,
+      );
+    }
+
+    void click() {
+      final Map<String, Object?>? event = lastTap;
+      lastTap = null;
+      FunctionsRepository.triggerAction(
+        context,
+        TriggerType.click,
+        reactions: onClickReactions,
+        event: event,
+      );
+    }
+
     if (inkWell != null) {
       return Material(
         type: MaterialType.transparency,
-        child: InkWell(
-          onTap: () => FunctionsRepository.triggerAction(
-            context,
-            TriggerType.click,
-            reactions: onClickReactions,
+        child: Builder(
+          builder: (tapContext) => InkWell(
+            onTapUp: (details) => recordTap(tapContext, details),
+            onTap: click,
+            onLongPress: onLongPressReactions.isEmpty
+                ? null
+                : () => FunctionsRepository.triggerAction(
+                    context,
+                    TriggerType.longPress,
+                    reactions: onLongPressReactions,
+                  ),
+            borderRadius: getBorderRadius(node),
+            overlayColor: inkWell.overlayColor != null
+                ? WidgetStatePropertyAll<Color>(
+                    inkWell.overlayColor!.toFlutterColor(),
+                  )
+                : null,
+            splashColor: inkWell.splashColor?.toFlutterColor(),
+            highlightColor: inkWell.highlightColor?.toFlutterColor(),
+            hoverColor: inkWell.hoverColor?.toFlutterColor(),
+            focusColor: inkWell.focusColor?.toFlutterColor(),
+            child: widget,
           ),
-          onLongPress: onLongPressReactions.isEmpty
-              ? null
-              : () => FunctionsRepository.triggerAction(
-                  context,
-                  TriggerType.longPress,
-                  reactions: onLongPressReactions,
-                ),
-          borderRadius: getBorderRadius(node),
-          overlayColor: inkWell.overlayColor != null
-              ? WidgetStatePropertyAll<Color>(
-                  inkWell.overlayColor!.toFlutterColor(),
-                )
-              : null,
-          splashColor: inkWell.splashColor?.toFlutterColor(),
-          highlightColor: inkWell.highlightColor?.toFlutterColor(),
-          hoverColor: inkWell.hoverColor?.toFlutterColor(),
-          focusColor: inkWell.focusColor?.toFlutterColor(),
-          child: widget,
         ),
       );
     } else {
@@ -297,21 +318,22 @@ abstract class WidgetNodeTransformerManager
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         hitTestBehavior: HitTestBehavior.opaque,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => FunctionsRepository.triggerAction(
-            context,
-            TriggerType.click,
-            reactions: onClickReactions,
+        child: Builder(
+          builder: (tapContext) => GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapUp: onClickReactions.isEmpty
+                ? null
+                : (details) => recordTap(tapContext, details),
+            onTap: onClickReactions.isEmpty ? null : click,
+            onLongPress: onLongPressReactions.isEmpty
+                ? null
+                : () => FunctionsRepository.triggerAction(
+                    context,
+                    TriggerType.longPress,
+                    reactions: onLongPressReactions,
+                  ),
+            child: widget,
           ),
-          onLongPress: onLongPressReactions.isEmpty
-              ? null
-              : () => FunctionsRepository.triggerAction(
-                  context,
-                  TriggerType.longPress,
-                  reactions: onLongPressReactions,
-                ),
-          child: widget,
         ),
       );
     }

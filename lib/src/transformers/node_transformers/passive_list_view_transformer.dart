@@ -91,6 +91,43 @@ class PassiveListViewWidget extends StatelessWidget {
     child: manager.buildWidgetByID(item.id, context, settings: settings),
   );
 
+  /// The items laid on top of each other in the list's box, each placed like
+  /// a child of a freeform frame (see [ListViewProperties.overlay]), so its
+  /// `positionX` / `positionY` variables place it by data.
+  Widget overlay(BaseNode item, int count, Object? Function(int) itemAt) {
+    return box(
+      canShrinkWrap: false,
+      (context, _) => FreeformLayout(
+        wrapsWidth: false,
+        wrapsHeight: false,
+        designSize: node.innerBoxLocal.size.flutterSize,
+        children: [
+          for (int index = 0; index < count; index++)
+            IndexedItemProvider(
+              key: ValueKey(index),
+              item: IndexedItem(index, itemAt(index)),
+              child: Builder(
+                // The builder's context has the item, so the placement
+                // reads this item's position.
+                builder: (context) => FreeformChild(
+                  placement: PassiveStackTransformer.withDataPosition(
+                    PassiveStackTransformer.placementFor(item, node),
+                    item,
+                    context,
+                  ),
+                  child: manager.buildWidgetByID(
+                    item.id,
+                    context,
+                    settings: settings,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (node.children.isEmpty) {
@@ -257,6 +294,14 @@ class PassiveListViewWidget extends StatelessWidget {
       itemCount = node.properties.itemCount ?? data?.length;
     } else {
       itemCount = data?.length ?? node.properties.itemCount;
+    }
+
+    if (node.properties.overlay) {
+      return overlay(
+        item,
+        itemCount ?? 1,
+        (index) => data?.elementAtOrNull(index),
+      );
     }
 
     Widget itemBuilder(BuildContext context, int index) => IndexedItemProvider(

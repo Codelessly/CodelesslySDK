@@ -37,22 +37,34 @@ class ActionChain {
   ActionChain({
     this.result,
     this.scopedValues,
+    this.event,
     this._context,
     this._hosts = const [],
   });
 
   /// Creates a chain for a trigger that fired in [context], capturing its
   /// scope and hosts.
-  factory ActionChain.capture(BuildContext context, {Object? result}) =>
-      ActionChain(
-        result: result,
-        scopedValues: ScopedValues.of(context),
-        context: context,
-        hosts: ActionChainHost.hostsOf(context),
-      );
+  factory ActionChain.capture(
+    BuildContext context, {
+    Object? result,
+    Map<String, Object?>? event,
+  }) => ActionChain(
+    result: result,
+    event: event,
+    scopedValues: ScopedValues.of(context),
+    context: context,
+    hosts: ActionChainHost.hostsOf(context),
+  );
 
   /// What `${result}` resolves to.
   Object? result;
+
+  /// What `${event}` resolves to: details of the gesture that fired the
+  /// chain's trigger. A click gives `x` and `y`, where the tap landed as a
+  /// fraction (0..1) of the tapped node's width and height, plus `localX`,
+  /// `localY` (pixels from its top left), `width` and `height`. Null for
+  /// triggers that carry no gesture.
+  final Map<String, Object?>? event;
 
   /// The scope captured when the chain's trigger fired, which the chain's
   /// actions read variables from. Null for a chain that was started without
@@ -80,22 +92,30 @@ class ActionChain {
   }
 
   /// A chain nested in this one: same scope and contexts, its own result.
-  ActionChain _nested(Object? result) => ActionChain(
-    result: result,
-    scopedValues: scopedValues,
-    context: _context,
-    hosts: _hosts,
-  );
+  ActionChain _nested(Object? result, {Map<String, Object?>? event}) =>
+      ActionChain(
+        result: result,
+        event: event ?? this.event,
+        scopedValues: scopedValues,
+        context: _context,
+        hosts: _hosts,
+      );
 
   /// Runs [body] in a new chain whose `${result}` starts as [result].
   ///
   /// With [context], the chain starts at a trigger: it captures the scope and
   /// hosts of [context]. Without it, the chain nests in the current one (a
   /// for-each's or an upload's actions) and keeps its scope and contexts.
-  static R run<R>(R Function() body, {Object? result, BuildContext? context}) {
+  static R run<R>(
+    R Function() body, {
+    Object? result,
+    BuildContext? context,
+    Map<String, Object?>? event,
+  }) {
     final ActionChain chain = context != null
-        ? ActionChain.capture(context, result: result)
-        : current?._nested(result) ?? ActionChain(result: result);
+        ? ActionChain.capture(context, result: result, event: event)
+        : current?._nested(result, event: event) ??
+              ActionChain(result: result, event: event);
     return runZoned(body, zoneValues: {_zoneKey: chain});
   }
 
