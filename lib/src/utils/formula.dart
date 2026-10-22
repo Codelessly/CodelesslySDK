@@ -41,6 +41,10 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///  - math: sqrt, pow, sin, cos, tan, asin, acos, atan, atan2 (radians),
 ///    pi, radians, degrees, clamp, and distance(lat1, lng1, lat2, lng2,
 ///    unit) for the great-circle distance in 'km' (default) or 'mi'.
+///  - building data: object(key, value, …), merge, set, keys, values, and
+///    list edits that return a new list: append, setAt, insertAt, removeAt
+///    and move. Set variable actions use them to change nested data, e.g.
+///    `setAt(trip.stops, index, merge(item, object('nights', 3)))`.
 ///  - list slicing: first, last, slice(list, start, end), take, skip,
 ///    reverse, range(end) or range(start, end, step), and indexOf(list,
 ///    value or predicate), which is -1 when nothing matches.
@@ -330,6 +334,48 @@ class FormulaEvaluator {
       'indexOf',
       'indexOf(list, value) or indexOf(list, item => test)',
       "indexOf(trips, t => t.id == id) → 2",
+    ),
+    FormulaFunctionDoc(
+      'object',
+      'object(key, value, key, value, …)',
+      "object('nights', 2, 'cg', id) → {nights: 2, cg: id}",
+    ),
+    FormulaFunctionDoc(
+      'merge',
+      'merge(map, map, …)',
+      "merge(stop, object('nights', 3)) → stop with 3 nights",
+    ),
+    FormulaFunctionDoc(
+      'set',
+      'set(map, key, value)',
+      "set(rig, 'length', 36) → rig, 36 ft long",
+    ),
+    FormulaFunctionDoc('keys', 'keys(map)', 'keys(rig) → [name, length, …]'),
+    FormulaFunctionDoc('values', 'values(map)', 'values(totals) → [3, 5]'),
+    FormulaFunctionDoc(
+      'append',
+      'append(list, item, …)',
+      "append(stops, object('cg', id, 'nights', 2))",
+    ),
+    FormulaFunctionDoc(
+      'setAt',
+      'setAt(list, index, item)',
+      'setAt([1, 2, 3], 1, 9) → [1, 9, 3]',
+    ),
+    FormulaFunctionDoc(
+      'insertAt',
+      'insertAt(list, index, item)',
+      'insertAt([1, 3], 1, 2) → [1, 2, 3]',
+    ),
+    FormulaFunctionDoc(
+      'removeAt',
+      'removeAt(list, index)',
+      'removeAt([1, 2, 3], 0) → [2, 3]',
+    ),
+    FormulaFunctionDoc(
+      'move',
+      'move(list, from, to)',
+      'move([a, b, c], 2, 0) → [c, a, b]',
     ),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
@@ -978,7 +1024,7 @@ final Map<String, _Function> _functions = {
   'first': (a) => _values(_arg(a, 0), null).firstOrNull,
   'last': (a) => _values(_arg(a, 0), null).lastOrNull,
   'slice': (a) {
-    final List<Object?> items = _values(_arg(a, 0), null).toList();
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
     final int start = _index(_arg(a, 1), items.length, 0);
     final int end = _index(_arg(a, 2), items.length, items.length);
     return end <= start ? <Object?>[] : items.sublist(start, end);
@@ -992,13 +1038,60 @@ final Map<String, _Function> _functions = {
   },
   'range': _range,
   'indexOf': (a) {
-    final List<Object?> items = _values(_arg(a, 0), null).toList();
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
     final List<Object?> rest = a.skip(1).toList();
     final bool predicate = rest.length > 1 || _arg(rest, 0) is _Closure;
     return items.indexWhere(
       (item) =>
           predicate ? _matches(item, rest) : _looseEquals(item, _arg(rest, 0)),
     );
+  },
+  'object': (a) => <String, Object?>{
+    for (int i = 0; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  'merge': (a) => <String, Object?>{
+    for (final Object? m in a)
+      if (m is Map) ...m.map((k, v) => MapEntry(k.toString(), v)),
+  },
+  'set': (a) => <String, Object?>{
+    if (_arg(a, 0) case final Map m) ...m.map((k, v) => MapEntry('$k', v)),
+    FormulaEvaluator.stringify(_arg(a, 1)): _arg(a, 2),
+  },
+  'keys': (a) => switch (_arg(a, 0)) {
+    final Map m => m.keys.map((k) => k.toString()).toList(),
+    _ => <Object?>[],
+  },
+  'values': (a) => switch (_arg(a, 0)) {
+    final Map m => m.values.toList(),
+    _ => <Object?>[],
+  },
+  'append': (a) => [..._values(_arg(a, 0), null), ...a.skip(1)],
+  'setAt': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    final int i = _index(_arg(a, 1), items.length, -1);
+    if (i < 0 || i >= items.length) return items;
+    items[i] = _arg(a, 2);
+    return items;
+  },
+  'insertAt': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    items.insert(_index(_arg(a, 1), items.length, items.length), _arg(a, 2));
+    return items;
+  },
+  'removeAt': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    final int i = _index(_arg(a, 1), items.length, -1);
+    if (i >= 0 && i < items.length) items.removeAt(i);
+    return items;
+  },
+  'move': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    final int from = _index(_arg(a, 1), items.length, -1);
+    if (from < 0 || from >= items.length) return items;
+    final Object? item = items.removeAt(from);
+    items.insert(_index(_arg(a, 2), items.length, items.length), item);
+    return items;
   },
   'number': (a) => _toNum(_arg(a, 0)),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
