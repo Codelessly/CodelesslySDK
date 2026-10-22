@@ -12,7 +12,7 @@
 - Record functions build and change lists and maps, which formulas couldn't
   do because they can't contain braces: `obj`, `set`, `unset`, `merge`,
   `append`, `prepend`, `concat`, `updateWhere`, `removeWhere`, `findIndex`,
-  `indexOf`, `slice`, `take`, `skip`, `first`, `last`, `range` and `newId`.
+  `indexOf`, `slice`, `take`, `skip`, `reverse`, `first`, `last`, `range` and `newId`.
   They return new values, so a setVariable can write a nested change back,
   e.g. `updateWhere(logs, l => l.id == logId, l => set(l, 'crew',
   append(l.crew, entry)))`.
