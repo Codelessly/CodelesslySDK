@@ -168,6 +168,16 @@ abstract class WidgetNodeTransformerManager
   /// inside reads as that text; one without (an icon button) reads as its
   /// node name, or its icon's name when the node still has a default name.
   Widget wrapWithSemantics(BaseNode node, Widget widget) {
+    final String? customLabel = node.variables['semanticLabel'];
+    final String? customSelected = node.variables['semanticSelected'];
+    if ((customLabel?.trim().isNotEmpty ?? false) || customSelected != null) {
+      return _wrapWithCustomSemantics(
+        node,
+        widget,
+        label: customLabel,
+        selected: customSelected,
+      );
+    }
     if (node is! ReactionMixin) return widget;
     if (node case CanvasNode() || SpacerNode()) return widget;
     if (node is CustomPropertiesMixin &&
@@ -200,6 +210,55 @@ abstract class WidgetNodeTransformerManager
         label: label.isEmpty ? null : label,
         child: widget,
       ),
+    );
+  }
+
+  /// Semantics a node's `semanticLabel` variable gives it (a text with paths
+  /// or formulas): one node with that label. It replaces what the children
+  /// read, or, on a button (a node that reacts to taps), comes first. A `semanticSelected`
+  /// formula marks it selected, e.g. the chosen tab or chip.
+  Widget _wrapWithCustomSemantics(
+    BaseNode node,
+    Widget widget, {
+    String? label,
+    String? selected,
+  }) {
+    final bool tappable =
+        node is ReactionMixin &&
+        (node as ReactionMixin).reactions.any(
+          (reaction) =>
+              reaction.trigger.type == TriggerType.click &&
+              reaction.action.enabled,
+        );
+    return Builder(
+      builder: (context) {
+        final ScopedValues scopedValues = ScopedValues.of(context);
+        final String? text = label == null || label.trim().isEmpty
+            ? null
+            : PropertyValueDelegate.substituteVariables(
+                label,
+                scopedValues: scopedValues,
+                nullSubstitutionMode: NullSubstitutionMode.emptyString,
+              );
+        final bool? isSelected = selected == null
+            ? null
+            : PropertyValueDelegate.getVariableValueFromPath<bool>(
+                selected,
+                scopedValues: scopedValues,
+              );
+        final Widget child = Semantics(
+          container: true,
+          button: tappable ? true : null,
+          selected: isSelected,
+          label: text,
+          // A label replaces the children's text, except on a tappable node:
+          // its tap action lives on a child, so the children merge in after
+          // the label.
+          excludeSemantics: text != null && !tappable,
+          child: widget,
+        );
+        return tappable ? MergeSemantics(child: child) : child;
+      },
     );
   }
 
