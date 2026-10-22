@@ -238,7 +238,13 @@ class CodelesslyContext with ChangeNotifier, Equatable {
       log('[CodelesslyContext] Variable with name $name does not exist.');
       return null;
     }
-    return variable.value.getValue().typedValue<R>();
+    return PropertyValueDelegate.variableValue(
+      variable.value,
+      scopedValues: ScopedValues.preview(
+        variables: variableNamesMap(),
+        codelesslyContext: this,
+      ),
+    ).typedValue<R>();
   }
 
   @override

@@ -356,10 +356,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       }
 
       // Get corresponding variable data from codelessly context.
-      final ValueNotifier<VariableData>? listenableVariable = codelesslyContext
-          .findVariableByName(match.name);
-      // Add variable to [listenables].
-      if (listenableVariable != null) listenables.add(listenableVariable);
+      listenables.addAll(variableListenables(codelesslyContext, match.name));
     }
 
     // Traverse through all the multi-variables that the node properties are attached
@@ -398,10 +395,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       }
 
       // Get corresponding variable data from codelessly context.
-      final ValueNotifier<VariableData>? listenableVariable = codelesslyContext
-          .findVariableByName(match.name);
-      // Add variable to [listenables].
-      if (listenableVariable != null) listenables.add(listenableVariable);
+      listenables.addAll(variableListenables(codelesslyContext, match.name));
     }
 
     // Traverse through all the conditions that affects the node.
@@ -428,16 +422,38 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           continue;
         }
         // Get corresponding variable data from codelessly context.
-        final ValueNotifier<VariableData>? listenableVariable =
-            codelesslyContext.variables.values.firstWhereOrNull(
-              (notifier) => notifier.value.name == name,
-            );
-        // Add variable to [listenables].
-        if (listenableVariable != null) listenables.add(listenableVariable);
+        listenables.addAll(variableListenables(codelesslyContext, name));
       }
     }
 
     return listenables;
+  }
+
+  /// The notifier of the variable [name] and, for a computed variable, the
+  /// notifiers of every variable its formula reads (and theirs, for computed
+  /// ones), so whatever is bound to it rebuilds when its inputs change.
+  static Iterable<Listenable> variableListenables(
+    CodelesslyContext codelesslyContext,
+    String name, [
+    Set<String>? seen,
+  ]) sync* {
+    seen ??= <String>{};
+    if (!seen.add(name)) return;
+    final Observable<VariableData>? notifier = codelesslyContext
+        .findVariableByName(name);
+    if (notifier == null) return;
+    yield notifier;
+    final VariableData variable = notifier.value;
+    if (!variable.isComputed) return;
+    final String? expression = FormulaEvaluator.exactExpression(variable.value);
+    if (expression == null) return;
+    for (final String path in FormulaEvaluator.referencedPaths(expression)) {
+      final VariableMatch? match = VariableMatch.parse(
+        path.wrapWithVariableSyntax(),
+      );
+      if (match == null || match.isPredefinedVariable) continue;
+      yield* variableListenables(codelesslyContext, match.name, seen);
+    }
   }
 
   Listenable? getStorageListenerFor(VariableMatch match, BuildContext context) {

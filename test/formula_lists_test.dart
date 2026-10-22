@@ -400,4 +400,73 @@ void main() {
       'No results for milk',
     );
   });
+
+  group('objects and slices', () {
+    test('obj builds a map from key-value pairs', () {
+      expect(eval("obj('cat', 'Mechanical', 'min', 80)"), {
+        'cat': 'Mechanical',
+        'min': 80,
+      });
+      expect(
+        eval("map(cart, c => obj('name', c.name, 'total', c.price * c.qty))"),
+        [
+          {'name': 'Tea', 'total': 8},
+          {'name': 'Cake', 'total': 7},
+        ],
+      );
+    });
+
+    test('set copies a map with fields changed or added', () {
+      expect(eval("set(find(cart, 'name', 'Tea'), 'qty', 5, 'note', 'x')"), {
+        'name': 'Tea',
+        'price': 2,
+        'qty': 5,
+        'meta': {'shop': 'x'},
+        'note': 'x',
+      });
+      // The original is unchanged.
+      expect((vars['cart']! as List).first, containsPair('qty', 4));
+      expect(
+        eval(
+          "map(cart, c => if(c.name == 'Cake', set(c, 'qty', 0), c))[1].qty",
+        ),
+        0,
+      );
+    });
+
+    test('get reads a field or index named by a value', () {
+      expect(eval("get(find(cart, 'qty', 2), 'name')"), 'Cake');
+      expect(eval('get(tags, limit)'), 'a');
+      expect(eval("get(obj('PA', 'Press Line A'), 'PA')"), 'Press Line A');
+    });
+
+    test('take and skip slice lists', () {
+      expect(eval('take(tags, 2)'), ['a', 'b']);
+      expect(eval('skip(tags, 3)'), ['c', 'b']);
+      expect(eval('take(tags, 99)').toString(), '[a, b, a, c, b]');
+      expect(eval('take(tags, -1)'), isEmpty);
+      // A running total: the first n items.
+      expect(eval("sum(take(cart, 2), c => c.qty)"), 6);
+    });
+
+    test('indexOf finds an item, a match or nothing', () {
+      expect(eval("indexOf(tags, 'c')"), 3);
+      expect(eval("indexOf(cart, c => c.name == 'Cake')"), 1);
+      expect(eval("indexOf(cart, 'name', 'Tea')"), 0);
+      expect(eval("indexOf(tags, 'z')"), -1);
+    });
+
+    test('split and pad handle clock times', () {
+      expect(eval("split('19:42', ':')"), ['19', '42']);
+      expect(
+        eval(
+          "number(split('19:42', ':')[0]) * 60 + number(split('19:42', ':')[1])",
+        ),
+        1182,
+      );
+      expect(eval('pad(7)'), '07');
+      expect(eval("pad(floor(1182 / 60)) + ':' + pad(1182 % 60)"), '19:42');
+      expect(eval("pad(5, 3, ' ')"), '  5');
+    });
+  });
 }

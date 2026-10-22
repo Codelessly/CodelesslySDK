@@ -1138,6 +1138,14 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       action.variable.name,
     );
     if (variableNotifier == null) return false;
+    // A computed variable's value is its formula; there's nothing to set.
+    if (variableNotifier.value.isComputed) {
+      DebugLogger.instance.printInfo(
+        'Not setting ${action.variable.name}: it is computed by a formula.',
+        name: 'FunctionsRepository',
+      );
+      return false;
+    }
 
     String newValue = substituteNewValue(
       action.newValue,
