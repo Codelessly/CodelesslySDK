@@ -243,6 +243,62 @@ void main() {
     expect(box().center, const Offset(200, 100));
   });
 
+  testWidgets('a tap on a frame under an overlay list adds a pin there', (
+    tester,
+  ) async {
+    final FrameNode plan = FrameNode.fromJson({
+      ...FrameNode(
+        id: 'plan',
+        name: 'plan',
+        basicBoxLocal: NodeBox(0, 0, 400, 200),
+        children: ['pins'],
+      ).toJson(),
+      'reactions': [
+        Reaction(
+          name: 'drop',
+          trigger: TriggerModel(type: TriggerType.click),
+          action: SetVariableAction(
+            variable: VariableData(
+              id: 'points',
+              name: 'points',
+              type: VariableType.list,
+            ),
+            listOperation: ListOperation.add,
+            newValue: r'{"x": ${event.x}, "y": ${event.y}}',
+          ),
+        ).toJson(),
+      ],
+    })..parentID = kRootNode;
+    final ListViewNode list = pins()
+      ..parentID = 'plan'
+      ..edgePins = const EdgePinsModel(left: 0, top: 0, right: 0, bottom: 0);
+    final data = points([
+      {'x': 0.5, 'y': 0.5},
+    ]);
+    await pump(
+      tester,
+      plan,
+      [
+        list,
+        pin(
+          variables: {
+            'positionX': r'${item.x}',
+            'positionY': r'${item.y}',
+          },
+        ),
+      ],
+      CodelesslyContext.empty()..variables['points'] = data,
+    );
+    expect(pinBoxes(), findsOneWidget);
+    await tester.tapAt(const Offset(100, 150));
+    await tester.pumpAndSettle();
+    expect(data.value.getValue(), [
+      {'x': 0.5, 'y': 0.5},
+      {'x': 0.25, 'y': 0.75},
+    ]);
+    expect(pinBoxes(), findsNWidgets(2));
+  });
+
   group('tap event', () {
     test('describes where a tap landed', () {
       expect(

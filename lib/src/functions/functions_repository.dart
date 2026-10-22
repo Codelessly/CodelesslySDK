@@ -1734,20 +1734,35 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
       scopedValues: scopedValues,
     );
-    final index = int.tryParse(substitutedIndex);
-    if (index == null) {
+    final int? parsedIndex = int.tryParse(substitutedIndex);
+    // Only the operations that work at a position need an index.
+    final bool needsIndex = switch (action.listOperation) {
+      ListOperation.insert ||
+      ListOperation.insertAll ||
+      ListOperation.removeAt ||
+      ListOperation.update => true,
+      _ => false,
+    };
+    if (needsIndex && parsedIndex == null) {
       DebugLogger.instance.printInfo(
         'Invalid index: $substitutedIndex',
         name: name,
       );
       return currentValue;
     }
+    final int index = parsedIndex ?? 0;
 
     // Perform list operations.
     switch (action.listOperation) {
       case ListOperation.add:
-        final parsedValue = newValue.toList<List>() ?? [];
-        currentValue.addAll(parsedValue);
+        // A list adds each of its items; any other value (an item's map,
+        // a number, text) is added as one item.
+        final Object? parsedValue = newValue.parsedValue();
+        if (parsedValue is List) {
+          currentValue.addAll(parsedValue);
+        } else if (parsedValue != null) {
+          currentValue.add(parsedValue);
+        }
       case ListOperation.insert:
         currentValue.insert(index, newValue.parsedValue());
       case ListOperation.insertAll:
