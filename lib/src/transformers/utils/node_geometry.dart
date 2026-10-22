@@ -215,6 +215,18 @@ class NodeGeometryRegistry extends ChangeNotifier {
     return true;
   }
 
+  /// Stops painting the instance [instance] of [nodeId] in place, so it can
+  /// be drawn above everything else, unclipped by its ancestors, while it is
+  /// dragged. Its geometry, paint offset included, stays where it would
+  /// paint. Returns false when the node isn't built.
+  bool setLifted(String nodeId, bool lifted, {List<int> instance = const []}) {
+    final RenderGeometryProbe? probe =
+        _probes[nodeId]?[_key(NodeBuildLayer.margin, instance)];
+    if (probe == null) return false;
+    probe.lifted = lifted;
+    return true;
+  }
+
   /// The geometry of one instance of [nodeId], or null when it isn't laid
   /// out under this scope (not built, hidden, disabled, or a list item that
   /// isn't built).
@@ -709,9 +721,23 @@ class RenderGeometryProbe extends RenderProxyBox {
     _registry.markChanged();
   }
 
+  /// Whether the node is painted somewhere else instead of here. See
+  /// [NodeGeometryRegistry.setLifted].
+  bool get lifted => _lifted;
+  bool _lifted = false;
+
+  set lifted(bool value) {
+    if (value == _lifted) return;
+    _lifted = value;
+    markNeedsPaint();
+    _registry.markChanged();
+  }
+
   @override
-  void paint(PaintingContext context, Offset offset) =>
-      super.paint(context, offset + _paintOffset);
+  void paint(PaintingContext context, Offset offset) {
+    if (_lifted) return;
+    super.paint(context, offset + _paintOffset);
+  }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {

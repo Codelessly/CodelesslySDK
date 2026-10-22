@@ -527,6 +527,38 @@ void main() {
     expectRect(registry.geometryOf('inner')!.bounds, inner);
   });
 
+  testWidgets('a lifted node is not painted but keeps its geometry', (
+    tester,
+  ) async {
+    final (root, nodes) = screenTree();
+    final registry = await pump(tester, root, nodes);
+    final Rect card = registry.geometryOf('card')!.bounds;
+
+    final Finder cardProbe = find.byWidgetPredicate(
+      (widget) =>
+          widget is GeometryProbe &&
+          widget.nodeId == 'card' &&
+          widget.layer == NodeBuildLayer.margin,
+    );
+    expect(cardProbe, isNot(paintsNothing));
+
+    expect(registry.setLifted('card', true), isTrue);
+    expect(registry.setLifted('missing', true), isFalse);
+    registry.setPaintOffset('card', const Offset(10, 5));
+    await tester.pump();
+    expect(cardProbe, paintsNothing);
+    expectRect(
+      registry.geometryOf('card')!.bounds,
+      card.shift(const Offset(10, 5)),
+    );
+
+    registry
+      ..setLifted('card', false)
+      ..setPaintOffset('card', Offset.zero);
+    await tester.pump();
+    expect(cardProbe, isNot(paintsNothing));
+  });
+
   testWidgets('removed nodes unregister', (tester) async {
     final (root, nodes) = screenTree();
     final registry = await pump(tester, root, nodes);
