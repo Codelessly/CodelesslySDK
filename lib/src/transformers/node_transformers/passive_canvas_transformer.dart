@@ -671,6 +671,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     codelessly?.removeNavigationListener('canvas-${widget.node.id}');
     _gateUser?.removeListener(_enforceSignIn);
     _stopWatchingValues();
+    _stopIntervals();
     super.dispose();
   }
 
@@ -723,6 +724,47 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     _watchedValues.clear();
   }
 
+  /// Timers running the screen's interval reactions while it shows.
+  final List<Timer> _intervalTimers = [];
+
+  /// Starts a timer for every enabled interval reaction of the screen. A
+  /// tick is skipped while the previous run of the same reaction is still
+  /// awaited, so slow actions don't pile up.
+  void _startIntervals() {
+    _stopIntervals();
+    for (final Reaction reaction in widget.node.reactions) {
+      if (reaction.trigger.type != TriggerType.interval) continue;
+      final ActionModel action = reaction.action;
+      if (!action.enabled) continue;
+      bool running = false;
+      _intervalTimers.add(
+        Timer.periodic(
+          Duration(milliseconds: max(50, reaction.trigger.intervalMs)),
+          (_) {
+            if (!mounted || running) return;
+            final BuildContext? actionContext = ActionChain.contextFor(context);
+            if (actionContext == null) return;
+            final Object? result = ActionChain.run(
+              () => FunctionsRepository.performAction(actionContext, action),
+              context: actionContext,
+            );
+            if (result is Future) {
+              running = true;
+              result.whenComplete(() => running = false);
+            }
+          },
+        ),
+      );
+    }
+  }
+
+  void _stopIntervals() {
+    for (final Timer timer in _intervalTimers) {
+      timer.cancel();
+    }
+    _intervalTimers.clear();
+  }
+
   /// The signed-in user a screen that requires sign-in watches.
   ValueNotifier<Map<String, dynamic>>? _gateUser;
 
@@ -758,6 +800,9 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     super.didUpdateWidget(oldWidget);
     if (widget.node != oldWidget.node) {
       onLoadActions = collectOnLoadActions();
+      if (didPerformOnLoadActions && !_redirected) {
+        _startIntervals();
+      }
     }
   }
 
@@ -779,6 +824,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
 
     triggerOnLoadActions(context);
     _watchValues(context);
+    _startIntervals();
   }
 
   List<ActionModel> collectOnLoadActions() => widget.node.reactions

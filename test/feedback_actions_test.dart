@@ -165,6 +165,7 @@ Future<Codelessly> pumpLayouts(
   WidgetTester tester,
   List<SDKPublishLayout> layouts, {
   Size size = const Size(390, 844),
+  Map<String, CodelesslyFunction> functions = const {},
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = size;
@@ -194,7 +195,8 @@ Future<Codelessly> pumpLayouts(
     MultiProvider(
       providers: [
         ChangeNotifierProvider<CodelesslyContext>.value(
-          value: CodelesslyContext.empty(layoutID: main.id),
+          value: CodelesslyContext.empty(layoutID: main.id)
+            ..functions = {...functions},
         ),
         Provider<Codelessly>.value(value: codelessly),
       ],
