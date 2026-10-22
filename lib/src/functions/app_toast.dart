@@ -178,23 +178,31 @@ class _ToastViewState extends State<_ToastView> {
             child: retrieveIconWidget(action.icon!, 18) ?? const SizedBox(),
           );
     final bool hasButton = widget.onAction != null;
+    final bool hasClose = action.showCloseButton;
+    final bool stretch = action.alignment == ToastAlignment.stretch;
     final bool top = action.position == ToastPosition.top;
     final EdgeInsets safe = MediaQuery.paddingOf(context);
     final TextStyle messageStyle = theme.bodyStyle.copyWith(
       color: textColor,
-      fontSize: 14,
+      fontSize: action.fontSize,
       height: 1.35,
       fontWeight: FontWeight.w600,
       decoration: TextDecoration.none,
     );
 
     Widget toast = Container(
-      constraints: const BoxConstraints(minHeight: 44, maxWidth: 560),
-      padding: EdgeInsets.fromLTRB(18, 10, hasButton ? 8 : 18, 10),
+      constraints: BoxConstraints(minHeight: 44, maxWidth: action.maxWidth),
+      padding: EdgeInsets.fromLTRB(
+        18,
+        hasButton || hasClose ? 6 : 10,
+        hasButton || hasClose ? 8 : 18,
+        hasButton || hasClose ? 6 : 10,
+      ),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(
-          hasButton ? theme.buttonRadius.clamp(8, 999) : 999,
+          action.cornerRadius ??
+              (hasButton ? theme.buttonRadius.clamp(8, 999) : 999),
         ),
         boxShadow: const [
           BoxShadow(
@@ -205,17 +213,21 @@ class _ToastViewState extends State<_ToastView> {
         ],
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: stretch ? MainAxisSize.max : MainAxisSize.min,
         children: [
           if (icon != null) ...[icon, const SizedBox(width: 8)],
-          Flexible(child: Text(widget.message, style: messageStyle)),
+          if (stretch)
+            Expanded(child: Text(widget.message, style: messageStyle))
+          else
+            Flexible(child: Text(widget.message, style: messageStyle)),
           if (hasButton) ...[
             const SizedBox(width: 8),
             TextButton(
               key: const ValueKey('codelessly-toast-action'),
               onPressed: _onActionPressed,
               style: TextButton.styleFrom(
-                foregroundColor: textColor,
+                foregroundColor:
+                    action.actionColor?.toFlutterColor() ?? textColor,
                 minimumSize: const Size(48, 36),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 textStyle: theme.buttonStyle.copyWith(
@@ -229,6 +241,16 @@ class _ToastViewState extends State<_ToastView> {
               child: Text(widget.actionLabel),
             ),
           ],
+          if (hasClose)
+            IconButton(
+              key: const ValueKey('codelessly-toast-close'),
+              onPressed: _close,
+              tooltip: 'Close message',
+              iconSize: 16,
+              visualDensity: VisualDensity.compact,
+              color: textColor,
+              icon: const Icon(Icons.close),
+            ),
         ],
       ),
     );
@@ -243,7 +265,13 @@ class _ToastViewState extends State<_ToastView> {
           offset: _visible ? Offset.zero : Offset(0, top ? -0.25 : 0.25),
           duration: _fade,
           curve: Curves.easeOutCubic,
-          child: Center(
+          child: Align(
+            alignment: switch (action.alignment) {
+              ToastAlignment.start => Alignment.centerLeft,
+              ToastAlignment.end => Alignment.centerRight,
+              ToastAlignment.center ||
+              ToastAlignment.stretch => Alignment.center,
+            },
             child: Material(type: MaterialType.transparency, child: toast),
           ),
         ),
@@ -251,12 +279,15 @@ class _ToastViewState extends State<_ToastView> {
     );
 
     return Positioned(
-      left: 16,
-      right: 16,
+      left: action.sideMargin,
+      right: action.sideMargin,
       top: top ? safe.top + 16 : null,
       bottom: top ? null : action.bottomOffset,
       // Only a toast with a button takes taps; the rest passes them through.
-      child: IgnorePointer(ignoring: !hasButton || !_visible, child: toast),
+      child: IgnorePointer(
+        ignoring: !(hasButton || hasClose) || !_visible,
+        child: toast,
+      ),
     );
   }
 }
