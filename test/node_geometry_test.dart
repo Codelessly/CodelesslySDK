@@ -352,10 +352,59 @@ void main() {
 
       expect(idsAt(const Offset(175, 315)), ['inner', 'card', 'frame']);
       expect(idsAt(const Offset(165, 305)), ['card', 'frame']);
-      expect(idsAt(const Offset(475, 475)), ['over', 'frame']);
+      expect(idsAt(const Offset(475, 475)), ['over', 'under', 'frame']);
+      expect(idsAt(const Offset(525, 525)), ['over', 'frame']);
       expect(idsAt(const Offset(425, 425)), ['under', 'frame']);
       // Inside the margin of a node, but outside its box.
       expect(idsAt(const Offset(55, 200)), ['frame']);
+      // Skipping a node skips its subtree, so what is under it is hit.
+      expect(
+        [
+          for (final hit in registry.hitTest(
+            const Offset(475, 475),
+            skip: (hit) => hit.nodeId == 'over',
+          ))
+            hit.nodeId,
+        ],
+        ['under', 'frame'],
+      );
+    });
+
+    testWidgets('overflowing children are hit unless their parent clips', (
+      tester,
+    ) async {
+      final out = rect('out', NodeBox(150, 20, 100, 40), parent: 'open');
+      final open = frame(
+        'open',
+        NodeBox(0, 0, 200, 100),
+        [out],
+        horizontalFit: SizeFit.fixed,
+        verticalFit: SizeFit.fixed,
+        parent: 'frame',
+      );
+      final cut = rect('cut', NodeBox(150, 20, 100, 40), parent: 'clipped');
+      final clipped = frame(
+        'clipped',
+        NodeBox(0, 200, 200, 100),
+        [cut],
+        horizontalFit: SizeFit.fixed,
+        verticalFit: SizeFit.fixed,
+        clipsContent: true,
+        parent: 'frame',
+        pins: const EdgePinsModel(left: 0, top: 200, right: null, bottom: null),
+      );
+      final registry = await pump(
+        tester,
+        frame('frame', NodeBox(0, 0, 800, 600), [open, clipped]),
+        [open, out, clipped, cut],
+      );
+      List<String> idsAt(Offset point) => [
+        for (final hit in registry.hitTest(point)) hit.nodeId,
+      ];
+      expect(idsAt(const Offset(230, 40)), ['out', 'frame']);
+      expect(idsAt(const Offset(170, 40)), ['out', 'open', 'frame']);
+      expect(idsAt(const Offset(230, 240)), ['frame']);
+      expect(idsAt(const Offset(170, 240)), ['cut', 'clipped', 'frame']);
     });
 
     testWidgets('a hidden node is laid out but neither painted nor hit', (

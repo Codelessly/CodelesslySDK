@@ -150,7 +150,6 @@ class NodeGeometry {
 class NodeGeometryRegistry extends ChangeNotifier {
   RenderGeometryRoot? _root;
   final Map<String, Map<String, RenderGeometryProbe>> _probes = {};
-  bool _hitTesting = false;
   bool _notified = false;
 
   /// The render box that geometry is measured relative to, if mounted.
@@ -284,24 +283,56 @@ class NodeGeometryRegistry extends ChangeNotifier {
     );
   }
 
-  /// The node instances under [position], in scope coordinates, deepest
-  /// first. Uses Flutter's hit testing, so clips, scroll offsets,
-  /// transforms, offstage subtrees and paint order are respected. A node is
-  /// hit anywhere inside its own box, whether or not it paints there.
-  List<NodeHit> hitTest(Offset position) {
+  /// The node instances under [position], in scope coordinates, topmost
+  /// first: a node comes before its ancestors and before the siblings it
+  /// paints over.
+  ///
+  /// This is a geometric test over the painted boxes, not Flutter's pointer
+  /// hit testing: a node is hit anywhere inside its own box, whether or not
+  /// it paints there, and children that overflow a parent that doesn't clip
+  /// are still hit. Clips, scroll offsets, transforms and rotation are
+  /// respected, and nodes that are hidden or not painted are never hit.
+  ///
+  /// When [skip] returns true for a node, neither it nor its subtree is hit,
+  /// so nodes under it can be (for example the nodes being dragged).
+  List<NodeHit> hitTest(Offset position, {bool Function(NodeHit hit)? skip}) {
     final RenderGeometryRoot? root = _root;
     if (root == null || !root.attached || !root.hasSize) return const [];
-    final BoxHitTestResult result = BoxHitTestResult();
-    _hitTesting = true;
-    try {
-      root.hitTest(result, position: position);
-    } finally {
-      _hitTesting = false;
+    final List<NodeHit> hits = [];
+    void visit(RenderObject object, Matrix4 transform) {
+      if (object is RenderGeometryProbe) {
+        if (!object.visible) return;
+        final NodeHit hit = NodeHit(object.nodeId, object.instance);
+        if (skip != null && skip(hit)) return;
+        if (object.buildLayer == NodeBuildLayer.content && object.hasSize) {
+          final Offset? local = _toLocal(transform, position);
+          if (local != null && (Offset.zero & object.size).contains(local)) {
+            hits.add(hit);
+          }
+        }
+      }
+      Offset? local;
+      object.visitChildren((child) {
+        if (!object.paintsChild(child)) return;
+        final Rect? clip = object.describeApproximatePaintClip(child);
+        if (clip != null) {
+          local ??= _toLocal(transform, position);
+          if (local == null || !clip.contains(local!)) return;
+        }
+        final Matrix4 childTransform = transform.clone();
+        object.applyPaintTransform(child, childTransform);
+        visit(child, childTransform);
+      });
     }
-    return [
-      for (final HitTestEntry entry in result.path)
-        if (entry is _GeometryHitEntry) entry.hit,
-    ];
+
+    visit(root, Matrix4.identity());
+    return hits.reversed.toList(growable: false);
+  }
+
+  static Offset? _toLocal(Matrix4 transform, Offset position) {
+    final Matrix4 inverse = Matrix4.zero();
+    if (inverse.copyInverse(transform) == 0) return null;
+    return MatrixUtils.transformPoint(inverse, position);
   }
 
   @override
@@ -555,24 +586,4 @@ class RenderGeometryProbe extends RenderProxyBox {
     super.performLayout();
     _registry.markChanged();
   }
-
-  @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    if (!_registry._hitTesting) {
-      return super.hitTest(result, position: position);
-    }
-    if (!size.contains(position)) return false;
-    // A margin probe is transparent: the node is hit only inside its own
-    // box, which its content probe reports.
-    final bool childHit = hitTestChildren(result, position: position);
-    if (_buildLayer == NodeBuildLayer.margin || !_visible) return childHit;
-    result.add(_GeometryHitEntry(this, position, NodeHit(_nodeId, _instance)));
-    return true;
-  }
-}
-
-class _GeometryHitEntry extends BoxHitTestEntry {
-  final NodeHit hit;
-
-  _GeometryHitEntry(super.target, super.localPosition, this.hit);
 }
