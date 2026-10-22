@@ -62,6 +62,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'badge': PassiveBadgeTransformer(getNode, this),
       'chip': PassiveChipTransformer(getNode, this),
       'segmentedButton': PassiveSegmentedButtonTransformer(getNode, this),
+      'signature': PassiveSignatureTransformer(getNode, this),
       'external': PassiveExternalComponentTransformer(getNode, this),
     });
   }

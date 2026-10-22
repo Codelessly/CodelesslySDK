@@ -26,6 +26,7 @@ export 'passive_radio_transformer.dart';
 export 'passive_rectangle_transformer.dart';
 export 'passive_row_column_transformer.dart';
 export 'passive_segmented_button_transformer.dart';
+export 'passive_signature_transformer.dart';
 export 'passive_single_placeholder_transformer.dart';
 export 'passive_slider_transformer.dart';
 export 'passive_spacer_transformer.dart';

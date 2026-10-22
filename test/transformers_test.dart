@@ -38,6 +38,7 @@ List<BaseNode> standaloneNodes() => [
   for (final type in ChipType.values)
     ChipNode.fromProperties(ChipProperties(chipType: type)),
   SegmentedButtonNode.empty(),
+  SignatureNode.empty(),
   AccordionNode(
     id: 'accordion',
     name: 'Accordion',
