@@ -323,116 +323,75 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // Add node values to [listenables].
     if (listenableNodeValues != null) listenables.add(listenableNodeValues);
 
-    // Traverse through all the variables that the node properties are attached
-    // to.
-    // A property bound to a formula listens to the paths the formula reads.
-    final Set<String> boundPaths = {
-      for (final String path in node.variables.values)
-        if (FormulaEvaluator.exactExpression(path) case final String expression)
-          ...FormulaEvaluator.referencedPaths(expression)
-        else
-          path,
-    };
-    for (final String variablePath in boundPaths) {
+    // Adds what a variable path rebuilds on: its variable, or the storage or
+    // auth notifier for those predefined variables. A computed variable (one
+    // whose value is a `${= ...}` formula) also brings in the variables its
+    // formula reads, so nodes stay live when those change.
+    final Set<String> seenNames = {};
+    void addPath(String variablePath) {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
-      if (match == null) continue;
+      // Storage listens per key, so predefined paths count whole.
+      if (match == null ||
+          !seenNames.add(
+            match.isPredefinedVariable ? variablePath : match.name,
+          )) {
+        return;
+      }
 
       if (match.isPredefinedVariable) {
         // If variable is not listenable or doesn't need to create a listenable,
         // skip it.
-        if (!predefinedListenableVariableNames.contains(match.name)) continue;
+        if (!predefinedListenableVariableNames.contains(match.name)) return;
 
         switch (match.name) {
           case 'storage':
-            // handle storage variable
             final notifier = getStorageListenerFor(match, context);
             if (notifier != null) listenables.add(notifier);
           case 'auth':
             final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
         }
+        return;
       }
 
       // Get corresponding variable data from codelessly context.
       final ValueNotifier<VariableData>? listenableVariable = codelesslyContext
           .findVariableByName(match.name);
-      // Add variable to [listenables].
-      if (listenableVariable != null) listenables.add(listenableVariable);
+      if (listenableVariable == null) return;
+      listenables.add(listenableVariable);
+      if (FormulaEvaluator.exactExpression(listenableVariable.value.value)
+          case final String expression) {
+        FormulaEvaluator.referencedPaths(expression).forEach(addPath);
+      }
     }
 
-    // Traverse through all the multi-variables that the node properties are attached
-    // to.
+    // The variables the node's properties are bound to. A property bound to
+    // a formula listens to the paths the formula reads.
+    for (final String path in node.variables.values) {
+      if (FormulaEvaluator.exactExpression(path) case final String expression) {
+        FormulaEvaluator.referencedPaths(expression).forEach(addPath);
+      } else {
+        addPath(path);
+      }
+    }
+
     // Text written with inline `${...}` paths or formulas (a text's
     // characters, a button's label, ...) listens to them too, so it stays
     // live whether or not its multipleVariables were filled in.
-    final Set<String> multiplePaths = {
-      ...node.multipleVariables.values.expand((path) => path),
-      for (final String template in inlineTextTemplatesOf(node)) ...{
-        ...variablePathRegex
-            .allMatches(template)
-            .map((match) => match.namedGroup('value'))
-            .nonNulls,
-        ...FormulaEvaluator.referencedPathsInText(template),
-      },
-    };
-    for (final String variablePath in multiplePaths) {
-      final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
-      if (match == null) continue;
-
-      if (match.isPredefinedVariable) {
-        // If variable is not listenable or doesn't need to create a listenable,
-        // skip it.
-        if (!predefinedListenableVariableNames.contains(match.name)) continue;
-
-        switch (match.name) {
-          case 'storage':
-            // handle storage variable
-            final notifier = getStorageListenerFor(match, context);
-            if (notifier != null) listenables.add(notifier);
-          case 'auth':
-            final notifier = context.read<Codelessly?>()?.appUser;
-            if (notifier != null) listenables.add(notifier);
-        }
-      }
-
-      // Get corresponding variable data from codelessly context.
-      final ValueNotifier<VariableData>? listenableVariable = codelesslyContext
-          .findVariableByName(match.name);
-      // Add variable to [listenables].
-      if (listenableVariable != null) listenables.add(listenableVariable);
+    node.multipleVariables.values.expand((path) => path).forEach(addPath);
+    for (final String template in inlineTextTemplatesOf(node)) {
+      variablePathRegex
+          .allMatches(template)
+          .map((match) => match.namedGroup('value'))
+          .nonNulls
+          .forEach(addPath);
+      FormulaEvaluator.referencedPathsInText(template).forEach(addPath);
     }
 
-    // Traverse through all the conditions that affects the node.
+    // The variables of the conditions that affect the node.
     for (final BaseCondition condition in codelesslyContext.conditions.values) {
       if (!condition.hasNode(node.id)) continue;
-
-      final Set<String> variableNames = condition
-          .getReactiveVariables()
-          .toSet();
-
-      for (final name in variableNames) {
-        if (predefinedListenableVariableNames.contains(name)) {
-          switch (name) {
-            case 'storage':
-              final notifier = getStorageListenerFor(
-                VariableMatch.parse(name.wrapWithVariableSyntax())!,
-                context,
-              );
-              if (notifier != null) listenables.add(notifier);
-            case 'auth':
-              final notifier = context.read<Codelessly?>()?.appUser;
-              if (notifier != null) listenables.add(notifier);
-          }
-          continue;
-        }
-        // Get corresponding variable data from codelessly context.
-        final ValueNotifier<VariableData>? listenableVariable =
-            codelesslyContext.variables.values.firstWhereOrNull(
-              (notifier) => notifier.value.name == name,
-            );
-        // Add variable to [listenables].
-        if (listenableVariable != null) listenables.add(listenableVariable);
-      }
+      condition.getReactiveVariables().toSet().forEach(addPath);
     }
 
     return listenables;
