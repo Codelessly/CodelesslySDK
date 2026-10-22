@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -57,6 +58,13 @@ class CodelesslyWidget extends StatefulWidget {
   /// If this is null, the controller's layoutID will be used.
   /// This cannot be null if no controller is provided.
   final String? layoutID;
+
+  /// The screen to open first instead of the entry screen, when no
+  /// [layoutID] is given: a canvas id, or a canvas name matched ignoring
+  /// case, spaces, dashes and underscores (so `record-form` opens the
+  /// canvas named "Record form"). Unknown screens fall back to the entry
+  /// screen. A site uses this for links such as `/<slug>/<screen>`.
+  final String? initialScreen;
 
   /// The [Codelessly] instance to use.
   ///
@@ -161,6 +169,7 @@ class CodelesslyWidget extends StatefulWidget {
   CodelesslyWidget({
     super.key,
     this.layoutID,
+    this.initialScreen,
     this.controller,
     this.codelessly,
     this.config,
@@ -222,6 +231,27 @@ class CodelesslyWidget extends StatefulWidget {
   /// Retrieves the canvas ID of [layoutID] for a layout of [width] logical
   /// pixels. Returns null if the layout does not exist or has no canvas for
   /// that width.
+  /// The layout holding the screen [screen] names: a canvas id, or a canvas
+  /// name compared without case, spaces, dashes or underscores. Null when
+  /// [screen] is null or names no canvas.
+  static String? layoutIdForScreen(SDKPublishModel model, String? screen) {
+    if (screen == null || screen.trim().isEmpty) return null;
+    String normalize(String value) =>
+        value.toLowerCase().replaceAll(RegExp(r'[\s_-]+'), '');
+    final String wanted = normalize(Uri.decodeComponent(screen));
+    for (final SDKPublishLayout layout in model.layouts.values) {
+      for (final MapEntry<String, Map<String, BaseNode>> canvas
+          in layout.canvases.entries) {
+        final BaseNode? node = canvas.value[canvas.key];
+        if (canvas.key == screen ||
+            (node != null && normalize(node.name) == wanted)) {
+          return layout.id;
+        }
+      }
+    }
+    return null;
+  }
+
   static String? canvasIDForWidth(
     String? layoutID,
     SDKPublishModel model,
@@ -509,7 +539,12 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
           final SDKPublishModel model = snapshot.data!;
           effectiveLayoutID =
-              _effectiveController.layoutID ?? model.entryLayoutId;
+              _effectiveController.layoutID ??
+              CodelesslyWidget.layoutIdForScreen(
+                model,
+                widget.initialScreen,
+              ) ??
+              model.entryLayoutId;
 
           if (effectiveLayoutID == null) {
             final errorLog = ErrorLog(
