@@ -99,6 +99,15 @@ void main() {
     expect(eval('newId()'), matches(RegExp(r'^[a-z0-9]{8}$')));
   });
 
+  test('thousands groups digits; money still shows cents', () {
+    expect(eval('thousands(921)'), '921');
+    expect(eval('thousands(12500)'), '12,500');
+    expect(eval('thousands(-1234567.891, 2)'), '-1,234,567.89');
+    expect(eval('thousands("x")'), isNull);
+    expect(eval('money(1234.5)'), r'$1,234.50');
+    expect(eval('money(-5, "€")'), '-€5.00');
+  });
+
   test('every function is documented', () {
     expect(
       FormulaEvaluator.functions.toSet(),
