@@ -27,8 +27,14 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `condition ? a : b`. `+` joins text when either side is text.
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
-///    endsWith, where, without, number, text, isEmpty and isNotEmpty. See
+///    endsWith, where, without, number, text, isEmpty, isNotEmpty, padLeft,
+///    padRight, substring, split, replace and coalesce. See
 ///    [FormulaEvaluator.functions].
+///  - maps: `obj('id', 1, 'name', n)` builds one (formulas have no `{}`
+///    literals), `set(map, key, value)` and `merge(a, b)` return changed
+///    copies, `keys` and `values` read them. With `map` this updates one
+///    item of a list: `map(units, u => if(u.id == id, set(u, 'hours', h), u))`.
+///  - more list functions: range, slice, first, last, concat and indexOf.
 ///  - list functions that take a predicate or key: filter, where, count,
 ///    find, any, all, map, sortBy, unique, sum and join. The predicate is a
 ///    lambda, `item => expression`, or a field name, optionally with a value
@@ -40,7 +46,7 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    function arguments.
 ///  - date functions: now, today, parseDate, formatDate, addMinutes, addHours,
 ///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
-///    hour, minute and weekday. Dates are ISO 8601 text such as
+///    hour, minute, weekday and daysInMonth. Dates are ISO 8601 text such as
 ///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
 ///    milliseconds or a Firestore timestamp.
 ///  - date-aware comparisons: `== != < <= > >=` compare as dates when one
@@ -335,6 +341,80 @@ class FormulaEvaluator {
       'weekday',
       'weekday(date)',
       'weekday("2026-10-21") → 3 (Monday is 1)',
+    ),
+    FormulaFunctionDoc(
+      'daysInMonth',
+      'daysInMonth(date)',
+      'daysInMonth("2026-02-10") → 28',
+    ),
+    FormulaFunctionDoc(
+      'obj',
+      'obj(key, value, key2, value2, ...)',
+      'obj("id", "ex1", "hours", 12) → {id: ex1, hours: 12}',
+    ),
+    FormulaFunctionDoc(
+      'set',
+      'set(map, key, value)',
+      'map(units, u => if(u.id == id, set(u, "hours", h), u))',
+    ),
+    FormulaFunctionDoc(
+      'merge',
+      'merge(map, map2, ...)',
+      'merge(unit, obj("status", "Down"))',
+    ),
+    FormulaFunctionDoc('keys', 'keys(map)', 'keys(obj("a", 1)) → [a]'),
+    FormulaFunctionDoc('values', 'values(map)', 'values(obj("a", 1)) → [1]'),
+    FormulaFunctionDoc(
+      'range',
+      'range(end) or range(start, end, step?)',
+      'range(2, 5) → [2, 3, 4]',
+    ),
+    FormulaFunctionDoc(
+      'slice',
+      'slice(list, start, end?)',
+      'slice(items, 0, 3) → first three',
+    ),
+    FormulaFunctionDoc('first', 'first(list)', 'first(units).id'),
+    FormulaFunctionDoc('last', 'last(list)', 'last(readings).hours'),
+    FormulaFunctionDoc(
+      'concat',
+      'concat(list, list2, ...)',
+      'concat(range(2), [9]) → [0, 1, 9]',
+    ),
+    FormulaFunctionDoc(
+      'indexOf',
+      'indexOf(list, value | item => test | key, value)',
+      'indexOf(units, u => u.id == "ex2") → 1',
+    ),
+    FormulaFunctionDoc(
+      'padLeft',
+      'padLeft(text, width, char?)',
+      'padLeft(42, 5, "0") → 00042',
+    ),
+    FormulaFunctionDoc(
+      'padRight',
+      'padRight(text, width, char?)',
+      'padRight("ab", 4, ".") → ab..',
+    ),
+    FormulaFunctionDoc(
+      'substring',
+      'substring(text, start, end?)',
+      'substring("EX-102", 3) → 102',
+    ),
+    FormulaFunctionDoc(
+      'split',
+      'split(text, separator?)',
+      'split("2481") → [2, 4, 8, 1]',
+    ),
+    FormulaFunctionDoc(
+      'replace',
+      'replace(text, from, to)',
+      'replace("1,402", ",", "") → 1402',
+    ),
+    FormulaFunctionDoc(
+      'coalesce',
+      'coalesce(value, fallback, ...)',
+      'coalesce(route.date, today())',
     ),
   ];
 }
@@ -876,7 +956,125 @@ final Map<String, _Function> _functions = {
   'hour': (a) => _toDate(_arg(a, 0))?.hour,
   'minute': (a) => _toDate(_arg(a, 0))?.minute,
   'weekday': (a) => _toDate(_arg(a, 0))?.weekday,
+  'daysInMonth': (a) {
+    final DateTime? date = _toDate(_arg(a, 0));
+    return date == null ? null : DateTime.utc(date.year, date.month + 1, 0).day;
+  },
+  // Maps: formulas can't write `{...}` literals, so these build and change
+  // maps. Each returns a new map and leaves its input alone.
+  'obj': (a) => <String, Object?>{
+    for (int i = 0; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  'set': (a) => switch (_arg(a, 0)) {
+    final Map map => <Object?, Object?>{...map, _arg(a, 1): _arg(a, 2)},
+    null => <String, Object?>{
+      FormulaEvaluator.stringify(_arg(a, 1)): _arg(a, 2),
+    },
+    _ => _arg(a, 0),
+  },
+  'merge': (a) => <Object?, Object?>{
+    for (final m in a)
+      if (m is Map) ...m,
+  },
+  'keys': (a) => switch (_arg(a, 0)) {
+    final Map map => map.keys.toList(),
+    _ => <Object?>[],
+  },
+  'values': (a) => switch (_arg(a, 0)) {
+    final Map map => map.values.toList(),
+    _ => <Object?>[],
+  },
+  // Lists.
+  'range': _range,
+  'slice': (a) {
+    final List<Object?> items = _values(_arg(a, 0), null).toList();
+    final int start = _clampIndex(_arg(a, 1), items.length, 0);
+    final int end = _clampIndex(_arg(a, 2), items.length, items.length);
+    return end <= start ? <Object?>[] : items.sublist(start, end);
+  },
+  'first': (a) => _values(_arg(a, 0), null).firstOrNull,
+  'last': (a) => _values(_arg(a, 0), null).lastOrNull,
+  'concat': (a) => [
+    for (final part in a)
+      if (part is Iterable) ...part else ?part,
+  ],
+  'indexOf': (a) {
+    final List<Object?> items = _values(_arg(a, 0), null).toList();
+    final Object? target = _arg(a, 1);
+    for (int i = 0; i < items.length; i++) {
+      if (target is _Closure
+          ? _truthy(target(items[i]))
+          : (a.length > 2
+                ? _looseEquals(_select(items[i], target), a[2])
+                : _looseEquals(items[i], target))) {
+        return i;
+      }
+    }
+    return -1;
+  },
+  // Text.
+  'padLeft': (a) =>
+      FormulaEvaluator.stringify(_arg(a, 0))
+          .padLeft(_intArg(_arg(a, 1)), _padChar(_arg(a, 2))),
+  'padRight': (a) =>
+      FormulaEvaluator.stringify(_arg(a, 0))
+          .padRight(_intArg(_arg(a, 1)), _padChar(_arg(a, 2))),
+  'substring': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final int start = _clampIndex(_arg(a, 1), text.length, 0);
+    final int end = _clampIndex(_arg(a, 2), text.length, text.length);
+    return end <= start ? '' : text.substring(start, end);
+  },
+  'split': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final Object? separator = _arg(a, 1);
+    if (text.isEmpty) return <String>[];
+    return text.split(
+      separator == null ? '' : FormulaEvaluator.stringify(separator),
+    );
+  },
+  'replace': (a) => FormulaEvaluator.stringify(_arg(a, 0)).replaceAll(
+    FormulaEvaluator.stringify(_arg(a, 1)),
+    FormulaEvaluator.stringify(_arg(a, 2)),
+  ),
+  // The first argument that is neither null nor empty text.
+  'coalesce': (a) => a.firstWhere(
+    (v) => v != null && !(v is String && v.isEmpty),
+    orElse: () => null,
+  ),
 };
+
+/// `range(end)`, `range(start, end)` or `range(start, end, step)`: whole
+/// numbers from start (default 0) up to, not including, end. Capped at
+/// 10000 items so a bad argument can't hang the app.
+List<int> _range(List<Object?> a) {
+  final bool one = a.length < 2;
+  final int start = one ? 0 : _intArg(_arg(a, 0));
+  final int end = one ? _intArg(_arg(a, 0)) : _intArg(_arg(a, 1));
+  int step = a.length > 2 ? _intArg(_arg(a, 2)) : (end >= start ? 1 : -1);
+  if (step == 0) step = 1;
+  final List<int> out = [];
+  for (int i = start; step > 0 ? i < end : i > end; i += step) {
+    out.add(i);
+    if (out.length >= 10000) break;
+  }
+  return out;
+}
+
+/// [value] as an index into a sequence of [length]; negative counts from the
+/// end, null is [fallback].
+int _clampIndex(Object? value, int length, int fallback) {
+  if (value == null) return fallback;
+  int index = _intArg(value);
+  if (index < 0) index += length;
+  return index.clamp(0, length);
+}
+
+String _padChar(Object? value) {
+  final String text = value == null ? ' ' : FormulaEvaluator.stringify(value);
+  return text.isEmpty ? ' ' : text;
+}
 
 // ---------------------------------------------------------------------------
 // Syntax tree
