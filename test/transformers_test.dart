@@ -23,6 +23,7 @@ List<BaseNode> standaloneNodes() => [
     ),
   ),
   ProgressBarNode.empty(),
+  ChartNode.empty(),
   RadioNode.empty(),
   SliderNode.empty(),
   SwitchNode.empty(),
