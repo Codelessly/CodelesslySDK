@@ -292,6 +292,8 @@ class FirestoreCloudDatabase extends CloudDatabase {
           (snapshot) {
             StatTracker.instance.track(StatType.read, 'cloudDatabase/rules');
             rules = DataRules.fromJson(snapshot.data());
+            // Lists that read schemas and indexes follow rule changes.
+            notifyListeners();
           },
           onError: (Object error) => DebugLogger.instance.printInfo(
             'Could not load data rules: $error',

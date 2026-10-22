@@ -63,6 +63,32 @@ class _RelatedDocumentsLoaderState extends State<RelatedDocumentsLoader> {
   final Set<String> requested = {};
 
   @override
+  void initState() {
+    super.initState();
+    // The schema naming each field's collection may arrive after the list.
+    widget.database?.addListener(_onRules);
+  }
+
+  @override
+  void didUpdateWidget(RelatedDocumentsLoader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.database != widget.database) {
+      oldWidget.database?.removeListener(_onRules);
+      widget.database?.addListener(_onRules);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.database?.removeListener(_onRules);
+    super.dispose();
+  }
+
+  void _onRules() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     _load();
     return widget.builder(context, related);
