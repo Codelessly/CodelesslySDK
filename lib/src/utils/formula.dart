@@ -27,8 +27,12 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `condition ? a : b`. `+` joins text when either side is text.
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
-///    endsWith, where, without, number, text, isEmpty and isNotEmpty. See
+///    endsWith, where, without, number, text, isEmpty, isNotEmpty, clamp,
+///    sin, cos, sqrt, pow and pad (`pad(5, 2)` is "05"). See
 ///    [FormulaEvaluator.functions].
+///  - `object(key, value, ...)` builds a map from key/value pairs, since
+///    braces can't appear in a formula: a list of records for a list view is
+///    `[object('title', 'Fresh', 'level', fresh), ...]`.
 ///  - list functions that take a predicate or key: filter, where, count,
 ///    find, any, all, map, sortBy, unique, sum and join. The predicate is a
 ///    lambda, `item => expression`, or a field name, optionally with a value
@@ -394,6 +398,25 @@ class FormulaEvaluator {
       'thousands(1094) → 1,094',
     ),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
+    FormulaFunctionDoc(
+      'object',
+      'object(key, value, …)',
+      "object('title', 'Black', 'level', 0.87)",
+    ),
+    FormulaFunctionDoc(
+      'clamp',
+      'clamp(value, min, max)',
+      'clamp(1.4, 0, 1) → 1',
+    ),
+    FormulaFunctionDoc('sin', 'sin(radians)', 'sin(0) → 0'),
+    FormulaFunctionDoc('cos', 'cos(radians)', 'cos(0) → 1'),
+    FormulaFunctionDoc('sqrt', 'sqrt(value)', 'sqrt(16) → 4'),
+    FormulaFunctionDoc('pow', 'pow(base, exponent)', 'pow(2, 10) → 1024'),
+    FormulaFunctionDoc(
+      'pad',
+      'pad(value, width, fill)',
+      'pad(5, 2) → 05',
+    ),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
     FormulaFunctionDoc(
       'isEmpty',
@@ -1130,6 +1153,21 @@ final Map<String, _Function> _functions = {
     return '${n < 0 ? '-' : ''}$whole${parts.length > 1 ? '.${parts[1]}' : ''}';
   },
   'number': (a) => _toNum(_arg(a, 0)),
+  'object': (a) => {
+    for (int i = 0; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  'clamp': (a) => _tidy(
+    _num(_arg(a, 0)).clamp(_num(_arg(a, 1)), _num(_arg(a, 2))),
+  ),
+  'sin': (a) => math.sin(_num(_arg(a, 0))),
+  'cos': (a) => math.cos(_num(_arg(a, 0))),
+  'sqrt': (a) => math.sqrt(_num(_arg(a, 0))),
+  'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
+  'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
+    _intArg(_arg(a, 1)),
+    _arg(a, 2) == null ? '0' : FormulaEvaluator.stringify(_arg(a, 2)),
+  ),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
   'isNotEmpty': (a) => _truthy(_functions['length']!(a)),
