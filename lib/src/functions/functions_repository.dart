@@ -1225,6 +1225,14 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       action.variable.name,
     );
     if (variableNotifier == null) return false;
+    if (variableNotifier.value.isComputed) {
+      DebugLogger.instance.printInfo(
+        'Variable ${action.variable.name} is computed from a formula and '
+        "can't be set.",
+        name: name,
+      );
+      return false;
+    }
 
     String newValue = substituteNewValue(
       action.newValue,
