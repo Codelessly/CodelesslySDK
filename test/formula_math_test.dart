@@ -48,6 +48,44 @@ void main() {
     });
   });
 
+  group('building data', () {
+    test('object, merge, set, keys and values', () {
+      expect(eval("object('cg', 'zion', 'nights', 2)"), {
+        'cg': 'zion',
+        'nights': 2,
+      });
+      expect(eval("merge(first(stops), object('nights', 9))"), {
+        'id': 'zion',
+        'nights': 9,
+        'lat': 37.20,
+        'lng': -113.18,
+      });
+      expect(eval("set(object('a', 1), 'b', 2)"), {'a': 1, 'b': 2});
+      expect(eval("keys(object('a', 1, 'b', 2))"), ['a', 'b']);
+      expect(eval("values(object('a', 1, 'b', 2))"), [1, 2]);
+    });
+
+    test('list edits return new lists', () {
+      expect(eval("append(tags, 'e')"), ['a', 'b', 'c', 'd', 'e']);
+      expect(eval("setAt(tags, 1, 'x')"), ['a', 'x', 'c', 'd']);
+      expect(eval("setAt(tags, 9, 'x')"), ['a', 'b', 'c', 'd']);
+      expect(eval("insertAt(tags, 0, 'z')"), ['z', 'a', 'b', 'c', 'd']);
+      expect(eval('removeAt(tags, -1)'), ['a', 'b', 'c']);
+      expect(eval('move(tags, 3, 0)'), ['d', 'a', 'b', 'c']);
+      expect(eval('move(tags, 0, 2)'), ['b', 'c', 'a', 'd']);
+      expect(vars['tags'], ['a', 'b', 'c', 'd']);
+    });
+
+    test('a nested edit: change the nights of one stop', () {
+      expect(
+        eval(
+          "map(setAt(stops, 1, merge(find(stops, 'id', 'bryce'), object('nights', 5))), 'nights')",
+        ),
+        [3, 5, 4],
+      );
+    });
+  });
+
   group('slicing', () {
     test('first, last, take, skip, slice, reverse', () {
       expect(eval('first(tags)'), 'a');

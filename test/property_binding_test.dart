@@ -71,4 +71,68 @@ void main() {
       expect(text(r'${= length(rig)}'), '2');
     });
   });
+
+  group('computed variables', () {
+    VariableData v(String name, String value, [VariableType? type]) =>
+        VariableData(
+          id: name,
+          name: name,
+          value: value,
+          type: type ?? VariableType.text,
+        );
+    final ScopedValues scope = ScopedValues.preview(
+      variables: {
+        'trips': v(
+          'trips',
+          '[{"id": "a", "name": "Loop", "stops": [{"nights": 2}, {"nights": 3}]},'
+              ' {"id": "b", "name": "Weekend", "stops": []}]',
+          VariableType.list,
+        ),
+        'selected': v('selected', 'a'),
+        'trip': v(
+          'trip',
+          r"${= find(trips, 'id', selected)}",
+          VariableType.map,
+        ),
+        'nights': v(
+          'nights',
+          r"${= sum(trip.stops, 'nights')}",
+          VariableType.integer,
+        ),
+        'names': v('names', r"${= map(trips, 'name')}", VariableType.list),
+        'loopA': v('loopA', r'${= loopB}'),
+        'loopB': v('loopB', r'${= loopA}'),
+      },
+    );
+    String text(String expression) => PropertyValueDelegate.substituteVariables(
+      expression,
+      scopedValues: scope,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
+
+    test('a formula value is worked out when read', () {
+      expect(text(r'${trip.name}'), 'Loop');
+      expect(text(r'${trip.stops.length}'), '2');
+      expect(text(r'${= trip.name + "!"}'), 'Loop!');
+    });
+
+    test('computed variables can read computed variables', () {
+      expect(text(r'${nights} nights'), '5 nights');
+      expect(text(r'${= nights * 2}'), '10');
+    });
+
+    test('lists come back as lists', () {
+      expect(
+        PropertyValueDelegate.getVariableValueFromPath<List>(
+          r'${names}',
+          scopedValues: scope,
+        ),
+        ['Loop', 'Weekend'],
+      );
+    });
+
+    test('a cycle gives nothing instead of recursing forever', () {
+      expect(text(r'${loopA}'), '');
+    });
+  });
 }
