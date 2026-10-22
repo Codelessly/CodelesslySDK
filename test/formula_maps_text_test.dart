@@ -110,4 +110,12 @@ void main() {
     expect(eval("daysInMonth('2028-02-10')"), 29);
     expect(eval('daysInMonth(start)'), 31);
   });
+
+  test('number formatting with thousands separators', () {
+    expect(eval('formatNumber(meter, 1)'), '2,481.6');
+    expect(eval('formatNumber(1234567)'), '1,234,567');
+    expect(eval("money(385, '\$', 0)"), r'$385');
+    expect(eval('money(1155)'), r'$1,155.00');
+    expect(eval('money(-4.5)'), r'-$4.50');
+  });
 }
