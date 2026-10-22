@@ -1,6 +1,7 @@
 import 'dart:core';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collection/collection.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -196,6 +197,19 @@ class PassiveListViewWidget extends StatelessWidget {
 
                 final int itemCount = items.itemCount;
 
+                if (node.properties.layout == ListLayout.stack) {
+                  return StackedListItems(
+                    node: node,
+                    item: item,
+                    values: [
+                      for (int index = 0; index < itemCount; index++)
+                        if (!items.isButton(index)) items.dataAt(index),
+                    ],
+                    manager: manager,
+                    settings: settings,
+                  );
+                }
+
                 // Item Count always exists.
                 return ListViewBuilder(
                   primary: node.primary,
@@ -257,6 +271,21 @@ class PassiveListViewWidget extends StatelessWidget {
       itemCount = node.properties.itemCount ?? data?.length;
     } else {
       itemCount = data?.length ?? node.properties.itemCount;
+    }
+
+    if (node.properties.layout == ListLayout.stack) {
+      return box(
+        canShrinkWrap: false,
+        (context, _) => StackedListItems(
+          node: node,
+          item: item,
+          values: [
+            for (int i = 0; i < (itemCount ?? 0); i++) data?.elementAtOrNull(i),
+          ],
+          manager: manager,
+          settings: settings,
+        ),
+      );
     }
 
     Widget itemBuilder(BuildContext context, int index) => IndexedItemProvider(
@@ -340,6 +369,146 @@ class PassiveListViewWidget extends StatelessWidget {
       (context, shrinkWrap) => list(shrinkWrap, itemCount, itemBuilder),
     );
   }
+}
+
+/// The items of a [ListLayout.stack] list: layered in the list's padded box,
+/// each placed at its item node's bound `x`/`y`, evaluated for that item, or
+/// at the item node's design offset when not bound.
+class StackedListItems extends StatelessWidget {
+  /// The list.
+  final ListViewNode node;
+
+  /// The list's item node, built once per value.
+  final BaseNode item;
+
+  /// One value per item, read as `${item}` by the item's nodes.
+  final List<Object?> values;
+
+  final NodeTransformerManager manager;
+  final WidgetBuildSettings settings;
+
+  const StackedListItems({
+    super.key,
+    required this.node,
+    required this.item,
+    required this.values,
+    required this.manager,
+    required this.settings,
+  });
+
+  /// Where [item] starts on an axis: its bound value, else its design offset
+  /// from [list]'s padded box.
+  static double offsetOf(
+    BaseNode item,
+    BaseNode list,
+    String property,
+    ScopedValues scopedValues,
+  ) {
+    final num? bound = PropertyValueDelegate.getPropertyValue<num>(
+      item,
+      property,
+      scopedValues: scopedValues,
+    );
+    if (bound != null && bound.isFinite) return bound.toDouble();
+    return property == 'x'
+        ? item.outerBoxLocal.x - list.innerBoxLocal.edgeLeft
+        : item.outerBoxLocal.y - list.innerBoxLocal.edgeTop;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Listenable> listenables =
+        manager is PassiveNodeTransformerManager
+        ? (manager as PassiveNodeTransformerManager).listenablesFor(
+            context,
+            item,
+          )
+        : const [];
+    return Padding(
+      padding: node.padding.flutterEdgeInsets,
+      child: Stack(
+        clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+        children: [
+          for (int index = 0; index < values.length; index++)
+            IndexedItemProvider(
+              key: ValueKey(index),
+              item: IndexedItem(index, values[index]),
+              // A component builder between the provider and the Positioned,
+              // so the offset reads this item and rebuilds when the
+              // variables it uses change.
+              child: _StackedItem(
+                listenables: listenables,
+                builder: (context) {
+                  final ScopedValues scope = ScopedValues.of(context);
+                  return Positioned(
+                    key: ValueKey('stacked item $index'),
+                    left: offsetOf(item, node, 'x', scope),
+                    top: offsetOf(item, node, 'y', scope),
+                    child: manager.buildWidgetByID(
+                      item.id,
+                      context,
+                      settings: settings,
+                    ),
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Rebuilds [builder] when [listenables] change. Builds no render object, so
+/// the [Positioned] it returns reaches the [Stack].
+class _StackedItem extends StatefulWidget {
+  final List<Listenable> listenables;
+  final WidgetBuilder builder;
+
+  const _StackedItem({required this.listenables, required this.builder});
+
+  @override
+  State<_StackedItem> createState() => _StackedItemState();
+}
+
+class _StackedItemState extends State<_StackedItem> {
+  Listenable? _listenable;
+
+  void _changed() => setState(() {});
+
+  void _listen() {
+    _listenable?.removeListener(_changed);
+    _listenable = widget.listenables.isEmpty
+        ? null
+        : Listenable.merge(widget.listenables);
+    _listenable?.addListener(_changed);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _listen();
+  }
+
+  @override
+  void didUpdateWidget(covariant _StackedItem old) {
+    super.didUpdateWidget(old);
+    if (!const ListEquality<Listenable>().equals(
+      old.listenables,
+      widget.listenables,
+    )) {
+      _listen();
+    }
+  }
+
+  @override
+  void dispose() {
+    _listenable?.removeListener(_changed);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(context);
 }
 
 class ListViewBuilder extends StatelessWidget {
