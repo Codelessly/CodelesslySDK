@@ -203,8 +203,17 @@ class CodelesslyContext with ChangeNotifier, Equatable {
 
   /// Returns a reverse-lookup of the [VariableData] associated with a given
   /// [name].
+  ///
+  /// When a screen variable and a shared (app or page) variable have the same
+  /// name, the screen's own variable wins, as it does when bindings read
+  /// [variableNamesMap]: shared variables are loaded first, so the last
+  /// variable with the name is the one in use.
   Observable<VariableData>? findVariableByName(String? name) => variables.values
-      .firstWhereOrNull((variable) => variable.value.name == name);
+      .lastWhereOrNull((variable) => variable.value.name == name);
+
+  /// The variable with [id], or else the one in use with [name].
+  Observable<VariableData>? findVariable({String? id, String? name}) =>
+      (id == null ? null : variables[id]) ?? findVariableByName(name);
 
   /// Allows to easily [value] of a variable with a given [name].
   /// Returns false if the variable does not exist.

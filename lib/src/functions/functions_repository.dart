@@ -1134,8 +1134,9 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final CodelesslyContext codelesslyContext = context
         .read<CodelesslyContext>();
-    final variableNotifier = codelesslyContext.findVariableByName(
-      action.variable.name,
+    final variableNotifier = codelesslyContext.findVariable(
+      id: action.variable.id,
+      name: action.variable.name,
     );
     if (variableNotifier == null) return false;
 

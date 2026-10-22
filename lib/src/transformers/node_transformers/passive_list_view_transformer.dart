@@ -302,6 +302,20 @@ class PassiveListViewWidget extends StatelessWidget {
       itemBuilder: builder,
     );
 
+    // A stacked list draws its items on top of each other, the first on
+    // top, inside the list's own box. It never scrolls.
+    if (node.properties.stacked) {
+      final int count = itemCount ?? 0;
+      return box(
+        canShrinkWrap: false,
+        (context, _) => StackedItems(
+          itemCount: count,
+          clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+          itemBuilder: itemBuilder,
+        ),
+      );
+    }
+
     // An endless list with items of free extent ends after a viewport's
     // worth of items that take no space, so they cannot be built without
     // limit; see [EndlessList]. A fixed item extent is bounded by Flutter.
@@ -461,4 +475,43 @@ class ListViewItemSeparator extends StatelessWidget {
         );
     }
   }
+}
+
+
+/// The items of a stacked list: drawn on top of each other in the list's
+/// box, each at its top center, the first item on top.
+class StackedItems extends StatelessWidget {
+  /// Creates a [StackedItems].
+  const StackedItems({
+    super.key,
+    required this.itemCount,
+    required this.itemBuilder,
+    this.clipBehavior = Clip.none,
+  });
+
+  /// How many items.
+  final int itemCount;
+
+  /// Builds an item.
+  final IndexedWidgetBuilder itemBuilder;
+
+  /// Whether items moved outside the box are clipped.
+  final Clip clipBehavior;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    clipBehavior: clipBehavior,
+    children: [
+      // Built last to first, so the first item paints over the rest and
+      // takes taps first.
+      for (int index = itemCount - 1; index >= 0; index--)
+        Positioned.fill(
+          key: ValueKey(index),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: itemBuilder(context, index),
+          ),
+        ),
+    ],
+  );
 }

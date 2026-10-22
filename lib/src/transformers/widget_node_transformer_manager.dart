@@ -143,6 +143,56 @@ abstract class WidgetNodeTransformerManager
     );
   }
 
+  /// The motion [node] shows now: its [BaseNode.motion] with the values
+  /// bound through `motion.<name>` variables resolved from [scopedValues].
+  /// Null when the node doesn't move.
+  static MotionModel? resolveMotion(
+    BaseNode node, {
+    required ScopedValues scopedValues,
+  }) {
+    MotionModel? motion = node.motion;
+    for (final String property in MotionModel.properties) {
+      final String key = MotionModel.variableKey(property);
+      if (!node.variables.containsKey(key)) continue;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      final double? number = switch (value) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()),
+        bool b => b ? 1 : 0,
+        _ => null,
+      };
+      if (number == null || !number.isFinite) continue;
+      motion = (motion ?? MotionModel.none).withValue(property, number);
+    }
+    return motion;
+  }
+
+  /// Draws [widget] with [node]'s motion: its transform, transitions and
+  /// spin. [animate] false (the design canvas) shows the values without
+  /// animating or spinning.
+  Widget applyWidgetMotion(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+    bool animate = true,
+  }) {
+    if (node.motion == null &&
+        !node.variables.keys.any((key) => key.startsWith('motion.'))) {
+      return widget;
+    }
+    final MotionModel? motion = resolveMotion(
+      node,
+      scopedValues: scopedValues ?? ScopedValues.of(context),
+    );
+    if (motion == null) return widget;
+    return NodeMotion(motion: motion, animate: animate, child: widget);
+  }
+
   /// Convenience method to handle widget margins.
   Widget applyWidgetMargins(BaseNode node, Widget widget) {
     if (node.margin == EdgeInsetsModel.zero) return widget;
@@ -315,6 +365,28 @@ abstract class WidgetNodeTransformerManager
         ),
       );
     }
+  }
+
+  /// Runs [node]'s swipe reactions when it is swiped, or scrolled with a
+  /// mouse wheel (scrolling down swipes up, as content moves up).
+  Widget wrapWithSwipes(BuildContext context, BaseNode node, Widget widget) {
+    if (node is! ReactionMixin) return widget;
+    final List<Reaction> swipes = (node as ReactionMixin).reactions
+        .where(
+          (reaction) =>
+              TriggerType.swipes.contains(reaction.trigger.type) &&
+              reaction.action.enabled,
+        )
+        .toList();
+    if (swipes.isEmpty) return widget;
+    return SwipeDetector(
+      onSwipe: (TriggerType direction) => FunctionsRepository.triggerAction(
+        context,
+        direction,
+        reactions: swipes,
+      ),
+      child: widget,
+    );
   }
 
   BorderRadius? getBorderRadius(BaseNode node) {
