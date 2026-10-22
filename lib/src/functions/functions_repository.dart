@@ -143,7 +143,63 @@ class FunctionsRepository {
           Duration(milliseconds: (action as DelayAction).milliseconds),
           () => true,
         );
+      case ActionType.cloudData:
+        return runCloudData(context, action as CloudDataAction);
+      case ActionType.cloudBatch:
+        return runCloudBatch(context, action as CloudBatchAction);
     }
+  }
+
+  /// Runs a [CloudDataAction] and puts its result in its result variable
+  /// and in `${result}` for the next actions. A failure (a required field
+  /// left empty, a missing permission, ...) stops the chain.
+  static Future<bool> runCloudData(
+    BuildContext context,
+    CloudDataAction action,
+  ) async {
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    final CodelesslyContext codelesslyContext = context
+        .read<CodelesslyContext>();
+    final CloudDatabase? database = await awaitCloudDatabase(context);
+    if (database is! FirestoreCloudDatabase) {
+      throw StateError('The cloud database is not available.');
+    }
+    try {
+      final Object? result = await CloudDataRunner(
+        database: database,
+        scopedValues: scopedValues,
+      ).run(action);
+      ActionChain.setResult(result);
+      if (action.resultVariable case final VariableData variable) {
+        final notifier = codelesslyContext.findVariableByName(variable.name);
+        notifier?.set(notifier.value.copyWith(value: result));
+      }
+      return true;
+    } catch (error) {
+      DebugLogger.instance.printInfo(
+        '${action.operation.label} on ${action.collection} failed: '
+        '${describeCloudError(error)}',
+        name: name,
+      );
+      rethrow;
+    }
+  }
+
+  /// Runs the writes of a [CloudBatchAction] together.
+  static Future<bool> runCloudBatch(
+    BuildContext context,
+    CloudBatchAction action,
+  ) async {
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    final CloudDatabase? database = await awaitCloudDatabase(context);
+    if (database is! FirestoreCloudDatabase) {
+      throw StateError('The cloud database is not available.');
+    }
+    await CloudDataRunner(
+      database: database,
+      scopedValues: scopedValues,
+    ).runBatch(action);
+    return true;
   }
 
   /// Runs [actions] in order, like a trigger's reactions: blocking actions
