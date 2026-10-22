@@ -433,12 +433,17 @@ Gradient? retrieveGradient(PaintModel paint) {
     final radians = rotation * pi / 180;
 
     if (paint.type == PaintType.gradientLinear) {
+      final double? repeatEvery = paint.gradientRepeatEvery;
+      final bool repeats = repeatEvery != null && repeatEvery > 0;
       return LinearGradient(
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
         stops: gradientStops.map((e) => e.position).toList(),
-        transform: GradientRotation(radians),
+        tileMode: repeats ? TileMode.repeated : TileMode.clamp,
+        transform: repeats
+            ? RepeatingGradientTransform(radians, repeatEvery)
+            : GradientRotation(radians),
       );
     } else if (paint.type == PaintType.gradientRadial) {
       return RadialGradient(
@@ -466,6 +471,41 @@ Gradient? retrieveGradient(PaintModel paint) {
     );
     return null;
   }
+}
+
+/// Rotates a linear gradient by [radians] about the box center, like
+/// [GradientRotation], after squeezing one run of its stops into [period]
+/// logical pixels along its axis. With [TileMode.repeated] the stops then
+/// repeat every [period] pixels whatever the box size, e.g. even stripes.
+class RepeatingGradientTransform extends GradientTransform {
+  const RepeatingGradientTransform(this.radians, this.period);
+
+  final double radians;
+  final double period;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    // A default LinearGradient runs from the left to the right edge, so one
+    // run spans the box width. Scale it about the left edge to [period].
+    final double scale = bounds.width <= 0 ? 1 : period / bounds.width;
+    final double cx = bounds.center.dx, cy = bounds.center.dy;
+    return Matrix4.identity()
+      ..translateByDouble(cx, cy, 0, 1)
+      ..rotateZ(radians)
+      ..translateByDouble(-cx, -cy, 0, 1)
+      ..translateByDouble(bounds.left, 0, 0, 1)
+      ..scaleByDouble(scale, 1, 1, 1)
+      ..translateByDouble(-bounds.left, 0, 0, 1);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is RepeatingGradientTransform &&
+      other.radians == radians &&
+      other.period == period;
+
+  @override
+  int get hashCode => Object.hash(radians, period);
 }
 
 // from https://math.stackexchange.com/a/2888105
