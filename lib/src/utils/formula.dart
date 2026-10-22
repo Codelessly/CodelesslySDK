@@ -27,8 +27,13 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `condition ? a : b`. `+` joins text when either side is text.
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
-///    endsWith, where, without, number, text, isEmpty and isNotEmpty. See
-///    [FormulaEvaluator.functions].
+///    endsWith, where, without, number, text, isEmpty, isNotEmpty, padLeft,
+///    replace, substring and split. See [FormulaEvaluator.functions].
+///  - list and map building: findIndex, first, last, take, skip, reverse,
+///    concat, range, object, set and merge. Formulas can't hold braces, so
+///    `object('id', 'A7')` builds a map and `set(site, 'status', 'vacant')`
+///    copies one with a key changed, e.g. to update one item of a list:
+///    `map(sites, s => s.id == pick ? set(s, 'status', 'vacant') : s)`.
 ///  - list functions that take a predicate or key: filter, where, count,
 ///    find, any, all, map, sortBy, unique, sum and join. The predicate is a
 ///    lambda, `item => expression`, or a field name, optionally with a value
@@ -38,10 +43,12 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `t.tags[0]`, `t.tags.length`) and hides a variable of the same name;
 ///    the body can read every other variable. Lambdas are only allowed as
 ///    function arguments.
-///  - date functions: now, today, parseDate, formatDate, addMinutes, addHours,
-///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
-///    hour, minute and weekday. Dates are ISO 8601 text such as
-///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
+///  - date functions: now, today, parseDate, formatDate, addSeconds,
+///    addMinutes, addHours, addDays, addMonths, diffSeconds, diffMinutes,
+///    diffHours, diffDays, formatDuration, year, month, day, hour, minute and
+///    weekday. A value bound to a formula that calls now() or today() is
+///    rebuilt every second, so clocks and countdowns stay live. Dates are
+///    ISO 8601 text such as `2026-10-21T14:30:00.000`; a date argument can also be epoch
 ///    milliseconds or a Firestore timestamp.
 ///  - date-aware comparisons: `== != < <= > >=` compare as dates when one
 ///    side is a date (ISO 8601 text such as `2026-10-21` or
@@ -76,6 +83,24 @@ class FormulaEvaluator {
     node.collectPaths(paths);
     return paths;
   }
+
+  /// Whether [expression] reads the clock (`now()` or `today()`), so its
+  /// value changes as time passes.
+  static bool readsClock(String expression) =>
+      _clockCall.hasMatch(expression.replaceAll(_quoted, ''));
+
+  /// Whether any formula in [text] reads the clock.
+  static bool textReadsClock(String text) => formulaRegex
+      .allMatches(text)
+      .any((match) => readsClock(match.namedGroup('expr')!));
+
+  static final RegExp _clockCall = RegExp(r'\b(now|today)\s*\(');
+
+  static final RegExp _quoted = RegExp(
+    r'"[^"]*"'
+    '|'
+    r"'[^']*'",
+  );
 
   /// The variable paths read by every formula in [text].
   static Set<String> referencedPathsInText(String text) => {
@@ -279,6 +304,61 @@ class FormulaEvaluator {
       'isNotEmpty(text or list)',
       'isNotEmpty(cart) → true',
     ),
+    FormulaFunctionDoc(
+      'findIndex',
+      'findIndex(list, item => test)',
+      "findIndex(sites, s => s.id == 'A7') → 6",
+    ),
+    FormulaFunctionDoc('first', 'first(list)', 'first(queue) → {ticket: 12}'),
+    FormulaFunctionDoc('last', 'last(list)', 'last(queue) → {ticket: 15}'),
+    FormulaFunctionDoc('take', 'take(list, n)', 'take(arrivals, 3)'),
+    FormulaFunctionDoc('skip', 'skip(list, n)', 'skip(queue, 1)'),
+    FormulaFunctionDoc('reverse', 'reverse(list)', 'reverse([1, 2]) → [2, 1]'),
+    FormulaFunctionDoc(
+      'concat',
+      'concat(list, list or item, …)',
+      'concat([1], [2, 3], 4) → [1, 2, 3, 4]',
+    ),
+    FormulaFunctionDoc(
+      'range',
+      'range(end) or range(start, end)',
+      'range(8, 11) → [8, 9, 10]',
+    ),
+    FormulaFunctionDoc(
+      'object',
+      'object(key, value, …)',
+      "object('id', 'A7', 'status', 'vacant') → {id: A7, status: vacant}",
+    ),
+    FormulaFunctionDoc(
+      'set',
+      'set(map, key, value)',
+      "set(site, 'status', 'occupied') → a copy with status changed",
+    ),
+    FormulaFunctionDoc(
+      'merge',
+      'merge(map, map, …)',
+      "merge(stay, object('paid', true)) → a copy with paid set",
+    ),
+    FormulaFunctionDoc(
+      'padLeft',
+      'padLeft(value, width, fill)',
+      'padLeft(7, 2) → "07"',
+    ),
+    FormulaFunctionDoc(
+      'replace',
+      'replace(text, from, to)',
+      'replace("A-7", "-", "") → "A7"',
+    ),
+    FormulaFunctionDoc(
+      'substring',
+      'substring(text, start, end)',
+      'substring("Ticket", 0, 3) → "Tic"',
+    ),
+    FormulaFunctionDoc(
+      'split',
+      'split(text, separator)',
+      'split("a,b", ",") → [a, b]',
+    ),
     FormulaFunctionDoc('now', 'now()', 'now() → 2026-10-21T14:30:00.000'),
     FormulaFunctionDoc('today', 'today()', 'today() → 2026-10-21T00:00:00.000'),
     FormulaFunctionDoc(
@@ -290,6 +370,21 @@ class FormulaEvaluator {
       'formatDate',
       'formatDate(date, pattern)',
       'formatDate(now(), "EEE, MMM d · h:mm a") → Wed, Oct 21 · 2:30 PM',
+    ),
+    FormulaFunctionDoc(
+      'addSeconds',
+      'addSeconds(date, seconds)',
+      'addSeconds(start, 90)',
+    ),
+    FormulaFunctionDoc(
+      'diffSeconds',
+      'diffSeconds(from, to)',
+      'diffSeconds(startedAt, now()) → 240',
+    ),
+    FormulaFunctionDoc(
+      'formatDuration',
+      'formatDuration(seconds, pattern)',
+      "formatDuration(6480, 'h:mm:ss') → 1:48:00 · 'mm:ss' → 108:00 · 'compact' → 1h 48m",
     ),
     FormulaFunctionDoc(
       'addMinutes',
@@ -657,6 +752,7 @@ DateTime? _shift(
   int days = 0,
   int hours = 0,
   int minutes = 0,
+  int seconds = 0,
 }) {
   final DateTime? date = _toDate(value);
   if (date == null) return null;
@@ -673,7 +769,7 @@ DateTime? _shift(
     day + days,
     date.hour + hours,
     date.minute + minutes,
-    date.second,
+    date.second + seconds,
     date.millisecond,
     date.microsecond,
   );
@@ -701,6 +797,27 @@ Duration? _difference(Object? from, Object? to) {
 int _intArg(Object? value) {
   final num n = _num(value);
   return n.isFinite ? n.toInt() : 0;
+}
+
+/// A count argument: a whole number, never negative.
+int _count(Object? value) => math.max(0, _intArg(value));
+
+/// [seconds] as a duration: `h:mm:ss` (1:48:00), `mm:ss` (04:00, minutes
+/// keep counting past 59), `m:ss` (4:00) or, by default, `compact` (1h 48m,
+/// 25m, 40s). Negative durations read as their size.
+String? _formatDuration(Object? seconds, Object? pattern) {
+  final num? value = _toNum(seconds);
+  if (value == null || !value.isFinite) return null;
+  final int total = value.abs().floor();
+  final int h = total ~/ 3600, m = (total % 3600) ~/ 60, s = total % 60;
+  String two(int n) => n.toString().padLeft(2, '0');
+  return switch (pattern?.toString().trim()) {
+    'h:mm:ss' => '$h:${two(m)}:${two(s)}',
+    'mm:ss' => '${two(total ~/ 60)}:${two(s)}',
+    'm:ss' => '${total ~/ 60}:${two(s)}',
+    _ =>
+      h > 0 ? (m == 0 ? '${h}h' : '${h}h ${m}m') : (m > 0 ? '${m}m' : '${s}s'),
+  };
 }
 
 const List<String> _monthNames = [
@@ -850,6 +967,55 @@ final Map<String, _Function> _functions = {
       if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
         item,
   ],
+  'findIndex': (a) {
+    final List<Object?> rest = a.skip(1).toList();
+    final List<Object?> items = _values(_arg(a, 0), null).toList();
+    return items.indexWhere((item) => _matches(item, rest));
+  },
+  'first': (a) => _values(_arg(a, 0), null).firstOrNull,
+  'last': (a) => _values(_arg(a, 0), null).lastOrNull,
+  'take': (a) => _values(_arg(a, 0), null).take(_count(_arg(a, 1))).toList(),
+  'skip': (a) => _values(_arg(a, 0), null).skip(_count(_arg(a, 1))).toList(),
+  'reverse': (a) => _values(_arg(a, 0), null).toList().reversed.toList(),
+  'concat': (a) => [
+    for (final list in a)
+      if (list is Iterable) ...list else ?list,
+  ],
+  'range': (a) {
+    final int start = a.length < 2 ? 0 : _intArg(_arg(a, 0));
+    final int end = _intArg(a.length < 2 ? _arg(a, 0) : _arg(a, 1));
+    return [for (int i = start; i < end; i++) i];
+  },
+  'object': (a) => {
+    for (int i = 0; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  'set': (a) => {
+    if (_arg(a, 0) case final Map map) ...map,
+    FormulaEvaluator.stringify(_arg(a, 1)): _arg(a, 2),
+  },
+  'merge': (a) => {
+    for (final map in a)
+      if (map is Map) ...map,
+  },
+  'padLeft': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
+    _count(_arg(a, 1)),
+    _arg(a, 2) == null ? '0' : FormulaEvaluator.stringify(_arg(a, 2)),
+  ),
+  'replace': (a) => FormulaEvaluator.stringify(_arg(a, 0)).replaceAll(
+    FormulaEvaluator.stringify(_arg(a, 1)),
+    FormulaEvaluator.stringify(_arg(a, 2)),
+  ),
+  'substring': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final int start = _count(_arg(a, 1)).clamp(0, text.length);
+    final int end = _arg(a, 2) == null
+        ? text.length
+        : _count(_arg(a, 2)).clamp(start, text.length);
+    return text.substring(start, end);
+  },
+  'split': (a) => FormulaEvaluator.stringify(_arg(a, 0))
+      .split(_arg(a, 1) == null ? ',' : FormulaEvaluator.stringify(_arg(a, 1))),
   'number': (a) => _toNum(_arg(a, 0)),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
@@ -867,6 +1033,10 @@ final Map<String, _Function> _functions = {
   'addDays': (a) => _dateText(_shift(_arg(a, 0), days: _intArg(_arg(a, 1)))),
   'addMonths': (a) =>
       _dateText(_shift(_arg(a, 0), months: _intArg(_arg(a, 1)))),
+  'addSeconds': (a) =>
+      _dateText(_shift(_arg(a, 0), seconds: _intArg(_arg(a, 1)))),
+  'diffSeconds': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inSeconds,
+  'formatDuration': (a) => _formatDuration(_arg(a, 0), _arg(a, 1)),
   'diffMinutes': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inMinutes,
   'diffHours': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inHours,
   'diffDays': (a) => _diffDays(_arg(a, 0), _arg(a, 1)),
