@@ -41,6 +41,7 @@ export 'src/ui/codelessly_widget.dart';
 export 'src/ui/codelessly_widget_controller.dart';
 export 'src/ui/feedback_theme.dart';
 export 'src/ui/show_more.dart';
+export 'src/ui/zoomable_box.dart';
 export 'src/ui/skeleton.dart';
 export 'src/ui/stripe_painter.dart';
 export 'src/utils/cupertino_icons_by_codepoint.dart';
