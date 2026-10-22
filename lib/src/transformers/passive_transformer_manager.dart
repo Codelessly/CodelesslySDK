@@ -333,7 +333,28 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         else
           path,
     };
-    for (final String variablePath in boundPaths) {
+    bool readsClock = false;
+    // A computed variable listens to whatever its formula reads.
+    final Map<String, VariableData> variablesByName = {
+      for (final notifier in codelesslyContext.variables.values)
+        notifier.value.name: notifier.value,
+    };
+    Set<String> withComputed(Set<String> paths) {
+      final Set<String> expanded = {...paths};
+      for (final String path in paths) {
+        final match = VariableMatch.parse(path.wrapWithVariableSyntax());
+        if (match == null || match.isPredefinedVariable) continue;
+        final deps = PropertyValueDelegate.computedDependencies(
+          match.name,
+          variablesByName,
+        );
+        expanded.addAll(deps.paths);
+        readsClock = readsClock || deps.readsClock;
+      }
+      return expanded;
+    }
+
+    for (final String variablePath in withComputed(boundPaths)) {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
       if (match == null) continue;
 
@@ -375,7 +396,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         ...FormulaEvaluator.referencedPathsInText(template),
       },
     };
-    for (final String variablePath in multiplePaths) {
+    for (final String variablePath in withComputed(multiplePaths)) {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
       if (match == null) continue;
 
@@ -404,7 +425,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     // A formula that reads the clock changes as time passes, so it rebuilds
     // on every tick.
-    final bool readsClock =
+    readsClock =
+        readsClock ||
         node.variables.values.any(
           (path) => switch (FormulaEvaluator.exactExpression(path)) {
             final String expression => FormulaEvaluator.readsClock(expression),
@@ -412,15 +434,17 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           },
         ) ||
         inlineTextTemplatesOf(node).any(FormulaEvaluator.textReadsClock);
-    if (readsClock) listenables.add(FormulaClock.instance);
 
     // Traverse through all the conditions that affects the node.
     for (final BaseCondition condition in codelesslyContext.conditions.values) {
       if (!condition.hasNode(node.id)) continue;
 
-      final Set<String> variableNames = condition
-          .getReactiveVariables()
-          .toSet();
+      final Set<String> variableNames = {
+        for (final String path in withComputed(
+          condition.getReactiveVariables().toSet(),
+        ))
+          VariableMatch.parse(path.wrapWithVariableSyntax())?.name ?? path,
+      };
 
       for (final name in variableNames) {
         if (predefinedListenableVariableNames.contains(name)) {
@@ -446,6 +470,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         if (listenableVariable != null) listenables.add(listenableVariable);
       }
     }
+
+    if (readsClock) listenables.add(FormulaClock.instance);
 
     return listenables;
   }
