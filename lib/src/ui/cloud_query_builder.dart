@@ -32,6 +32,10 @@ class CloudQueryBuilder extends StatefulWidget {
   /// button that says how many are left. [CloudQueryTotal.of] reads it.
   final bool countTotal;
 
+  /// The keys of the composite indexes the collection has: a query needing
+  /// one of them runs and pages in Firestore. See [CloudQuery.plan].
+  final Set<String> readyIndexes;
+
   /// Creates a [CloudQueryBuilder].
   const CloudQueryBuilder({
     super.key,
@@ -40,6 +44,7 @@ class CloudQueryBuilder extends StatefulWidget {
     required this.pageSize,
     required this.builder,
     this.countTotal = false,
+    this.readyIndexes = const {},
   });
 
   @override
@@ -54,7 +59,10 @@ class _CloudQueryBuilderState extends State<CloudQueryBuilder> {
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _subscription;
   _ClientSnapshot _snapshot = const _ClientSnapshot.fetching();
 
-  CloudQueryPlan get _plan => widget.query.plan(forceClient: _forceClient);
+  CloudQueryPlan get _plan => widget.query.plan(
+    forceClient: _forceClient,
+    readyIndexes: widget.readyIndexes,
+  );
 
   Query<Map<String, dynamic>>? _countedQuery;
   int? _total;

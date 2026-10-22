@@ -341,7 +341,11 @@ class CloudDataRunner {
     CloudDataAction action,
     String? uid,
   ) async {
-    final CloudQueryPlan plan = _cloudQuery(path, action, uid).plan();
+    final CloudQueryPlan plan = _cloudQuery(
+      path,
+      action,
+      uid,
+    ).plan(readyIndexes: _rules.readyIndexesFor(path));
     final QuerySnapshot<Map<String, dynamic>> snapshot = await plan
         .applyTo(collection)
         .get();
@@ -361,7 +365,11 @@ class CloudDataRunner {
     CloudDataAction action,
     String? uid,
   ) async {
-    final CloudQueryPlan plan = _cloudQuery(path, action, uid).plan();
+    final CloudQueryPlan plan = _cloudQuery(
+      path,
+      action,
+      uid,
+    ).plan(readyIndexes: _rules.readyIndexesFor(path));
     final String field = action.aggregateField.trim();
     if (action.operation != CloudDataOperation.count && field.isEmpty) {
       throw StateError('Pick the number field to ${action.operation.name}.');
