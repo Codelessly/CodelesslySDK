@@ -125,6 +125,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (settings.withReactions) {
       widget = wrapWithReaction(context, styled, widget);
       widget = wrapWithSemantics(styled, widget);
+      widget = applyTooltipAndZoom(context, styled, widget);
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
@@ -146,6 +147,30 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
 
     return decorate(context, styled, widget, NodeBuildLayer.margin);
+  }
+
+  /// Wraps [widget] in a tooltip showing [node]'s tooltip text (its data
+  /// substituted) and, when [node] is zoomable, in a viewer that pinches,
+  /// scrolls and double-taps to zoom.
+  Widget applyTooltipAndZoom(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
+    if (node.zoomable) {
+      widget = ZoomableBox(child: widget);
+    }
+    if (node.tooltip.trim().isNotEmpty) {
+      final String message = PropertyValueDelegate.substituteVariables(
+        node.tooltip,
+        scopedValues: ScopedValues.of(context),
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      );
+      if (message.trim().isNotEmpty) {
+        widget = Tooltip(message: message, child: widget);
+      }
+    }
+    return widget;
   }
 
   /// Returns [node] with the style properties that conditions, bound
