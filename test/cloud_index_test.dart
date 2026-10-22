@@ -66,6 +66,7 @@ void main() {
       'ownerId:asc,createdAt:desc',
     });
     expect(rules.readyIndexesFor('posts'), isEmpty);
+    expect(DataRules.collectionName(r'posts/${item.id}/comments'), 'comments');
     expect(DataRules.fromJson(rules.toJson()).indexes, rules.indexes);
   });
 }
