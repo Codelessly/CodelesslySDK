@@ -28,6 +28,10 @@ class CloudQueryBuilder extends StatefulWidget {
   /// Builds the result.
   final FirestoreQueryBuilderSnapshotBuilder<Map<String, dynamic>> builder;
 
+  /// Whether to count all documents the query matches, for a "Show more"
+  /// button that says how many are left. [CloudQueryTotal.of] reads it.
+  final bool countTotal;
+
   /// Creates a [CloudQueryBuilder].
   const CloudQueryBuilder({
     super.key,
@@ -35,6 +39,7 @@ class CloudQueryBuilder extends StatefulWidget {
     required this.query,
     required this.pageSize,
     required this.builder,
+    this.countTotal = false,
   });
 
   @override
@@ -50,6 +55,30 @@ class _CloudQueryBuilderState extends State<CloudQueryBuilder> {
   _ClientSnapshot _snapshot = const _ClientSnapshot.fetching();
 
   CloudQueryPlan get _plan => widget.query.plan(forceClient: _forceClient);
+
+  Query<Map<String, dynamic>>? _countedQuery;
+  int? _total;
+
+  /// Counts the documents [query] matches once, when asked to.
+  void _count(Query<Map<String, dynamic>> query) {
+    if (!widget.countTotal || query == _countedQuery) return;
+    _countedQuery = query;
+    _total = null;
+    query
+        .count()
+        .get()
+        .then((snapshot) {
+          if (mounted && query == _countedQuery) {
+            setState(() => _total = snapshot.count);
+          }
+        })
+        .catchError((Object error) {
+          DebugLogger.instance.printInfo(
+            'Could not count the query: ${describeCloudError(error)}',
+            name: 'CloudQueryBuilder',
+          );
+        });
+  }
 
   @override
   void didUpdateWidget(covariant CloudQueryBuilder oldWidget) {
@@ -99,33 +128,58 @@ class _CloudQueryBuilderState extends State<CloudQueryBuilder> {
     final CloudQueryPlan plan = _plan;
     if (!plan.runsOnClient) {
       _stopStreaming();
-      return FirestoreQueryBuilder<Map<String, dynamic>>(
-        query: plan.applyTo(widget.ref),
-        pageSize: widget.pageSize,
-        builder: (context, snapshot, child) {
-          if (snapshot.hasError && isMissingIndexError(snapshot.error)) {
-            DebugLogger.instance.printInfo(
-              'Query needs an index Firestore does not have; running it in '
-              'the app. ${describeCloudError(snapshot.error)}',
-              name: 'CloudQueryBuilder',
-            );
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) setState(() => _forceClient = true);
-            });
-            return widget.builder(
-              context,
-              const _ClientSnapshot.fetching(),
-              child,
-            );
-          }
-          return widget.builder(context, snapshot, child);
-        },
+      _count(plan.applyTo(widget.ref));
+      return CloudQueryTotal(
+        total: _total,
+        child: FirestoreQueryBuilder<Map<String, dynamic>>(
+          query: plan.applyTo(widget.ref),
+          pageSize: widget.pageSize,
+          builder: (context, snapshot, child) {
+            if (snapshot.hasError && isMissingIndexError(snapshot.error)) {
+              DebugLogger.instance.printInfo(
+                'Query needs an index Firestore does not have; running it in '
+                'the app. ${describeCloudError(snapshot.error)}',
+                name: 'CloudQueryBuilder',
+              );
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) setState(() => _forceClient = true);
+              });
+              return widget.builder(
+                context,
+                const _ClientSnapshot.fetching(),
+                child,
+              );
+            }
+            return widget.builder(context, snapshot, child);
+          },
+        ),
       );
     }
 
     _stream(plan.applyTo(widget.ref));
-    return widget.builder(context, _snapshot.finishedBy(plan), null);
+    // A query the app finishes arrives whole: what it shows is the total.
+    return CloudQueryTotal(
+      total: null,
+      child: widget.builder(context, _snapshot.finishedBy(plan), null),
+    );
   }
+}
+
+/// The number of documents a [CloudQueryBuilder] counted for its query,
+/// when it was asked to and the count has arrived.
+class CloudQueryTotal extends InheritedWidget {
+  /// The count, or null.
+  final int? total;
+
+  const CloudQueryTotal({super.key, required this.total, required super.child});
+
+  /// The count for the query around [context], or null.
+  static int? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<CloudQueryTotal>()?.total;
+
+  @override
+  bool updateShouldNotify(CloudQueryTotal oldWidget) =>
+      total != oldWidget.total;
 }
 
 /// A [FirestoreQueryBuilderSnapshot] of a query the app finishes: everything

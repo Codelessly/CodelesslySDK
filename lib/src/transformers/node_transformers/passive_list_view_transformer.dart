@@ -129,96 +129,101 @@ class PassiveListViewWidget extends StatelessWidget {
           ref: query.ref,
           query: query.query,
           pageSize: node.limit ?? 20,
-          builder: (context, snapshot, child) {
-            reportQueryStatus(
-              context,
-              node.statusVariable,
-              queryStatusOf(
-                isFetching: snapshot.isFetching,
-                hasError: snapshot.hasError,
-                count: snapshot.docs.length,
-              ),
-            );
-            // A layout with a status variable shows its own loading and
-            // error states.
-            if (node.statusVariable != null &&
-                (snapshot.isFetching || snapshot.hasError)) {
-              return const SizedBox.shrink();
-            }
-            if (snapshot.isFetching) {
-              return codelesslyController.loadingBuilder?.call(context) ??
-                  const Center(child: CircularProgressIndicator());
-            }
-
-            if (snapshot.hasError) {
-              final String message = describeCloudError(snapshot.error);
-              DebugLogger.instance.printInfo(
-                'Could not load ${node.collectionPath}: $message',
-                name: node.type,
+          countTotal: node.paging == QueryPaging.button,
+          builder: (context, snapshot, child) => ShowMorePager(
+            pageSize: node.limit ?? 20,
+            builder: (context, revealed, revealMore) {
+              reportQueryStatus(
+                context,
+                node.statusVariable,
+                queryStatusOf(
+                  isFetching: snapshot.isFetching,
+                  hasError: snapshot.hasError,
+                  count: snapshot.docs.length,
+                ),
               );
-              return codelesslyController.errorBuilder?.call(
-                    context,
-                    ErrorLog(
-                      timestamp: DateTime.now(),
-                      message: message,
-                      type: 'firestore_query_error',
-                    ),
-                  ) ??
-                  const Center(child: Text('Error'));
-            }
+              final CloudListItems items = CloudListItems(
+                snapshot: snapshot,
+                paging: node.paging,
+                revealed: revealed,
+                total: CloudQueryTotal.of(context),
+                skeleton: CloudListItems.showsSkeleton(context, snapshot),
+                revealMore: revealMore,
+              );
+              // A layout with a status variable shows its own loading and
+              // error states; a loading skeleton shows sample items.
+              if (node.statusVariable != null &&
+                  !items.skeleton &&
+                  (snapshot.isFetching || snapshot.hasError)) {
+                return const SizedBox.shrink();
+              }
+              if (snapshot.isFetching && !items.skeleton) {
+                return codelesslyController.loadingBuilder?.call(context) ??
+                    const Center(child: CircularProgressIndicator());
+              }
 
-            final List<QueryDocumentSnapshot<Map>> docs = snapshot.docs;
-            final itemCount = docs.length;
-
-            // Item Count always exists.
-            return ListViewBuilder(
-              primary: node.primary,
-              shrinkWrap: shrinkWrap,
-              itemCount: itemCount,
-              padding: node.padding.flutterEdgeInsets,
-              keyboardDismissBehavior:
-                  node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-              physics: node.physics.flutterScrollPhysics(
-                node.shouldAlwaysScroll,
-              ),
-              scrollDirection: node.scrollDirection.flutterAxis,
-              cacheExtent: node.properties.cacheExtent,
-              reverse: node.reverse,
-              itemExtent: node.properties.itemExtent,
-              clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
-              separatedBuilder: node.properties.hasSeparator
-                  ? (context, index) => ListViewItemSeparator(
-                      scrollDirection: node.scrollDirection,
-                      properties: node.properties,
-                    )
-                  : null,
-              itemBuilder: (context, index) {
-                // Load the next page when the last loaded item shows.
-                if (index == itemCount - 1 &&
-                    snapshot.hasMore &&
-                    !snapshot.isFetchingMore) {
-                  snapshot.fetchMore();
-                }
-                final doc = docs.elementAtOrNull(index);
-                final id = doc?.id;
-                final data = doc?.data();
-                return IndexedItemProvider(
-                  key: ValueKey(index),
-                  item: IndexedItem(index, {'id': ?id, ...?data}),
-                  child: Builder(
-                    builder: (context) {
-                      // This builder is important to pass a context that has
-                      // the IndexedItemProvider.
-                      return KeyedSubtree(
-                        key: ValueKey(index),
-                        child: buildItem(item, context),
-                      );
-                    },
-                  ),
+              if (snapshot.hasError) {
+                final String message = describeCloudError(snapshot.error);
+                DebugLogger.instance.printInfo(
+                  'Could not load ${node.collectionPath}: $message',
+                  name: node.type,
                 );
-              },
-            );
-          },
+                return codelesslyController.errorBuilder?.call(
+                      context,
+                      ErrorLog(
+                        timestamp: DateTime.now(),
+                        message: message,
+                        type: 'firestore_query_error',
+                      ),
+                    ) ??
+                    const Center(child: Text('Error'));
+              }
+
+              final int itemCount = items.itemCount;
+
+              // Item Count always exists.
+              return ListViewBuilder(
+                primary: node.primary,
+                shrinkWrap: shrinkWrap,
+                itemCount: itemCount,
+                padding: node.padding.flutterEdgeInsets,
+                keyboardDismissBehavior:
+                    node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+                physics: node.physics.flutterScrollPhysics(
+                  node.shouldAlwaysScroll,
+                ),
+                scrollDirection: node.scrollDirection.flutterAxis,
+                cacheExtent: node.properties.cacheExtent,
+                reverse: node.reverse,
+                itemExtent: node.properties.itemExtent,
+                clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+                separatedBuilder: node.properties.hasSeparator
+                    ? (context, index) => ListViewItemSeparator(
+                        scrollDirection: node.scrollDirection,
+                        properties: node.properties,
+                      )
+                    : null,
+                itemBuilder: (context, index) {
+                  if (items.isButton(index)) return items.buildButton();
+                  items.onItemBuilt(index);
+                  return IndexedItemProvider(
+                    key: ValueKey(index),
+                    item: IndexedItem(index, items.dataAt(index)),
+                    child: Builder(
+                      builder: (context) {
+                        // This builder is important to pass a context that has
+                        // the IndexedItemProvider.
+                        return KeyedSubtree(
+                          key: ValueKey(index),
+                          child: buildItem(item, context),
+                        );
+                      },
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         ),
       );
     }
