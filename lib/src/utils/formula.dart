@@ -388,6 +388,11 @@ class FormulaEvaluator {
       'move(list, from, to)',
       'move([a, b, c], 2, 0) → [c, a, b]',
     ),
+    FormulaFunctionDoc(
+      'thousands',
+      'thousands(value, decimals)',
+      'thousands(1094) → 1,094',
+    ),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
     FormulaFunctionDoc(
@@ -1111,6 +1116,18 @@ final Map<String, _Function> _functions = {
     final Object? item = items.removeAt(from);
     items.insert(_index(_arg(a, 2), items.length, items.length), item);
     return items;
+  },
+  'thousands': (a) {
+    final num n = _num(_arg(a, 0));
+    if (n.isNaN) return null;
+    final int decimals = _count(_arg(a, 1));
+    final String fixed = n.abs().toStringAsFixed(decimals);
+    final List<String> parts = fixed.split('.');
+    final String whole = parts[0].replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+$)'),
+      (m) => '${m[1]},',
+    );
+    return '${n < 0 ? '-' : ''}$whole${parts.length > 1 ? '.${parts[1]}' : ''}';
   },
   'number': (a) => _toNum(_arg(a, 0)),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
