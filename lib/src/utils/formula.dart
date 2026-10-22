@@ -70,6 +70,12 @@ class FormulaEvaluator {
     }
   }
 
+  /// Formats [date] (a DateTime, an ISO string, epoch milliseconds or a
+  /// timestamp) with a date [pattern] as the `formatDate` formula function
+  /// does, e.g. `h:mm a`. Returns null when [date] isn't a date.
+  static String? formatDate(Object? date, [String? pattern]) =>
+      _formatDate(date, pattern);
+
   /// The variable paths [expression] reads, e.g. `storage.cart` and `qty`.
   static Set<String> referencedPaths(String expression) {
     final _Node? node = _parse(expression);
