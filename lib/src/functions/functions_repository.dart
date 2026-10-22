@@ -571,6 +571,7 @@ class FunctionsRepository {
       barrierDismissible: action.barrierDismissible,
       barrierColor: action.barrierColor?.toFlutterColor(),
       showCloseButton: action.showCloseButton,
+      presentation: action.presentation,
     );
   }
 
@@ -590,6 +591,7 @@ class FunctionsRepository {
     bool barrierDismissible = true,
     Color? barrierColor,
     bool showCloseButton = false,
+    DialogPresentation presentation = DialogPresentation.dialog,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -632,21 +634,62 @@ class FunctionsRepository {
     // A chain triggered in the dialog can finish on this layout after the
     // dialog closes (e.g. Navigate back, then a toast).
     final List<BuildContext> openerHosts = ActionChainOpener.hostsFor(context);
-    final Object? result = await showDialog<Object?>(
-      context: context,
-      useRootNavigator: false,
-      barrierDismissible: barrierDismissible,
-      barrierColor: barrierColor,
-      routeSettings: RouteSettings(arguments: parsedParams),
-      builder: (context) => ActionChainOpener(
-        openerHosts: openerHosts,
-        child: CodelesslyDialogWidget(
-          showCloseButton: showCloseButton,
-          builder: (context) =>
-              CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
-        ),
-      ),
-    );
+    Widget content(BuildContext context, CanvasSizing sizing) =>
+        ActionChainOpener(
+          openerHosts: openerHosts,
+          child: CodelesslyDialogWidget(
+            showCloseButton: showCloseButton,
+            sizing: sizing,
+            builder: (context) =>
+                CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
+          ),
+        );
+    final RouteSettings settings = RouteSettings(arguments: parsedParams);
+    final Size screen = MediaQuery.sizeOf(context);
+    final bool sheet =
+        presentation == DialogPresentation.bottomSheet ||
+        (presentation == DialogPresentation.adaptive && screen.width < 600);
+    final Object? result;
+    if (sheet) {
+      // As wide as the screen and as tall as its content, up to 90% of the
+      // screen; the canvas draws its own background and corners.
+      result = await showModalBottomSheet<Object?>(
+        context: context,
+        useRootNavigator: false,
+        isScrollControlled: true,
+        isDismissible: barrierDismissible,
+        enableDrag: barrierDismissible,
+        barrierColor: barrierColor,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        constraints: BoxConstraints(maxHeight: screen.height * 0.9),
+        routeSettings: settings,
+        builder: (context) => content(context, CanvasSizing.sheet),
+      );
+    } else if (presentation == DialogPresentation.fullScreen) {
+      result = await showGeneralDialog<Object?>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: MaterialLocalizations.of(context)
+            .modalBarrierDismissLabel,
+        barrierColor: barrierColor ?? Colors.black,
+        routeSettings: settings,
+        transitionDuration: const Duration(milliseconds: 200),
+        transitionBuilder: (context, animation, _, child) =>
+            FadeTransition(opacity: animation, child: child),
+        pageBuilder: (context, _, _) => content(context, CanvasSizing.fill),
+      );
+    } else {
+      result = await showDialog<Object?>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierColor: barrierColor,
+        routeSettings: settings,
+        builder: (context) => content(context, CanvasSizing.design),
+      );
+    }
     if (context.mounted) {
       codelessly.notifyNavigationListeners(
         context,
