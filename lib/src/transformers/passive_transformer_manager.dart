@@ -360,11 +360,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         }
       }
 
-      // Get corresponding variable data from codelessly context.
-      final ValueNotifier<VariableData>? listenableVariable = codelesslyContext
-          .findVariableByName(match.name);
-      // Add variable to [listenables].
-      if (listenableVariable != null) listenables.add(listenableVariable);
+      addVariableListenables(
+        codelesslyContext,
+        match.name,
+        listenables,
+        context,
+      );
     }
 
     // Traverse through all the multi-variables that the node properties are attached
@@ -402,11 +403,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         }
       }
 
-      // Get corresponding variable data from codelessly context.
-      final ValueNotifier<VariableData>? listenableVariable = codelesslyContext
-          .findVariableByName(match.name);
-      // Add variable to [listenables].
-      if (listenableVariable != null) listenables.add(listenableVariable);
+      addVariableListenables(
+        codelesslyContext,
+        match.name,
+        listenables,
+        context,
+      );
     }
 
     // Traverse through all the conditions that affects the node.
@@ -432,17 +434,58 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           }
           continue;
         }
-        // Get corresponding variable data from codelessly context.
-        final ValueNotifier<VariableData>? listenableVariable =
-            codelesslyContext.variables.values.firstWhereOrNull(
-              (notifier) => notifier.value.name == name,
-            );
-        // Add variable to [listenables].
-        if (listenableVariable != null) listenables.add(listenableVariable);
+        addVariableListenables(codelesslyContext, name, listenables, context);
       }
     }
 
     return listenables;
+  }
+
+  /// Adds the notifier of variable [name] to [listenables]. A computed
+  /// variable, one whose value is a `${= ...}` formula, also adds the
+  /// variables its formula reads, so nodes showing it update when they do.
+  void addVariableListenables(
+    CodelesslyContext codelesslyContext,
+    String name,
+    List<Listenable> listenables,
+    BuildContext context, [
+    Set<String>? visited,
+  ]) {
+    final Set<String> seen = visited ?? {};
+    if (!seen.add(name)) return;
+    if (predefinedListenableVariableNames.contains(name)) {
+      final Listenable? notifier = switch (name) {
+        'storage' => getStorageListenerFor(
+          VariableMatch.parse(name.wrapWithVariableSyntax())!,
+          context,
+        ),
+        'auth' => context.read<Codelessly?>()?.appUser,
+        _ => null,
+      };
+      if (notifier != null) listenables.add(notifier);
+      return;
+    }
+    final ValueNotifier<VariableData>? variable = codelesslyContext
+        .findVariableByName(name);
+    if (variable == null) return;
+    if (!listenables.contains(variable)) listenables.add(variable);
+    final String? expression = FormulaEvaluator.exactExpression(
+      variable.value.value,
+    );
+    if (expression == null) return;
+    for (final String path in FormulaEvaluator.referencedPaths(expression)) {
+      final VariableMatch? match = VariableMatch.parse(
+        path.wrapWithVariableSyntax(),
+      );
+      if (match == null) continue;
+      addVariableListenables(
+        codelesslyContext,
+        match.name,
+        listenables,
+        context,
+        seen,
+      );
+    }
   }
 
   Listenable? getStorageListenerFor(VariableMatch match, BuildContext context) {

@@ -256,6 +256,31 @@ class PropertyValueDelegate {
 
   /// Evaluates a formula [expression] (the part after `${=`), reading its
   /// variable paths from [scopedValues]. See [FormulaEvaluator].
+  /// Whether [variable] is computed: its value is a `${= ...}` formula,
+  /// worked out from other variables whenever it is read.
+  static bool isComputedVariable(VariableData variable) =>
+      FormulaEvaluator.exactExpression(variable.value) != null;
+
+  static int _computedDepth = 0;
+
+  /// The value of [variable]: its formula's result for a computed variable,
+  /// else its stored value. Computed variables can read each other; a cycle
+  /// gives null instead of recursing forever.
+  static Object? variableValueOf(
+    VariableData variable,
+    ScopedValues scopedValues,
+  ) {
+    final String? expression = FormulaEvaluator.exactExpression(variable.value);
+    if (expression == null) return variable.getValue();
+    if (_computedDepth >= 16) return null;
+    _computedDepth++;
+    try {
+      return evaluateFormula(expression, scopedValues: scopedValues);
+    } finally {
+      _computedDepth--;
+    }
+  }
+
   static Object? evaluateFormula(
     String expression, {
     required ScopedValues scopedValues,
@@ -366,33 +391,34 @@ class PropertyValueDelegate {
 
     final VariableData? variable = scopedValues.variables[match.name];
     if (variable == null) return null;
+    final bool computed = isComputedVariable(variable);
+    final Object? variableValue = variableValueOf(variable, scopedValues);
+    // A computed variable's type is whatever its formula returns.
+    final VariableType type = computed && variableValue != null
+        ? VariableType.fromObjectType(variableValue)
+        : variable.type;
     if (match.hasAccessor) {
-      if (variable.type.isText) {
-        final characters = variable.getValue().toString().characters.toList();
+      if (type.isText) {
+        final characters = variableValue.toString().characters.toList();
         final (Object? value, _) = substituteJsonPath(match.fullPath, {
           match.name: characters,
         });
         return value;
       }
-      if (!variable.type.isList) return null;
+      if (!type.isList) return null;
       final (Object? value, _) = substituteJsonPath(match.fullPath, {
-        match.name: variable.getValue(),
+        match.name: variableValue,
       });
 
       return value;
     }
 
-    if (!match.hasPath) return variable.getValue();
+    if (!match.hasPath) return variableValue;
 
-    final variableProps = getVariableProperties(
-      variable.getValue(),
-      variable.type,
-    );
-    final Object? variableValue = variable.getValue();
+    final variableProps = getVariableProperties(variableValue, type);
     final Map<String, dynamic> values = {
       ...variableProps,
-      if (variable.type.isMap && variableValue is Map<String, dynamic>)
-        ...variableValue,
+      if (variableValue is Map) ...Map<String, dynamic>.from(variableValue),
     };
     final (Object? value, _) = substituteJsonPath(match.fullPath, {
       match.name: values,
