@@ -349,9 +349,12 @@ class TextUtils {
         .where((element) => element.type == EffectType.dropShadow)
         .map(
           (d) => Shadow(
-            offset: Offset(d.offset!.x.toDouble(), d.offset!.y.toDouble()),
+            offset: Offset(
+              d.offset?.x.toDouble() ?? 0,
+              d.offset?.y.toDouble() ?? 0,
+            ),
             blurRadius: d.radius,
-            color: d.color!.toFlutterColor(),
+            color: (d.color ?? ColorRGBA.black).toFlutterColor(),
           ),
         )
         .toList();

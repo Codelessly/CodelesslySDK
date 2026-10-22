@@ -362,14 +362,15 @@ List<BoxShadow> retrieveBoxShadow(BaseNode node, ScopedValues scopedValues) {
               scopedValues: scopedValues,
             ) ??
             effect.color;
+        // Shadows from JSON can leave out spread, offset and color.
         return BoxShadow(
-          spreadRadius: effect.spread!,
+          spreadRadius: effect.spread ?? 0,
           offset: Offset(
-            effect.offset!.x.toDouble(),
-            effect.offset!.y.toDouble(),
+            effect.offset?.x.toDouble() ?? 0,
+            effect.offset?.y.toDouble() ?? 0,
           ),
           blurRadius: effect.radius,
-          color: color!.toFlutterColor(),
+          color: (color ?? ColorRGBA.black).toFlutterColor(),
         );
       })
       .toList();
