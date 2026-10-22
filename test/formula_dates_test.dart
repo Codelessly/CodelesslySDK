@@ -123,6 +123,7 @@ void main() {
 
     test('differences between dates', () {
       expect(eval('diffMinutes(start, end)'), 165);
+      expect(eval('diffSeconds(start, end)'), 165 * 60);
       expect(eval('diffHours(start, end)'), 2);
       expect(eval('diffDays(start, due)'), 5);
       expect(eval('diffDays(due, start)'), -5);
@@ -165,6 +166,7 @@ void main() {
         'addHours',
         'addDays',
         'addMonths',
+        'diffSeconds',
         'diffMinutes',
         'diffHours',
         'diffDays',

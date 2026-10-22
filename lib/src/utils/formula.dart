@@ -41,7 +41,7 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    the body can read every other variable. Lambdas are only allowed as
 ///    function arguments.
 ///  - date functions: now, today, parseDate, formatDate, addMinutes, addHours,
-///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
+///    addDays, addMonths, diffSeconds, diffMinutes, diffHours, diffDays, year, month, day,
 ///    hour, minute and weekday. Dates are ISO 8601 text such as
 ///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
 ///    milliseconds or a Firestore timestamp.
@@ -329,6 +329,11 @@ class FormulaEvaluator {
       'addMonths',
       'addMonths(date, months)',
       'addMonths("2026-01-31", 1) → 2026-02-28T00:00:00.000',
+    ),
+    FormulaFunctionDoc(
+      'diffSeconds',
+      'diffSeconds(from, to)',
+      'diffSeconds(startedAt, now()) → 492',
     ),
     FormulaFunctionDoc(
       'diffMinutes',
@@ -952,6 +957,7 @@ final Map<String, _Function> _functions = {
   'addDays': (a) => _dateText(_shift(_arg(a, 0), days: _intArg(_arg(a, 1)))),
   'addMonths': (a) =>
       _dateText(_shift(_arg(a, 0), months: _intArg(_arg(a, 1)))),
+  'diffSeconds': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inSeconds,
   'diffMinutes': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inMinutes,
   'diffHours': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inHours,
   'diffDays': (a) => _diffDays(_arg(a, 0), _arg(a, 1)),
