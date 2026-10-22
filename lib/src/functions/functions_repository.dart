@@ -363,13 +363,35 @@ class FunctionsRepository {
     return makeApiRequest(
       context: context,
       method: apiData.method,
-      url: _applyApiInputs(apiData.url, params, scopedValues),
+      url: buildApiUrl(apiData, params, scopedValues),
       headers: _generateMapFromPairs(apiData.headers, params, scopedValues),
       body: apiData.bodyType == RequestBodyType.form
           ? _generateMapFromPairs(apiData.formFields, params, scopedValues)
           : _applyApiInputs(apiData.body ?? '', params, scopedValues),
       variable: variable,
     );
+  }
+
+  /// The URL [api] requests with the inputs [params]: its URL with inputs
+  /// and variables substituted, plus its query parameters (used, non-empty
+  /// keys; same substitution), which win over ones written in the URL.
+  static String buildApiUrl(
+    HttpApiData api,
+    Map<String, String> params,
+    ScopedValues scopedValues,
+  ) {
+    final String url = _applyApiInputs(api.url, params, scopedValues);
+    final Map<String, String> query = _generateMapFromPairs(
+      api.queryParams,
+      params,
+      scopedValues,
+    );
+    if (query.isEmpty) return url;
+    final Uri? uri = Uri.tryParse(url);
+    if (uri == null) return url;
+    return uri
+        .replace(queryParameters: {...uri.queryParameters, ...query})
+        .toString();
   }
 
   static Map<String, String> _generateMapFromPairs(
