@@ -183,7 +183,7 @@ abstract class WidgetNodeTransformerManager
     final List<BaseNode> descendants = [];
     void collect(BaseNode parent) {
       for (final String id in parent.childrenOrEmpty) {
-        final BaseNode? child = _tryGetNode(id);
+        final BaseNode? child = tryGetNode(id);
         if (child == null) continue;
         descendants.add(child);
         collect(child);
@@ -217,7 +217,7 @@ abstract class WidgetNodeTransformerManager
     return '';
   }
 
-  BaseNode? _tryGetNode(String id) {
+  BaseNode? tryGetNode(String id) {
     try {
       return getNode(id);
     } catch (_) {
@@ -227,6 +227,37 @@ abstract class WidgetNodeTransformerManager
 
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
+    final Widget tappable = _wrapWithTapReactions(context, node, widget);
+    if (node is! ReactionMixin || node is CanvasNode) return tappable;
+    final List<Reaction> reactions = (node as ReactionMixin).reactions;
+    List<Reaction> of(TriggerType type) => [
+      for (final reaction in reactions)
+        if (reaction.trigger.type == type && reaction.action.enabled) reaction,
+    ];
+    final List<Reaction> onDrag = of(TriggerType.drag);
+    final List<Reaction> onDragEnd = of(TriggerType.dragEnd);
+    final List<Reaction> onPointerDown = of(TriggerType.pointerDown);
+    final List<Reaction> onPointerUp = of(TriggerType.pointerUp);
+    if (onDrag.isEmpty &&
+        onDragEnd.isEmpty &&
+        onPointerDown.isEmpty &&
+        onPointerUp.isEmpty) {
+      return tappable;
+    }
+    return ReactionDragDetector(
+      onDrag: onDrag,
+      onDragEnd: onDragEnd,
+      onPointerDown: onPointerDown,
+      onPointerUp: onPointerUp,
+      child: tappable,
+    );
+  }
+
+  Widget _wrapWithTapReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
     if (node is! ReactionMixin) return widget;
     if (node case CanvasNode() || SpacerNode()) return widget;
     if (node is CustomPropertiesMixin &&
@@ -589,5 +620,99 @@ class SvgIconImage extends StatelessWidget {
                   const SizedBox.shrink(),
             ),
     );
+  }
+}
+
+/// Runs a node's drag and pointer reactions. Each action of a [TriggerType.drag]
+/// reaction runs on every move with `${result}` set to:
+///
+/// - `deltaX`, `deltaY`: how far the pointer moved since the last event,
+/// - `dx`, `dy`: how far it moved since the drag started,
+/// - `x`, `y`: where the pointer is, relative to the node's top-left.
+///
+/// [TriggerType.dragEnd] reactions run once when the pointer lifts after a
+/// drag, with the drag's total `dx`, `dy` and its `velocityX`, `velocityY`
+/// (px/s). [TriggerType.pointerDown] and [TriggerType.pointerUp] run when a
+/// pointer touches or leaves the node, with its local `x`, `y`.
+class ReactionDragDetector extends StatefulWidget {
+  final List<Reaction> onDrag;
+  final List<Reaction> onDragEnd;
+  final List<Reaction> onPointerDown;
+  final List<Reaction> onPointerUp;
+  final Widget child;
+
+  const ReactionDragDetector({
+    super.key,
+    required this.onDrag,
+    required this.onDragEnd,
+    required this.onPointerDown,
+    required this.onPointerUp,
+    required this.child,
+  });
+
+  @override
+  State<ReactionDragDetector> createState() => _ReactionDragDetectorState();
+}
+
+class _ReactionDragDetectorState extends State<ReactionDragDetector> {
+  Offset _total = Offset.zero;
+
+  void _run(List<Reaction> reactions, TriggerType type, Map result) {
+    if (reactions.isEmpty) return;
+    FunctionsRepository.triggerAction(
+      context,
+      type,
+      reactions: reactions,
+      result: result,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool drags = widget.onDrag.isNotEmpty || widget.onDragEnd.isNotEmpty;
+    Widget child = widget.child;
+    if (drags) {
+      child = MouseRegion(
+        cursor: SystemMouseCursors.grab,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onPanStart: (_) => _total = Offset.zero,
+          onPanUpdate: (details) {
+            _total += details.delta;
+            _run(widget.onDrag, TriggerType.drag, {
+              'deltaX': details.delta.dx,
+              'deltaY': details.delta.dy,
+              'dx': _total.dx,
+              'dy': _total.dy,
+              'x': details.localPosition.dx,
+              'y': details.localPosition.dy,
+            });
+          },
+          onPanEnd: (details) => _run(widget.onDragEnd, TriggerType.dragEnd, {
+            'dx': _total.dx,
+            'dy': _total.dy,
+            'velocityX': details.velocity.pixelsPerSecond.dx,
+            'velocityY': details.velocity.pixelsPerSecond.dy,
+          }),
+          child: child,
+        ),
+      );
+    }
+    if (widget.onPointerDown.isNotEmpty || widget.onPointerUp.isNotEmpty) {
+      child = Listener(
+        onPointerDown: (event) => _run(
+          widget.onPointerDown,
+          TriggerType.pointerDown,
+          {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+        ),
+        onPointerUp: (event) => _run(
+          widget.onPointerUp,
+          TriggerType.pointerUp,
+          {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+        ),
+        child: child,
+      );
+    }
+    return child;
   }
 }
