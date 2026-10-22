@@ -159,6 +159,49 @@ class FormulaEvaluator {
   /// How to call each function, with an example, for editors to list.
   static const List<FormulaFunctionDoc> functionDocs = [
     FormulaFunctionDoc(
+      'findIndex',
+      'findIndex(list, item => test)',
+      'findIndex(tasks, t => t.id == id) → 2',
+    ),
+    FormulaFunctionDoc(
+      'indexOf',
+      'indexOf(list, value)',
+      'indexOf(["a", "b"], "b") → 1',
+    ),
+    FormulaFunctionDoc(
+      'obj',
+      'obj(key, value, ...)',
+      'obj("status", "done", "by", user.name) → {status: done, by: Ann}',
+    ),
+    FormulaFunctionDoc(
+      'set',
+      'set(mapOrList, keyOrIndex, value)',
+      'set(task, "done", true) → a copy of task with done true',
+    ),
+    FormulaFunctionDoc(
+      'merge',
+      'merge(map, map, ...)',
+      'merge(task, obj("done", true)) → task with done true',
+    ),
+    FormulaFunctionDoc(
+      'concat',
+      'concat(list, list, ...)',
+      'concat([1], [2, 3]) → [1, 2, 3]',
+    ),
+    FormulaFunctionDoc(
+      'append',
+      'append(list, item, ...)',
+      'append(tags, "new") → tags plus "new"',
+    ),
+    FormulaFunctionDoc(
+      'take',
+      'take(list, count)',
+      'take([1, 2, 3], 2) → [1, 2]',
+    ),
+    FormulaFunctionDoc('skip', 'skip(list, count)', 'skip([1, 2, 3], 2) → [3]'),
+    FormulaFunctionDoc('group', 'group(number)', 'group(412908) → 412,908'),
+    FormulaFunctionDoc('pad', 'pad(value, width, fill)', 'pad(7, 2) → 07'),
+    FormulaFunctionDoc(
       'money',
       'money(value, symbol)',
       r'money(price) → $1,234.50',
@@ -786,6 +829,63 @@ typedef _Function = Object? Function(List<Object?> args);
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
+/// Index of the first item of the list matching the predicate in [args]
+/// (as in `find`), or of the item equal to the value when the second
+/// argument is neither a lambda nor followed by a value. -1 when none.
+int _findIndex(List<Object?> args) {
+  final Object? list = _arg(args, 0);
+  if (list is! Iterable) return -1;
+  final List<Object?> rest = args.skip(1).toList();
+  int i = 0;
+  for (final Object? item in list) {
+    final bool hit = rest.length == 1 && rest.first is! _Closure
+        ? _looseEquals(item, rest.first)
+        : _matches(item, rest);
+    if (hit) return i;
+    i++;
+  }
+  return -1;
+}
+
+/// A copy of [target] with [key] set to [value]: a map key, or a list index
+/// (an index equal to the length appends). Other targets come back as is.
+Object? _setIn(Object? target, Object? key, Object? value) {
+  if (target is Map) {
+    return {
+      ...target.map((k, v) => MapEntry(k.toString(), v)),
+      FormulaEvaluator.stringify(key): value,
+    };
+  }
+  if (target is Iterable) {
+    final List<Object?> list = List<Object?>.of(target);
+    final int i = _intArg(key);
+    if (i >= 0 && i < list.length) {
+      list[i] = value;
+    } else if (i == list.length) {
+      list.add(value);
+    }
+    return list;
+  }
+  return target;
+}
+
+/// [value] with thousands separators: 412908 → "412,908".
+String _group(Object? value) {
+  final num? n = _toNum(value);
+  if (n == null) return FormulaEvaluator.stringify(value);
+  final String sign = n < 0 ? '-' : '';
+  final String text = n.abs().toString();
+  final int dot = text.indexOf('.');
+  final String whole = dot < 0 ? text : text.substring(0, dot);
+  final String fraction = dot < 0 ? '' : text.substring(dot);
+  final StringBuffer out = StringBuffer();
+  for (int i = 0; i < whole.length; i++) {
+    if (i > 0 && (whole.length - i) % 3 == 0) out.write(',');
+    out.write(whole[i]);
+  }
+  return '$sign$out$fraction';
+}
+
 final Map<String, _Function> _functions = {
   'money': (a) => _money(_arg(a, 0), _arg(a, 1)),
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
@@ -850,6 +950,28 @@ final Map<String, _Function> _functions = {
       if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
         item,
   ],
+  'findIndex': (a) => _findIndex(a),
+  'indexOf': (a) => _findIndex(a),
+  'obj': (a) => {
+    for (int i = 0; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  'set': (a) => _setIn(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'merge': (a) => {
+    for (final Object? m in a)
+      if (m is Map) ...m.map((k, v) => MapEntry(k.toString(), v)),
+  },
+  'concat': (a) => [
+    for (final Object? l in a)
+      if (l is Iterable) ...l else if (l != null) l,
+  ],
+  'append': (a) => [..._values(_arg(a, 0), null), ...a.skip(1)],
+  'take': (a) => _values(_arg(a, 0), null).take(_intArg(_arg(a, 1))).toList(),
+  'skip': (a) => _values(_arg(a, 0), null).skip(_intArg(_arg(a, 1))).toList(),
+  'group': (a) => _group(_arg(a, 0)),
+  'pad': (a) => FormulaEvaluator.stringify(
+    _arg(a, 0),
+  ).padLeft(_intArg(_arg(a, 1)), FormulaEvaluator.stringify(_arg(a, 2) ?? '0')),
   'number': (a) => _toNum(_arg(a, 0)),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
