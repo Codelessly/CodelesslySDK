@@ -45,14 +45,24 @@ class DataRules {
   /// Collection name -> its typed fields, defined in the editor's Data panel.
   final Map<String, CollectionSchema> schemas;
 
+  /// Collection name -> the keys ([CloudIndex.key]) of the composite indexes
+  /// it has, which publishing creates for the app's queries. Queries with a
+  /// ready index run (and page) in Firestore instead of in the app.
+  final Map<String, Set<String>> indexes;
+
   /// Creates [DataRules].
-  const DataRules([this.collections = const {}, this.schemas = const {}]);
+  const DataRules([
+    this.collections = const {},
+    this.schemas = const {},
+    this.indexes = const {},
+  ]);
 
   /// Reads `{collections: {name: rule}, schemas: {name: schema}}`, ignoring
   /// unknown rules and unreadable schemas.
   factory DataRules.fromJson(Map? json) {
     final Map? collections = json?['collections'] as Map?;
     final Map? schemas = json?['schemas'] as Map?;
+    final Map? indexes = json?['indexes'] as Map?;
     return DataRules(
       {
         for (final MapEntry entry in (collections ?? {}).entries)
@@ -67,6 +77,13 @@ class DataRules {
               ...entry.value as Map,
             }),
       },
+      {
+        for (final MapEntry entry in (indexes ?? {}).entries)
+          if (entry.value is List)
+            entry.key.toString(): {
+              for (final Object? key in entry.value as List) '$key',
+            },
+      },
     );
   }
 
@@ -76,6 +93,11 @@ class DataRules {
       for (final MapEntry<String, DataRule> entry in collections.entries)
         entry.key: entry.value.name,
     },
+    if (indexes.isNotEmpty)
+      'indexes': {
+        for (final MapEntry<String, Set<String>> entry in indexes.entries)
+          entry.key: entry.value.toList(),
+      },
     if (schemas.isNotEmpty)
       'schemas': {
         for (final MapEntry<String, CollectionSchema> entry in schemas.entries)
@@ -83,18 +105,27 @@ class DataRules {
       },
   };
 
-  /// The schema of the collection [path] names, if it has one: the schema of
-  /// its last collection (`tasks` for `users/u1/tasks`), else of its top one.
-  CollectionSchema? schemaFor(String path) {
+  /// The name of the collection [path] names: its last collection (`tasks`
+  /// for `users/u1/tasks`).
+  static String? collectionName(String path) {
     final List<String> parts = [
       for (final String part in path.trim().split(pathSeparatorRegex))
         if (part.trim().isNotEmpty) part.trim(),
     ];
-    final String? last = parts.isEmpty
+    return parts.isEmpty
         ? null
         : parts[(parts.length - 1) - (parts.length - 1) % 2];
-    return schemas[last] ?? schemas[topCollection(path)];
   }
+
+  /// The schema of the collection [path] names, if it has one: the schema of
+  /// its last collection (`tasks` for `users/u1/tasks`), else of its top one.
+  CollectionSchema? schemaFor(String path) =>
+      schemas[collectionName(path)] ?? schemas[topCollection(path)];
+
+  /// The keys of the composite indexes ready for the collection [path]
+  /// names.
+  Set<String> readyIndexesFor(String path) =>
+      indexes[collectionName(path)] ?? const {};
 
   /// The top-level collection of [path], which is what rules are set on.
   static String topCollection(String path) {

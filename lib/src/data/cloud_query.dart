@@ -174,13 +174,62 @@ class CloudQuery {
     ];
   }
 
+  /// The composite index Firestore needs to run this query, or null when it
+  /// [runsOnServer] without one: its `==` and array filter fields first (by
+  /// name), then its sorts in order, then inequality fields it doesn't sort
+  /// by. The publish step creates these for the app's queries; see
+  /// [CloudIndex].
+  CloudIndex? get requiredIndex {
+    if (runsOnServer) return null;
+    final List<CloudIndexField> fields = [];
+    void add(CloudIndexField field) {
+      if (fields.every((f) => f.field != field.field)) fields.add(field);
+    }
+
+    final List<CloudWhereFilter> equalities = [
+      for (final filter in filters)
+        if (filter.isEqualityLike) filter,
+    ]..sort((a, b) => compareCloudStrings(a.field, b.field));
+    for (final CloudWhereFilter filter in equalities) {
+      add(
+        CloudIndexField(
+          filter.field,
+          arrayContains:
+              filter.operator == WhereQueryOperator.arrayContains ||
+              filter.operator == WhereQueryOperator.arrayContainsAny,
+        ),
+      );
+    }
+    for (final CloudOrderBy order in orderBy) {
+      if (order.field == cloudDocumentIdField) continue;
+      add(CloudIndexField(order.field, descending: order.descending));
+    }
+    final List<String> inequalities = {
+      for (final filter in filters)
+        if (filter.isInequality) filter.field,
+    }.toList()..sort(compareCloudStrings);
+    for (final String field in inequalities) {
+      add(CloudIndexField(field));
+    }
+    if (fields.length < 2) return null;
+    return CloudIndex(fields);
+  }
+
   /// Splits this query between Firestore and the app. Queries that
-  /// [runsOnServer] go to Firestore whole. Others, or all of them when
-  /// [forceClient] is set (after Firestore reported a missing index anyway),
-  /// send Firestore their `==` filters only, or their first filter alone when
-  /// there is no `==` filter, and leave the rest to [CloudQueryPlan.finish].
-  CloudQueryPlan plan({bool forceClient = false}) {
-    if (!forceClient && runsOnServer) return CloudQueryPlan._(server: this);
+  /// [runsOnServer], or whose [requiredIndex] is among [readyIndexes] (keys
+  /// of the indexes the project has), go to Firestore whole. Others, or all
+  /// of them when [forceClient] is set (after Firestore reported a missing
+  /// index anyway), send Firestore their `==` filters only, or their first
+  /// filter alone when there is no `==` filter, and leave the rest to
+  /// [CloudQueryPlan.finish].
+  CloudQueryPlan plan({
+    bool forceClient = false,
+    Set<String> readyIndexes = const {},
+  }) {
+    if (!forceClient &&
+        (runsOnServer || readyIndexes.contains(requiredIndex?.key))) {
+      return CloudQueryPlan._(server: this);
+    }
 
     final List<CloudWhereFilter> server = [
       for (final filter in filters)
@@ -467,3 +516,74 @@ List<int> _bytes(Object value) => switch (value) {
   Uint8List() => value,
   _ => const [],
 };
+
+/// A field of a [CloudIndex].
+class CloudIndexField {
+  /// The field.
+  final String field;
+
+  /// Whether the index sorts it descending.
+  final bool descending;
+
+  /// Whether the index answers array-contains filters on it.
+  final bool arrayContains;
+
+  /// Creates a [CloudIndexField].
+  const CloudIndexField(
+    this.field, {
+    this.descending = false,
+    this.arrayContains = false,
+  });
+
+  /// `field:asc`, `field:desc` or `field:contains`.
+  String get key =>
+      '$field:${arrayContains
+          ? 'contains'
+          : descending
+          ? 'desc'
+          : 'asc'}';
+
+  /// The field as the index requests store it.
+  Map<String, dynamic> toJson() => {
+    'fieldPath': field,
+    if (arrayContains)
+      'arrayConfig': 'CONTAINS'
+    else
+      'order': descending ? 'DESCENDING' : 'ASCENDING',
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      other is CloudIndexField && other.key == key;
+
+  @override
+  int get hashCode => key.hashCode;
+}
+
+/// A composite index on a collection's documents, which lets Firestore run
+/// (and page) a query that filters and sorts on several fields.
+class CloudIndex {
+  /// The indexed fields, in order.
+  final List<CloudIndexField> fields;
+
+  /// Creates a [CloudIndex].
+  const CloudIndex(this.fields);
+
+  /// Identifies the index: its fields' keys joined by commas.
+  String get key => fields.map((field) => field.key).join(',');
+
+  /// The index as the index requests store it.
+  Map<String, dynamic> toJson() => {
+    'key': key,
+    'fields': [for (final field in fields) field.toJson()],
+  };
+
+  @override
+  bool operator ==(Object other) => other is CloudIndex && other.key == key;
+
+  @override
+  int get hashCode => key.hashCode;
+
+  @override
+  String toString() => 'CloudIndex($key)';
+}
