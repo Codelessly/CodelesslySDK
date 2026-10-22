@@ -108,8 +108,10 @@ class DataRules {
   /// The name of the collection [path] names: its last collection (`tasks`
   /// for `users/u1/tasks`).
   static String? collectionName(String path) {
+    // `${...}` data (as in the editor) stands for one segment.
+    final String plain = path.trim().replaceAll(RegExp(r'\$\{[^}]*\}'), '_');
     final List<String> parts = [
-      for (final String part in path.trim().split(pathSeparatorRegex))
+      for (final String part in plain.split(pathSeparatorRegex))
         if (part.trim().isNotEmpty) part.trim(),
     ];
     return parts.isEmpty

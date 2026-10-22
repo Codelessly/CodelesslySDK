@@ -21,11 +21,7 @@ class _Doc extends Fake implements QueryDocumentSnapshot<Map<String, dynamic>> {
 
 class _Snapshot extends Fake
     implements FirestoreQueryBuilderSnapshot<Map<String, dynamic>> {
-  _Snapshot({
-    this.count = 0,
-    this.isFetching = false,
-    this.hasMore = false,
-  });
+  _Snapshot({this.count = 0, this.isFetching = false, this.hasMore = false});
 
   final int count;
   int fetchMoreCalls = 0;
