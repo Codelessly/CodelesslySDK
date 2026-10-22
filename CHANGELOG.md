@@ -1,3 +1,13 @@
+## Unreleased
+
+- Render `LineChartNode` with `PassiveLineChartTransformer` and
+  `PassiveLineChartWidget`: bands, grid, gradient area, area bands, a
+  polyline or Catmull-Rom curve, reference lines, x axis, markers, vertical
+  lines and a hover/tap/drag/arrow-key scrub cursor with a readout card.
+  `LineChartGeometry` holds the pure parts (dates, domain, interpolation,
+  Catmull-Rom control points, readout text and placement).
+- `FormulaEvaluator.formatDate` exposes the `formatDate` formula function.
+
 ## 8.2.0
 
 ### States
