@@ -96,6 +96,32 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     return ResolvedFeedbackTheme._resolve(combined, theme);
   }
 
+  /// The look a project's theme sets ([ThemeTokens], published with its
+  /// layouts). Tokens it doesn't set stay null.
+  factory FeedbackTheme.fromTokens(ThemeTokens? tokens) {
+    if (tokens == null || tokens.isEmpty) return const FeedbackTheme();
+    Color? color(ColorRGBA? value) => value?.toFlutterColor();
+    final TextStyle? body = tokens.fontFamily == null
+        ? null
+        : TextStyle(fontFamily: tokens.fontFamily);
+    return FeedbackTheme(
+      bodyStyle: body,
+      buttonStyle: body,
+      titleStyle: tokens.titleFontFamily == null
+          ? body
+          : TextStyle(fontFamily: tokens.titleFontFamily),
+      primary: color(tokens.primary),
+      onPrimary: color(tokens.onPrimary),
+      surface: color(tokens.surface),
+      onSurface: color(tokens.onSurface),
+      error: color(tokens.error),
+      success: color(tokens.success),
+      warning: color(tokens.warning),
+      radius: tokens.radius,
+      buttonRadius: tokens.buttonRadius,
+    );
+  }
+
   /// Reads the look of a layout from its [nodes]: the font most of its text
   /// uses, the fill of its buttons, its canvas color and its text color.
   ///
