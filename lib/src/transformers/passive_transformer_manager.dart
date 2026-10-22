@@ -73,7 +73,14 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     required WidgetBuildSettings settings,
   }) {
     if (settings.buildRawWidget) {
-      return getTransformerByNode(node).buildWidget(node, context, settings);
+      final Widget raw = getTransformerByNode(node)
+          .buildWidget(node, context, settings);
+      return decorate(
+        context,
+        node,
+        decorate(context, node, raw, NodeBuildLayer.content),
+        NodeBuildLayer.margin,
+      );
     }
 
     return _wrapWithListener(
@@ -83,6 +90,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         final BaseNode styled = applyStyleOverrides(context, node);
         Widget widget = getTransformerByNode(node)
             .buildWidget(styled, context, settings);
+        widget = decorate(context, styled, widget, NodeBuildLayer.content);
 
         if (settings.withOpacity) {
           widget = applyWidgetOpacity(styled, widget);
@@ -110,7 +118,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           );
         }
 
-        return widget;
+        return decorate(context, styled, widget, NodeBuildLayer.margin);
       },
     );
   }
