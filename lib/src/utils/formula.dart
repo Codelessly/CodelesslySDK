@@ -34,7 +34,9 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    literals), `set(map, key, value)` and `merge(a, b)` return changed
 ///    copies, `keys` and `values` read them. With `map` this updates one
 ///    item of a list: `map(units, u => if(u.id == id, set(u, 'hours', h), u))`.
-///  - more list functions: range, slice, first, last, concat and indexOf.
+///  - more list functions: range, slice, first, last, concat, indexOf, `at(l,
+///    i)`, `flatMap(l, lambda)`, and `with(m, key, value)` to copy a map with
+///    keys set.
 ///  - list functions that take a predicate or key: filter, where, count,
 ///    find, any, all, map, sortBy, unique, sum and join. The predicate is a
 ///    lambda, `item => expression`, or a field name, optionally with a value
@@ -522,6 +524,17 @@ class FormulaEvaluator {
       'coalesce',
       'coalesce(value, fallback, ...)',
       'coalesce(route.date, today())',
+    ),
+    FormulaFunctionDoc(
+      'with',
+      'with(map, key, value, …)',
+      "with(item, 'x', item.x + 1) → item with x changed",
+    ),
+    FormulaFunctionDoc('at', 'at(list, index)', 'at(tasks, 2)'),
+    FormulaFunctionDoc(
+      'flatMap',
+      'flatMap(list, item => list)',
+      'flatMap(orders, o => o.items) → every item',
     ),
   ];
 }
@@ -1216,6 +1229,18 @@ final Map<String, _Function> _functions = {
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
   'isNotEmpty': (a) => _truthy(_functions['length']!(a)),
+  // Map and list editing beyond obj/set/concat below, for formulas that build
+  // the value a set variable action stores.
+  'with': (a) => <Object?, Object?>{
+    if (_arg(a, 0) case final Map m) ...m,
+    for (int i = 1; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  'at': (a) => _values(_arg(a, 0), null).elementAtOrNull(_intArg(_arg(a, 1))),
+  'flatMap': (a) => [
+    for (final v in _values(_arg(a, 0), _arg(a, 1)))
+      if (v is Iterable) ...v else ?v,
+  ],
   'now': (a) => _dateText(DateTime.now()),
   'today': (a) {
     final DateTime now = DateTime.now();
