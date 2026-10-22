@@ -486,6 +486,47 @@ void main() {
     expect(registry.nodeIds, isEmpty);
   });
 
+  testWidgets('a paint offset moves a node without layout', (tester) async {
+    final (root, nodes) = screenTree();
+    final registry = await pump(tester, root, nodes);
+    final Rect card = registry.geometryOf('card')!.bounds;
+    final Rect inner = registry.geometryOf('inner')!.bounds;
+    final Rect painted = tester.getRect(rectOf(nodes.last));
+
+    expect(registry.setPaintOffset('card', const Offset(40, -25)), isTrue);
+    expect(registry.setPaintOffset('missing', const Offset(1, 1)), isFalse);
+    final RenderObject probe = tester.renderObject(
+      find.byType(GeometryProbe).first,
+    );
+    await tester.pump();
+    expect(probe.debugNeedsLayout, isFalse);
+
+    expectRect(
+      registry.geometryOf('card')!.bounds,
+      card.shift(const Offset(40, -25)),
+    );
+    expectRect(
+      registry.geometryOf('card', layer: NodeBuildLayer.margin)!.bounds,
+      card.shift(const Offset(40, -25)),
+    );
+    expectRect(
+      registry.geometryOf('inner')!.bounds,
+      inner.shift(const Offset(40, -25)),
+    );
+    expectRect(
+      tester.getRect(rectOf(nodes.last)),
+      painted.shift(const Offset(40, -25)),
+    );
+    expect(
+      registry.hitTest(inner.center + const Offset(40, -25)).first.nodeId,
+      'inner',
+    );
+
+    registry.setPaintOffset('card', Offset.zero);
+    await tester.pump();
+    expectRect(registry.geometryOf('inner')!.bounds, inner);
+  });
+
   testWidgets('removed nodes unregister', (tester) async {
     final (root, nodes) = screenTree();
     final registry = await pump(tester, root, nodes);
