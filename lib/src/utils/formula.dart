@@ -38,6 +38,13 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `t.tags[0]`, `t.tags.length`) and hides a variable of the same name;
 ///    the body can read every other variable. Lambdas are only allowed as
 ///    function arguments.
+///  - record functions that build and change lists and maps without braces
+///    (which formulas can't contain): obj, set, unset, merge, append,
+///    prepend, concat, updateWhere, removeWhere, findIndex, indexOf, slice,
+///    take, skip, first, last, range and newId. They return new values and
+///    never change their arguments, so a setVariable can write the result
+///    back, e.g. `updateWhere(logs, l => l.id == logId, l => set(l, 'crew',
+///    append(l.crew, entry)))`.
 ///  - date functions: now, today, parseDate, formatDate, addMinutes, addHours,
 ///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
 ///    hour, minute and weekday. Dates are ISO 8601 text such as
@@ -267,6 +274,69 @@ class FormulaEvaluator {
       'without(list, other)',
       'without(all, picked)',
     ),
+    FormulaFunctionDoc(
+      'obj',
+      'obj(key, value, key, value, …)',
+      'obj("name", name, "qty", 1) → {name: Tea, qty: 1}',
+    ),
+    FormulaFunctionDoc(
+      'set',
+      'set(map, key, value) or set(list, index, value)',
+      'set(task, "done", true)',
+    ),
+    FormulaFunctionDoc('unset', 'unset(map, key)', 'unset(task, "draft")'),
+    FormulaFunctionDoc(
+      'merge',
+      'merge(map, other, …)',
+      'merge(task, obj("done", true, "doneAt", now()))',
+    ),
+    FormulaFunctionDoc(
+      'append',
+      'append(list, item, …)',
+      'append(tasks, obj("title", draft))',
+    ),
+    FormulaFunctionDoc(
+      'prepend',
+      'prepend(list, item)',
+      'prepend(notes, note)',
+    ),
+    FormulaFunctionDoc('concat', 'concat(list, other, …)', 'concat(a, b)'),
+    FormulaFunctionDoc(
+      'updateWhere',
+      'updateWhere(list, item => condition, item => newItem) or '
+          'updateWhere(list, field, value, item => newItem or map to merge)',
+      'updateWhere(tasks, "id", id, t => set(t, "done", !t.done))',
+    ),
+    FormulaFunctionDoc(
+      'removeWhere',
+      'removeWhere(list, item => condition) or removeWhere(list, field, value)',
+      'removeWhere(tasks, "id", id)',
+    ),
+    FormulaFunctionDoc(
+      'findIndex',
+      'findIndex(list, item => condition) or findIndex(list, field, value)',
+      'findIndex(tasks, "id", id) → 2 (-1 when missing)',
+    ),
+    FormulaFunctionDoc(
+      'indexOf',
+      'indexOf(list or text, value)',
+      'indexOf(["a", "b"], "b") → 1',
+    ),
+    FormulaFunctionDoc(
+      'slice',
+      'slice(list or text, start, end)',
+      'slice(logs, 0, 10)',
+    ),
+    FormulaFunctionDoc('take', 'take(list, count)', 'take(logs, pageSize)'),
+    FormulaFunctionDoc('skip', 'skip(list, count)', 'skip(logs, 10)'),
+    FormulaFunctionDoc('first', 'first(list)', 'first(tasks)'),
+    FormulaFunctionDoc('last', 'last(list)', 'last(tasks)'),
+    FormulaFunctionDoc(
+      'range',
+      'range(count) or range(start, end)',
+      'range(3) → [0, 1, 2]',
+    ),
+    FormulaFunctionDoc('newId', 'newId(prefix)', 'newId("task") → task_k3x9f2'),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
     FormulaFunctionDoc(
@@ -783,6 +853,86 @@ String? _formatDate(Object? value, Object? pattern) {
 
 typedef _Function = Object? Function(List<Object?> args);
 
+/// [value] as a list: a copy of a list, an empty list for null, else a list
+/// of that one value.
+List<Object?> _listOf(Object? value) => switch (value) {
+  null => [],
+  final Iterable l => [...l],
+  _ => [value],
+};
+
+/// [value] as a map with text keys: a copy of a map, else empty.
+Map<String, Object?> _mapOf(Object? value) => switch (value) {
+  final Map m => {for (final e in m.entries) '${e.key}': e.value},
+  _ => {},
+};
+
+/// A copy of [target] with [key] set to [value]: a map key, or a list index
+/// (an index past the end appends).
+Object? _set(Object? target, Object? key, Object? value) {
+  if (target is Iterable) {
+    final List<Object?> list = [...target];
+    final int? index = _toNum(key)?.toInt();
+    if (index == null || index < 0) return list;
+    if (index >= list.length) return list..add(value);
+    return list..[index] = value;
+  }
+  return _mapOf(target)..[FormulaEvaluator.stringify(key)] = value;
+}
+
+/// `updateWhere(list, predicate…, update)`: items matching the predicate
+/// (a lambda, or a field and value) are replaced by `update(item)` when it
+/// is a lambda, or merged with it when it is a map.
+List<Object?> _updateWhere(List<Object?> args) {
+  if (args.length < 3) return _listOf(_arg(args, 0));
+  final Object? update = args.last;
+  final List<Object?> predicate = args.sublist(1, args.length - 1);
+  return [
+    for (final item in _values(_arg(args, 0), null))
+      if (!_matches(item, predicate))
+        item
+      else if (update is _Closure)
+        update(item)
+      else if (update is Map)
+        {..._mapOf(item), ..._mapOf(update)}
+      else
+        update,
+  ];
+}
+
+int _clampIndex(Object? value, int length, int fallback) {
+  if (value == null) return fallback;
+  final num? n = _toNum(value);
+  if (n == null || !n.isFinite) return fallback;
+  final int i = n.toInt();
+  return (i < 0 ? length + i : i).clamp(0, length);
+}
+
+Object? _slice(Object? target, Object? start, Object? end) {
+  if (target is String) {
+    final int from = _clampIndex(start, target.length, 0);
+    final int to = _clampIndex(end, target.length, target.length);
+    return to <= from ? '' : target.substring(from, to);
+  }
+  final List<Object?> list = _listOf(target);
+  final int from = _clampIndex(start, list.length, 0);
+  final int to = _clampIndex(end, list.length, list.length);
+  return to <= from ? <Object?>[] : list.sublist(from, to);
+}
+
+final math.Random _idRandom = math.Random();
+
+/// A short random id, such as `log_k3x9f2a1`, for new records.
+String _newId(Object? prefix) {
+  const String chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  final String id = String.fromCharCodes([
+    for (int i = 0; i < 8; i++)
+      chars.codeUnitAt(_idRandom.nextInt(chars.length)),
+  ]);
+  final String p = FormulaEvaluator.stringify(prefix);
+  return p.isEmpty ? id : '${p}_$id';
+}
+
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
@@ -850,6 +1000,56 @@ final Map<String, _Function> _functions = {
       if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
         item,
   ],
+  'obj': (a) => {
+    for (int i = 0; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  'set': (a) => _set(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'unset': (a) =>
+      _mapOf(_arg(a, 0))..remove(FormulaEvaluator.stringify(_arg(a, 1))),
+  'merge': (a) => {for (final m in a) ..._mapOf(m)},
+  'append': (a) => [..._listOf(_arg(a, 0)), ...a.skip(1)],
+  'prepend': (a) => [_arg(a, 1), ..._listOf(_arg(a, 0))],
+  'concat': (a) => [for (final l in a) ..._listOf(l)],
+  'updateWhere': _updateWhere,
+  'removeWhere': (a) {
+    final List<Object?> rest = a.skip(1).toList();
+    return [
+      for (final item in _values(_arg(a, 0), null))
+        if (!_matches(item, rest)) item,
+    ];
+  },
+  'findIndex': (a) {
+    final List<Object?> rest = a.skip(1).toList();
+    final List<Object?> list = _listOf(_arg(a, 0));
+    return list.indexWhere((item) => _matches(item, rest));
+  },
+  'indexOf': (a) => switch (_arg(a, 0)) {
+    final String s => s.indexOf(FormulaEvaluator.stringify(_arg(a, 1))),
+    final Iterable l => l.toList().indexWhere(
+      (v) => _looseEquals(v, _arg(a, 1)),
+    ),
+    _ => -1,
+  },
+  'slice': (a) => _slice(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'take': (a) => _slice(
+    _arg(a, 0),
+    0,
+    _num(_arg(a, 1)).isFinite ? _num(_arg(a, 1)).clamp(0, double.infinity) : 0,
+  ),
+  'skip': (a) => _slice(
+    _arg(a, 0),
+    _num(_arg(a, 1)).isFinite ? _num(_arg(a, 1)).clamp(0, double.infinity) : 0,
+    null,
+  ),
+  'first': (a) => _listOf(_arg(a, 0)).firstOrNull,
+  'last': (a) => _listOf(_arg(a, 0)).lastOrNull,
+  'range': (a) {
+    final int start = a.length < 2 ? 0 : _intArg(_arg(a, 0));
+    final int end = _intArg(a.length < 2 ? _arg(a, 0) : _arg(a, 1));
+    return [for (int i = start; i < end; i++) i];
+  },
+  'newId': (a) => _newId(_arg(a, 0)),
   'number': (a) => _toNum(_arg(a, 0)),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
