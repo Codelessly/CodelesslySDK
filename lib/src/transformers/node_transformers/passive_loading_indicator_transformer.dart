@@ -113,14 +113,33 @@ class PassiveLoadingIndicatorWidget extends StatelessWidget {
     if (node.properties.isMaterial) {
       final MaterialLoadingIndicatorProperties props = node.properties
           .asMaterial();
+      // A bound value (0-1) drives a determinate ring, e.g. a countdown.
+      final ScopedValues scopedValues = ScopedValues.of(
+        context,
+        variablesOverrides: variables,
+      );
+      final double? value =
+          PropertyValueDelegate.getPropertyValue<double>(
+            node,
+            'value',
+            scopedValues: scopedValues,
+          )?.clamp(0, 1).toDouble() ??
+          props.value;
+      final Color color =
+          PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+            node,
+            'color',
+            scopedValues: scopedValues,
+          )?.toFlutterColor() ??
+          props.color.toFlutterColor();
 
       return Center(
         child: SizedBox.square(
           dimension: node.innerBoxLocal.size.shortestSide,
           child: CircularProgressIndicator(
             strokeWidth: props.strokeWidth,
-            value: !animate ? props.value ?? 0.7 : props.value,
-            color: props.color.toFlutterColor(),
+            value: !animate ? value ?? 0.7 : value,
+            color: color,
             backgroundColor: props.backgroundColor.toFlutterColor(),
             strokeCap: props.strokeCap.flutterStrokeCap,
             strokeAlign: props.strokeAlign,
