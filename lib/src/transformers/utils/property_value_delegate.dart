@@ -436,6 +436,13 @@ class PropertyValueDelegate {
       'data' => scopedValues.data,
       'item' => scopedValues.indexedItem?.item,
       'index' => scopedValues.indexedItem?.index,
+      'parent' =>
+        scopedValues.parentIndexedItem == null
+            ? null
+            : {
+                'item': scopedValues.parentIndexedItem!.item,
+                'index': scopedValues.parentIndexedItem!.index,
+              },
       'value' => scopedValues.nodeState,
       'storage' => scopedValues.localStorage?.getAll(),
       'route' => scopedValues.routeParams,

@@ -225,4 +225,101 @@ void main() {
     // Design place (20, 20) to bound (30, 5).
     expect([translation.x, translation.y], [10, -15]);
   });
+
+  testWidgets('a nested list reads its outer item as parent', (tester) async {
+    // Homes, each with its own scale and placements.
+    final RectangleNode dot = RectangleNode.fromJson({
+      ...RectangleNode(
+        id: 'dot',
+        name: 'Dot',
+        basicBoxLocal: NodeBox(0, 0, 4, 4),
+      ).toJson(),
+      'variables': {
+        'x': r'${= item.x * parent.item.scale}',
+        'y': r'${= parent.index * 1}',
+      },
+    });
+    final ListViewNode inner = ListViewNode(
+      id: 'inner',
+      name: 'Inner',
+      basicBoxLocal: NodeBox(0, 0, 200, 40),
+      properties: ListViewProperties(layout: ListLayout.stack),
+      children: ['dot'],
+      variables: {'data': r'${item.placements}'},
+    );
+    final ListViewNode outer = ListViewNode(
+      id: 'outer',
+      name: 'Outer',
+      basicBoxLocal: NodeBox(0, 0, 200, 200),
+      properties: ListViewProperties(itemExtent: 40),
+      children: ['inner'],
+      variables: {'data': r'${homes}'},
+    );
+    dot.parentID = inner.id;
+    inner.parentID = outer.id;
+    outer.parentID = kRootNode;
+    final registry = NodeRegistry()
+      ..setNodes({outer.id: outer, inner.id: inner, dot.id: dot});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    final CodelesslyContext codelesslyContext = CodelesslyContext.empty()
+      ..variables['homes'] = Observable(
+        VariableData(
+          id: 'homes',
+          name: 'homes',
+          type: VariableType.list,
+          value: [
+            {
+              'scale': 10,
+              'placements': [
+                {'x': 1},
+                {'x': 2},
+              ],
+            },
+            {
+              'scale': 20,
+              'placements': [
+                {'x': 1},
+              ],
+            },
+          ],
+        ),
+      );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: codelesslyContext,
+        child: MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: Builder(
+                builder: (context) => manager.buildWidgetFromNode(
+                  outer,
+                  context,
+                  settings: const WidgetBuildSettings(debugLabel: 'test'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final List<Positioned> dots = tester
+        .widgetList<Positioned>(items())
+        .toList();
+    expect(
+      [
+        for (final d in dots) [d.left, d.top],
+      ],
+      [
+        [10, 0],
+        [20, 0],
+        [20, 1],
+      ],
+    );
+  });
 }
