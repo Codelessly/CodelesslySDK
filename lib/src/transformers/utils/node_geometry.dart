@@ -194,6 +194,22 @@ class NodeGeometryRegistry extends ChangeNotifier {
     markChanged();
   }
 
+  /// Paints the instance [instance] of [nodeId] shifted by [offset], without
+  /// laying anything out again: the node follows a drag while its parent
+  /// keeps its place. [Offset.zero] puts it back. Geometry, hit testing and
+  /// paint all include the offset. Returns false when the node isn't built.
+  bool setPaintOffset(
+    String nodeId,
+    Offset offset, {
+    List<int> instance = const [],
+  }) {
+    final RenderGeometryProbe? probe =
+        _probes[nodeId]?[_key(NodeBuildLayer.margin, instance)];
+    if (probe == null) return false;
+    probe.paintOffset = offset;
+    return true;
+  }
+
   /// The geometry of one instance of [nodeId], or null when it isn't laid
   /// out under this scope (not built, hidden, disabled, or a list item that
   /// isn't built).
@@ -266,6 +282,12 @@ class NodeGeometryRegistry extends ChangeNotifier {
         clip = clip == null ? mapped : clip.intersect(mapped);
       }
       parent.applyPaintTransform(child, transform);
+    }
+    // A margin probe paints its child shifted by its paint offset; its own
+    // box moves with it.
+    final Offset shift = probe.paintOffset;
+    if (shift != Offset.zero) {
+      transform.translateByDouble(shift.dx, shift.dy, 0, 1);
     }
     final RenderGeometryProbe? content =
         probe.buildLayer == NodeBuildLayer.content
@@ -586,6 +608,36 @@ class RenderGeometryProbe extends RenderProxyBox {
       _registry.markChanged();
     }
   }
+
+  /// How far the child is painted from where it was laid out. See
+  /// [NodeGeometryRegistry.setPaintOffset].
+  Offset get paintOffset => _paintOffset;
+  Offset _paintOffset = Offset.zero;
+
+  set paintOffset(Offset value) {
+    if (value == _paintOffset) return;
+    _paintOffset = value;
+    markNeedsPaint();
+    _registry.markChanged();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) =>
+      super.paint(context, offset + _paintOffset);
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.translateByDouble(_paintOffset.dx, _paintOffset.dy, 0, 1);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      result.addWithPaintOffset(
+        offset: _paintOffset,
+        position: position,
+        hitTest: (result, transformed) =>
+            super.hitTestChildren(result, position: transformed),
+      );
 
   @override
   void attach(PipelineOwner owner) {
