@@ -17,7 +17,7 @@ void main() {
     expect(fromTokens.titleStyle?.fontFamily, 'Fraunces');
     expect(fromTokens.buttonRadius, 20);
 
-    final FeedbackTheme fromNodes = const FeedbackTheme(
+    const FeedbackTheme fromNodes = FeedbackTheme(
       primary: Color(0xFF0000FF),
       surface: Color(0xFFFAFAFA),
     );
