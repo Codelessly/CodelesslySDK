@@ -65,6 +65,15 @@ void main() {
       expect(eval("values(object('a', 1, 'b', 2))"), [1, 2]);
     });
 
+    test('flatten and compact', () {
+      expect(eval('flatten([[1, 2], [3], 4])'), [1, 2, 3, 4]);
+      expect(eval("compact([1, null, '', 2])"), [1, 2]);
+      expect(
+        eval("compact(flatten(map(stops, s => [s.nights > 2 ? s.id : null])))"),
+        ['zion', 'moab'],
+      );
+    });
+
     test('list edits return new lists', () {
       expect(eval("append(tags, 'e')"), ['a', 'b', 'c', 'd', 'e']);
       expect(eval("setAt(tags, 1, 'x')"), ['a', 'x', 'c', 'd']);
