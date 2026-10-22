@@ -85,6 +85,7 @@ void main() {
     test('addSeconds and diffSeconds', () {
       expect(eval('addSeconds(start, 90)'), '2026-07-17T20:13:30.000');
       expect(eval("diffSeconds(start, '2026-07-17T20:16:00')"), 240);
+      expect(eval('second(addSeconds(start, 75))'), 15);
     });
 
     test('formatDuration patterns', () {
