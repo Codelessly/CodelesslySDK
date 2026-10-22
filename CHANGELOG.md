@@ -1,3 +1,30 @@
+## 8.2.0
+
+### States
+
+- Interaction states (hover, focus, pressed, selected, disabled) and
+  property-override variants render through `PropertyOverrideScope`.
+- Cloud lists show loading, empty and error variants, with a skeleton
+  shimmer, and page by scrolling or a "Show more · N remaining" button.
+
+### Data
+
+- `CloudDataRunner` runs cloud data and batch actions with collection
+  schemas; count, sum and average use Firestore aggregates.
+- Lists and grids load the documents their reference fields point to.
+- Queries use the composite indexes a project has ready.
+- Private uploads go to the uploader's own folder.
+
+### Auth and app
+
+- Google, Apple and email-link sign-in, profile photos, `users/{uid}`
+  profiles, `auth.profile` and `auth.role`.
+- `Codelessly.route` reports the screen shown and opens a deep link on start.
+- Debounced triggers and the value-changed trigger.
+- Tooltips and pinch-to-zoom on any node.
+- Choice variables; layouts carry the project's theme for dialogs and toasts.
+- An image link bound to a fill shows as an image.
+
 ## 8.1.0
 
 ### Node geometry
