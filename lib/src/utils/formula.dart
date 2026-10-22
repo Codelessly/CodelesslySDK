@@ -28,7 +28,8 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
 ///    endsWith, where, without, number, text, isEmpty, isNotEmpty, clamp,
-///    sin, cos, sqrt, pow and pad (`pad(5, 2)` is "05"). See
+///    sin, cos, sqrt, pow, pad (`pad(5, 2)` is "05") and alpha
+///    (`alpha('#FF4D4F', 0.12)` is "#1FFF4D4F"). See
 ///    [FormulaEvaluator.functions].
 ///  - `object(key, value, ...)` builds a map from key/value pairs, since
 ///    braces can't appear in a formula: a list of records for a list view is
@@ -402,19 +403,10 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc(
-      'object',
-      'object(key, value, …)',
-      "object('title', 'Black', 'level', 0.87)",
+      'alpha',
+      'alpha(color, opacity)',
+      "alpha('#FF4D4F', 0.12) → #1FFF4D4F",
     ),
-    FormulaFunctionDoc(
-      'clamp',
-      'clamp(value, min, max)',
-      'clamp(1.4, 0, 1) → 1',
-    ),
-    FormulaFunctionDoc('sin', 'sin(radians)', 'sin(0) → 0'),
-    FormulaFunctionDoc('cos', 'cos(radians)', 'cos(0) → 1'),
-    FormulaFunctionDoc('sqrt', 'sqrt(value)', 'sqrt(16) → 4'),
-    FormulaFunctionDoc('pow', 'pow(base, exponent)', 'pow(2, 10) → 1024'),
     FormulaFunctionDoc(
       'pad',
       'pad(value, width, fill)',
@@ -981,6 +973,16 @@ Object? _distance(List<Object?> a) {
   return unit.startsWith('mi') ? km / 1.609344 : km;
 }
 
+/// [color] (`#RRGGBB` or `#AARRGGBB`) at [opacity] (0 to 1), as
+/// `#AARRGGBB`.
+String? _alpha(Object? color, num opacity) {
+  final String hex = FormulaEvaluator.stringify(color).replaceAll('#', '');
+  if (hex.length != 6 && hex.length != 8) return null;
+  final String rgb = hex.substring(hex.length - 6).toUpperCase();
+  final int a = (opacity.clamp(0, 1) * 255).round();
+  return '#${a.toRadixString(16).padLeft(2, '0').toUpperCase()}$rgb';
+}
+
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
@@ -1156,17 +1158,7 @@ final Map<String, _Function> _functions = {
     return '${n < 0 ? '-' : ''}$whole${parts.length > 1 ? '.${parts[1]}' : ''}';
   },
   'number': (a) => _toNum(_arg(a, 0)),
-  'object': (a) => {
-    for (int i = 0; i + 1 < a.length; i += 2)
-      FormulaEvaluator.stringify(a[i]): a[i + 1],
-  },
-  'clamp': (a) => _tidy(
-    _num(_arg(a, 0)).clamp(_num(_arg(a, 1)), _num(_arg(a, 2))),
-  ),
-  'sin': (a) => math.sin(_num(_arg(a, 0))),
-  'cos': (a) => math.cos(_num(_arg(a, 0))),
-  'sqrt': (a) => math.sqrt(_num(_arg(a, 0))),
-  'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
+  'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
   'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
     _intArg(_arg(a, 1)),
     _arg(a, 2) == null ? '0' : FormulaEvaluator.stringify(_arg(a, 2)),
