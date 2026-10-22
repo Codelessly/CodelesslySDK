@@ -146,6 +146,26 @@ Future<void> everywhere(
 }
 
 void main() {
+  testWidgets(
+    'a row aligned to baselines lays out (it needs a text baseline)',
+    (tester) async {
+      final a = rect('a', '', width: 40, height: 30);
+      final b = rect('b', '', width: 40, height: 10);
+      final row = flex(
+        'row',
+        kRootNode,
+        [a, b],
+        type: RowColumnType.row,
+        width: 200,
+        height: 40,
+        crossAxisAlignment: CrossAxisAlignmentC.baseline,
+      );
+      await everywhere(tester, row, [a, b], (sizes, screen, host) {
+        expect(sizes['a'], const Size(40, 30));
+      });
+    },
+  );
+
   testWidgets('a shrinkWrap row with an expanded child inside a row (E1, A7)', (
     tester,
   ) async {
