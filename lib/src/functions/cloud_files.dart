@@ -54,6 +54,27 @@ abstract final class CloudFiles {
     return [rootFolder(codelessly), ...segments].join('/');
   }
 
+  /// Joins [folder] to [root], dropping empty and `..` segments; a private
+  /// file goes under the uploader's own folder, `users/{uid}`, which storage
+  /// rules keep to them.
+  static String folderFor({
+    required String root,
+    required String folder,
+    required CloudFileAccess access,
+    required String? uid,
+  }) {
+    final List<String> segments = folder
+        .split('/')
+        .map((segment) => segment.trim())
+        .where((segment) => segment.isNotEmpty && segment != '..')
+        .toList();
+    if (access == CloudFileAccess.public) return [root, ...segments].join('/');
+    if (uid == null || uid.isEmpty) {
+      throw StateError('Sign in to upload private files.');
+    }
+    return [root, 'users', uid, ...segments].join('/');
+  }
+
   /// Performs [action].
   static Future<bool> perform(
     BuildContext context,
@@ -79,7 +100,12 @@ abstract final class CloudFiles {
             : storage.ref(
                 path.startsWith(rootFolder(codelessly))
                     ? path
-                    : resolve(codelessly, path),
+                    : folderFor(
+                        root: rootFolder(codelessly),
+                        folder: path,
+                        access: action.access,
+                        uid: codelessly.firebaseAuth.currentUser?.uid,
+                      ),
               );
         if (!ref.fullPath.startsWith('${rootFolder(codelessly)}/')) {
           throw StateError('Files outside the project can\'t be deleted.');
@@ -142,7 +168,12 @@ abstract final class CloudFiles {
       );
     }
 
-    final String resolvedFolder = resolve(codelessly, folder);
+    final String resolvedFolder = folderFor(
+      root: rootFolder(codelessly),
+      folder: folder,
+      access: action.access,
+      uid: codelessly.firebaseAuth.currentUser?.uid,
+    );
     try {
       for (int index = 0; index < files.length; index++) {
         final PlatformFile file = files[index];
