@@ -1836,6 +1836,22 @@ extension ActionModelExt on ActionModel {
         };
       case ActionType.delay:
         return {};
+      case ActionType.cloudData:
+        final CloudDataAction action = this as CloudDataAction;
+        strings.addAll([
+          action.collection,
+          action.documentId,
+          for (final CloudFieldWrite field in action.fields) field.value,
+          for (final WhereQueryFilter filter in action.whereFilters)
+            filter.value,
+        ]);
+        return _namesIn(strings, includePredefined);
+      case ActionType.cloudBatch:
+        final CloudBatchAction action = this as CloudBatchAction;
+        return {
+          for (final CloudDataAction step in action.steps)
+            ...step.getUsedVariableNames(includePredefined: includePredefined),
+        };
       case ActionType.forEach:
         final ForEachAction action = this as ForEachAction;
         strings.add(action.items.wrapWithVariableSyntax());

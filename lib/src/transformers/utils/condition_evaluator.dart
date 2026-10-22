@@ -321,6 +321,12 @@ class ConditionEvaluator<R extends Object>
   R? visitDelayAction(DelayAction action) => null;
 
   @override
+  R? visitCloudDataAction(CloudDataAction action) => null;
+
+  @override
+  R? visitCloudBatchAction(CloudBatchAction action) => null;
+
+  @override
   R? visitForEachAction(ForEachAction action) => null;
 
   @override
@@ -472,6 +478,12 @@ class ConditionPrinter
 
   @override
   void visitDelayAction(DelayAction action) {}
+
+  @override
+  void visitCloudDataAction(CloudDataAction action) {}
+
+  @override
+  void visitCloudBatchAction(CloudBatchAction action) {}
 
   @override
   void visitForEachAction(ForEachAction action) {}

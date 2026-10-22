@@ -6,6 +6,7 @@ export 'src/cache/codelessly_cache_manager.dart';
 export 'src/codelessly.dart';
 export 'src/codelessly_config.dart';
 export 'src/constants.dart';
+export 'src/data/cloud_data.dart';
 export 'src/data/cloud_database.dart';
 export 'src/data/cloud_query.dart';
 export 'src/data/data_manager.dart';
