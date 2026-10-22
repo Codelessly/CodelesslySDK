@@ -363,9 +363,10 @@ class PropertyValueDelegate {
 
     final VariableData? variable = scopedValues.variables[match.name];
     if (variable == null) return null;
+    final Object? current = variableValue(variable, scopedValues: scopedValues);
     if (match.hasAccessor) {
       if (variable.type.isText) {
-        final characters = variable.getValue().toString().characters.toList();
+        final characters = current.toString().characters.toList();
         final (Object? value, _) = substituteJsonPath(match.fullPath, {
           match.name: characters,
         });
@@ -373,29 +374,57 @@ class PropertyValueDelegate {
       }
       if (!variable.type.isList) return null;
       final (Object? value, _) = substituteJsonPath(match.fullPath, {
-        match.name: variable.getValue(),
+        match.name: current,
       });
 
       return value;
     }
 
-    if (!match.hasPath) return variable.getValue();
+    if (!match.hasPath) return current;
 
-    final variableProps = getVariableProperties(
-      variable.getValue(),
-      variable.type,
-    );
-    final Object? variableValue = variable.getValue();
+    final variableProps = getVariableProperties(current, variable.type);
     final Map<String, dynamic> values = {
       ...variableProps,
-      if (variable.type.isMap && variableValue is Map<String, dynamic>)
-        ...variableValue,
+      if (variable.type.isMap && current is Map<String, dynamic>) ...current,
     };
     final (Object? value, _) = substituteJsonPath(match.fullPath, {
       match.name: values,
     });
 
     return value;
+  }
+
+  /// Variables being evaluated, to stop computed variables that read each
+  /// other in a loop.
+  static final Set<String> _computing = {};
+
+  /// The value of [variable]. A computed variable, whose value is exactly one
+  /// `${= ...}` formula, evaluates it against the current variables, so it
+  /// always reflects the variables it reads; others give their stored value.
+  /// A computed variable that reads itself, directly or through others, is
+  /// null.
+  static Object? variableValue(
+    VariableData variable, {
+    required ScopedValues scopedValues,
+  }) {
+    final String? expression = FormulaEvaluator.exactExpression(variable.value);
+    if (expression == null) return variable.getValue();
+    if (!_computing.add(variable.id)) return null;
+    try {
+      final Object? value = evaluateFormula(
+        expression,
+        scopedValues: scopedValues,
+      );
+      return switch (variable.type) {
+        VariableType.text =>
+          value == null ? null : FormulaEvaluator.stringify(value),
+        VariableType.list => value is Iterable ? value.toList() : null,
+        VariableType.map => value is Map ? value : null,
+        _ => value,
+      };
+    } finally {
+      _computing.remove(variable.id);
+    }
   }
 
   @internal
