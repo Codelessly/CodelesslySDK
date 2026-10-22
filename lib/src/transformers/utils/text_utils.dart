@@ -39,7 +39,8 @@ class TextUtils {
       context,
       characters,
       node: node,
-      color: boundTextColor(context, node, variablesOverrides) ??
+      color:
+          boundTextColor(context, node, variablesOverrides) ??
           retrievePropColor(prop),
       fontSize: prop.fontSize,
       letterSpacing: prop.letterSpacing,
