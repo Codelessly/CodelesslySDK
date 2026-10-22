@@ -41,7 +41,8 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///  - math: sqrt, pow, sin, cos, tan, asin, acos, atan, atan2 (radians),
 ///    pi, radians, degrees, clamp, and distance(lat1, lng1, lat2, lng2,
 ///    unit) for the great-circle distance in 'km' (default) or 'mi'.
-///  - building data: object(key, value, …), merge, set, keys, values, and
+///  - building data: object(key, value, …), merge, set, keys, values,
+///    flatten, compact (drops nulls and empty text), and
 ///    list edits that return a new list: append, setAt, insertAt, removeAt
 ///    and move. Set variable actions use them to change nested data, e.g.
 ///    `setAt(trip.stops, index, merge(item, object('nights', 3)))`.
@@ -352,6 +353,16 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('keys', 'keys(map)', 'keys(rig) → [name, length, …]'),
     FormulaFunctionDoc('values', 'values(map)', 'values(totals) → [3, 5]'),
+    FormulaFunctionDoc(
+      'flatten',
+      'flatten(list of lists)',
+      'flatten([[1, 2], [3]]) → [1, 2, 3]',
+    ),
+    FormulaFunctionDoc(
+      'compact',
+      'compact(list)',
+      "compact([1, null, '', 2]) → [1, 2]",
+    ),
     FormulaFunctionDoc(
       'append',
       'append(list, item, …)',
@@ -1066,6 +1077,14 @@ final Map<String, _Function> _functions = {
     final Map m => m.values.toList(),
     _ => <Object?>[],
   },
+  'flatten': (a) => [
+    for (final Object? item in _values(_arg(a, 0), null))
+      if (item is Iterable) ...item else item,
+  ],
+  'compact': (a) => [
+    for (final Object? item in _values(_arg(a, 0), null))
+      if (item != null && item != '') item,
+  ],
   'append': (a) => [..._values(_arg(a, 0), null), ...a.skip(1)],
   'setAt': (a) {
     final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
