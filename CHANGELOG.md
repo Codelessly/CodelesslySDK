@@ -1,5 +1,12 @@
 ## Unreleased
 
+### Dialogs
+
+- Show dialog actions present their canvas by `presentation`: a centered
+  dialog, a bottom sheet (full width, as tall as its content up to 90% of
+  the screen), a sheet on mobile and a dialog on larger screens, or full
+  screen. `CanvasSizing.sheet` sizes a canvas for a sheet.
+
 ### Layout
 
 - An expanded child's `flex` can be bound to data or set by a condition, so

@@ -7,10 +7,16 @@ class CodelesslyDialogWidget extends StatelessWidget {
   final WidgetBuilder builder;
   final bool showCloseButton;
 
+  /// How the canvas is sized: [CanvasSizing.design] for a centered dialog,
+  /// [CanvasSizing.sheet] for a bottom sheet, [CanvasSizing.fill] for a
+  /// full-screen dialog.
+  final CanvasSizing sizing;
+
   const CodelesslyDialogWidget({
     super.key,
     required this.builder,
     required this.showCloseButton,
+    this.sizing = CanvasSizing.design,
   });
 
   @override
@@ -18,7 +24,7 @@ class CodelesslyDialogWidget extends StatelessWidget {
     // A dialog is centered and sized by its layout, so its canvas keeps its
     // design size instead of filling the screen.
     return CanvasSizingScope(
-      sizing: CanvasSizing.design,
+      sizing: sizing,
       child: Builder(builder: _buildDialog),
     );
   }
@@ -49,6 +55,13 @@ class CodelesslyDialogWidget extends StatelessWidget {
       );
     }
 
-    return Center(child: builder(context));
+    return switch (sizing) {
+      CanvasSizing.sheet => Align(
+        alignment: Alignment.bottomCenter,
+        child: builder(context),
+      ),
+      CanvasSizing.fill => builder(context),
+      CanvasSizing.design => Center(child: builder(context)),
+    };
   }
 }
