@@ -36,12 +36,18 @@ class FitBox extends SingleChildRenderObjectWidget {
   /// Whether the box takes all of a bounded incoming height.
   final bool fillHeight;
 
+  /// Width / height to keep, for a node whose aspect ratio is locked: when
+  /// the box fills one axis, the other follows it; filling both, it is the
+  /// largest box of this ratio that fits. See [lockedAspectRatio].
+  final double? aspectRatio;
+
   const FitBox({
     super.key,
     this.width,
     this.height,
     this.fillWidth = false,
     this.fillHeight = false,
+    this.aspectRatio,
     super.child,
   });
 
@@ -53,6 +59,7 @@ class FitBox extends SingleChildRenderObjectWidget {
     required SizeFit? horizontalFit,
     required SizeFit? verticalFit,
     required SizeC size,
+    double? aspectRatio,
     Widget? child,
   }) : this(
          key: key,
@@ -60,6 +67,7 @@ class FitBox extends SingleChildRenderObjectWidget {
          height: verticalFit == SizeFit.shrinkWrap ? null : size.height,
          fillWidth: horizontalFit == SizeFit.expanded,
          fillHeight: verticalFit == SizeFit.expanded,
+         aspectRatio: aspectRatio,
          child: child,
        );
 
@@ -69,6 +77,7 @@ class FitBox extends SingleChildRenderObjectWidget {
     height: height,
     fillWidth: fillWidth,
     fillHeight: fillHeight,
+    aspectRatio: aspectRatio,
   );
 
   @override
@@ -77,7 +86,8 @@ class FitBox extends SingleChildRenderObjectWidget {
       ..width = width
       ..height = height
       ..fillWidth = fillWidth
-      ..fillHeight = fillHeight;
+      ..fillHeight = fillHeight
+      ..aspectRatio = aspectRatio;
   }
 
   @override
@@ -93,6 +103,20 @@ class FitBox extends SingleChildRenderObjectWidget {
   }
 }
 
+/// The width / height a node keeps at runtime, when its aspect ratio is
+/// locked and it fills an axis; null otherwise. See [FitBox.aspectRatio].
+double? lockedAspectRatio(BaseNode node) {
+  if (!node.aspectRatioLock) return null;
+  if (node.horizontalFit != SizeFit.expanded &&
+      node.verticalFit != SizeFit.expanded) {
+    return null;
+  }
+  final double width = node.basicBoxLocal.width;
+  final double height = node.basicBoxLocal.height;
+  if (width <= 0 || height <= 0) return null;
+  return width / height;
+}
+
 /// The render object of [FitBox].
 class RenderFitBox extends RenderProxyBox {
   RenderFitBox({
@@ -100,7 +124,16 @@ class RenderFitBox extends RenderProxyBox {
     this._height,
     this._fillWidth = false,
     this._fillHeight = false,
+    this._aspectRatio,
   });
+
+  double? _aspectRatio;
+  double? get aspectRatio => _aspectRatio;
+  set aspectRatio(double? value) {
+    if (_aspectRatio == value) return;
+    _aspectRatio = value;
+    markNeedsLayout();
+  }
 
   double? _width;
   double? get width => _width;
@@ -146,16 +179,32 @@ class RenderFitBox extends RenderProxyBox {
   }
 
   BoxConstraints _childConstraints(BoxConstraints constraints) {
-    final double? w = _extent(
+    double? w = _extent(
       fill: _fillWidth,
       design: _width,
       max: constraints.maxWidth,
     );
-    final double? h = _extent(
+    double? h = _extent(
       fill: _fillHeight,
       design: _height,
       max: constraints.maxHeight,
     );
+    final double? ratio = _aspectRatio;
+    if (ratio != null && ratio > 0 && ratio.isFinite) {
+      final bool widthFills = _fillWidth && constraints.hasBoundedWidth;
+      final bool heightFills = _fillHeight && constraints.hasBoundedHeight;
+      if (widthFills && heightFills && w != null && h != null) {
+        if (w / h > ratio) {
+          w = h * ratio;
+        } else {
+          h = w / ratio;
+        }
+      } else if (widthFills && w != null) {
+        h = w / ratio;
+      } else if (heightFills && h != null) {
+        w = h * ratio;
+      }
+    }
     return BoxConstraints.tightFor(width: w, height: h).enforce(constraints);
   }
 

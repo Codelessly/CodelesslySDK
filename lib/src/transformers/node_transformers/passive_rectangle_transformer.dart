@@ -156,6 +156,7 @@ class PassiveRectangleWidget extends StatelessWidget {
       horizontalFit: horizontalFit,
       verticalFit: verticalFit,
       size: node.basicBoxLocal.size,
+      aspectRatio: lockedAspectRatio(node),
       child: Container(
         clipBehavior: getClipBehavior(node),
         decoration: BoxDecoration(

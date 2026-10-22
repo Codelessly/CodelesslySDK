@@ -30,6 +30,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         parent is CanvasNode && parent.properties.bodyId == rowColumnNode.id;
 
     final FitBox outerBox = FitBox(
+      aspectRatio: lockedAspectRatio(rowColumnNode),
       width: _outerExtent(
         rowColumnNode.horizontalFit,
         design: rowColumnNode.outerBoxLocal.width,
@@ -155,6 +156,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       height: outerBox.height,
       fillWidth: outerBox.fillWidth,
       fillHeight: outerBox.fillHeight,
+      aspectRatio: outerBox.aspectRatio,
       child: res,
     );
   }
