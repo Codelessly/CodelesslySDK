@@ -402,6 +402,18 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       if (listenableVariable != null) listenables.add(listenableVariable);
     }
 
+    // A formula that reads the clock changes as time passes, so it rebuilds
+    // on every tick.
+    final bool readsClock =
+        node.variables.values.any(
+          (path) => switch (FormulaEvaluator.exactExpression(path)) {
+            final String expression => FormulaEvaluator.readsClock(expression),
+            null => false,
+          },
+        ) ||
+        inlineTextTemplatesOf(node).any(FormulaEvaluator.textReadsClock);
+    if (readsClock) listenables.add(FormulaClock.instance);
+
     // Traverse through all the conditions that affects the node.
     for (final BaseCondition condition in codelesslyContext.conditions.values) {
       if (!condition.hasNode(node.id)) continue;
