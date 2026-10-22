@@ -894,7 +894,7 @@ List<Accessor> getAccessorsForType(VariableType type) {
           name: 'isEmpty',
           type: VariableType.boolean,
           getValue: (value) {
-            final newValue = value?.toMap();
+            final newValue = value?.toList();
             if (newValue == null) return null;
             return newValue.isEmpty;
           },
@@ -903,7 +903,7 @@ List<Accessor> getAccessorsForType(VariableType type) {
           name: 'isNotEmpty',
           type: VariableType.boolean,
           getValue: (value) {
-            final newValue = value?.toMap();
+            final newValue = value?.toList();
             if (newValue == null) return null;
             return newValue.isNotEmpty;
           },
