@@ -45,8 +45,8 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    function arguments.
 ///  - date functions: now, today, parseDate, formatDate, addSeconds,
 ///    addMinutes, addHours, addDays, addMonths, diffSeconds, diffMinutes,
-///    diffHours, diffDays, formatDuration, year, month, day, hour, minute and
-///    weekday. A value bound to a formula that calls now() or today() is
+///    diffHours, diffDays, formatDuration, year, month, day, hour, minute,
+///    second and weekday. A value bound to a formula that calls now() or today() is
 ///    rebuilt every second, so clocks and countdowns stay live. Dates are
 ///    ISO 8601 text such as `2026-10-21T14:30:00.000`; a date argument can also be epoch
 ///    milliseconds or a Firestore timestamp.
@@ -425,6 +425,11 @@ class FormulaEvaluator {
       'minute',
       'minute(date)',
       'minute("2026-10-21T14:30") → 30',
+    ),
+    FormulaFunctionDoc(
+      'second',
+      'second(date)',
+      'second("2026-10-21T14:30:15") → 15',
     ),
     FormulaFunctionDoc(
       'weekday',
@@ -1045,6 +1050,7 @@ final Map<String, _Function> _functions = {
   'day': (a) => _toDate(_arg(a, 0))?.day,
   'hour': (a) => _toDate(_arg(a, 0))?.hour,
   'minute': (a) => _toDate(_arg(a, 0))?.minute,
+  'second': (a) => _toDate(_arg(a, 0))?.second,
   'weekday': (a) => _toDate(_arg(a, 0))?.weekday,
 };
 
