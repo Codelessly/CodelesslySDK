@@ -27,7 +27,9 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `condition ? a : b`. `+` joins text when either side is text.
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
-///    endsWith, where, without, number, text, isEmpty and isNotEmpty. See
+///    endsWith, where, without, number, text, isEmpty, isNotEmpty, pad
+///    (`pad(5, 2)` is `05`), slice, reverse, range and indexOf
+///    (`indexOf(bookings, b => b.id == id)`, -1 when nothing matches). See
 ///    [FormulaEvaluator.functions].
 ///  - list functions that take a predicate or key: filter, where, count,
 ///    find, any, all, map, sortBy, unique, sum and join. The predicate is a
@@ -262,6 +264,27 @@ class FormulaEvaluator {
       'unique(list, field or item => key)',
       'unique(tags) or unique(tasks, "category")',
     ),
+    FormulaFunctionDoc(
+      'indexOf',
+      'indexOf(list, item => condition)',
+      'indexOf(bookings, b => b.id == id) → 2',
+    ),
+    FormulaFunctionDoc(
+      'slice',
+      'slice(list, start, end)',
+      'slice(runs, 0, 3) → the first three',
+    ),
+    FormulaFunctionDoc(
+      'reverse',
+      'reverse(list)',
+      'reverse([1, 2, 3]) → [3, 2, 1]',
+    ),
+    FormulaFunctionDoc(
+      'range',
+      'range(start, end, step)',
+      'range(1, 6) → [1, 2, 3, 4, 5]',
+    ),
+    FormulaFunctionDoc('pad', 'pad(value, width, fill)', 'pad(5, 2) → 05'),
     FormulaFunctionDoc(
       'without',
       'without(list, other)',
@@ -520,6 +543,40 @@ List<Object?> _sortBy(List<Object?> args) {
     return x.$1 - y.$1;
   });
   return [for (final entry in keyed) entry.$2];
+}
+
+/// Items `start` (inclusive) to `end` (exclusive) of a list or text.
+/// Negative indexes count from the end; out-of-range ones are clamped.
+Object? _slice(Object? target, Object? start, Object? end) {
+  final List<Object?>? list = target is String
+      ? null
+      : _values(target, null).toList();
+  final int length = target is String ? target.length : list!.length;
+  int at(Object? index, int fallback) {
+    if (index == null || index == '') return fallback;
+    final int i = _num(index).toInt();
+    return (i < 0 ? length + i : i).clamp(0, length);
+  }
+
+  final int from = at(start, 0);
+  final int to = math.max(from, at(end, length));
+  return target is String
+      ? target.substring(from, to)
+      : list!.sublist(from, to);
+}
+
+/// Whole numbers from `start` up to `end` (exclusive) by `step`, or 0 to
+/// `start` when `end` is left out: `range(3)` is `[0, 1, 2]`. At most 10000.
+List<int> _range(Object? start, Object? end, Object? step) {
+  final int from = end == null ? 0 : _num(start).toInt();
+  final int to = _num(end ?? start).toInt();
+  final int by = step == null ? (to < from ? -1 : 1) : _num(step).toInt();
+  if (by == 0 || (to - from).sign != by.sign) return const [];
+  final int count = math.min(
+    10000,
+    ((to - from).abs() + by.abs() - 1) ~/ by.abs(),
+  );
+  return [for (int i = 0; i < count; i++) from + i * by];
 }
 
 /// Items of `args[0]` without repeats, keeping the first of each; repeats
@@ -845,6 +902,34 @@ final Map<String, _Function> _functions = {
   'map': (a) => _values(_arg(a, 0), _arg(a, 1)).toList(),
   'sortBy': _sortBy,
   'unique': _unique,
+  'indexOf': (a) => switch (_arg(a, 0)) {
+    final String text when a.length == 2 && _arg(a, 1) is! _Closure =>
+      text.indexOf(FormulaEvaluator.stringify(_arg(a, 1))),
+    final Object? list => _values(
+      list,
+      null,
+    ).toList().indexWhere((item) => _matches(item, a.skip(1).toList())),
+  },
+  'slice': (a) => _slice(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'reverse': (a) => switch (_arg(a, 0)) {
+    final String text => String.fromCharCodes(text.runes.toList().reversed),
+    final Object? list => _values(list, null).toList().reversed.toList(),
+  },
+  'range': (a) => _range(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'pad': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final String fill = switch (_arg(a, 2)) {
+      null => '0',
+      final Object? value => FormulaEvaluator.stringify(value),
+    };
+    if (fill.isEmpty) return text;
+    final int width = _num(_arg(a, 1) ?? 2).toInt();
+    // A sign stays in front: pad(-5, 3) is -05.
+    final bool negative = fill == '0' && text.startsWith('-');
+    final String digits = negative ? text.substring(1) : text;
+    return (negative ? '-' : '') +
+        digits.padLeft(width - (negative ? 1 : 0), fill);
+  },
   'without': (a) => [
     for (final item in _values(_arg(a, 0), null))
       if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
