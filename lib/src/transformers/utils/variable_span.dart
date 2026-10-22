@@ -37,8 +37,25 @@ abstract final class VariablePreview {
   static const Set<String> _literals = {'true', 'false', 'null'};
 
   /// The text the design canvas shows for [expression], one `${...}` match.
-  static String textFor(String expression, {BaseNode? node, TextStyle? style}) {
-    final ScopedValues? scopedValues = scopeResolver?.call(node);
+  ///
+  /// [item] is the list item the text is built for: a list on the canvas
+  /// shows each of its items, so `${item.name}` reads that item instead of
+  /// the sample item the resolver gives.
+  static String textFor(
+    String expression, {
+    BaseNode? node,
+    TextStyle? style,
+    IndexedItem? item,
+  }) {
+    ScopedValues? scopedValues = scopeResolver?.call(node);
+    if (scopedValues != null && item != null) {
+      scopedValues = ScopedValues.preview(
+        variables: scopedValues.variables,
+        codelesslyContext: scopedValues.codelesslyContext,
+        screenSize: scopedValues.screenSize,
+        indexedItem: item,
+      );
+    }
     if (scopedValues != null) {
       final String value = PropertyValueDelegate.substituteVariables(
         expression,
@@ -135,11 +152,17 @@ class VariableSpan extends TextSpan {
   VariableSpan({
     required this.variable,
     BaseNode? node,
+    IndexedItem? item,
     super.style,
     super.mouseCursor,
     super.onEnter,
     super.onExit,
   }) : super(
-         text: VariablePreview.textFor(variable, node: node, style: style),
+         text: VariablePreview.textFor(
+           variable,
+           node: node,
+           style: style,
+           item: item,
+         ),
        );
 }
