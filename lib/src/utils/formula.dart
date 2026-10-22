@@ -166,8 +166,13 @@ class FormulaEvaluator {
   static const List<FormulaFunctionDoc> functionDocs = [
     FormulaFunctionDoc(
       'money',
-      'money(value, symbol)',
-      r'money(price) → $1,234.50',
+      'money(value, symbol?, digits?)',
+      r'money(price) → $1,234.50, money(385, "$", 0) → $385',
+    ),
+    FormulaFunctionDoc(
+      'formatNumber',
+      'formatNumber(value, digits?)',
+      'formatNumber(2481.64, 1) → 2,481.6',
     ),
     FormulaFunctionDoc(
       'fixed',
@@ -522,16 +527,26 @@ Object? _member(Object? target, Object? key) {
 String _fixed(Object? value, Object? digits) =>
     _num(value).toStringAsFixed(_num(digits ?? 2).toInt().clamp(0, 20));
 
-String _money(Object? value, Object? symbol) {
+String _money(Object? value, Object? symbol, [Object? digits]) {
   final num amount = _num(value);
   if (amount.isNaN) return '';
   final String sign = amount < 0 ? '-' : '';
-  final String text = amount.abs().toStringAsFixed(2);
-  final int dot = text.indexOf('.');
+  return '$sign${symbol ?? r'$'}${_grouped(amount.abs(), digits ?? 2)}';
+}
+
+/// [value] with [digits] decimals (default 0) and thousands separators,
+/// e.g. 2481.64 with 1 digit is "2,481.6".
+String _grouped(Object? value, Object? digits) {
+  final num amount = _num(value);
+  if (amount.isNaN) return '';
+  final String text = amount.toStringAsFixed(
+    _num(digits ?? 0).toInt().clamp(0, 20),
+  );
+  final int dot = text.contains('.') ? text.indexOf('.') : text.length;
   final String whole = text
       .substring(0, dot)
       .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
-  return '$sign${symbol ?? r'$'}$whole${text.substring(dot)}';
+  return '$whole${text.substring(dot)}';
 }
 
 num _round(Object? value, Object? digits) {
@@ -867,7 +882,8 @@ Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
 final Map<String, _Function> _functions = {
-  'money': (a) => _money(_arg(a, 0), _arg(a, 1)),
+  'money': (a) => _money(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'formatNumber': (a) => _grouped(_arg(a, 0), _arg(a, 1)),
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
   'round': (a) => _round(_arg(a, 0), _arg(a, 1)),
   'floor': (a) => _num(_arg(a, 0)).floor(),
