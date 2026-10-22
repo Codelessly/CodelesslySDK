@@ -90,12 +90,17 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       }
     }
 
+    final CrossAxisAlignment crossAxisAlignment = stretchFallsBack
+        ? CrossAxisAlignment.start
+        : rowColumnNode.crossAxisAlignment.flutterAxis;
     Widget res = CodelesslyFlex(
       direction: isRow ? Axis.horizontal : Axis.vertical,
       mainAxisAlignment: rowColumnNode.mainAxisAlignment.flutterAxis,
-      crossAxisAlignment: stretchFallsBack
-          ? CrossAxisAlignment.start
-          : rowColumnNode.crossAxisAlignment.flutterAxis,
+      crossAxisAlignment: crossAxisAlignment,
+      // Flex asserts a baseline to align to; texts align on the alphabetic one.
+      textBaseline: crossAxisAlignment == CrossAxisAlignment.baseline
+          ? TextBaseline.alphabetic
+          : null,
       mainAxisSize: mainFit == SizeFit.shrinkWrap
           ? MainAxisSize.min
           : MainAxisSize.max,
