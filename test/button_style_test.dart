@@ -199,8 +199,85 @@ void main() {
       final ButtonNode node = ButtonNode.fromJson({
         ...button(ButtonProperties(buttonType: ButtonTypeEnum.text)).toJson(),
       });
-      expect(node.properties.buttonColor, ColorRGBA.black);
+      expect(node.properties.buttonColor, isNull);
       expect(background(styleOf(node)), Colors.transparent);
+    });
+
+    test('is black when black is set, also read from JSON', () {
+      final ButtonNode node = button(
+        ButtonProperties(
+          buttonType: ButtonTypeEnum.text,
+          buttonColor: ColorRGBA.black,
+        ),
+      );
+      expect(background(styleOf(node)), const Color(0xFF000000));
+      final ButtonNode read = ButtonNode.fromJson(node.toJson());
+      expect(read.properties.buttonColor, ColorRGBA.black);
+      expect(background(styleOf(read)), const Color(0xFF000000));
+    });
+
+    test('old JSON without the key keeps every type as it rendered', () {
+      for (final ButtonTypeEnum type in ButtonTypeEnum.values) {
+        final Map json = button(ButtonProperties(buttonType: type)).toJson();
+        (json['properties'] as Map).remove('buttonColor');
+        final ButtonNode node = ButtonNode.fromJson(json);
+        expect(node.properties.buttonColor, isNull, reason: '$type');
+        expect(
+          node.properties.effectiveButtonColor,
+          type == ButtonTypeEnum.text ? ColorRGBA.transparent : ColorRGBA.black,
+          reason: '$type',
+        );
+      }
+    });
+
+    testWidgets('renders black and unset text buttons at every size', (
+      tester,
+    ) async {
+      for (final Size size in const [
+        Size(390, 844),
+        Size(834, 1194),
+        Size(1440, 900),
+      ]) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        for (final ColorRGBA? color in [null, ColorRGBA.black]) {
+          await pumpNode(
+            tester,
+            button(
+              ButtonProperties(
+                buttonType: ButtonTypeEnum.text,
+                label: 'Go',
+                buttonColor: color,
+              ),
+            ),
+          );
+          expect(tester.takeException(), isNull);
+          final Rect box = tester.getRect(find.byType(TextButton));
+          expect(box.size, const Size(160, 48));
+          final Color? fill = tester
+              .widget<TextButton>(find.byType(TextButton))
+              .style
+              ?.backgroundColor
+              ?.resolve(const <WidgetState>{});
+          expect(
+            fill,
+            color == null ? Colors.transparent : const Color(0xFF000000),
+          );
+        }
+      }
+    });
+
+    test('converting to a text button keeps an unset color unset', () {
+      final ButtonNode node = button(ButtonProperties());
+      convertNodeToButtonType(ButtonTypeEnum.text, node);
+      expect(node.properties.buttonColor, isNull);
+      expect(background(styleOf(node)), Colors.transparent);
+      final ButtonNode black = button(
+        ButtonProperties(buttonColor: ColorRGBA.black),
+      );
+      convertNodeToButtonType(ButtonTypeEnum.text, black);
+      expect(black.properties.buttonColor, ColorRGBA.black.copyWith(a: 0.1));
     });
 
     test('uses a button color that is set', () {

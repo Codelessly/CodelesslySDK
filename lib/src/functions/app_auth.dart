@@ -33,6 +33,7 @@ abstract final class AppAuth {
 
   /// A readable message for a Firebase Auth [error].
   static String messageFor(Object error) {
+    if (error is StateError) return error.message;
     if (error is! FirebaseAuthException) return error.toString();
     return switch (error.code) {
       'invalid-credential' ||
@@ -49,6 +50,15 @@ abstract final class AppAuth {
       'requires-recent-login' => 'Sign in again, then try this again.',
       _ => error.message ?? error.code,
     };
+  }
+
+  /// The signed-in user, or an error saying the operation needs one.
+  static User _signedInUser(FirebaseAuth auth) {
+    final User? user = auth.currentUser;
+    if (user == null || user.isAnonymous) {
+      throw StateError('Sign in first.');
+    }
+    return user;
   }
 
   /// Performs [action]. Throws when it fails, so the actions after it in the
@@ -104,9 +114,19 @@ abstract final class AppAuth {
           await auth.currentUser?.updateDisplayName(displayName);
         case AuthOperation.sendPasswordResetEmail:
           await auth.sendPasswordResetEmail(email: email);
+        case AuthOperation.sendEmailVerification:
+          await _signedInUser(auth).sendEmailVerification();
+        case AuthOperation.updatePassword:
+          await _signedInUser(auth).updatePassword(eval(action.password));
+        case AuthOperation.deleteAccount:
+          await _signedInUser(auth).delete();
+          // The SDK needs a user to read the project's data.
+          await auth.signInAnonymously();
       }
 
-      if (action.operation != AuthOperation.sendPasswordResetEmail) {
+      if (action.operation
+          case != AuthOperation.sendPasswordResetEmail &&
+              != AuthOperation.sendEmailVerification) {
         await auth.currentUser?.reload();
         codelessly.refreshAppUser();
       }
@@ -116,7 +136,8 @@ abstract final class AppAuth {
       if (action.operation
           case AuthOperation.signIn ||
               AuthOperation.signUp ||
-              AuthOperation.signOut) {
+              AuthOperation.signOut ||
+              AuthOperation.deleteAccount) {
         await codelessly.authManager.reauthenticate();
       }
     } catch (error) {

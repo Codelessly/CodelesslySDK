@@ -1641,6 +1641,26 @@ extension ActionModelExt on ActionModel {
         ],
       );
     }
+    if (action is ConfirmAction) {
+      return action.copyWith(
+        actions: [
+          for (final nested in action.actions)
+            nested.withUpdatedNodeId(oldNodeId, newNodeId),
+        ],
+        cancelActions: [
+          for (final nested in action.cancelActions)
+            nested.withUpdatedNodeId(oldNodeId, newNodeId),
+        ],
+      );
+    }
+    if (action is ShowToastAction) {
+      return action.copyWith(
+        actions: [
+          for (final nested in action.actions)
+            nested.withUpdatedNodeId(oldNodeId, newNodeId),
+        ],
+      );
+    }
     if (action is CloudFilesAction) {
       return action.copyWith(
         actions: [
@@ -1681,7 +1701,14 @@ extension ActionModelExt on ActionModel {
         strings.addAll([action.url]);
       case ActionType.showToast:
         final ShowToastAction action = this as ShowToastAction;
-        strings.addAll([action.message]);
+        strings.addAll([action.message, action.actionLabel]);
+        return {
+          ..._namesIn(strings, includePredefined),
+          for (final ActionModel nested in action.actions)
+            ...nested.getUsedVariableNames(
+              includePredefined: includePredefined,
+            ),
+        };
       case ActionType.submit:
         final SubmitAction action = this as SubmitAction;
         strings.addAll([action.apiKey, action.primaryTextField]);
@@ -1785,6 +1812,30 @@ extension ActionModelExt on ActionModel {
               includePredefined: includePredefined,
             ),
         };
+      case ActionType.confirm:
+        final ConfirmAction action = this as ConfirmAction;
+        strings.addAll([
+          action.title,
+          action.message,
+          action.confirmLabel,
+          action.cancelLabel,
+          for (final MapEntry(:key, :value) in action.params.entries) ...[
+            key,
+            if (value is String) value,
+          ],
+        ]);
+        return {
+          ..._namesIn(strings, includePredefined),
+          for (final ActionModel nested in [
+            ...action.actions,
+            ...action.cancelActions,
+          ])
+            ...nested.getUsedVariableNames(
+              includePredefined: includePredefined,
+            ),
+        };
+      case ActionType.delay:
+        return {};
       case ActionType.forEach:
         final ForEachAction action = this as ForEachAction;
         strings.add(action.items.wrapWithVariableSyntax());

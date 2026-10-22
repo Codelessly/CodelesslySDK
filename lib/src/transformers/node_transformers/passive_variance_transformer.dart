@@ -54,8 +54,31 @@ class PassiveVarianceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = ScopedValues.of(context);
-    final List<String> children = getChildren(scopedValues);
+    if (!settings.isPreview && node.isResponsive) {
+      final double? canvasWidth = CanvasWidthScope.maybeOf(context);
+      if (canvasWidth != null) {
+        return _buildVariant(context, node.variantForWidth(canvasWidth));
+      }
+      // Outside of a canvas: the width this node is given, by the rule
+      // breakpoints are picked with.
+      return LayoutBuilder(
+        builder: (context, constraints) => _buildVariant(
+          context,
+          node.variantForWidth(
+            CodelesslyWidget.breakpointWidth(context, constraints),
+          ),
+        ),
+      );
+    }
+    return _buildChildren(context, getChildren(ScopedValues.of(context)));
+  }
+
+  /// Builds only [variant]: a responsive node's other variants are never
+  /// built.
+  Widget _buildVariant(BuildContext context, Variant variant) =>
+      _buildChildren(context, variant.children);
+
+  Widget _buildChildren(BuildContext context, List<String> children) {
     if (children.isNotEmpty) {
       final childNode = getNode(children.first);
 

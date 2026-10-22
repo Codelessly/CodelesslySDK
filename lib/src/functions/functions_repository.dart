@@ -15,7 +15,6 @@ import '../logging/stat_tracker.dart';
 import '../ui/codelessly_dialog_widget.dart';
 import 'action_chain.dart';
 import 'app_auth.dart';
-import 'app_toast.dart';
 import 'cloud_files.dart';
 
 /// Enum representing the types of API requests.
@@ -137,6 +136,13 @@ class FunctionsRepository {
         );
       case ActionType.showToast:
         return AppToast.show(context, action as ShowToastAction);
+      case ActionType.confirm:
+        return runConfirm(context, action as ConfirmAction);
+      case ActionType.delay:
+        return Future<bool>.delayed(
+          Duration(milliseconds: (action as DelayAction).milliseconds),
+          () => true,
+        );
     }
   }
 
@@ -181,6 +187,34 @@ class FunctionsRepository {
       name: name,
     );
     await runActions(context, matches ? action.actions : action.elseActions);
+    return true;
+  }
+
+  /// Asks the user to confirm [action], then runs its actions or its cancel
+  /// actions.
+  static Future<bool> runConfirm(
+    BuildContext context,
+    ConfirmAction action,
+  ) async {
+    final ConfirmOutcome outcome = await AppConfirmDialog.ask(context, action);
+    final bool confirmed = outcome.confirmed;
+    // What a canvas dialog passed back, e.g. a reason typed into it, is the
+    // `${result}` its confirm actions read.
+    if (outcome.values case final Map<String, dynamic> values
+        when values.isNotEmpty) {
+      ActionChain.setResult(values);
+    }
+    DebugLogger.instance.printInfo(
+      'Confirm dialog was ${confirmed ? 'confirmed' : 'cancelled'}.',
+      name: name,
+    );
+    // The confirmed actions run even when the widget that asked has
+    // unmounted meanwhile; see [ActionChain.contextFor].
+    await runActions(
+      // ignore: use_build_context_synchronously
+      context,
+      confirmed ? action.actions : action.cancelActions,
+    );
     return true;
   }
 
@@ -474,8 +508,35 @@ class FunctionsRepository {
     BuildContext context,
     ShowDialogAction action,
   ) async {
+    await showLayoutDialog(
+      context,
+      canvasId: action.destinationId,
+      params: action.params,
+      barrierDismissible: action.barrierDismissible,
+      barrierColor: action.barrierColor?.toFlutterColor(),
+      showCloseButton: action.showCloseButton,
+    );
+  }
+
+  /// The id of the published layout that holds the canvas [canvasId], if any.
+  static String? layoutIdForCanvas(Codelessly codelessly, String canvasId) =>
+      codelessly.dataManager.publishModel?.layouts.values
+          .firstWhereOrNull((layout) => layout.canvasIds.contains(canvasId))
+          ?.id;
+
+  /// Shows the canvas [canvasId] as a dialog and completes with what it was
+  /// closed with: the params of the "Navigate back" action that closed it, or
+  /// null when it was dismissed.
+  static Future<Object?> showLayoutDialog(
+    BuildContext context, {
+    required String canvasId,
+    Map<String, dynamic> params = const {},
+    bool barrierDismissible = true,
+    Color? barrierColor,
+    bool showCloseButton = false,
+  }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
-    final parsedParams = substituteVariablesInMap(action.params, scopedValues);
+    final parsedParams = substituteVariablesInMap(params, scopedValues);
 
     DebugLogger.instance.printInfo(
       'Performing show dialog action with params: $parsedParams',
@@ -487,17 +548,15 @@ class FunctionsRepository {
     final String? myCanvasId = codelessly.currentNavigatedCanvasId;
 
     // Check if a layout exists for the action's [destinationId].
-    final String? layoutId = codelessly.dataManager.publishModel?.layouts.values
-        .firstWhereOrNull(
-          (layout) => layout.canvasIds.contains(action.destinationId),
-        )
-        ?.id;
+    final String? layoutId = layoutIdForCanvas(codelessly, canvasId);
 
     DebugLogger.instance.printInfo(
-      'looking for layout with canvas id: [${action.destinationId}]',
+      'looking for layout with canvas id: [$canvasId]',
       name: name,
     );
-    for (final layout in codelessly.dataManager.publishModel!.layouts.values) {
+    for (final layout
+        in codelessly.dataManager.publishModel?.layouts.values ??
+            const <SDKPublishLayout>[]) {
       DebugLogger.instance.printInfo(
         'layout [${layout.id}] canvas ids: [${layout.canvasIds.join(', ')}]',
         name: name,
@@ -507,27 +566,26 @@ class FunctionsRepository {
     if (layoutId == null) {
       codelessly.errorLogger.captureException(
         'Layout not found',
-        message:
-            'Could not find a layout with a canvas id of [${action.destinationId}]',
+        message: 'Could not find a layout with a canvas id of [$canvasId]',
         type: 'layout_not_found',
         layoutID: layoutId,
       );
-      return;
+      return null;
     }
 
     // A chain triggered in the dialog can finish on this layout after the
     // dialog closes (e.g. Navigate back, then a toast).
     final List<BuildContext> openerHosts = ActionChainOpener.hostsFor(context);
-    await showDialog(
+    final Object? result = await showDialog<Object?>(
       context: context,
       useRootNavigator: false,
-      barrierDismissible: action.barrierDismissible,
-      barrierColor: action.barrierColor?.toFlutterColor(),
+      barrierDismissible: barrierDismissible,
+      barrierColor: barrierColor,
       routeSettings: RouteSettings(arguments: parsedParams),
       builder: (context) => ActionChainOpener(
         openerHosts: openerHosts,
         child: CodelesslyDialogWidget(
-          showCloseButton: action.showCloseButton,
+          showCloseButton: showCloseButton,
           builder: (context) =>
               CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
         ),
@@ -540,6 +598,7 @@ class FunctionsRepository {
         canvasId: myCanvasId,
       );
     }
+    return result;
   }
 
   static void launchURL(BuildContext context, LinkAction action) {
