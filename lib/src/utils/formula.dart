@@ -26,9 +26,9 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///  - `+ - * / %`, comparisons `== != < <= > >=`, `&& || !` and
 ///    `condition ? a : b`. `+` joins text when either side is text.
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
-///    length, if, plural, join, upper, lower, trim, contains, startsWith,
-///    endsWith, where, without, number, text, isEmpty and isNotEmpty. See
-///    [FormulaEvaluator.functions].
+///    length, if, plural, join, upper, lower, trim, replace, padLeft, split,
+///    substring, contains, startsWith, endsWith, where, without, number,
+///    text, isEmpty and isNotEmpty. See [FormulaEvaluator.functions].
 ///  - list functions that take a predicate or key: filter, where, count,
 ///    find, any, all, map, sortBy, unique, sum and join. The predicate is a
 ///    lambda, `item => expression`, or a field name, optionally with a value
@@ -218,6 +218,26 @@ class FormulaEvaluator {
     FormulaFunctionDoc('upper', 'upper(text)', 'upper("hi") → HI'),
     FormulaFunctionDoc('lower', 'lower(text)', 'lower("Hi") → hi'),
     FormulaFunctionDoc('trim', 'trim(text)', 'trim("  hi ") → hi'),
+    FormulaFunctionDoc(
+      'replace',
+      'replace(text, find, with)',
+      "replace('Unit {f}01', '{f}', 2) → Unit 201",
+    ),
+    FormulaFunctionDoc(
+      'padLeft',
+      'padLeft(value, width, pad)',
+      "padLeft(14, 3, '0') → 014",
+    ),
+    FormulaFunctionDoc(
+      'split',
+      'split(text, separator)',
+      "split('Maya Chen', ' ') → [Maya, Chen]",
+    ),
+    FormulaFunctionDoc(
+      'substring',
+      'substring(text, start, end)',
+      "substring('Maya', 0, 1) → M",
+    ),
     FormulaFunctionDoc(
       'contains',
       'contains(text or list, value)',
@@ -997,6 +1017,30 @@ final Map<String, _Function> _functions = {
   'upper': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toUpperCase(),
   'lower': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toLowerCase(),
   'trim': (a) => FormulaEvaluator.stringify(_arg(a, 0)).trim(),
+  'replace': (a) => FormulaEvaluator.stringify(_arg(a, 0)).replaceAll(
+    FormulaEvaluator.stringify(_arg(a, 1)),
+    FormulaEvaluator.stringify(_arg(a, 2)),
+  ),
+  'padLeft': (a) =>
+      FormulaEvaluator.stringify(_arg(a, 0))
+          .padLeft(_intArg(_arg(a, 1)), switch (_arg(a, 2)) {
+            null => ' ',
+            final Object? pad => FormulaEvaluator.stringify(pad),
+          }),
+  'split': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    if (text.isEmpty) return <String>[];
+    return text.split(FormulaEvaluator.stringify(_arg(a, 1) ?? ','));
+  },
+  'substring': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final int start = _intArg(_arg(a, 1)).clamp(0, text.length);
+    final Object? endArg = _arg(a, 2);
+    final int end = endArg == null
+        ? text.length
+        : _intArg(endArg).clamp(start, text.length);
+    return text.substring(start, end);
+  },
   'startsWith': (a) => switch (_arg(a, 0)) {
     final String s => s.startsWith(FormulaEvaluator.stringify(_arg(a, 1))),
     _ => false,

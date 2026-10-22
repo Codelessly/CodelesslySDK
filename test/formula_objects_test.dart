@@ -53,11 +53,31 @@ void main() {
     expect((vars['items'] as List).length, 2);
   });
 
+  test('text helpers', () {
+    expect(eval("replace('Unit {f}01 · Bath', '{f}', 2)"), 'Unit 201 · Bath');
+    expect(eval("padLeft(14, 3, '0')"), '014');
+    expect(eval("padLeft(1234, 3, '0')"), '1234');
+    expect(eval("split('Maya Chen', ' ')"), ['Maya', 'Chen']);
+    expect(eval("split('', ' ')"), <String>[]);
+    expect(
+      eval("join(map(split('Maya Chen', ' '), w => substring(w, 0, 1)), '')"),
+      'MC',
+    );
+    expect(eval("substring('Maya', 1)"), 'aya');
+    expect(eval("substring('Maya', 2, 99)"), 'ya');
+  });
+
   test('every new function is documented', () {
     final Set<String> documented = {
       for (final doc in FormulaEvaluator.functionDocs) doc.name,
     };
-    for (final name in ['prepend']) {
+    for (final name in [
+      'prepend',
+      'replace',
+      'padLeft',
+      'split',
+      'substring',
+    ]) {
       expect(documented, contains(name));
     }
   });
