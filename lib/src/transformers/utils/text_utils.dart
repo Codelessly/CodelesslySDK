@@ -39,8 +39,7 @@ class TextUtils {
       context,
       characters,
       node: node,
-      color: boundTextColor(context, node, variablesOverrides) ??
-          retrievePropColor(prop),
+      color: retrievePropColor(prop),
       fontSize: prop.fontSize,
       letterSpacing: prop.letterSpacing,
       fontName: prop.fontName,
@@ -53,25 +52,6 @@ class TextUtils {
       hasMissingFont: hasMissingFont,
       tapGestureRecognizer: tapGestureRecognizer,
     );
-  }
-
-  /// The color a text node's `textColor` variable or condition gives all of
-  /// its text, e.g. `${= selected ? '#C9A24A' : '#B6AA90'}`, overriding the
-  /// colors of its spans. Null when it has none.
-  static Color? boundTextColor(
-    BuildContext? context,
-    BaseNode? node,
-    List<VariableData> variablesOverrides,
-  ) {
-    if (context == null || node == null) return null;
-    return PropertyValueDelegate.getPropertyValue<ColorRGBA>(
-      node,
-      'textColor',
-      scopedValues: ScopedValues.of(
-        context,
-        variablesOverrides: variablesOverrides,
-      ),
-    )?.toFlutterColor();
   }
 
   static TextSpan buildTextSpan(

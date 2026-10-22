@@ -20,9 +20,9 @@ Color? spanColor(WidgetTester tester, String label) {
 }
 
 void main() {
-  testWidgets('a textColor binding recolors the whole text', (tester) async {
+  testWidgets('a fill binding on a text recolors the whole text', (tester) async {
     final TextNode bound = text('label', 'mainBody', 'Mystery', brandRegular)
-      ..variables['textColor'] = r"${= 2 > 1 ? '#C9A24A' : '#B6AA90'}";
+      ..variables['fill'] = r"${= 2 > 1 ? '#C9A24A' : '#B6AA90'}";
     final TextNode plain = text('plain', 'mainBody', 'Heist', brandRegular);
     await pumpLayouts(tester, [
       layoutOf('layout', [
