@@ -152,6 +152,10 @@ class NodeGeometryRegistry extends ChangeNotifier {
   final Map<String, Map<String, RenderGeometryProbe>> _probes = {};
   bool _notified = false;
 
+  /// Every painted probe in paint order, with what hit testing needs,
+  /// collected once after geometry changes rather than on every test.
+  List<_HitEntry>? _hitIndex;
+
   /// The render box that geometry is measured relative to, if mounted.
   RenderBox? get root => _root;
 
@@ -167,6 +171,7 @@ class NodeGeometryRegistry extends ChangeNotifier {
   /// Records that geometry may have changed and notifies listeners. During
   /// a frame's build, layout and paint, listeners are notified once.
   void markChanged() {
+    _hitIndex = null;
     final SchedulerBinding scheduler = SchedulerBinding.instance;
     if (scheduler.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       notifyListeners();
@@ -325,39 +330,74 @@ class NodeGeometryRegistry extends ChangeNotifier {
     NodeBuildLayer layer = NodeBuildLayer.content,
     bool Function(NodeHit hit)? skip,
   }) {
+    final List<_HitEntry> index = _hitIndex ??= _collectHitIndex();
+    // Entries are in paint order, so a parent comes before its subtree and
+    // a skipped parent can skip its subtree.
+    final Set<_HitEntry> skipped = {};
+    final List<NodeHit> hits = [];
+    for (final entry in index) {
+      final _HitEntry? parent = entry.parent;
+      if (parent != null && skipped.contains(parent)) {
+        skipped.add(entry);
+        continue;
+      }
+      if (skip != null && skip(entry.hit)) {
+        skipped.add(entry);
+        continue;
+      }
+      if (entry.layer != layer || !entry.contentVisible) continue;
+      if (!entry.clips.contains(position)) continue;
+      final Offset local = MatrixUtils.transformPoint(entry.inverse, position);
+      if ((Offset.zero & entry.size).contains(local)) hits.add(entry.hit);
+    }
+    return hits.reversed.toList(growable: false);
+  }
+
+  /// Walks the render tree once, in paint order, recording each painted,
+  /// visible probe with its inverse transform and the clips above it.
+  List<_HitEntry> _collectHitIndex() {
     final RenderGeometryRoot? root = _root;
     if (root == null || !root.attached || !root.hasSize) return const [];
-    final List<NodeHit> hits = [];
-    void visit(RenderObject object, Matrix4 transform) {
+    final List<_HitEntry> entries = [];
+    void visit(
+      RenderObject object,
+      Matrix4 transform,
+      _ClipChain clips,
+      _HitEntry? parent,
+    ) {
       if (object is RenderGeometryProbe) {
-        if (!object.visible) return;
-        final NodeHit hit = NodeHit(object.nodeId, object.instance);
-        if (skip != null && skip(hit)) return;
-        if (object.buildLayer == layer &&
-            object.hasSize &&
-            _contentVisible(object)) {
-          final Offset? local = _toLocal(transform, position);
-          if (local != null && (Offset.zero & object.size).contains(local)) {
-            hits.add(hit);
-          }
-        }
+        if (!object.visible || !object.hasSize) return;
+        final Matrix4 inverse = Matrix4.zero();
+        if (inverse.copyInverse(transform) == 0) return;
+        final _HitEntry entry = _HitEntry(
+          hit: NodeHit(object.nodeId, object.instance),
+          layer: object.buildLayer,
+          contentVisible: _contentVisible(object),
+          inverse: inverse,
+          size: object.size,
+          clips: clips,
+          parent: parent,
+        );
+        entries.add(entry);
+        parent = entry;
       }
-      Offset? local;
       object.visitChildren((child) {
         if (!object.paintsChild(child)) return;
+        _ClipChain childClips = clips;
         final Rect? clip = object.describeApproximatePaintClip(child);
         if (clip != null) {
-          local ??= _toLocal(transform, position);
-          if (local == null || !clip.contains(local!)) return;
+          final Matrix4 inverse = Matrix4.zero();
+          if (inverse.copyInverse(transform) == 0) return;
+          childClips = _ClipChain(inverse, clip, clips);
         }
         final Matrix4 childTransform = transform.clone();
         object.applyPaintTransform(child, childTransform);
-        visit(child, childTransform);
+        visit(child, childTransform, childClips, parent);
       });
     }
 
-    visit(root, Matrix4.identity());
-    return hits.reversed.toList(growable: false);
+    visit(root, Matrix4.identity(), const _ClipChain.none(), null);
+    return entries;
   }
 
   /// Whether the node of [probe] is visible. A margin probe sits outside the
@@ -369,17 +409,65 @@ class NodeGeometryRegistry extends ChangeNotifier {
         false;
   }
 
-  static Offset? _toLocal(Matrix4 transform, Offset position) {
-    final Matrix4 inverse = Matrix4.zero();
-    if (inverse.copyInverse(transform) == 0) return null;
-    return MatrixUtils.transformPoint(inverse, position);
-  }
-
   @override
   void dispose() {
     _probes.clear();
     _root = null;
     super.dispose();
+  }
+}
+
+/// A probe recorded for hit testing.
+class _HitEntry {
+  final NodeHit hit;
+  final NodeBuildLayer layer;
+  final bool contentVisible;
+
+  /// Maps scope coordinates into the probe's own.
+  final Matrix4 inverse;
+  final Size size;
+  final _ClipChain clips;
+
+  /// The nearest probe above this one.
+  final _HitEntry? parent;
+
+  _HitEntry({
+    required this.hit,
+    required this.layer,
+    required this.contentVisible,
+    required this.inverse,
+    required this.size,
+    required this.clips,
+    required this.parent,
+  });
+}
+
+/// The clips above a render object, innermost first, each in the space of
+/// the object that clips.
+class _ClipChain {
+  final Matrix4? _inverse;
+  final Rect? _clip;
+  final _ClipChain? _outer;
+
+  const _ClipChain(Matrix4 inverse, Rect clip, _ClipChain outer)
+    : _inverse = inverse,
+      _clip = clip,
+      _outer = outer;
+
+  const _ClipChain.none() : _inverse = null, _clip = null, _outer = null;
+
+  /// Whether [position], in scope coordinates, is inside every clip.
+  bool contains(Offset position) {
+    for (_ClipChain? chain = this; chain != null; chain = chain._outer) {
+      final Rect? clip = chain._clip;
+      if (clip == null) continue;
+      if (!clip.contains(
+        MatrixUtils.transformPoint(chain._inverse!, position),
+      )) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 
