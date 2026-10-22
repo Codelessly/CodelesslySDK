@@ -53,6 +53,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'loadingIndicator': PassiveLoadingIndicatorTransformer(getNode, this),
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),
+      'chart': PassiveChartTransformer(getNode, this),
       'variance': PassiveVarianceTransformer(getNode, this),
       'webView': PassiveWebViewTransformer(getNode, this),
       'listView': PassiveListViewTransformer(getNode, this),
