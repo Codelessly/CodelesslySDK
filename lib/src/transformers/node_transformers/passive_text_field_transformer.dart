@@ -310,11 +310,20 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         !widget.settings.isPreview &&
         (widget.autofocus ?? properties.autoFocus);
 
-    final (int? maxLines, int? minLines) = resolveTextFieldLines(
-      maxLines: properties.maxLines,
-      minLines: properties.minLines,
-      expands: !widget.node.isVerticalWrap,
-    );
+    // Flutter only obscures single-line fields, so an obscured field that
+    // isn't explicitly multi-line (a PIN or password in a fixed-height box)
+    // keeps one line instead of expanding to the box.
+    final bool singleLineObscured =
+        obscureText &&
+        (properties.maxLines ?? 1) <= 1 &&
+        (properties.minLines ?? 1) <= 1;
+    final (int? maxLines, int? minLines) = singleLineObscured
+        ? (1, null)
+        : resolveTextFieldLines(
+            maxLines: properties.maxLines,
+            minLines: properties.minLines,
+            expands: !widget.node.isVerticalWrap,
+          );
 
     Widget field = TextFormField(
       focusNode: focusNode,
@@ -352,7 +361,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       ],
       maxLines: maxLines,
       minLines: minLines,
-      expands: !widget.node.isVerticalWrap,
+      expands: !singleLineObscured && !widget.node.isVerticalWrap,
       obscuringCharacter: widget.node.properties.obscuringCharacter,
       style: TextUtils.retrieveTextStyleFromProp(
         widget.node.properties.inputStyle,
