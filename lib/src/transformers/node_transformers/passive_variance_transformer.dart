@@ -35,8 +35,10 @@ class PassiveVarianceWidget extends StatelessWidget {
     required this.settings,
   });
 
-  List<String> getChildren(ScopedValues scopedValues) {
-    if (settings.isPreview) return node.currentVariant.children;
+  /// The variant to show: the current one on the design canvas, otherwise
+  /// the one the bound variable or a condition picks by id or name.
+  Variant getVariant(ScopedValues scopedValues) {
+    if (settings.isPreview) return node.currentVariant;
     final String variantIdOrName =
         PropertyValueDelegate.getPropertyValue<String>(
           node,
@@ -45,11 +47,9 @@ class PassiveVarianceWidget extends StatelessWidget {
         ) ??
         node.currentVariantId;
 
-    final Variant variant =
-        node.variants.findById(variantIdOrName) ??
+    return node.variants.findById(variantIdOrName) ??
         node.variants.findByName(variantIdOrName) ??
         node.currentVariant;
-    return variant.children;
   }
 
   @override
@@ -70,13 +70,22 @@ class PassiveVarianceWidget extends StatelessWidget {
         ),
       );
     }
-    return _buildChildren(context, getChildren(ScopedValues.of(context)));
+    return _buildVariant(context, getVariant(ScopedValues.of(context)));
   }
 
-  /// Builds only [variant]: a responsive node's other variants are never
-  /// built.
-  Widget _buildVariant(BuildContext context, Variant variant) =>
-      _buildChildren(context, variant.children);
+  /// Builds only [variant]: the other variants are never built. A
+  /// property-override variant builds the default variant's children with
+  /// its overrides.
+  Widget _buildVariant(BuildContext context, Variant variant) {
+    final List<String> children = node.childrenOf(variant);
+    final PropertyOverrides? overrides = variant.overrides;
+    if (overrides == null) return _buildChildren(context, children);
+    return PropertyOverrideScope.wrap(
+      context,
+      overrides: overrides,
+      child: Builder(builder: (context) => _buildChildren(context, children)),
+    );
+  }
 
   Widget _buildChildren(BuildContext context, List<String> children) {
     if (children.isNotEmpty) {
