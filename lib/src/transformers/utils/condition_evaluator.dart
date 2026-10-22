@@ -102,7 +102,23 @@ class ConditionEvaluator<R extends Object>
   }
 
   @override
-  Object? visitRawValuePart(RawValuePart part) => _visitRawValue(part.value);
+  Object? visitRawValuePart(RawValuePart part) {
+    final String raw = part.value;
+    if (_rawValues.containsKey(raw)) return _rawValues[raw];
+    final Object? value = _visitRawValue(raw);
+    // A raw value is written in the condition, so it parses the same every
+    // time; parsing plain text tries JSON first, which throws. Lists and
+    // maps aren't kept, so no caller can change the one another gets.
+    if (value is! List && value is! Map) {
+      if (_rawValues.length >= _maxRawValues) _rawValues.clear();
+      _rawValues[raw] = value;
+    }
+    return value;
+  }
+
+  /// Parsed raw values of conditions, by their text.
+  static final Map<String, Object?> _rawValues = {};
+  static const int _maxRawValues = 1000;
 
   Object? _visitRawValue(String value) => value.parsedValue();
 
