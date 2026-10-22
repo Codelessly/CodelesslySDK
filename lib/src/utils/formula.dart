@@ -267,6 +267,34 @@ class FormulaEvaluator {
       'without(list, other)',
       'without(all, picked)',
     ),
+    FormulaFunctionDoc(
+      'obj',
+      'obj(key, value, ...)',
+      "obj('cat', c, 'min', 80) → {cat: c, min: 80}",
+    ),
+    FormulaFunctionDoc(
+      'set',
+      'set(map, key, value, ...)',
+      "set(item, 'status', 'down') → item with status down",
+    ),
+    FormulaFunctionDoc(
+      'get',
+      'get(map or list, key)',
+      "get(lineNames, item.line) → 'Weld'",
+    ),
+    FormulaFunctionDoc('take', 'take(list, count)', 'take(pareto, index + 1)'),
+    FormulaFunctionDoc('skip', 'skip(list, count)', 'skip(events, 25)'),
+    FormulaFunctionDoc(
+      'indexOf',
+      'indexOf(list, value or lambda)',
+      "indexOf(machines, m => m.id == 'PR-102') → 1",
+    ),
+    FormulaFunctionDoc(
+      'split',
+      'split(text, separator)',
+      "split('19:42', ':') → ['19', '42']",
+    ),
+    FormulaFunctionDoc('pad', 'pad(value, width, fill)', "pad(7) → '07'"),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
     FormulaFunctionDoc(
@@ -850,6 +878,39 @@ final Map<String, _Function> _functions = {
       if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
         item,
   ],
+  'obj': (a) => {
+    for (int i = 0; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  'set': (a) => {
+    if (_arg(a, 0) case final Map map)
+      for (final MapEntry entry in map.entries)
+        entry.key.toString(): entry.value,
+    for (int i = 1; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  'get': (a) => _member(_arg(a, 0), _arg(a, 1)),
+  'take': (a) =>
+      _values(_arg(a, 0), null).take(math.max(0, _intArg(_arg(a, 1)))).toList(),
+  'skip': (a) =>
+      _values(_arg(a, 0), null).skip(math.max(0, _intArg(_arg(a, 1)))).toList(),
+  'indexOf': (a) {
+    final List<Object?> items = _values(_arg(a, 0), null).toList();
+    final List<Object?> rest = a.skip(1).toList();
+    // A plain value finds an equal item; a lambda or field (and value)
+    // finds a matching one.
+    if (rest.length == 1 && rest.first is! _Closure) {
+      return items.indexWhere((item) => _looseEquals(item, rest.first));
+    }
+    return items.indexWhere((item) => _matches(item, rest));
+  },
+  'split': (a) =>
+      FormulaEvaluator.stringify(_arg(a, 0))
+          .split(FormulaEvaluator.stringify(_arg(a, 1) ?? ',')),
+  'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
+    _arg(a, 1) == null ? 2 : _intArg(_arg(a, 1)),
+    FormulaEvaluator.stringify(_arg(a, 2) ?? '0'),
+  ),
   'number': (a) => _toNum(_arg(a, 0)),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),

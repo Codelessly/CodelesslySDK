@@ -345,6 +345,118 @@ class PropertyValueDelegate {
     return value?.typedValue<R>();
   }
 
+  /// Variables being evaluated, to stop a computed variable that reads
+  /// itself (directly or through others).
+  static final Set<String> _evaluating = {};
+
+  /// The value of [variable]: its typed value, or for a computed variable
+  /// ([VariableData.isComputed]) the result of its formula, read in
+  /// [scopedValues] and converted to the variable's type. A computed
+  /// variable that depends on itself reads as null.
+  static Object? variableValue(
+    VariableData variable, {
+    required ScopedValues scopedValues,
+  }) {
+    if (!variable.isComputed) return variable.getValue();
+    final String? expression = FormulaEvaluator.exactExpression(variable.value);
+    if (expression == null || !_evaluating.add(variable.id)) return null;
+    try {
+      // Variables are immutable and replaced when they change, so a result
+      // is reused while the formula and the variables it reads are the same
+      // objects. Formulas reading item, index, screen, ... aren't cached.
+      final List<Object?>? inputs = _computedInputs(expression, scopedValues);
+      final _ComputedResult? cached = _computedCache[variable.id];
+      if (inputs != null &&
+          cached != null &&
+          identical(cached.variable, variable) &&
+          _sameInputs(cached.inputs, inputs)) {
+        return cached.value;
+      }
+      final Object? result = _computeVariable(
+        variable,
+        expression,
+        scopedValues,
+      );
+      if (inputs != null) {
+        _computedCache[variable.id] = _ComputedResult(variable, inputs, result);
+      }
+      return result;
+    } finally {
+      _evaluating.remove(variable.id);
+    }
+  }
+
+  static final Map<String, _ComputedResult> _computedCache = {};
+
+  /// The variables [expression] reads, or null when it reads predefined
+  /// values (item, index, screen, ...) that change from place to place.
+  static List<Object?>? _computedInputs(
+    String expression,
+    ScopedValues scopedValues,
+  ) => _inputsOf(expression, scopedValues.variables, <String>{});
+
+  static List<Object?>? _inputsOf(
+    String expression,
+    Map<String, VariableData> variables,
+    Set<String> seen,
+  ) {
+    final List<Object?> inputs = [];
+    for (final String path in FormulaEvaluator.referencedPaths(expression)) {
+      final VariableMatch? match = VariableMatch.parse(
+        path.wrapWithVariableSyntax(),
+      );
+      if (match == null) continue;
+      if (match.isPredefinedVariable) return null;
+      final VariableData? input = variables[match.name];
+      inputs.add(input);
+      // A computed input changes when its own inputs do, so they count too;
+      // and if it reads predefined values, so does this formula.
+      if (input != null && input.isComputed && seen.add(input.name)) {
+        final String? inner = FormulaEvaluator.exactExpression(input.value);
+        if (inner == null) continue;
+        final List<Object?>? nested = _inputsOf(inner, variables, seen);
+        if (nested == null) return null;
+        inputs.addAll(nested);
+      }
+    }
+    return inputs;
+  }
+
+  static bool _sameInputs(List<Object?> a, List<Object?> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (!identical(a[i], b[i])) return false;
+    }
+    return true;
+  }
+
+  static Object? _computeVariable(
+    VariableData variable,
+    String expression,
+    ScopedValues scopedValues,
+  ) {
+    {
+      final Object? value = evaluateFormula(
+        expression,
+        scopedValues: scopedValues,
+      );
+      return switch (variable.type) {
+        VariableType.text || VariableType.image =>
+          value == null ? null : FormulaEvaluator.stringify(value),
+        VariableType.integer =>
+          value is num ? value.toInt() : num.tryParse('$value')?.toInt(),
+        VariableType.decimal =>
+          value is num ? value.toDouble() : num.tryParse('$value')?.toDouble(),
+        VariableType.boolean =>
+          value is bool ? value : bool.tryParse('$value', caseSensitive: false),
+        VariableType.color =>
+          value is ColorRGBA ? value : ColorRGBA.fromHex('$value'),
+        VariableType.list => value is List ? value : null,
+        VariableType.map => value is Map ? value : null,
+      };
+    }
+  }
+
   static Object? _retrieveVariableValue(
     String path, {
     required ScopedValues scopedValues,
@@ -365,7 +477,10 @@ class PropertyValueDelegate {
     if (variable == null) return null;
     if (match.hasAccessor) {
       if (variable.type.isText) {
-        final characters = variable.getValue().toString().characters.toList();
+        final characters = variableValue(
+          variable,
+          scopedValues: scopedValues,
+        ).toString().characters.toList();
         final (Object? value, _) = substituteJsonPath(match.fullPath, {
           match.name: characters,
         });
@@ -373,23 +488,20 @@ class PropertyValueDelegate {
       }
       if (!variable.type.isList) return null;
       final (Object? value, _) = substituteJsonPath(match.fullPath, {
-        match.name: variable.getValue(),
+        match.name: variableValue(variable, scopedValues: scopedValues),
       });
 
       return value;
     }
 
-    if (!match.hasPath) return variable.getValue();
+    if (!match.hasPath)
+      return variableValue(variable, scopedValues: scopedValues);
 
-    final variableProps = getVariableProperties(
-      variable.getValue(),
-      variable.type,
-    );
-    final Object? variableValue = variable.getValue();
+    final Object? current = variableValue(variable, scopedValues: scopedValues);
+    final variableProps = getVariableProperties(current, variable.type);
     final Map<String, dynamic> values = {
       ...variableProps,
-      if (variable.type.isMap && variableValue is Map<String, dynamic>)
-        ...variableValue,
+      if (variable.type.isMap && current is Map<String, dynamic>) ...current,
     };
     final (Object? value, _) = substituteJsonPath(match.fullPath, {
       match.name: values,
@@ -1092,4 +1204,13 @@ String formatTimeAgo(DateTime date, {DateTime? now}) {
     return '${diff.inDays} ${diff.inDays == 1 ? 'day' : 'days'} ago';
   }
   return formatDate(date);
+}
+
+/// A computed variable's last result and what it was computed from.
+class _ComputedResult {
+  final VariableData variable;
+  final List<Object?> inputs;
+  final Object? value;
+
+  const _ComputedResult(this.variable, this.inputs, this.value);
 }
