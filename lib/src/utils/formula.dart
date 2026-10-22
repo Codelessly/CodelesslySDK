@@ -29,7 +29,8 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
 ///    endsWith, where, without, number, text, isEmpty, isNotEmpty, clamp,
 ///    sin, cos, sqrt, pow, pad (`pad(5, 2)` is "05") and alpha
-///    (`alpha('#FF4D4F', 0.12)` is "#1FFF4D4F"). See
+///    (`alpha('#FF4D4F', 0.12)` is "#1FFF4D4F"), take, skip and keys (a map's
+///    keys as text). See
 ///    [FormulaEvaluator.functions].
 ///  - `object(key, value, ...)` builds a map from key/value pairs, since
 ///    braces can't appear in a formula: a list of records for a list view is
