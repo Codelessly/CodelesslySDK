@@ -70,6 +70,19 @@ void main() {
       expect(eval("alpha('#FF4D4F', 0.12)"), '#1FFF4D4F');
       expect(eval("alpha('#80ff4d4f', 1)"), '#FFFF4D4F');
       expect(eval("alpha('red', 1)"), null);
+      expect(eval('take([1, 2, 3, 4], 3)'), [1, 2, 3]);
+      expect(eval('take([1], 3)'), [1]);
+      expect(eval('skip([1, 2, 3], 1)'), [2, 3]);
+      expect(eval("keys(object('a', 1, 'b', 2))"), ['a', 'b']);
+      expect(eval('keys(qty)'), isEmpty);
+      // A map read with a computed key, e.g. a snooze deadline by alert id.
+      expect(
+        eval(
+          "map(filter([object('id', 'a'), object('id', 'b')], r => "
+          "object('a', 900)[r.id] > 880), 'id')",
+        ),
+        ['a'],
+      );
     });
 
     test('arithmetic and precedence', () {
