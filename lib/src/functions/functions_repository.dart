@@ -1148,7 +1148,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     Object? currentValue = variableNotifier.value.getValue();
 
     final Object? updatedValue = switch (variableNotifier.value.type) {
-      VariableType.text => newValue,
+      VariableType.text || VariableType.choice => newValue,
       VariableType.image => newValue,
       VariableType.color => ColorRGBA.fromHex(newValue),
       VariableType.integer => _performIntOperation(
@@ -1536,7 +1536,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       }
 
       final Object? value = switch (action.variableType) {
-        VariableType.text => newValue,
+        VariableType.text || VariableType.choice => newValue,
         VariableType.image => newValue,
         VariableType.color => ColorRGBA.fromHex(newValue),
         VariableType.integer => _performIntOperation(
@@ -1922,7 +1922,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       // if (!context.mounted) throw Exception('Context is not mounted.');
 
       final Object? value = switch (subAction.variableType) {
-        VariableType.text => newValue,
+        VariableType.text || VariableType.choice => newValue,
         VariableType.image => newValue,
         VariableType.color => ColorRGBA.fromHex(newValue),
         VariableType.integer => _performIntOperation(
