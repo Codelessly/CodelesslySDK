@@ -527,6 +527,33 @@ void main() {
     expectRect(registry.geometryOf('inner')!.bounds, inner);
   });
 
+  testWidgets('a paint offset keeps hit testing in step without a full walk', (
+    tester,
+  ) async {
+    final (root, nodes) = screenTree();
+    final registry = await pump(tester, root, nodes);
+    final Rect scope = Offset.zero & registry.root!.size;
+    List<List<String>> sample() => [
+      for (double y = scope.top + 3; y < scope.bottom; y += 7)
+        for (double x = scope.left + 3; x < scope.right; x += 7)
+          [for (final hit in registry.hitTest(Offset(x, y))) hit.nodeId],
+    ];
+
+    // Collect the index, then move a node so only its subtree is patched.
+    sample();
+    for (final offset in const [
+      Offset(40, -25),
+      Offset(-13, 31),
+      Offset.zero,
+    ]) {
+      registry.setPaintOffset('card', offset);
+      await tester.pump();
+      final patched = sample();
+      registry.markChanged();
+      expect(patched, sample(), reason: 'offset $offset');
+    }
+  });
+
   testWidgets('a lifted node is not painted but keeps its geometry', (
     tester,
   ) async {
