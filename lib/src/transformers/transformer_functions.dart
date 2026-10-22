@@ -7,11 +7,32 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/extensions.dart';
 import 'transformers.dart';
 
+/// The colour a button of [type] has when its buttonColor is unset (null):
+/// no fill for a text button, as Flutter's TextButton; black for every other
+/// type, which is what designs saved before buttonColor was nullable meant by
+/// leaving it out. An outlined button is never filled; black is its outline
+/// and label colour.
+ColorRGBA defaultButtonColorFor(ButtonTypeEnum type) => switch (type) {
+  ButtonTypeEnum.text => ColorRGBA.transparent,
+  ButtonTypeEnum.elevated ||
+  ButtonTypeEnum.outlined ||
+  ButtonTypeEnum.filled ||
+  ButtonTypeEnum.filledTonal ||
+  ButtonTypeEnum.icon => ColorRGBA.black,
+};
+
+/// Resolves [ButtonProperties.buttonColor] for rendering.
+extension EffectiveButtonColor on ButtonProperties {
+  /// [buttonColor], or the [buttonType]'s default when it is unset.
+  ColorRGBA get effectiveButtonColor =>
+      buttonColor ?? defaultButtonColorFor(buttonType);
+}
+
 void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
   switch (type) {
     case ButtonTypeEnum.elevated:
       final brightness = ThemeData.estimateBrightnessForColor(
-        node.properties.buttonColor.toFlutterColor(),
+        node.properties.effectiveButtonColor.toFlutterColor(),
       );
       final color =
           (brightness == Brightness.light ? Colors.black : Colors.white)
@@ -25,7 +46,7 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
         ..icon = node.properties.icon.copyWith(
           color: color.toFlutterColor().toColorRGBA(),
         )
-        ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
+        ..buttonColor = node.properties.buttonColor?.copyWith(a: 1)
         ..elevation = 8
         ..gap = node.properties.icon.show ? 8 : 0
         ..shape = CShapeBorder.roundedRectangle
@@ -33,16 +54,16 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
         ..borderWidth = null;
     case ButtonTypeEnum.text:
       node.properties
-        ..buttonColor = node.properties.buttonColor.copyWith(a: 0.1)
+        ..buttonColor = node.properties.buttonColor?.copyWith(a: 0.1)
         ..labelStyle = node.properties.labelStyle.copyWith(
           fills: [
-            node.properties.buttonColor
+            node.properties.effectiveButtonColor
                 .copyWith(a: 1)
                 .toPaint(node.properties.labelStyle.fills.firstOrNull?.id),
           ],
         )
         ..icon = node.properties.icon.copyWith(
-          color: node.properties.buttonColor.copyWith(a: 1),
+          color: node.properties.effectiveButtonColor.copyWith(a: 1),
         )
         ..elevation = 0
         ..shape = CShapeBorder.roundedRectangle
@@ -50,16 +71,16 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
         ..borderColor = null;
     case ButtonTypeEnum.outlined:
       node.properties
-        ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
+        ..buttonColor = node.properties.buttonColor?.copyWith(a: 1)
         ..labelStyle = node.properties.labelStyle.copyWith(
           fills: [
-            node.properties.buttonColor
+            node.properties.effectiveButtonColor
                 .copyWith(a: 1)
                 .toPaint(node.properties.labelStyle.fills.firstOrNull?.id),
           ],
         )
         ..icon = node.properties.icon.copyWith(
-          color: node.properties.buttonColor.copyWith(a: 1),
+          color: node.properties.effectiveButtonColor.copyWith(a: 1),
         )
         ..elevation = 0
         ..shape = CShapeBorder.roundedRectangle
@@ -67,7 +88,7 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
         ..borderColor = null;
     case ButtonTypeEnum.filled:
       final brightness = ThemeData.estimateBrightnessForColor(
-        node.properties.buttonColor.toFlutterColor(),
+        node.properties.effectiveButtonColor.toFlutterColor(),
       );
       final color =
           (brightness == Brightness.light ? Colors.black : Colors.white)
@@ -79,7 +100,7 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
           ],
         )
         ..icon = node.properties.icon.copyWith(color: color)
-        ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
+        ..buttonColor = node.properties.buttonColor?.copyWith(a: 1)
         ..elevation = 0
         ..gap = node.properties.icon.show ? 8 : 0
         ..shape = CShapeBorder.stadium
@@ -87,16 +108,16 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
         ..borderWidth = null;
     case ButtonTypeEnum.filledTonal:
       node.properties
-        ..buttonColor = node.properties.buttonColor.copyWith(a: 0.2)
+        ..buttonColor = node.properties.buttonColor?.copyWith(a: 0.2)
         ..labelStyle = node.properties.labelStyle.copyWith(
           fills: [
-            node.properties.buttonColor
+            node.properties.effectiveButtonColor
                 .copyWith(a: 1)
                 .toPaint(node.properties.labelStyle.fills.firstOrNull?.id),
           ],
         )
         ..icon = node.properties.icon.copyWith(
-          color: node.properties.buttonColor.copyWith(a: 1),
+          color: node.properties.effectiveButtonColor.copyWith(a: 1),
         )
         ..elevation = 0
         ..gap = node.properties.icon.show ? 8 : 0
@@ -105,7 +126,7 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
         ..borderWidth = null;
     case ButtonTypeEnum.icon:
       final brightness = ThemeData.estimateBrightnessForColor(
-        node.properties.buttonColor.toFlutterColor(),
+        node.properties.effectiveButtonColor.toFlutterColor(),
       );
       final color =
           (brightness == Brightness.light ? Colors.black : Colors.white)
@@ -117,7 +138,7 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
           ],
         )
         ..icon = node.properties.icon.copyWith(color: color)
-        ..buttonColor = node.properties.buttonColor.copyWith(a: 1)
+        ..buttonColor = node.properties.buttonColor?.copyWith(a: 1)
         ..icon = node.properties.icon.copyWith(show: true)
         ..shape = CShapeBorder.circle
         ..gap = 0
@@ -189,13 +210,13 @@ ButtonStyle createMasterButtonStyle(
       )?.toFlutterColor() ??
       TextUtils.retrievePropColor(node.properties.labelStyle);
 
-  final buttonColor =
+  final ColorRGBA buttonColor =
       PropertyValueDelegate.getPropertyValue<ColorRGBA>(
         node,
         'buttonColor',
         scopedValues: scopedValues,
       ) ??
-      node.properties.buttonColor;
+      node.properties.effectiveButtonColor;
 
   final shadowColor =
       PropertyValueDelegate.getPropertyValue<ColorRGBA>(
@@ -223,12 +244,8 @@ ButtonStyle createMasterButtonStyle(
       buttonStyle = TextButton.styleFrom(
         foregroundColor: labelColor,
         elevation: elevation ?? node.properties.elevation,
-        // A text button has no fill, as Flutter's TextButton, unless a button
-        // color is set. An unset buttonColor reads as its default, black
-        // (the JSON omits it), so black means "not set" here.
-        backgroundColor: buttonColor == ColorRGBA.black
-            ? Colors.transparent
-            : buttonColor.toFlutterColor(),
+        // No fill unless a button color is set; see [defaultButtonColorFor].
+        backgroundColor: buttonColor.toFlutterColor(),
         padding: node.padding.flutterEdgeInsets,
         visualDensity: VisualDensity.standard,
         textStyle: textStyle,
@@ -294,13 +311,13 @@ ButtonStyle createMasterButtonStyle(
 }
 
 OutlinedBorder? getButtonShape(ButtonNode node, ScopedValues scopedValues) {
-  final buttonColor =
+  final ColorRGBA buttonColor =
       PropertyValueDelegate.getPropertyValue<ColorRGBA>(
         node,
         'buttonColor',
         scopedValues: scopedValues,
       ) ??
-      node.properties.buttonColor;
+      node.properties.effectiveButtonColor;
   final borderColor =
       PropertyValueDelegate.getPropertyValue<ColorRGBA>(
         node,

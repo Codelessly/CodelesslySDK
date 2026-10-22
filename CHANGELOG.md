@@ -1,3 +1,66 @@
+## 8.0.0
+
+### Breaking changes
+
+- Requires codelessly_api 6.0.0 (`ButtonProperties.buttonColor` and the
+  toast colours are nullable).
+- `ListViewBuilder.itemBuilder` is a `NullableIndexedWidgetBuilder`, so an
+  endless list can end where the builder returns `null`.
+
+### Layout
+
+- Freeform children are laid out by their pins at the runtime size: pinned
+  axes are placed from their pins (never the stored rect), both-pinned
+  children stretch to the parent minus the pins, and wrapping freeform
+  frames size to their largest child, as the editor's solver does.
+- Canvases size from their own space; text and scroll content can grow,
+  dialog canvases keep their design size, and a canvas body scrolls like a
+  Row/Column.
+- Row/Column children are never squeezed below their min-content size;
+  fills resolve against bounded axes and flex children no longer crash
+  unbounded Row/Columns.
+- Lists, grids and page views size by one viewport rule; endless lists build
+  a bounded number of items, dispose items off-screen and end only during
+  layout.
+- Responsive variances build only the variant for the canvas width
+  (mobile, tablet, desktop), and a screen variable reports the breakpoint
+  with no gaps between breakpoints.
+- Text field line limits resolve in one place; strokes paint only on the
+  side `strokeSide` names.
+
+### Actions
+
+- Action chains run against the scope and host captured at their trigger
+  and fall back to every host they run in, so `${item}` stays the tapped
+  item and toasts, dialogs and navigation still happen after the trigger
+  unmounts.
+- Confirm dialogs (built-in, themed from the app, or a canvas as the
+  dialog), delay actions, email verification, password change and account
+  deletion, and screens that send signed-out users to a sign-in canvas.
+- Toasts take the app's theme, a style, a top or bottom position and a
+  button with actions (e.g. Undo).
+
+### Data and variables
+
+- Cloud lists and grids load further pages, apply the query limit, report
+  their status into the list's status variable, re-query when a value their
+  query reads changes, and run queries that need a composite index without
+  one. Per-collection data rules are followed.
+- App and page variables are shared across screens and stored under ids
+  Firestore accepts; `auth.emailVerified` is exposed.
+- Formulas gain date and time functions, lambda list functions, text
+  helpers, date-aware comparisons and readable error messages.
+- Inline variables are listened to in every text-bearing property.
+
+### Design canvases and rendering
+
+- Design canvases show variable defaults and readable placeholders (a
+  compact marker in fixed-width nodes, "…" only when it doesn't fit), a
+  placeholder for images bound to empty variables, and evaluate visibility
+  and bound button labels with their values.
+- An unset button colour renders as the button type's default; button label
+  updates, text button fills and bound icon colours are fixed.
+
 ## 7.3.1
 
 - Fix layouts rendering without their variables and conditions. A layout

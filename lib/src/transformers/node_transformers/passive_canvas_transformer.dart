@@ -462,6 +462,28 @@ class CanvasSizingScope extends InheritedWidget {
       sizing != oldWidget.sizing;
 }
 
+/// The width the canvas above is laid out at, which picks the variant a
+/// responsive [VarianceNode] shows (see [VarianceNode.variantForWidth]), the
+/// same width the editor's design canvas has.
+class CanvasWidthScope extends InheritedWidget {
+  /// The canvas width.
+  final double width;
+
+  const CanvasWidthScope({
+    super.key,
+    required this.width,
+    required super.child,
+  });
+
+  /// The width of the nearest canvas, or null outside of one.
+  static double? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<CanvasWidthScope>()?.width;
+
+  @override
+  bool updateShouldNotify(CanvasWidthScope oldWidget) =>
+      width != oldWidget.width;
+}
+
 /// Gives a canvas the box it is laid out in, so its size never depends on
 /// whether the host's constraints are tight or loose.
 ///
@@ -522,12 +544,21 @@ class CanvasViewport extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final box = resolve(node, constraints, sizing: sizing);
+        // The width the canvas content is laid out at: the canvas box for a
+        // responsive canvas, the design width for an autoScale one (its
+        // content is laid out at design size and then scaled).
+        final Widget content = CanvasWidthScope(
+          width: node.scaleMode == ScaleMode.autoScale
+              ? node.basicBoxLocal.width
+              : box.width,
+          child: child,
+        );
         if (box.height != null) {
-          return SizedBox(width: box.width, height: box.height, child: child);
+          return SizedBox(width: box.width, height: box.height, child: content);
         }
         return SizedBox(
           width: box.width,
-          child: CanvasContentHeight(child: child),
+          child: CanvasContentHeight(child: content),
         );
       },
     );
@@ -638,7 +669,38 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   @override
   void dispose() {
     codelessly?.removeNavigationListener('canvas-${widget.node.id}');
+    _gateUser?.removeListener(_enforceSignIn);
     super.dispose();
+  }
+
+  /// The signed-in user a screen that requires sign-in watches.
+  ValueNotifier<Map<String, dynamic>>? _gateUser;
+
+  bool _redirected = false;
+
+  /// Sends a signed-out user from a screen that requires sign-in to its
+  /// redirect screen, now or when they sign out later.
+  void _enforceSignIn() {
+    final String? redirectId = widget.node.properties.signInRedirectId;
+    if (_redirected || !mounted || redirectId == null || redirectId.isEmpty) {
+      return;
+    }
+    if (_gateUser?.value['isSignedIn'] == true) return;
+    _redirected = true;
+    DebugLogger.instance.printInfo(
+      'Canvas ${widget.node.id} requires sign-in. Redirecting to $redirectId.',
+      name: PassiveCanvasTransformer.name,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      FunctionsRepository.navigate(
+        context,
+        NavigationAction(
+          navigationType: NavigationType.replace,
+          destinationId: redirectId,
+        ),
+      );
+    });
   }
 
   @override
@@ -656,6 +718,14 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
 
     if (didPerformOnLoadActions) return;
     didPerformOnLoadActions = true;
+
+    if (widget.node.properties.requiresSignIn) {
+      _gateUser = context.read<Codelessly?>()?.appUser
+        ?..addListener(_enforceSignIn);
+      _enforceSignIn();
+      // A signed-out user leaves before the screen's load actions run.
+      if (_redirected) return;
+    }
 
     triggerOnLoadActions(context);
   }

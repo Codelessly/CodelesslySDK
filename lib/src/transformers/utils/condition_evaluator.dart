@@ -299,6 +299,12 @@ class ConditionEvaluator<R extends Object>
   R? visitConditionalAction(ConditionalAction action) => null;
 
   @override
+  R? visitConfirmAction(ConfirmAction action) => null;
+
+  @override
+  R? visitDelayAction(DelayAction action) => null;
+
+  @override
   R? visitForEachAction(ForEachAction action) => null;
 
   @override
@@ -444,6 +450,12 @@ class ConditionPrinter
 
   @override
   void visitConditionalAction(ConditionalAction action) {}
+
+  @override
+  void visitConfirmAction(ConfirmAction action) {}
+
+  @override
+  void visitDelayAction(DelayAction action) {}
 
   @override
   void visitForEachAction(ForEachAction action) {}
