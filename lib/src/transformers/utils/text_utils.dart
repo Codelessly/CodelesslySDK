@@ -39,7 +39,8 @@ class TextUtils {
       context,
       characters,
       node: node,
-      color: retrievePropColor(prop),
+      color: boundTextColor(context, node, variablesOverrides) ??
+          retrievePropColor(prop),
       fontSize: prop.fontSize,
       letterSpacing: prop.letterSpacing,
       fontName: prop.fontName,
@@ -270,6 +271,26 @@ class TextUtils {
       maxLines: maxLines,
       overflow: overflow?.flutterOverflow,
     );
+  }
+
+  /// The color bound to a text node's `textColor` property (a variable,
+  /// path or formula giving a color such as `#1F2B2E`), which recolors every
+  /// span of the text. Null when nothing is bound or there's no [context].
+  static Color? boundTextColor(
+    BuildContext? context,
+    BaseNode? node,
+    List<VariableData> variablesOverrides,
+  ) {
+    if (context == null || node == null) return null;
+    if (node.variables['textColor'] == null) return null;
+    return PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+      node,
+      'textColor',
+      scopedValues: ScopedValues.of(
+        context,
+        variablesOverrides: variablesOverrides,
+      ),
+    )?.toFlutterColor();
   }
 
   static Color? retrievePropColor(TextProp prop) => prop.fills
