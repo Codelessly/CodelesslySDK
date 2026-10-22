@@ -41,7 +41,7 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///  - record functions that build and change lists and maps without braces
 ///    (which formulas can't contain): obj, set, unset, merge, append,
 ///    prepend, concat, updateWhere, removeWhere, findIndex, indexOf, slice,
-///    take, skip, first, last, range and newId. They return new values and
+///    take, skip, reverse, first, last, range and newId. They return new values and
 ///    never change their arguments, so a setVariable can write the result
 ///    back, e.g. `updateWhere(logs, l => l.id == logId, l => set(l, 'crew',
 ///    append(l.crew, entry)))`.
@@ -334,6 +334,7 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('take', 'take(list, count)', 'take(logs, pageSize)'),
     FormulaFunctionDoc('skip', 'skip(list, count)', 'skip(logs, 10)'),
+    FormulaFunctionDoc('reverse', 'reverse(list or text)', 'reverse(notes)'),
     FormulaFunctionDoc('first', 'first(list)', 'first(tasks)'),
     FormulaFunctionDoc('last', 'last(list)', 'last(tasks)'),
     FormulaFunctionDoc(
@@ -1057,6 +1058,10 @@ final Map<String, _Function> _functions = {
     _num(_arg(a, 1)).isFinite ? _num(_arg(a, 1)).clamp(0, double.infinity) : 0,
     null,
   ),
+  'reverse': (a) => switch (_arg(a, 0)) {
+    final String s => String.fromCharCodes(s.runes.toList().reversed),
+    final Object? other => _listOf(other).reversed.toList(),
+  },
   'first': (a) => _listOf(_arg(a, 0)).firstOrNull,
   'last': (a) => _listOf(_arg(a, 0)).lastOrNull,
   'range': (a) {
