@@ -25,7 +25,7 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    the same rules as `${path}`, followed by `[index]` or `.key`.
 ///  - `+ - * / %`, comparisons `== != < <= > >=`, `&& || !` and
 ///    `condition ? a : b`. `+` joins text when either side is text.
-///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
+///  - functions: money, fixed, thousands, round, floor, ceil, abs, min, max, sum, count,
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
 ///    endsWith, where, without, number, text, isEmpty and isNotEmpty. See
 ///    [FormulaEvaluator.functions].
@@ -174,6 +174,11 @@ class FormulaEvaluator {
       'fixed',
       'fixed(value, decimals)',
       'fixed(4.5, 2) → 4.50',
+    ),
+    FormulaFunctionDoc(
+      'thousands',
+      'thousands(value, decimals)',
+      'thousands(12500) → 12,500',
     ),
     FormulaFunctionDoc(
       'round',
@@ -513,15 +518,24 @@ String _fixed(Object? value, Object? digits) =>
     _num(value).toStringAsFixed(_num(digits ?? 2).toInt().clamp(0, 20));
 
 String _money(Object? value, Object? symbol) {
+  final String? text = _grouped(value, 2);
+  if (text == null) return '';
+  final bool negative = text.startsWith('-');
+  return '${negative ? '-' : ''}${symbol ?? r'$'}${negative ? text.substring(1) : text}';
+}
+
+/// [value] with [decimals] digits and a comma between thousands, such as
+/// `1,234` or `-12,500.50`. Null when it isn't a number.
+String? _grouped(Object? value, int decimals) {
   final num amount = _num(value);
-  if (amount.isNaN) return '';
+  if (amount.isNaN || amount.isInfinite) return null;
   final String sign = amount < 0 ? '-' : '';
-  final String text = amount.abs().toStringAsFixed(2);
-  final int dot = text.indexOf('.');
+  final String text = amount.abs().toStringAsFixed(decimals.clamp(0, 20));
+  final int dot = text.contains('.') ? text.indexOf('.') : text.length;
   final String whole = text
       .substring(0, dot)
       .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
-  return '$sign${symbol ?? r'$'}$whole${text.substring(dot)}';
+  return '$sign$whole${text.substring(dot)}';
 }
 
 num _round(Object? value, Object? digits) {
@@ -939,6 +953,7 @@ Object? _arg(List<Object?> args, int index) =>
 final Map<String, _Function> _functions = {
   'money': (a) => _money(_arg(a, 0), _arg(a, 1)),
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
+  'thousands': (a) => _grouped(_arg(a, 0), _intArg(_arg(a, 1))),
   'round': (a) => _round(_arg(a, 0), _arg(a, 1)),
   'floor': (a) => _num(_arg(a, 0)).floor(),
   'ceil': (a) => _num(_arg(a, 0)).ceil(),

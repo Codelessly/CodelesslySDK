@@ -1,5 +1,12 @@
 ## Unreleased
 
+### Icons
+
+- An icon's `iconName` can be bound to data, set by a condition or changed by
+  an action. It names a Material Symbol, so one icon node can show the
+  icon each list item asks for; a Material Icon becomes the symbol of the
+  same style.
+
 ### Formulas
 
 - Record functions build and change lists and maps, which formulas couldn't
@@ -9,6 +16,8 @@
   They return new values, so a setVariable can write a nested change back,
   e.g. `updateWhere(logs, l => l.id == logId, l => set(l, 'crew',
   append(l.crew, entry)))`.
+- `thousands(value, decimals)` writes a number with thousands separators,
+  such as `12,500`.
 
 ## 8.2.0
 
