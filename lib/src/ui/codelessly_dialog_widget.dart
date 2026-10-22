@@ -58,3 +58,28 @@ class CodelesslyDialogWidget extends StatelessWidget {
     return Align(alignment: alignment, child: builder(context));
   }
 }
+
+/// A layout shown as a bottom sheet: the screen's full width, its canvas's
+/// own height (design or content), at most 90% of the screen high and
+/// scrollable past that. The layout draws its own background, corners and
+/// grab handle; the sheet itself is transparent.
+class CodelesslyBottomSheetWidget extends StatelessWidget {
+  final WidgetBuilder builder;
+
+  const CodelesslyBottomSheetWidget({super.key, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    final MediaQueryData media = MediaQuery.of(context);
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: media.size.height * 0.9),
+      child: Padding(
+        // Keep inputs above the keyboard.
+        padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+        // Unbounded height inside the scroll view: a filling canvas takes
+        // the full width and its own height.
+        child: SingleChildScrollView(child: Builder(builder: builder)),
+      ),
+    );
+  }
+}

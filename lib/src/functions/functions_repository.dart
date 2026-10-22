@@ -1375,6 +1375,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     ReactionMixin? node,
     dynamic value,
     List<Reaction>? reactions,
+    Object? result,
   }) async {
     final filteredReactions = (reactions ?? node?.reactions ?? []).where(
       (reaction) => reaction.trigger.type == type,
@@ -1405,9 +1406,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     // The chain captures the trigger's scope and host now, so its actions
     // read the item that was tapped and still run if the row unmounts.
+    // [result] is what `${result}` starts as, e.g. a drag's deltas.
     return ActionChain.run(
       () => _runReactions(context, filteredReactions, value),
       context: context,
+      result: result,
     );
   }
 
