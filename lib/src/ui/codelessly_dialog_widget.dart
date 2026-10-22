@@ -7,10 +7,15 @@ class CodelesslyDialogWidget extends StatelessWidget {
   final WidgetBuilder builder;
   final bool showCloseButton;
 
+  /// Where the dialog sits: centered by default, bottom center for a sheet,
+  /// or anywhere else, e.g. a menu at the top right.
+  final AlignmentGeometry alignment;
+
   const CodelesslyDialogWidget({
     super.key,
     required this.builder,
     required this.showCloseButton,
+    this.alignment = Alignment.center,
   });
 
   @override
@@ -25,7 +30,8 @@ class CodelesslyDialogWidget extends StatelessWidget {
 
   Widget _buildDialog(BuildContext context) {
     if (showCloseButton) {
-      return Center(
+      return Align(
+        alignment: alignment,
         child: Material(
           type: MaterialType.transparency,
           child: Stack(
@@ -49,6 +55,6 @@ class CodelesslyDialogWidget extends StatelessWidget {
       );
     }
 
-    return Center(child: builder(context));
+    return Align(alignment: alignment, child: builder(context));
   }
 }

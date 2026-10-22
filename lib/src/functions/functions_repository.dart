@@ -571,6 +571,8 @@ class FunctionsRepository {
       barrierDismissible: action.barrierDismissible,
       barrierColor: action.barrierColor?.toFlutterColor(),
       showCloseButton: action.showCloseButton,
+      presentation: action.presentation,
+      alignment: action.alignment.flutterAlignment ?? Alignment.center,
     );
   }
 
@@ -590,6 +592,8 @@ class FunctionsRepository {
     bool barrierDismissible = true,
     Color? barrierColor,
     bool showCloseButton = false,
+    DialogPresentation presentation = DialogPresentation.dialog,
+    AlignmentGeometry alignment = Alignment.center,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -632,19 +636,17 @@ class FunctionsRepository {
     // A chain triggered in the dialog can finish on this layout after the
     // dialog closes (e.g. Navigate back, then a toast).
     final List<BuildContext> openerHosts = ActionChainOpener.hostsFor(context);
-    final Object? result = await showDialog<Object?>(
-      context: context,
-      useRootNavigator: false,
+    final Object? result = await presentCanvas<Object?>(
+      context,
+      presentation: presentation,
+      alignment: alignment,
       barrierDismissible: barrierDismissible,
       barrierColor: barrierColor,
+      showCloseButton: showCloseButton,
       routeSettings: RouteSettings(arguments: parsedParams),
       builder: (context) => ActionChainOpener(
         openerHosts: openerHosts,
-        child: CodelesslyDialogWidget(
-          showCloseButton: showCloseButton,
-          builder: (context) =>
-              CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
-        ),
+        child: CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
       ),
     );
     if (context.mounted) {
@@ -655,6 +657,53 @@ class FunctionsRepository {
       );
     }
     return result;
+  }
+
+  /// Opens what [builder] builds as a dialog at [alignment] or as a bottom
+  /// sheet, per [presentation] (adaptive: a sheet below 600 px wide), and
+  /// completes with the value it is closed with.
+  static Future<T?> presentCanvas<T>(
+    BuildContext context, {
+    required WidgetBuilder builder,
+    DialogPresentation presentation = DialogPresentation.dialog,
+    AlignmentGeometry alignment = Alignment.center,
+    bool barrierDismissible = true,
+    Color? barrierColor,
+    bool showCloseButton = false,
+    RouteSettings? routeSettings,
+  }) {
+    final bool asSheet = switch (presentation) {
+      DialogPresentation.dialog => false,
+      DialogPresentation.bottomSheet => true,
+      DialogPresentation.adaptive =>
+        (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < 600,
+    };
+    Widget content(BuildContext context) => CodelesslyDialogWidget(
+      showCloseButton: showCloseButton,
+      alignment: asSheet ? Alignment.bottomCenter : alignment,
+      builder: builder,
+    );
+    if (asSheet) {
+      return showModalBottomSheet<T>(
+        context: context,
+        useRootNavigator: false,
+        isScrollControlled: true,
+        isDismissible: barrierDismissible,
+        barrierColor: barrierColor,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        routeSettings: routeSettings,
+        builder: content,
+      );
+    }
+    return showDialog<T>(
+      context: context,
+      useRootNavigator: false,
+      barrierDismissible: barrierDismissible,
+      barrierColor: barrierColor,
+      routeSettings: routeSettings,
+      builder: content,
+    );
   }
 
   static void launchURL(BuildContext context, LinkAction action) {
