@@ -67,6 +67,9 @@ void main() {
       expect(eval('pad(5, 2)'), '05');
       expect(eval("pad(7, 3, ' ')"), '  7');
       expect(eval('pad(123, 2)'), '123');
+      expect(eval("alpha('#FF4D4F', 0.12)"), '#1FFF4D4F');
+      expect(eval("alpha('#80ff4d4f', 1)"), '#FFFF4D4F');
+      expect(eval("alpha('red', 1)"), null);
     });
 
     test('arithmetic and precedence', () {
