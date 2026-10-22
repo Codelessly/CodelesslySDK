@@ -1311,6 +1311,27 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     if (filteredReactions.isEmpty) return false;
 
+    // A debounced trigger runs once, after the last of a burst.
+    final int debounceMs = filteredReactions
+        .map((reaction) => reaction.trigger.debounceMs)
+        .fold(0, (a, b) => a > b ? a : b);
+    if (debounceMs > 0) {
+      final Object key = (node ?? reactions ?? context, type);
+      _debounceTimers.remove(key)?.cancel();
+      final Completer<bool> done = Completer<bool>();
+      _debounceTimers[key] = Timer(Duration(milliseconds: debounceMs), () {
+        _debounceTimers.remove(key);
+        if (!context.mounted) return done.complete(false);
+        done.complete(
+          ActionChain.run(
+            () => _runReactions(context, filteredReactions, value),
+            context: context,
+          ),
+        );
+      });
+      return done.future;
+    }
+
     // The chain captures the trigger's scope and host now, so its actions
     // read the item that was tapped and still run if the row unmounts.
     return ActionChain.run(
@@ -1318,6 +1339,9 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       context: context,
     );
   }
+
+  /// The pending runs of debounced triggers, by target and trigger type.
+  static final Map<Object, Timer> _debounceTimers = {};
 
   static Future<bool> _runReactions(
     BuildContext context,
