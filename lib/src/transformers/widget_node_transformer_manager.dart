@@ -123,13 +123,20 @@ abstract class WidgetNodeTransformerManager
     // Get node's values.
     final List<ValueModel> nodeValues =
         payload.nodeValues[node.id]?.value ?? [];
-    // Get local rotation value if it exists, else use node's rotation value.
-    final int rotationDegrees =
+    // A bound or conditional rotation (degrees, fractional allowed), else
+    // a local rotation value, else the node's own.
+    final double rotationDegrees =
+        PropertyValueDelegate.getPropertyValue<double>(
+          node,
+          'rotation',
+          scopedValues: ScopedValues.of(context),
+        ) ??
         nodeValues
             .firstWhereOrNull((value) => value.name == 'rotationDegrees')
             ?.value
-            .typedValue<int>() ??
-        node.rotationDegrees;
+            .typedValue<int>()
+            ?.toDouble() ??
+        node.rotationDegrees.toDouble();
     if (rotationDegrees == 0) return widget;
     return widget = Transform.rotate(
       angle: rotationDegrees * pi / 180,
