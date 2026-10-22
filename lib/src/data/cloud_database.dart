@@ -644,7 +644,10 @@ class FirestoreCloudDatabase extends CloudDatabase {
     Completer<void> firstSnapshot, {
     bool forceClient = false,
   }) {
-    final CloudQueryPlan plan = query.plan(forceClient: forceClient);
+    final CloudQueryPlan plan = query.plan(
+      forceClient: forceClient,
+      readyIndexes: rules.readyIndexesFor(path),
+    );
     if (plan.runsOnClient) {
       DebugLogger.instance.printInfo(
         'Query on $path needs a composite index; running $plan',

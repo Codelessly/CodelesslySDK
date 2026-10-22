@@ -130,6 +130,11 @@ class PassiveListViewWidget extends StatelessWidget {
           query: query.query,
           pageSize: node.limit ?? 20,
           countTotal: node.paging == QueryPaging.button,
+          readyIndexes:
+              codelessly.cloudDatabase?.rules.readyIndexesFor(
+                node.collectionPath ?? '',
+              ) ??
+              const {},
           builder: (context, snapshot, child) => ShowMorePager(
             pageSize: node.limit ?? 20,
             builder: (context, revealed, revealMore) {
