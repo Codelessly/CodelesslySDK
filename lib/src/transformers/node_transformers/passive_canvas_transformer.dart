@@ -440,6 +440,11 @@ enum CanvasSizing {
   /// given. Used where the host only centers the layout and lets it choose
   /// its size, such as a dialog.
   design,
+
+  /// The canvas spans the width it is given and keeps its design height (or
+  /// its content's height when it shrink-wraps vertically), within the
+  /// height it is given. Used for bottom sheets.
+  sheet,
 }
 
 /// Sets the [CanvasSizing] of the canvases below it. Without one, canvases
@@ -514,8 +519,11 @@ class CanvasViewport extends StatelessWidget {
         node.verticalFit == SizeFit.shrinkWrap &&
         node.scaleMode == ScaleMode.responsive &&
         !node.isAScaffold;
-    if (sizing == CanvasSizing.design) {
-      final double width = constraints.constrainWidth(node.basicBoxLocal.width);
+    if (sizing == CanvasSizing.design || sizing == CanvasSizing.sheet) {
+      final double width =
+          sizing == CanvasSizing.sheet && constraints.hasBoundedWidth
+          ? constraints.maxWidth
+          : constraints.constrainWidth(node.basicBoxLocal.width);
       if (contentHeight) return (width: width, height: null);
       final double height = node.scaleMode == ScaleMode.autoScale
           ? autoScaleHeight(node, width)
