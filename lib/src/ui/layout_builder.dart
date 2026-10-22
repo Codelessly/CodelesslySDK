@@ -404,7 +404,9 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         widget.layout.canvases[widget.canvasId] ?? const {};
     if (_feedbackTheme == null || !identical(nodes, _feedbackThemeNodes)) {
       _feedbackThemeNodes = nodes;
-      _feedbackTheme = FeedbackTheme.fromNodes(nodes.values);
+      // The project's theme wins; what it leaves out comes from the nodes.
+      _feedbackTheme = FeedbackTheme.fromTokens(widget.layout.theme)
+          .merge(FeedbackTheme.fromNodes(nodes.values));
     }
     return _feedbackTheme!;
   }

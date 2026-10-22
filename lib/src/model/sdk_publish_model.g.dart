@@ -17,18 +17,26 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
   layoutIDMap: (json['layoutIDMap'] as Map?)?.map(
     (k, e) => MapEntry(k as String, e as String),
   ),
-  fonts: SDKPublishModel.deserializeFonts(
-    SDKPublishModel.readLookupMap(json, 'fonts') as Map,
-  ),
-  layouts: SDKPublishModel.deserializeLayouts(
-    SDKPublishModel.readLookupMap(json, 'layouts') as Map,
-  ),
-  variables: SDKPublishModel.deserializeVariables(
-    SDKPublishModel.readLookupMap(json, 'variables') as Map,
-  ),
-  conditions: SDKPublishModel.deserializeConditions(
-    SDKPublishModel.readLookupMap(json, 'conditions') as Map,
-  ),
+  fonts: SDKPublishModel.readLookupMap(json, 'fonts') == null
+      ? null
+      : SDKPublishModel.deserializeFonts(
+          SDKPublishModel.readLookupMap(json, 'fonts') as Map,
+        ),
+  layouts: SDKPublishModel.readLookupMap(json, 'layouts') == null
+      ? null
+      : SDKPublishModel.deserializeLayouts(
+          SDKPublishModel.readLookupMap(json, 'layouts') as Map,
+        ),
+  variables: SDKPublishModel.readLookupMap(json, 'variables') == null
+      ? null
+      : SDKPublishModel.deserializeVariables(
+          SDKPublishModel.readLookupMap(json, 'variables') as Map,
+        ),
+  conditions: SDKPublishModel.readLookupMap(json, 'conditions') == null
+      ? null
+      : SDKPublishModel.deserializeConditions(
+          SDKPublishModel.readLookupMap(json, 'conditions') as Map,
+        ),
   apis: (json['apis'] as Map?)?.map(
     (k, e) => MapEntry(
       k as String,
@@ -93,6 +101,9 @@ SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
       ?.map((e) => Breakpoint.fromJson(e as Map))
       .toList(),
   hidden: json['hidden'] as bool?,
+  theme: json['theme'] == null
+      ? null
+      : ThemeTokens.fromJson(json['theme'] as Map),
   owner: json['owner'] as String,
   teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
   users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
@@ -116,6 +127,7 @@ Map<String, dynamic> _$SDKPublishLayoutToJson(SDKPublishLayout instance) =>
       'breakpoints': instance.breakpoints.map((e) => e.toJson()).toList(),
       'lastUpdated': ?const DateTimeConverter().toJson(instance.lastUpdated),
       'hidden': instance.hidden,
+      'theme': ?instance.theme?.toJson(),
     };
 
 SDKPublishFont _$SDKPublishFontFromJson(Map json) => SDKPublishFont(

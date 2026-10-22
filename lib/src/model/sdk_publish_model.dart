@@ -457,6 +457,11 @@ class SDKPublishLayout extends PrivacyBase {
   /// Returns true if the layout is hidden from Codelessly's CloudUI dashboard.
   final bool hidden;
 
+  /// The project's theme when the layout was published, for what the
+  /// runtime draws itself (dialogs, toasts). Null for layouts published
+  /// before themes, which read their look from their nodes.
+  final ThemeTokens? theme;
+
   /// Creates a new instance of [SDKPublishLayout].
   SDKPublishLayout({
     required this.id,
@@ -466,6 +471,7 @@ class SDKPublishLayout extends PrivacyBase {
     required this.lastUpdated,
     List<Breakpoint>? breakpoints,
     bool? hidden,
+    this.theme,
 
     // Privacy
     required super.owner,
@@ -487,6 +493,7 @@ class SDKPublishLayout extends PrivacyBase {
     required this.lastUpdated,
     List<Breakpoint>? breakpoints,
     bool? hidden,
+    this.theme,
 
     // Privacy
     required super.privacy,
@@ -517,6 +524,7 @@ class SDKPublishLayout extends PrivacyBase {
     DateTime? lastUpdated,
     List<Breakpoint>? breakpoints,
     bool? hidden,
+    ThemeTokens? theme,
 
     // Privacy
     PrivacyBase? privacy,
@@ -529,6 +537,7 @@ class SDKPublishLayout extends PrivacyBase {
       lastUpdated: lastUpdated ?? this.lastUpdated,
       breakpoints: breakpoints ?? this.breakpoints,
       hidden: hidden ?? this.hidden,
+      theme: theme ?? this.theme,
       // Privacy
       privacy: privacy ?? this,
     );
@@ -544,6 +553,7 @@ class SDKPublishLayout extends PrivacyBase {
     lastUpdated,
     breakpoints,
     hidden,
+    theme,
   ];
 }
 
