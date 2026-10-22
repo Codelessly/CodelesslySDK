@@ -84,6 +84,8 @@ void main() {
     expect(eval('take(tags, 2)'), ['a', 'b']);
     expect(eval('take(tags, 10)'), ['a', 'b', 'c', 'd']);
     expect(eval('skip(tags, 3)'), ['d']);
+    expect(eval('reverse(tags)'), ['d', 'c', 'b', 'a']);
+    expect(eval('reverse("abc")'), 'cba');
     expect(eval('first(tags)'), 'a');
     expect(eval('last(tags)'), 'd');
     expect(eval('first(null)'), isNull);
