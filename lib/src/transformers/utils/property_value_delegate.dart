@@ -693,6 +693,7 @@ List<Accessor> getAccessorsForType(VariableType type) {
   switch (type) {
     case VariableType.image:
     case VariableType.text:
+    case VariableType.choice:
       return [
         Accessor(
           name: 'length',
