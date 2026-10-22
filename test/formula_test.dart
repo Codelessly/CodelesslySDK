@@ -33,6 +33,35 @@ void main() {
       FormulaEvaluator.evaluate(expression, resolve);
 
   group('FormulaEvaluator', () {
+    test('object builds records a list can filter and sort', () {
+      expect(eval("object('title', 'Black', 'level', 0.87)"), {
+        'title': 'Black',
+        'level': 0.87,
+      });
+      expect(
+        eval(
+          "map(sortBy(filter([object('n', 'a', 'v', 3), object('n', 'b', "
+          "'v', 1), object('n', 'c', 'v', 0)], r => r.v > 0), 'v'), 'n')",
+        ),
+        ['b', 'a'],
+      );
+      expect(eval("object('k', qty * 2).k"), 4);
+      // A dangling key is dropped.
+      expect(eval("object('a', 1, 'b')"), {'a': 1});
+    });
+
+    test('math helpers', () {
+      expect(eval('clamp(1.4, 0, 1)'), 1);
+      expect(eval('clamp(-3, 0, 1)'), 0);
+      expect(eval('round(sin(0), 3)'), 0);
+      expect(eval('cos(0)'), 1);
+      expect(eval('sqrt(16)'), 4);
+      expect(eval('pow(2, 10)'), 1024);
+      expect(eval('pad(5, 2)'), '05');
+      expect(eval("pad(7, 3, ' ')"), '  7');
+      expect(eval('pad(123, 2)'), '123');
+    });
+
     test('arithmetic and precedence', () {
       expect(eval('1 + 2 * 3'), 7);
       expect(eval('(1 + 2) * 3'), 9);
