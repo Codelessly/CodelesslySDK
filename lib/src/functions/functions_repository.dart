@@ -109,7 +109,7 @@ class FunctionsRepository {
         if (result is Future) return result.then((_) => true);
         return true;
       case ActionType.callApi:
-        return makeApiRequestFromAction(action as ApiCallAction, context);
+        return callApi(context, action as ApiCallAction);
       case ActionType.setStorage:
         return setStorageFromAction(context, action as SetStorageAction);
       case ActionType.setCloudStorage:
@@ -307,6 +307,61 @@ class FunctionsRepository {
       );
     }
     return true;
+  }
+
+  /// Calls [action]'s API, then runs its onSuccess actions after a 2xx
+  /// response or its onError actions after any other response or a failed
+  /// request. Both read the response as `${result}`. A failed request stops
+  /// the chain only when there are no onError actions to handle it.
+  static Future<http.Response?> callApi(
+    BuildContext context,
+    ApiCallAction action, [
+    Observable<VariableData>? variable,
+  ]) async {
+    http.Response? response;
+    Object? failure;
+    StackTrace? failureStack;
+    try {
+      response = await makeApiRequestFromAction(action, context, variable);
+    } catch (error, stackTrace) {
+      failure = error;
+      failureStack = stackTrace;
+    }
+    if (!context.mounted) return response;
+    await handleApiOutcome(
+      context,
+      action,
+      response: response,
+      failure: failure,
+      failureStack: failureStack,
+    );
+    return response;
+  }
+
+  /// Runs [action]'s onSuccess actions after a 2xx [response], or its onError
+  /// actions otherwise. Rethrows [failure] (a request that didn't complete)
+  /// when there are no onError actions, so the chain stops as before.
+  static Future<void> handleApiOutcome(
+    BuildContext context,
+    ApiCallAction action, {
+    http.Response? response,
+    Object? failure,
+    StackTrace? failureStack,
+  }) async {
+    final bool ok =
+        failure == null &&
+        response != null &&
+        response.statusCode >= 200 &&
+        response.statusCode < 300;
+    if (ok) {
+      if (action.onSuccess.isNotEmpty) {
+        await runActions(context, action.onSuccess);
+      }
+    } else if (action.onError.isNotEmpty) {
+      await runActions(context, action.onError);
+    } else if (failure != null) {
+      Error.throwWithStackTrace(failure, failureStack ?? StackTrace.current);
+    }
   }
 
   static Future<http.Response> makeApiRequestFromAction(
