@@ -772,10 +772,13 @@ class FunctionsRepository {
 
       printResponse(response);
 
+      final Map responseValue = ApiResponseVariableUtils.fromResponse(response);
+      // The next actions of the chain read the response as `${result}`, e.g.
+      // `${result.data}` or `${result.isError}`, even when the API has no
+      // variable or another call overwrites it, as in a forEach.
+      ActionChain.setResult(responseValue);
       if (variable != null) {
-        variable.value = variable.value.copyWith(
-          value: ApiResponseVariableUtils.fromResponse(response),
-        );
+        variable.value = variable.value.copyWith(value: responseValue);
         DebugLogger.instance.printInfo(
           '${variable.value.name} updated with success state.',
           name: name,
@@ -791,10 +794,14 @@ class FunctionsRepository {
     } catch (error, stackTrace) {
       DebugLogger.instance.printInfo(error.toString(), name: name);
       DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
+      final Map errorValue = ApiResponseVariableUtils.error(
+        url,
+        error,
+        data: existingData,
+      );
+      ActionChain.setResult(errorValue);
       if (variable != null) {
-        variable.value = variable.value.copyWith(
-          value: ApiResponseVariableUtils.error(url, error, data: existingData),
-        );
+        variable.value = variable.value.copyWith(value: errorValue);
         DebugLogger.instance.printInfo(
           '${variable.value.name} updated with error state.',
           name: name,
