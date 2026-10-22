@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -10,6 +12,67 @@ import 'action_chain.dart';
 /// user to the `auth` variable.
 abstract final class AppAuth {
   static const String name = 'AppAuth';
+
+  /// The collection of the app users' profiles: `users/{uid}`.
+  static const String profilesCollection = 'users';
+
+  /// The local storage key of the email a sign-in link was sent to.
+  static const String linkEmailKey = 'codelessly_sign_in_link_email';
+
+  /// The fields a new profile starts with for [user], before the defaults
+  /// of the `users` collection's schema: who they are and the `user` role.
+  static Map<String, dynamic> newProfile(User user) => {
+    'uid': user.uid,
+    'email': user.email ?? '',
+    'displayName': user.displayName ?? '',
+    'photoUrl': user.photoURL ?? '',
+    'role': 'user',
+  };
+
+  /// Creates the signed-in user's profile document, `users/{uid}`, when it
+  /// doesn't exist yet, with the fields of [newProfile] and the defaults of
+  /// the `users` schema. `${auth.profile}` and `${auth.role}` read it.
+  static Future<void> ensureProfile(Codelessly codelessly) async {
+    final User? user = codelessly.firebaseAuth.currentUser;
+    final CloudDatabase? database = codelessly.cloudDatabase;
+    if (user == null || user.isAnonymous) return;
+    if (database is! FirestoreCloudDatabase) return;
+    final ref = database.getCollectionPath(profilesCollection).doc(user.uid);
+    final snapshot = await ref.get();
+    if (snapshot.exists) return;
+    // The schema's defaults; fields only the builder can fill stay empty.
+    final CollectionSchema? schema = database.rules.schemaFor(
+      profilesCollection,
+    );
+    final Map<String, dynamic> data = {
+      if (schema != null)
+        ...CloudFieldValues.buildWrite(
+          fields: const [],
+          schema: schema.copyWith(
+            fields: [
+              for (final SchemaField field in schema.fields)
+                field.copyWith(required: false),
+            ],
+          ),
+          evaluate: (value) => value,
+          create: true,
+        ),
+      ...newProfile(user),
+      'createdAt': Timestamp.now(),
+    };
+    await ref.set(
+      database.rules.prepareWrite(profilesCollection, data, user.uid),
+    );
+  }
+
+  /// Signs in with [provider]: a popup on the web, the platform's flow
+  /// elsewhere.
+  static Future<UserCredential> _signInWithProvider(
+    FirebaseAuth auth,
+    AuthProvider provider,
+  ) => kIsWeb
+      ? auth.signInWithPopup(provider)
+      : auth.signInWithProvider(provider);
 
   /// The `auth` variable's value for [user]. Anonymous users, which the SDK
   /// signs in on its own to read published data, count as signed out.
@@ -28,8 +91,22 @@ abstract final class AppAuth {
           : initialSource.characters.first.toUpperCase(),
       'photoUrl': signedIn ? user.photoURL ?? '' : '',
       'emailVerified': signedIn && user.emailVerified,
+      'providers': signedIn
+          ? [for (final info in user.providerData) info.providerId]
+          : <String>[],
     };
   }
+
+  /// The `auth` variable's `profile` and `role` for a [profile] document.
+  /// A signed-in user without a role is a `user`; signed out, the role is
+  /// empty.
+  static Map<String, dynamic> profileFields(
+    Map<String, dynamic>? profile, {
+    bool signedIn = false,
+  }) => {
+    'profile': profile ?? <String, dynamic>{},
+    'role': '${profile?['role'] ?? (signedIn ? 'user' : '')}',
+  };
 
   /// A readable message for a Firebase Auth [error].
   static String messageFor(Object error) {
@@ -122,6 +199,39 @@ abstract final class AppAuth {
           await _signedInUser(auth).delete();
           // The SDK needs a user to read the project's data.
           await auth.signInAnonymously();
+        case AuthOperation.signInWithGoogle:
+          await _signInWithProvider(auth, GoogleAuthProvider());
+        case AuthOperation.signInWithApple:
+          await _signInWithProvider(
+            auth,
+            AppleAuthProvider()
+              ..addScope('email')
+              ..addScope('name'),
+          );
+        case AuthOperation.sendSignInLink:
+          if (email.isEmpty) throw StateError('Enter your email.');
+          await auth.sendSignInLinkToEmail(
+            email: email,
+            actionCodeSettings: ActionCodeSettings(
+              // Back to the page the app runs on, which finishes signing in.
+              url: kIsWeb ? Uri.base.toString() : 'https://codelessly.com',
+              handleCodeInApp: true,
+            ),
+          );
+          await codelessly.localDatabase.put(linkEmailKey, email);
+        case AuthOperation.completeSignInLink:
+          final String link = Uri.base.toString();
+          if (!auth.isSignInWithEmailLink(link)) return true;
+          final String linkEmail = email.isNotEmpty
+              ? email
+              : '${codelessly.localDatabase.get(linkEmailKey) ?? ''}';
+          if (linkEmail.isEmpty) {
+            throw StateError('Enter the email the link was sent to.');
+          }
+          await auth.signInWithEmailLink(email: linkEmail, emailLink: link);
+          await codelessly.localDatabase.remove(linkEmailKey);
+        case AuthOperation.updatePhoto:
+          await _signedInUser(auth).updatePhotoURL(eval(action.photoUrl));
       }
 
       if (action.operation
@@ -133,13 +243,12 @@ abstract final class AppAuth {
 
       // A different user needs the project's claim before it can read or
       // write the project's data.
-      if (action.operation
-          case AuthOperation.signIn ||
-              AuthOperation.signUp ||
-              AuthOperation.signOut ||
-              AuthOperation.deleteAccount) {
+      if (action.operation.signsIn ||
+          action.operation == AuthOperation.signOut ||
+          action.operation == AuthOperation.deleteAccount) {
         await codelessly.authManager.reauthenticate();
       }
+      if (action.operation.signsIn) await ensureProfile(codelessly);
     } catch (error) {
       final String message = messageFor(error);
       DebugLogger.instance.printInfo(
