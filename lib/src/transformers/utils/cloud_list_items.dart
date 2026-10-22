@@ -3,6 +3,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../ui/related_documents.dart';
 import '../../ui/show_more.dart';
 import '../../ui/skeleton.dart';
 
@@ -35,6 +36,9 @@ class CloudListItems {
   /// Reveals the next page of a "Show more" list.
   final VoidCallback? revealMore;
 
+  /// The referenced documents loaded so far, put in place of their ids.
+  final RelatedDocumentMap related;
+
   late final ShowMorePage _page = showMorePage(
     loaded: snapshot.docs.length,
     revealed: paging == QueryPaging.button ? revealed : snapshot.docs.length,
@@ -49,6 +53,7 @@ class CloudListItems {
     this.total,
     this.skeleton = false,
     this.revealMore,
+    this.related = const {},
   });
 
   /// Whether a skeleton shows sample items for [snapshot].
@@ -76,7 +81,7 @@ class CloudListItems {
     if (skeleton) return const {};
     final QueryDocumentSnapshot<Map<String, dynamic>>? doc = snapshot.docs
         .elementAtOrNull(index);
-    return {'id': ?doc?.id, ...?doc?.data()};
+    return withRelated({'id': ?doc?.id, ...?doc?.data()}, related);
   }
 
   /// Called when the item at [index] is built: a list that pages on scroll

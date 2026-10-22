@@ -134,95 +134,107 @@ class PassiveGridViewWidget extends StatelessWidget {
               const {},
           builder: (context, snapshot, child) => ShowMorePager(
             pageSize: node.limit ?? 20,
-            builder: (context, revealed, revealMore) {
-              reportQueryStatus(
-                context,
-                node.statusVariable,
-                queryStatusOf(
-                  isFetching: snapshot.isFetching,
-                  hasError: snapshot.hasError,
-                  count: snapshot.docs.length,
-                ),
-              );
-              final CloudListItems items = CloudListItems(
-                snapshot: snapshot,
-                paging: node.paging,
-                revealed: revealed,
-                total: CloudQueryTotal.of(context),
-                skeleton: CloudListItems.showsSkeleton(context, snapshot),
-                revealMore: revealMore,
-              );
-              // A layout with a status variable shows its own loading and
-              // error states; a loading skeleton shows sample items.
-              if (node.statusVariable != null &&
-                  !items.skeleton &&
-                  (snapshot.isFetching || snapshot.hasError)) {
-                return const SizedBox.shrink();
-              }
-              if (snapshot.isFetching && !items.skeleton) {
-                return codelesslyController.loadingBuilder?.call(context) ??
-                    const Center(child: CircularProgressIndicator());
-              }
-
-              if (snapshot.hasError) {
-                final String message = describeCloudError(snapshot.error);
-                DebugLogger.instance.printInfo(
-                  'Could not load ${node.collectionPath}: $message',
-                  name: node.type,
+            builder: (context, revealed, revealMore) => RelatedDocumentsLoader(
+              fields: node.loadRelated,
+              collectionPath: node.collectionPath ?? '',
+              database: codelessly.cloudDatabase is FirestoreCloudDatabase
+                  ? codelessly.cloudDatabase as FirestoreCloudDatabase
+                  : null,
+              docs: [
+                for (final doc in snapshot.docs) {'id': doc.id, ...doc.data()},
+              ],
+              builder: (context, related) {
+                reportQueryStatus(
+                  context,
+                  node.statusVariable,
+                  queryStatusOf(
+                    isFetching: snapshot.isFetching,
+                    hasError: snapshot.hasError,
+                    count: snapshot.docs.length,
+                  ),
                 );
-                return codelesslyController.errorBuilder?.call(
-                      context,
-                      ErrorLog(
-                        timestamp: DateTime.now(),
-                        message: message,
-                        type: 'firestore_query_error',
-                      ),
-                    ) ??
-                    const Center(child: Text('Error'));
-              }
+                final CloudListItems items = CloudListItems(
+                  snapshot: snapshot,
+                  paging: node.paging,
+                  revealed: revealed,
+                  total: CloudQueryTotal.of(context),
+                  skeleton: CloudListItems.showsSkeleton(context, snapshot),
+                  revealMore: revealMore,
+                  related: related,
+                );
+                // A layout with a status variable shows its own loading and
+                // error states; a loading skeleton shows sample items.
+                if (node.statusVariable != null &&
+                    !items.skeleton &&
+                    (snapshot.isFetching || snapshot.hasError)) {
+                  return const SizedBox.shrink();
+                }
+                if (snapshot.isFetching && !items.skeleton) {
+                  return codelesslyController.loadingBuilder?.call(context) ??
+                      const Center(child: CircularProgressIndicator());
+                }
 
-              final int itemCount = items.itemCount;
-
-              return GridViewBuilder(
-                primary: node.primary,
-                gridDelegate: node.properties.gridDelegate,
-                designCellExtent: designCellExtent,
-                shrinkWrap: shrinkWrap,
-                itemCount: itemCount,
-                padding: node.padding.flutterEdgeInsets,
-                keyboardDismissBehavior:
-                    node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-                physics: node.physics.flutterScrollPhysics(
-                  node.shouldAlwaysScroll,
-                ),
-                scrollDirection: node.scrollDirection.flutterAxis,
-                cacheExtent: node.properties.cacheExtent,
-                reverse: node.reverse,
-                clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
-                itemBuilder: (context, index) {
-                  if (items.isButton(index)) return items.buildButton();
-                  items.onItemBuilt(index);
-                  return IndexedItemProvider(
-                    key: ValueKey(index),
-                    item: IndexedItem(index, items.dataAt(index)),
-                    child: Builder(
-                      builder: (context) {
-                        // This builder is important to pass a context that has
-                        // the IndexedItemProvider.
-                        return KeyedSubtree(
-                          key: ValueKey(index),
-                          child: manager.buildWidgetByID(
-                            itemNode,
-                            context,
-                            settings: settings,
-                          ),
-                        );
-                      },
-                    ),
+                if (snapshot.hasError) {
+                  final String message = describeCloudError(snapshot.error);
+                  DebugLogger.instance.printInfo(
+                    'Could not load ${node.collectionPath}: $message',
+                    name: node.type,
                   );
-                },
-              );
-            },
+                  return codelesslyController.errorBuilder?.call(
+                        context,
+                        ErrorLog(
+                          timestamp: DateTime.now(),
+                          message: message,
+                          type: 'firestore_query_error',
+                        ),
+                      ) ??
+                      const Center(child: Text('Error'));
+                }
+
+                final int itemCount = items.itemCount;
+
+                return GridViewBuilder(
+                  primary: node.primary,
+                  gridDelegate: node.properties.gridDelegate,
+                  designCellExtent: designCellExtent,
+                  shrinkWrap: shrinkWrap,
+                  itemCount: itemCount,
+                  padding: node.padding.flutterEdgeInsets,
+                  keyboardDismissBehavior: node
+                      .keyboardDismissBehavior
+                      .flutterKeyboardDismissBehavior,
+                  physics: node.physics.flutterScrollPhysics(
+                    node.shouldAlwaysScroll,
+                  ),
+                  scrollDirection: node.scrollDirection.flutterAxis,
+                  cacheExtent: node.properties.cacheExtent,
+                  reverse: node.reverse,
+                  clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+                  itemBuilder: (context, index) {
+                    if (items.isButton(index)) return items.buildButton();
+                    items.onItemBuilt(index);
+                    return IndexedItemProvider(
+                      key: ValueKey(index),
+                      item: IndexedItem(index, items.dataAt(index)),
+                      child: Builder(
+                        builder: (context) {
+                          // This builder is important to pass a context that has
+                          // the IndexedItemProvider.
+                          return KeyedSubtree(
+                            key: ValueKey(index),
+                            child: manager.buildWidgetByID(
+                              itemNode,
+                              context,
+                              settings: settings,
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       );

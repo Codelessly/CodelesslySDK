@@ -154,4 +154,28 @@ void main() {
     expect(snapshot.fetchMoreCalls, 1);
     expect(items.revealed, 4);
   });
+
+  test('loaded related documents replace their ids', () {
+    final RelatedDocumentMap related = {
+      'author': {
+        'u1': {'id': 'u1', 'name': 'Ava'},
+      },
+    };
+    expect(withRelated({'author': 'u1', 'text': 'Hi'}, related), {
+      'author': {'id': 'u1', 'name': 'Ava'},
+      'text': 'Hi',
+    });
+    // Not loaded yet: the id stays.
+    expect(withRelated({'author': 'u2'}, related), {'author': 'u2'});
+    final items = CloudListItems(
+      snapshot: _Snapshot(count: 1),
+      paging: QueryPaging.scroll,
+      related: {
+        'title': {
+          'Task 0': {'id': 'Task 0', 'x': 1},
+        },
+      },
+    );
+    expect(items.dataAt(0)['title'], {'id': 'Task 0', 'x': 1});
+  });
 }
