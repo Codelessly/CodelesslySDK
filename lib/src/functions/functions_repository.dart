@@ -571,6 +571,7 @@ class FunctionsRepository {
       barrierDismissible: action.barrierDismissible,
       barrierColor: action.barrierColor?.toFlutterColor(),
       showCloseButton: action.showCloseButton,
+      presentation: action.presentation,
     );
   }
 
@@ -590,6 +591,7 @@ class FunctionsRepository {
     bool barrierDismissible = true,
     Color? barrierColor,
     bool showCloseButton = false,
+    DialogPresentation presentation = DialogPresentation.dialog,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -632,21 +634,63 @@ class FunctionsRepository {
     // A chain triggered in the dialog can finish on this layout after the
     // dialog closes (e.g. Navigate back, then a toast).
     final List<BuildContext> openerHosts = ActionChainOpener.hostsFor(context);
-    final Object? result = await showDialog<Object?>(
-      context: context,
-      useRootNavigator: false,
-      barrierDismissible: barrierDismissible,
-      barrierColor: barrierColor,
-      routeSettings: RouteSettings(arguments: parsedParams),
-      builder: (context) => ActionChainOpener(
-        openerHosts: openerHosts,
-        child: CodelesslyDialogWidget(
-          showCloseButton: showCloseButton,
-          builder: (context) =>
-              CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
+    Widget layout(BuildContext context) =>
+        CodelesslyWidget(codelessly: codelessly, layoutID: layoutId);
+    final RouteSettings routeSettings = RouteSettings(arguments: parsedParams);
+    // Read from the triggering context before awaiting anything.
+    final DialogPresentation resolved = DialogPresenter.resolve(
+      presentation,
+      MediaQuery.sizeOf(context),
+    );
+    final Rect? anchor = DialogPresenter.anchorOf(context);
+    final String barrierLabel = MaterialLocalizations.of(context)
+        .modalBarrierDismissLabel;
+    final Object? result = await switch (resolved) {
+      DialogPresentation.bottomSheet => showModalBottomSheet<Object?>(
+        context: context,
+        useRootNavigator: false,
+        isScrollControlled: true,
+        isDismissible: barrierDismissible,
+        barrierColor: barrierColor,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        constraints: const BoxConstraints(),
+        routeSettings: routeSettings,
+        builder: (context) => ActionChainOpener(
+          openerHosts: openerHosts,
+          child: DialogPresenter.sheet(context, builder: layout),
         ),
       ),
-    );
+      DialogPresentation.popover => showGeneralDialog<Object?>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: barrierLabel,
+        barrierColor: barrierColor ?? Colors.transparent,
+        routeSettings: routeSettings,
+        transitionDuration: const Duration(milliseconds: 120),
+        pageBuilder: (_, _, _) => ActionChainOpener(
+          openerHosts: openerHosts,
+          child: DialogPresenter.popover(anchor: anchor, builder: layout),
+        ),
+        transitionBuilder: (context, animation, _, child) =>
+            FadeTransition(opacity: animation, child: child),
+      ),
+      _ => showDialog<Object?>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierColor: barrierColor,
+        routeSettings: routeSettings,
+        builder: (context) => ActionChainOpener(
+          openerHosts: openerHosts,
+          child: CodelesslyDialogWidget(
+            showCloseButton: showCloseButton,
+            builder: layout,
+          ),
+        ),
+      ),
+    };
     if (context.mounted) {
       codelessly.notifyNavigationListeners(
         context,
