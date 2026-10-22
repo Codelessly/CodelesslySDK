@@ -36,6 +36,19 @@ abstract class WidgetNodeTransformerManager
 
   WidgetNodeTransformerManager(super.getNode, this.layoutRetrievalBuilder);
 
+  /// Wraps every node this manager builds, when set. See
+  /// [NodeBuildDecorator].
+  NodeBuildDecorator? decorator;
+
+  /// Returns [widget] wrapped by [decorator] at [layer], or [widget] when no
+  /// decorator is set.
+  Widget decorate(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+    NodeBuildLayer layer,
+  ) => decorator?.decorate(context, node, widget, layer) ?? widget;
+
   /// Convenience method to handle widget opacity.
   Widget applyWidgetOpacity(BaseNode node, Widget widget) {
     if (node is! BlendMixin || node.opacity > 0.99) {
