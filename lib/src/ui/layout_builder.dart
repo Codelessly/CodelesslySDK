@@ -344,9 +344,9 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         // The variable carries the error state; report the failure instead
         // of leaving it as an unhandled async error.
         unawaited(
-          FunctionsRepository.makeApiRequestFromAction(
-            canvasAction,
+          FunctionsRepository.callApi(
             context,
+            canvasAction,
             notifier,
           ).then<void>(
             (_) {},
