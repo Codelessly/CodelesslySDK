@@ -38,4 +38,17 @@ void main() {
       ),
     );
   });
+
+  test('role-write collections name the role that writes them', () {
+    final DataRules rules = DataRules.fromJson({
+      'collections': {'products': 'roleWrite'},
+      'roles': {'products': 'admin'},
+    });
+    expect(rules.ruleFor('products'), DataRule.roleWrite);
+    expect(rules.roles['products'], 'admin');
+    expect(rules.readFilters('products', null), isEmpty);
+    expect(() => rules.prepareWrite('products', {}, null), throwsStateError);
+    expect(rules.prepareWrite('products', {'a': 1}, 'u1'), {'a': 1});
+    expect(DataRules.fromJson(rules.toJson()).roles, rules.roles);
+  });
 }

@@ -19,7 +19,11 @@ enum DataRule {
 
   /// Anyone using the app reads; signed-in users write only their own
   /// documents.
-  publicReadOwnerWrite;
+  publicReadOwnerWrite,
+
+  /// Anyone using the app reads; only signed-in users whose profile has the
+  /// collection's role ([DataRules.roles]) write.
+  roleWrite;
 
   /// Whether writes record the signed-in user as the document's owner.
   bool get stampsOwner => this == owner || this == publicReadOwnerWrite;
@@ -45,6 +49,10 @@ class DataRules {
   /// Collection name -> its typed fields, defined in the editor's Data panel.
   final Map<String, CollectionSchema> schemas;
 
+  /// Collection name -> the role (the `role` field of `users/{uid}`) a user
+  /// needs to write it, for [DataRule.roleWrite] collections.
+  final Map<String, String> roles;
+
   /// Collection name -> the keys ([CloudIndex.key]) of the composite indexes
   /// it has, which publishing creates for the app's queries. Queries with a
   /// ready index run (and page) in Firestore instead of in the app.
@@ -55,6 +63,7 @@ class DataRules {
     this.collections = const {},
     this.schemas = const {},
     this.indexes = const {},
+    this.roles = const {},
   ]);
 
   /// Reads `{collections: {name: rule}, schemas: {name: schema}}`, ignoring
@@ -63,6 +72,7 @@ class DataRules {
     final Map? collections = json?['collections'] as Map?;
     final Map? schemas = json?['schemas'] as Map?;
     final Map? indexes = json?['indexes'] as Map?;
+    final Map? roles = json?['roles'] as Map?;
     return DataRules(
       {
         for (final MapEntry entry in (collections ?? {}).entries)
@@ -84,6 +94,11 @@ class DataRules {
               for (final Object? key in entry.value as List) '$key',
             },
       },
+      {
+        for (final MapEntry entry in (roles ?? {}).entries)
+          if (entry.value is String)
+            entry.key.toString(): entry.value as String,
+      },
     );
   }
 
@@ -93,6 +108,7 @@ class DataRules {
       for (final MapEntry<String, DataRule> entry in collections.entries)
         entry.key: entry.value.name,
     },
+    if (roles.isNotEmpty) 'roles': roles,
     if (indexes.isNotEmpty)
       'indexes': {
         for (final MapEntry<String, Set<String>> entry in indexes.entries)
