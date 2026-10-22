@@ -139,5 +139,14 @@ void main() {
     );
     expect(image.url, 'https://example.com/ada.png');
     expect(image.paint?.fit, Fit.cover);
+    // Image hosts without CORS headers still show on the web.
+    expect(
+      tester.widget<Image>(find.byType(Image)).image,
+      isA<NetworkImage>().having(
+        (image) => image.webHtmlElementStrategy,
+        'webHtmlElementStrategy',
+        WebHtmlElementStrategy.fallback,
+      ),
+    );
   });
 }
