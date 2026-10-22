@@ -65,6 +65,14 @@ void main() {
       expect(eval("values(object('a', 1, 'b', 2))"), [1, 2]);
     });
 
+    test('thousands groups digits', () {
+      expect(eval('thousands(724)'), '724');
+      expect(eval('thousands(1094)'), '1,094');
+      expect(eval('thousands(1234567.891, 2)'), '1,234,567.89');
+      expect(eval('thousands(-5000)'), '-5,000');
+      expect(eval("thousands('x')"), isNull);
+    });
+
     test('flatten and compact', () {
       expect(eval('flatten([[1, 2], [3], 4])'), [1, 2, 3, 4]);
       expect(eval("compact([1, null, '', 2])"), [1, 2]);
