@@ -25,6 +25,10 @@ class PassiveBarChartWidget extends StatelessWidget {
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
 
+  /// The values bindings read, when the caller has them, e.g. the editor's
+  /// variable defaults on the design canvas. Defaults to the context's.
+  final ScopedValues? scopedValues;
+
   /// Overrides [BarChartProperties.animate], e.g. to hold still in the editor.
   final bool? animate;
 
@@ -33,6 +37,7 @@ class PassiveBarChartWidget extends StatelessWidget {
     required this.node,
     required this.settings,
     this.variablesOverrides = const [],
+    this.scopedValues,
     this.animate,
   });
 
@@ -56,10 +61,9 @@ class PassiveBarChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = ScopedValues.of(
-      context,
-      variablesOverrides: variablesOverrides,
-    );
+    final ScopedValues scopedValues =
+        this.scopedValues ??
+        ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final BarChartProperties props = node.properties;
     Object? bound(String property) =>
         PropertyValueDelegate.getPropertyValue<Object>(
@@ -71,9 +75,7 @@ class PassiveBarChartWidget extends StatelessWidget {
     final List<double?> values =
         _list(bound('values'))?.map(_number).toList() ?? node.values;
     final List<String> labels =
-        _list(
-          bound('labels'),
-        )?.map((e) => e == null ? '' : '$e').toList() ??
+        _list(bound('labels'))?.map((e) => e == null ? '' : '$e').toList() ??
         node.labels;
     final Object? boundHighlight = bound('highlight');
     final int? highlight = boundHighlight != null
@@ -111,8 +113,10 @@ class PassiveBarChartWidget extends StatelessWidget {
           final double labelHeight = hasLabels
               ? props.labelFontSize * 1.2 + props.labelGap
               : 0;
-          final double height = (constraints.maxHeight - labelHeight - 1)
-              .clamp(0, double.infinity);
+          final double height = (constraints.maxHeight - labelHeight - 1).clamp(
+            0,
+            double.infinity,
+          );
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -135,7 +139,8 @@ class PassiveBarChartWidget extends StatelessWidget {
                         Positioned(
                           right: 0,
                           width: props.gridLabelWidth - 6,
-                          bottom: height * g / props.gridLines -
+                          bottom:
+                              height * g / props.gridLines -
                               props.labelFontSize / 2,
                           child: Text(
                             props.gridLabels[g - 1],
@@ -235,7 +240,8 @@ class PassiveBarChartWidget extends StatelessWidget {
             props.emptyHeight,
             height,
           );
-    final Color barColor = highlight == null || highlight < 0 || index == highlight
+    final Color barColor =
+        highlight == null || highlight < 0 || index == highlight
         ? color
         : color.withValues(alpha: color.a * props.dimmedOpacity);
     return TweenAnimationBuilder<double>(
