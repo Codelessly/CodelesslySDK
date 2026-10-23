@@ -1,3 +1,38 @@
+## 8.3.0
+
+### Motion and interaction
+
+- `NodeMotion` draws a node's motion: animated transforms, spin, loops,
+  entrances (from rest or `enterFrom`, replayed when `replayKey` changes) and
+  delays.
+- Timer, key press, swipe, double tap and hover triggers.
+- Stacked and wrapping lists; row and column `itemSpacing`; vertical,
+  inverted and rectangular-thumb sliders with bound `min`/`max`.
+
+### Formulas and variables
+
+- Computed variables (`VariableData.formula`), kept up to date from their
+  inputs; Set variable leaves them alone.
+- New functions: `padLeft`/`padRight`, `substring`, `replace`, `split`,
+  `indexOf`, `matches`, `slug`, `seconds`, `duration`, `slice`, `take`,
+  `skip`, `reverse`, `findIndex`, `concat`, `merge`, `set`, `luminance`,
+  `sortByDesc`; object literals, `(item, i)` lambdas, multi-key `sortBy`,
+  `money(value, decimals)` and list `+`.
+- Bindable effects, stroke weight, corner radius, font weight and icon
+  (`StyleBindings`); image fills listen to the variables in their URL.
+- A screen variable shadows an app variable of the same name everywhere.
+
+### Navigation
+
+- A screen's route is set before its load actions run; a link's parameters
+  also set the variables they name.
+- `CodelesslyWidget.initialScreen` opens a screen by id or name.
+
+### Fixes
+
+- Dashed strokes draw round and square caps along the path; a zero pattern
+  no longer hangs.
+
 ## 8.2.0
 
 ### States
