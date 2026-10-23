@@ -552,11 +552,15 @@ class CanvasViewport extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final box = resolve(node, constraints, sizing: sizing);
-        // The width the canvas content is laid out at: the canvas box for a
+        // The width that picks responsive layouts: the canvas box for a
         // responsive canvas, the design width for an autoScale one (its
-        // content is laid out at design size and then scaled).
+        // content is laid out at design size and then scaled). A centered
+        // dialog keeps its design width on every screen, so it goes by the
+        // screen, as a layout group in a dialog picks its canvas.
         final Widget content = CanvasWidthScope(
-          width: node.scaleMode == ScaleMode.autoScale
+          width: sizing == CanvasSizing.design
+              ? MediaQuery.sizeOf(context).width
+              : node.scaleMode == ScaleMode.autoScale
               ? node.basicBoxLocal.width
               : box.width,
           child: child,

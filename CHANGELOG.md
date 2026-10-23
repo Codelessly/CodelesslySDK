@@ -15,6 +15,9 @@
 
 ### Dialogs
 
+- A responsive layout in a centered dialog shows the layout for the screen,
+  as a layout group in a dialog picks its canvas. It went by the dialog's
+  own width, so a 520 wide dialog always showed its mobile layout.
 - Show dialog actions present their canvas by `presentation`: a centered
   dialog, a bottom sheet (full width, as tall as its content up to 90% of
   the screen), a sheet on mobile and a dialog on larger screens, or full
