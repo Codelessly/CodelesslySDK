@@ -90,18 +90,33 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       }
     }
 
-    Widget res = CodelesslyFlex(
-      direction: isRow ? Axis.horizontal : Axis.vertical,
-      mainAxisAlignment: rowColumnNode.mainAxisAlignment.flutterAxis,
-      crossAxisAlignment: stretchFallsBack
-          ? CrossAxisAlignment.start
-          : rowColumnNode.crossAxisAlignment.flutterAxis,
-      mainAxisSize: mainFit == SizeFit.shrinkWrap
-          ? MainAxisSize.min
-          : MainAxisSize.max,
-      key: ValueKey(rowColumnNode.id),
-      children: childrenWidgets,
-    );
+    final bool wraps = rowColumnNode is RowColumnNode && rowColumnNode.wrap;
+    if (wraps) measureCross = false;
+
+    Widget res = wraps
+        ? Wrap(
+            key: ValueKey(rowColumnNode.id),
+            direction: isRow ? Axis.horizontal : Axis.vertical,
+            spacing: rowColumnNode.wrapSpacing,
+            runSpacing: rowColumnNode.wrapRunSpacing,
+            alignment: wrapAlignmentOf(rowColumnNode.mainAxisAlignment),
+            crossAxisAlignment: wrapCrossAlignmentOf(
+              rowColumnNode.crossAxisAlignment,
+            ),
+            children: childrenWidgets,
+          )
+        : CodelesslyFlex(
+            direction: isRow ? Axis.horizontal : Axis.vertical,
+            mainAxisAlignment: rowColumnNode.mainAxisAlignment.flutterAxis,
+            crossAxisAlignment: stretchFallsBack
+                ? CrossAxisAlignment.start
+                : rowColumnNode.crossAxisAlignment.flutterAxis,
+            mainAxisSize: mainFit == SizeFit.shrinkWrap
+                ? MainAxisSize.min
+                : MainAxisSize.max,
+            key: ValueKey(rowColumnNode.id),
+            children: childrenWidgets,
+          );
 
     if (measureCross) {
       res = isRow ? IntrinsicHeight(child: res) : IntrinsicWidth(child: res);
@@ -145,6 +160,28 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       child: res,
     );
   }
+
+  /// How a wrapping Row/Column places each line's children along the main
+  /// axis.
+  static WrapAlignment wrapAlignmentOf(MainAxisAlignmentC alignment) =>
+      switch (alignment) {
+        MainAxisAlignmentC.start => WrapAlignment.start,
+        MainAxisAlignmentC.center => WrapAlignment.center,
+        MainAxisAlignmentC.end => WrapAlignment.end,
+        MainAxisAlignmentC.spaceBetween => WrapAlignment.spaceBetween,
+        MainAxisAlignmentC.spaceAround => WrapAlignment.spaceAround,
+        MainAxisAlignmentC.spaceEvenly => WrapAlignment.spaceEvenly,
+      };
+
+  /// How a wrapping Row/Column places children within their line. A line
+  /// can't stretch its children, so stretch and baseline read as start.
+  static WrapCrossAlignment wrapCrossAlignmentOf(
+    CrossAxisAlignmentC alignment,
+  ) => switch (alignment) {
+    CrossAxisAlignmentC.center => WrapCrossAlignment.center,
+    CrossAxisAlignmentC.end => WrapCrossAlignment.end,
+    _ => WrapCrossAlignment.start,
+  };
 
   /// The design extent of a Row/Column's own box on one axis, or null when it
   /// hugs its children.
@@ -348,6 +385,32 @@ class PassiveRowColumnWidget extends StatelessWidget {
   final NodeTransformerManager manager;
   final WidgetBuildSettings settings;
 
+  /// Whether [child] isn't hidden by a condition or binding at runtime.
+  bool _runtimeVisible(BuildContext context, BaseNode child) {
+    final NodeTransformerManager manager = this.manager;
+    if (manager is! WidgetNodeTransformerManager) return true;
+    // Its parent's size is only known as it is laid out; it hides itself.
+    if (readsParentSize(child)) return true;
+    return manager.runtimeVisibility(context, child) != false;
+  }
+
+  Widget _buildChild(BuildContext context, BaseNode child, bool wraps) {
+    final Widget builtWidget = manager.buildWidgetByID(
+      child.id,
+      context,
+      settings: settings,
+    );
+    if (wraps) return builtWidget;
+    final Widget sizedWidget =
+        PassiveRowColumnTransformer.wrapChildWithSizeFits(
+          child,
+          node,
+          builtWidget,
+          child.flex,
+        );
+    return _collapseWhenHidden(context, child, sizedWidget);
+  }
+
   /// A flexing child hidden at runtime gives up its share of the free space,
   /// so a visible sibling (an empty state next to a hidden spinner) can take
   /// all of it. The flex drops to zero rather than removing the [Flexible] so
@@ -358,7 +421,11 @@ class PassiveRowColumnWidget extends StatelessWidget {
     Widget sizedWidget,
   ) {
     final NodeTransformerManager manager = this.manager;
-    if (sizedWidget is! Flexible || manager is! PassiveNodeTransformerManager) {
+    // A child that reads its parent's size can only tell whether it is
+    // hidden as it is laid out, so it keeps its flex.
+    if (sizedWidget is! Flexible ||
+        manager is! PassiveNodeTransformerManager ||
+        readsParentSize(child)) {
       return sizedWidget;
     }
 
@@ -389,22 +456,46 @@ class PassiveRowColumnWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> widgetChildren = children.map((child) {
-      final Widget builtWidget = manager.buildWidgetByID(
-        child.id,
-        context,
-        settings: settings,
-      );
+    // A wrapping Row/Column lays its children out at their own sizes: a
+    // Wrap can't flex them, and a spacer has no free space to take.
+    final bool wraps = node is RowColumnNode && (node as RowColumnNode).wrap;
 
-      final Widget sizedWidget =
-          PassiveRowColumnTransformer.wrapChildWithSizeFits(
+    Widget layout(BuildContext context) {
+      // A wrapping Row/Column leaves out the children hidden at runtime, so
+      // they take no spacing either.
+      final List<BaseNode> shown = [
+        for (final BaseNode child in children)
+          if (!wraps ||
+              (child is! SpacerNode && _runtimeVisible(context, child)))
             child,
-            node,
-            builtWidget,
-            child.flex,
+      ];
+      return PassiveRowColumnTransformer.buildRowColumnWidget(
+        node,
+        childrenWidgets: [
+          for (final BaseNode child in shown)
+            _buildChild(context, child, wraps),
+        ],
+        childrenNodes: shown,
+        withScroll: true,
+        getNode: manager.getNode,
+      );
+    }
+
+    final NodeTransformerManager passive = manager;
+    final List<Listenable> listenables =
+        wraps && passive is PassiveNodeTransformerManager
+        ? [
+            for (final BaseNode child in children)
+              ...passive.listenablesFor(context, child),
+          ]
+        : const [];
+    final Widget rowColumn = listenables.isEmpty
+        ? layout(context)
+        : ManagedListenableBuilder(
+            key: ValueKey('${node.id}-wrap'),
+            listenables: listenables,
+            builder: layout,
           );
-      return _collapseWhenHidden(context, child, sizedWidget);
-    }).toList();
 
     final Widget child = (node is DefaultShapeNode)
         ? manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
@@ -412,24 +503,10 @@ class PassiveRowColumnWidget extends StatelessWidget {
             applyPadding:
                 node is! ScrollableMixin ||
                 !(node as ScrollableMixin).isScrollable,
-            children: [
-              PassiveRowColumnTransformer.buildRowColumnWidget(
-                node,
-                childrenWidgets: widgetChildren,
-                childrenNodes: children,
-                withScroll: true,
-                getNode: manager.getNode,
-              ),
-            ],
+            children: [rowColumn],
             settings: settings,
           )
-        : PassiveRowColumnTransformer.buildRowColumnWidget(
-            node,
-            childrenWidgets: widgetChildren,
-            childrenNodes: children,
-            withScroll: true,
-            getNode: manager.getNode,
-          );
+        : rowColumn;
 
     if (kIsTestLayout) {
       return DecoratedBox(

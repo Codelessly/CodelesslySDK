@@ -67,8 +67,16 @@ bool usesInteractionStates(BaseNode node) =>
 /// states: puts the overrides of every active state (in
 /// [InteractionState] order, the later winning) in a [PropertyOverrideScope]
 /// over [builder]. A disabled node ignores the pointer, so its actions do
-/// not run.
+/// not run, and the cursor over it is the basic one.
+///
+/// A node disabled without a [InteractionState.disabled] state of its own
+/// fades to [defaultDisabledOpacity], so binding `variables['disabled']`
+/// (e.g. to `${= busy != ""}`) is enough to dim it. A node with that state
+/// shows the state's overrides instead.
 class InteractionStatesBox extends StatefulWidget {
+  /// The opacity of a disabled node that has no disabled state of its own.
+  static const double defaultDisabledOpacity = 0.4;
+
   /// The node whose states are shown.
   final BaseNode node;
 
@@ -176,6 +184,14 @@ class _InteractionStatesBoxState extends State<InteractionStatesBox> {
     // A disabled node runs no actions. Always wrapped so that switching it
     // keeps the state below.
     child = IgnorePointer(ignoring: disabled, child: child);
-    return child;
+    // Without a look of its own for the disabled state, a disabled node
+    // fades. Always wrapped, like the IgnorePointer.
+    final bool dims =
+        disabled && !states.containsKey(InteractionState.disabled);
+    child = Opacity(
+      opacity: dims ? InteractionStatesBox.defaultDisabledOpacity : 1,
+      child: child,
+    );
+    return Semantics(enabled: disabled ? false : null, child: child);
   }
 }
