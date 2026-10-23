@@ -892,11 +892,34 @@ class Codelessly {
     _currentNavigatedCanvasId = canvasId;
     final ModalRoute? modal = ModalRoute.of(context);
     if (canvasId != null && modal is! PopupRoute) {
-      route.value = CodelesslyRoute.of(canvasId, modal?.settings.arguments);
+      route.value = _routeOf(canvasId, modal);
       _openPendingRoute(context, canvasId);
     }
     for (final listener in [..._navigationListeners.values]) {
       listener(context, layoutId, canvasId);
+    }
+  }
+
+  /// The route of screen [canvasId] shown by [modal]: the link that opened
+  /// the app when it names this screen, or the parameters it was opened
+  /// with.
+  CodelesslyRoute _routeOf(String canvasId, ModalRoute? modal) {
+    final CodelesslyRoute? pending = pendingRoute;
+    if (pending != null && pending.canvasId == canvasId) return pending;
+    return CodelesslyRoute.of(canvasId, modal?.settings.arguments);
+  }
+
+  /// Makes [route] screen [canvasId]'s before its load actions run, so they
+  /// can read `${route.name}`, and applies the link that opened the app to
+  /// it when the link names this screen (navigation listeners only hear of
+  /// a screen after its first frame).
+  void prepareRoute(BuildContext context, String canvasId) {
+    final ModalRoute? modal = ModalRoute.of(context);
+    if (modal is PopupRoute) return;
+    route.value = _routeOf(canvasId, modal);
+    final CodelesslyRoute? pending = pendingRoute;
+    if (pending != null && pending.canvasId == canvasId) {
+      setVariablesFromRoute(context, pending);
     }
   }
 
