@@ -66,19 +66,39 @@ class CodelesslyDialogWidget extends StatelessWidget {
 class CodelesslyBottomSheetWidget extends StatelessWidget {
   final WidgetBuilder builder;
 
-  const CodelesslyBottomSheetWidget({super.key, required this.builder});
+  /// Whether the sheet is as tall as it can be (90% of the screen) with the
+  /// canvas filling it, so the canvas scrolls its own content under a fixed
+  /// header. Otherwise the sheet is as tall as the canvas and scrolls as one.
+  final bool fullHeight;
+
+  /// The share of the screen height a sheet can take.
+  static const double maxHeightFactor = 0.9;
+
+  const CodelesslyBottomSheetWidget({
+    super.key,
+    required this.builder,
+    this.fullHeight = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final MediaQueryData media = MediaQuery.of(context);
+    final double maxHeight = media.size.height * maxHeightFactor;
     return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: media.size.height * 0.9),
+      constraints: BoxConstraints(maxHeight: maxHeight),
       child: Padding(
         // Keep inputs above the keyboard.
         padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
-        // Unbounded height inside the scroll view: a filling canvas takes
-        // the full width and its own height.
-        child: SingleChildScrollView(child: Builder(builder: builder)),
+        child: fullHeight
+            // A bounded height: an expanded list in the canvas scrolls
+            // inside it.
+            ? SizedBox(
+                height: maxHeight,
+                child: Builder(builder: builder),
+              )
+            // Unbounded height inside the scroll view: a filling canvas
+            // takes the full width and its own height.
+            : SingleChildScrollView(child: Builder(builder: builder)),
       ),
     );
   }
@@ -144,9 +164,16 @@ Offset popoverPosition(Rect? anchor, Size screen, Size child) {
   }
   double left = anchor.left;
   if (left + child.width > screen.width - m) left = anchor.right - child.width;
-  left = left.clamp(m, (screen.width - child.width - m).clamp(m, double.infinity));
-  final bool below = anchor.bottom + m + child.height <= screen.height - m ||
+  left = left.clamp(
+    m,
+    (screen.width - child.width - m).clamp(m, double.infinity),
+  );
+  final bool below =
+      anchor.bottom + m + child.height <= screen.height - m ||
       anchor.top - m - child.height < m;
   final double top = below ? anchor.bottom + m : anchor.top - m - child.height;
-  return Offset(left, top.clamp(m, (screen.height - child.height - m).clamp(m, double.infinity)));
+  return Offset(
+    left,
+    top.clamp(m, (screen.height - child.height - m).clamp(m, double.infinity)),
+  );
 }
