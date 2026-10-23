@@ -11,15 +11,17 @@ Future<void> pump(WidgetTester tester, Widget child) => tester.pumpWidget(
   ),
 );
 
-GaugeNode gauge(GaugeProperties props, {Map<String, String> variables = const {}}) =>
-    GaugeNode(
-      id: 'gauge',
-      name: 'Gauge',
-      basicBoxLocal: NodeBox(0, 0, 168, 144),
-      value: 20,
-      limit: 30,
-      properties: props,
-    )..variables.addAll(variables);
+GaugeNode gauge(
+  GaugeProperties props, {
+  Map<String, String> variables = const {},
+}) => GaugeNode(
+  id: 'gauge',
+  name: 'Gauge',
+  basicBoxLocal: NodeBox(0, 0, 168, 144),
+  value: 20,
+  limit: 30,
+  properties: props,
+)..variables.addAll(variables);
 
 GaugePainter painterOf(WidgetTester tester) => tester
     .widgetList<CustomPaint>(find.byType(CustomPaint))
