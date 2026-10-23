@@ -1,3 +1,29 @@
+## Unreleased
+
+### Nodes
+
+- Renders `gauge` and `chart` nodes (`PassiveGaugeWidget`,
+  `PassiveChartWidget`); taps on a chart select a category and fire its
+  `changed` trigger with the index.
+- Repeating and mirrored linear, radial and sweep gradients.
+- A node's `pulse` fades its opacity in a loop (`PulseOpacity`).
+
+### Variables and formulas
+
+- Computed variables: a variable whose value is a `${= ...}` formula reads
+  as the formula's result, typed, in bindings, formulas and conditions.
+  Results are cached until a variable they read changes, and bindings
+  update when one does. Cycles stop; SetVariable leaves them alone.
+- Formula functions `obj`, `set`, `get`, `take`, `skip`, `indexOf`,
+  `split`, `pad`, `concat`, `range`, `thousands` and `duration`.
+
+### Design canvas
+
+- `VariablePreview.resolve(node, context)` gives a list row's own item to
+  the editor's resolver, so each row previews its data.
+- Gauge, chart, progress bar and dropdown widgets take `scopedValues`, so a
+  design canvas can show their bindings with its variable defaults.
+
 ## 8.2.0
 
 ### States
