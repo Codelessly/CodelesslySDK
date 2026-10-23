@@ -61,4 +61,39 @@ void main() {
       const CodelesslyRoute('x', <String, String>{'a': 'b'}),
     );
   });
+
+  testWidgets('A link to the screen shown first applies before its load actions', (
+    tester,
+  ) async {
+    final Codelessly codelessly = Codelessly();
+    codelessly.pendingRoute = const CodelesslyRoute('crates', <String, String>{
+      'loadState': 'loading',
+      'debugHold': '1',
+    });
+    final CodelesslyContext c = CodelesslyContext.empty()
+      ..variables['s'] = Observable(
+        VariableData(id: 's', name: 'loadState', value: 'ready'),
+      );
+    late BuildContext captured;
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: c,
+        child: Builder(
+          builder: (context) {
+            captured = context;
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    codelessly.prepareRoute(captured, 'crates');
+    expect(codelessly.route.value?.params['debugHold'], '1');
+    expect(c.findVariableByName('loadState')!.value.value, 'loading');
+
+    // Another screen gets its own (empty) route.
+    codelessly.prepareRoute(captured, 'ledger');
+    expect(codelessly.route.value?.canvasId, 'ledger');
+    expect(codelessly.route.value?.params, isEmpty);
+  });
 }
