@@ -499,6 +499,14 @@ class CanvasViewport extends StatelessWidget {
 
   const CanvasViewport({super.key, required this.node, required this.child});
 
+  /// Whether [node] is a canvas whose height is its content's: it hugs
+  /// vertically. A scaffold needs a bounded height, so a canvas with an app
+  /// bar, navigation bar or FAB takes its design height instead.
+  static bool sizesToContent(CanvasNode node) =>
+      node.verticalFit == SizeFit.shrinkWrap &&
+      node.scaleMode == ScaleMode.responsive &&
+      !node.isAScaffold;
+
   /// The canvas box for [constraints] under [sizing], per axis. A null
   /// height leaves the height to the canvas content (see
   /// [CanvasContentHeight]), within the incoming maximum.
@@ -507,13 +515,7 @@ class CanvasViewport extends StatelessWidget {
     BoxConstraints constraints, {
     CanvasSizing sizing = CanvasSizing.fill,
   }) {
-    // A canvas whose height is its content's. A scaffold needs a bounded
-    // height, so a canvas with an app bar, navigation bar or FAB takes its
-    // design height instead.
-    final bool contentHeight =
-        node.verticalFit == SizeFit.shrinkWrap &&
-        node.scaleMode == ScaleMode.responsive &&
-        !node.isAScaffold;
+    final bool contentHeight = sizesToContent(node);
     if (sizing == CanvasSizing.design) {
       final double width = constraints.constrainWidth(node.basicBoxLocal.width);
       if (contentHeight) return (width: width, height: null);
