@@ -14,6 +14,8 @@
   whether a mouse is over it as `${hovered}`, which it and the nodes inside
   it can bind for hover borders, fills and colors. The hold progress reaches
   the held node's own properties too.
+- `strokeWeight` can be bound, set by a condition or changed by an action,
+  for a border that thickens when picked or hovered.
 - An expanded child whose bound `flex` is 0 takes no space, where it used to
   keep its design size.
 
