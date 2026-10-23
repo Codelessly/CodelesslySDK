@@ -35,15 +35,25 @@ class PassiveIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
     final ColorRGBA? iconColor =
         PropertyValueDelegate.getPropertyValue<ColorRGBA>(
           node,
           'iconColor',
-          scopedValues: ScopedValues.of(context),
+          scopedValues: scopedValues,
         );
-    final MultiSourceIconModel icon = iconColor == null
-        ? node.properties.icon
-        : node.properties.icon.copyWith(color: iconColor);
+    // An `icon` binding names the icon to show, e.g. a list item's.
+    MultiSourceIconModel icon = iconWithName(
+      node.properties.icon,
+      node.variables['icon'] == null
+          ? null
+          : PropertyValueDelegate.getPropertyValue<String>(
+              node,
+              'icon',
+              scopedValues: scopedValues,
+            ),
+    );
+    if (iconColor != null) icon = icon.copyWith(color: iconColor);
     return retrieveIconWidget(icon, node.basicBoxLocal.width) ??
         SizedBox(
           width: node.basicBoxLocal.width,
