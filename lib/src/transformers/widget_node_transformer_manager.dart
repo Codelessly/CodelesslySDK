@@ -225,28 +225,50 @@ abstract class WidgetNodeTransformerManager
     }
   }
 
-  /// Convenience method to handle widget reactions.
-  Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
-    final Widget wrapped = _wrapWithTapReactions(context, node, widget);
-    if (node is! ReactionMixin) return wrapped;
-    final List<Reaction> onHoldReactions = (node as ReactionMixin).reactions
-        .where(
-          (reaction) =>
-              reaction.trigger.type == TriggerType.hold &&
-              reaction.action.enabled,
-        )
+  /// Wraps the whole build of a tappable [node] so it and the nodes inside
+  /// it can read `hovered`, and, when it has hold reactions, run them once it
+  /// has been held, sharing the progress as `hold`. [child] builds the node
+  /// below these scopes so the node's own bindings see them.
+  Widget wrapWithInteractionScopes(
+    BuildContext context,
+    BaseNode node,
+    Widget child,
+  ) {
+    if (node is! ReactionMixin) return child;
+    if (node case CanvasNode() || SpacerNode()) return child;
+    final List<Reaction> reactions = (node as ReactionMixin).reactions
+        .where((reaction) => reaction.action.enabled)
         .toList();
-    if (onHoldReactions.isEmpty) return wrapped;
-    return HoldToConfirm(
-      duration: Duration(milliseconds: onHoldReactions.first.trigger.duration),
-      onConfirmed: () => FunctionsRepository.triggerAction(
-        context,
+    final bool tappable = reactions.any(
+      (reaction) => const {
+        TriggerType.click,
+        TriggerType.longPress,
         TriggerType.hold,
-        reactions: onHoldReactions,
+      }.contains(reaction.trigger.type),
+    );
+    if (!tappable) return child;
+    final List<Reaction> onHoldReactions = reactions
+        .where((reaction) => reaction.trigger.type == TriggerType.hold)
+        .toList();
+    if (onHoldReactions.isEmpty) return HoverScope(child: child);
+    return HoverScope(
+      child: HoldToConfirm(
+        duration: Duration(
+          milliseconds: onHoldReactions.first.trigger.duration,
+        ),
+        onConfirmed: () => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.hold,
+          reactions: onHoldReactions,
+        ),
+        child: child,
       ),
-      child: wrapped,
     );
   }
+
+  /// Convenience method to handle widget reactions.
+  Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) =>
+      _wrapWithTapReactions(context, node, widget);
 
   Widget _wrapWithTapReactions(
     BuildContext context,

@@ -414,6 +414,7 @@ class PropertyValueDelegate {
       'result' => ActionChain.current?.result,
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
       'hold' => scopedValues.holdProgress ?? 0.0,
+      'hovered' => scopedValues.hovered ?? false,
       _ => null,
     };
 
