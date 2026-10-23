@@ -454,21 +454,37 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       scopedValues: scopedValues,
       settings: settings,
     );
-    final Widget? errorText = buildText(
+    // The error text is worked out first: a template such as
+    // `${= invalid ? 'Required' : ''}` that comes out empty (or blank) is
+    // no error, so the field keeps its normal border and has no error row.
+    // InputDecoration uses errorBorder/focusedErrorBorder only with an error.
+    final String? errorMessage = getText(
       context,
       node,
       property: 'errorText',
       defaultValue: decoration.errorText,
       scopedValues: scopedValues,
       settings: settings,
-      variablesOverrides: widget.variablesOverrides,
-      color: decoration.errorStyle.fills.first.toFlutterColor(),
-      fontSize: decoration.errorStyle.fontSize,
-      letterSpacing: decoration.errorStyle.letterSpacing,
-      lineHeight: decoration.errorStyle.lineHeight,
-      fontName: decoration.errorStyle.fontName,
-      textDecoration: decoration.errorStyle.textDecoration,
     );
+    final bool hasError =
+        errorMessage != null && errorMessage.trim().isNotEmpty;
+    final Widget? errorText = !hasError
+        ? null
+        : buildText(
+            context,
+            node,
+            property: 'errorText',
+            defaultValue: decoration.errorText,
+            scopedValues: scopedValues,
+            settings: settings,
+            variablesOverrides: widget.variablesOverrides,
+            color: decoration.errorStyle.fills.first.toFlutterColor(),
+            fontSize: decoration.errorStyle.fontSize,
+            letterSpacing: decoration.errorStyle.letterSpacing,
+            lineHeight: decoration.errorStyle.lineHeight,
+            fontName: decoration.errorStyle.fontName,
+            textDecoration: decoration.errorStyle.textDecoration,
+          );
     final Widget? prefixText = buildText(
       context,
       node,

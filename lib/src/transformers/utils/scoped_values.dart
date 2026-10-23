@@ -1,5 +1,4 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -115,19 +114,16 @@ class ScopedValues {
     indexedItem = IndexedItemProvider.maybeOf(context);
     screenSize = MediaQuery.maybeSizeOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
-    routeParams = {
-      // On the web, the page URL's query parameters, so a published site
-      // can be linked to a state: `?date=2026-10-22` is `${route.date}`.
-      ...urlQueryParameters(),
-      ...?ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?,
-    };
     final instance = context.read<Codelessly?>();
+    // Screens the app navigates to carry their parameters; the first screen
+    // shows in the host's route and takes them from the app's link.
+    routeParams =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
+        (instance ?? Codelessly.instance).linkParamsFor(
+          codelesslyContext?.layoutID,
+        ) ??
+        {};
     _appUser = null;
     _instanceRef = instance == null ? null : WeakReference(instance);
   }
 }
-
-/// The query parameters of the page URL on the web, else empty. Navigation
-/// params of the same name win over them in `route`. Tests replace it.
-Map<String, String> Function() urlQueryParameters = () =>
-    kIsWeb ? Uri.base.queryParameters : const {};

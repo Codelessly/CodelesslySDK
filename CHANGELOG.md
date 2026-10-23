@@ -2,17 +2,32 @@
 
 Requires codelessly_api 6.2.0.
 
-### Formulas
+### Layout
 
-- Computed variables: a variable whose value is a `${= ...}` formula is
-  evaluated when read, and widgets bound to it update when the variables
-  it uses change. Cycles resolve to null.
-- New functions: `obj`, `set`, `merge`, `keys`, `values`, `range`,
-  `slice`, `first`, `last`, `concat`, `indexOf`, `daysInMonth`, `padLeft`,
-  `padRight`, `substring`, `split`, `replace`, `coalesce`, `formatNumber`
-  and `matches` (regular expressions); `money` takes a digit count.
-- On the web, the page URL's query parameters are part of `route`
-  (`${route.date}`); navigation params of the same name win.
+- Row/column `spacing`, and `wrap` with `runSpacing` (`CodelesslyWrap`).
+  Children hidden by a visibility formula take no space and no gap.
+- `flex` and `rotation` can be bound to data like fill, opacity and size.
+
+### Formulas and variables
+
+- Computed variables: a variable holding a `${= ...}` formula is evaluated
+  when read and rebuilds what shows it when its inputs change.
+- Functions: `sqrt`, `pow`, trigonometry, `pi`, `radians`, `degrees`,
+  `clamp`, `distance` (great-circle), `first`, `last`, `slice`, `take`,
+  `skip`, `reverse`, `range`, `indexOf`, `object`, `merge`, `set`, `keys`,
+  `values`, `append`, `setAt`, `insertAt`, `removeAt`, `move`, `flatten`,
+  `compact` and `thousands`; also `obj`, `concat`, `daysInMonth`,
+  `padLeft`, `padRight`, `substring`, `split`, `replace`, `coalesce`,
+  `formatNumber` and `matches` (regular expressions). `money` takes a digit
+  count.
+- A map's own key wins over a built-in accessor of the same name
+  (`${rig.length}` reads the field).
+
+### Links
+
+- A layout opens by the ID of one of its canvases.
+- A link to the app's first screen gives it the link's parameters
+  (`${route.k}`).
 
 ### Rendering
 
@@ -37,6 +52,10 @@ Requires codelessly_api 6.2.0.
 
 ### Fixes
 
+- Shadows without spread, offset or color no longer crash.
+- Image fills apply their opacity once (they painted at its square).
+- A text field's `errorText` template that comes out empty is no error.
+- List items on the design canvas show their own item's text.
 - An API document without a directory no longer fails to load
   (`HttpApiData.directory` defaults to the root).
 
