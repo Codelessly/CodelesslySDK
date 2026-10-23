@@ -7,6 +7,17 @@
   `LineChartGeometry` holds the pure parts (dates, domain, interpolation,
   Catmull-Rom control points, readout text and placement).
 - `FormulaEvaluator.formatDate` exposes the `formatDate` formula function.
+- A dialog whose canvas is responsive and holds a responsive layout (a
+  `VarianceNode` with breakpoints) fills the screen instead of keeping its
+  design size, so its variant follows the screen width and each variant
+  places itself (a full-screen sheet on mobile, a centered card on desktop).
+  Dialogs with plain fixed-size canvases are unchanged.
+- In a dialog (`TapThroughScope`), taps on parts of the layout where nothing
+  paints or reacts (a canvas without a background, an empty frame) reach the
+  barrier, so a dismissible full-screen dialog closes on them.
+- A `squeezable` node that wraps its content on a Row/Column's main axis is
+  laid out as `Flexible(fit: FlexFit.loose)`: it hugs its content and
+  shrinks to the room left when the Row/Column runs out of space.
 
 ## 8.2.0
 
