@@ -119,7 +119,9 @@ class ScopedValues {
     // shows in the host's route and takes them from the app's link.
     routeParams =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
-        instance?.linkParamsFor(codelesslyContext?.layoutID) ??
+        (instance ?? Codelessly.instance).linkParamsFor(
+          codelesslyContext?.layoutID,
+        ) ??
         {};
     _appUser = null;
     _instanceRef = instance == null ? null : WeakReference(instance);
