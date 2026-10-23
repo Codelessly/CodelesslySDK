@@ -199,9 +199,14 @@ class PassiveDropdownWidget extends StatelessWidget {
             item: IndexedItem(index, value),
             child: Builder(
               builder: (context) => Container(
-                constraints: BoxConstraints(
-                  maxWidth: node.basicBoxLocal.width - node.properties.iconSize,
-                ),
+                // An expanded dropdown gives the value the field's width; the
+                // design width only caps one that sizes to its value.
+                constraints: node.properties.expanded
+                    ? null
+                    : BoxConstraints(
+                        maxWidth:
+                            node.basicBoxLocal.width - node.properties.iconSize,
+                      ),
                 child: itemContent(
                   context,
                   value,
