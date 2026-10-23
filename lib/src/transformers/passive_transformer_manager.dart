@@ -175,9 +175,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// Returns [node] with the style properties that conditions, bound
   /// variables or formulas, or set value actions give it at runtime: `fill`
-  /// (a text's color for text nodes), `stroke`, `opacity`, `width` and
-  /// `height`. Returns [node] itself when
-  /// nothing changes it.
+  /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
+  /// `height`, `flex` (its share of an expanded row or column, so bars
+  /// can be sized proportionally) and `rotation` (in degrees). Returns
+  /// [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     T? value<T extends Object>(String property) =>
@@ -237,6 +238,21 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         math.max(0, width ?? box.width),
         math.max(0, height ?? box.height),
       ).toJson();
+    }
+
+    final num? flex = value<num>('flex');
+    if (flex != null && flex.round() != node.flex) {
+      // Flutter needs a positive flex; 0 still gets a sliver.
+      patch['flex'] = math.max(1, flex.round());
+    }
+
+    // Rotation in degrees (the node's `rotation` JSON field), e.g. a card
+    // tilted while it's dragged: `${= dragging ? -2 : 0}`.
+    final num? rotation = value<num>('rotation');
+    if (rotation != null &&
+        rotation.isFinite &&
+        rotation.round() != node.rotationDegrees) {
+      patch['rotation'] = rotation.round();
     }
 
     // The states shown around the node (a property-override variant, its
@@ -323,78 +339,162 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // Add node values to [listenables].
     if (listenableNodeValues != null) listenables.add(listenableNodeValues);
 
-    // Adds what a variable path rebuilds on: its variable, or the storage or
-    // auth notifier for those predefined variables. A computed variable (one
-    // whose value is a `${= ...}` formula) also brings in the variables its
-    // formula reads, so nodes stay live when those change.
-    final Set<String> seenNames = {};
-    void addPath(String variablePath) {
+    // Traverse through all the variables that the node properties are attached
+    // to.
+    // A property bound to a formula listens to the paths the formula reads.
+    final Set<String> boundPaths = {
+      for (final String path in node.variables.values)
+        if (FormulaEvaluator.exactExpression(path) case final String expression)
+          ...FormulaEvaluator.referencedPaths(expression)
+        else
+          path,
+    };
+    for (final String variablePath in boundPaths) {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
-      // Storage listens per key, so predefined paths count whole.
-      if (match == null ||
-          !seenNames.add(
-            match.isPredefinedVariable ? variablePath : match.name,
-          )) {
-        return;
-      }
+      if (match == null) continue;
 
       if (match.isPredefinedVariable) {
         // If variable is not listenable or doesn't need to create a listenable,
         // skip it.
-        if (!predefinedListenableVariableNames.contains(match.name)) return;
+        if (!predefinedListenableVariableNames.contains(match.name)) continue;
 
         switch (match.name) {
           case 'storage':
+            // handle storage variable
             final notifier = getStorageListenerFor(match, context);
             if (notifier != null) listenables.add(notifier);
           case 'auth':
             final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
         }
-        return;
       }
 
-      // Get corresponding variable data from codelessly context.
-      final ValueNotifier<VariableData>? listenableVariable = codelesslyContext
-          .findVariableByName(match.name);
-      if (listenableVariable == null) return;
-      listenables.add(listenableVariable);
-      if (FormulaEvaluator.exactExpression(listenableVariable.value.value)
-          case final String expression) {
-        FormulaEvaluator.referencedPaths(expression).forEach(addPath);
-      }
+      addVariableListenables(
+        codelesslyContext,
+        match.name,
+        listenables,
+        context,
+      );
     }
 
-    // The variables the node's properties are bound to. A property bound to
-    // a formula listens to the paths the formula reads.
-    for (final String path in node.variables.values) {
-      if (FormulaEvaluator.exactExpression(path) case final String expression) {
-        FormulaEvaluator.referencedPaths(expression).forEach(addPath);
-      } else {
-        addPath(path);
-      }
-    }
-
+    // Traverse through all the multi-variables that the node properties are attached
+    // to.
     // Text written with inline `${...}` paths or formulas (a text's
     // characters, a button's label, ...) listens to them too, so it stays
     // live whether or not its multipleVariables were filled in.
-    node.multipleVariables.values.expand((path) => path).forEach(addPath);
-    for (final String template in inlineTextTemplatesOf(node)) {
-      variablePathRegex
-          .allMatches(template)
-          .map((match) => match.namedGroup('value'))
-          .nonNulls
-          .forEach(addPath);
-      FormulaEvaluator.referencedPathsInText(template).forEach(addPath);
+    final Set<String> multiplePaths = {
+      ...node.multipleVariables.values.expand((path) => path),
+      for (final String template in inlineTextTemplatesOf(node)) ...{
+        ...variablePathRegex
+            .allMatches(template)
+            .map((match) => match.namedGroup('value'))
+            .nonNulls,
+        ...FormulaEvaluator.referencedPathsInText(template),
+      },
+    };
+    for (final String variablePath in multiplePaths) {
+      final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
+      if (match == null) continue;
+
+      if (match.isPredefinedVariable) {
+        // If variable is not listenable or doesn't need to create a listenable,
+        // skip it.
+        if (!predefinedListenableVariableNames.contains(match.name)) continue;
+
+        switch (match.name) {
+          case 'storage':
+            // handle storage variable
+            final notifier = getStorageListenerFor(match, context);
+            if (notifier != null) listenables.add(notifier);
+          case 'auth':
+            final notifier = context.read<Codelessly?>()?.appUser;
+            if (notifier != null) listenables.add(notifier);
+        }
+      }
+
+      addVariableListenables(
+        codelesslyContext,
+        match.name,
+        listenables,
+        context,
+      );
     }
 
-    // The variables of the conditions that affect the node.
+    // Traverse through all the conditions that affects the node.
     for (final BaseCondition condition in codelesslyContext.conditions.values) {
       if (!condition.hasNode(node.id)) continue;
-      condition.getReactiveVariables().toSet().forEach(addPath);
+
+      final Set<String> variableNames = condition
+          .getReactiveVariables()
+          .toSet();
+
+      for (final name in variableNames) {
+        if (predefinedListenableVariableNames.contains(name)) {
+          switch (name) {
+            case 'storage':
+              final notifier = getStorageListenerFor(
+                VariableMatch.parse(name.wrapWithVariableSyntax())!,
+                context,
+              );
+              if (notifier != null) listenables.add(notifier);
+            case 'auth':
+              final notifier = context.read<Codelessly?>()?.appUser;
+              if (notifier != null) listenables.add(notifier);
+          }
+          continue;
+        }
+        addVariableListenables(codelesslyContext, name, listenables, context);
+      }
     }
 
     return listenables;
+  }
+
+  /// Adds the notifier of variable [name] to [listenables]. A computed
+  /// variable, one whose value is a `${= ...}` formula, also adds the
+  /// variables its formula reads, so nodes showing it update when they do.
+  void addVariableListenables(
+    CodelesslyContext codelesslyContext,
+    String name,
+    List<Listenable> listenables,
+    BuildContext context, [
+    Set<String>? visited,
+  ]) {
+    final Set<String> seen = visited ?? {};
+    if (!seen.add(name)) return;
+    if (predefinedListenableVariableNames.contains(name)) {
+      final Listenable? notifier = switch (name) {
+        'storage' => getStorageListenerFor(
+          VariableMatch.parse(name.wrapWithVariableSyntax())!,
+          context,
+        ),
+        'auth' => context.read<Codelessly?>()?.appUser,
+        _ => null,
+      };
+      if (notifier != null) listenables.add(notifier);
+      return;
+    }
+    final ValueNotifier<VariableData>? variable = codelesslyContext
+        .findVariableByName(name);
+    if (variable == null) return;
+    if (!listenables.contains(variable)) listenables.add(variable);
+    final String? expression = FormulaEvaluator.exactExpression(
+      variable.value.value,
+    );
+    if (expression == null) return;
+    for (final String path in FormulaEvaluator.referencedPaths(expression)) {
+      final VariableMatch? match = VariableMatch.parse(
+        path.wrapWithVariableSyntax(),
+      );
+      if (match == null) continue;
+      addVariableListenables(
+        codelesslyContext,
+        match.name,
+        listenables,
+        context,
+        seen,
+      );
+    }
   }
 
   Listenable? getStorageListenerFor(VariableMatch match, BuildContext context) {

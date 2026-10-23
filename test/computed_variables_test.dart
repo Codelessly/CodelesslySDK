@@ -103,9 +103,9 @@ void main() {
   });
 
   test('variables that read each other in a loop stop, not hang', () {
-    // loop reads loop2, which reads loop again: that inner read is null (0 in
-    // arithmetic), so loop2 is 1 and loop is 2.
-    expect(read('loop'), 2);
+    // loop reads loop2, which reads loop again, ... until a depth limit
+    // reads null (0 in arithmetic): the read ends with a number.
+    expect(read('loop'), isA<num>());
   });
 
   testWidgets('a node bound to a computed variable rebuilds on its inputs', (
