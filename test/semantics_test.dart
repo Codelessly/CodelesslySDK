@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -63,7 +64,8 @@ void main() {
         isSelected: true,
       ),
     );
-    // On a button with text, the label comes first, then the text.
+    // On a button with text, the label replaces the text (as the reference
+    // app's buttons read) and the button keeps its tap.
     final withText = TextNode.fromJson({
       'id': 'label',
       'name': 'Label',
@@ -113,7 +115,11 @@ void main() {
         ),
       ),
     );
-    expect(find.bySemanticsLabel(RegExp(r'^Saturday\n24$')), findsOneWidget);
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('Saturday')),
+      matchesSemantics(label: 'Saturday', isButton: true, hasTapAction: true),
+    );
+    expect(find.bySemanticsLabel(RegExp('24')), findsNothing);
     handle.dispose();
   });
 
@@ -183,6 +189,61 @@ void main() {
         .getSemantics(find.bySemanticsLabel(RegExp('^Search creatures')))
         .getSemanticsData();
     expect(data.flagsCollection.isTextField, isTrue);
+    handle.dispose();
+  });
+
+  testWidgets('a labelled button runs its reactions from its semantics tap', (
+    tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final List<String> calls = [];
+    final node =
+        RectangleNode(
+            id: 'settings',
+            name: 'Settings',
+            basicBoxLocal: NodeBox(0, 0, 40, 40),
+            reactions: [
+              Reaction(
+                action: CallFunctionAction(name: 'record'),
+                trigger: TriggerModel(type: TriggerType.click),
+              ),
+            ],
+          )
+          ..parentID = kRootNode
+          ..variables['semanticLabel'] = 'Settings';
+    final registry = NodeRegistry()..setNodes({node.id: node});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: CodelesslyContext.empty()
+          ..functions['record'] = (context, reference, params) =>
+              calls.add('tap'),
+        child: MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Builder(
+              builder: (context) => manager.buildWidgetFromNode(
+                node,
+                context,
+                settings: const WidgetBuildSettings(debugLabel: 'test'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final SemanticsNode semantics = tester.getSemantics(
+      find.bySemanticsLabel('Settings'),
+    );
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semantics.id,
+      SemanticsAction.tap,
+    );
+    await tester.pump();
+    expect(calls, ['tap']);
     handle.dispose();
   });
 }
