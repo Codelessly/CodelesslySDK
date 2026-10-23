@@ -194,6 +194,8 @@ abstract final class ComputedVariables {
     VariableType.color => result is String || result is ColorRGBA,
     VariableType.list => result is List,
     VariableType.map => result is Map,
+    // A choice holds the name of one of its options.
+    VariableType.choice => result is String,
   };
 
   static VariableType? _typeOf(Object result) {
