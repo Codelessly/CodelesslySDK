@@ -79,5 +79,7 @@ void main() {
       isNull,
     );
     expect(model.linkParamsFor(null, 'layout-trips'), isNull);
+    // A widget showing the first screen may not know its layout yet.
+    expect(model.linkParamsFor(link, null), {'state': 'loading'});
   });
 }
