@@ -1,4 +1,4 @@
-## Unreleased
+## 8.3.0
 
 ### Layout
 
@@ -30,6 +30,31 @@
 - Image fills apply their opacity once (they painted at its square).
 - A text field's `errorText` template that comes out empty is no error.
 - List items on the design canvas show their own item's text.
+
+### Widgets
+
+- Gauges (`PassiveGaugeWidget`, `GaugePainter`) and bar charts
+  (`PassiveBarChartWidget`) render the new `gauge` and `barChart` nodes; both
+  take `scopedValues` so an editor can preview their bindings.
+- Industrial slider: rectangle fader thumb with grip, fill from the thumb to
+  the end, notch tick marks, a value marker, a bindable active track color,
+  a selectable range and the `changeEnd` trigger.
+- Text nodes take a bound `textColor`; icons take an `icon` binding naming a
+  Material icon (`iconWithName`).
+- Nodes with a `transition` animate runtime opacity changes.
+- A row or column that hugs its cross axis and stretches its children gives
+  hugging children the thickest child's size, as the editor lays it out.
+
+### Actions and variables
+
+- Interval reactions run on a timer per period while a canvas shows.
+- Dialogs open centered, as a bottom sheet, adaptively or anchored under the
+  trigger; canvas confirms take the same placement.
+- Toasts: alignment, side margin, max width, corner radius, action color,
+  close button and font size.
+- Computed variables also come from `VariableData.formula`, coerced to the
+  variable's type; `setVariable` leaves computed variables alone.
+- Formulas: `pad`, `alpha`, `concat` and list `+`; `FormulaEvaluator.parses`.
 
 ## 8.2.0
 
