@@ -33,18 +33,38 @@ class PassiveIconWidget extends StatelessWidget {
     this.useFonts = false,
   });
 
-  @override
-  Widget build(BuildContext context) {
+  /// [node]'s icon with its bound color and glyph applied: a bound or
+  /// conditional `icon` names the glyph (e.g. star or star_border by a
+  /// favorite flag), `iconColor` colors it.
+  static MultiSourceIconModel resolvedIcon(
+    IconNode node,
+    ScopedValues scopedValues,
+  ) {
     final ColorRGBA? iconColor =
         PropertyValueDelegate.getPropertyValue<ColorRGBA>(
           node,
           'iconColor',
-          scopedValues: ScopedValues.of(context),
+          scopedValues: scopedValues,
         );
-    final MultiSourceIconModel icon = iconColor == null
-        ? node.properties.icon
-        : node.properties.icon.copyWith(color: iconColor);
-    return retrieveIconWidget(icon, node.basicBoxLocal.width) ??
+    final String? glyph = PropertyValueDelegate.getPropertyValue<String>(
+      node,
+      'icon',
+      scopedValues: scopedValues,
+    );
+    MultiSourceIconModel icon = node.properties.icon;
+    if (glyph != null && icon.icon != null) {
+      icon = icon.copyWith(icon: icon.icon!.named(glyph));
+    }
+    if (iconColor != null) icon = icon.copyWith(color: iconColor);
+    return icon;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return retrieveIconWidget(
+          resolvedIcon(node, ScopedValues.of(context)),
+          node.basicBoxLocal.width,
+        ) ??
         SizedBox(
           width: node.basicBoxLocal.width,
           height: node.basicBoxLocal.height,
