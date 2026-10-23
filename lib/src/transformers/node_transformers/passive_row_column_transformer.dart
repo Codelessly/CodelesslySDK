@@ -315,6 +315,12 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       }
     }
 
+    // A squeezable node that wraps its content hugs it while it fits and
+    // shrinks to the room the Row/Column has left when it doesn't.
+    if (mainAxisFit == SizeFit.shrinkWrap && node.squeezable) {
+      childWidget = Flexible(flex: flex, child: childWidget);
+    }
+
     return childWidget;
   }
 
