@@ -542,7 +542,18 @@ class FunctionsRepository {
     final String? myCanvasId = effectiveCodelessly.currentNavigatedCanvasId;
 
     if (action.navigationType == NavigationType.pop) {
-      await Navigator.maybePop(context, parsedParams);
+      final bool popped = await Navigator.maybePop(context, parsedParams);
+      // Nothing to go back to (the screen was opened directly): a pop with a
+      // destination goes there instead.
+      if (!popped && action.destinationId.isNotEmpty && context.mounted) {
+        return navigate(
+          context,
+          action.copyWith(navigationType: NavigationType.replace),
+          codelessly: codelessly,
+          codelesslyController: codelesslyController,
+          scopedValues: scopedValues,
+        );
+      }
     } else {
       // Check if a layout exists for the action's [destinationId].
       final String? layoutId =
