@@ -554,9 +554,17 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
       'stroke-paint-${paint.id}',
       scopedValues: scopedValues,
     );
+    final PaintModel used = paintValue ?? paint;
+    final Color? color = used.toFlutterColor();
+    // A gradient stroke (a brass bezel) is painted with the gradient spread
+    // over the node's box. A paint a stroke can't use (an image) is skipped.
+    final Gradient? gradient = color == null ? retrieveGradient(used) : null;
+    if (color == null && gradient == null) continue;
     // A solid stroke on every side is Flutter's own border. A stroke on one
-    // side, or a dashed one, is painted by [StrokePainter].
-    if (node.dashPattern.isEmpty && node.strokeSide == StrokeSide.all) {
+    // side, a dashed one or a gradient one is painted by [StrokePainter].
+    if (color != null &&
+        node.dashPattern.isEmpty &&
+        node.strokeSide == StrokeSide.all) {
       strokeWidgets.add(
         Positioned.fill(
           child: DecoratedBox(
@@ -564,7 +572,7 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
               borderRadius: getBorderRadius(node),
               border: Border.all(
                 strokeAlign: node.strokeAlign.alignment,
-                color: (paintValue ?? paint).toFlutterColor()!,
+                color: color,
                 width: node.strokeWeight,
               ),
             ),
@@ -576,7 +584,8 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
         Positioned.fill(
           child: CustomPaint(
             painter: StrokePainter(
-              color: (paintValue ?? paint).toFlutterColor()!,
+              color: color ?? Colors.black,
+              gradient: gradient,
               borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
               dashPattern: node.dashPattern,
               strokeWidth: node.strokeWeight,

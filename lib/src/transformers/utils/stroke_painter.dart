@@ -33,6 +33,10 @@ class StrokePainter extends CustomPainter {
 
   final List<double> dashPattern;
 
+  /// Paints the stroke with this gradient, spread over the node's box,
+  /// instead of [color].
+  final Gradient? gradient;
+
   /// The side of the stroke. Whether it is all, top, bottom, left, or right.
   final StrokeSide strokeSide;
 
@@ -63,6 +67,7 @@ class StrokePainter extends CustomPainter {
     this.color = Colors.black,
     this.strokeMiterLimit = 4,
     this.dashPattern = const [],
+    this.gradient,
     this.boxShape = BoxShape.rectangle,
     this.strokeSide = StrokeSide.all,
     this.strokeAlign = StrokeAlignC.inside,
@@ -84,7 +89,8 @@ class StrokePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = strokeCap.flutterStrokeCap
-      ..strokeMiterLimit = strokeMiterLimit;
+      ..strokeMiterLimit = strokeMiterLimit
+      ..shader = gradient?.createShader(Offset.zero & size);
 
     // If the stroke is dotted, we take a completely different rendering
     // route.
@@ -276,6 +282,7 @@ class StrokePainter extends CustomPainter {
       oldDelegate.boxShape != boxShape ||
       oldDelegate.color != color ||
       oldDelegate.dashPattern != dashPattern ||
+      oldDelegate.gradient != gradient ||
       oldDelegate.strokeWidth != strokeWidth ||
       oldDelegate.strokeAlign != strokeAlign ||
       oldDelegate.strokeSide != strokeSide ||
