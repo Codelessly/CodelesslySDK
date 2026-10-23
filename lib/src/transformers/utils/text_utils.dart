@@ -100,8 +100,12 @@ class TextUtils {
       final spans = characters
           .splitMap(
             variableSyntaxIdentifierRegex,
-            onMatch: (match) =>
-                VariableSpan(variable: match[0]!, node: node, style: style),
+            onMatch: (match) => VariableSpan(
+              variable: match[0]!,
+              node: node,
+              style: style,
+              context: context,
+            ),
             onNonMatch: (text) => TextSpan(text: text, style: style),
           )
           .toList();
@@ -346,7 +350,9 @@ class TextUtils {
 
     // Not supported yet but good to have.
     final List<Shadow> shadows = effects
-        .where((element) => element.type == EffectType.dropShadow)
+        .where(
+          (element) => element.type == EffectType.dropShadow && element.visible,
+        )
         .map(
           (d) => Shadow(
             offset: Offset(d.offset!.x.toDouble(), d.offset!.y.toDouble()),

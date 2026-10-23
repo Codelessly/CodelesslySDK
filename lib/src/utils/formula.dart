@@ -1,15 +1,28 @@
 import 'dart:math' as math;
 
+/// The body of a formula: text and quoted strings, with braces only in
+/// balanced pairs nested up to [depth] deep, such as the object literal in
+/// `merge(r, {tags: {a: 1}})`. Braces inside quoted strings don't count.
+String _formulaBody(int depth) {
+  const String atom = r'''[^{}'"]|'[^']*'|"[^"]*"''';
+  String body = '(?:$atom)*';
+  for (int i = 0; i < depth; i++) {
+    body = '(?:$atom|\\{$body\\})*';
+  }
+  return body;
+}
+
 /// Matches a formula written as `${= expression}` in a text.
 ///
-/// The expression can't contain braces, except inside quoted strings.
+/// The expression can contain braces in balanced pairs, three levels deep,
+/// for object literals such as `${= merge(r, {favorite: true})}`.
 final RegExp formulaRegex = RegExp(
-  r'''(?<!\\)\$\{=(?<expr>(?:[^{}'"]|'[^']*'|"[^"]*")*)\}''',
+  r'(?<!\\)\$\{=(?<expr>' + _formulaBody(3) + r')\}',
 );
 
 /// Matches a text that is exactly one formula, e.g. `${= qty * price}`.
 final RegExp exactFormulaRegex = RegExp(
-  r'''^\s*(?<!\\)\$\{=(?<expr>(?:[^{}'"]|'[^']*'|"[^"]*")*)\}\s*$''',
+  r'^\s*(?<!\\)\$\{=(?<expr>' + _formulaBody(3) + r')\}\s*$',
 );
 
 /// Resolves a variable path such as `storage.cart` or `item.price` to its
@@ -19,8 +32,9 @@ typedef FormulaPathResolver = Object? Function(String path);
 /// Evaluates small expressions used in `${= ...}` formulas.
 ///
 /// Supports:
-///  - numbers, 'single' or "double" quoted strings, true, false, null and
-///    `[a, b]` lists.
+///  - numbers, 'single' or "double" quoted strings, true, false, null,
+///    `[a, b]` lists and `{id: 'a', 'full name': n + 1}` objects, whose keys
+///    are names or quoted text.
 ///  - variable paths like `storage.cart.length` or `item.price`, resolved with
 ///    the same rules as `${path}`, followed by `[index]` or `.key`.
 ///  - `+ - * / %`, comparisons `== != < <= > >=`, `&& || !` and
@@ -29,15 +43,22 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
 ///    endsWith, where, without, number, text, isEmpty and isNotEmpty. See
 ///    [FormulaEvaluator.functions].
+///  - text functions: padLeft, padRight, substring, replace, split, indexOf,
+///    matches and slug; durations: seconds ('3:45' → 225) and duration
+///    (225 → '3:45'); colors: luminance.
 ///  - list functions that take a predicate or key: filter, where, count,
-///    find, any, all, map, sortBy, unique, sum and join. The predicate is a
-///    lambda, `item => expression`, or a field name, optionally with a value
-///    to match, e.g. `filter(tasks, t => contains(lower(t.title), q))`,
+///    find, findIndex, any, all, map, sortBy, sortByDesc, unique, sum and
+///    join. The predicate is a lambda, `item => expression`, or a field name,
+///    optionally with a value to match, e.g.
+///    `filter(tasks, t => contains(lower(t.title), q))`,
 ///    `filter(tasks, 'done')` or `count(tasks, 'done', false)`. A lambda's
 ///    parameter is read like a variable inside its body (`t.title`,
 ///    `t.tags[0]`, `t.tags.length`) and hides a variable of the same name;
-///    the body can read every other variable. Lambdas are only allowed as
-///    function arguments.
+///    the body can read every other variable. A lambda can take the item's
+///    index as a second parameter, `(t, i) => i < 3`. Lambdas are only
+///    allowed as function arguments.
+///  - other list functions: slice, take, skip and reverse (which also work
+///    on text); object functions: merge and set, which return new objects.
 ///  - date functions: now, today, parseDate, formatDate, addMinutes, addHours,
 ///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
 ///    hour, minute and weekday. Dates are ISO 8601 text such as
@@ -160,7 +181,7 @@ class FormulaEvaluator {
   static const List<FormulaFunctionDoc> functionDocs = [
     FormulaFunctionDoc(
       'money',
-      'money(value, symbol)',
+      'money(value, symbol, decimals) or money(value, decimals)',
       r'money(price) → $1,234.50',
     ),
     FormulaFunctionDoc(
@@ -223,6 +244,57 @@ class FormulaEvaluator {
       'endsWith("photo.png", ".png") → true',
     ),
     FormulaFunctionDoc(
+      'padLeft',
+      'padLeft(value, width, char)',
+      'padLeft(4, 2) → 04 (numbers pad with 0, text with spaces)',
+    ),
+    FormulaFunctionDoc(
+      'padRight',
+      'padRight(value, width, char)',
+      'padRight("A", 3, ".") → A..',
+    ),
+    FormulaFunctionDoc(
+      'substring',
+      'substring(text, start, end)',
+      'substring("Vinyl", 0, 3) → Vin',
+    ),
+    FormulaFunctionDoc(
+      'replace',
+      'replace(text, from, to)',
+      'replace("a-b-c", "-", " ") → a b c',
+    ),
+    FormulaFunctionDoc(
+      'split',
+      'split(text, separator)',
+      'split("rock, jazz", ", ") → [rock, jazz]',
+    ),
+    FormulaFunctionDoc(
+      'indexOf',
+      'indexOf(text or list, value)',
+      'indexOf(genres, "jazz") → 1 (-1 when missing)',
+    ),
+    FormulaFunctionDoc(
+      'matches',
+      'matches(text, pattern)',
+      r'matches(code, "^\d{4}$") → true',
+    ),
+    FormulaFunctionDoc(
+      'slug',
+      'slug(text)',
+      'slug("Kind of Blue!") → kind-of-blue',
+    ),
+    FormulaFunctionDoc(
+      'seconds',
+      'seconds("m:ss" or "h:mm:ss")',
+      'seconds("3:45") → 225',
+    ),
+    FormulaFunctionDoc('duration', 'duration(seconds)', 'duration(225) → 3:45'),
+    FormulaFunctionDoc(
+      'luminance',
+      'luminance(color)',
+      'luminance("#FFFFFF") → 1',
+    ),
+    FormulaFunctionDoc(
       'filter',
       'filter(list, item => condition) or filter(list, field, value)',
       'filter(tasks, t => contains(lower(t.title), lower(search)))',
@@ -254,8 +326,40 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'sortBy',
-      'sortBy(list, field or item => key, "desc")',
-      'sortBy(tasks, "due") (missing keys last)',
+      'sortBy(list, field or item => key, "desc", more keys…)',
+      'sortBy(records, r => r.artist, r => r.year, "desc") (missing keys last)',
+    ),
+    FormulaFunctionDoc(
+      'sortByDesc',
+      'sortByDesc(list, field or item => key, more keys…)',
+      'sortByDesc(records, "year")',
+    ),
+    FormulaFunctionDoc(
+      'findIndex',
+      'findIndex(list, item => condition) or findIndex(list, field, value)',
+      'findIndex(records, r => r.id == selectedId) → 2 (-1 when none)',
+    ),
+    FormulaFunctionDoc(
+      'slice',
+      'slice(list or text, start, end)',
+      'slice(tracks, 1, 3) → items 1 and 2 (negative counts from the end)',
+    ),
+    FormulaFunctionDoc('take', 'take(list or text, count)', 'take(tracks, 3)'),
+    FormulaFunctionDoc('skip', 'skip(list or text, count)', 'skip(tracks, 3)'),
+    FormulaFunctionDoc(
+      'reverse',
+      'reverse(list or text)',
+      'reverse([1, 2, 3]) → [3, 2, 1]',
+    ),
+    FormulaFunctionDoc(
+      'merge',
+      'merge(object, patch, …)',
+      'merge(r, {favorite: !r.favorite})',
+    ),
+    FormulaFunctionDoc(
+      'set',
+      'set(object or list, key or index, value)',
+      'set(r, "rating", 5)',
     ),
     FormulaFunctionDoc(
       'unique',
@@ -442,16 +546,189 @@ Object? _member(Object? target, Object? key) {
 String _fixed(Object? value, Object? digits) =>
     _num(value).toStringAsFixed(_num(digits ?? 2).toInt().clamp(0, 20));
 
-String _money(Object? value, Object? symbol) {
+/// Formats [value] as money with [symbol] (`$` by default) and [decimals]
+/// (2 by default). A number in place of the symbol is the decimals, so
+/// `money(38, 0)` is "$38". Decimals `'auto'` drop them for whole amounts:
+/// "$38" but "$38.50".
+String _money(Object? value, Object? symbol, Object? decimals) {
+  if (symbol is num) (symbol, decimals) = (null, symbol);
+  final bool auto =
+      decimals is String && decimals.trim().toLowerCase() == 'auto';
   final num amount = _num(value);
   if (amount.isNaN) return '';
+  int digits = auto || decimals == null ? 2 : _intArg(decimals).clamp(0, 20);
+  if (auto && (amount * 100).round() % 100 == 0) digits = 0;
   final String sign = amount < 0 ? '-' : '';
-  final String text = amount.abs().toStringAsFixed(2);
-  final int dot = text.indexOf('.');
+  final String text = amount.abs().toStringAsFixed(digits);
+  final int dot = text.contains('.') ? text.indexOf('.') : text.length;
   final String whole = text
       .substring(0, dot)
       .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
   return '$sign${symbol ?? r'$'}$whole${text.substring(dot)}';
+}
+
+/// [value] as text padded to [width] with the first character of [fill]:
+/// zeros for numbers and spaces for text by default. A negative number keeps
+/// its sign in front of zeros, so `padLeft(-4, 3)` is "-04".
+String _pad(Object? value, Object? width, Object? fill, {required bool left}) {
+  final String text = FormulaEvaluator.stringify(value);
+  final int size = _intArg(width);
+  final String char = fill == null
+      ? (value is num ? '0' : ' ')
+      : FormulaEvaluator.stringify(fill);
+  if (char.isEmpty) return text;
+  if (left && char[0] == '0' && text.startsWith('-')) {
+    return '-${text.substring(1).padLeft(size - 1, '0')}';
+  }
+  return left ? text.padLeft(size, char[0]) : text.padRight(size, char[0]);
+}
+
+/// The part of [value]'s text from [start] up to [end], clamped to the text.
+String _substring(Object? value, Object? start, Object? end) {
+  final String text = FormulaEvaluator.stringify(value);
+  final int from = _intArg(start).clamp(0, text.length);
+  final int to = end == null ? text.length : _intArg(end).clamp(0, text.length);
+  return to <= from ? '' : text.substring(from, to);
+}
+
+/// [start] and [end] as bounds of something [length] long, counting
+/// negative values from the end, like JavaScript's `slice`.
+(int, int) _bounds(int length, Object? start, Object? end) {
+  int bound(Object? value, int fallback) {
+    if (value == null) return fallback;
+    final int i = _intArg(value);
+    return (i < 0 ? length + i : i).clamp(0, length);
+  }
+
+  final int from = bound(start, 0);
+  return (from, math.max(from, bound(end, length)));
+}
+
+/// The items of a list, or characters of a text, from [start] up to [end].
+Object? _slice(Object? value, Object? start, Object? end) {
+  if (value is String) {
+    final (int from, int to) = _bounds(value.length, start, end);
+    return value.substring(from, to);
+  }
+  final List<Object?> items = _values(value, null).toList();
+  final (int from, int to) = _bounds(items.length, start, end);
+  return items.sublist(from, to);
+}
+
+/// [value], a list or text, reversed.
+Object? _reverse(Object? value) => value is String
+    ? value.split('').reversed.join()
+    : _values(value, null).toList().reversed.toList();
+
+/// Lowercase [value] with every run of other characters than letters and
+/// digits turned into one dash, e.g. "Kind of Blue!" is "kind-of-blue".
+String _slug(Object? value) =>
+    FormulaEvaluator.stringify(value)
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+
+/// Seconds in a duration written `m:ss` or `h:mm:ss` (or plain seconds),
+/// e.g. "3:45" is 225. Null when it isn't one.
+int? _seconds(Object? value) {
+  if (value is num) return value.isFinite ? value.round() : null;
+  if (value is! String) return null;
+  String text = value.trim();
+  final bool negative = text.startsWith('-');
+  if (negative) text = text.substring(1);
+  final List<String> parts = text.split(':');
+  if (parts.length > 3 || parts.any((p) => !RegExp(r'^\d+$').hasMatch(p))) {
+    return null;
+  }
+  int total = 0;
+  for (int i = 0; i < parts.length; i++) {
+    final int n = int.parse(parts[i]);
+    if (i > 0 && (parts[i].length != 2 || n >= 60)) return null;
+    total = total * 60 + n;
+  }
+  return negative ? -total : total;
+}
+
+/// [value] seconds written `m:ss`, or `h:mm:ss` from an hour, e.g. 225 is
+/// "3:45" and 3725 is "1:02:05". Text such as "3:45" is read with [_seconds].
+String? _duration(Object? value) {
+  if (value == null) return null;
+  final num? total = value is String && value.contains(':')
+      ? _seconds(value)
+      : _toNum(value);
+  if (total == null || !total.isFinite) return null;
+  final int all = total.abs().round();
+  String two(int n) => n.toString().padLeft(2, '0');
+  final String sign = total < 0 && all > 0 ? '-' : '';
+  final int hours = all ~/ 3600;
+  final int minutes = all % 3600 ~/ 60;
+  return hours > 0
+      ? '$sign$hours:${two(minutes)}:${two(all % 60)}'
+      : '$sign$minutes:${two(all % 60)}';
+}
+
+/// The relative luminance of a color, from 0 (black) to 1 (white), as WCAG
+/// defines it. Reads `#RGB`, `#RRGGBB` and `#AARRGGBB` text (the `#` is
+/// optional) and `{r, g, b}` objects with channels from 0 to 1. Null when
+/// [value] isn't a color.
+num? _luminance(Object? value) {
+  final List<double> channels;
+  if (value is Map) {
+    final List<num?> rgb = [
+      for (final key in ['r', 'g', 'b']) _toNum(value[key]),
+    ];
+    if (rgb.any((c) => c == null)) return null;
+    channels = [for (final c in rgb) c!.toDouble().clamp(0, 1)];
+  } else {
+    String hex = FormulaEvaluator.stringify(value).trim();
+    if (hex.startsWith('#')) hex = hex.substring(1);
+    if (hex.length == 3) hex = hex.split('').map((c) => c * 2).join();
+    if (hex.length == 8) hex = hex.substring(2);
+    if (!RegExp(r'^[0-9a-fA-F]{6}$').hasMatch(hex)) return null;
+    final int rgb = int.parse(hex, radix: 16);
+    channels = [
+      for (final shift in [16, 8, 0]) ((rgb >> shift) & 0xff) / 255,
+    ];
+  }
+  final List<double> linear = [
+    for (final c in channels)
+      c <= 0.03928 ? c / 12.92 : math.pow((c + 0.055) / 1.055, 2.4).toDouble(),
+  ];
+  return _round(
+    0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2],
+    4,
+  );
+}
+
+/// The index of [value] in a text or list, or -1 when it isn't there.
+int _indexOf(Object? target, Object? value) => switch (target) {
+  final String s => s.indexOf(FormulaEvaluator.stringify(value)),
+  final Iterable l => l.toList().indexWhere((v) => _looseEquals(v, value)),
+  _ => -1,
+};
+
+/// The objects [maps] combined into a new one, later keys winning. Values
+/// that aren't objects are skipped.
+Map<String, Object?> _merge(Iterable<Object?> maps) => {
+  for (final map in maps)
+    if (map is Map)
+      for (final MapEntry(:key, :value) in map.entries) key.toString(): value,
+};
+
+/// A copy of [target] with [key] set to [value]: an object's field, or a
+/// list's item at an index (an index out of range changes nothing).
+Object? _set(Object? target, Object? key, Object? value) {
+  if (target is List) {
+    final num? index = _toNum(key);
+    if (index == null || index < 0 || index >= target.length) {
+      return [...target];
+    }
+    return [...target]..[index.toInt()] = value;
+  }
+  return {
+    ..._merge([target]),
+    key.toString(): value,
+  };
 }
 
 num _round(Object? value, Object? digits) {
@@ -464,18 +741,20 @@ num _round(Object? value, Object? digits) {
 
 /// Values of [list], or of each item's [selector] when given: a field name
 /// such as `'price'` or `'author.name'`, or a lambda such as `t => t.price`.
+/// A lambda gets each item's index as its second parameter.
 Iterable<Object?> _values(Object? list, Object? selector) {
   if (list is! Iterable) return const [];
   if (selector == null) return list;
-  return list.map((item) => _select(item, selector));
+  return list.indexed.map((entry) => _select(entry.$2, selector, entry.$1));
 }
 
 /// [item]'s value for [selector]: the item itself when null, the lambda's
-/// result for a lambda, else the field [selector] names. A field name with
-/// dots, such as `author.name`, reads nested fields.
-Object? _select(Object? item, Object? selector) {
+/// result for a lambda (given the item and its [index]), else the field
+/// [selector] names. A field name with dots, such as `author.name`, reads
+/// nested fields.
+Object? _select(Object? item, Object? selector, [int? index]) {
   if (selector == null) return item;
-  if (selector is _Closure) return selector(item);
+  if (selector is _Closure) return selector(item, index);
   final Object? value = _member(item, selector);
   if (value != null || selector is! String || !selector.contains('.')) {
     return value;
@@ -486,37 +765,76 @@ Object? _select(Object? item, Object? selector) {
 /// Whether [item] matches a predicate given as function arguments [rest]:
 /// `(lambda)` or `(field)` match when truthy, `(lambda or field, value)`
 /// when the selected value equals value. No predicate matches truthy items.
-bool _matches(Object? item, List<Object?> rest) => rest.length < 2
-    ? _truthy(_select(item, _arg(rest, 0)))
-    : _looseEquals(_select(item, rest[0]), rest[1]);
+bool _matches(Object? item, List<Object?> rest, [int? index]) => rest.length < 2
+    ? _truthy(_select(item, _arg(rest, 0), index))
+    : _looseEquals(_select(item, rest[0], index), rest[1]);
+
+/// Items of `args[0]` with their indexes, in order.
+Iterable<(int, Object?)> _indexed(List<Object?> args) =>
+    _values(_arg(args, 0), null).indexed;
 
 /// Items of `args[0]` that match the predicate in the rest of [args].
 Iterable<Object?> _matching(List<Object?> args) {
   final List<Object?> rest = args.skip(1).toList();
-  return _values(_arg(args, 0), null).where((item) => _matches(item, rest));
+  return _indexed(args)
+      .where((entry) => _matches(entry.$2, rest, entry.$1))
+      .map((e) => e.$2);
 }
 
-/// Items of `args[0]` sorted by the key `args[1]`, descending when `args[2]`
-/// is `'desc'`. Equal keys keep their order and missing keys go last.
-List<Object?> _sortBy(List<Object?> args) {
+/// The index of the first item of `args[0]` that matches the predicate in
+/// the rest of [args], or -1.
+int _findIndex(List<Object?> args) {
+  final List<Object?> rest = args.skip(1).toList();
+  for (final (int i, Object? item) in _indexed(args)) {
+    if (_matches(item, rest, i)) return i;
+  }
+  return -1;
+}
+
+/// Whether [value] is a sort order: true for `'desc'`, false for `'asc'`,
+/// null for anything else.
+bool? _sortOrder(Object? value) => switch (value) {
+  final String order => switch (order.trim().toLowerCase()) {
+    'desc' || 'descending' => true,
+    'asc' || 'ascending' => false,
+    _ => null,
+  },
+  _ => null,
+};
+
+/// Items of `args[0]` sorted by the keys in the rest of [args], each a field
+/// name or lambda; later keys break ties of earlier ones. A key is followed
+/// by `'desc'` (or `'asc'`) to sort it descending, and every key is
+/// descending by default when [descending]. `args[1]` is always a key, so
+/// `sortBy(list, null, 'desc')` sorts plain values descending. Equal keys
+/// keep their order and missing keys go last.
+List<Object?> _sortBy(List<Object?> args, {bool descending = false}) {
   final List<Object?> items = _values(_arg(args, 0), null).toList();
-  final Object? selector = _arg(args, 1);
-  final bool descending = switch (_arg(args, 2)) {
-    final String order => order.trim().toLowerCase().startsWith('desc'),
-    _ => false,
-  };
-  final List<(int, Object?, Object?)> keyed = [
+  final List<(Object?, bool)> keys = [(_arg(args, 1), descending)];
+  for (final arg in args.skip(2)) {
+    if (_sortOrder(arg) case final bool desc) {
+      keys.last = (keys.last.$1, desc);
+    } else {
+      keys.add((arg, descending));
+    }
+  }
+  final List<(int, Object?, List<Object?>)> keyed = [
     for (int i = 0; i < items.length; i++)
-      (i, items[i], _select(items[i], selector)),
+      (i, items[i], [for (final key in keys) _select(items[i], key.$1, i)]),
   ];
   keyed.sort((x, y) {
-    final bool xMissing = x.$3 == null || x.$3 == '';
-    final bool yMissing = y.$3 == null || y.$3 == '';
-    if (xMissing || yMissing) {
-      return xMissing == yMissing ? x.$1 - y.$1 : (xMissing ? 1 : -1);
+    for (int k = 0; k < keys.length; k++) {
+      final Object? a = x.$3[k];
+      final Object? b = y.$3[k];
+      final bool aMissing = a == null || a == '';
+      final bool bMissing = b == null || b == '';
+      if (aMissing || bMissing) {
+        if (aMissing == bMissing) continue;
+        return aMissing ? 1 : -1;
+      }
+      final int order = _compare(a, b) ?? 0;
+      if (order != 0) return keys[k].$2 ? -order : order;
     }
-    final int order = _compare(x.$3, y.$3) ?? 0;
-    if (order != 0) return descending ? -order : order;
     return x.$1 - y.$1;
   });
   return [for (final entry in keyed) entry.$2];
@@ -527,8 +845,8 @@ List<Object?> _sortBy(List<Object?> args) {
 List<Object?> _unique(List<Object?> args) {
   final List<Object?> keys = [];
   final List<Object?> items = [];
-  for (final item in _values(_arg(args, 0), null)) {
-    final Object? key = _select(item, _arg(args, 1));
+  for (final (int i, Object? item) in _indexed(args)) {
+    final Object? key = _select(item, _arg(args, 1), i);
     if (keys.any((seen) => _looseEquals(seen, key))) continue;
     keys.add(key);
     items.add(item);
@@ -536,26 +854,34 @@ List<Object?> _unique(List<Object?> args) {
   return items;
 }
 
-/// A lambda such as `t => t.price`, ready to call with an item.
+/// A lambda such as `t => t.price` or `(t, i) => i + 1`, ready to call
+/// with an item and its index.
 class _Closure {
   final String param;
+  final String? indexParam;
   final _Node body;
   final FormulaPathResolver outer;
 
-  const _Closure(this.param, this.body, this.outer);
+  const _Closure(this.param, this.indexParam, this.body, this.outer);
 
   static final RegExp _part = RegExp(r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]');
 
-  Object? call(Object? value) => body.eval((path) {
-    if (path == param) return value;
-    if (path.startsWith(param) &&
-        (path.startsWith('.', param.length) ||
-            path.startsWith('[', param.length))) {
-      Object? result = value;
-      for (final Match part in _part.allMatches(path, param.length)) {
-        result = _member(result, part[1] ?? int.parse(part[2]!));
+  Object? call(Object? value, [int? index]) => body.eval((path) {
+    for (final (String? name, Object? bound) in [
+      (param, value),
+      (indexParam, index),
+    ]) {
+      if (name == null) continue;
+      if (path == name) return bound;
+      if (path.startsWith(name) &&
+          (path.startsWith('.', name.length) ||
+              path.startsWith('[', name.length))) {
+        Object? result = bound;
+        for (final Match part in _part.allMatches(path, name.length)) {
+          result = _member(result, part[1] ?? int.parse(part[2]!));
+        }
+        return result;
       }
-      return result;
     }
     return outer(path);
   });
@@ -787,7 +1113,7 @@ Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
 final Map<String, _Function> _functions = {
-  'money': (a) => _money(_arg(a, 0), _arg(a, 1)),
+  'money': (a) => _money(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
   'round': (a) => _round(_arg(a, 0), _arg(a, 1)),
   'floor': (a) => _num(_arg(a, 0)).floor(),
@@ -820,6 +1146,34 @@ final Map<String, _Function> _functions = {
   'upper': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toUpperCase(),
   'lower': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toLowerCase(),
   'trim': (a) => FormulaEvaluator.stringify(_arg(a, 0)).trim(),
+  'padLeft': (a) => _pad(_arg(a, 0), _arg(a, 1), _arg(a, 2), left: true),
+  'padRight': (a) => _pad(_arg(a, 0), _arg(a, 1), _arg(a, 2), left: false),
+  'substring': (a) => _substring(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'replace': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final String from = FormulaEvaluator.stringify(_arg(a, 1));
+    return from.isEmpty
+        ? text
+        : text.replaceAll(from, FormulaEvaluator.stringify(_arg(a, 2)));
+  },
+  'split': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    if (text.isEmpty) return <Object?>[];
+    return text.split(FormulaEvaluator.stringify(_arg(a, 1) ?? ','));
+  },
+  'indexOf': (a) => _indexOf(_arg(a, 0), _arg(a, 1)),
+  'matches': (a) {
+    try {
+      return RegExp(FormulaEvaluator.stringify(_arg(a, 1)))
+          .hasMatch(FormulaEvaluator.stringify(_arg(a, 0)));
+    } on FormatException {
+      return false;
+    }
+  },
+  'slug': (a) => _slug(_arg(a, 0)),
+  'seconds': (a) => _seconds(_arg(a, 0)),
+  'duration': (a) => _duration(_arg(a, 0)),
+  'luminance': (a) => _luminance(_arg(a, 0)),
   'startsWith': (a) => switch (_arg(a, 0)) {
     final String s => s.startsWith(FormulaEvaluator.stringify(_arg(a, 1))),
     _ => false,
@@ -837,13 +1191,21 @@ final Map<String, _Function> _functions = {
   'where': (a) => _matching(a).toList(),
   'filter': (a) => _matching(a).toList(),
   'find': (a) => _matching(a).firstOrNull,
+  'findIndex': _findIndex,
   'any': (a) => _matching(a).isNotEmpty,
   'all': (a) {
     final List<Object?> rest = a.skip(1).toList();
-    return _values(_arg(a, 0), null).every((item) => _matches(item, rest));
+    return _indexed(a).every((entry) => _matches(entry.$2, rest, entry.$1));
   },
   'map': (a) => _values(_arg(a, 0), _arg(a, 1)).toList(),
   'sortBy': _sortBy,
+  'sortByDesc': (a) => _sortBy(a, descending: true),
+  'slice': (a) => _slice(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'take': (a) => _slice(_arg(a, 0), 0, math.max(0, _intArg(_arg(a, 1)))),
+  'skip': (a) => _slice(_arg(a, 0), math.max(0, _intArg(_arg(a, 1))), null),
+  'reverse': (a) => _reverse(_arg(a, 0)),
+  'merge': _merge,
+  'set': (a) => _set(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'unique': _unique,
   'without': (a) => [
     for (final item in _values(_arg(a, 0), null))
@@ -972,31 +1334,54 @@ class _Call extends _Node {
   }
 }
 
-/// A lambda argument, `param => body`. Evaluates to a [_Closure] that list
-/// functions call once per item.
+/// A lambda argument, `param => body` or `(param, index) => body`.
+/// Evaluates to a [_Closure] that list functions call once per item.
 class _Lambda extends _Node {
   final String param;
+  final String? indexParam;
   final _Node body;
 
-  const _Lambda(this.param, this.body);
+  const _Lambda(this.param, this.indexParam, this.body);
 
   @override
-  Object? eval(FormulaPathResolver resolve) => _Closure(param, body, resolve);
+  Object? eval(FormulaPathResolver resolve) =>
+      _Closure(param, indexParam, body, resolve);
 
-  /// The body's paths, except those of the parameter, which aren't
+  /// The body's paths, except those of the parameters, which aren't
   /// variables.
   @override
   void collectPaths(Set<String> paths) {
     final Set<String> bodyPaths = {};
     body.collectPaths(bodyPaths);
+    bool isParam(String path, String? name) =>
+        name != null &&
+        (path == name ||
+            path.startsWith('$name.') ||
+            path.startsWith('$name['));
     paths.addAll(
       bodyPaths.where(
-        (path) =>
-            path != param &&
-            !path.startsWith('$param.') &&
-            !path.startsWith('$param['),
+        (path) => !isParam(path, param) && !isParam(path, indexParam),
       ),
     );
+  }
+}
+
+/// An object literal, `{id: 'a', 'full name': n + 1}`.
+class _MapLiteral extends _Node {
+  final List<(String, _Node)> entries;
+
+  const _MapLiteral(this.entries);
+
+  @override
+  Object? eval(FormulaPathResolver resolve) => <String, Object?>{
+    for (final (String key, _Node value) in entries) key: value.eval(resolve),
+  };
+
+  @override
+  void collectPaths(Set<String> paths) {
+    for (final (_, _Node value) in entries) {
+      value.collectPaths(paths);
+    }
   }
 }
 
@@ -1102,7 +1487,9 @@ class _Parser {
   static final RegExp _number = RegExp(r'\d+(\.\d+)?|\.\d+');
   static final RegExp _identifier = RegExp(r'[a-zA-Z_][a-zA-Z0-9_]*');
   static final RegExp _lambdaHead = RegExp(
-    r'(?:([a-zA-Z_][a-zA-Z0-9_]*)|\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\))\s*=>',
+    r'(?:([a-zA-Z_][a-zA-Z0-9_]*)'
+    r'|\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:,\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*)?\))'
+    r'\s*=>',
   );
 
   _Node parseAll() {
@@ -1137,13 +1524,14 @@ class _Parser {
   }
 
   /// A function argument: an expression, or a lambda `item => expression`
-  /// (also written `(item) => expression`).
+  /// (also written `(item) => expression`, or `(item, index) => expression`
+  /// to read the item's index).
   _Node _argument() {
     _skip();
     final Match? head = _lambdaHead.matchAsPrefix(source, pos);
     if (head == null) return _ternary();
     pos = head.end;
-    return _Lambda(head[1] ?? head[2]!, _ternary());
+    return _Lambda(head[1] ?? head[2]!, head[3], _ternary());
   }
 
   _Node _ternary() {
@@ -1232,6 +1620,22 @@ class _Parser {
     }
   }
 
+  /// An object literal's key: a name or quoted text.
+  String _key() {
+    _skip();
+    if (pos < source.length && (source[pos] == "'" || source[pos] == '"')) {
+      final int end = source.indexOf(source[pos], pos + 1);
+      if (end < 0) throw FormatException('Unclosed text', source, pos);
+      final String key = source.substring(pos + 1, end);
+      pos = end + 1;
+      return key;
+    }
+    final Match? name = _identifier.matchAsPrefix(source, pos);
+    if (name == null) throw FormatException('Expected a key', source, pos);
+    pos = name.end;
+    return name[0]!;
+  }
+
   _Node _primary() {
     _skip();
     if (pos >= source.length) {
@@ -1256,6 +1660,20 @@ class _Parser {
         _expect(']');
       }
       return _ListLiteral(items);
+    }
+
+    if (char == '{') {
+      pos++;
+      final List<(String, _Node)> entries = [];
+      if (!_eat('}')) {
+        do {
+          final String key = _key();
+          _expect(':');
+          entries.add((key, _ternary()));
+        } while (_eat(','));
+        _expect('}');
+      }
+      return _MapLiteral(entries);
     }
 
     if (char == "'" || char == '"') {
