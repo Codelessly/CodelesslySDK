@@ -31,6 +31,10 @@ class ScopedValues {
   /// The size of the screen, which the `screen` variable describes.
   late final Size? screenSize;
 
+  /// The value of the `parent` variable: the `width` and `height` the
+  /// node's parent gives it (see [ParentSizeScope]).
+  late final Map<String, dynamic>? parentSize;
+
   // private fields.
   late final WeakReference<CodelesslyContext>? _codelesslyContextRef;
   // The Codelessly instance, read live: its cloud database can become
@@ -77,7 +81,8 @@ class ScopedValues {
       nodeState = null,
       routeParams = {},
       _appUser = null,
-      screenSize = null;
+      screenSize = null,
+      parentSize = null;
 
   /// Creates scoped values for a design canvas, where [variables] (by name)
   /// hold their default values and nothing is read from a running app.
@@ -88,6 +93,7 @@ class ScopedValues {
     this.indexedItem,
     this._appUser,
     this.screenSize,
+    this.parentSize,
     Map<String, dynamic>? data,
   }) : _codelesslyContextRef = codelesslyContext == null
            ? null
@@ -113,6 +119,7 @@ class ScopedValues {
         : WeakReference(codelesslyContext);
     indexedItem = IndexedItemProvider.maybeOf(context);
     screenSize = MediaQuery.maybeSizeOf(context);
+    parentSize = ParentSizeScope.valueOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     routeParams =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??

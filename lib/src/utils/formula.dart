@@ -37,7 +37,10 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    parameter is read like a variable inside its body (`t.title`,
 ///    `t.tags[0]`, `t.tags.length`) and hides a variable of the same name;
 ///    the body can read every other variable. Lambdas are only allowed as
-///    function arguments.
+///    function arguments. A lambda can take a second parameter for the
+///    item's index: `map(steps, (s, i) => i == length(steps) - 1)`.
+///  - text and list helpers: reverse, substring, left, right and toMap (a
+///    map built from a list, `toMap(items, i => i.id, i => "pass")`).
 ///  - date functions: now, today, parseDate, formatDate, addMinutes, addHours,
 ///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
 ///    hour, minute and weekday. Dates are ISO 8601 text such as
@@ -194,6 +197,27 @@ class FormulaEvaluator {
       'append(tags, "new") → tags plus "new"',
     ),
     FormulaFunctionDoc(
+      'reverse',
+      'reverse(list or text)',
+      'reverse([1, 2, 3]) → [3, 2, 1]',
+    ),
+    FormulaFunctionDoc(
+      'substring',
+      'substring(text, start, end)',
+      'substring("MX4821", -4, -2) → 48',
+    ),
+    FormulaFunctionDoc('left', 'left(text, count)', 'left("MX4821", 2) → MX'),
+    FormulaFunctionDoc(
+      'right',
+      'right(text, count)',
+      'right("1FUJGLDR5MX4821", 6) → MX4821',
+    ),
+    FormulaFunctionDoc(
+      'toMap',
+      'toMap(list, item => key, item => value)',
+      'toMap(items, i => i.id, i => "pass") → {1a: pass, 1b: pass}',
+    ),
+    FormulaFunctionDoc(
       'take',
       'take(list, count)',
       'take([1, 2, 3], 2) → [1, 2]',
@@ -292,7 +316,7 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'map',
-      'map(list, field or item => value)',
+      'map(list, field or item => value or (item, index) => value)',
       'map(cart, i => i.price * i.qty) → [8, 16]',
     ),
     FormulaFunctionDoc(
@@ -510,15 +534,16 @@ num _round(Object? value, Object? digits) {
 Iterable<Object?> _values(Object? list, Object? selector) {
   if (list is! Iterable) return const [];
   if (selector == null) return list;
-  return list.map((item) => _select(item, selector));
+  return list.indexed.map((entry) => _select(entry.$2, selector, entry.$1));
 }
 
 /// [item]'s value for [selector]: the item itself when null, the lambda's
 /// result for a lambda, else the field [selector] names. A field name with
-/// dots, such as `author.name`, reads nested fields.
-Object? _select(Object? item, Object? selector) {
+/// dots, such as `author.name`, reads nested fields. A lambda with a second
+/// parameter gets [index], the item's position in its list.
+Object? _select(Object? item, Object? selector, [int? index]) {
   if (selector == null) return item;
-  if (selector is _Closure) return selector(item);
+  if (selector is _Closure) return selector(item, index);
   final Object? value = _member(item, selector);
   if (value != null || selector is! String || !selector.contains('.')) {
     return value;
@@ -529,14 +554,16 @@ Object? _select(Object? item, Object? selector) {
 /// Whether [item] matches a predicate given as function arguments [rest]:
 /// `(lambda)` or `(field)` match when truthy, `(lambda or field, value)`
 /// when the selected value equals value. No predicate matches truthy items.
-bool _matches(Object? item, List<Object?> rest) => rest.length < 2
-    ? _truthy(_select(item, _arg(rest, 0)))
-    : _looseEquals(_select(item, rest[0]), rest[1]);
+bool _matches(Object? item, List<Object?> rest, [int? index]) => rest.length < 2
+    ? _truthy(_select(item, _arg(rest, 0), index))
+    : _looseEquals(_select(item, rest[0], index), rest[1]);
 
 /// Items of `args[0]` that match the predicate in the rest of [args].
 Iterable<Object?> _matching(List<Object?> args) {
   final List<Object?> rest = args.skip(1).toList();
-  return _values(_arg(args, 0), null).where((item) => _matches(item, rest));
+  return _values(_arg(args, 0), null).indexed
+      .where((entry) => _matches(entry.$2, rest, entry.$1))
+      .map((entry) => entry.$2);
 }
 
 /// Items of `args[0]` sorted by the key `args[1]`, descending when `args[2]`
@@ -550,7 +577,7 @@ List<Object?> _sortBy(List<Object?> args) {
   };
   final List<(int, Object?, Object?)> keyed = [
     for (int i = 0; i < items.length; i++)
-      (i, items[i], _select(items[i], selector)),
+      (i, items[i], _select(items[i], selector, i)),
   ];
   keyed.sort((x, y) {
     final bool xMissing = x.$3 == null || x.$3 == '';
@@ -570,8 +597,9 @@ List<Object?> _sortBy(List<Object?> args) {
 List<Object?> _unique(List<Object?> args) {
   final List<Object?> keys = [];
   final List<Object?> items = [];
+  int index = 0;
   for (final item in _values(_arg(args, 0), null)) {
-    final Object? key = _select(item, _arg(args, 1));
+    final Object? key = _select(item, _arg(args, 1), index++);
     if (keys.any((seen) => _looseEquals(seen, key))) continue;
     keys.add(key);
     items.add(item);
@@ -579,17 +607,20 @@ List<Object?> _unique(List<Object?> args) {
   return items;
 }
 
-/// A lambda such as `t => t.price`, ready to call with an item.
+/// A lambda such as `t => t.price`, ready to call with an item. A lambda
+/// written `(t, i) => ...` also gets the item's index as [indexParam].
 class _Closure {
   final String param;
+  final String? indexParam;
   final _Node body;
   final FormulaPathResolver outer;
 
-  const _Closure(this.param, this.body, this.outer);
+  const _Closure(this.param, this.indexParam, this.body, this.outer);
 
   static final RegExp _part = RegExp(r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]');
 
-  Object? call(Object? value) => body.eval((path) {
+  Object? call(Object? value, [int? index]) => body.eval((path) {
+    if (indexParam != null && path == indexParam) return index;
     if (path == param) return value;
     if (path.startsWith(param) &&
         (path.startsWith('.', param.length) ||
@@ -840,7 +871,7 @@ int _findIndex(List<Object?> args) {
   for (final Object? item in list) {
     final bool hit = rest.length == 1 && rest.first is! _Closure
         ? _looseEquals(item, rest.first)
-        : _matches(item, rest);
+        : _matches(item, rest, i);
     if (hit) return i;
     i++;
   }
@@ -867,6 +898,49 @@ Object? _setIn(Object? target, Object? key, Object? value) {
     return list;
   }
   return target;
+}
+
+/// The part of [text] from [start] up to, not including, [end] (the end of
+/// the text when null). A negative index counts from the end, so
+/// `substring(vin, -6)` is the last six characters. Indexes past either end
+/// are clamped.
+String _substring(Object? text, Object? start, Object? end) {
+  final String value = FormulaEvaluator.stringify(text);
+  final int length = value.length;
+  int clamp(Object? index, int fallback) {
+    if (index == null) return fallback;
+    int i = _intArg(index);
+    if (i < 0) i += length;
+    return i.clamp(0, length);
+  }
+
+  final int from = clamp(start, 0);
+  final int to = clamp(end, length);
+  return to <= from ? '' : value.substring(from, to);
+}
+
+/// A map from each item of `args[0]` to a value: the key is the item's
+/// `args[1]` (a field name or lambda) and the value its `args[2]`, or the
+/// item itself when that's missing. A later item with the same key wins.
+Map<String, Object?> _toMap(List<Object?> args) {
+  final Object? list = _arg(args, 0);
+  if (list is! Iterable) return {};
+  final Object? keySelector = _arg(args, 1);
+  final Object? valueSelector = _arg(args, 2);
+  final Map<String, Object?> map = {};
+  int index = 0;
+  for (final Object? item in list) {
+    final Object? key = _select(item, keySelector, index);
+    if (key != null) {
+      map[FormulaEvaluator.stringify(key)] = _select(
+        item,
+        valueSelector,
+        index,
+      );
+    }
+    index++;
+  }
+  return map;
 }
 
 /// [value] with thousands separators: 412908 → "412,908".
@@ -940,7 +1014,10 @@ final Map<String, _Function> _functions = {
   'any': (a) => _matching(a).isNotEmpty,
   'all': (a) {
     final List<Object?> rest = a.skip(1).toList();
-    return _values(_arg(a, 0), null).every((item) => _matches(item, rest));
+    return _values(
+      _arg(a, 0),
+      null,
+    ).indexed.every((entry) => _matches(entry.$2, rest, entry.$1));
   },
   'map': (a) => _values(_arg(a, 0), _arg(a, 1)).toList(),
   'sortBy': _sortBy,
@@ -966,6 +1043,19 @@ final Map<String, _Function> _functions = {
       if (l is Iterable) ...l else ?l,
   ],
   'append': (a) => [..._values(_arg(a, 0), null), ...a.skip(1)],
+  'reverse': (a) => switch (_arg(a, 0)) {
+    final String text => String.fromCharCodes(text.runes.toList().reversed),
+    final Iterable list => list.toList().reversed.toList(),
+    _ => null,
+  },
+  'substring': (a) => _substring(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'left': (a) =>
+      _substring(_arg(a, 0), 0, _intArg(_arg(a, 1)).clamp(0, 1 << 30)),
+  'right': (a) {
+    final int n = _intArg(_arg(a, 1));
+    return n <= 0 ? '' : _substring(_arg(a, 0), -n, null);
+  },
+  'toMap': _toMap,
   'take': (a) => _values(_arg(a, 0), null).take(_intArg(_arg(a, 1))).toList(),
   'skip': (a) => _values(_arg(a, 0), null).skip(_intArg(_arg(a, 1))).toList(),
   'group': (a) => _group(_arg(a, 0)),
@@ -1098,12 +1188,14 @@ class _Call extends _Node {
 /// functions call once per item.
 class _Lambda extends _Node {
   final String param;
+  final String? indexParam;
   final _Node body;
 
-  const _Lambda(this.param, this.body);
+  const _Lambda(this.param, this.body, [this.indexParam]);
 
   @override
-  Object? eval(FormulaPathResolver resolve) => _Closure(param, body, resolve);
+  Object? eval(FormulaPathResolver resolve) =>
+      _Closure(param, indexParam, body, resolve);
 
   /// The body's paths, except those of the parameter, which aren't
   /// variables.
@@ -1115,6 +1207,7 @@ class _Lambda extends _Node {
       bodyPaths.where(
         (path) =>
             path != param &&
+            path != indexParam &&
             !path.startsWith('$param.') &&
             !path.startsWith('$param['),
       ),
@@ -1224,7 +1317,8 @@ class _Parser {
   static final RegExp _number = RegExp(r'\d+(\.\d+)?|\.\d+');
   static final RegExp _identifier = RegExp(r'[a-zA-Z_][a-zA-Z0-9_]*');
   static final RegExp _lambdaHead = RegExp(
-    r'(?:([a-zA-Z_][a-zA-Z0-9_]*)|\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\))\s*=>',
+    r'(?:([a-zA-Z_][a-zA-Z0-9_]*)|\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*'
+    r'(?:,\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*)?\))\s*=>',
   );
 
   _Node parseAll() {
@@ -1259,13 +1353,14 @@ class _Parser {
   }
 
   /// A function argument: an expression, or a lambda `item => expression`
-  /// (also written `(item) => expression`).
+  /// (also written `(item) => expression`, or `(item, index) => expression`
+  /// to read the item's index too).
   _Node _argument() {
     _skip();
     final Match? head = _lambdaHead.matchAsPrefix(source, pos);
     if (head == null) return _ternary();
     pos = head.end;
-    return _Lambda(head[1] ?? head[2]!, _ternary());
+    return _Lambda(head[1] ?? head[2]!, _ternary(), head[3]);
   }
 
   _Node _ternary() {

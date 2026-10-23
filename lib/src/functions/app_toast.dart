@@ -76,6 +76,19 @@ class AppToast {
     if (entry != null && entry.mounted) entry.remove();
   }
 
+  /// The font of [family], e.g. `Barlow`: a Google font or one the app
+  /// loaded. Null when [family] is null or empty.
+  static TextStyle? fontOf(String? family) {
+    if (family == null || family.trim().isEmpty) return null;
+    final TextStyle style = TextUtils.retrieveTextStyle(
+      fontName: FontName(family: family.trim(), weight: FontWeightNumeric.w600),
+    );
+    return TextStyle(
+      fontFamily: style.fontFamily,
+      fontFamilyFallback: style.fontFamilyFallback,
+    );
+  }
+
   /// The background and text colors of a toast of [style] in [theme].
   static (Color background, Color foreground) colorsOf(
     ToastStyle style,
@@ -171,38 +184,51 @@ class _ToastViewState extends State<_ToastView> {
         (action.backgroundColor == null
             ? styleForeground
             : ResolvedFeedbackTheme.onColor(background));
-    final Widget? icon = action.icon == null
+    final Color? accent = action.accentColor?.toFlutterColor();
+    // The icon's own color, unless [ShowToastAction.iconColor] is set, else
+    // the message color.
+    final MultiSourceIconModel? iconModel = action.iconColor == null
+        ? action.icon
+        : action.icon?.copyWith(color: action.iconColor);
+    final Widget? icon = iconModel == null
         ? null
-        : IconTheme.merge(
-            data: IconThemeData(color: textColor),
-            child: retrieveIconWidget(action.icon!, 18) ?? const SizedBox(),
-          );
+        : retrieveIconWidget(iconModel, iconModel.size ?? 18, textColor);
     final bool hasButton = widget.onAction != null;
     final bool top = action.position == ToastPosition.top;
     final EdgeInsets safe = MediaQuery.paddingOf(context);
-    final TextStyle messageStyle = theme.bodyStyle.copyWith(
-      color: textColor,
-      fontSize: 14,
-      height: 1.35,
-      fontWeight: FontWeight.w600,
-      decoration: TextDecoration.none,
-    );
+    final TextStyle? font = AppToast.fontOf(action.fontFamily);
+    final TextStyle messageStyle = theme.bodyStyle
+        .merge(font)
+        .copyWith(
+          color: textColor,
+          fontSize: 14,
+          height: 1.35,
+          fontWeight: FontWeight.w600,
+          decoration: TextDecoration.none,
+        );
 
+    final BorderRadius radius = BorderRadius.circular(
+      action.cornerRadius ??
+          (hasButton ? theme.buttonRadius.clamp(8, 999) : 999),
+    );
     Widget toast = Container(
+      key: const ValueKey('codelessly-toast'),
       constraints: const BoxConstraints(minHeight: 44, maxWidth: 560),
-      padding: EdgeInsets.fromLTRB(18, 10, hasButton ? 8 : 18, 10),
+      padding: EdgeInsets.fromLTRB(
+        accent == null ? 18 : 14,
+        10,
+        hasButton ? 8 : 18,
+        10,
+      ),
+      // The accent bar is a left border. A border on one side can't have a
+      // radius, so the clip below rounds the corners.
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(
-          hasButton ? theme.buttonRadius.clamp(8, 999) : 999,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 18,
-            offset: Offset(0, 6),
-          ),
-        ],
+        border: accent == null
+            ? null
+            : Border(
+                left: BorderSide(color: accent, width: action.accentWidth),
+              ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -218,10 +244,9 @@ class _ToastViewState extends State<_ToastView> {
                 foregroundColor: textColor,
                 minimumSize: const Size(48, 36),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                textStyle: theme.buttonStyle.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
+                textStyle: theme.buttonStyle
+                    .merge(font)
+                    .copyWith(fontSize: 14, fontWeight: FontWeight.w700),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(theme.buttonRadius),
                 ),
@@ -231,6 +256,19 @@ class _ToastViewState extends State<_ToastView> {
           ],
         ],
       ),
+    );
+    toast = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 18,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(borderRadius: radius, child: toast),
     );
     toast = Semantics(
       liveRegion: true,
