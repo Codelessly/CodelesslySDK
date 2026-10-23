@@ -441,7 +441,7 @@ class PropertyValueDelegate {
         scopedValues: scopedValues,
       );
       return switch (variable.type) {
-        VariableType.text || VariableType.image =>
+        VariableType.text || VariableType.image || VariableType.choice =>
           value == null ? null : FormulaEvaluator.stringify(value),
         VariableType.integer =>
           value is num ? value.toInt() : num.tryParse('$value')?.toInt(),

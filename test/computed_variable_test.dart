@@ -78,6 +78,15 @@ void main() {
     );
   });
 
+  test('a computed choice variable reads as the text its formula gives', () {
+    context.variables['worst'] = variable(
+      'worst',
+      r"${= if(downtime > 30, 'down', 'running')}",
+      VariableType.choice,
+    );
+    expect(context.getVariableValue<String>('worst'), 'down');
+  });
+
   test('it follows changes to what it reads', () {
     // Read once so the results are cached.
     expect(
