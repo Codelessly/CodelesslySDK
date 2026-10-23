@@ -631,11 +631,7 @@ class FunctionsRepository {
     String canvasId,
   ) {
     if (model == null || canvasId.isEmpty) return null;
-    return model.layouts[canvasId]?.id ??
-        model.layouts.values
-            .firstWhereOrNull((layout) => layout.canvasIds.contains(canvasId))
-            ?.id ??
-        model.updates.layoutIdForCanvas(canvasId);
+    return model.resolveLayoutId(canvasId);
   }
 
   /// Shows the canvas [canvasId] as a dialog, a bottom sheet or a side sheet

@@ -923,15 +923,17 @@ class SDKLayoutConditions extends PrivacyBase {
 /// Finding layouts in a published model.
 extension SDKPublishModelLayouts on SDKPublishModel {
   /// The layout [id] names: a layout ID, or the ID of a canvas in a layout,
-  /// so a link can open a screen by its canvas. Null when [id] is null or
-  /// names neither.
+  /// so a link can open a screen by its canvas. Layouts not loaded yet (on
+  /// another page, or loaded on demand) are found through
+  /// [SDKPublishUpdates.layoutCanvases]. Null when [id] is null or names
+  /// neither.
   String? resolveLayoutId(String? id) {
     if (id == null || id.isEmpty) return null;
     if (layouts.containsKey(id)) return id;
     for (final SDKPublishLayout layout in layouts.values) {
       if (layout.canvasIds.contains(id)) return layout.id;
     }
-    return null;
+    return updates.layoutIdForCanvas(id);
   }
 
   /// The parameters [link] gives a screen of layout [layoutId] (the entry
