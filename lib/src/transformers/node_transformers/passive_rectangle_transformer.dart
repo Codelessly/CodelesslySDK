@@ -807,6 +807,7 @@ Widget buildFill(
             node: node,
             bytes: bytes,
             useInk: useInk,
+            applyPaintOpacity: false,
           );
         }
       }
