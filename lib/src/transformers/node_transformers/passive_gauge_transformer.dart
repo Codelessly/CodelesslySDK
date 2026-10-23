@@ -25,6 +25,10 @@ class PassiveGaugeWidget extends StatelessWidget {
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
 
+  /// The values bindings read, when the caller has them, e.g. the editor's
+  /// variable defaults on the design canvas. Defaults to the context's.
+  final ScopedValues? scopedValues;
+
   /// Overrides [GaugeProperties.animate], e.g. to hold still in the editor.
   final bool? animate;
 
@@ -33,15 +37,15 @@ class PassiveGaugeWidget extends StatelessWidget {
     required this.node,
     required this.settings,
     this.variablesOverrides = const [],
+    this.scopedValues,
     this.animate,
   });
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = ScopedValues.of(
-      context,
-      variablesOverrides: variablesOverrides,
-    );
+    final ScopedValues scopedValues =
+        this.scopedValues ??
+        ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final GaugeProperties props = node.properties;
     final double value =
         _number(
@@ -173,7 +177,13 @@ class GaugePainter extends CustomPainter {
         ..strokeWidth = stroke;
       canvas.drawArc(rect, start, sweep, false, paint..color = track);
       if (fraction > 0) {
-        canvas.drawArc(rect, start, sweep * fraction, false, paint..color = color);
+        canvas.drawArc(
+          rect,
+          start,
+          sweep * fraction,
+          false,
+          paint..color = color,
+        );
       }
     }
 
@@ -256,8 +266,7 @@ class GaugePainter extends CustomPainter {
 
     if (props.segments > 0) {
       final double gap = props.segmentGap;
-      final double seg =
-          (length - gap * (props.segments - 1)) / props.segments;
+      final double seg = (length - gap * (props.segments - 1)) / props.segments;
       final int lit = (fraction * props.segments).round();
       final Radius segRadius = Radius.circular(
         math.min(props.cornerRadius, seg / 2),
@@ -311,7 +320,11 @@ class GaugePainter extends CustomPainter {
         final double p = length * i / props.ticks;
         if (vertical) {
           final double y = inner.bottom - p;
-          canvas.drawLine(Offset(inner.left, y), Offset(inner.left + w, y), tick);
+          canvas.drawLine(
+            Offset(inner.left, y),
+            Offset(inner.left + w, y),
+            tick,
+          );
           canvas.drawLine(
             Offset(inner.right - w, y),
             Offset(inner.right, y),
@@ -345,7 +358,11 @@ class GaugePainter extends CustomPainter {
         final double total = (b - a).distance;
         final Offset dir = (b - a) / total;
         for (double t = 0; t < total; t += dash * 2) {
-          canvas.drawLine(a + dir * t, a + dir * math.min(t + dash, total), paint);
+          canvas.drawLine(
+            a + dir * t,
+            a + dir * math.min(t + dash, total),
+            paint,
+          );
         }
       } else {
         canvas.drawLine(a, b, paint);
