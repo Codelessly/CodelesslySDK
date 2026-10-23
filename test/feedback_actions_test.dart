@@ -290,6 +290,57 @@ void main() {
       expect(theme.buttonRadius, 6);
     });
 
+    test('reads the outline and hard shadow most tappable shapes share', () {
+      RectangleNode stamped(String id, {bool outlined = true}) => RectangleNode(
+        id: id,
+        name: id,
+        basicBoxLocal: NodeBox(0, 0, 160, 44),
+        fills: [paint(brandPrimary)],
+        strokes: [if (outlined) paint(brandText)],
+        strokeWeight: outlined ? 1.5 : 0,
+        effects: [
+          Effect.dropShadow(
+            id: 'stamp',
+            radius: 0,
+            spread: 0,
+            color: brandText,
+            offset: const Vec(3, 3),
+          ),
+        ],
+        reactions: [
+          Reaction(
+            action: ShowToastAction(message: 'x'),
+            trigger: TriggerModel(type: TriggerType.click),
+          ),
+        ],
+      )..parentID = 'mainBody';
+
+      final FeedbackTheme theme = FeedbackTheme.fromNodes([
+        ...mainScreen(ShowToastAction(message: 'x')),
+        stamped('a'),
+        stamped('b'),
+        stamped('c', outlined: false),
+      ]);
+      expect(
+        theme.buttonBorder,
+        BorderSide(color: brandText.toFlutterColor(), width: 1.5),
+      );
+      expect(theme.buttonShadows, [
+        BoxShadow(
+          color: brandText.toFlutterColor(),
+          offset: const Offset(3, 3),
+        ),
+      ]);
+      expect(theme.border, isNull);
+
+      // A layout whose buttons have none keeps plain buttons.
+      final FeedbackTheme plain = FeedbackTheme.fromNodes(
+        mainScreen(ShowToastAction(message: 'x')),
+      );
+      expect(plain.buttonBorder, isNull);
+      expect(plain.buttonShadows, isNull);
+    });
+
     test('the app\'s extension wins over the layout', () {
       final FeedbackTheme layout = FeedbackTheme.fromNodes(
         mainScreen(ShowToastAction(message: 'x')),
