@@ -84,7 +84,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       );
     }
 
-    return _wrapWithListener(
+    final Widget built = _wrapWithListener(
       context,
       node: node,
       builder: (context) {
@@ -97,6 +97,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         return _buildDecorated(context, node, settings);
       },
     );
+    return settings.withReactions
+        ? wrapWithInteractionScopes(context, node, built)
+        : built;
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`

@@ -10,6 +10,10 @@
   duration. Letting go or moving off drains it. While it is held, the nodes
   inside read the progress, 0 to 1, as `${hold}`, to fill a bar or change a
   label.
+- A tappable node (one with click, long-press or hold actions) shares
+  whether a mouse is over it as `${hovered}`, which it and the nodes inside
+  it can bind for hover borders, fills and colors. The hold progress reaches
+  the held node's own properties too.
 - An expanded child whose bound `flex` is 0 takes no space, where it used to
   keep its design size.
 
