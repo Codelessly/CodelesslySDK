@@ -24,11 +24,16 @@ class PassiveChartWidget extends StatelessWidget {
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
 
+  /// The values bindings read instead of the build context's, such as the
+  /// variable defaults a design canvas shows.
+  final ScopedValues? scopedValues;
+
   const PassiveChartWidget({
     super.key,
     required this.node,
     required this.settings,
     this.variablesOverrides = const [],
+    this.scopedValues,
   });
 
   /// The chart's items: the bound `data` list, else the sample data.
@@ -76,10 +81,9 @@ class PassiveChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = ScopedValues.of(
-      context,
-      variablesOverrides: variablesOverrides,
-    );
+    final ScopedValues scopedValues =
+        this.scopedValues ??
+        ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final List<Map<String, Object?>> data = resolveData(node, scopedValues);
     final int selected =
         PropertyValueDelegate.getPropertyValue<int>(

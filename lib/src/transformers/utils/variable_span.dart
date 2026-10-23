@@ -12,8 +12,21 @@ import '../../../codelessly_sdk.dart';
 /// (`${auth.displayName}` shows "Display name").
 abstract final class VariablePreview {
   /// Returns the values that [node] can see on the design canvas, or null to
-  /// fall back to placeholders.
-  static ScopedValues? Function(BaseNode? node)? scopeResolver;
+  /// fall back to placeholders. When [item] is given (the row of a list a
+  /// node is built in), `${item...}` reads that row's data.
+  static ScopedValues? Function(BaseNode? node, {IndexedItem? item})?
+  scopeResolver;
+
+  /// The values [node] can see on the design canvas when built in
+  /// [context], which gives the list row it is in.
+  static ScopedValues? resolve(BaseNode? node, [BuildContext? context]) {
+    final resolver = scopeResolver;
+    if (resolver == null) return null;
+    final IndexedItem? item = context == null
+        ? null
+        : IndexedItemProvider.maybeOf(context);
+    return resolver(node, item: item?.item == null ? null : item);
+  }
 
   /// Accessors that read a property of a value rather than name it, so the
   /// placeholder for `${item.title.initial}` is named after `title`.
@@ -37,8 +50,13 @@ abstract final class VariablePreview {
   static const Set<String> _literals = {'true', 'false', 'null'};
 
   /// The text the design canvas shows for [expression], one `${...}` match.
-  static String textFor(String expression, {BaseNode? node, TextStyle? style}) {
-    final ScopedValues? scopedValues = scopeResolver?.call(node);
+  static String textFor(
+    String expression, {
+    BaseNode? node,
+    TextStyle? style,
+    BuildContext? context,
+  }) {
+    final ScopedValues? scopedValues = resolve(node, context);
     if (scopedValues != null) {
       final String value = PropertyValueDelegate.substituteVariables(
         expression,
@@ -135,11 +153,17 @@ class VariableSpan extends TextSpan {
   VariableSpan({
     required this.variable,
     BaseNode? node,
+    BuildContext? context,
     super.style,
     super.mouseCursor,
     super.onEnter,
     super.onExit,
   }) : super(
-         text: VariablePreview.textFor(variable, node: node, style: style),
+         text: VariablePreview.textFor(
+           variable,
+           node: node,
+           style: style,
+           context: context,
+         ),
        );
 }

@@ -24,6 +24,10 @@ class PassiveGaugeWidget extends StatelessWidget {
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
 
+  /// The values bindings read instead of the build context's, such as the
+  /// variable defaults a design canvas shows.
+  final ScopedValues? scopedValues;
+
   /// Overrides [GaugeProperties.animate], e.g. off on the editor canvas.
   final bool? animate;
 
@@ -32,6 +36,7 @@ class PassiveGaugeWidget extends StatelessWidget {
     required this.node,
     required this.settings,
     this.variablesOverrides = const [],
+    this.scopedValues,
     this.animate,
   });
 
@@ -40,10 +45,9 @@ class PassiveGaugeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = ScopedValues.of(
-      context,
-      variablesOverrides: variablesOverrides,
-    );
+    final ScopedValues scopedValues =
+        this.scopedValues ??
+        ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final double value =
         PropertyValueDelegate.getPropertyValue<double>(
           node,

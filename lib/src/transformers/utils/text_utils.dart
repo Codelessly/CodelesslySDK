@@ -100,8 +100,12 @@ class TextUtils {
       final spans = characters
           .splitMap(
             variableSyntaxIdentifierRegex,
-            onMatch: (match) =>
-                VariableSpan(variable: match[0]!, node: node, style: style),
+            onMatch: (match) => VariableSpan(
+              variable: match[0]!,
+              node: node,
+              style: style,
+              context: context,
+            ),
             onNonMatch: (text) => TextSpan(text: text, style: style),
           )
           .toList();
