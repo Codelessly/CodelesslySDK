@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
@@ -94,6 +96,20 @@ class PassiveSliderWidget extends StatelessWidget {
           scopedValues: scopedValues,
         ) ??
         node.value;
+    final double min =
+        PropertyValueDelegate.getPropertyValue<double>(
+          node,
+          'min',
+          scopedValues: scopedValues,
+        ) ??
+        node.properties.min;
+    final double max =
+        PropertyValueDelegate.getPropertyValue<double>(
+          node,
+          'max',
+          scopedValues: scopedValues,
+        ) ??
+        node.properties.max;
 
     return TransformerSlider(
       node: node,
@@ -101,6 +117,8 @@ class PassiveSliderWidget extends StatelessWidget {
       variablesOverrides: variablesOverrides,
       onChanged: (value) => onChanged(context, value),
       value: value,
+      min: min,
+      max: max,
     );
   }
 }
@@ -113,6 +131,8 @@ class TransformerSlider extends StatelessWidget {
     required this.onChanged,
     required this.value,
     this.variablesOverrides = const [],
+    this.min,
+    this.max,
   });
 
   final SliderNode node;
@@ -121,8 +141,18 @@ class TransformerSlider extends StatelessWidget {
   final ValueChanged<double>? onChanged;
   final double value;
 
+  /// The slider's minimum, when bound; [SliderProperties.min] otherwise.
+  final double? min;
+
+  /// The slider's maximum, when bound; [SliderProperties.max] otherwise.
+  /// Never less than the minimum.
+  final double? max;
+
   @override
   Widget build(BuildContext context) {
+    final double min = this.min ?? node.properties.min;
+    final double max = math.max(min, this.max ?? node.properties.max);
+    final bool vertical = node.properties.orientation == AxisC.vertical;
     final SliderTrackShape trackShape = switch (node.properties.trackShape) {
       SliderTrackShapeEnum.rectangle => const RectangularSliderTrackShape(),
       SliderTrackShapeEnum.roundedRectangle =>
@@ -158,9 +188,12 @@ class TransformerSlider extends StatelessWidget {
     };
     final bool showsLabel = showValueIndicator != ShowValueIndicator.never;
 
-    return SizedBox(
-      width: node.basicBoxLocal.width,
-      height: node.basicBoxLocal.height,
+    // A vertical slider is a horizontal one turned a quarter turn
+    // counterclockwise, so min sits at the bottom. RotatedBox turns its
+    // layout and hit testing too, so the whole node box drags the thumb.
+    final Widget slider = SizedBox(
+      width: vertical ? node.basicBoxLocal.height : node.basicBoxLocal.width,
+      height: vertical ? node.basicBoxLocal.width : node.basicBoxLocal.height,
       child: SliderTheme(
         data: SliderThemeData(
           trackHeight: node.properties.trackHeight,
@@ -171,10 +204,12 @@ class TransformerSlider extends StatelessWidget {
           inactiveTrackColor: node.properties.inactiveTrackColor
               .toFlutterColor(),
           thumbColor: node.properties.thumbColor.toFlutterColor(),
-          thumbShape: RoundSliderThumbShape(
+          thumbShape: StrokedSliderThumbShape(
             enabledThumbRadius: node.properties.showThumb
                 ? node.properties.thumbRadius
                 : 0,
+            strokeColor: node.properties.thumbStrokeColor?.toFlutterColor(),
+            strokeWidth: node.properties.thumbStrokeWidth,
           ),
           trackShape: trackShape,
           // GappedSliderTrackShape requires a gap; 6 is the Material 3
@@ -208,22 +243,100 @@ class TransformerSlider extends StatelessWidget {
           ),
         ),
         child: Slider(
-          value: value.clamp(node.properties.min, node.properties.max),
+          value: value.clamp(min, max),
           onChanged: onChanged,
           autofocus: node.properties.autofocus,
-          min: node.properties.min,
-          max: node.properties.max,
+          min: min,
+          max: max,
           divisions: node.properties.isDiscrete
               ? node.properties.divisions
               : null,
           label: showsLabel ? getSliderLabel(node, value) : null,
           secondaryTrackValue: node.properties.secondaryTrackValue?.clamp(
-            node.properties.min,
-            node.properties.max,
+            min,
+            max,
           ),
           padding: node.properties.padding?.flutterEdgeInsets,
         ),
       ),
+    );
+
+    final TextDirection direction =
+        Directionality.maybeOf(context) ?? TextDirection.ltr;
+    final TextDirection flipped = direction == TextDirection.ltr
+        ? TextDirection.rtl
+        : TextDirection.ltr;
+    // Vertical runs bottom to top in left to right text, so an inverted
+    // vertical slider runs top to bottom.
+    final Widget directed = node.properties.inverted
+        ? Directionality(textDirection: flipped, child: slider)
+        : Directionality(textDirection: direction, child: slider);
+
+    if (!vertical) {
+      return node.properties.inverted ? directed : slider;
+    }
+    return SizedBox(
+      width: node.basicBoxLocal.width,
+      height: node.basicBoxLocal.height,
+      child: RotatedBox(quarterTurns: 3, child: directed),
+    );
+  }
+}
+
+/// A [RoundSliderThumbShape] with an optional stroke drawn inside its edge.
+class StrokedSliderThumbShape extends RoundSliderThumbShape {
+  /// Creates a [StrokedSliderThumbShape].
+  const StrokedSliderThumbShape({
+    super.enabledThumbRadius,
+    this.strokeColor,
+    this.strokeWidth = 0,
+  });
+
+  /// Color of the stroke; no stroke when null.
+  final Color? strokeColor;
+
+  /// Width of the stroke; no stroke when 0.
+  final double strokeWidth;
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    super.paint(
+      context,
+      center,
+      activationAnimation: activationAnimation,
+      enableAnimation: enableAnimation,
+      isDiscrete: isDiscrete,
+      labelPainter: labelPainter,
+      parentBox: parentBox,
+      sliderTheme: sliderTheme,
+      textDirection: textDirection,
+      value: value,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
+    );
+    final Color? color = strokeColor;
+    if (color == null || strokeWidth <= 0 || enabledThumbRadius <= 0) return;
+    final double width = math.min(strokeWidth, enabledThumbRadius);
+    context.canvas.drawCircle(
+      center,
+      enabledThumbRadius - width / 2,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = width
+        ..color = color,
     );
   }
 }
