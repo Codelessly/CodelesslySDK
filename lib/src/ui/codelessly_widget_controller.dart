@@ -123,18 +123,6 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// node.
   final LayoutRetrieverBuilder? layoutRetrievalBuilder;
 
-  /// The location to open the app at when no [layoutID] is given, relative to
-  /// the app's root, such as `guide/bat-star?x=1`. The canvas whose
-  /// [CanvasProperties.path] matches it opens instead of the entry canvas,
-  /// with the path and query params as its route params. When no canvas
-  /// matches, the entry canvas opens.
-  final String? initialLocation;
-
-  /// Called when a navigation action opens, or goes back to, a screen with a
-  /// URL path, so the host can show its location, e.g. in the browser's URL
-  /// bar. Screens without a path report nothing.
-  final CodelesslyLocationCallback? onLocationChanged;
-
   /// Creates a [CodelesslyWidgetController].
   ///
   /// If the [layoutID] is not provided, then it is assumed that the published
@@ -157,10 +145,6 @@ class CodelesslyWidgetController extends ChangeNotifier {
     this.errorBuilder,
     this.layoutBuilder = _defaultLayoutBuilder,
     this.layoutRetrievalBuilder,
-
-    // Locations.
-    this.initialLocation,
-    this.onLocationChanged,
 
     // Optional managers. These are only used when using the global codelessly
     // instance.
@@ -211,8 +195,6 @@ class CodelesslyWidgetController extends ChangeNotifier {
     CodelesslyWidgetLayoutBuilder? layoutBuilder,
     LayoutRetrieverBuilder? layoutRetrievalBuilder,
     FirebaseApp? firebaseApp,
-    String? initialLocation,
-    CodelesslyLocationCallback? onLocationChanged,
   }) {
     return CodelesslyWidgetController(
       layoutID: layoutID ?? this.layoutID,
@@ -229,8 +211,6 @@ class CodelesslyWidgetController extends ChangeNotifier {
           layoutRetrievalBuilder ?? this.layoutRetrievalBuilder,
       loadingBuilder: loadingBuilder ?? this.loadingBuilder,
       errorBuilder: errorBuilder ?? this.errorBuilder,
-      initialLocation: initialLocation ?? this.initialLocation,
-      onLocationChanged: onLocationChanged ?? this.onLocationChanged,
     );
   }
 

@@ -114,10 +114,8 @@ class ScopedValues {
     indexedItem = IndexedItemProvider.maybeOf(context);
     screenSize = MediaQuery.maybeSizeOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
-    final ModalRoute<Object?>? route = ModalRoute.of(context);
     routeParams =
-        CodelesslyRouteParams.maybeOf(context, route) ??
-        route?.settings.arguments as Map<String, dynamic>? ??
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
         {};
     final instance = context.read<Codelessly?>();
     _appUser = null;

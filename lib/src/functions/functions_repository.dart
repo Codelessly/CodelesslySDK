@@ -598,28 +598,6 @@ class FunctionsRepository {
         codelessly: effectiveCodelessly,
       );
 
-      // Tell the host the location of the screen opened, and of this screen
-      // when it is gone back to.
-      final CodelesslyLocationCallback? onLocationChanged =
-          parentController.onLocationChanged;
-      final SDKPublishModel? model =
-          effectiveCodelessly.dataManager.publishModel;
-      String? locationOf(String? id, Map<String, dynamic> params) =>
-          onLocationChanged == null || model == null || id == null
-          ? null
-          : CanvasLocation.locationOf(model, id, params);
-      final String? location = locationOf(action.destinationId, parsedParams);
-      final String? myLocation = locationOf(
-        myCanvasId ?? myLayoutId,
-        effectiveScopedValues.routeParams,
-      );
-      if (location != null) {
-        onLocationChanged!(
-          location,
-          replace: action.navigationType == NavigationType.replace,
-        );
-      }
-
       if (action.navigationType == NavigationType.push) {
         // A chain triggered on the page can finish on this layout after
         // the page pops.
@@ -645,7 +623,6 @@ class FunctionsRepository {
             layoutId: myLayoutId,
             canvasId: myCanvasId,
           );
-          if (myLocation != null) onLocationChanged!(myLocation, replace: true);
         }
       } else if (action.navigationType == NavigationType.replace) {
         await Navigator.pushReplacement(
