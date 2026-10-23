@@ -787,8 +787,6 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       .where(
         (action) =>
             action.enabled &&
-            // Because calling api is handled in LayoutBuilder.
-            action.type != ActionType.callApi &&
             action.type != ActionType.navigation &&
             action.type != ActionType.submit &&
             action.type != ActionType.link,
