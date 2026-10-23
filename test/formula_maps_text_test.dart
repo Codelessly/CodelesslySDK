@@ -34,7 +34,7 @@ void main() {
         eval("merge(first(units), obj('status', 'Down'))")! as Map,
         containsPair('status', 'Down'),
       );
-      expect(eval("keys(first(units))"), ['id', 'hours', 'status']);
+      expect(eval('keys(first(units))'), ['id', 'hours', 'status']);
       expect(eval("values(obj('a', 1))"), [1]);
     });
 
