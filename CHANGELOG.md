@@ -9,6 +9,19 @@
   the center of its box. Needs the unreleased `codelessly_api` change that
   adds these fields.
 
+### Spacers and grids
+
+- A spacer that flexes on its parent's main axis is wrapped in its
+  `Expanded`/`Flexible` by the row or column, outside every wrapper built
+  around it, so it takes the free space like Flutter's `Spacer` also under
+  a `NodeBuildDecorator` (the editor's render canvas drew it at its design
+  size).
+- A `fixedCrossAxisCount` grid keeps its count at every width and divides
+  the grid's width between the cells (`DesignCellGridDelegate` is gone).
+- `GridDelegateProperties.shrinkWrapRows`: rows as tall as their tallest
+  item, built as a list of rows of `Expanded` cells in an `IntrinsicHeight`
+  (`GridViewBuilder.intrinsicRows`).
+
 ## 8.2.0
 
 ### States

@@ -192,10 +192,6 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   }) {
     assert(parentRowColumn is RowColumnMixin);
 
-    if (node is SpacerNode) {
-      return childWidget;
-    }
-
     final AxisC mainAxis =
         ((parentRowColumn as RowColumnMixin).rowColumnType == RowColumnType.row
         ? AxisC.horizontal
@@ -203,6 +199,18 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     final SizeFit mainAxisFit = (mainAxis == AxisC.horizontal
         ? node.horizontalFit
         : node.verticalFit);
+
+    // A spacer flexes like Flutter's Spacer. The flex goes around everything
+    // built for it, as for any other child: a host's wrappers (the editor's
+    // geometry probes) would otherwise sit between the Flex and an Expanded
+    // inside, and the Flex would lay the spacer out at its design size.
+    if (node is SpacerNode) {
+      return switch (mainAxisFit) {
+        SizeFit.expanded => Expanded(flex: flex, child: childWidget),
+        SizeFit.flexible => Flexible(flex: flex, child: childWidget),
+        _ => childWidget,
+      };
+    }
 
     final SizeFit crossAxisFit = (mainAxis == AxisC.horizontal
         ? node.verticalFit
