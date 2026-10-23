@@ -296,10 +296,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   /// The layout being shown.
   String? effectiveLayoutID;
 
-  /// The canvas the controller's [CodelesslyWidgetController.initialLocation]
-  /// opened, if any.
-  CanvasLocationMatch? locationMatch;
-
   /// Tracks whether this widget went through a full layout load and was made
   /// visible to the user successfully at least once.
   bool didView = false;
@@ -512,15 +508,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
           }
 
           final SDKPublishModel model = snapshot.data!;
-          final String? initialLocation = _effectiveController.initialLocation;
-          locationMatch =
-              _effectiveController.layoutID == null && initialLocation != null
-              ? CanvasLocation.match(model, initialLocation)
-              : null;
           effectiveLayoutID =
-              _effectiveController.layoutID ??
-              locationMatch?.layoutId ??
-              model.entryLayoutId;
+              _effectiveController.layoutID ?? model.entryLayoutId;
 
           if (effectiveLayoutID == null) {
             final errorLog = ErrorLog(
@@ -549,16 +538,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             didView = true;
             StatTracker.instance.track(StatType.view);
           }
-
-          // A screen opened at a location gets its params as route params,
-          // which its host's route was not pushed with.
-          Widget withRouteParams(Widget child) => locationMatch == null
-              ? child
-              : CodelesslyRouteParams(
-                  route: ModalRoute.of(context),
-                  params: locationMatch!.params,
-                  child: child,
-                );
 
           Widget buildLayout(BuildContext context) => Material(
             clipBehavior: Clip.none,
@@ -603,7 +582,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
                 key: ValueKey(effectiveLayoutID),
                 layoutId: effectiveLayoutID,
                 canvasId: canvasID,
-                builder: (context) => withRouteParams(buildLayout(context)),
+                builder: buildLayout,
               ),
             ),
           );

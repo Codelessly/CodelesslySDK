@@ -155,11 +155,11 @@ SDKPublishModel _model({ActionModel? tidesAction}) {
   return model;
 }
 
-Future<void> _pumpApp(
+/// Opens [model]'s app with [pendingRoute], as a site does for a link.
+Future<Codelessly> _pumpApp(
   WidgetTester tester,
   SDKPublishModel model, {
-  String? initialLocation,
-  CodelesslyLocationCallback? onLocationChanged,
+  CodelesslyRoute? pendingRoute,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = const Size(390, 844);
@@ -169,18 +169,16 @@ Future<void> _pumpApp(
     config: CodelesslyConfig(authToken: 'token'),
     publishDataManager: _TestDataManager(model)..status = CStatus.loaded(),
   )..status = CStatus.loaded();
+  codelessly.pendingRoute = pendingRoute;
   await tester.pumpWidget(
     MaterialApp(
       home: CodelesslyWidget(
-        controller: CodelesslyWidgetController(
-          codelessly: codelessly,
-          initialLocation: initialLocation,
-          onLocationChanged: onLocationChanged,
-        ),
+        controller: CodelesslyWidgetController(codelessly: codelessly),
       ),
     ),
   );
-  await tester.pump();
+  await tester.pumpAndSettle();
+  return codelessly;
 }
 
 void main() {
@@ -228,30 +226,30 @@ void main() {
     });
   });
 
-  group('initialLocation', () {
-    testWidgets('opens the canvas at that path with its params', (
+  group('links', () {
+    testWidgets('a link to a URL path opens that screen with its params', (
       tester,
     ) async {
       await _pumpApp(
         tester,
         _model(),
-        initialLocation: 'guide/bat-star?from=link',
+        pendingRoute: CodelesslyRoute.tryParse('guide/bat-star?from=link'),
       );
       expect(find.text('id=bat-star'), findsOneWidget);
       expect(find.text('from=link'), findsOneWidget);
-      expect(find.text('Tides'), findsNothing);
     });
 
-    testWidgets('opens the entry canvas at an unknown path', (tester) async {
-      await _pumpApp(tester, _model(), initialLocation: 'nowhere');
-      expect(find.text('Tides'), findsOneWidget);
-    });
-  });
-
-  group('onLocationChanged', () {
-    testWidgets('reports a push and going back', (tester) async {
-      final List<(String, bool)> locations = [];
+    testWidgets('a link to a screen id still opens it', (tester) async {
       await _pumpApp(
+        tester,
+        _model(),
+        pendingRoute: CodelesslyRoute.tryParse('creature?id=kraken'),
+      );
+      expect(find.text('id=kraken'), findsOneWidget);
+    });
+
+    testWidgets("the address shows the screen's URL path", (tester) async {
+      final Codelessly codelessly = await _pumpApp(
         tester,
         _model(
           tidesAction: NavigationAction(
@@ -260,36 +258,17 @@ void main() {
             params: {'id': 'kraken', 'from': 'tides'},
           ),
         ),
-        onLocationChanged: (location, {required replace}) =>
-            locations.add((location, replace)),
       );
+      expect(codelessly.pathOf(codelessly.route.value!), '');
       await tester.tap(find.text('Go'));
       await tester.pumpAndSettle();
       expect(find.text('id=kraken'), findsOneWidget);
-      expect(locations, [('guide/kraken?from=tides', false)]);
-
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pumpAndSettle();
-      expect(find.text('Tides'), findsOneWidget);
-      expect(locations.last, ('', true));
-    });
-
-    testWidgets('reports nothing for a screen without a path', (tester) async {
-      final List<String> locations = [];
-      await _pumpApp(
-        tester,
-        _model(
-          tidesAction: NavigationAction(
-            navigationType: NavigationType.replace,
-            destinationId: 'settings',
-          ),
-        ),
-        onLocationChanged: (location, {required replace}) =>
-            locations.add(location),
+      expect(
+        codelessly.pathOf(codelessly.route.value!),
+        'guide/kraken?from=tides',
       );
-      await tester.tap(find.text('Go'));
-      await tester.pumpAndSettle();
-      expect(locations, isEmpty);
+      // A screen without a URL path falls back to its id.
+      expect(codelessly.pathOf(const CodelesslyRoute('settings')), 'settings');
     });
   });
 }

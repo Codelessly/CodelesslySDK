@@ -1,20 +1,8 @@
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 import '../model/sdk_publish_model.dart';
-
-/// Called when navigation in a Codelessly app moves to a screen with a URL
-/// path. [location] is that screen's path with its params filled in, relative
-/// to the app's root and without a leading slash, such as
-/// `guide/bat-star?from=tides`. [replace] is true when the screen replaced the
-/// previous one or was gone back to, and false when it was pushed on top.
-typedef CodelesslyLocationCallback = void Function(
-  String location, {
-  required bool replace,
-});
 
 /// The canvas a location opens and the route params it passes to it.
 class CanvasLocationMatch {
@@ -161,40 +149,4 @@ abstract final class CanvasLocation {
     Map() || List() => jsonEncode(value),
     _ => '$value',
   };
-}
-
-/// Gives the screen below it the route params of the location it was opened
-/// at, for a screen whose route was not pushed with them: the host's own
-/// route of an app opened at a location.
-class CodelesslyRouteParams extends InheritedWidget {
-  /// The route these params belong to. A route nested below, such as one of
-  /// a navigator inside the screen, keeps its own params.
-  final ModalRoute<Object?>? route;
-
-  /// The route params.
-  final Map<String, dynamic> params;
-
-  /// Creates a [CodelesslyRouteParams].
-  const CodelesslyRouteParams({
-    super.key,
-    required this.route,
-    required this.params,
-    required super.child,
-  });
-
-  /// The params for [route] that a [CodelesslyRouteParams] above [context]
-  /// gives, if any.
-  static Map<String, dynamic>? maybeOf(
-    BuildContext context,
-    ModalRoute<Object?>? route,
-  ) {
-    final CodelesslyRouteParams? scope = context
-        .dependOnInheritedWidgetOfExactType<CodelesslyRouteParams>();
-    if (scope == null || scope.route != route) return null;
-    return scope.params;
-  }
-
-  @override
-  bool updateShouldNotify(CodelesslyRouteParams oldWidget) =>
-      route != oldWidget.route || !mapEquals(params, oldWidget.params);
 }
