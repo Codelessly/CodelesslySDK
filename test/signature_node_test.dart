@@ -55,15 +55,17 @@ Future<CodelesslyContext> pumpPad(
   return ctx;
 }
 
-SignatureStrokes painted(WidgetTester tester) => (tester
-        .widget<CustomPaint>(
-          find.descendant(
-            of: find.byType(PassiveSignatureWidget),
-            matching: find.byType(CustomPaint),
-          ),
-        )
-        .painter as SignaturePainter)
-    .strokes;
+SignatureStrokes painted(WidgetTester tester) =>
+    (tester
+                .widget<CustomPaint>(
+                  find.descendant(
+                    of: find.byType(PassiveSignatureWidget),
+                    matching: find.byType(CustomPaint),
+                  ),
+                )
+                .painter
+            as SignaturePainter)
+        .strokes;
 
 void main() {
   test('strokes parse from bound data and ignore junk', () {
@@ -114,7 +116,9 @@ void main() {
     await tester.dragFrom(const Offset(30, 50), const Offset(150, 20));
     await tester.pumpAndSettle();
 
-    final strokes = parseSignatureStrokes(ctx.variables['sig']!.value.getValue());
+    final strokes = parseSignatureStrokes(
+      ctx.variables['sig']!.value.getValue(),
+    );
     expect(strokes, hasLength(1));
     expect(strokes.first.first[0], closeTo(0.1, 0.01));
     expect(strokes.first.first[1], closeTo(0.5, 0.01));
