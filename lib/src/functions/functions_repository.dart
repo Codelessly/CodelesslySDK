@@ -553,25 +553,27 @@ class FunctionsRepository {
           );
         }
       } else if (action.navigationType == NavigationType.replace) {
-        await Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            settings: RouteSettings(arguments: parsedParams),
-            builder: (context) =>
-                CodelesslyWidget(controller: effectiveController),
+        // The new screen takes over the chain: the actions after this one
+        // (e.g. a toast) run with it once this screen unmounts.
+        final ActionChain? chain = ActionChain.current;
+        // Don't wait for the route's result: it only comes when the new
+        // screen pops, long after this screen is gone, and the rest of the
+        // chain would never run.
+        unawaited(
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              settings: RouteSettings(arguments: parsedParams),
+              builder: (context) {
+                final Widget page = CodelesslyWidget(
+                  controller: effectiveController,
+                );
+                if (chain == null) return page;
+                return ActionChainAdopter(chain: chain, child: page);
+              },
+            ),
           ),
         );
-
-        // Notify navigation listeners that this screen has been navigated back
-        // to, because the Navigator.push future has completed and came
-        // back to this screen.
-        if (context.mounted) {
-          effectiveCodelessly.notifyNavigationListeners(
-            context,
-            layoutId: myLayoutId,
-            canvasId: myCanvasId,
-          );
-        }
       }
     }
   }
