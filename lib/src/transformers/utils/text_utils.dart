@@ -97,11 +97,19 @@ class TextUtils {
 
     // On a design canvas, show defaults or placeholders for variables.
     if (replaceVariableWithSymbol) {
+      // In a list item built with its data, `item` is that item.
+      final IndexedItem? item = context == null
+          ? null
+          : IndexedItemProvider.maybeOf(context);
       final spans = characters
           .splitMap(
             variableSyntaxIdentifierRegex,
-            onMatch: (match) =>
-                VariableSpan(variable: match[0]!, node: node, style: style),
+            onMatch: (match) => VariableSpan(
+              variable: match[0]!,
+              node: node,
+              item: item,
+              style: style,
+            ),
             onNonMatch: (text) => TextSpan(text: text, style: style),
           )
           .toList();
