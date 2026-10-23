@@ -225,10 +225,9 @@ abstract class WidgetNodeTransformerManager
     }
   }
 
-  /// Wraps the whole build of a tappable [node] so it and the nodes inside
-  /// it can read `hovered`, and, when it has hold reactions, run them once it
-  /// has been held, sharing the progress as `hold`. [child] builds the node
-  /// below these scopes so the node's own bindings see them.
+  /// Wraps the whole build of a [node] with hold reactions so they run once
+  /// it has been held, sharing the progress as `hold`. [child] builds the
+  /// node below the scope so the node's own bindings see it too.
   Widget wrapWithInteractionScopes(
     BuildContext context,
     BaseNode node,
@@ -236,33 +235,22 @@ abstract class WidgetNodeTransformerManager
   ) {
     if (node is! ReactionMixin) return child;
     if (node case CanvasNode() || SpacerNode()) return child;
-    final List<Reaction> reactions = (node as ReactionMixin).reactions
-        .where((reaction) => reaction.action.enabled)
+    final List<Reaction> onHoldReactions = (node as ReactionMixin).reactions
+        .where(
+          (reaction) =>
+              reaction.trigger.type == TriggerType.hold &&
+              reaction.action.enabled,
+        )
         .toList();
-    final bool tappable = reactions.any(
-      (reaction) => const {
-        TriggerType.click,
-        TriggerType.longPress,
+    if (onHoldReactions.isEmpty) return child;
+    return HoldToConfirm(
+      duration: Duration(milliseconds: onHoldReactions.first.trigger.duration),
+      onConfirmed: () => FunctionsRepository.triggerAction(
+        context,
         TriggerType.hold,
-      }.contains(reaction.trigger.type),
-    );
-    if (!tappable) return child;
-    final List<Reaction> onHoldReactions = reactions
-        .where((reaction) => reaction.trigger.type == TriggerType.hold)
-        .toList();
-    if (onHoldReactions.isEmpty) return HoverScope(child: child);
-    return HoverScope(
-      child: HoldToConfirm(
-        duration: Duration(
-          milliseconds: onHoldReactions.first.trigger.duration,
-        ),
-        onConfirmed: () => FunctionsRepository.triggerAction(
-          context,
-          TriggerType.hold,
-          reactions: onHoldReactions,
-        ),
-        child: child,
+        reactions: onHoldReactions,
       ),
+      child: child,
     );
   }
 
