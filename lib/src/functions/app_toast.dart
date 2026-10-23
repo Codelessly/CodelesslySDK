@@ -35,6 +35,21 @@ class AppToast {
     final String message = text(action.message);
     final String actionLabel = action.hasAction ? text(action.actionLabel) : '';
     final ResolvedFeedbackTheme theme = FeedbackTheme.of(context);
+    // Without a font of its own, the toast takes the app's text style at
+    // the trigger, not Material's default.
+    final TextStyle appText = DefaultTextStyle.of(context).style;
+    final String? themeFamily = Theme.of(context)
+        .textTheme
+        .bodyMedium
+        ?.fontFamily;
+    final TextStyle font =
+        theme.bodyStyle.fontFamily == themeFamily && appText.fontFamily != null
+        ? theme.bodyStyle.copyWith(
+            fontFamily: appText.fontFamily,
+            fontFamilyFallback: appText.fontFamilyFallback,
+          )
+        : theme.bodyStyle;
+    final double? offset = offsetOf(action, scopedValues);
     // The button's actions run on the chain that showed the toast, whenever
     // it is pressed: with its captured scope (the `${item}` of a row that has
     // since left the list) and its `${result}` then (e.g. the id of the item
@@ -57,6 +72,8 @@ class AppToast {
         message: message,
         actionLabel: actionLabel,
         theme: theme,
+        font: font,
+        offset: offset,
         onAction: onAction,
         onDone: () {
           if (_current == entry) _current = null;
@@ -67,6 +84,27 @@ class AppToast {
     _current = entry;
     overlay.insert(entry);
     return true;
+  }
+
+  /// The distance from the screen edge [action]'s bound
+  /// [ShowToastAction.offset] gives, read with [scopedValues], or null when
+  /// it is empty or not a number.
+  static double? offsetOf(ShowToastAction action, ScopedValues scopedValues) {
+    final String template = action.offset.trim();
+    if (template.isEmpty) return null;
+    final Object? value =
+        FormulaEvaluator.exactExpression(template) != null ||
+            RegExp(r'^\$\{[^{}]+\}$').hasMatch(template)
+        ? PropertyValueDelegate.getVariableValueFromPath<Object>(
+            template,
+            scopedValues: scopedValues,
+          )
+        : PropertyValueDelegate.substituteVariables(
+            template,
+            scopedValues: scopedValues,
+            nullSubstitutionMode: NullSubstitutionMode.emptyString,
+          );
+    return value.toDouble();
   }
 
   /// Removes the toast on screen, if any.
@@ -108,6 +146,8 @@ class _ToastView extends StatefulWidget {
     required this.message,
     required this.actionLabel,
     required this.theme,
+    required this.font,
+    required this.offset,
     required this.onAction,
     required this.onDone,
   });
@@ -116,6 +156,8 @@ class _ToastView extends StatefulWidget {
   final String message;
   final String actionLabel;
   final ResolvedFeedbackTheme theme;
+  final TextStyle font;
+  final double? offset;
   final VoidCallback? onAction;
   final VoidCallback onDone;
 
@@ -178,11 +220,14 @@ class _ToastViewState extends State<_ToastView> {
             child: retrieveIconWidget(action.icon!, 18) ?? const SizedBox(),
           );
     final bool hasButton = widget.onAction != null;
+    final bool hasClose = action.showClose;
     final bool top = action.position == ToastPosition.top;
     final EdgeInsets safe = MediaQuery.paddingOf(context);
-    final TextStyle messageStyle = theme.bodyStyle.copyWith(
+    final double fontSize = action.fontSize ?? 14;
+    final Color actionColor = action.actionColor?.toFlutterColor() ?? textColor;
+    final TextStyle messageStyle = widget.font.copyWith(
       color: textColor,
-      fontSize: 14,
+      fontSize: fontSize,
       height: 1.35,
       fontWeight: FontWeight.w600,
       decoration: TextDecoration.none,
@@ -190,11 +235,12 @@ class _ToastViewState extends State<_ToastView> {
 
     Widget toast = Container(
       constraints: const BoxConstraints(minHeight: 44, maxWidth: 560),
-      padding: EdgeInsets.fromLTRB(18, 10, hasButton ? 8 : 18, 10),
+      padding: EdgeInsets.fromLTRB(18, 10, hasButton || hasClose ? 4 : 18, 10),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(
-          hasButton ? theme.buttonRadius.clamp(8, 999) : 999,
+          action.cornerRadius ??
+              (hasButton ? theme.buttonRadius.clamp(8, 999) : 999),
         ),
         boxShadow: const [
           BoxShadow(
@@ -215,11 +261,11 @@ class _ToastViewState extends State<_ToastView> {
               key: const ValueKey('codelessly-toast-action'),
               onPressed: _onActionPressed,
               style: TextButton.styleFrom(
-                foregroundColor: textColor,
+                foregroundColor: actionColor,
                 minimumSize: const Size(48, 36),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 textStyle: theme.buttonStyle.copyWith(
-                  fontSize: 14,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w700,
                 ),
                 shape: RoundedRectangleBorder(
@@ -227,6 +273,19 @@ class _ToastViewState extends State<_ToastView> {
                 ),
               ),
               child: Text(widget.actionLabel),
+            ),
+          ],
+          if (hasClose) ...[
+            if (!hasButton) const SizedBox(width: 4),
+            IconButton(
+              key: const ValueKey('codelessly-toast-close'),
+              onPressed: _close,
+              tooltip: 'Close',
+              color: textColor,
+              iconSize: 18,
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.close),
             ),
           ],
         ],
@@ -253,10 +312,13 @@ class _ToastViewState extends State<_ToastView> {
     return Positioned(
       left: 16,
       right: 16,
-      top: top ? safe.top + 16 : null,
-      bottom: top ? null : action.bottomOffset,
+      top: top ? safe.top + (widget.offset ?? 16) : null,
+      bottom: top ? null : widget.offset ?? action.bottomOffset,
       // Only a toast with a button takes taps; the rest passes them through.
-      child: IgnorePointer(ignoring: !hasButton || !_visible, child: toast),
+      child: IgnorePointer(
+        ignoring: !(hasButton || hasClose) || !_visible,
+        child: toast,
+      ),
     );
   }
 }
