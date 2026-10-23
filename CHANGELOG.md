@@ -1,3 +1,45 @@
+## 8.3.0
+
+Requires codelessly_api 6.2.0.
+
+### Formulas
+
+- Computed variables: a variable whose value is a `${= ...}` formula is
+  evaluated when read, and widgets bound to it update when the variables
+  it uses change. Cycles resolve to null.
+- New functions: `obj`, `set`, `merge`, `keys`, `values`, `range`,
+  `slice`, `first`, `last`, `concat`, `indexOf`, `daysInMonth`, `padLeft`,
+  `padRight`, `substring`, `split`, `replace`, `coalesce`, `formatNumber`
+  and `matches` (regular expressions); `money` takes a digit count.
+- On the web, the page URL's query parameters are part of `route`
+  (`${route.date}`); navigation params of the same name win.
+
+### Rendering
+
+- Linear gradients with `gradientRepeatEvery` repeat at a fixed pixel
+  period (`RepeatingGradientTransform`).
+- Arc progress bars (gauges) with ticks, needle and zone bands
+  (`ArcProgressPainter`).
+- Dialog canvases open as bottom sheets, adaptively (sheet below 600 px),
+  or aligned to a side or corner of the screen.
+
+### Text fields
+
+- `obscureText`, `enabled` and `readOnly` follow variables, conditions and
+  set-property actions.
+- A one-line field with a set height stays one line (it can obscure its
+  text and Enter submits it) and fills its height through its decoration.
+- Prefix and suffix icon constraints apply when set.
+
+### Actions
+
+- Delay actions wait as long as their `duration` formula says.
+
+### Fixes
+
+- An API document without a directory no longer fails to load
+  (`HttpApiData.directory` defaults to the root).
+
 ## 8.2.0
 
 ### States
