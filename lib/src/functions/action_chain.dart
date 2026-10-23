@@ -25,6 +25,10 @@ import '../transformers/utils/scoped_values.dart';
 ///   removed its document, the remaining actions run with the first host
 ///   still mounted, so toasts, dialogs and navigation still happen. See
 ///   [contextFor].
+/// * the screen a `replace` navigation of the chain put in place of the
+///   trigger's: its [ActionChainHost] joins the chain ([ActionChainAdopter]),
+///   so the actions after the navigation run there once the old screen is
+///   gone.
 ///
 /// Something the chain registers to run later, such as a toast's Undo
 /// button, runs on the same chain through [defer].
@@ -39,7 +43,8 @@ class ActionChain {
     this.scopedValues,
     this._context,
     this._hosts = const [],
-  });
+    List<BuildContext>? adopted,
+  }) : _adopted = adopted ?? [];
 
   /// Creates a chain for a trigger that fired in [context], capturing its
   /// scope and hosts.
@@ -61,6 +66,17 @@ class ActionChain {
 
   final BuildContext? _context;
   final List<BuildContext> _hosts;
+
+  /// Hosts of screens a navigation of this chain replaced the trigger's
+  /// with, oldest first. Shared with nested chains.
+  final List<BuildContext> _adopted;
+
+  /// Makes [host] a context the chain's remaining actions can run with,
+  /// ahead of the trigger's and its hosts: the screen a `replace`
+  /// navigation put in their place. See [ActionChainAdopter].
+  void adoptHost(BuildContext host) {
+    if (!_adopted.contains(host)) _adopted.add(host);
+  }
 
   static const Symbol _zoneKey = #codelesslyActionChain;
 
@@ -85,6 +101,7 @@ class ActionChain {
     scopedValues: scopedValues,
     context: _context,
     hosts: _hosts,
+    adopted: _adopted,
   );
 
   /// Runs [body] in a new chain whose `${result}` starts as [result].
@@ -149,14 +166,19 @@ class ActionChain {
       current?.scopedValues ?? ScopedValues.of(context);
 
   /// A mounted context to run the next action with: [context] while it is
-  /// mounted, else the chain's trigger context, else the first of its hosts
-  /// still mounted. Null when all of them have unmounted, e.g. the app
-  /// replaced the whole screen.
+  /// mounted, else the host of a screen a `replace` navigation of the chain
+  /// opened (see [adoptHost]), else the chain's trigger context, else the
+  /// first of its hosts still mounted. Null when all of them have unmounted,
+  /// e.g. the app replaced the whole screen.
   static BuildContext? contextFor(BuildContext context) {
     if (context.mounted) return context;
     final ActionChain? chain = current;
     if (chain == null) return null;
-    for (final BuildContext? candidate in [chain._context, ...chain._hosts]) {
+    for (final BuildContext? candidate in [
+      ...chain._adopted,
+      chain._context,
+      ...chain._hosts,
+    ]) {
       if (candidate != null && candidate.mounted) return candidate;
     }
     return null;
@@ -175,6 +197,9 @@ class ActionChainHost extends InheritedWidget {
   /// It does not make [context] depend on the host.
   static BuildContext? maybeOf(BuildContext context) =>
       context.getElementForInheritedWidgetOfExactType<ActionChainHost>();
+
+  @override
+  InheritedElement createElement() => _ActionChainHostElement(this);
 
   /// The contexts of the hosts a chain triggered in [context] can fall back
   /// to, nearest first: every [ActionChainHost] above [context] (a layout
@@ -224,4 +249,37 @@ class ActionChainOpener extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ActionChainOpener oldWidget) => false;
+}
+
+class _ActionChainHostElement extends InheritedElement {
+  _ActionChainHostElement(super.widget);
+
+  @override
+  void mount(Element? parent, Object? newSlot) {
+    super.mount(parent, newSlot);
+    final Widget? adopter = getElementForInheritedWidgetOfExactType<
+      ActionChainAdopter
+    >()?.widget;
+    if (adopter is ActionChainAdopter) adopter.chain.adoptHost(this);
+  }
+}
+
+/// Wraps a screen that an action of [chain] put in place of the screen the
+/// chain was triggered on (a `replace` navigation): the first
+/// [ActionChainHost] that mounts below it joins [chain], so the chain's
+/// remaining actions (e.g. a toast after "pop the dialog, then replace the
+/// page") run with the new screen once the old one unmounts.
+class ActionChainAdopter extends InheritedWidget {
+  /// Creates an [ActionChainAdopter] above [child].
+  const ActionChainAdopter({
+    super.key,
+    required this.chain,
+    required super.child,
+  });
+
+  /// The chain the new screen's hosts join.
+  final ActionChain chain;
+
+  @override
+  bool updateShouldNotify(ActionChainAdopter oldWidget) => false;
 }
