@@ -178,7 +178,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// Returns [node] with the style properties that conditions, bound
   /// variables or formulas, or set value actions give it at runtime: `fill`
   /// (a text's color for text nodes), `stroke`, `opacity`, `width` and
-  /// `height`. Returns [node] itself when
+  /// `height`, and the properties of [StyleBindings] (effects, stroke
+  /// weight, corner radius, font weight, icon). Returns [node] itself when
   /// nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
@@ -240,6 +241,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         math.max(0, height ?? box.height),
       ).toJson();
     }
+
+    // Effects, stroke weight, corner radius, font weight and icon.
+    StyleBindings.addTo(patch, node, scopedValues: scopedValues);
 
     // The states shown around the node (a property-override variant, its
     // own or an ancestor's interaction states) win over bindings.

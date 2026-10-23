@@ -224,6 +224,115 @@ class ListItemBox extends StatelessWidget {
   }
 }
 
+/// Sizes a wrapping list node (see `ListViewProperties.wrap`) and builds its
+/// content. The flag given to [builder] says whether the runs must scroll
+/// along the cross axis: true when the box has a set extent there.
+///
+/// Unlike a viewport, a [Wrap] can measure its items on both axes, so on
+/// each axis:
+///
+/// * expanded: fill when the incoming extent is bounded, else the design
+///   size.
+/// * shrinkWrap: size to the runs (on the wrap axis, the longest line that
+///   fits the incoming extent; on the cross axis, all the runs).
+/// * fixed, locked, flexible: the design size.
+class WrapNodeBox extends StatelessWidget {
+  /// The list node.
+  final ListViewNode node;
+
+  /// Builds the content inside the resolved box.
+  final ViewportContentBuilder builder;
+
+  /// Creates a [WrapNodeBox].
+  const WrapNodeBox({super.key, required this.node, required this.builder});
+
+  /// The extent of [node] along one axis whose fit is [fit] and design size
+  /// [design], under an incoming extent that is [bounded] or not. Null
+  /// sizes to the runs.
+  static double? extent(SizeFit fit, double design, bool bounded) =>
+      switch (fit) {
+        SizeFit.expanded => bounded ? double.infinity : design,
+        SizeFit.shrinkWrap => null,
+        SizeFit.fixed || SizeFit.locked || SizeFit.flexible => design,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double? width = extent(
+          node.horizontalFit,
+          node.basicBoxLocal.width,
+          constraints.hasBoundedWidth,
+        );
+        final double? height = extent(
+          node.verticalFit,
+          node.basicBoxLocal.height,
+          constraints.hasBoundedHeight,
+        );
+        final double? cross = node.scrollDirection == AxisC.horizontal
+            ? height
+            : width;
+        return SizedBox(
+          width: width,
+          height: height,
+          child: builder(context, cross != null),
+        );
+      },
+    );
+  }
+}
+
+/// Sizes the item [child] of a wrapping list: the item keeps its own size
+/// on both axes. An expanded or flexible item, which has nothing to fill in
+/// a run, takes its design size; with [itemExtent] the item takes that
+/// extent along the wrap direction.
+class WrapItemBox extends StatelessWidget {
+  /// The item node.
+  final BaseNode item;
+
+  /// The list's scroll axis: the wrap direction.
+  final AxisC scrollDirection;
+
+  /// The list's fixed item extent, if any.
+  final double? itemExtent;
+
+  /// The built item.
+  final Widget child;
+
+  /// Creates a [WrapItemBox].
+  const WrapItemBox({
+    super.key,
+    required this.item,
+    required this.scrollDirection,
+    required this.itemExtent,
+    required this.child,
+  });
+
+  static bool _fills(SizeFit fit) =>
+      fit == SizeFit.expanded || fit == SizeFit.flexible;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool vertical = scrollDirection == AxisC.vertical;
+    double? width = _fills(item.horizontalFit)
+        ? item.outerBoxLocal.width
+        : null;
+    double? height = _fills(item.verticalFit)
+        ? item.outerBoxLocal.height
+        : null;
+    if (itemExtent != null) {
+      if (vertical) {
+        height = itemExtent;
+      } else {
+        width = itemExtent;
+      }
+    }
+    if (width == null && height == null) return child;
+    return SizedBox(width: width, height: height, child: child);
+  }
+}
+
 /// A grid delegate for a fixed cross axis count that keeps cells at least as
 /// wide as the editor drew them.
 ///

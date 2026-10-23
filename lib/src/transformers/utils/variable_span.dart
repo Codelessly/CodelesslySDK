@@ -15,6 +15,33 @@ abstract final class VariablePreview {
   /// fall back to placeholders.
   static ScopedValues? Function(BaseNode? node)? scopeResolver;
 
+  /// The values that [node] sees on the design canvas where it is built in
+  /// [context], or null to fall back to placeholders.
+  ///
+  /// [scopeResolver] only knows the node, and a list's item template is one
+  /// node that every row of the list builds: it can only give the sample
+  /// item of the nearest data-bound list (its first). The row being built
+  /// is known from [context]: its [IndexedItemProvider] gives that row's
+  /// own item, as at runtime, so each row previews its own data.
+  ///
+  /// A row without an item of its own (a list that only sets an item count,
+  /// or a row past the end of the data) keeps the sample item but reads
+  /// its own `index`.
+  static ScopedValues? scopeOf(BaseNode? node, {BuildContext? context}) {
+    final ScopedValues? values = scopeResolver?.call(node);
+    if (values == null || context == null) return values;
+    final IndexedItem? row = IndexedItemProvider.maybeOf(context);
+    if (row == null || row == values.indexedItem) return values;
+    return ScopedValues.preview(
+      variables: values.variables,
+      codelesslyContext: values.codelesslyContext,
+      screenSize: values.screenSize,
+      indexedItem: row.item != null || values.indexedItem == null
+          ? row
+          : IndexedItem(row.index, values.indexedItem!.item),
+    );
+  }
+
   /// Accessors that read a property of a value rather than name it, so the
   /// placeholder for `${item.title.initial}` is named after `title`.
   static const Set<String> _accessorNames = {
@@ -36,9 +63,15 @@ abstract final class VariablePreview {
 
   static const Set<String> _literals = {'true', 'false', 'null'};
 
-  /// The text the design canvas shows for [expression], one `${...}` match.
-  static String textFor(String expression, {BaseNode? node, TextStyle? style}) {
-    final ScopedValues? scopedValues = scopeResolver?.call(node);
+  /// The text the design canvas shows for [expression], one `${...}` match,
+  /// in [node] built in [context] (see [scopeOf]).
+  static String textFor(
+    String expression, {
+    BaseNode? node,
+    TextStyle? style,
+    BuildContext? context,
+  }) {
+    final ScopedValues? scopedValues = scopeOf(node, context: context);
     if (scopedValues != null) {
       final String value = PropertyValueDelegate.substituteVariables(
         expression,
@@ -131,15 +164,22 @@ class VariableSpan extends TextSpan {
   /// The variable expression, such as `${user.name}`.
   final String variable;
 
-  /// Creates a [VariableSpan] for the [variable] expression of [node].
+  /// Creates a [VariableSpan] for the [variable] expression of [node], built
+  /// in [context]: a list row's context gives the row's own item.
   VariableSpan({
     required this.variable,
     BaseNode? node,
+    BuildContext? context,
     super.style,
     super.mouseCursor,
     super.onEnter,
     super.onExit,
   }) : super(
-         text: VariablePreview.textFor(variable, node: node, style: style),
+         text: VariablePreview.textFor(
+           variable,
+           node: node,
+           style: style,
+           context: context,
+         ),
        );
 }
