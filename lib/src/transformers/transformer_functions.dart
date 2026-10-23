@@ -351,6 +351,34 @@ String? getSliderLabel(SliderNode node, double value) {
   return node.properties.label.replaceAll('\${value}', valueString);
 }
 
+/// [base] showing the Material icon named [name] instead, for an icon bound
+/// to data. [name] is a Flutter `Icons` name such as `kitchen` or
+/// `kitchen_outlined`: an `_outlined`, `_rounded` or `_sharp` suffix picks
+/// the style. The icon is drawn from its SVG by name, so no codepoint is
+/// needed. Returns [base] for an empty or malformed name.
+MultiSourceIconModel iconWithName(MultiSourceIconModel base, String? name) {
+  final String key = (name ?? '').trim().toLowerCase();
+  if (!RegExp(r'^[a-z0-9_]+$').hasMatch(key)) return base;
+  MaterialIconStyle style = MaterialIconStyle.filled;
+  String iconName = key;
+  for (final (String suffix, MaterialIconStyle suffixStyle) in const [
+    ('_outlined', MaterialIconStyle.outlined),
+    ('_rounded', MaterialIconStyle.rounded),
+    ('_sharp', MaterialIconStyle.sharp),
+  ]) {
+    if (key.endsWith(suffix)) {
+      style = suffixStyle;
+      iconName = key.substring(0, key.length - suffix.length);
+      break;
+    }
+  }
+  return base.copyWith(
+    type: IconTypeEnum.icon,
+    icon: MaterialIcon(codepoint: 0, name: iconName, style: style),
+    forceIcon: true,
+  );
+}
+
 Widget? retrieveIconWidget(
   MultiSourceIconModel icon, [
   double? size,
