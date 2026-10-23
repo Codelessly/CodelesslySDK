@@ -1,5 +1,30 @@
 ## Unreleased
 
+- A text's color can be bound with a `textColor` variable or formula.
+- Formulas: `range`, `interpolate`, `runs`, `minBy`, `maxBy`, `obj`,
+  `slice`, `substring`, `replace`, `split`, `wallTime`, and `now(offset)` /
+  `today(offset)` at a UTC offset. `FormulaClock.pinned` lets a host pin the
+  clock they read (previews, reproducible screenshots).
+- API calls: the response (or the error) is the chain's `${result}`; query
+  parameters are sent; `onSuccess`/`onError` actions run, and with
+  `onError` a failure no longer stops the chain; the handlers still run when
+  the widget that made the call has unmounted (a dialog closed mid-load).
+  `Codelessly(client:)` takes an HTTP client.
+- Load-time API calls run in order with the canvas's other load actions.
+- A row aligned to text baselines gets a text baseline (it asserted).
+- Any node can bind `semanticLabel` and `semanticSelected` for screen
+  readers. A labelled button reads only its label and keeps its tap; a
+  labelled field or dropdown keeps its own semantics.
+- A pop with a destination goes there when there is nothing to pop.
+- Image fills honour `PaintModel.saturation` (greyscale at 0).
+- Links: a `CodelesslyRoute` path is matched against the screens' URL paths
+  (`CanvasProperties.path`, e.g. `guide/:id`) before it is read as a screen
+  id, and `Codelessly.pathOf` gives the address for a route
+  (`CanvasLocation` does the matching).
+- A line chart's axis title and readout units can be bound.
+- An expanded dropdown no longer cuts its value at its design width.
+- A toast's semantics are stable from its first frame, so its button can be
+  tapped on the web.
 - Toasts, the built-in confirm dialog and dropdown menus take the new
   `ShowToastAction`, `ConfirmAction` and `DropdownProperties.menuStyle`
   styling: toast action color, close button, radius, border, hard shadows,
