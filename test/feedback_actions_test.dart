@@ -512,4 +512,76 @@ void main() {
       await tester.pumpAndSettle();
     });
   });
+
+  group('navigation', () {
+    testWidgets('a chain in a dialog that pops it and replaces the page '
+        'still shows its toast and runs on the new page', (tester) async {
+      final ButtonNode save = button(
+        'save',
+        'dialogBody',
+        'Save',
+        NavigationAction(navigationType: NavigationType.pop, destinationId: ''),
+      );
+      save.reactions.addAll([
+        Reaction(
+          action: NavigationAction(
+            navigationType: NavigationType.replace,
+            destinationId: 'other',
+          ),
+          trigger: TriggerModel(type: TriggerType.click),
+        ),
+        Reaction(
+          action: ShowToastAction(message: 'Session saved', duration: 1500),
+          trigger: TriggerModel(type: TriggerType.click),
+        ),
+        Reaction(
+          action: DelayAction(milliseconds: 2000),
+          trigger: TriggerModel(type: TriggerType.click),
+        ),
+        Reaction(
+          action: ShowToastAction(message: 'Still here'),
+          trigger: TriggerModel(type: TriggerType.click),
+        ),
+      ]);
+      await pumpLayouts(tester, [
+        layoutOf(
+          'main',
+          mainScreen(ShowDialogAction(destinationId: 'dialogCanvas')),
+        ),
+        layoutOf('dialog', [
+          canvas('dialogCanvas', 'dialogBody', fill: ColorRGBA.white),
+          body('dialogBody', 'dialogCanvas', ['save']),
+          save,
+        ]),
+        layoutOf('other', [
+          canvas('other', 'otherBody', fill: ColorRGBA.white),
+          body('otherBody', 'other', ['otherTitle']),
+          text('otherTitle', 'otherBody', 'Settings', brandRegular),
+        ]),
+      ]);
+
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
+      expect(find.text('Save'), findsOneWidget);
+
+      await tester.tap(find.text('Save'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Session saved'), findsOneWidget);
+      await tester.pumpAndSettle();
+      // The page was replaced: the dialog and the main screen are gone.
+      expect(find.text('Save'), findsNothing);
+      expect(find.text('Go'), findsNothing);
+      expect(find.text('Settings'), findsOneWidget);
+
+      // The rest of the chain runs on the new page after the old one has
+      // unmounted.
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Still here'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+  });
 }
