@@ -112,6 +112,14 @@ class Codelessly {
     PublishSource.template => templateDataManager,
   };
 
+  /// [dataManager], or null before it's set up.
+  DataManager? get _maybeDataManager => switch (config?.publishSource) {
+    PublishSource.publish => _publishDataManager,
+    PublishSource.preview => _previewDataManager,
+    PublishSource.template => _templateDataManager,
+    null => null,
+  };
+
   /// Returns the local instance of the Firebase SDK that this instance of the
   /// Codelessly SDK is using.
   FirebaseApp get firebaseApp => _firebaseApp!;
@@ -260,7 +268,25 @@ class Codelessly {
 
   /// A screen to open once the app's first screen shows, e.g. the one a
   /// reloaded URL names. Set it before the first screen loads.
-  CodelesslyRoute? pendingRoute;
+  CodelesslyRoute? get pendingRoute => _pendingRoute;
+
+  set pendingRoute(CodelesslyRoute? value) {
+    _pendingRoute = value;
+    _link = value;
+  }
+
+  CodelesslyRoute? _pendingRoute;
+
+  /// The route the app was opened with, kept after [pendingRoute] is used.
+  CodelesslyRoute? _link;
+
+  /// The parameters the app's link gives the screen of layout [layoutId]
+  /// when the link names a screen of that layout: the first screen shows in
+  /// the host's own route, which carries no parameters, so a link to it
+  /// would otherwise lose them. Null when the link names another screen.
+  Map<String, String>? linkParamsFor(String? layoutId) {
+    return _maybeDataManager?.publishModel?.linkParamsFor(_link, layoutId);
+  }
 
   final Map<String, BreakpointsListener> _breakpointsListeners = {};
 
@@ -902,9 +928,9 @@ class Codelessly {
   /// Opens [pendingRoute] over the first screen shown, unless it is that
   /// screen.
   void _openPendingRoute(BuildContext context, String canvasId) {
-    final CodelesslyRoute? pending = pendingRoute;
+    final CodelesslyRoute? pending = _pendingRoute;
     if (pending == null) return;
-    pendingRoute = null;
+    _pendingRoute = null;
     if (pending.canvasId == canvasId) return;
     unawaited(
       FunctionsRepository.navigate(
