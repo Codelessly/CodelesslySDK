@@ -164,6 +164,16 @@ class FormulaEvaluator {
       r'money(price) → $1,234.50',
     ),
     FormulaFunctionDoc(
+      'thousands',
+      'thousands(value, decimals)',
+      'thousands(17402) → 17,402',
+    ),
+    FormulaFunctionDoc(
+      'duration',
+      'duration(minutes)',
+      "duration(134) → '2h 14m', duration(6) → '6m'",
+    ),
+    FormulaFunctionDoc(
       'fixed',
       'fixed(value, decimals)',
       'fixed(4.5, 2) → 4.50',
@@ -283,6 +293,12 @@ class FormulaEvaluator {
       "get(lineNames, item.line) → 'Weld'",
     ),
     FormulaFunctionDoc('take', 'take(list, count)', 'take(pareto, index + 1)'),
+    FormulaFunctionDoc(
+      'concat',
+      'concat(list, list, ...)',
+      'concat(alerts, ruleAlerts) → one list',
+    ),
+    FormulaFunctionDoc('range', 'range(count)', 'range(3) → [0, 1, 2]'),
     FormulaFunctionDoc('skip', 'skip(list, count)', 'skip(events, 25)'),
     FormulaFunctionDoc(
       'indexOf',
@@ -480,6 +496,18 @@ String _money(Object? value, Object? symbol) {
       .substring(0, dot)
       .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
   return '$sign${symbol ?? r'$'}$whole${text.substring(dot)}';
+}
+
+/// [value] with [digits] decimals (none by default) and commas between
+/// thousands: 17402 → "17,402".
+String _thousands(Object? value, Object? digits) {
+  final num amount = _num(value);
+  if (amount.isNaN) return '';
+  final String text = amount.abs().toStringAsFixed(_num(digits ?? 0).toInt());
+  final int dot = text.indexOf('.');
+  final String whole = (dot < 0 ? text : text.substring(0, dot))
+      .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
+  return '${amount < 0 ? '-' : ''}$whole${dot < 0 ? '' : text.substring(dot)}';
 }
 
 num _round(Object? value, Object? digits) {
@@ -816,6 +844,12 @@ Object? _arg(List<Object?> args, int index) =>
 
 final Map<String, _Function> _functions = {
   'money': (a) => _money(_arg(a, 0), _arg(a, 1)),
+  'thousands': (a) => _thousands(_arg(a, 0), _arg(a, 1)),
+  'duration': (a) {
+    final int minutes = _num(_arg(a, 0)).round();
+    if (minutes < 60) return '${minutes}m';
+    return '${minutes ~/ 60}h ${(minutes % 60).toString().padLeft(2, '0')}m';
+  },
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
   'round': (a) => _round(_arg(a, 0), _arg(a, 1)),
   'floor': (a) => _num(_arg(a, 0)).floor(),
@@ -890,6 +924,8 @@ final Map<String, _Function> _functions = {
       FormulaEvaluator.stringify(a[i]): a[i + 1],
   },
   'get': (a) => _member(_arg(a, 0), _arg(a, 1)),
+  'concat': (a) => [for (final list in a) ..._values(list, null)],
+  'range': (a) => [for (int i = 0; i < _intArg(_arg(a, 0)); i++) i],
   'take': (a) =>
       _values(_arg(a, 0), null).take(math.max(0, _intArg(_arg(a, 1)))).toList(),
   'skip': (a) =>
