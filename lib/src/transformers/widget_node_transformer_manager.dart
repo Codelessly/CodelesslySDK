@@ -169,7 +169,8 @@ abstract class WidgetNodeTransformerManager
   /// node name, or its icon's name when the node still has a default name.
   /// A bound `semanticLabel` (`"variables": {"semanticLabel": "..."}`, a
   /// value or formula) replaces both, e.g. "Open Harbor View Lofts" for a
-  /// card whose text is its name, address and progress.
+  /// card whose text is its name, address and progress. With
+  /// `semanticChildren` bound true the content stays readable inside it.
   Widget wrapWithSemantics(
     BaseNode node,
     Widget widget, {
@@ -205,11 +206,21 @@ abstract class WidgetNodeTransformerManager
     // [hasTappableDescendant]) so the inner ones keep their own nodes.
     if (descendants.any(_isTappable)) return widget;
 
-    // The content's own text was left out by [_wrapWithTapReactions].
     final String? custom = context == null
         ? null
         : customSemanticLabel(context, node);
     if (custom != null) {
+      // The button's own node, named [custom]. Its content stays readable
+      // inside it when `semanticChildren` is bound true (a card or row);
+      // otherwise [_wrapWithTapReactions] left the content out.
+      if (keepsSemanticChildren(context!, node)) {
+        return Semantics(
+          container: true,
+          button: true,
+          label: custom,
+          child: widget,
+        );
+      }
       return MergeSemantics(
         child: Semantics(button: true, label: custom, child: widget),
       );
@@ -236,6 +247,17 @@ abstract class WidgetNodeTransformerManager
     )?.trim();
     return label == null || label.isEmpty ? null : label;
   }
+
+  /// Whether [node]'s content stays in the semantics tree under its
+  /// [customSemanticLabel] (bound `semanticChildren`).
+  static bool keepsSemanticChildren(BuildContext context, BaseNode node) =>
+      node.variables['semanticChildren'] != null &&
+      PropertyValueDelegate.getPropertyValue<bool>(
+            node,
+            'semanticChildren',
+            scopedValues: ScopedValues.of(context),
+          ) ==
+          true;
 
   static bool _isTappable(BaseNode node) =>
       node is ReactionMixin &&
@@ -356,7 +378,8 @@ abstract class WidgetNodeTransformerManager
       return widget;
     }
     // A custom label replaces what the content reads as; the tap stays.
-    if (customSemanticLabel(context, node) != null) {
+    if (customSemanticLabel(context, node) != null &&
+        !keepsSemanticChildren(context, node)) {
       widget = ExcludeSemantics(child: widget);
     }
     final InkWellModel? inkWell = node is BlendMixin ? node.inkWell : null;

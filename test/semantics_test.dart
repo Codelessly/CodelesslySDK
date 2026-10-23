@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -143,6 +144,68 @@ void main() {
       ),
     );
     expect(find.bySemanticsLabel(RegExp('1420 Harbor')), findsNothing);
+    handle.dispose();
+  });
+
+  testWidgets('semanticChildren keeps the card text under its label', (
+    tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final FrameNode card = FrameNode.fromJson({
+      ...FrameNode(
+        id: 'card',
+        name: 'Card',
+        basicBoxLocal: NodeBox(0, 0, 300, 60),
+        children: ['name'],
+      ).toJson(),
+      'reactions': [
+        Reaction(
+          action: LinkAction(url: ''),
+          trigger: TriggerModel(type: TriggerType.click),
+        ).toJson(),
+      ],
+      'variables': {
+        'semanticLabel': "\${= 'Open ' + 'Harbor View Lofts'}",
+        'semanticChildren': '\${= true}',
+      },
+    })..parentID = kRootNode;
+    final TextNode name = TextNode(
+      id: 'name',
+      name: 'name',
+      basicBoxLocal: NodeBox(0, 0, 200, 24),
+      characters: 'Harbor View Lofts 1420 Harbor Blvd',
+      textMixedProps: [StartEndProp(start: 0, end: 34, fontSize: 16)],
+    )..parentID = 'card';
+    final registry = NodeRegistry()..setNodes({'card': card, 'name': name});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: CodelesslyContext.empty(),
+        child: MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Builder(
+              builder: (context) => manager.buildWidgetFromNode(
+                card,
+                context,
+                settings: const WidgetBuildSettings(debugLabel: 'test'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode button = tester.getSemantics(
+      find.bySemanticsLabel(RegExp('^Open Harbor View Lofts')),
+    );
+    final SemanticsData data = button.getSemanticsData();
+    expect(data.flagsCollection.isButton, isTrue);
+    expect(data.hasAction(SemanticsAction.tap), isTrue);
+    expect(find.bySemanticsLabel(RegExp('1420 Harbor')), findsOneWidget);
     handle.dispose();
   });
 
