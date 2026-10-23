@@ -227,6 +227,21 @@ void main() {
     expect(builtRectangles(nodes), idsOf(ScreenBreakpoint.mobile, 2));
   });
 
+  testWidgets('a canvas in a dialog picks by the screen width', (tester) async {
+    // A 520 wide dialog canvas on a desktop screen shows its desktop layout.
+    final nodes = responsivePage(canvasWidth: 520);
+    await pumpPage(
+      tester,
+      nodes,
+      screen: const Size(1440, 900),
+      wrap: (child) => Center(
+        child: CanvasSizingScope(sizing: CanvasSizing.design, child: child),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(builtRectangles(nodes), idsOf(ScreenBreakpoint.desktop, 4));
+  });
+
   testWidgets('an autoScale canvas picks by its design width', (tester) async {
     final nodes = responsivePage(
       canvasWidth: 1440,
