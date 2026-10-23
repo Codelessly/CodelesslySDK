@@ -27,7 +27,28 @@ class CodelesslyDialogWidget extends StatelessWidget {
     );
   }
 
+  /// Space a dialog keeps from the screen's edges, as Flutter's [Dialog]
+  /// does: a tall dialog stops short of the top and bottom.
+  static const double inset = 24;
+
   Widget _buildDialog(BuildContext context) {
+    final Size screen = MediaQuery.sizeOf(context);
+    final Widget dialog = _buildContent(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(inset),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: (screen.width - inset * 2).clamp(0, double.infinity),
+            maxHeight: (screen.height - inset * 2).clamp(0, double.infinity),
+          ),
+          child: dialog,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     if (showCloseButton) {
       return Center(
         child: Material(
@@ -53,7 +74,7 @@ class CodelesslyDialogWidget extends StatelessWidget {
       );
     }
 
-    return Center(child: builder(context));
+    return builder(context);
   }
 }
 
