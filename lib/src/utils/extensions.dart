@@ -491,6 +491,16 @@ extension CMainAxisAlignmentHelper on MainAxisAlignmentC {
         return flutter.MainAxisAlignment.spaceEvenly;
     }
   }
+
+  /// The [flutter.WrapAlignment] of the same name.
+  flutter.WrapAlignment get flutterWrapAlignment => switch (this) {
+    MainAxisAlignmentC.start => flutter.WrapAlignment.start,
+    MainAxisAlignmentC.end => flutter.WrapAlignment.end,
+    MainAxisAlignmentC.center => flutter.WrapAlignment.center,
+    MainAxisAlignmentC.spaceBetween => flutter.WrapAlignment.spaceBetween,
+    MainAxisAlignmentC.spaceAround => flutter.WrapAlignment.spaceAround,
+    MainAxisAlignmentC.spaceEvenly => flutter.WrapAlignment.spaceEvenly,
+  };
 }
 
 extension CCrossAxisAlignmentHelper on CrossAxisAlignmentC {
