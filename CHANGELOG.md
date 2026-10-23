@@ -1,6 +1,39 @@
 ## Unreleased
 
-### RigCheck gaps
+Needs the unreleased `codelessly_api` that adds these fields.
+
+### Formulas
+
+- Record helpers: `findIndex`, `indexOf`, `obj`, `set`, `merge`,
+  `concat`, `append`, `take`, `skip`, `group` (412908 → 412,908) and `pad`,
+  so a set variable action can change one item of a list:
+  `set(defects, findIndex(defects, d => d.id == id), merge(d, obj(...)))`.
+- `isEmpty` treats null as empty, so a text variable holding "" is empty.
+- The `isEmpty` and `isNotEmpty` accessors of list variables work (they
+  read the list as a map and gave null).
+
+### Nodes and actions
+
+- `PassiveSignatureTransformer` draws a `SignatureNode`: strokes in
+  round-cap ink, the sign line and placeholder, the error border when its
+  `error` binding is true. A finished stroke writes all strokes to the
+  bound value and fires `changed`; setting the value to `[]` clears it.
+- Loop animations: nodes with a `loopAnimation` build inside a
+  `LoopAnimationBox` (pulse, fade, scale or spin) that `loopAnimationEnabled`
+  turns on and off without remounting, and that holds still under a
+  disabled `TickerMode` (the editor's design canvas).
+- `cursorEnter`, `cursorExit` and `hover` reactions run, through a
+  translucent `MouseRegion`.
+- `showDialog` presents its canvas per `ShowDialogAction.presentation`
+  (`LayoutPresentationRoute`): a centered dialog that scales and fades in,
+  a bottom sheet sized to its content with a grab handle, or a side sheet.
+  What the canvas passes back on Navigate back becomes the chain's result.
+- An obscured text field that isn't explicitly multi-line keeps one line,
+  so a fixed-height PIN field no longer shows its text.
+- On the design canvas, text inside a list reads the row's own item, like
+  its fill, stroke and visibility bindings already did.
+
+### Forms, layout and feedback
 
 - Text fields: `variables['errorText']` is evaluated (formulas included) and
   an empty result means no error, so the field shows its error border only
@@ -35,8 +68,7 @@
   `gradientExtent`, the length in pixels of one run of the gradient (the
   radius of a radial one), so a short gradient with hard stops paints
   stripes. `GradientExtentTransform` rotates and scales the gradient about
-  the center of its box. Needs the unreleased `codelessly_api` change that
-  adds these fields.
+  the center of its box.
 
 ### Spacers and grids
 
