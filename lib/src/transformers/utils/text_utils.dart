@@ -161,24 +161,23 @@ class TextUtils {
                 replaceVariableWithSymbol: replaceVariablesWithSymbol,
                 hasMissingFont: hasMissingFont,
                 tapGestureRecognizer: tapGestureRecognizers[prop.link],
-                effects:
-                    effects ?? (node is BlendMixin ? node.effects : const []),
+                effects: effects ?? node.effects,
               ),
             ],
           )
         else
           buildTextSpanForProp(
-          context,
-          rawText,
-          node: node,
-          prop: prop,
-          variablesOverrides: variablesOverrides,
-          nullSubstitutionMode: nullSubstitutionMode,
-          replaceVariableWithSymbol: replaceVariablesWithSymbol,
-          hasMissingFont: hasMissingFont,
-          tapGestureRecognizer: tapGestureRecognizers[prop.link],
-          effects: effects ?? (node is BlendMixin ? node.effects : const []),
-        ),
+            context,
+            rawText,
+            node: node,
+            prop: prop,
+            variablesOverrides: variablesOverrides,
+            nullSubstitutionMode: nullSubstitutionMode,
+            replaceVariableWithSymbol: replaceVariablesWithSymbol,
+            hasMissingFont: hasMissingFont,
+            tapGestureRecognizer: tapGestureRecognizers[prop.link],
+            effects: effects ?? (node is BlendMixin ? node.effects : const []),
+          ),
     ];
   }
 

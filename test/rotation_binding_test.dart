@@ -39,13 +39,15 @@ void main() {
     return atan2(m.entry(1, 0), m.entry(0, 0));
   }
 
-  RectangleNode hand({int rotation = 0, Map<String, String> variables = const {}}) =>
-      RectangleNode(
-        id: 'hand',
-        name: 'Hand',
-        basicBoxLocal: NodeBox(0, 0, 2, 40),
-        rotationDegrees: rotation,
-      )..variables = variables;
+  RectangleNode hand({
+    int rotation = 0,
+    Map<String, String> variables = const {},
+  }) => RectangleNode(
+    id: 'hand',
+    name: 'Hand',
+    basicBoxLocal: NodeBox(0, 0, 2, 40),
+    rotationDegrees: rotation,
+  )..variables = variables;
 
   testWidgets('a bound rotation turns the node by the formula', (tester) async {
     final double? angle = await angleOf(
