@@ -17,6 +17,7 @@ const Set<String> predefinedVariableNames = {
   'auth',
   'result',
   'screen',
+  'parent',
 };
 
 /// The key under which a layout's published variables hold the project's
@@ -52,6 +53,7 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'auth', type: VariableType.map),
   PredefinedVariableData(name: 'result'),
   PredefinedVariableData(name: 'screen', type: VariableType.map),
+  PredefinedVariableData(name: 'parent', type: VariableType.map),
 };
 
 /// Widths at which the `screen` variable's breakpoint changes: below 600 is

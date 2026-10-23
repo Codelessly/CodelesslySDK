@@ -1,5 +1,34 @@
 ## Unreleased
 
+### RigCheck gaps
+
+- Text fields: `variables['errorText']` is evaluated (formulas included) and
+  an empty result means no error, so the field shows its error border only
+  while the message is non-empty. `variables['error']` (bool) shows the
+  error borders without a message. `enabled`, `obscureText`, `readOnly`,
+  `showCursor`, `maxLength`, `isCollapsed` and `isDense` follow their
+  bindings too (`resolveTextFieldError`).
+- Formulas: `reverse(list or text)`, `substring(text, start, end)` (negative
+  indexes count from the end), `left(text, n)`, `right(text, n)` and
+  `toMap(list, key, value)`. A lambda can take the item's index as a second
+  parameter: `map(steps, (s, i) => i == length(steps) - 1)`, also in filter,
+  find, count, any, all, findIndex, sortBy, unique, sum, join and toMap.
+- `ConfirmAction.presentation`: the built-in dialog and a `dialogId` canvas
+  show as a dialog, bottom sheet or side sheet, like `showDialog`.
+- Toasts: `accentColor`/`accentWidth` draw a bar down the left edge,
+  `iconColor` colors the icon, `fontFamily` sets the font and
+  `cornerRadius` the corners (default still a pill).
+- A node whose `disabled` binding is true and that has no Disabled
+  interaction state of its own fades to 40 % (it already ignored taps).
+- `RowColumnNode.wrap` lays the children out in a `Wrap` with
+  `wrapSpacing` and `wrapRunSpacing`; children hidden at runtime and spacers
+  take no space.
+- `FrameNode.contentFit` lays the frame's children out at its design size
+  and scales them into the frame (`ScaledContent`, a filling `FittedBox`).
+- The `parent` variable: `${parent.width}` and `${parent.height}` are the
+  size a node's parent gives it (`ParentSizeScope`), for layouts that change
+  with their container's width rather than the screen's.
+
 ### Repeating gradients
 
 - Gradient fills honour `PaintModel.tileMode` (clamp, repeated, mirror) and

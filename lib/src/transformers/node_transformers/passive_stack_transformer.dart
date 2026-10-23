@@ -261,24 +261,37 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     ];
 
     final AxisC? scrollAxis = scrollAxisFor(node);
-    final List<Widget> childrenWidgets = [
-      FreeformLayout(
-        wrapsWidth: node.isHorizontalWrap,
-        wrapsHeight: node.isVerticalWrap,
+    final Fit? contentFit = node is FrameNode ? node.contentFit : null;
+    Widget content = FreeformLayout(
+      // Scaled content is laid out at its design size.
+      wrapsWidth: contentFit == null && node.isHorizontalWrap,
+      wrapsHeight: contentFit == null && node.isVerticalWrap,
+      designSize: node.innerBoxLocal.size.flutterSize,
+      children: [
+        for (final BaseNode childNode in children)
+          buildStackChild(
+            childNode,
+            node,
+            context,
+            manager: manager,
+            scrollAxis: contentFit == null ? scrollAxis : null,
+            settings: settings,
+          ),
+      ],
+    );
+    if (contentFit != null) {
+      content = ScaledContent(
         designSize: node.innerBoxLocal.size.flutterSize,
-        children: [
-          for (final BaseNode childNode in children)
-            buildStackChild(
-              childNode,
-              node,
-              context,
-              manager: manager,
-              scrollAxis: scrollAxis,
-              settings: settings,
-            ),
-        ],
-      ),
-    ];
+        fit: contentFit.boxFit,
+        alignment:
+            (node as FrameNode).contentAlignment.flutterAlignment ??
+            Alignment.center,
+        hugsWidth: node.isHorizontalWrap,
+        hugsHeight: node.isVerticalWrap,
+        child: content,
+      );
+    }
+    final List<Widget> childrenWidgets = [content];
 
     Widget stack = manager
         .getTransformer<PassiveRectangleTransformer>()
@@ -296,4 +309,58 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       return stack;
     }
   }
+}
+
+/// Lays [child] out at [designSize] and scales it by [fit] into the space it
+/// gets, like a [FittedBox] that fills that space: a frame's content with
+/// [FrameNode.contentFit]. On an axis it hugs (or that is unbounded) it
+/// takes the design size.
+class ScaledContent extends StatelessWidget {
+  /// The size [child] is laid out at.
+  final Size designSize;
+
+  /// How [child] is scaled into the space.
+  final BoxFit fit;
+
+  /// Where [child] sits when [fit] leaves space.
+  final AlignmentGeometry alignment;
+
+  /// Whether the width hugs: it is then the design width.
+  final bool hugsWidth;
+
+  /// Whether the height hugs: it is then the design height.
+  final bool hugsHeight;
+
+  /// The content.
+  final Widget child;
+
+  /// Creates a [ScaledContent].
+  const ScaledContent({
+    super.key,
+    required this.designSize,
+    required this.fit,
+    required this.alignment,
+    required this.child,
+    this.hugsWidth = false,
+    this.hugsHeight = false,
+  });
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => SizedBox(
+      width: hugsWidth || !constraints.hasBoundedWidth
+          ? designSize.width
+          : constraints.maxWidth,
+      height: hugsHeight || !constraints.hasBoundedHeight
+          ? designSize.height
+          : constraints.maxHeight,
+      child: ClipRect(
+        child: FittedBox(
+          fit: fit,
+          alignment: alignment,
+          child: SizedBox.fromSize(size: designSize, child: child),
+        ),
+      ),
+    ),
+  );
 }

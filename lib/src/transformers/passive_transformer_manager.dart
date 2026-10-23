@@ -84,6 +84,27 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       );
     }
 
+    // A node that reads `parent` is built with the size its parent gives
+    // it, so its bindings can lay it out by that size.
+    if (readsParentSize(node)) {
+      return LayoutBuilder(
+        key: ValueKey('${node.id}-parent-size'),
+        builder: (context, constraints) => ParentSizeScope.fromConstraints(
+          constraints,
+          child: Builder(
+            builder: (context) => _buildNode(context, node, settings),
+          ),
+        ),
+      );
+    }
+    return _buildNode(context, node, settings);
+  }
+
+  Widget _buildNode(
+    BuildContext context,
+    BaseNode node,
+    WidgetBuildSettings settings,
+  ) {
     return _wrapWithListener(
       context,
       node: node,
