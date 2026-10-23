@@ -230,6 +230,10 @@ abstract class WidgetNodeTransformerManager
               reaction.trigger.type == TriggerType.click &&
               reaction.action.enabled,
         );
+    final bool interactive =
+        tappable ||
+        (node is CustomPropertiesMixin &&
+            node.handlesDefaultReactionsInternally);
     return Builder(
       builder: (context) {
         final ScopedValues scopedValues = ScopedValues.of(context);
@@ -251,13 +255,13 @@ abstract class WidgetNodeTransformerManager
           button: tappable ? true : null,
           selected: isSelected,
           label: text,
-          // A label replaces the children's text, except on a tappable node:
-          // its tap action lives on a child, so the children merge in after
-          // the label.
-          excludeSemantics: text != null && !tappable,
+          // A label replaces the children's text, except on a tappable node
+          // or a widget (a field, a dropdown): its actions and state live on
+          // a child, so the children merge in after the label.
+          excludeSemantics: text != null && !interactive,
           child: widget,
         );
-        return tappable ? MergeSemantics(child: child) : child;
+        return interactive ? MergeSemantics(child: child) : child;
       },
     );
   }

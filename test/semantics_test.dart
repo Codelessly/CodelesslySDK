@@ -26,13 +26,15 @@ Future<void> pumpNode(WidgetTester tester, BaseNode node) async {
     ChangeNotifierProvider<CodelesslyContext>.value(
       value: CodelesslyContext.empty(),
       child: MaterialApp(
-        home: Align(
-          alignment: Alignment.topLeft,
-          child: Builder(
-            builder: (context) => manager.buildWidgetFromNode(
-              node,
-              context,
-              settings: const WidgetBuildSettings(debugLabel: 'test'),
+        home: Material(
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Builder(
+              builder: (context) => manager.buildWidgetFromNode(
+                node,
+                context,
+                settings: const WidgetBuildSettings(debugLabel: 'test'),
+              ),
             ),
           ),
         ),
@@ -164,5 +166,23 @@ void main() {
       ),
       'Add to bag',
     );
+  });
+
+  testWidgets('a semanticLabel on a field keeps the field', (tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final node = TextFieldNode(
+      id: 'search',
+      name: 'Search',
+      basicBoxLocal: NodeBox(0, 0, 300, 48),
+      properties: TextFieldProperties(),
+    )..parentID = kRootNode;
+    node.variables['semanticLabel'] = 'Search creatures';
+    await pumpNode(tester, node);
+    expect(tester.takeException(), isNull);
+    final data = tester
+        .getSemantics(find.bySemanticsLabel(RegExp('^Search creatures')))
+        .getSemanticsData();
+    expect(data.flagsCollection.isTextField, isTrue);
+    handle.dispose();
   });
 }
