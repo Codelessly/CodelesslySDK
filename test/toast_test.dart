@@ -224,4 +224,55 @@ void main() {
       await tester.pumpAndSettle();
     });
   });
+
+  testWidgets('a toast button can be tapped from the first frame', (
+    tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    late BuildContext context;
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: CodelesslyContext.empty(),
+        child: MaterialApp(
+          home: Builder(
+            builder: (c) {
+              context = c;
+              return const SizedBox();
+            },
+          ),
+        ),
+      ),
+    );
+    FunctionsRepository.triggerAction(
+      context,
+      TriggerType.click,
+      reactions: [
+        Reaction(
+          action: ShowToastAction(
+            message: 'Sighting deleted',
+            actionLabel: 'Undo',
+            actions: [ShowToastAction(message: 'Restored')],
+          ),
+          trigger: TriggerModel(type: TriggerType.click),
+        ),
+      ],
+    );
+    // Its semantics don't change once it shows (the web engine keeps a new
+    // node's stacking only while its siblings stay the same).
+    await tester.pump();
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('Undo')),
+      matchesSemantics(
+        label: 'Undo',
+        isButton: true,
+        hasTapAction: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        isFocusable: true,
+        hasFocusAction: true,
+      ),
+    );
+    await tester.pumpAndSettle(const Duration(seconds: 6));
+    handle.dispose();
+  });
 }
