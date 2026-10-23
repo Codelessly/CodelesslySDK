@@ -38,7 +38,7 @@ Future<List<String>> pumpCanvas(
         home: ActionChainHost(
           child: PassiveCanvasWidget(
             node: canvas(reactions),
-            settings: WidgetBuildSettings(debugLabel: 'test'),
+            settings: const WidgetBuildSettings(debugLabel: 'test'),
             builder: (_) => const SizedBox.expand(),
           ),
         ),

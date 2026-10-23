@@ -58,11 +58,17 @@ class PassiveSliderWidget extends StatelessWidget {
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
 
+  /// The values the slider's bound `value`, `min` and `max` read, such as a
+  /// design canvas's variable defaults. When null they come from [context]
+  /// with [variablesOverrides].
+  final ScopedValues? scopedValues;
+
   const PassiveSliderWidget({
     super.key,
     required this.node,
     required this.settings,
     this.variablesOverrides = const [],
+    this.scopedValues,
   });
 
   void onChanged(BuildContext context, double internalValue) {
@@ -85,10 +91,9 @@ class PassiveSliderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = ScopedValues.of(
-      context,
-      variablesOverrides: variablesOverrides,
-    );
+    final ScopedValues scopedValues =
+        this.scopedValues ??
+        ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final double value =
         PropertyValueDelegate.getPropertyValue<double>(
           node,
@@ -204,13 +209,33 @@ class TransformerSlider extends StatelessWidget {
           inactiveTrackColor: node.properties.inactiveTrackColor
               .toFlutterColor(),
           thumbColor: node.properties.thumbColor.toFlutterColor(),
-          thumbShape: StrokedSliderThumbShape(
-            enabledThumbRadius: node.properties.showThumb
-                ? node.properties.thumbRadius
-                : 0,
-            strokeColor: node.properties.thumbStrokeColor?.toFlutterColor(),
-            strokeWidth: node.properties.thumbStrokeWidth,
-          ),
+          thumbShape: switch (node.properties.thumbShape) {
+            SliderThumbShapeEnum.circle => StrokedSliderThumbShape(
+              enabledThumbRadius: node.properties.showThumb
+                  ? node.properties.thumbRadius
+                  : 0,
+              strokeColor: node.properties.thumbStrokeColor?.toFlutterColor(),
+              strokeWidth: node.properties.thumbStrokeWidth,
+            ),
+            // The slider lays out horizontally and a vertical one is turned
+            // a quarter turn, so its thumb's width and height swap.
+            SliderThumbShapeEnum.roundedRect => RoundedRectSliderThumbShape(
+              size: !node.properties.showThumb
+                  ? Size.zero
+                  : vertical
+                  ? Size(
+                      node.properties.thumbHeight,
+                      node.properties.thumbWidth,
+                    )
+                  : Size(
+                      node.properties.thumbWidth,
+                      node.properties.thumbHeight,
+                    ),
+              cornerRadius: node.properties.thumbCornerRadius,
+              strokeColor: node.properties.thumbStrokeColor?.toFlutterColor(),
+              strokeWidth: node.properties.thumbStrokeWidth,
+            ),
+          },
           trackShape: trackShape,
           // GappedSliderTrackShape requires a gap; 6 is the Material 3
           // (2024) default.
@@ -337,6 +362,92 @@ class StrokedSliderThumbShape extends RoundSliderThumbShape {
         ..style = PaintingStyle.stroke
         ..strokeWidth = width
         ..color = color,
+    );
+  }
+}
+
+/// A rounded rectangle slider thumb, like a fader cap, with an optional
+/// stroke drawn inside its edge. [size] is in the slider's own (horizontal)
+/// layout: its width runs along the track.
+class RoundedRectSliderThumbShape extends SliderComponentShape {
+  /// Creates a [RoundedRectSliderThumbShape].
+  const RoundedRectSliderThumbShape({
+    required this.size,
+    this.cornerRadius = 0,
+    this.strokeColor,
+    this.strokeWidth = 0,
+    this.elevation = 1,
+    this.pressedElevation = 6,
+  });
+
+  /// Size of the thumb; along the track, then across it.
+  final Size size;
+
+  /// Radius of the thumb's corners, at most half its shorter side.
+  final double cornerRadius;
+
+  /// Color of the stroke; no stroke when null.
+  final Color? strokeColor;
+
+  /// Width of the stroke; no stroke when 0.
+  final double strokeWidth;
+
+  /// Shadow elevation of the thumb at rest.
+  final double elevation;
+
+  /// Shadow elevation of the thumb while it is dragged.
+  final double pressedElevation;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => size;
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    if (size.isEmpty) return;
+    final Canvas canvas = context.canvas;
+    final Color color = ColorTween(
+      begin: sliderTheme.disabledThumbColor,
+      end: sliderTheme.thumbColor,
+    ).evaluate(enableAnimation)!;
+    final double radius = math.max(
+      0,
+      math.min(cornerRadius, size.shortestSide / 2),
+    );
+    final RRect rect = RRect.fromRectAndRadius(
+      Rect.fromCenter(center: center, width: size.width, height: size.height),
+      Radius.circular(radius),
+    );
+    final double shadow = Tween<double>(
+      begin: elevation,
+      end: pressedElevation,
+    ).evaluate(activationAnimation);
+    if (shadow > 0 && !debugDisableShadows) {
+      canvas.drawShadow(Path()..addRRect(rect), Colors.black, shadow, true);
+    }
+    canvas.drawRRect(rect, Paint()..color = color);
+
+    final Color? stroke = strokeColor;
+    if (stroke == null || strokeWidth <= 0) return;
+    final double width = math.min(strokeWidth, size.shortestSide / 2);
+    canvas.drawRRect(
+      rect.deflate(width / 2),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = width
+        ..color = stroke,
     );
   }
 }

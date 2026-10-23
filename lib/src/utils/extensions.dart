@@ -1890,11 +1890,18 @@ extension ActionModelExt on ActionModel {
     return _namesIn(strings, includePredefined);
   }
 
+  /// The variables [strings] read: their `${path}`s and the paths their
+  /// formulas read, such as `records` in
+  /// `${= map(records, r => merge(r, {plays: r.plays + 1}))}`.
   static Set<String> _namesIn(List<String> strings, bool includePredefined) {
     return strings
-        .map((text) => VariableMatch.parseAll(text))
-        .expand((matches) => matches)
-        .map((match) => match.name)
+        .expand(
+          (text) => [
+            for (final match in VariableMatch.parseAll(text)) match.name,
+            for (final path in FormulaEvaluator.referencedPathsInText(text))
+              path.split(RegExp(r'[.\[]')).first,
+          ],
+        )
         .where(
           (name) =>
               includePredefined || !predefinedVariableNames.contains(name),
@@ -2140,7 +2147,14 @@ extension BaseNodeExt on BaseNode {
   /// Collects all the variable names used in this node.
   Set<String> getUsedVariableNames({bool includePredefined = false}) {
     final Set<String> usedVariables = {};
-    for (final path in variables.values) {
+    // A property bound to a formula reads the paths in it.
+    final Iterable<String> boundPaths = variables.values.expand(
+      (path) => switch (FormulaEvaluator.exactExpression(path)) {
+        final String expression => FormulaEvaluator.referencedPaths(expression),
+        null => [path],
+      },
+    );
+    for (final path in boundPaths) {
       final match = VariableMatch.parse(path.wrapWithVariableSyntax());
       if (match == null) continue;
 
