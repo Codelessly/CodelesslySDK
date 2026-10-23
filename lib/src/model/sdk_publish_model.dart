@@ -4,6 +4,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
+import '../ui/codelessly_route.dart';
 import 'model_http_request.dart';
 import 'privacy_base.dart';
 
@@ -878,5 +879,12 @@ extension SDKPublishModelLayouts on SDKPublishModel {
       if (layout.canvasIds.contains(id)) return layout.id;
     }
     return null;
+  }
+
+  /// The parameters [link] gives a screen of layout [layoutId]: its own when
+  /// it names a screen of that layout, else null.
+  Map<String, String>? linkParamsFor(CodelesslyRoute? link, String? layoutId) {
+    if (link == null || layoutId == null || link.params.isEmpty) return null;
+    return resolveLayoutId(link.canvasId) == layoutId ? link.params : null;
   }
 }
