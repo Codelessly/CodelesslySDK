@@ -88,8 +88,17 @@ class StrokePainter extends CustomPainter {
 
     // If the stroke is dotted, we take a completely different rendering
     // route.
+    // A pattern that never advances would loop forever, and draws nothing.
+    if (dashPattern.isNotEmpty &&
+        dashPattern.fold<double>(0, (sum, dash) => sum + max(0, dash)) <= 0) {
+      return;
+    }
     if (dashPattern.isNotEmpty && strokeSide != StrokeSide.all) {
       _paintDashedSide(canvas, size, paint);
+    } else if (dashPattern.isNotEmpty &&
+        strokeCap != StrokeCapEnum.none &&
+        strokeWidth > 0) {
+      _paintCappedDashes(canvas, size, paint, isLine, isHorizLine, isVertLine);
     } else if (dashPattern.isNotEmpty) {
       final Path path = Path();
 
@@ -136,7 +145,9 @@ class StrokePainter extends CustomPainter {
         while (totalDistance < metric.length) {
           final double dashDistance = dashArray.nextValue();
 
-          if (draw) {
+          // A butt-capped dash of no length covers nothing (a stroke width of
+          // zero would paint a hairline instead).
+          if (draw && dashDistance > 0) {
             // Now that we're about to draw a singular dash, we need to do it
             // manually. We do this with tangent calculations. Luckily for us,
             // Flutter has a convenient method for that!
@@ -239,6 +250,21 @@ class StrokePainter extends CustomPainter {
     };
     final double length = (end - start).distance;
     if (length <= 0 || dashPattern.every((dash) => dash <= 0)) return;
+    if (strokeCap != StrokeCapEnum.none && strokeWidth > 0) {
+      // Round and square caps extend every dash by half the stroke width,
+      // so even a dash of zero length draws a dot.
+      paint
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth;
+      _paintDashesAlong(
+        canvas,
+        Path()
+          ..moveTo(start.dx, start.dy)
+          ..lineTo(end.dx, end.dy),
+        paint,
+      );
+      return;
+    }
     final LoopingList<double> dashes = LoopingList(dashPattern);
     final Offset direction = (end - start) / length;
     paint
@@ -259,6 +285,123 @@ class StrokePainter extends CustomPainter {
       distance += dash;
       draw = !draw;
     }
+  }
+
+  /// Paints a dashed stroke on every side whose dashes have round or square
+  /// caps, as SVG and Figma draw them: each dash runs along the stroke's
+  /// center line and its caps extend it by half the stroke width at both
+  /// ends, so a dash of zero length is a dot as wide as the stroke.
+  ///
+  /// Dashes without caps are painted as "needles" across the stroke (see
+  /// [paint]) instead; caps on those would stick out of the stroke's band.
+  void _paintCappedDashes(
+    Canvas canvas,
+    Size size,
+    Paint paint,
+    bool isLine,
+    bool isHorizLine,
+    bool isVertLine,
+  ) {
+    final Path path = Path();
+    if (isLine) {
+      path
+        ..moveTo(
+          isHorizLine ? strokeWidth / 2 : 0,
+          isVertLine ? strokeWidth / 2 : 0,
+        )
+        ..lineTo(
+          isHorizLine ? strokeWidth / 2 : size.width,
+          isVertLine ? strokeWidth / 2 : size.height,
+        );
+    } else {
+      // The center line of the stroke: half its width inside the box for an
+      // inside stroke, on the edge for a centered one, and half its width
+      // outside for an outside one.
+      final double grow = switch (strokeAlign) {
+        StrokeAlignC.inside => -strokeWidth / 2,
+        StrokeAlignC.center => 0,
+        StrokeAlignC.outside => strokeWidth / 2,
+      };
+      if (boxShape == BoxShape.circle) {
+        final double diameter = min(size.width, size.height) + grow * 2;
+        if (diameter <= 0) return;
+        path.addOval(
+          Rect.fromCenter(
+            center: Offset(size.width / 2, size.height / 2),
+            width: diameter,
+            height: diameter,
+          ),
+        );
+      } else {
+        final RRect box = borderRadius
+            .toRRect(Rect.fromLTWH(0, 0, size.width, size.height))
+            .inflate(grow);
+        if (box.width <= 0 || box.height <= 0) return;
+        path.addRRect(box);
+      }
+    }
+    paint
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    _paintDashesAlong(canvas, path, paint);
+  }
+
+  /// Paints [dashPattern] along [path] with [paint], whose cap is round or
+  /// square. Dashes shorter than [_dotLength] are painted as dots: the cap
+  /// alone, which a stroke of (almost) no length may not draw.
+  void _paintDashesAlong(Canvas canvas, Path path, Paint paint) {
+    final LoopingList<double> dashes = LoopingList(dashPattern);
+    final Paint dotPaint = Paint()
+      ..color = paint.color
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = paint.isAntiAlias;
+    for (final PathMetric metric in path.computeMetrics()) {
+      double distance = 0;
+      bool draw = true;
+      while (distance < metric.length) {
+        final double dash = max(0.0, dashes.nextValue());
+        if (draw) {
+          final double end = min(distance + dash, metric.length);
+          if (end - distance < _dotLength) {
+            final Tangent? tangent = metric.getTangentForOffset(distance);
+            if (tangent != null) _paintDot(canvas, tangent, dotPaint);
+          } else {
+            canvas.drawPath(metric.extractPath(distance, end), paint);
+          }
+        }
+        distance += dash;
+        draw = !draw;
+      }
+    }
+  }
+
+  /// Dashes shorter than this are painted as a dot of the cap's shape.
+  static const double _dotLength = 0.01;
+
+  /// Paints a dash of no length at [tangent]: a circle as wide as the
+  /// stroke for a round cap, a square turned along the path for a square
+  /// one.
+  void _paintDot(Canvas canvas, Tangent tangent, Paint paint) {
+    final double radius = strokeWidth / 2;
+    if (strokeCap == StrokeCapEnum.round) {
+      canvas.drawCircle(tangent.position, radius, paint);
+      return;
+    }
+    final double length = tangent.vector.distance;
+    final Offset along = length == 0
+        ? Offset(radius, 0)
+        : tangent.vector / length * radius;
+    final Offset across = Offset(-along.dy, along.dx);
+    final Offset center = tangent.position;
+    canvas.drawPath(
+      Path()
+        ..moveTo((center - along - across).dx, (center - along - across).dy)
+        ..lineTo((center + along - across).dx, (center + along - across).dy)
+        ..lineTo((center + along + across).dx, (center + along + across).dy)
+        ..lineTo((center - along + across).dx, (center - along + across).dy)
+        ..close(),
+      paint,
+    );
   }
 
   @override
