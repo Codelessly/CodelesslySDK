@@ -51,9 +51,18 @@ abstract class WidgetNodeTransformerManager
 
   /// Convenience method to handle widget opacity.
   Widget applyWidgetOpacity(BaseNode node, Widget widget) {
-    if (node is! BlendMixin || node.opacity > 0.99) {
-      return widget;
+    if (node is! BlendMixin) return widget;
+    // A node with a transition always has the animated wrapper, so a change
+    // of its opacity (to fully opaque too) tweens instead of jumping.
+    if (node.transition case final NodeTransition transition?) {
+      return AnimatedOpacity(
+        opacity: node.opacity.clamp(0.0, 1.0),
+        duration: transition.duration,
+        curve: transition.curve.flutterCurve,
+        child: widget,
+      );
     }
+    if (node.opacity > 0.99) return widget;
 
     final double opacity = node.opacity < 0.99 ? node.opacity : 1;
     return Opacity(opacity: opacity, child: widget);
