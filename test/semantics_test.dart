@@ -1,7 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -235,13 +234,7 @@ void main() {
         ),
       ),
     );
-    final SemanticsNode semantics = tester.getSemantics(
-      find.bySemanticsLabel('Settings'),
-    );
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(
-      semantics.id,
-      SemanticsAction.tap,
-    );
+    tester.semantics.tap(find.semantics.byLabel('Settings'));
     await tester.pump();
     expect(calls, ['tap']);
     handle.dispose();
