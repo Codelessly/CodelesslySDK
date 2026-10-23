@@ -254,8 +254,7 @@ class Codelessly {
   final Map<String, NavigationListener> _navigationListeners = {};
 
   /// The screen shown and its parameters, for the browser's address: a host
-  /// listens and writes [CodelesslyRoute.toPath] to the URL. Dialogs don't
-  /// change it.
+  /// listens and writes [pathOf] it to the URL. Dialogs don't change it.
   final ValueNotifier<CodelesslyRoute?> route = ValueNotifier(null);
 
   /// A screen to open once the app's first screen shows, e.g. the one a
@@ -902,19 +901,44 @@ class Codelessly {
     }
   }
 
+  /// The link for [route]: the screen's URL path with its parameters filled
+  /// in when it has one (`guide/bat-star` for a screen at `guide/:id`; the
+  /// app's first screen without a path is the empty path), else
+  /// [CodelesslyRoute.toPath].
+  String pathOf(CodelesslyRoute route) {
+    final SDKPublishModel? model = dataManager.publishModel;
+    return (model == null
+            ? null
+            : CanvasLocation.locationOf(model, route.canvasId, route.params)) ??
+        route.toPath();
+  }
+
   /// Opens [pendingRoute] over the first screen shown, unless it is that
-  /// screen.
+  /// screen. A link's path is matched against the screens' URL paths first,
+  /// then read as a screen id.
   void _openPendingRoute(BuildContext context, String canvasId) {
     final CodelesslyRoute? pending = pendingRoute;
     if (pending == null) return;
     pendingRoute = null;
-    if (pending.canvasId == canvasId) return;
+    final SDKPublishModel? model = dataManager.publishModel;
+    final String? path = pending.path;
+    final CanvasLocationMatch? match = model == null || path == null
+        ? null
+        : CanvasLocation.match(
+            model,
+            Uri(
+              path: path,
+              queryParameters: pending.params.isEmpty ? null : pending.params,
+            ).toString(),
+          );
+    final String destination = match?.canvasId ?? pending.canvasId;
+    if (destination == canvasId) return;
     unawaited(
       FunctionsRepository.navigate(
         context,
         NavigationAction(
-          destinationId: pending.canvasId,
-          params: pending.params,
+          destinationId: destination,
+          params: match?.params ?? pending.params,
         ),
         codelessly: this,
       ),
