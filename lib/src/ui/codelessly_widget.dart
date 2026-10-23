@@ -541,7 +541,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
           final SDKPublishModel model = snapshot.data!;
           effectiveLayoutID =
-              _effectiveController.layoutID ??
+              model.resolveLayoutId(_effectiveController.layoutID) ??
               CodelesslyWidget.layoutIdForScreen(model, widget.initialScreen) ??
               model.entryLayoutId;
 

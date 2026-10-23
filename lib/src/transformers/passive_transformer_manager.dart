@@ -178,10 +178,11 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// Returns [node] with the style properties that conditions, bound
   /// variables or formulas, or set value actions give it at runtime: `fill`
-  /// (a text's color for text nodes), `stroke`, `opacity`, `width` and
-  /// `height`, and the properties of [StyleBindings] (effects, stroke
-  /// weight, corner radius, font weight, icon). Returns [node] itself when
-  /// nothing changes it.
+  /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
+  /// `height`, `flex` (its share of an expanded row or column, so bars
+  /// can be sized proportionally), `rotation` (in degrees), and the
+  /// properties of [StyleBindings] (effects, stroke weight, corner radius,
+  /// font weight, icon). Returns [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     T? value<T extends Object>(String property) =>
@@ -241,6 +242,21 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         math.max(0, width ?? box.width),
         math.max(0, height ?? box.height),
       ).toJson();
+    }
+
+    final num? flex = value<num>('flex');
+    if (flex != null && flex.round() != node.flex) {
+      // Flutter needs a positive flex; 0 still gets a sliver.
+      patch['flex'] = math.max(1, flex.round());
+    }
+
+    // Rotation in degrees (the node's `rotation` JSON field), e.g. a card
+    // tilted while it's dragged: `${= dragging ? -2 : 0}`.
+    final num? rotation = value<num>('rotation');
+    if (rotation != null &&
+        rotation.isFinite &&
+        rotation.round() != node.rotationDegrees) {
+      patch['rotation'] = rotation.round();
     }
 
     // Effects, stroke weight, corner radius, font weight and icon.
@@ -360,11 +376,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         }
       }
 
-      // Get corresponding variable data from codelessly context.
-      final ValueNotifier<VariableData>? listenableVariable = codelesslyContext
-          .findVariableByName(match.name);
-      // Add variable to [listenables].
-      if (listenableVariable != null) listenables.add(listenableVariable);
+      addVariableListenables(
+        codelesslyContext,
+        match.name,
+        listenables,
+        context,
+      );
     }
 
     // Traverse through all the multi-variables that the node properties are attached
@@ -402,11 +419,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         }
       }
 
-      // Get corresponding variable data from codelessly context.
-      final ValueNotifier<VariableData>? listenableVariable = codelesslyContext
-          .findVariableByName(match.name);
-      // Add variable to [listenables].
-      if (listenableVariable != null) listenables.add(listenableVariable);
+      addVariableListenables(
+        codelesslyContext,
+        match.name,
+        listenables,
+        context,
+      );
     }
 
     // Traverse through all the conditions that affects the node.
@@ -432,17 +450,58 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           }
           continue;
         }
-        // Get corresponding variable data from codelessly context.
-        final ValueNotifier<VariableData>? listenableVariable =
-            codelesslyContext.variables.values.firstWhereOrNull(
-              (notifier) => notifier.value.name == name,
-            );
-        // Add variable to [listenables].
-        if (listenableVariable != null) listenables.add(listenableVariable);
+        addVariableListenables(codelesslyContext, name, listenables, context);
       }
     }
 
     return listenables;
+  }
+
+  /// Adds the notifier of variable [name] to [listenables]. A computed
+  /// variable, one whose value is a `${= ...}` formula, also adds the
+  /// variables its formula reads, so nodes showing it update when they do.
+  void addVariableListenables(
+    CodelesslyContext codelesslyContext,
+    String name,
+    List<Listenable> listenables,
+    BuildContext context, [
+    Set<String>? visited,
+  ]) {
+    final Set<String> seen = visited ?? {};
+    if (!seen.add(name)) return;
+    if (predefinedListenableVariableNames.contains(name)) {
+      final Listenable? notifier = switch (name) {
+        'storage' => getStorageListenerFor(
+          VariableMatch.parse(name.wrapWithVariableSyntax())!,
+          context,
+        ),
+        'auth' => context.read<Codelessly?>()?.appUser,
+        _ => null,
+      };
+      if (notifier != null) listenables.add(notifier);
+      return;
+    }
+    final ValueNotifier<VariableData>? variable = codelesslyContext
+        .findVariableByName(name);
+    if (variable == null) return;
+    if (!listenables.contains(variable)) listenables.add(variable);
+    final String? expression = FormulaEvaluator.exactExpression(
+      variable.value.value,
+    );
+    if (expression == null) return;
+    for (final String path in FormulaEvaluator.referencedPaths(expression)) {
+      final VariableMatch? match = VariableMatch.parse(
+        path.wrapWithVariableSyntax(),
+      );
+      if (match == null) continue;
+      addVariableListenables(
+        codelesslyContext,
+        match.name,
+        listenables,
+        context,
+        seen,
+      );
+    }
   }
 
   Listenable? getStorageListenerFor(VariableMatch match, BuildContext context) {
