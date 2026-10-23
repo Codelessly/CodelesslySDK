@@ -1,8 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart'
-    show variableSyntaxIdentifierRegex;
-
 /// The body of a formula: text and quoted strings, with braces only in
 /// balanced pairs nested up to [depth] deep, such as the object literal in
 /// `merge(r, {tags: {a: 1}})`. Braces inside quoted strings don't count.
@@ -21,12 +18,6 @@ String _formulaBody(int depth) {
 /// for object literals such as `${= merge(r, {favorite: true})}`.
 final RegExp formulaRegex = RegExp(
   r'(?<!\\)\$\{=(?<expr>' + _formulaBody(3) + r')\}',
-);
-
-/// Matches the formulas and variables of a text, formulas first so a
-/// formula's own braces (`${= {a: 1}.a}`) don't end it early.
-final RegExp formulaOrVariableRegex = RegExp(
-  '${formulaRegex.pattern}|${variableSyntaxIdentifierRegex.pattern}',
 );
 
 /// Matches a text that is exactly one formula, e.g. `${= qty * price}`.
@@ -66,8 +57,19 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    the body can read every other variable. A lambda can take the item's
 ///    index as a second parameter, `(t, i) => i < 3`. Lambdas are only
 ///    allowed as function arguments.
-///  - other list functions: slice, take, skip and reverse (which also work
-///    on text); object functions: merge and set, which return new objects.
+///  - math: sqrt, pow, sin, cos, tan, asin, acos, atan, atan2 (radians),
+///    pi, radians, degrees, clamp, and distance(lat1, lng1, lat2, lng2,
+///    unit) for the great-circle distance in 'km' (default) or 'mi'.
+///  - building data: object(key, value, …) or `{key: value}` literals,
+///    merge, set, keys, values, flatten, compact (drops nulls and empty
+///    text), and list edits that return a new list: append, setAt,
+///    insertAt, removeAt and move. Set variable actions use them to change
+///    nested data, e.g.
+///    `setAt(trip.stops, index, merge(item, object('nights', 3)))`.
+///  - list slicing: first, last, slice(list, start, end), take, skip,
+///    reverse (these also work on text), range(end) or range(start, end,
+///    step), and indexOf(list, value or predicate), which is -1 when nothing
+///    matches.
 ///  - date functions: now, today, parseDate, formatDate, addMinutes, addHours,
 ///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
 ///    hour, minute and weekday. Dates are ISO 8601 text such as
@@ -278,11 +280,6 @@ class FormulaEvaluator {
       'split("rock, jazz", ", ") → [rock, jazz]',
     ),
     FormulaFunctionDoc(
-      'indexOf',
-      'indexOf(text or list, value)',
-      'indexOf(genres, "jazz") → 1 (-1 when missing)',
-    ),
-    FormulaFunctionDoc(
       'matches',
       'matches(text, pattern)',
       r'matches(code, "^\d{4}$") → true',
@@ -349,28 +346,6 @@ class FormulaEvaluator {
       'findIndex(records, r => r.id == selectedId) → 2 (-1 when none)',
     ),
     FormulaFunctionDoc(
-      'slice',
-      'slice(list or text, start, end)',
-      'slice(tracks, 1, 3) → items 1 and 2 (negative counts from the end)',
-    ),
-    FormulaFunctionDoc('take', 'take(list or text, count)', 'take(tracks, 3)'),
-    FormulaFunctionDoc('skip', 'skip(list or text, count)', 'skip(tracks, 3)'),
-    FormulaFunctionDoc(
-      'reverse',
-      'reverse(list or text)',
-      'reverse([1, 2, 3]) → [3, 2, 1]',
-    ),
-    FormulaFunctionDoc(
-      'merge',
-      'merge(object, patch, …)',
-      'merge(r, {favorite: !r.favorite})',
-    ),
-    FormulaFunctionDoc(
-      'set',
-      'set(object or list, key or index, value)',
-      'set(r, "rating", 5)',
-    ),
-    FormulaFunctionDoc(
       'unique',
       'unique(list, field or item => key)',
       'unique(tags) or unique(tasks, "category")',
@@ -384,6 +359,121 @@ class FormulaEvaluator {
       'concat',
       'concat(list or item, ...)',
       'concat([record.art], sleeves) or list1 + list2',
+    ),
+    FormulaFunctionDoc('sqrt', 'sqrt(value)', 'sqrt(16) → 4'),
+    FormulaFunctionDoc('pow', 'pow(base, exponent)', 'pow(2, 10) → 1024'),
+    FormulaFunctionDoc('sin', 'sin(radians)', 'sin(pi() / 2) → 1'),
+    FormulaFunctionDoc('cos', 'cos(radians)', 'cos(0) → 1'),
+    FormulaFunctionDoc('tan', 'tan(radians)', 'tan(0) → 0'),
+    FormulaFunctionDoc('asin', 'asin(value)', 'asin(1) → 1.5708'),
+    FormulaFunctionDoc('acos', 'acos(value)', 'acos(1) → 0'),
+    FormulaFunctionDoc('atan', 'atan(value)', 'atan(1) → 0.7854'),
+    FormulaFunctionDoc('atan2', 'atan2(y, x)', 'atan2(1, 1) → 0.7854'),
+    FormulaFunctionDoc('pi', 'pi()', 'pi() → 3.14159…'),
+    FormulaFunctionDoc(
+      'radians',
+      'radians(degrees)',
+      'radians(180) → 3.14159…',
+    ),
+    FormulaFunctionDoc('degrees', 'degrees(radians)', 'degrees(pi()) → 180'),
+    FormulaFunctionDoc(
+      'clamp',
+      'clamp(value, min, max)',
+      'clamp(12, 0, 10) → 10',
+    ),
+    FormulaFunctionDoc(
+      'distance',
+      "distance(lat1, lng1, lat2, lng2, 'km' or 'mi')",
+      "distance(a.lat, a.lng, b.lat, b.lng, 'mi') → 362.4",
+    ),
+    FormulaFunctionDoc('first', 'first(list)', 'first(stops) → the first stop'),
+    FormulaFunctionDoc('last', 'last(list)', 'last(stops) → the last stop'),
+    FormulaFunctionDoc(
+      'slice',
+      'slice(list, start, end)',
+      "slice(['a', 'b', 'c', 'd'], 1, 3) → ['b', 'c']",
+    ),
+    FormulaFunctionDoc(
+      'take',
+      'take(list, n)',
+      'take(stops, index) → stops before this one',
+    ),
+    FormulaFunctionDoc(
+      'skip',
+      'skip(list, n)',
+      'skip(stops, 1) → all but the first',
+    ),
+    FormulaFunctionDoc(
+      'reverse',
+      'reverse(list or text)',
+      'reverse([1, 2, 3]) → [3, 2, 1]',
+    ),
+    FormulaFunctionDoc(
+      'range',
+      'range(end) or range(start, end, step)',
+      'range(0, 70, 10) → [0, 10, …, 60]',
+    ),
+    FormulaFunctionDoc(
+      'indexOf',
+      'indexOf(list, value) or indexOf(list, item => test)',
+      'indexOf(trips, t => t.id == id) → 2',
+    ),
+    FormulaFunctionDoc(
+      'object',
+      'object(key, value, key, value, …)',
+      "object('nights', 2, 'cg', id) → {nights: 2, cg: id}",
+    ),
+    FormulaFunctionDoc(
+      'merge',
+      'merge(map, map, …)',
+      "merge(stop, object('nights', 3)) → stop with 3 nights",
+    ),
+    FormulaFunctionDoc(
+      'set',
+      'set(map, key, value)',
+      "set(rig, 'length', 36) → rig, 36 ft long",
+    ),
+    FormulaFunctionDoc('keys', 'keys(map)', 'keys(rig) → [name, length, …]'),
+    FormulaFunctionDoc('values', 'values(map)', 'values(totals) → [3, 5]'),
+    FormulaFunctionDoc(
+      'flatten',
+      'flatten(list of lists)',
+      'flatten([[1, 2], [3]]) → [1, 2, 3]',
+    ),
+    FormulaFunctionDoc(
+      'compact',
+      'compact(list)',
+      "compact([1, null, '', 2]) → [1, 2]",
+    ),
+    FormulaFunctionDoc(
+      'append',
+      'append(list, item, …)',
+      "append(stops, object('cg', id, 'nights', 2))",
+    ),
+    FormulaFunctionDoc(
+      'setAt',
+      'setAt(list, index, item)',
+      'setAt([1, 2, 3], 1, 9) → [1, 9, 3]',
+    ),
+    FormulaFunctionDoc(
+      'insertAt',
+      'insertAt(list, index, item)',
+      'insertAt([1, 3], 1, 2) → [1, 2, 3]',
+    ),
+    FormulaFunctionDoc(
+      'removeAt',
+      'removeAt(list, index)',
+      'removeAt([1, 2, 3], 0) → [2, 3]',
+    ),
+    FormulaFunctionDoc(
+      'move',
+      'move(list, from, to)',
+      'move([a, b, c], 2, 0) → [c, a, b]',
+    ),
+    FormulaFunctionDoc(
+      'thousands',
+      'thousands(value, decimals)',
+      'thousands(1094) → 1,094',
     ),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
@@ -713,13 +803,6 @@ num? _luminance(Object? value) {
     4,
   );
 }
-
-/// The index of [value] in a text or list, or -1 when it isn't there.
-int _indexOf(Object? target, Object? value) => switch (target) {
-  final String s => s.indexOf(FormulaEvaluator.stringify(value)),
-  final Iterable l => l.toList().indexWhere((v) => _looseEquals(v, value)),
-  _ => -1,
-};
 
 /// The objects [maps] combined into a new one, later keys winning. Values
 /// that aren't objects are skipped.
@@ -1123,6 +1206,52 @@ String? _formatDate(Object? value, Object? pattern) {
 
 typedef _Function = Object? Function(List<Object?> args);
 
+/// A list index from [value]: negative counts from the end, and the result
+/// is clamped to `0..length`. [fallback] when [value] isn't a number.
+int _index(Object? value, int length, int fallback) {
+  if (value == null) return fallback;
+  final num? n = _toNum(value);
+  if (n == null || n.isNaN) return fallback;
+  final int i = n.toInt();
+  return (i < 0 ? length + i : i).clamp(0, length);
+}
+
+int _count(Object? value) {
+  final num? n = _toNum(value);
+  return n == null || n.isNaN || n < 0 ? 0 : n.toInt();
+}
+
+/// `range(end)` is 0 up to [end], `range(start, end, step)` counts by step.
+/// Capped at 10,000 items.
+List<num> _range(List<Object?> a) {
+  final bool single = a.length < 2;
+  final num start = single ? 0 : _num(_arg(a, 0));
+  final num end = single ? _num(_arg(a, 0)) : _num(_arg(a, 1));
+  final num step = a.length > 2 ? _num(_arg(a, 2)) : (end < start ? -1 : 1);
+  if (start.isNaN || end.isNaN || step.isNaN || step == 0) return [];
+  return [for (num v = start; step > 0 ? v < end : v > end; v += step) _tidy(v)]
+      .take(10000)
+      .toList();
+}
+
+/// Great-circle distance between two points in degrees, in km, or in miles
+/// when the fifth argument is 'mi'.
+Object? _distance(List<Object?> a) {
+  final List<num> v = [for (int i = 0; i < 4; i++) _num(_arg(a, i))];
+  if (v.any((n) => n.isNaN)) return null;
+  double rad(num d) => d * math.pi / 180;
+  final double dLat = rad(v[2] - v[0]);
+  final double dLng = rad(v[3] - v[1]);
+  final double h =
+      math.pow(math.sin(dLat / 2), 2) +
+      math.cos(rad(v[0])) *
+          math.cos(rad(v[2])) *
+          math.pow(math.sin(dLng / 2), 2);
+  final double km = 2 * 6371.0088 * math.asin(math.min(1, math.sqrt(h)));
+  final String unit = FormulaEvaluator.stringify(_arg(a, 4)).toLowerCase();
+  return unit.startsWith('mi') ? km / 1.609344 : km;
+}
+
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
@@ -1175,7 +1304,6 @@ final Map<String, _Function> _functions = {
     if (text.isEmpty) return <Object?>[];
     return text.split(FormulaEvaluator.stringify(_arg(a, 1) ?? ','));
   },
-  'indexOf': (a) => _indexOf(_arg(a, 0), _arg(a, 1)),
   'matches': (a) {
     try {
       return RegExp(FormulaEvaluator.stringify(_arg(a, 1)))
@@ -1230,6 +1358,95 @@ final Map<String, _Function> _functions = {
       if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
         item,
   ],
+  'sqrt': (a) => _tidy(math.sqrt(_num(_arg(a, 0)))),
+  'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
+  'sin': (a) => math.sin(_num(_arg(a, 0))),
+  'cos': (a) => math.cos(_num(_arg(a, 0))),
+  'tan': (a) => math.tan(_num(_arg(a, 0))),
+  'asin': (a) => math.asin(_num(_arg(a, 0))),
+  'acos': (a) => math.acos(_num(_arg(a, 0))),
+  'atan': (a) => math.atan(_num(_arg(a, 0))),
+  'atan2': (a) => math.atan2(_num(_arg(a, 0)), _num(_arg(a, 1))),
+  'pi': (a) => math.pi,
+  'radians': (a) => _num(_arg(a, 0)) * math.pi / 180,
+  'degrees': (a) => _num(_arg(a, 0)) * 180 / math.pi,
+  'clamp': (a) =>
+      _tidy(_num(_arg(a, 0)).clamp(_num(_arg(a, 1)), _num(_arg(a, 2)))),
+  'distance': _distance,
+  'first': (a) => _values(_arg(a, 0), null).firstOrNull,
+  'last': (a) => _values(_arg(a, 0), null).lastOrNull,
+  'range': _range,
+  'indexOf': (a) {
+    if (_arg(a, 0) case final String text) {
+      return text.indexOf(FormulaEvaluator.stringify(_arg(a, 1)));
+    }
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    final List<Object?> rest = a.skip(1).toList();
+    final bool predicate = rest.length > 1 || _arg(rest, 0) is _Closure;
+    return items.indexWhere(
+      (item) =>
+          predicate ? _matches(item, rest) : _looseEquals(item, _arg(rest, 0)),
+    );
+  },
+  'object': (a) => <String, Object?>{
+    for (int i = 0; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  'keys': (a) => switch (_arg(a, 0)) {
+    final Map m => m.keys.map((k) => k.toString()).toList(),
+    _ => <Object?>[],
+  },
+  'values': (a) => switch (_arg(a, 0)) {
+    final Map m => m.values.toList(),
+    _ => <Object?>[],
+  },
+  'flatten': (a) => [
+    for (final Object? item in _values(_arg(a, 0), null))
+      if (item is Iterable) ...item else item,
+  ],
+  'compact': (a) => [
+    for (final Object? item in _values(_arg(a, 0), null))
+      if (item != null && item != '') item,
+  ],
+  'append': (a) => [..._values(_arg(a, 0), null), ...a.skip(1)],
+  'setAt': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    final int i = _index(_arg(a, 1), items.length, -1);
+    if (i < 0 || i >= items.length) return items;
+    items[i] = _arg(a, 2);
+    return items;
+  },
+  'insertAt': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    items.insert(_index(_arg(a, 1), items.length, items.length), _arg(a, 2));
+    return items;
+  },
+  'removeAt': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    final int i = _index(_arg(a, 1), items.length, -1);
+    if (i >= 0 && i < items.length) items.removeAt(i);
+    return items;
+  },
+  'move': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    final int from = _index(_arg(a, 1), items.length, -1);
+    if (from < 0 || from >= items.length) return items;
+    final Object? item = items.removeAt(from);
+    items.insert(_index(_arg(a, 2), items.length, items.length), item);
+    return items;
+  },
+  'thousands': (a) {
+    final num n = _num(_arg(a, 0));
+    if (n.isNaN) return null;
+    final int decimals = _count(_arg(a, 1));
+    final String fixed = n.abs().toStringAsFixed(decimals);
+    final List<String> parts = fixed.split('.');
+    final String whole = parts[0].replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+$)'),
+      (m) => '${m[1]},',
+    );
+    return '${n < 0 ? '-' : ''}$whole${parts.length > 1 ? '.${parts[1]}' : ''}';
+  },
   'number': (a) => _toNum(_arg(a, 0)),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
