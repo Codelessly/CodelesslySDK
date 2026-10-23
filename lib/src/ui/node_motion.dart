@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -72,31 +73,97 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   double _speed = 0;
   double _turns = 0;
 
+  /// Holds a transition back for [MotionModel.delayMs]; until it fires the
+  /// node stays where the transition starts.
+  Timer? _delay;
+
   void _rebuild() => setState(() {});
+
+  bool get _loops =>
+      widget.animate &&
+      widget.motion.loop != MotionLoop.none &&
+      widget.motion.durationMs > 0;
 
   @override
   void initState() {
     super.initState();
+    final MotionModel motion = widget.motion;
+    if (_loops) {
+      _startLoop();
+    } else if (widget.animate && motion.enter && motion.durationMs > 0) {
+      _from = motion.atRest;
+      _run(motion.durationMs);
+    }
     _syncSpin();
+  }
+
+  /// Animates from [_from] to [_to] over [ms], after the motion's delay.
+  void _run(int ms) {
+    _delay?.cancel();
+    _transition
+      ..stop()
+      ..duration = Duration(milliseconds: ms)
+      ..value = 0;
+    void start() {
+      if (mounted) _transition.forward(from: 0);
+    }
+
+    final int delay = widget.motion.delayMs;
+    if (delay > 0) {
+      _delay = Timer(Duration(milliseconds: delay), start);
+    } else {
+      start();
+    }
+  }
+
+  /// Repeats between rest and the motion's values.
+  void _startLoop() {
+    _delay?.cancel();
+    _from = widget.motion.atRest;
+    _to = widget.motion;
+    _transition.duration = Duration(milliseconds: widget.motion.durationMs);
+    void start() {
+      if (!mounted) return;
+      _transition.repeat(reverse: widget.motion.loop == MotionLoop.reverse);
+    }
+
+    final int delay = widget.motion.delayMs;
+    if (delay > 0) {
+      _transition.value = 0;
+      _delay = Timer(Duration(milliseconds: delay), start);
+    } else {
+      start();
+    }
   }
 
   @override
   void didUpdateWidget(NodeMotion oldWidget) {
     super.didUpdateWidget(oldWidget);
     final MotionModel next = widget.motion;
-    if (!_sameTransform(next, _to)) {
+    if (_loops) {
+      final MotionModel old = oldWidget.motion;
+      if (!_sameTransform(next, _to) ||
+          next.loop != old.loop ||
+          next.durationMs != old.durationMs ||
+          !_transition.isAnimating && _delay?.isActive != true) {
+        _startLoop();
+      } else {
+        _to = next;
+      }
+    } else if (!_sameTransform(next, _to) ||
+        oldWidget.motion.loop != MotionLoop.none) {
       final ms = widget.animate ? next.durationMs : 0;
       if (ms <= 0) {
+        _delay?.cancel();
         _transition.stop();
+        _transition.value = 0;
         _from = next;
         _to = next;
       } else {
         // Start from wherever the running transition has got to.
         _from = _current;
         _to = next;
-        _transition
-          ..duration = Duration(milliseconds: ms)
-          ..forward(from: 0);
+        _run(ms);
       }
     } else {
       // Settings that don't animate (duration, curve, spin) apply at once.
@@ -118,8 +185,11 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       a.originX == b.originX &&
       a.originY == b.originY;
 
+  /// Whether a transition is running or waiting out its delay.
+  bool get _moving => _transition.isAnimating || _delay?.isActive == true;
+
   MotionModel get _current {
-    if (!_transition.isAnimating && _transition.value == 0) return _to;
+    if (!_moving && _transition.value == 0) return _to;
     final double t = flutterCurveOf(_to.curve).transform(_transition.value);
     double lerp(String p) =>
         _from.valueOf(p) + (_to.valueOf(p) - _from.valueOf(p)) * t;
@@ -171,6 +241,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _delay?.cancel();
     _transition.dispose();
     _spinTicker?.dispose();
     super.dispose();
@@ -178,7 +249,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final MotionModel m = _transition.isAnimating ? _current : _to;
+    final MotionModel m = _moving ? _current : _to;
     if (!m.hasTransform && _turns == 0) return widget.child;
     Widget child = widget.child;
     if (m.opacity < 1) {

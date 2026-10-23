@@ -394,6 +394,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         if (!mounted) return;
         for (final notifier in codelesslyContext.variables.values) {
+          // Computed variables compute their value from the new data.
+          if (notifier.value.isComputed) continue;
           notifier.value = notifier.value.copyWith(
             value: widget.data[notifier.value.name],
           );

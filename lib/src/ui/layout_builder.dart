@@ -289,6 +289,9 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     loadApisAndItsVariables(context);
 
     setCloudStorageVariables(context);
+
+    // Computed variables read the variables loaded above.
+    codelesslyContext.bindComputedVariables();
   }
 
   /// This loads all the apis for the layout as variables to be available

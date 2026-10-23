@@ -130,7 +130,7 @@ class PassiveButtonWidget extends StatelessWidget {
     if (settings.replaceVariablesWithSymbols) {
       final List<TextSpan> spans = buttonLabelTemplateOf(node)
           .splitMap(
-            variableSyntaxIdentifierRegex,
+            formulaOrVariableRegex,
             onMatch: (match) =>
                 VariableSpan(variable: match[0]!, node: node, context: context),
             onNonMatch: (text) => TextSpan(text: text),
