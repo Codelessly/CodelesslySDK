@@ -494,8 +494,9 @@ class PropertyValueDelegate {
       return value;
     }
 
-    if (!match.hasPath)
+    if (!match.hasPath) {
       return variableValue(variable, scopedValues: scopedValues);
+    }
 
     final Object? current = variableValue(variable, scopedValues: scopedValues);
     final variableProps = getVariableProperties(current, variable.type);
