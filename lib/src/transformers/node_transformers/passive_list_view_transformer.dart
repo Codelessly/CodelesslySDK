@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
@@ -92,6 +93,7 @@ class PassiveListViewWidget extends StatelessWidget {
     int itemCount,
     IndexedWidgetBuilder itemBuilder,
   ) {
+    if (listWraps(node)) return wrappedList(context, itemCount, itemBuilder);
     final bool vertical = node.scrollDirection == AxisC.vertical;
     final List<Widget> items = [
       for (int index = 0; index < itemCount; index++) ...[
@@ -128,11 +130,51 @@ class PassiveListViewWidget extends StatelessWidget {
     );
   }
 
+  /// Lays out all [itemCount] items of a wrapping list (see [listWraps]) in
+  /// a [Wrap] along the scroll direction: items flow onto a new run when
+  /// they don't fit, with the separator's spacing between items and
+  /// [ListViewProperties.runSpacing] between runs, all aligned to the start.
+  ///
+  /// The list is sized by its own fits: fixed takes its design size, expanded
+  /// fills a bounded axis, and shrink-wrap hugs (along the scroll direction,
+  /// the widest run; across it, the runs).
+  Widget wrappedList(
+    BuildContext context,
+    int itemCount,
+    IndexedWidgetBuilder itemBuilder,
+  ) {
+    final List<Widget> items = [
+      for (int index = 0; index < itemCount; index++)
+        itemBuilder(context, index),
+    ];
+    final Widget wrap = Padding(
+      padding: node.padding.flutterEdgeInsets,
+      child: Wrap(
+        direction: node.scrollDirection.flutterAxis,
+        spacing: listWrapSpacing(node),
+        runSpacing: math.max(0, node.properties.runSpacing),
+        children: node.reverse ? items.reversed.toList() : items,
+      ),
+    );
+    return FitBox(
+      width: node.horizontalFit == SizeFit.shrinkWrap
+          ? null
+          : node.basicBoxLocal.width,
+      height: node.verticalFit == SizeFit.shrinkWrap
+          ? null
+          : node.basicBoxLocal.height,
+      fillWidth: node.horizontalFit == SizeFit.expanded,
+      fillHeight: node.verticalFit == SizeFit.expanded,
+      child: node.clipsContent ? ClipRect(child: wrap) : wrap,
+    );
+  }
+
   /// Builds one item, placed as the editor lays it out; see [ListItemBox].
   Widget buildItem(BaseNode item, BuildContext context) => ListItemBox(
     item: item,
     scrollDirection: node.scrollDirection,
     itemExtent: node.properties.itemExtent,
+    inWrap: listWraps(node),
     child: manager.buildWidgetByID(item.id, context, settings: settings),
   );
 
