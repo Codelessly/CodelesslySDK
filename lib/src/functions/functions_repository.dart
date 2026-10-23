@@ -595,6 +595,7 @@ class FunctionsRepository {
       showCloseButton: action.showCloseButton,
       presentation: action.presentation,
       alignment: action.alignment.flutterAlignment ?? Alignment.center,
+      fullHeight: action.fullHeight,
     );
   }
 
@@ -628,6 +629,7 @@ class FunctionsRepository {
     bool showCloseButton = false,
     DialogPresentation presentation = DialogPresentation.dialog,
     AlignmentGeometry alignment = Alignment.center,
+    bool fullHeight = false,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -678,6 +680,7 @@ class FunctionsRepository {
       barrierColor: barrierColor,
       showCloseButton: showCloseButton,
       routeSettings: RouteSettings(arguments: parsedParams),
+      fullHeight: fullHeight,
       anchor: presentation == DialogPresentation.popover
           ? anchorRectOf(context)
           : null,
@@ -699,7 +702,7 @@ class FunctionsRepository {
   /// Opens what [builder] builds as a dialog at [alignment], as a bottom
   /// sheet, or as a popover menu next to [anchor], per [presentation]
   /// (adaptive: a sheet below 600 px wide), and completes with the value it
-  /// is closed with.
+  /// is closed with. A [fullHeight] sheet takes 90% of the screen.
   static Future<T?> presentCanvas<T>(
     BuildContext context, {
     required WidgetBuilder builder,
@@ -710,6 +713,7 @@ class FunctionsRepository {
     bool showCloseButton = false,
     RouteSettings? routeSettings,
     Rect? anchor,
+    bool fullHeight = false,
   }) {
     if (presentation == DialogPresentation.popover) {
       return showGeneralDialog<T>(
@@ -732,11 +736,15 @@ class FunctionsRepository {
       DialogPresentation.adaptive =>
         (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < 600,
     };
-    Widget content(BuildContext context) => CodelesslyDialogWidget(
-      showCloseButton: showCloseButton,
-      alignment: asSheet ? Alignment.bottomCenter : alignment,
-      builder: builder,
-    );
+    // A full height sheet is as tall as it can be, with the canvas filling
+    // it, so the canvas scrolls its own content under a fixed header.
+    Widget content(BuildContext context) => asSheet && fullHeight
+        ? CodelesslyBottomSheetWidget(fullHeight: true, builder: builder)
+        : CodelesslyDialogWidget(
+            showCloseButton: showCloseButton,
+            alignment: asSheet ? Alignment.bottomCenter : alignment,
+            builder: builder,
+          );
     if (asSheet) {
       return showModalBottomSheet<T>(
         context: context,
