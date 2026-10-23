@@ -462,6 +462,29 @@ class CanvasSizingScope extends InheritedWidget {
       sizing != oldWidget.sizing;
 }
 
+/// The screen width that picks responsive variants below it, set where a
+/// canvas is not the screen: a dialog, sheet or popover is narrower than the
+/// screen it is shown on, but its layouts follow the screen's breakpoint
+/// (a 560-wide form on a desktop shows its desktop layout).
+class BreakpointWidthScope extends InheritedWidget {
+  /// The screen width.
+  final double width;
+
+  const BreakpointWidthScope({
+    super.key,
+    required this.width,
+    required super.child,
+  });
+
+  /// The screen width set above, or null.
+  static double? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<BreakpointWidthScope>()?.width;
+
+  @override
+  bool updateShouldNotify(BreakpointWidthScope oldWidget) =>
+      width != oldWidget.width;
+}
+
 /// The width the canvas above is laid out at, which picks the variant a
 /// responsive [VarianceNode] shows (see [VarianceNode.variantForWidth]), the
 /// same width the editor's design canvas has.

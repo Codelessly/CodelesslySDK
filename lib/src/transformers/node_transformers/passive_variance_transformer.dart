@@ -57,7 +57,9 @@ class PassiveVarianceWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!settings.isPreview && node.isResponsive) {
-      final double? canvasWidth = CanvasWidthScope.maybeOf(context);
+      final double? canvasWidth =
+          BreakpointWidthScope.maybeOf(context) ??
+          CanvasWidthScope.maybeOf(context);
       if (canvasWidth != null) {
         return _buildVariant(context, node.variantForWidth(canvasWidth));
       }
