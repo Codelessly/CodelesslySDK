@@ -90,6 +90,7 @@ Future<Map<String, Size>> pump(
   required Size screen,
   required Host host,
   CodelesslyContext? codelesslyContext,
+  NodeBuildDecorator? decorator,
 }) async {
   tester.view.physicalSize = screen;
   tester.view.devicePixelRatio = 1;
@@ -102,13 +103,20 @@ Future<Map<String, Size>> pump(
   final manager = PassiveNodeTransformerManager(
     registry.getNodeByID,
     (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
-  );
+  )..decorator = decorator;
   Widget built(BuildContext context) => manager.buildWidgetFromNode(
     root,
     context,
     settings: const WidgetBuildSettings(debugLabel: 'test'),
   );
-  final Widget body = Builder(builder: built);
+  // A decorator's probes only wrap nodes under a geometry scope, as on the
+  // editor's render canvas.
+  final Widget body = decorator == null
+      ? Builder(builder: built)
+      : NodeGeometryScope(
+          registry: NodeGeometryRegistry(),
+          child: Builder(builder: built),
+        );
   await tester.pumpWidget(
     ChangeNotifierProvider<CodelesslyContext>.value(
       value: codelesslyContext ?? CodelesslyContext.empty(),
@@ -135,11 +143,19 @@ Future<void> everywhere(
   WidgetTester tester,
   BaseNode root,
   List<BaseNode> nodes,
-  void Function(Map<String, Size> sizes, Size screen, Host host) check,
-) async {
+  void Function(Map<String, Size> sizes, Size screen, Host host) check, {
+  NodeBuildDecorator? decorator,
+}) async {
   for (final Size screen in screens) {
     for (final Host host in Host.values) {
-      final sizes = await pump(tester, root, nodes, screen: screen, host: host);
+      final sizes = await pump(
+        tester,
+        root,
+        nodes,
+        screen: screen,
+        host: host,
+        decorator: decorator,
+      );
       check(sizes, screen, host);
     }
   }
@@ -620,4 +636,76 @@ void main() {
       expect(sizes['c']!.width, 100);
     });
   });
+
+  // The spacer JSON the build scripts send: flex on both axes, so it works
+  // in a row and in a column, and none of the keys other nodes default.
+  SpacerNode spacerFromJson(String id) =>
+      NodeJsonConverter().fromJson({
+            'type': 'spacer',
+            'id': id,
+            'name': id,
+            'flex': 1,
+            'basicBoxLocal': [0, 0, 100, 100],
+            'horizontalFit': 'expanded',
+            'verticalFit': 'expanded',
+          })!
+          as SpacerNode;
+
+  for (final NodeBuildDecorator? decorator in [
+    null,
+    const GeometryProbeDecorator(),
+  ]) {
+    final String host = decorator == null ? 'an app' : 'the editor';
+    testWidgets('a spacer takes the free space of a row in $host', (
+      tester,
+    ) async {
+      final l = rect('l', '', width: 40, height: 40);
+      final gap = spacerFromJson('gap');
+      final r = rect('r', '', width: 40, height: 40);
+      final row = flex(
+        'row',
+        kRootNode,
+        [l, gap, r],
+        type: RowColumnType.row,
+        width: 390,
+        height: 56,
+      );
+      await everywhere(tester, row, [l, gap, r], (sizes, screen, host) {
+        // A tight host forces its size on the root; the others keep 390.
+        if (host == Host.tight) return;
+        expect(
+          tester.getTopLeft(rectOf('r')).dx -
+              tester.getTopLeft(rectOf('row')).dx,
+          390 - 40,
+          reason: '$host $screen',
+        );
+      }, decorator: decorator);
+    });
+
+    testWidgets('a spacer takes the free space of a column in $host', (
+      tester,
+    ) async {
+      final top = rect('top', '', width: 40, height: 44);
+      final gap = spacerFromJson('gap');
+      final bottom = rect('bottom', '', width: 40, height: 14);
+      final tile = flex(
+        'tile',
+        kRootNode,
+        [top, gap, bottom],
+        type: RowColumnType.column,
+        width: 160,
+        height: 112,
+      );
+      await everywhere(tester, tile, [top, gap, bottom], (sizes, screen, host) {
+        if (host == Host.tight) return;
+        expect(sizes['tile']!.height, 112, reason: '$host $screen');
+        expect(
+          tester.getTopLeft(rectOf('bottom')).dy -
+              tester.getTopLeft(rectOf('tile')).dy,
+          112 - 14,
+          reason: '$host $screen',
+        );
+      }, decorator: decorator);
+    });
+  }
 }
