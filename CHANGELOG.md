@@ -1,12 +1,5 @@
 ## Unreleased
 
-### Layout
-
-- A row or column with `wrap` builds a `Wrap`: its alignment places
-  children within and across runs, `spacing` and `runSpacing` set the gaps,
-  and expanded children take their own size. A child hidden at runtime
-  leaves no gap.
-
 ### Signing
 
 - Signature nodes take a signature by finger, pen or mouse and write its
@@ -17,12 +10,10 @@
   duration. Letting go or moving off drains it. While it is held, the nodes
   inside read the progress, 0 to 1, as `${hold}`, to fill a bar or change a
   label.
-- A tappable node (one with click, long-press or hold actions) shares
-  whether a mouse is over it as `${hovered}`, which it and the nodes inside
-  it can bind for hover borders, fills and colors. The hold progress reaches
-  the held node's own properties too.
+- The hold progress reaches the held node's own properties as well as
+  the nodes inside it.
 - `strokeWeight` can be bound, set by a condition or changed by an action,
-  for a border that thickens when picked or hovered.
+  for a border that thickens when picked.
 - An expanded child whose bound `flex` is 0 takes no space, where it used to
   keep its design size.
 
@@ -37,6 +28,11 @@
   screen. `CanvasSizing.sheet` sizes a canvas for a sheet.
 
 ### Layout
+
+- A row or column with `wrap` builds a `Wrap`: its alignment places
+  children within and across runs, `spacing` and `runSpacing` set the gaps,
+  and expanded children take their own size. A child hidden at runtime
+  leaves no gap.
 
 - An expanded child's `flex` can be bound to data or set by a condition, so
   bars share a row by value (a gauge, a progress split).
