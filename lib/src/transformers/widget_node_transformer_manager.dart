@@ -227,6 +227,59 @@ abstract class WidgetNodeTransformerManager
 
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
+    return _wrapWithPointerReactions(
+      context,
+      node,
+      _wrapWithTapReactions(context, node, widget),
+    );
+  }
+
+  /// Runs [node]'s hover and cursorEnter reactions when a mouse enters it
+  /// and its cursorExit reactions when it leaves, e.g. to show a tooltip
+  /// over a map pad. Doesn't take part in hit testing, so taps still reach
+  /// the widget.
+  Widget _wrapWithPointerReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
+    if (node is! ReactionMixin || node is CanvasNode) return widget;
+    List<Reaction> of(Set<TriggerType> types) => (node as ReactionMixin)
+        .reactions
+        .where((r) => types.contains(r.trigger.type) && r.action.enabled)
+        .toList();
+    final List<Reaction> enter = of({
+      TriggerType.hover,
+      TriggerType.cursorEnter,
+    });
+    final List<Reaction> exit = of({TriggerType.cursorExit});
+    if (enter.isEmpty && exit.isEmpty) return widget;
+    return MouseRegion(
+      opaque: false,
+      hitTestBehavior: HitTestBehavior.translucent,
+      onEnter: enter.isEmpty
+          ? null
+          : (_) => FunctionsRepository.triggerAction(
+              context,
+              enter.first.trigger.type,
+              reactions: enter,
+            ),
+      onExit: exit.isEmpty
+          ? null
+          : (_) => FunctionsRepository.triggerAction(
+              context,
+              TriggerType.cursorExit,
+              reactions: exit,
+            ),
+      child: widget,
+    );
+  }
+
+  Widget _wrapWithTapReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
     if (node is! ReactionMixin) return widget;
     if (node case CanvasNode() || SpacerNode()) return widget;
     if (node is CustomPropertiesMixin &&
@@ -293,7 +346,6 @@ abstract class WidgetNodeTransformerManager
       if (onClickReactions.isEmpty && onLongPressReactions.isEmpty) {
         return widget;
       }
-      // TODO: should handle TriggerType.hover and TriggerType.unhover too.
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         hitTestBehavior: HitTestBehavior.opaque,
