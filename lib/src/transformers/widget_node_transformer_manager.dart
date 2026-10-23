@@ -51,11 +51,12 @@ abstract class WidgetNodeTransformerManager
 
   /// Convenience method to handle widget opacity.
   Widget applyWidgetOpacity(BaseNode node, Widget widget) {
-    if (node is! BlendMixin || node.opacity > 0.99) {
-      return widget;
-    }
-
+    if (node is! BlendMixin) return widget;
     final double opacity = node.opacity < 0.99 ? node.opacity : 1;
+    if (node.pulse case final PulseModel pulse) {
+      return PulseOpacity(pulse: pulse, opacity: opacity, child: widget);
+    }
+    if (opacity == 1) return widget;
     return Opacity(opacity: opacity, child: widget);
   }
 
@@ -590,4 +591,66 @@ class SvgIconImage extends StatelessWidget {
             ),
     );
   }
+}
+
+/// Fades [child] from [PulseModel.minOpacity] × [opacity] to [opacity] and
+/// back, over and over (skeletons, blinking indicators).
+class PulseOpacity extends StatefulWidget {
+  /// The fade.
+  final PulseModel pulse;
+
+  /// The node's own opacity, the bright end of the fade.
+  final double opacity;
+
+  /// The faded widget.
+  final Widget child;
+
+  /// Creates a [PulseOpacity].
+  const PulseOpacity({
+    super.key,
+    required this.pulse,
+    required this.opacity,
+    required this.child,
+  });
+
+  @override
+  State<PulseOpacity> createState() => _PulseOpacityState();
+}
+
+class _PulseOpacityState extends State<PulseOpacity>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController controller = AnimationController(
+    vsync: this,
+    duration: _duration,
+  )..repeat(reverse: true);
+
+  Duration get _duration =>
+      Duration(milliseconds: widget.pulse.durationMillis.clamp(16, 60000));
+
+  @override
+  void didUpdateWidget(PulseOpacity oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pulse.durationMillis != widget.pulse.durationMillis) {
+      controller
+        ..duration = _duration
+        ..repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+    opacity: controller.drive(
+      Tween<double>(
+        begin: widget.opacity * widget.pulse.minOpacity.clamp(0, 1),
+        end: widget.opacity,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
+    ),
+    child: widget.child,
+  );
 }
