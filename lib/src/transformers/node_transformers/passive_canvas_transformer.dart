@@ -845,6 +845,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       if (_redirected) return;
     }
 
+    context.read<Codelessly?>()?.prepareRoute(context, widget.node.id);
     triggerOnLoadActions(context);
     _watchValues(context);
     _startTimers();
