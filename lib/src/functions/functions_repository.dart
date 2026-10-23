@@ -327,9 +327,14 @@ class FunctionsRepository {
       failure = error;
       failureStack = stackTrace;
     }
-    if (!context.mounted) return response;
+    // The widget that made the call can be gone by now (a dialog closed
+    // while it loaded); its handlers then run on the chain's opener.
+    // ignore: use_build_context_synchronously
+    final BuildContext? outcomeContext = ActionChain.contextFor(context);
+    if (outcomeContext == null) return response;
     await handleApiOutcome(
-      context,
+      // ignore: use_build_context_synchronously
+      outcomeContext,
       action,
       response: response,
       failure: failure,
