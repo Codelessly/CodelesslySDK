@@ -234,6 +234,11 @@ class FormulaEvaluator {
       'endsWith("photo.png", ".png") → true',
     ),
     FormulaFunctionDoc(
+      'matches',
+      'matches(text, pattern)',
+      'matches(email, "^[^@ ]+@[^@ ]+[.][^@ .]+\$") → true',
+    ),
+    FormulaFunctionDoc(
       'filter',
       'filter(list, item => condition) or filter(list, field, value)',
       'filter(tasks, t => contains(lower(t.title), lower(search)))',
@@ -923,6 +928,17 @@ final Map<String, _Function> _functions = {
   'endsWith': (a) => switch (_arg(a, 0)) {
     final String s => s.endsWith(FormulaEvaluator.stringify(_arg(a, 1))),
     _ => false,
+  },
+  // A pattern that doesn't compile matches nothing.
+  'matches': (a) {
+    final Object? text = _arg(a, 0);
+    if (text == null) return false;
+    try {
+      return RegExp(FormulaEvaluator.stringify(_arg(a, 1)))
+          .hasMatch(FormulaEvaluator.stringify(text));
+    } on FormatException {
+      return false;
+    }
   },
   'contains': (a) => switch (_arg(a, 0)) {
     final String s => s.contains(FormulaEvaluator.stringify(_arg(a, 1))),
