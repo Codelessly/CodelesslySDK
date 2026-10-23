@@ -227,6 +227,25 @@ void main() {
     expect(builtRectangles(nodes), idsOf(ScreenBreakpoint.mobile, 2));
   });
 
+  testWidgets('in a dialog it follows the screen, not the 560 wide canvas', (
+    tester,
+  ) async {
+    final nodes = responsivePage(canvasWidth: 560);
+    await pumpPage(
+      tester,
+      nodes,
+      screen: const Size(1440, 900),
+      wrap: (child) => Center(
+        child: BreakpointWidthScope(
+          width: 1440,
+          child: SizedBox(width: 560, child: child),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(builtRectangles(nodes), idsOf(ScreenBreakpoint.desktop, 4));
+  });
+
   testWidgets('an autoScale canvas picks by its design width', (tester) async {
     final nodes = responsivePage(
       canvasWidth: 1440,

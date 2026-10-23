@@ -18,9 +18,12 @@ class CodelesslyDialogWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // A dialog is centered and sized by its layout, so its canvas keeps its
     // design size instead of filling the screen.
-    return CanvasSizingScope(
-      sizing: CanvasSizing.design,
-      child: Builder(builder: _buildDialog),
+    return BreakpointWidthScope(
+      width: MediaQuery.sizeOf(context).width,
+      child: CanvasSizingScope(
+        sizing: CanvasSizing.design,
+        child: Builder(builder: _buildDialog),
+      ),
     );
   }
 
@@ -92,15 +95,18 @@ abstract final class DialogPresenter {
   /// up to [sheetMaxHeightFactor] of the screen.
   static Widget sheet(BuildContext context, {required WidgetBuilder builder}) {
     final Size screen = MediaQuery.sizeOf(context);
-    return CanvasSizingScope(
-      sizing: CanvasSizing.design,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: screen.width,
-          maxWidth: screen.width,
-          maxHeight: screen.height * sheetMaxHeightFactor,
+    return BreakpointWidthScope(
+      width: screen.width,
+      child: CanvasSizingScope(
+        sizing: CanvasSizing.design,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: screen.width,
+            maxWidth: screen.width,
+            maxHeight: screen.height * sheetMaxHeightFactor,
+          ),
+          child: Builder(builder: builder),
         ),
-        child: Builder(builder: builder),
       ),
     );
   }
@@ -112,9 +118,14 @@ abstract final class DialogPresenter {
     required Rect? anchor,
     required WidgetBuilder builder,
   }) {
-    final Widget child = CanvasSizingScope(
-      sizing: CanvasSizing.design,
-      child: Builder(builder: builder),
+    final Widget child = Builder(
+      builder: (context) => BreakpointWidthScope(
+        width: MediaQuery.sizeOf(context).width,
+        child: CanvasSizingScope(
+          sizing: CanvasSizing.design,
+          child: Builder(builder: builder),
+        ),
+      ),
     );
     if (anchor == null) return Center(child: child);
     return CustomSingleChildLayout(
