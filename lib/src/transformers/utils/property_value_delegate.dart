@@ -254,33 +254,83 @@ class PropertyValueDelegate {
     );
   }
 
-  /// Evaluates a formula [expression] (the part after `${=`), reading its
-  /// variable paths from [scopedValues]. See [FormulaEvaluator].
-  /// Whether [variable] is computed: its value is a `${= ...}` formula,
+  /// Whether [variable] is computed: it has a formula
+  /// ([VariableData.isComputed]) or its value is a `${= ...}` formula,
   /// worked out from other variables whenever it is read.
   static bool isComputedVariable(VariableData variable) =>
+      variable.isComputed ||
       FormulaEvaluator.exactExpression(variable.value) != null;
 
   static int _computedDepth = 0;
 
+  /// Names of the computed variables being evaluated, so a formula that
+  /// (indirectly) reads its own variable gets null instead of looping.
+  static final Set<String> _computing = {};
+
   /// The value of [variable]: its formula's result for a computed variable,
   /// else its stored value. Computed variables can read each other; a cycle
   /// gives null instead of recursing forever.
+  ///
+  /// A [VariableData.formula] result is coerced to the variable's type; a
+  /// `${= ...}` value keeps whatever its formula returns.
   static Object? variableValueOf(
     VariableData variable,
     ScopedValues scopedValues,
   ) {
-    final String? expression = FormulaEvaluator.exactExpression(variable.value);
+    final bool typed = variable.isComputed;
+    final String? expression = typed
+        ? variable.formula
+        : FormulaEvaluator.exactExpression(variable.value);
     if (expression == null) return variable.getValue();
-    if (_computedDepth >= 16) return null;
+    if (_computedDepth >= 16 || !_computing.add(variable.name)) return null;
     _computedDepth++;
     try {
-      return evaluateFormula(expression, scopedValues: scopedValues);
+      final Object? value = evaluateFormula(
+        expression,
+        scopedValues: scopedValues,
+      );
+      return typed ? _asType(value, variable.type) : value;
     } finally {
       _computedDepth--;
+      _computing.remove(variable.name);
     }
   }
 
+  /// [variableValueOf] with a named [scopedValues].
+  static Object? variableValue(
+    VariableData variable, {
+    required ScopedValues scopedValues,
+  }) => variableValueOf(variable, scopedValues);
+
+  static Object? _asType(Object? value, VariableType type) => switch (type) {
+    // A choice holds the id of one of its options.
+    VariableType.text ||
+    VariableType.choice => FormulaEvaluator.stringify(value),
+    VariableType.integer =>
+      value is num ? value.round() : num.tryParse('${value ?? ''}')?.round(),
+    VariableType.decimal =>
+      value is num
+          ? value.toDouble()
+          : num.tryParse('${value ?? ''}')?.toDouble(),
+    VariableType.boolean =>
+      value is bool
+          ? value
+          : value is String
+          ? bool.tryParse(value, caseSensitive: false)
+          : value != null && value != 0,
+    VariableType.list => value is List ? value : null,
+    VariableType.map => value is Map ? value : null,
+    VariableType.color =>
+      value is ColorRGBA
+          ? value
+          : value is String
+          ? ColorRGBA.fromHex(value)
+          : null,
+    VariableType.image => value,
+  };
+
+  /// Evaluates a formula [expression] (the part after `${=`), reading its
+  /// variable paths from [scopedValues]. See [FormulaEvaluator].
   static Object? evaluateFormula(
     String expression, {
     required ScopedValues scopedValues,

@@ -45,6 +45,7 @@ class AppConfirmDialog {
           params: action.params,
           barrierDismissible: action.barrierDismissible,
           barrierColor: action.barrierColor?.toFlutterColor(),
+          placement: action.placement,
         );
         final bool confirmed = ConfirmAction.isConfirmResult(result);
         return (

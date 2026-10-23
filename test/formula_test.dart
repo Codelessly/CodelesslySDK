@@ -33,6 +33,63 @@ void main() {
       FormulaEvaluator.evaluate(expression, resolve);
 
   group('FormulaEvaluator', () {
+    test('object builds records a list can filter and sort', () {
+      expect(eval("object('title', 'Black', 'level', 0.87)"), {
+        'title': 'Black',
+        'level': 0.87,
+      });
+      expect(
+        eval(
+          "map(sortBy(filter([object('n', 'a', 'v', 3), object('n', 'b', "
+          "'v', 1), object('n', 'c', 'v', 0)], r => r.v > 0), 'v'), 'n')",
+        ),
+        ['b', 'a'],
+      );
+      expect(eval("object('k', qty * 2).k"), 4);
+      // A dangling key is dropped.
+      expect(eval("object('a', 1, 'b')"), {'a': 1});
+    });
+
+    test('parses tells well-formed formulas apart', () {
+      expect(FormulaEvaluator.parses('level > limit'), isTrue);
+      expect(FormulaEvaluator.parses('null'), isTrue);
+      expect(FormulaEvaluator.parses('level >'), isFalse);
+      expect(FormulaEvaluator.parses("if(a, 'x'"), isFalse);
+    });
+
+    test('math helpers', () {
+      expect(eval('clamp(1.4, 0, 1)'), 1);
+      expect(eval('clamp(-3, 0, 1)'), 0);
+      expect(eval('round(sin(0), 3)'), 0);
+      expect(eval('cos(0)'), 1);
+      expect(eval('sqrt(16)'), 4);
+      expect(eval('pow(2, 10)'), 1024);
+      expect(eval('pad(5, 2)'), '05');
+      expect(eval("pad(7, 3, ' ')"), '  7');
+      expect(eval('pad(123, 2)'), '123');
+      expect(eval("alpha('#FF4D4F', 0.12)"), '#1FFF4D4F');
+      expect(eval("alpha('#80ff4d4f', 1)"), '#FFFF4D4F');
+      expect(eval("alpha('red', 1)"), null);
+      expect(eval('take([1, 2, 3, 4], 3)'), [1, 2, 3]);
+      expect(eval('take([1], 3)'), [1]);
+      expect(eval('concat([1, 2], [3], 4)'), [1, 2, 3, 4]);
+      expect(eval('concat(take([1, 2, 3], 2), [9])'), [1, 2, 9]);
+      expect(eval('[1, 2] + [3]'), [1, 2, 3]);
+      expect(eval('[1, 2] + 3'), [1, 2, 3]);
+      expect(eval("'a' + 'b'"), 'ab');
+      expect(eval('skip([1, 2, 3], 1)'), [2, 3]);
+      expect(eval("keys(object('a', 1, 'b', 2))"), ['a', 'b']);
+      expect(eval('keys(qty)'), isEmpty);
+      // A map read with a computed key, e.g. a snooze deadline by alert id.
+      expect(
+        eval(
+          "map(filter([object('id', 'a'), object('id', 'b')], r => "
+          "object('a', 900)[r.id] > 880), 'id')",
+        ),
+        ['a'],
+      );
+    });
+
     test('arithmetic and precedence', () {
       expect(eval('1 + 2 * 3'), 7);
       expect(eval('(1 + 2) * 3'), 9);

@@ -27,8 +27,14 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `condition ? a : b`. `+` joins text when either side is text.
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
-///    endsWith, where, without, number, text, isEmpty and isNotEmpty. See
+///    endsWith, where, without, number, text, isEmpty, isNotEmpty, clamp,
+///    sin, cos, sqrt, pow, pad (`pad(5, 2)` is "05") and alpha
+///    (`alpha('#FF4D4F', 0.12)` is "#1FFF4D4F"), take, skip and keys (a map's
+///    keys as text). See
 ///    [FormulaEvaluator.functions].
+///  - `object(key, value, ...)` builds a map from key/value pairs, since
+///    braces can't appear in a formula: a list of records for a list view is
+///    `[object('title', 'Fresh', 'level', fresh), ...]`.
 ///  - list functions that take a predicate or key: filter, where, count,
 ///    find, any, all, map, sortBy, unique, sum and join. The predicate is a
 ///    lambda, `item => expression`, or a field name, optionally with a value
@@ -78,6 +84,9 @@ class FormulaEvaluator {
       return null;
     }
   }
+
+  /// Whether [expression] is a well-formed formula.
+  static bool parses(String expression) => _parse(expression) != null;
 
   /// The variable paths [expression] reads, e.g. `storage.cart` and `qty`.
   static Set<String> referencedPaths(String expression) {
@@ -394,6 +403,17 @@ class FormulaEvaluator {
       'thousands(1094) → 1,094',
     ),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
+    FormulaFunctionDoc(
+      'concat',
+      'concat(list, list or value, ...)',
+      'concat(take(history, 23), [soc])',
+    ),
+    FormulaFunctionDoc(
+      'alpha',
+      'alpha(color, opacity)',
+      "alpha('#FF4D4F', 0.12) → #1FFF4D4F",
+    ),
+    FormulaFunctionDoc('pad', 'pad(value, width, fill)', 'pad(5, 2) → 05'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
     FormulaFunctionDoc(
       'isEmpty',
@@ -955,6 +975,16 @@ Object? _distance(List<Object?> a) {
   return unit.startsWith('mi') ? km / 1.609344 : km;
 }
 
+/// [color] (`#RRGGBB` or `#AARRGGBB`) at [opacity] (0 to 1), as
+/// `#AARRGGBB`.
+String? _alpha(Object? color, num opacity) {
+  final String hex = FormulaEvaluator.stringify(color).replaceAll('#', '');
+  if (hex.length != 6 && hex.length != 8) return null;
+  final String rgb = hex.substring(hex.length - 6).toUpperCase();
+  final int a = (opacity.clamp(0, 1) * 255).round();
+  return '#${a.toRadixString(16).padLeft(2, '0').toUpperCase()}$rgb';
+}
+
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
@@ -1074,6 +1104,10 @@ final Map<String, _Function> _functions = {
     if (_arg(a, 0) case final Map m) ...m.map((k, v) => MapEntry('$k', v)),
     FormulaEvaluator.stringify(_arg(a, 1)): _arg(a, 2),
   },
+  'concat': (a) => [
+    for (final Object? item in a)
+      if (item is Iterable) ...item else item,
+  ],
   'keys': (a) => switch (_arg(a, 0)) {
     final Map m => m.keys.map((k) => k.toString()).toList(),
     _ => <Object?>[],
@@ -1130,6 +1164,11 @@ final Map<String, _Function> _functions = {
     return '${n < 0 ? '-' : ''}$whole${parts.length > 1 ? '.${parts[1]}' : ''}';
   },
   'number': (a) => _toNum(_arg(a, 0)),
+  'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
+  'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
+    _intArg(_arg(a, 1)),
+    _arg(a, 2) == null ? '0' : FormulaEvaluator.stringify(_arg(a, 2)),
+  ),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
   'isNotEmpty': (a) => _truthy(_functions['length']!(a)),
@@ -1310,6 +1349,8 @@ class _Binary extends _Node {
     final Object? b = right.eval(resolve);
     switch (op) {
       case '+':
+        // Lists join, and a list plus a value appends it.
+        if (a is Iterable) return [...a, if (b is Iterable) ...b else b];
         final num? na = a is String ? null : _toNum(a);
         final num? nb = b is String ? null : _toNum(b);
         if (na != null && nb != null) return _tidy(na + nb);

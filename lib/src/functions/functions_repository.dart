@@ -571,7 +571,19 @@ class FunctionsRepository {
       barrierDismissible: action.barrierDismissible,
       barrierColor: action.barrierColor?.toFlutterColor(),
       showCloseButton: action.showCloseButton,
+      placement: action.placement,
+      anchorGap: action.anchorGap,
     );
+  }
+
+  /// The global rectangle of the widget [context] belongs to, if it is laid
+  /// out.
+  static Rect? _globalRectOf(BuildContext context) {
+    final RenderObject? box = context.mounted
+        ? context.findRenderObject()
+        : null;
+    if (box is! RenderBox || !box.hasSize || !box.attached) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
   }
 
   /// The id of the published layout that holds the canvas [canvasId], if any.
@@ -590,6 +602,8 @@ class FunctionsRepository {
     bool barrierDismissible = true,
     Color? barrierColor,
     bool showCloseButton = false,
+    DialogPlacement placement = DialogPlacement.center,
+    double anchorGap = 6,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -632,21 +646,94 @@ class FunctionsRepository {
     // A chain triggered in the dialog can finish on this layout after the
     // dialog closes (e.g. Navigate back, then a toast).
     final List<BuildContext> openerHosts = ActionChainOpener.hostsFor(context);
-    final Object? result = await showDialog<Object?>(
-      context: context,
-      useRootNavigator: false,
-      barrierDismissible: barrierDismissible,
-      barrierColor: barrierColor,
-      routeSettings: RouteSettings(arguments: parsedParams),
-      builder: (context) => ActionChainOpener(
-        openerHosts: openerHosts,
-        child: CodelesslyDialogWidget(
-          showCloseButton: showCloseButton,
-          builder: (context) =>
-              CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
-        ),
+    Widget dialog(BuildContext context) => ActionChainOpener(
+      openerHosts: openerHosts,
+      child: CodelesslyDialogWidget(
+        showCloseButton: showCloseButton,
+        builder: (context) =>
+            CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
       ),
     );
+
+    final Size screen = MediaQuery.sizeOf(context);
+    final DialogPlacement effective = switch (placement) {
+      DialogPlacement.adaptive =>
+        screen.width < 600
+            ? DialogPlacement.bottomSheet
+            : DialogPlacement.center,
+      _ => placement,
+    };
+    final Rect? anchor = effective == DialogPlacement.anchored
+        ? _globalRectOf(context)
+        : null;
+
+    final Future<Object?> shown = switch (effective) {
+      DialogPlacement.bottomSheet => showGeneralDialog<Object?>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: 'Close',
+        barrierColor: barrierColor ?? Colors.black54,
+        transitionDuration: const Duration(milliseconds: 250),
+        routeSettings: RouteSettings(arguments: parsedParams),
+        pageBuilder: (context, _, _) => CodelesslySheetPlacement(
+          child: ActionChainOpener(
+            openerHosts: openerHosts,
+            child: CanvasSizingScope(
+              sizing: CanvasSizing.fill,
+              child: CodelesslyWidget(
+                codelessly: codelessly,
+                layoutID: layoutId,
+              ),
+            ),
+          ),
+        ),
+        transitionBuilder: (context, animation, _, child) => SlideTransition(
+          position: Tween(begin: const Offset(0, 1), end: Offset.zero).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+          ),
+          child: child,
+        ),
+      ),
+      DialogPlacement.anchored when anchor != null =>
+        showGeneralDialog<Object?>(
+          context: context,
+          useRootNavigator: false,
+          barrierDismissible: barrierDismissible,
+          barrierLabel: 'Close',
+          barrierColor: barrierColor ?? Colors.transparent,
+          transitionDuration: const Duration(milliseconds: 120),
+          routeSettings: RouteSettings(arguments: parsedParams),
+          pageBuilder: (context, _, _) => CodelesslyAnchoredPlacement(
+            anchor: anchor,
+            gap: anchorGap,
+            child: ActionChainOpener(
+              openerHosts: openerHosts,
+              child: CanvasSizingScope(
+                sizing: CanvasSizing.design,
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: CodelesslyWidget(
+                    codelessly: codelessly,
+                    layoutID: layoutId,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          transitionBuilder: (context, animation, _, child) =>
+              FadeTransition(opacity: animation, child: child),
+        ),
+      _ => showDialog<Object?>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierColor: barrierColor,
+        routeSettings: RouteSettings(arguments: parsedParams),
+        builder: dialog,
+      ),
+    };
+    final Object? result = await shown;
     if (context.mounted) {
       codelessly.notifyNavigationListeners(
         context,
@@ -1138,6 +1225,14 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       action.variable.name,
     );
     if (variableNotifier == null) return false;
+    if (variableNotifier.value.isComputed) {
+      DebugLogger.instance.printInfo(
+        'Variable ${action.variable.name} is computed from a formula and '
+        "can't be set.",
+        name: name,
+      );
+      return false;
+    }
 
     String newValue = substituteNewValue(
       action.newValue,

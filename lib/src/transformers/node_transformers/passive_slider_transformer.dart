@@ -81,6 +81,15 @@ class PassiveSliderWidget extends StatelessWidget {
     );
   }
 
+  void onChangeEnd(BuildContext context, double internalValue) {
+    FunctionsRepository.triggerAction(
+      context,
+      node: node,
+      TriggerType.changeEnd,
+      value: internalValue,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ScopedValues scopedValues = ScopedValues.of(
@@ -94,13 +103,31 @@ class PassiveSliderWidget extends StatelessWidget {
           scopedValues: scopedValues,
         ) ??
         node.value;
+    final Object? marker = PropertyValueDelegate.getPropertyValue<Object>(
+      node,
+      'markerValue',
+      scopedValues: scopedValues,
+    );
+    final ColorRGBA? activeTrackColor =
+        PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+          node,
+          'activeTrackColor',
+          scopedValues: scopedValues,
+        );
 
     return TransformerSlider(
       node: node,
       settings: settings,
       variablesOverrides: variablesOverrides,
       onChanged: (value) => onChanged(context, value),
+      onChangeEnd: (value) => onChangeEnd(context, value),
       value: value,
+      markerValue: switch (marker) {
+        num() => marker.toDouble(),
+        String() => double.tryParse(marker),
+        _ => node.variables['markerValue'] == null ? node.markerValue : null,
+      },
+      activeTrackColor: activeTrackColor?.toFlutterColor(),
     );
   }
 }
@@ -112,6 +139,9 @@ class TransformerSlider extends StatelessWidget {
     required this.settings,
     required this.onChanged,
     required this.value,
+    this.onChangeEnd,
+    this.markerValue,
+    this.activeTrackColor,
     this.variablesOverrides = const [],
   });
 
@@ -119,16 +149,62 @@ class TransformerSlider extends StatelessWidget {
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
   final ValueChanged<double>? onChanged;
+  final ValueChanged<double>? onChangeEnd;
   final double value;
+
+  /// Where to draw [SliderProperties.markerColor]'s marker, if anywhere.
+  final double? markerValue;
+
+  /// Overrides [SliderProperties.activeTrackColor] (from a binding).
+  final Color? activeTrackColor;
+
+  /// [v] kept within the selectable part of the track.
+  double _selectable(double v) {
+    final SliderProperties p = node.properties;
+    final double lo = (p.selectableMin ?? p.min).clamp(p.min, p.max);
+    final double hi = (p.selectableMax ?? p.max).clamp(lo, p.max);
+    return v.clamp(lo, hi);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final SliderTrackShape trackShape = switch (node.properties.trackShape) {
+    final SliderProperties p = node.properties;
+    final double range = p.max - p.min;
+    final double? markerFraction = markerValue == null || range == 0
+        ? null
+        : ((markerValue! - p.min) / range).clamp(0.0, 1.0);
+    final SliderTrackShape baseTrackShape = switch (p.trackShape) {
       SliderTrackShapeEnum.rectangle => const RectangularSliderTrackShape(),
       SliderTrackShapeEnum.roundedRectangle =>
         const RoundedRectSliderTrackShape(),
       SliderTrackShapeEnum.gapped => const GappedSliderTrackShape(),
     };
+    // Filling from the end or drawing a marker needs our own track painter;
+    // otherwise the Material shapes stay as they were.
+    final SliderTrackShape trackShape = p.fillFromEnd || markerFraction != null
+        ? IndustrialSliderTrackShape(
+            fillFromEnd: p.fillFromEnd,
+            markerFraction: markerFraction,
+            markerColor: p.markerColor.toFlutterColor(),
+            markerWidth: p.markerWidth,
+            markerHeight: p.markerHeight,
+            radius: p.trackShape == SliderTrackShapeEnum.rectangle
+                ? 0
+                : (p.trackHeight / 2),
+          )
+        : baseTrackShape;
+    final SliderComponentShape thumbShape = !p.showThumb
+        ? const RoundSliderThumbShape(enabledThumbRadius: 0)
+        : p.thumbShape == SliderThumbShapeEnum.rectangle
+        ? RectSliderThumbShape(
+            width: p.thumbWidth,
+            height: p.thumbHeight,
+            radius: p.thumbCornerRadius,
+            borderColor: p.thumbBorderColor.toFlutterColor(),
+            borderWidth: p.thumbBorderWidth,
+            gripColor: p.thumbGripColor.toFlutterColor(),
+          )
+        : RoundSliderThumbShape(enabledThumbRadius: p.thumbRadius);
 
     final SliderComponentShape valueIndicatorShape = switch (node
         .properties
@@ -167,26 +243,30 @@ class TransformerSlider extends StatelessWidget {
           overlayColor: node.properties.showThumb
               ? node.properties.overlayColor.toFlutterColor()
               : Colors.transparent,
-          activeTrackColor: node.properties.activeTrackColor.toFlutterColor(),
+          activeTrackColor:
+              activeTrackColor ??
+              node.properties.activeTrackColor.toFlutterColor(),
           inactiveTrackColor: node.properties.inactiveTrackColor
               .toFlutterColor(),
           thumbColor: node.properties.thumbColor.toFlutterColor(),
-          thumbShape: RoundSliderThumbShape(
-            enabledThumbRadius: node.properties.showThumb
-                ? node.properties.thumbRadius
-                : 0,
-          ),
+          thumbShape: thumbShape,
           trackShape: trackShape,
           // GappedSliderTrackShape requires a gap; 6 is the Material 3
           // (2024) default.
           trackGap: node.properties.trackShape == SliderTrackShapeEnum.gapped
               ? 6
               : null,
-          tickMarkShape: node.properties.isDiscrete
-              ? RoundSliderTickMarkShape(
-                  tickMarkRadius: node.properties.tickMarkRadius,
+          tickMarkShape: !node.properties.isDiscrete
+              ? null
+              : node.properties.tickMarkStyle == SliderTickMarkStyle.notch
+              ? NotchSliderTickMarkShape(
+                  divisions: node.properties.divisions ?? 0,
+                  every: node.properties.notchEvery,
+                  color: node.properties.inactiveTickMarkColor.toFlutterColor(),
                 )
-              : null,
+              : RoundSliderTickMarkShape(
+                  tickMarkRadius: node.properties.tickMarkRadius,
+                ),
           showValueIndicator: showValueIndicator,
           secondaryActiveTrackColor: node.properties.secondaryActiveTrackColor
               ?.toFlutterColor(),
@@ -208,8 +288,18 @@ class TransformerSlider extends StatelessWidget {
           ),
         ),
         child: Slider(
-          value: value.clamp(node.properties.min, node.properties.max),
-          onChanged: onChanged,
+          value: _selectable(
+            value.clamp(node.properties.min, node.properties.max),
+          ),
+          onChanged: onChanged == null
+              ? null
+              : (v) {
+                  final double kept = _selectable(v);
+                  if (kept != value) onChanged!(kept);
+                },
+          onChangeEnd: onChangeEnd == null
+              ? null
+              : (v) => onChangeEnd!(_selectable(v)),
           autofocus: node.properties.autofocus,
           min: node.properties.min,
           max: node.properties.max,
@@ -224,6 +314,185 @@ class TransformerSlider extends StatelessWidget {
           padding: node.properties.padding?.flutterEdgeInsets,
         ),
       ),
+    );
+  }
+}
+
+/// A slider track that can fill from the thumb to the end and draw a thin
+/// marker at [markerFraction] of its length.
+class IndustrialSliderTrackShape extends SliderTrackShape
+    with BaseSliderTrackShape {
+  const IndustrialSliderTrackShape({
+    required this.fillFromEnd,
+    required this.markerFraction,
+    required this.markerColor,
+    required this.markerWidth,
+    required this.markerHeight,
+    required this.radius,
+  });
+
+  final bool fillFromEnd;
+  final double? markerFraction;
+  final Color markerColor;
+  final double markerWidth;
+  final double markerHeight;
+  final double radius;
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    Offset? secondaryOffset,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+  }) {
+    final Rect track = getPreferredRect(
+      parentBox: parentBox,
+      offset: offset,
+      sliderTheme: sliderTheme,
+      isEnabled: isEnabled,
+      isDiscrete: isDiscrete,
+    );
+    final Canvas canvas = context.canvas;
+    final Radius r = Radius.circular(radius);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(track, r),
+      Paint()..color = sliderTheme.inactiveTrackColor ?? Colors.grey,
+    );
+    final Rect active = fillFromEnd
+        ? Rect.fromLTRB(thumbCenter.dx, track.top, track.right, track.bottom)
+        : Rect.fromLTRB(track.left, track.top, thumbCenter.dx, track.bottom);
+    if (active.width > 0) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(active, r),
+        Paint()..color = sliderTheme.activeTrackColor ?? Colors.black,
+      );
+    }
+    if (markerFraction != null) {
+      final double x = track.left + track.width * markerFraction!;
+      canvas.drawRect(
+        Rect.fromCenter(
+          center: Offset(x, track.center.dy),
+          width: markerWidth,
+          height: markerHeight,
+        ),
+        Paint()..color = markerColor,
+      );
+    }
+  }
+}
+
+/// A rounded-rectangle thumb, like a fader knob, with an optional border
+/// and a short grip line across it.
+class RectSliderThumbShape extends SliderComponentShape {
+  const RectSliderThumbShape({
+    required this.width,
+    required this.height,
+    required this.radius,
+    required this.borderColor,
+    required this.borderWidth,
+    required this.gripColor,
+  });
+
+  final double width;
+  final double height;
+  final double radius;
+  final Color borderColor;
+  final double borderWidth;
+  final Color gripColor;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => Size(width, height);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final Canvas canvas = context.canvas;
+    final RRect body = RRect.fromRectAndRadius(
+      Rect.fromCenter(center: center, width: width, height: height),
+      Radius.circular(radius),
+    );
+    canvas.drawRRect(body, Paint()..color = sliderTheme.thumbColor!);
+    if (borderColor.a > 0 && borderWidth > 0) {
+      canvas.drawRRect(
+        body.deflate(borderWidth / 2),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = borderWidth
+          ..color = borderColor,
+      );
+    }
+    if (gripColor.a > 0) {
+      canvas.drawRect(
+        Rect.fromCenter(center: center, width: width * 0.43, height: 2),
+        Paint()..color = gripColor,
+      );
+    }
+  }
+}
+
+/// Division marks as short lines under the track; every fifth is longer.
+class NotchSliderTickMarkShape extends SliderTickMarkShape {
+  const NotchSliderTickMarkShape({
+    required this.divisions,
+    required this.color,
+    this.every = 1,
+  });
+
+  final int divisions;
+  final Color color;
+
+  /// Only every this many divisions gets a notch.
+  final int every;
+
+  @override
+  Size getPreferredSize({
+    required SliderThemeData sliderTheme,
+    bool isEnabled = false,
+  }) => const Size(1, 1);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    bool isEnabled = false,
+  }) {
+    final Rect track =
+        (sliderTheme.trackShape ?? const RectangularSliderTrackShape())
+            .getPreferredRect(parentBox: parentBox, sliderTheme: sliderTheme);
+    final double fraction = track.width == 0
+        ? 0
+        : ((center.dx - track.left) / track.width).clamp(0.0, 1.0);
+    final int index = (fraction * divisions).round();
+    final int step = every < 1 ? 1 : every;
+    if (index % step != 0) return;
+    final bool major = (index ~/ step) % 5 == 0;
+    final double top = center.dy + (sliderTheme.trackHeight ?? 4) / 2 + 3;
+    context.canvas.drawRect(
+      Rect.fromLTWH(center.dx - 0.5, top, 1, major ? 8 : 5),
+      Paint()..color = color,
     );
   }
 }

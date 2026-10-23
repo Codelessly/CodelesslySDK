@@ -53,6 +53,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'loadingIndicator': PassiveLoadingIndicatorTransformer(getNode, this),
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),
+      'gauge': PassiveGaugeTransformer(getNode, this),
+      'barChart': PassiveBarChartTransformer(getNode, this),
       'variance': PassiveVarianceTransformer(getNode, this),
       'webView': PassiveWebViewTransformer(getNode, this),
       'listView': PassiveListViewTransformer(getNode, this),
@@ -332,7 +334,6 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // List of value notifiers that the widget listens to. This includes node's
     // local values and the variables attached to node properties.
     final List<Listenable> listenables = [];
-
     // Local node values.
     final ValueNotifier<List<ValueModel>>? listenableNodeValues =
         codelesslyContext.nodeValues[node.id];
@@ -478,9 +479,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         .findVariableByName(name);
     if (variable == null) return;
     if (!listenables.contains(variable)) listenables.add(variable);
-    final String? expression = FormulaEvaluator.exactExpression(
-      variable.value.value,
-    );
+    // A computed variable listens to what its formula reads.
+    final String? expression = variable.value.isComputed
+        ? variable.value.formula
+        : FormulaEvaluator.exactExpression(variable.value.value);
     if (expression == null) return;
     for (final String path in FormulaEvaluator.referencedPaths(expression)) {
       final VariableMatch? match = VariableMatch.parse(
