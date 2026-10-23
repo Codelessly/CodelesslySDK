@@ -140,9 +140,34 @@ class TextUtils {
     List<Effect>? effects,
     Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
   }) {
+    // Tabular figures wrap each span in a style that only adds the feature,
+    // so the span's own style still sets everything else.
+    final bool tabular = node is TextNode && node.tabularFigures;
     return [
       for (final prop in props)
-        buildTextSpanForProp(
+        if (tabular)
+          TextSpan(
+            style: const TextStyle(
+              fontFeatures: [FontFeature.tabularFigures()],
+            ),
+            children: [
+              buildTextSpanForProp(
+                context,
+                rawText,
+                node: node,
+                prop: prop,
+                variablesOverrides: variablesOverrides,
+                nullSubstitutionMode: nullSubstitutionMode,
+                replaceVariableWithSymbol: replaceVariablesWithSymbol,
+                hasMissingFont: hasMissingFont,
+                tapGestureRecognizer: tapGestureRecognizers[prop.link],
+                effects:
+                    effects ?? (node is BlendMixin ? node.effects : const []),
+              ),
+            ],
+          )
+        else
+          buildTextSpanForProp(
           context,
           rawText,
           node: node,
