@@ -1,4 +1,3 @@
-import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/ui/codelessly_dialog_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,7 +13,8 @@ void main() {
       MaterialApp(
         home: CodelesslyDialogWidget(
           showCloseButton: false,
-          builder: (_) => const SizedBox(key: Key('form'), width: 640, height: 2000),
+          builder: (_) =>
+              const SizedBox(key: Key('form'), width: 640, height: 2000),
         ),
       ),
     );
@@ -32,7 +32,8 @@ void main() {
       MaterialApp(
         home: CodelesslyDialogWidget(
           showCloseButton: false,
-          builder: (_) => const SizedBox(key: Key('form'), width: 400, height: 300),
+          builder: (_) =>
+              const SizedBox(key: Key('form'), width: 400, height: 300),
         ),
       ),
     );
