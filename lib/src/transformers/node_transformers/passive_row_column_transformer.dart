@@ -341,42 +341,50 @@ class PassiveRowColumnWidget extends StatelessWidget {
   final NodeTransformerManager manager;
   final WidgetBuildSettings settings;
 
-  /// A flexing child hidden at runtime gives up its share of the free space,
-  /// so a visible sibling (an empty state next to a hidden spinner) can take
-  /// all of it. The flex drops to zero rather than removing the [Flexible] so
-  /// the child keeps its state when it shows again.
+  /// A child hidden at runtime collapses: it tells the [CodelesslyFlex] so
+  /// the row/column's spacing skips it, and a flexing one gives up its share
+  /// of the free space, so a visible sibling (an empty state next to a
+  /// hidden spinner) can take all of it. The flex drops to zero rather than
+  /// removing the [Flexible] so the child keeps its state when it shows
+  /// again.
   Widget _collapseWhenHidden(
     BuildContext context,
     BaseNode child,
     Widget sizedWidget,
   ) {
     final NodeTransformerManager manager = this.manager;
-    if (sizedWidget is! Flexible || manager is! PassiveNodeTransformerManager) {
-      return sizedWidget;
+    if (manager is! PassiveNodeTransformerManager) {
+      return FlexChildVisibility(collapsed: false, child: sizedWidget);
     }
 
-    Widget buildFlexible(BuildContext context) {
+    Widget buildChild(BuildContext context) {
       final bool hidden = manager.runtimeVisibility(context, child) == false;
+      if (sizedWidget is! Flexible) {
+        return FlexChildVisibility(collapsed: hidden, child: sizedWidget);
+      }
       // Without flex the hidden child would be laid out with unbounded
       // main-axis constraints, which a scrollable inside it can't take
       // (a hidden grid computed NaN offsets), so it gets no space at all.
-      return Flexible(
-        flex: hidden ? 0 : sizedWidget.flex,
-        fit: sizedWidget.fit,
-        child: SizedBox(
-          width: hidden ? 0 : null,
-          height: hidden ? 0 : null,
-          child: sizedWidget.child,
+      return FlexChildVisibility(
+        collapsed: hidden,
+        child: Flexible(
+          flex: hidden ? 0 : sizedWidget.flex,
+          fit: sizedWidget.fit,
+          child: SizedBox(
+            width: hidden ? 0 : null,
+            height: hidden ? 0 : null,
+            child: sizedWidget.child,
+          ),
         ),
       );
     }
 
     final List<Listenable> listenables = manager.listenablesFor(context, child);
-    if (listenables.isEmpty) return buildFlexible(context);
+    if (listenables.isEmpty) return buildChild(context);
     return ManagedListenableBuilder(
       key: ValueKey('${child.id}-flex'),
       listenables: listenables,
-      builder: buildFlexible,
+      builder: buildChild,
     );
   }
 
