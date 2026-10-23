@@ -753,4 +753,155 @@ void main() {
       }
     });
   });
+
+  group('a wrapping row (Wrap)', () {
+    // Chips 80 wide with a 10 margin on their right, so 90 apart.
+    List<RectangleNode> chips({
+      List<double> heights = const [20, 20, 20, 20],
+    }) => [
+      for (int i = 0; i < heights.length; i++)
+        RectangleNode(
+          id: 'chip$i',
+          name: 'chip$i',
+          basicBoxLocal: NodeBox(0, 0, 80, heights[i]),
+          margin: const EdgeInsetsModel.only(right: 10),
+        ),
+    ];
+
+    RowColumnNode wrapRow(
+      List<BaseNode> children, {
+      required double width,
+      SizeFit horizontalFit = SizeFit.fixed,
+      double runSpacing = 0,
+      MainAxisAlignmentC mainAxisAlignment = MainAxisAlignmentC.start,
+      CrossAxisAlignmentC crossAxisAlignment = CrossAxisAlignmentC.start,
+    }) =>
+        flex(
+            'row',
+            kRootNode,
+            children,
+            type: RowColumnType.row,
+            width: width,
+            height: 20,
+            horizontalFit: horizontalFit,
+            verticalFit: SizeFit.shrinkWrap,
+            mainAxisAlignment: mainAxisAlignment,
+            crossAxisAlignment: crossAxisAlignment,
+          )
+          ..wrap = true
+          ..runSpacing = runSpacing;
+
+    Offset offsetOf(WidgetTester tester, String id) =>
+        tester.getTopLeft(rectOf(id)) - tester.getTopLeft(rectOf('row'));
+
+    testWidgets('flows onto a second run when the row is too narrow', (
+      tester,
+    ) async {
+      final children = chips();
+      final row = wrapRow(children, width: 200, runSpacing: 8);
+      final sizes = await pump(
+        tester,
+        row,
+        children,
+        screen: screens.first,
+        host: Host.loose,
+      );
+      expect(offsetOf(tester, 'chip0'), Offset.zero);
+      expect(offsetOf(tester, 'chip1'), const Offset(90, 0));
+      expect(offsetOf(tester, 'chip2'), const Offset(0, 28));
+      expect(offsetOf(tester, 'chip3'), const Offset(90, 28));
+      expect(sizes['row'], const Size(200, 48));
+      expect(sizes['chip3'], const Size(80, 20));
+    });
+
+    testWidgets('a row that fills the screen wraps only on a narrow one', (
+      tester,
+    ) async {
+      // Six chips are 540 long: four fit on a phone, all of them on a tablet
+      // or a desktop.
+      final children = chips(heights: List.filled(6, 20));
+      final row = wrapRow(
+        children,
+        width: 390,
+        horizontalFit: SizeFit.expanded,
+        runSpacing: 8,
+      );
+      for (final (screen, host) in [
+        for (final screen in screens)
+          for (final host in [Host.loose, Host.unbounded]) (screen, host),
+      ]) {
+        final sizes = await pump(
+          tester,
+          row,
+          children,
+          screen: screen,
+          host: host,
+        );
+        final bool narrow = screen.width < 540;
+        for (int i = 0; i < 6; i++) {
+          expect(
+            offsetOf(tester, 'chip$i'),
+            narrow && i >= 4 ? Offset(90.0 * (i - 4), 28) : Offset(90.0 * i, 0),
+            reason: 'chip$i at $screen in $host',
+          );
+        }
+        expect(
+          sizes['row'],
+          Size(screen.width, narrow ? 48 : 20),
+          reason: '$screen in $host',
+        );
+      }
+    });
+
+    testWidgets('aligns runs on the main axis and items across a run', (
+      tester,
+    ) async {
+      final children = chips(heights: [20, 10, 20, 10]);
+      final row = wrapRow(
+        children,
+        width: 200,
+        mainAxisAlignment: MainAxisAlignmentC.end,
+        crossAxisAlignment: CrossAxisAlignmentC.center,
+      );
+      await pump(
+        tester,
+        row,
+        children,
+        screen: screens.first,
+        host: Host.loose,
+      );
+      // Each run is 180 long, placed at the end of the 200 wide row; the
+      // shorter chip sits in the middle of its 20 tall run.
+      expect(offsetOf(tester, 'chip0'), const Offset(20, 0));
+      expect(offsetOf(tester, 'chip1'), const Offset(110, 5));
+      expect(offsetOf(tester, 'chip2'), const Offset(20, 20));
+      expect(offsetOf(tester, 'chip3'), const Offset(110, 25));
+    });
+
+    testWidgets('an expanded child and a flex spacer keep their design size', (
+      tester,
+    ) async {
+      final a = rect('a', '', width: 80, height: 20);
+      final s = spacer('s', width: 30, height: 20);
+      final b = rect(
+        'b',
+        '',
+        width: 60,
+        height: 20,
+        horizontalFit: SizeFit.expanded,
+      );
+      final row = wrapRow([a, s, b], width: 300);
+      for (final host in Host.values) {
+        final sizes = await pump(
+          tester,
+          row,
+          [a, s, b],
+          screen: screens.first,
+          host: host,
+        );
+        expect(sizes['b'], const Size(60, 20), reason: '$host');
+        expect(offsetOf(tester, 'b'), const Offset(110, 0), reason: '$host');
+      }
+    });
+  });
 }
