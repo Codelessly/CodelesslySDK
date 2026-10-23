@@ -325,10 +325,7 @@ void main() {
       expect(painterOf(tester).cursorX, ms('2026-10-22 12:00'));
       expect(
         tester.getSemantics(find.bySemanticsLabel('Tide chart')),
-        isSemantics(
-          label: 'Tide chart',
-          value: 'Cursor 12:00 PM, 6.0 ft',
-        ),
+        isSemantics(label: 'Tide chart', value: 'Cursor 12:00 PM, 6.0 ft'),
       );
 
       // Tap to focus, then step 30 minutes with the arrow keys.
@@ -374,9 +371,7 @@ void main() {
     });
   });
 
-  testWidgets('the axis title and readout units can be bound', (
-    tester,
-  ) async {
+  testWidgets('the axis title and readout units can be bound', (tester) async {
     await pumpChart(
       tester,
       chart(
