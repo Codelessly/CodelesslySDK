@@ -212,12 +212,7 @@ void main() {
         'd',
         'b',
       ]);
-      expect(ids('sortBy(records, r => r.year, "desc")'), [
-        'c',
-        'b',
-        'a',
-        'd',
-      ]);
+      expect(ids('sortBy(records, r => r.year, "desc")'), ['c', 'b', 'a', 'd']);
       expect(eval('sortBy([2, 3, 1], null, "desc")'), [3, 2, 1]);
       expect(eval('sortByDesc([2, 3, 1])'), [3, 2, 1]);
     });

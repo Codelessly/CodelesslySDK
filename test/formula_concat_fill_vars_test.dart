@@ -23,13 +23,7 @@ void main() {
       id: 'r',
       name: 'r',
       basicBoxLocal: NodeBox(0, 0, 10, 10),
-      fills: [
-        PaintModel(
-          id: 'f',
-          type: PaintType.image,
-          downloadUrl: url,
-        ),
-      ],
+      fills: [PaintModel(id: 'f', type: PaintType.image, downloadUrl: url)],
     );
     expect(node(r'${fArt}').getUsedVariableNames(), {'fArt'});
     expect(

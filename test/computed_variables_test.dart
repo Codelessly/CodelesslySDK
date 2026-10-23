@@ -181,10 +181,11 @@ void main() {
           ),
         ],
       )..bindComputedVariables();
-      expect(
-        ComputedVariables.cyclicNames(context.variableNamesMap()),
-        {'a', 'b', 'self'},
-      );
+      expect(ComputedVariables.cyclicNames(context.variableNamesMap()), {
+        'a',
+        'b',
+        'self',
+      });
       expect(read(r'${a}', context), '');
       expect(read(r'${b}', context), '');
       expect(read(r'${self}', context), '');

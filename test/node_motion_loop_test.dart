@@ -3,20 +3,22 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> pump(WidgetTester tester, MotionModel motion,
-        {bool animate = true}) =>
-    tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: NodeMotion(
-            motion: motion,
-            animate: animate,
-            child: const SizedBox(width: 100, height: 100),
-          ),
-        ),
+Future<void> pump(
+  WidgetTester tester,
+  MotionModel motion, {
+  bool animate = true,
+}) => tester.pumpWidget(
+  Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(
+      child: NodeMotion(
+        motion: motion,
+        animate: animate,
+        child: const SizedBox(width: 100, height: 100),
       ),
-    );
+    ),
+  ),
+);
 
 double opacityOf(WidgetTester tester) {
   final Finder finder = find.byType(Opacity);
