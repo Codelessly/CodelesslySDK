@@ -99,7 +99,7 @@ class TextUtils {
     if (replaceVariableWithSymbol) {
       final spans = characters
           .splitMap(
-            variableSyntaxIdentifierRegex,
+            formulaOrVariableRegex,
             onMatch: (match) => VariableSpan(
               variable: match[0]!,
               node: node,

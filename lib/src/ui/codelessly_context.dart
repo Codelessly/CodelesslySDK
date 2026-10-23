@@ -4,6 +4,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../../codelessly_sdk.dart';
 
@@ -85,8 +86,110 @@ class CodelesslyContext with ChangeNotifier, Equatable {
 
   @override
   void dispose() {
+    unbindComputedVariables();
     nodeRebuildNotifier.dispose();
     super.dispose();
+  }
+
+  /// Listeners that keep computed variables up to date, by the notifier
+  /// they listen to. See [bindComputedVariables].
+  final List<(Listenable, VoidCallback)> _computedListeners = [];
+
+  /// The computed variables being evaluated, by id, to stop a cycle from
+  /// evaluating forever.
+  final Set<String> _computing = {};
+
+  /// Computes the value of every computed variable (a variable with a
+  /// [VariableData.formula]) in [variables] and keeps it up to date: each is
+  /// computed again when a variable its formula reads changes, or when
+  /// [data] changes. Their values are cached in their notifiers, so bindings
+  /// read and listen to them like any other variable.
+  ///
+  /// Computed variables in a cycle hold an empty value. Call this again when
+  /// [variables] changes; the previous listeners are removed.
+  /// See [ComputedVariables].
+  void bindComputedVariables() {
+    unbindComputedVariables();
+    final Map<String, VariableData> byName = variableNamesMap();
+    if (!byName.values.any((variable) => variable.isComputed)) return;
+    final Set<String> cyclic = ComputedVariables.cyclicNames(byName);
+    // The variables as declared: a result can change a computed variable's
+    // type, but each evaluation starts from the declared one.
+    final Map<String, VariableData> declared = {
+      for (final VariableData variable in byName.values)
+        if (variable.isComputed) variable.name: variable,
+    };
+
+    final List<VoidCallback> recomputeAll = [];
+    final List<Observable<VariableData>> ordered = [
+      for (final String name in ComputedVariables.evaluationOrder(byName))
+        ?findVariableByName(name),
+    ];
+    for (final Observable<VariableData> notifier in ordered) {
+      final VariableData variable = declared[notifier.value.name]!;
+      if (cyclic.contains(variable.name)) {
+        notifier.value = ComputedVariables.withResult(variable, null);
+        continue;
+      }
+      void recompute() => _recompute(notifier, variable);
+      recompute();
+      recomputeAll.add(recompute);
+      // Listeners are added in evaluation order, so of two computed
+      // variables reading the same input, the one the other reads updates
+      // first.
+      for (final String input in ComputedVariables.inputsOf(variable)) {
+        final Observable<VariableData>? source = findVariableByName(input);
+        if (source == null || identical(source, notifier)) continue;
+        source.addListener(recompute);
+        _computedListeners.add((source, recompute));
+      }
+    }
+    // Formulas can read `data`, which is set while widgets build: compute
+    // again after the frame, as setting a variable rebuilds its readers.
+    void onDataChanged() {
+      void run() {
+        for (final VoidCallback recompute in recomputeAll) {
+          recompute();
+        }
+      }
+
+      if (SchedulerBinding.instance.schedulerPhase ==
+          SchedulerPhase.persistentCallbacks) {
+        SchedulerBinding.instance.addPostFrameCallback((_) => run());
+      } else {
+        run();
+      }
+    }
+
+    addListener(onDataChanged);
+    _computedListeners.add((this, onDataChanged));
+  }
+
+  /// Removes the listeners [bindComputedVariables] added.
+  void unbindComputedVariables() {
+    for (final (Listenable listenable, VoidCallback listener)
+        in _computedListeners) {
+      listenable.removeListener(listener);
+    }
+    _computedListeners.clear();
+  }
+
+  void _recompute(Observable<VariableData> notifier, VariableData declared) {
+    if (!_computing.add(declared.id)) return;
+    try {
+      final Object? result = ComputedVariables.evaluate(
+        declared,
+        scopedValues: ScopedValues.preview(
+          variables: const {},
+          codelesslyContext: this,
+        ),
+      );
+      notifier.value = ComputedVariables.withResult(declared, result);
+    } catch (error) {
+      log('[CodelesslyContext] Computed variable ${declared.name}: $error');
+    } finally {
+      _computing.remove(declared.id);
+    }
   }
 
   /// Returns a map of all of the [VariableData]s in [variables] mapped by their
@@ -218,10 +321,16 @@ class CodelesslyContext with ChangeNotifier, Equatable {
   /// Allows to easily [value] of a variable with a given [name].
   /// Returns false if the variable does not exist.
   /// Returns true if the variable was updated successfully.
+  /// A computed variable (see [VariableData.formula]) can't be set: this
+  /// returns false and leaves it unchanged.
   bool updateVariable(String name, Object? value) {
     final ValueNotifier<VariableData>? variable = findVariableByName(name);
     if (variable == null) {
       log('[CodelesslyContext] Variable with name $name does not exist.');
+      return false;
+    }
+    if (variable.value.isComputed) {
+      log('[CodelesslyContext] Variable $name is computed and read-only.');
       return false;
     }
     final String newValue = value == null ? '' : '$value';
