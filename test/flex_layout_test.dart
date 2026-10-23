@@ -455,6 +455,37 @@ void main() {
     });
   });
 
+  testWidgets('a hugging column\'s min size includes its padding', (
+    tester,
+  ) async {
+    final label = rect('label', '', width: 60, height: 30);
+    final tile = RowColumnNode(
+      id: 'tile',
+      name: 'tile',
+      basicBoxLocal: NodeBox(0, 0, 120, 157),
+      children: const ['label'],
+      rowColumnType: RowColumnType.column,
+      horizontalFit: SizeFit.shrinkWrap,
+      verticalFit: SizeFit.shrinkWrap,
+      padding: const EdgeInsetsModel.all(17.5),
+      constraints: const BoxConstraintsModel(minWidth: 120, minHeight: 157),
+    );
+    label.parentID = 'tile';
+    final column = flex(
+      'column',
+      kRootNode,
+      [tile],
+      type: RowColumnType.column,
+      width: 300,
+      height: 400,
+    );
+    await everywhere(tester, column, [tile, label], (sizes, screen, host) {
+      // Like the editor, the min height is the tile's whole box: content
+      // and padding together, not the content alone.
+      expect(sizes['tile'], const Size(120, 157), reason: '$host $screen');
+    });
+  });
+
   testWidgets('fixed children wider than the row shrink to fit it (B1)', (
     tester,
   ) async {

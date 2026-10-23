@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
@@ -59,12 +61,25 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     final bool isPlaceholder =
         parent is CanvasNode && parent.properties.bodyId == rowColumnNode.id;
 
+    // A shape pads around this widget, except a scroll view, which puts the
+    // padding inside itself. Min and max constraints size the whole box, so
+    // the padding outside comes off them here.
+    final bool scrolls =
+        withScroll &&
+        rowColumnNode is ScrollableMixin &&
+        (rowColumnNode as ScrollableMixin).isScrollable;
+    final EdgeInsetsModel padding =
+        rowColumnNode is DefaultShapeNode && !scrolls
+        ? rowColumnNode.resolvedPadding()
+        : EdgeInsetsModel.zero;
+
     final FitBox outerBox = FitBox(
       width: _outerExtent(
         rowColumnNode.horizontalFit,
         design: rowColumnNode.outerBoxLocal.width,
         min: rowColumnNode.constraints.minWidth,
         max: rowColumnNode.constraints.maxWidth,
+        inset: padding.horizontal,
       ),
       fillWidth: _fillsAxis(
         rowColumnNode.horizontalFit,
@@ -77,6 +92,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
               design: rowColumnNode.outerBoxLocal.height,
               min: rowColumnNode.constraints.minHeight,
               max: rowColumnNode.constraints.maxHeight,
+              inset: padding.vertical,
             ),
       fillHeight:
           !(isPlaceholder && rowColumnNode.verticalFit.isFlex) &&
@@ -206,14 +222,18 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   /// unbounded one. Flexible takes its design size, as leaves do: its
   /// [Flexible] parent lets it get smaller, never larger, matching the
   /// editor's `min(flex share, design size)`.
+  ///
+  /// [inset] is the padding outside this widget on the axis, which a min or
+  /// max constraint (the whole box's) leaves less room inside.
   static double? _outerExtent(
     SizeFit fit, {
     required double design,
     required double? min,
     required double? max,
+    double inset = 0,
   }) => switch (fit) {
-    SizeFit.shrinkWrap => min,
-    SizeFit.expanded => max ?? design,
+    SizeFit.shrinkWrap => min == null ? null : math.max(0, min - inset),
+    SizeFit.expanded => max == null ? design : math.max(0, max - inset),
     SizeFit.fixed || SizeFit.locked || SizeFit.flexible => design,
   };
 
