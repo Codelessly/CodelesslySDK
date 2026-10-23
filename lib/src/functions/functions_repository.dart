@@ -1139,6 +1139,16 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       name: action.variable.name,
     );
     if (variableNotifier == null) return false;
+    // A computed variable's value comes from its formula: setting it does
+    // nothing.
+    if (variableNotifier.value.isComputed) {
+      DebugLogger.instance.printInfo(
+        'Variable ${variableNotifier.value.name} is computed from a formula '
+        'and cannot be set.',
+        name: name,
+      );
+      return false;
+    }
 
     String newValue = substituteNewValue(
       action.newValue,
@@ -1202,6 +1212,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     final ValueNotifier<VariableData>? variableNotifier = payload.variables[id];
     if (variableNotifier == null) return false;
+    if (variableNotifier.value.isComputed) return false;
 
     variableNotifier.value = variableNotifier.value.copyWith(value: value);
 
@@ -1231,6 +1242,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         .findVariableByName(match.name);
 
     if (propertyNotifier == null) return false;
+    if (propertyNotifier.value.isComputed) return false;
 
     if (match.name != match.fullPath &&
         (propertyNotifier.value.type == VariableType.map ||

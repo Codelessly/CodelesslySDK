@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:codelessly_api/codelessly_api.dart' show variableSyntaxIdentifierRegex;
 
 /// The body of a formula: text and quoted strings, with braces only in
 /// balanced pairs nested up to [depth] deep, such as the object literal in
@@ -18,6 +19,12 @@ String _formulaBody(int depth) {
 /// for object literals such as `${= merge(r, {favorite: true})}`.
 final RegExp formulaRegex = RegExp(
   r'(?<!\\)\$\{=(?<expr>' + _formulaBody(3) + r')\}',
+);
+
+/// Matches the formulas and variables of a text, formulas first so a
+/// formula's own braces (`${= {a: 1}.a}`) don't end it early.
+final RegExp formulaOrVariableRegex = RegExp(
+  '${formulaRegex.pattern}|${variableSyntaxIdentifierRegex.pattern}',
 );
 
 /// Matches a text that is exactly one formula, e.g. `${= qty * price}`.
