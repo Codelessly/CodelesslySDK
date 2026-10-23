@@ -592,18 +592,24 @@ class FunctionsRepository {
       presentation: action.presentation,
       alignment: action.alignment.flutterAlignment ?? Alignment.center,
       insets: action.insets.flutterEdgeInsets,
+      maxHeightFactor: action.maxHeightFactor,
     );
   }
 
   /// The size canvas [canvasId] was designed at, if it is published.
   static Size? canvasDesignSize(Codelessly codelessly, String canvasId) {
+    final BaseNode? canvas = publishedCanvas(codelessly, canvasId);
+    if (canvas == null) return null;
+    return Size(canvas.basicBoxLocal.width, canvas.basicBoxLocal.height);
+  }
+
+  /// The canvas node [canvasId], if it is published and downloaded.
+  static CanvasNode? publishedCanvas(Codelessly codelessly, String canvasId) {
     for (final layout
         in codelessly.dataManager.publishModel?.layouts.values ??
             const <SDKPublishLayout>[]) {
       final BaseNode? canvas = layout.canvases[canvasId]?[canvasId];
-      if (canvas != null) {
-        return Size(canvas.basicBoxLocal.width, canvas.basicBoxLocal.height);
-      }
+      if (canvas is CanvasNode) return canvas;
     }
     return null;
   }
@@ -646,6 +652,7 @@ class FunctionsRepository {
     DialogPresentation presentation = DialogPresentation.dialog,
     AlignmentGeometry alignment = Alignment.center,
     EdgeInsets insets = EdgeInsets.zero,
+    double? maxHeightFactor,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -696,7 +703,12 @@ class FunctionsRepository {
       barrierDismissible: barrierDismissible,
       barrierColor: barrierColor,
       showCloseButton: showCloseButton,
+      maxHeightFactor: maxHeightFactor,
       designSize: canvasDesignSize(codelessly, canvasId),
+      hugsContent: switch (publishedCanvas(codelessly, canvasId)) {
+        final CanvasNode canvas => CanvasViewport.sizesToContent(canvas),
+        null => false,
+      },
       routeSettings: RouteSettings(arguments: parsedParams),
       builder: (context) => ActionChainOpener(
         openerHosts: openerHosts,
@@ -716,13 +728,16 @@ class FunctionsRepository {
   /// Opens what [builder] builds per [presentation] and completes with the
   /// value it is closed with:
   ///
-  /// * a dialog at [alignment], kept [insets] from the screen edges;
+  /// * a dialog at [alignment], kept [insets] from the screen edges, at most
+  ///   [maxHeightFactor] of the screen high;
   /// * a bottom sheet at the screen's width and the canvas's [designSize]
-  ///   height, at most 88% of the screen (adaptive: a sheet below 600 px
-  ///   wide, a dialog otherwise);
+  ///   height, at most [maxHeightFactor] (else 88%) of the screen (adaptive:
+  ///   a sheet below 600 px wide, a dialog otherwise);
   /// * a side sheet sliding in from the right at the canvas's width, as tall
   ///   as the screen less [insets].
   ///
+  /// With [hugsContent] (the canvas hugs its height) a sheet is as tall as
+  /// its content, up to its cap; a side sheet is then centered vertically.
   /// The canvas draws the sheet's surface (fill, corners, grab handle).
   static Future<T?> presentCanvas<T>(
     BuildContext context, {
@@ -733,7 +748,9 @@ class FunctionsRepository {
     bool barrierDismissible = true,
     Color? barrierColor,
     bool showCloseButton = false,
+    double? maxHeightFactor,
     Size? designSize,
+    bool hugsContent = false,
     RouteSettings? routeSettings,
   }) {
     final bool asSheet = switch (presentation) {
@@ -764,7 +781,7 @@ class FunctionsRepository {
             child: Padding(
               padding: insets,
               child: CanvasSizingScope(
-                sizing: CanvasSizing.fill,
+                sizing: hugsContent ? CanvasSizing.design : CanvasSizing.fill,
                 child: SizedBox(
                   width: designSize?.width ?? 420,
                   child: Builder(builder: builder),
@@ -788,16 +805,34 @@ class FunctionsRepository {
         elevation: 0,
         constraints: const BoxConstraints(),
         routeSettings: routeSettings,
-        builder: (context) => CanvasSizingScope(
-          sizing: CanvasSizing.fill,
-          child: SizedBox(
-            height: math.min(
-              designSize?.height ?? double.infinity,
-              MediaQuery.sizeOf(context).height * 0.88,
+        builder: (context) {
+          final Size screen = MediaQuery.sizeOf(context);
+          final double cap =
+              CodelesslyDialogWidget.maxHeightFor(
+                maxHeightFactor,
+                screen.height,
+              ) ??
+              screen.height * 0.88;
+          if (hugsContent) {
+            return CanvasSizingScope(
+              sizing: CanvasSizing.design,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: screen.width,
+                  maxHeight: cap,
+                ),
+                child: Builder(builder: builder),
+              ),
+            );
+          }
+          return CanvasSizingScope(
+            sizing: CanvasSizing.fill,
+            child: SizedBox(
+              height: math.min(designSize?.height ?? double.infinity, cap),
+              child: Builder(builder: builder),
             ),
-            child: Builder(builder: builder),
-          ),
-        ),
+          );
+        },
       );
     }
     return showDialog<T>(
@@ -810,6 +845,7 @@ class FunctionsRepository {
         showCloseButton: showCloseButton,
         alignment: alignment,
         insets: insets,
+        maxHeightFactor: maxHeightFactor,
         builder: builder,
       ),
     );

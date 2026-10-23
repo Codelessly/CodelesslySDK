@@ -27,10 +27,16 @@ class PassiveIconWidget extends StatelessWidget {
   final IconNode node;
   final bool useFonts;
 
+  /// The values the icon's bindings read; by default the ones in scope
+  /// where it builds. A design canvas passes its variable defaults, which
+  /// its build context doesn't hold.
+  final ScopedValues? scopedValues;
+
   const PassiveIconWidget({
     super.key,
     required this.node,
     this.useFonts = false,
+    this.scopedValues,
   });
 
   /// [node]'s icon with its bound color and glyph applied: a bound or
@@ -62,7 +68,7 @@ class PassiveIconWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return retrieveIconWidget(
-          resolvedIcon(node, ScopedValues.of(context)),
+          resolvedIcon(node, scopedValues ?? ScopedValues.of(context)),
           node.basicBoxLocal.width,
         ) ??
         SizedBox(
