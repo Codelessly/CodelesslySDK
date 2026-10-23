@@ -4,6 +4,8 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'parent_size.dart';
+
 /// Builds a scroll view. [shrinkWrap] says whether the view must size itself
 /// to its items on its scroll axis.
 typedef ViewportContentBuilder = Widget Function(
@@ -243,6 +245,10 @@ bool subtreeBlocksIntrinsics(BaseNode node, GetNode getNode) {
   if (node is ScrollableMixin && node is! CanvasNode && node.isScrollable) {
     return true;
   }
+  // Scaled content and nodes that read their parent's size are built with
+  // a LayoutBuilder.
+  if (node is FrameNode && node.contentFit != null) return true;
+  if (readsParentSize(node)) return true;
   if (node is ChildrenMixin) {
     for (final String id in node.children) {
       if (subtreeBlocksIntrinsics(getNode(id), getNode)) return true;

@@ -54,6 +54,7 @@ abstract final class VariablePreview {
         variables: scopedValues.variables,
         codelesslyContext: scopedValues.codelesslyContext,
         screenSize: scopedValues.screenSize,
+        parentSize: scopedValues.parentSize,
         data: scopedValues.data,
         indexedItem: item,
       );

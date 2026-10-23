@@ -391,6 +391,46 @@ void main() {
     });
   }
 
+  testWidgets('a confirm with a canvas dialog shows it as a bottom sheet and '
+      'confirms from it', (tester) async {
+    await pumpLayouts(tester, [
+      mainLayout([
+        ConfirmAction(
+          title: 'Reopen?',
+          dialogId: 'confirmCanvas',
+          presentation: DialogPresentation.bottomSheet,
+          actions: [ShowToastAction(message: 'Reopened')],
+        ),
+      ]),
+      layoutOf('confirm', [
+        canvas('confirmCanvas', 'confirmBody', verticalFit: SizeFit.shrinkWrap),
+        body('confirmBody', 'confirmCanvas', ['yes']),
+        button('yes', 'confirmBody', 'Reopen', [
+          NavigationAction(
+            navigationType: NavigationType.pop,
+            destinationId: '',
+            params: {ConfirmAction.resultKey: true},
+          ),
+        ]),
+      ]),
+    ], size: phone);
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    final Rect sheet = tester.getRect(bottomSheet);
+    expect(sheet.width, phone.width);
+    expect(sheet.bottom, phone.height);
+    expect(dragHandle, findsOneWidget);
+
+    await tester.tap(find.text('Reopen'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(bottomSheet, findsNothing);
+    expect(find.text('Reopened'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('a saved show-dialog action stays a centered dialog that '
       'scales and fades in', (tester) async {
     final action = ActionModel.fromJson({

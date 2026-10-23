@@ -413,6 +413,7 @@ class PropertyValueDelegate {
       'auth' => scopedValues.appUser,
       'result' => ActionChain.current?.result,
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
+      'parent' => scopedValues.parentSize,
       _ => null,
     };
 
