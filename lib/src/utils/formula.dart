@@ -378,6 +378,11 @@ class FormulaEvaluator {
       'without(list, other)',
       'without(all, picked)',
     ),
+    FormulaFunctionDoc(
+      'concat',
+      'concat(list or item, ...)',
+      'concat([record.art], sleeves) or list1 + list2',
+    ),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
     FormulaFunctionDoc(
@@ -1214,6 +1219,10 @@ final Map<String, _Function> _functions = {
   'merge': _merge,
   'set': (a) => _set(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'unique': _unique,
+  'concat': (a) => [
+    for (final value in a)
+      if (value is Iterable) ...value else if (value != null) value,
+  ],
   'without': (a) => [
     for (final item in _values(_arg(a, 0), null))
       if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
@@ -1426,6 +1435,8 @@ class _Binary extends _Node {
         final num? na = a is String ? null : _toNum(a);
         final num? nb = b is String ? null : _toNum(b);
         if (na != null && nb != null) return _tidy(na + nb);
+        // Lists join: [first] + rest.
+        if (a is List && b is List) return [...a, ...b];
         return FormulaEvaluator.stringify(a) + FormulaEvaluator.stringify(b);
       case '-':
         return _tidy(_num(a) - _num(b));
