@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
@@ -367,15 +366,21 @@ class PassiveRowColumnWidget extends StatelessWidget {
               scopedValues: ScopedValues.of(context),
             )
           : null;
-      // Without flex the hidden child would be laid out with unbounded
+      // A child bound to no share (an empty progress fill) collapses too.
+      final bool empty = boundFlex != null && boundFlex <= 0;
+      final bool collapsed = hidden || empty;
+      final bool isRow =
+          node is RowColumnMixin &&
+          (node as RowColumnMixin).rowColumnType == RowColumnType.row;
+      // Without flex the collapsed child would be laid out with unbounded
       // main-axis constraints, which a scrollable inside it can't take
       // (a hidden grid computed NaN offsets), so it gets no space at all.
       return Flexible(
-        flex: hidden ? 0 : math.max(0, boundFlex ?? sizedWidget.flex),
+        flex: collapsed ? 0 : boundFlex ?? sizedWidget.flex,
         fit: sizedWidget.fit,
         child: SizedBox(
-          width: hidden ? 0 : null,
-          height: hidden ? 0 : null,
+          width: hidden || (empty && isRow) ? 0 : null,
+          height: hidden || (empty && !isRow) ? 0 : null,
           child: sizedWidget.child,
         ),
       );
