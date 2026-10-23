@@ -214,26 +214,28 @@ abstract class WidgetNodeTransformerManager
   }
 
   /// Semantics a node's `semanticLabel` variable gives it (a text with paths
-  /// or formulas): one node with that label. It replaces what the children
-  /// read, or, on a button (a node that reacts to taps), comes first. A `semanticSelected`
-  /// formula marks it selected, e.g. the chosen tab or chip.
+  /// or formulas): one node with that label, replacing what the children
+  /// read. A button (a node that reacts to taps) keeps its tap and long press
+  /// on that node; a widget (a field, a dropdown) keeps its own semantics,
+  /// read after the label. A `semanticSelected` formula marks it selected,
+  /// e.g. the chosen tab or chip.
   Widget _wrapWithCustomSemantics(
     BaseNode node,
     Widget widget, {
     String? label,
     String? selected,
   }) {
-    final bool tappable =
-        node is ReactionMixin &&
-        (node as ReactionMixin).reactions.any(
-          (reaction) =>
-              reaction.trigger.type == TriggerType.click &&
-              reaction.action.enabled,
-        );
-    final bool interactive =
-        tappable ||
-        (node is CustomPropertiesMixin &&
-            node.handlesDefaultReactionsInternally);
+    List<Reaction> reactionsOf(TriggerType type) => [
+      if (node is ReactionMixin)
+        for (final Reaction reaction in (node as ReactionMixin).reactions)
+          if (reaction.trigger.type == type && reaction.action.enabled)
+            reaction,
+    ];
+    final List<Reaction> taps = reactionsOf(TriggerType.click);
+    final List<Reaction> longPresses = reactionsOf(TriggerType.longPress);
+    final bool tappable = taps.isNotEmpty;
+    final bool widgetHandlesInput =
+        node is CustomPropertiesMixin && node.handlesDefaultReactionsInternally;
     return Builder(
       builder: (context) {
         final ScopedValues scopedValues = ScopedValues.of(context);
@@ -250,18 +252,42 @@ abstract class WidgetNodeTransformerManager
                 selected,
                 scopedValues: scopedValues,
               );
-        final Widget child = Semantics(
+        if (widgetHandlesInput) {
+          // A field or dropdown's state and actions live on its own
+          // semantics, which merge in after the label.
+          return MergeSemantics(
+            child: Semantics(
+              container: true,
+              selected: isSelected,
+              label: text,
+              child: widget,
+            ),
+          );
+        }
+        return Semantics(
           container: true,
           button: tappable ? true : null,
           selected: isSelected,
           label: text,
-          // A label replaces the children's text, except on a tappable node
-          // or a widget (a field, a dropdown): its actions and state live on
-          // a child, so the children merge in after the label.
-          excludeSemantics: text != null && !interactive,
+          // The children's text and the tap handler below are left out, so
+          // the node's own tap and long press are given here.
+          excludeSemantics: text != null,
+          onTap: text != null && tappable
+              ? () => FunctionsRepository.triggerAction(
+                  context,
+                  TriggerType.click,
+                  reactions: taps,
+                )
+              : null,
+          onLongPress: text != null && longPresses.isNotEmpty
+              ? () => FunctionsRepository.triggerAction(
+                  context,
+                  TriggerType.longPress,
+                  reactions: longPresses,
+                )
+              : null,
           child: widget,
         );
-        return interactive ? MergeSemantics(child: child) : child;
       },
     );
   }
