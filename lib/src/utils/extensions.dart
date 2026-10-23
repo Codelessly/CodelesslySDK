@@ -491,6 +491,15 @@ extension CMainAxisAlignmentHelper on MainAxisAlignmentC {
         return flutter.MainAxisAlignment.spaceEvenly;
     }
   }
+
+  flutter.WrapAlignment get flutterWrapAlignment => switch (this) {
+    MainAxisAlignmentC.start => flutter.WrapAlignment.start,
+    MainAxisAlignmentC.end => flutter.WrapAlignment.end,
+    MainAxisAlignmentC.center => flutter.WrapAlignment.center,
+    MainAxisAlignmentC.spaceBetween => flutter.WrapAlignment.spaceBetween,
+    MainAxisAlignmentC.spaceAround => flutter.WrapAlignment.spaceAround,
+    MainAxisAlignmentC.spaceEvenly => flutter.WrapAlignment.spaceEvenly,
+  };
 }
 
 extension CCrossAxisAlignmentHelper on CrossAxisAlignmentC {
@@ -508,6 +517,15 @@ extension CCrossAxisAlignmentHelper on CrossAxisAlignmentC {
         return flutter.CrossAxisAlignment.baseline;
     }
   }
+
+  /// A [flutter.Wrap] has no stretch or baseline: those align to the start.
+  flutter.WrapCrossAlignment get flutterWrapAlignment => switch (this) {
+    CrossAxisAlignmentC.end => flutter.WrapCrossAlignment.end,
+    CrossAxisAlignmentC.center => flutter.WrapCrossAlignment.center,
+    CrossAxisAlignmentC.start ||
+    CrossAxisAlignmentC.stretch ||
+    CrossAxisAlignmentC.baseline => flutter.WrapCrossAlignment.start,
+  };
 }
 
 extension AxisHelperExt on AxisC {

@@ -21,7 +21,8 @@ class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
         : verticalFit);
 
     final Widget spacerWidget;
-    if (mainFit.isFlex) {
+    // A wrap has no free space to fill: a flex spacer keeps its design size.
+    if (mainFit.isFlex && !PassiveRowColumnTransformer.isWrap(parentNode)) {
       // Fills its share of the free space. Where the main axis is unbounded
       // there is none, and it keeps its design size instead (see
       // CodelesslyFlex and FitBox).
