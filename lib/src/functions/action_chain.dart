@@ -257,9 +257,8 @@ class _ActionChainHostElement extends InheritedElement {
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
-    final Widget? adopter = getElementForInheritedWidgetOfExactType<
-      ActionChainAdopter
-    >()?.widget;
+    final Widget? adopter =
+        getElementForInheritedWidgetOfExactType<ActionChainAdopter>()?.widget;
     if (adopter is ActionChainAdopter) adopter.chain.adoptHost(this);
   }
 }
