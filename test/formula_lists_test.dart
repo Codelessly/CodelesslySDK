@@ -402,6 +402,27 @@ void main() {
   });
 
   group('objects and slices', () {
+    test('concat joins lists and range counts', () {
+      expect(eval('concat(take(tags, 2), [1], take(tags, 1))'), [
+        'a',
+        'b',
+        1,
+        'a',
+      ]);
+      expect(eval("length(concat(cart, filter(cart, 'qty', 2)))"), 3);
+      expect(eval('range(3)'), [0, 1, 2]);
+      expect(eval('range(0)'), isEmpty);
+    });
+
+    test('thousands and duration format readouts', () {
+      expect(eval('thousands(17402)'), '17,402');
+      expect(eval('thousands(-1234.5, 1)'), '-1,234.5');
+      expect(eval('thousands(999)'), '999');
+      expect(eval('duration(6)'), '6m');
+      expect(eval('duration(134)'), '2h 14m');
+      expect(eval('duration(124)'), '2h 04m');
+    });
+
     test('obj builds a map from key-value pairs', () {
       expect(eval("obj('cat', 'Mechanical', 'min', 80)"), {
         'cat': 'Mechanical',
