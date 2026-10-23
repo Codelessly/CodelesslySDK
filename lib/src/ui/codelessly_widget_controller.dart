@@ -455,8 +455,14 @@ class CodelesslyWidgetController extends ChangeNotifier {
           name: name,
         );
 
+        // A canvas ID opens the layout that holds the canvas.
         dataManager
-            .queueLayout(layoutID: layoutID!, prioritize: true)
+            .queueLayout(
+              layoutID:
+                  dataManager.publishModel?.resolveLayoutId(layoutID) ??
+                  layoutID!,
+              prioritize: true,
+            )
             .catchError((error, str) {
               ErrorLogger.instance.captureException(
                 error,
