@@ -1,3 +1,36 @@
+## Unreleased
+
+### Layout
+
+- Row/column `spacing`, and `wrap` with `runSpacing` (`CodelesslyWrap`).
+  Children hidden by a visibility formula take no space and no gap.
+- `flex` and `rotation` can be bound to data like fill, opacity and size.
+
+### Formulas and variables
+
+- Computed variables: a variable holding a `${= ...}` formula is evaluated
+  when read and rebuilds what shows it when its inputs change.
+- Functions: `sqrt`, `pow`, trigonometry, `pi`, `radians`, `degrees`,
+  `clamp`, `distance` (great-circle), `first`, `last`, `slice`, `take`,
+  `skip`, `reverse`, `range`, `indexOf`, `object`, `merge`, `set`, `keys`,
+  `values`, `append`, `setAt`, `insertAt`, `removeAt`, `move`, `flatten`,
+  `compact` and `thousands`.
+- A map's own key wins over a built-in accessor of the same name
+  (`${rig.length}` reads the field).
+
+### Links
+
+- A layout opens by the ID of one of its canvases.
+- A link to the app's first screen gives it the link's parameters
+  (`${route.k}`).
+
+### Fixes
+
+- Shadows without spread, offset or color no longer crash.
+- Image fills apply their opacity once (they painted at its square).
+- A text field's `errorText` template that comes out empty is no error.
+- List items on the design canvas show their own item's text.
+
 ## 8.2.0
 
 ### States
