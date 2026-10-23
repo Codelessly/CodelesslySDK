@@ -98,5 +98,39 @@ void main() {
         expect(painted(tester), 0xFF4A5D72);
       });
     }
+    testWidgets('an icon in the shape insertTree stores follows a bound fill', (
+      tester,
+    ) async {
+      // The stored shape lib.mjs icons get after fixIcons (list_ui.mjs).
+      final IconNode node = IconNode.fromJson({
+        'id': 'icon',
+        'name': 'Icon construction',
+        'type': 'icon',
+        'basicBoxLocal': NodeBox(0, 0, 18, 18).toJson(),
+        'properties': {
+          'icon': {
+            'icon': {
+              // A Cupertino icon paints from its font, without loading an
+              // SVG; a Material one gets the same color, as an SVG tint.
+              'type': 'CUPERTINO_ICON',
+              'name': 'battery_full',
+              'codepoint': 0xf113,
+            },
+            'show': true,
+            'color': ColorRGBA.fromHex('#FF4A5D72')!.toJson(),
+            'size': 18,
+            'type': 'icon',
+          },
+        },
+        'variables': {
+          'fill': r"${= isNotEmpty(trade) ? '#E85B08' : '#4A5D72'}",
+        },
+      });
+      final trade = await pumpManaged(tester, node);
+      expect(painted(tester), 0xFF4A5D72);
+      trade.set(trade.value.copyWith(value: 'electrical'));
+      await tester.pump();
+      expect(painted(tester), 0xFFE85B08);
+    });
   });
 }
