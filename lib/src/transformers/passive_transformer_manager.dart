@@ -175,10 +175,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// Returns [node] with the style properties that conditions, bound
   /// variables or formulas, or set value actions give it at runtime: `fill`
-  /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
-  /// `height`, `flex` (its share of an expanded row or column, so bars
-  /// can be sized proportionally) and `rotation` (in degrees). Returns
-  /// [node] itself when nothing changes it.
+  /// (a text's color for text nodes), `stroke`, `strokeWeight`, `opacity`,
+  /// `effects` / `effectsVisible`, `width`, `height`, `flex` (its share of
+  /// an expanded row or column, so bars can be sized proportionally) and
+  /// `rotation` (in degrees). Returns [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     T? value<T extends Object>(String property) =>
@@ -204,6 +204,41 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           stroke.copyWith(visible: true).toJson(),
           for (final paint in geometry.strokes.skip(1)) paint.toJson(),
         ];
+      }
+    }
+    if (node is GeometryMixin) {
+      final double? strokeWeight = value<double>('strokeWeight');
+      if (strokeWeight != null && strokeWeight != node.strokeWeight) {
+        patch['strokeWeight'] = math.max(0, strokeWeight).toDouble();
+      }
+    }
+    if (node is BlendMixin) {
+      // `effects` replaces the node's effects (shadows, blurs) with a list
+      // of effect JSON maps (or that list as a JSON string); `effectsVisible`
+      // shows or hides the ones it has, e.g. a shadow only when selected.
+      List<Effect> effects = node.effects;
+      if (node.variables['effects'] != null) {
+        Object? bound = value<Object>('effects');
+        if (bound is String) bound = tryJsonDecode(bound.trim());
+        if (bound is List) {
+          effects = [
+            for (final (int i, Object? e) in bound.indexed)
+              if (e is Map)
+                Effect.fromJson({'id': '${node.id}-effect-$i', ...e}),
+          ];
+        }
+      }
+      final bool? effectsVisible = node.variables['effectsVisible'] == null
+          ? null
+          : value<bool>('effectsVisible');
+      if (effectsVisible != null) {
+        effects = [
+          for (final Effect e in effects)
+            Effect.fromJson({...e.toJson(), 'visible': effectsVisible}),
+        ];
+      }
+      if (!const DeepCollectionEquality().equals(effects, node.effects)) {
+        patch['effects'] = [for (final e in effects) e.toJson()];
       }
     }
     if (node is TextNode) {
