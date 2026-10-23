@@ -140,7 +140,12 @@ class FunctionsRepository {
         return runConfirm(context, action as ConfirmAction);
       case ActionType.delay:
         return Future<bool>.delayed(
-          Duration(milliseconds: (action as DelayAction).milliseconds),
+          Duration(
+            milliseconds: delayMilliseconds(
+              action as DelayAction,
+              ActionChain.scopedValuesOf(context),
+            ),
+          ),
           () => true,
         );
       case ActionType.cloudData:
@@ -148,6 +153,23 @@ class FunctionsRepository {
       case ActionType.cloudBatch:
         return runCloudBatch(context, action as CloudBatchAction);
     }
+  }
+
+  /// How long [action] waits: its [DelayAction.duration] formula when that
+  /// gives a number, else its fixed [DelayAction.milliseconds].
+  static int delayMilliseconds(DelayAction action, ScopedValues scopedValues) {
+    final String? duration = action.duration;
+    if (duration == null || duration.trim().isEmpty) {
+      return action.milliseconds;
+    }
+    final num? value = num.tryParse(
+      PropertyValueDelegate.substituteVariables(
+        duration,
+        scopedValues: scopedValues,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ).trim(),
+    );
+    return value == null || value < 0 ? action.milliseconds : value.round();
   }
 
   /// Runs a [CloudDataAction] and puts its result in its result variable
