@@ -29,8 +29,11 @@ RectangleNode platter({
 
 /// Paints [painter] into a [size] image and returns how many pixels have
 /// any ink, so tests need no golden files.
-Future<int> inkedPixels(WidgetTester tester, CustomPainter painter,
-    {Size size = const Size(100, 100)}) async {
+Future<int> inkedPixels(
+  WidgetTester tester,
+  CustomPainter painter, {
+  Size size = const Size(100, 100),
+}) async {
   final int? count = await tester.runAsync(() async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     painter.paint(Canvas(recorder), size);
@@ -88,7 +91,13 @@ void main() {
   ) async {
     await pumpNode(tester, platter(cap: StrokeCapEnum.square));
     expect(tester.takeException(), isNull);
-    expect(strokePaint(), paints..path()..path()..path());
+    expect(
+      strokePaint(),
+      paints
+        ..path()
+        ..path()
+        ..path(),
+    );
     expect(
       await inkedPixels(tester, painterFor(cap: StrokeCapEnum.square)),
       greaterThan(31 * 10),
@@ -98,10 +107,7 @@ void main() {
   testWidgets('Dashes without caps and no length still paint nothing', (
     tester,
   ) async {
-    expect(
-      await inkedPixels(tester, painterFor(cap: StrokeCapEnum.none)),
-      0,
-    );
+    expect(await inkedPixels(tester, painterFor(cap: StrokeCapEnum.none)), 0);
   });
 
   testWidgets('Tiny round dashes stay within the stroke band of the box', (

@@ -90,8 +90,8 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     final MotionModel motion = widget.motion;
     if (_loops) {
       _startLoop();
-    } else if (widget.animate && motion.enter && motion.durationMs > 0) {
-      _from = motion.atRest;
+    } else if (widget.animate && motion.hasEntrance && motion.durationMs > 0) {
+      _from = motion.entranceStart;
       _run(motion.durationMs);
     }
     _syncSpin();
@@ -140,7 +140,16 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   void didUpdateWidget(NodeMotion oldWidget) {
     super.didUpdateWidget(oldWidget);
     final MotionModel next = widget.motion;
-    if (_loops) {
+    final bool replay =
+        widget.animate && next.replayKey != oldWidget.motion.replayKey;
+    if (_loops && replay) {
+      _startLoop();
+    } else if (replay && next.durationMs > 0) {
+      // Plays the entrance again, wherever the node was.
+      _from = next.entranceStart;
+      _to = next;
+      _run(next.durationMs);
+    } else if (_loops) {
       final MotionModel old = oldWidget.motion;
       if (!_sameTransform(next, _to) ||
           next.loop != old.loop ||

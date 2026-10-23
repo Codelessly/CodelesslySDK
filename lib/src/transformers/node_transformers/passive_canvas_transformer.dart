@@ -920,7 +920,8 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
         statusBarIconBrightness: brightness,
         statusBarBrightness: brightness,
       ),
-      child: widget.settings.isPreview ||
+      child:
+          widget.settings.isPreview ||
               !widget.node.reactions.any(
                 (reaction) => reaction.trigger.type == TriggerType.keyPress,
               )

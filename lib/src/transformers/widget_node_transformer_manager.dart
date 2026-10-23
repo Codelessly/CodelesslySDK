@@ -145,8 +145,9 @@ abstract class WidgetNodeTransformerManager
   }
 
   /// The motion [node] shows now: its [BaseNode.motion] with the values
-  /// bound through `motion.<name>` variables resolved from [scopedValues].
-  /// Null when the node doesn't move.
+  /// bound through `motion.<name>` variables resolved from [scopedValues],
+  /// and `motion.replayKey` resolved to text. Null when the node doesn't
+  /// move.
   static MotionModel? resolveMotion(
     BaseNode node, {
     required ScopedValues scopedValues,
@@ -168,6 +169,18 @@ abstract class WidgetNodeTransformerManager
       };
       if (number == null || !number.isFinite) continue;
       motion = (motion ?? MotionModel.none).withValue(property, number);
+    }
+    const String replay = MotionModel.replayKeyProperty;
+    if (node.variables.containsKey(MotionModel.variableKey(replay))) {
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        MotionModel.variableKey(replay),
+        scopedValues: scopedValues,
+      );
+      motion = (motion ?? MotionModel.none).copyWith(
+        replayKey: value?.toString(),
+        clearReplayKey: value == null,
+      );
     }
     return motion;
   }

@@ -1,5 +1,7 @@
 import 'dart:math' as math;
-import 'package:codelessly_api/codelessly_api.dart' show variableSyntaxIdentifierRegex;
+
+import 'package:codelessly_api/codelessly_api.dart'
+    show variableSyntaxIdentifierRegex;
 
 /// The body of a formula: text and quoted strings, with braces only in
 /// balanced pairs nested up to [depth] deep, such as the object literal in
@@ -1221,7 +1223,7 @@ final Map<String, _Function> _functions = {
   'unique': _unique,
   'concat': (a) => [
     for (final value in a)
-      if (value is Iterable) ...value else if (value != null) value,
+      if (value is Iterable) ...value else ?value,
   ],
   'without': (a) => [
     for (final item in _values(_arg(a, 0), null))
