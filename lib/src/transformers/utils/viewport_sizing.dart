@@ -300,6 +300,20 @@ class DesignCellGridDelegate extends SliverGridDelegate {
       oldDelegate.mainAxisExtent != mainAxisExtent;
 }
 
+/// Whether list [node] builds all its items up front, as a plain [Flex]
+/// rather than a viewport: it doesn't scroll, hugs its items along its axis
+/// and has a known item count (bound data or a set count). Such a list builds
+/// every item either way, so it needs no viewport.
+bool listBuildsAllItems(ListViewNode node) {
+  final SizeFit mainFit = node.scrollDirection == AxisC.vertical
+      ? node.verticalFit
+      : node.horizontalFit;
+  return !node.isScrollable &&
+      mainFit == SizeFit.shrinkWrap &&
+      !node.useCloudDatabase &&
+      (node.variables['data'] != null || node.properties.itemCount != null);
+}
+
 /// Whether [node] or any node below it builds a widget that cannot report
 /// intrinsic sizes: a list, grid or page view (a viewport behind a
 /// [LayoutBuilder]), a scrolling row, column or frame (a [LayoutBuilder]
@@ -310,7 +324,7 @@ class DesignCellGridDelegate extends SliverGridDelegate {
 /// "RenderViewport does not support returning intrinsic dimensions"), so a
 /// caller that adds an intrinsic wrapper must skip it when this is true.
 bool subtreeBlocksIntrinsics(BaseNode node, GetNode getNode) {
-  if (node is ListViewNode ||
+  if ((node is ListViewNode && !listBuildsAllItems(node)) ||
       node is GridViewNode ||
       node is PageViewNode ||
       node is WebViewNode) {
