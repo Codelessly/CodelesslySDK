@@ -158,14 +158,31 @@ class PassiveRectangleWidget extends StatelessWidget {
       size: node.basicBoxLocal.size,
       child: Container(
         clipBehavior: getClipBehavior(node),
-        decoration: BoxDecoration(
-          boxShadow: retrieveBoxShadow(node, scopedValues),
-          borderRadius: getBorderRadius(node),
-        ),
+        // This box only clips and casts shadows; the node's fills, strokes
+        // and children take taps where they paint. Under a TapThroughScope,
+        // its empty parts let taps through.
+        decoration: TapThroughScope.of(context)
+            ? _TapThroughDecoration(
+                boxShadow: retrieveBoxShadow(node, scopedValues),
+                borderRadius: getBorderRadius(node),
+              )
+            : BoxDecoration(
+                boxShadow: retrieveBoxShadow(node, scopedValues),
+                borderRadius: getBorderRadius(node),
+              ),
         child: child,
       ),
     );
   }
+}
+
+/// A [BoxDecoration] that takes no taps itself.
+class _TapThroughDecoration extends BoxDecoration {
+  const _TapThroughDecoration({super.boxShadow, super.borderRadius});
+
+  @override
+  bool hitTest(Size size, Offset position, {TextDirection? textDirection}) =>
+      false;
 }
 
 List<Widget> wrapWithInkWell(
