@@ -128,6 +128,11 @@ class _ToastViewState extends State<_ToastView> {
   static const Duration _fade = Duration(milliseconds: 220);
 
   bool _visible = false;
+
+  /// Fading out: taps pass through. Fading in, the toast already takes them:
+  /// its semantics stay as they are from the first frame, since the web
+  /// engine keeps a node's stacking only while its siblings don't change.
+  bool _closing = false;
   Timer? _timer;
 
   @override
@@ -142,7 +147,10 @@ class _ToastViewState extends State<_ToastView> {
   void _close() {
     if (!mounted) return;
     _timer?.cancel();
-    setState(() => _visible = false);
+    setState(() {
+      _visible = false;
+      _closing = true;
+    });
     _timer = Timer(_fade, widget.onDone);
   }
 
@@ -291,6 +299,7 @@ class _ToastViewState extends State<_ToastView> {
       label: widget.message,
       child: AnimatedOpacity(
         opacity: _visible ? 1 : 0,
+        alwaysIncludeSemantics: true,
         duration: _fade,
         child: AnimatedSlide(
           offset: _visible ? Offset.zero : Offset(0, top ? -0.25 : 0.25),
@@ -310,7 +319,7 @@ class _ToastViewState extends State<_ToastView> {
       bottom: top ? null : action.bottomOffsetFor(media.size.width),
       // Only a toast with a button takes taps; the rest passes them through.
       child: IgnorePointer(
-        ignoring: !(hasButton || hasClose) || !_visible,
+        ignoring: !(hasButton || hasClose) || _closing,
         child: toast,
       ),
     );
