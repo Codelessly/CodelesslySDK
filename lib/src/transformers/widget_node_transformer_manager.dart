@@ -192,6 +192,12 @@ abstract class WidgetNodeTransformerManager
 
     collect(node);
 
+    // A tappable inside a tappable (a pin on a plan, a button on a card)
+    // would be merged into the outer button and become unreachable. The
+    // outer one then stays out of the semantics tree (see
+    // [hasTappableDescendant]) so the inner ones keep their own nodes.
+    if (descendants.any(_isTappable)) return widget;
+
     final bool hasText = descendants.any((child) => child is TextNode);
     final String label = hasText ? '' : semanticLabelFor(node, descendants);
     return MergeSemantics(
@@ -201,6 +207,29 @@ abstract class WidgetNodeTransformerManager
         child: widget,
       ),
     );
+  }
+
+  static bool _isTappable(BaseNode node) =>
+      node is ReactionMixin &&
+      (node as ReactionMixin).reactions.any(
+        (reaction) =>
+            reaction.trigger.type == TriggerType.click &&
+            reaction.action.enabled,
+      );
+
+  /// Whether a node inside [node] reacts to clicks itself. [node]'s own
+  /// tap then leaves the semantics tree to its descendants.
+  bool hasTappableDescendant(BaseNode node) {
+    bool visit(BaseNode parent) {
+      for (final String id in parent.childrenOrEmpty) {
+        final BaseNode? child = _tryGetNode(id);
+        if (child == null) continue;
+        if (_isTappable(child) || visit(child)) return true;
+      }
+      return false;
+    }
+
+    return visit(node);
   }
 
   /// The name a screen reader announces for [node] when it has no text.
@@ -287,6 +316,7 @@ abstract class WidgetNodeTransformerManager
         type: MaterialType.transparency,
         child: Builder(
           builder: (tapContext) => InkWell(
+            excludeFromSemantics: hasTappableDescendant(node),
             onTapUp: (details) => recordTap(tapContext, details),
             onTap: click,
             onLongPress: onLongPressReactions.isEmpty
@@ -321,6 +351,7 @@ abstract class WidgetNodeTransformerManager
         child: Builder(
           builder: (tapContext) => GestureDetector(
             behavior: HitTestBehavior.opaque,
+            excludeFromSemantics: hasTappableDescendant(node),
             onTapUp: onClickReactions.isEmpty
                 ? null
                 : (details) => recordTap(tapContext, details),

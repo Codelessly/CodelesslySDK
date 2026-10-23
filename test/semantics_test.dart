@@ -75,4 +75,56 @@ void main() {
       'Add to bag',
     );
   });
+
+  testWidgets('tappables inside a tappable keep their own buttons', (
+    tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final FrameNode plan = FrameNode.fromJson({
+      ...FrameNode(
+        id: 'plan',
+        name: 'Plan',
+        basicBoxLocal: NodeBox(0, 0, 200, 100),
+        children: ['p1', 'p2'],
+      ).toJson(),
+      'reactions': [
+        Reaction(
+          action: LinkAction(url: ''),
+          trigger: TriggerModel(type: TriggerType.click),
+        ).toJson(),
+      ],
+    })..parentID = kRootNode;
+    final RectangleNode p1 = tappable('p1', 'Pin one')..parentID = 'plan';
+    final RectangleNode p2 = tappable('p2', 'Pin two')..parentID = 'plan';
+    final registry = NodeRegistry()
+      ..setNodes({for (final n in [plan, p1, p2]) n.id: n});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: CodelesslyContext.empty(),
+        child: MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Builder(
+              builder: (context) => manager.buildWidgetFromNode(
+                plan,
+                context,
+                settings: const WidgetBuildSettings(debugLabel: 'test'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    for (final String name in ['Pin one', 'Pin two']) {
+      expect(
+        tester.getSemantics(find.bySemanticsLabel(name)),
+        matchesSemantics(label: name, isButton: true, hasTapAction: true),
+      );
+    }
+    handle.dispose();
+  });
 }
