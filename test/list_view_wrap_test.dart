@@ -55,9 +55,13 @@ void main() {
   testWidgets('a wrapping list keeps its items on one run when they fit', (
     tester,
   ) async {
-    await vp.pump(tester, const Size(800, 800), vp.Host.loose, wrappingList(
-      width: 500,
-    ), [vp.rect('item', 'list')]);
+    await vp.pump(
+      tester,
+      const Size(800, 800),
+      vp.Host.loose,
+      wrappingList(width: 500),
+      [vp.rect('item', 'list')],
+    );
     expect(find.byType(Wrap), findsOneWidget);
     expect(find.byType(ViewportNodeBox), findsNothing);
     final List<Rect> items = itemRects(tester);

@@ -91,7 +91,7 @@ void main() {
   testWidgets('a custom content padding applies as given', (tester) async {
     await _pump(
       tester,
-      _field(contentPadding: EdgeInsetsModel.only(left: 4, top: 2)),
+      _field(contentPadding: const EdgeInsetsModel.only(left: 4, top: 2)),
     );
     expect(
       tester
