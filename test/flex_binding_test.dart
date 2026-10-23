@@ -12,7 +12,7 @@ RectangleNode bar(String id, {String? flex}) =>
         horizontalFit: SizeFit.expanded,
       )
       ..parentID = 'row'
-      ..variables.addAll({if (flex != null) 'flex': flex});
+      ..variables.addAll({'flex': ?flex});
 
 Future<Map<String, double>> pumpRow(
   WidgetTester tester,

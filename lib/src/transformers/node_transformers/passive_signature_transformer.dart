@@ -129,7 +129,7 @@ class _PassiveSignatureWidgetState extends State<PassiveSignatureWidget> {
           final Widget paint = CustomPaint(
             size: size,
             painter: SignaturePainter(
-              strokes: [...strokes, if (_stroke case final stroke?) stroke],
+              strokes: [...strokes, ?_stroke],
               color: ink,
               strokeWidth: node.properties.strokeWidth,
             ),

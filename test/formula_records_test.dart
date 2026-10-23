@@ -24,19 +24,27 @@ void main() {
     'name': 'Keystone',
   };
 
-  Object? eval(String expression) => FormulaEvaluator.evaluate(expression, (path) {
-    Object? value = vars;
-    for (final part in path.split('.')) {
-      value = value is Map ? value[part] : null;
-    }
-    return value;
-  });
+  Object? eval(String expression) =>
+      FormulaEvaluator.evaluate(expression, (path) {
+        Object? value = vars;
+        for (final part in path.split('.')) {
+          value = value is Map ? value[part] : null;
+        }
+        return value;
+      });
 
   test('obj, set, unset and merge build maps without braces', () {
-    expect(eval('obj("company", name, "n", 4)'), {'company': 'Keystone', 'n': 4});
+    expect(eval('obj("company", name, "n", 4)'), {
+      'company': 'Keystone',
+      'n': 4,
+    });
     expect(eval('set(obj("a", 1), "b", 2)'), {'a': 1, 'b': 2});
     expect(eval('unset(obj("a", 1, "b", 2), "a")'), {'b': 2});
-    expect(eval('merge(obj("a", 1, "b", 2), obj("b", 3), obj("c", 4))'), {'a': 1, 'b': 3, 'c': 4});
+    expect(eval('merge(obj("a", 1, "b", 2), obj("b", 3), obj("c", 4))'), {
+      'a': 1,
+      'b': 3,
+      'c': 4,
+    });
     expect(eval('set(tags, 1, "x")'), ['a', 'x', 'c', 'd']);
     expect(eval('set(tags, 9, "z")'), ['a', 'b', 'c', 'd', 'z']);
   });
@@ -46,17 +54,19 @@ void main() {
     expect(eval('prepend(tags, "z")'), ['z', 'a', 'b', 'c', 'd']);
     expect(eval('concat(tags, ["e"], null)'), ['a', 'b', 'c', 'd', 'e']);
     expect(eval('append(null, 1)'), [1]);
-    expect(vars['tags'], ['a', 'b', 'c', 'd'], reason: 'arguments are not changed');
+    expect(vars['tags'], [
+      'a',
+      'b',
+      'c',
+      'd',
+    ], reason: 'arguments are not changed');
   });
 
   test('updateWhere and removeWhere change matching records', () {
-    expect(
-      eval('updateWhere(logs, "id", logId, obj("signed", true))'),
-      [
-        (vars['logs'] as List)[0],
-        {...((vars['logs'] as List)[1] as Map), 'signed': true},
-      ],
-    );
+    expect(eval('updateWhere(logs, "id", logId, obj("signed", true))'), [
+      (vars['logs'] as List)[0],
+      {...((vars['logs'] as List)[1] as Map), 'signed': true},
+    ]);
     // A nested update: one crew entry inside one log.
     final Object? result = eval(
       'updateWhere(logs, l => l.id == logId, l => set(l, "crew", '
