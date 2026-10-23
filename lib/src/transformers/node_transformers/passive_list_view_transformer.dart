@@ -83,6 +83,51 @@ class PassiveListViewWidget extends StatelessWidget {
         builder: builder,
       );
 
+  /// Lays out all [itemCount] items in a [Flex] instead of a viewport, for a
+  /// list that [listBuildsAllItems]. It looks the same, and a Row or Column
+  /// around it can measure it (a viewport can't report intrinsic sizes), so
+  /// a stretched row of cards keeps equal heights with a list in one of them.
+  Widget staticList(
+    BuildContext context,
+    int itemCount,
+    IndexedWidgetBuilder itemBuilder,
+  ) {
+    final bool vertical = node.scrollDirection == AxisC.vertical;
+    final List<Widget> items = [
+      for (int index = 0; index < itemCount; index++) ...[
+        if (index > 0 && node.properties.hasSeparator)
+          ListViewItemSeparator(
+            scrollDirection: node.scrollDirection,
+            properties: node.properties,
+          ),
+        itemBuilder(context, index),
+      ],
+    ];
+    final Widget flex = Padding(
+      padding: node.padding.flutterEdgeInsets,
+      child: Flex(
+        direction: node.scrollDirection.flutterAxis,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: node.reverse ? items.reversed.toList() : items,
+      ),
+    );
+    // The cross axis follows [ViewportLayout]: fill when expanded and
+    // bounded, else the design size. The scroll axis hugs the items.
+    final SizeFit crossFit = vertical ? node.horizontalFit : node.verticalFit;
+    final double designCross = vertical
+        ? node.basicBoxLocal.width
+        : node.basicBoxLocal.height;
+    final bool fill = crossFit == SizeFit.expanded;
+    return FitBox(
+      width: vertical ? designCross : null,
+      height: vertical ? null : designCross,
+      fillWidth: vertical && fill,
+      fillHeight: !vertical && fill,
+      child: node.clipsContent ? ClipRect(child: flex) : flex,
+    );
+  }
+
   /// Builds one item, placed as the editor lays it out; see [ListItemBox].
   Widget buildItem(BaseNode item, BuildContext context) => ListItemBox(
     item: item,
@@ -301,6 +346,10 @@ class PassiveListViewWidget extends StatelessWidget {
           : null,
       itemBuilder: builder,
     );
+
+    if (itemCount != null && listBuildsAllItems(node)) {
+      return staticList(context, itemCount, itemBuilder);
+    }
 
     // An endless list with items of free extent ends after a viewport's
     // worth of items that take no space, so they cannot be built without
