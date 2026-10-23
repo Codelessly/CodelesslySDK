@@ -629,6 +629,18 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     final String? value =
         context.getNodeValue(node.id, property) ?? defaultValue;
     if (value == null || value.isEmpty) return null;
+    // A text that is only variables, like an error message from a formula,
+    // shows nothing when they come out empty: an empty error text would
+    // still put the field in its error state.
+    if (!settings.replaceVariablesWithSymbols &&
+        value.contains(r'${') &&
+        PropertyValueDelegate.substituteVariables(
+          value,
+          scopedValues: scopedValues,
+          nullSubstitutionMode: settings.nullSubstitutionMode,
+        ).trim().isEmpty) {
+      return null;
+    }
     return TextUtils.buildText(
       context,
       value,
