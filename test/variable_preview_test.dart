@@ -1,4 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/widgets.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -29,7 +30,7 @@ void main() {
 
   group('defaults', () {
     setUp(() {
-      VariablePreview.scopeResolver = (node) => ScopedValues.preview(
+      VariablePreview.scopeResolver = (node, {item}) => ScopedValues.preview(
         variables: {
           'userName': VariableData(
             id: 'v1',
@@ -88,5 +89,36 @@ void main() {
       ),
       'Shots',
     );
+  });
+
+  testWidgets('a list row shows its own item', (tester) async {
+    VariablePreview.scopeResolver = (node, {item}) => ScopedValues.preview(
+      variables: const {},
+      indexedItem: item ?? IndexedItem(0, {'id': 'first'}),
+    );
+    final texts = <String>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: [
+            for (final id in ['a', 'b'])
+              IndexedItemProvider(
+                item: IndexedItem(0, {'id': id}),
+                child: Builder(
+                  builder: (context) {
+                    texts.add(
+                      VariablePreview.textFor(r'${item.id}', context: context),
+                    );
+                    return const SizedBox();
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+    expect(texts, ['a', 'b']);
+    expect(VariablePreview.textFor(r'${item.id}'), 'first');
   });
 }
