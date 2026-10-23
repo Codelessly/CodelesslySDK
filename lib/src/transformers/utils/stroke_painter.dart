@@ -27,6 +27,10 @@ class StrokePainter extends CustomPainter {
   final StrokeCapEnum strokeCap;
 
   /// The dash pattern of the stroke. Empty if solid.
+  /// The most dashes painted along one path, so a pattern with tiny
+  /// entries can't stall a frame.
+  static const int maxDashes = 20000;
+
   final List<double> dashPattern;
 
   /// The side of the stroke. Whether it is all, top, bottom, left, or right.
@@ -40,10 +44,6 @@ class StrokePainter extends CustomPainter {
 
   /// The border radius of the box.
   final BorderRadius borderRadius;
-
-  /// A helper list to iterate the dashes cleanly for dashed or dotted borders.
-  /// This is constructed from the dash pattern.
-  final LoopingList<double> dashArray;
 
   /// A convenience getter for the inside alignment of the stroke. Helps
   /// simplify some calculations.
@@ -68,7 +68,7 @@ class StrokePainter extends CustomPainter {
     this.strokeAlign = StrokeAlignC.inside,
     this.strokeCap = StrokeCapEnum.square,
     this.borderRadius = BorderRadius.zero,
-  }) : dashArray = LoopingList(dashPattern);
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -127,14 +127,22 @@ class StrokePainter extends CustomPainter {
       // We loop over each "segment" of the path. Not up to us to know what
       // those segments are, we just work with them. Flutter likes being
       // mysterious.
+      // A pattern that doesn't advance (no positive entry) would loop
+      // forever; the cap keeps a tiny pattern on a long path from stalling a
+      // frame.
+      final double period = dashPattern.fold(0.0, (a, b) => a + max(0.0, b));
       for (final PathMetric metric in path.computeMetrics()) {
+        if (period <= 0) break;
         double totalDistance = 0;
         bool draw = true;
+        int dashes = 0;
+        // Each path starts the pattern from its first entry.
+        final LoopingList<double> dashArray = LoopingList(dashPattern);
 
         // We need to draw a dashed line, so we iterate with a while loop
         // our desired dash distance.
-        while (totalDistance < metric.length) {
-          final double dashDistance = dashArray.nextValue();
+        while (totalDistance < metric.length && dashes++ < maxDashes) {
+          final double dashDistance = max(0.0, dashArray.nextValue());
 
           if (draw) {
             // Now that we're about to draw a singular dash, we need to do it
@@ -247,8 +255,9 @@ class StrokePainter extends CustomPainter {
       ..strokeCap = StrokeCap.butt;
     double distance = 0;
     bool draw = true;
-    while (distance < length) {
-      final double dash = dashes.nextValue();
+    int count = 0;
+    while (distance < length && count++ < maxDashes) {
+      final double dash = max(0.0, dashes.nextValue());
       if (draw && dash > 0) {
         canvas.drawLine(
           start + direction * distance,
