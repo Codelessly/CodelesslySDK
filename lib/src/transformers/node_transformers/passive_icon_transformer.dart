@@ -35,12 +35,29 @@ class PassiveIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    // An icon's color can be bound as `iconColor` (the icon settings) or as
+    // `fill`, the color binding every other node uses.
     final ColorRGBA? iconColor =
         PropertyValueDelegate.getPropertyValue<ColorRGBA>(
           node,
           'iconColor',
-          scopedValues: ScopedValues.of(context),
-        );
+          scopedValues: scopedValues,
+        ) ??
+        PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+          node,
+          'fill',
+          scopedValues: scopedValues,
+        ) ??
+        switch (PropertyValueDelegate.getPropertyValue<PaintModel>(
+          node,
+          'fill',
+          scopedValues: scopedValues,
+        )) {
+          PaintModel(:final ColorRGB color, :final double opacity) =>
+            color.toColorRGBA(opacity),
+          _ => null,
+        };
     final MultiSourceIconModel icon = iconColor == null
         ? node.properties.icon
         : node.properties.icon.copyWith(color: iconColor);

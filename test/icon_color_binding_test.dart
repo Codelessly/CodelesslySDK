@@ -44,4 +44,59 @@ void main() {
     final Icon painted = await pumpIcon(tester, icon({}));
     expect(painted.color?.toARGB32(), _static.toARGB32());
   });
+
+  group('through the node manager', () {
+    Future<Observable<VariableData>> pumpManaged(
+      WidgetTester tester,
+      IconNode node,
+    ) async {
+      node.parentID = kRootNode;
+      final Observable<VariableData> trade = Observable(
+        VariableData(id: 'trade', name: 'trade', value: ''),
+      );
+      final registry = NodeRegistry()..setNodes({node.id: node});
+      final manager = PassiveNodeTransformerManager(
+        registry.getNodeByID,
+        (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+      );
+      await tester.pumpWidget(
+        ChangeNotifierProvider<CodelesslyContext>.value(
+          value: CodelesslyContext.empty()..variables['trade'] = trade,
+          child: MaterialApp(
+            home: Center(
+              child: Builder(
+                builder: (context) => manager.buildWidgetFromNode(
+                  node,
+                  context,
+                  settings: const WidgetBuildSettings(debugLabel: 'test'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      return trade;
+    }
+
+    int? painted(WidgetTester tester) =>
+        tester.widget<Icon>(find.byType(Icon)).color?.toARGB32();
+
+    for (final property in ['fill', 'iconColor']) {
+      testWidgets('a bound $property follows its variable', (tester) async {
+        final trade = await pumpManaged(
+          tester,
+          icon({property: r"${= isNotEmpty(trade) ? '#E85B08' : '#4A5D72'}"}),
+        );
+        expect(painted(tester), 0xFF4A5D72);
+
+        trade.set(trade.value.copyWith(value: 'electrical'));
+        await tester.pump();
+        expect(painted(tester), 0xFFE85B08);
+
+        trade.set(trade.value.copyWith(value: ''));
+        await tester.pump();
+        expect(painted(tester), 0xFF4A5D72);
+      });
+    }
+  });
 }
