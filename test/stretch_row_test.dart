@@ -15,11 +15,9 @@ RowColumnNode card(String id, String content) => RowColumnNode(
   children: [content],
 )..parentID = 'cards';
 
-RectangleNode block(String id, String parent, double height) => RectangleNode(
-  id: id,
-  name: id,
-  basicBoxLocal: NodeBox(0, 0, 100, height),
-)..parentID = parent;
+RectangleNode block(String id, String parent, double height) =>
+    RectangleNode(id: id, name: id, basicBoxLocal: NodeBox(0, 0, 100, height))
+      ..parentID = parent;
 
 void main() {
   testWidgets('a row that hugs its height and stretches its children gives '
@@ -46,7 +44,13 @@ void main() {
         block('tallBlock', 'tall', 320),
       ]),
     ]);
-    expect(tester.getSize(find.byKey(const ValueKey('short')).first).height, 320);
-    expect(tester.getSize(find.byKey(const ValueKey('tall')).first).height, 320);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('short')).first).height,
+      320,
+    );
+    expect(
+      tester.getSize(find.byKey(const ValueKey('tall')).first).height,
+      320,
+    );
   });
 }
