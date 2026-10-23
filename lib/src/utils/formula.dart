@@ -963,7 +963,7 @@ final Map<String, _Function> _functions = {
   },
   'concat': (a) => [
     for (final Object? l in a)
-      if (l is Iterable) ...l else if (l != null) l,
+      if (l is Iterable) ...l else ?l,
   ],
   'append': (a) => [..._values(_arg(a, 0), null), ...a.skip(1)],
   'take': (a) => _values(_arg(a, 0), null).take(_intArg(_arg(a, 1))).toList(),
