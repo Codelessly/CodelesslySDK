@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
+import 'package:provider/provider.dart';
 
 import '../codelessly_sdk.dart';
 import 'functions/app_auth.dart';
@@ -899,12 +900,31 @@ class Codelessly {
     }
   }
 
+  /// Sets the variables a link's parameters name to their values, so
+  /// `/<app>/<screen>?selectedId=kind-of-blue` opens with `selectedId` set,
+  /// as well as passing them as the screen's route parameters. Parameters
+  /// that name no variable are only route parameters.
+  static void setVariablesFromRoute(
+    BuildContext context,
+    CodelesslyRoute route,
+  ) {
+    if (route.params.isEmpty) return;
+    final CodelesslyContext? codelesslyContext =
+        Provider.of<CodelesslyContext?>(context, listen: false);
+    if (codelesslyContext == null) return;
+    for (final MapEntry<String, String> param in route.params.entries) {
+      if (codelesslyContext.findVariableByName(param.key) == null) continue;
+      codelesslyContext.updateVariable(param.key, param.value);
+    }
+  }
+
   /// Opens [pendingRoute] over the first screen shown, unless it is that
   /// screen.
   void _openPendingRoute(BuildContext context, String canvasId) {
     final CodelesslyRoute? pending = pendingRoute;
     if (pending == null) return;
     pendingRoute = null;
+    setVariablesFromRoute(context, pending);
     if (pending.canvasId == canvasId) return;
     unawaited(
       FunctionsRepository.navigate(
