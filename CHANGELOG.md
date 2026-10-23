@@ -1,5 +1,17 @@
 ## Unreleased
 
+- Toasts, the built-in confirm dialog and dropdown menus take the new
+  `ShowToastAction`, `ConfirmAction` and `DropdownProperties.menuStyle`
+  styling: toast action color, close button, radius, border, hard shadows,
+  fonts, icon size and per-screen-size bottom offsets; confirm dialog border,
+  shadows, fonts and outlined, shadowed buttons; and a dropdown menu drawn as
+  a card anchored under the field with a border, shadows, a highlighted
+  selected row with a check mark and per-item images (`itemImage`).
+- `FeedbackTheme` has `border`, `shadows`, `buttonBorder` and
+  `buttonShadows`; `FeedbackTheme.fromNodes` reads the outline and shadow
+  most of a layout's tappable shapes share for the confirm dialog's buttons.
+- A data-source dropdown finds its selected item by content, so a map value
+  selects the equal item.
 - Render `LineChartNode` with `PassiveLineChartTransformer` and
   `PassiveLineChartWidget`: bands, grid, gradient area, area bands, a
   polyline or Catmull-Rom curve, reference lines, x axis, markers, vertical
