@@ -8,14 +8,123 @@ typedef WidgetInserter = Widget Function(Widget child);
 class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   PassiveRowColumnTransformer(super.getNode, super.manager);
 
+  /// The gap a row/column puts between consecutive children along its main
+  /// axis: [RowColumnNode.itemSpacing], or 0 for other row/column-like nodes.
+  static double itemSpacingOf(BaseNode node) => switch (node) {
+    RowColumnNode(:final double itemSpacing)
+        when itemSpacing.isFinite && itemSpacing > 0 =>
+      itemSpacing,
+    _ => 0,
+  };
+
+  /// Spaces [childrenWidgets] [spacing] apart along [rowColumnNode]'s main
+  /// axis, leaving out the children [collapsed] marks: a child a visibility
+  /// formula hides (or that is disabled) takes no space, so it takes no gap
+  /// either, like CSS `display: none` in a flex box with a `gap`.
+  ///
+  /// When [collapsed] is null no child can collapse and the gap is Flutter's
+  /// own `Flex.spacing` (returned as `spacing`). Otherwise the gaps are built
+  /// into the children and the Flex gets no spacing:
+  ///
+  /// - A child that doesn't flex on the main axis gets the gap before it as
+  ///   main-axis padding (or the one after it, when the next child flexes).
+  ///   A fixed extent next to a child is exactly what `Flex.spacing` adds, so
+  ///   placement is the same for every main-axis alignment and the flex
+  ///   children share the same free space.
+  /// - Between two flexing children the gap is a box of its own. A flexing
+  ///   child takes the free space, so alignment spreads nothing and the box
+  ///   lands where `Flex.spacing` would put the gap.
+  ///
+  /// Every child keeps its wrapper whether it gets a gap or not, and every
+  /// child is keyed by its node id, so a child keeps its state while its
+  /// siblings collapse and show again.
+  static ({List<Widget> children, double spacing}) spaceChildren(
+    BaseNode rowColumnNode, {
+    required List<Widget> childrenWidgets,
+    required List<BaseNode> childrenNodes,
+    required double spacing,
+    List<bool>? collapsed,
+  }) {
+    if (spacing <= 0 || childrenWidgets.length < 2) {
+      return (children: childrenWidgets, spacing: 0);
+    }
+    if (collapsed == null) {
+      return (children: childrenWidgets, spacing: spacing);
+    }
+    assert(childrenWidgets.length == childrenNodes.length);
+    assert(collapsed.length == childrenNodes.length);
+
+    final bool isRow =
+        (rowColumnNode as RowColumnMixin).rowColumnType == RowColumnType.row;
+    bool flexes(BaseNode child) =>
+        (isRow ? child.horizontalFit : child.verticalFit).isFlex;
+
+    final int count = childrenNodes.length;
+    final List<double> leading = List<double>.filled(count, 0);
+    final List<double> trailing = List<double>.filled(count, 0);
+    // Index of a flexing child -> whether a gap box goes before it.
+    final Set<int> boxBefore = {};
+
+    int? previous;
+    for (int i = 0; i < count; i++) {
+      if (collapsed[i]) continue;
+      if (previous != null) {
+        if (!flexes(childrenNodes[i])) {
+          leading[i] = spacing;
+        } else if (!flexes(childrenNodes[previous])) {
+          trailing[previous] = spacing;
+        } else {
+          boxBefore.add(i);
+        }
+      }
+      previous = i;
+    }
+
+    final List<Widget> children = [];
+    for (int i = 0; i < count; i++) {
+      final BaseNode child = childrenNodes[i];
+      Widget widget = childrenWidgets[i];
+      if (boxBefore.contains(i)) {
+        children.add(
+          SizedBox(
+            key: ValueKey('${child.id}-gap'),
+            width: isRow ? spacing : null,
+            height: isRow ? null : spacing,
+          ),
+        );
+      }
+      if (!flexes(child)) {
+        widget = Padding(
+          padding: isRow
+              ? EdgeInsets.only(left: leading[i], right: trailing[i])
+              : EdgeInsets.only(top: leading[i], bottom: trailing[i]),
+          child: widget,
+        );
+      }
+      children.add(
+        KeyedSubtree(key: ValueKey('${child.id}-spaced'), child: widget),
+      );
+    }
+    return (children: children, spacing: 0);
+  }
+
   static Widget buildRowColumnWidget(
     BaseNode rowColumnNode, {
     required List<Widget> childrenWidgets,
     required List<BaseNode> childrenNodes,
     required bool withScroll,
     required GetNode getNode,
+    List<bool>? collapsedChildren,
   }) {
     assert(rowColumnNode is RowColumnMixin);
+
+    final spaced = spaceChildren(
+      rowColumnNode,
+      childrenWidgets: childrenWidgets,
+      childrenNodes: childrenNodes,
+      spacing: itemSpacingOf(rowColumnNode),
+      collapsed: collapsedChildren,
+    );
 
     final bool isRow =
         (rowColumnNode as RowColumnMixin).rowColumnType == RowColumnType.row;
@@ -100,7 +209,8 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
           ? MainAxisSize.min
           : MainAxisSize.max,
       key: ValueKey(rowColumnNode.id),
-      children: childrenWidgets,
+      spacing: spaced.spacing,
+      children: spaced.children,
     );
 
     if (measureCross) {
@@ -379,8 +489,67 @@ class PassiveRowColumnWidget extends StatelessWidget {
     );
   }
 
+  /// Whether [child] may take no space at runtime: a visibility formula or
+  /// condition decides whether it shows, or it is disabled.
+  bool _mayCollapse(BuildContext context, BaseNode child) {
+    final NodeTransformerManager manager = this.manager;
+    if (!child.enabled) return true;
+    if (manager is! PassiveNodeTransformerManager) return false;
+    return manager.runtimeVisibility(context, child) != null ||
+        PropertyValueDelegate.getPropertyValue<bool>(
+              child,
+              'node_enabled',
+              scopedValues: ScopedValues.of(context),
+            ) !=
+            null;
+  }
+
+  /// Whether [child] takes no space now (see [_mayCollapse]).
+  bool _isCollapsed(BuildContext context, BaseNode child) {
+    final NodeTransformerManager manager = this.manager;
+    if (manager is! PassiveNodeTransformerManager) return !child.enabled;
+    final bool enabled =
+        PropertyValueDelegate.getPropertyValue<bool>(
+          child,
+          'node_enabled',
+          scopedValues: ScopedValues.of(context),
+        ) ??
+        child.enabled;
+    return !enabled || manager.runtimeVisibility(context, child) == false;
+  }
+
   @override
   Widget build(BuildContext context) {
+    // With a gap, a child that collapses at runtime must give up its gaps
+    // too, so the row/column rebuilds when one of them shows or hides.
+    final bool spaced = PassiveRowColumnTransformer.itemSpacingOf(node) > 0;
+    final List<BaseNode> collapsible = spaced
+        ? children.where((child) => _mayCollapse(context, child)).toList()
+        : const [];
+    if (collapsible.isEmpty) return _build(context, null);
+
+    List<bool> collapsedNow(BuildContext context) => [
+      for (final BaseNode child in children)
+        collapsible.contains(child) && _isCollapsed(context, child),
+    ];
+
+    final NodeTransformerManager manager = this.manager;
+    final List<Listenable> listenables =
+        manager is PassiveNodeTransformerManager
+        ? [
+            for (final BaseNode child in collapsible)
+              ...manager.listenablesFor(context, child),
+          ]
+        : const [];
+    if (listenables.isEmpty) return _build(context, collapsedNow(context));
+    return ManagedListenableBuilder(
+      key: ValueKey('${node.id}-spacing'),
+      listenables: listenables,
+      builder: (context) => _build(context, collapsedNow(context)),
+    );
+  }
+
+  Widget _build(BuildContext context, List<bool>? collapsedChildren) {
     final List<Widget> widgetChildren = children.map((child) {
       final Widget builtWidget = manager.buildWidgetByID(
         child.id,
@@ -411,6 +580,7 @@ class PassiveRowColumnWidget extends StatelessWidget {
                 childrenNodes: children,
                 withScroll: true,
                 getNode: manager.getNode,
+                collapsedChildren: collapsedChildren,
               ),
             ],
             settings: settings,
@@ -421,6 +591,7 @@ class PassiveRowColumnWidget extends StatelessWidget {
             childrenNodes: children,
             withScroll: true,
             getNode: manager.getNode,
+            collapsedChildren: collapsedChildren,
           );
 
     if (kIsTestLayout) {
