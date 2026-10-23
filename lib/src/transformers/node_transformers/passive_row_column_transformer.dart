@@ -99,6 +99,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       mainAxisSize: mainFit == SizeFit.shrinkWrap
           ? MainAxisSize.min
           : MainAxisSize.max,
+      spacing: rowColumnNode.spacing,
       key: ValueKey(rowColumnNode.id),
       children: childrenWidgets,
     );
