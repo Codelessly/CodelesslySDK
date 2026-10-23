@@ -406,7 +406,7 @@ class FormulaEvaluator {
     FormulaFunctionDoc(
       'concat',
       'concat(list, list or value, ...)',
-      'concat(take(history, 23), [soc]); history + [soc] does the same',
+      'concat(take(history, 23), [soc])',
     ),
     FormulaFunctionDoc(
       'alpha',
