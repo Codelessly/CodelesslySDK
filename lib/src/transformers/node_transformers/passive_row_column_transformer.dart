@@ -159,6 +159,11 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         crossAxisAlignment: stretchFallsBack
             ? CrossAxisAlignment.start
             : rowColumnNode.crossAxisAlignment.flutterAxis,
+        // Baseline alignment lines texts up on their alphabetic baselines.
+        textBaseline:
+            rowColumnNode.crossAxisAlignment == CrossAxisAlignmentC.baseline
+            ? TextBaseline.alphabetic
+            : null,
         mainAxisSize: mainFit == SizeFit.shrinkWrap
             ? MainAxisSize.min
             : MainAxisSize.max,
