@@ -176,10 +176,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// Returns [node] with the style properties that conditions, bound
   /// variables or formulas, or set value actions give it at runtime: `fill`
-  /// (a text's color for text nodes), `stroke`, `opacity`, `cornerRadius`,
-  /// `padding`, `width`, `height`, `flex` (its share of an expanded row or
-  /// column, so bars can be sized proportionally) and `rotation` (in
-  /// degrees). Returns [node] itself when nothing changes it.
+  /// (a text's color for text nodes), `stroke`, `strokeWeight`, `opacity`,
+  /// `cornerRadius`, `padding`, `width`, `height`, `flex` (its share of an
+  /// expanded row or column, so bars can be sized proportionally) and
+  /// `rotation` (in degrees). Returns [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     T? value<T extends Object>(String property) =>
@@ -205,6 +205,11 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           stroke.copyWith(visible: true).toJson(),
           for (final paint in geometry.strokes.skip(1)) paint.toJson(),
         ];
+      }
+      // A selected row's border can thicken, e.g. 1.5 to 2 px.
+      final double? strokeWeight = value<double>('strokeWeight');
+      if (strokeWeight != null && strokeWeight != geometry.strokeWeight) {
+        patch['strokeWeight'] = strokeWeight < 0 ? 0.0 : strokeWeight;
       }
     }
     if (node is TextNode) {

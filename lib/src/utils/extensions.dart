@@ -1780,6 +1780,17 @@ extension ActionModelExt on ActionModel {
             ]);
           case RemoveDocumentSubAction action:
             strings.addAll([action.path, action.documentId]);
+          case RemoveDocumentsSubAction action:
+            strings.addAll([
+              action.path,
+              action.documentIds,
+              for (final filter in action.whereFilters) ...[
+                filter.field,
+                filter.value,
+              ],
+            ]);
+          case SetDocumentsSubAction action:
+            strings.addAll([action.path, action.documents]);
           case UpdateDocumentSubAction action:
             strings.addAll([
               action.path,
