@@ -197,6 +197,9 @@ Future<Codelessly> pumpLayouts(
           value: CodelesslyContext.empty(layoutID: main.id),
         ),
         Provider<Codelessly>.value(value: codelessly),
+        ChangeNotifierProvider<CodelesslyWidgetController>.value(
+          value: controller,
+        ),
       ],
       child: MaterialApp(
         home: CodelesslyLayoutBuilder(
@@ -222,6 +225,58 @@ TextStyle styleOfText(WidgetTester tester, String text) {
 }
 
 void main() {
+  group('pop', () {
+    testWidgets('with nothing to go back to goes to its destination', (
+      tester,
+    ) async {
+      final guide = layoutOf('guide', [
+        canvas('guideCanvas', 'guideBody'),
+        body('guideBody', 'guideCanvas', ['guideText']),
+        text('guideText', 'guideBody', 'The guide', brandRegular),
+      ]);
+      await pumpLayouts(tester, [
+        layoutOf(
+          'main',
+          mainScreen(
+            NavigationAction(
+              navigationType: NavigationType.pop,
+              destinationId: 'guideCanvas',
+            ),
+          ),
+        ),
+        guide,
+      ]);
+      expect(find.byType(CodelesslyWidget), findsNothing);
+      await tester.tap(find.text('Go'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      // The main screen was replaced by the guide's.
+      expect(find.text('Your album'), findsNothing);
+      expect(
+        tester
+            .widget<CodelesslyWidget>(find.byType(CodelesslyWidget))
+            .controller
+            ?.layoutID,
+        'guide',
+      );
+    });
+
+    testWidgets('without a destination does nothing at the first screen', (
+      tester,
+    ) async {
+      await pumpLayouts(tester, [
+        layoutOf(
+          'main',
+          mainScreen(NavigationAction(navigationType: NavigationType.pop)),
+        ),
+      ]);
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Your album'), findsOneWidget);
+    });
+  });
+
   group('FeedbackTheme', () {
     test('reads the font, primary, surface and text color of a layout', () {
       final FeedbackTheme theme = FeedbackTheme.fromNodes(
