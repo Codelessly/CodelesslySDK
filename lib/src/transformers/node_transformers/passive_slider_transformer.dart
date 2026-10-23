@@ -56,11 +56,16 @@ class PassiveSliderWidget extends StatelessWidget {
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
 
+  /// The values the slider's bindings read instead of the build context's,
+  /// such as the variable defaults a design canvas shows.
+  final ScopedValues? scopedValues;
+
   const PassiveSliderWidget({
     super.key,
     required this.node,
     required this.settings,
     this.variablesOverrides = const [],
+    this.scopedValues,
   });
 
   void onChanged(BuildContext context, double internalValue) {
@@ -83,10 +88,9 @@ class PassiveSliderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = ScopedValues.of(
-      context,
-      variablesOverrides: variablesOverrides,
-    );
+    final ScopedValues scopedValues =
+        this.scopedValues ??
+        ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final double value =
         PropertyValueDelegate.getPropertyValue<double>(
           node,
