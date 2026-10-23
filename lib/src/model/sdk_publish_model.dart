@@ -881,10 +881,13 @@ extension SDKPublishModelLayouts on SDKPublishModel {
     return null;
   }
 
-  /// The parameters [link] gives a screen of layout [layoutId]: its own when
-  /// it names a screen of that layout, else null.
+  /// The parameters [link] gives a screen of layout [layoutId] (the entry
+  /// layout when null, as for a widget that shows the app's first screen):
+  /// its own when it names a screen of that layout, else null.
   Map<String, String>? linkParamsFor(CodelesslyRoute? link, String? layoutId) {
-    if (link == null || layoutId == null || link.params.isEmpty) return null;
-    return resolveLayoutId(link.canvasId) == layoutId ? link.params : null;
+    if (link == null || link.params.isEmpty) return null;
+    final String? layout = resolveLayoutId(layoutId) ?? entryLayoutId;
+    if (layout == null) return null;
+    return resolveLayoutId(link.canvasId) == layout ? link.params : null;
   }
 }
