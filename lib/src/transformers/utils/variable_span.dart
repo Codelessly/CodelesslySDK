@@ -15,6 +15,21 @@ abstract final class VariablePreview {
   /// fall back to placeholders.
   static ScopedValues? Function(BaseNode? node)? scopeResolver;
 
+  /// The values [node] sees on the design canvas, as [scopeResolver] gives
+  /// them, with [item] as `item` / `index` when it carries data: a list on
+  /// the canvas builds each item with its own element of the list's data,
+  /// while [scopeResolver] only knows the node (so it gives the first item).
+  static ScopedValues? scopeFor(BaseNode? node, {IndexedItem? item}) {
+    final ScopedValues? values = scopeResolver?.call(node);
+    if (values == null || item == null || item.item == null) return values;
+    return ScopedValues.preview(
+      variables: values.variables,
+      codelesslyContext: values.codelesslyContext,
+      screenSize: values.screenSize,
+      indexedItem: item,
+    );
+  }
+
   /// Accessors that read a property of a value rather than name it, so the
   /// placeholder for `${item.title.initial}` is named after `title`.
   static const Set<String> _accessorNames = {
@@ -47,15 +62,7 @@ abstract final class VariablePreview {
     TextStyle? style,
     IndexedItem? item,
   }) {
-    ScopedValues? scopedValues = scopeResolver?.call(node);
-    if (scopedValues != null && item != null) {
-      scopedValues = ScopedValues.preview(
-        variables: scopedValues.variables,
-        codelesslyContext: scopedValues.codelesslyContext,
-        screenSize: scopedValues.screenSize,
-        indexedItem: item,
-      );
-    }
+    final ScopedValues? scopedValues = scopeFor(node, item: item);
     if (scopedValues != null) {
       final String value = PropertyValueDelegate.substituteVariables(
         expression,
@@ -148,7 +155,8 @@ class VariableSpan extends TextSpan {
   /// The variable expression, such as `${user.name}`.
   final String variable;
 
-  /// Creates a [VariableSpan] for the [variable] expression of [node].
+  /// Creates a [VariableSpan] for the [variable] expression of [node], in
+  /// list [item] when the node is inside a list.
   VariableSpan({
     required this.variable,
     BaseNode? node,
