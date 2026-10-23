@@ -2161,6 +2161,28 @@ extension BaseNodeExt on BaseNode {
       }
     }
 
+    // Image fills can name their image with a variable or formula
+    // (`${record.art}`); the node rebuilds when it changes.
+    if (this is GeometryMixin) {
+      for (final PaintModel fill in (this as GeometryMixin).fills) {
+        final String? url = fill.downloadUrl;
+        if (url == null || !url.contains(r'${')) continue;
+        final Iterable<String> names = [
+          for (final match in variableSyntaxIdentifierRegex.allMatches(url))
+            if (VariableMatch.parse(match[0]!) case final VariableMatch m)
+              m.name,
+          for (final path in FormulaEvaluator.referencedPathsInText(url))
+            path.split('.').first,
+        ];
+        for (final String name in names) {
+          if (!includePredefined && predefinedVariableNames.contains(name)) {
+            continue;
+          }
+          usedVariables.add(name);
+        }
+      }
+    }
+
     // Get variables from actions
     if (this is ReactionMixin) {
       for (final reaction in (this as ReactionMixin).reactions) {
