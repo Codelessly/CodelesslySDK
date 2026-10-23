@@ -668,12 +668,20 @@ Widget wrapWithPaddedScrollable({
   Clip? clipBehavior,
   bool fillViewport = false,
   bool flexContent = false,
+  bool hugScrollAxis = false,
   required Widget child,
 }) {
   if (!node.isScrollable) return child;
+  final bool vertical = node.scrollDirection.isVertical;
   return FitBox.fromFits(
-    horizontalFit: node.horizontalFit,
-    verticalFit: node.verticalFit,
+    // A scroll view that hugs its scroll axis is as long as its content, up
+    // to what its parent allows; past that it scrolls.
+    horizontalFit: hugScrollAxis && !vertical
+        ? SizeFit.shrinkWrap
+        : node.horizontalFit,
+    verticalFit: hugScrollAxis && vertical
+        ? SizeFit.shrinkWrap
+        : node.verticalFit,
     size: node.basicBoxLocal.size,
     child: buildScrollView(
       node: node,

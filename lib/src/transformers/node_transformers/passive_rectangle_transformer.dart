@@ -82,10 +82,18 @@ class PassiveRectangleWidget extends StatelessWidget {
     // The canvas body hugs; the canvas sizes the screen. Every other node
     // follows its fits (see FitBox): an expanded axis fills when bounded and
     // keeps its design size when not.
-    final SizeFit horizontalFit = isPlaceholder
+    // A flexible scrolling Row/Column hugs its scroll axis (its scroll view
+    // takes at most the space left), see
+    // [PassiveRowColumnTransformer.hugsItsScrollAxis].
+    final bool hugsScroll = PassiveRowColumnTransformer.hugsItsScrollAxis(node);
+    final bool scrollsVertically =
+        hugsScroll &&
+        (node as RowColumnMixin).rowColumnType == RowColumnType.column;
+    final SizeFit horizontalFit =
+        isPlaceholder || (hugsScroll && !scrollsVertically)
         ? SizeFit.shrinkWrap
         : node.horizontalFit;
-    final SizeFit verticalFit = isPlaceholder
+    final SizeFit verticalFit = isPlaceholder || scrollsVertically
         ? SizeFit.shrinkWrap
         : node.verticalFit;
 

@@ -29,7 +29,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     final bool isPlaceholder =
         parent is CanvasNode && parent.properties.bodyId == rowColumnNode.id;
 
-    final FitBox outerBox = FitBox(
+    FitBox outerBox = FitBox(
       aspectRatio: lockedAspectRatio(rowColumnNode),
       width: _outerExtent(
         rowColumnNode.horizontalFit,
@@ -67,6 +67,12 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     final SizeFit mainFit = isRow
         ? rowColumnNode.horizontalFit
         : rowColumnNode.verticalFit;
+
+    // A scrolling Row/Column that is flexible along its scroll axis (Flutter's
+    // Flexible around a scroll view) is as long as its content, up to the
+    // space its parent leaves it, and scrolls past that, rather than taking
+    // its design size. Where that axis is unbounded it keeps its design size.
+    final bool hugsScrollAxis = withScroll && hugsItsScrollAxis(rowColumnNode);
     final bool crossWraps = isRow
         ? rowColumnNode.isVerticalWrap
         : rowColumnNode.isHorizontalWrap;
@@ -125,7 +131,35 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         fillViewport:
             rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start,
         flexContent: hasMainAxisFlexChild(rowColumnNode, childrenNodes),
+        hugScrollAxis: hugsScrollAxis,
         child: res,
+      );
+    }
+
+    if (hugsScrollAxis) {
+      final Widget content = res;
+      final double design = isRow
+          ? rowColumnNode.outerBoxLocal.width
+          : rowColumnNode.outerBoxLocal.height;
+      res = LayoutBuilder(
+        builder: (context, constraints) {
+          final bool bounded = isRow
+              ? constraints.hasBoundedWidth
+              : constraints.hasBoundedHeight;
+          if (bounded) return content;
+          return SizedBox(
+            width: isRow ? design : null,
+            height: isRow ? null : design,
+            child: content,
+          );
+        },
+      );
+      outerBox = FitBox(
+        aspectRatio: outerBox.aspectRatio,
+        width: isRow ? null : outerBox.width,
+        height: isRow ? outerBox.height : null,
+        fillWidth: !isRow && outerBox.fillWidth,
+        fillHeight: isRow && outerBox.fillHeight,
       );
     }
 
@@ -240,6 +274,18 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         CrossAxisAlignmentC.stretch ||
         CrossAxisAlignmentC.baseline => WrapAlignment.start,
       };
+
+  /// Whether [node] is a scrolling Row/Column that is flexible along its
+  /// scroll axis: it is then as long as its content, up to the space its
+  /// parent leaves it, like a scroll view in Flutter's [Flexible].
+  static bool hugsItsScrollAxis(BaseNode node) {
+    if (node is! RowColumnMixin || node is! ScrollableMixin) return false;
+    if (!(node as ScrollableMixin).isScrollable) return false;
+    // A wrapping one scrolls across its runs; its main axis wraps instead.
+    if (node.wrap) return false;
+    final bool isRow = node.rowColumnType == RowColumnType.row;
+    return (isRow ? node.horizontalFit : node.verticalFit) == SizeFit.flexible;
+  }
 
   /// The design extent of a Row/Column's own box on one axis, or null when it
   /// hugs its children.
