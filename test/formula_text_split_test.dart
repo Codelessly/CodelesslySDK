@@ -1,4 +1,4 @@
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -6,7 +6,7 @@ void main() {
     const String text =
         r'Hi ${name}, ${= merge(r, {favorite: true}).favorite} and ${= 1 + 2}!';
     expect(
-      formulaOrVariableRegex.allMatches(text).map((m) => m[0]).toList(),
+      variableSyntaxIdentifierRegex.allMatches(text).map((m) => m[0]).toList(),
       <String>[
         r'${name}',
         r'${= merge(r, {favorite: true}).favorite}',

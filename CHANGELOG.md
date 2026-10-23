@@ -6,30 +6,49 @@
   entrances (from rest or `enterFrom`, replayed when `replayKey` changes) and
   delays.
 - Timer, key press, swipe, double tap and hover triggers.
-- Stacked and wrapping lists; row and column `itemSpacing`; vertical,
-  inverted and rectangular-thumb sliders with bound `min`/`max`.
+
+### Layout
+
+- Row/column `spacing`, and `wrap` with `runSpacing` (`CodelesslyWrap`).
+  Children hidden by a visibility formula take no space and no gap.
+- Stacked and wrapping lists.
+- Vertical, inverted and rectangular-thumb sliders with bound `min`/`max`.
+- `flex` and `rotation` can be bound to data like fill, opacity and size.
 
 ### Formulas and variables
 
-- Computed variables (`VariableData.formula`), kept up to date from their
-  inputs; Set variable leaves them alone.
-- New functions: `padLeft`/`padRight`, `substring`, `replace`, `split`,
-  `indexOf`, `matches`, `slug`, `seconds`, `duration`, `slice`, `take`,
-  `skip`, `reverse`, `findIndex`, `concat`, `merge`, `set`, `luminance`,
-  `sortByDesc`; object literals, `(item, i)` lambdas, multi-key `sortBy`,
-  `money(value, decimals)` and list `+`.
+- Computed variables: a variable holding a `${= ...}` formula is evaluated
+  when read and rebuilds what shows it when its inputs change. Set variable
+  leaves it alone.
+- Functions: `sqrt`, `pow`, trigonometry, `pi`, `radians`, `degrees`,
+  `clamp`, `distance` (great-circle), `first`, `last`, `slice`, `take`,
+  `skip`, `reverse` (these four also on text), `range`, `indexOf` (text,
+  value or predicate), `findIndex`, `object`, `merge`, `set`, `keys`,
+  `values`, `append`, `setAt`, `insertAt`, `removeAt`, `move`, `flatten`,
+  `compact`, `concat`, `thousands`, `padLeft`/`padRight`, `substring`,
+  `replace`, `split`, `matches`, `slug`, `seconds`, `duration`,
+  `luminance` and `sortByDesc`; object literals, `(item, i)` lambdas,
+  multi-key `sortBy`, `money(value, decimals)` and list `+`.
+- A map's own key wins over a built-in accessor of the same name
+  (`${rig.length}` reads the field).
 - Bindable effects, stroke weight, corner radius, font weight and icon
   (`StyleBindings`); image fills listen to the variables in their URL.
 - A screen variable shadows an app variable of the same name everywhere.
 
-### Navigation
+### Links and navigation
 
-- A screen's route is set before its load actions run; a link's parameters
-  also set the variables they name.
-- `CodelesslyWidget.initialScreen` opens a screen by id or name.
+- A layout opens by the ID of one of its canvases;
+  `CodelesslyWidget.initialScreen` opens a screen by id or name.
+- A link to the app's first screen gives it the link's parameters
+  (`${route.k}`), and a link's parameters also set the variables they name.
+- A screen's route is set before its load actions run.
 
 ### Fixes
 
+- Shadows without spread, offset or color no longer crash.
+- Image fills apply their opacity once (they painted at its square).
+- A text field's `errorText` template that comes out empty is no error.
+- List items on the design canvas show their own item's text.
 - Dashed strokes draw round and square caps along the path; a zero pattern
   no longer hangs.
 
