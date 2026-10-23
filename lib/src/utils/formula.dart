@@ -404,6 +404,11 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc(
+      'concat',
+      'concat(list, list or value, ...)',
+      'concat(take(history, 23), [soc]); history + [soc] does the same',
+    ),
+    FormulaFunctionDoc(
       'alpha',
       'alpha(color, opacity)',
       "alpha('#FF4D4F', 0.12) → #1FFF4D4F",
@@ -1103,6 +1108,10 @@ final Map<String, _Function> _functions = {
     if (_arg(a, 0) case final Map m) ...m.map((k, v) => MapEntry('$k', v)),
     FormulaEvaluator.stringify(_arg(a, 1)): _arg(a, 2),
   },
+  'concat': (a) => [
+    for (final Object? item in a)
+      if (item is Iterable) ...item else item,
+  ],
   'keys': (a) => switch (_arg(a, 0)) {
     final Map m => m.keys.map((k) => k.toString()).toList(),
     _ => <Object?>[],
@@ -1344,6 +1353,8 @@ class _Binary extends _Node {
     final Object? b = right.eval(resolve);
     switch (op) {
       case '+':
+        // Lists join, and a list plus a value appends it.
+        if (a is Iterable) return [...a, if (b is Iterable) ...b else b];
         final num? na = a is String ? null : _toNum(a);
         final num? nb = b is String ? null : _toNum(b);
         if (na != null && nb != null) return _tidy(na + nb);
