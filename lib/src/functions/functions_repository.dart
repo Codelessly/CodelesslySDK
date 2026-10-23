@@ -491,17 +491,10 @@ class FunctionsRepository {
       await Navigator.maybePop(context, parsedParams);
     } else {
       // Check if a layout exists for the action's [destinationId].
-      final String? layoutId =
-          effectiveCodelessly
-              .dataManager
-              .publishModel
-              ?.layouts[action.destinationId]
-              ?.id ??
-          effectiveCodelessly.dataManager.publishModel?.layouts.values
-              .firstWhereOrNull(
-                (layout) => layout.canvasIds.contains(action.destinationId),
-              )
-              ?.id;
+      final String? layoutId = resolveLayoutIdForCanvas(
+        effectiveCodelessly.dataManager.publishModel,
+        action.destinationId,
+      );
 
       DebugLogger.instance.printInfo(
         'looking for layout with canvas id: [${action.destinationId}]',
@@ -615,9 +608,27 @@ class FunctionsRepository {
 
   /// The id of the published layout that holds the canvas [canvasId], if any.
   static String? layoutIdForCanvas(Codelessly codelessly, String canvasId) =>
-      codelessly.dataManager.publishModel?.layouts.values
-          .firstWhereOrNull((layout) => layout.canvasIds.contains(canvasId))
-          ?.id;
+      resolveLayoutIdForCanvas(codelessly.dataManager.publishModel, canvasId);
+
+  /// The id of the layout of [model] that holds canvas [canvasId] (or whose
+  /// id is [canvasId]), if any.
+  ///
+  /// Layouts already downloaded are checked first. Otherwise the publish
+  /// model's index of layout canvases names it, so a destination whose
+  /// layout is not downloaded yet (a screen of another page of the project,
+  /// in an app that loads layouts on demand) still resolves: the
+  /// [CodelesslyWidget] shown for it downloads the layout.
+  static String? resolveLayoutIdForCanvas(
+    SDKPublishModel? model,
+    String canvasId,
+  ) {
+    if (model == null || canvasId.isEmpty) return null;
+    return model.layouts[canvasId]?.id ??
+        model.layouts.values
+            .firstWhereOrNull((layout) => layout.canvasIds.contains(canvasId))
+            ?.id ??
+        model.updates.layoutIdForCanvas(canvasId);
+  }
 
   /// Shows the canvas [canvasId] as a dialog, a bottom sheet or a side sheet
   /// (see [presentCanvas]) and completes with what it was closed with: the
