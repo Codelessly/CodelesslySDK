@@ -1,4 +1,4 @@
-## Unreleased
+## 8.3.0
 
 - A text's color can be bound with a `textColor` variable or formula.
 - Formulas: `range`, `interpolate`, `runs`, `minBy`, `maxBy`, `obj`,
