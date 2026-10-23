@@ -7,6 +7,7 @@ import 'package:rfc_6901/rfc_6901.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/action_chain.dart';
+import '../../functions/app_auth.dart';
 
 /// Represents what to do when a variable path evaluates to null when
 /// substituting variables in a text.
@@ -446,7 +447,9 @@ class PropertyValueDelegate {
       'value' => scopedValues.nodeState,
       'storage' => scopedValues.localStorage?.getAll(),
       'route' => scopedValues.routeParams,
-      'auth' => scopedValues.appUser,
+      // No Codelessly instance (the editor's design canvas, previews) means
+      // no app user: read as signed out rather than unknown.
+      'auth' => scopedValues.appUser ?? AppAuth.userToMap(null),
       'result' => ActionChain.current?.result,
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
       _ => null,
