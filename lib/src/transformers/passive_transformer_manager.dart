@@ -176,9 +176,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// Returns [node] with the style properties that conditions, bound
   /// variables or formulas, or set value actions give it at runtime: `fill`
   /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
-  /// `height` and `flex` (its share of an expanded row or column, so bars
-  /// can be sized proportionally). Returns [node] itself when
-  /// nothing changes it.
+  /// `height`, `flex` (its share of an expanded row or column, so bars
+  /// can be sized proportionally) and `rotation` (in degrees). Returns
+  /// [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     T? value<T extends Object>(String property) =>
@@ -244,6 +244,15 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (flex != null && flex.round() != node.flex) {
       // Flutter needs a positive flex; 0 still gets a sliver.
       patch['flex'] = math.max(1, flex.round());
+    }
+
+    // Rotation in degrees (the node's `rotation` JSON field), e.g. a card
+    // tilted while it's dragged: `${= dragging ? -2 : 0}`.
+    final num? rotation = value<num>('rotation');
+    if (rotation != null &&
+        rotation.isFinite &&
+        rotation.round() != node.rotationDegrees) {
+      patch['rotation'] = rotation.round();
     }
 
     // The states shown around the node (a property-override variant, its
