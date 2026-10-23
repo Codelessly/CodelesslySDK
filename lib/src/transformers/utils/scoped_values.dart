@@ -21,6 +21,10 @@ class ScopedValues {
   /// 0 to 1, or null outside one.
   late final double? holdProgress;
 
+  /// Whether the nearest tappable node above this context is hovered, or
+  /// null outside one.
+  late final bool? hovered;
+
   /// The route params for this route/page for given context.
   late final Map<String, dynamic> routeParams;
 
@@ -80,6 +84,7 @@ class ScopedValues {
       indexedItem = null,
       nodeState = null,
       holdProgress = null,
+      hovered = null,
       routeParams = {},
       _appUser = null,
       screenSize = null;
@@ -103,6 +108,7 @@ class ScopedValues {
        _previewVariables = variables,
        nodeState = null,
        holdProgress = null,
+       hovered = null,
        routeParams = {};
 
   /// Creates a new scoped values instance from a given context.
@@ -121,6 +127,7 @@ class ScopedValues {
     screenSize = MediaQuery.maybeSizeOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     holdProgress = HoldProgressProvider.maybeOf(context);
+    hovered = HoverProvider.maybeOf(context);
     routeParams =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
         {};
