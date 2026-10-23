@@ -413,6 +413,7 @@ class PropertyValueDelegate {
       'auth' => scopedValues.appUser,
       'result' => ActionChain.current?.result,
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
+      'hold' => scopedValues.holdProgress ?? 0.0,
       _ => null,
     };
 

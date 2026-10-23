@@ -30,6 +30,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'appBar': PassiveAppBarTransformer(getNode, this),
       'navigationBar': PassiveNavigationBarTransformer(getNode, this),
       'switch': PassiveSwitchTransformer(getNode, this),
+      'signature': PassiveSignatureTransformer(getNode, this),
       'slider': PassiveSliderTransformer(getNode, this),
       'placeholder': PassivePlaceholderTransformer(getNode, this),
       'singlePlaceholder': PassiveSinglePlaceholderTransformer(getNode, this),
