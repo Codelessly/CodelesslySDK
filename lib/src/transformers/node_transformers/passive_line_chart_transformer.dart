@@ -260,7 +260,7 @@ class LineChartSpec {
               color: LineChartGeometry.parseColor(t['color']),
             ),
       ],
-      yAxisTitle: props.yAxisTitle,
+      yAxisTitle: text(bound('yAxisTitle')) ?? props.yAxisTitle,
       areaBands: [
         for (final Map b in maps('areaBands'))
           if ((x(b['from']), x(b['to']), n(b['below']), c(b)) case (
@@ -341,9 +341,11 @@ class LineChartSpec {
         props.tooltipValueStyle,
       ),
       tooltipXFormat: props.tooltipXFormat,
-      tooltipYScale: props.tooltipYScale,
-      tooltipYDecimals: props.tooltipYDecimals,
-      tooltipYSuffix: props.tooltipYSuffix,
+      // The readout's units can follow a setting (feet or metres).
+      tooltipYScale: n(bound('tooltipYScale')) ?? props.tooltipYScale,
+      tooltipYDecimals:
+          n(bound('tooltipYDecimals'))?.round() ?? props.tooltipYDecimals,
+      tooltipYSuffix: text(bound('tooltipYSuffix')) ?? props.tooltipYSuffix,
       tooltipTrend: props.tooltipTrend,
     );
   }

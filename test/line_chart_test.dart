@@ -373,4 +373,25 @@ void main() {
       expect(find.byType(PassiveLineChartWidget), findsOneWidget);
     });
   });
+
+  testWidgets('the axis title and readout units can be bound', (
+    tester,
+  ) async {
+    await pumpChart(
+      tester,
+      chart(
+        variables: {
+          'yAxisTitle': r"${= 1 > 0 ? 'M' : 'FT'}",
+          'tooltipYScale': r'${= 0.3048}',
+          'tooltipYDecimals': r'${= 2}',
+          'tooltipYSuffix': r"${= ' m'}",
+        },
+      ),
+    );
+    final spec = painterOf(tester).spec;
+    expect(spec.yAxisTitle, 'M');
+    expect(spec.tooltipYScale, 0.3048);
+    expect(spec.tooltipYDecimals, 2);
+    expect(spec.tooltipYSuffix, ' m');
+  });
 }
