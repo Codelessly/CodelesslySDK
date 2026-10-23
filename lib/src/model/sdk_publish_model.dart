@@ -4,6 +4,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
+import '../ui/codelessly_route.dart';
 import 'model_http_request.dart';
 import 'privacy_base.dart';
 
@@ -864,4 +865,29 @@ class SDKLayoutConditions extends PrivacyBase {
   /// Converts this instance to a JSON map.
   @override
   Map<String, dynamic> toJson() => _$SDKLayoutConditionsToJson(this);
+}
+
+/// Finding layouts in a published model.
+extension SDKPublishModelLayouts on SDKPublishModel {
+  /// The layout [id] names: a layout ID, or the ID of a canvas in a layout,
+  /// so a link can open a screen by its canvas. Null when [id] is null or
+  /// names neither.
+  String? resolveLayoutId(String? id) {
+    if (id == null || id.isEmpty) return null;
+    if (layouts.containsKey(id)) return id;
+    for (final SDKPublishLayout layout in layouts.values) {
+      if (layout.canvasIds.contains(id)) return layout.id;
+    }
+    return null;
+  }
+
+  /// The parameters [link] gives a screen of layout [layoutId] (the entry
+  /// layout when null, as for a widget that shows the app's first screen):
+  /// its own when it names a screen of that layout, else null.
+  Map<String, String>? linkParamsFor(CodelesslyRoute? link, String? layoutId) {
+    if (link == null || link.params.isEmpty) return null;
+    final String? layout = resolveLayoutId(layoutId) ?? entryLayoutId;
+    if (layout == null) return null;
+    return resolveLayoutId(link.canvasId) == layout ? link.params : null;
+  }
 }
