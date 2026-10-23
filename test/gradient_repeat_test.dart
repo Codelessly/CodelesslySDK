@@ -70,7 +70,9 @@ void main() {
         // (255) then black (0), every 10 px, at both widths.
         reds = [
           for (final int x in const <int>[5, 15, 25, 35, 45, 55])
-            data.getUint8(((5 * image.width) + min<int>(x, image.width - 1)) * 4),
+            data.getUint8(
+              ((5 * image.width) + min<int>(x, image.width - 1)) * 4,
+            ),
         ];
       });
       return reds;
