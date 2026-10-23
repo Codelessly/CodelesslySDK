@@ -81,6 +81,10 @@ class PassiveDropdownWidget extends StatelessWidget {
   final int? initialValue;
   final WidgetBuildSettings settings;
 
+  /// The values the items and selection bindings read instead of the build
+  /// context's, such as the variable defaults a design canvas shows.
+  final ScopedValues? scopedValues;
+
   const PassiveDropdownWidget({
     super.key,
     required this.node,
@@ -88,6 +92,7 @@ class PassiveDropdownWidget extends StatelessWidget {
     this.onChanged,
     this.initialValue,
     required this.settings,
+    this.scopedValues,
   });
 
   List<DropdownMenuItem<Object>> buildItems(BuildContext context, List items) {
@@ -183,7 +188,8 @@ class PassiveDropdownWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues =
+        this.scopedValues ?? ScopedValues.of(context);
     final List items = node.properties.useDataSource
         ? PropertyValueDelegate.getPropertyValue<List>(
                 node,
