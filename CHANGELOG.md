@@ -1,5 +1,12 @@
 ## Unreleased
 
+### Layout
+
+- A row or column with `wrap` builds a `Wrap`: its alignment places
+  children within and across runs, `spacing` and `runSpacing` set the gaps,
+  and expanded children take their own size. A child hidden at runtime
+  leaves no gap.
+
 ### Signing
 
 - Signature nodes take a signature by finger, pen or mouse and write its

@@ -493,6 +493,32 @@ extension CMainAxisAlignmentHelper on MainAxisAlignmentC {
   }
 }
 
+extension CWrapMainAxisAlignmentHelper on MainAxisAlignmentC {
+  /// The [flutter.WrapAlignment] of a wrapping row/column: used both for the
+  /// children within a run and for the runs within the cross axis.
+  flutter.WrapAlignment get flutterWrapAlignment => switch (this) {
+    MainAxisAlignmentC.start => flutter.WrapAlignment.start,
+    MainAxisAlignmentC.end => flutter.WrapAlignment.end,
+    MainAxisAlignmentC.center => flutter.WrapAlignment.center,
+    MainAxisAlignmentC.spaceBetween => flutter.WrapAlignment.spaceBetween,
+    MainAxisAlignmentC.spaceAround => flutter.WrapAlignment.spaceAround,
+    MainAxisAlignmentC.spaceEvenly => flutter.WrapAlignment.spaceEvenly,
+  };
+}
+
+extension CWrapCrossAxisAlignmentHelper on CrossAxisAlignmentC {
+  /// The [flutter.WrapCrossAlignment] of a wrapping row/column. A run is as
+  /// thick as its thickest child, so there is nothing to stretch to; stretch
+  /// and baseline fall back to start.
+  flutter.WrapCrossAlignment get flutterWrapCrossAlignment => switch (this) {
+    CrossAxisAlignmentC.center => flutter.WrapCrossAlignment.center,
+    CrossAxisAlignmentC.end => flutter.WrapCrossAlignment.end,
+    CrossAxisAlignmentC.start ||
+    CrossAxisAlignmentC.stretch ||
+    CrossAxisAlignmentC.baseline => flutter.WrapCrossAlignment.start,
+  };
+}
+
 extension CCrossAxisAlignmentHelper on CrossAxisAlignmentC {
   flutter.CrossAxisAlignment get flutterAxis {
     switch (this) {
