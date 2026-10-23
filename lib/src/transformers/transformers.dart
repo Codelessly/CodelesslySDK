@@ -9,6 +9,7 @@ export 'utils/condition_evaluator.dart';
 export 'utils/condition_visitors.dart';
 export 'utils/dash_path.dart';
 export 'utils/fit_layout.dart';
+export 'utils/hold_to_confirm.dart';
 export 'utils/indexed_item_provider.dart';
 export 'utils/node_geometry.dart';
 export 'utils/property_overrides.dart';

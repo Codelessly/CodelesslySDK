@@ -1,5 +1,18 @@
 ## Unreleased
 
+### Signing
+
+- Signature nodes take a signature by finger, pen or mouse and write its
+  strokes to the bound `value` as the pen goes down and lifts, firing
+  `changed`. Setting the variable redraws the box: `[]` clears it, and a
+  saved signature replays it. Read-only boxes only show.
+- The hold trigger runs its actions once the node has been held for its
+  duration. Letting go or moving off drains it. While it is held, the nodes
+  inside read the progress, 0 to 1, as `${hold}`, to fill a bar or change a
+  label.
+- An expanded child whose bound `flex` is 0 takes no space, where it used to
+  keep its design size.
+
 ### Dialogs
 
 - Show dialog actions present their canvas by `presentation`: a centered

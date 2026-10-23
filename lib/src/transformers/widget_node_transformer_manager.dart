@@ -227,6 +227,32 @@ abstract class WidgetNodeTransformerManager
 
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
+    final Widget wrapped = _wrapWithTapReactions(context, node, widget);
+    if (node is! ReactionMixin) return wrapped;
+    final List<Reaction> onHoldReactions = (node as ReactionMixin).reactions
+        .where(
+          (reaction) =>
+              reaction.trigger.type == TriggerType.hold &&
+              reaction.action.enabled,
+        )
+        .toList();
+    if (onHoldReactions.isEmpty) return wrapped;
+    return HoldToConfirm(
+      duration: Duration(milliseconds: onHoldReactions.first.trigger.duration),
+      onConfirmed: () => FunctionsRepository.triggerAction(
+        context,
+        TriggerType.hold,
+        reactions: onHoldReactions,
+      ),
+      child: wrapped,
+    );
+  }
+
+  Widget _wrapWithTapReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
     if (node is! ReactionMixin) return widget;
     if (node case CanvasNode() || SpacerNode()) return widget;
     if (node is CustomPropertiesMixin &&
