@@ -996,12 +996,25 @@ Duration? _offset(Object? value) {
   return Duration(minutes: m[1] == '-' ? -minutes : minutes);
 }
 
+/// The instant formulas take as now (`now()`, `today()`).
+///
+/// A host can pin it to show an app at a given moment, for previews and
+/// reproducible screenshots of date-dependent screens (the Codelessly site
+/// pins it from a `?now=` URL parameter).
+abstract final class FormulaClock {
+  /// The pinned instant, or null for the device clock.
+  static DateTime? pinned;
+
+  /// Now: [pinned], or the device clock.
+  static DateTime now() => pinned ?? DateTime.now();
+}
+
 /// The wall-clock time now at the UTC [offset] (see [_offset]), or local
 /// time without one. Returned without a zone, like other formula dates.
 DateTime _nowAt(Object? offset) {
   final Duration? delta = _offset(offset);
-  if (delta == null) return DateTime.now();
-  final DateTime utc = DateTime.now().toUtc().add(delta);
+  if (delta == null) return FormulaClock.now().toLocal();
+  final DateTime utc = FormulaClock.now().toUtc().add(delta);
   return DateTime(
     utc.year,
     utc.month,
