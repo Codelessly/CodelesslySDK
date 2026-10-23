@@ -179,8 +179,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// Returns [node] with the style properties that conditions, bound
   /// variables or formulas, or set value actions give it at runtime: `fill`
-  /// (a text's color for text nodes), `stroke`, `opacity`, `width` and
-  /// `height`. Returns [node] itself when
+  /// (a text's color for text nodes), `stroke`, `strokeWeight`, `opacity`,
+  /// `width` and `height`. Returns [node] itself when
   /// nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
@@ -207,6 +207,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           stroke.copyWith(visible: true).toJson(),
           for (final paint in geometry.strokes.skip(1)) paint.toJson(),
         ];
+      }
+      final double? strokeWeight = value<double>('strokeWeight');
+      if (strokeWeight != null && strokeWeight != geometry.strokeWeight) {
+        patch['strokeWeight'] = math.max(0, strokeWeight).toDouble();
       }
     }
     if (node is TextNode) {
