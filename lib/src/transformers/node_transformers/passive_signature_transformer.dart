@@ -211,7 +211,8 @@ class SignaturePainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round;
     for (final List<List<double>> stroke in strokes) {
       if (stroke.isEmpty) continue;
-      Offset at(List<double> p) => Offset(p[0] * size.width, p[1] * size.height);
+      Offset at(List<double> p) =>
+          Offset(p[0] * size.width, p[1] * size.height);
       final Offset first = at(stroke.first);
       final Path path = Path()..moveTo(first.dx, first.dy);
       // A tap leaves a dot.

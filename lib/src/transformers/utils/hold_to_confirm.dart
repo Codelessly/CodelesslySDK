@@ -130,10 +130,8 @@ class _HoldToConfirmState extends State<HoldToConfirm>
         child: AnimatedBuilder(
           animation: _controller,
           child: widget.child,
-          builder: (context, child) => HoldProgressProvider(
-            progress: _controller.value,
-            child: child!,
-          ),
+          builder: (context, child) =>
+              HoldProgressProvider(progress: _controller.value, child: child!),
         ),
       ),
     );
