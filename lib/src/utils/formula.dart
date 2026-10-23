@@ -413,11 +413,7 @@ class FormulaEvaluator {
       'alpha(color, opacity)',
       "alpha('#FF4D4F', 0.12) → #1FFF4D4F",
     ),
-    FormulaFunctionDoc(
-      'pad',
-      'pad(value, width, fill)',
-      'pad(5, 2) → 05',
-    ),
+    FormulaFunctionDoc('pad', 'pad(value, width, fill)', 'pad(5, 2) → 05'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
     FormulaFunctionDoc(
       'isEmpty',

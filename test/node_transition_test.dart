@@ -1,5 +1,4 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -41,7 +40,10 @@ Future<void> pumpScreen(WidgetTester tester, {NodeTransition? transition}) =>
 
 double renderedOpacity(WidgetTester tester) {
   final Iterable<FadeTransition> fades = tester.widgetList<FadeTransition>(
-    find.ancestor(of: find.text('Loading'), matching: find.byType(FadeTransition)),
+    find.ancestor(
+      of: find.text('Loading'),
+      matching: find.byType(FadeTransition),
+    ),
   );
   return fades.first.opacity.value;
 }
@@ -74,7 +76,9 @@ void main() {
     await tester.tap(find.text('Dim'));
     await tester.pump();
     final Opacity opacity = tester.widget<Opacity>(
-      find.ancestor(of: find.text('Loading'), matching: find.byType(Opacity)).first,
+      find
+          .ancestor(of: find.text('Loading'), matching: find.byType(Opacity))
+          .first,
     );
     expect(opacity.opacity, 0.45);
   });

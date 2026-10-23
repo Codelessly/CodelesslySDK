@@ -93,10 +93,7 @@ void main() {
   testWidgets('reactions with different periods run on their own timers', (
     tester,
   ) async {
-    await pumpScreen(tester, [
-      every(1000, addOne()),
-      every(500, addOne()),
-    ]);
+    await pumpScreen(tester, [every(1000, addOne()), every(500, addOne())]);
     await tester.pump(const Duration(milliseconds: 1000));
     await tester.pump();
     // 2 from the 500 ms timer, 1 from the 1 s timer.
