@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
@@ -292,9 +291,9 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
   }
 
   /// This loads all the apis for the layout as variables to be available
-  /// in the layout. Any api that is defined on canvas' load action will be
-  /// called right away. Otherwise, the api will be available as a variable
-  /// with idle state.
+  /// in the layout. An api called by a canvas load action starts in the
+  /// loading state (the canvas calls it in order with its other load
+  /// actions); any other api is available as a variable with idle state.
   void loadApisAndItsVariables(BuildContext context) {
     final apiCallActions = canvasNode.reactions
         .whereTriggerType(TriggerType.load)
@@ -334,32 +333,6 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
       // Override default values of variables with values provided in data.
       final notifier = Observable(variable);
       codelesslyContext.variables[variable.id] = notifier;
-
-      // Make api request right away if it is a canvas action.
-      if (canvasAction != null) {
-        DebugLogger.instance.printInfo(
-          'Making api request for onLoad canvas action',
-          name: CodelesslyLayoutRetriever.name,
-        );
-        // The variable carries the error state; report the failure instead
-        // of leaving it as an unhandled async error.
-        unawaited(
-          FunctionsRepository.callApi(
-            context,
-            canvasAction,
-            notifier,
-          ).then<void>(
-            (_) {},
-            onError: (Object e, StackTrace stackTrace) =>
-                ErrorLogger.instance.captureException(
-                  e,
-                  message: 'onLoad API call failed',
-                  type: 'api_call_failed',
-                  stackTrace: stackTrace,
-                ),
-          ),
-        );
-      }
     }
   }
 
