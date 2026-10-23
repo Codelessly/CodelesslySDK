@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-Future<void> show(WidgetTester tester, ShowToastAction action, Size size) async {
+Future<void> show(
+  WidgetTester tester,
+  ShowToastAction action,
+  Size size,
+) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = size;
   addTearDown(tester.view.reset);
@@ -26,7 +30,10 @@ Future<void> show(WidgetTester tester, ShowToastAction action, Size size) async 
     context,
     TriggerType.click,
     reactions: [
-      Reaction(action: action, trigger: TriggerModel(type: TriggerType.click)),
+      Reaction(
+        action: action,
+        trigger: TriggerModel(type: TriggerType.click),
+      ),
     ],
   );
   await tester.pump();
@@ -63,7 +70,10 @@ void main() {
     expect(rect.right, closeTo(1440 - 24, 0.5));
     expect(rect.bottom, closeTo(900 - 24, 0.5));
     expect(rect.width, lessThanOrEqualTo(420));
-    expect(find.byKey(const ValueKey('codelessly-toast-close')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('codelessly-toast-close')),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const ValueKey('codelessly-toast-close')));
     await tester.pump(const Duration(milliseconds: 300));

@@ -40,7 +40,7 @@ void main() {
     test('distance between list items', () {
       expect(
         eval(
-          "round(distance(first(stops).lat, first(stops).lng, "
+          'round(distance(first(stops).lat, first(stops).lng, '
           "find(stops, 'id', 'bryce').lat, find(stops, 'id', 'bryce').lng, 'mi'))",
         ),
         inInclusiveRange(60, 70),
@@ -77,7 +77,7 @@ void main() {
       expect(eval('flatten([[1, 2], [3], 4])'), [1, 2, 3, 4]);
       expect(eval("compact([1, null, '', 2])"), [1, 2]);
       expect(
-        eval("compact(flatten(map(stops, s => [s.nights > 2 ? s.id : null])))"),
+        eval('compact(flatten(map(stops, s => [s.nights > 2 ? s.id : null])))'),
         ['zion', 'moab'],
       );
     });

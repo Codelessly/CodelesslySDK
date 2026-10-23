@@ -35,7 +35,9 @@ SliderNode rule({
 Future<void> pump(WidgetTester tester, Widget child) => tester.pumpWidget(
   ChangeNotifierProvider<CodelesslyContext>.value(
     value: CodelesslyContext.empty(),
-    child: MaterialApp(home: Scaffold(body: Center(child: child))),
+    child: MaterialApp(
+      home: Scaffold(body: Center(child: child)),
+    ),
   ),
 );
 
@@ -62,9 +64,7 @@ void main() {
     expect(track.markerFraction, closeTo(0.87, 1e-9));
   });
 
-  testWidgets('marker and active color follow their bindings', (
-    tester,
-  ) async {
+  testWidgets('marker and active color follow their bindings', (tester) async {
     await pump(
       tester,
       PassiveSliderWidget(
