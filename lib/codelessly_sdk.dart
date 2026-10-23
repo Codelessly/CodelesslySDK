@@ -47,6 +47,7 @@ export 'src/ui/skeleton.dart';
 export 'src/ui/node_motion.dart';
 export 'src/ui/swipe_detector.dart';
 export 'src/ui/stripe_painter.dart';
+export 'src/utils/computed_variables.dart';
 export 'src/utils/cupertino_icons_by_codepoint.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/flutter_icons_data_map.dart';
