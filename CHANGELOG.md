@@ -1,3 +1,38 @@
+## 8.3.0
+
+Needs codelessly_api 6.2.0.
+
+### Formulas and data
+
+- Record and list helpers (`object`, `set`, `merge`, `findIndex`, `first`,
+  `last`, `take`, `skip`, `reverse`, `concat`, `range`), text helpers
+  (`padLeft`, `replace`, `substring`, `split`), `second`, `addSeconds`,
+  `diffSeconds` and `formatDuration`.
+- Formulas that call `now()` tick every second (`FormulaClock`).
+- Computed variables: a text variable holding one `${= formula}` reads as
+  its result everywhere and updates when what it reads changes.
+
+### Layout and rendering
+
+- Wrapping rows and columns render as a `Wrap`.
+- A hugging row or column's min and max sizes include its padding.
+- Circular indicators draw arcs (start angle and sweep), with `value`,
+  `color`, `startAngle` and `sweepAngle` bindable.
+- Text with `tabularFigures` uses equal-width digits.
+- A node's `rotationDegrees` can be bound to a variable or formula.
+- Hover, cursor enter and cursor exit reactions run.
+
+### Dialogs
+
+- Show-dialog presentations: bottom sheet, adaptive and popover.
+- Dialogs pick their responsive layout by the screen width and keep a 24 px
+  inset from the screen edges.
+
+### Fixes
+
+- A text field's label, error or affix text made of variables shows nothing
+  when it comes out empty, so an empty error no longer marks the field.
+
 ## 8.2.0
 
 ### States
