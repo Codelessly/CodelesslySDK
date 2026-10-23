@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -388,6 +389,88 @@ abstract class WidgetNodeTransformerManager
       child: widget,
     );
   }
+
+  /// Runs [node]'s double tap and hover reactions.
+  ///
+  /// A double tap recognizer is only added when a double tap reaction
+  /// exists, since it makes single taps wait out the double tap timeout
+  /// (300ms) before they fire `click`. Hover reactions listen with a
+  /// [MouseRegion], which touch input never enters. The legacy
+  /// [TriggerType.cursorEnter] and [TriggerType.cursorExit] run with
+  /// [TriggerType.hoverEnter] and [TriggerType.hoverExit].
+  Widget wrapWithPointerTriggers(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
+    if (node is! ReactionMixin) return widget;
+    final List<Reaction> reactions = (node as ReactionMixin).reactions
+        .where(
+          (reaction) =>
+              _pointerTriggers.contains(reaction.trigger.type) &&
+              reaction.action.enabled,
+        )
+        .toList();
+    if (reactions.isEmpty) return widget;
+    bool has(TriggerType type) =>
+        reactions.any((reaction) => reaction.trigger.type == type);
+
+    if (has(TriggerType.doubleTap)) {
+      widget = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onDoubleTap: () => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.doubleTap,
+          reactions: reactions,
+        ),
+        child: widget,
+      );
+    }
+
+    final bool enters =
+        has(TriggerType.hoverEnter) || has(TriggerType.cursorEnter);
+    final bool exits =
+        has(TriggerType.hoverExit) || has(TriggerType.cursorExit);
+    if (enters || exits) {
+      void run(PointerEvent event, List<TriggerType> types) {
+        if (event.kind == PointerDeviceKind.touch) return;
+        for (final TriggerType type in types) {
+          FunctionsRepository.triggerAction(
+            context,
+            type,
+            reactions: reactions,
+          );
+        }
+      }
+
+      widget = MouseRegion(
+        opaque: false,
+        hitTestBehavior: HitTestBehavior.opaque,
+        onEnter: enters
+            ? (event) => run(event, const [
+                TriggerType.hoverEnter,
+                TriggerType.cursorEnter,
+              ])
+            : null,
+        onExit: exits
+            ? (event) => run(event, const [
+                TriggerType.hoverExit,
+                TriggerType.cursorExit,
+              ])
+            : null,
+        child: widget,
+      );
+    }
+    return widget;
+  }
+
+  static const Set<TriggerType> _pointerTriggers = {
+    TriggerType.doubleTap,
+    TriggerType.hoverEnter,
+    TriggerType.hoverExit,
+    TriggerType.cursorEnter,
+    TriggerType.cursorExit,
+  };
 
   BorderRadius? getBorderRadius(BaseNode node) {
     if (node is CornerMixin) {
