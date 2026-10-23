@@ -4,33 +4,29 @@ import 'package:codelessly_api/codelessly_api.dart';
 
 import '../../codelessly_sdk.dart';
 
-/// Evaluates computed (derived) variables: variables whose
-/// [VariableData.formula] gives their value from other variables, e.g.
+/// Helpers for computed variables: variables whose value is a `${= ...}`
+/// formula over other variables (see [VariableData.isComputed]), e.g.
 /// `visible = ${= sortBy(filter(records, r => r.crate == crateId), sortBy)}`.
 ///
 /// A computed variable is read like any other one, by name, in bindings and
-/// formulas (`${= length(visible)}`, `${visible[0].title}`): its value is
-/// materialized into the variable, so everything that reads variables reads
-/// the formula's result.
+/// formulas (`${= length(visible)}`, `${visible[0].title}`), and its formula
+/// is worked out whenever it is read. These helpers check a formula, find
+/// the variables it reads and cycles between computed variables, and work
+/// out every computed variable at once for the design canvas.
 ///
 /// Semantics:
-///  - The formula is written like a binding: `${= expression}`, a single
-///    path such as `${records}`, or a bare expression (`length(records)`).
 ///  - It reads other variables, including other computed ones, and the
-///    `data` passed to the layout. Item scoped values (`item`, `index`,
-///    `value`) don't exist where a computed variable lives and read as null.
-///  - Its value is cached in the variable and computed again only when a
-///    variable it reads changes (see [CodelesslyContext]).
+///    `data` passed to the layout.
 ///  - Computed variables that read themselves, directly or through others,
-///    form a cycle: they evaluate to null (an empty value) and don't update.
-///  - The result keeps the variable's declared type when it fits it (a
-///    whole number for an integer, a list for a list, ...), and otherwise
-///    takes the type of the result, so a formula producing a list reads as a
-///    list even if the variable was declared as text.
-///  - They are read-only: Set variable actions, two-way bindings and
-///    [CodelesslyContext.updateVariable] leave them unchanged and report
-///    that nothing was set.
+///    form a cycle and evaluate to null.
+///  - Set variable actions, two-way bindings and
+///    [CodelesslyContext.updateVariable] leave them unchanged, so their
+///    formula isn't overwritten by a value.
 abstract final class ComputedVariables {
+  /// [variable]'s formula, or null for a normal variable.
+  static String? formulaOf(VariableData variable) =>
+      variable.isComputed ? variable.value.trim() : null;
+
   static final RegExp _exactPath = RegExp(r'^\$\{([^{}]+)\}$');
 
   /// The single variable path of [formula] when it is exactly one `${path}`.
@@ -62,7 +58,7 @@ abstract final class ComputedVariables {
   /// The names of the variables [variable]'s formula reads, e.g. `records`
   /// and `crateId`. Empty for a normal variable.
   static Set<String> inputsOf(VariableData variable) {
-    final String? formula = variable.formula;
+    final String? formula = formulaOf(variable);
     if (formula == null) return const {};
     final String? path = _exactPathOf(formula);
     final Set<String> paths = path != null
@@ -81,7 +77,7 @@ abstract final class ComputedVariables {
     VariableData variable, {
     required ScopedValues scopedValues,
   }) {
-    final String? formula = variable.formula;
+    final String? formula = formulaOf(variable);
     if (formula == null) return null;
     final String? path = _exactPathOf(formula);
     if (path != null) {
@@ -235,7 +231,6 @@ abstract final class ComputedVariables {
       value: value,
       type: type,
       extra: variable.extra,
-      formula: variable.formula,
     ),
     RuntimeVariableData() => RuntimeVariableData(
       id: variable.id,
@@ -243,7 +238,6 @@ abstract final class ComputedVariables {
       value: value,
       type: type,
       extra: variable.extra,
-      formula: variable.formula,
     ),
     _ => VariableData(
       id: variable.id,
@@ -251,7 +245,6 @@ abstract final class ComputedVariables {
       value: value,
       type: type,
       extra: variable.extra,
-      formula: variable.formula,
     ),
   };
 }

@@ -27,10 +27,15 @@ abstract final class VariablePreview {
   /// A row without an item of its own (a list that only sets an item count,
   /// or a row past the end of the data) keeps the sample item but reads
   /// its own `index`.
-  static ScopedValues? scopeOf(BaseNode? node, {BuildContext? context}) {
+  static ScopedValues? scopeOf(
+    BaseNode? node, {
+    BuildContext? context,
+    IndexedItem? item,
+  }) {
     final ScopedValues? values = scopeResolver?.call(node);
-    if (values == null || context == null) return values;
-    final IndexedItem? row = IndexedItemProvider.maybeOf(context);
+    if (values == null) return values;
+    final IndexedItem? row =
+        item ?? (context == null ? null : IndexedItemProvider.maybeOf(context));
     if (row == null || row == values.indexedItem) return values;
     return ScopedValues.preview(
       variables: values.variables,
@@ -63,15 +68,18 @@ abstract final class VariablePreview {
 
   static const Set<String> _literals = {'true', 'false', 'null'};
 
-  /// The text the design canvas shows for [expression], one `${...}` match,
-  /// in [node] built in [context] (see [scopeOf]).
+  /// The text the design canvas shows for [expression], one `${...}` match.
+  ///
+  /// [item] is the list item the text is built for: a list on the canvas
+  /// shows each of its items, so `${item.name}` reads that item instead of
+  /// the sample item the resolver gives.
   static String textFor(
     String expression, {
     BaseNode? node,
     TextStyle? style,
-    BuildContext? context,
+    IndexedItem? item,
   }) {
-    final ScopedValues? scopedValues = scopeOf(node, context: context);
+    final ScopedValues? scopedValues = scopeOf(node, item: item);
     if (scopedValues != null) {
       final String value = PropertyValueDelegate.substituteVariables(
         expression,
@@ -164,12 +172,12 @@ class VariableSpan extends TextSpan {
   /// The variable expression, such as `${user.name}`.
   final String variable;
 
-  /// Creates a [VariableSpan] for the [variable] expression of [node], built
-  /// in [context]: a list row's context gives the row's own item.
+  /// Creates a [VariableSpan] for the [variable] expression of [node], in
+  /// list row [item] when it is built for one.
   VariableSpan({
     required this.variable,
     BaseNode? node,
-    BuildContext? context,
+    IndexedItem? item,
     super.style,
     super.mouseCursor,
     super.onEnter,
@@ -179,7 +187,7 @@ class VariableSpan extends TextSpan {
            variable,
            node: node,
            style: style,
-           context: context,
+           item: item,
          ),
        );
 }
