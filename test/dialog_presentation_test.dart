@@ -77,4 +77,40 @@ void main() {
     expect((await place(CanvasSizing.sheet)).dy, 844 - 200);
     expect((await place(CanvasSizing.design)).dy, (844 - 200) / 2);
   });
+
+  testWidgets('responsive layouts in a dialog go by the screen, in a sheet '
+      'by the sheet', (tester) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    Future<double?> widthIn(CanvasSizing sizing) async {
+      double? width;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CanvasSizingScope(
+            sizing: sizing,
+            child: Center(
+              child: SizedBox(
+                width: sizing == CanvasSizing.sheet ? 600 : 1440,
+                child: CanvasViewport(
+                  node: canvas(),
+                  child: Builder(
+                    builder: (context) {
+                      width = CanvasWidthScope.maybeOf(context);
+                      return const SizedBox();
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      return width;
+    }
+
+    // The 520 wide dialog shows the desktop layout on a desktop screen.
+    expect(await widthIn(CanvasSizing.design), 1440);
+    expect(await widthIn(CanvasSizing.sheet), 600);
+  });
 }
