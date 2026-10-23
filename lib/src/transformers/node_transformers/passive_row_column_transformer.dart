@@ -19,6 +19,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
 
     final bool isRow =
         (rowColumnNode as RowColumnMixin).rowColumnType == RowColumnType.row;
+    final bool wraps = isWrap(rowColumnNode);
 
     // If the node is a canvas node's body, it is a placeholder that expands to
     // fill the canvas, while the canvas is already meant to do that as a
@@ -77,7 +78,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         rowColumnNode.crossAxisAlignment == CrossAxisAlignmentC.stretch;
     bool measureCross = false;
     bool stretchFallsBack = false;
-    if (crossMin == null && crossWraps) {
+    if (!wraps && crossMin == null && crossWraps) {
       final bool anyChildNeedsAlignment = childrenNodes.any(
         (child) => child.alignment != AlignmentModel.none,
       );
@@ -93,20 +94,34 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     final CrossAxisAlignment crossAxisAlignment = stretchFallsBack
         ? CrossAxisAlignment.start
         : rowColumnNode.crossAxisAlignment.flutterAxis;
-    Widget res = CodelesslyFlex(
-      direction: isRow ? Axis.horizontal : Axis.vertical,
-      mainAxisAlignment: rowColumnNode.mainAxisAlignment.flutterAxis,
-      crossAxisAlignment: crossAxisAlignment,
-      // Flex asserts a baseline to align to; texts align on the alphabetic one.
-      textBaseline: crossAxisAlignment == CrossAxisAlignment.baseline
-          ? TextBaseline.alphabetic
-          : null,
-      mainAxisSize: mainFit == SizeFit.shrinkWrap
-          ? MainAxisSize.min
-          : MainAxisSize.max,
-      key: ValueKey(rowColumnNode.id),
-      children: childrenWidgets,
-    );
+    Widget res = wraps
+        ? Wrap(
+            direction: isRow ? Axis.horizontal : Axis.vertical,
+            alignment: rowColumnNode.mainAxisAlignment.flutterWrapAlignment,
+            crossAxisAlignment:
+                rowColumnNode.crossAxisAlignment.flutterWrapAlignment,
+            runAlignment: (rowColumnNode as RowColumnNode)
+                .runAlignment
+                .flutterWrapAlignment,
+            runSpacing: rowColumnNode.runSpacing,
+            key: ValueKey(rowColumnNode.id),
+            children: childrenWidgets,
+          )
+        : CodelesslyFlex(
+            direction: isRow ? Axis.horizontal : Axis.vertical,
+            mainAxisAlignment: rowColumnNode.mainAxisAlignment.flutterAxis,
+            crossAxisAlignment: crossAxisAlignment,
+            // Flex asserts a baseline to align to; texts align on the
+            // alphabetic one.
+            textBaseline: crossAxisAlignment == CrossAxisAlignment.baseline
+                ? TextBaseline.alphabetic
+                : null,
+            mainAxisSize: mainFit == SizeFit.shrinkWrap
+                ? MainAxisSize.min
+                : MainAxisSize.max,
+            key: ValueKey(rowColumnNode.id),
+            children: childrenWidgets,
+          );
 
     if (measureCross) {
       res = isRow ? IntrinsicHeight(child: res) : IntrinsicWidth(child: res);
@@ -120,7 +135,8 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         node: (rowColumnNode as ScrollableMixin),
         fillViewport:
             rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start,
-        flexContent: hasMainAxisFlexChild(rowColumnNode, childrenNodes),
+        flexContent:
+            !wraps && hasMainAxisFlexChild(rowColumnNode, childrenNodes),
         child: res,
       );
     }
@@ -174,6 +190,10 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   static bool _fillsAxis(SizeFit fit, {required double? max}) =>
       fit == SizeFit.expanded && max == null;
 
+  /// Whether [node] is a Row/Column that wraps its children onto new runs
+  /// ([RowColumnNode.wrap]) instead of laying them out in a [Flex].
+  static bool isWrap(BaseNode node) => node is RowColumnNode && node.wrap;
+
   /// Whether any of [children] flexes along [rowColumnNode]'s main axis
   /// (expanded, flexible, or a flex spacer).
   static bool hasMainAxisFlexChild(
@@ -199,6 +219,24 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
 
     if (node is SpacerNode) {
       return childWidget;
+    }
+
+    // A run has no free space to share: a child that flexes on the main axis
+    // takes its design size there (at most the run's length), and every
+    // child hugs or keeps its size across. Children align in their run with
+    // the Wrap's cross axis alignment rather than their own.
+    if (isWrap(parentRowColumn)) {
+      final bool isRow =
+          (parentRowColumn as RowColumnMixin).rowColumnType ==
+          RowColumnType.row;
+      if ((isRow ? node.horizontalFit : node.verticalFit) == SizeFit.expanded) {
+        childWidget = SizedBox(
+          width: isRow ? node.outerBoxLocal.width : null,
+          height: isRow ? null : node.outerBoxLocal.height,
+          child: childWidget,
+        );
+      }
+      return flexibleSpaceBackground?.call(childWidget) ?? childWidget;
     }
 
     final AxisC mainAxis =

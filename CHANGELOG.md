@@ -55,6 +55,12 @@
 - A `squeezable` node that wraps its content on a Row/Column's main axis is
   laid out as `Flexible(fit: FlexFit.loose)`: it hugs its content and
   shrinks to the room left when the Row/Column runs out of space.
+- A Row/Column with `wrap` is laid out as a `Wrap`: its children flow onto
+  a new run when they don't fit, `runSpacing` apart, aligned by its
+  `mainAxisAlignment`, `crossAxisAlignment` (stretch and baseline align to
+  the start) and `runAlignment`. A child that is expanded on the main axis
+  takes its design size there, a flexible one at most that, and a flex
+  spacer keeps its design size; margins still space the items.
 
 ## 8.2.0
 
