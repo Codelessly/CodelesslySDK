@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  testWidgets('corner radius and padding follow bound formulas', (
+  testWidgets('corner radius, padding and stroke weight follow bound formulas', (
     tester,
   ) async {
     final RectangleNode node = RectangleNode.fromJson({
@@ -13,6 +13,8 @@ void main() {
         id: 'sheet',
         name: 'Sheet',
         basicBoxLocal: NodeBox(0, 0, 200, 100),
+        strokes: [PaintModel.blackPaint],
+        strokeWeight: 1.5,
         fills: [
           PaintModel.solid(id: 'fill', color: ColorRGB.fromHex('#FFFFFF')),
         ],
@@ -20,6 +22,7 @@ void main() {
       'variables': {
         'cornerRadius': r'${= isMobile ? [18, 18, 0, 0] : 12}',
         'padding': r'${= isMobile ? [16, 8] : 24}',
+        'strokeWeight': r'${= isMobile ? 1.5 : 2}',
       },
     });
     node.parentID = kRootNode;
@@ -88,6 +91,7 @@ void main() {
       EdgeInsetsModel.symmetric(horizontal: 16, vertical: 8),
     );
     expect(styled.innerBoxLocal.edgeLeft, 16);
+    expect((styled as GeometryMixin).strokeWeight, 1.5);
 
     isMobile.set(isMobile.value.copyWith(value: false));
     await tester.pump();
@@ -95,6 +99,8 @@ void main() {
     expect(radius(), BorderRadius.circular(12));
     styled = manager.applyStyleOverrides(buildContext, node);
     expect(styled.padding, EdgeInsetsModel.all(24));
+    expect((styled as GeometryMixin).strokeWeight, 2);
+    expect(node.strokeWeight, 1.5);
     expect(
       (styled as CornerMixin).cornerRadius,
       CornerRadius.all(RadiusModel.circular(12)),

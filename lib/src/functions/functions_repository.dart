@@ -1914,7 +1914,170 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       ),
       RemoveDocumentSubAction removeDocumentSubAction =>
         removeDocumentFromCloud(removeDocumentSubAction, scopedValues),
+      RemoveDocumentsSubAction subAction => removeDocumentsFromCloud(
+        subAction,
+        scopedValues,
+      ),
+      SetDocumentsSubAction subAction => setDocumentsOnCloud(
+        subAction,
+        scopedValues,
+      ),
     };
+  }
+
+  /// The value [template] gives: a value as is when it is exactly one
+  /// `${...}` path or formula, else its text with variables substituted,
+  /// decoded when it is JSON (whose strings may hold paths too).
+  static Object? _valueFromTemplate(
+    String template,
+    ScopedValues scopedValues,
+  ) {
+    final String trimmed = template.trim();
+    if (trimmed.isEmpty) return null;
+    if (FormulaEvaluator.exactExpression(trimmed) != null ||
+        RegExp(r'^\$\{[^{}]+\}$').hasMatch(trimmed)) {
+      return PropertyValueDelegate.getVariableValueFromPath<Object>(
+        trimmed,
+        scopedValues: scopedValues,
+      );
+    }
+    final Object? json = tryJsonDecode(trimmed);
+    if (json is List || json is Map) {
+      return PropertyValueDelegate.substituteJsonValue(json, scopedValues);
+    }
+    return PropertyValueDelegate.substituteVariables(
+      trimmed,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
+  }
+
+  /// Document ids from [value]: a list of ids or of documents (their `id`),
+  /// JSON text of one, or ids separated by commas.
+  @visibleForTesting
+  static List<String> documentIdsOf(Object? value) {
+    if (value is String) {
+      final Object? json = tryJsonDecode(value.trim());
+      if (json is List) return documentIdsOf(json);
+      return [
+        for (final String id in value.split(','))
+          if (id.trim().isNotEmpty) id.trim(),
+      ];
+    }
+    if (value is Iterable) {
+      return [
+        for (final Object? item in value)
+          if (item is Map
+              ? item['id'] != null
+              : item != null && item.toString().trim().isNotEmpty)
+            (item is Map ? item['id'] : item).toString().trim(),
+      ];
+    }
+    if (value is Map && value['id'] != null) return [value['id'].toString()];
+    return [];
+  }
+
+  /// Removes many documents in one batched write: those [documentIds] gives,
+  /// or those matching the where filters (all of the collection when there
+  /// are none). `${result.count}` is how many were removed.
+  ///
+  /// [database] stands in for the app's cloud database, in tests.
+  static Future<bool> removeDocumentsFromCloud(
+    RemoveDocumentsSubAction subAction,
+    ScopedValues scopedValues, {
+    @visibleForTesting CloudDatabase? database,
+  }) async {
+    try {
+      final CloudDatabase? cloudDatabase =
+          database ?? scopedValues.cloudDatabase;
+      if (cloudDatabase == null) {
+        DebugLogger.instance.printInfo('Cloud storage is null.', name: name);
+        return false;
+      }
+      final String path = PropertyValueDelegate.substituteVariables(
+        subAction.path,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
+      );
+      final List<String>? ids = subAction.documentIds.trim().isEmpty
+          ? null
+          : documentIdsOf(
+              _valueFromTemplate(subAction.documentIds, scopedValues),
+            );
+      final List<CloudWhereFilter> filters = ids != null
+          ? const []
+          : resolveCloudQuery(
+              whereFilters: subAction.whereFilters,
+              orderByOperations: const [],
+              scopedValues: scopedValues,
+              nullSubstitutionMode: NullSubstitutionMode.emptyString,
+            ).filters;
+      final int removed = await cloudDatabase.removeDocuments(
+        path,
+        documentIds: ids,
+        filters: filters,
+      );
+      ActionChain.setResult({'count': removed, 'path': path});
+      return true;
+    } catch (error, stackTrace) {
+      DebugLogger.instance.printInfo(error.toString(), name: name);
+      DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
+      return false;
+    }
+  }
+
+  /// Writes a list of documents in one batched write, e.g. seed data from a
+  /// list variable. `${result.count}` is how many were written.
+  ///
+  /// [database] stands in for the app's cloud database, in tests.
+  static Future<bool> setDocumentsOnCloud(
+    SetDocumentsSubAction subAction,
+    ScopedValues scopedValues, {
+    @visibleForTesting CloudDatabase? database,
+  }) async {
+    try {
+      final CloudDatabase? cloudDatabase =
+          database ?? scopedValues.cloudDatabase;
+      if (cloudDatabase == null) {
+        DebugLogger.instance.printInfo('Cloud storage is null.', name: name);
+        return false;
+      }
+      final String path = PropertyValueDelegate.substituteVariables(
+        subAction.path,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
+      );
+      Object? value = _valueFromTemplate(subAction.documents, scopedValues);
+      if (value is String) value = tryJsonDecode(value);
+      if (value is Map) value = [value];
+      if (value is! List) {
+        DebugLogger.instance.printInfo(
+          'Set Documents needs a list of documents, got $value.',
+          name: name,
+        );
+        return false;
+      }
+      final List<Map<String, dynamic>> documents = [
+        for (final Object? item in value)
+          if (item is Map) Map<String, dynamic>.from(item),
+      ];
+      final String idField = subAction.idField.trim().isEmpty
+          ? 'id'
+          : subAction.idField.trim();
+      final int written = await cloudDatabase.setDocuments(
+        path,
+        documents,
+        idField: idField,
+        merge: subAction.merge,
+        replaceCollection: subAction.replaceCollection,
+      );
+      ActionChain.setResult({'count': written, 'path': path});
+      return true;
+    } catch (error, stackTrace) {
+      DebugLogger.instance.printInfo(error.toString(), name: name);
+      DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
+      return false;
+    }
   }
 
   static Future<bool> addDocumentToCloud(
