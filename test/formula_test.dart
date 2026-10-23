@@ -72,6 +72,11 @@ void main() {
       expect(eval("alpha('red', 1)"), null);
       expect(eval('take([1, 2, 3, 4], 3)'), [1, 2, 3]);
       expect(eval('take([1], 3)'), [1]);
+      expect(eval('concat([1, 2], [3], 4)'), [1, 2, 3, 4]);
+      expect(eval('concat(take([1, 2, 3], 2), [9])'), [1, 2, 9]);
+      expect(eval('[1, 2] + [3]'), [1, 2, 3]);
+      expect(eval('[1, 2] + 3'), [1, 2, 3]);
+      expect(eval("'a' + 'b'"), 'ab');
       expect(eval('skip([1, 2, 3], 1)'), [2, 3]);
       expect(eval("keys(object('a', 1, 'b', 2))"), ['a', 'b']);
       expect(eval('keys(qty)'), isEmpty);
