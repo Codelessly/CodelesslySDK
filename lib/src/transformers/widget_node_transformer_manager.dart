@@ -258,6 +258,68 @@ abstract class WidgetNodeTransformerManager
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
     if (node is! ReactionMixin) return widget;
     if (node case CanvasNode() || SpacerNode()) return widget;
+    return wrapWithHoverReactions(
+      context,
+      node,
+      _wrapWithTapReactions(context, node, widget),
+    );
+  }
+
+  /// Runs [node]'s `cursorEnter` and `hover` reactions when a mouse pointer
+  /// enters it, and its `cursorExit` reactions when the pointer leaves, from
+  /// [context] (so a list item's `${item}` is in scope, as for clicks).
+  Widget wrapWithHoverReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
+    if (node is! ReactionMixin) return widget;
+    List<Reaction> reactionsOf(Set<TriggerType> types) => [
+      for (final Reaction reaction in (node as ReactionMixin).reactions)
+        if (types.contains(reaction.trigger.type) && reaction.action.enabled)
+          reaction,
+    ];
+    final List<Reaction> onEnter = reactionsOf({
+      TriggerType.cursorEnter,
+      TriggerType.hover,
+    });
+    final List<Reaction> onExit = reactionsOf({TriggerType.cursorExit});
+    if (onEnter.isEmpty && onExit.isEmpty) return widget;
+    return MouseRegion(
+      // Regions behind this one (a parent's) still get the pointer.
+      opaque: false,
+      onEnter: onEnter.isEmpty
+          ? null
+          : (_) {
+              if (!context.mounted) return;
+              // Each run filters the reactions by its trigger type.
+              for (final type in [TriggerType.cursorEnter, TriggerType.hover]) {
+                FunctionsRepository.triggerAction(
+                  context,
+                  type,
+                  reactions: onEnter,
+                );
+              }
+            },
+      onExit: onExit.isEmpty
+          ? null
+          : (_) {
+              if (!context.mounted) return;
+              FunctionsRepository.triggerAction(
+                context,
+                TriggerType.cursorExit,
+                reactions: onExit,
+              );
+            },
+      child: widget,
+    );
+  }
+
+  Widget _wrapWithTapReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
     if (node is CustomPropertiesMixin &&
         node.handlesDefaultReactionsInternally) {
       // Node is a custom properties mixin and intends to handle reactions
@@ -344,7 +406,6 @@ abstract class WidgetNodeTransformerManager
       if (onClickReactions.isEmpty && onLongPressReactions.isEmpty) {
         return widget;
       }
-      // TODO: should handle TriggerType.hover and TriggerType.unhover too.
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         hitTestBehavior: HitTestBehavior.opaque,
