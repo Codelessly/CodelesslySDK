@@ -467,7 +467,7 @@ void main() {
       expect(eval('take(tags, 99)').toString(), '[a, b, a, c, b]');
       expect(eval('take(tags, -1)'), isEmpty);
       // A running total: the first n items.
-      expect(eval("sum(take(cart, 2), c => c.qty)"), 6);
+      expect(eval('sum(take(cart, 2), c => c.qty)'), 6);
     });
 
     test('indexOf finds an item, a match or nothing', () {
