@@ -334,7 +334,7 @@ class FormulaEvaluator {
     FormulaFunctionDoc(
       'indexOf',
       'indexOf(list, value) or indexOf(list, item => test)',
-      "indexOf(trips, t => t.id == id) → 2",
+      'indexOf(trips, t => t.id == id) → 2',
     ),
     FormulaFunctionDoc(
       'object',
