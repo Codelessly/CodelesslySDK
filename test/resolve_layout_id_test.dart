@@ -30,8 +30,8 @@ Map<String, dynamic> _layout(String id, List<String> canvasIds) => {
 };
 
 void main() {
-  // Sites open a screen from a link (?screen=<canvas id>), so a canvas ID
-  // must find the layout that holds it.
+  // A link names a screen by its canvas ID, so a canvas ID must find the
+  // layout that holds it.
   final SDKPublishModel model = SDKPublishModel.fromJson({
     'owner': 'o',
     'users': ['o'],
@@ -61,5 +61,23 @@ void main() {
     expect(model.resolveLayoutId('nope'), isNull);
     expect(model.resolveLayoutId(''), isNull);
     expect(model.resolveLayoutId(null), isNull);
+  });
+
+  // The first screen shows in the host's route, which has no arguments: it
+  // reads the link's parameters when the link names it.
+  test('link parameters reach the screen the link names', () {
+    const CodelesslyRoute link = CodelesslyRoute('canvas-trips', {
+      'state': 'loading',
+    });
+    expect(model.linkParamsFor(link, 'layout-trips'), {'state': 'loading'});
+    expect(model.linkParamsFor(link, 'layout-route'), isNull);
+    expect(
+      model.linkParamsFor(
+        const CodelesslyRoute('canvas-trips'),
+        'layout-trips',
+      ),
+      isNull,
+    );
+    expect(model.linkParamsFor(null, 'layout-trips'), isNull);
   });
 }
