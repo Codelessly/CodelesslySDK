@@ -8,6 +8,27 @@ typedef WidgetInserter = Widget Function(Widget child);
 class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   PassiveRowColumnTransformer(super.getNode, super.manager);
 
+  /// Whether a child of [rowColumn], which hugs its cross axis, fills that
+  /// axis while another child gives it a thickness: a card's severity edge
+  /// as tall as its text, `IntrinsicHeight(child: Row(...))` in Flutter.
+  /// The row is measured to its other children's thickness first, which the
+  /// filling child then fills. With no such other child there is nothing to
+  /// fill, and the child keeps its design size (see FitBox), as the editor
+  /// lays it out. A spacer's thickness is not used, so it gives none.
+  static bool fillsAcrossWrappingRowColumn(
+    BaseNode rowColumn,
+    List<BaseNode> childrenNodes,
+  ) {
+    final bool isRow =
+        (rowColumn as RowColumnMixin).rowColumnType == RowColumnType.row;
+    SizeFit crossFit(BaseNode child) =>
+        isRow ? child.verticalFit : child.horizontalFit;
+    bool fills(BaseNode child) =>
+        child is! SpacerNode && crossFit(child) == SizeFit.expanded;
+    return childrenNodes.any(fills) &&
+        childrenNodes.any((child) => child is! SpacerNode && !fills(child));
+  }
+
   static Widget buildRowColumnWidget(
     BaseNode rowColumnNode, {
     required List<Widget> childrenWidgets,
@@ -88,7 +109,9 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       final bool anyChildNeedsAlignment = childrenNodes.any(
         (child) => child.alignment != AlignmentModel.none,
       );
-      if (stretches || anyChildNeedsAlignment) {
+      if (stretches ||
+          anyChildNeedsAlignment ||
+          fillsAcrossWrappingRowColumn(rowColumnNode, childrenNodes)) {
         final bool blocked = childrenNodes.any(
           (child) => subtreeBlocksIntrinsics(child, getNode),
         );

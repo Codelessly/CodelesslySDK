@@ -323,6 +323,104 @@ void main() {
     });
   });
 
+  testWidgets(
+    'a child filling across a row that wraps its height stretches to the '
+    'height the other children give the row',
+    (tester) async {
+      // A card's severity edge, as tall as its text: in Flutter,
+      // IntrinsicHeight(child: Row(crossAxisAlignment: stretch)).
+      final edge = rect(
+        'edge',
+        '',
+        width: 4,
+        height: 10,
+        verticalFit: SizeFit.expanded,
+      );
+      final title = rect('title', '', width: 120, height: 20);
+      final subtitle = rect('subtitle', '', width: 160, height: 30);
+      final text = flex(
+        'text',
+        '',
+        [title, subtitle],
+        type: RowColumnType.column,
+        width: 200,
+        height: 50,
+        horizontalFit: SizeFit.expanded,
+        verticalFit: SizeFit.shrinkWrap,
+      );
+      final card = flex(
+        'card',
+        '',
+        [edge, text],
+        type: RowColumnType.row,
+        width: 300,
+        height: 40,
+        horizontalFit: SizeFit.expanded,
+        verticalFit: SizeFit.shrinkWrap,
+      );
+      final column = flex(
+        'column',
+        kRootNode,
+        [card],
+        type: RowColumnType.column,
+        width: 300,
+        height: 400,
+        isScrollable: true,
+      );
+      await everywhere(tester, column, [card, edge, text, title, subtitle], (
+        sizes,
+        screen,
+        host,
+      ) {
+        expect(sizes['edge'], const Size(4, 50), reason: '$host $screen');
+      });
+    },
+  );
+
+  testWidgets(
+    'a spacer filling across a row that wraps its height leaves the row as '
+    'tall as its other children',
+    (tester) async {
+      final label = rect('label', '', width: 90, height: 24);
+      final gap = spacer('gap', width: 10, height: 10);
+      final edge = rect(
+        'edge',
+        '',
+        width: 4,
+        height: 10,
+        verticalFit: SizeFit.expanded,
+      );
+      final row = flex(
+        'row',
+        '',
+        [label, gap..parentID = 'row', edge],
+        type: RowColumnType.row,
+        width: 300,
+        height: 40,
+        horizontalFit: SizeFit.expanded,
+        verticalFit: SizeFit.shrinkWrap,
+      );
+      final column = flex(
+        'column',
+        kRootNode,
+        [row],
+        type: RowColumnType.column,
+        width: 300,
+        height: 400,
+        isScrollable: true,
+      );
+      await everywhere(tester, column, [row, label, gap, edge], (
+        sizes,
+        screen,
+        host,
+      ) {
+        // The edge shows the row's height.
+        expect(sizes['edge'], const Size(4, 24), reason: '$host $screen');
+        expect(sizes['label'], const Size(90, 24), reason: '$host $screen');
+      });
+    },
+  );
+
   testWidgets('flexible column takes its design size like a leaf (A6)', (
     tester,
   ) async {
