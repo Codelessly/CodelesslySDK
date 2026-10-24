@@ -2,115 +2,90 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:codelessly_sdk/src/ui/codelessly_dialog_widget.dart';
 
-CanvasNode canvas({SizeFit verticalFit = SizeFit.fixed}) => CanvasNode(
-  id: 'sheet',
-  name: 'Sheet',
-  basicBoxLocal: NodeBox(0, 0, 520, 600),
-  verticalFit: verticalFit,
-  scaleMode: ScaleMode.responsive,
-  properties: CanvasProperties(bodyId: 'body'),
-  children: const ['body'],
-);
+Future<void> open(
+  WidgetTester tester, {
+  required double width,
+  required DialogPresentation presentation,
+  AlignmentGeometry alignment = Alignment.center,
+}) async {
+  tester.view.physicalSize = Size(width, 800);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Builder(
+        builder: (context) => TextButton(
+          onPressed: () => FunctionsRepository.presentCanvas<void>(
+            context,
+            presentation: presentation,
+            alignment: alignment,
+            builder: (context) =>
+                const SizedBox(key: Key('content'), width: 200, height: 100),
+          ),
+          child: const Text('Open'),
+        ),
+      ),
+    ),
+  );
+  await tester.tap(find.text('Open'));
+  await tester.pumpAndSettle();
+}
 
 void main() {
-  const BoxConstraints phone = BoxConstraints(maxWidth: 390, maxHeight: 760);
-
-  test('a sheet spans the width and keeps its design height', () {
-    final box = CanvasViewport.resolve(
-      canvas(),
-      phone,
-      sizing: CanvasSizing.sheet,
+  testWidgets('a dialog is centered by default', (tester) async {
+    await open(tester, width: 1024, presentation: DialogPresentation.dialog);
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(
+      tester.getCenter(find.byKey(const Key('content'))),
+      const Offset(512, 400),
     );
-    expect(box.width, 390);
-    expect(box.height, 600);
   });
 
-  test('a shrink-wrapping sheet is as tall as its content', () {
-    final box = CanvasViewport.resolve(
-      canvas(verticalFit: SizeFit.shrinkWrap),
-      phone,
-      sizing: CanvasSizing.sheet,
-    );
-    expect(box.width, 390);
-    expect(box.height, isNull);
-  });
-
-  test('a dialog keeps its design width; full screen fills', () {
-    const BoxConstraints desktop = BoxConstraints(
-      maxWidth: 1440,
-      maxHeight: 900,
+  testWidgets('a dialog can sit elsewhere, like a menu', (tester) async {
+    await open(
+      tester,
+      width: 1024,
+      presentation: DialogPresentation.dialog,
+      alignment: Alignment.topRight,
     );
     expect(
-      CanvasViewport.resolve(
-        canvas(),
-        desktop,
-        sizing: CanvasSizing.design,
-      ).width,
-      520,
+      tester.getTopRight(find.byKey(const Key('content'))),
+      const Offset(1024, 0),
     );
-    final full = CanvasViewport.resolve(canvas(), desktop);
-    expect((full.width, full.height), (1440, 900));
   });
 
-  testWidgets('a sheet sits at the bottom, a dialog in the middle', (
+  testWidgets('a bottom sheet sits on the bottom edge', (tester) async {
+    await open(
+      tester,
+      width: 1024,
+      presentation: DialogPresentation.bottomSheet,
+    );
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(tester.getBottomLeft(find.byKey(const Key('content'))).dy, 800);
+  });
+
+  testWidgets('adaptive is a sheet on phones and a dialog on wider screens', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    Future<Offset> place(CanvasSizing sizing) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: CodelesslyDialogWidget(
-            showCloseButton: false,
-            sizing: sizing,
-            builder: (_) =>
-                const SizedBox(key: ValueKey('box'), width: 390, height: 200),
-          ),
-        ),
-      );
-      return tester.getTopLeft(find.byKey(const ValueKey('box')));
-    }
-
-    expect((await place(CanvasSizing.sheet)).dy, 844 - 200);
-    expect((await place(CanvasSizing.design)).dy, (844 - 200) / 2);
+    await open(tester, width: 390, presentation: DialogPresentation.adaptive);
+    expect(find.byType(BottomSheet), findsOneWidget);
   });
 
-  testWidgets('responsive layouts in a dialog go by the screen, in a sheet '
-      'by the sheet', (tester) async {
-    tester.view.physicalSize = const Size(1440, 900);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    Future<double?> widthIn(CanvasSizing sizing) async {
-      double? width;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: CanvasSizingScope(
-            sizing: sizing,
-            child: Center(
-              child: SizedBox(
-                width: sizing == CanvasSizing.sheet ? 600 : 1440,
-                child: CanvasViewport(
-                  node: canvas(),
-                  child: Builder(
-                    builder: (context) {
-                      width = CanvasWidthScope.maybeOf(context);
-                      return const SizedBox();
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-      return width;
-    }
+  testWidgets('adaptive is a dialog from 600 px', (tester) async {
+    await open(tester, width: 834, presentation: DialogPresentation.adaptive);
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.byKey(const Key('content')), findsOneWidget);
+  });
 
-    // The 520 wide dialog shows the desktop layout on a desktop screen.
-    expect(await widthIn(CanvasSizing.design), 1440);
-    expect(await widthIn(CanvasSizing.sheet), 600);
+  test('the action keeps presentation and alignment in JSON', () {
+    final action = ShowDialogAction(
+      destinationId: 'c',
+      presentation: DialogPresentation.adaptive,
+      alignment: AlignmentModel.topRight,
+    );
+    final decoded = ShowDialogAction.fromJson(action.toJson());
+    expect(decoded.presentation, DialogPresentation.adaptive);
+    expect(decoded.alignment, AlignmentModel.topRight);
   });
 }
