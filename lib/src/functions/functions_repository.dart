@@ -734,8 +734,13 @@ class FunctionsRepository {
         barrierColor: barrierColor ?? Colors.transparent,
         transitionDuration: const Duration(milliseconds: 120),
         routeSettings: routeSettings,
-        pageBuilder: (context, _, _) =>
-            CodelesslyPopoverWidget(anchor: anchor, builder: builder),
+        pageBuilder: (context, _, _) => CodelesslyPopoverWidget(
+          anchor: anchor,
+          builder: builder,
+          // A popover aligned to the end (right) side lines up with the
+          // anchor's right edge.
+          alignEnd: (alignment.resolve(TextDirection.ltr).x) > 0,
+        ),
         transitionBuilder: (context, animation, _, child) =>
             FadeTransition(opacity: animation, child: child),
       );
