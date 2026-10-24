@@ -50,19 +50,22 @@ void main() {
       'b',
       'c',
     ]);
-    expect(eval("slice(range(10), 2, 5)"), [2, 3, 4]);
-    expect(eval("range(2, 5)"), [2, 3, 4]);
-    expect(eval("concat([1, 2], [3], 4)"), [1, 2, 3, 4]);
-    expect(eval("reverse([1, 2, 3])"), [3, 2, 1]);
-    expect(eval("first(plan).uid + last(plan).uid + at(plan, 1).uid"), 'acb');
+    expect(eval('slice(range(10), 2, 5)'), [2, 3, 4]);
+    expect(eval('range(2, 5)'), [2, 3, 4]);
+    expect(eval('concat([1, 2], [3], 4)'), [1, 2, 3, 4]);
+    expect(eval('reverse([1, 2, 3])'), [3, 2, 1]);
+    expect(eval('first(plan).uid + last(plan).uid + at(plan, 1).uid'), 'acb');
     // Out of range edits leave the list as it was.
-    expect(eval("length(removeAt(plan, 7))"), 3);
+    expect(eval('length(removeAt(plan, 7))'), 3);
   });
 
   test('indexOf by value, field and lambda', () {
-    expect(eval("indexOf(plan, p => p.uid == sel)"), 1);
+    expect(eval('indexOf(plan, p => p.uid == sel)'), 1);
     expect(eval("indexOf(plan, 'uid', 'c')"), 2);
-    expect(eval("indexOf([3, 4], 4)"), 1);
+    expect(eval('indexOf([3, 4], 4)'), 1);
+    expect(eval("indexOf(['a', 'b', 'c'], 'b')"), 1);
+    expect(eval("at(plan, indexOf(plan, p => p.uid == 'nope'))"), isNull);
+    expect(eval('length(range(1000000))'), 10000);
     expect(eval("indexOf(plan, p => p.uid == 'nope')"), -1);
   });
 

@@ -123,9 +123,10 @@ class PassiveListViewWidget extends StatelessWidget {
         );
       }
 
-      // A loaded query always has a known length, so it can shrink-wrap.
+      // A loaded query always has a known length, so it can shrink-wrap;
+      // a stacked list's Stack has only positioned children and can't.
       return box(
-        canShrinkWrap: true,
+        canShrinkWrap: node.properties.layout != ListLayout.stack,
         (context, shrinkWrap) => CloudQueryBuilder(
           ref: query.ref,
           query: query.query,
