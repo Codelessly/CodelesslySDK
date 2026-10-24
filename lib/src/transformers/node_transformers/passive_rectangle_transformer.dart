@@ -362,14 +362,15 @@ List<BoxShadow> retrieveBoxShadow(BaseNode node, ScopedValues scopedValues) {
               scopedValues: scopedValues,
             ) ??
             effect.color;
+        // Shadows from JSON can leave out spread, offset and color.
         return BoxShadow(
-          spreadRadius: effect.spread!,
+          spreadRadius: effect.spread ?? 0,
           offset: Offset(
-            effect.offset!.x.toDouble(),
-            effect.offset!.y.toDouble(),
+            effect.offset?.x.toDouble() ?? 0,
+            effect.offset?.y.toDouble() ?? 0,
           ),
           blurRadius: effect.radius,
-          color: color!.toFlutterColor(),
+          color: (color ?? ColorRGBA.black).toFlutterColor(),
         );
       })
       .toList();
@@ -431,36 +432,35 @@ Gradient? retrieveGradient(PaintModel paint) {
       (g1, g2) => g1.position.compareTo(g2.position),
     );
     final radians = rotation * pi / 180;
-    final colors = gradientStops
-        .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
-        .toList();
-    final stops = gradientStops.map((e) => e.position).toList();
-    final TileMode tileMode = paint.tileMode.flutterTileMode;
-    final GradientTransform transform = retrieveGradientTransform(
-      paint,
-      radians,
-    );
 
     if (paint.type == PaintType.gradientLinear) {
+      final double? repeatEvery = paint.gradientRepeatEvery;
+      final bool repeats = repeatEvery != null && repeatEvery > 0;
       return LinearGradient(
-        colors: colors,
-        stops: stops,
-        tileMode: tileMode,
-        transform: transform,
+        colors: gradientStops
+            .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
+            .toList(),
+        stops: gradientStops.map((e) => e.position).toList(),
+        tileMode: repeats ? TileMode.repeated : TileMode.clamp,
+        transform: repeats
+            ? RepeatingGradientTransform(radians, repeatEvery)
+            : GradientRotation(radians),
       );
     } else if (paint.type == PaintType.gradientRadial) {
       return RadialGradient(
-        colors: colors,
-        stops: stops,
-        tileMode: tileMode,
-        transform: transform,
+        colors: gradientStops
+            .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
+            .toList(),
+        stops: gradientStops.map((e) => e.position).toList(),
+        transform: GradientRotation(radians),
       );
     } else if (paint.type == PaintType.gradientAngular) {
       return SweepGradient(
-        colors: colors,
-        stops: stops,
-        tileMode: tileMode,
-        transform: transform,
+        colors: gradientStops
+            .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
+            .toList(),
+        stops: gradientStops.map((e) => e.position).toList(),
+        transform: GradientRotation(radians),
       );
     }
 
@@ -474,78 +474,39 @@ Gradient? retrieveGradient(PaintModel paint) {
   }
 }
 
-/// The transform of [paint]'s gradient: its rotation and, when the paint has
-/// a [PaintModel.gradientExtent], the scale that makes one run of the
-/// gradient that many pixels long.
-GradientTransform retrieveGradientTransform(PaintModel paint, double radians) {
-  final double? extent = paint.gradientExtent;
-  if (extent == null ||
-      extent <= 0 ||
-      paint.type == PaintType.gradientAngular) {
-    return GradientRotation(radians);
-  }
-  return GradientExtentTransform(
-    radians: radians,
-    extent: extent,
-    radial: paint.type == PaintType.gradientRadial,
-  );
-}
+/// Rotates a linear gradient by [radians] about the box center, like
+/// [GradientRotation], after squeezing one run of its stops into [period]
+/// logical pixels along its axis. With [TileMode.repeated] the stops then
+/// repeat every [period] pixels whatever the box size, e.g. even stripes.
+class RepeatingGradientTransform extends GradientTransform {
+  const RepeatingGradientTransform(this.radians, this.period);
 
-extension GradientTileModeExtension on GradientTileMode {
-  /// The Flutter [TileMode] of this tile mode.
-  TileMode get flutterTileMode => switch (this) {
-    GradientTileMode.clamp => TileMode.clamp,
-    GradientTileMode.repeated => TileMode.repeated,
-    GradientTileMode.mirror => TileMode.mirror,
-  };
-}
-
-/// Rotates a gradient about the center of its box, like [GradientRotation],
-/// and scales it about that center so that one run of the gradient is
-/// [extent] pixels long: the length of a linear gradient, or the radius of a
-/// radial one. With a repeating [TileMode] the gradient then tiles across the
-/// box, for example into stripes.
-class GradientExtentTransform extends GradientTransform {
-  /// Creates a [GradientExtentTransform].
-  const GradientExtentTransform({
-    required this.radians,
-    required this.extent,
-    this.radial = false,
-  });
-
-  /// The angle of rotation in radians in the clockwise direction.
   final double radians;
-
-  /// The length in pixels of one run of the gradient.
-  final double extent;
-
-  /// Whether the gradient is radial, whose run is its radius rather than the
-  /// width of the box.
-  final bool radial;
+  final double period;
 
   @override
   Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
-    // Unscaled, a linear gradient runs across the box's width and a radial
-    // one's radius is half the box's shortest side.
-    final double natural = radial ? bounds.shortestSide / 2 : bounds.width;
-    final double scale = natural > 0 ? extent / natural : 1;
-    final Offset center = bounds.center;
+    // A default LinearGradient runs from the left to the right edge, so one
+    // run spans the box width. Scale it about the left edge to [period].
+    final double scale = bounds.width <= 0 ? 1 : period / bounds.width;
+    final double cx = bounds.center.dx, cy = bounds.center.dy;
     return Matrix4.identity()
-      ..translateByDouble(center.dx, center.dy, 0, 1)
+      ..translateByDouble(cx, cy, 0, 1)
       ..rotateZ(radians)
-      ..scaleByDouble(scale, scale, 1, 1)
-      ..translateByDouble(-center.dx, -center.dy, 0, 1);
+      ..translateByDouble(-cx, -cy, 0, 1)
+      ..translateByDouble(bounds.left, 0, 0, 1)
+      ..scaleByDouble(scale, 1, 1, 1)
+      ..translateByDouble(-bounds.left, 0, 0, 1);
   }
 
   @override
   bool operator ==(Object other) =>
-      other is GradientExtentTransform &&
+      other is RepeatingGradientTransform &&
       other.radians == radians &&
-      other.extent == extent &&
-      other.radial == radial;
+      other.period == period;
 
   @override
-  int get hashCode => Object.hash(radians, extent, radial);
+  int get hashCode => Object.hash(radians, period);
 }
 
 // from https://math.stackexchange.com/a/2888105
@@ -886,6 +847,7 @@ Widget buildFill(
             node: node,
             bytes: bytes,
             useInk: useInk,
+            applyPaintOpacity: false,
           );
         }
       }

@@ -97,7 +97,6 @@ class TextUtils {
 
     // On a design canvas, show defaults or placeholders for variables.
     if (replaceVariableWithSymbol) {
-      // In a list item built with its data, `item` is that item.
       final IndexedItem? item = context == null
           ? null
           : IndexedItemProvider.maybeOf(context);
@@ -107,8 +106,8 @@ class TextUtils {
             onMatch: (match) => VariableSpan(
               variable: match[0]!,
               node: node,
-              item: item,
               style: style,
+              item: item,
             ),
             onNonMatch: (text) => TextSpan(text: text, style: style),
           )
@@ -357,9 +356,12 @@ class TextUtils {
         .where((element) => element.type == EffectType.dropShadow)
         .map(
           (d) => Shadow(
-            offset: Offset(d.offset!.x.toDouble(), d.offset!.y.toDouble()),
+            offset: Offset(
+              d.offset?.x.toDouble() ?? 0,
+              d.offset?.y.toDouble() ?? 0,
+            ),
             blurRadius: d.radius,
-            color: d.color!.toFlutterColor(),
+            color: (d.color ?? ColorRGBA.black).toFlutterColor(),
           ),
         )
         .toList();
