@@ -59,6 +59,32 @@ abstract class WidgetNodeTransformerManager
     return Opacity(opacity: opacity, child: widget);
   }
 
+  /// Runs the [BaseNode.loopAnimation] of [node] on [widget], if it has one.
+  ///
+  /// A `loopAnimationEnabled` condition or variable turns it on and off at
+  /// runtime; otherwise [LoopAnimation.enabled] does. The animation holds
+  /// still under a disabled [TickerMode], as on the editor's design canvas.
+  Widget applyLoopAnimation(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+  }) {
+    final LoopAnimation? animation = node.loopAnimation;
+    if (animation == null) return widget;
+    final bool? enabled = PropertyValueDelegate.getPropertyValue<bool>(
+      node,
+      'loopAnimationEnabled',
+      scopedValues: scopedValues ?? ScopedValues.of(context),
+    );
+    return LoopAnimationBox(
+      key: ValueKey('loop animation ${node.id}'),
+      animation: animation,
+      enabled: enabled,
+      child: widget,
+    );
+  }
+
   /// Returns the visibility a condition or variable gives [node] at runtime,
   /// or null when nothing overrides the node's own visibility.
   ///
@@ -293,7 +319,7 @@ abstract class WidgetNodeTransformerManager
       if (onClickReactions.isEmpty && onLongPressReactions.isEmpty) {
         return widget;
       }
-      // TODO: should handle TriggerType.hover and TriggerType.unhover too.
+      // Cursor triggers are handled by [wrapWithCursorReactions].
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         hitTestBehavior: HitTestBehavior.opaque,
@@ -315,6 +341,62 @@ abstract class WidgetNodeTransformerManager
         ),
       );
     }
+  }
+
+  /// Runs the [TriggerType.cursorEnter], [TriggerType.cursorExit] and
+  /// [TriggerType.hover] reactions of [node] when a mouse cursor enters,
+  /// leaves or moves over it.
+  ///
+  /// The region covers the node's whole box, transparent parts included, and
+  /// lets the nodes behind it get the cursor and taps too. Touch input fires
+  /// none of these triggers.
+  Widget wrapWithCursorReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
+    if (node is! ReactionMixin) return widget;
+    if (node case CanvasNode() || SpacerNode()) return widget;
+
+    List<Reaction> reactionsOf(TriggerType type) => (node as ReactionMixin)
+        .reactions
+        .where(
+          (reaction) =>
+              reaction.trigger.type == type && reaction.action.enabled,
+        )
+        .toList();
+
+    final List<Reaction> onEnter = reactionsOf(TriggerType.cursorEnter);
+    final List<Reaction> onExit = reactionsOf(TriggerType.cursorExit);
+    final List<Reaction> onHover = reactionsOf(TriggerType.hover);
+    if (onEnter.isEmpty && onExit.isEmpty && onHover.isEmpty) return widget;
+
+    return MouseRegion(
+      opaque: false,
+      hitTestBehavior: HitTestBehavior.translucent,
+      onEnter: onEnter.isEmpty
+          ? null
+          : (_) => FunctionsRepository.triggerAction(
+              context,
+              TriggerType.cursorEnter,
+              reactions: onEnter,
+            ),
+      onExit: onExit.isEmpty
+          ? null
+          : (_) => FunctionsRepository.triggerAction(
+              context,
+              TriggerType.cursorExit,
+              reactions: onExit,
+            ),
+      onHover: onHover.isEmpty
+          ? null
+          : (_) => FunctionsRepository.triggerAction(
+              context,
+              TriggerType.hover,
+              reactions: onHover,
+            ),
+      child: widget,
+    );
   }
 
   BorderRadius? getBorderRadius(BaseNode node) {

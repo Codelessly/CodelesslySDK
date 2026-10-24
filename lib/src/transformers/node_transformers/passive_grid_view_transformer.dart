@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
@@ -83,19 +84,18 @@ class PassiveGridViewWidget extends StatelessWidget {
         builder: builder,
       );
 
-  /// The cross extent of one cell as the editor drew it, the same size the
-  /// editor constrains the item node to.
-  double get designCellExtent => node.calculateCrossAxisExtent(
-    node.scrollDirection,
-    node.innerBoxLocal.size,
-  );
-
   @override
   Widget build(BuildContext context) {
     if (node.children.isEmpty) {
       return box(canShrinkWrap: true, (context, _) => const SizedBox());
     }
     final itemNode = node.children.first;
+    // Cells of a row sized to its content stretch to the tallest one, unless
+    // the item can't report its intrinsic size.
+    final bool intrinsicRows = !subtreeBlocksIntrinsics(
+      manager.getNode(itemNode),
+      manager.getNode,
+    );
 
     final bool useCloudDatabase = node.useCloudDatabase;
     if (useCloudDatabase && !settings.isPreview) {
@@ -196,7 +196,7 @@ class PassiveGridViewWidget extends StatelessWidget {
                 return GridViewBuilder(
                   primary: node.primary,
                   gridDelegate: node.properties.gridDelegate,
-                  designCellExtent: designCellExtent,
+                  intrinsicRows: intrinsicRows,
                   shrinkWrap: shrinkWrap,
                   itemCount: itemCount,
                   padding: node.padding.flutterEdgeInsets,
@@ -261,7 +261,7 @@ class PassiveGridViewWidget extends StatelessWidget {
       (context, shrinkWrap) => GridViewBuilder(
         primary: node.primary,
         gridDelegate: node.properties.gridDelegate,
-        designCellExtent: designCellExtent,
+        intrinsicRows: intrinsicRows,
         shrinkWrap: shrinkWrap,
         itemCount: itemCount,
         padding: node.padding.flutterEdgeInsets,
@@ -309,16 +309,17 @@ class GridViewBuilder extends StatelessWidget {
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
   final GridDelegateProperties gridDelegate;
 
-  /// The cross extent of one cell at the design size. With a fixed cross
-  /// axis count, the grid keeps cells at least this wide; see
-  /// [DesignCellGridDelegate]. Null keeps the count at every size.
-  final double? designCellExtent;
+  /// With [GridDelegateProperties.shrinkWrapRows], whether the cells of a row
+  /// stretch to its tallest item, like a [Row] in an [IntrinsicHeight].
+  /// False lays each row out at its tallest item and leaves the others at
+  /// their own size, for items that can't report intrinsic sizes.
+  final bool intrinsicRows;
 
   const GridViewBuilder({
     super.key,
     required this.shrinkWrap,
     required this.gridDelegate,
-    this.designCellExtent,
+    this.intrinsicRows = true,
     this.itemCount,
     this.padding,
     this.physics,
@@ -333,6 +334,35 @@ class GridViewBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (gridDelegate.shrinkWrapRows) {
+      return DraggableScrollConfiguration(
+        child: switch (gridDelegate) {
+          FixedCrossAxisCountGridDelegateProperties props => _rows(
+            props.crossAxisCount,
+          ),
+          MaxCrossAxisExtentGridDelegateProperties props => LayoutBuilder(
+            builder: (context, constraints) {
+              final bool vertical = scrollDirection == Axis.vertical;
+              final double extent =
+                  (vertical ? constraints.maxWidth : constraints.maxHeight) -
+                  (vertical
+                      ? padding?.horizontal ?? 0
+                      : padding?.vertical ?? 0);
+              // As SliverGridDelegateWithMaxCrossAxisExtent counts.
+              return _rows(
+                extent.isFinite
+                    ? (extent /
+                              (props.maxCrossAxisExtent +
+                                  props.crossAxisSpacing))
+                          .ceil()
+                    : 1,
+              );
+            },
+          ),
+        },
+      );
+    }
+
     return DraggableScrollConfiguration(
       child: GridView.builder(
         primary: primary,
@@ -350,13 +380,12 @@ class GridViewBuilder extends StatelessWidget {
         keyboardDismissBehavior: keyboardDismissBehavior,
         gridDelegate: switch (gridDelegate) {
           FixedCrossAxisCountGridDelegateProperties props =>
-            DesignCellGridDelegate(
-              crossAxisCount: props.crossAxisCount,
-              designCellExtent: designCellExtent ?? 0,
+            SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: math.max(1, props.crossAxisCount),
+              mainAxisExtent: props.mainAxisExtent,
+              childAspectRatio: props.childAspectRatio,
               crossAxisSpacing: props.crossAxisSpacing,
               mainAxisSpacing: props.mainAxisSpacing,
-              childAspectRatio: props.childAspectRatio,
-              mainAxisExtent: props.mainAxisExtent,
             ),
           MaxCrossAxisExtentGridDelegateProperties props =>
             SliverGridDelegateWithMaxCrossAxisExtent(
@@ -368,6 +397,67 @@ class GridViewBuilder extends StatelessWidget {
             ),
         },
       ),
+    );
+  }
+
+  /// A grid whose rows (columns when it scrolls horizontally) are as long as
+  /// their longest item: a list of rows of [crossAxisCount] equal cells.
+  Widget _rows(int crossAxisCount) {
+    final int count = math.max(1, crossAxisCount);
+    final bool vertical = scrollDirection == Axis.vertical;
+    final int? rowCount = itemCount == null
+        ? null
+        : (itemCount! / count).ceil();
+    // The spacing goes before every row but the first, on the side that
+    // faces the row before it.
+    final double spacing = gridDelegate.mainAxisSpacing;
+    final EdgeInsetsGeometry leading = switch ((vertical, reverse)) {
+      (true, false) => EdgeInsets.only(top: spacing),
+      (true, true) => EdgeInsets.only(bottom: spacing),
+      (false, false) => EdgeInsetsDirectional.only(start: spacing),
+      (false, true) => EdgeInsetsDirectional.only(end: spacing),
+    };
+
+    return ListView.builder(
+      primary: primary,
+      shrinkWrap: shrinkWrap,
+      itemCount: rowCount,
+      padding: padding,
+      physics: physics,
+      scrollDirection: scrollDirection,
+      scrollCacheExtent: cacheExtent == null
+          ? null
+          : ScrollCacheExtent.pixels(cacheExtent!),
+      reverse: reverse,
+      clipBehavior: clipBehavior,
+      keyboardDismissBehavior: keyboardDismissBehavior,
+      itemBuilder: (context, row) {
+        Widget line = Flex(
+          direction: vertical ? Axis.horizontal : Axis.vertical,
+          crossAxisAlignment: intrinsicRows
+              ? CrossAxisAlignment.stretch
+              : CrossAxisAlignment.start,
+          spacing: gridDelegate.crossAxisSpacing,
+          children: [
+            for (int column = 0; column < count; column++)
+              Expanded(
+                child: switch (row * count + column) {
+                  final int index
+                      when itemCount == null || index < itemCount! =>
+                    itemBuilder!(context, index),
+                  _ => const SizedBox.shrink(),
+                },
+              ),
+          ],
+        );
+        if (intrinsicRows) {
+          line = vertical
+              ? IntrinsicHeight(child: line)
+              : IntrinsicWidth(child: line);
+        }
+        if (row == 0 || spacing <= 0) return line;
+        return Padding(padding: leading, child: line);
+      },
     );
   }
 }

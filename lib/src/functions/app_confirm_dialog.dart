@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../ui/layout_presentation_route.dart';
 import 'action_chain.dart';
 
 /// How a [ConfirmAction]'s dialog closed.
@@ -45,6 +46,10 @@ class AppConfirmDialog {
           params: action.params,
           barrierDismissible: action.barrierDismissible,
           barrierColor: action.barrierColor?.toFlutterColor(),
+          presentation: action.presentation,
+          sheetWidth: action.sheetWidth,
+          maxHeightFactor: action.maxHeightFactor,
+          showDragHandle: action.showDragHandle,
         );
         final bool confirmed = ConfirmAction.isConfirmResult(result);
         return (
@@ -79,6 +84,42 @@ class AppConfirmDialog {
     // the layout.
     final ResolvedFeedbackTheme theme = FeedbackTheme.of(context);
 
+    Widget buildDialog(BuildContext context) => ThemedConfirmDialog(
+      theme: theme,
+      presentation: action.presentation.resolveFor(context),
+      title: title,
+      message: message,
+      confirmLabel: confirmLabel.isEmpty ? 'OK' : confirmLabel,
+      cancelLabel: cancelLabel.isEmpty ? 'Cancel' : cancelLabel,
+      destructive: action.destructive,
+      backgroundColor: action.backgroundColor?.toFlutterColor(),
+      textColor: action.textColor?.toFlutterColor(),
+      confirmColor: action.confirmColor?.toFlutterColor(),
+      cornerRadius: action.cornerRadius,
+    );
+
+    final DialogPresentation presentation = action.presentation.resolveFor(
+      context,
+    );
+    if (presentation != DialogPresentation.dialog) {
+      final Object? answer = await Navigator.of(context).push<Object?>(
+        LayoutPresentationRoute<Object?>(
+          context: context,
+          presentation: presentation,
+          barrierDismissible: action.barrierDismissible,
+          barrierColor:
+              action.barrierColor?.toFlutterColor() ??
+              Theme.of(context).dialogTheme.barrierColor ??
+              Colors.black54,
+          sheetWidth: action.sheetWidth,
+          maxHeightFactor: action.maxHeightFactor,
+          showDragHandle: action.showDragHandle,
+          builder: buildDialog,
+        ),
+      );
+      return (confirmed: answer == true, values: null);
+    }
+
     final bool? confirmed = await showDialog<bool>(
       context: context,
       useRootNavigator: false,
@@ -108,6 +149,7 @@ class ThemedConfirmDialog extends StatelessWidget {
   const ThemedConfirmDialog({
     super.key,
     required this.theme,
+    this.presentation = DialogPresentation.dialog,
     required this.title,
     required this.message,
     required this.confirmLabel,
@@ -121,6 +163,10 @@ class ThemedConfirmDialog extends StatelessWidget {
 
   /// The app's look.
   final ResolvedFeedbackTheme theme;
+
+  /// Whether it is a centered dialog or fills a bottom or side sheet. A
+  /// sheet's route ([LayoutPresentationRoute]) places and clips it.
+  final DialogPresentation presentation;
 
   /// Title; hidden when empty.
   final String title;
@@ -171,93 +217,123 @@ class ThemedConfirmDialog extends StatelessWidget {
     const Size buttonSize = Size(64, 44);
     const EdgeInsets buttonPadding = EdgeInsets.symmetric(horizontal: 18);
 
+    final Widget content = Semantics(
+      scopesRoute: true,
+      namesRoute: true,
+      explicitChildNodes: true,
+      label: title.isEmpty ? null : title,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (title.isNotEmpty)
+              Text(
+                title,
+                style: theme.titleStyle.copyWith(
+                  fontSize: 18,
+                  height: 1.3,
+                  color: onSurface,
+                ),
+              ),
+            if (title.isNotEmpty && message.isNotEmpty)
+              const SizedBox(height: 8),
+            if (message.isNotEmpty)
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Text(
+                    message,
+                    style: theme.bodyStyle.copyWith(
+                      fontSize: 15,
+                      height: 1.45,
+                      color: onSurface.withValues(alpha: 0.74),
+                    ),
+                  ),
+                ),
+              ),
+            const SizedBox(height: 20),
+            OverflowBar(
+              alignment: MainAxisAlignment.end,
+              overflowAlignment: OverflowBarAlignment.end,
+              spacing: 8,
+              overflowSpacing: 8,
+              children: [
+                TextButton(
+                  key: const ValueKey('codelessly-confirm-cancel'),
+                  onPressed: () => Navigator.of(context).pop(false),
+                  style: TextButton.styleFrom(
+                    foregroundColor: onSurface,
+                    textStyle: buttonText,
+                    shape: buttonShape,
+                    minimumSize: buttonSize,
+                    padding: buttonPadding,
+                  ),
+                  child: Text(cancelLabel),
+                ),
+                FilledButton(
+                  key: const ValueKey('codelessly-confirm-ok'),
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: confirmFill,
+                    foregroundColor: onConfirm,
+                    textStyle: buttonText,
+                    shape: buttonShape,
+                    minimumSize: buttonSize,
+                    padding: buttonPadding,
+                  ),
+                  child: Text(confirmLabel),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
     return Theme(
       data: theme.apply(Theme.of(context)),
-      child: Dialog(
-        backgroundColor: surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 8,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radius),
+      child: switch (presentation) {
+        DialogPresentation.dialog => Dialog(
+          backgroundColor: surface,
+          surfaceTintColor: Colors.transparent,
+          elevation: 8,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radius),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: content,
+          ),
         ),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: Semantics(
-            scopesRoute: true,
-            namesRoute: true,
-            explicitChildNodes: true,
-            label: title.isEmpty ? null : title,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (title.isNotEmpty)
-                    Text(
-                      title,
-                      style: theme.titleStyle.copyWith(
-                        fontSize: 18,
-                        height: 1.3,
-                        color: onSurface,
-                      ),
-                    ),
-                  if (title.isNotEmpty && message.isNotEmpty)
-                    const SizedBox(height: 8),
-                  if (message.isNotEmpty)
-                    Flexible(
-                      child: SingleChildScrollView(
-                        child: Text(
-                          message,
-                          style: theme.bodyStyle.copyWith(
-                            fontSize: 15,
-                            height: 1.45,
-                            color: onSurface.withValues(alpha: 0.74),
-                          ),
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 20),
-                  OverflowBar(
-                    alignment: MainAxisAlignment.end,
-                    overflowAlignment: OverflowBarAlignment.end,
-                    spacing: 8,
-                    overflowSpacing: 8,
-                    children: [
-                      TextButton(
-                        key: const ValueKey('codelessly-confirm-cancel'),
-                        onPressed: () => Navigator.of(context).pop(false),
-                        style: TextButton.styleFrom(
-                          foregroundColor: onSurface,
-                          textStyle: buttonText,
-                          shape: buttonShape,
-                          minimumSize: buttonSize,
-                          padding: buttonPadding,
-                        ),
-                        child: Text(cancelLabel),
-                      ),
-                      FilledButton(
-                        key: const ValueKey('codelessly-confirm-ok'),
-                        onPressed: () => Navigator.of(context).pop(true),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: confirmFill,
-                          foregroundColor: onConfirm,
-                          textStyle: buttonText,
-                          shape: buttonShape,
-                          minimumSize: buttonSize,
-                          padding: buttonPadding,
-                        ),
-                        child: Text(confirmLabel),
-                      ),
-                    ],
-                  ),
-                ],
+        // A sheet is as wide as its route makes it; its content keeps clear
+        // of the home indicator and the bottom sheet's grab handle.
+        DialogPresentation.bottomSheet ||
+        DialogPresentation.adaptive => SizedBox(
+          width: double.infinity,
+          child: Material(
+            color: surface,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: content,
               ),
             ),
           ),
         ),
-      ),
+        DialogPresentation.sideSheet => Material(
+          color: surface,
+          child: SafeArea(
+            left: false,
+            child: Align(alignment: Alignment.topLeft, child: content),
+          ),
+        ),
+      },
     );
   }
 }

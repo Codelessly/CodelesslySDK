@@ -8,6 +8,27 @@ typedef WidgetInserter = Widget Function(Widget child);
 class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   PassiveRowColumnTransformer(super.getNode, super.manager);
 
+  /// Whether a child of [rowColumn], which hugs its cross axis, fills that
+  /// axis while another child gives it a thickness: a card's severity edge
+  /// as tall as its text, `IntrinsicHeight(child: Row(...))` in Flutter.
+  /// The row is measured to its other children's thickness first, which the
+  /// filling child then fills. With no such other child there is nothing to
+  /// fill, and the child keeps its design size (see FitBox), as the editor
+  /// lays it out. A spacer's thickness is not used, so it gives none.
+  static bool fillsAcrossWrappingRowColumn(
+    BaseNode rowColumn,
+    List<BaseNode> childrenNodes,
+  ) {
+    final bool isRow =
+        (rowColumn as RowColumnMixin).rowColumnType == RowColumnType.row;
+    SizeFit crossFit(BaseNode child) =>
+        isRow ? child.verticalFit : child.horizontalFit;
+    bool fills(BaseNode child) =>
+        child is! SpacerNode && crossFit(child) == SizeFit.expanded;
+    return childrenNodes.any(fills) &&
+        childrenNodes.any((child) => child is! SpacerNode && !fills(child));
+  }
+
   static Widget buildRowColumnWidget(
     BaseNode rowColumnNode, {
     required List<Widget> childrenWidgets,
@@ -88,7 +109,9 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       final bool anyChildNeedsAlignment = childrenNodes.any(
         (child) => child.alignment != AlignmentModel.none,
       );
-      if (stretches || anyChildNeedsAlignment) {
+      if (stretches ||
+          anyChildNeedsAlignment ||
+          fillsAcrossWrappingRowColumn(rowColumnNode, childrenNodes)) {
         final bool blocked = childrenNodes.any(
           (child) => subtreeBlocksIntrinsics(child, getNode),
         );
@@ -294,16 +317,24 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       );
     }
 
-    if (node is SpacerNode) {
-      return childWidget;
-    }
-
     final AxisC mainAxis = (parentRowColumn.rowColumnType == RowColumnType.row
         ? AxisC.horizontal
         : AxisC.vertical);
     final SizeFit mainAxisFit = (mainAxis == AxisC.horizontal
         ? node.horizontalFit
         : node.verticalFit);
+
+    // A spacer flexes like Flutter's Spacer. The flex goes around everything
+    // built for it, as for any other child: a host's wrappers (the editor's
+    // geometry probes) would otherwise sit between the Flex and an Expanded
+    // inside, and the Flex would lay the spacer out at its design size.
+    if (node is SpacerNode) {
+      return switch (mainAxisFit) {
+        SizeFit.expanded => Expanded(flex: flex, child: childWidget),
+        SizeFit.flexible => Flexible(flex: flex, child: childWidget),
+        _ => childWidget,
+      };
+    }
 
     final SizeFit crossAxisFit = (mainAxis == AxisC.horizontal
         ? node.verticalFit
@@ -485,7 +516,9 @@ class PassiveRowColumnWidget extends StatelessWidget {
     Widget sizedWidget,
   ) {
     final NodeTransformerManager manager = this.manager;
-    if (manager is! PassiveNodeTransformerManager) {
+    // A child that reads its parent's size can only tell whether it is
+    // hidden as it is laid out, so it keeps its place.
+    if (manager is! PassiveNodeTransformerManager || readsParentSize(child)) {
       return FlexChildVisibility(collapsed: false, child: sizedWidget);
     }
 

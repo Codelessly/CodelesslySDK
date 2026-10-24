@@ -458,23 +458,36 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     // `${= invalid ? 'Required' : ''}` that comes out empty (or blank) is
     // no error, so the field keeps its normal border and has no error row.
     // InputDecoration uses errorBorder/focusedErrorBorder only with an error.
+    // The template is the errorText property, or a binding of it in the
+    // node's variables; a set-value action's value wins over both.
+    final String? errorTemplate =
+        node.variables['errorText'] ?? decoration.errorText;
     final String? errorMessage = getText(
       context,
       node,
       property: 'errorText',
-      defaultValue: decoration.errorText,
+      defaultValue: errorTemplate,
       scopedValues: scopedValues,
       settings: settings,
     );
     final bool hasError =
         errorMessage != null && errorMessage.trim().isNotEmpty;
+    // A true `error` binding shows the error borders without a message, for
+    // forms that show their errors elsewhere.
+    final bool errorFlag =
+        PropertyValueDelegate.getPropertyValue<bool>(
+          node,
+          'error',
+          scopedValues: scopedValues,
+        ) ??
+        false;
     final Widget? errorText = !hasError
         ? null
         : buildText(
             context,
             node,
             property: 'errorText',
-            defaultValue: decoration.errorText,
+            defaultValue: errorTemplate,
             scopedValues: scopedValues,
             settings: settings,
             variablesOverrides: widget.variablesOverrides,
@@ -605,10 +618,18 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       focusColor: decoration.focusColor.toFlutterColor(),
       hoverColor: decoration.hoverColor.toFlutterColor(),
       errorBorder: getInputBorder(decoration.errorBorder),
-      focusedBorder: getInputBorder(decoration.focusedBorder),
+      focusedBorder: getInputBorder(
+        errorFlag && !hasError
+            ? decoration.focusedErrorBorder
+            : decoration.focusedBorder,
+      ),
       focusedErrorBorder: getInputBorder(decoration.focusedErrorBorder),
       disabledBorder: getInputBorder(decoration.disabledBorder),
-      enabledBorder: getInputBorder(decoration.enabledBorder),
+      enabledBorder: getInputBorder(
+        errorFlag && !hasError
+            ? decoration.errorBorder
+            : decoration.enabledBorder,
+      ),
       border: getInputBorder(decoration.border),
       enabled: decoration.enabled,
       semanticCounterText: decoration.semanticCounterText,
