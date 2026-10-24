@@ -226,6 +226,36 @@ void main() {
     expect([translation.x, translation.y], [10, -15]);
   });
 
+  testWidgets('a bound size sizes a node pinned in a freeform parent', (
+    tester,
+  ) async {
+    final RectangleNode bar = RectangleNode.fromJson({
+      ...RectangleNode(
+        id: 'bar',
+        name: 'Meter fill',
+        basicBoxLocal: NodeBox(0, 0, 300, 8),
+        positioningMode: PositioningMode.pin,
+        edgePins: EdgePinsModel(left: 0, top: 0, right: null, bottom: null),
+      ).toJson(),
+      'variables': {'width': r'${= scale * 12}'},
+    });
+    final FrameNode frame = FrameNode(
+      id: 'frame',
+      name: 'Meter',
+      basicBoxLocal: NodeBox(0, 0, 400, 200),
+      children: ['bar'],
+    );
+    bar.parentID = frame.id;
+    frame.parentID = kRootNode;
+    final registry = NodeRegistry()..setNodes({frame.id: frame, bar.id: bar});
+    await pump(tester, registry, frame);
+
+    final Finder child = find.byWidgetPredicate(
+      (w) => w is FreeformChild && '${w.key}'.contains('[bar]'),
+    );
+    expect(tester.getSize(child), const Size(120, 8));
+  });
+
   testWidgets('a nested list reads its outer item as parent', (tester) async {
     // Homes, each with its own scale and placements.
     final RectangleNode dot = RectangleNode.fromJson({
