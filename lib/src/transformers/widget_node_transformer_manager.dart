@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -58,6 +57,32 @@ abstract class WidgetNodeTransformerManager
 
     final double opacity = node.opacity < 0.99 ? node.opacity : 1;
     return Opacity(opacity: opacity, child: widget);
+  }
+
+  /// Runs the [BaseNode.loopAnimation] of [node] on [widget], if it has one.
+  ///
+  /// A `loopAnimationEnabled` condition or variable turns it on and off at
+  /// runtime; otherwise [LoopAnimation.enabled] does. The animation holds
+  /// still under a disabled [TickerMode], as on the editor's design canvas.
+  Widget applyLoopAnimation(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+  }) {
+    final LoopAnimation? animation = node.loopAnimation;
+    if (animation == null) return widget;
+    final bool? enabled = PropertyValueDelegate.getPropertyValue<bool>(
+      node,
+      'loopAnimationEnabled',
+      scopedValues: scopedValues ?? ScopedValues.of(context),
+    );
+    return LoopAnimationBox(
+      key: ValueKey('loop animation ${node.id}'),
+      animation: animation,
+      enabled: enabled,
+      child: widget,
+    );
   }
 
   /// Returns the visibility a condition or variable gives [node] at runtime,
@@ -232,6 +257,16 @@ abstract class WidgetNodeTransformerManager
   /// inside reads as that text; one without (an icon button) reads as its
   /// node name, or its icon's name when the node still has a default name.
   Widget wrapWithSemantics(BaseNode node, Widget widget) {
+    final String? customLabel = node.variables['semanticLabel'];
+    final String? customSelected = node.variables['semanticSelected'];
+    if ((customLabel?.trim().isNotEmpty ?? false) || customSelected != null) {
+      return _wrapWithCustomSemantics(
+        node,
+        widget,
+        label: customLabel,
+        selected: customSelected,
+      );
+    }
     if (node is! ReactionMixin) return widget;
     if (node case CanvasNode() || SpacerNode()) return widget;
     if (node is CustomPropertiesMixin &&
@@ -264,6 +299,85 @@ abstract class WidgetNodeTransformerManager
         label: label.isEmpty ? null : label,
         child: widget,
       ),
+    );
+  }
+
+  /// Semantics a node's `semanticLabel` variable gives it (a text with paths
+  /// or formulas): one node with that label, replacing what the children
+  /// read. A button (a node that reacts to taps) keeps its tap and long press
+  /// on that node; a widget (a field, a dropdown) keeps its own semantics,
+  /// read after the label. A `semanticSelected` formula marks it selected,
+  /// e.g. the chosen tab or chip.
+  Widget _wrapWithCustomSemantics(
+    BaseNode node,
+    Widget widget, {
+    String? label,
+    String? selected,
+  }) {
+    List<Reaction> reactionsOf(TriggerType type) => [
+      if (node is ReactionMixin)
+        for (final Reaction reaction in (node as ReactionMixin).reactions)
+          if (reaction.trigger.type == type && reaction.action.enabled)
+            reaction,
+    ];
+    final List<Reaction> taps = reactionsOf(TriggerType.click);
+    final List<Reaction> longPresses = reactionsOf(TriggerType.longPress);
+    final bool tappable = taps.isNotEmpty;
+    final bool widgetHandlesInput =
+        node is CustomPropertiesMixin && node.handlesDefaultReactionsInternally;
+    return Builder(
+      builder: (context) {
+        final ScopedValues scopedValues = ScopedValues.of(context);
+        final String? text = label == null || label.trim().isEmpty
+            ? null
+            : PropertyValueDelegate.substituteVariables(
+                label,
+                scopedValues: scopedValues,
+                nullSubstitutionMode: NullSubstitutionMode.emptyString,
+              );
+        final bool? isSelected = selected == null
+            ? null
+            : PropertyValueDelegate.getVariableValueFromPath<bool>(
+                selected,
+                scopedValues: scopedValues,
+              );
+        if (widgetHandlesInput) {
+          // A field or dropdown's state and actions live on its own
+          // semantics, which merge in after the label.
+          return MergeSemantics(
+            child: Semantics(
+              container: true,
+              selected: isSelected,
+              label: text,
+              child: widget,
+            ),
+          );
+        }
+        return Semantics(
+          container: true,
+          button: tappable ? true : null,
+          selected: isSelected,
+          label: text,
+          // The children's text and the tap handler below are left out, so
+          // the node's own tap and long press are given here.
+          excludeSemantics: text != null,
+          onTap: text != null && tappable
+              ? () => FunctionsRepository.triggerAction(
+                  context,
+                  TriggerType.click,
+                  reactions: taps,
+                )
+              : null,
+          onLongPress: text != null && longPresses.isNotEmpty
+              ? () => FunctionsRepository.triggerAction(
+                  context,
+                  TriggerType.longPress,
+                  reactions: longPresses,
+                )
+              : null,
+          child: widget,
+        );
+      },
     );
   }
 
@@ -357,7 +471,7 @@ abstract class WidgetNodeTransformerManager
       if (onClickReactions.isEmpty && onLongPressReactions.isEmpty) {
         return widget;
       }
-      // TODO: should handle TriggerType.hover and TriggerType.unhover too.
+      // Cursor triggers are handled by [wrapWithCursorReactions].
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         hitTestBehavior: HitTestBehavior.opaque,
@@ -403,87 +517,87 @@ abstract class WidgetNodeTransformerManager
     );
   }
 
-  /// Runs [node]'s double tap and hover reactions.
+  /// Runs [node]'s double tap reactions.
   ///
-  /// A double tap recognizer is only added when a double tap reaction
+  /// The double tap recognizer is only added when a double tap reaction
   /// exists, since it makes single taps wait out the double tap timeout
-  /// (300ms) before they fire `click`. Hover reactions listen with a
-  /// [MouseRegion], which touch input never enters. The legacy
-  /// [TriggerType.cursorEnter] and [TriggerType.cursorExit] run with
-  /// [TriggerType.hoverEnter] and [TriggerType.hoverExit].
-  Widget wrapWithPointerTriggers(
+  /// (300ms) before they fire `click`.
+  Widget wrapWithDoubleTap(BuildContext context, BaseNode node, Widget widget) {
+    if (node is! ReactionMixin) return widget;
+    final List<Reaction> reactions = (node as ReactionMixin).reactions
+        .where(
+          (reaction) =>
+              reaction.trigger.type == TriggerType.doubleTap &&
+              reaction.action.enabled,
+        )
+        .toList();
+    if (reactions.isEmpty) return widget;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onDoubleTap: () => FunctionsRepository.triggerAction(
+        context,
+        TriggerType.doubleTap,
+        reactions: reactions,
+      ),
+      child: widget,
+    );
+  }
+
+  /// Runs the [TriggerType.cursorEnter], [TriggerType.cursorExit] and
+  /// [TriggerType.hover] reactions of [node] when a mouse cursor enters,
+  /// leaves or moves over it.
+  ///
+  /// The region covers the node's whole box, transparent parts included, and
+  /// lets the nodes behind it get the cursor and taps too. Touch input fires
+  /// none of these triggers.
+  Widget wrapWithCursorReactions(
     BuildContext context,
     BaseNode node,
     Widget widget,
   ) {
     if (node is! ReactionMixin) return widget;
-    final List<Reaction> reactions = (node as ReactionMixin).reactions
+    if (node case CanvasNode() || SpacerNode()) return widget;
+
+    List<Reaction> reactionsOf(TriggerType type) => (node as ReactionMixin)
+        .reactions
         .where(
           (reaction) =>
-              _pointerTriggers.contains(reaction.trigger.type) &&
-              reaction.action.enabled,
+              reaction.trigger.type == type && reaction.action.enabled,
         )
         .toList();
-    if (reactions.isEmpty) return widget;
-    bool has(TriggerType type) =>
-        reactions.any((reaction) => reaction.trigger.type == type);
 
-    if (has(TriggerType.doubleTap)) {
-      widget = GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onDoubleTap: () => FunctionsRepository.triggerAction(
-          context,
-          TriggerType.doubleTap,
-          reactions: reactions,
-        ),
-        child: widget,
-      );
-    }
+    final List<Reaction> onEnter = reactionsOf(TriggerType.cursorEnter);
+    final List<Reaction> onExit = reactionsOf(TriggerType.cursorExit);
+    final List<Reaction> onHover = reactionsOf(TriggerType.hover);
+    if (onEnter.isEmpty && onExit.isEmpty && onHover.isEmpty) return widget;
 
-    final bool enters =
-        has(TriggerType.hoverEnter) || has(TriggerType.cursorEnter);
-    final bool exits =
-        has(TriggerType.hoverExit) || has(TriggerType.cursorExit);
-    if (enters || exits) {
-      void run(PointerEvent event, List<TriggerType> types) {
-        if (event.kind == PointerDeviceKind.touch) return;
-        for (final TriggerType type in types) {
-          FunctionsRepository.triggerAction(
-            context,
-            type,
-            reactions: reactions,
-          );
-        }
-      }
-
-      widget = MouseRegion(
-        opaque: false,
-        hitTestBehavior: HitTestBehavior.opaque,
-        onEnter: enters
-            ? (event) => run(event, const [
-                TriggerType.hoverEnter,
-                TriggerType.cursorEnter,
-              ])
-            : null,
-        onExit: exits
-            ? (event) => run(event, const [
-                TriggerType.hoverExit,
-                TriggerType.cursorExit,
-              ])
-            : null,
-        child: widget,
-      );
-    }
-    return widget;
+    return MouseRegion(
+      opaque: false,
+      hitTestBehavior: HitTestBehavior.translucent,
+      onEnter: onEnter.isEmpty
+          ? null
+          : (_) => FunctionsRepository.triggerAction(
+              context,
+              TriggerType.cursorEnter,
+              reactions: onEnter,
+            ),
+      onExit: onExit.isEmpty
+          ? null
+          : (_) => FunctionsRepository.triggerAction(
+              context,
+              TriggerType.cursorExit,
+              reactions: onExit,
+            ),
+      onHover: onHover.isEmpty
+          ? null
+          : (_) => FunctionsRepository.triggerAction(
+              context,
+              TriggerType.hover,
+              reactions: onHover,
+            ),
+      child: widget,
+    );
   }
-
-  static const Set<TriggerType> _pointerTriggers = {
-    TriggerType.doubleTap,
-    TriggerType.hoverEnter,
-    TriggerType.hoverExit,
-    TriggerType.cursorEnter,
-    TriggerType.cursorExit,
-  };
 
   BorderRadius? getBorderRadius(BaseNode node) {
     if (node is CornerMixin) {

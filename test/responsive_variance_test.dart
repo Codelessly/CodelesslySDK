@@ -1,5 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/ui/codelessly_dialog_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -137,6 +138,79 @@ Future<void> pumpPage(
     ),
   );
   await tester.pump();
+}
+
+/// Shows [nodes]' canvas the way the SDK's show-dialog action does: a
+/// [CodelesslyDialogWidget] in a dismissible dialog, on a screen of [screen].
+Future<void> showPageInDialog(
+  WidgetTester tester,
+  Map<String, BaseNode> nodes, {
+  required Size screen,
+}) async {
+  tester.view.devicePixelRatio = 1;
+  tester.view.physicalSize = screen;
+  addTearDown(tester.view.reset);
+  final registry = NodeRegistry()..setNodes(nodes);
+  final manager = PassiveNodeTransformerManager(
+    registry.getNodeByID,
+    (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+  );
+  // A fresh app, without a dialog left open by an earlier call.
+  await tester.pumpWidget(const SizedBox());
+  await tester.pumpWidget(
+    ChangeNotifierProvider<CodelesslyContext>.value(
+      value: CodelesslyContext.empty(),
+      child: MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showDialog(
+                context: context,
+                useRootNavigator: false,
+                builder: (context) => CodelesslyDialogWidget(
+                  showCloseButton: false,
+                  builder: (context) => manager.buildWidgetFromNode(
+                    nodes['canvas']!,
+                    context,
+                    settings: const WidgetBuildSettings(debugLabel: 'test'),
+                  ),
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.tap(find.text('open'));
+  await tester.pumpAndSettle();
+}
+
+/// [responsivePage] as a sheet: full screen on mobile, a centered 560 wide
+/// card on tablet and desktop.
+Map<String, BaseNode> responsiveSheet() {
+  final nodes = responsivePage();
+  // No background: the barrier shows around the card.
+  (nodes['canvas']! as CanvasNode).fills = [];
+  for (final breakpoint in [
+    ScreenBreakpoint.tablet,
+    ScreenBreakpoint.desktop,
+  ]) {
+    final root = nodes['${breakpoint.name}-root']! as RowColumnNode;
+    nodes[root.id] = RowColumnNode(
+      id: root.id,
+      name: root.name,
+      basicBoxLocal: NodeBox(0, 0, 560, 400),
+      rowColumnType: RowColumnType.column,
+      mainAxisAlignment: MainAxisAlignmentC.start,
+      crossAxisAlignment: CrossAxisAlignmentC.stretch,
+      alignment: AlignmentModel.center,
+      fills: [PaintModel.whitePaint],
+      children: root.children,
+    )..parentID = root.parentID;
+  }
+  return nodes;
 }
 
 /// A variant's root and its rectangles.
@@ -285,5 +359,56 @@ void main() {
     await pumpPage(tester, nodes, screen: const Size(390, 844));
     expect(tester.takeException(), isNull);
     expect(builtRectangles(nodes), idsOf(ScreenBreakpoint.tablet, 3));
+  });
+
+  testWidgets('a dialog with a responsive layout follows the screen', (
+    tester,
+  ) async {
+    for (final screen in screens) {
+      final nodes = responsiveSheet();
+      await showPageInDialog(tester, nodes, screen: screen);
+
+      expect(tester.takeException(), isNull);
+      final ScreenBreakpoint breakpoint = ScreenBreakpoint.forWidth(
+        screen.width,
+      );
+      final int count = switch (breakpoint) {
+        ScreenBreakpoint.mobile => 2,
+        ScreenBreakpoint.tablet => 3,
+        ScreenBreakpoint.desktop => 4,
+      };
+      expect(builtRectangles(nodes), idsOf(breakpoint, count));
+      // The canvas fills the screen; each variant places itself in it: the
+      // mobile sheet fills it, the card is centered.
+      expect(tester.getSize(rectOf(nodes['canvas']!)), screen);
+      final Rect root = tester.getRect(
+        rectOf(nodes['${breakpoint.name}-root']!),
+      );
+      if (breakpoint == ScreenBreakpoint.mobile) {
+        expect(root, Offset.zero & screen);
+      } else {
+        expect(root.size, const Size(560, 400));
+        expect(root.center, screen.center(Offset.zero));
+      }
+    }
+  });
+
+  testWidgets('a dialog with a responsive layout closes on a barrier tap', (
+    tester,
+  ) async {
+    final nodes = responsiveSheet();
+    await showPageInDialog(tester, nodes, screen: const Size(1440, 900));
+    expect(builtRectangles(nodes), idsOf(ScreenBreakpoint.desktop, 4));
+
+    // Inside the card, below its rectangles, the dialog stays open.
+    await tester.tapAt(const Offset(720, 600));
+    await tester.pumpAndSettle();
+    expect(builtRectangles(nodes), idsOf(ScreenBreakpoint.desktop, 4));
+
+    // Outside of it, the empty canvas lets the tap through to the barrier.
+    await tester.tapAt(const Offset(100, 100));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(builtRectangles(nodes), isEmpty);
   });
 }

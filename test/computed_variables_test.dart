@@ -1,158 +1,150 @@
-import 'dart:convert';
-
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-const String visibleFormula =
-    r"${= sortBy(filter(records, r => crateId == 'all' || r.crate == crateId), sortBy)}";
+VariableData variable(
+  String id,
+  String name,
+  Object value,
+  VariableType type,
+) => VariableData(id: id, name: name, value: '$value', type: type);
 
-final List<Map<String, Object>> records = [
-  {'title': 'Banana', 'crate': 'b'},
-  {'title': 'Apple', 'crate': 'a'},
-  {'title': 'Cherry', 'crate': 'a'},
-];
+final VariableData units = variable(
+  'v1',
+  'units',
+  '[{"id":"ex1","status":"Available","hours":10},{"id":"ex2","status":"On rent","hours":20}]',
+  VariableType.list,
+);
+final VariableData query = variable('v2', 'query', 'ex', VariableType.text);
+final VariableData available = variable(
+  'v3',
+  'available',
+  r"${= filter(units, u => u.status == 'Available')}",
+  VariableType.list,
+);
+final VariableData availableCount = variable(
+  'v4',
+  'availableCount',
+  r'${= count(available)}',
+  VariableType.integer,
+);
+final VariableData label = variable(
+  'v5',
+  'label',
+  r"${= availableCount + ' of ' + count(units) + ' ready'}",
+  VariableType.text,
+);
+final VariableData loop = variable(
+  'v6',
+  'loop',
+  r'${= loop2 + 1}',
+  VariableType.integer,
+);
+final VariableData loop2 = variable(
+  'v7',
+  'loop2',
+  r'${= loop + 1}',
+  VariableType.integer,
+);
 
-CodelesslyContext recordsContext() {
-  final CodelesslyContext context = CodelesslyContext.empty();
-  for (final VariableData variable in [
-    VariableData(
-      id: 'records',
-      name: 'records',
-      type: VariableType.list,
-      value: records,
-    ),
-    VariableData(id: 'crateId', name: 'crateId', value: 'all'),
-    VariableData(id: 'sortBy', name: 'sortBy', value: 'title'),
-    VariableData(
-      id: 'visible',
-      name: 'visible',
-      type: VariableType.list,
-      value: visibleFormula,
-    ),
-    VariableData(
-      id: 'count',
-      name: 'count',
-      type: VariableType.integer,
-      value: r'${= length(visible)}',
-    ),
-  ]) {
-    context.variables[variable.id] = Observable(variable);
-  }
-  return context;
-}
+ScopedValues scope([List<VariableData>? extra]) => ScopedValues.preview(
+  variables: {
+    for (final v in [
+      units,
+      query,
+      available,
+      availableCount,
+      label,
+      loop,
+      loop2,
+      ...?extra,
+    ])
+      v.name: v,
+  },
+);
 
-Object? read(String path, CodelesslyContext context) =>
+Object? read(String path, [ScopedValues? values]) =>
     PropertyValueDelegate.getVariableValueFromPath<Object>(
       path,
-      scopedValues: ScopedValues.preview(
-        variables: const {},
-        codelesslyContext: context,
-      ),
+      scopedValues: values ?? scope(),
     );
 
 void main() {
-  testWidgets('Set variable leaves a computed variable its formula', (
+  test('a computed variable evaluates its formula against other variables', () {
+    expect(read('available'), [
+      {'id': 'ex1', 'status': 'Available', 'hours': 10},
+    ]);
+    expect(read('availableCount'), 1);
+    expect(read('label'), '1 of 2 ready');
+  });
+
+  test('paths and formulas read through computed variables', () {
+    expect(read('available[0].id'), 'ex1');
+    expect(read(r'${= available[0].hours * 2}'), 20);
+    expect(read(r'${= map(available, u => u.id)}'), ['ex1']);
+  });
+
+  test('it follows the variables it reads', () {
+    final VariableData moved = variable(
+      'v1',
+      'units',
+      '[{"id":"ex1","status":"On rent"},{"id":"ex2","status":"Available"},{"id":"ex3","status":"Available"}]',
+      VariableType.list,
+    );
+    final ScopedValues values = ScopedValues.preview(
+      variables: {
+        for (final v in [moved, available, availableCount, label]) v.name: v,
+      },
+    );
+    expect(read('availableCount', values), 2);
+    expect(read('label', values), '2 of 3 ready');
+  });
+
+  test('variables that read each other in a loop stop, not hang', () {
+    // loop reads loop2, which reads loop again, ... until a depth limit
+    // reads null (0 in arithmetic): the read ends with a number.
+    expect(read('loop'), isA<num>());
+  });
+
+  testWidgets('a node bound to a computed variable rebuilds on its inputs', (
     tester,
   ) async {
-    final CodelesslyContext context = recordsContext();
-    late BuildContext captured;
+    final CodelesslyContext context = CodelesslyContext.empty();
+    for (final v in [units, query, available, availableCount, label]) {
+      context.variables[v.id] = Observable(v);
+    }
+    final RectangleNode node = RectangleNode(
+      id: 'r',
+      name: 'Badge',
+      basicBoxLocal: NodeBox(0, 0, 10, 10),
+    )..variables['visible'] = r'${= availableCount > 0}';
+    final manager = PassiveNodeTransformerManager(
+      (id) => node,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    late List<Listenable> listenables;
     await tester.pumpWidget(
       ChangeNotifierProvider<CodelesslyContext>.value(
         value: context,
         child: Builder(
-          builder: (buildContext) {
-            captured = buildContext;
+          builder: (c) {
+            listenables = manager.listenablesFor(c, node);
             return const SizedBox();
           },
         ),
       ),
     );
-    expect(read(r'${count}', context), 3);
-    expect(context.updateVariable('count', 10), isFalse);
-
-    final bool set = FunctionsRepository.setVariableFromAction(
-      captured,
-      SetVariableAction(
-        variable: VariableData(
-          id: 'count',
-          name: 'count',
-          type: VariableType.integer,
-        ),
-        newValue: '42',
-      ),
-    );
-    expect(set, isFalse);
-    expect(context.findVariableByName('count')!.value.isComputed, isTrue);
-
-    FunctionsRepository.setVariableFromAction(
-      captured,
-      SetVariableAction(
-        variable: VariableData(id: 'crateId', name: 'crateId'),
-        newValue: 'a',
-      ),
-    );
-    expect(read(r'${count}', context), 2);
-  });
-
-  test('helpers read the formula from the value', () {
-    final Map<String, VariableData> byName = recordsContext()
-        .variableNamesMap();
-    expect(ComputedVariables.inputsOf(byName['visible']!), {
-      'records',
-      'crateId',
-      'sortBy',
-    });
-    expect(ComputedVariables.inputsOf(byName['records']!), isEmpty);
-    expect(ComputedVariables.errorOf(r'${= length(}'), isNotNull);
-    expect(ComputedVariables.errorOf(visibleFormula), isNull);
+    // availableCount -> available -> units.
     expect(
-      ComputedVariables.cyclicNames({
-        'a': VariableData(id: 'a', name: 'a', value: r'${= b + 1}'),
-        'b': VariableData(id: 'b', name: 'b', value: r'${= a + 1}'),
-        'c': VariableData(id: 'c', name: 'c', value: '1'),
-      }),
-      {'a', 'b'},
+      listenables,
+      containsAll([
+        context.variables['v4'],
+        context.variables['v3'],
+        context.variables['v1'],
+      ]),
     );
-  });
-
-  test('resolveAll previews computed variables over default values', () {
-    final Map<String, VariableData> resolved = ComputedVariables.resolveAll(
-      recordsContext().variableNamesMap(),
-    );
-    expect(resolved['count']!.getValue(), 3);
-    expect((resolved['visible']!.getValue() as List).first, {
-      'title': 'Apple',
-      'crate': 'a',
-    });
-  });
-
-  test('the formula survives the published variables JSON', () {
-    final SDKLayoutVariables published = SDKLayoutVariables(
-      id: 'layout',
-      variables: {
-        'canvas': {
-          'visible': VariableData(
-            id: 'visible',
-            name: 'visible',
-            type: VariableType.list,
-            value: visibleFormula,
-          ),
-        },
-      },
-      owner: 'owner',
-      teams: const {},
-      users: const {},
-      roles: const {},
-      public: false,
-    );
-    final SDKLayoutVariables decoded = SDKLayoutVariables.fromJson(
-      jsonDecode(jsonEncode(published.toJson())),
-    );
-    final VariableData visible = decoded.variables['canvas']!['visible']!;
-    expect(visible.value, visibleFormula);
-    expect(visible.isComputed, isTrue);
+    expect(listenables, isNot(contains(context.variables['v2'])));
   });
 }

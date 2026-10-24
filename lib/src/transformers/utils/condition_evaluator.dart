@@ -201,6 +201,9 @@ class ConditionEvaluator<R extends Object>
 
   @override
   bool visitIsEmptyOperator(Object? left) {
+    // An empty text variable reads as null (see _visitRawValue), and an unset
+    // one is null too: both are empty.
+    if (left == null) return true;
     if (left is List) return left.isEmpty;
     if (left is String) return left.isEmpty;
     if (left is Map) return left.isEmpty;

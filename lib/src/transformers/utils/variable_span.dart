@@ -41,6 +41,8 @@ abstract final class VariablePreview {
       variables: values.variables,
       codelesslyContext: values.codelesslyContext,
       screenSize: values.screenSize,
+      parentSize: values.parentSize,
+      data: values.data,
       indexedItem: row.item != null || values.indexedItem == null
           ? row
           : IndexedItem(row.index, values.indexedItem!.item),

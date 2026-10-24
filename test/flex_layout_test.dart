@@ -90,6 +90,7 @@ Future<Map<String, Size>> pump(
   required Size screen,
   required Host host,
   CodelesslyContext? codelesslyContext,
+  NodeBuildDecorator? decorator,
 }) async {
   tester.view.physicalSize = screen;
   tester.view.devicePixelRatio = 1;
@@ -102,13 +103,20 @@ Future<Map<String, Size>> pump(
   final manager = PassiveNodeTransformerManager(
     registry.getNodeByID,
     (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
-  );
+  )..decorator = decorator;
   Widget built(BuildContext context) => manager.buildWidgetFromNode(
     root,
     context,
     settings: const WidgetBuildSettings(debugLabel: 'test'),
   );
-  final Widget body = Builder(builder: built);
+  // A decorator's probes only wrap nodes under a geometry scope, as on the
+  // editor's render canvas.
+  final Widget body = decorator == null
+      ? Builder(builder: built)
+      : NodeGeometryScope(
+          registry: NodeGeometryRegistry(),
+          child: Builder(builder: built),
+        );
   await tester.pumpWidget(
     ChangeNotifierProvider<CodelesslyContext>.value(
       value: codelesslyContext ?? CodelesslyContext.empty(),
@@ -135,17 +143,45 @@ Future<void> everywhere(
   WidgetTester tester,
   BaseNode root,
   List<BaseNode> nodes,
-  void Function(Map<String, Size> sizes, Size screen, Host host) check,
-) async {
+  void Function(Map<String, Size> sizes, Size screen, Host host) check, {
+  NodeBuildDecorator? decorator,
+}) async {
   for (final Size screen in screens) {
     for (final Host host in Host.values) {
-      final sizes = await pump(tester, root, nodes, screen: screen, host: host);
+      final sizes = await pump(
+        tester,
+        root,
+        nodes,
+        screen: screen,
+        host: host,
+        decorator: decorator,
+      );
       check(sizes, screen, host);
     }
   }
 }
 
 void main() {
+  testWidgets(
+    'a row aligned to baselines lays out (it needs a text baseline)',
+    (tester) async {
+      final a = rect('a', '', width: 40, height: 30);
+      final b = rect('b', '', width: 40, height: 10);
+      final row = flex(
+        'row',
+        kRootNode,
+        [a, b],
+        type: RowColumnType.row,
+        width: 200,
+        height: 40,
+        crossAxisAlignment: CrossAxisAlignmentC.baseline,
+      );
+      await everywhere(tester, row, [a, b], (sizes, screen, host) {
+        expect(sizes['a'], const Size(40, 30));
+      });
+    },
+  );
+
   testWidgets('a shrinkWrap row with an expanded child inside a row (E1, A7)', (
     tester,
   ) async {
@@ -306,6 +342,104 @@ void main() {
       expect(sizes['a'], const Size(60, 70), reason: '$host $screen');
     });
   });
+
+  testWidgets(
+    'a child filling across a row that wraps its height stretches to the '
+    'height the other children give the row',
+    (tester) async {
+      // A card's severity edge, as tall as its text: in Flutter,
+      // IntrinsicHeight(child: Row(crossAxisAlignment: stretch)).
+      final edge = rect(
+        'edge',
+        '',
+        width: 4,
+        height: 10,
+        verticalFit: SizeFit.expanded,
+      );
+      final title = rect('title', '', width: 120, height: 20);
+      final subtitle = rect('subtitle', '', width: 160, height: 30);
+      final text = flex(
+        'text',
+        '',
+        [title, subtitle],
+        type: RowColumnType.column,
+        width: 200,
+        height: 50,
+        horizontalFit: SizeFit.expanded,
+        verticalFit: SizeFit.shrinkWrap,
+      );
+      final card = flex(
+        'card',
+        '',
+        [edge, text],
+        type: RowColumnType.row,
+        width: 300,
+        height: 40,
+        horizontalFit: SizeFit.expanded,
+        verticalFit: SizeFit.shrinkWrap,
+      );
+      final column = flex(
+        'column',
+        kRootNode,
+        [card],
+        type: RowColumnType.column,
+        width: 300,
+        height: 400,
+        isScrollable: true,
+      );
+      await everywhere(tester, column, [card, edge, text, title, subtitle], (
+        sizes,
+        screen,
+        host,
+      ) {
+        expect(sizes['edge'], const Size(4, 50), reason: '$host $screen');
+      });
+    },
+  );
+
+  testWidgets(
+    'a spacer filling across a row that wraps its height leaves the row as '
+    'tall as its other children',
+    (tester) async {
+      final label = rect('label', '', width: 90, height: 24);
+      final gap = spacer('gap', width: 10, height: 10);
+      final edge = rect(
+        'edge',
+        '',
+        width: 4,
+        height: 10,
+        verticalFit: SizeFit.expanded,
+      );
+      final row = flex(
+        'row',
+        '',
+        [label, gap..parentID = 'row', edge],
+        type: RowColumnType.row,
+        width: 300,
+        height: 40,
+        horizontalFit: SizeFit.expanded,
+        verticalFit: SizeFit.shrinkWrap,
+      );
+      final column = flex(
+        'column',
+        kRootNode,
+        [row],
+        type: RowColumnType.column,
+        width: 300,
+        height: 400,
+        isScrollable: true,
+      );
+      await everywhere(tester, column, [row, label, gap, edge], (
+        sizes,
+        screen,
+        host,
+      ) {
+        // The edge shows the row's height.
+        expect(sizes['edge'], const Size(4, 24), reason: '$host $screen');
+        expect(sizes['label'], const Size(90, 24), reason: '$host $screen');
+      });
+    },
+  );
 
   testWidgets('flexible column takes its design size like a leaf (A6)', (
     tester,
@@ -618,6 +752,191 @@ void main() {
       // The free space is shared by the expanded child and the spacer.
       expect(sizes['b']!.width, (350 - 200) / 2);
       expect(sizes['c']!.width, 100);
+    });
+  });
+
+  // The spacer JSON the build scripts send: flex on both axes, so it works
+  // in a row and in a column, and none of the keys other nodes default.
+  SpacerNode spacerFromJson(String id) =>
+      NodeJsonConverter().fromJson({
+            'type': 'spacer',
+            'id': id,
+            'name': id,
+            'flex': 1,
+            'basicBoxLocal': [0, 0, 100, 100],
+            'horizontalFit': 'expanded',
+            'verticalFit': 'expanded',
+          })!
+          as SpacerNode;
+
+  for (final NodeBuildDecorator? decorator in [
+    null,
+    const GeometryProbeDecorator(),
+  ]) {
+    final String host = decorator == null ? 'an app' : 'the editor';
+    testWidgets('a spacer takes the free space of a row in $host', (
+      tester,
+    ) async {
+      final l = rect('l', '', width: 40, height: 40);
+      final gap = spacerFromJson('gap');
+      final r = rect('r', '', width: 40, height: 40);
+      final row = flex(
+        'row',
+        kRootNode,
+        [l, gap, r],
+        type: RowColumnType.row,
+        width: 390,
+        height: 56,
+      );
+      await everywhere(tester, row, [l, gap, r], (sizes, screen, host) {
+        // A tight host forces its size on the root; the others keep 390.
+        if (host == Host.tight) return;
+        expect(
+          tester.getTopLeft(rectOf('r')).dx -
+              tester.getTopLeft(rectOf('row')).dx,
+          390 - 40,
+          reason: '$host $screen',
+        );
+      }, decorator: decorator);
+    });
+
+    testWidgets('a spacer takes the free space of a column in $host', (
+      tester,
+    ) async {
+      final top = rect('top', '', width: 40, height: 44);
+      final gap = spacerFromJson('gap');
+      final bottom = rect('bottom', '', width: 40, height: 14);
+      final tile = flex(
+        'tile',
+        kRootNode,
+        [top, gap, bottom],
+        type: RowColumnType.column,
+        width: 160,
+        height: 112,
+      );
+      await everywhere(tester, tile, [top, gap, bottom], (sizes, screen, host) {
+        if (host == Host.tight) return;
+        expect(sizes['tile']!.height, 112, reason: '$host $screen');
+        expect(
+          tester.getTopLeft(rectOf('bottom')).dy -
+              tester.getTopLeft(rectOf('tile')).dy,
+          112 - 14,
+          reason: '$host $screen',
+        );
+      }, decorator: decorator);
+    });
+  }
+
+  group('a squeezable shrinkWrap child (loose Flexible)', () {
+    TextNode label(String id, String characters, {bool squeezable = false}) =>
+        TextNode(
+          id: id,
+          name: id,
+          basicBoxLocal: NodeBox(0, 0, 120, 10),
+          horizontalFit: SizeFit.shrinkWrap,
+          verticalFit: SizeFit.shrinkWrap,
+          characters: characters,
+          maxLines: 1,
+          overflow: TextOverflowC.ellipsis,
+          textMixedProps: [
+            StartEndProp(start: 0, end: characters.length, fontSize: 10),
+          ],
+        )..squeezable = squeezable;
+
+    RenderParagraph paragraphOf(WidgetTester tester, String characters) =>
+        tester.renderObject(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is RichText && widget.text.toPlainText() == characters,
+          ),
+        );
+
+    // A name and its count in a 200 wide row; the test font is 10 px a
+    // character.
+    Future<void> pumpRow(WidgetTester tester, String characters, Size screen) {
+      final name = label('name', characters, squeezable: true);
+      final count = label('count', 'x3');
+      final row = flex(
+        'row',
+        kRootNode,
+        [name, count],
+        type: RowColumnType.row,
+        width: 200,
+        height: 10,
+      );
+      return pump(tester, row, [name, count], screen: screen, host: Host.loose);
+    }
+
+    for (final screen in screens) {
+      testWidgets('hugs a short name and ellipsizes a long one at '
+          '${screen.width.toInt()}', (tester) async {
+        await pumpRow(tester, 'Ann', screen);
+        final RenderParagraph short = paragraphOf(tester, 'Ann');
+        expect(short.size.width, 30);
+        expect(short.didExceedMaxLines, isFalse);
+        expect(
+          tester.getTopLeft(find.text('x3')).dx,
+          tester.getTopRight(find.text('Ann')).dx,
+        );
+
+        const String long = 'Bartholomew Montgomeryfitzgerald';
+        await pumpRow(tester, long, screen);
+        final RenderParagraph name = paragraphOf(tester, long);
+        // The name gives up what the count needs, and ellipsizes.
+        expect(name.size.width, 180);
+        expect(name.didExceedMaxLines, isTrue);
+        expect(paragraphOf(tester, 'x3').size.width, 20);
+        expect(
+          tester.getTopRight(find.text('x3')).dx,
+          tester.getTopRight(rectOf('row')).dx,
+        );
+      });
+    }
+
+    // A dialog body: a header and a card that is as tall as its content, up
+    // to the height the column has left.
+    testWidgets('a card hugs its content up to the room left', (tester) async {
+      for (final int items in [1, 6]) {
+        final header = rect('header', '', width: 300, height: 50);
+        final children = [
+          for (int i = 0; i < items; i++)
+            rect('item$i', '', width: 300, height: 100),
+        ];
+        final card = flex(
+          'card',
+          '',
+          children,
+          type: RowColumnType.column,
+          width: 300,
+          height: 100,
+          verticalFit: SizeFit.shrinkWrap,
+          isScrollable: true,
+        )..squeezable = true;
+        final column = flex(
+          'column',
+          kRootNode,
+          [header, card],
+          type: RowColumnType.column,
+          width: 300,
+          height: 400,
+        );
+        for (final screen in screens) {
+          final sizes = await pump(
+            tester,
+            column,
+            [header, card, ...children],
+            screen: screen,
+            host: Host.loose,
+          );
+          expect(sizes['column'], const Size(300, 400));
+          expect(
+            sizes['card'],
+            Size(300, items == 1 ? 100 : 350),
+            reason: '$items items at $screen',
+          );
+          expect(sizes['item0'], const Size(300, 100));
+        }
+      }
     });
   });
 }
