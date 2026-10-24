@@ -158,14 +158,31 @@ class PassiveRectangleWidget extends StatelessWidget {
       size: node.basicBoxLocal.size,
       child: Container(
         clipBehavior: getClipBehavior(node),
-        decoration: BoxDecoration(
-          boxShadow: retrieveBoxShadow(node, scopedValues),
-          borderRadius: getBorderRadius(node),
-        ),
+        // This box only clips and casts shadows; the node's fills, strokes
+        // and children take taps where they paint. Under a TapThroughScope,
+        // its empty parts let taps through.
+        decoration: TapThroughScope.of(context)
+            ? _TapThroughDecoration(
+                boxShadow: retrieveBoxShadow(node, scopedValues),
+                borderRadius: getBorderRadius(node),
+              )
+            : BoxDecoration(
+                boxShadow: retrieveBoxShadow(node, scopedValues),
+                borderRadius: getBorderRadius(node),
+              ),
         child: child,
       ),
     );
   }
+}
+
+/// A [BoxDecoration] that takes no taps itself.
+class _TapThroughDecoration extends BoxDecoration {
+  const _TapThroughDecoration({super.boxShadow, super.borderRadius});
+
+  @override
+  bool hitTest(Size size, Offset position, {TextDirection? textDirection}) =>
+      false;
 }
 
 List<Widget> wrapWithInkWell(
@@ -852,6 +869,12 @@ Widget buildFill(
         }
       }
 
+      if (paint.saturation != 1) {
+        child = ColorFiltered(
+          colorFilter: ColorFilter.matrix(saturationMatrix(paint.saturation)),
+          child: child,
+        );
+      }
       if (modifiedOpacity != 1) {
         child = Opacity(opacity: modifiedOpacity, child: child);
       }
@@ -862,6 +885,20 @@ Widget buildFill(
     case PaintType.emoji:
       return const SizedBox.shrink();
   }
+}
+
+/// A color matrix that scales color saturation by [saturation]: 1 keeps the
+/// colors, 0 leaves grey at each pixel's luminance (Rec. 709 weights).
+List<double> saturationMatrix(double saturation) {
+  const double r = 0.2126, g = 0.7152, b = 0.0722;
+  final double s = saturation;
+  final double i = 1 - s;
+  return <double>[
+    r * i + s, g * i, b * i, 0, 0, //
+    r * i, g * i + s, b * i, 0, 0, //
+    r * i, g * i, b * i + s, 0, 0, //
+    0, 0, 0, 1, 0, //
+  ];
 }
 
 class RelativeTransform {

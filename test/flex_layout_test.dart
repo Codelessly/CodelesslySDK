@@ -162,6 +162,26 @@ Future<void> everywhere(
 }
 
 void main() {
+  testWidgets(
+    'a row aligned to baselines lays out (it needs a text baseline)',
+    (tester) async {
+      final a = rect('a', '', width: 40, height: 30);
+      final b = rect('b', '', width: 40, height: 10);
+      final row = flex(
+        'row',
+        kRootNode,
+        [a, b],
+        type: RowColumnType.row,
+        width: 200,
+        height: 40,
+        crossAxisAlignment: CrossAxisAlignmentC.baseline,
+      );
+      await everywhere(tester, row, [a, b], (sizes, screen, host) {
+        expect(sizes['a'], const Size(40, 30));
+      });
+    },
+  );
+
   testWidgets('a shrinkWrap row with an expanded child inside a row (E1, A7)', (
     tester,
   ) async {
@@ -806,4 +826,117 @@ void main() {
       }, decorator: decorator);
     });
   }
+
+  group('a squeezable shrinkWrap child (loose Flexible)', () {
+    TextNode label(String id, String characters, {bool squeezable = false}) =>
+        TextNode(
+          id: id,
+          name: id,
+          basicBoxLocal: NodeBox(0, 0, 120, 10),
+          horizontalFit: SizeFit.shrinkWrap,
+          verticalFit: SizeFit.shrinkWrap,
+          characters: characters,
+          maxLines: 1,
+          overflow: TextOverflowC.ellipsis,
+          textMixedProps: [
+            StartEndProp(start: 0, end: characters.length, fontSize: 10),
+          ],
+        )..squeezable = squeezable;
+
+    RenderParagraph paragraphOf(WidgetTester tester, String characters) =>
+        tester.renderObject(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is RichText && widget.text.toPlainText() == characters,
+          ),
+        );
+
+    // A name and its count in a 200 wide row; the test font is 10 px a
+    // character.
+    Future<void> pumpRow(WidgetTester tester, String characters, Size screen) {
+      final name = label('name', characters, squeezable: true);
+      final count = label('count', 'x3');
+      final row = flex(
+        'row',
+        kRootNode,
+        [name, count],
+        type: RowColumnType.row,
+        width: 200,
+        height: 10,
+      );
+      return pump(tester, row, [name, count], screen: screen, host: Host.loose);
+    }
+
+    for (final screen in screens) {
+      testWidgets('hugs a short name and ellipsizes a long one at '
+          '${screen.width.toInt()}', (tester) async {
+        await pumpRow(tester, 'Ann', screen);
+        final RenderParagraph short = paragraphOf(tester, 'Ann');
+        expect(short.size.width, 30);
+        expect(short.didExceedMaxLines, isFalse);
+        expect(
+          tester.getTopLeft(find.text('x3')).dx,
+          tester.getTopRight(find.text('Ann')).dx,
+        );
+
+        const String long = 'Bartholomew Montgomeryfitzgerald';
+        await pumpRow(tester, long, screen);
+        final RenderParagraph name = paragraphOf(tester, long);
+        // The name gives up what the count needs, and ellipsizes.
+        expect(name.size.width, 180);
+        expect(name.didExceedMaxLines, isTrue);
+        expect(paragraphOf(tester, 'x3').size.width, 20);
+        expect(
+          tester.getTopRight(find.text('x3')).dx,
+          tester.getTopRight(rectOf('row')).dx,
+        );
+      });
+    }
+
+    // A dialog body: a header and a card that is as tall as its content, up
+    // to the height the column has left.
+    testWidgets('a card hugs its content up to the room left', (tester) async {
+      for (final int items in [1, 6]) {
+        final header = rect('header', '', width: 300, height: 50);
+        final children = [
+          for (int i = 0; i < items; i++)
+            rect('item$i', '', width: 300, height: 100),
+        ];
+        final card = flex(
+          'card',
+          '',
+          children,
+          type: RowColumnType.column,
+          width: 300,
+          height: 100,
+          verticalFit: SizeFit.shrinkWrap,
+          isScrollable: true,
+        )..squeezable = true;
+        final column = flex(
+          'column',
+          kRootNode,
+          [header, card],
+          type: RowColumnType.column,
+          width: 300,
+          height: 400,
+        );
+        for (final screen in screens) {
+          final sizes = await pump(
+            tester,
+            column,
+            [header, card, ...children],
+            screen: screen,
+            host: Host.loose,
+          );
+          expect(sizes['column'], const Size(300, 400));
+          expect(
+            sizes['card'],
+            Size(300, items == 1 ? 100 : 350),
+            reason: '$items items at $screen',
+          );
+          expect(sizes['item0'], const Size(300, 100));
+        }
+      }
+    });
+  });
 }
