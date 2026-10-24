@@ -5,6 +5,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:rfc_6901/rfc_6901.dart';
@@ -152,7 +153,23 @@ class FunctionsRepository {
         return runCloudData(context, action as CloudDataAction);
       case ActionType.cloudBatch:
         return runCloudBatch(context, action as CloudBatchAction);
+      case ActionType.copyToClipboard:
+        return copyToClipboard(context, action as CopyToClipboardAction);
     }
+  }
+
+  /// Copies the text of [action], its variables substituted.
+  static Future<bool> copyToClipboard(
+    BuildContext context,
+    CopyToClipboardAction action,
+  ) async {
+    final String text = PropertyValueDelegate.substituteVariables(
+      action.text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: ActionChain.scopedValuesOf(context),
+    );
+    await Clipboard.setData(ClipboardData(text: text));
+    return true;
   }
 
   /// How long [action] waits: its [DelayAction.duration] formula when that

@@ -1836,6 +1836,9 @@ extension ActionModelExt on ActionModel {
         };
       case ActionType.delay:
         return {};
+      case ActionType.copyToClipboard:
+        strings.add((this as CopyToClipboardAction).text);
+        return _namesIn(strings, includePredefined);
       case ActionType.cloudData:
         final CloudDataAction action = this as CloudDataAction;
         strings.addAll([
