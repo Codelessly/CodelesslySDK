@@ -188,14 +188,19 @@ class _ToastViewState extends State<_ToastView> {
       decoration: TextDecoration.none,
     );
 
+    final Color? accent = action.accentColor?.toFlutterColor();
     Widget toast = Container(
-      constraints: const BoxConstraints(minHeight: 44, maxWidth: 560),
+      constraints: BoxConstraints(minHeight: 44, maxWidth: action.maxWidth),
       padding: EdgeInsets.fromLTRB(18, 10, hasButton ? 8 : 18, 10),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(
-          hasButton ? theme.buttonRadius.clamp(8, 999) : 999,
+          action.cornerRadius ??
+              (hasButton ? theme.buttonRadius.clamp(8, 999) : 999),
         ),
+        border: accent == null
+            ? null
+            : BorderDirectional(start: BorderSide(color: accent, width: 4)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x33000000),
