@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -490,17 +491,10 @@ class FunctionsRepository {
       await Navigator.maybePop(context, parsedParams);
     } else {
       // Check if a layout exists for the action's [destinationId].
-      final String? layoutId =
-          effectiveCodelessly
-              .dataManager
-              .publishModel
-              ?.layouts[action.destinationId]
-              ?.id ??
-          effectiveCodelessly.dataManager.publishModel?.layouts.values
-              .firstWhereOrNull(
-                (layout) => layout.canvasIds.contains(action.destinationId),
-              )
-              ?.id;
+      final String? layoutId = resolveLayoutIdForCanvas(
+        effectiveCodelessly.dataManager.publishModel,
+        action.destinationId,
+      );
 
       DebugLogger.instance.printInfo(
         'looking for layout with canvas id: [${action.destinationId}]',
@@ -559,25 +553,27 @@ class FunctionsRepository {
           );
         }
       } else if (action.navigationType == NavigationType.replace) {
-        await Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            settings: RouteSettings(arguments: parsedParams),
-            builder: (context) =>
-                CodelesslyWidget(controller: effectiveController),
+        // The new screen takes over the chain: the actions after this one
+        // (e.g. a toast) run with it once this screen unmounts.
+        final ActionChain? chain = ActionChain.current;
+        // Don't wait for the route's result: it only comes when the new
+        // screen pops, long after this screen is gone, and the rest of the
+        // chain would never run.
+        unawaited(
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              settings: RouteSettings(arguments: parsedParams),
+              builder: (context) {
+                final Widget page = CodelesslyWidget(
+                  controller: effectiveController,
+                );
+                if (chain == null) return page;
+                return ActionChainAdopter(chain: chain, child: page);
+              },
+            ),
           ),
         );
-
-        // Notify navigation listeners that this screen has been navigated back
-        // to, because the Navigator.push future has completed and came
-        // back to this screen.
-        if (context.mounted) {
-          effectiveCodelessly.notifyNavigationListeners(
-            context,
-            layoutId: myLayoutId,
-            canvasId: myCanvasId,
-          );
-        }
       }
     }
   }
@@ -595,18 +591,53 @@ class FunctionsRepository {
       showCloseButton: action.showCloseButton,
       presentation: action.presentation,
       alignment: action.alignment.flutterAlignment ?? Alignment.center,
+      insets: action.insets.flutterEdgeInsets,
+      maxHeightFactor: action.maxHeightFactor,
     );
+  }
+
+  /// The size canvas [canvasId] was designed at, if it is published.
+  static Size? canvasDesignSize(Codelessly codelessly, String canvasId) {
+    final BaseNode? canvas = publishedCanvas(codelessly, canvasId);
+    if (canvas == null) return null;
+    return Size(canvas.basicBoxLocal.width, canvas.basicBoxLocal.height);
+  }
+
+  /// The canvas node [canvasId], if it is published and downloaded.
+  static CanvasNode? publishedCanvas(Codelessly codelessly, String canvasId) {
+    for (final layout
+        in codelessly.dataManager.publishModel?.layouts.values ??
+            const <SDKPublishLayout>[]) {
+      final BaseNode? canvas = layout.canvases[canvasId]?[canvasId];
+      if (canvas is CanvasNode) return canvas;
+    }
+    return null;
   }
 
   /// The id of the published layout that holds the canvas [canvasId], if any.
   static String? layoutIdForCanvas(Codelessly codelessly, String canvasId) =>
-      codelessly.dataManager.publishModel?.layouts.values
-          .firstWhereOrNull((layout) => layout.canvasIds.contains(canvasId))
-          ?.id;
+      resolveLayoutIdForCanvas(codelessly.dataManager.publishModel, canvasId);
 
-  /// Shows the canvas [canvasId] as a dialog and completes with what it was
-  /// closed with: the params of the "Navigate back" action that closed it, or
-  /// null when it was dismissed.
+  /// The id of the layout of [model] that holds canvas [canvasId] (or whose
+  /// id is [canvasId]), if any.
+  ///
+  /// Layouts already downloaded are checked first. Otherwise the publish
+  /// model's index of layout canvases names it, so a destination whose
+  /// layout is not downloaded yet (a screen of another page of the project,
+  /// in an app that loads layouts on demand) still resolves: the
+  /// [CodelesslyWidget] shown for it downloads the layout.
+  static String? resolveLayoutIdForCanvas(
+    SDKPublishModel? model,
+    String canvasId,
+  ) {
+    if (model == null || canvasId.isEmpty) return null;
+    return model.resolveLayoutId(canvasId);
+  }
+
+  /// Shows the canvas [canvasId] as a dialog, a bottom sheet or a side sheet
+  /// (see [presentCanvas]) and completes with what it was closed with: the
+  /// params of the "Navigate back" action that closed it, or null when it
+  /// was dismissed.
   static Future<Object?> showLayoutDialog(
     BuildContext context, {
     required String canvasId,
@@ -616,6 +647,8 @@ class FunctionsRepository {
     bool showCloseButton = false,
     DialogPresentation presentation = DialogPresentation.dialog,
     AlignmentGeometry alignment = Alignment.center,
+    EdgeInsets insets = EdgeInsets.zero,
+    double? maxHeightFactor,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -662,9 +695,16 @@ class FunctionsRepository {
       context,
       presentation: presentation,
       alignment: alignment,
+      insets: insets,
       barrierDismissible: barrierDismissible,
       barrierColor: barrierColor,
       showCloseButton: showCloseButton,
+      maxHeightFactor: maxHeightFactor,
+      designSize: canvasDesignSize(codelessly, canvasId),
+      hugsContent: switch (publishedCanvas(codelessly, canvasId)) {
+        final CanvasNode canvas => CanvasViewport.sizesToContent(canvas),
+        null => false,
+      },
       routeSettings: RouteSettings(arguments: parsedParams),
       builder: (context) => ActionChainOpener(
         openerHosts: openerHosts,
@@ -681,41 +721,115 @@ class FunctionsRepository {
     return result;
   }
 
-  /// Opens what [builder] builds as a dialog at [alignment] or as a bottom
-  /// sheet, per [presentation] (adaptive: a sheet below 600 px wide), and
-  /// completes with the value it is closed with.
+  /// Opens what [builder] builds per [presentation] and completes with the
+  /// value it is closed with:
+  ///
+  /// * a dialog at [alignment], kept [insets] from the screen edges, at most
+  ///   [maxHeightFactor] of the screen high;
+  /// * a bottom sheet at the screen's width and the canvas's [designSize]
+  ///   height, at most [maxHeightFactor] (else 88%) of the screen (adaptive:
+  ///   a sheet below 600 px wide, a dialog otherwise);
+  /// * a side sheet sliding in from the right at the canvas's width, as tall
+  ///   as the screen less [insets].
+  ///
+  /// With [hugsContent] (the canvas hugs its height) a sheet is as tall as
+  /// its content, up to its cap; a side sheet is then centered vertically.
+  /// The canvas draws the sheet's surface (fill, corners, grab handle).
   static Future<T?> presentCanvas<T>(
     BuildContext context, {
     required WidgetBuilder builder,
     DialogPresentation presentation = DialogPresentation.dialog,
     AlignmentGeometry alignment = Alignment.center,
+    EdgeInsets insets = EdgeInsets.zero,
     bool barrierDismissible = true,
     Color? barrierColor,
     bool showCloseButton = false,
+    double? maxHeightFactor,
+    Size? designSize,
+    bool hugsContent = false,
     RouteSettings? routeSettings,
   }) {
     final bool asSheet = switch (presentation) {
-      DialogPresentation.dialog => false,
+      DialogPresentation.dialog || DialogPresentation.sideSheet => false,
       DialogPresentation.bottomSheet => true,
       DialogPresentation.adaptive =>
         (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < 600,
     };
-    Widget content(BuildContext context) => CodelesslyDialogWidget(
-      showCloseButton: showCloseButton,
-      alignment: asSheet ? Alignment.bottomCenter : alignment,
-      builder: builder,
-    );
+    if (presentation == DialogPresentation.sideSheet) {
+      return showGeneralDialog<T>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: MaterialLocalizations.of(context)
+            .modalBarrierDismissLabel,
+        barrierColor: barrierColor ?? Colors.black54,
+        routeSettings: routeSettings,
+        transitionDuration: const Duration(milliseconds: 260),
+        transitionBuilder: (context, animation, _, child) => SlideTransition(
+          position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+              .animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              ),
+          child: child,
+        ),
+        pageBuilder: (context, _, _) => SafeArea(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: insets,
+              child: CanvasSizingScope(
+                sizing: hugsContent ? CanvasSizing.design : CanvasSizing.fill,
+                child: SizedBox(
+                  width: designSize?.width ?? 420,
+                  child: Builder(builder: builder),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     if (asSheet) {
       return showModalBottomSheet<T>(
         context: context,
         useRootNavigator: false,
         isScrollControlled: true,
         isDismissible: barrierDismissible,
+        enableDrag: barrierDismissible,
         barrierColor: barrierColor,
+        // The canvas draws the sheet: its fill, corners and grab handle.
         backgroundColor: Colors.transparent,
         elevation: 0,
+        constraints: const BoxConstraints(),
         routeSettings: routeSettings,
-        builder: content,
+        builder: (context) {
+          final Size screen = MediaQuery.sizeOf(context);
+          final double cap =
+              CodelesslyDialogWidget.maxHeightFor(
+                maxHeightFactor,
+                screen.height,
+              ) ??
+              screen.height * 0.88;
+          if (hugsContent) {
+            return CanvasSizingScope(
+              sizing: CanvasSizing.design,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: screen.width,
+                  maxHeight: cap,
+                ),
+                child: Builder(builder: builder),
+              ),
+            );
+          }
+          return CanvasSizingScope(
+            sizing: CanvasSizing.fill,
+            child: SizedBox(
+              height: math.min(designSize?.height ?? double.infinity, cap),
+              child: Builder(builder: builder),
+            ),
+          );
+        },
       );
     }
     return showDialog<T>(
@@ -724,7 +838,13 @@ class FunctionsRepository {
       barrierDismissible: barrierDismissible,
       barrierColor: barrierColor,
       routeSettings: routeSettings,
-      builder: content,
+      builder: (context) => CodelesslyDialogWidget(
+        showCloseButton: showCloseButton,
+        alignment: alignment,
+        insets: insets,
+        maxHeightFactor: maxHeightFactor,
+        builder: builder,
+      ),
     );
   }
 
@@ -1840,7 +1960,170 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       ),
       RemoveDocumentSubAction removeDocumentSubAction =>
         removeDocumentFromCloud(removeDocumentSubAction, scopedValues),
+      RemoveDocumentsSubAction subAction => removeDocumentsFromCloud(
+        subAction,
+        scopedValues,
+      ),
+      SetDocumentsSubAction subAction => setDocumentsOnCloud(
+        subAction,
+        scopedValues,
+      ),
     };
+  }
+
+  /// The value [template] gives: a value as is when it is exactly one
+  /// `${...}` path or formula, else its text with variables substituted,
+  /// decoded when it is JSON (whose strings may hold paths too).
+  static Object? _valueFromTemplate(
+    String template,
+    ScopedValues scopedValues,
+  ) {
+    final String trimmed = template.trim();
+    if (trimmed.isEmpty) return null;
+    if (FormulaEvaluator.exactExpression(trimmed) != null ||
+        RegExp(r'^\$\{[^{}]+\}$').hasMatch(trimmed)) {
+      return PropertyValueDelegate.getVariableValueFromPath<Object>(
+        trimmed,
+        scopedValues: scopedValues,
+      );
+    }
+    final Object? json = tryJsonDecode(trimmed);
+    if (json is List || json is Map) {
+      return PropertyValueDelegate.substituteJsonValue(json, scopedValues);
+    }
+    return PropertyValueDelegate.substituteVariables(
+      trimmed,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
+  }
+
+  /// Document ids from [value]: a list of ids or of documents (their `id`),
+  /// JSON text of one, or ids separated by commas.
+  @visibleForTesting
+  static List<String> documentIdsOf(Object? value) {
+    if (value is String) {
+      final Object? json = tryJsonDecode(value.trim());
+      if (json is List) return documentIdsOf(json);
+      return [
+        for (final String id in value.split(','))
+          if (id.trim().isNotEmpty) id.trim(),
+      ];
+    }
+    if (value is Iterable) {
+      return [
+        for (final Object? item in value)
+          if (item is Map
+              ? item['id'] != null
+              : item != null && item.toString().trim().isNotEmpty)
+            (item is Map ? item['id'] : item).toString().trim(),
+      ];
+    }
+    if (value is Map && value['id'] != null) return [value['id'].toString()];
+    return [];
+  }
+
+  /// Removes many documents in one batched write: those [documentIds] gives,
+  /// or those matching the where filters (all of the collection when there
+  /// are none). `${result.count}` is how many were removed.
+  ///
+  /// [database] stands in for the app's cloud database, in tests.
+  static Future<bool> removeDocumentsFromCloud(
+    RemoveDocumentsSubAction subAction,
+    ScopedValues scopedValues, {
+    @visibleForTesting CloudDatabase? database,
+  }) async {
+    try {
+      final CloudDatabase? cloudDatabase =
+          database ?? scopedValues.cloudDatabase;
+      if (cloudDatabase == null) {
+        DebugLogger.instance.printInfo('Cloud storage is null.', name: name);
+        return false;
+      }
+      final String path = PropertyValueDelegate.substituteVariables(
+        subAction.path,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
+      );
+      final List<String>? ids = subAction.documentIds.trim().isEmpty
+          ? null
+          : documentIdsOf(
+              _valueFromTemplate(subAction.documentIds, scopedValues),
+            );
+      final List<CloudWhereFilter> filters = ids != null
+          ? const []
+          : resolveCloudQuery(
+              whereFilters: subAction.whereFilters,
+              orderByOperations: const [],
+              scopedValues: scopedValues,
+              nullSubstitutionMode: NullSubstitutionMode.emptyString,
+            ).filters;
+      final int removed = await cloudDatabase.removeDocuments(
+        path,
+        documentIds: ids,
+        filters: filters,
+      );
+      ActionChain.setResult({'count': removed, 'path': path});
+      return true;
+    } catch (error, stackTrace) {
+      DebugLogger.instance.printInfo(error.toString(), name: name);
+      DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
+      return false;
+    }
+  }
+
+  /// Writes a list of documents in one batched write, e.g. seed data from a
+  /// list variable. `${result.count}` is how many were written.
+  ///
+  /// [database] stands in for the app's cloud database, in tests.
+  static Future<bool> setDocumentsOnCloud(
+    SetDocumentsSubAction subAction,
+    ScopedValues scopedValues, {
+    @visibleForTesting CloudDatabase? database,
+  }) async {
+    try {
+      final CloudDatabase? cloudDatabase =
+          database ?? scopedValues.cloudDatabase;
+      if (cloudDatabase == null) {
+        DebugLogger.instance.printInfo('Cloud storage is null.', name: name);
+        return false;
+      }
+      final String path = PropertyValueDelegate.substituteVariables(
+        subAction.path,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        scopedValues: scopedValues,
+      );
+      Object? value = _valueFromTemplate(subAction.documents, scopedValues);
+      if (value is String) value = tryJsonDecode(value);
+      if (value is Map) value = [value];
+      if (value is! List) {
+        DebugLogger.instance.printInfo(
+          'Set Documents needs a list of documents, got $value.',
+          name: name,
+        );
+        return false;
+      }
+      final List<Map<String, dynamic>> documents = [
+        for (final Object? item in value)
+          if (item is Map) Map<String, dynamic>.from(item),
+      ];
+      final String idField = subAction.idField.trim().isEmpty
+          ? 'id'
+          : subAction.idField.trim();
+      final int written = await cloudDatabase.setDocuments(
+        path,
+        documents,
+        idField: idField,
+        merge: subAction.merge,
+        replaceCollection: subAction.replaceCollection,
+      );
+      ActionChain.setResult({'count': written, 'path': path});
+      return true;
+    } catch (error, stackTrace) {
+      DebugLogger.instance.printInfo(error.toString(), name: name);
+      DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
+      return false;
+    }
   }
 
   static Future<bool> addDocumentToCloud(

@@ -53,6 +53,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'loadingIndicator': PassiveLoadingIndicatorTransformer(getNode, this),
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),
+      'chart': PassiveChartTransformer(getNode, this),
       'variance': PassiveVarianceTransformer(getNode, this),
       'webView': PassiveWebViewTransformer(getNode, this),
       'listView': PassiveListViewTransformer(getNode, this),
@@ -175,10 +176,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// Returns [node] with the style properties that conditions, bound
   /// variables or formulas, or set value actions give it at runtime: `fill`
-  /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
-  /// `height`, `flex` (its share of an expanded row or column, so bars
-  /// can be sized proportionally) and `rotation` (in degrees). Returns
-  /// [node] itself when nothing changes it.
+  /// (a text's color for text nodes), `stroke`, `strokeWeight`, `opacity`,
+  /// `cornerRadius`, `padding`, `width`, `height`, `flex` (its share of an
+  /// expanded row or column, so bars can be sized proportionally) and
+  /// `rotation` (in degrees). Returns [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     T? value<T extends Object>(String property) =>
@@ -205,6 +206,11 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           for (final paint in geometry.strokes.skip(1)) paint.toJson(),
         ];
       }
+      // A selected row's border can thicken, e.g. 1.5 to 2 px.
+      final double? strokeWeight = value<double>('strokeWeight');
+      if (strokeWeight != null && strokeWeight != geometry.strokeWeight) {
+        patch['strokeWeight'] = strokeWeight < 0 ? 0.0 : strokeWeight;
+      }
     }
     if (node is TextNode) {
       // A text's fill is its color: it replaces the color of every span.
@@ -226,6 +232,21 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       if (opacity != null && opacity != node.opacity) {
         patch['opacity'] = opacity.clamp(0, 1).toDouble();
       }
+    }
+    if (node is CornerMixin) {
+      // A number rounds every corner; [tl, tr, br, bl] rounds each (a bottom
+      // sheet's top corners). See [ConversionExt.toCornerRadius].
+      final CornerRadius? radius = value<Object>('cornerRadius')
+          ?.toCornerRadius();
+      if (radius != null && radius != node.cornerRadius) {
+        patch['cornerRadius'] = radius.toJson();
+      }
+    }
+    // A number pads every side; [h, v] or [l, t, r, b] pad each.
+    final EdgeInsetsModel? padding = value<Object>('padding')
+        ?.toEdgeInsetsModel();
+    if (padding != null && padding != node.padding) {
+      patch['padding'] = padding.toJson();
     }
     final NodeBox box = node.basicBoxLocal;
     final double? width = value<double>('width');

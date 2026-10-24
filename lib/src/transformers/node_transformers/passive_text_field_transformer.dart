@@ -551,7 +551,10 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       floatingLabelBehavior: decoration.floatingLabelBehavior.toFlutter(),
       isCollapsed: isCollapsed,
       isDense: isDense,
-      contentPadding: node.padding.flutterEdgeInsets,
+      // The decoration's own content padding wins over the node's padding,
+      // which defaults to 12 x 16 for text fields: zero makes a bare input.
+      contentPadding:
+          (decoration.contentPadding ?? node.padding).flutterEdgeInsets,
       prefixIcon:
           !decoration.prefixIcon.icon.show || decoration.prefixIcon.icon.isEmpty
           ? null

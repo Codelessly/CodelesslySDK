@@ -201,6 +201,14 @@ SDKPublishUpdates _$SDKPublishUpdatesFromJson(Map json) => SDKPublishUpdates(
         ),
       ) ??
       const {},
+  layoutCanvases:
+      (json['layoutCanvases'] as Map?)?.map(
+        (k, e) => MapEntry(
+          k as String,
+          (e as List<dynamic>).map((e) => e as String).toSet(),
+        ),
+      ) ??
+      const {},
 );
 
 Map<String, dynamic> _$SDKPublishUpdatesToJson(
@@ -213,6 +221,9 @@ Map<String, dynamic> _$SDKPublishUpdatesToJson(
   'conditions': const DateTimeMapConverter().toJson(instance.conditions),
   'layoutFonts': instance.layoutFonts.map((k, e) => MapEntry(k, e.toList())),
   'layoutApis': instance.layoutApis.map((k, e) => MapEntry(k, e.toList())),
+  'layoutCanvases': instance.layoutCanvases.map(
+    (k, e) => MapEntry(k, e.toList()),
+  ),
 };
 
 SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(

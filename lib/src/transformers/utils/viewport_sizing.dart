@@ -177,6 +177,9 @@ class ViewportNodeBox extends StatelessWidget {
 /// * Scroll axis: with [itemExtent] the item fills the extent, as in the
 ///   editor. Otherwise an expanded or flexible item, which has nothing to
 ///   fill along an endless axis, takes its design extent.
+///
+/// In a wrapping list ([inWrap]) the item is not aligned across the list:
+/// it sits in its run at its own size, as [Wrap] places it.
 class ListItemBox extends StatelessWidget {
   /// The item node.
   final BaseNode item;
@@ -190,6 +193,9 @@ class ListItemBox extends StatelessWidget {
   /// The built item.
   final Widget child;
 
+  /// Whether the item is a child of a wrapping list's [Wrap].
+  final bool inWrap;
+
   /// Creates a [ListItemBox].
   const ListItemBox({
     super.key,
@@ -197,6 +203,7 @@ class ListItemBox extends StatelessWidget {
     required this.scrollDirection,
     required this.itemExtent,
     required this.child,
+    this.inWrap = false,
   });
 
   @override
@@ -217,6 +224,7 @@ class ListItemBox extends StatelessWidget {
         child: result,
       );
     }
+    if (inWrap) return result;
     return Align(
       alignment: vertical ? Alignment.topCenter : Alignment.centerLeft,
       child: result,
@@ -300,6 +308,41 @@ class DesignCellGridDelegate extends SliverGridDelegate {
       oldDelegate.mainAxisExtent != mainAxisExtent;
 }
 
+/// Whether list [node] has a known item count: bound data or a set count,
+/// and no cloud query (whose length is only known once it loads, page by
+/// page).
+bool listHasKnownItemCount(ListViewNode node) =>
+    !node.useCloudDatabase &&
+    (node.variables['data'] != null || node.properties.itemCount != null);
+
+/// Whether list [node] lays its items out in a [Wrap]: it wraps
+/// ([ListViewProperties.wrap]) and has a known item count. Such a list builds
+/// all its items and never scrolls, whatever its scroll settings. A list
+/// with an unknown count ignores [ListViewProperties.wrap] and scrolls.
+bool listWraps(ListViewNode node) =>
+    node.properties.wrap && listHasKnownItemCount(node);
+
+/// Whether list [node] builds all its items up front, as a plain [Flex] or a
+/// [Wrap] rather than a viewport: it wraps (see [listWraps]), or it doesn't
+/// scroll, hugs its items along its axis and has a known item count (bound
+/// data or a set count). Such a list builds every item either way, so it
+/// needs no viewport.
+bool listBuildsAllItems(ListViewNode node) {
+  if (listWraps(node)) return true;
+  final SizeFit mainFit = node.scrollDirection == AxisC.vertical
+      ? node.verticalFit
+      : node.horizontalFit;
+  return !node.isScrollable &&
+      mainFit == SizeFit.shrinkWrap &&
+      listHasKnownItemCount(node);
+}
+
+/// The gap between consecutive items of a wrapping list: the separator's
+/// spacing when it has one. A wrapping list draws no dividers.
+double listWrapSpacing(ListViewNode node) => node.properties.hasSeparator
+    ? math.max(0, node.properties.separatorSpacing)
+    : 0;
+
 /// Whether [node] or any node below it builds a widget that cannot report
 /// intrinsic sizes: a list, grid or page view (a viewport behind a
 /// [LayoutBuilder]), a scrolling row, column or frame (a [LayoutBuilder]
@@ -310,7 +353,7 @@ class DesignCellGridDelegate extends SliverGridDelegate {
 /// "RenderViewport does not support returning intrinsic dimensions"), so a
 /// caller that adds an intrinsic wrapper must skip it when this is true.
 bool subtreeBlocksIntrinsics(BaseNode node, GetNode getNode) {
-  if (node is ListViewNode ||
+  if ((node is ListViewNode && !listBuildsAllItems(node)) ||
       node is GridViewNode ||
       node is PageViewNode ||
       node is WebViewNode) {

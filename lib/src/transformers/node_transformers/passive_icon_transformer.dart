@@ -27,24 +27,50 @@ class PassiveIconWidget extends StatelessWidget {
   final IconNode node;
   final bool useFonts;
 
+  /// The values the icon's bindings read; by default the ones in scope
+  /// where it builds. A design canvas passes its variable defaults, which
+  /// its build context doesn't hold.
+  final ScopedValues? scopedValues;
+
   const PassiveIconWidget({
     super.key,
     required this.node,
     this.useFonts = false,
+    this.scopedValues,
   });
 
-  @override
-  Widget build(BuildContext context) {
+  /// [node]'s icon with its bound color and glyph applied: a bound or
+  /// conditional `icon` names the glyph (e.g. star or star_border by a
+  /// favorite flag), `iconColor` colors it.
+  static MultiSourceIconModel resolvedIcon(
+    IconNode node,
+    ScopedValues scopedValues,
+  ) {
     final ColorRGBA? iconColor =
         PropertyValueDelegate.getPropertyValue<ColorRGBA>(
           node,
           'iconColor',
-          scopedValues: ScopedValues.of(context),
+          scopedValues: scopedValues,
         );
-    final MultiSourceIconModel icon = iconColor == null
-        ? node.properties.icon
-        : node.properties.icon.copyWith(color: iconColor);
-    return retrieveIconWidget(icon, node.basicBoxLocal.width) ??
+    final String? glyph = PropertyValueDelegate.getPropertyValue<String>(
+      node,
+      'icon',
+      scopedValues: scopedValues,
+    );
+    MultiSourceIconModel icon = node.properties.icon;
+    if (glyph != null && icon.icon != null) {
+      icon = icon.copyWith(icon: icon.icon!.named(glyph));
+    }
+    if (iconColor != null) icon = icon.copyWith(color: iconColor);
+    return icon;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return retrieveIconWidget(
+          resolvedIcon(node, scopedValues ?? ScopedValues.of(context)),
+          node.basicBoxLocal.width,
+        ) ??
         SizedBox(
           width: node.basicBoxLocal.width,
           height: node.basicBoxLocal.height,
