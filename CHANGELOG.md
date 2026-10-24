@@ -29,7 +29,7 @@
 - The rest of an action chain runs after a replace navigation.
 - Batch cloud writes: `removeDocuments` and `setDocuments` commit in
   Firestore batches of up to 500.
-- Toasts: action color, close button, corner radius, font size and a bound
+- Toasts: action color, close button, corner radius, font size, family and weight and a bound
   offset; without their own font they use the app's text style.
 - Text fields use their decoration's `contentPadding`.
 
