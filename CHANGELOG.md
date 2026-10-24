@@ -19,6 +19,9 @@ Requires codelessly_api 6.3.0.
 - Key Down reactions on screens, with `${result.key}` and modifiers.
 - Show dialog as a popover menu next to the node that opened it, or as a
   full height bottom sheet whose canvas scrolls its own content.
+- Copy to Clipboard actions copy their text, variables substituted.
+- A show dialog popover with an end alignment lines up with its anchor's
+  right edge.
 
 ### Formulas and variables
 
@@ -26,6 +29,11 @@ Requires codelessly_api 6.3.0.
 - `auth` reads as signed out where there is no app user (design canvases
   and previews).
 - A computed text that gives nothing shows nothing.
+- A formula that gives empty text shows nothing on the design canvas.
+
+### Layout fixes
+
+- A freeform child is placed at its bound width and height.
 
 ## 8.3.0
 
