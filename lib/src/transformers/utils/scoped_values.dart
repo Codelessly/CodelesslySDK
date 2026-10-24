@@ -121,10 +121,15 @@ class ScopedValues {
     screenSize = MediaQuery.maybeSizeOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     holdProgress = HoldProgressProvider.maybeOf(context);
+    final instance = context.read<Codelessly?>();
+    // Screens the app navigates to carry their parameters; the first screen
+    // shows in the host's route and takes them from the app's link.
     routeParams =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
+        (instance ?? Codelessly.instance).linkParamsFor(
+          codelesslyContext?.layoutID,
+        ) ??
         {};
-    final instance = context.read<Codelessly?>();
     _appUser = null;
     _instanceRef = instance == null ? null : WeakReference(instance);
   }

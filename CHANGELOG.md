@@ -1,5 +1,13 @@
 ## Unreleased
 
+### Layout
+
+- Row/column `spacing`, and `wrap` with `runSpacing` (`CodelesslyWrap`).
+  Children hidden by a visibility formula take no space and no gap.
+- `flex` and `rotation` can be bound to data like fill, opacity and size.
+- An expanded child whose bound `flex` is 0 takes no space, where it used to
+  keep a sliver.
+
 ### Signing
 
 - Signature nodes take a signature by finger, pen or mouse and write its
@@ -7,15 +15,11 @@
   `changed`. Setting the variable redraws the box: `[]` clears it, and a
   saved signature replays it. Read-only boxes only show.
 - The hold trigger runs its actions once the node has been held for its
-  duration. Letting go or moving off drains it. While it is held, the nodes
-  inside read the progress, 0 to 1, as `${hold}`, to fill a bar or change a
-  label.
-- The hold progress reaches the held node's own properties as well as
-  the nodes inside it.
+  duration. Letting go or moving off drains it. While it is held, the node
+  and the nodes inside read the progress, 0 to 1, as `${hold}`, to fill a
+  bar or change a label.
 - `strokeWeight` can be bound, set by a condition or changed by an action,
   for a border that thickens when picked.
-- An expanded child whose bound `flex` is 0 takes no space, where it used to
-  keep its design size.
 
 ### Dialogs
 
@@ -27,16 +31,6 @@
   the screen), a sheet on mobile and a dialog on larger screens, or full
   screen. `CanvasSizing.sheet` sizes a canvas for a sheet.
 
-### Layout
-
-- A row or column with `wrap` builds a `Wrap`: its alignment places
-  children within and across runs, `spacing` and `runSpacing` set the gaps,
-  and expanded children take their own size. A child hidden at runtime
-  leaves no gap.
-
-- An expanded child's `flex` can be bound to data or set by a condition, so
-  bars share a row by value (a gauge, a progress split).
-
 ### Icons
 
 - An icon's `iconName` can be bound to data, set by a condition or changed by
@@ -44,17 +38,36 @@
   icon each list item asks for; a Material Icon becomes the symbol of the
   same style.
 
-### Formulas
+### Formulas and variables
 
-- Record functions build and change lists and maps, which formulas couldn't
-  do because they can't contain braces: `obj`, `set`, `unset`, `merge`,
-  `append`, `prepend`, `concat`, `updateWhere`, `removeWhere`, `findIndex`,
-  `indexOf`, `slice`, `take`, `skip`, `reverse`, `first`, `last`, `range` and `newId`.
-  They return new values, so a setVariable can write a nested change back,
-  e.g. `updateWhere(logs, l => l.id == logId, l => set(l, 'crew',
-  append(l.crew, entry)))`.
-- `thousands(value, decimals)` writes a number with thousands separators,
-  such as `12,500`.
+- Computed variables: a variable holding a `${= ...}` formula is evaluated
+  when read and rebuilds what shows it when its inputs change.
+- Functions: `sqrt`, `pow`, trigonometry, `pi`, `radians`, `degrees`,
+  `clamp`, `distance` (great-circle), `first`, `last`, `slice`, `take`,
+  `skip`, `reverse`, `range`, `indexOf`, `object`, `merge`, `set`, `keys`,
+  `values`, `append`, `setAt`, `insertAt`, `removeAt`, `move`, `flatten`,
+  `compact` and `thousands`.
+- Record helpers: `obj` (the same as `object`), `unset`, `prepend`,
+  `concat`, `updateWhere`, `removeWhere`, `findIndex` and `newId`; `set`
+  also takes a list and an index, and `indexOf` and `slice` also take text.
+  They return new values, so a set variable action can write a nested
+  change back, e.g. `updateWhere(logs, l => l.id == logId, l => set(l,
+  'crew', append(l.crew, entry)))`.
+- A map's own key wins over a built-in accessor of the same name
+  (`${rig.length}` reads the field).
+
+### Links
+
+- A layout opens by the ID of one of its canvases.
+- A link to the app's first screen gives it the link's parameters
+  (`${route.k}`).
+
+### Fixes
+
+- Shadows without spread, offset or color no longer crash.
+- Image fills apply their opacity once (they painted at its square).
+- A text field's `errorText` template that comes out empty is no error.
+- List items on the design canvas show their own item's text.
 
 ## 8.2.0
 
