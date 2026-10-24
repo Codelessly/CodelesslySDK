@@ -163,13 +163,16 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       growsWithContent: node is TextNode,
     );
 
+    // An expanded axis fills the parent even when the node is aligned: a
+    // loose aligned slot would leave widgets that take their design size
+    // under loose constraints (a slider) at that size.
+    if (expands) return placement(FreeformAxisMode.fill);
     if (node.alignment.data case final AlignmentData alignment) {
       return placement(
         FreeformAxisMode.align,
         alignment: horizontal ? alignment.x : alignment.y,
       );
     }
-    if (expands) return placement(FreeformAxisMode.fill);
     if (isScrollAxis) return placement(FreeformAxisMode.start);
 
     final bool parentWraps = horizontal

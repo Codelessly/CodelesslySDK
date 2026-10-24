@@ -137,10 +137,30 @@ class PropertyValueDelegate {
 
     if (variablePath == null) return null;
 
+    // A binding that holds a plain value (`0.45`, `true`, `#FF0000`) applies
+    // like its formula form `${= 0.45}`.
+    final Object? literal = bindingLiteral(variablePath);
+    if (literal != null) return literal.typedValue<R>();
+
     return getVariableValueFromPath<R>(
       variablePath,
       scopedValues: scopedValues,
     );
+  }
+
+  /// The plain value a binding [path] holds instead of a variable path or a
+  /// formula: a number (`0.45`), a bool (`true`), a hex color (`#FF000080`,
+  /// `0xFF0000`) or an http(s) URL. Returns null for anything else, e.g. a
+  /// bare variable name, `${path}` or `${= formula}`.
+  static Object? bindingLiteral(String path) {
+    final String text = path.trim();
+    if (text.isEmpty || text.contains(r'${')) return null;
+    if (num.tryParse(text) case final num number) return number;
+    if (text == 'true') return true;
+    if (text == 'false') return false;
+    if (RegExp(r'^(#|0x)[0-9a-fA-F]{3,8}$').hasMatch(text)) return text;
+    if (RegExp(r'^https?://\S+$').hasMatch(text)) return text;
+    return null;
   }
 
   /// Substitutes variables & data paths used in given [text] with their values.
@@ -339,6 +359,20 @@ class PropertyValueDelegate {
     List<Accessor> accessors = variable.name.startsWith('api')
         ? getApiResponseAccessorsForType(VariableType.map)
         : getAccessorsForType(accessorType);
+
+    // `route.<name>` is the route parameter <name> only: a missing one is
+    // null, not a built-in like the number of parameters (`route.length`
+    // with no `length` parameter would be 0). `length(route)` counts them.
+    if (match.isPredefinedVariable &&
+        match.name == 'route' &&
+        value is Map &&
+        !match.hasAccessor) {
+      value = value[segments.removeAt(0)];
+      if (segments.isEmpty) return value?.typedValue<R>();
+      if (value == null) return null;
+      accessorType = VariableType.fromObjectType(value);
+      accessors = getAccessorsForType(accessorType);
+    }
 
     while (segments.isNotEmpty) {
       if (value == null) return null;

@@ -1217,15 +1217,47 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
     if (variableNotifier == null) return false;
 
+    // A new value that doesn't fit the variable (an empty or malformed
+    // color, a formula that throws) is reported and leaves the variable as
+    // it was; it never stops the actions after this one.
+    try {
+      final Object? updatedValue = _setVariableValue(
+        action,
+        variableNotifier.value,
+        scopedValues,
+      );
+      variableNotifier.set(
+        variableNotifier.value.copyWith(value: updatedValue),
+        notify: notify,
+      );
+      return true;
+    } catch (e, stackTrace) {
+      ErrorLogger.instance.captureException(
+        e,
+        message:
+            'Set variable ${action.variable.name} to "${action.newValue}" '
+            'failed',
+        type: 'action_failed',
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
+  }
+
+  static Object? _setVariableValue(
+    SetVariableAction action,
+    VariableData variable,
+    ScopedValues scopedValues,
+  ) {
     String newValue = substituteNewValue(
       action.newValue,
-      variableNotifier.value.type,
+      variable.type,
       scopedValues,
     );
 
-    Object? currentValue = variableNotifier.value.getValue();
+    Object? currentValue = variable.getValue();
 
-    final Object? updatedValue = switch (variableNotifier.value.type) {
+    return switch (variable.type) {
       VariableType.text || VariableType.choice => newValue,
       VariableType.image => newValue,
       VariableType.color => ColorRGBA.fromHex(newValue),
@@ -1258,13 +1290,6 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         scopedValues,
       ),
     };
-
-    final VariableData updatedVariable = variableNotifier.value.copyWith(
-      value: updatedValue,
-    );
-
-    variableNotifier.set(updatedVariable, notify: notify);
-    return true;
   }
 
   /// Sets given [value] for given [id] to a variable from
@@ -1293,6 +1318,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     required BaseNode node,
     required String property,
     required String value,
+    Object? typedValue,
   }) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
 
@@ -1312,15 +1338,89 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     if (match.name != match.fullPath &&
         (propertyNotifier.value.type == VariableType.map ||
             propertyNotifier.value.type == VariableType.list)) {
-      // TODO: support sub path on the variable?
-      // sub path on the variable
-      propertyNotifier.value = propertyNotifier.value.copyWith(value: value);
+      // Bound to a part of the variable (`${draft.length}`,
+      // `${stops[2].name}`): write there and keep the rest.
+      final List<Object>? keys = pathKeys(
+        match.fullPath.substring(match.name.length),
+      );
+      if (keys == null || keys.isEmpty) return false;
+      final Object? updated = setAtPath(
+        propertyNotifier.value.getValue(),
+        keys,
+        typedValue ?? value,
+      );
+      if (updated == null) return false;
+      propertyNotifier.value = propertyNotifier.value.copyWith(value: updated);
       return true;
     }
 
     propertyNotifier.value = propertyNotifier.value.copyWith(value: value);
 
     return true;
+  }
+
+  /// The keys of a variable sub [path] such as `.length`, `.stops[2].name`
+  /// or `['a key']`: strings for map keys, ints for list indexes. Null when
+  /// [path] isn't one.
+  @visibleForTesting
+  static List<Object>? pathKeys(String path) {
+    final RegExp segment = RegExp(
+      r'''^(?:\.([^.\[\]]+)|\[(\d+)\]|\[['"]([^'"\]]*)['"]\])''',
+    );
+    final List<Object> keys = [];
+    String rest = path.trim();
+    while (rest.isNotEmpty) {
+      final RegExpMatch? m = segment.firstMatch(rest);
+      if (m == null) return null;
+      keys.add(m[1] ?? (m[2] != null ? int.parse(m[2]!) : m[3]!));
+      rest = rest.substring(m[0]!.length);
+    }
+    return keys;
+  }
+
+  /// A copy of [target] (a map or list, nested) with [value] at [keys],
+  /// creating missing maps on the way. A list index may be one past the end
+  /// (appends). Null when a key doesn't fit the value it indexes.
+  @visibleForTesting
+  static Object? setAtPath(Object? target, List<Object> keys, Object? value) {
+    if (keys.isEmpty) return value;
+    final Object key = keys.first;
+    final List<Object> rest = keys.sublist(1);
+    // Text typed into a field bound to a number keeps it a number.
+    Object? leaf(Object? old) =>
+        old is num && value is String ? num.tryParse(value) ?? value : value;
+    if (rest.isEmpty) {
+      if (target is List && key is int) {
+        if (key < 0 || key > target.length) return null;
+        final List<Object?> list = [...target];
+        key < list.length ? list[key] = leaf(list[key]) : list.add(value);
+        return list;
+      }
+      if (target is Map || target == null) {
+        final Map map = target as Map? ?? {};
+        return {...map, key.toString(): leaf(map[key.toString()])};
+      }
+      return null;
+    }
+    if (target is List && key is int) {
+      if (key < 0 || key > target.length) return null;
+      final Object? child = setAtPath(
+        key < target.length ? target[key] : null,
+        rest,
+        value,
+      );
+      if (child == null && rest.isNotEmpty) return null;
+      final List<Object?> list = [...target];
+      key < list.length ? list[key] = child : list.add(child);
+      return list;
+    }
+    if (target is Map || target == null) {
+      final Map map = target as Map? ?? {};
+      final Object? child = setAtPath(map[key.toString()], rest, value);
+      if (child == null && rest.isNotEmpty) return null;
+      return {...map, key.toString(): child};
+    }
+    return null;
   }
 
   /// Sets given [value] to given [property] of given [node] as node value from
@@ -1368,6 +1468,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
           node: node,
           property: property,
           value: value.toString(),
+          typedValue: value,
         ) ||
         setNodeValue(context, node: node, property: property, value: value);
   }

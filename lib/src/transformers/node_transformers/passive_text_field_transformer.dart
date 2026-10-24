@@ -186,12 +186,6 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    focusNode.addListener(onFocusChanged);
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
@@ -268,12 +262,6 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     controller.dispose();
     focusNode.dispose();
     super.dispose();
-  }
-
-  void onFocusChanged() {
-    if (!focusNode.hasFocus) {
-      widget.onSubmitted?.call(context, controller.text);
-    }
   }
 
   @override
@@ -359,10 +347,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       ),
       onTap: () => widget.onTap?.call(context, controller.text),
       onChanged: (value) => widget.onChanged?.call(context, value),
+      // Keeps the focus on Enter (Flutter would unfocus on a done action),
+      // so a search field can be typed on after submitting.
       onEditingComplete: () {},
-      onFieldSubmitted: (value) {
-        // handled by the focus listener!
-      },
+      // Submitted reactions run once per Enter (the keyboard's action
+      // button), as Flutter's onSubmitted does; losing the focus (tapping a
+      // filter chip) doesn't submit.
+      onFieldSubmitted: (value) => widget.onSubmitted?.call(context, value),
       decoration: getDecoration(
         context,
         node,
@@ -440,7 +431,20 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     );
     final bool hasError =
         errorMessage != null && errorMessage.trim().isNotEmpty;
-    final Widget? errorText = !hasError
+    // With showErrorText off, an error only swaps in the error borders: the
+    // field is given no error (which would add its line), and its normal
+    // borders become the error ones.
+    final bool errorLine = hasError && decoration.showErrorText;
+    final bool errorBordersOnly = hasError && !decoration.showErrorText;
+    // The fill can be bound to data: `variables['fillColor']`.
+    final ColorRGBA fillColor =
+        PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+          node,
+          'fillColor',
+          scopedValues: scopedValues,
+        ) ??
+        decoration.fillColor;
+    final Widget? errorText = !errorLine
         ? null
         : buildText(
             context,
@@ -569,15 +573,23 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         decoration.counterStyle,
       ),
       filled: decoration.filled,
-      fillColor: decoration.fillColor.toFlutterColor(),
+      fillColor: fillColor.toFlutterColor(),
       focusColor: decoration.focusColor.toFlutterColor(),
       hoverColor: decoration.hoverColor.toFlutterColor(),
       errorBorder: getInputBorder(decoration.errorBorder),
-      focusedBorder: getInputBorder(decoration.focusedBorder),
+      focusedBorder: getInputBorder(
+        errorBordersOnly
+            ? decoration.focusedErrorBorder
+            : decoration.focusedBorder,
+      ),
       focusedErrorBorder: getInputBorder(decoration.focusedErrorBorder),
       disabledBorder: getInputBorder(decoration.disabledBorder),
-      enabledBorder: getInputBorder(decoration.enabledBorder),
-      border: getInputBorder(decoration.border),
+      enabledBorder: getInputBorder(
+        errorBordersOnly ? decoration.errorBorder : decoration.enabledBorder,
+      ),
+      border: getInputBorder(
+        errorBordersOnly ? decoration.errorBorder : decoration.border,
+      ),
       enabled: decoration.enabled,
       semanticCounterText: decoration.semanticCounterText,
       alignLabelWithHint: decoration.alignLabelWithHint,

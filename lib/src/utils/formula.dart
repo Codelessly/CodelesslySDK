@@ -26,7 +26,10 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    newline and a tab (any other `\x` stays as written), so
 ///    `'Doesn\'t fit'` and `"Doesn't fit"` both read Doesn't fit.
 ///  - variable paths like `storage.cart.length` or `item.price`, resolved with
-///    the same rules as `${path}`, followed by `[index]` or `.key`.
+///    the same rules as `${path}`, followed by `[index]` or `.key`. In an
+///    action that a widget's trigger runs (a slider's, switch's or text
+///    field's changed or submitted), the predefined `value` is that widget's
+///    new value: `${value}`, `${= round(value) * 2}`.
 ///  - `+ - * / %`, comparisons `== != < <= > >=`, `&& || !` and
 ///    `condition ? a : b`. `+` joins text when either side is text.
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
@@ -397,8 +400,16 @@ class FormulaEvaluator {
       'thousands(value, decimals)',
       'thousands(1094) → 1,094',
     ),
-    FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
-    FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
+    FormulaFunctionDoc(
+      'number',
+      'number(value)',
+      'number("42") → 42; a missing or blank value → null (0 in arithmetic)',
+    ),
+    FormulaFunctionDoc(
+      'text',
+      'text(value)',
+      "text(42) → \"42\"; a missing value → '' (never 'null')",
+    ),
     FormulaFunctionDoc(
       'isEmpty',
       'isEmpty(text or list)',
@@ -1133,7 +1144,13 @@ final Map<String, _Function> _functions = {
     );
     return '${n < 0 ? '-' : ''}$whole${parts.length > 1 ? '.${parts[1]}' : ''}';
   },
-  'number': (a) => _toNum(_arg(a, 0)),
+  // A missing or blank value isn't a number: null (shown as nothing; still
+  // 0 in arithmetic), so `number(route.nights) == null` spots a missing one.
+  'number': (a) => switch (_arg(a, 0)) {
+    null => null,
+    final String s when s.trim().isEmpty => null,
+    final value => _toNum(value),
+  },
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
   'isNotEmpty': (a) => _truthy(_functions['length']!(a)),

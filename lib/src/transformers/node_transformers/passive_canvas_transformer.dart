@@ -829,14 +829,44 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     if (actionContext == null) return;
     // Notifies: the canvas has built by now, so widgets bound to a variable
     // an action sets (a form prefilled on load) must rebuild.
-    final future = FunctionsRepository.performAction(actionContext, action);
+    // A failing load action is reported and the ones after it still run:
+    // they are independent set-ups (prefills, loads), and a throw here
+    // would otherwise end the chain with nothing but a console error.
+    final FutureOr future;
+    try {
+      future = FunctionsRepository.performAction(actionContext, action);
+    } catch (e, stackTrace) {
+      _reportLoadActionError(action, e, stackTrace);
+      executeActionAt(index + 1, actions);
+      return;
+    }
 
-    if (future is! Future || action.nonBlocking) {
+    if (future is! Future) {
+      executeActionAt(index + 1, actions);
+      return;
+    }
+    final Future<void> done = future.then<void>(
+      (_) {},
+      onError: (Object e, StackTrace stackTrace) =>
+          _reportLoadActionError(action, e, stackTrace),
+    );
+    if (action.nonBlocking) {
       executeActionAt(index + 1, actions);
     } else {
-      future.whenComplete(() => executeActionAt(index + 1, actions));
+      done.whenComplete(() => executeActionAt(index + 1, actions));
     }
   }
+
+  void _reportLoadActionError(
+    ActionModel action,
+    Object error,
+    StackTrace stackTrace,
+  ) => ErrorLogger.instance.captureException(
+    error,
+    message: 'Load action ${action.type.name} failed',
+    type: 'action_failed',
+    stackTrace: stackTrace,
+  );
 
   @override
   Widget build(BuildContext context) {
