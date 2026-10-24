@@ -7,6 +7,8 @@
   `changed` trigger with the index.
 - Repeating and mirrored linear, radial and sweep gradients.
 - A node's `pulse` fades its opacity in a loop (`PulseOpacity`).
+- Rectangular slider thumbs (`RectSliderThumbShape`) with a border and a
+  grip line.
 - `pointerDown` and `pointerUp` reactions fire (a cancelled pointer counts
   as up), so a press and hold can start on down and stop on release.
 - A dialog whose canvas holds a responsive layout fills the screen and
