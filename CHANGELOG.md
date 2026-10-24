@@ -30,6 +30,10 @@ Needs codelessly_api 6.2.0.
 
 ### Fixes
 
+- Rows with baseline cross-axis alignment render (they failed Flutter's
+  textBaseline assertion).
+- A shadow's spread grows a rounded box's corners with it, so a glow around
+  a dot stays round (`SpreadShadowPainter`).
 - A text field's label, error or affix text made of variables shows nothing
   when it comes out empty, so an empty error no longer marks the field.
 
