@@ -1,4 +1,6 @@
-## Unreleased
+## 8.3.0
+
+Requires codelessly_api 6.2.0.
 
 ### Layout
 
@@ -14,7 +16,10 @@
   `clamp`, `distance` (great-circle), `first`, `last`, `slice`, `take`,
   `skip`, `reverse`, `range`, `indexOf`, `object`, `merge`, `set`, `keys`,
   `values`, `append`, `setAt`, `insertAt`, `removeAt`, `move`, `flatten`,
-  `compact` and `thousands`.
+  `compact` and `thousands`; also `obj`, `concat`, `daysInMonth`,
+  `padLeft`, `padRight`, `substring`, `split`, `replace`, `coalesce`,
+  `formatNumber` and `matches` (regular expressions). `money` takes a digit
+  count.
 - A map's own key wins over a built-in accessor of the same name
   (`${rig.length}` reads the field).
 
@@ -24,12 +29,35 @@
 - A link to the app's first screen gives it the link's parameters
   (`${route.k}`).
 
+### Rendering
+
+- Linear gradients with `gradientRepeatEvery` repeat at a fixed pixel
+  period (`RepeatingGradientTransform`).
+- Arc progress bars (gauges) with ticks, needle and zone bands
+  (`ArcProgressPainter`).
+- Dialog canvases open as bottom sheets, adaptively (sheet below 600 px),
+  or aligned to a side or corner of the screen.
+
+### Text fields
+
+- `obscureText`, `enabled` and `readOnly` follow variables, conditions and
+  set-property actions.
+- A one-line field with a set height stays one line (it can obscure its
+  text and Enter submits it) and fills its height through its decoration.
+- Prefix and suffix icon constraints apply when set.
+
+### Actions
+
+- Delay actions wait as long as their `duration` formula says.
+
 ### Fixes
 
 - Shadows without spread, offset or color no longer crash.
 - Image fills apply their opacity once (they painted at its square).
 - A text field's `errorText` template that comes out empty is no error.
 - List items on the design canvas show their own item's text.
+- An API document without a directory no longer fails to load
+  (`HttpApiData.directory` defaults to the root).
 
 ## 8.2.0
 
