@@ -36,6 +36,7 @@ Needs codelessly_api 6.2.0.
 
 ### Fixes
 
+- Image fills keep to a node's rounded corners when it doesn't clip.
 - Rows with baseline cross-axis alignment render (they failed Flutter's
   textBaseline assertion).
 - A shadow's spread grows a rounded box's corners with it, so a glow around
