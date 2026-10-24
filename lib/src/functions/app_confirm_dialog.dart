@@ -86,7 +86,7 @@ class AppConfirmDialog {
 
     Widget buildDialog(BuildContext context) => ThemedConfirmDialog(
       theme: theme,
-      presentation: action.presentation,
+      presentation: action.presentation.resolveFor(context),
       title: title,
       message: message,
       confirmLabel: confirmLabel.isEmpty ? 'OK' : confirmLabel,
@@ -98,11 +98,14 @@ class AppConfirmDialog {
       cornerRadius: action.cornerRadius,
     );
 
-    if (action.presentation != DialogPresentation.dialog) {
+    final DialogPresentation presentation = action.presentation.resolveFor(
+      context,
+    );
+    if (presentation != DialogPresentation.dialog) {
       final Object? answer = await Navigator.of(context).push<Object?>(
         LayoutPresentationRoute<Object?>(
           context: context,
-          presentation: action.presentation,
+          presentation: presentation,
           barrierDismissible: action.barrierDismissible,
           barrierColor:
               action.barrierColor?.toFlutterColor() ??
@@ -309,7 +312,8 @@ class ThemedConfirmDialog extends StatelessWidget {
         ),
         // A sheet is as wide as its route makes it; its content keeps clear
         // of the home indicator and the bottom sheet's grab handle.
-        DialogPresentation.bottomSheet => SizedBox(
+        DialogPresentation.bottomSheet ||
+        DialogPresentation.adaptive => SizedBox(
           width: double.infinity,
           child: Material(
             color: surface,

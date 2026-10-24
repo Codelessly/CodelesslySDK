@@ -128,12 +128,14 @@ class PassiveButtonWidget extends StatelessWidget {
 
     // TODO: refactor into TextUtils where it can be built without a style.
     if (settings.replaceVariablesWithSymbols) {
-      final IndexedItem? item = IndexedItemProvider.maybeOf(context);
       final List<TextSpan> spans = buttonLabelTemplateOf(node)
           .splitMap(
             variableSyntaxIdentifierRegex,
-            onMatch: (match) =>
-                VariableSpan(variable: match[0]!, node: node, item: item),
+            onMatch: (match) => VariableSpan(
+              variable: match[0]!,
+              node: node,
+              item: IndexedItemProvider.maybeOf(context),
+            ),
             onNonMatch: (text) => TextSpan(text: text),
           )
           .toList();
