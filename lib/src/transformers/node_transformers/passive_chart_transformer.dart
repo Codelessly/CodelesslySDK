@@ -669,7 +669,9 @@ class ChartPainter extends CustomPainter {
       canvas.drawRect(
         Rect.fromLTWH(nx - 1, 0, 2, bandH),
         Paint()
-          ..color = props.axisLabelColor.toFlutterColor().withValues(alpha: 1),
+          ..color = (props.nowColor ?? props.axisLabelColor)
+              .toFlutterColor()
+              .withValues(alpha: 1),
       );
     }
     canvas.drawRect(
