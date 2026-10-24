@@ -703,6 +703,19 @@ class FunctionsRepository {
             canvasId: myCanvasId,
           );
         }
+      } else if (action.navigationType == NavigationType.reset) {
+        await _resetTo(
+          context,
+          action,
+          destination: MaterialPageRoute(
+            settings: RouteSettings(arguments: parsedParams),
+            builder: (context) =>
+                CodelesslyWidget(controller: effectiveController),
+          ),
+          codelessly: effectiveCodelessly,
+          parentController: parentController,
+          scopedValues: effectiveScopedValues,
+        );
       } else if (action.navigationType == NavigationType.replace) {
         // The new screen takes over the chain: the actions after this one
         // (e.g. a toast) run with it once this screen unmounts.
@@ -727,6 +740,49 @@ class FunctionsRepository {
         );
       }
     }
+  }
+
+  /// [NavigationType.reset]: clears the navigator's history and shows
+  /// [destination], with the action's base screen beneath it when it has
+  /// one, as `pushNamedAndRemoveUntil` does: going back from [destination]
+  /// opens the base screen, and going back from there leaves the app.
+  static Future<void> _resetTo(
+    BuildContext context,
+    NavigationAction action, {
+    required Route<void> destination,
+    required Codelessly codelessly,
+    required CodelesslyWidgetController parentController,
+    required ScopedValues scopedValues,
+  }) async {
+    final NavigatorState navigator = Navigator.of(context);
+    final String? baseId = action.baseDestinationId;
+    Route<void>? base;
+    if (baseId != null && baseId.isNotEmpty) {
+      final String? baseLayoutId = layoutIdForCanvas(codelessly, baseId);
+      if (baseLayoutId == null) {
+        codelessly.errorLogger.captureException(
+          'Layout not found',
+          message: 'Could not find a layout with a canvas id of [$baseId]',
+          type: 'layout_not_found',
+        );
+        return;
+      }
+      final CodelesslyWidgetController baseController = parentController
+          .copyWith(layoutID: baseLayoutId, codelessly: codelessly);
+      base = MaterialPageRoute(
+        settings: RouteSettings(
+          arguments: substituteVariablesInMap(
+            action.baseParams ?? const {},
+            scopedValues,
+          ),
+        ),
+        builder: (context) => CodelesslyWidget(controller: baseController),
+      );
+    }
+    // Not awaited: these complete only when their routes pop, and the
+    // screen that ran the action is gone by then.
+    unawaited(navigator.pushAndRemoveUntil(base ?? destination, (_) => false));
+    if (base != null) unawaited(navigator.push(destination));
   }
 
   /// Shows [action]'s canvas. What its "Navigate back" passes back, e.g. the
