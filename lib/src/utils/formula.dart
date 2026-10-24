@@ -188,6 +188,11 @@ class FormulaEvaluator {
       'formatNumber(2481.64, 1) → 2,481.6',
     ),
     FormulaFunctionDoc(
+      'feetInches',
+      'feetInches(feet)',
+      'feetInches(6.67) → 6′ 8″',
+    ),
+    FormulaFunctionDoc(
       'fixed',
       'fixed(value, decimals)',
       'fixed(4.5, 2) → 4.50',
@@ -664,6 +669,16 @@ String _grouped(Object? value, Object? digits) {
   return '$whole${text.substring(dot)}';
 }
 
+/// Feet as feet and inches rounded to the inch: 6.67 -> 6′ 8″, 7 -> 7′.
+String _feetInches(Object? value) {
+  final num feet = _num(value);
+  if (feet.isNaN || feet.isInfinite) return '';
+  final int inches = (feet * 12).round();
+  final String sign = inches < 0 ? '-' : '';
+  final int f = inches.abs() ~/ 12, i = inches.abs() % 12;
+  return i == 0 ? '$sign$f′' : '$sign$f′ $i″';
+}
+
 num _round(Object? value, Object? digits) {
   final num v = _num(value);
   final int d = _num(digits ?? 0).toInt();
@@ -1045,6 +1060,7 @@ Object? _arg(List<Object?> args, int index) =>
 final Map<String, _Function> _functions = {
   'money': (a) => _money(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'formatNumber': (a) => _grouped(_arg(a, 0), _arg(a, 1)),
+  'feetInches': (a) => _feetInches(_arg(a, 0)),
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
   'round': (a) => _round(_arg(a, 0), _arg(a, 1)),
   'floor': (a) => _num(_arg(a, 0)).floor(),
