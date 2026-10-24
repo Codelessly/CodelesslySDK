@@ -1,3 +1,67 @@
+## Unreleased
+
+Needs the `codelessly_api` release after 6.2.0 (signature, loop animation,
+side sheet, confirm presentation, toast styling, `contentFit` and
+`shrinkWrapRows`).
+
+### Nodes and actions
+
+- `PassiveSignatureTransformer` draws a `SignatureNode`: strokes in
+  round-cap ink, the sign line and placeholder, the error border when its
+  `error` binding is true. A finished stroke writes all strokes to the
+  bound value and fires `changed`; setting the value to `[]` clears it.
+- Loop animations: nodes with a `loopAnimation` build inside a
+  `LoopAnimationBox` (pulse, fade, scale or spin) that `loopAnimationEnabled`
+  turns on and off without remounting, and that holds still under a
+  disabled `TickerMode` (the editor's design canvas).
+- `cursorEnter`, `cursorExit` and `hover` reactions run, through a
+  translucent `MouseRegion`.
+- Dialog canvases also open as side sheets (`DialogPresentation.sideSheet`,
+  `sheetWidth`, `LayoutPresentationRoute`), and bottom sheets take
+  `maxHeightFactor` and `showDragHandle`. What a dialog canvas passes back
+  on Navigate back becomes the chain's result.
+- `ConfirmAction.presentation`: the built-in dialog and a `dialogId` canvas
+  open as a dialog, bottom sheet, adaptively or as a side sheet, like
+  `showDialog`.
+- Toasts: `accentColor`/`accentWidth` draw a bar down the left edge,
+  `iconColor` colors the icon, `fontFamily` sets the font and
+  `cornerRadius` the corners (default still a pill).
+- A node whose `disabled` binding is true and that has no Disabled
+  interaction state of its own fades to 40 % (it already ignored taps).
+
+### Forms and formulas
+
+- A text field's boolean `error` binding shows its error borders without a
+  message.
+- Formulas: `left(text, n)`, `right(text, n)` and `toMap(list, key,
+  value)`. A lambda can take the item's index as a second parameter:
+  `map(steps, (s, i) => i == length(steps) - 1)`, also in filter, find,
+  count, any, all, sortBy, unique, sum, join and toMap.
+- `isEmpty` treats null as empty, so a text variable holding "" is empty,
+  and the `isEmpty` / `isNotEmpty` accessors of list variables work.
+
+### Layout
+
+- `FrameNode.contentFit` lays the frame's children out at its design size
+  and scales them into the frame (`ScaledContent`, a filling `FittedBox`).
+- The `parent` variable: `${parent.width}` and `${parent.height}` are the
+  size a node's parent gives it (`ParentSizeScope`), for layouts that change
+  with their container's width rather than the screen's.
+- A spacer that flexes on its parent's main axis is wrapped in its
+  `Expanded`/`Flexible` by the row or column, outside every wrapper built
+  around it, so it takes the free space like Flutter's `Spacer` also under
+  a `NodeBuildDecorator` (the editor's render canvas drew it at its design
+  size).
+- A child that fills across a row or column that hugs that axis stretches
+  to the size its other children give it (the row is measured with
+  `IntrinsicHeight` / `IntrinsicWidth`), like a card's colored edge as tall
+  as its text.
+- A `fixedCrossAxisCount` grid keeps its count at every width and divides
+  the grid's width between the cells (`DesignCellGridDelegate` is gone).
+- `GridDelegateProperties.shrinkWrapRows`: rows as tall as their tallest
+  item, built as a list of rows of `Expanded` cells in an `IntrinsicHeight`
+  (`GridViewBuilder.intrinsicRows`).
+
 ## 8.3.0
 
 Requires codelessly_api 6.2.0.

@@ -6,7 +6,13 @@ import '../../../codelessly_sdk.dart';
 class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
   PassiveSpacerTransformer(super.getNode, super.manager);
 
-  Widget buildSpacer(BaseNode node, int flex) {
+  /// The spacer's own box. In a Row or Column, a spacer that flexes on the
+  /// main axis fills what it is given there: its parent wraps everything
+  /// built for it in an [Expanded] or [Flexible] (see
+  /// [PassiveRowColumnTransformer.wrapChildWithSizeFits]), like Flutter's
+  /// [Spacer]. Where the main axis is unbounded there is nothing to share,
+  /// and it keeps its design size instead (see CodelesslyFlex and FitBox).
+  Widget buildSpacer(BaseNode node) {
     final BaseNode parentNode = getNode(node.parentID);
 
     if (parentNode is! RowColumnMixin) {
@@ -14,34 +20,22 @@ class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
     }
 
     final AxisC mainAxis = parentNode.mainAxis;
-    final SizeFit horizontalFit = node.horizontalFit;
-    final SizeFit verticalFit = node.verticalFit;
-    final SizeFit mainFit = (mainAxis == AxisC.horizontal
-        ? horizontalFit
-        : verticalFit);
+    final SizeFit mainFit = mainAxis == AxisC.horizontal
+        ? node.horizontalFit
+        : node.verticalFit;
 
-    final Widget spacerWidget;
     if (mainFit.isFlex) {
-      // Fills its share of the free space. Where the main axis is unbounded
-      // there is none, and it keeps its design size instead (see
-      // CodelesslyFlex and FitBox).
-      spacerWidget = Expanded(
-        flex: flex,
-        child: FitBox(
-          width: mainAxis.isHorizontal ? node.outerBoxLocal.width : null,
-          height: mainAxis.isVertical ? node.outerBoxLocal.height : null,
-          fillWidth: mainAxis.isHorizontal,
-          fillHeight: mainAxis.isVertical,
-        ),
-      );
-    } else {
-      spacerWidget = SizedBox(
-        width: mainAxis.isVertical ? null : node.outerBoxLocal.width,
-        height: mainAxis.isHorizontal ? null : node.outerBoxLocal.height,
+      return FitBox(
+        width: mainAxis.isHorizontal ? node.outerBoxLocal.width : null,
+        height: mainAxis.isVertical ? node.outerBoxLocal.height : null,
+        fillWidth: mainAxis.isHorizontal,
+        fillHeight: mainAxis.isVertical,
       );
     }
-
-    return spacerWidget;
+    return SizedBox(
+      width: mainAxis.isVertical ? null : node.outerBoxLocal.width,
+      height: mainAxis.isHorizontal ? null : node.outerBoxLocal.height,
+    );
   }
 
   @override
@@ -50,6 +44,6 @@ class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    return buildSpacer(node, node.flex);
+    return buildSpacer(node);
   }
 }
