@@ -22,6 +22,12 @@ Needs codelessly_api 6.2.0.
 - A node's `rotationDegrees` can be bound to a variable or formula.
 - Hover, cursor enter and cursor exit reactions run.
 
+### Motion
+
+- Nodes with `transitionMs` ease opacity and draw-scale changes in.
+- `drawScale` (bindable) draws a node larger or smaller around its center.
+- `pulse` loops a node's opacity and scale (`NodePulse`).
+
 ### Dialogs
 
 - Show-dialog presentations: bottom sheet, adaptive and popover.

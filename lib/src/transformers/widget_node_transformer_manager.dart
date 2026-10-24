@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:math' hide log;
 import 'dart:typed_data';
+import 'dart:ui' show lerpDouble;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
@@ -51,12 +52,48 @@ abstract class WidgetNodeTransformerManager
 
   /// Convenience method to handle widget opacity.
   Widget applyWidgetOpacity(BaseNode node, Widget widget) {
-    if (node is! BlendMixin || node.opacity > 0.99) {
-      return widget;
+    final double opacity = node is BlendMixin && node.opacity < 0.99
+        ? node.opacity
+        : 1;
+    // With a transition the opacity eases in, back to full opacity too.
+    if (node.transitionMs > 0) {
+      return AnimatedOpacity(
+        opacity: opacity,
+        duration: Duration(milliseconds: node.transitionMs),
+        curve: Curves.easeOutCubic,
+        child: widget,
+      );
     }
-
-    final double opacity = node.opacity < 0.99 ? node.opacity : 1;
+    if (opacity == 1) return widget;
     return Opacity(opacity: opacity, child: widget);
+  }
+
+  /// Draws [node] at its draw scale (a `drawScale` binding wins), easing
+  /// changes in over its transition, and runs its pulse.
+  Widget applyWidgetMotion(BuildContext context, BaseNode node, Widget widget) {
+    final double scale =
+        (node.variables.containsKey('drawScale')
+            ? PropertyValueDelegate.getPropertyValue<double>(
+                node,
+                'drawScale',
+                scopedValues: ScopedValues.of(context),
+              )
+            : null) ??
+        node.drawScale;
+    if (node.transitionMs > 0) {
+      widget = AnimatedScale(
+        scale: scale,
+        duration: Duration(milliseconds: node.transitionMs),
+        curve: Curves.easeOutCubic,
+        child: widget,
+      );
+    } else if (scale != 1) {
+      widget = Transform.scale(scale: scale, child: widget);
+    }
+    if (node.pulse case final PulseModel pulse) {
+      widget = NodePulse(pulse: pulse, child: widget);
+    }
+    return widget;
   }
 
   /// Returns the visibility a condition or variable gives [node] at runtime,
@@ -648,6 +685,69 @@ class SvgIconImage extends StatelessWidget {
               errorBuilder: (context, error, stackTrace) =>
                   const SizedBox.shrink(),
             ),
+    );
+  }
+}
+
+/// Loops [child]'s opacity and scale as [pulse] describes.
+class NodePulse extends StatefulWidget {
+  const NodePulse({super.key, required this.pulse, required this.child});
+
+  final PulseModel pulse;
+  final Widget child;
+
+  @override
+  State<NodePulse> createState() => _NodePulseState();
+}
+
+class _NodePulseState extends State<NodePulse>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(vsync: this);
+
+  @override
+  void initState() {
+    super.initState();
+    _start();
+  }
+
+  @override
+  void didUpdateWidget(NodePulse oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pulse != widget.pulse) _start();
+  }
+
+  void _start() {
+    _controller
+      ..duration = Duration(milliseconds: max(1, widget.pulse.periodMs))
+      ..repeat(reverse: widget.pulse.reverse);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final PulseModel pulse = widget.pulse;
+    return AnimatedBuilder(
+      animation: _controller,
+      child: widget.child,
+      builder: (context, child) {
+        final double t = Curves.easeInOut.transform(_controller.value);
+        return Opacity(
+          opacity: lerpDouble(
+            pulse.opacityFrom,
+            pulse.opacityTo,
+            t,
+          )!.clamp(0, 1).toDouble(),
+          child: Transform.scale(
+            scale: lerpDouble(pulse.scaleFrom, pulse.scaleTo, t)!,
+            child: child,
+          ),
+        );
+      },
     );
   }
 }
