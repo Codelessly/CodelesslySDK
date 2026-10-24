@@ -270,9 +270,23 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     super.dispose();
   }
 
+  /// The text last submitted, so leaving the field right after Enter
+  /// doesn't submit the same text again.
+  String? _submittedText;
+
+  void submit() {
+    _submittedText = controller.text;
+    widget.onSubmitted?.call(context, controller.text);
+  }
+
   void onFocusChanged() {
-    if (!focusNode.hasFocus) {
-      widget.onSubmitted?.call(context, controller.text);
+    if (focusNode.hasFocus) {
+      _submittedText = null;
+      return;
+    }
+    if (widget.node.properties.submitOnUnfocus &&
+        _submittedText != controller.text) {
+      submit();
     }
   }
 
@@ -380,9 +394,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       onTap: () => widget.onTap?.call(context, controller.text),
       onChanged: (value) => widget.onChanged?.call(context, value),
       onEditingComplete: () {},
-      onFieldSubmitted: (value) {
-        // handled by the focus listener!
-      },
+      // The keyboard's action key (Enter) submits; leaving the field does
+      // too when submitOnUnfocus is on (see onFocusChanged).
+      onFieldSubmitted: (value) => submit(),
       decoration: decoration,
     );
 

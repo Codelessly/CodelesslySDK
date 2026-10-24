@@ -1,3 +1,11 @@
+## Unreleased
+
+- A fixed-count grid with `reflowColumns` off keeps its column count at
+  every width.
+- Pressing the keyboard's action key (Enter) runs a text field's submitted
+  actions; leaving the field runs them only with `submitOnUnfocus` on (the
+  default) and not again for text just submitted.
+
 ## 8.3.0
 
 Requires codelessly_api 6.2.0.

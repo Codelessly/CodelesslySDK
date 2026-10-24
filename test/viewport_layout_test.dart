@@ -285,6 +285,56 @@ void main() {
     });
   });
 
+  testWidgets('a grid that does not reflow keeps its column count', (
+    WidgetTester tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(1600, 900)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    Future<int> columnsAt(double width, {required bool reflow}) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: width,
+              height: 400,
+              child: GridViewBuilder(
+                shrinkWrap: false,
+                gridDelegate: FixedCrossAxisCountGridDelegateProperties(
+                  crossAxisCount: 7,
+                  reflowColumns: reflow,
+                ),
+                // Laid out at 1440 in the editor: 7 cells of ~205.
+                designCellExtent: 1440 / 7,
+                itemCount: 14,
+                scrollDirection: Axis.vertical,
+                reverse: false,
+                clipBehavior: Clip.none,
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.manual,
+                itemBuilder: (context, index) =>
+                    SizedBox(key: ValueKey('cell$index')),
+              ),
+            ),
+          ),
+        ),
+      );
+      final double cell = tester
+          .getSize(find.byKey(const ValueKey('cell0')))
+          .width;
+      return (width / cell).round();
+    }
+
+    expect(await columnsAt(1440, reflow: false), 7);
+    expect(await columnsAt(1200, reflow: false), 7);
+    expect(await columnsAt(390, reflow: false), 7);
+    // The default fits cells of the designed width.
+    expect(await columnsAt(1200, reflow: true), 5);
+  });
+
   group('subtreeBlocksIntrinsics', () {
     test('finds a viewport or scroll view below a node', () {
       final row = RowColumnNode(

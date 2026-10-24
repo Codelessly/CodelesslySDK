@@ -352,7 +352,8 @@ class GridViewBuilder extends StatelessWidget {
           FixedCrossAxisCountGridDelegateProperties props =>
             DesignCellGridDelegate(
               crossAxisCount: props.crossAxisCount,
-              designCellExtent: designCellExtent ?? 0,
+              // No design cell extent keeps exactly crossAxisCount columns.
+              designCellExtent: props.reflowColumns ? designCellExtent ?? 0 : 0,
               crossAxisSpacing: props.crossAxisSpacing,
               mainAxisSpacing: props.mainAxisSpacing,
               childAspectRatio: props.childAspectRatio,
