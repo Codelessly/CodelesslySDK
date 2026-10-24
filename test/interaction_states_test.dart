@@ -205,6 +205,89 @@ void main() {
     expect(harness.taps, ['tap']);
   });
 
+  double boxOpacity(WidgetTester tester) => tester
+      .widget<Opacity>(
+        find
+            .descendant(
+              of: find.byType(InteractionStatesBox),
+              matching: find.byType(Opacity),
+            )
+            .first,
+      )
+      .opacity;
+
+  testWidgets('a node disabled by a formula, with no disabled state, dims '
+      'and runs no actions', (tester) async {
+    final (:card, :dot) = cardWithDot();
+    card.variables = {'disabled': r'${= busy == "DF-3104"}'};
+    final harness = Harness();
+    final Observable<VariableData> busy = Observable(
+      VariableData(id: 'b', name: 'busy', type: VariableType.text, value: ''),
+    );
+    harness.codelesslyContext.variables['b'] = busy;
+    await harness.pump(tester, [card, dot]);
+    expect(boxOpacity(tester), 1);
+
+    busy.set(busy.value.copyWith(value: 'DF-3104'));
+    await tester.pump();
+    expect(boxOpacity(tester), InteractionStatesBox.defaultDisabledOpacity);
+    await tester.tapAt(const Offset(150, 50));
+    await tester.pumpAndSettle();
+    expect(harness.taps, isEmpty);
+
+    busy.set(busy.value.copyWith(value: ''));
+    await tester.pump();
+    expect(boxOpacity(tester), 1);
+    await tester.tapAt(const Offset(150, 50));
+    await tester.pumpAndSettle();
+    expect(harness.taps, ['tap']);
+  });
+
+  testWidgets('a node with its own disabled state does not also dim', (
+    tester,
+  ) async {
+    final (:card, :dot) = cardWithDot();
+    card.interactionStates = {
+      InteractionState.disabled: {'card': fillPatch('#808080')},
+    };
+    card.variables = {'disabled': r'${= true}'};
+    await Harness().pump(tester, [card, dot]);
+    expect(boxOpacity(tester), 1);
+    expect(colorOf(tester, 200), grey);
+  });
+
+  testWidgets('a button disabled by a formula dims and ignores taps', (
+    tester,
+  ) async {
+    final ButtonNode button = ButtonNode(
+      id: 'button',
+      name: 'Reopen',
+      basicBoxLocal: NodeBox(0, 0, 160, 48),
+      properties: ButtonProperties(label: 'Reopen'),
+      reactions: [
+        Reaction(
+          action: CallFunctionAction(name: 'tap'),
+          trigger: TriggerModel(type: TriggerType.click),
+        ),
+      ],
+    )..parentID = kRootNode;
+    button.variables['disabled'] = r'${= busy != ""}';
+    final harness = Harness();
+    harness.codelesslyContext.variables['b'] = Observable(
+      VariableData(
+        id: 'b',
+        name: 'busy',
+        type: VariableType.text,
+        value: 'DF-3104',
+      ),
+    );
+    await harness.pump(tester, [button]);
+    expect(boxOpacity(tester), InteractionStatesBox.defaultDisabledOpacity);
+    await tester.tap(find.text('Reopen'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(harness.taps, isEmpty);
+  });
+
   testWidgets('focused follows focus of an input inside the node', (
     tester,
   ) async {

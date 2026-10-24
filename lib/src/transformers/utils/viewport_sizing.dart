@@ -4,6 +4,8 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'parent_size.dart';
+
 /// Builds a scroll view. [shrinkWrap] says whether the view must size itself
 /// to its items on its scroll axis.
 typedef ViewportContentBuilder = Widget Function(
@@ -224,82 +226,6 @@ class ListItemBox extends StatelessWidget {
   }
 }
 
-/// A grid delegate for a fixed cross axis count that keeps cells at least as
-/// wide as the editor drew them.
-///
-/// The editor divides the grid's design cross extent by [crossAxisCount]. A
-/// plain [SliverGridDelegateWithFixedCrossAxisCount] divides the runtime
-/// extent instead, so a grid tuned to 4 columns at 1440 gets 90 px cells at
-/// 390 and its items, laid out for ~350 px, overflow. This delegate fits as
-/// many cells of [designCellExtent] (plus spacing) as the runtime cross
-/// extent holds, at least one, and shares the extent between them. At the
-/// design size that is exactly [crossAxisCount]; narrower screens get fewer
-/// columns and wider ones more, and a cell is never narrower than designed
-/// unless the grid itself is.
-class DesignCellGridDelegate extends SliverGridDelegate {
-  /// The column count at the design size.
-  final int crossAxisCount;
-
-  /// The cross extent of one cell at the design size. Zero or less falls
-  /// back to [crossAxisCount] at every size.
-  final double designCellExtent;
-
-  /// See [SliverGridDelegateWithFixedCrossAxisCount.mainAxisSpacing].
-  final double mainAxisSpacing;
-
-  /// See [SliverGridDelegateWithFixedCrossAxisCount.crossAxisSpacing].
-  final double crossAxisSpacing;
-
-  /// See [SliverGridDelegateWithFixedCrossAxisCount.childAspectRatio].
-  final double childAspectRatio;
-
-  /// See [SliverGridDelegateWithFixedCrossAxisCount.mainAxisExtent].
-  final double? mainAxisExtent;
-
-  /// Creates a [DesignCellGridDelegate].
-  const DesignCellGridDelegate({
-    required this.crossAxisCount,
-    required this.designCellExtent,
-    this.mainAxisSpacing = 0,
-    this.crossAxisSpacing = 0,
-    this.childAspectRatio = 1,
-    this.mainAxisExtent,
-  });
-
-  /// The column count for a runtime cross extent of [crossAxisExtent].
-  int crossAxisCountFor(double crossAxisExtent) {
-    if (!(designCellExtent > 0) || !crossAxisExtent.isFinite) {
-      return math.max(1, crossAxisCount);
-    }
-    // The epsilon keeps the design size at exactly [crossAxisCount] despite
-    // rounding in the design cell extent.
-    final double fit =
-        (crossAxisExtent + crossAxisSpacing) /
-        (designCellExtent + crossAxisSpacing);
-    return math.max(1, (fit + 1e-6).floor());
-  }
-
-  @override
-  SliverGridLayout getLayout(SliverConstraints constraints) {
-    return SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: crossAxisCountFor(constraints.crossAxisExtent),
-      mainAxisSpacing: mainAxisSpacing,
-      crossAxisSpacing: crossAxisSpacing,
-      childAspectRatio: childAspectRatio,
-      mainAxisExtent: mainAxisExtent,
-    ).getLayout(constraints);
-  }
-
-  @override
-  bool shouldRelayout(DesignCellGridDelegate oldDelegate) =>
-      oldDelegate.crossAxisCount != crossAxisCount ||
-      oldDelegate.designCellExtent != designCellExtent ||
-      oldDelegate.mainAxisSpacing != mainAxisSpacing ||
-      oldDelegate.crossAxisSpacing != crossAxisSpacing ||
-      oldDelegate.childAspectRatio != childAspectRatio ||
-      oldDelegate.mainAxisExtent != mainAxisExtent;
-}
-
 /// Whether [node] or any node below it builds a widget that cannot report
 /// intrinsic sizes: a list, grid or page view (a viewport behind a
 /// [LayoutBuilder]), a scrolling row, column or frame (a [LayoutBuilder]
@@ -319,6 +245,10 @@ bool subtreeBlocksIntrinsics(BaseNode node, GetNode getNode) {
   if (node is ScrollableMixin && node is! CanvasNode && node.isScrollable) {
     return true;
   }
+  // Scaled content and nodes that read their parent's size are built with
+  // a LayoutBuilder.
+  if (node is FrameNode && node.contentFit != null) return true;
+  if (readsParentSize(node)) return true;
   if (node is ChildrenMixin) {
     for (final String id in node.children) {
       if (subtreeBlocksIntrinsics(getNode(id), getNode)) return true;
