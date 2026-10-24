@@ -158,14 +158,31 @@ class PassiveRectangleWidget extends StatelessWidget {
       size: node.basicBoxLocal.size,
       child: Container(
         clipBehavior: getClipBehavior(node),
-        decoration: BoxDecoration(
-          boxShadow: retrieveBoxShadow(node, scopedValues),
-          borderRadius: getBorderRadius(node),
-        ),
+        // This box only clips and casts shadows; the node's fills, strokes
+        // and children take taps where they paint. Under a TapThroughScope,
+        // its empty parts let taps through.
+        decoration: TapThroughScope.of(context)
+            ? _TapThroughDecoration(
+                boxShadow: retrieveBoxShadow(node, scopedValues),
+                borderRadius: getBorderRadius(node),
+              )
+            : BoxDecoration(
+                boxShadow: retrieveBoxShadow(node, scopedValues),
+                borderRadius: getBorderRadius(node),
+              ),
         child: child,
       ),
     );
   }
+}
+
+/// A [BoxDecoration] that takes no taps itself.
+class _TapThroughDecoration extends BoxDecoration {
+  const _TapThroughDecoration({super.boxShadow, super.borderRadius});
+
+  @override
+  bool hitTest(Size size, Offset position, {TextDirection? textDirection}) =>
+      false;
 }
 
 List<Widget> wrapWithInkWell(
@@ -434,12 +451,17 @@ Gradient? retrieveGradient(PaintModel paint) {
     final radians = rotation * pi / 180;
 
     if (paint.type == PaintType.gradientLinear) {
+      final double? repeatEvery = paint.gradientRepeatEvery;
+      final bool repeats = repeatEvery != null && repeatEvery > 0;
       return LinearGradient(
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
         stops: gradientStops.map((e) => e.position).toList(),
-        transform: GradientRotation(radians),
+        tileMode: repeats ? TileMode.repeated : TileMode.clamp,
+        transform: repeats
+            ? RepeatingGradientTransform(radians, repeatEvery)
+            : GradientRotation(radians),
       );
     } else if (paint.type == PaintType.gradientRadial) {
       return RadialGradient(
@@ -467,6 +489,41 @@ Gradient? retrieveGradient(PaintModel paint) {
     );
     return null;
   }
+}
+
+/// Rotates a linear gradient by [radians] about the box center, like
+/// [GradientRotation], after squeezing one run of its stops into [period]
+/// logical pixels along its axis. With [TileMode.repeated] the stops then
+/// repeat every [period] pixels whatever the box size, e.g. even stripes.
+class RepeatingGradientTransform extends GradientTransform {
+  const RepeatingGradientTransform(this.radians, this.period);
+
+  final double radians;
+  final double period;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    // A default LinearGradient runs from the left to the right edge, so one
+    // run spans the box width. Scale it about the left edge to [period].
+    final double scale = bounds.width <= 0 ? 1 : period / bounds.width;
+    final double cx = bounds.center.dx, cy = bounds.center.dy;
+    return Matrix4.identity()
+      ..translateByDouble(cx, cy, 0, 1)
+      ..rotateZ(radians)
+      ..translateByDouble(-cx, -cy, 0, 1)
+      ..translateByDouble(bounds.left, 0, 0, 1)
+      ..scaleByDouble(scale, 1, 1, 1)
+      ..translateByDouble(-bounds.left, 0, 0, 1);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is RepeatingGradientTransform &&
+      other.radians == radians &&
+      other.period == period;
+
+  @override
+  int get hashCode => Object.hash(radians, period);
 }
 
 // from https://math.stackexchange.com/a/2888105
@@ -812,6 +869,12 @@ Widget buildFill(
         }
       }
 
+      if (paint.saturation != 1) {
+        child = ColorFiltered(
+          colorFilter: ColorFilter.matrix(saturationMatrix(paint.saturation)),
+          child: child,
+        );
+      }
       if (modifiedOpacity != 1) {
         child = Opacity(opacity: modifiedOpacity, child: child);
       }
@@ -822,6 +885,20 @@ Widget buildFill(
     case PaintType.emoji:
       return const SizedBox.shrink();
   }
+}
+
+/// A color matrix that scales color saturation by [saturation]: 1 keeps the
+/// colors, 0 leaves grey at each pixel's luminance (Rec. 709 weights).
+List<double> saturationMatrix(double saturation) {
+  const double r = 0.2126, g = 0.7152, b = 0.0722;
+  final double s = saturation;
+  final double i = 1 - s;
+  return <double>[
+    r * i + s, g * i, b * i, 0, 0, //
+    r * i, g * i + s, b * i, 0, 0, //
+    r * i, g * i, b * i + s, 0, 0, //
+    0, 0, 0, 1, 0, //
+  ];
 }
 
 class RelativeTransform {

@@ -1,47 +1,206 @@
+## Unreleased
+
+Needs the `codelessly_api` release after 6.2.0 (signature, loop animation,
+side sheet, confirm presentation, toast styling, `contentFit` and
+`shrinkWrapRows`).
+
+### Motion, triggers and lists
+
+- `NodeMotion` animates a node's `MotionModel`: transforms, 3D tilt, spin,
+  loops, entrances (from rest or `enterFrom`, replayed on `replayKey`) and
+  delays.
+- Timer and key press triggers on screens; swipe triggers (the mouse wheel
+  swipes too) and double tap on frames, rectangles, buttons, icons and text.
+- Stacked and wrapping lists; vertical, inverted and rectangular-thumb
+  sliders with bound `min`/`max`.
+
+### Formulas and variables
+
+- `ComputedVariables` helpers for editors: a computed variable's inputs,
+  cycles and preview values over default values.
+- `duration`, `seconds`, `slug`, `luminance`, `findIndex`, `sortByDesc`,
+  multi-key `sortBy`, text `indexOf`/`slice`/`take`/`skip`/`reverse`,
+  object literals and `money(v, decimals)` / `money(v, symbol, 'auto')`.
+
+### Style bindings and navigation
+
+- Effects, stroke weight, corner radius, font weight and icon bind as
+  property variables (`StyleBindings`); image fills listen to the variables
+  in their URL.
+- A screen's route is set before its load actions run, and a link's
+  parameters also set the variables they name. `CodelesslyWidget.initialScreen`.
+- A screen variable shadows an app variable of the same name in Set
+  variable; dashed strokes draw their caps, and a zero pattern no longer
+  hangs.
+
+### Nodes and actions
+
+- `PassiveSignatureTransformer` draws a `SignatureNode`: strokes in
+  round-cap ink, the sign line and placeholder, the error border when its
+  `error` binding is true. A finished stroke writes all strokes to the
+  bound value and fires `changed`; setting the value to `[]` clears it.
+- Loop animations: nodes with a `loopAnimation` build inside a
+  `LoopAnimationBox` (pulse, fade, scale or spin) that `loopAnimationEnabled`
+  turns on and off without remounting, and that holds still under a
+  disabled `TickerMode` (the editor's design canvas).
+- `cursorEnter`, `cursorExit` and `hover` reactions run, through a
+  translucent `MouseRegion`.
+- Dialog canvases also open as side sheets (`DialogPresentation.sideSheet`,
+  `sheetWidth`, `LayoutPresentationRoute`), and bottom sheets take
+  `maxHeightFactor` and `showDragHandle`. What a dialog canvas passes back
+  on Navigate back becomes the chain's result.
+- `ConfirmAction.presentation`: the built-in dialog and a `dialogId` canvas
+  open as a dialog, bottom sheet, adaptively or as a side sheet, like
+  `showDialog`.
+- Toasts: `accentColor`/`accentWidth` draw a bar down the left edge,
+  `iconColor` colors the icon, `fontFamily` sets the font and
+  `cornerRadius` the corners (default still a pill).
+- A node whose `disabled` binding is true and that has no Disabled
+  interaction state of its own fades to 40 % (it already ignored taps).
+
+### Forms and formulas
+
+- A text field's boolean `error` binding shows its error borders without a
+  message.
+- Formulas: `left(text, n)`, `right(text, n)` and `toMap(list, key,
+  value)`. A lambda can take the item's index as a second parameter:
+  `map(steps, (s, i) => i == length(steps) - 1)`, also in filter, find,
+  count, any, all, sortBy, unique, sum, join and toMap.
+- `isEmpty` treats null as empty, so a text variable holding "" is empty,
+  and the `isEmpty` / `isNotEmpty` accessors of list variables work.
+
+### Layout
+
+- `FrameNode.contentFit` lays the frame's children out at its design size
+  and scales them into the frame (`ScaledContent`, a filling `FittedBox`).
+- The `parent` variable: `${parent.width}` and `${parent.height}` are the
+  size a node's parent gives it (`ParentSizeScope`), for layouts that change
+  with their container's width rather than the screen's.
+- A spacer that flexes on its parent's main axis is wrapped in its
+  `Expanded`/`Flexible` by the row or column, outside every wrapper built
+  around it, so it takes the free space like Flutter's `Spacer` also under
+  a `NodeBuildDecorator` (the editor's render canvas drew it at its design
+  size).
+- A child that fills across a row or column that hugs that axis stretches
+  to the size its other children give it (the row is measured with
+  `IntrinsicHeight` / `IntrinsicWidth`), like a card's colored edge as tall
+  as its text.
+- A `fixedCrossAxisCount` grid keeps its count at every width and divides
+  the grid's width between the cells (`DesignCellGridDelegate` is gone).
+- `GridDelegateProperties.shrinkWrapRows`: rows as tall as their tallest
+  item, built as a list of rows of `Expanded` cells in an `IntrinsicHeight`
+  (`GridViewBuilder.intrinsicRows`).
+
+### Runtime UI, semantics, links and charts
+
+- A text's color can be bound with a `textColor` variable or formula.
+- Formulas: `range(start, end, step)` includes its end (`range(3, 7)` is
+  `[3, 4, 5, 6, 7]`; `range(n)` is still n items from 0) and steps through
+  dates in minutes; `interpolate`, `runs`, `minBy`, `maxBy`, `wallTime`, and
+  `now(offset)` / `today(offset)` at a UTC offset. `FormulaClock.pinned` lets a host pin the
+  clock they read (previews, reproducible screenshots).
+- API calls: the response (or the error) is the chain's `${result}`; query
+  parameters are sent; `onSuccess`/`onError` actions run, and with
+  `onError` a failure no longer stops the chain; the handlers still run when
+  the widget that made the call has unmounted (a dialog closed mid-load).
+  `Codelessly(client:)` takes an HTTP client.
+- Load-time API calls run in order with the canvas's other load actions.
+- A row aligned to text baselines gets a text baseline (it asserted).
+- Any node can bind `semanticLabel` and `semanticSelected` for screen
+  readers. A labelled button reads only its label and keeps its tap; a
+  labelled field or dropdown keeps its own semantics.
+- A pop with a destination goes there when there is nothing to pop.
+- Image fills honour `PaintModel.saturation` (greyscale at 0).
+- Links: a `CodelesslyRoute` path is matched against the screens' URL paths
+  (`CanvasProperties.path`, e.g. `guide/:id`) before it is read as a screen
+  id, and `Codelessly.pathOf` gives the address for a route
+  (`CanvasLocation` does the matching).
+- A line chart's axis title and readout units can be bound.
+- An expanded dropdown no longer cuts its value at its design width.
+- A toast's semantics are stable from its first frame, so its button can be
+  tapped on the web.
+- Toasts, the built-in confirm dialog and dropdown menus take the new
+  `ShowToastAction`, `ConfirmAction` and `DropdownProperties.menuStyle`
+  styling: toast action color, close button, radius, border, hard shadows,
+  fonts, icon size and per-screen-size bottom offsets; confirm dialog border,
+  shadows, fonts and outlined, shadowed buttons; and a dropdown menu drawn as
+  a card anchored under the field with a border, shadows, a highlighted
+  selected row with a check mark and per-item images (`itemImage`).
+- `FeedbackTheme` has `border`, `shadows`, `buttonBorder` and
+  `buttonShadows`; `FeedbackTheme.fromNodes` reads the outline and shadow
+  most of a layout's tappable shapes share for the confirm dialog's buttons.
+- A data-source dropdown finds its selected item by content, so a map value
+  selects the equal item.
+- Render `LineChartNode` with `PassiveLineChartTransformer` and
+  `PassiveLineChartWidget`: bands, grid, gradient area, area bands, a
+  polyline or Catmull-Rom curve, reference lines, x axis, markers, vertical
+  lines and a hover/tap/drag/arrow-key scrub cursor with a readout card.
+  `LineChartGeometry` holds the pure parts (dates, domain, interpolation,
+  Catmull-Rom control points, readout text and placement).
+- `FormulaEvaluator.formatDate` exposes the `formatDate` formula function.
+- A dialog whose canvas is responsive and holds a responsive layout (a
+  `VarianceNode` with breakpoints) fills the screen instead of keeping its
+  design size, so its variant follows the screen width and each variant
+  places itself (a full-screen sheet on mobile, a centered card on desktop).
+  Dialogs with plain fixed-size canvases are unchanged.
+- In a dialog (`TapThroughScope`), taps on parts of the layout where nothing
+  paints or reacts (a canvas without a background, an empty frame) reach the
+  barrier, so a dismissible full-screen dialog closes on them.
+- A `squeezable` node that wraps its content on a Row/Column's main axis is
+  laid out as `Flexible(fit: FlexFit.loose)`: it hugs its content and
+  shrinks to the room left when the Row/Column runs out of space.
+
 ## 8.3.0
 
-### Motion and interaction
-
-- `NodeMotion` draws a node's motion: animated transforms, spin, loops,
-  entrances (from rest or `enterFrom`, replayed when `replayKey` changes) and
-  delays.
-- Timer, key press, swipe, double tap and hover triggers.
+Requires codelessly_api 6.2.0.
 
 ### Layout
 
 - Row/column `spacing`, and `wrap` with `runSpacing` (`CodelesslyWrap`).
   Children hidden by a visibility formula take no space and no gap.
-- Stacked and wrapping lists.
-- Vertical, inverted and rectangular-thumb sliders with bound `min`/`max`.
 - `flex` and `rotation` can be bound to data like fill, opacity and size.
 
 ### Formulas and variables
 
 - Computed variables: a variable holding a `${= ...}` formula is evaluated
-  when read and rebuilds what shows it when its inputs change. Set variable
-  leaves it alone.
+  when read and rebuilds what shows it when its inputs change.
 - Functions: `sqrt`, `pow`, trigonometry, `pi`, `radians`, `degrees`,
   `clamp`, `distance` (great-circle), `first`, `last`, `slice`, `take`,
-  `skip`, `reverse` (these four also on text), `range`, `indexOf` (text,
-  value or predicate), `findIndex`, `object`, `merge`, `set`, `keys`,
+  `skip`, `reverse`, `range`, `indexOf`, `object`, `merge`, `set`, `keys`,
   `values`, `append`, `setAt`, `insertAt`, `removeAt`, `move`, `flatten`,
-  `compact`, `concat`, `thousands`, `padLeft`/`padRight`, `substring`,
-  `replace`, `split`, `matches`, `slug`, `seconds`, `duration`,
-  `luminance` and `sortByDesc`; object literals, `(item, i)` lambdas,
-  multi-key `sortBy`, `money(value, decimals)` and list `+`.
+  `compact` and `thousands`; also `obj`, `concat`, `daysInMonth`,
+  `padLeft`, `padRight`, `substring`, `split`, `replace`, `coalesce`,
+  `formatNumber` and `matches` (regular expressions). `money` takes a digit
+  count.
 - A map's own key wins over a built-in accessor of the same name
   (`${rig.length}` reads the field).
-- Bindable effects, stroke weight, corner radius, font weight and icon
-  (`StyleBindings`); image fills listen to the variables in their URL.
-- A screen variable shadows an app variable of the same name everywhere.
 
-### Links and navigation
+### Links
 
-- A layout opens by the ID of one of its canvases;
-  `CodelesslyWidget.initialScreen` opens a screen by id or name.
+- A layout opens by the ID of one of its canvases.
 - A link to the app's first screen gives it the link's parameters
-  (`${route.k}`), and a link's parameters also set the variables they name.
-- A screen's route is set before its load actions run.
+  (`${route.k}`).
+
+### Rendering
+
+- Linear gradients with `gradientRepeatEvery` repeat at a fixed pixel
+  period (`RepeatingGradientTransform`).
+- Arc progress bars (gauges) with ticks, needle and zone bands
+  (`ArcProgressPainter`).
+- Dialog canvases open as bottom sheets, adaptively (sheet below 600 px),
+  or aligned to a side or corner of the screen.
+
+### Text fields
+
+- `obscureText`, `enabled` and `readOnly` follow variables, conditions and
+  set-property actions.
+- A one-line field with a set height stays one line (it can obscure its
+  text and Enter submits it) and fills its height through its decoration.
+- Prefix and suffix icon constraints apply when set.
+
+### Actions
+
+- Delay actions wait as long as their `duration` formula says.
 
 ### Fixes
 
@@ -49,8 +208,8 @@
 - Image fills apply their opacity once (they painted at its square).
 - A text field's `errorText` template that comes out empty is no error.
 - List items on the design canvas show their own item's text.
-- Dashed strokes draw round and square caps along the path; a zero pattern
-  no longer hangs.
+- An API document without a directory no longer fails to load
+  (`HttpApiData.directory` defaults to the root).
 
 ## 8.2.0
 

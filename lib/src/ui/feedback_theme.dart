@@ -1,5 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
@@ -28,6 +29,10 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     this.warning,
     this.radius,
     this.buttonRadius,
+    this.border,
+    this.shadows,
+    this.buttonBorder,
+    this.buttonShadows,
   });
 
   /// Font of messages, without size or color.
@@ -66,6 +71,18 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
   /// Corner radius of buttons.
   final double? buttonRadius;
 
+  /// Outline of dialogs.
+  final BorderSide? border;
+
+  /// Shadows of dialogs, in place of their elevation.
+  final List<BoxShadow>? shadows;
+
+  /// Outline of buttons.
+  final BorderSide? buttonBorder;
+
+  /// Shadows of filled buttons.
+  final List<BoxShadow>? buttonShadows;
+
   /// Fills this theme's missing values from [other].
   FeedbackTheme merge(FeedbackTheme? other) {
     if (other == null) return this;
@@ -82,6 +99,10 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
       warning: warning ?? other.warning,
       radius: radius ?? other.radius,
       buttonRadius: buttonRadius ?? other.buttonRadius,
+      border: border ?? other.border,
+      shadows: shadows ?? other.shadows,
+      buttonBorder: buttonBorder ?? other.buttonBorder,
+      buttonShadows: buttonShadows ?? other.buttonShadows,
     );
   }
 
@@ -132,6 +153,10 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     final Map<int, int> textColors = {};
     final Map<int, int> primaryVotes = {};
     final Map<int, int> radiusVotes = {};
+    // Outlines and shadows of tappable shapes, keyed by their look.
+    final Map<BorderSide, int> buttonBorderVotes = {};
+    final Map<String, (List<BoxShadow>, int)> buttonShadowVotes = {};
+    int tappableShapes = 0;
     TextProp? buttonLabel;
     Color? surface;
 
@@ -179,8 +204,34 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
                   (Reaction r) => r.trigger.type == TriggerType.click,
                 ):
           // A tappable shape with a solid fill is a button too.
-          final Color? fill = _solidFill((scene as GeometryMixin).fills);
-          if (fill != null) vote(primaryVotes, fill.toARGB32(), 1);
+          final GeometryMixin shape = scene as GeometryMixin;
+          final Color? fill = _solidFill(shape.fills);
+          if (fill != null) {
+            vote(primaryVotes, fill.toARGB32(), 1);
+            tappableShapes++;
+            final Color? stroke = shape.strokeWeight > 0
+                ? _solidFill(shape.strokes)
+                : null;
+            if (stroke != null) {
+              final BorderSide side = BorderSide(
+                color: stroke,
+                width: shape.strokeWeight,
+              );
+              buttonBorderVotes[side] = (buttonBorderVotes[side] ?? 0) + 1;
+            }
+            if (scene is BlendMixin) {
+              final List<BoxShadow> shadows = boxShadowsOf(
+                (scene as BlendMixin).effects,
+              );
+              if (shadows.isNotEmpty) {
+                final String key = shadows.join();
+                buttonShadowVotes[key] = (
+                  shadows,
+                  (buttonShadowVotes[key]?.$2 ?? 0) + 1,
+                );
+              }
+            }
+          }
           if (scene is CornerMixin) {
             vote(
               radiusVotes,
@@ -235,6 +286,17 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
       (MapEntry<int, int> e) => e.value,
     )?.key;
 
+    // Outlined, stamped buttons: when most tappable shapes share an outline
+    // or a shadow, so do the dialog's buttons.
+    final MapEntry<BorderSide, int>? buttonBorder = maxBy(
+      buttonBorderVotes.entries,
+      (MapEntry<BorderSide, int> e) => e.value,
+    );
+    final (List<BoxShadow>, int)? buttonShadows = maxBy(
+      buttonShadowVotes.values,
+      ((List<BoxShadow>, int) e) => e.$2,
+    );
+
     return FeedbackTheme(
       bodyStyle: bodyStyle,
       titleStyle: titleStyle,
@@ -245,6 +307,14 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
       surface: surface,
       onSurface: onSurface == null ? null : Color(onSurface),
       buttonRadius: buttonRadius?.toDouble(),
+      buttonBorder:
+          buttonBorder != null && buttonBorder.value * 2 > tappableShapes
+          ? buttonBorder.key
+          : null,
+      buttonShadows:
+          buttonShadows != null && buttonShadows.$2 * 2 > tappableShapes
+          ? buttonShadows.$1
+          : null,
     );
   }
 
@@ -284,6 +354,10 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     Color? warning,
     double? radius,
     double? buttonRadius,
+    BorderSide? border,
+    List<BoxShadow>? shadows,
+    BorderSide? buttonBorder,
+    List<BoxShadow>? buttonShadows,
   }) => FeedbackTheme(
     bodyStyle: bodyStyle ?? this.bodyStyle,
     titleStyle: titleStyle ?? this.titleStyle,
@@ -297,6 +371,10 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     warning: warning ?? this.warning,
     radius: radius ?? this.radius,
     buttonRadius: buttonRadius ?? this.buttonRadius,
+    border: border ?? this.border,
+    shadows: shadows ?? this.shadows,
+    buttonBorder: buttonBorder ?? this.buttonBorder,
+    buttonShadows: buttonShadows ?? this.buttonShadows,
   );
 
   @override
@@ -315,6 +393,10 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
       warning: Color.lerp(warning, other.warning, t),
       radius: t < 0.5 ? radius : other.radius,
       buttonRadius: t < 0.5 ? buttonRadius : other.buttonRadius,
+      border: t < 0.5 ? border : other.border,
+      shadows: BoxShadow.lerpList(shadows, other.shadows, t),
+      buttonBorder: t < 0.5 ? buttonBorder : other.buttonBorder,
+      buttonShadows: BoxShadow.lerpList(buttonShadows, other.buttonShadows, t),
     );
   }
 
@@ -332,7 +414,11 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
       other.success == success &&
       other.warning == warning &&
       other.radius == radius &&
-      other.buttonRadius == buttonRadius;
+      other.buttonRadius == buttonRadius &&
+      other.border == border &&
+      listEquals(other.shadows, shadows) &&
+      other.buttonBorder == buttonBorder &&
+      listEquals(other.buttonShadows, buttonShadows);
 
   @override
   int get hashCode => Object.hash(
@@ -348,6 +434,10 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     warning,
     radius,
     buttonRadius,
+    border,
+    shadows == null ? null : Object.hashAll(shadows!),
+    buttonBorder,
+    buttonShadows == null ? null : Object.hashAll(buttonShadows!),
   );
 }
 
@@ -368,6 +458,10 @@ class ResolvedFeedbackTheme {
     required this.warning,
     required this.radius,
     required this.buttonRadius,
+    required this.border,
+    required this.shadows,
+    required this.buttonBorder,
+    required this.buttonShadows,
   });
 
   factory ResolvedFeedbackTheme._resolve(FeedbackTheme t, ThemeData theme) {
@@ -402,6 +496,10 @@ class ResolvedFeedbackTheme {
       warning: t.warning ?? const Color(0xFFF2A600),
       radius: t.radius ?? (buttonRadius + 8).clamp(12, 28).toDouble(),
       buttonRadius: buttonRadius,
+      border: t.border,
+      shadows: t.shadows,
+      buttonBorder: t.buttonBorder,
+      buttonShadows: t.buttonShadows,
     );
   }
 
@@ -443,6 +541,18 @@ class ResolvedFeedbackTheme {
 
   /// Corner radius of buttons.
   final double buttonRadius;
+
+  /// Outline of dialogs, if any.
+  final BorderSide? border;
+
+  /// Shadows of dialogs in place of their elevation, if set.
+  final List<BoxShadow>? shadows;
+
+  /// Outline of buttons, if any.
+  final BorderSide? buttonBorder;
+
+  /// Shadows of filled buttons, if any.
+  final List<BoxShadow>? buttonShadows;
 
   /// Black or white, whichever reads on [background].
   static Color onColor(Color background) =>
@@ -495,4 +605,64 @@ class FeedbackThemeScope extends InheritedWidget {
   @override
   bool updateShouldNotify(FeedbackThemeScope oldWidget) =>
       theme != oldWidget.theme;
+}
+
+/// The visible drop shadows of [effects] as [BoxShadow]s.
+List<BoxShadow> boxShadowsOf(Iterable<Effect>? effects) => [
+  for (final Effect effect in effects ?? const <Effect>[])
+    if (effect.type == EffectType.dropShadow && effect.visible)
+      BoxShadow(
+        color: effect.color?.toFlutterColor() ?? const Color(0x40000000),
+        offset: Offset(
+          effect.offset?.x.toDouble() ?? 0,
+          effect.offset?.y.toDouble() ?? 0,
+        ),
+        blurRadius: effect.radius,
+        spreadRadius: effect.spread ?? 0,
+      ),
+];
+
+/// [model] as a Flutter [BorderSide]; [BorderSide.none] for a border of
+/// style none.
+BorderSide borderSideOf(BorderSideModel model) =>
+    model.style == BorderStyleEnum.none || model.width <= 0
+    ? BorderSide.none
+    : BorderSide(color: model.color.toFlutterColor(), width: model.width);
+
+/// Applies a [TextStyleModel] to a Flutter [TextStyle].
+extension TextStyleModelApply on TextStyleModel? {
+  /// [base] with this style's values in place of its own. A font family
+  /// loads like a text node's, Google Fonts included.
+  TextStyle applyTo(TextStyle base) {
+    final TextStyleModel? model = this;
+    if (model == null) return base;
+    TextStyle style = base;
+    final FontName? font = model.fontName;
+    if (font != null) {
+      final TextStyle loaded = TextUtils.retrieveTextStyle(fontName: font);
+      style = style.copyWith(
+        fontFamily: loaded.fontFamily,
+        fontFamilyFallback: loaded.fontFamilyFallback,
+        fontWeight: loaded.fontWeight,
+        fontStyle: loaded.fontStyle,
+      );
+    } else {
+      if (model.fontWeight != null) {
+        style = style.copyWith(
+          fontWeight: FontWeight.values[model.fontWeight!.index],
+        );
+      }
+      if (model.italic != null) {
+        style = style.copyWith(
+          fontStyle: model.italic! ? FontStyle.italic : FontStyle.normal,
+        );
+      }
+    }
+    return style.copyWith(
+      fontSize: model.fontSize,
+      height: model.lineHeight,
+      letterSpacing: model.letterSpacing,
+      color: model.color?.toFlutterColor(),
+    );
+  }
 }

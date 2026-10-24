@@ -7,7 +7,7 @@ part of 'model_http_request.dart';
 // **************************************************************************
 
 HttpApiData _$HttpApiDataFromJson(Map json) => HttpApiData(
-  directory: json['directory'] as String,
+  directory: json['directory'] as String? ?? '',
   method:
       $enumDecodeNullable(_$HttpMethodEnumMap, json['method']) ??
       HttpMethod.get,
