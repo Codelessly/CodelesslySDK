@@ -431,4 +431,70 @@ void main() {
       expect(colorOf(tester, 200), red);
     });
   });
+
+  testWidgets('a state that rebinds a fill keeps the binding\'s other '
+      'cases, e.g. a selected chip stays dark on hover', (tester) async {
+    final (:card, :dot) = cardWithDot();
+    card.variables['fill-c'] = r"${= true ? '#00FF00' : '#FFFFFF'}";
+    card.interactionStates = {
+      InteractionState.hovered: {
+        'card': {
+          'variables': {'fill-c': r"${= false ? '#00FF00' : '#FF0000'}"},
+        },
+      },
+    };
+    await Harness().pump(tester, [card, dot]);
+    expect(colorOf(tester, 200), green);
+
+    final TestGesture mouse = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await mouse.addPointer(location: const Offset(500, 500));
+    await mouse.moveTo(const Offset(150, 50));
+    await tester.pump();
+    expect(colorOf(tester, 200), red);
+
+    await mouse.moveTo(const Offset(500, 500));
+    await tester.pump();
+    expect(colorOf(tester, 200), green);
+  });
+
+  testWidgets('hover can shift where a card paints without moving its '
+      'hover area', (tester) async {
+    final (:card, :dot) = cardWithDot();
+    card.interactionStates = {
+      InteractionState.hovered: {
+        'card': {
+          'motion': {'translateX': -2, 'translateY': -2},
+        },
+      },
+    };
+    await Harness().pump(tester, [card, dot]);
+    Offset dotAt() => tester.getTopLeft(
+      find
+          .byWidgetPredicate(
+            (w) => w is DecoratedBox || w is Container || w is Ink,
+          )
+          .evaluate()
+          .where((e) => e.size?.width == 20)
+          .map((e) => find.byWidget(e.widget))
+          .first,
+    );
+    final Offset before = dotAt();
+
+    final TestGesture mouse = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await mouse.addPointer(location: const Offset(500, 500));
+    // The bottom-right corner: still inside the card's laid-out box after
+    // it paints 2 px up and left.
+    await mouse.moveTo(const Offset(199, 99));
+    await tester.pump();
+    expect(dotAt(), before - const Offset(2, 2));
+
+    // Moving within the shifted-away strip keeps the hover.
+    await mouse.moveTo(const Offset(199.5, 99.5));
+    await tester.pump();
+    expect(dotAt(), before - const Offset(2, 2));
+  });
 }
