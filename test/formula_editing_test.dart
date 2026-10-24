@@ -87,4 +87,14 @@ void main() {
     expect(eval('pow(2, 10)'), 1024);
     expect(eval('sqrt(16)'), 4);
   });
+
+  test('feet-inches, and money without cents', () {
+    expect(eval(r"money(57030, '$', 0)"), r'$57,030');
+    expect(eval('money(1234.5)'), r'$1,234.50');
+    expect(eval('thousands(6016)'), '6,016');
+    expect(eval('thousands(1234.567, 1)'), '1,234.6');
+    expect(eval('feetInches(6.6667)'), '6′ 8″');
+    expect(eval('feetInches(7)'), '7′');
+    expect(eval('feetInches(0.25)'), '0′ 3″');
+  });
 }
