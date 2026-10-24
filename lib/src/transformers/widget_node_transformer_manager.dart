@@ -230,6 +230,52 @@ abstract class WidgetNodeTransformerManager
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
     if (node is! ReactionMixin) return widget;
     if (node case CanvasNode() || SpacerNode()) return widget;
+    return wrapWithPointerReactions(
+      context,
+      node,
+      _wrapWithTapReactions(context, node, widget),
+    );
+  }
+
+  /// Fires [node]'s pointer down and pointer up reactions, such as a press
+  /// and hold that starts on down and is cancelled on up. A cancelled
+  /// pointer (a scroll took over) counts as up. The pointer is only
+  /// listened to, so taps still reach the widget.
+  static Widget wrapWithPointerReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
+    if (node is! ReactionMixin) return widget;
+    List<Reaction> reactionsFor(TriggerType type) => (node as ReactionMixin)
+        .reactions
+        .where(
+          (reaction) =>
+              reaction.trigger.type == type && reaction.action.enabled,
+        )
+        .toList();
+    final List<Reaction> down = reactionsFor(TriggerType.pointerDown);
+    final List<Reaction> up = reactionsFor(TriggerType.pointerUp);
+    if (down.isEmpty && up.isEmpty) return widget;
+    void fire(TriggerType type, List<Reaction> reactions) {
+      if (reactions.isEmpty) return;
+      FunctionsRepository.triggerAction(context, type, reactions: reactions);
+    }
+
+    return Listener(
+      behavior: HitTestBehavior.opaque,
+      onPointerDown: (_) => fire(TriggerType.pointerDown, down),
+      onPointerUp: (_) => fire(TriggerType.pointerUp, up),
+      onPointerCancel: (_) => fire(TriggerType.pointerUp, up),
+      child: widget,
+    );
+  }
+
+  Widget _wrapWithTapReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
     if (node is CustomPropertiesMixin &&
         node.handlesDefaultReactionsInternally) {
       // Node is a custom properties mixin and intends to handle reactions
