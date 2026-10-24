@@ -75,21 +75,59 @@ class PassiveListViewWidget extends StatelessWidget {
   }
 
   /// Sizes the list by [ViewportLayout] around [builder].
+  ///
+  /// A wrapping list is sized by [WrapNodeBox] instead, and the flag given
+  /// to [builder] says whether its runs scroll along the cross axis.
   Widget box(ViewportContentBuilder builder, {required bool canShrinkWrap}) =>
-      ViewportNodeBox(
-        node: node,
-        scrollDirection: node.scrollDirection,
-        canShrinkWrap: canShrinkWrap,
-        builder: builder,
-      );
+      node.properties.isWrapping
+      ? WrapNodeBox(node: node, builder: builder)
+      : ViewportNodeBox(
+          node: node,
+          scrollDirection: node.scrollDirection,
+          canShrinkWrap: canShrinkWrap,
+          builder: builder,
+        );
 
   /// Builds one item, placed as the editor lays it out; see [ListItemBox].
-  Widget buildItem(BaseNode item, BuildContext context) => ListItemBox(
-    item: item,
-    scrollDirection: node.scrollDirection,
-    itemExtent: node.properties.itemExtent,
-    child: manager.buildWidgetByID(item.id, context, settings: settings),
-  );
+  /// The item of a wrapping list keeps its own size; see [WrapItemBox].
+  Widget buildItem(BaseNode item, BuildContext context) {
+    final Widget child = manager.buildWidgetByID(
+      item.id,
+      context,
+      settings: settings,
+    );
+    if (node.properties.isWrapping) {
+      return WrapItemBox(
+        item: item,
+        scrollDirection: node.scrollDirection,
+        itemExtent: node.properties.itemExtent,
+        child: child,
+      );
+    }
+    return ListItemBox(
+      item: item,
+      scrollDirection: node.scrollDirection,
+      itemExtent: node.properties.itemExtent,
+      child: child,
+    );
+  }
+
+  /// The items of a wrapping list; [scrolls] comes from [WrapNodeBox].
+  Widget wrapped(bool scrolls, int itemCount, IndexedWidgetBuilder builder) =>
+      WrappedItems(
+        itemCount: itemCount,
+        itemBuilder: builder,
+        direction: node.scrollDirection.flutterAxis,
+        spacing: node.properties.wrapSpacing,
+        runSpacing: node.properties.wrapRunSpacing,
+        alignment: node.properties.wrapAlignment.flutterWrapAlignment,
+        padding: node.padding.flutterEdgeInsets,
+        scrolls: scrolls,
+        physics: node.physics.flutterScrollPhysics(false),
+        keyboardDismissBehavior:
+            node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+        clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -196,6 +234,25 @@ class PassiveListViewWidget extends StatelessWidget {
 
                 final int itemCount = items.itemCount;
 
+                // A wrapping list builds every item at once, so it shows the
+                // loaded items without paging further.
+                if (node.properties.isWrapping) {
+                  final int loaded = snapshot.docs.length;
+                  return wrapped(shrinkWrap, loaded, (context, index) {
+                    final doc = snapshot.docs[index];
+                    return IndexedItemProvider(
+                      key: ValueKey(index),
+                      item: IndexedItem(index, {'id': doc.id, ...doc.data()}),
+                      child: Builder(
+                        builder: (context) => KeyedSubtree(
+                          key: ValueKey(index),
+                          child: buildItem(item, context),
+                        ),
+                      ),
+                    );
+                  });
+                }
+
                 // Item Count always exists.
                 return ListViewBuilder(
                   primary: node.primary,
@@ -301,6 +358,29 @@ class PassiveListViewWidget extends StatelessWidget {
           : null,
       itemBuilder: builder,
     );
+
+    // A stacked list draws its items on top of each other, the first on
+    // top, inside the list's own box. It never scrolls.
+    if (node.properties.stacked) {
+      final int count = itemCount ?? 0;
+      return box(
+        canShrinkWrap: false,
+        (context, _) => StackedItems(
+          itemCount: count,
+          clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+          itemBuilder: itemBuilder,
+        ),
+      );
+    }
+
+    // A wrapping list flows its items onto further lines, all of them built,
+    // so an endless one shows nothing.
+    if (node.properties.isWrapping) {
+      return box(
+        canShrinkWrap: true,
+        (context, scrolls) => wrapped(scrolls, itemCount ?? 0, itemBuilder),
+      );
+    }
 
     // An endless list with items of free extent ends after a viewport's
     // worth of items that take no space, so they cannot be built without
@@ -460,5 +540,133 @@ class ListViewItemSeparator extends StatelessWidget {
               : null,
         );
     }
+  }
+}
+
+/// The items of a stacked list: drawn on top of each other in the list's
+/// box, each at its top center, the first item on top.
+class StackedItems extends StatelessWidget {
+  /// Creates a [StackedItems].
+  const StackedItems({
+    super.key,
+    required this.itemCount,
+    required this.itemBuilder,
+    this.clipBehavior = Clip.none,
+  });
+
+  /// How many items.
+  final int itemCount;
+
+  /// Builds an item.
+  final IndexedWidgetBuilder itemBuilder;
+
+  /// Whether items moved outside the box are clipped.
+  final Clip clipBehavior;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    clipBehavior: clipBehavior,
+    children: [
+      // Built last to first, so the first item paints over the rest and
+      // takes taps first.
+      for (int index = itemCount - 1; index >= 0; index--)
+        Positioned.fill(
+          key: ValueKey(index),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: itemBuilder(context, index),
+          ),
+        ),
+    ],
+  );
+}
+
+/// The items of a wrapping list: laid out by a [Wrap] along [direction],
+/// flowing onto further lines (runs) when a line is full, each item at its
+/// own size.
+///
+/// With [scrolls], the runs scroll along the cross axis when they don't fit
+/// the box; otherwise the box grows with them.
+class WrappedItems extends StatelessWidget {
+  /// Creates a [WrappedItems].
+  const WrappedItems({
+    super.key,
+    required this.itemCount,
+    required this.itemBuilder,
+    this.direction = Axis.horizontal,
+    this.spacing = 0,
+    this.runSpacing = 0,
+    this.alignment = WrapAlignment.start,
+    this.padding = EdgeInsets.zero,
+    this.scrolls = false,
+    this.physics,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+    this.clipBehavior = Clip.none,
+  });
+
+  /// How many items.
+  final int itemCount;
+
+  /// Builds an item.
+  final IndexedWidgetBuilder itemBuilder;
+
+  /// The wrap direction: the list's scroll direction.
+  final Axis direction;
+
+  /// The gap between two items of a line.
+  final double spacing;
+
+  /// The gap between two lines.
+  final double runSpacing;
+
+  /// How the items of a line are placed along it.
+  final WrapAlignment alignment;
+
+  /// The list's padding, around the runs.
+  final EdgeInsets padding;
+
+  /// Whether the runs scroll along the cross axis.
+  final bool scrolls;
+
+  /// The physics of that scroll.
+  final ScrollPhysics? physics;
+
+  /// See [ScrollView.keyboardDismissBehavior].
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
+
+  /// Whether the runs are clipped to the box.
+  final Clip clipBehavior;
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget wrap = Wrap(
+      direction: direction,
+      spacing: spacing,
+      runSpacing: runSpacing,
+      alignment: alignment,
+      children: [
+        for (int index = 0; index < itemCount; index++)
+          itemBuilder(context, index),
+      ],
+    );
+    if (scrolls) {
+      return DraggableScrollConfiguration(
+        child: SingleChildScrollView(
+          primary: false,
+          scrollDirection: direction == Axis.horizontal
+              ? Axis.vertical
+              : Axis.horizontal,
+          padding: padding,
+          physics: physics,
+          keyboardDismissBehavior: keyboardDismissBehavior,
+          clipBehavior: clipBehavior,
+          child: wrap,
+        ),
+      );
+    }
+    final Widget padded = Padding(padding: padding, child: wrap);
+    return clipBehavior == Clip.none
+        ? padded
+        : ClipRect(clipBehavior: clipBehavior, child: padded);
   }
 }

@@ -375,7 +375,9 @@ class TextUtils {
 
     // Not supported yet but good to have.
     final List<Shadow> shadows = effects
-        .where((element) => element.type == EffectType.dropShadow)
+        .where(
+          (element) => element.type == EffectType.dropShadow && element.visible,
+        )
         .map(
           (d) => Shadow(
             offset: Offset(

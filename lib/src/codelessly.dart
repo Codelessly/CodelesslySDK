@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
+import 'package:provider/provider.dart';
 
 import '../codelessly_sdk.dart';
 import 'functions/app_auth.dart';
@@ -943,11 +944,52 @@ class Codelessly {
     _currentNavigatedCanvasId = canvasId;
     final ModalRoute? modal = ModalRoute.of(context);
     if (canvasId != null && modal is! PopupRoute) {
-      route.value = CodelesslyRoute.of(canvasId, modal?.settings.arguments);
+      route.value = _routeOf(canvasId, modal);
       _openPendingRoute(context, canvasId);
     }
     for (final listener in [..._navigationListeners.values]) {
       listener(context, layoutId, canvasId);
+    }
+  }
+
+  /// The route of screen [canvasId] shown by [modal]: the link that opened
+  /// the app when it names this screen, or the parameters it was opened
+  /// with.
+  CodelesslyRoute _routeOf(String canvasId, ModalRoute? modal) {
+    final CodelesslyRoute? pending = _resolveLink(pendingRoute);
+    if (pending != null && pending.canvasId == canvasId) return pending;
+    return CodelesslyRoute.of(canvasId, modal?.settings.arguments);
+  }
+
+  /// Makes [route] screen [canvasId]'s before its load actions run, so they
+  /// can read `${route.name}`, and applies the link that opened the app to
+  /// it when the link names this screen (navigation listeners only hear of
+  /// a screen after its first frame).
+  void prepareRoute(BuildContext context, String canvasId) {
+    final ModalRoute? modal = ModalRoute.of(context);
+    if (modal is PopupRoute) return;
+    route.value = _routeOf(canvasId, modal);
+    final CodelesslyRoute? pending = _resolveLink(pendingRoute);
+    if (pending != null && pending.canvasId == canvasId) {
+      setVariablesFromRoute(context, pending);
+    }
+  }
+
+  /// Sets the variables a link's parameters name to their values, so
+  /// `/<app>/<screen>?selectedId=kind-of-blue` opens with `selectedId` set,
+  /// as well as passing them as the screen's route parameters. Parameters
+  /// that name no variable are only route parameters.
+  static void setVariablesFromRoute(
+    BuildContext context,
+    CodelesslyRoute route,
+  ) {
+    if (route.params.isEmpty) return;
+    final CodelesslyContext? codelesslyContext =
+        Provider.of<CodelesslyContext?>(context, listen: false);
+    if (codelesslyContext == null) return;
+    for (final MapEntry<String, String> param in route.params.entries) {
+      if (codelesslyContext.findVariableByName(param.key) == null) continue;
+      codelesslyContext.updateVariable(param.key, param.value);
     }
   }
 
@@ -971,7 +1013,9 @@ class Codelessly {
     if (pending == null) return;
     _pendingRoute = null;
     final CodelesslyRoute? link = _resolveLink(pending);
-    if (link == null || link.canvasId == canvasId) return;
+    if (link == null) return;
+    setVariablesFromRoute(context, link);
+    if (link.canvasId == canvasId) return;
     unawaited(
       FunctionsRepository.navigate(
         context,

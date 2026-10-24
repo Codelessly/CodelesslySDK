@@ -17,6 +17,7 @@ export 'utils/property_overrides.dart';
 export 'utils/property_value_delegate.dart';
 export 'utils/scoped_values.dart';
 export 'utils/stroke_painter.dart';
+export 'utils/style_bindings.dart';
 export 'utils/text_utils.dart';
 export 'utils/variable_span.dart';
 export 'utils/viewport_sizing.dart';

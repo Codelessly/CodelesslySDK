@@ -148,12 +148,15 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     widget = applyLoopAnimation(context, styled, widget);
     if (settings.withReactions) {
       widget = wrapWithReaction(context, styled, widget);
+      widget = wrapWithSwipes(context, styled, widget);
+      widget = wrapWithDoubleTap(context, styled, widget);
       widget = wrapWithSemantics(styled, widget);
       widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
+      widget = applyWidgetMotion(context, styled, widget);
     }
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
@@ -202,8 +205,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// variables or formulas, or set value actions give it at runtime: `fill`
   /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
   /// `height`, `flex` (its share of an expanded row or column, so bars
-  /// can be sized proportionally) and `rotation` (in degrees). Returns
-  /// [node] itself when nothing changes it.
+  /// can be sized proportionally), `rotation` (in degrees), and the
+  /// properties of [StyleBindings] (effects, stroke weight, corner radius,
+  /// font weight, icon). Returns [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     T? value<T extends Object>(String property) =>
@@ -279,6 +283,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         rotation.round() != node.rotationDegrees) {
       patch['rotation'] = rotation.round();
     }
+
+    // Effects, stroke weight, corner radius, font weight and icon.
+    StyleBindings.addTo(patch, node, scopedValues: scopedValues);
 
     // The states shown around the node (a property-override variant, its
     // own or an ancestor's interaction states) win over bindings.
