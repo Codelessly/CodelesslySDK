@@ -892,6 +892,11 @@ Widget buildFill(
       if (imageRotation != null) {
         child = Transform.rotate(angle: imageRotation, child: child);
       }
+      // An image fill keeps to the node's rounded corners, as solid and
+      // gradient fills do, even when the node doesn't clip its content.
+      if (borderRadius != null && borderRadius != BorderRadius.zero) {
+        child = ClipRRect(borderRadius: borderRadius, child: child);
+      }
       return child;
     case PaintType.emoji:
       return const SizedBox.shrink();
