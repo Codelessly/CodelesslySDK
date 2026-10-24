@@ -57,6 +57,11 @@ void main() {
       expect(VariablePreview.textFor(r'${= price * 2}'), '9');
     });
 
+    test('show nothing for a formula that yields empty text', () {
+      expect(VariablePreview.textFor(r"${= if(price > 9, 'big', '')}"), '');
+      expect(VariablePreview.textFor(r'${= missing.name}'), 'Name');
+    });
+
     test('fall back to a placeholder when there is no value', () {
       expect(VariablePreview.textFor(r'${auth.email}'), 'Email');
     });
