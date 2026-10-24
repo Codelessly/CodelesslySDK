@@ -694,11 +694,20 @@ Widget wrapFillWithPositioned({
   PaintType.gradientAngular ||
   PaintType.gradientDiamond => Positioned.fill(child: fill),
   PaintType.image =>
-    node.isHorizontalWrap || node.isVerticalWrap
+    imageFillSizesNode(node)
         ? Positioned(child: fill)
         : Positioned.fill(child: fill),
   PaintType.emoji => fill,
 };
+
+/// Whether an image fill gives [node] its size: a node that hugs an axis
+/// and has no children to hug takes the image's (its design) size. A node
+/// with children, like a shrink-wrapping row or column, is as big as they
+/// are, and its image covers that size without changing it, like a
+/// [DecoratedBox] image.
+bool imageFillSizesNode(GeometryMixin node) =>
+    (node.isHorizontalWrap || node.isVerticalWrap) &&
+    !(node is ChildrenMixin && (node as ChildrenMixin).children.isNotEmpty);
 
 Widget buildFill(
   GeometryMixin node, {
@@ -791,15 +800,19 @@ Widget buildFill(
             child: const Placeholder(),
           );
         } else {
+          // A fill that covers the node (see [imageFillSizesNode]) takes
+          // the size the node lays out at on a hugging axis, not its design
+          // size.
+          final bool sizesNode = imageFillSizesNode(node);
           child = UltimateImageBuilder(
             url: imageURL,
             width: (node.horizontalFit == SizeFit.shrinkWrap)
-                ? null
+                ? (sizesNode ? null : double.infinity)
                 : (node.horizontalFit == SizeFit.expanded)
                 ? double.infinity
                 : node.basicBoxLocal.width,
             height: (node.verticalFit == SizeFit.shrinkWrap)
-                ? null
+                ? (sizesNode ? null : double.infinity)
                 : (node.verticalFit == SizeFit.expanded)
                 ? double.infinity
                 : node.basicBoxLocal.height,

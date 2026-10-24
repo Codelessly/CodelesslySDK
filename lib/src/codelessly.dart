@@ -280,6 +280,10 @@ class Codelessly {
   /// The route the app was opened with, kept after [pendingRoute] is used.
   CodelesslyRoute? _link;
 
+  /// The route the app was opened with (the last [pendingRoute] set), or
+  /// null when it opened at its first screen.
+  CodelesslyRoute? get link => _link;
+
   /// The parameters the app's link gives the screen of layout [layoutId]
   /// when the link names a screen of that layout: the first screen shows in
   /// the host's own route, which carries no parameters, so a link to it

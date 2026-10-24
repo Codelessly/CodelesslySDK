@@ -465,6 +465,28 @@ class FunctionsRepository {
     final String? myCanvasId = effectiveCodelessly.currentNavigatedCanvasId;
 
     if (action.navigationType == NavigationType.pop) {
+      // A screen a link opened with nothing under it (a host that shows the
+      // linked screen itself) goes back to the app's first screen instead of
+      // doing nothing.
+      final String? entryLayoutId =
+          effectiveCodelessly.dataManager.publishModel?.entryLayoutId;
+      final CodelesslyRoute? link = effectiveCodelessly.link;
+      if (!Navigator.canPop(context) &&
+          link != null &&
+          myCanvasId == link.canvasId &&
+          entryLayoutId != null &&
+          entryLayoutId != myLayoutId) {
+        return navigate(
+          context,
+          NavigationAction(
+            navigationType: NavigationType.replace,
+            destinationId: entryLayoutId,
+          ),
+          codelessly: effectiveCodelessly,
+          codelesslyController: codelesslyController,
+          scopedValues: effectiveScopedValues,
+        );
+      }
       await Navigator.maybePop(context, parsedParams);
     } else {
       // Check if a layout exists for the action's [destinationId].

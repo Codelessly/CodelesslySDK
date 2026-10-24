@@ -106,17 +106,26 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
 
   double get scale => (widget.scale ?? widget.paint?.scale ?? 1).abs();
 
-  BlendMode? get colorBlendMode =>
-      widget.blendMode ?? widget.paint?.blendMode.flutterBlendMode;
+  /// The tint of the image: [UltimateImageBuilder.color], else the paint's
+  /// [PaintModel.imageColor].
+  Color? get color =>
+      widget.color ?? widget.paint?.imageColor?.toFlutterColor();
 
-  ColorFilter? get colorFilter => widget.color != null
-      ? ColorFilter.mode(
-          widget.color!,
-          widget.blendMode ??
-              widget.paint?.blendMode.flutterBlendMode ??
-              BlendMode.srcIn,
-        )
-      : null;
+  /// How [color] combines with the image. A paint's own tint uses its
+  /// [PaintModel.imageColorBlendMode] (srcIn by default).
+  BlendMode? get colorBlendMode =>
+      widget.blendMode ??
+      (widget.color == null && widget.paint?.imageColor != null
+          ? widget.paint!.imageColorBlendMode.flutterBlendMode
+          : widget.paint?.blendMode.flutterBlendMode);
+
+  ColorFilter? get colorFilter => switch (color) {
+    final Color color => ColorFilter.mode(
+      color,
+      colorBlendMode ?? BlendMode.srcIn,
+    ),
+    null => null,
+  };
 
   double? get width {
     if (widget.width case var width?) return width;
@@ -250,7 +259,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         width: width,
         height: height,
         repeat: repeat,
-        color: widget.color,
+        color: color,
         colorBlendMode: colorBlendMode,
         errorBuilder: (context, _, _) =>
             (widget.errorBuilder ?? _defaultErrorBuilder)(context),
@@ -264,7 +273,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         height: height,
         repeat: repeat,
         scale: scale,
-        color: widget.color,
+        color: color,
         opacity: AlwaysStoppedAnimation(
           widget.applyPaintOpacity ? widget.paint?.opacity ?? 1 : 1,
         ),
@@ -332,7 +341,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
       width: width,
       height: height,
       repeat: repeat,
-      color: widget.color,
+      color: color,
       colorBlendMode: colorBlendMode,
       errorBuilder: (context, _, _) =>
           (widget.errorBuilder ?? _defaultErrorBuilder)(context),

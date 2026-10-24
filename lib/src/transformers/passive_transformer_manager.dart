@@ -173,6 +173,26 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     return widget;
   }
 
+  /// The flex [node]'s `flex` binding (a variable, formula, condition or set
+  /// value action) gives it with [scopedValues], or null when it has none or
+  /// it doesn't resolve to a number. Flutter needs a positive flex; 0 still
+  /// gets a sliver.
+  static int? boundFlex(BaseNode node, ScopedValues scopedValues) {
+    final num? flex = PropertyValueDelegate.getPropertyValue<num>(
+      node,
+      'flex',
+      scopedValues: scopedValues,
+    );
+    if (flex == null || !flex.isFinite) return null;
+    return math.max(1, flex.round());
+  }
+
+  /// The flex [node] takes in its parent row/column at runtime: its bound
+  /// `flex` resolved in [context]'s scope (the list item, variables), or its
+  /// own [BaseNode.flex].
+  int runtimeFlex(BuildContext context, BaseNode node) =>
+      boundFlex(node, ScopedValues.of(context)) ?? node.flex;
+
   /// Returns [node] with the style properties that conditions, bound
   /// variables or formulas, or set value actions give it at runtime: `fill`
   /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
@@ -240,11 +260,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       ).toJson();
     }
 
-    final num? flex = value<num>('flex');
-    if (flex != null && flex.round() != node.flex) {
-      // Flutter needs a positive flex; 0 still gets a sliver.
-      patch['flex'] = math.max(1, flex.round());
-    }
+    final int? flex = boundFlex(node, scopedValues);
+    if (flex != null && flex != node.flex) patch['flex'] = flex;
 
     // Rotation in degrees (the node's `rotation` JSON field), e.g. a card
     // tilted while it's dragged: `${= dragging ? -2 : 0}`.

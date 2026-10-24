@@ -102,9 +102,9 @@ abstract final class VariablePreview {
       // Name a formula after the first variable it reads.
       final String code = formula.replaceAll(
         RegExp(
-          r'"[^"]*"'
+          r'"(?:[^"\\]|\\.)*"'
           '|'
-          r"'[^']*'",
+          r"'(?:[^'\\]|\\.)*'",
         ),
         '',
       );

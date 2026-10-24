@@ -500,7 +500,7 @@ class PassiveRowColumnWidget extends StatelessWidget {
       return FlexChildVisibility(
         collapsed: hidden,
         child: Flexible(
-          flex: hidden ? 0 : sizedWidget.flex,
+          flex: hidden ? 0 : manager.runtimeFlex(context, child),
           fit: sizedWidget.fit,
           child: SizedBox(
             width: hidden ? 0 : null,

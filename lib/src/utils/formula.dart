@@ -2,14 +2,15 @@ import 'dart:math' as math;
 
 /// Matches a formula written as `${= expression}` in a text.
 ///
-/// The expression can't contain braces, except inside quoted strings.
+/// The expression can't contain braces, except inside quoted strings, which
+/// can contain backslash escapes (`'Doesn\'t fit'`).
 final RegExp formulaRegex = RegExp(
-  r'''(?<!\\)\$\{=(?<expr>(?:[^{}'"]|'[^']*'|"[^"]*")*)\}''',
+  r'''(?<!\\)\$\{=(?<expr>(?:[^{}'"]|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")*)\}''',
 );
 
 /// Matches a text that is exactly one formula, e.g. `${= qty * price}`.
 final RegExp exactFormulaRegex = RegExp(
-  r'''^\s*(?<!\\)\$\{=(?<expr>(?:[^{}'"]|'[^']*'|"[^"]*")*)\}\s*$''',
+  r'''^\s*(?<!\\)\$\{=(?<expr>(?:[^{}'"]|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")*)\}\s*$''',
 );
 
 /// Resolves a variable path such as `storage.cart` or `item.price` to its
@@ -20,7 +21,10 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///
 /// Supports:
 ///  - numbers, 'single' or "double" quoted strings, true, false, null and
-///    `[a, b]` lists.
+///    `[a, b]` lists. Inside quotes a backslash escapes the next character:
+///    `\'`, `\"` and `\\` write a quote or a backslash, `\n` and `\t` a
+///    newline and a tab (any other `\x` stays as written), so
+///    `'Doesn\'t fit'` and `"Doesn't fit"` both read Doesn't fit.
 ///  - variable paths like `storage.cart.length` or `item.price`, resolved with
 ///    the same rules as `${path}`, followed by `[index]` or `.key`.
 ///  - `+ - * / %`, comparisons `== != < <= > >=`, `&& || !` and
@@ -1538,11 +1542,30 @@ class _Parser {
     }
 
     if (char == "'" || char == '"') {
-      final int end = source.indexOf(char, pos + 1);
-      if (end < 0) throw FormatException('Unclosed text', source, pos);
-      final String text = source.substring(pos + 1, end);
-      pos = end + 1;
-      return _Literal(text);
+      final StringBuffer text = StringBuffer();
+      int i = pos + 1;
+      while (true) {
+        if (i >= source.length) {
+          throw FormatException('Unclosed text', source, pos);
+        }
+        final String c = source[i];
+        if (c == char) break;
+        if (c == r'\' && i + 1 < source.length) {
+          final String next = source[i + 1];
+          text.write(switch (next) {
+            'n' => '\n',
+            't' => '\t',
+            r'\' || "'" || '"' => next,
+            _ => '$c$next',
+          });
+          i += 2;
+          continue;
+        }
+        text.write(c);
+        i++;
+      }
+      pos = i + 1;
+      return _Literal(text.toString());
     }
 
     final Match? number = _number.matchAsPrefix(source, pos);

@@ -1,9 +1,12 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
 void main() {
+  group('bound flex in a row', _flexWidgetTests);
+
   // A gauge bar takes the rig's share of a 70 ft scale: two expanded
   // siblings whose flex comes from formulas.
   test('flex resolves from a formula bound to the node', () {
@@ -134,5 +137,125 @@ void main() {
     test('a cycle gives nothing instead of recursing forever', () {
       expect(text(r'${loopA}'), '');
     });
+  });
+}
+
+RectangleNode _bar(String id, String flex) => RectangleNode.fromJson({
+  ...RectangleNode(
+    id: id,
+    name: id,
+    basicBoxLocal: NodeBox(0, 0, 100, 20),
+    horizontalFit: SizeFit.expanded,
+  ).toJson(),
+  'variables': {'flex': flex},
+})..parentID = 'gauge';
+
+RowColumnNode _gauge(List<BaseNode> children) => RowColumnNode(
+  id: 'gauge',
+  name: 'gauge',
+  basicBoxLocal: NodeBox(0, 0, 400, 20),
+  children: [for (final child in children) child.id],
+  rowColumnType: RowColumnType.row,
+  mainAxisAlignment: MainAxisAlignmentC.start,
+  crossAxisAlignment: CrossAxisAlignmentC.start,
+)..parentID = kRootNode;
+
+/// Pumps [row] with [children], inside [item]'s list item when given, and
+/// returns each child's width.
+Future<Map<String, double>> _pumpGauge(
+  WidgetTester tester,
+  RowColumnNode row,
+  List<BaseNode> children, {
+  CodelesslyContext? codelesslyContext,
+  IndexedItem? item,
+}) async {
+  final registry = NodeRegistry()
+    ..setNodes({
+      for (final node in [row, ...children]) node.id: node,
+    });
+  final manager = PassiveNodeTransformerManager(
+    registry.getNodeByID,
+    (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+  );
+  Widget content = Builder(
+    builder: (context) => manager.buildWidgetFromNode(
+      row,
+      context,
+      settings: const WidgetBuildSettings(debugLabel: 'test'),
+    ),
+  );
+  if (item != null) content = IndexedItemProvider(item: item, child: content);
+  await tester.pumpWidget(
+    ChangeNotifierProvider<CodelesslyContext>.value(
+      value: codelesslyContext ?? CodelesslyContext.empty(),
+      child: MaterialApp(
+        home: Align(alignment: Alignment.topLeft, child: content),
+      ),
+    ),
+  );
+  expect(tester.takeException(), isNull);
+  return {
+    for (final child in children)
+      child.id: tester
+          .getSize(
+            find.byKey(
+              ValueKey('Rectangle Transformer of ${child.id} [${child.id}]'),
+            ),
+          )
+          .width,
+  };
+}
+
+void _flexWidgetTests() {
+  testWidgets('a bound flex splits the parent row', (tester) async {
+    final children = [_bar('a', r'${= 3}'), _bar('b', r'${= 1}')];
+    final widths = await _pumpGauge(tester, _gauge(children), children);
+    expect(widths['a'], 300);
+    expect(widths['b'], 100);
+  });
+
+  testWidgets('a bound flex follows its variable', (tester) async {
+    final Observable<VariableData> share = Observable(
+      VariableData(
+        id: 'share',
+        name: 'share',
+        type: VariableType.integer,
+        value: 3,
+      ),
+    );
+    final codelesslyContext = CodelesslyContext.empty()
+      ..variables['share'] = share;
+    final children = [_bar('a', r'${= share}'), _bar('b', r'${= 1}')];
+    var widths = await _pumpGauge(
+      tester,
+      _gauge(children),
+      children,
+      codelesslyContext: codelesslyContext,
+    );
+    expect(widths['a'], 300);
+
+    share.set(share.value.copyWith(value: 1));
+    await tester.pump();
+    expect(
+      tester
+          .getSize(find.byKey(const ValueKey('Rectangle Transformer of a [a]')))
+          .width,
+      200,
+    );
+  });
+
+  testWidgets('a bound flex reads the list item', (tester) async {
+    final children = [
+      _bar('used', r'${= item.used}'),
+      _bar('free', r'${= item.total - item.used}'),
+    ];
+    final widths = await _pumpGauge(
+      tester,
+      _gauge(children),
+      children,
+      item: IndexedItem(0, {'used': 30, 'total': 40}),
+    );
+    expect(widths['used'], 300);
+    expect(widths['free'], 100);
   });
 }
