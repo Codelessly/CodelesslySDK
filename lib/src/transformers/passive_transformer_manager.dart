@@ -30,6 +30,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'appBar': PassiveAppBarTransformer(getNode, this),
       'navigationBar': PassiveNavigationBarTransformer(getNode, this),
       'switch': PassiveSwitchTransformer(getNode, this),
+      'signature': PassiveSignatureTransformer(getNode, this),
       'slider': PassiveSliderTransformer(getNode, this),
       'placeholder': PassivePlaceholderTransformer(getNode, this),
       'singlePlaceholder': PassiveSinglePlaceholderTransformer(getNode, this),
@@ -83,7 +84,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       );
     }
 
-    return _wrapWithListener(
+    final Widget built = _wrapWithListener(
       context,
       node: node,
       builder: (context) {
@@ -96,6 +97,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         return _buildDecorated(context, node, settings);
       },
     );
+    return settings.withReactions
+        ? wrapWithInteractionScopes(context, node, built)
+        : built;
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -175,9 +179,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// Returns [node] with the style properties that conditions, bound
   /// variables or formulas, or set value actions give it at runtime: `fill`
-  /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
-  /// `height`, `flex` (its share of an expanded row or column, so bars
-  /// can be sized proportionally) and `rotation` (in degrees). Returns
+  /// (a text's color for text nodes), `stroke`, `strokeWeight`, `opacity`,
+  /// `width`, `height`, `flex` (its share of an expanded row or column, so
+  /// bars can be sized proportionally) and `rotation` (in degrees). Returns
   /// [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
@@ -204,6 +208,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           stroke.copyWith(visible: true).toJson(),
           for (final paint in geometry.strokes.skip(1)) paint.toJson(),
         ];
+      }
+      final double? strokeWeight = value<double>('strokeWeight');
+      if (strokeWeight != null && strokeWeight != geometry.strokeWeight) {
+        patch['strokeWeight'] = math.max(0, strokeWeight).toDouble();
       }
     }
     if (node is TextNode) {

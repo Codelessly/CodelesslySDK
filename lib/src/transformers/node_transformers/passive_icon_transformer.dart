@@ -35,19 +35,57 @@ class PassiveIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
     final ColorRGBA? iconColor =
         PropertyValueDelegate.getPropertyValue<ColorRGBA>(
           node,
           'iconColor',
-          scopedValues: ScopedValues.of(context),
+          scopedValues: scopedValues,
         );
-    final MultiSourceIconModel icon = iconColor == null
+    final String? iconName = PropertyValueDelegate.getPropertyValue<String>(
+      node,
+      'iconName',
+      scopedValues: scopedValues,
+    );
+    MultiSourceIconModel icon = iconColor == null
         ? node.properties.icon
         : node.properties.icon.copyWith(color: iconColor);
+    if (iconName != null && iconName.trim().isNotEmpty) {
+      icon = withIconName(icon, iconName.trim());
+    }
     return retrieveIconWidget(icon, node.basicBoxLocal.width) ??
         SizedBox(
           width: node.basicBoxLocal.width,
           height: node.basicBoxLocal.height,
         );
   }
+}
+
+/// [icon] showing the Material Symbol [name] instead, for an `iconName`
+/// bound to data. Material Symbols load by name alone (Material Icons need
+/// each icon's version), so a Material Icon becomes the Material Symbol of
+/// the same style, filled when it was filled.
+MultiSourceIconModel withIconName(MultiSourceIconModel icon, String name) {
+  final IconModel? current = icon.icon;
+  if (current is MaterialSymbol) {
+    return icon.copyWith(icon: current.copyWith(name: name), show: true);
+  }
+  final MaterialIconStyle? style = current is MaterialIcon
+      ? current.style
+      : null;
+  return icon.copyWith(
+    type: IconTypeEnum.icon,
+    show: true,
+    icon: MaterialSymbol(
+      codepoint: 0,
+      fontFamily: 'MaterialSymbols',
+      name: name,
+      style: switch (style) {
+        MaterialIconStyle.rounded => MaterialSymbolStyle.rounded,
+        MaterialIconStyle.sharp => MaterialSymbolStyle.sharp,
+        _ => MaterialSymbolStyle.outlined,
+      },
+    ),
+    fill: style == MaterialIconStyle.filled ? 1 : icon.fill,
+  );
 }

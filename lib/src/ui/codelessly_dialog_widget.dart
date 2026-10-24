@@ -11,27 +11,38 @@ class CodelesslyDialogWidget extends StatelessWidget {
   /// or anywhere else, e.g. a menu at the top right.
   final AlignmentGeometry alignment;
 
+  /// How the canvas is sized: [CanvasSizing.design] for a dialog,
+  /// [CanvasSizing.sheet] for a bottom sheet, [CanvasSizing.fill] for a
+  /// full-screen dialog.
+  final CanvasSizing sizing;
+
   const CodelesslyDialogWidget({
     super.key,
     required this.builder,
     required this.showCloseButton,
     this.alignment = Alignment.center,
+    this.sizing = CanvasSizing.design,
   });
 
   @override
   Widget build(BuildContext context) {
-    // A dialog is centered and sized by its layout, so its canvas keeps its
-    // design size instead of filling the screen.
+    // A dialog is placed and sized by its layout, so its canvas keeps its
+    // design size instead of filling the screen; a sheet takes the screen's
+    // width and a full-screen dialog all of it.
     return CanvasSizingScope(
-      sizing: CanvasSizing.design,
+      sizing: sizing,
       child: Builder(builder: _buildDialog),
     );
   }
 
+  /// A sheet sits on the bottom edge wherever the action places a dialog.
+  AlignmentGeometry get _alignment =>
+      sizing == CanvasSizing.sheet ? Alignment.bottomCenter : alignment;
+
   Widget _buildDialog(BuildContext context) {
     if (showCloseButton) {
       return Align(
-        alignment: alignment,
+        alignment: _alignment,
         child: Material(
           type: MaterialType.transparency,
           child: Stack(
@@ -55,6 +66,7 @@ class CodelesslyDialogWidget extends StatelessWidget {
       );
     }
 
-    return Align(alignment: alignment, child: builder(context));
+    if (sizing == CanvasSizing.fill) return builder(context);
+    return Align(alignment: _alignment, child: builder(context));
   }
 }

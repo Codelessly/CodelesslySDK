@@ -7,6 +7,38 @@ Requires codelessly_api 6.2.0.
 - Row/column `spacing`, and `wrap` with `runSpacing` (`CodelesslyWrap`).
   Children hidden by a visibility formula take no space and no gap.
 - `flex` and `rotation` can be bound to data like fill, opacity and size.
+- An expanded child whose bound `flex` is 0 takes no space, where it used to
+  keep a sliver.
+
+### Signing
+
+- Signature nodes take a signature by finger, pen or mouse and write its
+  strokes to the bound `value` as the pen goes down and lifts, firing
+  `changed`. Setting the variable redraws the box: `[]` clears it, and a
+  saved signature replays it. Read-only boxes only show.
+- The hold trigger runs its actions once the node has been held for its
+  duration. Letting go or moving off drains it. While it is held, the node
+  and the nodes inside read the progress, 0 to 1, as `${hold}`, to fill a
+  bar or change a label.
+- `strokeWeight` can be bound, set by a condition or changed by an action,
+  for a border that thickens when picked.
+
+### Dialogs
+
+- A responsive layout in a centered dialog shows the layout for the screen,
+  as a layout group in a dialog picks its canvas. It went by the dialog's
+  own width, so a 520 wide dialog always showed its mobile layout.
+- Show dialog actions present their canvas by `presentation`: a centered
+  dialog, a bottom sheet (full width, as tall as its content up to 90% of
+  the screen), a sheet on mobile and a dialog on larger screens, or full
+  screen. `CanvasSizing.sheet` sizes a canvas for a sheet.
+
+### Icons
+
+- An icon's `iconName` can be bound to data, set by a condition or changed by
+  an action. It names a Material Symbol, so one icon node can show the
+  icon each list item asks for; a Material Icon becomes the symbol of the
+  same style.
 
 ### Formulas and variables
 
@@ -20,6 +52,11 @@ Requires codelessly_api 6.2.0.
   `padLeft`, `padRight`, `substring`, `split`, `replace`, `coalesce`,
   `formatNumber` and `matches` (regular expressions). `money` takes a digit
   count.
+- Record helpers: `unset`, `prepend`, `updateWhere`, `removeWhere`,
+  `findIndex` and `newId`; `set` also takes a list and an index, and
+  `indexOf` and `slice` also take text. They return new values, so a set
+  variable action can write a nested change back, e.g. `updateWhere(logs,
+  l => l.id == logId, l => set(l, 'crew', append(l.crew, entry)))`.
 - A map's own key wins over a built-in accessor of the same name
   (`${rig.length}` reads the field).
 

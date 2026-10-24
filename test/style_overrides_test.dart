@@ -149,4 +149,51 @@ void main() {
       ),
     );
   });
+
+  testWidgets('a bound strokeWeight thickens the border', (tester) async {
+    final RectangleNode node = RectangleNode.fromJson({
+      ...RectangleNode(
+        id: 'tile',
+        name: 'Tile',
+        basicBoxLocal: NodeBox(0, 0, 40, 40),
+        strokes: [
+          PaintModel.solid(id: 's', color: ColorRGB.fromHex('#FFC21A')),
+        ],
+        strokeWeight: 1,
+      ).toJson(),
+      'variables': {'strokeWeight': r'${= if(picked, 3, 1)}'},
+    })..parentID = kRootNode;
+    final manager = PassiveNodeTransformerManager(
+      (id) => node,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    final Observable<VariableData> picked = Observable(
+      VariableData(
+        id: 'picked',
+        name: 'picked',
+        type: VariableType.boolean,
+        value: false,
+      ),
+    );
+    late double weight;
+    Future<void> pump() => tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: CodelesslyContext.empty()..variables['picked'] = picked,
+        child: Builder(
+          builder: (context) {
+            weight = (manager.applyStyleOverrides(
+              context,
+              node,
+            ) as GeometryMixin).strokeWeight;
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    await pump();
+    expect(weight, 1);
+    picked.set(picked.value.copyWith(value: true));
+    await pump();
+    expect(weight, 3);
+  });
 }

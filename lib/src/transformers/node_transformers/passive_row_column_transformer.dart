@@ -494,17 +494,36 @@ class PassiveRowColumnWidget extends StatelessWidget {
       if (sizedWidget is! Flexible) {
         return FlexChildVisibility(collapsed: hidden, child: sizedWidget);
       }
-      // Without flex the hidden child would be laid out with unbounded
+      // A flex bound to data (a bar's share of a gauge) or set by a
+      // condition replaces the node's own: the row lays out the Flexible, so
+      // the child's own style overrides can't change its share. One bound to
+      // no share (an empty progress fill) takes no space.
+      final num? boundFlex = child.variables.containsKey('flex')
+          ? PropertyValueDelegate.getPropertyValue<num>(
+              child,
+              'flex',
+              scopedValues: ScopedValues.of(context),
+            )
+          : null;
+      final bool empty = boundFlex != null && boundFlex <= 0;
+      final bool collapsed = hidden || empty;
+      final int flex = boundFlex != null && boundFlex > 0
+          ? boundFlex.round()
+          : sizedWidget.flex;
+      final bool isRow =
+          node is RowColumnMixin &&
+          (node as RowColumnMixin).rowColumnType == RowColumnType.row;
+      // Without flex the collapsed child would be laid out with unbounded
       // main-axis constraints, which a scrollable inside it can't take
       // (a hidden grid computed NaN offsets), so it gets no space at all.
       return FlexChildVisibility(
-        collapsed: hidden,
+        collapsed: collapsed,
         child: Flexible(
-          flex: hidden ? 0 : sizedWidget.flex,
+          flex: collapsed ? 0 : flex,
           fit: sizedWidget.fit,
           child: SizedBox(
-            width: hidden ? 0 : null,
-            height: hidden ? 0 : null,
+            width: hidden || (empty && isRow) ? 0 : null,
+            height: hidden || (empty && !isRow) ? 0 : null,
             child: sizedWidget.child,
           ),
         ),

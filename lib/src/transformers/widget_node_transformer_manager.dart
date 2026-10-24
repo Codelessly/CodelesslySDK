@@ -225,8 +225,44 @@ abstract class WidgetNodeTransformerManager
     }
   }
 
+  /// Wraps the whole build of a [node] with hold reactions so they run once
+  /// it has been held, sharing the progress as `hold`. [child] builds the
+  /// node below the scope so the node's own bindings see it too.
+  Widget wrapWithInteractionScopes(
+    BuildContext context,
+    BaseNode node,
+    Widget child,
+  ) {
+    if (node is! ReactionMixin) return child;
+    if (node case CanvasNode() || SpacerNode()) return child;
+    final List<Reaction> onHoldReactions = (node as ReactionMixin).reactions
+        .where(
+          (reaction) =>
+              reaction.trigger.type == TriggerType.hold &&
+              reaction.action.enabled,
+        )
+        .toList();
+    if (onHoldReactions.isEmpty) return child;
+    return HoldToConfirm(
+      duration: Duration(milliseconds: onHoldReactions.first.trigger.duration),
+      onConfirmed: () => FunctionsRepository.triggerAction(
+        context,
+        TriggerType.hold,
+        reactions: onHoldReactions,
+      ),
+      child: child,
+    );
+  }
+
   /// Convenience method to handle widget reactions.
-  Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
+  Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) =>
+      _wrapWithTapReactions(context, node, widget);
+
+  Widget _wrapWithTapReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
     if (node is! ReactionMixin) return widget;
     if (node case CanvasNode() || SpacerNode()) return widget;
     if (node is CustomPropertiesMixin &&
