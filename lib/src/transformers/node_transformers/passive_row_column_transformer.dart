@@ -192,6 +192,26 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       );
     }
 
+    // A hugging axis with a min constraint is at least that big, padding
+    // outside this widget included.
+    final double? minWidth = rowColumnNode.horizontalFit == SizeFit.shrinkWrap
+        ? _minExtent(rowColumnNode.constraints.minWidth, padding.horizontal)
+        : null;
+    final double? minHeight =
+        rowColumnNode.verticalFit == SizeFit.shrinkWrap &&
+            !(isPlaceholder && rowColumnNode.verticalFit.isFlex)
+        ? _minExtent(rowColumnNode.constraints.minHeight, padding.vertical)
+        : null;
+    if (minWidth != null || minHeight != null) {
+      res = ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: minWidth ?? 0,
+          minHeight: minHeight ?? 0,
+        ),
+        child: res,
+      );
+    }
+
     if (outerBox.width == null &&
         outerBox.height == null &&
         !outerBox.fillWidth &&
@@ -221,8 +241,8 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   /// The design extent of a Row/Column's own box on one axis, or null when it
   /// hugs its children.
   ///
-  /// Fixed and locked take the solved outer size. shrinkWrap hugs (at least
-  /// its min constraint). Expanded takes its max constraint when it has one,
+  /// Fixed and locked take the solved outer size. shrinkWrap hugs; its min
+  /// constraint is a minimum ([_minExtent]), not a size. Expanded takes its max constraint when it has one,
   /// and otherwise fills a bounded axis or takes its design size on an
   /// unbounded one. Flexible takes its design size, as leaves do: its
   /// [Flexible] parent lets it get smaller, never larger, matching the
@@ -237,10 +257,17 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     required double? max,
     double inset = 0,
   }) => switch (fit) {
-    SizeFit.shrinkWrap => min == null ? null : math.max(0, min - inset),
+    // A hugging axis has no size of its own: its min constraint is applied
+    // as a minimum (see [_minExtent]), so content larger than it grows it.
+    SizeFit.shrinkWrap => null,
     SizeFit.expanded => max == null ? design : math.max(0, max - inset),
     SizeFit.fixed || SizeFit.locked || SizeFit.flexible => design,
   };
+
+  /// The minimum a hugging axis keeps: its min constraint less the padding
+  /// outside this widget, or null without one.
+  static double? _minExtent(double? min, double inset) =>
+      min == null ? null : math.max(0, min - inset);
 
   static bool _fillsAxis(SizeFit fit, {required double? max}) =>
       fit == SizeFit.expanded && max == null;

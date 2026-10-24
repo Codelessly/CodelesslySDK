@@ -15,7 +15,8 @@ Needs codelessly_api 6.2.0.
 ### Layout and rendering
 
 - Wrapping rows and columns render as a `Wrap`.
-- A hugging row or column's min and max sizes include its padding.
+- A hugging row or column's min size is a minimum that includes its padding:
+  content taller than it grows it (it was drawn at exactly the min size).
 - Circular indicators draw arcs (start angle and sweep), with `value`,
   `color`, `startAngle` and `sweepAngle` bindable.
 - Text with `tabularFigures` uses equal-width digits.
