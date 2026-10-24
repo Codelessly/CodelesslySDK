@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../utils/node_state_provider.dart';
@@ -271,6 +272,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   }
 
   void onFocusChanged() {
+    // A `focused` variable follows the field's focus, so other nodes can
+    // style themselves by it (a focus ring drawn around the field).
+    if (mounted && widget.node.variables['focused'] != null) {
+      _setFocusedVariable(context, widget.node, focusNode.hasFocus);
+    }
     if (!focusNode.hasFocus) {
       widget.onSubmitted?.call(context, controller.text);
     }
@@ -306,9 +312,19 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     final FormFieldValidator<String> validator =
         widget.validator ?? validatorModel.validate;
 
+    // A bound `autoFocus` (e.g. only for a new item on desktop) replaces the
+    // design value. Like Flutter's, it applies when the field is first built.
     final bool autofocus =
         !widget.settings.isPreview &&
-        (widget.autofocus ?? properties.autoFocus);
+        (widget.autofocus ??
+            (node.variables['autoFocus'] == null
+                ? null
+                : PropertyValueDelegate.getPropertyValue<bool>(
+                    node,
+                    'autoFocus',
+                    scopedValues: scopedValues,
+                  )) ??
+            properties.autoFocus);
 
     // Flutter can only obscure a single-line field, and a field that expands
     // has no line limit, so an obscured field (a password) doesn't expand:
@@ -455,11 +471,20 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     // `${= invalid ? 'Required' : ''}` that comes out empty (or blank) is
     // no error, so the field keeps its normal border and has no error row.
     // InputDecoration uses errorBorder/focusedErrorBorder only with an error.
+    // A bound `errorText` (e.g. `${formErrors.title}`) takes precedence over
+    // the design one; a null value is no error.
+    final String? errorSource = node.variables['errorText'] == null
+        ? decoration.errorText
+        : PropertyValueDelegate.getPropertyValue<Object>(
+            node,
+            'errorText',
+            scopedValues: scopedValues,
+          )?.toString();
     final String? errorMessage = getText(
       context,
       node,
       property: 'errorText',
-      defaultValue: decoration.errorText,
+      defaultValue: errorSource,
       scopedValues: scopedValues,
       settings: settings,
     );
@@ -471,7 +496,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
             context,
             node,
             property: 'errorText',
-            defaultValue: decoration.errorText,
+            defaultValue: errorSource,
             scopedValues: scopedValues,
             settings: settings,
             variablesOverrides: widget.variablesOverrides,
@@ -688,6 +713,21 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       maxLines: maxLines,
     );
   }
+}
+
+/// Writes [focused] to the variable [node] binds its `focused` property to.
+void _setFocusedVariable(BuildContext context, BaseNode node, bool focused) {
+  final String? path = node.variables['focused'];
+  if (path == null) return;
+  final VariableMatch? match = VariableMatch.parse(
+    path.wrapWithVariableSyntax(),
+  );
+  if (match == null || match.hasPath) return;
+  final ValueNotifier<VariableData>? notifier = context
+      .read<CodelesslyContext>()
+      .findVariableByName(match.name);
+  if (notifier == null || notifier.value.value == '$focused') return;
+  notifier.value = notifier.value.copyWith(value: focused);
 }
 
 class _ReactiveIcon extends StatelessWidget {
