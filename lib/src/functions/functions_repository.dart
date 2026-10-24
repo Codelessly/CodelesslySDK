@@ -598,6 +598,18 @@ class FunctionsRepository {
     );
   }
 
+  /// The on-screen rect of the node that [context] belongs to (the node that
+  /// ran the action), which a popover opens next to. Null when it has no
+  /// laid-out box.
+  static Rect? anchorRectOf(BuildContext context) {
+    if (!context.mounted) return null;
+    final RenderObject? object = context.findRenderObject();
+    if (object is! RenderBox || !object.hasSize || !object.attached) {
+      return null;
+    }
+    return object.localToGlobal(Offset.zero) & object.size;
+  }
+
   /// The id of the published layout that holds the canvas [canvasId], if any.
   static String? layoutIdForCanvas(Codelessly codelessly, String canvasId) =>
       codelessly.dataManager.publishModel?.layouts.values
@@ -666,6 +678,9 @@ class FunctionsRepository {
       barrierColor: barrierColor,
       showCloseButton: showCloseButton,
       routeSettings: RouteSettings(arguments: parsedParams),
+      anchor: presentation == DialogPresentation.popover
+          ? anchorRectOf(context)
+          : null,
       builder: (context) => ActionChainOpener(
         openerHosts: openerHosts,
         child: CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
@@ -681,9 +696,10 @@ class FunctionsRepository {
     return result;
   }
 
-  /// Opens what [builder] builds as a dialog at [alignment] or as a bottom
-  /// sheet, per [presentation] (adaptive: a sheet below 600 px wide), and
-  /// completes with the value it is closed with.
+  /// Opens what [builder] builds as a dialog at [alignment], as a bottom
+  /// sheet, or as a popover menu next to [anchor], per [presentation]
+  /// (adaptive: a sheet below 600 px wide), and completes with the value it
+  /// is closed with.
   static Future<T?> presentCanvas<T>(
     BuildContext context, {
     required WidgetBuilder builder,
@@ -693,9 +709,25 @@ class FunctionsRepository {
     Color? barrierColor,
     bool showCloseButton = false,
     RouteSettings? routeSettings,
+    Rect? anchor,
   }) {
+    if (presentation == DialogPresentation.popover) {
+      return showGeneralDialog<T>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: 'Close',
+        barrierColor: barrierColor ?? Colors.transparent,
+        transitionDuration: const Duration(milliseconds: 120),
+        routeSettings: routeSettings,
+        pageBuilder: (context, _, _) =>
+            CodelesslyPopoverWidget(anchor: anchor, builder: builder),
+        transitionBuilder: (context, animation, _, child) =>
+            FadeTransition(opacity: animation, child: child),
+      );
+    }
     final bool asSheet = switch (presentation) {
-      DialogPresentation.dialog => false,
+      DialogPresentation.dialog || DialogPresentation.popover => false,
       DialogPresentation.bottomSheet => true,
       DialogPresentation.adaptive =>
         (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < 600,
