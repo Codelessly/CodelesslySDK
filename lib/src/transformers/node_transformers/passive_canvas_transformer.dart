@@ -195,8 +195,15 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         body: body,
       );
     } else {
+      final Color? background = retrieveBackgroundColor(context, node);
+      // Under a TapThroughScope, a canvas without a background takes no taps
+      // on its empty parts, so they reach its dialog's barrier.
+      final bool transparent =
+          (background == null || background.a == 0) &&
+          TapThroughScope.of(context);
       scaffold = Material(
-        color: retrieveBackgroundColor(context, node),
+        type: transparent ? MaterialType.transparency : MaterialType.canvas,
+        color: transparent ? null : background,
         child: body,
       );
     }
@@ -377,6 +384,9 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       settings: settings,
       builder: (context) => CanvasViewport(
         node: node,
+        followsScreen:
+            node.scaleMode == ScaleMode.responsive &&
+            hasResponsiveLayout(node, getNode),
         child: switch (node.scaleMode) {
           ScaleMode.responsive => _wrapInScaffoldForResponsive(
             context: context,
@@ -390,6 +400,20 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
           ),
         },
       ),
+    );
+  }
+
+  /// Whether [node] or a node under it is a responsive layout (a
+  /// [VarianceNode] whose variants map to breakpoints), in any variant.
+  static bool hasResponsiveLayout(BaseNode node, GetNode getNode) {
+    if (node is VarianceNode) {
+      if (node.isResponsive) return true;
+      return node.allVariantsChildren.any(
+        (id) => hasResponsiveLayout(getNode(id), getNode),
+      );
+    }
+    return node.childrenOrEmpty.any(
+      (id) => hasResponsiveLayout(getNode(id), getNode),
     );
   }
 
@@ -439,6 +463,13 @@ enum CanvasSizing {
   /// The canvas keeps the size it was designed at, within the space it is
   /// given. Used where the host only centers the layout and lets it choose
   /// its size, such as a dialog.
+  ///
+  /// A responsive canvas with a responsive layout in it (see
+  /// [PassiveCanvasTransformer.hasResponsiveLayout]) fills the space
+  /// instead, as with [fill]: its variant follows the screen, and each
+  /// variant places itself in it (a full-screen sheet on a phone, a
+  /// centered card on a desktop). Give such a canvas no background so the
+  /// barrier shows around what its layout draws.
   design,
 
   /// The canvas fills the width it is given and keeps its design height (or
@@ -465,6 +496,22 @@ class CanvasSizingScope extends InheritedWidget {
   @override
   bool updateShouldNotify(CanvasSizingScope oldWidget) =>
       sizing != oldWidget.sizing;
+}
+
+/// Makes the empty parts of the layout below let taps through to what is
+/// behind it: the parts where neither a node's fills, strokes or content
+/// paint nor a reactive node is (a transparent canvas, an empty frame). Set
+/// by `CodelesslyDialogWidget`, so a tap beside a full-screen dialog's
+/// layout reaches the barrier and closes a dismissible dialog.
+class TapThroughScope extends InheritedWidget {
+  const TapThroughScope({super.key, required super.child});
+
+  /// Whether a [TapThroughScope] is above [context].
+  static bool of(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<TapThroughScope>() != null;
+
+  @override
+  bool updateShouldNotify(TapThroughScope oldWidget) => false;
 }
 
 /// The width the canvas above is laid out at, which picks the variant a
@@ -500,9 +547,19 @@ class CanvasWidthScope extends InheritedWidget {
 /// on an unbounded axis it gets its design size (see [CanvasSizing.fill]).
 class CanvasViewport extends StatelessWidget {
   final CanvasNode node;
+
+  /// Whether the canvas fills the space under [CanvasSizing.design] too: a
+  /// responsive canvas that holds a responsive layout.
+  final bool followsScreen;
+
   final Widget child;
 
-  const CanvasViewport({super.key, required this.node, required this.child});
+  const CanvasViewport({
+    super.key,
+    required this.node,
+    this.followsScreen = false,
+    required this.child,
+  });
 
   /// The canvas box for [constraints] under [sizing], per axis. A null
   /// height leaves the height to the canvas content (see
@@ -548,7 +605,9 @@ class CanvasViewport extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CanvasSizing sizing = CanvasSizingScope.of(context);
+    final CanvasSizing sizing = followsScreen
+        ? CanvasSizing.fill
+        : CanvasSizingScope.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final box = resolve(node, constraints, sizing: sizing);
@@ -795,8 +854,6 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       .where(
         (action) =>
             action.enabled &&
-            // Because calling api is handled in LayoutBuilder.
-            action.type != ActionType.callApi &&
             action.type != ActionType.navigation &&
             action.type != ActionType.submit &&
             action.type != ActionType.link,

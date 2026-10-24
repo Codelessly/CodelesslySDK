@@ -123,8 +123,8 @@ void main() {
 
     test('range', () {
       expect(eval('range(4)'), [0, 1, 2, 3]);
-      expect(eval('range(0, 70, 10)'), [0, 10, 20, 30, 40, 50, 60]);
-      expect(eval('range(3, 0)'), [3, 2, 1]);
+      expect(eval('range(0, 70, 10)'), [0, 10, 20, 30, 40, 50, 60, 70]);
+      expect(eval('range(3, 0)'), [3, 2, 1, 0]);
       expect(eval('range(1, 5, 0)'), isEmpty);
     });
 

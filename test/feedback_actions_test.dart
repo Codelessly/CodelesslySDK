@@ -197,6 +197,9 @@ Future<Codelessly> pumpLayouts(
           value: CodelesslyContext.empty(layoutID: main.id),
         ),
         Provider<Codelessly>.value(value: codelessly),
+        ChangeNotifierProvider<CodelesslyWidgetController>.value(
+          value: controller,
+        ),
       ],
       child: MaterialApp(
         home: CodelesslyLayoutBuilder(
@@ -222,6 +225,58 @@ TextStyle styleOfText(WidgetTester tester, String text) {
 }
 
 void main() {
+  group('pop', () {
+    testWidgets('with nothing to go back to goes to its destination', (
+      tester,
+    ) async {
+      final guide = layoutOf('guide', [
+        canvas('guideCanvas', 'guideBody'),
+        body('guideBody', 'guideCanvas', ['guideText']),
+        text('guideText', 'guideBody', 'The guide', brandRegular),
+      ]);
+      await pumpLayouts(tester, [
+        layoutOf(
+          'main',
+          mainScreen(
+            NavigationAction(
+              navigationType: NavigationType.pop,
+              destinationId: 'guideCanvas',
+            ),
+          ),
+        ),
+        guide,
+      ]);
+      expect(find.byType(CodelesslyWidget), findsNothing);
+      await tester.tap(find.text('Go'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      // The main screen was replaced by the guide's.
+      expect(find.text('Your album'), findsNothing);
+      expect(
+        tester
+            .widget<CodelesslyWidget>(find.byType(CodelesslyWidget))
+            .controller
+            ?.layoutID,
+        'guide',
+      );
+    });
+
+    testWidgets('without a destination does nothing at the first screen', (
+      tester,
+    ) async {
+      await pumpLayouts(tester, [
+        layoutOf(
+          'main',
+          mainScreen(NavigationAction(navigationType: NavigationType.pop)),
+        ),
+      ]);
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Your album'), findsOneWidget);
+    });
+  });
+
   group('FeedbackTheme', () {
     test('reads the font, primary, surface and text color of a layout', () {
       final FeedbackTheme theme = FeedbackTheme.fromNodes(
@@ -233,6 +288,57 @@ void main() {
       expect(theme.surface, brandSurface.toFlutterColor());
       expect(theme.onSurface, brandText.toFlutterColor());
       expect(theme.buttonRadius, 6);
+    });
+
+    test('reads the outline and hard shadow most tappable shapes share', () {
+      RectangleNode stamped(String id, {bool outlined = true}) => RectangleNode(
+        id: id,
+        name: id,
+        basicBoxLocal: NodeBox(0, 0, 160, 44),
+        fills: [paint(brandPrimary)],
+        strokes: [if (outlined) paint(brandText)],
+        strokeWeight: outlined ? 1.5 : 0,
+        effects: [
+          Effect.dropShadow(
+            id: 'stamp',
+            radius: 0,
+            spread: 0,
+            color: brandText,
+            offset: const Vec(3, 3),
+          ),
+        ],
+        reactions: [
+          Reaction(
+            action: ShowToastAction(message: 'x'),
+            trigger: TriggerModel(type: TriggerType.click),
+          ),
+        ],
+      )..parentID = 'mainBody';
+
+      final FeedbackTheme theme = FeedbackTheme.fromNodes([
+        ...mainScreen(ShowToastAction(message: 'x')),
+        stamped('a'),
+        stamped('b'),
+        stamped('c', outlined: false),
+      ]);
+      expect(
+        theme.buttonBorder,
+        BorderSide(color: brandText.toFlutterColor(), width: 1.5),
+      );
+      expect(theme.buttonShadows, [
+        BoxShadow(
+          color: brandText.toFlutterColor(),
+          offset: const Offset(3, 3),
+        ),
+      ]);
+      expect(theme.border, isNull);
+
+      // A layout whose buttons have none keeps plain buttons.
+      final FeedbackTheme plain = FeedbackTheme.fromNodes(
+        mainScreen(ShowToastAction(message: 'x')),
+      );
+      expect(plain.buttonBorder, isNull);
+      expect(plain.buttonShadows, isNull);
     });
 
     test('the app\'s extension wins over the layout', () {

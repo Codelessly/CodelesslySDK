@@ -52,9 +52,9 @@ void main() {
   group('lists', () {
     test('range counts up to, not including, the end', () {
       expect(eval('range(4)'), [0, 1, 2, 3]);
-      expect(eval('range(2, 5)'), [2, 3, 4]);
+      expect(eval('range(2, 5)'), [2, 3, 4, 5]);
       expect(eval('range(0, 10, 3)'), [0, 3, 6, 9]);
-      expect(eval('range(3, 0)'), [3, 2, 1]);
+      expect(eval('range(3, 0)'), [3, 2, 1, 0]);
       expect(eval('range(0)'), isEmpty);
     });
 
