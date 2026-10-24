@@ -1,8 +1,8 @@
 ## Unreleased
 
 Needs the `codelessly_api` release after 6.2.0 (signature, loop animation,
-side sheet, confirm presentation, toast styling, `contentFit` and
-`shrinkWrapRows`).
+side sheet, confirm presentation, toast styling, `contentFit`,
+`shrinkWrapRows` and `semanticLabel`).
 
 ### Nodes and actions
 
@@ -10,6 +10,13 @@ side sheet, confirm presentation, toast styling, `contentFit` and
   round-cap ink, the sign line and placeholder, the error border when its
   `error` binding is true. A finished stroke writes all strokes to the
   bound value and fires `changed`; setting the value to `[]` clears it.
+- Accessibility labels: a node with a `semanticLabel` (its `${...}` data
+  substituted, or the value bound to `variables.semanticLabel`) reads as
+  that label alone. A node with click reactions is a button named by the
+  label whose tap runs them, so a button that shows "SIGN IN" can read
+  "Sign in"; a form control keeps its own semantics inside a container
+  with the label; any other node is a labelled container. Nodes without
+  a label read as before.
 - Loop animations: nodes with a `loopAnimation` build inside a
   `LoopAnimationBox` (pulse, fade, scale or spin) that `loopAnimationEnabled`
   turns on and off without remounting, and that holds still under a

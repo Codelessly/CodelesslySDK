@@ -147,7 +147,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     widget = applyLoopAnimation(context, styled, widget);
     if (settings.withReactions) {
       widget = wrapWithReaction(context, styled, widget);
-      widget = wrapWithSemantics(styled, widget);
+      widget = wrapWithSemantics(context, styled, widget);
       widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
     }
@@ -663,7 +663,8 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
 
 /// The strings of [node] that can hold inline `${...}` variable paths and
 /// formulas: a text's characters, every string in a widget's properties
-/// (a button's label, a field's hint, a tab's label, ...) and a queryable
+/// (a button's label, a field's hint, a tab's label, ...), its accessibility
+/// label and a queryable
 /// node's collection path, where filters and order-by filters, so a list
 /// re-queries when a value its query reads changes. Reactions are left
 /// out: their actions read values when they run, not when the node builds.
@@ -686,6 +687,7 @@ List<String> inlineTextTemplatesOf(BaseNode node) {
   }
 
   if (node is TextNode) collect(node.characters);
+  collect(node.semanticLabel);
   if (node is CustomPropertiesMixin) collect(node.properties.toJson());
   if (node case final QueryableMixin queryable) {
     collect(queryable.collectionPath);

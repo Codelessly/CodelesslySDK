@@ -193,7 +193,14 @@ abstract class WidgetNodeTransformerManager
   /// Tells screen readers that a tappable node is a button. A node with text
   /// inside reads as that text; one without (an icon button) reads as its
   /// node name, or its icon's name when the node still has a default name.
-  Widget wrapWithSemantics(BaseNode node, Widget widget) {
+  ///
+  /// A node with a [BaseNode.semanticLabel] reads as that label instead
+  /// (see [wrapWithSemanticLabel]).
+  Widget wrapWithSemantics(BuildContext context, BaseNode node, Widget widget) {
+    final String? semanticLabel = semanticLabelOf(context, node);
+    if (semanticLabel != null) {
+      return wrapWithSemanticLabel(context, node, semanticLabel, widget);
+    }
     if (node is! ReactionMixin) return widget;
     if (node case CanvasNode() || SpacerNode()) return widget;
     if (node is CustomPropertiesMixin &&
@@ -226,6 +233,85 @@ abstract class WidgetNodeTransformerManager
         label: label.isEmpty ? null : label,
         child: widget,
       ),
+    );
+  }
+
+  /// [node]'s [BaseNode.semanticLabel], or the value bound to it, with its
+  /// data substituted. Null when the node has none or it comes out empty.
+  static String? semanticLabelOf(BuildContext context, BaseNode node) {
+    if (node.semanticLabel.trim().isEmpty &&
+        !node.variables.containsKey('semanticLabel')) {
+      return null;
+    }
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    final String template =
+        PropertyValueDelegate.getPropertyValue<String>(
+          node,
+          'semanticLabel',
+          scopedValues: scopedValues,
+        ) ??
+        node.semanticLabel;
+    final String label = PropertyValueDelegate.substituteVariables(
+      template,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    return label.isEmpty ? null : label;
+  }
+
+  /// Makes [label] what assistive tech gets for [node], in place of what
+  /// the node and its children would read.
+  ///
+  /// A node with click reactions reads as a button named [label] whose tap
+  /// (and long press) runs those reactions. A form control that handles
+  /// its own input (a checkbox, a text field, ...) keeps its semantics
+  /// inside a container named [label]. Any other node reads as [label]
+  /// alone.
+  Widget wrapWithSemanticLabel(
+    BuildContext context,
+    BaseNode node,
+    String label,
+    Widget widget,
+  ) {
+    List<Reaction> reactionsOf(TriggerType type) => [
+      if (node is ReactionMixin && node is! CanvasNode && node is! SpacerNode)
+        for (final Reaction reaction in (node as ReactionMixin).reactions)
+          if (reaction.trigger.type == type && reaction.action.enabled)
+            reaction,
+    ];
+    final List<Reaction> onClick = reactionsOf(TriggerType.click);
+    final List<Reaction> onLongPress = reactionsOf(TriggerType.longPress);
+
+    if (onClick.isNotEmpty || onLongPress.isNotEmpty) {
+      return Semantics(
+        container: true,
+        button: onClick.isNotEmpty,
+        label: label,
+        excludeSemantics: true,
+        onTap: onClick.isEmpty
+            ? null
+            : () => FunctionsRepository.triggerAction(
+                context,
+                TriggerType.click,
+                reactions: onClick,
+              ),
+        onLongPress: onLongPress.isEmpty
+            ? null
+            : () => FunctionsRepository.triggerAction(
+                context,
+                TriggerType.longPress,
+                reactions: onLongPress,
+              ),
+        child: widget,
+      );
+    }
+    final bool handlesInput =
+        node is CustomPropertiesMixin && node.handlesDefaultReactionsInternally;
+    return Semantics(
+      container: true,
+      label: label,
+      excludeSemantics: !handlesInput,
+      child: widget,
     );
   }
 
