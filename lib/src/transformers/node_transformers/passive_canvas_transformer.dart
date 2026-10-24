@@ -738,6 +738,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     codelessly?.removeNavigationListener('canvas-${widget.node.id}');
     _gateUser?.removeListener(_enforceSignIn);
     _stopWatchingValues();
+    _stopTimers();
     super.dispose();
   }
 
@@ -825,7 +826,74 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     super.didUpdateWidget(oldWidget);
     if (widget.node != oldWidget.node) {
       onLoadActions = collectOnLoadActions();
+      if (_timersStarted) _startTimers();
     }
+  }
+
+  final List<Timer> _timers = [];
+  bool _timersStarted = false;
+
+  /// Runs each timer reaction every [TriggerModel.intervalMs] while the
+  /// canvas is shown. A tick is skipped while the previous one's actions
+  /// are still running, so slow actions don't pile up.
+  void _startTimers() {
+    _stopTimers();
+    _timersStarted = true;
+    for (final Reaction reaction in widget.node.reactions.whereTriggerType(
+      TriggerType.timer,
+    )) {
+      if (!reaction.action.enabled) continue;
+      bool busy = false;
+      _timers.add(
+        Timer.periodic(
+          Duration(milliseconds: reaction.trigger.effectiveIntervalMs),
+          (_) async {
+            if (!mounted || busy) return;
+            busy = true;
+            try {
+              await FunctionsRepository.triggerAction(
+                context,
+                TriggerType.timer,
+                reactions: [reaction],
+              );
+            } finally {
+              busy = false;
+            }
+          },
+        ),
+      );
+    }
+  }
+
+  void _stopTimers() {
+    for (final Timer timer in _timers) {
+      timer.cancel();
+    }
+    _timers.clear();
+  }
+
+  /// Runs the key press reactions for [event]'s key. Returns whether one
+  /// matched.
+  KeyEventResult _onKey(FocusNode _, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final String pressed = normalizeKeyLabel(event.logicalKey.keyLabel);
+    final List<Reaction> matching = [
+      for (final Reaction reaction in widget.node.reactions.whereTriggerType(
+        TriggerType.keyPress,
+      ))
+        if (reaction.action.enabled &&
+            normalizeKeyLabel(reaction.trigger.key ?? '') == pressed)
+          reaction,
+    ];
+    if (matching.isEmpty) return KeyEventResult.ignored;
+    FunctionsRepository.triggerAction(
+      context,
+      TriggerType.keyPress,
+      reactions: matching,
+    );
+    return KeyEventResult.handled;
   }
 
   @override
@@ -844,8 +912,10 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       if (_redirected) return;
     }
 
+    context.read<Codelessly?>()?.prepareRoute(context, widget.node.id);
     triggerOnLoadActions(context);
     _watchValues(context);
+    _startTimers();
   }
 
   List<ActionModel> collectOnLoadActions() => widget.node.reactions
@@ -915,7 +985,22 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
         statusBarIconBrightness: brightness,
         statusBarBrightness: brightness,
       ),
-      child: Builder(builder: widget.builder),
+      child:
+          widget.settings.isPreview ||
+              !widget.node.reactions.any(
+                (reaction) => reaction.trigger.type == TriggerType.keyPress,
+              )
+          ? Builder(builder: widget.builder)
+          : Focus(
+              autofocus: true,
+              onKeyEvent: _onKey,
+              child: Builder(builder: widget.builder),
+            ),
     );
   }
 }
+
+/// A key label in the form key press triggers compare: lower case, without
+/// spaces, so `Arrow Right`, `ArrowRight` and `arrowright` all match.
+String normalizeKeyLabel(String label) =>
+    label.replaceAll(' ', '').toLowerCase();
