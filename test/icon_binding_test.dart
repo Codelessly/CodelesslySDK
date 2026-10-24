@@ -18,12 +18,19 @@ void main() {
     expect(icon.style, MaterialIconStyle.outlined);
     expect(
       icon.toSvgUrl(),
-      'https://fonts.gstatic.com/s/i/materialiconsoutlined/kitchen/v1/24px.svg',
+      'https://fonts.gstatic.com/s/i/materialiconsoutlined/kitchen/v11/24px.svg',
     );
 
     final MaterialIcon filled = iconWithName(base, 'Air').icon! as MaterialIcon;
     expect(filled.name, 'air');
     expect(filled.style, MaterialIconStyle.filled);
+    // Its SVG is only served from the version it was added in.
+    expect(
+      filled.toSvgUrl(),
+      'https://fonts.gstatic.com/s/i/materialicons/air/v10/24px.svg',
+    );
+    // Icons at version 1 aren't listed.
+    expect((iconWithName(base, 'abc').icon! as MaterialIcon).version, 1);
     expect(
       (iconWithName(base, 'power_rounded').icon! as MaterialIcon).style,
       MaterialIconStyle.rounded,
