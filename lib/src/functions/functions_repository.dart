@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../codelessly_sdk.dart';
 import '../logging/stat_tracker.dart';
 import '../ui/codelessly_dialog_widget.dart';
+import '../ui/codelessly_popover.dart';
 import 'action_chain.dart';
 import 'app_auth.dart';
 import 'cloud_files.dart';
@@ -571,6 +572,10 @@ class FunctionsRepository {
       barrierDismissible: action.barrierDismissible,
       barrierColor: action.barrierColor?.toFlutterColor(),
       showCloseButton: action.showCloseButton,
+      anchor: action.anchor,
+      placement: action.placement,
+      anchorGap: action.anchorGap,
+      anchorOffset: action.anchorOffset,
     );
   }
 
@@ -583,6 +588,11 @@ class FunctionsRepository {
   /// Shows the canvas [canvasId] as a dialog and completes with what it was
   /// closed with: the params of the "Navigate back" action that closed it, or
   /// null when it was dismissed.
+  ///
+  /// With [anchor] set to [DialogAnchor.trigger] the dialog is a popover next
+  /// to [context]'s widget, the node that ran the action, at [placement]
+  /// (see [CodelesslyPopover]). It is centered when that widget has no laid
+  /// out box.
   static Future<Object?> showLayoutDialog(
     BuildContext context, {
     required String canvasId,
@@ -590,6 +600,10 @@ class FunctionsRepository {
     bool barrierDismissible = true,
     Color? barrierColor,
     bool showCloseButton = false,
+    DialogAnchor anchor = DialogAnchor.none,
+    DialogPlacement placement = DialogPlacement.belowStart,
+    double anchorGap = 4,
+    double anchorOffset = 0,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -632,21 +646,51 @@ class FunctionsRepository {
     // A chain triggered in the dialog can finish on this layout after the
     // dialog closes (e.g. Navigate back, then a toast).
     final List<BuildContext> openerHosts = ActionChainOpener.hostsFor(context);
-    final Object? result = await showDialog<Object?>(
-      context: context,
-      useRootNavigator: false,
-      barrierDismissible: barrierDismissible,
-      barrierColor: barrierColor,
-      routeSettings: RouteSettings(arguments: parsedParams),
-      builder: (context) => ActionChainOpener(
-        openerHosts: openerHosts,
-        child: CodelesslyDialogWidget(
-          showCloseButton: showCloseButton,
-          builder: (context) =>
-              CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
-        ),
+    // The context an action runs with is the widget of the node that ran it,
+    // which an anchored dialog opens next to.
+    final Rect? anchorRect = anchor == DialogAnchor.trigger
+        ? CodelesslyPopover.anchorRectOf(
+            context,
+            Navigator.of(context, rootNavigator: false),
+          )
+        : null;
+    if (anchor == DialogAnchor.trigger && anchorRect == null) {
+      DebugLogger.instance.printInfo(
+        'The trigger of the dialog [$canvasId] has no laid out box. Showing '
+        'the dialog centered.',
+        name: name,
+      );
+    }
+    Widget dialog(BuildContext context) => ActionChainOpener(
+      openerHosts: openerHosts,
+      child: CodelesslyDialogWidget(
+        showCloseButton: showCloseButton,
+        anchored: anchorRect != null,
+        builder: (context) =>
+            CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
       ),
     );
+    final RouteSettings routeSettings = RouteSettings(arguments: parsedParams);
+    final Object? result = anchorRect != null
+        ? await CodelesslyPopover.show<Object?>(
+            context: context,
+            anchorRect: anchorRect,
+            placement: placement,
+            gap: anchorGap,
+            offset: anchorOffset,
+            barrierDismissible: barrierDismissible,
+            barrierColor: barrierColor,
+            routeSettings: routeSettings,
+            builder: dialog,
+          )
+        : await showDialog<Object?>(
+            context: context,
+            useRootNavigator: false,
+            barrierDismissible: barrierDismissible,
+            barrierColor: barrierColor,
+            routeSettings: routeSettings,
+            builder: dialog,
+          );
     if (context.mounted) {
       codelessly.notifyNavigationListeners(
         context,

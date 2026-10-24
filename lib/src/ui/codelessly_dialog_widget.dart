@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
+import 'codelessly_popover.dart';
 
 /// A widget that wraps a canvas widget and shows it in a dialog.
 class CodelesslyDialogWidget extends StatelessWidget {
   final WidgetBuilder builder;
   final bool showCloseButton;
 
+  /// Whether the dialog is a popover next to the node that opened it (see
+  /// [CodelesslyPopover]) rather than centered on the screen. Its route
+  /// positions it, and its canvas keeps its design size even when it holds
+  /// a responsive layout.
+  final bool anchored;
+
   const CodelesslyDialogWidget({
     super.key,
     required this.builder,
     required this.showCloseButton,
+    this.anchored = false,
   });
 
   @override
@@ -18,15 +26,17 @@ class CodelesslyDialogWidget extends StatelessWidget {
     // A dialog is centered and sized by its layout, so its canvas keeps its
     // design size instead of filling the screen.
     return CanvasSizingScope(
-      sizing: CanvasSizing.design,
+      sizing: anchored ? CanvasSizing.content : CanvasSizing.design,
       child: Builder(builder: _buildDialog),
     );
   }
 
+  Widget _center(Widget child) => anchored ? child : Center(child: child);
+
   Widget _buildDialog(BuildContext context) {
     if (showCloseButton) {
-      return Center(
-        child: Material(
+      return _center(
+        Material(
           type: MaterialType.transparency,
           child: Stack(
             children: [
@@ -49,6 +59,6 @@ class CodelesslyDialogWidget extends StatelessWidget {
       );
     }
 
-    return Center(child: builder(context));
+    return _center(builder(context));
   }
 }
