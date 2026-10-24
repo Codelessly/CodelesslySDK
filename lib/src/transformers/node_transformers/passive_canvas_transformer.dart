@@ -471,6 +471,11 @@ enum CanvasSizing {
   /// centered card on a desktop). Give such a canvas no background so the
   /// barrier shows around what its layout draws.
   design,
+
+  /// The canvas fills the width it is given and keeps its design height (or
+  /// its content's), within the height it is given. Used by a bottom sheet,
+  /// which spans the screen and is as tall as its canvas.
+  fillWidth,
 }
 
 /// Sets the [CanvasSizing] of the canvases below it. Without one, canvases
@@ -571,8 +576,11 @@ class CanvasViewport extends StatelessWidget {
         node.verticalFit == SizeFit.shrinkWrap &&
         node.scaleMode == ScaleMode.responsive &&
         !node.isAScaffold;
-    if (sizing == CanvasSizing.design) {
-      final double width = constraints.constrainWidth(node.basicBoxLocal.width);
+    if (sizing != CanvasSizing.fill) {
+      final double width =
+          sizing == CanvasSizing.fillWidth && constraints.hasBoundedWidth
+          ? constraints.maxWidth
+          : constraints.constrainWidth(node.basicBoxLocal.width);
       if (contentHeight) return (width: width, height: null);
       final double height = node.scaleMode == ScaleMode.autoScale
           ? autoScaleHeight(node, width)

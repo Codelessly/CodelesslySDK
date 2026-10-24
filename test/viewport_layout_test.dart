@@ -260,31 +260,6 @@ void main() {
     });
   });
 
-  group('DesignCellGridDelegate', () {
-    test('keeps the design count at the design size', () {
-      // 4 columns over 1000 with 8 spacing: cells of 244.
-      const delegate = DesignCellGridDelegate(
-        crossAxisCount: 4,
-        designCellExtent: (1000 - 3 * 8) / 4,
-        crossAxisSpacing: 8,
-      );
-      expect(delegate.crossAxisCountFor(1000), 4);
-      expect(delegate.crossAxisCountFor(999), 3);
-      expect(delegate.crossAxisCountFor(390), 1);
-      expect(delegate.crossAxisCountFor(100), 1);
-      expect(delegate.crossAxisCountFor(2000), 7);
-    });
-
-    test('falls back to the count without a design cell', () {
-      const delegate = DesignCellGridDelegate(
-        crossAxisCount: 3,
-        designCellExtent: 0,
-      );
-      expect(delegate.crossAxisCountFor(390), 3);
-      expect(delegate.crossAxisCountFor(1440), 3);
-    });
-  });
-
   group('subtreeBlocksIntrinsics', () {
     test('finds a viewport or scroll view below a node', () {
       final row = RowColumnNode(
@@ -468,7 +443,7 @@ void main() {
       expectVisible(tester, rectOf('item'), screen);
     });
 
-    forEachLayout('cells tuned at 1440 stay at least as wide as designed', (
+    forEachLayout('a fixed cross axis count is kept at every width', (
       tester,
       screen,
       host,
@@ -476,30 +451,130 @@ void main() {
       await pump(tester, screen, host, grid(), [
         rect('item', 'grid', width: 360, height: 360),
       ]);
-      // 4 columns of 360 at 1440; 2 at 834; 1 at 390.
-      final int columns = (screen.width / 360).floor();
       final Rect cell = tester.getRect(rectOf('item').first);
-      expect(cell.width, closeTo(screen.width / columns, 0.01));
-      expect(cell.width, greaterThanOrEqualTo(360));
+      expect(cell.width, closeTo(screen.width / 4, 0.01));
       expect(cell.height, cell.width);
     });
 
-    forEachLayout('cells tuned at 390 add columns on wider screens', (
+    forEachLayout('cells divide the grid width, not the design box', (
       tester,
       screen,
       host,
     ) async {
-      await pump(
-        tester,
-        screen,
-        host,
-        grid(crossAxisCount: 2, width: 390, height: 844),
-        [rect('item', 'grid', width: 195, height: 195)],
-      );
-      final int columns = (screen.width / 195).floor();
-      final Rect cell = tester.getRect(rectOf('item').first);
-      expect(cell.width, closeTo(screen.width / columns, 0.01));
+      // The grid the build scripts send: a 100 wide design box.
+      final GridViewNode node =
+          NodeJsonConverter().fromJson({
+                  'type': 'gridView',
+                  'id': 'grid',
+                  'name': 'Vehicle grid',
+                  'basicBoxLocal': [0, 0, 100, 100],
+                  'horizontalFit': 'expanded',
+                  'verticalFit': 'shrinkWrap',
+                  'isScrollable': false,
+                  'allowedTypes': [],
+                  'deniedTypes': ['gridView'],
+                  'children': ['item'],
+                  'properties': {
+                    'itemCount': 4,
+                    'gridDelegate': {
+                      'type': 'fixedCrossAxisCount',
+                      'crossAxisCount': 2,
+                      'mainAxisSpacing': 16,
+                      'crossAxisSpacing': 16,
+                      'mainAxisExtent': 130,
+                    },
+                  },
+                })!
+                as GridViewNode
+            ..parentID = kRootNode;
+      await pump(tester, screen, host, node, [
+        rect('item', 'grid', horizontalFit: SizeFit.expanded),
+      ]);
+      final List<Rect> cells = [
+        for (final element in rectOf('item').evaluate())
+          tester.getRect(find.byWidget(element.widget)),
+      ];
+      expect(cells, hasLength(4));
+      for (final Rect cell in cells) {
+        expect(cell.width, closeTo((screen.width - 16) / 2, 0.01));
+        expect(cell.height, 130);
+      }
+      expect(cells[1].left - cells[0].right, closeTo(16, 0.01));
     });
+
+    forEachLayout('a grid node with rows sized to its items', (
+      tester,
+      screen,
+      host,
+    ) async {
+      final GridViewNode node = grid(
+        crossAxisCount: 2,
+        width: 390,
+        height: 300,
+        verticalFit: SizeFit.shrinkWrap,
+        itemCount: 4,
+      );
+      node.properties.gridDelegate
+        ..mainAxisExtent = 130
+        ..shrinkWrapRows = true;
+      await pump(tester, screen, host, node, [
+        rect('item', 'grid', height: 70, horizontalFit: SizeFit.expanded),
+      ]);
+      final Rect cell = tester.getRect(rectOf('item').first);
+      expect(cell.width, closeTo(screen.width / 2, 0.01));
+      expect(cell.height, 70);
+      if (host != Host.tight) {
+        expect(viewportSize(tester), Size(screen.width, 140));
+      }
+    });
+
+    for (final bool intrinsicRows in [true, false]) {
+      testWidgets('rows sized to their content'
+          '${intrinsicRows ? ' stretch their cells' : ''}', (tester) async {
+        const List<double> heights = [100, 150, 80, 60, 120];
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Center(
+              child: SizedBox(
+                width: 316,
+                child: GridViewBuilder(
+                  shrinkWrap: true,
+                  itemCount: heights.length,
+                  gridDelegate: FixedCrossAxisCountGridDelegateProperties(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 16,
+                    mainAxisExtent: 130,
+                    shrinkWrapRows: true,
+                  ),
+                  intrinsicRows: intrinsicRows,
+                  scrollDirection: Axis.vertical,
+                  reverse: false,
+                  clipBehavior: Clip.none,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.manual,
+                  itemBuilder: (context, index) =>
+                      SizedBox(key: ValueKey(index), height: heights[index]),
+                ),
+              ),
+            ),
+          ),
+        );
+        expect(tester.takeException(), isNull);
+        Rect cell(int index) => tester.getRect(find.byKey(ValueKey(index)));
+        // Each row is as tall as its tallest item: 150, 80, 120.
+        expect(
+          tester.getSize(find.byType(GridViewBuilder)).height,
+          150 + 10 + 80 + 10 + 120,
+        );
+        expect(cell(0).width, 150);
+        expect(cell(1).left - cell(0).right, 16);
+        expect(cell(2).top, cell(0).top + 150 + 10);
+        expect(cell(4).top, cell(2).top + 80 + 10);
+        expect(cell(0).height, intrinsicRows ? 150 : 100);
+        expect(cell(3).height, intrinsicRows ? 80 : 60);
+      });
+    }
 
     forEachLayout('shrinkWrap grid sizes to its rows', (
       tester,

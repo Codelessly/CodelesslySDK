@@ -52,6 +52,21 @@ void main() {
       expect(VariablePreview.textFor(r'${userName.length}'), '3');
     });
 
+    test('read the list item the text is built for', () {
+      VariablePreview.scopeResolver = (node) => ScopedValues.preview(
+        variables: const {},
+        indexedItem: IndexedItem(0, {'name': 'Canyon Loop'}),
+      );
+      expect(VariablePreview.textFor(r'${item.name}'), 'Canyon Loop');
+      expect(
+        VariablePreview.textFor(
+          r'${item.name}',
+          item: IndexedItem(2, {'name': 'Spring Shakedown'}),
+        ),
+        'Spring Shakedown',
+      );
+    });
+
     test('evaluate formulas with defaults', () {
       expect(VariablePreview.textFor(r'${= price * 2}'), '9');
     });

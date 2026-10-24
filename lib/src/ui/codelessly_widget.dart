@@ -509,7 +509,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
 
           final SDKPublishModel model = snapshot.data!;
           effectiveLayoutID =
-              _effectiveController.layoutID ?? model.entryLayoutId;
+              model.resolveLayoutId(_effectiveController.layoutID) ??
+              model.entryLayoutId;
 
           if (effectiveLayoutID == null) {
             final errorLog = ErrorLog(
