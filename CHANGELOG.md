@@ -52,6 +52,10 @@ side sheet, confirm presentation, toast styling, `contentFit` and
   around it, so it takes the free space like Flutter's `Spacer` also under
   a `NodeBuildDecorator` (the editor's render canvas drew it at its design
   size).
+- A child that fills across a row or column that hugs that axis stretches
+  to the size its other children give it (the row is measured with
+  `IntrinsicHeight` / `IntrinsicWidth`), like a card's colored edge as tall
+  as its text.
 - A `fixedCrossAxisCount` grid keeps its count at every width and divides
   the grid's width between the cells (`DesignCellGridDelegate` is gone).
 - `GridDelegateProperties.shrinkWrapRows`: rows as tall as their tallest
