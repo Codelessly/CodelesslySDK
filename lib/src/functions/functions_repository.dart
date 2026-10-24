@@ -140,7 +140,12 @@ class FunctionsRepository {
         return runConfirm(context, action as ConfirmAction);
       case ActionType.delay:
         return Future<bool>.delayed(
-          Duration(milliseconds: (action as DelayAction).milliseconds),
+          Duration(
+            milliseconds: delayMilliseconds(
+              action as DelayAction,
+              ActionChain.scopedValuesOf(context),
+            ),
+          ),
           () => true,
         );
       case ActionType.cloudData:
@@ -148,6 +153,23 @@ class FunctionsRepository {
       case ActionType.cloudBatch:
         return runCloudBatch(context, action as CloudBatchAction);
     }
+  }
+
+  /// How long [action] waits: its [DelayAction.duration] formula when that
+  /// gives a number, else its fixed [DelayAction.milliseconds].
+  static int delayMilliseconds(DelayAction action, ScopedValues scopedValues) {
+    final String? duration = action.duration;
+    if (duration == null || duration.trim().isEmpty) {
+      return action.milliseconds;
+    }
+    final num? value = num.tryParse(
+      PropertyValueDelegate.substituteVariables(
+        duration,
+        scopedValues: scopedValues,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ).trim(),
+    );
+    return value == null || value < 0 ? action.milliseconds : value.round();
   }
 
   /// Runs a [CloudDataAction] and puts its result in its result variable
@@ -572,6 +594,7 @@ class FunctionsRepository {
       barrierColor: action.barrierColor?.toFlutterColor(),
       showCloseButton: action.showCloseButton,
       presentation: action.presentation,
+      alignment: action.alignment.flutterAlignment ?? Alignment.center,
     );
   }
 
@@ -592,6 +615,7 @@ class FunctionsRepository {
     Color? barrierColor,
     bool showCloseButton = false,
     DialogPresentation presentation = DialogPresentation.dialog,
+    AlignmentGeometry alignment = Alignment.center,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -634,62 +658,19 @@ class FunctionsRepository {
     // A chain triggered in the dialog can finish on this layout after the
     // dialog closes (e.g. Navigate back, then a toast).
     final List<BuildContext> openerHosts = ActionChainOpener.hostsFor(context);
-    Widget content(BuildContext context, CanvasSizing sizing) =>
-        ActionChainOpener(
-          openerHosts: openerHosts,
-          child: CodelesslyDialogWidget(
-            showCloseButton: showCloseButton,
-            sizing: sizing,
-            builder: (context) =>
-                CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
-          ),
-        );
-    final RouteSettings settings = RouteSettings(arguments: parsedParams);
-    final Size screen = MediaQuery.sizeOf(context);
-    final bool sheet =
-        presentation == DialogPresentation.bottomSheet ||
-        (presentation == DialogPresentation.adaptive && screen.width < 600);
-    final Object? result;
-    if (sheet) {
-      // As wide as the screen and as tall as its content, up to 90% of the
-      // screen; the canvas draws its own background and corners.
-      result = await showModalBottomSheet<Object?>(
-        context: context,
-        useRootNavigator: false,
-        isScrollControlled: true,
-        isDismissible: barrierDismissible,
-        enableDrag: barrierDismissible,
-        barrierColor: barrierColor,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        constraints: BoxConstraints(maxHeight: screen.height * 0.9),
-        routeSettings: settings,
-        builder: (context) => content(context, CanvasSizing.sheet),
-      );
-    } else if (presentation == DialogPresentation.fullScreen) {
-      result = await showGeneralDialog<Object?>(
-        context: context,
-        useRootNavigator: false,
-        barrierDismissible: barrierDismissible,
-        barrierLabel: MaterialLocalizations.of(context)
-            .modalBarrierDismissLabel,
-        barrierColor: barrierColor ?? Colors.black,
-        routeSettings: settings,
-        transitionDuration: const Duration(milliseconds: 200),
-        transitionBuilder: (context, animation, _, child) =>
-            FadeTransition(opacity: animation, child: child),
-        pageBuilder: (context, _, _) => content(context, CanvasSizing.fill),
-      );
-    } else {
-      result = await showDialog<Object?>(
-        context: context,
-        useRootNavigator: false,
-        barrierDismissible: barrierDismissible,
-        barrierColor: barrierColor,
-        routeSettings: settings,
-        builder: (context) => content(context, CanvasSizing.design),
-      );
-    }
+    final Object? result = await presentCanvas<Object?>(
+      context,
+      presentation: presentation,
+      alignment: alignment,
+      barrierDismissible: barrierDismissible,
+      barrierColor: barrierColor,
+      showCloseButton: showCloseButton,
+      routeSettings: RouteSettings(arguments: parsedParams),
+      builder: (context) => ActionChainOpener(
+        openerHosts: openerHosts,
+        child: CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
+      ),
+    );
     if (context.mounted) {
       codelessly.notifyNavigationListeners(
         context,
@@ -698,6 +679,76 @@ class FunctionsRepository {
       );
     }
     return result;
+  }
+
+  /// Opens what [builder] builds as a dialog at [alignment] or as a bottom
+  /// sheet, per [presentation] (adaptive: a sheet below 600 px wide), and
+  /// completes with the value it is closed with.
+  static Future<T?> presentCanvas<T>(
+    BuildContext context, {
+    required WidgetBuilder builder,
+    DialogPresentation presentation = DialogPresentation.dialog,
+    AlignmentGeometry alignment = Alignment.center,
+    bool barrierDismissible = true,
+    Color? barrierColor,
+    bool showCloseButton = false,
+    RouteSettings? routeSettings,
+  }) {
+    final Size? screen = MediaQuery.maybeSizeOf(context);
+    final bool asSheet = switch (presentation) {
+      DialogPresentation.dialog || DialogPresentation.fullScreen => false,
+      DialogPresentation.bottomSheet => true,
+      DialogPresentation.adaptive => (screen?.width ?? 1024) < 600,
+    };
+    Widget content(BuildContext context, CanvasSizing sizing) =>
+        CodelesslyDialogWidget(
+          showCloseButton: showCloseButton,
+          sizing: sizing,
+          alignment: asSheet ? Alignment.bottomCenter : alignment,
+          builder: builder,
+        );
+    if (asSheet) {
+      // As wide as the screen and as tall as its content, up to 90% of the
+      // screen; the canvas draws its own background and corners.
+      return showModalBottomSheet<T>(
+        context: context,
+        useRootNavigator: false,
+        isScrollControlled: true,
+        isDismissible: barrierDismissible,
+        enableDrag: barrierDismissible,
+        barrierColor: barrierColor,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        constraints: screen == null
+            ? null
+            : BoxConstraints(maxHeight: screen.height * 0.9),
+        routeSettings: routeSettings,
+        builder: (context) => content(context, CanvasSizing.sheet),
+      );
+    }
+    if (presentation == DialogPresentation.fullScreen) {
+      return showGeneralDialog<T>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: MaterialLocalizations.of(context)
+            .modalBarrierDismissLabel,
+        barrierColor: barrierColor ?? Colors.black,
+        routeSettings: routeSettings,
+        transitionDuration: const Duration(milliseconds: 200),
+        transitionBuilder: (context, animation, _, child) =>
+            FadeTransition(opacity: animation, child: child),
+        pageBuilder: (context, _, _) => content(context, CanvasSizing.fill),
+      );
+    }
+    return showDialog<T>(
+      context: context,
+      useRootNavigator: false,
+      barrierDismissible: barrierDismissible,
+      barrierColor: barrierColor,
+      routeSettings: routeSettings,
+      builder: (context) => content(context, CanvasSizing.design),
+    );
   }
 
   static void launchURL(BuildContext context, LinkAction action) {
