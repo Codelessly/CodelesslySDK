@@ -59,46 +59,27 @@ class CodelesslyDialogWidget extends StatelessWidget {
   }
 }
 
-/// A layout shown as a bottom sheet: the screen's full width, its canvas's
-/// own height (design or content), at most 90% of the screen high and
-/// scrollable past that. The layout draws its own background, corners and
-/// grab handle; the sheet itself is transparent.
+/// A layout shown as a full height bottom sheet: the screen's full width
+/// and 90% of its height, with the canvas filling it, so the canvas scrolls
+/// its own content (a fixed header over a scrolling list). The layout draws
+/// its own background, corners and grab handle; the sheet is transparent.
 class CodelesslyBottomSheetWidget extends StatelessWidget {
   final WidgetBuilder builder;
 
-  /// Whether the sheet is as tall as it can be (90% of the screen) with the
-  /// canvas filling it, so the canvas scrolls its own content under a fixed
-  /// header. Otherwise the sheet is as tall as the canvas and scrolls as one.
-  final bool fullHeight;
+  /// The share of the screen height the sheet takes.
+  static const double heightFactor = 0.9;
 
-  /// The share of the screen height a sheet can take.
-  static const double maxHeightFactor = 0.9;
-
-  const CodelesslyBottomSheetWidget({
-    super.key,
-    required this.builder,
-    this.fullHeight = false,
-  });
+  const CodelesslyBottomSheetWidget({super.key, required this.builder});
 
   @override
   Widget build(BuildContext context) {
     final MediaQueryData media = MediaQuery.of(context);
-    final double maxHeight = media.size.height * maxHeightFactor;
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: maxHeight),
-      child: Padding(
-        // Keep inputs above the keyboard.
-        padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
-        child: fullHeight
-            // A bounded height: an expanded list in the canvas scrolls
-            // inside it.
-            ? SizedBox(
-                height: maxHeight,
-                child: Builder(builder: builder),
-              )
-            // Unbounded height inside the scroll view: a filling canvas
-            // takes the full width and its own height.
-            : SingleChildScrollView(child: Builder(builder: builder)),
+    return Padding(
+      // Keep inputs above the keyboard.
+      padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+      child: SizedBox(
+        height: media.size.height * heightFactor,
+        child: Builder(builder: builder),
       ),
     );
   }
