@@ -366,6 +366,20 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   //   );
   // }
 
+  /// Whether [node]'s layout is responsive: a variance with breakpoints
+  /// within its body's first levels, where `layouts.createResponsive` puts
+  /// one.
+  bool hasResponsiveLayout(CanvasNode node) {
+    bool check(String id, int depth) {
+      final BaseNode child = getNode(id);
+      if (child is VarianceNode && child.isResponsive) return true;
+      if (depth == 0 || child is! ChildrenMixin) return false;
+      return child.children.any((id) => check(id, depth - 1));
+    }
+
+    return node.children.any((id) => check(id, 2));
+  }
+
   @override
   Widget buildWidget(
     CanvasNode node,
@@ -377,6 +391,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       settings: settings,
       builder: (context) => CanvasViewport(
         node: node,
+        responsive: hasResponsiveLayout(node),
         child: switch (node.scaleMode) {
           ScaleMode.responsive => _wrapInScaffoldForResponsive(
             context: context,
@@ -497,7 +512,17 @@ class CanvasViewport extends StatelessWidget {
   final CanvasNode node;
   final Widget child;
 
-  const CanvasViewport({super.key, required this.node, required this.child});
+  /// Whether the canvas holds a responsive layout. Such a canvas fills the
+  /// space it is given even under [CanvasSizing.design], so its layout
+  /// follows the screen rather than the breakpoint it was last designed at.
+  final bool responsive;
+
+  const CanvasViewport({
+    super.key,
+    required this.node,
+    required this.child,
+    this.responsive = false,
+  });
 
   /// The canvas box for [constraints] under [sizing], per axis. A null
   /// height leaves the height to the canvas content (see
@@ -506,6 +531,7 @@ class CanvasViewport extends StatelessWidget {
     CanvasNode node,
     BoxConstraints constraints, {
     CanvasSizing sizing = CanvasSizing.fill,
+    bool responsive = false,
   }) {
     // A canvas whose height is its content's. A scaffold needs a bounded
     // height, so a canvas with an app bar, navigation bar or FAB takes its
@@ -514,7 +540,7 @@ class CanvasViewport extends StatelessWidget {
         node.verticalFit == SizeFit.shrinkWrap &&
         node.scaleMode == ScaleMode.responsive &&
         !node.isAScaffold;
-    if (sizing == CanvasSizing.design) {
+    if (sizing == CanvasSizing.design && !responsive) {
       final double width = constraints.constrainWidth(node.basicBoxLocal.width);
       if (contentHeight) return (width: width, height: null);
       final double height = node.scaleMode == ScaleMode.autoScale
@@ -543,7 +569,12 @@ class CanvasViewport extends StatelessWidget {
     final CanvasSizing sizing = CanvasSizingScope.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final box = resolve(node, constraints, sizing: sizing);
+        final box = resolve(
+          node,
+          constraints,
+          sizing: sizing,
+          responsive: responsive,
+        );
         // The width the canvas content is laid out at: the canvas box for a
         // responsive canvas, the design width for an autoScale one (its
         // content is laid out at design size and then scaled).

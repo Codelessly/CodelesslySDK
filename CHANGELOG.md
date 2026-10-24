@@ -7,6 +7,10 @@
   `changed` trigger with the index.
 - Repeating and mirrored linear, radial and sweep gradients.
 - A node's `pulse` fades its opacity in a loop (`PulseOpacity`).
+- A dialog whose canvas holds a responsive layout fills the screen and
+  shows the layout for the screen's width, not the canvas's design width.
+- On the design canvas, a formula that yields empty text shows nothing
+  instead of a placeholder.
 
 ### Variables and formulas
 

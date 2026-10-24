@@ -58,6 +58,17 @@ abstract final class VariablePreview {
   }) {
     final ScopedValues? scopedValues = resolve(node, context);
     if (scopedValues != null) {
+      // A formula that yields empty text means "show nothing", unlike one
+      // that can't be evaluated (null), which gets a placeholder.
+      final String? formula = FormulaEvaluator.exactExpression(expression);
+      if (formula != null &&
+          PropertyValueDelegate.evaluateFormula(
+                formula,
+                scopedValues: scopedValues,
+              ) ==
+              '') {
+        return '';
+      }
       final String value = PropertyValueDelegate.substituteVariables(
         expression,
         scopedValues: scopedValues,
