@@ -66,6 +66,10 @@ class HttpApiData extends PrivacyBase {
   bool isDraft;
   @DateTimeConverter()
   final DateTime created;
+
+  /// Folder of the API in the editor. Missing in some saved APIs, so it
+  /// reads as the root folder rather than failing every API's load.
+  @JsonKey(defaultValue: '')
   final String directory;
 
   HttpApiData({
