@@ -1,9 +1,74 @@
 ## Unreleased
 
+Needs the `codelessly_api` release after 6.2.0 (signature, loop animation,
+side sheet, confirm presentation, toast styling, `contentFit` and
+`shrinkWrapRows`).
+
+### Nodes and actions
+
+- `PassiveSignatureTransformer` draws a `SignatureNode`: strokes in
+  round-cap ink, the sign line and placeholder, the error border when its
+  `error` binding is true. A finished stroke writes all strokes to the
+  bound value and fires `changed`; setting the value to `[]` clears it.
+- Loop animations: nodes with a `loopAnimation` build inside a
+  `LoopAnimationBox` (pulse, fade, scale or spin) that `loopAnimationEnabled`
+  turns on and off without remounting, and that holds still under a
+  disabled `TickerMode` (the editor's design canvas).
+- `cursorEnter`, `cursorExit` and `hover` reactions run, through a
+  translucent `MouseRegion`.
+- Dialog canvases also open as side sheets (`DialogPresentation.sideSheet`,
+  `sheetWidth`, `LayoutPresentationRoute`), and bottom sheets take
+  `maxHeightFactor` and `showDragHandle`. What a dialog canvas passes back
+  on Navigate back becomes the chain's result.
+- `ConfirmAction.presentation`: the built-in dialog and a `dialogId` canvas
+  open as a dialog, bottom sheet, adaptively or as a side sheet, like
+  `showDialog`.
+- Toasts: `accentColor`/`accentWidth` draw a bar down the left edge,
+  `iconColor` colors the icon, `fontFamily` sets the font and
+  `cornerRadius` the corners (default still a pill).
+- A node whose `disabled` binding is true and that has no Disabled
+  interaction state of its own fades to 40 % (it already ignored taps).
+
+### Forms and formulas
+
+- A text field's boolean `error` binding shows its error borders without a
+  message.
+- Formulas: `left(text, n)`, `right(text, n)` and `toMap(list, key,
+  value)`. A lambda can take the item's index as a second parameter:
+  `map(steps, (s, i) => i == length(steps) - 1)`, also in filter, find,
+  count, any, all, sortBy, unique, sum, join and toMap.
+- `isEmpty` treats null as empty, so a text variable holding "" is empty,
+  and the `isEmpty` / `isNotEmpty` accessors of list variables work.
+
+### Layout
+
+- `FrameNode.contentFit` lays the frame's children out at its design size
+  and scales them into the frame (`ScaledContent`, a filling `FittedBox`).
+- The `parent` variable: `${parent.width}` and `${parent.height}` are the
+  size a node's parent gives it (`ParentSizeScope`), for layouts that change
+  with their container's width rather than the screen's.
+- A spacer that flexes on its parent's main axis is wrapped in its
+  `Expanded`/`Flexible` by the row or column, outside every wrapper built
+  around it, so it takes the free space like Flutter's `Spacer` also under
+  a `NodeBuildDecorator` (the editor's render canvas drew it at its design
+  size).
+- A child that fills across a row or column that hugs that axis stretches
+  to the size its other children give it (the row is measured with
+  `IntrinsicHeight` / `IntrinsicWidth`), like a card's colored edge as tall
+  as its text.
+- A `fixedCrossAxisCount` grid keeps its count at every width and divides
+  the grid's width between the cells (`DesignCellGridDelegate` is gone).
+- `GridDelegateProperties.shrinkWrapRows`: rows as tall as their tallest
+  item, built as a list of rows of `Expanded` cells in an `IntrinsicHeight`
+  (`GridViewBuilder.intrinsicRows`).
+
+### Runtime UI, semantics, links and charts
+
 - A text's color can be bound with a `textColor` variable or formula.
-- Formulas: `range`, `interpolate`, `runs`, `minBy`, `maxBy`, `obj`,
-  `slice`, `substring`, `replace`, `split`, `wallTime`, and `now(offset)` /
-  `today(offset)` at a UTC offset. `FormulaClock.pinned` lets a host pin the
+- Formulas: `range(start, end, step)` includes its end (`range(3, 7)` is
+  `[3, 4, 5, 6, 7]`; `range(n)` is still n items from 0) and steps through
+  dates in minutes; `interpolate`, `runs`, `minBy`, `maxBy`, `wallTime`, and
+  `now(offset)` / `today(offset)` at a UTC offset. `FormulaClock.pinned` lets a host pin the
   clock they read (previews, reproducible screenshots).
 - API calls: the response (or the error) is the chain's `${result}`; query
   parameters are sent; `onSuccess`/`onError` actions run, and with
@@ -55,12 +120,67 @@
 - A `squeezable` node that wraps its content on a Row/Column's main axis is
   laid out as `Flexible(fit: FlexFit.loose)`: it hugs its content and
   shrinks to the room left when the Row/Column runs out of space.
-- A Row/Column with `wrap` is laid out as a `Wrap`: its children flow onto
-  a new run when they don't fit, `runSpacing` apart, aligned by its
-  `mainAxisAlignment`, `crossAxisAlignment` (stretch and baseline align to
-  the start) and `runAlignment`. A child that is expanded on the main axis
-  takes its design size there, a flexible one at most that, and a flex
-  spacer keeps its design size; margins still space the items.
+
+## 8.3.0
+
+Requires codelessly_api 6.2.0.
+
+### Layout
+
+- Row/column `spacing`, and `wrap` with `runSpacing` (`CodelesslyWrap`).
+  Children hidden by a visibility formula take no space and no gap.
+- `flex` and `rotation` can be bound to data like fill, opacity and size.
+
+### Formulas and variables
+
+- Computed variables: a variable holding a `${= ...}` formula is evaluated
+  when read and rebuilds what shows it when its inputs change.
+- Functions: `sqrt`, `pow`, trigonometry, `pi`, `radians`, `degrees`,
+  `clamp`, `distance` (great-circle), `first`, `last`, `slice`, `take`,
+  `skip`, `reverse`, `range`, `indexOf`, `object`, `merge`, `set`, `keys`,
+  `values`, `append`, `setAt`, `insertAt`, `removeAt`, `move`, `flatten`,
+  `compact` and `thousands`; also `obj`, `concat`, `daysInMonth`,
+  `padLeft`, `padRight`, `substring`, `split`, `replace`, `coalesce`,
+  `formatNumber` and `matches` (regular expressions). `money` takes a digit
+  count.
+- A map's own key wins over a built-in accessor of the same name
+  (`${rig.length}` reads the field).
+
+### Links
+
+- A layout opens by the ID of one of its canvases.
+- A link to the app's first screen gives it the link's parameters
+  (`${route.k}`).
+
+### Rendering
+
+- Linear gradients with `gradientRepeatEvery` repeat at a fixed pixel
+  period (`RepeatingGradientTransform`).
+- Arc progress bars (gauges) with ticks, needle and zone bands
+  (`ArcProgressPainter`).
+- Dialog canvases open as bottom sheets, adaptively (sheet below 600 px),
+  or aligned to a side or corner of the screen.
+
+### Text fields
+
+- `obscureText`, `enabled` and `readOnly` follow variables, conditions and
+  set-property actions.
+- A one-line field with a set height stays one line (it can obscure its
+  text and Enter submits it) and fills its height through its decoration.
+- Prefix and suffix icon constraints apply when set.
+
+### Actions
+
+- Delay actions wait as long as their `duration` formula says.
+
+### Fixes
+
+- Shadows without spread, offset or color no longer crash.
+- Image fills apply their opacity once (they painted at its square).
+- A text field's `errorText` template that comes out empty is no error.
+- List items on the design canvas show their own item's text.
+- An API document without a directory no longer fails to load
+  (`HttpApiData.directory` defaults to the root).
 
 ## 8.2.0
 
