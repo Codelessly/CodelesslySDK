@@ -162,7 +162,20 @@ void main() {
         decoration.border,
         const Border.fromBorderSide(BorderSide(color: ink, width: 1.5)),
       );
-      expect(decoration.boxShadow, const [
+      // The shadow is drawn around the clip that rounds the toast.
+      final BoxDecoration outer =
+          tester
+                  .widget<DecoratedBox>(
+                    find
+                        .ancestor(
+                          of: find.byKey(const ValueKey('codelessly-toast')),
+                          matching: find.byType(DecoratedBox),
+                        )
+                        .first,
+                  )
+                  .decoration
+              as BoxDecoration;
+      expect(outer.boxShadow, const [
         BoxShadow(color: ink, offset: Offset(4, 4)),
       ]);
       expect(box.constraints!.maxWidth, 480);

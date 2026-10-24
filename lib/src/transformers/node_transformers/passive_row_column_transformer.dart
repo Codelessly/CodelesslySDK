@@ -8,6 +8,27 @@ typedef WidgetInserter = Widget Function(Widget child);
 class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   PassiveRowColumnTransformer(super.getNode, super.manager);
 
+  /// Whether a child of [rowColumn], which hugs its cross axis, fills that
+  /// axis while another child gives it a thickness: a card's severity edge
+  /// as tall as its text, `IntrinsicHeight(child: Row(...))` in Flutter.
+  /// The row is measured to its other children's thickness first, which the
+  /// filling child then fills. With no such other child there is nothing to
+  /// fill, and the child keeps its design size (see FitBox), as the editor
+  /// lays it out. A spacer's thickness is not used, so it gives none.
+  static bool fillsAcrossWrappingRowColumn(
+    BaseNode rowColumn,
+    List<BaseNode> childrenNodes,
+  ) {
+    final bool isRow =
+        (rowColumn as RowColumnMixin).rowColumnType == RowColumnType.row;
+    SizeFit crossFit(BaseNode child) =>
+        isRow ? child.verticalFit : child.horizontalFit;
+    bool fills(BaseNode child) =>
+        child is! SpacerNode && crossFit(child) == SizeFit.expanded;
+    return childrenNodes.any(fills) &&
+        childrenNodes.any((child) => child is! SpacerNode && !fills(child));
+  }
+
   static Widget buildRowColumnWidget(
     BaseNode rowColumnNode, {
     required List<Widget> childrenWidgets,
@@ -19,7 +40,6 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
 
     final bool isRow =
         (rowColumnNode as RowColumnMixin).rowColumnType == RowColumnType.row;
-    final bool wraps = isWrap(rowColumnNode);
 
     // If the node is a canvas node's body, it is a placeholder that expands to
     // fill the canvas, while the canvas is already meant to do that as a
@@ -57,6 +77,13 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
           ),
     );
 
+    if (rowColumnNode.wrap) {
+      return _withOuterBox(
+        outerBox,
+        _buildWrap(rowColumnNode, childrenWidgets, withScroll: withScroll),
+      );
+    }
+
     final SizeFit mainFit = isRow
         ? rowColumnNode.horizontalFit
         : rowColumnNode.verticalFit;
@@ -78,11 +105,13 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         rowColumnNode.crossAxisAlignment == CrossAxisAlignmentC.stretch;
     bool measureCross = false;
     bool stretchFallsBack = false;
-    if (!wraps && crossMin == null && crossWraps) {
+    if (crossMin == null && crossWraps) {
       final bool anyChildNeedsAlignment = childrenNodes.any(
         (child) => child.alignment != AlignmentModel.none,
       );
-      if (stretches || anyChildNeedsAlignment) {
+      if (stretches ||
+          anyChildNeedsAlignment ||
+          fillsAcrossWrappingRowColumn(rowColumnNode, childrenNodes)) {
         final bool blocked = childrenNodes.any(
           (child) => subtreeBlocksIntrinsics(child, getNode),
         );
@@ -94,34 +123,21 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     final CrossAxisAlignment crossAxisAlignment = stretchFallsBack
         ? CrossAxisAlignment.start
         : rowColumnNode.crossAxisAlignment.flutterAxis;
-    Widget res = wraps
-        ? Wrap(
-            direction: isRow ? Axis.horizontal : Axis.vertical,
-            alignment: rowColumnNode.mainAxisAlignment.flutterWrapAlignment,
-            crossAxisAlignment:
-                rowColumnNode.crossAxisAlignment.flutterWrapAlignment,
-            runAlignment: (rowColumnNode as RowColumnNode)
-                .runAlignment
-                .flutterWrapAlignment,
-            runSpacing: rowColumnNode.runSpacing,
-            key: ValueKey(rowColumnNode.id),
-            children: childrenWidgets,
-          )
-        : CodelesslyFlex(
-            direction: isRow ? Axis.horizontal : Axis.vertical,
-            mainAxisAlignment: rowColumnNode.mainAxisAlignment.flutterAxis,
-            crossAxisAlignment: crossAxisAlignment,
-            // Flex asserts a baseline to align to; texts align on the
-            // alphabetic one.
-            textBaseline: crossAxisAlignment == CrossAxisAlignment.baseline
-                ? TextBaseline.alphabetic
-                : null,
-            mainAxisSize: mainFit == SizeFit.shrinkWrap
-                ? MainAxisSize.min
-                : MainAxisSize.max,
-            key: ValueKey(rowColumnNode.id),
-            children: childrenWidgets,
-          );
+    Widget res = CodelesslyFlex(
+      direction: isRow ? Axis.horizontal : Axis.vertical,
+      mainAxisAlignment: rowColumnNode.mainAxisAlignment.flutterAxis,
+      crossAxisAlignment: crossAxisAlignment,
+      // Flex asserts a baseline to align to; texts align on the alphabetic one.
+      textBaseline: crossAxisAlignment == CrossAxisAlignment.baseline
+          ? TextBaseline.alphabetic
+          : null,
+      mainAxisSize: mainFit == SizeFit.shrinkWrap
+          ? MainAxisSize.min
+          : MainAxisSize.max,
+      spacing: rowColumnNode.spacing,
+      key: ValueKey(rowColumnNode.id),
+      children: childrenWidgets,
+    );
 
     if (measureCross) {
       res = isRow ? IntrinsicHeight(child: res) : IntrinsicWidth(child: res);
@@ -135,12 +151,16 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         node: (rowColumnNode as ScrollableMixin),
         fillViewport:
             rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start,
-        flexContent:
-            !wraps && hasMainAxisFlexChild(rowColumnNode, childrenNodes),
+        flexContent: hasMainAxisFlexChild(rowColumnNode, childrenNodes),
         child: res,
       );
     }
 
+    return _withOuterBox(outerBox, res);
+  }
+
+  /// Puts [res] in the row/column's own box, [outerBox], when it has one.
+  static Widget _withOuterBox(FitBox outerBox, Widget res) {
     if (outerBox.width == null &&
         outerBox.height == null &&
         !outerBox.fillWidth &&
@@ -167,6 +187,86 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     );
   }
 
+  /// The [CodelesslyWrap] of a row/column that wraps (see
+  /// [RowColumnMixin.wrap]): a row wraps horizontally and a column
+  /// vertically, with the row/column's spacing within runs and its
+  /// runSpacing between them.
+  ///
+  /// The main-axis alignment places children within each run. The
+  /// cross-axis alignment places them within their run and places the runs
+  /// in the cross-axis free space (start, center or end; stretch and
+  /// baseline act as start), as Figma auto layout does with wrap.
+  ///
+  /// A scrollable one scrolls along its cross axis, through its runs (see
+  /// `RowColumnNode.scrollDirection`).
+  static Widget _buildWrap(
+    RowColumnMixin node,
+    List<Widget> children, {
+    required bool withScroll,
+  }) {
+    final WrapAlignment runAlignment = wrapRunAlignment(
+      node.crossAxisAlignment,
+    );
+    Widget res = CodelesslyWrap(
+      key: ValueKey(node.id),
+      direction: node.rowColumnType == RowColumnType.row
+          ? Axis.horizontal
+          : Axis.vertical,
+      alignment: wrapAlignment(node.mainAxisAlignment),
+      spacing: node.spacing,
+      runAlignment: runAlignment,
+      runSpacing: node.runSpacing,
+      crossAxisAlignment: wrapCrossAlignment(node.crossAxisAlignment),
+      children: children,
+    );
+    if (withScroll && node is ScrollableMixin) {
+      final ScrollableMixin scrollable = node as ScrollableMixin;
+      if (scrollable.isScrollable) {
+        res = wrapWithPaddedScrollable(
+          padding: node.resolvedPadding().flutterEdgeInsets,
+          node: scrollable,
+          fillViewport: runAlignment != WrapAlignment.start,
+          child: res,
+        );
+      }
+    }
+    return res;
+  }
+
+  /// The [Wrap.alignment] of a wrapping row/column with [alignment] as its
+  /// main-axis alignment.
+  static WrapAlignment wrapAlignment(MainAxisAlignmentC alignment) =>
+      switch (alignment) {
+        MainAxisAlignmentC.start => WrapAlignment.start,
+        MainAxisAlignmentC.end => WrapAlignment.end,
+        MainAxisAlignmentC.center => WrapAlignment.center,
+        MainAxisAlignmentC.spaceBetween => WrapAlignment.spaceBetween,
+        MainAxisAlignmentC.spaceAround => WrapAlignment.spaceAround,
+        MainAxisAlignmentC.spaceEvenly => WrapAlignment.spaceEvenly,
+      };
+
+  /// The [Wrap.crossAxisAlignment] of a wrapping row/column with
+  /// [alignment] as its cross-axis alignment.
+  static WrapCrossAlignment wrapCrossAlignment(CrossAxisAlignmentC alignment) =>
+      switch (alignment) {
+        CrossAxisAlignmentC.center => WrapCrossAlignment.center,
+        CrossAxisAlignmentC.end => WrapCrossAlignment.end,
+        CrossAxisAlignmentC.start ||
+        CrossAxisAlignmentC.stretch ||
+        CrossAxisAlignmentC.baseline => WrapCrossAlignment.start,
+      };
+
+  /// The [Wrap.runAlignment] of a wrapping row/column with [alignment] as
+  /// its cross-axis alignment.
+  static WrapAlignment wrapRunAlignment(CrossAxisAlignmentC alignment) =>
+      switch (alignment) {
+        CrossAxisAlignmentC.center => WrapAlignment.center,
+        CrossAxisAlignmentC.end => WrapAlignment.end,
+        CrossAxisAlignmentC.start ||
+        CrossAxisAlignmentC.stretch ||
+        CrossAxisAlignmentC.baseline => WrapAlignment.start,
+      };
+
   /// The design extent of a Row/Column's own box on one axis, or null when it
   /// hugs its children.
   ///
@@ -189,10 +289,6 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
 
   static bool _fillsAxis(SizeFit fit, {required double? max}) =>
       fit == SizeFit.expanded && max == null;
-
-  /// Whether [node] is a Row/Column that wraps its children onto new runs
-  /// ([RowColumnNode.wrap]) instead of laying them out in a [Flex].
-  static bool isWrap(BaseNode node) => node is RowColumnNode && node.wrap;
 
   /// Whether any of [children] flexes along [rowColumnNode]'s main axis
   /// (expanded, flexible, or a flex spacer).
@@ -217,35 +313,33 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   }) {
     assert(parentRowColumn is RowColumnMixin);
 
-    if (node is SpacerNode) {
-      return childWidget;
+    if ((parentRowColumn as RowColumnMixin).wrap) {
+      return _wrapChild(
+        node,
+        parentRowColumn,
+        childWidget,
+        flexibleSpaceBackground: flexibleSpaceBackground,
+      );
     }
 
-    // A run has no free space to share: a child that flexes on the main axis
-    // takes its design size there (at most the run's length), and every
-    // child hugs or keeps its size across. Children align in their run with
-    // the Wrap's cross axis alignment rather than their own.
-    if (isWrap(parentRowColumn)) {
-      final bool isRow =
-          (parentRowColumn as RowColumnMixin).rowColumnType ==
-          RowColumnType.row;
-      if ((isRow ? node.horizontalFit : node.verticalFit) == SizeFit.expanded) {
-        childWidget = SizedBox(
-          width: isRow ? node.outerBoxLocal.width : null,
-          height: isRow ? null : node.outerBoxLocal.height,
-          child: childWidget,
-        );
-      }
-      return flexibleSpaceBackground?.call(childWidget) ?? childWidget;
-    }
-
-    final AxisC mainAxis =
-        ((parentRowColumn as RowColumnMixin).rowColumnType == RowColumnType.row
+    final AxisC mainAxis = (parentRowColumn.rowColumnType == RowColumnType.row
         ? AxisC.horizontal
         : AxisC.vertical);
     final SizeFit mainAxisFit = (mainAxis == AxisC.horizontal
         ? node.horizontalFit
         : node.verticalFit);
+
+    // A spacer flexes like Flutter's Spacer. The flex goes around everything
+    // built for it, as for any other child: a host's wrappers (the editor's
+    // geometry probes) would otherwise sit between the Flex and an Expanded
+    // inside, and the Flex would lay the spacer out at its design size.
+    if (node is SpacerNode) {
+      return switch (mainAxisFit) {
+        SizeFit.expanded => Expanded(flex: flex, child: childWidget),
+        SizeFit.flexible => Flexible(flex: flex, child: childWidget),
+        _ => childWidget,
+      };
+    }
 
     final SizeFit crossAxisFit = (mainAxis == AxisC.horizontal
         ? node.verticalFit
@@ -362,6 +456,38 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     return childWidget;
   }
 
+  /// A child of a wrapping row/column. Children of a [Wrap] can't flex: one
+  /// that is expanded or flexible along the main axis keeps its design size
+  /// there, like a fixed child (a [Wrap] would otherwise let it fill a whole
+  /// run). Across, a [Wrap] gives an unbounded extent, where an expanded
+  /// child takes its design size too (see [FitBox]). A spacer is a gap of its
+  /// design length. A child's own alignment does not apply in a wrap.
+  static Widget _wrapChild(
+    BaseNode node,
+    RowColumnMixin parent,
+    Widget childWidget, {
+    WidgetInserter? flexibleSpaceBackground,
+  }) {
+    if (flexibleSpaceBackground != null) {
+      childWidget = flexibleSpaceBackground(childWidget);
+    }
+    final bool isRow = parent.rowColumnType == RowColumnType.row;
+    // A spacer is a gap of its design length, with no thickness.
+    if (node is SpacerNode) {
+      return SizedBox(
+        width: isRow ? node.outerBoxLocal.width : 0,
+        height: isRow ? 0 : node.outerBoxLocal.height,
+      );
+    }
+    final SizeFit mainFit = isRow ? node.horizontalFit : node.verticalFit;
+    if (!mainFit.isFlex) return childWidget;
+    return SizedBox(
+      width: isRow ? node.outerBoxLocal.width : null,
+      height: isRow ? null : node.outerBoxLocal.height,
+      child: childWidget,
+    );
+  }
+
   @override
   Widget buildWidget(
     BaseNode node,
@@ -389,42 +515,52 @@ class PassiveRowColumnWidget extends StatelessWidget {
   final NodeTransformerManager manager;
   final WidgetBuildSettings settings;
 
-  /// A flexing child hidden at runtime gives up its share of the free space,
-  /// so a visible sibling (an empty state next to a hidden spinner) can take
-  /// all of it. The flex drops to zero rather than removing the [Flexible] so
-  /// the child keeps its state when it shows again.
+  /// A child hidden at runtime collapses: it tells the [CodelesslyFlex] so
+  /// the row/column's spacing skips it, and a flexing one gives up its share
+  /// of the free space, so a visible sibling (an empty state next to a
+  /// hidden spinner) can take all of it. The flex drops to zero rather than
+  /// removing the [Flexible] so the child keeps its state when it shows
+  /// again.
   Widget _collapseWhenHidden(
     BuildContext context,
     BaseNode child,
     Widget sizedWidget,
   ) {
     final NodeTransformerManager manager = this.manager;
-    if (sizedWidget is! Flexible || manager is! PassiveNodeTransformerManager) {
-      return sizedWidget;
+    // A child that reads its parent's size can only tell whether it is
+    // hidden as it is laid out, so it keeps its place.
+    if (manager is! PassiveNodeTransformerManager || readsParentSize(child)) {
+      return FlexChildVisibility(collapsed: false, child: sizedWidget);
     }
 
-    Widget buildFlexible(BuildContext context) {
+    Widget buildChild(BuildContext context) {
       final bool hidden = manager.runtimeVisibility(context, child) == false;
+      if (sizedWidget is! Flexible) {
+        return FlexChildVisibility(collapsed: hidden, child: sizedWidget);
+      }
       // Without flex the hidden child would be laid out with unbounded
       // main-axis constraints, which a scrollable inside it can't take
       // (a hidden grid computed NaN offsets), so it gets no space at all.
-      return Flexible(
-        flex: hidden ? 0 : sizedWidget.flex,
-        fit: sizedWidget.fit,
-        child: SizedBox(
-          width: hidden ? 0 : null,
-          height: hidden ? 0 : null,
-          child: sizedWidget.child,
+      return FlexChildVisibility(
+        collapsed: hidden,
+        child: Flexible(
+          flex: hidden ? 0 : sizedWidget.flex,
+          fit: sizedWidget.fit,
+          child: SizedBox(
+            width: hidden ? 0 : null,
+            height: hidden ? 0 : null,
+            child: sizedWidget.child,
+          ),
         ),
       );
     }
 
     final List<Listenable> listenables = manager.listenablesFor(context, child);
-    if (listenables.isEmpty) return buildFlexible(context);
+    if (listenables.isEmpty) return buildChild(context);
     return ManagedListenableBuilder(
       key: ValueKey('${child.id}-flex'),
       listenables: listenables,
-      builder: buildFlexible,
+      builder: buildChild,
     );
   }
 

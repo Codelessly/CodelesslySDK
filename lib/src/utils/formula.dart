@@ -27,8 +27,14 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `condition ? a : b`. `+` joins text when either side is text.
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
-///    endsWith, where, without, number, text, isEmpty and isNotEmpty. See
+///    endsWith, where, without, number, text, isEmpty, isNotEmpty, padLeft,
+///    padRight, substring, split, replace and coalesce. See
 ///    [FormulaEvaluator.functions].
+///  - maps: `obj('id', 1, 'name', n)` builds one (formulas have no `{}`
+///    literals), `set(map, key, value)` and `merge(a, b)` return changed
+///    copies, `keys` and `values` read them. With `map` this updates one
+///    item of a list: `map(units, u => if(u.id == id, set(u, 'hours', h), u))`.
+///  - more list functions: range, slice, first, last, concat and indexOf.
 ///  - list functions that take a predicate or key: filter, where, count,
 ///    find, any, all, map, sortBy, unique, sum and join. The predicate is a
 ///    lambda, `item => expression`, or a field name, optionally with a value
@@ -37,12 +43,26 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    parameter is read like a variable inside its body (`t.title`,
 ///    `t.tags[0]`, `t.tags.length`) and hides a variable of the same name;
 ///    the body can read every other variable. Lambdas are only allowed as
-///    function arguments.
-///  - series and text helpers: range, interpolate, runs, minBy, maxBy, obj,
-///    slice, substring, replace and split.
+///    function arguments. A lambda can take a second parameter for the
+///    item's index: `map(steps, (s, i) => i == length(steps) - 1)`.
+///  - left(text, n), right(text, n) and toMap (a map built from a list,
+///    `toMap(items, i => i.id, i => "pass")`).
+///  - math: sqrt, pow, sin, cos, tan, asin, acos, atan, atan2 (radians),
+///    pi, radians, degrees, clamp, and distance(lat1, lng1, lat2, lng2,
+///    unit) for the great-circle distance in 'km' (default) or 'mi'.
+///  - building data: object(key, value, …), merge, set, keys, values,
+///    flatten, compact (drops nulls and empty text), and
+///    list edits that return a new list: append, setAt, insertAt, removeAt
+///    and move. Set variable actions use them to change nested data, e.g.
+///    `setAt(trip.stops, index, merge(item, object('nights', 3)))`.
+///  - list slicing: first, last, slice(list, start, end), take, skip,
+///    reverse, range(count) or range(start, end, step) with the end
+///    included, and indexOf(list,
+///    value or predicate), which is -1 when nothing matches.
+///  - series helpers: interpolate, runs, minBy and maxBy.
 ///  - date functions: now, today, wallTime, parseDate, formatDate, addMinutes, addHours,
 ///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
-///    hour, minute and weekday. Dates are ISO 8601 text such as
+///    hour, minute, weekday and daysInMonth. Dates are ISO 8601 text such as
 ///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
 ///    milliseconds or a Firestore timestamp.
 ///  - date-aware comparisons: `== != < <= > >=` compare as dates when one
@@ -166,10 +186,26 @@ class FormulaEvaluator {
 
   /// How to call each function, with an example, for editors to list.
   static const List<FormulaFunctionDoc> functionDocs = [
+    FormulaFunctionDoc('left', 'left(text, count)', 'left("MX4821", 2) → MX'),
+    FormulaFunctionDoc(
+      'right',
+      'right(text, count)',
+      'right("1FUJGLDR5MX4821", 6) → MX4821',
+    ),
+    FormulaFunctionDoc(
+      'toMap',
+      'toMap(list, item => key, item => value)',
+      'toMap(items, i => i.id, i => "pass") → {1a: pass, 1b: pass}',
+    ),
     FormulaFunctionDoc(
       'money',
-      'money(value, symbol)',
-      r'money(price) → $1,234.50',
+      'money(value, symbol?, digits?)',
+      r'money(price) → $1,234.50, money(385, "$", 0) → $385',
+    ),
+    FormulaFunctionDoc(
+      'formatNumber',
+      'formatNumber(value, digits?)',
+      'formatNumber(2481.64, 1) → 2,481.6',
     ),
     FormulaFunctionDoc(
       'fixed',
@@ -231,6 +267,11 @@ class FormulaEvaluator {
       'endsWith("photo.png", ".png") → true',
     ),
     FormulaFunctionDoc(
+      'matches',
+      'matches(text, pattern)',
+      'matches(email, "^[^@ ]+@[^@ ]+[.][^@ .]+\$") → true',
+    ),
+    FormulaFunctionDoc(
       'filter',
       'filter(list, item => condition) or filter(list, field, value)',
       'filter(tasks, t => contains(lower(t.title), lower(search)))',
@@ -257,7 +298,7 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'map',
-      'map(list, field or item => value)',
+      'map(list, field or item => value or (item, index) => value)',
       'map(cart, i => i.price * i.qty) → [8, 16]',
     ),
     FormulaFunctionDoc(
@@ -274,6 +315,127 @@ class FormulaEvaluator {
       'without',
       'without(list, other)',
       'without(all, picked)',
+    ),
+    FormulaFunctionDoc('sqrt', 'sqrt(value)', 'sqrt(16) → 4'),
+    FormulaFunctionDoc('pow', 'pow(base, exponent)', 'pow(2, 10) → 1024'),
+    FormulaFunctionDoc('sin', 'sin(radians)', 'sin(pi() / 2) → 1'),
+    FormulaFunctionDoc('cos', 'cos(radians)', 'cos(0) → 1'),
+    FormulaFunctionDoc('tan', 'tan(radians)', 'tan(0) → 0'),
+    FormulaFunctionDoc('asin', 'asin(value)', 'asin(1) → 1.5708'),
+    FormulaFunctionDoc('acos', 'acos(value)', 'acos(1) → 0'),
+    FormulaFunctionDoc('atan', 'atan(value)', 'atan(1) → 0.7854'),
+    FormulaFunctionDoc('atan2', 'atan2(y, x)', 'atan2(1, 1) → 0.7854'),
+    FormulaFunctionDoc('pi', 'pi()', 'pi() → 3.14159…'),
+    FormulaFunctionDoc(
+      'radians',
+      'radians(degrees)',
+      'radians(180) → 3.14159…',
+    ),
+    FormulaFunctionDoc('degrees', 'degrees(radians)', 'degrees(pi()) → 180'),
+    FormulaFunctionDoc(
+      'clamp',
+      'clamp(value, min, max)',
+      'clamp(12, 0, 10) → 10',
+    ),
+    FormulaFunctionDoc(
+      'distance',
+      "distance(lat1, lng1, lat2, lng2, 'km' or 'mi')",
+      "distance(a.lat, a.lng, b.lat, b.lng, 'mi') → 362.4",
+    ),
+    FormulaFunctionDoc('first', 'first(list)', 'first(stops) → the first stop'),
+    FormulaFunctionDoc('last', 'last(list)', 'last(stops) → the last stop'),
+    FormulaFunctionDoc(
+      'concat',
+      'concat(list, list2, ...)',
+      'concat(range(2), [9]) → [0, 1, 9]',
+    ),
+    FormulaFunctionDoc(
+      'slice',
+      'slice(list, start, end)',
+      "slice(['a', 'b', 'c', 'd'], 1, 3) → ['b', 'c']",
+    ),
+    FormulaFunctionDoc(
+      'take',
+      'take(list, n)',
+      'take(stops, index) → stops before this one',
+    ),
+    FormulaFunctionDoc(
+      'skip',
+      'skip(list, n)',
+      'skip(stops, 1) → all but the first',
+    ),
+    FormulaFunctionDoc(
+      'reverse',
+      'reverse(list or text)',
+      'reverse([1, 2, 3]) → [3, 2, 1]',
+    ),
+    FormulaFunctionDoc(
+      'range',
+      'range(count) or range(start, end, step), end included (dates: step '
+          'in minutes)',
+      'range(3, 7) → [3, 4, 5, 6, 7]; range(3) → [0, 1, 2]',
+    ),
+    FormulaFunctionDoc(
+      'indexOf',
+      'indexOf(list, value) or indexOf(list, item => test)',
+      'indexOf(trips, t => t.id == id) → 2',
+    ),
+    FormulaFunctionDoc(
+      'object',
+      'object(key, value, key, value, …)',
+      "object('nights', 2, 'cg', id) → {nights: 2, cg: id}",
+    ),
+    FormulaFunctionDoc(
+      'merge',
+      'merge(map, map, …)',
+      "merge(stop, object('nights', 3)) → stop with 3 nights",
+    ),
+    FormulaFunctionDoc(
+      'set',
+      'set(map, key, value)',
+      "set(rig, 'length', 36) → rig, 36 ft long",
+    ),
+    FormulaFunctionDoc('keys', 'keys(map)', 'keys(rig) → [name, length, …]'),
+    FormulaFunctionDoc('values', 'values(map)', 'values(totals) → [3, 5]'),
+    FormulaFunctionDoc(
+      'flatten',
+      'flatten(list of lists)',
+      'flatten([[1, 2], [3]]) → [1, 2, 3]',
+    ),
+    FormulaFunctionDoc(
+      'compact',
+      'compact(list)',
+      "compact([1, null, '', 2]) → [1, 2]",
+    ),
+    FormulaFunctionDoc(
+      'append',
+      'append(list, item, …)',
+      "append(stops, object('cg', id, 'nights', 2))",
+    ),
+    FormulaFunctionDoc(
+      'setAt',
+      'setAt(list, index, item)',
+      'setAt([1, 2, 3], 1, 9) → [1, 9, 3]',
+    ),
+    FormulaFunctionDoc(
+      'insertAt',
+      'insertAt(list, index, item)',
+      'insertAt([1, 3], 1, 2) → [1, 2, 3]',
+    ),
+    FormulaFunctionDoc(
+      'removeAt',
+      'removeAt(list, index)',
+      'removeAt([1, 2, 3], 0) → [2, 3]',
+    ),
+    FormulaFunctionDoc(
+      'move',
+      'move(list, from, to)',
+      'move([a, b, c], 2, 0) → [c, a, b]',
+    ),
+    FormulaFunctionDoc(
+      'thousands',
+      'thousands(value, decimals)',
+      'thousands(1094) → 1,094',
     ),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
@@ -303,27 +465,6 @@ class FormulaEvaluator {
       'wallTime("2026-10-22T07:25:17-07:00") → 2026-10-22T07:25:17.000',
     ),
     FormulaFunctionDoc(
-      'substring',
-      'substring(text, start, end?)',
-      'substring("2026-10-22 02:58", 0, 10) → 2026-10-22',
-    ),
-    FormulaFunctionDoc(
-      'replace',
-      'replace(text, from, to)',
-      'replace("a-b", "-", " ") → a b',
-    ),
-    FormulaFunctionDoc('split', 'split(text, separator)', 'split("a,b", ",")'),
-    FormulaFunctionDoc(
-      'slice',
-      'slice(list, start, end?)',
-      'slice(items, 0, 3) or slice(items, -2)',
-    ),
-    FormulaFunctionDoc(
-      'range',
-      'range(start, end, step) (dates: step in minutes)',
-      'range(0, 6, 2) → [0, 2, 4, 6]',
-    ),
-    FormulaFunctionDoc(
       'interpolate',
       'interpolate(points, xField, yField, x)',
       'interpolate(tides, "t", "v", now())',
@@ -342,11 +483,6 @@ class FormulaEvaluator {
       'maxBy',
       'maxBy(list, field or item => key)',
       'maxBy(highs, "v")',
-    ),
-    FormulaFunctionDoc(
-      'obj',
-      'obj(key, value, …)',
-      'obj("from", start, "to", end) → {from, to}',
     ),
     FormulaFunctionDoc(
       'parseDate',
@@ -402,6 +538,46 @@ class FormulaEvaluator {
       'weekday',
       'weekday(date)',
       'weekday("2026-10-21") → 3 (Monday is 1)',
+    ),
+    FormulaFunctionDoc(
+      'daysInMonth',
+      'daysInMonth(date)',
+      'daysInMonth("2026-02-10") → 28',
+    ),
+    FormulaFunctionDoc(
+      'obj',
+      'obj(key, value, key2, value2, ...)',
+      'obj("id", "ex1", "hours", 12) → {id: ex1, hours: 12}',
+    ),
+    FormulaFunctionDoc(
+      'padLeft',
+      'padLeft(text, width, char?)',
+      'padLeft(42, 5, "0") → 00042',
+    ),
+    FormulaFunctionDoc(
+      'padRight',
+      'padRight(text, width, char?)',
+      'padRight("ab", 4, ".") → ab..',
+    ),
+    FormulaFunctionDoc(
+      'substring',
+      'substring(text, start, end?)',
+      'substring("EX-102", 3) → 102',
+    ),
+    FormulaFunctionDoc(
+      'split',
+      'split(text, separator?)',
+      'split("2481") → [2, 4, 8, 1]',
+    ),
+    FormulaFunctionDoc(
+      'replace',
+      'replace(text, from, to)',
+      'replace("1,402", ",", "") → 1402',
+    ),
+    FormulaFunctionDoc(
+      'coalesce',
+      'coalesce(value, fallback, ...)',
+      'coalesce(route.date, today())',
     ),
   ];
 }
@@ -509,16 +685,26 @@ Object? _member(Object? target, Object? key) {
 String _fixed(Object? value, Object? digits) =>
     _num(value).toStringAsFixed(_num(digits ?? 2).toInt().clamp(0, 20));
 
-String _money(Object? value, Object? symbol) {
+String _money(Object? value, Object? symbol, [Object? digits]) {
   final num amount = _num(value);
   if (amount.isNaN) return '';
   final String sign = amount < 0 ? '-' : '';
-  final String text = amount.abs().toStringAsFixed(2);
-  final int dot = text.indexOf('.');
+  return '$sign${symbol ?? r'$'}${_grouped(amount.abs(), digits ?? 2)}';
+}
+
+/// [value] with [digits] decimals (default 0) and thousands separators,
+/// e.g. 2481.64 with 1 digit is "2,481.6".
+String _grouped(Object? value, Object? digits) {
+  final num amount = _num(value);
+  if (amount.isNaN) return '';
+  final String text = amount.toStringAsFixed(
+    _num(digits ?? 0).toInt().clamp(0, 20),
+  );
+  final int dot = text.contains('.') ? text.indexOf('.') : text.length;
   final String whole = text
       .substring(0, dot)
       .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
-  return '$sign${symbol ?? r'$'}$whole${text.substring(dot)}';
+  return '$whole${text.substring(dot)}';
 }
 
 num _round(Object? value, Object? digits) {
@@ -534,15 +720,16 @@ num _round(Object? value, Object? digits) {
 Iterable<Object?> _values(Object? list, Object? selector) {
   if (list is! Iterable) return const [];
   if (selector == null) return list;
-  return list.map((item) => _select(item, selector));
+  return list.indexed.map((entry) => _select(entry.$2, selector, entry.$1));
 }
 
 /// [item]'s value for [selector]: the item itself when null, the lambda's
 /// result for a lambda, else the field [selector] names. A field name with
-/// dots, such as `author.name`, reads nested fields.
-Object? _select(Object? item, Object? selector) {
+/// dots, such as `author.name`, reads nested fields. A lambda with a second
+/// parameter gets [index], the item's position in its list.
+Object? _select(Object? item, Object? selector, [int? index]) {
   if (selector == null) return item;
-  if (selector is _Closure) return selector(item);
+  if (selector is _Closure) return selector(item, index);
   final Object? value = _member(item, selector);
   if (value != null || selector is! String || !selector.contains('.')) {
     return value;
@@ -553,14 +740,16 @@ Object? _select(Object? item, Object? selector) {
 /// Whether [item] matches a predicate given as function arguments [rest]:
 /// `(lambda)` or `(field)` match when truthy, `(lambda or field, value)`
 /// when the selected value equals value. No predicate matches truthy items.
-bool _matches(Object? item, List<Object?> rest) => rest.length < 2
-    ? _truthy(_select(item, _arg(rest, 0)))
-    : _looseEquals(_select(item, rest[0]), rest[1]);
+bool _matches(Object? item, List<Object?> rest, [int? index]) => rest.length < 2
+    ? _truthy(_select(item, _arg(rest, 0), index))
+    : _looseEquals(_select(item, rest[0], index), rest[1]);
 
 /// Items of `args[0]` that match the predicate in the rest of [args].
 Iterable<Object?> _matching(List<Object?> args) {
   final List<Object?> rest = args.skip(1).toList();
-  return _values(_arg(args, 0), null).where((item) => _matches(item, rest));
+  return _values(_arg(args, 0), null).indexed
+      .where((entry) => _matches(entry.$2, rest, entry.$1))
+      .map((entry) => entry.$2);
 }
 
 /// Items of `args[0]` sorted by the key `args[1]`, descending when `args[2]`
@@ -574,7 +763,7 @@ List<Object?> _sortBy(List<Object?> args) {
   };
   final List<(int, Object?, Object?)> keyed = [
     for (int i = 0; i < items.length; i++)
-      (i, items[i], _select(items[i], selector)),
+      (i, items[i], _select(items[i], selector, i)),
   ];
   keyed.sort((x, y) {
     final bool xMissing = x.$3 == null || x.$3 == '';
@@ -594,8 +783,9 @@ List<Object?> _sortBy(List<Object?> args) {
 List<Object?> _unique(List<Object?> args) {
   final List<Object?> keys = [];
   final List<Object?> items = [];
+  int index = 0;
   for (final item in _values(_arg(args, 0), null)) {
-    final Object? key = _select(item, _arg(args, 1));
+    final Object? key = _select(item, _arg(args, 1), index++);
     if (keys.any((seen) => _looseEquals(seen, key))) continue;
     keys.add(key);
     items.add(item);
@@ -603,17 +793,20 @@ List<Object?> _unique(List<Object?> args) {
   return items;
 }
 
-/// A lambda such as `t => t.price`, ready to call with an item.
+/// A lambda such as `t => t.price`, ready to call with an item. A lambda
+/// written `(t, i) => ...` also gets the item's index as [indexParam].
 class _Closure {
   final String param;
+  final String? indexParam;
   final _Node body;
   final FormulaPathResolver outer;
 
-  const _Closure(this.param, this.body, this.outer);
+  const _Closure(this.param, this.indexParam, this.body, this.outer);
 
   static final RegExp _part = RegExp(r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]');
 
-  Object? call(Object? value) => body.eval((path) {
+  Object? call(Object? value, [int? index]) => body.eval((path) {
+    if (indexParam != null && path == indexParam) return index;
     if (path == param) return value;
     if (path.startsWith(param) &&
         (path.startsWith('.', param.length) ||
@@ -857,28 +1050,16 @@ const int _maxRange = 10000;
 
 /// Numbers from [start] through [end] by [step], or, when [start] is a date,
 /// dates from [start] through [end] every [step] minutes (default 1).
-List<Object?> _range(List<Object?> args) {
-  final Object? start = _arg(args, 0), end = _arg(args, 1);
-  if (_isDateLike(start)) {
-    final DateTime? from = _toDate(start), to = _toDate(end);
-    final num step = _num(_arg(args, 2) ?? 1);
-    if (from == null || to == null || !(step > 0)) return const [];
-    final Duration delta = Duration(microseconds: (step * 60e6).round());
-    return [
-      for (DateTime t = from; !t.isAfter(to); t = t.add(delta)) _dateText(t),
-    ].take(_maxRange).toList();
-  }
-  final num from = _num(start), to = _num(end);
-  final num step = _num(_arg(args, 2) ?? 1);
-  if (!from.isFinite || !to.isFinite || step == 0 || !step.isFinite) {
-    return const [];
-  }
-  final List<Object?> out = [];
-  for (num v = from; step > 0 ? v <= to + 1e-9 : v >= to - 1e-9; v += step) {
-    out.add(_tidy(v));
-    if (out.length >= _maxRange) break;
-  }
-  return out;
+/// The times from [start] to [end], both included, [step] minutes apart
+/// (default 1), as ISO 8601 text: `range(sunrise, sunset, 5)`.
+List<Object?> _dateRange(Object? start, Object? end, Object? step) {
+  final DateTime? from = _toDate(start), to = _toDate(end);
+  final num minutes = _num(step ?? 1);
+  if (from == null || to == null || !(minutes > 0)) return const [];
+  final Duration delta = Duration(microseconds: (minutes * 60e6).round());
+  return [
+    for (DateTime t = from; !t.isAfter(to); t = t.add(delta)) _dateText(t),
+  ].take(_maxRange).toList();
 }
 
 /// A point's x as a number: dates as epoch milliseconds.
@@ -973,13 +1154,6 @@ Object? _extremeBy(List<Object?> args, {required bool max}) {
   return best;
 }
 
-/// A map from key, value pairs: `obj("from", a, "to", b)`. Formulas can't
-/// contain braces, so this is how they build objects.
-Map<String, Object?> _object(List<Object?> args) => {
-  for (int i = 0; i + 1 < args.length; i += 2)
-    FormulaEvaluator.stringify(args[i]): args[i + 1],
-};
-
 /// The UTC offset [value] gives, as hours (`-7`, `5.5`) or text (`-07:00`,
 /// `+0530`, `Z`), or null.
 Duration? _offset(Object? value) {
@@ -1040,11 +1214,113 @@ String? _wallTime(Object? value) {
 
 typedef _Function = Object? Function(List<Object?> args);
 
+/// A list index from [value]: negative counts from the end, and the result
+/// is clamped to `0..length`. [fallback] when [value] isn't a number.
+int _index(Object? value, int length, int fallback) {
+  if (value == null) return fallback;
+  final num? n = _toNum(value);
+  if (n == null || n.isNaN) return fallback;
+  final int i = n.toInt();
+  return (i < 0 ? length + i : i).clamp(0, length);
+}
+
+int _count(Object? value) {
+  final num? n = _toNum(value);
+  return n == null || n.isNaN || n < 0 ? 0 : n.toInt();
+}
+
+/// `range(n)`: n numbers from 0, `[0, 1, …, n - 1]`. `range(start, end,
+/// step)`: from [start] to [end], both included, [step] apart (default 1, or
+/// -1 counting down). Dates step in minutes. Capped at 10,000 items.
+List<Object?> _range(List<Object?> a) {
+  if (a.length < 2) {
+    final num count = _num(_arg(a, 0));
+    if (count.isNaN) return [];
+    return [for (int i = 0; i < count; i++) i].take(_maxRange).toList();
+  }
+  if (_isDateLike(_arg(a, 0))) {
+    return _dateRange(_arg(a, 0), _arg(a, 1), _arg(a, 2));
+  }
+  final num start = _num(_arg(a, 0));
+  final num end = _num(_arg(a, 1));
+  final num step = a.length > 2 ? _num(_arg(a, 2)) : (end < start ? -1 : 1);
+  if (!start.isFinite || !end.isFinite || !step.isFinite || step == 0) {
+    return [];
+  }
+  // A little slack keeps an end reached by fractional steps (0.1) in.
+  return [
+    for (num v = start; step > 0 ? v <= end + 1e-9 : v >= end - 1e-9; v += step)
+      _tidy(v),
+  ].take(_maxRange).toList();
+}
+
+/// Great-circle distance between two points in degrees, in km, or in miles
+/// when the fifth argument is 'mi'.
+Object? _distance(List<Object?> a) {
+  final List<num> v = [for (int i = 0; i < 4; i++) _num(_arg(a, i))];
+  if (v.any((n) => n.isNaN)) return null;
+  double rad(num d) => d * math.pi / 180;
+  final double dLat = rad(v[2] - v[0]);
+  final double dLng = rad(v[3] - v[1]);
+  final double h =
+      math.pow(math.sin(dLat / 2), 2) +
+      math.cos(rad(v[0])) *
+          math.cos(rad(v[2])) *
+          math.pow(math.sin(dLng / 2), 2);
+  final double km = 2 * 6371.0088 * math.asin(math.min(1, math.sqrt(h)));
+  final String unit = FormulaEvaluator.stringify(_arg(a, 4)).toLowerCase();
+  return unit.startsWith('mi') ? km / 1.609344 : km;
+}
+
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
+/// The part of [text] from [start] up to, not including, [end] (the end of
+/// the text when null). A negative index counts from the end, so
+/// `substring(vin, -6)` is the last six characters. Indexes past either end
+/// are clamped.
+String _substring(Object? text, Object? start, Object? end) {
+  final String value = FormulaEvaluator.stringify(text);
+  final int length = value.length;
+  int clamp(Object? index, int fallback) {
+    if (index == null) return fallback;
+    int i = _intArg(index);
+    if (i < 0) i += length;
+    return i.clamp(0, length);
+  }
+
+  final int from = clamp(start, 0);
+  final int to = clamp(end, length);
+  return to <= from ? '' : value.substring(from, to);
+}
+
+/// A map from each item of `args[0]` to a value: the key is the item's
+/// `args[1]` (a field name or lambda) and the value its `args[2]`, or the
+/// item itself when that's missing. A later item with the same key wins.
+Map<String, Object?> _toMap(List<Object?> args) {
+  final Object? list = _arg(args, 0);
+  if (list is! Iterable) return {};
+  final Object? keySelector = _arg(args, 1);
+  final Object? valueSelector = _arg(args, 2);
+  final Map<String, Object?> map = {};
+  int index = 0;
+  for (final Object? item in list) {
+    final Object? key = _select(item, keySelector, index);
+    if (key != null) {
+      map[FormulaEvaluator.stringify(key)] = _select(
+        item,
+        valueSelector,
+        index,
+      );
+    }
+    index++;
+  }
+  return map;
+}
+
 final Map<String, _Function> _functions = {
-  'money': (a) => _money(_arg(a, 0), _arg(a, 1)),
+  'money': (a) => _money(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'formatNumber': (a) => _grouped(_arg(a, 0), _arg(a, 1)),
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
   'round': (a) => _round(_arg(a, 0), _arg(a, 1)),
   'floor': (a) => _num(_arg(a, 0)).floor(),
@@ -1085,6 +1361,17 @@ final Map<String, _Function> _functions = {
     final String s => s.endsWith(FormulaEvaluator.stringify(_arg(a, 1))),
     _ => false,
   },
+  // A pattern that doesn't compile matches nothing.
+  'matches': (a) {
+    final Object? text = _arg(a, 0);
+    if (text == null) return false;
+    try {
+      return RegExp(FormulaEvaluator.stringify(_arg(a, 1)))
+          .hasMatch(FormulaEvaluator.stringify(text));
+    } on FormatException {
+      return false;
+    }
+  },
   'contains': (a) => switch (_arg(a, 0)) {
     final String s => s.contains(FormulaEvaluator.stringify(_arg(a, 1))),
     final Iterable l => l.any((v) => _looseEquals(v, _arg(a, 1))),
@@ -1097,7 +1384,10 @@ final Map<String, _Function> _functions = {
   'any': (a) => _matching(a).isNotEmpty,
   'all': (a) {
     final List<Object?> rest = a.skip(1).toList();
-    return _values(_arg(a, 0), null).every((item) => _matches(item, rest));
+    return _values(
+      _arg(a, 0),
+      null,
+    ).indexed.every((entry) => _matches(entry.$2, rest, entry.$1));
   },
   'map': (a) => _values(_arg(a, 0), _arg(a, 1)).toList(),
   'sortBy': _sortBy,
@@ -1107,6 +1397,123 @@ final Map<String, _Function> _functions = {
       if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
         item,
   ],
+  'sqrt': (a) => _tidy(math.sqrt(_num(_arg(a, 0)))),
+  'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
+  'sin': (a) => math.sin(_num(_arg(a, 0))),
+  'cos': (a) => math.cos(_num(_arg(a, 0))),
+  'tan': (a) => math.tan(_num(_arg(a, 0))),
+  'asin': (a) => math.asin(_num(_arg(a, 0))),
+  'acos': (a) => math.acos(_num(_arg(a, 0))),
+  'atan': (a) => math.atan(_num(_arg(a, 0))),
+  'atan2': (a) => math.atan2(_num(_arg(a, 0)), _num(_arg(a, 1))),
+  'pi': (a) => math.pi,
+  'radians': (a) => _num(_arg(a, 0)) * math.pi / 180,
+  'degrees': (a) => _num(_arg(a, 0)) * 180 / math.pi,
+  'clamp': (a) =>
+      _tidy(_num(_arg(a, 0)).clamp(_num(_arg(a, 1)), _num(_arg(a, 2)))),
+  'distance': _distance,
+  'first': (a) => _values(_arg(a, 0), null).firstOrNull,
+  'last': (a) => _values(_arg(a, 0), null).lastOrNull,
+  'slice': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    final int start = _index(_arg(a, 1), items.length, 0);
+    final int end = _index(_arg(a, 2), items.length, items.length);
+    return end <= start ? <Object?>[] : items.sublist(start, end);
+  },
+  'take': (a) => _values(_arg(a, 0), null).take(_count(_arg(a, 1))).toList(),
+  'skip': (a) => _values(_arg(a, 0), null).skip(_count(_arg(a, 1))).toList(),
+  'reverse': (a) => switch (_arg(a, 0)) {
+    final String s => s.split('').reversed.join(),
+    final Iterable l => l.toList().reversed.toList(),
+    _ => null,
+  },
+  'range': _range,
+  'indexOf': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    final List<Object?> rest = a.skip(1).toList();
+    final bool predicate = rest.length > 1 || _arg(rest, 0) is _Closure;
+    for (int i = 0; i < items.length; i++) {
+      if (predicate
+          ? _matches(items[i], rest, i)
+          : _looseEquals(items[i], _arg(rest, 0))) {
+        return i;
+      }
+    }
+    return -1;
+  },
+  'object': (a) => <String, Object?>{
+    for (int i = 0; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  'merge': (a) => <String, Object?>{
+    for (final Object? m in a)
+      if (m is Map) ...m.map((k, v) => MapEntry(k.toString(), v)),
+  },
+  'set': (a) => <String, Object?>{
+    if (_arg(a, 0) case final Map m) ...m.map((k, v) => MapEntry('$k', v)),
+    FormulaEvaluator.stringify(_arg(a, 1)): _arg(a, 2),
+  },
+  'keys': (a) => switch (_arg(a, 0)) {
+    final Map m => m.keys.map((k) => k.toString()).toList(),
+    _ => <Object?>[],
+  },
+  'values': (a) => switch (_arg(a, 0)) {
+    final Map m => m.values.toList(),
+    _ => <Object?>[],
+  },
+  'flatten': (a) => [
+    for (final Object? item in _values(_arg(a, 0), null))
+      if (item is Iterable) ...item else item,
+  ],
+  'compact': (a) => [
+    for (final Object? item in _values(_arg(a, 0), null))
+      if (item != null && item != '') item,
+  ],
+  'append': (a) => [..._values(_arg(a, 0), null), ...a.skip(1)],
+  'setAt': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    final int i = _index(_arg(a, 1), items.length, -1);
+    if (i < 0 || i >= items.length) return items;
+    items[i] = _arg(a, 2);
+    return items;
+  },
+  'insertAt': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    items.insert(_index(_arg(a, 1), items.length, items.length), _arg(a, 2));
+    return items;
+  },
+  'removeAt': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    final int i = _index(_arg(a, 1), items.length, -1);
+    if (i >= 0 && i < items.length) items.removeAt(i);
+    return items;
+  },
+  'move': (a) {
+    final List<Object?> items = List<Object?>.of(_values(_arg(a, 0), null));
+    final int from = _index(_arg(a, 1), items.length, -1);
+    if (from < 0 || from >= items.length) return items;
+    final Object? item = items.removeAt(from);
+    items.insert(_index(_arg(a, 2), items.length, items.length), item);
+    return items;
+  },
+  'thousands': (a) {
+    final num n = _num(_arg(a, 0));
+    if (n.isNaN) return null;
+    final int decimals = _count(_arg(a, 1));
+    final String fixed = n.abs().toStringAsFixed(decimals);
+    final List<String> parts = fixed.split('.');
+    final String whole = parts[0].replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+$)'),
+      (m) => '${m[1]},',
+    );
+    return '${n < 0 ? '-' : ''}$whole${parts.length > 1 ? '.${parts[1]}' : ''}';
+  },
+  'left': (a) => _substring(_arg(a, 0), 0, _count(_arg(a, 1))),
+  'right': (a) {
+    final int n = _count(_arg(a, 1));
+    return n <= 0 ? '' : _substring(_arg(a, 0), -n, null);
+  },
+  'toMap': _toMap,
   'number': (a) => _toNum(_arg(a, 0)),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
@@ -1117,39 +1524,10 @@ final Map<String, _Function> _functions = {
     return _dateText(DateTime(now.year, now.month, now.day));
   },
   'wallTime': (a) => _wallTime(_arg(a, 0)),
-  'substring': (a) {
-    final String text = FormulaEvaluator.stringify(_arg(a, 0));
-    final int start = _intArg(_arg(a, 1)).clamp(0, text.length);
-    final int end = _arg(a, 2) == null
-        ? text.length
-        : _intArg(_arg(a, 2)).clamp(start, text.length);
-    return text.substring(start, end);
-  },
-  'replace': (a) => FormulaEvaluator.stringify(_arg(a, 0)).replaceAll(
-    FormulaEvaluator.stringify(_arg(a, 1)),
-    FormulaEvaluator.stringify(_arg(a, 2)),
-  ),
-  'split': (a) =>
-      FormulaEvaluator.stringify(_arg(a, 0))
-          .split(FormulaEvaluator.stringify(_arg(a, 1) ?? ',')),
-  'slice': (a) {
-    final List<Object?> items = _values(_arg(a, 0), null).toList();
-    int index(Object? value, int fallback) {
-      if (value == null) return fallback;
-      final int i = _intArg(value);
-      return (i < 0 ? items.length + i : i).clamp(0, items.length);
-    }
-
-    final int start = index(_arg(a, 1), 0);
-    final int end = index(_arg(a, 2), items.length);
-    return end <= start ? <Object?>[] : items.sublist(start, end);
-  },
-  'range': _range,
   'interpolate': _interpolate,
   'runs': _runs,
   'minBy': (a) => _extremeBy(a, max: false),
   'maxBy': (a) => _extremeBy(a, max: true),
-  'obj': _object,
   'parseDate': (a) => _dateText(_toDate(_arg(a, 0))),
   'formatDate': (a) => _formatDate(_arg(a, 0), _arg(a, 1)),
   'addMinutes': (a) =>
@@ -1167,7 +1545,66 @@ final Map<String, _Function> _functions = {
   'hour': (a) => _toDate(_arg(a, 0))?.hour,
   'minute': (a) => _toDate(_arg(a, 0))?.minute,
   'weekday': (a) => _toDate(_arg(a, 0))?.weekday,
+  'daysInMonth': (a) {
+    final DateTime? date = _toDate(_arg(a, 0));
+    return date == null ? null : DateTime.utc(date.year, date.month + 1, 0).day;
+  },
+  // Maps: formulas can't write `{...}` literals, so these build and change
+  // maps. Each returns a new map and leaves its input alone.
+  'obj': (a) => <String, Object?>{
+    for (int i = 0; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  // Lists.
+  'concat': (a) => [
+    for (final part in a)
+      if (part is Iterable) ...part else ?part,
+  ],
+  // Text.
+  'padLeft': (a) =>
+      FormulaEvaluator.stringify(_arg(a, 0))
+          .padLeft(_intArg(_arg(a, 1)), _padChar(_arg(a, 2))),
+  'padRight': (a) =>
+      FormulaEvaluator.stringify(_arg(a, 0))
+          .padRight(_intArg(_arg(a, 1)), _padChar(_arg(a, 2))),
+  'substring': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final int start = _clampIndex(_arg(a, 1), text.length, 0);
+    final int end = _clampIndex(_arg(a, 2), text.length, text.length);
+    return end <= start ? '' : text.substring(start, end);
+  },
+  'split': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final Object? separator = _arg(a, 1);
+    if (text.isEmpty) return <String>[];
+    return text.split(
+      separator == null ? '' : FormulaEvaluator.stringify(separator),
+    );
+  },
+  'replace': (a) => FormulaEvaluator.stringify(_arg(a, 0)).replaceAll(
+    FormulaEvaluator.stringify(_arg(a, 1)),
+    FormulaEvaluator.stringify(_arg(a, 2)),
+  ),
+  // The first argument that is neither null nor empty text.
+  'coalesce': (a) => a.firstWhere(
+    (v) => v != null && !(v is String && v.isEmpty),
+    orElse: () => null,
+  ),
 };
+
+/// [value] as an index into a sequence of [length]; negative counts from the
+/// end, null is [fallback].
+int _clampIndex(Object? value, int length, int fallback) {
+  if (value == null) return fallback;
+  int index = _intArg(value);
+  if (index < 0) index += length;
+  return index.clamp(0, length);
+}
+
+String _padChar(Object? value) {
+  final String text = value == null ? ' ' : FormulaEvaluator.stringify(value);
+  return text.isEmpty ? ' ' : text;
+}
 
 // ---------------------------------------------------------------------------
 // Syntax tree
@@ -1267,12 +1704,14 @@ class _Call extends _Node {
 /// functions call once per item.
 class _Lambda extends _Node {
   final String param;
+  final String? indexParam;
   final _Node body;
 
-  const _Lambda(this.param, this.body);
+  const _Lambda(this.param, this.body, [this.indexParam]);
 
   @override
-  Object? eval(FormulaPathResolver resolve) => _Closure(param, body, resolve);
+  Object? eval(FormulaPathResolver resolve) =>
+      _Closure(param, indexParam, body, resolve);
 
   /// The body's paths, except those of the parameter, which aren't
   /// variables.
@@ -1284,6 +1723,7 @@ class _Lambda extends _Node {
       bodyPaths.where(
         (path) =>
             path != param &&
+            path != indexParam &&
             !path.startsWith('$param.') &&
             !path.startsWith('$param['),
       ),
@@ -1393,7 +1833,8 @@ class _Parser {
   static final RegExp _number = RegExp(r'\d+(\.\d+)?|\.\d+');
   static final RegExp _identifier = RegExp(r'[a-zA-Z_][a-zA-Z0-9_]*');
   static final RegExp _lambdaHead = RegExp(
-    r'(?:([a-zA-Z_][a-zA-Z0-9_]*)|\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\))\s*=>',
+    r'(?:([a-zA-Z_][a-zA-Z0-9_]*)|\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*'
+    r'(?:,\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*)?\))\s*=>',
   );
 
   _Node parseAll() {
@@ -1428,13 +1869,14 @@ class _Parser {
   }
 
   /// A function argument: an expression, or a lambda `item => expression`
-  /// (also written `(item) => expression`).
+  /// (also written `(item) => expression`, or `(item, index) => expression`
+  /// to read the item's index too).
   _Node _argument() {
     _skip();
     final Match? head = _lambdaHead.matchAsPrefix(source, pos);
     if (head == null) return _ternary();
     pos = head.end;
-    return _Lambda(head[1] ?? head[2]!, _ternary());
+    return _Lambda(head[1] ?? head[2]!, _ternary(), head[3]);
   }
 
   _Node _ternary() {
