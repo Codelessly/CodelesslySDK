@@ -283,8 +283,6 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
     final bool enabled =
         context.getNodeValue(node.id, 'enabled') ?? properties.enabled;
-    final bool obscureText =
-        context.getNodeValue(node.id, 'obscureText') ?? properties.obscureText;
     final bool readOnly =
         context.getNodeValue(node.id, 'readOnly') ?? properties.readOnly;
     final bool showCursor =
@@ -293,6 +291,15 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         context.getNodeValue(node.id, 'maxLength') ?? properties.maxLength;
 
     final ScopedValues scopedValues = ScopedValues.of(context);
+    // Bindable, e.g. to a show / hide toggle: a variable, a condition or
+    // a node value set by an action.
+    final bool obscureText =
+        PropertyValueDelegate.getPropertyValue<bool>(
+          node,
+          'obscureText',
+          scopedValues: scopedValues,
+        ) ??
+        properties.obscureText;
 
     final TextInputType keyboardType =
         properties.keyboardType == TextInputTypeEnum.number
@@ -310,11 +317,20 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         !widget.settings.isPreview &&
         (widget.autofocus ?? properties.autoFocus);
 
-    final (int? maxLines, int? minLines) = resolveTextFieldLines(
-      maxLines: properties.maxLines,
-      minLines: properties.minLines,
-      expands: !widget.node.isVerticalWrap,
-    );
+    // An obscured field is one line (Flutter allows no other). A one-line
+    // field of fixed height would expand to its height, which drops the
+    // line limit and so the obscuring; it stays one line instead.
+    final bool singleLine =
+        properties.maxLines == 1 && (properties.minLines ?? 1) <= 1;
+    final bool obscure = obscureText && singleLine;
+    final bool expands = !widget.node.isVerticalWrap && !obscure;
+    final (int? maxLines, int? minLines) = obscure
+        ? (1, null)
+        : resolveTextFieldLines(
+            maxLines: properties.maxLines,
+            minLines: properties.minLines,
+            expands: expands,
+          );
 
     Widget field = TextFormField(
       focusNode: focusNode,
@@ -323,7 +339,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       enableInteractiveSelection: properties.enableInteractiveSelection,
       enabled: enabled,
       controller: controller,
-      obscureText: maxLines == 1 && obscureText,
+      obscureText: obscure,
       readOnly: readOnly,
       showCursor: showCursor,
       keyboardType: keyboardType,
@@ -352,7 +368,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       ],
       maxLines: maxLines,
       minLines: minLines,
-      expands: !widget.node.isVerticalWrap,
+      expands: expands,
       obscuringCharacter: widget.node.properties.obscuringCharacter,
       style: TextUtils.retrieveTextStyleFromProp(
         widget.node.properties.inputStyle,
