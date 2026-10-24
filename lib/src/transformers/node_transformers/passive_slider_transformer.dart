@@ -175,11 +175,24 @@ class TransformerSlider extends StatelessWidget {
           inactiveTrackColor: node.properties.inactiveTrackColor
               .toFlutterColor(),
           thumbColor: node.properties.thumbColor.toFlutterColor(),
-          thumbShape: RoundSliderThumbShape(
-            enabledThumbRadius: node.properties.showThumb
-                ? node.properties.thumbRadius
-                : 0,
-          ),
+          thumbShape: switch (node.properties.thumbShape) {
+            _ when !node.properties.showThumb => const RoundSliderThumbShape(
+              enabledThumbRadius: 0,
+            ),
+            SliderThumbShapeEnum.circle => RoundSliderThumbShape(
+              enabledThumbRadius: node.properties.thumbRadius,
+            ),
+            SliderThumbShapeEnum.rectangle => RectSliderThumbShape(
+              size: Size(
+                node.properties.thumbWidth,
+                node.properties.thumbHeight,
+              ),
+              radius: node.properties.thumbCornerRadius,
+              borderColor: node.properties.thumbBorderColor?.toFlutterColor(),
+              borderWidth: node.properties.thumbBorderWidth,
+              gripColor: node.properties.thumbGripColor?.toFlutterColor(),
+            ),
+          },
           trackShape: trackShape,
           // GappedSliderTrackShape requires a gap; 6 is the Material 3
           // (2024) default.
@@ -229,5 +242,73 @@ class TransformerSlider extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// A rectangular slider thumb with rounded corners, an optional border and
+/// an optional vertical grip line, filled with the theme's thumb color.
+class RectSliderThumbShape extends SliderComponentShape {
+  final Size size;
+  final double radius;
+  final Color? borderColor;
+  final double borderWidth;
+  final Color? gripColor;
+
+  const RectSliderThumbShape({
+    required this.size,
+    this.radius = 2,
+    this.borderColor,
+    this.borderWidth = 2,
+    this.gripColor,
+  });
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => size;
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final Canvas canvas = context.canvas;
+    final RRect box = RRect.fromRectAndRadius(
+      Rect.fromCenter(center: center, width: size.width, height: size.height),
+      Radius.circular(radius),
+    );
+    canvas.drawRRect(
+      box.shift(const Offset(0, 2)),
+      Paint()
+        ..color = const Color(0x66000000)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+    );
+    canvas.drawRRect(
+      box,
+      Paint()..color = sliderTheme.thumbColor ?? const Color(0xFF000000),
+    );
+    if (borderColor != null && borderWidth > 0) {
+      canvas.drawRRect(
+        box.deflate(borderWidth / 2),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = borderWidth
+          ..color = borderColor!,
+      );
+    }
+    if (gripColor != null) {
+      canvas.drawRect(
+        Rect.fromCenter(center: center, width: 2, height: size.height * 0.42),
+        Paint()..color = gripColor!,
+      );
+    }
   }
 }
