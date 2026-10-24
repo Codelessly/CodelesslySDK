@@ -32,9 +32,45 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       key: ValueKey(
         'Static Stack child [${node.id}](${node.name})<${node.type}> on parent [${parent.id}](${parent.name})<${parent.type}>',
       ),
-      placement: placementFor(node, parent, scrollAxis: scrollAxis),
+      placement: placementFor(
+        withBoundSize(context, node),
+        parent,
+        scrollAxis: scrollAxis,
+      ),
       child: child,
     );
+  }
+
+  /// [node] with the `width` and `height` its variables, formulas or
+  /// conditions give it, so the parent places it at that size (a meter's
+  /// fill, a to-scale dimension line). [node] itself when neither is bound.
+  static BaseNode withBoundSize(BuildContext context, BaseNode node) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
+    bool bound(String property) =>
+        node.variables.containsKey(property) ||
+        codelesslyContext?.conditions.findByNodeProperty(node.id, property) !=
+            null;
+    if (!bound('width') && !bound('height')) return node;
+    double? value(String property) {
+      final num? v = PropertyValueDelegate.getPropertyValue<num>(
+        node,
+        property,
+        scopedValues: scopedValues,
+      );
+      return v != null && v.isFinite ? math.max(0, v.toDouble()) : null;
+    }
+
+    final NodeBox box = node.basicBoxLocal;
+    final double width = value('width') ?? box.width;
+    final double height = value('height') ?? box.height;
+    if (width == box.width && height == box.height) return node;
+    final BaseNode? sized = NodeJsonConverter().fromJson({
+      ...node.toJson(),
+      'basicBoxLocal': NodeBox(box.x, box.y, width, height).toJson(),
+    });
+    if (sized == null) return node;
+    return sized..parentID = node.parentID;
   }
 
   /// How [node] is placed inside the freeform container [parent], derived
