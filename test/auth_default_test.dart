@@ -7,10 +7,10 @@ void main() {
   test('auth reads as signed out with no app user', () {
     final ScopedValues scope = ScopedValues.preview(variables: {});
     String eval(String text) => PropertyValueDelegate.substituteVariables(
-          text,
-          scopedValues: scope,
-          nullSubstitutionMode: NullSubstitutionMode.emptyString,
-        );
+      text,
+      scopedValues: scope,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
     expect(eval(r'${auth.isSignedIn}'), 'false');
     expect(eval(r'${= !auth.isSignedIn}'), 'true');
     expect(eval(r'${auth.uid}'), '');

@@ -761,6 +761,10 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     super.didUpdateWidget(oldWidget);
     if (widget.node != oldWidget.node) {
       onLoadActions = collectOnLoadActions();
+      if (!widget.settings.isPreview && didPerformOnLoadActions) {
+        HardwareKeyboard.instance.removeHandler(_onKey);
+        _listenToKeys();
+      }
     }
   }
 
@@ -811,6 +815,8 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
             focused.findAncestorWidgetOfExactType<EditableText>() != null)) {
       return false;
     }
+    // Shift, Control, Alt and Meta alone are modifiers of the next key.
+    if (_modifierKeys.contains(event.logicalKey)) return false;
     final String key = keyTriggerLabel(event.logicalKey);
     final List<Reaction> reactions = [
       for (final Reaction reaction in _keyReactions)
@@ -832,9 +838,30 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
         'meta': keyboard.isMetaPressed || keyboard.isControlPressed,
       },
     );
-    // Handled: arrows don't also scroll the page.
-    return true;
+    // A reaction for a specific key takes it (an arrow doesn't also scroll
+    // the page); a reaction for any key lets it through, so Tab and the
+    // browser's shortcuts keep working.
+    return reactions.any(
+      (reaction) => reaction.trigger.key?.isNotEmpty ?? false,
+    );
   }
+
+  static final Set<LogicalKeyboardKey> _modifierKeys = {
+    LogicalKeyboardKey.shift,
+    LogicalKeyboardKey.shiftLeft,
+    LogicalKeyboardKey.shiftRight,
+    LogicalKeyboardKey.control,
+    LogicalKeyboardKey.controlLeft,
+    LogicalKeyboardKey.controlRight,
+    LogicalKeyboardKey.alt,
+    LogicalKeyboardKey.altLeft,
+    LogicalKeyboardKey.altRight,
+    LogicalKeyboardKey.meta,
+    LogicalKeyboardKey.metaLeft,
+    LogicalKeyboardKey.metaRight,
+    LogicalKeyboardKey.capsLock,
+    LogicalKeyboardKey.fn,
+  };
 
   List<ActionModel> collectOnLoadActions() => widget.node.reactions
       .whereTriggerType(TriggerType.load)
@@ -912,8 +939,9 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
 
 /// The label a "Key Down" trigger's `${result.key}` reads for [key]: the
 /// character of a character key (`a`, `1`, `/`), else the key's name
-/// without spaces (`ArrowLeft`, `Delete`, `Escape`, `Enter`).
+/// without spaces (`ArrowLeft`, `Delete`, `Escape`, `Enter`, `Space`).
 String keyTriggerLabel(LogicalKeyboardKey key) {
+  if (key == LogicalKeyboardKey.space) return 'Space';
   final String label = key.keyLabel;
   if (label.length == 1) return label.toLowerCase();
   return label.replaceAll(' ', '');

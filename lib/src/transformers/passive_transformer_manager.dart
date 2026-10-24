@@ -307,9 +307,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       return bound.toDouble() - design;
     }
 
-    final Offset offset = Offset(delta('x'), delta('y'));
-    if (offset == Offset.zero) return widget;
-    return Transform.translate(offset: offset, child: widget);
+    // Always wrapped, even unmoved: a wrapper that came and went as the
+    // value crossed its design position would rebuild the node, ending a
+    // drag that moves it.
+    return Transform.translate(
+      offset: Offset(delta('x'), delta('y')),
+      child: widget,
+    );
   }
 
   bool _hasPositionCondition(BuildContext context, BaseNode node) {

@@ -599,16 +599,24 @@ class FunctionsRepository {
     );
   }
 
-  /// The on-screen rect of the node that [context] belongs to (the node that
-  /// ran the action), which a popover opens next to. Null when it has no
-  /// laid-out box.
+  /// The rect of the node that [context] belongs to (the node that ran the
+  /// action), which a popover opens next to. Null when it has no laid-out
+  /// box.
   static Rect? anchorRectOf(BuildContext context) {
     if (!context.mounted) return null;
     final RenderObject? object = context.findRenderObject();
     if (object is! RenderBox || !object.hasSize || !object.attached) {
       return null;
     }
-    return object.localToGlobal(Offset.zero) & object.size;
+    // In the coordinates of the navigator the popover opens in, which need
+    // not start at the screen's corner (a nested navigator under a bar).
+    final RenderObject? overlay = Navigator.maybeOf(context)?.overlay?.context
+        .findRenderObject();
+    return object.localToGlobal(
+          Offset.zero,
+          ancestor: overlay is RenderBox && overlay.attached ? overlay : null,
+        ) &
+        object.size;
   }
 
   /// The id of the published layout that holds the canvas [canvasId], if any.
@@ -681,6 +689,8 @@ class FunctionsRepository {
       showCloseButton: showCloseButton,
       routeSettings: RouteSettings(arguments: parsedParams),
       fullHeight: fullHeight,
+      // Where the node that opened a popover is now: the opener may rebuild
+      // or go away while the popover shows.
       anchor: presentation == DialogPresentation.popover
           ? anchorRectOf(context)
           : null,

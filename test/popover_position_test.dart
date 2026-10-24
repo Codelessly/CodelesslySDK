@@ -10,15 +10,24 @@ void main() {
   const Size menu = Size(240, 300);
 
   test('below and left-aligned', () {
-    expect(popoverPosition(const Rect.fromLTWH(20, 100, 120, 40), screen, menu), const Offset(20, 146));
+    expect(
+      popoverPosition(const Rect.fromLTWH(20, 100, 120, 40), screen, menu),
+      const Offset(20, 146),
+    );
   });
 
   test('right-aligned near the right edge', () {
-    expect(popoverPosition(const Rect.fromLTWH(330, 10, 44, 44), screen, menu), const Offset(134, 60));
+    expect(
+      popoverPosition(const Rect.fromLTWH(330, 10, 44, 44), screen, menu),
+      const Offset(134, 60),
+    );
   });
 
   test('above when there is no room below', () {
-    expect(popoverPosition(const Rect.fromLTWH(20, 700, 120, 40), screen, menu), const Offset(20, 394));
+    expect(
+      popoverPosition(const Rect.fromLTWH(20, 700, 120, 40), screen, menu),
+      const Offset(20, 394),
+    );
   });
 
   test('centered without an anchor', () {
