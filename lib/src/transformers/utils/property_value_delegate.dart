@@ -442,6 +442,7 @@ class PropertyValueDelegate {
       'auth' => scopedValues.appUser,
       'result' => ActionChain.current?.result,
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
+      'parent' => scopedValues.parentSize,
       _ => null,
     };
 
@@ -929,7 +930,7 @@ List<Accessor> getAccessorsForType(VariableType type) {
           name: 'isEmpty',
           type: VariableType.boolean,
           getValue: (value) {
-            final newValue = value?.toMap();
+            final newValue = value?.toList();
             if (newValue == null) return null;
             return newValue.isEmpty;
           },
@@ -938,7 +939,7 @@ List<Accessor> getAccessorsForType(VariableType type) {
           name: 'isNotEmpty',
           type: VariableType.boolean,
           getValue: (value) {
-            final newValue = value?.toMap();
+            final newValue = value?.toList();
             if (newValue == null) return null;
             return newValue.isNotEmpty;
           },
@@ -1117,7 +1118,7 @@ String formatDate(DateTime date) {
 /// Formats [date] relative to now: `Just now`, `5 min ago`, `2 hours ago`,
 /// `3 days ago`, then [formatDate] after a week.
 String formatTimeAgo(DateTime date, {DateTime? now}) {
-  final Duration diff = (now ?? DateTime.now()).difference(date);
+  final Duration diff = (now ?? FormulaClock.now()).difference(date);
   if (diff.inMinutes < 1) return 'Just now';
   if (diff.inHours < 1) return '${diff.inMinutes} min ago';
   if (diff.inDays < 1) {

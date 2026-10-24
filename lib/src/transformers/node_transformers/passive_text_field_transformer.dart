@@ -281,18 +281,24 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     final TextFieldNode node = widget.node;
     final TextFieldProperties properties = node.properties;
 
-    final bool enabled =
-        context.getNodeValue(node.id, 'enabled') ?? properties.enabled;
-    final bool obscureText =
-        context.getNodeValue(node.id, 'obscureText') ?? properties.obscureText;
-    final bool readOnly =
-        context.getNodeValue(node.id, 'readOnly') ?? properties.readOnly;
+    final ScopedValues scopedValues = ScopedValues.of(context);
+
+    // Bindable: a variable, condition or set-property action can change them
+    // (e.g. a show-password toggle).
+    bool flag(String property, bool fallback) =>
+        PropertyValueDelegate.getPropertyValue<bool>(
+          node,
+          property,
+          scopedValues: scopedValues,
+        ) ??
+        fallback;
+    final bool enabled = flag('enabled', properties.enabled);
+    final bool obscureText = flag('obscureText', properties.obscureText);
+    final bool readOnly = flag('readOnly', properties.readOnly);
     final bool showCursor =
         context.getNodeValue(node.id, 'showCursor') ?? properties.showCursor;
     final int? maxLength =
         context.getNodeValue(node.id, 'maxLength') ?? properties.maxLength;
-
-    final ScopedValues scopedValues = ScopedValues.of(context);
 
     final TextInputType keyboardType =
         properties.keyboardType == TextInputTypeEnum.number
@@ -310,13 +316,27 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         !widget.settings.isPreview &&
         (widget.autofocus ?? properties.autoFocus);
 
+    // A field with a set height fills it. A one-line field stays one line
+    // (so it can obscure its text and Enter submits it) and fills the height
+    // through its decoration; only multi-line fields expand.
+    final bool fillsHeight = !widget.node.isVerticalWrap;
+    final bool oneLine =
+        properties.maxLines == 1 && (properties.minLines ?? 1) <= 1;
+    final bool expands = fillsHeight && !oneLine;
     final (int? maxLines, int? minLines) = resolveTextFieldLines(
       maxLines: properties.maxLines,
       minLines: properties.minLines,
-      expands: !widget.node.isVerticalWrap,
+      expands: expands,
+    );
+    final InputDecoration decoration = getDecoration(
+      context,
+      node,
+      properties.decoration,
+      widget.settings,
+      scopedValues,
     );
 
-    Widget field = TextFormField(
+    Widget buildField(InputDecoration decoration) => TextFormField(
       focusNode: focusNode,
       autocorrect: properties.autoCorrect,
       autofocus: autofocus,
@@ -352,7 +372,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       ],
       maxLines: maxLines,
       minLines: minLines,
-      expands: !widget.node.isVerticalWrap,
+      expands: expands,
       obscuringCharacter: widget.node.properties.obscuringCharacter,
       style: TextUtils.retrieveTextStyleFromProp(
         widget.node.properties.inputStyle,
@@ -363,14 +383,22 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       onFieldSubmitted: (value) {
         // handled by the focus listener!
       },
-      decoration: getDecoration(
-        context,
-        node,
-        properties.decoration,
-        widget.settings,
-        scopedValues,
-      ),
+      decoration: decoration,
     );
+
+    Widget field = fillsHeight && oneLine
+        ? LayoutBuilder(
+            builder: (context, constraints) => buildField(
+              constraints.hasBoundedHeight
+                  ? decoration.copyWith(
+                      constraints: BoxConstraints.tightFor(
+                        height: constraints.maxHeight,
+                      ),
+                    )
+                  : decoration,
+            ),
+          )
+        : buildField(decoration);
 
     if (node.isHorizontalWrap) {
       field = IntrinsicWidth(child: field);
@@ -430,23 +458,36 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     // `${= invalid ? 'Required' : ''}` that comes out empty (or blank) is
     // no error, so the field keeps its normal border and has no error row.
     // InputDecoration uses errorBorder/focusedErrorBorder only with an error.
+    // The template is the errorText property, or a binding of it in the
+    // node's variables; a set-value action's value wins over both.
+    final String? errorTemplate =
+        node.variables['errorText'] ?? decoration.errorText;
     final String? errorMessage = getText(
       context,
       node,
       property: 'errorText',
-      defaultValue: decoration.errorText,
+      defaultValue: errorTemplate,
       scopedValues: scopedValues,
       settings: settings,
     );
     final bool hasError =
         errorMessage != null && errorMessage.trim().isNotEmpty;
+    // A true `error` binding shows the error borders without a message, for
+    // forms that show their errors elsewhere.
+    final bool errorFlag =
+        PropertyValueDelegate.getPropertyValue<bool>(
+          node,
+          'error',
+          scopedValues: scopedValues,
+        ) ??
+        false;
     final Widget? errorText = !hasError
         ? null
         : buildText(
             context,
             node,
             property: 'errorText',
-            defaultValue: decoration.errorText,
+            defaultValue: errorTemplate,
             scopedValues: scopedValues,
             settings: settings,
             variablesOverrides: widget.variablesOverrides,
@@ -535,8 +576,10 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
               ),
               iconModel: decoration.prefixIcon,
             ),
-      // prefixIconConstraints:
-      //     decoration.prefixIconConstraints.flutterConstraints,
+      // Unset constraints keep Flutter's 48 px icon slot.
+      prefixIconConstraints: decoration.prefixIconConstraints.isEmpty
+          ? null
+          : decoration.prefixIconConstraints.flutterConstraints,
       prefix: prefixText,
       prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
       suffixIcon:
@@ -552,8 +595,10 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
             ),
       suffix: suffixText,
       suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
-      // suffixIconConstraints:
-      //     decoration.suffixIconConstraints.flutterConstraints,
+      // Unset constraints keep Flutter's 48 px icon slot.
+      suffixIconConstraints: decoration.suffixIconConstraints.isEmpty
+          ? null
+          : decoration.suffixIconConstraints.flutterConstraints,
       counter: decoration.showCounter
           ? decoration.counterText?.isNotEmpty == true
                 ? counterText
@@ -573,10 +618,18 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       focusColor: decoration.focusColor.toFlutterColor(),
       hoverColor: decoration.hoverColor.toFlutterColor(),
       errorBorder: getInputBorder(decoration.errorBorder),
-      focusedBorder: getInputBorder(decoration.focusedBorder),
+      focusedBorder: getInputBorder(
+        errorFlag && !hasError
+            ? decoration.focusedErrorBorder
+            : decoration.focusedBorder,
+      ),
       focusedErrorBorder: getInputBorder(decoration.focusedErrorBorder),
       disabledBorder: getInputBorder(decoration.disabledBorder),
-      enabledBorder: getInputBorder(decoration.enabledBorder),
+      enabledBorder: getInputBorder(
+        errorFlag && !hasError
+            ? decoration.errorBorder
+            : decoration.enabledBorder,
+      ),
       border: getInputBorder(decoration.border),
       enabled: decoration.enabled,
       semanticCounterText: decoration.semanticCounterText,

@@ -114,15 +114,15 @@ void main() {
     expect(calls, ['double', 'tap']);
   });
 
-  testWidgets('Hover enter and exit run for a mouse, never for touch', (
+  testWidgets('Cursor enter and exit run for a mouse, never for touch', (
     tester,
   ) async {
     final calls = <String>[];
     await pumpNode(
       tester,
       box([
-        on(TriggerType.hoverEnter, 'enter'),
-        on(TriggerType.hoverExit, 'exit'),
+        on(TriggerType.cursorEnter, 'enter'),
+        on(TriggerType.cursorExit, 'exit'),
       ]),
       calls,
     );

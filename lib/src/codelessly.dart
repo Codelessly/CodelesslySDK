@@ -47,7 +47,7 @@ class Codelessly {
   /// Initialization is needed before usage.
   static Codelessly get instance => _instance;
 
-  final Client _client = CodelesslyHttpClient();
+  final Client _client;
 
   /// Returns the HTTP client used by this SDK instance.
   Client get client => _client;
@@ -263,8 +263,7 @@ class Codelessly {
   final Map<String, NavigationListener> _navigationListeners = {};
 
   /// The screen shown and its parameters, for the browser's address: a host
-  /// listens and writes [CodelesslyRoute.toPath] to the URL. Dialogs don't
-  /// change it.
+  /// listens and writes [pathOf] it to the URL. Dialogs don't change it.
   final ValueNotifier<CodelesslyRoute?> route = ValueNotifier(null);
 
   /// A screen to open once the app's first screen shows, e.g. the one a
@@ -286,7 +285,31 @@ class Codelessly {
   /// the host's own route, which carries no parameters, so a link to it
   /// would otherwise lose them. Null when the link names another screen.
   Map<String, String>? linkParamsFor(String? layoutId) {
-    return _maybeDataManager?.publishModel?.linkParamsFor(_link, layoutId);
+    return _maybeDataManager?.publishModel?.linkParamsFor(
+      _resolveLink(_link),
+      layoutId,
+    );
+  }
+
+  /// [link] with its URL path, if it has one, matched against the screens'
+  /// URL paths: the screen it names and the parameters the path and query
+  /// give. A path no screen's URL path matches is read as a screen id.
+  CodelesslyRoute? _resolveLink(CodelesslyRoute? link) {
+    final String? path = link?.path;
+    final SDKPublishModel? model = _maybeDataManager?.publishModel;
+    if (link == null || path == null || model == null) return link;
+    final CanvasLocationMatch? match = CanvasLocation.match(
+      model,
+      Uri(
+        path: path,
+        queryParameters: link.params.isEmpty ? null : link.params,
+      ).toString(),
+    );
+    if (match == null) return link;
+    return CodelesslyRoute(match.canvasId, {
+      for (final MapEntry<String, dynamic> param in match.params.entries)
+        param.key: '${param.value}',
+    });
   }
 
   final Map<String, BreakpointsListener> _breakpointsListeners = {};
@@ -313,7 +336,10 @@ class Codelessly {
     DataManager? publishDataManager,
     DataManager? previewDataManager,
     DataManager? templateDataManager,
-  }) {
+
+    // The HTTP client for API calls and data loading (tests pass a mock).
+    Client? client,
+  }) : _client = client ?? CodelesslyHttpClient() {
     _config = config;
     _cacheManager = cacheManager;
     _authManager = authManager;
@@ -930,7 +956,7 @@ class Codelessly {
   /// the app when it names this screen, or the parameters it was opened
   /// with.
   CodelesslyRoute _routeOf(String canvasId, ModalRoute? modal) {
-    final CodelesslyRoute? pending = pendingRoute;
+    final CodelesslyRoute? pending = _resolveLink(pendingRoute);
     if (pending != null && pending.canvasId == canvasId) return pending;
     return CodelesslyRoute.of(canvasId, modal?.settings.arguments);
   }
@@ -943,7 +969,7 @@ class Codelessly {
     final ModalRoute? modal = ModalRoute.of(context);
     if (modal is PopupRoute) return;
     route.value = _routeOf(canvasId, modal);
-    final CodelesslyRoute? pending = pendingRoute;
+    final CodelesslyRoute? pending = _resolveLink(pendingRoute);
     if (pending != null && pending.canvasId == canvasId) {
       setVariablesFromRoute(context, pending);
     }
@@ -967,21 +993,33 @@ class Codelessly {
     }
   }
 
+  /// The link for [route]: the screen's URL path with its parameters filled
+  /// in when it has one (`guide/bat-star` for a screen at `guide/:id`; the
+  /// app's first screen without a path is the empty path), else
+  /// [CodelesslyRoute.toPath].
+  String pathOf(CodelesslyRoute route) {
+    final SDKPublishModel? model = dataManager.publishModel;
+    return (model == null
+            ? null
+            : CanvasLocation.locationOf(model, route.canvasId, route.params)) ??
+        route.toPath();
+  }
+
   /// Opens [pendingRoute] over the first screen shown, unless it is that
-  /// screen.
+  /// screen. A link's path is matched against the screens' URL paths first,
+  /// then read as a screen id.
   void _openPendingRoute(BuildContext context, String canvasId) {
     final CodelesslyRoute? pending = _pendingRoute;
     if (pending == null) return;
     _pendingRoute = null;
-    setVariablesFromRoute(context, pending);
-    if (pending.canvasId == canvasId) return;
+    final CodelesslyRoute? link = _resolveLink(pending);
+    if (link == null) return;
+    setVariablesFromRoute(context, link);
+    if (link.canvasId == canvasId) return;
     unawaited(
       FunctionsRepository.navigate(
         context,
-        NavigationAction(
-          destinationId: pending.canvasId,
-          params: pending.params,
-        ),
+        NavigationAction(destinationId: link.canvasId, params: link.params),
         codelessly: this,
       ),
     );
