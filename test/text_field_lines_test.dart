@@ -142,6 +142,28 @@ void main() {
       _expectOnScreen(tester, size);
     });
 
+    testWidgets('fixed-height password field is obscured at $label', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        _field(
+          maxLines: 1,
+          minLines: null,
+          verticalFit: SizeFit.fixed,
+          obscureText: true,
+        ),
+        size,
+      );
+      expect(tester.takeException(), isNull);
+      final TextField field = tester.widget(find.byType(TextField));
+      expect(field.obscureText, isTrue);
+      expect(field.expands, isFalse);
+      expect(field.maxLines, 1);
+      expect(tester.getSize(find.byType(TextField)).height, 120);
+      _expectOnScreen(tester, size);
+    });
+
     testWidgets('fixed-height field expands with lines set at $label', (
       tester,
     ) async {

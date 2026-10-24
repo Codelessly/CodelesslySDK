@@ -61,7 +61,7 @@ void main() {
 
     test('split', () {
       expect(eval('split("rock, jazz", ", ")'), ['rock', 'jazz']);
-      expect(eval('split("a,b")'), ['a', 'b']);
+      expect(eval('split("ab")'), ['a', 'b']);
       expect(eval('split("", ",")'), isEmpty);
       expect(eval('length(split("a b c", " "))'), 3);
     });

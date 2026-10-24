@@ -168,4 +168,67 @@ void main() {
       expect(find.byKey(const Key('email')), findsNothing);
     });
   });
+
+  group('a text in a list item', () {
+    const String note = r'${= flags[item.id].note}';
+    final TextNode text = TextNode(
+      id: 'note',
+      name: 'Note',
+      basicBoxLocal: NodeBox(0, 0, 200, 20),
+      characters: note,
+      textMixedProps: [StartEndProp(start: 0, end: note.length)],
+    )..parentID = kRootNode;
+
+    // The editor's values for the canvas: the first item of the list.
+    setUp(
+      () => VariablePreview.scopeResolver = (_) => ScopedValues.preview(
+        variables: {
+          'flags': VariableData(
+            id: 'flags',
+            name: 'flags',
+            value: {
+              '1a': {'note': 'Tread worn'},
+              '1b': {'note': 'Brake hose leak'},
+            },
+            type: VariableType.map,
+          ),
+        },
+        indexedItem: IndexedItem(0, {'id': '1a'}),
+      ),
+    );
+
+    Future<void> pumpItem(WidgetTester tester, IndexedItem? item) =>
+        pumpHost(tester, (context) {
+          Widget build(BuildContext context) => TextUtils.buildTextForProps(
+            context,
+            note,
+            node: text,
+            props: text.textMixedProps,
+            variablesOverrides: const [],
+            nullSubstitutionMode: NullSubstitutionMode.noChange,
+            replaceVariablesWithSymbol: true,
+          );
+          if (item == null) return build(context);
+          return IndexedItemProvider(
+            item: item,
+            child: Builder(builder: build),
+          );
+        });
+
+    testWidgets('reads the item it is built in, as its bindings do', (
+      tester,
+    ) async {
+      await pumpItem(tester, IndexedItem(1, {'id': '1b'}));
+      expect(find.text('Brake hose leak', findRichText: true), findsOne);
+    });
+
+    testWidgets('reads the first item when built without item data', (
+      tester,
+    ) async {
+      await pumpItem(tester, IndexedItem(1, null));
+      expect(find.text('Tread worn', findRichText: true), findsOne);
+      await pumpItem(tester, null);
+      expect(find.text('Tread worn', findRichText: true), findsOne);
+    });
+  });
 }

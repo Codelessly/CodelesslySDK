@@ -518,6 +518,15 @@ extension CCrossAxisAlignmentHelper on CrossAxisAlignmentC {
         return flutter.CrossAxisAlignment.baseline;
     }
   }
+
+  /// A [flutter.Wrap] has no stretch or baseline: those align to the start.
+  flutter.WrapCrossAlignment get flutterWrapAlignment => switch (this) {
+    CrossAxisAlignmentC.end => flutter.WrapCrossAlignment.end,
+    CrossAxisAlignmentC.center => flutter.WrapCrossAlignment.center,
+    CrossAxisAlignmentC.start ||
+    CrossAxisAlignmentC.stretch ||
+    CrossAxisAlignmentC.baseline => flutter.WrapCrossAlignment.start,
+  };
 }
 
 extension AxisHelperExt on AxisC {

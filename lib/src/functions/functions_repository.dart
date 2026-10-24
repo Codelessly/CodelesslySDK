@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../codelessly_sdk.dart';
 import '../logging/stat_tracker.dart';
 import '../ui/codelessly_dialog_widget.dart';
+import '../ui/layout_presentation_route.dart';
 import 'action_chain.dart';
 import 'app_auth.dart';
 import 'cloud_files.dart';
@@ -109,7 +110,7 @@ class FunctionsRepository {
         if (result is Future) return result.then((_) => true);
         return true;
       case ActionType.callApi:
-        return makeApiRequestFromAction(action as ApiCallAction, context);
+        return callApi(context, action as ApiCallAction);
       case ActionType.setStorage:
         return setStorageFromAction(context, action as SetStorageAction);
       case ActionType.setCloudStorage:
@@ -140,7 +141,12 @@ class FunctionsRepository {
         return runConfirm(context, action as ConfirmAction);
       case ActionType.delay:
         return Future<bool>.delayed(
-          Duration(milliseconds: (action as DelayAction).milliseconds),
+          Duration(
+            milliseconds: delayMilliseconds(
+              action as DelayAction,
+              ActionChain.scopedValuesOf(context),
+            ),
+          ),
           () => true,
         );
       case ActionType.cloudData:
@@ -148,6 +154,23 @@ class FunctionsRepository {
       case ActionType.cloudBatch:
         return runCloudBatch(context, action as CloudBatchAction);
     }
+  }
+
+  /// How long [action] waits: its [DelayAction.duration] formula when that
+  /// gives a number, else its fixed [DelayAction.milliseconds].
+  static int delayMilliseconds(DelayAction action, ScopedValues scopedValues) {
+    final String? duration = action.duration;
+    if (duration == null || duration.trim().isEmpty) {
+      return action.milliseconds;
+    }
+    final num? value = num.tryParse(
+      PropertyValueDelegate.substituteVariables(
+        duration,
+        scopedValues: scopedValues,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ).trim(),
+    );
+    return value == null || value < 0 ? action.milliseconds : value.round();
   }
 
   /// Runs a [CloudDataAction] and puts its result in its result variable
@@ -309,6 +332,66 @@ class FunctionsRepository {
     return true;
   }
 
+  /// Calls [action]'s API, then runs its onSuccess actions after a 2xx
+  /// response or its onError actions after any other response or a failed
+  /// request. Both read the response as `${result}`. A failed request stops
+  /// the chain only when there are no onError actions to handle it.
+  static Future<http.Response?> callApi(
+    BuildContext context,
+    ApiCallAction action, [
+    Observable<VariableData>? variable,
+  ]) async {
+    http.Response? response;
+    Object? failure;
+    StackTrace? failureStack;
+    try {
+      response = await makeApiRequestFromAction(action, context, variable);
+    } catch (error, stackTrace) {
+      failure = error;
+      failureStack = stackTrace;
+    }
+    // The widget that made the call can be gone by now (a dialog closed
+    // while it loaded); its handlers then run on the chain's opener.
+    // ignore: use_build_context_synchronously
+    final BuildContext? outcomeContext = ActionChain.contextFor(context);
+    if (outcomeContext == null) return response;
+    await handleApiOutcome(
+      // ignore: use_build_context_synchronously
+      outcomeContext,
+      action,
+      response: response,
+      failure: failure,
+      failureStack: failureStack,
+    );
+    return response;
+  }
+
+  /// Runs [action]'s onSuccess actions after a 2xx [response], or its onError
+  /// actions otherwise. Rethrows [failure] (a request that didn't complete)
+  /// when there are no onError actions, so the chain stops as before.
+  static Future<void> handleApiOutcome(
+    BuildContext context,
+    ApiCallAction action, {
+    http.Response? response,
+    Object? failure,
+    StackTrace? failureStack,
+  }) async {
+    final bool ok =
+        failure == null &&
+        response != null &&
+        response.statusCode >= 200 &&
+        response.statusCode < 300;
+    if (ok) {
+      if (action.onSuccess.isNotEmpty) {
+        await runActions(context, action.onSuccess);
+      }
+    } else if (action.onError.isNotEmpty) {
+      await runActions(context, action.onError);
+    } else if (failure != null) {
+      Error.throwWithStackTrace(failure, failureStack ?? StackTrace.current);
+    }
+  }
+
   static Future<http.Response> makeApiRequestFromAction(
     ApiCallAction action,
     BuildContext context, [
@@ -363,13 +446,35 @@ class FunctionsRepository {
     return makeApiRequest(
       context: context,
       method: apiData.method,
-      url: _applyApiInputs(apiData.url, params, scopedValues),
+      url: buildApiUrl(apiData, params, scopedValues),
       headers: _generateMapFromPairs(apiData.headers, params, scopedValues),
       body: apiData.bodyType == RequestBodyType.form
           ? _generateMapFromPairs(apiData.formFields, params, scopedValues)
           : _applyApiInputs(apiData.body ?? '', params, scopedValues),
       variable: variable,
     );
+  }
+
+  /// The URL [api] requests with the inputs [params]: its URL with inputs
+  /// and variables substituted, plus its query parameters (used, non-empty
+  /// keys; same substitution), which win over ones written in the URL.
+  static String buildApiUrl(
+    HttpApiData api,
+    Map<String, String> params,
+    ScopedValues scopedValues,
+  ) {
+    final String url = _applyApiInputs(api.url, params, scopedValues);
+    final Map<String, String> query = _generateMapFromPairs(
+      api.queryParams,
+      params,
+      scopedValues,
+    );
+    if (query.isEmpty) return url;
+    final Uri? uri = Uri.tryParse(url);
+    if (uri == null) return url;
+    return uri
+        .replace(queryParameters: {...uri.queryParameters, ...query})
+        .toString();
   }
 
   static Map<String, String> _generateMapFromPairs(
@@ -465,7 +570,18 @@ class FunctionsRepository {
     final String? myCanvasId = effectiveCodelessly.currentNavigatedCanvasId;
 
     if (action.navigationType == NavigationType.pop) {
-      await Navigator.maybePop(context, parsedParams);
+      final bool popped = await Navigator.maybePop(context, parsedParams);
+      // Nothing to go back to (the screen was opened directly): a pop with a
+      // destination goes there instead.
+      if (!popped && action.destinationId.isNotEmpty && context.mounted) {
+        return navigate(
+          context,
+          action.copyWith(navigationType: NavigationType.replace),
+          codelessly: codelessly,
+          codelesslyController: codelesslyController,
+          scopedValues: scopedValues,
+        );
+      }
     } else {
       // Check if a layout exists for the action's [destinationId].
       final String? layoutId =
@@ -560,18 +676,28 @@ class FunctionsRepository {
     }
   }
 
+  /// Shows [action]'s canvas. What its "Navigate back" passes back, e.g. the
+  /// values of a form in a sheet, is the `${result}` of the actions after it.
   static Future<void> showDialogAction(
     BuildContext context,
     ShowDialogAction action,
   ) async {
-    await showLayoutDialog(
+    final Object? result = await showLayoutDialog(
       context,
       canvasId: action.destinationId,
       params: action.params,
       barrierDismissible: action.barrierDismissible,
       barrierColor: action.barrierColor?.toFlutterColor(),
       showCloseButton: action.showCloseButton,
+      presentation: action.presentation,
+      alignment: action.alignment.flutterAlignment ?? Alignment.center,
+      sheetWidth: action.sheetWidth,
+      maxHeightFactor: action.maxHeightFactor,
+      showDragHandle: action.showDragHandle,
     );
+    if (result case final Map values when values.isNotEmpty) {
+      ActionChain.setResult(values);
+    }
   }
 
   /// The id of the published layout that holds the canvas [canvasId], if any.
@@ -580,9 +706,10 @@ class FunctionsRepository {
           .firstWhereOrNull((layout) => layout.canvasIds.contains(canvasId))
           ?.id;
 
-  /// Shows the canvas [canvasId] as a dialog and completes with what it was
-  /// closed with: the params of the "Navigate back" action that closed it, or
-  /// null when it was dismissed.
+  /// Shows the canvas [canvasId] as a dialog, a bottom sheet or a side sheet
+  /// (see [presentation]) and completes with what it was closed with: the
+  /// params of the "Navigate back" action that closed it, or null when it was
+  /// dismissed.
   static Future<Object?> showLayoutDialog(
     BuildContext context, {
     required String canvasId,
@@ -590,6 +717,11 @@ class FunctionsRepository {
     bool barrierDismissible = true,
     Color? barrierColor,
     bool showCloseButton = false,
+    DialogPresentation presentation = DialogPresentation.dialog,
+    AlignmentGeometry alignment = Alignment.center,
+    double? sheetWidth,
+    double maxHeightFactor = 1,
+    bool showDragHandle = false,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -632,19 +764,26 @@ class FunctionsRepository {
     // A chain triggered in the dialog can finish on this layout after the
     // dialog closes (e.g. Navigate back, then a toast).
     final List<BuildContext> openerHosts = ActionChainOpener.hostsFor(context);
-    final Object? result = await showDialog<Object?>(
-      context: context,
-      useRootNavigator: false,
+    final BaseNode? canvas = codelessly
+        .dataManager
+        .publishModel
+        ?.layouts[layoutId]
+        ?.canvases[canvasId]?[canvasId];
+    final Object? result = await presentCanvas<Object?>(
+      context,
+      presentation: presentation,
+      alignment: alignment,
       barrierDismissible: barrierDismissible,
       barrierColor: barrierColor,
+      showCloseButton: showCloseButton,
+      sheetWidth: sheetWidth,
+      designWidth: canvas?.basicBoxLocal.width,
+      maxHeightFactor: maxHeightFactor,
+      showDragHandle: showDragHandle,
       routeSettings: RouteSettings(arguments: parsedParams),
       builder: (context) => ActionChainOpener(
         openerHosts: openerHosts,
-        child: CodelesslyDialogWidget(
-          showCloseButton: showCloseButton,
-          builder: (context) =>
-              CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
-        ),
+        child: CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
       ),
     );
     if (context.mounted) {
@@ -655,6 +794,82 @@ class FunctionsRepository {
       );
     }
     return result;
+  }
+
+  /// Opens what [builder] builds as a dialog at [alignment] or as a bottom
+  /// sheet, per [presentation] (adaptive: a sheet below 600 px wide), and
+  /// completes with the value it is closed with.
+  static Future<T?> presentCanvas<T>(
+    BuildContext context, {
+    required WidgetBuilder builder,
+    DialogPresentation presentation = DialogPresentation.dialog,
+    AlignmentGeometry alignment = Alignment.center,
+    bool barrierDismissible = true,
+    Color? barrierColor,
+    bool showCloseButton = false,
+    RouteSettings? routeSettings,
+    double? sheetWidth,
+    double? designWidth,
+    double maxHeightFactor = 1,
+    bool showDragHandle = false,
+  }) {
+    if (presentation == DialogPresentation.sideSheet) {
+      return Navigator.of(context).push<T>(
+        LayoutPresentationRoute<T>(
+          context: context,
+          presentation: presentation,
+          barrierDismissible: barrierDismissible,
+          barrierColor:
+              barrierColor ??
+              Theme.of(context).dialogTheme.barrierColor ??
+              Colors.black54,
+          showCloseButton: showCloseButton,
+          sheetWidth: sheetWidth,
+          designWidth: designWidth,
+          settings: routeSettings,
+          builder: builder,
+        ),
+      );
+    }
+    final bool asSheet = switch (presentation) {
+      DialogPresentation.dialog || DialogPresentation.sideSheet => false,
+      DialogPresentation.bottomSheet => true,
+      DialogPresentation.adaptive =>
+        (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < 600,
+    };
+    Widget content(BuildContext context) => CodelesslyDialogWidget(
+      showCloseButton: showCloseButton,
+      alignment: asSheet ? Alignment.bottomCenter : alignment,
+      hugHeight: asSheet,
+      builder: builder,
+    );
+    if (asSheet) {
+      return showModalBottomSheet<T>(
+        context: context,
+        useRootNavigator: false,
+        isScrollControlled: true,
+        isDismissible: barrierDismissible,
+        barrierColor: barrierColor,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        showDragHandle: showDragHandle,
+        constraints: BoxConstraints(
+          maxHeight:
+              (MediaQuery.maybeSizeOf(context)?.height ?? double.infinity) *
+              maxHeightFactor.clamp(0, 1),
+        ),
+        routeSettings: routeSettings,
+        builder: content,
+      );
+    }
+    return showDialog<T>(
+      context: context,
+      useRootNavigator: false,
+      barrierDismissible: barrierDismissible,
+      barrierColor: barrierColor,
+      routeSettings: routeSettings,
+      builder: content,
+    );
   }
 
   static void launchURL(BuildContext context, LinkAction action) {
@@ -772,10 +987,13 @@ class FunctionsRepository {
 
       printResponse(response);
 
+      final Map responseValue = ApiResponseVariableUtils.fromResponse(response);
+      // The next actions of the chain read the response as `${result}`, e.g.
+      // `${result.data}` or `${result.isError}`, even when the API has no
+      // variable or another call overwrites it, as in a forEach.
+      ActionChain.setResult(responseValue);
       if (variable != null) {
-        variable.value = variable.value.copyWith(
-          value: ApiResponseVariableUtils.fromResponse(response),
-        );
+        variable.value = variable.value.copyWith(value: responseValue);
         DebugLogger.instance.printInfo(
           '${variable.value.name} updated with success state.',
           name: name,
@@ -791,10 +1009,14 @@ class FunctionsRepository {
     } catch (error, stackTrace) {
       DebugLogger.instance.printInfo(error.toString(), name: name);
       DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
+      final Map errorValue = ApiResponseVariableUtils.error(
+        url,
+        error,
+        data: existingData,
+      );
+      ActionChain.setResult(errorValue);
       if (variable != null) {
-        variable.value = variable.value.copyWith(
-          value: ApiResponseVariableUtils.error(url, error, data: existingData),
-        );
+        variable.value = variable.value.copyWith(value: errorValue);
         DebugLogger.instance.printInfo(
           '${variable.value.name} updated with error state.',
           name: name,

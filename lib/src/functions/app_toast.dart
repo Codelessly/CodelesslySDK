@@ -11,8 +11,9 @@ import 'action_chain.dart';
 /// new toast replaces the one on screen.
 ///
 /// The toast takes the app's look ([FeedbackTheme.of]): its font, and the
-/// color of its [ShowToastAction.style]. It can carry a button, e.g. Undo,
-/// that runs [ShowToastAction.actions].
+/// color of its [ShowToastAction.style]. The action's own colors, fonts,
+/// radius, border and shadows override that look. It can carry a button,
+/// e.g. Undo, that runs [ShowToastAction.actions], and a close (×) button.
 class AppToast {
   AppToast._();
 
@@ -76,6 +77,19 @@ class AppToast {
     if (entry != null && entry.mounted) entry.remove();
   }
 
+  /// The font of [family], e.g. `Barlow`: a Google font or one the app
+  /// loaded. Null when [family] is null or empty.
+  static TextStyle? fontOf(String? family) {
+    if (family == null || family.trim().isEmpty) return null;
+    final TextStyle style = TextUtils.retrieveTextStyle(
+      fontName: FontName(family: family.trim(), weight: FontWeightNumeric.w600),
+    );
+    return TextStyle(
+      fontFamily: style.fontFamily,
+      fontFamilyFallback: style.fontFamilyFallback,
+    );
+  }
+
   /// The background and text colors of a toast of [style] in [theme].
   static (Color background, Color foreground) colorsOf(
     ToastStyle style,
@@ -127,6 +141,11 @@ class _ToastViewState extends State<_ToastView> {
   static const Duration _fade = Duration(milliseconds: 220);
 
   bool _visible = false;
+
+  /// Fading out: taps pass through. Fading in, the toast already takes them:
+  /// its semantics stay as they are from the first frame, since the web
+  /// engine keeps a node's stacking only while its siblings don't change.
+  bool _closing = false;
   Timer? _timer;
 
   @override
@@ -141,7 +160,10 @@ class _ToastViewState extends State<_ToastView> {
   void _close() {
     if (!mounted) return;
     _timer?.cancel();
-    setState(() => _visible = false);
+    setState(() {
+      _visible = false;
+      _closing = true;
+    });
     _timer = Timer(_fade, widget.onDone);
   }
 
@@ -171,38 +193,85 @@ class _ToastViewState extends State<_ToastView> {
         (action.backgroundColor == null
             ? styleForeground
             : ResolvedFeedbackTheme.onColor(background));
-    final Widget? icon = action.icon == null
+    final Color? accent = action.accentColor?.toFlutterColor();
+    // The icon's own color, unless [ShowToastAction.iconColor] is set, else
+    // the message color.
+    final MultiSourceIconModel? iconModel = action.iconColor == null
+        ? action.icon
+        : action.icon?.copyWith(color: action.iconColor);
+    final Widget? icon = iconModel == null
         ? null
-        : IconTheme.merge(
-            data: IconThemeData(color: textColor),
-            child: retrieveIconWidget(action.icon!, 18) ?? const SizedBox(),
+        : retrieveIconWidget(
+            iconModel,
+            // A toast icon size of its own wins over the icon's.
+            action.iconSize != 18 ? action.iconSize : iconModel.size ?? 18,
+            textColor,
           );
     final bool hasButton = widget.onAction != null;
+    final bool hasClose = action.showClose;
     final bool top = action.position == ToastPosition.top;
-    final EdgeInsets safe = MediaQuery.paddingOf(context);
-    final TextStyle messageStyle = theme.bodyStyle.copyWith(
-      color: textColor,
-      fontSize: 14,
-      height: 1.35,
-      fontWeight: FontWeight.w600,
-      decoration: TextDecoration.none,
+    final MediaQueryData media = MediaQuery.of(context);
+    final TextStyle? font = AppToast.fontOf(action.fontFamily);
+    final TextStyle messageStyle = action.messageStyle.applyTo(
+      theme.bodyStyle
+          .merge(font)
+          .copyWith(
+            color: textColor,
+            fontSize: 14,
+            height: 1.35,
+            fontWeight: FontWeight.w600,
+            decoration: TextDecoration.none,
+          ),
     );
+    final Color actionColor =
+        action.actionColor?.toFlutterColor() ?? messageStyle.color!;
+    final TextStyle actionStyle = action.actionStyle.applyTo(
+      theme.buttonStyle
+          .merge(font)
+          .copyWith(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: actionColor,
+            decoration: TextDecoration.none,
+          ),
+    );
+    final Color closeColor =
+        action.closeColor?.toFlutterColor() ?? messageStyle.color!;
+    final double buttonRadius = action.cornerRadius != null
+        ? (action.cornerRadius! / 2).clamp(0, theme.buttonRadius).toDouble()
+        : theme.buttonRadius;
+    final BorderSide? outline = action.border == null
+        ? null
+        : borderSideOf(action.border!);
 
+    final BorderRadius radius = BorderRadius.circular(
+      action.cornerRadius ??
+          (hasButton ? theme.buttonRadius.clamp(8, 999) : 999),
+    );
     Widget toast = Container(
-      constraints: const BoxConstraints(minHeight: 44, maxWidth: 560),
-      padding: EdgeInsets.fromLTRB(18, 10, hasButton ? 8 : 18, 10),
+      key: const ValueKey('codelessly-toast'),
+      constraints: BoxConstraints(minHeight: 44, maxWidth: action.maxWidth),
+      padding:
+          action.padding?.flutterEdgeInsets ??
+          EdgeInsets.fromLTRB(
+            accent == null ? 18 : 14,
+            10,
+            hasButton || hasClose ? 8 : 18,
+            10,
+          ),
+      // The accent bar is a left border. A border that differs by side can't
+      // have a radius, so the clip below rounds the corners.
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(
-          hasButton ? theme.buttonRadius.clamp(8, 999) : 999,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 18,
-            offset: Offset(0, 6),
-          ),
-        ],
+        borderRadius: accent == null && outline != null ? radius : null,
+        border: accent == null
+            ? (outline == null ? null : Border.fromBorderSide(outline))
+            : Border(
+                left: BorderSide(color: accent, width: action.accentWidth),
+                top: outline ?? BorderSide.none,
+                right: outline ?? BorderSide.none,
+                bottom: outline ?? BorderSide.none,
+              ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -215,22 +284,60 @@ class _ToastViewState extends State<_ToastView> {
               key: const ValueKey('codelessly-toast-action'),
               onPressed: _onActionPressed,
               style: TextButton.styleFrom(
-                foregroundColor: textColor,
+                foregroundColor: actionColor,
                 minimumSize: const Size(48, 36),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                textStyle: theme.buttonStyle.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
+                textStyle: actionStyle,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(theme.buttonRadius),
+                  borderRadius: BorderRadius.circular(buttonRadius),
                 ),
               ),
               child: Text(widget.actionLabel),
             ),
           ],
+          if (hasClose) ...[
+            SizedBox(width: hasButton ? 0 : 8),
+            Semantics(
+              button: true,
+              label: 'Dismiss',
+              excludeSemantics: true,
+              child: IconButton(
+                key: const ValueKey('codelessly-toast-close'),
+                onPressed: _close,
+                tooltip: null,
+                iconSize: 18,
+                color: closeColor,
+                constraints: const BoxConstraints.tightFor(
+                  width: 36,
+                  height: 36,
+                ),
+                padding: EdgeInsets.zero,
+                style: IconButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(buttonRadius),
+                  ),
+                ),
+                icon: const Icon(Icons.close),
+              ),
+            ),
+          ],
         ],
       ),
+    );
+    toast = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: action.shadows != null
+            ? boxShadowsOf(action.shadows)
+            : const [
+                BoxShadow(
+                  color: Color(0x33000000),
+                  blurRadius: 18,
+                  offset: Offset(0, 6),
+                ),
+              ],
+      ),
+      child: ClipRRect(borderRadius: radius, child: toast),
     );
     toast = Semantics(
       liveRegion: true,
@@ -238,6 +345,7 @@ class _ToastViewState extends State<_ToastView> {
       label: widget.message,
       child: AnimatedOpacity(
         opacity: _visible ? 1 : 0,
+        alwaysIncludeSemantics: true,
         duration: _fade,
         child: AnimatedSlide(
           offset: _visible ? Offset.zero : Offset(0, top ? -0.25 : 0.25),
@@ -253,10 +361,13 @@ class _ToastViewState extends State<_ToastView> {
     return Positioned(
       left: 16,
       right: 16,
-      top: top ? safe.top + 16 : null,
-      bottom: top ? null : action.bottomOffset,
+      top: top ? media.padding.top + 16 : null,
+      bottom: top ? null : action.bottomOffsetFor(media.size.width),
       // Only a toast with a button takes taps; the rest passes them through.
-      child: IgnorePointer(ignoring: !hasButton || !_visible, child: toast),
+      child: IgnorePointer(
+        ignoring: !(hasButton || hasClose) || _closing,
+        child: toast,
+      ),
     );
   }
 }

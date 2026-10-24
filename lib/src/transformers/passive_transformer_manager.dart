@@ -53,6 +53,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'loadingIndicator': PassiveLoadingIndicatorTransformer(getNode, this),
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),
+      'lineChart': PassiveLineChartTransformer(getNode, this),
       'variance': PassiveVarianceTransformer(getNode, this),
       'webView': PassiveWebViewTransformer(getNode, this),
       'listView': PassiveListViewTransformer(getNode, this),
@@ -62,6 +63,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'badge': PassiveBadgeTransformer(getNode, this),
       'chip': PassiveChipTransformer(getNode, this),
       'segmentedButton': PassiveSegmentedButtonTransformer(getNode, this),
+      'signature': PassiveSignatureTransformer(getNode, this),
       'external': PassiveExternalComponentTransformer(getNode, this),
     });
   }
@@ -83,6 +85,27 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       );
     }
 
+    // A node that reads `parent` is built with the size its parent gives
+    // it, so its bindings can lay it out by that size.
+    if (readsParentSize(node)) {
+      return LayoutBuilder(
+        key: ValueKey('${node.id}-parent-size'),
+        builder: (context, constraints) => ParentSizeScope.fromConstraints(
+          constraints,
+          child: Builder(
+            builder: (context) => _buildNode(context, node, settings),
+          ),
+        ),
+      );
+    }
+    return _buildNode(context, node, settings);
+  }
+
+  Widget _buildNode(
+    BuildContext context,
+    BaseNode node,
+    WidgetBuildSettings settings,
+  ) {
     return _wrapWithListener(
       context,
       node: node,
@@ -122,11 +145,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (settings.withOpacity) {
       widget = applyWidgetOpacity(styled, widget);
     }
+    widget = applyLoopAnimation(context, styled, widget);
     if (settings.withReactions) {
       widget = wrapWithReaction(context, styled, widget);
       widget = wrapWithSwipes(context, styled, widget);
-      widget = wrapWithPointerTriggers(context, styled, widget);
+      widget = wrapWithDoubleTap(context, styled, widget);
       widget = wrapWithSemantics(styled, widget);
+      widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
     }
     if (settings.withRotation) {
