@@ -82,6 +82,8 @@ class ScopedValues {
   /// Creates scoped values for a design canvas, where [variables] (by name)
   /// hold their default values and nothing is read from a running app.
   /// [codelesslyContext] supplies conditions; the caller keeps it alive.
+  /// [routeParams] are sample params for `${route.…}`, such as the ones a
+  /// dialog canvas is designed with.
   ScopedValues.preview({
     required Map<String, VariableData> variables,
     CodelesslyContext? codelesslyContext,
@@ -89,6 +91,7 @@ class ScopedValues {
     this._appUser,
     this.screenSize,
     Map<String, dynamic>? data,
+    Map<String, dynamic>? routeParams,
   }) : _codelesslyContextRef = codelesslyContext == null
            ? null
            : WeakReference(codelesslyContext),
@@ -97,7 +100,7 @@ class ScopedValues {
        _dataOverrides = data,
        _previewVariables = variables,
        nodeState = null,
-       routeParams = {};
+       routeParams = routeParams ?? {};
 
   /// Creates a new scoped values instance from a given context.
   ScopedValues.of(
