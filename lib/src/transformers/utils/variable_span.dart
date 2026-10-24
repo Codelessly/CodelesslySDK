@@ -48,11 +48,13 @@ abstract final class VariablePreview {
     IndexedItem? item,
   }) {
     ScopedValues? scopedValues = scopeResolver?.call(node);
-    if (scopedValues != null && item != null) {
+    if (scopedValues != null && item?.item != null) {
       scopedValues = ScopedValues.preview(
         variables: scopedValues.variables,
         codelesslyContext: scopedValues.codelesslyContext,
         screenSize: scopedValues.screenSize,
+        parentSize: scopedValues.parentSize,
+        data: scopedValues.data,
         indexedItem: item,
       );
     }
@@ -148,7 +150,8 @@ class VariableSpan extends TextSpan {
   /// The variable expression, such as `${user.name}`.
   final String variable;
 
-  /// Creates a [VariableSpan] for the [variable] expression of [node].
+  /// Creates a [VariableSpan] for the [variable] expression of [node],
+  /// built in the list, grid or page [item] if any.
   VariableSpan({
     required this.variable,
     BaseNode? node,
