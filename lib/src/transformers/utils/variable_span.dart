@@ -65,6 +65,18 @@ abstract final class VariablePreview {
       if (value.isNotEmpty && !variableSyntaxIdentifierRegex.hasMatch(value)) {
         return value;
       }
+      // A formula that gives empty text (`${= if(x, 'a', '')}`) shows
+      // nothing, not a placeholder.
+      final String? formula = FormulaEvaluator.exactExpression(expression);
+      if (value.isEmpty &&
+          formula != null &&
+          PropertyValueDelegate.evaluateFormula(
+                formula,
+                scopedValues: scopedValues,
+              ) ==
+              '') {
+        return '';
+      }
     }
     final String placeholder = placeholderFor(expression);
     // A name can be wider than a fixed-width slot; show a compact marker
