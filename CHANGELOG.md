@@ -46,6 +46,8 @@
   `${route.…}` with sample params.
 - An icon bound to a name loads the SVG of that icon's version
   (`materialIconVersions`), so icons added after version 1 (`air`) draw.
+- `PassiveTextFieldWidget.scopedValues`: the values a field's bound and
+  initial text read, so an editor can show variable defaults.
 - Nodes with corners take a `cornerRadius` binding: a number or
   `[top-left, top-right, bottom-right, bottom-left]`.
 - A row or column that hugs its cross axis and stretches its children gives
