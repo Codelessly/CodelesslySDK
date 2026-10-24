@@ -30,6 +30,30 @@ void main() {
     );
   });
 
+  test('aligned to the end, right edges line up', () {
+    expect(
+      popoverPosition(
+        const Rect.fromLTWH(300, 100, 30, 30),
+        screen,
+        menu,
+        alignEnd: true,
+      ),
+      const Offset(90, 136),
+    );
+  });
+
+  test('aligned to the end, left-aligned near the left edge', () {
+    expect(
+      popoverPosition(
+        const Rect.fromLTWH(10, 100, 30, 30),
+        screen,
+        menu,
+        alignEnd: true,
+      ),
+      const Offset(10, 136),
+    );
+  });
+
   test('centered without an anchor', () {
     expect(popoverPosition(null, screen, menu), const Offset(75, 272));
   });
