@@ -595,7 +595,28 @@ class FunctionsRepository {
       showCloseButton: action.showCloseButton,
       presentation: action.presentation,
       alignment: action.alignment.flutterAlignment ?? Alignment.center,
+      fullHeight: action.fullHeight,
     );
+  }
+
+  /// The rect of the node that [context] belongs to (the node that ran the
+  /// action), which a popover opens next to. Null when it has no laid-out
+  /// box.
+  static Rect? anchorRectOf(BuildContext context) {
+    if (!context.mounted) return null;
+    final RenderObject? object = context.findRenderObject();
+    if (object is! RenderBox || !object.hasSize || !object.attached) {
+      return null;
+    }
+    // In the coordinates of the navigator the popover opens in, which need
+    // not start at the screen's corner (a nested navigator under a bar).
+    final RenderObject? overlay = Navigator.maybeOf(context)?.overlay?.context
+        .findRenderObject();
+    return object.localToGlobal(
+          Offset.zero,
+          ancestor: overlay is RenderBox && overlay.attached ? overlay : null,
+        ) &
+        object.size;
   }
 
   /// The id of the published layout that holds the canvas [canvasId], if any.
@@ -616,6 +637,7 @@ class FunctionsRepository {
     bool showCloseButton = false,
     DialogPresentation presentation = DialogPresentation.dialog,
     AlignmentGeometry alignment = Alignment.center,
+    bool fullHeight = false,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -666,6 +688,12 @@ class FunctionsRepository {
       barrierColor: barrierColor,
       showCloseButton: showCloseButton,
       routeSettings: RouteSettings(arguments: parsedParams),
+      fullHeight: fullHeight,
+      // Where the node that opened a popover is now: the opener may rebuild
+      // or go away while the popover shows.
+      anchor: presentation == DialogPresentation.popover
+          ? anchorRectOf(context)
+          : null,
       builder: (context) => ActionChainOpener(
         openerHosts: openerHosts,
         child: CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
@@ -681,9 +709,10 @@ class FunctionsRepository {
     return result;
   }
 
-  /// Opens what [builder] builds as a dialog at [alignment] or as a bottom
-  /// sheet, per [presentation] (adaptive: a sheet below 600 px wide), and
-  /// completes with the value it is closed with.
+  /// Opens what [builder] builds as a dialog at [alignment], as a bottom
+  /// sheet, or as a popover menu next to [anchor], per [presentation]
+  /// (adaptive: a sheet below 600 px wide), and completes with the value it
+  /// is closed with. A [fullHeight] sheet takes 90% of the screen.
   static Future<T?> presentCanvas<T>(
     BuildContext context, {
     required WidgetBuilder builder,
@@ -693,18 +722,39 @@ class FunctionsRepository {
     Color? barrierColor,
     bool showCloseButton = false,
     RouteSettings? routeSettings,
+    Rect? anchor,
+    bool fullHeight = false,
   }) {
+    if (presentation == DialogPresentation.popover) {
+      return showGeneralDialog<T>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: 'Close',
+        barrierColor: barrierColor ?? Colors.transparent,
+        transitionDuration: const Duration(milliseconds: 120),
+        routeSettings: routeSettings,
+        pageBuilder: (context, _, _) =>
+            CodelesslyPopoverWidget(anchor: anchor, builder: builder),
+        transitionBuilder: (context, animation, _, child) =>
+            FadeTransition(opacity: animation, child: child),
+      );
+    }
     final bool asSheet = switch (presentation) {
-      DialogPresentation.dialog => false,
+      DialogPresentation.dialog || DialogPresentation.popover => false,
       DialogPresentation.bottomSheet => true,
       DialogPresentation.adaptive =>
         (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < 600,
     };
-    Widget content(BuildContext context) => CodelesslyDialogWidget(
-      showCloseButton: showCloseButton,
-      alignment: asSheet ? Alignment.bottomCenter : alignment,
-      builder: builder,
-    );
+    // A full height sheet is as tall as it can be, with the canvas filling
+    // it, so the canvas scrolls its own content under a fixed header.
+    Widget content(BuildContext context) => asSheet && fullHeight
+        ? CodelesslyBottomSheetWidget(builder: builder)
+        : CodelesslyDialogWidget(
+            showCloseButton: showCloseButton,
+            alignment: asSheet ? Alignment.bottomCenter : alignment,
+            builder: builder,
+          );
     if (asSheet) {
       return showModalBottomSheet<T>(
         context: context,
@@ -1375,6 +1425,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     ReactionMixin? node,
     dynamic value,
     List<Reaction>? reactions,
+    Object? result,
   }) async {
     final filteredReactions = (reactions ?? node?.reactions ?? []).where(
       (reaction) => reaction.trigger.type == type,
@@ -1405,9 +1456,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     // The chain captures the trigger's scope and host now, so its actions
     // read the item that was tapped and still run if the row unmounts.
+    // [result] is what `${result}` starts as, e.g. a drag's deltas.
     return ActionChain.run(
       () => _runReactions(context, filteredReactions, value),
       context: context,
+      result: result,
     );
   }
 

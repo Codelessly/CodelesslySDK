@@ -544,15 +544,17 @@ class CanvasViewport extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final box = resolve(node, constraints, sizing: sizing);
-        // The width the canvas content is laid out at: the canvas box for a
-        // responsive canvas, the design width for an autoScale one (its
-        // content is laid out at design size and then scaled).
-        final Widget content = CanvasWidthScope(
-          width: node.scaleMode == ScaleMode.autoScale
-              ? node.basicBoxLocal.width
-              : box.width,
-          child: child,
-        );
+        // The width that picks the canvas's responsive layouts: the canvas
+        // box for a responsive canvas, the design width for an autoScale one
+        // (its content is laid out at design size and then scaled). A canvas
+        // at its design size in a dialog, sheet or popover isn't the screen:
+        // a 520 wide dialog on a desktop shows its desktop layout.
+        final double width = sizing == CanvasSizing.design
+            ? MediaQuery.maybeSizeOf(context)?.width ?? box.width
+            : node.scaleMode == ScaleMode.autoScale
+            ? node.basicBoxLocal.width
+            : box.width;
+        final Widget content = CanvasWidthScope(width: width, child: child);
         if (box.height != null) {
           return SizedBox(width: box.width, height: box.height, child: content);
         }
@@ -671,6 +673,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     codelessly?.removeNavigationListener('canvas-${widget.node.id}');
     _gateUser?.removeListener(_enforceSignIn);
     _stopWatchingValues();
+    HardwareKeyboard.instance.removeHandler(_onKey);
     super.dispose();
   }
 
@@ -758,6 +761,10 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     super.didUpdateWidget(oldWidget);
     if (widget.node != oldWidget.node) {
       onLoadActions = collectOnLoadActions();
+      if (!widget.settings.isPreview && didPerformOnLoadActions) {
+        HardwareKeyboard.instance.removeHandler(_onKey);
+        _listenToKeys();
+      }
     }
   }
 
@@ -779,7 +786,82 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
 
     triggerOnLoadActions(context);
     _watchValues(context);
+    _listenToKeys();
   }
+
+  /// The screen's "Key Down" reactions, while it listens to the keyboard.
+  List<Reaction> _keyReactions = const [];
+
+  /// Runs the screen's "Key Down" actions for keys pressed (and held) while
+  /// it is the screen on top and no text field has focus.
+  void _listenToKeys() {
+    _keyReactions = [
+      for (final Reaction reaction in widget.node.reactions)
+        if (reaction.trigger.type == TriggerType.keyDown &&
+            reaction.action.enabled)
+          reaction,
+    ];
+    if (_keyReactions.isNotEmpty) {
+      HardwareKeyboard.instance.addHandler(_onKey);
+    }
+  }
+
+  bool _onKey(KeyEvent event) {
+    if (event is KeyUpEvent || !mounted) return false;
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return false;
+    final BuildContext? focused = FocusManager.instance.primaryFocus?.context;
+    if (focused != null &&
+        (focused.widget is EditableText ||
+            focused.findAncestorWidgetOfExactType<EditableText>() != null)) {
+      return false;
+    }
+    // Shift, Control, Alt and Meta alone are modifiers of the next key.
+    if (_modifierKeys.contains(event.logicalKey)) return false;
+    final String key = keyTriggerLabel(event.logicalKey);
+    final List<Reaction> reactions = [
+      for (final Reaction reaction in _keyReactions)
+        if (reaction.trigger.key == null ||
+            reaction.trigger.key!.isEmpty ||
+            reaction.trigger.key!.toLowerCase() == key.toLowerCase())
+          reaction,
+    ];
+    if (reactions.isEmpty) return false;
+    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
+    FunctionsRepository.triggerAction(
+      context,
+      TriggerType.keyDown,
+      reactions: reactions,
+      result: {
+        'key': key,
+        'shift': keyboard.isShiftPressed,
+        'alt': keyboard.isAltPressed,
+        'meta': keyboard.isMetaPressed || keyboard.isControlPressed,
+      },
+    );
+    // A reaction for a specific key takes it (an arrow doesn't also scroll
+    // the page); a reaction for any key lets it through, so Tab and the
+    // browser's shortcuts keep working.
+    return reactions.any(
+      (reaction) => reaction.trigger.key?.isNotEmpty ?? false,
+    );
+  }
+
+  static final Set<LogicalKeyboardKey> _modifierKeys = {
+    LogicalKeyboardKey.shift,
+    LogicalKeyboardKey.shiftLeft,
+    LogicalKeyboardKey.shiftRight,
+    LogicalKeyboardKey.control,
+    LogicalKeyboardKey.controlLeft,
+    LogicalKeyboardKey.controlRight,
+    LogicalKeyboardKey.alt,
+    LogicalKeyboardKey.altLeft,
+    LogicalKeyboardKey.altRight,
+    LogicalKeyboardKey.meta,
+    LogicalKeyboardKey.metaLeft,
+    LogicalKeyboardKey.metaRight,
+    LogicalKeyboardKey.capsLock,
+    LogicalKeyboardKey.fn,
+  };
 
   List<ActionModel> collectOnLoadActions() => widget.node.reactions
       .whereTriggerType(TriggerType.load)
@@ -853,4 +935,14 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       child: Builder(builder: widget.builder),
     );
   }
+}
+
+/// The label a "Key Down" trigger's `${result.key}` reads for [key]: the
+/// character of a character key (`a`, `1`, `/`), else the key's name
+/// without spaces (`ArrowLeft`, `Delete`, `Escape`, `Enter`, `Space`).
+String keyTriggerLabel(LogicalKeyboardKey key) {
+  if (key == LogicalKeyboardKey.space) return 'Space';
+  final String label = key.keyLabel;
+  if (label.length == 1) return label.toLowerCase();
+  return label.replaceAll(' ', '');
 }

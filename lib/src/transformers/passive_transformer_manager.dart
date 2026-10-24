@@ -129,6 +129,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
+      widget = applyBoundOffset(context, styled, widget);
     }
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
@@ -270,6 +271,58 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     );
     if (styled == null) return node;
     return styled..parentID = node.parentID;
+  }
+
+  /// Moves [widget] to the node's bound `x`/`y` (variables, formulas or
+  /// conditions): the distance from the parent's padded top-left to the
+  /// node's outer box, as in the editor. The node is laid out at its design
+  /// place and painted (and hit tested) at the bound one, so bind it on
+  /// nodes pinned to the top-left of a freeform parent. An item of a
+  /// [ListLayout.stack] list is placed by the list instead.
+  Widget applyBoundOffset(BuildContext context, BaseNode node, Widget widget) {
+    if (!node.variables.containsKey('x') &&
+        !node.variables.containsKey('y') &&
+        !_hasPositionCondition(context, node)) {
+      return widget;
+    }
+    final BaseNode? parent = node.parentID.isEmpty
+        ? null
+        : tryGetNode(node.parentID);
+    if (parent == null) return widget;
+    if (parent is ListViewNode &&
+        parent.properties.layout == ListLayout.stack) {
+      return widget;
+    }
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    double delta(String property) {
+      final num? bound = PropertyValueDelegate.getPropertyValue<num>(
+        node,
+        property,
+        scopedValues: scopedValues,
+      );
+      if (bound == null || !bound.isFinite) return 0;
+      final double design = property == 'x'
+          ? node.outerBoxLocal.x - parent.innerBoxLocal.edgeLeft
+          : node.outerBoxLocal.y - parent.innerBoxLocal.edgeTop;
+      return bound.toDouble() - design;
+    }
+
+    // Always wrapped, even unmoved: a wrapper that came and went as the
+    // value crossed its design position would rebuild the node, ending a
+    // drag that moves it.
+    return Transform.translate(
+      offset: Offset(delta('x'), delta('y')),
+      child: widget,
+    );
+  }
+
+  bool _hasPositionCondition(BuildContext context, BaseNode node) {
+    final CodelesslyContext? codelesslyContext = ScopedValues.of(context)
+        .codelesslyContext;
+    if (codelesslyContext == null) return false;
+    return codelesslyContext.conditions.findByNodeProperty(node.id, 'x') !=
+            null ||
+        codelesslyContext.conditions.findByNodeProperty(node.id, 'y') != null;
   }
 
   @override

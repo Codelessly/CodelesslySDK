@@ -1,0 +1,36 @@
+import 'dart:ui';
+
+import 'package:codelessly_sdk/src/ui/codelessly_dialog_widget.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+/// A popover opens below its anchor, left-aligned, and flips to stay on the
+/// screen.
+void main() {
+  const Size screen = Size(390, 844);
+  const Size menu = Size(240, 300);
+
+  test('below and left-aligned', () {
+    expect(
+      popoverPosition(const Rect.fromLTWH(20, 100, 120, 40), screen, menu),
+      const Offset(20, 146),
+    );
+  });
+
+  test('right-aligned near the right edge', () {
+    expect(
+      popoverPosition(const Rect.fromLTWH(330, 10, 44, 44), screen, menu),
+      const Offset(134, 60),
+    );
+  });
+
+  test('above when there is no room below', () {
+    expect(
+      popoverPosition(const Rect.fromLTWH(20, 700, 120, 40), screen, menu),
+      const Offset(20, 394),
+    );
+  });
+
+  test('centered without an anchor', () {
+    expect(popoverPosition(null, screen, menu), const Offset(75, 272));
+  });
+}

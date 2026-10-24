@@ -7,6 +7,7 @@ import 'package:rfc_6901/rfc_6901.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/action_chain.dart';
+import '../../functions/app_auth.dart';
 
 /// Represents what to do when a variable path evaluates to null when
 /// substituting variables in a text.
@@ -399,6 +400,8 @@ class PropertyValueDelegate {
         : variable.type;
     if (match.hasAccessor) {
       if (type.isText) {
+        // A computed text whose formula gives nothing has no characters.
+        if (variableValue == null) return null;
         final characters = variableValue.toString().characters.toList();
         final (Object? value, _) = substituteJsonPath(match.fullPath, {
           match.name: characters,
@@ -436,10 +439,19 @@ class PropertyValueDelegate {
       'data' => scopedValues.data,
       'item' => scopedValues.indexedItem?.item,
       'index' => scopedValues.indexedItem?.index,
+      'parent' =>
+        scopedValues.parentIndexedItem == null
+            ? null
+            : {
+                'item': scopedValues.parentIndexedItem!.item,
+                'index': scopedValues.parentIndexedItem!.index,
+              },
       'value' => scopedValues.nodeState,
       'storage' => scopedValues.localStorage?.getAll(),
       'route' => scopedValues.routeParams,
-      'auth' => scopedValues.appUser,
+      // No Codelessly instance (the editor's design canvas, previews) means
+      // no app user: read as signed out rather than unknown.
+      'auth' => scopedValues.appUser ?? AppAuth.userToMap(null),
       'result' => ActionChain.current?.result,
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
       _ => null,
