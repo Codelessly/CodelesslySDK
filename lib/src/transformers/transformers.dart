@@ -19,4 +19,5 @@ export 'utils/stroke_painter.dart';
 export 'utils/text_utils.dart';
 export 'utils/variable_span.dart';
 export 'utils/viewport_sizing.dart';
+export 'utils/wrap_layout.dart';
 export 'widget_node_transformer_manager.dart';
