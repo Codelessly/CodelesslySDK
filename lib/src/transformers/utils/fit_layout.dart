@@ -237,8 +237,17 @@ class RenderFitBox extends RenderProxyBox {
 ///   so boxes squeeze and text wraps instead of running offscreen. Text never
 ///   goes below its lines; content that can't fit even then overflows.
 ///
-/// When everything fits, as it does at the design size, the layout is
-/// exactly [RenderFlex]'s.
+/// - **Spacing skips collapsed children.** [spacing] goes only between
+///   consecutive children that are shown, like CSS `gap` or Figma auto
+///   layout, so a column of alternative panels of which one shows has no
+///   stray gaps. A child is collapsed when it is wrapped in a
+///   [FlexChildVisibility] that says so, as a row/column's children are
+///   while a visibility formula hides them. Collapsed children still take
+///   part in the alignment's free-space distribution, at their (zero) size,
+///   as in [RenderFlex].
+///
+/// When everything fits and every child shows, as at the design size, the
+/// layout is exactly [RenderFlex]'s.
 class CodelesslyFlex extends Flex {
   const CodelesslyFlex({
     super.key,
@@ -251,8 +260,14 @@ class CodelesslyFlex extends Flex {
     super.textBaseline,
     super.clipBehavior,
     super.spacing,
+    this.squeeze = true,
     super.children,
   });
+
+  /// Whether children that overflow a bounded main axis squeeze (see
+  /// above). The design canvas turns it off: there children keep the sizes
+  /// the layout solver gave them and overflow, as in [RenderFlex].
+  final bool squeeze;
 
   @override
   RenderCodelesslyFlex createRenderObject(BuildContext context) =>
@@ -266,10 +281,78 @@ class CodelesslyFlex extends Flex {
         textBaseline: textBaseline,
         clipBehavior: clipBehavior,
         spacing: spacing,
+        squeeze: squeeze,
       );
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant RenderCodelesslyFlex renderObject,
+  ) {
+    super.updateRenderObject(context, renderObject);
+    renderObject.squeeze = squeeze;
+  }
+}
+
+/// Parent data of a [CodelesslyFlex] child.
+class CodelesslyFlexParentData extends FlexParentData {
+  /// Whether the child is collapsed (hidden and taking no space), so it
+  /// gets no [CodelesslyFlex.spacing] on either side.
+  bool collapsed = false;
+
+  @override
+  String toString() => '${super.toString()}; collapsed=$collapsed';
+}
+
+/// Tells a [CodelesslyFlex] whether its [child] is [collapsed]: hidden at
+/// runtime and taking no space, so the flex leaves no gap next to it.
+///
+/// A widget that hides itself deep in its subtree can't tell its flex: its
+/// box is still there, at zero size. The row/column that builds the child
+/// knows why it is hidden and wraps it in this. A zero-size box alone does
+/// not mean hidden: an empty text or a zero-width divider still gets its
+/// gaps, as in CSS.
+class FlexChildVisibility extends ParentDataWidget<CodelesslyFlexParentData> {
+  const FlexChildVisibility({
+    super.key,
+    required this.collapsed,
+    required super.child,
+  });
+
+  /// Whether [child] is hidden and takes no space.
+  final bool collapsed;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    final CodelesslyFlexParentData data =
+        renderObject.parentData! as CodelesslyFlexParentData;
+    if (data.collapsed == collapsed) return;
+    data.collapsed = collapsed;
+    final RenderObject? parent = renderObject.parent;
+    if (parent is RenderObject) parent.markNeedsLayout();
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => CodelesslyFlex;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      FlagProperty('collapsed', value: collapsed, ifTrue: 'collapsed'),
+    );
+  }
 }
 
 /// The render object of [CodelesslyFlex].
+///
+/// The gaps are laid out here rather than by [RenderFlex], which puts one
+/// between every pair of children: [RenderFlex] runs with no spacing and
+/// with the main axis shortened by the gaps between the shown children
+/// ([_gaps]), so flex children share what is left after the gaps as they
+/// do in Flutter. The children are then moved along by the gaps before
+/// them, and the flex grows by the gaps. Free space, alignment and
+/// overflow come out as [RenderFlex] computes them with spacing.
 class RenderCodelesslyFlex extends RenderFlex {
   RenderCodelesslyFlex({
     super.direction,
@@ -280,8 +363,128 @@ class RenderCodelesslyFlex extends RenderFlex {
     super.verticalDirection,
     super.textBaseline,
     super.clipBehavior,
-    super.spacing,
-  });
+    double spacing = 0,
+    this._squeeze = true,
+  }) : _gap = spacing,
+       assert(spacing >= 0);
+
+  /// The gap between consecutive shown children (the widget's
+  /// [Flex.spacing]).
+  double get gap => _gap;
+  double _gap;
+  set gap(double value) {
+    assert(value >= 0);
+    if (_gap == value) return;
+    _gap = value;
+    markNeedsLayout();
+  }
+
+  /// [RenderFlex] lays out without spacing; this flex's [gap] is the
+  /// spacing, set by [Flex.updateRenderObject] through this setter.
+  @override
+  double get spacing => 0;
+
+  @override
+  set spacing(double value) => gap = value;
+
+  /// See [CodelesslyFlex.squeeze].
+  bool get squeeze => _squeeze;
+  bool _squeeze;
+  set squeeze(bool value) {
+    if (_squeeze == value) return;
+    _squeeze = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! CodelesslyFlexParentData) {
+      child.parentData = CodelesslyFlexParentData();
+    }
+  }
+
+  static bool _collapsed(RenderBox child) {
+    final ParentData? data = child.parentData;
+    return data is CodelesslyFlexParentData && data.collapsed;
+  }
+
+  /// The space the gaps take on the main axis: [gap] between each pair of
+  /// consecutive shown children.
+  double get _gaps {
+    if (_gap <= 0) return 0;
+    int shown = 0;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      if (!_collapsed(child)) shown++;
+      child = childAfter(child);
+    }
+    return _gap * math.max(0, shown - 1);
+  }
+
+  /// [constraints] while [RenderFlex] lays out: the main axis shortened by
+  /// the gaps.
+  BoxConstraints? _innerConstraints;
+
+  @override
+  BoxConstraints get constraints => _innerConstraints ?? super.constraints;
+
+  BoxConstraints _withoutGaps(BoxConstraints constraints, double gaps) {
+    double shorten(double extent) => math.max(0, extent - gaps);
+    return direction == Axis.horizontal
+        ? constraints.copyWith(
+            minWidth: shorten(constraints.minWidth),
+            maxWidth: shorten(constraints.maxWidth),
+          )
+        : constraints.copyWith(
+            minHeight: shorten(constraints.minHeight),
+            maxHeight: shorten(constraints.maxHeight),
+          );
+  }
+
+  Size _withGaps(Size size, double gaps) => direction == Axis.horizontal
+      ? Size(size.width + gaps, size.height)
+      : Size(size.width, size.height + gaps);
+
+  /// Whether children are placed right to left or bottom to top, as
+  /// [RenderFlex] decides it.
+  bool get _flipMainAxis => switch (direction) {
+    Axis.horizontal => textDirection == TextDirection.rtl,
+    Axis.vertical => verticalDirection == VerticalDirection.up,
+  };
+
+  /// [RenderFlex]'s layout, with [gap] between consecutive shown children.
+  void _layOutWithGaps() {
+    final double gaps = _gaps;
+    if (gaps <= 0) {
+      super.performLayout();
+      return;
+    }
+    final BoxConstraints outer = constraints;
+    _innerConstraints = _withoutGaps(outer, gaps);
+    try {
+      super.performLayout();
+    } finally {
+      _innerConstraints = null;
+    }
+    size = outer.constrain(_withGaps(size, gaps));
+
+    // Each child moves along by the gaps before it in visual order: one per
+    // shown child before it.
+    final bool flip = _flipMainAxis;
+    int shownBefore = 0;
+    RenderBox? child = flip ? lastChild : firstChild;
+    while (child != null) {
+      final FlexParentData data = child.parentData! as FlexParentData;
+      final double shift = _gap * shownBefore;
+      if (shift != 0) {
+        data.offset += direction == Axis.horizontal
+            ? Offset(shift, 0)
+            : Offset(0, shift);
+      }
+      if (!_collapsed(child)) shownBefore++;
+      child = flip ? data.previousSibling : data.nextSibling;
+    }
+  }
 
   bool _mainAxisBounded(BoxConstraints constraints) =>
       direction == Axis.horizontal
@@ -337,18 +540,18 @@ class RenderCodelesslyFlex extends RenderFlex {
   void performLayout() {
     if (!_mainAxisBounded(constraints)) {
       if (_hasFlexChild) {
-        _inflexible(super.performLayout);
+        _inflexible(_layOutWithGaps);
       } else {
-        super.performLayout();
+        _layOutWithGaps();
       }
       return;
     }
 
-    super.performLayout();
+    _layOutWithGaps();
+    if (!_squeeze) return;
 
     // Shrink pass: only when the children overflow a bounded main axis.
-    final double available =
-        _mainExtent(size) - spacing * math.max(0, childCount - 1);
+    final double available = _mainExtent(size) - _gaps;
     double used = 0;
     double capacity = 0;
     final Map<RenderBox, (double, double)> extents = {};
@@ -382,7 +585,7 @@ class RenderCodelesslyFlex extends RenderFlex {
       final int weight = (target * _resolution).round();
       if (weight <= 0) return (0, data.fit);
       return (weight, FlexFit.loose);
-    }, super.performLayout);
+    }, _layOutWithGaps);
   }
 
   /// Shrink weights are main extents in 1/[_resolution] px.
@@ -412,10 +615,19 @@ class RenderCodelesslyFlex extends RenderFlex {
 
   @override
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    if (!_mainAxisBounded(constraints) && _hasFlexChild) {
-      return _inflexible(() => super.computeDryLayout(constraints));
+    Size dryLayout() {
+      final double gaps = _gaps;
+      if (gaps <= 0) return super.computeDryLayout(constraints);
+      final Size inner = super.computeDryLayout(
+        _withoutGaps(constraints, gaps),
+      );
+      return constraints.constrain(_withGaps(inner, gaps));
     }
-    return super.computeDryLayout(constraints);
+
+    if (!_mainAxisBounded(constraints) && _hasFlexChild) {
+      return _inflexible(dryLayout);
+    }
+    return dryLayout();
   }
 
   @override
@@ -423,10 +635,60 @@ class RenderCodelesslyFlex extends RenderFlex {
     covariant BoxConstraints constraints,
     TextBaseline baseline,
   ) {
-    if (!_mainAxisBounded(constraints) && _hasFlexChild) {
-      return _inflexible(() => super.computeDryBaseline(constraints, baseline));
+    double? dryBaseline() {
+      final double gaps = _gaps;
+      if (gaps <= 0) return super.computeDryBaseline(constraints, baseline);
+      final double? inner = super.computeDryBaseline(
+        _withoutGaps(constraints, gaps),
+        baseline,
+      );
+      // A row's baseline is on its cross axis, which the gaps don't move. A
+      // column's is its first child's: no gaps come before the first shown
+      // child, or all of them do when the column runs bottom to top.
+      if (inner == null || direction == Axis.horizontal) return inner;
+      return _flipMainAxis ? inner + gaps : inner;
     }
-    return super.computeDryBaseline(constraints, baseline);
+
+    if (!_mainAxisBounded(constraints) && _hasFlexChild) {
+      return _inflexible(dryBaseline);
+    }
+    return dryBaseline();
+  }
+
+  // Intrinsic sizes: the gaps add to the main axis, and come out of the
+  // main extent the flex children share when the cross size is measured.
+
+  double _mainIntrinsic(double Function() measure) => measure() + _gaps;
+
+  double _crossExtent(double extent) =>
+      extent.isFinite ? math.max(0, extent - _gaps) : extent;
+
+  @override
+  double computeMinIntrinsicWidth(double height) => direction == Axis.horizontal
+      ? _mainIntrinsic(() => super.computeMinIntrinsicWidth(height))
+      : super.computeMinIntrinsicWidth(_crossExtent(height));
+
+  @override
+  double computeMaxIntrinsicWidth(double height) => direction == Axis.horizontal
+      ? _mainIntrinsic(() => super.computeMaxIntrinsicWidth(height))
+      : super.computeMaxIntrinsicWidth(_crossExtent(height));
+
+  @override
+  double computeMinIntrinsicHeight(double width) => direction == Axis.vertical
+      ? _mainIntrinsic(() => super.computeMinIntrinsicHeight(width))
+      : super.computeMinIntrinsicHeight(_crossExtent(width));
+
+  @override
+  double computeMaxIntrinsicHeight(double width) => direction == Axis.vertical
+      ? _mainIntrinsic(() => super.computeMaxIntrinsicHeight(width))
+      : super.computeMaxIntrinsicHeight(_crossExtent(width));
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DoubleProperty('gap', gap, defaultValue: 0))
+      ..add(FlagProperty('squeeze', value: squeeze, ifFalse: 'no squeeze'));
   }
 }
 
