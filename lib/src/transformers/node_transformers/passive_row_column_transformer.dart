@@ -527,6 +527,11 @@ class PassiveRowColumnWidget extends StatelessWidget {
   /// hidden spinner) can take all of it. The flex drops to zero rather than
   /// removing the [Flexible] so the child keeps its state when it shows
   /// again.
+  ///
+  /// A flexing child's bound `flex` (see
+  /// [PassiveNodeTransformerManager.applyStyleOverrides]) is its share here,
+  /// and a bound flex of zero or less collapses it like a hidden child: a
+  /// bar segment for a count of 0 takes no space.
   Widget _collapseWhenHidden(
     BuildContext context,
     BaseNode child,
@@ -538,17 +543,19 @@ class PassiveRowColumnWidget extends StatelessWidget {
     }
 
     Widget buildChild(BuildContext context) {
-      final bool hidden = manager.runtimeVisibility(context, child) == false;
+      bool hidden = manager.runtimeVisibility(context, child) == false;
       if (sizedWidget is! Flexible) {
         return FlexChildVisibility(collapsed: hidden, child: sizedWidget);
       }
+      final int? boundFlex = _boundFlex(context, child);
+      if (boundFlex != null && boundFlex <= 0) hidden = true;
       // Without flex the hidden child would be laid out with unbounded
       // main-axis constraints, which a scrollable inside it can't take
       // (a hidden grid computed NaN offsets), so it gets no space at all.
       return FlexChildVisibility(
         collapsed: hidden,
         child: Flexible(
-          flex: hidden ? 0 : sizedWidget.flex,
+          flex: hidden ? 0 : boundFlex ?? sizedWidget.flex,
           fit: sizedWidget.fit,
           child: SizedBox(
             width: hidden ? 0 : null,
@@ -566,6 +573,22 @@ class PassiveRowColumnWidget extends StatelessWidget {
       listenables: listenables,
       builder: buildChild,
     );
+  }
+
+  /// The flex a variable, formula or condition binds [child]'s `flex` to,
+  /// rounded, or null when it isn't bound.
+  ///
+  /// The child's own widget gets it through
+  /// [PassiveNodeTransformerManager.applyStyleOverrides], but its [Flexible]
+  /// is built here, from the design flex, so the row/column reads it too.
+  static int? _boundFlex(BuildContext context, BaseNode child) {
+    final num? flex = PropertyValueDelegate.getPropertyValue<num>(
+      child,
+      'flex',
+      scopedValues: ScopedValues.of(context),
+    );
+    if (flex == null || !flex.isFinite) return null;
+    return flex.round();
   }
 
   @override
