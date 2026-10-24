@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../utils/extensions.dart';
+import '../utils/material_icon_versions.dart';
 import 'transformers.dart';
 
 /// The colour a button of [type] has when its buttonColor is unset (null):
@@ -374,7 +375,13 @@ MultiSourceIconModel iconWithName(MultiSourceIconModel base, String? name) {
   }
   return base.copyWith(
     type: IconTypeEnum.icon,
-    icon: MaterialIcon(codepoint: 0, name: iconName, style: style),
+    // The icon's SVG is served from the version the icon was added in.
+    icon: MaterialIcon(
+      codepoint: 0,
+      name: iconName,
+      style: style,
+      version: materialIconVersions[iconName] ?? 1,
+    ),
     forceIcon: true,
   );
 }
