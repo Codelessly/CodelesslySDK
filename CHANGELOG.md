@@ -4,6 +4,35 @@ Needs the `codelessly_api` release after 6.2.0 (signature, loop animation,
 side sheet, confirm presentation, toast styling, `contentFit` and
 `shrinkWrapRows`).
 
+### Motion, triggers and lists
+
+- `NodeMotion` animates a node's `MotionModel`: transforms, 3D tilt, spin,
+  loops, entrances (from rest or `enterFrom`, replayed on `replayKey`) and
+  delays.
+- Timer and key press triggers on screens; swipe triggers (the mouse wheel
+  swipes too) and double tap on frames, rectangles, buttons, icons and text.
+- Stacked and wrapping lists; vertical, inverted and rectangular-thumb
+  sliders with bound `min`/`max`.
+
+### Formulas and variables
+
+- `ComputedVariables` helpers for editors: a computed variable's inputs,
+  cycles and preview values over default values.
+- `duration`, `seconds`, `slug`, `luminance`, `findIndex`, `sortByDesc`,
+  multi-key `sortBy`, text `indexOf`/`slice`/`take`/`skip`/`reverse`,
+  object literals and `money(v, decimals)` / `money(v, symbol, 'auto')`.
+
+### Style bindings and navigation
+
+- Effects, stroke weight, corner radius, font weight and icon bind as
+  property variables (`StyleBindings`); image fills listen to the variables
+  in their URL.
+- A screen's route is set before its load actions run, and a link's
+  parameters also set the variables they name. `CodelesslyWidget.initialScreen`.
+- A screen variable shadows an app variable of the same name in Set
+  variable; dashed strokes draw their caps, and a zero pattern no longer
+  hangs.
+
 ### Nodes and actions
 
 - `PassiveSignatureTransformer` draws a `SignatureNode`: strokes in
