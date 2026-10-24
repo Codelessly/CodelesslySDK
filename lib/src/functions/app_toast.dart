@@ -178,6 +178,8 @@ class _ToastViewState extends State<_ToastView> {
             child: retrieveIconWidget(action.icon!, 18) ?? const SizedBox(),
           );
     final bool hasButton = widget.onAction != null;
+    final bool hasClose = action.showCloseButton;
+    final Color actionColor = action.actionColor?.toFlutterColor() ?? textColor;
     final bool top = action.position == ToastPosition.top;
     final EdgeInsets safe = MediaQuery.paddingOf(context);
     final TextStyle messageStyle = theme.bodyStyle.copyWith(
@@ -190,11 +192,12 @@ class _ToastViewState extends State<_ToastView> {
 
     Widget toast = Container(
       constraints: const BoxConstraints(minHeight: 44, maxWidth: 560),
-      padding: EdgeInsets.fromLTRB(18, 10, hasButton ? 8 : 18, 10),
+      padding: EdgeInsets.fromLTRB(18, 10, hasButton || hasClose ? 8 : 18, 10),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(
-          hasButton ? theme.buttonRadius.clamp(8, 999) : 999,
+          action.cornerRadius ??
+              (hasButton || hasClose ? theme.buttonRadius.clamp(8, 999) : 999),
         ),
         boxShadow: const [
           BoxShadow(
@@ -215,7 +218,7 @@ class _ToastViewState extends State<_ToastView> {
               key: const ValueKey('codelessly-toast-action'),
               onPressed: _onActionPressed,
               style: TextButton.styleFrom(
-                foregroundColor: textColor,
+                foregroundColor: actionColor,
                 minimumSize: const Size(48, 36),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 textStyle: theme.buttonStyle.copyWith(
@@ -227,6 +230,23 @@ class _ToastViewState extends State<_ToastView> {
                 ),
               ),
               child: Text(widget.actionLabel),
+            ),
+          ],
+          if (hasClose) ...[
+            const SizedBox(width: 4),
+            IconButton(
+              key: const ValueKey('codelessly-toast-close'),
+              onPressed: _close,
+              tooltip: 'Dismiss',
+              icon: const Icon(Icons.close, size: 18),
+              color: textColor,
+              constraints: const BoxConstraints.tightFor(width: 30, height: 30),
+              padding: EdgeInsets.zero,
+              style: IconButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(theme.buttonRadius),
+                ),
+              ),
             ),
           ],
         ],
@@ -256,7 +276,10 @@ class _ToastViewState extends State<_ToastView> {
       top: top ? safe.top + 16 : null,
       bottom: top ? null : action.bottomOffset,
       // Only a toast with a button takes taps; the rest passes them through.
-      child: IgnorePointer(ignoring: !hasButton || !_visible, child: toast),
+      child: IgnorePointer(
+        ignoring: !(hasButton || hasClose) || !_visible,
+        child: toast,
+      ),
     );
   }
 }
