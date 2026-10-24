@@ -361,6 +361,10 @@ class CodelesslyFlexParentData extends FlexParentData {
 /// knows why it is hidden and wraps it in this. A zero-size box alone does
 /// not mean hidden: an empty text or a zero-width divider still gets its
 /// gaps, as in CSS.
+///
+/// A row/column also marks the fixed gaps that stand in for a flex child's
+/// main-axis margins as collapsed: they belong to that child, so the
+/// spacing goes around the child and its margins rather than between them.
 class FlexChildVisibility extends ParentDataWidget<CodelesslyFlexParentData> {
   const FlexChildVisibility({
     super.key,

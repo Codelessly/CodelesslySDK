@@ -591,14 +591,93 @@ class PassiveRowColumnWidget extends StatelessWidget {
     return flex.round();
   }
 
+  /// The main-axis margins (leading, trailing) of a [child] that flexes on
+  /// this row/column's main axis, or null when it doesn't flex or has none.
+  ///
+  /// A flex child's margin is fixed space, like a gap box between children,
+  /// so it doesn't come out of the child's flex share: four `flex: 1` tiles
+  /// with an 8 px margin between them are all the same width. A wrapping
+  /// row/column's children don't flex, so their margins stay theirs.
+  (double, double)? _flexMainMargins(BaseNode child) {
+    if (child is SpacerNode) return null;
+    final RowColumnMixin rowColumn = node as RowColumnMixin;
+    if (rowColumn.wrap) return null;
+    final bool isRow = rowColumn.rowColumnType == RowColumnType.row;
+    final SizeFit mainFit = isRow ? child.horizontalFit : child.verticalFit;
+    if (!mainFit.isFlex) return null;
+    final EdgeInsetsModel m = child.margin;
+    final (double lead, double trail) = isRow ? (m.l, m.r) : (m.t, m.b);
+    if (lead == 0 && trail == 0) return null;
+    return (lead, trail);
+  }
+
+  /// A fixed gap that stands in for a flex [child]'s main-axis margin, gone
+  /// while the child is hidden or its bound flex takes no space.
+  ///
+  /// The gap belongs to its child, so it tells the [CodelesslyFlex] it is
+  /// collapsed: the row/column's spacing goes around the child and its
+  /// margins, not between them.
+  Widget _marginGap(
+    BuildContext context,
+    BaseNode child,
+    double extent, {
+    required bool leading,
+  }) {
+    final bool isRow =
+        (node as RowColumnMixin).rowColumnType == RowColumnType.row;
+    final NodeTransformerManager manager = this.manager;
+    Widget buildGap(BuildContext context) {
+      bool hidden = false;
+      if (manager is PassiveNodeTransformerManager) {
+        final int? boundFlex = _boundFlex(context, child);
+        hidden =
+            manager.runtimeVisibility(context, child) == false ||
+            (boundFlex != null && boundFlex <= 0);
+      }
+      final double size = hidden ? 0 : extent;
+      return FlexChildVisibility(
+        collapsed: true,
+        child: SizedBox(
+          width: isRow ? size : null,
+          height: isRow ? null : size,
+        ),
+      );
+    }
+
+    if (manager is! PassiveNodeTransformerManager) return buildGap(context);
+    final List<Listenable> listenables = manager.listenablesFor(context, child);
+    if (listenables.isEmpty) return buildGap(context);
+    return ManagedListenableBuilder(
+      key: ValueKey('${child.id}-${leading ? 'lead' : 'trail'}-margin'),
+      listenables: listenables,
+      builder: buildGap,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<Widget> widgetChildren = children.map((child) {
-      final Widget builtWidget = manager.buildWidgetByID(
-        child.id,
-        context,
-        settings: settings,
-      );
+    final bool isRow =
+        (node as RowColumnMixin).rowColumnType == RowColumnType.row;
+    final List<Widget> widgetChildren = [];
+    for (final BaseNode child in children) {
+      final (double, double)? mainMargins = _flexMainMargins(child);
+      BaseNode built = child;
+      if (mainMargins != null) {
+        // The child is built without its main-axis margin, which becomes
+        // gaps outside its Flexible.
+        final EdgeInsetsModel m = child.margin;
+        final EdgeInsetsModel crossMargin = isRow
+            ? EdgeInsetsModel.only(top: m.t, bottom: m.b)
+            : EdgeInsetsModel.only(left: m.l, right: m.r);
+        final BaseNode? copy = NodeJsonConverter().fromJson({
+          ...child.toJson(),
+          'margin': crossMargin.toJson(),
+        });
+        if (copy != null) built = copy..parentID = child.parentID;
+      }
+      final Widget builtWidget = identical(built, child)
+          ? manager.buildWidgetByID(child.id, context, settings: settings)
+          : manager.buildWidgetFromNode(built, context, settings: settings);
 
       final Widget sizedWidget =
           PassiveRowColumnTransformer.wrapChildWithSizeFits(
@@ -607,8 +686,18 @@ class PassiveRowColumnWidget extends StatelessWidget {
             builtWidget,
             child.flex,
           );
-      return _collapseWhenHidden(context, child, sizedWidget);
-    }).toList();
+      if (mainMargins != null && mainMargins.$1 > 0) {
+        widgetChildren.add(
+          _marginGap(context, child, mainMargins.$1, leading: true),
+        );
+      }
+      widgetChildren.add(_collapseWhenHidden(context, child, sizedWidget));
+      if (mainMargins != null && mainMargins.$2 > 0) {
+        widgetChildren.add(
+          _marginGap(context, child, mainMargins.$2, leading: false),
+        );
+      }
+    }
 
     final Widget child = (node is DefaultShapeNode)
         ? manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
