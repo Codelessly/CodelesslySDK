@@ -370,6 +370,15 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       field = IntrinsicHeight(child: field);
     }
 
+    // TextField needs a Material ancestor. A published layout has one (its
+    // canvas's Scaffold or Material), but a field built on its own, as the
+    // editor's design canvas does with a top-level node that is not a
+    // canvas, would throw "No Material widget found".
+    if (LookupBoundary.findAncestorWidgetOfExactType<Material>(context) ==
+        null) {
+      field = Material(type: MaterialType.transparency, child: field);
+    }
+
     field = AdaptiveNodeBox(node: node, child: field);
 
     return field;
