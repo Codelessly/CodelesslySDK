@@ -199,4 +199,26 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
   });
+
+  test('a toast can set its font family and weight', () {
+    const TextStyle app = TextStyle(fontFamily: 'Mono', fontSize: 14);
+    final TextStyle plain = AppToast.fontOf(
+      ShowToastAction(message: 'Saved'),
+      app,
+    );
+    expect(plain.fontFamily, 'Mono');
+    expect(plain.fontWeight, FontWeight.w600);
+
+    final TextStyle custom = AppToast.fontOf(
+      ShowToastAction(
+        message: 'Saved',
+        fontFamily: 'Brand Sans',
+        fontWeight: FontWeightNumeric.w500,
+      ),
+      app,
+    );
+    expect(custom.fontFamily, 'Brand Sans');
+    expect(custom.fontWeight, FontWeight.w500);
+    expect(custom.fontSize, 14);
+  });
 }

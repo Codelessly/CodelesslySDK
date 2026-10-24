@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../codelessly_sdk.dart';
 import 'action_chain.dart';
@@ -42,13 +43,14 @@ class AppToast {
         .textTheme
         .bodyMedium
         ?.fontFamily;
-    final TextStyle font =
+    final TextStyle appFont =
         theme.bodyStyle.fontFamily == themeFamily && appText.fontFamily != null
         ? theme.bodyStyle.copyWith(
             fontFamily: appText.fontFamily,
             fontFamilyFallback: appText.fontFamilyFallback,
           )
         : theme.bodyStyle;
+    final TextStyle font = fontOf(action, appFont);
     final double? offset = offsetOf(action, scopedValues);
     // The button's actions run on the chain that showed the toast, whenever
     // it is pressed: with its captured scope (the `${item}` of a row that has
@@ -84,6 +86,24 @@ class AppToast {
     _current = entry;
     overlay.insert(entry);
     return true;
+  }
+
+  /// The message's text style: [base] in [ShowToastAction.fontFamily] (a
+  /// Google font or one the project loaded) and [ShowToastAction.fontWeight]
+  /// when set. Without a weight it is semibold.
+  static TextStyle fontOf(ShowToastAction action, TextStyle base) {
+    final FontWeight weight =
+        action.fontWeight?.flutterFontWeight ?? FontWeight.w600;
+    final String family = action.fontFamily?.trim() ?? '';
+    if (family.isEmpty) return base.copyWith(fontWeight: weight);
+    if (GoogleFonts.asMap().containsKey(family)) {
+      return GoogleFonts.getFont(family, textStyle: base, fontWeight: weight);
+    }
+    return base.copyWith(
+      fontFamily: family,
+      fontFamilyFallback: const <String>[],
+      fontWeight: weight,
+    );
   }
 
   /// The distance from the screen edge [action]'s bound
@@ -229,7 +249,6 @@ class _ToastViewState extends State<_ToastView> {
       color: textColor,
       fontSize: fontSize,
       height: 1.35,
-      fontWeight: FontWeight.w600,
       decoration: TextDecoration.none,
     );
 
