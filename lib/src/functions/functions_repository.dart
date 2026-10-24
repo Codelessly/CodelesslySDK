@@ -760,7 +760,8 @@ class FunctionsRepository {
         context: context,
         useRootNavigator: false,
         barrierDismissible: barrierDismissible,
-        barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        barrierLabel: MaterialLocalizations.of(context)
+            .modalBarrierDismissLabel,
         barrierColor: barrierColor ?? Colors.black54,
         routeSettings: routeSettings,
         transitionDuration: const Duration(milliseconds: 260),
