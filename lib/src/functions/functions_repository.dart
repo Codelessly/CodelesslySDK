@@ -110,7 +110,7 @@ class FunctionsRepository {
         if (result is Future) return result.then((_) => true);
         return true;
       case ActionType.callApi:
-        return makeApiRequestFromAction(action as ApiCallAction, context);
+        return callApi(context, action as ApiCallAction);
       case ActionType.setStorage:
         return setStorageFromAction(context, action as SetStorageAction);
       case ActionType.setCloudStorage:
@@ -332,6 +332,66 @@ class FunctionsRepository {
     return true;
   }
 
+  /// Calls [action]'s API, then runs its onSuccess actions after a 2xx
+  /// response or its onError actions after any other response or a failed
+  /// request. Both read the response as `${result}`. A failed request stops
+  /// the chain only when there are no onError actions to handle it.
+  static Future<http.Response?> callApi(
+    BuildContext context,
+    ApiCallAction action, [
+    Observable<VariableData>? variable,
+  ]) async {
+    http.Response? response;
+    Object? failure;
+    StackTrace? failureStack;
+    try {
+      response = await makeApiRequestFromAction(action, context, variable);
+    } catch (error, stackTrace) {
+      failure = error;
+      failureStack = stackTrace;
+    }
+    // The widget that made the call can be gone by now (a dialog closed
+    // while it loaded); its handlers then run on the chain's opener.
+    // ignore: use_build_context_synchronously
+    final BuildContext? outcomeContext = ActionChain.contextFor(context);
+    if (outcomeContext == null) return response;
+    await handleApiOutcome(
+      // ignore: use_build_context_synchronously
+      outcomeContext,
+      action,
+      response: response,
+      failure: failure,
+      failureStack: failureStack,
+    );
+    return response;
+  }
+
+  /// Runs [action]'s onSuccess actions after a 2xx [response], or its onError
+  /// actions otherwise. Rethrows [failure] (a request that didn't complete)
+  /// when there are no onError actions, so the chain stops as before.
+  static Future<void> handleApiOutcome(
+    BuildContext context,
+    ApiCallAction action, {
+    http.Response? response,
+    Object? failure,
+    StackTrace? failureStack,
+  }) async {
+    final bool ok =
+        failure == null &&
+        response != null &&
+        response.statusCode >= 200 &&
+        response.statusCode < 300;
+    if (ok) {
+      if (action.onSuccess.isNotEmpty) {
+        await runActions(context, action.onSuccess);
+      }
+    } else if (action.onError.isNotEmpty) {
+      await runActions(context, action.onError);
+    } else if (failure != null) {
+      Error.throwWithStackTrace(failure, failureStack ?? StackTrace.current);
+    }
+  }
+
   static Future<http.Response> makeApiRequestFromAction(
     ApiCallAction action,
     BuildContext context, [
@@ -386,13 +446,35 @@ class FunctionsRepository {
     return makeApiRequest(
       context: context,
       method: apiData.method,
-      url: _applyApiInputs(apiData.url, params, scopedValues),
+      url: buildApiUrl(apiData, params, scopedValues),
       headers: _generateMapFromPairs(apiData.headers, params, scopedValues),
       body: apiData.bodyType == RequestBodyType.form
           ? _generateMapFromPairs(apiData.formFields, params, scopedValues)
           : _applyApiInputs(apiData.body ?? '', params, scopedValues),
       variable: variable,
     );
+  }
+
+  /// The URL [api] requests with the inputs [params]: its URL with inputs
+  /// and variables substituted, plus its query parameters (used, non-empty
+  /// keys; same substitution), which win over ones written in the URL.
+  static String buildApiUrl(
+    HttpApiData api,
+    Map<String, String> params,
+    ScopedValues scopedValues,
+  ) {
+    final String url = _applyApiInputs(api.url, params, scopedValues);
+    final Map<String, String> query = _generateMapFromPairs(
+      api.queryParams,
+      params,
+      scopedValues,
+    );
+    if (query.isEmpty) return url;
+    final Uri? uri = Uri.tryParse(url);
+    if (uri == null) return url;
+    return uri
+        .replace(queryParameters: {...uri.queryParameters, ...query})
+        .toString();
   }
 
   static Map<String, String> _generateMapFromPairs(
@@ -488,7 +570,18 @@ class FunctionsRepository {
     final String? myCanvasId = effectiveCodelessly.currentNavigatedCanvasId;
 
     if (action.navigationType == NavigationType.pop) {
-      await Navigator.maybePop(context, parsedParams);
+      final bool popped = await Navigator.maybePop(context, parsedParams);
+      // Nothing to go back to (the screen was opened directly): a pop with a
+      // destination goes there instead.
+      if (!popped && action.destinationId.isNotEmpty && context.mounted) {
+        return navigate(
+          context,
+          action.copyWith(navigationType: NavigationType.replace),
+          codelessly: codelessly,
+          codelesslyController: codelesslyController,
+          scopedValues: scopedValues,
+        );
+      }
     } else {
       // Check if a layout exists for the action's [destinationId].
       final String? layoutId =
@@ -894,10 +987,13 @@ class FunctionsRepository {
 
       printResponse(response);
 
+      final Map responseValue = ApiResponseVariableUtils.fromResponse(response);
+      // The next actions of the chain read the response as `${result}`, e.g.
+      // `${result.data}` or `${result.isError}`, even when the API has no
+      // variable or another call overwrites it, as in a forEach.
+      ActionChain.setResult(responseValue);
       if (variable != null) {
-        variable.value = variable.value.copyWith(
-          value: ApiResponseVariableUtils.fromResponse(response),
-        );
+        variable.value = variable.value.copyWith(value: responseValue);
         DebugLogger.instance.printInfo(
           '${variable.value.name} updated with success state.',
           name: name,
@@ -913,10 +1009,14 @@ class FunctionsRepository {
     } catch (error, stackTrace) {
       DebugLogger.instance.printInfo(error.toString(), name: name);
       DebugLogger.instance.printInfo(stackTrace.toString(), name: name);
+      final Map errorValue = ApiResponseVariableUtils.error(
+        url,
+        error,
+        data: existingData,
+      );
+      ActionChain.setResult(errorValue);
       if (variable != null) {
-        variable.value = variable.value.copyWith(
-          value: ApiResponseVariableUtils.error(url, error, data: existingData),
-        );
+        variable.value = variable.value.copyWith(value: errorValue);
         DebugLogger.instance.printInfo(
           '${variable.value.name} updated with error state.',
           name: name,

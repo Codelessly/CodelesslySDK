@@ -120,12 +120,17 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       }
     }
 
+    final CrossAxisAlignment crossAxisAlignment = stretchFallsBack
+        ? CrossAxisAlignment.start
+        : rowColumnNode.crossAxisAlignment.flutterAxis;
     Widget res = CodelesslyFlex(
       direction: isRow ? Axis.horizontal : Axis.vertical,
       mainAxisAlignment: rowColumnNode.mainAxisAlignment.flutterAxis,
-      crossAxisAlignment: stretchFallsBack
-          ? CrossAxisAlignment.start
-          : rowColumnNode.crossAxisAlignment.flutterAxis,
+      crossAxisAlignment: crossAxisAlignment,
+      // Flex asserts a baseline to align to; texts align on the alphabetic one.
+      textBaseline: crossAxisAlignment == CrossAxisAlignment.baseline
+          ? TextBaseline.alphabetic
+          : null,
       mainAxisSize: mainFit == SizeFit.shrinkWrap
           ? MainAxisSize.min
           : MainAxisSize.max,
@@ -440,6 +445,12 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
           childWidget = flexibleSpaceBackground(childWidget);
         }
       }
+    }
+
+    // A squeezable node that wraps its content hugs it while it fits and
+    // shrinks to the room the Row/Column has left when it doesn't.
+    if (mainAxisFit == SizeFit.shrinkWrap && node.squeezable) {
+      childWidget = Flexible(flex: flex, child: childWidget);
     }
 
     return childWidget;

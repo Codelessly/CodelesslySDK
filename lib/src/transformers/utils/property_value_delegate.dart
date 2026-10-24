@@ -1118,7 +1118,7 @@ String formatDate(DateTime date) {
 /// Formats [date] relative to now: `Just now`, `5 min ago`, `2 hours ago`,
 /// `3 days ago`, then [formatDate] after a week.
 String formatTimeAgo(DateTime date, {DateTime? now}) {
-  final Duration diff = (now ?? DateTime.now()).difference(date);
+  final Duration diff = (now ?? FormulaClock.now()).difference(date);
   if (diff.inMinutes < 1) return 'Just now';
   if (diff.inHours < 1) return '${diff.inMinutes} min ago';
   if (diff.inDays < 1) {

@@ -1,16 +1,23 @@
 /// A screen of a Codelessly app and the parameters it was opened with, as a
-/// link: `{canvasId}?key=value`. Hosts put it in the browser's address
-/// (see [Codelessly.route]) and hand it back on a reload (see
-/// [Codelessly.pendingRoute]), so a reload opens the same screen with the
-/// same parameters.
+/// link: `{canvasId}?key=value`, or the screen's own URL path when it has one
+/// (`guide/bat-star` for a screen at `guide/:id`, see
+/// [Codelessly.pathOf]). Hosts put it in the browser's address (see
+/// [Codelessly.route]) and hand it back on a reload or a shared link (see
+/// [Codelessly.pendingRoute]), so it opens the same screen with the same
+/// parameters.
 class CodelesslyRoute {
-  /// The screen (canvas) id.
+  /// The screen (canvas) id. For a link read from a URL path, its last
+  /// segment, which [path] may resolve to another screen.
   final String canvasId;
 
   /// The parameters the screen was opened with (`${route.key}`).
   final Map<String, String> params;
 
-  const CodelesslyRoute(this.canvasId, [this.params = const {}]);
+  /// The whole path of a link read by [tryParse], such as `guide/bat-star`,
+  /// matched against the screens' URL paths when it opens.
+  final String? path;
+
+  const CodelesslyRoute(this.canvasId, [this.params = const {}, this.path]);
 
   /// The route of a screen opened with [arguments], the navigation action's
   /// parameters. Values that aren't text, numbers or yes/no are left out:
@@ -33,7 +40,11 @@ class CodelesslyRoute {
         if (segment.isNotEmpty) segment,
     ];
     if (segments.isEmpty) return null;
-    return CodelesslyRoute(segments.last, uri.queryParameters);
+    return CodelesslyRoute(
+      segments.last,
+      uri.queryParameters,
+      segments.join('/'),
+    );
   }
 
   /// The link: `{canvasId}` and its parameters as a query.

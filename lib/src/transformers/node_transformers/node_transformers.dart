@@ -15,6 +15,8 @@ export 'passive_external_component_transformer.dart';
 export 'passive_floating_action_button_transformer.dart';
 export 'passive_grid_view_transformer.dart';
 export 'passive_icon_transformer.dart';
+export 'line_chart_geometry.dart';
+export 'passive_line_chart_transformer.dart';
 export 'passive_list_tile_transformer.dart';
 export 'passive_list_view_transformer.dart';
 export 'passive_loading_indicator_transformer.dart';

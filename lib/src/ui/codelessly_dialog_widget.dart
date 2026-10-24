@@ -27,10 +27,12 @@ class CodelesslyDialogWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // A dialog is centered and sized by its layout, so its canvas keeps its
-    // design size instead of filling the screen.
+    // design size instead of filling the screen, unless it holds a
+    // responsive layout (see CanvasSizing.design). Taps on its empty parts
+    // reach the barrier.
     return CanvasSizingScope(
       sizing: CanvasSizing.design,
-      child: Builder(builder: _buildDialog),
+      child: TapThroughScope(child: Builder(builder: _buildDialog)),
     );
   }
 
