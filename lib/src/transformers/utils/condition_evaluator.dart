@@ -321,6 +321,9 @@ class ConditionEvaluator<R extends Object>
   R? visitDelayAction(DelayAction action) => null;
 
   @override
+  R? visitCopyToClipboardAction(CopyToClipboardAction action) => null;
+
+  @override
   R? visitCloudDataAction(CloudDataAction action) => null;
 
   @override
@@ -478,6 +481,9 @@ class ConditionPrinter
 
   @override
   void visitDelayAction(DelayAction action) {}
+
+  @override
+  void visitCopyToClipboardAction(CopyToClipboardAction action) {}
 
   @override
   void visitCloudDataAction(CloudDataAction action) {}
