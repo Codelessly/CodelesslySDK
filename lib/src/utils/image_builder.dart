@@ -25,6 +25,11 @@ class UltimateImageBuilder extends StatefulWidget {
   final BlendMode? blendMode;
   final bool useInk;
 
+  /// Whether to paint the image at [paint]'s opacity. Off when the caller
+  /// applies the opacity itself, like an image fill, which wraps every kind
+  /// of image (network, bytes, SVG) in one [Opacity].
+  final bool applyPaintOpacity;
+
   const UltimateImageBuilder({
     super.key,
     this.url,
@@ -42,6 +47,7 @@ class UltimateImageBuilder extends StatefulWidget {
     this.node,
     this.blendMode,
     this.useInk = false,
+    this.applyPaintOpacity = true,
   }) : assert(
          url != null || bytes != null || paint != null,
          'url or bytes or paint must be provided',
@@ -259,7 +265,9 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         repeat: repeat,
         scale: scale,
         color: widget.color,
-        opacity: AlwaysStoppedAnimation(widget.paint?.opacity ?? 1),
+        opacity: AlwaysStoppedAnimation(
+          widget.applyPaintOpacity ? widget.paint?.opacity ?? 1 : 1,
+        ),
         filterQuality: FilterQuality.medium,
         colorBlendMode: colorBlendMode,
         // On the web, hosts that don't allow cross-origin reads (no CORS

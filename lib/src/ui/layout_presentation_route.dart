@@ -38,18 +38,19 @@ class LayoutPresentationRoute<T> extends PopupRoute<T> {
 
   /// Creates a [LayoutPresentationRoute].
   LayoutPresentationRoute({
-    required this.presentation,
+    required DialogPresentation presentation,
     required this.builder,
     required BuildContext context,
     this.showCloseButton = false,
     this.sheetWidth,
     this.designWidth,
-    this.maxHeightFactor = 0.92,
-    this.showDragHandle = true,
+    this.maxHeightFactor = 1,
+    this.showDragHandle = false,
     this.barrierDismissible = true,
     this.barrierColor = Colors.black54,
     super.settings,
-  }) : _barrierLabel = MaterialLocalizations.of(context)
+  }) : presentation = presentation.resolveFor(context),
+       _barrierLabel = MaterialLocalizations.of(context)
            .modalBarrierDismissLabel,
        _themes = InheritedTheme.capture(
          from: context,
@@ -111,7 +112,8 @@ class LayoutPresentationRoute<T> extends PopupRoute<T> {
             builder: builder,
           ),
         ),
-        DialogPresentation.bottomSheet => _BottomSheet(
+        DialogPresentation.bottomSheet ||
+        DialogPresentation.adaptive => _BottomSheet(
           maxHeightFactor: maxHeightFactor,
           showDragHandle: showDragHandle,
           showCloseButton: showCloseButton,
@@ -147,7 +149,8 @@ class LayoutPresentationRoute<T> extends PopupRoute<T> {
           child: child,
         ),
       ),
-      DialogPresentation.bottomSheet => SlideTransition(
+      DialogPresentation.bottomSheet ||
+      DialogPresentation.adaptive => SlideTransition(
         position: Tween<Offset>(
           begin: const Offset(0, 1),
           end: Offset.zero,
@@ -313,4 +316,16 @@ class _SideSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Resolves [DialogPresentation.adaptive] for the screen.
+extension DialogPresentationResolve on DialogPresentation {
+  /// A bottom sheet on phones (narrower than 600 px) and a dialog otherwise
+  /// for [DialogPresentation.adaptive]; any other presentation as is.
+  DialogPresentation resolveFor(BuildContext context) =>
+      this == DialogPresentation.adaptive
+      ? (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < 600
+            ? DialogPresentation.bottomSheet
+            : DialogPresentation.dialog
+      : this;
 }

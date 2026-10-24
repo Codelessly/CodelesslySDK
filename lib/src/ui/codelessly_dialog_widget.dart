@@ -7,10 +7,21 @@ class CodelesslyDialogWidget extends StatelessWidget {
   final WidgetBuilder builder;
   final bool showCloseButton;
 
+  /// Where the dialog sits: centered by default, bottom center for a sheet,
+  /// or anywhere else, e.g. a menu at the top right.
+  final AlignmentGeometry alignment;
+
+  /// Whether the dialog is only as tall as its canvas, as a bottom sheet is,
+  /// so the space above it stays the sheet's scrim (a tap there dismisses
+  /// it). A centered dialog fills the screen to place its canvas.
+  final bool hugHeight;
+
   const CodelesslyDialogWidget({
     super.key,
     required this.builder,
     required this.showCloseButton,
+    this.alignment = Alignment.center,
+    this.hugHeight = false,
   });
 
   @override
@@ -25,7 +36,9 @@ class CodelesslyDialogWidget extends StatelessWidget {
 
   Widget _buildDialog(BuildContext context) {
     if (showCloseButton) {
-      return Center(
+      return Align(
+        alignment: alignment,
+        heightFactor: hugHeight ? 1 : null,
         child: Material(
           type: MaterialType.transparency,
           child: Stack(
@@ -49,6 +62,10 @@ class CodelesslyDialogWidget extends StatelessWidget {
       );
     }
 
-    return Center(child: builder(context));
+    return Align(
+      alignment: alignment,
+      heightFactor: hugHeight ? 1 : null,
+      child: builder(context),
+    );
   }
 }

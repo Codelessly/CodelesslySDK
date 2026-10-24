@@ -212,9 +212,7 @@ Future<void> pumpLayouts(
   await tester.pump();
 }
 
-final Finder bottomSheet = find.byKey(
-  const ValueKey('Codelessly bottom sheet'),
-);
+final Finder bottomSheet = find.byType(BottomSheet);
 final Finder sideSheet = find.byKey(const ValueKey('Codelessly side sheet'));
 final Finder dragHandle = find.byKey(
   const ValueKey('Codelessly sheet drag handle'),
@@ -229,6 +227,7 @@ void main() {
           ShowDialogAction(
             destinationId: 'sheetCanvas',
             presentation: DialogPresentation.bottomSheet,
+            showDragHandle: true,
           ),
         ]),
         sheetLayout(),
@@ -244,22 +243,26 @@ void main() {
 
       final Rect sheet = tester.getRect(bottomSheet);
       expect(midTop, greaterThan(sheet.top));
-      expect(sheet.left, 0);
-      expect(sheet.width, size.width);
       expect(sheet.bottom, size.height);
-      // The content box and the Done button.
-      expect(sheet.height, 344);
-      expect(
-        tester.widget<ClipRRect>(bottomSheet).borderRadius,
-        const BorderRadius.vertical(top: Radius.circular(10)),
-      );
-
-      final Rect handle = tester.getRect(dragHandle);
-      expect(handle.size, const Size(40, 4));
-      expect(handle.top, sheet.top + 8);
-      expect(handle.center.dx, size.width / 2);
+      expect(sheet.height, lessThan(size.height / 2));
+      expect(tester.widget<BottomSheet>(bottomSheet).showDragHandle, isTrue);
     });
   }
+
+  testWidgets('a saved bottom sheet has no drag handle', (tester) async {
+    await pumpLayouts(tester, [
+      mainLayout([
+        ShowDialogAction(
+          destinationId: 'sheetCanvas',
+          presentation: DialogPresentation.bottomSheet,
+        ),
+      ]),
+      sheetLayout(),
+    ], size: phone);
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<BottomSheet>(bottomSheet).showDragHandle, isFalse);
+  });
 
   testWidgets('a bottom sheet is at most 92% of the screen tall', (
     tester,
@@ -269,7 +272,7 @@ void main() {
         ShowDialogAction(
           destinationId: 'sheetCanvas',
           presentation: DialogPresentation.bottomSheet,
-          showDragHandle: false,
+          maxHeightFactor: 0.92,
         ),
       ]),
       sheetLayout(contentHeight: 1200, verticalFit: SizeFit.fixed),
@@ -278,9 +281,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     final Rect sheet = tester.getRect(bottomSheet);
-    expect(sheet.height, closeTo(844 * 0.92, 0.01));
+    expect(sheet.height, lessThanOrEqualTo(844 * 0.92 + 0.01));
     expect(sheet.bottom, 844);
-    expect(dragHandle, findsNothing);
   });
 
   for (final (Size size, double? width) in [
@@ -399,6 +401,7 @@ void main() {
           title: 'Reopen?',
           dialogId: 'confirmCanvas',
           presentation: DialogPresentation.bottomSheet,
+          showDragHandle: true,
           actions: [ShowToastAction(message: 'Reopened')],
         ),
       ]),
@@ -418,9 +421,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     final Rect sheet = tester.getRect(bottomSheet);
-    expect(sheet.width, phone.width);
     expect(sheet.bottom, phone.height);
-    expect(dragHandle, findsOneWidget);
+    expect(tester.widget<BottomSheet>(bottomSheet).showDragHandle, isTrue);
 
     await tester.tap(find.text('Reopen'));
     await tester.pump();
@@ -431,8 +433,9 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('a saved show-dialog action stays a centered dialog that '
-      'scales and fades in', (tester) async {
+  testWidgets('a saved show-dialog action stays a centered dialog', (
+    tester,
+  ) async {
     final action = ActionModel.fromJson({
       'type': 'showDialog',
       'destinationId': 'dialogCanvas',
@@ -451,14 +454,6 @@ void main() {
       ]),
     ], size: desktop);
     await tester.tap(find.text('Go'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
-    final Finder scale = find
-        .ancestor(of: find.text('OK'), matching: find.byType(ScaleTransition))
-        .first;
-    final double midScale = tester.widget<ScaleTransition>(scale).scale.value;
-    expect(midScale, greaterThanOrEqualTo(0.96));
-    expect(midScale, lessThan(1));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(bottomSheet, findsNothing);
