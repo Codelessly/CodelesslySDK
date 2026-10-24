@@ -749,7 +749,7 @@ class FunctionsRepository {
     // A full height sheet is as tall as it can be, with the canvas filling
     // it, so the canvas scrolls its own content under a fixed header.
     Widget content(BuildContext context) => asSheet && fullHeight
-        ? CodelesslyBottomSheetWidget(fullHeight: true, builder: builder)
+        ? CodelesslyBottomSheetWidget(builder: builder)
         : CodelesslyDialogWidget(
             showCloseButton: showCloseButton,
             alignment: asSheet ? Alignment.bottomCenter : alignment,
