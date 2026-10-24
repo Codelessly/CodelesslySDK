@@ -783,13 +783,27 @@ Widget buildFill(
         'fill-${paint.id}',
         scopedValues: scopedValues,
       );
-      final decoration = BoxDecoration(
-        borderRadius: borderRadius,
-        color: (propertyValue ?? paint).toFlutterColor()!,
-      );
-      return useInk
-          ? Ink(decoration: decoration)
-          : DecoratedBox(decoration: decoration);
+      final Color color = (propertyValue ?? paint).toFlutterColor()!;
+      Widget solid(Color? color) {
+        final decoration = BoxDecoration(
+          borderRadius: borderRadius,
+          color: color,
+        );
+        return useInk
+            ? Ink(decoration: decoration)
+            : DecoratedBox(decoration: decoration);
+      }
+
+      // With a transition a fill eases to its new color (a hovered row).
+      if ((node as BaseNode).transitionMs > 0) {
+        return TweenAnimationBuilder<Color?>(
+          tween: ColorTween(end: color),
+          duration: Duration(milliseconds: (node as BaseNode).transitionMs),
+          curve: Curves.easeOutCubic,
+          builder: (context, color, _) => solid(color),
+        );
+      }
+      return solid(color);
     case PaintType.gradientLinear:
     case PaintType.gradientRadial:
     case PaintType.gradientAngular:

@@ -24,7 +24,7 @@ Needs codelessly_api 6.2.0.
 
 ### Motion
 
-- Nodes with `transitionMs` ease opacity and draw-scale changes in.
+- Nodes with `transitionMs` ease opacity, draw-scale and solid fill changes in.
 - `drawScale` (bindable) draws a node larger or smaller around its center.
 - `pulse` loops a node's opacity and scale (`NodePulse`).
 
