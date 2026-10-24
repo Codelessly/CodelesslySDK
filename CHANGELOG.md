@@ -7,6 +7,8 @@
   `changed` trigger with the index.
 - Repeating and mirrored linear, radial and sweep gradients.
 - A node's `pulse` fades its opacity in a loop (`PulseOpacity`).
+- Toasts take an accent edge, corner radius and max width
+  (`ShowToastAction.accentColor`, `cornerRadius`, `maxWidth`).
 - Rectangular slider thumbs (`RectSliderThumbShape`) with a border and a
   grip line.
 - `pointerDown` and `pointerUp` reactions fire (a cancelled pointer counts
