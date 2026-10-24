@@ -103,6 +103,37 @@ void main() {
     }
   });
 
+  testWidgets('a rectangular slider thumb takes its size', (tester) async {
+    final node = SliderNode(
+      id: 's',
+      name: 's',
+      basicBoxLocal: NodeBox(0, 0, 300, 48),
+      value: 20,
+      properties: SliderProperties(
+        thumbShape: SliderThumbShapeEnum.rectangle,
+        thumbBorderColor: ColorRGBA.white,
+        thumbGripColor: ColorRGBA.white,
+      ),
+    );
+    await tester.pumpWidget(
+      host(
+        TransformerSlider(
+          node: node,
+          value: 20,
+          onChanged: (_) {},
+          settings: settings,
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    final SliderThemeData theme = tester
+        .widget<SliderTheme>(find.byType(SliderTheme).last)
+        .data;
+    final shape = theme.thumbShape! as RectSliderThumbShape;
+    expect(shape.getPreferredSize(true, false), const Size(18, 24));
+    expect(shape.gripColor, isNotNull);
+  });
+
   testWidgets('badge renders every type, alone and on a child', (tester) async {
     final child = IconNode(
       id: 'icon',
