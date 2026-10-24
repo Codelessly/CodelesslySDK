@@ -235,7 +235,7 @@ void main() {
         name: 'Meter fill',
         basicBoxLocal: NodeBox(0, 0, 300, 8),
         positioningMode: PositioningMode.pin,
-        edgePins: EdgePinsModel(left: 0, top: 0, right: null, bottom: null),
+        edgePins: const EdgePinsModel(left: 0, top: 0, right: null, bottom: null),
       ).toJson(),
       'variables': {'width': r'${= scale * 12}'},
     });

@@ -87,11 +87,16 @@ class CodelesslyBottomSheetWidget extends StatelessWidget {
 
 /// A layout shown as a popover menu next to [anchor] (the rect, in global
 /// coordinates, of the node that opened it): below it and left-aligned with
-/// it, right-aligned when that would run off the screen, and above it when
-/// there is no room below. The canvas keeps its design size.
+/// it (right-aligned with [alignEnd]), the other way when that would run off
+/// the screen, and above it when there is no room below. The canvas keeps
+/// its design size.
 class CodelesslyPopoverWidget extends StatelessWidget {
   final Rect? anchor;
   final WidgetBuilder builder;
+
+  /// Whether the popover's right edge lines up with the anchor's, as for a
+  /// menu opened from a button at the right of a card.
+  final bool alignEnd;
 
   /// Gap between the anchor and the popover, and the screen margin.
   static const double gap = 6;
@@ -100,12 +105,13 @@ class CodelesslyPopoverWidget extends StatelessWidget {
     super.key,
     required this.anchor,
     required this.builder,
+    this.alignEnd = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return CustomSingleChildLayout(
-      delegate: _PopoverLayout(anchor),
+      delegate: _PopoverLayout(anchor, alignEnd: alignEnd),
       child: CanvasSizingScope(
         sizing: CanvasSizing.design,
         child: Builder(builder: builder),
@@ -116,8 +122,9 @@ class CodelesslyPopoverWidget extends StatelessWidget {
 
 class _PopoverLayout extends SingleChildLayoutDelegate {
   final Rect? anchor;
+  final bool alignEnd;
 
-  const _PopoverLayout(this.anchor);
+  const _PopoverLayout(this.anchor, {this.alignEnd = false});
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
@@ -127,15 +134,21 @@ class _PopoverLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) =>
-      popoverPosition(anchor, size, childSize);
+      popoverPosition(anchor, size, childSize, alignEnd: alignEnd);
 
   @override
-  bool shouldRelayout(covariant _PopoverLayout old) => old.anchor != anchor;
+  bool shouldRelayout(covariant _PopoverLayout old) =>
+      old.anchor != anchor || old.alignEnd != alignEnd;
 }
 
 /// Where a popover of [child] size goes in a [screen] for [anchor]; centered
-/// when there is no anchor.
-Offset popoverPosition(Rect? anchor, Size screen, Size child) {
+/// when there is no anchor. See [CodelesslyPopoverWidget.alignEnd].
+Offset popoverPosition(
+  Rect? anchor,
+  Size screen,
+  Size child, {
+  bool alignEnd = false,
+}) {
   const double m = CodelesslyPopoverWidget.gap;
   if (anchor == null) {
     return Offset(
@@ -143,8 +156,10 @@ Offset popoverPosition(Rect? anchor, Size screen, Size child) {
       (screen.height - child.height) / 2,
     );
   }
-  double left = anchor.left;
-  if (left + child.width > screen.width - m) left = anchor.right - child.width;
+  final double start = anchor.left, end = anchor.right - child.width;
+  double left = alignEnd ? end : start;
+  if (!alignEnd && left + child.width > screen.width - m) left = end;
+  if (alignEnd && left < m) left = start;
   left = left.clamp(
     m,
     (screen.width - child.width - m).clamp(m, double.infinity),
