@@ -400,6 +400,8 @@ class PropertyValueDelegate {
         : variable.type;
     if (match.hasAccessor) {
       if (type.isText) {
+        // A computed text whose formula gives nothing has no characters.
+        if (variableValue == null) return null;
         final characters = variableValue.toString().characters.toList();
         final (Object? value, _) = substituteJsonPath(match.fullPath, {
           match.name: characters,
