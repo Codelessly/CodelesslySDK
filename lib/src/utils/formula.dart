@@ -27,8 +27,14 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `condition ? a : b`. `+` joins text when either side is text.
 ///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
-///    endsWith, where, without, number, text, isEmpty and isNotEmpty. See
+///    endsWith, where, without, number, text, isEmpty, isNotEmpty, padLeft,
+///    padRight, substring, split, replace and coalesce. See
 ///    [FormulaEvaluator.functions].
+///  - maps: `obj('id', 1, 'name', n)` builds one (formulas have no `{}`
+///    literals), `set(map, key, value)` and `merge(a, b)` return changed
+///    copies, `keys` and `values` read them. With `map` this updates one
+///    item of a list: `map(units, u => if(u.id == id, set(u, 'hours', h), u))`.
+///  - more list functions: range, slice, first, last, concat and indexOf.
 ///  - list functions that take a predicate or key: filter, where, count,
 ///    find, any, all, map, sortBy, unique, sum and join. The predicate is a
 ///    lambda, `item => expression`, or a field name, optionally with a value
@@ -51,7 +57,7 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    value or predicate), which is -1 when nothing matches.
 ///  - date functions: now, today, parseDate, formatDate, addMinutes, addHours,
 ///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
-///    hour, minute and weekday. Dates are ISO 8601 text such as
+///    hour, minute, weekday and daysInMonth. Dates are ISO 8601 text such as
 ///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
 ///    milliseconds or a Firestore timestamp.
 ///  - date-aware comparisons: `== != < <= > >=` compare as dates when one
@@ -171,8 +177,13 @@ class FormulaEvaluator {
   static const List<FormulaFunctionDoc> functionDocs = [
     FormulaFunctionDoc(
       'money',
-      'money(value, symbol)',
-      r'money(price) → $1,234.50',
+      'money(value, symbol?, digits?)',
+      r'money(price) → $1,234.50, money(385, "$", 0) → $385',
+    ),
+    FormulaFunctionDoc(
+      'formatNumber',
+      'formatNumber(value, digits?)',
+      'formatNumber(2481.64, 1) → 2,481.6',
     ),
     FormulaFunctionDoc(
       'fixed',
@@ -232,6 +243,11 @@ class FormulaEvaluator {
       'endsWith',
       'endsWith(text, suffix)',
       'endsWith("photo.png", ".png") → true',
+    ),
+    FormulaFunctionDoc(
+      'matches',
+      'matches(text, pattern)',
+      'matches(email, "^[^@ ]+@[^@ ]+[.][^@ .]+\$") → true',
     ),
     FormulaFunctionDoc(
       'filter',
@@ -306,6 +322,11 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('first', 'first(list)', 'first(stops) → the first stop'),
     FormulaFunctionDoc('last', 'last(list)', 'last(stops) → the last stop'),
+    FormulaFunctionDoc(
+      'concat',
+      'concat(list, list2, ...)',
+      'concat(range(2), [9]) → [0, 1, 9]',
+    ),
     FormulaFunctionDoc(
       'slice',
       'slice(list, start, end)',
@@ -462,6 +483,46 @@ class FormulaEvaluator {
       'weekday(date)',
       'weekday("2026-10-21") → 3 (Monday is 1)',
     ),
+    FormulaFunctionDoc(
+      'daysInMonth',
+      'daysInMonth(date)',
+      'daysInMonth("2026-02-10") → 28',
+    ),
+    FormulaFunctionDoc(
+      'obj',
+      'obj(key, value, key2, value2, ...)',
+      'obj("id", "ex1", "hours", 12) → {id: ex1, hours: 12}',
+    ),
+    FormulaFunctionDoc(
+      'padLeft',
+      'padLeft(text, width, char?)',
+      'padLeft(42, 5, "0") → 00042',
+    ),
+    FormulaFunctionDoc(
+      'padRight',
+      'padRight(text, width, char?)',
+      'padRight("ab", 4, ".") → ab..',
+    ),
+    FormulaFunctionDoc(
+      'substring',
+      'substring(text, start, end?)',
+      'substring("EX-102", 3) → 102',
+    ),
+    FormulaFunctionDoc(
+      'split',
+      'split(text, separator?)',
+      'split("2481") → [2, 4, 8, 1]',
+    ),
+    FormulaFunctionDoc(
+      'replace',
+      'replace(text, from, to)',
+      'replace("1,402", ",", "") → 1402',
+    ),
+    FormulaFunctionDoc(
+      'coalesce',
+      'coalesce(value, fallback, ...)',
+      'coalesce(route.date, today())',
+    ),
   ];
 }
 
@@ -568,16 +629,26 @@ Object? _member(Object? target, Object? key) {
 String _fixed(Object? value, Object? digits) =>
     _num(value).toStringAsFixed(_num(digits ?? 2).toInt().clamp(0, 20));
 
-String _money(Object? value, Object? symbol) {
+String _money(Object? value, Object? symbol, [Object? digits]) {
   final num amount = _num(value);
   if (amount.isNaN) return '';
   final String sign = amount < 0 ? '-' : '';
-  final String text = amount.abs().toStringAsFixed(2);
-  final int dot = text.indexOf('.');
+  return '$sign${symbol ?? r'$'}${_grouped(amount.abs(), digits ?? 2)}';
+}
+
+/// [value] with [digits] decimals (default 0) and thousands separators,
+/// e.g. 2481.64 with 1 digit is "2,481.6".
+String _grouped(Object? value, Object? digits) {
+  final num amount = _num(value);
+  if (amount.isNaN) return '';
+  final String text = amount.toStringAsFixed(
+    _num(digits ?? 0).toInt().clamp(0, 20),
+  );
+  final int dot = text.contains('.') ? text.indexOf('.') : text.length;
   final String whole = text
       .substring(0, dot)
       .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
-  return '$sign${symbol ?? r'$'}$whole${text.substring(dot)}';
+  return '$whole${text.substring(dot)}';
 }
 
 num _round(Object? value, Object? digits) {
@@ -959,7 +1030,8 @@ Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
 final Map<String, _Function> _functions = {
-  'money': (a) => _money(_arg(a, 0), _arg(a, 1)),
+  'money': (a) => _money(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'formatNumber': (a) => _grouped(_arg(a, 0), _arg(a, 1)),
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
   'round': (a) => _round(_arg(a, 0), _arg(a, 1)),
   'floor': (a) => _num(_arg(a, 0)).floor(),
@@ -999,6 +1071,17 @@ final Map<String, _Function> _functions = {
   'endsWith': (a) => switch (_arg(a, 0)) {
     final String s => s.endsWith(FormulaEvaluator.stringify(_arg(a, 1))),
     _ => false,
+  },
+  // A pattern that doesn't compile matches nothing.
+  'matches': (a) {
+    final Object? text = _arg(a, 0);
+    if (text == null) return false;
+    try {
+      return RegExp(FormulaEvaluator.stringify(_arg(a, 1)))
+          .hasMatch(FormulaEvaluator.stringify(text));
+    } on FormatException {
+      return false;
+    }
   },
   'contains': (a) => switch (_arg(a, 0)) {
     final String s => s.contains(FormulaEvaluator.stringify(_arg(a, 1))),
@@ -1155,7 +1238,66 @@ final Map<String, _Function> _functions = {
   'hour': (a) => _toDate(_arg(a, 0))?.hour,
   'minute': (a) => _toDate(_arg(a, 0))?.minute,
   'weekday': (a) => _toDate(_arg(a, 0))?.weekday,
+  'daysInMonth': (a) {
+    final DateTime? date = _toDate(_arg(a, 0));
+    return date == null ? null : DateTime.utc(date.year, date.month + 1, 0).day;
+  },
+  // Maps: formulas can't write `{...}` literals, so these build and change
+  // maps. Each returns a new map and leaves its input alone.
+  'obj': (a) => <String, Object?>{
+    for (int i = 0; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  // Lists.
+  'concat': (a) => [
+    for (final part in a)
+      if (part is Iterable) ...part else ?part,
+  ],
+  // Text.
+  'padLeft': (a) =>
+      FormulaEvaluator.stringify(_arg(a, 0))
+          .padLeft(_intArg(_arg(a, 1)), _padChar(_arg(a, 2))),
+  'padRight': (a) =>
+      FormulaEvaluator.stringify(_arg(a, 0))
+          .padRight(_intArg(_arg(a, 1)), _padChar(_arg(a, 2))),
+  'substring': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final int start = _clampIndex(_arg(a, 1), text.length, 0);
+    final int end = _clampIndex(_arg(a, 2), text.length, text.length);
+    return end <= start ? '' : text.substring(start, end);
+  },
+  'split': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final Object? separator = _arg(a, 1);
+    if (text.isEmpty) return <String>[];
+    return text.split(
+      separator == null ? '' : FormulaEvaluator.stringify(separator),
+    );
+  },
+  'replace': (a) => FormulaEvaluator.stringify(_arg(a, 0)).replaceAll(
+    FormulaEvaluator.stringify(_arg(a, 1)),
+    FormulaEvaluator.stringify(_arg(a, 2)),
+  ),
+  // The first argument that is neither null nor empty text.
+  'coalesce': (a) => a.firstWhere(
+    (v) => v != null && !(v is String && v.isEmpty),
+    orElse: () => null,
+  ),
 };
+
+/// [value] as an index into a sequence of [length]; negative counts from the
+/// end, null is [fallback].
+int _clampIndex(Object? value, int length, int fallback) {
+  if (value == null) return fallback;
+  int index = _intArg(value);
+  if (index < 0) index += length;
+  return index.clamp(0, length);
+}
+
+String _padChar(Object? value) {
+  final String text = value == null ? ' ' : FormulaEvaluator.stringify(value);
+  return text.isEmpty ? ' ' : text;
+}
 
 // ---------------------------------------------------------------------------
 // Syntax tree
