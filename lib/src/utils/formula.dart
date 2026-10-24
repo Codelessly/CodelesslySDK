@@ -368,8 +368,8 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'set',
-      'set(map, key, value)',
-      "set(rig, 'length', 36) → rig, 36 ft long",
+      'set(map, key, value, key, value, …)',
+      "set(rig, 'length', 36, 'name', 'Sol') → rig, 36 ft long, named Sol",
     ),
     FormulaFunctionDoc('keys', 'keys(map)', 'keys(rig) → [name, length, …]'),
     FormulaFunctionDoc('values', 'values(map)', 'values(totals) → [3, 5]'),
@@ -1119,9 +1119,11 @@ final Map<String, _Function> _functions = {
     for (final Object? m in a)
       if (m is Map) ...m.map((k, v) => MapEntry(k.toString(), v)),
   },
+  // set(map, key, value, key, value, …): a copy with each pair set.
   'set': (a) => <String, Object?>{
     if (_arg(a, 0) case final Map m) ...m.map((k, v) => MapEntry('$k', v)),
-    FormulaEvaluator.stringify(_arg(a, 1)): _arg(a, 2),
+    for (int i = 1; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
   },
   'keys': (a) => switch (_arg(a, 0)) {
     final Map m => m.keys.map((k) => k.toString()).toList(),

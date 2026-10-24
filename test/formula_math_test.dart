@@ -61,6 +61,10 @@ void main() {
         'lng': -113.18,
       });
       expect(eval("set(object('a', 1), 'b', 2)"), {'a': 1, 'b': 2});
+      expect(
+        eval("set(object('a', 1), 'b', 2, 'a', 3)"),
+        {'a': 3, 'b': 2},
+      );
       expect(eval("keys(object('a', 1, 'b', 2))"), ['a', 'b']);
       expect(eval("values(object('a', 1, 'b', 2))"), [1, 2]);
     });
