@@ -39,4 +39,22 @@ void main() {
     );
     expect((box.width, box.height), (1920.0, 1080.0));
   });
+
+  test('a responsive popover canvas keeps its design size', () {
+    final CanvasNode menu = CanvasNode(
+      id: 'menu',
+      name: 'Menu',
+      basicBoxLocal: NodeBox(0, 0, 240, 160),
+      children: const [],
+      properties: CanvasProperties(bodyId: 'body'),
+      scaleMode: ScaleMode.responsive,
+    );
+    final box = CanvasViewport.resolve(
+      menu,
+      const BoxConstraints(maxWidth: 1920, maxHeight: 1080),
+      sizing: CanvasSizing.content,
+      responsive: true,
+    );
+    expect((box.width, box.height), (240.0, 160.0));
+  });
 }
