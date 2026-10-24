@@ -7,6 +7,9 @@
   `changed` trigger with the index.
 - Repeating and mirrored linear, radial and sweep gradients.
 - A node's `pulse` fades its opacity in a loop (`PulseOpacity`).
+- A text field's `obscureText` can be bound to a variable or condition, and a
+  one-line field of fixed height obscures its text (it expanded to its
+  height, which dropped the line limit and so the obscuring).
 - Toasts take an accent edge, corner radius and max width
   (`ShowToastAction.accentColor`, `cornerRadius`, `maxWidth`).
 - Rectangular slider thumbs (`RectSliderThumbShape`) with a border and a
