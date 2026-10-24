@@ -455,6 +455,12 @@ enum CanvasSizing {
   /// given. Used where the host only centers the layout and lets it choose
   /// its size, such as a dialog.
   design,
+
+  /// Like [design], and a canvas holding a responsive layout keeps its
+  /// design size too instead of filling the space. Used for a popover next
+  /// to the node that opened it, which is as big as it was designed (or as
+  /// tall as its content) wherever it opens.
+  content,
 }
 
 /// Sets the [CanvasSizing] of the canvases below it. Without one, canvases
@@ -540,7 +546,8 @@ class CanvasViewport extends StatelessWidget {
         node.verticalFit == SizeFit.shrinkWrap &&
         node.scaleMode == ScaleMode.responsive &&
         !node.isAScaffold;
-    if (sizing == CanvasSizing.design && !responsive) {
+    if ((sizing == CanvasSizing.design && !responsive) ||
+        sizing == CanvasSizing.content) {
       final double width = constraints.constrainWidth(node.basicBoxLocal.width);
       if (contentHeight) return (width: width, height: null);
       final double height = node.scaleMode == ScaleMode.autoScale
