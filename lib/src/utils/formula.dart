@@ -1252,7 +1252,11 @@ final Map<String, _Function> _functions = {
     for (int i = 1; i + 1 < a.length; i += 2)
       FormulaEvaluator.stringify(a[i]): a[i + 1],
   },
-  'at': (a) => _values(_arg(a, 0), null).elementAtOrNull(_intArg(_arg(a, 1))),
+  'at': (a) {
+    final int index = _intArg(_arg(a, 1));
+    // indexOf's -1 (not found) reads nothing rather than failing.
+    return index < 0 ? null : _values(_arg(a, 0), null).elementAtOrNull(index);
+  },
   'flatMap': (a) => [
     for (final v in _values(_arg(a, 0), _arg(a, 1)))
       if (v is Iterable) ...v else ?v,

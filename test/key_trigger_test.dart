@@ -13,6 +13,7 @@ void main() {
     expect(keyTriggerLabel(LogicalKeyboardKey.arrowLeft), 'ArrowLeft');
     expect(keyTriggerLabel(LogicalKeyboardKey.delete), 'Delete');
     expect(keyTriggerLabel(LogicalKeyboardKey.escape), 'Escape');
+    expect(keyTriggerLabel(LogicalKeyboardKey.space), 'Space');
   });
 
   testWidgets('a key down reaction reads the key and its modifiers', (
