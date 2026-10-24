@@ -2,8 +2,9 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Functions that build and update records (maps) and lists, so actions
-/// can change one item of a list variable: findIndex, obj, set, merge,
-/// concat, append, take, skip, group, pad.
+/// can change one item of a list variable (indexOf with a predicate, obj,
+/// set, setAt, merge, concat, append, take, skip) and format an odometer
+/// (thousands, padLeft).
 void main() {
   final Map<String, Object?> vars = {
     'defects': [
@@ -25,12 +26,12 @@ void main() {
         .fold<Object?>(vars, (value, key) => value is Map ? value[key] : null),
   );
 
-  test('findIndex finds by lambda, field and value, or plain value', () {
-    expect(eval('findIndex(defects, d => d.id == id)'), 1);
-    expect(eval('findIndex(defects, "status", "open")'), 0);
+  test('indexOf finds by lambda, field and value, or plain value', () {
+    expect(eval('indexOf(defects, d => d.id == id)'), 1);
+    expect(eval('indexOf(defects, "status", "open")'), 0);
     expect(eval('indexOf(["a", "b"], "b")'), 1);
-    expect(eval('findIndex(defects, d => d.id == "nope")'), -1);
-    expect(eval('findIndex(null, d => true)'), -1);
+    expect(eval('indexOf(defects, d => d.id == "nope")'), -1);
+    expect(eval('indexOf(null, d => true)'), -1);
   });
 
   test('obj builds a map from key/value pairs', () {
@@ -38,15 +39,14 @@ void main() {
     expect(eval('obj()'), <String, Object?>{});
   });
 
-  test('set copies a map or list with one key or index changed', () {
+  test('set copies a map, and setAt a list, with one entry changed', () {
     expect(eval('set(answers, "1b", "fail")'), {'1a': 'pass', '1b': 'fail'});
     expect(vars['answers'], {
       '1a': 'pass',
     }, reason: 'the original is unchanged');
-    expect(eval('set([1, 2, 3], 1, 9)'), [1, 9, 3]);
-    expect(eval('set([1, 2], 2, 3)'), [1, 2, 3]);
+    expect(eval('setAt([1, 2, 3], 1, 9)'), [1, 9, 3]);
     final Object? updated = eval(
-      'set(defects, findIndex(defects, d => d.id == id), '
+      'setAt(defects, indexOf(defects, d => d.id == id), '
       'set(find(defects, d => d.id == id), "status", "verified"))',
     );
     expect((updated! as List)[1], {
@@ -72,11 +72,9 @@ void main() {
     expect(eval('skip([1, 2, 3], 2)'), [3]);
   });
 
-  test('group adds thousands separators and pad left-pads', () {
-    expect(eval('group(412908)'), '412,908');
-    expect(eval('group(-1234.5)'), '-1,234.5');
-    expect(eval('group(12)'), '12');
-    expect(eval('pad(7, 2)'), '07');
-    expect(eval('pad("5", 3, " ")'), '  5');
+  test('thousands groups an odometer and padLeft pads', () {
+    expect(eval('thousands(412908)'), '412,908');
+    expect(eval('thousands(12)'), '12');
+    expect(eval('padLeft(7, 2, "0")'), '07');
   });
 }

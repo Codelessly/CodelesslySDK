@@ -38,10 +38,9 @@ abstract final class VariablePreview {
 
   /// The text the design canvas shows for [expression], one `${...}` match.
   ///
-  /// [item] is the list, grid or page item the text is built in, when the
-  /// canvas builds items with their data: `item` then reads that item, as
-  /// the item's other bindings do, instead of the one [scopeResolver] picks
-  /// for [node].
+  /// [item] is the list item the text is built for: a list on the canvas
+  /// shows each of its items, so `${item.name}` reads that item instead of
+  /// the sample item the resolver gives.
   static String textFor(
     String expression, {
     BaseNode? node,

@@ -59,7 +59,7 @@ void main() {
       ]);
     });
 
-    test('filter, find, count, any, all and findIndex get the index', () {
+    test('filter, find, count, any, all and indexOf get the index', () {
       expect(eval('map(filter(items, (x, i) => i > 0), x => x.id)'), [
         '1b',
         '1c',
@@ -68,7 +68,7 @@ void main() {
       expect(eval('count(items, (x, i) => i % 2 == 0)'), 2);
       expect(eval('any(items, (x, i) => i == 5)'), false);
       expect(eval('all(items, (x, i) => i < 3)'), true);
-      expect(eval('findIndex(items, (x, i) => x.id == "1c" && i == 2)'), 2);
+      expect(eval('indexOf(items, (x, i) => x.id == "1c" && i == 2)'), 2);
     });
 
     test('a one-parameter lambda still works', () {
