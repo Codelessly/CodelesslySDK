@@ -177,9 +177,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// Returns [node] with the style properties that conditions, bound
   /// variables or formulas, or set value actions give it at runtime: `fill`
-  /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
-  /// `height`, `flex` (its share of an expanded row or column, so bars
-  /// can be sized proportionally) and `rotation` (in degrees). Returns
+  /// (a text's color for text nodes), `stroke`, `cornerRadius`, `opacity`,
+  /// `width`, `height`, `flex` (its share of an expanded row or column, so
+  /// bars can be sized proportionally) and `rotation` (in degrees). Returns
   /// [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
@@ -221,6 +221,15 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
               'fills': [fill.copyWith(visible: true).toJson()],
             },
         ];
+      }
+    }
+    if (node is CornerMixin) {
+      // A number, or [top-left, top-right, bottom-right, bottom-left], e.g.
+      // a dialog squared at the bottom as a mobile sheet:
+      // `${= screen.isMobile ? [6, 6, 0, 0] : 6}`.
+      final CornerRadius? radius = value<CornerRadius>('cornerRadius');
+      if (radius != null && radius != node.cornerRadius) {
+        patch['cornerRadius'] = radius.toJson();
       }
     }
     if (node is BlendMixin) {

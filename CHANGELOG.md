@@ -42,6 +42,8 @@
 - Text nodes take a bound `textColor`; icons take an `icon` binding naming a
   Material icon (`iconWithName`).
 - Nodes with a `transition` animate runtime opacity changes.
+- Nodes with corners take a `cornerRadius` binding: a number or
+  `[top-left, top-right, bottom-right, bottom-left]`.
 - A row or column that hugs its cross axis and stretches its children gives
   hugging children the thickest child's size, as the editor lays it out.
 
