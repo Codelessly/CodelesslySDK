@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../ui/layout_presentation_route.dart';
 import 'action_chain.dart';
 
 /// How a [ConfirmAction]'s dialog closed.
@@ -46,6 +47,10 @@ class AppConfirmDialog {
           params: action.params,
           barrierDismissible: action.barrierDismissible,
           barrierColor: action.barrierColor?.toFlutterColor(),
+          presentation: action.presentation,
+          sheetWidth: action.sheetWidth,
+          maxHeightFactor: action.maxHeightFactor,
+          showDragHandle: action.showDragHandle,
         );
         final bool confirmed = ConfirmAction.isConfirmResult(result);
         return (
@@ -79,6 +84,42 @@ class AppConfirmDialog {
     // Read the look where the action runs: the dialog's route sits outside
     // the layout.
     final ResolvedFeedbackTheme theme = FeedbackTheme.of(context);
+
+    Widget buildDialog(BuildContext context) => ThemedConfirmDialog(
+      theme: theme,
+      presentation: action.presentation.resolveFor(context),
+      title: title,
+      message: message,
+      confirmLabel: confirmLabel.isEmpty ? 'OK' : confirmLabel,
+      cancelLabel: cancelLabel.isEmpty ? 'Cancel' : cancelLabel,
+      destructive: action.destructive,
+      backgroundColor: action.backgroundColor?.toFlutterColor(),
+      textColor: action.textColor?.toFlutterColor(),
+      confirmColor: action.confirmColor?.toFlutterColor(),
+      cornerRadius: action.cornerRadius,
+    );
+
+    final DialogPresentation presentation = action.presentation.resolveFor(
+      context,
+    );
+    if (presentation != DialogPresentation.dialog) {
+      final Object? answer = await Navigator.of(context).push<Object?>(
+        LayoutPresentationRoute<Object?>(
+          context: context,
+          presentation: presentation,
+          barrierDismissible: action.barrierDismissible,
+          barrierColor:
+              action.barrierColor?.toFlutterColor() ??
+              Theme.of(context).dialogTheme.barrierColor ??
+              Colors.black54,
+          sheetWidth: action.sheetWidth,
+          maxHeightFactor: action.maxHeightFactor,
+          showDragHandle: action.showDragHandle,
+          builder: buildDialog,
+        ),
+      );
+      return (confirmed: answer == true, values: null);
+    }
 
     final bool? confirmed = await showDialog<bool>(
       context: context,
@@ -124,6 +165,7 @@ class ThemedConfirmDialog extends StatelessWidget {
   const ThemedConfirmDialog({
     super.key,
     required this.theme,
+    this.presentation = DialogPresentation.dialog,
     required this.title,
     required this.message,
     required this.confirmLabel,
@@ -148,6 +190,10 @@ class ThemedConfirmDialog extends StatelessWidget {
 
   /// The app's look.
   final ResolvedFeedbackTheme theme;
+
+  /// Whether it is a centered dialog or fills a bottom or side sheet. A
+  /// sheet's route ([LayoutPresentationRoute]) places and clips it.
+  final DialogPresentation presentation;
 
   /// Title; hidden when empty.
   final String title;
@@ -282,68 +328,70 @@ class ThemedConfirmDialog extends StatelessWidget {
       child: Text(confirmLabel),
     );
 
-    Widget content = ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 400),
-      child: Semantics(
-        scopesRoute: true,
-        namesRoute: true,
-        explicitChildNodes: true,
-        label: title.isEmpty ? null : title,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (title.isNotEmpty)
-                Text(
-                  title,
-                  style: titleStyle.applyTo(
-                    theme.titleStyle.copyWith(
-                      fontSize: 18,
-                      height: 1.3,
-                      color: onSurface,
-                    ),
+    final Widget content = Semantics(
+      scopesRoute: true,
+      namesRoute: true,
+      explicitChildNodes: true,
+      label: title.isEmpty ? null : title,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (title.isNotEmpty)
+              Text(
+                title,
+                style: titleStyle.applyTo(
+                  theme.titleStyle.copyWith(
+                    fontSize: 18,
+                    height: 1.3,
+                    color: onSurface,
                   ),
                 ),
-              if (title.isNotEmpty && message.isNotEmpty)
-                const SizedBox(height: 8),
-              if (message.isNotEmpty)
-                Flexible(
-                  child: SingleChildScrollView(
-                    child: Text(
-                      message,
-                      style: messageStyle.applyTo(
-                        theme.bodyStyle.copyWith(
-                          fontSize: 15,
-                          height: 1.45,
-                          color: onSurface.withValues(alpha: 0.74),
-                        ),
+              ),
+            if (title.isNotEmpty && message.isNotEmpty)
+              const SizedBox(height: 8),
+            if (message.isNotEmpty)
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Text(
+                    message,
+                    style: messageStyle.applyTo(
+                      theme.bodyStyle.copyWith(
+                        fontSize: 15,
+                        height: 1.45,
+                        color: onSurface.withValues(alpha: 0.74),
                       ),
                     ),
                   ),
                 ),
-              const SizedBox(height: 20),
-              OverflowBar(
-                alignment: MainAxisAlignment.end,
-                overflowAlignment: OverflowBarAlignment.end,
-                // Outlined or shadowed buttons need room between them.
-                spacing: buttonShadowList.isEmpty ? 8 : 12,
-                overflowSpacing: 8,
-                children: [
-                  cancelColor != null ? withShadow(cancel) : cancel,
-                  withShadow(confirm),
-                ],
               ),
-            ],
-          ),
+            const SizedBox(height: 20),
+            OverflowBar(
+              alignment: MainAxisAlignment.end,
+              overflowAlignment: OverflowBarAlignment.end,
+              // Outlined or shadowed buttons need room between them.
+              spacing: buttonShadowList.isEmpty ? 8 : 12,
+              overflowSpacing: 8,
+              children: [
+                cancelColor != null ? withShadow(cancel) : cancel,
+                withShadow(confirm),
+              ],
+            ),
+          ],
         ),
       ),
     );
+
     // Shadows of its own replace the dialog's elevation: they are drawn
     // around a box that carries its fill and outline.
+    Widget dialogBody = ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 400),
+      child: content,
+    );
     if (dialogShadows != null) {
-      content = DecoratedBox(
+      dialogBody = DecoratedBox(
         key: const ValueKey('codelessly-confirm-surface'),
         decoration: BoxDecoration(
           color: surface,
@@ -351,26 +399,54 @@ class ThemedConfirmDialog extends StatelessWidget {
           border: dialogSide == null ? null : Border.fromBorderSide(dialogSide),
           boxShadow: dialogShadows,
         ),
-        child: content,
+        child: dialogBody,
       );
     }
 
     return Theme(
       data: theme.apply(Theme.of(context)),
-      child: Dialog(
-        backgroundColor: dialogShadows != null ? Colors.transparent : surface,
-        surfaceTintColor: Colors.transparent,
-        shadowColor: dialogShadows != null ? Colors.transparent : null,
-        elevation: dialogShadows != null ? 0 : 8,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radius),
-          side: dialogShadows == null
-              ? dialogSide ?? BorderSide.none
-              : BorderSide.none,
+      child: switch (presentation) {
+        DialogPresentation.dialog => Dialog(
+          backgroundColor: dialogShadows != null ? Colors.transparent : surface,
+          surfaceTintColor: Colors.transparent,
+          shadowColor: dialogShadows != null ? Colors.transparent : null,
+          elevation: dialogShadows != null ? 0 : 8,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radius),
+            side: dialogShadows == null
+                ? dialogSide ?? BorderSide.none
+                : BorderSide.none,
+          ),
+          child: dialogBody,
         ),
-        child: content,
-      ),
+        // A sheet is as wide as its route makes it; its content keeps clear
+        // of the home indicator and the bottom sheet's grab handle.
+        DialogPresentation.bottomSheet ||
+        DialogPresentation.adaptive => SizedBox(
+          width: double.infinity,
+          child: Material(
+            color: surface,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: content,
+              ),
+            ),
+          ),
+        ),
+        DialogPresentation.sideSheet => Material(
+          color: surface,
+          child: SafeArea(
+            left: false,
+            child: Align(alignment: Alignment.topLeft, child: content),
+          ),
+        ),
+      },
     );
   }
 }
