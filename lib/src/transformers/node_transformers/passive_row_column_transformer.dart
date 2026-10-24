@@ -1,5 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show OverflowBoxFit;
 
 import '../../../codelessly_sdk.dart';
 
@@ -7,6 +8,33 @@ typedef WidgetInserter = Widget Function(Widget child);
 
 class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   PassiveRowColumnTransformer(super.getNode, super.manager);
+
+  /// Whether [node] is a row that wraps its children into runs (see
+  /// [RowColumnNode.wrap]). It renders as a [Wrap] instead of a [Flex].
+  static bool wraps(BaseNode node) =>
+      node is RowColumnNode && node.wrapsChildren;
+
+  /// The [WrapAlignment] of each run of a wrapping row.
+  static WrapAlignment wrapAlignment(MainAxisAlignmentC alignment) =>
+      switch (alignment) {
+        MainAxisAlignmentC.start => WrapAlignment.start,
+        MainAxisAlignmentC.end => WrapAlignment.end,
+        MainAxisAlignmentC.center => WrapAlignment.center,
+        MainAxisAlignmentC.spaceBetween => WrapAlignment.spaceBetween,
+        MainAxisAlignmentC.spaceAround => WrapAlignment.spaceAround,
+        MainAxisAlignmentC.spaceEvenly => WrapAlignment.spaceEvenly,
+      };
+
+  /// The [WrapCrossAlignment] of children within a run. A [Wrap] can't
+  /// stretch or align baselines; both behave as start, as in the editor.
+  static WrapCrossAlignment wrapCrossAlignment(CrossAxisAlignmentC alignment) =>
+      switch (alignment) {
+        CrossAxisAlignmentC.center => WrapCrossAlignment.center,
+        CrossAxisAlignmentC.end => WrapCrossAlignment.end,
+        CrossAxisAlignmentC.start ||
+        CrossAxisAlignmentC.stretch ||
+        CrossAxisAlignmentC.baseline => WrapCrossAlignment.start,
+      };
 
   static Widget buildRowColumnWidget(
     BaseNode rowColumnNode, {
@@ -55,6 +83,22 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
             max: rowColumnNode.constraints.maxHeight,
           ),
     );
+
+    // A wrapping row lays its children out in runs, like the editor's
+    // solver. It doesn't scroll and has no intrinsic cross measuring: a
+    // Wrap's runs already give it its thickness.
+    if (wraps(rowColumnNode)) {
+      final RowColumnNode wrapNode = rowColumnNode as RowColumnNode;
+      final Widget wrap = Wrap(
+        key: ValueKey(rowColumnNode.id),
+        alignment: wrapAlignment(wrapNode.mainAxisAlignment),
+        crossAxisAlignment: wrapCrossAlignment(wrapNode.crossAxisAlignment),
+        spacing: wrapNode.spacing,
+        runSpacing: wrapNode.runSpacing,
+        children: childrenWidgets,
+      );
+      return _withOuterBox(wrap, outerBox);
+    }
 
     final SizeFit mainFit = isRow
         ? rowColumnNode.horizontalFit
@@ -120,6 +164,12 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       );
     }
 
+    return _withOuterBox(res, outerBox);
+  }
+
+  /// Puts [res] in the Row/Column's own box, [outerBox], unless the box
+  /// hugs on both axes.
+  static Widget _withOuterBox(Widget res, FitBox outerBox) {
     if (outerBox.width == null &&
         outerBox.height == null &&
         !outerBox.fillWidth &&
@@ -194,6 +244,14 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
 
     if (node is SpacerNode) {
       return childWidget;
+    }
+
+    if (wraps(parentRowColumn)) {
+      return _wrapChildOfWrap(
+        node,
+        childWidget,
+        flexibleSpaceBackground: flexibleSpaceBackground,
+      );
     }
 
     final AxisC mainAxis =
@@ -310,6 +368,33 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       }
     }
 
+    return childWidget;
+  }
+
+  /// A child of a wrapping row keeps its natural size, as in the editor's
+  /// solver: a [Wrap] has no flex, so an expanded or flexible child is not
+  /// wrapped in [Expanded]/[Flexible] (which a [Wrap] can't hold), and its
+  /// own alignment does not apply.
+  ///
+  /// A child that fills the main axis would take the whole run width in a
+  /// [Wrap]; an unbounded main axis makes it take its design size instead
+  /// (see [FitBox]).
+  static Widget _wrapChildOfWrap(
+    BaseNode node,
+    Widget childWidget, {
+    WidgetInserter? flexibleSpaceBackground,
+  }) {
+    if (flexibleSpaceBackground != null) {
+      childWidget = flexibleSpaceBackground(childWidget);
+    }
+    if (node.horizontalFit == SizeFit.expanded) {
+      childWidget = OverflowBox(
+        maxWidth: double.infinity,
+        fit: OverflowBoxFit.deferToChild,
+        alignment: AlignmentDirectional.topStart,
+        child: childWidget,
+      );
+    }
     return childWidget;
   }
 

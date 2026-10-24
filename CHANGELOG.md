@@ -7,6 +7,8 @@
   `changed` trigger with the index.
 - Repeating and mirrored linear, radial and sweep gradients.
 - A node's `pulse` fades its opacity in a loop (`PulseOpacity`).
+- A row with `wrap` renders as a `Wrap`: children keep their design size
+  and break onto new lines.
 - A dialog anchored to its trigger opens as a popover next to the node that
   ran the action, flipping to the other side when it doesn't fit and kept
   inside the safe area (`CanvasSizing.content`).
