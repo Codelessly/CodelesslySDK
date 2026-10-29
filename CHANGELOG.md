@@ -1,3 +1,46 @@
+## Unreleased
+
+### Nodes
+
+- Renders `gauge` and `chart` nodes (`PassiveGaugeWidget`,
+  `PassiveChartWidget`); taps on a chart select a category and fire its
+  `changed` trigger with the index.
+- Repeating and mirrored linear, radial and sweep gradients.
+- A node's `pulse` fades its opacity in a loop (`PulseOpacity`).
+- A row with `wrap` renders as a `Wrap`: children keep their design size
+  and break onto new lines.
+- A dialog anchored to its trigger opens as a popover next to the node that
+  ran the action, flipping to the other side when it doesn't fit and kept
+  inside the safe area (`CanvasSizing.content`).
+- A text field's `obscureText` can be bound to a variable or condition, and a
+  one-line field of fixed height obscures its text.
+- Toasts take an accent edge, corner radius and max width
+  (`ShowToastAction.accentColor`, `cornerRadius`, `maxWidth`).
+- Rectangular slider thumbs (`RectSliderThumbShape`) with a border and a
+  grip line.
+- `pointerDown` and `pointerUp` reactions fire (a cancelled pointer counts
+  as up), so a press and hold can start on down and stop on release.
+- A dialog whose canvas holds a responsive layout fills the screen and
+  shows the layout for the screen's width, not the canvas's design width.
+- On the design canvas, a formula that yields empty text shows nothing
+  instead of a placeholder.
+
+### Variables and formulas
+
+- Computed variables read typed formulas in bindings, formulas and conditions.
+  Results are cached until a variable they read changes, and bindings
+  update when one does. Cycles stop; SetVariable leaves them alone.
+- Formula functions `obj`, `set`, `get`, `take`, `skip`, `indexOf`,
+  `split`, `pad`, `concat`, `range` and `thousands` complement the existing
+  `duration` function (which measures seconds).
+
+### Design canvas
+
+- `VariablePreview.resolve(node, context)` gives a list row's own item to
+  the editor's resolver, so each row previews its data.
+- Gauge, chart, progress bar and dropdown widgets take `scopedValues`, so a
+  design canvas can show their bindings with its variable defaults.
+
 ## 8.4.0
 
 Requires codelessly_api 6.3.0.

@@ -273,17 +273,28 @@ class PropertyValueDelegate {
     VariableData variable,
     ScopedValues scopedValues,
   ) {
-    final String? expression = variable.formula.trim().isNotEmpty
-        ? variable.formula
-        : FormulaEvaluator.exactExpression(variable.value);
+    final String? expression = computedExpressionOf(variable);
     if (expression == null) return variable.getValue();
     if (_computedDepth >= 16 || !_computing.add(variable.name)) return null;
     _computedDepth++;
     try {
+      // Cache only formulas whose inputs are immutable variables, not row,
+      // parent, screen, or other predefined values that vary with scope.
+      final List<Object?>? inputs = _computedInputs(expression, scopedValues);
+      final _ComputedResult? cached = _computedCache[variable.id];
+      if (inputs != null &&
+          cached != null &&
+          identical(cached.variable, variable) &&
+          _sameInputs(cached.inputs, inputs)) {
+        return cached.value;
+      }
       final Object? value = evaluateFormula(
         expression,
         scopedValues: scopedValues,
       );
+      if (inputs != null) {
+        _computedCache[variable.id] = _ComputedResult(variable, inputs, value);
+      }
       return value;
     } finally {
       _computedDepth--;
@@ -393,6 +404,50 @@ class PropertyValueDelegate {
     }
 
     return value?.typedValue<R>();
+  }
+
+  static final Map<String, _ComputedResult> _computedCache = {};
+
+  /// The variables [expression] reads, or null when it reads predefined
+  /// values (item, index, screen, ...) that change from place to place.
+  static List<Object?>? _computedInputs(
+    String expression,
+    ScopedValues scopedValues,
+  ) => _inputsOf(expression, scopedValues.variables, <String>{});
+
+  static List<Object?>? _inputsOf(
+    String expression,
+    Map<String, VariableData> variables,
+    Set<String> seen,
+  ) {
+    final List<Object?> inputs = [];
+    for (final String path in FormulaEvaluator.referencedPaths(expression)) {
+      final VariableMatch? match = VariableMatch.parse(
+        path.wrapWithVariableSyntax(),
+      );
+      if (match == null) continue;
+      if (match.isPredefinedVariable) return null;
+      final VariableData? input = variables[match.name];
+      inputs.add(input);
+      // A computed input changes when its own inputs do, so they count too;
+      // and if it reads predefined values, so does this formula.
+      if (input != null && input.isComputed && seen.add(input.name)) {
+        final String? inner = computedExpressionOf(input);
+        if (inner == null) continue;
+        final List<Object?>? nested = _inputsOf(inner, variables, seen);
+        if (nested == null) return null;
+        inputs.addAll(nested);
+      }
+    }
+    return inputs;
+  }
+
+  static bool _sameInputs(List<Object?> a, List<Object?> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (!identical(a[i], b[i])) return false;
+    }
+    return true;
   }
 
   static Object? _retrieveVariableValue(
@@ -1202,4 +1257,13 @@ String formatTimeAgo(DateTime date, {DateTime? now}) {
     return '${diff.inDays} ${diff.inDays == 1 ? 'day' : 'days'} ago';
   }
   return formatDate(date);
+}
+
+/// A computed variable's last result and what it was computed from.
+class _ComputedResult {
+  final VariableData variable;
+  final List<Object?> inputs;
+  final Object? value;
+
+  const _ComputedResult(this.variable, this.inputs, this.value);
 }

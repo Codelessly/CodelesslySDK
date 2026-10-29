@@ -289,9 +289,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
     final ScopedValues scopedValues = ScopedValues.of(context);
 
-    // Bindable: a variable, condition or set-property action can change them
-    // (e.g. a show-password toggle).
+    // Resolve variable bindings as well as values set by actions.
     bool flag(String property, bool fallback) =>
+        context.getNodeValue(node.id, property) ??
         PropertyValueDelegate.getPropertyValue<bool>(
           node,
           property,
@@ -322,12 +322,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         !widget.settings.isPreview &&
         (widget.autofocus ?? properties.autoFocus);
 
-    // A field with a set height fills it. A one-line field stays one line
-    // (so it can obscure its text and Enter submits it) and fills the height
-    // through its decoration; only multi-line fields expand.
+    // Keep a one-line field one line even when it fills a fixed height.
     final bool fillsHeight = !widget.node.isVerticalWrap;
     final bool oneLine =
         properties.maxLines == 1 && (properties.minLines ?? 1) <= 1;
+    final bool obscure = obscureText && oneLine;
     final bool expands = fillsHeight && !oneLine;
     final (int? maxLines, int? minLines) = resolveTextFieldLines(
       maxLines: properties.maxLines,
@@ -349,7 +348,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       enableInteractiveSelection: properties.enableInteractiveSelection,
       enabled: enabled,
       controller: controller,
-      obscureText: maxLines == 1 && obscureText,
+      obscureText: obscure,
       readOnly: readOnly,
       showCursor: showCursor,
       keyboardType: keyboardType,

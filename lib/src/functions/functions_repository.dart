@@ -16,6 +16,7 @@ import '../../codelessly_sdk.dart';
 import '../logging/stat_tracker.dart';
 import '../ui/codelessly_dialog_widget.dart';
 import '../ui/layout_presentation_route.dart';
+import '../ui/codelessly_popover.dart';
 import 'action_chain.dart';
 import 'app_auth.dart';
 import 'cloud_files.dart';
@@ -708,9 +709,10 @@ class FunctionsRepository {
       insets: action.insets.flutterEdgeInsets,
       maxHeightFactor: action.maxHeightFactor,
       showDragHandle: action.showDragHandle,
-      placement: action.placement.name,
+      placement: action.placement,
       anchorToTrigger: action.anchor == DialogAnchor.trigger,
       anchorGap: action.anchorGap,
+      anchorOffset: action.anchorOffset,
       fullHeight: action.fullHeight,
     );
     if (result case final Map values when values.isNotEmpty) {
@@ -769,8 +771,8 @@ class FunctionsRepository {
     return model.resolveLayoutId(canvasId);
   }
 
-  /// Shows the canvas [canvasId] as a dialog, sheet or popover and completes
-  /// with the params passed by the action that closed it, or null on dismissal.
+  /// Shows canvas [canvasId] as a dialog, sheet or placed popover and returns
+  /// the closing action's params, or null when dismissed.
   static Future<Object?> showLayoutDialog(
     BuildContext context, {
     required String canvasId,
@@ -784,9 +786,10 @@ class FunctionsRepository {
     EdgeInsets insets = EdgeInsets.zero,
     double? maxHeightFactor,
     bool showDragHandle = false,
-    String? placement,
+    DialogPlacement placement = DialogPlacement.belowStart,
     bool anchorToTrigger = false,
     double anchorGap = 6,
+    double anchorOffset = 0,
     bool fullHeight = false,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
@@ -834,17 +837,29 @@ class FunctionsRepository {
     final DialogPresentation effectivePresentation =
         presentation == DialogPresentation.dialog
         ? switch (placement) {
-            'bottomSheet' => DialogPresentation.bottomSheet,
-            'adaptive' => DialogPresentation.adaptive,
+            DialogPlacement.bottomSheet => DialogPresentation.bottomSheet,
+            DialogPlacement.adaptive => DialogPresentation.adaptive,
             _ => presentation,
           }
         : presentation;
-    final Rect? anchor =
-        presentation == DialogPresentation.dialog &&
-            (anchorToTrigger || placement == 'anchored')
-        ? anchorRectOf(context)
+    final bool wantsAnchor =
+        effectivePresentation == DialogPresentation.dialog &&
+        (anchorToTrigger || placement == DialogPlacement.anchored);
+    final Rect? anchorRect = wantsAnchor
+        ? CodelesslyPopover.anchorRectOf(
+            context,
+            Navigator.of(context, rootNavigator: false),
+          )
         : null;
-    final Object? result = anchor == null
+    if (wantsAnchor && anchorRect == null) {
+      DebugLogger.instance.printInfo(
+        'The trigger of dialog [$canvasId] has no laid out box; showing '
+        'the dialog centered.',
+        name: name,
+      );
+    }
+    final RouteSettings routeSettings = RouteSettings(arguments: parsedParams);
+    final Object? result = anchorRect == null
         ? await presentCanvas<Object?>(
             context,
             presentation: effectivePresentation,
@@ -863,7 +878,7 @@ class FunctionsRepository {
             anchor: effectivePresentation == DialogPresentation.popover
                 ? anchorRectOf(context)
                 : null,
-            routeSettings: RouteSettings(arguments: parsedParams),
+            routeSettings: routeSettings,
             builder: (context) => ActionChainOpener(
               openerHosts: openerHosts,
               child: CodelesslyWidget(
@@ -872,34 +887,28 @@ class FunctionsRepository {
               ),
             ),
           )
-        : await showGeneralDialog<Object?>(
+        : await CodelesslyPopover.show<Object?>(
             context: context,
-            useRootNavigator: false,
+            anchorRect: anchorRect,
+            placement: placement == DialogPlacement.anchored
+                ? DialogPlacement.belowStart
+                : placement,
+            gap: anchorGap,
+            offset: anchorOffset,
             barrierDismissible: barrierDismissible,
-            barrierLabel: MaterialLocalizations.of(context)
-                .modalBarrierDismissLabel,
-            barrierColor: barrierColor ?? Colors.transparent,
-            transitionDuration: const Duration(milliseconds: 120),
-            routeSettings: RouteSettings(arguments: parsedParams),
-            pageBuilder: (context, _, _) => CodelesslyAnchoredPlacement(
-              anchor: anchor,
-              gap: anchorGap,
-              child: ActionChainOpener(
-                openerHosts: openerHosts,
-                child: CanvasSizingScope(
-                  sizing: CanvasSizing.design,
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: CodelesslyWidget(
-                      codelessly: codelessly,
-                      layoutID: layoutId,
-                    ),
-                  ),
+            barrierColor: barrierColor,
+            routeSettings: routeSettings,
+            builder: (context) => ActionChainOpener(
+              openerHosts: openerHosts,
+              child: CodelesslyDialogWidget(
+                showCloseButton: showCloseButton,
+                anchored: true,
+                builder: (context) => CodelesslyWidget(
+                  codelessly: codelessly,
+                  layoutID: layoutId,
                 ),
               ),
             ),
-            transitionBuilder: (context, animation, _, child) =>
-                FadeTransition(opacity: animation, child: child),
           );
     if (context.mounted) {
       codelessly.notifyNavigationListeners(
