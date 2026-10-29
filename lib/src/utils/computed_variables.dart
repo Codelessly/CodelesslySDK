@@ -23,9 +23,12 @@ import '../../codelessly_sdk.dart';
 ///    [CodelesslyContext.updateVariable] leave them unchanged, so their
 ///    formula isn't overwritten by a value.
 abstract final class ComputedVariables {
-  /// [variable]'s formula, or null for a normal variable.
-  static String? formulaOf(VariableData variable) =>
-      variable.isComputed ? variable.value.trim() : null;
+  /// [variable]'s separate expression, or its legacy whole-formula value.
+  /// A separate formula takes precedence over any default value.
+  static String? formulaOf(VariableData variable) {
+    if (variable.formula.trim().isNotEmpty) return variable.formula.trim();
+    return variable.isComputed ? variable.value.trim() : null;
+  }
 
   static final RegExp _exactPath = RegExp(r'^\$\{([^{}]+)\}$');
 
@@ -216,7 +219,9 @@ abstract final class ComputedVariables {
     _ => result.toString(),
   };
 
-  /// A copy of [variable] of the same class with [type] and [value].
+  /// A concrete preview snapshot of [variable] with [type] and [value].
+  /// Do not copy its formula: a resolved result must be readable via getValue,
+  /// while the original variable (and its separate formula) stays untouched.
   /// [VariableData.copyWith] keeps the old value when the new one doesn't
   /// sanitize, so an empty result would not clear it.
   static VariableData _rebuild(
