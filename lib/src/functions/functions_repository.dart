@@ -694,10 +694,23 @@ class FunctionsRepository {
       sheetWidth: action.sheetWidth,
       maxHeightFactor: action.maxHeightFactor,
       showDragHandle: action.showDragHandle,
+      placement: action.placement.name,
+      anchorToTrigger: action.anchor == DialogAnchor.trigger,
+      anchorGap: action.anchorGap,
     );
     if (result case final Map values when values.isNotEmpty) {
       ActionChain.setResult(values);
     }
+  }
+
+  /// The global rectangle of the widget [context] belongs to, if it is laid
+  /// out.
+  static Rect? _globalRectOf(BuildContext context) {
+    final RenderObject? box = context.mounted
+        ? context.findRenderObject()
+        : null;
+    if (box is! RenderBox || !box.hasSize || !box.attached) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
   }
 
   /// The id of the published layout that holds the canvas [canvasId], if any.
@@ -722,6 +735,9 @@ class FunctionsRepository {
     double? sheetWidth,
     double maxHeightFactor = 1,
     bool showDragHandle = false,
+    String? placement,
+    bool anchorToTrigger = false,
+    double anchorGap = 6,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -769,23 +785,69 @@ class FunctionsRepository {
         .publishModel
         ?.layouts[layoutId]
         ?.canvases[canvasId]?[canvasId];
-    final Object? result = await presentCanvas<Object?>(
-      context,
-      presentation: presentation,
-      alignment: alignment,
-      barrierDismissible: barrierDismissible,
-      barrierColor: barrierColor,
-      showCloseButton: showCloseButton,
-      sheetWidth: sheetWidth,
-      designWidth: canvas?.basicBoxLocal.width,
-      maxHeightFactor: maxHeightFactor,
-      showDragHandle: showDragHandle,
-      routeSettings: RouteSettings(arguments: parsedParams),
-      builder: (context) => ActionChainOpener(
-        openerHosts: openerHosts,
-        child: CodelesslyWidget(codelessly: codelessly, layoutID: layoutId),
-      ),
-    );
+    final DialogPresentation effectivePresentation =
+        presentation == DialogPresentation.dialog
+        ? switch (placement) {
+            'bottomSheet' => DialogPresentation.bottomSheet,
+            'adaptive' => DialogPresentation.adaptive,
+            _ => presentation,
+          }
+        : presentation;
+    final Rect? anchor =
+        presentation == DialogPresentation.dialog &&
+                (anchorToTrigger || placement == 'anchored')
+        ? _globalRectOf(context)
+        : null;
+    final Object? result = anchor == null
+        ? await presentCanvas<Object?>(
+            context,
+            presentation: effectivePresentation,
+            alignment: alignment,
+            barrierDismissible: barrierDismissible,
+            barrierColor: barrierColor,
+            showCloseButton: showCloseButton,
+            sheetWidth: sheetWidth,
+            designWidth: canvas?.basicBoxLocal.width,
+            maxHeightFactor: maxHeightFactor,
+            showDragHandle: showDragHandle,
+            routeSettings: RouteSettings(arguments: parsedParams),
+            builder: (context) => ActionChainOpener(
+              openerHosts: openerHosts,
+              child: CodelesslyWidget(
+                codelessly: codelessly,
+                layoutID: layoutId,
+              ),
+            ),
+          )
+        : await showGeneralDialog<Object?>(
+            context: context,
+            useRootNavigator: false,
+            barrierDismissible: barrierDismissible,
+            barrierLabel: MaterialLocalizations.of(context)
+                .modalBarrierDismissLabel,
+            barrierColor: barrierColor ?? Colors.transparent,
+            transitionDuration: const Duration(milliseconds: 120),
+            routeSettings: RouteSettings(arguments: parsedParams),
+            pageBuilder: (context, _, _) => CodelesslyAnchoredPlacement(
+              anchor: anchor,
+              gap: anchorGap,
+              child: ActionChainOpener(
+                openerHosts: openerHosts,
+                child: CanvasSizingScope(
+                  sizing: CanvasSizing.design,
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: CodelesslyWidget(
+                      codelessly: codelessly,
+                      layoutID: layoutId,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            transitionBuilder: (context, animation, _, child) =>
+                FadeTransition(opacity: animation, child: child),
+          );
     if (context.mounted) {
       codelessly.notifyNavigationListeners(
         context,

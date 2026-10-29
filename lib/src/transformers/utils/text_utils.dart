@@ -219,8 +219,22 @@ class TextUtils {
       hasMissingFont: hasMissingFont,
     );
 
+    // A `textColor` binding or condition recolors every span.
+    final Color? textColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+      textNode,
+      'textColor',
+      scopedValues: ScopedValues.of(
+        context,
+        variablesOverrides: variablesOverrides,
+      ),
+    )?.toFlutterColor();
+
     return Text.rich(
-      TextSpan(children: spans),
+      TextSpan(
+        children: textColor == null
+            ? spans
+            : [for (final span in spans) recolorSpan(span, textColor)],
+      ),
       textAlign: textNode.textAlignHorizontal.toFlutter(),
       maxLines: textNode.maxLines,
       overflow: textNode.overflow.flutterOverflow,
@@ -300,6 +314,22 @@ class TextUtils {
       ),
     )?.toFlutterColor();
   }
+
+  /// [span] and its children drawn in [color].
+  static TextSpan recolorSpan(TextSpan span, Color color) => TextSpan(
+    text: span.text,
+    style: (span.style ?? const TextStyle()).copyWith(color: color),
+    recognizer: span.recognizer,
+    semanticsLabel: span.semanticsLabel,
+    mouseCursor: span.mouseCursor,
+    onEnter: span.onEnter,
+    onExit: span.onExit,
+    locale: span.locale,
+    spellOut: span.spellOut,
+    children: span.children
+        ?.map((child) => child is TextSpan ? recolorSpan(child, color) : child)
+        .toList(),
+  );
 
   static Color? retrievePropColor(TextProp prop) => prop.fills
       .firstWhereOrNull((fill) => fill.color != null)
