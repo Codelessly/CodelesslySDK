@@ -1,3 +1,4 @@
+import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
@@ -20,6 +21,10 @@ class CodelesslyDialogWidget extends StatelessWidget {
   /// Space kept between the dialog and the screen edges.
   final EdgeInsets insets;
 
+  /// Reserve the conventional 24px margin for a design-sized dialog.
+  /// Off by default so aligned and full-screen canvases can reach the edge.
+  final bool useDefaultInset;
+
   /// The maximum share of screen height, when set.
   final double? maxHeightFactor;
 
@@ -31,6 +36,7 @@ class CodelesslyDialogWidget extends StatelessWidget {
     this.hugHeight = false,
     this.sizing = CanvasSizing.design,
     this.insets = EdgeInsets.zero,
+    this.useDefaultInset = false,
     this.maxHeightFactor,
   });
 
@@ -43,13 +49,19 @@ class CodelesslyDialogWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Responsive layouts can follow the screen even in a design-sized
-    // dialog. Empty transparent areas let taps reach the dismissible barrier.
-    return CanvasSizingScope(
-      sizing: sizing,
-      child: TapThroughScope(child: Builder(builder: _buildDialog)),
+    // Dialog content uses the screen breakpoint even when its canvas is narrow.
+    // Empty transparent areas let taps reach the dismissible barrier.
+    return BreakpointWidthScope(
+      width: MediaQuery.sizeOf(context).width,
+      child: CanvasSizingScope(
+        sizing: sizing,
+        child: TapThroughScope(child: Builder(builder: _buildDialog)),
+      ),
     );
   }
+
+  /// Space reserved at screen edges for a design-sized dialog.
+  static const double inset = 24;
 
   /// A sheet sits on the bottom edge wherever the action places a dialog.
   AlignmentGeometry get _alignment =>
@@ -63,7 +75,9 @@ class CodelesslyDialogWidget extends StatelessWidget {
         sizing == CanvasSizing.sheet ||
         sizing == CanvasSizing.fillWidth;
     return Padding(
-      padding: insets,
+      padding: sizing == CanvasSizing.design && useDefaultInset
+          ? insets + const EdgeInsets.all(inset)
+          : insets,
       child: Align(
         alignment: _alignment,
         heightFactor: sheetHeight ? 1 : null,
@@ -136,6 +150,84 @@ class CodelesslySheetPlacement extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Lays out a canvas shown by a show-dialog action as a bottom sheet or a
+/// popover (see [DialogPresentation]).
+abstract final class DialogPresenter {
+  /// Screens narrower than this show an adaptive dialog as a bottom sheet.
+  static const double sheetBelowWidth = 600;
+
+  /// A sheet is at most this fraction of the screen height.
+  static const double sheetMaxHeightFactor = 0.94;
+
+  /// Gap between a popover and the node it is anchored to, and from the
+  /// screen edges.
+  static const double popoverGap = 6;
+
+  /// The presentation [presentation] takes on a screen of [screen] size:
+  /// adaptive becomes a sheet on phones and a dialog elsewhere.
+  static DialogPresentation resolve(
+    DialogPresentation presentation,
+    Size screen,
+  ) => switch (presentation) {
+    DialogPresentation.adaptive =>
+      screen.width < sheetBelowWidth
+          ? DialogPresentation.bottomSheet
+          : DialogPresentation.dialog,
+    _ => presentation,
+  };
+
+  /// The global rect of the widget [context] belongs to, if laid out.
+  static Rect? anchorOf(BuildContext context) {
+    if (!context.mounted) return null;
+    final RenderObject? box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize || !box.attached) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
+  }
+
+  /// A sheet: the canvas spans the screen width and keeps its design height,
+  /// up to [sheetMaxHeightFactor] of the screen.
+  static Widget sheet(BuildContext context, {required WidgetBuilder builder}) {
+    final Size screen = MediaQuery.sizeOf(context);
+    return BreakpointWidthScope(
+      width: screen.width,
+      child: CanvasSizingScope(
+        sizing: CanvasSizing.design,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: screen.width,
+            maxWidth: screen.width,
+            maxHeight: screen.height * sheetMaxHeightFactor,
+          ),
+          child: Builder(builder: builder),
+        ),
+      ),
+    );
+  }
+
+  /// A popover: the canvas at its design size, below [anchor] (above it
+  /// when it doesn't fit below), left-aligned to it and kept on screen.
+  /// Without an anchor it is centered.
+  static Widget popover({
+    required Rect? anchor,
+    required WidgetBuilder builder,
+  }) {
+    final Widget child = Builder(
+      builder: (context) => BreakpointWidthScope(
+        width: MediaQuery.sizeOf(context).width,
+        child: CanvasSizingScope(
+          sizing: CanvasSizing.design,
+          child: Builder(builder: builder),
+        ),
+      ),
+    );
+    if (anchor == null) return Center(child: child);
+    return CustomSingleChildLayout(
+      delegate: PopoverLayoutDelegate(anchor: anchor, gap: popoverGap),
+      child: child,
     );
   }
 }
@@ -251,6 +343,46 @@ class _AnchorDelegate extends SingleChildLayoutDelegate {
   @override
   bool shouldRelayout(_AnchorDelegate old) =>
       old.anchor != anchor || old.gap != gap;
+}
+
+/// Places a popover of any size next to [anchor] within the screen.
+class PopoverLayoutDelegate extends SingleChildLayoutDelegate {
+  /// The node the popover belongs to, in global coordinates.
+  final Rect anchor;
+
+  /// Space between the popover and [anchor] and the screen edges.
+  final double gap;
+
+  /// Creates a [PopoverLayoutDelegate].
+  const PopoverLayoutDelegate({required this.anchor, required this.gap});
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      BoxConstraints.loose(constraints.biggest).deflate(EdgeInsets.all(gap));
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final double below = anchor.bottom + gap;
+    final double above = anchor.top - gap - childSize.height;
+    final double top = below + childSize.height <= size.height - gap
+        ? below
+        : (above >= gap ? above : (size.height - childSize.height) / 2);
+    final double left = anchor.left.clamp(
+      gap,
+      (size.width - childSize.width - gap).clamp(gap, double.infinity),
+    );
+    return Offset(
+      left,
+      top.clamp(
+        gap,
+        (size.height - childSize.height - gap).clamp(gap, double.infinity),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRelayout(PopoverLayoutDelegate oldDelegate) =>
+      oldDelegate.anchor != anchor || oldDelegate.gap != gap;
 }
 
 class _PopoverLayout extends SingleChildLayoutDelegate {

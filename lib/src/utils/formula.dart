@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'formula_clock.dart';
+
 /// The body of a formula: text and quoted strings, with braces only in
 /// balanced pairs nested up to [depth] deep, such as the object literal in
 /// `merge(r, {tags: {a: 1}})`. Braces inside quoted strings don't count.
@@ -79,6 +81,7 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    reverse (these also work on text), range(end) or range(start, end,
 ///    step), and indexOf(list, value or predicate), which is -1 when nothing
 ///    matches.
+///  - text helpers: padLeft, replace, substring and split.
 ///  - record helpers: unset, prepend, updateWhere, removeWhere, findIndex
 ///    and newId; set also takes a list and an index, and indexOf and slice
 ///    also take text. Like the list edits they return new values.
@@ -86,7 +89,9 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///  - date functions: now, today, wallTime, parseDate, formatDate,
 ///    addMinutes, addHours,
 ///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
-///    hour, minute, weekday and daysInMonth. Dates are ISO 8601 text such as
+///    hour, minute, second, weekday and daysInMonth, plus addSeconds,
+///    diffSeconds and formatDuration. Formulas using now() or today() rebuild
+///    every second while listened to. Dates are ISO 8601 text such as
 ///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
 ///    milliseconds or a Firestore timestamp.
 ///  - date-aware comparisons: `== != < <= > >=` compare as dates when one
@@ -131,6 +136,24 @@ class FormulaEvaluator {
     node.collectPaths(paths);
     return paths;
   }
+
+  /// Whether [expression] reads the clock (`now()` or `today()`), so its
+  /// value changes as time passes.
+  static bool readsClock(String expression) =>
+      _clockCall.hasMatch(expression.replaceAll(_quoted, ''));
+
+  /// Whether any formula in [text] reads the clock.
+  static bool textReadsClock(String text) => formulaRegex
+      .allMatches(text)
+      .any((match) => readsClock(match.namedGroup('expr')!));
+
+  static final RegExp _clockCall = RegExp(r'\b(now|today)\s*\(');
+
+  static final RegExp _quoted = RegExp(
+    r'"[^"]*"'
+    '|'
+    r"'[^']*'",
+  );
 
   /// The variable paths read by every formula in [text].
   static Set<String> referencedPathsInText(String text) => {
@@ -617,6 +640,21 @@ class FormulaEvaluator {
       'formatDate(now(), "EEE, MMM d · h:mm a") → Wed, Oct 21 · 2:30 PM',
     ),
     FormulaFunctionDoc(
+      'addSeconds',
+      'addSeconds(date, seconds)',
+      'addSeconds(start, 90)',
+    ),
+    FormulaFunctionDoc(
+      'diffSeconds',
+      'diffSeconds(from, to)',
+      'diffSeconds(startedAt, now()) → 240',
+    ),
+    FormulaFunctionDoc(
+      'formatDuration',
+      'formatDuration(seconds, pattern)',
+      "formatDuration(6480, 'h:mm:ss') → 1:48:00 · 'mm:ss' → 108:00 · 'compact' → 1h 48m",
+    ),
+    FormulaFunctionDoc(
       'addMinutes',
       'addMinutes(date, minutes)',
       'addMinutes(start, 90)',
@@ -655,6 +693,11 @@ class FormulaEvaluator {
       'minute',
       'minute(date)',
       'minute("2026-10-21T14:30") → 30',
+    ),
+    FormulaFunctionDoc(
+      'second',
+      'second(date)',
+      'second("2026-10-21T14:30:15") → 15',
     ),
     FormulaFunctionDoc(
       'weekday',
@@ -1277,6 +1320,7 @@ DateTime? _shift(
   int days = 0,
   int hours = 0,
   int minutes = 0,
+  int seconds = 0,
 }) {
   final DateTime? date = _toDate(value);
   if (date == null) return null;
@@ -1293,7 +1337,7 @@ DateTime? _shift(
     day + days,
     date.hour + hours,
     date.minute + minutes,
-    date.second,
+    date.second + seconds,
     date.millisecond,
     date.microsecond,
   );
@@ -1321,6 +1365,24 @@ Duration? _difference(Object? from, Object? to) {
 int _intArg(Object? value) {
   final num n = _num(value);
   return n.isFinite ? n.toInt() : 0;
+}
+
+/// [seconds] as a duration: `h:mm:ss` (1:48:00), `mm:ss` (04:00, minutes
+/// keep counting past 59), `m:ss` (4:00) or, by default, `compact` (1h 48m,
+/// 25m, 40s). Negative durations read as their size.
+String? _formatDuration(Object? seconds, Object? pattern) {
+  final num? value = _toNum(seconds);
+  if (value == null || !value.isFinite) return null;
+  final int total = value.abs().floor();
+  final int h = total ~/ 3600, m = (total % 3600) ~/ 60, s = total % 60;
+  String two(int n) => n.toString().padLeft(2, '0');
+  return switch (pattern?.toString().trim()) {
+    'h:mm:ss' => '$h:${two(m)}:${two(s)}',
+    'mm:ss' => '${two(total ~/ 60)}:${two(s)}',
+    'm:ss' => '${total ~/ 60}:${two(s)}',
+    _ =>
+      h > 0 ? (m == 0 ? '${h}h' : '${h}h ${m}m') : (m > 0 ? '${m}m' : '${s}s'),
+  };
 }
 
 const List<String> _monthNames = [
@@ -1528,19 +1590,6 @@ Duration? _offset(Object? value) {
   }
   final int minutes = int.parse(m[2]!) * 60 + int.parse(m[3] ?? '0');
   return Duration(minutes: m[1] == '-' ? -minutes : minutes);
-}
-
-/// The instant formulas take as now (`now()`, `today()`).
-///
-/// A host can pin it to show an app at a given moment, for previews and
-/// reproducible screenshots of date-dependent screens (the Codelessly site
-/// pins it from a `?now=` URL parameter).
-abstract final class FormulaClock {
-  /// The pinned instant, or null for the device clock.
-  static DateTime? pinned;
-
-  /// Now: [pinned], or the device clock.
-  static DateTime now() => pinned ?? DateTime.now();
 }
 
 /// The wall-clock time now at the UTC [offset] (see [_offset]), or local
@@ -1981,6 +2030,10 @@ final Map<String, _Function> _functions = {
   'addDays': (a) => _dateText(_shift(_arg(a, 0), days: _intArg(_arg(a, 1)))),
   'addMonths': (a) =>
       _dateText(_shift(_arg(a, 0), months: _intArg(_arg(a, 1)))),
+  'addSeconds': (a) =>
+      _dateText(_shift(_arg(a, 0), seconds: _intArg(_arg(a, 1)))),
+  'diffSeconds': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inSeconds,
+  'formatDuration': (a) => _formatDuration(_arg(a, 0), _arg(a, 1)),
   'diffMinutes': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inMinutes,
   'diffHours': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inHours,
   'diffDays': (a) => _diffDays(_arg(a, 0), _arg(a, 1)),
@@ -1989,6 +2042,7 @@ final Map<String, _Function> _functions = {
   'day': (a) => _toDate(_arg(a, 0))?.day,
   'hour': (a) => _toDate(_arg(a, 0))?.hour,
   'minute': (a) => _toDate(_arg(a, 0))?.minute,
+  'second': (a) => _toDate(_arg(a, 0))?.second,
   'weekday': (a) => _toDate(_arg(a, 0))?.weekday,
   'daysInMonth': (a) {
     final DateTime? date = _toDate(_arg(a, 0));

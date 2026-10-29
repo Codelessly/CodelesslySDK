@@ -589,6 +589,72 @@ void main() {
     });
   });
 
+  testWidgets('a hugging column\'s min size includes its padding', (
+    tester,
+  ) async {
+    final label = rect('label', '', width: 60, height: 30);
+    final tile = RowColumnNode(
+      id: 'tile',
+      name: 'tile',
+      basicBoxLocal: NodeBox(0, 0, 120, 157),
+      children: const ['label'],
+      rowColumnType: RowColumnType.column,
+      horizontalFit: SizeFit.shrinkWrap,
+      verticalFit: SizeFit.shrinkWrap,
+      padding: const EdgeInsetsModel.all(17.5),
+      constraints: const BoxConstraintsModel(minWidth: 120, minHeight: 157),
+    );
+    label.parentID = 'tile';
+    final column = flex(
+      'column',
+      kRootNode,
+      [tile],
+      type: RowColumnType.column,
+      width: 300,
+      height: 400,
+    );
+    await everywhere(tester, column, [tile, label], (sizes, screen, host) {
+      // Like the editor, the min height is the tile's whole box: content
+      // and padding together, not the content alone.
+      expect(sizes['tile'], const Size(120, 157), reason: '$host $screen');
+    });
+  });
+
+  testWidgets('a hugging column grows past its min size to fit content', (
+    tester,
+  ) async {
+    final content = rect('content', '', width: 100, height: 122);
+    final tile = RowColumnNode(
+      id: 'tile',
+      name: 'tile',
+      basicBoxLocal: NodeBox(0, 0, 200, 148),
+      children: const ['content'],
+      rowColumnType: RowColumnType.column,
+      horizontalFit: SizeFit.fixed,
+      verticalFit: SizeFit.shrinkWrap,
+      padding: const EdgeInsetsModel.all(17.5),
+      constraints: const BoxConstraintsModel(minHeight: 148),
+    );
+    content.parentID = 'tile';
+    final column = flex(
+      'column',
+      kRootNode,
+      [tile],
+      type: RowColumnType.column,
+      width: 300,
+      height: 400,
+    );
+    await everywhere(tester, column, [tile, content], (sizes, screen, host) {
+      // 122 + 35 padding = 157: more than the min, so the tile grows to it.
+      expect(sizes['tile'], const Size(200, 157), reason: '$host $screen');
+      expect(
+        tester.getTopLeft(rectOf('content')).dy -
+            tester.getTopLeft(rectOf('tile')).dy,
+        17.5,
+      );
+    });
+  });
+
   testWidgets('fixed children wider than the row shrink to fit it (B1)', (
     tester,
   ) async {

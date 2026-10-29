@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:math' hide log;
 import 'dart:typed_data';
+import 'dart:ui' show lerpDouble;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
@@ -51,6 +52,10 @@ abstract class WidgetNodeTransformerManager
 
   /// Convenience method to handle widget opacity.
   Widget applyWidgetOpacity(BaseNode node, Widget widget) {
+    final PulseModel? pulse = node.pulse;
+    if (pulse != null) {
+      widget = NodePulse(pulse: pulse, child: widget);
+    }
     if (node is! BlendMixin) return widget;
     // A node with a transition always has the animated wrapper, so a change
     // of its opacity (to fully opaque too) tweens instead of jumping.
@@ -59,6 +64,13 @@ abstract class WidgetNodeTransformerManager
         opacity: node.opacity.clamp(0.0, 1.0),
         duration: transition.duration,
         curve: transition.curve.flutterCurve,
+        child: widget,
+      );
+    }
+    if (node.transitionMs > 0) {
+      return AnimatedOpacity(
+        opacity: node.opacity.clamp(0.0, 1.0),
+        duration: Duration(milliseconds: node.transitionMs),
         child: widget,
       );
     }
@@ -158,12 +170,20 @@ abstract class WidgetNodeTransformerManager
     // Get node's values.
     final List<ValueModel> nodeValues =
         payload.nodeValues[node.id]?.value ?? [];
-    // Get local rotation value if it exists, else use node's rotation value.
-    final int rotationDegrees =
+    // A value set by an action wins, then a bound variable or formula (a
+    // dial's hand following the clock), then the node's own rotation.
+    final num rotationDegrees =
         nodeValues
             .firstWhereOrNull((value) => value.name == 'rotationDegrees')
             ?.value
             .typedValue<int>() ??
+        (node.variables.containsKey('rotationDegrees')
+            ? PropertyValueDelegate.getPropertyValue<double>(
+                node,
+                'rotationDegrees',
+                scopedValues: ScopedValues.of(context),
+              )
+            : null) ??
         node.rotationDegrees;
     if (rotationDegrees == 0) return widget;
     return widget = Transform.rotate(
@@ -229,6 +249,27 @@ abstract class WidgetNodeTransformerManager
     ScopedValues? scopedValues,
     bool animate = true,
   }) {
+    final Object? boundScale = node.variables.containsKey('drawScale')
+        ? PropertyValueDelegate.getPropertyValue<Object>(
+            node,
+            'drawScale',
+            scopedValues: scopedValues ?? ScopedValues.of(context),
+          )
+        : null;
+    final double scale = switch (boundScale) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()) ?? node.drawScale,
+      _ => node.drawScale,
+    };
+    if (scale.isFinite && scale != 1) {
+      widget = animate && node.transitionMs > 0
+          ? AnimatedScale(
+              scale: scale,
+              duration: Duration(milliseconds: node.transitionMs),
+              child: widget,
+            )
+          : Transform.scale(scale: scale, child: widget);
+    }
     if (node.motion == null &&
         !node.variables.keys.any((key) => key.startsWith('motion.'))) {
       return widget;
@@ -460,14 +501,65 @@ abstract class WidgetNodeTransformerManager
         onDragEnd.isEmpty &&
         onPointerDown.isEmpty &&
         onPointerUp.isEmpty) {
-      return tappable;
+      return _wrapWithPointerReactions(context, node, tappable);
     }
-    return ReactionDragDetector(
-      onDrag: onDrag,
-      onDragEnd: onDragEnd,
-      onPointerDown: onPointerDown,
-      onPointerUp: onPointerUp,
-      child: tappable,
+    return _wrapWithPointerReactions(
+      context,
+      node,
+      ReactionDragDetector(
+        onDrag: onDrag,
+        onDragEnd: onDragEnd,
+        onPointerDown: onPointerDown,
+        onPointerUp: onPointerUp,
+        child: tappable,
+      ),
+    );
+  }
+
+  /// Owns cursor transitions (including hover on entry) for direct reaction
+  /// wrappers as well as full node builds. The outer region handles moves only.
+  Widget _wrapWithPointerReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
+    if (node is! ReactionMixin || node is CanvasNode) return widget;
+    List<Reaction> of(TriggerType type) => (node as ReactionMixin).reactions
+        .where((r) => r.trigger.type == type && r.action.enabled)
+        .toList();
+    final List<Reaction> enter = of(TriggerType.cursorEnter);
+    final List<Reaction> hover = of(TriggerType.hover);
+    final List<Reaction> exit = of(TriggerType.cursorExit);
+    if (enter.isEmpty && hover.isEmpty && exit.isEmpty) return widget;
+    return MouseRegion(
+      opaque: false,
+      hitTestBehavior: HitTestBehavior.translucent,
+      onEnter: enter.isEmpty && hover.isEmpty
+          ? null
+          : (_) {
+              if (enter.isNotEmpty) {
+                FunctionsRepository.triggerAction(
+                  context,
+                  TriggerType.cursorEnter,
+                  reactions: enter,
+                );
+              }
+              if (hover.isNotEmpty) {
+                FunctionsRepository.triggerAction(
+                  context,
+                  TriggerType.hover,
+                  reactions: hover,
+                );
+              }
+            },
+      onExit: exit.isEmpty
+          ? null
+          : (_) => FunctionsRepository.triggerAction(
+              context,
+              TriggerType.cursorExit,
+              reactions: exit,
+            ),
+      child: widget,
     );
   }
 
@@ -637,28 +729,13 @@ abstract class WidgetNodeTransformerManager
         )
         .toList();
 
-    final List<Reaction> onEnter = reactionsOf(TriggerType.cursorEnter);
-    final List<Reaction> onExit = reactionsOf(TriggerType.cursorExit);
     final List<Reaction> onHover = reactionsOf(TriggerType.hover);
-    if (onEnter.isEmpty && onExit.isEmpty && onHover.isEmpty) return widget;
+    if (onHover.isEmpty) return widget;
 
     return MouseRegion(
       opaque: false,
       hitTestBehavior: HitTestBehavior.translucent,
-      onEnter: onEnter.isEmpty
-          ? null
-          : (_) => FunctionsRepository.triggerAction(
-              context,
-              TriggerType.cursorEnter,
-              reactions: onEnter,
-            ),
-      onExit: onExit.isEmpty
-          ? null
-          : (_) => FunctionsRepository.triggerAction(
-              context,
-              TriggerType.cursorExit,
-              reactions: onExit,
-            ),
+      // wrapWithReaction owns entry/exit; this region reports movement only.
       onHover: onHover.isEmpty
           ? null
           : (_) => FunctionsRepository.triggerAction(
@@ -1036,5 +1113,83 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
       );
     }
     return child;
+  }
+}
+
+/// Loops [child]'s opacity and scale as [pulse] describes.
+class NodePulse extends StatefulWidget {
+  const NodePulse({super.key, required this.pulse, required this.child});
+
+  final PulseModel pulse;
+  final Widget child;
+
+  @override
+  State<NodePulse> createState() => _NodePulseState();
+}
+
+class _NodePulseState extends State<NodePulse>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(vsync: this);
+
+  @override
+  void initState() {
+    super.initState();
+    _start();
+  }
+
+  @override
+  void didUpdateWidget(NodePulse oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pulse != widget.pulse) _start();
+  }
+
+  void _start() {
+    _controller
+      ..duration = Duration(
+        milliseconds: max(1, switch (widget.pulse) {
+          MotionPulseModel pulse => pulse.periodMs,
+          PulseModel pulse => pulse.durationMillis,
+        }),
+      )
+      ..repeat(
+        reverse:
+            widget.pulse is! MotionPulseModel ||
+            (widget.pulse as MotionPulseModel).reverse,
+      );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final PulseModel pulse = widget.pulse;
+    return AnimatedBuilder(
+      animation: _controller,
+      child: widget.child,
+      builder: (context, child) {
+        final double t = Curves.easeInOut.transform(_controller.value);
+        if (pulse is! MotionPulseModel) {
+          return Opacity(
+            opacity: lerpDouble(pulse.minOpacity, 1, t)!.clamp(0, 1),
+            child: child,
+          );
+        }
+        return Opacity(
+          opacity: lerpDouble(
+            pulse.opacityFrom,
+            pulse.opacityTo,
+            t,
+          )!.clamp(0, 1),
+          child: Transform.scale(
+            scale: lerpDouble(pulse.scaleFrom, pulse.scaleTo, t)!,
+            child: child,
+          ),
+        );
+      },
+    );
   }
 }
