@@ -56,6 +56,8 @@ class Codelessly {
   static Future<PaywallResult> paywall({
     required BuildContext context,
     required String placement,
+    Uri? fallbackTermsUrl,
+    Uri? fallbackPrivacyUrl,
     Future<PaywallPlacement> Function(String placement)? resolvePlacement,
     PurchaseService? purchaseService,
     List<ProductSlot>? slots,
@@ -98,13 +100,21 @@ class Codelessly {
         if (!context.mounted) {
           return const PaywallResult(PaywallOutcome.cancelled);
         }
-        await Navigator.of(context).push<void>(
-          MaterialPageRoute(
-            builder: (routeContext) => PaywallUnavailableFallback(
-              onClose: () => Navigator.of(routeContext).pop(),
+        final fallbackStore = runtime.purchaseService();
+        try {
+          await Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              builder: (routeContext) => PaywallUnavailableFallback(
+                onClose: () => Navigator.of(routeContext).pop(),
+                restoreService: fallbackStore,
+                termsUrl: fallbackTermsUrl,
+                privacyUrl: fallbackPrivacyUrl,
+              ),
             ),
-          ),
-        );
+          );
+        } finally {
+          await fallbackStore.dispose();
+        }
         return const PaywallResult(
           PaywallOutcome.failed,
           error: 'No cached compliant paywall',
