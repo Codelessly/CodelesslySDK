@@ -19,7 +19,7 @@
      "name": "Title",
      "horizontalFit": "expanded",
      "verticalFit": "shrinkWrap",
-     "characters": "Designer",
+     "data": "Designer",
      "alignment": {
       "data": [
        0,
@@ -185,7 +185,7 @@
      "name": "Title",
      "horizontalFit": "expanded",
      "verticalFit": "shrinkWrap",
-     "characters": "Designer",
+     "data": "Designer",
      "alignment": {
       "data": [
        0,

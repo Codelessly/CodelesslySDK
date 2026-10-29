@@ -70,7 +70,7 @@ void main() {
       'name': 'Label',
       'type': 'text',
       'basicBoxLocal': [0, 0, 40, 20],
-      'characters': '24',
+      'data': '24',
       'textMixedProps': [
         {'start': 0, 'end': 2},
       ],

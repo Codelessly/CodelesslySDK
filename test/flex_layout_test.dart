@@ -694,7 +694,7 @@ void main() {
       basicBoxLocal: NodeBox(0, 0, 400, 20),
       horizontalFit: SizeFit.shrinkWrap,
       verticalFit: SizeFit.shrinkWrap,
-      characters: 'Lorem ipsum dolor sit amet consectetur',
+      data: 'Lorem ipsum dolor sit amet consectetur',
       textMixedProps: [StartEndProp(start: 0, end: 38, fontSize: 14)],
     );
     final a = rect('a', '', width: 300, height: 40);
@@ -736,7 +736,7 @@ void main() {
         basicBoxLocal: NodeBox(0, 0, 1000, 20),
         horizontalFit: SizeFit.expanded,
         verticalFit: SizeFit.fixed,
-        characters:
+        data:
             'Lorem ipsum dolor sit amet consectetur adipiscing elit sed do '
             'eiusmod tempor incididunt ut labore et dolore magna aliqua',
         textMixedProps: [StartEndProp(start: 0, end: 120, fontSize: 14)],
@@ -901,7 +901,7 @@ void main() {
           basicBoxLocal: NodeBox(0, 0, 120, 10),
           horizontalFit: SizeFit.shrinkWrap,
           verticalFit: SizeFit.shrinkWrap,
-          characters: characters,
+          data: characters,
           maxLines: 1,
           overflow: TextOverflowC.ellipsis,
           textMixedProps: [
