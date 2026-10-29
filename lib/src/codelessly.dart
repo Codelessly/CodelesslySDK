@@ -63,6 +63,7 @@ class Codelessly {
     final sdk = Codelessly.instance;
     PublishedPaywall? published;
     FirebasePaywallBackend? eventBackend;
+    PaywallAnalyticsQueue? analytics;
     PurchaseService? ownedService;
     if (resolvePlacement == null || purchaseService == null || slots == null) {
       if (!Platform.isIOS && !Platform.isAndroid) {
@@ -80,6 +81,7 @@ class Codelessly {
         projectId: projectId,
       );
       eventBackend = backend;
+      analytics = sdk._analyticsFor(backend);
       final runtime = sdk._paywallRuntime ??= PaywallRuntime(
         backend: backend,
         purchaseService: () => InAppPurchaseService(verify: backend.verify),
@@ -125,16 +127,17 @@ class Codelessly {
           ? null
           : (event, slot) {
               unawaited(
-                eventBackend!
-                    .event(
-                      eventId: generateId(),
-                      name: event,
-                      placement: placement,
-                      releaseId: published!.releaseId,
-                      variant: published.variant,
-                      slot: slot,
-                    )
-                    .catchError((Object _) {}),
+                analytics!.record(
+                  PaywallAnalyticsEvent(
+                    id: generateId(),
+                    name: event,
+                    placement: placement,
+                    releaseId: published!.releaseId,
+                    variant: published.variant,
+                    slot: slot,
+                    at: DateTime.now().millisecondsSinceEpoch,
+                  ),
+                ),
               );
             },
     );
@@ -147,15 +150,16 @@ class Codelessly {
               ? null
               : () {
                   unawaited(
-                    eventBackend!
-                        .event(
-                          eventId: generateId(),
-                          name: 'paywall_view',
-                          placement: placement,
-                          releaseId: published!.releaseId,
-                          variant: published.variant,
-                        )
-                        .catchError((Object _) {}),
+                    analytics!.record(
+                      PaywallAnalyticsEvent(
+                        id: generateId(),
+                        name: 'paywall_view',
+                        placement: placement,
+                        releaseId: published!.releaseId,
+                        variant: published.variant,
+                        at: DateTime.now().millisecondsSinceEpoch,
+                      ),
+                    ),
                   );
                 },
         ),
@@ -202,6 +206,42 @@ class Codelessly {
   /// Verified entitlement IDs for visibility and app-level conditions.
   final ValueNotifier<Set<String>> entitlements = ValueNotifier(<String>{});
   PaywallRuntime? _paywallRuntime;
+  PaywallAnalyticsQueue? _paywallAnalytics;
+  bool _paywallAnalyticsConsent = false;
+
+  /// Explicit opt-in; revoking consent clears locally queued events.
+  Future<void> setPaywallAnalyticsConsent(bool enabled) async {
+    _paywallAnalyticsConsent = enabled;
+    await _paywallAnalytics?.setConsent(enabled);
+  }
+
+  PaywallAnalyticsQueue _analyticsFor(FirebasePaywallBackend backend) {
+    final uid = firebaseAuth.currentUser?.uid;
+    if (uid == null) throw StateError('Paywall event auth required');
+    final existing = _paywallAnalytics;
+    if (existing != null &&
+        existing.uid == uid &&
+        existing.projectId == backend.projectId) {
+      return existing;
+    }
+    existing?.dispose();
+    final queue = PaywallAnalyticsQueue(
+      projectId: backend.projectId,
+      uid: uid,
+      send: (event) => backend.event(
+        eventId: event.id,
+        name: event.name,
+        placement: event.placement,
+        releaseId: event.releaseId,
+        variant: event.variant,
+        slot: event.slot,
+      ),
+    );
+    _paywallAnalytics = queue;
+    if (_paywallAnalyticsConsent) unawaited(queue.setConsent(true));
+    return queue;
+  }
+
   VoidCallback? _grantSync;
 
   void _watchPaywallGrants(PaywallRuntime runtime) {
@@ -378,6 +418,10 @@ class Codelessly {
       refreshAppUser();
       final runtime = _paywallRuntime;
       if (runtime != null) runtime.listenToGrants(firebaseFirestore, user?.uid);
+      if (_paywallAnalytics?.uid != user?.uid) {
+        _paywallAnalytics?.dispose();
+        _paywallAnalytics = null;
+      }
       unawaited(_followProfile(user));
     });
     refreshAppUser();
@@ -568,6 +612,8 @@ class Codelessly {
     _paywallRuntime?.dispose();
     _paywallRuntime = null;
     _grantSync = null;
+    _paywallAnalytics?.dispose();
+    _paywallAnalytics = null;
 
     _systemUIBrightnessStreamController.close();
   }
