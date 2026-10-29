@@ -42,6 +42,7 @@ class CodelessNodeTreeView extends StatefulWidget {
     this.variables = const {},
     this.theme,
     this.onAction,
+    this.previewNativePaywallActions = false,
   });
 
   final Map<String, BaseNode> nodes;
@@ -50,6 +51,10 @@ class CodelessNodeTreeView extends StatefulWidget {
   final Map<String, VariableData> variables;
   final ThemeData? theme;
   final CodelessNodeAction? onAction;
+
+  /// Editor-only inert paywall preview. Native actions are stripped from a
+  /// cloned node tree; this never dispatches a purchase, restore or legal URL.
+  final bool previewNativePaywallActions;
 
   @override
   State<CodelessNodeTreeView> createState() => _CodelessNodeTreeViewState();
@@ -109,11 +114,13 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
         );
       }
     }
-    // Reject native actions even on currently unreachable nodes.
+    // Reject native actions even on currently unreachable nodes. The editor
+    // may opt into an inert clone of paywall actions, not arbitrary actions.
     for (final node in widget.nodes.values) {
       if (node is ReactionMixin) {
         for (final reaction in (node as ReactionMixin).reactions) {
-          if (reaction.action is! CallFunctionAction) {
+          if (reaction.action is! CallFunctionAction &&
+              !(widget.previewNativePaywallActions && reaction.action is PaywallAction)) {
             throw ArgumentError(
               'Standalone tree rejects action '
               '${reaction.action.type} on node ${node.id}',
@@ -123,7 +130,13 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
       }
     }
     final old = _context;
-    _registry.setNodes(widget.nodes);
+    final previewNodes = widget.previewNativePaywallActions
+        ? <String, BaseNode>{
+            for (final entry in widget.nodes.entries)
+              entry.key: _withoutNativeActions(entry.value),
+          }
+        : widget.nodes;
+    _registry.setNodes(previewNodes);
     final nodes = _registry.getNodes();
     final allNodes = nodes.values.toList();
     for (final node in allNodes) {
@@ -142,6 +155,7 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
     for (final node in nodes.values) {
       if (node is ReactionMixin) {
         for (final reaction in (node as ReactionMixin).reactions) {
+          if (reaction.action is! CallFunctionAction) continue;
           final name = (reaction.action as CallFunctionAction).name;
           context.functions[name] = (_, _, params) =>
               widget.onAction?.call(name, params);
@@ -153,6 +167,18 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
     if (old != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
     }
+  }
+
+  BaseNode _withoutNativeActions(BaseNode node) {
+    if (node is! ReactionMixin || (node as ReactionMixin).reactions.isEmpty) {
+      return node;
+    }
+    final json = Map<String, dynamic>.from(node.toJson());
+    json['reactions'] = [
+      for (final reaction in (node as ReactionMixin).reactions)
+        if (reaction.action is CallFunctionAction) reaction.toJson(),
+    ];
+    return NodeJsonConverter().fromJson(json)!;
   }
 
   @override
