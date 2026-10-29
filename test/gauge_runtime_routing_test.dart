@@ -9,6 +9,8 @@ void main() {
     ('gaugeRadial', PassiveRadialGaugeWidget),
     ('gaugeMeter', PassiveGaugeWidget),
     ('barChart', PassiveBarChartWidget),
+    ('chartSeries', PassiveChartSeriesWidget),
+    ('chartPlot', PassiveChartWidget),
   ]) {
     testWidgets('$wire deserializes and dispatches to its own SDK renderer', (
       tester,
@@ -16,6 +18,8 @@ void main() {
       final source = switch (wire) {
         'gaugeRadial' => GaugeNode.empty(),
         'gaugeMeter' => GaugeMeterNode.empty(),
+        'chartSeries' => ChartNode.empty(),
+        'chartPlot' => PlotChartNode.empty(),
         _ => BarChartNode.empty(),
       };
       final node = NodeJsonConverter.instance.fromJson(source.toJson())!;
