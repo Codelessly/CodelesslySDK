@@ -32,6 +32,7 @@ RowColumnNode rowColumn(
   SizeFit horizontalFit = SizeFit.fixed,
   SizeFit verticalFit = SizeFit.fixed,
   bool wrap = true,
+  double spacing = 0,
   double runSpacing = 0,
   MainAxisAlignmentC mainAxisAlignment = MainAxisAlignmentC.start,
   CrossAxisAlignmentC crossAxisAlignment = CrossAxisAlignmentC.start,
@@ -50,6 +51,7 @@ RowColumnNode rowColumn(
     mainAxisAlignment: mainAxisAlignment,
     crossAxisAlignment: crossAxisAlignment,
     wrap: wrap,
+    spacing: spacing,
     runSpacing: runSpacing,
   )..parentID = parent;
 }
@@ -214,5 +216,105 @@ void main() {
     expect(find.byType(CodelesslyWrap), findsNothing);
     expect(find.byWidgetPredicate((w) => w is Flex), findsOneWidget);
     expect(offsetOf(tester, 'c', 'row'), const Offset(200, 0));
+  });
+
+  testWidgets('PR83 spacing, runs, and wide row', (tester) async {
+    final children = [
+      rect('a', width: 50, height: 20),
+      rect('b', width: 50, height: 30),
+      rect('c', width: 50, height: 20),
+    ];
+    final row = rowColumn(
+      'row',
+      kRootNode,
+      children,
+      width: 120,
+      height: 20,
+      verticalFit: SizeFit.shrinkWrap,
+      spacing: 10,
+      runSpacing: 5,
+    );
+    await pump(tester, row, children);
+    final wrap = tester.widget<CodelesslyWrap>(find.byType(CodelesslyWrap));
+    expect(wrap.spacing, 10);
+    expect(wrap.runSpacing, 5);
+    expect(offsetOf(tester, 'b', 'row'), const Offset(60, 0));
+    expect(offsetOf(tester, 'c', 'row'), const Offset(0, 35));
+  });
+
+  testWidgets('PR83 expanded children and spacers keep design size', (
+    tester,
+  ) async {
+    final gap = SpacerNode(
+      id: 'gap',
+      name: 'gap',
+      basicBoxLocal: NodeBox(0, 0, 20, 20),
+      horizontalFit: SizeFit.expanded,
+      verticalFit: SizeFit.expanded,
+    );
+    final children = <BaseNode>[
+      rect('a', width: 60, height: 20, horizontalFit: SizeFit.expanded),
+      gap,
+      rect('b', width: 60, height: 20, verticalFit: SizeFit.expanded),
+    ];
+    final row = rowColumn(
+      'row',
+      kRootNode,
+      children,
+      width: 120,
+      height: 20,
+      spacing: 0,
+      verticalFit: SizeFit.shrinkWrap,
+    );
+    await pump(tester, row, children);
+    expect(tester.getSize(rectOf('a')), const Size(60, 20));
+    expect(tester.getSize(rectOf('b')), const Size(60, 20));
+    expect(offsetOf(tester, 'b', 'row'), const Offset(0, 20));
+  });
+
+  testWidgets('PR83 stretch maps to start cross alignment', (tester) async {
+    final children = [rect('a'), rect('b')];
+    final row = rowColumn(
+      'row',
+      kRootNode,
+      children,
+      width: 250,
+      mainAxisAlignment: MainAxisAlignmentC.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignmentC.stretch,
+    );
+    await pump(tester, row, children);
+    final wrap = tester.widget<CodelesslyWrap>(find.byType(CodelesslyWrap));
+    expect(wrap.alignment, WrapAlignment.spaceBetween);
+    expect(wrap.crossAxisAlignment, WrapCrossAlignment.start);
+    expect(wrap.runAlignment, WrapAlignment.start);
+  });
+
+  testWidgets('PR83 wide row stays on one line', (tester) async {
+    final children = [
+      rect('a', width: 50, height: 20),
+      rect('b', width: 50, height: 20),
+      rect('c', width: 50, height: 20),
+    ];
+    final row = rowColumn(
+      'row',
+      kRootNode,
+      children,
+      width: 300,
+      height: 20,
+      spacing: 10,
+      verticalFit: SizeFit.shrinkWrap,
+    );
+    await pump(tester, row, children);
+    expect(offsetOf(tester, 'c', 'row'), const Offset(120, 0));
+  });
+
+  testWidgets('PR83 wrap off leaves Flex in place', (tester) async {
+    final children = [rect('a'), rect('b')];
+    await pump(
+      tester,
+      rowColumn('row', kRootNode, children, wrap: false),
+      children,
+    );
+    expect(find.byType(CodelesslyWrap), findsNothing);
   });
 }

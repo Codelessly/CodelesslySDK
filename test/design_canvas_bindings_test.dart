@@ -52,7 +52,7 @@ void main() {
     testWidgets('shows the default-value result on a design canvas', (
       tester,
     ) async {
-      VariablePreview.scopeResolver = (_) => defaults('signIn');
+      VariablePreview.scopeResolver = (_, {item}) => defaults('signIn');
       await pumpHost(
         tester,
         (context) => PassiveButtonWidget(

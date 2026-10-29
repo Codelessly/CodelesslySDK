@@ -112,6 +112,7 @@ class TextUtils {
               variable: match[0]!,
               node: node,
               style: style,
+              context: context,
               item: item,
             ),
             onNonMatch: (text) => TextSpan(text: text, style: style),

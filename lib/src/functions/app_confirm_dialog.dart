@@ -51,7 +51,7 @@ class AppConfirmDialog {
           sheetWidth: action.sheetWidth,
           maxHeightFactor: action.maxHeightFactor,
           showDragHandle: action.showDragHandle,
-          placement: action.placement.name,
+          placement: action.placement,
         );
         final bool confirmed = ConfirmAction.isConfirmResult(result);
         return (

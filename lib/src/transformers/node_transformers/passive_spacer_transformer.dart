@@ -24,7 +24,10 @@ class PassiveSpacerTransformer extends NodeWidgetTransformer<SpacerNode> {
         ? node.horizontalFit
         : node.verticalFit;
 
-    if (mainFit.isFlex) {
+    // The wrapping parent supplies the spacer's design length; a flexing
+    // spacer in an ordinary row is expanded by wrapChildWithSizeFits.
+    if (mainFit.isFlex &&
+        !PassiveRowColumnTransformer.rowColumnWraps(parentNode)) {
       return FitBox(
         width: mainAxis.isHorizontal ? node.outerBoxLocal.width : null,
         height: mainAxis.isVertical ? node.outerBoxLocal.height : null,

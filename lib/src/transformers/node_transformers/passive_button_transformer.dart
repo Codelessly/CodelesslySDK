@@ -135,6 +135,7 @@ class PassiveButtonWidget extends StatelessWidget {
               variable: match[0]!,
               node: node,
               item: IndexedItemProvider.maybeOf(context),
+              context: context,
             ),
             onNonMatch: (text) => TextSpan(text: text),
           )

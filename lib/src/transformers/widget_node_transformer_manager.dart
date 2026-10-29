@@ -53,12 +53,20 @@ abstract class WidgetNodeTransformerManager
   /// Convenience method to handle widget opacity.
   Widget applyWidgetOpacity(BaseNode node, Widget widget) {
     final PulseModel? pulse = node.pulse;
-    if (pulse != null) {
+    if (pulse is MotionPulseModel) {
       widget = NodePulse(pulse: pulse, child: widget);
     }
     if (node is! BlendMixin) return widget;
-    // A node with a transition always has the animated wrapper, so a change
-    // of its opacity (to fully opaque too) tweens instead of jumping.
+    final double opacity = node.opacity < 0.99 ? node.opacity : 1;
+    // Keep the relative fade inside the node's animated base opacity, so
+    // changes to that base still tween without multiplying it twice.
+    if (pulse != null && pulse is! MotionPulseModel) {
+      widget = PulseOpacity(
+        pulse: pulse,
+        opacity: node.transition != null || node.transitionMs > 0 ? 1 : opacity,
+        child: widget,
+      );
+    }
     if (node.transition case final NodeTransition transition?) {
       return AnimatedOpacity(
         opacity: node.opacity.clamp(0.0, 1.0),
@@ -74,9 +82,8 @@ abstract class WidgetNodeTransformerManager
         child: widget,
       );
     }
-    if (node.opacity > 0.99) return widget;
-
-    final double opacity = node.opacity < 0.99 ? node.opacity : 1;
+    if (pulse != null && pulse is! MotionPulseModel) return widget;
+    if (opacity == 1) return widget;
     return Opacity(opacity: opacity, child: widget);
   }
 
@@ -563,13 +570,45 @@ abstract class WidgetNodeTransformerManager
     );
   }
 
-  Widget _wrapWithTapReactions(
+  /// Fires [node]'s pointer down and pointer up reactions, such as a press
+  /// and hold that starts on down and is cancelled on up. A cancelled
+  /// pointer (a scroll took over) counts as up. The pointer is only
+  /// listened to, so taps still reach the widget.
+  static Widget wrapWithPointerReactions(
     BuildContext context,
     BaseNode node,
     Widget widget,
   ) {
     if (node is! ReactionMixin) return widget;
-    if (node case CanvasNode() || SpacerNode()) return widget;
+    List<Reaction> reactionsFor(TriggerType type) => (node as ReactionMixin)
+        .reactions
+        .where(
+          (reaction) =>
+              reaction.trigger.type == type && reaction.action.enabled,
+        )
+        .toList();
+    final List<Reaction> down = reactionsFor(TriggerType.pointerDown);
+    final List<Reaction> up = reactionsFor(TriggerType.pointerUp);
+    if (down.isEmpty && up.isEmpty) return widget;
+    void fire(TriggerType type, List<Reaction> reactions) {
+      if (reactions.isEmpty) return;
+      FunctionsRepository.triggerAction(context, type, reactions: reactions);
+    }
+
+    return Listener(
+      behavior: HitTestBehavior.opaque,
+      onPointerDown: (_) => fire(TriggerType.pointerDown, down),
+      onPointerUp: (_) => fire(TriggerType.pointerUp, up),
+      onPointerCancel: (_) => fire(TriggerType.pointerUp, up),
+      child: widget,
+    );
+  }
+
+  Widget _wrapWithTapReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
     if (node is CustomPropertiesMixin &&
         node.handlesDefaultReactionsInternally) {
       // Node is a custom properties mixin and intends to handle reactions
@@ -1192,4 +1231,60 @@ class _NodePulseState extends State<NodePulse>
       },
     );
   }
+}
+
+/// Fades a relative pulse from [PulseModel.minOpacity] times [opacity] to
+/// [opacity], leaving motion pulses to [NodePulse].
+class PulseOpacity extends StatefulWidget {
+  final PulseModel pulse;
+  final double opacity;
+  final Widget child;
+
+  const PulseOpacity({
+    super.key,
+    required this.pulse,
+    required this.opacity,
+    required this.child,
+  });
+
+  @override
+  State<PulseOpacity> createState() => _PulseOpacityState();
+}
+
+class _PulseOpacityState extends State<PulseOpacity>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController controller = AnimationController(
+    vsync: this,
+    duration: _duration,
+  )..repeat(reverse: true);
+
+  Duration get _duration =>
+      Duration(milliseconds: widget.pulse.durationMillis.clamp(16, 60000));
+
+  @override
+  void didUpdateWidget(PulseOpacity oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pulse.durationMillis != widget.pulse.durationMillis) {
+      controller
+        ..duration = _duration
+        ..repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+    opacity: controller.drive(
+      Tween<double>(
+        begin: widget.opacity * widget.pulse.minOpacity.clamp(0, 1),
+        end: widget.opacity,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
+    ),
+    child: widget.child,
+  );
 }

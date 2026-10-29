@@ -12,8 +12,12 @@ import '../../../codelessly_sdk.dart';
 /// (`${auth.displayName}` shows "Display name").
 abstract final class VariablePreview {
   /// Returns the values that [node] can see on the design canvas, or null to
-  /// fall back to placeholders.
+  /// fall back to placeholders. Row-specific values are overlaid by [scopeOf].
   static ScopedValues? Function(BaseNode? node)? scopeResolver;
+
+  /// The values [node] can see on the design canvas when built in [context].
+  static ScopedValues? resolve(BaseNode? node, [BuildContext? context]) =>
+      scopeOf(node, context: context);
 
   /// The values that [node] sees on the design canvas where it is built in
   /// [context], or null to fall back to placeholders.
@@ -71,18 +75,31 @@ abstract final class VariablePreview {
   static const Set<String> _literals = {'true', 'false', 'null'};
 
   /// The text the design canvas shows for [expression], one `${...}` match.
-  ///
-  /// [item] is the list item the text is built for: a list on the canvas
-  /// shows each of its items, so `${item.name}` reads that item instead of
-  /// the sample item the resolver gives.
+  /// The row's [item] overrides the resolver's sample item when present.
   static String textFor(
     String expression, {
     BaseNode? node,
     TextStyle? style,
     IndexedItem? item,
+    BuildContext? context,
   }) {
-    final ScopedValues? scopedValues = scopeOf(node, item: item);
+    final ScopedValues? scopedValues = scopeOf(
+      node,
+      item: item,
+      context: context,
+    );
     if (scopedValues != null) {
+      // A formula that yields empty text means "show nothing", unlike one
+      // that can't be evaluated (null), which gets a placeholder.
+      final String? formula = FormulaEvaluator.exactExpression(expression);
+      if (formula != null &&
+          PropertyValueDelegate.evaluateFormula(
+                formula,
+                scopedValues: scopedValues,
+              ) ==
+              '') {
+        return '';
+      }
       final String value = PropertyValueDelegate.substituteVariables(
         expression,
         scopedValues: scopedValues,
@@ -90,18 +107,6 @@ abstract final class VariablePreview {
       );
       if (value.isNotEmpty && !variableSyntaxIdentifierRegex.hasMatch(value)) {
         return value;
-      }
-      // A formula that gives empty text (`${= if(x, 'a', '')}`) shows
-      // nothing, not a placeholder.
-      final String? formula = FormulaEvaluator.exactExpression(expression);
-      if (value.isEmpty &&
-          formula != null &&
-          PropertyValueDelegate.evaluateFormula(
-                formula,
-                scopedValues: scopedValues,
-              ) ==
-              '') {
-        return '';
       }
     }
     final String placeholder = placeholderFor(expression);
@@ -192,6 +197,7 @@ class VariableSpan extends TextSpan {
     required this.variable,
     BaseNode? node,
     IndexedItem? item,
+    BuildContext? context,
     super.style,
     super.mouseCursor,
     super.onEnter,
@@ -202,6 +208,7 @@ class VariableSpan extends TextSpan {
            node: node,
            style: style,
            item: item,
+           context: context,
          ),
        );
 }

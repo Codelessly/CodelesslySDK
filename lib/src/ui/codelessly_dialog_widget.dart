@@ -8,6 +8,9 @@ class CodelesslyDialogWidget extends StatelessWidget {
   final WidgetBuilder builder;
   final bool showCloseButton;
 
+  /// Whether the popover route positions this canvas next to its trigger.
+  final bool anchored;
+
   /// Where the dialog sits: centered by default, bottom center for a sheet,
   /// or anywhere else, e.g. a menu at the top right.
   final AlignmentGeometry alignment;
@@ -32,6 +35,7 @@ class CodelesslyDialogWidget extends StatelessWidget {
     super.key,
     required this.builder,
     required this.showCloseButton,
+    this.anchored = false,
     this.alignment = Alignment.center,
     this.hugHeight = false,
     this.sizing = CanvasSizing.design,
@@ -54,7 +58,7 @@ class CodelesslyDialogWidget extends StatelessWidget {
     return BreakpointWidthScope(
       width: MediaQuery.sizeOf(context).width,
       child: CanvasSizingScope(
-        sizing: sizing,
+        sizing: anchored ? CanvasSizing.content : sizing,
         child: TapThroughScope(child: Builder(builder: _buildDialog)),
       ),
     );
@@ -74,6 +78,7 @@ class CodelesslyDialogWidget extends StatelessWidget {
         hugHeight ||
         sizing == CanvasSizing.sheet ||
         sizing == CanvasSizing.fillWidth;
+    if (anchored) return _buildContent(context);
     return Padding(
       padding: sizing == CanvasSizing.design && useDefaultInset
           ? insets + const EdgeInsets.all(inset)

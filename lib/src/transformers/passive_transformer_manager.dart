@@ -55,6 +55,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'progressBar': PassiveProgressBarTransformer(getNode, this),
       'lineChart': PassiveLineChartTransformer(getNode, this),
       'chartPlot': PassiveChartTransformer(getNode, this),
+      'chartSeries': PassiveChartSeriesTransformer(getNode, this),
       'gaugeRadial': PassiveRadialGaugeTransformer(getNode, this),
       'gaugeMeter': PassiveGaugeTransformer(getNode, this),
       'barChart': PassiveBarChartTransformer(getNode, this),
@@ -600,6 +601,31 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (readsClock) listenables.add(FormulaClock.instance);
 
     return listenables;
+  }
+
+  /// The named variable and its transitive computed inputs, each once.
+  static Iterable<Listenable> variableListenables(
+    CodelesslyContext codelesslyContext,
+    String name, [
+    Set<String>? visited,
+  ]) sync* {
+    final Set<String> seen = visited ?? <String>{};
+    if (!seen.add(name)) return;
+    final notifier = codelesslyContext.findVariableByName(name);
+    if (notifier == null) return;
+    yield notifier;
+    final VariableData variable = notifier.value;
+    final String? expression = variable.formula.trim().isNotEmpty
+        ? variable.formula
+        : FormulaEvaluator.exactExpression(variable.value);
+    if (expression == null) return;
+    for (final String path in FormulaEvaluator.referencedPaths(expression)) {
+      final VariableMatch? match = VariableMatch.parse(
+        path.wrapWithVariableSyntax(),
+      );
+      if (match == null || match.isPredefinedVariable) continue;
+      yield* variableListenables(codelesslyContext, match.name, seen);
+    }
   }
 
   /// Adds the notifier of variable [name] to [listenables]. A computed

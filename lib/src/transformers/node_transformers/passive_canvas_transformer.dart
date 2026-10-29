@@ -373,6 +373,20 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   //   );
   // }
 
+  /// Whether [node]'s layout is responsive: a variance with breakpoints
+  /// within its body's first levels, where `layouts.createResponsive` puts
+  /// one.
+  bool hasNearbyResponsiveLayout(CanvasNode node) {
+    bool check(String id, int depth) {
+      final BaseNode child = getNode(id);
+      if (child is VarianceNode && child.isResponsive) return true;
+      if (depth == 0 || child is! ChildrenMixin) return false;
+      return child.children.any((id) => check(id, depth - 1));
+    }
+
+    return node.children.any((id) => check(id, 2));
+  }
+
   @override
   Widget buildWidget(
     CanvasNode node,
@@ -479,6 +493,9 @@ enum CanvasSizing {
   /// Sheet sizing for callers using the dialog presentation API; equivalent
   /// to [fillWidth].
   sheet,
+
+  /// Keep the design size even for a responsive canvas, for popovers.
+  content,
 }
 
 /// Sets the [CanvasSizing] of the canvases below it. Without one, canvases
@@ -587,9 +604,8 @@ class CanvasViewport extends StatelessWidget {
     required this.child,
   });
 
-  /// Whether [node] is a canvas whose height is its content's: it hugs
-  /// vertically. A scaffold needs a bounded height, so a canvas with an app
-  /// bar, navigation bar or FAB takes its design height instead.
+  /// Whether the canvas hugs its content vertically instead of using a
+  /// design height. A scaffold must retain a bounded height.
   static bool sizesToContent(CanvasNode node) =>
       node.verticalFit == SizeFit.shrinkWrap &&
       node.scaleMode == ScaleMode.responsive &&
@@ -602,9 +618,11 @@ class CanvasViewport extends StatelessWidget {
     CanvasNode node,
     BoxConstraints constraints, {
     CanvasSizing sizing = CanvasSizing.fill,
+    bool responsive = false,
   }) {
     final bool contentHeight = sizesToContent(node);
-    if (sizing != CanvasSizing.fill) {
+    if (sizing != CanvasSizing.fill &&
+        (sizing != CanvasSizing.design || !responsive)) {
       final double width =
           (sizing == CanvasSizing.fillWidth || sizing == CanvasSizing.sheet) &&
               constraints.hasBoundedWidth
@@ -640,11 +658,8 @@ class CanvasViewport extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final box = resolve(node, constraints, sizing: sizing);
-        // The width that picks the canvas's responsive layouts: the canvas
-        // box for a responsive canvas, the design width for an autoScale one
-        // (its content is laid out at design size and then scaled). A canvas
-        // at its design size in a dialog, sheet or popover isn't the screen:
-        // a 520 wide dialog on a desktop shows its desktop layout.
+        // Dialogs select a responsive variant using the host screen width;
+        // popovers use their own compact design width.
         final double width = sizing == CanvasSizing.design
             ? MediaQuery.maybeSizeOf(context)?.width ?? box.width
             : node.scaleMode == ScaleMode.autoScale
