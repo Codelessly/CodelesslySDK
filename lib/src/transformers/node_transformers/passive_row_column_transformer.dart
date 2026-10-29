@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
@@ -56,6 +58,16 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     final bool contentSized =
         withScroll && scrollsFlexiblyOnMainAxis(rowColumnNode);
 
+    // Padding belongs outside this widget unless scrolling moves it inside.
+    final bool scrolls =
+        withScroll &&
+        rowColumnNode is ScrollableMixin &&
+        (rowColumnNode as ScrollableMixin).isScrollable;
+    final EdgeInsetsModel padding =
+        rowColumnNode is DefaultShapeNode && !scrolls
+        ? rowColumnNode.resolvedPadding()
+        : EdgeInsetsModel.zero;
+
     final FitBox outerBox = FitBox(
       width: contentSized && isRow
           ? null
@@ -64,6 +76,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
               design: rowColumnNode.outerBoxLocal.width,
               min: rowColumnNode.constraints.minWidth,
               max: rowColumnNode.constraints.maxWidth,
+              inset: padding.horizontal,
             ),
       fillWidth: _fillsAxis(
         rowColumnNode.horizontalFit,
@@ -78,6 +91,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
               design: rowColumnNode.outerBoxLocal.height,
               min: rowColumnNode.constraints.minHeight,
               max: rowColumnNode.constraints.maxHeight,
+              inset: padding.vertical,
             ),
       fillHeight:
           !(isPlaceholder && rowColumnNode.verticalFit.isFlex) &&
@@ -87,10 +101,16 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
           ),
     );
 
-    if (rowColumnNode.wrap) {
+    final bool wrapsChildren = rowColumnWraps(rowColumnNode);
+    if (wrapsChildren) {
       return _withOuterBox(
         outerBox,
-        _buildWrap(rowColumnNode, childrenWidgets, withScroll: withScroll),
+        _withMinExtent(
+          rowColumnNode,
+          padding,
+          isPlaceholder,
+          _buildWrap(rowColumnNode, childrenWidgets, withScroll: withScroll),
+        ),
       );
     }
 
@@ -115,7 +135,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         rowColumnNode.crossAxisAlignment == CrossAxisAlignmentC.stretch;
     bool measureCross = false;
     bool stretchFallsBack = false;
-    if (crossMin == null && crossWraps) {
+    if (!wrapsChildren && crossMin == null && crossWraps) {
       final bool anyChildNeedsAlignment = childrenNodes.any(
         (child) => child.alignment != AlignmentModel.none,
       );
@@ -153,7 +173,10 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       res = isRow ? IntrinsicHeight(child: res) : IntrinsicWidth(child: res);
     }
 
+    // A wrapping row/column puts its children on new runs instead of
+    // scrolling them along its main axis.
     if (withScroll &&
+        !wrapsChildren &&
         rowColumnNode is ScrollableMixin &&
         (rowColumnNode as ScrollableMixin).isScrollable) {
       res = wrapWithPaddedScrollable(
@@ -169,7 +192,34 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       );
     }
 
-    return _withOuterBox(outerBox, res);
+    return _withOuterBox(
+      outerBox,
+      _withMinExtent(rowColumnNode, padding, isPlaceholder, res),
+    );
+  }
+
+  static Widget _withMinExtent(
+    BaseNode node,
+    EdgeInsetsModel padding,
+    bool isPlaceholder,
+    Widget res,
+  ) {
+    final double? minWidth = node.horizontalFit == SizeFit.shrinkWrap
+        ? _minExtent(node.constraints.minWidth, padding.horizontal)
+        : null;
+    final double? minHeight =
+        node.verticalFit == SizeFit.shrinkWrap &&
+            !(isPlaceholder && node.verticalFit.isFlex)
+        ? _minExtent(node.constraints.minHeight, padding.vertical)
+        : null;
+    if (minWidth == null && minHeight == null) return res;
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: minWidth ?? 0,
+        minHeight: minHeight ?? 0,
+      ),
+      child: res,
+    );
   }
 
   /// Puts [res] in the row/column's own box, [outerBox], when it has one.
@@ -304,22 +354,33 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   /// The design extent of a Row/Column's own box on one axis, or null when it
   /// hugs its children.
   ///
-  /// Fixed and locked take the solved outer size. shrinkWrap hugs (at least
-  /// its min constraint). Expanded takes its max constraint when it has one,
+  /// Fixed and locked take the solved outer size. shrinkWrap hugs; its min
+  /// constraint is a minimum ([_minExtent]), not a size. Expanded takes its max constraint when it has one,
   /// and otherwise fills a bounded axis or takes its design size on an
   /// unbounded one. Flexible takes its design size, as leaves do: its
   /// [Flexible] parent lets it get smaller, never larger, matching the
   /// editor's `min(flex share, design size)`.
+  ///
+  /// [inset] is the padding outside this widget on the axis, which a min or
+  /// max constraint (the whole box's) leaves less room inside.
   static double? _outerExtent(
     SizeFit fit, {
     required double design,
     required double? min,
     required double? max,
+    double inset = 0,
   }) => switch (fit) {
-    SizeFit.shrinkWrap => min,
-    SizeFit.expanded => max ?? design,
+    // A hugging axis has no size of its own: its min constraint is applied
+    // as a minimum (see [_minExtent]), so content larger than it grows it.
+    SizeFit.shrinkWrap => null,
+    SizeFit.expanded => max == null ? design : math.max(0, max - inset),
     SizeFit.fixed || SizeFit.locked || SizeFit.flexible => design,
   };
+
+  /// The minimum a hugging axis keeps: its min constraint less the padding
+  /// outside this widget, or null without one.
+  static double? _minExtent(double? min, double inset) =>
+      min == null ? null : math.max(0, min - inset);
 
   static bool _fillsAxis(SizeFit fit, {required double? max}) =>
       fit == SizeFit.expanded && max == null;
@@ -344,19 +405,22 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     int flex, {
     AlignmentModel? alignment,
     WidgetInserter? flexibleSpaceBackground,
+    GetNode? getNode,
   }) {
     assert(parentRowColumn is RowColumnMixin);
 
-    if ((parentRowColumn as RowColumnMixin).wrap) {
-      return _wrapChild(
+    if (rowColumnWraps(parentRowColumn)) {
+      return wrapChildInRun(
         node,
         parentRowColumn,
         childWidget,
         flexibleSpaceBackground: flexibleSpaceBackground,
+        getNode: getNode,
       );
     }
 
-    final AxisC mainAxis = (parentRowColumn.rowColumnType == RowColumnType.row
+    final RowColumnMixin parent = parentRowColumn as RowColumnMixin;
+    final AxisC mainAxis = (parent.rowColumnType == RowColumnType.row
         ? AxisC.horizontal
         : AxisC.vertical);
     final SizeFit mainAxisFit = (mainAxis == AxisC.horizontal
@@ -392,7 +456,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         SizeFit.shrinkWrap;
     final AlignmentGeometry? childAlignment =
         (alignment ?? node.alignment).data?.flutterAlignmentGeometry ??
-        (parentRowColumn.crossAxisAlignment == CrossAxisAlignmentC.stretch &&
+        (parent.crossAxisAlignment == CrossAxisAlignmentC.stretch &&
                 crossAxisFit == SizeFit.shrinkWrap &&
                 !parentHugsCross
             ? AlignmentDirectional.topStart
@@ -499,36 +563,57 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     return childWidget;
   }
 
-  /// A child of a wrapping row/column. Children of a [Wrap] can't flex: one
-  /// that is expanded or flexible along the main axis keeps its design size
-  /// there, like a fixed child (a [Wrap] would otherwise let it fill a whole
-  /// run). Across, a [Wrap] gives an unbounded extent, where an expanded
-  /// child takes its design size too (see [FitBox]). A spacer is a gap of its
-  /// design length. A child's own alignment does not apply in a wrap.
-  static Widget _wrapChild(
+  /// Sizes a child of a wrapping row/column ([rowColumnWraps]) for its [CodelesslyWrap] run.
+  ///
+  /// Expanded and flexible mean nothing in a run, so a child that flexes on
+  /// an axis hugs its content there instead, as the editor lays it out: an
+  /// intrinsic wrapper measures it. A subtree that can't report intrinsic
+  /// sizes ([subtreeBlocksIntrinsics]) takes its design size on that axis,
+  /// the size the editor solved for it. A spacer has no content and takes
+  /// no room. The child's own alignment is not applied: an [Align] would
+  /// take the whole run.
+  static Widget wrapChildInRun(
     BaseNode node,
-    RowColumnMixin parent,
+    BaseNode parentRowColumn,
     Widget childWidget, {
     WidgetInserter? flexibleSpaceBackground,
+    GetNode? getNode,
   }) {
-    if (flexibleSpaceBackground != null) {
-      childWidget = flexibleSpaceBackground(childWidget);
-    }
-    final bool isRow = parent.rowColumnType == RowColumnType.row;
-    // A spacer is a gap of its design length, with no thickness.
     if (node is SpacerNode) {
+      final bool isRow =
+          (parentRowColumn as RowColumnMixin).rowColumnType ==
+          RowColumnType.row;
       return SizedBox(
         width: isRow ? node.outerBoxLocal.width : 0,
         height: isRow ? 0 : node.outerBoxLocal.height,
       );
     }
-    final SizeFit mainFit = isRow ? node.horizontalFit : node.verticalFit;
-    if (!mainFit.isFlex) return childWidget;
-    return SizedBox(
-      width: isRow ? node.outerBoxLocal.width : null,
-      height: isRow ? null : node.outerBoxLocal.height,
-      child: childWidget,
-    );
+
+    if (flexibleSpaceBackground != null) {
+      childWidget = flexibleSpaceBackground(childWidget);
+    }
+
+    final bool flexesHorizontally = node.horizontalFit.isFlex;
+    final bool flexesVertically = node.verticalFit.isFlex;
+    if (!flexesHorizontally && !flexesVertically) return childWidget;
+
+    // Leaves with expanded fit have no intrinsic content extent (FitBox
+    // reports zero); unlike content-hugging row/columns they keep their
+    // design size in a wrap.
+    final bool blocked =
+        node is! RowColumnMixin ||
+        getNode == null ||
+        subtreeBlocksIntrinsics(node, getNode);
+    if (blocked) {
+      return SizedBox(
+        width: flexesHorizontally ? node.outerBoxLocal.width : null,
+        height: flexesVertically ? node.outerBoxLocal.height : null,
+        child: childWidget,
+      );
+    }
+    if (flexesHorizontally) childWidget = IntrinsicWidth(child: childWidget);
+    if (flexesVertically) childWidget = IntrinsicHeight(child: childWidget);
+    return childWidget;
   }
 
   @override
@@ -641,6 +726,7 @@ class PassiveRowColumnWidget extends StatelessWidget {
             node,
             builtWidget,
             child.flex,
+            getNode: manager.getNode,
           );
       return _collapseWhenHidden(context, child, sizedWidget);
     }).toList();

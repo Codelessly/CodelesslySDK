@@ -163,20 +163,11 @@ class PassiveRectangleWidget extends StatelessWidget {
       horizontalFit: horizontalFit,
       verticalFit: verticalFit,
       size: node.basicBoxLocal.size,
-      child: Container(
+      child: decorateWithShadows(
+        boxShadow: retrieveBoxShadow(node, scopedValues),
+        borderRadius: getBorderRadius(node),
         clipBehavior: getClipBehavior(node),
-        // This box only clips and casts shadows; the node's fills, strokes
-        // and children take taps where they paint. Under a TapThroughScope,
-        // its empty parts let taps through.
-        decoration: TapThroughScope.of(context)
-            ? _TapThroughDecoration(
-                boxShadow: retrieveBoxShadow(node, scopedValues),
-                borderRadius: getBorderRadius(node),
-              )
-            : BoxDecoration(
-                boxShadow: retrieveBoxShadow(node, scopedValues),
-                borderRadius: getBorderRadius(node),
-              ),
+        tapThrough: TapThroughScope.of(context),
         child: child,
       ),
     );
@@ -190,6 +181,79 @@ class _TapThroughDecoration extends BoxDecoration {
   @override
   bool hitTest(Size size, Offset position, {TextDirection? textDirection}) =>
       false;
+}
+
+/// A box with [borderRadius] and [boxShadow] around [child]. A shadow with a
+/// spread on a rounded box is painted by [SpreadShadowPainter], so its
+/// corners grow with it as in CSS and design tools; [BoxDecoration] keeps the
+/// box's radius, which turns a spread glow around a dot into a square.
+Widget decorateWithShadows({
+  required List<BoxShadow> boxShadow,
+  required BorderRadius? borderRadius,
+  required Clip clipBehavior,
+  required Widget child,
+  bool tapThrough = false,
+}) {
+  final bool rounded =
+      borderRadius != null && borderRadius != BorderRadius.zero;
+  final List<BoxShadow> spread = [
+    if (rounded)
+      for (final BoxShadow shadow in boxShadow)
+        if (shadow.spreadRadius != 0) shadow,
+  ];
+  final Widget box = Container(
+    clipBehavior: clipBehavior,
+    decoration: tapThrough
+        ? _TapThroughDecoration(
+            boxShadow: [
+              for (final BoxShadow shadow in boxShadow)
+                if (!spread.contains(shadow)) shadow,
+            ],
+            borderRadius: borderRadius,
+          )
+        : BoxDecoration(
+            boxShadow: [
+              for (final BoxShadow shadow in boxShadow)
+                if (!spread.contains(shadow)) shadow,
+            ],
+            borderRadius: borderRadius,
+          ),
+    child: child,
+  );
+  // Only a rounded box has spread shadows here, so it has a radius.
+  if (spread.isEmpty) return box;
+  return CustomPaint(
+    painter: SpreadShadowPainter(shadows: spread, borderRadius: borderRadius!),
+    child: box,
+  );
+}
+
+/// Paints [shadows] around a box of [borderRadius], growing (or, for a
+/// negative spread, shrinking) the corner radii with each shadow's spread.
+class SpreadShadowPainter extends CustomPainter {
+  const SpreadShadowPainter({
+    required this.shadows,
+    required this.borderRadius,
+  });
+
+  final List<BoxShadow> shadows;
+  final BorderRadius borderRadius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final RRect box = borderRadius.toRRect(Offset.zero & size);
+    for (final BoxShadow shadow in shadows) {
+      canvas.drawRRect(
+        box.shift(shadow.offset).inflate(shadow.spreadRadius),
+        shadow.toPaint(),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(SpreadShadowPainter oldDelegate) =>
+      !const ListEquality<BoxShadow>().equals(oldDelegate.shadows, shadows) ||
+      oldDelegate.borderRadius != borderRadius;
 }
 
 List<Widget> wrapWithInkWell(
@@ -786,13 +850,27 @@ Widget buildFill(
         'fill-${paint.id}',
         scopedValues: scopedValues,
       );
-      final decoration = BoxDecoration(
-        borderRadius: borderRadius,
-        color: (propertyValue ?? paint).toFlutterColor()!,
-      );
-      return useInk
-          ? Ink(decoration: decoration)
-          : DecoratedBox(decoration: decoration);
+      final Color color = (propertyValue ?? paint).toFlutterColor()!;
+      Widget solid(Color? color) {
+        final decoration = BoxDecoration(
+          borderRadius: borderRadius,
+          color: color,
+        );
+        return useInk
+            ? Ink(decoration: decoration)
+            : DecoratedBox(decoration: decoration);
+      }
+
+      // With a transition a fill eases to its new color (a hovered row).
+      if ((node as BaseNode).transitionMs > 0) {
+        return TweenAnimationBuilder<Color?>(
+          tween: ColorTween(end: color),
+          duration: Duration(milliseconds: (node as BaseNode).transitionMs),
+          curve: Curves.easeOutCubic,
+          builder: (context, color, _) => solid(color),
+        );
+      }
+      return solid(color);
     case PaintType.gradientLinear:
     case PaintType.gradientRadial:
     case PaintType.gradientAngular:
@@ -887,6 +965,11 @@ Widget buildFill(
       }
       if (imageRotation != null) {
         child = Transform.rotate(angle: imageRotation, child: child);
+      }
+      // An image fill keeps to the node's rounded corners, as solid and
+      // gradient fills do, even when the node doesn't clip its content.
+      if (borderRadius != null && borderRadius != BorderRadius.zero) {
+        child = ClipRRect(borderRadius: borderRadius, child: child);
       }
       return child;
     case PaintType.emoji:

@@ -901,7 +901,6 @@ class FunctionsRepository {
             transitionBuilder: (context, animation, _, child) =>
                 FadeTransition(opacity: animation, child: child),
           );
-
     if (context.mounted) {
       codelessly.notifyNavigationListeners(
         context,

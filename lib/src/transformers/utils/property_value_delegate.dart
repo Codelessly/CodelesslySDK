@@ -349,9 +349,13 @@ class PropertyValueDelegate {
 
     if (variable == null) return null;
 
-    // Predefined variables like item hold any type, so read accessors for
-    // the value they hold (an item can be a string, a map, ...).
-    VariableType accessorType = match.hasAccessor || match.isPredefinedVariable
+    // Predefined variables like item hold any type, and so does a computed
+    // variable, so read accessors for the value they hold (an item can be a
+    // string, a map, ...).
+    VariableType accessorType =
+        match.hasAccessor ||
+            match.isPredefinedVariable ||
+            computedExpressionOf(variable) != null
         ? VariableType.fromObjectType(value)
         : variable.type;
     List<Accessor> accessors = variable.name.startsWith('api')
@@ -445,6 +449,47 @@ class PropertyValueDelegate {
     });
 
     return value;
+  }
+
+  /// The formula of a computed variable: a text variable whose value is
+  /// exactly one `${= expression}`. Reading it evaluates the expression, so
+  /// a value derived from others (a filtered list, a count, the demo clock)
+  /// is written once and read everywhere. Null for other variables.
+  static String? computedExpressionOf(VariableData variable) {
+    if (!variable.isComputed) return null;
+    return variable.formula.trim().isNotEmpty
+        ? variable.formula
+        : FormulaEvaluator.exactExpression(variable.value);
+  }
+
+  /// The variable paths a computed variable's formula reads, followed
+  /// through other computed variables, and whether any of them reads the
+  /// clock. Widgets bound to [name] listen to these too.
+  static ({Set<String> paths, bool readsClock}) computedDependencies(
+    String name,
+    Map<String, VariableData> variables,
+  ) {
+    final Set<String> paths = {};
+    bool readsClock = false;
+    final Set<String> seen = {};
+    void visit(String variableName) {
+      if (!seen.add(variableName)) return;
+      final VariableData? variable = variables[variableName];
+      if (variable == null) return;
+      final String? expression = computedExpressionOf(variable);
+      if (expression == null) return;
+      readsClock = readsClock || FormulaEvaluator.readsClock(expression);
+      for (final String path in FormulaEvaluator.referencedPaths(expression)) {
+        paths.add(path);
+        final VariableMatch? match = VariableMatch.parse(
+          path.wrapWithVariableSyntax(),
+        );
+        if (match != null) visit(match.name);
+      }
+    }
+
+    visit(name);
+    return (paths: paths, readsClock: readsClock);
   }
 
   @internal

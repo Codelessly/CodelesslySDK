@@ -72,4 +72,21 @@ void main() {
     expect(decoration.error, isNotNull);
     expect(find.text('Required'), findsOneWidget);
   });
+
+  testWidgets('conditional error text shows only when the condition is true', (
+    tester,
+  ) async {
+    final valid = await _pump(
+      tester,
+      _field(r"${= 1 > 2 ? 'Enter a name' : ''}"),
+    );
+    expect(valid.error, isNull);
+    expect(valid.errorText, isNull);
+    final invalid = await _pump(
+      tester,
+      _field(r"${= 1 < 2 ? 'Enter a name' : ''}"),
+    );
+    expect(invalid.error, isNotNull);
+    expect(find.text('Enter a name'), findsOneWidget);
+  });
 }
