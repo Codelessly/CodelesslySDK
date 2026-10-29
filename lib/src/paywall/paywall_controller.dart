@@ -11,6 +11,9 @@ class PaywallProduct {
   final String currency;
   final String period;
   final String? trial;
+  final String? introOffer;
+  final double? rawPrice;
+  final String? currencySymbol;
   final bool eligibleForTrial;
   final String? pricePerMonth;
   final int? savingsPercent;
@@ -22,10 +25,29 @@ class PaywallProduct {
     required this.currency,
     required this.period,
     this.trial,
+    this.introOffer,
+    this.rawPrice,
+    this.currencySymbol,
     this.eligibleForTrial = false,
     this.pricePerMonth,
     this.savingsPercent,
   });
+
+  PaywallProduct copyWith({int? savingsPercent, String? pricePerMonth}) =>
+      PaywallProduct(
+        slot: slot,
+        storeId: storeId,
+        price: price,
+        currency: currency,
+        period: period,
+        trial: trial,
+        introOffer: introOffer,
+        rawPrice: rawPrice,
+        currencySymbol: currencySymbol,
+        eligibleForTrial: eligibleForTrial,
+        savingsPercent: savingsPercent ?? this.savingsPercent,
+        pricePerMonth: pricePerMonth ?? this.pricePerMonth,
+      );
 
   Map<String, dynamic> toVariables() => {
     'slot': slot,
@@ -33,20 +55,33 @@ class PaywallProduct {
     'currency': currency,
     'period': period,
     'trial': trial ?? '',
-    'introOffer': trial ?? '',
+    'introOffer': introOffer ?? trial ?? '',
     'eligibleForTrial': eligibleForTrial,
     'pricePerMonth': pricePerMonth ?? '',
     'savingsPercent': savingsPercent ?? 0,
   };
 }
 
-enum PaywallOutcome { purchased, restored, cancelled, failed, closed }
+enum PaywallOutcome {
+  purchased,
+  restored,
+  restoreNothing,
+  cancelled,
+  failed,
+  closed,
+}
 
 class PaywallResult {
   final PaywallOutcome outcome;
   final String? productId;
+  final String? entitlementId;
   final String? error;
-  const PaywallResult(this.outcome, {this.productId, this.error});
+  const PaywallResult(
+    this.outcome, {
+    this.productId,
+    this.entitlementId,
+    this.error,
+  });
 }
 
 /// The verification callback must validate store purchase tokens on a trusted server.
@@ -71,6 +106,7 @@ class PaywallController extends ChangeNotifier {
   String? error;
   bool purchasing = false;
   bool restoring = false;
+  String? restoreResult;
 
   PaywallController({
     required this.service,
@@ -113,6 +149,7 @@ class PaywallController extends ChangeNotifier {
     'paywall': {
       'purchasing': purchasing,
       'restoring': restoring,
+      'restoreResult': restoreResult ?? '',
       'selectedProduct': selectedSlot ?? '',
       'error': error ?? '',
     },
@@ -152,6 +189,7 @@ class PaywallController extends ChangeNotifier {
     if (purchasing || restoring) return;
     error = null;
     restoring = true;
+    restoreResult = null;
     notifyListeners();
     try {
       await service.restore();
@@ -170,17 +208,17 @@ class PaywallController extends ChangeNotifier {
     if (result.outcome == PaywallOutcome.failed) {
       error = result.error ?? 'Purchase failed';
     }
+    if (result.outcome == PaywallOutcome.restoreNothing) {
+      restoreResult = 'nothing';
+    }
     if (result.outcome == PaywallOutcome.purchased ||
         result.outcome == PaywallOutcome.restored) {
-      if (result.productId != null) {
-        entitlements.add(result.productId!);
-        for (final product in products) {
-          if (product.storeId == result.productId) {
-            entitlements.add(product.slot);
-          }
-        }
+      if (result.entitlementId == null || result.entitlementId!.isEmpty) {
+        error = 'Missing verified entitlement';
+      } else {
+        entitlements.add(result.entitlementId!);
+        _finish(result);
       }
-      _finish(result);
     }
     notifyListeners();
   }

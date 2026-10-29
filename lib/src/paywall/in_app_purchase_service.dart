@@ -1,38 +1,196 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'paywall_controller.dart';
+import 'store_product_metadata.dart';
 
-/// Server-side verifier: send [PurchaseDetails.verificationData.serverVerificationData]
-/// to an authenticated Firebase Function, verify with Apple/Google, then return
-/// true only for an active entitlement. Never trust the client purchase status.
-typedef VerifyPurchase = Future<bool> Function(PurchaseDetails purchase);
+/// A server-verified entitlement grant. Null means verification failed and
+/// must be retried; a store receipt alone is never an entitlement.
+typedef VerifyPurchase = Future<String?> Function(PurchaseDetails purchase);
 
-/// Flutter StoreKit / Play Billing adapter. Purchase stream subscription is
-/// established before requests so pending and restored updates are not lost.
+/// Replayable transaction fields; never log or attach verificationData to events.
+class PendingPurchase {
+  final String key;
+  final String productId;
+  final String? purchaseId;
+  final String? transactionDate;
+  final String source;
+  final String serverVerificationData;
+  final bool restored;
+
+  const PendingPurchase({
+    required this.key,
+    required this.productId,
+    required this.purchaseId,
+    required this.transactionDate,
+    required this.source,
+    required this.serverVerificationData,
+    required this.restored,
+  });
+
+  factory PendingPurchase.fromPurchase(
+    PurchaseDetails purchase,
+  ) => PendingPurchase(
+    key:
+        '${purchase.verificationData.source}:${purchase.purchaseID ?? purchase.productID}:${purchase.transactionDate ?? purchase.verificationData.serverVerificationData.hashCode}',
+    productId: purchase.productID,
+    purchaseId: purchase.purchaseID,
+    transactionDate: purchase.transactionDate,
+    source: purchase.verificationData.source,
+    serverVerificationData: purchase.verificationData.serverVerificationData,
+    restored: purchase.status == PurchaseStatus.restored,
+  );
+
+  PurchaseDetails toPurchase() => PurchaseDetails(
+    purchaseID: purchaseId,
+    productID: productId,
+    transactionDate: transactionDate,
+    status: restored ? PurchaseStatus.restored : PurchaseStatus.purchased,
+    verificationData: PurchaseVerificationData(
+      source: source,
+      localVerificationData: '',
+      serverVerificationData: serverVerificationData,
+    ),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'key': key,
+    'productId': productId,
+    'purchaseId': purchaseId,
+    'transactionDate': transactionDate,
+    'source': source,
+    'serverVerificationData': serverVerificationData,
+    'restored': restored,
+  };
+
+  factory PendingPurchase.fromJson(Map<String, dynamic> json) =>
+      PendingPurchase(
+        key: json['key'] as String,
+        productId: json['productId'] as String,
+        purchaseId: json['purchaseId'] as String?,
+        transactionDate: json['transactionDate'] as String?,
+        source: json['source'] as String,
+        serverVerificationData: json['serverVerificationData'] as String,
+        restored: json['restored'] as bool,
+      );
+}
+
+/// Persist the transaction *before* verification; saves must complete before
+/// the store stream handler acknowledges or emits any result.
+abstract interface class PurchaseRetryQueue {
+  Future<List<PendingPurchase>> read();
+  Future<void> write(List<PendingPurchase> pending);
+}
+
+/// Device-local retry journal. Host apps handling sensitive receipt data should
+/// replace with an encrypted [PurchaseRetryQueue] appropriate to their threat model.
+class SharedPreferencesPurchaseRetryQueue implements PurchaseRetryQueue {
+  static const _key = 'codelessly.pending_purchases.v1';
+  @override
+  Future<List<PendingPurchase>> read() async {
+    final prefs = await SharedPreferences.getInstance();
+    return [
+      for (final entry in prefs.getStringList(_key) ?? <String>[])
+        PendingPurchase.fromJson(jsonDecode(entry) as Map<String, dynamic>),
+    ];
+  }
+
+  @override
+  Future<void> write(List<PendingPurchase> pending) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!await prefs.setStringList(_key, [
+      for (final entry in pending) jsonEncode(entry.toJson()),
+    ])) {
+      throw StateError('Could not persist purchase verification journal');
+    }
+  }
+}
+
+/// Testable interface to the in_app_purchase plugin.
+abstract interface class StorePurchaseGateway {
+  Stream<List<PurchaseDetails>> get purchaseStream;
+  Future<bool> isAvailable();
+  Future<ProductDetailsResponse> queryProductDetails(Set<String> identifiers);
+  Future<bool> buyNonConsumable({required PurchaseParam purchaseParam});
+  Future<void> restorePurchases();
+  Future<void> completePurchase(PurchaseDetails purchase);
+}
+
+class _PluginPurchaseGateway implements StorePurchaseGateway {
+  final InAppPurchase plugin = InAppPurchase.instance;
+  @override
+  Stream<List<PurchaseDetails>> get purchaseStream => plugin.purchaseStream;
+  @override
+  Future<bool> isAvailable() => plugin.isAvailable();
+  @override
+  Future<ProductDetailsResponse> queryProductDetails(Set<String> identifiers) =>
+      plugin.queryProductDetails(identifiers);
+  @override
+  Future<bool> buyNonConsumable({required PurchaseParam purchaseParam}) =>
+      plugin.buyNonConsumable(purchaseParam: purchaseParam);
+  @override
+  Future<void> restorePurchases() => plugin.restorePurchases();
+  @override
+  Future<void> completePurchase(PurchaseDetails purchase) =>
+      plugin.completePurchase(purchase);
+}
+
+/// StoreKit / Play Billing adapter; subscribes before purchase calls and
+/// replays durable unverified transactions when started or explicitly retried.
 class InAppPurchaseService implements PurchaseService {
-  final InAppPurchase store;
+  final StorePurchaseGateway store;
   final VerifyPurchase verify;
+  final PurchaseRetryQueue queue;
+  final StoreProductMetadata metadata;
   final StreamController<PaywallResult> _events = StreamController.broadcast();
   late final StreamSubscription<List<PurchaseDetails>> _subscription;
+  late final Future<void> ready;
+  Future<void> _serial = Future.value();
 
-  InAppPurchaseService({required this.verify, InAppPurchase? store})
-    : store = store ?? InAppPurchase.instance {
+  InAppPurchaseService({
+    required this.verify,
+    PurchaseRetryQueue? queue,
+    StorePurchaseGateway? store,
+    StoreProductMetadata? metadata,
+  }) : store = store ?? _PluginPurchaseGateway(),
+       queue = queue ?? SharedPreferencesPurchaseRetryQueue(),
+       metadata = metadata ?? const StoreProductMetadata() {
     _subscription = this.store.purchaseStream.listen(
-      _handle,
+      (purchases) {
+        _serial = _serial.then((_) => _handle(purchases)).catchError((
+          Object error,
+        ) {
+          _events.add(
+            PaywallResult(PaywallOutcome.failed, error: error.toString()),
+          );
+        });
+      },
       onError: (Object error) {
         _events.add(
           PaywallResult(PaywallOutcome.failed, error: error.toString()),
         );
       },
     );
+    ready = replayPending();
   }
 
   @override
   Stream<PaywallResult> get updates => _events.stream;
+
+  Future<void> replayPending() async {
+    _serial = _serial.then((_) async {
+      final pending = await queue.read();
+      for (final entry in pending) {
+        await _verifyAndComplete(entry, null);
+      }
+    });
+    await _serial;
+  }
 
   @override
   Future<List<PaywallProduct>> products(List<ProductSlot> slots) async {
@@ -46,24 +204,39 @@ class InAppPurchaseService implements PurchaseService {
         .toSet();
     final response = await store.queryProductDetails(ids);
     if (response.error != null) throw StateError(response.error!.message);
-    return [
-      for (final slot in slots)
-        for (final detail in response.productDetails)
-          if (detail.id ==
-              (Platform.isIOS ? slot.iosProductId : slot.androidProductId))
-            PaywallProduct(
-              slot: slot.id,
-              storeId: detail.id,
-              price: detail.price,
-              currency: detail.currencyCode,
-              period: '',
-              eligibleForTrial: false,
-            ),
-    ];
+    final products = <PaywallProduct>[];
+    for (final slot in slots) {
+      final storeId = Platform.isIOS
+          ? slot.iosProductId
+          : slot.androidProductId;
+      for (final detail in response.productDetails.where(
+        (item) => item.id == storeId,
+      )) {
+        products.add(await metadata.fromDetails(slot.id, detail));
+      }
+    }
+    final monthly = products
+        .where((item) => item.slot == 'monthly')
+        .firstOrNull;
+    if (monthly != null) {
+      for (var i = 0; i < products.length; i++) {
+        final product = products[i];
+        if (product.slot != 'annual') continue;
+        final savings = StoreProductMetadata.savingsPercent(
+          annual: product,
+          monthly: monthly,
+        );
+        if (savings != null) {
+          products[i] = product.copyWith(savingsPercent: savings);
+        }
+      }
+    }
+    return products;
   }
 
   @override
   Future<void> purchase(PaywallProduct product) async {
+    await ready;
     final response = await store.queryProductDetails({product.storeId});
     if (response.error != null || response.productDetails.isEmpty) {
       throw StateError('Store product not found: ${product.storeId}');
@@ -81,41 +254,41 @@ class InAppPurchaseService implements PurchaseService {
   }
 
   @override
-  Future<void> restore() => store.restorePurchases();
+  Future<void> restore() async {
+    await ready;
+    await store.restorePurchases();
+  }
 
   Future<void> _handle(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
+      if (purchase.status == PurchaseStatus.pending) continue;
+      if (purchase.status == PurchaseStatus.error ||
+          purchase.status == PurchaseStatus.canceled) {
+        _events.add(
+          PaywallResult(
+            purchase.status == PurchaseStatus.canceled
+                ? PaywallOutcome.cancelled
+                : PaywallOutcome.failed,
+            productId: purchase.productID,
+            error: purchase.error?.message,
+          ),
+        );
+        continue;
+      }
+      if (purchase.status != PurchaseStatus.purchased &&
+          purchase.status != PurchaseStatus.restored) {
+        continue;
+      }
       try {
-        if (purchase.status == PurchaseStatus.pending) continue;
-        if (purchase.status == PurchaseStatus.error ||
-            purchase.status == PurchaseStatus.canceled) {
-          _events.add(
-            PaywallResult(
-              purchase.status == PurchaseStatus.canceled
-                  ? PaywallOutcome.cancelled
-                  : PaywallOutcome.failed,
-              productId: purchase.productID,
-              error: purchase.error?.message,
-            ),
-          );
-        } else if (purchase.status == PurchaseStatus.purchased ||
-            purchase.status == PurchaseStatus.restored) {
-          final verified = await verify(purchase);
-          _events.add(
-            PaywallResult(
-              verified
-                  ? (purchase.status == PurchaseStatus.restored
-                        ? PaywallOutcome.restored
-                        : PaywallOutcome.purchased)
-                  : PaywallOutcome.failed,
-              productId: purchase.productID,
-              error: verified
-                  ? null
-                  : 'Store transaction could not be verified',
-            ),
-          );
+        final entry = PendingPurchase.fromPurchase(purchase);
+        final pending = await queue.read();
+        if (!pending.any((item) => item.key == entry.key)) {
+          await queue.write([...pending, entry]);
         }
+        await _verifyAndComplete(entry, purchase);
       } catch (error) {
+        // Never call completePurchase here: keep store delivery pending until
+        // the journal is durable and the server has verified the grant.
         _events.add(
           PaywallResult(
             PaywallOutcome.failed,
@@ -123,17 +296,52 @@ class InAppPurchaseService implements PurchaseService {
             error: error.toString(),
           ),
         );
-      } finally {
-        if (purchase.pendingCompletePurchase) {
-          await store.completePurchase(purchase);
-        }
       }
+    }
+  }
+
+  Future<void> _verifyAndComplete(
+    PendingPurchase entry,
+    PurchaseDetails? live,
+  ) async {
+    try {
+      final entitlementId = await verify(live ?? entry.toPurchase());
+      if (entitlementId == null || entitlementId.isEmpty) {
+        throw StateError('Purchase verification pending');
+      }
+      if (live != null && live.pendingCompletePurchase) {
+        await store.completePurchase(live);
+      }
+      // On replay no live store object exists to acknowledge. Retain the
+      // journal until StoreKit/Play redelivers the unfinished transaction.
+      if (live != null) {
+        final pending = await queue.read();
+        await queue.write(
+          pending.where((item) => item.key != entry.key).toList(),
+        );
+      }
+      _events.add(
+        PaywallResult(
+          entry.restored ? PaywallOutcome.restored : PaywallOutcome.purchased,
+          productId: entry.productId,
+          entitlementId: entitlementId,
+        ),
+      );
+    } catch (error) {
+      _events.add(
+        PaywallResult(
+          PaywallOutcome.failed,
+          productId: entry.productId,
+          error: error.toString(),
+        ),
+      );
     }
   }
 
   @override
   Future<void> dispose() async {
     await _subscription.cancel();
+    await _serial;
     await _events.close();
   }
 }

@@ -1894,6 +1894,9 @@ extension ActionModelExt on ActionModel {
         };
       case ActionType.delay:
         return {};
+      case ActionType.paywall:
+        final PaywallAction action = this as PaywallAction;
+        return _namesIn([?action.slot, ?action.url], includePredefined);
       case ActionType.copyToClipboard:
         strings.add((this as CopyToClipboardAction).text);
         return _namesIn(strings, includePredefined);

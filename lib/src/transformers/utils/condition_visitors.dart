@@ -142,6 +142,9 @@ class ConditionVariablesVisitor
   Set<String>? visitCopyToClipboardAction(CopyToClipboardAction action) => {};
 
   @override
+  Set<String>? visitPaywallAction(PaywallAction action) => {};
+
+  @override
   Set<String>? visitCloudDataAction(CloudDataAction action) => {};
 
   @override
@@ -236,6 +239,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitCopyToClipboardAction(CopyToClipboardAction action) => null;
+
+  @override
+  String? visitPaywallAction(PaywallAction action) => null;
 
   @override
   String? visitCloudDataAction(CloudDataAction action) => null;
