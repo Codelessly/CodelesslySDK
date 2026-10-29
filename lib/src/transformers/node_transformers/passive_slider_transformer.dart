@@ -58,9 +58,8 @@ class PassiveSliderWidget extends StatelessWidget {
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
 
-  /// The values the slider's bound `value`, `min` and `max` read, such as a
-  /// design canvas's variable defaults. When null they come from [context]
-  /// with [variablesOverrides].
+  /// The values the slider's bindings read, such as design canvas defaults.
+  /// When null, bindings use the build context and [variablesOverrides].
   final ScopedValues? scopedValues;
 
   const PassiveSliderWidget({

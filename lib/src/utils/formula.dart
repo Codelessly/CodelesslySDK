@@ -503,7 +503,7 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'set',
-      'set(map, key, value) or set(list, index, value)',
+      'set(map, key, value, …) or set(list, index, value)',
       "set(rig, 'length', 36) → rig, 36 ft long",
     ),
     FormulaFunctionDoc('keys', 'keys(map)', 'keys(rig) → [name, length, …]'),
@@ -571,12 +571,15 @@ class FormulaEvaluator {
       'findIndex(tasks, "id", id) → 2 (-1 when missing)',
     ),
     FormulaFunctionDoc('newId', 'newId(prefix)', 'newId("task") → task_k3x9f2'),
-    FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc(
-      'concat',
-      'concat(list, list or value, ...)',
-      'concat(take(history, 23), [soc])',
+      'get',
+      'get(map or list, key)',
+      "get(lineNames, item.line) → 'Weld'",
     ),
+    FormulaFunctionDoc('take', 'take(list, count)', 'take(pareto, index + 1)'),
+    FormulaFunctionDoc('range', 'range(count)', 'range(3) → [0, 1, 2]'),
+    FormulaFunctionDoc('skip', 'skip(list, count)', 'skip(events, 25)'),
+    FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc(
       'alpha',
       'alpha(color, opacity)',
@@ -1865,7 +1868,13 @@ final Map<String, _Function> _functions = {
   'skip': (a) => _slice(_arg(a, 0), math.max(0, _intArg(_arg(a, 1))), null),
   'reverse': (a) => _reverse(_arg(a, 0)),
   'merge': _merge,
-  'set': (a) => _set(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'set': (a) {
+    Object? result = _arg(a, 0);
+    for (int i = 1; i + 1 < a.length; i += 2) {
+      result = _set(result, a[i], a[i + 1]);
+    }
+    return result;
+  },
   'unique': _unique,
   'concat': (a) => [
     for (final value in a)
@@ -1987,11 +1996,12 @@ final Map<String, _Function> _functions = {
     ];
   },
   'newId': (a) => _newId(_arg(a, 0)),
+  'get': (a) => _member(_arg(a, 0), _arg(a, 1)),
   'number': (a) => _toNum(_arg(a, 0)),
   'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
   'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
-    _intArg(_arg(a, 1)),
-    _arg(a, 2) == null ? '0' : FormulaEvaluator.stringify(_arg(a, 2)),
+    _arg(a, 1) == null ? 2 : _intArg(_arg(a, 1)),
+    FormulaEvaluator.stringify(_arg(a, 2) ?? '0'),
   ),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),

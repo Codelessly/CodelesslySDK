@@ -109,6 +109,10 @@ class PassiveProgressBarWidget extends StatelessWidget {
   final bool? animate;
   final ValueChanged<double>? onChanged;
 
+  /// The values bindings read instead of the build context's, such as the
+  /// variable defaults a design canvas shows.
+  final ScopedValues? scopedValues;
+
   const PassiveProgressBarWidget({
     super.key,
     required this.node,
@@ -116,14 +120,14 @@ class PassiveProgressBarWidget extends StatelessWidget {
     this.variablesOverrides = const [],
     this.animate,
     this.onChanged,
+    this.scopedValues,
   });
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = ScopedValues.of(
-      context,
-      variablesOverrides: variablesOverrides,
-    );
+    final ScopedValues scopedValues =
+        this.scopedValues ??
+        ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final double currentValue =
         PropertyValueDelegate.getPropertyValue<double>(
           node,
