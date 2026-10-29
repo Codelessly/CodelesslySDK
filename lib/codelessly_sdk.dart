@@ -7,6 +7,7 @@ export 'src/codelessly.dart';
 export 'src/paywall/paywall_controller.dart';
 export 'src/paywall/paywall_widget.dart';
 export 'src/paywall/in_app_purchase_service.dart';
+export 'src/paywall/store_product_metadata.dart';
 export 'src/codelessly_config.dart';
 export 'src/constants.dart';
 export 'src/data/cloud_data.dart';
