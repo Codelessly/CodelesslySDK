@@ -5,7 +5,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 
@@ -46,6 +46,46 @@ class Codelessly {
   /// Returns the global singleton instance of the SDK.
   /// Initialization is needed before usage.
   static Codelessly get instance => _instance;
+
+  /// Present a named published paywall and await its terminal result.
+  /// [resolvePlacement] must resolve the current targeted placement from the
+  /// project's published manifest, not from the editor's draft.
+  static Future<PaywallResult> paywall({
+    required BuildContext context,
+    required String placement,
+    required Future<PaywallPlacement> Function(String placement)
+    resolvePlacement,
+    required PurchaseService purchaseService,
+    required List<ProductSlot> slots,
+  }) async {
+    final resolved = await resolvePlacement(placement);
+    if (!context.mounted) return const PaywallResult(PaywallOutcome.cancelled);
+    final controller = PaywallController(
+      service: purchaseService,
+      slots: slots
+          .where((slot) => resolved.productSlots.contains(slot.id))
+          .toList(),
+    );
+    try {
+      final route = MaterialPageRoute<void>(
+        builder: (_) => CodelesslyPaywall(
+          layoutId: resolved.layoutId,
+          controller: controller,
+        ),
+      );
+      final popped = Navigator.of(context).push(route);
+      final outcome = await Future.any<PaywallResult>([
+        controller.result,
+        popped.then((_) => const PaywallResult(PaywallOutcome.cancelled)),
+      ]);
+      if (route.isActive && context.mounted) {
+        Navigator.of(context).removeRoute(route);
+      }
+      return outcome;
+    } finally {
+      controller.dispose();
+    }
+  }
 
   final Client _client;
 
