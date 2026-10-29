@@ -39,7 +39,7 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    the same rules as `${path}`, followed by `[index]` or `.key`.
 ///  - `+ - * / %`, comparisons `== != < <= > >=`, `&& || !` and
 ///    `condition ? a : b`. `+` joins text when either side is text.
-///  - functions: money, fixed, round, floor, ceil, abs, min, max, sum, count,
+///  - functions: money, fixed, thousands, round, floor, ceil, abs, min, max, sum, count,
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
 ///    endsWith, where, without, number, text, isEmpty, isNotEmpty, padLeft,
 ///    padRight, substring, split, replace and coalesce. See
@@ -78,8 +78,12 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    reverse (these also work on text), range(end) or range(start, end,
 ///    step), and indexOf(list, value or predicate), which is -1 when nothing
 ///    matches.
+///  - record helpers: unset, prepend, updateWhere, removeWhere, findIndex
+///    and newId; set also takes a list and an index, and indexOf and slice
+///    also take text. Like the list edits they return new values.
 ///  - series helpers: interpolate, runs, minBy and maxBy.
-///  - date functions: now, today, wallTime, parseDate, formatDate, addMinutes, addHours,
+///  - date functions: now, today, wallTime, parseDate, formatDate,
+///    addMinutes, addHours,
 ///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
 ///    hour, minute, weekday and daysInMonth. Dates are ISO 8601 text such as
 ///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
@@ -467,7 +471,7 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'set',
-      'set(map, key, value)',
+      'set(map, key, value) or set(list, index, value)',
       "set(rig, 'length', 36) → rig, 36 ft long",
     ),
     FormulaFunctionDoc('keys', 'keys(map)', 'keys(rig) → [name, length, …]'),
@@ -512,6 +516,29 @@ class FormulaEvaluator {
       'thousands(value, decimals)',
       'thousands(1094) → 1,094',
     ),
+    FormulaFunctionDoc('unset', 'unset(map, key)', 'unset(task, "draft")'),
+    FormulaFunctionDoc(
+      'prepend',
+      'prepend(list, item)',
+      'prepend(notes, note)',
+    ),
+    FormulaFunctionDoc(
+      'updateWhere',
+      'updateWhere(list, item => condition, item => newItem) or '
+          'updateWhere(list, field, value, item => newItem or map to merge)',
+      'updateWhere(tasks, "id", id, t => set(t, "done", !t.done))',
+    ),
+    FormulaFunctionDoc(
+      'removeWhere',
+      'removeWhere(list, item => condition) or removeWhere(list, field, value)',
+      'removeWhere(tasks, "id", id)',
+    ),
+    FormulaFunctionDoc(
+      'findIndex',
+      'findIndex(list, item => condition) or findIndex(list, field, value)',
+      'findIndex(tasks, "id", id) → 2 (-1 when missing)',
+    ),
+    FormulaFunctionDoc('newId', 'newId(prefix)', 'newId("task") → task_k3x9f2'),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
     FormulaFunctionDoc(
@@ -769,7 +796,7 @@ String _money(Object? value, Object? symbol, Object? decimals) {
   final bool auto =
       decimals is String && decimals.trim().toLowerCase() == 'auto';
   final num amount = _num(value);
-  if (amount.isNaN) return '';
+  if (!amount.isFinite) return '';
   int digits = auto || decimals == null ? 2 : _intArg(decimals).clamp(0, 20);
   if (auto && (amount * 100).round() % 100 == 0) digits = 0;
   final String sign = amount < 0 ? '-' : '';
@@ -942,18 +969,18 @@ Map<String, Object?> _merge(Iterable<Object?> maps) => {
 };
 
 /// A copy of [target] with [key] set to [value]: an object's field, or a
-/// list's item at an index (an index out of range changes nothing).
+/// list's item at an index. Out-of-range indices leave lists unchanged.
 Object? _set(Object? target, Object? key, Object? value) {
   if (target is List) {
+    final List<Object?> list = [...target];
     final num? index = _toNum(key);
-    if (index == null || index < 0 || index >= target.length) {
-      return [...target];
-    }
-    return [...target]..[index.toInt()] = value;
+    if (index == null || !index.isFinite || index < 0) return list;
+    if (index >= list.length) return list;
+    return list..[index.toInt()] = value;
   }
   return {
     ..._merge([target]),
-    key.toString(): value,
+    FormulaEvaluator.stringify(key): value,
   };
 }
 
@@ -1506,6 +1533,40 @@ String? _wallTime(Object? value) {
 
 typedef _Function = Object? Function(List<Object?> args);
 
+/// [value] as a list: a copy of a list, an empty list for null, else a list
+/// of that one value.
+List<Object?> _listOf(Object? value) => switch (value) {
+  null => [],
+  final Iterable l => [...l],
+  _ => [value],
+};
+
+/// [value] as a map with text keys: a copy of a map, else empty.
+Map<String, Object?> _mapOf(Object? value) => switch (value) {
+  final Map m => {for (final e in m.entries) '${e.key}': e.value},
+  _ => {},
+};
+
+/// `updateWhere(list, predicate…, update)`: items matching the predicate
+/// (a lambda, or a field and value) are replaced by `update(item)` when it
+/// is a lambda, or merged with it when it is a map.
+List<Object?> _updateWhere(List<Object?> args) {
+  if (args.length < 3) return _listOf(_arg(args, 0));
+  final Object? update = args.last;
+  final List<Object?> predicate = args.sublist(1, args.length - 1);
+  return [
+    for (final item in _values(_arg(args, 0), null))
+      if (!_matches(item, predicate))
+        item
+      else if (update is _Closure)
+        update(item)
+      else if (update is Map)
+        {..._mapOf(item), ..._mapOf(update)}
+      else
+        update,
+  ];
+}
+
 /// A list index from [value]: negative counts from the end, and the result
 /// is clamped to `0..length`. [fallback] when [value] isn't a number.
 int _index(Object? value, int length, int fallback) {
@@ -1514,6 +1575,19 @@ int _index(Object? value, int length, int fallback) {
   if (n == null || n.isNaN) return fallback;
   final int i = n.toInt();
   return (i < 0 ? length + i : i).clamp(0, length);
+}
+
+final math.Random _idRandom = math.Random();
+
+/// A short random id, such as `log_k3x9f2a1`, for new records.
+String _newId(Object? prefix) {
+  const String chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  final String id = String.fromCharCodes([
+    for (int i = 0; i < 8; i++)
+      chars.codeUnitAt(_idRandom.nextInt(chars.length)),
+  ]);
+  final String p = FormulaEvaluator.stringify(prefix);
+  return p.isEmpty ? id : '${p}_$id';
 }
 
 int _count(Object? value) {
@@ -1800,6 +1874,18 @@ final Map<String, _Function> _functions = {
     return n <= 0 ? '' : _substring(_arg(a, 0), -n, null);
   },
   'toMap': _toMap,
+  'unset': (a) =>
+      _mapOf(_arg(a, 0))..remove(FormulaEvaluator.stringify(_arg(a, 1))),
+  'prepend': (a) => [_arg(a, 1), ..._listOf(_arg(a, 0))],
+  'updateWhere': _updateWhere,
+  'removeWhere': (a) {
+    final List<Object?> rest = a.skip(1).toList();
+    return [
+      for (final item in _values(_arg(a, 0), null))
+        if (!_matches(item, rest)) item,
+    ];
+  },
+  'newId': (a) => _newId(_arg(a, 0)),
   'number': (a) => _toNum(_arg(a, 0)),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),

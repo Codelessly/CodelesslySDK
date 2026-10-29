@@ -443,6 +443,7 @@ class PropertyValueDelegate {
       'result' => ActionChain.current?.result,
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
       'parent' => scopedValues.parentSize,
+      'hold' => scopedValues.holdProgress ?? 0.0,
       _ => null,
     };
 

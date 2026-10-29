@@ -11,10 +11,12 @@ class CodelesslyDialogWidget extends StatelessWidget {
   /// or anywhere else, e.g. a menu at the top right.
   final AlignmentGeometry alignment;
 
-  /// Whether the dialog is only as tall as its canvas, as a bottom sheet is,
-  /// so the space above it stays the sheet's scrim (a tap there dismisses
-  /// it). A centered dialog fills the screen to place its canvas.
+  /// Whether the dialog is only as tall as its canvas, leaving the space
+  /// above a bottom sheet to its dismissible scrim.
   final bool hugHeight;
+
+  /// Design-sized dialog, full-width sheet, or full-screen canvas.
+  final CanvasSizing sizing;
 
   const CodelesslyDialogWidget({
     super.key,
@@ -22,25 +24,34 @@ class CodelesslyDialogWidget extends StatelessWidget {
     required this.showCloseButton,
     this.alignment = Alignment.center,
     this.hugHeight = false,
+    this.sizing = CanvasSizing.design,
   });
 
   @override
   Widget build(BuildContext context) {
-    // A dialog is centered and sized by its layout, so its canvas keeps its
-    // design size instead of filling the screen, unless it holds a
-    // responsive layout (see CanvasSizing.design). Taps on its empty parts
-    // reach the barrier.
+    // Responsive layouts can follow the screen even in a design-sized
+    // dialog. Empty transparent areas let taps reach the dismissible barrier.
     return CanvasSizingScope(
-      sizing: CanvasSizing.design,
+      sizing: sizing,
       child: TapThroughScope(child: Builder(builder: _buildDialog)),
     );
   }
 
+  /// A sheet sits on the bottom edge wherever the action places a dialog.
+  AlignmentGeometry get _alignment =>
+      sizing == CanvasSizing.sheet || sizing == CanvasSizing.fillWidth
+      ? Alignment.bottomCenter
+      : alignment;
+
   Widget _buildDialog(BuildContext context) {
+    final bool sheetHeight =
+        hugHeight ||
+        sizing == CanvasSizing.sheet ||
+        sizing == CanvasSizing.fillWidth;
     if (showCloseButton) {
       return Align(
-        alignment: alignment,
-        heightFactor: hugHeight ? 1 : null,
+        alignment: _alignment,
+        heightFactor: sheetHeight ? 1 : null,
         child: Material(
           type: MaterialType.transparency,
           child: Stack(
@@ -64,9 +75,10 @@ class CodelesslyDialogWidget extends StatelessWidget {
       );
     }
 
+    if (sizing == CanvasSizing.fill) return builder(context);
     return Align(
-      alignment: alignment,
-      heightFactor: hugHeight ? 1 : null,
+      alignment: _alignment,
+      heightFactor: sheetHeight ? 1 : null,
       child: builder(context),
     );
   }

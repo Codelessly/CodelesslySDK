@@ -320,33 +320,36 @@ void main() {
   }
 
   for (final presentation in DialogPresentation.values) {
-    testWidgets('tapping the scrim dismisses a ${presentation.name}', (
-      tester,
-    ) async {
-      await pumpLayouts(tester, [
-        mainLayout([
-          ShowDialogAction(
-            destinationId: 'sheetCanvas',
-            presentation: presentation,
-            sheetWidth: 440,
-          ),
-          ShowToastAction(message: r'Closed with ${result.flag}'),
-        ]),
-        sheetLayout(),
-      ], size: tablet);
-      await tester.tap(find.text('Go'));
-      await tester.pumpAndSettle();
-      expect(find.text('Done'), findsOneWidget);
+    // A full-screen canvas covers the route: there is no outside scrim.
+    if (presentation != DialogPresentation.fullScreen) {
+      testWidgets('tapping the scrim dismisses a ${presentation.name}', (
+        tester,
+      ) async {
+        await pumpLayouts(tester, [
+          mainLayout([
+            ShowDialogAction(
+              destinationId: 'sheetCanvas',
+              presentation: presentation,
+              sheetWidth: 440,
+            ),
+            ShowToastAction(message: r'Closed with ${result.flag}'),
+          ]),
+          sheetLayout(),
+        ], size: tablet);
+        await tester.tap(find.text('Go'));
+        await tester.pumpAndSettle();
+        expect(find.text('Done'), findsOneWidget);
 
-      await tester.tapAt(const Offset(10, 10));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('Done'), findsNothing);
-      // Dismissed, it passes nothing back.
-      expect(find.text('Closed with '), findsOneWidget);
-      await tester.pump(const Duration(seconds: 3));
-      await tester.pumpAndSettle();
-    });
+        await tester.tapAt(const Offset(10, 10));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(find.text('Done'), findsNothing);
+        // Dismissed, it passes nothing back.
+        expect(find.text('Closed with '), findsOneWidget);
+        await tester.pump(const Duration(seconds: 3));
+        await tester.pumpAndSettle();
+      });
+    }
 
     testWidgets('a ${presentation.name} that is not barrier dismissible '
         'stays open', (tester) async {

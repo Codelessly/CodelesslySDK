@@ -17,6 +17,10 @@ class ScopedValues {
   /// The exposed internal value of a node in the widget tree.
   late final Object? nodeState;
 
+  /// How far the nearest hold-to-confirm above this context has been held,
+  /// 0 to 1, or null outside one.
+  late final double? holdProgress;
+
   /// The route params for this route/page for given context.
   late final Map<String, dynamic> routeParams;
 
@@ -79,6 +83,7 @@ class ScopedValues {
       _dataOverrides = null,
       indexedItem = null,
       nodeState = null,
+      holdProgress = null,
       routeParams = {},
       _appUser = null,
       screenSize = null,
@@ -103,6 +108,7 @@ class ScopedValues {
        _dataOverrides = data,
        _previewVariables = variables,
        nodeState = null,
+       holdProgress = null,
        routeParams = {};
 
   /// Creates a new scoped values instance from a given context.
@@ -121,6 +127,7 @@ class ScopedValues {
     screenSize = MediaQuery.maybeSizeOf(context);
     parentSize = ParentSizeScope.valueOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
+    holdProgress = HoldProgressProvider.maybeOf(context);
     final instance = context.read<Codelessly?>();
     // Screens the app navigates to carry their parameters; the first screen
     // shows in the host's route and takes them from the app's link.
