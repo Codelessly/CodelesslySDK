@@ -30,9 +30,8 @@ typedef CodelessNodeAction = FutureOr<void> Function(
 /// the existing observable variable pipeline.
 ///
 /// [onAction] receives enabled [CallFunctionAction] reactions, including
-/// substituted parameters. Other SDK action types are handled by the existing
-/// action runner and may require a full Codelessly host; this widget does not
-/// provide an action sandbox, streaming adapter, or published-model services.
+/// substituted parameters. Other reaction types are rejected before rendering;
+/// standalone trees cannot execute native actions.
 /// Host this widget under a MaterialApp for Material widgets and navigation.
 class CodelessNodeTreeView extends StatefulWidget {
   const CodelessNodeTreeView({
@@ -77,10 +76,25 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.nodes != widget.nodes ||
         oldWidget.rootId != widget.rootId ||
-        oldWidget.data != widget.data ||
-        oldWidget.variables != widget.variables ||
-        oldWidget.onAction != widget.onAction) {
+        oldWidget.variables != widget.variables) {
       _load();
+    } else if (oldWidget.data != widget.data) {
+      final context = _context!;
+      context.data = widget.data;
+      for (final variable in widget.variables.values) {
+        final current = context.variables[variable.id];
+        if (current == null) continue;
+        final previous = oldWidget.data.containsKey(variable.name)
+            ? oldWidget.data[variable.name]
+            : variable.value;
+        final next = widget.data.containsKey(variable.name)
+            ? widget.data[variable.name]
+            : variable.value;
+        // A user-edited field wins over an unrelated data refresh.
+        if (current.value.value == previous && previous != next) {
+          current.value = variable.copyWith(value: next);
+        }
+      }
     }
   }
 
@@ -93,6 +107,19 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
         throw ArgumentError(
           'Node map key ${entry.key} does not match node id ${entry.value.id}',
         );
+      }
+    }
+    // Reject native actions even on currently unreachable nodes.
+    for (final node in widget.nodes.values) {
+      if (node is ReactionMixin) {
+        for (final reaction in (node as ReactionMixin).reactions) {
+          if (reaction.action is! CallFunctionAction) {
+            throw ArgumentError(
+              'Standalone tree rejects action '
+              '${reaction.action.type} on node ${node.id}',
+            );
+          }
+        }
       }
     }
     final old = _context;
@@ -115,12 +142,9 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
     for (final node in nodes.values) {
       if (node is ReactionMixin) {
         for (final reaction in (node as ReactionMixin).reactions) {
-          context.handleActionConnections(reaction.action, nodes);
-          if (reaction.action is CallFunctionAction) {
-            final name = (reaction.action as CallFunctionAction).name;
-            context.functions[name] = (_, _, params) =>
-                widget.onAction?.call(name, params);
-          }
+          final name = (reaction.action as CallFunctionAction).name;
+          context.functions[name] = (_, _, params) =>
+              widget.onAction?.call(name, params);
         }
       }
     }
