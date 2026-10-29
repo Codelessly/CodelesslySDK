@@ -65,8 +65,10 @@ class ScopedValues {
   Map<String, VariableData> get variables => {
     ...?_previewVariables,
     ...codelesslyContext?.variableNamesMap() ?? const {},
+    // By name, as everything reading this map looks variables up (a
+    // formula's `formStart`); keyed by id an override was never found.
     for (final variable in _variablesOverrides ?? const [])
-      variable.id: variable,
+      variable.name: variable,
   };
 
   /// A map of data that is passed to loaded layouts for nodes to replace their

@@ -31,6 +31,12 @@ class LayoutPresentationRoute<T> extends PopupRoute<T> {
   /// The most of the screen's height a bottom sheet takes.
   final double maxHeightFactor;
 
+  /// The inset of a side sheet from the viewport edges.
+  final EdgeInsets insets;
+
+  /// Whether the destination canvas sizes its side sheet to content.
+  final bool hugsContent;
+
   /// Whether a bottom sheet shows a grab handle.
   final bool showDragHandle;
 
@@ -45,6 +51,8 @@ class LayoutPresentationRoute<T> extends PopupRoute<T> {
     this.sheetWidth,
     this.designWidth,
     this.maxHeightFactor = 1,
+    this.insets = EdgeInsets.zero,
+    this.hugsContent = false,
     this.showDragHandle = false,
     this.barrierDismissible = true,
     this.barrierColor = Colors.black54,
@@ -123,6 +131,8 @@ class LayoutPresentationRoute<T> extends PopupRoute<T> {
         ),
         DialogPresentation.sideSheet => _SideSheet(
           width: sheetWidth ?? designWidth ?? defaultSheetWidth,
+          insets: insets,
+          hugsContent: hugsContent,
           showCloseButton: showCloseButton,
           builder: builder,
         ),
@@ -278,11 +288,15 @@ class _DragHandle extends StatelessWidget {
 /// [width] wide.
 class _SideSheet extends StatelessWidget {
   final double width;
+  final EdgeInsets insets;
+  final bool hugsContent;
   final bool showCloseButton;
   final WidgetBuilder builder;
 
   const _SideSheet({
     required this.width,
+    required this.insets,
+    required this.hugsContent,
     required this.showCloseButton,
     required this.builder,
   });
@@ -290,30 +304,47 @@ class _SideSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Size screen = MediaQuery.sizeOf(context);
-    return Align(
-      alignment: Alignment.centerRight,
-      child: DecoratedBox(
-        key: const ValueKey('Codelessly side sheet'),
-        decoration: const BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x33000000),
-              blurRadius: 24,
-              offset: Offset(-4, 0),
-            ),
-          ],
-        ),
-        child: SizedBox(
-          width: min(width, screen.width),
-          height: screen.height,
-          child: CanvasSizingScope(
-            sizing: CanvasSizing.fill,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Builder(builder: builder),
-                if (showCloseButton) const _CloseButton(),
-              ],
+    return Padding(
+      padding: insets,
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: DecoratedBox(
+          key: const ValueKey('Codelessly side sheet'),
+          decoration: const BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x33000000),
+                blurRadius: 24,
+                offset: Offset(-4, 0),
+              ),
+            ],
+          ),
+          child: SizedBox(
+            width: min(width, max(0, screen.width - insets.horizontal)),
+            height: hugsContent
+                ? null
+                : max(0, screen.height - insets.vertical),
+            child: CanvasSizingScope(
+              sizing: hugsContent ? CanvasSizing.design : CanvasSizing.fill,
+              child: hugsContent
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Stack(
+                          children: [
+                            Builder(builder: builder),
+                            if (showCloseButton) const _CloseButton(),
+                          ],
+                        ),
+                      ],
+                    )
+                  : Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Builder(builder: builder),
+                        if (showCloseButton) const _CloseButton(),
+                      ],
+                    ),
             ),
           ),
         ),

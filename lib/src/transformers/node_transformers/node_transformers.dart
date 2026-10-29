@@ -5,6 +5,7 @@ export 'passive_app_bar_transformer.dart';
 export 'passive_badge_transformer.dart';
 export 'passive_button_transformer.dart';
 export 'passive_canvas_transformer.dart';
+export 'passive_chart_transformer.dart';
 export 'passive_checkbox_transformer.dart';
 export 'passive_chip_transformer.dart';
 export 'passive_divider_transformer.dart';

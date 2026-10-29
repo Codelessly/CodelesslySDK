@@ -695,6 +695,13 @@ class SDKPublishUpdates with Equatable {
   /// apis of a given project.
   final Map<String, Set<String>> layoutApis;
 
+  /// A map that holds a mapping of layout ids -> the ids of the canvases the
+  /// layout holds.
+  ///
+  /// This lets the SDK find the layout of a canvas (the destination of a
+  /// navigation or dialog action) before the layout itself is downloaded.
+  final Map<String, Set<String>> layoutCanvases;
+
   /// Creates a new instance of [SDKPublishUpdates].
   SDKPublishUpdates({
     this.fonts = const {},
@@ -704,6 +711,7 @@ class SDKPublishUpdates with Equatable {
     this.conditions = const {},
     this.layoutFonts = const {},
     this.layoutApis = const {},
+    this.layoutCanvases = const {},
   });
 
   /// Creates a copy of this instance with the provided parameters.
@@ -715,6 +723,7 @@ class SDKPublishUpdates with Equatable {
     Map<String, DateTime>? conditions,
     Map<String, Set<String>>? layoutFonts,
     Map<String, Set<String>>? layoutApis,
+    Map<String, Set<String>>? layoutCanvases,
   }) {
     return SDKPublishUpdates(
       fonts: fonts ?? this.fonts,
@@ -724,7 +733,50 @@ class SDKPublishUpdates with Equatable {
       conditions: conditions ?? this.conditions,
       layoutFonts: layoutFonts ?? this.layoutFonts,
       layoutApis: layoutApis ?? this.layoutApis,
+      layoutCanvases: layoutCanvases ?? this.layoutCanvases,
     );
+  }
+
+  /// These updates with [newer] applied on top: what the publish model holds
+  /// after a publish that changed only some of the layouts (for instance the
+  /// layouts of one page of a project).
+  ///
+  /// Timestamps are combined, and the per-layout maps ([layoutFonts],
+  /// [layoutApis], [layoutCanvases]) keep the entries of layouts [newer] does
+  /// not mention while taking [newer]'s entries for the layouts it does.
+  /// A canvas that [newer] places in a layout is dropped from any other
+  /// layout that listed it, since a canvas lives in one layout.
+  SDKPublishUpdates merge(SDKPublishUpdates newer) {
+    final Set<String> movedCanvases = {
+      for (final Set<String> canvases in newer.layoutCanvases.values)
+        ...canvases,
+    };
+    return SDKPublishUpdates(
+      fonts: {...fonts, ...newer.fonts},
+      layouts: {...layouts, ...newer.layouts},
+      apis: {...apis, ...newer.apis},
+      variables: {...variables, ...newer.variables},
+      conditions: {...conditions, ...newer.conditions},
+      layoutFonts: {...layoutFonts, ...newer.layoutFonts},
+      layoutApis: {...layoutApis, ...newer.layoutApis},
+      layoutCanvases: {
+        for (final MapEntry(key: String layoutId, value: Set<String> canvases)
+            in layoutCanvases.entries)
+          if (!newer.layoutCanvases.containsKey(layoutId))
+            layoutId: canvases.difference(movedCanvases),
+        ...newer.layoutCanvases,
+      }..removeWhere((_, Set<String> canvases) => canvases.isEmpty),
+    );
+  }
+
+  /// The id of the layout that holds canvas [canvasId] according to
+  /// [layoutCanvases], if any.
+  String? layoutIdForCanvas(String canvasId) {
+    for (final MapEntry(key: String layoutId, value: Set<String> canvases)
+        in layoutCanvases.entries) {
+      if (canvases.contains(canvasId)) return layoutId;
+    }
+    return null;
   }
 
   @override
@@ -736,6 +788,7 @@ class SDKPublishUpdates with Equatable {
     conditions,
     layoutFonts,
     layoutApis,
+    layoutCanvases,
   ];
 
   /// Creates a new instance of [SDKPublishUpdates] from a JSON map.
@@ -870,15 +923,17 @@ class SDKLayoutConditions extends PrivacyBase {
 /// Finding layouts in a published model.
 extension SDKPublishModelLayouts on SDKPublishModel {
   /// The layout [id] names: a layout ID, or the ID of a canvas in a layout,
-  /// so a link can open a screen by its canvas. Null when [id] is null or
-  /// names neither.
+  /// so a link can open a screen by its canvas. Layouts not loaded yet (on
+  /// another page, or loaded on demand) are found through
+  /// [SDKPublishUpdates.layoutCanvases]. Null when [id] is null or names
+  /// neither.
   String? resolveLayoutId(String? id) {
     if (id == null || id.isEmpty) return null;
     if (layouts.containsKey(id)) return id;
     for (final SDKPublishLayout layout in layouts.values) {
       if (layout.canvasIds.contains(id)) return layout.id;
     }
-    return null;
+    return updates.layoutIdForCanvas(id);
   }
 
   /// The parameters [link] gives a screen of layout [layoutId] (the entry

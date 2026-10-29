@@ -697,18 +697,28 @@ bool isCustomPositionRequiredForImage(PaintModel paint, SizeC nodeSize) {
 
 /// Wraps [child] in [node]'s scroll view, sized by [node]'s fits (see
 /// [FitBox]). See [buildScrollView] for [fillViewport] and [flexContent].
+///
+/// With [contentSizedOnScrollAxis] the scroll view hugs its content along
+/// the scroll axis (at most the incoming maximum) instead of taking its
+/// design size: a flexible Row/Column that scrolls.
 Widget wrapWithPaddedScrollable({
   required ScrollableMixin node,
   EdgeInsets? padding,
   Clip? clipBehavior,
   bool fillViewport = false,
   bool flexContent = false,
+  bool contentSizedOnScrollAxis = false,
   required Widget child,
 }) {
   if (!node.isScrollable) return child;
+  final bool vertical = node.scrollDirection.isVertical;
   return FitBox.fromFits(
-    horizontalFit: node.horizontalFit,
-    verticalFit: node.verticalFit,
+    horizontalFit: contentSizedOnScrollAxis && !vertical
+        ? SizeFit.shrinkWrap
+        : node.horizontalFit,
+    verticalFit: contentSizedOnScrollAxis && vertical
+        ? SizeFit.shrinkWrap
+        : node.verticalFit,
     size: node.basicBoxLocal.size,
     child: buildScrollView(
       node: node,

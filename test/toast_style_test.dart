@@ -97,6 +97,7 @@ void main() {
     expect(icon.size, 20);
     final Text text = tester.widget(find.text('Saved'));
     expect(text.style!.fontFamily, AppToast.fontOf('Fleet Sans')!.fontFamily);
+    expect(text.style!.fontWeight, FontWeight.w600);
     expect(text.style!.color, Colors.white);
     await _finish(tester);
   });

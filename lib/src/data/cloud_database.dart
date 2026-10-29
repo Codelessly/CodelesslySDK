@@ -132,6 +132,69 @@ abstract class CloudDatabase extends ChangeNotifier {
   /// it will return true.
   Future<bool> removeDocument(String path, String documentId);
 
+  /// The most writes Firestore takes in one batch.
+  static const int maxBatchWrites = 500;
+
+  /// Removes many documents of the collection at [path] at once and returns
+  /// how many were removed.
+  ///
+  /// Removes the documents with [documentIds] when given; otherwise those
+  /// matching [filters], or every document of the collection when there are
+  /// none. Implementations remove them in as few writes as they can (see
+  /// [FirestoreCloudDatabase.removeDocuments]); this default removes the
+  /// [documentIds] one by one and can't query.
+  Future<int> removeDocuments(
+    String path, {
+    Iterable<String>? documentIds,
+    List<CloudWhereFilter> filters = const [],
+  }) async {
+    if (documentIds == null) {
+      throw UnsupportedError('$runtimeType can only remove documents by id.');
+    }
+    int removed = 0;
+    for (final String id in documentIds) {
+      if (id.trim().isEmpty) continue;
+      if (await removeDocument(path, id.trim())) removed++;
+    }
+    return removed;
+  }
+
+  /// Writes [documents] to the collection at [path] at once and returns how
+  /// many were written.
+  ///
+  /// Each document's id is its [idField]; a document without one gets a
+  /// generated id. A document replaces the stored one unless [merge] is
+  /// true. With [replaceCollection], the collection's other documents are
+  /// removed, so it holds exactly [documents] (restoring seed data).
+  ///
+  /// This default writes them one by one and can't [replaceCollection];
+  /// see [FirestoreCloudDatabase.setDocuments].
+  Future<int> setDocuments(
+    String path,
+    List<Map<String, dynamic>> documents, {
+    String idField = 'id',
+    bool merge = false,
+    bool replaceCollection = false,
+  }) async {
+    if (replaceCollection) {
+      throw UnsupportedError('$runtimeType cannot replace a collection.');
+    }
+    int written = 0;
+    for (final Map<String, dynamic> document in documents) {
+      final String id = document[idField]?.toString().trim() ?? '';
+      final bool ok = merge && id.isNotEmpty
+          ? await updateDocument(path, documentId: id, value: document)
+          : await addDocument(
+              path,
+              documentId: id.isEmpty ? generateId() : id,
+              skipCreationIfDocumentExists: false,
+              value: document,
+            );
+      if (ok) written++;
+    }
+    return written;
+  }
+
   /// Retrieves the document data from the cloud storage at the given [path]
   /// with the given [documentId].
   ///
@@ -481,6 +544,135 @@ class FirestoreCloudDatabase extends CloudDatabase {
     StatTracker.instance.track(StatType.write, 'cloudDatabase/removeDocument');
 
     return true;
+  }
+
+  /// Removes the documents in as few batched writes as Firestore allows
+  /// ([CloudDatabase.maxBatchWrites] deletes each). Without [documentIds],
+  /// the documents to remove are read first: those matching [filters] (run
+  /// in the app past their `==` filters, so no index is needed), and in an
+  /// owner-only collection only the signed-in user's.
+  @override
+  Future<int> removeDocuments(
+    String path, {
+    Iterable<String>? documentIds,
+    List<CloudWhereFilter> filters = const [],
+  }) async {
+    DebugLogger.instance.printFunction(
+      'removeDocuments(path: $path, ids: $documentIds, filters: $filters)',
+      name: name,
+    );
+    final CollectionReference<Map<String, dynamic>> collection =
+        getCollectionPath(path);
+    final List<DocumentReference<Map<String, dynamic>>> refs =
+        documentIds != null
+        ? [
+            for (final String id in {
+              for (final String id in documentIds)
+                if (id.trim().isNotEmpty) id.trim(),
+            })
+              collection.doc(id),
+          ]
+        : [
+            for (final doc in await _matchingDocuments(path, filters))
+              doc.reference,
+          ];
+    await _commitInBatches([
+      for (final ref in refs) (WriteBatch batch) => batch.delete(ref),
+    ], 'cloudDatabase/removeDocuments');
+    return refs.length;
+  }
+
+  /// Writes the documents in as few batched writes as Firestore allows
+  /// ([CloudDatabase.maxBatchWrites] each), applying the collection's rules
+  /// to each like [addDocument] does.
+  @override
+  Future<int> setDocuments(
+    String path,
+    List<Map<String, dynamic>> documents, {
+    String idField = 'id',
+    bool merge = false,
+    bool replaceCollection = false,
+  }) async {
+    DebugLogger.instance.printFunction(
+      'setDocuments(path: $path, count: ${documents.length}, '
+      'merge: $merge, replaceCollection: $replaceCollection)',
+      name: name,
+    );
+    final CollectionReference<Map<String, dynamic>> collection =
+        getCollectionPath(path);
+    final String? uid = currentUserId();
+    final Set<String> written = {};
+    final List<void Function(WriteBatch batch)> writes = [];
+    for (final Map<String, dynamic> document in documents) {
+      final String id = document[idField]?.toString().trim() ?? '';
+      final DocumentReference<Map<String, dynamic>> ref = id.isEmpty
+          ? collection.doc()
+          : collection.doc(id);
+      written.add(ref.id);
+      Map<String, dynamic> data = rules.prepareWrite(path, document, uid);
+      data = sanitizeCloudDataToSend(data, docId: ref.id, keepCreatedAt: merge);
+      final Map<String, dynamic> resolved = resolveFieldOperations(data);
+      writes.add(
+        (WriteBatch batch) =>
+            batch.set(ref, resolved, SetOptions(merge: merge)),
+      );
+    }
+    if (replaceCollection) {
+      for (final doc in await _matchingDocuments(path, const [])) {
+        if (written.contains(doc.id)) continue;
+        writes.add((WriteBatch batch) => batch.delete(doc.reference));
+      }
+    }
+    await _commitInBatches(writes, 'cloudDatabase/setDocuments');
+    return documents.length;
+  }
+
+  /// The documents of the collection at [path] that pass [filters] and the
+  /// collection's read rules for the signed-in user.
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> _matchingDocuments(
+    String path,
+    List<CloudWhereFilter> filters,
+  ) async {
+    final List<CloudWhereFilter>? readFilters = rules.readFilters(
+      path,
+      currentUserId(),
+    );
+    if (readFilters == null) return [];
+    final CloudQueryPlan plan = CloudQuery(
+      filters: [...readFilters, ...filters],
+    ).plan(forceClient: true);
+    final QuerySnapshot<Map<String, dynamic>> snapshot = await plan
+        .applyTo(getCollectionPath(path))
+        .get();
+    StatTracker.instance.track(StatType.read, 'cloudDatabase/batchQuery');
+    return plan.finish(
+      snapshot.docs,
+      data: (doc) => doc.data(),
+      id: (doc) => doc.id,
+    );
+  }
+
+  /// Commits [writes] in batches of at most [CloudDatabase.maxBatchWrites].
+  Future<void> _commitInBatches(
+    List<void Function(WriteBatch batch)> writes,
+    String stat,
+  ) async {
+    for (
+      int start = 0;
+      start < writes.length;
+      start += CloudDatabase.maxBatchWrites
+    ) {
+      final WriteBatch batch = firestore.batch();
+      final int end = (start + CloudDatabase.maxBatchWrites).clamp(
+        0,
+        writes.length,
+      );
+      for (final write in writes.sublist(start, end)) {
+        write(batch);
+      }
+      await batch.commit();
+      StatTracker.instance.track(StatType.write, stat);
+    }
   }
 
   @override
