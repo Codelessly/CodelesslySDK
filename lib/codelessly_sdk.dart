@@ -12,6 +12,7 @@ export 'src/paywall/firebase_paywall_backend.dart';
 export 'src/paywall/paywall_runtime.dart';
 export 'src/paywall/paywall_fallback.dart';
 export 'src/paywall/paywall_placement_view.dart';
+export 'src/paywall/paywall_analytics.dart';
 export 'src/codelessly_config.dart';
 export 'src/constants.dart';
 export 'src/data/cloud_data.dart';
