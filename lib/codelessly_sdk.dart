@@ -44,6 +44,7 @@ export 'src/transformers/utils/cloud_list_items.dart';
 export 'src/transformers/utils/query_status.dart';
 export 'src/ui/canvas_location.dart';
 export 'src/ui/codelessly_context.dart';
+export 'src/ui/codelessly_node_tree_view.dart';
 export 'src/ui/codelessly_route.dart';
 export 'src/ui/codelessly_widget.dart';
 export 'src/ui/codelessly_widget_controller.dart';
