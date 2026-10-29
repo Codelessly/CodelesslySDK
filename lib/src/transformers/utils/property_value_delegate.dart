@@ -554,6 +554,9 @@ class PropertyValueDelegate {
   ) {
     final Object? variableValue = switch (match.name) {
       'data' => scopedValues.data,
+      'product' => scopedValues.data['product'],
+      'paywall' => scopedValues.data['paywall'],
+      'entitlements' => scopedValues.data['entitlements'],
       'item' => scopedValues.indexedItem?.item,
       'index' => scopedValues.indexedItem?.index,
       'parent' => {
