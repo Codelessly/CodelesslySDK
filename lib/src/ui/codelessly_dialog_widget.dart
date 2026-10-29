@@ -11,12 +11,17 @@ class CodelesslyDialogWidget extends StatelessWidget {
   /// or anywhere else, e.g. a menu at the top right.
   final AlignmentGeometry alignment;
 
-  /// Whether the dialog is only as tall as its canvas, leaving the space
-  /// above a bottom sheet to its dismissible scrim.
+  /// Whether a dialog hugs its canvas height.
   final bool hugHeight;
 
   /// Design-sized dialog, full-width sheet, or full-screen canvas.
   final CanvasSizing sizing;
+
+  /// Space kept between the dialog and the screen edges.
+  final EdgeInsets insets;
+
+  /// The maximum share of screen height, when set.
+  final double? maxHeightFactor;
 
   const CodelesslyDialogWidget({
     super.key,
@@ -25,7 +30,16 @@ class CodelesslyDialogWidget extends StatelessWidget {
     this.alignment = Alignment.center,
     this.hugHeight = false,
     this.sizing = CanvasSizing.design,
+    this.insets = EdgeInsets.zero,
+    this.maxHeightFactor,
   });
+
+  /// The height cap of a canvas shown on a screen [screenHeight] tall with
+  /// [factor] (see [ShowDialogAction.maxHeightFactor]), or null for none.
+  static double? maxHeightFor(double? factor, double screenHeight) {
+    if (factor == null || !factor.isFinite || factor <= 0) return null;
+    return screenHeight * factor.clamp(0, 1);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,39 +62,53 @@ class CodelesslyDialogWidget extends StatelessWidget {
         hugHeight ||
         sizing == CanvasSizing.sheet ||
         sizing == CanvasSizing.fillWidth;
-    if (showCloseButton) {
-      return Align(
+    return Padding(
+      padding: insets,
+      child: Align(
         alignment: _alignment,
         heightFactor: sheetHeight ? 1 : null,
-        child: Material(
-          type: MaterialType.transparency,
-          child: Stack(
-            children: [
-              builder(context),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: IconButton(
-                    onPressed: () => Navigator.maybePop(context),
-                    splashRadius: 16,
-                    icon: const Icon(Icons.close),
-                  ),
+        child: _buildContent(context),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    final double? maxHeight = maxHeightFor(
+      maxHeightFactor,
+      MediaQuery.sizeOf(context).height,
+    );
+    if (maxHeight == null) return _buildCanvas(context);
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      child: _buildCanvas(context),
+    );
+  }
+
+  Widget _buildCanvas(BuildContext context) {
+    if (showCloseButton) {
+      return Material(
+        type: MaterialType.transparency,
+        child: Stack(
+          children: [
+            builder(context),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Material(
+                type: MaterialType.transparency,
+                child: IconButton(
+                  onPressed: () => Navigator.maybePop(context),
+                  splashRadius: 16,
+                  icon: const Icon(Icons.close),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     }
 
-    if (sizing == CanvasSizing.fill) return builder(context);
-    return Align(
-      alignment: _alignment,
-      heightFactor: sheetHeight ? 1 : null,
-      child: builder(context),
-    );
+    return builder(context);
   }
 }
 

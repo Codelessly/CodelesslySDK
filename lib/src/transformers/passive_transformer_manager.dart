@@ -54,6 +54,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),
       'lineChart': PassiveLineChartTransformer(getNode, this),
+      'chartPlot': PassiveChartTransformer(getNode, this),
       'gaugeRadial': PassiveRadialGaugeTransformer(getNode, this),
       'gaugeMeter': PassiveGaugeTransformer(getNode, this),
       'barChart': PassiveBarChartTransformer(getNode, this),
@@ -215,10 +216,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// Returns [node] with the style properties that conditions, bound
   /// variables or formulas, or set value actions give it at runtime: `fill`
   /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
-  /// `height`, `flex` (its share of an expanded row or column, so bars
-  /// can be sized proportionally), `rotation` (in degrees), and the
-  /// properties of [StyleBindings] (effects, stroke weight, corner radius,
-  /// font weight, icon). Returns [node] itself when nothing changes it.
+  /// `height`, `flex`, `rotation`, and the properties of [StyleBindings]
+  /// (effects, stroke weight, corner radius, padding, font weight, icon).
+  /// Returns [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     T? value<T extends Object>(String property) =>
@@ -245,6 +245,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           for (final paint in geometry.strokes.skip(1)) paint.toJson(),
         ];
       }
+      // A selected row's border can thicken, e.g. 1.5 to 2 px.
       final double? strokeWeight = value<double>('strokeWeight');
       if (strokeWeight != null && strokeWeight != geometry.strokeWeight) {
         patch['strokeWeight'] = math.max(0, strokeWeight).toDouble();
@@ -279,6 +280,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       if (opacity != null && opacity != node.opacity) {
         patch['opacity'] = opacity.clamp(0, 1).toDouble();
       }
+    }
+    // A number pads every side; [h, v] or [l, t, r, b] pad each.
+    final EdgeInsetsModel? padding = value<Object>('padding')
+        ?.toEdgeInsetsModel();
+    if (padding != null && padding != node.padding) {
+      patch['padding'] = padding.toJson();
     }
     final NodeBox box = node.basicBoxLocal;
     final double? width = value<double>('width');

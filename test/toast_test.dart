@@ -288,4 +288,95 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 6));
     handle.dispose();
   });
+
+  testWidgets('bound offset and app font apply to toast', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    late BuildContext context;
+    final ctx = CodelesslyContext.empty()
+      ..variables['isMobile'] = Observable(
+        VariableData(
+          id: 'isMobile',
+          name: 'isMobile',
+          type: VariableType.boolean,
+          value: true,
+        ),
+      );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: ctx,
+        child: MaterialApp(
+          home: DefaultTextStyle(
+            style: const TextStyle(fontFamily: 'AppBody'),
+            child: Builder(
+              builder: (c) {
+                context = c;
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    AppToast.show(
+      context,
+      ShowToastAction(
+        message: 'Session deleted',
+        duration: 10000,
+        actionLabel: 'UNDO',
+        actionColor: ColorRGBA.fromHex('#F2542D'),
+        showClose: true,
+        cornerRadius: 8,
+        fontSize: 13,
+        offset: r'${= isMobile ? 72 : 16}',
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    final Text message = tester.widget<Text>(find.text('Session deleted'));
+    expect(message.style!.fontSize, 13);
+    expect(message.style!.fontFamily, 'AppBody');
+    final Positioned positioned = tester.widget<Positioned>(
+      find
+          .ancestor(
+            of: find.text('Session deleted'),
+            matching: find.byType(Positioned),
+          )
+          .first,
+    );
+    expect(positioned.bottom, 72);
+    expect(
+      tester
+          .widget<TextButton>(
+            find.byKey(const ValueKey('codelessly-toast-action')),
+          )
+          .style!
+          .foregroundColor!
+          .resolve({}),
+      ColorRGBA.fromHex('#F2542D')!.toFlutterColor(),
+    );
+    await tester.tap(find.byKey(const ValueKey('codelessly-toast-close')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Session deleted'), findsNothing);
+  });
+
+  test('toast font takes app family or explicit family and weight', () {
+    const TextStyle app = TextStyle(fontFamily: 'Mono', fontSize: 14);
+    expect(
+      AppToast.fontForAction(ShowToastAction(message: 'Saved'), app).fontFamily,
+      'Mono',
+    );
+    final TextStyle custom = AppToast.fontForAction(
+      ShowToastAction(
+        message: 'Saved',
+        fontFamily: 'Brand Sans',
+        fontWeight: FontWeightNumeric.w500,
+      ),
+      app,
+    );
+    expect(custom.fontFamily, 'Brand Sans');
+    expect(custom.fontWeight, FontWeight.w500);
+  });
 }

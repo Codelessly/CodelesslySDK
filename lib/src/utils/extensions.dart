@@ -1160,6 +1160,23 @@ extension BoxWidthStyleEnumExtensions on BoxWidthStyleEnum {
 }
 
 extension IconModelExt on IconModel {
+  /// This icon's glyph swapped for the one called [name] (e.g. `star_border`)
+  /// in the same set and style, or this icon when [name] is empty or the set
+  /// can't be looked up by name (Cupertino icons are found by codepoint).
+  IconModel named(String name) {
+    final String glyph = name.trim().toLowerCase();
+    if (glyph.isEmpty || glyph == this.name) return this;
+    final IconModel icon = this;
+    return switch (icon) {
+      MaterialIcon() => icon.copyWith(
+        name: glyph,
+        version: materialIconVersions[glyph] ?? icon.version,
+      ),
+      MaterialSymbol() => icon.copyWith(name: glyph),
+      _ => icon,
+    };
+  }
+
   String get label => name.split('_').map((part) => part.capitalized).join(' ');
 
   // IconData toFontIconData() {

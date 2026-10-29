@@ -187,6 +187,49 @@ side sheet, confirm presentation, toast styling, `contentFit` and
   laid out as `Flexible(fit: FlexFit.loose)`: it hugs its content and
   shrinks to the room left when the Row/Column runs out of space.
 
+### Additional changes
+
+### Layout
+
+- Charts: `ChartNode` renders as a line/area chart; tapping or dragging
+  snaps the selection, writes the bound variable and fires `changed`.
+- A list that doesn't scroll, hugs its items and has a known item count
+  lays them out without a viewport, so a stretched row of cards keeps
+  equal heights with a list in one of them; with `wrap` its items flow onto
+  runs.
+- A flexible row or column that scrolls sizes to its content, up to the
+  space left.
+- Text span ranges are clamped to the text.
+
+### Bindings
+
+- `cornerRadius`, `padding` and `strokeWeight` can be bound to data like
+  fill, opacity and size.
+- Bind an icon's glyph by name (`icon`); `materialIconVersions` gives the
+  SVG version of each Material icon.
+- Variable overrides are looked up by name.
+
+### Overlays and actions
+
+- Side sheets (`DialogPresentation.sideSheet`), dialogs kept `insets` from
+  the screen edges, and a maximum height as a share of the screen
+  (`maxHeightFactor`) for dialogs and bottom sheets; a canvas that hugs its
+  content gives a content-height sheet or dialog.
+- The rest of an action chain runs after a replace navigation.
+- Batch cloud writes: `removeDocuments` and `setDocuments` commit in
+  Firestore batches of up to 500.
+- Toasts: action color, close button, corner radius, font size, family and weight and a bound
+  offset; without their own font they use the app's text style.
+- Text fields use their decoration's `contentPadding`.
+
+### Publishing and design canvas
+
+- Navigation, dialogs and links resolve a canvas on any published page
+  (`layoutCanvases` index); publishing one page keeps the other pages'
+  fonts and APIs.
+- List items on the design canvas read their own element of the list's
+  data (`VariablePreview.scopeFor`).
+
 ## 8.3.0
 
 Requires codelessly_api 6.2.0.
