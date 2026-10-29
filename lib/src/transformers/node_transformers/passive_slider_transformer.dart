@@ -219,7 +219,8 @@ class TransformerSlider extends StatelessWidget {
             ),
             // The slider lays out horizontally and a vertical one is turned
             // a quarter turn, so its thumb's width and height swap.
-            SliderThumbShapeEnum.roundedRect => RoundedRectSliderThumbShape(
+            SliderThumbShapeEnum.roundedRect ||
+            SliderThumbShapeEnum.rectangle => RoundedRectSliderThumbShape(
               size: !node.properties.showThumb
                   ? Size.zero
                   : vertical
@@ -231,7 +232,10 @@ class TransformerSlider extends StatelessWidget {
                       node.properties.thumbWidth,
                       node.properties.thumbHeight,
                     ),
-              cornerRadius: node.properties.thumbCornerRadius,
+              cornerRadius:
+                  node.properties.thumbShape == SliderThumbShapeEnum.rectangle
+                  ? 0
+                  : node.properties.thumbCornerRadius,
               strokeColor: node.properties.thumbStrokeColor?.toFlutterColor(),
               strokeWidth: node.properties.thumbStrokeWidth,
             ),

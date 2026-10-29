@@ -106,7 +106,7 @@ class LayoutPresentationRoute<T> extends PopupRoute<T> {
       scopesRoute: true,
       explicitChildNodes: true,
       child: switch (presentation) {
-        DialogPresentation.dialog => SafeArea(
+        DialogPresentation.dialog || DialogPresentation.fullScreen => SafeArea(
           child: CodelesslyDialogWidget(
             showCloseButton: showCloseButton,
             builder: builder,
@@ -142,7 +142,8 @@ class LayoutPresentationRoute<T> extends PopupRoute<T> {
       reverseCurve: Curves.easeInCubic,
     );
     return switch (presentation) {
-      DialogPresentation.dialog => FadeTransition(
+      DialogPresentation.dialog ||
+      DialogPresentation.fullScreen => FadeTransition(
         opacity: curved,
         child: ScaleTransition(
           scale: Tween<double>(begin: 0.96, end: 1).animate(curved),
