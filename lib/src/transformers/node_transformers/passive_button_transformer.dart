@@ -25,7 +25,14 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
     EdgeInsetsModel? padding,
     required WidgetBuildSettings settings,
   }) {
-    final node = ButtonNode(
+    final buttonClass = switch (props.buttonType) {
+      ButtonTypeEnum.elevated => ElevatedButtonNode.new,
+      ButtonTypeEnum.text => TextButtonNode.new,
+      ButtonTypeEnum.outlined => OutlinedButtonNode.new,
+      ButtonTypeEnum.icon => IconButtonNode.new,
+      ButtonTypeEnum.filled || ButtonTypeEnum.filledTonal => FilledButtonNode.new,
+    };
+    final node = buttonClass(
       id: '',
       name: 'Button',
       basicBoxLocal: NodeBox(0, 0, width, height),
