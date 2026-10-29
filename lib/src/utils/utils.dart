@@ -12,12 +12,12 @@ const Set<String> predefinedVariableNames = {
   'index',
   'value',
   'item',
+  'parent',
   'storage',
   'route',
   'auth',
   'result',
   'screen',
-  'parent',
   'hold',
 };
 
@@ -48,6 +48,7 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'data', type: VariableType.map),
   PredefinedVariableData(name: 'index', type: VariableType.integer),
   PredefinedVariableData(name: 'item'),
+  PredefinedVariableData(name: 'parent', type: VariableType.map),
   PredefinedVariableData(name: 'value'),
   PredefinedVariableData(name: 'storage', type: VariableType.map),
   PredefinedVariableData(name: 'route', type: VariableType.map),

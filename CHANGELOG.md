@@ -1,3 +1,40 @@
+## 8.4.0
+
+Requires codelessly_api 6.3.0.
+
+### Layout
+
+- A node's `x` and `y` in a freeform parent can be bound to data.
+- Stacked lists (`ListViewProperties.layout: stack`) place each item at its
+  bound `x`/`y`, for diagrams drawn from data.
+- `${parent.item}` and `${parent.index}` read the item of the list one
+  level out.
+- A canvas in a dialog, sheet or popover picks its responsive layout by
+  the screen width.
+
+### Actions and triggers
+
+- Drag, drag end, pointer down and pointer up reactions, with
+  `${result.dx}`, `${result.deltaX}`, `${result.x}` and the like.
+- Key Down reactions on screens, with `${result.key}` and modifiers.
+- Show dialog as a popover menu next to the node that opened it, or as a
+  full height bottom sheet whose canvas scrolls its own content.
+- Copy to Clipboard actions copy their text, variables substituted.
+- A show dialog popover with an end alignment lines up with its anchor's
+  right edge.
+
+### Formulas and variables
+
+- Functions: `with`, `at`, `flatMap` and `feetInches`.
+- `auth` reads as signed out where there is no app user (design canvases
+  and previews).
+- A computed text that gives nothing shows nothing.
+- A formula that gives empty text shows nothing on the design canvas.
+
+### Layout fixes
+
+- A freeform child is placed at its bound width and height.
+
 ## 8.3.0
 
 Needs the `codelessly_api` release after 6.2.0 (signature, loop animation,

@@ -139,6 +139,9 @@ class ConditionVariablesVisitor
   Set<String>? visitDelayAction(DelayAction action) => {};
 
   @override
+  Set<String>? visitCopyToClipboardAction(CopyToClipboardAction action) => {};
+
+  @override
   Set<String>? visitCloudDataAction(CloudDataAction action) => {};
 
   @override
@@ -230,6 +233,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitDelayAction(DelayAction action) => null;
+
+  @override
+  String? visitCopyToClipboardAction(CopyToClipboardAction action) => null;
 
   @override
   String? visitCloudDataAction(CloudDataAction action) => null;

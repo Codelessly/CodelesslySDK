@@ -407,7 +407,9 @@ class ThemedConfirmDialog extends StatelessWidget {
     return Theme(
       data: theme.apply(Theme.of(context)),
       child: switch (presentation) {
-        DialogPresentation.dialog || DialogPresentation.fullScreen => Dialog(
+        DialogPresentation.dialog ||
+        DialogPresentation.popover ||
+        DialogPresentation.fullScreen => Dialog(
           backgroundColor: dialogShadows != null ? Colors.transparent : surface,
           surfaceTintColor: Colors.transparent,
           shadowColor: dialogShadows != null ? Colors.transparent : null,

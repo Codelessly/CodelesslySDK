@@ -5,6 +5,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:rfc_6901/rfc_6901.dart';
@@ -153,7 +154,23 @@ class FunctionsRepository {
         return runCloudData(context, action as CloudDataAction);
       case ActionType.cloudBatch:
         return runCloudBatch(context, action as CloudBatchAction);
+      case ActionType.copyToClipboard:
+        return copyToClipboard(context, action as CopyToClipboardAction);
     }
+  }
+
+  /// Copies the text of [action], its variables substituted.
+  static Future<bool> copyToClipboard(
+    BuildContext context,
+    CopyToClipboardAction action,
+  ) async {
+    final String text = PropertyValueDelegate.substituteVariables(
+      action.text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: ActionChain.scopedValuesOf(context),
+    );
+    await Clipboard.setData(ClipboardData(text: text));
+    return true;
   }
 
   /// How long [action] waits: its [DelayAction.duration] formula when that
@@ -697,20 +714,30 @@ class FunctionsRepository {
       placement: action.placement.name,
       anchorToTrigger: action.anchor == DialogAnchor.trigger,
       anchorGap: action.anchorGap,
+      fullHeight: action.fullHeight,
     );
     if (result case final Map values when values.isNotEmpty) {
       ActionChain.setResult(values);
     }
   }
 
-  /// The global rectangle of the widget [context] belongs to, if it is laid
-  /// out.
-  static Rect? _globalRectOf(BuildContext context) {
-    final RenderObject? box = context.mounted
-        ? context.findRenderObject()
-        : null;
-    if (box is! RenderBox || !box.hasSize || !box.attached) return null;
-    return box.localToGlobal(Offset.zero) & box.size;
+  /// The rect of the node that [context] belongs to, relative to its
+  /// navigator overlay. Null when it has no laid-out box.
+  static Rect? anchorRectOf(BuildContext context) {
+    if (!context.mounted) return null;
+    final RenderObject? object = context.findRenderObject();
+    if (object is! RenderBox || !object.hasSize || !object.attached) {
+      return null;
+    }
+    // In the coordinates of the navigator the popover opens in, which need
+    // not start at the screen's corner (a nested navigator under a bar).
+    final RenderObject? overlay = Navigator.maybeOf(context)?.overlay?.context
+        .findRenderObject();
+    return object.localToGlobal(
+          Offset.zero,
+          ancestor: overlay is RenderBox && overlay.attached ? overlay : null,
+        ) &
+        object.size;
   }
 
   /// The id of the published layout that holds the canvas [canvasId], if any.
@@ -738,6 +765,7 @@ class FunctionsRepository {
     String? placement,
     bool anchorToTrigger = false,
     double anchorGap = 6,
+    bool fullHeight = false,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -795,8 +823,8 @@ class FunctionsRepository {
         : presentation;
     final Rect? anchor =
         presentation == DialogPresentation.dialog &&
-                (anchorToTrigger || placement == 'anchored')
-        ? _globalRectOf(context)
+            (anchorToTrigger || placement == 'anchored')
+        ? anchorRectOf(context)
         : null;
     final Object? result = anchor == null
         ? await presentCanvas<Object?>(
@@ -810,6 +838,10 @@ class FunctionsRepository {
             designWidth: canvas?.basicBoxLocal.width,
             maxHeightFactor: maxHeightFactor,
             showDragHandle: showDragHandle,
+            fullHeight: fullHeight,
+            anchor: effectivePresentation == DialogPresentation.popover
+                ? anchorRectOf(context)
+                : null,
             routeSettings: RouteSettings(arguments: parsedParams),
             builder: (context) => ActionChainOpener(
               openerHosts: openerHosts,
@@ -848,6 +880,7 @@ class FunctionsRepository {
             transitionBuilder: (context, animation, _, child) =>
                 FadeTransition(opacity: animation, child: child),
           );
+
     if (context.mounted) {
       codelessly.notifyNavigationListeners(
         context,
@@ -858,9 +891,10 @@ class FunctionsRepository {
     return result;
   }
 
-  /// Opens what [builder] builds as a dialog at [alignment] or as a bottom
-  /// sheet, per [presentation] (adaptive: a sheet below 600 px wide), and
-  /// completes with the value it is closed with.
+  /// Opens what [builder] builds as a dialog at [alignment], as a bottom
+  /// sheet, or as a popover menu next to [anchor], per [presentation]
+  /// (adaptive: a sheet below 600 px wide), and completes with the value it
+  /// is closed with. A [fullHeight] sheet takes 90% of the screen.
   static Future<T?> presentCanvas<T>(
     BuildContext context, {
     required WidgetBuilder builder,
@@ -874,7 +908,27 @@ class FunctionsRepository {
     double? designWidth,
     double maxHeightFactor = 1,
     bool showDragHandle = false,
+    Rect? anchor,
+    bool fullHeight = false,
   }) {
+    if (presentation == DialogPresentation.popover) {
+      return showGeneralDialog<T>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: 'Close',
+        barrierColor: barrierColor ?? Colors.transparent,
+        transitionDuration: const Duration(milliseconds: 120),
+        routeSettings: routeSettings,
+        pageBuilder: (context, _, _) => CodelesslyPopoverWidget(
+          anchor: anchor,
+          builder: builder,
+          alignEnd: alignment.resolve(TextDirection.ltr).x > 0,
+        ),
+        transitionBuilder: (context, animation, _, child) =>
+            FadeTransition(opacity: animation, child: child),
+      );
+    }
     if (presentation == DialogPresentation.sideSheet) {
       return Navigator.of(context).push<T>(
         LayoutPresentationRoute<T>(
@@ -897,17 +951,20 @@ class FunctionsRepository {
     final bool asSheet = switch (presentation) {
       DialogPresentation.dialog ||
       DialogPresentation.fullScreen ||
-      DialogPresentation.sideSheet => false,
+      DialogPresentation.sideSheet ||
+      DialogPresentation.popover => false,
       DialogPresentation.bottomSheet => true,
       DialogPresentation.adaptive => (screen?.width ?? 1024) < 600,
     };
     Widget content(BuildContext context, CanvasSizing sizing) =>
-        CodelesslyDialogWidget(
-          showCloseButton: showCloseButton,
-          sizing: sizing,
-          alignment: asSheet ? Alignment.bottomCenter : alignment,
-          builder: builder,
-        );
+        asSheet && fullHeight
+        ? CodelesslyBottomSheetWidget(builder: builder)
+        : CodelesslyDialogWidget(
+            showCloseButton: showCloseButton,
+            sizing: sizing,
+            alignment: asSheet ? Alignment.bottomCenter : alignment,
+            builder: builder,
+          );
     if (asSheet) {
       // As wide as the screen and as tall as its content, up to 90% of the
       // screen; the canvas draws its own background and corners.
@@ -1622,6 +1679,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     ReactionMixin? node,
     dynamic value,
     List<Reaction>? reactions,
+    Object? result,
   }) async {
     final filteredReactions = (reactions ?? node?.reactions ?? []).where(
       (reaction) => reaction.trigger.type == type,
@@ -1652,9 +1710,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     // The chain captures the trigger's scope and host now, so its actions
     // read the item that was tapped and still run if the row unmounts.
+    // [result] is what `${result}` starts as, e.g. a drag's deltas.
     return ActionChain.run(
       () => _runReactions(context, filteredReactions, value),
       context: context,
+      result: result,
     );
   }
 
@@ -2087,6 +2147,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       ),
       RemoveDocumentSubAction removeDocumentSubAction =>
         removeDocumentFromCloud(removeDocumentSubAction, scopedValues),
+      // Batch deletion requires collection query, filter and owner-safety
+      // semantics absent from CloudDatabase. Never guess or delete one id.
+      RemoveDocumentsSubAction() => Future<bool>.value(false),
+      // A collection replacement cannot be emulated safely with one write.
+      SetDocumentsSubAction() => Future<bool>.value(false),
     };
   }
 
