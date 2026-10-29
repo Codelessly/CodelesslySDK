@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 import '../codelessly_sdk.dart';
@@ -83,11 +84,13 @@ class Codelessly {
         backend: backend,
         purchaseService: () => InAppPurchaseService(verify: backend.verify),
       );
-      runtime.scopeToUser(sdk.firebaseAuth.currentUser?.uid);
+      sdk._watchPaywallGrants(runtime);
+      final locale = Localizations.localeOf(context).toLanguageTag();
+      final appVersion = (await PackageInfo.fromPlatform()).version;
       published = await runtime.resolve(
         placement,
-        locale: Localizations.localeOf(context).toLanguageTag(),
-        appVersion: '8.4.0',
+        locale: locale,
+        appVersion: appVersion,
       );
       if (published == null) {
         if (!context.mounted) {
@@ -109,7 +112,6 @@ class Codelessly {
       slots = published.slots;
       ownedService = runtime.purchaseService();
       purchaseService = ownedService;
-      sdk.entitlements.value = Set.of(published.entitlements);
     }
     final resolved = await resolvePlacement(placement);
     if (!context.mounted) return const PaywallResult(PaywallOutcome.cancelled);
@@ -168,7 +170,6 @@ class Codelessly {
       }
       return outcome;
     } finally {
-      sdk.entitlements.value = Set.of(controller.entitlements);
       controller.dispose();
       await ownedService?.dispose();
     }
@@ -189,14 +190,28 @@ class Codelessly {
       backend: backend,
       purchaseService: () => InAppPurchaseService(verify: backend.verify),
     );
-    runtime.scopeToUser(firebaseAuth.currentUser?.uid);
-    await runtime.prefetch(placement, locale: locale, appVersion: '8.4.0');
+    _watchPaywallGrants(runtime);
+    await runtime.prefetch(
+      placement,
+      locale: locale,
+      appVersion: (await PackageInfo.fromPlatform()).version,
+    );
     entitlements.value = Set.of(runtime.entitlements.value);
   }
 
   /// Verified entitlement IDs for visibility and app-level conditions.
   final ValueNotifier<Set<String>> entitlements = ValueNotifier(<String>{});
   PaywallRuntime? _paywallRuntime;
+  VoidCallback? _grantSync;
+
+  void _watchPaywallGrants(PaywallRuntime runtime) {
+    _grantSync ??= () {
+      entitlements.value = Set.of(runtime.entitlements.value);
+    };
+    runtime.entitlements.removeListener(_grantSync!);
+    runtime.entitlements.addListener(_grantSync!);
+    runtime.listenToGrants(firebaseFirestore, firebaseAuth.currentUser?.uid);
+  }
 
   final Client _client;
 
@@ -361,6 +376,8 @@ class Codelessly {
     _appUserSubscription?.cancel();
     _appUserSubscription = _firebaseAuth?.userChanges().listen((User? user) {
       refreshAppUser();
+      final runtime = _paywallRuntime;
+      if (runtime != null) runtime.listenToGrants(firebaseFirestore, user?.uid);
       unawaited(_followProfile(user));
     });
     refreshAppUser();
@@ -545,8 +562,12 @@ class Codelessly {
     _navigationListeners.clear();
     _breakpointsListeners.clear();
     _client.close();
-    _paywallRuntime?.entitlements.dispose();
+    if (_grantSync != null) {
+      _paywallRuntime?.entitlements.removeListener(_grantSync!);
+    }
+    _paywallRuntime?.dispose();
     _paywallRuntime = null;
+    _grantSync = null;
 
     _systemUIBrightnessStreamController.close();
   }
