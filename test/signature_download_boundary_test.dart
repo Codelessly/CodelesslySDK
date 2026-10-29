@@ -7,6 +7,56 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
+  test(
+    'ambiguous legacy gauge download fails closed with original canvases',
+    () async {
+      final raw = <String, dynamic>{
+        'id': 'layout',
+        'pageId': 'page',
+        'projectId': 'project',
+        'owner': 'owner',
+        'roles': <String, dynamic>{},
+        'canvases': {
+          'first': {'radial': GaugeNode.empty().toJson()},
+          'second': {
+            'ambiguous': {
+              'id': 'ambiguous',
+              'name': 'Gauge',
+              'type': 'gauge',
+              'basicBoxLocal': [0, 0, 220, 185],
+              'properties': <String, dynamic>{},
+            },
+          },
+        },
+      };
+      final repository = WebDataRepository(
+        config: CodelesslyConfig(authToken: 'token'),
+        client: MockClient((_) async => http.Response(jsonEncode(raw), 200)),
+      );
+      await expectLater(
+        repository.downloadLayoutModel(
+          projectID: 'project',
+          layoutID: 'layout',
+          source: PublishSource.publish,
+        ),
+        throwsA(
+          isA<UnresolvedDocumentSchema>()
+              .having(
+                (error) => error.reason,
+                'reason',
+                'ambiguous-gauge-schema',
+              )
+              .having((error) => error.nodeKey, 'nodeKey', 'ambiguous')
+              .having(
+                (error) => error.raw.keys,
+                'full canvas map',
+                containsAll(['first', 'second']),
+              ),
+        ),
+      );
+    },
+  );
+
   test('ambiguous raw layout download throws with context, never returns empty layout', () async {
     final raw = <String, dynamic>{
       'id': 'layout',

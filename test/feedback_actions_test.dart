@@ -161,10 +161,14 @@ class _TestDataManager extends DataManager {
 }
 
 /// Pumps the layout [layouts.first] on a screen of [size].
+///
+/// [variables] are the first layout's variables by canvas ID (or app/page
+/// scope) and variable ID.
 Future<Codelessly> pumpLayouts(
   WidgetTester tester,
   List<SDKPublishLayout> layouts, {
   Size size = const Size(390, 844),
+  Map<String, Map<String, VariableData>> variables = const {},
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = size;
@@ -180,6 +184,17 @@ Future<Codelessly> pumpLayouts(
   );
   for (final layout in layouts) {
     model.layouts[layout.id] = layout;
+  }
+  if (variables.isNotEmpty) {
+    model.variables[layouts.first.id] = SDKLayoutVariables(
+      id: layouts.first.id,
+      variables: variables,
+      owner: 'owner',
+      teams: const {},
+      users: const {},
+      roles: const {},
+      public: false,
+    );
   }
   final codelessly = Codelessly(
     config: CodelesslyConfig(authToken: 'token'),

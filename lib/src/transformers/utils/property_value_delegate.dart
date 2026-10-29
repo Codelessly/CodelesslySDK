@@ -254,33 +254,50 @@ class PropertyValueDelegate {
     );
   }
 
-  /// Evaluates a formula [expression] (the part after `${=`), reading its
-  /// variable paths from [scopedValues]. See [FormulaEvaluator].
-  /// Whether [variable] is computed: its value is a `${= ...}` formula,
-  /// worked out from other variables whenever it is read.
-  static bool isComputedVariable(VariableData variable) =>
-      FormulaEvaluator.exactExpression(variable.value) != null;
+  /// Whether [variable] has a separate expression or a `${= ...}` value.
+  static bool isComputedVariable(VariableData variable) => variable.isComputed;
 
   static int _computedDepth = 0;
+
+  /// Names of the computed variables being evaluated, so a formula that
+  /// (indirectly) reads its own variable gets null instead of looping.
+  static final Set<String> _computing = {};
 
   /// The value of [variable]: its formula's result for a computed variable,
   /// else its stored value. Computed variables can read each other; a cycle
   /// gives null instead of recursing forever.
+  ///
+  /// A `${= ...}` value keeps the type returned by its formula.
   static Object? variableValueOf(
     VariableData variable,
     ScopedValues scopedValues,
   ) {
-    final String? expression = FormulaEvaluator.exactExpression(variable.value);
+    final String? expression = variable.formula.trim().isNotEmpty
+        ? variable.formula
+        : FormulaEvaluator.exactExpression(variable.value);
     if (expression == null) return variable.getValue();
-    if (_computedDepth >= 16) return null;
+    if (_computedDepth >= 16 || !_computing.add(variable.name)) return null;
     _computedDepth++;
     try {
-      return evaluateFormula(expression, scopedValues: scopedValues);
+      final Object? value = evaluateFormula(
+        expression,
+        scopedValues: scopedValues,
+      );
+      return value;
     } finally {
       _computedDepth--;
+      _computing.remove(variable.name);
     }
   }
 
+  /// [variableValueOf] with a named [scopedValues].
+  static Object? variableValue(
+    VariableData variable, {
+    required ScopedValues scopedValues,
+  }) => variableValueOf(variable, scopedValues);
+
+  /// Evaluates a formula [expression] (the part after `${=`), reading its
+  /// variable paths from [scopedValues]. See [FormulaEvaluator].
   static Object? evaluateFormula(
     String expression, {
     required ScopedValues scopedValues,

@@ -42,17 +42,26 @@ class PassiveIconWidget extends StatelessWidget {
           'iconColor',
           scopedValues: scopedValues,
         );
+    // `icon` uses Material Icons; `iconName` retains Material Symbols.
+    MultiSourceIconModel icon = iconWithName(
+      node.properties.icon,
+      node.variables['icon'] == null
+          ? null
+          : PropertyValueDelegate.getPropertyValue<String>(
+              node,
+              'icon',
+              scopedValues: scopedValues,
+            ),
+    );
     final String? iconName = PropertyValueDelegate.getPropertyValue<String>(
       node,
       'iconName',
       scopedValues: scopedValues,
     );
-    MultiSourceIconModel icon = iconColor == null
-        ? node.properties.icon
-        : node.properties.icon.copyWith(color: iconColor);
     if (iconName != null && iconName.trim().isNotEmpty) {
       icon = withIconName(icon, iconName.trim());
     }
+    if (iconColor != null) icon = icon.copyWith(color: iconColor);
     return retrieveIconWidget(icon, node.basicBoxLocal.width) ??
         SizedBox(
           width: node.basicBoxLocal.width,
