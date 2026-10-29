@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../codelessly.dart';
 import '../ui/codelessly_widget.dart';
 import 'paywall_controller.dart';
 
-/// Displays an already-published layout, forwarding its reserved paywall.*
-/// callFunction actions to the store controller. A product change rebuilds
+/// Displays an already-published layout, forwarding native paywall actions
+/// to the scoped controller. A product change rebuilds
 /// CodelesslyWidget with fresh scoped data (including localized store prices).
 class CodelesslyPaywall extends StatefulWidget {
   final String layoutId;
@@ -42,19 +43,12 @@ class _CodelesslyPaywallState extends State<CodelesslyPaywall> {
   }
 
   @override
-  Widget build(BuildContext context) => CodelesslyWidget(
-    layoutID: widget.layoutId,
-    codelessly: widget.codelessly,
-    data: widget.controller.variables,
-    functions: {
-      'paywall.purchase': (context, scope, params) =>
-          widget.controller.purchase(slot: params['slot'] as String?),
-      'paywall.restore': (context, scope, params) =>
-          widget.controller.restore(),
-      'paywall.selectProduct': (context, scope, params) =>
-          widget.controller.selectProduct(params['slot'] as String),
-      'paywall.closePaywall': (context, scope, params) =>
-          widget.controller.close(),
-    },
+  Widget build(BuildContext context) => Provider<PaywallController>.value(
+    value: widget.controller,
+    child: CodelesslyWidget(
+      layoutID: widget.layoutId,
+      codelessly: widget.codelessly,
+      data: widget.controller.variables,
+    ),
   );
 }

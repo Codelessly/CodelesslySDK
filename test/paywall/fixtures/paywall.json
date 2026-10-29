@@ -6,8 +6,8 @@
   ],
   "layout": {
     "headline": "Upgrade to Pro for ${product.price} / ${product.period}",
-    "cta": {"type": "callFunction", "name": "paywall.purchase", "params": {"slot": "annual"}},
-    "restore": {"type": "callFunction", "name": "paywall.restore"},
-    "close": {"type": "callFunction", "name": "paywall.closePaywall"}
+    "cta": {"type": "paywall", "operation": "purchase", "slot": "annual"},
+    "restore": {"type": "paywall", "operation": "restore"},
+    "close": {"type": "paywall", "operation": "closePaywall"}
   }
 }

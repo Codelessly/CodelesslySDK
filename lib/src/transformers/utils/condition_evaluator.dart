@@ -327,6 +327,9 @@ class ConditionEvaluator<R extends Object>
   R? visitCopyToClipboardAction(CopyToClipboardAction action) => null;
 
   @override
+  R? visitPaywallAction(PaywallAction action) => null;
+
+  @override
   R? visitCloudDataAction(CloudDataAction action) => null;
 
   @override
@@ -487,6 +490,11 @@ class ConditionPrinter
 
   @override
   void visitCopyToClipboardAction(CopyToClipboardAction action) {}
+
+  @override
+  void visitPaywallAction(PaywallAction action) {
+    _buffer.writeln('\tPaywall ${action.operation.name}');
+  }
 
   @override
   void visitCloudDataAction(CloudDataAction action) {}

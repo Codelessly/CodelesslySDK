@@ -78,12 +78,12 @@ void main() {
   });
 
   test('published JSON action selects localized store product bindings', () {
-    final actionJson = const PaywallAction(
+    final actionJson = PaywallAction(
       PaywallOperation.selectProduct,
       slot: 'monthly',
-    ).toAction().toJson();
-    final action = ActionModel.fromJson(actionJson) as CallFunctionAction;
-    controller.selectProduct(action.params['slot'] as String);
+    ).toJson();
+    final action = ActionModel.fromJson(actionJson) as PaywallAction;
+    controller.selectProduct(action.slot!);
     expect(controller.variables['product']['price'], '€4,99');
     expect(controller.variables['product']['currency'], 'EUR');
     controller.selectProduct('annual');
@@ -114,13 +114,14 @@ void main() {
         const PaywallResult(
           PaywallOutcome.purchased,
           productId: 'com.example.annual',
+          entitlementId: 'pro',
         ),
       );
       expect((await controller.result).outcome, PaywallOutcome.purchased);
-      expect(controller.variables['entitlements']['com.example.annual'], true);
+      expect(controller.variables['entitlements']['pro'], true);
       expect(
         PropertyValueDelegate.getVariableValueFromPath<bool>(
-          r'${entitlements.annual}',
+          r'${entitlements.pro}',
           scopedValues: ScopedValues.preview(
             variables: {},
             data: controller.variables,
@@ -163,10 +164,11 @@ void main() {
       const PaywallResult(
         PaywallOutcome.restored,
         productId: 'com.example.annual',
+        entitlementId: 'pro',
       ),
     );
     expect((await controller.result).outcome, PaywallOutcome.restored);
-    expect(controller.variables['entitlements']['com.example.annual'], true);
+    expect(controller.variables['entitlements']['pro'], true);
   });
 
   test(
@@ -190,12 +192,22 @@ void main() {
       );
       expect(headline, 'Upgrade to Pro for €39,99 / year');
       final action =
-          ActionModel.fromJson(layout['cta'] as Map) as CallFunctionAction;
-      expect(action.name, 'paywall.purchase');
-      await controller.purchase(slot: action.params['slot'] as String);
+          ActionModel.fromJson(layout['cta'] as Map) as PaywallAction;
+      expect(action.operation, PaywallOperation.purchase);
+      await controller.purchase(slot: action.slot);
       expect(store.purchased, 'com.example.annual');
     },
   );
+
+  test('empty restore leaves paywall open and exposes result', () async {
+    await controller.restore();
+    store.events.add(const PaywallResult(PaywallOutcome.restoreNothing));
+    await Future<void>.delayed(Duration.zero);
+    expect(controller.variables['paywall']['restoreResult'], 'nothing');
+    expect(controller.restoring, false);
+    controller.close();
+    expect((await controller.result).outcome, PaywallOutcome.closed);
+  });
 
   test('placement JSON carries published layout and slots', () {
     final placement = PaywallPlacement.fromJson({

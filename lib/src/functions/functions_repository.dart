@@ -158,7 +158,39 @@ class FunctionsRepository {
         return runCloudBatch(context, action as CloudBatchAction);
       case ActionType.copyToClipboard:
         return copyToClipboard(context, action as CopyToClipboardAction);
+      case ActionType.paywall:
+        return performPaywallAction(context, action as PaywallAction);
     }
+  }
+
+  /// Run a native paywall action in the enclosing paywall surface.
+  static Future<bool> performPaywallAction(
+    BuildContext context,
+    PaywallAction action,
+  ) async {
+    final controller = context.read<PaywallController?>();
+    if (controller == null) {
+      throw StateError('Paywall action outside a paywall');
+    }
+    switch (action.operation) {
+      case PaywallOperation.purchase:
+        await controller.purchase(slot: action.slot);
+      case PaywallOperation.restore:
+        await controller.restore();
+      case PaywallOperation.selectProduct:
+        controller.selectProduct(
+          action.slot ?? (throw StateError('Missing product slot')),
+        );
+      case PaywallOperation.closePaywall:
+        controller.close();
+      case PaywallOperation.openLegalLink:
+        final url = Uri.tryParse(action.url ?? '');
+        if (url == null || url.scheme != 'https') {
+          throw StateError('Invalid paywall legal URL');
+        }
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+    return true;
   }
 
   /// Copies the text of [action], its variables substituted.
