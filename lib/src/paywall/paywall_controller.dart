@@ -99,6 +99,7 @@ class PaywallController extends ChangeNotifier {
   final PurchaseService service;
   final List<ProductSlot> slots;
   final Set<String> entitlements;
+  final void Function(String event, String? slot)? onEvent;
   late final StreamSubscription<PaywallResult> _subscription;
   final Completer<PaywallResult> _completion = Completer<PaywallResult>();
   List<PaywallProduct> products = [];
@@ -112,6 +113,7 @@ class PaywallController extends ChangeNotifier {
     required this.service,
     required this.slots,
     Set<String>? entitlements,
+    this.onEvent,
   }) : entitlements = entitlements ?? {} {
     _subscription = service.updates.listen(
       _onPurchase,
@@ -161,6 +163,7 @@ class PaywallController extends ChangeNotifier {
       throw ArgumentError.value(slot, 'slot', 'Unknown store product');
     }
     selectedSlot = slot;
+    onEvent?.call('product_selected', slot);
     notifyListeners();
   }
 
@@ -171,6 +174,7 @@ class PaywallController extends ChangeNotifier {
     if (product == null) throw StateError('No store product selected');
     error = null;
     purchasing = true;
+    onEvent?.call('purchase_start', product.slot);
     notifyListeners();
     try {
       await service.purchase(product);
@@ -189,6 +193,7 @@ class PaywallController extends ChangeNotifier {
     if (purchasing || restoring) return;
     error = null;
     restoring = true;
+    onEvent?.call('restore', selectedSlot);
     restoreResult = null;
     notifyListeners();
     try {
@@ -200,13 +205,17 @@ class PaywallController extends ChangeNotifier {
     }
   }
 
-  void close() => _finish(const PaywallResult(PaywallOutcome.closed));
+  void close() {
+    onEvent?.call('close', selectedSlot);
+    _finish(const PaywallResult(PaywallOutcome.closed));
+  }
 
   void _onPurchase(PaywallResult result) {
     purchasing = false;
     restoring = false;
     if (result.outcome == PaywallOutcome.failed) {
       error = result.error ?? 'Purchase failed';
+      onEvent?.call('purchase_fail', selectedSlot);
     }
     if (result.outcome == PaywallOutcome.restoreNothing) {
       restoreResult = 'nothing';
@@ -217,6 +226,9 @@ class PaywallController extends ChangeNotifier {
         error = 'Missing verified entitlement';
       } else {
         entitlements.add(result.entitlementId!);
+        if (result.outcome == PaywallOutcome.purchased) {
+          onEvent?.call('purchase_success', selectedSlot);
+        }
         _finish(result);
       }
     }

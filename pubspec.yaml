@@ -35,6 +35,7 @@ dependencies:
   firebase_core: ^4.15.0
   firebase_auth: ^6.7.0
   cloud_firestore: ^6.10.0
+  cloud_functions: ^6.0.6
   firebase_storage: ^13.0.6
   firebase_ui_firestore: ^2.1.0
   google_fonts: ^9.0.0
