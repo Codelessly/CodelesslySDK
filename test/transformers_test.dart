@@ -24,6 +24,8 @@ List<BaseNode> standaloneNodes() => [
   ),
   ProgressBarNode.empty(),
   LineChartNode.empty(),
+  // ChartNode is a series inside a PlotChartNode, not a standalone widget;
+  // the plot and its series are exercised in chart_test.dart.
   RadioNode.empty(),
   SliderNode.empty(),
   SwitchNode.empty(),

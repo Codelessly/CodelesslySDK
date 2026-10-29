@@ -31,8 +31,11 @@ class TextUtils {
     String characters = rawText;
 
     // Get substring from the raw text for the given start and end positions.
+    // A range past the text (left by an edit that shortened it) is clamped,
+    // so one bad range can't throw on every layout and paint.
     if (prop is StartEndProp) {
-      characters = rawText.substring(prop.start, prop.end);
+      final int end = prop.end.clamp(0, rawText.length);
+      characters = rawText.substring(prop.start.clamp(0, end), end);
     }
 
     return buildTextSpan(

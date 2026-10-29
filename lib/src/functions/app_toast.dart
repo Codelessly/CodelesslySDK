@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../codelessly_sdk.dart';
 import 'action_chain.dart';
@@ -36,6 +37,22 @@ class AppToast {
     final String message = text(action.message);
     final String actionLabel = action.hasAction ? text(action.actionLabel) : '';
     final ResolvedFeedbackTheme theme = FeedbackTheme.of(context);
+    // Without a font of its own, the toast takes the app's text style at
+    // the trigger, not Material's default.
+    final TextStyle appText = DefaultTextStyle.of(context).style;
+    final String? themeFamily = Theme.of(context)
+        .textTheme
+        .bodyMedium
+        ?.fontFamily;
+    final TextStyle appFont =
+        theme.bodyStyle.fontFamily == themeFamily && appText.fontFamily != null
+        ? theme.bodyStyle.copyWith(
+            fontFamily: appText.fontFamily,
+            fontFamilyFallback: appText.fontFamilyFallback,
+          )
+        : theme.bodyStyle;
+    final TextStyle font = fontForAction(action, appFont);
+    final double? offset = offsetOf(action, scopedValues);
     // The button's actions run on the chain that showed the toast, whenever
     // it is pressed: with its captured scope (the `${item}` of a row that has
     // since left the list) and its `${result}` then (e.g. the id of the item
@@ -58,6 +75,8 @@ class AppToast {
         message: message,
         actionLabel: actionLabel,
         theme: theme,
+        font: font,
+        offset: offset,
         onAction: onAction,
         onDone: () {
           if (_current == entry) _current = null;
@@ -68,6 +87,55 @@ class AppToast {
     _current = entry;
     overlay.insert(entry);
     return true;
+  }
+
+  /// The message's text style: [base] in [ShowToastAction.fontFamily] (a
+  /// Google font or one the project loaded) and [ShowToastAction.fontWeight]
+  /// when set. Without a weight it is semibold.
+  static TextStyle fontForAction(ShowToastAction action, TextStyle base) {
+    final FontWeight weight =
+        action.fontWeight?.flutterFontWeight ?? FontWeight.w600;
+    final String family = action.fontFamily?.trim() ?? '';
+    if (family.isEmpty) return base.copyWith(fontWeight: weight);
+    if (GoogleFonts.asMap().containsKey(family)) {
+      // The SDK's font resolver selects the loaded face for the requested
+      // weight (including the semibold face) rather than just a family name.
+      final TextStyle? resolved = fontOf(family);
+      return base.copyWith(
+        fontFamily: resolved?.fontFamily,
+        fontFamilyFallback: resolved?.fontFamilyFallback,
+        fontWeight: weight,
+      );
+    }
+    final TextStyle? resolved = action.fontWeight == null
+        ? fontOf(family)
+        : null;
+    return base.copyWith(
+      fontFamily: resolved?.fontFamily ?? family,
+      fontFamilyFallback: resolved?.fontFamilyFallback ?? const <String>[],
+      fontWeight: weight,
+    );
+  }
+
+  /// The distance from the screen edge [action]'s bound
+  /// [ShowToastAction.offset] gives, read with [scopedValues], or null when
+  /// it is empty or not a number.
+  static double? offsetOf(ShowToastAction action, ScopedValues scopedValues) {
+    final String template = action.offset.trim();
+    if (template.isEmpty) return null;
+    final Object? value =
+        FormulaEvaluator.exactExpression(template) != null ||
+            RegExp(r'^\$\{[^{}]+\}$').hasMatch(template)
+        ? PropertyValueDelegate.getVariableValueFromPath<Object>(
+            template,
+            scopedValues: scopedValues,
+          )
+        : PropertyValueDelegate.substituteVariables(
+            template,
+            scopedValues: scopedValues,
+            nullSubstitutionMode: NullSubstitutionMode.emptyString,
+          );
+    return value.toDouble();
   }
 
   /// Removes the toast on screen, if any.
@@ -122,6 +190,8 @@ class _ToastView extends StatefulWidget {
     required this.message,
     required this.actionLabel,
     required this.theme,
+    required this.font,
+    required this.offset,
     required this.onAction,
     required this.onDone,
   });
@@ -130,6 +200,8 @@ class _ToastView extends StatefulWidget {
   final String message;
   final String actionLabel;
   final ResolvedFeedbackTheme theme;
+  final TextStyle font;
+  final double? offset;
   final VoidCallback? onAction;
   final VoidCallback onDone;
 
@@ -217,18 +289,23 @@ class _ToastViewState extends State<_ToastView> {
     final bool stretch = alignment == 'stretch';
     final bool top = action.position == ToastPosition.top;
     final MediaQueryData media = MediaQuery.of(context);
-    final TextStyle? font = AppToast.fontOf(action.fontFamily);
-    final TextStyle messageStyle = action.messageStyle.applyTo(
-      theme.bodyStyle
-          .merge(font)
-          .copyWith(
+    final double fontSize =
+        action.fontSize ?? (options['fontSize'] as num?)?.toDouble() ?? 14;
+    final TextStyle font = widget.font;
+    final TextStyle messageStyle = action.messageStyle
+        .applyTo(
+          font.copyWith(
             color: textColor,
-            fontSize: (options['fontSize'] as num?)?.toDouble() ?? 14,
+            fontSize: fontSize,
             height: 1.35,
-            fontWeight: FontWeight.w600,
             decoration: TextDecoration.none,
           ),
-    );
+        )
+        .copyWith(
+          fontFamily: action.fontFamily?.trim().isNotEmpty == true
+              ? font.fontFamily
+              : null,
+        );
     final Color actionColor =
         action.actionColor?.toFlutterColor() ?? messageStyle.color!;
     final TextStyle actionStyle = action.actionStyle.applyTo(
@@ -295,7 +372,7 @@ class _ToastViewState extends State<_ToastView> {
                 foregroundColor: actionColor,
                 minimumSize: const Size(48, 36),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                textStyle: actionStyle,
+                textStyle: actionStyle.copyWith(fontSize: fontSize),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(buttonRadius),
                 ),
@@ -374,8 +451,10 @@ class _ToastViewState extends State<_ToastView> {
     return Positioned(
       left: (options['sideMargin'] as num?)?.toDouble() ?? 16,
       right: (options['sideMargin'] as num?)?.toDouble() ?? 16,
-      top: top ? media.padding.top + 16 : null,
-      bottom: top ? null : action.bottomOffsetFor(media.size.width),
+      top: top ? media.padding.top + (widget.offset ?? 16) : null,
+      bottom: top
+          ? null
+          : widget.offset ?? action.bottomOffsetFor(media.size.width),
       // Only a toast with a button takes taps; the rest passes them through.
       child: IgnorePointer(
         ignoring: !(hasButton || hasClose) || _closing,

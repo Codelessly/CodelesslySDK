@@ -262,6 +262,10 @@ ProgressBarProperties get defaultProgressBarProperties => ProgressBarProperties(
   cornerRadius: ProgressBarDefaults.cornerRadius,
 );
 
+/// A new chart's properties: a sample curve, so it looks like a chart.
+PlotChartProperties get defaultPlotChartProperties =>
+    PlotChartProperties.sample();
+
 TabBarProperties get defaultTabBarProperties => TabBarProperties(
   dividerColor: TabBarDefaults.dividerColor.toColorRGBA(),
   indicatorColor: TabBarDefaults.indicatorColor.toColorRGBA(),

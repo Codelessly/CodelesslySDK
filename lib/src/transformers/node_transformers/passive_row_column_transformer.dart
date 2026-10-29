@@ -50,18 +50,28 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     final bool isPlaceholder =
         parent is CanvasNode && parent.properties.bodyId == rowColumnNode.id;
 
+    // A flexible Row/Column that scrolls along its main axis is a Flutter
+    // Flexible (loose) around its scroll view: as long as its content, at
+    // most the space its parent gives it, and the content scrolls past that.
+    final bool contentSized =
+        withScroll && scrollsFlexiblyOnMainAxis(rowColumnNode);
+
     final FitBox outerBox = FitBox(
-      width: _outerExtent(
-        rowColumnNode.horizontalFit,
-        design: rowColumnNode.outerBoxLocal.width,
-        min: rowColumnNode.constraints.minWidth,
-        max: rowColumnNode.constraints.maxWidth,
-      ),
+      width: contentSized && isRow
+          ? null
+          : _outerExtent(
+              rowColumnNode.horizontalFit,
+              design: rowColumnNode.outerBoxLocal.width,
+              min: rowColumnNode.constraints.minWidth,
+              max: rowColumnNode.constraints.maxWidth,
+            ),
       fillWidth: _fillsAxis(
         rowColumnNode.horizontalFit,
         max: rowColumnNode.constraints.maxWidth,
       ),
-      height: isPlaceholder && rowColumnNode.verticalFit.isFlex
+      height: contentSized && !isRow
+          ? null
+          : isPlaceholder && rowColumnNode.verticalFit.isFlex
           ? rowColumnNode.constraints.minHeight
           : _outerExtent(
               rowColumnNode.verticalFit,
@@ -149,9 +159,12 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       res = wrapWithPaddedScrollable(
         padding: rowColumnNode.resolvedPadding().flutterEdgeInsets,
         node: (rowColumnNode as ScrollableMixin),
+        // Sized by its content, there is no free space to align it in.
         fillViewport:
+            !contentSized &&
             rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start,
         flexContent: hasMainAxisFlexChild(rowColumnNode, childrenNodes),
+        contentSizedOnScrollAxis: contentSized,
         child: res,
       );
     }
@@ -232,6 +245,27 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     }
     return res;
   }
+
+  /// Whether [node] is a Row/Column that scrolls along its main axis and is
+  /// flexible on it: it is as long as its content, capped by its [Flexible]
+  /// parent, like the editor's `min(flex share, content)`.
+  static bool scrollsFlexiblyOnMainAxis(BaseNode node) {
+    if (node is! RowColumnMixin || node is! ScrollableMixin) return false;
+    if (rowColumnWraps(node)) return false;
+    final ScrollableMixin scrollable = node as ScrollableMixin;
+    final bool isRow = node.rowColumnType == RowColumnType.row;
+    if (!scrollable.isScrollable) return false;
+    if (scrollable.scrollDirection !=
+        (isRow ? AxisC.horizontal : AxisC.vertical)) {
+      return false;
+    }
+    return (isRow ? node.horizontalFit : node.verticalFit) == SizeFit.flexible;
+  }
+
+  /// Whether [node] is a row/column whose children flow onto new runs when
+  /// they don't fit ([RowColumnMixin.wrap]), built as a [CodelesslyWrap].
+  static bool rowColumnWraps(BaseNode node) =>
+      node is RowColumnMixin && node.wrap;
 
   /// The [Wrap.alignment] of a wrapping row/column with [alignment] as its
   /// main-axis alignment.

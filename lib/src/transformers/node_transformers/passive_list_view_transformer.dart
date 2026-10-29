@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
@@ -75,12 +76,18 @@ class PassiveListViewWidget extends StatelessWidget {
     );
   }
 
+  /// Explicit wrap spacing belongs to the scrollable, cross-axis run layout;
+  /// separator spacing belongs to the intrinsic, non-scrolling wrap layout.
+  bool get usesScrollableWrap =>
+      node.properties.isWrapping &&
+      (node.properties.wrapSpacing != 0 || node.properties.wrapRunSpacing != 0);
+
   /// Sizes the list by [ViewportLayout] around [builder].
   ///
-  /// A wrapping list is sized by [WrapNodeBox] instead, and the flag given
-  /// to [builder] says whether its runs scroll along the cross axis.
+  /// A scrollable wrapping list is sized by [WrapNodeBox] instead, and the
+  /// flag given to [builder] says whether its runs scroll along the cross axis.
   Widget box(ViewportContentBuilder builder, {required bool canShrinkWrap}) =>
-      node.properties.isWrapping
+      usesScrollableWrap
       ? WrapNodeBox(node: node, builder: builder)
       : ViewportNodeBox(
           node: node,
@@ -89,15 +96,102 @@ class PassiveListViewWidget extends StatelessWidget {
           builder: builder,
         );
 
+  /// Lays out all [itemCount] items in a [Flex] instead of a viewport, for a
+  /// list that [listBuildsAllItems]. It looks the same, and a Row or Column
+  /// around it can measure it (a viewport can't report intrinsic sizes), so
+  /// a stretched row of cards keeps equal heights with a list in one of them.
+  Widget staticList(
+    BuildContext context,
+    int itemCount,
+    IndexedWidgetBuilder itemBuilder,
+  ) {
+    if (listWraps(node) && !usesScrollableWrap) {
+      return wrappedList(context, itemCount, itemBuilder);
+    }
+    final bool vertical = node.scrollDirection == AxisC.vertical;
+    final List<Widget> items = [
+      for (int index = 0; index < itemCount; index++) ...[
+        if (index > 0 && node.properties.hasSeparator)
+          ListViewItemSeparator(
+            scrollDirection: node.scrollDirection,
+            properties: node.properties,
+          ),
+        itemBuilder(context, index),
+      ],
+    ];
+    final Widget flex = Padding(
+      padding: node.padding.flutterEdgeInsets,
+      child: Flex(
+        direction: node.scrollDirection.flutterAxis,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: node.reverse ? items.reversed.toList() : items,
+      ),
+    );
+    // The cross axis follows [ViewportLayout]: fill when expanded and
+    // bounded, else the design size. The scroll axis hugs the items.
+    final SizeFit crossFit = vertical ? node.horizontalFit : node.verticalFit;
+    final double designCross = vertical
+        ? node.basicBoxLocal.width
+        : node.basicBoxLocal.height;
+    final bool fill = crossFit == SizeFit.expanded;
+    return FitBox(
+      width: vertical ? designCross : null,
+      height: vertical ? null : designCross,
+      fillWidth: vertical && fill,
+      fillHeight: !vertical && fill,
+      child: node.clipsContent ? ClipRect(child: flex) : flex,
+    );
+  }
+
+  /// Lays out all [itemCount] items of a wrapping list (see [listWraps]) in
+  /// a [Wrap] along the scroll direction: items flow onto a new run when
+  /// they don't fit, with the separator's spacing between items and
+  /// [ListViewProperties.runSpacing] between runs, all aligned to the start.
+  ///
+  /// The list is sized by its own fits: fixed takes its design size, expanded
+  /// fills a bounded axis, and shrink-wrap hugs (along the scroll direction,
+  /// the widest run; across it, the runs).
+  Widget wrappedList(
+    BuildContext context,
+    int itemCount,
+    IndexedWidgetBuilder itemBuilder,
+  ) {
+    final List<Widget> items = [
+      for (int index = 0; index < itemCount; index++)
+        itemBuilder(context, index),
+    ];
+    final Widget wrap = Padding(
+      padding: node.padding.flutterEdgeInsets,
+      child: Wrap(
+        direction: node.scrollDirection.flutterAxis,
+        spacing: listWrapSpacing(node),
+        runSpacing: math.max(0, node.properties.runSpacing),
+        children: node.reverse ? items.reversed.toList() : items,
+      ),
+    );
+    return FitBox(
+      width: node.horizontalFit == SizeFit.shrinkWrap
+          ? null
+          : node.basicBoxLocal.width,
+      height: node.verticalFit == SizeFit.shrinkWrap
+          ? null
+          : node.basicBoxLocal.height,
+      fillWidth: node.horizontalFit == SizeFit.expanded,
+      fillHeight: node.verticalFit == SizeFit.expanded,
+      child: node.clipsContent ? ClipRect(child: wrap) : wrap,
+    );
+  }
+
   /// Builds one item, placed as the editor lays it out; see [ListItemBox].
-  /// The item of a wrapping list keeps its own size; see [WrapItemBox].
+  /// Legacy wrapping lists retain their item sizing and scroll behavior.
   Widget buildItem(BaseNode item, BuildContext context) {
     final Widget child = manager.buildWidgetByID(
       item.id,
       context,
       settings: settings,
     );
-    if (node.properties.isWrapping) {
+    if (usesScrollableWrap) {
       return WrapItemBox(
         item: item,
         scrollDirection: node.scrollDirection,
@@ -109,11 +203,11 @@ class PassiveListViewWidget extends StatelessWidget {
       item: item,
       scrollDirection: node.scrollDirection,
       itemExtent: node.properties.itemExtent,
+      inWrap: listWraps(node) && !usesScrollableWrap,
       child: child,
     );
   }
 
-  /// The items of a wrapping list; [scrolls] comes from [WrapNodeBox].
   Widget wrapped(bool scrolls, int itemCount, IndexedWidgetBuilder builder) =>
       WrappedItems(
         itemCount: itemCount,
@@ -405,27 +499,25 @@ class PassiveListViewWidget extends StatelessWidget {
       itemBuilder: builder,
     );
 
-    // A stacked list draws its items on top of each other, the first on
-    // top, inside the list's own box. It never scrolls.
+    // Legacy stacked and wrapping layouts keep their placement and physics.
     if (node.properties.stacked) {
-      final int count = itemCount ?? 0;
       return box(
         canShrinkWrap: false,
         (context, _) => StackedItems(
-          itemCount: count,
+          itemCount: itemCount ?? 0,
           clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
           itemBuilder: itemBuilder,
         ),
       );
     }
-
-    // A wrapping list flows its items onto further lines, all of them built,
-    // so an endless one shows nothing.
-    if (node.properties.isWrapping) {
+    if (usesScrollableWrap) {
       return box(
         canShrinkWrap: true,
         (context, scrolls) => wrapped(scrolls, itemCount ?? 0, itemBuilder),
       );
+    }
+    if (itemCount != null && listBuildsAllItems(node)) {
+      return staticList(context, itemCount, itemBuilder);
     }
 
     // An endless list with items of free extent ends after a viewport's

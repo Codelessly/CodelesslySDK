@@ -1,8 +1,58 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'feedback_actions_test.dart' as harness;
+
+IconNode star(String? glyph) => IconNode(
+  id: 'star',
+  name: 'star',
+  basicBoxLocal: NodeBox(0, 0, 24, 24),
+  icon: const MaterialIcon(
+    codepoint: 0xe838,
+    name: 'star',
+    style: MaterialIconStyle.filled,
+    version: 22,
+  ),
+)..variables.addAll({'icon': ?glyph});
+
+Future<ScopedValues> scope(WidgetTester tester) async {
+  await harness.pumpLayouts(tester, [
+    harness.layoutOf('main', [
+      harness.canvas('main', 'mainBody'),
+      harness.body('mainBody', 'main', ['box']),
+      RectangleNode(
+        id: 'box',
+        name: 'box',
+        basicBoxLocal: NodeBox(0, 0, 10, 10),
+      )..parentID = 'mainBody',
+    ]),
+  ]);
+  await tester.pumpAndSettle();
+  return ScopedValues.of(
+    tester.element(
+      find.byKey(const ValueKey('Rectangle Transformer of box [box]')),
+    ),
+  );
+}
+
 void main() {
+  testWidgets('bound glyph uses its material icon version', (tester) async {
+    final ScopedValues values = await scope(tester);
+    final IconModel icon = PassiveIconWidget.resolvedIcon(
+      star(r"${= 1 > 2 ? 'star' : 'star_border'}"),
+      values,
+    ).icon!;
+    expect(icon.name, 'star_border');
+    expect((icon as MaterialIcon).version, materialIconVersions['star_border']);
+    expect(icon.toSvgUrl(), contains('/materialicons/star_border/v'));
+    expect(
+      PassiveIconWidget.resolvedIcon(star(null), values).icon!.name,
+      'star',
+    );
+  });
+
   const MultiSourceIconModel base = MultiSourceIconModel.icon(
     icon: MaterialIcon(
       codepoint: 0xe5e0,
@@ -18,7 +68,7 @@ void main() {
     expect(icon.style, MaterialIconStyle.outlined);
     expect(
       icon.toSvgUrl(),
-      'https://fonts.gstatic.com/s/i/materialiconsoutlined/kitchen/v11/24px.svg',
+      'https://fonts.gstatic.com/s/i/materialiconsoutlined/kitchen/v12/24px.svg',
     );
 
     final MaterialIcon filled = iconWithName(base, 'Air').icon! as MaterialIcon;
