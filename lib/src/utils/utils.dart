@@ -9,6 +9,9 @@ import 'constants.dart';
 
 const Set<String> predefinedVariableNames = {
   'data',
+  'product',
+  'paywall',
+  'entitlements',
   'index',
   'value',
   'item',
@@ -42,10 +45,19 @@ bool isSharedVariablesScope(String scopeId) =>
     scopeId == kPageVariablesScope ||
     scopeId.startsWith(kPageVariablesStoragePrefix);
 
-const Set<String> predefinedListenableVariableNames = {'storage', 'auth'};
+const Set<String> predefinedListenableVariableNames = {
+  'storage',
+  'auth',
+  'product',
+  'paywall',
+  'entitlements',
+};
 
 final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'data', type: VariableType.map),
+  PredefinedVariableData(name: 'product', type: VariableType.map),
+  PredefinedVariableData(name: 'paywall', type: VariableType.map),
+  PredefinedVariableData(name: 'entitlements', type: VariableType.map),
   PredefinedVariableData(name: 'index', type: VariableType.integer),
   PredefinedVariableData(name: 'item'),
   PredefinedVariableData(name: 'parent', type: VariableType.map),
