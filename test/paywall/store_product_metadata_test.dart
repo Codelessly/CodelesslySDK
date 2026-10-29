@@ -67,7 +67,7 @@ void main() {
       description: '',
       productType: ProductType.subs,
       subscriptionOfferDetails: [
-        const SubscriptionOfferDetailsWrapper(
+        SubscriptionOfferDetailsWrapper(
           basePlanId: 'annual',
           offerTags: [],
           offerIdToken: 'offer',
