@@ -129,6 +129,155 @@ void main() {
     });
   });
 
+  test(
+    'separate expression resolves dependencies without changing wire inputs',
+    () {
+      final VariableData seed = VariableData(
+        id: 'seed',
+        name: 'seed',
+        type: VariableType.integer,
+        value: '2',
+      );
+      final VariableData first = VariableData(
+        id: 'first',
+        name: 'first',
+        type: VariableType.integer,
+        value: '99',
+        formula: 'seed + 1',
+      );
+      final VariableData second = VariableData(
+        id: 'second',
+        name: 'second',
+        type: VariableType.integer,
+        formula: 'first + 1',
+      );
+      final VariableData legacy = VariableData(
+        id: 'legacy',
+        name: 'legacy',
+        type: VariableType.integer,
+        value: r'${= second + 1}',
+      );
+      final Map<String, VariableData> original = {
+        'legacy': legacy,
+        'second': second,
+        'first': first,
+        'seed': seed,
+      };
+      expect(ComputedVariables.formulaOf(first), 'seed + 1');
+      expect(ComputedVariables.formulaOf(legacy), r'${= second + 1}');
+      final VariableData both = VariableData(
+        id: 'both',
+        name: 'both',
+        type: VariableType.integer,
+        value: r'${= 100}',
+        formula: 'seed + 1',
+      );
+      expect(ComputedVariables.formulaOf(both), 'seed + 1');
+      expect(
+        ComputedVariables.resolveAll({
+          'seed': seed,
+          'both': both,
+        })['both']!.getValue(),
+        3,
+      );
+      expect(both.value, r'${= 100}');
+      expect(both.formula, 'seed + 1');
+      expect(ComputedVariables.inputsOf(first), {'seed'});
+      expect(ComputedVariables.inputsOf(second), {'first'});
+      expect(ComputedVariables.cyclicNames(original), isEmpty);
+
+      final Map<String, VariableData> resolved = ComputedVariables.resolveAll(
+        original,
+      );
+      expect(resolved['first']!.getValue(), 3);
+      expect(resolved['second']!.getValue(), 4);
+      expect(resolved['legacy']!.getValue(), 5);
+      expect(resolved['first']!.formula, isEmpty);
+      expect(resolved['legacy']!.value, '5');
+      expect(original['first'], same(first));
+      expect(first.value, '99');
+      expect(first.formula, 'seed + 1');
+      expect(second.value, isEmpty);
+      expect(second.formula, 'first + 1');
+      expect(legacy.value, r'${= second + 1}');
+    },
+  );
+
+  test(
+    'separate and legacy expressions form cycles and clear preview values',
+    () {
+      final VariableData a = VariableData(
+        id: 'a',
+        name: 'a',
+        type: VariableType.integer,
+        value: '7',
+        formula: 'b + 1',
+      );
+      final VariableData b = VariableData(
+        id: 'b',
+        name: 'b',
+        type: VariableType.integer,
+        value: r'${= a + 1}',
+      );
+      final Map<String, VariableData> variables = {'a': a, 'b': b};
+      expect(ComputedVariables.cyclicNames(variables), {'a', 'b'});
+      final resolved = ComputedVariables.resolveAll(variables);
+      expect(resolved['a']!.value, isEmpty);
+      expect(resolved['b']!.value, isEmpty);
+      expect(resolved['a']!.getValue(), isNull);
+      expect(a.value, '7');
+      expect(a.formula, 'b + 1');
+      expect(b.value, r'${= a + 1}');
+    },
+  );
+
+  test(
+    'both formula wire forms round-trip and resolve after deserialization',
+    () {
+      final separate = VariableData.fromJson({
+        'id': 'separate',
+        'name': 'separate',
+        'type': 'integer',
+        'value': '',
+        'formula': 'base + 1',
+      });
+      final legacy = VariableData.fromJson({
+        'id': 'legacy',
+        'name': 'legacy',
+        'type': 'integer',
+        'formula': r'${= separate + 1}',
+      });
+      expect(separate.value, isEmpty);
+      expect(separate.formula, 'base + 1');
+      expect(separate.toJson()['formula'], 'base + 1');
+      expect(separate.toJson()['value'], isNull);
+      expect(legacy.formula, isEmpty);
+      expect(legacy.value, r'${= separate + 1}');
+      expect(legacy.toJson()['value'], r'${= separate + 1}');
+      expect(legacy.toJson()['formula'], isNull);
+      final copied = separate.copyWith(value: '8');
+      expect(copied.value, '8');
+      expect(copied.formula, 'base + 1');
+      final decoded = <String, VariableData>{
+        'base': VariableData(
+          id: 'base',
+          name: 'base',
+          type: VariableType.integer,
+          value: 2,
+        ),
+        'separate': VariableData.fromJson(
+          jsonDecode(jsonEncode(separate.toJson())),
+        ),
+        'legacy': VariableData.fromJson(
+          jsonDecode(jsonEncode(legacy.toJson())),
+        ),
+      };
+      expect(ComputedVariables.resolveAll(decoded)['legacy']!.getValue(), 4);
+      expect(decoded['separate']!.formula, 'base + 1');
+      expect(decoded['legacy']!.value, r'${= separate + 1}');
+    },
+  );
+
   test('the formula survives the published variables JSON', () {
     final SDKLayoutVariables published = SDKLayoutVariables(
       id: 'layout',
@@ -139,6 +288,12 @@ void main() {
             name: 'visible',
             type: VariableType.list,
             value: visibleFormula,
+          ),
+          'separate': VariableData(
+            id: 'separate',
+            name: 'separate',
+            type: VariableType.list,
+            formula: ComputedVariables.expressionOf(visibleFormula)!,
           ),
         },
       },
@@ -154,5 +309,19 @@ void main() {
     final VariableData visible = decoded.variables['canvas']!['visible']!;
     expect(visible.value, visibleFormula);
     expect(visible.isComputed, isTrue);
+    final VariableData separate = decoded.variables['canvas']!['separate']!;
+    expect(separate.value, isEmpty);
+    expect(separate.formula, ComputedVariables.expressionOf(visibleFormula));
+    expect(separate.isComputed, isTrue);
+    final Map<String, VariableData> resolved = ComputedVariables.resolveAll({
+      ...recordsContext().variableNamesMap(),
+      'separate': separate,
+    });
+    expect((resolved['separate']!.getValue() as List).first, {
+      'title': 'Apple',
+      'crate': 'a',
+    });
+    expect(separate.formula, ComputedVariables.expressionOf(visibleFormula));
+    expect(separate.value, isEmpty);
   });
 }
