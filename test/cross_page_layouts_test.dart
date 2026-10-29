@@ -42,7 +42,7 @@ TextNode text(String id, String parent, String characters) => TextNode(
   id: id,
   name: id,
   basicBoxLocal: NodeBox(0, 0, 300, 24),
-  characters: characters,
+  data: characters,
   textMixedProps: [
     StartEndProp(
       start: 0,

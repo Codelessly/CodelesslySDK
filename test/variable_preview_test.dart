@@ -102,7 +102,7 @@ void main() {
       name: 'Text',
       basicBoxLocal: NodeBox(0, 0, width, 20),
       horizontalFit: fit,
-      characters: r'${shots}',
+      data: r'${shots}',
     );
     expect(
       VariablePreview.textFor(r'${shots}', node: node(SizeFit.fixed)),

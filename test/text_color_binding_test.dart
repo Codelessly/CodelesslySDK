@@ -9,7 +9,7 @@ TextNode text(Map<String, String> variables) => TextNode.fromJson({
   'name': 'Label',
   'type': 'text',
   'basicBoxLocal': [0, 0, 120, 20],
-  'characters': 'Mid zone',
+  'data': 'Mid zone',
   'textMixedProps': [
     {
       'start': 0,
@@ -25,7 +25,7 @@ TextNode reading(Map<String, String> variables) => TextNode(
   id: 'reading',
   name: 'Reading',
   basicBoxLocal: NodeBox(0, 0, 120, 30),
-  characters: '87%',
+  data: '87%',
   textMixedProps: [
     StartEndProp(
       start: 0,
