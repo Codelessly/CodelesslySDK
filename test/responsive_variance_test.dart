@@ -316,6 +316,23 @@ void main() {
     expect(builtRectangles(nodes), idsOf(ScreenBreakpoint.desktop, 4));
   });
 
+  testWidgets('a dialog breakpoint scope uses screen width', (tester) async {
+    final nodes = responsivePage(canvasWidth: 560);
+    await pumpPage(
+      tester,
+      nodes,
+      screen: const Size(1440, 900),
+      wrap: (child) => Center(
+        child: BreakpointWidthScope(
+          width: 1440,
+          child: SizedBox(width: 560, child: child),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(builtRectangles(nodes), idsOf(ScreenBreakpoint.desktop, 4));
+  });
+
   testWidgets('an autoScale canvas picks by its design width', (tester) async {
     final nodes = responsivePage(
       canvasWidth: 1440,
