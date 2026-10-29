@@ -54,10 +54,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),
       'lineChart': PassiveLineChartTransformer(getNode, this),
-      'chartPlot': PassiveChartTransformer(getNode, this),
-      'chartSeries': PassiveChartSeriesTransformer(getNode, this),
-      'gaugeRadial': PassiveRadialGaugeTransformer(getNode, this),
-      'gaugeMeter': PassiveGaugeTransformer(getNode, this),
+      'chart': PassiveChartTransformer(getNode, this),
+      'chart#series': PassiveChartSeriesTransformer(getNode, this),
+      'gauge': PassiveRadialGaugeTransformer(getNode, this),
+      'gauge#meter': PassiveGaugeTransformer(getNode, this),
       'barChart': PassiveBarChartTransformer(getNode, this),
       'variance': PassiveVarianceTransformer(getNode, this),
       'webView': PassiveWebViewTransformer(getNode, this),
@@ -69,13 +69,23 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'chip': PassiveChipTransformer(getNode, this),
       'segmentedButton': PassiveSegmentedButtonTransformer(getNode, this),
       'signature': PassiveSignatureTransformer(getNode, this),
-      'signatureNormalized': PassiveSignatureNormalizedTransformer(
-        getNode,
-        this,
-      ),
+      'signature#normalized': PassiveSignatureNormalizedTransformer(getNode, this),
       'external': PassiveExternalComponentTransformer(getNode, this),
     });
   }
+
+  @override
+  NodeWidgetTransformer<BaseNode> getTransformerByNode(BaseNode node) =>
+      switch (node) {
+        ChartNode() => getTransformer<PassiveChartSeriesTransformer>(),
+        PlotChartNode() => getTransformer<PassiveChartTransformer>(),
+        GaugeNode() => getTransformer<PassiveRadialGaugeTransformer>(),
+        GaugeMeterNode() => getTransformer<PassiveGaugeTransformer>(),
+        SignatureNode() => getTransformer<PassiveSignatureTransformer>(),
+        SignatureNormalizedNode() =>
+          getTransformer<PassiveSignatureNormalizedTransformer>(),
+        _ => super.getTransformerByNode(node),
+      };
 
   @override
   Widget buildWidgetFromNode(
