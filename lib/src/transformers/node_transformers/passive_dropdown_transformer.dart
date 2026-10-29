@@ -206,7 +206,7 @@ class PassiveDropdownWidget extends StatelessWidget {
               builder: (context) => Container(
                 // An expanded dropdown gives the value the field's width; the
                 // design width only caps one that sizes to its value.
-                constraints: node.properties.expanded
+                constraints: node.properties.isExpanded
                     ? null
                     : BoxConstraints(
                         maxWidth:
@@ -266,9 +266,9 @@ class PassiveDropdownWidget extends StatelessWidget {
           builder: (context) {
             final child = DropdownButton<Object>(
               value: value,
-              isDense: node.properties.dense,
-              isExpanded: node.properties.expanded,
-              autofocus: node.properties.autoFocus,
+              isDense: node.properties.isDense,
+              isExpanded: node.properties.isExpanded,
+              autofocus: node.properties.autofocus,
               enableFeedback: node.properties.enableFeedback,
               alignment:
                   node

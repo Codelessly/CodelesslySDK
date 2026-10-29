@@ -237,7 +237,7 @@ class TextUtils {
   }) {
     final spans = buildTextSpansForProps(
       context,
-      textNode.characters,
+      textNode.data,
       node: textNode,
       props: textNode.textMixedProps,
       variablesOverrides: variablesOverrides,

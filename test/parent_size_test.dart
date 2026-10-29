@@ -107,7 +107,7 @@ void main() {
       id: 't',
       name: 't',
       basicBoxLocal: NodeBox(0, 0, 10, 10),
-      characters: r'Width ${= round(parent.width)}',
+      data: r'Width ${= round(parent.width)}',
     );
     expect(readsParentSize(text), true);
   });

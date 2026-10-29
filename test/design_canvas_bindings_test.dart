@@ -175,7 +175,7 @@ void main() {
       id: 'note',
       name: 'Note',
       basicBoxLocal: NodeBox(0, 0, 200, 20),
-      characters: note,
+      data: note,
       textMixedProps: [StartEndProp(start: 0, end: note.length)],
     )..parentID = kRootNode;
 
