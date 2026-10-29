@@ -28,6 +28,9 @@ enum FreeformAxisMode {
   /// that carry no explicit pins.
   relative,
 
+  /// Places the child's anchor at a fraction of the runtime parent extent.
+  fraction,
+
   /// Aligned with [Alignment.inscribe] semantics.
   align,
 }
@@ -59,6 +62,12 @@ class FreeformAxisPlacement {
   /// The alignment value (-1..1) for [FreeformAxisMode.align].
   final double alignment;
 
+  /// Fractional position of the child's anchor, for [FreeformAxisMode.fraction].
+  final double fraction;
+
+  /// Anchor within the child: 0=start, 0.5=center, 1=end.
+  final double anchor;
+
   /// Whether the child is kept inside the container when the container is
   /// smaller than at design size. False along a scroll axis, where children
   /// are content of a fixed extent.
@@ -83,6 +92,8 @@ class FreeformAxisPlacement {
     required this.parentExtent,
     this.size,
     this.alignment = 0,
+    this.fraction = 0,
+    this.anchor = 0.5,
     this.clamp = true,
     this.expands = false,
     this.growsWithContent = false,
@@ -156,7 +167,7 @@ class FreeformAxisPlacement {
   double _unwrappedContribution(double childExtent) => switch (mode) {
     FreeformAxisMode.fill => 0,
     FreeformAxisMode.stretch => math.max(0, start) + math.max(0, end),
-    FreeformAxisMode.align => childExtent,
+    FreeformAxisMode.align || FreeformAxisMode.fraction => childExtent,
     FreeformAxisMode.end => childExtent + math.max(0, end),
     FreeformAxisMode.start ||
     FreeformAxisMode.relative => math.max(0, start) + childExtent,
@@ -175,6 +186,7 @@ class FreeformAxisPlacement {
         final double v = s == null ? math.max(0, extent) : stretchIn(s).$2;
         return (v, v);
       case FreeformAxisMode.align:
+      case FreeformAxisMode.fraction:
         final double max = s ?? incomingMax;
         if (expands && max.isInfinite) return (extent, extent);
         return (0, max);
@@ -204,6 +216,8 @@ class FreeformAxisPlacement {
         return stretchIn(s).$1;
       case FreeformAxisMode.align:
         return (s - childExtent) / 2 * (1 + alignment);
+      case FreeformAxisMode.fraction:
+        return fraction * s - anchor * childExtent;
       case FreeformAxisMode.start:
         offset = wraps ? math.max(0, start) : start;
       case FreeformAxisMode.end:
@@ -233,6 +247,8 @@ class FreeformAxisPlacement {
       other.parentExtent == parentExtent &&
       other.size == size &&
       other.alignment == alignment &&
+      other.fraction == fraction &&
+      other.anchor == anchor &&
       other.clamp == clamp &&
       other.expands == expands &&
       other.growsWithContent == growsWithContent &&
@@ -246,6 +262,8 @@ class FreeformAxisPlacement {
     parentExtent,
     size,
     alignment,
+    fraction,
+    anchor,
     clamp,
     expands,
     growsWithContent,
