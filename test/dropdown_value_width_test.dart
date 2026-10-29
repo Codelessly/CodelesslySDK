@@ -16,7 +16,7 @@ void main() {
       value: spot,
       properties: DropdownProperties(
         items: const [spot, 'Point Pinos'],
-        expanded: true,
+        isExpanded: true,
       ),
     );
     await tester.pumpWidget(

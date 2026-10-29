@@ -8,7 +8,7 @@ void main() {
     id: 'clock',
     name: 'Clock',
     basicBoxLocal: NodeBox(0, 0, 200, 40),
-    characters: '1:48:00',
+    data: '1:48:00',
     textMixedProps: [StartEndProp(start: 0, end: 7, fontSize: 32)],
     tabularFigures: tabular,
   );
@@ -18,7 +18,7 @@ void main() {
     final List<FontFeature> features = [];
     for (final InlineSpan span in TextUtils.buildTextSpansForProps(
       null,
-      node.characters,
+      node.data,
       node: node,
       props: node.textMixedProps,
       variablesOverrides: const [],
