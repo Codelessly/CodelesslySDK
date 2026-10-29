@@ -281,7 +281,7 @@ void main() {
       final ButtonNode converted = ButtonNode.fromJson({
         ...node.toJson(),
         'type': 'textButton',
-        'properties': {...node.properties.toJson(), 'buttonType': 'text'},
+        'properties': node.properties.toJson(),
       });
       expect(background(styleOf(converted)), Colors.transparent);
       final ButtonNode black = button(
