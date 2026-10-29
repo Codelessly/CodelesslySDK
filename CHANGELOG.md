@@ -1,4 +1,4 @@
-## Unreleased
+## 8.3.0
 
 Needs the `codelessly_api` release after 6.2.0 (signature, loop animation,
 side sheet, confirm presentation, toast styling, `contentFit` and
@@ -247,6 +247,39 @@ Requires codelessly_api 6.2.0.
 - List items on the design canvas show their own item's text.
 - An API document without a directory no longer fails to load
   (`HttpApiData.directory` defaults to the root).
+
+### Widgets
+
+- Gauges (`PassiveGaugeWidget`, `GaugePainter`) and bar charts
+  (`PassiveBarChartWidget`) render the new `gauge` and `barChart` nodes; both
+  take `scopedValues` so an editor can preview their bindings.
+- Industrial slider: rectangle fader thumb with grip, fill from the thumb to
+  the end, notch tick marks, a value marker, a bindable active track color,
+  a selectable range and the `changeEnd` trigger.
+- Text nodes take a bound `textColor`; icons take an `icon` binding naming a
+  Material icon (`iconWithName`).
+- Nodes with a `transition` animate runtime opacity changes.
+- `ScopedValues.preview` takes `routeParams`, so a design canvas can show
+  `${route.…}` with sample params.
+- An icon bound to a name loads the SVG of that icon's version
+  (`materialIconVersions`), so icons added after version 1 (`air`) draw.
+- `PassiveTextFieldWidget.scopedValues`: the values a field's bound and
+  initial text read, so an editor can show variable defaults.
+- Nodes with corners take a `cornerRadius` binding: a number or
+  `[top-left, top-right, bottom-right, bottom-left]`.
+- A row or column that hugs its cross axis and stretches its children gives
+  hugging children the thickest child's size, as the editor lays it out.
+
+### Actions and variables
+
+- Interval reactions run on a timer per period while a canvas shows.
+- Dialogs open centered, as a bottom sheet, adaptively or anchored under the
+  trigger; canvas confirms take the same placement.
+- Toasts: alignment, side margin, max width, corner radius, action color,
+  close button and font size.
+- Computed variables also come from `VariableData.formula`, coerced to the
+  variable's type; `setVariable` leaves computed variables alone.
+- Formulas: `pad`, `alpha`, `concat` and list `+`; `FormulaEvaluator.parses`.
 
 ## 8.2.0
 

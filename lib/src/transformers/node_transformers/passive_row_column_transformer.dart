@@ -348,10 +348,19 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     // A parent that stretches its children across gives each one the full
     // cross axis, like the editor's solver, except a child that hugs on that
     // axis: the solver keeps its own size there and places it at the start.
+    // In a parent that hugs the cross axis too (measured with an
+    // IntrinsicHeight/Width), the solver stretches hugging children to the
+    // thickest one, so cards in a row get equal heights.
+    final bool parentHugsCross =
+        (mainAxis == AxisC.horizontal
+            ? parentRowColumn.verticalFit
+            : parentRowColumn.horizontalFit) ==
+        SizeFit.shrinkWrap;
     final AlignmentGeometry? childAlignment =
         (alignment ?? node.alignment).data?.flutterAlignmentGeometry ??
         (parentRowColumn.crossAxisAlignment == CrossAxisAlignmentC.stretch &&
-                crossAxisFit == SizeFit.shrinkWrap
+                crossAxisFit == SizeFit.shrinkWrap &&
+                !parentHugsCross
             ? AlignmentDirectional.topStart
             : null);
     final bool hasAlignment = childAlignment != null;

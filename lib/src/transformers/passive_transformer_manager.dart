@@ -54,6 +54,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),
       'lineChart': PassiveLineChartTransformer(getNode, this),
+      'gaugeRadial': PassiveRadialGaugeTransformer(getNode, this),
+      'gaugeMeter': PassiveGaugeTransformer(getNode, this),
+      'barChart': PassiveBarChartTransformer(getNode, this),
       'variance': PassiveVarianceTransformer(getNode, this),
       'webView': PassiveWebViewTransformer(getNode, this),
       'listView': PassiveListViewTransformer(getNode, this),
@@ -261,6 +264,15 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         ];
       }
     }
+    if (node is CornerMixin) {
+      // A number, or [top-left, top-right, bottom-right, bottom-left], e.g.
+      // a dialog squared at the bottom as a mobile sheet:
+      // `${= screen.isMobile ? [6, 6, 0, 0] : 6}`.
+      final CornerRadius? radius = value<CornerRadius>('cornerRadius');
+      if (radius != null && radius != node.cornerRadius) {
+        patch['cornerRadius'] = radius.toJson();
+      }
+    }
     if (node is BlendMixin) {
       final double? opacity = value<double>('opacity');
       if (opacity != null && opacity != node.opacity) {
@@ -375,7 +387,6 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // List of value notifiers that the widget listens to. This includes node's
     // local values and the variables attached to node properties.
     final List<Listenable> listenables = [];
-
     // Local node values.
     final ValueNotifier<List<ValueModel>>? listenableNodeValues =
         codelesslyContext.nodeValues[node.id];
@@ -521,9 +532,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         .findVariableByName(name);
     if (variable == null) return;
     if (!listenables.contains(variable)) listenables.add(variable);
-    final String? expression = FormulaEvaluator.exactExpression(
-      variable.value.value,
-    );
+    // A computed variable listens to what its formula reads.
+    final String? expression = variable.value.formula.trim().isNotEmpty
+        ? variable.value.formula
+        : FormulaEvaluator.exactExpression(variable.value.value);
     if (expression == null) return;
     for (final String path in FormulaEvaluator.referencedPaths(expression)) {
       final VariableMatch? match = VariableMatch.parse(

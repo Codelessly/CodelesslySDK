@@ -139,6 +139,10 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final FormFieldValidator<String>? validator;
   final bool? autofocus;
 
+  /// The values the field's bound and initial text read, in place of the
+  /// running app's: an editor's design canvas passes its variable defaults.
+  final ScopedValues? scopedValues;
+
   PassiveTextFieldWidget({
     super.key,
     required this.node,
@@ -152,6 +156,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
     this.autovalidateMode,
     this.validator,
     this.autofocus,
+    this.scopedValues,
   }) : variablesOverrides = variables ?? [];
 
   @override
@@ -171,7 +176,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     return PropertyValueDelegate.getPropertyValue<String>(
       widget.node,
       'inputValue',
-      scopedValues: ScopedValues.of(context),
+      scopedValues: widget.scopedValues ?? ScopedValues.of(context),
     );
   }
 
@@ -181,7 +186,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     return PropertyValueDelegate.substituteVariables(
       text,
       nullSubstitutionMode: widget.settings.nullSubstitutionMode,
-      scopedValues: ScopedValues.of(context),
+      scopedValues: widget.scopedValues ?? ScopedValues.of(context),
     );
   }
 
@@ -203,7 +208,8 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     super.didUpdateWidget(oldWidget);
 
     // Update controller text if this text field is bound to a variable.
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues =
+        widget.scopedValues ?? ScopedValues.of(context);
 
     // Get the value of bound variable and update the controller text if it's
     // different from the current controller text.

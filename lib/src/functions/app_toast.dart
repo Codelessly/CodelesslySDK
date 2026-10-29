@@ -208,7 +208,13 @@ class _ToastViewState extends State<_ToastView> {
             textColor,
           );
     final bool hasButton = widget.onAction != null;
-    final bool hasClose = action.showClose;
+    final Map<dynamic, dynamic> options = action.toJson();
+    final bool hasClose =
+        action.showClose || options['showCloseButton'] == true;
+    final String alignment = '${options['alignment'] ?? 'center'}'
+        .split('.')
+        .last;
+    final bool stretch = alignment == 'stretch';
     final bool top = action.position == ToastPosition.top;
     final MediaQueryData media = MediaQuery.of(context);
     final TextStyle? font = AppToast.fontOf(action.fontFamily);
@@ -217,7 +223,7 @@ class _ToastViewState extends State<_ToastView> {
           .merge(font)
           .copyWith(
             color: textColor,
-            fontSize: 14,
+            fontSize: (options['fontSize'] as num?)?.toDouble() ?? 14,
             height: 1.35,
             fontWeight: FontWeight.w600,
             decoration: TextDecoration.none,
@@ -255,12 +261,11 @@ class _ToastViewState extends State<_ToastView> {
           action.padding?.flutterEdgeInsets ??
           EdgeInsets.fromLTRB(
             accent == null ? 18 : 14,
-            10,
+            hasButton || hasClose ? 6 : 10,
             hasButton || hasClose ? 8 : 18,
-            10,
+            hasButton || hasClose ? 6 : 10,
           ),
-      // The accent bar is a left border. A border that differs by side can't
-      // have a radius, so the clip below rounds the corners.
+      // Clip below rounds the accent bar and differently colored outline.
       decoration: BoxDecoration(
         color: background,
         borderRadius: accent == null && outline != null ? radius : null,
@@ -274,10 +279,13 @@ class _ToastViewState extends State<_ToastView> {
               ),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: stretch ? MainAxisSize.max : MainAxisSize.min,
         children: [
           if (icon != null) ...[icon, const SizedBox(width: 8)],
-          Flexible(child: Text(widget.message, style: messageStyle)),
+          if (stretch)
+            Expanded(child: Text(widget.message, style: messageStyle))
+          else
+            Flexible(child: Text(widget.message, style: messageStyle)),
           if (hasButton) ...[
             const SizedBox(width: 8),
             TextButton(
@@ -351,7 +359,12 @@ class _ToastViewState extends State<_ToastView> {
           offset: _visible ? Offset.zero : Offset(0, top ? -0.25 : 0.25),
           duration: _fade,
           curve: Curves.easeOutCubic,
-          child: Center(
+          child: Align(
+            alignment: switch (alignment) {
+              'start' => Alignment.centerLeft,
+              'end' => Alignment.centerRight,
+              _ => Alignment.center,
+            },
             child: Material(type: MaterialType.transparency, child: toast),
           ),
         ),
@@ -359,8 +372,8 @@ class _ToastViewState extends State<_ToastView> {
     );
 
     return Positioned(
-      left: 16,
-      right: 16,
+      left: (options['sideMargin'] as num?)?.toDouble() ?? 16,
+      right: (options['sideMargin'] as num?)?.toDouble() ?? 16,
       top: top ? media.padding.top + 16 : null,
       bottom: top ? null : action.bottomOffsetFor(media.size.width),
       // Only a toast with a button takes taps; the rest passes them through.
