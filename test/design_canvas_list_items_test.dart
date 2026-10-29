@@ -39,7 +39,7 @@ List<BaseNode> crateList({bool stacked = false}) => [
     name: 'label',
     basicBoxLocal: NodeBox(0, 0, 200, 24),
     horizontalFit: SizeFit.shrinkWrap,
-    characters: r'${item.name}',
+    data: r'${item.name}',
     textMixedProps: [StartEndProp(start: 0, end: 12, fontSize: 16)],
   )..parentID = 'list',
 ];

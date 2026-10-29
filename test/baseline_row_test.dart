@@ -8,7 +8,7 @@ TextNode _text(String id, String chars, double size) => TextNode(
   id: id,
   name: id,
   basicBoxLocal: NodeBox(0, 0, 60, size * 1.2),
-  characters: chars,
+  data: chars,
   horizontalFit: SizeFit.shrinkWrap,
   verticalFit: SizeFit.shrinkWrap,
   textMixedProps: [StartEndProp(start: 0, end: chars.length, fontSize: size)],

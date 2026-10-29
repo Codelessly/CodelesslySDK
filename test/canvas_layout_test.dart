@@ -444,7 +444,7 @@ void main() {
       horizontalFit: horizontalFit,
       verticalFit: verticalFit,
       edgePins: edgePins,
-      characters: characters,
+      data: characters,
       textMixedProps: [
         StartEndProp(start: 0, end: characters.length, fontSize: 16),
       ],

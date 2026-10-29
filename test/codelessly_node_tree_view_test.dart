@@ -7,7 +7,7 @@ TextNode text(String id, String characters) => TextNode(
   id: id,
   name: id,
   basicBoxLocal: NodeBox(0, 0, 180, 30),
-  characters: characters,
+  data: characters,
   textMixedProps: [
     StartEndProp(start: 0, end: characters.length, fontSize: 16),
   ],
