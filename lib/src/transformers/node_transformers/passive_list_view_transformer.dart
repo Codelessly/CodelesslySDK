@@ -456,15 +456,27 @@ class PassiveListViewWidget extends StatelessWidget {
       );
     }
 
+    // Data-backed rows have stable identity across inserts and reorders.
+    final ids = data
+        ?.map((value) => value is Map ? value['id'] : null)
+        .toList();
+    Object itemKey(int index) {
+      final id = ids?.elementAtOrNull(index);
+      return id != null &&
+              ids!.where((candidate) => candidate == id).length == 1
+          ? ('id', id)
+          : ('index', index);
+    }
+
     Widget itemBuilder(BuildContext context, int index) => IndexedItemProvider(
-      key: ValueKey(index),
+      key: ValueKey(itemKey(index)),
       item: IndexedItem(index, data?.elementAtOrNull(index)),
       child: Builder(
         builder: (context) {
           // This builder is important to pass a context that has
           // the IndexedItemProvider.
           return KeyedSubtree(
-            key: ValueKey(index),
+            key: ValueKey(itemKey(index)),
             child: buildItem(item, context),
           );
         },
