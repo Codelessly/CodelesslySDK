@@ -115,13 +115,9 @@ void main() {
       id: 'count',
       name: 'count',
       basicBoxLocal: NodeBox(0, 0, 100, 20),
-      characters: '',
+      data: '',
       variables: {
         'data': countPlay,
-        'characters':
-            r'${= count(filter('
-            r'map(records, r => merge(r, {hot: r.plays > 2})), '
-            r'r => r.hot))} hot',
       },
     );
     final List? mapped = PropertyValueDelegate.getPropertyValue<List>(
@@ -133,9 +129,13 @@ void main() {
       {'id': 'a', 'plays': 1},
       {'id': 'b', 'plays': 5},
     ]);
+    text.variables['data'] =
+        r'${= count(filter('
+            r'map(records, r => merge(r, {hot: r.plays > 2})), '
+            r'r => r.hot))} hot';
     expect(
       PropertyValueDelegate.substituteVariables(
-        text.variables['characters']!,
+        text.variables['data']!,
         nullSubstitutionMode: NullSubstitutionMode.emptyString,
         scopedValues: scopedValues,
       ),

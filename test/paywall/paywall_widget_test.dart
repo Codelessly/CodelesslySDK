@@ -79,7 +79,7 @@ void main() {
         id: 'headline',
         name: 'headline',
         basicBoxLocal: NodeBox(0, 0, 300, 30),
-        characters: r'Upgrade for ${product.price}',
+        data: r'Upgrade for ${product.price}',
         textMixedProps: [
           StartEndProp(
             start: 0,
