@@ -472,10 +472,13 @@ enum CanvasSizing {
   /// barrier shows around what its layout draws.
   design,
 
-  /// The canvas fills the width it is given and keeps its design height (or
-  /// its content's), within the height it is given. Used by a bottom sheet,
-  /// which spans the screen and is as tall as its canvas.
+  /// The canvas fills the available width and keeps its design height (or
+  /// its content's height when it shrink-wraps vertically). Used by sheets.
   fillWidth,
+
+  /// Sheet sizing for callers using the dialog presentation API; equivalent
+  /// to [fillWidth].
+  sheet,
 }
 
 /// Sets the [CanvasSizing] of the canvases below it. Without one, canvases
@@ -578,7 +581,8 @@ class CanvasViewport extends StatelessWidget {
         !node.isAScaffold;
     if (sizing != CanvasSizing.fill) {
       final double width =
-          sizing == CanvasSizing.fillWidth && constraints.hasBoundedWidth
+          (sizing == CanvasSizing.fillWidth || sizing == CanvasSizing.sheet) &&
+              constraints.hasBoundedWidth
           ? constraints.maxWidth
           : constraints.constrainWidth(node.basicBoxLocal.width);
       if (contentHeight) return (width: width, height: null);
@@ -611,11 +615,15 @@ class CanvasViewport extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final box = resolve(node, constraints, sizing: sizing);
-        // The width the canvas content is laid out at: the canvas box for a
+        // The width that picks responsive layouts: the canvas box for a
         // responsive canvas, the design width for an autoScale one (its
-        // content is laid out at design size and then scaled).
+        // content is laid out at design size and then scaled). A centered
+        // dialog keeps its design width on every screen, so it goes by the
+        // screen, as a layout group in a dialog picks its canvas.
         final Widget content = CanvasWidthScope(
-          width: node.scaleMode == ScaleMode.autoScale
+          width: sizing == CanvasSizing.design
+              ? MediaQuery.sizeOf(context).width
+              : node.scaleMode == ScaleMode.autoScale
               ? node.basicBoxLocal.width
               : box.width,
           child: child,

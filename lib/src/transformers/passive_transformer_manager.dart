@@ -110,7 +110,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     BaseNode node,
     WidgetBuildSettings settings,
   ) {
-    return _wrapWithListener(
+    final Widget built = _wrapWithListener(
       context,
       node: node,
       builder: (context) {
@@ -123,6 +123,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         return _buildDecorated(context, node, settings);
       },
     );
+    return settings.withReactions
+        ? wrapWithInteractionScopes(context, node, built)
+        : built;
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -237,6 +240,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           stroke.copyWith(visible: true).toJson(),
           for (final paint in geometry.strokes.skip(1)) paint.toJson(),
         ];
+      }
+      final double? strokeWeight = value<double>('strokeWeight');
+      if (strokeWeight != null && strokeWeight != geometry.strokeWeight) {
+        patch['strokeWeight'] = math.max(0, strokeWeight).toDouble();
       }
     }
     if (node is TextNode) {
