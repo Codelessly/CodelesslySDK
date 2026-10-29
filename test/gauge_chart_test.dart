@@ -47,10 +47,14 @@ void main() {
   test(
     'series and plot charts, radial and meter gauges keep separate schemas',
     () {
-      expect(hourly().type, 'chartSeries');
-      expect(PlotChartNode.empty().type, 'chartPlot');
-      expect(GaugeNode.empty().type, 'gaugeRadial');
-      expect(GaugeMeterNode.empty().type, 'gaugeMeter');
+      expect(hourly().type, 'chart');
+      expect(hourly().toJson()['chartKind'], 'series');
+      expect(PlotChartNode.empty().type, 'chart');
+      expect(PlotChartNode.empty().toJson()['chartKind'], 'plot');
+      expect(GaugeNode.empty().type, 'gauge');
+      expect(GaugeNode.empty().toJson()['gaugeKind'], 'radial');
+      expect(GaugeMeterNode.empty().type, 'gauge');
+      expect(GaugeMeterNode.empty().toJson()['gaugeKind'], 'meter');
     },
   );
 

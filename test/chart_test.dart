@@ -100,9 +100,10 @@ void main() {
   test('plot chart JSON keeps its own schema and painted details', () {
     final original = tideChart(selectedX: 7);
     final json = original.toJson();
-    expect(json['type'], 'chartPlot');
+    expect(json['type'], 'chart');
+    expect(json['chartKind'], 'plot');
     final restored = PlotChartNode.fromJson(json);
-    expect(restored.type, 'chartPlot');
+    expect(restored.type, 'chart');
     expect(restored.selectedX, 7);
     expect(restored.properties.points, hasLength(25));
     expect(restored.properties.ranges, hasLength(2));
