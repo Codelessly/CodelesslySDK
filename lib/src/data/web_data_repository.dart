@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:codelessly_api/codelessly_api.dart'
+    show UnresolvedDocumentSchema;
 import 'package:http/http.dart' as http;
 
 import '../../codelessly_sdk.dart';
@@ -88,6 +90,16 @@ class WebDataRepository extends NetworkDataRepository {
       final SDKPublishLayout layout = SDKPublishLayout.fromJson(modelDoc);
 
       return layout;
+    } on UnresolvedDocumentSchema catch (error, trace) {
+      ErrorLogger.instance.captureException(
+        error,
+        message:
+            'Unresolved layout schema for [$layoutID] (node: ${error.nodeKey}, reason: ${error.reason})',
+        type: 'layout_schema_unresolved',
+        layoutID: layoutID,
+        stackTrace: trace,
+      );
+      rethrow;
     } catch (e, str) {
       ErrorLogger.instance.captureException(
         e,

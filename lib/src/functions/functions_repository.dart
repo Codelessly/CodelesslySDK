@@ -832,7 +832,9 @@ class FunctionsRepository {
       );
     }
     final bool asSheet = switch (presentation) {
-      DialogPresentation.dialog || DialogPresentation.sideSheet => false,
+      DialogPresentation.dialog ||
+      DialogPresentation.fullScreen ||
+      DialogPresentation.sideSheet => false,
       DialogPresentation.bottomSheet => true,
       DialogPresentation.adaptive =>
         (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < 600,
