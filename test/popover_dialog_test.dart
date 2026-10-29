@@ -52,7 +52,7 @@ AutoPlaceholderNode body(
 )..parentID = canvasId;
 
 ButtonNode button(String id, String parent, String label, ActionModel action) =>
-    ButtonNode(
+    FilledButtonNode(
       id: id,
       name: id,
       basicBoxLocal: NodeBox(0, 0, 120, 40),

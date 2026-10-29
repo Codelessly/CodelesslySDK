@@ -63,7 +63,7 @@ ButtonNode button(
   String parent,
   String label,
   List<ActionModel> actions,
-) => ButtonNode(
+) => FilledButtonNode(
   id: id,
   name: id,
   basicBoxLocal: NodeBox(0, 0, 160, 44),

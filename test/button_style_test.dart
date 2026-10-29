@@ -4,7 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-ButtonNode button(ButtonProperties properties) => ButtonNode(
+ButtonNode button(ButtonProperties properties) => (switch (properties.buttonType) {
+  ButtonTypeEnum.elevated => ElevatedButtonNode.new,
+  ButtonTypeEnum.text => TextButtonNode.new,
+  ButtonTypeEnum.outlined => OutlinedButtonNode.new,
+  ButtonTypeEnum.icon => IconButtonNode.new,
+  ButtonTypeEnum.filled || ButtonTypeEnum.filledTonal => FilledButtonNode.new,
+})(
   id: 'button',
   name: 'Button',
   basicBoxLocal: NodeBox(0, 0, 160, 48),
@@ -272,7 +278,12 @@ void main() {
       final ButtonNode node = button(ButtonProperties());
       convertNodeToButtonType(ButtonTypeEnum.text, node);
       expect(node.properties.buttonColor, isNull);
-      expect(background(styleOf(node)), Colors.transparent);
+      final ButtonNode converted = ButtonNode.fromJson({
+        ...node.toJson(),
+        'type': 'textButton',
+        'properties': {...node.properties.toJson(), 'buttonType': 'text'},
+      });
+      expect(background(styleOf(converted)), Colors.transparent);
       final ButtonNode black = button(
         ButtonProperties(buttonColor: ColorRGBA.black),
       );

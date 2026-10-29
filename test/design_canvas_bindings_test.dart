@@ -20,7 +20,7 @@ ScopedValues defaults(String authMode) => ScopedValues.preview(
 const String _signInFormula =
     r"${= authMode == 'signIn' ? 'Sign in' : 'Create account'}";
 
-ButtonNode button({String label = ''}) => ButtonNode(
+ButtonNode button({String label = ''}) => ElevatedButtonNode(
   id: 'button',
   name: 'Button',
   basicBoxLocal: NodeBox(0, 0, 200, 40),

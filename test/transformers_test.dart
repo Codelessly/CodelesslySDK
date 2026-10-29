@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 /// Nodes that build without children or remote data.
 List<BaseNode> standaloneNodes() => [
-  ButtonNode.empty(),
+  ElevatedButtonNode.empty(),
   CheckboxNode.empty(),
   DividerNode.empty(),
   FloatingActionButtonNode.empty(),

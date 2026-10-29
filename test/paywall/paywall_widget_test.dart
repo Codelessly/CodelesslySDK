@@ -91,7 +91,7 @@ void main() {
           ),
         ],
       )..parentID = 'body';
-      final close = ButtonNode(
+      final close = FilledButtonNode(
         id: 'close',
         name: 'close',
         basicBoxLocal: NodeBox(0, 0, 160, 44),

@@ -100,7 +100,7 @@ void main() {
     (tester) async {
       String? called;
       Map<String, dynamic>? received;
-      final button = ButtonNode(
+      final button = ElevatedButtonNode(
         id: 'button',
         name: 'button',
         basicBoxLocal: NodeBox(0, 0, 180, 48),
@@ -180,7 +180,7 @@ void main() {
   testWidgets('rejects native reactions even on unreachable nodes', (
     tester,
   ) async {
-    final button = ButtonNode(
+    final button = ElevatedButtonNode(
       id: 'unsafe',
       name: 'unsafe',
       basicBoxLocal: NodeBox(0, 0, 180, 48),
