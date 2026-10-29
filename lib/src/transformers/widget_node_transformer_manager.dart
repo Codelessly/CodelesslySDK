@@ -974,6 +974,14 @@ class SvgIcon extends StatelessWidget {
     if (cupertinoIcon != null) {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
+    // Material Icons ship with Flutter; use their bundled glyph offline.
+    if (icon is MaterialIcon && icon.codepoint > 0) {
+      return Icon(
+        IconData(icon.codepoint, fontFamily: icon.fontFamily),
+        size: dimension,
+        color: iconColor,
+      );
+    }
 
     final url = icon.toSvgUrl(
       fill: fill,
