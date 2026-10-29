@@ -71,6 +71,19 @@ void main() {
       expect(VariablePreview.textFor(r'${= price * 2}'), '9');
     });
 
+    test('show a formula that gives empty text as empty', () {
+      expect(VariablePreview.textFor(r"${= if(price > 9, 'x', '')}"), '');
+      expect(VariablePreview.textFor(r"${= ''}"), '');
+      VariablePreview.scopeResolver = (node) => ScopedValues.preview(
+        variables: const {},
+        indexedItem: IndexedItem(0, {'published': false}),
+      );
+      expect(
+        VariablePreview.textFor(r"${= if(item.published, 'Published', '')}"),
+        '',
+      );
+    });
+
     test('fall back to a placeholder when there is no value', () {
       expect(VariablePreview.textFor(r'${auth.email}'), 'Email');
     });
