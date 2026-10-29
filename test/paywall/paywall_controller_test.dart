@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -166,6 +168,34 @@ void main() {
     expect((await controller.result).outcome, PaywallOutcome.restored);
     expect(controller.variables['entitlements']['com.example.annual'], true);
   });
+
+  test(
+    'fixture placement and layout JSON drive localized text and purchase',
+    () async {
+      final json = jsonDecode(
+        File('test/paywall/fixtures/paywall.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      final placement = PaywallPlacement.fromJson(
+        json['placement'] as Map<String, dynamic>,
+      );
+      final layout = json['layout'] as Map<String, dynamic>;
+      expect(placement.layoutId, 'onboarding_annual_v1');
+      final headline = PropertyValueDelegate.substituteVariables(
+        layout['headline'] as String,
+        scopedValues: ScopedValues.preview(
+          variables: {},
+          data: controller.variables,
+        ),
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      );
+      expect(headline, 'Upgrade to Pro for €39,99 / year');
+      final action =
+          ActionModel.fromJson(layout['cta'] as Map) as CallFunctionAction;
+      expect(action.name, 'paywall.purchase');
+      await controller.purchase(slot: action.params['slot'] as String);
+      expect(store.purchased, 'com.example.annual');
+    },
+  );
 
   test('placement JSON carries published layout and slots', () {
     final placement = PaywallPlacement.fromJson({

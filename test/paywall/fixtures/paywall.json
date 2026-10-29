@@ -1,0 +1,13 @@
+{
+  "placement": {"id": "onboarding_end", "layoutId": "onboarding_annual_v1", "productSlots": ["annual", "monthly"]},
+  "slots": [
+    {"id": "annual", "iosProductId": "com.example.annual", "androidProductId": "com.example.annual"},
+    {"id": "monthly", "iosProductId": "com.example.monthly", "androidProductId": "com.example.monthly"}
+  ],
+  "layout": {
+    "headline": "Upgrade to Pro for ${product.price} / ${product.period}",
+    "cta": {"type": "callFunction", "name": "paywall.purchase", "params": {"slot": "annual"}},
+    "restore": {"type": "callFunction", "name": "paywall.restore"},
+    "close": {"type": "callFunction", "name": "paywall.closePaywall"}
+  }
+}
