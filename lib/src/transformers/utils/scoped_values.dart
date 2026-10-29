@@ -14,6 +14,10 @@ class ScopedValues {
   /// The indexed item provider if it exists in this context.
   late final IndexedItem? indexedItem;
 
+  /// The item of the list around [indexedItem]'s list, for a list nested in
+  /// another list's item: what `${parent.item}` and `${parent.index}` read.
+  late final IndexedItem? parentIndexedItem;
+
   /// The exposed internal value of a node in the widget tree.
   late final Object? nodeState;
 
@@ -82,6 +86,7 @@ class ScopedValues {
       _variablesOverrides = null,
       _dataOverrides = null,
       indexedItem = null,
+      parentIndexedItem = null,
       nodeState = null,
       holdProgress = null,
       routeParams = {},
@@ -98,6 +103,7 @@ class ScopedValues {
     required Map<String, VariableData> variables,
     CodelesslyContext? codelesslyContext,
     this.indexedItem,
+    this.parentIndexedItem,
     this._appUser,
     this.screenSize,
     this.parentSize,
@@ -127,6 +133,7 @@ class ScopedValues {
         ? null
         : WeakReference(codelesslyContext);
     indexedItem = IndexedItemProvider.maybeOf(context);
+    parentIndexedItem = IndexedItemProvider.parentOf(context);
     screenSize = MediaQuery.maybeSizeOf(context);
     parentSize = ParentSizeScope.valueOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;

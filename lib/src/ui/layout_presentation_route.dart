@@ -106,7 +106,9 @@ class LayoutPresentationRoute<T> extends PopupRoute<T> {
       scopesRoute: true,
       explicitChildNodes: true,
       child: switch (presentation) {
-        DialogPresentation.dialog || DialogPresentation.fullScreen => SafeArea(
+        DialogPresentation.dialog ||
+        DialogPresentation.popover ||
+        DialogPresentation.fullScreen => SafeArea(
           child: CodelesslyDialogWidget(
             showCloseButton: showCloseButton,
             builder: builder,
@@ -143,6 +145,7 @@ class LayoutPresentationRoute<T> extends PopupRoute<T> {
     );
     return switch (presentation) {
       DialogPresentation.dialog ||
+      DialogPresentation.popover ||
       DialogPresentation.fullScreen => FadeTransition(
         opacity: curved,
         child: ScaleTransition(

@@ -48,10 +48,11 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///  - text functions: indexOf, matches and slug; durations: seconds
 ///    ('3:45' → 225) and duration (225 → '3:45'); colors: luminance.
 ///  - maps: `obj('id', 1)`, `object('id', 1)` or `{id: 1}` builds one;
-///    `set(map, key, value)` and `merge(a, b)` return changed copies;
-///    `keys` and `values` read them. `map` can update one list item:
-///    `map(units, u => if(u.id == id, set(u, 'hours', h), u))`.
-///  - more list functions: range, slice, first, last, concat and indexOf.
+///    `set(map, key, value)`, `with(map, key, value, …)` and `merge(a, b)`
+///    return changed copies; `keys` and `values` read them. `map` can update
+///    one list item: `map(units, u => with(u, 'hours', h))`.
+///  - more list functions: range, slice, first, last, concat, indexOf,
+///    at(list, index) and flatMap(list, lambda).
 ///  - list functions that take a predicate or key: filter, where, count,
 ///    find, findIndex, any, all, map, sortBy, sortByDesc, unique, sum and
 ///    join. The predicate is a lambda, `item => expression`, or a field name,
@@ -232,6 +233,11 @@ class FormulaEvaluator {
       'formatNumber',
       'formatNumber(value, digits?)',
       'formatNumber(2481.64, 1) → 2,481.6',
+    ),
+    FormulaFunctionDoc(
+      'feetInches',
+      'feetInches(feet)',
+      'feetInches(6.67) → 6′ 8″',
     ),
     FormulaFunctionDoc(
       'fixed',
@@ -695,6 +701,17 @@ class FormulaEvaluator {
       'coalesce(value, fallback, ...)',
       'coalesce(route.date, today())',
     ),
+    FormulaFunctionDoc(
+      'with',
+      'with(map, key, value, …)',
+      "with(item, 'x', item.x + 1) → item with x changed",
+    ),
+    FormulaFunctionDoc('at', 'at(list, index)', 'at(tasks, 2)'),
+    FormulaFunctionDoc(
+      'flatMap',
+      'flatMap(list, item => list)',
+      'flatMap(orders, o => o.items) → every item',
+    ),
   ];
 }
 
@@ -996,6 +1013,16 @@ Object? _set(Object? target, Object? key, Object? value) {
     ..._merge([target]),
     FormulaEvaluator.stringify(key): value,
   };
+}
+
+/// Feet as feet and inches rounded to the inch: 6.67 -> 6′ 8″, 7 -> 7′.
+String _feetInches(Object? value) {
+  final num feet = _num(value);
+  if (feet.isNaN || feet.isInfinite) return '';
+  final int inches = (feet * 12).round();
+  final String sign = inches < 0 ? '-' : '';
+  final int f = inches.abs() ~/ 12, i = inches.abs() % 12;
+  return i == 0 ? '$sign$f′' : '$sign$f′ $i″';
 }
 
 num _round(Object? value, Object? digits) {
@@ -1692,6 +1719,7 @@ Map<String, Object?> _toMap(List<Object?> args) {
 final Map<String, _Function> _functions = {
   'money': (a) => _money(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'formatNumber': (a) => _grouped(_arg(a, 0), _arg(a, 1)),
+  'feetInches': (a) => _feetInches(_arg(a, 0)),
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
   'round': (a) => _round(_arg(a, 0), _arg(a, 1)),
   'floor': (a) => _num(_arg(a, 0)).floor(),
@@ -1919,6 +1947,22 @@ final Map<String, _Function> _functions = {
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
   'isNotEmpty': (a) => _truthy(_functions['length']!(a)),
+  // Map and list editing beyond obj/set/concat below, for formulas that build
+  // the value a set variable action stores.
+  'with': (a) => <Object?, Object?>{
+    if (_arg(a, 0) case final Map m) ...m,
+    for (int i = 1; i + 1 < a.length; i += 2)
+      FormulaEvaluator.stringify(a[i]): a[i + 1],
+  },
+  'at': (a) {
+    final int index = _intArg(_arg(a, 1));
+    // indexOf's -1 (not found) reads nothing rather than failing.
+    return index < 0 ? null : _values(_arg(a, 0), null).elementAtOrNull(index);
+  },
+  'flatMap': (a) => [
+    for (final v in _values(_arg(a, 0), _arg(a, 1)))
+      if (v is Iterable) ...v else ?v,
+  ],
   'now': (a) => _dateText(_nowAt(_arg(a, 0))),
   'today': (a) {
     final DateTime now = _nowAt(_arg(a, 0));

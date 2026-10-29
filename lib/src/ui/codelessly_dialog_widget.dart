@@ -112,6 +112,32 @@ class CodelesslySheetPlacement extends StatelessWidget {
   }
 }
 
+/// A layout shown as a full height bottom sheet: the screen's full width
+/// and 90% of its height, with the canvas filling it, so the canvas scrolls
+/// its own content (a fixed header over a scrolling list). The layout draws
+/// its own background, corners and grab handle; the sheet is transparent.
+class CodelesslyBottomSheetWidget extends StatelessWidget {
+  final WidgetBuilder builder;
+
+  /// The share of the screen height the sheet takes.
+  static const double heightFactor = 0.9;
+
+  const CodelesslyBottomSheetWidget({super.key, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    final MediaQueryData media = MediaQuery.of(context);
+    return Padding(
+      // Keep inputs above the keyboard.
+      padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+      child: SizedBox(
+        height: media.size.height * heightFactor,
+        child: Builder(builder: builder),
+      ),
+    );
+  }
+}
+
 /// Places a dialog canvas at its design size just below [anchor] (a global
 /// rectangle), left-aligned with it, or above it when there is no room
 /// below, and always fully on screen.
@@ -128,10 +154,43 @@ class CodelesslyAnchoredPlacement extends StatelessWidget {
   });
 
   @override
+  Widget build(BuildContext context) => CustomSingleChildLayout(
+    delegate: _AnchorDelegate(anchor, gap),
+    child: child,
+  );
+}
+
+/// A layout shown as a popover menu next to [anchor] (the rect, in global
+/// coordinates, of the node that opened it): below it and left-aligned with
+/// it (right-aligned with [alignEnd]), the other way when that would run off
+/// the screen, and above it when there is no room below. The canvas keeps
+/// its design size.
+class CodelesslyPopoverWidget extends StatelessWidget {
+  final Rect? anchor;
+  final WidgetBuilder builder;
+
+  /// Whether the popover's right edge lines up with the anchor's, as for a
+  /// menu opened from a button at the right of a card.
+  final bool alignEnd;
+
+  /// Gap between the anchor and the popover, and the screen margin.
+  static const double gap = 6;
+
+  const CodelesslyPopoverWidget({
+    super.key,
+    required this.anchor,
+    required this.builder,
+    this.alignEnd = false,
+  });
+
+  @override
   Widget build(BuildContext context) {
     return CustomSingleChildLayout(
-      delegate: _AnchorDelegate(anchor, gap),
-      child: child,
+      delegate: _PopoverLayout(anchor, alignEnd: alignEnd),
+      child: CanvasSizingScope(
+        sizing: CanvasSizing.design,
+        child: Builder(builder: builder),
+      ),
     );
   }
 }
@@ -164,4 +223,58 @@ class _AnchorDelegate extends SingleChildLayoutDelegate {
   @override
   bool shouldRelayout(_AnchorDelegate old) =>
       old.anchor != anchor || old.gap != gap;
+}
+
+class _PopoverLayout extends SingleChildLayoutDelegate {
+  final Rect? anchor;
+  final bool alignEnd;
+
+  const _PopoverLayout(this.anchor, {this.alignEnd = false});
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      constraints.loosen().deflate(
+        const EdgeInsets.all(CodelesslyPopoverWidget.gap),
+      );
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) =>
+      popoverPosition(anchor, size, childSize, alignEnd: alignEnd);
+
+  @override
+  bool shouldRelayout(covariant _PopoverLayout old) =>
+      old.anchor != anchor || old.alignEnd != alignEnd;
+}
+
+/// Where a popover of [child] size goes in a [screen] for [anchor]; centered
+/// when there is no anchor. See [CodelesslyPopoverWidget.alignEnd].
+Offset popoverPosition(
+  Rect? anchor,
+  Size screen,
+  Size child, {
+  bool alignEnd = false,
+}) {
+  const double m = CodelesslyPopoverWidget.gap;
+  if (anchor == null) {
+    return Offset(
+      (screen.width - child.width) / 2,
+      (screen.height - child.height) / 2,
+    );
+  }
+  final double start = anchor.left, end = anchor.right - child.width;
+  double left = alignEnd ? end : start;
+  if (!alignEnd && left + child.width > screen.width - m) left = end;
+  if (alignEnd && left < m) left = start;
+  left = left.clamp(
+    m,
+    (screen.width - child.width - m).clamp(m, double.infinity),
+  );
+  final bool below =
+      anchor.bottom + m + child.height <= screen.height - m ||
+      anchor.top - m - child.height < m;
+  final double top = below ? anchor.bottom + m : anchor.top - m - child.height;
+  return Offset(
+    left,
+    top.clamp(m, (screen.height - child.height - m).clamp(m, double.infinity)),
+  );
 }

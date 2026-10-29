@@ -1795,6 +1795,15 @@ extension ActionModelExt on ActionModel {
             ]);
           case RemoveDocumentSubAction action:
             strings.addAll([action.path, action.documentId]);
+          case RemoveDocumentsSubAction action:
+            strings.addAll([action.path, action.documentIds]);
+            strings.addAll(
+              action.whereFilters
+                  .map((filter) => filter.getUsedVariableNames())
+                  .expand((names) => names),
+            );
+          case SetDocumentsSubAction action:
+            strings.addAll([action.path, action.documents, action.idField]);
           case UpdateDocumentSubAction action:
             strings.addAll([
               action.path,
@@ -1868,6 +1877,9 @@ extension ActionModelExt on ActionModel {
         };
       case ActionType.delay:
         return {};
+      case ActionType.copyToClipboard:
+        strings.add((this as CopyToClipboardAction).text);
+        return _namesIn(strings, includePredefined);
       case ActionType.cloudData:
         final CloudDataAction action = this as CloudDataAction;
         strings.addAll([
