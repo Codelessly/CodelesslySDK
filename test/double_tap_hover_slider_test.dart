@@ -31,7 +31,7 @@ Future<CodelesslyContext> pumpNode(
   );
   final codelesslyContext = CodelesslyContext.empty()
     ..functions = {
-      for (final name in ['tap', 'double', 'enter', 'exit', 'reset'])
+      for (final name in ['tap', 'double', 'enter', 'exit', 'hover', 'reset'])
         name: (context, reference, params) => calls.add(name),
     };
   codelesslyContext.variables.addAll(variables);
@@ -123,17 +123,31 @@ void main() {
       box([
         on(TriggerType.cursorEnter, 'enter'),
         on(TriggerType.cursorExit, 'exit'),
+        on(TriggerType.hover, 'hover'),
       ]),
       calls,
+    );
+    // A hover-move region may be separate, but only one region owns the
+    // cursor transition; otherwise entering or leaving dispatches twice.
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is MouseRegion &&
+            widget.onEnter != null &&
+            widget.onExit != null,
+      ),
+      findsOneWidget,
     );
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer(location: const Offset(300, 300));
     await mouse.moveTo(const Offset(50, 50));
     await tester.pump();
-    expect(calls, ['enter']);
+    expect(calls.where((call) => call == 'enter'), hasLength(1));
+    expect(calls.where((call) => call == 'hover'), isNotEmpty);
     await mouse.moveTo(const Offset(300, 300));
     await tester.pump();
-    expect(calls, ['enter', 'exit']);
+    expect(calls.where((call) => call == 'enter'), hasLength(1));
+    expect(calls.where((call) => call == 'exit'), hasLength(1));
     await mouse.removePointer();
 
     calls.clear();
