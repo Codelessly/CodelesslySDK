@@ -2390,3 +2390,14 @@ extension TextInputActionCExt on TextInputActionC {
     TextInputActionC.newline => TextInputAction.newline,
   };
 }
+
+extension TransitionCurveExt on TransitionCurve {
+  /// The Flutter [Curve] for this easing.
+  Curve get flutterCurve => switch (this) {
+    TransitionCurve.linear => Curves.linear,
+    TransitionCurve.easeIn => Curves.easeIn,
+    TransitionCurve.easeOut => Curves.easeOut,
+    TransitionCurve.easeInOut => Curves.easeInOut,
+    TransitionCurve.easeOutCubic => Curves.easeOutCubic,
+  };
+}

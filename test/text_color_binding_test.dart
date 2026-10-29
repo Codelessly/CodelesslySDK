@@ -21,6 +21,21 @@ TextNode text(Map<String, String> variables) => TextNode.fromJson({
   ],
 })..variables.addAll(variables);
 
+TextNode reading(Map<String, String> variables) => TextNode(
+  id: 'reading',
+  name: 'Reading',
+  basicBoxLocal: NodeBox(0, 0, 120, 30),
+  characters: '87%',
+  textMixedProps: [
+    StartEndProp(
+      start: 0,
+      end: 3,
+      fontSize: 20,
+      fills: [PaintModel.solid(id: 'p', color: ColorRGB.fromHex('#E9EBEE'))],
+    ),
+  ],
+)..variables.addAll(variables);
+
 Future<List<Color?>> pumpText(WidgetTester tester, TextNode node) async {
   await tester.pumpWidget(
     ChangeNotifierProvider<CodelesslyContext>.value(
@@ -44,6 +59,37 @@ Future<List<Color?>> pumpText(WidgetTester tester, TextNode node) async {
   return colors;
 }
 
+Future<Color?> paintedColor(WidgetTester tester, TextNode node) async {
+  await tester.pumpWidget(
+    ChangeNotifierProvider<CodelesslyContext>.value(
+      value: CodelesslyContext.empty(),
+      child: MaterialApp(
+        home: Center(
+          child: Builder(
+            builder: (context) => TextUtils.buildTextForTextNode(
+              context,
+              node,
+              variablesOverrides: const [],
+              nullSubstitutionMode: NullSubstitutionMode.emptyString,
+              replaceVariablesWithSymbol: false,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  final RichText rich = tester.widget<RichText>(find.byType(RichText));
+  Color? color;
+  rich.text.visitChildren((span) {
+    if (span is TextSpan && span.text != null) {
+      color = span.style?.color;
+      return false;
+    }
+    return true;
+  });
+  return color;
+}
+
 void main() {
   testWidgets('A textColor formula recolors every span of a text', (
     WidgetTester tester,
@@ -63,5 +109,22 @@ void main() {
   ) async {
     final colors = await pumpText(tester, text({}));
     expect(colors.single?.toARGB32(), isNot(0xFFF3ECDD));
+  });
+
+  testWidgets('a textColor formula recolors the text through TextUtils', (
+    WidgetTester tester,
+  ) async {
+    final Color? color = await paintedColor(
+      tester,
+      reading({'textColor': r'${= 0.87 > 0.75 ? "#FF4D4F" : "#E9EBEE"}'}),
+    );
+    expect(color?.toARGB32(), 0xFFFF4D4F);
+  });
+
+  testWidgets('without a binding TextUtils keeps the fill', (
+    WidgetTester tester,
+  ) async {
+    final Color? color = await paintedColor(tester, reading({}));
+    expect(color?.toARGB32(), 0xFFE9EBEE);
   });
 }

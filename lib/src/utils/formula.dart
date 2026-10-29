@@ -41,16 +41,16 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `condition ? a : b`. `+` joins text when either side is text.
 ///  - functions: money, fixed, thousands, round, floor, ceil, abs, min, max, sum, count,
 ///    length, if, plural, join, upper, lower, trim, contains, startsWith,
-///    endsWith, where, without, number, text, isEmpty, isNotEmpty, padLeft,
-///    padRight, substring, split, replace and coalesce. See
+///    endsWith, where, without, number, text, isEmpty, isNotEmpty, clamp,
+///    sin, cos, sqrt, pow, pad, alpha, take, skip, padLeft, padRight,
+///    substring, split, replace and coalesce. See
 ///    [FormulaEvaluator.functions].
-///  - text functions: padLeft, padRight, substring, replace, split, indexOf,
-///    matches and slug; durations: seconds ('3:45' → 225) and duration
-///    (225 → '3:45'); colors: luminance.
-///  - maps: `obj('id', 1, 'name', n)` or an object literal `{id: 1, name: n}`
-///    builds one, `set(map, key, value)` and `merge(a, b)` return changed
-///    copies, `keys` and `values` read them. With `map` this updates one
-///    item of a list: `map(units, u => if(u.id == id, set(u, 'hours', h), u))`.
+///  - text functions: indexOf, matches and slug; durations: seconds
+///    ('3:45' → 225) and duration (225 → '3:45'); colors: luminance.
+///  - maps: `obj('id', 1)`, `object('id', 1)` or `{id: 1}` builds one;
+///    `set(map, key, value)` and `merge(a, b)` return changed copies;
+///    `keys` and `values` read them. `map` can update one list item:
+///    `map(units, u => if(u.id == id, set(u, 'hours', h), u))`.
 ///  - more list functions: range, slice, first, last, concat and indexOf.
 ///  - list functions that take a predicate or key: filter, where, count,
 ///    find, findIndex, any, all, map, sortBy, sortByDesc, unique, sum and
@@ -118,6 +118,9 @@ class FormulaEvaluator {
   /// does, e.g. `h:mm a`. Returns null when [date] isn't a date.
   static String? formatDate(Object? date, [String? pattern]) =>
       _formatDate(date, pattern);
+
+  /// Whether [expression] is a well-formed formula.
+  static bool parses(String expression) => _parse(expression) != null;
 
   /// The variable paths [expression] reads, e.g. `storage.cart` and `qty`.
   static Set<String> referencedPaths(String expression) {
@@ -540,6 +543,17 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('newId', 'newId(prefix)', 'newId("task") → task_k3x9f2'),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
+    FormulaFunctionDoc(
+      'concat',
+      'concat(list, list or value, ...)',
+      'concat(take(history, 23), [soc])',
+    ),
+    FormulaFunctionDoc(
+      'alpha',
+      'alpha(color, opacity)',
+      "alpha('#FF4D4F', 0.12) → #1FFF4D4F",
+    ),
+    FormulaFunctionDoc('pad', 'pad(value, width, fill)', 'pad(5, 2) → 05'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
     FormulaFunctionDoc(
       'isEmpty',
@@ -1638,6 +1652,16 @@ Object? _distance(List<Object?> a) {
   return unit.startsWith('mi') ? km / 1.609344 : km;
 }
 
+/// [color] (`#RRGGBB` or `#AARRGGBB`) at [opacity] (0 to 1), as
+/// `#AARRGGBB`.
+String? _alpha(Object? color, num opacity) {
+  final String hex = FormulaEvaluator.stringify(color).replaceAll('#', '');
+  if (hex.length != 6 && hex.length != 8) return null;
+  final String rgb = hex.substring(hex.length - 6).toUpperCase();
+  final int a = (opacity.clamp(0, 1) * 255).round();
+  return '#${a.toRadixString(16).padLeft(2, '0').toUpperCase()}$rgb';
+}
+
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
@@ -1887,6 +1911,11 @@ final Map<String, _Function> _functions = {
   },
   'newId': (a) => _newId(_arg(a, 0)),
   'number': (a) => _toNum(_arg(a, 0)),
+  'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
+  'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
+    _intArg(_arg(a, 1)),
+    _arg(a, 2) == null ? '0' : FormulaEvaluator.stringify(_arg(a, 2)),
+  ),
   'text': (a) => FormulaEvaluator.stringify(_arg(a, 0)),
   'isEmpty': (a) => !_truthy(_functions['length']!(a)),
   'isNotEmpty': (a) => _truthy(_functions['length']!(a)),
@@ -2110,6 +2139,8 @@ class _Binary extends _Node {
     final Object? b = right.eval(resolve);
     switch (op) {
       case '+':
+        // Lists join, and a list plus a value appends it.
+        if (a is Iterable) return [...a, if (b is Iterable) ...b else b];
         final num? na = a is String ? null : _toNum(a);
         final num? nb = b is String ? null : _toNum(b);
         if (na != null && nb != null) return _tidy(na + nb);
