@@ -35,7 +35,7 @@ List<BaseNode> standaloneNodes() => [
     id: 'text',
     name: 'Text',
     basicBoxLocal: NodeBox(0, 0, 100, 20),
-    characters: 'Hello',
+    data: 'Hello',
   ),
   BadgeNode.empty(),
   for (final type in ChipType.values)

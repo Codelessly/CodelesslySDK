@@ -128,7 +128,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
       basicBoxLocal: NodeBox(0, 0, 180, 21),
       verticalFit: SizeFit.shrinkWrap,
       horizontalFit: SizeFit.expanded,
-      characters: titleText,
+      data: titleText,
       textMixedProps: [
         StartEndProp(
           start: 0,
@@ -146,7 +146,7 @@ class PassiveListTileTransformer extends NodeWidgetTransformer<ListTileNode> {
       basicBoxLocal: NodeBox(0, 0, 180, 21),
       verticalFit: SizeFit.shrinkWrap,
       horizontalFit: SizeFit.expanded,
-      characters: subtitleText,
+      data: subtitleText,
       textMixedProps: [
         StartEndProp(
           start: 0,
