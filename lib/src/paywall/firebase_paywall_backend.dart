@@ -49,6 +49,13 @@ class FirebasePaywallBackend {
     );
   }
 
+  Future<Set<String>> refreshEntitlements() async {
+    final reply = await functions
+        .httpsCallable('getPaywallEntitlements')
+        .call<Map<Object?, Object?>>({'projectId': projectId});
+    return (reply.data['entitlements'] as List).cast<String>().toSet();
+  }
+
   Future<String?> verify(PurchaseDetails purchase) async {
     final result = await functions
         .httpsCallable('verifyPurchase')
@@ -85,6 +92,27 @@ class FirebasePaywallBackend {
 }
 
 class PublishedPaywall {
+  Map<String, dynamic> toCacheJson() => {
+    'placement': placement.toJson(),
+    'slots': [for (final slot in slots) slot.toJson()],
+    'releaseId': releaseId,
+    'variant': variant,
+  };
+
+  factory PublishedPaywall.fromCacheJson(Map<String, dynamic> json) =>
+      PublishedPaywall(
+        placement: PaywallPlacement.fromJson(
+          Map<String, dynamic>.from(json['placement'] as Map),
+        ),
+        slots: [
+          for (final slot in json['slots'] as List)
+            ProductSlot.fromJson(Map<String, dynamic>.from(slot as Map)),
+        ],
+        entitlements: const {},
+        releaseId: json['releaseId'] as String,
+        variant: json['variant'] as String,
+      );
+
   final PaywallPlacement placement;
   final List<ProductSlot> slots;
   final Set<String> entitlements;
