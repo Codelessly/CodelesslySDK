@@ -28,18 +28,34 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         childWidget ??
         manager!.buildWidgetFromNode(node, context, settings: settings);
 
-    return FreeformChild(
+    Widget placed(BuildContext scope) => FreeformChild(
       key: ValueKey(
         'Static Stack child [${node.id}](${node.name})<${node.type}> on parent [${parent.id}](${parent.name})<${parent.type}>',
       ),
       placement: placementFor(
-        withBoundSize(context, node),
+        withBoundSize(scope, node),
         parent,
         scrollAxis: scrollAxis,
-        scopedValues: ScopedValues.of(context),
+        scopedValues: ScopedValues.of(scope),
       ),
       child: child,
     );
+
+    // The child widget already listens to its bindings, but its parent data
+    // belongs to the freeform slot. Rebuild that slot as well when a bound
+    // position changes, using the mounted scope (including list item values).
+    if (manager is PassiveNodeTransformerManager &&
+        (node.variables.containsKey('positionX') ||
+            node.variables.containsKey('positionY'))) {
+      final listenables = manager.listenablesFor(context, node);
+      if (listenables.isNotEmpty) {
+        return AnimatedBuilder(
+          animation: Listenable.merge(listenables),
+          builder: (scope, _) => placed(scope),
+        );
+      }
+    }
+    return placed(context);
   }
 
   /// [node] with the `width` and `height` its variables, formulas or
@@ -140,7 +156,12 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         property,
         scopedValues: scopedValues,
       );
-      if (fraction != null && fraction.isFinite) {
+      // Invalid or out-of-range values do not move a node to an arbitrary
+      // edge: leave this axis on its original freeform placement instead.
+      if (fraction != null &&
+          fraction.isFinite &&
+          fraction >= 0 &&
+          fraction <= 1) {
         final AlignmentData? alignment = node.alignment.data;
         return FreeformAxisPlacement(
           mode: FreeformAxisMode.fraction,
@@ -151,7 +172,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
           parentExtent: horizontal
               ? parent.innerBoxLocal.width
               : parent.innerBoxLocal.height,
-          fraction: fraction.toDouble().clamp(0.0, 1.0),
+          fraction: fraction.toDouble(),
           anchor: ((horizontal ? alignment?.x : alignment?.y) ?? 0) / 2 + 0.5,
         );
       }
