@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -48,16 +50,67 @@ class Codelessly {
   static Codelessly get instance => _instance;
 
   /// Present a named published paywall and await its terminal result.
-  /// [resolvePlacement] must resolve the current targeted placement from the
-  /// project's published manifest, not from the editor's draft.
+  /// Uses the authenticated published manifest and Firebase-backed verifier.
+  /// Explicit resolver/store parameters are a test-only override seam.
   static Future<PaywallResult> paywall({
     required BuildContext context,
     required String placement,
-    required Future<PaywallPlacement> Function(String placement)
-    resolvePlacement,
-    required PurchaseService purchaseService,
-    required List<ProductSlot> slots,
+    Future<PaywallPlacement> Function(String placement)? resolvePlacement,
+    PurchaseService? purchaseService,
+    List<ProductSlot>? slots,
   }) async {
+    final sdk = Codelessly.instance;
+    PublishedPaywall? published;
+    FirebasePaywallBackend? eventBackend;
+    PurchaseService? ownedService;
+    if (resolvePlacement == null || purchaseService == null || slots == null) {
+      if (!Platform.isIOS && !Platform.isAndroid) {
+        return const PaywallResult(
+          PaywallOutcome.failed,
+          error: 'Paywall store unavailable on this platform',
+        );
+      }
+      final projectId = sdk.authManager.authData?.projectId;
+      if (projectId == null) {
+        throw StateError('Initialize Codelessly before showing a paywall');
+      }
+      final backend = FirebasePaywallBackend(
+        functions: FirebaseFunctions.instanceFor(app: sdk.firebaseApp),
+        projectId: projectId,
+      );
+      eventBackend = backend;
+      final runtime = sdk._paywallRuntime ??= PaywallRuntime(
+        backend: backend,
+        purchaseService: () => InAppPurchaseService(verify: backend.verify),
+      );
+      runtime.scopeToUser(sdk.firebaseAuth.currentUser?.uid);
+      published = await runtime.resolve(
+        placement,
+        locale: Localizations.localeOf(context).toLanguageTag(),
+        appVersion: '8.4.0',
+      );
+      if (published == null) {
+        if (!context.mounted) {
+          return const PaywallResult(PaywallOutcome.cancelled);
+        }
+        await Navigator.of(context).push<void>(
+          MaterialPageRoute(
+            builder: (routeContext) => PaywallUnavailableFallback(
+              onClose: () => Navigator.of(routeContext).pop(),
+            ),
+          ),
+        );
+        return const PaywallResult(
+          PaywallOutcome.failed,
+          error: 'No cached compliant paywall',
+        );
+      }
+      resolvePlacement = (_) async => published!.placement;
+      slots = published.slots;
+      ownedService = runtime.purchaseService();
+      purchaseService = ownedService;
+      sdk.entitlements.value = Set.of(published.entitlements);
+    }
     final resolved = await resolvePlacement(placement);
     if (!context.mounted) return const PaywallResult(PaywallOutcome.cancelled);
     final controller = PaywallController(
@@ -65,12 +118,44 @@ class Codelessly {
       slots: slots
           .where((slot) => resolved.productSlots.contains(slot.id))
           .toList(),
+      entitlements: Set.of(sdk.entitlements.value),
+      onEvent: eventBackend == null || published == null
+          ? null
+          : (event, slot) {
+              unawaited(
+                eventBackend!
+                    .event(
+                      eventId: generateId(),
+                      name: event,
+                      placement: placement,
+                      releaseId: published!.releaseId,
+                      variant: published.variant,
+                      slot: slot,
+                    )
+                    .catchError((Object _) {}),
+              );
+            },
     );
     try {
       final route = MaterialPageRoute<void>(
         builder: (_) => CodelesslyPaywall(
           layoutId: resolved.layoutId,
           controller: controller,
+          onView: eventBackend == null || published == null
+              ? null
+              : () {
+                  unawaited(
+                    eventBackend!
+                        .event(
+                          eventId: generateId(),
+                          name: 'paywall_view',
+                          placement: placement,
+                          releaseId: published!.releaseId,
+                          variant: published.variant,
+                        )
+                        .catchError((Object _) {}),
+                  );
+                },
         ),
       );
       final popped = Navigator.of(context).push(route);
@@ -83,9 +168,35 @@ class Codelessly {
       }
       return outcome;
     } finally {
+      sdk.entitlements.value = Set.of(controller.entitlements);
       controller.dispose();
+      await ownedService?.dispose();
     }
   }
+
+  /// Warm the authenticated placement manifest ahead of presentation.
+  Future<void> prefetchPaywall(
+    String placement, {
+    required String locale,
+  }) async {
+    final projectId = authManager.authData?.projectId;
+    if (projectId == null) throw StateError('Initialize Codelessly first');
+    final backend = FirebasePaywallBackend(
+      functions: FirebaseFunctions.instanceFor(app: firebaseApp),
+      projectId: projectId,
+    );
+    final runtime = _paywallRuntime ??= PaywallRuntime(
+      backend: backend,
+      purchaseService: () => InAppPurchaseService(verify: backend.verify),
+    );
+    runtime.scopeToUser(firebaseAuth.currentUser?.uid);
+    await runtime.prefetch(placement, locale: locale, appVersion: '8.4.0');
+    entitlements.value = Set.of(runtime.entitlements.value);
+  }
+
+  /// Verified entitlement IDs for visibility and app-level conditions.
+  final ValueNotifier<Set<String>> entitlements = ValueNotifier(<String>{});
+  PaywallRuntime? _paywallRuntime;
 
   final Client _client;
 
@@ -434,6 +545,8 @@ class Codelessly {
     _navigationListeners.clear();
     _breakpointsListeners.clear();
     _client.close();
+    _paywallRuntime?.entitlements.dispose();
+    _paywallRuntime = null;
 
     _systemUIBrightnessStreamController.close();
   }

@@ -12,12 +12,14 @@ class CodelesslyPaywall extends StatefulWidget {
   final String layoutId;
   final PaywallController controller;
   final Codelessly? codelessly;
+  final VoidCallback? onView;
 
   const CodelesslyPaywall({
     super.key,
     required this.layoutId,
     required this.controller,
     this.codelessly,
+    this.onView,
   });
 
   @override
@@ -30,6 +32,9 @@ class _CodelesslyPaywallState extends State<CodelesslyPaywall> {
     super.initState();
     widget.controller.addListener(_updated);
     widget.controller.load();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onView?.call();
+    });
   }
 
   void _updated() {
@@ -43,12 +48,13 @@ class _CodelesslyPaywallState extends State<CodelesslyPaywall> {
   }
 
   @override
-  Widget build(BuildContext context) => Provider<PaywallController>.value(
-    value: widget.controller,
-    child: CodelesslyWidget(
-      layoutID: widget.layoutId,
-      codelessly: widget.codelessly,
-      data: widget.controller.variables,
-    ),
-  );
+  Widget build(BuildContext context) =>
+      ChangeNotifierProvider<PaywallController>.value(
+        value: widget.controller,
+        child: CodelesslyWidget(
+          layoutID: widget.layoutId,
+          codelessly: widget.codelessly,
+          data: widget.controller.variables,
+        ),
+      );
 }

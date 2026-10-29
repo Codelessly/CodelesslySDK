@@ -256,7 +256,22 @@ class InAppPurchaseService implements PurchaseService {
   @override
   Future<void> restore() async {
     await ready;
-    await store.restorePurchases();
+    var sawRestored = false;
+    final watcher = store.purchaseStream.listen((purchases) {
+      if (purchases.any((item) => item.status == PurchaseStatus.restored)) {
+        sawRestored = true;
+      }
+    });
+    try {
+      await store.restorePurchases();
+      // The store's restore completion can arrive before the stream callback.
+      await Future<void>.delayed(Duration.zero);
+      if (!sawRestored) {
+        _events.add(const PaywallResult(PaywallOutcome.restoreNothing));
+      }
+    } finally {
+      await watcher.cancel();
+    }
   }
 
   Future<void> _handle(List<PurchaseDetails> purchases) async {
