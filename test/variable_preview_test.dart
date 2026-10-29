@@ -117,4 +117,44 @@ void main() {
       'Shots',
     );
   });
+
+  group('list items', () {
+    setUp(() {
+      // As the editor resolves a node in a bound list: the first item.
+      VariablePreview.scopeResolver = (node) => ScopedValues.preview(
+        variables: {
+          'region': VariableData(
+            id: 'v1',
+            name: 'region',
+            value: 'All',
+            type: VariableType.text,
+          ),
+        },
+        indexedItem: IndexedItem(0, {'label': 'All'}),
+      );
+    });
+
+    test('an item with data shows its own element', () {
+      final IndexedItem third = IndexedItem(2, {'label': 'Orange County'});
+      expect(
+        VariablePreview.textFor(r'${item.label}', item: third),
+        'Orange County',
+      );
+      expect(VariablePreview.textFor(r'${= index + 1}', item: third), '3');
+      expect(
+        VariableSpan(variable: r'${item.label}', item: third).text,
+        'Orange County',
+      );
+      // Variables still read the canvas's defaults.
+      expect(VariablePreview.textFor(r'${region}', item: third), 'All');
+    });
+
+    test('without item data the item from the resolver stands', () {
+      expect(VariablePreview.textFor(r'${item.label}'), 'All');
+      expect(
+        VariablePreview.textFor(r'${item.label}', item: IndexedItem(3, null)),
+        'All',
+      );
+    });
+  });
 }
