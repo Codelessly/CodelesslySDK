@@ -87,7 +87,7 @@ class PassiveNavigationBarTransformer
         width ?? 300,
         height ?? kBottomNavigationBarHeight,
       ),
-      currentIndex: currentIndex,
+      selectedIndex: currentIndex,
       verticalFit: SizeFit.shrinkWrap,
     );
     return PassiveNavigationBarWidget(
@@ -129,8 +129,8 @@ class _PassiveNavigationBarWidgetState
   @override
   void initState() {
     currentIndex =
-        context.getNodeValue(widget.node.id, 'currentIndex') ??
-        widget.node.currentIndex;
+        context.getNodeValue(widget.node.id, 'selectedIndex') ??
+        widget.node.selectedIndex;
     super.initState();
   }
 
