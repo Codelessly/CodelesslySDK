@@ -89,7 +89,8 @@ void main() {
       ),
     );
     final json = node.toJson();
-    expect(json['type'], 'signatureNormalized');
+    expect(json['type'], 'signature');
+    expect(json['signatureKind'], 'normalized');
     final back =
         NodeJsonConverter.instance.fromJson(json)! as SignatureNormalizedNode;
     expect(back.properties.readOnly, isTrue);
