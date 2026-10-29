@@ -8,7 +8,7 @@ import 'package:http/testing.dart';
 
 void main() {
   test(
-    'ambiguous legacy gauge download fails closed with original canvases',
+    'gauge without kind download fails closed with original canvases',
     () async {
       final raw = <String, dynamic>{
         'id': 'layout',
@@ -44,7 +44,7 @@ void main() {
               .having(
                 (error) => error.reason,
                 'reason',
-                'ambiguous-gauge-schema',
+                'missing-gaugeKind',
               )
               .having((error) => error.nodeKey, 'nodeKey', 'ambiguous')
               .having(
@@ -57,7 +57,7 @@ void main() {
     },
   );
 
-  test('ambiguous raw layout download throws with context, never returns empty layout', () async {
+  test('signature without kind download throws with context, never returns empty layout', () async {
     final raw = <String, dynamic>{
       'id': 'layout',
       'pageId': 'page',
@@ -94,7 +94,7 @@ void main() {
             .having(
               (error) => error.reason,
               'reason',
-              'ambiguous-signature-schema',
+              'missing-signatureKind',
             )
             .having(
               (error) => error.raw.keys,
