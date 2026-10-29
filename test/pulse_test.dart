@@ -23,7 +23,7 @@ void main() {
       id: 'bar',
       name: 'Skeleton',
       basicBoxLocal: NodeBox(0, 0, 100, 20),
-      characters: 'Loading',
+      data: 'Loading',
       opacity: 0.8,
     )..pulse = const PulseModel(minOpacity: 0.5, durationMillis: 1000);
     final registry = NodeRegistry()..setNodes({node.id: node});
@@ -61,7 +61,7 @@ void main() {
       id: 'bar',
       name: 'Bar',
       basicBoxLocal: NodeBox(0, 0, 100, 20),
-      characters: 'Ready',
+      data: 'Ready',
     );
     final registry = NodeRegistry()..setNodes({node.id: node});
     final manager = PassiveNodeTransformerManager(

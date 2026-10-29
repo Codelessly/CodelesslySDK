@@ -855,7 +855,7 @@ List<String> inlineTextTemplatesOf(BaseNode node) {
     }
   }
 
-  if (node is TextNode) collect(node.characters);
+  if (node is TextNode) collect(node.data);
   if (node is CustomPropertiesMixin) collect(node.properties.toJson());
   if (node case final QueryableMixin queryable) {
     collect(queryable.collectionPath);

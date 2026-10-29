@@ -650,7 +650,7 @@ void main() {
       edgePins:
           pins ??
           EdgePinsModel(left: box.x, top: box.y, right: null, bottom: null),
-      characters: characters,
+      data: characters,
       textMixedProps: [
         StartEndProp(start: 0, end: characters.length, fontSize: 16),
       ],
@@ -767,7 +767,7 @@ void main() {
           verticalFit: SizeFit.shrinkWrap,
           edgePins: EdgePinsModel(left: x, top: y, right: x, bottom: y),
           positioningMode: PositioningMode.pin,
-          characters: characters,
+          data: characters,
           textMixedProps: [
             StartEndProp(start: 0, end: characters.length, fontSize: 16),
           ],
