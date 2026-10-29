@@ -36,6 +36,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         withBoundSize(context, node),
         parent,
         scrollAxis: scrollAxis,
+        scopedValues: ScopedValues.of(context),
       ),
       child: child,
     );
@@ -100,6 +101,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     BaseNode node,
     BaseNode parent, {
     AxisC? scrollAxis,
+    ScopedValues? scopedValues,
   }) {
     if (parent is ScrollableMixin && parent.isScrollable) {
       scrollAxis ??= parent.scrollDirection;
@@ -112,12 +114,14 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         parent,
         horizontal: true,
         isScrollAxis: scrolls && !verticalScroll,
+        scopedValues: scopedValues,
       ),
       vertical: _axisPlacement(
         node,
         parent,
         horizontal: false,
         isScrollAxis: verticalScroll,
+        scopedValues: scopedValues,
       ),
     );
   }
@@ -127,7 +131,31 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     BaseNode parent, {
     required bool horizontal,
     required bool isScrollAxis,
+    ScopedValues? scopedValues,
   }) {
+    final String property = horizontal ? 'positionX' : 'positionY';
+    if (scopedValues != null && node.variables.containsKey(property)) {
+      final num? fraction = PropertyValueDelegate.getPropertyValue<num>(
+        node,
+        property,
+        scopedValues: scopedValues,
+      );
+      if (fraction != null && fraction.isFinite) {
+        final AlignmentData? alignment = node.alignment.data;
+        return FreeformAxisPlacement(
+          mode: FreeformAxisMode.fraction,
+          start: 0,
+          extent: horizontal
+              ? node.outerBoxLocal.width
+              : node.outerBoxLocal.height,
+          parentExtent: horizontal
+              ? parent.innerBoxLocal.width
+              : parent.innerBoxLocal.height,
+          fraction: fraction.toDouble().clamp(0.0, 1.0),
+          anchor: ((horizontal ? alignment?.x : alignment?.y) ?? 0) / 2 + 0.5,
+        );
+      }
+    }
     final double extent = horizontal
         ? node.outerBoxLocal.width
         : node.outerBoxLocal.height;

@@ -165,6 +165,41 @@ void expectOnScreen(
 }
 
 void main() {
+  testWidgets('five hero pins with identical saved boxes use bound positions', (
+    tester,
+  ) async {
+    const positions = <(double, double)>[
+      (0.18, 0.30),
+      (0.47, 0.62),
+      (0.70, 0.24),
+      (0.86, 0.78),
+      (0.32, 0.86),
+    ];
+    final children = <RectangleNode>[
+      for (int i = 0; i < positions.length; i++)
+        rect(
+            'pin$i',
+            NodeBox(325.06, 415.92, 27.88, 36.08),
+            alignment: AlignmentModel.bottomCenter,
+          )
+          ..variables['positionX'] = '\${= ${positions[i].$1}}'
+          ..variables['positionY'] = '\${= ${positions[i].$2}}',
+    ];
+    final root = frame('frame', NodeBox(0, 0, 600, 400), children);
+    final rects = await pump(
+      tester,
+      root,
+      children,
+      screen: const Size(600, 400),
+    );
+    for (int i = 0; i < positions.length; i++) {
+      final pin = rects['pin$i']!;
+      expect(pin.center.dx, closeTo(600 * positions[i].$1, 0.1));
+      expect(pin.bottom, closeTo(400 * positions[i].$2, 0.1));
+    }
+    expect(rects.values.map((r) => r.topLeft).toSet(), hasLength(6));
+  });
+
   group('freeform children at the design size', () {
     for (final design in screens) {
       testWidgets('stay exactly where they were designed at $design', (

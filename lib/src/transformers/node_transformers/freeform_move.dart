@@ -111,6 +111,10 @@ class FreeformMove {
     switch (placement.mode) {
       case FreeformAxisMode.fill:
         return _AxisMove(startPin, endPin, origin);
+      case FreeformAxisMode.fraction:
+        // The caller must update the position binding to move this child;
+        // altering its design pins would be ignored by the runtime binding.
+        return _AxisMove(startPin, endPin, origin);
       case FreeformAxisMode.align:
         final double free = extent - childExtent;
         return _AxisMove(
