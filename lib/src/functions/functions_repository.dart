@@ -831,37 +831,56 @@ class FunctionsRepository {
         ),
       );
     }
+    final Size? screen = MediaQuery.maybeSizeOf(context);
     final bool asSheet = switch (presentation) {
       DialogPresentation.dialog ||
       DialogPresentation.fullScreen ||
       DialogPresentation.sideSheet => false,
       DialogPresentation.bottomSheet => true,
-      DialogPresentation.adaptive =>
-        (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < 600,
+      DialogPresentation.adaptive => (screen?.width ?? 1024) < 600,
     };
-    Widget content(BuildContext context) => CodelesslyDialogWidget(
-      showCloseButton: showCloseButton,
-      alignment: asSheet ? Alignment.bottomCenter : alignment,
-      hugHeight: asSheet,
-      builder: builder,
-    );
+    Widget content(BuildContext context, CanvasSizing sizing) =>
+        CodelesslyDialogWidget(
+          showCloseButton: showCloseButton,
+          sizing: sizing,
+          alignment: asSheet ? Alignment.bottomCenter : alignment,
+          builder: builder,
+        );
     if (asSheet) {
+      // As wide as the screen and as tall as its content, up to 90% of the
+      // screen; the canvas draws its own background and corners.
       return showModalBottomSheet<T>(
         context: context,
         useRootNavigator: false,
         isScrollControlled: true,
         isDismissible: barrierDismissible,
+        enableDrag: barrierDismissible,
         barrierColor: barrierColor,
         backgroundColor: Colors.transparent,
         elevation: 0,
         showDragHandle: showDragHandle,
-        constraints: BoxConstraints(
-          maxHeight:
-              (MediaQuery.maybeSizeOf(context)?.height ?? double.infinity) *
-              maxHeightFactor.clamp(0, 1),
-        ),
+        constraints: screen == null
+            ? null
+            : BoxConstraints(
+                maxHeight: screen.height * maxHeightFactor.clamp(0, 0.9),
+              ),
         routeSettings: routeSettings,
-        builder: content,
+        builder: (context) => content(context, CanvasSizing.sheet),
+      );
+    }
+    if (presentation == DialogPresentation.fullScreen) {
+      return showGeneralDialog<T>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: MaterialLocalizations.of(context)
+            .modalBarrierDismissLabel,
+        barrierColor: barrierColor ?? Colors.black,
+        routeSettings: routeSettings,
+        transitionDuration: const Duration(milliseconds: 200),
+        transitionBuilder: (context, animation, _, child) =>
+            FadeTransition(opacity: animation, child: child),
+        pageBuilder: (context, _, _) => content(context, CanvasSizing.fill),
       );
     }
     return showDialog<T>(
@@ -870,7 +889,7 @@ class FunctionsRepository {
       barrierDismissible: barrierDismissible,
       barrierColor: barrierColor,
       routeSettings: routeSettings,
-      builder: content,
+      builder: (context) => content(context, CanvasSizing.design),
     );
   }
 
