@@ -73,7 +73,7 @@ ButtonNode button(
   String label,
   ActionModel action, {
   ColorRGBA color = brandPrimary,
-}) => ButtonNode(
+}) => FilledButtonNode(
   id: id,
   name: id,
   basicBoxLocal: NodeBox(0, 0, 160, 44),

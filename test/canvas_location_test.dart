@@ -53,7 +53,7 @@ TextNode _text(String id, String parent, String characters) => TextNode(
   textMixedProps: [StartEndProp(start: 0, end: characters.length)],
 )..parentID = parent;
 
-ButtonNode _button(String id, String parent, ActionModel action) => ButtonNode(
+ButtonNode _button(String id, String parent, ActionModel action) => ElevatedButtonNode(
   id: id,
   name: id,
   basicBoxLocal: NodeBox(0, 0, 160, 44),

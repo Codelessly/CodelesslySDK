@@ -259,7 +259,7 @@ void main() {
   testWidgets('a button disabled by a formula dims and ignores taps', (
     tester,
   ) async {
-    final ButtonNode button = ButtonNode(
+    final ButtonNode button = ElevatedButtonNode(
       id: 'button',
       name: 'Reopen',
       basicBoxLocal: NodeBox(0, 0, 160, 48),

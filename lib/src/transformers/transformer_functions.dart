@@ -152,7 +152,8 @@ void convertNodeToButtonType(ButtonTypeEnum type, ButtonNode node) {
   } else if (type == ButtonTypeEnum.icon) {
     transformNodeToIconButton(node);
   }
-  node.properties.buttonType = type;
+  // The editor swaps the concrete node class after applying style changes.
+  // Mutating the discriminator here would make the old class unserializable.
 }
 
 void transformNodeFromIconButton(ButtonNode node) {

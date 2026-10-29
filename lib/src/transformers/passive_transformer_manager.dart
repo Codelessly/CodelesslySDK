@@ -20,11 +20,16 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// This is the registry of transformers that are used by the manager.
   PassiveNodeTransformerManager(super.getNode, super.retrieveLayout) {
     registerAllTransformers({
-      'rowColumn': PassiveRowColumnTransformer(getNode, this),
+      'row': PassiveRowColumnTransformer(getNode, this),
+      'column': PassiveRowColumnTransformer(getNode, this),
       'stack': PassiveStackTransformer(getNode, this),
       'frame': PassiveStackTransformer(getNode, this),
       'canvas': PassiveCanvasTransformer(getNode, this),
-      'button': PassiveButtonTransformer(getNode, this),
+      'elevatedButton': PassiveButtonTransformer(getNode, this),
+      'textButton': PassiveButtonTransformer(getNode, this),
+      'outlinedButton': PassiveButtonTransformer(getNode, this),
+      'iconButton': PassiveButtonTransformer(getNode, this),
+      'filledButton': PassiveButtonTransformer(getNode, this),
       'textField': PassiveTextFieldTransformer(getNode, this),
       'checkbox': PassiveCheckboxTransformer(getNode, this),
       'appBar': PassiveAppBarTransformer(getNode, this),
