@@ -177,6 +177,85 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('rejects native reactions even on unreachable nodes', (
+    tester,
+  ) async {
+    final button = ButtonNode(
+      id: 'unsafe',
+      name: 'unsafe',
+      basicBoxLocal: NodeBox(0, 0, 180, 48),
+      properties: ButtonProperties(label: 'Unsafe'),
+      reactions: [
+        Reaction(
+          trigger: TriggerModel(type: TriggerType.click),
+          action: LinkAction(url: 'https://example.com'),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      host({'safe': text('safe', 'Safe'), 'unsafe': button}, 'safe'),
+    );
+    expect(tester.takeException(), isArgumentError);
+  });
+
+  testWidgets(
+    'data refresh preserves edited input and updates untouched fields',
+    (tester) async {
+      final edited = TextFieldNode(
+        id: 'edited',
+        name: 'edited',
+        basicBoxLocal: NodeBox(0, 0, 300, 48),
+        properties: TextFieldProperties(),
+      )..variables['inputValue'] = r'${name}';
+      final untouched = TextFieldNode(
+        id: 'untouched',
+        name: 'untouched',
+        basicBoxLocal: NodeBox(0, 0, 300, 48),
+        properties: TextFieldProperties(),
+      )..variables['inputValue'] = r'${other}';
+      final root = RowColumnNode(
+        id: 'root',
+        name: 'root',
+        basicBoxLocal: NodeBox(0, 0, 400, 160),
+        children: ['edited', 'untouched'],
+        rowColumnType: RowColumnType.column,
+      );
+      final nodes = {
+        for (final node in [root, edited, untouched]) node.id: node,
+      };
+      final variables = {
+        for (final name in ['name', 'other'])
+          name: VariableData(
+            id: name,
+            name: name,
+            type: VariableType.text,
+            value: '',
+          ),
+      };
+      await tester.pumpWidget(
+        host(
+          nodes,
+          'root',
+          variables: variables,
+          data: {'name': 'Ada', 'other': 'One'},
+        ),
+      );
+      await tester.enterText(find.byType(TextField).first, 'Typed');
+      await tester.pump();
+      await tester.pumpWidget(
+        host(
+          nodes,
+          'root',
+          variables: variables,
+          data: {'name': 'Grace', 'other': 'Two'},
+        ),
+      );
+      expect(find.text('Typed'), findsOneWidget);
+      expect(find.text('Two'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('list repeats data-bound item text', (tester) async {
     const items = [
       {'name': 'Jazz'},
@@ -207,6 +286,26 @@ void main() {
     );
     expect(find.text('Jazz'), findsOneWidget);
     expect(find.text('Soul'), findsOneWidget);
+    await tester.pumpWidget(
+      host(
+        {'list': list, 'item': item},
+        'list',
+        variables: {
+          'crates': VariableData(
+            id: 'crates',
+            name: 'crates',
+            type: VariableType.list,
+            value: const [
+              {'id': 'new', 'name': 'Blues'},
+              {'id': 'jazz', 'name': 'Jazz'},
+            ],
+          ),
+        },
+      ),
+    );
+    expect(find.text('Blues'), findsOneWidget);
+    expect(find.text('Jazz'), findsOneWidget);
+    expect(find.text('Soul'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }
