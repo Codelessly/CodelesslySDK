@@ -111,6 +111,20 @@ class PassiveChartSeriesWidget extends StatelessWidget {
           cursor: node.reactions.isEmpty
               ? MouseCursor.defer
               : SystemMouseCursors.click,
+          onHover: !node.properties.selectOnHover
+              ? null
+              : (event) {
+                  final int index =
+                      painter.categoryAt(
+                        event.localPosition,
+                        constraints.biggest,
+                      ) ??
+                      -1;
+                  if (index != selected) onSelect(context, index);
+                },
+          onExit: !node.properties.selectOnHover || selected < 0
+              ? null
+              : (_) => onSelect(context, -1),
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTapUp: (details) {
@@ -234,6 +248,7 @@ class ChartSeriesPainter extends CustomPainter {
   /// The category under [position], or null.
   int? categoryAt(Offset position, Size size) {
     if (data.isEmpty) return null;
+    if (props.chartType == ChartType.donut) return sliceAt(position, size);
     final Rect plot = plotRect(size);
     if (position.dx < plot.left || position.dx > plot.right) return null;
     if (props.chartType == ChartType.line) {
@@ -352,9 +367,91 @@ class ChartSeriesPainter extends CustomPainter {
     switch (props.chartType) {
       case ChartType.timeline:
         _paintTimeline(canvas, size);
+      case ChartType.donut:
+        _paintDonut(canvas, size);
       case ChartType.bar:
       case ChartType.line:
         _paintXY(canvas, size);
+    }
+  }
+
+  /// Donut slice values: the first series' field of each item (negative
+  /// and missing values count as 0).
+  List<double> get _sliceValues {
+    final String field = props.series.isEmpty
+        ? 'value'
+        : props.series.first.field;
+    return [
+      for (final item in data) math.max(0, chartNumber(item, field) ?? 0),
+    ];
+  }
+
+  /// The donut's ring: center and the radius of the middle of the stroke.
+  (Offset, double, double) _ring(Size size) {
+    final double diameter = math.min(size.width, size.height);
+    final double stroke = diameter * props.donutThickness.clamp(0.02, 0.5);
+    // Room for the selected slice, drawn thicker.
+    final double radius = diameter / 2 - stroke / 2 - 4;
+    return (size.center(Offset.zero), radius, stroke);
+  }
+
+  /// The slice under [position], or null (the hole and outside the ring).
+  int? sliceAt(Offset position, Size size) {
+    final List<double> values = _sliceValues;
+    final double total = values.fold(0.0, (a, b) => a + b);
+    if (total <= 0) return null;
+    final (Offset c, double r, double stroke) = _ring(size);
+    final Offset v = position - c;
+    if ((v.distance - r).abs() > stroke / 2 + 4) return null;
+    double a =
+        math.atan2(v.dy, v.dx) + math.pi / 2 - props.startAngle * math.pi / 180;
+    a %= 2 * math.pi;
+    if (a < 0) a += 2 * math.pi;
+    double acc = 0;
+    for (int i = 0; i < values.length; i++) {
+      acc += values[i] / total * 2 * math.pi;
+      if (a <= acc) return i;
+    }
+    return values.length - 1;
+  }
+
+  void _paintDonut(Canvas canvas, Size size) {
+    final List<double> values = _sliceValues;
+    final double total = values.fold(0.0, (a, b) => a + b);
+    final (Offset c, double r, double stroke) = _ring(size);
+    final Rect rect = Rect.fromCircle(center: c, radius: r);
+    final Paint paint = Paint()..style = PaintingStyle.stroke;
+    if (total <= 0) {
+      canvas.drawArc(
+        rect,
+        0,
+        2 * math.pi,
+        false,
+        paint
+          ..color = props.trackColor.toFlutterColor()
+          ..strokeWidth = stroke,
+      );
+      return;
+    }
+    final ChartSeries? series = props.series.firstOrNull;
+    final double gap = props.sliceGap * math.pi / 180;
+    double start = -math.pi / 2 + props.startAngle * math.pi / 180;
+    for (int i = 0; i < values.length; i++) {
+      final double sweep = values[i] / total * 2 * math.pi;
+      final Color base =
+          (series?.colorField == null
+              ? null
+              : chartColor(data[i][series!.colorField!])) ??
+          series?.color.toFlutterColor() ??
+          const Color(0xFF888888);
+      final bool on = selectedIndex < 0 || selectedIndex == i;
+      paint
+        ..color = on ? base : base.withValues(alpha: 0.28)
+        ..strokeWidth = selectedIndex == i ? stroke + 8 : stroke;
+      if (sweep > gap) {
+        canvas.drawArc(rect, start + gap / 2, sweep - gap, false, paint);
+      }
+      start += sweep;
     }
   }
 

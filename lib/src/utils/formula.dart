@@ -253,6 +253,23 @@ class FormulaEvaluator {
       r'money(price) → $1,234.50',
     ),
     FormulaFunctionDoc(
+      'currency',
+      'currency(value, code, options?)',
+      'currency(-1234.5, "EUR") → −1.234,50 €; currency(42, "USD", "signed") → +\$42.00',
+    ),
+    FormulaFunctionDoc(
+      'parseAmount',
+      'parseAmount(text, code)',
+      'parseAmount("1.234,50", "EUR") → 1234.5',
+    ),
+    FormulaFunctionDoc(
+      'formatAmount',
+      'formatAmount(text, code)',
+      'formatAmount("12345.6", "USD") → 12,345.6',
+    ),
+    FormulaFunctionDoc('currencySymbol', 'currencySymbol(code)', 'currencySymbol("GBP") → £'),
+    FormulaFunctionDoc('currencyDecimals', 'currencyDecimals(code)', 'currencyDecimals("JPY") → 0'),
+    FormulaFunctionDoc(
       'formatNumber',
       'formatNumber(value, digits?)',
       'formatNumber(2481.64, 1) → 2,481.6',
@@ -883,6 +900,145 @@ String _money(Object? value, Object? symbol, Object? decimals) {
       .substring(0, dot)
       .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
   return '$sign${symbol ?? r'$'}$whole${text.substring(dot)}';
+}
+
+/// How a currency is written: symbol, which side it goes on, digit
+/// grouping and decimal marks, and how many decimals it has.
+class _CurrencyFormat {
+  const _CurrencyFormat(this.symbol, this.decimals, this.group, this.decimal,
+      {this.after = false, this.space = false});
+  final String symbol, group, decimal;
+  final int decimals;
+  final bool after, space;
+}
+
+const Map<String, _CurrencyFormat> _currencyFormats = {
+  'USD': _CurrencyFormat(r'$', 2, ',', '.'),
+  'EUR': _CurrencyFormat('€', 2, '.', ',', after: true, space: true),
+  'GBP': _CurrencyFormat('£', 2, ',', '.'),
+  'JPY': _CurrencyFormat('¥', 0, ',', '.'),
+  'CNY': _CurrencyFormat('¥', 2, ',', '.'),
+  'CAD': _CurrencyFormat(r'CA$', 2, ',', '.'),
+  'AUD': _CurrencyFormat(r'A$', 2, ',', '.'),
+  'CHF': _CurrencyFormat('CHF', 2, '’', '.', space: true),
+  'INR': _CurrencyFormat('₹', 2, ',', '.'),
+  'KRW': _CurrencyFormat('₩', 0, ',', '.'),
+  'MXN': _CurrencyFormat(r'MX$', 2, ',', '.'),
+  'BRL': _CurrencyFormat(r'R$', 2, '.', ',', space: true),
+  'SEK': _CurrencyFormat('kr', 2, ' ', ',', after: true, space: true),
+};
+
+_CurrencyFormat _currencyFormat(Object? code) {
+  final String c = FormulaEvaluator.stringify(code).trim().toUpperCase();
+  return _currencyFormats[c.isEmpty ? 'USD' : c] ??
+      _CurrencyFormat(c, 2, ',', '.', space: true);
+}
+
+String _groupDigits(String digits, String sep) => digits.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (_) => sep,
+    );
+
+/// [value] written the way [code] writes money: `currency(-1234.5, "EUR")`
+/// is "−1.234,50 €", `currency(123456, "JPY")` is "¥123,456". [options] is
+/// a list of words: `signed` puts "+" on positive amounts, `whole` drops the
+/// decimals, `compact` shortens to "$12k" / "$1.2M", `plain` leaves the
+/// symbol out, `ascii` uses "-" instead of the true minus sign.
+String _currency(Object? value, Object? code, Object? options) {
+  final num amount = _num(value);
+  if (!amount.isFinite) return '';
+  final _CurrencyFormat f = _currencyFormat(code);
+  final Set<String> opts = FormulaEvaluator.stringify(options)
+      .toLowerCase()
+      .split(RegExp(r'[\s,]+'))
+      .where((s) => s.isNotEmpty)
+      .toSet();
+  String body;
+  final num a = amount.abs();
+  if (opts.contains('compact')) {
+    String n;
+    if (a >= 1e6) {
+      n = '${(a / 1e6).toStringAsFixed(1)}M';
+    } else if (a >= 1e4) {
+      n = '${(a / 1e3).toStringAsFixed(0)}k';
+    } else if (a >= 1e3) {
+      n = '${(a / 1e3).toStringAsFixed(1)}k';
+    } else {
+      n = a.toStringAsFixed(0);
+    }
+    body = f.decimal == ',' ? n.replaceAll('.', ',') : n;
+  } else {
+    final int digits = opts.contains('whole') ? 0 : f.decimals;
+    final String text = a.toStringAsFixed(digits);
+    final List<String> parts = text.split('.');
+    body = _groupDigits(parts[0], f.group);
+    if (parts.length > 1) body = '$body${f.decimal}${parts[1]}';
+  }
+  final bool zero = num.parse(
+        a.toStringAsFixed(opts.contains('whole') ? 0 : f.decimals),
+      ) ==
+      0;
+  if (!opts.contains('plain')) {
+    final String gap = f.space ? ' ' : '';
+    body = f.after ? '$body$gap${f.symbol}' : '${f.symbol}$gap$body';
+  }
+  if (amount < 0 && !zero) {
+    return '${opts.contains('ascii') ? '-' : '−'}$body';
+  }
+  if (opts.contains('signed') && amount > 0 && !zero) return '+$body';
+  return body;
+}
+
+/// [text] grouped as an amount being typed in [code]'s format; used by the
+/// text field's currency formatter and the `formatAmount` formula.
+String formatAmountInput(String text, String code) => _formatAmount(text, code);
+
+/// The number typed into an amount field for [code]: accepts its own marks
+/// ("1.234,5" for EUR) and loose input ("12", "-3.50"). Null when it isn't a
+/// number.
+num? _parseAmount(Object? text, Object? code) {
+  final _CurrencyFormat f = _currencyFormat(code);
+  String t = FormulaEvaluator.stringify(text)
+      .trim()
+      .replaceAll('−', '-')
+      .replaceAll(RegExp(r'[^0-9.,\-]'), '');
+  if (t.isEmpty || t == '-') return null;
+  if (f.decimal == ',') {
+    t = t.replaceAll('.', '').replaceAll(',', '.');
+  } else {
+    t = t.replaceAll(',', '');
+  }
+  return num.tryParse(t);
+}
+
+/// What an amount field shows while typing in [code]: the whole part
+/// grouped, the person's decimals kept but capped at the currency's, "."
+/// accepted for a comma currency's decimal mark. `formatAmount("1234,5",
+/// "EUR")` is "1.234,5"; `formatAmount("12345.678", "JPY")` is "12,345".
+String _formatAmount(Object? text, Object? code) {
+  final _CurrencyFormat f = _currencyFormat(code);
+  String raw = FormulaEvaluator.stringify(text);
+  if (f.decimal == ',') {
+    // A "." after the last group (not a group mark) is a decimal point.
+    final int dot = raw.lastIndexOf('.');
+    if (dot >= 0 && !raw.contains(',') && raw.length - dot - 1 != 3) {
+      raw = '${raw.substring(0, dot)},${raw.substring(dot + 1)}';
+    }
+  }
+  final String clean =
+      raw.replaceAll(RegExp('[^0-9${RegExp.escape(f.decimal)}]'), '');
+  final int i = clean.indexOf(f.decimal);
+  String whole = i < 0 ? clean : clean.substring(0, i);
+  String? frac = i < 0 ? null : clean.substring(i + 1).replaceAll(f.decimal, '');
+  whole = whole.replaceFirst(RegExp(r'^0+(?=\d)'), '');
+  if (frac != null && frac.length > f.decimals) {
+    frac = frac.substring(0, f.decimals);
+  }
+  final String g = whole.isEmpty
+      ? (frac != null ? '0' : '')
+      : _groupDigits(whole, f.group);
+  if (f.decimals == 0 || frac == null) return g;
+  return '$g${f.decimal}$frac';
 }
 
 /// [value] with [digits] decimals (default 0) and thousands separators,
@@ -1770,6 +1926,11 @@ Map<String, Object?> _toMap(List<Object?> args) {
 
 final Map<String, _Function> _functions = {
   'money': (a) => _money(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'currency': (a) => _currency(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'parseAmount': (a) => _parseAmount(_arg(a, 0), _arg(a, 1)),
+  'formatAmount': (a) => _formatAmount(_arg(a, 0), _arg(a, 1)),
+  'currencySymbol': (a) => _currencyFormat(_arg(a, 0)).symbol,
+  'currencyDecimals': (a) => _currencyFormat(_arg(a, 0)).decimals,
   'formatNumber': (a) => _grouped(_arg(a, 0), _arg(a, 1)),
   'feetInches': (a) => _feetInches(_arg(a, 0)),
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
