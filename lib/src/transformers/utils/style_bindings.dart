@@ -24,6 +24,9 @@ import 'scoped_values.dart';
 ///   JSON value (e.g. `[8, true, 'circular']`) is accepted too.
 /// * [fontWeight] (number 100-900, or `w700`, `bold`, `normal`): the weight
 ///   of every span of a text node.
+/// * [textDecoration] (`strikethrough`, `underline`, `overline`, `none`, or
+///   a bool for strikethrough): the decoration of every span of a text
+///   node, e.g. a move that was wrong struck through.
 /// * [icon] (string): the name of the icon an icon node shows, in the
 ///   naming of its icon model (`star`, `star_border`, ...). Its family and
 ///   style stay. An icon model JSON map replaces the icon as a whole.
@@ -54,6 +57,9 @@ abstract final class StyleBindings {
 
   /// The font weight of every span of a text node.
   static const String fontWeight = 'fontWeight';
+
+  /// See the class documentation.
+  static const String textDecoration = 'textDecoration';
 
   /// The name of the icon an icon node shows.
   static const String icon = 'icon';
@@ -126,6 +132,22 @@ abstract final class StyleBindings {
       }
     }
 
+    if (node is TextNode) {
+      final TextDecorationEnum? decoration = parseTextDecoration(
+        value<Object>(textDecoration),
+      );
+      if (decoration != null &&
+          node.textMixedProps.any((prop) => prop.textDecoration != decoration)) {
+        final List spans =
+            patch['textMixedProps'] as List? ??
+            [for (final prop in node.textMixedProps) prop.toJson()];
+        patch['textMixedProps'] = [
+          for (final Map span in spans.cast<Map>())
+            {...span, 'textDecoration': decoration.name},
+        ];
+      }
+    }
+
     if (node is IconNode) {
       final IconModel? bound = _icon(
         node.properties.icon.icon,
@@ -144,6 +166,22 @@ abstract final class StyleBindings {
       }
     }
   }
+
+  /// A text decoration from a bound value: its name, or a bool for
+  /// strikethrough. Null for anything else.
+  static TextDecorationEnum? parseTextDecoration(Object? value) =>
+      switch (value) {
+        bool b => b ? TextDecorationEnum.strikethrough : TextDecorationEnum.none,
+        String s => TextDecorationEnum.values.firstWhereOrNull(
+          (d) => d.name.toLowerCase() == s.trim().toLowerCase(),
+        ) ?? switch (s.trim()) {
+          'true' => TextDecorationEnum.strikethrough,
+          'false' => TextDecorationEnum.none,
+          'lineThrough' => TextDecorationEnum.strikethrough,
+          _ => null,
+        },
+        _ => null,
+      };
 
   static List<Effect> _effects(
     List<Effect> effects,
