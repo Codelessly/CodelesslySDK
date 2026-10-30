@@ -551,6 +551,8 @@ Gradient? retrieveGradient(PaintModel paint) {
       );
     } else if (paint.type == PaintType.gradientRadial) {
       return RadialGradient(
+        center: Alignment(paint.gradientCenterX, paint.gradientCenterY),
+        radius: paint.gradientRadius,
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
@@ -560,6 +562,7 @@ Gradient? retrieveGradient(PaintModel paint) {
       );
     } else if (paint.type == PaintType.gradientAngular) {
       return SweepGradient(
+        center: Alignment(paint.gradientCenterX, paint.gradientCenterY),
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
