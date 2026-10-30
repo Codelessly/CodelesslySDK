@@ -202,6 +202,15 @@ void main() {
       expect(paragraph.textDirection, TextDirection.rtl);
     });
 
+    testWidgets('a wide left-aligned text sits at the start edge in RTL', (
+      tester,
+    ) async {
+      await pump(tester, text({'layoutDirection': 'rtl'}), []);
+      final Rect box = tester.getRect(find.byType(TextNodeBox).first);
+      final Rect line = tester.getRect(find.byType(RichText).first);
+      expect(line.right, moreOrLessEquals(box.right));
+    });
+
     testWidgets('textAlign follows its binding', (tester) async {
       final rtl = textVariable('rtl', 'false');
       final node = text({
@@ -218,7 +227,7 @@ void main() {
       expect(paragraph().textAlign, TextAlign.end);
       expect(
         TextNodeBox.alignmentOf(node, TextAlignHorizontalEnum.right),
-        const Alignment(1, -1),
+        const AlignmentDirectional(1, -1),
       );
     });
 
