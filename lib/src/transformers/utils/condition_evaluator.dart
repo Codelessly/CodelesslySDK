@@ -330,6 +330,9 @@ class ConditionEvaluator<R extends Object>
   R? visitCopyToClipboardAction(CopyToClipboardAction action) => null;
 
   @override
+  R? visitControlDragAction(ControlDragAction action) => null;
+
+  @override
   R? visitPaywallAction(PaywallAction action) => null;
 
   @override
@@ -496,6 +499,11 @@ class ConditionPrinter
 
   @override
   void visitCopyToClipboardAction(CopyToClipboardAction action) {}
+
+  @override
+  void visitControlDragAction(ControlDragAction action) {
+    _buffer.writeln('\tControl drag ${action.command.name} ${action.direction.name} on ${action.nodeId}');
+  }
 
   @override
   void visitPaywallAction(PaywallAction action) {

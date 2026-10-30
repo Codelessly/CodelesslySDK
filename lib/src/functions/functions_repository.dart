@@ -167,6 +167,13 @@ class FunctionsRepository {
         return copyToClipboard(context, action as CopyToClipboardAction);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
+      case ActionType.controlDrag:
+        final ControlDragAction drag = action as ControlDragAction;
+        return NodeDrag.control(
+          drag.nodeId,
+          drag.command,
+          drag.direction,
+        ).then((_) => true);
     }
   }
 

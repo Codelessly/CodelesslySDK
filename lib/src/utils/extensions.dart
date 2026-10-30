@@ -1895,6 +1895,7 @@ extension ActionModelExt on ActionModel {
             ),
         };
       case ActionType.delay:
+      case ActionType.controlDrag:
         return {};
       case ActionType.paywall:
         final PaywallAction action = this as PaywallAction;

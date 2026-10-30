@@ -519,6 +519,7 @@ class PassiveListViewWidget extends StatelessWidget {
           itemCount: itemCount ?? 0,
           clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
           itemBuilder: itemBuilder,
+          keyOf: itemKey,
         ),
       );
     }
@@ -842,6 +843,7 @@ class StackedItems extends StatelessWidget {
     required this.itemCount,
     required this.itemBuilder,
     this.clipBehavior = Clip.none,
+    this.keyOf,
   });
 
   /// How many items.
@@ -853,6 +855,13 @@ class StackedItems extends StatelessWidget {
   /// Whether items moved outside the box are clipped.
   final Clip clipBehavior;
 
+  /// The identity of the item at an index, e.g. its data's `id`. An item
+  /// keeps its widget (and its running motion and drag) when it moves to
+  /// another index: when the top card of a deck is swiped away, the card
+  /// behind it rises to the top as the same widget, so its index-bound
+  /// motion animates. By index when null.
+  final Object Function(int index)? keyOf;
+
   @override
   Widget build(BuildContext context) => Stack(
     clipBehavior: clipBehavior,
@@ -861,7 +870,7 @@ class StackedItems extends StatelessWidget {
       // takes taps first.
       for (int index = itemCount - 1; index >= 0; index--)
         Positioned.fill(
-          key: ValueKey(index),
+          key: ValueKey(keyOf?.call(index) ?? index),
           child: Align(
             alignment: Alignment.topCenter,
             child: itemBuilder(context, index),
