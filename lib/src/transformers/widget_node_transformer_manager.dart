@@ -498,6 +498,18 @@ abstract class WidgetNodeTransformerManager
   Widget wrapWithDrag(BuildContext context, BaseNode node, Widget child) {
     final DragModel? drag = node.drag;
     if (drag == null || node is CanvasNode) return child;
+    if (drag.reorder) {
+      // The handle of a row in a reorderable data list: dragging it moves
+      // the row (see PassiveListViewWidget).
+      final int? index = IndexedItemProvider.maybeOf(context)?.index;
+      if (index == null || SliverReorderableList.maybeOf(context) == null) {
+        return child;
+      }
+      return ReorderableDragStartListener(
+        index: index,
+        child: MouseRegion(cursor: SystemMouseCursors.grab, child: child),
+      );
+    }
     final List<Reaction> reactions = node is ReactionMixin
         ? [
             for (final reaction in (node as ReactionMixin).reactions)
