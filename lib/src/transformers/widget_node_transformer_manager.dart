@@ -1151,6 +1151,7 @@ class ReactionDragDetector extends StatefulWidget {
 }
 
 class _ReactionDragDetectorState extends State<ReactionDragDetector> {
+  Offset _origin = Offset.zero;
   Offset _total = Offset.zero;
 
   /// The node's laid out size: drags measured in node sizes (squares of a
@@ -1179,9 +1180,16 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
         cursor: SystemMouseCursors.grab,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onPanStart: (_) => _total = Offset.zero,
+          // Totals count from where the pointer went down: a pan starts
+          // only after the touch slop, and summing its deltas from there
+          // would leave the slop out, so a piece dropped two squares away
+          // would land one square short.
+          onPanDown: (details) {
+            _origin = details.localPosition;
+            _total = Offset.zero;
+          },
           onPanUpdate: (details) {
-            _total += details.delta;
+            _total = details.localPosition - _origin;
             _run(widget.onDrag, TriggerType.drag, {
               'deltaX': details.delta.dx,
               'deltaY': details.delta.dy,
