@@ -71,7 +71,7 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
         _registry.getNodeByID,
         (context, bounds, pageID, layoutID, canvasID) =>
             const SizedBox.shrink(),
-      );
+      )..cacheUnchangedNodes = true;
   CodelesslyContext? _context;
 
   @override
@@ -134,6 +134,7 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
   }
 
   void _load() {
+    _manager.clearStandaloneWidgetCache();
     if (!widget.nodes.containsKey(widget.rootId)) {
       throw ArgumentError.value(widget.rootId, 'rootId', 'Missing root node');
     }
