@@ -1,13 +1,15 @@
-import 'dart:io';
-
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
+import 'support/load_test_fonts.dart';
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(loadTestFonts);
+
   Future<void> mount(WidgetTester tester) async {
     final modal = ModalNode(
       id: 'modal',
@@ -23,6 +25,13 @@ void main() {
       properties: ButtonProperties(
         label: 'Open',
         buttonType: ButtonTypeEnum.filled,
+        labelStyle: TextProp.general(
+          fontName: const FontName(
+            family: 'TabsFixture',
+            style: 'Normal',
+            weight: FontWeightNumeric.w400,
+          ),
+        ),
       ),
     );
     final content = ColumnNode.fromJson({
@@ -40,6 +49,13 @@ void main() {
       properties: ButtonProperties(
         label: 'Close',
         buttonType: ButtonTypeEnum.filled,
+        labelStyle: TextProp.general(
+          fontName: const FontName(
+            family: 'TabsFixture',
+            style: 'Normal',
+            weight: FontWeightNumeric.w400,
+          ),
+        ),
       ),
       reactions: [
         Reaction(
@@ -63,6 +79,7 @@ void main() {
       ChangeNotifierProvider<CodelesslyContext>.value(
         value: CodelesslyContext.empty(),
         child: MaterialApp(
+          theme: ThemeData(fontFamily: 'Roboto'),
           home: Scaffold(
             body: Center(
               child: Builder(
@@ -96,19 +113,6 @@ void main() {
   });
 
   testWidgets('closed and open dialog use real-font goldens', (tester) async {
-    TestWidgetsFlutterBinding.ensureInitialized();
-    await (FontLoader(
-      'MaterialIcons',
-    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
-    final loaded = await tester.runAsync(() async {
-      final bytes = await File('../material_icons/assets/Roboto-Regular.ttf')
-          .readAsBytes();
-      await (FontLoader(
-        'Roboto',
-      )..addFont(Future.value(bytes.buffer.asByteData()))).load();
-      return true;
-    });
-    expect(loaded, isTrue);
     await tester.binding.setSurfaceSize(const Size(400, 240));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await mount(tester);
