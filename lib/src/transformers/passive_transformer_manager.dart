@@ -161,9 +161,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         return _buildDecorated(context, node, settings);
       },
     );
-    return settings.withReactions
-        ? wrapWithInteractionScopes(context, node, built)
-        : built;
+    if (!settings.withReactions) return built;
+    return wrapWithDragDrop(
+      context,
+      node,
+      wrapWithInteractionScopes(context, node, built),
+    );
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -202,6 +205,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
       widget = applyWidgetMotion(context, styled, widget);
+      widget = applyNodePlay(context, styled, widget);
       widget = applyBoundOffset(context, styled, widget);
     }
     if (settings.withConstraints) {
