@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:provider/provider.dart';
 
 import '../transformers/node_registry.dart';
@@ -39,6 +40,7 @@ class CodelessNodeTreeView extends StatefulWidget {
     required this.nodes,
     required this.rootId,
     this.data = const {},
+    this.dataListenable,
     this.variables = const {},
     this.theme,
     this.onAction,
@@ -48,6 +50,8 @@ class CodelessNodeTreeView extends StatefulWidget {
   final Map<String, BaseNode> nodes;
   final String rootId;
   final Map<String, dynamic> data;
+  /// Optional external data source; updates the SDK context without reloading nodes.
+  final ValueListenable<Map<String, dynamic>>? dataListenable;
   final Map<String, VariableData> variables;
   final ThemeData? theme;
   final CodelessNodeAction? onAction;
@@ -67,23 +71,60 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
         _registry.getNodeByID,
         (context, bounds, pageID, layoutID, canvasID) =>
             const SizedBox.shrink(),
-      );
+      )..cacheUnchangedNodes = true;
   CodelesslyContext? _context;
 
   @override
   void initState() {
     super.initState();
     _load();
+    widget.dataListenable?.addListener(_onDataChanged);
+  }
+
+  void _onDataChanged() {
+    final next = widget.dataListenable?.value;
+    if (next != null) _context?.data = next;
   }
 
   @override
   void didUpdateWidget(CodelessNodeTreeView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.nodes != widget.nodes ||
-        oldWidget.rootId != widget.rootId ||
+    if (oldWidget.dataListenable != widget.dataListenable) {
+      oldWidget.dataListenable?.removeListener(_onDataChanged);
+      widget.dataListenable?.addListener(_onDataChanged);
+      _onDataChanged();
+    }
+    if (oldWidget.rootId != widget.rootId ||
         oldWidget.variables != widget.variables) {
       _load();
-    } else if (oldWidget.data != widget.data) {
+    } else if (oldWidget.nodes != widget.nodes) {
+      for (final node in widget.nodes.values) {
+        if (node is ReactionMixin) {
+          for (final reaction in (node as ReactionMixin).reactions) {
+            if (reaction.action is! CallFunctionAction &&
+                !(widget.previewNativePaywallActions && reaction.action is PaywallAction)) {
+              throw ArgumentError('Standalone tree rejects action ${reaction.action.type} on node ${node.id}');
+            }
+          }
+        }
+      }
+      _manager.retainStandaloneWidgets(widget.nodes.keys.toSet());
+      _registry.setNodes(widget.nodes);
+      final allNodes = _registry.getNodes().values.toList();
+      for (final node in allNodes) {
+        node.parentID = resolveParentNodeIDs(node: node, nodes: allNodes);
+      }
+      final context = _context!;
+      for (final node in allNodes) {
+        if (node is ReactionMixin) {
+          for (final reaction in (node as ReactionMixin).reactions) {
+            if (reaction.action is! CallFunctionAction) continue;
+            final name = (reaction.action as CallFunctionAction).name;
+            context.functions[name] = (_, _, params) => widget.onAction?.call(name, params);
+          }
+        }
+      }
+    } else if (oldWidget.data != widget.data && widget.dataListenable == null) {
       final context = _context!;
       context.data = widget.data;
       for (final variable in widget.variables.values) {
@@ -104,6 +145,7 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
   }
 
   void _load() {
+    _manager.clearStandaloneWidgetCache();
     if (!widget.nodes.containsKey(widget.rootId)) {
       throw ArgumentError.value(widget.rootId, 'rootId', 'Missing root node');
     }
@@ -143,7 +185,7 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
       node.parentID = resolveParentNodeIDs(node: node, nodes: allNodes);
     }
     final context = CodelesslyContext.empty()
-      ..data = widget.data
+      ..data = widget.dataListenable?.value ?? widget.data
       ..variables.addAll({
         for (final variable in widget.variables.values)
           variable.id: Observable(
@@ -183,6 +225,7 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
 
   @override
   void dispose() {
+    widget.dataListenable?.removeListener(_onDataChanged);
     _context?.dispose();
     super.dispose();
   }
