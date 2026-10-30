@@ -163,6 +163,10 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   late MotionModel _from = widget.motion;
   late MotionModel _to = widget.motion;
 
+  /// The curve of the running transition, kept from when it started so a
+  /// bound curve that changes mid-way doesn't jump it.
+  late MotionCurve _curve = widget.motion.curve;
+
   Ticker? _spinTicker;
   Duration _lastTick = Duration.zero;
 
@@ -197,6 +201,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   /// Animates from [_from] to [_to] over [ms], after the motion's delay.
   void _run(int ms) {
     _delay?.cancel();
+    _curve = _to.curve;
     _transition
       ..stop()
       ..duration = Duration(milliseconds: ms)
@@ -218,6 +223,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     _delay?.cancel();
     _from = widget.motion.atRest;
     _to = widget.motion;
+    _curve = _to.curve;
     _transition.duration = Duration(milliseconds: widget.motion.durationMs);
     void start() {
       if (!mounted) return;
@@ -239,11 +245,21 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     final MotionModel next = widget.motion;
     final bool replay =
         widget.animate && next.replayKey != oldWidget.motion.replayKey;
+    final bool pulse =
+        widget.animate &&
+        next.hasKeyframes &&
+        next.pulseKey != oldWidget.motion.pulseKey;
     if (_loops && replay) {
       _startLoop();
     } else if (replay && next.durationMs > 0) {
       // Plays the entrance again, wherever the node was.
       _from = next.entranceStart;
+      _to = next;
+      _run(next.durationMs);
+    } else if (pulse && !_loops && next.durationMs > 0) {
+      // Plays the keyframes once, from wherever the node is to its values
+      // (the same, unless they changed too).
+      _from = _current;
       _to = next;
       _run(next.durationMs);
     } else if (_loops) {
@@ -302,8 +318,18 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
 
   MotionModel get _current {
     if (!_moving && _transition.value == 0) return _to;
-    final double t = flutterCurveOf(_to.curve).transform(_transition.value);
+    final double time = _transition.value;
+    final double t = flutterCurveOf(_curve).transform(time);
+    // A value the keyframes key follows them in time; the others follow
+    // the curve.
     double lerp(String p) =>
+        MotionModel.keyframedValue(
+          _to.keyframes,
+          p,
+          _from.valueOf(p),
+          _to.valueOf(p),
+          time,
+        ) ??
         _from.valueOf(p) + (_to.valueOf(p) - _from.valueOf(p)) * t;
     return _to.copyWith(
       translateX: lerp('translateX'),
@@ -413,7 +439,6 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     );
   }
 }
-
 
 /// Paints [child] only while its front faces the viewer, judged by its
 /// whole transform to the screen, so a face turned away by its own motion

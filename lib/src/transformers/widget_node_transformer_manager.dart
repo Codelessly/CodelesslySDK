@@ -207,8 +207,9 @@ abstract class WidgetNodeTransformerManager
 
   /// The motion [node] shows now: its [BaseNode.motion] with the values
   /// bound through `motion.<name>` variables resolved from [scopedValues],
-  /// and `motion.replayKey` resolved to text. Null when the node doesn't
-  /// move.
+  /// the settings in [MotionModel.settings] (duration, delay, curve), and
+  /// `motion.replayKey` and `motion.pulseKey` resolved to text. Null when
+  /// the node doesn't move.
   static MotionModel? resolveMotion(
     BaseNode node, {
     required ScopedValues scopedValues,
@@ -244,6 +245,18 @@ abstract class WidgetNodeTransformerManager
         clearPath: data.isEmpty,
       );
     }
+    // The transition's duration, delay and curve, e.g. a slow spring in
+    // and a quick ease out: `${= open ? 'elasticOut' : 'easeIn'}`.
+    for (final String setting in MotionModel.settings) {
+      final String key = MotionModel.variableKey(setting);
+      if (!node.variables.containsKey(key)) continue;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      motion = (motion ?? MotionModel.none).withSetting(setting, value);
+    }
     const String replay = MotionModel.replayKeyProperty;
     if (node.variables.containsKey(MotionModel.variableKey(replay))) {
       final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
@@ -254,6 +267,18 @@ abstract class WidgetNodeTransformerManager
       motion = (motion ?? MotionModel.none).copyWith(
         replayKey: value?.toString(),
         clearReplayKey: value == null,
+      );
+    }
+    const String pulse = MotionModel.pulseKeyProperty;
+    if (node.variables.containsKey(MotionModel.variableKey(pulse))) {
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        MotionModel.variableKey(pulse),
+        scopedValues: scopedValues,
+      );
+      motion = (motion ?? MotionModel.none).copyWith(
+        pulseKey: value?.toString(),
+        clearPulseKey: value == null,
       );
     }
     return motion;
@@ -518,6 +543,20 @@ abstract class WidgetNodeTransformerManager
           ]
         : const [];
     final bool bound = node.variables.containsKey(DragModel.enabledVariableKey);
+    double rest(String key, double fallback) {
+      if (!node.variables.containsKey(key)) return fallback;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: ScopedValues.of(context),
+      );
+      return switch (value) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()) ?? fallback,
+        _ => fallback,
+      };
+    }
+
     return NodeDrag(
       nodeId: node.id,
       drag: drag,
@@ -549,6 +588,10 @@ abstract class WidgetNodeTransformerManager
         TriggerType.dragEnd,
         reactions: reactions,
         result: result,
+      ),
+      rest: Offset(
+        rest(DragModel.restXVariableKey, drag.restX),
+        rest(DragModel.restYVariableKey, drag.restY),
       ),
       onValues: drag.shareAs.trim().isEmpty
           ? null
