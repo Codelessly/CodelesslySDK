@@ -103,4 +103,28 @@ void main() {
     expect(find.byType(Icon), findsNothing);
     expect(tester.getSize(find.byType(SizedBox).last), const Size(20, 20));
   });
+
+  testWidgets(
+    "Material icons draw Flutter's glyph for their styled name, whatever codepoint is stored",
+    (tester) async {
+      // The editor stores Google's codepoint (0xe8b6 is search there); in
+      // Flutter's font that number is another icon.
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: SvgIcon(
+            icon: MaterialIcon(
+              codepoint: 0xe8b6,
+              fontFamily: 'MaterialIcons',
+              name: 'search',
+              style: MaterialIconStyle.rounded,
+              version: 17,
+            ),
+          ),
+        ),
+      );
+      final Icon drawn = tester.widget(find.byType(Icon));
+      expect(drawn.icon!.codePoint, Icons.search_rounded.codePoint);
+    },
+  );
 }
