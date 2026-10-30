@@ -63,6 +63,7 @@ export 'src/utils/cupertino_icons_by_codepoint.dart';
 export 'src/utils/material_icon_versions.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/flutter_icons_data_map.dart';
+export 'src/ui/floating_node.dart';
 export 'src/utils/flutter_icons_names_map.dart';
 export 'src/utils/font_parser.dart';
 export 'src/utils/formula.dart';
