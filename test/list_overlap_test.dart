@@ -70,9 +70,6 @@ void main() {
     // The first two items take 22 instead of 28; the last keeps its size.
     expect(rects.map((r) => r.left), [0, 22]);
     expect(rects.map((r) => r.width), [22, 22]);
-    expect(
-      tester.getSize(find.byType(ListView)).width,
-      28 + 22 + 22,
-    );
+    expect(tester.getSize(find.byType(ListView)).width, 28 + 22 + 22);
   });
 }

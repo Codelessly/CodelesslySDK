@@ -35,7 +35,7 @@ void main() {
     expect(last.value.value, 'r true');
   });
 
-  testWidgets('while typing only Escape reaches the screen, marked typing', (
+  testWidgets('while typing only Escape and shortcuts reach the screen', (
     tester,
   ) async {
     final Observable<VariableData> last = await pumpScreen(
@@ -53,6 +53,15 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(last.value.value, 'Escape true');
+
+    // A shortcut with Command/Control also reaches it (⌘↵ submits).
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pumpAndSettle();
+    expect(last.value.value, 'Enter true');
   });
 }
 
