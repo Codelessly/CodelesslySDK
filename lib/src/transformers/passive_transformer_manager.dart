@@ -117,8 +117,19 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     required WidgetBuildSettings settings,
   }) {
     if (settings.buildRawWidget) {
-      final Widget raw = getTransformerByNode(node)
-          .buildWidget(node, context, settings);
+      // The design canvas builds each node raw; its content still follows
+      // the node's layout direction.
+      final TextDirection? direction = layoutDirectionOf(context, node);
+      final Widget raw = direction == null
+          ? getTransformerByNode(node).buildWidget(node, context, settings)
+          : Directionality(
+              textDirection: direction,
+              child: Builder(
+                builder: (context) => getTransformerByNode(
+                  node,
+                ).buildWidget(node, context, settings),
+              ),
+            );
       return decorate(
         context,
         node,
@@ -395,7 +406,11 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
       node,
       kLayoutDirection,
-      scopedValues: ScopedValues.of(context),
+      // On the design canvas the editor's preview scope (variable defaults
+      // and preview values), at runtime the app's.
+      scopedValues:
+          VariablePreview.scopeOf(node, context: context) ??
+          ScopedValues.of(context),
     );
     return parseLayoutDirection(value);
   }
