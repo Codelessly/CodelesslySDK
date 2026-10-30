@@ -165,6 +165,8 @@ class FunctionsRepository {
         return runCloudBatch(context, action as CloudBatchAction);
       case ActionType.copyToClipboard:
         return copyToClipboard(context, action as CopyToClipboardAction);
+      case ActionType.editText:
+        return editText(context, action as EditTextAction);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
     }
@@ -212,6 +214,36 @@ class FunctionsRepository {
     );
     await Clipboard.setData(ClipboardData(text: text));
     return true;
+  }
+
+  /// Edits the text field [action] names, on the screen [context] is on, at
+  /// its cursor (see [EditTextOperation]); its text, before and after have
+  /// their variables substituted. Returns whether the field was found.
+  static bool editText(BuildContext context, EditTextAction action) {
+    final EditableTextField? field = TextFieldRegistry.find(
+      context,
+      action.nodeId,
+    );
+    if (field == null) {
+      DebugLogger.instance.printInfo(
+        'Edit text: no text field ${action.nodeId} on screen.',
+        name: name,
+      );
+      return false;
+    }
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    String substitute(String text) => PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
+    return field.editText(
+      action.operation,
+      text: substitute(action.text),
+      before: substitute(action.before),
+      after: action.after == null ? null : substitute(action.after!),
+      numbered: action.numbered,
+    );
   }
 
   /// How long [action] waits: its [DelayAction.duration] formula when that

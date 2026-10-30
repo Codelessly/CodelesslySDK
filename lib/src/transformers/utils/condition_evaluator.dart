@@ -330,6 +330,9 @@ class ConditionEvaluator<R extends Object>
   R? visitCopyToClipboardAction(CopyToClipboardAction action) => null;
 
   @override
+  R? visitEditTextAction(EditTextAction action) => null;
+
+  @override
   R? visitPaywallAction(PaywallAction action) => null;
 
   @override
@@ -496,6 +499,9 @@ class ConditionPrinter
 
   @override
   void visitCopyToClipboardAction(CopyToClipboardAction action) {}
+
+  @override
+  void visitEditTextAction(EditTextAction action) {}
 
   @override
   void visitPaywallAction(PaywallAction action) {

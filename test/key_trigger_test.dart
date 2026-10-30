@@ -82,4 +82,93 @@ void main() {
     await tester.pumpAndSettle();
     expect(last.value.value, 'r true');
   });
+
+  testWidgets('canvas key down reactions match combinations and their when', (
+    tester,
+  ) async {
+    Reaction setLast(String value, String key, {String? when}) => Reaction(
+      action: SetVariableAction(
+        variable: VariableData(id: 'last', name: 'last'),
+        newValue: value,
+      ),
+      trigger: TriggerModel(type: TriggerType.keyDown, key: key, when: when),
+    );
+    final CanvasNode canvas = CanvasNode(
+      id: 'canvas',
+      name: 'canvas',
+      basicBoxLocal: NodeBox(0, 0, 390, 844),
+      children: ['body'],
+      properties: CanvasProperties(
+        bodyId: 'body',
+        safeArea: const SafeAreaModel.all(false),
+      ),
+      reactions: [
+        setLast('save', 'Meta+s'),
+        setLast('s', 's'),
+        setLast('down', 'ArrowDown', when: r'${= armed}'),
+      ],
+    )..parentID = kRootNode;
+    final AutoPlaceholderNode body = AutoPlaceholderNode(
+      id: 'body',
+      name: 'body',
+      basicBoxLocal: NodeBox(0, 0, 390, 844),
+      children: const [],
+      horizontalFit: SizeFit.expanded,
+      verticalFit: SizeFit.expanded,
+    )..parentID = 'canvas';
+    final registry = NodeRegistry()
+      ..setNodes({canvas.id: canvas, body.id: body});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    final Observable<VariableData> last = Observable(
+      VariableData(id: 'last', name: 'last'),
+    );
+    final Observable<VariableData> armed = Observable(
+      VariableData(
+        id: 'armed',
+        name: 'armed',
+        type: VariableType.boolean,
+        value: false,
+      ),
+    );
+    final CodelesslyContext codelesslyContext = CodelesslyContext.empty()
+      ..variables['last'] = last
+      ..variables['armed'] = armed;
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: codelesslyContext,
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => manager.buildWidgetFromNode(
+              canvas,
+              context,
+              settings: const WidgetBuildSettings(debugLabel: 'test'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
+    await tester.pumpAndSettle();
+    expect(last.value.value, 's');
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+    expect(last.value.value, 'save');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(last.value.value, 'save');
+
+    armed.value = armed.value.copyWith(value: true);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(last.value.value, 'down');
+  });
 }
