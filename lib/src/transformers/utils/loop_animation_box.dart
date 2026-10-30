@@ -1,12 +1,14 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/widgets.dart';
 
 /// Runs a node's [LoopAnimation] on [child] over and over: it scales and
 /// fades [child] for [LoopAnimationType.pulse], fades it for
-/// [LoopAnimationType.fade], scales it for [LoopAnimationType.scale] and
-/// rotates it for [LoopAnimationType.spin], about its center.
+/// [LoopAnimationType.fade], scales it for [LoopAnimationType.scale],
+/// rotates it for [LoopAnimationType.spin], about its center, hops it for
+/// [LoopAnimationType.bob] and rocks it for [LoopAnimationType.sway].
 ///
 /// The animation runs on this widget's ticker, so it holds still at its
 /// `from` values under a disabled [TickerMode], as on the editor's design
@@ -144,6 +146,30 @@ class _LoopAnimationBoxState extends State<LoopAnimationBox>
     }
     if (type.fades) {
       child = FadeTransition(opacity: opacity, child: child);
+    }
+    if (enabled &&
+        (type == LoopAnimationType.bob || type == LoopAnimationType.sway)) {
+      final LoopAnimation animation = widget.animation;
+      final Curve curve = LoopAnimationBox.curveOf(animation.curve);
+      child = AnimatedBuilder(
+        animation: controller,
+        child: child,
+        builder: (context, child) {
+          final double t = curve.transform(controller.value);
+          // One hop per cycle: up and back down, like a bouncing ball.
+          if (type == LoopAnimationType.bob) {
+            return Transform.translate(
+              offset: Offset(0, -math.sin(t * math.pi) * animation.distance),
+              child: child,
+            );
+          }
+          // One full swing per cycle: right, back, left, back.
+          return Transform.rotate(
+            angle: math.sin(t * 2 * math.pi) * animation.angle * math.pi / 180,
+            child: child,
+          );
+        },
+      );
     }
     return child;
   }

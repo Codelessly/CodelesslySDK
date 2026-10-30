@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:just_audio/just_audio.dart' show AudioPlayer;
 import 'package:provider/provider.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -18,6 +19,7 @@ import '../ui/codelessly_dialog_widget.dart';
 import '../ui/layout_presentation_route.dart';
 import '../ui/codelessly_popover.dart';
 import 'action_chain.dart';
+import 'sound/sound_player.dart';
 import 'app_auth.dart';
 import 'cloud_files.dart';
 
@@ -165,6 +167,14 @@ class FunctionsRepository {
         return runCloudBatch(context, action as CloudBatchAction);
       case ActionType.copyToClipboard:
         return copyToClipboard(context, action as CopyToClipboardAction);
+      case ActionType.speak:
+        return speak(context, action as SpeakAction);
+      case ActionType.playSound:
+        return playSound(context, action as PlaySoundAction);
+      case ActionType.playAnimation:
+        final PlayAnimationAction play = action as PlayAnimationAction;
+        return NodePlayRegistry.play(play.nodeId, play.animation)
+            .then((_) => true);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
     }
@@ -305,6 +315,64 @@ class FunctionsRepository {
         await future;
       }
     }
+  }
+
+  /// Reads [action]'s text aloud.
+  static Future<bool> speak(BuildContext context, SpeakAction action) async {
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    final String text = PropertyValueDelegate.substituteVariables(
+      action.text,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
+    double rate = action.rate;
+    if (action.rateValue case final String bound when bound.trim().isNotEmpty) {
+      final Object? value = PropertyValueDelegate.substituteJsonValue(
+        bound.trim(),
+        scopedValues,
+      );
+      final double? parsed = switch (value) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()),
+        _ => null,
+      };
+      if (parsed != null && parsed > 0) rate = parsed;
+    }
+    await SoundPlayer.speak(
+      text,
+      rate: rate,
+      pitch: action.pitch,
+      language: action.language,
+    );
+    return true;
+  }
+
+  /// Plays [action]'s sound: its file, or its preset.
+  static Future<bool> playSound(
+    BuildContext context,
+    PlaySoundAction action,
+  ) async {
+    final String url = PropertyValueDelegate.substituteVariables(
+      action.url,
+      scopedValues: ActionChain.scopedValuesOf(context),
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    if (url.isEmpty) {
+      await SoundPlayer.playPreset(action.preset, volume: action.volume);
+      return true;
+    }
+    final AudioPlayer player = AudioPlayer();
+    try {
+      await player.setUrl(url);
+      await player.setVolume(action.volume.clamp(0, 1).toDouble());
+      unawaited(
+        player.play().whenComplete(player.dispose),
+      );
+    } catch (e) {
+      await player.dispose();
+      DebugLogger.instance.printInfo('Could not play $url: $e', name: name);
+    }
+    return true;
   }
 
   /// Runs the branch of [action] its expression picks.

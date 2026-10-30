@@ -6,6 +6,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
@@ -287,6 +288,183 @@ abstract class WidgetNodeTransformerManager
     );
     if (motion == null) return widget;
     return NodeMotion(motion: motion, animate: animate, child: widget);
+  }
+
+  /// Plays [node]'s one-shot [EffectAnimation]s and [ParticleEmitter] on
+  /// their cues, and flies it in by its [BaseNode.flightKey]. Nothing plays
+  /// under a disabled [TickerMode] (the design canvas).
+  Widget applyNodePlay(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+  }) {
+    final bool plays =
+        node.effectAnimations.isNotEmpty || node.particles != null;
+    final bool binds = node.variables.containsKey('flightKey');
+    if (!plays && node.flightKey.isEmpty && !binds) return widget;
+    final ScopedValues values = scopedValues ?? ScopedValues.of(context);
+    Object? bound(String key) => node.variables.containsKey(key)
+        ? PropertyValueDelegate.getPropertyValue<Object>(
+            node,
+            key,
+            scopedValues: values,
+          )
+        : null;
+    if (plays) {
+      final Map<String, String?> playKeys = {};
+      final Map<String, int> delays = {};
+      for (final EffectAnimation effect in node.effectAnimations) {
+        final String key = EffectAnimation.playKeyVariable(effect.name);
+        if (node.variables.containsKey(key)) {
+          playKeys[effect.name] = bound(key)?.toString();
+        }
+        final Object? delay = bound(EffectAnimation.delayVariable(effect.name));
+        final num? ms = switch (delay) {
+          num n => n,
+          String s => num.tryParse(s.trim()),
+          _ => null,
+        };
+        if (ms != null && ms.isFinite) delays[effect.name] = ms.round();
+      }
+      if (node.particles != null &&
+          node.variables.containsKey(ParticleEmitter.playKeyVariable)) {
+        playKeys[ParticleEmitter.animationName] = bound(
+          ParticleEmitter.playKeyVariable,
+        )?.toString();
+      }
+      widget = NodePlayBox(
+        key: ValueKey('play ${node.id}'),
+        nodeId: node.id,
+        effects: node.effectAnimations,
+        particles: node.particles,
+        playKeys: playKeys,
+        delays: delays,
+        child: widget,
+      );
+    }
+    final String flightKey = binds
+        ? (bound('flightKey')?.toString() ?? '')
+        : node.flightKey;
+    if (flightKey.isEmpty) return widget;
+    final MotionModel? motion = node.motion;
+    return FlightBox(
+      key: ValueKey('flight ${node.id}'),
+      flightKey: flightKey,
+      animate: TickerMode.valuesOf(context).enabled,
+      spring: motion != null && motion.curve == MotionCurve.spring
+          ? motionSpring(motion)
+          : const SpringDescription(mass: 1, stiffness: 420, damping: 24),
+      child: widget,
+    );
+  }
+
+  /// Whether the condition [text] (a `${...}` path or `${= ...}` formula,
+  /// or `true`/`false`) holds with [scopedValues]. Empty text is null.
+  static bool? evaluateConditionText(
+    String text,
+    ScopedValues scopedValues,
+  ) {
+    if (text.trim().isEmpty) return null;
+    final Object? value = PropertyValueDelegate.substituteJsonValue(
+      text.trim(),
+      scopedValues,
+    );
+    return switch (value) {
+      bool b => b,
+      String s => s.trim().toLowerCase() == 'true',
+      num n => n != 0,
+      null => false,
+      _ => true,
+    };
+  }
+
+  /// Makes [node] draggable ([BaseNode.draggable]) and/or a drop target
+  /// ([BaseNode.dropTarget]), running its drag and drop reactions.
+  Widget wrapWithDragDrop(BuildContext context, BaseNode node, Widget widget) {
+    final DropTargetModel? target = node.dropTarget;
+    final DraggableModel? draggable = node.draggable;
+    if (target == null && draggable == null) return widget;
+    final List<Reaction> reactions = switch (node) {
+      ReactionMixin(:final reactions) => reactions,
+      _ => const [],
+    };
+    String textOf(String key, String fallback) =>
+        node.variables[key] ?? fallback;
+    bool flag(String key, bool fallback) => node.variables.containsKey(key)
+        ? PropertyValueDelegate.getPropertyValue<bool>(
+                node,
+                key,
+                scopedValues: ScopedValues.of(context),
+              ) ??
+              fallback
+        : fallback;
+    if (target != null) {
+      widget = NodeDropTarget(
+        key: ValueKey('drop ${node.id}'),
+        groups: target.groups,
+        enabled: flag(DropTargetModel.enabledVariable, target.enabled),
+        accepts: (context, data) =>
+            evaluateConditionText(
+              textOf(DropTargetModel.acceptIfVariable, target.acceptIf),
+              ScopedValues.of(context),
+            ) ??
+            true,
+        isFull: () =>
+            context.mounted &&
+            (evaluateConditionText(
+                  textOf(DropTargetModel.fullIfVariable, target.fullIf),
+                  ScopedValues.of(context),
+                ) ??
+                false),
+        onEvent: (context, type, result) => FunctionsRepository.triggerAction(
+          context,
+          type,
+          reactions: reactions,
+          result: result,
+        ),
+        child: widget,
+      );
+    }
+    if (draggable != null) {
+      final ScopedValues values = ScopedValues.of(context);
+      final Object? data =
+          node.variables.containsKey(DraggableModel.dataVariable)
+          ? PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              DraggableModel.dataVariable,
+              scopedValues: values,
+            )
+          : draggable.data;
+      final String flightKey = node.variables.containsKey('flightKey')
+          ? (PropertyValueDelegate.getPropertyValue<Object>(
+                      node,
+                      'flightKey',
+                      scopedValues: values,
+                    ) ??
+                    '')
+                .toString()
+          : node.flightKey;
+      widget = NodeDraggable(
+        key: ValueKey('drag ${node.id}'),
+        nodeId: node.id,
+        model: draggable,
+        data: data,
+        enabled: flag(DraggableModel.enabledVariable, draggable.enabled),
+        flightKey: flightKey,
+        onEvent: (type, data) {
+          if (!context.mounted) return;
+          FunctionsRepository.triggerAction(
+            context,
+            type,
+            reactions: reactions,
+            result: {'data': data},
+          );
+        },
+        child: widget,
+      );
+    }
+    return widget;
   }
 
   /// Convenience method to handle widget margins.
