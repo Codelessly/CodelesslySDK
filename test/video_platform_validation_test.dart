@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
+
+import 'support/load_test_fonts.dart';
 
 class FakeVideoPlatform extends VideoPlayerPlatform {
   final sources = <String>[];
@@ -65,6 +66,7 @@ class FakeVideoPlatform extends VideoPlayerPlatform {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(loadTestFonts);
   late VideoPlayerPlatform previous;
   late FakeVideoPlatform fake;
   setUp(() {
@@ -169,9 +171,6 @@ void main() {
   testWidgets('poster golden uses bundled Material font and fixed viewport', (
     tester,
   ) async {
-    final fonts = FontLoader('MaterialIcons')
-      ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
-    await fonts.load();
     await tester.binding.setSurfaceSize(const Size(400, 240));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await mount(tester, null);
