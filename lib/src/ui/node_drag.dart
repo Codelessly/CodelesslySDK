@@ -115,6 +115,7 @@ class NodeDrag extends StatefulWidget {
     this.onDismissed,
     this.onEnd,
     this.onValues,
+    this.rest = Offset.zero,
   });
 
   /// The node this drag belongs to.
@@ -142,6 +143,11 @@ class NodeDrag extends StatefulWidget {
   /// Called with the live values whenever they change (see
   /// [DragModel.shareAs]).
   final ValueChanged<DragValues>? onValues;
+
+  /// Where the node rests, from where its layout puts it (see
+  /// [DragModel.restX]): it springs back here, and a new value moves it
+  /// there, so data can hold a card mid-drag or peeking.
+  final Offset rest;
 
   /// The node.
   final Widget child;
@@ -172,6 +178,8 @@ class NodeDrag extends StatefulWidget {
         await target.returnFrom(direction);
       case DragCommand.reset:
         await target.reset();
+      case DragCommand.shake:
+        target.shake();
     }
   }
 
@@ -218,6 +226,13 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
     super.initState();
     (NodeDrag._instances[widget.nodeId] ??= []).add(this);
     final DragDirection? back = NodeDrag._pendingReturns.remove(widget.nodeId);
+    _offset = widget.rest;
+    if (_offset != Offset.zero) {
+      // Progress is a fraction of the node's size, known after layout.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+    }
     if (back != null) {
       _offset = _offscreen(back, const Size(300, 400));
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -233,6 +248,13 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
       NodeDrag._instances[oldWidget.nodeId]?.remove(this);
       (NodeDrag._instances[widget.nodeId] ??= []).add(this);
     }
+    if (oldWidget.rest != widget.rest && !_dragging && !_dismissed) {
+      _animateTo(
+        widget.rest,
+        _model.snapBackMs,
+        flutterCurveOf(_model.snapCurve),
+      );
+    }
   }
 
   @override
@@ -247,10 +269,14 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
     setState(() {
       if (_shake > 0) {
         // A damped sideways wiggle.
-        _offset = Offset(
-          math.sin(_anim.value * math.pi * 6) * _shake * (1 - _anim.value),
-          0,
-        );
+        _offset =
+            widget.rest +
+            Offset(
+              math.sin(_anim.value * math.pi * 6) *
+                  _shake *
+                  (1 - _anim.value),
+              0,
+            );
       } else {
         _offset = Offset.lerp(_from, _to, t)!;
         if (_spinTo != 0) {
@@ -293,7 +319,7 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
         direction == DragDirection.left || direction == DragDirection.right
         ? size.width
         : size.height;
-    return math.max(1, extent * _model.distanceThreshold);
+    return math.max(1, extent * _model.thresholdFor(direction));
   }
 
   DragValues get values {
@@ -399,7 +425,7 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
         'blocked': true,
       });
       _animateTo(
-        Offset.zero,
+        widget.rest,
         _model.snapBackMs,
         flutterCurveOf(_model.snapCurve),
       ).then((_) {
@@ -421,7 +447,7 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
       _flyOff(direction, velocity);
     } else if (_model.release != DragRelease.stay) {
       _animateTo(
-        Offset.zero,
+        widget.rest,
         _model.snapBackMs,
         flutterCurveOf(_model.snapCurve),
       );
@@ -500,7 +526,7 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
     // Still here: the node shows its next content, back at rest.
     setState(() {
       _dismissed = false;
-      _offset = Offset.zero;
+      _offset = widget.rest;
       _spin = _spinTo = 0;
     });
   }
@@ -513,16 +539,22 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
       if (!mounted) return;
       setState(() {
         _shake = 0;
-        _offset = Offset.zero;
+        _offset = widget.rest;
       });
     });
   }
 
   // ---- Commands -----------------------------------------------------------
 
+  /// Wiggles sideways once, as a hint that the node can't go yet.
+  void shake() {
+    if (_dismissed || _dragging || _anim.isAnimating) return;
+    _shakeOnce();
+  }
+
   /// Flies off toward [direction] as if swiped, then reports it.
   Future<void> fling(DragDirection direction) async {
-    if (_dismissed || _active && _to != Offset.zero) return;
+    if (_dismissed || _active && _to != widget.rest) return;
     _anim.stop();
     await _flyOff(direction);
   }
@@ -542,7 +574,7 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
       _spinTo = 0;
     });
     await _animateTo(
-      Offset.zero,
+      widget.rest,
       math.max(_model.flyOutMs, 380),
       Curves.easeOutCubic,
     );
@@ -553,7 +585,7 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
     _anim.stop();
     setState(() => _dismissed = false);
     await _animateTo(
-      Offset.zero,
+      widget.rest,
       _model.snapBackMs,
       flutterCurveOf(_model.snapCurve),
     );
@@ -567,7 +599,14 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
     final double angle =
         _offset.dx / math.max(1, size.width) * _model.rotateFactor + _spin;
     final DragValues current = values;
-    if (widget.onValues != null && current != _shared) {
+    // Only the instance an action would move (the top card of a stack), or
+    // one moving now, shares: the cards resting behind it would otherwise
+    // overwrite the live drag with their rest values.
+    final bool sharing =
+        _dragging ||
+        _active ||
+        identical(NodeDrag.instanceOf(widget.nodeId), this);
+    if (widget.onValues != null && sharing && current != _shared) {
       _shared = current;
       // Shared after the frame: writing a variable rebuilds other nodes.
       WidgetsBinding.instance.addPostFrameCallback((_) {
