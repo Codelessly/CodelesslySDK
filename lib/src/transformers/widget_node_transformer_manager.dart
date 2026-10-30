@@ -147,6 +147,23 @@ abstract class WidgetNodeTransformerManager
     );
     final bool visible = runtimeVisible ?? node.visible;
 
+    // A node shown and hidden by a binding, with a transition time, grows
+    // open and shrinks closed (fading too) instead of popping: an error
+    // line sliding open under a field, like Flutter's AnimatedSize.
+    if (runtimeVisible != null && node.transitionMs > 0) {
+      final Duration duration = Duration(milliseconds: node.transitionMs);
+      return AnimatedSize(
+        duration: duration,
+        curve: Curves.easeOutBack,
+        alignment: Alignment.topLeft,
+        child: AnimatedOpacity(
+          duration: duration,
+          opacity: visible ? 1 : 0,
+          child: visible ? widget : const SizedBox.shrink(),
+        ),
+      );
+    }
+
     if (visible) return widget;
 
     // A node hidden by a condition or variable at runtime gives up its space,
