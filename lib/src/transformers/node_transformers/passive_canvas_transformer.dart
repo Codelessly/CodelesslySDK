@@ -998,23 +998,35 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       timer.cancel();
     }
     _timers.clear();
-    for (final BeatClock clock in _clocks) {
-      clock.stop();
+    for (final (BeatClock clock, void Function(int, double, double) onTick)
+        in _clocks) {
+      clock.release(onTick);
     }
     _clocks.clear();
   }
 
-  final List<BeatClock> _clocks = [];
+  final List<(BeatClock, void Function(int, double, double))> _clocks = [];
 
   /// Runs each Beat Clock reaction on the sound clock while its run
   /// condition holds (see [BeatClock]), with `${result.tick}`,
-  /// `${result.at}` and `${result.waitMs}`.
+  /// `${result.at}` and `${result.waitMs}`. Screens with the same clock share
+  /// it, so the count carries on from one tab to the next.
   void _startClocks() {
     for (final Reaction reaction in widget.node.reactions.whereTriggerType(
       TriggerType.clock,
     )) {
       if (!reaction.action.enabled) continue;
-      final BeatClock clock = BeatClock(
+      void onTick(int tick, double at, double waitMs) {
+        if (!mounted) return;
+        FunctionsRepository.triggerAction(
+          context,
+          TriggerType.clock,
+          reactions: [reaction],
+          result: {'tick': tick, 'at': at, 'waitMs': waitMs.round()},
+        );
+      }
+
+      final BeatClock clock = BeatClock.acquire(
         trigger: reaction.trigger,
         evaluate: (String text) => mounted
             ? PropertyValueDelegate.substituteVariables(
@@ -1023,17 +1035,9 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
                 nullSubstitutionMode: NullSubstitutionMode.emptyString,
               )
             : '',
-        onTick: (int tick, double at, double waitMs) {
-          if (!mounted) return;
-          FunctionsRepository.triggerAction(
-            context,
-            TriggerType.clock,
-            reactions: [reaction],
-            result: {'tick': tick, 'at': at, 'waitMs': waitMs.round()},
-          );
-        },
+        onTick: onTick,
       );
-      _clocks.add(clock..start());
+      _clocks.add((clock, onTick));
     }
   }
 
