@@ -73,6 +73,11 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
               StrokeCapEnum.square => StrokeCap.square,
               _ => StrokeCap.butt,
             },
+            join: switch (node.strokeJoin) {
+              StrokeJoinEnum.miter => StrokeJoin.miter,
+              StrokeJoinEnum.bevel => StrokeJoin.bevel,
+              StrokeJoinEnum.round => StrokeJoin.round,
+            },
             dashes: node.dashPattern,
             trimStart: trim.dx,
             trimEnd: trim.dy,
@@ -93,6 +98,7 @@ class PathNodePainter extends CustomPainter {
     this.strokes = const [],
     this.strokeWeight = 2,
     this.cap = StrokeCap.round,
+    this.join = StrokeJoin.round,
     this.dashes = const [],
     this.trimStart = 0,
     this.trimEnd = 1,
@@ -104,6 +110,7 @@ class PathNodePainter extends CustomPainter {
   final List<Color> strokes;
   final double strokeWeight;
   final StrokeCap cap;
+  final StrokeJoin join;
   final List<double> dashes;
   final double trimStart;
   final double trimEnd;
@@ -201,7 +208,7 @@ class PathNodePainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeWeight
           ..strokeCap = cap
-          ..strokeJoin = StrokeJoin.round,
+          ..strokeJoin = join,
       );
     }
   }
@@ -213,6 +220,7 @@ class PathNodePainter extends CustomPainter {
       !_sameColors(old.fills, fills) ||
       !_sameColors(old.strokes, strokes) ||
       old.strokeWeight != strokeWeight ||
+      old.join != join ||
       old.cap != cap ||
       old.trimStart != trimStart ||
       old.trimEnd != trimEnd ||
