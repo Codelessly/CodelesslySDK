@@ -505,6 +505,9 @@ abstract class WidgetNodeTransformerManager
           ]
         : const [];
     final bool bound = node.variables.containsKey(DragModel.enabledVariableKey);
+    if (drag.track case final DragTrackModel track) {
+      return _wrapWithTrack(context, node, drag, track, reactions, child);
+    }
     return NodeDrag(
       nodeId: node.id,
       drag: drag,
@@ -538,6 +541,85 @@ abstract class WidgetNodeTransformerManager
         result: result,
       ),
       child: child,
+    );
+  }
+
+  /// A node with a [DragTrackModel] is a value control: it is drawn at its
+  /// variable's place along the track and dragging it writes the variable,
+  /// running its `changed` reactions on each change and `dragEnd` on release
+  /// (both with `${result.value}`). See [NodeDragTrack].
+  Widget _wrapWithTrack(
+    BuildContext context,
+    BaseNode node,
+    DragModel drag,
+    DragTrackModel track,
+    List<Reaction> reactions,
+    Widget child,
+  ) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
+    final Observable<VariableData>? variable = codelesslyContext?.findVariable(
+      name: track.variable,
+    );
+    bool enabled(BuildContext context) {
+      if (!node.variables.containsKey(DragModel.enabledVariableKey)) {
+        return drag.enabled;
+      }
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        DragModel.enabledVariableKey,
+        scopedValues: ScopedValues.of(context),
+      );
+      return switch (value) {
+        bool b => b,
+        num n => n != 0,
+        String s => s.trim().toLowerCase() == 'true',
+        _ => drag.enabled,
+      };
+    }
+
+    Widget build(BuildContext context) {
+      final Object? raw =
+          PropertyValueDelegate.getVariableValueFromPath<Object>(
+            track.variable,
+            scopedValues: ScopedValues.of(context),
+          );
+      final double value = switch (raw) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()) ?? track.min,
+        _ => track.defaultValue ?? track.min,
+      };
+      return NodeDragTrack(
+        track: track,
+        value: value,
+        enabled: enabled(context),
+        onChanged: (v) {
+          final bool whole = variable?.value.type == VariableType.integer;
+          codelesslyContext?.updateVariable(
+            track.variable,
+            whole ? v.round() : v,
+          );
+          FunctionsRepository.triggerAction(
+            context,
+            TriggerType.changed,
+            reactions: reactions,
+            result: {'value': v},
+          );
+        },
+        onEnd: (v) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.dragEnd,
+          reactions: reactions,
+          result: {'value': v},
+        ),
+        child: child,
+      );
+    }
+
+    if (variable == null) return Builder(builder: build);
+    return ValueListenableBuilder<VariableData>(
+      valueListenable: variable,
+      builder: (context, _, _) => build(context),
     );
   }
 
