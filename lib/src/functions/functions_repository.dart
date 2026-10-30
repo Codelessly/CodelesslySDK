@@ -624,6 +624,23 @@ class FunctionsRepository {
 
     final Codelessly effectiveCodelessly =
         codelessly ?? context.read<Codelessly>();
+
+    // A screen shown by a Codelessly router navigates through it, so the
+    // browser's address and history follow the app's screens.
+    final CodelesslyRouterDelegate? router = CodelesslyRouterDelegate.maybeOf(
+      context,
+    );
+    if (router != null) {
+      return _navigateWithRouter(
+        context,
+        router,
+        action,
+        params: parsedParams,
+        codelessly: effectiveCodelessly,
+        scopedValues: effectiveScopedValues,
+      );
+    }
+
     final String? myLayoutId = effectiveCodelessly.currentNavigatedLayoutId;
     final String? myCanvasId = effectiveCodelessly.currentNavigatedCanvasId;
 
@@ -739,6 +756,88 @@ class FunctionsRepository {
           ),
         );
       }
+    }
+  }
+
+  /// [navigate] for a screen shown by [router]: its stack of screens is the
+  /// browser's history, so screens opened are entries the browser's back
+  /// and forward buttons move through.
+  static Future<void> _navigateWithRouter(
+    BuildContext context,
+    CodelesslyRouterDelegate router,
+    NavigationAction action, {
+    required Map<String, dynamic> params,
+    required Codelessly codelessly,
+    required ScopedValues scopedValues,
+  }) async {
+    if (action.navigationType == NavigationType.pop) {
+      // A dialog or sheet over the screen closes first.
+      final ModalRoute<Object?>? modal = ModalRoute.of(context);
+      if (modal != null && (!modal.isCurrent || modal.settings is! Page)) {
+        await Navigator.maybePop(context, params);
+        return;
+      }
+      if (router.canGoBack) {
+        router.pop(params);
+        return;
+      }
+      // Nothing to go back to (the screen was opened directly): a pop with
+      // a destination goes there instead.
+      if (action.destinationId.isEmpty || !context.mounted) return;
+      action = action.copyWith(navigationType: NavigationType.replace);
+    }
+
+    final String? location = router.locationFor(action.destinationId, params);
+    if (location == null) {
+      codelessly.errorLogger.captureException(
+        'Layout not found',
+        message:
+            'Could not find a layout with a canvas id of [${action.destinationId}]',
+        type: 'layout_not_found',
+      );
+      return;
+    }
+
+    switch (action.navigationType) {
+      case NavigationType.push:
+        // A chain triggered on the new screen can finish on this layout
+        // after the screen closes.
+        await router.pushLocation(
+          location,
+          params: params,
+          openerHosts: ActionChainOpener.hostsFor(context),
+        );
+      case NavigationType.replace || NavigationType.pop:
+        // The new screen takes over the chain: the actions after this one
+        // (e.g. a toast) run with it once this screen unmounts. Its result
+        // only comes when the new screen closes, so it isn't awaited.
+        unawaited(
+          router.replaceLocation(
+            location,
+            params: params,
+            chain: ActionChain.current,
+          ),
+        );
+      case NavigationType.reset:
+        final String? baseId = action.baseDestinationId;
+        if (baseId == null || baseId.isEmpty) {
+          router.resetTo([location], params: [params]);
+          return;
+        }
+        final Map<String, dynamic> baseParams = substituteVariablesInMap(
+          action.baseParams ?? const {},
+          scopedValues,
+        );
+        final String? baseLocation = router.locationFor(baseId, baseParams);
+        if (baseLocation == null) {
+          codelessly.errorLogger.captureException(
+            'Layout not found',
+            message: 'Could not find a layout with a canvas id of [$baseId]',
+            type: 'layout_not_found',
+          );
+          return;
+        }
+        router.resetTo([baseLocation, location], params: [baseParams, params]);
     }
   }
 
