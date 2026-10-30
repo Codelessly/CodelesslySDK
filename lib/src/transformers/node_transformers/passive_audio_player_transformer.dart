@@ -197,19 +197,23 @@ class _PassiveAudioPlayerWidgetState extends State<PassiveAudioPlayerWidget>
     super.dispose();
   }
 
+  String _clock(Duration duration) =>
+      '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
+
   @override
   Widget build(BuildContext context) {
     final description = widget.node.properties.description;
     return AdaptiveNodeBox(
       node: widget.node,
       child: ColoredBox(
-        color: Colors.black12,
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
         child: Row(
           children: [
             if (widget.isPreview || widget.node.properties.url == null)
-              const Icon(
-                Icons.audiotrack_outlined,
-                semanticLabel: 'Audio preview',
+              const IconButton.filledTonal(
+                tooltip: 'Play audio',
+                onPressed: null,
+                icon: Icon(Icons.play_arrow),
               )
             else if (_failed || _player == null)
               const Icon(
@@ -237,9 +241,9 @@ class _PassiveAudioPlayerWidgetState extends State<PassiveAudioPlayerWidget>
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (_ready && !_failed && widget.node.properties.showControls)
+                  if (!_failed && widget.node.properties.showControls)
                     SizedBox(
-                      height: 32,
+                      height: 24,
                       child: Slider(
                         value: _position.inMilliseconds
                             .clamp(0, _duration.inMilliseconds)
@@ -247,7 +251,7 @@ class _PassiveAudioPlayerWidgetState extends State<PassiveAudioPlayerWidget>
                         max: _duration.inMilliseconds > 0
                             ? _duration.inMilliseconds.toDouble()
                             : 1,
-                        onChanged: _duration > Duration.zero
+                        onChanged: _ready && _duration > Duration.zero
                             ? (value) => _run(
                                 () => _player!.seek(
                                   Duration(milliseconds: value.round()),
@@ -255,6 +259,11 @@ class _PassiveAudioPlayerWidgetState extends State<PassiveAudioPlayerWidget>
                               )
                             : null,
                       ),
+                    ),
+                  if (!_failed && widget.node.properties.showControls)
+                    Text(
+                      '${_clock(_position)} / ${_duration > Duration.zero ? _clock(_duration) : '--:--'}',
+                      style: Theme.of(context).textTheme.labelSmall,
                     ),
                 ],
               ),
