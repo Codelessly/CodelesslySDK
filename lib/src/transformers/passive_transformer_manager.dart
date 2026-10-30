@@ -17,6 +17,14 @@ typedef BuildWidgetFromNode = Widget Function(
 /// This is the passive implementation of the [NodeTransformerManager],
 /// registering all the transformers that are available in the SDK.
 class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
+  /// Standalone tree only: retain the exact Widget for unchanged BaseNode
+  /// instances. Dynamic bindings notify their own widgets independently.
+  bool cacheUnchangedNodes = false;
+  final Map<String, (BaseNode, Widget)> _standaloneWidgetCache = {};
+  void clearStandaloneWidgetCache() => _standaloneWidgetCache.clear();
+  void retainStandaloneWidgets(Set<String> ids) =>
+      _standaloneWidgetCache.removeWhere((id, _) => !ids.contains(id));
+
   /// This is the registry of transformers that are used by the manager.
   PassiveNodeTransformerManager(super.getNode, super.retrieveLayout) {
     registerAllTransformers({
@@ -419,7 +427,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     required WidgetBuildSettings settings,
   }) {
     final BaseNode node = getNode(id);
-    return buildWidgetFromNode(node, context, settings: settings);
+    if (cacheUnchangedNodes) {
+      final cached = _standaloneWidgetCache[id];
+      if (cached != null && identical(cached.$1, node)) return cached.$2;
+    }
+    final widget = buildWidgetFromNode(node, context, settings: settings);
+    if (cacheUnchangedNodes) _standaloneWidgetCache[id] = (node, widget);
+    return widget;
   }
 
   /// This is SDK specific and is also used in editor's preview dialog.
