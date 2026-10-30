@@ -1059,7 +1059,7 @@ class ImageFillPlaceholder extends StatelessWidget {
         color: const Color(0xFFE9ECEF),
         borderRadius: borderRadius,
       ),
-      child: LayoutBuilder(
+      child: IntrinsicSafeLayoutBuilder(
         builder: (context, constraints) {
           final double side = constraints.biggest.shortestSide;
           if (!side.isFinite || side < 12) return const SizedBox.expand();

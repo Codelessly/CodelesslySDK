@@ -391,8 +391,10 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       decoration: decoration,
     );
 
-    Widget field = fillsHeight && oneLine
-        ? LayoutBuilder(
+    // A field that hugs its width is measured by [IntrinsicWidth] below, so
+    // it can't be sized by a layout builder.
+    Widget field = fillsHeight && oneLine && !node.isHorizontalWrap
+        ? IntrinsicSafeLayoutBuilder(
             builder: (context, constraints) => buildField(
               constraints.hasBoundedHeight
                   ? decoration.copyWith(
