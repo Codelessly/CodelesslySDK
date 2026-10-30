@@ -167,6 +167,24 @@ class FunctionsRepository {
         return copyToClipboard(context, action as CopyToClipboardAction);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
+      case ActionType.speak:
+        final SpeakAction speak = action as SpeakAction;
+        if (speak.stop) {
+          Speech.instance.stop();
+          return true;
+        }
+        final ScopedValues scope = ActionChain.scopedValuesOf(context);
+        String text(String value) => PropertyValueDelegate.substituteVariables(
+          value,
+          scopedValues: scope,
+          nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        );
+        return Speech.instance.speak(
+          text(speak.text),
+          language: text(speak.language),
+          rate: speak.rate,
+          pitch: speak.pitch,
+        );
       case ActionType.controlDrag:
         final ControlDragAction drag = action as ControlDragAction;
         return NodeDrag.control(
