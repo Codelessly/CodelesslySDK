@@ -48,7 +48,8 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    substring, split, replace and coalesce. See
 ///    [FormulaEvaluator.functions].
 ///  - text functions: indexOf, matches and slug; durations: seconds
-///    ('3:45' → 225) and duration (225 → '3:45'); colors: luminance.
+///    ('3:45' → 225) and duration (225 → '3:45'); colors: luminance and
+///    mix(a, b, t), which blends two colors (t from 0, all a, to 1, all b).
 ///  - maps: `obj('id', 1)`, `object('id', 1)` or `{id: 1}` builds one;
 ///    `set(map, key, value)`, `with(map, key, value, …)` and `merge(a, b)`
 ///    return changed copies; `keys` and `values` read them. `map` can update
@@ -366,6 +367,11 @@ class FormulaEvaluator {
       'luminance',
       'luminance(color)',
       'luminance("#FFFFFF") → 1',
+    ),
+    FormulaFunctionDoc(
+      'mix',
+      'mix(color, color, t)',
+      'mix("#7DE3D8", "#FFFFFF", 0.35) → #ABEDE6',
     ),
     FormulaFunctionDoc(
       'filter',
@@ -1002,6 +1008,44 @@ String? _duration(Object? value) {
   return hours > 0
       ? '$sign$hours:${two(minutes)}:${two(all % 60)}'
       : '$sign$minutes:${two(all % 60)}';
+}
+
+/// The 0–255 channels `[a, r, g, b]` of `#RGB`, `#RRGGBB` or `#AARRGGBB`
+/// text, or of `{r, g, b, a?}` with channels from 0 to 1. Null when [value]
+/// isn't a color.
+List<double>? _argb(Object? value) {
+  if (value is Map) {
+    final List<num?> c = [
+      for (final key in ['a', 'r', 'g', 'b'])
+        key == 'a' ? _toNum(value[key] ?? 1) : _toNum(value[key]),
+    ];
+    if (c.any((v) => v == null)) return null;
+    return [for (final v in c) v!.toDouble().clamp(0, 1) * 255];
+  }
+  String hex = FormulaEvaluator.stringify(value).trim();
+  if (hex.startsWith('#')) hex = hex.substring(1);
+  if (hex.length == 3) hex = hex.split('').map((c) => c * 2).join();
+  if (hex.length == 6) hex = 'ff$hex';
+  if (!RegExp(r'^[0-9a-fA-F]{8}$').hasMatch(hex)) return null;
+  final int argb = int.parse(hex, radix: 16);
+  return [
+    for (final shift in [24, 16, 8, 0]) ((argb >> shift) & 0xff).toDouble(),
+  ];
+}
+
+/// Blends color [a] into color [b] by [t] (0 is all a, 1 all b) and returns
+/// `#RRGGBB`, or `#AARRGGBB` when the result isn't opaque. Null unless both
+/// are colors.
+String? _mixColors(Object? a, Object? b, Object? t) {
+  final List<double>? from = _argb(a);
+  final List<double>? to = _argb(b);
+  if (from == null || to == null) return null;
+  final double k = (_toNum(t) ?? 0.5).toDouble().clamp(0, 1);
+  String two(double v) => v.round().clamp(0, 255).toRadixString(16).padLeft(2, '0');
+  final List<String> c = [
+    for (int i = 0; i < 4; i++) two(from[i] + (to[i] - from[i]) * k),
+  ];
+  return '#${c[0] == 'ff' ? '' : c[0]}${c[1]}${c[2]}${c[3]}'.toUpperCase();
 }
 
 /// The relative luminance of a color, from 0 (black) to 1 (white), as WCAG
@@ -1837,6 +1881,7 @@ final Map<String, _Function> _functions = {
   'seconds': (a) => _seconds(_arg(a, 0)),
   'duration': (a) => _duration(_arg(a, 0)),
   'luminance': (a) => _luminance(_arg(a, 0)),
+  'mix': (a) => _mixColors(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'startsWith': (a) => switch (_arg(a, 0)) {
     final String s => s.startsWith(FormulaEvaluator.stringify(_arg(a, 1))),
     _ => false,

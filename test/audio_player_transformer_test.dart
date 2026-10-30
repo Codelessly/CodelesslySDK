@@ -48,6 +48,15 @@ class FakeAudioPlayback implements AudioPlayback {
     seeks.add(position);
   }
 
+  final loops = <bool>[];
+  final volumes = <double>[];
+
+  @override
+  Future<void> setLoop(bool loop) async => loops.add(loop);
+
+  @override
+  Future<void> setVolume(double volume) async => volumes.add(volume);
+
   @override
   Future<void> dispose() async {
     disposals++;
@@ -214,5 +223,114 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('goldens/audio_loading.png'),
     );
+  });
+
+  group('state-driven playback', () {
+    AudioPlayerNode ambient({bool background = true}) => AudioPlayerNode(
+      id: 'rain',
+      name: 'Rain',
+      basicBoxLocal: NodeBox(0, 0, 24, 24),
+      properties: AudioPlayerProperties(
+        url: 'https://example.com/rain.mp3',
+        loop: true,
+        volume: 0.5,
+        background: background,
+      ),
+    );
+
+    Future<void> mountBound(
+      WidgetTester tester,
+      AudioPlayerNode audio,
+      AudioBindings bindings, {
+      bool preview = false,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PassiveAudioPlayerWidget(
+              node: audio,
+              isPreview: preview,
+              createPlayer: createPlayer,
+              bindings: bindings,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    testWidgets('loop and volume are applied once loaded; bound volume wins', (
+      tester,
+    ) async {
+      final audio = ambient();
+      await mountBound(tester, audio, const AudioBindings(volume: 0.2));
+      final player = players.single;
+      expect(player.loops, [true]);
+      expect(player.volumes, [0.2]);
+      expect(player.plays, 0, reason: 'nothing plays unless bound to');
+      await mountBound(tester, audio, const AudioBindings(volume: 0.8));
+      expect(player.volumes, [0.2, 0.8]);
+      expect(players, hasLength(1), reason: 'a volume change keeps the player');
+    });
+
+    testWidgets('a bound playing value plays and pauses', (tester) async {
+      final audio = ambient();
+      await mountBound(tester, audio, const AudioBindings(playing: true));
+      final player = players.single;
+      expect(player.plays, 1);
+      await mountBound(tester, audio, const AudioBindings(playing: false));
+      expect(player.pauses, 1);
+      await mountBound(tester, audio, const AudioBindings(playing: false));
+      expect(player.pauses, 1, reason: 'unchanged state does nothing');
+    });
+
+    testWidgets('a changed playKey plays from the start', (tester) async {
+      final audio = ambient();
+      await mountBound(tester, audio, const AudioBindings(playKey: 'inhale'));
+      final player = players.single;
+      expect(player.plays, 0, reason: 'the first key does not chime');
+      await mountBound(tester, audio, const AudioBindings(playKey: 'hold'));
+      expect(player.seeks, [Duration.zero]);
+      expect(player.plays, 1);
+      await mountBound(
+        tester,
+        audio,
+        const AudioBindings(playKey: 'exhale', playing: false),
+      );
+      expect(player.plays, 1, reason: 'a muted chime stays silent');
+    });
+
+    testWidgets('a bound url loads that source', (tester) async {
+      await mountBound(
+        tester,
+        ambient(),
+        const AudioBindings(url: 'https://example.com/waves.mp3'),
+      );
+      expect(players.single.urls, ['https://example.com/waves.mp3']);
+    });
+
+    testWidgets(
+      'background audio draws nothing at runtime, a marker in design',
+      (tester) async {
+        await mountBound(tester, ambient(), const AudioBindings());
+        expect(find.byType(Slider), findsNothing);
+        expect(find.byIcon(Icons.graphic_eq), findsNothing);
+        await mountBound(
+          tester,
+          ambient(),
+          const AudioBindings(),
+          preview: true,
+        );
+        expect(find.byIcon(Icons.graphic_eq), findsOneWidget);
+      },
+    );
+
+    test('properties round-trip through JSON', () {
+      final json = ambient().toJson();
+      final copy = AudioPlayerNode.fromJson(json);
+      expect(copy.properties.loop, isTrue);
+      expect(copy.properties.volume, 0.5);
+      expect(copy.properties.background, isTrue);
+    });
   });
 }
