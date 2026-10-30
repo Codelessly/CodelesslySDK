@@ -234,7 +234,10 @@ void main() {
     await tester.pump();
 
     expect(drags, isNotEmpty);
-    expect(drags.last['dx'], 40 - drags.first['dx'] + drags.first['deltaX']);
+    // dx/dy count from where the pointer went down, touch slop included:
+    // a drag of 40 reports 40, so a drop two squares away lands there.
+    expect(drags.last['dx'], 40);
+    expect(drags.last['dy'], 5);
     expect(drags.last['deltaX'], 10);
     expect(drags.last['deltaY'], 5);
     expect(ends.single['dy'], drags.last['dy']);
