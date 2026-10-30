@@ -263,4 +263,40 @@ void main() {
       expect(find.text('Tread worn', findRichText: true), findsOne);
     });
   });
+
+  testWidgets('a text colour binding reads the preview values on a canvas', (
+    tester,
+  ) async {
+    const String data = 'Name';
+    final TextNode text = TextNode(
+      id: 'msg',
+      name: 'Message',
+      basicBoxLocal: NodeBox(0, 0, 200, 20),
+      data: data,
+      textMixedProps: [StartEndProp(start: 0, end: data.length)],
+    )
+      ..parentID = kRootNode
+      ..variables['textColor'] =
+          r"${= authMode == 'reset' ? '#E5392C' : '#8A8072'}";
+    VariablePreview.scopeResolver = (_, {item}) => defaults('reset');
+    await pumpHost(
+      tester,
+      (context) => TextUtils.buildTextForTextNode(
+        context,
+        text,
+        variablesOverrides: const [],
+        nullSubstitutionMode: NullSubstitutionMode.noChange,
+        replaceVariablesWithSymbol: true,
+      ),
+    );
+    final RichText rich = tester.widget<RichText>(find.byType(RichText));
+    final TextSpan root = rich.text as TextSpan;
+    final List<Color?> colors = <Color?>[];
+    root.visitChildren((span) {
+      if (span is TextSpan && span.text != null) colors.add(span.style?.color);
+      return true;
+    });
+    expect(colors, isNotEmpty);
+    expect(colors, everyElement(const Color(0xFFE5392C)));
+  });
 }
