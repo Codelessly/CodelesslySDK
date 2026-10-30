@@ -468,6 +468,7 @@ abstract class WidgetNodeTransformerManager
     BaseNode node,
     Widget child,
   ) {
+    child = wrapWithDrag(context, node, child);
     if (node is! ReactionMixin) return child;
     if (node case CanvasNode() || SpacerNode()) return child;
     final List<Reaction> onHoldReactions = (node as ReactionMixin).reactions
@@ -489,6 +490,57 @@ abstract class WidgetNodeTransformerManager
     );
   }
 
+  /// Makes [node] draggable when it has a [BaseNode.drag]: it follows the
+  /// pointer and springs back, stays or flies off (see [NodeDrag]). Flying
+  /// off fires the node's swipe reaction for that direction; letting go
+  /// fires its drag end reactions. [child] is the node's whole build, so its
+  /// own bindings and its children read the drag as `drag`.
+  Widget wrapWithDrag(BuildContext context, BaseNode node, Widget child) {
+    final DragModel? drag = node.drag;
+    if (drag == null || node is CanvasNode) return child;
+    final List<Reaction> reactions = node is ReactionMixin
+        ? [
+            for (final reaction in (node as ReactionMixin).reactions)
+              if (reaction.action.enabled) reaction,
+          ]
+        : const [];
+    final bool bound = node.variables.containsKey(DragModel.enabledVariableKey);
+    return NodeDrag(
+      nodeId: node.id,
+      drag: drag,
+      order: IndexedItemProvider.maybeOf(context)?.index ?? 0,
+      isEnabled: !bound
+          ? null
+          : () {
+              final Object? value =
+                  PropertyValueDelegate.getPropertyValue<Object>(
+                    node,
+                    DragModel.enabledVariableKey,
+                    scopedValues: ScopedValues.of(context),
+                  );
+              return switch (value) {
+                bool b => b,
+                num n => n != 0,
+                String s => s.trim().toLowerCase() == 'true',
+                _ => drag.enabled,
+              };
+            },
+      onDismissed: (direction) => FunctionsRepository.triggerAction(
+        context,
+        direction.swipeTrigger,
+        reactions: reactions,
+        result: {'direction': direction.name},
+      ),
+      onEnd: (result) => FunctionsRepository.triggerAction(
+        context,
+        TriggerType.dragEnd,
+        reactions: reactions,
+        result: result,
+      ),
+      child: child,
+    );
+  }
+
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
     final Widget tappable = _wrapWithTapReactions(context, node, widget);
@@ -500,8 +552,12 @@ abstract class WidgetNodeTransformerManager
       for (final reaction in reactions)
         if (reaction.trigger.type == type && reaction.action.enabled) reaction,
     ];
-    final List<Reaction> onDrag = of(TriggerType.drag);
-    final List<Reaction> onDragEnd = of(TriggerType.dragEnd);
+    // A node with a drag model drags itself (see [wrapWithDrag]).
+    final bool ownDrag = node.drag != null;
+    final List<Reaction> onDrag = ownDrag ? const [] : of(TriggerType.drag);
+    final List<Reaction> onDragEnd = ownDrag
+        ? const []
+        : of(TriggerType.dragEnd);
     final List<Reaction> onPointerDown = of(TriggerType.pointerDown);
     final List<Reaction> onPointerUp = of(TriggerType.pointerUp);
     if (onDrag.isEmpty &&
@@ -701,6 +757,8 @@ abstract class WidgetNodeTransformerManager
   /// mouse wheel (scrolling down swipes up, as content moves up).
   Widget wrapWithSwipes(BuildContext context, BaseNode node, Widget widget) {
     if (node is! ReactionMixin) return widget;
+    // A draggable node fires its swipes when it flies off.
+    if (node.drag != null) return widget;
     final List<Reaction> swipes = (node as ReactionMixin).reactions
         .where(
           (reaction) =>
