@@ -205,6 +205,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = applyWidgetMotion(context, styled, widget);
       widget = applyBoundOffset(context, styled, widget);
     }
+    // Without reactions (the design canvas) a knob or fader cap is drawn
+    // where its drag track puts it; with them NodeDragTrack draws it there
+    // and makes it draggable.
+    if (!settings.withReactions) {
+      widget = applyTrackPose(context, styled, widget);
+    }
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
     }
