@@ -231,6 +231,19 @@ abstract class WidgetNodeTransformerManager
       if (number == null || !number.isFinite) continue;
       motion = (motion ?? MotionModel.none).withValue(property, number);
     }
+    final String pathKey = MotionModel.variableKey(MotionModel.pathProperty);
+    if (node.variables.containsKey(pathKey)) {
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        pathKey,
+        scopedValues: scopedValues,
+      );
+      final String data = value?.toString().trim() ?? '';
+      motion = (motion ?? MotionModel.none).copyWith(
+        path: data,
+        clearPath: data.isEmpty,
+      );
+    }
     const String replay = MotionModel.replayKeyProperty;
     if (node.variables.containsKey(MotionModel.variableKey(replay))) {
       final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
@@ -537,8 +550,25 @@ abstract class WidgetNodeTransformerManager
         reactions: reactions,
         result: result,
       ),
+      onValues: drag.shareAs.trim().isEmpty
+          ? null
+          : (values) => shareDragValues(context, drag.shareAs.trim(), values),
       child: child,
     );
+  }
+
+  /// Writes a drag's live [values] into the variable named [name], so nodes
+  /// outside the dragged one can follow it (see [DragModel.shareAs]).
+  static void shareDragValues(
+    BuildContext context,
+    String name,
+    DragValues values,
+  ) {
+    final CodelesslyContext? codelessly = context.read<CodelesslyContext?>();
+    final ValueNotifier<VariableData>? variable = codelessly
+        ?.findVariableByName(name);
+    if (variable == null) return;
+    variable.value = variable.value.copyWith(value: values.toMap());
   }
 
   /// Convenience method to handle widget reactions.
