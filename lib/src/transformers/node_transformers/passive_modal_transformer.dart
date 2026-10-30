@@ -27,13 +27,22 @@ class PassiveModalTransformer extends NodeWidgetTransformer<ModalNode> {
       showDialog<void>(
         context: triggerContext,
         builder: (dialogContext) => Dialog(
+          backgroundColor: Theme.of(dialogContext)
+              .colorScheme
+              .surfaceContainerHigh,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
           constraints: const BoxConstraints(maxWidth: 560),
-          child: IntrinsicWidth(
-            child: Builder(
-              builder: (bodyContext) => manager.buildWidgetFromNode(
-                content,
-                bodyContext,
-                settings: settings,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: IntrinsicWidth(
+              child: Builder(
+                builder: (bodyContext) => manager.buildWidgetFromNode(
+                  content,
+                  bodyContext,
+                  settings: settings,
+                ),
               ),
             ),
           ),
