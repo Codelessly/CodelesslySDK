@@ -1670,6 +1670,9 @@ extension ActionModelExt on ActionModel {
     if (action is SetVariantAction && action.nodeID == oldNodeId) {
       return action.copyWith(nodeID: newNodeId);
     }
+    if (action is EditTextAction && action.nodeId == oldNodeId) {
+      return action.copyWith(nodeId: newNodeId);
+    }
     if (action is ConditionalAction) {
       return action.copyWith(
         actions: [
@@ -1901,6 +1904,10 @@ extension ActionModelExt on ActionModel {
         return _namesIn([?action.slot, ?action.url], includePredefined);
       case ActionType.copyToClipboard:
         strings.add((this as CopyToClipboardAction).text);
+        return _namesIn(strings, includePredefined);
+      case ActionType.editText:
+        final EditTextAction action = this as EditTextAction;
+        strings.addAll([action.text, action.before, ?action.after]);
         return _namesIn(strings, includePredefined);
       case ActionType.cloudData:
         final CloudDataAction action = this as CloudDataAction;
