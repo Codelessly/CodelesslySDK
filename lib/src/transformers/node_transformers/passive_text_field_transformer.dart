@@ -349,6 +349,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       enabled: enabled,
       controller: controller,
       obscureText: obscure,
+      textCapitalization: switch (node.properties.textCapitalization) {
+        TextCapitalizationC.none => TextCapitalization.none,
+        TextCapitalizationC.words => TextCapitalization.words,
+        TextCapitalizationC.sentences => TextCapitalization.sentences,
+        TextCapitalizationC.characters => TextCapitalization.characters,
+      },
       readOnly: readOnly,
       showCursor: showCursor,
       keyboardType: keyboardType,

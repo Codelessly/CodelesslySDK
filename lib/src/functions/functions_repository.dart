@@ -2337,8 +2337,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     // Perform list operations.
     switch (action.listOperation) {
       case ListOperation.add:
-        final parsedValue = newValue.toList<List>() ?? [];
-        currentValue.addAll(parsedValue);
+        currentValue.addAll(_listFromValue(newValue));
       case ListOperation.insert:
         currentValue.insert(index, newValue.parsedValue());
       case ListOperation.insertAll:
@@ -2357,10 +2356,20 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         }
       case ListOperation.set:
       case ListOperation.replace:
-        final parsedValue = newValue.toList<List>() ?? [];
-        return parsedValue;
+        return _listFromValue(newValue);
     }
     return currentValue;
+  }
+
+  /// The list [newValue] holds. A JSON list (what a `${= ...}` formula
+  /// giving a list is written as) keeps its items as they are: `''` stays
+  /// empty text and `"12"` stays text, where [TypedValueExt.toList] would
+  /// read them as null and 12. Anything else is read by
+  /// [TypedValueExt.toList].
+  static List _listFromValue(String newValue) {
+    final Object? decoded = tryJsonDecode(newValue.trim());
+    if (decoded is List) return decoded;
+    return newValue.toList<List>() ?? [];
   }
 
   static Future<bool> setCloudDatabaseFromAction(
