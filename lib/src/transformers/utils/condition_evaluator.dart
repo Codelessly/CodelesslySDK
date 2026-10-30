@@ -333,6 +333,9 @@ class ConditionEvaluator<R extends Object>
   R? visitPaywallAction(PaywallAction action) => null;
 
   @override
+  R? visitScrollToAction(ScrollToAction action) => null;
+
+  @override
   R? visitCloudDataAction(CloudDataAction action) => null;
 
   @override
@@ -500,6 +503,11 @@ class ConditionPrinter
   @override
   void visitPaywallAction(PaywallAction action) {
     _buffer.writeln('\tPaywall ${action.operation.name}');
+  }
+
+  @override
+  void visitScrollToAction(ScrollToAction action) {
+    _buffer.writeln('\tScroll to ${action.nodeId}');
   }
 
   @override

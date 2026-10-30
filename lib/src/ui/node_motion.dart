@@ -5,6 +5,8 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
+import 'viewport_visibility.dart';
+
 /// The Flutter curve for a [MotionCurve].
 Curve flutterCurveOf(MotionCurve curve) => switch (curve) {
   MotionCurve.linear => Curves.linear,
@@ -38,6 +40,10 @@ Matrix4 motionMatrix(MotionModel motion, {double spinTurns = 0}) {
 /// resolved. When they change the widget animates to them over
 /// [MotionModel.durationMs]. When [animate] is false (the design canvas) it
 /// jumps to them and doesn't spin.
+///
+/// A [MotionModel.revealOnScroll] motion holds the node where its entrance
+/// starts until [MotionModel.revealFraction] of it is in view, then plays
+/// the entrance once.
 class NodeMotion extends StatefulWidget {
   /// Creates a [NodeMotion].
   const NodeMotion({
@@ -55,6 +61,11 @@ class NodeMotion extends StatefulWidget {
 
   /// The node's widget.
   final Widget child;
+
+  /// Whether [MotionModel.revealOnScroll] entrances wait for their node to
+  /// scroll into view. Set it to false to show such nodes at rest at once,
+  /// for example to take deterministic screenshots of a whole page.
+  static bool revealsEnabled = true;
 
   @override
   State<NodeMotion> createState() => _NodeMotionState();
@@ -77,6 +88,14 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   /// node stays where the transition starts.
   Timer? _delay;
 
+  /// Whether the node holds at its entrance start until it scrolls into
+  /// view; see [MotionModel.revealOnScroll].
+  bool _awaitingReveal = false;
+
+  /// Keeps the node's widget (and its state) when the transform around it
+  /// comes and goes.
+  final GlobalKey _childKey = GlobalKey();
+
   void _rebuild() => setState(() {});
 
   bool get _loops =>
@@ -90,11 +109,36 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     final MotionModel motion = widget.motion;
     if (_loops) {
       _startLoop();
-    } else if (widget.animate && motion.hasEntrance && motion.durationMs > 0) {
+    } else if (_revealsOnScroll(motion)) {
+      _from = motion.entranceStart;
+      _awaitingReveal = true;
+    } else if (widget.animate &&
+        motion.hasEntrance &&
+        !motion.revealOnScroll &&
+        motion.durationMs > 0) {
       _from = motion.entranceStart;
       _run(motion.durationMs);
     }
     _syncSpin();
+  }
+
+  /// Whether [motion] waits to scroll into view before its entrance.
+  bool _revealsOnScroll(MotionModel motion) =>
+      widget.animate &&
+      motion.revealOnScroll &&
+      motion.durationMs > 0 &&
+      NodeMotion.revealsEnabled;
+
+  /// Plays the entrance once enough of the node is in view.
+  void _onVisibility(double fraction) {
+    if (!_awaitingReveal) return;
+    final MotionModel motion = widget.motion;
+    if (!meetsVisibleFraction(fraction, motion.revealFraction)) return;
+    _awaitingReveal = false;
+    _from = motion.entranceStart;
+    _to = motion;
+    _run(motion.durationMs);
+    setState(() {});
   }
 
   /// Animates from [_from] to [_to] over [ms], after the motion's delay.
@@ -140,6 +184,18 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   void didUpdateWidget(NodeMotion oldWidget) {
     super.didUpdateWidget(oldWidget);
     final MotionModel next = widget.motion;
+    if (_awaitingReveal) {
+      // Still out of view: follow the new values without moving.
+      if (_revealsOnScroll(next)) {
+        _from = next.entranceStart;
+      } else {
+        _awaitingReveal = false;
+        _from = next;
+      }
+      _to = next;
+      _syncSpin();
+      return;
+    }
     final bool replay =
         widget.animate && next.replayKey != oldWidget.motion.replayKey;
     if (_loops && replay) {
@@ -258,9 +314,24 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final MotionModel m = _moving ? _current : _to;
-    if (!m.hasTransform && _turns == 0) return widget.child;
-    Widget child = widget.child;
+    final MotionModel m = _awaitingReveal
+        ? _from
+        : _moving
+        ? _current
+        : _to;
+    final Widget drawn = _draw(m);
+    if (!widget.animate || !widget.motion.revealOnScroll) return drawn;
+    return ViewportVisibility(
+      enabled: _awaitingReveal,
+      onChanged: _onVisibility,
+      child: drawn,
+    );
+  }
+
+  /// The node's widget drawn with the values of [m].
+  Widget _draw(MotionModel m) {
+    Widget child = KeyedSubtree(key: _childKey, child: widget.child);
+    if (!m.hasTransform && _turns == 0) return child;
     if (m.opacity < 1) {
       // A fully transparent node also stops taking taps, like a hidden one.
       child = IgnorePointer(

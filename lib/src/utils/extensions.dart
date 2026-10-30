@@ -1894,7 +1894,7 @@ extension ActionModelExt on ActionModel {
               includePredefined: includePredefined,
             ),
         };
-      case ActionType.delay:
+      case ActionType.delay || ActionType.scrollTo:
         return {};
       case ActionType.paywall:
         final PaywallAction action = this as PaywallAction;

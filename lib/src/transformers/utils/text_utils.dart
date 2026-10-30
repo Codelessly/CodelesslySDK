@@ -257,11 +257,24 @@ class TextUtils {
       ),
     )?.toFlutterColor();
 
+    final List<InlineSpan> colored = textColor == null
+        ? spans
+        : [for (final span in spans) recolorSpan(span, textColor)];
+    final SyntaxLanguage language = codeLanguageOf(
+      context,
+      textNode,
+      variablesOverrides,
+    );
+
     return Text.rich(
       TextSpan(
-        children: textColor == null
-            ? spans
-            : [for (final span in spans) recolorSpan(span, textColor)],
+        children: language == SyntaxLanguage.none
+            ? colored
+            : CodeHighlighter.highlightSpans(
+                colored,
+                language,
+                theme: textNode.codeTheme,
+              ),
       ),
       textAlign: textNode.textAlignHorizontal.toFlutter(),
       maxLines: textNode.maxLines,
@@ -341,6 +354,30 @@ class TextUtils {
         variablesOverrides: variablesOverrides,
       ),
     )?.toFlutterColor();
+  }
+
+  /// The language [node] highlights its text as: the language its
+  /// `codeLanguage` binding names (a name or alias, see
+  /// [SyntaxLanguage.tryParse]; one naming no language shows plain text),
+  /// else its [TextNode.codeLanguage].
+  static SyntaxLanguage codeLanguageOf(
+    BuildContext? context,
+    TextNode node,
+    List<VariableData> variablesOverrides,
+  ) {
+    if (context == null || node.variables['codeLanguage'] == null) {
+      return node.codeLanguage;
+    }
+    final Object? bound = PropertyValueDelegate.getPropertyValue<Object>(
+      node,
+      'codeLanguage',
+      scopedValues: ScopedValues.of(
+        context,
+        variablesOverrides: variablesOverrides,
+      ),
+    );
+    if (bound == null) return node.codeLanguage;
+    return SyntaxLanguage.tryParse(bound.toString()) ?? SyntaxLanguage.none;
   }
 
   /// [span] and its children drawn in [color].
