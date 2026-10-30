@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
@@ -13,7 +14,23 @@ Curve flutterCurveOf(MotionCurve curve) => switch (curve) {
   MotionCurve.easeIn => Curves.easeIn,
   MotionCurve.easeOutBack => Curves.easeOutBack,
   MotionCurve.easeOutCubic => Curves.easeOutCubic,
+  // Where a spring can't run as physics (a loop), it overshoots once.
+  MotionCurve.spring => Curves.easeOutBack,
+  MotionCurve.elasticOut => Curves.elasticOut,
+  MotionCurve.bounceOut => Curves.bounceOut,
 };
+
+/// The spring a [MotionCurve.spring] motion runs with.
+SpringDescription motionSpring(MotionModel motion) => SpringDescription(
+  mass: 1,
+  stiffness: motion.springStiffness <= 0 ? 380 : motion.springStiffness,
+  damping: motion.springDamping < 0 ? 20 : motion.springDamping,
+);
+
+/// How long a transition of [motion] runs, for deciding whether it animates
+/// at all: a spring runs at its own pace, whatever its duration.
+int motionTransitionMs(MotionModel motion) =>
+    motion.curve == MotionCurve.spring ? 1 : motion.durationMs;
 
 /// The transform [motion] draws, without spin, around [origin] in a box of
 /// [size]. [spinTurns] adds a spin angle.
@@ -63,6 +80,13 @@ class NodeMotion extends StatefulWidget {
 class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   late final AnimationController _transition = AnimationController(vsync: this)
     ..addListener(_rebuild);
+
+  /// Runs a [MotionCurve.spring] transition: 0 at its start, 1 at rest,
+  /// overshooting past 1 on the way.
+  late final AnimationController _spring = AnimationController.unbounded(
+    vsync: this,
+    value: 1,
+  )..addListener(_rebuild);
   late MotionModel _from = widget.motion;
   late MotionModel _to = widget.motion;
 
@@ -90,9 +114,11 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     final MotionModel motion = widget.motion;
     if (_loops) {
       _startLoop();
-    } else if (widget.animate && motion.hasEntrance && motion.durationMs > 0) {
+    } else if (widget.animate &&
+        motion.hasEntrance &&
+        motionTransitionMs(motion) > 0) {
       _from = motion.entranceStart;
-      _run(motion.durationMs);
+      _run(motionTransitionMs(motion));
     }
     _syncSpin();
   }
@@ -104,8 +130,19 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       ..stop()
       ..duration = Duration(milliseconds: ms)
       ..value = 0;
+    final bool spring = widget.motion.curve == MotionCurve.spring;
+    _spring
+      ..stop()
+      ..value = spring ? 0 : 1;
     void start() {
-      if (mounted) _transition.forward(from: 0);
+      if (!mounted) return;
+      if (spring) {
+        _spring.animateWith(
+          SpringSimulation(motionSpring(widget.motion), 0, 1, 0),
+        );
+      } else {
+        _transition.forward(from: 0);
+      }
     }
 
     final int delay = widget.motion.delayMs;
@@ -144,11 +181,11 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
         widget.animate && next.replayKey != oldWidget.motion.replayKey;
     if (_loops && replay) {
       _startLoop();
-    } else if (replay && next.durationMs > 0) {
+    } else if (replay && motionTransitionMs(next) > 0) {
       // Plays the entrance again, wherever the node was.
       _from = next.entranceStart;
       _to = next;
-      _run(next.durationMs);
+      _run(motionTransitionMs(next));
     } else if (_loops) {
       final MotionModel old = oldWidget.motion;
       if (!_sameTransform(next, _to) ||
@@ -161,11 +198,14 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       }
     } else if (!_sameTransform(next, _to) ||
         oldWidget.motion.loop != MotionLoop.none) {
-      final ms = widget.animate ? next.durationMs : 0;
+      final ms = widget.animate ? motionTransitionMs(next) : 0;
       if (ms <= 0) {
         _delay?.cancel();
         _transition.stop();
         _transition.value = 0;
+        _spring
+          ..stop()
+          ..value = 1;
         _from = next;
         _to = next;
       } else {
@@ -195,11 +235,17 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       a.originY == b.originY;
 
   /// Whether a transition is running or waiting out its delay.
-  bool get _moving => _transition.isAnimating || _delay?.isActive == true;
+  bool get _moving =>
+      _transition.isAnimating ||
+      _spring.isAnimating ||
+      _delay?.isActive == true;
 
   MotionModel get _current {
-    if (!_moving && _transition.value == 0) return _to;
-    final double t = flutterCurveOf(_to.curve).transform(_transition.value);
+    final bool spring = _spring.isAnimating || _spring.value != 1;
+    if (!_moving && _transition.value == 0 && !spring) return _to;
+    final double t = spring
+        ? _spring.value
+        : flutterCurveOf(_to.curve).transform(_transition.value);
     double lerp(String p) =>
         _from.valueOf(p) + (_to.valueOf(p) - _from.valueOf(p)) * t;
     return _to.copyWith(
@@ -252,6 +298,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   void dispose() {
     _delay?.cancel();
     _transition.dispose();
+    _spring.dispose();
     _spinTicker?.dispose();
     super.dispose();
   }

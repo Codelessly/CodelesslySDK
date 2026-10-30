@@ -1670,6 +1670,9 @@ extension ActionModelExt on ActionModel {
     if (action is SetVariantAction && action.nodeID == oldNodeId) {
       return action.copyWith(nodeID: newNodeId);
     }
+    if (action is PlayAnimationAction && action.nodeId == oldNodeId) {
+      return action.copyWith(nodeId: newNodeId);
+    }
     if (action is ConditionalAction) {
       return action.copyWith(
         actions: [
@@ -1901,6 +1904,15 @@ extension ActionModelExt on ActionModel {
         return _namesIn([?action.slot, ?action.url], includePredefined);
       case ActionType.copyToClipboard:
         strings.add((this as CopyToClipboardAction).text);
+        return _namesIn(strings, includePredefined);
+      case ActionType.speak:
+        final SpeakAction action = this as SpeakAction;
+        strings.addAll([action.text, ?action.rateValue]);
+        return _namesIn(strings, includePredefined);
+      case ActionType.playSound:
+        strings.add((this as PlaySoundAction).url);
+        return _namesIn(strings, includePredefined);
+      case ActionType.playAnimation:
         return _namesIn(strings, includePredefined);
       case ActionType.cloudData:
         final CloudDataAction action = this as CloudDataAction;
