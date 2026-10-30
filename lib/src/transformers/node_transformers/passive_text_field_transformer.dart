@@ -45,6 +45,8 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
           onIconTap(context, node, reactions, value),
       onChanged: (context, value) => onChanged(context, node, value),
       onSubmitted: (context, value) => onSubmitted(context, node, value),
+      onEditingComplete: (context, value) =>
+          onEditingComplete(context, node, value),
     );
   }
 
@@ -108,6 +110,23 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     );
   }
 
+  /// The field lost focus: its value is kept, and its "Editing Complete"
+  /// actions run (not its "Submitted" ones, which wait for the keyboard's
+  /// submit, so clicking elsewhere doesn't submit a form).
+  void onEditingComplete(
+    BuildContext context,
+    TextFieldNode node,
+    String inputValue,
+  ) {
+    NodeStateProvider.setState(context, inputValue);
+    FunctionsRepository.triggerAction(
+      context,
+      node: node,
+      TriggerType.editingComplete,
+      value: inputValue,
+    );
+  }
+
   void onIconTap(
     BuildContext context,
     TextFieldNode node,
@@ -132,6 +151,9 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final Function(BuildContext context, String value)? onTap;
   final Function(BuildContext context, String value)? onChanged;
   final Function(BuildContext context, String value)? onSubmitted;
+
+  /// Called when the field loses focus.
+  final Function(BuildContext context, String value)? onEditingComplete;
   final Function(BuildContext context, List<Reaction> reactions, String value)?
   onIconTap;
   final bool withAutofill;
@@ -150,6 +172,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
     this.onTap,
     this.onChanged,
     this.onSubmitted,
+    this.onEditingComplete,
     this.withAutofill = true,
     this.onIconTap,
     List<VariableData>? variables,
@@ -322,7 +345,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
   void onFocusChanged() {
     if (!focusNode.hasFocus) {
-      widget.onSubmitted?.call(context, controller.text);
+      widget.onEditingComplete?.call(context, controller.text);
     }
   }
 
@@ -429,9 +452,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       onTap: () => widget.onTap?.call(context, controller.text),
       onChanged: (value) => widget.onChanged?.call(context, value),
       onEditingComplete: () {},
-      onFieldSubmitted: (value) {
-        // handled by the focus listener!
-      },
+      // The keyboard's submit (Enter on a one-line field) runs the
+      // "Submitted" actions; the field keeps its focus, as a form expects.
+      onFieldSubmitted: (value) => widget.onSubmitted?.call(context, value),
       decoration: decoration,
     );
 
