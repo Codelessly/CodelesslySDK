@@ -183,13 +183,17 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     BaseNode node,
     WidgetBuildSettings settings,
   ) {
-    final BaseNode styled = applyStyleOverrides(context, node);
     // On the design canvas (no reactions) bindings read the editor's
     // preview values, as text does, so a state previewed with
     // `preview.setValues` shows and hides the same nodes it would at runtime.
     final ScopedValues? preview = settings.withReactions
         ? null
-        : VariablePreview.scopeOf(styled, context: context);
+        : VariablePreview.scopeOf(node, context: context);
+    final BaseNode styled = applyStyleOverrides(
+      context,
+      node,
+      scopedValues: preview,
+    );
     Widget widget = getTransformerByNode(node)
         .buildWidget(styled, context, settings);
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
@@ -277,13 +281,17 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// `height`, `flex`, `rotation`, and the properties of [StyleBindings]
   /// (effects, stroke weight, corner radius, padding, font weight, icon).
   /// Returns [node] itself when nothing changes it.
-  BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+  BaseNode applyStyleOverrides(
+    BuildContext context,
+    BaseNode node, {
+    ScopedValues? scopedValues,
+  }) {
+    final ScopedValues scope = scopedValues ?? ScopedValues.of(context);
     T? value<T extends Object>(String property) =>
         PropertyValueDelegate.getPropertyValue<T>(
           node,
           property,
-          scopedValues: scopedValues,
+          scopedValues: scope,
         );
 
     final Map<String, dynamic> patch = {};
@@ -374,7 +382,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
 
     // Effects, stroke weight, corner radius, font weight and icon.
-    StyleBindings.addTo(patch, node, scopedValues: scopedValues);
+    StyleBindings.addTo(patch, node, scopedValues: scope);
 
     // The states shown around the node (a property-override variant, its
     // own or an ancestor's interaction states) win over bindings.
