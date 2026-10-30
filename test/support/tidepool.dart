@@ -56,18 +56,19 @@ TextNode testText(String id, String parent, String characters) => TextNode(
   textMixedProps: [StartEndProp(start: 0, end: characters.length)],
 )..parentID = parent;
 
-ButtonNode testButton(String id, String parent, ActionModel action) => ElevatedButtonNode(
-  id: id,
-  name: id,
-  basicBoxLocal: NodeBox(0, 0, 160, 44),
-  properties: ButtonProperties(label: id),
-  reactions: [
-    Reaction(
-      action: action,
-      trigger: TriggerModel(type: TriggerType.click),
-    ),
-  ],
-)..parentID = parent;
+ButtonNode testButton(String id, String parent, ActionModel action) =>
+    ElevatedButtonNode(
+      id: id,
+      name: id,
+      basicBoxLocal: NodeBox(0, 0, 160, 44),
+      properties: ButtonProperties(label: id),
+      reactions: [
+        Reaction(
+          action: action,
+          trigger: TriggerModel(type: TriggerType.click),
+        ),
+      ],
+    )..parentID = parent;
 
 /// A layout of one canvas [id] at [path] that shows [children].
 SDKPublishLayout testScreen(

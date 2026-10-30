@@ -16,10 +16,7 @@ class FakeBrowser {
       (call) async {
         if (call.method != 'routeInformationUpdated') return null;
         final Map args = call.arguments as Map;
-        final entry = (
-          url: args['uri'] as String,
-          state: args['state'],
-        );
+        final entry = (url: args['uri'] as String, state: args['state']);
         if (args['replace'] == true) {
           entries[index] = entry;
         } else {
@@ -128,9 +125,7 @@ Future<CodelesslyRouter> pumpRouterApp(
     historyGo: browser.go,
     historyState: () => browser.entries[browser.index].state,
   );
-  await tester.pumpWidget(
-    MaterialApp.router(routerConfig: router.config()),
-  );
+  await tester.pumpWidget(MaterialApp.router(routerConfig: router.config()));
   await tester.pumpAndSettle();
   return router;
 }
@@ -142,9 +137,7 @@ Future<void> tap(WidgetTester tester, String label) async {
 
 void main() {
   group('routes', () {
-    testWidgets('each screen has a URL: its path, else its id', (
-      tester,
-    ) async {
+    testWidgets('each screen has a URL: its path, else its id', (tester) async {
       final browser = FakeBrowser(tester);
       final router = await pumpRouterApp(tester, appModel(), browser);
       final delegate = router.delegate;
@@ -238,9 +231,7 @@ void main() {
       expect(find.text('id=kraken'), findsOneWidget);
     });
 
-    testWidgets('a reset clears the stack to its base screen', (
-      tester,
-    ) async {
+    testWidgets('a reset clears the stack to its base screen', (tester) async {
       final browser = FakeBrowser(tester);
       await pumpRouterApp(tester, appModel(), browser);
       await tap(tester, 'ToGuide');

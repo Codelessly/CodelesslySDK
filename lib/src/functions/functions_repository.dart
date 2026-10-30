@@ -837,10 +837,7 @@ class FunctionsRepository {
           );
           return;
         }
-        router.resetTo(
-          [baseLocation, location],
-          params: [baseParams, params],
-        );
+        router.resetTo([baseLocation, location], params: [baseParams, params]);
     }
   }
 
