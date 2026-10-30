@@ -63,6 +63,7 @@ dependencies:
   equatable: ^3.0.0
   vector_math: ^2.1.4
   provider: ^6.1.2
+  navigation_utils: ^0.9.11
   cupertino_icons: ^1.0.9
   flutter_svg: ^2.0.17
 

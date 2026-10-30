@@ -4,7 +4,6 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
-import '../ui/codelessly_route.dart';
 import 'model_http_request.dart';
 import 'privacy_base.dart';
 
@@ -702,6 +701,13 @@ class SDKPublishUpdates with Equatable {
   /// navigation or dialog action) before the layout itself is downloaded.
   final Map<String, Set<String>> layoutCanvases;
 
+  /// A map of canvas ids -> the canvas's URL path pattern, such as
+  /// `guide/:id`, for canvases that have one.
+  ///
+  /// This lets the SDK route a URL to its screen before the screen's layout
+  /// is downloaded, e.g. when a link to a deep screen opens the app.
+  final Map<String, String> canvasPaths;
+
   /// Creates a new instance of [SDKPublishUpdates].
   SDKPublishUpdates({
     this.fonts = const {},
@@ -712,6 +718,7 @@ class SDKPublishUpdates with Equatable {
     this.layoutFonts = const {},
     this.layoutApis = const {},
     this.layoutCanvases = const {},
+    this.canvasPaths = const {},
   });
 
   /// Creates a copy of this instance with the provided parameters.
@@ -724,6 +731,7 @@ class SDKPublishUpdates with Equatable {
     Map<String, Set<String>>? layoutFonts,
     Map<String, Set<String>>? layoutApis,
     Map<String, Set<String>>? layoutCanvases,
+    Map<String, String>? canvasPaths,
   }) {
     return SDKPublishUpdates(
       fonts: fonts ?? this.fonts,
@@ -734,6 +742,7 @@ class SDKPublishUpdates with Equatable {
       layoutFonts: layoutFonts ?? this.layoutFonts,
       layoutApis: layoutApis ?? this.layoutApis,
       layoutCanvases: layoutCanvases ?? this.layoutCanvases,
+      canvasPaths: canvasPaths ?? this.canvasPaths,
     );
   }
 
@@ -766,6 +775,13 @@ class SDKPublishUpdates with Equatable {
             layoutId: canvases.difference(movedCanvases),
         ...newer.layoutCanvases,
       }..removeWhere((_, Set<String> canvases) => canvases.isEmpty),
+      // A republished canvas takes its path from [newer], or loses it.
+      canvasPaths: {
+        for (final MapEntry(key: String canvasId, value: String path)
+            in canvasPaths.entries)
+          if (!movedCanvases.contains(canvasId)) canvasId: path,
+        ...newer.canvasPaths,
+      },
     );
   }
 
@@ -789,6 +805,7 @@ class SDKPublishUpdates with Equatable {
     layoutFonts,
     layoutApis,
     layoutCanvases,
+    canvasPaths,
   ];
 
   /// Creates a new instance of [SDKPublishUpdates] from a JSON map.
@@ -934,15 +951,5 @@ extension SDKPublishModelLayouts on SDKPublishModel {
       if (layout.canvasIds.contains(id)) return layout.id;
     }
     return updates.layoutIdForCanvas(id);
-  }
-
-  /// The parameters [link] gives a screen of layout [layoutId] (the entry
-  /// layout when null, as for a widget that shows the app's first screen):
-  /// its own when it names a screen of that layout, else null.
-  Map<String, String>? linkParamsFor(CodelesslyRoute? link, String? layoutId) {
-    if (link == null || link.params.isEmpty) return null;
-    final String? layout = resolveLayoutId(layoutId) ?? entryLayoutId;
-    if (layout == null) return null;
-    return resolveLayoutId(link.canvasId) == layout ? link.params : null;
   }
 }
