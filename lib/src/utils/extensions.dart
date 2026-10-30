@@ -1264,6 +1264,15 @@ String materialSymbolVariant({double? fill, double? weight, double? grade}) {
 int _nearest(double value, List<int> options) =>
     options.reduce((a, b) => (a - value).abs() <= (b - value).abs() ? a : b);
 
+/// The codepoint of [icon] in Flutter's bundled `MaterialIcons` font, or
+/// null when it isn't a Material Icon Flutter ships (Google Fonts'
+/// codepoints, which the model stores, draw other glyphs in that font).
+int? materialIconFlutterCodepoint(IconModel icon) {
+  if (icon is! MaterialIcon) return null;
+  final String? id = icon.flutterID;
+  return id == null ? null : flutterIconsDataMap[id];
+}
+
 extension MaterialIconExt on MaterialIcon {
   String? get flutterID => flutterIconNames[styledName];
 
