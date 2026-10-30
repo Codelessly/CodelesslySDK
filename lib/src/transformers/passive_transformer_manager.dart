@@ -195,6 +195,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = wrapWithReaction(context, styled, widget);
       widget = wrapWithSwipes(context, styled, widget);
       widget = wrapWithDoubleTap(context, styled, widget);
+      widget = wrapWithViewportReactions(context, styled, widget);
       widget = wrapWithSemantics(styled, widget);
       widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
@@ -820,6 +821,7 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
   @override
   void initState() {
     super.initState();
+    NodeContextRegistry.register(widget.node.id, context);
     nodeState.onChangedByUser = updateKeepAlive;
     widget.codelesslyContext.nodeRebuildNotifier.addListener(
       onNodeNotification,
@@ -828,6 +830,7 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
 
   @override
   void dispose() {
+    NodeContextRegistry.unregister(widget.node.id, context);
     nodeState.onChangedByUser = null;
     widget.codelesslyContext.nodeRebuildNotifier.removeListener(
       onNodeNotification,

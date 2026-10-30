@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../functions/functions_repository.dart';
 import '../../ui/draggable_scroll_configuration.dart';
+import '../../ui/node_motion.dart';
 import '../../utils/extensions.dart';
 import '../transformers.dart';
 
@@ -66,25 +67,44 @@ class PassivePageViewWidget extends StatefulWidget {
   State<PassivePageViewWidget> createState() => _PassivePageViewWidgetState();
 }
 
+/// Shows a [PageViewNode]'s pages. A swipe writes the page it settles on to
+/// the variable bound to `indexValue` (and runs the `changed` reactions); a
+/// change of that variable slides the page view to its page over
+/// [PageViewProperties.animationDurationMs], or jumps when that is 0.
 class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
-  late PageController controller;
+  late PageController controller = _createController(
+    widget.node.properties.initialPage,
+  );
 
-  @override
-  void initState() {
-    super.initState();
-    controller = PageController(
-      initialPage: widget.node.properties.initialPage,
-      keepPage: widget.node.properties.keepPage,
-      viewportFraction: widget.node.properties.viewportFraction,
-    );
-  }
+  /// The page a slide started by a change of the bound index is heading
+  /// for. The pages it passes on the way don't count as page changes, so
+  /// they don't write the bound variable back mid-slide.
+  int? _animatingTo;
+
+  PageController _createController(int initialPage) => PageController(
+    initialPage: initialPage,
+    keepPage: widget.node.properties.keepPage,
+    viewportFraction: widget.node.properties.viewportFraction,
+  );
 
   @override
   void didUpdateWidget(covariant PassivePageViewWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.node.properties.initialPage !=
-        oldWidget.node.properties.initialPage) {
-      _jumpToPage(widget.node.properties.initialPage);
+    final PageViewProperties properties = widget.node.properties;
+    final PageViewProperties oldProperties = oldWidget.node.properties;
+    if (properties.viewportFraction != oldProperties.viewportFraction ||
+        properties.keepPage != oldProperties.keepPage) {
+      // A controller's viewport fraction is fixed: replace it, staying on
+      // the same page.
+      final PageController old = controller;
+      controller = _createController(
+        old.hasClients ? (old.page ?? 0).round() : properties.initialPage,
+      );
+      _animatingTo = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
+    }
+    if (properties.initialPage != oldProperties.initialPage) {
+      _jumpToPage(properties.initialPage);
     }
 
     final ScopedValues scopedValues = ScopedValues.of(context);
@@ -100,11 +120,42 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
             'indexValue',
             scopedValues: scopedValues,
           );
-      if (currentPropertyValue != null &&
-          controller.page?.round() != currentPropertyValue) {
-        _jumpToPage(currentPropertyValue);
+      final int? current =
+          _animatingTo ??
+          (controller.hasClients ? controller.page?.round() : null);
+      if (currentPropertyValue != null && current != currentPropertyValue) {
+        _animateToPage(currentPropertyValue);
       }
     }
+  }
+
+  /// Slides to [page] over the page view's animation duration, or jumps
+  /// when it is 0 or the page view isn't laid out yet.
+  void _animateToPage(int page) {
+    final int ms = widget.node.properties.animationDurationMs;
+    if (ms <= 0 || !controller.hasClients) {
+      _animatingTo = null;
+      _jumpToPage(page);
+      return;
+    }
+    _animatingTo = page;
+    controller
+        .animateToPage(
+          page,
+          duration: Duration(milliseconds: ms),
+          curve: flutterCurveOf(widget.node.properties.animationCurve),
+        )
+        .whenComplete(() {
+          if (_animatingTo == page) _animatingTo = null;
+        });
+  }
+
+  /// Reports a page change, except the pages a slide to [_animatingTo]
+  /// passes on its way.
+  void _onPageChanged(BuildContext context, int index) {
+    final int? target = _animatingTo;
+    if (target != null && index != target) return;
+    widget.onPageChanged?.call(context, index);
   }
 
   /// Jumps once the controller is attached; didUpdateWidget can run before
@@ -163,7 +214,7 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
           allowImplicitScrolling: widget.node.properties.allowImplicitScrolling,
           pageSnapping: widget.node.properties.pageSnapping,
           controller: controller,
-          onPageChanged: (index) => widget.onPageChanged?.call(context, index),
+          onPageChanged: (index) => _onPageChanged(context, index),
           itemBuilder: (context, index) => IndexedItemProvider(
             key: ValueKey(index),
             item: IndexedItem(index, data?.elementAtOrNull(index)),
