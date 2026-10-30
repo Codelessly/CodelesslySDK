@@ -25,6 +25,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'stack': PassiveStackTransformer(getNode, this),
       'frame': PassiveStackTransformer(getNode, this),
       'canvas': PassiveCanvasTransformer(getNode, this),
+      'modal': PassiveModalTransformer(getNode, this),
       'elevatedButton': PassiveButtonTransformer(getNode, this),
       'textButton': PassiveButtonTransformer(getNode, this),
       'outlinedButton': PassiveButtonTransformer(getNode, this),

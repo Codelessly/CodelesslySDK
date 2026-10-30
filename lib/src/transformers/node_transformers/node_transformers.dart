@@ -25,6 +25,7 @@ export 'passive_line_chart_transformer.dart';
 export 'passive_list_tile_transformer.dart';
 export 'passive_list_view_transformer.dart';
 export 'passive_loading_indicator_transformer.dart';
+export 'passive_modal_transformer.dart';
 export 'passive_navigation_bar_transformer.dart';
 export 'passive_page_view_transformer.dart';
 export 'passive_picker_transformers.dart';
