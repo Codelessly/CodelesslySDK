@@ -650,11 +650,22 @@ class CanvasViewport extends StatelessWidget {
     return (width: width, height: height);
   }
 
+  /// The sizing a canvas uses under [scope]: one that [followsScreen] fills
+  /// the screen, except in a popover, which hugs its design size wherever
+  /// it is anchored (filling would push it into the corner of the screen).
+  static CanvasSizing sizingFor(
+    CanvasSizing scope, {
+    bool followsScreen = false,
+  }) => followsScreen && scope != CanvasSizing.content
+      ? CanvasSizing.fill
+      : scope;
+
   @override
   Widget build(BuildContext context) {
-    final CanvasSizing sizing = followsScreen
-        ? CanvasSizing.fill
-        : CanvasSizingScope.of(context);
+    final CanvasSizing sizing = sizingFor(
+      CanvasSizingScope.of(context),
+      followsScreen: followsScreen,
+    );
     return LayoutBuilder(
       builder: (context, constraints) {
         final box = resolve(node, constraints, sizing: sizing);

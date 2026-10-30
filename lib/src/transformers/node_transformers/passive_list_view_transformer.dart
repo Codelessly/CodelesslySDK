@@ -505,6 +505,17 @@ class PassiveListViewWidget extends StatelessWidget {
                   child: child,
                 );
               }
+              // Negative spacing overlaps the items (an avatar stack): each
+              // but the last takes that much less room and the next one is
+              // drawn over it.
+              final double overlap = listItemOverlap(node);
+              if (overlap > 0 && index < (itemCount ?? 0) - 1) {
+                child = OverlapBox(
+                  overlap: overlap,
+                  axis: node.scrollDirection.flutterAxis,
+                  child: child,
+                );
+              }
               return child;
             },
           ),
@@ -882,6 +893,8 @@ class ListViewItemSeparator extends StatelessWidget {
           endIndent: properties.dividerProperties.endIndent,
         );
       case ListItemSeparator.space:
+        // Negative spacing is an overlap the items take care of.
+        if (properties.separatorSpacing < 0) return const SizedBox.shrink();
         return SizedBox(
           width: scrollDirection.isHorizontal
               ? properties.separatorSpacing
@@ -1020,4 +1033,84 @@ class WrappedItems extends StatelessWidget {
         ? padded
         : ClipRect(clipBehavior: clipBehavior, child: padded);
   }
+}
+
+
+/// How far a list's items overlap: its negative space separator's spacing.
+double listItemOverlap(ListViewNode node) =>
+    node.properties.hasSeparator &&
+        node.properties.separator == ListItemSeparator.space &&
+        node.properties.separatorSpacing < 0
+    ? -node.properties.separatorSpacing
+    : 0;
+
+/// Lays [child] out at its size but takes [overlap] less room along [axis],
+/// so the next item of a list is drawn over its end.
+class OverlapBox extends SingleChildRenderObjectWidget {
+  /// Creates an [OverlapBox].
+  const OverlapBox({
+    super.key,
+    required this.overlap,
+    required this.axis,
+    super.child,
+  });
+
+  /// How much less room the child takes.
+  final double overlap;
+
+  /// The list's direction.
+  final Axis axis;
+
+  @override
+  RenderOverlapBox createRenderObject(BuildContext context) =>
+      RenderOverlapBox(overlap: overlap, axis: axis);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderOverlapBox renderObject) {
+    renderObject
+      ..overlap = overlap
+      ..axis = axis;
+  }
+}
+
+/// The render object of [OverlapBox].
+class RenderOverlapBox extends RenderProxyBox {
+  /// Creates a [RenderOverlapBox].
+  RenderOverlapBox({required double overlap, required Axis axis})
+    : _overlap = overlap,
+      _axis = axis;
+
+  double _overlap;
+  Axis _axis;
+
+  set overlap(double value) {
+    if (value == _overlap) return;
+    _overlap = value;
+    markNeedsLayout();
+  }
+
+  set axis(Axis value) {
+    if (value == _axis) return;
+    _axis = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox child = this.child!;
+    child.layout(constraints.loosen(), parentUsesSize: true);
+    final Size size = child.size;
+    this.size = constraints.constrain(
+      _axis == Axis.horizontal
+          ? Size(math.max(0, size.width - _overlap), size.height)
+          : Size(size.width, math.max(0, size.height - _overlap)),
+    );
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      child!.hitTest(result, position: position);
+
+  @override
+  Rect get paintBounds => Offset.zero & child!.size;
 }
