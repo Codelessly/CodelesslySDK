@@ -98,6 +98,17 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
         oldWidget.variables != widget.variables) {
       _load();
     } else if (oldWidget.nodes != widget.nodes) {
+      for (final node in widget.nodes.values) {
+        if (node is ReactionMixin) {
+          for (final reaction in (node as ReactionMixin).reactions) {
+            if (reaction.action is! CallFunctionAction &&
+                !(widget.previewNativePaywallActions && reaction.action is PaywallAction)) {
+              throw ArgumentError('Standalone tree rejects action ${reaction.action.type} on node ${node.id}');
+            }
+          }
+        }
+      }
+      _manager.retainStandaloneWidgets(widget.nodes.keys.toSet());
       _registry.setNodes(widget.nodes);
       final allNodes = _registry.getNodes().values.toList();
       for (final node in allNodes) {

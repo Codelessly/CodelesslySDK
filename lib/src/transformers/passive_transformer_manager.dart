@@ -22,6 +22,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   bool cacheUnchangedNodes = false;
   final Map<String, (BaseNode, Widget)> _standaloneWidgetCache = {};
   void clearStandaloneWidgetCache() => _standaloneWidgetCache.clear();
+  void retainStandaloneWidgets(Set<String> ids) =>
+      _standaloneWidgetCache.removeWhere((id, _) => !ids.contains(id));
 
   /// This is the registry of transformers that are used by the manager.
   PassiveNodeTransformerManager(super.getNode, super.retrieveLayout) {
