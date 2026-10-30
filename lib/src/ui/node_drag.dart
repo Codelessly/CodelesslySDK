@@ -114,6 +114,7 @@ class NodeDrag extends StatefulWidget {
     this.order = 0,
     this.onDismissed,
     this.onEnd,
+    this.onValues,
   });
 
   /// The node this drag belongs to.
@@ -137,6 +138,10 @@ class NodeDrag extends StatefulWidget {
   /// Called when the pointer lifts after a drag, with `dx`, `dy`,
   /// `velocityX`, `velocityY`, `dismissed` and `direction`.
   final void Function(Map<String, dynamic> result)? onEnd;
+
+  /// Called with the live values whenever they change (see
+  /// [DragModel.shareAs]).
+  final ValueChanged<DragValues>? onValues;
 
   /// The node.
   final Widget child;
@@ -248,12 +253,25 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
         );
       } else {
         _offset = Offset.lerp(_from, _to, t)!;
+        if (_spinTo != 0) {
+          _spin = _spinTo * t;
+        } else if (_spinFrom != 0) {
+          _spin = _spinFrom * (1 - t);
+        }
       }
     });
   }
 
+  double _spinFrom = 0;
+
   Future<void> _animateTo(Offset to, int ms, Curve curve) async {
     _shake = 0;
+    if (_spinTo == 0 && _spin != 0) {
+      // Unwind any turn left over (a returning card).
+      _spinFrom = _spin;
+    } else {
+      _spinFrom = 0;
+    }
     _from = _offset;
     _to = to;
     _curve = curve;
@@ -338,13 +356,20 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
 
   Offset _raw = Offset.zero;
 
+  /// Whether the current drag is of a disabled node, which only follows by
+  /// [DragModel.disabledFollow] and always springs back.
+  bool _blocked = false;
+
   void _onStart(DragStartDetails details) {
     if (_dismissed) return;
-    if (!_enabled) {
+    _blocked = !_enabled;
+    if (_blocked && _model.disabledFollow <= 0) {
       if (_model.shakeWhenDisabled && !_anim.isAnimating) _shakeOnce();
+      widget.onEnd?.call({'blocked': true, 'dismissed': false, 'direction': ''});
       return;
     }
     _anim.stop();
+    _shake = 0;
     _raw = _offset;
     setState(() => _dragging = true);
   }
@@ -352,13 +377,36 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
   void _onUpdate(DragUpdateDetails details) {
     if (!_dragging) return;
     _raw += details.delta;
-    setState(() => _offset = _resist(_raw));
+    setState(
+      () => _offset = _blocked
+          ? _raw * _model.disabledFollow.clamp(0, 1).toDouble()
+          : _resist(_raw),
+    );
   }
 
   void _onEnd(DragEndDetails details) {
     if (!_dragging) return;
     setState(() => _dragging = false);
     final Offset velocity = details.velocity.pixelsPerSecond;
+    if (_blocked) {
+      widget.onEnd?.call({
+        'dx': _offset.dx,
+        'dy': _offset.dy,
+        'velocityX': velocity.dx,
+        'velocityY': velocity.dy,
+        'dismissed': false,
+        'direction': '',
+        'blocked': true,
+      });
+      _animateTo(
+        Offset.zero,
+        _model.snapBackMs,
+        flutterCurveOf(_model.snapCurve),
+      ).then((_) {
+        if (mounted && _model.shakeWhenDisabled) _shakeOnce();
+      });
+      return;
+    }
     final DragDirection? direction = _dismissDirection(velocity);
     widget.onEnd?.call({
       'dx': _offset.dx,
@@ -367,6 +415,7 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
       'velocityY': velocity.dy,
       'dismissed': direction != null,
       'direction': direction?.name ?? '',
+      'blocked': false,
     });
     if (direction != null) {
       _flyOff(direction, velocity);
@@ -427,7 +476,15 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
     return _offset + heading * far;
   }
 
+  /// Extra turn while flying off, in degrees, eased in with the flight.
+  double _spin = 0;
+  double _spinTo = 0;
+
   Future<void> _flyOff(DragDirection direction, [Offset? velocity]) async {
+    _spinTo = switch (direction) {
+      DragDirection.left || DragDirection.up => -_model.flyOutRotate,
+      DragDirection.right || DragDirection.down => _model.flyOutRotate,
+    };
     final Offset target = _offscreen(
       direction,
       _size,
@@ -444,6 +501,7 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
     setState(() {
       _dismissed = false;
       _offset = Offset.zero;
+      _spin = _spinTo = 0;
     });
   }
 
@@ -472,9 +530,16 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
   /// Flies in from off-screen toward [direction] to rest.
   Future<void> returnFrom(DragDirection direction) async {
     _anim.stop();
+    // Comes back unwinding the turn it left with.
+    final double turn = switch (direction) {
+      DragDirection.left || DragDirection.up => -_model.flyOutRotate,
+      DragDirection.right || DragDirection.down => _model.flyOutRotate,
+    };
     setState(() {
       _dismissed = false;
       _offset = _offscreen(direction, _size) - _offset;
+      _spin = turn;
+      _spinTo = 0;
     });
     await _animateTo(
       Offset.zero,
@@ -494,12 +559,22 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
     );
   }
 
+  DragValues? _shared;
+
   @override
   Widget build(BuildContext context) {
     final Size size = _size;
     final double angle =
-        _offset.dx / math.max(1, size.width) * _model.rotateFactor;
-    Widget child = DragScope(values: values, child: widget.child);
+        _offset.dx / math.max(1, size.width) * _model.rotateFactor + _spin;
+    final DragValues current = values;
+    if (widget.onValues != null && current != _shared) {
+      _shared = current;
+      // Shared after the frame: writing a variable rebuilds other nodes.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onValues!(current);
+      });
+    }
+    Widget child = DragScope(values: current, child: widget.child);
     if (_offset != Offset.zero || angle != 0) {
       child = Transform(
         alignment: Alignment(_model.originX, _model.originY),

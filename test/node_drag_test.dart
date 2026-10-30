@@ -21,6 +21,8 @@ void main() {
   late List<Map<String, dynamic>> ends;
   late List<DragValues> seen;
 
+  late List<DragValues> shared;
+
   Widget card({
     DragModel drag = swipeCard,
     bool Function()? isEnabled,
@@ -42,6 +44,7 @@ void main() {
             isEnabled: isEnabled,
             onDismissed: (d) => dismissed.add(d),
             onEnd: ends.add,
+            onValues: shared.add,
             child: Builder(
               builder: (context) {
                 seen.add(DragScope.maybeOf(context)!);
@@ -55,6 +58,7 @@ void main() {
   );
 
   setUp(() {
+    shared = [];
     dismissed = [];
     ends = [];
     seen = [];
@@ -210,5 +214,57 @@ void main() {
       const DragModel(release: DragRelease.stay).canDismiss(DragDirection.left),
       isFalse,
     );
+  });
+
+  testWidgets('a disabled drag can follow a little and reports blocked', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      card(
+        drag: swipeCard.copyWith(disabledFollow: 0.3, shakeWhenDisabled: true),
+        isEnabled: () => false,
+      ),
+    );
+    final gesture = await tester.startGesture(const Offset(100, 150));
+    for (int i = 0; i < 5; i++) {
+      await gesture.moveBy(const Offset(-30, 0));
+    }
+    await tester.pump();
+    // 150px of pointer travel minus the pan slop, at 30%.
+    expect(seen.last.offset.dx, lessThan(-30));
+    expect(seen.last.offset.dx, greaterThan(-46));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(dismissed, isEmpty);
+    expect(ends.last['blocked'], isTrue);
+    expect(seen.last.offset, Offset.zero);
+  });
+
+  testWidgets('shares its live values and spins as it flies off', (
+    tester,
+  ) async {
+    await tester.pumpWidget(card(drag: swipeCard.copyWith(flyOutRotate: 20, rotateFactor: 0)));
+    final gesture = await tester.startGesture(const Offset(100, 150));
+    await gesture.moveBy(const Offset(30, 0));
+    await gesture.moveBy(const Offset(30, 0));
+    await tester.pump();
+    await tester.pump();
+    expect(shared.last.right, greaterThan(0));
+    await gesture.moveBy(const Offset(100, 0));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    final Matrix4 m = tester
+        .widget<Transform>(
+          find.ancestor(of: find.text('front'), matching: find.byType(Transform)),
+        )
+        .transform;
+    final double angle = math.atan2(m.storage[1], m.storage[0]) * 180 / math.pi;
+    // No tilt from the drag here: the turn is the fly-off spin, on its way
+    // to 20° clockwise.
+    expect(angle, greaterThan(1));
+    expect(angle, lessThanOrEqualTo(20));
+    await tester.pumpAndSettle();
+    expect(dismissed, [DragDirection.right]);
   });
 }
