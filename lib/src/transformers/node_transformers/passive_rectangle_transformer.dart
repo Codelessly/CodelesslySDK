@@ -344,10 +344,11 @@ List<Widget> wrapWithPadding(
 }) {
   if (children.isEmpty || !applyPadding) return children;
 
-  final EdgeInsets resolvedPadding =
-      node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
+  // Directional, so padding mirrors in a right-to-left layout.
+  final EdgeInsetsDirectional resolvedPadding =
+      node.innerBoxLocal.edgeInsets.flutterEdgeInsetsDirectional;
 
-  if (resolvedPadding == EdgeInsets.zero) {
+  if (resolvedPadding == EdgeInsetsDirectional.zero) {
     return children;
   }
 
@@ -384,8 +385,9 @@ List<Widget> wrapWithPaddingAndScroll(
 }) {
   if (children.isEmpty) return children;
 
-  final EdgeInsets resolvedPadding =
-      node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
+  // Directional, so padding mirrors in a right-to-left layout.
+  final EdgeInsetsDirectional resolvedPadding =
+      node.innerBoxLocal.edgeInsets.flutterEdgeInsetsDirectional;
 
   if (node is FrameNode && node.isScrollable) {
     // The content reaches the farthest child along the scroll axis, and at

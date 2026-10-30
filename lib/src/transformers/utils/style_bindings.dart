@@ -24,6 +24,10 @@ import 'scoped_values.dart';
 ///   JSON value (e.g. `[8, true, 'circular']`) is accepted too.
 /// * [fontWeight] (number 100-900, or `w700`, `bold`, `normal`): the weight
 ///   of every span of a text node.
+/// * [fontFamily] (string): the font family of every span of a text node,
+///   e.g. one per script: `${= uiLang == 'ar' ? 'IBM Plex Sans Arabic' :
+///   'DM Serif Display'}`. Weights and styles stay.
+/// * [fontSize] (number): the font size of every span of a text node.
 /// * [icon] (string): the name of the icon an icon node shows, in the
 ///   naming of its icon model (`star`, `star_border`, ...). Its family and
 ///   style stay. An icon model JSON map replaces the icon as a whole.
@@ -54,6 +58,12 @@ abstract final class StyleBindings {
 
   /// The font weight of every span of a text node.
   static const String fontWeight = 'fontWeight';
+
+  /// The font family of every span of a text node.
+  static const String fontFamily = 'fontFamily';
+
+  /// The font size of every span of a text node.
+  static const String fontSize = 'fontSize';
 
   /// The name of the icon an icon node shows.
   static const String icon = 'icon';
@@ -105,6 +115,29 @@ abstract final class StyleBindings {
     }
 
     if (node is TextNode) {
+      final String? family = value<Object>(fontFamily)?.toString().trim();
+      final num? size = value<num>(fontSize);
+      if ((family != null &&
+              family.isNotEmpty &&
+              node.textMixedProps.any((p) => p.fontName.family != family)) ||
+          (size != null &&
+              size > 0 &&
+              node.textMixedProps.any((p) => p.fontSize != size))) {
+        final List spans =
+            patch['textMixedProps'] as List? ??
+            [for (final prop in node.textMixedProps) prop.toJson()];
+        patch['textMixedProps'] = [
+          for (final (int index, Map span) in spans.cast<Map>().indexed)
+            {
+              ...span,
+              if (family != null && family.isNotEmpty)
+                'fontName': node.textMixedProps[index].fontName
+                    .copyWith(family: family)
+                    .toJson(),
+              if (size != null && size > 0) 'fontSize': size.toDouble(),
+            },
+        ];
+      }
       final FontWeightNumeric? weight = parseFontWeight(
         value<Object>(fontWeight),
       );
@@ -119,7 +152,10 @@ abstract final class StyleBindings {
               ...span,
               // A span's JSON leaves out a default font name.
               'fontName': node.textMixedProps[index].fontName
-                  .copyWith(weight: weight)
+                  .copyWith(
+                    weight: weight,
+                    family: family != null && family.isNotEmpty ? family : null,
+                  )
                   .toJson(),
             },
         ];

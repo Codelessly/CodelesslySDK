@@ -292,7 +292,11 @@ abstract class WidgetNodeTransformerManager
   /// Convenience method to handle widget margins.
   Widget applyWidgetMargins(BaseNode node, Widget widget) {
     if (node.margin == EdgeInsetsModel.zero) return widget;
-    return Padding(padding: node.margin.flutterEdgeInsets, child: widget);
+    // Directional: margins mirror in a right-to-left layout.
+    return Padding(
+      padding: node.margin.flutterEdgeInsetsDirectional,
+      child: widget,
+    );
   }
 
   /// Convenience method to handle widget constraints.

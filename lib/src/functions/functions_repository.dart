@@ -55,6 +55,14 @@ enum ApiRequestType {
   }
 }
 
+/// What a [SpeakAction] speaks, its bindings resolved.
+typedef ResolvedSpeech = ({
+  String text,
+  String language,
+  double rate,
+  double pitch,
+});
+
 class FunctionsRepository {
   static const String name = 'FunctionsRepository';
 
@@ -167,6 +175,8 @@ class FunctionsRepository {
         return copyToClipboard(context, action as CopyToClipboardAction);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
+      case ActionType.speak:
+        return speak(context, action as SpeakAction);
     }
   }
 
@@ -212,6 +222,59 @@ class FunctionsRepository {
     );
     await Clipboard.setData(ClipboardData(text: text));
     return true;
+  }
+
+  /// Speaks the text of [action] in its language at its rate, its variables
+  /// and formulas resolved, replacing anything being spoken; or stops any
+  /// speech when [SpeakAction.stop] is set. Speech runs on [Speech.backend].
+  static bool speak(BuildContext context, SpeakAction action) {
+    if (action.stop) {
+      Speech.backend.stop();
+      return true;
+    }
+    final ResolvedSpeech speech = resolveSpeech(
+      action,
+      ActionChain.scopedValuesOf(context),
+    );
+    if (speech.text.trim().isEmpty) {
+      Speech.backend.stop();
+      return true;
+    }
+    Speech.backend.speak(
+      speech.text,
+      language: speech.language,
+      rate: speech.rate,
+      pitch: speech.pitch,
+    );
+    return true;
+  }
+
+  /// The text, language, rate and pitch [action] speaks with, its variables
+  /// and formulas resolved. A rate or pitch that is not a number falls back
+  /// to `1`; rates are kept within 0.1-10 and pitches within 0-2, the Web
+  /// Speech API's ranges.
+  static ResolvedSpeech resolveSpeech(
+    SpeakAction action,
+    ScopedValues scopedValues,
+  ) {
+    String resolve(String text) => PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
+    double number(String? text, double min, double max) {
+      if (text == null || text.trim().isEmpty) return 1;
+      final num? value = num.tryParse(resolve(text).trim());
+      if (value == null || value.isNaN) return 1;
+      return value.toDouble().clamp(min, max);
+    }
+
+    return (
+      text: resolve(action.text),
+      language: resolve(action.language).trim(),
+      rate: number(action.rate, 0.1, 10),
+      pitch: number(action.pitch, 0, 2),
+    );
   }
 
   /// How long [action] waits: its [DelayAction.duration] formula when that
