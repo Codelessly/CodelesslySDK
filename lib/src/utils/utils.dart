@@ -80,8 +80,10 @@ const double kDesktopMinWidth = 1024;
 /// The value of the `screen` variable for a screen of [size]: its `width`,
 /// `height`, `breakpoint` (mobile, tablet or desktop), `isMobile`,
 /// `isTablet`, `isDesktop`, `orientation` (portrait or landscape),
-/// `isPortrait` and `isLandscape`.
-Map<String, dynamic> screenVariableValue(Size size) {
+/// `isPortrait` and `isLandscape`, and the device's light or dark mode as
+/// `brightness` (`light` or `dark`) and `isDark`, for a theme that follows
+/// the system.
+Map<String, dynamic> screenVariableValue(Size size, {Brightness? brightness}) {
   final String breakpoint = ScreenBreakpoint.forWidth(size.width).name;
   final bool portrait = size.height >= size.width;
   return {
@@ -94,6 +96,8 @@ Map<String, dynamic> screenVariableValue(Size size) {
     'orientation': portrait ? 'portrait' : 'landscape',
     'isPortrait': portrait,
     'isLandscape': !portrait,
+    'brightness': (brightness ?? Brightness.light).name,
+    'isDark': brightness == Brightness.dark,
   };
 }
 

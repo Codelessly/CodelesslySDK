@@ -41,6 +41,11 @@ abstract class WidgetNodeTransformerManager
   /// [NodeBuildDecorator].
   NodeBuildDecorator? decorator;
 
+  /// Whether nodes with a hero tag are built as shared elements (Flutter
+  /// [Hero]s) that fly between screens. True at runtime; a design canvas
+  /// turns it off, where a node is drawn as designed and nothing navigates.
+  bool buildsHeroes = true;
+
   /// Returns [widget] wrapped by [decorator] at [layer], or [widget] when no
   /// decorator is set.
   Widget decorate(
@@ -287,6 +292,29 @@ abstract class WidgetNodeTransformerManager
     );
     if (motion == null) return widget;
     return NodeMotion(motion: motion, animate: animate, child: widget);
+  }
+
+  /// Wraps [widget] in a [Hero] when [node] is a shared element: it has a
+  /// hero tag ([BaseNode.heroTag] or a `heroTag` binding) that resolves to
+  /// non-empty text with [scopedValues] (by default those of [context]),
+  /// and it is visible. See [NodeHero]. Does nothing when [buildsHeroes] is
+  /// false.
+  Widget applyHero(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+  }) {
+    if (!buildsHeroes || !NodeHero.hasHeroTag(node)) return widget;
+    final ScopedValues values = scopedValues ?? ScopedValues.of(context);
+    // A hidden node stays in the tree to keep its state; it must not fly,
+    // nor clash with a shown node of the same tag.
+    final bool visible =
+        runtimeVisibility(context, node, scopedValues: values) ?? node.visible;
+    final String tag = visible
+        ? NodeHero.resolveTag(node, scopedValues: values) ?? ''
+        : '';
+    return NodeHero.wrap(node: node, tag: tag, child: widget);
   }
 
   /// Convenience method to handle widget margins.

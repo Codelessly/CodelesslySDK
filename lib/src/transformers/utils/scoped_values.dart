@@ -39,6 +39,10 @@ class ScopedValues {
   /// The size of the screen, which the `screen` variable describes.
   late final Size? screenSize;
 
+  /// Whether the device is in dark mode, as the `screen` variable's
+  /// `brightness` and `isDark` say.
+  late final Brightness? platformBrightness;
+
   /// The value of the `parent` variable: the `width` and `height` the
   /// node's parent gives it (see [ParentSizeScope]).
   late final Map<String, dynamic>? parentSize;
@@ -94,6 +98,7 @@ class ScopedValues {
       routeParams = {},
       _appUser = null,
       screenSize = null,
+      platformBrightness = null,
       parentSize = null;
 
   /// Creates scoped values for a design canvas, where [variables] (by name)
@@ -108,6 +113,7 @@ class ScopedValues {
     this.parentIndexedItem,
     this._appUser,
     this.screenSize,
+    this.platformBrightness,
     this.parentSize,
     Map<String, dynamic>? data,
     Map<String, dynamic>? routeParams,
@@ -137,6 +143,7 @@ class ScopedValues {
     indexedItem = IndexedItemProvider.maybeOf(context);
     parentIndexedItem = IndexedItemProvider.parentOf(context);
     screenSize = MediaQuery.maybeSizeOf(context);
+    platformBrightness = MediaQuery.maybePlatformBrightnessOf(context);
     parentSize = ParentSizeScope.valueOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     holdProgress = HoldProgressProvider.maybeOf(context);

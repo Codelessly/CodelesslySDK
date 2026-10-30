@@ -123,12 +123,15 @@ class PassiveRectangleWidget extends StatelessWidget {
       alignment:
           stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
       children: [
-        ...buildFills(
+        ...clipFillsToNotches(
           node,
-          useInk: false,
-          obscureImages: settings.obscureImages,
-          settings: settings,
-          scopedValues: scopedValues,
+          buildFills(
+            node,
+            useInk: false,
+            obscureImages: settings.obscureImages,
+            settings: settings,
+            scopedValues: scopedValues,
+          ),
         ),
         ...buildStrokes(node, scopedValues),
         ...wrapWithInkWell(
@@ -168,6 +171,7 @@ class PassiveRectangleWidget extends StatelessWidget {
         borderRadius: getBorderRadius(node),
         clipBehavior: getClipBehavior(node),
         tapThrough: TapThroughScope.of(context),
+        notches: notchesOf(node),
         child: child,
       ),
     );
@@ -193,7 +197,27 @@ Widget decorateWithShadows({
   required Clip clipBehavior,
   required Widget child,
   bool tapThrough = false,
+  List<NotchModel> notches = const [],
 }) {
+  if (notches.isNotEmpty) {
+    final BorderRadius radius = borderRadius ?? BorderRadius.zero;
+    final Widget box = clipBehavior == Clip.none
+        ? child
+        : ClipPath(
+            clipper: NotchedClipper(borderRadius: radius, notches: notches),
+            clipBehavior: Clip.antiAlias,
+            child: child,
+          );
+    if (boxShadow.isEmpty) return box;
+    return CustomPaint(
+      painter: NotchedShadowPainter(
+        shadows: boxShadow,
+        borderRadius: radius,
+        notches: notches,
+      ),
+      child: box,
+    );
+  }
   final bool rounded =
       borderRadius != null && borderRadius != BorderRadius.zero;
   final List<BoxShadow> spread = [
@@ -694,12 +718,34 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
     return [];
   }
   final List<Widget> strokeWidgets = [];
+  final List<NotchModel> notches = notchesOf(node);
   for (final paint in node.strokes.where((paint) => paint.visible)) {
     final paintValue = PropertyValueDelegate.getPropertyValue<PaintModel>(
       node,
       'stroke-paint-${paint.id}',
       scopedValues: scopedValues,
     );
+    // A notched outline is stroked along its notches.
+    if (notches.isNotEmpty) {
+      strokeWidgets.add(
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: NotchedStrokePainter(
+                color: (paintValue ?? paint).toFlutterColor()!,
+                strokeWidth: node.strokeWeight,
+                borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+                notches: notches,
+                strokeAlign: node.strokeAlign,
+                dashPattern: node.dashPattern,
+                strokeCap: node.strokeCap,
+              ),
+            ),
+          ),
+        ),
+      );
+      continue;
+    }
     // A solid stroke on every side is Flutter's own border. A stroke on one
     // side, or a dashed one, is painted by [StrokePainter].
     if (node.dashPattern.isEmpty && node.strokeSide == StrokeSide.all) {
@@ -739,6 +785,24 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
   }
 
   return strokeWidgets;
+}
+
+/// [fills] clipped to [node]'s notched outline when it has notches (fills
+/// are clipped even when the node doesn't clip its children), else [fills].
+List<Widget> clipFillsToNotches(BaseNode node, List<Widget> fills) {
+  final List<NotchModel> notches = notchesOf(node);
+  if (notches.isEmpty || fills.isEmpty) return fills;
+  return [
+    Positioned.fill(
+      child: ClipPath(
+        clipper: NotchedClipper(
+          borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+          notches: notches,
+        ),
+        child: Stack(children: fills),
+      ),
+    ),
+  ];
 }
 
 typedef ImageFillBuilder = Widget Function(

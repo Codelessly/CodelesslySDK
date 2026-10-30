@@ -69,6 +69,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'video': PassiveVideoTransformer(getNode, this),
       'audioPlayer': PassiveAudioPlayerTransformer(getNode, this),
       'divider': PassiveDividerTransformer(getNode, this),
+      'barcode': PassiveBarcodeTransformer(getNode, this),
       'loadingIndicator': PassiveLoadingIndicatorTransformer(getNode, this),
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),
@@ -198,6 +199,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = wrapWithSemantics(styled, widget);
       widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
+    }
+    // Inside the node's rotation and motion, so a flight starts from where
+    // the node is drawn (a card moved back in a stack) and flies the node
+    // itself.
+    if (!settings.isPreview) {
+      widget = applyHero(context, styled, widget);
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
