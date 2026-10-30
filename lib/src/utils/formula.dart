@@ -2064,10 +2064,12 @@ final Map<String, _Function> _functions = {
     for (int i = 0; i + 1 < a.length; i += 2)
       FormulaEvaluator.stringify(a[i]): a[i + 1],
   },
-  // The first argument that is neither null nor empty text.
+  // The first argument that is neither null nor empty text; otherwise the
+  // last one, the fallback, so `coalesce(x, '')` is text even when x is
+  // missing.
   'coalesce': (a) => a.firstWhere(
     (v) => v != null && !(v is String && v.isEmpty),
-    orElse: () => null,
+    orElse: () => a.isEmpty ? null : a.last,
   ),
 };
 
