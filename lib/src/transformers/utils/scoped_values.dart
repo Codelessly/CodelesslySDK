@@ -29,6 +29,10 @@ class ScopedValues {
   /// [NodeDrag]), or null outside one: what the `drag` variable reads.
   late final DragValues? dragValues;
 
+  /// The drag track of the nearest value control above this context (see
+  /// [NodeDragTrack]), or null outside one: what the `track` variable reads.
+  late final TrackValues? trackValues;
+
   /// The route params for this route/page for given context.
   late final Map<String, dynamic> routeParams;
 
@@ -96,6 +100,7 @@ class ScopedValues {
       nodeState = null,
       holdProgress = null,
       dragValues = null,
+      trackValues = null,
       routeParams = {},
       _appUser = null,
       screenSize = null,
@@ -125,7 +130,8 @@ class ScopedValues {
        _previewVariables = variables,
        nodeState = null,
        holdProgress = null,
-      dragValues = null,
+       dragValues = null,
+       trackValues = null,
        routeParams = routeParams ?? {};
 
   /// Creates a new scoped values instance from a given context.
@@ -147,6 +153,7 @@ class ScopedValues {
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     holdProgress = HoldProgressProvider.maybeOf(context);
     dragValues = DragScope.maybeOf(context);
+    trackValues = TrackScope.maybeOf(context);
     final instance = context.read<Codelessly?>();
     // Screens the app navigates to carry their parameters; the first screen
     // shows in the host's route and takes them from the app's link.
