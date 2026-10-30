@@ -44,6 +44,7 @@ export 'passive_spacer_transformer.dart';
 export 'passive_stack_transformer.dart';
 export 'passive_switch_transformer.dart';
 export 'passive_tab_bar_transformer.dart';
+export 'passive_tabs_transformer.dart';
 export 'passive_text_field_transformer.dart';
 export 'passive_text_transformer.dart';
 export 'passive_variance_transformer.dart';
