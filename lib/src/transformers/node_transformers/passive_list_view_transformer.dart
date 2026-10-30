@@ -183,6 +183,23 @@ class PassiveListViewWidget extends StatelessWidget {
     );
   }
 
+  /// The first node in [item]'s subtree that is a reorder handle (its drag
+  /// has [DragModel.reorder]), or null when the rows can't be reordered.
+  BaseNode? reorderHandleOf(BaseNode item) {
+    if (item.drag?.reorder == true) return item;
+    for (final String id in item.childrenOrEmpty) {
+      final BaseNode child;
+      try {
+        child = manager.getNode(id);
+      } catch (_) {
+        continue;
+      }
+      final BaseNode? found = reorderHandleOf(child);
+      if (found != null) return found;
+    }
+    return null;
+  }
+
   /// Builds one item, placed as the editor lays it out; see [ListItemBox].
   /// Legacy wrapping lists retain their item sizing and scroll behavior.
   Widget buildItem(BaseNode item, BuildContext context) {
@@ -527,6 +544,52 @@ class PassiveListViewWidget extends StatelessWidget {
       return box(
         canShrinkWrap: true,
         (context, scrolls) => wrapped(scrolls, itemCount ?? 0, itemBuilder),
+      );
+    }
+    // A row with a reorder handle (a node whose drag has `reorder`) can be
+    // dragged by it to a new place; dropping runs the handle's reorder
+    // reactions with the old and new index.
+    final BaseNode? handle = settings.isPreview || data == null
+        ? null
+        : reorderHandleOf(item);
+    if (handle != null && !listWraps(node)) {
+      final double gap = node.properties.hasSeparator
+          ? math.max(0, node.properties.separatorSpacing)
+          : 0;
+      final bool vertical = node.scrollDirection == AxisC.vertical;
+      return box(
+        canShrinkWrap: true,
+        (context, shrinkWrap) => ReorderableListView.builder(
+          shrinkWrap: shrinkWrap || !node.isScrollable,
+          physics: node.isScrollable
+              ? null
+              : const NeverScrollableScrollPhysics(),
+          padding: node.padding.flutterEdgeInsets,
+          scrollDirection: node.scrollDirection.flutterAxis,
+          buildDefaultDragHandles: false,
+          itemCount: itemCount ?? 0,
+          proxyDecorator: (child, index, animation) =>
+              Material(type: MaterialType.transparency, child: child),
+          onReorderItem: (int from, int to) {
+            FunctionsRepository.triggerAction(
+              context,
+              TriggerType.reorder,
+              reactions: handle is ReactionMixin
+                  ? (handle as ReactionMixin).reactions
+                  : const [],
+              result: {'from': from, 'to': to},
+            );
+          },
+          itemBuilder: (context, index) => Padding(
+            key: ValueKey(('reorder', itemKey(index))),
+            padding: index == (itemCount ?? 0) - 1
+                ? EdgeInsets.zero
+                : vertical
+                ? EdgeInsets.only(bottom: gap)
+                : EdgeInsets.only(right: gap),
+            child: itemBuilder(context, index),
+          ),
+        ),
       );
     }
     if (itemCount != null && listBuildsAllItems(node)) {
