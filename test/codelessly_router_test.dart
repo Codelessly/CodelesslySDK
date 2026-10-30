@@ -354,5 +354,21 @@ void main() {
       // Nothing reached the browser.
       expect(calls, isEmpty);
     });
+
+    testWidgets("it opens on its controller's screen", (tester) async {
+      final router = CodelesslyRouter(
+        controller: CodelesslyWidgetController(
+          codelessly: codelesslyFor(appModel()),
+          layoutID: 'journal',
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router.config(syncWithBrowser: false)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Journal'), findsOneWidget);
+      // Nothing below it.
+      expect(router.delegate.canGoBack, isFalse);
+    });
   });
 }

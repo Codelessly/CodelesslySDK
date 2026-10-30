@@ -42,9 +42,12 @@ class CodelesslyRouter {
   /// Creates a router for the app [controller] loads. [basePath] prefixes
   /// every URL, such as `/my-app` for a site served under it. Screens with
   /// a URL path are at `[basePath]/[path]`; others at `[basePath]/[canvasId]`;
-  /// the app's entry screen at [basePath]. [initialLocation] is the screen
-  /// to show first when the router doesn't sync with the browser, such as
-  /// `/guide/bat-star`.
+  /// the app's entry screen at [basePath].
+  ///
+  /// When the router doesn't sync with the browser, it first shows
+  /// [initialLocation], such as `/guide/bat-star`, above the entry screen
+  /// as a link would; else the screen of [controller]'s layout ID alone;
+  /// else the entry screen.
   CodelesslyRouter({
     required this.controller,
     String basePath = '',
@@ -325,7 +328,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   final CodelesslyWidgetController controller;
 
   /// The screen to show first when no browser gives one, such as
-  /// `/guide/bat-star`; the entry screen when null.
+  /// `/guide/bat-star`, above the entry screen. When null, the screen of
+  /// [controller]'s layout ID, else the entry screen.
   final String? initialLocation;
 
   /// Whether the browser's address and history follow the stack, as for the
@@ -429,10 +433,15 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     if (pending != null) {
       unawaited(setNewRoutePath(pending));
     } else if (routes.isEmpty) {
-      _restore([
-        if (initialLocation != null && initialLocation != '/') '/',
-        _canonical(initialLocation ?? '/'),
-      ], fromLink: true);
+      final String? link = initialLocation;
+      final String? screen = controller.layoutID;
+      if (link != null) {
+        _restore([if (_canonical(link) != '/') '/', link], fromLink: true);
+      } else {
+        _restore([
+          (screen == null ? null : locationFor(screen, const {})) ?? '/',
+        ]);
+      }
     } else {
       notifyListeners();
     }
