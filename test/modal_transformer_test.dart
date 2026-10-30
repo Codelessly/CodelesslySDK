@@ -39,6 +39,9 @@ void main() {
       'name': 'Content',
       'type': 'column',
       'basicBoxLocal': [0, 0, 200, 100],
+      'verticalFit': 'shrinkWrap',
+      'horizontalFit': 'shrinkWrap',
+      'crossAxisAlignment': 'center',
       'children': ['close'],
     });
     content.parentID = modal.id;
@@ -79,6 +82,7 @@ void main() {
       ChangeNotifierProvider<CodelesslyContext>.value(
         value: CodelesslyContext.empty(),
         child: MaterialApp(
+          debugShowCheckedModeBanner: false,
           theme: ThemeData(fontFamily: 'Roboto'),
           home: Scaffold(
             body: Center(
@@ -106,6 +110,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(Dialog), findsOneWidget);
     expect(find.text('Close'), findsOneWidget);
+    final dialogRect = tester.getRect(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
+    );
+    final closeRect = tester.getRect(find.text('Close'));
+    expect(dialogRect.width, lessThanOrEqualTo(560));
+    expect(closeRect.center.dx, closeTo(dialogRect.center.dx, 24));
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
     expect(find.byType(Dialog), findsNothing);
