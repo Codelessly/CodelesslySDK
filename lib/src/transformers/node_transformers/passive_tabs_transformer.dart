@@ -55,7 +55,7 @@ class _PassiveTabsWidgetState extends State<PassiveTabsWidget> {
       // Reject an ancestor or a cycle in the parent chain before rendering.
       final visited = <String>{widget.node.id};
       BaseNode current = widget.node;
-      while (current.parentID.isNotEmpty) {
+      while (current.parentID.isNotEmpty && current.parentID != kRootNode) {
         if (!visited.add(current.parentID)) return null;
         if (current.parentID == id) return null;
         current = widget.manager.getNode(current.parentID);
