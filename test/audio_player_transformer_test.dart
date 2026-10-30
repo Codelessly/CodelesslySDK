@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -86,6 +87,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: ThemeData(fontFamily: 'Roboto'),
         home: Scaffold(
           body: Center(
             child: PassiveAudioPlayerWidget(
@@ -198,6 +200,15 @@ void main() {
     final icons = FontLoader('MaterialIcons')
       ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
     await icons.load();
+    final loaded = await tester.runAsync(() async {
+      final roboto = await File('../material_icons/assets/Roboto-Regular.ttf')
+          .readAsBytes();
+      await (FontLoader('Roboto')
+            ..addFont(Future.value(roboto.buffer.asByteData())))
+          .load();
+      return true;
+    });
+    expect(loaded, isTrue);
     await tester.binding.setSurfaceSize(const Size(400, 240));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await mount(tester, null);
