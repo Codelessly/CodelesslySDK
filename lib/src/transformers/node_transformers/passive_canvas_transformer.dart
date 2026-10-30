@@ -1067,11 +1067,13 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     if (event is KeyUpEvent || !mounted) return false;
     if (!(ModalRoute.of(context)?.isCurrent ?? true)) return false;
     final BuildContext? focused = FocusManager.instance.primaryFocus?.context;
-    if (focused != null &&
+    final bool typing =
+        focused != null &&
         (focused.widget is EditableText ||
-            focused.findAncestorWidgetOfExactType<EditableText>() != null)) {
-      return false;
-    }
+            focused.findAncestorWidgetOfExactType<EditableText>() != null);
+    // Keys belong to the field being typed in, except Escape, which leaves
+    // it (`${result.typing}` tells the actions).
+    if (typing && event.logicalKey != LogicalKeyboardKey.escape) return false;
     // Shift, Control, Alt and Meta alone are modifiers of the next key.
     if (_modifierKeys.contains(event.logicalKey)) return false;
     final String key = keyTriggerLabel(event.logicalKey);
@@ -1093,6 +1095,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
         'shift': keyboard.isShiftPressed,
         'alt': keyboard.isAltPressed,
         'meta': keyboard.isMetaPressed || keyboard.isControlPressed,
+        'typing': typing,
       },
     );
     // A reaction for a specific key takes it (an arrow doesn't also scroll
