@@ -1159,6 +1159,13 @@ extension BoxWidthStyleEnumExtensions on BoxWidthStyleEnum {
   }
 }
 
+/// The codepoint of [icon] in the MaterialIcons font that ships with
+/// Flutter, found by its name and style, or null when Flutter doesn't have it.
+int? flutterIconCodepoint(MaterialIcon icon) {
+  final String styled = icon.styledName;
+  return flutterIconsDataMap[flutterIconNames[styled] ?? styled];
+}
+
 extension IconModelExt on IconModel {
   /// This icon's glyph swapped for the one called [name] (e.g. `star_border`)
   /// in the same set and style, or this icon when [name] is empty or the set

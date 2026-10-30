@@ -1063,12 +1063,19 @@ class SvgIcon extends StatelessWidget {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
     // Material Icons ship with Flutter; use their bundled glyph offline.
-    if (icon is MaterialIcon && icon.codepoint > 0) {
-      return Icon(
-        IconData(icon.codepoint, fontFamily: icon.fontFamily),
-        size: dimension,
-        color: iconColor,
-      );
+    // The glyph is looked up by name and style in Flutter's own table:
+    // stored codepoints come from Google's catalog (the icon picker's), whose
+    // numbers differ from Flutter's font (play_arrow is 0xe037 there, which
+    // is ac_unit in Flutter's font).
+    if (icon case final MaterialIcon material) {
+      final int? codepoint = flutterIconCodepoint(material);
+      if (codepoint != null) {
+        return Icon(
+          IconData(codepoint, fontFamily: 'MaterialIcons'),
+          size: dimension,
+          color: iconColor,
+        );
+      }
     }
 
     final url = icon.toSvgUrl(
