@@ -75,6 +75,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'gridView': PassiveGridViewTransformer(getNode, this),
       'pageView': PassivePageViewTransformer(getNode, this),
       'tabBar': PassiveTabBarTransformer(getNode, this),
+      'tabs': PassiveTabsTransformer(getNode, this),
       'badge': PassiveBadgeTransformer(getNode, this),
       'chip': PassiveChipTransformer(getNode, this),
       'segmentedButton': PassiveSegmentedButtonTransformer(getNode, this),
