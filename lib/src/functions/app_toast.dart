@@ -15,6 +15,12 @@ import 'action_chain.dart';
 /// color of its [ShowToastAction.style]. The action's own colors, fonts,
 /// radius, border and shadows override that look. It can carry a button,
 /// e.g. Undo, that runs [ShowToastAction.actions], and a close (×) button.
+///
+/// With a [ShowToastAction.title] the toast is a card: the bold title over
+/// the message, after the icon (in a filled disc with
+/// [ShowToastAction.iconDiscColor]). Colors bound in
+/// [ShowToastAction.variables] are read when the toast shows (see
+/// [ActionColorBindings]) and win over the action's own.
 class AppToast {
   AppToast._();
 
@@ -35,6 +41,12 @@ class AppToast {
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
     );
     final String message = text(action.message);
+    final String title = action.hasTitle ? text(action.title) : '';
+    final Map<String, Color> colors = ActionColorBindings.resolve(
+      action.variables,
+      scopedValues,
+      keys: ShowToastAction.bindableColors,
+    );
     final String actionLabel = action.hasAction ? text(action.actionLabel) : '';
     final ResolvedFeedbackTheme theme = FeedbackTheme.of(context);
     // Without a font of its own, the toast takes the app's text style at
@@ -73,6 +85,8 @@ class AppToast {
       builder: (context) => _ToastView(
         action: action,
         message: message,
+        title: title,
+        colors: colors,
         actionLabel: actionLabel,
         theme: theme,
         font: font,
@@ -188,6 +202,8 @@ class _ToastView extends StatefulWidget {
   const _ToastView({
     required this.action,
     required this.message,
+    required this.title,
+    required this.colors,
     required this.actionLabel,
     required this.theme,
     required this.font,
@@ -198,6 +214,12 @@ class _ToastView extends StatefulWidget {
 
   final ShowToastAction action;
   final String message;
+
+  /// The bold line above [message]; empty for none.
+  final String title;
+
+  /// Colors bound in [ShowToastAction.variables], by field name.
+  final Map<String, Color> colors;
   final String actionLabel;
   final ResolvedFeedbackTheme theme;
   final TextStyle font;
@@ -258,20 +280,31 @@ class _ToastViewState extends State<_ToastView> {
       action.style,
       theme,
     );
-    final Color background =
-        action.backgroundColor?.toFlutterColor() ?? styleBackground;
+    final Map<String, Color> bound = widget.colors;
+    final Color? ownBackground =
+        bound['backgroundColor'] ?? action.backgroundColor?.toFlutterColor();
+    final Color background = ownBackground ?? styleBackground;
     final Color textColor =
+        bound['textColor'] ??
         action.textColor?.toFlutterColor() ??
-        (action.backgroundColor == null
+        (ownBackground == null
             ? styleForeground
             : ResolvedFeedbackTheme.onColor(background));
-    final Color? accent = action.accentColor?.toFlutterColor();
+    final bool hasTitle = widget.title.trim().isNotEmpty;
+    final Color? ownMessageColor =
+        bound['messageColor'] ?? action.messageColor?.toFlutterColor();
+    final Color? accent =
+        bound['accentColor'] ?? action.accentColor?.toFlutterColor();
     // The icon's own color, unless [ShowToastAction.iconColor] is set, else
     // the message color.
-    final MultiSourceIconModel? iconModel = action.iconColor == null
+    final Color? iconColor =
+        bound['iconColor'] ?? action.iconColor?.toFlutterColor();
+    final MultiSourceIconModel? iconModel = iconColor == null
         ? action.icon
-        : action.icon?.copyWith(color: action.iconColor);
-    final Widget? icon = iconModel == null
+        : action.icon?.copyWith(color: iconColor.toColorRGBA());
+    final Color? iconDisc =
+        bound['iconDiscColor'] ?? action.iconDiscColor?.toFlutterColor();
+    Widget? icon = iconModel == null
         ? null
         : retrieveIconWidget(
             iconModel,
@@ -279,20 +312,32 @@ class _ToastViewState extends State<_ToastView> {
             action.iconSize != 18 ? action.iconSize : iconModel.size ?? 18,
             textColor,
           );
+    if (icon != null && iconDisc != null) {
+      icon = Container(
+        key: const ValueKey('codelessly-toast-icon-disc'),
+        width: action.iconDiscSize,
+        height: action.iconDiscSize,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(color: iconDisc, shape: BoxShape.circle),
+        child: icon,
+      );
+    }
     final bool hasButton = widget.onAction != null;
     final Map<dynamic, dynamic> options = action.toJson();
     final bool hasClose =
         action.showClose || options['showCloseButton'] == true;
-    final String alignment = '${options['alignment'] ?? 'center'}'
-        .split('.')
-        .last;
-    final bool stretch = alignment == 'stretch';
-    final bool top = action.position == ToastPosition.top;
     final MediaQueryData media = MediaQuery.of(context);
+    final String alignment = action.alignmentFor(media.size.width).name;
+    // A fixed-width card (minWidth up to maxWidth) spreads its row like a
+    // stretched toast: the button and close sit at its end.
+    final bool stretch =
+        alignment == 'stretch' ||
+        (action.minWidth > 0 && action.minWidth >= action.maxWidth);
+    final bool top = action.position == ToastPosition.top;
     final double fontSize =
         action.fontSize ?? (options['fontSize'] as num?)?.toDouble() ?? 14;
     final TextStyle font = widget.font;
-    final TextStyle messageStyle = action.messageStyle
+    final TextStyle textStyle = action.messageStyle
         .applyTo(
           font.copyWith(
             color: textColor,
@@ -306,8 +351,23 @@ class _ToastViewState extends State<_ToastView> {
               ? font.fontFamily
               : null,
         );
+    // Under a title the message is a fainter body line.
+    final TextStyle messageStyle = ownMessageColor != null
+        ? textStyle.copyWith(color: ownMessageColor)
+        : hasTitle && action.messageStyle?.color == null
+        ? textStyle.copyWith(color: textColor.withValues(alpha: 0.72))
+        : textStyle;
+    final TextStyle titleStyle = action.titleStyle.applyTo(
+      textStyle.copyWith(
+        color: textColor,
+        fontWeight: FontWeight.w700,
+        height: 1.25,
+      ),
+    );
     final Color actionColor =
-        action.actionColor?.toFlutterColor() ?? messageStyle.color!;
+        bound['actionColor'] ??
+        action.actionColor?.toFlutterColor() ??
+        textStyle.color!;
     final TextStyle actionStyle = action.actionStyle.applyTo(
       theme.buttonStyle
           .merge(font)
@@ -319,13 +379,45 @@ class _ToastViewState extends State<_ToastView> {
           ),
     );
     final Color closeColor =
-        action.closeColor?.toFlutterColor() ?? messageStyle.color!;
+        bound['closeColor'] ??
+        action.closeColor?.toFlutterColor() ??
+        textStyle.color!;
     final double buttonRadius = action.cornerRadius != null
         ? (action.cornerRadius! / 2).clamp(0, theme.buttonRadius).toDouble()
         : theme.buttonRadius;
-    final BorderSide? outline = action.border == null
+    BorderSide? outline = action.border == null
         ? null
         : borderSideOf(action.border!);
+    final Color? borderColor = bound['borderColor'];
+    if (borderColor != null) {
+      outline = outline == null || outline == BorderSide.none
+          ? BorderSide(color: borderColor)
+          : outline.copyWith(color: borderColor);
+    }
+
+    final Widget texts = !hasTitle
+        ? Text(widget.message, style: messageStyle)
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.title,
+                key: const ValueKey('codelessly-toast-title'),
+                style: titleStyle,
+              ),
+              if (widget.message.trim().isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  widget.message,
+                  key: const ValueKey('codelessly-toast-message'),
+                  style: messageStyle,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ],
+          );
 
     final BorderRadius radius = BorderRadius.circular(
       action.cornerRadius ??
@@ -333,7 +425,11 @@ class _ToastViewState extends State<_ToastView> {
     );
     Widget toast = Container(
       key: const ValueKey('codelessly-toast'),
-      constraints: BoxConstraints(minHeight: 44, maxWidth: action.maxWidth),
+      constraints: BoxConstraints(
+        minHeight: 44,
+        minWidth: action.minWidth.clamp(0, action.maxWidth).toDouble(),
+        maxWidth: action.maxWidth,
+      ),
       padding:
           action.padding?.flutterEdgeInsets ??
           EdgeInsets.fromLTRB(
@@ -358,11 +454,14 @@ class _ToastViewState extends State<_ToastView> {
       child: Row(
         mainAxisSize: stretch ? MainAxisSize.max : MainAxisSize.min,
         children: [
-          if (icon != null) ...[icon, const SizedBox(width: 8)],
+          if (icon != null) ...[
+            icon,
+            SizedBox(width: iconDisc != null || hasTitle ? 12 : 8),
+          ],
           if (stretch)
-            Expanded(child: Text(widget.message, style: messageStyle))
+            Expanded(child: texts)
           else
-            Flexible(child: Text(widget.message, style: messageStyle)),
+            Flexible(child: texts),
           if (hasButton) ...[
             const SizedBox(width: 8),
             TextButton(
@@ -427,7 +526,11 @@ class _ToastViewState extends State<_ToastView> {
     toast = Semantics(
       liveRegion: true,
       container: true,
-      label: widget.message,
+      label: hasTitle && widget.message.trim().isNotEmpty
+          ? '${widget.title}. ${widget.message}'
+          : hasTitle
+          ? widget.title
+          : widget.message,
       child: AnimatedOpacity(
         opacity: _visible ? 1 : 0,
         alwaysIncludeSemantics: true,
@@ -448,9 +551,10 @@ class _ToastViewState extends State<_ToastView> {
       ),
     );
 
+    final double sideMargin = action.sideMarginFor(media.size.width);
     return Positioned(
-      left: (options['sideMargin'] as num?)?.toDouble() ?? 16,
-      right: (options['sideMargin'] as num?)?.toDouble() ?? 16,
+      left: sideMargin,
+      right: sideMargin,
       top: top ? media.padding.top + (widget.offset ?? 16) : null,
       bottom: top
           ? null
