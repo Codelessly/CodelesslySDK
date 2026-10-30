@@ -222,6 +222,58 @@ void main() {
       );
     });
 
+    testWidgets('a text field takes bound fonts for its input and hint', (
+      tester,
+    ) async {
+      final query = textVariable('query', 'hello');
+      final TextFieldNode field = TextFieldNode.fromJson({
+        ...TextFieldNode(
+          id: 'field',
+          name: 'Field',
+          basicBoxLocal: NodeBox(0, 0, 300, 48),
+          properties: TextFieldProperties(),
+        ).toJson(),
+        'variables': {
+          'fontFamily': r"${= textDirectionOf(query) == 'rtl' ? 'IBM Plex Sans Arabic' : 'IBM Plex Sans'}",
+          'fontSize': r'${= 17}',
+        },
+      })..parentID = kRootNode;
+      final registry = NodeRegistry()..setNodes({field.id: field});
+      final manager = PassiveNodeTransformerManager(
+        registry.getNodeByID,
+        (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+      );
+      final context = CodelesslyContext.empty()..variables['query'] = query;
+      late BuildContext host;
+      await tester.pumpWidget(
+        ChangeNotifierProvider<CodelesslyContext>.value(
+          value: context,
+          child: MaterialApp(
+            home: Builder(
+              builder: (c) {
+                host = c;
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      );
+      TextFieldProperties props() => (manager.applyStyleOverrides(
+        host,
+        field,
+      ) as TextFieldNode).properties;
+      expect(props().inputStyle.fontName.family, 'IBM Plex Sans');
+      expect(props().inputStyle.fontSize, 17);
+      expect(props().decoration.hintStyle.fontName.family, 'IBM Plex Sans');
+
+      query.value = query.value.copyWith(value: 'شكرا');
+      expect(props().inputStyle.fontName.family, 'IBM Plex Sans Arabic');
+      expect(
+        props().decoration.hintStyle.fontName.family,
+        'IBM Plex Sans Arabic',
+      );
+    });
+
     testWidgets('fontFamily and fontSize follow their bindings', (
       tester,
     ) async {
