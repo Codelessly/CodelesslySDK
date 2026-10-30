@@ -336,6 +336,9 @@ class ConditionEvaluator<R extends Object>
   R? visitSpeakAction(SpeakAction action) => null;
 
   @override
+  R? visitFocusFieldAction(FocusFieldAction action) => null;
+
+  @override
   R? visitPaywallAction(PaywallAction action) => null;
 
   @override
@@ -502,6 +505,11 @@ class ConditionPrinter
 
   @override
   void visitCopyToClipboardAction(CopyToClipboardAction action) {}
+
+  @override
+  void visitFocusFieldAction(FocusFieldAction action) {
+    _buffer.writeln('\tFocus field: ${action.unfocus ? 'none' : action.nodeId}');
+  }
 
   @override
   void visitSpeakAction(SpeakAction action) {

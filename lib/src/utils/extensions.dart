@@ -1903,6 +1903,7 @@ extension ActionModelExt on ActionModel {
         };
       case ActionType.delay:
       case ActionType.controlDrag:
+      case ActionType.focusField:
         return {};
       case ActionType.speak:
         final SpeakAction action = this as SpeakAction;
