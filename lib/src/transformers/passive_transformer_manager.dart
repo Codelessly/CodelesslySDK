@@ -54,6 +54,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'accordion': PassiveAccordionTransformer(getNode, this),
       'listTile': PassiveListTileTransformer(getNode, this),
       'embeddedVideo': PassiveEmbeddedVideoTransformer(getNode, this),
+      'video': PassiveVideoTransformer(getNode, this),
       'divider': PassiveDividerTransformer(getNode, this),
       'loadingIndicator': PassiveLoadingIndicatorTransformer(getNode, this),
       'dropdown': PassiveDropdownTransformer(getNode, this),
