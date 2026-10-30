@@ -4,18 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-ButtonNode button(ButtonProperties properties) => (switch (properties.buttonType) {
-  ButtonTypeEnum.elevated => ElevatedButtonNode.new,
-  ButtonTypeEnum.text => TextButtonNode.new,
-  ButtonTypeEnum.outlined => OutlinedButtonNode.new,
-  ButtonTypeEnum.icon => IconButtonNode.new,
-  ButtonTypeEnum.filled || ButtonTypeEnum.filledTonal => FilledButtonNode.new,
-})(
-  id: 'button',
-  name: 'Button',
-  basicBoxLocal: NodeBox(0, 0, 160, 48),
-  properties: properties,
-)..parentID = kRootNode;
+ButtonNode button(ButtonProperties properties) =>
+    (switch (properties.buttonType) {
+        ButtonTypeEnum.elevated => ElevatedButtonNode.new,
+        ButtonTypeEnum.text => TextButtonNode.new,
+        ButtonTypeEnum.outlined => OutlinedButtonNode.new,
+        ButtonTypeEnum.icon => IconButtonNode.new,
+        ButtonTypeEnum.filled ||
+        ButtonTypeEnum.filledTonal => FilledButtonNode.new,
+      })(
+        id: 'button',
+        name: 'Button',
+        basicBoxLocal: NodeBox(0, 0, 160, 48),
+        properties: properties,
+      )
+      ..parentID = kRootNode;
 
 /// Pumps [node] through the passive manager, as a layout renders it.
 Future<void> pumpNode(
@@ -58,6 +61,33 @@ Color? background(ButtonStyle style) =>
     style.backgroundColor?.resolve(const <WidgetState>{});
 
 void main() {
+  testWidgets(
+    'unset filled button uses theme primary; explicit black remains black',
+    (tester) async {
+      for (final ColorRGBA? color in [null, ColorRGBA.black]) {
+        await pumpNode(
+          tester,
+          button(
+            ButtonProperties(
+              buttonType: ButtonTypeEnum.filled,
+              label: 'Close',
+              buttonColor: color,
+            ),
+          ),
+        );
+        final filled = tester.widget<FilledButton>(find.byType(FilledButton));
+        final primary = Theme.of(tester.element(find.byType(FilledButton)))
+            .colorScheme
+            .primary;
+        expect(
+          filled.style?.backgroundColor?.resolve(const <WidgetState>{}),
+          color == null ? primary : Colors.black,
+        );
+        expect(tester.takeException(), isNull);
+      }
+    },
+  );
+
   group('A label with inline variables or formulas re-renders', () {
     for (final String label in [r'${count} tasks', r'${= count * 2} tasks']) {
       testWidgets(label, (tester) async {
