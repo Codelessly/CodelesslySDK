@@ -54,6 +54,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'autoPlaceholder': PassiveRowColumnTransformer(getNode, this),
       'rectangle': PassiveRectangleTransformer(getNode, this),
       'ellipse': PassiveRectangleTransformer(getNode, this),
+      'path': PassivePathTransformer(getNode, this),
       'text': PassiveTextTransformer(getNode, this),
       'radio': PassiveRadioTransformer(getNode, this),
       'icon': PassiveIconTransformer(getNode, this),
