@@ -162,9 +162,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         return _buildDecorated(context, node, settings);
       },
     );
-    return settings.withReactions
-        ? wrapWithInteractionScopes(context, node, built)
-        : built;
+    // A node a Scroll To action targets records where it is built.
+    return ScrollTargets.wrap(
+      node,
+      settings.withReactions
+          ? wrapWithInteractionScopes(context, node, built)
+          : built,
+    );
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -252,7 +256,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// variables or formulas, or set value actions give it at runtime: `fill`
   /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
   /// `height`, `flex`, `rotation`, and the properties of [StyleBindings]
-  /// (effects, stroke weight, corner radius, padding, font weight, icon).
+  /// (effects, stroke weight, corner radius, padding, font weight and size,
+  /// icon).
   /// Returns [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
     final ScopedValues scopedValues = ScopedValues.of(context);
@@ -350,7 +355,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       patch['rotation'] = rotation.round();
     }
 
-    // Effects, stroke weight, corner radius, font weight and icon.
+    // Effects, stroke weight, corner radius, font weight and size, and icon.
     StyleBindings.addTo(patch, node, scopedValues: scopedValues);
 
     // The states shown around the node (a property-override variant, its

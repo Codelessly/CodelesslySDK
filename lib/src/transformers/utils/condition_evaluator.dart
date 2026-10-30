@@ -339,6 +339,9 @@ class ConditionEvaluator<R extends Object>
   R? visitFocusFieldAction(FocusFieldAction action) => null;
 
   @override
+  R? visitScrollToAction(ScrollToAction action) => null;
+
+  @override
   R? visitPaywallAction(PaywallAction action) => null;
 
   @override
@@ -509,6 +512,11 @@ class ConditionPrinter
   @override
   void visitFocusFieldAction(FocusFieldAction action) {
     _buffer.writeln('\tFocus field: ${action.unfocus ? 'none' : action.nodeId}');
+  }
+
+  @override
+  void visitScrollToAction(ScrollToAction action) {
+    _buffer.writeln('\tScroll to: ${action.nodeId}');
   }
 
   @override
