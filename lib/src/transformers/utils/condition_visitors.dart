@@ -148,6 +148,9 @@ class ConditionVariablesVisitor
   Set<String>? visitPaywallAction(PaywallAction action) => {};
 
   @override
+  Set<String>? visitScrollToAction(ScrollToAction action) => {};
+
+  @override
   Set<String>? visitCloudDataAction(CloudDataAction action) => {};
 
   @override
@@ -248,6 +251,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitPaywallAction(PaywallAction action) => null;
+
+  @override
+  String? visitScrollToAction(ScrollToAction action) => null;
 
   @override
   String? visitCloudDataAction(CloudDataAction action) => null;

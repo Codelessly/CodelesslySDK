@@ -207,8 +207,9 @@ abstract class WidgetNodeTransformerManager
 
   /// The motion [node] shows now: its [BaseNode.motion] with the values
   /// bound through `motion.<name>` variables resolved from [scopedValues],
-  /// and `motion.replayKey` resolved to text. Null when the node doesn't
-  /// move.
+  /// `motion.replayKey` resolved to text and `motion.delayMs` to whole
+  /// milliseconds (e.g. `${= index * 80}` staggers list items). Null when
+  /// the node doesn't move.
   static MotionModel? resolveMotion(
     BaseNode node, {
     required ScopedValues scopedValues,
@@ -242,6 +243,24 @@ abstract class WidgetNodeTransformerManager
         replayKey: value?.toString(),
         clearReplayKey: value == null,
       );
+    }
+    const String delay = MotionModel.delayMsProperty;
+    if (node.variables.containsKey(MotionModel.variableKey(delay))) {
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        MotionModel.variableKey(delay),
+        scopedValues: scopedValues,
+      );
+      final num? ms = switch (value) {
+        num n => n,
+        String s => num.tryParse(s.trim()),
+        _ => null,
+      };
+      if (ms != null && ms.isFinite) {
+        motion = (motion ?? MotionModel.none).copyWith(
+          delayMs: max(0, ms.round()),
+        );
+      }
     }
     return motion;
   }
@@ -715,6 +734,35 @@ abstract class WidgetNodeTransformerManager
         direction,
         reactions: swipes,
       ),
+      child: widget,
+    );
+  }
+
+  /// Runs [node]'s [TriggerType.enterViewport] and
+  /// [TriggerType.exitViewport] reactions when it scrolls into and out of
+  /// view; see [ViewportReactionsBox].
+  Widget wrapWithViewportReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
+    if (node is! ReactionMixin) return widget;
+    final List<Reaction> reactions = (node as ReactionMixin).reactions
+        .where(
+          (reaction) =>
+              TriggerType.viewport.contains(reaction.trigger.type) &&
+              reaction.action.enabled,
+        )
+        .toList();
+    if (reactions.isEmpty) return widget;
+    return ViewportReactionsBox(
+      reactions: reactions,
+      onTrigger: (TriggerType type, List<Reaction> reactions) =>
+          FunctionsRepository.triggerAction(
+            context,
+            type,
+            reactions: reactions,
+          ),
       child: widget,
     );
   }

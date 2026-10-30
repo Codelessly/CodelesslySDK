@@ -6,6 +6,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -167,6 +168,8 @@ class FunctionsRepository {
         return copyToClipboard(context, action as CopyToClipboardAction);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
+      case ActionType.scrollTo:
+        return scrollToNode(context, action as ScrollToAction);
     }
   }
 
@@ -197,6 +200,66 @@ class FunctionsRepository {
         }
         await launchUrl(url, mode: LaunchMode.externalApplication);
     }
+    return true;
+  }
+
+  /// Scrolls every scrollable around the node [ScrollToAction.nodeId]
+  /// (variables in it substituted) so the node shows at the top, the
+  /// action's offset below the edge: the nearest scrollable brings the node
+  /// there, each one further out brings the scrollable inside it there.
+  /// Returns false when the node isn't shown or nothing around it scrolls.
+  static Future<bool> scrollToNode(
+    BuildContext context,
+    ScrollToAction action,
+  ) async {
+    final String nodeId = PropertyValueDelegate.substituteVariables(
+      action.nodeId,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: ActionChain.scopedValuesOf(context),
+    ).trim();
+    final BuildContext? target = NodeContextRegistry.find(
+      nodeId,
+      from: context,
+    );
+    if (target == null) {
+      DebugLogger.instance.printInfo(
+        'Scroll to: node "$nodeId" is not shown.',
+        name: name,
+      );
+      return false;
+    }
+    final List<Future<void>> scrolls = [];
+    RenderObject? object = target.findRenderObject();
+    ScrollableState? scrollable = Scrollable.maybeOf(target);
+    while (scrollable != null && object != null && object.attached) {
+      final RenderAbstractViewport? viewport = RenderAbstractViewport.maybeOf(
+        object,
+      );
+      if (viewport == null) break;
+      final ScrollPosition position = scrollable.position;
+      if (position.hasContentDimensions) {
+        final double offset =
+            (viewport.getOffsetToReveal(object, 0).offset - action.offset)
+                .clamp(position.minScrollExtent, position.maxScrollExtent)
+                .toDouble();
+        if ((offset - position.pixels).abs() >= 0.5) {
+          if (action.durationMs <= 0) {
+            position.jumpTo(offset);
+          } else {
+            scrolls.add(
+              position.animateTo(
+                offset,
+                duration: Duration(milliseconds: action.durationMs),
+                curve: flutterCurveOf(action.curve),
+              ),
+            );
+          }
+        }
+      }
+      object = scrollable.context.findRenderObject();
+      scrollable = Scrollable.maybeOf(scrollable.context);
+    }
+    await Future.wait(scrolls);
     return true;
   }
 
