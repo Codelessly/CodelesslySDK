@@ -42,6 +42,7 @@ void main() {
       'verticalFit': 'shrinkWrap',
       'horizontalFit': 'shrinkWrap',
       'crossAxisAlignment': 'center',
+      'spacing': 16,
       'children': ['title', 'close'],
     });
     content.parentID = modal.id;
@@ -144,6 +145,8 @@ void main() {
           .first,
     );
     final closeRect = tester.getRect(find.text('Close'));
+    final titleRect = tester.getRect(find.text('Dialog title'));
+    expect(closeRect.top - titleRect.bottom, greaterThanOrEqualTo(16));
     expect(dialogRect.width, lessThanOrEqualTo(560));
     expect(dialogRect.width, lessThan(400));
     expect(dialogRect.height, lessThan(300));
