@@ -505,8 +505,8 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'indexOf',
-      'indexOf(list, value) or indexOf(list, item => test)',
-      'indexOf(trips, t => t.id == id) → 2',
+      'indexOf(list, value), indexOf(list, item => test) or indexOf(text, part)',
+      'indexOf(trips, t => t.id == id) → 2; indexOf("Dining", "in") → 1',
     ),
     FormulaFunctionDoc(
       'object',
@@ -652,7 +652,7 @@ class FormulaEvaluator {
     FormulaFunctionDoc(
       'parseDate',
       'parseDate(text or millis)',
-      'parseDate("2026-10-21") → 2026-10-21T00:00:00.000',
+      'parseDate("2026-10-21"), parseDate("10/21/2026"), parseDate("Oct 21, 2026") → 2026-10-21; null when not a real date',
     ),
     FormulaFunctionDoc(
       'formatDate',
@@ -1409,7 +1409,7 @@ DateTime? _toDate(Object? value) {
       if (millis != null && text.length > 8) {
         return DateTime.fromMillisecondsSinceEpoch(millis);
       }
-      return DateTime.tryParse(text);
+      return DateTime.tryParse(text) ?? _typedDate(text);
     case Map():
       final Object? seconds = value['seconds'] ?? value['_seconds'];
       if (seconds is! num) return null;
@@ -1424,6 +1424,48 @@ DateTime? _toDate(Object? value) {
   } catch (_) {
     return null;
   }
+}
+
+
+/// A date as people type it: `10/03/2026` (month first), `Oct 3, 2026`,
+/// `October 3 2026`, `3 Oct 2026`. Null when it isn't one, or the day
+/// doesn't exist (`Feb 30, 2026`).
+DateTime? _typedDate(String text) {
+  DateTime? ymd(int y, int m, int d) {
+    if (m < 1 || m > 12 || d < 1) return null;
+    final DateTime date = DateTime(y, m, d);
+    return date.month == m ? date : null;
+  }
+
+  int month(String name) {
+    final String n = name.toLowerCase().replaceAll('.', '');
+    if (n.length < 3) return 0;
+    return _monthNames.indexWhere((m) => m.toLowerCase().startsWith(n)) + 1;
+  }
+
+  final RegExpMatch? us = RegExp(
+    r'^(\d{1,2})/(\d{1,2})/(\d{4})$',
+  ).firstMatch(text);
+  if (us != null) {
+    return ymd(int.parse(us[3]!), int.parse(us[1]!), int.parse(us[2]!));
+  }
+  final RegExpMatch? named = RegExp(
+    r'^([A-Za-z]+\.?)\s+(\d{1,2}),?\s+(\d{4})$',
+  ).firstMatch(text);
+  if (named != null) {
+    return ymd(int.parse(named[3]!), month(named[1]!), int.parse(named[2]!));
+  }
+  final RegExpMatch? dayFirst = RegExp(
+    r'^(\d{1,2})\s+([A-Za-z]+\.?),?\s+(\d{4})$',
+  ).firstMatch(text);
+  if (dayFirst != null) {
+    return ymd(
+      int.parse(dayFirst[3]!),
+      month(dayFirst[2]!),
+      int.parse(dayFirst[1]!),
+    );
+  }
+  return null;
 }
 
 /// ISO 8601 dates and date-times, such as `2026-10-21`,
