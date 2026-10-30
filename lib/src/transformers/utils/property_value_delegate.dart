@@ -573,7 +573,12 @@ class PropertyValueDelegate {
       // no app user: read as signed out rather than unknown.
       'auth' => scopedValues.appUser ?? AppAuth.userToMap(null),
       'result' => ActionChain.current?.result,
-      'screen' => scopedValues.screenSize?.let(screenVariableValue),
+      'screen' => scopedValues.screenSize?.let(
+        (Size size) => screenVariableValue(
+          size,
+          brightness: scopedValues.platformBrightness,
+        ),
+      ),
       'hold' => scopedValues.holdProgress ?? 0.0,
       _ => null,
     };
