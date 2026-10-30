@@ -50,6 +50,7 @@ class CodelessNodeTreeView extends StatefulWidget {
   final Map<String, BaseNode> nodes;
   final String rootId;
   final Map<String, dynamic> data;
+
   /// Optional external data source; updates the SDK context without reloading nodes.
   final ValueListenable<Map<String, dynamic>>? dataListenable;
   final Map<String, VariableData> variables;
@@ -102,8 +103,11 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
         if (node is ReactionMixin) {
           for (final reaction in (node as ReactionMixin).reactions) {
             if (reaction.action is! CallFunctionAction &&
-                !(widget.previewNativePaywallActions && reaction.action is PaywallAction)) {
-              throw ArgumentError('Standalone tree rejects action ${reaction.action.type} on node ${node.id}');
+                !(widget.previewNativePaywallActions &&
+                    reaction.action is PaywallAction)) {
+              throw ArgumentError(
+                'Standalone tree rejects action ${reaction.action.type} on node ${node.id}',
+              );
             }
           }
         }
@@ -120,7 +124,8 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
           for (final reaction in (node as ReactionMixin).reactions) {
             if (reaction.action is! CallFunctionAction) continue;
             final name = (reaction.action as CallFunctionAction).name;
-            context.functions[name] = (_, _, params) => widget.onAction?.call(name, params);
+            context.functions[name] = (_, _, params) =>
+                widget.onAction?.call(name, params);
           }
         }
       }
@@ -162,7 +167,8 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
       if (node is ReactionMixin) {
         for (final reaction in (node as ReactionMixin).reactions) {
           if (reaction.action is! CallFunctionAction &&
-              !(widget.previewNativePaywallActions && reaction.action is PaywallAction)) {
+              !(widget.previewNativePaywallActions &&
+                  reaction.action is PaywallAction)) {
             throw ArgumentError(
               'Standalone tree rejects action '
               '${reaction.action.type} on node ${node.id}',

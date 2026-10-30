@@ -1902,6 +1902,8 @@ extension ActionModelExt on ActionModel {
       case ActionType.copyToClipboard:
         strings.add((this as CopyToClipboardAction).text);
         return _namesIn(strings, includePredefined);
+      case ActionType.focus:
+        return {};
       case ActionType.cloudData:
         final CloudDataAction action = this as CloudDataAction;
         strings.addAll([

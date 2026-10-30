@@ -163,6 +163,15 @@ class PassiveTextFieldWidget extends StatefulWidget {
   State<PassiveTextFieldWidget> createState() => _PassiveTextFieldWidgetState();
 }
 
+/// Moves the keyboard focus to the text field of a node (Focus action).
+/// Returns whether that field is on screen.
+bool focusTextField(String nodeId, {bool selectAll = false}) =>
+    _PassiveTextFieldWidgetState.focus(nodeId, selectAll: selectAll);
+
+/// Takes the focus from the text field of [nodeId], or from any field.
+void unfocusTextField([String? nodeId]) =>
+    _PassiveTextFieldWidgetState.unfocus(nodeId);
+
 class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   late final TextEditingController controller = TextEditingController(
     text: boundValue() ?? getInitialText(widget.node.initialText),
@@ -182,6 +191,36 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
   final FocusNode focusNode = FocusNode();
 
+  /// The text fields on screen by node id, newest last, so a Focus action
+  /// can reach a field by its node.
+  static final Map<String, List<_PassiveTextFieldWidgetState>> _mounted = {};
+
+  /// Focuses the newest field of [nodeId] on screen (and selects its text
+  /// when [selectAll]); returns whether there was one.
+  static bool focus(String nodeId, {bool selectAll = false}) {
+    final _PassiveTextFieldWidgetState? state = _mounted[nodeId]?.lastOrNull;
+    if (state == null) return false;
+    state.focusNode.requestFocus();
+    if (selectAll) {
+      state.controller.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: state.controller.text.length,
+      );
+    }
+    return true;
+  }
+
+  /// Unfocuses the field of [nodeId] (any field when null).
+  static void unfocus([String? nodeId]) {
+    if (nodeId == null) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      return;
+    }
+    for (final _PassiveTextFieldWidgetState state in [...?_mounted[nodeId]]) {
+      state.focusNode.unfocus();
+    }
+  }
+
   String getInitialText(String text) {
     return PropertyValueDelegate.substituteVariables(
       text,
@@ -194,6 +233,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   void initState() {
     super.initState();
     focusNode.addListener(onFocusChanged);
+    (_mounted[widget.node.id] ??= []).add(this);
   }
 
   @override
@@ -271,6 +311,10 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
   @override
   void dispose() {
+    _mounted[widget.node.id]?.remove(this);
+    if (_mounted[widget.node.id]?.isEmpty ?? false) {
+      _mounted.remove(widget.node.id);
+    }
     controller.dispose();
     focusNode.dispose();
     super.dispose();
