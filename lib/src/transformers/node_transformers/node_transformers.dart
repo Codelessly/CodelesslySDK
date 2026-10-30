@@ -12,6 +12,7 @@ export 'passive_chip_transformer.dart';
 export 'passive_divider_transformer.dart';
 export 'passive_dropdown_transformer.dart';
 export 'passive_embedded_video_transformer.dart';
+export 'passive_video_transformer.dart';
 export 'passive_expansion_tile_transformer.dart';
 export 'passive_external_component_transformer.dart';
 export 'passive_floating_action_button_transformer.dart';
