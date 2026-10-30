@@ -342,11 +342,17 @@ class FreeformLayout extends MultiChildRenderObjectWidget {
   /// The container's inner size at design size.
   final Size designSize;
 
+  /// The direction children are placed in. Null takes the ambient
+  /// [Directionality]: right to left, every child is mirrored across the
+  /// container, so a design made left to right reads from the right edge.
+  final TextDirection? textDirection;
+
   const FreeformLayout({
     super.key,
     required this.wrapsWidth,
     required this.wrapsHeight,
     required this.designSize,
+    this.textDirection,
     super.children,
   });
 
@@ -356,6 +362,10 @@ class FreeformLayout extends MultiChildRenderObjectWidget {
         wrapsWidth: wrapsWidth,
         wrapsHeight: wrapsHeight,
         designSize: designSize,
+        textDirection:
+            textDirection ??
+            Directionality.maybeOf(context) ??
+            TextDirection.ltr,
       );
 
   @override
@@ -366,7 +376,9 @@ class FreeformLayout extends MultiChildRenderObjectWidget {
     renderObject
       ..wrapsWidth = wrapsWidth
       ..wrapsHeight = wrapsHeight
-      ..designSize = designSize;
+      ..designSize = designSize
+      ..textDirection =
+          textDirection ?? Directionality.maybeOf(context) ?? TextDirection.ltr;
   }
 }
 
@@ -379,10 +391,23 @@ class RenderFreeformLayout extends RenderBox
     required bool wrapsWidth,
     required bool wrapsHeight,
     required Size designSize,
+    TextDirection textDirection = TextDirection.ltr,
   }) {
     _wrapsWidth = wrapsWidth;
     _wrapsHeight = wrapsHeight;
     _designSize = designSize;
+    _textDirection = textDirection;
+  }
+
+  late TextDirection _textDirection;
+
+  /// Right to left, children are mirrored across the container.
+  TextDirection get textDirection => _textDirection;
+
+  set textDirection(TextDirection value) {
+    if (value == _textDirection) return;
+    _textDirection = value;
+    markNeedsLayout();
   }
 
   late bool _wrapsWidth;
@@ -536,15 +561,20 @@ class RenderFreeformLayout extends RenderBox
     }
     final Map<RenderBox, double> pushX = _flowPushes(sizes, true);
     final Map<RenderBox, double> pushY = _flowPushes(sizes, false);
+    final bool rtl = _textDirection == TextDirection.rtl;
     sizes.forEach((child, childSize) {
       final FreeformPlacement placement = _placementOf(child);
+      final double x =
+          placement.horizontal.offsetIn(
+            size.width,
+            childSize.width,
+            wraps: wrapsWidth,
+          ) +
+          (pushX[child] ?? 0);
       positions[child] = Offset(
-        placement.horizontal.offsetIn(
-              size.width,
-              childSize.width,
-              wraps: wrapsWidth,
-            ) +
-            (pushX[child] ?? 0),
+        // Right to left the child keeps its distance from the end edge
+        // instead of the start edge: its box mirrored across the container.
+        rtl ? size.width - x - childSize.width : x,
         placement.vertical.offsetIn(
               size.height,
               childSize.height,

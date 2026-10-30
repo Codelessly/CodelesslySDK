@@ -330,6 +330,9 @@ class ConditionEvaluator<R extends Object>
   R? visitCopyToClipboardAction(CopyToClipboardAction action) => null;
 
   @override
+  R? visitSpeakAction(SpeakAction action) => null;
+
+  @override
   R? visitPaywallAction(PaywallAction action) => null;
 
   @override
@@ -496,6 +499,13 @@ class ConditionPrinter
 
   @override
   void visitCopyToClipboardAction(CopyToClipboardAction action) {}
+
+  @override
+  void visitSpeakAction(SpeakAction action) {
+    _buffer.writeln(
+      action.stop ? '\tStop speaking' : '\tSpeak ${action.text}',
+    );
+  }
 
   @override
   void visitPaywallAction(PaywallAction action) {

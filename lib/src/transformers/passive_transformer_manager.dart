@@ -183,8 +183,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     WidgetBuildSettings settings,
   ) {
     final BaseNode styled = applyStyleOverrides(context, node);
-    Widget widget = getTransformerByNode(node)
-        .buildWidget(styled, context, settings);
+    final TextDirection? direction = layoutDirectionOf(context, styled);
+    Widget widget = direction == null
+        ? getTransformerByNode(node).buildWidget(styled, context, settings)
+        // The content (children, padding, text) is built under the
+        // direction, so it reaches every row, freeform layout and text in
+        // it; the node's own margin and place follow its parent.
+        : Directionality(
+            textDirection: direction,
+            child: Builder(
+              builder: (context) => getTransformerByNode(
+                node,
+              ).buildWidget(styled, context, settings),
+            ),
+          );
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
 
     if (settings.withOpacity) {
@@ -368,6 +380,37 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (styled == null) return node;
     return styled..parentID = node.parentID;
   }
+
+  /// The direction [node] lays out its content in, from its
+  /// `layoutDirection` variable (a fixed value or a binding such as
+  /// `${= uiLang == 'ar' ? 'rtl' : 'ltr'}`): `rtl` mirrors rows, freeform
+  /// children, padding, margins and text alignment of the subtree, `ltr`
+  /// restores left to right. Anything else (`inherit`, empty) keeps the
+  /// direction of the parent.
+  static TextDirection? layoutDirectionOf(BuildContext context, BaseNode node) {
+    final String? raw = node.variables[kLayoutDirection];
+    if (raw == null) return null;
+    // A fixed value, not a binding.
+    if (!raw.contains(r'${')) return parseLayoutDirection(raw);
+    final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+      node,
+      kLayoutDirection,
+      scopedValues: ScopedValues.of(context),
+    );
+    return parseLayoutDirection(value);
+  }
+
+  /// `rtl`/`ltr` (any case, also `right-to-left`, `true` for right to left)
+  /// as a [TextDirection]; null for anything else.
+  static TextDirection? parseLayoutDirection(Object? value) =>
+      switch (value?.toString().trim().toLowerCase()) {
+        'rtl' || 'right-to-left' || 'righttoleft' || 'true' => TextDirection.rtl,
+        'ltr' || 'left-to-right' || 'lefttoright' || 'false' => TextDirection.ltr,
+        _ => null,
+      };
+
+  /// The variables key of a node's layout direction binding.
+  static const String kLayoutDirection = 'layoutDirection';
 
   /// Moves [widget] to the node's bound `x`/`y` (variables, formulas or
   /// conditions): the distance from the parent's padded top-left to the

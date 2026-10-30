@@ -611,6 +611,12 @@ extension EdgeInsetsHelper on EdgeInsetsModel {
   flutter.EdgeInsets get flutterEdgeInsets =>
       flutter.EdgeInsets.fromLTRB(l, t, r, b);
 
+  /// The insets with left as the start side and right as the end side, so
+  /// they mirror in a right-to-left layout (see `layoutDirection`). The same
+  /// as [flutterEdgeInsets] left to right.
+  flutter.EdgeInsetsDirectional get flutterEdgeInsetsDirectional =>
+      flutter.EdgeInsetsDirectional.fromSTEB(l, t, r, b);
+
   bool get isSymmetric => l == r && r == t && t == b;
 
   bool get isHorizontalSymmetric => l == r;
@@ -976,10 +982,13 @@ extension TextAlignHorizontalEnumExtensions on TextAlignHorizontalEnum {
     switch (this) {
       case TextAlignHorizontalEnum.center:
         return TextAlign.center;
+      // Left and right are the start and end of the line, so text aligned
+      // left in a design lines up with the start edge of a right-to-left
+      // layout. Left to right it is the same.
       case TextAlignHorizontalEnum.left:
-        return TextAlign.left;
+        return TextAlign.start;
       case TextAlignHorizontalEnum.right:
-        return TextAlign.right;
+        return TextAlign.end;
       case TextAlignHorizontalEnum.justified:
         return TextAlign.justify;
       case TextAlignHorizontalEnum.start:
@@ -1901,6 +1910,15 @@ extension ActionModelExt on ActionModel {
         return _namesIn([?action.slot, ?action.url], includePredefined);
       case ActionType.copyToClipboard:
         strings.add((this as CopyToClipboardAction).text);
+        return _namesIn(strings, includePredefined);
+      case ActionType.speak:
+        final SpeakAction action = this as SpeakAction;
+        strings.addAll([
+          action.text,
+          action.language,
+          action.rate,
+          ?action.pitch,
+        ]);
         return _namesIn(strings, includePredefined);
       case ActionType.cloudData:
         final CloudDataAction action = this as CloudDataAction;
