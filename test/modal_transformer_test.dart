@@ -1,11 +1,14 @@
+import 'dart:io';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  testWidgets('Modal renders only trigger in the closed scene', (tester) async {
+  Future<void> mount(WidgetTester tester) async {
     final modal = ModalNode(
       id: 'modal',
       name: 'Modal',
@@ -21,25 +24,37 @@ void main() {
         label: 'Open',
         buttonType: ButtonTypeEnum.filled,
       ),
+    );
+    final content = ColumnNode.fromJson({
+      'id': 'content',
+      'name': 'Content',
+      'type': 'column',
+      'basicBoxLocal': [0, 0, 200, 100],
+      'children': ['close'],
+    });
+    content.parentID = modal.id;
+    final close = FilledButtonNode(
+      id: 'close',
+      name: 'Close',
+      basicBoxLocal: NodeBox(0, 0, 120, 40),
+      properties: ButtonProperties(
+        label: 'Close',
+        buttonType: ButtonTypeEnum.filled,
+      ),
       reactions: [
         Reaction(
-          action: ShowDialogAction(destinationId: 'content'),
+          action: CloseModalAction(),
           trigger: TriggerModel(type: TriggerType.click),
         ),
       ],
     );
-    final content = CanvasNode(
-      id: 'content',
-      name: 'Content',
-      basicBoxLocal: NodeBox(0, 0, 200, 100),
-      children: const [],
-      properties: CanvasProperties(
-        bodyId: 'body',
-        safeArea: const SafeAreaModel.all(false),
-      ),
-    );
     final registry = NodeRegistry()
-      ..setNodes({modal.id: modal, trigger.id: trigger, content.id: content});
+      ..setNodes({
+        modal.id: modal,
+        trigger.id: trigger,
+        content.id: content,
+        close.id: close,
+      });
     final manager = PassiveNodeTransformerManager(
       registry.getNodeByID,
       (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
@@ -48,18 +63,74 @@ void main() {
       ChangeNotifierProvider<CodelesslyContext>.value(
         value: CodelesslyContext.empty(),
         child: MaterialApp(
-          home: Builder(
-            builder: (context) => manager.buildWidgetFromNode(
-              modal,
-              context,
-              settings: const WidgetBuildSettings(debugLabel: 'modal'),
+          home: Scaffold(
+            body: Center(
+              child: Builder(
+                builder: (context) => manager.buildWidgetFromNode(
+                  modal,
+                  context,
+                  settings: const WidgetBuildSettings(debugLabel: 'modal'),
+                ),
+              ),
             ),
           ),
         ),
       ),
     );
-    expect(find.byType(FilledButton), findsOneWidget);
+  }
+
+  testWidgets('trigger opens arbitrary column content; closeModal closes it', (
+    tester,
+  ) async {
+    await mount(tester);
     expect(find.text('Open'), findsOneWidget);
-    expect(find.byType(Scaffold), findsNothing);
+    expect(find.text('Close'), findsNothing);
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    expect(find.byType(Dialog), findsOneWidget);
+    expect(find.text('Close'), findsOneWidget);
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+    expect(find.byType(Dialog), findsNothing);
+    expect(find.text('Close'), findsNothing);
+  });
+
+  testWidgets('closed and open dialog use real-font goldens', (tester) async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    await (FontLoader(
+      'MaterialIcons',
+    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+    final loaded = await tester.runAsync(() async {
+      final bytes = await File('../material_icons/assets/Roboto-Regular.ttf')
+          .readAsBytes();
+      await (FontLoader(
+        'Roboto',
+      )..addFont(Future.value(bytes.buffer.asByteData()))).load();
+      return true;
+    });
+    expect(loaded, isTrue);
+    await tester.binding.setSurfaceSize(const Size(400, 240));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await mount(tester);
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('goldens/modal_closed.png'),
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('goldens/modal_open.png'),
+    );
+  });
+
+  testWidgets('barrier dismisses modal content', (tester) async {
+    await mount(tester);
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    expect(find.text('Close'), findsOneWidget);
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+    expect(find.text('Close'), findsNothing);
   });
 }

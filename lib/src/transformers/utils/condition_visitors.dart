@@ -122,6 +122,9 @@ class ConditionVariablesVisitor
   Set<String>? visitShowDialogAction(ShowDialogAction action) => {};
 
   @override
+  Set<String>? visitCloseModalAction(CloseModalAction action) => {};
+
+  @override
   Set<String>? visitLoadFromCloudStorageAction(
     LoadFromCloudStorageAction action,
   ) => {};
@@ -220,6 +223,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitShowDialogAction(ShowDialogAction action) => null;
+
+  @override
+  String? visitCloseModalAction(CloseModalAction action) => null;
 
   @override
   String? visitLoadFromCloudStorageAction(LoadFromCloudStorageAction action) =>
