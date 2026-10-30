@@ -18,6 +18,11 @@ SoundEngine createSoundEngine() {
 /// Short synthesised voices, each under 80 ms, through a gentle compressor.
 class _WebSoundEngine implements SoundEngine {
   _WebSoundEngine(this._ctx) {
+    // Browsers start audio only inside a user gesture, and Play Sound runs
+    // from timers and clocks: resume on the first press or key anywhere.
+    void unlock(web.Event _) => resume();
+    web.document.addEventListener('pointerdown', unlock.toJS, true.toJS);
+    web.document.addEventListener('keydown', unlock.toJS, true.toJS);
     _out = _ctx.createDynamicsCompressor()
       ..threshold.value = -6
       ..ratio.value = 4;
@@ -41,10 +46,23 @@ class _WebSoundEngine implements SoundEngine {
   }();
 
   @override
-  bool get available => true;
+  bool get available => _ctx.state == 'running';
+
+  final Stopwatch _stopwatch = Stopwatch()..start();
+
+  /// Stopwatch time minus audio time, kept while audio runs, so the clock
+  /// carries on (on the stopwatch) while the browser holds audio back.
+  double _offset = 0;
 
   @override
-  double get now => _ctx.currentTime;
+  double get now {
+    final double wall = _stopwatch.elapsedMicroseconds / 1e6;
+    if (_ctx.state == 'running') {
+      _offset = wall - _ctx.currentTime;
+      return _ctx.currentTime;
+    }
+    return wall - _offset;
+  }
 
   @override
   void resume() {
