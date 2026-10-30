@@ -185,4 +185,39 @@ void main() {
     expect(t.transform.storage[0], closeTo(0.5, 1e-9));
     expect(t.transform.storage[5], closeTo(1, 1e-9));
   });
+
+  test('an entrance keeps the values it does not name', () {
+    const MotionModel tilted = MotionModel(
+      rotate: 8,
+      translateY: 20,
+      enterFrom: MotionModel(opacity: 0, scale: 0.6),
+    );
+    final MotionModel start = tilted.entranceStart;
+    expect(start.opacity, 0);
+    expect(start.scale, 0.6);
+    expect(start.rotate, 8, reason: 'not named: stays tilted');
+    expect(start.translateY, 20);
+  });
+
+  testWidgets('where tickers are off, an entrance shows its values at rest', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: TickerMode(
+          enabled: false,
+          child: NodeMotion(
+            motion: MotionModel(
+              durationMs: 500,
+              enterFrom: MotionModel(opacity: 0),
+            ),
+            child: SizedBox(width: 10, height: 10, child: Text('pop')),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(Opacity), findsNothing, reason: 'fully shown');
+  });
 }

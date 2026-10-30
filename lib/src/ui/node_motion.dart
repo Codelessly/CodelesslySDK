@@ -364,7 +364,11 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final MotionModel m = _moving ? _current : _to;
+    // Where tickers are off (the editor's design canvas holds still), an
+    // entrance or transition would stay at its first frame forever: show
+    // the values at rest instead, as the design canvas should.
+    final bool still = !TickerMode.valuesOf(context).enabled;
+    final MotionModel m = still ? widget.motion : (_moving ? _current : _to);
     if (!m.hasTransform && _turns == 0) return widget.child;
     Widget child = widget.child;
     if (m.backfaceHidden) child = BackfaceHidden(child: child);
