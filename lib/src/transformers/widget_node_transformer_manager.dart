@@ -5,7 +5,9 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show BrowserContextMenu;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
@@ -491,7 +493,7 @@ abstract class WidgetNodeTransformerManager
 
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
-    final Widget tappable = _wrapWithTapReactions(context, node, widget);
+    Widget tappable = _wrapWithTapReactions(context, node, widget);
     if (node is! ReactionMixin || node is CanvasNode || node is SpacerNode) {
       return tappable;
     }
@@ -504,6 +506,24 @@ abstract class WidgetNodeTransformerManager
     final List<Reaction> onDragEnd = of(TriggerType.dragEnd);
     final List<Reaction> onPointerDown = of(TriggerType.pointerDown);
     final List<Reaction> onPointerUp = of(TriggerType.pointerUp);
+    final List<Reaction> onSecondary = of(TriggerType.secondaryClick);
+    if (onSecondary.isNotEmpty) {
+      // A right click opens the app's menu, not the browser's.
+      if (kIsWeb) BrowserContextMenu.disableContextMenu();
+      tappable = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onSecondaryTapUp: (details) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.secondaryClick,
+          reactions: onSecondary,
+          result: {
+            'x': details.globalPosition.dx,
+            'y': details.globalPosition.dy,
+          },
+        ),
+        child: tappable,
+      );
+    }
     if (onDrag.isEmpty &&
         onDragEnd.isEmpty &&
         onPointerDown.isEmpty &&

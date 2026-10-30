@@ -42,6 +42,7 @@ export 'src/model/publish_source.dart';
 export 'src/model/sdk_publish_model.dart';
 export 'src/transformers/transformers.dart';
 export 'src/transformers/utils/blend_mask.dart';
+export 'src/transformers/utils/drag_and_drop.dart';
 export 'src/transformers/utils/cloud_list_items.dart';
 export 'src/transformers/utils/query_status.dart';
 export 'src/ui/canvas_location.dart';
