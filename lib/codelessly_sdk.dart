@@ -4,6 +4,7 @@ export 'src/auth/auth_manager.dart';
 export 'src/cache/cache_manager.dart';
 export 'src/cache/codelessly_cache_manager.dart';
 export 'src/codelessly.dart';
+export 'src/navigation/codelessly_router.dart';
 export 'src/paywall/paywall_controller.dart';
 export 'src/paywall/paywall_widget.dart';
 export 'src/paywall/in_app_purchase_service.dart';
