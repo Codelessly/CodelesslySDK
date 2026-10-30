@@ -39,6 +39,7 @@ class CodelessNodeTreeView extends StatefulWidget {
     required this.nodes,
     required this.rootId,
     this.data = const {},
+    this.dataListenable,
     this.variables = const {},
     this.theme,
     this.onAction,
@@ -48,6 +49,8 @@ class CodelessNodeTreeView extends StatefulWidget {
   final Map<String, BaseNode> nodes;
   final String rootId;
   final Map<String, dynamic> data;
+  /// Optional external data source; updates the SDK context without reloading nodes.
+  final ValueListenable<Map<String, dynamic>>? dataListenable;
   final Map<String, VariableData> variables;
   final ThemeData? theme;
   final CodelessNodeAction? onAction;
@@ -74,11 +77,22 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
   void initState() {
     super.initState();
     _load();
+    widget.dataListenable?.addListener(_onDataChanged);
+  }
+
+  void _onDataChanged() {
+    final next = widget.dataListenable?.value;
+    if (next != null) _context?.data = next;
   }
 
   @override
   void didUpdateWidget(CodelessNodeTreeView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.dataListenable != widget.dataListenable) {
+      oldWidget.dataListenable?.removeListener(_onDataChanged);
+      widget.dataListenable?.addListener(_onDataChanged);
+      _onDataChanged();
+    }
     if (oldWidget.nodes != widget.nodes ||
         oldWidget.rootId != widget.rootId ||
         oldWidget.variables != widget.variables) {
@@ -143,7 +157,7 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
       node.parentID = resolveParentNodeIDs(node: node, nodes: allNodes);
     }
     final context = CodelesslyContext.empty()
-      ..data = widget.data
+      ..data = widget.dataListenable?.value ?? widget.data
       ..variables.addAll({
         for (final variable in widget.variables.values)
           variable.id: Observable(
@@ -183,6 +197,7 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
 
   @override
   void dispose() {
+    widget.dataListenable?.removeListener(_onDataChanged);
     _context?.dispose();
     super.dispose();
   }
