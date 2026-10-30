@@ -11,9 +11,14 @@ Future<void> loadTestFonts() async {
   await icons.load();
   final bytes = await File('../material_icons/assets/Roboto-Regular.ttf')
       .readAsBytes();
-  for (final family in ['Roboto', 'Roboto Regular', 'TabsFixture Regular', '']) {
-    await (FontLoader(family)
-          ..addFont(Future.value(bytes.buffer.asByteData())))
-        .load();
+  for (final family in [
+    'Roboto',
+    'Roboto Regular',
+    'TabsFixture Regular',
+    '',
+  ]) {
+    await (FontLoader(
+      family,
+    )..addFont(Future.value(bytes.buffer.asByteData()))).load();
   }
 }

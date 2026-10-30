@@ -186,7 +186,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
 
     if (needsAScaffold) {
       scaffold = Scaffold(
-        backgroundColor: retrieveBackgroundColor(context, node),
+        backgroundColor: canvasBackground(context, node),
         appBar: appBar,
         floatingActionButton: floatingActionButton,
         floatingActionButtonLocation: props.floatingActionButton?.location
@@ -195,7 +195,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         body: body,
       );
     } else {
-      final Color? background = retrieveBackgroundColor(context, node);
+      final Color? background = canvasBackground(context, node);
       // Under a TapThroughScope, a canvas without a background takes no taps
       // on its empty parts, so they reach its dialog's barrier.
       final bool transparent =
@@ -319,7 +319,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
 
     if (needsAScaffold) {
       scaffold = Scaffold(
-        backgroundColor: retrieveBackgroundColor(context, node),
+        backgroundColor: canvasBackground(context, node),
         appBar: appBar,
         floatingActionButton: floatingActionButton,
         floatingActionButtonLocation: props.floatingActionButton?.location
@@ -329,7 +329,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       );
     } else {
       scaffold = Material(
-        color: retrieveBackgroundColor(context, node),
+        color: canvasBackground(context, node),
         child: !node.isScrollable
             // This would make it so auto scale layouts are top-center aligned
             // in the viewport. But this doesn't work if the layout is inside a
@@ -430,6 +430,20 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       (id) => hasResponsiveLayout(getNode(id), getNode),
     );
   }
+
+  /// The canvas's background: its fill, except for a dialog's canvas that
+  /// fills the screen because it holds a responsive layout; its layout draws
+  /// the dialog, and its fill would hide the screen behind the barrier.
+  Color? canvasBackground(BuildContext context, CanvasNode node) =>
+      showsOverScreen(CanvasSizingScope.of(context), node)
+      ? Colors.transparent
+      : retrieveBackgroundColor(context, node);
+
+  /// Whether [node], shown with [sizing], fills the screen as a dialog.
+  bool showsOverScreen(CanvasSizing sizing, CanvasNode node) =>
+      sizing == CanvasSizing.design &&
+      node.scaleMode == ScaleMode.responsive &&
+      hasResponsiveLayout(node, getNode);
 
   static Color? retrieveBackgroundColor(BuildContext context, CanvasNode node) {
     final fills = <PaintModel>[
@@ -1083,8 +1097,15 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
         (focused.widget is EditableText ||
             focused.findAncestorWidgetOfExactType<EditableText>() != null);
     // Keys belong to the field being typed in, except Escape, which leaves
-    // it (`${result.typing}` tells the actions).
-    if (typing && event.logicalKey != LogicalKeyboardKey.escape) return false;
+    // it, and shortcuts with Command/Control (⌘↵ submits a form); the
+    // actions read `${result.typing}`.
+    final HardwareKeyboard keys = HardwareKeyboard.instance;
+    if (typing &&
+        event.logicalKey != LogicalKeyboardKey.escape &&
+        !keys.isMetaPressed &&
+        !keys.isControlPressed) {
+      return false;
+    }
     // Shift, Control, Alt and Meta alone are modifiers of the next key.
     if (_modifierKeys.contains(event.logicalKey)) return false;
     final String key = keyTriggerLabel(event.logicalKey);

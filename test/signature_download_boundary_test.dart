@@ -41,11 +41,7 @@ void main() {
         ),
         throwsA(
           isA<UnresolvedDocumentSchema>()
-              .having(
-                (error) => error.reason,
-                'reason',
-                'missing-gaugeKind',
-              )
+              .having((error) => error.reason, 'reason', 'missing-gaugeKind')
               .having((error) => error.nodeKey, 'nodeKey', 'ambiguous')
               .having(
                 (error) => error.raw.keys,
@@ -91,11 +87,7 @@ void main() {
       throwsA(
         isA<UnresolvedDocumentSchema>()
             .having((error) => error.nodeKey, 'nodeKey', 'unresolved')
-            .having(
-              (error) => error.reason,
-              'reason',
-              'missing-signatureKind',
-            )
+            .having((error) => error.reason, 'reason', 'missing-signatureKind')
             .having(
               (error) => error.raw.keys,
               'retained canvas keys',
