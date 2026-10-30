@@ -4,6 +4,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -97,6 +98,9 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.node.data.contains(r'${data.')) {
+      context.watch<CodelesslyContext>();
+    }
     return TextNodeBox(
       node: widget.node,
       child: TextUtils.buildTextForTextNode(
