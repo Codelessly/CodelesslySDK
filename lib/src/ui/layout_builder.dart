@@ -193,6 +193,8 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     nodeRegistry.clear();
     nodeRegistry.setNodes(widget.layout.canvases[widget.canvasId]!);
     final List<BaseNode> allNodes = nodeRegistry.getNodes().values.toList();
+    // Nodes Scroll To actions target record where they are built.
+    ScrollTargets.addTargetsIn(allNodes);
 
     // Populate node values for nodes with internal values.
     codelesslyContext.nodeValues.clear();

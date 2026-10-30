@@ -154,6 +154,9 @@ class ConditionVariablesVisitor
   Set<String>? visitFocusFieldAction(FocusFieldAction action) => {};
 
   @override
+  Set<String>? visitScrollToAction(ScrollToAction action) => {};
+
+  @override
   Set<String>? visitPaywallAction(PaywallAction action) => {};
 
   @override
@@ -263,6 +266,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitFocusFieldAction(FocusFieldAction action) => null;
+
+  @override
+  String? visitScrollToAction(ScrollToAction action) => null;
 
   @override
   String? visitPaywallAction(PaywallAction action) => null;
