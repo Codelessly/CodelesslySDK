@@ -45,6 +45,18 @@ abstract final class CanvasLocation {
     List<String> pattern,
     List<String> segments,
   ) {
+    // A last segment `*` takes any rest of the path (even none) as the
+    // `path` param: a not-found screen at `*` catches every unknown path.
+    if (pattern.isNotEmpty && pattern.last == '*') {
+      final List<String> head = pattern.sublist(0, pattern.length - 1);
+      if (segments.length < head.length) return null;
+      final Map<String, String>? params = matchPattern(
+        head,
+        segments.sublist(0, head.length),
+      );
+      if (params == null) return null;
+      return {...params, 'path': '/${segments.skip(head.length).join('/')}'};
+    }
     if (pattern.length != segments.length) return null;
     final Map<String, String> params = {};
     for (int i = 0; i < pattern.length; i++) {
@@ -69,7 +81,18 @@ abstract final class CanvasLocation {
         .toList();
     if (segments.isEmpty) return null;
 
+    // A link naming a screen by its id isn't an unknown path.
+    final bool namesScreen =
+        segments.length == 1 &&
+        model.layouts.values.any(
+          (layout) =>
+              layout.id == segments.single ||
+              layout.canvasIds.contains(segments.single),
+        );
+
     CanvasLocationMatch? best;
+    // Literal segments, doubled; a `*` pattern scores one less than the same
+    // literals without one, so any exact path beats a catch-all.
     int bestLiterals = -1;
     for (final SDKPublishLayout layout in model.layouts.values) {
       if (model.disabledLayouts.contains(layout.id)) continue;
@@ -77,9 +100,13 @@ abstract final class CanvasLocation {
         final CanvasNode? canvas = canvasOf(layout, canvasId);
         if (canvas == null || !canvas.properties.hasPath) continue;
         final List<String> pattern = segmentsOf(canvas.properties.path!);
+        final bool catchAll = pattern.isNotEmpty && pattern.last == '*';
+        if (catchAll && namesScreen) continue;
         final Map<String, String>? params = matchPattern(pattern, segments);
         if (params == null) continue;
-        final int literals = pattern.length - params.length;
+        final int literals = catchAll
+            ? 2 * (pattern.length - 1 - (params.length - 1))
+            : 2 * (pattern.length - params.length) + 1;
         if (literals <= bestLiterals) continue;
         bestLiterals = literals;
         best = CanvasLocationMatch(
@@ -129,6 +156,13 @@ abstract final class CanvasLocation {
         final String value = _stringOf(query.remove(segment.substring(1)));
         if (value.isEmpty) return null;
         segments.add(value);
+      } else if (segment == '*') {
+        // A catch-all screen shows at the path it caught, else at its own
+        // name.
+        final String caught = _stringOf(query.remove('path'));
+        final List<String> rest = segmentsOf(caught);
+        if (rest.isEmpty) return null;
+        segments.addAll(rest);
       } else {
         segments.add(segment);
       }
