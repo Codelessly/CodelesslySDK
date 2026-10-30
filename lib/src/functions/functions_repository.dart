@@ -167,7 +167,24 @@ class FunctionsRepository {
         return copyToClipboard(context, action as CopyToClipboardAction);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
+      case ActionType.focus:
+        return runFocus(action as FocusAction);
     }
+  }
+
+  /// Focuses (or unfocuses) the text field [action] names.
+  static Future<bool> runFocus(FocusAction action) async {
+    final String nodeId = action.nodeId;
+    if (action.unfocus) {
+      unfocusTextField(nodeId.isEmpty ? null : nodeId);
+      return true;
+    }
+    if (nodeId.isEmpty) return true;
+    // A field the previous actions just revealed builds on the next frame.
+    if (focusTextField(nodeId, selectAll: action.selectAll)) return true;
+    await WidgetsBinding.instance.endOfFrame;
+    focusTextField(nodeId, selectAll: action.selectAll);
+    return true;
   }
 
   /// Run a native paywall action in the enclosing paywall surface.
