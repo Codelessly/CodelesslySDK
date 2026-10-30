@@ -27,6 +27,10 @@ import 'scoped_values.dart';
 /// * [icon] (string): the name of the icon an icon node shows, in the
 ///   naming of its icon model (`star`, `star_border`, ...). Its family and
 ///   style stay. An icon model JSON map replaces the icon as a whole.
+/// * [fillStop] `fill-stop-<index>` (color): the color of one stop of the
+///   node's first fill when it is a gradient, e.g. a halo whose center
+///   follows the phase color. A `#RRGGBB` color keeps the stop's own alpha
+///   (a 35% halo stays 35%); `#AARRGGBB` sets it too.
 abstract final class StyleBindings {
   /// Shows or hides every effect of the node.
   static const String effectsVisible = 'effectsVisible';
@@ -64,6 +68,9 @@ abstract final class StyleBindings {
   /// The color of the shadow [effectId].
   static String shadowColor(String effectId) => 'shadow-color-$effectId';
 
+  /// The color of stop [index] of the first fill's gradient.
+  static String fillStop(int index) => 'fill-stop-$index';
+
   /// Adds to [patch], a partial node JSON, the values that the bindings of
   /// these properties give [node], evaluated with [scopedValues]. A property
   /// whose binding is missing, evaluates to null or gives the node's own
@@ -91,6 +98,13 @@ abstract final class StyleBindings {
     }
 
     if (node is GeometryMixin) {
+      final List? fills = _fillStops(
+        (patch['fills'] as List?) ??
+            [for (final paint in node.fills) paint.toJson()],
+        node.variables,
+        value,
+      );
+      if (fills != null) patch['fills'] = fills;
       final double? weight = value<double>(strokeWeight);
       if (weight != null && weight != node.strokeWeight) {
         patch['strokeWeight'] = weight < 0 ? 0.0 : weight;
@@ -143,6 +157,48 @@ abstract final class StyleBindings {
         };
       }
     }
+  }
+
+  /// [fills] (paint JSON) with the first gradient's stops recolored by
+  /// their `fill-stop-<index>` bindings, or null when none changes.
+  static List? _fillStops(
+    List fills,
+    Map<String, String> variables,
+    T? Function<T extends Object>(String property) value,
+  ) {
+    if (fills.isEmpty || !variables.keys.any((k) => k.startsWith('fill-stop-'))) {
+      return null;
+    }
+    final PaintModel first = PaintModel.fromJson(fills.first as Map);
+    final List<ColorStop>? stops = first.gradientStops;
+    if (stops == null || stops.isEmpty) return null;
+    bool changed = false;
+    final List<ColorStop> next = [
+      for (final (int i, ColorStop stop) in stops.indexed)
+        if (variables.containsKey(fillStop(i)))
+          switch (value<Object>(fillStop(i))) {
+            final Object raw when raw.toColorRGBA() != null => () {
+              final ColorRGBA bound = raw.toColorRGBA()!;
+              // #RRGGBB names a hue only: keep the stop's transparency.
+              final bool hueOnly =
+                  raw is String &&
+                  RegExp(r'^#?[0-9a-fA-F]{6}$').hasMatch(raw.trim());
+              final ColorRGBA color = hueOnly
+                  ? bound.copyWith(a: stop.color.a)
+                  : bound;
+              if (color != stop.color) changed = true;
+              return stop.copyWith(color: color);
+            }(),
+            _ => stop,
+          }
+        else
+          stop,
+    ];
+    if (!changed) return null;
+    return [
+      first.copyWith(gradientStops: next).toJson(),
+      ...fills.skip(1),
+    ];
   }
 
   static List<Effect> _effects(
