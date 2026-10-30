@@ -104,27 +104,20 @@ void main() {
     expect(tester.getSize(find.byType(SizedBox).last), const Size(20, 20));
   });
 
-  testWidgets(
-    "Material icons draw Flutter's glyph for their styled name, whatever codepoint is stored",
-    (tester) async {
-      // The editor stores Google's codepoint (0xe8b6 is search there); in
-      // Flutter's font that number is another icon.
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: SvgIcon(
-            icon: MaterialIcon(
-              codepoint: 0xe8b6,
-              fontFamily: 'MaterialIcons',
-              name: 'search',
-              style: MaterialIconStyle.rounded,
-              version: 17,
-            ),
-          ),
-        ),
-      );
-      final Icon drawn = tester.widget(find.byType(Icon));
-      expect(drawn.icon!.codePoint, Icons.search_rounded.codePoint);
-    },
-  );
+  test('rounded Material icons load the Round SVG by name', () {
+    // The editor stores Google's codepoint (0xe8b6 is search there); the
+    // icon is drawn from its SVG by name, never from Flutter's font, where
+    // that number is another glyph (and a runtime IconData breaks release
+    // builds).
+    expect(
+      const MaterialIcon(
+        codepoint: 0xe8b6,
+        fontFamily: 'MaterialIcons',
+        name: 'search',
+        style: MaterialIconStyle.rounded,
+        version: 17,
+      ).toSvgUrl(),
+      'https://fonts.gstatic.com/s/i/materialiconsround/search/v17/24px.svg',
+    );
+  });
 }
