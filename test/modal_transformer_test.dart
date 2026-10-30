@@ -42,9 +42,29 @@ void main() {
       'verticalFit': 'shrinkWrap',
       'horizontalFit': 'shrinkWrap',
       'crossAxisAlignment': 'center',
-      'children': ['close'],
+      'children': ['title', 'close'],
     });
     content.parentID = modal.id;
+    final title = TextNode(
+      id: 'title',
+      name: 'Dialog title',
+      basicBoxLocal: NodeBox(0, 0, 200, 32),
+      data: 'Dialog title',
+      horizontalFit: SizeFit.shrinkWrap,
+      verticalFit: SizeFit.shrinkWrap,
+      textMixedProps: [
+        StartEndProp(
+          start: 0,
+          end: 12,
+          fontSize: 20,
+          fontName: const FontName(
+            family: 'TabsFixture',
+            style: 'Normal',
+            weight: FontWeightNumeric.w400,
+          ),
+        ),
+      ],
+    )..parentID = content.id;
     final close = FilledButtonNode(
       id: 'close',
       name: 'Close',
@@ -72,6 +92,7 @@ void main() {
         modal.id: modal,
         trigger.id: trigger,
         content.id: content,
+        title.id: title,
         close.id: close,
       });
     final manager = PassiveNodeTransformerManager(
@@ -110,16 +131,28 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(Dialog), findsOneWidget);
     expect(find.text('Close'), findsOneWidget);
+    expect(find.text('Dialog title'), findsOneWidget);
+    final dialog = tester.widget<Dialog>(find.byType(Dialog));
+    expect(
+      dialog.backgroundColor,
+      ThemeData().colorScheme.surfaceContainerHigh,
+    );
+    expect(dialog.shape, isA<RoundedRectangleBorder>());
     final dialogRect = tester.getRect(
-      find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
+      find
+          .descendant(of: find.byType(Dialog), matching: find.byType(Material))
+          .first,
     );
     final closeRect = tester.getRect(find.text('Close'));
     expect(dialogRect.width, lessThanOrEqualTo(560));
+    expect(dialogRect.width, lessThan(400));
+    expect(dialogRect.height, lessThan(300));
     expect(closeRect.center.dx, closeTo(dialogRect.center.dx, 24));
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
     expect(find.byType(Dialog), findsNothing);
     expect(find.text('Close'), findsNothing);
+    expect(find.text('Dialog title'), findsNothing);
   });
 
   testWidgets('closed and open dialog use real-font goldens', (tester) async {
