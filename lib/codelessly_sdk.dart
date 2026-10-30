@@ -55,6 +55,7 @@ export 'src/ui/related_documents.dart';
 export 'src/ui/show_more.dart';
 export 'src/ui/zoomable_box.dart';
 export 'src/ui/skeleton.dart';
+export 'src/audio/sound.dart' show Sound, SoundEngine, SilentSoundEngine;
 export 'src/speech/speech.dart' show Speech, SpeechEngine;
 export 'src/ui/node_drag.dart';
 export 'src/ui/node_drag_track.dart';

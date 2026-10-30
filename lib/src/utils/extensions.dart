@@ -1900,6 +1900,14 @@ extension ActionModelExt on ActionModel {
       case ActionType.speak:
         final SpeakAction action = this as SpeakAction;
         return _namesIn([action.text, action.language], includePredefined);
+      case ActionType.playSound:
+        final PlaySoundAction action = this as PlaySoundAction;
+        return _namesIn([
+          action.sound,
+          action.volume,
+          action.pitch,
+          action.at,
+        ], includePredefined);
       case ActionType.paywall:
         final PaywallAction action = this as PaywallAction;
         return _namesIn([?action.slot, ?action.url], includePredefined);

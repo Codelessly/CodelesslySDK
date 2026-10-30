@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/action_chain.dart';
+import '../../functions/beat_clock.dart';
 
 class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   static const String name = 'PassiveCanvasWidget';
@@ -965,6 +966,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   void _startTimers() {
     _stopTimers();
     _timersStarted = true;
+    _startClocks();
     for (final Reaction reaction in widget.node.reactions.whereTriggerType(
       TriggerType.timer,
     )) {
@@ -996,6 +998,43 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       timer.cancel();
     }
     _timers.clear();
+    for (final BeatClock clock in _clocks) {
+      clock.stop();
+    }
+    _clocks.clear();
+  }
+
+  final List<BeatClock> _clocks = [];
+
+  /// Runs each Beat Clock reaction on the sound clock while its run
+  /// condition holds (see [BeatClock]), with `${result.tick}`,
+  /// `${result.at}` and `${result.waitMs}`.
+  void _startClocks() {
+    for (final Reaction reaction in widget.node.reactions.whereTriggerType(
+      TriggerType.clock,
+    )) {
+      if (!reaction.action.enabled) continue;
+      final BeatClock clock = BeatClock(
+        trigger: reaction.trigger,
+        evaluate: (String text) => mounted
+            ? PropertyValueDelegate.substituteVariables(
+                text,
+                scopedValues: ScopedValues.of(context),
+                nullSubstitutionMode: NullSubstitutionMode.emptyString,
+              )
+            : '',
+        onTick: (int tick, double at, double waitMs) {
+          if (!mounted) return;
+          FunctionsRepository.triggerAction(
+            context,
+            TriggerType.clock,
+            reactions: [reaction],
+            result: {'tick': tick, 'at': at, 'waitMs': waitMs.round()},
+          );
+        },
+      );
+      _clocks.add(clock..start());
+    }
   }
 
   /// Runs the key press reactions for [event]'s key. Returns whether one

@@ -336,6 +336,9 @@ class ConditionEvaluator<R extends Object>
   R? visitSpeakAction(SpeakAction action) => null;
 
   @override
+  R? visitPlaySoundAction(PlaySoundAction action) => null;
+
+  @override
   R? visitPaywallAction(PaywallAction action) => null;
 
   @override
@@ -506,6 +509,11 @@ class ConditionPrinter
   @override
   void visitSpeakAction(SpeakAction action) {
     _buffer.writeln('\tSpeak: ${action.stop ? 'stop' : action.text}');
+  }
+
+  @override
+  void visitPlaySoundAction(PlaySoundAction action) {
+    _buffer.writeln('\tPlay sound: ${action.sound}');
   }
 
   @override
