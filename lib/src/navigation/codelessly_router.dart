@@ -156,11 +156,7 @@ class CodelesslyLinkRoute extends DefaultRoute {
   final CodelesslyHistoryEntry? entry;
 
   /// Creates a [CodelesslyLinkRoute].
-  CodelesslyLinkRoute({
-    required super.path,
-    super.queryParameters,
-    this.entry,
-  });
+  CodelesslyLinkRoute({required super.path, super.queryParameters, this.entry});
 }
 
 /// Maps the browser's address to the screen stack and back, under a base
@@ -201,9 +197,7 @@ class CodelesslyRouteInformationParser extends DefaultRouteInformationParser {
     }
     return Uri(
       path: path,
-      queryParameters: uri.queryParameters.isEmpty
-          ? null
-          : uri.queryParameters,
+      queryParameters: uri.queryParameters.isEmpty ? null : uri.queryParameters,
     ).toString();
   }
 
@@ -215,9 +209,7 @@ class CodelesslyRouteInformationParser extends DefaultRouteInformationParser {
         : '$basePath${uri.path}';
     return Uri(
       path: path,
-      queryParameters: uri.queryParameters.isEmpty
-          ? null
-          : uri.queryParameters,
+      queryParameters: uri.queryParameters.isEmpty ? null : uri.queryParameters,
     );
   }
 
@@ -376,9 +368,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   /// The nearest [CodelesslyRouterDelegate] that shows [context]'s screen,
   /// or null when no Codelessly router shows it.
   static CodelesslyRouterDelegate? maybeOf(BuildContext context) {
-    final RouterDelegate<Object?>? delegate = Router.maybeOf(
-      context,
-    )?.routerDelegate;
+    final RouterDelegate<Object?>? delegate = Router.maybeOf(context)
+        ?.routerDelegate;
     return delegate is CodelesslyRouterDelegate ? delegate : null;
   }
 
@@ -453,8 +444,10 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   /// over `/guide/:id`.
   List<NavigationData> _buildRoutes(SDKPublishModel model) {
     final Map<String, String> patterns = {};
-    void add(String pattern, String layoutId) =>
-        patterns.putIfAbsent('/${CanvasLocation.segmentsOf(pattern).join('/')}', () => layoutId);
+    void add(String pattern, String layoutId) => patterns.putIfAbsent(
+      '/${CanvasLocation.segmentsOf(pattern).join('/')}',
+      () => layoutId,
+    );
 
     final String? entry = model.resolveLayoutId(model.entryLayoutId);
     if (entry != null) add('', entry);
@@ -473,9 +466,10 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
       add(layoutId, layoutId);
     }
 
-    int literals(String pattern) => CanvasLocation.segmentsOf(
-      pattern,
-    ).where((segment) => !segment.startsWith(':')).length;
+    int literals(String pattern) =>
+        CanvasLocation.segmentsOf(pattern)
+            .where((segment) => !segment.startsWith(':'))
+            .length;
     final List<String> ordered = patterns.keys.toList()
       ..sort((a, b) => literals(b).compareTo(literals(a)));
     return [
@@ -503,7 +497,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     // says the same; one edited in the address is the URL's text.
     final Map<String, dynamic> params = {
       for (final MapEntry(:String key, :String value) in fromUrl.entries)
-        key: typed is Map &&
+        key:
+            typed is Map &&
                 typed.containsKey(key) &&
                 CanvasLocation.stringOf(typed[key]) == value
             ? typed[key]
@@ -532,9 +527,7 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   Page<dynamic> _buildNotFoundPage(DefaultRoute route) => MaterialPage<void>(
     key: ValueKey('not-found:${route.path}'),
     name: route.name,
-    child: _ScreenNotFound(
-      onHome: () => resetTo(const ['/']),
-    ),
+    child: _ScreenNotFound(onHome: () => resetTo(const ['/'])),
   );
 
   /// The location of screen [destinationId] (a canvas or layout id) opened
@@ -552,9 +545,14 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   }
 
   static String _canonical(String location) {
-    final Uri uri = Uri.parse(location.startsWith('/') ? location : '/$location');
+    final Uri uri = Uri.parse(
+      location.startsWith('/') ? location : '/$location',
+    );
     return locationOfRoute(
-      DefaultRoute(path: _canonicalPath(uri.path), queryParameters: uri.queryParameters),
+      DefaultRoute(
+        path: _canonicalPath(uri.path),
+        queryParameters: uri.queryParameters,
+      ),
     );
   }
 
@@ -692,7 +690,9 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     // runs, the screen goes back to its earlier place in the stack, or
     // opens above the top.
     _back = null;
-    final List<String> current = [for (final route in routes) locationOfRoute(route)];
+    final List<String> current = [
+      for (final route in routes) locationOfRoute(route),
+    ];
     final int index = current.indexOf(location);
     if (current.isEmpty) {
       _restore([if (location != '/') '/', location], fromLink: true);
@@ -706,8 +706,12 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   /// Shows [stack], keeping the screens it shares with the current stack
   /// from the bottom up as they are, with their state.
   void _restore(List<String> stack, {bool fromLink = false}) {
-    final List<String> target = [for (final location in stack) _canonical(location)];
-    final List<String> current = [for (final route in routes) locationOfRoute(route)];
+    final List<String> target = [
+      for (final location in stack) _canonical(location),
+    ];
+    final List<String> current = [
+      for (final route in routes) locationOfRoute(route),
+    ];
     int common = 0;
     while (common < current.length &&
         common < target.length &&
