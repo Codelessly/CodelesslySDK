@@ -51,6 +51,7 @@ dependencies:
   meta: ">=1.9.0 <2.0.0"
   shared_preferences: ^2.3.5
   url_launcher: ^6.3.1
+  video_player: ^2.14.0
   webview_flutter: ^4.10.0
   webview_flutter_android: ^4.3.0
   webview_flutter_wkwebview: ^3.17.0
@@ -86,6 +87,7 @@ dev_dependencies:
   json_serializable: ^6.14.1
   build_runner: ^2.4.14
   flutter_lints: ^6.0.0
+  video_player_platform_interface: ^6.9.0
 
 flutter:
   uses-material-design: true
