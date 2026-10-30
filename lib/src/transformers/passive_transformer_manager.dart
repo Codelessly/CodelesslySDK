@@ -184,6 +184,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     WidgetBuildSettings settings,
   ) {
     final BaseNode styled = applyStyleOverrides(context, node);
+    // On the design canvas (no reactions) bindings read the editor's
+    // preview values, as text does, so a state previewed with
+    // `preview.setValues` shows and hides the same nodes it would at runtime.
+    final ScopedValues? preview = settings.withReactions
+        ? null
+        : VariablePreview.scopeOf(styled, context: context);
     Widget widget = getTransformerByNode(node)
         .buildWidget(styled, context, settings);
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
@@ -202,14 +208,24 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
-      widget = applyWidgetMotion(context, styled, widget);
+      widget = applyWidgetMotion(
+        context,
+        styled,
+        widget,
+        scopedValues: preview,
+      );
       widget = applyBoundOffset(context, styled, widget);
     }
     // Without reactions (the design canvas) a knob or fader cap is drawn
     // where its drag track puts it; with them NodeDragTrack draws it there
     // and makes it draggable.
     if (!settings.withReactions) {
-      widget = applyTrackPose(context, styled, widget);
+      widget = applyTrackPose(
+        context,
+        styled,
+        widget,
+        scopedValues: preview,
+      );
     }
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
@@ -224,6 +240,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         styled,
         widget,
         maintainState: true,
+        scopedValues: preview,
       );
     }
 

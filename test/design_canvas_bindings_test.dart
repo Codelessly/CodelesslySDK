@@ -167,6 +167,38 @@ void main() {
       await pumpVisibility(tester);
       expect(find.byKey(const Key('email')), findsNothing);
     });
+
+    // A node the SDK builds on the canvas (a list item's child) reads the
+    // editor's preview values, so `preview.setValues` shows the same state.
+    Future<void> pumpBuilt(WidgetTester tester, {required bool reactions}) =>
+        pumpHost(
+          tester,
+          (context) => manager.buildWidgetFromNode(
+            email,
+            context,
+            settings: WidgetBuildSettings(
+              debugLabel: 'canvas',
+              withReactions: reactions,
+            ),
+          ),
+        );
+
+    testWidgets('built on the canvas, it reads the preview values', (
+      tester,
+    ) async {
+      VariablePreview.scopeResolver = (_, {item}) => defaults('signIn');
+      await pumpBuilt(tester, reactions: false);
+      expect(tester.getSize(find.byType(PassiveRectangleWidget)).height, 40);
+      VariablePreview.scopeResolver = (_, {item}) => defaults('reset');
+      await pumpBuilt(tester, reactions: false);
+      expect(find.byType(PassiveRectangleWidget), findsNothing);
+    });
+
+    testWidgets('built with reactions, it ignores them', (tester) async {
+      VariablePreview.scopeResolver = (_, {item}) => defaults('signIn');
+      await pumpBuilt(tester, reactions: true);
+      expect(find.byType(PassiveRectangleWidget), findsNothing);
+    });
   });
 
   group('a text in a list item', () {
