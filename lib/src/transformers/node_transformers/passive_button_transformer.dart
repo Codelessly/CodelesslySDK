@@ -30,7 +30,8 @@ class PassiveButtonTransformer extends NodeWidgetTransformer<ButtonNode> {
       ButtonTypeEnum.text => TextButtonNode.new,
       ButtonTypeEnum.outlined => OutlinedButtonNode.new,
       ButtonTypeEnum.icon => IconButtonNode.new,
-      ButtonTypeEnum.filled || ButtonTypeEnum.filledTonal => FilledButtonNode.new,
+      ButtonTypeEnum.filled ||
+      ButtonTypeEnum.filledTonal => FilledButtonNode.new,
     };
     final node = buttonClass(
       id: '',
@@ -109,11 +110,19 @@ class PassiveButtonWidget extends StatelessWidget {
     final ScopedValues scopedValues =
         this.scopedValues ??
         ScopedValues.of(context, variablesOverrides: variablesOverrides);
-    final ButtonStyle buttonStyle = createMasterButtonStyle(
-      node,
-      elevation: elevation,
-      scopedValues: scopedValues,
-    );
+    final ButtonStyle buttonStyle =
+        createMasterButtonStyle(
+          node,
+          elevation: elevation,
+          scopedValues: scopedValues,
+        ).copyWith(
+          backgroundColor:
+              node.properties.buttonColor == null &&
+                  node.variables['buttonColor'] == null &&
+                  node.properties.buttonType == ButtonTypeEnum.filled
+              ? WidgetStatePropertyAll(Theme.of(context).colorScheme.primary)
+              : null,
+        );
     final double effectiveIconSize = min(
       node.properties.icon.size ?? 24,
       node.basicBoxLocal.height,
