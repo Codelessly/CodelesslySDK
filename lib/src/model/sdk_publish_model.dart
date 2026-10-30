@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:archive/archive.dart' show GZipDecoder, GZipEncoder;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
@@ -508,7 +510,41 @@ class SDKPublishLayout extends PrivacyBase {
 
   /// Creates a new instance of [SDKPublishLayout] from a JSON map.
   factory SDKPublishLayout.fromJson(Map<String, dynamic> json) =>
-      _$SDKPublishLayoutFromJson(json);
+      _$SDKPublishLayoutFromJson(expandCompressedCanvases(json));
+
+  /// The key a layout too large for one Firestore document (1 MiB) keeps its
+  /// canvases under, gzipped and base64 encoded, in place of `canvases`.
+  static const String compressedCanvasesKey = 'compressedCanvases';
+
+  /// [json] with its `canvases` gzipped into [compressedCanvasesKey]: a
+  /// screen's layout with every breakpoint and its logic can exceed the
+  /// document limit, while its JSON compresses about tenfold.
+  static Map<String, dynamic> compressCanvases(Map<String, dynamic> json) {
+    final Object? canvases = json['canvases'];
+    if (canvases == null) return json;
+    final List<int> zipped = const GZipEncoder().encodeBytes(
+      utf8.encode(jsonEncode(canvases)),
+    );
+    return <String, dynamic>{
+      for (final MapEntry<String, dynamic> e in json.entries)
+        if (e.key != 'canvases') e.key: e.value,
+      compressedCanvasesKey: base64Encode(zipped),
+    };
+  }
+
+  /// [json] with [compressedCanvasesKey] expanded back into `canvases`.
+  static Map<String, dynamic> expandCompressedCanvases(
+    Map<String, dynamic> json,
+  ) {
+    final Object? zipped = json[compressedCanvasesKey];
+    if (zipped is! String) return json;
+    final List<int> bytes = const GZipDecoder().decodeBytes(base64Decode(zipped));
+    return <String, dynamic>{
+      for (final MapEntry<String, dynamic> e in json.entries)
+        if (e.key != compressedCanvasesKey) e.key: e.value,
+      'canvases': jsonDecode(utf8.decode(bytes)),
+    };
+  }
 
   /// Converts this instance to a JSON map.
   @override
