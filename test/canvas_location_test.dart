@@ -226,6 +226,43 @@ void main() {
     });
   });
 
+  group('catch-all', () {
+    SDKPublishModel withLost() {
+      final SDKPublishModel model = _model();
+      final lost = _screen('lost', path: '*');
+      model.layouts[lost.id] = lost;
+      return model;
+    }
+
+    test('a * screen catches unknown paths, naming them', () {
+      final SDKPublishModel model = withLost();
+      final CanvasLocationMatch? match = CanvasLocation.match(
+        model,
+        'guide/bat-star/more?x=1',
+      );
+      expect(match?.canvasId, 'lost');
+      expect(match?.params, {'x': '1', 'path': '/guide/bat-star/more'});
+      expect(CanvasLocation.match(model, 'kraken')?.params['path'], '/kraken');
+    });
+
+    test('known paths and screen ids still win', () {
+      final SDKPublishModel model = withLost();
+      expect(CanvasLocation.match(model, 'guide')?.canvasId, 'guide');
+      expect(CanvasLocation.match(model, 'guide/x')?.canvasId, 'creature');
+      // A link naming a screen by id isn't an unknown path.
+      expect(CanvasLocation.match(model, 'settings'), isNull);
+      expect(CanvasLocation.match(model, ''), isNull);
+    });
+
+    test('the catch-all screen shows at the path it caught', () {
+      final SDKPublishModel model = withLost();
+      expect(
+        CanvasLocation.locationOf(model, 'lost', {'path': '/kraken/deep'}),
+        'kraken/deep',
+      );
+    });
+  });
+
   group('links', () {
     testWidgets('a link to a URL path opens that screen with its params', (
       tester,
