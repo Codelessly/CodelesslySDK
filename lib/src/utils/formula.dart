@@ -2065,9 +2065,11 @@ final Map<String, _Function> _functions = {
       FormulaEvaluator.stringify(a[i]): a[i + 1],
   },
   // The first argument that is neither null nor empty text.
+  // The first value that isn't null or empty text; when none is, the last
+  // one, so an explicit fallback of '' (or 0, false) is kept.
   'coalesce': (a) => a.firstWhere(
     (v) => v != null && !(v is String && v.isEmpty),
-    orElse: () => null,
+    orElse: () => a.isEmpty ? null : a.last,
   ),
 };
 
