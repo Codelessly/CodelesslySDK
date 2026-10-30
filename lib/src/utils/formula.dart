@@ -585,6 +585,11 @@ class FormulaEvaluator {
       'alpha(color, opacity)',
       "alpha('#FF4D4F', 0.12) → #1FFF4D4F",
     ),
+    FormulaFunctionDoc(
+      'mix',
+      'mix(color, otherColor, amount)',
+      "mix(agent.color, '#FFFFFF', 0.35) → a lighter tint",
+    ),
     FormulaFunctionDoc('pad', 'pad(value, width, fill)', 'pad(5, 2) → 05'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
     FormulaFunctionDoc(
@@ -1741,6 +1746,36 @@ String? _alpha(Object? color, num opacity) {
   return '#${a.toRadixString(16).padLeft(2, '0').toUpperCase()}$rgb';
 }
 
+/// [color] moved [amount] (0–1) of the way to [other], as `#RRGGBB`, or
+/// `#AARRGGBB` when either has an alpha below 1: e.g. a light tint of a
+/// person's color for their initials.
+String? _mix(Object? color, Object? other, num amount) {
+  List<int>? argb(Object? value) {
+    final String hex = FormulaEvaluator.stringify(value).replaceAll('#', '');
+    if (hex.length != 6 && hex.length != 8) return null;
+    final int? v = int.tryParse(hex, radix: 16);
+    if (v == null) return null;
+    return <int>[
+      hex.length == 8 ? (v >> 24) & 0xFF : 0xFF,
+      (v >> 16) & 0xFF,
+      (v >> 8) & 0xFF,
+      v & 0xFF,
+    ];
+  }
+
+  final List<int>? a = argb(color);
+  final List<int>? b = argb(other);
+  if (a == null || b == null) return null;
+  final double t = amount.clamp(0, 1).toDouble();
+  final List<int> c = <int>[
+    for (int i = 0; i < 4; i++) (a[i] + (b[i] - a[i]) * t).round(),
+  ];
+  String h(int v) => v.toRadixString(16).padLeft(2, '0').toUpperCase();
+  return c[0] == 0xFF
+      ? '#${h(c[1])}${h(c[2])}${h(c[3])}'
+      : '#${h(c[0])}${h(c[1])}${h(c[2])}${h(c[3])}';
+}
+
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
@@ -1999,6 +2034,7 @@ final Map<String, _Function> _functions = {
   'get': (a) => _member(_arg(a, 0), _arg(a, 1)),
   'number': (a) => _toNum(_arg(a, 0)),
   'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
+  'mix': (a) => _mix(_arg(a, 0), _arg(a, 1), _num(_arg(a, 2))),
   'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
     _arg(a, 1) == null ? 2 : _intArg(_arg(a, 1)),
     FormulaEvaluator.stringify(_arg(a, 2) ?? '0'),

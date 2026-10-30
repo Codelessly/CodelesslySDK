@@ -257,11 +257,14 @@ class TextUtils {
       ),
     )?.toFlutterColor();
 
+    final List<InlineSpan> colored = textColor == null
+        ? spans
+        : [for (final span in spans) recolorSpan(span, textColor)];
     return Text.rich(
       TextSpan(
-        children: textColor == null
-            ? spans
-            : [for (final span in spans) recolorSpan(span, textColor)],
+        children: textNode.markdown == null
+            ? colored
+            : markdownSpans(colored, textNode.markdown!),
       ),
       textAlign: textNode.textAlignHorizontal.toFlutter(),
       maxLines: textNode.maxLines,
