@@ -1897,6 +1897,9 @@ extension ActionModelExt on ActionModel {
       case ActionType.delay:
       case ActionType.controlDrag:
         return {};
+      case ActionType.speak:
+        final SpeakAction action = this as SpeakAction;
+        return _namesIn([action.text, action.language], includePredefined);
       case ActionType.paywall:
         final PaywallAction action = this as PaywallAction;
         return _namesIn([?action.slot, ?action.url], includePredefined);

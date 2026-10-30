@@ -542,6 +542,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           case 'auth':
             final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
+          case 'speech':
+            listenables.add(Speech.instance);
         }
       }
 
@@ -585,6 +587,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           case 'auth':
             final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
+          case 'speech':
+            listenables.add(Speech.instance);
         }
       }
 
@@ -631,6 +635,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             case 'auth':
               final notifier = context.read<Codelessly?>()?.appUser;
               if (notifier != null) listenables.add(notifier);
+            case 'speech':
+              listenables.add(Speech.instance);
           }
           continue;
         }
@@ -687,6 +693,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           context,
         ),
         'auth' => context.read<Codelessly?>()?.appUser,
+        'speech' => Speech.instance,
         _ => null,
       };
       if (notifier != null) listenables.add(notifier);
