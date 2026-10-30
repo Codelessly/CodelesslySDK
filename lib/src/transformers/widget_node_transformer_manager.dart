@@ -544,6 +544,33 @@ abstract class WidgetNodeTransformerManager
     );
   }
 
+  /// Draws [node] where its drag track puts it for its variable's value,
+  /// without making it draggable: how the design canvas shows a knob or a
+  /// fader cap. Returns [widget] for a node without a track.
+  Widget applyTrackPose(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+  }) {
+    final DragTrackModel? track = node.drag?.track;
+    if (track == null) return widget;
+    final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
+      track.variable,
+      scopedValues: scopedValues ?? ScopedValues.of(context),
+    );
+    final double value = switch (raw) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()) ?? track.defaultValue ?? track.min,
+      _ => track.defaultValue ?? track.min,
+    };
+    return Transform(
+      alignment: Alignment.center,
+      transform: DragTrackGeometry(track).poseAt(track.progressOf(value)),
+      child: widget,
+    );
+  }
+
   /// A node with a [DragTrackModel] is a value control: it is drawn at its
   /// variable's place along the track and dragging it writes the variable,
   /// running its `changed` reactions on each change and `dragEnd` on release

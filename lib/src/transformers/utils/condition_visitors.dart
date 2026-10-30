@@ -151,6 +151,9 @@ class ConditionVariablesVisitor
   Set<String>? visitSpeakAction(SpeakAction action) => {};
 
   @override
+  Set<String>? visitPlaySoundAction(PlaySoundAction action) => {};
+
+  @override
   Set<String>? visitPaywallAction(PaywallAction action) => {};
 
   @override
@@ -257,6 +260,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitSpeakAction(SpeakAction action) => null;
+
+  @override
+  String? visitPlaySoundAction(PlaySoundAction action) => null;
 
   @override
   String? visitPaywallAction(PaywallAction action) => null;

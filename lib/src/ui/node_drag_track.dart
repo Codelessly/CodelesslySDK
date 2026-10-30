@@ -122,6 +122,15 @@ class DragTrackGeometry {
     }
   }
 
+  /// The transform that draws the node at [progress] around its centre (for
+  /// a [Transform] aligned to [Alignment.center]).
+  Matrix4 poseAt(double progress) {
+    final Offset o = offsetAt(progress);
+    return Matrix4.identity()
+      ..translateByDouble(o.dx, o.dy, 0, 1)
+      ..rotateZ(rotationAt(progress) * math.pi / 180);
+  }
+
   /// The transform that draws the node at [progress], for a box of [size].
   Matrix4 transformAt(double progress, Size size) {
     final Offset o = offsetAt(progress);
