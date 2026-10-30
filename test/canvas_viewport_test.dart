@@ -57,4 +57,18 @@ void main() {
     );
     expect((box.width, box.height), (240.0, 160.0));
   });
+
+  test('a popover holding a responsive layout still hugs its design size', () {
+    // An anchored menu whose canvas holds a responsive layout: filling the
+    // screen would pin it to the top left instead of the pointer.
+    expect(
+      CanvasViewport.sizingFor(CanvasSizing.content, followsScreen: true),
+      CanvasSizing.content,
+    );
+    expect(
+      CanvasViewport.sizingFor(CanvasSizing.design, followsScreen: true),
+      CanvasSizing.fill,
+    );
+    expect(CanvasViewport.sizingFor(CanvasSizing.design), CanvasSizing.design);
+  });
 }
