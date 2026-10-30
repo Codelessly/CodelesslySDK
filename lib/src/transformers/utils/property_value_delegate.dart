@@ -275,6 +275,17 @@ class PropertyValueDelegate {
   ) {
     final String? expression = computedExpressionOf(variable);
     if (expression == null) return variable.getValue();
+    // A variable with parameters is a function: its value is the function,
+    // which formulas call with arguments. Its body reads the other
+    // variables of this scope.
+    if (variable.isFunction) {
+      return FormulaFunction(
+        variable.parameters,
+        expression,
+        (path) =>
+            getVariableValueFromPath<Object>(path, scopedValues: scopedValues),
+      );
+    }
     if (_computedDepth >= 16 || !_computing.add(variable.name)) return null;
     _computedDepth++;
     try {
@@ -470,6 +481,10 @@ class PropertyValueDelegate {
     if (variable == null) return null;
     final bool computed = isComputedVariable(variable);
     final Object? variableValue = variableValueOf(variable, scopedValues);
+    // A function has no members: it is only called.
+    if (variableValue is FormulaFunction) {
+      return match.hasAccessor || match.hasPath ? null : variableValue;
+    }
     // A computed variable's type is whatever its formula returns.
     final VariableType type = computed && variableValue != null
         ? VariableType.fromObjectType(variableValue)
@@ -534,7 +549,12 @@ class PropertyValueDelegate {
       final String? expression = computedExpressionOf(variable);
       if (expression == null) return;
       readsClock = readsClock || FormulaEvaluator.readsClock(expression);
-      for (final String path in FormulaEvaluator.referencedPaths(expression)) {
+      // A function's parameters aren't variables.
+      final Iterable<String> read = variable.isFunction
+          ? FormulaFunction(variable.parameters, expression, (_) => null)
+                .externalPaths
+          : FormulaEvaluator.referencedPaths(expression);
+      for (final String path in read) {
         paths.add(path);
         final VariableMatch? match = VariableMatch.parse(
           path.wrapWithVariableSyntax(),
