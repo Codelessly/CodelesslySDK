@@ -56,6 +56,8 @@ export 'src/ui/show_more.dart';
 export 'src/ui/zoomable_box.dart';
 export 'src/ui/skeleton.dart';
 export 'src/ui/node_motion.dart';
+export 'src/ui/node_play.dart';
+export 'src/ui/node_drag_drop.dart';
 export 'src/ui/swipe_detector.dart';
 export 'src/ui/stripe_painter.dart';
 export 'src/utils/computed_variables.dart';
