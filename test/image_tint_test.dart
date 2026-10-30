@@ -32,4 +32,38 @@ void main() {
       const ColorFilter.mode(Color(0xFFC8332B), BlendMode.srcIn),
     );
   });
+
+  // A hugging card with an airmail tile behind its text grows with the
+  // text; the tile has to cover all of it, not stay at the image's size.
+  test('an image fill covers a hugging node with children', () {
+    RowColumnNode card({List<String> children = const []}) => RowColumnNode(
+      id: 'card',
+      name: 'card',
+      basicBoxLocal: NodeBox(0, 0, 300, 120),
+      rowColumnType: RowColumnType.column,
+      horizontalFit: SizeFit.shrinkWrap,
+      verticalFit: SizeFit.shrinkWrap,
+      children: children,
+      fills: [fill()],
+    );
+    const Widget tile = SizedBox();
+    final Widget withContent = wrapFillWithPositioned(
+      node: card(children: ['text']),
+      fill: tile,
+      paint: fill(),
+    );
+    expect(withContent, isA<Positioned>());
+    final Positioned covering = withContent as Positioned;
+    expect([covering.left, covering.top, covering.right, covering.bottom], [
+      0,
+      0,
+      0,
+      0,
+    ]);
+    // Without content, the image gives the node its size.
+    final Positioned sized =
+        wrapFillWithPositioned(node: card(), fill: tile, paint: fill())
+            as Positioned;
+    expect(sized.left, isNull);
+  });
 }

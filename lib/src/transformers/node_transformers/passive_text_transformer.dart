@@ -139,8 +139,8 @@ class TextNodeBox extends StatelessWidget {
 
   const TextNodeBox({super.key, required this.node, required this.child});
 
-  /// Where text sits in its box for [node]'s text alignment. Start and end
-  /// follow the text direction, like [TextAlign.start] and [TextAlign.end].
+  /// Where text sits in its box for [node]'s text alignment. Left and start,
+  /// right and end follow the text direction, like the lines do.
   static AlignmentGeometry alignmentOf(
     TextNode node, [
     TextAlignHorizontalEnum? horizontal,
@@ -151,11 +151,13 @@ class TextNodeBox extends StatelessWidget {
       TextAlignVerticalEnum.bottom => 1,
     };
     return switch (horizontal ?? node.textAlignHorizontal) {
+      // Left and right are the start and end edges, as for the lines
+      // (TextAlign.start / end), so a right-to-left layout mirrors both.
       TextAlignHorizontalEnum.left ||
-      TextAlignHorizontalEnum.justified => Alignment(-1, y),
-      TextAlignHorizontalEnum.center => Alignment(0, y),
-      TextAlignHorizontalEnum.right => Alignment(1, y),
+      TextAlignHorizontalEnum.justified ||
       TextAlignHorizontalEnum.start => AlignmentDirectional(-1, y),
+      TextAlignHorizontalEnum.center => Alignment(0, y),
+      TextAlignHorizontalEnum.right ||
       TextAlignHorizontalEnum.end => AlignmentDirectional(1, y),
     };
   }
