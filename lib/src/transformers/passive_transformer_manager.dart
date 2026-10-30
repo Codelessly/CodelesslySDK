@@ -31,6 +31,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'iconButton': PassiveButtonTransformer(getNode, this),
       'filledButton': PassiveButtonTransformer(getNode, this),
       'textField': PassiveTextFieldTransformer(getNode, this),
+      'datePicker': PassiveDatePickerTransformer(getNode, this),
+      'timePicker': PassiveTimePickerTransformer(getNode, this),
       'checkbox': PassiveCheckboxTransformer(getNode, this),
       'appBar': PassiveAppBarTransformer(getNode, this),
       'navigationBar': PassiveNavigationBarTransformer(getNode, this),
@@ -54,6 +56,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'accordion': PassiveAccordionTransformer(getNode, this),
       'listTile': PassiveListTileTransformer(getNode, this),
       'embeddedVideo': PassiveEmbeddedVideoTransformer(getNode, this),
+      'video': PassiveVideoTransformer(getNode, this),
       'divider': PassiveDividerTransformer(getNode, this),
       'loadingIndicator': PassiveLoadingIndicatorTransformer(getNode, this),
       'dropdown': PassiveDropdownTransformer(getNode, this),
@@ -74,7 +77,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'chip': PassiveChipTransformer(getNode, this),
       'segmentedButton': PassiveSegmentedButtonTransformer(getNode, this),
       'signature': PassiveSignatureTransformer(getNode, this),
-      'signature#normalized': PassiveSignatureNormalizedTransformer(getNode, this),
+      'signature#normalized': PassiveSignatureNormalizedTransformer(
+        getNode,
+        this,
+      ),
       'external': PassiveExternalComponentTransformer(getNode, this),
     });
   }
