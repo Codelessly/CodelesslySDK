@@ -575,6 +575,7 @@ class PropertyValueDelegate {
       'result' => ActionChain.current?.result,
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
       'hold' => scopedValues.holdProgress ?? 0.0,
+      'drag' => (scopedValues.dragValues ?? DragValues.rest).toMap(),
       _ => null,
     };
 

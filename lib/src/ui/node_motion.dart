@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' show PathMetric, Tangent;
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:path_parsing/path_parsing.dart';
 
 /// The Flutter curve for a [MotionCurve].
 Curve flutterCurveOf(MotionCurve curve) => switch (curve) {
@@ -13,7 +16,96 @@ Curve flutterCurveOf(MotionCurve curve) => switch (curve) {
   MotionCurve.easeIn => Curves.easeIn,
   MotionCurve.easeOutBack => Curves.easeOutBack,
   MotionCurve.easeOutCubic => Curves.easeOutCubic,
+  MotionCurve.spring => const SpringCurve(),
+  MotionCurve.elasticOut => Curves.elasticOut,
+  MotionCurve.bounceOut => Curves.bounceOut,
+  MotionCurve.fastOutSlowIn => Curves.fastOutSlowIn,
 };
+
+/// An under-damped spring settling on 1: it passes the target once by about
+/// 12%, swings back a little and settles, the way a released card snaps
+/// home.
+class SpringCurve extends Curve {
+  /// Creates a [SpringCurve].
+  const SpringCurve();
+
+  @override
+  double transformInternal(double t) =>
+      1 - math.exp(-6.5 * t) * math.cos(2 * math.pi * 1.25 * t) * (1 - t * t);
+}
+
+final Map<String, _MeasuredPath?> _pathCache = {};
+
+class _MeasuredPath {
+  _MeasuredPath(this.metrics, this.start)
+    : length = metrics.fold(0, (sum, m) => sum + m.length);
+
+  final List<PathMetric> metrics;
+  final Offset start;
+  final double length;
+
+  /// Position (relative to the path's start) and direction at [progress].
+  (Offset, double)? at(double progress) {
+    if (length <= 0) return null;
+    double distance = progress.clamp(0, 1).toDouble() * length;
+    for (final PathMetric metric in metrics) {
+      if (distance <= metric.length || metric == metrics.last) {
+        final Tangent? tangent = metric.getTangentForOffset(
+          distance.clamp(0, metric.length).toDouble(),
+        );
+        if (tangent == null) return null;
+        return (tangent.position - start, -tangent.angle);
+      }
+      distance -= metric.length;
+    }
+    return null;
+  }
+}
+
+class _PathBuilder extends PathProxy {
+  final Path path = Path();
+  Offset? start;
+
+  @override
+  void moveTo(double x, double y) {
+    start ??= Offset(x, y);
+    path.moveTo(x, y);
+  }
+
+  @override
+  void lineTo(double x, double y) => path.lineTo(x, y);
+
+  @override
+  void cubicTo(
+    double x1,
+    double y1,
+    double x2,
+    double y2,
+    double x3,
+    double y3,
+  ) => path.cubicTo(x1, y1, x2, y2, x3, y3);
+
+  @override
+  void close() => path.close();
+}
+
+_MeasuredPath? _measure(String data) => _pathCache.putIfAbsent(data, () {
+  try {
+    final builder = _PathBuilder();
+    writeSvgPathDataToPath(data, builder);
+    final metrics = builder.path.computeMetrics().toList();
+    if (metrics.isEmpty) return null;
+    return _MeasuredPath(metrics, builder.start ?? Offset.zero);
+  } catch (_) {
+    return null;
+  }
+});
+
+/// Where a node moving along SVG path [data] is at [progress] (0 to 1, by
+/// arc length), relative to the path's start, and the path's direction
+/// there in radians. Null when the path can't be read or is empty.
+(Offset, double)? pointOnMotionPath(String data, double progress) =>
+    _measure(data)?.at(progress);
 
 /// The transform [motion] draws, without spin, around [origin] in a box of
 /// [size]. [spinTurns] adds a spin angle.
@@ -192,7 +284,11 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       a.rotateY == b.rotateY &&
       a.perspective == b.perspective &&
       a.originX == b.originX &&
-      a.originY == b.originY;
+      a.originY == b.originY &&
+      a.pathProgress == b.pathProgress &&
+      a.path == b.path &&
+      a.orientToPath == b.orientToPath &&
+      a.backfaceHidden == b.backfaceHidden;
 
   /// Whether a transition is running or waiting out its delay.
   bool get _moving => _transition.isAnimating || _delay?.isActive == true;
@@ -210,6 +306,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       rotate: lerp('rotate'),
       rotateX: lerp('rotateX'),
       rotateY: lerp('rotateY'),
+      pathProgress: lerp('pathProgress'),
     );
   }
 
@@ -261,6 +358,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     final MotionModel m = _moving ? _current : _to;
     if (!m.hasTransform && _turns == 0) return widget.child;
     Widget child = widget.child;
+    if (m.backfaceHidden) child = BackfaceHidden(child: child);
     if (m.opacity < 1) {
       // A fully transparent node also stops taking taps, like a hidden one.
       child = IgnorePointer(
@@ -274,13 +372,87 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
         m.rotate == 0 &&
         m.rotateX == 0 &&
         m.rotateY == 0 &&
-        _turns == 0) {
+        _turns == 0 &&
+        !m.hasPath) {
       return child;
     }
+    MotionModel shown = m;
+    if (m.hasPath) {
+      final (Offset, double)? point = pointOnMotionPath(
+        m.path!,
+        m.pathProgress,
+      );
+      if (point != null) {
+        final (Offset offset, double angle) = point;
+        shown = m.copyWith(
+          translateX: m.translateX + offset.dx,
+          translateY: m.translateY + offset.dy,
+          rotate: m.orientToPath ? m.rotate + angle * 180 / math.pi : null,
+        );
+      }
+    }
     return Transform(
-      alignment: Alignment(m.originX, m.originY),
-      transform: motionMatrix(m, spinTurns: _turns),
+      alignment: Alignment(shown.originX, shown.originY),
+      transform: motionMatrix(shown, spinTurns: _turns),
       child: child,
     );
   }
+}
+
+
+/// Paints [child] only while its front faces the viewer, judged by its
+/// whole transform to the screen, so a face turned away by its own motion
+/// or by any rotating parent disappears (CSS `backface-visibility: hidden`).
+/// A hidden face takes no taps either.
+class BackfaceHidden extends SingleChildRenderObjectWidget {
+  /// Creates a [BackfaceHidden].
+  const BackfaceHidden({super.key, super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => RenderBackface();
+}
+
+/// The render object of [BackfaceHidden].
+class RenderBackface extends RenderProxyBox {
+  /// Whether the box's front faces the viewer through [transform], a
+  /// transform from the box to the screen: the box's corners keep their
+  /// winding (clockwise) when projected.
+  static bool facesViewer(Matrix4 transform, Size size) {
+    final List<double> m = transform.storage;
+    Offset project(double x, double y) {
+      final double w = m[3] * x + m[7] * y + m[15];
+      final double d = w == 0 ? 1e-9 : w;
+      return Offset(
+        (m[0] * x + m[4] * y + m[12]) / d,
+        (m[1] * x + m[5] * y + m[13]) / d,
+      );
+    }
+
+    final w = size.width <= 0 ? 1.0 : size.width;
+    final h = size.height <= 0 ? 1.0 : size.height;
+    final a = project(0, 0);
+    final b = project(w, 0);
+    final c = project(0, h);
+    final double cross =
+        (b.dx - a.dx) * (c.dy - a.dy) - (b.dy - a.dy) * (c.dx - a.dx);
+    return cross > 0;
+  }
+
+  bool get _facing {
+    if (!attached) return true;
+    try {
+      return facesViewer(getTransformTo(null), size);
+    } catch (_) {
+      return true;
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_facing) super.paint(context, offset);
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) =>
+      _facing && super.hitTest(result, position: position);
 }
