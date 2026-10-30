@@ -43,34 +43,73 @@ class PassiveDateTimeInputWidget extends StatefulWidget {
 class _PassiveDateTimeInputWidgetState
     extends State<PassiveDateTimeInputWidget> {
   String? selected;
+  String? error;
 
   @override
   Widget build(BuildContext context) {
     final node = widget.node;
+    final scoped = ScopedValues.of(context);
     final bound = PropertyValueDelegate.getPropertyValue<String>(
       node,
       'value',
-      scopedValues: ScopedValues.of(context),
+      scopedValues: scoped,
     );
     final raw = bound ?? selected ?? node.value;
-    String value;
+    String? value;
     try {
-      value = validateDateTimeInputValue(node.mode, raw);
+      if (raw.isNotEmpty) value = validateDateTimeInputValue(node.mode, raw);
     } on FormatException {
-      value = node.value;
+      value = null;
     }
-    final first = _date(node.properties.firstDate ?? '0001-01-01');
-    final last = _date(node.properties.lastDate ?? '9999-12-31');
-    final date = node.mode == 'time'
+    final min =
+        PropertyValueDelegate.getPropertyValue<String>(
+          node,
+          'min',
+          scopedValues: scoped,
+        ) ??
+        node.properties.min;
+    final max =
+        PropertyValueDelegate.getPropertyValue<String>(
+          node,
+          'max',
+          scopedValues: scoped,
+        ) ??
+        node.properties.max;
+    DateTime first = _date(node.properties.firstDate ?? '0001-01-01');
+    DateTime last = _date(node.properties.lastDate ?? '9999-12-31');
+    if (node.mode != 'time') {
+      if (min != null && min.isNotEmpty) {
+        final lower = _date(min.substring(0, 10));
+        if (lower.isAfter(first)) first = lower;
+      }
+      if (max != null && max.isNotEmpty) {
+        final upper = _date(max.substring(0, 10));
+        if (upper.isBefore(last)) last = upper;
+      }
+    }
+    final date = value == null || node.mode == 'time'
         ? DateTime.now()
-        : (node.mode == 'date' ? _date(value) : DateTime.parse(value));
+        : _date(value.substring(0, 10));
     final initial = date.isBefore(first)
         ? first
         : date.isAfter(last)
         ? last
         : date;
-    return OutlinedButton(
-      onPressed: !node.enabled || widget.isPreview
+    final localizations = MaterialLocalizations.of(context);
+    final display = value == null
+        ? ''
+        : node.mode == 'date'
+        ? localizations.formatMediumDate(date)
+        : node.mode == 'time'
+        ? TimeOfDay(
+            hour: int.parse(value.substring(0, 2)),
+            minute: int.parse(value.substring(3, 5)),
+          ).format(context)
+        : '${localizations.formatMediumDate(date)} · '
+              '${TimeOfDay.fromDateTime(DateTime.parse(value)).format(context)}';
+    final enabled = node.enabled && !widget.isPreview;
+    return InkWell(
+      onTap: !enabled || first.isAfter(last)
           ? null
           : () async {
               DateTime chosen = initial;
@@ -88,12 +127,14 @@ class _PassiveDateTimeInputWidgetState
               if (node.mode != 'date') {
                 time = await showTimePicker(
                   context: context,
-                  initialTime: node.mode == 'time'
+                  initialTime: value == null
+                      ? TimeOfDay.now()
+                      : node.mode == 'time'
                       ? TimeOfDay(
                           hour: int.parse(value.substring(0, 2)),
                           minute: int.parse(value.substring(3, 5)),
                         )
-                      : TimeOfDay.fromDateTime(date),
+                      : TimeOfDay.fromDateTime(DateTime.parse(value)),
                 );
                 if (time == null || !context.mounted) return;
               }
@@ -108,7 +149,25 @@ class _PassiveDateTimeInputWidgetState
                       time!.hour,
                       time.minute,
                     ).toIso8601String();
-              setState(() => selected = result);
+              final tooEarly =
+                  min != null &&
+                  min.isNotEmpty &&
+                  compareDateTimeBounds(node.mode, result, min) < 0;
+              final tooLate =
+                  max != null &&
+                  max.isNotEmpty &&
+                  compareDateTimeBounds(node.mode, result, max) > 0;
+              if (tooEarly || tooLate) {
+                setState(
+                  () => error =
+                      'Choose a time between ${min ?? "—"} and ${max ?? "—"}',
+                );
+                return;
+              }
+              setState(() {
+                selected = result;
+                error = null;
+              });
               if (context.read<CodelesslyContext?>() == null) return;
               NodeStateProvider.setState(context, result);
               FunctionsRepository.setPropertyValue(
@@ -124,10 +183,22 @@ class _PassiveDateTimeInputWidgetState
                 value: result,
               );
             },
-      child: Text(
-        node.properties.label == null || node.properties.label!.isEmpty
-            ? value
-            : '${node.properties.label}: $value',
+      child: InputDecorator(
+        isEmpty: display.isEmpty,
+        decoration: InputDecoration(
+          labelText: node.properties.label,
+          hintText:
+              node.properties.label == null || node.properties.label!.isEmpty
+              ? 'Select ${node.mode == 'dateTime' ? 'date and time' : node.mode}'
+              : null,
+          suffixIcon: Icon(
+            node.mode == 'time' ? Icons.access_time : Icons.calendar_today,
+          ),
+          enabled: node.enabled,
+          errorText: error,
+          border: const OutlineInputBorder(),
+        ),
+        child: Text(display.isEmpty ? ' ' : display),
       ),
     );
   }
