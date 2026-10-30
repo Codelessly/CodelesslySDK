@@ -66,6 +66,11 @@ class CodelesslyWidget extends StatefulWidget {
   /// screen. A site uses this for links such as `/<slug>/<screen>`.
   final String? initialScreen;
 
+  /// Whether this widget draws the app's overlay screen (a canvas with
+  /// `CanvasProperties.overlay`) above the other screens. Set by
+  /// [CodelesslyOverlayHost]; an overlay leaves navigation state alone.
+  final bool overlay;
+
   /// The [Codelessly] instance to use.
   ///
   /// By default, if this is null, the global instance is used, which is
@@ -170,6 +175,7 @@ class CodelesslyWidget extends StatefulWidget {
     super.key,
     this.layoutID,
     this.initialScreen,
+    this.overlay = false,
     this.controller,
     this.codelessly,
     this.config,
@@ -491,7 +497,9 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
             (breakpoint) => breakpoint.nodeId == canvasID,
           );
           // Listeners may rebuild widgets, which is not allowed mid-layout.
-          if (breakpoint != null) {
+          // The overlay screen follows the screen's breakpoint, not the
+          // other way around.
+          if (breakpoint != null && !widget.overlay) {
             SchedulerBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
               _effectiveController.effectiveCodelessly
@@ -604,6 +612,25 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
               name: CodelesslyWidget.name,
             );
           }
+
+          // The overlay screen is drawn above the screens, not navigated to.
+          if (widget.overlay) {
+            return _effectiveLayoutBuilder(
+              context,
+              _buildForBreakpoint(model, buildLayout),
+            );
+          }
+          // A screen puts the app's overlay screen (if any) above it and the
+          // screens that follow.
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            CodelesslyOverlayHost.ensure(
+              context,
+              model: model,
+              controller: _effectiveController,
+              currentLayoutId: effectiveLayoutID,
+            );
+          });
 
           // The breakpoint (and so the canvas) is known only once the width
           // this widget gets is, so navigation listeners hear of the canvas

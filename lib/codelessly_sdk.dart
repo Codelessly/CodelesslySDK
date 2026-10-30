@@ -49,6 +49,7 @@ export 'src/ui/codelessly_context.dart';
 export 'src/ui/codelessly_node_tree_view.dart';
 export 'src/ui/codelessly_route.dart';
 export 'src/ui/codelessly_widget.dart';
+export 'src/ui/overlay_screen.dart';
 export 'src/ui/codelessly_widget_controller.dart';
 export 'src/ui/feedback_theme.dart';
 export 'src/ui/related_documents.dart';
