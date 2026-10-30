@@ -14,6 +14,125 @@ String _isoDate(DateTime value) =>
 String _clock(TimeOfDay value) =>
     '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
 
+class PassiveDateTimeInputTransformer
+    extends NodeWidgetTransformer<DateTimeInputNode> {
+  PassiveDateTimeInputTransformer(super.getNode, super.manager);
+
+  @override
+  Widget buildWidget(
+    DateTimeInputNode node,
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) => PassiveDateTimeInputWidget(node: node, isPreview: settings.isPreview);
+}
+
+class PassiveDateTimeInputWidget extends StatefulWidget {
+  const PassiveDateTimeInputWidget({
+    super.key,
+    required this.node,
+    this.isPreview = false,
+  });
+  final DateTimeInputNode node;
+  final bool isPreview;
+
+  @override
+  State<PassiveDateTimeInputWidget> createState() =>
+      _PassiveDateTimeInputWidgetState();
+}
+
+class _PassiveDateTimeInputWidgetState
+    extends State<PassiveDateTimeInputWidget> {
+  String? selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final node = widget.node;
+    final bound = PropertyValueDelegate.getPropertyValue<String>(
+      node,
+      'value',
+      scopedValues: ScopedValues.of(context),
+    );
+    final raw = bound ?? selected ?? node.value;
+    String value;
+    try {
+      value = validateDateTimeInputValue(node.mode, raw);
+    } on FormatException {
+      value = node.value;
+    }
+    final first = _date(node.properties.firstDate ?? '0001-01-01');
+    final last = _date(node.properties.lastDate ?? '9999-12-31');
+    final date = node.mode == 'time'
+        ? DateTime.now()
+        : (node.mode == 'date' ? _date(value) : DateTime.parse(value));
+    final initial = date.isBefore(first)
+        ? first
+        : date.isAfter(last)
+        ? last
+        : date;
+    return OutlinedButton(
+      onPressed: !node.enabled || widget.isPreview
+          ? null
+          : () async {
+              DateTime chosen = initial;
+              if (node.mode != 'time') {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: initial,
+                  firstDate: first,
+                  lastDate: last,
+                );
+                if (picked == null || !context.mounted) return;
+                chosen = picked;
+              }
+              TimeOfDay? time;
+              if (node.mode != 'date') {
+                time = await showTimePicker(
+                  context: context,
+                  initialTime: node.mode == 'time'
+                      ? TimeOfDay(
+                          hour: int.parse(value.substring(0, 2)),
+                          minute: int.parse(value.substring(3, 5)),
+                        )
+                      : TimeOfDay.fromDateTime(date),
+                );
+                if (time == null || !context.mounted) return;
+              }
+              final result = node.mode == 'date'
+                  ? _isoDate(chosen)
+                  : node.mode == 'time'
+                  ? _clock(time!)
+                  : DateTime.utc(
+                      chosen.year,
+                      chosen.month,
+                      chosen.day,
+                      time!.hour,
+                      time.minute,
+                    ).toIso8601String();
+              setState(() => selected = result);
+              if (context.read<CodelesslyContext?>() == null) return;
+              NodeStateProvider.setState(context, result);
+              FunctionsRepository.setPropertyValue(
+                context,
+                node: node,
+                property: 'value',
+                value: result,
+              );
+              FunctionsRepository.triggerAction(
+                context,
+                TriggerType.changed,
+                node: node,
+                value: result,
+              );
+            },
+      child: Text(
+        node.properties.label == null || node.properties.label!.isEmpty
+            ? value
+            : '${node.properties.label}: $value',
+      ),
+    );
+  }
+}
+
 class PassiveDatePickerTransformer
     extends NodeWidgetTransformer<DatePickerNode> {
   PassiveDatePickerTransformer(super.getNode, super.manager);

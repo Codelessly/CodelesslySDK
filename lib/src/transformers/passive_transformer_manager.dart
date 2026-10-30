@@ -42,6 +42,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'textField': PassiveTextFieldTransformer(getNode, this),
       'datePicker': PassiveDatePickerTransformer(getNode, this),
       'timePicker': PassiveTimePickerTransformer(getNode, this),
+      'dateTimeInput': PassiveDateTimeInputTransformer(getNode, this),
       'checkbox': PassiveCheckboxTransformer(getNode, this),
       'appBar': PassiveAppBarTransformer(getNode, this),
       'navigationBar': PassiveNavigationBarTransformer(getNode, this),
