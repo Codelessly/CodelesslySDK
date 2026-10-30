@@ -170,4 +170,19 @@ void main() {
     expect(peak, greaterThan(1.03));
     expect(peak, lessThan(1.25));
   });
+
+  testWidgets('scaleX stretches one way only', (tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: NodeMotion(
+          motion: MotionModel(scaleX: 0.5, originX: -1),
+          child: SizedBox(width: 100, height: 20),
+        ),
+      ),
+    );
+    final Transform t = tester.widget(find.byType(Transform));
+    expect(t.transform.storage[0], closeTo(0.5, 1e-9));
+    expect(t.transform.storage[5], closeTo(1, 1e-9));
+  });
 }
