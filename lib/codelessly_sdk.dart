@@ -58,6 +58,7 @@ export 'src/ui/skeleton.dart';
 export 'src/speech/speech.dart' show Speech, SpeechEngine;
 export 'src/ui/node_drag.dart';
 export 'src/ui/node_motion.dart';
+export 'src/ui/node_scroll.dart';
 export 'src/ui/swipe_detector.dart';
 export 'src/ui/stripe_painter.dart';
 export 'src/utils/computed_variables.dart';
