@@ -10,6 +10,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../utils/material_icons_by_name.dart';
 
 typedef LayoutRetrieverBuilder = Widget Function(
   BuildContext context,
@@ -975,12 +976,14 @@ class SvgIcon extends StatelessWidget {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
     // Material Icons ship with Flutter; use their bundled glyph offline.
-    if (icon is MaterialIcon && icon.codepoint > 0) {
-      return Icon(
-        IconData(icon.codepoint, fontFamily: icon.fontFamily),
-        size: dimension,
-        color: iconColor,
-      );
+    // Icon models hold the codepoints of Google's Material Icons fonts, which
+    // aren't the codepoints of Flutter's MaterialIcons font, so the glyph is
+    // found by name and style.
+    if (icon case final MaterialIcon material) {
+      final IconData? glyph = materialIconsByName[material.styledName];
+      if (glyph != null) {
+        return Icon(glyph, size: dimension, color: iconColor);
+      }
     }
 
     final url = icon.toSvgUrl(

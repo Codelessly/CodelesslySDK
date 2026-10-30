@@ -124,6 +124,21 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     );
   }
 
+  /// The surface a canvas without a scaffold is drawn on: its background
+  /// colour. Under a [TapThroughScope] (a dialog's canvas, the overlay
+  /// screen) a canvas without a background takes no taps on its empty
+  /// parts, so they reach what is below it.
+  Widget _canvasMaterial(BuildContext context, CanvasNode node, Widget body) {
+    final Color? background = retrieveBackgroundColor(context, node);
+    final bool transparent =
+        (background == null || background.a == 0) && TapThroughScope.of(context);
+    return Material(
+      type: transparent ? MaterialType.transparency : MaterialType.canvas,
+      color: transparent ? null : background,
+      child: body,
+    );
+  }
+
   Widget _wrapInScaffoldForResponsive({
     required CanvasNode node,
     required BuildContext context,
@@ -195,17 +210,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         body: body,
       );
     } else {
-      final Color? background = retrieveBackgroundColor(context, node);
-      // Under a TapThroughScope, a canvas without a background takes no taps
-      // on its empty parts, so they reach its dialog's barrier.
-      final bool transparent =
-          (background == null || background.a == 0) &&
-          TapThroughScope.of(context);
-      scaffold = Material(
-        type: transparent ? MaterialType.transparency : MaterialType.canvas,
-        color: transparent ? null : background,
-        child: body,
-      );
+      scaffold = _canvasMaterial(context, node, body);
     }
 
     return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
@@ -328,17 +333,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         body: body,
       );
     } else {
-      scaffold = Material(
-        color: retrieveBackgroundColor(context, node),
-        child: !node.isScrollable
-            // This would make it so auto scale layouts are top-center aligned
-            // in the viewport. But this doesn't work if the layout is inside a
-            // dialog. it will force it to top-center align in the dialog
-            // which is not what we want.
-            // ? Align(alignment: Alignment.topCenter, child: body)
-            ? body
-            : body,
-      );
+      scaffold = _canvasMaterial(context, node, body);
     }
 
     return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
@@ -1038,7 +1033,11 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       if (_redirected) return;
     }
 
-    context.read<Codelessly?>()?.prepareRoute(context, widget.node.id);
+    // The overlay screen isn't the screen the app is on: the route is not
+    // its own.
+    if (!OverlayScreenScope.of(context)) {
+      context.read<Codelessly?>()?.prepareRoute(context, widget.node.id);
+    }
     triggerOnLoadActions(context);
     _watchValues(context);
     _startTimers();
