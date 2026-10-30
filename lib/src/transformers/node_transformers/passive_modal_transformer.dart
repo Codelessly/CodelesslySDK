@@ -27,11 +27,14 @@ class PassiveModalTransformer extends NodeWidgetTransformer<ModalNode> {
       showDialog<void>(
         context: triggerContext,
         builder: (dialogContext) => Dialog(
-          child: Builder(
-            builder: (bodyContext) => manager.buildWidgetFromNode(
-              content,
-              bodyContext,
-              settings: settings,
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: IntrinsicWidth(
+            child: Builder(
+              builder: (bodyContext) => manager.buildWidgetFromNode(
+                content,
+                bodyContext,
+                settings: settings,
+              ),
             ),
           ),
         ),
