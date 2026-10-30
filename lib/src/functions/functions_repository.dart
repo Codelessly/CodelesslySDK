@@ -935,8 +935,8 @@ class FunctionsRepository {
             DialogPlacement.bottomSheet => DialogPresentation.bottomSheet,
             DialogPlacement.adaptive => DialogPresentation.adaptive,
             _ => presentation,
-          }
-        : presentation;
+          }.resolveFor(context)
+        : presentation.resolveFor(context);
     final bool wantsAnchor =
         effectivePresentation == DialogPresentation.dialog &&
         (anchorToTrigger || placement == DialogPlacement.anchored);

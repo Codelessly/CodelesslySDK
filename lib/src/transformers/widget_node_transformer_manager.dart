@@ -491,7 +491,7 @@ abstract class WidgetNodeTransformerManager
 
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
-    final Widget tappable = _wrapWithTapReactions(context, node, widget);
+    Widget tappable = _wrapWithTapReactions(context, node, widget);
     if (node is! ReactionMixin || node is CanvasNode || node is SpacerNode) {
       return tappable;
     }
@@ -500,6 +500,10 @@ abstract class WidgetNodeTransformerManager
       for (final reaction in reactions)
         if (reaction.trigger.type == type && reaction.action.enabled) reaction,
     ];
+    final List<Reaction> onScrollEnd = of(TriggerType.scrollEnd);
+    if (onScrollEnd.isNotEmpty) {
+      tappable = ScrollEndDetector(reactions: onScrollEnd, child: tappable);
+    }
     final List<Reaction> onDrag = of(TriggerType.drag);
     final List<Reaction> onDragEnd = of(TriggerType.dragEnd);
     final List<Reaction> onPointerDown = of(TriggerType.pointerDown);
