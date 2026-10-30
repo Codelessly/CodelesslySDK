@@ -64,8 +64,12 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    parameter is read like a variable inside its body (`t.title`,
 ///    `t.tags[0]`, `t.tags.length`) and hides a variable of the same name;
 ///    the body can read every other variable. A lambda can take the item's
-///    index as a second parameter, `(t, i) => i < 3`. Lambdas are only
-///    allowed as function arguments.
+///    index as a second parameter, `(t, i) => i < 3`.
+///  - user functions: a variable whose formula is a lambda with any number
+///    of parameters, e.g. `fraction = ${= (v, step) => ...}`, is called like
+///    a built-in function, `fraction(qty * scale, 0.25)`, from any formula
+///    that can read the variable. Calling any other unknown name makes the
+///    formula null.
 ///  - left(text, n), right(text, n) and toMap (a map built from a list,
 ///    `toMap(items, i => i.id, i => "pass")`).
 ///  - math: sqrt, pow, sin, cos, tan, asin, acos, atan, atan2 (radians),
@@ -215,14 +219,36 @@ class FormulaEvaluator {
     return _cache[key] = node;
   }
 
+  /// The functions [expression] calls that aren't built in: user functions,
+  /// variables whose value is a lambda.
+  static Set<String> userFunctionCalls(String expression) {
+    try {
+      final _Parser parser = _Parser(expression.trim());
+      parser.parseAll();
+      return parser.userCalls;
+    } catch (_) {
+      return const {};
+    }
+  }
+
   /// Names of the functions formulas can call.
   static Iterable<String> get functions => _functions.keys;
 
   /// Why [expression] can't be evaluated, such as `Unknown function "sun"`
   /// or `Expected ")" at 12`, or null when it parses.
-  static String? errorOf(String expression) {
+  ///
+  /// A call of a function that isn't built in is a user function call: a
+  /// variable holding a lambda. Calls of names that aren't among
+  /// [variables] (the names in scope; none when omitted) are unknown
+  /// functions.
+  static String? errorOf(String expression, {Iterable<String>? variables}) {
     try {
-      _Parser(expression.trim()).parseAll();
+      final _Parser parser = _Parser(expression.trim());
+      parser.parseAll();
+      final Set<String> known = {...?variables};
+      for (final String name in parser.userCalls) {
+        if (!known.contains(name)) return 'Unknown function "$name"';
+      }
       return null;
     } on FormatException catch (error) {
       final int? offset = error.offset;
@@ -1194,24 +1220,29 @@ List<Object?> _unique(List<Object?> args) {
   return items;
 }
 
-/// A lambda such as `t => t.price` or `(t, i) => i + 1`, ready to call
-/// with an item and its index.
+/// A lambda such as `t => t.price`, `(t, i) => i + 1` or, as a user
+/// function stored in a variable, `(qty, unit, system) => ...`. List
+/// functions call it with an item and its index; a user function call
+/// passes its arguments in order. Its text is its [source], so a function
+/// survives being stored as a variable's value.
 class _Closure {
-  final String param;
-  final String? indexParam;
+  final List<String> params;
   final _Node body;
   final FormulaPathResolver outer;
+  final String source;
 
-  const _Closure(this.param, this.indexParam, this.body, this.outer);
+  const _Closure(this.params, this.body, this.outer, this.source);
 
   static final RegExp _part = RegExp(r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]');
 
-  Object? call(Object? value, [int? index]) => body.eval((path) {
-    for (final (String? name, Object? bound) in [
-      (param, value),
-      (indexParam, index),
-    ]) {
-      if (name == null) continue;
+  Object? call(Object? value, [int? index]) => callWith([value, index]);
+
+  /// Calls the lambda with [args] bound to its parameters in order; missing
+  /// arguments are null.
+  Object? callWith(List<Object?> args) => body.eval((path) {
+    for (int i = 0; i < params.length; i++) {
+      final String name = params[i];
+      final Object? bound = i < args.length ? args[i] : null;
       if (path == name) return bound;
       if (path.startsWith(name) &&
           (path.startsWith('.', name.length) ||
@@ -1227,7 +1258,7 @@ class _Closure {
   });
 
   @override
-  String toString() => '';
+  String toString() => source;
 }
 
 // ---------------------------------------------------------------------------
@@ -2165,18 +2196,18 @@ class _Call extends _Node {
   }
 }
 
-/// A lambda argument, `param => body` or `(param, index) => body`.
-/// Evaluates to a [_Closure] that list functions call once per item.
+/// A lambda, `param => body`, `(param, index) => body`, or with more
+/// parameters for a user function. Evaluates to a [_Closure].
 class _Lambda extends _Node {
-  final String param;
-  final String? indexParam;
+  final List<String> params;
   final _Node body;
+  final String source;
 
-  const _Lambda(this.param, this.indexParam, this.body);
+  const _Lambda(this.params, this.body, this.source);
 
   @override
   Object? eval(FormulaPathResolver resolve) =>
-      _Closure(param, indexParam, body, resolve);
+      _Closure(params, body, resolve, source);
 
   /// The body's paths, except those of the parameters, which aren't
   /// variables.
@@ -2184,17 +2215,57 @@ class _Lambda extends _Node {
   void collectPaths(Set<String> paths) {
     final Set<String> bodyPaths = {};
     body.collectPaths(bodyPaths);
-    bool isParam(String path, String? name) =>
-        name != null &&
-        (path == name ||
-            path.startsWith('$name.') ||
-            path.startsWith('$name['));
-    paths.addAll(
-      bodyPaths.where(
-        (path) => !isParam(path, param) && !isParam(path, indexParam),
-      ),
+    bool isParam(String path) => params.any(
+      (name) =>
+          path == name ||
+          path.startsWith('$name.') ||
+          path.startsWith('$name['),
     );
+    paths.addAll(bodyPaths.where((path) => !isParam(path)));
   }
+}
+
+/// A call of a function that isn't built in: a user function, i.e. a
+/// variable whose value is a lambda (a computed variable with the formula
+/// `${= (qty, unit) => ...}`). The variable may hold the function itself or
+/// its text. Calling anything else evaluates to null.
+class _UserCall extends _Node {
+  final String name;
+  final List<_Node> args;
+
+  const _UserCall(this.name, this.args);
+
+  @override
+  Object? eval(FormulaPathResolver resolve) {
+    final _Closure? function = _userFunction(resolve(name), resolve);
+    // Like any invalid expression, calling what isn't a function makes the
+    // whole formula null.
+    if (function == null) throw StateError('"$name" is not a function');
+    return function.callWith([for (final arg in args) arg.eval(resolve)]);
+  }
+
+  @override
+  void collectPaths(Set<String> paths) {
+    paths.add(name);
+    for (final arg in args) {
+      arg.collectPaths(paths);
+    }
+  }
+}
+
+/// [value] as a callable function: a closure, or the text of a lambda
+/// (with or without its `${= }` wrapper). Its body reads the caller's
+/// variables, so a function defined in one scope (an app variable) works
+/// with the variables where it is called.
+_Closure? _userFunction(Object? value, FormulaPathResolver resolve) {
+  if (value is _Closure) {
+    return _Closure(value.params, value.body, resolve, value.source);
+  }
+  if (value is! String || !value.contains('=>')) return null;
+  final String text = FormulaEvaluator.exactExpression(value) ?? value;
+  final _Node? node = FormulaEvaluator._parse(text);
+  if (node is! _Lambda) return null;
+  return node.eval(resolve) as _Closure;
 }
 
 /// An object literal, `{id: 'a', 'full name': n + 1}`.
@@ -2323,12 +2394,16 @@ class _Parser {
   static final RegExp _identifier = RegExp(r'[a-zA-Z_][a-zA-Z0-9_]*');
   static final RegExp _lambdaHead = RegExp(
     r'(?:([a-zA-Z_][a-zA-Z0-9_]*)'
-    r'|\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:,\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*)?\))'
+    r'|\(\s*([a-zA-Z_][a-zA-Z0-9_]*(?:\s*,\s*[a-zA-Z_][a-zA-Z0-9_]*)*)\s*\))'
     r'\s*=>',
   );
 
+  /// Functions called that aren't built in (user functions).
+  final Set<String> userCalls = {};
+
+  /// The whole formula: an expression, or a lambda (a user function).
   _Node parseAll() {
-    final _Node node = _ternary();
+    final _Node node = _argument();
     _skip();
     if (pos != source.length) {
       throw FormatException('Unexpected "${source[pos]}"', source, pos);
@@ -2365,8 +2440,13 @@ class _Parser {
     _skip();
     final Match? head = _lambdaHead.matchAsPrefix(source, pos);
     if (head == null) return _ternary();
+    final int start = pos;
     pos = head.end;
-    return _Lambda(head[1] ?? head[2]!, head[3], _ternary());
+    final List<String> params = head[1] != null
+        ? [head[1]!]
+        : head[2]!.split(',').map((name) => name.trim()).toList();
+    final _Node body = _ternary();
+    return _Lambda(params, body, source.substring(start, pos).trim());
   }
 
   _Node _ternary() {
@@ -2542,15 +2622,18 @@ class _Parser {
     }
 
     if (_eat('(')) {
-      if (!_functions.containsKey(name)) {
-        throw FormatException('Unknown function "$name"', source, pos);
-      }
       final List<_Node> args = [];
       if (!_eat(')')) {
         do {
           args.add(_argument());
         } while (_eat(','));
         _expect(')');
+      }
+      // Not a built-in function: a user function (a variable holding a
+      // lambda), resolved when evaluated.
+      if (!_functions.containsKey(name)) {
+        userCalls.add(name);
+        return _UserCall(name, args);
       }
       return _Call(name, args);
     }

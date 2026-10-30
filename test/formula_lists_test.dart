@@ -61,7 +61,8 @@ void main() {
       expect(eval('map([1, 2, 3], n => n * 2)'), [2, 4, 6]);
       expect(eval('map([1, 2, 3], (n) => n + limit)'), [3, 4, 5]);
       expect(FormulaEvaluator.errorOf('count(tasks, t => t.done)'), isNull);
-      expect(FormulaEvaluator.errorOf('x => x'), isNotNull);
+      // A lambda on its own is a user function (stored in a variable).
+      expect(FormulaEvaluator.errorOf('x => x'), isNull);
       expect(FormulaEvaluator.errorOf('count(tasks, t =>)'), isNotNull);
     });
 

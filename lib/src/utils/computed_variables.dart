@@ -51,11 +51,13 @@ abstract final class ComputedVariables {
     return formula.trim();
   }
 
-  /// Why [formula] can't be evaluated, or null when it parses.
-  static String? errorOf(String formula) {
+  /// Why [formula] can't be evaluated, or null when it parses. Calls of
+  /// user functions (variables holding a lambda) are valid when their names
+  /// are among [variables].
+  static String? errorOf(String formula, {Iterable<String>? variables}) {
     final String? expression = expressionOf(formula);
     if (expression == null) return null;
-    return FormulaEvaluator.errorOf(expression);
+    return FormulaEvaluator.errorOf(expression, variables: variables);
   }
 
   /// The names of the variables [variable]'s formula reads, e.g. `records`
