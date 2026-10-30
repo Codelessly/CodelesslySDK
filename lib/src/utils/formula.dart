@@ -586,6 +586,11 @@ class FormulaEvaluator {
     FormulaFunctionDoc('skip', 'skip(list, count)', 'skip(events, 25)'),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc(
+      'mix',
+      'mix(color1, color2, amount)',
+      "mix('#FFFFFF', '#000000', 0.25) → #FFBFBFBF",
+    ),
+    FormulaFunctionDoc(
       'alpha',
       'alpha(color, opacity)',
       "alpha('#FF4D4F', 0.12) → #1FFF4D4F",
@@ -1746,6 +1751,27 @@ String? _alpha(Object? color, num opacity) {
   return '#${a.toRadixString(16).padLeft(2, '0').toUpperCase()}$rgb';
 }
 
+/// [from] moved [amount] (0–1) of the way to [to], channel by channel
+/// (alpha too), like Flutter's `Color.lerp`: `mix(paper, ink, 0.28)` is ink
+/// at 28% over paper. Colors are `#RRGGBB` or `#AARRGGBB`.
+String? _mix(Object? from, Object? to, num amount) {
+  int? argb(Object? color) {
+    final String hex = FormulaEvaluator.stringify(color).replaceAll('#', '');
+    if (hex.length != 6 && hex.length != 8) return null;
+    return int.tryParse(hex.length == 6 ? 'FF$hex' : hex, radix: 16);
+  }
+
+  final int? a = argb(from), b = argb(to);
+  if (a == null || b == null) return null;
+  final double t = amount.clamp(0, 1).toDouble();
+  final StringBuffer out = StringBuffer('#');
+  for (final int shift in const <int>[24, 16, 8, 0]) {
+    final int ca = (a >> shift) & 0xFF, cb = (b >> shift) & 0xFF;
+    out.write((ca + (cb - ca) * t).round().toRadixString(16).padLeft(2, '0'));
+  }
+  return out.toString().toUpperCase();
+}
+
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
@@ -2014,6 +2040,7 @@ final Map<String, _Function> _functions = {
   'get': (a) => _member(_arg(a, 0), _arg(a, 1)),
   'number': (a) => _toNum(_arg(a, 0)),
   'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
+  'mix': (a) => _mix(_arg(a, 0), _arg(a, 1), _num(_arg(a, 2) ?? 0.5)),
   'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
     _arg(a, 1) == null ? 2 : _intArg(_arg(a, 1)),
     FormulaEvaluator.stringify(_arg(a, 2) ?? '0'),

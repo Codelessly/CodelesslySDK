@@ -39,6 +39,14 @@ void main() {
       expect(eval('round(exp(-120 / 500), 3)'), 0.787);
     });
 
+    test('mix blends colors like Color.lerp', () {
+      expect(eval("mix('#FFFFFF', '#000000', 0.25)"), '#FFBFBFBF');
+      // A pencil washed at 28% over blueprint paper.
+      expect(eval("mix('#0E2A57', '#FFB547', 0.28)"), '#FF515153');
+      expect(eval("mix('#00000000', '#FF000000', 0.5)"), '#80000000');
+      expect(eval("mix('#123456', 'nope', 0.5)"), isNull);
+    });
+
     test('great-circle distance in km and miles', () {
       // Las Vegas to Salt Lake City is about 362 miles as the crow flies.
       expect(
