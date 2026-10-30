@@ -2373,8 +2373,15 @@ extension VariableDataExt on VariableData {
 }
 
 extension TextFieldFormatterExt on TextInputFormatterModel {
-  TextInputFormatter? toFlutterFormatter() {
+  /// [resolve] turns a bound value (`${account.currency}`) into text.
+  TextInputFormatter? toFlutterFormatter({
+    String Function(String value)? resolve,
+  }) {
     switch (this) {
+      case CurrencyTextInputFormatterModel formatter:
+        final String code =
+            resolve?.call(formatter.currencyCode) ?? formatter.currencyCode;
+        return CurrencyAmountInputFormatter(code);
       case NoneTextInputFormatterModel():
         return null;
       case RegexTextInputFormatterModel formatter:
@@ -2393,6 +2400,30 @@ extension TextFieldFormatterExt on TextInputFormatterModel {
           replacementString: formatter.replacementString,
         );
     }
+  }
+}
+
+/// Groups an amount as it is typed in [currencyCode]'s format (see the
+/// `formatAmount` formula), keeping the caret the same number of characters
+/// from the end.
+class CurrencyAmountInputFormatter extends TextInputFormatter {
+  CurrencyAmountInputFormatter(this.currencyCode);
+
+  final String currencyCode;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final String formatted = formatAmountInput(newValue.text, currencyCode);
+    final int fromEnd =
+        newValue.text.length - newValue.selection.extentOffset.clamp(0, newValue.text.length);
+    final int caret = (formatted.length - fromEnd).clamp(0, formatted.length);
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: caret),
+    );
   }
 }
 
