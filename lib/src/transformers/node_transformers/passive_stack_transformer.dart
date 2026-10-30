@@ -28,17 +28,34 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         childWidget ??
         manager!.buildWidgetFromNode(node, context, settings: settings);
 
-    return FreeformChild(
+    Widget placed(BuildContext scope) => FreeformChild(
       key: ValueKey(
         'Static Stack child [${node.id}](${node.name})<${node.type}> on parent [${parent.id}](${parent.name})<${parent.type}>',
       ),
       placement: placementFor(
-        withBoundSize(context, node),
+        withBoundSize(scope, node),
         parent,
         scrollAxis: scrollAxis,
+        scopedValues: ScopedValues.of(scope),
       ),
       child: child,
     );
+
+    // The child widget already listens to its bindings, but its parent data
+    // belongs to the freeform slot. Rebuild that slot as well when a bound
+    // position changes, using the mounted scope (including list item values).
+    if (manager is PassiveNodeTransformerManager &&
+        (node.variables.containsKey('positionX') ||
+            node.variables.containsKey('positionY'))) {
+      final listenables = manager.listenablesFor(context, node);
+      if (listenables.isNotEmpty) {
+        return AnimatedBuilder(
+          animation: Listenable.merge(listenables),
+          builder: (scope, _) => placed(scope),
+        );
+      }
+    }
+    return placed(context);
   }
 
   /// [node] with the `width` and `height` its variables, formulas or
@@ -100,6 +117,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     BaseNode node,
     BaseNode parent, {
     AxisC? scrollAxis,
+    ScopedValues? scopedValues,
   }) {
     if (parent is ScrollableMixin && parent.isScrollable) {
       scrollAxis ??= parent.scrollDirection;
@@ -112,12 +130,14 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         parent,
         horizontal: true,
         isScrollAxis: scrolls && !verticalScroll,
+        scopedValues: scopedValues,
       ),
       vertical: _axisPlacement(
         node,
         parent,
         horizontal: false,
         isScrollAxis: verticalScroll,
+        scopedValues: scopedValues,
       ),
     );
   }
@@ -127,7 +147,36 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     BaseNode parent, {
     required bool horizontal,
     required bool isScrollAxis,
+    ScopedValues? scopedValues,
   }) {
+    final String property = horizontal ? 'positionX' : 'positionY';
+    if (scopedValues != null && node.variables.containsKey(property)) {
+      final num? fraction = PropertyValueDelegate.getPropertyValue<num>(
+        node,
+        property,
+        scopedValues: scopedValues,
+      );
+      // Invalid or out-of-range values do not move a node to an arbitrary
+      // edge: leave this axis on its original freeform placement instead.
+      if (fraction != null &&
+          fraction.isFinite &&
+          fraction >= 0 &&
+          fraction <= 1) {
+        final AlignmentData? alignment = node.alignment.data;
+        return FreeformAxisPlacement(
+          mode: FreeformAxisMode.fraction,
+          start: 0,
+          extent: horizontal
+              ? node.outerBoxLocal.width
+              : node.outerBoxLocal.height,
+          parentExtent: horizontal
+              ? parent.innerBoxLocal.width
+              : parent.innerBoxLocal.height,
+          fraction: fraction.toDouble(),
+          anchor: ((horizontal ? alignment?.x : alignment?.y) ?? 0) / 2 + 0.5,
+        );
+      }
+    }
     final double extent = horizontal
         ? node.outerBoxLocal.width
         : node.outerBoxLocal.height;
