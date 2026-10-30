@@ -1079,7 +1079,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       for (final Reaction reaction in _keyReactions)
         if (reaction.trigger.key == null ||
             reaction.trigger.key!.isEmpty ||
-            reaction.trigger.key!.toLowerCase() == key.toLowerCase())
+            normalizeKeyLabel(reaction.trigger.key!) == normalizeKeyLabel(key))
           reaction,
     ];
     if (reactions.isEmpty) return false;
