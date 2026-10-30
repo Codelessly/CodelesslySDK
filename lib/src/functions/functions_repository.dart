@@ -188,6 +188,16 @@ class FunctionsRepository {
           rate: speak.rate,
           pitch: speak.pitch,
         );
+      case ActionType.focusField:
+        final FocusFieldAction focus = action as FocusFieldAction;
+        if (focus.unfocus) {
+          FocusManager.instance.primaryFocus?.unfocus();
+          return true;
+        }
+        final FocusNode? node = TextFieldFocus.of(focus.nodeId);
+        if (node == null) return false;
+        node.requestFocus();
+        return true;
       case ActionType.controlDrag:
         final ControlDragAction drag = action as ControlDragAction;
         return NodeDrag.control(
