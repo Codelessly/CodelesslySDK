@@ -103,4 +103,35 @@ void main() {
     expect(find.byType(Icon), findsNothing);
     expect(tester.getSize(find.byType(SizedBox).last), const Size(20, 20));
   });
+
+  testWidgets('Material icons draw Flutter\'s glyph for their name, not the '
+      'catalog codepoint', (tester) async {
+    Future<IconData?> glyph(MaterialIcon icon) async {
+      await tester.pumpWidget(MaterialApp(home: SvgIcon(icon: icon, size: 24)));
+      return tester.widget<Icon>(find.byType(Icon)).icon;
+    }
+
+    // The editor's catalog stores Google's codepoint (play_arrow = 0xe037),
+    // which is ac_unit in Flutter's MaterialIcons font.
+    expect(
+      await glyph(
+        const MaterialIcon(
+          codepoint: 0xe037,
+          name: 'play_arrow',
+          style: MaterialIconStyle.filled,
+        ),
+      ),
+      Icons.play_arrow,
+    );
+    expect(
+      await glyph(
+        const MaterialIcon(
+          codepoint: 0,
+          name: 'volume_up',
+          style: MaterialIconStyle.outlined,
+        ),
+      ),
+      Icons.volume_up_outlined,
+    );
+  });
 }
