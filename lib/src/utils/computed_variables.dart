@@ -51,11 +51,15 @@ abstract final class ComputedVariables {
     return formula.trim();
   }
 
-  /// Why [formula] can't be evaluated, or null when it parses.
-  static String? errorOf(String formula) {
+  /// Why [formula] can't be evaluated, or null when it parses. Calls to
+  /// [functionNames] (function variables) are allowed.
+  static String? errorOf(
+    String formula, {
+    Iterable<String> functionNames = const [],
+  }) {
     final String? expression = expressionOf(formula);
     if (expression == null) return null;
-    return FormulaEvaluator.errorOf(expression);
+    return FormulaEvaluator.errorOf(expression, functionNames: functionNames);
   }
 
   /// The names of the variables [variable]'s formula reads, e.g. `records`
@@ -66,6 +70,13 @@ abstract final class ComputedVariables {
     final String? path = _exactPathOf(formula);
     final Set<String> paths = path != null
         ? {path}
+        : variable.isFunction
+        // A function's parameters aren't variables.
+        ? FormulaFunction(
+            variable.parameters,
+            expressionOf(formula)!,
+            (_) => null,
+          ).externalPaths
         : FormulaEvaluator.referencedPaths(expressionOf(formula)!);
     return {
       for (final String path in paths)
@@ -108,12 +119,15 @@ abstract final class ComputedVariables {
   /// themselves, directly or through other computed variables.
   static Set<String> cyclicNames(Map<String, VariableData> variables) {
     final Set<String> cyclic = {};
+    // Functions can call themselves, and are worked out when called, so
+    // they take no part in cycles.
+    bool isValue(VariableData? v) => v != null && v.isComputed && !v.isFunction;
     final Map<String, Set<String>> edges = {
       for (final VariableData variable in variables.values)
-        if (variable.isComputed)
+        if (isValue(variable))
           variable.name: {
             for (final String input in inputsOf(variable))
-              if (variables[input]?.isComputed ?? false) input,
+              if (isValue(variables[input])) input,
           },
     };
     // A computed variable is cyclic when it can reach itself.
@@ -142,7 +156,9 @@ abstract final class ComputedVariables {
     void visit(String name) {
       if (!visited.add(name)) return;
       final VariableData? variable = variables[name];
-      if (variable == null || !variable.isComputed) return;
+      if (variable == null || !variable.isComputed || variable.isFunction) {
+        return;
+      }
       for (final String input in inputsOf(variable)) {
         if (!cyclic.contains(input)) visit(input);
       }
@@ -150,7 +166,9 @@ abstract final class ComputedVariables {
     }
 
     for (final VariableData variable in variables.values) {
-      if (variable.isComputed && !cyclic.contains(variable.name)) {
+      if (variable.isComputed &&
+          !variable.isFunction &&
+          !cyclic.contains(variable.name)) {
         visit(variable.name);
       }
     }

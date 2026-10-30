@@ -231,6 +231,24 @@ abstract class WidgetNodeTransformerManager
       if (number == null || !number.isFinite) continue;
       motion = (motion ?? MotionModel.none).withValue(property, number);
     }
+    const String duration = MotionModel.durationProperty;
+    if (node.variables.containsKey(MotionModel.variableKey(duration))) {
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        MotionModel.variableKey(duration),
+        scopedValues: scopedValues,
+      );
+      final num? ms = switch (value) {
+        num n => n,
+        String s => num.tryParse(s.trim()),
+        _ => null,
+      };
+      if (ms != null && ms.isFinite) {
+        motion = (motion ?? MotionModel.none).copyWith(
+          durationMs: ms.round().clamp(0, 60000),
+        );
+      }
+    }
     const String replay = MotionModel.replayKeyProperty;
     if (node.variables.containsKey(MotionModel.variableKey(replay))) {
       final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
@@ -841,6 +859,7 @@ class AdaptiveNodeBox extends StatelessWidget {
       horizontalFit: node.horizontalFit,
       verticalFit: node.verticalFit,
       size: node.basicBoxLocal.size,
+      keepAspect: node.keepAspect,
       child: child,
     );
   }
@@ -899,6 +918,10 @@ class AdaptiveSizeFitBox extends StatelessWidget {
   /// The design size of the box.
   final SizeC size;
 
+  /// Width ÷ height the box keeps, or 0: the side that stretches sets the
+  /// size and the other follows. See [BaseNode.keepAspect].
+  final double keepAspect;
+
   /// Creates a [AdaptiveSizeFitBox] that will fit its [child] to the size of
   /// the [SizeC], taking into account the [horizontalFit] and [verticalFit]
   /// values.
@@ -908,10 +931,27 @@ class AdaptiveSizeFitBox extends StatelessWidget {
     required this.verticalFit,
     required this.size,
     required this.child,
+    this.keepAspect = 0,
   });
+
+  static bool _stretches(SizeFit? fit) =>
+      fit == SizeFit.expanded || fit == SizeFit.flexible;
 
   @override
   Widget build(BuildContext context) {
+    if (keepAspect > 0 && keepAspect.isFinite) {
+      final bool wide = _stretches(horizontalFit);
+      final bool tall = _stretches(verticalFit);
+      if (wide != tall || wide) {
+        // The stretching side decides; the other hugs the ratio's box.
+        return FitBox.fromFits(
+          horizontalFit: wide || !tall ? horizontalFit : SizeFit.shrinkWrap,
+          verticalFit: tall && !wide ? verticalFit : SizeFit.shrinkWrap,
+          size: size,
+          child: AspectRatio(aspectRatio: keepAspect, child: child),
+        );
+      }
+    }
     return FitBox.fromFits(
       horizontalFit: horizontalFit,
       verticalFit: verticalFit,
@@ -1074,7 +1114,9 @@ class SvgIconImage extends StatelessWidget {
 ///
 /// - `deltaX`, `deltaY`: how far the pointer moved since the last event,
 /// - `dx`, `dy`: how far it moved since the drag started,
-/// - `x`, `y`: where the pointer is, relative to the node's top-left.
+/// - `x`, `y`: where the pointer is, relative to the node's top-left,
+/// - `width`, `height`: the node's size, so `round(dx / width)` counts how
+///   many of its own widths the pointer went.
 ///
 /// [TriggerType.dragEnd] reactions run once when the pointer lifts after a
 /// drag, with the drag's total `dx`, `dy` and its `velocityX`, `velocityY`
@@ -1102,6 +1144,13 @@ class ReactionDragDetector extends StatefulWidget {
 
 class _ReactionDragDetectorState extends State<ReactionDragDetector> {
   Offset _total = Offset.zero;
+
+  /// The node's laid out size: drags measured in node sizes (squares of a
+  /// board, cards of a deck) divide by it.
+  Map<String, double> get _size {
+    final Size size = context.size ?? Size.zero;
+    return {'width': size.width, 'height': size.height};
+  }
 
   void _run(List<Reaction> reactions, TriggerType type, Map result) {
     if (reactions.isEmpty) return;
@@ -1132,6 +1181,7 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
               'dy': _total.dy,
               'x': details.localPosition.dx,
               'y': details.localPosition.dy,
+              ..._size,
             });
           },
           onPanEnd: (details) => _run(widget.onDragEnd, TriggerType.dragEnd, {
@@ -1139,6 +1189,7 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
             'dy': _total.dy,
             'velocityX': details.velocity.pixelsPerSecond.dx,
             'velocityY': details.velocity.pixelsPerSecond.dy,
+            ..._size,
           }),
           child: child,
         ),
