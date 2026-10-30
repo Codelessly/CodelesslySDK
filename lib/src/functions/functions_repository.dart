@@ -87,7 +87,10 @@ class FunctionsRepository {
         return showDialogAction(context, action as ShowDialogAction);
       case ActionType.closeModal:
         final route = ModalRoute.of(context);
-        if (route is DialogRoute && route.isCurrent) {
+        // Every dialog presentation is a popup route: a dialog's DialogRoute,
+        // and the RawDialogRoute that full-screen and popover dialogs open
+        // with showGeneralDialog, which a DialogRoute check missed.
+        if (route is PopupRoute && route.isCurrent) {
           Navigator.of(context).pop();
           return true;
         }
