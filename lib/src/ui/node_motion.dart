@@ -13,7 +13,16 @@ Curve flutterCurveOf(MotionCurve curve) => switch (curve) {
   MotionCurve.easeIn => Curves.easeIn,
   MotionCurve.easeOutBack => Curves.easeOutBack,
   MotionCurve.easeOutCubic => Curves.easeOutCubic,
+  MotionCurve.easeInOutCubic => Curves.easeInOutCubic,
 };
+
+/// Whether a node tilted by [motion] shows its back: its face turned past
+/// 90° on rotateX or rotateY, so its normal points away from the viewer.
+bool facesAway(MotionModel motion) {
+  final double x = motion.rotateX * math.pi / 180;
+  final double y = motion.rotateY * math.pi / 180;
+  return math.cos(x) * math.cos(y) < -1e-9;
+}
 
 /// The transform [motion] draws, without spin, around [origin] in a box of
 /// [size]. [spinTurns] adds a spin angle.
@@ -270,6 +279,11 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     final MotionModel m = _moving ? _current : _to;
     if (!m.hasTransform && _turns == 0) return widget.child;
     Widget child = widget.child;
+    if (m.hideBackface && facesAway(m)) {
+      // Its back faces the viewer: keep its place, draw nothing, take no
+      // taps (CSS backface-visibility: hidden).
+      return IgnorePointer(child: Opacity(opacity: 0, child: child));
+    }
     if (m.opacity < 1) {
       // A fully transparent node also stops taking taps, like a hidden one.
       child = IgnorePointer(
