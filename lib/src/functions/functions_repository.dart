@@ -198,6 +198,8 @@ class FunctionsRepository {
         if (node == null) return false;
         node.requestFocus();
         return true;
+      case ActionType.scrollTo:
+        return ScrollTargets.scrollTo(action as ScrollToAction);
       case ActionType.controlDrag:
         final ControlDragAction drag = action as ControlDragAction;
         return NodeDrag.control(
