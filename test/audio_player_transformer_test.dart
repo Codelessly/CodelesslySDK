@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
+
+import 'support/load_test_fonts.dart';
 
 class FakeAudioPlayback implements AudioPlayback {
   final states = StreamController<PlayerState>.broadcast(sync: true);
@@ -59,6 +59,7 @@ class FakeAudioPlayback implements AudioPlayback {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(loadTestFonts);
   AudioPlayerNode node(String? url, {String? description}) => AudioPlayerNode(
     id: 'audio',
     name: 'Audio',
@@ -116,7 +117,9 @@ void main() {
       );
       await mount(tester, audio.properties.url, preview: true);
       expect(players, isEmpty);
-      expect(find.byIcon(Icons.audiotrack_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+      expect(find.text('0:00 / --:--'), findsOneWidget);
+      expect(find.byType(Slider), findsOneWidget);
     },
   );
 
@@ -197,18 +200,6 @@ void main() {
   testWidgets('poster and loading use real bundled fonts and fixed viewport', (
     tester,
   ) async {
-    final icons = FontLoader('MaterialIcons')
-      ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
-    await icons.load();
-    final loaded = await tester.runAsync(() async {
-      final roboto = await File('../material_icons/assets/Roboto-Regular.ttf')
-          .readAsBytes();
-      await (FontLoader('Roboto')
-            ..addFont(Future.value(roboto.buffer.asByteData())))
-          .load();
-      return true;
-    });
-    expect(loaded, isTrue);
     await tester.binding.setSurfaceSize(const Size(400, 240));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await mount(tester, null);
