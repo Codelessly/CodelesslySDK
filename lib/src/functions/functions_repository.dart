@@ -805,7 +805,10 @@ class FunctionsRepository {
       maxHeightFactor: action.maxHeightFactor,
       showDragHandle: action.showDragHandle,
       placement: action.placement,
-      anchorToTrigger: action.anchor == DialogAnchor.trigger,
+      anchorToTrigger: action.anchor != DialogAnchor.none,
+      anchorPoint: action.anchor == DialogAnchor.pointer
+          ? pointerOf(ActionChain.current?.result)
+          : null,
       anchorGap: action.anchorGap,
       anchorOffset: action.anchorOffset,
       fullHeight: action.fullHeight,
@@ -813,6 +816,15 @@ class FunctionsRepository {
     if (result case final Map values when values.isNotEmpty) {
       ActionChain.setResult(values);
     }
+  }
+
+  /// The screen position in a trigger's result (`{x, y}`, as right clicks
+  /// and pointer triggers report it), or null.
+  static Offset? pointerOf(Object? result) {
+    if (result is! Map) return null;
+    final Object? x = result['x'], y = result['y'];
+    if (x is! num || y is! num) return null;
+    return Offset(x.toDouble(), y.toDouble());
   }
 
   /// The rect of the node that [context] belongs to, relative to its
@@ -883,6 +895,7 @@ class FunctionsRepository {
     bool showDragHandle = false,
     DialogPlacement placement = DialogPlacement.belowStart,
     bool anchorToTrigger = false,
+    Offset? anchorPoint,
     double anchorGap = 6,
     double anchorOffset = 0,
     bool fullHeight = false,
@@ -940,12 +953,23 @@ class FunctionsRepository {
     final bool wantsAnchor =
         effectivePresentation == DialogPresentation.dialog &&
         (anchorToTrigger || placement == DialogPlacement.anchored);
-    final Rect? anchorRect = wantsAnchor
-        ? CodelesslyPopover.anchorRectOf(
+    // At the pointer: a point in the navigator overlay's coordinates.
+    final RenderObject? overlayBox = Navigator.of(
+      context,
+      rootNavigator: false,
+    ).overlay?.context.findRenderObject();
+    final Rect? anchorRect = !wantsAnchor
+        ? null
+        : anchorPoint != null && overlayBox is RenderBox && overlayBox.attached
+        ? Rect.fromCenter(
+            center: overlayBox.globalToLocal(anchorPoint),
+            width: 0,
+            height: 0,
+          )
+        : CodelesslyPopover.anchorRectOf(
             context,
             Navigator.of(context, rootNavigator: false),
-          )
-        : null;
+          );
     if (wantsAnchor && anchorRect == null) {
       DebugLogger.instance.printInfo(
         'The trigger of dialog [$canvasId] has no laid out box; showing '
@@ -1871,6 +1895,18 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         );
       });
       return done.future;
+    }
+
+    // A click reads the modifier keys held, as `${result.meta}` (Command
+    // on macOS, Control elsewhere), `${result.shift}` and `${result.alt}`,
+    // for multi-select (⌘-click) and range select (⇧-click).
+    if (type == TriggerType.click && result == null) {
+      final HardwareKeyboard keys = HardwareKeyboard.instance;
+      result = {
+        'meta': keys.isMetaPressed || keys.isControlPressed,
+        'shift': keys.isShiftPressed,
+        'alt': keys.isAltPressed,
+      };
     }
 
     // The chain captures the trigger's scope and host now, so its actions

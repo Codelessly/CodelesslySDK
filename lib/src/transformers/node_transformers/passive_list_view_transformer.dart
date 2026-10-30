@@ -226,6 +226,21 @@ class PassiveListViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // A list a drop target owns rebuilds as drags move over it, to open the
+    // slot where the drop would land.
+    final DropTargetBoxState? target = DropTargetScope.forList(
+      context,
+      node.id,
+    );
+    if (target == null || settings.isPreview) return buildList(context, null);
+    return ListenableBuilder(
+      listenable: target.controller,
+      builder: (context, _) => buildList(context, target),
+    );
+  }
+
+  /// Builds the list; [target] is the drop target that owns it, if any.
+  Widget buildList(BuildContext context, DropTargetBoxState? target) {
     if (node.children.isEmpty) {
       return box(canShrinkWrap: true, (context, _) => const SizedBox());
     }
@@ -434,7 +449,7 @@ class PassiveListViewWidget extends StatelessWidget {
         ) ??
         (node.variables['data'] != null ? [] : null);
 
-    final int? itemCount;
+    int? itemCount;
     if (settings.isPreview) {
       itemCount = node.properties.itemCount ?? data?.length;
     } else {
@@ -468,20 +483,62 @@ class PassiveListViewWidget extends StatelessWidget {
           : ('index', index);
     }
 
-    Widget itemBuilder(BuildContext context, int index) => IndexedItemProvider(
-      key: ValueKey(itemKey(index)),
-      item: IndexedItem(index, data?.elementAtOrNull(index)),
-      child: Builder(
-        builder: (context) {
-          // This builder is important to pass a context that has
-          // the IndexedItemProvider.
-          return KeyedSubtree(
-            key: ValueKey(itemKey(index)),
-            child: buildItem(item, context),
-          );
-        },
+    Widget dataItemBuilder(BuildContext context, int index) =>
+        IndexedItemProvider(
+          key: ValueKey(itemKey(index)),
+          item: IndexedItem(index, data?.elementAtOrNull(index)),
+          child: Builder(
+            builder: (context) {
+              // This builder is important to pass a context that has
+              // the IndexedItemProvider.
+              Widget child = KeyedSubtree(
+                key: ValueKey(itemKey(index)),
+                child: buildItem(item, context),
+              );
+              if (target != null) {
+                target.registerListScrollable(context);
+                child = target.registerItem(
+                  identity: itemKey(index),
+                  index: index,
+                  value: data?.elementAtOrNull(index),
+                  axis: node.scrollDirection.flutterAxis,
+                  child: child,
+                );
+              }
+              return child;
+            },
+          ),
+        );
+
+    // While a drag is over the target that owns this list, a slot opens
+    // where the drop would land: drawn with the item it lands before, so no
+    // item changes index (a list reuses items by index, and the dragged item
+    // must keep its state), or after the last item.
+    final int? slotAt = target?.slotBefore?.clamp(0, itemCount ?? 0);
+    Widget slot(BuildContext context) => target!.buildSlot(
+      context,
+      node.scrollDirection.flutterAxis,
+      (context, id) => manager.buildWidgetByID(
+        id,
+        context,
+        settings: const WidgetBuildSettings(
+          debugLabel: 'drop slot',
+          withReactions: false,
+          withVisibility: false,
+        ),
       ),
     );
+    Widget itemBuilder(BuildContext context, int index) {
+      if (slotAt == null) return dataItemBuilder(context, index);
+      if (index == itemCount) return slot(context);
+      if (index != slotAt) return dataItemBuilder(context, index);
+      return Flex(
+        direction: node.scrollDirection.flutterAxis,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [slot(context), dataItemBuilder(context, index)],
+      );
+    }
 
     Widget list(
       bool shrinkWrap,
@@ -510,6 +567,10 @@ class PassiveListViewWidget extends StatelessWidget {
           : null,
       itemBuilder: builder,
     );
+
+    if (slotAt != null && itemCount != null && slotAt == itemCount) {
+      itemCount = itemCount + 1;
+    }
 
     // Legacy stacked and wrapping layouts keep their placement and physics.
     if (node.properties.stacked) {

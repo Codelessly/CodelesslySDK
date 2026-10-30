@@ -575,6 +575,10 @@ class PropertyValueDelegate {
       'result' => ActionChain.current?.result,
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
       'hold' => scopedValues.holdProgress ?? 0.0,
+      'drag' =>
+        scopedValues.codelesslyContext?.dragAndDrop.value ??
+            DragAndDropController.preview ??
+            DragAndDropController.idle,
       _ => null,
     };
 
