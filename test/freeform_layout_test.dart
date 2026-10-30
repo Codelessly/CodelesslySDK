@@ -165,6 +165,225 @@ void expectOnScreen(
 }
 
 void main() {
+  testWidgets('invalid fractional values retain the legacy axis placement', (
+    tester,
+  ) async {
+    final pin = rect('pin', NodeBox(40, 60, 28, 36), mode: PositioningMode.pin);
+    final root = frame('frame', NodeBox(0, 0, 400, 300), [pin]);
+    for (final value in <String>[
+      r'${= -0.1}',
+      r'${= 1.1}',
+      r'${= 0 / 0}',
+      r'${= "bad"}',
+    ]) {
+      pin.variables['positionX'] = value;
+      pin.variables['positionY'] = value;
+      final boxes = await pump(tester, root, [
+        pin,
+      ], screen: const Size(400, 300));
+      expect(boxes['pin']!.topLeft, const Offset(40, 60), reason: value);
+    }
+  });
+
+  testWidgets(
+    'typed formula fractions respond to parent resize; no binding stays legacy',
+    (tester) async {
+      final pin =
+          rect(
+              'pin',
+              NodeBox(40, 60, 28, 36),
+              alignment: AlignmentModel.bottomCenter,
+            )
+            ..variables['positionX'] = r'${= 1 / 4}'
+            ..variables['positionY'] = r'${= 3 / 4}';
+      final legacy = rect(
+        'legacy',
+        NodeBox(40, 60, 28, 36),
+        mode: PositioningMode.pin,
+      );
+      final root = frame('frame', NodeBox(0, 0, 400, 300), [pin, legacy]);
+      for (final size in <Size>[const Size(400, 300), const Size(800, 600)]) {
+        final boxes = await pump(tester, root, [pin, legacy], screen: size);
+        expect(boxes['pin']!.center.dx, closeTo(size.width / 4, 0.1));
+        expect(boxes['pin']!.bottom, closeTo(size.height * 3 / 4, 0.1));
+        expect(boxes['legacy']!.topLeft, const Offset(40, 60));
+      }
+    },
+  );
+
+  testWidgets('mounted position binding updates its freeform parent slot', (
+    tester,
+  ) async {
+    const size = Size(400, 300);
+    tester.view.physicalSize = size;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final pin = rect('pin', NodeBox(40, 60, 28, 36))
+      ..variables['positionX'] = r'${= pinX}'
+      ..variables['positionY'] = r'${= 1 / 2}';
+    final root = frame('frame', NodeBox(0, 0, 400, 300), [pin]);
+    final registry = NodeRegistry()..setNodes({root.id: root, pin.id: pin});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    final x = Observable(
+      VariableData(
+        id: 'pinX',
+        name: 'pinX',
+        type: VariableType.decimal,
+        value: .2,
+      ),
+    );
+    final scope = CodelesslyContext.empty()..variables['pinX'] = x;
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: scope,
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => manager.buildWidgetFromNode(
+              root,
+              context,
+              settings: const WidgetBuildSettings(debugLabel: 'test'),
+            ),
+          ),
+        ),
+      ),
+    );
+    Rect current() => tester.getRect(rectOf(pin));
+    expect(current().center.dx, closeTo(80, .1));
+    expect(current().center.dy, closeTo(150, .1));
+    x.set(x.value.copyWith(value: .8));
+    await tester.pump();
+    expect(current().center.dx, closeTo(320, .1));
+    expect(current().center.dy, closeTo(150, .1));
+    x.set(x.value.copyWith(value: 1.5));
+    await tester.pump();
+    expect(current().topLeft, const Offset(40, 132));
+  });
+
+  testWidgets('mounted fractional parent slot follows a changed variable', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 300);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final pin = rect('pin', NodeBox(40, 60, 28, 36))
+      ..variables['positionX'] = r'${= pinX}'
+      ..variables['positionY'] = r'${= 0.5}';
+    final root = frame('frame', NodeBox(0, 0, 400, 300), [pin]);
+    final registry = NodeRegistry()..setNodes({root.id: root, pin.id: pin});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    final position = Observable(
+      VariableData(
+        id: 'pinX',
+        name: 'pinX',
+        type: VariableType.decimal,
+        value: 0.25,
+      ),
+    );
+    final context = CodelesslyContext.empty()..variables['pinX'] = position;
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: context,
+        child: MaterialApp(
+          home: Builder(
+            builder: (scope) => manager.buildWidgetFromNode(
+              root,
+              scope,
+              settings: const WidgetBuildSettings(debugLabel: 'test'),
+            ),
+          ),
+        ),
+      ),
+    );
+    Rect box() => tester.getRect(rectOf(pin));
+    expect(box().center.dx, closeTo(100, 0.1));
+    position.set(position.value.copyWith(value: 0.75));
+    await tester.pump();
+    expect(box().center.dx, closeTo(300, 0.1));
+    expect(box().center.dy, closeTo(150, 0.1));
+  });
+
+  testWidgets('five hero pins with identical saved boxes use bound positions', (
+    tester,
+  ) async {
+    const positions = <(double, double)>[
+      (0.18, 0.30),
+      (0.47, 0.62),
+      (0.70, 0.24),
+      (0.86, 0.78),
+      (0.32, 0.86),
+    ];
+    final children = <RectangleNode>[
+      for (int i = 0; i < positions.length; i++)
+        rect(
+            'pin$i',
+            NodeBox(325.06, 415.92, 27.88, 36.08),
+            alignment: AlignmentModel.bottomCenter,
+          )
+          ..variables['positionX'] = '\${= ${positions[i].$1}}'
+          ..variables['positionY'] = '\${= ${positions[i].$2}}',
+    ];
+    final root = frame('frame', NodeBox(0, 0, 600, 400), children);
+    final rects = await pump(
+      tester,
+      root,
+      children,
+      screen: const Size(600, 400),
+    );
+    for (int i = 0; i < positions.length; i++) {
+      final pin = rects['pin$i']!;
+      expect(pin.center.dx, closeTo(600 * positions[i].$1, 0.1));
+      expect(pin.bottom, closeTo(400 * positions[i].$2, 0.1));
+    }
+    expect(rects.values.map((r) => r.topLeft).toSet(), hasLength(6));
+  });
+
+  testWidgets('fractional pin positions follow responsive parent size', (
+    tester,
+  ) async {
+    final pin = rect('pin', NodeBox(325.06, 415.92, 27.88, 36.08))
+      ..variables['positionX'] = r'${= .18}'
+      ..variables['positionY'] = r'${= .3}';
+    final root = frame('frame', NodeBox(0, 0, 600, 400), [pin]);
+    for (final size in [const Size(600, 400), const Size(900, 700)]) {
+      final result = await pump(tester, root, [pin], screen: size);
+      expect(result['pin']!.center.dx, closeTo(size.width * .18, .1));
+      expect(result['pin']!.center.dy, closeTo(size.height * .3, .1));
+    }
+  });
+
+  testWidgets('bad fractional bindings leave legacy placement unchanged', (
+    tester,
+  ) async {
+    final baseline = rect('baseline', NodeBox(80, 90, 28, 36));
+    final children = <RectangleNode>[
+      baseline,
+      for (final (index, binding) in [
+        r'${= -0.1}',
+        r'${= 1.2}',
+        r'${= "oops"}',
+        r'${= 0 / 0}',
+      ].indexed)
+        rect('bad$index', NodeBox(80, 90, 28, 36))
+          ..variables['positionX'] = binding,
+    ];
+    final root = frame('frame', NodeBox(0, 0, 390, 844), children);
+    final result = await pump(
+      tester,
+      root,
+      children,
+      screen: const Size(390, 844),
+    );
+    for (final child in children.skip(1)) {
+      expect(result[child.id]!.topLeft, result['baseline']!.topLeft);
+    }
+  });
+
   group('freeform children at the design size', () {
     for (final design in screens) {
       testWidgets('stay exactly where they were designed at $design', (
