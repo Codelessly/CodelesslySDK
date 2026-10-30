@@ -95,23 +95,18 @@ class _PassiveTabsWidgetState extends State<PassiveTabsWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              for (var i = 0; i < tabs.length; i++)
-                Expanded(
-                  child: TextButton(
-                    onPressed: () =>
-                        setState(() => selectedChild = tabs[i].child),
-                    style: TextButton.styleFrom(
-                      foregroundColor: i == selected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    child: Text(tabs[i].title),
-                  ),
-                ),
-            ],
-          ),
+          if (tabs.isNotEmpty)
+            DefaultTabController(
+              key: ValueKey(selected),
+              length: tabs.length,
+              initialIndex: selected,
+              child: TabBar(
+                isScrollable: false,
+                tabs: [for (final tab in tabs) Tab(text: tab.title)],
+                onTap: (index) =>
+                    setState(() => selectedChild = tabs[index].child),
+              ),
+            ),
           if (child != null)
             Expanded(
               child: widget.manager.buildWidgetFromNode(
