@@ -1736,6 +1736,8 @@ extension ActionModelExt on ActionModel {
             if (params.value is String) params.value,
           ]);
         }
+      case ActionType.closeModal:
+        break;
       case ActionType.showDialog:
         final ShowDialogAction action = this as ShowDialogAction;
         strings.addAll([action.destinationId]);
