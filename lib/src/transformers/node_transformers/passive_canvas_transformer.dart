@@ -1004,7 +1004,11 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
-    final String pressed = normalizeKeyLabel(event.logicalKey.keyLabel);
+    // The trigger label names keys without a visible label (Space's label
+    // is " ", which normalizes to nothing).
+    final String pressed = normalizeKeyLabel(
+      keyTriggerLabel(event.logicalKey),
+    );
     final List<Reaction> matching = [
       for (final Reaction reaction in widget.node.reactions.whereTriggerType(
         TriggerType.keyPress,
