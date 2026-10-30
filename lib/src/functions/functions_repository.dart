@@ -85,6 +85,13 @@ class FunctionsRepository {
         return navigate(context, action as NavigationAction);
       case ActionType.showDialog:
         return showDialogAction(context, action as ShowDialogAction);
+      case ActionType.closeModal:
+        final route = ModalRoute.of(context);
+        if (route is DialogRoute && route.isCurrent) {
+          Navigator.of(context).pop();
+          return true;
+        }
+        return false;
       case ActionType.link:
         launchURL(context, (action as LinkAction));
         return true;

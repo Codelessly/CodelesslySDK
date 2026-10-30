@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
 
-/// A modal owns two scene references, but only its trigger participates in
-/// the normal widget tree. The body is presented by the trigger's existing
-/// ShowDialogAction, which addresses a published Canvas rather than a widget.
+/// Presents the content only while the trigger's dialog route is open.
 class PassiveModalTransformer extends NodeWidgetTransformer<ModalNode> {
   PassiveModalTransformer(super.getNode, super.manager);
 
@@ -17,30 +15,45 @@ class PassiveModalTransformer extends NodeWidgetTransformer<ModalNode> {
   ) {
     final trigger = _resolve(node.trigger, node);
     final content = _resolve(node.content, node);
-    if (content is! CanvasNode) {
-      throw StateError(
-        'Modal ${node.id} content must reference a Canvas; '
-        'ShowDialogAction cannot present an arbitrary scene widget.',
-      );
-    }
     if (_contains(node.id, trigger.id, <String>{}) ||
         _contains(node.id, content.id, <String>{})) {
       throw StateError('Modal ${node.id} has a cyclic child reference.');
     }
-    if (trigger is! SceneNode) {
-      throw StateError('Modal ${node.id} trigger must be a scene node.');
+    if (trigger is! SceneNode || content is! SceneNode) {
+      throw StateError('Modal ${node.id} children must be scene nodes.');
     }
-    final actions = trigger.reactions.map((reaction) => reaction.action);
-    if (!actions.any(
-      (action) =>
-          action is ShowDialogAction && action.destinationId == content.id,
-    )) {
-      throw StateError(
-        'Modal ${node.id} trigger must have a ShowDialogAction '
-        'whose destinationId is the content Canvas ${content.id}.',
+
+    void open(BuildContext triggerContext) {
+      showDialog<void>(
+        context: triggerContext,
+        builder: (dialogContext) => Dialog(
+          child: Builder(
+            builder: (bodyContext) => manager.buildWidgetFromNode(
+              content,
+              bodyContext,
+              settings: settings,
+            ),
+          ),
+        ),
       );
     }
-    return manager.buildWidgetFromNode(trigger, context, settings: settings);
+
+    if (trigger is ButtonNode) {
+      return PassiveButtonWidget(
+        node: trigger,
+        settings: settings,
+        onPressed: (triggerContext) => open(triggerContext),
+        onLongPress: (triggerContext) => FunctionsRepository.triggerAction(
+          triggerContext,
+          TriggerType.longPress,
+          reactions: trigger.reactions,
+        ),
+      );
+    }
+    return GestureDetector(
+      onTap: () => open(context),
+      child: manager.buildWidgetFromNode(trigger, context, settings: settings),
+    );
   }
 
   BaseNode _resolve(String id, ModalNode modal) {
