@@ -164,4 +164,40 @@ void main() {
       containsAll(['voice', 'accentGain', 'master']),
     );
   });
+
+  test('screens with the same clock share it and the newest runs it', () {
+    final TriggerModel trigger = TriggerModel(
+      type: TriggerType.clock,
+      every: '500',
+      runWhen: '',
+    );
+    final List<String> fired = [];
+    void a(int t, double at, double w) => fired.add('a$t');
+    void b(int t, double at, double w) => fired.add('b$t');
+    final BeatClock first = BeatClock.acquire(
+      trigger: trigger,
+      evaluate: (t) => t,
+      onTick: a,
+    );
+    final BeatClock second = BeatClock.acquire(
+      trigger: trigger,
+      evaluate: (t) => t,
+      onTick: b,
+    );
+    expect(identical(first, second), isTrue);
+    fired.clear();
+    second.poll();
+    first.release(a);
+    second.poll();
+    expect(fired.every((f) => f.startsWith('b')), isTrue);
+    second.release(b);
+    expect(second.running, isFalse);
+    final BeatClock fresh = BeatClock.acquire(
+      trigger: trigger,
+      evaluate: (t) => t,
+      onTick: a,
+    );
+    expect(identical(fresh, first), isFalse);
+    fresh.release(a);
+  });
 }

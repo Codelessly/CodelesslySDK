@@ -44,6 +44,61 @@ class BeatClock {
   /// Whether the clock is counting ticks now.
   bool get running => _next != null;
 
+  static final Map<String, BeatClock> _shared = {};
+  final List<void Function(int tick, double at, double waitMs)> _listeners =
+      [];
+
+  /// The clock of [trigger] shared by every screen with the same settings:
+  /// a screen shown in place of another (a tab) picks up the running clock
+  /// instead of starting its own count again. The newest listener runs each
+  /// tick; [release] removes it, and the clock stops with the last one.
+  static BeatClock acquire({
+    required TriggerModel trigger,
+    required String Function(String text) evaluate,
+    required void Function(int tick, double at, double waitMs) onTick,
+  }) {
+    final String key =
+        '${trigger.every}|${trigger.runWhen}|${trigger.lookaheadMs}';
+    final BeatClock clock = _shared[key] ??= BeatClock._keyed(
+      key,
+      trigger,
+    );
+    clock
+      .._evaluate = evaluate
+      .._listeners.add(onTick);
+    if (clock._timer == null) clock.start();
+    return clock;
+  }
+
+  BeatClock._keyed(this._key, this.trigger)
+    : _now = (() => Sound.now),
+      evaluate = _noEvaluate,
+      onTick = _noTick;
+
+  static String _noEvaluate(String text) => '';
+  static void _noTick(int tick, double at, double waitMs) {}
+
+  String? _key;
+  String Function(String text)? _evaluate;
+
+  /// Removes [onTick] from a shared clock; the last one stops it.
+  void release(void Function(int tick, double at, double waitMs) onTick) {
+    _listeners.remove(onTick);
+    if (_listeners.isNotEmpty) return;
+    stop();
+    _shared.remove(_key);
+  }
+
+  String _eval(String text) => (_evaluate ?? evaluate)(text);
+
+  void _fire(int tick, double at, double waitMs) {
+    if (_key == null) {
+      onTick(tick, at, waitMs);
+    } else if (_listeners.isNotEmpty) {
+      _listeners.last(tick, at, waitMs);
+    }
+  }
+
   /// Starts polling.
   void start() {
     _timer?.cancel();
@@ -62,7 +117,7 @@ class BeatClock {
   bool _shouldRun() {
     final String? when = trigger.runWhen;
     if (when == null || when.trim().isEmpty) return true;
-    final String v = evaluate(when).trim().toLowerCase();
+    final String v = _eval(when).trim().toLowerCase();
     return v == 'true' || (double.tryParse(v) ?? 0) != 0;
   }
 
@@ -71,7 +126,7 @@ class BeatClock {
     final String? every = trigger.every;
     final double? ms = every == null || every.trim().isEmpty
         ? trigger.intervalMs?.toDouble()
-        : double.tryParse(evaluate(every).trim());
+        : double.tryParse(_eval(every).trim());
     if (ms == null || !ms.isFinite) return 1000;
     return math.max(10, ms);
   }
@@ -92,7 +147,7 @@ class BeatClock {
     int fired = 0;
     while (_next! <= now + lookahead && fired < 32) {
       final double at = _next!;
-      onTick(_tick, at, math.max(0, (at - now) * 1000));
+      _fire(_tick, at, math.max(0, (at - now) * 1000));
       _tick++;
       fired++;
       _next = at + _intervalMs() / 1000;
