@@ -1012,22 +1012,29 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   /// `${result.at}` and `${result.waitMs}`. Screens with the same clock share
   /// it, so the count carries on from one tab to the next.
   void _startClocks() {
+    // Reactions on the same clock run in order on each tick (Play Sound,
+    // then a Delay, then Set Variable): one clock for each setting.
+    final Map<String, List<Reaction>> groups = {};
     for (final Reaction reaction in widget.node.reactions.whereTriggerType(
       TriggerType.clock,
     )) {
       if (!reaction.action.enabled) continue;
+      final TriggerModel t = reaction.trigger;
+      (groups['${t.every}|${t.runWhen}|${t.lookaheadMs}'] ??= []).add(reaction);
+    }
+    for (final List<Reaction> reactions in groups.values) {
       void onTick(int tick, double at, double waitMs) {
         if (!mounted) return;
         FunctionsRepository.triggerAction(
           context,
           TriggerType.clock,
-          reactions: [reaction],
+          reactions: reactions,
           result: {'tick': tick, 'at': at, 'waitMs': waitMs.round()},
         );
       }
 
       final BeatClock clock = BeatClock.acquire(
-        trigger: reaction.trigger,
+        trigger: reactions.first.trigger,
         evaluate: (String text) => mounted
             ? PropertyValueDelegate.substituteVariables(
                 text,
