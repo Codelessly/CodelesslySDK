@@ -70,6 +70,20 @@ void main() {
     expect(tester.widget<TextField>(find.byType(TextField)).textCapitalization, TextCapitalization.words);
   });
 
+  testWidgets('a bound visibility with a transition animates its size', (tester) async {
+    final node = RectangleNode(id: 'err', name: 'Error line', basicBoxLocal: NodeBox(0, 0, 200, 30))
+      ..parentID = kRootNode
+      ..transitionMs = 280
+      ..variables['visible'] = r'${= false}';
+    await _pump(tester, node);
+    expect(find.byType(AnimatedSize), findsOneWidget);
+    final AnimatedOpacity fade = tester.widget<AnimatedOpacity>(
+      find.descendant(of: find.byType(AnimatedSize), matching: find.byType(AnimatedOpacity)),
+    );
+    expect(fade.opacity, 0);
+    expect(fade.child, isA<SizedBox>());
+  });
+
   test('motion.delayMs is bindable', () {
     final node = RectangleNode(id: 'chip', name: 'Chip', basicBoxLocal: NodeBox(0, 0, 10, 10))
       ..motion = const MotionModel(enter: true, durationMs: 700)
