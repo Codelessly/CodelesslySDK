@@ -429,6 +429,11 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('sqrt', 'sqrt(value)', 'sqrt(16) → 4'),
     FormulaFunctionDoc('pow', 'pow(base, exponent)', 'pow(2, 10) → 1024'),
+    FormulaFunctionDoc('exp', 'exp(value)', 'exp(1) → 2.71828… (zoom by exp(-delta / 500))'),
+    FormulaFunctionDoc('ln', 'ln(value)', 'ln(exp(2)) → 2'),
+    FormulaFunctionDoc('log', 'log(value, base?)', 'log(1000) → 3, log(8, 2) → 3'),
+    FormulaFunctionDoc('sign', 'sign(value)', 'sign(-4) → -1'),
+    FormulaFunctionDoc('hypot', 'hypot(x, y)', 'hypot(3, 4) → 5'),
     FormulaFunctionDoc('sin', 'sin(radians)', 'sin(pi() / 2) → 1'),
     FormulaFunctionDoc('cos', 'cos(radians)', 'cos(0) → 1'),
     FormulaFunctionDoc('tan', 'tan(radians)', 'tan(0) → 0'),
@@ -1887,6 +1892,16 @@ final Map<String, _Function> _functions = {
   ],
   'sqrt': (a) => _tidy(math.sqrt(_num(_arg(a, 0)))),
   'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
+  'exp': (a) => _tidy(math.exp(_num(_arg(a, 0)))),
+  'ln': (a) => _tidy(math.log(_num(_arg(a, 0)))),
+  'log': (a) => _tidy(
+    math.log(_num(_arg(a, 0))) /
+        math.log(a.length > 1 ? _num(_arg(a, 1)) : 10),
+  ),
+  'sign': (a) => _num(_arg(a, 0)).sign,
+  'hypot': (a) => _tidy(
+    math.sqrt(math.pow(_num(_arg(a, 0)), 2) + math.pow(_num(_arg(a, 1)), 2)),
+  ),
   'sin': (a) => math.sin(_num(_arg(a, 0))),
   'cos': (a) => math.cos(_num(_arg(a, 0))),
   'tan': (a) => math.tan(_num(_arg(a, 0))),

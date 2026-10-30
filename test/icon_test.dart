@@ -103,4 +103,39 @@ void main() {
     expect(find.byType(Icon), findsNothing);
     expect(tester.getSize(find.byType(SizedBox).last), const Size(20, 20));
   });
+
+  testWidgets('Material icons draw Flutter\'s glyph for their name, not the web '
+      'font codepoint', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SvgIcon(
+          // 0xe8fd is help_outline in the Material Icons web font; in
+          // Flutter's font it is another glyph.
+          icon: MaterialIcon(
+            codepoint: 0xe8fd,
+            name: 'help_outline',
+            style: MaterialIconStyle.filled,
+            version: 12,
+          ),
+          size: 22,
+        ),
+      ),
+    );
+    final Icon drawn = tester.widget(find.byType(Icon));
+    expect(drawn.icon!.codePoint, Icons.help_outline.codePoint);
+    expect(drawn.icon!.fontFamily, 'MaterialIcons');
+  });
+
+  test('outlined and rounded icons map to Flutter\'s styled names', () {
+    MaterialIcon of(String name, MaterialIconStyle style) =>
+        MaterialIcon(codepoint: 1, name: name, style: style, version: 1);
+    expect(flutterMaterialCodepoint(of('layers', MaterialIconStyle.outlined)),
+        Icons.layers_outlined.codePoint);
+    expect(flutterMaterialCodepoint(of('home', MaterialIconStyle.rounded)),
+        Icons.home_rounded.codePoint);
+    expect(flutterMaterialCodepoint(of('architecture', MaterialIconStyle.filled)),
+        Icons.architecture.codePoint);
+    expect(flutterMaterialCodepoint(of('home', MaterialIconStyle.twoTone)), isNull);
+    expect(flutterMaterialCodepoint(of('no_such_icon_x', MaterialIconStyle.filled)), isNull);
+  });
 }

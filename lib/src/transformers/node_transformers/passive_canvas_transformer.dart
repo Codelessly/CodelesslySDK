@@ -1046,15 +1046,18 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     _listenToKeys();
   }
 
-  /// The screen's "Key Down" reactions, while it listens to the keyboard.
+  /// The screen's "Key Down" and "Key Up" reactions, while it listens to
+  /// the keyboard.
   List<Reaction> _keyReactions = const [];
 
-  /// Runs the screen's "Key Down" actions for keys pressed (and held) while
-  /// it is the screen on top and no text field has focus.
+  /// Runs the screen's "Key Down" actions for keys pressed (and held), and
+  /// its "Key Up" actions for keys released, while it is the screen on top
+  /// and no text field has focus.
   void _listenToKeys() {
     _keyReactions = [
       for (final Reaction reaction in widget.node.reactions)
-        if (reaction.trigger.type == TriggerType.keyDown &&
+        if ((reaction.trigger.type == TriggerType.keyDown ||
+                reaction.trigger.type == TriggerType.keyUp) &&
             reaction.action.enabled)
           reaction,
     ];
@@ -1064,7 +1067,9 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   }
 
   bool _onKeyDown(KeyEvent event) {
-    if (event is KeyUpEvent || !mounted) return false;
+    if (!mounted) return false;
+    final TriggerType type =
+        event is KeyUpEvent ? TriggerType.keyUp : TriggerType.keyDown;
     if (!(ModalRoute.of(context)?.isCurrent ?? true)) return false;
     final BuildContext? focused = FocusManager.instance.primaryFocus?.context;
     if (focused != null &&
@@ -1077,16 +1082,17 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     final String key = keyTriggerLabel(event.logicalKey);
     final List<Reaction> reactions = [
       for (final Reaction reaction in _keyReactions)
-        if (reaction.trigger.key == null ||
-            reaction.trigger.key!.isEmpty ||
-            reaction.trigger.key!.toLowerCase() == key.toLowerCase())
+        if (reaction.trigger.type == type &&
+            (reaction.trigger.key == null ||
+                reaction.trigger.key!.isEmpty ||
+                reaction.trigger.key!.toLowerCase() == key.toLowerCase()))
           reaction,
     ];
     if (reactions.isEmpty) return false;
     final HardwareKeyboard keyboard = HardwareKeyboard.instance;
     FunctionsRepository.triggerAction(
       context,
-      TriggerType.keyDown,
+      type,
       reactions: reactions,
       result: {
         'key': key,
