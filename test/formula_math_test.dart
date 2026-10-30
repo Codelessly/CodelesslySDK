@@ -26,6 +26,19 @@ void main() {
       expect(eval('clamp(-1, 0, 10)'), 0);
     });
 
+    test('exponentials and logarithms', () {
+      expect(eval('round(exp(1), 5)'), 2.71828);
+      expect(eval('exp(0)'), 1);
+      expect(eval('round(ln(exp(2)), 6)'), 2);
+      expect(eval('round(log(1000), 6)'), 3);
+      expect(eval('round(log(8, 2), 6)'), 3);
+      expect(eval('sign(-4)'), -1);
+      expect(eval('sign(0)'), 0);
+      expect(eval('hypot(3, 4)'), 5);
+      // A wheel step of 120 px zooms out by about a quarter.
+      expect(eval('round(exp(-120 / 500), 3)'), 0.787);
+    });
+
     test('great-circle distance in km and miles', () {
       // Las Vegas to Salt Lake City is about 362 miles as the crow flies.
       expect(
