@@ -14,7 +14,12 @@ RectangleNode rect(String id, NodeBox box, {String parent = 'frame'}) =>
       id: id,
       name: id,
       basicBoxLocal: box,
-      edgePins: EdgePinsModel(left: box.x, top: box.y, right: null, bottom: null),
+      edgePins: EdgePinsModel(
+        left: box.x,
+        top: box.y,
+        right: null,
+        bottom: null,
+      ),
       positioningMode: PositioningMode.align,
       horizontalFit: SizeFit.fixed,
       verticalFit: SizeFit.fixed,
@@ -44,7 +49,9 @@ FrameNode frame(
 )..parentID = kRootNode;
 
 Finder rectOf(String id) => find.byKey(
-  ValueKey('Rectangle Transformer of ${RectangleNode(id: id, name: id, basicBoxLocal: NodeBox(0, 0, 1, 1)).debugLabel}'),
+  ValueKey(
+    'Rectangle Transformer of ${RectangleNode(id: id, name: id, basicBoxLocal: NodeBox(0, 0, 1, 1)).debugLabel}',
+  ),
 );
 
 Observable<VariableData> textVariable(String name, String value) => Observable(
@@ -133,9 +140,7 @@ void main() {
   ) async {
     final child = rect('child', NodeBox(30, 0, 50, 50));
     final root = withVariables(
-      frame([
-        child,
-      ], padding: const EdgeInsetsModel.only(left: 30)),
+      frame([child], padding: const EdgeInsetsModel.only(left: 30)),
       {'layoutDirection': 'rtl'},
     );
     await pump(tester, root, [child]);
@@ -195,6 +200,26 @@ void main() {
       );
       expect(paragraph.textAlign, TextAlign.start);
       expect(paragraph.textDirection, TextDirection.rtl);
+    });
+
+    testWidgets('textAlign follows its binding', (tester) async {
+      final rtl = textVariable('rtl', 'false');
+      final node = text({
+        'textAlign': r"${= rtl == 'true' ? 'right' : 'center'}",
+      });
+      await pump(tester, node, [], variables: {'rtl': rtl});
+      RenderParagraph paragraph() =>
+          tester.renderObject(find.byType(RichText).first);
+      expect(paragraph().textAlign, TextAlign.center);
+
+      rtl.value = rtl.value.copyWith(value: 'true');
+      await tester.pump();
+      // Right, which an LTR text keeps on the right (not mapped to end).
+      expect(paragraph().textAlign, TextAlign.end);
+      expect(
+        TextNodeBox.alignmentOf(node, TextAlignHorizontalEnum.right),
+        const Alignment(1, -1),
+      );
     });
 
     testWidgets('fontFamily and fontSize follow their bindings', (
