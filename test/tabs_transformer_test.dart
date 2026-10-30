@@ -106,10 +106,7 @@ void main() {
     expect(find.text('First page'), findsNothing);
     expect(find.text('Second page'), findsOneWidget);
     final bar = tester.widget<TabBar>(find.byType(TabBar));
-    expect(
-      DefaultTabController.of(tester.element(find.byType(TabBar))).index,
-      1,
-    );
+    expect(DefaultTabController.of(tester.element(find.byType(TabBar))).index, 1);
     final theme = Theme.of(tester.element(find.byType(TabBar)));
     expect(
       bar.labelColor ??
