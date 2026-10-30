@@ -53,18 +53,19 @@ TextNode _text(String id, String parent, String characters) => TextNode(
   textMixedProps: [StartEndProp(start: 0, end: characters.length)],
 )..parentID = parent;
 
-ButtonNode _button(String id, String parent, ActionModel action) => ElevatedButtonNode(
-  id: id,
-  name: id,
-  basicBoxLocal: NodeBox(0, 0, 160, 44),
-  properties: ButtonProperties(label: id),
-  reactions: [
-    Reaction(
-      action: action,
-      trigger: TriggerModel(type: TriggerType.click),
-    ),
-  ],
-)..parentID = parent;
+ButtonNode _button(String id, String parent, ActionModel action) =>
+    ElevatedButtonNode(
+      id: id,
+      name: id,
+      basicBoxLocal: NodeBox(0, 0, 160, 44),
+      properties: ButtonProperties(label: id),
+      reactions: [
+        Reaction(
+          action: action,
+          trigger: TriggerModel(type: TriggerType.click),
+        ),
+      ],
+    )..parentID = parent;
 
 /// A layout of one canvas [id] at [path] that shows [children].
 SDKPublishLayout _screen(
@@ -223,6 +224,41 @@ void main() {
       // No path, or a path param missing.
       expect(CanvasLocation.locationOf(model, 'settings', {}), isNull);
       expect(CanvasLocation.locationOf(model, 'creature', {}), isNull);
+    });
+  });
+
+  group('catch-all paths', () {
+    final SDKPublishModel model = _model()
+      ..layouts['notFound'] = _screen('notFound', path: '*path')
+      ..layouts['docs'] = _screen('docs', path: 'docs/*rest');
+
+    test('take any path no other screen matches, with the rest', () {
+      final CanvasLocationMatch? lost = CanvasLocation.match(
+        model,
+        'kraken/deep?x=1',
+      );
+      expect(lost?.canvasId, 'notFound');
+      expect(lost?.params, {'path': 'kraken/deep', 'x': '1'});
+      expect(CanvasLocation.match(model, 'docs/a/b')?.params, {'rest': 'a/b'});
+      // Too short for docs/*rest: the catch-all takes it.
+      expect(CanvasLocation.match(model, 'docs')?.canvasId, 'notFound');
+    });
+
+    test('lose to every other match', () {
+      expect(CanvasLocation.match(model, 'guide')?.canvasId, 'guide');
+      expect(
+        CanvasLocation.match(model, 'guide/bat-star')?.canvasId,
+        'creature',
+      );
+      expect(CanvasLocation.match(model, ''), isNull);
+    });
+
+    test('fill a path with the rest', () {
+      expect(
+        CanvasLocation.locationOf(model, 'docs', {'rest': 'a/b', 'q': 1}),
+        'docs/a/b?q=1',
+      );
+      expect(CanvasLocation.locationOf(model, 'notFound', {}), isNull);
     });
   });
 
