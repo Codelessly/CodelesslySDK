@@ -1,14 +1,14 @@
-import 'dart:io';
-
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
+import 'support/load_test_fonts.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(loadTestFonts);
 
   final tabs = TabsNode(
     id: 'tabs',
@@ -26,7 +26,15 @@ void main() {
     'basicBoxLocal': [0, 0, 300, 50],
     'data': 'First page',
     'textMixedProps': [
-      {'start': 0, 'end': 10, 'fontName': {'family': 'TabsFixture', 'style': 'Normal', 'weight': 'w400'}},
+      {
+        'start': 0,
+        'end': 10,
+        'fontName': {
+          'family': 'TabsFixture',
+          'style': 'Normal',
+          'weight': 'w400',
+        },
+      },
     ],
   })..parentID = 'tabs';
   final second = TextNode.fromJson({
@@ -36,7 +44,15 @@ void main() {
     'basicBoxLocal': [0, 0, 300, 50],
     'data': 'Second page',
     'textMixedProps': [
-      {'start': 0, 'end': 11, 'fontName': {'family': 'TabsFixture', 'style': 'Normal', 'weight': 'w400'}},
+      {
+        'start': 0,
+        'end': 11,
+        'fontName': {
+          'family': 'TabsFixture',
+          'style': 'Normal',
+          'weight': 'w400',
+        },
+      },
     ],
   })..parentID = 'tabs';
 
@@ -89,6 +105,21 @@ void main() {
     await tester.pump();
     expect(find.text('First page'), findsNothing);
     expect(find.text('Second page'), findsOneWidget);
+    final bar = tester.widget<TabBar>(find.byType(TabBar));
+    expect(DefaultTabController.of(tester.element(find.byType(TabBar))).index, 1);
+    final theme = Theme.of(tester.element(find.byType(TabBar)));
+    expect(
+      bar.labelColor ??
+          theme.tabBarTheme.labelColor ??
+          theme.colorScheme.primary,
+      theme.colorScheme.primary,
+    );
+    expect(
+      bar.indicatorColor ??
+          theme.tabBarTheme.indicatorColor ??
+          theme.colorScheme.primary,
+      theme.colorScheme.primary,
+    );
     await mount(tester, tabs);
     expect(find.text('Second page'), findsOneWidget);
   });
@@ -113,20 +144,6 @@ void main() {
   testWidgets('closed and selected states use real-font goldens', (
     tester,
   ) async {
-    final icons = FontLoader('MaterialIcons')
-      ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
-    await icons.load();
-    final loaded = await tester.runAsync(() async {
-      final roboto = await File('../material_icons/assets/Roboto-Regular.ttf')
-          .readAsBytes();
-      for (final family in ['Roboto', 'TabsFixture Regular']) {
-        await (FontLoader(family)
-              ..addFont(Future.value(roboto.buffer.asByteData())))
-            .load();
-      }
-      return true;
-    });
-    expect(loaded, isTrue);
     await tester.binding.setSurfaceSize(const Size(400, 240));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await mount(tester, tabs);
