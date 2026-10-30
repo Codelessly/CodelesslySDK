@@ -2,6 +2,23 @@
 
 ### Nodes
 
+- A text field with `markdown` shows what's typed as live Markdown
+  (`MarkdownTextEditingController`), markers kept and dimmed; Enter in a
+  list item continues the list, and on an empty item ends it.
+- Text fields run their own Key Down reactions while focused, before their
+  editing keys. Keys may be combinations (`Meta+Enter`, `Shift+Enter`,
+  `Meta+b`) and a trigger's `when` limits a reaction to when a formula is
+  true; only a reaction that matched takes the key. Screens' Key Down
+  reactions take combinations and `when` too.
+- A text field's Changed (and tap) and Key Down reactions read
+  `${result.word}` (the word ending at the cursor), `${result.cursor}`,
+  `${result.selectionStart}` and `${result.selectionEnd}`.
+- Edit Text actions edit a text field on the screen at its cursor (wrap,
+  toggle list, insert, replace the word, set, clear, focus) like typing:
+  its bound variable updates and its Changed reactions run. A toolbar
+  button's tap keeps the field's selection (`TextFieldRegistry`,
+  `TextEdits`).
+
 - Renders `gauge` and `chart` nodes (`PassiveGaugeWidget`,
   `PassiveChartWidget`); taps on a chart select a category and fire its
   `changed` trigger with the index.

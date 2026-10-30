@@ -45,6 +45,13 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
           onIconTap(context, node, reactions, value),
       onChanged: (context, value) => onChanged(context, node, value),
       onSubmitted: (context, value) => onSubmitted(context, node, value),
+      onKeyDown: (context, reactions, result) =>
+          FunctionsRepository.triggerAction(
+            context,
+            TriggerType.keyDown,
+            reactions: reactions,
+            result: result,
+          ),
     );
   }
 
@@ -67,8 +74,21 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
 
   void onTap(BuildContext context, TextFieldNode node, String inputValue) {
     NodeStateProvider.setState(context, inputValue);
-    FunctionsRepository.triggerAction(context, node: node, TriggerType.changed);
+    FunctionsRepository.triggerAction(
+      context,
+      node: node,
+      TriggerType.changed,
+      result: _result(context, inputValue),
+    );
   }
+
+  /// What the field's triggers read in `${result}`: the text with the word
+  /// at the cursor and the selection (see [TextEdits.resultOf]).
+  Map<String, Object> _result(BuildContext context, String inputValue) =>
+      TextEdits.resultOf(
+        PassiveTextFieldWidget.editingValueOf(context) ??
+            TextEditingValue(text: inputValue),
+      );
 
   void onChanged(BuildContext context, TextFieldNode node, String inputValue) {
     NodeStateProvider.setState(context, inputValue);
@@ -91,6 +111,7 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
       node: node,
       TriggerType.changed,
       value: inputValue,
+      result: _result(context, inputValue),
     );
   }
 
@@ -134,6 +155,15 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final Function(BuildContext context, String value)? onSubmitted;
   final Function(BuildContext context, List<Reaction> reactions, String value)?
   onIconTap;
+
+  /// Runs the field's Key Down [reactions] that match a key pressed while it
+  /// has focus, with the key, its modifiers and the cursor in [result].
+  final Function(
+    BuildContext context,
+    List<Reaction> reactions,
+    Map<String, Object> result,
+  )?
+  onKeyDown;
   final bool withAutofill;
   final AutovalidateMode? autovalidateMode;
   final FormFieldValidator<String>? validator;
@@ -152,6 +182,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
     this.onSubmitted,
     this.withAutofill = true,
     this.onIconTap,
+    this.onKeyDown,
     List<VariableData>? variables,
     this.autovalidateMode,
     this.validator,
@@ -161,12 +192,41 @@ class PassiveTextFieldWidget extends StatefulWidget {
 
   @override
   State<PassiveTextFieldWidget> createState() => _PassiveTextFieldWidgetState();
+
+  /// The text and selection of the field whose state's context is
+  /// [context] (the context the field's callbacks get), if it is one.
+  static TextEditingValue? editingValueOf(BuildContext context) =>
+      switch (context) {
+        StatefulElement(state: final _PassiveTextFieldWidgetState state) =>
+          state.controller.value,
+        _ => null,
+      };
 }
 
-class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
-  late final TextEditingController controller = TextEditingController(
-    text: boundValue() ?? getInitialText(widget.node.initialText),
-  );
+class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
+    implements EditableTextField {
+  late final MarkdownTextEditingController controller =
+      MarkdownTextEditingController(
+        text: boundValue() ?? getInitialText(widget.node.initialText),
+        markdown: widget.node.properties.markdown,
+      );
+
+  /// The selection while the field last had focus. Tapping a toolbar button
+  /// can take the focus (and, on the web, the selection) away before the
+  /// button's Edit Text action runs.
+  TextSelection? _lastSelection;
+
+  @override
+  int lastFocused = 0;
+
+  bool _listening = false;
+
+  @override
+  ModalRoute<Object?>? route;
+
+  /// Whether the field runs in an app (it has handlers), so Edit Text
+  /// actions can reach it. A design canvas's fields don't register.
+  bool get _editable => widget.onChanged != null && widget.node.id.isNotEmpty;
 
   /// The current value of the variable this field is bound to, if any. A
   /// variable set before the field first builds (by a canvas load action
@@ -180,7 +240,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     );
   }
 
-  final FocusNode focusNode = FocusNode();
+  late final FocusNode focusNode = FocusNode(onKeyEvent: _onKeyEvent);
 
   String getInitialText(String text) {
     return PropertyValueDelegate.substituteVariables(
@@ -194,11 +254,19 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   void initState() {
     super.initState();
     focusNode.addListener(onFocusChanged);
+    if (_editable) TextFieldRegistry.register(widget.node.id, this);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    route = ModalRoute.of(context);
+    // The controller reads the bound value, so it is made here, not in
+    // initState.
+    if (!_listening) {
+      _listening = true;
+      controller.addListener(_rememberSelection);
+    }
 
     NodeStateProvider.setState(context, controller.text, byUser: false);
   }
@@ -206,6 +274,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   @override
   void didUpdateWidget(covariant PassiveTextFieldWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+    controller.markdown = widget.node.properties.markdown;
+    if (oldWidget.node.id != widget.node.id ||
+        (oldWidget.onChanged != null) != (widget.onChanged != null)) {
+      TextFieldRegistry.unregister(oldWidget.node.id, this);
+      if (_editable) TextFieldRegistry.register(widget.node.id, this);
+    }
 
     // Update controller text if this text field is bound to a variable.
     final ScopedValues scopedValues =
@@ -271,15 +345,142 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
   @override
   void dispose() {
+    TextFieldRegistry.unregister(widget.node.id, this);
     controller.dispose();
     focusNode.dispose();
     super.dispose();
   }
 
   void onFocusChanged() {
-    if (!focusNode.hasFocus) {
+    if (focusNode.hasFocus) {
+      lastFocused = TextFieldRegistry.tick();
+    } else {
       widget.onSubmitted?.call(context, controller.text);
     }
+  }
+
+  void _rememberSelection() {
+    if (focusNode.hasFocus && controller.selection.isValid) {
+      _lastSelection = controller.selection;
+    }
+  }
+
+  /// The field's text with the selection to edit at: the current one while
+  /// focused, else the one it had when it last had focus.
+  TextEditingValue get _editingValue {
+    final TextSelection? last = _lastSelection;
+    final TextSelection selection =
+        !focusNode.hasFocus &&
+            last != null &&
+            last.end <= controller.text.length
+        ? last
+        : controller.selection;
+    return controller.value.copyWith(
+      selection: selection,
+      composing: TextRange.empty,
+    );
+  }
+
+  @override
+  bool editText(
+    EditTextOperation operation, {
+    String text = '',
+    String before = '',
+    String? after,
+    bool numbered = false,
+  }) {
+    if (!mounted) return false;
+    final TextEditingValue current = _editingValue;
+    final TextEditingValue? next = TextEdits.apply(
+      current,
+      operation,
+      text: text,
+      before: before,
+      after: after,
+      numbered: numbered,
+    );
+    if (next != null) _setValue(next);
+    if (operation != EditTextOperation.clear &&
+        operation != EditTextOperation.setText) {
+      _focusKeeping(next?.selection ?? TextEdits.selectionOf(current));
+    }
+    return true;
+  }
+
+  /// Shows [value] and, when its text differs, updates the bound variable
+  /// and runs the Changed reactions, as typing does.
+  void _setValue(TextEditingValue value) {
+    final bool changed = value.text != controller.text;
+    controller.value = value;
+    if (value.selection.isValid) _lastSelection = value.selection;
+    if (changed) widget.onChanged?.call(context, value.text);
+  }
+
+  /// Focuses the field with [selection]. A one-line field selects all when
+  /// it gains focus on the web and desktop, so the selection is put back
+  /// once the focus has moved.
+  void _focusKeeping(TextSelection selection) {
+    if (focusNode.hasFocus) return;
+    focusNode.requestFocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || controller.selection == selection) return;
+      if (selection.end <= controller.text.length) {
+        controller.selection = selection;
+      }
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
+  }
+
+  /// Runs the field's Key Down reactions for [event], before the field's own
+  /// editing keys. A reaction for a specific key (or combination) whose
+  /// `when` holds takes the key; others let it through. Enter that no
+  /// reaction took continues a Markdown list.
+  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyUpEvent || isModifierKey(event.logicalKey)) {
+      return KeyEventResult.ignored;
+    }
+    final List<Reaction> reactions = [
+      for (final Reaction reaction in widget.node.reactions)
+        if (reaction.trigger.type == TriggerType.keyDown &&
+            reaction.action.enabled)
+          reaction,
+    ];
+    if (reactions.isNotEmpty && widget.onKeyDown != null) {
+      final ScopedValues scopedValues = ScopedValues.of(context);
+      final List<Reaction> matched = [
+        for (final Reaction reaction in reactions)
+          if (keyTriggerMatches(reaction.trigger, event.logicalKey) &&
+              triggerWhenHolds(reaction.trigger, scopedValues))
+            reaction,
+      ];
+      if (matched.isNotEmpty) {
+        widget.onKeyDown!(context, matched, {
+          ...TextEdits.resultOf(controller.value),
+          ...keyTriggerResult(event.logicalKey),
+        });
+        if (matched.any((reaction) => reaction.trigger.keyCombo != null)) {
+          return KeyEventResult.handled;
+        }
+      }
+    }
+    if (event.logicalKey == LogicalKeyboardKey.enter &&
+        controller.markdown != null &&
+        widget.node.properties.maxLines != 1 &&
+        !widget.node.properties.readOnly) {
+      final HardwareKeyboard keyboard = HardwareKeyboard.instance;
+      if (keyboard.isShiftPressed ||
+          keyboard.isMetaPressed ||
+          keyboard.isControlPressed ||
+          keyboard.isAltPressed) {
+        return KeyEventResult.ignored;
+      }
+      final TextEditingValue? next = TextEdits.continueList(controller.value);
+      if (next != null) {
+        _setValue(next);
+        return KeyEventResult.handled;
+      }
+    }
+    return KeyEventResult.ignored;
   }
 
   @override
