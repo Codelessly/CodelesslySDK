@@ -52,6 +52,7 @@ dependencies:
   shared_preferences: ^2.3.5
   url_launcher: ^6.3.1
   video_player: ^2.14.0
+  just_audio: ^0.10.5
   webview_flutter: ^4.10.0
   webview_flutter_android: ^4.3.0
   webview_flutter_wkwebview: ^3.17.0
