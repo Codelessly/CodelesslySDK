@@ -14,49 +14,48 @@ void main() {
     ('signature', 'strokes', PassiveSignatureWidget),
     ('signature', 'normalized', PassiveSignatureNormalizedWidget),
   ]) {
-    testWidgets(
-      '$wire/$kind deserializes and dispatches to its own SDK renderer',
-      (tester) async {
-        final source = switch ((wire, kind)) {
-          ('gauge', 'radial') => GaugeNode.empty(),
-          ('gauge', 'meter') => GaugeMeterNode.empty(),
-          ('chart', 'series') => ChartNode.empty(),
-          ('chart', 'plot') => PlotChartNode.empty(),
-          ('signature', 'strokes') => SignatureNode.empty(),
-          ('signature', 'normalized') => SignatureNormalizedNode.empty(),
-          _ => BarChartNode.empty(),
-        };
-        final node = NodeJsonConverter.instance.fromJson(source.toJson())!;
-        final registry = NodeRegistry()..setNodes({node.id: node});
-        final manager = PassiveNodeTransformerManager(
-          registry.getNodeByID,
-          (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
-        );
-        await tester.pumpWidget(
-          ChangeNotifierProvider<CodelesslyContext>.value(
-            value: CodelesslyContext.empty(),
-            child: MaterialApp(
-              home: Scaffold(
-                body: Builder(
-                  builder: (context) => manager.buildWidgetFromNode(
-                    node,
-                    context,
-                    settings: const WidgetBuildSettings(
-                      debugLabel: 'gauge routing',
-                    ),
+    testWidgets('$wire/$kind deserializes and dispatches to its own SDK renderer', (
+      tester,
+    ) async {
+      final source = switch ((wire, kind)) {
+        ('gauge', 'radial') => GaugeNode.empty(),
+        ('gauge', 'meter') => GaugeMeterNode.empty(),
+        ('chart', 'series') => ChartNode.empty(),
+        ('chart', 'plot') => PlotChartNode.empty(),
+        ('signature', 'strokes') => SignatureNode.empty(),
+        ('signature', 'normalized') => SignatureNormalizedNode.empty(),
+        _ => BarChartNode.empty(),
+      };
+      final node = NodeJsonConverter.instance.fromJson(source.toJson())!;
+      final registry = NodeRegistry()..setNodes({node.id: node});
+      final manager = PassiveNodeTransformerManager(
+        registry.getNodeByID,
+        (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+      );
+      await tester.pumpWidget(
+        ChangeNotifierProvider<CodelesslyContext>.value(
+          value: CodelesslyContext.empty(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => manager.buildWidgetFromNode(
+                  node,
+                  context,
+                  settings: const WidgetBuildSettings(
+                    debugLabel: 'gauge routing',
                   ),
                 ),
               ),
             ),
           ),
-        );
-        expect(node.type, wire);
-        expect(
-          find.byWidgetPredicate((widget) => widget.runtimeType == expected),
-          findsOneWidget,
-        );
-        expect(tester.takeException(), isNull);
-      },
-    );
+        ),
+      );
+      expect(node.type, wire);
+      expect(
+        find.byWidgetPredicate((widget) => widget.runtimeType == expected),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
   }
 }
