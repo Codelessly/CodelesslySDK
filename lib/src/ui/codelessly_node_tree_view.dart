@@ -94,11 +94,26 @@ class _CodelessNodeTreeViewState extends State<CodelessNodeTreeView> {
       widget.dataListenable?.addListener(_onDataChanged);
       _onDataChanged();
     }
-    if (oldWidget.nodes != widget.nodes ||
-        oldWidget.rootId != widget.rootId ||
+    if (oldWidget.rootId != widget.rootId ||
         oldWidget.variables != widget.variables) {
       _load();
-    } else if (oldWidget.data != widget.data) {
+    } else if (oldWidget.nodes != widget.nodes) {
+      _registry.setNodes(widget.nodes);
+      final allNodes = _registry.getNodes().values.toList();
+      for (final node in allNodes) {
+        node.parentID = resolveParentNodeIDs(node: node, nodes: allNodes);
+      }
+      final context = _context!;
+      for (final node in allNodes) {
+        if (node is ReactionMixin) {
+          for (final reaction in (node as ReactionMixin).reactions) {
+            if (reaction.action is! CallFunctionAction) continue;
+            final name = (reaction.action as CallFunctionAction).name;
+            context.functions[name] = (_, _, params) => widget.onAction?.call(name, params);
+          }
+        }
+      }
+    } else if (oldWidget.data != widget.data && widget.dataListenable == null) {
       final context = _context!;
       context.data = widget.data;
       for (final variable in widget.variables.values) {
