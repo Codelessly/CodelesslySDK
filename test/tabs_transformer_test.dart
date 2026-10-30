@@ -26,7 +26,7 @@ void main() {
     'basicBoxLocal': [0, 0, 300, 50],
     'data': 'First page',
     'textMixedProps': [
-      {'start': 0, 'end': 10},
+      {'start': 0, 'end': 10, 'fontName': {'family': 'TabsFixture', 'style': 'Normal', 'weight': 'w400'}},
     ],
   })..parentID = 'tabs';
   final second = TextNode.fromJson({
@@ -36,7 +36,7 @@ void main() {
     'basicBoxLocal': [0, 0, 300, 50],
     'data': 'Second page',
     'textMixedProps': [
-      {'start': 0, 'end': 11},
+      {'start': 0, 'end': 11, 'fontName': {'family': 'TabsFixture', 'style': 'Normal', 'weight': 'w400'}},
     ],
   })..parentID = 'tabs';
 
@@ -119,9 +119,11 @@ void main() {
     final loaded = await tester.runAsync(() async {
       final roboto = await File('../material_icons/assets/Roboto-Regular.ttf')
           .readAsBytes();
-      await (FontLoader(
-        'Roboto',
-      )..addFont(Future.value(roboto.buffer.asByteData()))).load();
+      for (final family in ['Roboto', 'TabsFixture Regular']) {
+        await (FontLoader(family)
+              ..addFont(Future.value(roboto.buffer.asByteData())))
+            .load();
+      }
       return true;
     });
     expect(loaded, isTrue);
