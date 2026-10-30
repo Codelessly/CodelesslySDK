@@ -24,7 +24,12 @@ Matrix4 motionMatrix(MotionModel motion, {double spinTurns = 0}) {
   }
   matrix
     ..translateByDouble(motion.translateX, motion.translateY, 0, 1)
-    ..scaleByDouble(motion.scale, motion.scale, 1, 1)
+    ..scaleByDouble(
+      motion.scale * motion.scaleX,
+      motion.scale * motion.scaleY,
+      1,
+      1,
+    )
     ..rotateZ(motion.rotate * math.pi / 180 + spinTurns * 2 * math.pi)
     ..rotateX(motion.rotateX * math.pi / 180)
     ..rotateY(motion.rotateY * math.pi / 180);
@@ -77,6 +82,9 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   /// node stays where the transition starts.
   Timer? _delay;
 
+  /// Whether a counted loop has played all its times: the node rests.
+  bool _rested = false;
+
   void _rebuild() => setState(() {});
 
   bool get _loops =>
@@ -119,12 +127,30 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   /// Repeats between rest and the motion's values.
   void _startLoop() {
     _delay?.cancel();
+    _rested = false;
     _from = widget.motion.atRest;
     _to = widget.motion;
     _transition.duration = Duration(milliseconds: widget.motion.durationMs);
     void start() {
       if (!mounted) return;
-      _transition.repeat(reverse: widget.motion.loop == MotionLoop.reverse);
+      final bool reverse = widget.motion.loop == MotionLoop.reverse;
+      final int repeat = widget.motion.repeat;
+      if (repeat <= 0) {
+        _transition.repeat(reverse: reverse);
+        return;
+      }
+      // A counted loop comes to rest when it is done; a reverse loop counts
+      // each way, so one time is there and back.
+      _transition
+          .repeat(reverse: reverse, count: reverse ? repeat * 2 : repeat)
+          .then((_) {
+            if (mounted) {
+              setState(() {
+                _transition.value = 0;
+                _rested = true;
+              });
+            }
+          }, onError: (_) {});
     }
 
     final int delay = widget.motion.delayMs;
@@ -153,6 +179,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       final MotionModel old = oldWidget.motion;
       if (!_sameTransform(next, _to) ||
           next.loop != old.loop ||
+          next.repeat != old.repeat ||
           next.durationMs != old.durationMs ||
           !_transition.isAnimating && _delay?.isActive != true) {
         _startLoop();
@@ -185,7 +212,11 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   static bool _sameTransform(MotionModel a, MotionModel b) =>
       a.translateX == b.translateX &&
       a.translateY == b.translateY &&
+      a.shiftX == b.shiftX &&
+      a.shiftY == b.shiftY &&
       a.scale == b.scale &&
+      a.scaleX == b.scaleX &&
+      a.scaleY == b.scaleY &&
       a.opacity == b.opacity &&
       a.rotate == b.rotate &&
       a.rotateX == b.rotateX &&
@@ -205,7 +236,11 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     return _to.copyWith(
       translateX: lerp('translateX'),
       translateY: lerp('translateY'),
+      shiftX: lerp('shiftX'),
+      shiftY: lerp('shiftY'),
       scale: lerp('scale'),
+      scaleX: lerp('scaleX'),
+      scaleY: lerp('scaleY'),
       opacity: lerp('opacity').clamp(0, 1).toDouble(),
       rotate: lerp('rotate'),
       rotateX: lerp('rotateX'),
@@ -258,7 +293,9 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final MotionModel m = _moving ? _current : _to;
+    final MotionModel m = _rested && _loops
+        ? _to.atRest
+        : (_moving ? _current : _to);
     if (!m.hasTransform && _turns == 0) return widget.child;
     Widget child = widget.child;
     if (m.opacity < 1) {
@@ -268,19 +305,28 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
         child: Opacity(opacity: m.opacity, child: child),
       );
     }
-    if (m.translateX == 0 &&
-        m.translateY == 0 &&
-        m.scale == 1 &&
-        m.rotate == 0 &&
-        m.rotateX == 0 &&
-        m.rotateY == 0 &&
-        _turns == 0) {
-      return child;
+    if (m.translateX != 0 ||
+        m.translateY != 0 ||
+        m.scale != 1 ||
+        m.scaleX != 1 ||
+        m.scaleY != 1 ||
+        m.rotate != 0 ||
+        m.rotateX != 0 ||
+        m.rotateY != 0 ||
+        _turns != 0) {
+      child = Transform(
+        alignment: Alignment(m.originX, m.originY),
+        transform: motionMatrix(m, spinTurns: _turns),
+        child: child,
+      );
     }
-    return Transform(
-      alignment: Alignment(m.originX, m.originY),
-      transform: motionMatrix(m, spinTurns: _turns),
-      child: child,
-    );
+    // Shifts move by the node's own size, whatever size it got; taps follow.
+    if (m.shiftX != 0 || m.shiftY != 0) {
+      child = FractionalTranslation(
+        translation: Offset(m.shiftX, m.shiftY),
+        child: child,
+      );
+    }
+    return child;
   }
 }
