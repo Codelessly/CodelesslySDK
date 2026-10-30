@@ -153,6 +153,14 @@ void main() {
         find.byKey(const ValueKey('codelessly-drop-slot')),
         findsOneWidget,
       );
+      // The card follows the pointer with its text.
+      expect(
+        find.descendant(
+          of: find.byType(IgnorePointer),
+          matching: find.text('One', findRichText: true),
+        ),
+        findsWidgets,
+      );
 
       await gesture.up();
       await tester.pumpAndSettle();
