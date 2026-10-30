@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:provider/provider.dart';
 
 import '../transformers/node_registry.dart';
