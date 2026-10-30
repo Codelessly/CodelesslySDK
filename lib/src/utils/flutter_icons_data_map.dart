@@ -1,3 +1,8 @@
+import 'package:codelessly_api/codelessly_api.dart';
+
+import 'extensions.dart';
+import 'flutter_icons_names_map.dart';
+
 const Map<String, int> flutterIconsDataMap = {
   'ten_k': 0xe000,
   'ten_k_sharp': 0xe700,
@@ -8825,3 +8830,13 @@ const Map<String, int> flutterIconsDataMap = {
   'zoom_out_map_rounded': 0xf02cf,
   'zoom_out_map_outlined': 0xf4dd,
 };
+
+/// The code point of [icon] in Flutter's bundled `MaterialIcons` font, or
+/// null when Flutter doesn't ship that icon in that style. The editor's
+/// catalog uses Google's code points (close is 0xe5cd), which differ from
+/// Flutter's (close is 0xe16a), so icons are matched by their styled name
+/// (`close_rounded`).
+int? flutterMaterialCodepoint(MaterialIcon icon) {
+  final String styled = icon.styledName;
+  return flutterIconsDataMap[flutterIconNames[styled] ?? styled];
+}
