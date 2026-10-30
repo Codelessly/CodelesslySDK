@@ -189,6 +189,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     Widget widget = getTransformerByNode(node)
         .buildWidget(styled, context, settings);
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
+    widget = applyStrokePath(context, styled, widget);
 
     if (settings.withOpacity) {
       widget = applyWidgetOpacity(styled, widget);
@@ -210,6 +211,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
+    }
+    if (settings.withReactions) {
+      widget = applyReveal(context, styled, widget);
     }
     if (settings.withMargins) {
       widget = applyWidgetMargins(styled, widget);
