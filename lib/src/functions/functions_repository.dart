@@ -90,7 +90,17 @@ class FunctionsRepository {
       case ActionType.closeModal:
         final route = ModalRoute.of(context);
         if (route is DialogRoute && route.isCurrent) {
-          Navigator.of(context).pop();
+          // Its params are the `${result}` of the chain that showed it.
+          final Map<String, dynamic> params = (action as CloseModalAction)
+              .params;
+          Navigator.of(context).pop(
+            params.isEmpty
+                ? null
+                : substituteVariablesInMap(
+                    params,
+                    ActionChain.scopedValuesOf(context),
+                  ),
+          );
           return true;
         }
         return false;
