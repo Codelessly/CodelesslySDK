@@ -267,7 +267,11 @@ class _DragSourceBoxState extends State<DragSourceBox> {
     payload.cancel();
   }
 
-  Widget _feedback(BuildContext context) {
+  /// The node drawn under the pointer, in the app's overlay. What the node
+  /// reads (its list item, the layout's context, themes) is taken from the
+  /// node's own place in the tree, not from the overlay's.
+  Widget _feedback(BuildContext overlayContext) {
+    final BuildContext context = this.context;
     final DraggableModel model = widget.model;
     final CodelesslyContext codelesslyContext = context
         .read<CodelesslyContext>();
