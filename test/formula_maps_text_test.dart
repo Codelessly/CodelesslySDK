@@ -103,6 +103,14 @@ void main() {
       expect(eval("coalesce(missing, '', 'fallback')"), 'fallback');
       expect(eval('coalesce(meter, 1)'), 2481.6);
     });
+
+    test('coalesce falls back to its last value, even empty text', () {
+      // `coalesce(gate, '') != ''` must be false when gate is missing.
+      expect(eval("coalesce(missing, '')"), '');
+      expect(eval("coalesce(missing, '') != ''"), false);
+      expect(eval("coalesce('', '')"), '');
+      expect(eval('coalesce(missing, null)'), isNull);
+    });
   });
 
   test('daysInMonth', () {
