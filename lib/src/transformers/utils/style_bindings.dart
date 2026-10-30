@@ -24,7 +24,8 @@ import 'scoped_values.dart';
 ///   JSON value (e.g. `[8, true, 'circular']`) is accepted too.
 /// * [fontWeight] (number 100-900, or `w700`, `bold`, `normal`): the weight
 ///   of every span of a text node.
-/// * [fontFamily] (string): the font family of every span of a text node,
+/// * [fontFamily] (string): the font family of every span of a text node
+///   (of a text field's input and hint),
 ///   e.g. one per script: `${= uiLang == 'ar' ? 'IBM Plex Sans Arabic' :
 ///   'DM Serif Display'}`. Weights and styles stay.
 /// * [fontSize] (number): the font size of every span of a text node.
@@ -159,6 +160,52 @@ abstract final class StyleBindings {
                   .toJson(),
             },
         ];
+      }
+    }
+
+    if (node is TextFieldNode) {
+      // The typed text and the hint take a bound font too, e.g. an input
+      // switching to an Arabic font when the query is Arabic.
+      final String? family = value<Object>(fontFamily)?.toString().trim();
+      final num? size = value<num>(fontSize);
+      final FontWeightNumeric? weight = parseFontWeight(
+        value<Object>(fontWeight),
+      );
+      Map<String, dynamic>? styled(TextProp style) {
+        final FontName name = style.fontName.copyWith(
+          family: family != null && family.isNotEmpty ? family : null,
+          weight: weight,
+        );
+        final double fontSizeValue = size != null && size > 0
+            ? size.toDouble()
+            : style.fontSize;
+        if (name == style.fontName && fontSizeValue == style.fontSize) {
+          return null;
+        }
+        return {
+          ...style.toJson(),
+          'fontName': name.toJson(),
+          'fontSize': fontSizeValue,
+        };
+      }
+
+      final Map<String, dynamic>? input = styled(node.properties.inputStyle);
+      final Map<String, dynamic>? hint = styled(
+        node.properties.decoration.hintStyle,
+      );
+      if (input != null || hint != null) {
+        final Map current =
+            patch['properties'] as Map? ?? node.properties.toJson();
+        patch['properties'] = {
+          ...current,
+          if (input != null) 'inputStyle': input,
+          if (hint != null)
+            'decoration': {
+              ...(current['decoration'] as Map? ??
+                  node.properties.decoration.toJson()),
+              'hintStyle': hint,
+            },
+        };
       }
     }
 
