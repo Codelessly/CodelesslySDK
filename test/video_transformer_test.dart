@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:video_player/video_player.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   VideoNode node({String? url}) => VideoNode(
@@ -26,15 +27,18 @@ void main() {
         isA<PassiveVideoTransformer>(),
       );
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => manager.buildWidgetFromNode(
-                video,
-                context,
-                settings: const WidgetBuildSettings(
-                  debugLabel: 'video',
-                  isPreview: true,
+        ChangeNotifierProvider<CodelesslyContext>.value(
+          value: CodelesslyContext.empty(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => manager.buildWidgetFromNode(
+                  video,
+                  context,
+                  settings: const WidgetBuildSettings(
+                    debugLabel: 'video',
+                    isPreview: true,
+                  ),
                 ),
               ),
             ),
