@@ -961,6 +961,11 @@ class AdaptiveSizeFitBox extends StatelessWidget {
   }
 }
 
+/// The codepoint of [icon]'s glyph in Flutter's MaterialIcons font, found by
+/// its name and style, or null when it isn't a Material icon Flutter has.
+int? flutterGlyphOf(IconModel icon) =>
+    icon is MaterialIcon ? flutterIconsDataMap[icon.flutterID] : null;
+
 /// Renders an [IconModel]: Material icons and symbols from Google's prebuilt
 /// SVGs, Cupertino icons from the cupertino_icons font.
 class SvgIcon extends StatelessWidget {
@@ -1015,9 +1020,12 @@ class SvgIcon extends StatelessWidget {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
     // Material Icons ship with Flutter; use their bundled glyph offline.
-    if (icon is MaterialIcon && icon.codepoint > 0) {
+    // The stored codepoint is Google's font's, which Flutter's MaterialIcons
+    // font numbers differently (add is e145 there, e047 here), so look the
+    // glyph up by the icon's name and style.
+    if (flutterGlyphOf(icon) case final int glyph) {
       return Icon(
-        IconData(icon.codepoint, fontFamily: icon.fontFamily),
+        IconData(glyph, fontFamily: 'MaterialIcons'),
         size: dimension,
         color: iconColor,
       );
