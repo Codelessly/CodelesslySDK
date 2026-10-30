@@ -14,6 +14,196 @@ String _isoDate(DateTime value) =>
 String _clock(TimeOfDay value) =>
     '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
 
+class PassiveDateTimeInputTransformer
+    extends NodeWidgetTransformer<DateTimeInputNode> {
+  PassiveDateTimeInputTransformer(super.getNode, super.manager);
+
+  @override
+  Widget buildWidget(
+    DateTimeInputNode node,
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) => PassiveDateTimeInputWidget(node: node, isPreview: settings.isPreview);
+}
+
+class PassiveDateTimeInputWidget extends StatefulWidget {
+  const PassiveDateTimeInputWidget({
+    super.key,
+    required this.node,
+    this.isPreview = false,
+  });
+  final DateTimeInputNode node;
+  final bool isPreview;
+
+  @override
+  State<PassiveDateTimeInputWidget> createState() =>
+      _PassiveDateTimeInputWidgetState();
+}
+
+class _PassiveDateTimeInputWidgetState
+    extends State<PassiveDateTimeInputWidget> {
+  String? selected;
+  String? error;
+
+  @override
+  Widget build(BuildContext context) {
+    final node = widget.node;
+    final scoped = ScopedValues.of(context);
+    final bound = PropertyValueDelegate.getPropertyValue<String>(
+      node,
+      'value',
+      scopedValues: scoped,
+    );
+    final raw = bound ?? selected ?? node.value;
+    String? value;
+    try {
+      if (raw.isNotEmpty) value = validateDateTimeInputValue(node.mode, raw);
+    } on FormatException {
+      value = null;
+    }
+    final min =
+        PropertyValueDelegate.getPropertyValue<String>(
+          node,
+          'min',
+          scopedValues: scoped,
+        ) ??
+        node.properties.min;
+    final max =
+        PropertyValueDelegate.getPropertyValue<String>(
+          node,
+          'max',
+          scopedValues: scoped,
+        ) ??
+        node.properties.max;
+    DateTime first = _date(node.properties.firstDate ?? '0001-01-01');
+    DateTime last = _date(node.properties.lastDate ?? '9999-12-31');
+    if (node.mode != 'time') {
+      if (min != null && min.isNotEmpty) {
+        final lower = _date(min.substring(0, 10));
+        if (lower.isAfter(first)) first = lower;
+      }
+      if (max != null && max.isNotEmpty) {
+        final upper = _date(max.substring(0, 10));
+        if (upper.isBefore(last)) last = upper;
+      }
+    }
+    final date = value == null || node.mode == 'time'
+        ? DateTime.now()
+        : _date(value.substring(0, 10));
+    final initial = date.isBefore(first)
+        ? first
+        : date.isAfter(last)
+        ? last
+        : date;
+    final localizations = MaterialLocalizations.of(context);
+    final display = value == null
+        ? ''
+        : node.mode == 'date'
+        ? localizations.formatMediumDate(date)
+        : node.mode == 'time'
+        ? TimeOfDay(
+            hour: int.parse(value.substring(0, 2)),
+            minute: int.parse(value.substring(3, 5)),
+          ).format(context)
+        : '${localizations.formatMediumDate(date)} · '
+              '${TimeOfDay.fromDateTime(DateTime.parse(value)).format(context)}';
+    final enabled = node.enabled && !widget.isPreview;
+    return InkWell(
+      onTap: !enabled || first.isAfter(last)
+          ? null
+          : () async {
+              DateTime chosen = initial;
+              if (node.mode != 'time') {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: initial,
+                  firstDate: first,
+                  lastDate: last,
+                );
+                if (picked == null || !context.mounted) return;
+                chosen = picked;
+              }
+              TimeOfDay? time;
+              if (node.mode != 'date') {
+                time = await showTimePicker(
+                  context: context,
+                  initialTime: value == null
+                      ? TimeOfDay.now()
+                      : node.mode == 'time'
+                      ? TimeOfDay(
+                          hour: int.parse(value.substring(0, 2)),
+                          minute: int.parse(value.substring(3, 5)),
+                        )
+                      : TimeOfDay.fromDateTime(DateTime.parse(value)),
+                );
+                if (time == null || !context.mounted) return;
+              }
+              final result = node.mode == 'date'
+                  ? _isoDate(chosen)
+                  : node.mode == 'time'
+                  ? _clock(time!)
+                  : DateTime.utc(
+                      chosen.year,
+                      chosen.month,
+                      chosen.day,
+                      time!.hour,
+                      time.minute,
+                    ).toIso8601String();
+              final tooEarly =
+                  min != null &&
+                  min.isNotEmpty &&
+                  compareDateTimeBounds(node.mode, result, min) < 0;
+              final tooLate =
+                  max != null &&
+                  max.isNotEmpty &&
+                  compareDateTimeBounds(node.mode, result, max) > 0;
+              if (tooEarly || tooLate) {
+                setState(
+                  () => error =
+                      'Choose a time between ${min ?? "—"} and ${max ?? "—"}',
+                );
+                return;
+              }
+              setState(() {
+                selected = result;
+                error = null;
+              });
+              if (context.read<CodelesslyContext?>() == null) return;
+              NodeStateProvider.setState(context, result);
+              FunctionsRepository.setPropertyValue(
+                context,
+                node: node,
+                property: 'value',
+                value: result,
+              );
+              FunctionsRepository.triggerAction(
+                context,
+                TriggerType.changed,
+                node: node,
+                value: result,
+              );
+            },
+      child: InputDecorator(
+        isEmpty: display.isEmpty,
+        decoration: InputDecoration(
+          labelText: node.properties.label,
+          hintText:
+              node.properties.label == null || node.properties.label!.isEmpty
+              ? 'Select ${node.mode == 'dateTime' ? 'date and time' : node.mode}'
+              : null,
+          suffixIcon: Icon(
+            node.mode == 'time' ? Icons.access_time : Icons.calendar_today,
+          ),
+          enabled: node.enabled,
+          errorText: error,
+          border: const OutlineInputBorder(),
+        ),
+        child: Text(display.isEmpty ? ' ' : display),
+      ),
+    );
+  }
+}
+
 class PassiveDatePickerTransformer
     extends NodeWidgetTransformer<DatePickerNode> {
   PassiveDatePickerTransformer(super.getNode, super.manager);
