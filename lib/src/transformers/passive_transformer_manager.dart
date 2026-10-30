@@ -637,7 +637,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       }
     }
 
-    if (readsClock) listenables.add(FormulaClock.instance);
+    if (readsClock && !codelesslyContext.freezesClock) {
+      listenables.add(FormulaClock.instance);
+    }
 
     return listenables;
   }

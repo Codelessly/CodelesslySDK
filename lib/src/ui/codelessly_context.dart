@@ -72,11 +72,19 @@ class CodelesslyContext with ChangeNotifier, Equatable {
     required this.variables,
     required this.conditions,
     required this.layoutID,
+    this.freezesClock = false,
   }) : _externalComponentBuilders = externalComponentBuilders ?? {};
+
+  /// Whether nodes leave the clock alone: formulas that read `now()` keep
+  /// the time they were built at instead of rebuilding every second. A
+  /// design canvas shows values at rest, like its motion; rebuilding a
+  /// whole screen every second there also makes the editor unusable.
+  final bool freezesClock;
 
   /// Creates a [CodelesslyContext] with empty an empty map of each property.
   CodelesslyContext.empty({String? layoutID})
-    : _data = {},
+    : freezesClock = false,
+      _data = {},
       functions = {},
       _externalComponentBuilders = {},
       nodeValues = {},
@@ -115,6 +123,7 @@ class CodelesslyContext with ChangeNotifier, Equatable {
       variables: variables ?? this.variables,
       layoutID: forceLayoutID ? layoutID : layoutID ?? this.layoutID,
       conditions: conditions ?? this.conditions,
+      freezesClock: freezesClock,
     );
   }
 
