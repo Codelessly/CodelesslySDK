@@ -158,7 +158,9 @@ abstract class WidgetNodeTransformerManager
     return Visibility(
       visible: visible,
       maintainState: maintainState,
-      maintainAnimation: maintainState,
+      // Pulses, loops and spins of a node nobody can see stop ticking
+      // (Visibility mutes its tickers); one that keeps its space keeps them.
+      maintainAnimation: keepSize,
       maintainSize: keepSize,
       maintainSemantics: keepSize,
       maintainInteractivity: keepSize,
