@@ -978,23 +978,11 @@ class SvgIcon extends StatelessWidget {
     if (cupertinoIcon != null) {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
-    // Material Icons ship with Flutter; use their bundled glyph offline.
-    // The glyph is looked up by the icon's styled name (`search_rounded`):
-    // Flutter's font numbers its glyphs differently from Google's icon
-    // fonts, whose codepoints the editor stores, so a stored codepoint
-    // drew another icon.
-    final IconModel model = icon;
-    if (model is MaterialIcon) {
-      final int? glyph = flutterIconsDataMap[model.styledName];
-      if (glyph != null) {
-        return Icon(
-          IconData(glyph, fontFamily: 'MaterialIcons'),
-          size: dimension,
-          color: iconColor,
-        );
-      }
-    }
-
+    // Material icons draw from their SVG by name. Not from Flutter's bundled
+    // font: a glyph picked at runtime needs a non-constant IconData, which
+    // fails every app's release build (icon tree shaking), and the glyph
+    // would be shaken out anyway; and the stored codepoint is Google's,
+    // which names another glyph in Flutter's font.
     final url = icon.toSvgUrl(
       fill: fill,
       weight: weight,
