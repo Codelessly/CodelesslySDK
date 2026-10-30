@@ -27,6 +27,7 @@ export 'src/data/network_data_repository.dart';
 export 'src/data/web_data_repository.dart';
 export 'src/functions/functions.dart';
 export 'src/functions/functions_repository.dart';
+export 'src/functions/speech/speech.dart';
 export 'src/functions/app_confirm_dialog.dart';
 export 'src/functions/app_toast.dart';
 export 'src/logging/debug_logger.dart';

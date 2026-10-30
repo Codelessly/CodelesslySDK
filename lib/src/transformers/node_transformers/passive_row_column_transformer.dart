@@ -180,7 +180,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         rowColumnNode is ScrollableMixin &&
         (rowColumnNode as ScrollableMixin).isScrollable) {
       res = wrapWithPaddedScrollable(
-        padding: rowColumnNode.resolvedPadding().flutterEdgeInsets,
+        padding: rowColumnNode.resolvedPadding().flutterEdgeInsetsDirectional,
         node: (rowColumnNode as ScrollableMixin),
         // Sized by its content, there is no free space to align it in.
         fillViewport:
@@ -286,7 +286,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       final ScrollableMixin scrollable = node as ScrollableMixin;
       if (scrollable.isScrollable) {
         res = wrapWithPaddedScrollable(
-          padding: node.resolvedPadding().flutterEdgeInsets,
+          padding: node.resolvedPadding().flutterEdgeInsetsDirectional,
           node: scrollable,
           fillViewport: runAlignment != WrapAlignment.start,
           child: res,

@@ -704,7 +704,7 @@ bool isCustomPositionRequiredForImage(PaintModel paint, SizeC nodeSize) {
 /// design size: a flexible Row/Column that scrolls.
 Widget wrapWithPaddedScrollable({
   required ScrollableMixin node,
-  EdgeInsets? padding,
+  EdgeInsetsGeometry? padding,
   Clip? clipBehavior,
   bool fillViewport = false,
   bool flexContent = false,
@@ -744,7 +744,7 @@ Widget wrapWithPaddedScrollable({
 /// size once the content scrolls.
 Widget buildScrollView({
   required ScrollableMixin node,
-  EdgeInsets? padding,
+  EdgeInsetsGeometry? padding,
   Clip? clipBehavior,
   bool fillViewport = false,
   bool flexContent = false,

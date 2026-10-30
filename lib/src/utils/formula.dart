@@ -1,5 +1,11 @@
 import 'dart:math' as math;
 
+import 'package:intl/date_symbol_data_custom.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/date_symbols.dart';
+import 'package:intl/date_time_patterns.dart';
+import 'package:intl/intl.dart';
+
 import 'formula_clock.dart';
 
 /// The body of a formula: text and quoted strings, with braces only in
@@ -94,6 +100,26 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    every second while listened to. Dates are ISO 8601 text such as
 ///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
 ///    milliseconds or a Firestore timestamp.
+///  - locale-aware formatting with intl, taking a locale such as `ar_EG`,
+///    `fr-FR` or `ja` (an unknown one falls back to its language, then
+///    English): formatNumber(value, digits?, locale?) with the locale's
+///    separators and digits, formatCurrency(value, currencyCode, locale?,
+///    decimals?), formatPercent(value, locale?, decimals?), and
+///    formatDate(date, patternOrStyle, locale?), whose second argument can
+///    also be a named style: full, long, medium, short, time, dayMonth,
+///    weekday or monthYear. Without a locale, formatNumber and an ICU
+///    pattern in formatDate keep their English output.
+///  - plurals: pluralCategory(count, locale?) is the CLDR category (zero,
+///    one, two, few, many or other) and plural(count, forms, locale?)
+///    picks from a map of forms by category, falling back to `other`, with
+///    `{n}` replaced by the count in the locale's digits:
+///    `plural(n, {one: '{n} phrase', other: '{n} phrases'}, 'ar_EG')`.
+///  - text direction: textDirection(locale) is 'rtl' for right-to-left
+///    languages (ar, he, fa, ur, …) else 'ltr'; textDirectionOf(text) is the
+///    direction of the text's first strong character, or '' when it has
+///    none.
+///  - fill(template, values) replaces `{name}` placeholders from a map (or
+///    `{0}` from a list): `fill('{i} of {n}', {i: 1, n: 10})` is "1 of 10".
 ///  - date-aware comparisons: `== != < <= > >=` compare as dates when one
 ///    side is a date (ISO 8601 text such as `2026-10-21` or
 ///    `2026-10-21T09:00:00Z`, a DateTime or a timestamp) and the other reads
@@ -120,10 +146,11 @@ class FormulaEvaluator {
   }
 
   /// Formats [date] (a DateTime, an ISO string, epoch milliseconds or a
-  /// timestamp) with a date [pattern] as the `formatDate` formula function
-  /// does, e.g. `h:mm a`. Returns null when [date] isn't a date.
-  static String? formatDate(Object? date, [String? pattern]) =>
-      _formatDate(date, pattern);
+  /// timestamp) with a date [pattern] or named style as the `formatDate`
+  /// formula function does, e.g. `h:mm a` or `full`, in [locale] when given.
+  /// Returns null when [date] isn't a date.
+  static String? formatDate(Object? date, [String? pattern, String? locale]) =>
+      _formatDateIn(date, pattern, locale);
 
   /// Whether [expression] is a well-formed formula.
   static bool parses(String expression) => _parse(expression) != null;
@@ -254,8 +281,40 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'formatNumber',
-      'formatNumber(value, digits?)',
-      'formatNumber(2481.64, 1) → 2,481.6',
+      'formatNumber(value, digits?, locale?)',
+      'formatNumber(2481.64, 1) → 2,481.6 · '
+          'formatNumber(1234.5, 1, "ar_EG") → ١٬٢٣٤٫٥',
+    ),
+    FormulaFunctionDoc(
+      'formatCurrency',
+      'formatCurrency(value, currencyCode, locale?, decimals?)',
+      'formatCurrency(1234.5, "EUR", "fr_FR") → 1 234,50 € · '
+          'formatCurrency(1500, "JPY", "ja_JP") → ￥1,500',
+    ),
+    FormulaFunctionDoc(
+      'formatPercent',
+      'formatPercent(value, locale?, decimals?)',
+      'formatPercent(0.42) → 42% · formatPercent(0.42, "fr_FR") → 42 %',
+    ),
+    FormulaFunctionDoc(
+      'pluralCategory',
+      'pluralCategory(count, locale?)',
+      'pluralCategory(3, "ar") → few · pluralCategory(0, "en") → other',
+    ),
+    FormulaFunctionDoc(
+      'textDirection',
+      'textDirection(locale)',
+      'textDirection("he_IL") → rtl · textDirection("fr") → ltr',
+    ),
+    FormulaFunctionDoc(
+      'textDirectionOf',
+      'textDirectionOf(text)',
+      'textDirectionOf("שלום") → rtl · textDirectionOf("123") → (empty)',
+    ),
+    FormulaFunctionDoc(
+      'fill',
+      'fill(template, map or list)',
+      'fill("{i} of {n}", {i: 1, n: 10}) → 1 of 10',
     ),
     FormulaFunctionDoc(
       'feetInches',
@@ -295,8 +354,10 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'plural',
-      'plural(count, one, many)',
-      'plural(2, "photo") → photos',
+      'plural(count, one, many) or plural(count, forms, locale?)',
+      'plural(2, "photo") → photos · '
+          'plural(2, {one: "{n} phrase", other: "{n} phrases"}, "en") '
+          '→ 2 phrases',
     ),
     FormulaFunctionDoc(
       'join',
@@ -639,8 +700,9 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'formatDate',
-      'formatDate(date, pattern)',
-      'formatDate(now(), "EEE, MMM d · h:mm a") → Wed, Oct 21 · 2:30 PM',
+      'formatDate(date, pattern or style, locale?)',
+      'formatDate(now(), "EEE, MMM d · h:mm a") → Wed, Oct 21 · 2:30 PM · '
+          'formatDate(today(), "full", "fr_FR") → jeudi 30 octobre 2026',
     ),
     FormulaFunctionDoc(
       'addSeconds',
@@ -898,6 +960,305 @@ String _grouped(Object? value, Object? digits) {
       .substring(0, dot)
       .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
   return '$whole${text.substring(dot)}';
+}
+
+// ---------------------------------------------------------------------------
+// Locale-aware formatting
+// ---------------------------------------------------------------------------
+
+/// The locale used when a locale-aware function gets none.
+const String _defaultLocale = 'en_US';
+
+/// [value] as a locale name, e.g. `ar_EG` for 'ar-EG', or null when it's
+/// missing or empty.
+String? _localeName(Object? value) {
+  if (value == null) return null;
+  final String text = FormulaEvaluator.stringify(value).trim();
+  if (text.isEmpty) return null;
+  return Intl.canonicalizedLocale(text.replaceAll('-', '_'));
+}
+
+/// The first of [locale], its language and `en` that [exists] knows.
+String _supportedLocale(Object? locale, bool Function(String) exists) {
+  final String? name = _localeName(locale);
+  if (name == null) return exists(_defaultLocale) ? _defaultLocale : 'en';
+  if (exists(name)) return name;
+  final String language = Intl.shortLocale(name).toLowerCase();
+  if (exists(language)) return language;
+  return exists(_defaultLocale) ? _defaultLocale : 'en';
+}
+
+/// [locale] as one intl has number symbols for.
+String _numberLocale(Object? locale) =>
+    _supportedLocale(locale, NumberFormat.localeExists);
+
+/// [locale] as one intl has date symbols for, loading them on first use.
+String _dateLocale(Object? locale) =>
+    _supportedLocale(locale, _ensureDateLocale);
+
+Map<String, DateSymbols>? _allDateSymbols;
+Map<String, Map<String, String>>? _allDatePatterns;
+
+/// Whether intl can format dates in [locale], loading its date symbols the
+/// first time. `initializeDateFormatting` sets every locale's data before it
+/// returns; when an app has already set up its own date data (for example
+/// through flutter_localizations), only the missing locale is added.
+bool _ensureDateLocale(String locale) {
+  if (_hasDateLocale(locale)) return true;
+  // Sets the data synchronously, before the returned future completes.
+  initializeDateFormatting();
+  if (_hasDateLocale(locale)) return true;
+  final DateSymbols? symbols = (_allDateSymbols ??=
+      dateTimeSymbolMap())[locale];
+  final Map<String, String>? patterns = (_allDatePatterns ??=
+      dateTimePatternMap())[locale];
+  if (symbols == null || patterns == null) return false;
+  try {
+    initializeDateFormattingCustom(
+      locale: locale,
+      symbols: symbols,
+      patterns: patterns,
+    );
+  } catch (_) {
+    return false;
+  }
+  return _hasDateLocale(locale);
+}
+
+/// Whether intl has date data for [locale]. Before any data is set up,
+/// intl throws for every locale but en_US.
+bool _hasDateLocale(String locale) {
+  try {
+    return DateFormat.localeExists(locale);
+  } catch (_) {
+    return false;
+  }
+}
+
+/// Whether [value] is text that names a locale rather than a number, so
+/// `formatNumber(n, 'fr_FR')` reads the second argument as the locale.
+bool _isLocaleArg(Object? value) =>
+    value is String &&
+    value.trim().isNotEmpty &&
+    num.tryParse(value.trim()) == null;
+
+/// [value] with [digits] decimals (default 0) written the [locale] way: its
+/// group and decimal separators and its digits, e.g. "١٬٢٣٤٫٥" in ar_EG.
+String _localeNumber(Object? value, Object? digits, Object? locale) {
+  final num amount = _num(value);
+  if (amount.isNaN) return '';
+  return NumberFormat.decimalPatternDigits(
+    locale: _numberLocale(locale),
+    decimalDigits: _num(digits ?? 0).toInt().clamp(0, 20),
+  ).format(amount);
+}
+
+/// `formatNumber(value, digits?, locale?)`; a locale in place of the digits
+/// also works: `formatNumber(n, 'fr_FR')`.
+String _formatNumber(List<Object?> args) {
+  Object? digits = _arg(args, 1), locale = _arg(args, 2);
+  if (_isLocaleArg(digits)) (digits, locale) = (locale, digits);
+  if (_localeName(locale) == null) return _grouped(_arg(args, 0), digits);
+  return _localeNumber(_arg(args, 0), digits, locale);
+}
+
+/// [value] in the currency [code] (`EUR`, `JPY`) written the [locale] way
+/// (en_US by default), with the currency's own decimals unless [decimals]
+/// is given. A number in place of the locale is the decimals.
+String _formatCurrency(
+  Object? value,
+  Object? code,
+  Object? locale,
+  Object? decimals,
+) {
+  if (locale is num) (locale, decimals) = (decimals, locale);
+  final num amount = _num(value);
+  if (!amount.isFinite) return '';
+  final String? name = code == null
+      ? null
+      : FormulaEvaluator.stringify(code).trim().toUpperCase();
+  return NumberFormat.simpleCurrency(
+    locale: _numberLocale(locale),
+    name: name == null || name.isEmpty ? null : name,
+    decimalDigits: decimals == null ? null : _intArg(decimals).clamp(0, 20),
+  ).format(amount);
+}
+
+/// [value] as a percentage written the [locale] way: 0.42 is "42%", "42 %"
+/// in fr_FR and "٪٤٢" in ar_EG. A number in place of the locale is the
+/// decimals.
+String _formatPercent(Object? value, Object? locale, Object? decimals) {
+  if (locale is num) (locale, decimals) = (decimals, locale);
+  final num amount = _num(value);
+  if (!amount.isFinite) return '';
+  return NumberFormat.decimalPercentPattern(
+    locale: _numberLocale(locale),
+    decimalDigits: decimals == null ? 0 : _intArg(decimals).clamp(0, 20),
+  ).format(amount);
+}
+
+/// Named date styles formatDate accepts in place of a pattern.
+const Map<String, String> _dateStyles = {
+  'full': DateFormat.YEAR_MONTH_WEEKDAY_DAY,
+  'long': DateFormat.YEAR_MONTH_DAY,
+  'medium': DateFormat.YEAR_ABBR_MONTH_DAY,
+  'short': DateFormat.YEAR_NUM_MONTH_DAY,
+  'time': 'jm',
+  'dayMonth': DateFormat.MONTH_DAY,
+  'weekday': DateFormat.WEEKDAY,
+  'monthYear': DateFormat.YEAR_MONTH,
+};
+
+/// `formatDate(date, patternOrStyle, locale?)`: the hand-rolled English
+/// formatter for a pattern without a locale, intl's DateFormat for a named
+/// style or a locale.
+String? _formatDateIn(Object? value, Object? pattern, Object? locale) {
+  final String? style = pattern is String ? _dateStyles[pattern.trim()] : null;
+  if (style == null && _localeName(locale) == null) {
+    return _formatDate(value, pattern);
+  }
+  final DateTime? date = _toDate(value);
+  if (date == null) return null;
+  final String name = _dateLocale(locale);
+  final DateFormat format = style != null
+      ? (DateFormat(null, name)..addPattern(style))
+      : DateFormat(
+          pattern == null ? 'yyyy-MM-dd' : FormulaEvaluator.stringify(pattern),
+          name,
+        );
+  return format.format(date);
+}
+
+/// The CLDR plural category of [count] in [locale] (en by default):
+/// zero, one, two, few, many or other. Unlike `Intl.plural`, 0 is only
+/// "zero" in languages that have that category, such as Arabic.
+String _pluralCategory(Object? count, Object? locale) {
+  final num n = _num(count);
+  if (!n.isFinite) return 'other';
+  final String? name = _localeName(locale);
+  return Intl.pluralLogic<String>(
+    n,
+    zero: 'zero',
+    one: 'one',
+    two: 'two',
+    few: 'few',
+    many: 'many',
+    other: 'other',
+    locale: name ?? 'en',
+    useExplicitNumberCases: false,
+  );
+}
+
+/// `plural(count, forms, locale?)` with a map of forms by plural category,
+/// e.g. `{one: '{n} phrase', other: '{n} phrases'}`. Picks the count's
+/// category, falling back to `other`, and writes the count in the locale's
+/// digits in place of `{n}`.
+String _pluralForms(Object? count, Map forms, Object? locale) {
+  final String category = _pluralCategory(count, locale);
+  final Object? form = forms[category] ?? forms['other'];
+  if (form == null) return '';
+  final String text = FormulaEvaluator.stringify(form);
+  if (!text.contains('{n}')) return text;
+  final num n = _num(count);
+  final String number = !n.isFinite
+      ? FormulaEvaluator.stringify(count)
+      : n == n.roundToDouble()
+      ? _localeNumber(n, 0, locale ?? _defaultLocale)
+      : NumberFormat.decimalPattern(_numberLocale(locale)).format(n);
+  return text.replaceAll('{n}', number);
+}
+
+/// 'rtl' when [locale] (`ar_EG`, `he`, `fa-IR`) is written right to left,
+/// else 'ltr'.
+String _textDirection(Object? locale) {
+  final String? name = _localeName(locale);
+  if (name == null) return 'ltr';
+  return Bidi.isRtlLanguage(name) ? 'rtl' : 'ltr';
+}
+
+/// Whether [rune] is a strong right-to-left character: a Hebrew, Arabic,
+/// Syriac, Thaana or N'Ko letter, an RTL presentation form or an RTL mark.
+/// Arabic-Indic digits, separators and combining marks are not strong.
+bool _isStrongRtl(int rune) {
+  if (rune == 0x200F || rune == 0x061C) return true;
+  if (rune >= 0x0660 && rune <= 0x066C) return false;
+  if (rune >= 0x06F0 && rune <= 0x06F9) return false;
+  if (rune >= 0x0600 && rune <= 0x0605) return false;
+  if (rune == 0x060C) return false;
+  if (rune >= 0x064B && rune <= 0x065F) return false;
+  if (rune == 0x0670) return false;
+  if (rune >= 0x0591 && rune <= 0x05BD) return false;
+  if (rune >= 0x0590 && rune <= 0x07FF) return true;
+  if (rune >= 0x0800 && rune <= 0x08FF) return true;
+  if (rune >= 0xFB1D && rune <= 0xFDFD) return true;
+  if (rune >= 0xFE70 && rune <= 0xFEFC) return true;
+  return rune >= 0x10800 && rune <= 0x10FFF;
+}
+
+/// Whether [rune] is a strong left-to-right character, such as a Latin,
+/// Greek, Cyrillic or CJK letter, or the LRM mark.
+bool _isStrongLtr(int rune) {
+  if (rune == 0x200E) return true;
+  if ((rune >= 0x41 && rune <= 0x5A) || (rune >= 0x61 && rune <= 0x7A)) {
+    return true;
+  }
+  if (rune < 0xC0) return false;
+  if (rune == 0xD7 || rune == 0xF7) return false;
+  if (rune <= 0x02B8) return true;
+  if (rune >= 0x0370 && rune <= 0x058F) return true;
+  if (rune >= 0x0900 && rune <= 0x1FFF) return true;
+  if (rune >= 0x2C00 && rune <= 0xFB1C) {
+    return !(rune >= 0x3000 && rune <= 0x303F && rune != 0x3005);
+  }
+  return rune >= 0x10000 && rune < 0x10800 || rune >= 0x11000;
+}
+
+/// 'rtl' or 'ltr' for the direction of the first strong character in
+/// [value], or '' when it has none, such as digits or punctuation only.
+String _textDirectionOf(Object? value) {
+  for (final int rune in FormulaEvaluator.stringify(value).runes) {
+    if (_isStrongRtl(rune)) return 'rtl';
+    if (_isStrongLtr(rune)) return 'ltr';
+  }
+  return '';
+}
+
+/// [template] with every `{name}` placeholder replaced by [values]' `name`
+/// (a map) or item at that index (a list). Unknown placeholders are kept.
+String _fill(Object? template, Object? values) =>
+    FormulaEvaluator.stringify(template)
+        .replaceAllMapped(RegExp(r'\{([^{}]+)\}'), (match) {
+          final String key = match[1]!.trim();
+          if (values is Map) {
+            if (values.containsKey(key)) {
+              return FormulaEvaluator.stringify(values[key]);
+            }
+            final Object? nested = _fillPath(values, key);
+            if (nested != _missing) return FormulaEvaluator.stringify(nested);
+          } else if (values is List) {
+            final int? index = int.tryParse(key);
+            if (index != null && index >= 0 && index < values.length) {
+              return FormulaEvaluator.stringify(values[index]);
+            }
+          }
+          return match[0]!;
+        });
+
+const Object _missing = Object();
+
+/// The value at a dotted [path] such as `trip.city` in [values], or
+/// [_missing].
+Object? _fillPath(Map values, String path) {
+  if (!path.contains('.')) return _missing;
+  Object? value = values;
+  for (final String part in path.split('.')) {
+    if (value is Map && value.containsKey(part)) {
+      value = value[part];
+    } else {
+      return _missing;
+    }
+  }
+  return value;
 }
 
 /// [value] as text padded to [width] with the first character of [fill]:
@@ -1770,7 +2131,14 @@ Map<String, Object?> _toMap(List<Object?> args) {
 
 final Map<String, _Function> _functions = {
   'money': (a) => _money(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
-  'formatNumber': (a) => _grouped(_arg(a, 0), _arg(a, 1)),
+  'formatNumber': _formatNumber,
+  'formatCurrency': (a) =>
+      _formatCurrency(_arg(a, 0), _arg(a, 1), _arg(a, 2), _arg(a, 3)),
+  'formatPercent': (a) => _formatPercent(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'pluralCategory': (a) => _pluralCategory(_arg(a, 0), _arg(a, 1)),
+  'textDirection': (a) => _textDirection(_arg(a, 0)),
+  'textDirectionOf': (a) => _textDirectionOf(_arg(a, 0)),
+  'fill': (a) => _fill(_arg(a, 0), _arg(a, 1)),
   'feetInches': (a) => _feetInches(_arg(a, 0)),
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
   'round': (a) => _round(_arg(a, 0), _arg(a, 1)),
@@ -1795,8 +2163,10 @@ final Map<String, _Function> _functions = {
     _ => 0,
   },
   'if': (a) => _truthy(_arg(a, 0)) ? _arg(a, 1) : _arg(a, 2),
-  'plural': (a) =>
-      _num(_arg(a, 0)) == 1 ? _arg(a, 1) : (_arg(a, 2) ?? '${_arg(a, 1)}s'),
+  'plural': (a) => switch (_arg(a, 1)) {
+    final Map forms => _pluralForms(_arg(a, 0), forms, _arg(a, 2)),
+    _ => _num(_arg(a, 0)) == 1 ? _arg(a, 1) : (_arg(a, 2) ?? '${_arg(a, 1)}s'),
+  },
   'join': (a) => _values(_arg(a, 0), _arg(a, 2))
       .map(FormulaEvaluator.stringify)
       .where((s) => s.isNotEmpty)
@@ -2033,7 +2403,7 @@ final Map<String, _Function> _functions = {
   'minBy': (a) => _extremeBy(a, max: false),
   'maxBy': (a) => _extremeBy(a, max: true),
   'parseDate': (a) => _dateText(_toDate(_arg(a, 0))),
-  'formatDate': (a) => _formatDate(_arg(a, 0), _arg(a, 1)),
+  'formatDate': (a) => _formatDateIn(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'addMinutes': (a) =>
       _dateText(_shift(_arg(a, 0), minutes: _intArg(_arg(a, 1)))),
   'addHours': (a) => _dateText(_shift(_arg(a, 0), hours: _intArg(_arg(a, 1)))),
