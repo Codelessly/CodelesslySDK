@@ -210,6 +210,134 @@ void main() {
     }
   }
 
+  testWidgets('date bounds are inclusive and refresh from Observable', (
+    tester,
+  ) async {
+    final lower = Observable(
+      VariableData(id: 'lower', name: 'lower', value: '2024-02-29'),
+    );
+    final upper = Observable(
+      VariableData(id: 'upper', name: 'upper', value: '2024-03-01'),
+    );
+    final payload = CodelesslyContext.empty()
+      ..variables['lower'] = lower
+      ..variables['upper'] = upper;
+    final node = DateTimeInputNode(
+      id: 'date-bound',
+      name: 'Date',
+      basicBoxLocal: NodeBox(0, 0, 320, 48),
+      mode: 'date',
+      value: '2024-02-29',
+      properties: DateTimeInputProperties(label: 'Date'),
+      variables: {'min': r'${lower}', 'max': r'${upper}'},
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: payload,
+        child: MaterialApp(
+          home: Scaffold(body: PassiveDateTimeInputWidget(node: node)),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(InkWell).first);
+    await tester.pumpAndSettle();
+    var dialog = tester.widget<DatePickerDialog>(find.byType(DatePickerDialog));
+    expect(dialog.firstDate, DateTime(2024, 2, 29));
+    expect(dialog.lastDate, DateTime(2024, 3, 1));
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(find.text('Thu, Feb 29'), findsOneWidget);
+
+    lower.value = lower.value.copyWith(value: '2024-03-01');
+    upper.value = upper.value.copyWith(value: '2024-03-01');
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: payload,
+        child: MaterialApp(
+          home: Scaffold(body: PassiveDateTimeInputWidget(node: node)),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(InkWell).first);
+    await tester.pumpAndSettle();
+    dialog = tester.widget<DatePickerDialog>(find.byType(DatePickerDialog));
+    expect(dialog.firstDate, DateTime(2024, 3, 1));
+    expect(dialog.lastDate, DateTime(2024, 3, 1));
+    expect(dialog.initialDate, DateTime(2024, 3, 1));
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(find.text('Fri, Mar 1'), findsOneWidget);
+  });
+
+  testWidgets('dateTime accepts same-day min and rejects time past max', (
+    tester,
+  ) async {
+    final value = Observable(
+      VariableData(
+        id: 'appointment',
+        name: 'appointment',
+        value: '2024-02-29T09:05:00Z',
+      ),
+    );
+    final payload = CodelesslyContext.empty()..variables['appointment'] = value;
+    final node = DateTimeInputNode(
+      id: 'date-time-bounded',
+      name: 'Appointment',
+      basicBoxLocal: NodeBox(0, 0, 320, 48),
+      mode: 'dateTime',
+      value: '2024-02-29T09:05:00Z',
+      properties: DateTimeInputProperties(
+        label: 'Appointment',
+        min: '2024-02-29T09:00:00Z',
+        max: '2024-02-29T10:00:00Z',
+      ),
+      variables: {'value': r'${appointment}'},
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: payload,
+        child: MaterialApp(
+          home: Scaffold(body: PassiveDateTimeInputWidget(node: node)),
+        ),
+      ),
+    );
+    Future<void> openTime() async {
+      await tester.tap(find.byType(InkWell).first);
+      await tester.pumpAndSettle();
+      final dialog = tester.widget<DatePickerDialog>(
+        find.byType(DatePickerDialog),
+      );
+      expect(dialog.firstDate, DateTime(2024, 2, 29));
+      expect(dialog.lastDate, DateTime(2024, 2, 29));
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TimePickerDialog), findsOneWidget);
+    }
+
+    await openTime();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(value.value.value, '2024-02-29T09:05:00.000Z');
+    expect(find.text('Thu, Feb 29 · 9:05 AM'), findsOneWidget);
+
+    await openTime();
+    await tester.tap(find.byIcon(Icons.keyboard_outlined));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, '11');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(value.value.value, '2024-02-29T09:05:00.000Z');
+    expect(find.text('Thu, Feb 29 · 9:05 AM'), findsOneWidget);
+    expect(
+      find.text(
+        'Choose a time between 2024-02-29T09:00:00Z and '
+        '2024-02-29T10:00:00Z',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('time bounds reject selection and refresh from Observable', (
     tester,
   ) async {
