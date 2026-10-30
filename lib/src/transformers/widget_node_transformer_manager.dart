@@ -975,12 +975,10 @@ class SvgIcon extends StatelessWidget {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
     // Material Icons ship with Flutter; use their bundled glyph offline.
-    if (icon is MaterialIcon && icon.codepoint > 0) {
-      return Icon(
-        IconData(icon.codepoint, fontFamily: icon.fontFamily),
-        size: dimension,
-        color: iconColor,
-      );
+    // Flutter's font numbers glyphs differently from the Material Icons
+    // codepoints the editor stores, so find the glyph by name and style.
+    if (flutterMaterialIconData(icon) case final IconData data) {
+      return Icon(data, size: dimension, color: iconColor);
     }
 
     final url = icon.toSvgUrl(
@@ -1295,4 +1293,22 @@ class _PulseOpacityState extends State<PulseOpacity>
     ),
     child: widget.child,
   );
+}
+
+/// [icon]'s glyph in the Material Icons font bundled with Flutter, found by
+/// its name and style (`home` filled, `home_outlined`...). Null when it isn't
+/// a Material icon or Flutter has no such glyph (two-tone, newer icons);
+/// those are drawn from their SVG.
+IconData? flutterMaterialIconData(IconModel icon) {
+  if (icon is! MaterialIcon || icon.name.isEmpty) return null;
+  final String suffix = switch (icon.style) {
+    MaterialIconStyle.filled => '',
+    MaterialIconStyle.outlined => '_outlined',
+    MaterialIconStyle.rounded => '_rounded',
+    MaterialIconStyle.sharp => '_sharp',
+    MaterialIconStyle.twoTone => '\u0000',
+  };
+  final int? codepoint = flutterIconsDataMap['${icon.name}$suffix'];
+  if (codepoint == null) return null;
+  return IconData(codepoint, fontFamily: 'MaterialIcons');
 }
