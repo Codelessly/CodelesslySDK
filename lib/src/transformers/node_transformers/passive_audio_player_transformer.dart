@@ -203,10 +203,12 @@ class _PassiveAudioPlayerWidgetState extends State<PassiveAudioPlayerWidget>
   @override
   Widget build(BuildContext context) {
     final description = widget.node.properties.description;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return AdaptiveNodeBox(
       node: widget.node,
       child: ColoredBox(
-        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         child: Row(
           children: [
             if (widget.isPreview || widget.node.properties.url == null)
@@ -240,30 +242,56 @@ class _PassiveAudioPlayerWidgetState extends State<PassiveAudioPlayerWidget>
                     description?.isNotEmpty == true ? description! : 'Audio',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colors.onSurface,
+                    ),
                   ),
                   if (!_failed && widget.node.properties.showControls)
                     SizedBox(
                       height: 24,
-                      child: Slider(
-                        value: _position.inMilliseconds
-                            .clamp(0, _duration.inMilliseconds)
-                            .toDouble(),
-                        max: _duration.inMilliseconds > 0
-                            ? _duration.inMilliseconds.toDouble()
-                            : 1,
-                        onChanged: _ready && _duration > Duration.zero
-                            ? (value) => _run(
-                                () => _player!.seek(
-                                  Duration(milliseconds: value.round()),
-                                ),
-                              )
-                            : null,
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 3,
+                          thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 6,
+                            disabledThumbRadius: 5,
+                            elevation: 0,
+                            pressedElevation: 0,
+                          ),
+                          overlayShape: const RoundSliderOverlayShape(
+                            overlayRadius: 12,
+                          ),
+                          activeTrackColor: colors.primary,
+                          thumbColor: colors.primary,
+                          inactiveTrackColor: colors.surfaceContainerHighest,
+                          disabledActiveTrackColor: colors.onSurface.withValues(
+                            alpha: 0.24,
+                          ),
+                          disabledInactiveTrackColor: colors.onSurface
+                              .withValues(alpha: 0.12),
+                          disabledThumbColor: colors.onSurfaceVariant,
+                        ),
+                        child: Slider(
+                          value: _position.inMilliseconds
+                              .clamp(0, _duration.inMilliseconds)
+                              .toDouble(),
+                          max: _duration.inMilliseconds > 0
+                              ? _duration.inMilliseconds.toDouble()
+                              : 1,
+                          onChanged: _ready && _duration > Duration.zero
+                              ? (value) => _run(
+                                  () => _player!.seek(
+                                    Duration(milliseconds: value.round()),
+                                  ),
+                                )
+                              : null,
+                        ),
                       ),
                     ),
                   if (!_failed && widget.node.properties.showControls)
                     Text(
                       '${_clock(_position)} / ${_duration > Duration.zero ? _clock(_duration) : '--:--'}',
-                      style: Theme.of(context).textTheme.labelSmall,
+                      style: theme.textTheme.labelSmall,
                     ),
                 ],
               ),
