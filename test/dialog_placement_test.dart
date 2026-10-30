@@ -45,6 +45,7 @@ Future<void> open(
   DialogPlacement placement, {
   Size size = const Size(390, 844),
   DialogAnchor anchor = DialogAnchor.none,
+  DialogPresentation presentation = DialogPresentation.dialog,
 }) async {
   await pumpLayouts(tester, [
     layoutOf(
@@ -55,6 +56,7 @@ Future<void> open(
           placement: placement,
           anchor: anchor,
           anchorGap: 6,
+          presentation: presentation,
         ),
       ),
     ),
@@ -138,5 +140,37 @@ void main() {
     final Rect shown = menuRect(tester);
     expect(shown.top, greaterThanOrEqualTo(8));
     expect(shown.bottom, lessThanOrEqualTo(192));
+  });
+
+  // A menu: a popover at its trigger on wide screens, a sheet on phones.
+  testWidgets('an adaptive anchored menu is a popover on desktop', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      DialogPlacement.belowStart,
+      anchor: DialogAnchor.trigger,
+      presentation: DialogPresentation.adaptive,
+      size: const Size(1440, 900),
+    );
+    final Rect go = tester.getRect(
+      find.ancestor(of: find.text('Go'), matching: find.byType(FitBox)).first,
+    );
+    final Rect shown = menuRect(tester);
+    expect(shown.top, closeTo(go.bottom + 6, 1));
+    expect(shown.size, const Size(180, 120));
+  });
+
+  testWidgets('an adaptive anchored menu is a sheet on mobile', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      DialogPlacement.belowStart,
+      anchor: DialogAnchor.trigger,
+      presentation: DialogPresentation.adaptive,
+    );
+    expect(menuRect(tester).bottom, 844);
+    expect(menuRect(tester).width, 390);
   });
 }
