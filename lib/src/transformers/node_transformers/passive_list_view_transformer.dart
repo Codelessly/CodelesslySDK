@@ -1035,7 +1035,6 @@ class WrappedItems extends StatelessWidget {
   }
 }
 
-
 /// How far a list's items overlap: its negative space separator's spacing.
 double listItemOverlap(ListViewNode node) =>
     node.properties.hasSeparator &&
