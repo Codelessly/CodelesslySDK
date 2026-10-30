@@ -139,9 +139,34 @@ class PropertyValueDelegate {
     if (variablePath == null) return null;
 
     return getVariableValueFromPath<R>(
-      variablePath,
-      scopedValues: scopedValues,
-    );
+          variablePath,
+          scopedValues: scopedValues,
+        ) ??
+        literalIconName<R>(node, property, variablePath);
+  }
+
+  /// The icon properties of an icon node that take an icon's name.
+  static const Set<String> iconNameProperties = {'icon', 'iconName'};
+
+  static final RegExp _iconName = RegExp(r'^[a-z0-9_]+$');
+
+  /// [binding] itself as the value of [property] when it is an icon name
+  /// written as is (`block_rounded`) rather than a variable or formula
+  /// giving one: an icon node's `icon` or `iconName` bound to a plain name
+  /// that no variable has shows that icon, as `${= 'block_rounded'}` does.
+  /// Null otherwise, and for any other property.
+  static R? literalIconName<R extends Object>(
+    BaseNode node,
+    String property,
+    String binding,
+  ) {
+    if (node is! IconNode || !iconNameProperties.contains(property)) {
+      return null;
+    }
+    if (R != String && R != Object) return null;
+    final String name = binding.trim();
+    if (!_iconName.hasMatch(name)) return null;
+    return name as R;
   }
 
   /// Substitutes variables & data paths used in given [text] with their values.
