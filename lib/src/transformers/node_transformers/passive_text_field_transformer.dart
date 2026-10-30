@@ -373,7 +373,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
           : null,
       inputFormatters: [
         if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
-        ?properties.formatter.toFlutterFormatter(),
+        ?properties.formatter.toFlutterFormatter(
+          resolve: (value) => PropertyValueDelegate.substituteVariables(
+            value,
+            nullSubstitutionMode: widget.settings.nullSubstitutionMode,
+            scopedValues: widget.scopedValues ?? ScopedValues.of(context),
+          ),
+        ),
       ],
       maxLines: maxLines,
       minLines: minLines,
