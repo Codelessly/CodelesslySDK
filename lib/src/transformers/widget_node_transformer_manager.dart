@@ -650,14 +650,28 @@ abstract class WidgetNodeTransformerManager
         )
         .toList();
 
+    // A click's result says where it landed: `x`, `y` in the node and
+    // `globalX`, `globalY` on screen (one cell can tell which slot of a
+    // timeline was tapped).
+    Map<String, double>? tapAt;
+    Map<String, double> where(Offset local, Offset global) => {
+      'x': local.dx,
+      'y': local.dy,
+      'globalX': global.dx,
+      'globalY': global.dy,
+    };
+
     if (inkWell != null) {
       return Material(
         type: MaterialType.transparency,
         child: InkWell(
+          onTapDown: (details) =>
+              tapAt = where(details.localPosition, details.globalPosition),
           onTap: () => FunctionsRepository.triggerAction(
             context,
             TriggerType.click,
             reactions: onClickReactions,
+            result: tapAt,
           ),
           onLongPress: onLongPressReactions.isEmpty
               ? null
@@ -689,11 +703,14 @@ abstract class WidgetNodeTransformerManager
         hitTestBehavior: HitTestBehavior.opaque,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => FunctionsRepository.triggerAction(
-            context,
-            TriggerType.click,
-            reactions: onClickReactions,
-          ),
+          onTapUp: onClickReactions.isEmpty
+              ? null
+              : (details) => FunctionsRepository.triggerAction(
+                  context,
+                  TriggerType.click,
+                  reactions: onClickReactions,
+                  result: where(details.localPosition, details.globalPosition),
+                ),
           onLongPress: onLongPressReactions.isEmpty
               ? null
               : () => FunctionsRepository.triggerAction(
