@@ -125,6 +125,15 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
   }
 }
 
+/// The focus of every text field shown, by node id, for Focus Field
+/// actions. The latest built one wins when a field shows twice.
+abstract final class TextFieldFocus {
+  static final Map<String, FocusNode> _nodes = {};
+
+  /// The focus of text field [nodeId], or null when it isn't shown.
+  static FocusNode? of(String nodeId) => _nodes[nodeId];
+}
+
 class PassiveTextFieldWidget extends StatefulWidget {
   final TextFieldNode node;
   final WidgetBuildSettings settings;
@@ -194,6 +203,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   void initState() {
     super.initState();
     focusNode.addListener(onFocusChanged);
+    TextFieldFocus._nodes[widget.node.id] = focusNode;
   }
 
   @override
@@ -272,6 +282,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   @override
   void dispose() {
     controller.dispose();
+    if (TextFieldFocus._nodes[widget.node.id] == focusNode) {
+      TextFieldFocus._nodes.remove(widget.node.id);
+    }
     focusNode.dispose();
     super.dispose();
   }
