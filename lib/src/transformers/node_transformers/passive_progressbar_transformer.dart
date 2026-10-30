@@ -145,9 +145,13 @@ class PassiveProgressBarWidget extends StatelessWidget {
         node.properties.progressColor.toFlutterColor();
 
     if (node.properties.shape == ProgressBarShape.arc) {
-      final double maxValue = node.properties.maxValue <= 0
+      final ProgressBarProperties properties = boundArcProperties(
+        node,
+        scopedValues,
+      );
+      final double maxValue = properties.maxValue <= 0
           ? 1
-          : node.properties.maxValue;
+          : properties.maxValue;
       return AdaptiveNodeBox(
         node: node,
         child: TweenAnimationBuilder<double>(
@@ -162,7 +166,7 @@ class PassiveProgressBarWidget extends StatelessWidget {
             size: Size.infinite,
             painter: ArcProgressPainter(
               progress: progress,
-              properties: node.properties,
+              properties: properties,
               progressColor: progressColor,
             ),
           ),
@@ -191,6 +195,50 @@ class PassiveProgressBarWidget extends StatelessWidget {
   }
 }
 
+/// [node]'s arc properties with the values its variables bind (see
+/// [ProgressBarProperties.bindableKeys]): angles, thickness, max and colors,
+/// so one arc per item of a data list can make up a segmented ring.
+ProgressBarProperties boundArcProperties(
+  ProgressBarNode node,
+  ScopedValues scopedValues,
+) {
+  final ProgressBarProperties p = node.properties;
+  if (!node.variables.keys.any(ProgressBarProperties.bindableKeys.contains)) {
+    return p;
+  }
+  double? number(String key) {
+    if (!node.variables.containsKey(key)) return null;
+    final Object? v = PropertyValueDelegate.getPropertyValue<Object>(
+      node,
+      key,
+      scopedValues: scopedValues,
+    );
+    final double? d = switch (v) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()),
+      _ => null,
+    };
+    return d != null && d.isFinite ? d : null;
+  }
+
+  ColorRGBA? color(String key) => node.variables.containsKey(key)
+      ? PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+          node,
+          key,
+          scopedValues: scopedValues,
+        )
+      : null;
+
+  return p.copyWith(
+    maxValue: number('maxValue'),
+    arcStartAngle: number('arcStartAngle'),
+    arcSweepAngle: number('arcSweepAngle'),
+    arcStrokeWidth: number('arcStrokeWidth'),
+    backgroundColor: color('backgroundColor'),
+    progressEndColor: color('progressEndColor'),
+  );
+}
+
 /// Paints an arc progress bar: a track, colored zone bands just outside it,
 /// the progress arc, tick marks and an optional needle. [progress] is the
 /// value as a fraction of the max; over 1 fills the arc and pushes the needle
@@ -216,21 +264,15 @@ class ArcProgressPainter extends CustomPainter {
     final double start = _rad(properties.arcStartAngle);
     final double sweep = _rad(properties.arcSweepAngle);
 
-    // The largest circle whose arc fits the box.
-    final Rect unit = _arcBounds(start, sweep);
-    final double outer = stroke / 2 + gap + bandWidth;
-    final double radius = math.max(
-      0,
-      math.min(
-        (size.width - 2 * outer) / unit.width,
-        (size.height - 2 * outer) / unit.height,
-      ),
-    );
-    final Offset center = Offset(
-      size.width / 2 - unit.center.dx * radius,
-      size.height / 2 - unit.center.dy * radius,
+    final (:Offset center, :double radius) = arcGeometry(
+      size,
+      properties,
+      outer: stroke / 2 + gap + bandWidth,
     );
     final Rect arcRect = Rect.fromCircle(center: center, radius: radius);
+    final StrokeCap cap = properties.arcRoundCaps
+        ? StrokeCap.round
+        : StrokeCap.butt;
 
     canvas.drawArc(
       arcRect,
@@ -240,6 +282,7 @@ class ArcProgressPainter extends CustomPainter {
       Paint()
         ..color = properties.backgroundColor.toFlutterColor()
         ..style = PaintingStyle.stroke
+        ..strokeCap = cap
         ..strokeWidth = stroke,
     );
 
@@ -265,16 +308,55 @@ class ArcProgressPainter extends CustomPainter {
 
     final double filled = progress.clamp(0, 1).toDouble();
     if (filled > 0) {
-      canvas.drawArc(
-        arcRect,
-        start,
-        sweep * filled,
-        false,
-        Paint()
-          ..color = progressColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = stroke,
-      );
+      final double fill = sweep * filled;
+      if (properties.arcGlow > 0) {
+        canvas.drawArc(
+          arcRect,
+          start,
+          fill,
+          false,
+          Paint()
+            ..color = progressColor.withValues(alpha: progressColor.a * 0.35)
+            ..style = PaintingStyle.stroke
+            ..strokeCap = cap
+            ..strokeWidth = stroke + properties.arcGlow
+            ..maskFilter = MaskFilter.blur(BlurStyle.normal, properties.arcGlow),
+        );
+      }
+      final Paint paint = Paint()
+        ..color = progressColor
+        ..style = PaintingStyle.stroke
+        ..strokeCap = cap
+        ..strokeWidth = stroke;
+      final ColorRGBA? end = properties.progressEndColor;
+      if (end != null && fill.abs() > 0.001) {
+        // A sweep gradient from the start of the arc to the tip of the fill.
+        final double from = fill >= 0 ? start : start + fill;
+        paint.shader = SweepGradient(
+          colors: fill >= 0
+              ? [progressColor, end.toFlutterColor()]
+              : [end.toFlutterColor(), progressColor],
+          endAngle: fill.abs(),
+          transform: GradientRotation(from),
+        ).createShader(arcRect);
+      }
+      canvas.drawArc(arcRect, start, fill, false, paint);
+      if (properties.arcHeadDot && filled < 1) {
+        final double a = start + fill;
+        final Offset tip = center + Offset(math.cos(a), math.sin(a)) * radius;
+        canvas.drawCircle(
+          tip,
+          stroke,
+          Paint()
+            ..color = progressColor.withValues(alpha: progressColor.a * 0.6)
+            ..maskFilter = MaskFilter.blur(BlurStyle.normal, stroke),
+        );
+        canvas.drawCircle(
+          tip,
+          stroke * 0.62,
+          Paint()..color = const Color(0xFFFFFFFF),
+        );
+      }
     }
 
     if (properties.tickCount > 1) {
@@ -309,6 +391,42 @@ class ArcProgressPainter extends CustomPainter {
         Paint()..color = needle.toFlutterColor(),
       );
     }
+  }
+
+  /// Where the arc's circle sits in a box of [size]: the largest circle whose
+  /// arc fits the box, or with [ArcFit.circle] the whole circle, centred, so
+  /// arcs of any length share one ring. [outer] is the room kept outside the
+  /// circle's line (half the stroke, plus bands).
+  static ({Offset center, double radius}) arcGeometry(
+    Size size,
+    ProgressBarProperties properties, {
+    double? outer,
+  }) {
+    final double room = outer ?? properties.arcStrokeWidth / 2;
+    if (properties.arcFit == ArcFit.circle) {
+      return (
+        center: size.center(Offset.zero),
+        radius: math.max(0, size.shortestSide / 2 - room),
+      );
+    }
+    final Rect unit = _arcBounds(
+      _rad(properties.arcStartAngle),
+      _rad(properties.arcSweepAngle),
+    );
+    final double radius = math.max(
+      0,
+      math.min(
+        (size.width - 2 * room) / unit.width,
+        (size.height - 2 * room) / unit.height,
+      ),
+    );
+    return (
+      center: Offset(
+        size.width / 2 - unit.center.dx * radius,
+        size.height / 2 - unit.center.dy * radius,
+      ),
+      radius: radius,
+    );
   }
 
   /// Bounds of an arc of a unit circle from [start] sweeping [sweep], plus

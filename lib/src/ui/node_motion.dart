@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/scheduler.dart';
@@ -13,6 +14,7 @@ Curve flutterCurveOf(MotionCurve curve) => switch (curve) {
   MotionCurve.easeIn => Curves.easeIn,
   MotionCurve.easeOutBack => Curves.easeOutBack,
   MotionCurve.easeOutCubic => Curves.easeOutCubic,
+  MotionCurve.easeInOutSine => Curves.easeInOutSine,
 };
 
 /// The transform [motion] draws, without spin, around [origin] in a box of
@@ -192,7 +194,8 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       a.rotateY == b.rotateY &&
       a.perspective == b.perspective &&
       a.originX == b.originX &&
-      a.originY == b.originY;
+      a.originY == b.originY &&
+      a.blur == b.blur;
 
   /// Whether a transition is running or waiting out its delay.
   bool get _moving => _transition.isAnimating || _delay?.isActive == true;
@@ -210,6 +213,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       rotate: lerp('rotate'),
       rotateX: lerp('rotateX'),
       rotateY: lerp('rotateY'),
+      blur: math.max(0, lerp('blur')),
     );
   }
 
@@ -266,6 +270,12 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       child = IgnorePointer(
         ignoring: m.opacity == 0,
         child: Opacity(opacity: m.opacity, child: child),
+      );
+    }
+    if (m.blur > 0) {
+      child = ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: m.blur, sigmaY: m.blur),
+        child: child,
       );
     }
     if (m.translateX == 0 &&
