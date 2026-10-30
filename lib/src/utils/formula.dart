@@ -2434,10 +2434,12 @@ final Map<String, _Function> _functions = {
     for (int i = 0; i + 1 < a.length; i += 2)
       FormulaEvaluator.stringify(a[i]): a[i + 1],
   },
-  // The first argument that is neither null nor empty text.
+  // The first argument that is neither null nor empty text, else the last
+  // one that isn't null, so an explicit '' fallback is kept:
+  // coalesce(route.lang, '') is '' without the param, not null.
   'coalesce': (a) => a.firstWhere(
     (v) => v != null && !(v is String && v.isEmpty),
-    orElse: () => null,
+    orElse: () => a.lastWhere((v) => v != null, orElse: () => null),
   ),
 };
 
