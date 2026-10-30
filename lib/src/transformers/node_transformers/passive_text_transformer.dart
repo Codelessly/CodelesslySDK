@@ -141,13 +141,16 @@ class TextNodeBox extends StatelessWidget {
 
   /// Where text sits in its box for [node]'s text alignment. Start and end
   /// follow the text direction, like [TextAlign.start] and [TextAlign.end].
-  static AlignmentGeometry alignmentOf(TextNode node) {
+  static AlignmentGeometry alignmentOf(
+    TextNode node, [
+    TextAlignHorizontalEnum? horizontal,
+  ]) {
     final double y = switch (node.textAlignVertical) {
       TextAlignVerticalEnum.top => -1,
       TextAlignVerticalEnum.center => 0,
       TextAlignVerticalEnum.bottom => 1,
     };
-    return switch (node.textAlignHorizontal) {
+    return switch (horizontal ?? node.textAlignHorizontal) {
       TextAlignHorizontalEnum.left ||
       TextAlignHorizontalEnum.justified => Alignment(-1, y),
       TextAlignHorizontalEnum.center => Alignment(0, y),
@@ -165,7 +168,7 @@ class TextNodeBox extends StatelessWidget {
         vFit != SizeFit.shrinkWrap && vFit != SizeFit.expanded;
 
     Widget box = Align(
-      alignment: alignmentOf(node),
+      alignment: alignmentOf(node, TextUtils.textAlignOf(node, context)),
       // Hug the text on an axis that does not fill its parent, so a loose
       // parent does not stretch the box; tight constraints still size it.
       widthFactor: hFit == SizeFit.shrinkWrap ? 1 : null,

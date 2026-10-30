@@ -263,7 +263,11 @@ class TextUtils {
             ? spans
             : [for (final span in spans) recolorSpan(span, textColor)],
       ),
-      textAlign: textNode.textAlignHorizontal.toFlutter(),
+      textAlign: textAlignOf(
+        textNode,
+        context,
+        variablesOverrides: variablesOverrides,
+      ).toFlutter(),
       maxLines: textNode.maxLines,
       overflow: textNode.overflow.flutterOverflow,
       softWrap: textNode.softWrap,
@@ -271,6 +275,30 @@ class TextUtils {
           ? null
           : TextScaler.linear(textNode.textScaleFactor!),
     );
+  }
+
+  /// [node]'s horizontal text alignment: its `textAlign` binding (`left`,
+  /// `center`, `right`, `start`, `end`, `justified`), e.g. a
+  /// transliteration that stays left to right but sits at the interface's
+  /// start edge with `${= rtl ? 'right' : 'left'}`, else its own setting.
+  static TextAlignHorizontalEnum textAlignOf(
+    TextNode node,
+    BuildContext context, {
+    List<VariableData>? variablesOverrides,
+  }) {
+    if (node.variables['textAlign'] == null) return node.textAlignHorizontal;
+    final String? bound = PropertyValueDelegate.getPropertyValue<String>(
+      node,
+      'textAlign',
+      scopedValues:
+          VariablePreview.scopeOf(node, context: context) ??
+          ScopedValues.of(context, variablesOverrides: variablesOverrides),
+    )?.trim();
+    final String? name = bound == 'justify' ? 'justified' : bound;
+    return TextAlignHorizontalEnum.values
+            .where((a) => a.name == name)
+            .firstOrNull ??
+        node.textAlignHorizontal;
   }
 
   static Text buildText(
