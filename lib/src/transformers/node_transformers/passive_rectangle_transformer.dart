@@ -840,8 +840,13 @@ Widget wrapFillWithPositioned({
   PaintType.gradientRadial ||
   PaintType.gradientAngular ||
   PaintType.gradientDiamond => Positioned.fill(child: fill),
+  // A hugging node without content takes its size from the image; one with
+  // children takes it from them, and the image covers it like any fill (an
+  // airmail border tile behind a card that grows with its text).
   PaintType.image =>
-    node.isHorizontalWrap || node.isVerticalWrap
+    (node.isHorizontalWrap || node.isVerticalWrap) &&
+            !(node is ChildrenMixin &&
+                (node as ChildrenMixin).children.isNotEmpty)
         ? Positioned(child: fill)
         : Positioned.fill(child: fill),
   PaintType.emoji => fill,
