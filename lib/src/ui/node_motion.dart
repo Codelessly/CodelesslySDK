@@ -24,7 +24,12 @@ Matrix4 motionMatrix(MotionModel motion, {double spinTurns = 0}) {
   }
   matrix
     ..translateByDouble(motion.translateX, motion.translateY, 0, 1)
-    ..scaleByDouble(motion.scale, motion.scale, 1, 1)
+    ..scaleByDouble(
+      motion.scale * motion.scaleX,
+      motion.scale * motion.scaleY,
+      1,
+      1,
+    )
     ..rotateZ(motion.rotate * math.pi / 180 + spinTurns * 2 * math.pi)
     ..rotateX(motion.rotateX * math.pi / 180)
     ..rotateY(motion.rotateY * math.pi / 180);
@@ -186,6 +191,8 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       a.translateX == b.translateX &&
       a.translateY == b.translateY &&
       a.scale == b.scale &&
+      a.scaleX == b.scaleX &&
+      a.scaleY == b.scaleY &&
       a.opacity == b.opacity &&
       a.rotate == b.rotate &&
       a.rotateX == b.rotateX &&
@@ -206,6 +213,8 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       translateX: lerp('translateX'),
       translateY: lerp('translateY'),
       scale: lerp('scale'),
+      scaleX: lerp('scaleX'),
+      scaleY: lerp('scaleY'),
       opacity: lerp('opacity').clamp(0, 1).toDouble(),
       rotate: lerp('rotate'),
       rotateX: lerp('rotateX'),
@@ -271,6 +280,8 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     if (m.translateX == 0 &&
         m.translateY == 0 &&
         m.scale == 1 &&
+        m.scaleX == 1 &&
+        m.scaleY == 1 &&
         m.rotate == 0 &&
         m.rotateX == 0 &&
         m.rotateY == 0 &&
