@@ -23,20 +23,20 @@ class FormulaClock extends ChangeNotifier {
   static Duration interval = const Duration(seconds: 1);
 
   Timer? _timer;
-  int _listeners = 0;
 
   @override
   void addListener(VoidCallback listener) {
     super.addListener(listener);
-    _listeners++;
     _timer ??= Timer.periodic(interval, (_) => notifyListeners());
   }
 
+  // Whether anything still listens is asked of the notifier: a count of
+  // adds and removes drifts when a widget removes a listener it never
+  // added, and would stop the clock under widgets still listening.
   @override
   void removeListener(VoidCallback listener) {
     super.removeListener(listener);
-    _listeners = _listeners > 0 ? _listeners - 1 : 0;
-    if (_listeners == 0) {
+    if (!hasListeners) {
       _timer?.cancel();
       _timer = null;
     }
@@ -62,25 +62,21 @@ class FrameClock extends ChangeNotifier {
   /// shows a still frame instead of redrawing every frame.
   static bool enabled = true;
 
-  int _listeners = 0;
   bool _scheduled = false;
 
+  // Whether anything listens is asked of the notifier itself: a count of
+  // adds and removes drifts when a widget removes a listener it never
+  // added (or twice), and the clock would stop with widgets still
+  // listening, freezing them.
   @override
   void addListener(VoidCallback listener) {
     super.addListener(listener);
-    _listeners++;
     _schedule();
-  }
-
-  @override
-  void removeListener(VoidCallback listener) {
-    super.removeListener(listener);
-    _listeners = _listeners > 0 ? _listeners - 1 : 0;
   }
 
   void _schedule() {
     if (_scheduled ||
-        _listeners == 0 ||
+        !hasListeners ||
         !enabled ||
         FormulaClock.pinned != null) {
       return;
@@ -88,7 +84,7 @@ class FrameClock extends ChangeNotifier {
     _scheduled = true;
     SchedulerBinding.instance.scheduleFrameCallback((_) {
       _scheduled = false;
-      if (_listeners == 0) return;
+      if (!hasListeners) return;
       notifyListeners();
       _schedule();
     });
