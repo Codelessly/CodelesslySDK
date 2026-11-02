@@ -216,6 +216,8 @@ class PassiveListViewWidget extends StatelessWidget {
         spacing: node.properties.wrapSpacing,
         runSpacing: node.properties.wrapRunSpacing,
         alignment: node.properties.wrapAlignment.flutterWrapAlignment,
+        crossAxisAlignment:
+            node.properties.wrapCrossAlignment.flutterWrapAlignment,
         padding: node.padding.flutterEdgeInsets,
         scrolls: scrolls,
         physics: node.physics.flutterScrollPhysics(false),
@@ -887,6 +889,7 @@ class WrappedItems extends StatelessWidget {
     this.spacing = 0,
     this.runSpacing = 0,
     this.alignment = WrapAlignment.start,
+    this.crossAxisAlignment = WrapCrossAlignment.start,
     this.padding = EdgeInsets.zero,
     this.scrolls = false,
     this.physics,
@@ -912,6 +915,9 @@ class WrappedItems extends StatelessWidget {
   /// How the items of a line are placed along it.
   final WrapAlignment alignment;
 
+  /// How the items of a line are placed across it.
+  final WrapCrossAlignment crossAxisAlignment;
+
   /// The list's padding, around the runs.
   final EdgeInsets padding;
 
@@ -934,6 +940,7 @@ class WrappedItems extends StatelessWidget {
       spacing: spacing,
       runSpacing: runSpacing,
       alignment: alignment,
+      crossAxisAlignment: crossAxisAlignment,
       children: [
         for (int index = 0; index < itemCount; index++)
           itemBuilder(context, index),
