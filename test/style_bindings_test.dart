@@ -265,6 +265,31 @@ void main() {
       expect(weights, isNot(contains(FontWeight.w400)));
     });
 
+    testWidgets('textDecoration strikes a ticked item through', (tester) async {
+      final ticked = boolVariable('ticked', false);
+      final host = Host(
+        text({'textDecoration': r"${= ticked ? 'lineThrough' : 'none'}"}),
+        variables: {'ticked': ticked},
+      );
+      await host.pump(tester);
+      expect(
+        (host.styled as TextNode).textMixedProps.single.textDecoration,
+        TextDecorationEnum.none,
+      );
+      ticked.set(ticked.value.copyWith(value: true));
+      await tester.pump();
+      expect(
+        (host.styled as TextNode).textMixedProps.single.textDecoration,
+        TextDecorationEnum.strikethrough,
+      );
+    });
+
+    test('parseTextDecoration reads the API and Flutter names', () {
+      expect(StyleBindings.parseTextDecoration('lineThrough'), TextDecorationEnum.strikethrough);
+      expect(StyleBindings.parseTextDecoration('underline'), TextDecorationEnum.underline);
+      expect(StyleBindings.parseTextDecoration('nope'), isNull);
+    });
+
     test('parseFontWeight reads numbers, wNNN and names', () {
       expect(StyleBindings.parseFontWeight(700), FontWeightNumeric.w700);
       expect(StyleBindings.parseFontWeight(650.0), FontWeightNumeric.w700);
