@@ -20,19 +20,24 @@ void main() {
       expect(eval('combine(4, 2)', {'combine': fn}), 42);
     });
 
-    test('a function stored as its text (a serialized computed value) works', () {
-      expect(eval('twice(21)', {'twice': 'x => x * 2'}), 42);
-      expect(eval('twice(21)', {'twice': r'${= x => x * 2}'}), 42);
-    });
+    test(
+      'a function stored as its text (a serialized computed value) works',
+      () {
+        expect(eval('twice(21)', {'twice': 'x => x * 2'}), 42);
+        expect(eval('twice(21)', {'twice': r'${= x => x * 2}'}), 42);
+      },
+    );
 
     test('the fraction formatter', () {
       final Object? fraction = eval(
         FormulaEvaluator.exactExpression(fractionFormula)!,
         {},
       );
-      String f(num v, num step) =>
-          eval('fraction(v, s)', {'fraction': fraction, 'v': v, 's': step})
-              .toString();
+      String f(num v, num step) => eval('fraction(v, s)', {
+        'fraction': fraction,
+        'v': v,
+        's': step,
+      }).toString();
       expect(f(1.5, 0.5), '1½');
       expect(f(0.1, 0.25), '¼');
       expect(f(2.74, 0.25), '2¾');
@@ -61,19 +66,21 @@ void main() {
         containsAll(['fmt', 'qty', 'scale', 'units']),
       );
       expect(FormulaEvaluator.userFunctionCalls('fmt(round(x), 2)'), {'fmt'});
-      expect(
-        FormulaEvaluator.referencedPaths('(qty, unit) => qty * scale'),
-        {'scale'},
-      );
+      expect(FormulaEvaluator.referencedPaths('(qty, unit) => qty * scale'), {
+        'scale',
+      });
     });
 
     test('unknown functions are reported against the variables in scope', () {
       expect(FormulaEvaluator.errorOf('sun(1)'), 'Unknown function "sun"');
       expect(
-        FormulaEvaluator.errorOf('sun(1)', variables: ['fmt']),
+        FormulaEvaluator.errorOf('sun(1)', functionNames: ['fmt']),
         'Unknown function "sun"',
       );
-      expect(FormulaEvaluator.errorOf('fmt(1)', variables: ['fmt']), isNull);
+      expect(
+        FormulaEvaluator.errorOf('fmt(1)', functionNames: ['fmt']),
+        isNull,
+      );
     });
 
     test('computed variables can define and use functions on the canvas', () {
@@ -111,15 +118,26 @@ void main() {
         value: r"${= (m) => m < 60 ? m + ' min' : floor(m / 60) + 'h ' + m % 60 + 'm'}",
         type: VariableType.text,
       ),
-      'minutes': VariableData(id: 'n', name: 'minutes', value: '210', type: VariableType.integer),
+      'minutes': VariableData(
+        id: 'n',
+        name: 'minutes',
+        value: '210',
+        type: VariableType.integer,
+      ),
     };
     final scope = ScopedValues.preview(variables: vars);
     expect(
-      PropertyValueDelegate.evaluateFormula('minutesText(minutes)', scopedValues: scope),
+      PropertyValueDelegate.evaluateFormula(
+        'minutesText(minutes)',
+        scopedValues: scope,
+      ),
       '3h 30m',
     );
     expect(
-      PropertyValueDelegate.evaluateFormula('minutesText(45)', scopedValues: scope),
+      PropertyValueDelegate.evaluateFormula(
+        'minutesText(45)',
+        scopedValues: scope,
+      ),
       '45 min',
     );
   });
