@@ -36,6 +36,17 @@ void main() {
     tester,
   ) async {
     final nodes = _load('test/fixtures/wireless_player_tablet.json');
+    // This test asserts frame geometry, not icon artwork. Avoid fetching
+    // Material SVGs while the widget-test HTTP client rejects all requests.
+    for (final entry in nodes.entries.toList()) {
+      if (entry.value case final IconNode icon) {
+        nodes[entry.key] = RectangleNode(
+          id: icon.id,
+          name: icon.name,
+          basicBoxLocal: icon.basicBoxLocal,
+        )..parentID = icon.parentID;
+      }
+    }
     await pumpPage(tester, nodes, screen: const Size(834, 1112));
     // Text without the app's fonts may overflow; only geometry is checked.
     while (tester.takeException() != null) {}
