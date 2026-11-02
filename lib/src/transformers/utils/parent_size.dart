@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/widgets.dart';
 
@@ -59,6 +61,7 @@ Map<String, dynamic> parentVariableValue(double? width, double? height) => {
 /// Whether [node] reads the `parent` variable in a binding, a formula or an
 /// inline `${...}` text, so it is built inside a [ParentSizeScope].
 bool readsParentSize(BaseNode node) {
+  if (hasFractionalSize(node)) return true;
   bool isParent(String path) =>
       VariableMatch.parse(path.wrapWithVariableSyntax())?.name == 'parent';
   for (final String path in node.variables.values) {
@@ -84,4 +87,73 @@ bool readsParentSize(BaseNode node) {
     }
   }
   return false;
+}
+
+/// The keys in [BaseNode.variables] that bind [BaseNode.widthFactor] and
+/// [BaseNode.heightFactor].
+const String widthFactorVariable = 'widthFactor';
+
+/// See [widthFactorVariable].
+const String heightFactorVariable = 'heightFactor';
+
+/// Whether [node] is sized as a fraction of its parent on an axis: it has a
+/// [BaseNode.widthFactor] or [BaseNode.heightFactor], or binds one through
+/// `variables['widthFactor']` / `variables['heightFactor']`.
+bool hasFractionalSize(BaseNode node) =>
+    node.isFractionallySized ||
+    node.variables[widthFactorVariable]?.trim().isNotEmpty == true ||
+    node.variables[heightFactorVariable]?.trim().isNotEmpty == true;
+
+/// The fractions of its parent's width and height [node] takes, with its
+/// `widthFactor` and `heightFactor` bindings read with [scopedValues] (a
+/// binding wins over the node's own factor). Null on an axis that isn't
+/// sized by a fraction. Negative fractions count as 0.
+({double? width, double? height}) fractionalSizeOf(
+  BaseNode node, {
+  required ScopedValues scopedValues,
+}) {
+  double? factor(String key, double? own) {
+    double? value = own;
+    if (node.variables[key]?.trim().isNotEmpty == true) {
+      final Object? bound = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      value = switch (bound) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()) ?? own,
+        _ => own,
+      };
+    }
+    if (value == null || !value.isFinite) return null;
+    return value < 0 ? 0 : value;
+  }
+
+  return (
+    width: factor(widthFactorVariable, node.widthFactor),
+    height: factor(heightFactorVariable, node.heightFactor),
+  );
+}
+
+/// The size [node] takes on each axis it is sized on by a fraction of its
+/// parent (see [fractionalSizeOf]), given the [parentWidth] and
+/// [parentHeight] the parent gives it; null on an axis without a fraction or
+/// whose parent size is unbounded. The node's margins are taken off the
+/// parent's size first, as the node's box sits inside them.
+({double? width, double? height}) fractionalBoxOf(
+  BaseNode node, {
+  required ScopedValues scopedValues,
+  required double? parentWidth,
+  required double? parentHeight,
+}) {
+  final fraction = fractionalSizeOf(node, scopedValues: scopedValues);
+  double? size(double? factor, double? parent, double margins) =>
+      factor == null || parent == null || !parent.isFinite
+      ? null
+      : math.max(0, (parent - margins) * factor).toDouble();
+  return (
+    width: size(fraction.width, parentWidth, node.margin.horizontal),
+    height: size(fraction.height, parentHeight, node.margin.vertical),
+  );
 }

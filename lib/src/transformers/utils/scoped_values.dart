@@ -128,6 +128,26 @@ class ScopedValues {
        holdProgress = null,
        routeParams = routeParams ?? {};
 
+  /// These values as an item of a list sees them: [item] is what `${item}`
+  /// and `${index}` read, and the item these values had, if any, becomes
+  /// the parent item. Lets a list evaluate a binding for each of its items
+  /// before building them, e.g. their keys and paint order.
+  ScopedValues.forItem(ScopedValues base, IndexedItem item)
+    : _codelesslyContextRef = base._codelesslyContextRef,
+      _instanceRef = base._instanceRef,
+      _variablesOverrides = base._variablesOverrides,
+      _dataOverrides = base._dataOverrides,
+      _previewVariables = base._previewVariables,
+      _appUser = base._appUser,
+      indexedItem = item,
+      parentIndexedItem = base.indexedItem,
+      nodeState = base.nodeState,
+      holdProgress = base.holdProgress,
+      routeParams = base.routeParams,
+      screenSize = base.screenSize,
+      platformBrightness = base.platformBrightness,
+      parentSize = base.parentSize;
+
   /// Creates a new scoped values instance from a given context.
   ScopedValues.of(
     BuildContext context, {
