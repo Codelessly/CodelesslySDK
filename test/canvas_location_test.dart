@@ -29,6 +29,25 @@ void main() {
       expect(CanvasLocation.match(model, 'kraken'), isNull);
     });
 
+    test("an app's not found screen takes every unknown path", () {
+      final SDKPublishModel withLost = tidepoolModel(withNotFound: true);
+      final CanvasLocationMatch? lost = CanvasLocation.match(
+        withLost,
+        '/amp/room?x=1',
+      );
+      expect(lost?.canvasId, 'lost');
+      expect(lost?.params, {'x': '1', 'path': 'amp/room'});
+      // Known paths still win, and the root is still the entry screen.
+      expect(
+        CanvasLocation.match(withLost, 'guide/new')?.canvasId,
+        'newCreature',
+      );
+      expect(CanvasLocation.match(withLost, 'journal')?.canvasId, 'journal');
+      expect(CanvasLocation.match(withLost, '/'), isNull);
+      // It has no location of its own: it is opened by its id.
+      expect(CanvasLocation.locationOf(withLost, 'lost', {}), isNull);
+    });
+
     test('fills a path with params', () {
       expect(
         CanvasLocation.locationOf(model, 'creature', {
