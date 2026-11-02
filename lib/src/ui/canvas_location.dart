@@ -69,6 +69,46 @@ abstract final class CanvasLocation {
     return params;
   }
 
+  /// The ids of the canvases of layout [layoutId]: those of the loaded
+  /// layout, else those [SDKPublishUpdates.layoutCanvases] lists for it.
+  static List<String> canvasIdsOf(SDKPublishModel model, String layoutId) =>
+      model.layouts[layoutId]?.canvasIds.toList() ??
+      model.updates.layoutCanvases[layoutId]?.toList() ??
+      <String>[];
+
+  /// The ids of the layouts of [model] that can be shown: loaded ones and
+  /// those only listed in [SDKPublishUpdates.layoutCanvases], without
+  /// disabled ones.
+  static Iterable<String> layoutIdsOf(SDKPublishModel model) => {
+    ...model.layouts.keys,
+    ...model.updates.layoutCanvases.keys,
+  }.where((layoutId) => !model.disabledLayouts.contains(layoutId));
+
+  /// The path pattern of canvas [canvasId], such as `guide/:id`: the loaded
+  /// canvas's, else the one [SDKPublishUpdates.canvasPaths] holds. Null when
+  /// it has none.
+  static String? pathOf(SDKPublishModel model, String canvasId) {
+    String? path;
+    for (final SDKPublishLayout layout in model.layouts.values) {
+      if (!layout.canvasIds.contains(canvasId)) continue;
+      path = canvasOf(layout, canvasId)?.properties.path;
+      break;
+    }
+    path ??= model.updates.canvasPaths[canvasId];
+    if (path == null || segmentsOf(path).isEmpty) return null;
+    return segmentsOf(path).join('/');
+  }
+
+  /// The path pattern of layout [layoutId]: that of its first canvas (one
+  /// per breakpoint) that has one. Null when none has.
+  static String? layoutPathOf(SDKPublishModel model, String layoutId) {
+    for (final String canvasId in canvasIdsOf(model, layoutId)) {
+      final String? path = pathOf(model, canvasId);
+      if (path != null) return path;
+    }
+    return null;
+  }
+
   /// The canvas of [model] whose path matches [location], such as
   /// `guide/bat-star?x=1` for a canvas at `guide/:id`. Its params are the path
   /// params (`id: bat-star`) over the query params (`x: 1`). When several
@@ -84,22 +124,21 @@ abstract final class CanvasLocation {
     // A link naming a screen by its id isn't an unknown path.
     final bool namesScreen =
         segments.length == 1 &&
-        model.layouts.values.any(
-          (layout) =>
-              layout.id == segments.single ||
-              layout.canvasIds.contains(segments.single),
+        layoutIdsOf(model).any(
+          (layoutId) =>
+              layoutId == segments.single ||
+              canvasIdsOf(model, layoutId).contains(segments.single),
         );
 
     CanvasLocationMatch? best;
     // Literal segments, doubled; a `*` pattern scores one less than the same
     // literals without one, so any exact path beats a catch-all.
     int bestLiterals = -1;
-    for (final SDKPublishLayout layout in model.layouts.values) {
-      if (model.disabledLayouts.contains(layout.id)) continue;
-      for (final String canvasId in layout.canvasIds) {
-        final CanvasNode? canvas = canvasOf(layout, canvasId);
-        if (canvas == null || !canvas.properties.hasPath) continue;
-        final List<String> pattern = segmentsOf(canvas.properties.path!);
+    for (final String layoutId in layoutIdsOf(model)) {
+      for (final String canvasId in canvasIdsOf(model, layoutId)) {
+        final String? path = pathOf(model, canvasId);
+        if (path == null) continue;
+        final List<String> pattern = segmentsOf(path);
         final bool catchAll = pattern.isNotEmpty && pattern.last == '*';
         if (catchAll && namesScreen) continue;
         final Map<String, String>? params = matchPattern(pattern, segments);
@@ -110,7 +149,7 @@ abstract final class CanvasLocation {
         if (literals <= bestLiterals) continue;
         bestLiterals = literals;
         best = CanvasLocationMatch(
-          layoutId: layout.id,
+          layoutId: layoutId,
           canvasId: canvasId,
           params: {...uri.queryParameters, ...params},
         );
@@ -129,29 +168,24 @@ abstract final class CanvasLocation {
     String destinationId,
     Map<String, dynamic> params,
   ) {
-    final SDKPublishLayout? layout =
-        model.layouts[destinationId] ??
-        model.layouts.values
-            .where((layout) => layout.canvasIds.contains(destinationId))
-            .firstOrNull;
-    if (layout == null) return null;
+    final String? layoutId = model.resolveLayoutId(destinationId);
+    if (layoutId == null) return null;
 
     // The destination canvas's path, else that of a canvas for another
     // breakpoint of its layout.
-    String? path = canvasOf(layout, destinationId)?.properties.path;
-    if (path == null || path.trim().isEmpty) {
-      path = layout.canvasIds
-          .map((canvasId) => canvasOf(layout, canvasId)?.properties.path)
-          .firstWhere(
-            (path) => path != null && path.trim().isNotEmpty,
-            orElse: () => null,
-          );
-    }
-    if (path == null && model.entryLayoutId != layout.id) return null;
+    final String? path =
+        pathOf(model, destinationId) ?? layoutPathOf(model, layoutId);
+    if (path == null && model.entryLayoutId != layoutId) return null;
+    return fill(path ?? '', params);
+  }
 
+  /// [pattern] with its `:name` segments filled from [params] and the other
+  /// params as the query, such as `guide/bat-star?x=1`. Null when [params]
+  /// lack one of its path params.
+  static String? fill(String pattern, Map<String, dynamic> params) {
     final Map<String, dynamic> query = {...params};
     final List<String> segments = [];
-    for (final String segment in segmentsOf(path ?? '')) {
+    for (final String segment in segmentsOf(pattern)) {
       if (segment.startsWith(':') && segment.length > 1) {
         final String value = _stringOf(query.remove(segment.substring(1)));
         if (value.isEmpty) return null;
@@ -176,6 +210,9 @@ abstract final class CanvasLocation {
           : query.map((key, value) => MapEntry(key, _stringOf(value))),
     ).toString();
   }
+
+  /// [value] as it is written in a link: text as is, lists and maps as JSON.
+  static String stringOf(Object? value) => _stringOf(value);
 
   static String _stringOf(Object? value) => switch (value) {
     null => '',

@@ -1,5 +1,28 @@
 ## Unreleased
 
+### Navigation
+
+- A Codelessly app navigates like a website: `CodelesslyRouter` shows its
+  screens as pages of a Navigator 2 router built on NavigationUtils
+  (`CodelesslyRouterDelegate`). Every screen has a URL (its path, such as
+  `/guide/:id`, else `/<canvasId>`; the entry screen at `/`), screens the
+  app opens are browser history entries, the browser's back and forward
+  buttons move through them, the app's own back goes back in the browser,
+  and a reload or a shared link opens the same screen with the same back
+  stack (kept in the history entry's state). Use
+  `MaterialApp.router(routerConfig: router.config())`, with `basePath` for
+  an app served under a path, or `config(syncWithBrowser: false)` to embed
+  an app without touching the address.
+- Navigation actions of a screen shown by a router go through it; other
+  hosts keep using their `Navigator`.
+- Screen parameters come from the route's location
+  (`CodelesslyRouteScope`); a link's parameters also set the variables they
+  name.
+- `SDKPublishUpdates.canvasPaths` holds each canvas's URL path, so links
+  resolve before the screen's layout downloads.
+- Removed `Codelessly.pendingRoute` and `SDKPublishModel.linkParamsFor`:
+  the router reads links from the address.
+
 ### Nodes
 
 - Renders `gauge` and `chart` nodes (`PassiveGaugeWidget`,
