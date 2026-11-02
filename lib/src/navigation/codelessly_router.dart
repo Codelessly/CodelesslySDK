@@ -454,7 +454,11 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     final List<String> layoutIds = CanvasLocation.layoutIdsOf(model).toList();
     for (final String layoutId in layoutIds) {
       final String? path = CanvasLocation.layoutPathOf(model, layoutId);
-      if (path != null) add(path, layoutId);
+      // A catch-all (`*`) screen takes the paths no route matches; see
+      // [_buildNotFoundPage].
+      if (path != null && !CanvasLocation.segmentsOf(path).contains('*')) {
+        add(path, layoutId);
+      }
     }
     for (final String layoutId in layoutIds) {
       for (final String canvasId in CanvasLocation.canvasIdsOf(
@@ -524,11 +528,35 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     ),
   );
 
-  Page<dynamic> _buildNotFoundPage(DefaultRoute route) => MaterialPage<void>(
-    key: ValueKey('not-found:${route.path}'),
-    name: route.name,
-    child: _ScreenNotFound(onHome: () => resetTo(const ['/'])),
-  );
+  /// A path no route matches: the app's catch-all screen (a canvas whose
+  /// path ends in `*`), which gets the path as its `path` param, else the
+  /// built-in not-found page.
+  Page<dynamic> _buildNotFoundPage(DefaultRoute route) {
+    final SDKPublishModel? model = _model;
+    final String location = locationOfRoute(route);
+    final CanvasLocationMatch? match = model == null
+        ? null
+        : CanvasLocation.match(model, location);
+    if (match != null) {
+      return MaterialPage<void>(
+        key: ValueKey('catch-all:$location'),
+        name: route.name,
+        child: CodelesslyScreen(
+          key: ValueKey(location),
+          router: this,
+          layoutId: match.layoutId,
+          location: location,
+          params: match.params,
+          fromLink: route.metadata?['link'] == true,
+        ),
+      );
+    }
+    return MaterialPage<void>(
+      key: ValueKey('not-found:${route.path}'),
+      name: route.name,
+      child: _ScreenNotFound(onHome: () => resetTo(const ['/'])),
+    );
+  }
 
   /// The location of screen [destinationId] (a canvas or layout id) opened
   /// with [params]: its URL path with [params] filled in, else its id with
