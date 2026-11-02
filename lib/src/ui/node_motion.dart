@@ -16,6 +16,7 @@ Curve flutterCurveOf(MotionCurve curve) => switch (curve) {
   MotionCurve.easeIn => Curves.easeIn,
   MotionCurve.easeOutBack => Curves.easeOutBack,
   MotionCurve.easeOutCubic => Curves.easeOutCubic,
+  MotionCurve.easeInOutCubic => Curves.easeInOutCubic,
   MotionCurve.spring => const SpringCurve(),
   MotionCurve.elasticOut => Curves.elasticOut,
   MotionCurve.bounceOut => Curves.bounceOut,
