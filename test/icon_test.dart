@@ -104,38 +104,20 @@ void main() {
     expect(tester.getSize(find.byType(SizedBox).last), const Size(20, 20));
   });
 
-  testWidgets('Material icons draw Flutter\'s glyph for their name, not the web '
-      'font codepoint', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: SvgIcon(
-          // 0xe8fd is help_outline in the Material Icons web font; in
-          // Flutter's font it is another glyph.
-          icon: MaterialIcon(
-            codepoint: 0xe8fd,
-            name: 'help_outline',
-            style: MaterialIconStyle.filled,
-            version: 12,
-          ),
-          size: 22,
-        ),
-      ),
+  test('rounded Material icons load the Round SVG by name', () {
+    // The editor stores Google's codepoint (0xe8b6 is search there); the
+    // icon is drawn from its SVG by name, never from Flutter's font, where
+    // that number is another glyph (and a runtime IconData breaks release
+    // builds).
+    expect(
+      const MaterialIcon(
+        codepoint: 0xe8b6,
+        fontFamily: 'MaterialIcons',
+        name: 'search',
+        style: MaterialIconStyle.rounded,
+        version: 17,
+      ).toSvgUrl(),
+      'https://fonts.gstatic.com/s/i/materialiconsround/search/v17/24px.svg',
     );
-    final Icon drawn = tester.widget(find.byType(Icon));
-    expect(drawn.icon!.codePoint, Icons.help_outline.codePoint);
-    expect(drawn.icon!.fontFamily, 'MaterialIcons');
-  });
-
-  test('outlined and rounded icons map to Flutter\'s styled names', () {
-    MaterialIcon of(String name, MaterialIconStyle style) =>
-        MaterialIcon(codepoint: 1, name: name, style: style, version: 1);
-    expect(flutterMaterialCodepoint(of('layers', MaterialIconStyle.outlined)),
-        Icons.layers_outlined.codePoint);
-    expect(flutterMaterialCodepoint(of('home', MaterialIconStyle.rounded)),
-        Icons.home_rounded.codePoint);
-    expect(flutterMaterialCodepoint(of('architecture', MaterialIconStyle.filled)),
-        Icons.architecture.codePoint);
-    expect(flutterMaterialCodepoint(of('home', MaterialIconStyle.twoTone)), isNull);
-    expect(flutterMaterialCodepoint(of('no_such_icon_x', MaterialIconStyle.filled)), isNull);
   });
 }
