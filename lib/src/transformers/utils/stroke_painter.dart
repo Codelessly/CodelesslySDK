@@ -38,6 +38,10 @@ class StrokePainter extends CustomPainter {
   /// The color of the stroke.
   final Color color;
 
+  /// A gradient to paint the stroke with instead of [color], spanning the
+  /// painted box.
+  final Gradient? gradient;
+
   /// The border radius of the box.
   final BorderRadius borderRadius;
 
@@ -61,6 +65,7 @@ class StrokePainter extends CustomPainter {
   StrokePainter({
     this.strokeWidth = 1,
     this.color = Colors.black,
+    this.gradient,
     this.strokeMiterLimit = 4,
     this.dashPattern = const [],
     this.boxShape = BoxShape.rectangle,
@@ -85,6 +90,9 @@ class StrokePainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = strokeCap.flutterStrokeCap
       ..strokeMiterLimit = strokeMiterLimit;
+    if (gradient != null) {
+      paint.shader = gradient!.createShader(Offset.zero & size);
+    }
 
     // If the stroke is dotted, we take a completely different rendering
     // route.
@@ -409,6 +417,7 @@ class StrokePainter extends CustomPainter {
       oldDelegate.borderRadius != borderRadius ||
       oldDelegate.boxShape != boxShape ||
       oldDelegate.color != color ||
+      oldDelegate.gradient != gradient ||
       oldDelegate.dashPattern != dashPattern ||
       oldDelegate.strokeWidth != strokeWidth ||
       oldDelegate.strokeAlign != strokeAlign ||

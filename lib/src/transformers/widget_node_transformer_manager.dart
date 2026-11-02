@@ -609,6 +609,25 @@ abstract class WidgetNodeTransformerManager
     };
   }
 
+  /// Animates [widget] to [node]'s new size when it changes, with the node's
+  /// [BaseNode.sizeTransition]; see [NodeSizeTransition]. A node with a set
+  /// size on an axis is laid out at each size in between there; one that
+  /// hugs its content on an axis is revealed or hidden by its box.
+  Widget applySizeTransition(BaseNode node, Widget widget) {
+    final NodeTransition? transition = node.sizeTransition;
+    if (transition == null || transition.duration == Duration.zero) {
+      return widget;
+    }
+    return NodeSizeTransition(
+      key: ValueKey('size transition ${node.id}'),
+      duration: transition.duration,
+      curve: transition.curve.flutterCurve,
+      resizeWidth: node.horizontalFit != SizeFit.shrinkWrap,
+      resizeHeight: node.verticalFit != SizeFit.shrinkWrap,
+      child: widget,
+    );
+  }
+
   /// Convenience method to handle widget margins.
   Widget applyWidgetMargins(BaseNode node, Widget widget) {
     if (node.margin == EdgeInsetsModel.zero) return widget;
@@ -1338,6 +1357,35 @@ abstract class WidgetNodeTransformerManager
         direction,
         reactions: swipes,
       ),
+      child: widget,
+    );
+  }
+
+  /// Runs [node]'s [TriggerType.enterViewport] and
+  /// [TriggerType.exitViewport] reactions when it scrolls into and out of
+  /// view; see [ViewportReactionsBox].
+  Widget wrapWithViewportReactions(
+    BuildContext context,
+    BaseNode node,
+    Widget widget,
+  ) {
+    if (node is! ReactionMixin) return widget;
+    final List<Reaction> reactions = (node as ReactionMixin).reactions
+        .where(
+          (reaction) =>
+              TriggerType.viewport.contains(reaction.trigger.type) &&
+              reaction.action.enabled,
+        )
+        .toList();
+    if (reactions.isEmpty) return widget;
+    return ViewportReactionsBox(
+      reactions: reactions,
+      onTrigger: (TriggerType type, List<Reaction> reactions) =>
+          FunctionsRepository.triggerAction(
+            context,
+            type,
+            reactions: reactions,
+          ),
       child: widget,
     );
   }

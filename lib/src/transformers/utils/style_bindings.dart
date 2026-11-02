@@ -35,6 +35,17 @@ import 'scoped_values.dart';
 ///   or `lineThrough`, see [TextDecorationEnum.parse]; true strikes
 ///   through): the decoration of every span of a text node, e.g.
 ///   a done checklist item struck through.
+/// * [letterSpacing] (number in pixels, `"-2%"` of the font size,
+///   `"-0.02em"`, or a letter spacing JSON map): every span's letter spacing.
+/// * [lineHeight] (a multiplier up to 4 such as `1.1`, else pixels such as
+///   `28`; `"28px"`, `"120%"` or `"1.2x"`; `"auto"`; or a line height JSON
+///   map): every span's line height.
+/// * [textAlign] (string): the horizontal alignment of a text node: `left`,
+///   `center`, `right`, `justified` (or `justify`), `start` or `end`.
+/// * [spacing] (number): the gap between a row's or column's children,
+///   e.g. `${= screen.isMobile ? 28 : 56}`.
+/// * [runSpacing] (number): the gap between the runs of a wrapping row or
+///   column.
 /// * [icon] (string): the name of the icon an icon node shows, in the
 ///   naming of its icon model (`star`, `star_border`, ...). Its family and
 ///   style stay. An icon model JSON map replaces the icon as a whole.
@@ -86,6 +97,12 @@ abstract final class StyleBindings {
   /// The decoration of every span of a text node.
   static const String textDecoration = 'textDecoration';
 
+  /// The gap between a row's or column's children.
+  static const String spacing = 'spacing';
+
+  /// The gap between the runs of a wrapping row or column.
+  static const String runSpacing = 'runSpacing';
+
   /// The name of the icon an icon node shows.
   static const String icon = 'icon';
 
@@ -94,6 +111,25 @@ abstract final class StyleBindings {
 
   /// The offset of the notch at [index] of the node's notches.
   static String notchOffsetAt(int index) => 'notch-offset-$index';
+
+  /// The letter spacing of every span of a text node.
+  static const String letterSpacing = 'letterSpacing';
+
+  /// The line height of every span of a text node.
+  static const String lineHeight = 'lineHeight';
+
+  /// The horizontal alignment of a text node.
+  static const String textAlign = 'textAlign';
+
+  /// The bindable properties of a text node's style, beyond its color.
+  static const List<String> textStyle = [
+    fontWeight,
+    fontSize,
+    letterSpacing,
+    lineHeight,
+    fontFamily,
+    textAlign,
+  ];
 
   /// Shows or hides the effect [effectId].
   static String effectVisible(String effectId) => 'effect-visible-$effectId';
@@ -151,51 +187,59 @@ abstract final class StyleBindings {
       }
     }
 
-    if (node is TextNode) {
-      final String? family = value<Object>(fontFamily)?.toString().trim();
-      final double? size = parseFontSize(value<Object>(fontSize));
-      if ((family != null &&
-              family.isNotEmpty &&
-              node.textMixedProps.any((p) => p.fontName.family != family)) ||
-          (size != null &&
-              size > 0 &&
-              node.textMixedProps.any((p) => p.fontSize != size))) {
-        final List spans =
-            patch['textMixedProps'] as List? ??
-            [for (final prop in node.textMixedProps) prop.toJson()];
-        patch['textMixedProps'] = [
-          for (final (int index, Map span) in spans.cast<Map>().indexed)
-            {
-              ...span,
-              if (family != null && family.isNotEmpty)
-                'fontName': node.textMixedProps[index].fontName
-                    .copyWith(family: family)
-                    .toJson(),
-              if (size != null && size > 0) 'fontSize': size,
-            },
-        ];
+    if (node is RowColumnMixin) {
+      final double? gap = gapOf(node, spacing, scopedValues: scopedValues);
+      if (gap != null && gap != node.spacing) patch['spacing'] = gap;
+      final double? runGap = gapOf(
+        node,
+        runSpacing,
+        scopedValues: scopedValues,
+      );
+      if (runGap != null && runGap != node.runSpacing) {
+        patch['runSpacing'] = runGap;
       }
+    }
+
+    if (node is TextNode) {
       final FontWeightNumeric? weight = parseFontWeight(
         value<Object>(fontWeight),
       );
-      if (weight != null &&
-          node.textMixedProps.any((prop) => prop.fontName.weight != weight)) {
+      final double? size = _fontSize(value<Object>(fontSize));
+      final LetterSpacing? spacing = parseLetterSpacing(
+        value<Object>(letterSpacing),
+      );
+      final LineHeight? height = parseLineHeight(value<Object>(lineHeight));
+      final String? family = _fontFamily(value<Object>(fontFamily));
+      bool differs(StartEndProp prop) =>
+          (weight != null && prop.fontName.weight != weight) ||
+          (family != null && prop.fontName.family != family) ||
+          (size != null && prop.fontSize != size) ||
+          (spacing != null && prop.letterSpacing != spacing) ||
+          (height != null && prop.lineHeight != height);
+      if (node.textMixedProps.any(differs)) {
         final List spans =
             patch['textMixedProps'] as List? ??
             [for (final prop in node.textMixedProps) prop.toJson()];
         patch['textMixedProps'] = [
           for (final (int index, Map span) in spans.cast<Map>().indexed)
-            {
+            <dynamic, dynamic>{
               ...span,
               // A span's JSON leaves out a default font name.
-              'fontName': node.textMixedProps[index].fontName
-                  .copyWith(
-                    weight: weight,
-                    family: family != null && family.isNotEmpty ? family : null,
-                  )
-                  .toJson(),
+              if (weight != null || family != null)
+                'fontName': node.textMixedProps[index].fontName
+                    .copyWith(weight: weight, family: family)
+                    .toJson(),
+              if (size != null) 'fontSize': size,
+              if (spacing != null) 'letterSpacing': spacing.toJson(),
+              if (height != null) 'lineHeight': height.toJson(),
             },
         ];
+      }
+      final TextAlignHorizontalEnum? align = parseTextAlign(
+        value<Object>(textAlign),
+      );
+      if (align != null && align != node.textAlignHorizontal) {
+        patch['textAlignHorizontal'] = align.name;
       }
     }
 
@@ -359,6 +403,26 @@ abstract final class StyleBindings {
     ];
   }
 
+  /// The gap the [property] ([spacing] or [runSpacing]) binding of [node]
+  /// gives, evaluated with [scopedValues]: a number (or numeric text) of at
+  /// least 0. Null when the node has no such binding or it gives no number.
+  static double? gapOf(
+    BaseNode node,
+    String property, {
+    required ScopedValues scopedValues,
+  }) {
+    if (node.variables[property]?.isNotEmpty != true) return null;
+    final double? gap = _number(
+      PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        property,
+        scopedValues: scopedValues,
+      ),
+    );
+    if (gap == null || !gap.isFinite) return null;
+    return gap < 0 ? 0 : gap;
+  }
+
   static List<Effect> _effects(
     List<Effect> effects,
     T? Function<T extends Object>(String property) value,
@@ -480,6 +544,128 @@ abstract final class StyleBindings {
     };
     if (size == null || !size.isFinite || size <= 0) return null;
     return size;
+  }
+
+  static double? _number(Object? value) => switch (value) {
+    final num number => number.toDouble(),
+    final String text => double.tryParse(text.trim()),
+    _ => null,
+  };
+
+  static double? _fontSize(Object? value) => parseFontSize(value);
+
+  static String? _fontFamily(Object? value) {
+    if (value is! String) return null;
+    final String family = value.trim();
+    return family.isEmpty ? null : family;
+  }
+
+  /// The letter spacing [value] gives: a number of pixels, text with a unit
+  /// (`"1.5px"`, `"-2%"` of the font size, `"-0.02em"`, which is `-2%`), or
+  /// a letter spacing JSON map (`{value: -2, unit: percent}`). Null when it
+  /// gives none.
+  static LetterSpacing? parseLetterSpacing(Object? value) {
+    switch (value) {
+      case null:
+        return null;
+      case LetterSpacing():
+        return value;
+      case num():
+        return value.isFinite ? LetterSpacing.pixels(value.toDouble()) : null;
+      case Map():
+        try {
+          return LetterSpacing.fromJson(value);
+        } catch (_) {
+          return null;
+        }
+      case String():
+        final String text = value.trim().toLowerCase();
+        double? amount(String suffix) => text.endsWith(suffix)
+            ? double.tryParse(
+                text.substring(0, text.length - suffix.length).trim(),
+              )
+            : null;
+        if (amount('%') case final double percent) {
+          return LetterSpacing.percent(percent);
+        }
+        if (amount('em') case final double em) {
+          return LetterSpacing.percent(_times100(em));
+        }
+        if ((amount('px') ?? double.tryParse(text)) case final double px) {
+          return LetterSpacing.pixels(px);
+        }
+    }
+    return null;
+  }
+
+  /// [times] as a percentage, without float noise (1.1 is 110, not
+  /// 110.00000000000001).
+  static double _times100(num times) => (times * 1e8).round() / 1e6;
+
+  /// The largest number [parseLineHeight] reads as a multiplier of the font
+  /// size; a larger one is pixels.
+  static const double maxLineHeightMultiplier = 4;
+
+  /// The line height [value] gives: a number, which is a multiplier of the
+  /// font size up to [maxLineHeightMultiplier] (`1.1`, as the editor API's
+  /// text `style` writes it) and pixels above it (`28`, as a span stores
+  /// it); text with a unit (`"28px"`, `"120%"` of the font size, `"1.2x"` or
+  /// `"1.2em"`, which are `120%`); `"auto"` (or 0) for the font's own; or a
+  /// line height JSON map (`{value: 120, unit: percent}`). Null when it
+  /// gives none.
+  static LineHeight? parseLineHeight(Object? value) {
+    switch (value) {
+      case null:
+        return null;
+      case LineHeight():
+        return value;
+      case num():
+        if (!value.isFinite || value < 0) return null;
+        if (value == 0) return LineHeight.auto;
+        // No text is set 4px apart, and no text 4 lines apart: a small
+        // number is a multiplier, as the editor API's text style writes it.
+        return value <= maxLineHeightMultiplier
+            ? LineHeight.percent(_times100(value))
+            : LineHeight.pixels(value.toDouble());
+      case Map():
+        try {
+          return LineHeight.fromJson(value);
+        } catch (_) {
+          return null;
+        }
+      case String():
+        final String text = value.trim().toLowerCase();
+        if (text == 'auto' || text == 'normal') return LineHeight.auto;
+        double? amount(String suffix) => text.endsWith(suffix)
+            ? double.tryParse(
+                text.substring(0, text.length - suffix.length).trim(),
+              )
+            : null;
+        final double? percent =
+            amount('%') ??
+            switch (amount('x') ?? amount('em')) {
+              final double times => _times100(times),
+              null => null,
+            };
+        if (percent != null) {
+          return percent <= 0 ? LineHeight.auto : LineHeight.percent(percent);
+        }
+        return parseLineHeight(amount('px') ?? double.tryParse(text));
+    }
+    return null;
+  }
+
+  /// The text alignment [value] names: `left`, `center`, `right`,
+  /// `justified` (or `justify`), `start` or `end`, in any case. Null when it
+  /// names none.
+  static TextAlignHorizontalEnum? parseTextAlign(Object? value) {
+    if (value is TextAlignHorizontalEnum) return value;
+    if (value is! String) return null;
+    final String name = value.trim().toLowerCase();
+    if (name == 'justify') return TextAlignHorizontalEnum.justified;
+    return TextAlignHorizontalEnum.values.firstWhereOrNull(
+      (align) => align.name == name,
+    );
   }
 
   /// The icon [value] names: [current] with the name [value] gives it, or

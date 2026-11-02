@@ -106,7 +106,8 @@ class PassiveChartSeriesWidget extends StatelessWidget {
     if (node.properties.chartType != ChartType.timeline &&
         !settings.isPreview &&
         data.isNotEmpty) {
-      chart = LayoutBuilder(
+      chart = MeasurableLayoutBuilder(
+        fallbackSize: Size(node.basicBoxLocal.width, node.basicBoxLocal.height),
         builder: (context, constraints) => MouseRegion(
           cursor: node.reactions.isEmpty
               ? MouseCursor.defer

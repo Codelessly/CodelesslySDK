@@ -452,24 +452,22 @@ class ScaledContent extends StatelessWidget {
     this.hugsHeight = false,
   });
 
+  // A [FitBox] rather than a LayoutBuilder decides the box at layout time,
+  // so a row or column around the frame can measure it.
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) => SizedBox(
-      width: hugsWidth || !constraints.hasBoundedWidth
-          ? designSize.width
-          : constraints.maxWidth,
-      height: hugsHeight || !constraints.hasBoundedHeight
-          ? designSize.height
-          : constraints.maxHeight,
-      // No clip of its own: children's shadows and overflow paint past the
-      // box like they do in any frame. The frame's clipsContent (applied by
-      // the rectangle around this content) is what clips, cover's overflow
-      // included.
-      child: FittedBox(
-        fit: fit,
-        alignment: alignment,
-        child: SizedBox.fromSize(size: designSize, child: child),
-      ),
+  Widget build(BuildContext context) => FitBox(
+    width: designSize.width,
+    height: designSize.height,
+    fillWidth: !hugsWidth,
+    fillHeight: !hugsHeight,
+    // No clip of its own: children's shadows and overflow paint past the
+    // box like they do in any frame. The frame's clipsContent (applied by
+    // the rectangle around this content) is what clips, cover's overflow
+    // included.
+    child: FittedBox(
+      fit: fit,
+      alignment: alignment,
+      child: SizedBox.fromSize(size: designSize, child: child),
     ),
   );
 }

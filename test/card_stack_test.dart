@@ -134,6 +134,11 @@ void main() {
     ];
   }
 
+  /// The stateful body under a [NodeMotion], which holds its animation.
+  final Finder motionBody = find.byWidgetPredicate(
+    (w) => w is StatefulWidget && '${w.runtimeType}' == '_NodeMotionBody',
+  );
+
   Finder cardKeyed(String id) => find.byKey(listItemKey(('item', id))).first;
 
   /// The scale the card [id] is drawn at by its motion.
@@ -185,7 +190,7 @@ void main() {
       expect(scaleOf(tester, 'a'), closeTo(1, 1e-6));
       expect(scaleOf(tester, 'b'), closeTo(0.945, 1e-6));
       final State motionOfA = tester.state(
-        find.descendant(of: cardKeyed('a'), matching: find.byType(NodeMotion)),
+        find.descendant(of: cardKeyed('a'), matching: motionBody),
       );
 
       // The front card goes to the back; the first item now paints under
@@ -196,10 +201,7 @@ void main() {
       // Same card, same state: its motion slides it back over 400ms.
       expect(
         tester.state(
-          find.descendant(
-            of: cardKeyed('a'),
-            matching: find.byType(NodeMotion),
-          ),
+          find.descendant(of: cardKeyed('a'), matching: motionBody),
         ),
         same(motionOfA),
       );
@@ -215,7 +217,7 @@ void main() {
       final t = build(listVariables: {'itemKey': r'${item.id}'});
       final CodelesslyContext context = await pump(tester, t.registry, t.deck);
       final State before = tester.state(
-        find.descendant(of: cardKeyed('c'), matching: find.byType(NodeMotion)),
+        find.descendant(of: cardKeyed('c'), matching: motionBody),
       );
       final Observable<VariableData> v = context.variables['passes']!;
       v.set(v.value.copyWith(value: [passes[2], passes[0], passes[1]]));
@@ -223,10 +225,7 @@ void main() {
       expect(paintOrder(tester), ['b', 'a', 'c']);
       expect(
         tester.state(
-          find.descendant(
-            of: cardKeyed('c'),
-            matching: find.byType(NodeMotion),
-          ),
+          find.descendant(of: cardKeyed('c'), matching: motionBody),
         ),
         same(before),
       );

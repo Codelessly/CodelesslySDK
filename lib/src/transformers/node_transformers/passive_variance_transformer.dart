@@ -65,7 +65,8 @@ class PassiveVarianceWidget extends StatelessWidget {
       }
       // Outside of a canvas: the width this node is given, by the rule
       // breakpoints are picked with.
-      return LayoutBuilder(
+      return MeasurableLayoutBuilder(
+        fallbackSize: Size(node.basicBoxLocal.width, node.basicBoxLocal.height),
         builder: (context, constraints) => _buildVariant(
           context,
           node.variantForWidth(

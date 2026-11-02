@@ -204,6 +204,35 @@ void main() {
     );
   });
 
+  testWidgets('a row\'s spacing follows its binding', (tester) async {
+    final RowColumnNode row = RowColumnNode.fromJson({
+      ...RowColumnNode(
+        id: 'row',
+        name: 'Row',
+        basicBoxLocal: NodeBox(0, 0, 300, 40),
+        children: const [],
+        rowColumnType: RowColumnType.row,
+        spacing: 8,
+      ).toJson(),
+      'variables': {
+        'spacing': r'${= isMobile ? 28 : 56}',
+        'runSpacing': r'${= -4}',
+      },
+    })..parentID = kRootNode;
+    final host = Host(row, variables: {'isMobile': boolVariable('isMobile', true)});
+    await host.pump(tester, build: false);
+    expect((host.styled as RowColumnNode).spacing, 28);
+    // A negative gap is no gap.
+    expect((host.styled as RowColumnNode).runSpacing, 0);
+    host.context.variables['isMobile']!.value = VariableData(
+      id: 'isMobile',
+      name: 'isMobile',
+      type: VariableType.boolean,
+      value: false,
+    );
+    expect((host.styled as RowColumnNode).spacing, 56);
+  });
+
   group('text', () {
     TextNode text(Map<String, String> variables) => TextNode.fromJson({
       ...TextNode(
