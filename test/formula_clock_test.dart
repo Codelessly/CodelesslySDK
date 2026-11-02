@@ -22,4 +22,10 @@ void main() {
     final String year = '${DateTime.now().year}';
     expect(eval("formatDate(now(), 'yyyy')"), year);
   });
+
+  test('nowMs() is the clock in milliseconds, for timing taps', () {
+    FormulaClock.pinned = DateTime.fromMillisecondsSinceEpoch(1793356053036);
+    expect(eval('nowMs()'), '1793356053036');
+    expect(eval('round(60000 / (nowMs() - 1793356052536))'), '120');
+  });
 }

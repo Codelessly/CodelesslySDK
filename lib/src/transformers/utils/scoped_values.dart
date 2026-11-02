@@ -29,6 +29,13 @@ class ScopedValues {
   /// over it: `hovering`, `data`, `accepts`, and after a drop `dx`, `dy`.
   /// Null outside a drop target. See [DropScope].
   late final Map<String, dynamic>? dropState;
+  /// The drag of the nearest draggable node above this context (see
+  /// [NodeDrag]), or null outside one: what the `drag` variable reads.
+  late final DragValues? dragValues;
+
+  /// The drag track of the nearest value control above this context (see
+  /// [NodeDragTrack]), or null outside one: what the `track` variable reads.
+  late final TrackValues? trackValues;
 
   /// The route params for this route/page for given context.
   late final Map<String, dynamic> routeParams;
@@ -97,6 +104,8 @@ class ScopedValues {
       nodeState = null,
       holdProgress = null,
       dropState = null,
+      dragValues = null,
+      trackValues = null,
       routeParams = {},
       _appUser = null,
       screenSize = null,
@@ -127,6 +136,8 @@ class ScopedValues {
        nodeState = null,
        holdProgress = null,
        dropState = null,
+       dragValues = null,
+       trackValues = null,
        routeParams = routeParams ?? {};
 
   /// Creates a new scoped values instance from a given context.
@@ -148,6 +159,8 @@ class ScopedValues {
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     holdProgress = HoldProgressProvider.maybeOf(context);
     dropState = DropScope.stateOf(context);
+    dragValues = DragScope.maybeOf(context);
+    trackValues = TrackScope.maybeOf(context);
     final instance = context.read<Codelessly?>();
     // A screen a Codelessly router shows has the parameters of its location;
     // one pushed on a plain navigator has its route's arguments.

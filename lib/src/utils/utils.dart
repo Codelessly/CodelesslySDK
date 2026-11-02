@@ -23,6 +23,9 @@ const Set<String> predefinedVariableNames = {
   'screen',
   'hold',
   'drop',
+  'drag',
+  'track',
+  'speech',
 };
 
 /// The key under which a layout's published variables hold the project's
@@ -49,6 +52,7 @@ bool isSharedVariablesScope(String scopeId) =>
 const Set<String> predefinedListenableVariableNames = {
   'storage',
   'auth',
+  'speech',
   'product',
   'paywall',
   'entitlements',
@@ -71,6 +75,9 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'parent', type: VariableType.map),
   PredefinedVariableData(name: 'hold', type: VariableType.decimal),
   PredefinedVariableData(name: 'drop', type: VariableType.map),
+  PredefinedVariableData(name: 'drag', type: VariableType.map),
+  PredefinedVariableData(name: 'track', type: VariableType.map),
+  PredefinedVariableData(name: 'speech', type: VariableType.map),
 };
 
 /// Widths at which the `screen` variable's breakpoint changes: below 600 is
