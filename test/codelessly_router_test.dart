@@ -338,7 +338,7 @@ void main() {
       model.layouts[lost.id] = lost;
       final browser = FakeBrowser(tester, url: '/kraken/lair?x=1');
       await pumpRouterApp(tester, model, browser);
-      expect(find.text('lost /kraken/lair'), findsOneWidget);
+      expect(find.text('lost kraken/lair'), findsOneWidget);
       expect(find.text('This screen does not exist.'), findsNothing);
     });
 

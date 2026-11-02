@@ -78,3 +78,5 @@ build/
 pubspec_overrides.yaml
 
 coverage/
+# Golden test failure images (flutter test writes them next to the goldens)
+test/failures/

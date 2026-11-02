@@ -12,6 +12,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../utils/material_icons_by_name.dart';
 
 typedef LayoutRetrieverBuilder = Widget Function(
   BuildContext context,
@@ -332,7 +333,11 @@ abstract class WidgetNodeTransformerManager
   /// Convenience method to handle widget margins.
   Widget applyWidgetMargins(BaseNode node, Widget widget) {
     if (node.margin == EdgeInsetsModel.zero) return widget;
-    return Padding(padding: node.margin.flutterEdgeInsets, child: widget);
+    // Directional: margins mirror in a right-to-left layout.
+    return Padding(
+      padding: node.margin.flutterEdgeInsetsDirectional,
+      child: widget,
+    );
   }
 
   /// Convenience method to handle widget constraints.
@@ -1248,27 +1253,17 @@ class SvgIcon extends StatelessWidget {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
     // Material Icons ship with Flutter; use their bundled glyph offline.
-    final IconModel model = icon;
-    if (model is MaterialIcon &&
-        (model.codepoint > 0 || model.name.isNotEmpty)) {
-      // The stored codepoint comes from Google's icon catalog, whose web
-      // font numbers icons differently from Flutter's bundled font (av_timer
-      // is 0xe01b there, three_k here): look the glyph up by name. An icon
-      // stored with only its name draws too.
-      final String suffix = switch (model.style) {
-        MaterialIconStyle.filled => '',
-        MaterialIconStyle.outlined => '_outlined',
-        MaterialIconStyle.rounded => '_rounded',
-        MaterialIconStyle.sharp => '_sharp',
-        _ => '',
-      };
-      final int? codepoint =
-          flutterIconsDataMap['${model.name}$suffix'] ??
-          flutterIconsDataMap[model.name] ??
-          (model.codepoint > 0 ? model.codepoint : null);
-      if (codepoint != null) {
+    // Icon models hold the codepoints of Google's Material Icons fonts, which
+    // aren't the codepoints of Flutter's MaterialIcons font, so the glyph is
+    // found by name and style.
+    if (icon case final MaterialIcon material) {
+      final IconData? glyph = materialIconsByName[material.styledName];
+      if (glyph != null) {
+        return Icon(glyph, size: dimension, color: iconColor);
+      }
+      if (material.codepoint > 0) {
         return Icon(
-          IconData(codepoint, fontFamily: model.fontFamily),
+          IconData(material.codepoint, fontFamily: material.fontFamily),
           size: dimension,
           color: iconColor,
         );

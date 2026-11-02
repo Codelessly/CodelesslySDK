@@ -48,40 +48,38 @@ void main() {
     });
   });
 
-  group('catch-all', () {
-    SDKPublishModel withLost() {
-      final SDKPublishModel model = tidepoolModel();
-      final SDKPublishLayout lost = testScreen('lost', path: '*');
-      model.layouts[lost.id] = lost;
-      return model;
-    }
+  group('catch-all paths', () {
+    final SDKPublishModel model = tidepoolModel()
+      ..layouts['notFound'] = testScreen('notFound', path: '*path')
+      ..layouts['docs'] = testScreen('docs', path: 'docs/*rest');
 
-    test('a * screen catches unknown paths, naming them', () {
-      final SDKPublishModel model = withLost();
-      final CanvasLocationMatch? match = CanvasLocation.match(
+    test('take any path no other screen matches, with the rest', () {
+      final CanvasLocationMatch? lost = CanvasLocation.match(
         model,
-        'guide/bat-star/more?x=1',
+        'kraken/deep?x=1',
       );
-      expect(match?.canvasId, 'lost');
-      expect(match?.params, {'x': '1', 'path': '/guide/bat-star/more'});
-      expect(CanvasLocation.match(model, 'kraken')?.params['path'], '/kraken');
+      expect(lost?.canvasId, 'notFound');
+      expect(lost?.params, {'path': 'kraken/deep', 'x': '1'});
+      expect(CanvasLocation.match(model, 'docs/a/b')?.params, {'rest': 'a/b'});
+      // Too short for docs/*rest: the catch-all takes it.
+      expect(CanvasLocation.match(model, 'docs')?.canvasId, 'notFound');
     });
 
-    test('known paths and screen ids still win', () {
-      final SDKPublishModel model = withLost();
+    test('lose to every other match', () {
       expect(CanvasLocation.match(model, 'guide')?.canvasId, 'guide');
-      expect(CanvasLocation.match(model, 'guide/x')?.canvasId, 'creature');
-      // A link naming a screen by id isn't an unknown path.
-      expect(CanvasLocation.match(model, 'settings'), isNull);
+      expect(
+        CanvasLocation.match(model, 'guide/bat-star')?.canvasId,
+        'creature',
+      );
       expect(CanvasLocation.match(model, ''), isNull);
     });
 
-    test('the catch-all screen shows at the path it caught', () {
-      final SDKPublishModel model = withLost();
+    test('fill a path with the rest', () {
       expect(
-        CanvasLocation.locationOf(model, 'lost', {'path': '/kraken/deep'}),
-        'kraken/deep',
+        CanvasLocation.locationOf(model, 'docs', {'rest': 'a/b', 'q': 1}),
+        'docs/a/b?q=1',
       );
+      expect(CanvasLocation.locationOf(model, 'notFound', {}), isNull);
     });
   });
 }
