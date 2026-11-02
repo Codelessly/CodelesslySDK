@@ -72,6 +72,24 @@ class PassiveBarcodeWidget extends StatelessWidget {
     );
   }
 
+  /// The symbology [node] draws: its `symbology` binding (a name such as
+  /// `pdf417` or `qrCode`, see [BarcodeSymbology.parse]) when it gives one,
+  /// else the node's own.
+  static BarcodeSymbology resolveSymbology(
+    BarcodeNode node,
+    ScopedValues scopedValues,
+  ) {
+    if (node.variables['symbology'] == null) return node.properties.symbology;
+    return BarcodeSymbology.parse(
+          PropertyValueDelegate.getPropertyValue<String>(
+            node,
+            'symbology',
+            scopedValues: scopedValues,
+          ),
+        ) ??
+        node.properties.symbology;
+  }
+
   @override
   Widget build(BuildContext context) {
     final ScopedValues values =
@@ -90,17 +108,18 @@ class PassiveBarcodeWidget extends StatelessWidget {
           scopedValues: values,
         )?.toFlutterColor() ??
         props.color.toFlutterColor();
+    final BarcodeSymbology symbology = resolveSymbology(node, values);
 
     return AdaptiveNodeBox(
       node: node,
       child: Semantics(
         image: true,
-        label: props.symbology.prettify,
+        label: symbology.prettify,
         child: CustomPaint(
           size: Size.infinite,
           painter: BarcodePainter(
             data: data,
-            symbology: props.symbology,
+            symbology: symbology,
             errorCorrection: props.errorCorrection,
             color: color,
             backgroundColor: props.backgroundColor?.toFlutterColor(),
