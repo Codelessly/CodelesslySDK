@@ -281,6 +281,16 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       widget.onSubmitted?.call(context, controller.text);
     }
     if (!mounted) return;
+    if (focusNode.hasFocus && widget.node.properties.selectAllOnFocus) {
+      // After the tap that focused it places the caret.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !focusNode.hasFocus) return;
+        controller.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: controller.text.length,
+        );
+      });
+    }
     FunctionsRepository.triggerAction(
       context,
       node: widget.node,
