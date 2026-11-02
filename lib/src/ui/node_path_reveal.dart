@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter/widgets.dart';
 
 /// Reads a `strokePath.points` binding: a list of `[x, y]` lists or of maps
@@ -15,7 +16,10 @@ List<List<double>> readPathPoints(Object? value) {
   };
   return [
     for (final Object? p in value)
-      if (p is List && p.length >= 2 && number(p[0]) != null && number(p[1]) != null)
+      if (p is List &&
+          p.length >= 2 &&
+          number(p[0]) != null &&
+          number(p[1]) != null)
         [number(p[0])!, number(p[1])!]
       else if (p is Map && number(p['x']) != null && number(p['y']) != null)
         [number(p['x'])!, number(p['y'])!],
@@ -191,13 +195,48 @@ class _RevealBoxState extends State<RevealBox> {
         );
       }
       if (!mounted) return;
-      Scrollable.ensureVisible(
+      await Scrollable.ensureVisible(
         context,
-        alignment: widget.reveal.alignment.clamp(0, 1),
+        alignment: _alignment,
         duration: Duration(milliseconds: widget.reveal.durationMs),
         curve: Curves.easeInOutCubic,
       );
+      await _settle();
     });
+  }
+
+  double get _alignment => widget.reveal.alignment.clamp(0, 1).toDouble();
+
+  /// Keeps the node where the reveal put it while the layout around it
+  /// settles: images and fonts that arrive after the first frame can move it
+  /// (text above it wraps differently, a picture gets its height). Checks a
+  /// few times shortly after the reveal and scrolls back to the node if it
+  /// drifted, unless the user has scrolled since.
+  Future<void> _settle() async {
+    final ScrollableState? scrollable = Scrollable.maybeOf(context);
+    final ScrollPosition? position = scrollable?.position;
+    if (position == null) return;
+    double expected = position.pixels;
+    for (int i = 0; i < 6; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      if (!mounted || !position.hasPixels) return;
+      // The user scrolled: their position wins.
+      if ((position.pixels - expected).abs() > 0.5) return;
+      final RenderObject? box = context.findRenderObject();
+      final RenderAbstractViewport? viewport = box == null
+          ? null
+          : RenderAbstractViewport.maybeOf(box);
+      if (box == null || viewport == null || !box.attached) return;
+      final double target = viewport
+          .getOffsetToReveal(box, _alignment)
+          .offset
+          .clamp(position.minScrollExtent, position.maxScrollExtent)
+          .toDouble();
+      if ((target - position.pixels).abs() > 1) {
+        position.jumpTo(target);
+      }
+      expected = position.pixels;
+    }
   }
 
   @override
