@@ -146,7 +146,8 @@ class NodePlayBox extends StatefulWidget {
 }
 
 /// State of a [NodePlayBox]; [play] plays one of its animations.
-class NodePlayBoxState extends State<NodePlayBox> with TickerProviderStateMixin {
+class NodePlayBoxState extends State<NodePlayBox>
+    with TickerProviderStateMixin {
   final Map<String, AnimationController> _controllers = {};
   final Map<String, Timer> _delays = {};
   final GlobalKey<_ParticleLayerState> _particles = GlobalKey();
@@ -342,7 +343,8 @@ class _ParticleLayerState extends State<_ParticleLayer>
         : e.shapes;
     for (int i = 0; i < n; i++) {
       final double x =
-          origin.dx + (_random.nextDouble() - 0.5) * e.originWidth * _size.width;
+          origin.dx +
+          (_random.nextDouble() - 0.5) * e.originWidth * _size.width;
       final double a =
           (e.direction + (_random.nextDouble() * 2 - 1) * e.spread) *
           math.pi /
@@ -516,6 +518,11 @@ abstract final class FlightRegistry {
     list.add(_FlightRecord(rect, DateTime.now(), null));
   }
 
+  /// Where a dragged copy with [key] was last let go, if it was.
+  @visibleForTesting
+  static Rect? lastDrop(String key) =>
+      _records[key]?.where((r) => r.owner == null).lastOrNull?.rect;
+
   static void _paint(RenderFlightProbe probe, String key, Rect rect) {
     final List<_FlightRecord> list = _records[key] ??= [];
     final _FlightRecord? mine = list.firstWhereOrNull((r) => r.owner == probe);
@@ -597,7 +604,10 @@ class FlightProbe extends SingleChildRenderObjectWidget {
       RenderFlightProbe(flightKey, record, onPlaced);
 
   @override
-  void updateRenderObject(BuildContext context, RenderFlightProbe renderObject) {
+  void updateRenderObject(
+    BuildContext context,
+    RenderFlightProbe renderObject,
+  ) {
     renderObject
       ..flightKey = flightKey
       ..record = record
@@ -737,16 +747,17 @@ class _FlightBoxState extends State<FlightBox>
       onPlaced: _placed,
       child: Transform(
         alignment: Alignment.center,
-        transform: Matrix4.translationValues(
-          _fromOffset.dx * rest,
-          _fromOffset.dy * rest,
-          0,
-        )..scaleByDouble(
-            1 + (_fromScale - 1) * rest,
-            1 + (_fromScale - 1) * rest,
-            1,
-            1,
-          ),
+        transform:
+            Matrix4.translationValues(
+              _fromOffset.dx * rest,
+              _fromOffset.dy * rest,
+              0,
+            )..scaleByDouble(
+              1 + (_fromScale - 1) * rest,
+              1 + (_fromScale - 1) * rest,
+              1,
+              1,
+            ),
         child: widget.child,
       ),
     );
