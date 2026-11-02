@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:just_audio/just_audio.dart' show AudioPlayer;
 import 'package:provider/provider.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -56,6 +57,14 @@ enum ApiRequestType {
   }
 }
 
+/// What a [SpeakAction] speaks, its bindings resolved.
+typedef ResolvedSpeech = ({
+  String text,
+  String language,
+  double rate,
+  double pitch,
+});
+
 class FunctionsRepository {
   static const String name = 'FunctionsRepository';
 
@@ -88,8 +97,21 @@ class FunctionsRepository {
         return showDialogAction(context, action as ShowDialogAction);
       case ActionType.closeModal:
         final route = ModalRoute.of(context);
-        if (route is DialogRoute && route.isCurrent) {
-          Navigator.of(context).pop();
+        // Every dialog presentation is a popup route: a dialog's DialogRoute,
+        // and the RawDialogRoute that full-screen and popover dialogs open
+        // with showGeneralDialog, which a DialogRoute check missed.
+        if (route is PopupRoute && route.isCurrent) {
+          // Its params are the `${result}` of the chain that showed it.
+          final Map<String, dynamic> params =
+              (action as CloseModalAction).params;
+          Navigator.of(context).pop(
+            params.isEmpty
+                ? null
+                : substituteVariablesInMap(
+                    params,
+                    ActionChain.scopedValuesOf(context),
+                  ),
+          );
           return true;
         }
         return false;
@@ -166,9 +188,45 @@ class FunctionsRepository {
         return runCloudBatch(context, action as CloudBatchAction);
       case ActionType.copyToClipboard:
         return copyToClipboard(context, action as CopyToClipboardAction);
+      case ActionType.playAnimation:
+        final PlayAnimationAction play = action as PlayAnimationAction;
+        return NodePlayRegistry.play(
+          play.nodeId,
+          play.animation,
+        ).then((_) => true);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
+      case ActionType.focus:
+        return runFocus(action as FocusAction);
+      case ActionType.speak:
+        return speak(context, action as SpeakAction);
+      case ActionType.scrollTo:
+        return ScrollTargets.scrollTo(action as ScrollToAction);
+      case ActionType.playSound:
+        return playSound(context, action as PlaySoundAction);
+      case ActionType.controlDrag:
+        final ControlDragAction drag = action as ControlDragAction;
+        return NodeDrag.control(
+          drag.nodeId,
+          drag.command,
+          drag.direction,
+        ).then((_) => true);
     }
+  }
+
+  /// Focuses (or unfocuses) the text field [action] names.
+  static Future<bool> runFocus(FocusAction action) async {
+    final String nodeId = action.nodeId;
+    if (action.unfocus) {
+      unfocusTextField(nodeId.isEmpty ? null : nodeId);
+      return true;
+    }
+    if (nodeId.isEmpty) return true;
+    // A field the previous actions just revealed builds on the next frame.
+    if (focusTextField(nodeId, selectAll: action.selectAll)) return true;
+    await WidgetsBinding.instance.endOfFrame;
+    focusTextField(nodeId, selectAll: action.selectAll);
+    return true;
   }
 
   /// Run a native paywall action in the enclosing paywall surface.
@@ -213,6 +271,60 @@ class FunctionsRepository {
     );
     await Clipboard.setData(ClipboardData(text: text));
     return true;
+  }
+
+  /// Speaks the text of [action] in its language at its rate, its variables
+  /// and formulas resolved, replacing anything being spoken; or stops any
+  /// speech when [SpeakAction.stop] is set. Speech runs on [Speech.instance],
+  /// whose state the `speech` variable reads.
+  static bool speak(BuildContext context, SpeakAction action) {
+    if (action.stop) {
+      Speech.instance.stop();
+      return true;
+    }
+    final ResolvedSpeech speech = resolveSpeech(
+      action,
+      ActionChain.scopedValuesOf(context),
+    );
+    if (speech.text.trim().isEmpty) {
+      Speech.instance.stop();
+      return true;
+    }
+    Speech.instance.speak(
+      speech.text,
+      language: speech.language,
+      rate: speech.rate,
+      pitch: speech.pitch,
+    );
+    return true;
+  }
+
+  /// The text, language, rate and pitch [action] speaks with, its variables
+  /// and formulas resolved. A rate or pitch that is not a number falls back
+  /// to `1`; rates are kept within 0.1-10 and pitches within 0-2, the Web
+  /// Speech API's ranges.
+  static ResolvedSpeech resolveSpeech(
+    SpeakAction action,
+    ScopedValues scopedValues,
+  ) {
+    String resolve(String text) => PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
+    double number(String? text, double min, double max) {
+      if (text == null || text.trim().isEmpty) return 1;
+      final num? value = num.tryParse(resolve(text).trim());
+      if (value == null || value.isNaN) return 1;
+      return value.toDouble().clamp(min, max);
+    }
+
+    return (
+      text: resolve(action.text),
+      language: resolve(action.language).trim(),
+      rate: number(action.rate, 0.1, 10),
+      pitch: number(action.pitch, 0, 2),
+    );
   }
 
   /// How long [action] waits: its [DelayAction.duration] formula when that
@@ -778,7 +890,9 @@ class FunctionsRepository {
         await Navigator.maybePop(context, params);
         return;
       }
-      if (router.canGoBack) {
+      final bool fallsBack =
+          action.destinationId.isNotEmpty && router.backIsOnlySeededHome;
+      if (router.canGoBack && !fallsBack) {
         router.pop(params);
         return;
       }
@@ -905,7 +1019,10 @@ class FunctionsRepository {
       maxHeightFactor: action.maxHeightFactor,
       showDragHandle: action.showDragHandle,
       placement: action.placement,
-      anchorToTrigger: action.anchor == DialogAnchor.trigger,
+      anchorToTrigger: action.anchor != DialogAnchor.none,
+      anchorPoint: action.anchor == DialogAnchor.pointer
+          ? pointerOf(ActionChain.current?.result)
+          : null,
       anchorGap: action.anchorGap,
       anchorOffset: action.anchorOffset,
       fullHeight: action.fullHeight,
@@ -915,6 +1032,15 @@ class FunctionsRepository {
     if (result case final Map values when values.isNotEmpty) {
       ActionChain.setResult(values);
     }
+  }
+
+  /// The screen position in a trigger's result (`{x, y}`, as right clicks
+  /// and pointer triggers report it), or null.
+  static Offset? pointerOf(Object? result) {
+    if (result is! Map) return null;
+    final Object? x = result['x'], y = result['y'];
+    if (x is! num || y is! num) return null;
+    return Offset(x.toDouble(), y.toDouble());
   }
 
   /// The rect of the node that [context] belongs to, relative to its
@@ -985,6 +1111,7 @@ class FunctionsRepository {
     bool showDragHandle = false,
     DialogPlacement placement = DialogPlacement.belowStart,
     bool anchorToTrigger = false,
+    Offset? anchorPoint,
     double anchorGap = 6,
     double anchorOffset = 0,
     bool fullHeight = false,
@@ -1044,12 +1171,23 @@ class FunctionsRepository {
     final bool wantsAnchor =
         effectivePresentation == DialogPresentation.dialog &&
         (anchorToTrigger || placement == DialogPlacement.anchored);
-    final Rect? anchorRect = wantsAnchor
-        ? CodelesslyPopover.anchorRectOf(
+    // At the pointer: a point in the navigator overlay's coordinates.
+    final RenderObject? overlayBox = Navigator.of(
+      context,
+      rootNavigator: false,
+    ).overlay?.context.findRenderObject();
+    final Rect? anchorRect = !wantsAnchor
+        ? null
+        : anchorPoint != null && overlayBox is RenderBox && overlayBox.attached
+        ? Rect.fromCenter(
+            center: overlayBox.globalToLocal(anchorPoint),
+            width: 0,
+            height: 0,
+          )
+        : CodelesslyPopover.anchorRectOf(
             context,
             Navigator.of(context, rootNavigator: false),
-          )
-        : null;
+          );
     if (wantsAnchor && anchorRect == null) {
       DebugLogger.instance.printInfo(
         'The trigger of dialog [$canvasId] has no laid out box; showing '
@@ -1815,6 +1953,46 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
   }
 
+  /// Plays [action]'s sound, now or at its `at` time on the sound clock, or
+  /// its sound file.
+  /// Its fields are values or formulas (`${result.at}`, `${voice}`).
+  static bool playSound(BuildContext context, PlaySoundAction action) {
+    final ScopedValues scope = ActionChain.scopedValuesOf(context);
+    String text(String value) => PropertyValueDelegate.substituteVariables(
+      value,
+      scopedValues: scope,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    double? number(String value) => double.tryParse(text(value));
+    final String url = text(action.url);
+    if (url.isNotEmpty) {
+      unawaited(_playFile(url, (number(action.volume) ?? 1).clamp(0, 1)));
+      return true;
+    }
+    final String at = text(action.at);
+    Sound.play(
+      Sound.voiceNamed(text(action.sound)),
+      time: at.isEmpty ? null : double.tryParse(at),
+      volume: number(action.volume) ?? 1,
+      pitch: number(action.pitch) ?? 1,
+    );
+    return true;
+  }
+
+  /// Plays the sound file at [url] once, at [volume] (0 to 1).
+  static Future<void> _playFile(String url, double volume) async {
+    final AudioPlayer player = AudioPlayer();
+    try {
+      await player.setUrl(url);
+      await player.setVolume(volume);
+      await player.play();
+    } catch (e) {
+      DebugLogger.instance.printInfo('Could not play $url: $e', name: name);
+    } finally {
+      await player.dispose();
+    }
+  }
+
   /// Sets given [action.newValue] for given [action.variable] to a variable
   /// from [CodelesslyContext.variables].
   /// Returns `true` if variable was found and updated, `false` otherwise.
@@ -1939,9 +2117,15 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     if (match.name != match.fullPath &&
         (propertyNotifier.value.type == VariableType.map ||
             propertyNotifier.value.type == VariableType.list)) {
-      // TODO: support sub path on the variable?
-      // sub path on the variable
-      propertyNotifier.value = propertyNotifier.value.copyWith(value: value);
+      // A field bound to part of a map or list (`${draft.title}`,
+      // `${rows[2].name}`) sets that part, not the whole variable.
+      final List<Object> keys = variablePathKeys(
+        match.fullPath.substring(match.name.length),
+      );
+      final Object? root = propertyNotifier.value.getValue();
+      final Object? updated = setAtPath(root, keys, value);
+      if (updated == null) return false;
+      propertyNotifier.value = propertyNotifier.value.copyWith(value: updated);
       return true;
     }
 
@@ -2036,6 +2220,20 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         );
       });
       return done.future;
+    }
+
+    // A click reads the modifier keys held, as `${result.meta}` (Command
+    // on macOS, Control elsewhere), `${result.shift}` and `${result.alt}`,
+    // for multi-select (⌘-click) and range select (⇧-click).
+    // Beside where it landed (`x`, `y`, `globalX`, `globalY`), when known.
+    if (type == TriggerType.click && (result == null || result is Map)) {
+      final HardwareKeyboard keys = HardwareKeyboard.instance;
+      result = {
+        ...?(result as Map?),
+        'meta': keys.isMetaPressed || keys.isControlPressed,
+        'shift': keys.isShiftPressed,
+        'alt': keys.isAltPressed,
+      };
     }
 
     // The chain captures the trigger's scope and host now, so its actions
@@ -2434,8 +2632,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     // Perform list operations.
     switch (action.listOperation) {
       case ListOperation.add:
-        final parsedValue = newValue.toList<List>() ?? [];
-        currentValue.addAll(parsedValue);
+        currentValue.addAll(_listFromValue(newValue));
       case ListOperation.insert:
         currentValue.insert(index, newValue.parsedValue());
       case ListOperation.insertAll:
@@ -2454,10 +2651,20 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         }
       case ListOperation.set:
       case ListOperation.replace:
-        final parsedValue = newValue.toList<List>() ?? [];
-        return parsedValue;
+        return _listFromValue(newValue);
     }
     return currentValue;
+  }
+
+  /// The list [newValue] holds. A JSON list (what a `${= ...}` formula
+  /// giving a list is written as) keeps its items as they are: `''` stays
+  /// empty text and `"12"` stays text, where [TypedValueExt.toList] would
+  /// read them as null and 12. Anything else is read by
+  /// [TypedValueExt.toList].
+  static List _listFromValue(String newValue) {
+    final Object? decoded = tryJsonDecode(newValue.trim());
+    if (decoded is List) return decoded;
+    return newValue.toList<List>() ?? [];
   }
 
   static Future<bool> setCloudDatabaseFromAction(
@@ -3094,4 +3301,33 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       NumberOperation.subtract => currentValue - parsedValue,
     };
   }
+}
+
+/// The keys of a variable path after its name: `.title` → `['title']`,
+/// `[2].name` → `[2, 'name']`.
+List<Object> variablePathKeys(String path) => [
+  for (final Match m in RegExp(
+    r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]',
+  ).allMatches(path))
+    if (m.group(1) case final String key) key else int.parse(m.group(2)!),
+];
+
+/// A copy of [root] with [value] at [keys] (map keys and list indexes),
+/// making missing maps on the way; null when a key doesn't fit (an index
+/// past the end of a list, a key into a list).
+Object? setAtPath(Object? root, List<Object> keys, Object? value) {
+  if (keys.isEmpty) return value;
+  final Object key = keys.first;
+  final List<Object> rest = keys.sublist(1);
+  if (key is int) {
+    if (root is! List || key < 0 || key >= root.length) return null;
+    final Object? child = setAtPath(root[key], rest, value);
+    if (child == null && rest.isNotEmpty) return null;
+    return [...root]..[key] = child;
+  }
+  final Map<dynamic, dynamic> map = root is Map ? root : <String, dynamic>{};
+  if (root != null && root is! Map) return null;
+  final Object? child = setAtPath(map[key], rest, value);
+  if (child == null && rest.isNotEmpty) return null;
+  return {...map, key: child};
 }
