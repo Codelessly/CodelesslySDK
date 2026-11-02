@@ -40,16 +40,27 @@ abstract final class VariablePreview {
     if (values == null) return values;
     final IndexedItem? row =
         item ?? (context == null ? null : IndexedItemProvider.maybeOf(context));
-    if (row == null || row == values.indexedItem) return values;
+    // A list inside a list's row reads the outer row as `parent.item`, as at
+    // runtime (a card's money list converting into that card's currency).
+    final IndexedItem? outer = context == null
+        ? null
+        : IndexedItemProvider.parentOf(context);
+    if ((row == null || row == values.indexedItem) && outer == null) {
+      return values;
+    }
     return ScopedValues.preview(
       variables: values.variables,
       codelesslyContext: values.codelesslyContext,
       screenSize: values.screenSize,
       parentSize: values.parentSize,
       data: values.data,
-      indexedItem: row.item != null || values.indexedItem == null
+      routeParams: values.routeParams,
+      indexedItem: row == null
+          ? values.indexedItem
+          : row.item != null || values.indexedItem == null
           ? row
           : IndexedItem(row.index, values.indexedItem!.item),
+      parentIndexedItem: outer ?? values.parentIndexedItem,
     );
   }
 
