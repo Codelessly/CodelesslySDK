@@ -738,7 +738,6 @@ class FormulaEvaluator {
       "get(lineNames, item.line) → 'Weld'",
     ),
     FormulaFunctionDoc('take', 'take(list, count)', 'take(pareto, index + 1)'),
-    FormulaFunctionDoc('range', 'range(count)', 'range(3) → [0, 1, 2]'),
     FormulaFunctionDoc('skip', 'skip(list, count)', 'skip(events, 25)'),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc(
