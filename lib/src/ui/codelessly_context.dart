@@ -62,6 +62,9 @@ class CodelesslyContext with ChangeNotifier, Equatable {
   /// A notifier that is used to rebuild individual nodes.
   final ValueNotifier<String> nodeRebuildNotifier = ValueNotifier('');
 
+  /// The drag in progress in this layout, which `${drag}` reads.
+  final DragAndDropController dragAndDrop = DragAndDropController();
+
   /// Creates a [CodelesslyContext] with the given [_data], [functions], and
   /// [nodeValues].
   CodelesslyContext({

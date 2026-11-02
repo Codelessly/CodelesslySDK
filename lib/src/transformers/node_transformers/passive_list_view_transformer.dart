@@ -226,6 +226,21 @@ class PassiveListViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // A list a drop target owns rebuilds as drags move over it, to open the
+    // slot where the drop would land.
+    final DropTargetBoxState? target = DropTargetScope.forList(
+      context,
+      node.id,
+    );
+    if (target == null || settings.isPreview) return buildList(context, null);
+    return ListenableBuilder(
+      listenable: target.controller,
+      builder: (context, _) => buildList(context, target),
+    );
+  }
+
+  /// Builds the list; [target] is the drop target that owns it, if any.
+  Widget buildList(BuildContext context, DropTargetBoxState? target) {
     if (node.children.isEmpty) {
       return box(canShrinkWrap: true, (context, _) => const SizedBox());
     }
@@ -434,7 +449,7 @@ class PassiveListViewWidget extends StatelessWidget {
         ) ??
         (node.variables['data'] != null ? [] : null);
 
-    final int? itemCount;
+    int? itemCount;
     if (settings.isPreview) {
       itemCount = node.properties.itemCount ?? data?.length;
     } else {
@@ -468,20 +483,73 @@ class PassiveListViewWidget extends StatelessWidget {
           : ('index', index);
     }
 
-    Widget itemBuilder(BuildContext context, int index) => IndexedItemProvider(
-      key: ValueKey(itemKey(index)),
-      item: IndexedItem(index, data?.elementAtOrNull(index)),
-      child: Builder(
-        builder: (context) {
-          // This builder is important to pass a context that has
-          // the IndexedItemProvider.
-          return KeyedSubtree(
-            key: ValueKey(itemKey(index)),
-            child: buildItem(item, context),
-          );
-        },
+    Widget dataItemBuilder(BuildContext context, int index) =>
+        IndexedItemProvider(
+          key: ValueKey(itemKey(index)),
+          item: IndexedItem(index, data?.elementAtOrNull(index)),
+          child: Builder(
+            builder: (context) {
+              // This builder is important to pass a context that has
+              // the IndexedItemProvider.
+              Widget child = KeyedSubtree(
+                key: ValueKey(itemKey(index)),
+                child: buildItem(item, context),
+              );
+              if (target != null) {
+                target.registerListScrollable(context);
+                child = target.registerItem(
+                  identity: itemKey(index),
+                  index: index,
+                  value: data?.elementAtOrNull(index),
+                  axis: node.scrollDirection.flutterAxis,
+                  child: child,
+                );
+              }
+              // Negative spacing overlaps the items (an avatar stack): each
+              // but the last takes that much less room and the next one is
+              // drawn over it.
+              final double overlap = listItemOverlap(node);
+              if (overlap > 0 && index < (itemCount ?? 0) - 1) {
+                child = OverlapBox(
+                  overlap: overlap,
+                  axis: node.scrollDirection.flutterAxis,
+                  child: child,
+                );
+              }
+              return child;
+            },
+          ),
+        );
+
+    // While a drag is over the target that owns this list, a slot opens
+    // where the drop would land: drawn with the item it lands before, so no
+    // item changes index (a list reuses items by index, and the dragged item
+    // must keep its state), or after the last item.
+    final int? slotAt = target?.slotBefore?.clamp(0, itemCount ?? 0);
+    Widget slot(BuildContext context) => target!.buildSlot(
+      context,
+      node.scrollDirection.flutterAxis,
+      (context, id) => manager.buildWidgetByID(
+        id,
+        context,
+        settings: const WidgetBuildSettings(
+          debugLabel: 'drop slot',
+          withReactions: false,
+          withVisibility: false,
+        ),
       ),
     );
+    Widget itemBuilder(BuildContext context, int index) {
+      if (slotAt == null) return dataItemBuilder(context, index);
+      if (index == itemCount) return slot(context);
+      if (index != slotAt) return dataItemBuilder(context, index);
+      return Flex(
+        direction: node.scrollDirection.flutterAxis,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [slot(context), dataItemBuilder(context, index)],
+      );
+    }
 
     Widget list(
       bool shrinkWrap,
@@ -510,6 +578,10 @@ class PassiveListViewWidget extends StatelessWidget {
           : null,
       itemBuilder: builder,
     );
+
+    if (slotAt != null && itemCount != null && slotAt == itemCount) {
+      itemCount = itemCount + 1;
+    }
 
     // Legacy stacked and wrapping layouts keep their placement and physics.
     if (node.properties.stacked) {
@@ -821,6 +893,8 @@ class ListViewItemSeparator extends StatelessWidget {
           endIndent: properties.dividerProperties.endIndent,
         );
       case ListItemSeparator.space:
+        // Negative spacing is an overlap the items take care of.
+        if (properties.separatorSpacing < 0) return const SizedBox.shrink();
         return SizedBox(
           width: scrollDirection.isHorizontal
               ? properties.separatorSpacing
@@ -959,4 +1033,83 @@ class WrappedItems extends StatelessWidget {
         ? padded
         : ClipRect(clipBehavior: clipBehavior, child: padded);
   }
+}
+
+/// How far a list's items overlap: its negative space separator's spacing.
+double listItemOverlap(ListViewNode node) =>
+    node.properties.hasSeparator &&
+        node.properties.separator == ListItemSeparator.space &&
+        node.properties.separatorSpacing < 0
+    ? -node.properties.separatorSpacing
+    : 0;
+
+/// Lays [child] out at its size but takes [overlap] less room along [axis],
+/// so the next item of a list is drawn over its end.
+class OverlapBox extends SingleChildRenderObjectWidget {
+  /// Creates an [OverlapBox].
+  const OverlapBox({
+    super.key,
+    required this.overlap,
+    required this.axis,
+    super.child,
+  });
+
+  /// How much less room the child takes.
+  final double overlap;
+
+  /// The list's direction.
+  final Axis axis;
+
+  @override
+  RenderOverlapBox createRenderObject(BuildContext context) =>
+      RenderOverlapBox(overlap: overlap, axis: axis);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderOverlapBox renderObject) {
+    renderObject
+      ..overlap = overlap
+      ..axis = axis;
+  }
+}
+
+/// The render object of [OverlapBox].
+class RenderOverlapBox extends RenderProxyBox {
+  /// Creates a [RenderOverlapBox].
+  RenderOverlapBox({required double overlap, required Axis axis})
+    : _overlap = overlap,
+      _axis = axis;
+
+  double _overlap;
+  Axis _axis;
+
+  set overlap(double value) {
+    if (value == _overlap) return;
+    _overlap = value;
+    markNeedsLayout();
+  }
+
+  set axis(Axis value) {
+    if (value == _axis) return;
+    _axis = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox child = this.child!;
+    child.layout(constraints.loosen(), parentUsesSize: true);
+    final Size size = child.size;
+    this.size = constraints.constrain(
+      _axis == Axis.horizontal
+          ? Size(math.max(0, size.width - _overlap), size.height)
+          : Size(size.width, math.max(0, size.height - _overlap)),
+    );
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      child!.hitTest(result, position: position);
+
+  @override
+  Rect get paintBounds => Offset.zero & child!.size;
 }
