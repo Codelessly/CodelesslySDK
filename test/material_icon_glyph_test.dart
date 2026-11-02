@@ -1,45 +1,53 @@
+import 'dart:io';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/utils/flutter_icons_data_map.dart';
+import 'package:codelessly_sdk/src/utils/material_icons_by_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-MaterialIcon icon(String name, int codepoint, MaterialIconStyle style) =>
-    MaterialIcon(codepoint: codepoint, name: name, style: style, version: 19);
-
+/// Icons placed from the editor's catalog carry Google's web font
+/// codepoints, which number the glyphs differently from Flutter's bundled
+/// MaterialIcons font; the glyph is looked up by name.
 void main() {
-  test('catalog icons draw the Flutter glyph of their name and style', () {
-    // The catalog stores Google's code point for close (0xe5cd), which is
-    // snowboarding in Flutter's font.
-    expect(
-      flutterMaterialCodepoint(icon('close', 0xe5cd, MaterialIconStyle.rounded)),
-      Icons.close_rounded.codePoint,
+  Future<IconData> glyph(WidgetTester tester, MaterialIcon icon) async {
+    await tester.pumpWidget(MaterialApp(home: SvgIcon(icon: icon, size: 24)));
+    return tester.widget<Icon>(find.byType(Icon)).icon!;
+  }
+
+  testWidgets('a catalog codepoint draws the icon of its name', (tester) async {
+    final IconData data = await glyph(
+      tester,
+      const MaterialIcon(
+        codepoint: 0xe01b,
+        name: 'av_timer',
+        style: MaterialIconStyle.filled,
+        version: 12,
+      ),
     );
-    expect(
-      flutterMaterialCodepoint(icon('close', 0xe5cd, MaterialIconStyle.filled)),
-      Icons.close.codePoint,
+    expect(data.codePoint, Icons.av_timer.codePoint);
+  });
+
+  testWidgets('styles pick their own glyph', (tester) async {
+    final IconData data = await glyph(
+      tester,
+      const MaterialIcon(
+        codepoint: 1,
+        name: 'edit',
+        style: MaterialIconStyle.outlined,
+      ),
     );
-    expect(
-      flutterMaterialCodepoint(icon('play_arrow', 0xe037, MaterialIconStyle.outlined)),
-      Icons.play_arrow_outlined.codePoint,
-    );
+    expect(data.codePoint, Icons.edit_outlined.codePoint);
   });
 
   test('names Flutter renames (123 → onetwothree) still resolve', () {
-    expect(
-      flutterMaterialCodepoint(icon('123', 0xeb8d, MaterialIconStyle.filled)),
-      Icons.onetwothree.codePoint,
-    );
+    expect(materialIconsByName['123'], Icons.onetwothree);
+    expect(materialIconsByName['close_rounded'], Icons.close_rounded);
   });
 
-  test('an icon Flutter does not ship falls back (null)', () {
-    expect(
-      flutterMaterialCodepoint(icon('no_such_icon', 1, MaterialIconStyle.filled)),
-      isNull,
-    );
-  });
-
-  testWidgets('a Material Symbol Flutter ships draws its bundled glyph', (tester) async {
+  testWidgets('a Material Symbol Flutter ships draws its bundled glyph', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: SvgIcon(
@@ -54,5 +62,25 @@ void main() {
     );
     final Icon drawn = tester.widget(find.byType(Icon));
     expect(drawn.icon!.codePoint, Icons.close_rounded.codePoint);
+  });
+
+  test('an unknown name has no font glyph (it is drawn from its SVG)', () {
+    expect(materialIconsByName['no_such_icon'], isNull);
+  });
+
+  test('the SDK never builds a non-constant IconData', () {
+    // Flutter's icon tree shaking rejects `IconData(...)` from runtime
+    // values, which fails every release web build (the site's included).
+    final RegExp call = RegExp(r'(?<!const )(?<![\w.])IconData\(');
+    final List<String> offenders = [
+      for (final File file in Directory(
+        'lib',
+      ).listSync(recursive: true).whereType<File>())
+        if (file.path.endsWith('.dart'))
+          for (final (int i, String line) in file.readAsLinesSync().indexed)
+            if (!line.trimLeft().startsWith('//') && call.hasMatch(line))
+              '${file.path}:${i + 1}',
+    ];
+    expect(offenders, isEmpty);
   });
 }

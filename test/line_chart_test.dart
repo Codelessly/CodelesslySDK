@@ -268,6 +268,45 @@ void main() {
       expect(spec.valueAt(ms('2026-10-22 09:00')), 4.5);
     });
 
+    testWidgets('markers style themselves: colour, radius, outline, halo', (
+      tester,
+    ) async {
+      await pumpChart(
+        tester,
+        chart(
+          properties: LineChartProperties(xField: 't', yField: 'ft'),
+          variables: {'data': r'${tides}', 'markers': r'${markers}'},
+        ),
+        variables: [
+          listVariable('tides', tides),
+          listVariable('markers', [
+            {
+              'x': '2026-10-22 12:00',
+              'y': 6,
+              'color': '#4F7A4A',
+              'radius': 3.5,
+              'outlineWidth': 0,
+              'haloColor': '#F4E8CE',
+              'haloRadius': 4.5,
+            },
+            {'x': '2026-10-22 13:00', 'y': 5},
+          ]),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+      final styled = painterOf(tester).spec.markers.first;
+      expect(styled.color, const Color(0xFF4F7A4A));
+      expect(styled.radius, 3.5);
+      expect(styled.outlineWidth, 0);
+      expect(styled.haloColor, const Color(0xFFF4E8CE));
+      expect(styled.haloRadius, 4.5);
+      // An unstyled marker keeps the chart's look.
+      final plain = painterOf(tester).spec.markers.last;
+      expect(plain.color, isNull);
+      expect(plain.radius, isNull);
+      expect(plain.haloColor, isNull);
+    });
+
     testWidgets('binds the data list from a formula', (tester) async {
       await pumpChart(
         tester,

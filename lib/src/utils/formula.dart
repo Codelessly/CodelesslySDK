@@ -1,5 +1,11 @@
 import 'dart:math' as math;
 
+import 'package:intl/date_symbol_data_custom.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/date_symbols.dart';
+import 'package:intl/date_time_patterns.dart';
+import 'package:intl/intl.dart';
+
 import 'formula_clock.dart';
 
 /// The body of a formula: text and quoted strings, with braces only in
@@ -65,8 +71,12 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    parameter is read like a variable inside its body (`t.title`,
 ///    `t.tags[0]`, `t.tags.length`) and hides a variable of the same name;
 ///    the body can read every other variable. A lambda can take the item's
-///    index as a second parameter, `(t, i) => i < 3`. Lambdas are only
-///    allowed as function arguments.
+///    index as a second parameter, `(t, i) => i < 3`.
+///  - user functions: a variable whose formula is a lambda with any number
+///    of parameters, e.g. `fraction = ${= (v, step) => ...}`, is called like
+///    a built-in function, `fraction(qty * scale, 0.25)`, from any formula
+///    that can read the variable. Calling any other unknown name makes the
+///    formula null.
 ///  - left(text, n), right(text, n) and toMap (a map built from a list,
 ///    `toMap(items, i => i.id, i => "pass")`).
 ///  - math: sqrt, pow, sin, cos, tan, asin, acos, atan, atan2 (radians),
@@ -95,12 +105,41 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    every second while listened to. Dates are ISO 8601 text such as
 ///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
 ///    milliseconds or a Firestore timestamp.
+///  - locale-aware formatting with intl, taking a locale such as `ar_EG`,
+///    `fr-FR` or `ja` (an unknown one falls back to its language, then
+///    English): formatNumber(value, digits?, locale?) with the locale's
+///    separators and digits, formatCurrency(value, currencyCode, locale?,
+///    decimals?), formatPercent(value, locale?, decimals?), and
+///    formatDate(date, patternOrStyle, locale?), whose second argument can
+///    also be a named style: full, long, medium, short, time, dayMonth,
+///    weekday or monthYear. Without a locale, formatNumber and an ICU
+///    pattern in formatDate keep their English output.
+///  - plurals: pluralCategory(count, locale?) is the CLDR category (zero,
+///    one, two, few, many or other) and plural(count, forms, locale?)
+///    picks from a map of forms by category, falling back to `other`, with
+///    `{n}` replaced by the count in the locale's digits:
+///    `plural(n, {one: '{n} phrase', other: '{n} phrases'}, 'ar_EG')`.
+///  - text direction: textDirection(locale) is 'rtl' for right-to-left
+///    languages (ar, he, fa, ur, …) else 'ltr'; textDirectionOf(text) is the
+///    direction of the text's first strong character, or '' when it has
+///    none.
+///  - fill(template, values) replaces `{name}` placeholders from a map (or
+///    `{0}` from a list): `fill('{i} of {n}', {i: 1, n: 10})` is "1 of 10".
 ///  - date-aware comparisons: `== != < <= > >=` compare as dates when one
 ///    side is a date (ISO 8601 text such as `2026-10-21` or
 ///    `2026-10-21T09:00:00Z`, a DateTime or a timestamp) and the other reads
 ///    as one, so `t.due <= today()` and `t.due == today()` work even when
 ///    `t.due` is a date without a time or a Firestore timestamp. A missing
 ///    date is neither before nor after a date.
+///
+///  - your own functions: a call to a name that isn't a built-in function,
+///    such as `attacked(board, sq, 'w')`, reads the variable of that name.
+///    A variable with parameters (`VariableData.parameters`) is a
+///    [FormulaFunction]: its formula is the body, which reads the
+///    arguments by the parameters' names (`board[sq]`, `move.to`) and every
+///    other variable. Functions can call each other and themselves (up to
+///    [FormulaFunction.maxDepth] calls deep), so rules that would be
+///    hundreds of characters, repeated in every formula, are written once.
 ///
 /// Null counts as 0 in arithmetic and as empty text when joining text. An
 /// invalid expression evaluates to null.
@@ -121,13 +160,24 @@ class FormulaEvaluator {
   }
 
   /// Formats [date] (a DateTime, an ISO string, epoch milliseconds or a
-  /// timestamp) with a date [pattern] as the `formatDate` formula function
-  /// does, e.g. `h:mm a`. Returns null when [date] isn't a date.
-  static String? formatDate(Object? date, [String? pattern]) =>
-      _formatDate(date, pattern);
+  /// timestamp) with a date [pattern] or named style as the `formatDate`
+  /// formula function does, e.g. `h:mm a` or `full`, in [locale] when given.
+  /// Returns null when [date] isn't a date.
+  static String? formatDate(Object? date, [String? pattern, String? locale]) =>
+      _formatDateIn(date, pattern, locale);
 
   /// Whether [expression] is a well-formed formula.
   static bool parses(String expression) => _parse(expression) != null;
+
+  /// The names of the functions [expression] calls that aren't built in:
+  /// calls to [FormulaFunction] variables.
+  static Set<String> userFunctionCalls(String expression) {
+    final _Node? node = _parse(expression);
+    if (node == null) return {};
+    final Set<String> names = {};
+    node.collectUserCalls(names);
+    return names;
+  }
 
   /// The variable paths [expression] reads, e.g. `storage.cart` and `qty`.
   static Set<String> referencedPaths(String expression) {
@@ -149,6 +199,18 @@ class FormulaEvaluator {
       .any((match) => readsClock(match.namedGroup('expr')!));
 
   static final RegExp _clockCall = RegExp(r'\b(now|today)\s*\(');
+
+  /// Whether [expression] reads the millisecond clock (`nowMs()`), so its
+  /// value changes from frame to frame.
+  static bool readsFrameClock(String expression) =>
+      _frameClockCall.hasMatch(expression.replaceAll(_quoted, ''));
+
+  /// Whether any formula in [text] reads the millisecond clock.
+  static bool textReadsFrameClock(String text) => formulaRegex
+      .allMatches(text)
+      .any((match) => readsFrameClock(match.namedGroup('expr')!));
+
+  static final RegExp _frameClockCall = RegExp(r'\bnowMs\s*\(');
 
   static final RegExp _quoted = RegExp(
     r'"[^"]*"'
@@ -221,9 +283,21 @@ class FormulaEvaluator {
 
   /// Why [expression] can't be evaluated, such as `Unknown function "sun"`
   /// or `Expected ")" at 12`, or null when it parses.
-  static String? errorOf(String expression) {
+  ///
+  /// A call to a name that isn't a built-in function is an error unless
+  /// [functionNames] lists it (the variables that are [FormulaFunction]s).
+  static String? errorOf(
+    String expression, {
+    Iterable<String> functionNames = const [],
+  }) {
     try {
-      _Parser(expression.trim()).parseAll();
+      final _Node node = _Parser(expression.trim()).parseAll();
+      final Set<String> calls = {};
+      node.collectUserCalls(calls);
+      final Set<String> known = functionNames.toSet();
+      for (final String name in calls) {
+        if (!known.contains(name)) return 'Unknown function "$name"';
+      }
       return null;
     } on FormatException catch (error) {
       final int? offset = error.offset;
@@ -255,8 +329,40 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'formatNumber',
-      'formatNumber(value, digits?)',
-      'formatNumber(2481.64, 1) → 2,481.6',
+      'formatNumber(value, digits?, locale?)',
+      'formatNumber(2481.64, 1) → 2,481.6 · '
+          'formatNumber(1234.5, 1, "ar_EG") → ١٬٢٣٤٫٥',
+    ),
+    FormulaFunctionDoc(
+      'formatCurrency',
+      'formatCurrency(value, currencyCode, locale?, decimals?)',
+      'formatCurrency(1234.5, "EUR", "fr_FR") → 1 234,50 € · '
+          'formatCurrency(1500, "JPY", "ja_JP") → ￥1,500',
+    ),
+    FormulaFunctionDoc(
+      'formatPercent',
+      'formatPercent(value, locale?, decimals?)',
+      'formatPercent(0.42) → 42% · formatPercent(0.42, "fr_FR") → 42 %',
+    ),
+    FormulaFunctionDoc(
+      'pluralCategory',
+      'pluralCategory(count, locale?)',
+      'pluralCategory(3, "ar") → few · pluralCategory(0, "en") → other',
+    ),
+    FormulaFunctionDoc(
+      'textDirection',
+      'textDirection(locale)',
+      'textDirection("he_IL") → rtl · textDirection("fr") → ltr',
+    ),
+    FormulaFunctionDoc(
+      'textDirectionOf',
+      'textDirectionOf(text)',
+      'textDirectionOf("שלום") → rtl · textDirectionOf("123") → (empty)',
+    ),
+    FormulaFunctionDoc(
+      'fill',
+      'fill(template, map or list)',
+      'fill("{i} of {n}", {i: 1, n: 10}) → 1 of 10',
     ),
     FormulaFunctionDoc(
       'feetInches',
@@ -296,8 +402,10 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'plural',
-      'plural(count, one, many)',
-      'plural(2, "photo") → photos',
+      'plural(count, one, many) or plural(count, forms, locale?)',
+      'plural(2, "photo") → photos · '
+          'plural(2, {one: "{n} phrase", other: "{n} phrases"}, "en") '
+          '→ 2 phrases',
     ),
     FormulaFunctionDoc(
       'join',
@@ -369,11 +477,6 @@ class FormulaEvaluator {
       'luminance("#FFFFFF") → 1',
     ),
     FormulaFunctionDoc(
-      'mix',
-      'mix(color, color, t)',
-      'mix("#7DE3D8", "#FFFFFF", 0.35) → #ABEDE6',
-    ),
-    FormulaFunctionDoc(
       'filter',
       'filter(list, item => condition) or filter(list, field, value)',
       'filter(tasks, t => contains(lower(t.title), lower(search)))',
@@ -435,6 +538,19 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('sqrt', 'sqrt(value)', 'sqrt(16) → 4'),
     FormulaFunctionDoc('pow', 'pow(base, exponent)', 'pow(2, 10) → 1024'),
+    FormulaFunctionDoc(
+      'exp',
+      'exp(value)',
+      'exp(1) → 2.71828… (zoom by exp(-delta / 500))',
+    ),
+    FormulaFunctionDoc('ln', 'ln(value)', 'ln(exp(2)) → 2'),
+    FormulaFunctionDoc(
+      'log',
+      'log(value, base?)',
+      'log(1000) → 3, log(8, 2) → 3',
+    ),
+    FormulaFunctionDoc('sign', 'sign(value)', 'sign(-4) → -1'),
+    FormulaFunctionDoc('hypot', 'hypot(x, y)', 'hypot(3, 4) → 5'),
     FormulaFunctionDoc('sin', 'sin(radians)', 'sin(pi() / 2) → 1'),
     FormulaFunctionDoc('cos', 'cos(radians)', 'cos(0) → 1'),
     FormulaFunctionDoc('tan', 'tan(radians)', 'tan(0) → 0'),
@@ -550,6 +666,13 @@ class FormulaEvaluator {
       'move([a, b, c], 2, 0) → [c, a, b]',
     ),
     FormulaFunctionDoc(
+      'moveItems',
+      'moveItems(list, ids, beforeId, changes)',
+      "moveItems(cards, drag.ids, drag.beforeId, object('lane', drag.over)) "
+          '→ the cards with those ids (or values) moved before the one with '
+          "beforeId ('' = to the end), with the changes merged in",
+    ),
+    FormulaFunctionDoc(
       'thousands',
       'thousands(value, decimals)',
       'thousands(1094) → 1,094',
@@ -587,6 +710,11 @@ class FormulaEvaluator {
     FormulaFunctionDoc('skip', 'skip(list, count)', 'skip(events, 25)'),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
     FormulaFunctionDoc(
+      'mix',
+      'mix(color1, color2, amount)',
+      "mix('#FFFFFF', '#000000', 0.25) → #BFBFBF",
+    ),
+    FormulaFunctionDoc(
       'alpha',
       'alpha(color, opacity)',
       "alpha('#FF4D4F', 0.12) → #1FFF4D4F",
@@ -607,6 +735,12 @@ class FormulaEvaluator {
       'now',
       'now(utcOffset?)',
       'now() → 2026-10-21T14:30:00.000, now("-07:00") at UTC−7',
+    ),
+    FormulaFunctionDoc(
+      'nowMs',
+      'nowMs()',
+      'nowMs() → 1793356053036, milliseconds since 1970 (time taps: '
+          '60000 / (nowMs() - lastTap) is a tempo)',
     ),
     FormulaFunctionDoc(
       'today',
@@ -645,8 +779,9 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'formatDate',
-      'formatDate(date, pattern)',
-      'formatDate(now(), "EEE, MMM d · h:mm a") → Wed, Oct 21 · 2:30 PM',
+      'formatDate(date, pattern or style, locale?)',
+      'formatDate(now(), "EEE, MMM d · h:mm a") → Wed, Oct 21 · 2:30 PM · '
+          'formatDate(today(), "full", "fr_FR") → jeudi 30 octobre 2026',
     ),
     FormulaFunctionDoc(
       'addSeconds',
@@ -904,6 +1039,305 @@ String _grouped(Object? value, Object? digits) {
       .substring(0, dot)
       .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
   return '$whole${text.substring(dot)}';
+}
+
+// ---------------------------------------------------------------------------
+// Locale-aware formatting
+// ---------------------------------------------------------------------------
+
+/// The locale used when a locale-aware function gets none.
+const String _defaultLocale = 'en_US';
+
+/// [value] as a locale name, e.g. `ar_EG` for 'ar-EG', or null when it's
+/// missing or empty.
+String? _localeName(Object? value) {
+  if (value == null) return null;
+  final String text = FormulaEvaluator.stringify(value).trim();
+  if (text.isEmpty) return null;
+  return Intl.canonicalizedLocale(text.replaceAll('-', '_'));
+}
+
+/// The first of [locale], its language and `en` that [exists] knows.
+String _supportedLocale(Object? locale, bool Function(String) exists) {
+  final String? name = _localeName(locale);
+  if (name == null) return exists(_defaultLocale) ? _defaultLocale : 'en';
+  if (exists(name)) return name;
+  final String language = Intl.shortLocale(name).toLowerCase();
+  if (exists(language)) return language;
+  return exists(_defaultLocale) ? _defaultLocale : 'en';
+}
+
+/// [locale] as one intl has number symbols for.
+String _numberLocale(Object? locale) =>
+    _supportedLocale(locale, NumberFormat.localeExists);
+
+/// [locale] as one intl has date symbols for, loading them on first use.
+String _dateLocale(Object? locale) =>
+    _supportedLocale(locale, _ensureDateLocale);
+
+Map<String, DateSymbols>? _allDateSymbols;
+Map<String, Map<String, String>>? _allDatePatterns;
+
+/// Whether intl can format dates in [locale], loading its date symbols the
+/// first time. `initializeDateFormatting` sets every locale's data before it
+/// returns; when an app has already set up its own date data (for example
+/// through flutter_localizations), only the missing locale is added.
+bool _ensureDateLocale(String locale) {
+  if (_hasDateLocale(locale)) return true;
+  // Sets the data synchronously, before the returned future completes.
+  initializeDateFormatting();
+  if (_hasDateLocale(locale)) return true;
+  final DateSymbols? symbols = (_allDateSymbols ??=
+      dateTimeSymbolMap())[locale];
+  final Map<String, String>? patterns = (_allDatePatterns ??=
+      dateTimePatternMap())[locale];
+  if (symbols == null || patterns == null) return false;
+  try {
+    initializeDateFormattingCustom(
+      locale: locale,
+      symbols: symbols,
+      patterns: patterns,
+    );
+  } catch (_) {
+    return false;
+  }
+  return _hasDateLocale(locale);
+}
+
+/// Whether intl has date data for [locale]. Before any data is set up,
+/// intl throws for every locale but en_US.
+bool _hasDateLocale(String locale) {
+  try {
+    return DateFormat.localeExists(locale);
+  } catch (_) {
+    return false;
+  }
+}
+
+/// Whether [value] is text that names a locale rather than a number, so
+/// `formatNumber(n, 'fr_FR')` reads the second argument as the locale.
+bool _isLocaleArg(Object? value) =>
+    value is String &&
+    value.trim().isNotEmpty &&
+    num.tryParse(value.trim()) == null;
+
+/// [value] with [digits] decimals (default 0) written the [locale] way: its
+/// group and decimal separators and its digits, e.g. "١٬٢٣٤٫٥" in ar_EG.
+String _localeNumber(Object? value, Object? digits, Object? locale) {
+  final num amount = _num(value);
+  if (amount.isNaN) return '';
+  return NumberFormat.decimalPatternDigits(
+    locale: _numberLocale(locale),
+    decimalDigits: _num(digits ?? 0).toInt().clamp(0, 20),
+  ).format(amount);
+}
+
+/// `formatNumber(value, digits?, locale?)`; a locale in place of the digits
+/// also works: `formatNumber(n, 'fr_FR')`.
+String _formatNumber(List<Object?> args) {
+  Object? digits = _arg(args, 1), locale = _arg(args, 2);
+  if (_isLocaleArg(digits)) (digits, locale) = (locale, digits);
+  if (_localeName(locale) == null) return _grouped(_arg(args, 0), digits);
+  return _localeNumber(_arg(args, 0), digits, locale);
+}
+
+/// [value] in the currency [code] (`EUR`, `JPY`) written the [locale] way
+/// (en_US by default), with the currency's own decimals unless [decimals]
+/// is given. A number in place of the locale is the decimals.
+String _formatCurrency(
+  Object? value,
+  Object? code,
+  Object? locale,
+  Object? decimals,
+) {
+  if (locale is num) (locale, decimals) = (decimals, locale);
+  final num amount = _num(value);
+  if (!amount.isFinite) return '';
+  final String? name = code == null
+      ? null
+      : FormulaEvaluator.stringify(code).trim().toUpperCase();
+  return NumberFormat.simpleCurrency(
+    locale: _numberLocale(locale),
+    name: name == null || name.isEmpty ? null : name,
+    decimalDigits: decimals == null ? null : _intArg(decimals).clamp(0, 20),
+  ).format(amount);
+}
+
+/// [value] as a percentage written the [locale] way: 0.42 is "42%", "42 %"
+/// in fr_FR and "٪٤٢" in ar_EG. A number in place of the locale is the
+/// decimals.
+String _formatPercent(Object? value, Object? locale, Object? decimals) {
+  if (locale is num) (locale, decimals) = (decimals, locale);
+  final num amount = _num(value);
+  if (!amount.isFinite) return '';
+  return NumberFormat.decimalPercentPattern(
+    locale: _numberLocale(locale),
+    decimalDigits: decimals == null ? 0 : _intArg(decimals).clamp(0, 20),
+  ).format(amount);
+}
+
+/// Named date styles formatDate accepts in place of a pattern.
+const Map<String, String> _dateStyles = {
+  'full': DateFormat.YEAR_MONTH_WEEKDAY_DAY,
+  'long': DateFormat.YEAR_MONTH_DAY,
+  'medium': DateFormat.YEAR_ABBR_MONTH_DAY,
+  'short': DateFormat.YEAR_NUM_MONTH_DAY,
+  'time': 'jm',
+  'dayMonth': DateFormat.MONTH_DAY,
+  'weekday': DateFormat.WEEKDAY,
+  'monthYear': DateFormat.YEAR_MONTH,
+};
+
+/// `formatDate(date, patternOrStyle, locale?)`: the hand-rolled English
+/// formatter for a pattern without a locale, intl's DateFormat for a named
+/// style or a locale.
+String? _formatDateIn(Object? value, Object? pattern, Object? locale) {
+  final String? style = pattern is String ? _dateStyles[pattern.trim()] : null;
+  if (style == null && _localeName(locale) == null) {
+    return _formatDate(value, pattern);
+  }
+  final DateTime? date = _toDate(value);
+  if (date == null) return null;
+  final String name = _dateLocale(locale);
+  final DateFormat format = style != null
+      ? (DateFormat(null, name)..addPattern(style))
+      : DateFormat(
+          pattern == null ? 'yyyy-MM-dd' : FormulaEvaluator.stringify(pattern),
+          name,
+        );
+  return format.format(date);
+}
+
+/// The CLDR plural category of [count] in [locale] (en by default):
+/// zero, one, two, few, many or other. Unlike `Intl.plural`, 0 is only
+/// "zero" in languages that have that category, such as Arabic.
+String _pluralCategory(Object? count, Object? locale) {
+  final num n = _num(count);
+  if (!n.isFinite) return 'other';
+  final String? name = _localeName(locale);
+  return Intl.pluralLogic<String>(
+    n,
+    zero: 'zero',
+    one: 'one',
+    two: 'two',
+    few: 'few',
+    many: 'many',
+    other: 'other',
+    locale: name ?? 'en',
+    useExplicitNumberCases: false,
+  );
+}
+
+/// `plural(count, forms, locale?)` with a map of forms by plural category,
+/// e.g. `{one: '{n} phrase', other: '{n} phrases'}`. Picks the count's
+/// category, falling back to `other`, and writes the count in the locale's
+/// digits in place of `{n}`.
+String _pluralForms(Object? count, Map forms, Object? locale) {
+  final String category = _pluralCategory(count, locale);
+  final Object? form = forms[category] ?? forms['other'];
+  if (form == null) return '';
+  final String text = FormulaEvaluator.stringify(form);
+  if (!text.contains('{n}')) return text;
+  final num n = _num(count);
+  final String number = !n.isFinite
+      ? FormulaEvaluator.stringify(count)
+      : n == n.roundToDouble()
+      ? _localeNumber(n, 0, locale ?? _defaultLocale)
+      : NumberFormat.decimalPattern(_numberLocale(locale)).format(n);
+  return text.replaceAll('{n}', number);
+}
+
+/// 'rtl' when [locale] (`ar_EG`, `he`, `fa-IR`) is written right to left,
+/// else 'ltr'.
+String _textDirection(Object? locale) {
+  final String? name = _localeName(locale);
+  if (name == null) return 'ltr';
+  return Bidi.isRtlLanguage(name) ? 'rtl' : 'ltr';
+}
+
+/// Whether [rune] is a strong right-to-left character: a Hebrew, Arabic,
+/// Syriac, Thaana or N'Ko letter, an RTL presentation form or an RTL mark.
+/// Arabic-Indic digits, separators and combining marks are not strong.
+bool _isStrongRtl(int rune) {
+  if (rune == 0x200F || rune == 0x061C) return true;
+  if (rune >= 0x0660 && rune <= 0x066C) return false;
+  if (rune >= 0x06F0 && rune <= 0x06F9) return false;
+  if (rune >= 0x0600 && rune <= 0x0605) return false;
+  if (rune == 0x060C) return false;
+  if (rune >= 0x064B && rune <= 0x065F) return false;
+  if (rune == 0x0670) return false;
+  if (rune >= 0x0591 && rune <= 0x05BD) return false;
+  if (rune >= 0x0590 && rune <= 0x07FF) return true;
+  if (rune >= 0x0800 && rune <= 0x08FF) return true;
+  if (rune >= 0xFB1D && rune <= 0xFDFD) return true;
+  if (rune >= 0xFE70 && rune <= 0xFEFC) return true;
+  return rune >= 0x10800 && rune <= 0x10FFF;
+}
+
+/// Whether [rune] is a strong left-to-right character, such as a Latin,
+/// Greek, Cyrillic or CJK letter, or the LRM mark.
+bool _isStrongLtr(int rune) {
+  if (rune == 0x200E) return true;
+  if ((rune >= 0x41 && rune <= 0x5A) || (rune >= 0x61 && rune <= 0x7A)) {
+    return true;
+  }
+  if (rune < 0xC0) return false;
+  if (rune == 0xD7 || rune == 0xF7) return false;
+  if (rune <= 0x02B8) return true;
+  if (rune >= 0x0370 && rune <= 0x058F) return true;
+  if (rune >= 0x0900 && rune <= 0x1FFF) return true;
+  if (rune >= 0x2C00 && rune <= 0xFB1C) {
+    return !(rune >= 0x3000 && rune <= 0x303F && rune != 0x3005);
+  }
+  return rune >= 0x10000 && rune < 0x10800 || rune >= 0x11000;
+}
+
+/// 'rtl' or 'ltr' for the direction of the first strong character in
+/// [value], or '' when it has none, such as digits or punctuation only.
+String _textDirectionOf(Object? value) {
+  for (final int rune in FormulaEvaluator.stringify(value).runes) {
+    if (_isStrongRtl(rune)) return 'rtl';
+    if (_isStrongLtr(rune)) return 'ltr';
+  }
+  return '';
+}
+
+/// [template] with every `{name}` placeholder replaced by [values]' `name`
+/// (a map) or item at that index (a list). Unknown placeholders are kept.
+String _fill(Object? template, Object? values) =>
+    FormulaEvaluator.stringify(template)
+        .replaceAllMapped(RegExp(r'\{([^{}]+)\}'), (match) {
+          final String key = match[1]!.trim();
+          if (values is Map) {
+            if (values.containsKey(key)) {
+              return FormulaEvaluator.stringify(values[key]);
+            }
+            final Object? nested = _fillPath(values, key);
+            if (nested != _missing) return FormulaEvaluator.stringify(nested);
+          } else if (values is List) {
+            final int? index = int.tryParse(key);
+            if (index != null && index >= 0 && index < values.length) {
+              return FormulaEvaluator.stringify(values[index]);
+            }
+          }
+          return match[0]!;
+        });
+
+const Object _missing = Object();
+
+/// The value at a dotted [path] such as `trip.city` in [values], or
+/// [_missing].
+Object? _fillPath(Map values, String path) {
+  if (!path.contains('.')) return _missing;
+  Object? value = values;
+  for (final String part in path.split('.')) {
+    if (value is Map && value.containsKey(part)) {
+      value = value[part];
+    } else {
+      return _missing;
+    }
+  }
+  return value;
 }
 
 /// [value] as text padded to [width] with the first character of [fill]:
@@ -1238,24 +1672,29 @@ List<Object?> _unique(List<Object?> args) {
   return items;
 }
 
-/// A lambda such as `t => t.price` or `(t, i) => i + 1`, ready to call
-/// with an item and its index.
+/// A lambda such as `t => t.price`, `(t, i) => i + 1` or, as a user
+/// function stored in a variable, `(qty, unit, system) => ...`. List
+/// functions call it with an item and its index; a user function call
+/// passes its arguments in order. Its text is its [source], so a function
+/// survives being stored as a variable's value.
 class _Closure {
-  final String param;
-  final String? indexParam;
+  final List<String> params;
   final _Node body;
   final FormulaPathResolver outer;
+  final String source;
 
-  const _Closure(this.param, this.indexParam, this.body, this.outer);
+  const _Closure(this.params, this.body, this.outer, this.source);
 
   static final RegExp _part = RegExp(r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]');
 
-  Object? call(Object? value, [int? index]) => body.eval((path) {
-    for (final (String? name, Object? bound) in [
-      (param, value),
-      (indexParam, index),
-    ]) {
-      if (name == null) continue;
+  Object? call(Object? value, [int? index]) => callWith([value, index]);
+
+  /// Calls the lambda with [args] bound to its parameters in order; missing
+  /// arguments are null.
+  Object? callWith(List<Object?> args) => body.eval((path) {
+    for (int i = 0; i < params.length; i++) {
+      final String name = params[i];
+      final Object? bound = i < args.length ? args[i] : null;
       if (path == name) return bound;
       if (path.startsWith(name) &&
           (path.startsWith('.', name.length) ||
@@ -1271,7 +1710,7 @@ class _Closure {
   });
 
   @override
-  String toString() => '';
+  String toString() => source;
 }
 
 // ---------------------------------------------------------------------------
@@ -1814,7 +2253,14 @@ Map<String, Object?> _toMap(List<Object?> args) {
 
 final Map<String, _Function> _functions = {
   'money': (a) => _money(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
-  'formatNumber': (a) => _grouped(_arg(a, 0), _arg(a, 1)),
+  'formatNumber': _formatNumber,
+  'formatCurrency': (a) =>
+      _formatCurrency(_arg(a, 0), _arg(a, 1), _arg(a, 2), _arg(a, 3)),
+  'formatPercent': (a) => _formatPercent(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'pluralCategory': (a) => _pluralCategory(_arg(a, 0), _arg(a, 1)),
+  'textDirection': (a) => _textDirection(_arg(a, 0)),
+  'textDirectionOf': (a) => _textDirectionOf(_arg(a, 0)),
+  'fill': (a) => _fill(_arg(a, 0), _arg(a, 1)),
   'feetInches': (a) => _feetInches(_arg(a, 0)),
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
   'round': (a) => _round(_arg(a, 0), _arg(a, 1)),
@@ -1839,8 +2285,10 @@ final Map<String, _Function> _functions = {
     _ => 0,
   },
   'if': (a) => _truthy(_arg(a, 0)) ? _arg(a, 1) : _arg(a, 2),
-  'plural': (a) =>
-      _num(_arg(a, 0)) == 1 ? _arg(a, 1) : (_arg(a, 2) ?? '${_arg(a, 1)}s'),
+  'plural': (a) => switch (_arg(a, 1)) {
+    final Map forms => _pluralForms(_arg(a, 0), forms, _arg(a, 2)),
+    _ => _num(_arg(a, 0)) == 1 ? _arg(a, 1) : (_arg(a, 2) ?? '${_arg(a, 1)}s'),
+  },
   'join': (a) => _values(_arg(a, 0), _arg(a, 2))
       .map(FormulaEvaluator.stringify)
       .where((s) => s.isNotEmpty)
@@ -1881,7 +2329,6 @@ final Map<String, _Function> _functions = {
   'seconds': (a) => _seconds(_arg(a, 0)),
   'duration': (a) => _duration(_arg(a, 0)),
   'luminance': (a) => _luminance(_arg(a, 0)),
-  'mix': (a) => _mixColors(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'startsWith': (a) => switch (_arg(a, 0)) {
     final String s => s.startsWith(FormulaEvaluator.stringify(_arg(a, 1))),
     _ => false,
@@ -1932,6 +2379,15 @@ final Map<String, _Function> _functions = {
   ],
   'sqrt': (a) => _tidy(math.sqrt(_num(_arg(a, 0)))),
   'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
+  'exp': (a) => _tidy(math.exp(_num(_arg(a, 0)))),
+  'ln': (a) => _tidy(math.log(_num(_arg(a, 0)))),
+  'log': (a) => _tidy(
+    math.log(_num(_arg(a, 0))) / math.log(a.length > 1 ? _num(_arg(a, 1)) : 10),
+  ),
+  'sign': (a) => _num(_arg(a, 0)).sign,
+  'hypot': (a) => _tidy(
+    math.sqrt(math.pow(_num(_arg(a, 0)), 2) + math.pow(_num(_arg(a, 1)), 2)),
+  ),
   'sin': (a) => math.sin(_num(_arg(a, 0))),
   'cos': (a) => math.cos(_num(_arg(a, 0))),
   'tan': (a) => math.tan(_num(_arg(a, 0))),
@@ -2011,6 +2467,34 @@ final Map<String, _Function> _functions = {
     items.insert(_index(_arg(a, 2), items.length, items.length), item);
     return items;
   },
+  'moveItems': (a) {
+    String idOf(Object? v) =>
+        FormulaEvaluator.stringify(v is Map && v['id'] != null ? v['id'] : v);
+    final Object? idsArg = _arg(a, 1);
+    final Set<String> ids = {
+      if (idsArg is Iterable)
+        for (final Object? v in idsArg) idOf(v)
+      else if (idsArg != null)
+        idOf(idsArg),
+    };
+    final Object? changes = _arg(a, 3);
+    final List<Object?> moving = [];
+    final List<Object?> rest = [];
+    for (final Object? item in _values(_arg(a, 0), null)) {
+      if (!ids.contains(idOf(item))) {
+        rest.add(item);
+      } else if (changes is Map && item is Map) {
+        moving.add({...item, ...changes});
+      } else {
+        moving.add(item);
+      }
+    }
+    final String before = FormulaEvaluator.stringify(_arg(a, 2));
+    int at = before.isEmpty ? -1 : rest.indexWhere((i) => idOf(i) == before);
+    if (at < 0) at = rest.length;
+    rest.insertAll(at, moving);
+    return rest;
+  },
   'thousands': (a) {
     final num n = _num(_arg(a, 0));
     if (n.isNaN) return null;
@@ -2044,6 +2528,7 @@ final Map<String, _Function> _functions = {
   'get': (a) => _member(_arg(a, 0), _arg(a, 1)),
   'number': (a) => _toNum(_arg(a, 0)),
   'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
+  'mix': (a) => _mixColors(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
     _arg(a, 1) == null ? 2 : _intArg(_arg(a, 1)),
     FormulaEvaluator.stringify(_arg(a, 2) ?? '0'),
@@ -2068,6 +2553,8 @@ final Map<String, _Function> _functions = {
       if (v is Iterable) ...v else ?v,
   ],
   'now': (a) => _dateText(_nowAt(_arg(a, 0))),
+  'nowMs': (a) =>
+      (FormulaClock.pinned ?? DateTime.now()).millisecondsSinceEpoch,
   'today': (a) {
     final DateTime now = _nowAt(_arg(a, 0));
     return _dateText(DateTime(now.year, now.month, now.day));
@@ -2078,7 +2565,7 @@ final Map<String, _Function> _functions = {
   'minBy': (a) => _extremeBy(a, max: false),
   'maxBy': (a) => _extremeBy(a, max: true),
   'parseDate': (a) => _dateText(_toDate(_arg(a, 0))),
-  'formatDate': (a) => _formatDate(_arg(a, 0), _arg(a, 1)),
+  'formatDate': (a) => _formatDateIn(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'addMinutes': (a) =>
       _dateText(_shift(_arg(a, 0), minutes: _intArg(_arg(a, 1)))),
   'addHours': (a) => _dateText(_shift(_arg(a, 0), hours: _intArg(_arg(a, 1)))),
@@ -2109,10 +2596,12 @@ final Map<String, _Function> _functions = {
     for (int i = 0; i + 1 < a.length; i += 2)
       FormulaEvaluator.stringify(a[i]): a[i + 1],
   },
-  // The first argument that is neither null nor empty text.
+  // The first argument that is neither null nor empty text, else the last
+  // one that isn't null, so an explicit '' fallback is kept:
+  // coalesce(route.lang, '') is '' without the param, not null.
   'coalesce': (a) => a.firstWhere(
     (v) => v != null && !(v is String && v.isEmpty),
-    orElse: () => null,
+    orElse: () => a.lastWhere((v) => v != null, orElse: () => null),
   ),
 };
 
@@ -2126,6 +2615,133 @@ sealed class _Node {
   Object? eval(FormulaPathResolver resolve);
 
   void collectPaths(Set<String> paths) {}
+
+  /// Child nodes, for walks over the whole expression.
+  Iterable<_Node> get children => const [];
+
+  /// Adds the names of the user functions this expression calls.
+  void collectUserCalls(Set<String> names) {
+    for (final _Node child in children) {
+      child.collectUserCalls(names);
+    }
+  }
+}
+
+/// A function written in the app: a [FormulaFunction] variable called by
+/// name, e.g. `legalMoves(board, sq)`.
+class _UserCall extends _Node {
+  final String name;
+  final List<_Node> args;
+
+  const _UserCall(this.name, this.args);
+
+  @override
+  Object? eval(FormulaPathResolver resolve) {
+    final Object? function = resolve(name);
+    final List<Object?> values = [for (final arg in args) arg.eval(resolve)];
+    if (function is FormulaFunction) return function.call(values);
+    // A computed variable holding a lambda, `${= (qty, unit) => ...}`.
+    if (_userFunction(function, resolve) case final _Closure closure) {
+      return closure.callWith(values);
+    }
+    // A name that is neither built in nor a function variable is an error,
+    // as an unknown function always was: the whole formula is null.
+    throw StateError('Unknown function "$name"');
+  }
+
+  /// The function's own variable (so a binding listens to what its body
+  /// reads) and what the arguments read.
+  @override
+  void collectPaths(Set<String> paths) {
+    paths.add(name);
+    for (final arg in args) {
+      arg.collectPaths(paths);
+    }
+  }
+
+  @override
+  Iterable<_Node> get children => args;
+
+  @override
+  void collectUserCalls(Set<String> names) {
+    names.add(name);
+    super.collectUserCalls(names);
+  }
+}
+
+/// A function defined by a variable with parameters: its [parameters] and
+/// the formula [body] that computes its result from them.
+///
+/// Calling it evaluates [body] with each parameter reading the argument at
+/// its position (missing ones are null). Every other path is read from
+/// [scope]: the app's variables. Calls nest up to [maxDepth] deep, so a
+/// runaway recursion ends with null instead of a crash.
+class FormulaFunction {
+  /// Names of the parameters, in order.
+  final List<String> parameters;
+
+  /// The formula, without `${= }`.
+  final String body;
+
+  /// Reads the variables the body uses besides its parameters.
+  final FormulaPathResolver scope;
+
+  /// Creates a [FormulaFunction].
+  const FormulaFunction(this.parameters, this.body, this.scope);
+
+  /// The deepest nesting of calls allowed.
+  static const int maxDepth = 128;
+
+  static int _depth = 0;
+
+  static final RegExp _part = RegExp(r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]');
+
+  /// The result of the body for [arguments].
+  Object? call(List<Object?> arguments) {
+    final _Node? node = FormulaEvaluator._parse(body);
+    if (node == null || _depth >= maxDepth) return null;
+    _depth++;
+    try {
+      return node.eval((path) {
+        for (int i = 0; i < parameters.length; i++) {
+          final String name = parameters[i];
+          if (!path.startsWith(name)) continue;
+          final Object? bound = i < arguments.length ? arguments[i] : null;
+          if (path.length == name.length) return bound;
+          if (!path.startsWith('.', name.length) &&
+              !path.startsWith('[', name.length)) {
+            continue;
+          }
+          Object? result = bound;
+          for (final Match part in _part.allMatches(path, name.length)) {
+            result = _member(result, part[1] ?? int.parse(part[2]!));
+          }
+          return result;
+        }
+        return scope(path);
+      });
+    } catch (_) {
+      return null;
+    } finally {
+      _depth--;
+    }
+  }
+
+  /// The paths [body] reads that aren't its parameters: the variables a
+  /// call depends on.
+  Set<String> get externalPaths => {
+    for (final String path in FormulaEvaluator.referencedPaths(body))
+      if (!parameters.any(
+        (name) =>
+            path == name ||
+            path.startsWith('$name.') ||
+            path.startsWith('$name['),
+      ))
+        path,
+  };
+
+  @override
+  String toString() => 'function(${parameters.join(', ')})';
 }
 
 class _Literal extends _Node {
@@ -2163,6 +2779,9 @@ class _ListLiteral extends _Node {
   ];
 
   @override
+  Iterable<_Node> get children => items;
+
+  @override
   void collectPaths(Set<String> paths) {
     for (final item in items) {
       item.collectPaths(paths);
@@ -2179,6 +2798,9 @@ class _Member extends _Node {
   @override
   Object? eval(FormulaPathResolver resolve) =>
       _member(target.eval(resolve), key.eval(resolve));
+
+  @override
+  Iterable<_Node> get children => [target, key];
 
   @override
   void collectPaths(Set<String> paths) {
@@ -2206,6 +2828,9 @@ class _Call extends _Node {
   }
 
   @override
+  Iterable<_Node> get children => args;
+
+  @override
   void collectPaths(Set<String> paths) {
     for (final arg in args) {
       arg.collectPaths(paths);
@@ -2213,18 +2838,21 @@ class _Call extends _Node {
   }
 }
 
-/// A lambda argument, `param => body` or `(param, index) => body`.
-/// Evaluates to a [_Closure] that list functions call once per item.
+/// A lambda, `param => body`, `(param, index) => body`, or with more
+/// parameters for a user function. Evaluates to a [_Closure].
 class _Lambda extends _Node {
-  final String param;
-  final String? indexParam;
+  final List<String> params;
   final _Node body;
+  final String source;
 
-  const _Lambda(this.param, this.indexParam, this.body);
+  const _Lambda(this.params, this.body, this.source);
 
   @override
   Object? eval(FormulaPathResolver resolve) =>
-      _Closure(param, indexParam, body, resolve);
+      _Closure(params, body, resolve, source);
+
+  @override
+  Iterable<_Node> get children => [body];
 
   /// The body's paths, except those of the parameters, which aren't
   /// variables.
@@ -2232,17 +2860,29 @@ class _Lambda extends _Node {
   void collectPaths(Set<String> paths) {
     final Set<String> bodyPaths = {};
     body.collectPaths(bodyPaths);
-    bool isParam(String path, String? name) =>
-        name != null &&
-        (path == name ||
-            path.startsWith('$name.') ||
-            path.startsWith('$name['));
-    paths.addAll(
-      bodyPaths.where(
-        (path) => !isParam(path, param) && !isParam(path, indexParam),
-      ),
+    bool isParam(String path) => params.any(
+      (name) =>
+          path == name ||
+          path.startsWith('$name.') ||
+          path.startsWith('$name['),
     );
+    paths.addAll(bodyPaths.where((path) => !isParam(path)));
   }
+}
+
+/// [value] as a callable function: a closure, or the text of a lambda
+/// (with or without its `${= }` wrapper). Its body reads the caller's
+/// variables, so a function defined in one scope (an app variable) works
+/// with the variables where it is called.
+_Closure? _userFunction(Object? value, FormulaPathResolver resolve) {
+  if (value is _Closure) {
+    return _Closure(value.params, value.body, resolve, value.source);
+  }
+  if (value is! String || !value.contains('=>')) return null;
+  final String text = FormulaEvaluator.exactExpression(value) ?? value;
+  final _Node? node = FormulaEvaluator._parse(text);
+  if (node is! _Lambda) return null;
+  return node.eval(resolve) as _Closure;
 }
 
 /// An object literal, `{id: 'a', 'full name': n + 1}`.
@@ -2257,6 +2897,11 @@ class _MapLiteral extends _Node {
   };
 
   @override
+  Iterable<_Node> get children => [
+    for (final (_, _Node value) in entries) value,
+  ];
+
+  @override
   void collectPaths(Set<String> paths) {
     for (final (_, _Node value) in entries) {
       value.collectPaths(paths);
@@ -2269,6 +2914,9 @@ class _Unary extends _Node {
   final _Node operand;
 
   const _Unary(this.op, this.operand);
+
+  @override
+  Iterable<_Node> get children => [operand];
 
   @override
   Object? eval(FormulaPathResolver resolve) {
@@ -2286,6 +2934,9 @@ class _Binary extends _Node {
   final _Node right;
 
   const _Binary(this.op, this.left, this.right);
+
+  @override
+  Iterable<_Node> get children => [left, right];
 
   @override
   Object? eval(FormulaPathResolver resolve) {
@@ -2345,6 +2996,9 @@ class _Ternary extends _Node {
   const _Ternary(this.condition, this.then, this.otherwise);
 
   @override
+  Iterable<_Node> get children => [condition, then, otherwise];
+
+  @override
   Object? eval(FormulaPathResolver resolve) => _truthy(condition.eval(resolve))
       ? then.eval(resolve)
       : otherwise.eval(resolve);
@@ -2371,12 +3025,13 @@ class _Parser {
   static final RegExp _identifier = RegExp(r'[a-zA-Z_][a-zA-Z0-9_]*');
   static final RegExp _lambdaHead = RegExp(
     r'(?:([a-zA-Z_][a-zA-Z0-9_]*)'
-    r'|\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:,\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*)?\))'
+    r'|\(\s*([a-zA-Z_][a-zA-Z0-9_]*(?:\s*,\s*[a-zA-Z_][a-zA-Z0-9_]*)*)\s*\))'
     r'\s*=>',
   );
 
+  /// The whole formula: an expression, or a lambda (a user function).
   _Node parseAll() {
-    final _Node node = _ternary();
+    final _Node node = _argument();
     _skip();
     if (pos != source.length) {
       throw FormatException('Unexpected "${source[pos]}"', source, pos);
@@ -2413,8 +3068,13 @@ class _Parser {
     _skip();
     final Match? head = _lambdaHead.matchAsPrefix(source, pos);
     if (head == null) return _ternary();
+    final int start = pos;
     pos = head.end;
-    return _Lambda(head[1] ?? head[2]!, head[3], _ternary());
+    final List<String> params = head[1] != null
+        ? [head[1]!]
+        : head[2]!.split(',').map((name) => name.trim()).toList();
+    final _Node body = _ternary();
+    return _Lambda(params, body, source.substring(start, pos).trim());
   }
 
   _Node _ternary() {
@@ -2590,9 +3250,6 @@ class _Parser {
     }
 
     if (_eat('(')) {
-      if (!_functions.containsKey(name)) {
-        throw FormatException('Unknown function "$name"', source, pos);
-      }
       final List<_Node> args = [];
       if (!_eat(')')) {
         do {
@@ -2600,6 +3257,8 @@ class _Parser {
         } while (_eat(','));
         _expect(')');
       }
+      // A name that isn't built in calls a function variable.
+      if (!_functions.containsKey(name)) return _UserCall(name, args);
       return _Call(name, args);
     }
 
