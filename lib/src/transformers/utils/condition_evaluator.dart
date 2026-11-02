@@ -331,13 +331,21 @@ class ConditionEvaluator<R extends Object>
 
   @override
   R? visitFocusAction(FocusAction action) => null;
+
+  @override
   R? visitControlDragAction(ControlDragAction action) => null;
 
   @override
   R? visitSpeakAction(SpeakAction action) => null;
 
   @override
+  R? visitScrollToAction(ScrollToAction action) => null;
+
+  @override
   R? visitPlaySoundAction(PlaySoundAction action) => null;
+
+  @override
+  R? visitPlayAnimationAction(PlayAnimationAction action) => null;
 
   @override
   R? visitPaywallAction(PaywallAction action) => null;
@@ -508,6 +516,11 @@ class ConditionPrinter
   void visitCopyToClipboardAction(CopyToClipboardAction action) {}
 
   @override
+  void visitScrollToAction(ScrollToAction action) {
+    _buffer.writeln('\tScroll to: ${action.nodeId}');
+  }
+
+  @override
   void visitFocusAction(FocusAction action) {
     _buffer.writeln(
       '\t${action.unfocus ? 'Unfocus' : 'Focus'} ${action.nodeId}',
@@ -526,8 +539,13 @@ class ConditionPrinter
 
   @override
   void visitControlDragAction(ControlDragAction action) {
-    _buffer.writeln('\tControl drag ${action.command.name} ${action.direction.name} on ${action.nodeId}');
+    _buffer.writeln(
+      '\tControl drag ${action.command.name} ${action.direction.name} on ${action.nodeId}',
+    );
   }
+
+  @override
+  void visitPlayAnimationAction(PlayAnimationAction action) {}
 
   @override
   void visitPaywallAction(PaywallAction action) {

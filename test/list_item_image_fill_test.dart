@@ -1,5 +1,7 @@
 /// Rows of a data list hug their content, also with an image fill behind
 /// them (Backline's tolex setlist cards).
+library;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';

@@ -79,6 +79,13 @@ class ScopedValues {
       variable.name: variable,
   };
 
+  /// Variable name -> the variable as published, before actions changed it.
+  /// On a design canvas that is the variable itself.
+  Map<String, VariableData> get initialVariables => {
+    ...?_previewVariables,
+    ...codelesslyContext?.initialVariables ?? const {},
+  };
+
   /// A map of data that is passed to loaded layouts for nodes to replace their
   /// values with.
   Map<String, dynamic> get data => {

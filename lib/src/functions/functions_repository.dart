@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:just_audio/just_audio.dart' show AudioPlayer;
 import 'package:provider/provider.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -95,8 +97,21 @@ class FunctionsRepository {
         return showDialogAction(context, action as ShowDialogAction);
       case ActionType.closeModal:
         final route = ModalRoute.of(context);
-        if (route is DialogRoute && route.isCurrent) {
-          Navigator.of(context).pop();
+        // Every dialog presentation is a popup route: a dialog's DialogRoute,
+        // and the RawDialogRoute that full-screen and popover dialogs open
+        // with showGeneralDialog, which a DialogRoute check missed.
+        if (route is PopupRoute && route.isCurrent) {
+          // Its params are the `${result}` of the chain that showed it.
+          final Map<String, dynamic> params =
+              (action as CloseModalAction).params;
+          Navigator.of(context).pop(
+            params.isEmpty
+                ? null
+                : substituteVariablesInMap(
+                    params,
+                    ActionChain.scopedValuesOf(context),
+                  ),
+          );
           return true;
         }
         return false;
@@ -173,12 +188,20 @@ class FunctionsRepository {
         return runCloudBatch(context, action as CloudBatchAction);
       case ActionType.copyToClipboard:
         return copyToClipboard(context, action as CopyToClipboardAction);
+      case ActionType.playAnimation:
+        final PlayAnimationAction play = action as PlayAnimationAction;
+        return NodePlayRegistry.play(
+          play.nodeId,
+          play.animation,
+        ).then((_) => true);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
       case ActionType.focus:
         return runFocus(action as FocusAction);
       case ActionType.speak:
         return speak(context, action as SpeakAction);
+      case ActionType.scrollTo:
+        return ScrollTargets.scrollTo(action as ScrollToAction);
       case ActionType.playSound:
         return playSound(context, action as PlaySoundAction);
       case ActionType.controlDrag:
@@ -811,13 +834,21 @@ class FunctionsRepository {
           );
         }
       } else if (action.navigationType == NavigationType.reset) {
+        // The destination takes over the chain, as with a replace: actions
+        // it set up to run later (a toast's Undo) run with it.
+        final ActionChain? chain = ActionChain.current;
         await _resetTo(
           context,
           action,
           destination: MaterialPageRoute(
             settings: RouteSettings(arguments: parsedParams),
-            builder: (context) =>
-                CodelesslyWidget(controller: effectiveController),
+            builder: (context) {
+              final Widget page = CodelesslyWidget(
+                controller: effectiveController,
+              );
+              if (chain == null) return page;
+              return ActionChainAdopter(chain: chain, child: page);
+            },
           ),
           codelessly: effectiveCodelessly,
           parentController: parentController,
@@ -867,7 +898,9 @@ class FunctionsRepository {
         await Navigator.maybePop(context, params);
         return;
       }
-      if (router.canGoBack) {
+      final bool fallsBack =
+          action.destinationId.isNotEmpty && router.backIsOnlySeededHome;
+      if (router.canGoBack && !fallsBack) {
         router.pop(params);
         return;
       }
@@ -896,6 +929,7 @@ class FunctionsRepository {
           location,
           params: params,
           openerHosts: ActionChainOpener.hostsFor(context),
+          transition: action.transition,
         );
       case NavigationType.replace || NavigationType.pop:
         // The new screen takes over the chain: the actions after this one
@@ -906,12 +940,17 @@ class FunctionsRepository {
             location,
             params: params,
             chain: ActionChain.current,
+            transition: action.transition,
           ),
         );
       case NavigationType.reset:
         final String? baseId = action.baseDestinationId;
         if (baseId == null || baseId.isEmpty) {
-          router.resetTo([location], params: [params]);
+          router.resetTo(
+            [location],
+            params: [params],
+            chain: ActionChain.current,
+          );
           return;
         }
         final Map<String, dynamic> baseParams = substituteVariablesInMap(
@@ -927,7 +966,11 @@ class FunctionsRepository {
           );
           return;
         }
-        router.resetTo([baseLocation, location], params: [baseParams, params]);
+        router.resetTo(
+          [baseLocation, location],
+          params: [baseParams, params],
+          chain: ActionChain.current,
+        );
     }
   }
 
@@ -1001,6 +1044,8 @@ class FunctionsRepository {
       anchorGap: action.anchorGap,
       anchorOffset: action.anchorOffset,
       fullHeight: action.fullHeight,
+      barrierBlur: action.barrierBlur,
+      enterScale: action.enterScale,
     );
     if (result case final Map values when values.isNotEmpty) {
       ActionChain.setResult(values);
@@ -1088,6 +1133,8 @@ class FunctionsRepository {
     double anchorGap = 6,
     double anchorOffset = 0,
     bool fullHeight = false,
+    double barrierBlur = 0,
+    double enterScale = 1,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -1183,6 +1230,8 @@ class FunctionsRepository {
             maxHeightFactor: maxHeightFactor,
             showDragHandle: showDragHandle,
             fullHeight: fullHeight,
+            barrierBlur: barrierBlur,
+            enterScale: enterScale,
             anchor: effectivePresentation == DialogPresentation.popover
                 ? anchorRectOf(context)
                 : null,
@@ -1228,6 +1277,40 @@ class FunctionsRepository {
     return result;
   }
 
+  /// The transition of a dialog with a frosted scrim: the page behind blurs
+  /// up to [barrierBlur] (a Gaussian sigma) while the dialog fades in and
+  /// scales from [enterScale] to 1, all eased by [animation].
+  static Widget frostedDialogTransition({
+    required Animation<double> animation,
+    required double barrierBlur,
+    required double enterScale,
+    required Widget child,
+  }) {
+    final Animation<double> eased = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+    );
+    Widget dialog = FadeTransition(
+      opacity: eased,
+      child: ScaleTransition(
+        scale: Tween<double>(begin: enterScale, end: 1).animate(eased),
+        child: child,
+      ),
+    );
+    if (barrierBlur <= 0) return dialog;
+    return AnimatedBuilder(
+      animation: eased,
+      child: dialog,
+      builder: (context, child) {
+        final double sigma = barrierBlur * eased.value;
+        return BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+          child: child,
+        );
+      },
+    );
+  }
+
   /// Opens a canvas as a dialog, sheet or anchored popover. The canvas draws
   /// its own surface; sheets may use their design height or hug content.
   static Future<T?> presentCanvas<T>(
@@ -1247,6 +1330,8 @@ class FunctionsRepository {
     bool showDragHandle = false,
     Rect? anchor,
     bool fullHeight = false,
+    double barrierBlur = 0,
+    double enterScale = 1,
   }) {
     if (presentation == DialogPresentation.popover) {
       return showGeneralDialog<T>(
@@ -1368,25 +1453,48 @@ class FunctionsRepository {
         pageBuilder: (context, _, _) => content(context, CanvasSizing.fill),
       );
     }
+    Widget dialogBody(BuildContext context) => Padding(
+      padding: insets,
+      child: maxHeightFactor == null
+          ? content(context, CanvasSizing.design)
+          : ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight:
+                    MediaQuery.sizeOf(context).height *
+                    maxHeightFactor.clamp(0, 1),
+              ),
+              child: content(context, CanvasSizing.design),
+            ),
+    );
+    if (barrierBlur > 0 || enterScale != 1) {
+      // A frosted scrim: the page behind blurs while the dialog fades and
+      // grows in, both following the route's animation.
+      return showGeneralDialog<T>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: MaterialLocalizations.of(context)
+            .modalBarrierDismissLabel,
+        barrierColor: barrierColor ?? Colors.black54,
+        routeSettings: routeSettings,
+        transitionDuration: const Duration(milliseconds: 280),
+        transitionBuilder: (context, animation, _, child) =>
+            frostedDialogTransition(
+              animation: animation,
+              barrierBlur: barrierBlur,
+              enterScale: enterScale,
+              child: child,
+            ),
+        pageBuilder: (context, _, _) => SafeArea(child: dialogBody(context)),
+      );
+    }
     return showDialog<T>(
       context: context,
       useRootNavigator: false,
       barrierDismissible: barrierDismissible,
       barrierColor: barrierColor,
       routeSettings: routeSettings,
-      builder: (context) => Padding(
-        padding: insets,
-        child: maxHeightFactor == null
-            ? content(context, CanvasSizing.design)
-            : ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight:
-                      MediaQuery.sizeOf(context).height *
-                      maxHeightFactor.clamp(0, 1),
-                ),
-                child: content(context, CanvasSizing.design),
-              ),
-      ),
+      builder: dialogBody,
     );
   }
 
@@ -1863,7 +1971,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
   }
 
-  /// Plays [action]'s sound, now or at its `at` time on the sound clock.
+  /// Plays [action]'s sound, now or at its `at` time on the sound clock, or
+  /// its sound file.
   /// Its fields are values or formulas (`${result.at}`, `${voice}`).
   static bool playSound(BuildContext context, PlaySoundAction action) {
     final ScopedValues scope = ActionChain.scopedValuesOf(context);
@@ -1873,6 +1982,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
     ).trim();
     double? number(String value) => double.tryParse(text(value));
+    final String url = text(action.url);
+    if (url.isNotEmpty) {
+      unawaited(_playFile(url, (number(action.volume) ?? 1).clamp(0, 1)));
+      return true;
+    }
     final String at = text(action.at);
     Sound.play(
       Sound.voiceNamed(text(action.sound)),
@@ -1881,6 +1995,20 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       pitch: number(action.pitch) ?? 1,
     );
     return true;
+  }
+
+  /// Plays the sound file at [url] once, at [volume] (0 to 1).
+  static Future<void> _playFile(String url, double volume) async {
+    final AudioPlayer player = AudioPlayer();
+    try {
+      await player.setUrl(url);
+      await player.setVolume(volume);
+      await player.play();
+    } catch (e) {
+      DebugLogger.instance.printInfo('Could not play $url: $e', name: name);
+    } finally {
+      await player.dispose();
+    }
   }
 
   /// Sets given [action.newValue] for given [action.variable] to a variable
@@ -2007,9 +2135,15 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     if (match.name != match.fullPath &&
         (propertyNotifier.value.type == VariableType.map ||
             propertyNotifier.value.type == VariableType.list)) {
-      // TODO: support sub path on the variable?
-      // sub path on the variable
-      propertyNotifier.value = propertyNotifier.value.copyWith(value: value);
+      // A field bound to part of a map or list (`${draft.title}`,
+      // `${rows[2].name}`) sets that part, not the whole variable.
+      final List<Object> keys = variablePathKeys(
+        match.fullPath.substring(match.name.length),
+      );
+      final Object? root = propertyNotifier.value.getValue();
+      final Object? updated = setAtPath(root, keys, value);
+      if (updated == null) return false;
+      propertyNotifier.value = propertyNotifier.value.copyWith(value: updated);
       return true;
     }
 
@@ -2109,9 +2243,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     // A click reads the modifier keys held, as `${result.meta}` (Command
     // on macOS, Control elsewhere), `${result.shift}` and `${result.alt}`,
     // for multi-select (⌘-click) and range select (⇧-click).
-    if (type == TriggerType.click && result == null) {
+    // Beside where it landed (`x`, `y`, `globalX`, `globalY`), when known.
+    if (type == TriggerType.click && (result == null || result is Map)) {
       final HardwareKeyboard keys = HardwareKeyboard.instance;
       result = {
+        ...?(result as Map?),
         'meta': keys.isMetaPressed || keys.isControlPressed,
         'shift': keys.isShiftPressed,
         'alt': keys.isAltPressed,
@@ -2514,8 +2650,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     // Perform list operations.
     switch (action.listOperation) {
       case ListOperation.add:
-        final parsedValue = newValue.toList<List>() ?? [];
-        currentValue.addAll(parsedValue);
+        currentValue.addAll(_listFromValue(newValue));
       case ListOperation.insert:
         currentValue.insert(index, newValue.parsedValue());
       case ListOperation.insertAll:
@@ -2534,10 +2669,20 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         }
       case ListOperation.set:
       case ListOperation.replace:
-        final parsedValue = newValue.toList<List>() ?? [];
-        return parsedValue;
+        return _listFromValue(newValue);
     }
     return currentValue;
+  }
+
+  /// The list [newValue] holds. A JSON list (what a `${= ...}` formula
+  /// giving a list is written as) keeps its items as they are: `''` stays
+  /// empty text and `"12"` stays text, where [TypedValueExt.toList] would
+  /// read them as null and 12. Anything else is read by
+  /// [TypedValueExt.toList].
+  static List _listFromValue(String newValue) {
+    final Object? decoded = tryJsonDecode(newValue.trim());
+    if (decoded is List) return decoded;
+    return newValue.toList<List>() ?? [];
   }
 
   static Future<bool> setCloudDatabaseFromAction(
@@ -3174,4 +3319,33 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       NumberOperation.subtract => currentValue - parsedValue,
     };
   }
+}
+
+/// The keys of a variable path after its name: `.title` → `['title']`,
+/// `[2].name` → `[2, 'name']`.
+List<Object> variablePathKeys(String path) => [
+  for (final Match m in RegExp(
+    r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]',
+  ).allMatches(path))
+    if (m.group(1) case final String key) key else int.parse(m.group(2)!),
+];
+
+/// A copy of [root] with [value] at [keys] (map keys and list indexes),
+/// making missing maps on the way; null when a key doesn't fit (an index
+/// past the end of a list, a key into a list).
+Object? setAtPath(Object? root, List<Object> keys, Object? value) {
+  if (keys.isEmpty) return value;
+  final Object key = keys.first;
+  final List<Object> rest = keys.sublist(1);
+  if (key is int) {
+    if (root is! List || key < 0 || key >= root.length) return null;
+    final Object? child = setAtPath(root[key], rest, value);
+    if (child == null && rest.isNotEmpty) return null;
+    return [...root]..[key] = child;
+  }
+  final Map<dynamic, dynamic> map = root is Map ? root : <String, dynamic>{};
+  if (root != null && root is! Map) return null;
+  final Object? child = setAtPath(map[key], rest, value);
+  if (child == null && rest.isNotEmpty) return null;
+  return {...map, key: child};
 }

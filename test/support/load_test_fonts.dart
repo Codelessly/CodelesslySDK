@@ -9,11 +9,18 @@ Future<void> loadTestFonts() async {
   final icons = FontLoader('MaterialIcons')
     ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
   await icons.load();
-  final bytes = await File('../material_icons/assets/Roboto-Regular.ttf')
+  // Kept with the tests (Roboto, Apache License 2.0), so they run from a
+  // checkout of this repository alone, as CI has.
+  final bytes = await File('test/support/fonts/Roboto-Regular.ttf')
       .readAsBytes();
-  for (final family in ['Roboto', 'Roboto Regular', 'TabsFixture Regular', '']) {
-    await (FontLoader(family)
-          ..addFont(Future.value(bytes.buffer.asByteData())))
-        .load();
+  for (final family in [
+    'Roboto',
+    'Roboto Regular',
+    'TabsFixture Regular',
+    '',
+  ]) {
+    await (FontLoader(
+      family,
+    )..addFont(Future.value(bytes.buffer.asByteData()))).load();
   }
 }

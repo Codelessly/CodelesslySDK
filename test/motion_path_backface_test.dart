@@ -12,21 +12,28 @@ void main() {
     test('a point is found by arc length, relative to the start', () {
       final (Offset start, _) = pointOnMotionPath('M10 10 L110 10', 0)!;
       expect(start, Offset.zero);
-      final (Offset mid, double angle) = pointOnMotionPath('M10 10 L110 10', 0.5)!;
+      final (Offset mid, double angle) = pointOnMotionPath(
+        'M10 10 L110 10',
+        0.5,
+      )!;
       expect(mid.dx, closeTo(50, 0.01));
       expect(mid.dy, closeTo(0, 0.01));
       expect(angle, closeTo(0, 1e-6));
       // Two segments: halfway along an L is at its corner.
-      final (Offset corner, double down) =
-          pointOnMotionPath('M0 0 L100 0 L100 100', 0.75)!;
+      final (Offset corner, double down) = pointOnMotionPath(
+        'M0 0 L100 0 L100 100',
+        0.75,
+      )!;
       expect(corner.dx, closeTo(100, 0.01));
       expect(corner.dy, closeTo(50, 0.01));
       expect(down, closeTo(math.pi / 2, 1e-6), reason: 'heading down');
     });
 
     test('curves and bad data', () {
-      final (Offset end, _) =
-          pointOnMotionPath('M0 0 C 80 -160 240 -200 300 -40', 1)!;
+      final (Offset end, _) = pointOnMotionPath(
+        'M0 0 C 80 -160 240 -200 300 -40',
+        1,
+      )!;
       expect(end.dx, closeTo(300, 0.5));
       expect(end.dy, closeTo(-40, 0.5));
       expect(pointOnMotionPath('not a path', 0.5), isNull);
@@ -144,9 +151,10 @@ void main() {
       expect(painted('answer'), isTrue);
       // Hidden faces take no taps.
       expect(
-        tester.hitTestOnBinding(tester.getCenter(find.byType(Stack))).path.any(
-          (e) => e.target == tester.renderObject(find.text('question')),
-        ),
+        tester
+            .hitTestOnBinding(tester.getCenter(find.byType(Stack)))
+            .path
+            .any((e) => e.target == tester.renderObject(find.text('question'))),
         isFalse,
       );
     });
@@ -169,5 +177,55 @@ void main() {
     ].reduce(math.max);
     expect(peak, greaterThan(1.03));
     expect(peak, lessThan(1.25));
+  });
+
+  testWidgets('scaleX stretches one way only', (tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: NodeMotion(
+          motion: MotionModel(scaleX: 0.5, originX: -1),
+          child: SizedBox(width: 100, height: 20),
+        ),
+      ),
+    );
+    final Transform t = tester.widget(find.byType(Transform));
+    expect(t.transform.storage[0], closeTo(0.5, 1e-9));
+    expect(t.transform.storage[5], closeTo(1, 1e-9));
+  });
+
+  test('an entrance keeps the values it does not name', () {
+    const MotionModel tilted = MotionModel(
+      rotate: 8,
+      translateY: 20,
+      enterFrom: MotionModel(opacity: 0, scale: 0.6),
+    );
+    final MotionModel start = tilted.entranceStart;
+    expect(start.opacity, 0);
+    expect(start.scale, 0.6);
+    expect(start.rotate, 8, reason: 'not named: stays tilted');
+    expect(start.translateY, 20);
+  });
+
+  testWidgets('where tickers are off, an entrance shows its values at rest', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: TickerMode(
+          enabled: false,
+          child: NodeMotion(
+            motion: MotionModel(
+              durationMs: 500,
+              enterFrom: MotionModel(opacity: 0),
+            ),
+            child: SizedBox(width: 10, height: 10, child: Text('pop')),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(Opacity), findsNothing, reason: 'fully shown');
   });
 }

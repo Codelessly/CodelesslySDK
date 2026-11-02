@@ -35,16 +35,29 @@ class PreviewSwitchWidget extends StatefulWidget {
   State<PreviewSwitchWidget> createState() => _PreviewSwitchWidgetState();
 }
 
+/// A design-time switch: shows its bound value (or its own), and
+/// can be toggled locally until that value changes.
 class _PreviewSwitchWidgetState extends State<PreviewSwitchWidget> {
-  bool effectiveValue = false;
+  bool? toggled;
+  bool? toggledFrom;
 
   @override
   Widget build(BuildContext context) {
+    final bool bound =
+        PropertyValueDelegate.getPropertyValue<bool>(
+          widget.node,
+          'value',
+          scopedValues: ScopedValues.of(context),
+        ) ??
+        widget.node.value;
+    if (toggled != null && bound != toggledFrom) toggled = null;
+    final bool effectiveValue = toggled ?? bound;
     return TransformerSwitch(
       node: widget.node,
       settings: widget.settings,
       onChanged: (context, value) => setState(() {
-        effectiveValue = value;
+        toggled = value;
+        toggledFrom = bound;
       }),
       value: effectiveValue,
     );
@@ -56,11 +69,16 @@ class PassiveSwitchWidget extends StatelessWidget {
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
 
+  /// The values bindings read instead of the build context's, such as the
+  /// variable defaults a design canvas shows.
+  final ScopedValues? scopedValues;
+
   const PassiveSwitchWidget({
     super.key,
     required this.node,
     required this.settings,
     this.variablesOverrides = const [],
+    this.scopedValues,
   });
 
   void onChanged(BuildContext context, bool internalValue) {
@@ -82,10 +100,9 @@ class PassiveSwitchWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = ScopedValues.of(
-      context,
-      variablesOverrides: variablesOverrides,
-    );
+    final ScopedValues scopedValues =
+        this.scopedValues ??
+        ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final bool value =
         PropertyValueDelegate.getPropertyValue<bool>(
           node,

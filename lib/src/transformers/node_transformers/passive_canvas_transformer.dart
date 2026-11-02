@@ -132,7 +132,8 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   Widget _canvasMaterial(BuildContext context, CanvasNode node, Widget body) {
     final Color? background = canvasBackground(context, node);
     final bool transparent =
-        (background == null || background.a == 0) && TapThroughScope.of(context);
+        (background == null || background.a == 0) &&
+        TapThroughScope.of(context);
     return Material(
       type: transparent ? MaterialType.transparency : MaterialType.canvas,
       color: transparent ? null : background,
@@ -394,9 +395,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       settings: settings,
       builder: (context) => CanvasViewport(
         node: node,
-        followsScreen:
-            node.scaleMode == ScaleMode.responsive &&
-            hasResponsiveLayout(node, getNode),
+        followsScreen: followsScreen(node),
         child: switch (node.scaleMode) {
           ScaleMode.responsive => _wrapInScaffoldForResponsive(
             context: context,
@@ -437,8 +436,16 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
 
   /// Whether [node], shown with [sizing], fills the screen as a dialog.
   bool showsOverScreen(CanvasSizing sizing, CanvasNode node) =>
-      sizing == CanvasSizing.design &&
+      sizing == CanvasSizing.design && followsScreen(node);
+
+  /// Whether [node] fills the space it is shown in even as a dialog: a
+  /// responsive canvas holding a responsive layout, whose layout draws the
+  /// dialog. A canvas that hugs its content is a card of its own size
+  /// instead (a confirm dialog), centered like any dialog; its layout still
+  /// picks the variant for the screen's width.
+  bool followsScreen(CanvasNode node) =>
       node.scaleMode == ScaleMode.responsive &&
+      !CanvasViewport.sizesToContent(node) &&
       hasResponsiveLayout(node, getNode);
 
   static Color? retrieveBackgroundColor(BuildContext context, CanvasNode node) {
@@ -1023,7 +1030,8 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       clock.release(onTick);
     }
     _clocks.clear();
-    for (final (Listenable listenable, VoidCallback listener) in _clockWatches) {
+    for (final (Listenable listenable, VoidCallback listener)
+        in _clockWatches) {
       listenable.removeListener(listener);
     }
     _clockWatches.clear();
@@ -1086,6 +1094,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
               )
             : '',
         onTick: onTick,
+        isShown: () => mounted && (ModalRoute.of(context)?.isCurrent ?? true),
       );
       _clocks.add((clock, onTick));
       // The condition is checked when what it reads changes, not only on
@@ -1107,7 +1116,9 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
-    final String pressed = normalizeKeyLabel(event.logicalKey.keyLabel);
+    // The trigger label names keys without a visible label (Space's label
+    // is " ", which normalizes to nothing).
+    final String pressed = normalizeKeyLabel(keyTriggerLabel(event.logicalKey));
     final List<Reaction> matching = [
       for (final Reaction reaction in widget.node.reactions.whereTriggerType(
         TriggerType.keyPress,
@@ -1179,15 +1190,18 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     triggerOnLoadActions(context);
   }
 
-  /// The screen's "Key Down" reactions, while it listens to the keyboard.
+  /// The screen's "Key Down" and "Key Up" reactions, while it listens to
+  /// the keyboard.
   List<Reaction> _keyReactions = const [];
 
-  /// Runs the screen's "Key Down" actions for keys pressed (and held) while
-  /// it is the screen on top and no text field has focus.
+  /// Runs the screen's "Key Down" actions for keys pressed (and held), and
+  /// its "Key Up" actions for keys released, while it is the screen on top
+  /// and no text field has focus.
   void _listenToKeys() {
     _keyReactions = [
       for (final Reaction reaction in widget.node.reactions)
-        if (reaction.trigger.type == TriggerType.keyDown &&
+        if ((reaction.trigger.type == TriggerType.keyDown ||
+                reaction.trigger.type == TriggerType.keyUp) &&
             reaction.action.enabled)
           reaction,
     ];
@@ -1197,7 +1211,10 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   }
 
   bool _onKeyDown(KeyEvent event) {
-    if (event is KeyUpEvent || !mounted) return false;
+    if (!mounted) return false;
+    final TriggerType type = event is KeyUpEvent
+        ? TriggerType.keyUp
+        : TriggerType.keyDown;
     if (!(ModalRoute.of(context)?.isCurrent ?? true)) return false;
     final BuildContext? focused = FocusManager.instance.primaryFocus?.context;
     final bool typing =
@@ -1219,16 +1236,18 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     final String key = keyTriggerLabel(event.logicalKey);
     final List<Reaction> reactions = [
       for (final Reaction reaction in _keyReactions)
-        if (reaction.trigger.key == null ||
-            reaction.trigger.key!.isEmpty ||
-            reaction.trigger.key!.toLowerCase() == key.toLowerCase())
+        if (reaction.trigger.type == type &&
+            (reaction.trigger.key == null ||
+                reaction.trigger.key!.isEmpty ||
+                normalizeKeyLabel(reaction.trigger.key!) ==
+                    normalizeKeyLabel(key)))
           reaction,
     ];
     if (reactions.isEmpty) return false;
     final HardwareKeyboard keyboard = HardwareKeyboard.instance;
     FunctionsRepository.triggerAction(
       context,
-      TriggerType.keyDown,
+      type,
       reactions: reactions,
       result: {
         'key': key,
