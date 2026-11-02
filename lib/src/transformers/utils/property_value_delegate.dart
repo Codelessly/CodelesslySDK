@@ -433,9 +433,14 @@ class PropertyValueDelegate {
     Map<String, VariableData> variables,
     Set<String> seen,
   ) {
-    // A formula that reads the clock changes as time passes.
-    if (FormulaEvaluator.readsClock(expression)) return null;
-    final List<Object?> inputs = [];
+    final List<Object?> inputs = [
+      // A formula that reads the clock changes as time passes: its value
+      // holds for the current second (the clock ticks once a second), so a
+      // list computed from it stays the same list until then instead of
+      // being worked out, and rebuilt, on every read.
+      if (FormulaEvaluator.readsClock(expression))
+        FormulaClock.now().millisecondsSinceEpoch ~/ 1000,
+    ];
     for (final String path in FormulaEvaluator.referencedPaths(expression)) {
       final VariableMatch? match = VariableMatch.parse(
         path.wrapWithVariableSyntax(),
@@ -460,7 +465,10 @@ class PropertyValueDelegate {
   static bool _sameInputs(List<Object?> a, List<Object?> b) {
     if (a.length != b.length) return false;
     for (int i = 0; i < a.length; i++) {
-      if (!identical(a[i], b[i])) return false;
+      final Object? x = a[i], y = b[i];
+      // Variables by identity (they are immutable); the clock's second by
+      // value.
+      if (!identical(x, y) && !(x is int && x == y)) return false;
     }
     return true;
   }
