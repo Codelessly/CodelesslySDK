@@ -126,6 +126,46 @@ class _WebSoundEngine implements SoundEngine {
         _tone(t, 'triangle', 1700 * f, volume * 0.5, 0.025);
       case SoundVoice.hat:
         _burst(t, volume * 0.7, 0.04, 7000 * f);
+      case SoundVoice.pop:
+        _notes(t, f, volume, const [(660, 0, 0.12), (990, 0.06, 0.16)]);
+      case SoundVoice.boing:
+        _notes(t, f, volume * 1.2, const [
+          (220, 0, 0.18),
+          (165, 0.1, 0.22),
+        ], type: 'triangle');
+      case SoundVoice.chime:
+        _notes(t, f, volume, const [
+          (784, 0, 0.18),
+          (988, 0.1, 0.18),
+          (1319, 0.2, 0.32),
+        ]);
+      case SoundVoice.fanfare:
+        _notes(t, f, volume, const [
+          (523, 0, 0.16),
+          (659, 0.14, 0.16),
+          (784, 0.28, 0.16),
+          (1047, 0.42, 0.5),
+          (784, 0.56, 0.16),
+          (1047, 0.7, 0.6),
+        ], type: 'triangle');
+      case SoundVoice.tap:
+        _notes(t, f, volume * 0.45, const [(880, 0, 0.05)]);
+      case SoundVoice.pick:
+        _notes(t, f, volume * 0.55, const [(520, 0, 0.07)]);
+    }
+  }
+
+  /// Short notes for the game sounds: (frequency, start, length) each, in
+  /// Hz and seconds from [t].
+  void _notes(
+    double t,
+    double f,
+    double volume,
+    List<(double, double, double)> notes, {
+    String type = 'sine',
+  }) {
+    for (final (double hz, double start, double length) in notes) {
+      _tone(t + start, type, hz * f, volume * 0.7, length);
     }
   }
 }

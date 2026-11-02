@@ -25,6 +25,7 @@ platforms:
   windows:
 
 dependencies:
+  archive: ^4.0.7
   flutter:
     sdk: flutter
   # Codelessly
