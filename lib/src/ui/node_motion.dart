@@ -199,6 +199,9 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   /// node stays where the transition starts.
   Timer? _delay;
 
+  /// Whether a counted loop has played all its times: the node rests.
+  bool _rested = false;
+
   void _rebuild() => setState(() {});
 
   bool get _loops =>
@@ -255,13 +258,31 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   /// Repeats between rest and the motion's values.
   void _startLoop() {
     _delay?.cancel();
+    _rested = false;
     _from = widget.motion.atRest;
     _to = widget.motion;
     _curve = _to.curve;
     _transition.duration = Duration(milliseconds: widget.motion.durationMs);
     void start() {
       if (!mounted) return;
-      _transition.repeat(reverse: widget.motion.loop == MotionLoop.reverse);
+      final bool reverse = widget.motion.loop == MotionLoop.reverse;
+      final int repeat = widget.motion.repeat;
+      if (repeat <= 0) {
+        _transition.repeat(reverse: reverse);
+        return;
+      }
+      // A counted loop comes to rest when it is done; a reverse loop counts
+      // each way, so one time is there and back.
+      _transition
+          .repeat(reverse: reverse, count: reverse ? repeat * 2 : repeat)
+          .then((_) {
+            if (mounted) {
+              setState(() {
+                _transition.value = 0;
+                _rested = true;
+              });
+            }
+          }, onError: (_) {});
     }
 
     final int delay = widget.motion.delayMs;
@@ -300,6 +321,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       final MotionModel old = oldWidget.motion;
       if (!_sameTransform(next, _to) ||
           next.loop != old.loop ||
+          next.repeat != old.repeat ||
           next.durationMs != old.durationMs ||
           !_transition.isAnimating && _delay?.isActive != true) {
         _startLoop();
@@ -335,6 +357,8 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   static bool _sameTransform(MotionModel a, MotionModel b) =>
       a.translateX == b.translateX &&
       a.translateY == b.translateY &&
+      a.shiftX == b.shiftX &&
+      a.shiftY == b.shiftY &&
       a.scale == b.scale &&
       a.scaleX == b.scaleX &&
       a.scaleY == b.scaleY &&
@@ -381,6 +405,8 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     return _to.copyWith(
       translateX: lerp('translateX'),
       translateY: lerp('translateY'),
+      shiftX: lerp('shiftX'),
+      shiftY: lerp('shiftY'),
       scale: lerp('scale'),
       scaleX: lerp('scaleX'),
       scaleY: lerp('scaleY'),
@@ -442,7 +468,12 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     // entrance or transition would stay at its first frame forever: show
     // the values at rest instead, as the design canvas should.
     final bool still = !TickerMode.valuesOf(context).enabled;
-    final MotionModel m = still ? widget.motion : (_moving ? _current : _to);
+    // A loop that ran its [MotionModel.repeat] runs rests.
+    final MotionModel m = still
+        ? widget.motion
+        : _rested && _loops
+        ? _to.atRest
+        : (_moving ? _current : _to);
     if (!m.hasTransform && _turns == 0) return widget.child;
     Widget child = widget.child;
     if (m.backfaceHidden) child = BackfaceHidden(child: child);
@@ -453,6 +484,14 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
         child: Opacity(opacity: m.opacity, child: child),
       );
     }
+    // Shifts move by the node's own size, whatever size it got (paint only,
+    // like the transform: taps go where the node was laid out).
+    Widget shifted(Widget child) => m.shiftX == 0 && m.shiftY == 0
+        ? child
+        : FractionalTranslation(
+            translation: Offset(m.shiftX, m.shiftY),
+            child: child,
+          );
     if (m.translateX == 0 &&
         m.translateY == 0 &&
         m.scale == 1 &&
@@ -463,7 +502,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
         m.rotateY == 0 &&
         _turns == 0 &&
         !m.hasPath) {
-      return child;
+      return shifted(child);
     }
     MotionModel shown = m;
     if (m.hasPath) {
@@ -480,10 +519,12 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
         );
       }
     }
-    return Transform(
-      alignment: Alignment(shown.originX, shown.originY),
-      transform: motionMatrix(shown, spinTurns: _turns),
-      child: child,
+    return shifted(
+      Transform(
+        alignment: Alignment(shown.originX, shown.originY),
+        transform: motionMatrix(shown, spinTurns: _turns),
+        child: child,
+      ),
     );
   }
 }
