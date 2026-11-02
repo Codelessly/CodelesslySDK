@@ -317,6 +317,40 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   /// under, keeping their types (lists, maps, numbers) for the screen.
   static const String paramsKey = 'codelessly.params';
 
+  /// Key of the [NavigationTransition] a screen was opened with in the
+  /// route's global data (absent for the platform's transition).
+  static const String transitionKey = 'codelessly.transition';
+
+  /// The page of a screen: a [MaterialPage], or a
+  /// [CodelesslyTransitionPage] when the screen was opened with another
+  /// [NavigationTransition].
+  static Page<dynamic> pageFor(
+    ValueKey<String>? key,
+    String? name,
+    Widget child,
+    Map<String, dynamic> globalData,
+    Object? arguments,
+  ) {
+    final NavigationTransition transition =
+        NavigationTransition.values.asNameMap()[globalData[transitionKey]] ??
+        NavigationTransition.platform;
+    if (transition == NavigationTransition.platform) {
+      return MaterialPage<dynamic>(
+        key: key,
+        name: name,
+        arguments: arguments,
+        child: child,
+      );
+    }
+    return CodelesslyTransitionPage<dynamic>(
+      key: key,
+      name: name,
+      arguments: arguments,
+      transition: transition,
+      child: child,
+    );
+  }
+
   /// The app's controller. Each screen loads its layout through a copy.
   final CodelesslyWidgetController controller;
 
@@ -489,6 +523,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
           metadata: {'layoutId': patterns[pattern]},
           builder: (context, route, globalData) =>
               _buildScreen(patterns[pattern]!, route, globalData),
+          pageBuilder: (key, name, child, route, globalData, arguments) =>
+              pageFor(key, name, child, globalData, arguments),
         ),
     ];
   }
@@ -682,6 +718,7 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     String location, {
     Map<String, dynamic> params = const {},
     List<BuildContext> openerHosts = const [],
+    NavigationTransition transition = NavigationTransition.platform,
   }) {
     _handoffs[_canonical(location)] = (openerHosts: openerHosts, chain: null);
     _change = const CodelesslyHistoryPush();
@@ -694,7 +731,7 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     return push(
       uri.path,
       queryParameters: uri.queryParameters,
-      data: {paramsKey: params},
+      data: _routeData(params, transition),
     );
   }
 
@@ -708,6 +745,7 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     String location, {
     Map<String, dynamic> params = const {},
     ActionChain? chain,
+    NavigationTransition transition = NavigationTransition.platform,
   }) {
     _handoffs[_canonical(location)] = (openerHosts: const [], chain: chain);
     _change = const CodelesslyHistoryPush();
@@ -716,17 +754,37 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     return pushReplacement(
       uri.path,
       queryParameters: uri.queryParameters,
-      data: {paramsKey: params},
+      data: _routeData(params, transition),
     );
   }
 
+  static Map<String, dynamic> _routeData(
+    Map<String, dynamic> params,
+    NavigationTransition transition,
+  ) => {
+    paramsKey: params,
+    if (transition != NavigationTransition.platform)
+      transitionKey: transition.name,
+  };
+
   /// Clears the stack and shows [locations], bottom first, as a new browser
   /// history entry. [params] are the typed parameters of each location.
+  ///
+  /// The top screen takes over [chain], as with [replaceLocation]: actions
+  /// the chain set up to run later (a toast's Undo) run with it once the
+  /// screen that started the chain is gone.
   void resetTo(
     List<String> locations, {
     List<Map<String, dynamic>> params = const [],
+    ActionChain? chain,
   }) {
     assert(locations.isNotEmpty);
+    if (chain != null) {
+      _handoffs[_canonical(locations.last)] = (
+        openerHosts: const [],
+        chain: chain,
+      );
+    }
     _change = const CodelesslyHistoryPush();
     _back = null;
     _replaceStack([
@@ -1058,4 +1116,95 @@ class _ScreenNotFound extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// A screen's page opened with a [NavigationTransition] other than the
+/// platform's: it rises from the bottom, fades in or shows at once, and
+/// plays the same in reverse when it closes.
+class CodelesslyTransitionPage<T> extends Page<T> {
+  /// The screen.
+  final Widget child;
+
+  /// How the screen comes in.
+  final NavigationTransition transition;
+
+  /// Creates a [CodelesslyTransitionPage].
+  const CodelesslyTransitionPage({
+    super.key,
+    super.name,
+    super.arguments,
+    required this.transition,
+    required this.child,
+  });
+
+  @override
+  Route<T> createRoute(BuildContext context) =>
+      _CodelesslyTransitionRoute<T>(this);
+}
+
+class _CodelesslyTransitionRoute<T> extends PageRoute<T> {
+  _CodelesslyTransitionRoute(CodelesslyTransitionPage<T> page)
+    : super(settings: page);
+
+  CodelesslyTransitionPage<T> get _page =>
+      settings as CodelesslyTransitionPage<T>;
+
+  @override
+  Duration get transitionDuration => switch (_page.transition) {
+    NavigationTransition.none => Duration.zero,
+    NavigationTransition.fade => const Duration(milliseconds: 220),
+    _ => const Duration(milliseconds: 380),
+  };
+
+  @override
+  Duration get reverseTransitionDuration => switch (_page.transition) {
+    NavigationTransition.none => Duration.zero,
+    _ => const Duration(milliseconds: 260),
+  };
+
+  @override
+  bool get opaque => true;
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) => _page.child;
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    switch (_page.transition) {
+      case NavigationTransition.slideUp:
+        return SlideTransition(
+          position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+              .animate(
+                CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                  reverseCurve: Curves.easeInCubic,
+                ),
+              ),
+          child: child,
+        );
+      case NavigationTransition.fade:
+        return FadeTransition(opacity: animation, child: child);
+      case NavigationTransition.none || NavigationTransition.platform:
+        return child;
+    }
+  }
 }

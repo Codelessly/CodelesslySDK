@@ -833,13 +833,21 @@ class FunctionsRepository {
           );
         }
       } else if (action.navigationType == NavigationType.reset) {
+        // The destination takes over the chain, as with a replace: actions
+        // it set up to run later (a toast's Undo) run with it.
+        final ActionChain? chain = ActionChain.current;
         await _resetTo(
           context,
           action,
           destination: MaterialPageRoute(
             settings: RouteSettings(arguments: parsedParams),
-            builder: (context) =>
-                CodelesslyWidget(controller: effectiveController),
+            builder: (context) {
+              final Widget page = CodelesslyWidget(
+                controller: effectiveController,
+              );
+              if (chain == null) return page;
+              return ActionChainAdopter(chain: chain, child: page);
+            },
           ),
           codelessly: effectiveCodelessly,
           parentController: parentController,
@@ -920,6 +928,7 @@ class FunctionsRepository {
           location,
           params: params,
           openerHosts: ActionChainOpener.hostsFor(context),
+          transition: action.transition,
         );
       case NavigationType.replace || NavigationType.pop:
         // The new screen takes over the chain: the actions after this one
@@ -930,12 +939,17 @@ class FunctionsRepository {
             location,
             params: params,
             chain: ActionChain.current,
+            transition: action.transition,
           ),
         );
       case NavigationType.reset:
         final String? baseId = action.baseDestinationId;
         if (baseId == null || baseId.isEmpty) {
-          router.resetTo([location], params: [params]);
+          router.resetTo(
+            [location],
+            params: [params],
+            chain: ActionChain.current,
+          );
           return;
         }
         final Map<String, dynamic> baseParams = substituteVariablesInMap(
@@ -951,7 +965,11 @@ class FunctionsRepository {
           );
           return;
         }
-        router.resetTo([baseLocation, location], params: [baseParams, params]);
+        router.resetTo(
+          [baseLocation, location],
+          params: [baseParams, params],
+          chain: ActionChain.current,
+        );
     }
   }
 
