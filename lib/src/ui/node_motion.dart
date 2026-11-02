@@ -145,10 +145,11 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     }
   }
 
-  /// Repeats between rest and the motion's values.
+  /// Repeats between the loop's start (rest, or what
+  /// [MotionModel.enterFrom] gives) and the motion's values.
   void _startLoop() {
     _delay?.cancel();
-    _from = widget.motion.atRest;
+    _from = widget.motion.loopStart;
     _to = widget.motion;
     _transition.duration = Duration(milliseconds: widget.motion.durationMs);
     void start() {
