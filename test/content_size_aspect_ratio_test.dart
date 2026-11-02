@@ -39,7 +39,7 @@ Finder _of(String id) =>
           contentFit: Fit.contain,
           contentSize: contentSize,
         )
-        ..aspectRatio = aspectRatio
+        ..layoutAspectRatio = aspectRatio
         ..parentID = kRootNode;
   return (face: face, stamp: stamp);
 }
@@ -123,7 +123,7 @@ void main() {
       name: 'card',
       basicBoxLocal: NodeBox(0, 0, 100, 100),
       horizontalFit: SizeFit.expanded,
-    )..aspectRatio = 1.5;
+    )..layoutAspectRatio = 1.5;
     card.parentID = kRootNode;
     await _pump(tester, [card], width: 300);
     expect(tester.getSize(_of('card')), const Size(300, 200));
@@ -157,10 +157,26 @@ void main() {
     expect(keep(null, null, const BoxConstraints()), isNull);
   });
 
+  test('an icon\'s built-in 1:1 ratio does not wrap it', () {
+    final BaseNode icon = NodeJsonConverter().fromJson({
+      'id': 'icon',
+      'name': 'icon',
+      'type': 'icon',
+      'basicBoxLocal': [0, 0, 24, 24],
+      'properties': {
+        'icon': {'type': 'icon', 'show': true},
+      },
+    })!;
+    const Widget child = SizedBox();
+    expect(identical(wrapWithAspectRatio(icon, child), child), isTrue);
+    icon.layoutAspectRatio = 2;
+    expect(wrapWithAspectRatio(icon, child), isA<FitBox>());
+  });
+
   test('contentSize and aspectRatio round-trip through JSON', () {
     final (:face, stamp: _) = _face();
     final FrameNode copy = FrameNode.fromJson(face.toJson());
     expect(copy.contentSize, const SizeC(340, 214));
-    expect(copy.aspectRatio, face.aspectRatio);
+    expect(copy.layoutAspectRatio, face.layoutAspectRatio);
   });
 }
