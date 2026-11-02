@@ -220,10 +220,15 @@ Widget decorateWithShadows({
           ),
     child: child,
   );
-  // Only a rounded box has spread shadows here, so it has a radius.
-  if (spread.isEmpty) return box;
+  // Always a CustomPaint, painting nothing without spread shadows: a ring
+  // that comes and goes (a focused state) must not change the tree, or
+  // everything inside is rebuilt from scratch and a text field in the box
+  // loses focus as it gains it. Only a rounded box has spread shadows here,
+  // so it has a radius.
   return CustomPaint(
-    painter: SpreadShadowPainter(shadows: spread, borderRadius: borderRadius!),
+    painter: spread.isEmpty
+        ? null
+        : SpreadShadowPainter(shadows: spread, borderRadius: borderRadius!),
     child: box,
   );
 }
