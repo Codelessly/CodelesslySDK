@@ -71,6 +71,7 @@ export 'src/ui/swipe_detector.dart';
 export 'src/ui/stripe_painter.dart';
 export 'src/utils/computed_variables.dart';
 export 'src/utils/cupertino_svg_url.dart';
+export 'src/utils/directional_icons.dart';
 export 'src/utils/material_icon_versions.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/flutter_icons_data_map.dart';
