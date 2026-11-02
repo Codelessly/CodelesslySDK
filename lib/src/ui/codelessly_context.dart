@@ -62,6 +62,16 @@ class CodelesslyContext with ChangeNotifier, Equatable {
   /// A notifier that is used to rebuild individual nodes.
   final ValueNotifier<String> nodeRebuildNotifier = ValueNotifier('');
 
+  /// The layouts of this screen whose load actions have run. A layout's
+  /// breakpoint canvases are one screen: the canvas shown for a new width
+  /// (or the first one replaced by the right one at start-up) doesn't run
+  /// them again. A copy starts empty, as a new screen does.
+  final Set<String> _loadedLayouts = <String>{};
+
+  /// Records that the load actions of [layoutId] run now, and whether this
+  /// is the first time for this screen.
+  bool markLayoutLoaded(String layoutId) => _loadedLayouts.add(layoutId);
+
   /// Creates a [CodelesslyContext] with the given [_data], [functions], and
   /// [nodeValues].
   CodelesslyContext({

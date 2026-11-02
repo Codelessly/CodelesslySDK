@@ -1041,7 +1041,14 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     }
 
     context.read<Codelessly?>()?.prepareRoute(context, widget.node.id);
-    triggerOnLoadActions(context);
+    // Another breakpoint canvas of this layout may have run them already.
+    final CodelesslyContext? screen = context.read<CodelesslyContext?>();
+    final String? layoutId = screen?.layoutID;
+    if (screen == null ||
+        layoutId == null ||
+        screen.markLayoutLoaded(layoutId)) {
+      triggerOnLoadActions(context);
+    }
     _watchValues(context);
     _startTimers();
     startIntervals();
