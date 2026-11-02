@@ -86,4 +86,41 @@ void main() {
   test('key labels match however the trigger spells them', () {
     expect(normalizeKeyLabel('Arrow Down'), normalizeKeyLabel(keyTriggerLabel(LogicalKeyboardKey.arrowDown)));
   });
+
+  testWidgets('selectAllOnFocus selects the text when the field gains focus', (tester) async {
+    final node = TextFieldNode(
+      id: 'field',
+      name: 'Field',
+      basicBoxLocal: NodeBox(0, 0, 300, 48),
+      properties: TextFieldProperties(selectAllOnFocus: true),
+      initialText: 'Dining Out',
+    );
+    final registry = NodeRegistry()..setNodes({node.id: node});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: CodelesslyContext.empty(),
+        child: MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => manager.buildWidgetFromNode(
+                node,
+                context,
+                settings: const WidgetBuildSettings(debugLabel: 'test'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    await tester.pump();
+    final selection = tester.widget<TextField>(find.byType(TextField)).controller!.selection;
+    expect(selection.start, 0);
+    expect(selection.end, 'Dining Out'.length);
+  });
 }
