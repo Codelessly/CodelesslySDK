@@ -554,7 +554,7 @@ Gradient? retrieveGradient(PaintModel paint) {
         tileMode: repeats ? TileMode.repeated : tileMode,
         transform: repeats
             ? RepeatingGradientTransform(radians, repeatEvery)
-            : GradientRotation(radians),
+            : SpanningGradientRotation(radians),
       );
     } else if (paint.type == PaintType.gradientRadial) {
       return RadialGradient(
@@ -587,6 +587,39 @@ Gradient? retrieveGradient(PaintModel paint) {
     );
     return null;
   }
+}
+
+/// Rotates a linear gradient by [radians] about the box center and stretches
+/// it to span the whole box along its new direction: the box's extent along
+/// the axis, `w·|cos| + h·|sin|`, as a CSS angled gradient does.
+///
+/// [GradientRotation] alone keeps a run as long as the box is wide, so a
+/// gradient turned 90° in a tall box covered only `w` pixels of its height,
+/// centred, and held its end colours above and below that band.
+class SpanningGradientRotation extends GradientTransform {
+  const SpanningGradientRotation(this.radians);
+
+  final double radians;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    final double extent =
+        bounds.width * cos(radians).abs() + bounds.height * sin(radians).abs();
+    final double scale = bounds.width <= 0 ? 1 : extent / bounds.width;
+    final double cx = bounds.center.dx, cy = bounds.center.dy;
+    return Matrix4.identity()
+      ..translateByDouble(cx, cy, 0, 1)
+      ..rotateZ(radians)
+      ..scaleByDouble(scale, scale, 1, 1)
+      ..translateByDouble(-cx, -cy, 0, 1);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SpanningGradientRotation && other.radians == radians;
+
+  @override
+  int get hashCode => radians.hashCode;
 }
 
 /// Rotates a linear gradient by [radians] about the box center, like
