@@ -37,18 +37,31 @@ class PreviewSliderWidget extends StatefulWidget {
   State<PreviewSliderWidget> createState() => _PreviewSliderWidgetState();
 }
 
+/// A design-time slider: it shows what its bindings give (value, min, max,
+/// marker, track color), as the runtime does, and can be dragged without
+/// running any actions. A drag holds until the bound value changes.
 class _PreviewSliderWidgetState extends State<PreviewSliderWidget> {
-  double effectiveValue = 0;
+  double? dragged;
+  Object? draggedFrom;
 
   @override
   Widget build(BuildContext context) {
-    return TransformerSlider(
+    final Object? bound = widget.node.variables['value'] == null
+        ? widget.node.value
+        : PropertyValueDelegate.getPropertyValue<double>(
+            widget.node,
+            'value',
+            scopedValues: ScopedValues.of(context),
+          );
+    if (dragged != null && bound != draggedFrom) dragged = null;
+    return PassiveSliderWidget(
       node: widget.node,
       settings: widget.settings,
-      onChanged: (value) => setState(() {
-        effectiveValue = value;
+      valueOverride: dragged,
+      onPreviewChanged: (value) => setState(() {
+        dragged = value;
+        draggedFrom = bound;
       }),
-      value: effectiveValue,
     );
   }
 }
@@ -62,15 +75,28 @@ class PassiveSliderWidget extends StatelessWidget {
   /// When null, bindings use the build context and [variablesOverrides].
   final ScopedValues? scopedValues;
 
+  /// Shown instead of the bound value (a design-time drag).
+  final double? valueOverride;
+
+  /// When set, a drag calls this instead of updating state and running
+  /// actions: the design canvas's slider.
+  final ValueChanged<double>? onPreviewChanged;
+
   const PassiveSliderWidget({
     super.key,
     required this.node,
     required this.settings,
     this.variablesOverrides = const [],
     this.scopedValues,
+    this.valueOverride,
+    this.onPreviewChanged,
   });
 
   void onChanged(BuildContext context, double internalValue) {
+    if (onPreviewChanged case final ValueChanged<double> preview) {
+      preview(internalValue);
+      return;
+    }
     NodeStateProvider.setState(context, internalValue);
 
     FunctionsRepository.setPropertyValue(
@@ -103,6 +129,7 @@ class PassiveSliderWidget extends StatelessWidget {
         this.scopedValues ??
         ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final double value =
+        valueOverride ??
         PropertyValueDelegate.getPropertyValue<double>(
           node,
           'value',
@@ -140,7 +167,9 @@ class PassiveSliderWidget extends StatelessWidget {
       settings: settings,
       variablesOverrides: variablesOverrides,
       onChanged: (value) => onChanged(context, value),
-      onChangeEnd: (value) => onChangeEnd(context, value),
+      onChangeEnd: onPreviewChanged == null
+          ? (value) => onChangeEnd(context, value)
+          : null,
       value: value,
       min: min,
       max: max,
