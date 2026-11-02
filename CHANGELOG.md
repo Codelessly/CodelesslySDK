@@ -75,8 +75,6 @@
   `mix(from, to, amount)` to blend two colors like `Color.lerp`.
 - A node hidden by a binding or condition stops its pulses, motion loops
   and spins.
-- Material icons draw Flutter's glyph for their name and style (the stored
-  codepoint is the web font's).
 - A published layout too large for one document may be stored with its
   canvases gzipped (`compressedCanvases`); `SDKPublishLayout.fromJson`
   expands it.
