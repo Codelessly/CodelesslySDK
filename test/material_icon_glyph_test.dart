@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/utils/material_icons_by_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -15,7 +18,12 @@ void main() {
   testWidgets('a catalog codepoint draws the icon of its name', (tester) async {
     final IconData data = await glyph(
       tester,
-      const MaterialIcon(codepoint: 0xe01b, name: 'av_timer', style: MaterialIconStyle.filled, version: 12),
+      const MaterialIcon(
+        codepoint: 0xe01b,
+        name: 'av_timer',
+        style: MaterialIconStyle.filled,
+        version: 12,
+      ),
     );
     expect(data.codePoint, Icons.av_timer.codePoint);
   });
@@ -23,16 +31,32 @@ void main() {
   testWidgets('styles pick their own glyph', (tester) async {
     final IconData data = await glyph(
       tester,
-      const MaterialIcon(codepoint: 1, name: 'edit', style: MaterialIconStyle.outlined),
+      const MaterialIcon(
+        codepoint: 1,
+        name: 'edit',
+        style: MaterialIconStyle.outlined,
+      ),
     );
     expect(data.codePoint, Icons.edit_outlined.codePoint);
   });
 
-  testWidgets('an unknown name keeps its stored codepoint', (tester) async {
-    final IconData data = await glyph(
-      tester,
-      const MaterialIcon(codepoint: 0xe123, name: 'no_such_icon', style: MaterialIconStyle.filled),
-    );
-    expect(data.codePoint, 0xe123);
+  test('an unknown name has no font glyph (it is drawn from its SVG)', () {
+    expect(materialIconsByName['no_such_icon'], isNull);
+  });
+
+  test('the SDK never builds a non-constant IconData', () {
+    // Flutter's icon tree shaking rejects `IconData(...)` from runtime
+    // values, which fails every release web build (the site's included).
+    final RegExp call = RegExp(r'(?<!const )(?<![\w.])IconData\(');
+    final List<String> offenders = [
+      for (final File file in Directory(
+        'lib',
+      ).listSync(recursive: true).whereType<File>())
+        if (file.path.endsWith('.dart'))
+          for (final (int i, String line) in file.readAsLinesSync().indexed)
+            if (!line.trimLeft().startsWith('//') && call.hasMatch(line))
+              '${file.path}:${i + 1}',
+    ];
+    expect(offenders, isEmpty);
   });
 }
