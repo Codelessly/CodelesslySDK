@@ -1019,7 +1019,24 @@ class SvgIcon extends StatelessWidget {
     // Flutter's font numbers its glyphs its own way (close is 0xe16a there,
     // 0xe5cd is snowboarding), so look the glyph up by the icon's styled
     // name instead of using the catalog's codepoint.
-    if (icon case final MaterialIcon material) {
+    // A Material Symbol Flutter also ships (by name, in the matching
+    // style) draws offline the same way; others load their SVG below.
+    final IconModel model = icon;
+    final MaterialIcon? asIcon = switch (model) {
+      final MaterialIcon material => material,
+      final MaterialSymbol symbol => MaterialIcon(
+        codepoint: 0,
+        name: symbol.name,
+        style: switch (symbol.style) {
+          MaterialSymbolStyle.rounded => MaterialIconStyle.rounded,
+          MaterialSymbolStyle.sharp => MaterialIconStyle.sharp,
+          MaterialSymbolStyle.outlined =>
+            (fill ?? 0) >= 1 ? MaterialIconStyle.filled : MaterialIconStyle.outlined,
+        },
+      ),
+      _ => null,
+    };
+    if (asIcon case final MaterialIcon material) {
       final int? flutterCodepoint = flutterMaterialCodepoint(material);
       if (flutterCodepoint != null) {
         return Icon(

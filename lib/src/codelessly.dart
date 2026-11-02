@@ -1182,8 +1182,35 @@ class Codelessly {
         Provider.of<CodelesslyContext?>(context, listen: false);
     if (codelesslyContext == null) return;
     for (final MapEntry<String, String> param in route.params.entries) {
-      if (codelesslyContext.findVariableByName(param.key) == null) continue;
-      codelesslyContext.updateVariable(param.key, param.value);
+      final VariableData? variable = codelesslyContext
+          .findVariableByName(param.key)
+          ?.value;
+      if (variable == null) continue;
+      codelesslyContext.updateVariable(
+        param.key,
+        linkValueFor(variable.type, param.value),
+      );
+    }
+  }
+
+  /// A link parameter's text as the value of a variable of [type]: `?done=1`
+  /// sets a boolean to true (also `true`, `yes`, `on`; `0`, `false`, `no`,
+  /// `off` and empty to false) and numbers are read as numbers. A link only
+  /// carries text, and `"1"` in a boolean read as false.
+  static Object linkValueFor(VariableType type, String text) {
+    final String t = text.trim();
+    switch (type) {
+      case VariableType.boolean:
+        final String lower = t.toLowerCase();
+        if (const {'1', 'true', 'yes', 'on'}.contains(lower)) return true;
+        if (const {'0', 'false', 'no', 'off', ''}.contains(lower)) return false;
+        return text;
+      case VariableType.integer:
+        return int.tryParse(t) ?? double.tryParse(t)?.round() ?? text;
+      case VariableType.decimal:
+        return double.tryParse(t) ?? text;
+      default:
+        return text;
     }
   }
 
