@@ -46,6 +46,7 @@ Future<void> open(
   Size size = const Size(390, 844),
   DialogAnchor anchor = DialogAnchor.none,
   DialogPresentation presentation = DialogPresentation.dialog,
+  double sheetBelowWidth = 600,
 }) async {
   await pumpLayouts(tester, [
     layoutOf(
@@ -57,6 +58,7 @@ Future<void> open(
           anchor: anchor,
           anchorGap: 6,
           presentation: presentation,
+          sheetBelowWidth: sheetBelowWidth,
         ),
       ),
     ),
@@ -161,9 +163,7 @@ void main() {
     expect(shown.size, const Size(180, 120));
   });
 
-  testWidgets('an adaptive anchored menu is a sheet on mobile', (
-    tester,
-  ) async {
+  testWidgets('an adaptive anchored menu is a sheet on mobile', (tester) async {
     await open(
       tester,
       DialogPlacement.belowStart,
@@ -173,4 +173,35 @@ void main() {
     expect(menuRect(tester).bottom, 844);
     expect(menuRect(tester).width, 390);
   });
+
+  // Switchboard's phone layout ends at 640, not the default 600: at 620 its
+  // menus must be sheets, as the rest of the screen is the phone layout.
+  testWidgets('an adaptive menu takes the app\'s sheet breakpoint', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      DialogPlacement.belowStart,
+      anchor: DialogAnchor.trigger,
+      presentation: DialogPresentation.adaptive,
+      size: const Size(620, 900),
+    );
+    expect(menuRect(tester).width, isNot(620));
+  });
+
+  testWidgets(
+    'below the app\'s sheet breakpoint, an adaptive menu is a sheet',
+    (tester) async {
+      await open(
+        tester,
+        DialogPlacement.belowStart,
+        anchor: DialogAnchor.trigger,
+        presentation: DialogPresentation.adaptive,
+        size: const Size(620, 900),
+        sheetBelowWidth: 640,
+      );
+      expect(menuRect(tester).bottom, 900);
+      expect(menuRect(tester).width, 620);
+    },
+  );
 }
