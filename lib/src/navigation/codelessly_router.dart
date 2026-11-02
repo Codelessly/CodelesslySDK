@@ -427,7 +427,11 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
       final String? link = initialLocation;
       final String? screen = controller.layoutID;
       if (link != null) {
-        _restore([if (_canonical(link) != '/') '/', link], fromLink: true);
+        _restore(
+          [if (_canonical(link) != '/') '/', link],
+          fromLink: true,
+          seedsHome: _canonical(link) != '/',
+        );
       } else {
         _restore([
           (screen == null ? null : locationFor(screen, const {})) ?? '/',
@@ -595,6 +599,7 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     String location, {
     Map<String, dynamic>? params,
     bool fromLink = false,
+    bool seeded = false,
   }) {
     final Uri uri = Uri.parse(location);
     final DefaultRoute link = DefaultRoute(
@@ -609,7 +614,11 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         link;
     if (params != null) globalData[route.path] = {paramsKey: params};
     return route.copyWith(
-      metadata: {...?route.metadata, if (fromLink) 'link': true},
+      metadata: {
+        ...?route.metadata,
+        if (fromLink) 'link': true,
+        if (seeded) 'seeded': true,
+      },
     );
   }
 
@@ -676,8 +685,18 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     ]);
   }
 
+  /// Whether the browser has reported a location yet.
+  bool _reportedLocation = false;
+
   /// Whether the app can go back from its top screen.
   bool get canGoBack => routes.length > 1;
+
+  /// Whether the only screen to go back to is the entry screen the router
+  /// put under a link opened directly, not one the user came from. A pop
+  /// with a destination then goes to its destination, as from a screen
+  /// with nothing below it.
+  bool get backIsOnlySeededHome =>
+      routes.length == 2 && routes.first.metadata?['seeded'] == true;
 
   @override
   void pop([dynamic result, bool apply = true, bool all = false]) {
@@ -720,18 +739,37 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
       for (final route in routes) locationOfRoute(route),
     ];
     final int index = current.indexOf(location);
+    // The first location the browser reports is the link the app opened
+    // with: the entry screen under it was put there, not visited.
+    final bool opening = !_reportedLocation;
+    _reportedLocation = true;
     if (current.isEmpty) {
-      _restore([if (location != '/') '/', location], fromLink: true);
+      _restore(
+        [if (location != '/') '/', location],
+        fromLink: true,
+        seedsHome: location != '/',
+      );
     } else if (index != -1) {
       _restore(current.sublist(0, index + 1), fromLink: true);
     } else {
-      _restore([...current, location], fromLink: true);
+      _restore(
+        [...current, location],
+        fromLink: true,
+        seedsHome: opening && current.length == 1 && current.single == '/',
+      );
     }
   }
 
   /// Shows [stack], keeping the screens it shares with the current stack
   /// from the bottom up as they are, with their state.
-  void _restore(List<String> stack, {bool fromLink = false}) {
+  ///
+  /// With [seedsHome], the first screen of [stack] is the entry screen put
+  /// under a link opened directly; see [backIsOnlySeededHome].
+  void _restore(
+    List<String> stack, {
+    bool fromLink = false,
+    bool seedsHome = false,
+  }) {
     final List<String> target = [
       for (final location in stack) _canonical(location),
     ];
@@ -749,9 +787,15 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
       return;
     }
     _replaceStack([
-      ...routes.take(common),
-      for (final String location in target.skip(common))
-        _routeFor(location, fromLink: fromLink),
+      for (int i = 0; i < common; i++)
+        // The entry screen already shown stays, marked as put there.
+        seedsHome && i == 0
+            ? routes[i].copyWith(
+                metadata: {...?routes[i].metadata, 'seeded': true},
+              )
+            : routes[i],
+      for (int i = common; i < target.length; i++)
+        _routeFor(target[i], fromLink: fromLink, seeded: seedsHome && i == 0),
     ]);
   }
 
