@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' show PathMetric, Tangent;
+import 'dart:ui' show ImageFilter, PathMetric, Tangent;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/physics.dart';
@@ -17,6 +17,7 @@ Curve flutterCurveOf(MotionCurve curve) => switch (curve) {
   MotionCurve.easeIn => Curves.easeIn,
   MotionCurve.easeOutBack => Curves.easeOutBack,
   MotionCurve.easeOutCubic => Curves.easeOutCubic,
+  MotionCurve.easeInOutSine => Curves.easeInOutSine,
   MotionCurve.easeInOutCubic => Curves.easeInOutCubic,
   MotionCurve.spring => const SpringCurve(),
   MotionCurve.elasticOut => Curves.elasticOut,
@@ -369,6 +370,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       a.perspective == b.perspective &&
       a.originX == b.originX &&
       a.originY == b.originY &&
+      a.blur == b.blur &&
       a.pathProgress == b.pathProgress &&
       a.path == b.path &&
       a.orientToPath == b.orientToPath &&
@@ -414,6 +416,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       rotate: lerp('rotate'),
       rotateX: lerp('rotateX'),
       rotateY: lerp('rotateY'),
+      blur: math.max(0, lerp('blur')),
       pathProgress: lerp('pathProgress'),
     );
   }
@@ -482,6 +485,12 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       child = IgnorePointer(
         ignoring: m.opacity == 0,
         child: Opacity(opacity: m.opacity, child: child),
+      );
+    }
+    if (m.blur > 0) {
+      child = ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: m.blur, sigmaY: m.blur),
+        child: child,
       );
     }
     // Shifts move by the node's own size, whatever size it got (paint only,
