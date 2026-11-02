@@ -1,93 +1,97 @@
+import 'dart:async';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 
-class _RecordingSpeech implements SpeechBackend {
-  final List<String> calls = [];
+class FakeEngine implements SpeechEngine {
+  FakeEngine({this.available = true});
 
   @override
-  void speak(
+  final bool available;
+  final List<String> said = [];
+  final List<String> languages = [];
+  Completer<void>? current;
+  int cancels = 0;
+
+  @override
+  Future<void> speak(
     String text, {
     required String language,
     required double rate,
     required double pitch,
-  }) => calls.add('speak $text|$language|$rate|$pitch');
-
-  @override
-  void stop() => calls.add('stop');
-}
-
-Observable<VariableData> _variable(
-  String name,
-  VariableType type,
-  Object value,
-) => Observable(VariableData(id: name, name: name, type: type, value: value));
-
-void main() {
-  late SpeechBackend original;
-  late _RecordingSpeech speech;
-
-  setUp(() {
-    original = Speech.backend;
-    speech = _RecordingSpeech();
-    Speech.backend = speech;
-  });
-  tearDown(() => Speech.backend = original);
-
-  Future<BuildContext> pumpContext(WidgetTester tester) async {
-    final CodelesslyContext codelesslyContext = CodelesslyContext.empty()
-      ..variables['phrase'] = _variable('phrase', VariableType.text, 'شكرا')
-      ..variables['lang'] = _variable('lang', VariableType.text, 'ar-EG')
-      ..variables['slow'] = _variable('slow', VariableType.boolean, true);
-    late BuildContext context;
-    await tester.pumpWidget(
-      ChangeNotifierProvider<CodelesslyContext>.value(
-        value: codelesslyContext,
-        child: Builder(
-          builder: (c) {
-            context = c;
-            return const SizedBox();
-          },
-        ),
-      ),
-    );
-    return context;
+  }) {
+    said.add(text);
+    languages.add(language);
+    current = Completer<void>();
+    return current!.future;
   }
 
-  testWidgets('speak resolves text, language and a formula rate', (
-    tester,
-  ) async {
-    final BuildContext context = await pumpContext(tester);
-    final Object? done = FunctionsRepository.performAction(
-      context,
-      SpeakAction(
-        text: r'${phrase}',
-        language: r'${lang}',
-        rate: r'${= slow ? 0.6 : 1}',
-      ),
-    );
-    expect(done, isTrue);
-    expect(speech.calls, ['speak شكرا|ar-EG|0.6|1.0']);
+  @override
+  void cancel() {
+    cancels++;
+    if (current?.isCompleted == false) current!.complete();
+  }
+}
+
+/// Text-to-speech: the `speech` variable follows what is being said, and
+/// the action finishes when the speech does.
+void main() {
+  test('speaks, reports what it says, and settles when done', () async {
+    final engine = FakeEngine();
+    Speech.engine = engine;
+    final states = <Map<String, dynamic>>[];
+    void listen() => states.add(Speech.instance.value);
+    Speech.instance.addListener(listen);
+    addTearDown(() => Speech.instance.removeListener(listen));
+
+    final Future<bool> done = Speech.instance.speak('hola', language: 'es-ES');
+    expect(Speech.instance.value, {
+      'speaking': true,
+      'text': 'hola',
+      'available': true,
+    });
+    expect(engine.languages, ['es-ES']);
+    engine.current!.complete();
+    expect(await done, isTrue);
+    expect(Speech.instance.speaking, isFalse);
+    expect(states.last['text'], '');
   });
 
-  testWidgets('a stop action stops speech instead of speaking', (tester) async {
-    final BuildContext context = await pumpContext(tester);
-    FunctionsRepository.performAction(
-      context,
-      SpeakAction(text: r'${phrase}', stop: true),
-    );
-    expect(speech.calls, ['stop']);
+  test('a new word cuts the last one off; only the last ends speaking', () async {
+    final engine = FakeEngine();
+    Speech.engine = engine;
+    final Future<bool> first = Speech.instance.speak('uno');
+    final Future<bool> second = Speech.instance.speak('dos');
+    await first;
+    // The first one was cancelled, but "dos" is still being said.
+    expect(Speech.instance.value['text'], 'dos');
+    expect(Speech.instance.speaking, isTrue);
+    engine.current!.complete();
+    await second;
+    expect(Speech.instance.speaking, isFalse);
   });
 
-  testWidgets('a rate that is not a number falls back to normal and pitch '
-      'is clamped', (tester) async {
-    final BuildContext context = await pumpContext(tester);
-    FunctionsRepository.performAction(
-      context,
-      SpeakAction(text: 'Hello', language: 'en-US', rate: 'fast', pitch: '5'),
+  test('without a voice it says so instead', () async {
+    Speech.engine = FakeEngine(available: false);
+    expect(await Speech.instance.speak('bonjour'), isFalse);
+    expect(Speech.instance.value['available'], isFalse);
+  });
+
+  test('stop silences it', () {
+    final engine = FakeEngine();
+    Speech.engine = engine;
+    Speech.instance.speak('ありがとう');
+    Speech.instance.stop();
+    expect(engine.cancels, greaterThan(0));
+    expect(Speech.instance.speaking, isFalse);
+  });
+
+  test('the action lists the variables it reads', () {
+    final action = SpeakAction(
+      text: r'${card.front}',
+      language: r'${deck.lang}',
     );
-    expect(speech.calls, ['speak Hello|en-US|1.0|2.0']);
+    expect(action.getUsedVariableNames(), containsAll(['card', 'deck']));
   });
 }
