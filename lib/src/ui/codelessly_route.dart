@@ -1,10 +1,8 @@
 /// A screen of a Codelessly app and the parameters it was opened with, as a
 /// link: `{canvasId}?key=value`, or the screen's own URL path when it has one
 /// (`guide/bat-star` for a screen at `guide/:id`, see
-/// [Codelessly.pathOf]). Hosts put it in the browser's address (see
-/// [Codelessly.route]) and hand it back on a reload or a shared link (see
-/// [Codelessly.pendingRoute]), so it opens the same screen with the same
-/// parameters.
+/// [Codelessly.pathOf]). [Codelessly.route] holds the one shown; a
+/// [CodelesslyRouter] keeps the browser's address on it.
 class CodelesslyRoute {
   /// The screen (canvas) id. For a link read from a URL path, its last
   /// segment, which [path] may resolve to another screen.
