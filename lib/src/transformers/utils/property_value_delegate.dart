@@ -420,6 +420,8 @@ class PropertyValueDelegate {
     Map<String, VariableData> variables,
     Set<String> seen,
   ) {
+    // A formula that reads the clock changes as time passes.
+    if (FormulaEvaluator.readsClock(expression)) return null;
     final List<Object?> inputs = [];
     for (final String path in FormulaEvaluator.referencedPaths(expression)) {
       final VariableMatch? match = VariableMatch.parse(
