@@ -64,6 +64,25 @@
 - Gauge, chart, progress bar and dropdown widgets take `scopedValues`, so a
   design canvas can show their bindings with its variable defaults.
 
+### Pan and zoom canvases
+
+- `wheel`, `pinch` and screen `keyUp` reactions; drag, drag end and pointer
+  results carry `globalX`/`globalY` and the `shift`, `alt` and `meta` keys,
+  pointer results the `button`; pointer reactions listen on a node's whole
+  box.
+- Click results carry `x`, `y` (in the node) and `globalX`, `globalY`.
+- Formulas: `exp`, `ln`, `log(value, base?)`, `sign`, `hypot`, and
+  `mix(from, to, amount)` to blend two colors like `Color.lerp`.
+- A node hidden by a binding or condition stops its pulses, motion loops
+  and spins.
+- Material icons draw Flutter's glyph for their name and style (the stored
+  codepoint is the web font's).
+- A published layout too large for one document may be stored with its
+  canvases gzipped (`compressedCanvases`); `SDKPublishLayout.fromJson`
+  expands it.
+- Responsive layouts follow their own tablet/desktop breakpoints
+  (`VarianceProperties.tabletMinWidth` / `desktopMinWidth`).
+
 ## 8.4.0
 
 Requires codelessly_api 6.3.0.
