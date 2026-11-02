@@ -1042,8 +1042,13 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
 
     context.read<Codelessly?>()?.prepareRoute(context, widget.node.id);
     // Another breakpoint canvas of this layout may have run them already.
+    // The context names its layout only when the app asked for one by id
+    // (the site opens its entry screen without), so find the layout that
+    // holds this canvas.
     final CodelesslyContext? screen = context.read<CodelesslyContext?>();
-    final String? layoutId = screen?.layoutID;
+    final String? layoutId =
+        screen?.layoutID ??
+        context.read<Codelessly?>()?.layoutIdOfCanvas(widget.node.id);
     if (screen == null ||
         layoutId == null ||
         screen.markLayoutLoaded(layoutId)) {

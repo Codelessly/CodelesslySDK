@@ -81,76 +81,87 @@ void main() {
   // site showed the screen's desktop canvas, then its phone canvas for the
   // width, and each ran the screen's load actions; the second found the
   // failure spent and loaded. A layout's breakpoint canvases are one screen.
-  testWidgets('a screen runs its load actions once across breakpoints', (
-    tester,
-  ) async {
-    final List<String> calls = [];
-    final model = SDKPublishModel(
-      projectId: 'project',
-      owner: 'owner',
-      teams: const {},
-      users: const {},
-      roles: const {},
-      public: false,
-    );
-    final layout = SDKPublishLayout.private(
-      id: 'layout',
-      projectId: 'project',
-      pageId: 'page',
-      lastUpdated: DateTime(2026),
-      canvases: {
-        'mobile': _canvas('mobile', 390),
-        'desktop': _canvas('desktop', 1440),
-      },
-      breakpoints: [
-        const Breakpoint(nodeId: 'mobile', lowerBound: 0, upperBound: 640),
-        const Breakpoint(nodeId: 'desktop', lowerBound: 640, upperBound: 100000),
-      ],
-      privacy: model,
-    );
-    model.layouts[layout.id] = SDKPublishLayout.fromJson(
-      jsonDecode(jsonEncode(layout.toJson())) as Map<String, dynamic>,
-    );
-    final config = CodelesslyConfig(authToken: 'token', isPreview: false);
-    final codelessly = Codelessly(
-      config: config,
-      client: MockClient((request) async => http.Response('{}', 200)),
-      publishDataManager: _TestDataManager(model, config)
-        ..status = CStatus.loaded(),
-      previewDataManager: _TestDataManager(model, config)
-        ..status = CStatus.loaded(),
-    )..status = CStatus.loaded();
-
-    tester.view.devicePixelRatio = 1;
-    tester.view.physicalSize = const Size(1440, 900);
-    addTearDown(tester.view.reset);
-    await tester.runAsync(() async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: CodelesslyWidget(
-            codelessly: codelessly,
-            layoutID: 'layout',
-            functions: {
-              'record': (context, reference, params) =>
-                  calls.add('${params['what']}'),
-            },
-          ),
-        ),
+  for (final bool byId in [true, false])
+    testWidgets('a screen runs its load actions once across breakpoints '
+        '(${byId ? 'by layout id' : 'as the entry screen'})', (tester) async {
+      final List<String> calls = [];
+      final model = SDKPublishModel(
+        projectId: 'project',
+        owner: 'owner',
+        teams: const {},
+        users: const {},
+        roles: const {},
+        public: false,
+        entryLayoutId: 'layout',
+        entryPageId: 'page',
+        entryCanvasId: 'desktop',
       );
-      for (int i = 0; i < 5; i++) {
-        await tester.pump();
-        await Future<void>.delayed(const Duration(milliseconds: 20));
-      }
-      tester.view.physicalSize = const Size(390, 844);
-      for (int i = 0; i < 5; i++) {
-        await tester.pump();
-        await Future<void>.delayed(const Duration(milliseconds: 20));
-      }
-    });
+      final layout = SDKPublishLayout.private(
+        id: 'layout',
+        projectId: 'project',
+        pageId: 'page',
+        lastUpdated: DateTime(2026),
+        canvases: {
+          'mobile': _canvas('mobile', 390),
+          'desktop': _canvas('desktop', 1440),
+        },
+        breakpoints: [
+          const Breakpoint(nodeId: 'mobile', lowerBound: 0, upperBound: 640),
+          const Breakpoint(
+            nodeId: 'desktop',
+            lowerBound: 640,
+            upperBound: 100000,
+          ),
+        ],
+        privacy: model,
+      );
+      model.layouts[layout.id] = SDKPublishLayout.fromJson(
+        jsonDecode(jsonEncode(layout.toJson())) as Map<String, dynamic>,
+      );
+      final config = CodelesslyConfig(
+      authToken: 'token',
+      isPreview: false,
+      slug: byId ? null : 'app',
+    );
+      final codelessly = Codelessly(
+        config: config,
+        client: MockClient((request) async => http.Response('{}', 200)),
+        publishDataManager: _TestDataManager(model, config)
+          ..status = CStatus.loaded(),
+        previewDataManager: _TestDataManager(model, config)
+          ..status = CStatus.loaded(),
+      )..status = CStatus.loaded();
 
-    expect(tester.takeException(), isNull);
-    expect(calls, ['desktop']);
-  });
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(1440, 900);
+      addTearDown(tester.view.reset);
+      await tester.runAsync(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: CodelesslyWidget(
+              codelessly: codelessly,
+              layoutID: byId ? 'layout' : null,
+              functions: {
+                'record': (context, reference, params) =>
+                    calls.add('${params['what']}'),
+              },
+            ),
+          ),
+        );
+        for (int i = 0; i < 5; i++) {
+          await tester.pump();
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
+        tester.view.physicalSize = const Size(390, 844);
+        for (int i = 0; i < 5; i++) {
+          await tester.pump();
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
+      });
+
+      expect(tester.takeException(), isNull);
+      expect(calls, ['desktop']);
+    });
 
   // The same link at phone width: it names the desktop canvas, the phone
   // canvas shows. Its parameters were applied only to the canvas the link
@@ -179,7 +190,11 @@ void main() {
       },
       breakpoints: [
         const Breakpoint(nodeId: 'mobile', lowerBound: 0, upperBound: 640),
-        const Breakpoint(nodeId: 'desktop', lowerBound: 640, upperBound: 100000),
+        const Breakpoint(
+          nodeId: 'desktop',
+          lowerBound: 640,
+          upperBound: 100000,
+        ),
       ],
       privacy: model,
     );
