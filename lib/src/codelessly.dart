@@ -513,6 +513,29 @@ class Codelessly {
     );
   }
 
+  /// The URL path of the screen of layout [layoutId], as `${route.path}`
+  /// reads it, without its query: `/pass/zz999`. A screen opened by a
+  /// navigation with [params] is at its own URL path with those params
+  /// filled in (`/` for the first screen without a path). The screen
+  /// shown in the host's route ([params] null) takes the path of the link
+  /// the app was opened with, even one no screen's path matches, so a
+  /// not-found screen can show the path it was given. Null when the screen
+  /// has no URL path.
+  String? routePathFor(String? layoutId, Map<String, dynamic>? params) {
+    final CodelesslyRoute? link = _link;
+    if (params == null && link != null) {
+      return '/${link.path ?? link.canvasId}';
+    }
+    final SDKPublishModel? model = _maybeDataManager?.publishModel;
+    if (model == null || layoutId == null) return null;
+    final String? location = CanvasLocation.locationOf(
+      model,
+      layoutId,
+      params ?? const {},
+    );
+    return location == null ? null : '/${Uri.parse(location).path}';
+  }
+
   /// [link] with its URL path, if it has one, matched against the screens'
   /// URL paths: the screen it names and the parameters the path and query
   /// give. A path no screen's URL path matches is read as a screen id.

@@ -72,19 +72,30 @@ abstract class WidgetNodeTransformerManager
         child: widget,
       );
     }
+    // Under a disabled TickerMode (the design canvas, its captures) the
+    // fades jump to the current opacity instead of holding the old one.
     if (node.transition case final NodeTransition transition?) {
-      return AnimatedOpacity(
-        opacity: node.opacity.clamp(0.0, 1.0),
-        duration: transition.duration,
-        curve: transition.curve.flutterCurve,
-        child: widget,
+      final Widget child = widget;
+      return Builder(
+        builder: (context) => AnimatedOpacity(
+          opacity: node.opacity.clamp(0.0, 1.0),
+          duration: implicitTransitionDuration(
+            context,
+            transition.duration.inMilliseconds,
+          ),
+          curve: transition.curve.flutterCurve,
+          child: child,
+        ),
       );
     }
     if (node.transitionMs > 0) {
-      return AnimatedOpacity(
-        opacity: node.opacity.clamp(0.0, 1.0),
-        duration: Duration(milliseconds: node.transitionMs),
-        child: widget,
+      final Widget child = widget;
+      return Builder(
+        builder: (context) => AnimatedOpacity(
+          opacity: node.opacity.clamp(0.0, 1.0),
+          duration: implicitTransitionDuration(context, node.transitionMs),
+          child: child,
+        ),
       );
     }
     if (pulse != null && pulse is! MotionPulseModel) return widget;
@@ -212,11 +223,14 @@ abstract class WidgetNodeTransformerManager
 
   /// The motion [node] shows now: its [BaseNode.motion] with the values
   /// bound through `motion.<name>` variables resolved from [scopedValues],
-  /// and `motion.replayKey` resolved to text. Null when the node doesn't
-  /// move.
+  /// and `motion.replayKey` resolved to text. With [animate] (the running
+  /// app), a `motion.loop` binding switches the loop (see
+  /// [MotionModel.loopProperty]); the design canvas ignores it. Null when
+  /// the node doesn't move.
   static MotionModel? resolveMotion(
     BaseNode node, {
     required ScopedValues scopedValues,
+    bool animate = true,
   }) {
     MotionModel? motion = node.motion;
     for (final String property in MotionModel.properties) {
@@ -248,7 +262,50 @@ abstract class WidgetNodeTransformerManager
         clearReplayKey: value == null,
       );
     }
+    final String loopKey = MotionModel.variableKey(MotionModel.loopProperty);
+    if (animate && node.variables.containsKey(loopKey)) {
+      final MotionModel base = motion ?? MotionModel.none;
+      final String raw = node.variables[loopKey]!;
+      // A plain value ("reverse", "true") is read as it is.
+      final MotionLoop? loop = motionLoopOf(
+        raw.contains(r'${')
+            ? PropertyValueDelegate.getPropertyValue<Object>(
+                node,
+                loopKey,
+                scopedValues: scopedValues,
+              )
+            : raw,
+        saved: base.loop,
+      );
+      if (loop == MotionLoop.none) {
+        // A loop's values are where it swings to; switched off, the node
+        // eases back to rest.
+        motion = base.atRest.copyWith(loop: MotionLoop.none);
+      } else if (loop != null) {
+        motion = base.copyWith(loop: loop);
+      }
+    }
     return motion;
+  }
+
+  /// The loop a `motion.loop` binding's [value] asks for: `none`, `restart`
+  /// or `reverse` by name; true (or on) keeps [saved], or loops back and
+  /// forth when [saved] is none; false, off, 0 or empty text is none. Null
+  /// (keep [saved]) for anything else, such as an unresolved binding.
+  static MotionLoop? motionLoopOf(Object? value, {required MotionLoop saved}) {
+    final MotionLoop on = saved == MotionLoop.none ? MotionLoop.reverse : saved;
+    return switch (value) {
+      bool b => b ? on : MotionLoop.none,
+      num n => n == 0 ? MotionLoop.none : on,
+      String s => switch (s.trim().toLowerCase()) {
+        'none' || 'off' || 'false' || '0' || '' => MotionLoop.none,
+        'restart' || 'loop' => MotionLoop.restart,
+        'reverse' || 'pulse' => MotionLoop.reverse,
+        'true' || 'on' || '1' => on,
+        _ => null,
+      },
+      _ => null,
+    };
   }
 
   /// Draws [widget] with [node]'s motion: its transform, transitions and
@@ -277,7 +334,7 @@ abstract class WidgetNodeTransformerManager
       widget = animate && node.transitionMs > 0
           ? AnimatedScale(
               scale: scale,
-              duration: Duration(milliseconds: node.transitionMs),
+              duration: implicitTransitionDuration(context, node.transitionMs),
               child: widget,
             )
           : Transform.scale(scale: scale, child: widget);
@@ -289,6 +346,7 @@ abstract class WidgetNodeTransformerManager
     final MotionModel? motion = resolveMotion(
       node,
       scopedValues: scopedValues ?? ScopedValues.of(context),
+      animate: animate,
     );
     if (motion == null) return widget;
     return NodeMotion(motion: motion, animate: animate, child: widget);
