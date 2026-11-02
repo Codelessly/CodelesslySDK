@@ -198,12 +198,13 @@ void main() {
     expect(codelessly.currentNavigatedCanvasId, 'home');
   });
 
-  testWidgets('it persists, with its state, across navigation', (
-    tester,
-  ) async {
+  testWidgets('it persists, with its state, across navigation', (tester) async {
     await _app(tester);
     final State before = tester.state(
-      find.ancestor(of: _content('player'), matching: find.byType(CodelesslyWidget)),
+      find.ancestor(
+        of: _content('player'),
+        matching: find.byType(CodelesslyWidget),
+      ),
     );
     // Its empty parts let the tap through to the screen below.
     await tester.tap(_content('home'));
@@ -211,9 +212,16 @@ void main() {
     expect(_content('detail'), findsOneWidget);
     expect(_content('player'), findsOneWidget);
     final State after = tester.state(
-      find.ancestor(of: _content('player'), matching: find.byType(CodelesslyWidget)),
+      find.ancestor(
+        of: _content('player'),
+        matching: find.byType(CodelesslyWidget),
+      ),
     );
-    expect(identical(before, after), isTrue, reason: 'not rebuilt from scratch');
+    expect(
+      identical(before, after),
+      isTrue,
+      reason: 'not rebuilt from scratch',
+    );
   });
 
   testWidgets('its navigation actions navigate the screens below', (

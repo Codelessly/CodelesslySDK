@@ -166,23 +166,38 @@ class TextNodeBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final SizeFit hFit = node.horizontalFit;
     final SizeFit vFit = node.verticalFit;
+    // A flexible width is the text's own width, capped by the space its
+    // Flexible parent offers (min(flex share, content), as in the editor):
+    // a label followed by a badge keeps the badge right after it.
+    final bool hugsWidth =
+        hFit == SizeFit.shrinkWrap || hFit == SizeFit.flexible;
     final bool minHeight =
         vFit != SizeFit.shrinkWrap && vFit != SizeFit.expanded;
 
+    // Scale-down text stays on its lines and shrinks as a whole to fit the
+    // width it is given.
+    final Widget content = node.overflow == TextOverflowC.scaleDown
+        ? FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: alignmentOf(node),
+            child: child,
+          )
+        : child;
     Widget box = Align(
       alignment: alignmentOf(node, TextUtils.textAlignOf(node, context)),
       // Hug the text on an axis that does not fill its parent, so a loose
       // parent does not stretch the box; tight constraints still size it.
-      widthFactor: hFit == SizeFit.shrinkWrap ? 1 : null,
+      widthFactor: hugsWidth ? 1 : null,
       heightFactor: vFit == SizeFit.expanded ? null : 1,
-      child: child,
+      child: content,
     );
     if (minHeight) {
       box = TextMinHeight(minHeight: node.basicBoxLocal.height, child: box);
     }
+    if (hFit == SizeFit.shrinkWrap) box = TextIntrinsicSlack(child: box);
     return SizedBox(
       width: switch (hFit) {
-        SizeFit.shrinkWrap => null,
+        SizeFit.shrinkWrap || SizeFit.flexible => null,
         SizeFit.expanded => double.infinity,
         _ => node.basicBoxLocal.width,
       },
@@ -190,6 +205,32 @@ class TextNodeBox extends StatelessWidget {
       child: box,
     );
   }
+}
+
+/// Rounds a text's maximum intrinsic width up to a whole pixel.
+///
+/// A row or column that sizes its children by their intrinsic width (a
+/// shrink-wrapped column that stretches them) gives the text exactly that
+/// width. On the web a paragraph's intrinsic width can come out a fraction
+/// narrower than the width it needs to lay out on one line, so its last
+/// word wrapped away: `Bluebird Coffee` drew as `Bluebird`, with the space
+/// for `Coffee` left empty.
+class TextIntrinsicSlack extends SingleChildRenderObjectWidget {
+  const TextIntrinsicSlack({super.key, super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      RenderTextIntrinsicSlack();
+}
+
+class RenderTextIntrinsicSlack extends RenderProxyBox {
+  /// [width] rounded up to a whole pixel.
+  static double slackWidth(double width) =>
+      width <= 0 || !width.isFinite ? width : width.ceilToDouble();
+
+  @override
+  double computeMaxIntrinsicWidth(double height) =>
+      slackWidth(super.computeMaxIntrinsicWidth(height));
 }
 
 /// Gives text a minimum height, its design height, that it may grow past.

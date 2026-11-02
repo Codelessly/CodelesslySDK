@@ -1,9 +1,11 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../../functions/functions_repository.dart';
 import '../../ui/draggable_scroll_configuration.dart';
 import '../../utils/extensions.dart';
+import '../../utils/formula.dart';
 import '../transformers.dart';
 
 class PassivePageViewTransformer extends NodeWidgetTransformer<PageViewNode> {
@@ -69,13 +71,71 @@ class PassivePageViewWidget extends StatefulWidget {
 class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
   late PageController controller;
 
+  /// The page position last written to the `positionValue` variable.
+  double? _writtenPosition;
+
+  /// The page an action asked for, while the page view animates there.
+  int? _target;
+
+  bool _created = false;
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_created) return;
+    _created = true;
     controller = PageController(
-      initialPage: widget.node.properties.initialPage,
+      // A bound page index (e.g. a link to step 3) is where it starts.
+      initialPage: _boundIndex(context) ?? widget.node.properties.initialPage,
       keepPage: widget.node.properties.keepPage,
       viewportFraction: widget.node.properties.viewportFraction,
+    );
+    controller.addListener(_writePosition);
+    // The starting position, once the pages are laid out.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _writePosition();
+    });
+  }
+
+  bool _writeScheduled = false;
+
+  int? _boundIndex(BuildContext context) {
+    if (widget.node.variables['indexValue'] == null) return null;
+    return PropertyValueDelegate.getPropertyValue<int>(
+      widget.node,
+      'indexValue',
+      scopedValues: ScopedValues.of(context),
+    );
+  }
+
+  /// Writes the fractional page position (1.5 = half way from the second
+  /// page to the third) to the variable bound to `positionValue`, as the
+  /// pages move, so other nodes can follow a swipe (progress bars,
+  /// parallax). Rounded to thousandths; only changes are written.
+  void _writePosition() {
+    if (widget.node.variables['positionValue'] == null) return;
+    if (!controller.hasClients || !controller.position.haveDimensions) return;
+    // A jump made while building (a bound index changed) can't write a
+    // variable mid-build; write it once the frame is done.
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      if (_writeScheduled) return;
+      _writeScheduled = true;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _writeScheduled = false;
+        if (mounted) _writePosition();
+      });
+      return;
+    }
+    final double page = controller.page ?? 0;
+    final double rounded = (page * 1000).roundToDouble() / 1000;
+    if (rounded == _writtenPosition) return;
+    _writtenPosition = rounded;
+    FunctionsRepository.setPropertyVariable(
+      context,
+      node: widget.node,
+      property: 'positionValue',
+      value: FormulaEvaluator.stringify(rounded),
     );
   }
 
@@ -101,10 +161,31 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
             scopedValues: scopedValues,
           );
       if (currentPropertyValue != null &&
+          currentPropertyValue != _target &&
           controller.page?.round() != currentPropertyValue) {
-        _jumpToPage(currentPropertyValue);
+        _goToPage(currentPropertyValue);
       }
     }
+  }
+
+  /// Moves to [page] when the bound index changes: animated over
+  /// `animationDurationMs` (easeOutCubic), or a jump when it is 0.
+  void _goToPage(int page) {
+    final int ms = widget.node.properties.animationDurationMs;
+    if (ms <= 0 || !controller.hasClients) {
+      _jumpToPage(page);
+      return;
+    }
+    _target = page;
+    controller
+        .animateToPage(
+          page,
+          duration: Duration(milliseconds: ms),
+          curve: Curves.easeOutCubic,
+        )
+        .whenComplete(() {
+          if (_target == page) _target = null;
+        });
   }
 
   /// Jumps once the controller is attached; didUpdateWidget can run before
@@ -163,7 +244,12 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
           allowImplicitScrolling: widget.node.properties.allowImplicitScrolling,
           pageSnapping: widget.node.properties.pageSnapping,
           controller: controller,
-          onPageChanged: (index) => widget.onPageChanged?.call(context, index),
+          onPageChanged: (index) {
+            // Pages passed on the way to an action's target aren't
+            // reported: they would send the page view back to them.
+            if (_target != null && index != _target) return;
+            widget.onPageChanged?.call(context, index);
+          },
           itemBuilder: (context, index) => IndexedItemProvider(
             key: ValueKey(index),
             item: IndexedItem(index, data?.elementAtOrNull(index)),
@@ -189,6 +275,7 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
 
   @override
   void dispose() {
+    controller.removeListener(_writePosition);
     controller.dispose();
     super.dispose();
   }
