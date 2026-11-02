@@ -61,6 +61,33 @@ void main() {
     expect(find.text('You can join again later.'), findsOneWidget);
   });
 
+  testWidgets('a caption shows above the title', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => AppConfirmDialog.show(
+              context,
+              ConfirmAction(
+                caption: 'RESET PROGRESS',
+                title: 'Clear your record?',
+                confirmLabel: 'Clear record',
+              ),
+            ),
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    final Rect caption = tester.getRect(find.text('RESET PROGRESS'));
+    final Rect title = tester.getRect(find.text('Clear your record?'));
+    expect(caption.bottom, lessThanOrEqualTo(title.top));
+    // A confirm without one has no caption line.
+    expect(ConfirmAction(title: 'Sure?').caption, isEmpty);
+  });
+
   Future<void> open(
     WidgetTester tester,
     ConfirmAction action,
