@@ -575,7 +575,15 @@ class PropertyValueDelegate {
       'result' => ActionChain.current?.result,
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
       'hold' => scopedValues.holdProgress ?? 0.0,
-      'drag' => (scopedValues.dragValues ?? DragValues.rest).toMap(),
+      // A drag track's pose of this node (dx, dy, progress, dragging...) and
+      // the app's drag and drop session (active, over, accepted...).
+      'drag' => {
+        ...(scopedValues.dragValues ?? DragValues.rest).toMap(),
+        ...?(scopedValues.codelesslyContext?.dragAndDrop.value ??
+            DragAndDropController.preview ??
+            DragAndDropController.idle) as Map?,
+      },
+      'track' => (scopedValues.trackValues ?? const TrackValues()).toMap(),
       'speech' => Speech.instance.value,
       _ => null,
     };

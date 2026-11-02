@@ -5,7 +5,9 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show BrowserContextMenu;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
@@ -536,6 +538,18 @@ abstract class WidgetNodeTransformerManager
   Widget wrapWithDrag(BuildContext context, BaseNode node, Widget child) {
     final DragModel? drag = node.drag;
     if (drag == null || node is CanvasNode) return child;
+    if (drag.reorder) {
+      // The handle of a row in a reorderable data list: dragging it moves
+      // the row (see PassiveListViewWidget).
+      final int? index = IndexedItemProvider.maybeOf(context)?.index;
+      if (index == null || SliverReorderableList.maybeOf(context) == null) {
+        return child;
+      }
+      return ReorderableDragStartListener(
+        index: index,
+        child: MouseRegion(cursor: SystemMouseCursors.grab, child: child),
+      );
+    }
     final List<Reaction> reactions = node is ReactionMixin
         ? [
             for (final reaction in (node as ReactionMixin).reactions)
@@ -543,6 +557,10 @@ abstract class WidgetNodeTransformerManager
           ]
         : const [];
     final bool bound = node.variables.containsKey(DragModel.enabledVariableKey);
+    if (drag.track case final DragTrackModel track) {
+      return _wrapWithTrack(context, node, drag, track, reactions, child);
+    }
+
     double rest(String key, double fallback) {
       if (!node.variables.containsKey(key)) return fallback;
       final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
@@ -614,9 +632,115 @@ abstract class WidgetNodeTransformerManager
     variable.value = variable.value.copyWith(value: values.toMap());
   }
 
+  /// Draws [node] where its drag track puts it for its variable's value,
+  /// without making it draggable: how the design canvas shows a knob or a
+  /// fader cap. Returns [widget] for a node without a track.
+  Widget applyTrackPose(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+  }) {
+    final DragTrackModel? track = node.drag?.track;
+    if (track == null) return widget;
+    final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
+      track.variable,
+      scopedValues: scopedValues ?? ScopedValues.of(context),
+    );
+    final double value = switch (raw) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()) ?? track.defaultValue ?? track.min,
+      _ => track.defaultValue ?? track.min,
+    };
+    return Transform(
+      alignment: Alignment.center,
+      transform: DragTrackGeometry(track).poseAt(track.progressOf(value)),
+      child: widget,
+    );
+  }
+
+  /// A node with a [DragTrackModel] is a value control: it is drawn at its
+  /// variable's place along the track and dragging it writes the variable,
+  /// running its `changed` reactions on each change and `dragEnd` on release
+  /// (both with `${result.value}`). See [NodeDragTrack].
+  Widget _wrapWithTrack(
+    BuildContext context,
+    BaseNode node,
+    DragModel drag,
+    DragTrackModel track,
+    List<Reaction> reactions,
+    Widget child,
+  ) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
+    final Observable<VariableData>? variable = codelesslyContext?.findVariable(
+      name: track.variable,
+    );
+    bool enabled(BuildContext context) {
+      if (!node.variables.containsKey(DragModel.enabledVariableKey)) {
+        return drag.enabled;
+      }
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        DragModel.enabledVariableKey,
+        scopedValues: ScopedValues.of(context),
+      );
+      return switch (value) {
+        bool b => b,
+        num n => n != 0,
+        String s => s.trim().toLowerCase() == 'true',
+        _ => drag.enabled,
+      };
+    }
+
+    Widget build(BuildContext context) {
+      final Object? raw =
+          PropertyValueDelegate.getVariableValueFromPath<Object>(
+            track.variable,
+            scopedValues: ScopedValues.of(context),
+          );
+      final double value = switch (raw) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()) ?? track.min,
+        _ => track.defaultValue ?? track.min,
+      };
+      return NodeDragTrack(
+        track: track,
+        value: value,
+        enabled: enabled(context),
+        onChanged: (v) {
+          final bool whole = variable?.value.type == VariableType.integer;
+          codelesslyContext?.updateVariable(
+            track.variable,
+            whole ? v.round() : v,
+          );
+          FunctionsRepository.triggerAction(
+            context,
+            TriggerType.changed,
+            reactions: reactions,
+            result: {'value': v},
+          );
+        },
+        onEnd: (v) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.dragEnd,
+          reactions: reactions,
+          result: {'value': v},
+        ),
+        child: child,
+      );
+    }
+
+    if (variable == null) return Builder(builder: build);
+    return ValueListenableBuilder<VariableData>(
+      valueListenable: variable,
+      builder: (context, _, _) => build(context),
+    );
+  }
+
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
-    final Widget tappable = _wrapWithTapReactions(context, node, widget);
+    Widget tappable = _wrapWithTapReactions(context, node, widget);
     if (node is! ReactionMixin || node is CanvasNode || node is SpacerNode) {
       return tappable;
     }
@@ -633,6 +757,24 @@ abstract class WidgetNodeTransformerManager
         : of(TriggerType.dragEnd);
     final List<Reaction> onPointerDown = of(TriggerType.pointerDown);
     final List<Reaction> onPointerUp = of(TriggerType.pointerUp);
+    final List<Reaction> onSecondary = of(TriggerType.secondaryClick);
+    if (onSecondary.isNotEmpty) {
+      // A right click opens the app's menu, not the browser's.
+      if (kIsWeb) BrowserContextMenu.disableContextMenu();
+      tappable = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onSecondaryTapUp: (details) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.secondaryClick,
+          reactions: onSecondary,
+          result: {
+            'x': details.globalPosition.dx,
+            'y': details.globalPosition.dy,
+          },
+        ),
+        child: tappable,
+      );
+    }
     if (onDrag.isEmpty &&
         onDragEnd.isEmpty &&
         onPointerDown.isEmpty &&
@@ -1106,15 +1248,27 @@ class SvgIcon extends StatelessWidget {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
     // Material Icons ship with Flutter; use their bundled glyph offline.
-    // The glyph is looked up by name and style in Flutter's own table:
-    // stored codepoints come from Google's catalog (the icon picker's), whose
-    // numbers differ from Flutter's font (play_arrow is 0xe037 there, which
-    // is ac_unit in Flutter's font).
-    if (icon case final MaterialIcon material) {
-      final int? codepoint = flutterIconCodepoint(material);
+    final IconModel model = icon;
+    if (model is MaterialIcon &&
+        (model.codepoint > 0 || model.name.isNotEmpty)) {
+      // The stored codepoint comes from Google's icon catalog, whose web
+      // font numbers icons differently from Flutter's bundled font (av_timer
+      // is 0xe01b there, three_k here): look the glyph up by name. An icon
+      // stored with only its name draws too.
+      final String suffix = switch (model.style) {
+        MaterialIconStyle.filled => '',
+        MaterialIconStyle.outlined => '_outlined',
+        MaterialIconStyle.rounded => '_rounded',
+        MaterialIconStyle.sharp => '_sharp',
+        _ => '',
+      };
+      final int? codepoint =
+          flutterIconsDataMap['${model.name}$suffix'] ??
+          flutterIconsDataMap[model.name] ??
+          (model.codepoint > 0 ? model.codepoint : null);
       if (codepoint != null) {
         return Icon(
-          IconData(codepoint, fontFamily: 'MaterialIcons'),
+          IconData(codepoint, fontFamily: model.fontFamily),
           size: dimension,
           color: iconColor,
         );
