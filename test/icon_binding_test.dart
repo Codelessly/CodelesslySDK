@@ -87,6 +87,24 @@ void main() {
     );
   });
 
+  test('a bare name keeps the designed icon\'s style', () {
+    const MultiSourceIconModel outlined = MultiSourceIconModel.icon(
+      icon: MaterialIcon(
+        codepoint: 0xef4a,
+        name: 'circle',
+        style: MaterialIconStyle.outlined,
+      ),
+    );
+    final MaterialIcon kept = iconWithName(outlined, 'circle').icon! as MaterialIcon;
+    expect(kept.style, MaterialIconStyle.outlined);
+    // A suffix still sets the style.
+    expect(
+      (iconWithName(outlined, 'check_circle_rounded').icon! as MaterialIcon)
+          .style,
+      MaterialIconStyle.rounded,
+    );
+  });
+
   test('an empty or malformed name keeps the designed icon', () {
     expect(iconWithName(base, null), same(base));
     expect(iconWithName(base, '  '), same(base));
