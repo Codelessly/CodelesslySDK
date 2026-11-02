@@ -344,10 +344,11 @@ List<Widget> wrapWithPadding(
 }) {
   if (children.isEmpty || !applyPadding) return children;
 
-  final EdgeInsets resolvedPadding =
-      node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
+  // Directional, so padding mirrors in a right-to-left layout.
+  final EdgeInsetsDirectional resolvedPadding =
+      node.innerBoxLocal.edgeInsets.flutterEdgeInsetsDirectional;
 
-  if (resolvedPadding == EdgeInsets.zero) {
+  if (resolvedPadding == EdgeInsetsDirectional.zero) {
     return children;
   }
 
@@ -384,8 +385,9 @@ List<Widget> wrapWithPaddingAndScroll(
 }) {
   if (children.isEmpty) return children;
 
-  final EdgeInsets resolvedPadding =
-      node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
+  // Directional, so padding mirrors in a right-to-left layout.
+  final EdgeInsetsDirectional resolvedPadding =
+      node.innerBoxLocal.edgeInsets.flutterEdgeInsetsDirectional;
 
   if (node is FrameNode && node.isScrollable) {
     // The content reaches the farthest child along the scroll axis, and at
@@ -987,6 +989,7 @@ Widget buildFill(
           child: child,
         );
       }
+      child = tintImage(paint, child);
       if (modifiedOpacity != 1) {
         child = Opacity(opacity: modifiedOpacity, child: child);
       }
@@ -1003,6 +1006,16 @@ Widget buildFill(
       return const SizedBox.shrink();
   }
 }
+
+/// [image] drawn with [paint]'s image tint: every pixel in that one color,
+/// keeping its transparency. Unchanged without a tint.
+Widget tintImage(PaintModel paint, Widget image) => switch (paint.imageTint) {
+  null => image,
+  final ColorRGBA tint => ColorFiltered(
+    colorFilter: ColorFilter.mode(tint.toFlutterColor(), BlendMode.srcIn),
+    child: image,
+  ),
+};
 
 /// A color matrix that scales color saturation by [saturation]: 1 keeps the
 /// colors, 0 leaves grey at each pixel's luminance (Rec. 709 weights).

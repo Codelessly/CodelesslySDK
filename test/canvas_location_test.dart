@@ -47,4 +47,39 @@ void main() {
       expect(CanvasLocation.locationOf(model, 'creature', {}), isNull);
     });
   });
+
+  group('catch-all paths', () {
+    final SDKPublishModel model = tidepoolModel()
+      ..layouts['notFound'] = testScreen('notFound', path: '*path')
+      ..layouts['docs'] = testScreen('docs', path: 'docs/*rest');
+
+    test('take any path no other screen matches, with the rest', () {
+      final CanvasLocationMatch? lost = CanvasLocation.match(
+        model,
+        'kraken/deep?x=1',
+      );
+      expect(lost?.canvasId, 'notFound');
+      expect(lost?.params, {'path': 'kraken/deep', 'x': '1'});
+      expect(CanvasLocation.match(model, 'docs/a/b')?.params, {'rest': 'a/b'});
+      // Too short for docs/*rest: the catch-all takes it.
+      expect(CanvasLocation.match(model, 'docs')?.canvasId, 'notFound');
+    });
+
+    test('lose to every other match', () {
+      expect(CanvasLocation.match(model, 'guide')?.canvasId, 'guide');
+      expect(
+        CanvasLocation.match(model, 'guide/bat-star')?.canvasId,
+        'creature',
+      );
+      expect(CanvasLocation.match(model, ''), isNull);
+    });
+
+    test('fill a path with the rest', () {
+      expect(
+        CanvasLocation.locationOf(model, 'docs', {'rest': 'a/b', 'q': 1}),
+        'docs/a/b?q=1',
+      );
+      expect(CanvasLocation.locationOf(model, 'notFound', {}), isNull);
+    });
+  });
 }
