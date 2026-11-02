@@ -301,6 +301,34 @@ void main() {
     });
   });
 
+  group('catch-all screen', () {
+    SDKPublishModel withLost() => appModel()
+      ..layouts['lost'] = testScreen(
+        'lost',
+        path: '*path',
+        children: [(body) => testText('lostPath', body, r'lost=${route.path}')],
+      );
+
+    // A not-found screen at `*path` shows for any location no other screen
+    // has, with the rest of the path as `path`.
+    testWidgets('shows for an unknown location, with the path', (tester) async {
+      final browser = FakeBrowser(tester, url: '/kraken/lair');
+      await pumpRouterApp(tester, withLost(), browser);
+      expect(find.text('lost=kraken/lair'), findsOneWidget);
+      expect(find.text('This screen does not exist.'), findsNothing);
+    });
+
+    testWidgets('leaves known screens and ids alone', (tester) async {
+      final browser = FakeBrowser(tester, url: '/guide');
+      await pumpRouterApp(tester, withLost(), browser);
+      expect(find.text('Guide'), findsOneWidget);
+      final byId = FakeBrowser(tester, url: '/creature?id=kraken');
+      await tester.pumpWidget(const SizedBox());
+      await pumpRouterApp(tester, withLost(), byId);
+      expect(find.text('id=kraken'), findsOneWidget);
+    });
+  });
+
   group('base path', () {
     testWidgets('URLs are under the base path', (tester) async {
       final browser = FakeBrowser(tester, url: '/tidepool/journal');
