@@ -12,7 +12,7 @@ import 'formula_clock.dart';
 /// balanced pairs nested up to [depth] deep, such as the object literal in
 /// `merge(r, {tags: {a: 1}})`. Braces inside quoted strings don't count.
 String _formulaBody(int depth) {
-  const String atom = r'''[^{}'"]|'[^']*'|"[^"]*"''';
+  const String atom = r'''[^{}'"]|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"''';
   String body = '(?:$atom)*';
   for (int i = 0; i < depth; i++) {
     body = '(?:$atom|\\{$body\\})*';
@@ -213,9 +213,9 @@ class FormulaEvaluator {
   static final RegExp _frameClockCall = RegExp(r'\bnowMs\s*\(');
 
   static final RegExp _quoted = RegExp(
-    r'"[^"]*"'
+    r'"(?:[^"\\]|\\.)*"'
     '|'
-    r"'[^']*'",
+    r"'(?:[^'\\]|\\.)*'",
   );
 
   /// The variable paths read by every formula in [text].
@@ -314,34 +314,66 @@ class FormulaEvaluator {
   /// Unexpected end at 4`), or null when every formula in it parses. Calls
   /// to unknown functions aren't checked: they may be function variables.
   static String? textErrorOf(String text) {
-    if (!text.contains(r'${=')) return null;
-    for (final RegExpMatch match in formulaRegex.allMatches(text)) {
-      final String expression = match.namedGroup('expr')!;
-      if (_parse(expression) != null) continue;
-      String reason;
-      try {
-        _Parser(expression.trim()).parseAll();
+    int from = 0;
+    while (true) {
+      final int start = text.indexOf(r'${=', from);
+      if (start < 0) return null;
+      if (start > 0 && text[start - 1] == r'\') {
+        from = start + 3;
         continue;
-      } on FormatException catch (error) {
-        final int? offset = error.offset;
-        reason = offset == null || offset >= expression.trim().length
-            ? error.message
-            : '${error.message} at ${offset + 1}';
-      } catch (error) {
-        reason = error.toString();
       }
-      return 'The formula "${match.group(0)}" doesn\'t parse: $reason';
+      // The closing brace, skipping quoted text (with \' and \" escapes)
+      // and balanced braces.
+      int depth = 1;
+      int pos = start + 3;
+      String? quote;
+      while (pos < text.length && depth > 0) {
+        final String char = text[pos];
+        if (quote != null) {
+          if (char == r'\') {
+            pos++;
+          } else if (char == quote) {
+            quote = null;
+          }
+        } else if (char == "'" || char == '"') {
+          quote = char;
+        } else if (char == '{') {
+          depth++;
+        } else if (char == '}') {
+          depth--;
+        }
+        pos++;
+      }
+      if (depth > 0) {
+        final String rest = text.substring(start);
+        final String shown = rest.length > 40
+            ? '${rest.substring(0, 40)}...'
+            : rest;
+        return 'The formula "$shown" is not closed at character ${start + 1}: '
+            r'a formula is written ${= expression}, its quotes closed and '
+            'its braces balanced.';
+      }
+      final String expression = text.substring(start + 3, pos - 1);
+      if (_parse(expression) == null) {
+        String reason;
+        try {
+          _Parser(expression.trim()).parseAll();
+          reason = 'it is invalid';
+        } on FormatException catch (error) {
+          final int? offset = error.offset;
+          final int lead = expression.length - expression.trimLeft().length;
+          reason = offset == null || offset >= expression.trim().length
+              ? error.message
+              : '${error.message} at character '
+                    '${start + 3 + lead + offset + 1}';
+        } catch (error) {
+          reason = error.toString();
+        }
+        return 'The formula "${text.substring(start, pos)}" doesn\'t parse: '
+            '$reason';
+      }
+      from = pos;
     }
-    // A `${=` the pattern couldn't close: its braces don't balance.
-    final String rest = text.replaceAll(formulaRegex, '');
-    final int open = rest.indexOf(RegExp(r'(?<!\\)\$\{='));
-    if (open >= 0) {
-      final String start = rest.substring(open);
-      return 'The formula "${start.length > 40 ? '${start.substring(0, 40)}...' : start}" '
-          'is not closed: a formula is written \${= expression} with its '
-          'braces balanced.';
-    }
-    return null;
   }
 
   /// How to call each function, with an example, for editors to list.
@@ -3562,15 +3594,34 @@ class _Parser {
     }
   }
 
+  /// The quoted text at [pos], without its quotes: a backslash before the
+  /// quote (`'Won\'t'`) keeps the quote in the text; other backslashes are
+  /// kept as written.
+  String _quotedText() {
+    final String quote = source[pos];
+    final StringBuffer text = StringBuffer();
+    int i = pos + 1;
+    while (i < source.length && source[i] != quote) {
+      if (source[i] == r'\' &&
+          i + 1 < source.length &&
+          source[i + 1] == quote) {
+        i++;
+      }
+      text.write(source[i]);
+      i++;
+    }
+    if (i >= source.length) {
+      throw FormatException('Unclosed text', source, pos);
+    }
+    pos = i + 1;
+    return text.toString();
+  }
+
   /// An object literal's key: a name or quoted text.
   String _key() {
     _skip();
     if (pos < source.length && (source[pos] == "'" || source[pos] == '"')) {
-      final int end = source.indexOf(source[pos], pos + 1);
-      if (end < 0) throw FormatException('Unclosed text', source, pos);
-      final String key = source.substring(pos + 1, end);
-      pos = end + 1;
-      return key;
+      return _quotedText();
     }
     final Match? name = _identifier.matchAsPrefix(source, pos);
     if (name == null) throw FormatException('Expected a key', source, pos);
@@ -3618,13 +3669,7 @@ class _Parser {
       return _MapLiteral(entries);
     }
 
-    if (char == "'" || char == '"') {
-      final int end = source.indexOf(char, pos + 1);
-      if (end < 0) throw FormatException('Unclosed text', source, pos);
-      final String text = source.substring(pos + 1, end);
-      pos = end + 1;
-      return _Literal(text);
-    }
+    if (char == "'" || char == '"') return _Literal(_quotedText());
 
     final Match? number = _number.matchAsPrefix(source, pos);
     if (number != null) {
