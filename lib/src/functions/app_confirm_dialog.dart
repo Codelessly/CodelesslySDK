@@ -79,6 +79,7 @@ class AppConfirmDialog {
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
     );
     final String title = text(action.title);
+    final String caption = text(action.caption);
     final String message = text(action.message);
     final String confirmLabel = text(action.confirmLabel);
     final String cancelLabel = text(action.cancelLabel);
@@ -90,6 +91,8 @@ class AppConfirmDialog {
       theme: theme,
       presentation: action.presentation.resolveFor(context),
       title: title,
+      caption: caption,
+      captionStyle: action.captionStyle,
       message: message,
       confirmLabel: confirmLabel.isEmpty ? 'OK' : confirmLabel,
       cancelLabel: cancelLabel.isEmpty ? 'Cancel' : cancelLabel,
@@ -130,6 +133,8 @@ class AppConfirmDialog {
       builder: (context) => ThemedConfirmDialog(
         theme: theme,
         title: title,
+        caption: caption,
+        captionStyle: action.captionStyle,
         message: message,
         confirmLabel: confirmLabel.isEmpty ? 'OK' : confirmLabel,
         cancelLabel: cancelLabel.isEmpty ? 'Cancel' : cancelLabel,
@@ -168,6 +173,8 @@ class ThemedConfirmDialog extends StatelessWidget {
     required this.theme,
     this.presentation = DialogPresentation.dialog,
     required this.title,
+    this.caption = '',
+    this.captionStyle,
     required this.message,
     required this.confirmLabel,
     required this.cancelLabel,
@@ -198,6 +205,12 @@ class ThemedConfirmDialog extends StatelessWidget {
 
   /// Title; hidden when empty.
   final String title;
+
+  /// A small line above the [title], or empty for none.
+  final String caption;
+
+  /// Style of the [caption], over the built-in small caps.
+  final TextStyleModel? captionStyle;
 
   /// Text under the title; hidden when empty.
   final String message;
@@ -340,6 +353,21 @@ class ThemedConfirmDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (caption.isNotEmpty) ...[
+              Text(
+                caption,
+                style: captionStyle.applyTo(
+                  theme.bodyStyle.copyWith(
+                    fontSize: 11,
+                    height: 1.2,
+                    letterSpacing: 1.6,
+                    fontWeight: FontWeight.w600,
+                    color: onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+            ],
             if (title.isNotEmpty)
               Text(
                 title,
