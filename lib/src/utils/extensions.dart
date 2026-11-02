@@ -284,6 +284,9 @@ extension TextOverflowHelper on TextOverflowC {
         return TextOverflow.ellipsis;
       case TextOverflowC.visible:
         return TextOverflow.visible;
+      // The text keeps its size and is scaled as a whole (TextNodeBox).
+      case TextOverflowC.scaleDown:
+        return TextOverflow.visible;
     }
   }
 
@@ -610,6 +613,12 @@ extension VecHelper on Vec {
 extension EdgeInsetsHelper on EdgeInsetsModel {
   flutter.EdgeInsets get flutterEdgeInsets =>
       flutter.EdgeInsets.fromLTRB(l, t, r, b);
+
+  /// The insets with left as the start side and right as the end side, so
+  /// they mirror in a right-to-left layout (see `layoutDirection`). The same
+  /// as [flutterEdgeInsets] left to right.
+  flutter.EdgeInsetsDirectional get flutterEdgeInsetsDirectional =>
+      flutter.EdgeInsetsDirectional.fromSTEB(l, t, r, b);
 
   bool get isSymmetric => l == r && r == t && t == b;
 
@@ -976,10 +985,13 @@ extension TextAlignHorizontalEnumExtensions on TextAlignHorizontalEnum {
     switch (this) {
       case TextAlignHorizontalEnum.center:
         return TextAlign.center;
+      // Left and right are the start and end of the line, so text aligned
+      // left in a design lines up with the start edge of a right-to-left
+      // layout. Left to right it is the same.
       case TextAlignHorizontalEnum.left:
-        return TextAlign.left;
+        return TextAlign.start;
       case TextAlignHorizontalEnum.right:
-        return TextAlign.right;
+        return TextAlign.end;
       case TextAlignHorizontalEnum.justified:
         return TextAlign.justify;
       case TextAlignHorizontalEnum.start:
@@ -1159,6 +1171,13 @@ extension BoxWidthStyleEnumExtensions on BoxWidthStyleEnum {
   }
 }
 
+/// The codepoint of [icon] in the MaterialIcons font that ships with
+/// Flutter, found by its name and style, or null when Flutter doesn't have it.
+int? flutterIconCodepoint(MaterialIcon icon) {
+  final String styled = icon.styledName;
+  return flutterIconsDataMap[flutterIconNames[styled] ?? styled];
+}
+
 extension IconModelExt on IconModel {
   /// This icon's glyph swapped for the one called [name] (e.g. `star_border`)
   /// in the same set and style, or this icon when [name] is empty or the set
@@ -1168,8 +1187,10 @@ extension IconModelExt on IconModel {
     if (glyph.isEmpty || glyph == this.name) return this;
     final IconModel icon = this;
     return switch (icon) {
+      // The old glyph's codepoint doesn't name the new one: draw by name.
       MaterialIcon() => icon.copyWith(
         name: glyph,
+        codepoint: 0,
         version: materialIconVersions[glyph] ?? icon.version,
       ),
       MaterialSymbol() => icon.copyWith(name: glyph),
@@ -1670,6 +1691,9 @@ extension ActionModelExt on ActionModel {
     if (action is SetVariantAction && action.nodeID == oldNodeId) {
       return action.copyWith(nodeID: newNodeId);
     }
+    if (action is PlayAnimationAction && action.nodeId == oldNodeId) {
+      return action.copyWith(nodeId: newNodeId);
+    }
     if (action is ConditionalAction) {
       return action.copyWith(
         actions: [
@@ -1895,12 +1919,42 @@ extension ActionModelExt on ActionModel {
             ),
         };
       case ActionType.delay:
+      case ActionType.controlDrag:
+      case ActionType.scrollTo:
         return {};
+      case ActionType.playSound:
+        final PlaySoundAction action = this as PlaySoundAction;
+        return _namesIn([
+          action.sound,
+          action.volume,
+          action.pitch,
+          action.at,
+        ], includePredefined);
       case ActionType.paywall:
         final PaywallAction action = this as PaywallAction;
         return _namesIn([?action.slot, ?action.url], includePredefined);
       case ActionType.copyToClipboard:
         strings.add((this as CopyToClipboardAction).text);
+        return _namesIn(strings, includePredefined);
+      case ActionType.speak:
+        final SpeakAction action = this as SpeakAction;
+        strings.addAll([action.text, action.language, action.rate, ?action.pitch]);
+        return _namesIn(strings, includePredefined);
+      case ActionType.playSound:
+        strings.add((this as PlaySoundAction).url);
+        return _namesIn(strings, includePredefined);
+      case ActionType.playAnimation:
+        return _namesIn(strings, includePredefined);
+      case ActionType.focus:
+        return {};
+      case ActionType.speak:
+        final SpeakAction action = this as SpeakAction;
+        strings.addAll([
+          action.text,
+          action.language,
+          action.rate,
+          ?action.pitch,
+        ]);
         return _namesIn(strings, includePredefined);
       case ActionType.cloudData:
         final CloudDataAction action = this as CloudDataAction;
