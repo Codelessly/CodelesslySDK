@@ -61,4 +61,86 @@ void main() {
     );
     expect(action, FocusAction(nodeId: 'search', selectAll: true));
   });
+
+  testWidgets('in a list, the field in the item that ran it is focused', (
+    tester,
+  ) async {
+    final VariableData lanes = VariableData(
+      id: 'lanes',
+      name: 'lanes',
+      type: VariableType.list,
+      value: ['todo', 'doing', 'done'],
+    );
+    final List<BaseNode> nodes = [
+      ListViewNode(
+        id: 'list',
+        name: 'list',
+        basicBoxLocal: NodeBox(0, 0, 300, 400),
+        properties: ListViewProperties(),
+        variables: {'data': r'${lanes}'},
+        children: ['item'],
+      )..parentID = kRootNode,
+      RowColumnNode(
+        id: 'item',
+        name: 'item',
+        basicBoxLocal: NodeBox(0, 0, 300, 60),
+        rowColumnType: RowColumnType.row,
+        children: ['button', 'field'],
+      )..parentID = 'list',
+      RectangleNode(
+        id: 'button',
+        name: 'button',
+        basicBoxLocal: NodeBox(0, 0, 40, 40),
+        reactions: [
+          Reaction(
+            trigger: TriggerModel(type: TriggerType.click),
+            action: FocusAction(nodeId: 'field'),
+          ),
+        ],
+      )..parentID = 'item',
+      TextFieldNode(
+        id: 'field',
+        name: 'field',
+        basicBoxLocal: NodeBox(0, 0, 200, 40),
+        properties: TextFieldProperties(),
+      )..parentID = 'item',
+    ];
+    final registry = NodeRegistry()
+      ..setNodes({for (final node in nodes) node.id: node});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: CodelesslyContext.empty().copyWith(
+          variables: {lanes.id: Observable(lanes)},
+        ),
+        child: MaterialApp(
+          home: Material(
+            child: Builder(
+              builder: (context) => manager.buildWidgetFromNode(
+                nodes.first,
+                context,
+                settings: const WidgetBuildSettings(debugLabel: 'test'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final Finder fields = find.byType(EditableText);
+    expect(fields, findsNWidgets(3));
+    // The button of the second item.
+    final Offset second =
+        tester.getTopLeft(fields.at(1)) - const Offset(20, -10);
+    await tester.tapAt(second);
+    await tester.pumpAndSettle();
+    final List<bool> focused = [
+      for (final e in tester.widgetList<EditableText>(fields))
+        e.focusNode.hasFocus,
+    ];
+    expect(focused, [false, true, false]);
+  });
 }
