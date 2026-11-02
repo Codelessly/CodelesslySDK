@@ -94,7 +94,7 @@ class PassiveChartSeriesWidget extends StatelessWidget {
         ) ??
         node.selectedIndex;
     final ChartSeriesPainter painter = ChartSeriesPainter(
-      props: node.properties,
+      props: boundChartProperties(node, scopedValues),
       data: data,
       selectedIndex: selected,
     );
@@ -189,6 +189,58 @@ String compactNumber(num v) => v.abs() >= 10000
     : v.abs() >= 1000
     ? '${(v / 1000).toStringAsFixed(1)}k'
     : (v == v.roundToDouble() ? v.round().toString() : v.toStringAsFixed(1));
+
+/// [node]'s properties with its bound `yLabelPrefix`, `yLabelSuffix`,
+/// `minY`, `maxY` and `series<i>Color` applied.
+ChartProperties boundChartProperties(
+  ChartNode node,
+  ScopedValues scopedValues,
+) {
+  final ChartProperties props = node.properties;
+  T? bound<T extends Object>(String property) =>
+      node.variables.containsKey(property)
+      ? PropertyValueDelegate.getPropertyValue<T>(
+          node,
+          property,
+          scopedValues: scopedValues,
+        )
+      : null;
+  double? number(String property) => switch (bound<Object>(property)) {
+    final num n => n.toDouble(),
+    final String s => double.tryParse(s.trim()),
+    _ => null,
+  };
+  final String? prefix = bound<String>('yLabelPrefix');
+  final String? suffix = bound<String>('yLabelSuffix');
+  final double? minY = number('minY');
+  final double? maxY = number('maxY');
+  final List<ColorRGBA?> colors = [
+    for (int i = 0; i < props.series.length; i++)
+      bound<ColorRGBA>('series${i}Color'),
+  ];
+  if (prefix == null &&
+      suffix == null &&
+      minY == null &&
+      maxY == null &&
+      colors.every((c) => c == null)) {
+    return props;
+  }
+  return props.copyWith(
+    yLabelPrefix: prefix,
+    yLabelSuffix: suffix,
+    minY: minY,
+    maxY: maxY,
+    series: [
+      for (int i = 0; i < props.series.length; i++)
+        colors[i] == null
+            ? props.series[i]
+            : ChartSeries.fromJson({
+                ...props.series[i].toJson(),
+                'color': colors[i]!.toJson(),
+              }),
+    ],
+  );
+}
 
 /// A y-axis label: [prefix] and [suffix] around the compact number, with
 /// the minus sign in front (`−$5k`).
