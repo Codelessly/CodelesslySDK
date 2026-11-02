@@ -1274,6 +1274,7 @@ class Codelessly {
         context,
         NavigationAction(destinationId: link.canvasId, params: link.params),
         codelessly: this,
+        literalParams: true,
       ),
     );
   }

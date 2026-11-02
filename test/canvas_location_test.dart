@@ -53,18 +53,19 @@ TextNode _text(String id, String parent, String characters) => TextNode(
   textMixedProps: [StartEndProp(start: 0, end: characters.length)],
 )..parentID = parent;
 
-ButtonNode _button(String id, String parent, ActionModel action) => ElevatedButtonNode(
-  id: id,
-  name: id,
-  basicBoxLocal: NodeBox(0, 0, 160, 44),
-  properties: ButtonProperties(label: id),
-  reactions: [
-    Reaction(
-      action: action,
-      trigger: TriggerModel(type: TriggerType.click),
-    ),
-  ],
-)..parentID = parent;
+ButtonNode _button(String id, String parent, ActionModel action) =>
+    ElevatedButtonNode(
+      id: id,
+      name: id,
+      basicBoxLocal: NodeBox(0, 0, 160, 44),
+      properties: ButtonProperties(label: id),
+      reactions: [
+        Reaction(
+          action: action,
+          trigger: TriggerModel(type: TriggerType.click),
+        ),
+      ],
+    )..parentID = parent;
 
 /// A layout of one canvas [id] at [path] that shows [children].
 SDKPublishLayout _screen(
@@ -144,6 +145,11 @@ SDKPublishModel _model({ActionModel? tidesAction}) {
       children: [
         (body) => _text('creatureId', body, r'id=${route.id}'),
         (body) => _text('creatureFrom', body, r'from=${route.from}'),
+        (body) => _text(
+          'creatureKind',
+          body,
+          r"${= isNotEmpty(route.n) ? 'n is text' : 'n is not text'}",
+        ),
       ],
     ),
     _screen('newCreature', path: 'guide/new'),
@@ -237,6 +243,19 @@ void main() {
       );
       expect(find.text('id=bat-star'), findsOneWidget);
       expect(find.text('from=link'), findsOneWidget);
+    });
+
+    testWidgets("a link's params reach the screen as the text in the URL", (
+      tester,
+    ) async {
+      // Opening the screen from a link must not parse `1` into a number:
+      // `isNotEmpty(1)` is false.
+      await _pumpApp(
+        tester,
+        _model(),
+        pendingRoute: CodelesslyRoute.tryParse('guide/bat-star?n=1'),
+      );
+      expect(find.text('n is text'), findsOneWidget);
     });
 
     testWidgets('a link to a screen id still opens it', (tester) async {
