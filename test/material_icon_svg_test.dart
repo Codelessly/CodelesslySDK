@@ -25,4 +25,12 @@ void main() {
     const MaterialIcon icon = MaterialIcon(codepoint: 0xe8b6, name: 'search', style: MaterialIconStyle.filled, version: 12);
     expect(icon.toSvgUrl(), 'https://fonts.gstatic.com/s/i/materialicons/search/v12/24px.svg');
   });
+
+  test('a bound icon name draws that icon, not the old codepoint', () {
+    const MaterialIcon pause = MaterialIcon(codepoint: 0xe034, name: 'pause', style: MaterialIconStyle.filled, version: 12);
+    final IconModel check = pause.named('check');
+    expect(check.name, 'check');
+    expect(check.codepoint, 0);
+    expect((check as MaterialIcon).toSvgUrl(), contains('/check/'));
+  });
 }

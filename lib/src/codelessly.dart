@@ -516,22 +516,67 @@ class Codelessly {
   /// [link] with its URL path, if it has one, matched against the screens'
   /// URL paths: the screen it names and the parameters the path and query
   /// give. A path no screen's URL path matches is read as a screen id.
+  /// The id of the screen named "Not found" (or "404", "Page not found")
+  /// in [model], which links to unknown screens open.
+  static String? notFoundCanvasId(SDKPublishModel model) {
+    const Set<String> names = {'notfound', '404', 'pagenotfound'};
+    for (final SDKPublishLayout layout in model.layouts.values) {
+      for (final MapEntry<String, Map<String, BaseNode>> canvas
+          in layout.canvases.entries) {
+        final BaseNode? node = canvas.value[canvas.key];
+        if (node == null) continue;
+        final String name =
+            node.name.toLowerCase().replaceAll(RegExp(r'[\s_-]+'), '');
+        if (names.contains(name)) return canvas.key;
+      }
+    }
+    return null;
+  }
+
   CodelesslyRoute? _resolveLink(CodelesslyRoute? link) {
-    final String? path = link?.path;
     final SDKPublishModel? model = _maybeDataManager?.publishModel;
-    if (link == null || path == null || model == null) return link;
-    final CanvasLocationMatch? match = CanvasLocation.match(
-      model,
-      Uri(
-        path: path,
-        queryParameters: link.params.isEmpty ? null : link.params,
-      ).toString(),
-    );
-    if (match == null) return link;
-    return CodelesslyRoute(match.canvasId, {
-      for (final MapEntry<String, dynamic> param in match.params.entries)
-        param.key: '${param.value}',
-    });
+    if (link == null || model == null) return link;
+    return resolveLinkIn(model, link);
+  }
+
+  /// [link] resolved against the screens of [model]: a URL path matched to a
+  /// screen's location; a link to no screen at all opens the "Not found"
+  /// screen when there is one; anything else is returned as it is.
+  static CodelesslyRoute resolveLinkIn(
+    SDKPublishModel model,
+    CodelesslyRoute link,
+  ) {
+    final String? path = link.path;
+    if (path != null) {
+      final CanvasLocationMatch? match = CanvasLocation.match(
+        model,
+        Uri(
+          path: path,
+          queryParameters: link.params.isEmpty ? null : link.params,
+        ).toString(),
+      );
+      if (match != null) {
+        return CodelesslyRoute(match.canvasId, {
+          for (final MapEntry<String, dynamic> param in match.params.entries)
+            param.key: '${param.value}',
+        });
+      }
+    }
+    // A link to no screen at all opens the app's "Not found" (or "404")
+    // screen, when it has one, with the link as `route.path`.
+    final String target = path ?? link.canvasId;
+    if (target.isNotEmpty &&
+        CodelesslyWidget.layoutIdForScreen(model, target) == null &&
+        CodelesslyWidget.layoutIdForScreen(model, link.canvasId) == null) {
+      final String? notFound = notFoundCanvasId(model);
+      if (notFound != null) {
+        return CodelesslyRoute(notFound, {
+          ...link.params,
+          'path': target.startsWith('/') ? target : '/$target',
+        });
+      }
+    }
+    return link;
   }
 
   final Map<String, BreakpointsListener> _breakpointsListeners = {};
