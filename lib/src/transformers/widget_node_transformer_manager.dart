@@ -1211,7 +1211,7 @@ class SvgIcon extends StatelessWidget {
       return SizedBox.square(dimension: dimension);
     }
 
-    return SizedBox.square(
+    final Widget svg = SizedBox.square(
       dimension: dimension,
       child: SvgPicture.network(
         url,
@@ -1221,7 +1221,30 @@ class SvgIcon extends StatelessWidget {
         errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
       ),
     );
+    // A directional icon (arrow_back, chevron_right, ...) points the other
+    // way in a right-to-left layout, as Flutter's glyph of the same name
+    // does, so an icon drawn from its SVG agrees with one drawn from the font.
+    return mirrorsInRtl(icon) &&
+            Directionality.maybeOf(context) == TextDirection.rtl
+        ? Transform.flip(flipX: true, child: svg)
+        : svg;
   }
+}
+
+/// Whether [icon] is directional: Flutter's Material icon of the same name
+/// matches the text direction (an arrow or chevron), so it is mirrored in a
+/// right-to-left layout wherever it is drawn from.
+bool mirrorsInRtl(IconModel icon) {
+  final String name = icon.name.toLowerCase();
+  final IconData? glyph = switch (icon) {
+    MaterialSymbol(:final MaterialSymbolStyle style) =>
+      materialIconsByName['${name}_${style.name.toLowerCase()}'] ??
+          materialIconsByName[name],
+    MaterialIcon() =>
+      materialIconsByName[icon.styledName] ?? materialIconsByName[name],
+    _ => null,
+  };
+  return glyph?.matchTextDirection ?? false;
 }
 
 class SvgIconImage extends StatelessWidget {
