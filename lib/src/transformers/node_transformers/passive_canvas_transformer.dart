@@ -1022,7 +1022,13 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     super.didChangeDependencies();
     if (widget.settings.isPreview) return;
 
-    if (didPerformOnLoadActions) return;
+    if (didPerformOnLoadActions) {
+      if (_loadWaitsForRoute && _isCurrentRoute) {
+        _loadWaitsForRoute = false;
+        _load();
+      }
+      return;
+    }
     didPerformOnLoadActions = true;
 
     if (widget.node.properties.requiresSignIn) {
@@ -1033,16 +1039,36 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       if (_redirected) return;
     }
 
+    // A screen built beneath another (a link opens its screen above the
+    // entry screen) loads when it is first shown, so its load actions don't
+    // run after, and undo, those of the screen on top.
+    if (_isCurrentRoute) {
+      _load();
+    } else {
+      _loadWaitsForRoute = true;
+    }
+    _watchValues(context);
+    _startTimers();
+    startIntervals();
+    _listenToKeys();
+  }
+
+  /// Whether the screen's load waits until its route is the one on top.
+  bool _loadWaitsForRoute = false;
+
+  /// Whether this screen is on top of its navigator (true outside one, and
+  /// for the overlay screen). Reading it makes route changes call
+  /// [didChangeDependencies].
+  bool get _isCurrentRoute => ModalRoute.of(context)?.isCurrent ?? true;
+
+  /// Takes the route's params and runs the load actions.
+  void _load() {
     // The overlay screen isn't the screen the app is on: the route is not
     // its own.
     if (!OverlayScreenScope.of(context)) {
       context.read<Codelessly?>()?.prepareRoute(context, widget.node.id);
     }
     triggerOnLoadActions(context);
-    _watchValues(context);
-    _startTimers();
-    startIntervals();
-    _listenToKeys();
   }
 
   /// The screen's "Key Down" reactions, while it listens to the keyboard.
