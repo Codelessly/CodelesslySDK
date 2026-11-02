@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -560,11 +561,53 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         ),
       );
     }
+    // Else the app's own "Not found" (or "404") screen, with the location
+    // as `route.path`.
+    final String? notFound = model == null ? null : notFoundLayoutId(model);
+    if (notFound != null) {
+      return MaterialPage<void>(
+        key: ValueKey('not-found:${route.path}'),
+        name: route.name,
+        child: _buildScreen(
+          notFound,
+          DefaultRoute(
+            path: route.path,
+            queryParameters: {
+              ...route.queryParameters,
+              'path': route.path.startsWith('/')
+                  ? route.path
+                  : '/${route.path}',
+            },
+            metadata: route.metadata,
+          ),
+          const {},
+        ),
+      );
+    }
     return MaterialPage<void>(
       key: ValueKey('not-found:${route.path}'),
       name: route.name,
       child: _ScreenNotFound(onHome: () => resetTo(const ['/'])),
     );
+  }
+
+  /// The layout of the screen named "Not found" (or "404", "Page not
+  /// found") in [model], which locations no screen matches open.
+  static String? notFoundLayoutId(SDKPublishModel model) {
+    const Set<String> names = {'notfound', '404', 'pagenotfound'};
+    for (final SDKPublishLayout layout in model.layouts.values) {
+      for (final MapEntry<String, Map<String, BaseNode>> canvas
+          in layout.canvases.entries) {
+        final BaseNode? node = canvas.value[canvas.key];
+        if (node == null) continue;
+        final String name = node.name.toLowerCase().replaceAll(
+          RegExp(r'[\s_-]+'),
+          '',
+        );
+        if (names.contains(name)) return layout.id;
+      }
+    }
+    return null;
   }
 
   /// The location of screen [destinationId] (a canvas or layout id) opened

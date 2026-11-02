@@ -22,7 +22,10 @@ typedef ViewportContentBuilder = Widget Function(
 /// fallback wherever the node's fit cannot be honoured:
 ///
 /// * Scroll axis
-///   * fixed, locked, flexible: the design size.
+///   * fixed, locked: the design size.
+///   * flexible: as long as its items, up to the space it is given (then it
+///     scrolls), when that is bounded and the items can be counted; else
+///     the design size. A column's list of cards with "Add card" under it.
 ///   * expanded: fill when the incoming extent is bounded, else the design
 ///     size (inside another scroll view, a list item or a non-flex slot).
 ///   * shrinkWrap: shrink-wrap the items when their number is known, else the
@@ -89,7 +92,10 @@ class ViewportLayout {
       case SizeFit.shrinkWrap:
         shrinkWrap = canShrinkWrap;
         main = canShrinkWrap ? null : designMain;
-      case SizeFit.fixed || SizeFit.locked || SizeFit.flexible:
+      case SizeFit.flexible:
+        shrinkWrap = mainBounded && canShrinkWrap;
+        main = shrinkWrap ? null : designMain;
+      case SizeFit.fixed || SizeFit.locked:
         main = designMain;
     }
 
