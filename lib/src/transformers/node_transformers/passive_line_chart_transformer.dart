@@ -455,7 +455,8 @@ class _PassiveLineChartWidgetState extends State<PassiveLineChartWidget> {
 
     return AdaptiveNodeBox(
       node: node,
-      child: LayoutBuilder(
+      child: MeasurableLayoutBuilder(
+        fallbackSize: Size(node.basicBoxLocal.width, node.basicBoxLocal.height),
         builder: (context, constraints) {
           final Size size = constraints.biggest.isFinite
               ? constraints.biggest

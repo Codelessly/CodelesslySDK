@@ -130,8 +130,11 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // A node that reads `parent` is built with the size its parent gives
     // it, so its bindings can lay it out by that size.
     if (readsParentSize(node)) {
-      return LayoutBuilder(
+      // Measurable, so a row or column that measures its children (an
+      // IntrinsicHeight around a stretching row) can have it inside.
+      return MeasurableLayoutBuilder(
         key: ValueKey('${node.id}-parent-size'),
+        fallbackSize: Size(node.outerBoxLocal.width, node.outerBoxLocal.height),
         builder: (context, constraints) => ParentSizeScope.fromConstraints(
           constraints,
           child: Builder(
@@ -186,6 +189,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     Widget widget = getTransformerByNode(node)
         .buildWidget(styled, context, settings);
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
+    widget = applySizeTransition(styled, widget);
 
     if (settings.withOpacity) {
       widget = applyWidgetOpacity(styled, widget);
@@ -321,6 +325,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         ?.toEdgeInsetsModel();
     if (padding != null && padding != node.padding) {
       patch['padding'] = padding.toJson();
+    }
+    // Margin likewise; a map of sides works too, e.g. `{"top": 44}`.
+    final EdgeInsetsModel? margin = value<Object>('margin')
+        ?.toEdgeInsetsModel();
+    if (margin != null && margin != node.margin) {
+      patch['margin'] = margin.toJson();
     }
     final NodeBox box = node.basicBoxLocal;
     final double? width = value<double>('width');
