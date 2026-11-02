@@ -89,6 +89,7 @@ class AppToast {
         : theme.bodyStyle;
     final TextStyle font = fontForAction(action, appFont);
     final double? offset = offsetOf(action, scopedValues);
+    final int duration = durationOf(action, scopedValues);
     // The button's actions run on the chain that showed the toast, whenever
     // it is pressed: with its captured scope (the `${item}` of a row that has
     // since left the list) and its `${result}` then (e.g. the id of the item
@@ -116,6 +117,7 @@ class AppToast {
         theme: theme,
         font: font,
         offset: offset,
+        duration: duration,
         onAction: onAction,
         onDone: () {
           if (_current == entry) _current = null;
@@ -177,6 +179,24 @@ class AppToast {
     return value.toDouble();
   }
 
+  /// How long [action]'s toast stays, in milliseconds: its `duration`
+  /// binding (`variables: {"duration": "${= toast.sticky ? 0 : 6000}"}`)
+  /// read with [scopedValues], else [ShowToastAction.duration]. Zero or less
+  /// keeps the toast up until it is closed or replaced.
+  static int durationOf(ShowToastAction action, ScopedValues scopedValues) {
+    final String? binding = action.variables['duration'];
+    if (binding == null || binding.trim().isEmpty) return action.duration;
+    final Object? value =
+        FormulaEvaluator.exactExpression(binding) != null ||
+            RegExp(r'^\$\{[^{}]+\}$').hasMatch(binding)
+        ? PropertyValueDelegate.getVariableValueFromPath<Object>(
+            binding,
+            scopedValues: scopedValues,
+          )
+        : binding;
+    return value.toDouble()?.round() ?? action.duration;
+  }
+
   /// Removes the toast on screen, if any.
   static void hide() {
     final OverlayEntry? entry = _current;
@@ -234,6 +254,7 @@ class _ToastView extends StatefulWidget {
     required this.theme,
     required this.font,
     required this.offset,
+    required this.duration,
     required this.onAction,
     required this.onDone,
   });
@@ -254,6 +275,9 @@ class _ToastView extends StatefulWidget {
   final ResolvedFeedbackTheme theme;
   final TextStyle font;
   final double? offset;
+
+  /// Milliseconds the toast stays; zero or less keeps it until closed.
+  final int duration;
   final VoidCallback? onAction;
   final VoidCallback onDone;
 
@@ -278,7 +302,9 @@ class _ToastViewState extends State<_ToastView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(() => _visible = true);
     });
-    _timer = Timer(Duration(milliseconds: widget.action.duration), _close);
+    if (widget.duration > 0) {
+      _timer = Timer(Duration(milliseconds: widget.duration), _close);
+    }
   }
 
   void _close() {
