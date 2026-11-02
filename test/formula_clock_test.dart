@@ -2,6 +2,32 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('the frame clock ticks each frame only while listened to', (
+    tester,
+  ) async {
+    int ticks = 0;
+    void listener() => ticks++;
+    expect(FrameClock.instance.isTicking, isFalse);
+    FrameClock.instance.addListener(listener);
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(ticks, greaterThanOrEqualTo(3));
+    FrameClock.instance.removeListener(listener);
+    final int stopped = ticks;
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(ticks, stopped);
+    expect(FrameClock.instance.isTicking, isFalse);
+  });
+
+  test('nowMs() reads the frame clock, now() the second clock', () {
+    expect(FormulaEvaluator.readsFrameClock('hit * (nowMs() - at)'), isTrue);
+    expect(FormulaEvaluator.readsClock('hit * (nowMs() - at)'), isFalse);
+    expect(FormulaEvaluator.readsFrameClock('now()'), isFalse);
+    expect(FormulaEvaluator.readsFrameClock("'nowMs()'"), isFalse);
+  });
+
   tearDown(() => FormulaClock.pinned = null);
 
   String eval(String formula) => FormulaEvaluator.stringify(
