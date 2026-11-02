@@ -186,6 +186,15 @@ class FreeformAxisPlacement {
         final double v = s == null ? math.max(0, extent) : stretchIn(s).$2;
         return (v, v);
       case FreeformAxisMode.align:
+        // Like Flutter's Align, but a child larger than the container at
+        // design size keeps that overhang (see [room]), as the editor's
+        // solver keeps a fixed size: a 585 wide decoration aligned in a 390
+        // wide frame stays 585 wide and sits at the Alignment.inscribe
+        // offset instead of being squashed to the frame.
+        final double designOverflow = math.max(0, extent - parentExtent);
+        final double max = s == null ? incomingMax : s + designOverflow;
+        if (expands && max.isInfinite) return (extent, extent);
+        return (0, max);
       case FreeformAxisMode.fraction:
         final double max = s ?? incomingMax;
         if (expands && max.isInfinite) return (extent, extent);

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -1220,10 +1221,37 @@ class Codelessly {
         return int.tryParse(t) ?? double.tryParse(t)?.round() ?? text;
       case VariableType.decimal:
         return double.tryParse(t) ?? text;
+      case VariableType.list:
+        // JSON (`["Tired","Wired"]`) when it is a JSON list, else the
+        // comma-separated items (`Tired,Wired`); empty is an empty list.
+        if (t.startsWith('[')) {
+          try {
+            final Object? decoded = jsonDecode(t);
+            if (decoded is List) return decoded;
+          } catch (_) {}
+        }
+        if (t.isEmpty) return <Object>[];
+        return <Object>[
+          for (final String item in t.split(','))
+            if (item.trim().isNotEmpty) linkValueOf(item.trim()),
+        ];
+      case VariableType.map:
+        if (t.startsWith('{')) {
+          try {
+            final Object? decoded = jsonDecode(t);
+            if (decoded is Map) return decoded;
+          } catch (_) {}
+        }
+        return text;
       default:
         return text;
     }
   }
+
+  /// One comma-separated item of a list link parameter: a whole number or
+  /// decimal as a number (`?ids=3,7`), anything else as text.
+  static Object linkValueOf(String item) =>
+      int.tryParse(item) ?? double.tryParse(item) ?? item;
 
   /// The link for [route]: the screen's URL path with its parameters filled
   /// in when it has one (`guide/bat-star` for a screen at `guide/:id`; the
