@@ -187,7 +187,17 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     BaseNode node,
     WidgetBuildSettings settings,
   ) {
-    final BaseNode styled = applyStyleOverrides(context, node);
+    // On the design canvas (no reactions) bindings read the editor's
+    // preview values, as text does, so a state previewed with
+    // `preview.setValues` shows and hides the same nodes it would at runtime.
+    final ScopedValues? preview = settings.withReactions
+        ? null
+        : VariablePreview.scopeOf(node, context: context);
+    final BaseNode styled = applyStyleOverrides(
+      context,
+      node,
+      scopedValues: preview,
+    );
     Widget widget = getTransformerByNode(node)
         .buildWidget(styled, context, settings);
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
@@ -203,11 +213,28 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = wrapWithSemantics(styled, widget);
       widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
+      widget = applyDragAndDrop(context, styled, widget);
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
-      widget = applyWidgetMotion(context, styled, widget);
+      widget = applyWidgetMotion(
+        context,
+        styled,
+        widget,
+        scopedValues: preview,
+      );
       widget = applyBoundOffset(context, styled, widget);
+    }
+    // Without reactions (the design canvas) a knob or fader cap is drawn
+    // where its drag track puts it; with them NodeDragTrack draws it there
+    // and makes it draggable.
+    if (!settings.withReactions) {
+      widget = applyTrackPose(
+        context,
+        styled,
+        widget,
+        scopedValues: preview,
+      );
     }
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
@@ -222,10 +249,37 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         styled,
         widget,
         maintainState: true,
+        scopedValues: preview,
       );
     }
 
     return decorate(context, styled, widget, NodeBuildLayer.margin);
+  }
+
+  /// Makes [widget] draggable and/or a drop target, as [node]'s
+  /// [BaseNode.draggable] and [BaseNode.dropTarget] say.
+  Widget applyDragAndDrop(BuildContext context, BaseNode node, Widget widget) {
+    if (node.dropTarget case final DropTargetModel target) {
+      widget = DropTargetBox(node: node, model: target, child: widget);
+    }
+    if (node.draggable case final DraggableModel draggable) {
+      widget = DragSourceBox(
+        node: node,
+        model: draggable,
+        // The feedback node is usually hidden where it is designed.
+        buildNode: (context, id) => buildWidgetByID(
+          id,
+          context,
+          settings: const WidgetBuildSettings(
+            debugLabel: 'drag feedback',
+            withReactions: false,
+            withVisibility: false,
+          ),
+        ),
+        child: widget,
+      );
+    }
+    return widget;
   }
 
   /// Wraps [widget] in a tooltip showing [node]'s tooltip text (its data
@@ -259,13 +313,17 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// (effects, stroke weight, corner radius, padding, font weight and size,
   /// icon).
   /// Returns [node] itself when nothing changes it.
-  BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+  BaseNode applyStyleOverrides(
+    BuildContext context,
+    BaseNode node, {
+    ScopedValues? scopedValues,
+  }) {
+    final ScopedValues scope = scopedValues ?? ScopedValues.of(context);
     T? value<T extends Object>(String property) =>
         PropertyValueDelegate.getPropertyValue<T>(
           node,
           property,
-          scopedValues: scopedValues,
+          scopedValues: scope,
         );
 
     final Map<String, dynamic> patch = {};
@@ -356,7 +414,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
 
     // Effects, stroke weight, corner radius, font weight and size, and icon.
-    StyleBindings.addTo(patch, node, scopedValues: scopedValues);
+    StyleBindings.addTo(patch, node, scopedValues: scope);
 
     // The states shown around the node (a property-override variant, its
     // own or an ancestor's interaction states) win over bindings.
@@ -547,6 +605,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           case 'auth':
             final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
+          case 'drag':
+            listenables.add(codelesslyContext.dragAndDrop);
           case 'speech':
             listenables.add(Speech.instance);
         }
@@ -592,6 +652,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           case 'auth':
             final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
+          case 'drag':
+            listenables.add(codelesslyContext.dragAndDrop);
           case 'speech':
             listenables.add(Speech.instance);
         }
@@ -640,6 +702,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             case 'auth':
               final notifier = context.read<Codelessly?>()?.appUser;
               if (notifier != null) listenables.add(notifier);
+            case 'drag':
+              listenables.add(codelesslyContext.dragAndDrop);
             case 'speech':
               listenables.add(Speech.instance);
           }
@@ -698,6 +762,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           context,
         ),
         'auth' => context.read<Codelessly?>()?.appUser,
+        'drag' => codelesslyContext.dragAndDrop,
         'speech' => Speech.instance,
         _ => null,
       };

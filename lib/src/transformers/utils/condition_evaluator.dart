@@ -330,16 +330,19 @@ class ConditionEvaluator<R extends Object>
   R? visitCopyToClipboardAction(CopyToClipboardAction action) => null;
 
   @override
+  R? visitFocusAction(FocusAction action) => null;
+
+  @override
   R? visitControlDragAction(ControlDragAction action) => null;
 
   @override
   R? visitSpeakAction(SpeakAction action) => null;
 
   @override
-  R? visitFocusFieldAction(FocusFieldAction action) => null;
+  R? visitScrollToAction(ScrollToAction action) => null;
 
   @override
-  R? visitScrollToAction(ScrollToAction action) => null;
+  R? visitPlaySoundAction(PlaySoundAction action) => null;
 
   @override
   R? visitPaywallAction(PaywallAction action) => null;
@@ -510,18 +513,25 @@ class ConditionPrinter
   void visitCopyToClipboardAction(CopyToClipboardAction action) {}
 
   @override
-  void visitFocusFieldAction(FocusFieldAction action) {
-    _buffer.writeln('\tFocus field: ${action.unfocus ? 'none' : action.nodeId}');
-  }
-
-  @override
   void visitScrollToAction(ScrollToAction action) {
     _buffer.writeln('\tScroll to: ${action.nodeId}');
   }
 
   @override
+  void visitFocusAction(FocusAction action) {
+    _buffer.writeln(
+      '\t${action.unfocus ? 'Unfocus' : 'Focus'} ${action.nodeId}',
+    );
+  }
+
+  @override
   void visitSpeakAction(SpeakAction action) {
     _buffer.writeln('\tSpeak: ${action.stop ? 'stop' : action.text}');
+  }
+
+  @override
+  void visitPlaySoundAction(PlaySoundAction action) {
+    _buffer.writeln('\tPlay sound: ${action.sound}');
   }
 
   @override

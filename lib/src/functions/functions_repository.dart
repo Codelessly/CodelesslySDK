@@ -170,6 +170,8 @@ class FunctionsRepository {
         return copyToClipboard(context, action as CopyToClipboardAction);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
+      case ActionType.focus:
+        return runFocus(action as FocusAction);
       case ActionType.speak:
         final SpeakAction speak = action as SpeakAction;
         if (speak.stop) {
@@ -188,18 +190,10 @@ class FunctionsRepository {
           rate: speak.rate,
           pitch: speak.pitch,
         );
-      case ActionType.focusField:
-        final FocusFieldAction focus = action as FocusFieldAction;
-        if (focus.unfocus) {
-          FocusManager.instance.primaryFocus?.unfocus();
-          return true;
-        }
-        final FocusNode? node = TextFieldFocus.of(focus.nodeId);
-        if (node == null) return false;
-        node.requestFocus();
-        return true;
       case ActionType.scrollTo:
         return ScrollTargets.scrollTo(action as ScrollToAction);
+      case ActionType.playSound:
+        return playSound(context, action as PlaySoundAction);
       case ActionType.controlDrag:
         final ControlDragAction drag = action as ControlDragAction;
         return NodeDrag.control(
@@ -208,6 +202,21 @@ class FunctionsRepository {
           drag.direction,
         ).then((_) => true);
     }
+  }
+
+  /// Focuses (or unfocuses) the text field [action] names.
+  static Future<bool> runFocus(FocusAction action) async {
+    final String nodeId = action.nodeId;
+    if (action.unfocus) {
+      unfocusTextField(nodeId.isEmpty ? null : nodeId);
+      return true;
+    }
+    if (nodeId.isEmpty) return true;
+    // A field the previous actions just revealed builds on the next frame.
+    if (focusTextField(nodeId, selectAll: action.selectAll)) return true;
+    await WidgetsBinding.instance.endOfFrame;
+    focusTextField(nodeId, selectAll: action.selectAll);
+    return true;
   }
 
   /// Run a native paywall action in the enclosing paywall surface.
@@ -944,7 +953,10 @@ class FunctionsRepository {
       maxHeightFactor: action.maxHeightFactor,
       showDragHandle: action.showDragHandle,
       placement: action.placement,
-      anchorToTrigger: action.anchor == DialogAnchor.trigger,
+      anchorToTrigger: action.anchor != DialogAnchor.none,
+      anchorPoint: action.anchor == DialogAnchor.pointer
+          ? pointerOf(ActionChain.current?.result)
+          : null,
       anchorGap: action.anchorGap,
       anchorOffset: action.anchorOffset,
       fullHeight: action.fullHeight,
@@ -952,6 +964,15 @@ class FunctionsRepository {
     if (result case final Map values when values.isNotEmpty) {
       ActionChain.setResult(values);
     }
+  }
+
+  /// The screen position in a trigger's result (`{x, y}`, as right clicks
+  /// and pointer triggers report it), or null.
+  static Offset? pointerOf(Object? result) {
+    if (result is! Map) return null;
+    final Object? x = result['x'], y = result['y'];
+    if (x is! num || y is! num) return null;
+    return Offset(x.toDouble(), y.toDouble());
   }
 
   /// The rect of the node that [context] belongs to, relative to its
@@ -1022,6 +1043,7 @@ class FunctionsRepository {
     bool showDragHandle = false,
     DialogPlacement placement = DialogPlacement.belowStart,
     bool anchorToTrigger = false,
+    Offset? anchorPoint,
     double anchorGap = 6,
     double anchorOffset = 0,
     bool fullHeight = false,
@@ -1079,12 +1101,23 @@ class FunctionsRepository {
     final bool wantsAnchor =
         effectivePresentation == DialogPresentation.dialog &&
         (anchorToTrigger || placement == DialogPlacement.anchored);
-    final Rect? anchorRect = wantsAnchor
-        ? CodelesslyPopover.anchorRectOf(
+    // At the pointer: a point in the navigator overlay's coordinates.
+    final RenderObject? overlayBox = Navigator.of(
+      context,
+      rootNavigator: false,
+    ).overlay?.context.findRenderObject();
+    final Rect? anchorRect = !wantsAnchor
+        ? null
+        : anchorPoint != null && overlayBox is RenderBox && overlayBox.attached
+        ? Rect.fromCenter(
+            center: overlayBox.globalToLocal(anchorPoint),
+            width: 0,
+            height: 0,
+          )
+        : CodelesslyPopover.anchorRectOf(
             context,
             Navigator.of(context, rootNavigator: false),
-          )
-        : null;
+          );
     if (wantsAnchor && anchorRect == null) {
       DebugLogger.instance.printInfo(
         'The trigger of dialog [$canvasId] has no laid out box; showing '
@@ -1789,6 +1822,26 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
   }
 
+  /// Plays [action]'s sound, now or at its `at` time on the sound clock.
+  /// Its fields are values or formulas (`${result.at}`, `${voice}`).
+  static bool playSound(BuildContext context, PlaySoundAction action) {
+    final ScopedValues scope = ActionChain.scopedValuesOf(context);
+    String text(String value) => PropertyValueDelegate.substituteVariables(
+      value,
+      scopedValues: scope,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    double? number(String value) => double.tryParse(text(value));
+    final String at = text(action.at);
+    Sound.play(
+      Sound.voiceNamed(text(action.sound)),
+      time: at.isEmpty ? null : double.tryParse(at),
+      volume: number(action.volume) ?? 1,
+      pitch: number(action.pitch) ?? 1,
+    );
+    return true;
+  }
+
   /// Sets given [action.newValue] for given [action.variable] to a variable
   /// from [CodelesslyContext.variables].
   /// Returns `true` if variable was found and updated, `false` otherwise.
@@ -2010,6 +2063,18 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         );
       });
       return done.future;
+    }
+
+    // A click reads the modifier keys held, as `${result.meta}` (Command
+    // on macOS, Control elsewhere), `${result.shift}` and `${result.alt}`,
+    // for multi-select (⌘-click) and range select (⇧-click).
+    if (type == TriggerType.click && result == null) {
+      final HardwareKeyboard keys = HardwareKeyboard.instance;
+      result = {
+        'meta': keys.isMetaPressed || keys.isControlPressed,
+        'shift': keys.isShiftPressed,
+        'alt': keys.isAltPressed,
+      };
     }
 
     // The chain captures the trigger's scope and host now, so its actions
