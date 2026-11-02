@@ -27,6 +27,16 @@ import 'scoped_values.dart';
 /// * [icon] (string): the name of the icon an icon node shows, in the
 ///   naming of its icon model (`star`, `star_border`, ...). Its family and
 ///   style stay. An icon model JSON map replaces the icon as a whole.
+/// * [textDecoration] (string): the decoration of every span of a text
+///   node: `none`, `underline`, `strikethrough` (or `lineThrough`) or
+///   `overline` (see [TextDecorationEnum.parse]).
+/// * [notchOffset] (number): the offset of every notch of a node with
+///   [CornerMixin.notches], in the notch's own unit (pixels, or a fraction
+///   of the edge when the notch is relative), e.g. a ticket whose tear line
+///   follows the screen width: `${146 * screen.width / 340}`.
+/// * [notchOffsetAt] `notch-offset-<index>` (number): the offset of the
+///   notch at index (0-based) of [CornerMixin.notches]. Wins over
+///   [notchOffset].
 abstract final class StyleBindings {
   /// Shows or hides every effect of the node.
   static const String effectsVisible = 'effectsVisible';
@@ -57,6 +67,15 @@ abstract final class StyleBindings {
 
   /// The name of the icon an icon node shows.
   static const String icon = 'icon';
+
+  /// The decoration of every span of a text node.
+  static const String textDecoration = 'textDecoration';
+
+  /// The offset of every notch of the node.
+  static const String notchOffset = 'notchOffset';
+
+  /// The offset of the notch at [index] of the node's notches.
+  static String notchOffsetAt(int index) => 'notch-offset-$index';
 
   /// Shows or hides the effect [effectId].
   static String effectVisible(String effectId) => 'effect-visible-$effectId';
@@ -126,6 +145,31 @@ abstract final class StyleBindings {
       }
     }
 
+    if (node is TextNode) {
+      final TextDecorationEnum? decoration = TextDecorationEnum.parse(
+        value<Object>(textDecoration),
+      );
+      if (decoration != null &&
+          node.textMixedProps.any(
+            (prop) => prop.textDecoration != decoration,
+          )) {
+        final List spans =
+            patch['textMixedProps'] as List? ??
+            [for (final prop in node.textMixedProps) prop.toJson()];
+        patch['textMixedProps'] = [
+          for (final Map span in spans.cast<Map>())
+            {...span, 'textDecoration': decoration.name},
+        ];
+      }
+    }
+
+    if (node is CornerMixin && node.notches.isNotEmpty) {
+      final List<NotchModel> notches = boundNotches(node, scopedValues);
+      if (!const ListEquality<NotchModel>().equals(notches, node.notches)) {
+        patch['notches'] = [for (final notch in notches) notch.toJson()];
+      }
+    }
+
     if (node is IconNode) {
       final IconModel? bound = _icon(
         node.properties.icon.icon,
@@ -143,6 +187,36 @@ abstract final class StyleBindings {
         };
       }
     }
+  }
+
+  /// [node]'s notches with the offsets their [notchOffsetAt] or
+  /// [notchOffset] bindings give them, evaluated with [scopedValues]. A
+  /// binding that is missing or isn't a finite number keeps the notch's own
+  /// offset.
+  static List<NotchModel> boundNotches(
+    CornerMixin node,
+    ScopedValues scopedValues,
+  ) {
+    double? number(String property) {
+      if (node.variables[property] == null) return null;
+      final num? offset = PropertyValueDelegate.getPropertyValue<num>(
+        node,
+        property,
+        scopedValues: scopedValues,
+      );
+      return offset == null || !offset.isFinite ? null : offset.toDouble();
+    }
+
+    final double? all = number(notchOffset);
+    return [
+      for (final (int index, NotchModel notch) in node.notches.indexed)
+        () {
+          final double? offset = number(notchOffsetAt(index)) ?? all;
+          return offset == null || offset == notch.offset
+              ? notch
+              : notch.copyWith(offset: offset);
+        }(),
+    ];
   }
 
   static List<Effect> _effects(
