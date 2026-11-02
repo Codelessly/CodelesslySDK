@@ -17,6 +17,7 @@ Curve flutterCurveOf(MotionCurve curve) => switch (curve) {
   MotionCurve.easeIn => Curves.easeIn,
   MotionCurve.easeOutBack => Curves.easeOutBack,
   MotionCurve.easeOutCubic => Curves.easeOutCubic,
+  MotionCurve.easeInOutCubic => Curves.easeInOutCubic,
   MotionCurve.spring => const SpringCurve(),
   MotionCurve.elasticOut => Curves.elasticOut,
   MotionCurve.bounceOut => Curves.bounceOut,
@@ -129,7 +130,12 @@ Matrix4 motionMatrix(MotionModel motion, {double spinTurns = 0}) {
   }
   matrix
     ..translateByDouble(motion.translateX, motion.translateY, 0, 1)
-    ..scaleByDouble(motion.scale, motion.scale, 1, 1)
+    ..scaleByDouble(
+      motion.scale * motion.scaleX,
+      motion.scale * motion.scaleY,
+      1,
+      1,
+    )
     ..rotateZ(motion.rotate * math.pi / 180 + spinTurns * 2 * math.pi)
     ..rotateX(motion.rotateX * math.pi / 180)
     ..rotateY(motion.rotateY * math.pi / 180);
@@ -178,6 +184,10 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   late MotionModel _from = widget.motion;
   late MotionModel _to = widget.motion;
 
+  /// The curve of the running transition, kept from when it started so a
+  /// bound curve that changes mid-way doesn't jump it.
+  late MotionCurve _curve = widget.motion.curve;
+
   Ticker? _spinTicker;
   Duration _lastTick = Duration.zero;
 
@@ -214,6 +224,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   /// Animates from [_from] to [_to] over [ms], after the motion's delay.
   void _run(int ms) {
     _delay?.cancel();
+    _curve = _to.curve;
     _transition
       ..stop()
       ..duration = Duration(milliseconds: ms)
@@ -246,6 +257,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     _delay?.cancel();
     _from = widget.motion.atRest;
     _to = widget.motion;
+    _curve = _to.curve;
     _transition.duration = Duration(milliseconds: widget.motion.durationMs);
     void start() {
       if (!mounted) return;
@@ -267,6 +279,10 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     final MotionModel next = widget.motion;
     final bool replay =
         widget.animate && next.replayKey != oldWidget.motion.replayKey;
+    final bool pulse =
+        widget.animate &&
+        next.hasKeyframes &&
+        next.pulseKey != oldWidget.motion.pulseKey;
     if (_loops && replay) {
       _startLoop();
     } else if (replay && motionTransitionMs(next) > 0) {
@@ -274,6 +290,12 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       _from = next.entranceStart;
       _to = next;
       _run(motionTransitionMs(next));
+    } else if (pulse && !_loops && next.durationMs > 0) {
+      // Plays the keyframes once, from wherever the node is to its values
+      // (the same, unless they changed too).
+      _from = _current;
+      _to = next;
+      _run(next.durationMs);
     } else if (_loops) {
       final MotionModel old = oldWidget.motion;
       if (!_sameTransform(next, _to) ||
@@ -314,6 +336,8 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       a.translateX == b.translateX &&
       a.translateY == b.translateY &&
       a.scale == b.scale &&
+      a.scaleX == b.scaleX &&
+      a.scaleY == b.scaleY &&
       a.opacity == b.opacity &&
       a.rotate == b.rotate &&
       a.rotateX == b.rotateX &&
@@ -335,15 +359,31 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   MotionModel get _current {
     final bool spring = _spring.isAnimating || _spring.value != 1;
     if (!_moving && _transition.value == 0 && !spring) return _to;
+    // A spring runs on real physics (and may overshoot past 1); a curve on
+    // the transition's time.
+    final double time = spring
+        ? _spring.value.clamp(0.0, 1.0)
+        : _transition.value;
     final double t = spring
         ? _spring.value
-        : flutterCurveOf(_to.curve).transform(_transition.value);
+        : flutterCurveOf(_curve).transform(time);
+    // A value the keyframes key follows them in time; the others follow
+    // the curve.
     double lerp(String p) =>
+        MotionModel.keyframedValue(
+          _to.keyframes,
+          p,
+          _from.valueOf(p),
+          _to.valueOf(p),
+          time,
+        ) ??
         _from.valueOf(p) + (_to.valueOf(p) - _from.valueOf(p)) * t;
     return _to.copyWith(
       translateX: lerp('translateX'),
       translateY: lerp('translateY'),
       scale: lerp('scale'),
+      scaleX: lerp('scaleX'),
+      scaleY: lerp('scaleY'),
       opacity: lerp('opacity').clamp(0, 1).toDouble(),
       rotate: lerp('rotate'),
       rotateX: lerp('rotateX'),
@@ -398,7 +438,11 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final MotionModel m = _moving ? _current : _to;
+    // Where tickers are off (the editor's design canvas holds still), an
+    // entrance or transition would stay at its first frame forever: show
+    // the values at rest instead, as the design canvas should.
+    final bool still = !TickerMode.valuesOf(context).enabled;
+    final MotionModel m = still ? widget.motion : (_moving ? _current : _to);
     if (!m.hasTransform && _turns == 0) return widget.child;
     Widget child = widget.child;
     if (m.backfaceHidden) child = BackfaceHidden(child: child);
@@ -412,6 +456,8 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     if (m.translateX == 0 &&
         m.translateY == 0 &&
         m.scale == 1 &&
+        m.scaleX == 1 &&
+        m.scaleY == 1 &&
         m.rotate == 0 &&
         m.rotateX == 0 &&
         m.rotateY == 0 &&

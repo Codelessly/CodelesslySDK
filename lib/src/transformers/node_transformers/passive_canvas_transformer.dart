@@ -125,6 +125,21 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     );
   }
 
+  /// The surface a canvas without a scaffold is drawn on: its background
+  /// colour. Under a [TapThroughScope] (a dialog's canvas, the overlay
+  /// screen) a canvas without a background takes no taps on its empty
+  /// parts, so they reach what is below it.
+  Widget _canvasMaterial(BuildContext context, CanvasNode node, Widget body) {
+    final Color? background = canvasBackground(context, node);
+    final bool transparent =
+        (background == null || background.a == 0) && TapThroughScope.of(context);
+    return Material(
+      type: transparent ? MaterialType.transparency : MaterialType.canvas,
+      color: transparent ? null : background,
+      child: body,
+    );
+  }
+
   Widget _wrapInScaffoldForResponsive({
     required CanvasNode node,
     required BuildContext context,
@@ -196,17 +211,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         body: body,
       );
     } else {
-      final Color? background = canvasBackground(context, node);
-      // Under a TapThroughScope, a canvas without a background takes no taps
-      // on its empty parts, so they reach its dialog's barrier.
-      final bool transparent =
-          (background == null || background.a == 0) &&
-          TapThroughScope.of(context);
-      scaffold = Material(
-        type: transparent ? MaterialType.transparency : MaterialType.canvas,
-        color: transparent ? null : background,
-        child: body,
-      );
+      scaffold = _canvasMaterial(context, node, body);
     }
 
     return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
@@ -329,17 +334,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         body: body,
       );
     } else {
-      scaffold = Material(
-        color: canvasBackground(context, node),
-        child: !node.isScrollable
-            // This would make it so auto scale layouts are top-center aligned
-            // in the viewport. But this doesn't work if the layout is inside a
-            // dialog. it will force it to top-center align in the dialog
-            // which is not what we want.
-            // ? Align(alignment: Alignment.topCenter, child: body)
-            ? body
-            : body,
-      );
+      scaffold = _canvasMaterial(context, node, body);
     }
 
     return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
@@ -1112,7 +1107,11 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
-    final String pressed = normalizeKeyLabel(event.logicalKey.keyLabel);
+    // The trigger label names keys without a visible label (Space's label
+    // is " ", which normalizes to nothing).
+    final String pressed = normalizeKeyLabel(
+      keyTriggerLabel(event.logicalKey),
+    );
     final List<Reaction> matching = [
       for (final Reaction reaction in widget.node.reactions.whereTriggerType(
         TriggerType.keyPress,
@@ -1135,7 +1134,13 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     super.didChangeDependencies();
     if (widget.settings.isPreview) return;
 
-    if (didPerformOnLoadActions) return;
+    if (didPerformOnLoadActions) {
+      if (_loadWaitsForRoute && _isCurrentRoute) {
+        _loadWaitsForRoute = false;
+        _load();
+      }
+      return;
+    }
     didPerformOnLoadActions = true;
 
     if (widget.node.properties.requiresSignIn) {
@@ -1146,12 +1151,36 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       if (_redirected) return;
     }
 
-    context.read<Codelessly?>()?.prepareRoute(context, widget.node.id);
-    triggerOnLoadActions(context);
+    // A screen built beneath another (a link opens its screen above the
+    // entry screen) loads when it is first shown, so its load actions don't
+    // run after, and undo, those of the screen on top.
+    if (_isCurrentRoute) {
+      _load();
+    } else {
+      _loadWaitsForRoute = true;
+    }
     _watchValues(context);
     _startTimers();
     startIntervals();
     _listenToKeys();
+  }
+
+  /// Whether the screen's load waits until its route is the one on top.
+  bool _loadWaitsForRoute = false;
+
+  /// Whether this screen is on top of its navigator (true outside one, and
+  /// for the overlay screen). Reading it makes route changes call
+  /// [didChangeDependencies].
+  bool get _isCurrentRoute => ModalRoute.of(context)?.isCurrent ?? true;
+
+  /// Takes the route's params and runs the load actions.
+  void _load() {
+    // The overlay screen isn't the screen the app is on: the route is not
+    // its own.
+    if (!OverlayScreenScope.of(context)) {
+      context.read<Codelessly?>()?.prepareRoute(context, widget.node.id);
+    }
+    triggerOnLoadActions(context);
   }
 
   /// The screen's "Key Down" reactions, while it listens to the keyboard.
