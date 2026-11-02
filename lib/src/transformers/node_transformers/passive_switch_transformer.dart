@@ -35,16 +35,29 @@ class PreviewSwitchWidget extends StatefulWidget {
   State<PreviewSwitchWidget> createState() => _PreviewSwitchWidgetState();
 }
 
+/// A design-time switch: shows its bound value (or its own), and
+/// can be toggled locally until that value changes.
 class _PreviewSwitchWidgetState extends State<PreviewSwitchWidget> {
-  bool effectiveValue = false;
+  bool? toggled;
+  bool? toggledFrom;
 
   @override
   Widget build(BuildContext context) {
+    final bool? bound =
+        PropertyValueDelegate.getPropertyValue<bool>(
+          widget.node,
+          'value',
+          scopedValues: ScopedValues.of(context),
+        ) ??
+        widget.node.value;
+    if (toggled != null && bound != toggledFrom) toggled = null;
+    final bool effectiveValue = toggled ?? bound ?? false;
     return TransformerSwitch(
       node: widget.node,
       settings: widget.settings,
       onChanged: (context, value) => setState(() {
-        effectiveValue = value;
+        toggled = value;
+        toggledFrom = bound;
       }),
       value: effectiveValue,
     );
