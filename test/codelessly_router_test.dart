@@ -301,6 +301,35 @@ void main() {
     });
   });
 
+  group('catch-all', () {
+    testWidgets('an unknown link opens the app\'s * screen with its path', (
+      tester,
+    ) async {
+      final SDKPublishModel model = appModel();
+      final SDKPublishLayout lost = testScreen(
+        'lost',
+        path: '*',
+        children: [
+          (body) => testText('lostPath', body, r'lost ${route.path}'),
+        ],
+      );
+      model.layouts[lost.id] = lost;
+      final browser = FakeBrowser(tester, url: '/kraken/lair?x=1');
+      await pumpRouterApp(tester, model, browser);
+      expect(find.text('lost /kraken/lair'), findsOneWidget);
+      expect(find.text('This screen does not exist.'), findsNothing);
+    });
+
+    testWidgets('known paths still open their screens', (tester) async {
+      final SDKPublishModel model = appModel();
+      final SDKPublishLayout lost = testScreen('lost', path: '*');
+      model.layouts[lost.id] = lost;
+      final browser = FakeBrowser(tester, url: '/guide');
+      await pumpRouterApp(tester, model, browser);
+      expect(find.text('Guide'), findsOneWidget);
+    });
+  });
+
   group('base path', () {
     testWidgets('URLs are under the base path', (tester) async {
       final browser = FakeBrowser(tester, url: '/tidepool/journal');
