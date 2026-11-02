@@ -48,7 +48,8 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    substring, split, replace and coalesce. See
 ///    [FormulaEvaluator.functions].
 ///  - text functions: indexOf, matches and slug; durations: seconds
-///    ('3:45' → 225) and duration (225 → '3:45'); colors: luminance.
+///    ('3:45' → 225) and duration (225 → '3:45'); colors: luminance, and
+///    mix(a, b, t) (alias lerpColor) blending two colors to `#AARRGGBB`.
 ///  - maps: `obj('id', 1)`, `object('id', 1)` or `{id: 1}` builds one;
 ///    `set(map, key, value)`, `with(map, key, value, …)` and `merge(a, b)`
 ///    return changed copies; `keys` and `values` read them. `map` can update
@@ -594,6 +595,16 @@ class FormulaEvaluator {
       'alpha',
       'alpha(color, opacity)',
       "alpha('#FF4D4F', 0.12) → #1FFF4D4F",
+    ),
+    FormulaFunctionDoc(
+      'mix',
+      'mix(colorA, colorB, t)',
+      "mix('#000000', '#FFFFFF', 0.5) → #FF808080",
+    ),
+    FormulaFunctionDoc(
+      'lerpColor',
+      'lerpColor(colorA, colorB, t), same as mix',
+      "lerpColor('#FF4D4F', '#1677FF', 0.25) → #FFC5587B",
     ),
     FormulaFunctionDoc('pad', 'pad(value, width, fill)', 'pad(5, 2) → 05'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
@@ -1751,6 +1762,50 @@ String? _alpha(Object? color, num opacity) {
   return '#${a.toRadixString(16).padLeft(2, '0').toUpperCase()}$rgb';
 }
 
+/// The ARGB channels (0 to 255) of a `#RGB`, `#RRGGBB` or `#AARRGGBB`
+/// color (the `#` is optional), or of an `{r, g, b, a}` object with
+/// channels from 0 to 1. Null when [value] isn't a color.
+List<double>? _argb(Object? value) {
+  if (value is Map) {
+    final List<num?> rgba = [
+      for (final key in ['a', 'r', 'g', 'b']) _toNum(value[key]),
+    ];
+    if (rgba.skip(1).any((c) => c == null)) return null;
+    return [
+      for (final c in rgba) ((c ?? 1).toDouble().clamp(0, 1) * 255).toDouble(),
+    ];
+  }
+  String hex = FormulaEvaluator.stringify(value).trim();
+  if (hex.startsWith('#')) hex = hex.substring(1);
+  if (hex.length == 3) hex = hex.split('').map((c) => c * 2).join();
+  if (hex.length == 6) hex = 'FF$hex';
+  if (!RegExp(r'^[0-9a-fA-F]{8}$').hasMatch(hex)) return null;
+  final int argb = int.parse(hex, radix: 16);
+  return [
+    for (final shift in [24, 16, 8, 0]) ((argb >> shift) & 0xff).toDouble(),
+  ];
+}
+
+/// [a] blended toward [b] by [t] (0 is [a], 1 is [b], clamped), channel by
+/// channel including alpha, as `#AARRGGBB`: a band fading from ink to the
+/// background as a trip ages. Null when either isn't a color (see [_argb]).
+String? _mix(Object? a, Object? b, Object? t) {
+  final List<double>? from = _argb(a);
+  final List<double>? to = _argb(b);
+  if (from == null || to == null) return null;
+  final double amount = (_toNum(t) ?? 0.5).toDouble();
+  final double f = amount.isFinite ? amount.clamp(0, 1).toDouble() : 0.5;
+  final String hex = [
+    for (int i = 0; i < 4; i++)
+      (from[i] + (to[i] - from[i]) * f)
+          .round()
+          .clamp(0, 255)
+          .toRadixString(16)
+          .padLeft(2, '0'),
+  ].join();
+  return '#${hex.toUpperCase()}';
+}
+
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
@@ -2029,6 +2084,8 @@ final Map<String, _Function> _functions = {
   'get': (a) => _member(_arg(a, 0), _arg(a, 1)),
   'number': (a) => _toNum(_arg(a, 0)),
   'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
+  'mix': (a) => _mix(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'lerpColor': (a) => _mix(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
     _arg(a, 1) == null ? 2 : _intArg(_arg(a, 1)),
     FormulaEvaluator.stringify(_arg(a, 2) ?? '0'),

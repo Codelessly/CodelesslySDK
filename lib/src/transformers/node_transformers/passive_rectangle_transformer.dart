@@ -148,6 +148,7 @@ class PassiveRectangleWidget extends StatelessWidget {
           alignment:
               stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
         ),
+        ...buildForegroundFills(node, scopedValues),
       ],
     );
 
@@ -564,6 +565,24 @@ Gradient? retrieveGradient(PaintModel paint) {
     );
     final radians = rotation * pi / 180;
 
+    if (paint.type == PaintType.gradientLinear && paint.hasGradientHandles) {
+      // Between its handles, as authored: begin (-1, -1) to end (1, 1) runs
+      // corner to corner whatever the box's proportions, where a rotation
+      // about the centre would miss the corners of a wide box.
+      double read(double? value) =>
+          value == null || !value.isFinite ? 0 : value;
+      return LinearGradient(
+        transform: GradientHandlesTransform(
+          Alignment(read(paint.gradientBeginX), read(paint.gradientBeginY)),
+          Alignment(read(paint.gradientEndX), read(paint.gradientEndY)),
+        ),
+        colors: gradientStops
+            .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
+            .toList(),
+        stops: gradientStops.map((e) => e.position).toList(),
+        tileMode: tileMode,
+      );
+    }
     if (paint.type == PaintType.gradientLinear) {
       final double? repeatEvery = paint.gradientRepeatEvery;
       final bool repeats = repeatEvery != null && repeatEvery > 0;
@@ -622,6 +641,53 @@ Gradient? retrieveGradient(PaintModel paint) {
     );
     return null;
   }
+}
+
+/// Places a default linear gradient (left edge to right edge) between the
+/// handles [begin] and [end], alignments in the box, the way design tools
+/// do: the gradient is laid out in the box's normalized space and stretched
+/// with it, so its bands stay perpendicular to the handles there. Begin
+/// (-1, -1) and end (1, 1) then run corner to corner on any box, with the
+/// other diagonal on the middle band. On a square box this is Flutter's
+/// `LinearGradient(begin: begin, end: end)`.
+class GradientHandlesTransform extends GradientTransform {
+  const GradientHandlesTransform(this.begin, this.end);
+
+  final Alignment begin;
+  final Alignment end;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    final double w = bounds.width, h = bounds.height;
+    if (w <= 0 || h <= 0) return Matrix4.identity();
+    // Handles and the axis between them in normalized space (0..1).
+    final double x0 = (begin.x + 1) / 2, y0 = (begin.y + 1) / 2;
+    final double dx = (end.x - begin.x) / 2, dy = (end.y - begin.y) / 2;
+    if (dx == 0 && dy == 0) return Matrix4.identity();
+    // The default gradient runs along (w, 0) from the left middle, with
+    // bands along (0, w). Map those onto the axis and its normal in
+    // normalized space, then into the box.
+    final double a = dx, b = dy * h / w;
+    final double c = -dy, d = dx * h / w;
+    final double fromX = bounds.left, fromY = bounds.center.dy;
+    final double toX = bounds.left + x0 * w, toY = bounds.top + y0 * h;
+    return Matrix4.identity()
+      ..setEntry(0, 0, a)
+      ..setEntry(1, 0, b)
+      ..setEntry(0, 1, c)
+      ..setEntry(1, 1, d)
+      ..setEntry(0, 3, toX - (a * fromX + c * fromY))
+      ..setEntry(1, 3, toY - (b * fromX + d * fromY));
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is GradientHandlesTransform &&
+      other.begin == begin &&
+      other.end == end;
+
+  @override
+  int get hashCode => Object.hash(begin, end);
 }
 
 /// Rotates a linear gradient by [radians] about the box center, like
@@ -836,6 +902,62 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
 /// are clipped even when the node doesn't clip its children), else [fills].
 ///
 /// A rectangle with a path ([RectangleNode.path]) fills the path instead.
+/// The [DefaultShapeNode.foregroundFills] of [node], painted over its
+/// children inside its corners and notches (Flutter's
+/// `foregroundDecoration`): a translucent solid dims the whole box, text
+/// included. A solid's colour can be bound as `foreground-<paint id>`.
+/// They take no taps. Empty when the node has none.
+List<Widget> buildForegroundFills(BaseNode node, ScopedValues scopedValues) {
+  if (node is! DefaultShapeNode || node.foregroundFills.isEmpty) return [];
+  final BorderRadius? borderRadius = getBorderRadius(node);
+  final List<Widget> layers = [
+    for (final PaintModel paint in node.foregroundFills)
+      if (paint.visible)
+        if (_foregroundDecoration(node, paint, borderRadius, scopedValues)
+            case final BoxDecoration decoration)
+          Positioned.fill(child: DecoratedBox(decoration: decoration)),
+  ];
+  if (layers.isEmpty) return [];
+  return [
+    Positioned.fill(
+      child: IgnorePointer(
+        child: Stack(children: clipFillsToNotches(node, layers)),
+      ),
+    ),
+  ];
+}
+
+BoxDecoration? _foregroundDecoration(
+  DefaultShapeNode node,
+  PaintModel paint,
+  BorderRadius? borderRadius,
+  ScopedValues scopedValues,
+) {
+  switch (paint.type) {
+    case PaintType.solid:
+      final PaintModel? bound =
+          PropertyValueDelegate.getPropertyValue<PaintModel>(
+            node,
+            'foreground-${paint.id}',
+            scopedValues: scopedValues,
+          );
+      final Color? color = (bound ?? paint).toFlutterColor();
+      if (color == null) return null;
+      return BoxDecoration(borderRadius: borderRadius, color: color);
+    case PaintType.gradientLinear:
+    case PaintType.gradientRadial:
+    case PaintType.gradientAngular:
+    case PaintType.gradientDiamond:
+      return BoxDecoration(
+        borderRadius: borderRadius,
+        gradient: retrieveGradient(paint),
+      );
+    case PaintType.image:
+    case PaintType.emoji:
+      return null;
+  }
+}
+
 List<Widget> clipFillsToNotches(BaseNode node, List<Widget> fills) {
   if (node is RectangleNode && node.hasPath) {
     if (fills.isEmpty) return fills;

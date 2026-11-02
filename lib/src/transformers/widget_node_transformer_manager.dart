@@ -235,12 +235,16 @@ abstract class WidgetNodeTransformerManager
     MotionModel? motion = node.motion;
     for (final String property in MotionModel.properties) {
       final String key = MotionModel.variableKey(property);
-      if (!node.variables.containsKey(key)) continue;
-      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
-        node,
-        key,
-        scopedValues: scopedValues,
-      );
+      final String? raw = node.variables[key];
+      if (raw == null) continue;
+      // A plain value ("-3.4") is a static pose, read as it is.
+      final Object? value = raw.contains(r'${')
+          ? PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              key,
+              scopedValues: scopedValues,
+            )
+          : raw;
       final double? number = switch (value) {
         num n => n.toDouble(),
         String s => double.tryParse(s.trim()),
