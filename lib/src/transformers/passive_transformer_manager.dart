@@ -331,8 +331,36 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       patch['padding'] = padding.toJson();
     }
     final NodeBox box = node.basicBoxLocal;
-    final double? width = value<double>('width');
-    final double? height = value<double>('height');
+    // A fraction of the parent's size (a progress fill's share of its
+    // track); a bound width or height wins. A page's share of a page view
+    // is its viewport fraction, which the page view applies itself.
+    final BaseNode? parent = node.parentID.isEmpty
+        ? null
+        : tryGetNode(node.parentID);
+    // A freeform container sizes a fractional child itself (see
+    // [FreeformAxisPlacement.sizeFactor]), against its runtime size.
+    final bool placedByParent =
+        parent is PageViewNode ||
+        (parent != null &&
+            const {'frame', 'stack', 'freeformPlaceholder'}.contains(
+              parent.type,
+            ));
+    final fractional = hasFractionalSize(node) && !placedByParent
+        ? fractionalBoxOf(
+            node,
+            scopedValues: scopedValues,
+            parentWidth: (scopedValues.parentSize?['width'] as num?)
+                ?.toDouble(),
+            parentHeight: (scopedValues.parentSize?['height'] as num?)
+                ?.toDouble(),
+          )
+        : (width: null, height: null);
+    final double? width = node.variables.containsKey('width')
+        ? value<double>('width') ?? fractional.width
+        : fractional.width;
+    final double? height = node.variables.containsKey('height')
+        ? value<double>('height') ?? fractional.height
+        : fractional.height;
     if ((width != null && width != box.width) ||
         (height != null && height != box.height)) {
       patch['basicBoxLocal'] = NodeBox(
