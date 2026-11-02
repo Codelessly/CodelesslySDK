@@ -4,6 +4,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../../functions/functions_repository.dart';
 import '../../ui/draggable_scroll_configuration.dart';
+import '../../ui/node_motion.dart';
 import '../../utils/extensions.dart';
 import '../../utils/formula.dart';
 import '../transformers.dart';
@@ -68,8 +69,18 @@ class PassivePageViewWidget extends StatefulWidget {
   State<PassivePageViewWidget> createState() => _PassivePageViewWidgetState();
 }
 
+/// Shows a [PageViewNode]'s pages. A swipe writes the page it settles on to
+/// the variable bound to `indexValue` (and runs the `changed` reactions); a
+/// change of that variable slides the page view to its page over
+/// [PageViewProperties.animationDurationMs], or jumps when that is 0.
 class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
   late PageController controller;
+
+  PageController _createController(int initialPage) => PageController(
+    initialPage: initialPage,
+    keepPage: widget.node.properties.keepPage,
+    viewportFraction: widget.node.properties.viewportFraction,
+  );
 
   /// The page position last written to the `positionValue` variable.
   double? _writtenPosition;
@@ -84,11 +95,9 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
     super.didChangeDependencies();
     if (_created) return;
     _created = true;
-    controller = PageController(
-      // A bound page index (e.g. a link to step 3) is where it starts.
-      initialPage: _boundIndex(context) ?? widget.node.properties.initialPage,
-      keepPage: widget.node.properties.keepPage,
-      viewportFraction: widget.node.properties.viewportFraction,
+    // A bound page index (e.g. a link to step 3) is where it starts.
+    controller = _createController(
+      _boundIndex(context) ?? widget.node.properties.initialPage,
     );
     controller.addListener(_writePosition);
     // The starting position, once the pages are laid out.
@@ -142,9 +151,22 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
   @override
   void didUpdateWidget(covariant PassivePageViewWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.node.properties.initialPage !=
-        oldWidget.node.properties.initialPage) {
-      _jumpToPage(widget.node.properties.initialPage);
+    final PageViewProperties properties = widget.node.properties;
+    final PageViewProperties oldProperties = oldWidget.node.properties;
+    if (properties.viewportFraction != oldProperties.viewportFraction ||
+        properties.keepPage != oldProperties.keepPage) {
+      // A controller's viewport fraction is fixed: replace it, staying on
+      // the same page.
+      final PageController old = controller;
+      controller = _createController(
+        old.hasClients ? (old.page ?? 0).round() : properties.initialPage,
+      );
+      controller.addListener(_writePosition);
+      _target = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
+    }
+    if (properties.initialPage != oldProperties.initialPage) {
+      _jumpToPage(properties.initialPage);
     }
 
     final ScopedValues scopedValues = ScopedValues.of(context);
@@ -169,7 +191,7 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
   }
 
   /// Moves to [page] when the bound index changes: animated over
-  /// `animationDurationMs` (easeOutCubic), or a jump when it is 0.
+  /// `animationDurationMs` with `animationCurve`, or a jump when it is 0.
   void _goToPage(int page) {
     final int ms = widget.node.properties.animationDurationMs;
     if (ms <= 0 || !controller.hasClients) {
@@ -181,7 +203,7 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
         .animateToPage(
           page,
           duration: Duration(milliseconds: ms),
-          curve: Curves.easeOutCubic,
+          curve: flutterCurveOf(widget.node.properties.animationCurve),
         )
         .whenComplete(() {
           if (_target == page) _target = null;

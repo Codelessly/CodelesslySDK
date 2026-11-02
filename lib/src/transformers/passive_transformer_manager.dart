@@ -143,8 +143,11 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // A node that reads `parent` is built with the size its parent gives
     // it, so its bindings can lay it out by that size.
     if (readsParentSize(node)) {
-      return LayoutBuilder(
+      // Measurable, so a row or column that measures its children (an
+      // IntrinsicHeight around a stretching row) can have it inside.
+      return MeasurableLayoutBuilder(
         key: ValueKey('${node.id}-parent-size'),
+        fallbackSize: Size(node.outerBoxLocal.width, node.outerBoxLocal.height),
         builder: (context, constraints) => ParentSizeScope.fromConstraints(
           constraints,
           child: Builder(
@@ -230,6 +233,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     widget = applyStrokePath(context, styled, widget);
     // Blurs act on everything the node paints, its stroke path included.
     widget = applyWidgetBlurs(styled, widget);
+    widget = applySizeTransition(styled, widget);
 
     if (settings.withOpacity) {
       widget = applyWidgetOpacity(styled, widget);
@@ -239,6 +243,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = wrapWithReaction(context, styled, widget);
       widget = wrapWithSwipes(context, styled, widget);
       widget = wrapWithDoubleTap(context, styled, widget);
+      widget = wrapWithViewportReactions(context, styled, widget);
       widget = wrapWithSemantics(styled, widget);
       widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
@@ -458,6 +463,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         ?.toEdgeInsetsModel();
     if (padding != null && padding != node.padding) {
       patch['padding'] = padding.toJson();
+    }
+    // Margin likewise; a map of sides works too, e.g. `{"top": 44}`.
+    final EdgeInsetsModel? margin = value<Object>('margin')
+        ?.toEdgeInsetsModel();
+    if (margin != null && margin != node.margin) {
+      patch['margin'] = margin.toJson();
     }
     final NodeBox box = node.basicBoxLocal;
     // A fraction of the parent's size (a progress fill's share of its
@@ -1061,6 +1072,7 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
   @override
   void initState() {
     super.initState();
+    NodeContextRegistry.register(widget.node.id, context);
     nodeState.onChangedByUser = updateKeepAlive;
     widget.codelesslyContext.nodeRebuildNotifier.addListener(
       onNodeNotification,
@@ -1069,6 +1081,7 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
 
   @override
   void dispose() {
+    NodeContextRegistry.unregister(widget.node.id, context);
     nodeState.onChangedByUser = null;
     widget.codelesslyContext.nodeRebuildNotifier.removeListener(
       onNodeNotification,
