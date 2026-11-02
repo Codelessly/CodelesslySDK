@@ -2,6 +2,25 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('a stray removal does not stop the frame clock under listeners', (
+    tester,
+  ) async {
+    int ticks = 0;
+    void listener() => ticks++;
+    void stray() {}
+    FrameClock.instance.addListener(listener);
+    // A widget removing a listener it never added (or removing one twice)
+    // as screens swap.
+    FrameClock.instance.removeListener(stray);
+    FrameClock.instance.removeListener(stray);
+    for (int i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(ticks, greaterThanOrEqualTo(3));
+    FrameClock.instance.removeListener(listener);
+    await tester.pump(const Duration(milliseconds: 16));
+  });
+
   testWidgets('the frame clock ticks each frame only while listened to', (
     tester,
   ) async {
