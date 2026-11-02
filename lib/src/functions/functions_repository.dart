@@ -169,6 +169,33 @@ class FunctionsRepository {
         return performPaywallAction(context, action as PaywallAction);
       case ActionType.focus:
         return runFocus(action as FocusAction);
+      case ActionType.speak:
+        final SpeakAction speak = action as SpeakAction;
+        if (speak.stop) {
+          Speech.instance.stop();
+          return true;
+        }
+        final ScopedValues scope = ActionChain.scopedValuesOf(context);
+        String text(String value) => PropertyValueDelegate.substituteVariables(
+          value,
+          scopedValues: scope,
+          nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        );
+        return Speech.instance.speak(
+          text(speak.text),
+          language: text(speak.language),
+          rate: speak.rate,
+          pitch: speak.pitch,
+        );
+      case ActionType.playSound:
+        return playSound(context, action as PlaySoundAction);
+      case ActionType.controlDrag:
+        final ControlDragAction drag = action as ControlDragAction;
+        return NodeDrag.control(
+          drag.nodeId,
+          drag.command,
+          drag.direction,
+        ).then((_) => true);
     }
   }
 
@@ -1788,6 +1815,26 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
       scopedValues: scopedValues,
     );
+  }
+
+  /// Plays [action]'s sound, now or at its `at` time on the sound clock.
+  /// Its fields are values or formulas (`${result.at}`, `${voice}`).
+  static bool playSound(BuildContext context, PlaySoundAction action) {
+    final ScopedValues scope = ActionChain.scopedValuesOf(context);
+    String text(String value) => PropertyValueDelegate.substituteVariables(
+      value,
+      scopedValues: scope,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    double? number(String value) => double.tryParse(text(value));
+    final String at = text(action.at);
+    Sound.play(
+      Sound.voiceNamed(text(action.sound)),
+      time: at.isEmpty ? null : double.tryParse(at),
+      volume: number(action.volume) ?? 1,
+      pitch: number(action.pitch) ?? 1,
+    );
+    return true;
   }
 
   /// Sets given [action.newValue] for given [action.variable] to a variable

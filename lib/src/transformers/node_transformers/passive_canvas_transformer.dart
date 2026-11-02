@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/action_chain.dart';
+import '../../functions/beat_clock.dart';
 
 class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   static const String name = 'PassiveCanvasWidget';
@@ -990,6 +991,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   void _startTimers() {
     _stopTimers();
     _timersStarted = true;
+    _startClocks();
     for (final Reaction reaction in widget.node.reactions.whereTriggerType(
       TriggerType.timer,
     )) {
@@ -1021,6 +1023,87 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       timer.cancel();
     }
     _timers.clear();
+    for (final (BeatClock clock, void Function(int, double, double) onTick)
+        in _clocks) {
+      clock.release(onTick);
+    }
+    _clocks.clear();
+    for (final (Listenable listenable, VoidCallback listener) in _clockWatches) {
+      listenable.removeListener(listener);
+    }
+    _clockWatches.clear();
+  }
+
+  final List<(BeatClock, void Function(int, double, double))> _clocks = [];
+  final List<(Listenable, VoidCallback)> _clockWatches = [];
+
+  /// The variables a clock's run condition [when] reads.
+  Iterable<Listenable> _runConditionVariables(String? when) {
+    if (when == null || when.trim().isEmpty) return const [];
+    final Set<String> names = {
+      if (FormulaEvaluator.exactExpression(when) case final String expression)
+        for (final String path in FormulaEvaluator.referencedPaths(expression))
+          path.split(RegExp(r'[.\[]')).first
+      else
+        for (final Match match in RegExp(
+          r'\$\{\s*([A-Za-z_][A-Za-z0-9_]*)',
+        ).allMatches(when))
+          match.group(1)!,
+    };
+    return context.read<CodelesslyContext>().variables.values.where(
+      (variable) => names.contains(variable.value.name),
+    );
+  }
+
+  /// Runs each Beat Clock reaction on the sound clock while its run
+  /// condition holds (see [BeatClock]), with `${result.tick}`,
+  /// `${result.at}` and `${result.waitMs}`. Screens with the same clock share
+  /// it, so the count carries on from one tab to the next.
+  void _startClocks() {
+    // Reactions on the same clock run in order on each tick (Play Sound,
+    // then a Delay, then Set Variable): one clock for each setting.
+    final Map<String, List<Reaction>> groups = {};
+    for (final Reaction reaction in widget.node.reactions.whereTriggerType(
+      TriggerType.clock,
+    )) {
+      if (!reaction.action.enabled) continue;
+      final TriggerModel t = reaction.trigger;
+      (groups['${t.every}|${t.runWhen}|${t.lookaheadMs}'] ??= []).add(reaction);
+    }
+    for (final List<Reaction> reactions in groups.values) {
+      void onTick(int tick, double at, double waitMs) {
+        if (!mounted) return;
+        FunctionsRepository.triggerAction(
+          context,
+          TriggerType.clock,
+          reactions: reactions,
+          result: {'tick': tick, 'at': at, 'waitMs': waitMs.round()},
+        );
+      }
+
+      final BeatClock clock = BeatClock.acquire(
+        trigger: reactions.first.trigger,
+        evaluate: (String text) => mounted
+            ? PropertyValueDelegate.substituteVariables(
+                text,
+                scopedValues: ScopedValues.of(context),
+                nullSubstitutionMode: NullSubstitutionMode.emptyString,
+              )
+            : '',
+        onTick: onTick,
+      );
+      _clocks.add((clock, onTick));
+      // The condition is checked when what it reads changes, not only on
+      // the next poll: actions that stop and start the clock in one go
+      // (playing false, then true) restart the count from tick 0.
+      for (final Listenable variable in _runConditionVariables(
+        reactions.first.trigger.runWhen,
+      )) {
+        void listener() => clock.poll();
+        variable.addListener(listener);
+        _clockWatches.add((variable, listener));
+      }
+    }
   }
 
   /// Runs the key press reactions for [event]'s key. Returns whether one
