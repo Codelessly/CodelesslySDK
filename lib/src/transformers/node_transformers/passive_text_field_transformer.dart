@@ -208,7 +208,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     return PropertyValueDelegate.getPropertyValue<String>(
       widget.node,
       'inputValue',
-      scopedValues: widget.scopedValues ?? ScopedValues.of(context),
+      scopedValues: _scopedValues,
     );
   }
 
@@ -243,12 +243,21 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       state.focusNode.unfocus();
     }
   }
+  /// The values the field's bindings read: those it was given, else on the
+  /// design canvas (no reactions) the editor's preview values, else the
+  /// live ones.
+  ScopedValues get _scopedValues =>
+      widget.scopedValues ??
+      (widget.settings.withReactions
+          ? null
+          : VariablePreview.scopeOf(widget.node, context: context)) ??
+      ScopedValues.of(context);
 
   String getInitialText(String text) {
     return PropertyValueDelegate.substituteVariables(
       text,
       nullSubstitutionMode: widget.settings.nullSubstitutionMode,
-      scopedValues: widget.scopedValues ?? ScopedValues.of(context),
+      scopedValues: _scopedValues,
     );
   }
 
@@ -272,7 +281,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
     // Update controller text if this text field is bound to a variable.
     final ScopedValues scopedValues =
-        widget.scopedValues ?? ScopedValues.of(context);
+        _scopedValues;
 
     // Get the value of bound variable and update the controller text if it's
     // different from the current controller text.
@@ -354,7 +363,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     final TextFieldNode node = widget.node;
     final TextFieldProperties properties = node.properties;
 
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues = _scopedValues;
 
     // Resolve variable bindings as well as values set by actions.
     bool flag(String property, bool fallback) =>
@@ -458,8 +467,10 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       decoration: decoration,
     );
 
-    Widget field = fillsHeight && oneLine
-        ? LayoutBuilder(
+    // A field that hugs its width is measured by [IntrinsicWidth] below, so
+    // it can't be sized by a layout builder.
+    Widget field = fillsHeight && oneLine && !node.isHorizontalWrap
+        ? IntrinsicSafeLayoutBuilder(
             builder: (context, constraints) => buildField(
               constraints.hasBoundedHeight
                   ? decoration.copyWith(

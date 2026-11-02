@@ -33,6 +33,7 @@ export 'passive_placeholder_transformer.dart';
 export 'passive_progressbar_transformer.dart';
 export 'passive_bar_chart_transformer.dart';
 export 'passive_radio_transformer.dart';
+export 'passive_path_transformer.dart';
 export 'passive_rectangle_transformer.dart';
 export 'passive_row_column_transformer.dart';
 export 'passive_segmented_button_transformer.dart';
