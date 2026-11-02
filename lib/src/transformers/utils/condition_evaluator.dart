@@ -330,6 +330,9 @@ class ConditionEvaluator<R extends Object>
   R? visitCopyToClipboardAction(CopyToClipboardAction action) => null;
 
   @override
+  R? visitFocusAction(FocusAction action) => null;
+
+  @override
   R? visitPaywallAction(PaywallAction action) => null;
 
   @override
@@ -496,6 +499,13 @@ class ConditionPrinter
 
   @override
   void visitCopyToClipboardAction(CopyToClipboardAction action) {}
+
+  @override
+  void visitFocusAction(FocusAction action) {
+    _buffer.writeln(
+      '\t${action.unfocus ? 'Unfocus' : 'Focus'} ${action.nodeId}',
+    );
+  }
 
   @override
   void visitPaywallAction(PaywallAction action) {
