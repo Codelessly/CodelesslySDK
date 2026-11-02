@@ -209,6 +209,11 @@ class DataManager {
 
         if (_publishModel == null) {
           await publishBundleFuture;
+          // Nothing cached and nothing downloaded: there is no app to show.
+          // Fail, so the widget shows an error instead of loading forever.
+          if (_publishModel == null) {
+            throw Exception('Could not download the published app "$slug".');
+          }
         } else {
           // Background refresh: report failures instead of leaving them as
           // unhandled async errors.
