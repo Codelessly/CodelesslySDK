@@ -186,6 +186,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     final BaseNode styled = applyStyleOverrides(context, node);
     Widget widget = getTransformerByNode(node)
         .buildWidget(styled, context, settings);
+    // A node with an aspect ratio derives one axis from the other.
+    widget = wrapWithAspectRatio(styled, widget);
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
 
     if (settings.withOpacity) {
