@@ -224,6 +224,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             ),
           );
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
+    widget = applyStrokePath(context, styled, widget);
 
     if (settings.withOpacity) {
       widget = applyWidgetOpacity(styled, widget);
@@ -246,21 +247,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         widget,
         scopedValues: preview,
       );
+      widget = applyNodePlay(context, styled, widget);
       widget = applyBoundOffset(context, styled, widget);
     }
     // Without reactions (the design canvas) a knob or fader cap is drawn
     // where its drag track puts it; with them NodeDragTrack draws it there
     // and makes it draggable.
     if (!settings.withReactions) {
-      widget = applyTrackPose(
-        context,
-        styled,
-        widget,
-        scopedValues: preview,
-      );
+      widget = applyTrackPose(context, styled, widget, scopedValues: preview);
     }
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
+    }
+    if (settings.withReactions) {
+      widget = applyReveal(context, styled, widget);
     }
     if (settings.withMargins) {
       widget = applyWidgetMargins(styled, widget);
@@ -282,13 +282,42 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// Makes [widget] draggable and/or a drop target, as [node]'s
   /// [BaseNode.draggable] and [BaseNode.dropTarget] say.
   Widget applyDragAndDrop(BuildContext context, BaseNode node, Widget widget) {
+    // `draggable.enabled` / `dropTarget.enabled` bind the switches.
+    bool flag(String key, bool fallback) => node.variables.containsKey(key)
+        ? PropertyValueDelegate.getPropertyValue<bool>(
+                node,
+                key,
+                scopedValues: ScopedValues.of(context),
+              ) ??
+              fallback
+        : fallback;
     if (node.dropTarget case final DropTargetModel target) {
-      widget = DropTargetBox(node: node, model: target, child: widget);
+      widget = DropTargetBox(
+        node: node,
+        model: target,
+        enabled: flag(DropTargetModel.enabledVariable, target.enabled),
+        child: widget,
+      );
     }
-    if (node.draggable case final DraggableModel draggable) {
+    if (node.draggable case DraggableModel draggable) {
+      // The first form bound the payload as `draggable.data`.
+      if (draggable.data.isEmpty) {
+        if (node.variables['draggable.data'] case final String bound) {
+          draggable = draggable.copyWith(data: bound);
+        }
+      }
+      final Object? flightKey = node.variables.containsKey('flightKey')
+          ? PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              'flightKey',
+              scopedValues: ScopedValues.of(context),
+            )
+          : node.flightKey;
       widget = DragSourceBox(
         node: node,
         model: draggable,
+        enabled: flag(DraggableModel.enabledVariable, draggable.enabled),
+        flightKey: '${flightKey ?? ''}',
         // The feedback node is usually hidden where it is designed.
         buildNode: (context, id) => buildWidgetByID(
           id,
@@ -626,6 +655,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           path,
     };
     bool readsClock = false;
+    bool readsFrameClock = false;
     // A computed variable listens to whatever its formula reads.
     final Map<String, VariableData> variablesByName = {
       for (final notifier in codelesslyContext.variables.values)
@@ -642,6 +672,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         );
         expanded.addAll(deps.paths);
         readsClock = readsClock || deps.readsClock;
+        readsFrameClock = readsFrameClock || deps.readsFrameClock;
       }
       return expanded;
     }
@@ -772,6 +803,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
 
     if (readsClock) listenables.add(FormulaClock.instance);
+
+    // A formula that reads the millisecond clock rebuilds on every frame.
+    readsFrameClock =
+        readsFrameClock ||
+        node.variables.values.any(
+          (path) => switch (FormulaEvaluator.exactExpression(path)) {
+            final String expression => FormulaEvaluator.readsFrameClock(
+              expression,
+            ),
+            null => false,
+          },
+        ) ||
+        inlineTextTemplatesOf(node).any(FormulaEvaluator.textReadsFrameClock);
+    if (readsFrameClock) listenables.add(FrameClock.instance);
 
     return listenables;
   }

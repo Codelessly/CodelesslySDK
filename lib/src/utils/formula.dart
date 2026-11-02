@@ -176,6 +176,18 @@ class FormulaEvaluator {
 
   static final RegExp _clockCall = RegExp(r'\b(now|today)\s*\(');
 
+  /// Whether [expression] reads the millisecond clock (`nowMs()`), so its
+  /// value changes from frame to frame.
+  static bool readsFrameClock(String expression) =>
+      _frameClockCall.hasMatch(expression.replaceAll(_quoted, ''));
+
+  /// Whether any formula in [text] reads the millisecond clock.
+  static bool textReadsFrameClock(String text) => formulaRegex
+      .allMatches(text)
+      .any((match) => readsFrameClock(match.namedGroup('expr')!));
+
+  static final RegExp _frameClockCall = RegExp(r'\bnowMs\s*\(');
+
   static final RegExp _quoted = RegExp(
     r'"[^"]*"'
     '|'
@@ -490,6 +502,19 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('sqrt', 'sqrt(value)', 'sqrt(16) → 4'),
     FormulaFunctionDoc('pow', 'pow(base, exponent)', 'pow(2, 10) → 1024'),
+    FormulaFunctionDoc(
+      'exp',
+      'exp(value)',
+      'exp(1) → 2.71828… (zoom by exp(-delta / 500))',
+    ),
+    FormulaFunctionDoc('ln', 'ln(value)', 'ln(exp(2)) → 2'),
+    FormulaFunctionDoc(
+      'log',
+      'log(value, base?)',
+      'log(1000) → 3, log(8, 2) → 3',
+    ),
+    FormulaFunctionDoc('sign', 'sign(value)', 'sign(-4) → -1'),
+    FormulaFunctionDoc('hypot', 'hypot(x, y)', 'hypot(3, 4) → 5'),
     FormulaFunctionDoc('sin', 'sin(radians)', 'sin(pi() / 2) → 1'),
     FormulaFunctionDoc('cos', 'cos(radians)', 'cos(0) → 1'),
     FormulaFunctionDoc('tan', 'tan(radians)', 'tan(0) → 0'),
@@ -648,6 +673,11 @@ class FormulaEvaluator {
     FormulaFunctionDoc('range', 'range(count)', 'range(3) → [0, 1, 2]'),
     FormulaFunctionDoc('skip', 'skip(list, count)', 'skip(events, 25)'),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
+    FormulaFunctionDoc(
+      'mix',
+      'mix(color1, color2, amount)',
+      "mix('#FFFFFF', '#000000', 0.25) → #BFBFBF",
+    ),
     FormulaFunctionDoc(
       'alpha',
       'alpha(color, opacity)',
@@ -2115,6 +2145,29 @@ String? _alpha(Object? color, num opacity) {
   return '#${a.toRadixString(16).padLeft(2, '0').toUpperCase()}$rgb';
 }
 
+/// [from] moved [amount] (0–1) of the way to [to], channel by channel
+/// (alpha too), like Flutter's `Color.lerp`: `mix(paper, ink, 0.28)` is ink
+/// at 28% over paper. Colors are `#RRGGBB` or `#AARRGGBB`.
+String? _mix(Object? from, Object? to, num amount) {
+  int? argb(Object? color) {
+    final String hex = FormulaEvaluator.stringify(color).replaceAll('#', '');
+    if (hex.length != 6 && hex.length != 8) return null;
+    return int.tryParse(hex.length == 6 ? 'FF$hex' : hex, radix: 16);
+  }
+
+  final int? a = argb(from), b = argb(to);
+  if (a == null || b == null) return null;
+  final double t = amount.clamp(0, 1).toDouble();
+  final List<int> channels = <int>[
+    for (final int shift in const <int>[24, 16, 8, 0])
+      (((a >> shift) & 0xFF) +
+              (((b >> shift) & 0xFF) - ((a >> shift) & 0xFF)) * t)
+          .round(),
+  ];
+  // Opaque colors come back as #RRGGBB, like the colors they came from.
+  return '#${[if (channels.first != 0xFF) channels.first, ...channels.skip(1)].map((int c) => c.toRadixString(16).padLeft(2, '0')).join().toUpperCase()}';
+}
+
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
@@ -2270,6 +2323,15 @@ final Map<String, _Function> _functions = {
   ],
   'sqrt': (a) => _tidy(math.sqrt(_num(_arg(a, 0)))),
   'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
+  'exp': (a) => _tidy(math.exp(_num(_arg(a, 0)))),
+  'ln': (a) => _tidy(math.log(_num(_arg(a, 0)))),
+  'log': (a) => _tidy(
+    math.log(_num(_arg(a, 0))) / math.log(a.length > 1 ? _num(_arg(a, 1)) : 10),
+  ),
+  'sign': (a) => _num(_arg(a, 0)).sign,
+  'hypot': (a) => _tidy(
+    math.sqrt(math.pow(_num(_arg(a, 0)), 2) + math.pow(_num(_arg(a, 1)), 2)),
+  ),
   'sin': (a) => math.sin(_num(_arg(a, 0))),
   'cos': (a) => math.cos(_num(_arg(a, 0))),
   'tan': (a) => math.tan(_num(_arg(a, 0))),
@@ -2410,6 +2472,7 @@ final Map<String, _Function> _functions = {
   'get': (a) => _member(_arg(a, 0), _arg(a, 1)),
   'number': (a) => _toNum(_arg(a, 0)),
   'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
+  'mix': (a) => _mix(_arg(a, 0), _arg(a, 1), _num(_arg(a, 2) ?? 0.5)),
   'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
     _arg(a, 1) == null ? 2 : _intArg(_arg(a, 1)),
     FormulaEvaluator.stringify(_arg(a, 2) ?? '0'),
