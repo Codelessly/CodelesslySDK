@@ -128,6 +128,31 @@ void main() {
     expect(transformOf(tester)!.getTranslation().x, 80);
   });
 
+  // The editor's design canvas mutes tickers. A screen there whose overlay
+  // slides in (translateX bound to `ticketId != 0 ? 0 : 390`) stayed off
+  // screen: the transition never advanced.
+  testWidgets('Under muted tickers, values jump instead of animating', (
+    tester,
+  ) async {
+    Future<void> pump(double x) => tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TickerMode(
+          enabled: false,
+          child: Center(
+            child: NodeMotion(
+              motion: MotionModel(durationMs: 240, translateX: x),
+              child: const SizedBox(width: 100, height: 100),
+            ),
+          ),
+        ),
+      ),
+    );
+    await pump(390);
+    await pump(0);
+    expect(transformOf(tester)?.getTranslation().x ?? 0, 0);
+  });
+
   testWidgets('Spin ramps up, turns, and winds down when stopped', (
     tester,
   ) async {

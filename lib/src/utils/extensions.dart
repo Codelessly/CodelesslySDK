@@ -1694,6 +1694,9 @@ extension ActionModelExt on ActionModel {
     if (action is PlayAnimationAction && action.nodeId == oldNodeId) {
       return action.copyWith(nodeId: newNodeId);
     }
+    if (action is EditTextAction && action.nodeId == oldNodeId) {
+      return action.copyWith(nodeId: newNodeId);
+    }
     if (action is ConditionalAction) {
       return action.copyWith(
         actions: [
@@ -1949,6 +1952,10 @@ extension ActionModelExt on ActionModel {
         return _namesIn(strings, includePredefined);
       case ActionType.focus:
         return {};
+      case ActionType.editText:
+        final EditTextAction action = this as EditTextAction;
+        strings.addAll([action.text, action.before, ?action.after]);
+        return _namesIn(strings, includePredefined);
       case ActionType.cloudData:
         final CloudDataAction action = this as CloudDataAction;
         strings.addAll([
