@@ -141,13 +141,11 @@ class ScopedValues {
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     holdProgress = HoldProgressProvider.maybeOf(context);
     final instance = context.read<Codelessly?>();
-    // Screens the app navigates to carry their parameters; the first screen
-    // shows in the host's route and takes them from the app's link.
+    // A screen a Codelessly router shows has the parameters of its location;
+    // one pushed on a plain navigator has its route's arguments.
     routeParams =
+        CodelesslyRouteScope.maybeOf(context)?.params ??
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
-        (instance ?? Codelessly.instance).linkParamsFor(
-          codelesslyContext?.layoutID,
-        ) ??
         {};
     _appUser = null;
     _instanceRef = instance == null ? null : WeakReference(instance);
