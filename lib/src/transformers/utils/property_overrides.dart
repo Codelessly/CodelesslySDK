@@ -1,6 +1,8 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../ui/node_drag.dart';
+import '../../ui/node_drag_track.dart';
 import 'property_value_delegate.dart';
 import 'scoped_values.dart';
 
@@ -138,11 +140,16 @@ class _InteractionStatesBoxState extends State<InteractionStatesBox> {
     final Set<InteractionState> propertyStates =
         InteractionStatesBox.propertyStates(context, node);
     final bool disabled = propertyStates.contains(InteractionState.disabled);
+    final bool dragged =
+        DraggedScope.of(context) ||
+        DragScope.maybeOf(context)?.dragging == true ||
+        TrackScope.maybeOf(context)?.dragging == true;
     // A disabled node is not hovered or pressed.
     final Set<InteractionState> active = {
       ...propertyStates,
       for (final InteractionState state in pointerStates)
         if (!disabled || state == InteractionState.focused) state,
+      if (dragged) InteractionState.dragged,
     };
 
     Widget child = Builder(builder: widget.builder);
@@ -194,4 +201,23 @@ class _InteractionStatesBoxState extends State<InteractionStatesBox> {
     );
     return Semantics(enabled: disabled ? false : null, child: child);
   }
+}
+
+/// Marks the nodes inside [child] as dragged: the copy of a list row that a
+/// reorder handle drags. Their `dragged` interaction state applies.
+class DraggedScope extends InheritedWidget {
+  /// Whether the nodes inside are being dragged.
+  final bool dragged;
+
+  /// Creates a [DraggedScope].
+  const DraggedScope({super.key, this.dragged = true, required super.child});
+
+  /// Whether a [DraggedScope] above [context] marks it as dragged.
+  static bool of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<DraggedScope>()?.dragged ??
+      false;
+
+  @override
+  bool updateShouldNotify(DraggedScope oldWidget) =>
+      dragged != oldWidget.dragged;
 }

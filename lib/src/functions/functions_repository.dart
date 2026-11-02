@@ -889,7 +889,9 @@ class FunctionsRepository {
         await Navigator.maybePop(context, params);
         return;
       }
-      if (router.canGoBack) {
+      final bool fallsBack =
+          action.destinationId.isNotEmpty && router.backIsOnlySeededHome;
+      if (router.canGoBack && !fallsBack) {
         router.pop(params);
         return;
       }
