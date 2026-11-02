@@ -313,3 +313,13 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     );
   }
 }
+
+/// How long an implicit transition of [ms] milliseconds (a `transitionMs`
+/// fill or opacity, a drawScale change) runs where it builds: zero under a
+/// disabled [TickerMode] (the editor's design canvas and its captures),
+/// where the transition could never tick and would hold the old value, so
+/// it jumps to the new one instead. Unchanged where tickers run.
+Duration implicitTransitionDuration(BuildContext context, int ms) =>
+    TickerMode.valuesOf(context).enabled
+    ? Duration(milliseconds: ms)
+    : Duration.zero;
