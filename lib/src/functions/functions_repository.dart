@@ -841,6 +841,7 @@ class FunctionsRepository {
       anchorGap: action.anchorGap,
       anchorOffset: action.anchorOffset,
       fullHeight: action.fullHeight,
+      sheetBelowWidth: action.sheetBelowWidth,
     );
     if (result case final Map values when values.isNotEmpty) {
       ActionChain.setResult(values);
@@ -918,6 +919,7 @@ class FunctionsRepository {
     double anchorGap = 6,
     double anchorOffset = 0,
     bool fullHeight = false,
+    double sheetBelowWidth = 600,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -967,8 +969,8 @@ class FunctionsRepository {
             DialogPlacement.bottomSheet => DialogPresentation.bottomSheet,
             DialogPlacement.adaptive => DialogPresentation.adaptive,
             _ => presentation,
-          }.resolveFor(context)
-        : presentation.resolveFor(context);
+          }.resolveFor(context, sheetBelowWidth: sheetBelowWidth)
+        : presentation.resolveFor(context, sheetBelowWidth: sheetBelowWidth);
     final bool wantsAnchor =
         effectivePresentation == DialogPresentation.dialog &&
         (anchorToTrigger || placement == DialogPlacement.anchored);
@@ -1002,6 +1004,7 @@ class FunctionsRepository {
             maxHeightFactor: maxHeightFactor,
             showDragHandle: showDragHandle,
             fullHeight: fullHeight,
+            sheetBelowWidth: sheetBelowWidth,
             anchor: effectivePresentation == DialogPresentation.popover
                 ? anchorRectOf(context)
                 : null,
@@ -1066,6 +1069,7 @@ class FunctionsRepository {
     bool showDragHandle = false,
     Rect? anchor,
     bool fullHeight = false,
+    double sheetBelowWidth = 600,
   }) {
     if (presentation == DialogPresentation.popover) {
       return showGeneralDialog<T>(
@@ -1112,7 +1116,8 @@ class FunctionsRepository {
       DialogPresentation.sideSheet ||
       DialogPresentation.popover => false,
       DialogPresentation.bottomSheet => true,
-      DialogPresentation.adaptive => (screen?.width ?? 1024) < 600,
+      DialogPresentation.adaptive =>
+        (screen?.width ?? 1024) < sheetBelowWidth,
     };
     Widget content(BuildContext context, CanvasSizing sizing) =>
         asSheet && fullHeight
