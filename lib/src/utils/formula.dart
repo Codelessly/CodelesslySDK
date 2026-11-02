@@ -430,6 +430,11 @@ class FormulaEvaluator {
       'findIndex(records, r => r.id == selectedId) → 2 (-1 when none)',
     ),
     FormulaFunctionDoc(
+      'groupBy',
+      'groupBy(list, field or item => key) → [{key, items, count}]',
+      'groupBy(txns, "date") → one entry per day, in order of first appearance',
+    ),
+    FormulaFunctionDoc(
       'unique',
       'unique(list, field or item => key)',
       'unique(tags) or unique(tasks, "category")',
@@ -1350,6 +1355,31 @@ List<Object?> _unique(List<Object?> args) {
   return items;
 }
 
+/// [args]' list split into groups by key, in the order each key first
+/// appears: `[{key, items, count}]`. The key is a field name or a lambda.
+List<Object?> _groupBy(List<Object?> args) {
+  final List<Object?> keys = [];
+  final List<List<Object?>> groups = [];
+  for (final (int i, Object? item) in _indexed(args)) {
+    final Object? key = _select(item, _arg(args, 1), i);
+    final int at = keys.indexWhere((seen) => _looseEquals(seen, key));
+    if (at < 0) {
+      keys.add(key);
+      groups.add([item]);
+    } else {
+      groups[at].add(item);
+    }
+  }
+  return [
+    for (int i = 0; i < keys.length; i++)
+      <String, Object?>{
+        'key': keys[i],
+        'items': groups[i],
+        'count': groups[i].length,
+      },
+  ];
+}
+
 /// A lambda such as `t => t.price` or `(t, i) => i + 1`, ready to call
 /// with an item and its index.
 class _Closure {
@@ -2079,6 +2109,7 @@ final Map<String, _Function> _functions = {
     return result;
   },
   'unique': _unique,
+  'groupBy': _groupBy,
   'concat': (a) => [
     for (final value in a)
       if (value is Iterable) ...value else ?value,
