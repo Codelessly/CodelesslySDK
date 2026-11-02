@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/action_chain.dart';
+import '../../functions/beat_clock.dart';
 
 class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   static const String name = 'PassiveCanvasWidget';
@@ -186,7 +187,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
 
     if (needsAScaffold) {
       scaffold = Scaffold(
-        backgroundColor: retrieveBackgroundColor(context, node),
+        backgroundColor: canvasBackground(context, node),
         appBar: appBar,
         floatingActionButton: floatingActionButton,
         floatingActionButtonLocation: props.floatingActionButton?.location
@@ -195,7 +196,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         body: body,
       );
     } else {
-      final Color? background = retrieveBackgroundColor(context, node);
+      final Color? background = canvasBackground(context, node);
       // Under a TapThroughScope, a canvas without a background takes no taps
       // on its empty parts, so they reach its dialog's barrier.
       final bool transparent =
@@ -319,7 +320,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
 
     if (needsAScaffold) {
       scaffold = Scaffold(
-        backgroundColor: retrieveBackgroundColor(context, node),
+        backgroundColor: canvasBackground(context, node),
         appBar: appBar,
         floatingActionButton: floatingActionButton,
         floatingActionButtonLocation: props.floatingActionButton?.location
@@ -329,7 +330,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       );
     } else {
       scaffold = Material(
-        color: retrieveBackgroundColor(context, node),
+        color: canvasBackground(context, node),
         child: !node.isScrollable
             // This would make it so auto scale layouts are top-center aligned
             // in the viewport. But this doesn't work if the layout is inside a
@@ -430,6 +431,20 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       (id) => hasResponsiveLayout(getNode(id), getNode),
     );
   }
+
+  /// The canvas's background: its fill, except for a dialog's canvas that
+  /// fills the screen because it holds a responsive layout; its layout draws
+  /// the dialog, and its fill would hide the screen behind the barrier.
+  Color? canvasBackground(BuildContext context, CanvasNode node) =>
+      showsOverScreen(CanvasSizingScope.of(context), node)
+      ? Colors.transparent
+      : retrieveBackgroundColor(context, node);
+
+  /// Whether [node], shown with [sizing], fills the screen as a dialog.
+  bool showsOverScreen(CanvasSizing sizing, CanvasNode node) =>
+      sizing == CanvasSizing.design &&
+      node.scaleMode == ScaleMode.responsive &&
+      hasResponsiveLayout(node, getNode);
 
   static Color? retrieveBackgroundColor(BuildContext context, CanvasNode node) {
     final fills = <PaintModel>[
@@ -650,11 +665,22 @@ class CanvasViewport extends StatelessWidget {
     return (width: width, height: height);
   }
 
+  /// The sizing a canvas uses under [scope]: one that [followsScreen] fills
+  /// the screen, except in a popover, which hugs its design size wherever
+  /// it is anchored (filling would push it into the corner of the screen).
+  static CanvasSizing sizingFor(
+    CanvasSizing scope, {
+    bool followsScreen = false,
+  }) => followsScreen && scope != CanvasSizing.content
+      ? CanvasSizing.fill
+      : scope;
+
   @override
   Widget build(BuildContext context) {
-    final CanvasSizing sizing = followsScreen
-        ? CanvasSizing.fill
-        : CanvasSizingScope.of(context);
+    final CanvasSizing sizing = sizingFor(
+      CanvasSizingScope.of(context),
+      followsScreen: followsScreen,
+    );
     return LayoutBuilder(
       builder: (context, constraints) {
         final box = resolve(node, constraints, sizing: sizing);
@@ -965,6 +991,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   void _startTimers() {
     _stopTimers();
     _timersStarted = true;
+    _startClocks();
     for (final Reaction reaction in widget.node.reactions.whereTriggerType(
       TriggerType.timer,
     )) {
@@ -996,6 +1023,87 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       timer.cancel();
     }
     _timers.clear();
+    for (final (BeatClock clock, void Function(int, double, double) onTick)
+        in _clocks) {
+      clock.release(onTick);
+    }
+    _clocks.clear();
+    for (final (Listenable listenable, VoidCallback listener) in _clockWatches) {
+      listenable.removeListener(listener);
+    }
+    _clockWatches.clear();
+  }
+
+  final List<(BeatClock, void Function(int, double, double))> _clocks = [];
+  final List<(Listenable, VoidCallback)> _clockWatches = [];
+
+  /// The variables a clock's run condition [when] reads.
+  Iterable<Listenable> _runConditionVariables(String? when) {
+    if (when == null || when.trim().isEmpty) return const [];
+    final Set<String> names = {
+      if (FormulaEvaluator.exactExpression(when) case final String expression)
+        for (final String path in FormulaEvaluator.referencedPaths(expression))
+          path.split(RegExp(r'[.\[]')).first
+      else
+        for (final Match match in RegExp(
+          r'\$\{\s*([A-Za-z_][A-Za-z0-9_]*)',
+        ).allMatches(when))
+          match.group(1)!,
+    };
+    return context.read<CodelesslyContext>().variables.values.where(
+      (variable) => names.contains(variable.value.name),
+    );
+  }
+
+  /// Runs each Beat Clock reaction on the sound clock while its run
+  /// condition holds (see [BeatClock]), with `${result.tick}`,
+  /// `${result.at}` and `${result.waitMs}`. Screens with the same clock share
+  /// it, so the count carries on from one tab to the next.
+  void _startClocks() {
+    // Reactions on the same clock run in order on each tick (Play Sound,
+    // then a Delay, then Set Variable): one clock for each setting.
+    final Map<String, List<Reaction>> groups = {};
+    for (final Reaction reaction in widget.node.reactions.whereTriggerType(
+      TriggerType.clock,
+    )) {
+      if (!reaction.action.enabled) continue;
+      final TriggerModel t = reaction.trigger;
+      (groups['${t.every}|${t.runWhen}|${t.lookaheadMs}'] ??= []).add(reaction);
+    }
+    for (final List<Reaction> reactions in groups.values) {
+      void onTick(int tick, double at, double waitMs) {
+        if (!mounted) return;
+        FunctionsRepository.triggerAction(
+          context,
+          TriggerType.clock,
+          reactions: reactions,
+          result: {'tick': tick, 'at': at, 'waitMs': waitMs.round()},
+        );
+      }
+
+      final BeatClock clock = BeatClock.acquire(
+        trigger: reactions.first.trigger,
+        evaluate: (String text) => mounted
+            ? PropertyValueDelegate.substituteVariables(
+                text,
+                scopedValues: ScopedValues.of(context),
+                nullSubstitutionMode: NullSubstitutionMode.emptyString,
+              )
+            : '',
+        onTick: onTick,
+      );
+      _clocks.add((clock, onTick));
+      // The condition is checked when what it reads changes, not only on
+      // the next poll: actions that stop and start the clock in one go
+      // (playing false, then true) restart the count from tick 0.
+      for (final Listenable variable in _runConditionVariables(
+        reactions.first.trigger.runWhen,
+      )) {
+        void listener() => clock.poll();
+        variable.addListener(listener);
+        _clockWatches.add((variable, listener));
+      }
+    }
   }
 
   /// Runs the key press reactions for [event]'s key. Returns whether one
@@ -1067,9 +1175,18 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     if (event is KeyUpEvent || !mounted) return false;
     if (!(ModalRoute.of(context)?.isCurrent ?? true)) return false;
     final BuildContext? focused = FocusManager.instance.primaryFocus?.context;
-    if (focused != null &&
+    final bool typing =
+        focused != null &&
         (focused.widget is EditableText ||
-            focused.findAncestorWidgetOfExactType<EditableText>() != null)) {
+            focused.findAncestorWidgetOfExactType<EditableText>() != null);
+    // Keys belong to the field being typed in, except Escape, which leaves
+    // it, and shortcuts with Command/Control (⌘↵ submits a form); the
+    // actions read `${result.typing}`.
+    final HardwareKeyboard keys = HardwareKeyboard.instance;
+    if (typing &&
+        event.logicalKey != LogicalKeyboardKey.escape &&
+        !keys.isMetaPressed &&
+        !keys.isControlPressed) {
       return false;
     }
     // Shift, Control, Alt and Meta alone are modifiers of the next key.
@@ -1093,6 +1210,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
         'shift': keyboard.isShiftPressed,
         'alt': keyboard.isAltPressed,
         'meta': keyboard.isMetaPressed || keyboard.isControlPressed,
+        'typing': typing,
       },
     );
     // A reaction for a specific key takes it (an arrow doesn't also scroll
