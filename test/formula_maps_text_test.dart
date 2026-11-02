@@ -102,6 +102,10 @@ void main() {
     test('coalesce picks the first value that is set', () {
       expect(eval("coalesce(missing, '', 'fallback')"), 'fallback');
       expect(eval('coalesce(meter, 1)'), 2481.6);
+      // Nothing set: the fallback, even when it is empty text.
+      expect(eval("coalesce(missing, '')"), '');
+      expect(eval("coalesce(missing, '') == ''"), isTrue);
+      expect(eval('coalesce(missing, null)'), isNull);
     });
   });
 
