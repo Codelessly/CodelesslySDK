@@ -70,8 +70,12 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    parameter is read like a variable inside its body (`t.title`,
 ///    `t.tags[0]`, `t.tags.length`) and hides a variable of the same name;
 ///    the body can read every other variable. A lambda can take the item's
-///    index as a second parameter, `(t, i) => i < 3`. Lambdas are only
-///    allowed as function arguments.
+///    index as a second parameter, `(t, i) => i < 3`.
+///  - user functions: a variable whose formula is a lambda with any number
+///    of parameters, e.g. `fraction = ${= (v, step) => ...}`, is called like
+///    a built-in function, `fraction(qty * scale, 0.25)`, from any formula
+///    that can read the variable. Calling any other unknown name makes the
+///    formula null.
 ///  - left(text, n), right(text, n) and toMap (a map built from a list,
 ///    `toMap(items, i => i.id, i => "pass")`).
 ///  - math: sqrt, pow, sin, cos, tan, asin, acos, atan, atan2 (radians),
@@ -127,6 +131,15 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `t.due` is a date without a time or a Firestore timestamp. A missing
 ///    date is neither before nor after a date.
 ///
+///  - your own functions: a call to a name that isn't a built-in function,
+///    such as `attacked(board, sq, 'w')`, reads the variable of that name.
+///    A variable with parameters (`VariableData.parameters`) is a
+///    [FormulaFunction]: its formula is the body, which reads the
+///    arguments by the parameters' names (`board[sq]`, `move.to`) and every
+///    other variable. Functions can call each other and themselves (up to
+///    [FormulaFunction.maxDepth] calls deep), so rules that would be
+///    hundreds of characters, repeated in every formula, are written once.
+///
 /// Null counts as 0 in arithmetic and as empty text when joining text. An
 /// invalid expression evaluates to null.
 class FormulaEvaluator {
@@ -154,6 +167,16 @@ class FormulaEvaluator {
 
   /// Whether [expression] is a well-formed formula.
   static bool parses(String expression) => _parse(expression) != null;
+
+  /// The names of the functions [expression] calls that aren't built in:
+  /// calls to [FormulaFunction] variables.
+  static Set<String> userFunctionCalls(String expression) {
+    final _Node? node = _parse(expression);
+    if (node == null) return {};
+    final Set<String> names = {};
+    node.collectUserCalls(names);
+    return names;
+  }
 
   /// The variable paths [expression] reads, e.g. `storage.cart` and `qty`.
   static Set<String> referencedPaths(String expression) {
@@ -259,9 +282,21 @@ class FormulaEvaluator {
 
   /// Why [expression] can't be evaluated, such as `Unknown function "sun"`
   /// or `Expected ")" at 12`, or null when it parses.
-  static String? errorOf(String expression) {
+  ///
+  /// A call to a name that isn't a built-in function is an error unless
+  /// [functionNames] lists it (the variables that are [FormulaFunction]s).
+  static String? errorOf(
+    String expression, {
+    Iterable<String> functionNames = const [],
+  }) {
     try {
-      _Parser(expression.trim()).parseAll();
+      final _Node node = _Parser(expression.trim()).parseAll();
+      final Set<String> calls = {};
+      node.collectUserCalls(calls);
+      final Set<String> known = functionNames.toSet();
+      for (final String name in calls) {
+        if (!known.contains(name)) return 'Unknown function "$name"';
+      }
       return null;
     } on FormatException catch (error) {
       final int? offset = error.offset;
@@ -1598,24 +1633,29 @@ List<Object?> _unique(List<Object?> args) {
   return items;
 }
 
-/// A lambda such as `t => t.price` or `(t, i) => i + 1`, ready to call
-/// with an item and its index.
+/// A lambda such as `t => t.price`, `(t, i) => i + 1` or, as a user
+/// function stored in a variable, `(qty, unit, system) => ...`. List
+/// functions call it with an item and its index; a user function call
+/// passes its arguments in order. Its text is its [source], so a function
+/// survives being stored as a variable's value.
 class _Closure {
-  final String param;
-  final String? indexParam;
+  final List<String> params;
   final _Node body;
   final FormulaPathResolver outer;
+  final String source;
 
-  const _Closure(this.param, this.indexParam, this.body, this.outer);
+  const _Closure(this.params, this.body, this.outer, this.source);
 
   static final RegExp _part = RegExp(r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]');
 
-  Object? call(Object? value, [int? index]) => body.eval((path) {
-    for (final (String? name, Object? bound) in [
-      (param, value),
-      (indexParam, index),
-    ]) {
-      if (name == null) continue;
+  Object? call(Object? value, [int? index]) => callWith([value, index]);
+
+  /// Calls the lambda with [args] bound to its parameters in order; missing
+  /// arguments are null.
+  Object? callWith(List<Object?> args) => body.eval((path) {
+    for (int i = 0; i < params.length; i++) {
+      final String name = params[i];
+      final Object? bound = i < args.length ? args[i] : null;
       if (path == name) return bound;
       if (path.startsWith(name) &&
           (path.startsWith('.', name.length) ||
@@ -1631,7 +1671,7 @@ class _Closure {
   });
 
   @override
-  String toString() => '';
+  String toString() => source;
 }
 
 // ---------------------------------------------------------------------------
@@ -2497,7 +2537,8 @@ final Map<String, _Function> _functions = {
       if (v is Iterable) ...v else ?v,
   ],
   'now': (a) => _dateText(_nowAt(_arg(a, 0))),
-  'nowMs': (a) => (FormulaClock.pinned ?? DateTime.now()).millisecondsSinceEpoch,
+  'nowMs': (a) =>
+      (FormulaClock.pinned ?? DateTime.now()).millisecondsSinceEpoch,
   'today': (a) {
     final DateTime now = _nowAt(_arg(a, 0));
     return _dateText(DateTime(now.year, now.month, now.day));
@@ -2558,6 +2599,133 @@ sealed class _Node {
   Object? eval(FormulaPathResolver resolve);
 
   void collectPaths(Set<String> paths) {}
+
+  /// Child nodes, for walks over the whole expression.
+  Iterable<_Node> get children => const [];
+
+  /// Adds the names of the user functions this expression calls.
+  void collectUserCalls(Set<String> names) {
+    for (final _Node child in children) {
+      child.collectUserCalls(names);
+    }
+  }
+}
+
+/// A function written in the app: a [FormulaFunction] variable called by
+/// name, e.g. `legalMoves(board, sq)`.
+class _UserCall extends _Node {
+  final String name;
+  final List<_Node> args;
+
+  const _UserCall(this.name, this.args);
+
+  @override
+  Object? eval(FormulaPathResolver resolve) {
+    final Object? function = resolve(name);
+    final List<Object?> values = [for (final arg in args) arg.eval(resolve)];
+    if (function is FormulaFunction) return function.call(values);
+    // A computed variable holding a lambda, `${= (qty, unit) => ...}`.
+    if (_userFunction(function, resolve) case final _Closure closure) {
+      return closure.callWith(values);
+    }
+    // A name that is neither built in nor a function variable is an error,
+    // as an unknown function always was: the whole formula is null.
+    throw StateError('Unknown function "$name"');
+  }
+
+  /// The function's own variable (so a binding listens to what its body
+  /// reads) and what the arguments read.
+  @override
+  void collectPaths(Set<String> paths) {
+    paths.add(name);
+    for (final arg in args) {
+      arg.collectPaths(paths);
+    }
+  }
+
+  @override
+  Iterable<_Node> get children => args;
+
+  @override
+  void collectUserCalls(Set<String> names) {
+    names.add(name);
+    super.collectUserCalls(names);
+  }
+}
+
+/// A function defined by a variable with parameters: its [parameters] and
+/// the formula [body] that computes its result from them.
+///
+/// Calling it evaluates [body] with each parameter reading the argument at
+/// its position (missing ones are null). Every other path is read from
+/// [scope]: the app's variables. Calls nest up to [maxDepth] deep, so a
+/// runaway recursion ends with null instead of a crash.
+class FormulaFunction {
+  /// Names of the parameters, in order.
+  final List<String> parameters;
+
+  /// The formula, without `${= }`.
+  final String body;
+
+  /// Reads the variables the body uses besides its parameters.
+  final FormulaPathResolver scope;
+
+  /// Creates a [FormulaFunction].
+  const FormulaFunction(this.parameters, this.body, this.scope);
+
+  /// The deepest nesting of calls allowed.
+  static const int maxDepth = 128;
+
+  static int _depth = 0;
+
+  static final RegExp _part = RegExp(r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]');
+
+  /// The result of the body for [arguments].
+  Object? call(List<Object?> arguments) {
+    final _Node? node = FormulaEvaluator._parse(body);
+    if (node == null || _depth >= maxDepth) return null;
+    _depth++;
+    try {
+      return node.eval((path) {
+        for (int i = 0; i < parameters.length; i++) {
+          final String name = parameters[i];
+          if (!path.startsWith(name)) continue;
+          final Object? bound = i < arguments.length ? arguments[i] : null;
+          if (path.length == name.length) return bound;
+          if (!path.startsWith('.', name.length) &&
+              !path.startsWith('[', name.length)) {
+            continue;
+          }
+          Object? result = bound;
+          for (final Match part in _part.allMatches(path, name.length)) {
+            result = _member(result, part[1] ?? int.parse(part[2]!));
+          }
+          return result;
+        }
+        return scope(path);
+      });
+    } catch (_) {
+      return null;
+    } finally {
+      _depth--;
+    }
+  }
+
+  /// The paths [body] reads that aren't its parameters: the variables a
+  /// call depends on.
+  Set<String> get externalPaths => {
+    for (final String path in FormulaEvaluator.referencedPaths(body))
+      if (!parameters.any(
+        (name) =>
+            path == name ||
+            path.startsWith('$name.') ||
+            path.startsWith('$name['),
+      ))
+        path,
+  };
+
+  @override
+  String toString() => 'function(${parameters.join(', ')})';
 }
 
 class _Literal extends _Node {
@@ -2592,6 +2760,9 @@ class _ListLiteral extends _Node {
   ];
 
   @override
+  Iterable<_Node> get children => items;
+
+  @override
   void collectPaths(Set<String> paths) {
     for (final item in items) {
       item.collectPaths(paths);
@@ -2608,6 +2779,9 @@ class _Member extends _Node {
   @override
   Object? eval(FormulaPathResolver resolve) =>
       _member(target.eval(resolve), key.eval(resolve));
+
+  @override
+  Iterable<_Node> get children => [target, key];
 
   @override
   void collectPaths(Set<String> paths) {
@@ -2635,6 +2809,9 @@ class _Call extends _Node {
   }
 
   @override
+  Iterable<_Node> get children => args;
+
+  @override
   void collectPaths(Set<String> paths) {
     for (final arg in args) {
       arg.collectPaths(paths);
@@ -2642,18 +2819,21 @@ class _Call extends _Node {
   }
 }
 
-/// A lambda argument, `param => body` or `(param, index) => body`.
-/// Evaluates to a [_Closure] that list functions call once per item.
+/// A lambda, `param => body`, `(param, index) => body`, or with more
+/// parameters for a user function. Evaluates to a [_Closure].
 class _Lambda extends _Node {
-  final String param;
-  final String? indexParam;
+  final List<String> params;
   final _Node body;
+  final String source;
 
-  const _Lambda(this.param, this.indexParam, this.body);
+  const _Lambda(this.params, this.body, this.source);
 
   @override
   Object? eval(FormulaPathResolver resolve) =>
-      _Closure(param, indexParam, body, resolve);
+      _Closure(params, body, resolve, source);
+
+  @override
+  Iterable<_Node> get children => [body];
 
   /// The body's paths, except those of the parameters, which aren't
   /// variables.
@@ -2661,17 +2841,29 @@ class _Lambda extends _Node {
   void collectPaths(Set<String> paths) {
     final Set<String> bodyPaths = {};
     body.collectPaths(bodyPaths);
-    bool isParam(String path, String? name) =>
-        name != null &&
-        (path == name ||
-            path.startsWith('$name.') ||
-            path.startsWith('$name['));
-    paths.addAll(
-      bodyPaths.where(
-        (path) => !isParam(path, param) && !isParam(path, indexParam),
-      ),
+    bool isParam(String path) => params.any(
+      (name) =>
+          path == name ||
+          path.startsWith('$name.') ||
+          path.startsWith('$name['),
     );
+    paths.addAll(bodyPaths.where((path) => !isParam(path)));
   }
+}
+
+/// [value] as a callable function: a closure, or the text of a lambda
+/// (with or without its `${= }` wrapper). Its body reads the caller's
+/// variables, so a function defined in one scope (an app variable) works
+/// with the variables where it is called.
+_Closure? _userFunction(Object? value, FormulaPathResolver resolve) {
+  if (value is _Closure) {
+    return _Closure(value.params, value.body, resolve, value.source);
+  }
+  if (value is! String || !value.contains('=>')) return null;
+  final String text = FormulaEvaluator.exactExpression(value) ?? value;
+  final _Node? node = FormulaEvaluator._parse(text);
+  if (node is! _Lambda) return null;
+  return node.eval(resolve) as _Closure;
 }
 
 /// An object literal, `{id: 'a', 'full name': n + 1}`.
@@ -2686,6 +2878,11 @@ class _MapLiteral extends _Node {
   };
 
   @override
+  Iterable<_Node> get children => [
+    for (final (_, _Node value) in entries) value,
+  ];
+
+  @override
   void collectPaths(Set<String> paths) {
     for (final (_, _Node value) in entries) {
       value.collectPaths(paths);
@@ -2698,6 +2895,9 @@ class _Unary extends _Node {
   final _Node operand;
 
   const _Unary(this.op, this.operand);
+
+  @override
+  Iterable<_Node> get children => [operand];
 
   @override
   Object? eval(FormulaPathResolver resolve) {
@@ -2715,6 +2915,9 @@ class _Binary extends _Node {
   final _Node right;
 
   const _Binary(this.op, this.left, this.right);
+
+  @override
+  Iterable<_Node> get children => [left, right];
 
   @override
   Object? eval(FormulaPathResolver resolve) {
@@ -2774,6 +2977,9 @@ class _Ternary extends _Node {
   const _Ternary(this.condition, this.then, this.otherwise);
 
   @override
+  Iterable<_Node> get children => [condition, then, otherwise];
+
+  @override
   Object? eval(FormulaPathResolver resolve) => _truthy(condition.eval(resolve))
       ? then.eval(resolve)
       : otherwise.eval(resolve);
@@ -2800,12 +3006,13 @@ class _Parser {
   static final RegExp _identifier = RegExp(r'[a-zA-Z_][a-zA-Z0-9_]*');
   static final RegExp _lambdaHead = RegExp(
     r'(?:([a-zA-Z_][a-zA-Z0-9_]*)'
-    r'|\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:,\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*)?\))'
+    r'|\(\s*([a-zA-Z_][a-zA-Z0-9_]*(?:\s*,\s*[a-zA-Z_][a-zA-Z0-9_]*)*)\s*\))'
     r'\s*=>',
   );
 
+  /// The whole formula: an expression, or a lambda (a user function).
   _Node parseAll() {
-    final _Node node = _ternary();
+    final _Node node = _argument();
     _skip();
     if (pos != source.length) {
       throw FormatException('Unexpected "${source[pos]}"', source, pos);
@@ -2842,8 +3049,13 @@ class _Parser {
     _skip();
     final Match? head = _lambdaHead.matchAsPrefix(source, pos);
     if (head == null) return _ternary();
+    final int start = pos;
     pos = head.end;
-    return _Lambda(head[1] ?? head[2]!, head[3], _ternary());
+    final List<String> params = head[1] != null
+        ? [head[1]!]
+        : head[2]!.split(',').map((name) => name.trim()).toList();
+    final _Node body = _ternary();
+    return _Lambda(params, body, source.substring(start, pos).trim());
   }
 
   _Node _ternary() {
@@ -3019,9 +3231,6 @@ class _Parser {
     }
 
     if (_eat('(')) {
-      if (!_functions.containsKey(name)) {
-        throw FormatException('Unknown function "$name"', source, pos);
-      }
       final List<_Node> args = [];
       if (!_eat(')')) {
         do {
@@ -3029,6 +3238,8 @@ class _Parser {
         } while (_eat(','));
         _expect(')');
       }
+      // A name that isn't built in calls a function variable.
+      if (!_functions.containsKey(name)) return _UserCall(name, args);
       return _Call(name, args);
     }
 

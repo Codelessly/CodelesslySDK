@@ -238,6 +238,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
       widget = applyDragAndDrop(context, styled, widget);
+      // Pointer events pass through to the nodes under this one.
+      if (styled.ignorePointer) widget = IgnorePointer(child: widget);
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);

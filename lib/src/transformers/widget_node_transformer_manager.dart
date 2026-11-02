@@ -1291,6 +1291,7 @@ class AdaptiveNodeBox extends StatelessWidget {
       horizontalFit: node.horizontalFit,
       verticalFit: node.verticalFit,
       size: node.basicBoxLocal.size,
+      keepAspect: node.keepAspect,
       child: child,
     );
   }
@@ -1349,6 +1350,10 @@ class AdaptiveSizeFitBox extends StatelessWidget {
   /// The design size of the box.
   final SizeC size;
 
+  /// Width ÷ height the box keeps, or 0: the side that stretches sets the
+  /// size and the other follows. See [BaseNode.keepAspect].
+  final double keepAspect;
+
   /// Creates a [AdaptiveSizeFitBox] that will fit its [child] to the size of
   /// the [SizeC], taking into account the [horizontalFit] and [verticalFit]
   /// values.
@@ -1358,10 +1363,27 @@ class AdaptiveSizeFitBox extends StatelessWidget {
     required this.verticalFit,
     required this.size,
     required this.child,
+    this.keepAspect = 0,
   });
+
+  static bool _stretches(SizeFit? fit) =>
+      fit == SizeFit.expanded || fit == SizeFit.flexible;
 
   @override
   Widget build(BuildContext context) {
+    if (keepAspect > 0 && keepAspect.isFinite) {
+      final bool wide = _stretches(horizontalFit);
+      final bool tall = _stretches(verticalFit);
+      if (wide != tall || wide) {
+        // The stretching side decides; the other hugs the ratio's box.
+        return FitBox.fromFits(
+          horizontalFit: wide || !tall ? horizontalFit : SizeFit.shrinkWrap,
+          verticalFit: tall && !wide ? verticalFit : SizeFit.shrinkWrap,
+          size: size,
+          child: AspectRatio(aspectRatio: keepAspect, child: child),
+        );
+      }
+    }
     return FitBox.fromFits(
       horizontalFit: horizontalFit,
       verticalFit: verticalFit,
@@ -1427,7 +1449,9 @@ class SvgIcon extends StatelessWidget {
     // Material Icons ship with Flutter; use their bundled glyph offline.
     // Icon models hold the codepoints of Google's Material Icons fonts, which
     // aren't the codepoints of Flutter's MaterialIcons font, so the glyph is
-    // found by name and style.
+    // found by name and style. Otherwise it is drawn from its SVG: an
+    // IconData built at runtime fails release web builds (icon fonts are
+    // tree-shaken).
     if (icon case final MaterialIcon material) {
       final IconData? glyph = materialIconsByName[material.styledName];
       if (glyph != null) {
@@ -1533,6 +1557,8 @@ class SvgIconImage extends StatelessWidget {
 /// - `globalX`, `globalY`: where it is on the screen,
 /// - `shift`, `alt`, `meta`: modifier keys held (meta is Command on macOS,
 ///   Control elsewhere).
+/// - `width`, `height`: the node's size, so `round(dx / width)` counts how
+///   many of its own widths the pointer went.
 ///
 /// [TriggerType.dragEnd] reactions run once when the pointer lifts after a
 /// drag, with the drag's total `dx`, `dy`, its `velocityX`, `velocityY`
@@ -1568,6 +1594,7 @@ class ReactionDragDetector extends StatefulWidget {
 }
 
 class _ReactionDragDetectorState extends State<ReactionDragDetector> {
+  Offset _origin = Offset.zero;
   Offset _total = Offset.zero;
   Offset _last = Offset.zero;
   Offset _lastGlobal = Offset.zero;
@@ -1584,6 +1611,13 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
     };
   }
 
+  /// The node's laid out size: drags measured in node sizes (squares of a
+  /// board, cards of a deck) divide by it.
+  Map<String, double> get _size {
+    final Size size = context.size ?? Size.zero;
+    return {'width': size.width, 'height': size.height};
+  }
+
   void _run(List<Reaction> reactions, TriggerType type, Map result) {
     if (reactions.isEmpty) return;
     FunctionsRepository.triggerAction(
@@ -1595,7 +1629,7 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
   }
 
   void _dragUpdate(Offset delta, Offset local, Offset global) {
-    _total += delta;
+    _total = local - _origin;
     _dragged = true;
     _run(widget.onDrag, TriggerType.drag, {
       'deltaX': delta.dx,
@@ -1606,6 +1640,7 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
       'y': local.dy,
       'globalX': global.dx,
       'globalY': global.dy,
+      ..._size,
       ..._modifiers,
     });
   }
@@ -1622,6 +1657,7 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
       'y': _last.dy,
       'globalX': _lastGlobal.dx,
       'globalY': _lastGlobal.dy,
+      ..._size,
       ..._modifiers,
     });
   }
@@ -1665,6 +1701,7 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
       child = GestureDetector(
         behavior: HitTestBehavior.opaque,
         onScaleStart: (details) {
+          _origin = details.localFocalPoint;
           _total = Offset.zero;
           _lastScale = 1;
           _pinching = details.pointerCount > 1;
@@ -1706,7 +1743,14 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
         cursor: SystemMouseCursors.grab,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onPanStart: (_) => _total = Offset.zero,
+          // Totals count from where the pointer went down: a pan starts
+          // only after the touch slop, and summing its deltas from there
+          // would leave the slop out, so a piece dropped two squares away
+          // would land one square short.
+          onPanDown: (details) {
+            _origin = details.localPosition;
+            _total = Offset.zero;
+          },
           onPanUpdate: (details) {
             _last = details.localPosition;
             _lastGlobal = details.globalPosition;
