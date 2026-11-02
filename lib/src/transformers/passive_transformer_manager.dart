@@ -54,6 +54,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'autoPlaceholder': PassiveRowColumnTransformer(getNode, this),
       'rectangle': PassiveRectangleTransformer(getNode, this),
       'ellipse': PassiveRectangleTransformer(getNode, this),
+      'path': PassivePathTransformer(getNode, this),
       'text': PassiveTextTransformer(getNode, this),
       'radio': PassiveRadioTransformer(getNode, this),
       'icon': PassiveIconTransformer(getNode, this),
@@ -185,7 +186,17 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     BaseNode node,
     WidgetBuildSettings settings,
   ) {
-    final BaseNode styled = applyStyleOverrides(context, node);
+    // On the design canvas (no reactions) bindings read the editor's
+    // preview values, as text does, so a state previewed with
+    // `preview.setValues` shows and hides the same nodes it would at runtime.
+    final ScopedValues? preview = settings.withReactions
+        ? null
+        : VariablePreview.scopeOf(node, context: context);
+    final BaseNode styled = applyStyleOverrides(
+      context,
+      node,
+      scopedValues: preview,
+    );
     Widget widget = getTransformerByNode(node)
         .buildWidget(styled, context, settings);
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
@@ -205,9 +216,25 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
-      widget = applyWidgetMotion(context, styled, widget);
+      widget = applyWidgetMotion(
+        context,
+        styled,
+        widget,
+        scopedValues: preview,
+      );
       widget = applyNodePlay(context, styled, widget);
       widget = applyBoundOffset(context, styled, widget);
+    }
+    // Without reactions (the design canvas) a knob or fader cap is drawn
+    // where its drag track puts it; with them NodeDragTrack draws it there
+    // and makes it draggable.
+    if (!settings.withReactions) {
+      widget = applyTrackPose(
+        context,
+        styled,
+        widget,
+        scopedValues: preview,
+      );
     }
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
@@ -225,6 +252,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         styled,
         widget,
         maintainState: true,
+        scopedValues: preview,
       );
     }
 
@@ -261,13 +289,17 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// `height`, `flex`, `rotation`, and the properties of [StyleBindings]
   /// (effects, stroke weight, corner radius, padding, font weight, icon).
   /// Returns [node] itself when nothing changes it.
-  BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+  BaseNode applyStyleOverrides(
+    BuildContext context,
+    BaseNode node, {
+    ScopedValues? scopedValues,
+  }) {
+    final ScopedValues scope = scopedValues ?? ScopedValues.of(context);
     T? value<T extends Object>(String property) =>
         PropertyValueDelegate.getPropertyValue<T>(
           node,
           property,
-          scopedValues: scopedValues,
+          scopedValues: scope,
         );
 
     final Map<String, dynamic> patch = {};
@@ -358,7 +390,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
 
     // Effects, stroke weight, corner radius, font weight and icon.
-    StyleBindings.addTo(patch, node, scopedValues: scopedValues);
+    StyleBindings.addTo(patch, node, scopedValues: scope);
 
     // The states shown around the node (a property-override variant, its
     // own or an ancestor's interaction states) win over bindings.
@@ -549,6 +581,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           case 'auth':
             final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
+          case 'speech':
+            listenables.add(Speech.instance);
         }
       }
 
@@ -592,6 +626,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           case 'auth':
             final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
+          case 'speech':
+            listenables.add(Speech.instance);
         }
       }
 
@@ -638,6 +674,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             case 'auth':
               final notifier = context.read<Codelessly?>()?.appUser;
               if (notifier != null) listenables.add(notifier);
+            case 'speech':
+              listenables.add(Speech.instance);
           }
           continue;
         }
@@ -694,6 +732,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           context,
         ),
         'auth' => context.read<Codelessly?>()?.appUser,
+        'speech' => Speech.instance,
         _ => null,
       };
       if (notifier != null) listenables.add(notifier);

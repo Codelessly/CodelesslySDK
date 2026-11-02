@@ -145,6 +145,9 @@ class ConditionVariablesVisitor
   Set<String>? visitCopyToClipboardAction(CopyToClipboardAction action) => {};
 
   @override
+  Set<String>? visitControlDragAction(ControlDragAction action) => {};
+
+  @override
   Set<String>? visitSpeakAction(SpeakAction action) => {};
 
   @override
@@ -254,6 +257,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitCopyToClipboardAction(CopyToClipboardAction action) => null;
+
+  @override
+  String? visitControlDragAction(ControlDragAction action) => null;
 
   @override
   String? visitSpeakAction(SpeakAction action) => null;

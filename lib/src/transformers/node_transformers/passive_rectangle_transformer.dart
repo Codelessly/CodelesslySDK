@@ -556,6 +556,8 @@ Gradient? retrieveGradient(PaintModel paint) {
       );
     } else if (paint.type == PaintType.gradientRadial) {
       return RadialGradient(
+        center: Alignment(paint.gradientCenterX, paint.gradientCenterY),
+        radius: paint.gradientRadius,
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
@@ -565,6 +567,7 @@ Gradient? retrieveGradient(PaintModel paint) {
       );
     } else if (paint.type == PaintType.gradientAngular) {
       return SweepGradient(
+        center: Alignment(paint.gradientCenterX, paint.gradientCenterY),
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
@@ -833,6 +836,9 @@ List<Widget> buildFills(
   return raster.reversed.toList();
 }
 
+bool _hasChildren(GeometryMixin node) =>
+    node is ChildrenMixin && (node as ChildrenMixin).children.isNotEmpty;
+
 Widget wrapFillWithPositioned({
   required GeometryMixin node,
   required Widget fill,
@@ -843,8 +849,12 @@ Widget wrapFillWithPositioned({
   PaintType.gradientRadial ||
   PaintType.gradientAngular ||
   PaintType.gradientDiamond => Positioned.fill(child: fill),
+  // A node that hugs its size and has nothing else in it takes the image's
+  // size (a `Positioned` with no offsets sizes the stack). A node with
+  // children hugs them, and the image fills it behind them, as at design
+  // time: otherwise every card of a list would be as tall as its texture.
   PaintType.image =>
-    node.isHorizontalWrap || node.isVerticalWrap
+    (node.isHorizontalWrap || node.isVerticalWrap) && !_hasChildren(node)
         ? Positioned(child: fill)
         : Positioned.fill(child: fill),
   PaintType.emoji => fill,
@@ -1061,7 +1071,7 @@ class ImageFillPlaceholder extends StatelessWidget {
         color: const Color(0xFFE9ECEF),
         borderRadius: borderRadius,
       ),
-      child: LayoutBuilder(
+      child: IntrinsicSafeLayoutBuilder(
         builder: (context, constraints) {
           final double side = constraints.biggest.shortestSide;
           if (!side.isFinite || side < 12) return const SizedBox.expand();
