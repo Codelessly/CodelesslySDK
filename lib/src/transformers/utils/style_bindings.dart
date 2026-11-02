@@ -24,6 +24,9 @@ import 'scoped_values.dart';
 ///   JSON value (e.g. `[8, true, 'circular']`) is accepted too.
 /// * [fontWeight] (number 100-900, or `w700`, `bold`, `normal`): the weight
 ///   of every span of a text node.
+/// * [textDecoration] (`none`, `underline`, `overline`, `strikethrough`,
+///   or Flutter's `lineThrough`): the decoration of every span of a text
+///   node, e.g. a ticked item struck through.
 /// * [icon] (string): the name of the icon an icon node shows, in the
 ///   naming of its icon model (`star`, `star_border`, ...). Its family and
 ///   style stay. An icon model JSON map replaces the icon as a whole.
@@ -54,6 +57,22 @@ abstract final class StyleBindings {
 
   /// The font weight of every span of a text node.
   static const String fontWeight = 'fontWeight';
+
+  /// The decoration of every span of a text node.
+  static const String textDecoration = 'textDecoration';
+
+  /// [value] as a text decoration, or null when it names none.
+  static TextDecorationEnum? parseTextDecoration(Object? value) {
+    if (value is TextDecorationEnum) return value;
+    if (value is! String) return null;
+    final String name = value.trim().toLowerCase();
+    if (name == 'linethrough' || name == 'line-through') {
+      return TextDecorationEnum.strikethrough;
+    }
+    return TextDecorationEnum.values.firstWhereOrNull(
+      (decoration) => decoration.name.toLowerCase() == name,
+    );
+  }
 
   /// The name of the icon an icon node shows.
   static const String icon = 'icon';
@@ -122,6 +141,22 @@ abstract final class StyleBindings {
                   .copyWith(weight: weight)
                   .toJson(),
             },
+        ];
+      }
+    }
+
+    if (node is TextNode) {
+      final TextDecorationEnum? decoration = parseTextDecoration(
+        value<Object>(textDecoration),
+      );
+      if (decoration != null &&
+          node.textMixedProps.any((prop) => prop.textDecoration != decoration)) {
+        final List spans =
+            patch['textMixedProps'] as List? ??
+            [for (final prop in node.textMixedProps) prop.toJson()];
+        patch['textMixedProps'] = [
+          for (final Map span in spans.cast<Map>())
+            {...span, 'textDecoration': decoration.name},
         ];
       }
     }
