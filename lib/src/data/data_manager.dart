@@ -1583,21 +1583,29 @@ class DataManager {
               name: name,
             );
 
-            for (final SDKPublishFont fontModel in fontModels) {
-              DebugLogger.instance.printInfo(
-                '\t\tFontModel [${fontModel.id}] ready. Fetching bytes & loading...',
-                name: name,
-              );
-
-              model.fonts[fontModel.id] = fontModel;
-
-              await getOrFetchFontBytesAndSaveAndLoad(fontModel).then((_) {
-                DebugLogger.instance.printInfo(
-                  '\t\tFontModel [${fontModel.id}] loaded. Done!\n',
-                  name: name,
-                );
-              });
-            }
+            // All of the layout's fonts at once: one after another, a
+            // font-heavy layout showed fallback text for many seconds, and
+            // one font that failed kept the rest from loading.
+            await Future.wait([
+              for (final SDKPublishFont fontModel in fontModels)
+                () async {
+                  model.fonts[fontModel.id] = fontModel;
+                  try {
+                    await getOrFetchFontBytesAndSaveAndLoad(fontModel);
+                    DebugLogger.instance.printInfo(
+                      '\t\tFontModel [${fontModel.id}] loaded. Done!\n',
+                      name: name,
+                    );
+                  } catch (error) {
+                    DebugLogger.instance.log(
+                      'Font [${fontModel.id}] failed to load: $error',
+                      category: DebugCategory.error,
+                      name: name,
+                      level: Level.WARNING,
+                    );
+                  }
+                }(),
+            ]);
           })
           .catchError((error, stack) {
             DebugLogger.instance.log(
@@ -1740,33 +1748,29 @@ class DataManager {
   }) async {
     final AuthData? auth = authManager.authData;
 
-    final Set<SDKPublishFont> fonts = {};
-    for (final String fontID in fontIDs) {
-      final SDKPublishFont? font = _publishModel?.fonts[fontID];
-      if (font != null) {
-        fonts.add(font);
-      } else {
-        if (auth == null) continue;
-
-        try {
-          final SDKPublishFont? downloadedFont = await networkDataRepository
-              .downloadFontModel(
-                projectID: auth.projectId,
-                fontID: fontID,
-                source: config.publishSource,
-              );
-          if (downloadedFont != null) {
-            fonts.add(downloadedFont);
+    // Downloaded together, not one after another.
+    final List<SDKPublishFont?> found = await Future.wait([
+      for (final String fontID in fontIDs)
+        () async {
+          final SDKPublishFont? font = _publishModel?.fonts[fontID];
+          if (font != null) return font;
+          if (auth == null) return null;
+          try {
+            return await networkDataRepository.downloadFontModel(
+              projectID: auth.projectId,
+              fontID: fontID,
+              source: config.publishSource,
+            );
+          } catch (e) {
+            DebugLogger.instance.printInfo(
+              '\t\tFont [$fontID] could not be downloaded.',
+              name: name,
+            );
+            return null;
           }
-        } catch (e) {
-          DebugLogger.instance.printInfo(
-            '\t\tFont [$fontID] could not be downloaded.',
-            name: name,
-          );
-        }
-      }
-    }
-    return fonts;
+        }(),
+    ]);
+    return found.nonNulls.toSet();
   }
 
   /// Gets all [SDKPublishFont] models of a given set of [fontIDs] either from
