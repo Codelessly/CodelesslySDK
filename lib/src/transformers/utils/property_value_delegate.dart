@@ -471,9 +471,13 @@ class PropertyValueDelegate {
     final bool computed = isComputedVariable(variable);
     final Object? variableValue = variableValueOf(variable, scopedValues);
     // A computed variable's type is whatever its formula returns.
-    final VariableType type = computed && variableValue != null
-        ? VariableType.fromObjectType(variableValue)
-        : variable.type;
+    // A user function (a lambda) has no variable type; it keeps its own.
+    VariableType type = variable.type;
+    if (computed && variableValue != null) {
+      try {
+        type = VariableType.fromObjectType(variableValue);
+      } catch (_) {}
+    }
     if (match.hasAccessor) {
       if (type.isText) {
         // A computed text whose formula gives nothing has no characters.

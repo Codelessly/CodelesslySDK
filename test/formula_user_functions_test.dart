@@ -102,4 +102,25 @@ void main() {
       expect(ComputedVariables.evaluationOrder(vars), ['fraction', 'label']);
     });
   });
+
+  test('user functions work at runtime, read through the variable scope', () {
+    final Map<String, VariableData> vars = {
+      'minutesText': VariableData(
+        id: 'm',
+        name: 'minutesText',
+        value: r"${= (m) => m < 60 ? m + ' min' : floor(m / 60) + 'h ' + m % 60 + 'm'}",
+        type: VariableType.text,
+      ),
+      'minutes': VariableData(id: 'n', name: 'minutes', value: '210', type: VariableType.integer),
+    };
+    final scope = ScopedValues.preview(variables: vars);
+    expect(
+      PropertyValueDelegate.evaluateFormula('minutesText(minutes)', scopedValues: scope),
+      '3h 30m',
+    );
+    expect(
+      PropertyValueDelegate.evaluateFormula('minutesText(45)', scopedValues: scope),
+      '45 min',
+    );
+  });
 }
