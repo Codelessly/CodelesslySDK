@@ -347,11 +347,16 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
 
     final AxisC? scrollAxis = scrollAxisFor(node);
     final Fit? contentFit = node is FrameNode ? node.contentFit : null;
+    // Scaled content is laid out at its design size: the frame's
+    // contentSize when set, which stays put while the frame follows its
+    // parent, else its content box.
+    final Size designSize = contentFit != null
+        ? (node as FrameNode).contentDesignSize.flutterSize
+        : node.innerBoxLocal.size.flutterSize;
     Widget content = FreeformLayout(
-      // Scaled content is laid out at its design size.
       wrapsWidth: contentFit == null && node.isHorizontalWrap,
       wrapsHeight: contentFit == null && node.isVerticalWrap,
-      designSize: node.innerBoxLocal.size.flutterSize,
+      designSize: designSize,
       children: [
         for (final BaseNode childNode in children)
           buildStackChild(
@@ -366,7 +371,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     );
     if (contentFit != null) {
       content = ScaledContent(
-        designSize: node.innerBoxLocal.size.flutterSize,
+        designSize: designSize,
         fit: contentFit.boxFit,
         alignment:
             (node as FrameNode).contentAlignment.flutterAlignment ??
