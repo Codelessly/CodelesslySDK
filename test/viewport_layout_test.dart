@@ -238,6 +238,39 @@ void main() {
       }
     });
 
+    test('flexible hugs its items up to a bounded extent', () {
+      final ListViewNode node = list(verticalFit: SizeFit.flexible);
+      // In a column with room: as long as the items, scrolling past it.
+      expect(
+        ViewportLayout.resolve(
+          node: node,
+          scrollDirection: AxisC.vertical,
+          canShrinkWrap: true,
+          constraints: BoxConstraints.loose(const Size(390, 844)),
+        ),
+        const ViewportLayout(width: 300, height: null, shrinkWrap: true),
+      );
+      // Unbounded, or an endless list: the design size.
+      expect(
+        ViewportLayout.resolve(
+          node: node,
+          scrollDirection: AxisC.vertical,
+          canShrinkWrap: true,
+          constraints: unboundedHeight(390),
+        ),
+        const ViewportLayout(width: 300, height: 400, shrinkWrap: false),
+      );
+      expect(
+        ViewportLayout.resolve(
+          node: node,
+          scrollDirection: AxisC.vertical,
+          canShrinkWrap: false,
+          constraints: BoxConstraints.loose(const Size(390, 844)),
+        ),
+        const ViewportLayout(width: 300, height: 400, shrinkWrap: false),
+      );
+    });
+
     test('the cross axis is bounded by the design size when unbounded', () {
       final node = list(
         scrollDirection: AxisC.horizontal,
