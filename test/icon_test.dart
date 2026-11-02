@@ -103,4 +103,63 @@ void main() {
     expect(find.byType(Icon), findsNothing);
     expect(tester.getSize(find.byType(SizedBox).last), const Size(20, 20));
   });
+
+  group('Material icons draw Flutter\'s glyph for their name', () {
+    // Catalog (Google font) codepoints, which are other glyphs in Flutter's
+    // MaterialIcons font: 0xe5ca is sms_failed, 0xe5cb snippet_folder.
+    final Map<String, (int, IconData)> cases = {
+      'check': (0xe5ca, Icons.check),
+      'chevron_left': (0xe5cb, Icons.chevron_left),
+      'arrow_forward': (0xe5c8, Icons.arrow_forward),
+      'expand_more': (0xe5cf, Icons.expand_more),
+    };
+    for (final MapEntry(key: name, value: (codepoint, expected))
+        in cases.entries) {
+      testWidgets(name, (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SvgIcon(
+              icon: MaterialIcon(
+                codepoint: codepoint,
+                name: name,
+                style: MaterialIconStyle.filled,
+                version: 1,
+              ),
+              size: 24,
+            ),
+          ),
+        );
+        final Icon icon = tester.widget(find.byType(Icon));
+        expect(icon.icon!.codePoint, expected.codePoint);
+        expect(icon.icon!.fontFamily, 'MaterialIcons');
+      });
+    }
+
+    test('styles map to their styled Flutter glyph', () {
+      MaterialIcon styled(MaterialIconStyle style) => MaterialIcon(
+        codepoint: 0xe5ca,
+        name: 'check',
+        style: style,
+      );
+      expect(
+        flutterMaterialIconCodepoint(styled(MaterialIconStyle.outlined)),
+        Icons.check_outlined.codePoint,
+      );
+      expect(
+        flutterMaterialIconCodepoint(styled(MaterialIconStyle.rounded)),
+        Icons.check_rounded.codePoint,
+      );
+      expect(
+        flutterMaterialIconCodepoint(styled(MaterialIconStyle.twoTone)),
+        isNull,
+      );
+      // Flutter renames icons whose names aren't identifiers.
+      expect(
+        flutterMaterialIconCodepoint(
+          MaterialIcon(codepoint: 1, name: '360', style: MaterialIconStyle.filled),
+        ),
+        Icons.threesixty.codePoint,
+      );
+    });
+  });
 }

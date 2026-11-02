@@ -35,6 +35,10 @@ import 'scoped_values.dart';
 ///   name such as `Inter`. Each span keeps its weight and style.
 /// * [textAlign] (string): the horizontal alignment of a text node: `left`,
 ///   `center`, `right`, `justified` (or `justify`), `start` or `end`.
+/// * [spacing] (number): the gap between a row's or column's children,
+///   e.g. `${= screen.isMobile ? 28 : 56}`.
+/// * [runSpacing] (number): the gap between the runs of a wrapping row or
+///   column.
 /// * [icon] (string): the name of the icon an icon node shows, in the
 ///   naming of its icon model (`star`, `star_border`, ...). Its family and
 ///   style stay. An icon model JSON map replaces the icon as a whole.
@@ -65,6 +69,12 @@ abstract final class StyleBindings {
 
   /// The font weight of every span of a text node.
   static const String fontWeight = 'fontWeight';
+
+  /// The gap between a row's or column's children.
+  static const String spacing = 'spacing';
+
+  /// The gap between the runs of a wrapping row or column.
+  static const String runSpacing = 'runSpacing';
 
   /// The name of the icon an icon node shows.
   static const String icon = 'icon';
@@ -140,6 +150,19 @@ abstract final class StyleBindings {
       }
     }
 
+    if (node is RowColumnMixin) {
+      final double? gap = gapOf(node, spacing, scopedValues: scopedValues);
+      if (gap != null && gap != node.spacing) patch['spacing'] = gap;
+      final double? runGap = gapOf(
+        node,
+        runSpacing,
+        scopedValues: scopedValues,
+      );
+      if (runGap != null && runGap != node.runSpacing) {
+        patch['runSpacing'] = runGap;
+      }
+    }
+
     if (node is TextNode) {
       final FontWeightNumeric? weight = parseFontWeight(
         value<Object>(fontWeight),
@@ -200,6 +223,26 @@ abstract final class StyleBindings {
         };
       }
     }
+  }
+
+  /// The gap the [property] ([spacing] or [runSpacing]) binding of [node]
+  /// gives, evaluated with [scopedValues]: a number (or numeric text) of at
+  /// least 0. Null when the node has no such binding or it gives no number.
+  static double? gapOf(
+    BaseNode node,
+    String property, {
+    required ScopedValues scopedValues,
+  }) {
+    if (node.variables[property]?.isNotEmpty != true) return null;
+    final double? gap = _number(
+      PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        property,
+        scopedValues: scopedValues,
+      ),
+    );
+    if (gap == null || !gap.isFinite) return null;
+    return gap < 0 ? 0 : gap;
   }
 
   static List<Effect> _effects(

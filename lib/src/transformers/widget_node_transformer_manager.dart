@@ -988,8 +988,25 @@ class AdaptiveSizeFitBox extends StatelessWidget {
   }
 }
 
-/// Renders an [IconModel]: Material icons and symbols from Google's prebuilt
-/// SVGs, Cupertino icons from the cupertino_icons font.
+/// The codepoint of [icon]'s glyph in Flutter's bundled `MaterialIcons`
+/// font, or null when it isn't a Material Icon Flutter ships (two-tone
+/// icons, newer names, symbols, other fonts).
+///
+/// A [MaterialIcon]'s stored codepoint is Google's Material Icons font
+/// codepoint (`check` is 0xe5ca), which is a different glyph in Flutter's
+/// font (0xe5ca is `sms_failed` there; `check` is 0xe156). Drawing the
+/// stored codepoint with Flutter's font draws the wrong icon, so the glyph
+/// is looked up by name and style instead.
+int? flutterMaterialIconCodepoint(IconModel icon) {
+  if (icon is! MaterialIcon || icon.name.isEmpty) return null;
+  if (icon.style == MaterialIconStyle.twoTone) return null;
+  final String styled = icon.styledName;
+  return flutterIconsDataMap[flutterIconNames[styled] ?? styled];
+}
+
+/// Renders an [IconModel]: Material icons from Flutter's bundled font when
+/// it has them, otherwise from Google's prebuilt SVGs; Cupertino icons from
+/// the cupertino_icons font.
 class SvgIcon extends StatelessWidget {
   final IconModel icon;
   final Color? color;
@@ -1042,9 +1059,10 @@ class SvgIcon extends StatelessWidget {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
     // Material Icons ship with Flutter; use their bundled glyph offline.
-    if (icon is MaterialIcon && icon.codepoint > 0) {
+    final int? flutterCodepoint = flutterMaterialIconCodepoint(icon);
+    if (flutterCodepoint != null) {
       return Icon(
-        IconData(icon.codepoint, fontFamily: icon.fontFamily),
+        IconData(flutterCodepoint, fontFamily: 'MaterialIcons'),
         size: dimension,
         color: iconColor,
       );
