@@ -5,7 +5,9 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show BrowserContextMenu;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
@@ -491,7 +493,7 @@ abstract class WidgetNodeTransformerManager
 
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
-    final Widget tappable = _wrapWithTapReactions(context, node, widget);
+    Widget tappable = _wrapWithTapReactions(context, node, widget);
     if (node is! ReactionMixin || node is CanvasNode || node is SpacerNode) {
       return tappable;
     }
@@ -504,6 +506,24 @@ abstract class WidgetNodeTransformerManager
     final List<Reaction> onDragEnd = of(TriggerType.dragEnd);
     final List<Reaction> onPointerDown = of(TriggerType.pointerDown);
     final List<Reaction> onPointerUp = of(TriggerType.pointerUp);
+    final List<Reaction> onSecondary = of(TriggerType.secondaryClick);
+    if (onSecondary.isNotEmpty) {
+      // A right click opens the app's menu, not the browser's.
+      if (kIsWeb) BrowserContextMenu.disableContextMenu();
+      tappable = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onSecondaryTapUp: (details) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.secondaryClick,
+          reactions: onSecondary,
+          result: {
+            'x': details.globalPosition.dx,
+            'y': details.globalPosition.dy,
+          },
+        ),
+        child: tappable,
+      );
+    }
     if (onDrag.isEmpty &&
         onDragEnd.isEmpty &&
         onPointerDown.isEmpty &&
@@ -975,12 +995,17 @@ class SvgIcon extends StatelessWidget {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
     // Material Icons ship with Flutter; use their bundled glyph offline.
-    if (icon is MaterialIcon && icon.codepoint > 0) {
-      return Icon(
-        IconData(icon.codepoint, fontFamily: icon.fontFamily),
-        size: dimension,
-        color: iconColor,
-      );
+    // The editor stores Google's codepoints (fonts.google.com/icons), which
+    // differ from those of Flutter's font, so the glyph is found by name.
+    if (icon case final MaterialIcon material) {
+      final int? codepoint = flutterMaterialCodepoint(material);
+      if (codepoint != null) {
+        return Icon(
+          IconData(codepoint, fontFamily: 'MaterialIcons'),
+          size: dimension,
+          color: iconColor,
+        );
+      }
     }
 
     final url = icon.toSvgUrl(
@@ -1295,4 +1320,11 @@ class _PulseOpacityState extends State<PulseOpacity>
     ),
     child: widget.child,
   );
+}
+
+/// The codepoint of [icon]'s glyph in Flutter's bundled MaterialIcons font,
+/// looked up by its name and style; null for an icon Flutter doesn't have.
+int? flutterMaterialCodepoint(MaterialIcon icon) {
+  final String styled = icon.styledName;
+  return flutterIconsDataMap[flutterIconNames[styled] ?? styled];
 }
