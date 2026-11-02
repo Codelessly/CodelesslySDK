@@ -31,9 +31,9 @@ import 'scoped_values.dart';
 /// * [fontSize] (number, logical pixels): the size of every span of a text
 ///   node, e.g. a counter that grows past 99: `${= count > 99 ? 28 : 36}`.
 ///   Line heights and letter spacings given in percent scale with it.
-/// * [textDecoration] (`strikethrough`, `underline`, `overline`, `none`, or
-///   a bool for strikethrough): the decoration of every span of a text
-///   node, e.g. a move that was wrong struck through.
+/// * [textDecoration] (`none`, `underline`, `overline`, `strikethrough`
+///   or `lineThrough`): the decoration of every span of a text node, e.g.
+///   a done checklist item struck through.
 /// * [icon] (string): the name of the icon an icon node shows, in the
 ///   naming of its icon model (`star`, `star_border`, ...). Its family and
 ///   style stay. An icon model JSON map replaces the icon as a whole.
@@ -71,7 +71,7 @@ abstract final class StyleBindings {
   /// The font size of every span of a text node.
   static const String fontSize = 'fontSize';
 
-  /// See the class documentation.
+  /// The decoration of every span of a text node.
   static const String textDecoration = 'textDecoration';
 
   /// The name of the icon an icon node shows.
@@ -222,7 +222,9 @@ abstract final class StyleBindings {
         value<Object>(textDecoration),
       );
       if (decoration != null &&
-          node.textMixedProps.any((prop) => prop.textDecoration != decoration)) {
+          node.textMixedProps.any(
+            (prop) => prop.textDecoration != decoration,
+          )) {
         final List spans =
             patch['textMixedProps'] as List? ??
             [for (final prop in node.textMixedProps) prop.toJson()];
@@ -251,22 +253,6 @@ abstract final class StyleBindings {
       }
     }
   }
-
-  /// A text decoration from a bound value: its name, or a bool for
-  /// strikethrough. Null for anything else.
-  static TextDecorationEnum? parseTextDecoration(Object? value) =>
-      switch (value) {
-        bool b => b ? TextDecorationEnum.strikethrough : TextDecorationEnum.none,
-        String s => TextDecorationEnum.values.firstWhereOrNull(
-          (d) => d.name.toLowerCase() == s.trim().toLowerCase(),
-        ) ?? switch (s.trim()) {
-          'true' => TextDecorationEnum.strikethrough,
-          'false' => TextDecorationEnum.none,
-          'lineThrough' => TextDecorationEnum.strikethrough,
-          _ => null,
-        },
-        _ => null,
-      };
 
   static List<Effect> _effects(
     List<Effect> effects,
@@ -326,6 +312,24 @@ abstract final class StyleBindings {
     } catch (_) {
       return null;
     }
+  }
+
+  /// A text decoration from a binding's value: a [TextDecorationEnum] name
+  /// (`lineThrough` for `strikethrough` too), or null.
+  static TextDecorationEnum? parseTextDecoration(Object? value) {
+    if (value is TextDecorationEnum) return value;
+    // A bool strikes through: `${= m.wrong}`.
+    if (value is bool) {
+      return value ? TextDecorationEnum.strikethrough : TextDecorationEnum.none;
+    }
+    if (value is! String) return null;
+    final String name = value.trim();
+    if (name == 'true') return TextDecorationEnum.strikethrough;
+    if (name == 'false') return TextDecorationEnum.none;
+    if (name == 'lineThrough' || name == 'line-through') {
+      return TextDecorationEnum.strikethrough;
+    }
+    return TextDecorationEnum.values.asNameMap()[name];
   }
 
   /// The font weight [value] names: a number from 100 to 900 (rounded to the
