@@ -1066,6 +1066,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
               )
             : '',
         onTick: onTick,
+        isShown: () => mounted && (ModalRoute.of(context)?.isCurrent ?? true),
       );
       _clocks.add((clock, onTick));
       // The condition is checked when what it reads changes, not only on
