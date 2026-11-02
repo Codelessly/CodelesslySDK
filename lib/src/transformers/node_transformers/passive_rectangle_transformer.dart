@@ -220,10 +220,15 @@ Widget decorateWithShadows({
           ),
     child: child,
   );
-  // Only a rounded box has spread shadows here, so it has a radius.
-  if (spread.isEmpty) return box;
+  // Always a CustomPaint, painting nothing without spread shadows: a ring
+  // that comes and goes (a focused state) must not change the tree, or
+  // everything inside is rebuilt from scratch and a text field in the box
+  // loses focus as it gains it. Only a rounded box has spread shadows here,
+  // so it has a radius.
   return CustomPaint(
-    painter: SpreadShadowPainter(shadows: spread, borderRadius: borderRadius!),
+    painter: spread.isEmpty
+        ? null
+        : SpreadShadowPainter(shadows: spread, borderRadius: borderRadius!),
     child: box,
   );
 }
@@ -344,10 +349,11 @@ List<Widget> wrapWithPadding(
 }) {
   if (children.isEmpty || !applyPadding) return children;
 
-  final EdgeInsets resolvedPadding =
-      node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
+  // Directional, so padding mirrors in a right-to-left layout.
+  final EdgeInsetsDirectional resolvedPadding =
+      node.innerBoxLocal.edgeInsets.flutterEdgeInsetsDirectional;
 
-  if (resolvedPadding == EdgeInsets.zero) {
+  if (resolvedPadding == EdgeInsetsDirectional.zero) {
     return children;
   }
 
@@ -384,8 +390,9 @@ List<Widget> wrapWithPaddingAndScroll(
 }) {
   if (children.isEmpty) return children;
 
-  final EdgeInsets resolvedPadding =
-      node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
+  // Directional, so padding mirrors in a right-to-left layout.
+  final EdgeInsetsDirectional resolvedPadding =
+      node.innerBoxLocal.edgeInsets.flutterEdgeInsetsDirectional;
 
   if (node is FrameNode && node.isScrollable) {
     // The content reaches the farthest child along the scroll axis, and at
@@ -551,6 +558,8 @@ Gradient? retrieveGradient(PaintModel paint) {
       );
     } else if (paint.type == PaintType.gradientRadial) {
       return RadialGradient(
+        center: Alignment(paint.gradientCenterX, paint.gradientCenterY),
+        radius: paint.gradientRadius,
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
@@ -560,6 +569,7 @@ Gradient? retrieveGradient(PaintModel paint) {
       );
     } else if (paint.type == PaintType.gradientAngular) {
       return SweepGradient(
+        center: Alignment(paint.gradientCenterX, paint.gradientCenterY),
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
@@ -828,6 +838,9 @@ List<Widget> buildFills(
   return raster.reversed.toList();
 }
 
+bool _hasChildren(GeometryMixin node) =>
+    node is ChildrenMixin && (node as ChildrenMixin).children.isNotEmpty;
+
 Widget wrapFillWithPositioned({
   required GeometryMixin node,
   required Widget fill,
@@ -838,8 +851,12 @@ Widget wrapFillWithPositioned({
   PaintType.gradientRadial ||
   PaintType.gradientAngular ||
   PaintType.gradientDiamond => Positioned.fill(child: fill),
+  // A node that hugs its size and has nothing else in it takes the image's
+  // size (a `Positioned` with no offsets sizes the stack). A node with
+  // children hugs them, and the image fills it behind them, as at design
+  // time: otherwise every card of a list would be as tall as its texture.
   PaintType.image =>
-    node.isHorizontalWrap || node.isVerticalWrap
+    (node.isHorizontalWrap || node.isVerticalWrap) && !_hasChildren(node)
         ? Positioned(child: fill)
         : Positioned.fill(child: fill),
   PaintType.emoji => fill,
@@ -977,6 +994,7 @@ Widget buildFill(
           child: child,
         );
       }
+      child = tintImage(paint, child);
       if (modifiedOpacity != 1) {
         child = Opacity(opacity: modifiedOpacity, child: child);
       }
@@ -993,6 +1011,16 @@ Widget buildFill(
       return const SizedBox.shrink();
   }
 }
+
+/// [image] drawn with [paint]'s image tint: every pixel in that one color,
+/// keeping its transparency. Unchanged without a tint.
+Widget tintImage(PaintModel paint, Widget image) => switch (paint.imageTint) {
+  null => image,
+  final ColorRGBA tint => ColorFiltered(
+    colorFilter: ColorFilter.mode(tint.toFlutterColor(), BlendMode.srcIn),
+    child: image,
+  ),
+};
 
 /// A color matrix that scales color saturation by [saturation]: 1 keeps the
 /// colors, 0 leaves grey at each pixel's luminance (Rec. 709 weights).
@@ -1056,7 +1084,7 @@ class ImageFillPlaceholder extends StatelessWidget {
         color: const Color(0xFFE9ECEF),
         borderRadius: borderRadius,
       ),
-      child: LayoutBuilder(
+      child: IntrinsicSafeLayoutBuilder(
         builder: (context, constraints) {
           final double side = constraints.biggest.shortestSide;
           if (!side.isFinite || side < 12) return const SizedBox.expand();

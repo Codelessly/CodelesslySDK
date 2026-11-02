@@ -84,4 +84,43 @@ void main() {
     );
     expect(find.byType(PulseOpacity), findsNothing);
   });
+
+  testWidgets('a node hidden by a binding stops its pulse from ticking', (
+    tester,
+  ) async {
+    final node = TextNode(
+      id: 'glow',
+      name: 'Glow',
+      basicBoxLocal: NodeBox(0, 0, 100, 20),
+      data: 'Fits',
+      variables: {'visible': r'${= 1 > 2}'},
+    )..pulse = const PulseModel(minOpacity: 0.5, durationMillis: 1000);
+    final registry = NodeRegistry()..setNodes({node.id: node});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: CodelesslyContext.empty(),
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => manager.buildWidgetFromNode(
+              node,
+              context,
+              settings: const WidgetBuildSettings(debugLabel: 'test'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(PulseOpacity, skipOffstage: false), findsOneWidget);
+    final Iterable<TickerMode> modes = tester.widgetList<TickerMode>(
+      find.ancestor(
+        of: find.byType(PulseOpacity, skipOffstage: false),
+        matching: find.byType(TickerMode, skipOffstage: false),
+      ),
+    );
+    expect(modes.any((mode) => !mode.enabled), isTrue);
+  });
 }

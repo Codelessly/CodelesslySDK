@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../functions/functions_repository.dart';
 import '../utils/extensions.dart';
 import '../utils/material_icon_versions.dart';
 import 'transformers.dart';
@@ -361,7 +362,12 @@ String? getSliderLabel(SliderNode node, double value) {
 MultiSourceIconModel iconWithName(MultiSourceIconModel base, String? name) {
   final String key = (name ?? '').trim().toLowerCase();
   if (!RegExp(r'^[a-z0-9_]+$').hasMatch(key)) return base;
-  MaterialIconStyle style = MaterialIconStyle.filled;
+  // A bare name keeps the node's style (a bound `circle` on an outlined
+  // circle stays outlined); a suffix (`_outlined`...) sets it.
+  final IconModel? current = base.icon;
+  MaterialIconStyle style = current is MaterialIcon
+      ? current.style
+      : MaterialIconStyle.filled;
   String iconName = key;
   for (final (String suffix, MaterialIconStyle suffixStyle) in const [
     ('_outlined', MaterialIconStyle.outlined),
@@ -704,7 +710,7 @@ bool isCustomPositionRequiredForImage(PaintModel paint, SizeC nodeSize) {
 /// design size: a flexible Row/Column that scrolls.
 Widget wrapWithPaddedScrollable({
   required ScrollableMixin node,
-  EdgeInsets? padding,
+  EdgeInsetsGeometry? padding,
   Clip? clipBehavior,
   bool fillViewport = false,
   bool flexContent = false,
@@ -744,7 +750,7 @@ Widget wrapWithPaddedScrollable({
 /// size once the content scrolls.
 Widget buildScrollView({
   required ScrollableMixin node,
-  EdgeInsets? padding,
+  EdgeInsetsGeometry? padding,
   Clip? clipBehavior,
   bool fillViewport = false,
   bool flexContent = false,
@@ -762,8 +768,8 @@ Widget buildScrollView({
     clipBehavior: clipBehavior ?? Clip.hardEdge,
     child: content,
   );
-  if (!fillViewport && !flexContent) return scrollView(child);
-  return LayoutBuilder(
+  if (!fillViewport && !flexContent) return _onScroll(node, scrollView(child));
+  return _onScroll(node, LayoutBuilder(
     builder: (BuildContext context, BoxConstraints constraints) {
       final double extent = vertical
           ? constraints.maxHeight - (padding?.vertical ?? 0)
@@ -777,6 +783,44 @@ Widget buildScrollView({
         ),
       );
     },
+  ));
+}
+
+/// Runs [node]'s [TriggerType.scroll] reactions on every scroll update of
+/// [scrollView] itself (not of scroll views inside it), with
+/// `${result.offset}`, `${result.max}` and `${result.fraction}`.
+Widget _onScroll(ScrollableMixin node, Widget scrollView) {
+  if (node is! ReactionMixin) return scrollView;
+  final List<Reaction> reactions = (node as ReactionMixin).reactions
+      .where((Reaction reaction) => reaction.trigger.type == TriggerType.scroll)
+      .toList();
+  if (reactions.isEmpty) return scrollView;
+  return Builder(
+    builder: (BuildContext context) =>
+        NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification notification) {
+            if (notification.depth != 0 ||
+                notification is! ScrollUpdateNotification) {
+              return false;
+            }
+            final ScrollMetrics metrics = notification.metrics;
+            final double max = metrics.maxScrollExtent;
+            FunctionsRepository.triggerAction(
+              context,
+              TriggerType.scroll,
+              reactions: reactions,
+              result: <String, Object?>{
+                'offset': metrics.pixels,
+                'max': max,
+                'fraction': max <= 0
+                    ? 0.0
+                    : (metrics.pixels / max).clamp(0.0, 1.0),
+              },
+            );
+            return false;
+          },
+          child: scrollView,
+        ),
   );
 }
 

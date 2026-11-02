@@ -43,7 +43,12 @@ class TextUtils {
       characters,
       node: node,
       color:
-          boundTextColor(context, node, variablesOverrides) ??
+          boundTextColor(
+            context,
+            node,
+            variablesOverrides,
+            preview: replaceVariableWithSymbol,
+          ) ??
           retrievePropColor(prop),
       fontSize: prop.fontSize,
       letterSpacing: prop.letterSpacing,
@@ -251,10 +256,13 @@ class TextUtils {
     final Color? textColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
       textNode,
       'textColor',
-      scopedValues: ScopedValues.of(
-        context,
-        variablesOverrides: variablesOverrides,
-      ),
+      // On the design canvas, the editor's preview values, as the text
+      // itself reads them.
+      scopedValues:
+          (replaceVariablesWithSymbol
+              ? VariablePreview.scopeOf(textNode, context: context)
+              : null) ??
+          ScopedValues.of(context, variablesOverrides: variablesOverrides),
     )?.toFlutterColor();
 
     return Text.rich(
@@ -263,7 +271,11 @@ class TextUtils {
             ? spans
             : [for (final span in spans) recolorSpan(span, textColor)],
       ),
-      textAlign: textNode.textAlignHorizontal.toFlutter(),
+      textAlign: textAlignOf(
+        textNode,
+        context,
+        variablesOverrides: variablesOverrides,
+      ).toFlutter(),
       maxLines: textNode.maxLines,
       overflow: textNode.overflow.flutterOverflow,
       softWrap: textNode.softWrap,
@@ -271,6 +283,30 @@ class TextUtils {
           ? null
           : TextScaler.linear(textNode.textScaleFactor!),
     );
+  }
+
+  /// [node]'s horizontal text alignment: its `textAlign` binding (`left`,
+  /// `center`, `right`, `start`, `end`, `justified`), e.g. a
+  /// transliteration that stays left to right but sits at the interface's
+  /// start edge with `${= rtl ? 'right' : 'left'}`, else its own setting.
+  static TextAlignHorizontalEnum textAlignOf(
+    TextNode node,
+    BuildContext context, {
+    List<VariableData>? variablesOverrides,
+  }) {
+    if (node.variables['textAlign'] == null) return node.textAlignHorizontal;
+    final String? bound = PropertyValueDelegate.getPropertyValue<String>(
+      node,
+      'textAlign',
+      scopedValues:
+          VariablePreview.scopeOf(node, context: context) ??
+          ScopedValues.of(context, variablesOverrides: variablesOverrides),
+    )?.trim();
+    final String? name = bound == 'justify' ? 'justified' : bound;
+    return TextAlignHorizontalEnum.values
+            .where((a) => a.name == name)
+            .firstOrNull ??
+        node.textAlignHorizontal;
   }
 
   static Text buildText(
@@ -329,17 +365,18 @@ class TextUtils {
   static Color? boundTextColor(
     BuildContext? context,
     BaseNode? node,
-    List<VariableData> variablesOverrides,
-  ) {
+    List<VariableData> variablesOverrides, {
+    bool preview = false,
+  }) {
     if (context == null || node == null) return null;
     if (node.variables['textColor'] == null) return null;
     return PropertyValueDelegate.getPropertyValue<ColorRGBA>(
       node,
       'textColor',
-      scopedValues: ScopedValues.of(
-        context,
-        variablesOverrides: variablesOverrides,
-      ),
+      // [preview] (the design canvas): the editor's preview values.
+      scopedValues:
+          (preview ? VariablePreview.scopeOf(node, context: context) : null) ??
+          ScopedValues.of(context, variablesOverrides: variablesOverrides),
     )?.toFlutterColor();
   }
 

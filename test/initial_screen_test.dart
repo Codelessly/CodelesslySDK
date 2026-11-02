@@ -45,4 +45,18 @@ void main() {
     expect(CodelesslyWidget.layoutIdForScreen(m, ''), isNull);
     expect(CodelesslyWidget.layoutIdForScreen(m, 'ledger'), isNull);
   });
+
+  test('Locations no screen matches open the screen named Not found', () {
+    final m = model();
+    // Without one, the built-in not-found page shows.
+    expect(CodelesslyRouterDelegate.notFoundLayoutId(m), isNull);
+    for (final String name in ['Not found', '404', 'page_not_found']) {
+      final nf = layoutOf('nf-layout', [
+        canvas('nf', 'nfBody')..name = name,
+        body('nfBody', 'nf', []),
+      ]);
+      m.layouts[nf.id] = nf;
+      expect(CodelesslyRouterDelegate.notFoundLayoutId(m), 'nf-layout');
+    }
+  });
 }
