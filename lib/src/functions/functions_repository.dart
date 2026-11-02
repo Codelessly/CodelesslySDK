@@ -1026,7 +1026,12 @@ class FunctionsRepository {
             gap: anchorGap,
             offset: anchorOffset,
             barrierDismissible: barrierDismissible,
-            barrierColor: barrierColor,
+            // An adaptive menu tints the screen behind its sheet on phones;
+            // anchored to its trigger on wider screens it is a popover
+            // menu, which leaves the screen as it is.
+            barrierColor: presentation == DialogPresentation.adaptive
+                ? Colors.transparent
+                : barrierColor,
             routeSettings: routeSettings,
             builder: (context) => ActionChainOpener(
               openerHosts: openerHosts,
