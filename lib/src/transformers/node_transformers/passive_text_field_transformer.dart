@@ -393,15 +393,29 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
     Widget field = fillsHeight && oneLine
         ? LayoutBuilder(
-            builder: (context, constraints) => buildField(
-              constraints.hasBoundedHeight
-                  ? decoration.copyWith(
-                      constraints: BoxConstraints.tightFor(
-                        height: constraints.maxHeight,
-                      ),
-                    )
-                  : decoration,
-            ),
+            builder: (context, constraints) {
+              // A collapsed decoration has no box of its own to fill, so the
+              // line would sit at the top: place it by the field's vertical
+              // alignment instead.
+              if (decoration.isCollapsed ?? false) {
+                return Align(
+                  alignment: Alignment(
+                    -1,
+                    properties.textAlignVertical.flutterTextAlignVertical.y,
+                  ),
+                  child: buildField(decoration),
+                );
+              }
+              return buildField(
+                constraints.hasBoundedHeight
+                    ? decoration.copyWith(
+                        constraints: BoxConstraints.tightFor(
+                          height: constraints.maxHeight,
+                        ),
+                      )
+                    : decoration,
+              );
+            },
           )
         : buildField(decoration);
 
