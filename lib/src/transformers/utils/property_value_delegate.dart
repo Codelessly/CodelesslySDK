@@ -344,6 +344,19 @@ class PropertyValueDelegate {
         getVariableValueFromPath<Object>(path, scopedValues: scopedValues),
   );
 
+  /// The expression in [path] when it is a `${...}` path that indexes by a
+  /// variable, such as `${pal[item.statusKey]}` or `${rows[index]}`; null
+  /// for any other path (literal keys like `${a['b']}` or `${a[0]}` stay
+  /// plain paths).
+  static String? _dynamicIndexPath(String path) {
+    final RegExpMatch? match = _dynamicIndexRegex.firstMatch(path.trim());
+    return match?.group(1);
+  }
+
+  static final RegExp _dynamicIndexRegex = RegExp(
+    r'^\$\{\s*([A-Za-z_][\w.]*\[\s*[A-Za-z_][\w.]*\s*\][\w.\[\]]*)\s*\}$',
+  );
+
   /// Retrieves the value of a variable [path]. This also supports predefined
   /// variables such as data, index, and item.
   ///
@@ -358,7 +371,11 @@ class PropertyValueDelegate {
     String path, {
     required ScopedValues scopedValues,
   }) {
-    final String? expression = FormulaEvaluator.exactExpression(path);
+    // A path that indexes by another variable, e.g. `${pal[item.statusKey]}`,
+    // is read as the formula `pal[item.statusKey]`: a plain path only takes
+    // literal keys and indices.
+    final String? expression =
+        FormulaEvaluator.exactExpression(path) ?? _dynamicIndexPath(path);
     if (expression != null) {
       final Object? value = evaluateFormula(
         expression,
