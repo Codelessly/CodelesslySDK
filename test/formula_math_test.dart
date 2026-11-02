@@ -40,9 +40,9 @@ void main() {
     });
 
     test('mix blends colors like Color.lerp', () {
-      expect(eval("mix('#FFFFFF', '#000000', 0.25)"), '#FFBFBFBF');
+      expect(eval("mix('#FFFFFF', '#000000', 0.25)"), '#BFBFBF');
       // A pencil washed at 28% over blueprint paper.
-      expect(eval("mix('#0E2A57', '#FFB547', 0.28)"), '#FF515153');
+      expect(eval("mix('#0E2A57', '#FFB547', 0.28)"), '#515153');
       expect(eval("mix('#00000000', '#FF000000', 0.5)"), '#80000000');
       expect(eval("mix('#123456', 'nope', 0.5)"), isNull);
     });
