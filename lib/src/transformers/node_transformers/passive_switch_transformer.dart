@@ -187,53 +187,85 @@ class TransformerSwitch extends StatelessWidget {
       ? const WidgetStatePropertyAll<Icon?>(Icon(null))
       : null;
 
+  /// The size of the track a [Switch] draws under [theme]: 52×32 in
+  /// Material 3, 33×14 in Material 2.
+  static Size trackSizeOf(ThemeData theme) =>
+      theme.useMaterial3 ? const Size(52, 32) : const Size(33, 14);
+
   @override
   Widget build(BuildContext context) {
-    final scale = node.basicBoxLocal.width / kSwitchDefaultWidth;
     final SwitchProperties properties = resolvedProperties(
       node,
       scopedValues ??
           ScopedValues.of(context, variablesOverrides: variablesOverrides),
     );
+    final bool fillTrack = properties.fillTrack;
 
-    return AdaptiveNodeBox(
-      node: node,
-      child: Transform.scale(
-        scale: scale,
-        child: Theme(
-          data: Theme.of(context).copyWith(),
-          child: Switch(
-            // Its toggle animates the thumb and the track colours; where
-            // tickers are off (the design canvas, its captures) it could
-            // never move, so a new switch shows the current value.
-            key: TickerMode.valuesOf(context).enabled
-                ? null
-                : ValueKey<bool>(value),
-            value: value,
-            onChanged: (value) => onChanged?.call(context, value),
-            autofocus: properties.autofocus,
-            activeTrackColor: properties.activeTrackColor.toFlutterColor(),
-            inactiveTrackColor: properties.inactiveTrackColor
-                .toFlutterColor(),
-            activeThumbColor: properties.activeThumbColor.toFlutterColor(),
-            inactiveThumbColor: properties.inactiveThumbColor
-                .toFlutterColor(),
-            hoverColor: properties.hoverColor.toFlutterColor(),
-            focusColor: properties.focusColor.toFlutterColor(),
-            splashRadius: properties.splashRadius,
-            trackOutlineColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return properties.activeTrackBorderColor?.toFlutterColor();
-              }
-              return properties.inactiveTrackBorderColor?.toFlutterColor();
-            }),
-            trackOutlineWidth: WidgetStateProperty.all(
-              properties.trackOutlineWidth,
+    final Widget toggle = Theme(
+      data: Theme.of(context).copyWith(),
+      child: Switch(
+        // Its toggle animates the thumb and the track colours; where
+        // tickers are off (the design canvas, its captures) it could
+        // never move, so a new switch shows the current value.
+        key: TickerMode.valuesOf(context).enabled
+            ? null
+            : ValueKey<bool>(value),
+        value: value,
+        onChanged: (value) => onChanged?.call(context, value),
+        autofocus: properties.autofocus,
+        activeTrackColor: properties.activeTrackColor.toFlutterColor(),
+        inactiveTrackColor: properties.inactiveTrackColor.toFlutterColor(),
+        activeThumbColor: properties.activeThumbColor.toFlutterColor(),
+        inactiveThumbColor: properties.inactiveThumbColor.toFlutterColor(),
+        hoverColor: properties.hoverColor.toFlutterColor(),
+        focusColor: properties.focusColor.toFlutterColor(),
+        splashRadius: properties.splashRadius,
+        trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return properties.activeTrackBorderColor?.toFlutterColor();
+          }
+          return properties.inactiveTrackBorderColor?.toFlutterColor();
+        }),
+        trackOutlineWidth: WidgetStateProperty.all(
+          properties.trackOutlineWidth,
+        ),
+        thumbIcon: thumbIconOf(properties),
+        // A track that fills the node has no margin around it: no padding
+        // and no tap target height beyond the switch's own.
+        padding: fillTrack ? EdgeInsets.zero : null,
+        materialTapTargetSize: fillTrack
+            ? MaterialTapTargetSize.shrinkWrap
+            : null,
+      ),
+    );
+
+    if (fillTrack) {
+      // The switch, now as wide as its track and centring it vertically in
+      // its collapsed height, is cut to the track's box (its thumb, hover
+      // and focus rings still paint past it) and that box is stretched to
+      // the node's bounds.
+      return AdaptiveNodeBox(
+        node: node,
+        child: FittedBox(
+          fit: BoxFit.fill,
+          child: SizedBox.fromSize(
+            size: trackSizeOf(Theme.of(context)),
+            child: OverflowBox(
+              minWidth: 0,
+              minHeight: 0,
+              maxWidth: double.infinity,
+              maxHeight: double.infinity,
+              child: toggle,
             ),
-            thumbIcon: thumbIconOf(properties),
           ),
         ),
-      ),
+      );
+    }
+
+    final scale = node.basicBoxLocal.width / kSwitchDefaultWidth;
+    return AdaptiveNodeBox(
+      node: node,
+      child: Transform.scale(scale: scale, child: toggle),
     );
   }
 }
