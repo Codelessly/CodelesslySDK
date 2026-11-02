@@ -204,4 +204,40 @@ void main() {
       expect(menuRect(tester).width, 620);
     },
   );
+
+  // Switchboard's menus are popovers on desktop with nothing dimmed behind
+  // them, and sheets over a scrim on phones, from one adaptive action.
+  testWidgets('an adaptive menu dims behind its sheet, not its popover', (
+    tester,
+  ) async {
+    Color? barrier() => tester
+        .widgetList<ModalBarrier>(find.byType(ModalBarrier))
+        .last
+        .color;
+    await open(
+      tester,
+      DialogPlacement.belowStart,
+      anchor: DialogAnchor.trigger,
+      presentation: DialogPresentation.adaptive,
+      size: const Size(1440, 900),
+    );
+    expect(barrier(), anyOf(isNull, Colors.transparent));
+  });
+
+  testWidgets('an adaptive menu sheet keeps its barrier color', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      DialogPlacement.belowStart,
+      anchor: DialogAnchor.trigger,
+      presentation: DialogPresentation.adaptive,
+    );
+    final Color? color = tester
+        .widgetList<ModalBarrier>(find.byType(ModalBarrier))
+        .last
+        .color;
+    expect(color, isNotNull);
+    expect(color!.a, greaterThan(0));
+  });
 }
