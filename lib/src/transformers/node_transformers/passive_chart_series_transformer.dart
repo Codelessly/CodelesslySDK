@@ -190,6 +190,43 @@ String compactNumber(num v) => v.abs() >= 10000
     ? '${(v / 1000).toStringAsFixed(1)}k'
     : (v == v.roundToDouble() ? v.round().toString() : v.toStringAsFixed(1));
 
+/// A y-axis label: [prefix] and [suffix] around the compact number, with
+/// the minus sign in front (`−$5k`).
+String yAxisLabel(num v, String prefix, String suffix) {
+  final String number = compactNumber(v.abs());
+  return '${v < 0 ? '−' : ''}$prefix$number$suffix';
+}
+
+/// A y domain (low, high, step) from just under [min] to just over [max],
+/// on round steps, for line charts that don't start at 0.
+(double, double, double) fittedYDomain(double min, double max, int lines) {
+  final double pad = (max - min) * 0.05;
+  final (_, double step) = niceAxis(max - min + pad * 2, lines);
+  final double lo = ((min - pad) / step).floorToDouble() * step;
+  double hi = lo + step * lines;
+  while (hi < max) {
+    hi += step;
+  }
+  return (lo, hi, step);
+}
+
+/// The path through [pts]: straight segments, or with [curved] a smooth
+/// curve that passes through every point without overshooting it
+/// (control points share the neighbouring points' heights).
+Path seriesPath(List<Offset> pts, {bool curved = false}) {
+  final Path path = Path()..moveTo(pts.first.dx, pts.first.dy);
+  for (int i = 1; i < pts.length; i++) {
+    final Offset a = pts[i - 1], b = pts[i];
+    if (curved) {
+      final double mx = (a.dx + b.dx) / 2;
+      path.cubicTo(mx, a.dy, mx, b.dy, b.dx, b.dy);
+    } else {
+      path.lineTo(b.dx, b.dy);
+    }
+  }
+  return path;
+}
+
 /// Resolves series-chart axis label fonts, including Google Fonts.
 TextStyle _chartSeriesLabelStyle({
   required String? family,
@@ -239,8 +276,9 @@ class ChartSeriesPainter extends CustomPainter {
     final double bottom = props.showXAxis ? _xAxisHeight : 0;
     return Rect.fromLTRB(
       left,
-      props.chartType == ChartType.line ? 6 : 0,
-      size.width - (props.chartType == ChartType.line ? 6 : 0),
+      props.chartType == ChartType.line ? (props.plotInset ?? 6) : 0,
+      size.width -
+          (props.chartType == ChartType.line ? (props.plotInset ?? 6) : 0),
       size.height - bottom,
     );
   }
@@ -288,6 +326,8 @@ class ChartSeriesPainter extends CustomPainter {
   /// The y domain: min and max.
   (double, double, double) _yDomain() {
     double maxV = 0, minV = 0;
+    // The lowest value plotted, for [ChartProperties.fitMinY].
+    double dataMin = double.infinity;
     final groups = _groups;
     for (final item in data) {
       for (final group in groups) {
@@ -306,11 +346,20 @@ class ChartSeriesPainter extends CustomPainter {
         if (v != null) {
           maxV = math.max(maxV, v);
           minV = math.min(minV, v);
+          dataMin = math.min(dataMin, v);
         }
       }
     }
     for (final line in props.referenceLines) {
       maxV = math.max(maxV, line.value);
+    }
+    if (props.minY == null &&
+        props.maxY == null &&
+        props.fitMinY &&
+        props.chartType == ChartType.line &&
+        dataMin.isFinite &&
+        maxV > dataMin) {
+      return fittedYDomain(dataMin, maxV, math.max(1, props.gridLines));
     }
     final double lo = props.minY ?? minV;
     if (props.maxY != null) {
@@ -479,9 +528,16 @@ class ChartSeriesPainter extends CustomPainter {
         if (props.showYAxis) {
           _label(
             canvas,
-            compactNumber(v),
+            yAxisLabel(v, props.yLabelPrefix, props.yLabelSuffix),
             Offset(plot.left - 8, gy),
             align: TextAlign.right,
+            style: props.yAxisFontFamily == null
+                ? null
+                : _chartSeriesLabelStyle(
+                    family: props.yAxisFontFamily,
+                    size: props.axisFontSize,
+                    color: props.axisLabelColor.toFlutterColor(),
+                  ),
           );
         }
       }
@@ -616,10 +672,7 @@ class ChartSeriesPainter extends CustomPainter {
             Offset(cx(i), y(v)),
       ];
       if (pts.length < 2) continue;
-      final Path area = Path()..moveTo(pts.first.dx, pts.first.dy);
-      for (final Offset p in pts.skip(1)) {
-        area.lineTo(p.dx, p.dy);
-      }
+      final Path area = seriesPath(pts, curved: s.curved);
       final Color color = s.color.toFlutterColor();
       if (s.fillTo != null) {
         final List<Offset> other = [
@@ -677,17 +730,16 @@ class ChartSeriesPainter extends CustomPainter {
           _dashedLine(canvas, pts[i], pts[i + 1], p, dash: 4, gap: 4);
         }
       } else if (pts.length > 1) {
-        final Path path = Path()..moveTo(pts.first.dx, pts.first.dy);
-        for (final Offset pt in pts.skip(1)) {
-          path.lineTo(pt.dx, pt.dy);
-        }
-        canvas.drawPath(path, p);
+        canvas.drawPath(seriesPath(pts, curved: s.curved), p);
       }
       if (s.endDot) {
         canvas.drawCircle(
           pts.last,
           s.strokeWidth + 2.5,
-          Paint()..color = Colors.black.withValues(alpha: 0.85),
+          Paint()
+            ..color =
+                s.endDotHaloColor?.toFlutterColor() ??
+                Colors.black.withValues(alpha: 0.85),
         );
         canvas.drawCircle(
           pts.last,
