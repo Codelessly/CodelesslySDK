@@ -58,6 +58,10 @@ class FrameClock extends ChangeNotifier {
   /// The clock every frame-bound widget shares.
   static final FrameClock instance = FrameClock._();
 
+  /// Whether the clock ticks. An editor turns it off: its design canvas
+  /// shows a still frame instead of redrawing every frame.
+  static bool enabled = true;
+
   int _listeners = 0;
   bool _scheduled = false;
 
@@ -75,7 +79,12 @@ class FrameClock extends ChangeNotifier {
   }
 
   void _schedule() {
-    if (_scheduled || _listeners == 0 || FormulaClock.pinned != null) return;
+    if (_scheduled ||
+        _listeners == 0 ||
+        !enabled ||
+        FormulaClock.pinned != null) {
+      return;
+    }
     _scheduled = true;
     SchedulerBinding.instance.scheduleFrameCallback((_) {
       _scheduled = false;
