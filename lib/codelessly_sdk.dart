@@ -52,6 +52,7 @@ export 'src/ui/codelessly_route.dart';
 export 'src/ui/codelessly_widget.dart';
 export 'src/ui/codelessly_widget_controller.dart';
 export 'src/ui/feedback_theme.dart';
+export 'src/ui/material_localizations_scope.dart';
 export 'src/ui/related_documents.dart';
 export 'src/ui/show_more.dart';
 export 'src/ui/zoomable_box.dart';
