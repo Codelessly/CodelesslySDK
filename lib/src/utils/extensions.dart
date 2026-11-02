@@ -2433,5 +2433,8 @@ extension TransitionCurveExt on TransitionCurve {
     TransitionCurve.easeOut => Curves.easeOut,
     TransitionCurve.easeInOut => Curves.easeInOut,
     TransitionCurve.easeOutCubic => Curves.easeOutCubic,
+    TransitionCurve.easeOutBack => Curves.easeOutBack,
+    TransitionCurve.easeInOutCubic => Curves.easeInOutCubic,
+    TransitionCurve.step => const Threshold(0.5),
   };
 }
