@@ -152,6 +152,41 @@ class PassiveListViewWidget extends StatelessWidget {
   /// The list is sized by its own fits: fixed takes its design size, expanded
   /// fills a bounded axis, and shrink-wrap hugs (along the scroll direction,
   /// the widest run; across it, the runs).
+  /// How the runs of a wrapping list line up: its `wrapAlignment`
+  /// binding (`start`, `end`, `center`, `spaceBetween`, `spaceAround`,
+  /// `spaceEvenly`), e.g. a phrase written against the UI's direction lined
+  /// up with the UI's start edge, else its wrap alignment setting.
+  WrapAlignment wrapAlignmentOf(BuildContext context) {
+    final String? bound = PropertyValueDelegate.getPropertyValue<String>(
+      node,
+      'wrapAlignment',
+      scopedValues:
+          VariablePreview.scopeOf(node, context: context) ??
+          ScopedValues.of(context),
+    );
+    final MainAxisAlignmentC? named = MainAxisAlignmentC.values
+        .where((a) => a.name == bound?.trim())
+        .firstOrNull;
+    return (named ?? node.properties.wrapAlignment).flutterWrapAlignment;
+  }
+
+  /// The space between items of a wrapping list: its `wrapSpacing`
+  /// binding (a number), e.g. none between the characters of a Japanese
+  /// phrase and a word space elsewhere, else [fallback], its own setting.
+  double wrapSpacingOf(BuildContext context, double fallback) {
+    if (node.variables['wrapSpacing'] == null) return fallback;
+    final num? bound = PropertyValueDelegate.getPropertyValue<num>(
+      node,
+      'wrapSpacing',
+      scopedValues:
+          VariablePreview.scopeOf(node, context: context) ??
+          ScopedValues.of(context),
+    );
+    return bound == null || bound.isNaN
+        ? fallback
+        : math.max(0, bound.toDouble());
+  }
+
   Widget wrappedList(
     BuildContext context,
     int itemCount,
@@ -165,7 +200,8 @@ class PassiveListViewWidget extends StatelessWidget {
       padding: node.padding.flutterEdgeInsets,
       child: Wrap(
         direction: node.scrollDirection.flutterAxis,
-        spacing: listWrapSpacing(node),
+        alignment: wrapAlignmentOf(context),
+        spacing: wrapSpacingOf(context, listWrapSpacing(node)),
         runSpacing: math.max(0, node.properties.runSpacing),
         children: node.reverse ? items.reversed.toList() : items,
       ),
@@ -225,21 +261,25 @@ class PassiveListViewWidget extends StatelessWidget {
     );
   }
 
-  Widget wrapped(bool scrolls, int itemCount, IndexedWidgetBuilder builder) =>
-      WrappedItems(
-        itemCount: itemCount,
-        itemBuilder: builder,
-        direction: node.scrollDirection.flutterAxis,
-        spacing: node.properties.wrapSpacing,
-        runSpacing: node.properties.wrapRunSpacing,
-        alignment: node.properties.wrapAlignment.flutterWrapAlignment,
-        padding: node.padding.flutterEdgeInsets,
-        scrolls: scrolls,
-        physics: node.physics.flutterScrollPhysics(false),
-        keyboardDismissBehavior:
-            node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
-        clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
-      );
+  Widget wrapped(
+    BuildContext context,
+    bool scrolls,
+    int itemCount,
+    IndexedWidgetBuilder builder,
+  ) => WrappedItems(
+    itemCount: itemCount,
+    itemBuilder: builder,
+    direction: node.scrollDirection.flutterAxis,
+    spacing: wrapSpacingOf(context, node.properties.wrapSpacing),
+    runSpacing: node.properties.wrapRunSpacing,
+    alignment: wrapAlignmentOf(context),
+    padding: node.padding.flutterEdgeInsets,
+    scrolls: scrolls,
+    physics: node.physics.flutterScrollPhysics(false),
+    keyboardDismissBehavior:
+        node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
+    clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -368,7 +408,7 @@ class PassiveListViewWidget extends StatelessWidget {
                 // loaded items without paging further.
                 if (node.properties.isWrapping) {
                   final int loaded = snapshot.docs.length;
-                  return wrapped(shrinkWrap, loaded, (context, index) {
+                  return wrapped(context, shrinkWrap, loaded, (context, index) {
                     final doc = snapshot.docs[index];
                     return IndexedItemProvider(
                       key: ValueKey(index),
@@ -615,7 +655,8 @@ class PassiveListViewWidget extends StatelessWidget {
     if (usesScrollableWrap) {
       return box(
         canShrinkWrap: true,
-        (context, scrolls) => wrapped(scrolls, itemCount ?? 0, itemBuilder),
+        (context, scrolls) =>
+            wrapped(context, scrolls, itemCount ?? 0, itemBuilder),
       );
     }
     // A row with a reorder handle (a node whose drag has `reorder`) can be

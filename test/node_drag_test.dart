@@ -21,11 +21,14 @@ void main() {
   late List<Map<String, dynamic>> ends;
   late List<DragValues> seen;
 
+  late List<DragValues> shared;
+
   Widget card({
     DragModel drag = swipeCard,
     bool Function()? isEnabled,
     String id = 'card',
     Key? key,
+    Offset rest = Offset.zero,
   }) => Directionality(
     textDirection: TextDirection.ltr,
     child: MediaQuery(
@@ -40,8 +43,10 @@ void main() {
             nodeId: id,
             drag: drag,
             isEnabled: isEnabled,
+            rest: rest,
             onDismissed: (d) => dismissed.add(d),
             onEnd: ends.add,
+            onValues: shared.add,
             child: Builder(
               builder: (context) {
                 seen.add(DragScope.maybeOf(context)!);
@@ -55,6 +60,7 @@ void main() {
   );
 
   setUp(() {
+    shared = [];
     dismissed = [];
     ends = [];
     seen = [];
@@ -210,5 +216,137 @@ void main() {
       const DragModel(release: DragRelease.stay).canDismiss(DragDirection.left),
       isFalse,
     );
+  });
+
+  testWidgets('a disabled drag can follow a little and reports blocked', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      card(
+        drag: swipeCard.copyWith(disabledFollow: 0.3, shakeWhenDisabled: true),
+        isEnabled: () => false,
+      ),
+    );
+    final gesture = await tester.startGesture(const Offset(100, 150));
+    for (int i = 0; i < 5; i++) {
+      await gesture.moveBy(const Offset(-30, 0));
+    }
+    await tester.pump();
+    // 150px of pointer travel minus the pan slop, at 30%.
+    expect(seen.last.offset.dx, lessThan(-30));
+    expect(seen.last.offset.dx, greaterThan(-46));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(dismissed, isEmpty);
+    expect(ends.last['blocked'], isTrue);
+    expect(seen.last.offset, Offset.zero);
+  });
+
+  testWidgets('shares its live values and spins as it flies off', (
+    tester,
+  ) async {
+    await tester.pumpWidget(card(drag: swipeCard.copyWith(flyOutRotate: 20, rotateFactor: 0)));
+    final gesture = await tester.startGesture(const Offset(100, 150));
+    await gesture.moveBy(const Offset(30, 0));
+    await gesture.moveBy(const Offset(30, 0));
+    await tester.pump();
+    await tester.pump();
+    expect(shared.last.right, greaterThan(0));
+    await gesture.moveBy(const Offset(100, 0));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    final Matrix4 m = tester
+        .widget<Transform>(
+          find.ancestor(of: find.text('front'), matching: find.byType(Transform)),
+        )
+        .transform;
+    final double angle = math.atan2(m.storage[1], m.storage[0]) * 180 / math.pi;
+    // No tilt from the drag here: the turn is the fly-off spin, on its way
+    // to 20° clockwise.
+    expect(angle, greaterThan(1));
+    expect(angle, lessThanOrEqualTo(20));
+    await tester.pumpAndSettle();
+    expect(dismissed, [DragDirection.right]);
+  });
+
+  testWidgets('up and down can have their own threshold', (tester) async {
+    await tester.pumpWidget(card());
+    await tester.timedDrag(
+      find.text('front'),
+      const Offset(0, -100),
+      const Duration(milliseconds: 800),
+    );
+    await tester.pumpAndSettle();
+    // Short of 35% of the height (105).
+    expect(dismissed, isEmpty);
+
+    await tester.pumpWidget(
+      card(drag: swipeCard.copyWith(verticalThreshold: 0.25)),
+    );
+    await tester.timedDrag(
+      find.text('front'),
+      const Offset(0, -100),
+      const Duration(milliseconds: 800),
+    );
+    await tester.pumpAndSettle();
+    // Past 25% (75); sideways still needs 35%.
+    expect(dismissed, [DragDirection.up]);
+    expect(swipeCard.copyWith(verticalThreshold: 0.25).thresholdFor(
+      DragDirection.left,
+    ), 0.35);
+  });
+
+  testWidgets('rests where data puts it and moves when it changes', (
+    tester,
+  ) async {
+    await tester.pumpWidget(card(rest: const Offset(40, 0)));
+    await tester.pump();
+    expect(seen.last.offset, const Offset(40, 0));
+    expect(seen.last.right, closeTo(40 / 70, 0.001));
+    expect(transformOf(tester)!.getTranslation().x, 40);
+
+    await tester.pumpWidget(card());
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(seen.last.offset.dx, inExclusiveRange(-20, 40));
+    await tester.pumpAndSettle();
+    expect(seen.last.offset, Offset.zero);
+  });
+
+  testWidgets('an action shakes it once and it settles back', (tester) async {
+    await tester.pumpWidget(card(id: 'shy'));
+    await NodeDrag.control('shy', DragCommand.shake, DragDirection.right);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
+    expect(seen.last.offset.dx, isNot(0));
+    await tester.pumpAndSettle();
+    expect(seen.last.offset, Offset.zero);
+    expect(dismissed, isEmpty);
+  });
+
+  testWidgets('only the instance actions move shares its values', (
+    tester,
+  ) async {
+    final List<DragValues> top = [], behind = [];
+    Widget instance(int order, List<DragValues> into) => SizedBox(
+      width: 200,
+      height: 200,
+      child: NodeDrag(
+        nodeId: 'stack',
+        drag: swipeCard,
+        order: order,
+        onValues: into.add,
+        child: Text('card $order'),
+      ),
+    );
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(children: [instance(0, top), instance(1, behind)]),
+      ),
+    );
+    await tester.pump();
+    expect(top, isNotEmpty);
+    expect(behind, isEmpty);
   });
 }
