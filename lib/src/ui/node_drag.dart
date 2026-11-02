@@ -115,6 +115,7 @@ class NodeDrag extends StatefulWidget {
     this.onDismissed,
     this.onEnd,
     this.onValues,
+    this.onUpdate,
     this.rest = Offset.zero,
   });
 
@@ -141,8 +142,13 @@ class NodeDrag extends StatefulWidget {
   final void Function(Map<String, dynamic> result)? onEnd;
 
   /// Called with the live values whenever they change (see
-  /// [DragModel.shareAs]).
+  /// [DragModel.shareAs], [DragModel.xVariable] and [DragModel.yVariable]).
   final ValueChanged<DragValues>? onValues;
+
+  /// Called on every move of a drag with `dx`, `dy` (the offset from rest)
+  /// and `deltaX`, `deltaY` (this move): what [TriggerType.drag] reactions
+  /// read.
+  final void Function(Map<String, dynamic> result)? onUpdate;
 
   /// Where the node rests, from where its layout puts it (see
   /// [DragModel.restX]): it springs back here, and a new value moves it
@@ -405,11 +411,18 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
   void _onUpdate(DragUpdateDetails details) {
     if (!_dragging) return;
     _raw += details.delta;
+    final Offset before = _offset;
     setState(
       () => _offset = _blocked
           ? _raw * _model.disabledFollow.clamp(0, 1).toDouble()
           : _resist(_raw),
     );
+    widget.onUpdate?.call({
+      'dx': _offset.dx - widget.rest.dx,
+      'dy': _offset.dy - widget.rest.dy,
+      'deltaX': _offset.dx - before.dx,
+      'deltaY': _offset.dy - before.dy,
+    });
   }
 
   void _onEnd(DragEndDetails details) {
@@ -513,12 +526,30 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
       DragDirection.left || DragDirection.up => -_model.flyOutRotate,
       DragDirection.right || DragDirection.down => _model.flyOutRotate,
     };
-    final Offset target = _offscreen(
-      direction,
-      _size,
-      velocity == null || velocity == Offset.zero ? _offset : velocity,
+    final double? distance = _model.flyOutDistance;
+    final Offset target;
+    if (distance != null) {
+      // A set distance: that many of its own sizes along the direction it
+      // leaves in, keeping where it is across it.
+      final Size size = _size;
+      target = switch (direction) {
+        DragDirection.left => Offset(-distance * size.width, _offset.dy),
+        DragDirection.right => Offset(distance * size.width, _offset.dy),
+        DragDirection.up => Offset(_offset.dx, -distance * size.height),
+        DragDirection.down => Offset(_offset.dx, distance * size.height),
+      };
+    } else {
+      target = _offscreen(
+        direction,
+        _size,
+        velocity == null || velocity == Offset.zero ? _offset : velocity,
+      );
+    }
+    await _animateTo(
+      target,
+      _model.flyOutMs,
+      flutterCurveOf(_model.flyOutCurve),
     );
-    await _animateTo(target, _model.flyOutMs, Curves.easeIn);
     if (!mounted) return;
     setState(() => _dismissed = true);
     await widget.onDismissed?.call(direction);
@@ -616,7 +647,8 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
       });
     }
     Widget child = DragScope(values: current, child: widget.child);
-    if (_offset != Offset.zero || angle != 0) {
+    // A drag that doesn't follow only reports: the node stays put.
+    if (_model.follow && (_offset != Offset.zero || angle != 0)) {
       child = Transform(
         alignment: Alignment(_model.originX, _model.originY),
         transform: Matrix4.translationValues(_offset.dx, _offset.dy, 0)

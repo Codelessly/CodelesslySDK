@@ -88,6 +88,32 @@ class AppConfirmDialog {
     // Read the look where the action runs: the dialog's route sits outside
     // the layout.
     final ResolvedFeedbackTheme theme = FeedbackTheme.of(context);
+    // Colors bound in [ConfirmAction.variables] win over the action's own.
+    final Map<String, Color> bound = ActionColorBindings.resolve(
+      action.variables,
+      scopedValues,
+      keys: ConfirmAction.bindableColors,
+    );
+    Color? color(String key, ColorRGBA? own) =>
+        bound[key] ?? own?.toFlutterColor();
+    TextStyleModel? styled(TextStyleModel? style, String key) {
+      final Color? value = bound[key];
+      if (value == null) return style;
+      return (style ?? const TextStyleModel()).copyWith(
+        color: value.toColorRGBA(),
+      );
+    }
+
+    BorderSide? side(BorderSideModel? model, String key) {
+      final BorderSide? own = model == null ? null : borderSideOf(model);
+      final Color? value = bound[key];
+      if (value == null) return own;
+      return own == null || own == BorderSide.none
+          ? BorderSide(color: value)
+          : own.copyWith(color: value);
+    }
+
+    final Color? barrierColor = color('barrierColor', action.barrierColor);
 
     Widget buildDialog(BuildContext context) => ThemedConfirmDialog(
       theme: theme,
@@ -99,10 +125,23 @@ class AppConfirmDialog {
       confirmLabel: confirmLabel.isEmpty ? 'OK' : confirmLabel,
       cancelLabel: cancelLabel.isEmpty ? 'Cancel' : cancelLabel,
       destructive: action.destructive,
-      backgroundColor: action.backgroundColor?.toFlutterColor(),
-      textColor: action.textColor?.toFlutterColor(),
-      confirmColor: action.confirmColor?.toFlutterColor(),
+      backgroundColor: color('backgroundColor', action.backgroundColor),
+      textColor: color('textColor', action.textColor),
+      confirmColor: color('confirmColor', action.confirmColor),
       cornerRadius: action.cornerRadius,
+      border: side(action.border, 'borderColor'),
+      shadows: action.shadows == null ? null : boxShadowsOf(action.shadows),
+      titleStyle: styled(action.titleStyle, 'titleColor'),
+      messageStyle: styled(action.messageStyle, 'messageColor'),
+      buttonStyle: action.buttonStyle,
+      buttonRadius: action.buttonRadius,
+      buttonBorder: side(action.buttonBorder, 'buttonBorderColor'),
+      buttonShadows: action.buttonShadows == null
+          ? null
+          : boxShadowsOf(action.buttonShadows),
+      confirmTextColor: color('confirmTextColor', action.confirmTextColor),
+      cancelColor: color('cancelColor', action.cancelColor),
+      cancelTextColor: color('cancelTextColor', action.cancelTextColor),
     );
 
     final DialogPresentation presentation = action.presentation.resolveFor(
@@ -115,7 +154,7 @@ class AppConfirmDialog {
           presentation: presentation,
           barrierDismissible: action.barrierDismissible,
           barrierColor:
-              action.barrierColor?.toFlutterColor() ??
+              barrierColor ??
               Theme.of(context).dialogTheme.barrierColor ??
               Colors.black54,
           sheetWidth: action.sheetWidth,
@@ -131,36 +170,8 @@ class AppConfirmDialog {
       context: context,
       useRootNavigator: false,
       barrierDismissible: action.barrierDismissible,
-      barrierColor: action.barrierColor?.toFlutterColor(),
-      builder: (context) => ThemedConfirmDialog(
-        theme: theme,
-        title: title,
-        caption: caption,
-        captionStyle: action.captionStyle,
-        message: message,
-        confirmLabel: confirmLabel.isEmpty ? 'OK' : confirmLabel,
-        cancelLabel: cancelLabel.isEmpty ? 'Cancel' : cancelLabel,
-        destructive: action.destructive,
-        backgroundColor: action.backgroundColor?.toFlutterColor(),
-        textColor: action.textColor?.toFlutterColor(),
-        confirmColor: action.confirmColor?.toFlutterColor(),
-        cornerRadius: action.cornerRadius,
-        border: action.border == null ? null : borderSideOf(action.border!),
-        shadows: action.shadows == null ? null : boxShadowsOf(action.shadows),
-        titleStyle: action.titleStyle,
-        messageStyle: action.messageStyle,
-        buttonStyle: action.buttonStyle,
-        buttonRadius: action.buttonRadius,
-        buttonBorder: action.buttonBorder == null
-            ? null
-            : borderSideOf(action.buttonBorder!),
-        buttonShadows: action.buttonShadows == null
-            ? null
-            : boxShadowsOf(action.buttonShadows),
-        confirmTextColor: action.confirmTextColor?.toFlutterColor(),
-        cancelColor: action.cancelColor?.toFlutterColor(),
-        cancelTextColor: action.cancelTextColor?.toFlutterColor(),
-      ),
+      barrierColor: barrierColor,
+      builder: buildDialog,
     );
     return (confirmed: confirmed ?? false, values: null);
   }

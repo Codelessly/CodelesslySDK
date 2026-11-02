@@ -320,6 +320,13 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   /// route's global data (absent for the platform's transition).
   static const String transitionKey = 'codelessly.transition';
 
+  /// The key of [NavigationAction.transitionMs] in a route's global data.
+  static const String transitionMsKey = 'codelessly.transitionMs';
+
+  /// The key of [NavigationAction.reverseTransitionMs] in a route's global
+  /// data.
+  static const String reverseTransitionMsKey = 'codelessly.reverseTransitionMs';
+
   /// The page of a screen: a [MaterialPage], or a
   /// [CodelesslyTransitionPage] when the screen was opened with another
   /// [NavigationTransition].
@@ -346,6 +353,14 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
       name: name,
       arguments: arguments,
       transition: transition,
+      transitionMs: switch (globalData[transitionMsKey]) {
+        num n => n.toInt(),
+        _ => null,
+      },
+      reverseTransitionMs: switch (globalData[reverseTransitionMsKey]) {
+        num n => n.toInt(),
+        _ => null,
+      },
       child: child,
     );
   }
@@ -718,6 +733,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     Map<String, dynamic> params = const {},
     List<BuildContext> openerHosts = const [],
     NavigationTransition transition = NavigationTransition.platform,
+    int? transitionMs,
+    int? reverseTransitionMs,
   }) {
     _handoffs[_canonical(location)] = (openerHosts: openerHosts, chain: null);
     _change = const CodelesslyHistoryPush();
@@ -730,7 +747,12 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     return push(
       uri.path,
       queryParameters: uri.queryParameters,
-      data: _routeData(params, transition),
+      data: _routeData(
+        params,
+        transition,
+        transitionMs: transitionMs,
+        reverseTransitionMs: reverseTransitionMs,
+      ),
     );
   }
 
@@ -745,6 +767,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     Map<String, dynamic> params = const {},
     ActionChain? chain,
     NavigationTransition transition = NavigationTransition.platform,
+    int? transitionMs,
+    int? reverseTransitionMs,
   }) {
     _handoffs[_canonical(location)] = (openerHosts: const [], chain: chain);
     _change = const CodelesslyHistoryPush();
@@ -753,17 +777,29 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     return pushReplacement(
       uri.path,
       queryParameters: uri.queryParameters,
-      data: _routeData(params, transition),
+      data: _routeData(
+        params,
+        transition,
+        transitionMs: transitionMs,
+        reverseTransitionMs: reverseTransitionMs,
+      ),
     );
   }
 
   static Map<String, dynamic> _routeData(
     Map<String, dynamic> params,
-    NavigationTransition transition,
-  ) => {
+    NavigationTransition transition, {
+    int? transitionMs,
+    int? reverseTransitionMs,
+  }) => {
     paramsKey: params,
     if (transition != NavigationTransition.platform)
       transitionKey: transition.name,
+    if (transition != NavigationTransition.platform && transitionMs != null)
+      transitionMsKey: transitionMs,
+    if (transition != NavigationTransition.platform &&
+        reverseTransitionMs != null)
+      reverseTransitionMsKey: reverseTransitionMs,
   };
 
   /// Clears the stack and shows [locations], bottom first, as a new browser
@@ -1117,9 +1153,9 @@ class _ScreenNotFound extends StatelessWidget {
   );
 }
 
-/// A screen's page opened with a [NavigationTransition] other than the
-/// platform's: it rises from the bottom, fades in or shows at once, and
-/// plays the same in reverse when it closes.
+/// A screen's page opened with a [PageTransition] other than the
+/// platform's (see [FunctionsRepository.buildPageTransition]), played in
+/// reverse when it closes.
 class CodelesslyTransitionPage<T> extends Page<T> {
   /// The screen.
   final Widget child;
@@ -1127,14 +1163,31 @@ class CodelesslyTransitionPage<T> extends Page<T> {
   /// How the screen comes in.
   final NavigationTransition transition;
 
+  /// Milliseconds the transition takes; null for the transition's
+  /// [PageTransition.defaultDurationMs].
+  final int? transitionMs;
+
+  /// Milliseconds the transition takes in reverse; null for the forward
+  /// duration.
+  final int? reverseTransitionMs;
+
   /// Creates a [CodelesslyTransitionPage].
   const CodelesslyTransitionPage({
     super.key,
     super.name,
     super.arguments,
     required this.transition,
+    this.transitionMs,
+    this.reverseTransitionMs,
     required this.child,
   });
+
+  /// The [NavigationAction] timing of this page, resolved.
+  NavigationAction get _timing => NavigationAction(
+    transition: transition,
+    transitionMs: transitionMs,
+    reverseTransitionMs: reverseTransitionMs,
+  );
 
   @override
   Route<T> createRoute(BuildContext context) =>
@@ -1149,17 +1202,12 @@ class _CodelesslyTransitionRoute<T> extends PageRoute<T> {
       settings as CodelesslyTransitionPage<T>;
 
   @override
-  Duration get transitionDuration => switch (_page.transition) {
-    NavigationTransition.none => Duration.zero,
-    NavigationTransition.fade => const Duration(milliseconds: 220),
-    _ => const Duration(milliseconds: 380),
-  };
+  Duration get transitionDuration =>
+      Duration(milliseconds: _page._timing.resolvedTransitionMs);
 
   @override
-  Duration get reverseTransitionDuration => switch (_page.transition) {
-    NavigationTransition.none => Duration.zero,
-    _ => const Duration(milliseconds: 260),
-  };
+  Duration get reverseTransitionDuration =>
+      Duration(milliseconds: _page._timing.resolvedReverseTransitionMs);
 
   @override
   bool get opaque => true;
@@ -1187,23 +1235,11 @@ class _CodelesslyTransitionRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    switch (_page.transition) {
-      case NavigationTransition.slideUp:
-        return SlideTransition(
-          position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
-              .animate(
-                CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOutCubic,
-                  reverseCurve: Curves.easeInCubic,
-                ),
-              ),
-          child: child,
-        );
-      case NavigationTransition.fade:
-        return FadeTransition(opacity: animation, child: child);
-      case NavigationTransition.none || NavigationTransition.platform:
-        return child;
-    }
+    return FunctionsRepository.buildPageTransition(
+      context,
+      _page.transition,
+      animation,
+      child,
+    );
   }
 }

@@ -21,6 +21,12 @@ import 'package:flutter/widgets.dart';
 ///
 /// A `SizedBox(double.infinity)` would throw under an unbounded axis; this
 /// box never does, and at the design size it lays out exactly like one.
+///
+/// With an [aspectRatio] (width / height, [BaseNode.layoutAspectRatio]) one axis
+/// follows the other: the height is the width over the ratio, unless only
+/// the height fills (or the width hugs), when the width is the height times
+/// the ratio. Both stay within the incoming constraints, the ratio kept
+/// where they allow.
 class FitBox extends SingleChildRenderObjectWidget {
   /// The design width, used when the box is sized, or when it fills and the
   /// incoming width is unbounded.
@@ -36,12 +42,16 @@ class FitBox extends SingleChildRenderObjectWidget {
   /// Whether the box takes all of a bounded incoming height.
   final bool fillHeight;
 
+  /// Width divided by height the box keeps, or null for none.
+  final double? aspectRatio;
+
   const FitBox({
     super.key,
     this.width,
     this.height,
     this.fillWidth = false,
     this.fillHeight = false,
+    this.aspectRatio,
     super.child,
   });
 
@@ -53,6 +63,7 @@ class FitBox extends SingleChildRenderObjectWidget {
     required SizeFit? horizontalFit,
     required SizeFit? verticalFit,
     required SizeC size,
+    double? aspectRatio,
     Widget? child,
   }) : this(
          key: key,
@@ -60,6 +71,7 @@ class FitBox extends SingleChildRenderObjectWidget {
          height: verticalFit == SizeFit.shrinkWrap ? null : size.height,
          fillWidth: horizontalFit == SizeFit.expanded,
          fillHeight: verticalFit == SizeFit.expanded,
+         aspectRatio: aspectRatio,
          child: child,
        );
 
@@ -69,6 +81,7 @@ class FitBox extends SingleChildRenderObjectWidget {
     height: height,
     fillWidth: fillWidth,
     fillHeight: fillHeight,
+    aspectRatio: aspectRatio,
   );
 
   @override
@@ -77,7 +90,8 @@ class FitBox extends SingleChildRenderObjectWidget {
       ..width = width
       ..height = height
       ..fillWidth = fillWidth
-      ..fillHeight = fillHeight;
+      ..fillHeight = fillHeight
+      ..aspectRatio = aspectRatio;
   }
 
   @override
@@ -87,9 +101,8 @@ class FitBox extends SingleChildRenderObjectWidget {
       ..add(DoubleProperty('width', width, defaultValue: null))
       ..add(DoubleProperty('height', height, defaultValue: null))
       ..add(FlagProperty('fillWidth', value: fillWidth, ifTrue: 'fillWidth'))
-      ..add(
-        FlagProperty('fillHeight', value: fillHeight, ifTrue: 'fillHeight'),
-      );
+      ..add(FlagProperty('fillHeight', value: fillHeight, ifTrue: 'fillHeight'))
+      ..add(DoubleProperty('aspectRatio', aspectRatio, defaultValue: null));
   }
 }
 
@@ -100,7 +113,16 @@ class RenderFitBox extends RenderProxyBox {
     this._height,
     this._fillWidth = false,
     this._fillHeight = false,
+    this._aspectRatio,
   });
+
+  double? _aspectRatio;
+  double? get aspectRatio => _aspectRatio;
+  set aspectRatio(double? value) {
+    if (_aspectRatio == value) return;
+    _aspectRatio = value;
+    markNeedsLayout();
+  }
 
   double? _width;
   double? get width => _width;
@@ -156,7 +178,50 @@ class RenderFitBox extends RenderProxyBox {
       design: _height,
       max: constraints.maxHeight,
     );
+    final double? ratio = _aspectRatio;
+    if (ratio != null && ratio.isFinite && ratio > 0) {
+      final Size? kept = keepAspectRatio(w, h, ratio, constraints, (
+        fillWidth: _fillWidth,
+        fillHeight: _fillHeight,
+      ));
+      if (kept != null) return BoxConstraints.tight(kept);
+    }
     return BoxConstraints.tightFor(width: w, height: h).enforce(constraints);
+  }
+
+  /// The size a box of [ratio] (width / height) takes from its preferred
+  /// width [w] and height [h] (null where it hugs) within [constraints].
+  /// The width leads unless it hugs or only the height fills. Null when
+  /// both axes hug.
+  @visibleForTesting
+  static Size? keepAspectRatio(
+    double? w,
+    double? h,
+    double ratio,
+    BoxConstraints constraints,
+    ({bool fillWidth, bool fillHeight}) fills,
+  ) {
+    final bool heightLeads =
+        h != null && (w == null || (fills.fillHeight && !fills.fillWidth));
+    if (!heightLeads && w != null) {
+      double width = constraints.constrainWidth(w);
+      double height = width / ratio;
+      if (height > constraints.maxHeight) {
+        height = constraints.maxHeight;
+        width = constraints.constrainWidth(height * ratio);
+      }
+      return Size(width, constraints.constrainHeight(height));
+    }
+    if (h != null) {
+      double height = constraints.constrainHeight(h);
+      double width = height * ratio;
+      if (width > constraints.maxWidth) {
+        width = constraints.maxWidth;
+        height = constraints.constrainHeight(width / ratio);
+      }
+      return Size(constraints.constrainWidth(width), height);
+    }
+    return null;
   }
 
   @override
@@ -806,4 +871,20 @@ class RenderScrollContentExtent extends RenderProxyBox {
     if (filled == constraints) return natural;
     return constraints.constrain(child.getDryLayout(filled));
   }
+}
+
+/// Wraps [child], a node's widget, in a box that keeps the node's
+/// [BaseNode.layoutAspectRatio] (see [FitBox.aspectRatio]); [child] as is when the
+/// node has none.
+Widget wrapWithAspectRatio(BaseNode node, Widget child) {
+  final double? ratio = node.layoutAspectRatio;
+  if (ratio == null || !ratio.isFinite || ratio <= 0) return child;
+  return FitBox.fromFits(
+    key: ValueKey('aspect-ratio-${node.id}'),
+    horizontalFit: node.horizontalFit,
+    verticalFit: node.verticalFit,
+    size: node.basicBoxLocal.size,
+    aspectRatio: ratio,
+    child: child,
+  );
 }

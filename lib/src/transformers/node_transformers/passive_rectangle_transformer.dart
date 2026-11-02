@@ -123,12 +123,15 @@ class PassiveRectangleWidget extends StatelessWidget {
       alignment:
           stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
       children: [
-        ...buildFills(
+        ...clipFillsToNotches(
           node,
-          useInk: false,
-          obscureImages: settings.obscureImages,
-          settings: settings,
-          scopedValues: scopedValues,
+          buildFills(
+            node,
+            useInk: false,
+            obscureImages: settings.obscureImages,
+            settings: settings,
+            scopedValues: scopedValues,
+          ),
         ),
         ...buildStrokes(node, scopedValues),
         ...wrapWithInkWell(
@@ -145,6 +148,7 @@ class PassiveRectangleWidget extends StatelessWidget {
           alignment:
               stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
         ),
+        ...buildForegroundFills(node, scopedValues),
       ],
     );
 
@@ -168,6 +172,7 @@ class PassiveRectangleWidget extends StatelessWidget {
         borderRadius: getBorderRadius(node),
         clipBehavior: getClipBehavior(node),
         tapThrough: TapThroughScope.of(context),
+        notches: notchesOf(node),
         child: child,
       ),
     );
@@ -193,7 +198,27 @@ Widget decorateWithShadows({
   required Clip clipBehavior,
   required Widget child,
   bool tapThrough = false,
+  List<NotchModel> notches = const [],
 }) {
+  if (notches.isNotEmpty) {
+    final BorderRadius radius = borderRadius ?? BorderRadius.zero;
+    final Widget box = clipBehavior == Clip.none
+        ? child
+        : ClipPath(
+            clipper: NotchedClipper(borderRadius: radius, notches: notches),
+            clipBehavior: Clip.antiAlias,
+            child: child,
+          );
+    if (boxShadow.isEmpty) return box;
+    return CustomPaint(
+      painter: NotchedShadowPainter(
+        shadows: boxShadow,
+        borderRadius: radius,
+        notches: notches,
+      ),
+      child: box,
+    );
+  }
   final bool rounded =
       borderRadius != null && borderRadius != BorderRadius.zero;
   final List<BoxShadow> spread = [
@@ -447,6 +472,8 @@ List<Widget> wrapWithPaddingAndScroll(
 
 List<BoxShadow> retrieveBoxShadow(BaseNode node, ScopedValues scopedValues) {
   if (node is! DefaultShapeNode) return [];
+  // A box shadow would outline the box, not the path.
+  if (node is RectangleNode && node.hasPath) return [];
   return node.effects
       .where((effect) => effect.type == EffectType.dropShadow && effect.visible)
       .map((effect) {
@@ -486,6 +513,8 @@ BorderRadius? getBorderRadius(BaseNode node) {
 }
 
 Clip defaultGetClipBehavior(BaseNode node) {
+  // A path is drawn whole: its round caps reach past the box at its edges.
+  if (node is RectangleNode && node.hasPath) return Clip.none;
   if (node is ClipMixin) {
     if (node.clipsContent) {
       return Clip.hardEdge;
@@ -517,6 +546,14 @@ double nearestValue(double goal, List<double> array) {
 
 void getLinearGradientAlignment(double rotationDeg) {}
 
+/// The centre of a radial or angular [paint]: its
+/// [PaintModel.gradientCenterX] and [PaintModel.gradientCenterY] as an
+/// alignment in the box, the centre when unset.
+Alignment gradientCenterOf(PaintModel paint) {
+  double read(double? value) => value == null || !value.isFinite ? 0 : value;
+  return Alignment(read(paint.gradientCenterX), read(paint.gradientCenterY));
+}
+
 Gradient? retrieveGradient(PaintModel paint) {
   try {
     final RelativeTransform relative = decomposeRelativeTransform(
@@ -535,6 +572,24 @@ Gradient? retrieveGradient(PaintModel paint) {
     );
     final radians = rotation * pi / 180;
 
+    if (paint.type == PaintType.gradientLinear && paint.hasGradientHandles) {
+      // Between its handles, as authored: begin (-1, -1) to end (1, 1) runs
+      // corner to corner whatever the box's proportions, where a rotation
+      // about the centre would miss the corners of a wide box.
+      double read(double? value) =>
+          value == null || !value.isFinite ? 0 : value;
+      return LinearGradient(
+        transform: GradientHandlesTransform(
+          Alignment(read(paint.gradientBeginX), read(paint.gradientBeginY)),
+          Alignment(read(paint.gradientEndX), read(paint.gradientEndY)),
+        ),
+        colors: gradientStops
+            .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
+            .toList(),
+        stops: gradientStops.map((e) => e.position).toList(),
+        tileMode: tileMode,
+      );
+    }
     if (paint.type == PaintType.gradientLinear) {
       final double? repeatEvery = paint.gradientRepeatEvery;
       final bool repeats = repeatEvery != null && repeatEvery > 0;
@@ -557,19 +612,24 @@ Gradient? retrieveGradient(PaintModel paint) {
             : SpanningGradientRotation(radians),
       );
     } else if (paint.type == PaintType.gradientRadial) {
+      final double radius = paint.gradientRadius;
       return RadialGradient(
-        center: Alignment(paint.gradientCenterX, paint.gradientCenterY),
-        radius: paint.gradientRadius,
+        center: gradientCenterOf(paint),
+        radius: radius.isFinite && radius > 0 ? radius : 0.5,
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
         stops: gradientStops.map((e) => e.position).toList(),
         tileMode: tileMode,
-        transform: GradientRotation(radians),
+        // Turning a circle about the box centre only moves an off-centre
+        // one away from where it was placed.
+        transform: paint.gradientCenterX == 0 && paint.gradientCenterY == 0
+            ? GradientRotation(radians)
+            : null,
       );
     } else if (paint.type == PaintType.gradientAngular) {
       return SweepGradient(
-        center: Alignment(paint.gradientCenterX, paint.gradientCenterY),
+        center: gradientCenterOf(paint),
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
@@ -620,6 +680,53 @@ class SpanningGradientRotation extends GradientTransform {
 
   @override
   int get hashCode => radians.hashCode;
+}
+
+/// Places a default linear gradient (left edge to right edge) between the
+/// handles [begin] and [end], alignments in the box, the way design tools
+/// do: the gradient is laid out in the box's normalized space and stretched
+/// with it, so its bands stay perpendicular to the handles there. Begin
+/// (-1, -1) and end (1, 1) then run corner to corner on any box, with the
+/// other diagonal on the middle band. On a square box this is Flutter's
+/// `LinearGradient(begin: begin, end: end)`.
+class GradientHandlesTransform extends GradientTransform {
+  const GradientHandlesTransform(this.begin, this.end);
+
+  final Alignment begin;
+  final Alignment end;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    final double w = bounds.width, h = bounds.height;
+    if (w <= 0 || h <= 0) return Matrix4.identity();
+    // Handles and the axis between them in normalized space (0..1).
+    final double x0 = (begin.x + 1) / 2, y0 = (begin.y + 1) / 2;
+    final double dx = (end.x - begin.x) / 2, dy = (end.y - begin.y) / 2;
+    if (dx == 0 && dy == 0) return Matrix4.identity();
+    // The default gradient runs along (w, 0) from the left middle, with
+    // bands along (0, w). Map those onto the axis and its normal in
+    // normalized space, then into the box.
+    final double a = dx, b = dy * h / w;
+    final double c = -dy, d = dx * h / w;
+    final double fromX = bounds.left, fromY = bounds.center.dy;
+    final double toX = bounds.left + x0 * w, toY = bounds.top + y0 * h;
+    return Matrix4.identity()
+      ..setEntry(0, 0, a)
+      ..setEntry(1, 0, b)
+      ..setEntry(0, 1, c)
+      ..setEntry(1, 1, d)
+      ..setEntry(0, 3, toX - (a * fromX + c * fromY))
+      ..setEntry(1, 3, toY - (b * fromX + d * fromY));
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is GradientHandlesTransform &&
+      other.begin == begin &&
+      other.end == end;
+
+  @override
+  int get hashCode => Object.hash(begin, end);
 }
 
 /// Rotates a linear gradient by [radians] about the box center, like
@@ -737,12 +844,58 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
     return [];
   }
   final List<Widget> strokeWidgets = [];
+  final List<NotchModel> notches = notchesOf(node);
+  // A rectangle with a path strokes the path (open shapes included).
+  final Path? path = node is RectangleNode && node.hasPath
+      ? parseSvgPath(node.path)
+      : null;
   for (final paint in node.strokes.where((paint) => paint.visible)) {
     final paintValue = PropertyValueDelegate.getPropertyValue<PaintModel>(
       node,
       'stroke-paint-${paint.id}',
       scopedValues: scopedValues,
     );
+    if (path != null) {
+      strokeWidgets.add(
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: SvgPathStrokePainter(
+                path: path,
+                color: (paintValue ?? paint).toFlutterColor()!,
+                strokeWidth: node.strokeWeight,
+                strokeCap: node.strokeCap,
+                strokeJoin: (node as RectangleNode).strokeJoin,
+                strokeMiterLimit: node.strokeMiterLimit,
+                dashPattern: node.dashPattern,
+              ),
+            ),
+          ),
+        ),
+      );
+      continue;
+    }
+    // A notched outline is stroked along its notches.
+    if (notches.isNotEmpty) {
+      strokeWidgets.add(
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: NotchedStrokePainter(
+                color: (paintValue ?? paint).toFlutterColor()!,
+                strokeWidth: node.strokeWeight,
+                borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+                notches: notches,
+                strokeAlign: node.strokeAlign,
+                dashPattern: node.dashPattern,
+                strokeCap: node.strokeCap,
+              ),
+            ),
+          ),
+        ),
+      );
+      continue;
+    }
     // A solid stroke on every side is Flutter's own border. A stroke on one
     // side, or a dashed one, is painted by [StrokePainter].
     if (node.dashPattern.isEmpty && node.strokeSide == StrokeSide.all) {
@@ -782,6 +935,93 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
   }
 
   return strokeWidgets;
+}
+
+/// [fills] clipped to [node]'s notched outline when it has notches (fills
+/// are clipped even when the node doesn't clip its children), else [fills].
+///
+/// A rectangle with a path ([RectangleNode.path]) fills the path instead.
+/// The [DefaultShapeNode.foregroundFills] of [node], painted over its
+/// children inside its corners and notches (Flutter's
+/// `foregroundDecoration`): a translucent solid dims the whole box, text
+/// included. A solid's colour can be bound as `foreground-<paint id>`.
+/// They take no taps. Empty when the node has none.
+List<Widget> buildForegroundFills(BaseNode node, ScopedValues scopedValues) {
+  if (node is! DefaultShapeNode || node.foregroundFills.isEmpty) return [];
+  final BorderRadius? borderRadius = getBorderRadius(node);
+  final List<Widget> layers = [
+    for (final PaintModel paint in node.foregroundFills)
+      if (paint.visible)
+        if (_foregroundDecoration(node, paint, borderRadius, scopedValues)
+            case final BoxDecoration decoration)
+          Positioned.fill(child: DecoratedBox(decoration: decoration)),
+  ];
+  if (layers.isEmpty) return [];
+  return [
+    Positioned.fill(
+      child: IgnorePointer(
+        child: Stack(children: clipFillsToNotches(node, layers)),
+      ),
+    ),
+  ];
+}
+
+BoxDecoration? _foregroundDecoration(
+  DefaultShapeNode node,
+  PaintModel paint,
+  BorderRadius? borderRadius,
+  ScopedValues scopedValues,
+) {
+  switch (paint.type) {
+    case PaintType.solid:
+      final PaintModel? bound =
+          PropertyValueDelegate.getPropertyValue<PaintModel>(
+            node,
+            'foreground-${paint.id}',
+            scopedValues: scopedValues,
+          );
+      final Color? color = (bound ?? paint).toFlutterColor();
+      if (color == null) return null;
+      return BoxDecoration(borderRadius: borderRadius, color: color);
+    case PaintType.gradientLinear:
+    case PaintType.gradientRadial:
+    case PaintType.gradientAngular:
+    case PaintType.gradientDiamond:
+      return BoxDecoration(
+        borderRadius: borderRadius,
+        gradient: retrieveGradient(paint),
+      );
+    case PaintType.image:
+    case PaintType.emoji:
+      return null;
+  }
+}
+
+List<Widget> clipFillsToNotches(BaseNode node, List<Widget> fills) {
+  if (node is RectangleNode && node.hasPath) {
+    if (fills.isEmpty) return fills;
+    return [
+      Positioned.fill(
+        child: ClipPath(
+          clipper: SvgPathClipper(node.path!),
+          child: Stack(children: fills),
+        ),
+      ),
+    ];
+  }
+  final List<NotchModel> notches = notchesOf(node);
+  if (notches.isEmpty || fills.isEmpty) return fills;
+  return [
+    Positioned.fill(
+      child: ClipPath(
+        clipper: NotchedClipper(
+          borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+          notches: notches,
+        ),
+        child: Stack(children: fills),
+      ),
+    ),
+  ];
 }
 
 typedef ImageFillBuilder = Widget Function(
@@ -929,12 +1169,16 @@ Widget buildFill(
       }
 
       // With a transition a fill eases to its new color (a hovered row).
+      // Where tickers are off (the design canvas, its captures) it jumps.
       if ((node as BaseNode).transitionMs > 0) {
-        return TweenAnimationBuilder<Color?>(
-          tween: ColorTween(end: color),
-          duration: Duration(milliseconds: (node as BaseNode).transitionMs),
-          curve: Curves.easeOutCubic,
-          builder: (context, color, _) => solid(color),
+        final int ms = (node as BaseNode).transitionMs;
+        return Builder(
+          builder: (context) => TweenAnimationBuilder<Color?>(
+            tween: ColorTween(end: color),
+            duration: implicitTransitionDuration(context, ms),
+            curve: Curves.easeOutCubic,
+            builder: (context, color, _) => solid(color),
+          ),
         );
       }
       return solid(color);

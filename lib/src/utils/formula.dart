@@ -55,7 +55,7 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    [FormulaEvaluator.functions].
 ///  - text functions: indexOf, matches and slug; durations: seconds
 ///    ('3:45' → 225) and duration (225 → '3:45'); colors: luminance and
-///    mix(a, b, t), which blends two colors (t from 0, all a, to 1, all b).
+///    mix(a, b, t) (alias lerpColor), which blends two colors (t from 0, all a, to 1, all b).
 ///  - maps: `obj('id', 1)`, `object('id', 1)` or `{id: 1}` builds one;
 ///    `set(map, key, value)`, `with(map, key, value, …)` and `merge(a, b)`
 ///    return changed copies; `keys` and `values` read them. `map` can update
@@ -438,6 +438,16 @@ class FormulaEvaluator {
       'join(tags, " · ")',
     ),
     FormulaFunctionDoc('upper', 'upper(text)', 'upper("hi") → HI'),
+    FormulaFunctionDoc(
+      'charCode',
+      'charCode(text, index)',
+      'charCode("MX", 1) → 88',
+    ),
+    FormulaFunctionDoc(
+      'fromCharCode',
+      'fromCharCode(code, …) or fromCharCode(list)',
+      'fromCharCode(65 + seat) → B',
+    ),
     FormulaFunctionDoc('lower', 'lower(text)', 'lower("Hi") → hi'),
     FormulaFunctionDoc(
       'codeUnits',
@@ -762,6 +772,16 @@ class FormulaEvaluator {
       'alpha',
       'alpha(color, opacity)',
       "alpha('#FF4D4F', 0.12) → #1FFF4D4F",
+    ),
+    FormulaFunctionDoc(
+      'mix',
+      'mix(colorA, colorB, t)',
+      "mix('#000000', '#FFFFFF', 0.5) → #FF808080",
+    ),
+    FormulaFunctionDoc(
+      'lerpColor',
+      'lerpColor(colorA, colorB, t), same as mix',
+      "lerpColor('#FF4D4F', '#1677FF', 0.25) → #FFC5587B",
     ),
     FormulaFunctionDoc('pad', 'pad(value, width, fill)', 'pad(5, 2) → 05'),
     FormulaFunctionDoc('text', 'text(value)', 'text(42) → "42"'),
@@ -2558,6 +2578,26 @@ final Map<String, _Function> _functions = {
       .where((s) => s.isNotEmpty)
       .join((_arg(a, 1) ?? ', ').toString()),
   'upper': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toUpperCase(),
+  'charCode': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final num index = a.length > 1 ? _num(_arg(a, 1)) : 0;
+    if (!index.isFinite) return null;
+    // Out of range (indexOf's -1 included) reads nothing, like at().
+    final int i = index.toInt();
+    return i >= 0 && i < text.length ? text.codeUnitAt(i) : null;
+  },
+  'fromCharCode': (a) {
+    final StringBuffer out = StringBuffer();
+    for (final Object? arg in a) {
+      for (final Object? code in arg is Iterable ? arg : [arg]) {
+        final num n = _num(code);
+        if (n.isFinite && n >= 0 && n <= 0x10FFFF) {
+          out.writeCharCode(n.toInt());
+        }
+      }
+    }
+    return out.toString();
+  },
   'lower': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toLowerCase(),
   // The UTF-16 code units of the text, for hashing a label into a color:
   // sum(codeUnits(tag)) % 8.
@@ -2827,6 +2867,7 @@ final Map<String, _Function> _functions = {
   'number': (a) => _toNum(_arg(a, 0)),
   'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
   'mix': (a) => _mixColors(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'lerpColor': (a) => _mixColors(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
     _arg(a, 1) == null ? 2 : _intArg(_arg(a, 1)),
     FormulaEvaluator.stringify(_arg(a, 2) ?? '0'),
