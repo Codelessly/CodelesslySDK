@@ -202,6 +202,10 @@ bool focusTextField(
   near: near,
 );
 
+/// Whether a text field of [nodeId] has the keyboard focus.
+bool textFieldHasFocus(String nodeId) =>
+    _PassiveTextFieldWidgetState.hasFocus(nodeId);
+
 /// Takes the focus from the text field of [nodeId], or from any field.
 void unfocusTextField([String? nodeId]) =>
     _PassiveTextFieldWidgetState.unfocus(nodeId);
@@ -268,6 +272,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     }
     return true;
   }
+
+  /// Whether a field of [nodeId] has the focus.
+  static bool hasFocus(String nodeId) =>
+      [...?_mounted[nodeId]]
+          .any((state) => state.mounted && state.focusNode.hasFocus);
 
   /// Unfocuses the field of [nodeId] (any field when null).
   static void unfocus([String? nodeId]) {
