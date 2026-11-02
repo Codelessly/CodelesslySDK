@@ -96,7 +96,7 @@ Future<void> pump(
 
 void main() {
   test('parseLayoutDirection reads rtl and ltr, nothing else', () {
-    final parse = PassiveNodeTransformerManager.parseLayoutDirection;
+    const parse = PassiveNodeTransformerManager.parseLayoutDirection;
     expect(parse('rtl'), TextDirection.rtl);
     expect(parse(' RTL '), TextDirection.rtl);
     expect(parse('right-to-left'), TextDirection.rtl);

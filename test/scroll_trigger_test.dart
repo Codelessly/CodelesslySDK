@@ -17,10 +17,7 @@ void main() {
       children: const [],
     );
     expect(column.triggerTypes, contains(TriggerType.scroll));
-    expect(
-      TriggerModel.fromJson({'type': 'scroll'}).type,
-      TriggerType.scroll,
-    );
+    expect(TriggerModel.fromJson({'type': 'scroll'}).type, TriggerType.scroll);
   });
 
   testWidgets('Scrolling runs the reactions with the offset', (tester) async {
@@ -78,7 +75,10 @@ void main() {
     await tester.drag(find.byKey(const Key('inner')), const Offset(-200, 0));
     await tester.pump();
     expect(offsets, isEmpty);
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -150));
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -150),
+    );
     await tester.pumpAndSettle();
     expect(offsets, isNotEmpty);
     expect(num.parse('${offsets.last}'), greaterThan(100));

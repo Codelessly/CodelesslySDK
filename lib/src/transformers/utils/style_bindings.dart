@@ -28,10 +28,19 @@ import 'scoped_values.dart';
 ///   (of a text field's input and hint),
 ///   e.g. one per script: `${= uiLang == 'ar' ? 'IBM Plex Sans Arabic' :
 ///   'DM Serif Display'}`. Weights and styles stay.
-/// * [fontSize] (number): the font size of every span of a text node.
+/// * [fontSize] (number, logical pixels): the size of every span of a text
+///   node, e.g. a counter that grows past 99: `${= count > 99 ? 28 : 36}`.
+///   Line heights and letter spacings given in percent scale with it.
+/// * [textDecoration] (`none`, `underline`, `overline`, `strikethrough`
+///   or `lineThrough`): the decoration of every span of a text node, e.g.
+///   a done checklist item struck through.
 /// * [icon] (string): the name of the icon an icon node shows, in the
 ///   naming of its icon model (`star`, `star_border`, ...). Its family and
 ///   style stay. An icon model JSON map replaces the icon as a whole.
+/// * [fillStop] `fill-stop-<index>` (color): the color of one stop of the
+///   node's first fill when it is a gradient, e.g. a halo whose center
+///   follows the phase color. A `#RRGGBB` color keeps the stop's own alpha
+///   (a 35% halo stays 35%); `#AARRGGBB` sets it too.
 abstract final class StyleBindings {
   /// Shows or hides every effect of the node.
   static const String effectsVisible = 'effectsVisible';
@@ -66,6 +75,9 @@ abstract final class StyleBindings {
   /// The font size of every span of a text node.
   static const String fontSize = 'fontSize';
 
+  /// The decoration of every span of a text node.
+  static const String textDecoration = 'textDecoration';
+
   /// The name of the icon an icon node shows.
   static const String icon = 'icon';
 
@@ -74,6 +86,9 @@ abstract final class StyleBindings {
 
   /// The color of the shadow [effectId].
   static String shadowColor(String effectId) => 'shadow-color-$effectId';
+
+  /// The color of stop [index] of the first fill's gradient.
+  static String fillStop(int index) => 'fill-stop-$index';
 
   /// Adds to [patch], a partial node JSON, the values that the bindings of
   /// these properties give [node], evaluated with [scopedValues]. A property
@@ -102,6 +117,13 @@ abstract final class StyleBindings {
     }
 
     if (node is GeometryMixin) {
+      final List? fills = _fillStops(
+        (patch['fills'] as List?) ??
+            [for (final paint in node.fills) paint.toJson()],
+        node.variables,
+        value,
+      );
+      if (fills != null) patch['fills'] = fills;
       final double? weight = value<double>(strokeWeight);
       if (weight != null && weight != node.strokeWeight) {
         patch['strokeWeight'] = weight < 0 ? 0.0 : weight;
@@ -117,7 +139,7 @@ abstract final class StyleBindings {
 
     if (node is TextNode) {
       final String? family = value<Object>(fontFamily)?.toString().trim();
-      final num? size = value<num>(fontSize);
+      final double? size = parseFontSize(value<Object>(fontSize));
       if ((family != null &&
               family.isNotEmpty &&
               node.textMixedProps.any((p) => p.fontName.family != family)) ||
@@ -135,7 +157,7 @@ abstract final class StyleBindings {
                 'fontName': node.textMixedProps[index].fontName
                     .copyWith(family: family)
                     .toJson(),
-              if (size != null && size > 0) 'fontSize': size.toDouble(),
+              if (size != null && size > 0) 'fontSize': size,
             },
         ];
       }
@@ -198,7 +220,7 @@ abstract final class StyleBindings {
             patch['properties'] as Map? ?? node.properties.toJson();
         patch['properties'] = {
           ...current,
-          if (input != null) 'inputStyle': input,
+          'inputStyle': ?input,
           if (hint != null)
             'decoration': {
               ...(current['decoration'] as Map? ??
@@ -206,6 +228,24 @@ abstract final class StyleBindings {
               'hintStyle': hint,
             },
         };
+      }
+    }
+
+    if (node is TextNode) {
+      final TextDecorationEnum? decoration = parseTextDecoration(
+        value<Object>(textDecoration),
+      );
+      if (decoration != null &&
+          node.textMixedProps.any(
+            (prop) => prop.textDecoration != decoration,
+          )) {
+        final List spans =
+            patch['textMixedProps'] as List? ??
+            [for (final prop in node.textMixedProps) prop.toJson()];
+        patch['textMixedProps'] = [
+          for (final Map span in spans.cast<Map>())
+            {...span, 'textDecoration': decoration.name},
+        ];
       }
     }
 
@@ -226,6 +266,46 @@ abstract final class StyleBindings {
         };
       }
     }
+  }
+
+  /// [fills] (paint JSON) with the first gradient's stops recolored by
+  /// their `fill-stop-<index>` bindings, or null when none changes.
+  static List? _fillStops(
+    List fills,
+    Map<String, String> variables,
+    T? Function<T extends Object>(String property) value,
+  ) {
+    if (fills.isEmpty ||
+        !variables.keys.any((k) => k.startsWith('fill-stop-'))) {
+      return null;
+    }
+    final PaintModel first = PaintModel.fromJson(fills.first as Map);
+    final List<ColorStop>? stops = first.gradientStops;
+    if (stops == null || stops.isEmpty) return null;
+    bool changed = false;
+    final List<ColorStop> next = [
+      for (final (int i, ColorStop stop) in stops.indexed)
+        if (variables.containsKey(fillStop(i)))
+          switch (value<Object>(fillStop(i))) {
+            final Object raw when raw.toColorRGBA() != null => () {
+              final ColorRGBA bound = raw.toColorRGBA()!;
+              // #RRGGBB names a hue only: keep the stop's transparency.
+              final bool hueOnly =
+                  raw is String &&
+                  RegExp(r'^#?[0-9a-fA-F]{6}$').hasMatch(raw.trim());
+              final ColorRGBA color = hueOnly
+                  ? bound.copyWith(a: stop.color.a)
+                  : bound;
+              if (color != stop.color) changed = true;
+              return stop.copyWith(color: color);
+            }(),
+            _ => stop,
+          }
+        else
+          stop,
+    ];
+    if (!changed) return null;
+    return [first.copyWith(gradientStops: next).toJson(), ...fills.skip(1)];
   }
 
   static List<Effect> _effects(
@@ -288,6 +368,24 @@ abstract final class StyleBindings {
     }
   }
 
+  /// A text decoration from a binding's value: a [TextDecorationEnum] name
+  /// (`lineThrough` for `strikethrough` too), or null.
+  static TextDecorationEnum? parseTextDecoration(Object? value) {
+    if (value is TextDecorationEnum) return value;
+    // A bool strikes through: `${= m.wrong}`.
+    if (value is bool) {
+      return value ? TextDecorationEnum.strikethrough : TextDecorationEnum.none;
+    }
+    if (value is! String) return null;
+    final String name = value.trim();
+    if (name == 'true') return TextDecorationEnum.strikethrough;
+    if (name == 'false') return TextDecorationEnum.none;
+    if (name == 'lineThrough' || name == 'line-through') {
+      return TextDecorationEnum.strikethrough;
+    }
+    return TextDecorationEnum.values.asNameMap()[name];
+  }
+
   /// The font weight [value] names: a number from 100 to 900 (rounded to the
   /// nearest hundred), `w700`, or a name such as `bold`, `normal` or
   /// `semibold`. Null when it names none.
@@ -319,6 +417,20 @@ abstract final class StyleBindings {
     if (number == null || number.isNaN) return null;
     final int index = ((number / 100).round() - 1).clamp(0, 8);
     return FontWeightNumeric.values[index];
+  }
+
+  /// The font size [value] gives: a positive number, or text that reads as
+  /// one (`18`, `18.5`, `18px`). Null otherwise.
+  static double? parseFontSize(Object? value) {
+    final double? size = switch (value) {
+      num n => n.toDouble(),
+      String s => double.tryParse(
+        s.trim().toLowerCase().replaceFirst(RegExp(r'(px|dp)$'), '').trim(),
+      ),
+      _ => null,
+    };
+    if (size == null || !size.isFinite || size <= 0) return null;
+    return size;
   }
 
   /// The icon [value] names: [current] with the name [value] gives it, or

@@ -197,8 +197,13 @@ void unfocusTextField([String? nodeId]) =>
 
 class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   late final TextEditingController controller = TextEditingController(
-    text: boundValue() ?? getInitialText(widget.node.initialText),
+    text: _lastBound = boundValue() ?? getInitialText(widget.node.initialText),
   );
+
+  /// The bound value the field last showed. The field takes the binding's
+  /// value only when it changes, so typing into a field whose binding can't
+  /// be set (a computed variable, a formula) isn't undone on every rebuild.
+  String? _lastBound;
 
   /// The current value of the variable this field is bound to, if any. A
   /// variable set before the field first builds (by a canvas load action
@@ -243,6 +248,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       state.focusNode.unfocus();
     }
   }
+
   /// The values the field's bindings read: those it was given, else on the
   /// design canvas (no reactions) the editor's preview values, else the
   /// live ones.
@@ -280,8 +286,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     super.didUpdateWidget(oldWidget);
 
     // Update controller text if this text field is bound to a variable.
-    final ScopedValues scopedValues =
-        _scopedValues;
+    final ScopedValues scopedValues = _scopedValues;
 
     // Get the value of bound variable and update the controller text if it's
     // different from the current controller text.
@@ -312,9 +317,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     }
 
     if (currentPropertyValue != null &&
+        currentPropertyValue != _lastBound &&
         controller.text != currentPropertyValue) {
       controller.text = currentPropertyValue;
     }
+    if (currentPropertyValue != null) _lastBound = currentPropertyValue;
   }
 
   bool _isExistingVariable(String path, ScopedValues scopedValues) {
@@ -356,6 +363,58 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     if (!focusNode.hasFocus) {
       widget.onEditingComplete?.call(context, controller.text);
     }
+    if (!mounted) return;
+    if (focusNode.hasFocus && widget.node.properties.selectAllOnFocus) {
+      // After the tap that focused it places the caret.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !focusNode.hasFocus) return;
+        controller.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: controller.text.length,
+        );
+      });
+    }
+    FunctionsRepository.triggerAction(
+      context,
+      node: widget.node,
+      focusNode.hasFocus ? TriggerType.focusGained : TriggerType.focusLost,
+      value: controller.text,
+    );
+  }
+
+  /// The field's "Key Down" reactions: keys pressed while it has focus.
+  /// A reaction for a specific key takes it (↑ ↓ don't move the caret);
+  /// one for any key lets typing through.
+  KeyEventResult onKey(FocusNode _, KeyEvent event) {
+    if (event is KeyUpEvent) return KeyEventResult.ignored;
+    final String key = keyTriggerLabel(event.logicalKey);
+    final List<Reaction> reactions = [
+      for (final Reaction reaction in widget.node.reactions)
+        if (reaction.trigger.type == TriggerType.keyDown &&
+            reaction.action.enabled &&
+            (reaction.trigger.key == null ||
+                reaction.trigger.key!.isEmpty ||
+                normalizeKeyLabel(reaction.trigger.key!) ==
+                    normalizeKeyLabel(key)))
+          reaction,
+    ];
+    if (reactions.isEmpty) return KeyEventResult.ignored;
+    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
+    FunctionsRepository.triggerAction(
+      context,
+      TriggerType.keyDown,
+      reactions: reactions,
+      value: controller.text,
+      result: {
+        'key': key,
+        'shift': keyboard.isShiftPressed,
+        'alt': keyboard.isAltPressed,
+        'meta': keyboard.isMetaPressed || keyboard.isControlPressed,
+      },
+    );
+    return reactions.any((r) => r.trigger.key?.isNotEmpty ?? false)
+        ? KeyEventResult.handled
+        : KeyEventResult.ignored;
   }
 
   @override
@@ -425,6 +484,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       enabled: enabled,
       controller: controller,
       obscureText: obscure,
+      textCapitalization: switch (node.properties.textCapitalization) {
+        TextCapitalizationC.none => TextCapitalization.none,
+        TextCapitalizationC.words => TextCapitalization.words,
+        TextCapitalizationC.sentences => TextCapitalization.sentences,
+        TextCapitalizationC.characters => TextCapitalization.characters,
+      },
       readOnly: readOnly,
       showCursor: showCursor,
       keyboardType: keyboardType,
@@ -449,7 +514,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
           : null,
       inputFormatters: [
         if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
-        ?properties.formatter.toFlutterFormatter(),
+        ?properties.formatter.toFlutterFormatter(
+          resolve: (value) => PropertyValueDelegate.substituteVariables(
+            value,
+            nullSubstitutionMode: widget.settings.nullSubstitutionMode,
+            scopedValues: widget.scopedValues ?? ScopedValues.of(context),
+          ),
+        ),
       ],
       maxLines: maxLines,
       minLines: minLines,
@@ -471,15 +542,29 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     // it can't be sized by a layout builder.
     Widget field = fillsHeight && oneLine && !node.isHorizontalWrap
         ? IntrinsicSafeLayoutBuilder(
-            builder: (context, constraints) => buildField(
-              constraints.hasBoundedHeight
-                  ? decoration.copyWith(
-                      constraints: BoxConstraints.tightFor(
-                        height: constraints.maxHeight,
-                      ),
-                    )
-                  : decoration,
-            ),
+            builder: (context, constraints) {
+              // A collapsed decoration has no box of its own to fill, so the
+              // line would sit at the top: place it by the field's vertical
+              // alignment instead.
+              if (decoration.isCollapsed ?? false) {
+                return Align(
+                  alignment: Alignment(
+                    -1,
+                    properties.textAlignVertical.flutterTextAlignVertical.y,
+                  ),
+                  child: buildField(decoration),
+                );
+              }
+              return buildField(
+                constraints.hasBoundedHeight
+                    ? decoration.copyWith(
+                        constraints: BoxConstraints.tightFor(
+                          height: constraints.maxHeight,
+                        ),
+                      )
+                    : decoration,
+              );
+            },
           )
         : buildField(decoration);
 
@@ -488,6 +573,10 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     }
     if (node.isVerticalWrap) {
       field = IntrinsicHeight(child: field);
+    }
+
+    if (node.reactions.any((r) => r.trigger.type == TriggerType.keyDown)) {
+      field = Focus(onKeyEvent: onKey, skipTraversal: true, child: field);
     }
 
     field = AdaptiveNodeBox(node: node, child: field);

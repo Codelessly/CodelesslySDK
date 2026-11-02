@@ -55,6 +55,14 @@ void main() {
     expect((copy as PathNode).pathData, node.pathData);
     expect(copy.trimEnd, 0.4);
     expect(copy.strokeCap, StrokeCapEnum.round);
+    expect(copy.strokeJoin, StrokeJoinEnum.round);
+    expect(node.toJson().containsKey('strokeJoin'), isFalse);
+    final PathNode sharp = PathNode.fromJson({
+      ...node.toJson(),
+      'strokeJoin': 'miter',
+    });
+    expect(sharp.strokeJoin, StrokeJoinEnum.miter);
+    expect(sharp.toJson()['strokeJoin'], 'miter');
   });
 
   testWidgets('a bound trim draws part of the line and eases to new values', (
@@ -105,15 +113,18 @@ void main() {
         ),
       ),
     );
-    PathNodePainter painter() => tester
-        .widget<CustomPaint>(
-          find.byWidgetPredicate(
-            (w) => w is CustomPaint && w.painter is PathNodePainter,
-          ),
-        )
-        .painter! as PathNodePainter;
+    PathNodePainter painter() =>
+        tester
+                .widget<CustomPaint>(
+                  find.byWidgetPredicate(
+                    (w) => w is CustomPaint && w.painter is PathNodePainter,
+                  ),
+                )
+                .painter!
+            as PathNodePainter;
     expect(painter().trimEnd, 0.25);
     expect(painter().viewBox, const Size(100, 50));
+    expect(painter().join, StrokeJoin.round);
 
     goal.set(goal.value.copyWith(value: 0.75));
     await tester.pump();
