@@ -368,17 +368,34 @@ bool listWraps(ListViewNode node) =>
 
 /// Whether list [node] builds all its items up front, as a plain [Flex] or a
 /// [Wrap] rather than a viewport: it wraps (see [listWraps]), or it doesn't
-/// scroll, hugs its items along its axis and has a known item count (bound
-/// data or a set count). Such a list builds every item either way, so it
-/// needs no viewport.
+/// scroll, has a known item count (bound data or a set count) and either
+/// hugs its items along its axis or stretches them across a cross axis it
+/// hugs (see [listStretchesHuggedCross]). Such a list builds every item
+/// either way, so it needs no viewport.
 bool listBuildsAllItems(ListViewNode node) {
   if (listWraps(node)) return true;
   final SizeFit mainFit = node.scrollDirection == AxisC.vertical
       ? node.verticalFit
       : node.horizontalFit;
   return !node.isScrollable &&
-      mainFit == SizeFit.shrinkWrap &&
+      (mainFit == SizeFit.shrinkWrap || listStretchesHuggedCross(node)) &&
       listHasKnownItemCount(node);
+}
+
+/// Whether list [node] stretches its items ([ListViewProperties.stretchItems])
+/// across a cross axis it shrink-wraps. Its cross extent is then that of its
+/// thickest item, which only laying out every item tells: a viewport could
+/// only take the design size, which the editor solves from the item
+/// template alone (the first item's data), so a thicker item further on
+/// overflowed.
+bool listStretchesHuggedCross(ListViewNode node) {
+  final SizeFit crossFit = node.scrollDirection == AxisC.vertical
+      ? node.horizontalFit
+      : node.verticalFit;
+  return node.properties.stretchItems &&
+      !node.properties.stacked &&
+      node.properties.layout == ListLayout.list &&
+      crossFit == SizeFit.shrinkWrap;
 }
 
 /// The gap between consecutive items of a wrapping list: the separator's

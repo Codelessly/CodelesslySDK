@@ -14,6 +14,7 @@ void main() {
       {'name': 'Oat latte', 'qty': 2, 'total': 12.9},
     ],
     'syrups': ['vanilla', 'honey'],
+    'cells': ['50k', true, false, 'true', 'False', '', 1, 0],
   };
   Object? resolve(String path) {
     final parts = RegExp(r'[a-zA-Z_]\w*|\d+').allMatches(path).toList();
@@ -121,6 +122,29 @@ void main() {
       expect(eval("qty > 1 ? 'many' : 'one'"), 'many');
       expect(eval("qty > 5 ? 'a' : qty > 1 ? 'b' : 'c'"), 'b');
       expect(eval('missing || 4'), 4);
+    });
+
+    test('== compares a boolean by value, not by truthiness', () {
+      // A text cell is no check mark: "50k" equals neither true nor false.
+      expect(eval('cells[0] == true'), false);
+      expect(eval('cells[0] == false'), false);
+      expect(eval('cells[0] != true'), true);
+      expect(eval('true == cells[0]'), false);
+      expect(eval('cells[1] == true'), true);
+      expect(eval('cells[2] == false'), true);
+      expect(eval('cells[1] == false'), false);
+      // Text and numbers that spell a boolean still match it.
+      expect(eval('cells[3] == true'), true);
+      expect(eval('cells[4] == false'), true);
+      expect(eval('cells[5] == false'), true);
+      expect(eval('cells[6] == true'), true);
+      expect(eval('cells[7] == false'), true);
+      expect(eval("'1' == true"), true);
+      // A list or the missing value is not a boolean.
+      expect(eval('syrups == true'), false);
+      expect(eval('missing == false'), false);
+      // Truthiness itself is unchanged.
+      expect(eval("cells[0] ? 'yes' : 'no'"), 'yes');
     });
 
     test('functions', () {
