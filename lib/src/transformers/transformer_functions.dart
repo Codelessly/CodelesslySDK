@@ -362,7 +362,12 @@ String? getSliderLabel(SliderNode node, double value) {
 MultiSourceIconModel iconWithName(MultiSourceIconModel base, String? name) {
   final String key = (name ?? '').trim().toLowerCase();
   if (!RegExp(r'^[a-z0-9_]+$').hasMatch(key)) return base;
-  MaterialIconStyle style = MaterialIconStyle.filled;
+  // A bare name keeps the node's style (a bound `circle` on an outlined
+  // circle stays outlined); a suffix (`_outlined`...) sets it.
+  final IconModel? current = base.icon;
+  MaterialIconStyle style = current is MaterialIcon
+      ? current.style
+      : MaterialIconStyle.filled;
   String iconName = key;
   for (final (String suffix, MaterialIconStyle suffixStyle) in const [
     ('_outlined', MaterialIconStyle.outlined),

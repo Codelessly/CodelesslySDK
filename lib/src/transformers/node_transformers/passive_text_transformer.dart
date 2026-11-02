@@ -166,16 +166,30 @@ class TextNodeBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final SizeFit hFit = node.horizontalFit;
     final SizeFit vFit = node.verticalFit;
+    // A flexible width is the text's own width, capped by the space its
+    // Flexible parent offers (min(flex share, content), as in the editor):
+    // a label followed by a badge keeps the badge right after it.
+    final bool hugsWidth =
+        hFit == SizeFit.shrinkWrap || hFit == SizeFit.flexible;
     final bool minHeight =
         vFit != SizeFit.shrinkWrap && vFit != SizeFit.expanded;
 
+    // Scale-down text stays on its lines and shrinks as a whole to fit the
+    // width it is given.
+    final Widget content = node.overflow == TextOverflowC.scaleDown
+        ? FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: alignmentOf(node),
+            child: child,
+          )
+        : child;
     Widget box = Align(
       alignment: alignmentOf(node, TextUtils.textAlignOf(node, context)),
       // Hug the text on an axis that does not fill its parent, so a loose
       // parent does not stretch the box; tight constraints still size it.
-      widthFactor: hFit == SizeFit.shrinkWrap ? 1 : null,
+      widthFactor: hugsWidth ? 1 : null,
       heightFactor: vFit == SizeFit.expanded ? null : 1,
-      child: child,
+      child: content,
     );
     if (minHeight) {
       box = TextMinHeight(minHeight: node.basicBoxLocal.height, child: box);
@@ -183,7 +197,7 @@ class TextNodeBox extends StatelessWidget {
     if (hFit == SizeFit.shrinkWrap) box = TextIntrinsicSlack(child: box);
     return SizedBox(
       width: switch (hFit) {
-        SizeFit.shrinkWrap => null,
+        SizeFit.shrinkWrap || SizeFit.flexible => null,
         SizeFit.expanded => double.infinity,
         _ => node.basicBoxLocal.width,
       },
