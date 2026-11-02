@@ -1001,4 +1001,87 @@ void main() {
       });
     }
   });
+
+  group('an aligned child larger than its frame', () {
+    // Decorative blobs 1.5x the screen, placed by alignment values outside
+    // [-1, 1]. The editor's solver keeps their fixed size and places them at
+    // Alignment.inscribe's offset, (parent - child) / 2 * (1 + a), so they
+    // must not be squashed to the frame at design size.
+    const Map<String, AlignmentData> blobs = {
+      'aqua': AlignmentData(-1.6, -1.15),
+      'lilac': AlignmentData(-0.6, 1.5),
+      'peach': AlignmentData(1.7, 0.1),
+    };
+    double inscribe(double parent, double child, double a) =>
+        (parent - child) / 2 * (1 + a);
+
+    for (final (Size screen, double size) in const [
+      (Size(390, 844), 585.0),
+      (Size(834, 1112), 1251.0),
+    ]) {
+      testWidgets('keeps its size and overflows at the Align offset on '
+          '$screen', (tester) async {
+        final children = <BaseNode>[
+          for (final MapEntry(:key, :value) in blobs.entries)
+            FrameNode(
+              id: key,
+              name: key,
+              basicBoxLocal: NodeBox(0, 0, size, size),
+              children: const [],
+              alignment: AlignmentModel(value),
+              edgePins: const EdgePinsModel(
+                left: 0,
+                top: 0,
+                right: null,
+                bottom: null,
+              ),
+              clipsContent: false,
+            )..parentID = 'sky',
+        ];
+        final sky = frame(
+          'sky',
+          NodeBox(0, 0, screen.width, screen.height),
+          children,
+        );
+        final rects = await pump(tester, sky, children, screen: screen);
+        expect(rects['sky'], Offset.zero & screen);
+        for (final MapEntry(:key, :value) in blobs.entries) {
+          final Rect r = rects[key]!;
+          expect(r.size, Size(size, size), reason: key);
+          expect(
+            r.left,
+            closeTo(inscribe(screen.width, size, value.x), 0.1),
+            reason: '$key left',
+          );
+          expect(
+            r.top,
+            closeTo(inscribe(screen.height, size, value.y), 0.1),
+            reason: '$key top',
+          );
+        }
+        if (screen.width == 390) {
+          expect(rects['aqua']!.left, closeTo(58.5, 0.1));
+          expect(rects['aqua']!.top, closeTo(-19.425, 0.1));
+        }
+      });
+    }
+
+    testWidgets('designed wider than a smaller screen it still shrinks', (
+      tester,
+    ) async {
+      // No overhang at design size: shown on a narrower screen the aligned
+      // child is limited to the frame, as before.
+      final child = rect(
+        'card',
+        NodeBox(270, 100, 900, 200),
+        alignment: AlignmentModel.center,
+      );
+      final root = frame('frame', NodeBox(0, 0, 1440, 900), [child]);
+      final rects = await pump(tester, root, [
+        child,
+      ], screen: const Size(390, 844));
+      expect(rects['card']!.width, 390);
+      expect(rects['card']!.left, 0);
+    });
+  });
 }
