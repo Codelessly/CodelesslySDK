@@ -7,6 +7,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
@@ -1047,6 +1048,11 @@ class SvgIcon extends StatelessWidget {
   final double? grade;
   final double? opticalSize;
 
+  /// The client icon SVGs load with, or null for a new one per load. Tests
+  /// set it: their binding answers every request with a 400.
+  @visibleForTesting
+  static http.Client? httpClient;
+
   const SvgIcon({
     super.key,
     required this.icon,
@@ -1113,14 +1119,27 @@ class SvgIcon extends StatelessWidget {
       return SizedBox.square(dimension: dimension);
     }
 
+    // A Material Symbol shows Flutter's bundled icon of its name while its
+    // SVG loads and when it can't, instead of nothing.
+    final int? standIn = materialSymbolFlutterCodepoint(icon, fill: fill);
+    Widget fallback(BuildContext context) => standIn == null
+        ? const SizedBox.shrink()
+        : Icon(
+            IconData(standIn, fontFamily: 'MaterialIcons'),
+            size: dimension,
+            color: iconColor,
+          );
+
     return SizedBox.square(
       dimension: dimension,
       child: SvgPicture.network(
         url,
         fit: fit,
         colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+        placeholderBuilder: standIn == null ? null : fallback,
+        httpClient: httpClient,
         // Offline or unavailable icons leave their space empty.
-        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+        errorBuilder: (context, error, stackTrace) => fallback(context),
       ),
     );
   }
