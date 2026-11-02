@@ -956,7 +956,7 @@ abstract class WidgetNodeTransformerManager
     final num value = rounded == rounded.roundToDouble()
         ? rounded.round()
         : rounded;
-    if (variable.value.value == value) return;
+    if ('${variable.value.value}' == '$value') return;
     variable.value = variable.value.copyWith(value: value);
   }
 
