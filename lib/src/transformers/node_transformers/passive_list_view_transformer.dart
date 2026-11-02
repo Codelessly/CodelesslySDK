@@ -170,6 +170,23 @@ class PassiveListViewWidget extends StatelessWidget {
     return (named ?? node.properties.wrapAlignment).flutterWrapAlignment;
   }
 
+  /// The space between items of a wrapping list: its `wrapSpacing`
+  /// binding (a number), e.g. none between the characters of a Japanese
+  /// phrase and a word space elsewhere, else [fallback], its own setting.
+  double wrapSpacingOf(BuildContext context, double fallback) {
+    if (node.variables['wrapSpacing'] == null) return fallback;
+    final num? bound = PropertyValueDelegate.getPropertyValue<num>(
+      node,
+      'wrapSpacing',
+      scopedValues:
+          VariablePreview.scopeOf(node, context: context) ??
+          ScopedValues.of(context),
+    );
+    return bound == null || bound.isNaN
+        ? fallback
+        : math.max(0, bound.toDouble());
+  }
+
   Widget wrappedList(
     BuildContext context,
     int itemCount,
@@ -184,7 +201,7 @@ class PassiveListViewWidget extends StatelessWidget {
       child: Wrap(
         direction: node.scrollDirection.flutterAxis,
         alignment: wrapAlignmentOf(context),
-        spacing: listWrapSpacing(node),
+        spacing: wrapSpacingOf(context, listWrapSpacing(node)),
         runSpacing: math.max(0, node.properties.runSpacing),
         children: node.reverse ? items.reversed.toList() : items,
       ),
@@ -236,7 +253,7 @@ class PassiveListViewWidget extends StatelessWidget {
     itemCount: itemCount,
     itemBuilder: builder,
     direction: node.scrollDirection.flutterAxis,
-    spacing: node.properties.wrapSpacing,
+    spacing: wrapSpacingOf(context, node.properties.wrapSpacing),
     runSpacing: node.properties.wrapRunSpacing,
     alignment: wrapAlignmentOf(context),
     padding: node.padding.flutterEdgeInsets,

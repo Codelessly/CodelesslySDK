@@ -32,4 +32,18 @@ void main() {
     final Offset list = tester.getTopLeft(find.byType(WrapNodeBox));
     expect(tester.getRect(items().at(0)).shift(-list).left, 10);
   });
+
+  // Japanese runs its characters together; other phrases keep a word gap.
+  testWidgets('a bound wrap spacing replaces the gap', (tester) async {
+    final List<BaseNode> nodes = wrapList(itemCount: 2);
+    final ListViewNode list = ListViewNode.fromJson({
+      ...nodes.first.toJson(),
+      'variables': {'wrapSpacing': r'${= 0}'},
+    })..parentID = kRootNode;
+    await pump(tester, [list, nodes.last]);
+    expect(
+      tester.getRect(items().at(1)).left - tester.getRect(items().at(0)).right,
+      0,
+    );
+  });
 }
