@@ -456,7 +456,11 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
       final String? path = CanvasLocation.layoutPathOf(model, layoutId);
       // A catch-all (`*`) screen takes the paths no route matches; see
       // [_buildNotFoundPage].
-      if (path != null && !CanvasLocation.segmentsOf(path).contains('*')) {
+      final List<String> segments = path == null
+          ? const []
+          : CanvasLocation.segmentsOf(path);
+      if (path != null &&
+          !(segments.isNotEmpty && CanvasLocation.isCatchAll(segments.last))) {
         add(path, layoutId);
       }
     }

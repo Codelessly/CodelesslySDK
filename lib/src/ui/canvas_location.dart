@@ -39,28 +39,32 @@ abstract final class CanvasLocation {
     return node is CanvasNode ? node : null;
   }
 
+  /// Whether [segment] of a path pattern is a catch-all: `*name` (or a bare
+  /// `*`, named `path`) as the last segment takes the rest of the location,
+  /// one segment or more, such as a not-found screen at `*path`.
+  static bool isCatchAll(String segment) => segment.startsWith('*');
+
+  /// The param name of catch-all [segment] (see [isCatchAll]).
+  static String catchAllName(String segment) =>
+      segment.length > 1 ? segment.substring(1) : 'path';
+
   /// The params [pattern] takes from [segments], or null when it does not
   /// match them.
   static Map<String, String>? matchPattern(
     List<String> pattern,
     List<String> segments,
   ) {
-    // A last segment `*` takes any rest of the path (even none) as the
-    // `path` param: a not-found screen at `*` catches every unknown path.
-    if (pattern.isNotEmpty && pattern.last == '*') {
-      final List<String> head = pattern.sublist(0, pattern.length - 1);
-      if (segments.length < head.length) return null;
-      final Map<String, String>? params = matchPattern(
-        head,
-        segments.sublist(0, head.length),
-      );
-      if (params == null) return null;
-      return {...params, 'path': '/${segments.skip(head.length).join('/')}'};
+    final bool catchAll = pattern.isNotEmpty && isCatchAll(pattern.last);
+    if (catchAll
+        ? segments.length < pattern.length
+        : pattern.length != segments.length) {
+      return null;
     }
-    if (pattern.length != segments.length) return null;
     final Map<String, String> params = {};
     for (int i = 0; i < pattern.length; i++) {
-      if (pattern[i].startsWith(':') && pattern[i].length > 1) {
+      if (catchAll && i == pattern.length - 1) {
+        params[catchAllName(pattern[i])] = segments.sublist(i).join('/');
+      } else if (pattern[i].startsWith(':') && pattern[i].length > 1) {
         params[pattern[i].substring(1)] = segments[i];
       } else if (pattern[i] != segments[i]) {
         return null;
@@ -113,7 +117,8 @@ abstract final class CanvasLocation {
   /// `guide/bat-star?x=1` for a canvas at `guide/:id`. Its params are the path
   /// params (`id: bat-star`) over the query params (`x: 1`). When several
   /// canvases match, the one with the most literal segments wins, so
-  /// `guide/new` beats `guide/:id`. Null when no canvas matches.
+  /// `guide/new` beats `guide/:id`, and a catch-all (`*path`) loses to any
+  /// other match. Null when no canvas matches.
   static CanvasLocationMatch? match(SDKPublishModel model, String location) {
     final Uri uri = Uri.parse(location.trim());
     final List<String> segments = uri.pathSegments
@@ -121,33 +126,21 @@ abstract final class CanvasLocation {
         .toList();
     if (segments.isEmpty) return null;
 
-    // A link naming a screen by its id isn't an unknown path.
-    final bool namesScreen =
-        segments.length == 1 &&
-        layoutIdsOf(model).any(
-          (layoutId) =>
-              layoutId == segments.single ||
-              canvasIdsOf(model, layoutId).contains(segments.single),
-        );
-
     CanvasLocationMatch? best;
-    // Literal segments, doubled; a `*` pattern scores one less than the same
-    // literals without one, so any exact path beats a catch-all.
-    int bestLiterals = -1;
+    int bestRank = -1;
     for (final String layoutId in layoutIdsOf(model)) {
       for (final String canvasId in canvasIdsOf(model, layoutId)) {
         final String? path = pathOf(model, canvasId);
         if (path == null) continue;
         final List<String> pattern = segmentsOf(path);
-        final bool catchAll = pattern.isNotEmpty && pattern.last == '*';
-        if (catchAll && namesScreen) continue;
+        // A catch-all only takes what no other path matches.
+        final bool catchAll = pattern.isNotEmpty && isCatchAll(pattern.last);
         final Map<String, String>? params = matchPattern(pattern, segments);
         if (params == null) continue;
-        final int literals = catchAll
-            ? 2 * (pattern.length - 1 - (params.length - 1))
-            : 2 * (pattern.length - params.length) + 1;
-        if (literals <= bestLiterals) continue;
-        bestLiterals = literals;
+        final int literals = pattern.length - params.length;
+        final int rank = (catchAll ? 0 : 1000) + literals;
+        if (rank <= bestRank) continue;
+        bestRank = rank;
         best = CanvasLocationMatch(
           layoutId: layoutId,
           canvasId: canvasId,
@@ -186,7 +179,11 @@ abstract final class CanvasLocation {
     final Map<String, dynamic> query = {...params};
     final List<String> segments = [];
     for (final String segment in segmentsOf(pattern)) {
-      if (segment.startsWith(':') && segment.length > 1) {
+      if (isCatchAll(segment)) {
+        final String value = _stringOf(query.remove(catchAllName(segment)));
+        if (value.isEmpty) return null;
+        segments.addAll(segmentsOf(value));
+      } else if (segment.startsWith(':') && segment.length > 1) {
         final String value = _stringOf(query.remove(segment.substring(1)));
         if (value.isEmpty) return null;
         segments.add(value);
