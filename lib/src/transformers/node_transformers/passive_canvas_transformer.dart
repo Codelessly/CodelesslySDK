@@ -1003,9 +1003,32 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       clock.release(onTick);
     }
     _clocks.clear();
+    for (final (Listenable listenable, VoidCallback listener) in _clockWatches) {
+      listenable.removeListener(listener);
+    }
+    _clockWatches.clear();
   }
 
   final List<(BeatClock, void Function(int, double, double))> _clocks = [];
+  final List<(Listenable, VoidCallback)> _clockWatches = [];
+
+  /// The variables a clock's run condition [when] reads.
+  Iterable<Listenable> _runConditionVariables(String? when) {
+    if (when == null || when.trim().isEmpty) return const [];
+    final Set<String> names = {
+      if (FormulaEvaluator.exactExpression(when) case final String expression)
+        for (final String path in FormulaEvaluator.referencedPaths(expression))
+          path.split(RegExp(r'[.\[]')).first
+      else
+        for (final Match match in RegExp(
+          r'\$\{\s*([A-Za-z_][A-Za-z0-9_]*)',
+        ).allMatches(when))
+          match.group(1)!,
+    };
+    return context.read<CodelesslyContext>().variables.values.where(
+      (variable) => names.contains(variable.value.name),
+    );
+  }
 
   /// Runs each Beat Clock reaction on the sound clock while its run
   /// condition holds (see [BeatClock]), with `${result.tick}`,
@@ -1045,6 +1068,16 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
         onTick: onTick,
       );
       _clocks.add((clock, onTick));
+      // The condition is checked when what it reads changes, not only on
+      // the next poll: actions that stop and start the clock in one go
+      // (playing false, then true) restart the count from tick 0.
+      for (final Listenable variable in _runConditionVariables(
+        reactions.first.trigger.runWhen,
+      )) {
+        void listener() => clock.poll();
+        variable.addListener(listener);
+        _clockWatches.add((variable, listener));
+      }
     }
   }
 
