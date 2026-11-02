@@ -1,4 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/utils/flutter_icons_data_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,5 +37,22 @@ void main() {
       flutterMaterialCodepoint(icon('no_such_icon', 1, MaterialIconStyle.filled)),
       isNull,
     );
+  });
+
+  testWidgets('a Material Symbol Flutter ships draws its bundled glyph', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SvgIcon(
+          icon: MaterialSymbol(
+            codepoint: 0,
+            fontFamily: 'MaterialSymbols',
+            name: 'close',
+            style: MaterialSymbolStyle.rounded,
+          ),
+        ),
+      ),
+    );
+    final Icon drawn = tester.widget(find.byType(Icon));
+    expect(drawn.icon!.codePoint, Icons.close_rounded.codePoint);
   });
 }
