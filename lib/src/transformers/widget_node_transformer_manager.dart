@@ -13,6 +13,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../utils/material_icons_by_name.dart';
 
 typedef LayoutRetrieverBuilder = Widget Function(
   BuildContext context,
@@ -227,8 +228,9 @@ abstract class WidgetNodeTransformerManager
 
   /// The motion [node] shows now: its [BaseNode.motion] with the values
   /// bound through `motion.<name>` variables resolved from [scopedValues],
-  /// and `motion.replayKey` resolved to text. Null when the node doesn't
-  /// move.
+  /// the settings in [MotionModel.settings] (duration, delay, curve), and
+  /// `motion.replayKey` and `motion.pulseKey` resolved to text. Null when
+  /// the node doesn't move.
   static MotionModel? resolveMotion(
     BaseNode node, {
     required ScopedValues scopedValues,
@@ -251,23 +253,30 @@ abstract class WidgetNodeTransformerManager
       if (number == null || !number.isFinite) continue;
       motion = (motion ?? MotionModel.none).withValue(property, number);
     }
-    final String delayKey = MotionModel.variableKey(MotionModel.delayProperty);
-    if (node.variables.containsKey(delayKey)) {
+    final String pathKey = MotionModel.variableKey(MotionModel.pathProperty);
+    if (node.variables.containsKey(pathKey)) {
       final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
         node,
-        delayKey,
+        pathKey,
         scopedValues: scopedValues,
       );
-      final num? ms = switch (value) {
-        num n => n,
-        String s => num.tryParse(s.trim()),
-        _ => null,
-      };
-      if (ms != null && ms.isFinite) {
-        motion = (motion ?? MotionModel.none).copyWith(
-          delayMs: max(0, ms.round()),
-        );
-      }
+      final String data = value?.toString().trim() ?? '';
+      motion = (motion ?? MotionModel.none).copyWith(
+        path: data,
+        clearPath: data.isEmpty,
+      );
+    }
+    // The transition's duration, delay and curve, e.g. a slow spring in
+    // and a quick ease out: `${= open ? 'elasticOut' : 'easeIn'}`.
+    for (final String setting in MotionModel.settings) {
+      final String key = MotionModel.variableKey(setting);
+      if (!node.variables.containsKey(key)) continue;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      motion = (motion ?? MotionModel.none).withSetting(setting, value);
     }
     const String replay = MotionModel.replayKeyProperty;
     if (node.variables.containsKey(MotionModel.variableKey(replay))) {
@@ -279,6 +288,18 @@ abstract class WidgetNodeTransformerManager
       motion = (motion ?? MotionModel.none).copyWith(
         replayKey: value?.toString(),
         clearReplayKey: value == null,
+      );
+    }
+    const String pulse = MotionModel.pulseKeyProperty;
+    if (node.variables.containsKey(MotionModel.variableKey(pulse))) {
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        MotionModel.variableKey(pulse),
+        scopedValues: scopedValues,
+      );
+      motion = (motion ?? MotionModel.none).copyWith(
+        pulseKey: value?.toString(),
+        clearPulseKey: value == null,
       );
     }
     return motion;
@@ -461,7 +482,11 @@ abstract class WidgetNodeTransformerManager
   /// Convenience method to handle widget margins.
   Widget applyWidgetMargins(BaseNode node, Widget widget) {
     if (node.margin == EdgeInsetsModel.zero) return widget;
-    return Padding(padding: node.margin.flutterEdgeInsets, child: widget);
+    // Directional: margins mirror in a right-to-left layout.
+    return Padding(
+      padding: node.margin.flutterEdgeInsetsDirectional,
+      child: widget,
+    );
   }
 
   /// Convenience method to handle widget constraints.
@@ -689,6 +714,21 @@ abstract class WidgetNodeTransformerManager
     if (drag.track case final DragTrackModel track) {
       return _wrapWithTrack(context, node, drag, track, reactions, child);
     }
+
+    double rest(String key, double fallback) {
+      if (!node.variables.containsKey(key)) return fallback;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: ScopedValues.of(context),
+      );
+      return switch (value) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()) ?? fallback,
+        _ => fallback,
+      };
+    }
+
     return NodeDrag(
       nodeId: node.id,
       drag: drag,
@@ -721,8 +761,29 @@ abstract class WidgetNodeTransformerManager
         reactions: reactions,
         result: result,
       ),
+      rest: Offset(
+        rest(DragModel.restXVariableKey, drag.restX),
+        rest(DragModel.restYVariableKey, drag.restY),
+      ),
+      onValues: drag.shareAs.trim().isEmpty
+          ? null
+          : (values) => shareDragValues(context, drag.shareAs.trim(), values),
       child: child,
     );
+  }
+
+  /// Writes a drag's live [values] into the variable named [name], so nodes
+  /// outside the dragged one can follow it (see [DragModel.shareAs]).
+  static void shareDragValues(
+    BuildContext context,
+    String name,
+    DragValues values,
+  ) {
+    final CodelesslyContext? codelessly = context.read<CodelesslyContext?>();
+    final ValueNotifier<VariableData>? variable = codelessly
+        ?.findVariableByName(name);
+    if (variable == null) return;
+    variable.value = variable.value.copyWith(value: values.toMap());
   }
 
   /// Draws [node] where its drag track puts it for its variable's value,
@@ -1341,27 +1402,21 @@ class SvgIcon extends StatelessWidget {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
     // Material Icons ship with Flutter; use their bundled glyph offline.
-    final IconModel model = icon;
-    if (model is MaterialIcon && model.codepoint > 0) {
-      // The stored codepoint comes from Google's icon catalog, whose web
-      // font numbers icons differently from Flutter's bundled font (av_timer
-      // is 0xe01b there, three_k here): look the glyph up by name.
-      final String suffix = switch (model.style) {
-        MaterialIconStyle.filled => '',
-        MaterialIconStyle.outlined => '_outlined',
-        MaterialIconStyle.rounded => '_rounded',
-        MaterialIconStyle.sharp => '_sharp',
-        _ => '',
-      };
-      final int codepoint =
-          flutterIconsDataMap['${model.name}$suffix'] ??
-          flutterIconsDataMap[model.name] ??
-          model.codepoint;
-      return Icon(
-        IconData(codepoint, fontFamily: model.fontFamily),
-        size: dimension,
-        color: iconColor,
-      );
+    // Icon models hold the codepoints of Google's Material Icons fonts, which
+    // aren't the codepoints of Flutter's MaterialIcons font, so the glyph is
+    // found by name and style.
+    if (icon case final MaterialIcon material) {
+      final IconData? glyph = materialIconsByName[material.styledName];
+      if (glyph != null) {
+        return Icon(glyph, size: dimension, color: iconColor);
+      }
+      if (material.codepoint > 0) {
+        return Icon(
+          IconData(material.codepoint, fontFamily: material.fontFamily),
+          size: dimension,
+          color: iconColor,
+        );
+      }
     }
 
     final url = icon.toSvgUrl(
