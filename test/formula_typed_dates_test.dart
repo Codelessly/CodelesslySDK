@@ -20,4 +20,25 @@ void main() {
     expect(eval('indexOf("Dining Out", "Out")'), 7);
     expect(eval('indexOf("Dining", "x")'), -1);
   });
+
+  test('groupBy groups in order of first appearance', () {
+    final Object? groups = FormulaEvaluator.evaluate(
+      'groupBy(rows, r => r.date)',
+      (path) => path == 'rows'
+          ? [
+              {'date': '2026-10-30', 'a': 1},
+              {'date': '2026-10-29', 'a': 2},
+              {'date': '2026-10-30', 'a': 3},
+            ]
+          : null,
+    );
+    expect(groups, [
+      {'key': '2026-10-30', 'items': [{'date': '2026-10-30', 'a': 1}, {'date': '2026-10-30', 'a': 3}], 'count': 2},
+      {'key': '2026-10-29', 'items': [{'date': '2026-10-29', 'a': 2}], 'count': 1},
+    ]);
+    expect(eval('groupBy([1, 2, 3, 4], x => x > 2)'), [
+      {'key': false, 'items': [1, 2], 'count': 2},
+      {'key': true, 'items': [3, 4], 'count': 2},
+    ]);
+  });
 }
