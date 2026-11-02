@@ -2291,6 +2291,14 @@ extension StrokeCapEnumExt on StrokeCapEnum {
   };
 }
 
+extension StrokeJoinEnumExt on StrokeJoinEnum {
+  StrokeJoin get flutterStrokeJoin => switch (this) {
+    StrokeJoinEnum.miter => StrokeJoin.miter,
+    StrokeJoinEnum.round => StrokeJoin.round,
+    StrokeJoinEnum.bevel => StrokeJoin.bevel,
+  };
+}
+
 extension BlendModeCExt on BlendModeC {
   BlendMode get flutterBlendMode => switch (this) {
     BlendModeC.src => BlendMode.src,
