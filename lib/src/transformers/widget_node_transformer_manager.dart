@@ -1526,18 +1526,9 @@ class SvgIcon extends StatelessWidget {
 /// Whether [icon] is directional: Flutter's Material icon of the same name
 /// matches the text direction (an arrow or chevron), so it is mirrored in a
 /// right-to-left layout wherever it is drawn from.
-bool mirrorsInRtl(IconModel icon) {
-  final String name = icon.name.toLowerCase();
-  final IconData? glyph = switch (icon) {
-    MaterialSymbol(:final MaterialSymbolStyle style) =>
-      materialIconsByName['${name}_${style.name.toLowerCase()}'] ??
-          materialIconsByName[name],
-    MaterialIcon() =>
-      materialIconsByName[icon.styledName] ?? materialIconsByName[name],
-    _ => null,
-  };
-  return glyph?.matchTextDirection ?? false;
-}
+bool mirrorsInRtl(IconModel icon) =>
+    (icon is MaterialIcon || icon is MaterialSymbol) &&
+    directionalMaterialIcons.contains(icon.name.toLowerCase());
 
 class SvgIconImage extends StatelessWidget {
   final String? url;
