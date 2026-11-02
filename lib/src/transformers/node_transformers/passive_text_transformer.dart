@@ -195,6 +195,7 @@ class TextNodeBox extends StatelessWidget {
       box = TextMinHeight(minHeight: node.basicBoxLocal.height, child: box);
     }
     if (hFit == SizeFit.shrinkWrap) box = TextIntrinsicSlack(child: box);
+    box = RemeasureOnFontsChange(child: box);
     return SizedBox(
       width: switch (hFit) {
         SizeFit.shrinkWrap || SizeFit.flexible => null,
@@ -231,6 +232,49 @@ class RenderTextIntrinsicSlack extends RenderProxyBox {
   @override
   double computeMaxIntrinsicWidth(double height) =>
       slackWidth(super.computeMaxIntrinsicWidth(height));
+}
+
+/// Rebuilds [child]'s render objects when the system fonts change (a web
+/// font such as a Google Font finished loading).
+///
+/// Flutter's RenderParagraph measures its intrinsic sizes with a second
+/// TextPainter that a font change doesn't invalidate: only the painter it
+/// lays out with is. So a row or column that sizes text by its intrinsic
+/// width (a shrink-wrapped column stretching its children) kept the width
+/// measured with the fallback font after the real one loaded, and on the
+/// published web app one-line texts lost their last word (`Bluebird Coffee`
+/// drew as `Bluebird`). New render objects measure afresh.
+class RemeasureOnFontsChange extends StatefulWidget {
+  const RemeasureOnFontsChange({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<RemeasureOnFontsChange> createState() => _RemeasureOnFontsChangeState();
+}
+
+class _RemeasureOnFontsChangeState extends State<RemeasureOnFontsChange> {
+  int _generation = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    PaintingBinding.instance.systemFonts.addListener(_fontsChanged);
+  }
+
+  @override
+  void dispose() {
+    PaintingBinding.instance.systemFonts.removeListener(_fontsChanged);
+    super.dispose();
+  }
+
+  void _fontsChanged() {
+    if (mounted) setState(() => _generation++);
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      KeyedSubtree(key: ValueKey<int>(_generation), child: widget.child);
 }
 
 /// Gives text a minimum height, its design height, that it may grow past.
