@@ -139,20 +139,25 @@ class TextNodeBox extends StatelessWidget {
 
   const TextNodeBox({super.key, required this.node, required this.child});
 
-  /// Where text sits in its box for [node]'s text alignment. Start and end
-  /// follow the text direction, like [TextAlign.start] and [TextAlign.end].
-  static AlignmentGeometry alignmentOf(TextNode node) {
+  /// Where text sits in its box for [node]'s text alignment. Left and start,
+  /// right and end follow the text direction, like the lines do.
+  static AlignmentGeometry alignmentOf(
+    TextNode node, [
+    TextAlignHorizontalEnum? horizontal,
+  ]) {
     final double y = switch (node.textAlignVertical) {
       TextAlignVerticalEnum.top => -1,
       TextAlignVerticalEnum.center => 0,
       TextAlignVerticalEnum.bottom => 1,
     };
-    return switch (node.textAlignHorizontal) {
+    return switch (horizontal ?? node.textAlignHorizontal) {
+      // Left and right are the start and end edges, as for the lines
+      // (TextAlign.start / end), so a right-to-left layout mirrors both.
       TextAlignHorizontalEnum.left ||
-      TextAlignHorizontalEnum.justified => Alignment(-1, y),
-      TextAlignHorizontalEnum.center => Alignment(0, y),
-      TextAlignHorizontalEnum.right => Alignment(1, y),
+      TextAlignHorizontalEnum.justified ||
       TextAlignHorizontalEnum.start => AlignmentDirectional(-1, y),
+      TextAlignHorizontalEnum.center => Alignment(0, y),
+      TextAlignHorizontalEnum.right ||
       TextAlignHorizontalEnum.end => AlignmentDirectional(1, y),
     };
   }
@@ -179,7 +184,7 @@ class TextNodeBox extends StatelessWidget {
           )
         : child;
     Widget box = Align(
-      alignment: alignmentOf(node),
+      alignment: alignmentOf(node, TextUtils.textAlignOf(node, context)),
       // Hug the text on an axis that does not fill its parent, so a loose
       // parent does not stretch the box; tight constraints still size it.
       widthFactor: hugsWidth ? 1 : null,

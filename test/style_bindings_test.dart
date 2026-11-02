@@ -285,9 +285,57 @@ void main() {
     });
 
     test('parseTextDecoration reads the API and Flutter names', () {
-      expect(StyleBindings.parseTextDecoration('lineThrough'), TextDecorationEnum.strikethrough);
-      expect(StyleBindings.parseTextDecoration('underline'), TextDecorationEnum.underline);
+      expect(
+        StyleBindings.parseTextDecoration('lineThrough'),
+        TextDecorationEnum.strikethrough,
+      );
+      expect(
+        StyleBindings.parseTextDecoration('underline'),
+        TextDecorationEnum.underline,
+      );
       expect(StyleBindings.parseTextDecoration('nope'), isNull);
+    });
+
+    testWidgets('fontSize follows its formula, with fontWeight', (
+      tester,
+    ) async {
+      final big = boolVariable('big', false);
+      final host = Host(
+        text({
+          'fontSize': r'${= big ? 28 : 14}',
+          'fontWeight': r'${= big ? 700 : 400}',
+        }),
+        variables: {'big': big},
+      );
+      await host.pump(tester);
+      expect((host.styled as TextNode).textMixedProps.single.fontSize, 14);
+
+      big.set(big.value.copyWith(value: true));
+      await tester.pump();
+      final StartEndProp span = (host.styled as TextNode).textMixedProps.single;
+      expect(span.fontSize, 28);
+      expect(span.fontName.weight, FontWeightNumeric.w700);
+
+      final List<double?> sizes = [];
+      for (final RichText text in tester.widgetList<RichText>(
+        find.byType(RichText),
+      )) {
+        text.text.visitChildren((span) {
+          sizes.add(span.style?.fontSize);
+          return true;
+        });
+      }
+      expect(sizes, contains(28));
+      expect(sizes, isNot(contains(14)));
+    });
+
+    test('parseFontSize reads positive numbers and pixel text', () {
+      expect(StyleBindings.parseFontSize(18), 18);
+      expect(StyleBindings.parseFontSize('18.5'), 18.5);
+      expect(StyleBindings.parseFontSize(' 24px '), 24);
+      expect(StyleBindings.parseFontSize(0), isNull);
+      expect(StyleBindings.parseFontSize('big'), isNull);
+      expect(StyleBindings.parseFontSize(null), isNull);
     });
 
     test('parseFontWeight reads numbers, wNNN and names', () {
