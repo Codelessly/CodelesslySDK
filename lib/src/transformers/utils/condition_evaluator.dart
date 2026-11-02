@@ -331,10 +331,15 @@ class ConditionEvaluator<R extends Object>
 
   @override
   R? visitFocusAction(FocusAction action) => null;
+
+  @override
   R? visitControlDragAction(ControlDragAction action) => null;
 
   @override
   R? visitSpeakAction(SpeakAction action) => null;
+
+  @override
+  R? visitScrollToAction(ScrollToAction action) => null;
 
   @override
   R? visitPlaySoundAction(PlaySoundAction action) => null;
@@ -506,6 +511,11 @@ class ConditionPrinter
 
   @override
   void visitCopyToClipboardAction(CopyToClipboardAction action) {}
+
+  @override
+  void visitScrollToAction(ScrollToAction action) {
+    _buffer.writeln('\tScroll to: ${action.nodeId}');
+  }
 
   @override
   void visitFocusAction(FocusAction action) {

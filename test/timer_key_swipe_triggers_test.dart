@@ -59,6 +59,18 @@ void main() {
     expect(TriggerModel(type: TriggerType.timer).effectiveIntervalMs, 1000);
   });
 
+  test('Key labels normalize so Space and arrows match their triggers', () {
+    String pressed(LogicalKeyboardKey k) =>
+        normalizeKeyLabel(keyTriggerLabel(k));
+    expect(pressed(LogicalKeyboardKey.space), normalizeKeyLabel('Space'));
+    expect(pressed(LogicalKeyboardKey.space), isNotEmpty);
+    expect(
+      pressed(LogicalKeyboardKey.arrowRight),
+      normalizeKeyLabel('Arrow Right'),
+    );
+    expect(pressed(LogicalKeyboardKey.keyA), normalizeKeyLabel('A'));
+  });
+
   test('Canvases offer timer and key press, shapes offer swipes', () {
     expect(
       canvas([]).triggerTypes,

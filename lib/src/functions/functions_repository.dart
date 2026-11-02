@@ -55,6 +55,14 @@ enum ApiRequestType {
   }
 }
 
+/// What a [SpeakAction] speaks, its bindings resolved.
+typedef ResolvedSpeech = ({
+  String text,
+  String language,
+  double rate,
+  double pitch,
+});
+
 class FunctionsRepository {
   static const String name = 'FunctionsRepository';
 
@@ -87,7 +95,10 @@ class FunctionsRepository {
         return showDialogAction(context, action as ShowDialogAction);
       case ActionType.closeModal:
         final route = ModalRoute.of(context);
-        if (route is DialogRoute && route.isCurrent) {
+        // Every dialog presentation is a popup route: a dialog's DialogRoute,
+        // and the RawDialogRoute that full-screen and popover dialogs open
+        // with showGeneralDialog, which a DialogRoute check missed.
+        if (route is PopupRoute && route.isCurrent) {
           Navigator.of(context).pop();
           return true;
         }
@@ -170,23 +181,9 @@ class FunctionsRepository {
       case ActionType.focus:
         return runFocus(action as FocusAction);
       case ActionType.speak:
-        final SpeakAction speak = action as SpeakAction;
-        if (speak.stop) {
-          Speech.instance.stop();
-          return true;
-        }
-        final ScopedValues scope = ActionChain.scopedValuesOf(context);
-        String text(String value) => PropertyValueDelegate.substituteVariables(
-          value,
-          scopedValues: scope,
-          nullSubstitutionMode: NullSubstitutionMode.emptyString,
-        );
-        return Speech.instance.speak(
-          text(speak.text),
-          language: text(speak.language),
-          rate: speak.rate,
-          pitch: speak.pitch,
-        );
+        return speak(context, action as SpeakAction);
+      case ActionType.scrollTo:
+        return ScrollTargets.scrollTo(action as ScrollToAction);
       case ActionType.playSound:
         return playSound(context, action as PlaySoundAction);
       case ActionType.controlDrag:
@@ -256,6 +253,60 @@ class FunctionsRepository {
     );
     await Clipboard.setData(ClipboardData(text: text));
     return true;
+  }
+
+  /// Speaks the text of [action] in its language at its rate, its variables
+  /// and formulas resolved, replacing anything being spoken; or stops any
+  /// speech when [SpeakAction.stop] is set. Speech runs on [Speech.instance],
+  /// whose state the `speech` variable reads.
+  static bool speak(BuildContext context, SpeakAction action) {
+    if (action.stop) {
+      Speech.instance.stop();
+      return true;
+    }
+    final ResolvedSpeech speech = resolveSpeech(
+      action,
+      ActionChain.scopedValuesOf(context),
+    );
+    if (speech.text.trim().isEmpty) {
+      Speech.instance.stop();
+      return true;
+    }
+    Speech.instance.speak(
+      speech.text,
+      language: speech.language,
+      rate: speech.rate,
+      pitch: speech.pitch,
+    );
+    return true;
+  }
+
+  /// The text, language, rate and pitch [action] speaks with, its variables
+  /// and formulas resolved. A rate or pitch that is not a number falls back
+  /// to `1`; rates are kept within 0.1-10 and pitches within 0-2, the Web
+  /// Speech API's ranges.
+  static ResolvedSpeech resolveSpeech(
+    SpeakAction action,
+    ScopedValues scopedValues,
+  ) {
+    String resolve(String text) => PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
+    double number(String? text, double min, double max) {
+      if (text == null || text.trim().isEmpty) return 1;
+      final num? value = num.tryParse(resolve(text).trim());
+      if (value == null || value.isNaN) return 1;
+      return value.toDouble().clamp(min, max);
+    }
+
+    return (
+      text: resolve(action.text),
+      language: resolve(action.language).trim(),
+      rate: number(action.rate, 0.1, 10),
+      pitch: number(action.pitch, 0, 2),
+    );
   }
 
   /// How long [action] waits: its [DelayAction.duration] formula when that

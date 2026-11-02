@@ -454,7 +454,12 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     final List<String> layoutIds = CanvasLocation.layoutIdsOf(model).toList();
     for (final String layoutId in layoutIds) {
       final String? path = CanvasLocation.layoutPathOf(model, layoutId);
-      if (path != null) add(path, layoutId);
+      // A catch-all (`*path`) is no route of its own: it shows for a
+      // location no route matches (see [_buildNotFoundPage]).
+      if (path != null &&
+          !CanvasLocation.segmentsOf(path).any(CanvasLocation.isCatchAll)) {
+        add(path, layoutId);
+      }
     }
     for (final String layoutId in layoutIds) {
       for (final String canvasId in CanvasLocation.canvasIdsOf(
@@ -524,11 +529,39 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     ),
   );
 
-  Page<dynamic> _buildNotFoundPage(DefaultRoute route) => MaterialPage<void>(
-    key: ValueKey('not-found:${route.path}'),
-    name: route.name,
-    child: _ScreenNotFound(onHome: () => resetTo(const ['/'])),
-  );
+  /// A location no route matches: the app's catch-all screen (a URL path
+  /// ending in `*name`) with the rest of the path as `name`, else the
+  /// built-in not-found screen.
+  Page<dynamic> _buildNotFoundPage(DefaultRoute route) {
+    final SDKPublishModel? model = _model;
+    final CanvasLocationMatch? match = model == null
+        ? null
+        : CanvasLocation.match(model, locationOfRoute(route));
+    if (match != null) {
+      return MaterialPage<void>(
+        key: ValueKey('catch-all:${locationOfRoute(route)}'),
+        name: route.name,
+        child: _buildScreen(
+          match.layoutId,
+          DefaultRoute(
+            path: route.path,
+            queryParameters: route.queryParameters,
+            pathParameters: {
+              for (final MapEntry(:key, :value) in match.params.entries)
+                key: '$value',
+            },
+            metadata: route.metadata,
+          ),
+          const {},
+        ),
+      );
+    }
+    return MaterialPage<void>(
+      key: ValueKey('not-found:${route.path}'),
+      name: route.name,
+      child: _ScreenNotFound(onHome: () => resetTo(const ['/'])),
+    );
+  }
 
   /// The location of screen [destinationId] (a canvas or layout id) opened
   /// with [params]: its URL path with [params] filled in, else its id with
