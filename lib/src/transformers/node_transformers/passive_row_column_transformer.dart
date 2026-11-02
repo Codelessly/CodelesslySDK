@@ -782,7 +782,7 @@ class PassiveRowColumnWidget extends StatelessWidget {
 /// as thick as its thickest child, every stretching child that thick.
 ///
 /// Flutter stretches only to a bounded cross axis. This lays the flex out
-/// once with its children at the start to find its natural thickness, then
+/// once with its children unstretched to find its natural thickness, then
 /// again with that thickness fixed and the stretch back on, instead of an
 /// [IntrinsicHeight] / [IntrinsicWidth]: no intrinsic pass (which a viewport
 /// or LayoutBuilder can't answer, and which can measure text differently
@@ -814,7 +814,9 @@ class RenderHugCross extends RenderProxyBox {
     // Switching the flex's alignment mid-layout is a mutation of a
     // descendant, allowed inside a layout callback (as LayoutBuilder does).
     invokeLayoutCallback<BoxConstraints>(
-      (_) => box.crossAxisAlignment = CrossAxisAlignment.start,
+      // Any non-stretching alignment measures the same; center needs no
+      // text direction for a column's cross axis.
+      (_) => box.crossAxisAlignment = CrossAxisAlignment.center,
     );
     box.layout(loose, parentUsesSize: true);
     final double natural = row ? box.size.height : box.size.width;
