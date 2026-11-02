@@ -248,6 +248,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       state.focusNode.unfocus();
     }
   }
+
   /// The values the field's bindings read: those it was given, else on the
   /// design canvas (no reactions) the editor's preview values, else the
   /// live ones.
@@ -285,8 +286,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     super.didUpdateWidget(oldWidget);
 
     // Update controller text if this text field is bound to a variable.
-    final ScopedValues scopedValues =
-        _scopedValues;
+    final ScopedValues scopedValues = _scopedValues;
 
     // Get the value of bound variable and update the controller text if it's
     // different from the current controller text.
@@ -484,15 +484,29 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     // it can't be sized by a layout builder.
     Widget field = fillsHeight && oneLine && !node.isHorizontalWrap
         ? IntrinsicSafeLayoutBuilder(
-            builder: (context, constraints) => buildField(
-              constraints.hasBoundedHeight
-                  ? decoration.copyWith(
-                      constraints: BoxConstraints.tightFor(
-                        height: constraints.maxHeight,
-                      ),
-                    )
-                  : decoration,
-            ),
+            builder: (context, constraints) {
+              // A collapsed decoration has no box of its own to fill, so the
+              // line would sit at the top: place it by the field's vertical
+              // alignment instead.
+              if (decoration.isCollapsed ?? false) {
+                return Align(
+                  alignment: Alignment(
+                    -1,
+                    properties.textAlignVertical.flutterTextAlignVertical.y,
+                  ),
+                  child: buildField(decoration),
+                );
+              }
+              return buildField(
+                constraints.hasBoundedHeight
+                    ? decoration.copyWith(
+                        constraints: BoxConstraints.tightFor(
+                          height: constraints.maxHeight,
+                        ),
+                      )
+                    : decoration,
+              );
+            },
           )
         : buildField(decoration);
 
