@@ -603,6 +603,12 @@ class FormulaEvaluator {
       'now() → 2026-10-21T14:30:00.000, now("-07:00") at UTC−7',
     ),
     FormulaFunctionDoc(
+      'nowMs',
+      'nowMs()',
+      'nowMs() → 1793356053036, milliseconds since 1970 (time taps: '
+          '60000 / (nowMs() - lastTap) is a tempo)',
+    ),
+    FormulaFunctionDoc(
       'today',
       'today(utcOffset?)',
       'today() → 2026-10-21T00:00:00.000',
@@ -2023,6 +2029,7 @@ final Map<String, _Function> _functions = {
       if (v is Iterable) ...v else ?v,
   ],
   'now': (a) => _dateText(_nowAt(_arg(a, 0))),
+  'nowMs': (a) => (FormulaClock.pinned ?? DateTime.now()).millisecondsSinceEpoch,
   'today': (a) {
     final DateTime now = _nowAt(_arg(a, 0));
     return _dateText(DateTime(now.year, now.month, now.day));
