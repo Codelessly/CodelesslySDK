@@ -517,6 +517,23 @@ abstract class WidgetNodeTransformerManager
     );
   }
 
+  /// Whether [node]'s [BaseNode.drag] takes drags now: its `drag.enabled`
+  /// binding ([DragModel.enabledVariableKey]), true when it has none.
+  static bool dragEnabled(BuildContext context, BaseNode node) {
+    if (!node.variables.containsKey(DragModel.enabledVariableKey)) return true;
+    final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+      node,
+      DragModel.enabledVariableKey,
+      scopedValues: ScopedValues.of(context),
+    );
+    return switch (value) {
+      bool b => b,
+      num n => n != 0,
+      String s => s.trim().toLowerCase() == 'true',
+      _ => true,
+    };
+  }
+
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
     final Widget tappable = _wrapWithTapReactions(context, node, widget);
@@ -532,7 +549,9 @@ abstract class WidgetNodeTransformerManager
     final List<Reaction> onDragEnd = of(TriggerType.dragEnd);
     final List<Reaction> onPointerDown = of(TriggerType.pointerDown);
     final List<Reaction> onPointerUp = of(TriggerType.pointerUp);
-    if (onDrag.isEmpty &&
+    final DragModel? drag = node.drag;
+    if (drag == null &&
+        onDrag.isEmpty &&
         onDragEnd.isEmpty &&
         onPointerDown.isEmpty &&
         onPointerUp.isEmpty) {
@@ -546,6 +565,8 @@ abstract class WidgetNodeTransformerManager
         onDragEnd: onDragEnd,
         onPointerDown: onPointerDown,
         onPointerUp: onPointerUp,
+        drag: drag,
+        dragEnabled: drag == null || dragEnabled(context, node),
         child: tappable,
       ),
     );
@@ -1111,11 +1132,24 @@ class SvgIconImage extends StatelessWidget {
 /// drag, with the drag's total `dx`, `dy` and its `velocityX`, `velocityY`
 /// (px/s). [TriggerType.pointerDown] and [TriggerType.pointerUp] run when a
 /// pointer touches or leaves the node, with its local `x`, `y`.
+///
+/// With a [drag] model the node also follows the pointer, springs back or
+/// flies off when let go, and writes the distance into its variables; the
+/// drag end result then also holds `dismissed` and `direction`. See
+/// [DragModel].
 class ReactionDragDetector extends StatefulWidget {
   final List<Reaction> onDrag;
   final List<Reaction> onDragEnd;
   final List<Reaction> onPointerDown;
   final List<Reaction> onPointerUp;
+
+  /// How the node follows the pointer, or null when it doesn't.
+  final DragModel? drag;
+
+  /// Whether [drag] takes new drags; a drag in progress or a return that
+  /// is playing goes on.
+  final bool dragEnabled;
+
   final Widget child;
 
   const ReactionDragDetector({
@@ -1125,14 +1159,33 @@ class ReactionDragDetector extends StatefulWidget {
     required this.onPointerDown,
     required this.onPointerUp,
     required this.child,
+    this.drag,
+    this.dragEnabled = true,
   });
 
   @override
   State<ReactionDragDetector> createState() => _ReactionDragDetectorState();
 }
 
-class _ReactionDragDetectorState extends State<ReactionDragDetector> {
+class _ReactionDragDetectorState extends State<ReactionDragDetector>
+    with SingleTickerProviderStateMixin {
   Offset _total = Offset.zero;
+
+  /// Where a [ReactionDragDetector.drag] node is drawn, from its place.
+  Offset _offset = Offset.zero;
+
+  /// The node's size when the drag started.
+  Size _size = Size.zero;
+
+  /// Whether the node is flying off; it takes no new drag until it lands.
+  bool _flying = false;
+
+  AnimationController? _settleController;
+  AnimationController get _settle =>
+      _settleController ??= AnimationController(vsync: this);
+  int _settleRun = 0;
+
+  DragModel? get _model => widget.drag;
 
   void _run(List<Reaction> reactions, TriggerType type, Map result) {
     if (reactions.isEmpty) return;
@@ -1144,33 +1197,231 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
     );
   }
 
+  Offset _onAxis(Offset offset) => switch (_model?.axis) {
+    DragAxis.horizontal => Offset(offset.dx, 0),
+    DragAxis.vertical => Offset(0, offset.dy),
+    _ => offset,
+  };
+
+  /// Writes the drawn offset into the drag's variables.
+  void _report(Offset offset) {
+    final DragModel? model = _model;
+    if (model == null) return;
+    final CodelesslyContext? payload = context.read<CodelesslyContext?>();
+    if (payload == null) return;
+    void write(String? name, double value) {
+      if (name == null || name.isEmpty) return;
+      final variable = payload.findVariableByName(name);
+      if (variable == null || variable.value.isComputed) return;
+      final num rounded = (value * 100).round() / 100;
+      final String text = rounded == rounded.roundToDouble()
+          ? '${rounded.round()}'
+          : '$rounded';
+      if (variable.value.value == text) return;
+      variable.value = variable.value.copyWith(value: text);
+    }
+
+    write(model.xVariable, offset.dx);
+    write(model.yVariable, offset.dy);
+  }
+
+  void _moveTo(Offset offset) {
+    _offset = offset;
+    _report(offset);
+    if (mounted && (_model?.follow ?? false)) setState(() {});
+  }
+
+  /// Animates the drawn offset to [to] over [ms] with [curve].
+  Future<void> _animateTo(Offset to, int ms, MotionCurve curve) async {
+    final int run = ++_settleRun;
+    final Offset from = _offset;
+    if (ms <= 0 || from == to) {
+      _moveTo(to);
+      return;
+    }
+    final AnimationController controller = _settle
+      ..stop()
+      ..duration = Duration(milliseconds: ms);
+    final Curve flutterCurve = flutterCurveOf(curve);
+    void tick() {
+      if (run != _settleRun) return;
+      _moveTo(Offset.lerp(from, to, flutterCurve.transform(controller.value))!);
+    }
+
+    controller.addListener(tick);
+    try {
+      await controller.forward(from: 0).orCancel;
+    } on TickerCanceled {
+      // Stopped by a new drag or disposed.
+    } finally {
+      controller.removeListener(tick);
+    }
+    if (run == _settleRun && mounted) _moveTo(to);
+  }
+
+  void _start(DragStartDetails details) {
+    _settleRun++;
+    _settleController?.stop();
+    _size = context.size ?? Size.zero;
+    // A drag that catches the node on its way back goes on from there.
+    _total = _model == null ? Offset.zero : _offset;
+  }
+
+  void _update(DragUpdateDetails details) {
+    final Offset delta = _onAxis(details.delta);
+    _total += delta;
+    if (_model != null) _moveTo(_total);
+    _run(widget.onDrag, TriggerType.drag, {
+      'deltaX': delta.dx,
+      'deltaY': delta.dy,
+      'dx': _total.dx,
+      'dy': _total.dy,
+      'x': details.localPosition.dx,
+      'y': details.localPosition.dy,
+    });
+  }
+
+  void _end(DragEndDetails details) {
+    final Offset velocity = _onAxis(details.velocity.pixelsPerSecond);
+    final Map<String, Object?> result = {
+      'dx': _total.dx,
+      'dy': _total.dy,
+      'velocityX': velocity.dx,
+      'velocityY': velocity.dy,
+    };
+    final DragModel? model = _model;
+    if (model == null) {
+      _run(widget.onDragEnd, TriggerType.dragEnd, result);
+      return;
+    }
+    final double width = _size.width > 0 ? _size.width : 1;
+    final double height = _size.height > 0 ? _size.height : 1;
+    final bool horizontalDismiss = model.axis != DragAxis.vertical &&
+        model.dismisses(distance: _total.dx / width, velocity: velocity.dx);
+    final bool verticalDismiss = model.axis != DragAxis.horizontal &&
+        model.dismisses(distance: _total.dy / height, velocity: velocity.dy);
+    // A free drag flies off along the axis it went furthest on.
+    final bool horizontal = horizontalDismiss &&
+        (!verticalDismiss ||
+            (_total.dx / width).abs() >= (_total.dy / height).abs());
+    final bool vertical = verticalDismiss && !horizontal;
+    double sign(double distance, double speed) =>
+        (distance != 0 ? distance : speed) < 0 ? -1 : 1;
+    if (horizontal || vertical) {
+      final String direction = horizontal
+          ? (sign(_total.dx, velocity.dx) < 0 ? 'left' : 'right')
+          : (sign(_total.dy, velocity.dy) < 0 ? 'up' : 'down');
+      final Offset target = horizontal
+          ? Offset(sign(_total.dx, velocity.dx) * model.dismissTo * width,
+              _total.dy)
+          : Offset(_total.dx,
+              sign(_total.dy, velocity.dy) * model.dismissTo * height);
+      setState(() => _flying = true);
+      _animateTo(target, model.follow ? model.dismissMs : 0, model.dismissCurve)
+          .then((_) {
+            if (!mounted) return;
+            _flying = false;
+            _run(widget.onDragEnd, TriggerType.dragEnd, {
+              ...result,
+              'dismissed': true,
+              'direction': direction,
+            });
+            // The actions have usually moved the node by now (a card sent
+            // to the back of a deck): it comes back to rest there.
+            _settleRun++;
+            _total = Offset.zero;
+            _moveTo(Offset.zero);
+          });
+      return;
+    }
+    _run(widget.onDragEnd, TriggerType.dragEnd, {
+      ...result,
+      'dismissed': false,
+      'direction': '',
+    });
+    _total = Offset.zero;
+    _animateTo(Offset.zero, model.returnMs, model.returnCurve);
+  }
+
+  void _cancel() {
+    if (_model == null) return;
+    _total = Offset.zero;
+    _animateTo(Offset.zero, _model!.returnMs, _model!.returnCurve);
+  }
+
+  @override
+  void dispose() {
+    _settleRun++;
+    _settleController?.dispose();
+    super.dispose();
+  }
+
+  Widget _follow(Widget child) {
+    final DragModel model = _model!;
+    final double width = _size.width > 0 ? _size.width : 1;
+    final double degrees = model.rotate * _offset.dx / width;
+    if (!model.follow || (_offset == Offset.zero && degrees == 0)) {
+      return child;
+    }
+    return Transform(
+      alignment: Alignment(model.originX, model.originY),
+      transform: Matrix4.identity()
+        ..translateByDouble(_offset.dx, _offset.dy, 0, 1)
+        ..rotateZ(degrees * pi / 180),
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final DragModel? model = _model;
     final bool drags = widget.onDrag.isNotEmpty || widget.onDragEnd.isNotEmpty;
     Widget child = widget.child;
-    if (drags) {
+    if (model != null) {
+      final bool enabled = widget.dragEnabled && !_flying;
+      final GestureDragStartCallback? start = enabled ? _start : null;
+      final GestureDragUpdateCallback? update = enabled ? _update : null;
+      final GestureDragEndCallback? end = enabled ? _end : null;
+      final GestureDragCancelCallback? cancel = enabled ? _cancel : null;
+      // The detector stays put while the node moves under the pointer, so
+      // the drag's deltas aren't turned by the node's own tilt.
+      child = MouseRegion(
+        cursor: enabled ? SystemMouseCursors.grab : MouseCursor.defer,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onHorizontalDragStart: model.axis == DragAxis.horizontal
+              ? start
+              : null,
+          onHorizontalDragUpdate: model.axis == DragAxis.horizontal
+              ? update
+              : null,
+          onHorizontalDragEnd: model.axis == DragAxis.horizontal ? end : null,
+          onHorizontalDragCancel: model.axis == DragAxis.horizontal
+              ? cancel
+              : null,
+          onVerticalDragStart: model.axis == DragAxis.vertical ? start : null,
+          onVerticalDragUpdate: model.axis == DragAxis.vertical
+              ? update
+              : null,
+          onVerticalDragEnd: model.axis == DragAxis.vertical ? end : null,
+          onVerticalDragCancel: model.axis == DragAxis.vertical
+              ? cancel
+              : null,
+          onPanStart: model.axis == DragAxis.free ? start : null,
+          onPanUpdate: model.axis == DragAxis.free ? update : null,
+          onPanEnd: model.axis == DragAxis.free ? end : null,
+          onPanCancel: model.axis == DragAxis.free ? cancel : null,
+          child: _follow(child),
+        ),
+      );
+    } else if (drags) {
       child = MouseRegion(
         cursor: SystemMouseCursors.grab,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onPanStart: (_) => _total = Offset.zero,
-          onPanUpdate: (details) {
-            _total += details.delta;
-            _run(widget.onDrag, TriggerType.drag, {
-              'deltaX': details.delta.dx,
-              'deltaY': details.delta.dy,
-              'dx': _total.dx,
-              'dy': _total.dy,
-              'x': details.localPosition.dx,
-              'y': details.localPosition.dy,
-            });
-          },
-          onPanEnd: (details) => _run(widget.onDragEnd, TriggerType.dragEnd, {
-            'dx': _total.dx,
-            'dy': _total.dy,
-            'velocityX': details.velocity.pixelsPerSecond.dx,
-            'velocityY': details.velocity.pixelsPerSecond.dy,
-          }),
+          onPanStart: _start,
+          onPanUpdate: _update,
+          onPanEnd: _end,
           child: child,
         ),
       );
