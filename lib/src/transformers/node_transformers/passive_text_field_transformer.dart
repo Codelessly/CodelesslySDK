@@ -395,6 +395,8 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       widget.onEditingComplete?.call(context, controller.text);
     }
     if (!mounted) return;
+    // The focus ring follows focus.
+    if (widget.node.properties.focusRingWidth > 0) setState(() {});
     if (focusNode.hasFocus && widget.node.properties.selectAllOnFocus) {
       // After the tap that focused it places the caret.
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -610,9 +612,53 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       field = Focus(onKeyEvent: onKey, skipTraversal: true, child: field);
     }
 
+    // Always a DecoratedBox, empty without focus: a ring that came and went
+    // as a wrapper would rebuild the field and drop its focus.
+    final double ring = properties.focusRingWidth;
+    field = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: _ringRadius(properties.decoration),
+        boxShadow: [
+          if (ring > 0 && focusNode.hasFocus)
+            BoxShadow(
+              color: properties.focusRingColor.toFlutterColor(),
+              spreadRadius: ring,
+            ),
+        ],
+      ),
+      child: field,
+    );
+
     field = AdaptiveNodeBox(node: node, child: field);
 
     return field;
+  }
+
+  /// The corner radius the focus ring follows: the field's focused border's,
+  /// else its resting border's.
+  BorderRadius _ringRadius(InputDecorationModel decoration) {
+    for (final InputBorderModel? border in [
+      decoration.focusedBorder,
+      decoration.enabledBorder,
+      decoration.border,
+    ]) {
+      if (border != null && border.borderType == BorderTypeEnum.outline) {
+        return border.cornerRadius.borderRadius;
+      }
+    }
+    return BorderRadius.zero;
+  }
+
+  /// A border color bound in the node's variables under [key]
+  /// (`decoration.borderColor`, `decoration.focusedBorderColor`), e.g. red
+  /// while the input is invalid: `${= error != '' ? '#FF5A5F' : '#E6E4F2'}`.
+  Color? _boundBorderColor(String key, ScopedValues scopedValues) {
+    if (!widget.node.variables.containsKey(key)) return null;
+    return PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+      widget.node,
+      key,
+      scopedValues: scopedValues,
+    )?.toFlutterColor();
   }
 
   InputDecoration getDecoration(
@@ -622,6 +668,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     WidgetBuildSettings settings,
     ScopedValues scopedValues,
   ) {
+    final Color? borderColor = _boundBorderColor(
+      'decoration.borderColor',
+      scopedValues,
+    );
+    final Color? focusedBorderColor =
+        _boundBorderColor('decoration.focusedBorderColor', scopedValues) ??
+        borderColor;
     final bool isCollapsed =
         context.getNodeValue(node.id, 'isCollapsed') ?? decoration.isCollapsed;
     final bool isDense =
@@ -828,6 +881,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         errorFlag && !hasError
             ? decoration.focusedErrorBorder
             : decoration.focusedBorder,
+        color: focusedBorderColor,
       ),
       focusedErrorBorder: getInputBorder(decoration.focusedErrorBorder),
       disabledBorder: getInputBorder(decoration.disabledBorder),
@@ -835,8 +889,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
         errorFlag && !hasError
             ? decoration.errorBorder
             : decoration.enabledBorder,
+        color: borderColor,
       ),
-      border: getInputBorder(decoration.border),
+      border: getInputBorder(decoration.border, color: borderColor),
       enabled: decoration.enabled,
       semanticCounterText: decoration.semanticCounterText,
       alignLabelWithHint: decoration.alignLabelWithHint,
@@ -844,21 +899,28 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     );
   }
 
-  InputBorder? getInputBorder(InputBorderModel? inputBorder) {
+  /// [inputBorder] as a Flutter border, its line in [color] when given (a
+  /// bound border color).
+  InputBorder? getInputBorder(InputBorderModel? inputBorder, {Color? color}) {
     if (inputBorder == null) return null;
+    BorderSide side() {
+      final BorderSide base = inputBorder.borderSide.toFlutter();
+      return color == null ? base : base.copyWith(color: color);
+    }
+
     switch (inputBorder.borderType) {
       case BorderTypeEnum.none:
         return InputBorder.none;
       case BorderTypeEnum.outline:
         return OutlineInputBorder(
           borderRadius: inputBorder.cornerRadius.borderRadius,
-          borderSide: inputBorder.borderSide.toFlutter(),
+          borderSide: side(),
           gapPadding: inputBorder.gapPadding,
         );
       case BorderTypeEnum.underline:
         return UnderlineInputBorder(
           borderRadius: inputBorder.cornerRadius.borderRadius,
-          borderSide: inputBorder.borderSide.toFlutter(),
+          borderSide: side(),
         );
     }
   }
