@@ -178,6 +178,15 @@ class TransformerSwitch extends StatelessWidget {
     );
   }
 
+  /// The thumb icon of a switch with [SwitchProperties.uniformThumb]: an
+  /// empty icon in every state, which makes a Material 3 thumb as large off
+  /// as on (a thumb with an icon always takes the full size), without
+  /// drawing anything on it. Null otherwise: the off thumb is smaller.
+  static WidgetStateProperty<Icon?>? thumbIconOf(SwitchProperties properties) =>
+      properties.uniformThumb
+      ? const WidgetStatePropertyAll<Icon?>(Icon(null))
+      : null;
+
   @override
   Widget build(BuildContext context) {
     final scale = node.basicBoxLocal.width / kSwitchDefaultWidth;
@@ -221,6 +230,7 @@ class TransformerSwitch extends StatelessWidget {
             trackOutlineWidth: WidgetStateProperty.all(
               properties.trackOutlineWidth,
             ),
+            thumbIcon: thumbIconOf(properties),
           ),
         ),
       ),
