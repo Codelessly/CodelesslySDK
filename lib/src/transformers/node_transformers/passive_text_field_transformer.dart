@@ -395,8 +395,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       widget.onEditingComplete?.call(context, controller.text);
     }
     if (!mounted) return;
-    // The focus ring follows focus.
-    if (widget.node.properties.focusRingWidth > 0) setState(() {});
+    // The focus ring follows focus (its width may be bound).
+    if (widget.node.properties.focusRingWidth > 0 ||
+        widget.node.variables.containsKey('focusRingWidth')) {
+      setState(() {});
+    }
     if (focusNode.hasFocus && widget.node.properties.selectAllOnFocus) {
       // After the tap that focused it places the caret.
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -614,16 +617,33 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
     // Always a DecoratedBox, empty without focus: a ring that came and went
     // as a wrapper would rebuild the field and drop its focus.
-    final double ring = properties.focusRingWidth;
+    // Both bindable: `focusRingWidth` (e.g. 0 while the input is invalid)
+    // and `focusRingColor`.
+    final double ring =
+        (node.variables.containsKey('focusRingWidth')
+                ? PropertyValueDelegate.getPropertyValue<num>(
+                    node,
+                    'focusRingWidth',
+                    scopedValues: scopedValues,
+                  )
+                : null)
+            ?.toDouble() ??
+        properties.focusRingWidth;
+    final Color ringColor =
+        (node.variables.containsKey('focusRingColor')
+            ? PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+                node,
+                'focusRingColor',
+                scopedValues: scopedValues,
+              )?.toFlutterColor()
+            : null) ??
+        properties.focusRingColor.toFlutterColor();
     field = DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: _ringRadius(properties.decoration),
         boxShadow: [
           if (ring > 0 && focusNode.hasFocus)
-            BoxShadow(
-              color: properties.focusRingColor.toFlutterColor(),
-              spreadRadius: ring,
-            ),
+            BoxShadow(color: ringColor, spreadRadius: ring),
         ],
       ),
       child: field,

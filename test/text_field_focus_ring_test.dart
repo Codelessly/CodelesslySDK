@@ -93,6 +93,30 @@ void main() {
     expect(rings(tester), isEmpty);
   });
 
+  testWidgets('a bound focus ring width switches the ring off', (tester) async {
+    final TextFieldNode node =
+        TextFieldNode(
+            id: 'name',
+            name: 'Name',
+            basicBoxLocal: NodeBox(0, 0, 300, 68),
+            properties: TextFieldProperties(
+              focusRingColor: const ColorRGBA(
+                r: 0.545,
+                g: 0.424,
+                b: 1,
+                a: 0.25,
+              ),
+              focusRingWidth: 4,
+            ),
+          )
+          ..parentID = kRootNode
+          ..variables['focusRingWidth'] = r'${= 1 > 2 ? 4 : 0}';
+    await pump(tester, node);
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(rings(tester), isEmpty);
+  });
+
   testWidgets('a bound border color draws the outline', (tester) async {
     final TextFieldNode node =
         TextFieldNode(
