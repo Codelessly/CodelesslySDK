@@ -224,13 +224,21 @@ class FunctionsRepository {
       return true;
     }
     if (nodeId.isEmpty) return true;
-    // A field the previous actions just revealed builds on the next frame.
-    if (focusTextField(nodeId, selectAll: action.selectAll, near: near)) {
-      return true;
+    // A field the previous actions just revealed (an inline "Add card"
+    // field shown by a variable) builds and becomes focusable over the next
+    // frames: keep asking until it has the focus.
+    for (int frame = 0; frame < 8; frame++) {
+      if (focusTextField(nodeId, selectAll: action.selectAll, near: near)) {
+        // The focus moves in a microtask.
+        await Future<void>.microtask(() {});
+        if (textFieldHasFocus(nodeId)) return true;
+      }
+      if (!WidgetsBinding.instance.hasScheduledFrame) {
+        WidgetsBinding.instance.scheduleFrame();
+      }
+      await WidgetsBinding.instance.endOfFrame;
     }
-    await WidgetsBinding.instance.endOfFrame;
-    focusTextField(nodeId, selectAll: action.selectAll, near: near);
-    return true;
+    return focusTextField(nodeId, selectAll: action.selectAll, near: near);
   }
 
   /// Run a native paywall action in the enclosing paywall surface.
