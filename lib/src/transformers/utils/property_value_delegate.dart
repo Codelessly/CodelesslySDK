@@ -275,6 +275,17 @@ class PropertyValueDelegate {
   ) {
     final String? expression = computedExpressionOf(variable);
     if (expression == null) return variable.getValue();
+    // A variable with parameters is a function: its value is the function,
+    // which formulas call with arguments. Its body reads the other
+    // variables of this scope.
+    if (variable.isFunction) {
+      return FormulaFunction(
+        variable.parameters,
+        expression,
+        (path) =>
+            getVariableValueFromPath<Object>(path, scopedValues: scopedValues),
+      );
+    }
     if (_computedDepth >= 16 || !_computing.add(variable.name)) return null;
     _computedDepth++;
     try {
@@ -420,6 +431,8 @@ class PropertyValueDelegate {
     Map<String, VariableData> variables,
     Set<String> seen,
   ) {
+    // A formula that reads the clock changes as time passes.
+    if (FormulaEvaluator.readsClock(expression)) return null;
     final List<Object?> inputs = [];
     for (final String path in FormulaEvaluator.referencedPaths(expression)) {
       final VariableMatch? match = VariableMatch.parse(
@@ -467,13 +480,32 @@ class PropertyValueDelegate {
     }
 
     final VariableData? variable = scopedValues.variables[match.name];
-    if (variable == null) return null;
+    if (variable == null) {
+      // In a text field's own actions, `inputValue` (the property a field's
+      // text is bound by) reads its text, like `value`, unless an app
+      // variable has that name.
+      if (match.name == 'inputValue' &&
+          !match.hasPath &&
+          !match.hasAccessor &&
+          scopedValues.nodeState is String) {
+        return scopedValues.nodeState;
+      }
+      return null;
+    }
     final bool computed = isComputedVariable(variable);
     final Object? variableValue = variableValueOf(variable, scopedValues);
+    // A function has no members: it is only called.
+    if (variableValue is FormulaFunction) {
+      return match.hasAccessor || match.hasPath ? null : variableValue;
+    }
     // A computed variable's type is whatever its formula returns.
-    final VariableType type = computed && variableValue != null
-        ? VariableType.fromObjectType(variableValue)
-        : variable.type;
+    // A user function (a lambda) has no variable type; it keeps its own.
+    VariableType type = variable.type;
+    if (computed && variableValue != null) {
+      try {
+        type = VariableType.fromObjectType(variableValue);
+      } catch (_) {}
+    }
     if (match.hasAccessor) {
       if (type.isText) {
         // A computed text whose formula gives nothing has no characters.
@@ -539,7 +571,12 @@ class PropertyValueDelegate {
       readsClock = readsClock || FormulaEvaluator.readsClock(expression);
       readsFrameClock =
           readsFrameClock || FormulaEvaluator.readsFrameClock(expression);
-      for (final String path in FormulaEvaluator.referencedPaths(expression)) {
+      // A function's parameters aren't variables.
+      final Iterable<String> read = variable.isFunction
+          ? FormulaFunction(variable.parameters, expression, (_) => null)
+                .externalPaths
+          : FormulaEvaluator.referencedPaths(expression);
+      for (final String path in read) {
         paths.add(path);
         final VariableMatch? match = VariableMatch.parse(
           path.wrapWithVariableSyntax(),
