@@ -51,7 +51,8 @@ void main() {
 
   test('a text reports its intrinsic width rounded up with slack, so a '
       'parent sizing it by that width never wraps its last word', () {
-    expect(RenderTextIntrinsicSlack.slackWidth(124.62), 126);
+    expect(RenderTextIntrinsicSlack.slackWidth(124.62), 125);
+    expect(RenderTextIntrinsicSlack.slackWidth(154), 154);
     expect(RenderTextIntrinsicSlack.slackWidth(124.4), 125);
     expect(RenderTextIntrinsicSlack.slackWidth(0), 0);
     expect(RenderTextIntrinsicSlack.slackWidth(double.infinity), double.infinity);
