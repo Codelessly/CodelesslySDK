@@ -55,6 +55,11 @@ class CodelesslyContext with ChangeNotifier, Equatable {
   /// The key is the variable's id.
   final Map<String, Observable<VariableData>> variables;
 
+  /// The variables as published (name -> variable, with any value given in
+  /// [data]), before any action changed them: `${initial.<name>}` reads
+  /// them, so a Set variable action can put a variable back.
+  final Map<String, VariableData> initialVariables = {};
+
   /// A map that holds the current state of all conditions.
   /// The key is the condition's id.
   final Map<String, BaseCondition> conditions;

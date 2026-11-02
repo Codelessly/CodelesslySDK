@@ -252,6 +252,7 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     codelesslyContext.variables.removeWhere(
       (key, value) => !value.value.isApiVariable,
     );
+    codelesslyContext.initialVariables.clear();
     // App, then page variables, so a screen's own variable of the same name
     // wins. Their notifiers are shared by every layout of this instance.
     final Codelessly codelessly = context.read<Codelessly>();
@@ -264,6 +265,9 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
                 variable.copyWith(value: codelesslyContext.data[variable.name]),
               ),
             );
+        codelesslyContext.initialVariables[variable.name] = variable.copyWith(
+          value: codelesslyContext.data[variable.name],
+        );
       }
     }
     for (final variable in variablesMap.values) {
@@ -272,6 +276,7 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         variable.copyWith(value: codelesslyContext.data[variable.name]),
       );
       codelesslyContext.variables[variable.id] = notifier;
+      codelesslyContext.initialVariables[variable.name] = notifier.value;
     }
 
     final conditions =
