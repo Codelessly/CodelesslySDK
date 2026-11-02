@@ -429,9 +429,17 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('sqrt', 'sqrt(value)', 'sqrt(16) → 4'),
     FormulaFunctionDoc('pow', 'pow(base, exponent)', 'pow(2, 10) → 1024'),
-    FormulaFunctionDoc('exp', 'exp(value)', 'exp(1) → 2.71828… (zoom by exp(-delta / 500))'),
+    FormulaFunctionDoc(
+      'exp',
+      'exp(value)',
+      'exp(1) → 2.71828… (zoom by exp(-delta / 500))',
+    ),
     FormulaFunctionDoc('ln', 'ln(value)', 'ln(exp(2)) → 2'),
-    FormulaFunctionDoc('log', 'log(value, base?)', 'log(1000) → 3, log(8, 2) → 3'),
+    FormulaFunctionDoc(
+      'log',
+      'log(value, base?)',
+      'log(1000) → 3, log(8, 2) → 3',
+    ),
     FormulaFunctionDoc('sign', 'sign(value)', 'sign(-4) → -1'),
     FormulaFunctionDoc('hypot', 'hypot(x, y)', 'hypot(3, 4) → 5'),
     FormulaFunctionDoc('sin', 'sin(radians)', 'sin(pi() / 2) → 1'),
@@ -588,7 +596,7 @@ class FormulaEvaluator {
     FormulaFunctionDoc(
       'mix',
       'mix(color1, color2, amount)',
-      "mix('#FFFFFF', '#000000', 0.25) → #FFBFBFBF",
+      "mix('#FFFFFF', '#000000', 0.25) → #BFBFBF",
     ),
     FormulaFunctionDoc(
       'alpha',
@@ -1764,12 +1772,14 @@ String? _mix(Object? from, Object? to, num amount) {
   final int? a = argb(from), b = argb(to);
   if (a == null || b == null) return null;
   final double t = amount.clamp(0, 1).toDouble();
-  final StringBuffer out = StringBuffer('#');
-  for (final int shift in const <int>[24, 16, 8, 0]) {
-    final int ca = (a >> shift) & 0xFF, cb = (b >> shift) & 0xFF;
-    out.write((ca + (cb - ca) * t).round().toRadixString(16).padLeft(2, '0'));
-  }
-  return out.toString().toUpperCase();
+  final List<int> channels = <int>[
+    for (final int shift in const <int>[24, 16, 8, 0])
+      (((a >> shift) & 0xFF) +
+              (((b >> shift) & 0xFF) - ((a >> shift) & 0xFF)) * t)
+          .round(),
+  ];
+  // Opaque colors come back as #RRGGBB, like the colors they came from.
+  return '#${[if (channels.first != 0xFF) channels.first, ...channels.skip(1)].map((int c) => c.toRadixString(16).padLeft(2, '0')).join().toUpperCase()}';
 }
 
 Object? _arg(List<Object?> args, int index) =>
@@ -1921,8 +1931,7 @@ final Map<String, _Function> _functions = {
   'exp': (a) => _tidy(math.exp(_num(_arg(a, 0)))),
   'ln': (a) => _tidy(math.log(_num(_arg(a, 0)))),
   'log': (a) => _tidy(
-    math.log(_num(_arg(a, 0))) /
-        math.log(a.length > 1 ? _num(_arg(a, 1)) : 10),
+    math.log(_num(_arg(a, 0))) / math.log(a.length > 1 ? _num(_arg(a, 1)) : 10),
   ),
   'sign': (a) => _num(_arg(a, 0)).sign,
   'hypot': (a) => _tidy(
