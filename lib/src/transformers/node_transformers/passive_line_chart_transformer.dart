@@ -54,7 +54,10 @@ class PassiveLineChartTransformer extends NodeWidgetTransformer<LineChartNode> {
 typedef ChartBand = ({double from, double to, Color color});
 
 /// A horizontal grid line with an optional label.
-typedef ChartYTick = ({double y, String? label, Color? color});
+/// A horizontal grid line with its label. The label sits left of the plot,
+/// against it (`align: "end"`, the default) or at the chart's left edge
+/// (`align: "start"`).
+typedef ChartYTick = ({double y, String? label, Color? color, bool atStart});
 
 /// The part of the area under the curve inside [from, to] and below
 /// [below], with an optional bar on the x axis.
@@ -267,6 +270,7 @@ class LineChartSpec {
               y: y,
               label: text(t['label']),
               color: LineChartGeometry.parseColor(t['color']),
+              atStart: t['align'] == 'start',
             ),
       ],
       yAxisTitle: text(bound('yAxisTitle')) ?? props.yAxisTitle,
@@ -608,7 +612,8 @@ class LineChartPainter extends CustomPainter {
       canvas.drawLine(Offset(plot.left, y), Offset(plot.right, y), grid);
       if (tick.label case final String label when label.isNotEmpty) {
         final TextPainter tp = _text(label, spec.axisLabelStyle);
-        tp.paint(canvas, Offset(plot.left - tp.width - 10, y - tp.height / 2));
+        final double x = tick.atStart ? 0 : plot.left - tp.width - 10;
+        tp.paint(canvas, Offset(x, y - tp.height / 2));
       }
     }
     if (spec.yAxisTitle.isNotEmpty) {
