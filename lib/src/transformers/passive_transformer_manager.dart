@@ -54,6 +54,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'autoPlaceholder': PassiveRowColumnTransformer(getNode, this),
       'rectangle': PassiveRectangleTransformer(getNode, this),
       'ellipse': PassiveRectangleTransformer(getNode, this),
+      'path': PassivePathTransformer(getNode, this),
       'text': PassiveTextTransformer(getNode, this),
       'radio': PassiveRadioTransformer(getNode, this),
       'icon': PassiveIconTransformer(getNode, this),
@@ -117,8 +118,19 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     required WidgetBuildSettings settings,
   }) {
     if (settings.buildRawWidget) {
-      final Widget raw = getTransformerByNode(node)
-          .buildWidget(node, context, settings);
+      // The design canvas builds each node raw; its content still follows
+      // the node's layout direction.
+      final TextDirection? direction = layoutDirectionOf(context, node);
+      final Widget raw = direction == null
+          ? getTransformerByNode(node).buildWidget(node, context, settings)
+          : Directionality(
+              textDirection: direction,
+              child: Builder(
+                builder: (context) => getTransformerByNode(
+                  node,
+                ).buildWidget(node, context, settings),
+              ),
+            );
       return decorate(
         context,
         node,
@@ -161,9 +173,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         return _buildDecorated(context, node, settings);
       },
     );
-    return settings.withReactions
-        ? wrapWithInteractionScopes(context, node, built)
-        : built;
+    // A node a Scroll To action targets records where it is built.
+    return ScrollTargets.wrap(
+      node,
+      settings.withReactions
+          ? wrapWithInteractionScopes(context, node, built)
+          : built,
+    );
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -182,10 +198,33 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     BaseNode node,
     WidgetBuildSettings settings,
   ) {
-    final BaseNode styled = applyStyleOverrides(context, node);
-    Widget widget = getTransformerByNode(node)
-        .buildWidget(styled, context, settings);
+    // On the design canvas (no reactions) bindings read the editor's
+    // preview values, as text does, so a state previewed with
+    // `preview.setValues` shows and hides the same nodes it would at runtime.
+    final ScopedValues? preview = settings.withReactions
+        ? null
+        : VariablePreview.scopeOf(node, context: context);
+    final BaseNode styled = applyStyleOverrides(
+      context,
+      node,
+      scopedValues: preview,
+    );
+    final TextDirection? direction = layoutDirectionOf(context, styled);
+    Widget widget = direction == null
+        ? getTransformerByNode(node).buildWidget(styled, context, settings)
+        // The content (children, padding, text) is built under the
+        // direction, so it reaches every row, freeform layout and text in
+        // it; the node's own margin and place follow its parent.
+        : Directionality(
+            textDirection: direction,
+            child: Builder(
+              builder: (context) => getTransformerByNode(
+                node,
+              ).buildWidget(styled, context, settings),
+            ),
+          );
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
+    widget = applyStrokePath(context, styled, widget);
 
     if (settings.withOpacity) {
       widget = applyWidgetOpacity(styled, widget);
@@ -198,14 +237,30 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = wrapWithSemantics(styled, widget);
       widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
+      widget = applyDragAndDrop(context, styled, widget);
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
-      widget = applyWidgetMotion(context, styled, widget);
+      widget = applyWidgetMotion(
+        context,
+        styled,
+        widget,
+        scopedValues: preview,
+      );
+      widget = applyNodePlay(context, styled, widget);
       widget = applyBoundOffset(context, styled, widget);
+    }
+    // Without reactions (the design canvas) a knob or fader cap is drawn
+    // where its drag track puts it; with them NodeDragTrack draws it there
+    // and makes it draggable.
+    if (!settings.withReactions) {
+      widget = applyTrackPose(context, styled, widget, scopedValues: preview);
     }
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
+    }
+    if (settings.withReactions) {
+      widget = applyReveal(context, styled, widget);
     }
     if (settings.withMargins) {
       widget = applyWidgetMargins(styled, widget);
@@ -217,10 +272,66 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         styled,
         widget,
         maintainState: true,
+        scopedValues: preview,
       );
     }
 
     return decorate(context, styled, widget, NodeBuildLayer.margin);
+  }
+
+  /// Makes [widget] draggable and/or a drop target, as [node]'s
+  /// [BaseNode.draggable] and [BaseNode.dropTarget] say.
+  Widget applyDragAndDrop(BuildContext context, BaseNode node, Widget widget) {
+    // `draggable.enabled` / `dropTarget.enabled` bind the switches.
+    bool flag(String key, bool fallback) => node.variables.containsKey(key)
+        ? PropertyValueDelegate.getPropertyValue<bool>(
+                node,
+                key,
+                scopedValues: ScopedValues.of(context),
+              ) ??
+              fallback
+        : fallback;
+    if (node.dropTarget case final DropTargetModel target) {
+      widget = DropTargetBox(
+        node: node,
+        model: target,
+        enabled: flag(DropTargetModel.enabledVariable, target.enabled),
+        child: widget,
+      );
+    }
+    if (node.draggable case DraggableModel draggable) {
+      // The first form bound the payload as `draggable.data`.
+      if (draggable.data.isEmpty) {
+        if (node.variables['draggable.data'] case final String bound) {
+          draggable = draggable.copyWith(data: bound);
+        }
+      }
+      final Object? flightKey = node.variables.containsKey('flightKey')
+          ? PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              'flightKey',
+              scopedValues: ScopedValues.of(context),
+            )
+          : node.flightKey;
+      widget = DragSourceBox(
+        node: node,
+        model: draggable,
+        enabled: flag(DraggableModel.enabledVariable, draggable.enabled),
+        flightKey: '${flightKey ?? ''}',
+        // The feedback node is usually hidden where it is designed.
+        buildNode: (context, id) => buildWidgetByID(
+          id,
+          context,
+          settings: const WidgetBuildSettings(
+            debugLabel: 'drag feedback',
+            withReactions: false,
+            withVisibility: false,
+          ),
+        ),
+        child: widget,
+      );
+    }
+    return widget;
   }
 
   /// Wraps [widget] in a tooltip showing [node]'s tooltip text (its data
@@ -251,15 +362,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// variables or formulas, or set value actions give it at runtime: `fill`
   /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
   /// `height`, `flex`, `rotation`, and the properties of [StyleBindings]
-  /// (effects, stroke weight, corner radius, padding, font weight, icon).
+  /// (effects, stroke weight, corner radius, padding, font weight and size,
+  /// icon).
   /// Returns [node] itself when nothing changes it.
-  BaseNode applyStyleOverrides(BuildContext context, BaseNode node) {
-    final ScopedValues scopedValues = ScopedValues.of(context);
+  BaseNode applyStyleOverrides(
+    BuildContext context,
+    BaseNode node, {
+    ScopedValues? scopedValues,
+  }) {
+    final ScopedValues scope = scopedValues ?? ScopedValues.of(context);
     T? value<T extends Object>(String property) =>
         PropertyValueDelegate.getPropertyValue<T>(
           node,
           property,
-          scopedValues: scopedValues,
+          scopedValues: scope,
         );
 
     final Map<String, dynamic> patch = {};
@@ -349,8 +465,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       patch['rotation'] = rotation.round();
     }
 
-    // Effects, stroke weight, corner radius, font weight and icon.
-    StyleBindings.addTo(patch, node, scopedValues: scopedValues);
+    // Effects, stroke weight, corner radius, font weight and size, and icon.
+    StyleBindings.addTo(patch, node, scopedValues: scope);
 
     // The states shown around the node (a property-override variant, its
     // own or an ancestor's interaction states) win over bindings.
@@ -368,6 +484,41 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (styled == null) return node;
     return styled..parentID = node.parentID;
   }
+
+  /// The direction [node] lays out its content in, from its
+  /// `layoutDirection` variable (a fixed value or a binding such as
+  /// `${= uiLang == 'ar' ? 'rtl' : 'ltr'}`): `rtl` mirrors rows, freeform
+  /// children, padding, margins and text alignment of the subtree, `ltr`
+  /// restores left to right. Anything else (`inherit`, empty) keeps the
+  /// direction of the parent.
+  static TextDirection? layoutDirectionOf(BuildContext context, BaseNode node) {
+    final String? raw = node.variables[kLayoutDirection];
+    if (raw == null) return null;
+    // A fixed value, not a binding.
+    if (!raw.contains(r'${')) return parseLayoutDirection(raw);
+    final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+      node,
+      kLayoutDirection,
+      // On the design canvas the editor's preview scope (variable defaults
+      // and preview values), at runtime the app's.
+      scopedValues:
+          VariablePreview.scopeOf(node, context: context) ??
+          ScopedValues.of(context),
+    );
+    return parseLayoutDirection(value);
+  }
+
+  /// `rtl`/`ltr` (any case, also `right-to-left`, `true` for right to left)
+  /// as a [TextDirection]; null for anything else.
+  static TextDirection? parseLayoutDirection(Object? value) =>
+      switch (value?.toString().trim().toLowerCase()) {
+        'rtl' || 'right-to-left' || 'righttoleft' || 'true' => TextDirection.rtl,
+        'ltr' || 'left-to-right' || 'lefttoright' || 'false' => TextDirection.ltr,
+        _ => null,
+      };
+
+  /// The variables key of a node's layout direction binding.
+  static const String kLayoutDirection = 'layoutDirection';
 
   /// Moves [widget] to the node's bound `x`/`y` (variables, formulas or
   /// conditions): the distance from the parent's padded top-left to the
@@ -504,6 +655,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           path,
     };
     bool readsClock = false;
+    bool readsFrameClock = false;
     // A computed variable listens to whatever its formula reads.
     final Map<String, VariableData> variablesByName = {
       for (final notifier in codelesslyContext.variables.values)
@@ -520,6 +672,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         );
         expanded.addAll(deps.paths);
         readsClock = readsClock || deps.readsClock;
+        readsFrameClock = readsFrameClock || deps.readsFrameClock;
       }
       return expanded;
     }
@@ -541,6 +694,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           case 'auth':
             final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
+          case 'drag':
+            listenables.add(codelesslyContext.dragAndDrop);
+          case 'speech':
+            listenables.add(Speech.instance);
         }
       }
 
@@ -584,6 +741,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           case 'auth':
             final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
+          case 'drag':
+            listenables.add(codelesslyContext.dragAndDrop);
+          case 'speech':
+            listenables.add(Speech.instance);
         }
       }
 
@@ -630,6 +791,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             case 'auth':
               final notifier = context.read<Codelessly?>()?.appUser;
               if (notifier != null) listenables.add(notifier);
+            case 'drag':
+              listenables.add(codelesslyContext.dragAndDrop);
+            case 'speech':
+              listenables.add(Speech.instance);
           }
           continue;
         }
@@ -638,6 +803,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
 
     if (readsClock) listenables.add(FormulaClock.instance);
+
+    // A formula that reads the millisecond clock rebuilds on every frame.
+    readsFrameClock =
+        readsFrameClock ||
+        node.variables.values.any(
+          (path) => switch (FormulaEvaluator.exactExpression(path)) {
+            final String expression => FormulaEvaluator.readsFrameClock(
+              expression,
+            ),
+            null => false,
+          },
+        ) ||
+        inlineTextTemplatesOf(node).any(FormulaEvaluator.textReadsFrameClock);
+    if (readsFrameClock) listenables.add(FrameClock.instance);
 
     return listenables;
   }
@@ -686,6 +865,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           context,
         ),
         'auth' => context.read<Codelessly?>()?.appUser,
+        'drag' => codelesslyContext.dragAndDrop,
+        'speech' => Speech.instance,
         _ => null,
       };
       if (notifier != null) listenables.add(notifier);

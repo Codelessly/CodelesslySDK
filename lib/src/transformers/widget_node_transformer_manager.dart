@@ -5,11 +5,15 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
+import 'package:flutter/services.dart' show BrowserContextMenu;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../utils/material_icons_by_name.dart';
 
 typedef LayoutRetrieverBuilder = Widget Function(
   BuildContext context,
@@ -146,6 +150,23 @@ abstract class WidgetNodeTransformerManager
     );
     final bool visible = runtimeVisible ?? node.visible;
 
+    // A node shown and hidden by a binding, with a transition time, grows
+    // open and shrinks closed (fading too) instead of popping: an error
+    // line sliding open under a field, like Flutter's AnimatedSize.
+    if (runtimeVisible != null && node.transitionMs > 0) {
+      final Duration duration = Duration(milliseconds: node.transitionMs);
+      return AnimatedSize(
+        duration: duration,
+        curve: Curves.easeOutBack,
+        alignment: Alignment.topLeft,
+        child: AnimatedOpacity(
+          duration: duration,
+          opacity: visible ? 1 : 0,
+          child: visible ? widget : const SizedBox.shrink(),
+        ),
+      );
+    }
+
     if (visible) return widget;
 
     // A node hidden by a condition or variable at runtime gives up its space,
@@ -207,8 +228,9 @@ abstract class WidgetNodeTransformerManager
 
   /// The motion [node] shows now: its [BaseNode.motion] with the values
   /// bound through `motion.<name>` variables resolved from [scopedValues],
-  /// and `motion.replayKey` resolved to text. Null when the node doesn't
-  /// move.
+  /// the settings in [MotionModel.settings] (duration, delay, curve), and
+  /// `motion.replayKey` and `motion.pulseKey` resolved to text. Null when
+  /// the node doesn't move.
   static MotionModel? resolveMotion(
     BaseNode node, {
     required ScopedValues scopedValues,
@@ -231,6 +253,31 @@ abstract class WidgetNodeTransformerManager
       if (number == null || !number.isFinite) continue;
       motion = (motion ?? MotionModel.none).withValue(property, number);
     }
+    final String pathKey = MotionModel.variableKey(MotionModel.pathProperty);
+    if (node.variables.containsKey(pathKey)) {
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        pathKey,
+        scopedValues: scopedValues,
+      );
+      final String data = value?.toString().trim() ?? '';
+      motion = (motion ?? MotionModel.none).copyWith(
+        path: data,
+        clearPath: data.isEmpty,
+      );
+    }
+    // The transition's duration, delay and curve, e.g. a slow spring in
+    // and a quick ease out: `${= open ? 'elasticOut' : 'easeIn'}`.
+    for (final String setting in MotionModel.settings) {
+      final String key = MotionModel.variableKey(setting);
+      if (!node.variables.containsKey(key)) continue;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      motion = (motion ?? MotionModel.none).withSetting(setting, value);
+    }
     const String replay = MotionModel.replayKeyProperty;
     if (node.variables.containsKey(MotionModel.variableKey(replay))) {
       final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
@@ -241,6 +288,18 @@ abstract class WidgetNodeTransformerManager
       motion = (motion ?? MotionModel.none).copyWith(
         replayKey: value?.toString(),
         clearReplayKey: value == null,
+      );
+    }
+    const String pulse = MotionModel.pulseKeyProperty;
+    if (node.variables.containsKey(MotionModel.variableKey(pulse))) {
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        MotionModel.variableKey(pulse),
+        scopedValues: scopedValues,
+      );
+      motion = (motion ?? MotionModel.none).copyWith(
+        pulseKey: value?.toString(),
+        clearPulseKey: value == null,
       );
     }
     return motion;
@@ -289,10 +348,145 @@ abstract class WidgetNodeTransformerManager
     return NodeMotion(motion: motion, animate: animate, child: widget);
   }
 
+  /// Plays [node]'s one-shot [EffectAnimation]s and [ParticleEmitter] on
+  /// their cues, and flies it in by its [BaseNode.flightKey]. Nothing plays
+  /// under a disabled [TickerMode] (the design canvas).
+  Widget applyNodePlay(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+  }) {
+    final bool plays =
+        node.effectAnimations.isNotEmpty || node.particles != null;
+    final bool binds = node.variables.containsKey('flightKey');
+    if (!plays && node.flightKey.isEmpty && !binds) return widget;
+    final ScopedValues values = scopedValues ?? ScopedValues.of(context);
+    Object? bound(String key) => node.variables.containsKey(key)
+        ? PropertyValueDelegate.getPropertyValue<Object>(
+            node,
+            key,
+            scopedValues: values,
+          )
+        : null;
+    if (plays) {
+      final Map<String, String?> playKeys = {};
+      final Map<String, int> delays = {};
+      for (final EffectAnimation effect in node.effectAnimations) {
+        final String key = EffectAnimation.playKeyVariable(effect.name);
+        if (node.variables.containsKey(key)) {
+          playKeys[effect.name] = bound(key)?.toString();
+        }
+        final Object? delay = bound(EffectAnimation.delayVariable(effect.name));
+        final num? ms = switch (delay) {
+          num n => n,
+          String s => num.tryParse(s.trim()),
+          _ => null,
+        };
+        if (ms != null && ms.isFinite) delays[effect.name] = ms.round();
+      }
+      if (node.particles != null &&
+          node.variables.containsKey(ParticleEmitter.playKeyVariable)) {
+        playKeys[ParticleEmitter.animationName] = bound(
+          ParticleEmitter.playKeyVariable,
+        )?.toString();
+      }
+      widget = NodePlayBox(
+        key: ValueKey('play ${node.id}'),
+        nodeId: node.id,
+        effects: node.effectAnimations,
+        particles: node.particles,
+        playKeys: playKeys,
+        delays: delays,
+        child: widget,
+      );
+    }
+    final String flightKey = binds
+        ? (bound('flightKey')?.toString() ?? '')
+        : node.flightKey;
+    if (flightKey.isEmpty) return widget;
+    final MotionModel? motion = node.motion;
+    return FlightBox(
+      key: ValueKey('flight ${node.id}'),
+      flightKey: flightKey,
+      animate: TickerMode.valuesOf(context).enabled,
+      spring: motion != null && motion.curve == MotionCurve.spring
+          ? motionSpring(motion)
+          : const SpringDescription(mass: 1, stiffness: 420, damping: 24),
+      child: widget,
+    );
+  }
+
+  /// Draws [node]'s [BaseNode.strokePath] in its box.
+  Widget applyStrokePath(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+  }) {
+    final StrokePath? path = node.strokePath;
+    if (path == null) return widget;
+    List<List<double>> points = path.points;
+    if (node.variables.containsKey(StrokePath.pointsVariable)) {
+      points = readPathPoints(
+        PropertyValueDelegate.getPropertyValue<Object>(
+          node,
+          StrokePath.pointsVariable,
+          scopedValues: scopedValues ?? ScopedValues.of(context),
+        ),
+      );
+    }
+    return StrokePathBox(path: path, points: points, child: widget);
+  }
+
+  /// Scrolls [node] into view as its [BaseNode.reveal] says.
+  Widget applyReveal(BuildContext context, BaseNode node, Widget widget) {
+    final RevealModel? reveal = node.reveal;
+    if (reveal == null) return widget;
+    final bool when = node.variables.containsKey(RevealModel.whenVariable)
+        ? PropertyValueDelegate.getPropertyValue<bool>(
+                node,
+                RevealModel.whenVariable,
+                scopedValues: ScopedValues.of(context),
+              ) ??
+              false
+        : true;
+    return RevealBox(
+      key: ValueKey('reveal ${node.id}'),
+      reveal: reveal,
+      when: when,
+      child: widget,
+    );
+  }
+
+  /// Whether the condition [text] (a `${...}` path or `${= ...}` formula,
+  /// or `true`/`false`) holds with [scopedValues]. Empty text is null.
+  static bool? evaluateConditionText(
+    String text,
+    ScopedValues scopedValues,
+  ) {
+    if (text.trim().isEmpty) return null;
+    final Object? value = PropertyValueDelegate.substituteJsonValue(
+      text.trim(),
+      scopedValues,
+    );
+    return switch (value) {
+      bool b => b,
+      String s => s.trim().toLowerCase() == 'true',
+      num n => n != 0,
+      null => false,
+      _ => true,
+    };
+  }
+
   /// Convenience method to handle widget margins.
   Widget applyWidgetMargins(BaseNode node, Widget widget) {
     if (node.margin == EdgeInsetsModel.zero) return widget;
-    return Padding(padding: node.margin.flutterEdgeInsets, child: widget);
+    // Directional: margins mirror in a right-to-left layout.
+    return Padding(
+      padding: node.margin.flutterEdgeInsetsDirectional,
+      child: widget,
+    );
   }
 
   /// Convenience method to handle widget constraints.
@@ -468,6 +662,7 @@ abstract class WidgetNodeTransformerManager
     BaseNode node,
     Widget child,
   ) {
+    child = wrapWithDrag(context, node, child);
     if (node is! ReactionMixin) return child;
     if (node case CanvasNode() || SpacerNode()) return child;
     final List<Reaction> onHoldReactions = (node as ReactionMixin).reactions
@@ -489,9 +684,217 @@ abstract class WidgetNodeTransformerManager
     );
   }
 
+  /// Makes [node] draggable when it has a [BaseNode.drag]: it follows the
+  /// pointer and springs back, stays or flies off (see [NodeDrag]). Flying
+  /// off fires the node's swipe reaction for that direction; letting go
+  /// fires its drag end reactions. [child] is the node's whole build, so its
+  /// own bindings and its children read the drag as `drag`.
+  Widget wrapWithDrag(BuildContext context, BaseNode node, Widget child) {
+    final DragModel? drag = node.drag;
+    if (drag == null || node is CanvasNode) return child;
+    if (drag.reorder) {
+      // The handle of a row in a reorderable data list: dragging it moves
+      // the row (see PassiveListViewWidget).
+      final int? index = IndexedItemProvider.maybeOf(context)?.index;
+      if (index == null || SliverReorderableList.maybeOf(context) == null) {
+        return child;
+      }
+      return ReorderableDragStartListener(
+        index: index,
+        child: MouseRegion(cursor: SystemMouseCursors.grab, child: child),
+      );
+    }
+    final List<Reaction> reactions = node is ReactionMixin
+        ? [
+            for (final reaction in (node as ReactionMixin).reactions)
+              if (reaction.action.enabled) reaction,
+          ]
+        : const [];
+    final bool bound = node.variables.containsKey(DragModel.enabledVariableKey);
+    if (drag.track case final DragTrackModel track) {
+      return _wrapWithTrack(context, node, drag, track, reactions, child);
+    }
+
+    double rest(String key, double fallback) {
+      if (!node.variables.containsKey(key)) return fallback;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: ScopedValues.of(context),
+      );
+      return switch (value) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()) ?? fallback,
+        _ => fallback,
+      };
+    }
+
+    return NodeDrag(
+      nodeId: node.id,
+      drag: drag,
+      order: IndexedItemProvider.maybeOf(context)?.index ?? 0,
+      isEnabled: !bound
+          ? null
+          : () {
+              final Object? value =
+                  PropertyValueDelegate.getPropertyValue<Object>(
+                    node,
+                    DragModel.enabledVariableKey,
+                    scopedValues: ScopedValues.of(context),
+                  );
+              return switch (value) {
+                bool b => b,
+                num n => n != 0,
+                String s => s.trim().toLowerCase() == 'true',
+                _ => drag.enabled,
+              };
+            },
+      onDismissed: (direction) => FunctionsRepository.triggerAction(
+        context,
+        direction.swipeTrigger,
+        reactions: reactions,
+        result: {'direction': direction.name},
+      ),
+      onEnd: (result) => FunctionsRepository.triggerAction(
+        context,
+        TriggerType.dragEnd,
+        reactions: reactions,
+        result: result,
+      ),
+      rest: Offset(
+        rest(DragModel.restXVariableKey, drag.restX),
+        rest(DragModel.restYVariableKey, drag.restY),
+      ),
+      onValues: drag.shareAs.trim().isEmpty
+          ? null
+          : (values) => shareDragValues(context, drag.shareAs.trim(), values),
+      child: child,
+    );
+  }
+
+  /// Writes a drag's live [values] into the variable named [name], so nodes
+  /// outside the dragged one can follow it (see [DragModel.shareAs]).
+  static void shareDragValues(
+    BuildContext context,
+    String name,
+    DragValues values,
+  ) {
+    final CodelesslyContext? codelessly = context.read<CodelesslyContext?>();
+    final ValueNotifier<VariableData>? variable = codelessly
+        ?.findVariableByName(name);
+    if (variable == null) return;
+    variable.value = variable.value.copyWith(value: values.toMap());
+  }
+
+  /// Draws [node] where its drag track puts it for its variable's value,
+  /// without making it draggable: how the design canvas shows a knob or a
+  /// fader cap. Returns [widget] for a node without a track.
+  Widget applyTrackPose(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+  }) {
+    final DragTrackModel? track = node.drag?.track;
+    if (track == null) return widget;
+    final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
+      track.variable,
+      scopedValues: scopedValues ?? ScopedValues.of(context),
+    );
+    final double value = switch (raw) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()) ?? track.defaultValue ?? track.min,
+      _ => track.defaultValue ?? track.min,
+    };
+    return Transform(
+      alignment: Alignment.center,
+      transform: DragTrackGeometry(track).poseAt(track.progressOf(value)),
+      child: widget,
+    );
+  }
+
+  /// A node with a [DragTrackModel] is a value control: it is drawn at its
+  /// variable's place along the track and dragging it writes the variable,
+  /// running its `changed` reactions on each change and `dragEnd` on release
+  /// (both with `${result.value}`). See [NodeDragTrack].
+  Widget _wrapWithTrack(
+    BuildContext context,
+    BaseNode node,
+    DragModel drag,
+    DragTrackModel track,
+    List<Reaction> reactions,
+    Widget child,
+  ) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
+    final Observable<VariableData>? variable = codelesslyContext?.findVariable(
+      name: track.variable,
+    );
+    bool enabled(BuildContext context) {
+      if (!node.variables.containsKey(DragModel.enabledVariableKey)) {
+        return drag.enabled;
+      }
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        DragModel.enabledVariableKey,
+        scopedValues: ScopedValues.of(context),
+      );
+      return switch (value) {
+        bool b => b,
+        num n => n != 0,
+        String s => s.trim().toLowerCase() == 'true',
+        _ => drag.enabled,
+      };
+    }
+
+    Widget build(BuildContext context) {
+      final Object? raw =
+          PropertyValueDelegate.getVariableValueFromPath<Object>(
+            track.variable,
+            scopedValues: ScopedValues.of(context),
+          );
+      final double value = switch (raw) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()) ?? track.min,
+        _ => track.defaultValue ?? track.min,
+      };
+      return NodeDragTrack(
+        track: track,
+        value: value,
+        enabled: enabled(context),
+        onChanged: (v) {
+          final bool whole = variable?.value.type == VariableType.integer;
+          codelesslyContext?.updateVariable(
+            track.variable,
+            whole ? v.round() : v,
+          );
+          FunctionsRepository.triggerAction(
+            context,
+            TriggerType.changed,
+            reactions: reactions,
+            result: {'value': v},
+          );
+        },
+        onEnd: (v) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.dragEnd,
+          reactions: reactions,
+          result: {'value': v},
+        ),
+        child: child,
+      );
+    }
+
+    if (variable == null) return Builder(builder: build);
+    return ValueListenableBuilder<VariableData>(
+      valueListenable: variable,
+      builder: (context, _, _) => build(context),
+    );
+  }
+
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
-    final Widget tappable = _wrapWithTapReactions(context, node, widget);
+    Widget tappable = _wrapWithTapReactions(context, node, widget);
     if (node is! ReactionMixin || node is CanvasNode || node is SpacerNode) {
       return tappable;
     }
@@ -500,10 +903,32 @@ abstract class WidgetNodeTransformerManager
       for (final reaction in reactions)
         if (reaction.trigger.type == type && reaction.action.enabled) reaction,
     ];
-    final List<Reaction> onDrag = of(TriggerType.drag);
-    final List<Reaction> onDragEnd = of(TriggerType.dragEnd);
+    // A node with a drag model drags itself (see [wrapWithDrag]).
+    final bool ownDrag = node.drag != null;
+    final List<Reaction> onDrag = ownDrag ? const [] : of(TriggerType.drag);
+    final List<Reaction> onDragEnd = ownDrag
+        ? const []
+        : of(TriggerType.dragEnd);
     final List<Reaction> onPointerDown = of(TriggerType.pointerDown);
     final List<Reaction> onPointerUp = of(TriggerType.pointerUp);
+    final List<Reaction> onSecondary = of(TriggerType.secondaryClick);
+    if (onSecondary.isNotEmpty) {
+      // A right click opens the app's menu, not the browser's.
+      if (kIsWeb) BrowserContextMenu.disableContextMenu();
+      tappable = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onSecondaryTapUp: (details) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.secondaryClick,
+          reactions: onSecondary,
+          result: {
+            'x': details.globalPosition.dx,
+            'y': details.globalPosition.dy,
+          },
+        ),
+        child: tappable,
+      );
+    }
     if (onDrag.isEmpty &&
         onDragEnd.isEmpty &&
         onPointerDown.isEmpty &&
@@ -701,6 +1126,8 @@ abstract class WidgetNodeTransformerManager
   /// mouse wheel (scrolling down swipes up, as content moves up).
   Widget wrapWithSwipes(BuildContext context, BaseNode node, Widget widget) {
     if (node is! ReactionMixin) return widget;
+    // A draggable node fires its swipes when it flies off.
+    if (node.drag != null) return widget;
     final List<Reaction> swipes = (node as ReactionMixin).reactions
         .where(
           (reaction) =>
@@ -974,10 +1401,18 @@ class SvgIcon extends StatelessWidget {
     if (cupertinoIcon != null) {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
-    // Material icons are drawn from their SVG by name, never from a
-    // codepoint: an IconData built at runtime fails release web builds
-    // (icon fonts are tree-shaken), and the codepoints icons are saved with
-    // are Google's, which don't match Flutter's MaterialIcons font.
+    // Material Icons ship with Flutter; use their bundled glyph offline.
+    // Icon models hold the codepoints of Google's Material Icons fonts, which
+    // aren't the codepoints of Flutter's MaterialIcons font, so the glyph is
+    // found by name and style. Otherwise it is drawn from its SVG: an
+    // IconData built at runtime fails release web builds (icon fonts are
+    // tree-shaken).
+    if (icon case final MaterialIcon material) {
+      final IconData? glyph = materialIconsByName[material.styledName];
+      if (glyph != null) {
+        return Icon(glyph, size: dimension, color: iconColor);
+      }
+    }
 
     final url = icon.toSvgUrl(
       fill: fill,

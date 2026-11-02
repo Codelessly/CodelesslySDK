@@ -52,13 +52,6 @@ Future<Observable<VariableData>> _pump(
   await tester.enterText(find.byType(EditableText), 'lemon');
   await tester.pumpAndSettle();
   return q;
-  testWidgets('so does \${inputValue}, the property it is bound by', (
-    tester,
-  ) async {
-    final q = await _pump(tester, r'${inputValue}');
-    expect(q.value.value, 'lemon');
-    expect(find.text('lemon'), findsOneWidget);
-  });
 }
 
 void main() {
@@ -69,6 +62,7 @@ void main() {
     expect(q.value.value, 'lemon');
     expect(find.text('lemon'), findsOneWidget);
   });
+
   testWidgets('so does \${inputValue}, the property it is bound by', (
     tester,
   ) async {

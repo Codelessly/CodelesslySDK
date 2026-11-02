@@ -536,13 +536,16 @@ class PropertyValueDelegate {
 
   /// The variable paths a computed variable's formula reads, followed
   /// through other computed variables, and whether any of them reads the
-  /// clock. Widgets bound to [name] listen to these too.
-  static ({Set<String> paths, bool readsClock}) computedDependencies(
+  /// clock (`now()`) or the millisecond clock (`nowMs()`). Widgets bound to
+  /// [name] listen to these too.
+  static ({Set<String> paths, bool readsClock, bool readsFrameClock})
+  computedDependencies(
     String name,
     Map<String, VariableData> variables,
   ) {
     final Set<String> paths = {};
     bool readsClock = false;
+    bool readsFrameClock = false;
     final Set<String> seen = {};
     void visit(String variableName) {
       if (!seen.add(variableName)) return;
@@ -551,6 +554,8 @@ class PropertyValueDelegate {
       final String? expression = computedExpressionOf(variable);
       if (expression == null) return;
       readsClock = readsClock || FormulaEvaluator.readsClock(expression);
+      readsFrameClock =
+          readsFrameClock || FormulaEvaluator.readsFrameClock(expression);
       for (final String path in FormulaEvaluator.referencedPaths(expression)) {
         paths.add(path);
         final VariableMatch? match = VariableMatch.parse(
@@ -561,7 +566,11 @@ class PropertyValueDelegate {
     }
 
     visit(name);
-    return (paths: paths, readsClock: readsClock);
+    return (
+      paths: paths,
+      readsClock: readsClock,
+      readsFrameClock: readsFrameClock,
+    );
   }
 
   @internal
@@ -592,6 +601,16 @@ class PropertyValueDelegate {
       'result' => ActionChain.current?.result,
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
       'hold' => scopedValues.holdProgress ?? 0.0,
+      // A drag track's pose of this node (dx, dy, progress, dragging...) and
+      // the app's drag and drop session (active, over, accepted...).
+      'drag' => {
+        ...(scopedValues.dragValues ?? DragValues.rest).toMap(),
+        ...?(scopedValues.codelesslyContext?.dragAndDrop.value ??
+            DragAndDropController.preview ??
+            DragAndDropController.idle) as Map?,
+      },
+      'track' => (scopedValues.trackValues ?? const TrackValues()).toMap(),
+      'speech' => Speech.instance.value,
       _ => null,
     };
 
