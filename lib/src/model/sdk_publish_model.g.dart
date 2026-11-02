@@ -209,6 +209,11 @@ SDKPublishUpdates _$SDKPublishUpdatesFromJson(Map json) => SDKPublishUpdates(
         ),
       ) ??
       const {},
+  canvasPaths:
+      (json['canvasPaths'] as Map?)?.map(
+        (k, e) => MapEntry(k as String, e as String),
+      ) ??
+      const {},
 );
 
 Map<String, dynamic> _$SDKPublishUpdatesToJson(
@@ -224,6 +229,7 @@ Map<String, dynamic> _$SDKPublishUpdatesToJson(
   'layoutCanvases': instance.layoutCanvases.map(
     (k, e) => MapEntry(k, e.toList()),
   ),
+  'canvasPaths': instance.canvasPaths,
 };
 
 SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
