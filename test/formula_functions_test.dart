@@ -13,9 +13,8 @@ VariableData fn(String name, List<String> params, String body) => VariableData(
 VariableData value(String name, Object value, VariableType type) =>
     VariableData(id: name, name: name, value: '$value', type: type);
 
-ScopedValues scopeOf(List<VariableData> variables) => ScopedValues.preview(
-  variables: {for (final v in variables) v.name: v},
-);
+ScopedValues scopeOf(List<VariableData> variables) =>
+    ScopedValues.preview(variables: {for (final v in variables) v.name: v});
 
 Object? eval(String expression, List<VariableData> variables) =>
     PropertyValueDelegate.evaluateFormula(
@@ -26,7 +25,9 @@ Object? eval(String expression, List<VariableData> variables) =>
 void main() {
   group('formula functions', () {
     test('a variable with parameters is called by name', () {
-      final vars = [fn('double', ['x'], 'x * 2')];
+      final vars = [
+        fn('double', ['x'], 'x * 2'),
+      ];
       expect(eval('double(21)', vars), 42);
       expect(eval('double(double(3)) + 1', vars), 13);
     });
@@ -55,8 +56,11 @@ void main() {
     test('functions call each other and recurse, with a depth limit', () {
       final vars = [
         fn('fact', ['n'], 'n <= 1 ? 1 : n * fact(n - 1)'),
-        fn('slide', ['f', 'r', 'df', 'dr'],
-            'f < 0 || f > 7 || r < 0 || r > 7 ? [] : concat([r * 8 + f], slide(f + df, r + dr, df, dr))'),
+        fn(
+          'slide',
+          ['f', 'r', 'df', 'dr'],
+          'f < 0 || f > 7 || r < 0 || r > 7 ? [] : concat([r * 8 + f], slide(f + df, r + dr, df, dr))',
+        ),
         fn('forever', ['n'], 'forever(n + 1)'),
       ];
       expect(eval('fact(6)', vars), 720);
@@ -73,13 +77,18 @@ void main() {
     });
 
     test('missing arguments are null; unknown functions give null', () {
-      final vars = [fn('orZero', ['a'], 'coalesce(a, 0)')];
+      final vars = [
+        fn('orZero', ['a'], 'coalesce(a, 0)'),
+      ];
       expect(eval('orZero()', vars), 0);
       expect(eval('nope(1)', vars), isNull);
     });
 
     test('errorOf knows the function variables it is given', () {
-      expect(FormulaEvaluator.errorOf('legal(board, 3)'), 'Unknown function "legal"');
+      expect(
+        FormulaEvaluator.errorOf('legal(board, 3)'),
+        'Unknown function "legal"',
+      );
       expect(
         FormulaEvaluator.errorOf('legal(board, 3)', functionNames: ['legal']),
         isNull,
@@ -96,7 +105,7 @@ void main() {
       final vars = {
         for (final v in [
           value('turn', 'w', VariableType.text),
-          fn('mine', ['board'], "filter(board, c => left(c, 1) == turn)"),
+          fn('mine', ['board'], 'filter(board, c => left(c, 1) == turn)'),
           value('legal', r'${= mine(board)}', VariableType.list),
         ])
           v.name: v,
@@ -109,27 +118,34 @@ void main() {
       expect(mine.paths, isNot(contains('board')), reason: 'a parameter');
     });
 
-    test('functions take no part in cycles and stay callable when resolved', () {
-      final vars = {
-        for (final v in [
-          fn('fact', ['n'], 'n <= 1 ? 1 : n * fact(n - 1)'),
-          value('five', r'${= fact(5)}', VariableType.integer),
-        ])
-          v.name: v,
-      };
-      expect(ComputedVariables.cyclicNames(vars), isEmpty);
-      expect(ComputedVariables.inputsOf(vars['fact']!), {'fact'});
-      final resolved = ComputedVariables.resolveAll(vars);
-      expect(resolved['five']!.value, '120');
-      expect(resolved['fact']!.isFunction, isTrue);
-    });
+    test(
+      'functions take no part in cycles and stay callable when resolved',
+      () {
+        final vars = {
+          for (final v in [
+            fn('fact', ['n'], 'n <= 1 ? 1 : n * fact(n - 1)'),
+            value('five', r'${= fact(5)}', VariableType.integer),
+          ])
+            v.name: v,
+        };
+        expect(ComputedVariables.cyclicNames(vars), isEmpty);
+        expect(ComputedVariables.inputsOf(vars['fact']!), {'fact'});
+        final resolved = ComputedVariables.resolveAll(vars);
+        expect(resolved['five']!.value, '120');
+        expect(resolved['fact']!.isFunction, isTrue);
+      },
+    );
 
     test('parameters survive JSON', () {
       final v = fn('f', ['a', 'b'], 'a + b');
       final back = VariableData.fromJson(v.toJson());
       expect(back.parameters, ['a', 'b']);
       expect(back.isFunction, isTrue);
-      expect(VariableData.fromJson(value('n', 1, VariableType.integer).toJson()).parameters, isEmpty);
+      expect(
+        VariableData.fromJson(value('n', 1, VariableType.integer).toJson())
+            .parameters,
+        isEmpty,
+      );
     });
   });
 }

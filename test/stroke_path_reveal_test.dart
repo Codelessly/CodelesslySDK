@@ -64,15 +64,15 @@ void main() {
       MaterialApp(
         home: SingleChildScrollView(
           controller: controller,
-          child: Column(
+          child: const Column(
             children: [
-              const SizedBox(height: 2000),
+              SizedBox(height: 2000),
               RevealBox(
-                reveal: const RevealModel(alignment: 0.5, durationMs: 0),
+                reveal: RevealModel(alignment: 0.5, durationMs: 0),
                 when: true,
-                child: const SizedBox(height: 100, width: 100),
+                child: SizedBox(height: 100, width: 100),
               ),
-              const SizedBox(height: 2000),
+              SizedBox(height: 2000),
             ],
           ),
         ),
@@ -100,10 +100,10 @@ void main() {
                   valueListenable: above,
                   builder: (context, h, _) => SizedBox(height: h),
                 ),
-                RevealBox(
-                  reveal: const RevealModel(alignment: 0.5, durationMs: 0),
+                const RevealBox(
+                  reveal: RevealModel(alignment: 0.5, durationMs: 0),
                   when: true,
-                  child: const SizedBox(height: 100, width: 100),
+                  child: SizedBox(height: 100, width: 100),
                 ),
                 const SizedBox(height: 2000),
               ],

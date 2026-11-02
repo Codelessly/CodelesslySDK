@@ -4,12 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   GaugeNode ring(Map<String, String> variables) => GaugeNode(
-        id: 'g',
-        name: 'Ring',
-        basicBoxLocal: NodeBox(0, 0, 100, 100),
-        value: 0.5,
-        properties: GaugeProperties(colorByZone: false, showTarget: false, target: 0.2),
-      )..variables.addAll(variables);
+    id: 'g',
+    name: 'Ring',
+    basicBoxLocal: NodeBox(0, 0, 100, 100),
+    value: 0.5,
+    properties: GaugeProperties(
+      colorByZone: false,
+      showTarget: false,
+      target: 0.2,
+    ),
+  )..variables.addAll(variables);
 
   test('a radial gauge reads its bound color and pace marker', () {
     final props = boundRadialGaugeProperties(
@@ -27,6 +31,12 @@ void main() {
 
   test('without bindings the stored properties are used as they are', () {
     final node = ring(const {});
-    expect(identical(boundRadialGaugeProperties(node, ScopedValues.preview(variables: {})), node.properties), isTrue);
+    expect(
+      identical(
+        boundRadialGaugeProperties(node, ScopedValues.preview(variables: {})),
+        node.properties,
+      ),
+      isTrue,
+    );
   });
 }

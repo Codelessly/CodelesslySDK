@@ -452,29 +452,43 @@ const Map<String, IconData> materialIconsByName = {
   'airline_seat_flat_angled_rounded': Icons.airline_seat_flat_angled_rounded,
   'airline_seat_flat_angled_outlined': Icons.airline_seat_flat_angled_outlined,
   'airline_seat_individual_suite': Icons.airline_seat_individual_suite,
-  'airline_seat_individual_suite_sharp': Icons.airline_seat_individual_suite_sharp,
-  'airline_seat_individual_suite_rounded': Icons.airline_seat_individual_suite_rounded,
-  'airline_seat_individual_suite_outlined': Icons.airline_seat_individual_suite_outlined,
+  'airline_seat_individual_suite_sharp':
+      Icons.airline_seat_individual_suite_sharp,
+  'airline_seat_individual_suite_rounded':
+      Icons.airline_seat_individual_suite_rounded,
+  'airline_seat_individual_suite_outlined':
+      Icons.airline_seat_individual_suite_outlined,
   'airline_seat_legroom_extra': Icons.airline_seat_legroom_extra,
   'airline_seat_legroom_extra_sharp': Icons.airline_seat_legroom_extra_sharp,
-  'airline_seat_legroom_extra_rounded': Icons.airline_seat_legroom_extra_rounded,
-  'airline_seat_legroom_extra_outlined': Icons.airline_seat_legroom_extra_outlined,
+  'airline_seat_legroom_extra_rounded':
+      Icons.airline_seat_legroom_extra_rounded,
+  'airline_seat_legroom_extra_outlined':
+      Icons.airline_seat_legroom_extra_outlined,
   'airline_seat_legroom_normal': Icons.airline_seat_legroom_normal,
   'airline_seat_legroom_normal_sharp': Icons.airline_seat_legroom_normal_sharp,
-  'airline_seat_legroom_normal_rounded': Icons.airline_seat_legroom_normal_rounded,
-  'airline_seat_legroom_normal_outlined': Icons.airline_seat_legroom_normal_outlined,
+  'airline_seat_legroom_normal_rounded':
+      Icons.airline_seat_legroom_normal_rounded,
+  'airline_seat_legroom_normal_outlined':
+      Icons.airline_seat_legroom_normal_outlined,
   'airline_seat_legroom_reduced': Icons.airline_seat_legroom_reduced,
-  'airline_seat_legroom_reduced_sharp': Icons.airline_seat_legroom_reduced_sharp,
-  'airline_seat_legroom_reduced_rounded': Icons.airline_seat_legroom_reduced_rounded,
-  'airline_seat_legroom_reduced_outlined': Icons.airline_seat_legroom_reduced_outlined,
+  'airline_seat_legroom_reduced_sharp':
+      Icons.airline_seat_legroom_reduced_sharp,
+  'airline_seat_legroom_reduced_rounded':
+      Icons.airline_seat_legroom_reduced_rounded,
+  'airline_seat_legroom_reduced_outlined':
+      Icons.airline_seat_legroom_reduced_outlined,
   'airline_seat_recline_extra': Icons.airline_seat_recline_extra,
   'airline_seat_recline_extra_sharp': Icons.airline_seat_recline_extra_sharp,
-  'airline_seat_recline_extra_rounded': Icons.airline_seat_recline_extra_rounded,
-  'airline_seat_recline_extra_outlined': Icons.airline_seat_recline_extra_outlined,
+  'airline_seat_recline_extra_rounded':
+      Icons.airline_seat_recline_extra_rounded,
+  'airline_seat_recline_extra_outlined':
+      Icons.airline_seat_recline_extra_outlined,
   'airline_seat_recline_normal': Icons.airline_seat_recline_normal,
   'airline_seat_recline_normal_sharp': Icons.airline_seat_recline_normal_sharp,
-  'airline_seat_recline_normal_rounded': Icons.airline_seat_recline_normal_rounded,
-  'airline_seat_recline_normal_outlined': Icons.airline_seat_recline_normal_outlined,
+  'airline_seat_recline_normal_rounded':
+      Icons.airline_seat_recline_normal_rounded,
+  'airline_seat_recline_normal_outlined':
+      Icons.airline_seat_recline_normal_outlined,
   'airline_stops': Icons.airline_stops,
   'airline_stops_sharp': Icons.airline_stops_sharp,
   'airline_stops_rounded': Icons.airline_stops_rounded,
@@ -2285,7 +2299,8 @@ const Map<String, IconData> materialIconsByName = {
   'directions_railway_filled': Icons.directions_railway_filled,
   'directions_railway_filled_sharp': Icons.directions_railway_filled_sharp,
   'directions_railway_filled_rounded': Icons.directions_railway_filled_rounded,
-  'directions_railway_filled_outlined': Icons.directions_railway_filled_outlined,
+  'directions_railway_filled_outlined':
+      Icons.directions_railway_filled_outlined,
   'directions_run': Icons.directions_run,
   'directions_run_sharp': Icons.directions_run_sharp,
   'directions_run_rounded': Icons.directions_run_rounded,
@@ -2309,7 +2324,8 @@ const Map<String, IconData> materialIconsByName = {
   'directions_transit_filled': Icons.directions_transit_filled,
   'directions_transit_filled_sharp': Icons.directions_transit_filled_sharp,
   'directions_transit_filled_rounded': Icons.directions_transit_filled_rounded,
-  'directions_transit_filled_outlined': Icons.directions_transit_filled_outlined,
+  'directions_transit_filled_outlined':
+      Icons.directions_transit_filled_outlined,
   'directions_walk': Icons.directions_walk,
   'directions_walk_sharp': Icons.directions_walk_sharp,
   'directions_walk_rounded': Icons.directions_walk_rounded,
@@ -2395,9 +2411,12 @@ const Map<String, IconData> materialIconsByName = {
   'do_not_disturb_on_rounded': Icons.do_not_disturb_on_rounded,
   'do_not_disturb_on_outlined': Icons.do_not_disturb_on_outlined,
   'do_not_disturb_on_total_silence': Icons.do_not_disturb_on_total_silence,
-  'do_not_disturb_on_total_silence_sharp': Icons.do_not_disturb_on_total_silence_sharp,
-  'do_not_disturb_on_total_silence_rounded': Icons.do_not_disturb_on_total_silence_rounded,
-  'do_not_disturb_on_total_silence_outlined': Icons.do_not_disturb_on_total_silence_outlined,
+  'do_not_disturb_on_total_silence_sharp':
+      Icons.do_not_disturb_on_total_silence_sharp,
+  'do_not_disturb_on_total_silence_rounded':
+      Icons.do_not_disturb_on_total_silence_rounded,
+  'do_not_disturb_on_total_silence_outlined':
+      Icons.do_not_disturb_on_total_silence_outlined,
   'do_not_step': Icons.do_not_step,
   'do_not_step_sharp': Icons.do_not_step_sharp,
   'do_not_step_rounded': Icons.do_not_step_rounded,
@@ -2522,7 +2541,8 @@ const Map<String, IconData> materialIconsByName = {
   'drive_file_rename_outline': Icons.drive_file_rename_outline,
   'drive_file_rename_outline_sharp': Icons.drive_file_rename_outline_sharp,
   'drive_file_rename_outline_rounded': Icons.drive_file_rename_outline_rounded,
-  'drive_file_rename_outline_outlined': Icons.drive_file_rename_outline_outlined,
+  'drive_file_rename_outline_outlined':
+      Icons.drive_file_rename_outline_outlined,
   'drive_folder_upload': Icons.drive_folder_upload,
   'drive_folder_upload_sharp': Icons.drive_folder_upload_sharp,
   'drive_folder_upload_rounded': Icons.drive_folder_upload_rounded,
@@ -3416,12 +3436,16 @@ const Map<String, IconData> materialIconsByName = {
   'format_strikethrough_outlined': Icons.format_strikethrough_outlined,
   'format_textdirection_l_to_r': Icons.format_textdirection_l_to_r,
   'format_textdirection_l_to_r_sharp': Icons.format_textdirection_l_to_r_sharp,
-  'format_textdirection_l_to_r_rounded': Icons.format_textdirection_l_to_r_rounded,
-  'format_textdirection_l_to_r_outlined': Icons.format_textdirection_l_to_r_outlined,
+  'format_textdirection_l_to_r_rounded':
+      Icons.format_textdirection_l_to_r_rounded,
+  'format_textdirection_l_to_r_outlined':
+      Icons.format_textdirection_l_to_r_outlined,
   'format_textdirection_r_to_l': Icons.format_textdirection_r_to_l,
   'format_textdirection_r_to_l_sharp': Icons.format_textdirection_r_to_l_sharp,
-  'format_textdirection_r_to_l_rounded': Icons.format_textdirection_r_to_l_rounded,
-  'format_textdirection_r_to_l_outlined': Icons.format_textdirection_r_to_l_outlined,
+  'format_textdirection_r_to_l_rounded':
+      Icons.format_textdirection_r_to_l_rounded,
+  'format_textdirection_r_to_l_outlined':
+      Icons.format_textdirection_r_to_l_outlined,
   'format_underline': Icons.format_underline,
   'format_underline_sharp': Icons.format_underline_sharp,
   'format_underline_rounded': Icons.format_underline_rounded,
@@ -4187,16 +4211,22 @@ const Map<String, IconData> materialIconsByName = {
   'keyboard_control_key_outlined': Icons.keyboard_control_key_outlined,
   'keyboard_double_arrow_down': Icons.keyboard_double_arrow_down,
   'keyboard_double_arrow_down_sharp': Icons.keyboard_double_arrow_down_sharp,
-  'keyboard_double_arrow_down_rounded': Icons.keyboard_double_arrow_down_rounded,
-  'keyboard_double_arrow_down_outlined': Icons.keyboard_double_arrow_down_outlined,
+  'keyboard_double_arrow_down_rounded':
+      Icons.keyboard_double_arrow_down_rounded,
+  'keyboard_double_arrow_down_outlined':
+      Icons.keyboard_double_arrow_down_outlined,
   'keyboard_double_arrow_left': Icons.keyboard_double_arrow_left,
   'keyboard_double_arrow_left_sharp': Icons.keyboard_double_arrow_left_sharp,
-  'keyboard_double_arrow_left_rounded': Icons.keyboard_double_arrow_left_rounded,
-  'keyboard_double_arrow_left_outlined': Icons.keyboard_double_arrow_left_outlined,
+  'keyboard_double_arrow_left_rounded':
+      Icons.keyboard_double_arrow_left_rounded,
+  'keyboard_double_arrow_left_outlined':
+      Icons.keyboard_double_arrow_left_outlined,
   'keyboard_double_arrow_right': Icons.keyboard_double_arrow_right,
   'keyboard_double_arrow_right_sharp': Icons.keyboard_double_arrow_right_sharp,
-  'keyboard_double_arrow_right_rounded': Icons.keyboard_double_arrow_right_rounded,
-  'keyboard_double_arrow_right_outlined': Icons.keyboard_double_arrow_right_outlined,
+  'keyboard_double_arrow_right_rounded':
+      Icons.keyboard_double_arrow_right_rounded,
+  'keyboard_double_arrow_right_outlined':
+      Icons.keyboard_double_arrow_right_outlined,
   'keyboard_double_arrow_up': Icons.keyboard_double_arrow_up,
   'keyboard_double_arrow_up_sharp': Icons.keyboard_double_arrow_up_sharp,
   'keyboard_double_arrow_up_rounded': Icons.keyboard_double_arrow_up_rounded,
@@ -5265,8 +5295,10 @@ const Map<String, IconData> materialIconsByName = {
   'no_encryption_outlined': Icons.no_encryption_outlined,
   'no_encryption_gmailerrorred': Icons.no_encryption_gmailerrorred,
   'no_encryption_gmailerrorred_sharp': Icons.no_encryption_gmailerrorred_sharp,
-  'no_encryption_gmailerrorred_rounded': Icons.no_encryption_gmailerrorred_rounded,
-  'no_encryption_gmailerrorred_outlined': Icons.no_encryption_gmailerrorred_outlined,
+  'no_encryption_gmailerrorred_rounded':
+      Icons.no_encryption_gmailerrorred_rounded,
+  'no_encryption_gmailerrorred_outlined':
+      Icons.no_encryption_gmailerrorred_outlined,
   'no_flash': Icons.no_flash,
   'no_flash_sharp': Icons.no_flash_sharp,
   'no_flash_rounded': Icons.no_flash_rounded,
@@ -5536,16 +5568,20 @@ const Map<String, IconData> materialIconsByName = {
   'panorama_horizontal_outlined': Icons.panorama_horizontal_outlined,
   'panorama_horizontal_select': Icons.panorama_horizontal_select,
   'panorama_horizontal_select_sharp': Icons.panorama_horizontal_select_sharp,
-  'panorama_horizontal_select_rounded': Icons.panorama_horizontal_select_rounded,
-  'panorama_horizontal_select_outlined': Icons.panorama_horizontal_select_outlined,
+  'panorama_horizontal_select_rounded':
+      Icons.panorama_horizontal_select_rounded,
+  'panorama_horizontal_select_outlined':
+      Icons.panorama_horizontal_select_outlined,
   'panorama_photosphere': Icons.panorama_photosphere,
   'panorama_photosphere_sharp': Icons.panorama_photosphere_sharp,
   'panorama_photosphere_rounded': Icons.panorama_photosphere_rounded,
   'panorama_photosphere_outlined': Icons.panorama_photosphere_outlined,
   'panorama_photosphere_select': Icons.panorama_photosphere_select,
   'panorama_photosphere_select_sharp': Icons.panorama_photosphere_select_sharp,
-  'panorama_photosphere_select_rounded': Icons.panorama_photosphere_select_rounded,
-  'panorama_photosphere_select_outlined': Icons.panorama_photosphere_select_outlined,
+  'panorama_photosphere_select_rounded':
+      Icons.panorama_photosphere_select_rounded,
+  'panorama_photosphere_select_outlined':
+      Icons.panorama_photosphere_select_outlined,
   'panorama_vertical': Icons.panorama_vertical,
   'panorama_vertical_sharp': Icons.panorama_vertical_sharp,
   'panorama_vertical_rounded': Icons.panorama_vertical_rounded,
@@ -5560,8 +5596,10 @@ const Map<String, IconData> materialIconsByName = {
   'panorama_wide_angle_outlined': Icons.panorama_wide_angle_outlined,
   'panorama_wide_angle_select': Icons.panorama_wide_angle_select,
   'panorama_wide_angle_select_sharp': Icons.panorama_wide_angle_select_sharp,
-  'panorama_wide_angle_select_rounded': Icons.panorama_wide_angle_select_rounded,
-  'panorama_wide_angle_select_outlined': Icons.panorama_wide_angle_select_outlined,
+  'panorama_wide_angle_select_rounded':
+      Icons.panorama_wide_angle_select_rounded,
+  'panorama_wide_angle_select_outlined':
+      Icons.panorama_wide_angle_select_outlined,
   'paragliding': Icons.paragliding,
   'paragliding_sharp': Icons.paragliding_sharp,
   'paragliding_rounded': Icons.paragliding_rounded,
@@ -5996,7 +6034,8 @@ const Map<String, IconData> materialIconsByName = {
   'playlist_add_check_circle': Icons.playlist_add_check_circle,
   'playlist_add_check_circle_sharp': Icons.playlist_add_check_circle_sharp,
   'playlist_add_check_circle_rounded': Icons.playlist_add_check_circle_rounded,
-  'playlist_add_check_circle_outlined': Icons.playlist_add_check_circle_outlined,
+  'playlist_add_check_circle_outlined':
+      Icons.playlist_add_check_circle_outlined,
   'playlist_add_circle': Icons.playlist_add_circle,
   'playlist_add_circle_sharp': Icons.playlist_add_circle_sharp,
   'playlist_add_circle_rounded': Icons.playlist_add_circle_rounded,
@@ -6119,8 +6158,10 @@ const Map<String, IconData> materialIconsByName = {
   'private_connectivity_outlined': Icons.private_connectivity_outlined,
   'production_quantity_limits': Icons.production_quantity_limits,
   'production_quantity_limits_sharp': Icons.production_quantity_limits_sharp,
-  'production_quantity_limits_rounded': Icons.production_quantity_limits_rounded,
-  'production_quantity_limits_outlined': Icons.production_quantity_limits_outlined,
+  'production_quantity_limits_rounded':
+      Icons.production_quantity_limits_rounded,
+  'production_quantity_limits_outlined':
+      Icons.production_quantity_limits_outlined,
   'propane': Icons.propane,
   'propane_sharp': Icons.propane_sharp,
   'propane_rounded': Icons.propane_rounded,
@@ -6832,8 +6873,10 @@ const Map<String, IconData> materialIconsByName = {
   'sentiment_satisfied_alt_outlined': Icons.sentiment_satisfied_alt_outlined,
   'sentiment_very_dissatisfied': Icons.sentiment_very_dissatisfied,
   'sentiment_very_dissatisfied_sharp': Icons.sentiment_very_dissatisfied_sharp,
-  'sentiment_very_dissatisfied_rounded': Icons.sentiment_very_dissatisfied_rounded,
-  'sentiment_very_dissatisfied_outlined': Icons.sentiment_very_dissatisfied_outlined,
+  'sentiment_very_dissatisfied_rounded':
+      Icons.sentiment_very_dissatisfied_rounded,
+  'sentiment_very_dissatisfied_outlined':
+      Icons.sentiment_very_dissatisfied_outlined,
   'sentiment_very_satisfied': Icons.sentiment_very_satisfied,
   'sentiment_very_satisfied_sharp': Icons.sentiment_very_satisfied_sharp,
   'sentiment_very_satisfied_rounded': Icons.sentiment_very_satisfied_rounded,
@@ -7038,19 +7081,29 @@ const Map<String, IconData> materialIconsByName = {
   'signal_cellular_alt_1_bar': Icons.signal_cellular_alt_1_bar,
   'signal_cellular_alt_1_bar_sharp': Icons.signal_cellular_alt_1_bar_sharp,
   'signal_cellular_alt_1_bar_rounded': Icons.signal_cellular_alt_1_bar_rounded,
-  'signal_cellular_alt_1_bar_outlined': Icons.signal_cellular_alt_1_bar_outlined,
+  'signal_cellular_alt_1_bar_outlined':
+      Icons.signal_cellular_alt_1_bar_outlined,
   'signal_cellular_alt_2_bar': Icons.signal_cellular_alt_2_bar,
   'signal_cellular_alt_2_bar_sharp': Icons.signal_cellular_alt_2_bar_sharp,
   'signal_cellular_alt_2_bar_rounded': Icons.signal_cellular_alt_2_bar_rounded,
-  'signal_cellular_alt_2_bar_outlined': Icons.signal_cellular_alt_2_bar_outlined,
-  'signal_cellular_connected_no_internet_0_bar': Icons.signal_cellular_connected_no_internet_0_bar,
-  'signal_cellular_connected_no_internet_0_bar_sharp': Icons.signal_cellular_connected_no_internet_0_bar_sharp,
-  'signal_cellular_connected_no_internet_0_bar_rounded': Icons.signal_cellular_connected_no_internet_0_bar_rounded,
-  'signal_cellular_connected_no_internet_0_bar_outlined': Icons.signal_cellular_connected_no_internet_0_bar_outlined,
-  'signal_cellular_connected_no_internet_4_bar': Icons.signal_cellular_connected_no_internet_4_bar,
-  'signal_cellular_connected_no_internet_4_bar_sharp': Icons.signal_cellular_connected_no_internet_4_bar_sharp,
-  'signal_cellular_connected_no_internet_4_bar_rounded': Icons.signal_cellular_connected_no_internet_4_bar_rounded,
-  'signal_cellular_connected_no_internet_4_bar_outlined': Icons.signal_cellular_connected_no_internet_4_bar_outlined,
+  'signal_cellular_alt_2_bar_outlined':
+      Icons.signal_cellular_alt_2_bar_outlined,
+  'signal_cellular_connected_no_internet_0_bar':
+      Icons.signal_cellular_connected_no_internet_0_bar,
+  'signal_cellular_connected_no_internet_0_bar_sharp':
+      Icons.signal_cellular_connected_no_internet_0_bar_sharp,
+  'signal_cellular_connected_no_internet_0_bar_rounded':
+      Icons.signal_cellular_connected_no_internet_0_bar_rounded,
+  'signal_cellular_connected_no_internet_0_bar_outlined':
+      Icons.signal_cellular_connected_no_internet_0_bar_outlined,
+  'signal_cellular_connected_no_internet_4_bar':
+      Icons.signal_cellular_connected_no_internet_4_bar,
+  'signal_cellular_connected_no_internet_4_bar_sharp':
+      Icons.signal_cellular_connected_no_internet_4_bar_sharp,
+  'signal_cellular_connected_no_internet_4_bar_rounded':
+      Icons.signal_cellular_connected_no_internet_4_bar_rounded,
+  'signal_cellular_connected_no_internet_4_bar_outlined':
+      Icons.signal_cellular_connected_no_internet_4_bar_outlined,
   'signal_cellular_no_sim': Icons.signal_cellular_no_sim,
   'signal_cellular_no_sim_sharp': Icons.signal_cellular_no_sim_sharp,
   'signal_cellular_no_sim_rounded': Icons.signal_cellular_no_sim_rounded,
@@ -7083,26 +7136,38 @@ const Map<String, IconData> materialIconsByName = {
   'signal_wifi_bad_sharp': Icons.signal_wifi_bad_sharp,
   'signal_wifi_bad_rounded': Icons.signal_wifi_bad_rounded,
   'signal_wifi_bad_outlined': Icons.signal_wifi_bad_outlined,
-  'signal_wifi_connected_no_internet_4': Icons.signal_wifi_connected_no_internet_4,
-  'signal_wifi_connected_no_internet_4_sharp': Icons.signal_wifi_connected_no_internet_4_sharp,
-  'signal_wifi_connected_no_internet_4_rounded': Icons.signal_wifi_connected_no_internet_4_rounded,
-  'signal_wifi_connected_no_internet_4_outlined': Icons.signal_wifi_connected_no_internet_4_outlined,
+  'signal_wifi_connected_no_internet_4':
+      Icons.signal_wifi_connected_no_internet_4,
+  'signal_wifi_connected_no_internet_4_sharp':
+      Icons.signal_wifi_connected_no_internet_4_sharp,
+  'signal_wifi_connected_no_internet_4_rounded':
+      Icons.signal_wifi_connected_no_internet_4_rounded,
+  'signal_wifi_connected_no_internet_4_outlined':
+      Icons.signal_wifi_connected_no_internet_4_outlined,
   'signal_wifi_off': Icons.signal_wifi_off,
   'signal_wifi_off_sharp': Icons.signal_wifi_off_sharp,
   'signal_wifi_off_rounded': Icons.signal_wifi_off_rounded,
   'signal_wifi_off_outlined': Icons.signal_wifi_off_outlined,
   'signal_wifi_statusbar_4_bar': Icons.signal_wifi_statusbar_4_bar,
   'signal_wifi_statusbar_4_bar_sharp': Icons.signal_wifi_statusbar_4_bar_sharp,
-  'signal_wifi_statusbar_4_bar_rounded': Icons.signal_wifi_statusbar_4_bar_rounded,
-  'signal_wifi_statusbar_4_bar_outlined': Icons.signal_wifi_statusbar_4_bar_outlined,
-  'signal_wifi_statusbar_connected_no_internet_4': Icons.signal_wifi_statusbar_connected_no_internet_4,
-  'signal_wifi_statusbar_connected_no_internet_4_sharp': Icons.signal_wifi_statusbar_connected_no_internet_4_sharp,
-  'signal_wifi_statusbar_connected_no_internet_4_rounded': Icons.signal_wifi_statusbar_connected_no_internet_4_rounded,
-  'signal_wifi_statusbar_connected_no_internet_4_outlined': Icons.signal_wifi_statusbar_connected_no_internet_4_outlined,
+  'signal_wifi_statusbar_4_bar_rounded':
+      Icons.signal_wifi_statusbar_4_bar_rounded,
+  'signal_wifi_statusbar_4_bar_outlined':
+      Icons.signal_wifi_statusbar_4_bar_outlined,
+  'signal_wifi_statusbar_connected_no_internet_4':
+      Icons.signal_wifi_statusbar_connected_no_internet_4,
+  'signal_wifi_statusbar_connected_no_internet_4_sharp':
+      Icons.signal_wifi_statusbar_connected_no_internet_4_sharp,
+  'signal_wifi_statusbar_connected_no_internet_4_rounded':
+      Icons.signal_wifi_statusbar_connected_no_internet_4_rounded,
+  'signal_wifi_statusbar_connected_no_internet_4_outlined':
+      Icons.signal_wifi_statusbar_connected_no_internet_4_outlined,
   'signal_wifi_statusbar_null': Icons.signal_wifi_statusbar_null,
   'signal_wifi_statusbar_null_sharp': Icons.signal_wifi_statusbar_null_sharp,
-  'signal_wifi_statusbar_null_rounded': Icons.signal_wifi_statusbar_null_rounded,
-  'signal_wifi_statusbar_null_outlined': Icons.signal_wifi_statusbar_null_outlined,
+  'signal_wifi_statusbar_null_rounded':
+      Icons.signal_wifi_statusbar_null_rounded,
+  'signal_wifi_statusbar_null_outlined':
+      Icons.signal_wifi_statusbar_null_outlined,
   'signpost': Icons.signpost,
   'signpost_sharp': Icons.signpost_sharp,
   'signpost_rounded': Icons.signpost_rounded,
@@ -7680,8 +7745,10 @@ const Map<String, IconData> materialIconsByName = {
   'switch_access_shortcut_outlined': Icons.switch_access_shortcut_outlined,
   'switch_access_shortcut_add': Icons.switch_access_shortcut_add,
   'switch_access_shortcut_add_sharp': Icons.switch_access_shortcut_add_sharp,
-  'switch_access_shortcut_add_rounded': Icons.switch_access_shortcut_add_rounded,
-  'switch_access_shortcut_add_outlined': Icons.switch_access_shortcut_add_outlined,
+  'switch_access_shortcut_add_rounded':
+      Icons.switch_access_shortcut_add_rounded,
+  'switch_access_shortcut_add_outlined':
+      Icons.switch_access_shortcut_add_outlined,
   'switch_account': Icons.switch_account,
   'switch_account_sharp': Icons.switch_account_sharp,
   'switch_account_rounded': Icons.switch_account_rounded,
@@ -7732,12 +7799,17 @@ const Map<String, IconData> materialIconsByName = {
   'system_security_update_outlined': Icons.system_security_update_outlined,
   'system_security_update_good': Icons.system_security_update_good,
   'system_security_update_good_sharp': Icons.system_security_update_good_sharp,
-  'system_security_update_good_rounded': Icons.system_security_update_good_rounded,
-  'system_security_update_good_outlined': Icons.system_security_update_good_outlined,
+  'system_security_update_good_rounded':
+      Icons.system_security_update_good_rounded,
+  'system_security_update_good_outlined':
+      Icons.system_security_update_good_outlined,
   'system_security_update_warning': Icons.system_security_update_warning,
-  'system_security_update_warning_sharp': Icons.system_security_update_warning_sharp,
-  'system_security_update_warning_rounded': Icons.system_security_update_warning_rounded,
-  'system_security_update_warning_outlined': Icons.system_security_update_warning_outlined,
+  'system_security_update_warning_sharp':
+      Icons.system_security_update_warning_sharp,
+  'system_security_update_warning_rounded':
+      Icons.system_security_update_warning_rounded,
+  'system_security_update_warning_outlined':
+      Icons.system_security_update_warning_outlined,
   'system_update': Icons.system_update,
   'system_update_sharp': Icons.system_update_sharp,
   'system_update_rounded': Icons.system_update_rounded,
@@ -8065,7 +8137,8 @@ const Map<String, IconData> materialIconsByName = {
   'transfer_within_a_station': Icons.transfer_within_a_station,
   'transfer_within_a_station_sharp': Icons.transfer_within_a_station_sharp,
   'transfer_within_a_station_rounded': Icons.transfer_within_a_station_rounded,
-  'transfer_within_a_station_outlined': Icons.transfer_within_a_station_outlined,
+  'transfer_within_a_station_outlined':
+      Icons.transfer_within_a_station_outlined,
   'transform': Icons.transform,
   'transform_sharp': Icons.transform_sharp,
   'transform_rounded': Icons.transform_rounded,
@@ -8732,9 +8805,12 @@ const Map<String, IconData> materialIconsByName = {
   'wifi_tethering_error': Icons.wifi_tethering_error,
   'wifi_tethering_error_sharp': Icons.wifi_tethering_error_sharp,
   'wifi_tethering_error_outlined': Icons.wifi_tethering_error_outlined,
-  'wifi_tethering_error_rounded_sharp': Icons.wifi_tethering_error_rounded_sharp,
-  'wifi_tethering_error_rounded_rounded': Icons.wifi_tethering_error_rounded_rounded,
-  'wifi_tethering_error_rounded_outlined': Icons.wifi_tethering_error_rounded_outlined,
+  'wifi_tethering_error_rounded_sharp':
+      Icons.wifi_tethering_error_rounded_sharp,
+  'wifi_tethering_error_rounded_rounded':
+      Icons.wifi_tethering_error_rounded_rounded,
+  'wifi_tethering_error_rounded_outlined':
+      Icons.wifi_tethering_error_rounded_outlined,
   'wifi_tethering_off': Icons.wifi_tethering_off,
   'wifi_tethering_off_sharp': Icons.wifi_tethering_off_sharp,
   'wifi_tethering_off_rounded': Icons.wifi_tethering_off_rounded,

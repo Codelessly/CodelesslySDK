@@ -47,10 +47,8 @@ class BeatClock {
   bool get running => _next != null;
 
   static final Map<String, BeatClock> _shared = {};
-  final List<void Function(int tick, double at, double waitMs)> _listeners =
-      [];
-  final Map<void Function(int, double, double), bool Function()> _isShown =
-      {};
+  final List<void Function(int tick, double at, double waitMs)> _listeners = [];
+  final Map<void Function(int, double, double), bool Function()> _isShown = {};
 
   /// The clock of [trigger] shared by every screen with the same settings:
   /// a screen shown in place of another (a tab) picks up the running clock
@@ -67,10 +65,7 @@ class BeatClock {
   }) {
     final String key =
         '${trigger.every}|${trigger.runWhen}|${trigger.lookaheadMs}';
-    final BeatClock clock = _shared[key] ??= BeatClock._keyed(
-      key,
-      trigger,
-    );
+    final BeatClock clock = _shared[key] ??= BeatClock._keyed(key, trigger);
     clock
       .._evaluate = evaluate
       .._listeners.add(onTick);

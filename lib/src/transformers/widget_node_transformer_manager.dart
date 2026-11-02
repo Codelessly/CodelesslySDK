@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'dart:math' hide log;
-import 'dart:typed_data';
 import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -8,7 +7,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';

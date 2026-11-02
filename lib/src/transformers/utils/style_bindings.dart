@@ -220,7 +220,7 @@ abstract final class StyleBindings {
             patch['properties'] as Map? ?? node.properties.toJson();
         patch['properties'] = {
           ...current,
-          if (input != null) 'inputStyle': input,
+          'inputStyle': ?input,
           if (hint != null)
             'decoration': {
               ...(current['decoration'] as Map? ??
@@ -275,7 +275,8 @@ abstract final class StyleBindings {
     Map<String, String> variables,
     T? Function<T extends Object>(String property) value,
   ) {
-    if (fills.isEmpty || !variables.keys.any((k) => k.startsWith('fill-stop-'))) {
+    if (fills.isEmpty ||
+        !variables.keys.any((k) => k.startsWith('fill-stop-'))) {
       return null;
     }
     final PaintModel first = PaintModel.fromJson(fills.first as Map);
@@ -304,10 +305,7 @@ abstract final class StyleBindings {
           stop,
     ];
     if (!changed) return null;
-    return [
-      first.copyWith(gradientStops: next).toJson(),
-      ...fills.skip(1),
-    ];
+    return [first.copyWith(gradientStops: next).toJson(), ...fills.skip(1)];
   }
 
   static List<Effect> _effects(

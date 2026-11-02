@@ -268,16 +268,17 @@ void main() {
     tester,
   ) async {
     const String data = 'Name';
-    final TextNode text = TextNode(
-      id: 'msg',
-      name: 'Message',
-      basicBoxLocal: NodeBox(0, 0, 200, 20),
-      data: data,
-      textMixedProps: [StartEndProp(start: 0, end: data.length)],
-    )
-      ..parentID = kRootNode
-      ..variables['textColor'] =
-          r"${= authMode == 'reset' ? '#E5392C' : '#8A8072'}";
+    final TextNode text =
+        TextNode(
+            id: 'msg',
+            name: 'Message',
+            basicBoxLocal: NodeBox(0, 0, 200, 20),
+            data: data,
+            textMixedProps: [StartEndProp(start: 0, end: data.length)],
+          )
+          ..parentID = kRootNode
+          ..variables['textColor'] =
+              r"${= authMode == 'reset' ? '#E5392C' : '#8A8072'}";
     VariablePreview.scopeResolver = (_, {item}) => defaults('reset');
     await pumpHost(
       tester,

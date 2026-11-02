@@ -10,7 +10,12 @@ void main() {
   ) async {
     final CodelesslyContext context = CodelesslyContext.empty();
     context.variables['placed'] = Observable(
-      VariableData(id: 'placed', name: 'placed', type: VariableType.list, value: const []),
+      VariableData(
+        id: 'placed',
+        name: 'placed',
+        type: VariableType.list,
+        value: const [],
+      ),
     );
     late BuildContext captured;
     await tester.pumpWidget(
@@ -24,12 +29,17 @@ void main() {
         ),
       ),
     );
-    List placed() => context.findVariableByName('placed')!.value.getValue() as List;
+    List placed() =>
+        context.findVariableByName('placed')!.value.getValue() as List;
     void set(String value, {ListOperation op = ListOperation.replace}) =>
         FunctionsRepository.setVariableFromAction(
           captured,
           SetVariableAction(
-            variable: VariableData(id: 'placed', name: 'placed', type: VariableType.list),
+            variable: VariableData(
+              id: 'placed',
+              name: 'placed',
+              type: VariableType.list,
+            ),
             newValue: value,
             listOperation: op,
           ),
@@ -44,9 +54,9 @@ void main() {
     set(r"${= map(range(2), i => '' + (i + 7))}");
     expect(placed(), ['7', '8']);
     // Numbers and booleans keep their types.
-    set(r"${= map(range(2), i => i == 0)}");
+    set(r'${= map(range(2), i => i == 0)}');
     expect(placed(), [true, false]);
-    set(r"${= map(range(2), i => -1)}", op: ListOperation.add);
+    set(r'${= map(range(2), i => -1)}', op: ListOperation.add);
     expect(placed(), [true, false, -1, -1]);
   });
 }

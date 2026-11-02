@@ -342,8 +342,16 @@ class FormulaEvaluator {
       'formatAmount(text, code)',
       'formatAmount("12345.6", "USD") → 12,345.6',
     ),
-    FormulaFunctionDoc('currencySymbol', 'currencySymbol(code)', 'currencySymbol("GBP") → £'),
-    FormulaFunctionDoc('currencyDecimals', 'currencyDecimals(code)', 'currencyDecimals("JPY") → 0'),
+    FormulaFunctionDoc(
+      'currencySymbol',
+      'currencySymbol(code)',
+      'currencySymbol("GBP") → £',
+    ),
+    FormulaFunctionDoc(
+      'currencyDecimals',
+      'currencyDecimals(code)',
+      'currencyDecimals("JPY") → 0',
+    ),
     FormulaFunctionDoc(
       'formatNumber',
       'formatNumber(value, digits?, locale?)',
@@ -1061,8 +1069,14 @@ String _money(Object? value, Object? symbol, Object? decimals) {
 /// How a currency is written: symbol, which side it goes on, digit
 /// grouping and decimal marks, and how many decimals it has.
 class _CurrencyFormat {
-  const _CurrencyFormat(this.symbol, this.decimals, this.group, this.decimal,
-      {this.after = false, this.space = false});
+  const _CurrencyFormat(
+    this.symbol,
+    this.decimals,
+    this.group,
+    this.decimal, {
+    this.after = false,
+    this.space = false,
+  });
   final String symbol, group, decimal;
   final int decimals;
   final bool after, space;
@@ -1090,10 +1104,8 @@ _CurrencyFormat _currencyFormat(Object? code) {
       _CurrencyFormat(c, 2, ',', '.', space: true);
 }
 
-String _groupDigits(String digits, String sep) => digits.replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (_) => sep,
-    );
+String _groupDigits(String digits, String sep) =>
+    digits.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => sep);
 
 /// [value] written the way [code] writes money: `currency(-1234.5, "EUR")`
 /// is "−1.234,50 €", `currency(123456, "JPY")` is "¥123,456". [options] is
@@ -1130,9 +1142,8 @@ String _currency(Object? value, Object? code, Object? options) {
     body = _groupDigits(parts[0], f.group);
     if (parts.length > 1) body = '$body${f.decimal}${parts[1]}';
   }
-  final bool zero = num.parse(
-        a.toStringAsFixed(opts.contains('whole') ? 0 : f.decimals),
-      ) ==
+  final bool zero =
+      num.parse(a.toStringAsFixed(opts.contains('whole') ? 0 : f.decimals)) ==
       0;
   if (!opts.contains('plain')) {
     final String gap = f.space ? ' ' : '';
@@ -1181,11 +1192,15 @@ String _formatAmount(Object? text, Object? code) {
       raw = '${raw.substring(0, dot)},${raw.substring(dot + 1)}';
     }
   }
-  final String clean =
-      raw.replaceAll(RegExp('[^0-9${RegExp.escape(f.decimal)}]'), '');
+  final String clean = raw.replaceAll(
+    RegExp('[^0-9${RegExp.escape(f.decimal)}]'),
+    '',
+  );
   final int i = clean.indexOf(f.decimal);
   String whole = i < 0 ? clean : clean.substring(0, i);
-  String? frac = i < 0 ? null : clean.substring(i + 1).replaceAll(f.decimal, '');
+  String? frac = i < 0
+      ? null
+      : clean.substring(i + 1).replaceAll(f.decimal, '');
   whole = whole.replaceFirst(RegExp(r'^0+(?=\d)'), '');
   if (frac != null && frac.length > f.decimals) {
     frac = frac.substring(0, f.decimals);
@@ -1646,7 +1661,8 @@ String? _mixColors(Object? a, Object? b, Object? t) {
   final List<double>? to = _argb(b);
   if (from == null || to == null) return null;
   final double k = (_toNum(t) ?? 0.5).toDouble().clamp(0, 1);
-  String two(double v) => v.round().clamp(0, 255).toRadixString(16).padLeft(2, '0');
+  String two(double v) =>
+      v.round().clamp(0, 255).toRadixString(16).padLeft(2, '0');
   final List<String> c = [
     for (int i = 0; i < 4; i++) two(from[i] + (to[i] - from[i]) * k),
   ];
@@ -1949,7 +1965,6 @@ DateTime? _toDate(Object? value) {
   }
 }
 
-
 /// A date as people type it: `10/03/2026` (month first), `Oct 3, 2026`,
 /// `October 3 2026`, `3 Oct 2026`. Null when it isn't one, or the day
 /// doesn't exist (`Feb 30, 2026`).
@@ -1966,15 +1981,13 @@ DateTime? _typedDate(String text) {
     return _monthNames.indexWhere((m) => m.toLowerCase().startsWith(n)) + 1;
   }
 
-  final RegExpMatch? us = RegExp(
-    r'^(\d{1,2})/(\d{1,2})/(\d{4})$',
-  ).firstMatch(text);
+  final RegExpMatch? us = RegExp(r'^(\d{1,2})/(\d{1,2})/(\d{4})$')
+      .firstMatch(text);
   if (us != null) {
     return ymd(int.parse(us[3]!), int.parse(us[1]!), int.parse(us[2]!));
   }
-  final RegExpMatch? named = RegExp(
-    r'^([A-Za-z]+\.?)\s+(\d{1,2}),?\s+(\d{4})$',
-  ).firstMatch(text);
+  final RegExpMatch? named = RegExp(r'^([A-Za-z]+\.?)\s+(\d{1,2}),?\s+(\d{4})$')
+      .firstMatch(text);
   if (named != null) {
     return ymd(int.parse(named[3]!), month(named[1]!), int.parse(named[2]!));
   }
@@ -2557,20 +2570,17 @@ final Map<String, _Function> _functions = {
     try {
       // `$1`, `${name}` insert groups; `$$` is a literal dollar.
       return text.replaceAllMapped(RegExp(pattern), (m) {
-        return to.replaceAllMapped(
-          RegExp(r'\$\$|\$(\d+)|\$\{(\w+)\}'),
-          (g) {
-            if (g[0] == r'$$') return r'$';
-            if (g[1] != null) {
-              final int i = int.parse(g[1]!);
-              return i <= m.groupCount ? (m.group(i) ?? '') : '';
-            }
-            if (m is RegExpMatch && m.groupNames.contains(g[2])) {
-              return m.namedGroup(g[2]!) ?? '';
-            }
-            return '';
-          },
-        );
+        return to.replaceAllMapped(RegExp(r'\$\$|\$(\d+)|\$\{(\w+)\}'), (g) {
+          if (g[0] == r'$$') return r'$';
+          if (g[1] != null) {
+            final int i = int.parse(g[1]!);
+            return i <= m.groupCount ? (m.group(i) ?? '') : '';
+          }
+          if (m is RegExpMatch && m.groupNames.contains(g[2])) {
+            return m.namedGroup(g[2]!) ?? '';
+          }
+          return '';
+        });
       });
     } on FormatException {
       return text;
