@@ -27,6 +27,42 @@ import '../utils/node_state_provider.dart';
   return (max, min);
 }
 
+/// Turns everything typed or pasted into a text field into capitals, for a
+/// field with [TextCapitalizationC.characters]: a booking reference typed
+/// `mx4821` reads `MX4821`. The selection stays where it was (upper-casing
+/// can change a text's length, e.g. `ß` to `SS`; the caret then goes to the
+/// end).
+class UpperCaseTextInputFormatter extends TextInputFormatter {
+  /// Creates an [UpperCaseTextInputFormatter].
+  const UpperCaseTextInputFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final String upper = newValue.text.toUpperCase();
+    if (upper == newValue.text) return newValue;
+    if (upper.length == newValue.text.length) {
+      return newValue.copyWith(text: upper);
+    }
+    return TextEditingValue(
+      text: upper,
+      selection: TextSelection.collapsed(offset: upper.length),
+    );
+  }
+}
+
+/// The Flutter [TextCapitalization] of [capitalization].
+TextCapitalization flutterTextCapitalization(
+  TextCapitalizationC capitalization,
+) => switch (capitalization) {
+  TextCapitalizationC.none => TextCapitalization.none,
+  TextCapitalizationC.words => TextCapitalization.words,
+  TextCapitalizationC.sentences => TextCapitalization.sentences,
+  TextCapitalizationC.characters => TextCapitalization.characters,
+};
+
 class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
   PassiveTextFieldTransformer(super.getNode, super.manager);
 
@@ -126,6 +162,31 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
 }
 
 class PassiveTextFieldWidget extends StatefulWidget {
+  /// The key in [BaseNode.variables] that binds the colour of the typed
+  /// text (`${pal.ink}`, `${= dark ? '#F4EFE6' : '#1F2B2E'}`).
+  static const String inputColor = 'inputColor';
+
+  /// The key in [BaseNode.variables] that binds the colour of the hint.
+  static const String hintColor = 'hintColor';
+
+  /// The key in [BaseNode.variables] that binds the colour of the cursor.
+  static const String cursorColor = 'cursorColor';
+
+  /// The colour that the binding [property] of [node] gives, evaluated with
+  /// [scopedValues] (or a condition on it), or null when it is missing or
+  /// isn't a colour.
+  static Color? boundColor(
+    TextFieldNode node,
+    String property,
+    ScopedValues scopedValues,
+  ) {
+    return PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+      node,
+      property,
+      scopedValues: scopedValues,
+    )?.toFlutterColor();
+  }
+
   final TextFieldNode node;
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
@@ -288,6 +349,20 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     final TextFieldProperties properties = node.properties;
 
     final ScopedValues scopedValues = ScopedValues.of(context);
+    // Colour bindings read the canvas's defaults on a design canvas.
+    final ScopedValues styleScope = widget.scopedValues ?? scopedValues;
+    final Color? inputColor = PassiveTextFieldWidget.boundColor(
+      node,
+      PassiveTextFieldWidget.inputColor,
+      styleScope,
+    );
+    final Color? cursorColor = PassiveTextFieldWidget.boundColor(
+      node,
+      PassiveTextFieldWidget.cursorColor,
+      styleScope,
+    );
+    final bool upperCase =
+        properties.textCapitalization == TextCapitalizationC.characters;
 
     // Resolve variable bindings as well as values set by actions.
     bool flag(String property, bool fallback) =>
@@ -358,7 +433,8 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       selectionWidthStyle: properties.selectionWidthStyle.toFlutter(),
       textAlign: properties.textAlign.toFlutter(),
       textAlignVertical: properties.textAlignVertical.flutterTextAlignVertical,
-      cursorColor: properties.cursorColor.toFlutterColor(opacity: 1),
+      cursorColor:
+          cursorColor ?? properties.cursorColor.toFlutterColor(opacity: 1),
       cursorHeight: properties.cursorHeight,
       cursorWidth: properties.cursorWidth,
       cursorRadius: Radius.circular(properties.cursorRadius),
@@ -371,7 +447,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
           AutofillGroup.maybeOf(context) != null && !widget.settings.isPreview
           ? widget.node.properties.autofillHints.map((hint) => hint.code)
           : null,
+      textCapitalization: flutterTextCapitalization(
+        properties.textCapitalization,
+      ),
       inputFormatters: [
+        if (upperCase) const UpperCaseTextInputFormatter(),
         if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
         ?properties.formatter.toFlutterFormatter(),
       ],
@@ -381,7 +461,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       obscuringCharacter: widget.node.properties.obscuringCharacter,
       style: TextUtils.retrieveTextStyleFromProp(
         widget.node.properties.inputStyle,
-      ),
+      ).copyWith(color: inputColor),
       onTap: () => widget.onTap?.call(context, controller.text),
       onChanged: (value) => widget.onChanged?.call(context, value),
       onEditingComplete: () {},
@@ -561,7 +641,14 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       helperStyle: TextUtils.retrieveTextStyleFromProp(decoration.helperStyle),
       helperMaxLines: decoration.helperMaxLines,
       hintText: hintText,
-      hintStyle: TextUtils.retrieveTextStyleFromProp(decoration.hintStyle),
+      hintStyle: TextUtils.retrieveTextStyleFromProp(decoration.hintStyle)
+          .copyWith(
+            color: PassiveTextFieldWidget.boundColor(
+              node,
+              PassiveTextFieldWidget.hintColor,
+              widget.scopedValues ?? scopedValues,
+            ),
+          ),
       hintMaxLines: decoration.hintMaxLines,
       error: errorText,
       errorStyle: TextUtils.retrieveTextStyleFromProp(decoration.errorStyle),

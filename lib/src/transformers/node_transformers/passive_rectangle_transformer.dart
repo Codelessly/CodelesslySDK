@@ -534,6 +534,14 @@ double nearestValue(double goal, List<double> array) {
 
 void getLinearGradientAlignment(double rotationDeg) {}
 
+/// The centre of a radial or angular [paint]: its
+/// [PaintModel.gradientCenterX] and [PaintModel.gradientCenterY] as an
+/// alignment in the box, the centre when unset.
+Alignment gradientCenterOf(PaintModel paint) {
+  double read(double? value) => value == null || !value.isFinite ? 0 : value;
+  return Alignment(read(paint.gradientCenterX), read(paint.gradientCenterY));
+}
+
 Gradient? retrieveGradient(PaintModel paint) {
   try {
     final RelativeTransform relative = decomposeRelativeTransform(
@@ -574,16 +582,25 @@ Gradient? retrieveGradient(PaintModel paint) {
             : GradientRotation(radians),
       );
     } else if (paint.type == PaintType.gradientRadial) {
+      final double radius = paint.gradientRadius ?? 0.5;
       return RadialGradient(
+        center: gradientCenterOf(paint),
+        radius: radius.isFinite && radius > 0 ? radius : 0.5,
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
         stops: gradientStops.map((e) => e.position).toList(),
         tileMode: tileMode,
-        transform: GradientRotation(radians),
+        // Turning a circle about the box centre only moves an off-centre
+        // one away from where it was placed.
+        transform:
+            paint.gradientCenterX == null && paint.gradientCenterY == null
+            ? GradientRotation(radians)
+            : null,
       );
     } else if (paint.type == PaintType.gradientAngular) {
       return SweepGradient(
+        center: gradientCenterOf(paint),
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
