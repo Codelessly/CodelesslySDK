@@ -442,7 +442,7 @@ class FormulaEvaluator {
     FormulaFunctionDoc('acos', 'acos(value)', 'acos(1) → 0'),
     FormulaFunctionDoc('atan', 'atan(value)', 'atan(1) → 0.7854'),
     FormulaFunctionDoc('atan2', 'atan2(y, x)', 'atan2(1, 1) → 0.7854'),
-    FormulaFunctionDoc('pi', 'pi()', 'pi() → 3.14159…'),
+    FormulaFunctionDoc('pi', 'pi or pi()', 'pi → 3.14159…'),
     FormulaFunctionDoc(
       'radians',
       'radians(degrees)',
@@ -2142,8 +2142,11 @@ class _Path extends _Node {
 
   const _Path(this.path);
 
+  /// Bare `pi` is the constant (as `pi()` is) unless a variable of that
+  /// name exists: `sin(t * 2 * pi)` read pi as a missing variable, 0.
   @override
-  Object? eval(FormulaPathResolver resolve) => resolve(path);
+  Object? eval(FormulaPathResolver resolve) =>
+      resolve(path) ?? (path == 'pi' ? math.pi : null);
 
   @override
   void collectPaths(Set<String> paths) => paths.add(path);
