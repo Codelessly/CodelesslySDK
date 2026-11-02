@@ -128,6 +128,14 @@ class PassiveListViewWidget extends StatelessWidget {
         : node.basicBoxLocal.height;
     final bool fill = crossFit == SizeFit.expanded;
     final bool hugs = crossFit == SizeFit.shrinkWrap;
+    // The scroll axis hugs the items, or (a list that stretches its items
+    // across a cross axis it hugs, see [listStretchesHuggedCross]) follows
+    // its own fit, like a viewport would.
+    final SizeFit mainFit = vertical ? node.verticalFit : node.horizontalFit;
+    final bool hugsMain = mainFit == SizeFit.shrinkWrap;
+    final double designMain = vertical
+        ? node.basicBoxLocal.height
+        : node.basicBoxLocal.width;
     // Hugging, the list is as thick as its thickest item. Stretched items
     // then all take that thickness, measured first; items that can't be
     // measured keep their own, centred as in the editor.
@@ -145,12 +153,30 @@ class PassiveListViewWidget extends StatelessWidget {
           ? IntrinsicWidth(child: flex)
           : IntrinsicHeight(child: flex);
     }
+    if (!hugsMain) {
+      // Items past the list's extent run on past its end, clipped with
+      // clipsContent, as in a viewport that doesn't scroll, rather than
+      // squeezing.
+      flex = OverflowBox(
+        alignment: AlignmentDirectional.topStart,
+        minWidth: vertical ? null : 0,
+        maxWidth: vertical ? null : double.infinity,
+        minHeight: vertical ? 0 : null,
+        maxHeight: vertical ? double.infinity : null,
+        fit: OverflowBoxFit.deferToChild,
+        child: flex,
+      );
+    }
     flex = Padding(padding: node.padding.flutterEdgeInsets, child: flex);
     return FitBox(
-      width: vertical && !hugs ? designCross : null,
-      height: !vertical && !hugs ? designCross : null,
-      fillWidth: vertical && fill,
-      fillHeight: !vertical && fill,
+      width: vertical
+          ? (hugs ? null : designCross)
+          : (hugsMain ? null : designMain),
+      height: vertical
+          ? (hugsMain ? null : designMain)
+          : (hugs ? null : designCross),
+      fillWidth: vertical ? fill : mainFit == SizeFit.expanded,
+      fillHeight: vertical ? mainFit == SizeFit.expanded : fill,
       child: node.clipsContent ? ClipRect(child: flex) : flex,
     );
   }

@@ -815,9 +815,28 @@ bool _looseEquals(Object? a, Object? b) {
   final num? na = a is String ? num.tryParse(a) : _toNum(a);
   final num? nb = b is String ? num.tryParse(b) : _toNum(b);
   if ((a is num || b is num) && na != null && nb != null) return na == nb;
-  if (a is bool || b is bool) return _truthy(a) == _truthy(b);
+  if (a is bool) return _boolText(b) == a;
+  if (b is bool) return _boolText(a) == b;
   return a.toString() == b.toString();
 }
+
+/// [value] read as a boolean for `==`: a bool as is, text that spells one
+/// ("true", "false", any case), a number (non-zero is true) or the empty
+/// text (false). Anything else, such as "50k" or a list, is no boolean at all
+/// and equals neither true nor false; truthiness is for `if` and `&&`.
+bool? _boolText(Object? value) => switch (value) {
+  bool() => value,
+  num() => value != 0,
+  String() => switch (value.trim().toLowerCase()) {
+    'true' => true,
+    'false' || '' => false,
+    final String text => switch (num.tryParse(text)) {
+      final num n => n != 0,
+      null => null,
+    },
+  },
+  _ => null,
+};
 
 /// Orders [a] and [b]: as dates when [_asDates] reads them as dates, as
 /// numbers when both read as numbers, else as text. Null when they can't be
