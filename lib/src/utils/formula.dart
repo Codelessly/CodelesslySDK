@@ -309,6 +309,41 @@ class FormulaEvaluator {
     }
   }
 
+  /// Why a `${= ...}` formula in [text] doesn't parse, quoting it and the
+  /// character where it goes wrong (`The formula "${= a +}" doesn't parse:
+  /// Unexpected end at 4`), or null when every formula in it parses. Calls
+  /// to unknown functions aren't checked: they may be function variables.
+  static String? textErrorOf(String text) {
+    if (!text.contains(r'${=')) return null;
+    for (final RegExpMatch match in formulaRegex.allMatches(text)) {
+      final String expression = match.namedGroup('expr')!;
+      if (_parse(expression) != null) continue;
+      String reason;
+      try {
+        _Parser(expression.trim()).parseAll();
+        continue;
+      } on FormatException catch (error) {
+        final int? offset = error.offset;
+        reason = offset == null || offset >= expression.trim().length
+            ? error.message
+            : '${error.message} at ${offset + 1}';
+      } catch (error) {
+        reason = error.toString();
+      }
+      return 'The formula "${match.group(0)}" doesn\'t parse: $reason';
+    }
+    // A `${=` the pattern couldn't close: its braces don't balance.
+    final String rest = text.replaceAll(formulaRegex, '');
+    final int open = rest.indexOf(RegExp(r'(?<!\\)\$\{='));
+    if (open >= 0) {
+      final String start = rest.substring(open);
+      return 'The formula "${start.length > 40 ? '${start.substring(0, 40)}...' : start}" '
+          'is not closed: a formula is written \${= expression} with its '
+          'braces balanced.';
+    }
+    return null;
+  }
+
   /// How to call each function, with an example, for editors to list.
   static const List<FormulaFunctionDoc> functionDocs = [
     FormulaFunctionDoc('left', 'left(text, count)', 'left("MX4821", 2) → MX'),

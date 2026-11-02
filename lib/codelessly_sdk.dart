@@ -73,6 +73,7 @@ export 'src/ui/scroll_end_detector.dart';
 export 'src/ui/node_context_registry.dart';
 export 'src/ui/node_size_transition.dart';
 export 'src/ui/viewport_visibility.dart';
+export 'src/ui/route_params_scope.dart';
 export 'src/ui/swipe_detector.dart';
 export 'src/ui/stripe_painter.dart';
 export 'src/utils/code_highlighter.dart';

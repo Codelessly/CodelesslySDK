@@ -214,6 +214,7 @@ class ScopedValues {
     );
     _givenRouteParams =
         routeScope?.params ??
+        RouteParamsScope.maybeOf(context) ??
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
         {};
     _routePath = routeScope == null
