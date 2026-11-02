@@ -615,11 +615,16 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       child: Builder(
         builder: (context) {
           if (listenables.isNotEmpty) {
-            return ManagedListenableBuilder(
+            final Widget listening = ManagedListenableBuilder(
               key: ValueKey(node.id),
               listenables: listenables,
               builder: (context) => builder(context),
             );
+            // A node redrawn every frame (it reads nowMs()) paints on a layer
+            // of its own, so its frames don't repaint the rest of the screen.
+            return listenables.contains(FrameClock.instance)
+                ? RepaintBoundary(child: listening)
+                : listening;
           } else {
             return builder(context);
           }
