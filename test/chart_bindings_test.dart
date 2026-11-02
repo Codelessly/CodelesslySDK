@@ -4,14 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   ChartNode chart(Map<String, String> variables) => ChartNode(
-        id: 'c',
-        name: 'Balance',
-        basicBoxLocal: NodeBox(0, 0, 300, 120),
-        properties: ChartProperties(
-          chartType: ChartType.line,
-          series: const [ChartSeries(field: 'v', kind: ChartSeriesKind.area)],
-        ),
-      )..variables.addAll(variables);
+    id: 'c',
+    name: 'Balance',
+    basicBoxLocal: NodeBox(0, 0, 300, 120),
+    properties: ChartProperties(
+      chartType: ChartType.line,
+      series: const [ChartSeries(field: 'v', kind: ChartSeriesKind.area)],
+    ),
+  )..variables.addAll(variables);
 
   test('a chart reads its bound axis labels, scale and series color', () {
     final props = boundChartProperties(
@@ -22,9 +22,11 @@ void main() {
         'maxY': r'${= 2}',
         'series0Color': r"${= '#B4553A'}",
       }),
-      ScopedValues.preview(variables: {
-        'base': VariableData(id: 'base', name: 'base', value: 'EUR'),
-      }),
+      ScopedValues.preview(
+        variables: {
+          'base': VariableData(id: 'base', name: 'base', value: 'EUR'),
+        },
+      ),
     );
     expect(props.yLabelPrefix, '');
     expect(props.yLabelSuffix, ' €');

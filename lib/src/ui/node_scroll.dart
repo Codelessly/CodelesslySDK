@@ -54,9 +54,8 @@ abstract final class ScrollTargets {
 
   /// [child], the build of [node], wrapped to record where it is built
   /// when a Scroll To action targets it.
-  static Widget wrap(BaseNode node, Widget child) => isTarget(node.id)
-      ? ScrollTarget(nodeId: node.id, child: child)
-      : child;
+  static Widget wrap(BaseNode node, Widget child) =>
+      isTarget(node.id) ? ScrollTarget(nodeId: node.id, child: child) : child;
 
   /// Where node [nodeId] is built, or null when it isn't. The latest built
   /// instance wins when it is built more than once.
@@ -145,9 +144,7 @@ abstract final class ScrollTargets {
         if (duration == Duration.zero) {
           position.jumpTo(to);
         } else {
-          scrolls.add(
-            position.animateTo(to, duration: duration, curve: curve),
-          );
+          scrolls.add(position.animateTo(to, duration: duration, curve: curve));
         }
       }
 

@@ -122,11 +122,10 @@ void main() {
     await Harness().pump(tester, [card, dot]);
     expect(colorOf(tester, 200), isNot(red));
     // The copy of a row that a reorder handle drags.
-    await Harness().pump(
-      tester,
-      [card, dot],
-      wrap: (child) => DraggedScope(child: child),
-    );
+    await Harness().pump(tester, [
+      card,
+      dot,
+    ], wrap: (child) => DraggedScope(child: child));
     expect(colorOf(tester, 200), red);
   });
 

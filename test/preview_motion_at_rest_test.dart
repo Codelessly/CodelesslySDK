@@ -19,7 +19,10 @@ Future<void> pump(WidgetTester tester, BaseNode node, {required bool preview}) {
             builder: (context) => manager.buildWidgetFromNode(
               node,
               context,
-              settings: WidgetBuildSettings(debugLabel: 'test', isPreview: preview),
+              settings: WidgetBuildSettings(
+                debugLabel: 'test',
+                isPreview: preview,
+              ),
             ),
           ),
         ),
@@ -28,27 +31,37 @@ Future<void> pump(WidgetTester tester, BaseNode node, {required bool preview}) {
   );
 }
 
-RectangleNode entering() => RectangleNode(
-  id: 'r',
-  name: 'Bar',
-  basicBoxLocal: NodeBox(0, 0, 40, 100),
-)
-  ..parentID = kRootNode
-  ..motion = const MotionModel(
-    durationMs: 600,
-    enterFrom: MotionModel(opacity: 0, scale: 0),
-  );
+RectangleNode entering() =>
+    RectangleNode(id: 'r', name: 'Bar', basicBoxLocal: NodeBox(0, 0, 40, 100))
+      ..parentID = kRootNode
+      ..motion = const MotionModel(
+        durationMs: 600,
+        enterFrom: MotionModel(opacity: 0, scale: 0),
+      );
 
 void main() {
-  testWidgets('the design canvas shows an entering node at rest', (tester) async {
+  testWidgets('the design canvas shows an entering node at rest', (
+    tester,
+  ) async {
     await pump(tester, entering(), preview: true);
-    expect(find.byType(Opacity), findsNothing, reason: 'not stuck at opacity 0');
+    expect(
+      find.byType(Opacity),
+      findsNothing,
+      reason: 'not stuck at opacity 0',
+    );
   });
 
-  testWidgets('at runtime the node still enters from opacity 0', (tester) async {
+  testWidgets('at runtime the node still enters from opacity 0', (
+    tester,
+  ) async {
     await pump(tester, entering(), preview: false);
     final Opacity start = tester.widget(
-      find.descendant(of: find.byType(NodeMotion), matching: find.byType(Opacity)).first,
+      find
+          .descendant(
+            of: find.byType(NodeMotion),
+            matching: find.byType(Opacity),
+          )
+          .first,
     );
     expect(start.opacity, lessThan(0.05));
     await tester.pumpAndSettle();

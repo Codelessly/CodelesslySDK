@@ -538,7 +538,9 @@ class SDKPublishLayout extends PrivacyBase {
   ) {
     final Object? zipped = json[compressedCanvasesKey];
     if (zipped is! String) return json;
-    final List<int> bytes = const GZipDecoder().decodeBytes(base64Decode(zipped));
+    final List<int> bytes = const GZipDecoder().decodeBytes(
+      base64Decode(zipped),
+    );
     return <String, dynamic>{
       for (final MapEntry<String, dynamic> e in json.entries)
         if (e.key != compressedCanvasesKey) e.key: e.value,

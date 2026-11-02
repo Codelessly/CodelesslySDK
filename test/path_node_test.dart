@@ -113,13 +113,15 @@ void main() {
         ),
       ),
     );
-    PathNodePainter painter() => tester
-        .widget<CustomPaint>(
-          find.byWidgetPredicate(
-            (w) => w is CustomPaint && w.painter is PathNodePainter,
-          ),
-        )
-        .painter! as PathNodePainter;
+    PathNodePainter painter() =>
+        tester
+                .widget<CustomPaint>(
+                  find.byWidgetPredicate(
+                    (w) => w is CustomPaint && w.painter is PathNodePainter,
+                  ),
+                )
+                .painter!
+            as PathNodePainter;
     expect(painter().trimEnd, 0.25);
     expect(painter().viewBox, const Size(100, 50));
     expect(painter().join, StrokeJoin.round);

@@ -38,8 +38,10 @@ void main() {
       final back = ConfirmAction.fromJson(json);
       expect(back.barrierBlur, 8);
       expect(back.enterScale, 0.94);
-      expect(ConfirmAction(title: 't').toJson().containsKey('barrierBlur'),
-          isFalse);
+      expect(
+        ConfirmAction(title: 't').toJson().containsKey('barrierBlur'),
+        isFalse,
+      );
     });
   });
 
@@ -55,12 +57,15 @@ void main() {
           ),
         );
 
-    testWidgets('blurs the page fully and shows the dialog at rest when open',
-        (tester) async {
+    testWidgets('blurs the page fully and shows the dialog at rest when open', (
+      tester,
+    ) async {
       await tester.pumpWidget(host(const AlwaysStoppedAnimation(1)));
       final filter = tester.widget<BackdropFilter>(find.byType(BackdropFilter));
       expect(filter.filter, ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8));
-      final scale = tester.widget<ScaleTransition>(find.byType(ScaleTransition));
+      final scale = tester.widget<ScaleTransition>(
+        find.byType(ScaleTransition),
+      );
       expect(scale.scale.value, 1);
       final fade = tester.widget<FadeTransition>(find.byType(FadeTransition));
       expect(fade.opacity.value, 1);
@@ -70,7 +75,9 @@ void main() {
       await tester.pumpWidget(host(const AlwaysStoppedAnimation(0)));
       final filter = tester.widget<BackdropFilter>(find.byType(BackdropFilter));
       expect(filter.filter, ui.ImageFilter.blur(sigmaX: 0, sigmaY: 0));
-      final scale = tester.widget<ScaleTransition>(find.byType(ScaleTransition));
+      final scale = tester.widget<ScaleTransition>(
+        find.byType(ScaleTransition),
+      );
       expect(scale.scale.value, closeTo(0.94, 1e-9));
       final fade = tester.widget<FadeTransition>(find.byType(FadeTransition));
       expect(fade.opacity.value, 0);

@@ -16,12 +16,21 @@ void main() {
     })..variables['textDecoration'] = r'${= true}';
     final patch = <String, dynamic>{};
     StyleBindings.addTo(patch, node, scopedValues: ScopedValues.empty());
-    expect((patch['textMixedProps'] as List).single['textDecoration'], 'strikethrough');
+    expect(
+      (patch['textMixedProps'] as List).single['textDecoration'],
+      'strikethrough',
+    );
   });
 
   test('decoration values are read by name or as a bool', () {
-    expect(StyleBindings.parseTextDecoration('underline'), TextDecorationEnum.underline);
-    expect(StyleBindings.parseTextDecoration('lineThrough'), TextDecorationEnum.strikethrough);
+    expect(
+      StyleBindings.parseTextDecoration('underline'),
+      TextDecorationEnum.underline,
+    );
+    expect(
+      StyleBindings.parseTextDecoration('lineThrough'),
+      TextDecorationEnum.strikethrough,
+    );
     expect(StyleBindings.parseTextDecoration(false), TextDecorationEnum.none);
     expect(StyleBindings.parseTextDecoration(3), isNull);
   });

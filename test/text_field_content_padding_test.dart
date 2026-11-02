@@ -102,33 +102,34 @@ void main() {
     );
   });
 
-  testWidgets('a collapsed one-line field filling a fixed height is centred in it', (
-    tester,
-  ) async {
-    final TextFieldNode node = TextFieldNode(
-      id: 'field',
-      name: 'Field',
-      basicBoxLocal: NodeBox(0, 0, 300, 48),
-      verticalFit: SizeFit.fixed,
-      properties: TextFieldProperties(
-        maxLines: 1,
-        decoration: InputDecorationModel(
-          isCollapsed: true,
-          hintText: 'Search',
-          border: _none,
-          enabledBorder: _none,
-          focusedBorder: _none,
-          disabledBorder: _none,
-          errorBorder: _none,
-          focusedErrorBorder: _none,
-          contentPadding: EdgeInsetsModel.zero,
+  testWidgets(
+    'a collapsed one-line field filling a fixed height is centred in it',
+    (tester) async {
+      final TextFieldNode node = TextFieldNode(
+        id: 'field',
+        name: 'Field',
+        basicBoxLocal: NodeBox(0, 0, 300, 48),
+        verticalFit: SizeFit.fixed,
+        properties: TextFieldProperties(
+          maxLines: 1,
+          decoration: InputDecorationModel(
+            isCollapsed: true,
+            hintText: 'Search',
+            border: _none,
+            enabledBorder: _none,
+            focusedBorder: _none,
+            disabledBorder: _none,
+            errorBorder: _none,
+            focusedErrorBorder: _none,
+            contentPadding: EdgeInsetsModel.zero,
+          ),
         ),
-      ),
-    );
-    await _pump(tester, node);
-    final Rect text = tester.getRect(find.byType(EditableText));
-    final Rect box = tester.getRect(find.byType(TextField).first);
-    expect(text.center.dy, closeTo(24, 1.5));
-    expect(box.height, lessThan(48));
-  });
+      );
+      await _pump(tester, node);
+      final Rect text = tester.getRect(find.byType(EditableText));
+      final Rect box = tester.getRect(find.byType(TextField).first);
+      expect(text.center.dy, closeTo(24, 1.5));
+      expect(box.height, lessThan(48));
+    },
+  );
 }

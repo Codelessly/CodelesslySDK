@@ -1197,9 +1197,7 @@ class OverlapBox extends SingleChildRenderObjectWidget {
 /// The render object of [OverlapBox].
 class RenderOverlapBox extends RenderProxyBox {
   /// Creates a [RenderOverlapBox].
-  RenderOverlapBox({required double overlap, required Axis axis})
-    : _overlap = overlap,
-      _axis = axis;
+  RenderOverlapBox({required this._overlap, required this._axis});
 
   double _overlap;
   Axis _axis;

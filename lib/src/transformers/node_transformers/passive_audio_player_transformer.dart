@@ -76,7 +76,9 @@ class AudioBindings {
     final Object? url = read('url');
     final Object? key = read('playKey');
     return AudioBindings(
-      url: url?.toString().trim().isEmpty ?? true ? null : url.toString().trim(),
+      url: url?.toString().trim().isEmpty ?? true
+          ? null
+          : url.toString().trim(),
       volume: switch (volume) {
         num n => n.toDouble(),
         String s => double.tryParse(s.trim()),
@@ -316,7 +318,10 @@ class _PassiveAudioPlayerWidgetState extends State<PassiveAudioPlayerWidget>
         node: widget.node,
         child: widget.isPreview
             ? const FittedBox(
-                child: Icon(Icons.graphic_eq, semanticLabel: 'Background audio'),
+                child: Icon(
+                  Icons.graphic_eq,
+                  semanticLabel: 'Background audio',
+                ),
               )
             : const SizedBox.shrink(),
       );

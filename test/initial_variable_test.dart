@@ -3,12 +3,8 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  VariableData list(String name, String value) => VariableData(
-    id: name,
-    name: name,
-    type: VariableType.list,
-    value: value,
-  );
+  VariableData list(String name, String value) =>
+      VariableData(id: name, name: name, type: VariableType.list, value: value);
 
   test('initial.<name> reads a variable as published, not as changed', () {
     final CodelesslyContext context = CodelesslyContext.empty();
@@ -45,7 +41,14 @@ void main() {
 
   test('on a design canvas initial.<name> is the variable itself', () {
     final ScopedValues scope = ScopedValues.preview(
-      variables: {'seq': VariableData(id: 'seq', name: 'seq', type: VariableType.integer, value: '7')},
+      variables: {
+        'seq': VariableData(
+          id: 'seq',
+          name: 'seq',
+          type: VariableType.integer,
+          value: '7',
+        ),
+      },
     );
     expect(
       PropertyValueDelegate.getVariableValueFromPath<Object>(

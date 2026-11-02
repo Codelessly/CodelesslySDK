@@ -8,7 +8,9 @@ RectangleNode glass(List<Effect> effects) => RectangleNode(
   id: 'glass',
   name: 'Glass',
   basicBoxLocal: NodeBox(0, 0, 200, 100),
-  fills: [PaintModel.solid(id: 'f', color: ColorRGB.fromHex('#FFFFFF'), opacity: 0.1)],
+  fills: [
+    PaintModel.solid(id: 'f', color: ColorRGB.fromHex('#FFFFFF'), opacity: 0.1),
+  ],
   cornerRadius: const CornerRadius.all(RadiusModel.circular(28)),
   effects: effects,
 )..parentID = kRootNode;
@@ -48,15 +50,23 @@ Future<void> pump(WidgetTester tester, RectangleNode node) async {
 }
 
 void main() {
-  testWidgets('a background blur frosts what is behind, clipped to the corners', (tester) async {
-    await pump(tester, glass([blur(EffectType.backgroundBlur, 24)]));
-    final BackdropFilter filter = tester.widget(find.byType(BackdropFilter));
-    expect(filter.filter.toString(), contains('24'));
-    final ClipRRect clip = tester.widget(
-      find.ancestor(of: find.byType(BackdropFilter), matching: find.byType(ClipRRect)).first,
-    );
-    expect(clip.borderRadius, BorderRadius.circular(28));
-  });
+  testWidgets(
+    'a background blur frosts what is behind, clipped to the corners',
+    (tester) async {
+      await pump(tester, glass([blur(EffectType.backgroundBlur, 24)]));
+      final BackdropFilter filter = tester.widget(find.byType(BackdropFilter));
+      expect(filter.filter.toString(), contains('24'));
+      final ClipRRect clip = tester.widget(
+        find
+            .ancestor(
+              of: find.byType(BackdropFilter),
+              matching: find.byType(ClipRRect),
+            )
+            .first,
+      );
+      expect(clip.borderRadius, BorderRadius.circular(28));
+    },
+  );
 
   testWidgets('a layer blur blurs the node itself', (tester) async {
     await pump(tester, glass([blur(EffectType.layerBlur, 6)]));
@@ -65,10 +75,13 @@ void main() {
   });
 
   testWidgets('hidden or zero blurs draw nothing', (tester) async {
-    await pump(tester, glass([
-      blur(EffectType.backgroundBlur, 24, visible: false),
-      blur(EffectType.layerBlur, 0),
-    ]));
+    await pump(
+      tester,
+      glass([
+        blur(EffectType.backgroundBlur, 24, visible: false),
+        blur(EffectType.layerBlur, 0),
+      ]),
+    );
     expect(find.byType(BackdropFilter), findsNothing);
     expect(find.byType(ImageFiltered), findsNothing);
   });
