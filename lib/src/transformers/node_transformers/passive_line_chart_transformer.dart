@@ -77,13 +77,22 @@ typedef ChartReferenceLine = ({
 /// A tick and label on the x axis.
 typedef ChartXTick = ({double x, String label});
 
-/// A circle on a point with an optional label above or below it.
+/// A circle on a point with an optional label above or below it. A marker
+/// may style itself (a result-coloured dot on a halo, say); unset styles
+/// fall back to the chart's: radius 5, filled with the line colour or the
+/// hollow colour, a 2px outline in the line colour.
 typedef ChartMarker = ({
   double x,
   double y,
   String? label,
   bool filled,
   bool above,
+  Color? color,
+  double? radius,
+  Color? outlineColor,
+  double? outlineWidth,
+  Color? haloColor,
+  double? haloRadius,
 });
 
 /// A dashed vertical line with an optional tag and dot on the curve.
@@ -301,6 +310,12 @@ class LineChartSpec {
               label: text(m['label']),
               filled: m['filled'] == true,
               above: m['above'] == true,
+              color: LineChartGeometry.parseColor(m['color']),
+              radius: n(m['radius']),
+              outlineColor: LineChartGeometry.parseColor(m['outlineColor']),
+              outlineWidth: n(m['outlineWidth']),
+              haloColor: LineChartGeometry.parseColor(m['haloColor']),
+              haloRadius: n(m['haloRadius']),
             ),
       ],
       verticalLines: [
@@ -701,13 +716,33 @@ class LineChartPainter extends CustomPainter {
       ..strokeWidth = 2;
     for (final ChartMarker marker in spec.markers) {
       final Offset p = Offset(px(marker.x), py(marker.y));
+      final double radius = marker.radius ?? 5;
+      if (marker.haloColor case final Color halo) {
+        canvas.drawCircle(
+          p,
+          marker.haloRadius ?? radius + 1,
+          Paint()..color = halo,
+        );
+      }
       canvas.drawCircle(
         p,
-        5,
+        radius,
         Paint()
-          ..color = marker.filled ? spec.lineColor : spec.markerHollowColor,
+          ..color =
+              marker.color ??
+              (marker.filled ? spec.lineColor : spec.markerHollowColor),
       );
-      canvas.drawCircle(p, 5, outline);
+      final double outlineWidth = marker.outlineWidth ?? 2;
+      if (outlineWidth > 0) {
+        canvas.drawCircle(
+          p,
+          radius,
+          Paint()
+            ..color = marker.outlineColor ?? spec.lineColor
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = outlineWidth,
+        );
+      }
       if (marker.label case final String label when label.isNotEmpty) {
         final TextPainter tp = _text(label, spec.markerLabelStyle);
         final double ly = marker.above ? p.dy - tp.height - 8 : p.dy + 8;
