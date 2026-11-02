@@ -19,7 +19,6 @@ import '../ui/codelessly_dialog_widget.dart';
 import '../ui/layout_presentation_route.dart';
 import '../ui/codelessly_popover.dart';
 import 'action_chain.dart';
-import 'sound/sound_player.dart';
 import 'app_auth.dart';
 import 'cloud_files.dart';
 
@@ -91,8 +90,8 @@ class FunctionsRepository {
         final route = ModalRoute.of(context);
         if (route is DialogRoute && route.isCurrent) {
           // Its params are the `${result}` of the chain that showed it.
-          final Map<String, dynamic> params = (action as CloseModalAction)
-              .params;
+          final Map<String, dynamic> params =
+              (action as CloseModalAction).params;
           Navigator.of(context).pop(
             params.isEmpty
                 ? null
@@ -177,16 +176,41 @@ class FunctionsRepository {
         return runCloudBatch(context, action as CloudBatchAction);
       case ActionType.copyToClipboard:
         return copyToClipboard(context, action as CopyToClipboardAction);
-      case ActionType.speak:
-        return speak(context, action as SpeakAction);
-      case ActionType.playSound:
-        return playSound(context, action as PlaySoundAction);
       case ActionType.playAnimation:
         final PlayAnimationAction play = action as PlayAnimationAction;
-        return NodePlayRegistry.play(play.nodeId, play.animation)
-            .then((_) => true);
+        return NodePlayRegistry.play(
+          play.nodeId,
+          play.animation,
+        ).then((_) => true);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
+      case ActionType.speak:
+        final SpeakAction speak = action as SpeakAction;
+        if (speak.stop) {
+          Speech.instance.stop();
+          return true;
+        }
+        final ScopedValues scope = ActionChain.scopedValuesOf(context);
+        String text(String value) => PropertyValueDelegate.substituteVariables(
+          value,
+          scopedValues: scope,
+          nullSubstitutionMode: NullSubstitutionMode.emptyString,
+        );
+        return Speech.instance.speak(
+          text(speak.text),
+          language: text(speak.language),
+          rate: speechRate(speak, scope),
+          pitch: speak.pitch,
+        );
+      case ActionType.playSound:
+        return playSound(context, action as PlaySoundAction);
+      case ActionType.controlDrag:
+        final ControlDragAction drag = action as ControlDragAction;
+        return NodeDrag.control(
+          drag.nodeId,
+          drag.command,
+          drag.direction,
+        ).then((_) => true);
     }
   }
 
@@ -327,15 +351,9 @@ class FunctionsRepository {
     }
   }
 
-  /// Reads [action]'s text aloud.
-  static Future<bool> speak(BuildContext context, SpeakAction action) async {
-    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
-    final String text = PropertyValueDelegate.substituteVariables(
-      action.text,
-      scopedValues: scopedValues,
-      nullSubstitutionMode: NullSubstitutionMode.emptyString,
-    );
-    double rate = action.rate;
+  /// The speed [action] speaks at: its bound `rateValue` when that gives a
+  /// positive number, else its `rate`.
+  static double speechRate(SpeakAction action, ScopedValues scopedValues) {
     if (action.rateValue case final String bound when bound.trim().isNotEmpty) {
       final Object? value = PropertyValueDelegate.substituteJsonValue(
         bound.trim(),
@@ -346,43 +364,9 @@ class FunctionsRepository {
         String s => double.tryParse(s.trim()),
         _ => null,
       };
-      if (parsed != null && parsed > 0) rate = parsed;
+      if (parsed != null && parsed > 0) return parsed;
     }
-    await SoundPlayer.speak(
-      text,
-      rate: rate,
-      pitch: action.pitch,
-      language: action.language,
-    );
-    return true;
-  }
-
-  /// Plays [action]'s sound: its file, or its preset.
-  static Future<bool> playSound(
-    BuildContext context,
-    PlaySoundAction action,
-  ) async {
-    final String url = PropertyValueDelegate.substituteVariables(
-      action.url,
-      scopedValues: ActionChain.scopedValuesOf(context),
-      nullSubstitutionMode: NullSubstitutionMode.emptyString,
-    ).trim();
-    if (url.isEmpty) {
-      await SoundPlayer.playPreset(action.preset, volume: action.volume);
-      return true;
-    }
-    final AudioPlayer player = AudioPlayer();
-    try {
-      await player.setUrl(url);
-      await player.setVolume(action.volume.clamp(0, 1).toDouble());
-      unawaited(
-        player.play().whenComplete(player.dispose),
-      );
-    } catch (e) {
-      await player.dispose();
-      DebugLogger.instance.printInfo('Could not play $url: $e', name: name);
-    }
-    return true;
+    return action.rate;
   }
 
   /// Runs the branch of [action] its expression picks.
@@ -1825,6 +1809,46 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
       scopedValues: scopedValues,
     );
+  }
+
+  /// Plays [action]'s sound, now or at its `at` time on the sound clock, or
+  /// its sound file.
+  /// Its fields are values or formulas (`${result.at}`, `${voice}`).
+  static bool playSound(BuildContext context, PlaySoundAction action) {
+    final ScopedValues scope = ActionChain.scopedValuesOf(context);
+    String text(String value) => PropertyValueDelegate.substituteVariables(
+      value,
+      scopedValues: scope,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    double? number(String value) => double.tryParse(text(value));
+    final String url = text(action.url);
+    if (url.isNotEmpty) {
+      unawaited(_playFile(url, (number(action.volume) ?? 1).clamp(0, 1)));
+      return true;
+    }
+    final String at = text(action.at);
+    Sound.play(
+      Sound.voiceNamed(text(action.sound)),
+      time: at.isEmpty ? null : double.tryParse(at),
+      volume: number(action.volume) ?? 1,
+      pitch: number(action.pitch) ?? 1,
+    );
+    return true;
+  }
+
+  /// Plays the sound file at [url] once, at [volume] (0 to 1).
+  static Future<void> _playFile(String url, double volume) async {
+    final AudioPlayer player = AudioPlayer();
+    try {
+      await player.setUrl(url);
+      await player.setVolume(volume);
+      await player.play();
+    } catch (e) {
+      DebugLogger.instance.printInfo('Could not play $url: $e', name: name);
+    } finally {
+      await player.dispose();
+    }
   }
 
   /// Sets given [action.newValue] for given [action.variable] to a variable

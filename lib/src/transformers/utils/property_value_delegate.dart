@@ -576,6 +576,9 @@ class PropertyValueDelegate {
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
       'hold' => scopedValues.holdProgress ?? 0.0,
       'drop' => scopedValues.dropState ?? DropScope.idle,
+      'drag' => (scopedValues.dragValues ?? DragValues.rest).toMap(),
+      'track' => (scopedValues.trackValues ?? const TrackValues()).toMap(),
+      'speech' => Speech.instance.value,
       _ => null,
     };
 
