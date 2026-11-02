@@ -569,9 +569,15 @@ class PassiveListViewWidget extends StatelessWidget {
           buildDefaultDragHandles: false,
           itemCount: itemCount ?? 0,
           // The row being dragged shows its nodes' `dragged` state.
-          proxyDecorator: (child, index, animation) => Material(
-            type: MaterialType.transparency,
-            child: DraggedScope(child: child),
+          // The row being dragged shows its nodes' `dragged` state. Flutter
+          // draws it in the overlay, above the app's providers, so they are
+          // given to it again.
+          proxyDecorator: (child, index, animation) => reprovideCodelessly(
+            context,
+            Material(
+              type: MaterialType.transparency,
+              child: DraggedScope(child: child),
+            ),
           ),
           onReorderItem: (int from, int to) {
             FunctionsRepository.triggerAction(
@@ -1034,4 +1040,38 @@ class WrappedItems extends StatelessWidget {
         ? padded
         : ClipRect(clipBehavior: clipBehavior, child: padded);
   }
+}
+
+/// [child] with the Codelessly providers of [from] (the app, its context and
+/// controller, a paywall): for nodes built in an overlay, such as the copy of
+/// a list row being dragged, which sits above the providers of the screen.
+Widget reprovideCodelessly(BuildContext from, Widget child) {
+  final Codelessly? codelessly = from.read<Codelessly?>();
+  final CodelesslyContext? codelesslyContext = from.read<CodelesslyContext?>();
+  final CodelesslyWidgetController? controller = from
+      .read<CodelesslyWidgetController?>();
+  final PaywallController? paywall = from.read<PaywallController?>();
+  Widget result = child;
+  if (paywall != null) {
+    result = ChangeNotifierProvider<PaywallController>.value(
+      value: paywall,
+      child: result,
+    );
+  }
+  if (controller != null) {
+    result = ChangeNotifierProvider<CodelesslyWidgetController>.value(
+      value: controller,
+      child: result,
+    );
+  }
+  if (codelesslyContext != null) {
+    result = ChangeNotifierProvider<CodelesslyContext>.value(
+      value: codelesslyContext,
+      child: result,
+    );
+  }
+  if (codelessly != null) {
+    result = Provider<Codelessly>.value(value: codelessly, child: result);
+  }
+  return result;
 }
