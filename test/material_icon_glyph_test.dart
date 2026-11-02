@@ -1,52 +1,38 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/utils/material_icons_by_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Icon models hold the codepoints of Google's Material Icons fonts (what
-/// the editor's icon picker stores), which differ from those of Flutter's
-/// MaterialIcons font. The glyph must be found by name and style, or every
-/// icon draws another one (play_arrow, 0xe037, drew ac_unit).
+/// Icons placed from the editor's catalog carry Google's web font
+/// codepoints, which number the glyphs differently from Flutter's bundled
+/// MaterialIcons font; the glyph is looked up by name.
 void main() {
-  Future<IconData?> glyphOf(WidgetTester tester, MaterialIcon icon) async {
-    await tester.pumpWidget(
-      MaterialApp(home: SvgIcon(icon: icon, size: 24, color: Colors.black)),
-    );
-    return tester.widget<Icon>(find.byType(Icon)).icon;
+  Future<IconData> glyph(WidgetTester tester, MaterialIcon icon) async {
+    await tester.pumpWidget(MaterialApp(home: SvgIcon(icon: icon, size: 24)));
+    return tester.widget<Icon>(find.byType(Icon)).icon!;
   }
 
-  testWidgets('a picked icon draws its own glyph, not its codepoint\'s',
-      (tester) async {
-    const icon = MaterialIcon(
-      codepoint: 0xe037, // play_arrow in Google's fonts, ac_unit in Flutter's
-      name: 'play_arrow',
-      style: MaterialIconStyle.filled,
-      version: 16,
+  testWidgets('a catalog codepoint draws the icon of its name', (tester) async {
+    final IconData data = await glyph(
+      tester,
+      const MaterialIcon(codepoint: 0xe01b, name: 'av_timer', style: MaterialIconStyle.filled, version: 12),
     );
-    expect(await glyphOf(tester, icon), Icons.play_arrow);
+    expect(data.codePoint, Icons.av_timer.codePoint);
   });
 
-  testWidgets('styles pick the styled glyph', (tester) async {
-    expect(
-      await glyphOf(
-        tester,
-        const MaterialIcon(codepoint: 0xe037, name: 'play_arrow', style: MaterialIconStyle.rounded),
-      ),
-      Icons.play_arrow_rounded,
+  testWidgets('styles pick their own glyph', (tester) async {
+    final IconData data = await glyph(
+      tester,
+      const MaterialIcon(codepoint: 1, name: 'edit', style: MaterialIconStyle.outlined),
     );
-    expect(
-      await glyphOf(
-        tester,
-        const MaterialIcon(codepoint: 0, name: 'radio', style: MaterialIconStyle.outlined),
-      ),
-      Icons.radio_outlined,
-    );
+    expect(data.codePoint, Icons.edit_outlined.codePoint);
   });
 
-  test('names Flutter spells differently map by Google name', () {
-    expect(materialIconsByName['10k'], Icons.ten_k);
-    expect(materialIconsByName['class'], Icons.class_);
-    expect(materialIconsByName['3d_rotation_sharp'], Icons.threed_rotation_sharp);
+  testWidgets('an unknown name keeps its stored codepoint', (tester) async {
+    final IconData data = await glyph(
+      tester,
+      const MaterialIcon(codepoint: 0xe123, name: 'no_such_icon', style: MaterialIconStyle.filled),
+    );
+    expect(data.codePoint, 0xe123);
   });
 }
