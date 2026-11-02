@@ -188,8 +188,19 @@ class PassiveTextFieldWidget extends StatefulWidget {
 
 /// Moves the keyboard focus to the text field of a node (Focus action).
 /// Returns whether that field is on screen.
-bool focusTextField(String nodeId, {bool selectAll = false}) =>
-    _PassiveTextFieldWidgetState.focus(nodeId, selectAll: selectAll);
+///
+/// In a list each item has its own copy of the field: the one in the same
+/// item as [near] (the node that ran the action) is focused, else the
+/// newest.
+bool focusTextField(
+  String nodeId, {
+  bool selectAll = false,
+  BuildContext? near,
+}) => _PassiveTextFieldWidgetState.focus(
+  nodeId,
+  selectAll: selectAll,
+  near: near,
+);
 
 /// Takes the focus from the text field of [nodeId], or from any field.
 void unfocusTextField([String? nodeId]) =>
@@ -225,8 +236,28 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
   /// Focuses the newest field of [nodeId] on screen (and selects its text
   /// when [selectAll]); returns whether there was one.
-  static bool focus(String nodeId, {bool selectAll = false}) {
-    final _PassiveTextFieldWidgetState? state = _mounted[nodeId]?.lastOrNull;
+  static bool focus(
+    String nodeId, {
+    bool selectAll = false,
+    BuildContext? near,
+  }) {
+    final List<_PassiveTextFieldWidgetState> fields = [
+      for (final state in _mounted[nodeId] ?? const [])
+        if (state.mounted) state,
+    ];
+    Element? itemOf(BuildContext context) =>
+        context.getElementForInheritedWidgetOfExactType<IndexedItemProvider>();
+    final Element? item = near != null && near.mounted ? itemOf(near) : null;
+    _PassiveTextFieldWidgetState? state;
+    if (item != null) {
+      for (final field in fields.reversed) {
+        if (itemOf(field.context) == item) {
+          state = field;
+          break;
+        }
+      }
+    }
+    state ??= fields.lastOrNull;
     if (state == null) return false;
     state.focusNode.requestFocus();
     if (selectAll) {

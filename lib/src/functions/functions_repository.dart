@@ -197,7 +197,7 @@ class FunctionsRepository {
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
       case ActionType.focus:
-        return runFocus(action as FocusAction);
+        return runFocus(action as FocusAction, near: context);
       case ActionType.speak:
         return speak(context, action as SpeakAction);
       case ActionType.scrollTo:
@@ -215,7 +215,7 @@ class FunctionsRepository {
   }
 
   /// Focuses (or unfocuses) the text field [action] names.
-  static Future<bool> runFocus(FocusAction action) async {
+  static Future<bool> runFocus(FocusAction action, {BuildContext? near}) async {
     final String nodeId = action.nodeId;
     if (action.unfocus) {
       unfocusTextField(nodeId.isEmpty ? null : nodeId);
@@ -223,9 +223,11 @@ class FunctionsRepository {
     }
     if (nodeId.isEmpty) return true;
     // A field the previous actions just revealed builds on the next frame.
-    if (focusTextField(nodeId, selectAll: action.selectAll)) return true;
+    if (focusTextField(nodeId, selectAll: action.selectAll, near: near)) {
+      return true;
+    }
     await WidgetsBinding.instance.endOfFrame;
-    focusTextField(nodeId, selectAll: action.selectAll);
+    focusTextField(nodeId, selectAll: action.selectAll, near: near);
     return true;
   }
 
