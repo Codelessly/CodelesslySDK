@@ -219,4 +219,48 @@ void main() {
     expect(tester.getTopLeft(find.text('1')), const Offset(130, 0));
     expect(tester.getTopLeft(find.text('2')), const Offset(75, 20));
   });
+
+  // Switchboard's ticket properties: 20px tag chips on a line with 28px
+  // buttons, centered across it.
+  testWidgets('WrappedItems centers short items across their line', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 300,
+            child: WrappedItems(
+              itemCount: 2,
+              spacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              itemBuilder: (context, index) => SizedBox(
+                key: ValueKey<int>(index),
+                width: 80,
+                height: index == 0 ? 28 : 20,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getTopLeft(find.byKey(const ValueKey<int>(1))).dy, 4);
+  });
+
+  test('wrapCrossAlignment round-trips', () {
+    final ListViewProperties properties = ListViewProperties(
+      wrap: true,
+      wrapCrossAlignment: CrossAxisAlignmentC.center,
+    );
+    final Map<String, dynamic> json = properties.toJson();
+    expect(json['wrapCrossAlignment'], 'center');
+    expect(
+      ListViewProperties.fromJson(json).wrapCrossAlignment,
+      CrossAxisAlignmentC.center,
+    );
+    expect(ListViewProperties().toJson().containsKey('wrapCrossAlignment'),
+        isFalse);
+  });
 }
