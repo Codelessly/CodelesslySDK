@@ -454,13 +454,10 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     final List<String> layoutIds = CanvasLocation.layoutIdsOf(model).toList();
     for (final String layoutId in layoutIds) {
       final String? path = CanvasLocation.layoutPathOf(model, layoutId);
-      // A catch-all (`*`) screen takes the paths no route matches; see
-      // [_buildNotFoundPage].
-      final List<String> segments = path == null
-          ? const []
-          : CanvasLocation.segmentsOf(path);
+      // A catch-all (`*path`) is no route of its own: it shows for a
+      // location no route matches (see [_buildNotFoundPage]).
       if (path != null &&
-          !(segments.isNotEmpty && CanvasLocation.isCatchAll(segments.last))) {
+          !CanvasLocation.segmentsOf(path).any(CanvasLocation.isCatchAll)) {
         add(path, layoutId);
       }
     }
@@ -532,26 +529,30 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     ),
   );
 
-  /// A path no route matches: the app's catch-all screen (a canvas whose
-  /// path ends in `*`), which gets the path as its `path` param, else the
-  /// built-in not-found page.
+  /// A location no route matches: the app's catch-all screen (a URL path
+  /// ending in `*name`) with the rest of the path as `name`, else the
+  /// built-in not-found screen.
   Page<dynamic> _buildNotFoundPage(DefaultRoute route) {
     final SDKPublishModel? model = _model;
-    final String location = locationOfRoute(route);
     final CanvasLocationMatch? match = model == null
         ? null
-        : CanvasLocation.match(model, location);
+        : CanvasLocation.match(model, locationOfRoute(route));
     if (match != null) {
       return MaterialPage<void>(
-        key: ValueKey('catch-all:$location'),
+        key: ValueKey('catch-all:${locationOfRoute(route)}'),
         name: route.name,
-        child: CodelesslyScreen(
-          key: ValueKey(location),
-          router: this,
-          layoutId: match.layoutId,
-          location: location,
-          params: match.params,
-          fromLink: route.metadata?['link'] == true,
+        child: _buildScreen(
+          match.layoutId,
+          DefaultRoute(
+            path: route.path,
+            queryParameters: route.queryParameters,
+            pathParameters: {
+              for (final MapEntry(:key, :value) in match.params.entries)
+                key: '$value',
+            },
+            metadata: route.metadata,
+          ),
+          const {},
         ),
       );
     }
