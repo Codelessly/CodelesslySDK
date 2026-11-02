@@ -176,6 +176,18 @@ class FormulaEvaluator {
 
   static final RegExp _clockCall = RegExp(r'\b(now|today)\s*\(');
 
+  /// Whether [expression] reads the millisecond clock (`nowMs()`), so its
+  /// value changes from frame to frame.
+  static bool readsFrameClock(String expression) =>
+      _frameClockCall.hasMatch(expression.replaceAll(_quoted, ''));
+
+  /// Whether any formula in [text] reads the millisecond clock.
+  static bool textReadsFrameClock(String text) => formulaRegex
+      .allMatches(text)
+      .any((match) => readsFrameClock(match.namedGroup('expr')!));
+
+  static final RegExp _frameClockCall = RegExp(r'\bnowMs\s*\(');
+
   static final RegExp _quoted = RegExp(
     r'"[^"]*"'
     '|'

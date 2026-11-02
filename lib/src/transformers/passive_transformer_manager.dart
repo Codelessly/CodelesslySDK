@@ -655,6 +655,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           path,
     };
     bool readsClock = false;
+    bool readsFrameClock = false;
     // A computed variable listens to whatever its formula reads.
     final Map<String, VariableData> variablesByName = {
       for (final notifier in codelesslyContext.variables.values)
@@ -671,6 +672,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         );
         expanded.addAll(deps.paths);
         readsClock = readsClock || deps.readsClock;
+        readsFrameClock = readsFrameClock || deps.readsFrameClock;
       }
       return expanded;
     }
@@ -801,6 +803,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
 
     if (readsClock) listenables.add(FormulaClock.instance);
+
+    // A formula that reads the millisecond clock rebuilds on every frame.
+    readsFrameClock =
+        readsFrameClock ||
+        node.variables.values.any(
+          (path) => switch (FormulaEvaluator.exactExpression(path)) {
+            final String expression => FormulaEvaluator.readsFrameClock(
+              expression,
+            ),
+            null => false,
+          },
+        ) ||
+        inlineTextTemplatesOf(node).any(FormulaEvaluator.textReadsFrameClock);
+    if (readsFrameClock) listenables.add(FrameClock.instance);
 
     return listenables;
   }
