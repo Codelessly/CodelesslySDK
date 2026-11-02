@@ -284,6 +284,9 @@ extension TextOverflowHelper on TextOverflowC {
         return TextOverflow.ellipsis;
       case TextOverflowC.visible:
         return TextOverflow.visible;
+      // The text keeps its size and is scaled as a whole (TextNodeBox).
+      case TextOverflowC.scaleDown:
+        return TextOverflow.visible;
     }
   }
 
@@ -1184,8 +1187,10 @@ extension IconModelExt on IconModel {
     if (glyph.isEmpty || glyph == this.name) return this;
     final IconModel icon = this;
     return switch (icon) {
+      // The old glyph's codepoint doesn't name the new one: draw by name.
       MaterialIcon() => icon.copyWith(
         name: glyph,
+        codepoint: 0,
         version: materialIconVersions[glyph] ?? icon.version,
       ),
       MaterialSymbol() => icon.copyWith(name: glyph),

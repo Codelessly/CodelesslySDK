@@ -318,8 +318,14 @@ abstract final class StyleBindings {
   /// (`lineThrough` for `strikethrough` too), or null.
   static TextDecorationEnum? parseTextDecoration(Object? value) {
     if (value is TextDecorationEnum) return value;
+    // A bool strikes through: `${= m.wrong}`.
+    if (value is bool) {
+      return value ? TextDecorationEnum.strikethrough : TextDecorationEnum.none;
+    }
     if (value is! String) return null;
     final String name = value.trim();
+    if (name == 'true') return TextDecorationEnum.strikethrough;
+    if (name == 'false') return TextDecorationEnum.none;
     if (name == 'lineThrough' || name == 'line-through') {
       return TextDecorationEnum.strikethrough;
     }
