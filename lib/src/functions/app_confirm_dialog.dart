@@ -52,6 +52,8 @@ class AppConfirmDialog {
           maxHeightFactor: action.maxHeightFactor,
           showDragHandle: action.showDragHandle,
           placement: action.placement,
+          barrierBlur: action.barrierBlur,
+          enterScale: action.enterScale,
         );
         final bool confirmed = ConfirmAction.isConfirmResult(result);
         return (

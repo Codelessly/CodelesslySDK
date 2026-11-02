@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -908,6 +909,8 @@ class FunctionsRepository {
       anchorGap: action.anchorGap,
       anchorOffset: action.anchorOffset,
       fullHeight: action.fullHeight,
+      barrierBlur: action.barrierBlur,
+      enterScale: action.enterScale,
     );
     if (result case final Map values when values.isNotEmpty) {
       ActionChain.setResult(values);
@@ -985,6 +988,8 @@ class FunctionsRepository {
     double anchorGap = 6,
     double anchorOffset = 0,
     bool fullHeight = false,
+    double barrierBlur = 0,
+    double enterScale = 1,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -1069,6 +1074,8 @@ class FunctionsRepository {
             maxHeightFactor: maxHeightFactor,
             showDragHandle: showDragHandle,
             fullHeight: fullHeight,
+            barrierBlur: barrierBlur,
+            enterScale: enterScale,
             anchor: effectivePresentation == DialogPresentation.popover
                 ? anchorRectOf(context)
                 : null,
@@ -1114,6 +1121,40 @@ class FunctionsRepository {
     return result;
   }
 
+  /// The transition of a dialog with a frosted scrim: the page behind blurs
+  /// up to [barrierBlur] (a Gaussian sigma) while the dialog fades in and
+  /// scales from [enterScale] to 1, all eased by [animation].
+  static Widget frostedDialogTransition({
+    required Animation<double> animation,
+    required double barrierBlur,
+    required double enterScale,
+    required Widget child,
+  }) {
+    final Animation<double> eased = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+    );
+    Widget dialog = FadeTransition(
+      opacity: eased,
+      child: ScaleTransition(
+        scale: Tween<double>(begin: enterScale, end: 1).animate(eased),
+        child: child,
+      ),
+    );
+    if (barrierBlur <= 0) return dialog;
+    return AnimatedBuilder(
+      animation: eased,
+      child: dialog,
+      builder: (context, child) {
+        final double sigma = barrierBlur * eased.value;
+        return BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+          child: child,
+        );
+      },
+    );
+  }
+
   /// Opens a canvas as a dialog, sheet or anchored popover. The canvas draws
   /// its own surface; sheets may use their design height or hug content.
   static Future<T?> presentCanvas<T>(
@@ -1133,6 +1174,8 @@ class FunctionsRepository {
     bool showDragHandle = false,
     Rect? anchor,
     bool fullHeight = false,
+    double barrierBlur = 0,
+    double enterScale = 1,
   }) {
     if (presentation == DialogPresentation.popover) {
       return showGeneralDialog<T>(
@@ -1254,25 +1297,48 @@ class FunctionsRepository {
         pageBuilder: (context, _, _) => content(context, CanvasSizing.fill),
       );
     }
+    Widget dialogBody(BuildContext context) => Padding(
+      padding: insets,
+      child: maxHeightFactor == null
+          ? content(context, CanvasSizing.design)
+          : ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight:
+                    MediaQuery.sizeOf(context).height *
+                    maxHeightFactor.clamp(0, 1),
+              ),
+              child: content(context, CanvasSizing.design),
+            ),
+    );
+    if (barrierBlur > 0 || enterScale != 1) {
+      // A frosted scrim: the page behind blurs while the dialog fades and
+      // grows in, both following the route's animation.
+      return showGeneralDialog<T>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: MaterialLocalizations.of(context)
+            .modalBarrierDismissLabel,
+        barrierColor: barrierColor ?? Colors.black54,
+        routeSettings: routeSettings,
+        transitionDuration: const Duration(milliseconds: 280),
+        transitionBuilder: (context, animation, _, child) =>
+            frostedDialogTransition(
+              animation: animation,
+              barrierBlur: barrierBlur,
+              enterScale: enterScale,
+              child: child,
+            ),
+        pageBuilder: (context, _, _) => SafeArea(child: dialogBody(context)),
+      );
+    }
     return showDialog<T>(
       context: context,
       useRootNavigator: false,
       barrierDismissible: barrierDismissible,
       barrierColor: barrierColor,
       routeSettings: routeSettings,
-      builder: (context) => Padding(
-        padding: insets,
-        child: maxHeightFactor == null
-            ? content(context, CanvasSizing.design)
-            : ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight:
-                      MediaQuery.sizeOf(context).height *
-                      maxHeightFactor.clamp(0, 1),
-                ),
-                child: content(context, CanvasSizing.design),
-              ),
-      ),
+      builder: dialogBody,
     );
   }
 
