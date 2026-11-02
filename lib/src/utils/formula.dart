@@ -359,6 +359,16 @@ class FormulaEvaluator {
       'replace("a-b-c", "-", " ") → a b c',
     ),
     FormulaFunctionDoc(
+      'regexReplace',
+      'regexReplace(text, pattern, to)',
+      r'regexReplace("WILLOW PHARMACY 044", " [0-9]+$", "") → WILLOW PHARMACY; \$1 in to inserts a group',
+    ),
+    FormulaFunctionDoc(
+      'titleCase',
+      'titleCase(text)',
+      'titleCase("SQ *KESTREL FLOWERS") → Sq *Kestrel Flowers',
+    ),
+    FormulaFunctionDoc(
       'split',
       'split(text, separator)',
       'split("rock, jazz", ", ") → [rock, jazz]',
@@ -2047,6 +2057,39 @@ final Map<String, _Function> _functions = {
         ? text
         : text.replaceAll(from, FormulaEvaluator.stringify(_arg(a, 2)));
   },
+  'regexReplace': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final String pattern = FormulaEvaluator.stringify(_arg(a, 1));
+    if (pattern.isEmpty) return text;
+    final String to = FormulaEvaluator.stringify(_arg(a, 2));
+    try {
+      // `$1`, `${name}` insert groups; `$$` is a literal dollar.
+      return text.replaceAllMapped(RegExp(pattern), (m) {
+        return to.replaceAllMapped(
+          RegExp(r'\$\$|\$(\d+)|\$\{(\w+)\}'),
+          (g) {
+            if (g[0] == r'$$') return r'$';
+            if (g[1] != null) {
+              final int i = int.parse(g[1]!);
+              return i <= m.groupCount ? (m.group(i) ?? '') : '';
+            }
+            if (m is RegExpMatch && m.groupNames.contains(g[2])) {
+              return m.namedGroup(g[2]!) ?? '';
+            }
+            return '';
+          },
+        );
+      });
+    } on FormatException {
+      return text;
+    }
+  },
+  'titleCase': (a) => FormulaEvaluator.stringify(_arg(a, 0))
+      .toLowerCase()
+      .replaceAllMapped(
+        RegExp(r"(^|[^A-Za-z0-9'’])([a-z])"),
+        (m) => '${m[1]}${m[2]!.toUpperCase()}',
+      ),
   'split': (a) {
     final String text = FormulaEvaluator.stringify(_arg(a, 0));
     if (text.isEmpty) return <Object?>[];
