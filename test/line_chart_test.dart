@@ -268,6 +268,29 @@ void main() {
       expect(spec.valueAt(ms('2026-10-22 09:00')), 4.5);
     });
 
+    testWidgets('y tick labels sit against the plot or at the left edge', (
+      tester,
+    ) async {
+      await pumpChart(
+        tester,
+        chart(
+          properties: LineChartProperties(xField: 't', yField: 'ft'),
+          variables: {'data': r'${tides}', 'yTicks': r'${ticks}'},
+        ),
+        variables: [
+          listVariable('tides', tides),
+          listVariable('ticks', [
+            {'y': 2, 'label': '2 ft', 'align': 'start'},
+            {'y': 4, 'label': '4 ft'},
+          ]),
+        ],
+      );
+      expect(tester.takeException(), isNull);
+      final ticks = painterOf(tester).spec.yTicks;
+      expect(ticks.first.atStart, isTrue);
+      expect(ticks.last.atStart, isFalse);
+    });
+
     testWidgets('markers style themselves: colour, radius, outline, halo', (
       tester,
     ) async {
