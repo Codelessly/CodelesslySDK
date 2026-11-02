@@ -40,6 +40,30 @@ void main() {
     expect(data.codePoint, Icons.edit_outlined.codePoint);
   });
 
+  test('names Flutter renames (123 → onetwothree) still resolve', () {
+    expect(materialIconsByName['123'], Icons.onetwothree);
+    expect(materialIconsByName['close_rounded'], Icons.close_rounded);
+  });
+
+  testWidgets('a Material Symbol Flutter ships draws its bundled glyph', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SvgIcon(
+          icon: MaterialSymbol(
+            codepoint: 0,
+            fontFamily: 'MaterialSymbols',
+            name: 'close',
+            style: MaterialSymbolStyle.rounded,
+          ),
+        ),
+      ),
+    );
+    final Icon drawn = tester.widget(find.byType(Icon));
+    expect(drawn.icon!.codePoint, Icons.close_rounded.codePoint);
+  });
+
   test('an unknown name has no font glyph (it is drawn from its SVG)', () {
     expect(materialIconsByName['no_such_icon'], isNull);
   });

@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'dart:math' hide log;
 import 'dart:typed_data';
-import 'dart:ui' show lerpDouble;
+import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
@@ -54,6 +54,47 @@ abstract class WidgetNodeTransformerManager
     Widget widget,
     NodeBuildLayer layer,
   ) => decorator?.decorate(context, node, widget, layer) ?? widget;
+
+  /// Draws [node]'s visible blur effects around [widget]: a background blur
+  /// (frosted glass) blurs whatever is painted behind the node, clipped to
+  /// its corner radius, and a layer blur blurs the node itself. An effect's
+  /// radius is the Gaussian sigma, as CSS `blur()` and Flutter's
+  /// `ImageFilter.blur` take it.
+  Widget applyWidgetBlurs(BaseNode node, Widget widget) {
+    if (node is! BlendMixin) return widget;
+    double layer = 0, background = 0;
+    for (final Effect effect in node.effects) {
+      if (!effect.visible || effect.radius <= 0) continue;
+      switch (effect.type) {
+        case EffectType.layerBlur:
+          layer = max(layer, effect.radius);
+        case EffectType.backgroundBlur:
+          background = max(background, effect.radius);
+        case EffectType.dropShadow || EffectType.innerShadow:
+          break;
+      }
+    }
+    if (background > 0) {
+      final BorderRadius radius = switch (node as Object) {
+        final CornerMixin corners => corners.cornerRadius.borderRadius,
+        _ => BorderRadius.zero,
+      };
+      widget = ClipRRect(
+        borderRadius: radius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: background, sigmaY: background),
+          child: widget,
+        ),
+      );
+    }
+    if (layer > 0) {
+      widget = ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: layer, sigmaY: layer),
+        child: widget,
+      );
+    }
+    return widget;
+  }
 
   /// Convenience method to handle widget opacity.
   Widget applyWidgetOpacity(BaseNode node, Widget widget) {
@@ -1452,7 +1493,26 @@ class SvgIcon extends StatelessWidget {
     // found by name and style. Otherwise it is drawn from its SVG: an
     // IconData built at runtime fails release web builds (icon fonts are
     // tree-shaken).
-    if (icon case final MaterialIcon material) {
+    // A Material Symbol Flutter also ships (by name, in the matching
+    // style) draws offline the same way; others load their SVG below.
+    final IconModel model = icon;
+    final MaterialIcon? asIcon = switch (model) {
+      final MaterialIcon material => material,
+      final MaterialSymbol symbol => MaterialIcon(
+        codepoint: 0,
+        name: symbol.name,
+        style: switch (symbol.style) {
+          MaterialSymbolStyle.rounded => MaterialIconStyle.rounded,
+          MaterialSymbolStyle.sharp => MaterialIconStyle.sharp,
+          MaterialSymbolStyle.outlined =>
+            (fill ?? 0) >= 1
+                ? MaterialIconStyle.filled
+                : MaterialIconStyle.outlined,
+        },
+      ),
+      _ => null,
+    };
+    if (asIcon case final MaterialIcon material) {
       final IconData? glyph = materialIconsByName[material.styledName];
       if (glyph != null) {
         return Icon(glyph, size: dimension, color: iconColor);
