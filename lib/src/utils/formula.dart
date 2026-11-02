@@ -305,6 +305,11 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('upper', 'upper(text)', 'upper("hi") → HI'),
     FormulaFunctionDoc('lower', 'lower(text)', 'lower("Hi") → hi'),
+    FormulaFunctionDoc(
+      'codeUnits',
+      'codeUnits(text)',
+      'sum(codeUnits(tag)) % 8 → a stable color index for tag',
+    ),
     FormulaFunctionDoc('trim', 'trim(text)', 'trim("  hi ") → hi'),
     FormulaFunctionDoc(
       'contains',
@@ -1842,6 +1847,9 @@ final Map<String, _Function> _functions = {
       .join((_arg(a, 1) ?? ', ').toString()),
   'upper': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toUpperCase(),
   'lower': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toLowerCase(),
+  // The UTF-16 code units of the text, for hashing a label into a color:
+  // sum(codeUnits(tag)) % 8.
+  'codeUnits': (a) => FormulaEvaluator.stringify(_arg(a, 0)).codeUnits,
   'trim': (a) => FormulaEvaluator.stringify(_arg(a, 0)).trim(),
   'padLeft': (a) => _pad(_arg(a, 0), _arg(a, 1), _arg(a, 2), left: true),
   'padRight': (a) => _pad(_arg(a, 0), _arg(a, 1), _arg(a, 2), left: false),

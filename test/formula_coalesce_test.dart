@@ -34,4 +34,12 @@ void main() {
     expect(eval("at(drafts, '1')", values), isNull);
     expect(eval("at(list, 1)", {'list': ['x', 'y']}), 'y');
   });
+
+  // Tag dots take one of 8 colors from their name, as the reference's
+  // tagColor sums the name's code units.
+  test('codeUnits hashes a name into a color index', () {
+    expect(eval("codeUnits('ab')"), <int>[97, 98]);
+    expect(eval("sum(codeUnits('bug')) % 8"), (98 + 117 + 103) % 8);
+    expect(eval("codeUnits('')"), isEmpty);
+  });
 }
