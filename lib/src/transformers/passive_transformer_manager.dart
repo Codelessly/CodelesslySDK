@@ -225,6 +225,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           );
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
     widget = applyStrokePath(context, styled, widget);
+    // Blurs act on everything the node paints, its stroke path included.
+    widget = applyWidgetBlurs(styled, widget);
 
     if (settings.withOpacity) {
       widget = applyWidgetOpacity(styled, widget);
@@ -243,11 +245,15 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
+      // The design canvas (isPreview) shows motion at rest: an entrance
+      // from opacity 0 would otherwise wait there for frames an idle canvas
+      // never draws, leaving the node invisible.
       widget = applyWidgetMotion(
         context,
         styled,
         widget,
         scopedValues: preview,
+        animate: !settings.isPreview,
       );
       widget = applyNodePlay(context, styled, widget);
       widget = applyBoundOffset(context, styled, widget);
