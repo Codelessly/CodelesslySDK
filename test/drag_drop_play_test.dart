@@ -61,7 +61,7 @@ void main() {
             calls.add(name);
             final ScopedValues values = ActionChain.scopedValuesOf(context);
             seen[name] = PropertyValueDelegate.getVariableValueFromPath<Object>(
-              'drop',
+              'result',
               scopedValues: values,
             );
           },
@@ -114,19 +114,24 @@ void main() {
 
   RectangleNode tile(String letter) => box(
     'tile',
-    draggable: DraggableModel(data: letter, group: 'letters'),
+    // A press starts the drag (the test platform would long-press).
+    draggable: DraggableModel(
+      data: letter,
+      group: 'letters',
+      start: DragStart.press,
+    ),
     reactions: [
       call('start', TriggerType.dragStart),
       call('completed', TriggerType.dragCompleted),
-      call('canceled', TriggerType.dragCanceled),
+      call('canceled', TriggerType.dragCancel),
     ],
   );
 
   RectangleNode slot() => box(
     'slot',
     dropTarget: const DropTargetModel(
-      groups: ['letters'],
-      acceptIf: r"${= drop.data == 'A'}",
+      accepts: ['letters'],
+      acceptIf: r"${= drag.data == 'A'}",
     ),
     reactions: [
       call('enter', TriggerType.dragEnter),
@@ -136,7 +141,7 @@ void main() {
     ],
   );
 
-  testWidgets('a right drop runs drop with its data and offset', (
+  testWidgets('a right drop runs drop with its data, then dragCompleted', (
     tester,
   ) async {
     await pumpNodes(tester, [tile('A'), slot()]);
@@ -152,10 +157,8 @@ void main() {
     expect(calls, isNot(contains('rejected')));
     final Map drop = seen['dropped'] as Map;
     expect(drop['data'], 'A');
-    expect(drop['accepts'], isTrue);
-    // The copy was let go 10 px right and 5 px below the slot's top left.
-    expect(drop['dx'], closeTo(10, 0.01));
-    expect(drop['dy'], closeTo(-5, 0.01));
+    expect(drop['accepted'], isTrue);
+    expect(calls, isNot(contains('canceled')));
   });
 
   testWidgets('a wrong drop is rejected and the tile springs back', (
@@ -182,6 +185,42 @@ void main() {
     expect(moved, findsWidgets);
     await tester.pumpAndSettle();
     expect(moved, findsNothing);
+  });
+
+  testWidgets('a bound draggable.enabled switches dragging off', (
+    tester,
+  ) async {
+    final RectangleNode off = tile('A')
+      ..variables['draggable.enabled'] = r'${= 1 > 2}';
+    await pumpNodes(tester, [off, slot()]);
+    final TestGesture gesture = await tester.startGesture(const Offset(50, 50));
+    await gesture.moveBy(const Offset(0, 20));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0, 80));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(calls, isEmpty);
+  });
+
+  testWidgets('a taken drop remembers where it was let go for its flight', (
+    tester,
+  ) async {
+    final RectangleNode flying = tile('A')..flightKey = 'tile-a';
+    await pumpNodes(tester, [flying, slot()]);
+    final TestGesture gesture = await tester.startGesture(const Offset(50, 50));
+    await gesture.moveBy(const Offset(0, 20));
+    await tester.pump();
+    await gesture.moveBy(const Offset(10, 75));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(calls, contains('completed'));
+    final Rect? from = FlightRegistry.lastDrop('tile-a');
+    expect(from, isNotNull);
+    // Let go 10 px right and 95 px below where it started.
+    expect(from!.topLeft.dx, closeTo(10, 1));
+    expect(from.topLeft.dy, closeTo(95, 1));
   });
 
   testWidgets('a full target takes nothing', (tester) async {
@@ -314,9 +353,8 @@ void main() {
   testWidgets('bob and sway loops move the node', (tester) async {
     await pumpNodes(tester, [
       box('bob')
-        ..loopAnimation = LoopAnimation.preset(
-          LoopAnimationType.bob,
-        ).copyWith(distance: 20),
+        ..loopAnimation = LoopAnimation.preset(LoopAnimationType.bob)
+            .copyWith(distance: 20),
     ]);
     await tester.pump(const Duration(milliseconds: 800));
     expect(

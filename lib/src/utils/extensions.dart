@@ -1926,6 +1926,8 @@ extension ActionModelExt on ActionModel {
         return _namesIn(strings, includePredefined);
       case ActionType.playAnimation:
         return _namesIn(strings, includePredefined);
+      case ActionType.focus:
+        return {};
       case ActionType.cloudData:
         final CloudDataAction action = this as CloudDataAction;
         strings.addAll([

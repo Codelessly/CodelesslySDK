@@ -22,7 +22,6 @@ const Set<String> predefinedVariableNames = {
   'result',
   'screen',
   'hold',
-  'drop',
   'drag',
   'track',
   'speech',
@@ -51,6 +50,7 @@ bool isSharedVariablesScope(String scopeId) =>
 
 const Set<String> predefinedListenableVariableNames = {
   'storage',
+  'drag',
   'auth',
   'speech',
   'product',
@@ -74,7 +74,6 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'screen', type: VariableType.map),
   PredefinedVariableData(name: 'parent', type: VariableType.map),
   PredefinedVariableData(name: 'hold', type: VariableType.decimal),
-  PredefinedVariableData(name: 'drop', type: VariableType.map),
   PredefinedVariableData(name: 'drag', type: VariableType.map),
   PredefinedVariableData(name: 'track', type: VariableType.map),
   PredefinedVariableData(name: 'speech', type: VariableType.map),

@@ -25,10 +25,6 @@ class ScopedValues {
   /// 0 to 1, or null outside one.
   late final double? holdProgress;
 
-  /// What the nearest drop target above this context knows about a drag
-  /// over it: `hovering`, `data`, `accepts`, and after a drop `dx`, `dy`.
-  /// Null outside a drop target. See [DropScope].
-  late final Map<String, dynamic>? dropState;
   /// The drag of the nearest draggable node above this context (see
   /// [NodeDrag]), or null outside one: what the `drag` variable reads.
   late final DragValues? dragValues;
@@ -103,7 +99,6 @@ class ScopedValues {
       parentIndexedItem = null,
       nodeState = null,
       holdProgress = null,
-      dropState = null,
       dragValues = null,
       trackValues = null,
       routeParams = {},
@@ -135,8 +130,7 @@ class ScopedValues {
        _previewVariables = variables,
        nodeState = null,
        holdProgress = null,
-       dropState = null,
-       dragValues = null,
+        dragValues = null,
        trackValues = null,
        routeParams = routeParams ?? {};
 
@@ -158,7 +152,6 @@ class ScopedValues {
     parentSize = ParentSizeScope.valueOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     holdProgress = HoldProgressProvider.maybeOf(context);
-    dropState = DropScope.stateOf(context);
     dragValues = DragScope.maybeOf(context);
     trackValues = TrackScope.maybeOf(context);
     final instance = context.read<Codelessly?>();
