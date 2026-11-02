@@ -131,6 +131,15 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    `t.due` is a date without a time or a Firestore timestamp. A missing
 ///    date is neither before nor after a date.
 ///
+///  - your own functions: a call to a name that isn't a built-in function,
+///    such as `attacked(board, sq, 'w')`, reads the variable of that name.
+///    A variable with parameters (`VariableData.parameters`) is a
+///    [FormulaFunction]: its formula is the body, which reads the
+///    arguments by the parameters' names (`board[sq]`, `move.to`) and every
+///    other variable. Functions can call each other and themselves (up to
+///    [FormulaFunction.maxDepth] calls deep), so rules that would be
+///    hundreds of characters, repeated in every formula, are written once.
+///
 /// Null counts as 0 in arithmetic and as empty text when joining text. An
 /// invalid expression evaluates to null.
 class FormulaEvaluator {
@@ -158,6 +167,16 @@ class FormulaEvaluator {
 
   /// Whether [expression] is a well-formed formula.
   static bool parses(String expression) => _parse(expression) != null;
+
+  /// The names of the functions [expression] calls that aren't built in:
+  /// calls to [FormulaFunction] variables.
+  static Set<String> userFunctionCalls(String expression) {
+    final _Node? node = _parse(expression);
+    if (node == null) return {};
+    final Set<String> names = {};
+    node.collectUserCalls(names);
+    return names;
+  }
 
   /// The variable paths [expression] reads, e.g. `storage.cart` and `qty`.
   static Set<String> referencedPaths(String expression) {
@@ -258,34 +277,24 @@ class FormulaEvaluator {
     return _cache[key] = node;
   }
 
-  /// The functions [expression] calls that aren't built in: user functions,
-  /// variables whose value is a lambda.
-  static Set<String> userFunctionCalls(String expression) {
-    try {
-      final _Parser parser = _Parser(expression.trim());
-      parser.parseAll();
-      return parser.userCalls;
-    } catch (_) {
-      return const {};
-    }
-  }
-
   /// Names of the functions formulas can call.
   static Iterable<String> get functions => _functions.keys;
 
   /// Why [expression] can't be evaluated, such as `Unknown function "sun"`
   /// or `Expected ")" at 12`, or null when it parses.
   ///
-  /// A call of a function that isn't built in is a user function call: a
-  /// variable holding a lambda. Calls of names that aren't among
-  /// [variables] (the names in scope; none when omitted) are unknown
-  /// functions.
-  static String? errorOf(String expression, {Iterable<String>? variables}) {
+  /// A call to a name that isn't a built-in function is an error unless
+  /// [functionNames] lists it (the variables that are [FormulaFunction]s).
+  static String? errorOf(
+    String expression, {
+    Iterable<String> functionNames = const [],
+  }) {
     try {
-      final _Parser parser = _Parser(expression.trim());
-      parser.parseAll();
-      final Set<String> known = {...?variables};
-      for (final String name in parser.userCalls) {
+      final _Node node = _Parser(expression.trim()).parseAll();
+      final Set<String> calls = {};
+      node.collectUserCalls(calls);
+      final Set<String> known = functionNames.toSet();
+      for (final String name in calls) {
         if (!known.contains(name)) return 'Unknown function "$name"';
       }
       return null;
@@ -528,6 +537,19 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('sqrt', 'sqrt(value)', 'sqrt(16) → 4'),
     FormulaFunctionDoc('pow', 'pow(base, exponent)', 'pow(2, 10) → 1024'),
+    FormulaFunctionDoc(
+      'exp',
+      'exp(value)',
+      'exp(1) → 2.71828… (zoom by exp(-delta / 500))',
+    ),
+    FormulaFunctionDoc('ln', 'ln(value)', 'ln(exp(2)) → 2'),
+    FormulaFunctionDoc(
+      'log',
+      'log(value, base?)',
+      'log(1000) → 3, log(8, 2) → 3',
+    ),
+    FormulaFunctionDoc('sign', 'sign(value)', 'sign(-4) → -1'),
+    FormulaFunctionDoc('hypot', 'hypot(x, y)', 'hypot(3, 4) → 5'),
     FormulaFunctionDoc('sin', 'sin(radians)', 'sin(pi() / 2) → 1'),
     FormulaFunctionDoc('cos', 'cos(radians)', 'cos(0) → 1'),
     FormulaFunctionDoc('tan', 'tan(radians)', 'tan(0) → 0'),
@@ -686,6 +708,11 @@ class FormulaEvaluator {
     FormulaFunctionDoc('range', 'range(count)', 'range(3) → [0, 1, 2]'),
     FormulaFunctionDoc('skip', 'skip(list, count)', 'skip(events, 25)'),
     FormulaFunctionDoc('number', 'number(value)', 'number("42") → 42'),
+    FormulaFunctionDoc(
+      'mix',
+      'mix(color1, color2, amount)',
+      "mix('#FFFFFF', '#000000', 0.25) → #BFBFBF",
+    ),
     FormulaFunctionDoc(
       'alpha',
       'alpha(color, opacity)',
@@ -2158,6 +2185,29 @@ String? _alpha(Object? color, num opacity) {
   return '#${a.toRadixString(16).padLeft(2, '0').toUpperCase()}$rgb';
 }
 
+/// [from] moved [amount] (0–1) of the way to [to], channel by channel
+/// (alpha too), like Flutter's `Color.lerp`: `mix(paper, ink, 0.28)` is ink
+/// at 28% over paper. Colors are `#RRGGBB` or `#AARRGGBB`.
+String? _mix(Object? from, Object? to, num amount) {
+  int? argb(Object? color) {
+    final String hex = FormulaEvaluator.stringify(color).replaceAll('#', '');
+    if (hex.length != 6 && hex.length != 8) return null;
+    return int.tryParse(hex.length == 6 ? 'FF$hex' : hex, radix: 16);
+  }
+
+  final int? a = argb(from), b = argb(to);
+  if (a == null || b == null) return null;
+  final double t = amount.clamp(0, 1).toDouble();
+  final List<int> channels = <int>[
+    for (final int shift in const <int>[24, 16, 8, 0])
+      (((a >> shift) & 0xFF) +
+              (((b >> shift) & 0xFF) - ((a >> shift) & 0xFF)) * t)
+          .round(),
+  ];
+  // Opaque colors come back as #RRGGBB, like the colors they came from.
+  return '#${[if (channels.first != 0xFF) channels.first, ...channels.skip(1)].map((int c) => c.toRadixString(16).padLeft(2, '0')).join().toUpperCase()}';
+}
+
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
@@ -2313,6 +2363,15 @@ final Map<String, _Function> _functions = {
   ],
   'sqrt': (a) => _tidy(math.sqrt(_num(_arg(a, 0)))),
   'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
+  'exp': (a) => _tidy(math.exp(_num(_arg(a, 0)))),
+  'ln': (a) => _tidy(math.log(_num(_arg(a, 0)))),
+  'log': (a) => _tidy(
+    math.log(_num(_arg(a, 0))) / math.log(a.length > 1 ? _num(_arg(a, 1)) : 10),
+  ),
+  'sign': (a) => _num(_arg(a, 0)).sign,
+  'hypot': (a) => _tidy(
+    math.sqrt(math.pow(_num(_arg(a, 0)), 2) + math.pow(_num(_arg(a, 1)), 2)),
+  ),
   'sin': (a) => math.sin(_num(_arg(a, 0))),
   'cos': (a) => math.cos(_num(_arg(a, 0))),
   'tan': (a) => math.tan(_num(_arg(a, 0))),
@@ -2453,6 +2512,7 @@ final Map<String, _Function> _functions = {
   'get': (a) => _member(_arg(a, 0), _arg(a, 1)),
   'number': (a) => _toNum(_arg(a, 0)),
   'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
+  'mix': (a) => _mix(_arg(a, 0), _arg(a, 1), _num(_arg(a, 2) ?? 0.5)),
   'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
     _arg(a, 1) == null ? 2 : _intArg(_arg(a, 1)),
     FormulaEvaluator.stringify(_arg(a, 2) ?? '0'),
@@ -2477,7 +2537,8 @@ final Map<String, _Function> _functions = {
       if (v is Iterable) ...v else ?v,
   ],
   'now': (a) => _dateText(_nowAt(_arg(a, 0))),
-  'nowMs': (a) => (FormulaClock.pinned ?? DateTime.now()).millisecondsSinceEpoch,
+  'nowMs': (a) =>
+      (FormulaClock.pinned ?? DateTime.now()).millisecondsSinceEpoch,
   'today': (a) {
     final DateTime now = _nowAt(_arg(a, 0));
     return _dateText(DateTime(now.year, now.month, now.day));
@@ -2538,6 +2599,133 @@ sealed class _Node {
   Object? eval(FormulaPathResolver resolve);
 
   void collectPaths(Set<String> paths) {}
+
+  /// Child nodes, for walks over the whole expression.
+  Iterable<_Node> get children => const [];
+
+  /// Adds the names of the user functions this expression calls.
+  void collectUserCalls(Set<String> names) {
+    for (final _Node child in children) {
+      child.collectUserCalls(names);
+    }
+  }
+}
+
+/// A function written in the app: a [FormulaFunction] variable called by
+/// name, e.g. `legalMoves(board, sq)`.
+class _UserCall extends _Node {
+  final String name;
+  final List<_Node> args;
+
+  const _UserCall(this.name, this.args);
+
+  @override
+  Object? eval(FormulaPathResolver resolve) {
+    final Object? function = resolve(name);
+    final List<Object?> values = [for (final arg in args) arg.eval(resolve)];
+    if (function is FormulaFunction) return function.call(values);
+    // A computed variable holding a lambda, `${= (qty, unit) => ...}`.
+    if (_userFunction(function, resolve) case final _Closure closure) {
+      return closure.callWith(values);
+    }
+    // A name that is neither built in nor a function variable is an error,
+    // as an unknown function always was: the whole formula is null.
+    throw StateError('Unknown function "$name"');
+  }
+
+  /// The function's own variable (so a binding listens to what its body
+  /// reads) and what the arguments read.
+  @override
+  void collectPaths(Set<String> paths) {
+    paths.add(name);
+    for (final arg in args) {
+      arg.collectPaths(paths);
+    }
+  }
+
+  @override
+  Iterable<_Node> get children => args;
+
+  @override
+  void collectUserCalls(Set<String> names) {
+    names.add(name);
+    super.collectUserCalls(names);
+  }
+}
+
+/// A function defined by a variable with parameters: its [parameters] and
+/// the formula [body] that computes its result from them.
+///
+/// Calling it evaluates [body] with each parameter reading the argument at
+/// its position (missing ones are null). Every other path is read from
+/// [scope]: the app's variables. Calls nest up to [maxDepth] deep, so a
+/// runaway recursion ends with null instead of a crash.
+class FormulaFunction {
+  /// Names of the parameters, in order.
+  final List<String> parameters;
+
+  /// The formula, without `${= }`.
+  final String body;
+
+  /// Reads the variables the body uses besides its parameters.
+  final FormulaPathResolver scope;
+
+  /// Creates a [FormulaFunction].
+  const FormulaFunction(this.parameters, this.body, this.scope);
+
+  /// The deepest nesting of calls allowed.
+  static const int maxDepth = 128;
+
+  static int _depth = 0;
+
+  static final RegExp _part = RegExp(r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]');
+
+  /// The result of the body for [arguments].
+  Object? call(List<Object?> arguments) {
+    final _Node? node = FormulaEvaluator._parse(body);
+    if (node == null || _depth >= maxDepth) return null;
+    _depth++;
+    try {
+      return node.eval((path) {
+        for (int i = 0; i < parameters.length; i++) {
+          final String name = parameters[i];
+          if (!path.startsWith(name)) continue;
+          final Object? bound = i < arguments.length ? arguments[i] : null;
+          if (path.length == name.length) return bound;
+          if (!path.startsWith('.', name.length) &&
+              !path.startsWith('[', name.length)) {
+            continue;
+          }
+          Object? result = bound;
+          for (final Match part in _part.allMatches(path, name.length)) {
+            result = _member(result, part[1] ?? int.parse(part[2]!));
+          }
+          return result;
+        }
+        return scope(path);
+      });
+    } catch (_) {
+      return null;
+    } finally {
+      _depth--;
+    }
+  }
+
+  /// The paths [body] reads that aren't its parameters: the variables a
+  /// call depends on.
+  Set<String> get externalPaths => {
+    for (final String path in FormulaEvaluator.referencedPaths(body))
+      if (!parameters.any(
+        (name) =>
+            path == name ||
+            path.startsWith('$name.') ||
+            path.startsWith('$name['),
+      ))
+        path,
+  };
+
+  @override
+  String toString() => 'function(${parameters.join(', ')})';
 }
 
 class _Literal extends _Node {
@@ -2572,6 +2760,9 @@ class _ListLiteral extends _Node {
   ];
 
   @override
+  Iterable<_Node> get children => items;
+
+  @override
   void collectPaths(Set<String> paths) {
     for (final item in items) {
       item.collectPaths(paths);
@@ -2588,6 +2779,9 @@ class _Member extends _Node {
   @override
   Object? eval(FormulaPathResolver resolve) =>
       _member(target.eval(resolve), key.eval(resolve));
+
+  @override
+  Iterable<_Node> get children => [target, key];
 
   @override
   void collectPaths(Set<String> paths) {
@@ -2615,6 +2809,9 @@ class _Call extends _Node {
   }
 
   @override
+  Iterable<_Node> get children => args;
+
+  @override
   void collectPaths(Set<String> paths) {
     for (final arg in args) {
       arg.collectPaths(paths);
@@ -2635,6 +2832,9 @@ class _Lambda extends _Node {
   Object? eval(FormulaPathResolver resolve) =>
       _Closure(params, body, resolve, source);
 
+  @override
+  Iterable<_Node> get children => [body];
+
   /// The body's paths, except those of the parameters, which aren't
   /// variables.
   @override
@@ -2648,34 +2848,6 @@ class _Lambda extends _Node {
           path.startsWith('$name['),
     );
     paths.addAll(bodyPaths.where((path) => !isParam(path)));
-  }
-}
-
-/// A call of a function that isn't built in: a user function, i.e. a
-/// variable whose value is a lambda (a computed variable with the formula
-/// `${= (qty, unit) => ...}`). The variable may hold the function itself or
-/// its text. Calling anything else evaluates to null.
-class _UserCall extends _Node {
-  final String name;
-  final List<_Node> args;
-
-  const _UserCall(this.name, this.args);
-
-  @override
-  Object? eval(FormulaPathResolver resolve) {
-    final _Closure? function = _userFunction(resolve(name), resolve);
-    // Like any invalid expression, calling what isn't a function makes the
-    // whole formula null.
-    if (function == null) throw StateError('"$name" is not a function');
-    return function.callWith([for (final arg in args) arg.eval(resolve)]);
-  }
-
-  @override
-  void collectPaths(Set<String> paths) {
-    paths.add(name);
-    for (final arg in args) {
-      arg.collectPaths(paths);
-    }
   }
 }
 
@@ -2706,6 +2878,11 @@ class _MapLiteral extends _Node {
   };
 
   @override
+  Iterable<_Node> get children => [
+    for (final (_, _Node value) in entries) value,
+  ];
+
+  @override
   void collectPaths(Set<String> paths) {
     for (final (_, _Node value) in entries) {
       value.collectPaths(paths);
@@ -2718,6 +2895,9 @@ class _Unary extends _Node {
   final _Node operand;
 
   const _Unary(this.op, this.operand);
+
+  @override
+  Iterable<_Node> get children => [operand];
 
   @override
   Object? eval(FormulaPathResolver resolve) {
@@ -2735,6 +2915,9 @@ class _Binary extends _Node {
   final _Node right;
 
   const _Binary(this.op, this.left, this.right);
+
+  @override
+  Iterable<_Node> get children => [left, right];
 
   @override
   Object? eval(FormulaPathResolver resolve) {
@@ -2794,6 +2977,9 @@ class _Ternary extends _Node {
   const _Ternary(this.condition, this.then, this.otherwise);
 
   @override
+  Iterable<_Node> get children => [condition, then, otherwise];
+
+  @override
   Object? eval(FormulaPathResolver resolve) => _truthy(condition.eval(resolve))
       ? then.eval(resolve)
       : otherwise.eval(resolve);
@@ -2823,9 +3009,6 @@ class _Parser {
     r'|\(\s*([a-zA-Z_][a-zA-Z0-9_]*(?:\s*,\s*[a-zA-Z_][a-zA-Z0-9_]*)*)\s*\))'
     r'\s*=>',
   );
-
-  /// Functions called that aren't built in (user functions).
-  final Set<String> userCalls = {};
 
   /// The whole formula: an expression, or a lambda (a user function).
   _Node parseAll() {
@@ -3055,12 +3238,8 @@ class _Parser {
         } while (_eat(','));
         _expect(')');
       }
-      // Not a built-in function: a user function (a variable holding a
-      // lambda), resolved when evaluated.
-      if (!_functions.containsKey(name)) {
-        userCalls.add(name);
-        return _UserCall(name, args);
-      }
+      // A name that isn't built in calls a function variable.
+      if (!_functions.containsKey(name)) return _UserCall(name, args);
       return _Call(name, args);
     }
 
