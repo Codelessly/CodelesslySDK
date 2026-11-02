@@ -1261,13 +1261,9 @@ class SvgIcon extends StatelessWidget {
       if (glyph != null) {
         return Icon(glyph, size: dimension, color: iconColor);
       }
-      if (material.codepoint > 0) {
-        return Icon(
-          IconData(material.codepoint, fontFamily: material.fontFamily),
-          size: dimension,
-          color: iconColor,
-        );
-      }
+      // A name the bundled font doesn't have is drawn from its SVG below.
+      // Never `IconData(codepoint)` from data: a non-constant IconData
+      // breaks icon tree shaking, and with it every release web build.
     }
 
     final url = icon.toSvgUrl(
