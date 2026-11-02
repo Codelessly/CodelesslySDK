@@ -1001,12 +1001,16 @@ Widget buildFill(
       }
 
       // With a transition a fill eases to its new color (a hovered row).
+      // Where tickers are off (the design canvas, its captures) it jumps.
       if ((node as BaseNode).transitionMs > 0) {
-        return TweenAnimationBuilder<Color?>(
-          tween: ColorTween(end: color),
-          duration: Duration(milliseconds: (node as BaseNode).transitionMs),
-          curve: Curves.easeOutCubic,
-          builder: (context, color, _) => solid(color),
+        final int ms = (node as BaseNode).transitionMs;
+        return Builder(
+          builder: (context) => TweenAnimationBuilder<Color?>(
+            tween: ColorTween(end: color),
+            duration: implicitTransitionDuration(context, ms),
+            curve: Curves.easeOutCubic,
+            builder: (context, color, _) => solid(color),
+          ),
         );
       }
       return solid(color);

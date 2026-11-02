@@ -25,8 +25,20 @@ class ScopedValues {
   /// 0 to 1, or null outside one.
   late final double? holdProgress;
 
-  /// The route params for this route/page for given context.
-  late final Map<String, dynamic> routeParams;
+  /// The route params for this route/page for given context, as
+  /// `${route.<name>}` reads them, plus `path`: the screen's URL path, such
+  /// as `/pass/zz999` (see [Codelessly.routePathFor]), unless a param of
+  /// that name was given.
+  Map<String, dynamic> get routeParams => _routeParams ??= {
+    if (_routePath?.call() case final String path) 'path': path,
+    ..._givenRouteParams,
+  };
+
+  Map<String, dynamic>? _routeParams;
+  late final Map<String, dynamic> _givenRouteParams;
+
+  /// Works out the route's `path` when it is first read.
+  late final String? Function()? _routePath;
 
   /// The signed-in app user, as the `auth` variable sees it. It is read
   /// live from the Codelessly instance, so an action chain that holds on to
@@ -95,7 +107,8 @@ class ScopedValues {
       parentIndexedItem = null,
       nodeState = null,
       holdProgress = null,
-      routeParams = {},
+      _givenRouteParams = {},
+      _routePath = null,
       _appUser = null,
       screenSize = null,
       platformBrightness = null,
@@ -126,7 +139,8 @@ class ScopedValues {
        _previewVariables = variables,
        nodeState = null,
        holdProgress = null,
-       routeParams = routeParams ?? {};
+       _givenRouteParams = routeParams ?? {},
+       _routePath = null;
 
   /// These values as an item of a list sees them: [item] is what `${item}`
   /// and `${index}` read, and the item these values had, if any, becomes
@@ -143,7 +157,8 @@ class ScopedValues {
       parentIndexedItem = base.indexedItem,
       nodeState = base.nodeState,
       holdProgress = base.holdProgress,
-      routeParams = base.routeParams,
+      _givenRouteParams = base._givenRouteParams,
+      _routePath = base._routePath,
       screenSize = base.screenSize,
       platformBrightness = base.platformBrightness,
       parentSize = base.parentSize;
@@ -170,12 +185,13 @@ class ScopedValues {
     final instance = context.read<Codelessly?>();
     // Screens the app navigates to carry their parameters; the first screen
     // shows in the host's route and takes them from the app's link.
-    routeParams =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
-        (instance ?? Codelessly.instance).linkParamsFor(
-          codelesslyContext?.layoutID,
-        ) ??
-        {};
+    final Map<String, dynamic>? arguments =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final Codelessly codelessly = instance ?? Codelessly.instance;
+    final String? layoutId = codelesslyContext?.layoutID;
+    _givenRouteParams =
+        arguments ?? codelessly.linkParamsFor(layoutId) ?? {};
+    _routePath = () => codelessly.routePathFor(layoutId, arguments);
     _appUser = null;
     _instanceRef = instance == null ? null : WeakReference(instance);
   }

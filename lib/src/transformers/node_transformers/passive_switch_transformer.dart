@@ -152,19 +152,22 @@ class TransformerSwitch extends StatelessWidget {
   /// `inactiveThumbColor`, `activeTrackBorderColor` and
   /// `inactiveTrackBorderColor` in [SwitchNode.variables], e.g.
   /// `${pal.ink}` or `${= on ? '#1F2B2E' : '#D9D2C3'}`), evaluated with
-  /// [scopedValues]. A binding that is missing or isn't a color keeps the
-  /// node's own color.
+  /// [scopedValues]; a plain hex colour there is used as it is. A binding
+  /// that is missing or isn't a color keeps the node's own color.
   static SwitchProperties resolvedProperties(
     SwitchNode node,
     ScopedValues scopedValues,
   ) {
-    ColorRGBA? color(String property) => node.variables[property] == null
-        ? null
-        : PropertyValueDelegate.getPropertyValue<ColorRGBA>(
-            node,
-            property,
-            scopedValues: scopedValues,
-          );
+    ColorRGBA? color(String property) => switch (node.variables[property]) {
+      null => null,
+      // A plain colour ("#C9A227") given where a binding goes.
+      final String raw when !raw.contains(r'${') => ColorRGBA.fromHex(raw),
+      _ => PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+        node,
+        property,
+        scopedValues: scopedValues,
+      ),
+    };
     return node.properties.copyWith(
       activeTrackColor: color('activeTrackColor'),
       inactiveTrackColor: color('inactiveTrackColor'),
@@ -191,6 +194,12 @@ class TransformerSwitch extends StatelessWidget {
         child: Theme(
           data: Theme.of(context).copyWith(),
           child: Switch(
+            // Its toggle animates the thumb and the track colours; where
+            // tickers are off (the design canvas, its captures) it could
+            // never move, so a new switch shows the current value.
+            key: TickerMode.valuesOf(context).enabled
+                ? null
+                : ValueKey<bool>(value),
             value: value,
             onChanged: (value) => onChanged?.call(context, value),
             autofocus: properties.autofocus,
