@@ -568,8 +568,11 @@ class PassiveListViewWidget extends StatelessWidget {
           scrollDirection: node.scrollDirection.flutterAxis,
           buildDefaultDragHandles: false,
           itemCount: itemCount ?? 0,
-          proxyDecorator: (child, index, animation) =>
-              Material(type: MaterialType.transparency, child: child),
+          // The row being dragged shows its nodes' `dragged` state.
+          proxyDecorator: (child, index, animation) => Material(
+            type: MaterialType.transparency,
+            child: DraggedScope(child: child),
+          ),
           onReorderItem: (int from, int to) {
             FunctionsRepository.triggerAction(
               context,
