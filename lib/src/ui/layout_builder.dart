@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -254,26 +256,46 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     codelesslyContext.variables.removeWhere(
       (key, value) => !value.value.isApiVariable,
     );
+    codelesslyContext.initialVariables.clear();
     // App, then page variables, so a screen's own variable of the same name
     // wins. Their notifiers are shared by every layout of this instance.
     final Codelessly codelessly = context.read<Codelessly>();
+    // A screen whose link params set its variables: `?month=2026-09`.
+    final Map<String, dynamic> linkParams =
+        canvasNode.properties.paramsSetVariables
+        ? {
+            // Where ScopedValues reads `${route.…}` from.
+            ...?(CodelesslyRouteScope.maybeOf(context)?.params ??
+                (ModalRoute.of(context)?.settings.arguments as Map?)
+                    ?.cast<String, dynamic>()),
+          }
+        : const {};
     for (final String scope in [kAppVariablesScope, kPageVariablesScope]) {
       for (final variable in (layoutVariables[scope] ?? {}).values) {
-        codelesslyContext.variables[variable.id] = codelessly.sharedVariables
+        final Observable<VariableData> shared = codelessly.sharedVariables
             .putIfAbsent(
               variable.id,
               () => Observable(
                 variable.copyWith(value: codelesslyContext.data[variable.name]),
               ),
             );
+        if (linkParams.containsKey(variable.name)) {
+          shared.value = withLinkParam(shared.value, linkParams);
+        }
+        codelesslyContext.variables[variable.id] = shared;
+        codelesslyContext.initialVariables[variable.name] = variable.copyWith(
+          value: codelesslyContext.data[variable.name],
+        );
       }
     }
     for (final variable in variablesMap.values) {
       // Override default values of variables with values provided in data.
-      final notifier = Observable(
-        variable.copyWith(value: codelesslyContext.data[variable.name]),
+      final VariableData published = variable.copyWith(
+        value: codelesslyContext.data[variable.name],
       );
+      final notifier = Observable(withLinkParam(published, linkParams));
       codelesslyContext.variables[variable.id] = notifier;
+      codelesslyContext.initialVariables[variable.name] = published;
     }
 
     final conditions =
@@ -413,4 +435,14 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
       ),
     );
   }
+}
+
+/// [variable] holding the link param of its name, when [params] has a
+/// non-empty one; the raw text is read as the variable's type.
+VariableData withLinkParam(VariableData variable, Map<String, dynamic> params) {
+  final Object? param = params[variable.name];
+  if (param == null) return variable;
+  final String value = param is String ? param : jsonEncode(param);
+  if (value.isEmpty) return variable;
+  return variable.copyWith(value: value);
 }
