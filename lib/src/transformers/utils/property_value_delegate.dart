@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
@@ -575,6 +576,7 @@ class PropertyValueDelegate {
       'result' => ActionChain.current?.result,
       'screen' => scopedValues.screenSize?.let(screenVariableValue),
       'hold' => scopedValues.holdProgress ?? 0.0,
+      'initial' => InitialValues(scopedValues.initialVariables),
       _ => null,
     };
 
@@ -1269,4 +1271,34 @@ class _ComputedResult {
   final Object? value;
 
   const _ComputedResult(this.variable, this.inputs, this.value);
+}
+
+/// The value of `${initial}`: variable name -> its published value. Values
+/// are read when asked for, so `${initial.txns}` parses only that list.
+class InitialValues extends MapBase<String, Object?> {
+  InitialValues(this._variables);
+
+  final Map<String, VariableData> _variables;
+  final Map<String, Object?> _cache = {};
+
+  @override
+  Object? operator [](Object? key) {
+    final VariableData? variable = _variables[key];
+    if (variable == null) return null;
+    return _cache.putIfAbsent(key as String, variable.getValue);
+  }
+
+  @override
+  Iterable<String> get keys => _variables.keys;
+
+  @override
+  void operator []=(String key, Object? value) =>
+      throw UnsupportedError('initial values are read-only');
+
+  @override
+  void clear() => throw UnsupportedError('initial values are read-only');
+
+  @override
+  Object? remove(Object? key) =>
+      throw UnsupportedError('initial values are read-only');
 }
