@@ -22,7 +22,7 @@ import 'package:flutter/widgets.dart';
 /// A `SizedBox(double.infinity)` would throw under an unbounded axis; this
 /// box never does, and at the design size it lays out exactly like one.
 ///
-/// With an [aspectRatio] (width / height, [BaseNode.aspectRatio]) one axis
+/// With an [aspectRatio] (width / height, [BaseNode.layoutAspectRatio]) one axis
 /// follows the other: the height is the width over the ratio, unless only
 /// the height fills (or the width hugs), when the width is the height times
 /// the ratio. Both stay within the incoming constraints, the ratio kept
@@ -865,10 +865,10 @@ class RenderScrollContentExtent extends RenderProxyBox {
 }
 
 /// Wraps [child], a node's widget, in a box that keeps the node's
-/// [BaseNode.aspectRatio] (see [FitBox.aspectRatio]); [child] as is when the
+/// [BaseNode.layoutAspectRatio] (see [FitBox.aspectRatio]); [child] as is when the
 /// node has none.
 Widget wrapWithAspectRatio(BaseNode node, Widget child) {
-  final double? ratio = node.aspectRatio;
+  final double? ratio = node.layoutAspectRatio;
   if (ratio == null || !ratio.isFinite || ratio <= 0) return child;
   return FitBox.fromFits(
     key: ValueKey('aspect-ratio-${node.id}'),
