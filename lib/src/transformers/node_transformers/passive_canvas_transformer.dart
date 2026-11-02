@@ -1032,6 +1032,11 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     if (widget.settings.isPreview) return;
 
     if (didPerformOnLoadActions) return;
+    // A screen under the one a link opened (the entry screen below a deep
+    // link) loads when it shows, not before the linked screen: its load
+    // actions would otherwise change state the linked screen reads. The
+    // route tells its dependents when it becomes current.
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
     didPerformOnLoadActions = true;
 
     if (widget.node.properties.requiresSignIn) {

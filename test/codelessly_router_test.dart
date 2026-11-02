@@ -263,6 +263,28 @@ void main() {
       expect(find.text('Tides'), findsOneWidget);
     });
 
+    testWidgets('the entry screen under a link loads when it shows', (
+      tester,
+    ) async {
+      final SDKPublishModel model = appModel();
+      CanvasLocation.canvasOf(model.layouts['tides']!, 'tides')!.reactions = [
+        Reaction(
+          trigger: TriggerModel(type: TriggerType.load),
+          action: ShowToastAction(message: 'Tides loaded'),
+        ),
+      ];
+      final browser = FakeBrowser(tester, url: '/guide/bat-star');
+      await pumpRouterApp(tester, model, browser);
+      expect(find.text('id=bat-star'), findsOneWidget);
+      expect(find.text('Tides loaded'), findsNothing);
+
+      await tap(tester, 'CreatureBack');
+      expect(find.text('Tides'), findsOneWidget);
+      expect(find.text('Tides loaded'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 10));
+      await tester.pumpAndSettle();
+    });
+
     testWidgets('a link to a screen id still opens it', (tester) async {
       final browser = FakeBrowser(tester, url: '/creature?id=kraken');
       await pumpRouterApp(tester, appModel(), browser);
