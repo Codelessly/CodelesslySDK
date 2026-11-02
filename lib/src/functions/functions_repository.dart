@@ -194,6 +194,8 @@ class FunctionsRepository {
           play.nodeId,
           play.animation,
         ).then((_) => true);
+      case ActionType.editText:
+        return editText(context, action as EditTextAction);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
       case ActionType.focus:
@@ -326,6 +328,36 @@ class FunctionsRepository {
       language: resolve(action.language).trim(),
       rate: number(action.rate, 0.1, 10),
       pitch: number(action.pitch, 0, 2),
+    );
+  }
+
+  /// Edits the text field [action] names, on the screen [context] is on, at
+  /// its cursor (see [EditTextOperation]); its text, before and after have
+  /// their variables substituted. Returns whether the field was found.
+  static bool editText(BuildContext context, EditTextAction action) {
+    final EditableTextField? field = TextFieldRegistry.find(
+      context,
+      action.nodeId,
+    );
+    if (field == null) {
+      DebugLogger.instance.printInfo(
+        'Edit text: no text field ${action.nodeId} on screen.',
+        name: name,
+      );
+      return false;
+    }
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    String substitute(String text) => PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
+    return field.editText(
+      action.operation,
+      text: substitute(action.text),
+      before: substitute(action.before),
+      after: action.after == null ? null : substitute(action.after!),
+      numbered: action.numbered,
     );
   }
 
@@ -1048,6 +1080,7 @@ class FunctionsRepository {
       fullHeight: action.fullHeight,
       barrierBlur: action.barrierBlur,
       enterScale: action.enterScale,
+      sheetBelowWidth: action.sheetBelowWidth,
     );
     if (result case final Map values when values.isNotEmpty) {
       ActionChain.setResult(values);
@@ -1137,6 +1170,7 @@ class FunctionsRepository {
     bool fullHeight = false,
     double barrierBlur = 0,
     double enterScale = 1,
+    double sheetBelowWidth = 600,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -1186,8 +1220,8 @@ class FunctionsRepository {
             DialogPlacement.bottomSheet => DialogPresentation.bottomSheet,
             DialogPlacement.adaptive => DialogPresentation.adaptive,
             _ => presentation,
-          }
-        : presentation;
+          }.resolveFor(context, sheetBelowWidth: sheetBelowWidth)
+        : presentation.resolveFor(context, sheetBelowWidth: sheetBelowWidth);
     final bool wantsAnchor =
         effectivePresentation == DialogPresentation.dialog &&
         (anchorToTrigger || placement == DialogPlacement.anchored);
@@ -1234,6 +1268,7 @@ class FunctionsRepository {
             fullHeight: fullHeight,
             barrierBlur: barrierBlur,
             enterScale: enterScale,
+            sheetBelowWidth: sheetBelowWidth,
             anchor: effectivePresentation == DialogPresentation.popover
                 ? anchorRectOf(context)
                 : null,
@@ -1255,7 +1290,12 @@ class FunctionsRepository {
             gap: anchorGap,
             offset: anchorOffset,
             barrierDismissible: barrierDismissible,
-            barrierColor: barrierColor,
+            // An adaptive menu tints the screen behind its sheet on phones;
+            // anchored to its trigger on wider screens it is a popover
+            // menu, which leaves the screen as it is.
+            barrierColor: presentation == DialogPresentation.adaptive
+                ? Colors.transparent
+                : barrierColor,
             routeSettings: routeSettings,
             builder: (context) => ActionChainOpener(
               openerHosts: openerHosts,
@@ -1334,6 +1374,7 @@ class FunctionsRepository {
     bool fullHeight = false,
     double barrierBlur = 0,
     double enterScale = 1,
+    double sheetBelowWidth = 600,
   }) {
     if (presentation == DialogPresentation.popover) {
       return showGeneralDialog<T>(
@@ -1380,7 +1421,8 @@ class FunctionsRepository {
       DialogPresentation.sideSheet ||
       DialogPresentation.popover => false,
       DialogPresentation.bottomSheet => true,
-      DialogPresentation.adaptive => (screen?.width ?? 1024) < 600,
+      DialogPresentation.adaptive =>
+        (screen?.width ?? 1024) < sheetBelowWidth,
     };
     Widget content(BuildContext context, CanvasSizing sizing) =>
         asSheet && fullHeight
