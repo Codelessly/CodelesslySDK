@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -12,6 +13,7 @@ Finder _of(String id) =>
   Fit? fit = Fit.contain,
   AlignmentModel alignment = AlignmentModel.center,
   SizeFit fits = SizeFit.expanded,
+  bool clipsContent = true,
 }) {
   final RectangleNode wheel = RectangleNode(
     id: 'wheel',
@@ -34,6 +36,7 @@ Finder _of(String id) =>
     verticalFit: fits,
     contentFit: fit,
     contentAlignment: alignment,
+    clipsContent: clipsContent,
   )..parentID = kRootNode;
   return (truck: truck, wheel: wheel);
 }
@@ -77,7 +80,59 @@ Future<void> _pump(
   expect(tester.takeException(), isNull);
 }
 
+/// The clipping render objects between [id]'s rectangle and the frame
+/// [frameId]'s rectangle, the frame's own included.
+List<RenderObject> _clipsAbove(WidgetTester tester, String id, String frameId) {
+  final RenderObject frame = tester.renderObject(_of(frameId));
+  final List<RenderObject> clips = [];
+  RenderObject? node = tester.renderObject(_of(id)).parent;
+  bool clips_(RenderObject o) =>
+      o is RenderClipRect ||
+      o is RenderClipRRect ||
+      o is RenderClipRSuperellipse ||
+      o is RenderClipPath ||
+      o is RenderClipOval ||
+      (o is RenderFittedBox && o.clipBehavior != Clip.none);
+  while (node != null) {
+    if (clips_(node)) clips.add(node);
+    if (identical(node, frame)) break;
+    node = node.parent;
+  }
+  // The frame's rectangle wraps its clip; look one level into it as well.
+  void down(RenderObject o, int depth) {
+    if (depth == 0) return;
+    o.visitChildren((c) {
+      if (clips_(c) && !clips.contains(c)) clips.add(c);
+      down(c, depth - 1);
+    });
+  }
+
+  down(frame, 3);
+  return clips;
+}
+
 void main() {
+  testWidgets('scaled content does not clip its children unless the frame '
+      'clips', (tester) async {
+    // A card's drop shadow paints past the frame's box: only the frame's
+    // own clipsContent may cut it.
+    final (:truck, :wheel) = _truck(clipsContent: false);
+    await _pump(tester, [truck, wheel], box: const Size(600, 330));
+    expect(_clipsAbove(tester, 'wheel', 'truck'), isEmpty);
+    expect(
+      tester.getRect(_of('wheel')),
+      const Rect.fromLTWH(225 + 75, 165, 75, 165),
+    );
+  });
+
+  testWidgets('a clipping frame with scaled content still clips', (
+    tester,
+  ) async {
+    final (:truck, :wheel) = _truck();
+    await _pump(tester, [truck, wheel], box: const Size(600, 330));
+    expect(_clipsAbove(tester, 'wheel', 'truck'), isNotEmpty);
+  });
+
   testWidgets('contain scales the design into a short wide box, centered', (
     tester,
   ) async {

@@ -464,6 +464,8 @@ List<Widget> wrapWithPaddingAndScroll(
 
 List<BoxShadow> retrieveBoxShadow(BaseNode node, ScopedValues scopedValues) {
   if (node is! DefaultShapeNode) return [];
+  // A box shadow would outline the box, not the path.
+  if (node is RectangleNode && node.hasPath) return [];
   return node.effects
       .where((effect) => effect.type == EffectType.dropShadow && effect.visible)
       .map((effect) {
@@ -503,6 +505,8 @@ BorderRadius? getBorderRadius(BaseNode node) {
 }
 
 Clip defaultGetClipBehavior(BaseNode node) {
+  // A path is drawn whole: its round caps reach past the box at its edges.
+  if (node is RectangleNode && node.hasPath) return Clip.none;
   if (node is ClipMixin) {
     if (node.clipsContent) {
       return Clip.hardEdge;
@@ -736,12 +740,36 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
   }
   final List<Widget> strokeWidgets = [];
   final List<NotchModel> notches = notchesOf(node);
+  // A rectangle with a path strokes the path (open shapes included).
+  final Path? path = node is RectangleNode && node.hasPath
+      ? parseSvgPath(node.path)
+      : null;
   for (final paint in node.strokes.where((paint) => paint.visible)) {
     final paintValue = PropertyValueDelegate.getPropertyValue<PaintModel>(
       node,
       'stroke-paint-${paint.id}',
       scopedValues: scopedValues,
     );
+    if (path != null) {
+      strokeWidgets.add(
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: SvgPathStrokePainter(
+                path: path,
+                color: (paintValue ?? paint).toFlutterColor()!,
+                strokeWidth: node.strokeWeight,
+                strokeCap: node.strokeCap,
+                strokeJoin: (node as RectangleNode).strokeJoin,
+                strokeMiterLimit: node.strokeMiterLimit,
+                dashPattern: node.dashPattern,
+              ),
+            ),
+          ),
+        ),
+      );
+      continue;
+    }
     // A notched outline is stroked along its notches.
     if (notches.isNotEmpty) {
       strokeWidgets.add(
@@ -806,7 +834,20 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
 
 /// [fills] clipped to [node]'s notched outline when it has notches (fills
 /// are clipped even when the node doesn't clip its children), else [fills].
+///
+/// A rectangle with a path ([RectangleNode.path]) fills the path instead.
 List<Widget> clipFillsToNotches(BaseNode node, List<Widget> fills) {
+  if (node is RectangleNode && node.hasPath) {
+    if (fills.isEmpty) return fills;
+    return [
+      Positioned.fill(
+        child: ClipPath(
+          clipper: SvgPathClipper(node.path!),
+          child: Stack(children: fills),
+        ),
+      ),
+    ];
+  }
   final List<NotchModel> notches = notchesOf(node);
   if (notches.isEmpty || fills.isEmpty) return fills;
   return [
