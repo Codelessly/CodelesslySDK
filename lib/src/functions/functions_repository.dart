@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:just_audio/just_audio.dart' show AudioPlayer;
 import 'package:provider/provider.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -99,7 +100,17 @@ class FunctionsRepository {
         // and the RawDialogRoute that full-screen and popover dialogs open
         // with showGeneralDialog, which a DialogRoute check missed.
         if (route is PopupRoute && route.isCurrent) {
-          Navigator.of(context).pop();
+          // Its params are the `${result}` of the chain that showed it.
+          final Map<String, dynamic> params =
+              (action as CloseModalAction).params;
+          Navigator.of(context).pop(
+            params.isEmpty
+                ? null
+                : substituteVariablesInMap(
+                    params,
+                    ActionChain.scopedValuesOf(context),
+                  ),
+          );
           return true;
         }
         return false;
@@ -176,6 +187,12 @@ class FunctionsRepository {
         return runCloudBatch(context, action as CloudBatchAction);
       case ActionType.copyToClipboard:
         return copyToClipboard(context, action as CopyToClipboardAction);
+      case ActionType.playAnimation:
+        final PlayAnimationAction play = action as PlayAnimationAction;
+        return NodePlayRegistry.play(
+          play.nodeId,
+          play.animation,
+        ).then((_) => true);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
       case ActionType.focus:
@@ -872,7 +889,9 @@ class FunctionsRepository {
         await Navigator.maybePop(context, params);
         return;
       }
-      if (router.canGoBack) {
+      final bool fallsBack =
+          action.destinationId.isNotEmpty && router.backIsOnlySeededHome;
+      if (router.canGoBack && !fallsBack) {
         router.pop(params);
         return;
       }
@@ -1868,7 +1887,8 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
   }
 
-  /// Plays [action]'s sound, now or at its `at` time on the sound clock.
+  /// Plays [action]'s sound, now or at its `at` time on the sound clock, or
+  /// its sound file.
   /// Its fields are values or formulas (`${result.at}`, `${voice}`).
   static bool playSound(BuildContext context, PlaySoundAction action) {
     final ScopedValues scope = ActionChain.scopedValuesOf(context);
@@ -1878,6 +1898,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
     ).trim();
     double? number(String value) => double.tryParse(text(value));
+    final String url = text(action.url);
+    if (url.isNotEmpty) {
+      unawaited(_playFile(url, (number(action.volume) ?? 1).clamp(0, 1)));
+      return true;
+    }
     final String at = text(action.at);
     Sound.play(
       Sound.voiceNamed(text(action.sound)),
@@ -1886,6 +1911,20 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       pitch: number(action.pitch) ?? 1,
     );
     return true;
+  }
+
+  /// Plays the sound file at [url] once, at [volume] (0 to 1).
+  static Future<void> _playFile(String url, double volume) async {
+    final AudioPlayer player = AudioPlayer();
+    try {
+      await player.setUrl(url);
+      await player.setVolume(volume);
+      await player.play();
+    } catch (e) {
+      DebugLogger.instance.printInfo('Could not play $url: $e', name: name);
+    } finally {
+      await player.dispose();
+    }
   }
 
   /// Sets given [action.newValue] for given [action.variable] to a variable
@@ -2114,9 +2153,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     // A click reads the modifier keys held, as `${result.meta}` (Command
     // on macOS, Control elsewhere), `${result.shift}` and `${result.alt}`,
     // for multi-select (⌘-click) and range select (⇧-click).
-    if (type == TriggerType.click && result == null) {
+    // Beside where it landed (`x`, `y`, `globalX`, `globalY`), when known.
+    if (type == TriggerType.click && (result == null || result is Map)) {
       final HardwareKeyboard keys = HardwareKeyboard.instance;
       result = {
+        ...?(result as Map?),
         'meta': keys.isMetaPressed || keys.isControlPressed,
         'shift': keys.isShiftPressed,
         'alt': keys.isAltPressed,
@@ -2519,8 +2560,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     // Perform list operations.
     switch (action.listOperation) {
       case ListOperation.add:
-        final parsedValue = newValue.toList<List>() ?? [];
-        currentValue.addAll(parsedValue);
+        currentValue.addAll(_listFromValue(newValue));
       case ListOperation.insert:
         currentValue.insert(index, newValue.parsedValue());
       case ListOperation.insertAll:
@@ -2539,10 +2579,20 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         }
       case ListOperation.set:
       case ListOperation.replace:
-        final parsedValue = newValue.toList<List>() ?? [];
-        return parsedValue;
+        return _listFromValue(newValue);
     }
     return currentValue;
+  }
+
+  /// The list [newValue] holds. A JSON list (what a `${= ...}` formula
+  /// giving a list is written as) keeps its items as they are: `''` stays
+  /// empty text and `"12"` stays text, where [TypedValueExt.toList] would
+  /// read them as null and 12. Anything else is read by
+  /// [TypedValueExt.toList].
+  static List _listFromValue(String newValue) {
+    final Object? decoded = tryJsonDecode(newValue.trim());
+    if (decoded is List) return decoded;
+    return newValue.toList<List>() ?? [];
   }
 
   static Future<bool> setCloudDatabaseFromAction(

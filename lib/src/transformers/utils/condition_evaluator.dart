@@ -345,6 +345,9 @@ class ConditionEvaluator<R extends Object>
   R? visitPlaySoundAction(PlaySoundAction action) => null;
 
   @override
+  R? visitPlayAnimationAction(PlayAnimationAction action) => null;
+
+  @override
   R? visitPaywallAction(PaywallAction action) => null;
 
   @override
@@ -538,6 +541,9 @@ class ConditionPrinter
   void visitControlDragAction(ControlDragAction action) {
     _buffer.writeln('\tControl drag ${action.command.name} ${action.direction.name} on ${action.nodeId}');
   }
+
+  @override
+  void visitPlayAnimationAction(PlayAnimationAction action) {}
 
   @override
   void visitPaywallAction(PaywallAction action) {

@@ -197,8 +197,13 @@ void unfocusTextField([String? nodeId]) =>
 
 class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   late final TextEditingController controller = TextEditingController(
-    text: boundValue() ?? getInitialText(widget.node.initialText),
+    text: _lastBound = boundValue() ?? getInitialText(widget.node.initialText),
   );
+
+  /// The bound value the field last showed. The field takes the binding's
+  /// value only when it changes, so typing into a field whose binding can't
+  /// be set (a computed variable, a formula) isn't undone on every rebuild.
+  String? _lastBound;
 
   /// The current value of the variable this field is bound to, if any. A
   /// variable set before the field first builds (by a canvas load action
@@ -312,9 +317,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     }
 
     if (currentPropertyValue != null &&
+        currentPropertyValue != _lastBound &&
         controller.text != currentPropertyValue) {
       controller.text = currentPropertyValue;
     }
+    if (currentPropertyValue != null) _lastBound = currentPropertyValue;
   }
 
   bool _isExistingVariable(String path, ScopedValues scopedValues) {
@@ -425,6 +432,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       enabled: enabled,
       controller: controller,
       obscureText: obscure,
+      textCapitalization: switch (node.properties.textCapitalization) {
+        TextCapitalizationC.none => TextCapitalization.none,
+        TextCapitalizationC.words => TextCapitalization.words,
+        TextCapitalizationC.sentences => TextCapitalization.sentences,
+        TextCapitalizationC.characters => TextCapitalization.characters,
+      },
       readOnly: readOnly,
       showCursor: showCursor,
       keyboardType: keyboardType,

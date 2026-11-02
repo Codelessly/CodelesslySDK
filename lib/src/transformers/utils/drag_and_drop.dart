@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
@@ -157,6 +158,10 @@ class CodelesslyDragPayload {
 
   /// Fires the source's `dragCancel` reactions.
   VoidCallback cancel = () {};
+
+  /// Whether a target took the drop (its group, `acceptIf` and `fullIf`
+  /// allowed it), as opposed to the drag merely ending over one.
+  bool dropped = false;
 }
 
 /// Evaluates [text] (`${...}` path, `${= ...}` formula or text with paths)
@@ -188,20 +193,49 @@ class DragSourceBox extends StatefulWidget {
   /// Builds the node drawn under the pointer when the model names one.
   final Widget Function(BuildContext context, String nodeId)? buildNode;
 
+  /// Whether it can be dragged now ([DraggableModel.enabled], or its
+  /// binding).
+  final bool enabled;
+
+  /// The node's flight key ([BaseNode.flightKey]): where a taken drop is let
+  /// go is remembered under it, so the node that shows the drop next flies
+  /// in from there.
+  final String flightKey;
+
   const DragSourceBox({
     super.key,
     required this.node,
     required this.model,
     required this.child,
     this.buildNode,
+    this.enabled = true,
+    this.flightKey = '',
   });
 
   @override
   State<DragSourceBox> createState() => _DragSourceBoxState();
 }
 
-class _DragSourceBoxState extends State<DragSourceBox> {
+class _DragSourceBoxState extends State<DragSourceBox>
+    with SingleTickerProviderStateMixin {
   Size _size = Size.zero;
+
+  /// The spring back of a drag no target took: 0 where it was let go, 1
+  /// home.
+  late final AnimationController _return = AnimationController.unbounded(
+    vsync: this,
+    value: 1,
+  )..addListener(() => setState(() {}));
+
+  /// Where the node was let go, from its place.
+  Offset _returnFrom = Offset.zero;
+
+  @override
+  void dispose() {
+    _return.dispose();
+    super.dispose();
+  }
+
   final CodelesslyDragPayload _holder = CodelesslyDragPayload();
   CodelesslyDragPayload? _payload;
 
@@ -228,6 +262,7 @@ class _DragSourceBoxState extends State<DragSourceBox> {
     return _holder
       ..session = session
       ..controller = controller
+      ..dropped = false
       ..cancel = () {
         if (!mounted) return;
         FunctionsRepository.triggerAction(
@@ -242,6 +277,9 @@ class _DragSourceBoxState extends State<DragSourceBox> {
   void _started() {
     final CodelesslyDragPayload? payload = _payload;
     if (payload == null) return;
+    _return
+      ..stop()
+      ..value = 1;
     HapticFeedback.selectionClick();
     payload.controller.start(payload.session);
     final List<Reaction> onStart = _reactions(TriggerType.dragStart);
@@ -255,16 +293,75 @@ class _DragSourceBoxState extends State<DragSourceBox> {
     }
   }
 
-  void _ended(bool accepted) {
+  /// Ends the drag let go with the dragged copy's top left at [offset]
+  /// (global). [wasAccepted] is whether it ended over a target of its group;
+  /// whether the target took it is [CodelesslyDragPayload.dropped].
+  void _ended(bool wasAccepted, Offset offset) {
     final CodelesslyDragPayload? payload = _payload;
     _payload = null;
     if (payload == null) return;
+    if (wasAccepted && payload.dropped) {
+      _completed(payload, offset);
+    } else {
+      _springBack(offset);
+    }
     // A drop on a target ends the session there.
-    if (accepted && !identical(payload.controller.session, payload.session)) {
+    if (wasAccepted &&
+        !identical(payload.controller.session, payload.session)) {
       return;
     }
     payload.controller.end();
     payload.cancel();
+  }
+
+  /// A target took the drop: remembers where it was let go for the node
+  /// that shows the drop next (see [BaseNode.flightKey]) and runs the
+  /// `dragCompleted` reactions.
+  void _completed(CodelesslyDragPayload payload, Offset offset) {
+    if (widget.flightKey.isNotEmpty) {
+      final double scale = widget.model.feedbackScale;
+      FlightRegistry.recordDrop(
+        widget.flightKey,
+        Rect.fromCenter(
+          center: offset + _size.center(Offset.zero),
+          width: _size.width * scale,
+          height: _size.height * scale,
+        ),
+      );
+    }
+    final List<Reaction> reactions = _reactions(TriggerType.dragCompleted);
+    if (reactions.isNotEmpty && mounted) {
+      FunctionsRepository.triggerAction(
+        context,
+        TriggerType.dragCompleted,
+        reactions: reactions,
+        result: payload.session.toMap(active: false),
+      );
+    }
+  }
+
+  /// Flies the node back from where it was let go to its place, on the
+  /// model's spring ([DraggableModel.returnSpring]).
+  void _springBack(Offset offset) {
+    final RenderObject? box = context.findRenderObject();
+    if (!widget.model.returnSpring || box is! RenderBox || !box.attached) {
+      return;
+    }
+    _returnFrom = offset - box.localToGlobal(Offset.zero);
+    _return
+      ..value = 0
+      ..animateWith(
+        SpringSimulation(
+          SpringDescription(
+            mass: 1,
+            stiffness: widget.model.springStiffness,
+            damping: widget.model.springDamping,
+          ),
+          0,
+          1,
+          0,
+        ),
+      );
   }
 
   /// The node drawn under the pointer, in the app's overlay. What the node
@@ -367,6 +464,12 @@ class _DragSourceBoxState extends State<DragSourceBox> {
         final DragSession? session = controller.session;
         final bool dragged = session != null && controller.isDragging(_ownIds);
         Widget shown = widget.child;
+        if (_return.value != 1) {
+          shown = Transform.translate(
+            offset: _returnFrom * (1 - _return.value),
+            child: shown,
+          );
+        }
         if (dragged) {
           shown = switch (model.whileDragging) {
             // Collapses while over a target, so the slot there is the only
@@ -395,8 +498,9 @@ class _DragSourceBoxState extends State<DragSourceBox> {
           }.contains(Theme.of(context).platform),
         };
         final Widget feedback = Builder(builder: _feedback);
-        void onEnd(DraggableDetails details) => _ended(details.wasAccepted);
-        void onCanceled(Velocity _, Offset _) => _ended(false);
+        void onEnd(DraggableDetails details) =>
+            _ended(details.wasAccepted, details.offset);
+        void onCanceled(Velocity _, Offset offset) => _ended(false, offset);
         void onUpdate(DragUpdateDetails details) =>
             DropTargetBox.autoScroll(details.globalPosition);
         void onEnd2(DraggableDetails details) {
@@ -415,6 +519,7 @@ class _DragSourceBoxState extends State<DragSourceBox> {
                 onDragEnd: onEnd2,
                 onDraggableCanceled: onCanceled,
                 onDragUpdate: onUpdate,
+                maxSimultaneousDrags: widget.enabled ? null : 0,
                 delay: const Duration(milliseconds: 300),
                 child: shown,
               )
@@ -428,8 +533,11 @@ class _DragSourceBoxState extends State<DragSourceBox> {
                 onDragEnd: onEnd2,
                 onDraggableCanceled: onCanceled,
                 onDragUpdate: onUpdate,
+                maxSimultaneousDrags: widget.enabled ? null : 0,
                 child: MouseRegion(
-                  cursor: SystemMouseCursors.grab,
+                  cursor: widget.enabled
+                      ? SystemMouseCursors.grab
+                      : MouseCursor.defer,
                   child: shown,
                 ),
               );
@@ -485,11 +593,15 @@ class DropTargetBox extends StatefulWidget {
   final DropTargetModel model;
   final Widget child;
 
+  /// Whether it takes drops now ([DropTargetModel.enabled], or its binding).
+  final bool enabled;
+
   const DropTargetBox({
     super.key,
     required this.node,
     required this.model,
     required this.child,
+    this.enabled = true,
   });
 
   /// Scrollers of the scroll views under drop targets and their lists.
@@ -653,6 +765,19 @@ class DropTargetBoxState extends State<DropTargetBox> {
             : entries.map((e) => e.index).reduce(math.max) + 1);
   }
 
+  /// Whether the target takes no drops now ([DropTargetModel.fullIf]).
+  bool _isFull() {
+    final String condition = widget.model.fullIf.trim();
+    if (condition.isEmpty) return false;
+    final Object? value = evaluateDragValue(condition, context);
+    return value == true || value == 'true';
+  }
+
+  /// Whether a drag of [group] may come onto this target at all: a group it
+  /// accepts, while it is enabled and not full.
+  bool _takes(String group) =>
+      widget.enabled && widget.model.acceptsGroup(group) && !_isFull();
+
   bool _evaluateAccept() {
     final String condition = widget.model.acceptIf.trim();
     if (condition.isEmpty) return true;
@@ -720,14 +845,24 @@ class DropTargetBoxState extends State<DropTargetBox> {
     _entered = false;
     DropTargetBox.stopAutoScroll();
     final DragSession session = payload.session;
-    final bool accepted =
-        identical(session.overTarget, this) && session.accepted;
+    // Let go before a move reached this target: judge the drop now.
+    if (!identical(session.overTarget, this)) {
+      session
+        ..overTarget = this
+        ..over = key
+        ..accepted = _evaluateAccept();
+    }
+    final bool accepted = session.accepted;
     final Map<String, Object?> result = session.toMap(active: false)
       ..['key'] = session.over;
+    payload.dropped = accepted;
     payload.controller.end(dropped: accepted);
     if (accepted) {
       _fire(TriggerType.drop, result);
     } else {
+      // Let go on this target, of a group it takes, but its acceptIf
+      // refused it: a wrong answer.
+      _fire(TriggerType.dropRejected, result);
       payload.cancel();
     }
   }
@@ -765,10 +900,10 @@ class DropTargetBoxState extends State<DropTargetBox> {
         // Asked once when the drag reaches the target, which for the target
         // the drag starts in is before the session is started.
         onWillAcceptWithDetails: (details) =>
-            widget.model.acceptsGroup(details.data.session.group),
+            _takes(details.data.session.group),
         onMove: (details) {
           final CodelesslyDragPayload payload = details.data;
-          if (!widget.model.acceptsGroup(payload.session.group)) return;
+          if (!_takes(payload.session.group)) return;
           _move(payload, details.offset + payload.session.grab);
         },
         onLeave: (payload) {
