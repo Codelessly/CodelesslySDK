@@ -16,6 +16,8 @@ abstract class AudioPlayback {
   Future<void> play();
   Future<void> pause();
   Future<void> seek(Duration position);
+  Future<void> setLoop(bool loop);
+  Future<void> setVolume(double volume);
   Future<void> dispose();
 }
 
@@ -39,7 +41,57 @@ class _JustAudioPlayback implements AudioPlayback {
   @override
   Future<void> seek(Duration position) => _player.seek(position);
   @override
+  Future<void> setLoop(bool loop) =>
+      _player.setLoopMode(loop ? LoopMode.one : LoopMode.off);
+  @override
+  Future<void> setVolume(double volume) => _player.setVolume(volume);
+  @override
   Future<void> dispose() => _player.dispose();
+}
+
+/// Playback values an audio node takes from state through its variables
+/// (see [AudioPlayerProperties.bindableKeys]); null when not bound.
+class AudioBindings {
+  const AudioBindings({this.url, this.volume, this.playing, this.playKey});
+
+  final String? url;
+  final double? volume;
+  final bool? playing;
+  final String? playKey;
+
+  static AudioBindings of(BuildContext context, AudioPlayerNode node) {
+    if (!node.variables.keys.any(AudioPlayerProperties.bindableKeys.contains)) {
+      return const AudioBindings();
+    }
+    final ScopedValues scope = ScopedValues.of(context);
+    Object? read(String key) => node.variables.containsKey(key)
+        ? PropertyValueDelegate.getPropertyValue<Object>(
+            node,
+            key,
+            scopedValues: scope,
+          )
+        : null;
+    final Object? volume = read('volume');
+    final Object? playing = read('playing');
+    final Object? url = read('url');
+    final Object? key = read('playKey');
+    return AudioBindings(
+      url: url?.toString().trim().isEmpty ?? true ? null : url.toString().trim(),
+      volume: switch (volume) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()),
+        _ => null,
+      },
+      playing: switch (playing) {
+        bool b => b,
+        String s when s.trim() == 'true' => true,
+        String s when s.trim() == 'false' || s.trim().isEmpty => false,
+        num n => n != 0,
+        _ => null,
+      },
+      playKey: node.variables.containsKey('playKey') ? '${key ?? ''}' : null,
+    );
+  }
 }
 
 class PassiveAudioPlayerTransformer
@@ -51,7 +103,11 @@ class PassiveAudioPlayerTransformer
     AudioPlayerNode node,
     BuildContext context,
     WidgetBuildSettings settings,
-  ) => PassiveAudioPlayerWidget(node: node, isPreview: settings.isPreview);
+  ) => PassiveAudioPlayerWidget(
+    node: node,
+    isPreview: settings.isPreview,
+    bindings: AudioBindings.of(context, node),
+  );
 }
 
 class PassiveAudioPlayerWidget extends StatefulWidget {
@@ -60,9 +116,13 @@ class PassiveAudioPlayerWidget extends StatefulWidget {
     required this.node,
     required this.isPreview,
     this.createPlayer,
+    this.bindings = const AudioBindings(),
   });
   final AudioPlayerNode node;
   final bool isPreview;
+
+  /// Values bound to state; they win over the node's own properties.
+  final AudioBindings bindings;
   final AudioPlayback Function()? createPlayer;
 
   @override
@@ -102,11 +162,56 @@ class _PassiveAudioPlayerWidgetState extends State<PassiveAudioPlayerWidget>
   void didUpdateWidget(covariant PassiveAudioPlayerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isPreview != widget.isPreview ||
-        oldWidget.node.properties.url != widget.node.properties.url ||
+        _urlOf(oldWidget) != _url ||
         oldWidget.createPlayer != widget.createPlayer) {
       _load();
+      return;
+    }
+    _applyState(previous: oldWidget);
+  }
+
+  static String? _urlOf(PassiveAudioPlayerWidget w) =>
+      w.bindings.url ?? w.node.properties.url;
+
+  String? get _url => _urlOf(widget);
+
+  double get _volume =>
+      (widget.bindings.volume ?? widget.node.properties.volume).clamp(0, 1);
+
+  /// Applies loop, volume and the bound play state to a loaded player.
+  /// A bound `playing` plays or pauses to follow it; a changed `playKey`
+  /// plays again from the start.
+  void _applyState({PassiveAudioPlayerWidget? previous}) {
+    final player = _player;
+    if (player == null || !_ready) return;
+    final props = widget.node.properties;
+    if (previous == null || previous.node.properties.loop != props.loop) {
+      _run(() => player.setLoop(props.loop));
+    }
+    if (previous == null || _volumeOf(previous) != _volume) {
+      _run(() => player.setVolume(_volume));
+    }
+    final bindings = widget.bindings;
+    final bool restarted =
+        previous != null &&
+        bindings.playKey != null &&
+        previous.bindings.playKey != bindings.playKey;
+    final bool wantsPlay = bindings.playing ?? bindings.playKey != null;
+    if (restarted && wantsPlay) {
+      _run(() async {
+        await player.seek(Duration.zero);
+        await player.play();
+      });
+      return;
+    }
+    if (bindings.playing case final bool playing
+        when previous == null || previous.bindings.playing != playing) {
+      _run(playing ? player.play : player.pause);
     }
   }
+
+  static double _volumeOf(PassiveAudioPlayerWidget w) =>
+      (w.bindings.volume ?? w.node.properties.volume).clamp(0, 1);
 
   void _release() {
     for (final subscription in _subscriptions) {
@@ -133,7 +238,7 @@ class _PassiveAudioPlayerWidgetState extends State<PassiveAudioPlayerWidget>
     _playing = false;
     _position = Duration.zero;
     _duration = Duration.zero;
-    final url = widget.node.properties.url;
+    final url = _url;
     // Preview and invalid URLs never create a platform player or make requests.
     if (widget.isPreview || url == null || !isRemoteAudioUrl(url)) {
       return;
@@ -174,8 +279,10 @@ class _PassiveAudioPlayerWidgetState extends State<PassiveAudioPlayerWidget>
         .then((_) {
           if (mounted && generation == _generation) {
             setState(() => _ready = true);
+            _applyState();
           }
-          // Untrusted content's autoPlay flag is intentionally ignored.
+          // Untrusted content's autoPlay flag is intentionally ignored; a
+          // layout plays on its own only through a bound `playing`.
         })
         .catchError((Object _) => _onError(generation));
   }
@@ -202,6 +309,18 @@ class _PassiveAudioPlayerWidgetState extends State<PassiveAudioPlayerWidget>
 
   @override
   Widget build(BuildContext context) {
+    // A background sound has no player to show. The design canvas marks it
+    // so it can still be found and selected.
+    if (widget.node.properties.background) {
+      return AdaptiveNodeBox(
+        node: widget.node,
+        child: widget.isPreview
+            ? const FittedBox(
+                child: Icon(Icons.graphic_eq, semanticLabel: 'Background audio'),
+              )
+            : const SizedBox.shrink(),
+      );
+    }
     final description = widget.node.properties.description;
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
@@ -211,7 +330,7 @@ class _PassiveAudioPlayerWidgetState extends State<PassiveAudioPlayerWidget>
         color: colors.surfaceContainerHigh,
         child: Row(
           children: [
-            if (widget.isPreview || widget.node.properties.url == null)
+            if (widget.isPreview || _url == null)
               const IconButton.filledTonal(
                 tooltip: 'Play audio',
                 onPressed: null,
