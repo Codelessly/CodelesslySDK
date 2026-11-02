@@ -133,10 +133,10 @@ abstract final class CanvasLocation {
         final String? path = pathOf(model, canvasId);
         if (path == null) continue;
         final List<String> pattern = segmentsOf(path);
+        // A catch-all only takes what no other path matches.
+        final bool catchAll = pattern.isNotEmpty && isCatchAll(pattern.last);
         final Map<String, String>? params = matchPattern(pattern, segments);
         if (params == null) continue;
-        // A catch-all only takes what no other path matches.
-        final bool catchAll = isCatchAll(pattern.last);
         final int literals = pattern.length - params.length;
         final int rank = (catchAll ? 0 : 1000) + literals;
         if (rank <= bestRank) continue;
@@ -187,6 +187,13 @@ abstract final class CanvasLocation {
         final String value = _stringOf(query.remove(segment.substring(1)));
         if (value.isEmpty) return null;
         segments.add(value);
+      } else if (segment == '*') {
+        // A catch-all screen shows at the path it caught, else at its own
+        // name.
+        final String caught = _stringOf(query.remove('path'));
+        final List<String> rest = segmentsOf(caught);
+        if (rest.isEmpty) return null;
+        segments.addAll(rest);
       } else {
         segments.add(segment);
       }

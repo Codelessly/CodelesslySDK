@@ -1,3 +1,5 @@
+import 'sound_clock.dart';
+
 import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -50,19 +52,15 @@ class _WebSoundEngine implements SoundEngine {
 
   final Stopwatch _stopwatch = Stopwatch()..start();
 
-  /// Stopwatch time minus audio time, kept while audio runs, so the clock
-  /// carries on (on the stopwatch) while the browser holds audio back.
-  double _offset = 0;
+  /// Continuous across audio starting and stopping; see [SoundClock].
+  final SoundClock _clock = SoundClock();
 
   @override
-  double get now {
-    final double wall = _stopwatch.elapsedMicroseconds / 1e6;
-    if (_ctx.state == 'running') {
-      _offset = wall - _ctx.currentTime;
-      return _ctx.currentTime;
-    }
-    return wall - _offset;
-  }
+  double get now => _clock.now(
+    wall: _stopwatch.elapsedMicroseconds / 1e6,
+    running: _ctx.state == 'running',
+    audio: _ctx.currentTime,
+  );
 
   @override
   void resume() {
@@ -110,7 +108,9 @@ class _WebSoundEngine implements SoundEngine {
     double pitch = 1,
   }) {
     if (volume <= 0.0005) return;
-    final double t = math.max(time ?? 0, _ctx.currentTime);
+    // [time] is on the sound clock ([now]); the audio graph runs on the
+    // audio clock.
+    final double t = math.max(_clock.toAudio(time ?? 0), _ctx.currentTime);
     final double f = pitch;
     switch (voice) {
       case SoundVoice.wood:
@@ -126,6 +126,46 @@ class _WebSoundEngine implements SoundEngine {
         _tone(t, 'triangle', 1700 * f, volume * 0.5, 0.025);
       case SoundVoice.hat:
         _burst(t, volume * 0.7, 0.04, 7000 * f);
+      case SoundVoice.pop:
+        _notes(t, f, volume, const [(660, 0, 0.12), (990, 0.06, 0.16)]);
+      case SoundVoice.boing:
+        _notes(t, f, volume * 1.2, const [
+          (220, 0, 0.18),
+          (165, 0.1, 0.22),
+        ], type: 'triangle');
+      case SoundVoice.chime:
+        _notes(t, f, volume, const [
+          (784, 0, 0.18),
+          (988, 0.1, 0.18),
+          (1319, 0.2, 0.32),
+        ]);
+      case SoundVoice.fanfare:
+        _notes(t, f, volume, const [
+          (523, 0, 0.16),
+          (659, 0.14, 0.16),
+          (784, 0.28, 0.16),
+          (1047, 0.42, 0.5),
+          (784, 0.56, 0.16),
+          (1047, 0.7, 0.6),
+        ], type: 'triangle');
+      case SoundVoice.tap:
+        _notes(t, f, volume * 0.45, const [(880, 0, 0.05)]);
+      case SoundVoice.pick:
+        _notes(t, f, volume * 0.55, const [(520, 0, 0.07)]);
+    }
+  }
+
+  /// Short notes for the game sounds: (frequency, start, length) each, in
+  /// Hz and seconds from [t].
+  void _notes(
+    double t,
+    double f,
+    double volume,
+    List<(double, double, double)> notes, {
+    String type = 'sine',
+  }) {
+    for (final (double hz, double start, double length) in notes) {
+      _tone(t + start, type, hz * f, volume * 0.7, length);
     }
   }
 }

@@ -126,9 +126,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           : Directionality(
               textDirection: direction,
               child: Builder(
-                builder: (context) => getTransformerByNode(
-                  node,
-                ).buildWidget(node, context, settings),
+                builder: (context) =>
+                    getTransformerByNode(node)
+                        .buildWidget(node, context, settings),
               ),
             );
       return decorate(
@@ -173,9 +173,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         return _buildDecorated(context, node, settings);
       },
     );
-    return settings.withReactions
-        ? wrapWithInteractionScopes(context, node, built)
-        : built;
+    // A node a Scroll To action targets records where it is built.
+    return ScrollTargets.wrap(
+      node,
+      settings.withReactions
+          ? wrapWithInteractionScopes(context, node, built)
+          : built,
+    );
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -214,12 +218,15 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         : Directionality(
             textDirection: direction,
             child: Builder(
-              builder: (context) => getTransformerByNode(
-                node,
-              ).buildWidget(styled, context, settings),
+              builder: (context) =>
+                  getTransformerByNode(node)
+                      .buildWidget(styled, context, settings),
             ),
           );
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
+    widget = applyStrokePath(context, styled, widget);
+    // Blurs act on everything the node paints, its stroke path included.
+    widget = applyWidgetBlurs(styled, widget);
 
     if (settings.withOpacity) {
       widget = applyWidgetOpacity(styled, widget);
@@ -233,30 +240,35 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
       widget = applyDragAndDrop(context, styled, widget);
+      // Pointer events pass through to the nodes under this one.
+      if (styled.ignorePointer) widget = IgnorePointer(child: widget);
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
+      // The design canvas (isPreview) shows motion at rest: an entrance
+      // from opacity 0 would otherwise wait there for frames an idle canvas
+      // never draws, leaving the node invisible.
       widget = applyWidgetMotion(
         context,
         styled,
         widget,
         scopedValues: preview,
+        animate: !settings.isPreview,
       );
+      widget = applyNodePlay(context, styled, widget);
       widget = applyBoundOffset(context, styled, widget);
     }
     // Without reactions (the design canvas) a knob or fader cap is drawn
     // where its drag track puts it; with them NodeDragTrack draws it there
     // and makes it draggable.
     if (!settings.withReactions) {
-      widget = applyTrackPose(
-        context,
-        styled,
-        widget,
-        scopedValues: preview,
-      );
+      widget = applyTrackPose(context, styled, widget, scopedValues: preview);
     }
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
+    }
+    if (settings.withReactions) {
+      widget = applyReveal(context, styled, widget);
     }
     if (settings.withMargins) {
       widget = applyWidgetMargins(styled, widget);
@@ -271,6 +283,11 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         scopedValues: preview,
       );
     }
+    // A floating node (a field's menu) draws above the screen at runtime;
+    // the design canvas draws it in place.
+    if (styled.floating && !settings.isPreview) {
+      widget = FloatingNode(child: widget);
+    }
 
     return decorate(context, styled, widget, NodeBuildLayer.margin);
   }
@@ -278,13 +295,42 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// Makes [widget] draggable and/or a drop target, as [node]'s
   /// [BaseNode.draggable] and [BaseNode.dropTarget] say.
   Widget applyDragAndDrop(BuildContext context, BaseNode node, Widget widget) {
+    // `draggable.enabled` / `dropTarget.enabled` bind the switches.
+    bool flag(String key, bool fallback) => node.variables.containsKey(key)
+        ? PropertyValueDelegate.getPropertyValue<bool>(
+                node,
+                key,
+                scopedValues: ScopedValues.of(context),
+              ) ??
+              fallback
+        : fallback;
     if (node.dropTarget case final DropTargetModel target) {
-      widget = DropTargetBox(node: node, model: target, child: widget);
+      widget = DropTargetBox(
+        node: node,
+        model: target,
+        enabled: flag(DropTargetModel.enabledVariable, target.enabled),
+        child: widget,
+      );
     }
-    if (node.draggable case final DraggableModel draggable) {
+    if (node.draggable case DraggableModel draggable) {
+      // The first form bound the payload as `draggable.data`.
+      if (draggable.data.isEmpty) {
+        if (node.variables['draggable.data'] case final String bound) {
+          draggable = draggable.copyWith(data: bound);
+        }
+      }
+      final Object? flightKey = node.variables.containsKey('flightKey')
+          ? PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              'flightKey',
+              scopedValues: ScopedValues.of(context),
+            )
+          : node.flightKey;
       widget = DragSourceBox(
         node: node,
         model: draggable,
+        enabled: flag(DraggableModel.enabledVariable, draggable.enabled),
+        flightKey: '${flightKey ?? ''}',
         // The feedback node is usually hidden where it is designed.
         buildNode: (context, id) => buildWidgetByID(
           id,
@@ -329,7 +375,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// variables or formulas, or set value actions give it at runtime: `fill`
   /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
   /// `height`, `flex`, `rotation`, and the properties of [StyleBindings]
-  /// (effects, stroke weight, corner radius, padding, font weight, icon).
+  /// (effects, stroke weight, corner radius, padding, font weight and size,
+  /// icon).
   /// Returns [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(
     BuildContext context,
@@ -431,7 +478,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       patch['rotation'] = rotation.round();
     }
 
-    // Effects, stroke weight, corner radius, font weight and icon.
+    // Effects, stroke weight, corner radius, font weight and size, and icon.
     StyleBindings.addTo(patch, node, scopedValues: scope);
 
     // The states shown around the node (a property-override variant, its
@@ -476,12 +523,14 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// `rtl`/`ltr` (any case, also `right-to-left`, `true` for right to left)
   /// as a [TextDirection]; null for anything else.
-  static TextDirection? parseLayoutDirection(Object? value) =>
-      switch (value?.toString().trim().toLowerCase()) {
-        'rtl' || 'right-to-left' || 'righttoleft' || 'true' => TextDirection.rtl,
-        'ltr' || 'left-to-right' || 'lefttoright' || 'false' => TextDirection.ltr,
-        _ => null,
-      };
+  static TextDirection? parseLayoutDirection(Object? value) => switch (value
+      ?.toString()
+      .trim()
+      .toLowerCase()) {
+    'rtl' || 'right-to-left' || 'righttoleft' || 'true' => TextDirection.rtl,
+    'ltr' || 'left-to-right' || 'lefttoright' || 'false' => TextDirection.ltr,
+    _ => null,
+  };
 
   /// The variables key of a node's layout direction binding.
   static const String kLayoutDirection = 'layoutDirection';
@@ -581,11 +630,16 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       child: Builder(
         builder: (context) {
           if (listenables.isNotEmpty) {
-            return ManagedListenableBuilder(
+            final Widget listening = ManagedListenableBuilder(
               key: ValueKey(node.id),
               listenables: listenables,
               builder: (context) => builder(context),
             );
+            // A node redrawn every frame (it reads nowMs()) paints on a layer
+            // of its own, so its frames don't repaint the rest of the screen.
+            return listenables.contains(FrameClock.instance)
+                ? RepaintBoundary(child: listening)
+                : listening;
           } else {
             return builder(context);
           }
@@ -621,6 +675,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           path,
     };
     bool readsClock = false;
+    bool readsFrameClock = false;
     // A computed variable listens to whatever its formula reads.
     final Map<String, VariableData> variablesByName = {
       for (final notifier in codelesslyContext.variables.values)
@@ -637,6 +692,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         );
         expanded.addAll(deps.paths);
         readsClock = readsClock || deps.readsClock;
+        readsFrameClock = readsFrameClock || deps.readsFrameClock;
       }
       return expanded;
     }
@@ -767,6 +823,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
 
     if (readsClock) listenables.add(FormulaClock.instance);
+
+    // A formula that reads the millisecond clock rebuilds on every frame.
+    readsFrameClock =
+        readsFrameClock ||
+        node.variables.values.any(
+          (path) => switch (FormulaEvaluator.exactExpression(path)) {
+            final String expression => FormulaEvaluator.readsFrameClock(
+              expression,
+            ),
+            null => false,
+          },
+        ) ||
+        inlineTextTemplatesOf(node).any(FormulaEvaluator.textReadsFrameClock);
+    if (readsFrameClock) listenables.add(FrameClock.instance);
 
     return listenables;
   }

@@ -54,7 +54,10 @@ class PassiveLineChartTransformer extends NodeWidgetTransformer<LineChartNode> {
 typedef ChartBand = ({double from, double to, Color color});
 
 /// A horizontal grid line with an optional label.
-typedef ChartYTick = ({double y, String? label, Color? color});
+/// A horizontal grid line with its label. The label sits left of the plot,
+/// against it (`align: "end"`, the default) or at the chart's left edge
+/// (`align: "start"`).
+typedef ChartYTick = ({double y, String? label, Color? color, bool atStart});
 
 /// The part of the area under the curve inside [from, to] and below
 /// [below], with an optional bar on the x axis.
@@ -77,13 +80,22 @@ typedef ChartReferenceLine = ({
 /// A tick and label on the x axis.
 typedef ChartXTick = ({double x, String label});
 
-/// A circle on a point with an optional label above or below it.
+/// A circle on a point with an optional label above or below it. A marker
+/// may style itself (a result-coloured dot on a halo, say); unset styles
+/// fall back to the chart's: radius 5, filled with the line colour or the
+/// hollow colour, a 2px outline in the line colour.
 typedef ChartMarker = ({
   double x,
   double y,
   String? label,
   bool filled,
   bool above,
+  Color? color,
+  double? radius,
+  Color? outlineColor,
+  double? outlineWidth,
+  Color? haloColor,
+  double? haloRadius,
 });
 
 /// A dashed vertical line with an optional tag and dot on the curve.
@@ -258,6 +270,7 @@ class LineChartSpec {
               y: y,
               label: text(t['label']),
               color: LineChartGeometry.parseColor(t['color']),
+              atStart: t['align'] == 'start',
             ),
       ],
       yAxisTitle: text(bound('yAxisTitle')) ?? props.yAxisTitle,
@@ -301,6 +314,12 @@ class LineChartSpec {
               label: text(m['label']),
               filled: m['filled'] == true,
               above: m['above'] == true,
+              color: LineChartGeometry.parseColor(m['color']),
+              radius: n(m['radius']),
+              outlineColor: LineChartGeometry.parseColor(m['outlineColor']),
+              outlineWidth: n(m['outlineWidth']),
+              haloColor: LineChartGeometry.parseColor(m['haloColor']),
+              haloRadius: n(m['haloRadius']),
             ),
       ],
       verticalLines: [
@@ -593,7 +612,8 @@ class LineChartPainter extends CustomPainter {
       canvas.drawLine(Offset(plot.left, y), Offset(plot.right, y), grid);
       if (tick.label case final String label when label.isNotEmpty) {
         final TextPainter tp = _text(label, spec.axisLabelStyle);
-        tp.paint(canvas, Offset(plot.left - tp.width - 10, y - tp.height / 2));
+        final double x = tick.atStart ? 0 : plot.left - tp.width - 10;
+        tp.paint(canvas, Offset(x, y - tp.height / 2));
       }
     }
     if (spec.yAxisTitle.isNotEmpty) {
@@ -701,13 +721,33 @@ class LineChartPainter extends CustomPainter {
       ..strokeWidth = 2;
     for (final ChartMarker marker in spec.markers) {
       final Offset p = Offset(px(marker.x), py(marker.y));
+      final double radius = marker.radius ?? 5;
+      if (marker.haloColor case final Color halo) {
+        canvas.drawCircle(
+          p,
+          marker.haloRadius ?? radius + 1,
+          Paint()..color = halo,
+        );
+      }
       canvas.drawCircle(
         p,
-        5,
+        radius,
         Paint()
-          ..color = marker.filled ? spec.lineColor : spec.markerHollowColor,
+          ..color =
+              marker.color ??
+              (marker.filled ? spec.lineColor : spec.markerHollowColor),
       );
-      canvas.drawCircle(p, 5, outline);
+      final double outlineWidth = marker.outlineWidth ?? 2;
+      if (outlineWidth > 0) {
+        canvas.drawCircle(
+          p,
+          radius,
+          Paint()
+            ..color = marker.outlineColor ?? spec.lineColor
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = outlineWidth,
+        );
+      }
       if (marker.label case final String label when label.isNotEmpty) {
         final TextPainter tp = _text(label, spec.markerLabelStyle);
         final double ly = marker.above ? p.dy - tp.height - 8 : p.dy + 8;

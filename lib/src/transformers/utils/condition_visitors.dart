@@ -146,13 +146,21 @@ class ConditionVariablesVisitor
 
   @override
   Set<String>? visitFocusAction(FocusAction action) => {};
+
+  @override
   Set<String>? visitControlDragAction(ControlDragAction action) => {};
 
   @override
   Set<String>? visitSpeakAction(SpeakAction action) => {};
 
   @override
+  Set<String>? visitScrollToAction(ScrollToAction action) => {};
+
+  @override
   Set<String>? visitPlaySoundAction(PlaySoundAction action) => {};
+
+  @override
+  Set<String>? visitPlayAnimationAction(PlayAnimationAction action) => {};
 
   @override
   Set<String>? visitPaywallAction(PaywallAction action) => {};
@@ -258,13 +266,21 @@ class ConditionNodesVisitor
 
   @override
   String? visitFocusAction(FocusAction action) => null;
+
+  @override
   String? visitControlDragAction(ControlDragAction action) => null;
 
   @override
   String? visitSpeakAction(SpeakAction action) => null;
 
   @override
+  String? visitScrollToAction(ScrollToAction action) => null;
+
+  @override
   String? visitPlaySoundAction(PlaySoundAction action) => null;
+
+  @override
+  String? visitPlayAnimationAction(PlayAnimationAction action) => null;
 
   @override
   String? visitPaywallAction(PaywallAction action) => null;

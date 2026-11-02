@@ -15,35 +15,38 @@ void main() {
         name: id,
         basicBoxLocal: NodeBox(0, 0, 100, 20),
         data: chars,
-        textMixedProps: [StartEndProp(start: 0, end: chars.length, fontSize: 14)],
+        textMixedProps: [
+          StartEndProp(start: 0, end: chars.length, fontSize: 14),
+        ],
         variables: variables ?? {},
       )..parentID = 'card';
 
   ({NodeRegistry registry, ListViewNode list}) build() {
-    final FrameNode card = FrameNode(
-      id: 'card',
-      name: 'Card',
-      basicBoxLocal: NodeBox(0, 0, 200, 300),
-      children: const ['label', 'stamp'],
-      reactions: [
-        Reaction(
-          trigger: TriggerModel(type: TriggerType.swipeRight),
-          action: CallFunctionAction(name: 'good'),
-        ),
-        Reaction(
-          trigger: TriggerModel(type: TriggerType.swipeLeft),
-          action: CallFunctionAction(name: 'again'),
-        ),
-      ],
-    )
-      ..variables['motion.scale'] = r'${= 1 - index * 0.1}'
-      ..parentID = 'deck'
-      ..drag = const DragModel(
-        release: DragRelease.dismiss,
-        directions: [DragDirection.left, DragDirection.right],
-        rotateFactor: 15,
-      )
-      ..motion = const MotionModel(durationMs: 300);
+    final FrameNode card =
+        FrameNode(
+            id: 'card',
+            name: 'Card',
+            basicBoxLocal: NodeBox(0, 0, 200, 300),
+            children: const ['label', 'stamp'],
+            reactions: [
+              Reaction(
+                trigger: TriggerModel(type: TriggerType.swipeRight),
+                action: CallFunctionAction(name: 'good'),
+              ),
+              Reaction(
+                trigger: TriggerModel(type: TriggerType.swipeLeft),
+                action: CallFunctionAction(name: 'again'),
+              ),
+            ],
+          )
+          ..variables['motion.scale'] = r'${= 1 - index * 0.1}'
+          ..parentID = 'deck'
+          ..drag = const DragModel(
+            release: DragRelease.dismiss,
+            directions: [DragDirection.left, DragDirection.right],
+            rotateFactor: 15,
+          )
+          ..motion = const MotionModel(durationMs: 300);
     final ListViewNode list = ListViewNode(
       id: 'deck',
       name: 'Deck',
@@ -57,7 +60,11 @@ void main() {
         list.id: list,
         card.id: card,
         'label': text('label', r'${item.id}'),
-        'stamp': text('stamp', 'GOOD', variables: {'opacity': r'${drag.right}'}),
+        'stamp': text(
+          'stamp',
+          'GOOD',
+          variables: {'opacity': r'${drag.right}'},
+        ),
       });
     return (registry: registry, list: list);
   }
