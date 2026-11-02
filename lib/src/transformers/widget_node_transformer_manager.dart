@@ -468,6 +468,7 @@ abstract class WidgetNodeTransformerManager
     BaseNode node,
     Widget child,
   ) {
+    child = wrapWithDrag(context, node, child);
     if (node is! ReactionMixin) return child;
     if (node case CanvasNode() || SpacerNode()) return child;
     final List<Reaction> onHoldReactions = (node as ReactionMixin).reactions
@@ -489,6 +490,178 @@ abstract class WidgetNodeTransformerManager
     );
   }
 
+  /// Makes [node] draggable when it has a [BaseNode.drag]: it follows the
+  /// pointer and springs back, stays or flies off (see [NodeDrag]). Flying
+  /// off fires the node's swipe reaction for that direction; letting go
+  /// fires its drag end reactions. [child] is the node's whole build, so its
+  /// own bindings and its children read the drag as `drag`.
+  Widget wrapWithDrag(BuildContext context, BaseNode node, Widget child) {
+    final DragModel? drag = node.drag;
+    if (drag == null || node is CanvasNode) return child;
+    if (drag.reorder) {
+      // The handle of a row in a reorderable data list: dragging it moves
+      // the row (see PassiveListViewWidget).
+      final int? index = IndexedItemProvider.maybeOf(context)?.index;
+      if (index == null || SliverReorderableList.maybeOf(context) == null) {
+        return child;
+      }
+      return ReorderableDragStartListener(
+        index: index,
+        child: MouseRegion(cursor: SystemMouseCursors.grab, child: child),
+      );
+    }
+    final List<Reaction> reactions = node is ReactionMixin
+        ? [
+            for (final reaction in (node as ReactionMixin).reactions)
+              if (reaction.action.enabled) reaction,
+          ]
+        : const [];
+    final bool bound = node.variables.containsKey(DragModel.enabledVariableKey);
+    if (drag.track case final DragTrackModel track) {
+      return _wrapWithTrack(context, node, drag, track, reactions, child);
+    }
+    return NodeDrag(
+      nodeId: node.id,
+      drag: drag,
+      order: IndexedItemProvider.maybeOf(context)?.index ?? 0,
+      isEnabled: !bound
+          ? null
+          : () {
+              final Object? value =
+                  PropertyValueDelegate.getPropertyValue<Object>(
+                    node,
+                    DragModel.enabledVariableKey,
+                    scopedValues: ScopedValues.of(context),
+                  );
+              return switch (value) {
+                bool b => b,
+                num n => n != 0,
+                String s => s.trim().toLowerCase() == 'true',
+                _ => drag.enabled,
+              };
+            },
+      onDismissed: (direction) => FunctionsRepository.triggerAction(
+        context,
+        direction.swipeTrigger,
+        reactions: reactions,
+        result: {'direction': direction.name},
+      ),
+      onEnd: (result) => FunctionsRepository.triggerAction(
+        context,
+        TriggerType.dragEnd,
+        reactions: reactions,
+        result: result,
+      ),
+      child: child,
+    );
+  }
+
+  /// Draws [node] where its drag track puts it for its variable's value,
+  /// without making it draggable: how the design canvas shows a knob or a
+  /// fader cap. Returns [widget] for a node without a track.
+  Widget applyTrackPose(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+  }) {
+    final DragTrackModel? track = node.drag?.track;
+    if (track == null) return widget;
+    final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
+      track.variable,
+      scopedValues: scopedValues ?? ScopedValues.of(context),
+    );
+    final double value = switch (raw) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()) ?? track.defaultValue ?? track.min,
+      _ => track.defaultValue ?? track.min,
+    };
+    return Transform(
+      alignment: Alignment.center,
+      transform: DragTrackGeometry(track).poseAt(track.progressOf(value)),
+      child: widget,
+    );
+  }
+
+  /// A node with a [DragTrackModel] is a value control: it is drawn at its
+  /// variable's place along the track and dragging it writes the variable,
+  /// running its `changed` reactions on each change and `dragEnd` on release
+  /// (both with `${result.value}`). See [NodeDragTrack].
+  Widget _wrapWithTrack(
+    BuildContext context,
+    BaseNode node,
+    DragModel drag,
+    DragTrackModel track,
+    List<Reaction> reactions,
+    Widget child,
+  ) {
+    final ScopedValues scopedValues = ScopedValues.of(context);
+    final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
+    final Observable<VariableData>? variable = codelesslyContext?.findVariable(
+      name: track.variable,
+    );
+    bool enabled(BuildContext context) {
+      if (!node.variables.containsKey(DragModel.enabledVariableKey)) {
+        return drag.enabled;
+      }
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        DragModel.enabledVariableKey,
+        scopedValues: ScopedValues.of(context),
+      );
+      return switch (value) {
+        bool b => b,
+        num n => n != 0,
+        String s => s.trim().toLowerCase() == 'true',
+        _ => drag.enabled,
+      };
+    }
+
+    Widget build(BuildContext context) {
+      final Object? raw =
+          PropertyValueDelegate.getVariableValueFromPath<Object>(
+            track.variable,
+            scopedValues: ScopedValues.of(context),
+          );
+      final double value = switch (raw) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()) ?? track.min,
+        _ => track.defaultValue ?? track.min,
+      };
+      return NodeDragTrack(
+        track: track,
+        value: value,
+        enabled: enabled(context),
+        onChanged: (v) {
+          final bool whole = variable?.value.type == VariableType.integer;
+          codelesslyContext?.updateVariable(
+            track.variable,
+            whole ? v.round() : v,
+          );
+          FunctionsRepository.triggerAction(
+            context,
+            TriggerType.changed,
+            reactions: reactions,
+            result: {'value': v},
+          );
+        },
+        onEnd: (v) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.dragEnd,
+          reactions: reactions,
+          result: {'value': v},
+        ),
+        child: child,
+      );
+    }
+
+    if (variable == null) return Builder(builder: build);
+    return ValueListenableBuilder<VariableData>(
+      valueListenable: variable,
+      builder: (context, _, _) => build(context),
+    );
+  }
+
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
     final Widget tappable = _wrapWithTapReactions(context, node, widget);
@@ -500,8 +673,12 @@ abstract class WidgetNodeTransformerManager
       for (final reaction in reactions)
         if (reaction.trigger.type == type && reaction.action.enabled) reaction,
     ];
-    final List<Reaction> onDrag = of(TriggerType.drag);
-    final List<Reaction> onDragEnd = of(TriggerType.dragEnd);
+    // A node with a drag model drags itself (see [wrapWithDrag]).
+    final bool ownDrag = node.drag != null;
+    final List<Reaction> onDrag = ownDrag ? const [] : of(TriggerType.drag);
+    final List<Reaction> onDragEnd = ownDrag
+        ? const []
+        : of(TriggerType.dragEnd);
     final List<Reaction> onPointerDown = of(TriggerType.pointerDown);
     final List<Reaction> onPointerUp = of(TriggerType.pointerUp);
     if (onDrag.isEmpty &&
@@ -701,6 +878,8 @@ abstract class WidgetNodeTransformerManager
   /// mouse wheel (scrolling down swipes up, as content moves up).
   Widget wrapWithSwipes(BuildContext context, BaseNode node, Widget widget) {
     if (node is! ReactionMixin) return widget;
+    // A draggable node fires its swipes when it flies off.
+    if (node.drag != null) return widget;
     final List<Reaction> swipes = (node as ReactionMixin).reactions
         .where(
           (reaction) =>
@@ -975,9 +1154,24 @@ class SvgIcon extends StatelessWidget {
       return Icon(cupertinoIcon, size: dimension, color: iconColor);
     }
     // Material Icons ship with Flutter; use their bundled glyph offline.
-    if (icon is MaterialIcon && icon.codepoint > 0) {
+    final IconModel model = icon;
+    if (model is MaterialIcon && model.codepoint > 0) {
+      // The stored codepoint comes from Google's icon catalog, whose web
+      // font numbers icons differently from Flutter's bundled font (av_timer
+      // is 0xe01b there, three_k here): look the glyph up by name.
+      final String suffix = switch (model.style) {
+        MaterialIconStyle.filled => '',
+        MaterialIconStyle.outlined => '_outlined',
+        MaterialIconStyle.rounded => '_rounded',
+        MaterialIconStyle.sharp => '_sharp',
+        _ => '',
+      };
+      final int codepoint =
+          flutterIconsDataMap['${model.name}$suffix'] ??
+          flutterIconsDataMap[model.name] ??
+          model.codepoint;
       return Icon(
-        IconData(icon.codepoint, fontFamily: icon.fontFamily),
+        IconData(codepoint, fontFamily: model.fontFamily),
         size: dimension,
         color: iconColor,
       );
