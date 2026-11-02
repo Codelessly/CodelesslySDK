@@ -101,16 +101,21 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
     if (widget.node.data.contains(r'${data.')) {
       context.watch<CodelesslyContext>();
     }
+    final Text text = TextUtils.buildTextForTextNode(
+      context,
+      widget.node,
+      tapGestureRecognizers: tapGestureRecognizerRegistry,
+      variablesOverrides: widget.variablesOverrides,
+      nullSubstitutionMode: widget.settings.nullSubstitutionMode,
+      replaceVariablesWithSymbol: widget.settings.isPreview,
+    );
+    final CountUpModel? countUp = widget.node.countUp;
     return TextNodeBox(
       node: widget.node,
-      child: TextUtils.buildTextForTextNode(
-        context,
-        widget.node,
-        tapGestureRecognizers: tapGestureRecognizerRegistry,
-        variablesOverrides: widget.variablesOverrides,
-        nullSubstitutionMode: widget.settings.nullSubstitutionMode,
-        replaceVariablesWithSymbol: widget.settings.isPreview,
-      ),
+      // A design canvas shows the final text.
+      child: countUp == null || widget.settings.isPreview
+          ? text
+          : CountUpText(text: text, countUp: countUp),
     );
   }
 }

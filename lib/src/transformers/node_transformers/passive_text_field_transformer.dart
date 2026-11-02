@@ -392,7 +392,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     );
 
     Widget field = fillsHeight && oneLine
-        ? LayoutBuilder(
+        ? MeasurableLayoutBuilder(
+            fallbackSize: Size(
+              widget.node.basicBoxLocal.width,
+              widget.node.basicBoxLocal.height,
+            ),
             builder: (context, constraints) => buildField(
               constraints.hasBoundedHeight
                   ? decoration.copyWith(

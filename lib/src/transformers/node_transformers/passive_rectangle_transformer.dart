@@ -550,13 +550,29 @@ Gradient? retrieveGradient(PaintModel paint) {
             : GradientRotation(radians),
       );
     } else if (paint.type == PaintType.gradientRadial) {
+      final AlignmentData? center = paint.gradientCenter;
+      final double? radius = paint.gradientRadius;
+      final bool shaped = center != null || radius != null;
       return RadialGradient(
+        center: center == null
+            ? Alignment.center
+            : Alignment(center.x, center.y),
+        // Flutter measures the radius against the shortest side; the paint
+        // measures it against the longest, see [RadialRadiusTransform].
+        radius: radius ?? 0.5,
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
         stops: gradientStops.map((e) => e.position).toList(),
         tileMode: tileMode,
-        transform: GradientRotation(radians),
+        transform: shaped
+            ? RadialRadiusTransform(
+                center: center == null
+                    ? Alignment.center
+                    : Alignment(center.x, center.y),
+                longestSide: radius != null,
+              )
+            : GradientRotation(radians),
       );
     } else if (paint.type == PaintType.gradientAngular) {
       return SweepGradient(
@@ -577,6 +593,41 @@ Gradient? retrieveGradient(PaintModel paint) {
     );
     return null;
   }
+}
+
+/// Scales a [RadialGradient] about its [center] so that its radius is a
+/// fraction of the box's longest side rather than its shortest
+/// ([PaintModel.gradientRadius]); without [longestSide] it changes nothing.
+/// The gradient stays circular.
+class RadialRadiusTransform extends GradientTransform {
+  const RadialRadiusTransform({required this.center, this.longestSide = true});
+
+  /// The gradient's centre in the box; may lie outside it.
+  final Alignment center;
+
+  /// Whether the radius is relative to the longest side.
+  final bool longestSide;
+
+  @override
+  Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
+    if (!longestSide || bounds.shortestSide <= 0) return null;
+    final double k = bounds.longestSide / bounds.shortestSide;
+    if (k == 1) return null;
+    final Offset c = center.withinRect(bounds);
+    return Matrix4.identity()
+      ..translateByDouble(c.dx, c.dy, 0, 1)
+      ..scaleByDouble(k, k, 1, 1)
+      ..translateByDouble(-c.dx, -c.dy, 0, 1);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is RadialRadiusTransform &&
+      other.center == center &&
+      other.longestSide == longestSide;
+
+  @override
+  int get hashCode => Object.hash(center, longestSide);
 }
 
 /// Rotates a linear gradient by [radians] about the box center, like
@@ -1056,7 +1107,7 @@ class ImageFillPlaceholder extends StatelessWidget {
         color: const Color(0xFFE9ECEF),
         borderRadius: borderRadius,
       ),
-      child: LayoutBuilder(
+      child: MeasurableLayoutBuilder(
         builder: (context, constraints) {
           final double side = constraints.biggest.shortestSide;
           if (!side.isFinite || side < 12) return const SizedBox.expand();

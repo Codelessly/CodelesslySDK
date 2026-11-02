@@ -50,6 +50,9 @@ class TextUtils {
       fontName: prop.fontName,
       lineHeight: prop.lineHeight,
       textDecoration: prop.textDecoration,
+      decorationColor: prop.decorationColor?.toFlutterColor(),
+      decorationThickness: prop.decorationThickness,
+      decorationStyle: prop.decorationStyle,
       effects: effects ?? (node is BlendMixin ? node.effects : const []),
       variablesOverrides: variablesOverrides,
       nullSubstitutionMode: nullSubstitutionMode,
@@ -69,6 +72,9 @@ class TextUtils {
     LineHeight? lineHeight,
     FontName? fontName,
     TextDecorationEnum? textDecoration,
+    Color? decorationColor,
+    double? decorationThickness,
+    TextDecorationStyleEnum? decorationStyle,
     List<Effect>? effects,
 
     // Additional properties.
@@ -86,6 +92,9 @@ class TextUtils {
         fontSize: fontSize,
         fontName: fontName,
         textDecoration: textDecoration,
+        decorationColor: decorationColor,
+        decorationThickness: decorationThickness,
+        decorationStyle: decorationStyle,
         lineHeight: lineHeight,
         letterSpacing: letterSpacing,
         color: color,
@@ -266,10 +275,18 @@ class TextUtils {
       variablesOverrides,
     );
 
+    // Inline code: segments between backticks take the code style. Code
+    // highlighting (a whole text shown as code) wins.
+    final InlineCodeStyle? inlineCode = textNode.inlineCode;
+    final List<InlineSpan> withCode =
+        inlineCode == null || language != SyntaxLanguage.none
+        ? colored
+        : InlineCode.apply(colored, inlineCode);
+
     return Text.rich(
       TextSpan(
         children: language == SyntaxLanguage.none
-            ? colored
+            ? withCode
             : CodeHighlighter.highlightSpans(
                 colored,
                 language,
@@ -437,6 +454,9 @@ class TextUtils {
     fontSize: prop.fontSize,
     fontName: prop.fontName,
     textDecoration: prop.textDecoration,
+    decorationColor: prop.decorationColor?.toFlutterColor(),
+    decorationThickness: prop.decorationThickness,
+    decorationStyle: prop.decorationStyle,
     lineHeight: prop.lineHeight,
     letterSpacing: prop.letterSpacing,
     color: retrievePropColor(prop),
@@ -451,9 +471,19 @@ class TextUtils {
     LineHeight? lineHeight,
     FontName? fontName,
     TextDecorationEnum? textDecoration,
+    Color? decorationColor,
+    double? decorationThickness,
+    TextDecorationStyleEnum? decorationStyle,
     List<Effect> effects = const [],
   }) {
     final TextDecoration? textDecorationProp = textDecoration?.toFlutter();
+    final TextDecorationStyle? decorationStyleProp = switch (decorationStyle) {
+      null || TextDecorationStyleEnum.solid => null,
+      TextDecorationStyleEnum.double => TextDecorationStyle.double,
+      TextDecorationStyleEnum.dotted => TextDecorationStyle.dotted,
+      TextDecorationStyleEnum.dashed => TextDecorationStyle.dashed,
+      TextDecorationStyleEnum.wavy => TextDecorationStyle.wavy,
+    };
 
     final double? lineHeightProp = lineHeight != null && fontSize != null
         ? retrieveLineHeight(lineHeight, fontSize)
@@ -498,6 +528,9 @@ class TextUtils {
         letterSpacing: letterSpacingProp,
         height: lineHeightProp,
         decoration: textDecorationProp,
+        decorationColor: decorationColor,
+        decorationThickness: decorationThickness,
+        decorationStyle: decorationStyleProp,
         shadows: shadows,
       );
     } else {
@@ -516,6 +549,9 @@ class TextUtils {
         height: lineHeightProp,
         shadows: shadows,
         decoration: textDecorationProp,
+        decorationColor: decorationColor,
+        decorationThickness: decorationThickness,
+        decorationStyle: decorationStyleProp,
         fontFamily: fontFamily,
         fontFamilyFallback: const [
           // Enable this to test fonts loading.

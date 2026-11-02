@@ -15,7 +15,39 @@ Curve flutterCurveOf(MotionCurve curve) => switch (curve) {
   MotionCurve.easeIn => Curves.easeIn,
   MotionCurve.easeOutBack => Curves.easeOutBack,
   MotionCurve.easeOutCubic => Curves.easeOutCubic,
+  MotionCurve.easeInOutCubic => Curves.easeInOutCubic,
+  MotionCurve.step => const Threshold(0.5),
 };
+
+/// Turns animation of node motion off for the nodes below it: a design
+/// canvas or an editor capture, which show every node at rest.
+///
+/// Below a [NodeMotionScope] whose [animate] is false, a [NodeMotion] acts
+/// as with [NodeMotion.animate] false: it shows its values without
+/// transitions, entrances, loops or spin, so a
+/// [MotionModel.revealOnScroll] node is visible at rest instead of waiting
+/// to scroll into view, and a [NodeSizeTransition] jumps to its final size.
+class NodeMotionScope extends InheritedWidget {
+  /// Creates a [NodeMotionScope].
+  const NodeMotionScope({
+    super.key,
+    required this.animate,
+    required super.child,
+  });
+
+  /// Whether node motion below animates.
+  final bool animate;
+
+  /// Whether node motion animates at [context]: false below a
+  /// [NodeMotionScope] that turns it off, else true.
+  static bool animatesAt(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<NodeMotionScope>()?.animate ??
+      true;
+
+  @override
+  bool updateShouldNotify(NodeMotionScope oldWidget) =>
+      animate != oldWidget.animate;
+}
 
 /// The transform [motion] draws, without spin, around [origin] in a box of
 /// [size]. [spinTurns] adds a spin angle.
@@ -44,7 +76,7 @@ Matrix4 motionMatrix(MotionModel motion, {double spinTurns = 0}) {
 /// A [MotionModel.revealOnScroll] motion holds the node where its entrance
 /// starts until [MotionModel.revealFraction] of it is in view, then plays
 /// the entrance once.
-class NodeMotion extends StatefulWidget {
+class NodeMotion extends StatelessWidget {
   /// Creates a [NodeMotion].
   const NodeMotion({
     super.key,
@@ -68,10 +100,31 @@ class NodeMotion extends StatefulWidget {
   static bool revealsEnabled = true;
 
   @override
-  State<NodeMotion> createState() => _NodeMotionState();
+  Widget build(BuildContext context) => _NodeMotionBody(
+    motion: motion,
+    animate: animate && NodeMotionScope.animatesAt(context),
+    child: child,
+  );
 }
 
-class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
+/// [NodeMotion] with its [NodeMotionScope] applied.
+class _NodeMotionBody extends StatefulWidget {
+  const _NodeMotionBody({
+    required this.motion,
+    required this.child,
+    required this.animate,
+  });
+
+  final MotionModel motion;
+  final bool animate;
+  final Widget child;
+
+  @override
+  State<_NodeMotionBody> createState() => _NodeMotionState();
+}
+
+class _NodeMotionState extends State<_NodeMotionBody>
+    with TickerProviderStateMixin {
   late final AnimationController _transition = AnimationController(vsync: this)
     ..addListener(_rebuild);
   late MotionModel _from = widget.motion;
@@ -181,7 +234,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   }
 
   @override
-  void didUpdateWidget(NodeMotion oldWidget) {
+  void didUpdateWidget(_NodeMotionBody oldWidget) {
     super.didUpdateWidget(oldWidget);
     final MotionModel next = widget.motion;
     if (_awaitingReveal) {
