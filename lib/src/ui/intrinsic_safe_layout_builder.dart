@@ -13,7 +13,8 @@ import 'package:flutter/widgets.dart';
 /// This one reports [intrinsicSize] (zero by default) in every build mode,
 /// so a node built with it (an image placeholder, a field that fills its
 /// height) can sit anywhere a design puts it.
-class IntrinsicSafeLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
+class IntrinsicSafeLayoutBuilder
+    extends ConstrainedLayoutBuilder<BoxConstraints> {
   /// The size reported to intrinsic and dry layout queries.
   final Size intrinsicSize;
 

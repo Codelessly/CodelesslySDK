@@ -58,19 +58,22 @@ void main() {
     expect(states.last['text'], '');
   });
 
-  test('a new word cuts the last one off; only the last ends speaking', () async {
-    final engine = FakeEngine();
-    Speech.engine = engine;
-    final Future<bool> first = Speech.instance.speak('uno');
-    final Future<bool> second = Speech.instance.speak('dos');
-    await first;
-    // The first one was cancelled, but "dos" is still being said.
-    expect(Speech.instance.value['text'], 'dos');
-    expect(Speech.instance.speaking, isTrue);
-    engine.current!.complete();
-    await second;
-    expect(Speech.instance.speaking, isFalse);
-  });
+  test(
+    'a new word cuts the last one off; only the last ends speaking',
+    () async {
+      final engine = FakeEngine();
+      Speech.engine = engine;
+      final Future<bool> first = Speech.instance.speak('uno');
+      final Future<bool> second = Speech.instance.speak('dos');
+      await first;
+      // The first one was cancelled, but "dos" is still being said.
+      expect(Speech.instance.value['text'], 'dos');
+      expect(Speech.instance.speaking, isTrue);
+      engine.current!.complete();
+      await second;
+      expect(Speech.instance.speaking, isFalse);
+    },
+  );
 
   test('without a voice it says so instead', () async {
     Speech.engine = FakeEngine(available: false);

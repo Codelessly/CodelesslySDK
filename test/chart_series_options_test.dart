@@ -13,8 +13,7 @@ void main() {
   });
 
   test('a fitted y domain hugs the data on round steps', () {
-    final (double lo, double hi, double step) =
-        fittedYDomain(38200, 42061, 4);
+    final (double lo, double hi, double step) = fittedYDomain(38200, 42061, 4);
     expect(lo, lessThanOrEqualTo(38200));
     expect(lo, greaterThan(30000));
     expect(hi, greaterThanOrEqualTo(42061));

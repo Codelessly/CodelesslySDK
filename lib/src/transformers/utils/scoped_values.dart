@@ -137,7 +137,7 @@ class ScopedValues {
        _previewVariables = variables,
        nodeState = null,
        holdProgress = null,
-        dragValues = null,
+       dragValues = null,
        trackValues = null,
        routeParams = routeParams ?? {};
 

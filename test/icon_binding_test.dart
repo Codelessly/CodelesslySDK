@@ -95,7 +95,8 @@ void main() {
         style: MaterialIconStyle.outlined,
       ),
     );
-    final MaterialIcon kept = iconWithName(outlined, 'circle').icon! as MaterialIcon;
+    final MaterialIcon kept =
+        iconWithName(outlined, 'circle').icon! as MaterialIcon;
     expect(kept.style, MaterialIconStyle.outlined);
     // A suffix still sets the style.
     expect(

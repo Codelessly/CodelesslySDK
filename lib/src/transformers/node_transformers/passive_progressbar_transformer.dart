@@ -320,7 +320,10 @@ class ArcProgressPainter extends CustomPainter {
             ..style = PaintingStyle.stroke
             ..strokeCap = cap
             ..strokeWidth = stroke + properties.arcGlow
-            ..maskFilter = MaskFilter.blur(BlurStyle.normal, properties.arcGlow),
+            ..maskFilter = MaskFilter.blur(
+              BlurStyle.normal,
+              properties.arcGlow,
+            ),
         );
       }
       final Paint paint = Paint()

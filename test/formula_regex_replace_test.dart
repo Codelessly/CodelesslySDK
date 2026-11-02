@@ -6,16 +6,24 @@ void main() {
       FormulaEvaluator.evaluate(expression, (path) => vars[path]);
 
   test('regexReplace replaces every match of a pattern', () {
-    expect(eval("regexReplace('WILLOW PHARMACY 044', ' [0-9]+\$', '')"),
-        'WILLOW PHARMACY');
+    expect(
+      eval("regexReplace('WILLOW PHARMACY 044', ' [0-9]+\$', '')"),
+      'WILLOW PHARMACY',
+    );
     expect(eval("regexReplace('A #12 B #7', '#[0-9]+', 'n')"), 'A n B n');
   });
 
   test('regexReplace inserts numbered and named groups', () {
-    expect(eval("regexReplace('2026-10-30', '([0-9]+)-([0-9]+)-([0-9]+)', '\$3/\$2/\$1')"),
-        '30/10/2026');
-    expect(eval("regexReplace('SQ *KESTREL', '^SQ [*](?<name>.+)', '\${name}')"),
-        'KESTREL');
+    expect(
+      eval(
+        "regexReplace('2026-10-30', '([0-9]+)-([0-9]+)-([0-9]+)', '\$3/\$2/\$1')",
+      ),
+      '30/10/2026',
+    );
+    expect(
+      eval("regexReplace('SQ *KESTREL', '^SQ [*](?<name>.+)', '\${name}')"),
+      'KESTREL',
+    );
     expect(eval("regexReplace('5', '(5)', '\$\$\$1')"), r'$5');
   });
 
