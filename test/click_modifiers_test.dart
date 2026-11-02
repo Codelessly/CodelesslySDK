@@ -58,9 +58,15 @@ void main() {
     await tester.pump();
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    const Map<String, double> at = {
+      'x': 10,
+      'y': 10,
+      'globalX': 10,
+      'globalY': 10,
+    };
     expect(results, [
-      {'meta': false, 'shift': false, 'alt': false},
-      {'meta': true, 'shift': true, 'alt': false},
+      {...at, 'meta': false, 'shift': false, 'alt': false},
+      {...at, 'meta': true, 'shift': true, 'alt': false},
     ]);
   });
 }
