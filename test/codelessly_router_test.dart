@@ -285,6 +285,44 @@ void main() {
       await tester.pumpAndSettle();
     });
 
+    testWidgets('a pop with a destination goes there from a direct link', (
+      tester,
+    ) async {
+      // Opened by link, the journal sits on the entry screen the router put
+      // under it, which isn't where the user came from.
+      final SDKPublishModel model = tidepoolModel(
+        buttons: {
+          'journal': {
+            'Leave': NavigationAction(
+              navigationType: NavigationType.pop,
+              destinationId: 'guide',
+            ),
+          },
+          'guide': {'ToJournal': push('journal')},
+        },
+      );
+      final browser = FakeBrowser(tester, url: '/journal');
+      await pumpRouterApp(tester, model, browser);
+      await tap(tester, 'Leave');
+      expect(find.text('Guide'), findsOneWidget);
+
+      // Opened from the guide, it goes back there by popping.
+      await tap(tester, 'ToJournal');
+      expect(find.text('Journal'), findsOneWidget);
+      await tap(tester, 'Leave');
+      expect(find.text('Guide'), findsOneWidget);
+      expect(find.text('Journal'), findsNothing);
+    });
+
+    testWidgets("an unknown link opens the app's own not found screen", (
+      tester,
+    ) async {
+      final browser = FakeBrowser(tester, url: '/amp/room');
+      await pumpRouterApp(tester, tidepoolModel(withNotFound: true), browser);
+      expect(find.text('lost amp/room'), findsOneWidget);
+      expect(browser.url, '/amp/room');
+    });
+
     testWidgets('a link to a screen id still opens it', (tester) async {
       final browser = FakeBrowser(tester, url: '/creature?id=kraken');
       await pumpRouterApp(tester, appModel(), browser);

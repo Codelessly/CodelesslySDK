@@ -18,6 +18,7 @@ void main() {
     List<BaseNode> nodes, {
     required bool runtime,
     required List<VariableData> variables,
+    bool providersInsideApp = false,
   }) async {
     final registry = NodeRegistry()
       ..setNodes({for (final node in nodes) node.id: node});
@@ -28,28 +29,30 @@ void main() {
     codelesslyContext = CodelesslyContext.empty().copyWith(
       variables: {for (final v in variables) v.id: Observable(v)},
     );
-    await tester.pumpWidget(
-      ChangeNotifierProvider<CodelesslyContext>.value(
-        value: codelesslyContext,
-        child: MaterialApp(
-          home: Material(
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: Builder(
-                builder: (context) => manager.buildWidgetFromNode(
-                  nodes.first,
-                  context,
-                  settings: WidgetBuildSettings(
-                    debugLabel: runtime ? 'runtime' : 'design canvas',
-                    isPreview: !runtime,
-                    withReactions: runtime,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+    Widget screen(BuildContext context) => manager.buildWidgetFromNode(
+      nodes.first,
+      context,
+      settings: WidgetBuildSettings(
+        debugLabel: runtime ? 'runtime' : 'design canvas',
+        isPreview: !runtime,
+        withReactions: runtime,
       ),
+    );
+    Widget provided(Widget child) =>
+        ChangeNotifierProvider<CodelesslyContext>.value(
+          value: codelesslyContext,
+          child: child,
+        );
+    // In an app the providers sit inside the navigator, below the overlay
+    // where a dragged row is drawn.
+    final Widget body = Align(
+      alignment: Alignment.topLeft,
+      child: Builder(builder: screen),
+    );
+    await tester.pumpWidget(
+      providersInsideApp
+          ? MaterialApp(home: Material(child: provided(body)))
+          : provided(MaterialApp(home: Material(child: body))),
     );
     expect(tester.takeException(), isNull);
   }
@@ -194,6 +197,7 @@ void main() {
       tester,
       songs(),
       runtime: true,
+      providersInsideApp: true,
       variables: [
         variable('songs', VariableType.list, [
           {'id': 'a', 'title': 'Superstition'},
@@ -212,6 +216,9 @@ void main() {
       await gesture.moveBy(const Offset(0, 10));
       await tester.pump(const Duration(milliseconds: 16));
     }
+    // The copy being dragged, drawn in the overlay, builds.
+    expect(tester.takeException(), isNull);
+    expect(find.text('Superstition', findRichText: true), findsWidgets);
     await gesture.up();
     await tester.pumpAndSettle();
     final List titles = [

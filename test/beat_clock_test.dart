@@ -200,4 +200,35 @@ void main() {
     expect(identical(fresh, first), isFalse);
     fresh.release(a);
   });
+
+  test('a screen kept under the shown one does not take its clock', () {
+    final TriggerModel trigger = TriggerModel(
+      type: TriggerType.clock,
+      every: '400',
+      runWhen: '',
+      lookaheadMs: 120,
+    );
+    final List<String> fired = [];
+    void shown(int t, double at, double w) => fired.add('shown');
+    void hidden(int t, double at, double w) => fired.add('hidden');
+    // The shown screen (a deep-linked Mixer) acquires first; the entry
+    // screen under it is built, and acquires, after it.
+    final BeatClock clock = BeatClock.acquire(
+      trigger: trigger,
+      evaluate: (t) => t,
+      onTick: shown,
+      isShown: () => true,
+    );
+    BeatClock.acquire(
+      trigger: trigger,
+      evaluate: (t) => t,
+      onTick: hidden,
+      isShown: () => false,
+    );
+    clock.poll();
+    expect(fired, isNotEmpty);
+    expect(fired.toSet(), {'shown'});
+    clock.release(hidden);
+    clock.release(shown);
+  });
 }
