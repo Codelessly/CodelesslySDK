@@ -94,7 +94,7 @@ class PassiveChartSeriesWidget extends StatelessWidget {
         ) ??
         node.selectedIndex;
     final ChartSeriesPainter painter = ChartSeriesPainter(
-      props: node.properties,
+      props: boundChartProperties(node, scopedValues),
       data: data,
       selectedIndex: selected,
     );
@@ -111,6 +111,20 @@ class PassiveChartSeriesWidget extends StatelessWidget {
           cursor: node.reactions.isEmpty
               ? MouseCursor.defer
               : SystemMouseCursors.click,
+          onHover: !node.properties.selectOnHover
+              ? null
+              : (event) {
+                  final int index =
+                      painter.categoryAt(
+                        event.localPosition,
+                        constraints.biggest,
+                      ) ??
+                      -1;
+                  if (index != selected) onSelect(context, index);
+                },
+          onExit: !node.properties.selectOnHover || selected < 0
+              ? null
+              : (_) => onSelect(context, -1),
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTapUp: (details) {
@@ -176,6 +190,95 @@ String compactNumber(num v) => v.abs() >= 10000
     ? '${(v / 1000).toStringAsFixed(1)}k'
     : (v == v.roundToDouble() ? v.round().toString() : v.toStringAsFixed(1));
 
+/// [node]'s properties with its bound `yLabelPrefix`, `yLabelSuffix`,
+/// `minY`, `maxY` and `series<i>Color` applied.
+ChartProperties boundChartProperties(
+  ChartNode node,
+  ScopedValues scopedValues,
+) {
+  final ChartProperties props = node.properties;
+  T? bound<T extends Object>(String property) =>
+      node.variables.containsKey(property)
+      ? PropertyValueDelegate.getPropertyValue<T>(
+          node,
+          property,
+          scopedValues: scopedValues,
+        )
+      : null;
+  double? number(String property) => switch (bound<Object>(property)) {
+    final num n => n.toDouble(),
+    final String s => double.tryParse(s.trim()),
+    _ => null,
+  };
+  final String? prefix = bound<String>('yLabelPrefix');
+  final String? suffix = bound<String>('yLabelSuffix');
+  final double? minY = number('minY');
+  final double? maxY = number('maxY');
+  final List<ColorRGBA?> colors = [
+    for (int i = 0; i < props.series.length; i++)
+      bound<ColorRGBA>('series${i}Color'),
+  ];
+  if (prefix == null &&
+      suffix == null &&
+      minY == null &&
+      maxY == null &&
+      colors.every((c) => c == null)) {
+    return props;
+  }
+  return props.copyWith(
+    yLabelPrefix: prefix,
+    yLabelSuffix: suffix,
+    minY: minY,
+    maxY: maxY,
+    series: [
+      for (int i = 0; i < props.series.length; i++)
+        colors[i] == null
+            ? props.series[i]
+            : ChartSeries.fromJson({
+                ...props.series[i].toJson(),
+                'color': colors[i]!.toJson(),
+              }),
+    ],
+  );
+}
+
+/// A y-axis label: [prefix] and [suffix] around the compact number, with
+/// the minus sign in front (`−$5k`).
+String yAxisLabel(num v, String prefix, String suffix) {
+  final String number = compactNumber(v.abs());
+  return '${v < 0 ? '−' : ''}$prefix$number$suffix';
+}
+
+/// A y domain (low, high, step) from just under [min] to just over [max],
+/// on round steps, for line charts that don't start at 0.
+(double, double, double) fittedYDomain(double min, double max, int lines) {
+  final double pad = (max - min) * 0.05;
+  final (_, double step) = niceAxis(max - min + pad * 2, lines);
+  final double lo = ((min - pad) / step).floorToDouble() * step;
+  double hi = lo + step * lines;
+  while (hi < max) {
+    hi += step;
+  }
+  return (lo, hi, step);
+}
+
+/// The path through [pts]: straight segments, or with [curved] a smooth
+/// curve that passes through every point without overshooting it
+/// (control points share the neighbouring points' heights).
+Path seriesPath(List<Offset> pts, {bool curved = false}) {
+  final Path path = Path()..moveTo(pts.first.dx, pts.first.dy);
+  for (int i = 1; i < pts.length; i++) {
+    final Offset a = pts[i - 1], b = pts[i];
+    if (curved) {
+      final double mx = (a.dx + b.dx) / 2;
+      path.cubicTo(mx, a.dy, mx, b.dy, b.dx, b.dy);
+    } else {
+      path.lineTo(b.dx, b.dy);
+    }
+  }
+  return path;
+}
+
 /// Resolves series-chart axis label fonts, including Google Fonts.
 TextStyle _chartSeriesLabelStyle({
   required String? family,
@@ -225,8 +328,9 @@ class ChartSeriesPainter extends CustomPainter {
     final double bottom = props.showXAxis ? _xAxisHeight : 0;
     return Rect.fromLTRB(
       left,
-      props.chartType == ChartType.line ? 6 : 0,
-      size.width - (props.chartType == ChartType.line ? 6 : 0),
+      props.chartType == ChartType.line ? (props.plotInset ?? 6) : 0,
+      size.width -
+          (props.chartType == ChartType.line ? (props.plotInset ?? 6) : 0),
       size.height - bottom,
     );
   }
@@ -234,6 +338,7 @@ class ChartSeriesPainter extends CustomPainter {
   /// The category under [position], or null.
   int? categoryAt(Offset position, Size size) {
     if (data.isEmpty) return null;
+    if (props.chartType == ChartType.donut) return sliceAt(position, size);
     final Rect plot = plotRect(size);
     if (position.dx < plot.left || position.dx > plot.right) return null;
     if (props.chartType == ChartType.line) {
@@ -273,6 +378,8 @@ class ChartSeriesPainter extends CustomPainter {
   /// The y domain: min and max.
   (double, double, double) _yDomain() {
     double maxV = 0, minV = 0;
+    // The lowest value plotted, for [ChartProperties.fitMinY].
+    double dataMin = double.infinity;
     final groups = _groups;
     for (final item in data) {
       for (final group in groups) {
@@ -291,11 +398,20 @@ class ChartSeriesPainter extends CustomPainter {
         if (v != null) {
           maxV = math.max(maxV, v);
           minV = math.min(minV, v);
+          dataMin = math.min(dataMin, v);
         }
       }
     }
     for (final line in props.referenceLines) {
       maxV = math.max(maxV, line.value);
+    }
+    if (props.minY == null &&
+        props.maxY == null &&
+        props.fitMinY &&
+        props.chartType == ChartType.line &&
+        dataMin.isFinite &&
+        maxV > dataMin) {
+      return fittedYDomain(dataMin, maxV, math.max(1, props.gridLines));
     }
     final double lo = props.minY ?? minV;
     if (props.maxY != null) {
@@ -352,9 +468,91 @@ class ChartSeriesPainter extends CustomPainter {
     switch (props.chartType) {
       case ChartType.timeline:
         _paintTimeline(canvas, size);
+      case ChartType.donut:
+        _paintDonut(canvas, size);
       case ChartType.bar:
       case ChartType.line:
         _paintXY(canvas, size);
+    }
+  }
+
+  /// Donut slice values: the first series' field of each item (negative
+  /// and missing values count as 0).
+  List<double> get _sliceValues {
+    final String field = props.series.isEmpty
+        ? 'value'
+        : props.series.first.field;
+    return [
+      for (final item in data) math.max(0, chartNumber(item, field) ?? 0),
+    ];
+  }
+
+  /// The donut's ring: center and the radius of the middle of the stroke.
+  (Offset, double, double) _ring(Size size) {
+    final double diameter = math.min(size.width, size.height);
+    final double stroke = diameter * props.donutThickness.clamp(0.02, 0.5);
+    // Room for the selected slice, drawn thicker.
+    final double radius = diameter / 2 - stroke / 2 - 4;
+    return (size.center(Offset.zero), radius, stroke);
+  }
+
+  /// The slice under [position], or null (the hole and outside the ring).
+  int? sliceAt(Offset position, Size size) {
+    final List<double> values = _sliceValues;
+    final double total = values.fold(0.0, (a, b) => a + b);
+    if (total <= 0) return null;
+    final (Offset c, double r, double stroke) = _ring(size);
+    final Offset v = position - c;
+    if ((v.distance - r).abs() > stroke / 2 + 4) return null;
+    double a =
+        math.atan2(v.dy, v.dx) + math.pi / 2 - props.startAngle * math.pi / 180;
+    a %= 2 * math.pi;
+    if (a < 0) a += 2 * math.pi;
+    double acc = 0;
+    for (int i = 0; i < values.length; i++) {
+      acc += values[i] / total * 2 * math.pi;
+      if (a <= acc) return i;
+    }
+    return values.length - 1;
+  }
+
+  void _paintDonut(Canvas canvas, Size size) {
+    final List<double> values = _sliceValues;
+    final double total = values.fold(0.0, (a, b) => a + b);
+    final (Offset c, double r, double stroke) = _ring(size);
+    final Rect rect = Rect.fromCircle(center: c, radius: r);
+    final Paint paint = Paint()..style = PaintingStyle.stroke;
+    if (total <= 0) {
+      canvas.drawArc(
+        rect,
+        0,
+        2 * math.pi,
+        false,
+        paint
+          ..color = props.trackColor.toFlutterColor()
+          ..strokeWidth = stroke,
+      );
+      return;
+    }
+    final ChartSeries? series = props.series.firstOrNull;
+    final double gap = props.sliceGap * math.pi / 180;
+    double start = -math.pi / 2 + props.startAngle * math.pi / 180;
+    for (int i = 0; i < values.length; i++) {
+      final double sweep = values[i] / total * 2 * math.pi;
+      final Color base =
+          (series?.colorField == null
+              ? null
+              : chartColor(data[i][series!.colorField!])) ??
+          series?.color.toFlutterColor() ??
+          const Color(0xFF888888);
+      final bool on = selectedIndex < 0 || selectedIndex == i;
+      paint
+        ..color = on ? base : base.withValues(alpha: 0.28)
+        ..strokeWidth = selectedIndex == i ? stroke + 8 : stroke;
+      if (sweep > gap) {
+        canvas.drawArc(rect, start + gap / 2, sweep - gap, false, paint);
+      }
+      start += sweep;
     }
   }
 
@@ -382,9 +580,16 @@ class ChartSeriesPainter extends CustomPainter {
         if (props.showYAxis) {
           _label(
             canvas,
-            compactNumber(v),
+            yAxisLabel(v, props.yLabelPrefix, props.yLabelSuffix),
             Offset(plot.left - 8, gy),
             align: TextAlign.right,
+            style: props.yAxisFontFamily == null
+                ? null
+                : _chartSeriesLabelStyle(
+                    family: props.yAxisFontFamily,
+                    size: props.axisFontSize,
+                    color: props.axisLabelColor.toFlutterColor(),
+                  ),
           );
         }
       }
@@ -519,10 +724,7 @@ class ChartSeriesPainter extends CustomPainter {
             Offset(cx(i), y(v)),
       ];
       if (pts.length < 2) continue;
-      final Path area = Path()..moveTo(pts.first.dx, pts.first.dy);
-      for (final Offset p in pts.skip(1)) {
-        area.lineTo(p.dx, p.dy);
-      }
+      final Path area = seriesPath(pts, curved: s.curved);
       final Color color = s.color.toFlutterColor();
       if (s.fillTo != null) {
         final List<Offset> other = [
@@ -580,17 +782,16 @@ class ChartSeriesPainter extends CustomPainter {
           _dashedLine(canvas, pts[i], pts[i + 1], p, dash: 4, gap: 4);
         }
       } else if (pts.length > 1) {
-        final Path path = Path()..moveTo(pts.first.dx, pts.first.dy);
-        for (final Offset pt in pts.skip(1)) {
-          path.lineTo(pt.dx, pt.dy);
-        }
-        canvas.drawPath(path, p);
+        canvas.drawPath(seriesPath(pts, curved: s.curved), p);
       }
       if (s.endDot) {
         canvas.drawCircle(
           pts.last,
           s.strokeWidth + 2.5,
-          Paint()..color = Colors.black.withValues(alpha: 0.85),
+          Paint()
+            ..color =
+                s.endDotHaloColor?.toFlutterColor() ??
+                Colors.black.withValues(alpha: 0.85),
         );
         canvas.drawCircle(
           pts.last,

@@ -283,6 +283,11 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         scopedValues: preview,
       );
     }
+    // A floating node (a field's menu) draws above the screen at runtime;
+    // the design canvas draws it in place.
+    if (styled.floating && !settings.isPreview) {
+      widget = FloatingNode(child: widget);
+    }
 
     return decorate(context, styled, widget, NodeBuildLayer.margin);
   }
