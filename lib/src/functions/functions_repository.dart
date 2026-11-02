@@ -609,13 +609,17 @@ class FunctionsRepository {
     Codelessly? codelessly,
     CodelesslyWidgetController? codelesslyController,
     ScopedValues? scopedValues,
+    bool literalParams = false,
   }) async {
     final ScopedValues effectiveScopedValues =
         scopedValues ?? ActionChain.scopedValuesOf(context);
-    final parsedParams = substituteVariablesInMap(
-      action.params,
-      effectiveScopedValues,
-    );
+    // A link's parameters are text the visitor typed: they are passed as
+    // they are, as the first screen reads them, never evaluated (a
+    // `${...}` in a URL is not a formula) or parsed (`?validate=1` stays
+    // the text '1', not the number 1).
+    final Map<String, dynamic> parsedParams = literalParams
+        ? {...action.params}
+        : substituteVariablesInMap(action.params, effectiveScopedValues);
 
     DebugLogger.instance.printInfo(
       'Performing navigation action with params: $parsedParams',
@@ -638,6 +642,7 @@ class FunctionsRepository {
           codelessly: codelessly,
           codelesslyController: codelesslyController,
           scopedValues: scopedValues,
+          literalParams: literalParams,
         );
       }
     } else {
