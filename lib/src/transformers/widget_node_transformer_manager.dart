@@ -6,9 +6,10 @@ import 'dart:ui' show lerpDouble;
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
-import 'package:flutter/services.dart' show BrowserContextMenu;
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
@@ -177,7 +178,9 @@ abstract class WidgetNodeTransformerManager
     return Visibility(
       visible: visible,
       maintainState: maintainState,
-      maintainAnimation: maintainState,
+      // Pulses, loops and spins of a node nobody can see stop ticking
+      // (Visibility mutes its tickers); one that keeps its space keeps them.
+      maintainAnimation: keepSize,
       maintainSize: keepSize,
       maintainSemantics: keepSize,
       maintainInteractivity: keepSize,
@@ -461,10 +464,7 @@ abstract class WidgetNodeTransformerManager
 
   /// Whether the condition [text] (a `${...}` path or `${= ...}` formula,
   /// or `true`/`false`) holds with [scopedValues]. Empty text is null.
-  static bool? evaluateConditionText(
-    String text,
-    ScopedValues scopedValues,
-  ) {
+  static bool? evaluateConditionText(String text, ScopedValues scopedValues) {
     if (text.trim().isEmpty) return null;
     final Object? value = PropertyValueDelegate.substituteJsonValue(
       text.trim(),
@@ -911,6 +911,8 @@ abstract class WidgetNodeTransformerManager
         : of(TriggerType.dragEnd);
     final List<Reaction> onPointerDown = of(TriggerType.pointerDown);
     final List<Reaction> onPointerUp = of(TriggerType.pointerUp);
+    final List<Reaction> onWheel = of(TriggerType.wheel);
+    final List<Reaction> onPinch = of(TriggerType.pinch);
     final List<Reaction> onSecondary = of(TriggerType.secondaryClick);
     if (onSecondary.isNotEmpty) {
       // A right click opens the app's menu, not the browser's.
@@ -932,7 +934,9 @@ abstract class WidgetNodeTransformerManager
     if (onDrag.isEmpty &&
         onDragEnd.isEmpty &&
         onPointerDown.isEmpty &&
-        onPointerUp.isEmpty) {
+        onPointerUp.isEmpty &&
+        onWheel.isEmpty &&
+        onPinch.isEmpty) {
       return _wrapWithPointerReactions(context, node, tappable);
     }
     return _wrapWithPointerReactions(
@@ -943,6 +947,8 @@ abstract class WidgetNodeTransformerManager
         onDragEnd: onDragEnd,
         onPointerDown: onPointerDown,
         onPointerUp: onPointerUp,
+        onWheel: onWheel,
+        onPinch: onPinch,
         child: tappable,
       ),
     );
@@ -1065,14 +1071,28 @@ abstract class WidgetNodeTransformerManager
         )
         .toList();
 
+    // A click's result says where it landed: `x`, `y` in the node and
+    // `globalX`, `globalY` on screen (one cell can tell which slot of a
+    // timeline was tapped).
+    Map<String, double>? tapAt;
+    Map<String, double> where(Offset local, Offset global) => {
+      'x': local.dx,
+      'y': local.dy,
+      'globalX': global.dx,
+      'globalY': global.dy,
+    };
+
     if (inkWell != null) {
       return Material(
         type: MaterialType.transparency,
         child: InkWell(
+          onTapDown: (details) =>
+              tapAt = where(details.localPosition, details.globalPosition),
           onTap: () => FunctionsRepository.triggerAction(
             context,
             TriggerType.click,
             reactions: onClickReactions,
+            result: tapAt,
           ),
           onLongPress: onLongPressReactions.isEmpty
               ? null
@@ -1104,11 +1124,14 @@ abstract class WidgetNodeTransformerManager
         hitTestBehavior: HitTestBehavior.opaque,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => FunctionsRepository.triggerAction(
-            context,
-            TriggerType.click,
-            reactions: onClickReactions,
-          ),
+          onTapUp: onClickReactions.isEmpty
+              ? null
+              : (details) => FunctionsRepository.triggerAction(
+                  context,
+                  TriggerType.click,
+                  reactions: onClickReactions,
+                  result: where(details.localPosition, details.globalPosition),
+                ),
           onLongPress: onLongPressReactions.isEmpty
               ? null
               : () => FunctionsRepository.triggerAction(
@@ -1410,13 +1433,9 @@ class SvgIcon extends StatelessWidget {
       if (glyph != null) {
         return Icon(glyph, size: dimension, color: iconColor);
       }
-      if (material.codepoint > 0) {
-        return Icon(
-          IconData(material.codepoint, fontFamily: material.fontFamily),
-          size: dimension,
-          color: iconColor,
-        );
-      }
+      // A name the bundled font doesn't have is drawn from its SVG below.
+      // Never `IconData(codepoint)` from data: a non-constant IconData
+      // breaks icon tree shaking, and with it every release web build.
     }
 
     final url = icon.toSvgUrl(
@@ -1505,22 +1524,32 @@ class SvgIconImage extends StatelessWidget {
   }
 }
 
-/// Runs a node's drag and pointer reactions. Each action of a [TriggerType.drag]
-/// reaction runs on every move with `${result}` set to:
+/// Runs a node's drag, pointer, wheel and pinch reactions. Each action of a
+/// [TriggerType.drag] reaction runs on every move with `${result}` set to:
 ///
 /// - `deltaX`, `deltaY`: how far the pointer moved since the last event,
 /// - `dx`, `dy`: how far it moved since the drag started,
-/// - `x`, `y`: where the pointer is, relative to the node's top-left.
+/// - `x`, `y`: where the pointer is, relative to the node's top-left,
+/// - `globalX`, `globalY`: where it is on the screen,
+/// - `shift`, `alt`, `meta`: modifier keys held (meta is Command on macOS,
+///   Control elsewhere).
 ///
 /// [TriggerType.dragEnd] reactions run once when the pointer lifts after a
-/// drag, with the drag's total `dx`, `dy` and its `velocityX`, `velocityY`
-/// (px/s). [TriggerType.pointerDown] and [TriggerType.pointerUp] run when a
-/// pointer touches or leaves the node, with its local `x`, `y`.
+/// drag, with the drag's total `dx`, `dy`, its `velocityX`, `velocityY`
+/// (px/s) and where it ended (`x`, `y`, `globalX`, `globalY`).
+/// [TriggerType.pointerDown] and [TriggerType.pointerUp] run when a pointer
+/// touches or leaves the node, with its local `x`, `y`, `globalX`, `globalY`,
+/// the modifiers and `button` (`primary`, `secondary` or `middle`).
+/// [TriggerType.wheel] runs on mouse wheel and trackpad scrolls over the node
+/// and [TriggerType.pinch] on two-finger (or trackpad) pinches; see their
+/// docs for `${result}`.
 class ReactionDragDetector extends StatefulWidget {
   final List<Reaction> onDrag;
   final List<Reaction> onDragEnd;
   final List<Reaction> onPointerDown;
   final List<Reaction> onPointerUp;
+  final List<Reaction> onWheel;
+  final List<Reaction> onPinch;
   final Widget child;
 
   const ReactionDragDetector({
@@ -1529,6 +1558,8 @@ class ReactionDragDetector extends StatefulWidget {
     required this.onDragEnd,
     required this.onPointerDown,
     required this.onPointerUp,
+    this.onWheel = const [],
+    this.onPinch = const [],
     required this.child,
   });
 
@@ -1538,6 +1569,20 @@ class ReactionDragDetector extends StatefulWidget {
 
 class _ReactionDragDetectorState extends State<ReactionDragDetector> {
   Offset _total = Offset.zero;
+  Offset _last = Offset.zero;
+  Offset _lastGlobal = Offset.zero;
+  double _lastScale = 1;
+  bool _pinching = false;
+  bool _dragged = false;
+
+  static Map<String, bool> get _modifiers {
+    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
+    return {
+      'shift': keyboard.isShiftPressed,
+      'alt': keyboard.isAltPressed,
+      'meta': keyboard.isMetaPressed || keyboard.isControlPressed,
+    };
+  }
 
   void _run(List<Reaction> reactions, TriggerType type, Map result) {
     if (reactions.isEmpty) return;
@@ -1549,49 +1594,157 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
     );
   }
 
+  void _dragUpdate(Offset delta, Offset local, Offset global) {
+    _total += delta;
+    _dragged = true;
+    _run(widget.onDrag, TriggerType.drag, {
+      'deltaX': delta.dx,
+      'deltaY': delta.dy,
+      'dx': _total.dx,
+      'dy': _total.dy,
+      'x': local.dx,
+      'y': local.dy,
+      'globalX': global.dx,
+      'globalY': global.dy,
+      ..._modifiers,
+    });
+  }
+
+  void _dragEnd(Velocity velocity) {
+    if (!_dragged) return;
+    _dragged = false;
+    _run(widget.onDragEnd, TriggerType.dragEnd, {
+      'dx': _total.dx,
+      'dy': _total.dy,
+      'velocityX': velocity.pixelsPerSecond.dx,
+      'velocityY': velocity.pixelsPerSecond.dy,
+      'x': _last.dx,
+      'y': _last.dy,
+      'globalX': _lastGlobal.dx,
+      'globalY': _lastGlobal.dy,
+      ..._modifiers,
+    });
+  }
+
+  void _onWheel(PointerSignalEvent event) {
+    if (widget.onWheel.isEmpty && widget.onPinch.isEmpty) return;
+    // Claim the event so an enclosing scroll view doesn't also scroll.
+    GestureBinding.instance.pointerSignalResolver.register(event, (event) {
+      if (event is PointerScrollEvent) {
+        _run(widget.onWheel, TriggerType.wheel, {
+          'deltaX': event.scrollDelta.dx,
+          'deltaY': event.scrollDelta.dy,
+          'x': event.localPosition.dx,
+          'y': event.localPosition.dy,
+          'trackpad': event.kind == PointerDeviceKind.trackpad,
+          'ctrl':
+              HardwareKeyboard.instance.isControlPressed ||
+              HardwareKeyboard.instance.isMetaPressed,
+          ..._modifiers,
+        });
+      } else if (event is PointerScaleEvent) {
+        _run(widget.onPinch, TriggerType.pinch, {
+          'scale': event.scale,
+          'totalScale': event.scale,
+          'x': event.localPosition.dx,
+          'y': event.localPosition.dy,
+          'deltaX': 0.0,
+          'deltaY': 0.0,
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool drags = widget.onDrag.isNotEmpty || widget.onDragEnd.isNotEmpty;
+    final bool pinches = widget.onPinch.isNotEmpty;
     Widget child = widget.child;
-    if (drags) {
+    if (pinches) {
+      // A scale recognizer handles one-finger drags too, so both live here.
+      child = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onScaleStart: (details) {
+          _total = Offset.zero;
+          _lastScale = 1;
+          _pinching = details.pointerCount > 1;
+          _last = details.localFocalPoint;
+          _lastGlobal = details.focalPoint;
+        },
+        onScaleUpdate: (details) {
+          if (details.pointerCount > 1 || _pinching) {
+            _pinching = true;
+            final double step = details.scale / _lastScale;
+            _lastScale = details.scale;
+            _run(widget.onPinch, TriggerType.pinch, {
+              'scale': step,
+              'totalScale': details.scale,
+              'x': details.localFocalPoint.dx,
+              'y': details.localFocalPoint.dy,
+              'deltaX': details.focalPointDelta.dx,
+              'deltaY': details.focalPointDelta.dy,
+            });
+          } else {
+            _last = details.localFocalPoint;
+            _lastGlobal = details.focalPoint;
+            _dragUpdate(
+              details.focalPointDelta,
+              details.localFocalPoint,
+              details.focalPoint,
+            );
+          }
+        },
+        onScaleEnd: (details) {
+          if (!_pinching) _dragEnd(details.velocity);
+          _pinching = false;
+          _dragged = false;
+        },
+        child: child,
+      );
+    } else if (drags) {
       child = MouseRegion(
         cursor: SystemMouseCursors.grab,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onPanStart: (_) => _total = Offset.zero,
           onPanUpdate: (details) {
-            _total += details.delta;
-            _run(widget.onDrag, TriggerType.drag, {
-              'deltaX': details.delta.dx,
-              'deltaY': details.delta.dy,
-              'dx': _total.dx,
-              'dy': _total.dy,
-              'x': details.localPosition.dx,
-              'y': details.localPosition.dy,
-            });
+            _last = details.localPosition;
+            _lastGlobal = details.globalPosition;
+            _dragUpdate(
+              details.delta,
+              details.localPosition,
+              details.globalPosition,
+            );
           },
-          onPanEnd: (details) => _run(widget.onDragEnd, TriggerType.dragEnd, {
-            'dx': _total.dx,
-            'dy': _total.dy,
-            'velocityX': details.velocity.pixelsPerSecond.dx,
-            'velocityY': details.velocity.pixelsPerSecond.dy,
-          }),
+          onPanEnd: (details) => _dragEnd(details.velocity),
           child: child,
         ),
       );
     }
-    if (widget.onPointerDown.isNotEmpty || widget.onPointerUp.isNotEmpty) {
+    if (widget.onPointerDown.isNotEmpty ||
+        widget.onPointerUp.isNotEmpty ||
+        widget.onWheel.isNotEmpty ||
+        pinches) {
+      Map<String, Object> pointer(PointerEvent event) => {
+        'x': event.localPosition.dx,
+        'y': event.localPosition.dy,
+        'globalX': event.position.dx,
+        'globalY': event.position.dy,
+        'button': switch (event.buttons) {
+          kSecondaryMouseButton => 'secondary',
+          kMiddleMouseButton => 'middle',
+          _ => 'primary',
+        },
+        ..._modifiers,
+      };
       child = Listener(
-        onPointerDown: (event) => _run(
-          widget.onPointerDown,
-          TriggerType.pointerDown,
-          {'x': event.localPosition.dx, 'y': event.localPosition.dy},
-        ),
-        onPointerUp: (event) => _run(
-          widget.onPointerUp,
-          TriggerType.pointerUp,
-          {'x': event.localPosition.dx, 'y': event.localPosition.dy},
-        ),
+        // The node's whole box listens, painted or not.
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (event) =>
+            _run(widget.onPointerDown, TriggerType.pointerDown, pointer(event)),
+        onPointerUp: (event) =>
+            _run(widget.onPointerUp, TriggerType.pointerUp, pointer(event)),
+        onPointerSignal: _onWheel,
         child: child,
       );
     }

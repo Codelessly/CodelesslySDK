@@ -2153,9 +2153,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     // A click reads the modifier keys held, as `${result.meta}` (Command
     // on macOS, Control elsewhere), `${result.shift}` and `${result.alt}`,
     // for multi-select (⌘-click) and range select (⇧-click).
-    if (type == TriggerType.click && result == null) {
+    // Beside where it landed (`x`, `y`, `globalX`, `globalY`), when known.
+    if (type == TriggerType.click && (result == null || result is Map)) {
       final HardwareKeyboard keys = HardwareKeyboard.instance;
       result = {
+        ...?(result as Map?),
         'meta': keys.isMetaPressed || keys.isControlPressed,
         'shift': keys.isShiftPressed,
         'alt': keys.isAltPressed,
