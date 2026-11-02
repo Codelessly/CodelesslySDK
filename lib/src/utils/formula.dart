@@ -2096,9 +2096,12 @@ final Map<String, _Function> _functions = {
       FormulaEvaluator.stringify(a[i]): a[i + 1],
   },
   // The first argument that is neither null nor empty text.
+  // The first value that is neither null nor empty text; when none is, the
+  // last one that isn't null, so `coalesce(route.q, '')` is '' rather than
+  // null when the parameter is missing.
   'coalesce': (a) => a.firstWhere(
     (v) => v != null && !(v is String && v.isEmpty),
-    orElse: () => null,
+    orElse: () => a.lastWhere((v) => v != null, orElse: () => null),
   ),
 };
 

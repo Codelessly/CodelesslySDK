@@ -102,6 +102,11 @@ void main() {
     test('coalesce picks the first value that is set', () {
       expect(eval("coalesce(missing, '', 'fallback')"), 'fallback');
       expect(eval('coalesce(meter, 1)'), 2481.6);
+      // Nothing set: the last value given, so a missing link parameter
+      // compares as empty text.
+      expect(eval("coalesce(missing, '')"), '');
+      expect(eval("coalesce(missing, '') != ''"), isFalse);
+      expect(eval('coalesce(missing, other)'), isNull);
     });
   });
 
