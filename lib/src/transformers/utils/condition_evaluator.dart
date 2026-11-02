@@ -330,6 +330,9 @@ class ConditionEvaluator<R extends Object>
   R? visitCopyToClipboardAction(CopyToClipboardAction action) => null;
 
   @override
+  R? visitControlDragAction(ControlDragAction action) => null;
+
+  @override
   R? visitSpeakAction(SpeakAction action) => null;
 
   @override
@@ -507,10 +510,19 @@ class ConditionPrinter
   void visitCopyToClipboardAction(CopyToClipboardAction action) {}
 
   @override
-  void visitSpeakAction(SpeakAction action) {}
+  void visitSpeakAction(SpeakAction action) {
+    _buffer.writeln('\tSpeak: ${action.stop ? 'stop' : action.text}');
+  }
 
   @override
-  void visitPlaySoundAction(PlaySoundAction action) {}
+  void visitPlaySoundAction(PlaySoundAction action) {
+    _buffer.writeln('\tPlay sound: ${action.sound}');
+  }
+
+  @override
+  void visitControlDragAction(ControlDragAction action) {
+    _buffer.writeln('\tControl drag ${action.command.name} ${action.direction.name} on ${action.nodeId}');
+  }
 
   @override
   void visitPlayAnimationAction(PlayAnimationAction action) {}

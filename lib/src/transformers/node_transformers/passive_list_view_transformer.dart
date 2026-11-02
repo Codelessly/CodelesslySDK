@@ -183,6 +183,23 @@ class PassiveListViewWidget extends StatelessWidget {
     );
   }
 
+  /// The first node in [item]'s subtree that is a reorder handle (its drag
+  /// has [DragModel.reorder]), or null when the rows can't be reordered.
+  BaseNode? reorderHandleOf(BaseNode item) {
+    if (item.drag?.reorder == true) return item;
+    for (final String id in item.childrenOrEmpty) {
+      final BaseNode child;
+      try {
+        child = manager.getNode(id);
+      } catch (_) {
+        continue;
+      }
+      final BaseNode? found = reorderHandleOf(child);
+      if (found != null) return found;
+    }
+    return null;
+  }
+
   /// Builds one item, placed as the editor lays it out; see [ListItemBox].
   /// Legacy wrapping lists retain their item sizing and scroll behavior.
   Widget buildItem(BaseNode item, BuildContext context) {
@@ -519,6 +536,7 @@ class PassiveListViewWidget extends StatelessWidget {
           itemCount: itemCount ?? 0,
           clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
           itemBuilder: itemBuilder,
+          keyOf: itemKey,
         ),
       );
     }
@@ -526,6 +544,52 @@ class PassiveListViewWidget extends StatelessWidget {
       return box(
         canShrinkWrap: true,
         (context, scrolls) => wrapped(scrolls, itemCount ?? 0, itemBuilder),
+      );
+    }
+    // A row with a reorder handle (a node whose drag has `reorder`) can be
+    // dragged by it to a new place; dropping runs the handle's reorder
+    // reactions with the old and new index.
+    final BaseNode? handle = settings.isPreview || data == null
+        ? null
+        : reorderHandleOf(item);
+    if (handle != null && !listWraps(node)) {
+      final double gap = node.properties.hasSeparator
+          ? math.max(0, node.properties.separatorSpacing)
+          : 0;
+      final bool vertical = node.scrollDirection == AxisC.vertical;
+      return box(
+        canShrinkWrap: true,
+        (context, shrinkWrap) => ReorderableListView.builder(
+          shrinkWrap: shrinkWrap || !node.isScrollable,
+          physics: node.isScrollable
+              ? null
+              : const NeverScrollableScrollPhysics(),
+          padding: node.padding.flutterEdgeInsets,
+          scrollDirection: node.scrollDirection.flutterAxis,
+          buildDefaultDragHandles: false,
+          itemCount: itemCount ?? 0,
+          proxyDecorator: (child, index, animation) =>
+              Material(type: MaterialType.transparency, child: child),
+          onReorderItem: (int from, int to) {
+            FunctionsRepository.triggerAction(
+              context,
+              TriggerType.reorder,
+              reactions: handle is ReactionMixin
+                  ? (handle as ReactionMixin).reactions
+                  : const [],
+              result: {'from': from, 'to': to},
+            );
+          },
+          itemBuilder: (context, index) => Padding(
+            key: ValueKey(('reorder', itemKey(index))),
+            padding: index == (itemCount ?? 0) - 1
+                ? EdgeInsets.zero
+                : vertical
+                ? EdgeInsets.only(bottom: gap)
+                : EdgeInsets.only(right: gap),
+            child: itemBuilder(context, index),
+          ),
+        ),
       );
     }
     if (itemCount != null && listBuildsAllItems(node)) {
@@ -842,6 +906,7 @@ class StackedItems extends StatelessWidget {
     required this.itemCount,
     required this.itemBuilder,
     this.clipBehavior = Clip.none,
+    this.keyOf,
   });
 
   /// How many items.
@@ -853,6 +918,13 @@ class StackedItems extends StatelessWidget {
   /// Whether items moved outside the box are clipped.
   final Clip clipBehavior;
 
+  /// The identity of the item at an index, e.g. its data's `id`. An item
+  /// keeps its widget (and its running motion and drag) when it moves to
+  /// another index: when the top card of a deck is swiped away, the card
+  /// behind it rises to the top as the same widget, so its index-bound
+  /// motion animates. By index when null.
+  final Object Function(int index)? keyOf;
+
   @override
   Widget build(BuildContext context) => Stack(
     clipBehavior: clipBehavior,
@@ -861,7 +933,7 @@ class StackedItems extends StatelessWidget {
       // takes taps first.
       for (int index = itemCount - 1; index >= 0; index--)
         Positioned.fill(
-          key: ValueKey(index),
+          key: ValueKey(keyOf?.call(index) ?? index),
           child: Align(
             alignment: Alignment.topCenter,
             child: itemBuilder(context, index),
