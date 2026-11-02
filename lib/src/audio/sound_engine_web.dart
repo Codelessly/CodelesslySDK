@@ -50,18 +50,32 @@ class _WebSoundEngine implements SoundEngine {
 
   final Stopwatch _stopwatch = Stopwatch()..start();
 
-  /// Stopwatch time minus audio time, kept while audio runs, so the clock
-  /// carries on (on the stopwatch) while the browser holds audio back.
-  double _offset = 0;
+  /// The sound clock is continuous whichever source runs it: the stopwatch
+  /// while the browser holds audio back, the audio clock once it runs.
+  /// [_audioBase] is added to the audio clock's time, [_wallBase] taken from
+  /// the stopwatch's, each set at a switch so the time carries on instead of
+  /// jumping (audio starting late would set it back by the seconds the page
+  /// ran on the stopwatch, and the clocks and delays timed on it with it).
+  double _audioBase = 0;
+  double _wallBase = 0;
+  bool _onAudio = false;
 
   @override
   double get now {
     final double wall = _stopwatch.elapsedMicroseconds / 1e6;
-    if (_ctx.state == 'running') {
-      _offset = wall - _ctx.currentTime;
-      return _ctx.currentTime;
+    final bool running = _ctx.state == 'running';
+    if (running != _onAudio) {
+      final double current = _onAudio
+          ? _ctx.currentTime + _audioBase
+          : wall - _wallBase;
+      if (running) {
+        _audioBase = current - _ctx.currentTime;
+      } else {
+        _wallBase = wall - current;
+      }
+      _onAudio = running;
     }
-    return wall - _offset;
+    return running ? _ctx.currentTime + _audioBase : wall - _wallBase;
   }
 
   @override
@@ -110,7 +124,9 @@ class _WebSoundEngine implements SoundEngine {
     double pitch = 1,
   }) {
     if (volume <= 0.0005) return;
-    final double t = math.max(time ?? 0, _ctx.currentTime);
+    // [time] is on the sound clock ([now]); the audio graph runs on the
+    // audio clock.
+    final double t = math.max((time ?? 0) - _audioBase, _ctx.currentTime);
     final double f = pitch;
     switch (voice) {
       case SoundVoice.wood:
