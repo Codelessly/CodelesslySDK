@@ -605,6 +605,13 @@ class FormulaEvaluator {
       'move([a, b, c], 2, 0) → [c, a, b]',
     ),
     FormulaFunctionDoc(
+      'moveItems',
+      'moveItems(list, ids, beforeId, changes)',
+      "moveItems(cards, drag.ids, drag.beforeId, object('lane', drag.over)) "
+          '→ the cards with those ids (or values) moved before the one with '
+          "beforeId ('' = to the end), with the changes merged in",
+    ),
+    FormulaFunctionDoc(
       'thousands',
       'thousands(value, decimals)',
       'thousands(1094) → 1,094',
@@ -662,6 +669,12 @@ class FormulaEvaluator {
       'now',
       'now(utcOffset?)',
       'now() → 2026-10-21T14:30:00.000, now("-07:00") at UTC−7',
+    ),
+    FormulaFunctionDoc(
+      'nowMs',
+      'nowMs()',
+      'nowMs() → 1793356053036, milliseconds since 1970 (time taps: '
+          '60000 / (nowMs() - lastTap) is a tempo)',
     ),
     FormulaFunctionDoc(
       'today',
@@ -2336,6 +2349,34 @@ final Map<String, _Function> _functions = {
     items.insert(_index(_arg(a, 2), items.length, items.length), item);
     return items;
   },
+  'moveItems': (a) {
+    String idOf(Object? v) =>
+        FormulaEvaluator.stringify(v is Map && v['id'] != null ? v['id'] : v);
+    final Object? idsArg = _arg(a, 1);
+    final Set<String> ids = {
+      if (idsArg is Iterable)
+        for (final Object? v in idsArg) idOf(v)
+      else if (idsArg != null)
+        idOf(idsArg),
+    };
+    final Object? changes = _arg(a, 3);
+    final List<Object?> moving = [];
+    final List<Object?> rest = [];
+    for (final Object? item in _values(_arg(a, 0), null)) {
+      if (!ids.contains(idOf(item))) {
+        rest.add(item);
+      } else if (changes is Map && item is Map) {
+        moving.add({...item, ...changes});
+      } else {
+        moving.add(item);
+      }
+    }
+    final String before = FormulaEvaluator.stringify(_arg(a, 2));
+    int at = before.isEmpty ? -1 : rest.indexWhere((i) => idOf(i) == before);
+    if (at < 0) at = rest.length;
+    rest.insertAll(at, moving);
+    return rest;
+  },
   'thousands': (a) {
     final num n = _num(_arg(a, 0));
     if (n.isNaN) return null;
@@ -2393,6 +2434,7 @@ final Map<String, _Function> _functions = {
       if (v is Iterable) ...v else ?v,
   ],
   'now': (a) => _dateText(_nowAt(_arg(a, 0))),
+  'nowMs': (a) => (FormulaClock.pinned ?? DateTime.now()).millisecondsSinceEpoch,
   'today': (a) {
     final DateTime now = _nowAt(_arg(a, 0));
     return _dateText(DateTime(now.year, now.month, now.day));

@@ -340,7 +340,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
   }
 
   Widget jsonPathBuilder(String path) {
-    return LayoutBuilder(
+    return IntrinsicSafeLayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
           return const FittedBox(
