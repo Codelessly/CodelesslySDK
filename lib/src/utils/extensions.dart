@@ -1285,6 +1285,40 @@ String materialSymbolVariant({double? fill, double? weight, double? grade}) {
 int _nearest(double value, List<int> options) =>
     options.reduce((a, b) => (a - value).abs() <= (b - value).abs() ? a : b);
 
+/// The codepoint of [icon] in Flutter's bundled `MaterialIcons` font, or
+/// null when it isn't a Material Icon Flutter ships (Google Fonts'
+/// codepoints, which the model stores, draw other glyphs in that font).
+int? materialIconFlutterCodepoint(IconModel icon) {
+  if (icon is! MaterialIcon) return null;
+  final String? id = icon.flutterID;
+  return id == null ? null : flutterIconsDataMap[id];
+}
+
+/// The codepoint in Flutter's bundled `MaterialIcons` font of the Material
+/// Icon that looks like the Material Symbol [icon] ([fill] is its fill
+/// axis), or null when [icon] isn't a Material Symbol or Flutter ships no
+/// icon of its name.
+///
+/// Material Symbols are drawn from SVGs loaded by name; this glyph stands in
+/// while one loads (a capture right after the editor starts) and when it
+/// can't load (offline), so a symbol isn't left blank. An unfilled outlined
+/// symbol is Flutter's `_outlined` icon, a filled one its plain icon, and
+/// rounded and sharp symbols its `_rounded` and `_sharp` icons.
+int? materialSymbolFlutterCodepoint(IconModel icon, {double? fill}) {
+  if (icon is! MaterialSymbol) return null;
+  final String name = icon.name.trim().toLowerCase();
+  if (name.isEmpty) return null;
+  final bool filled = (fill ?? 0) >= 0.5;
+  final String styled = switch (icon.style) {
+    MaterialSymbolStyle.outlined => filled ? name : '${name}_outlined',
+    MaterialSymbolStyle.rounded => '${name}_rounded',
+    MaterialSymbolStyle.sharp => '${name}_sharp',
+  };
+  return flutterIconsDataMap[styled] ??
+      flutterIconsDataMap[name] ??
+      flutterIconsDataMap['${name}_outlined'];
+}
+
 extension MaterialIconExt on MaterialIcon {
   String? get flutterID => flutterIconNames[styledName];
 
@@ -2333,6 +2367,14 @@ extension StrokeCapEnumExt on StrokeCapEnum {
     StrokeCapEnum.round => StrokeCap.round,
     StrokeCapEnum.none => StrokeCap.butt,
     StrokeCapEnum.square => StrokeCap.square,
+  };
+}
+
+extension StrokeJoinEnumExt on StrokeJoinEnum {
+  StrokeJoin get flutterStrokeJoin => switch (this) {
+    StrokeJoinEnum.miter => StrokeJoin.miter,
+    StrokeJoinEnum.round => StrokeJoin.round,
+    StrokeJoinEnum.bevel => StrokeJoin.bevel,
   };
 }
 

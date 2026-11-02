@@ -196,6 +196,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
             rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start,
         flexContent: hasMainAxisFlexChild(rowColumnNode, childrenNodes),
         contentSizedOnScrollAxis: contentSized,
+        clipBehavior: scrollClipBehavior(rowColumnNode),
         child: res,
       );
     }
@@ -297,12 +298,23 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
           padding: node.resolvedPadding().flutterEdgeInsetsDirectional,
           node: scrollable,
           fillViewport: runAlignment != WrapAlignment.start,
+          clipBehavior: scrollClipBehavior(node),
           child: res,
         );
       }
     }
     return res;
   }
+
+  /// How the scroll view of a scrolling row/column clips its content:
+  /// [Clip.hardEdge], as every scroll view does, unless the row/column
+  /// turns [RowColumnNode.clipsScrollContent] off and doesn't clip its
+  /// content ([ClipMixin.clipsContent]): then [Clip.none], so its children's
+  /// shadows paint past its edges.
+  static Clip scrollClipBehavior(BaseNode node) =>
+      node is RowColumnNode && !node.clipsScrollContent && !node.clipsContent
+      ? Clip.none
+      : Clip.hardEdge;
 
   /// Whether [node] is a Row/Column that scrolls along its main axis and is
   /// flexible on it: it is as long as its content, capped by its [Flexible]

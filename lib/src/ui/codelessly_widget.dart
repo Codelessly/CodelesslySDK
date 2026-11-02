@@ -678,7 +678,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     _stopwatch ??= Stopwatch()..start();
     final Codelessly codelessly = _effectiveController.effectiveCodelessly;
 
-    return MultiProvider(
+    final Widget layout = MultiProvider(
       providers: [
         ChangeNotifierProvider<CodelesslyContext>.value(
           value: codelesslyContext,
@@ -736,6 +736,9 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
         ),
       ),
     );
+    // Material widgets (text fields, pickers) need Material localizations,
+    // which a host without Flutter's own MaterialApp doesn't give.
+    return MaterialLocalizationsScope(child: layout);
   }
 }
 

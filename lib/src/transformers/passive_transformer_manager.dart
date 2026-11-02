@@ -70,6 +70,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'video': PassiveVideoTransformer(getNode, this),
       'audioPlayer': PassiveAudioPlayerTransformer(getNode, this),
       'divider': PassiveDividerTransformer(getNode, this),
+      'barcode': PassiveBarcodeTransformer(getNode, this),
       'loadingIndicator': PassiveLoadingIndicatorTransformer(getNode, this),
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),
@@ -223,6 +224,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
                       .buildWidget(styled, context, settings),
             ),
           );
+    // A node with an aspect ratio derives one axis from the other.
+    widget = wrapWithAspectRatio(styled, widget);
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
     widget = applyStrokePath(context, styled, widget);
     // Blurs act on everything the node paints, its stroke path included.
@@ -242,6 +245,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = applyDragAndDrop(context, styled, widget);
       // Pointer events pass through to the nodes under this one.
       if (styled.ignorePointer) widget = IgnorePointer(child: widget);
+    }
+    // Inside the node's rotation and motion, so a flight starts from where
+    // the node is drawn (a card moved back in a stack) and flies the node
+    // itself.
+    if (!settings.isPreview) {
+      widget = applyHero(context, styled, widget);
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
@@ -451,8 +460,36 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       patch['padding'] = padding.toJson();
     }
     final NodeBox box = node.basicBoxLocal;
-    final double? width = value<double>('width');
-    final double? height = value<double>('height');
+    // A fraction of the parent's size (a progress fill's share of its
+    // track); a bound width or height wins. A page's share of a page view
+    // is its viewport fraction, which the page view applies itself.
+    final BaseNode? parent = node.parentID.isEmpty
+        ? null
+        : tryGetNode(node.parentID);
+    // A freeform container sizes a fractional child itself (see
+    // [FreeformAxisPlacement.sizeFactor]), against its runtime size.
+    final bool placedByParent =
+        parent is PageViewNode ||
+        (parent != null &&
+            const {
+              'frame',
+              'stack',
+              'freeformPlaceholder',
+            }.contains(parent.type));
+    final fractional = hasFractionalSize(node) && !placedByParent
+        ? fractionalBoxOf(
+            node,
+            scopedValues: scope,
+            parentWidth: (scope.parentSize?['width'] as num?)?.toDouble(),
+            parentHeight: (scope.parentSize?['height'] as num?)?.toDouble(),
+          )
+        : (width: null, height: null);
+    final double? width = node.variables.containsKey('width')
+        ? value<double>('width') ?? fractional.width
+        : fractional.width;
+    final double? height = node.variables.containsKey('height')
+        ? value<double>('height') ?? fractional.height
+        : fractional.height;
     if ((width != null && width != box.width) ||
         (height != null && height != box.height)) {
       patch['basicBoxLocal'] = NodeBox(
@@ -472,10 +509,11 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // Rotation in degrees (the node's `rotation` JSON field), e.g. a card
     // tilted while it's dragged: `${= dragging ? -2 : 0}`.
     final num? rotation = value<num>('rotation');
+    // Fractional degrees are kept: a stamp tilted -4.6° stays at -4.6°.
     if (rotation != null &&
         rotation.isFinite &&
-        rotation.round() != node.rotationDegrees) {
-      patch['rotation'] = rotation.round();
+        rotation != node.rotationDegrees) {
+      patch['rotation'] = rotation;
     }
 
     // Effects, stroke weight, corner radius, font weight and size, and icon.

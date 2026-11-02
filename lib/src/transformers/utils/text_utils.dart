@@ -529,6 +529,14 @@ class TextUtils {
 
     final TextTheme typography = Typography.material2021().englishLike;
 
-    return typography.bodySmall!.merge(style);
+    // Material 3's type scale distributes leading evenly, which puts a font
+    // whose ascent is much larger than its descent (DM Serif Display: 1.036em
+    // over 0.335em) up to 0.1em lower in its line than Flutter's own
+    // TextStyle(height: x) does. Keep Flutter's default, proportional
+    // leading, and set it explicitly so a host's Material default text style
+    // doesn't change where the text sits either.
+    return typography.bodySmall!
+        .merge(style)
+        .copyWith(leadingDistribution: TextLeadingDistribution.proportional);
   }
 }
