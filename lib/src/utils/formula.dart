@@ -667,7 +667,7 @@ class FormulaEvaluator {
     FormulaFunctionDoc(
       'parseDate',
       'parseDate(text or millis)',
-      'parseDate("2026-10-21"), parseDate("10/21/2026"), parseDate("Oct 21, 2026") → 2026-10-21; null when not a real date',
+      'parseDate("10/21/2026") or parseDate("Oct 21, 2026") → 2026-10-21; null when not a real date',
     ),
     FormulaFunctionDoc(
       'formatDate',
