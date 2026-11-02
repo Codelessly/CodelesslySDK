@@ -103,4 +103,21 @@ void main() {
     expect(find.byType(Icon), findsNothing);
     expect(tester.getSize(find.byType(SizedBox).last), const Size(20, 20));
   });
+
+  test('rounded Material icons load the Round SVG by name', () {
+    // The editor stores Google's codepoint (0xe8b6 is search there); the
+    // icon is drawn from its SVG by name, never from Flutter's font, where
+    // that number is another glyph (and a runtime IconData breaks release
+    // builds).
+    expect(
+      const MaterialIcon(
+        codepoint: 0xe8b6,
+        fontFamily: 'MaterialIcons',
+        name: 'search',
+        style: MaterialIconStyle.rounded,
+        version: 17,
+      ).toSvgUrl(),
+      'https://fonts.gstatic.com/s/i/materialiconsround/search/v17/24px.svg',
+    );
+  });
 }

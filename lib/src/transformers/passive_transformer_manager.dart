@@ -118,8 +118,19 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     required WidgetBuildSettings settings,
   }) {
     if (settings.buildRawWidget) {
-      final Widget raw = getTransformerByNode(node)
-          .buildWidget(node, context, settings);
+      // The design canvas builds each node raw; its content still follows
+      // the node's layout direction.
+      final TextDirection? direction = layoutDirectionOf(context, node);
+      final Widget raw = direction == null
+          ? getTransformerByNode(node).buildWidget(node, context, settings)
+          : Directionality(
+              textDirection: direction,
+              child: Builder(
+                builder: (context) => getTransformerByNode(
+                  node,
+                ).buildWidget(node, context, settings),
+              ),
+            );
       return decorate(
         context,
         node,
@@ -162,8 +173,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         return _buildDecorated(context, node, settings);
       },
     );
-    if (!settings.withReactions) return built;
-    return wrapWithInteractionScopes(context, node, built);
+    // A node a Scroll To action targets records where it is built.
+    return ScrollTargets.wrap(
+      node,
+      settings.withReactions
+          ? wrapWithInteractionScopes(context, node, built)
+          : built,
+    );
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -193,8 +209,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       node,
       scopedValues: preview,
     );
-    Widget widget = getTransformerByNode(node)
-        .buildWidget(styled, context, settings);
+    final TextDirection? direction = layoutDirectionOf(context, styled);
+    Widget widget = direction == null
+        ? getTransformerByNode(node).buildWidget(styled, context, settings)
+        // The content (children, padding, text) is built under the
+        // direction, so it reaches every row, freeform layout and text in
+        // it; the node's own margin and place follow its parent.
+        : Directionality(
+            textDirection: direction,
+            child: Builder(
+              builder: (context) => getTransformerByNode(
+                node,
+              ).buildWidget(styled, context, settings),
+            ),
+          );
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
     widget = applyStrokePath(context, styled, widget);
 
@@ -334,7 +362,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   /// variables or formulas, or set value actions give it at runtime: `fill`
   /// (a text's color for text nodes), `stroke`, `opacity`, `width`,
   /// `height`, `flex`, `rotation`, and the properties of [StyleBindings]
-  /// (effects, stroke weight, corner radius, padding, font weight, icon).
+  /// (effects, stroke weight, corner radius, padding, font weight and size,
+  /// icon).
   /// Returns [node] itself when nothing changes it.
   BaseNode applyStyleOverrides(
     BuildContext context,
@@ -436,7 +465,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       patch['rotation'] = rotation.round();
     }
 
-    // Effects, stroke weight, corner radius, font weight and icon.
+    // Effects, stroke weight, corner radius, font weight and size, and icon.
     StyleBindings.addTo(patch, node, scopedValues: scope);
 
     // The states shown around the node (a property-override variant, its
@@ -455,6 +484,41 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (styled == null) return node;
     return styled..parentID = node.parentID;
   }
+
+  /// The direction [node] lays out its content in, from its
+  /// `layoutDirection` variable (a fixed value or a binding such as
+  /// `${= uiLang == 'ar' ? 'rtl' : 'ltr'}`): `rtl` mirrors rows, freeform
+  /// children, padding, margins and text alignment of the subtree, `ltr`
+  /// restores left to right. Anything else (`inherit`, empty) keeps the
+  /// direction of the parent.
+  static TextDirection? layoutDirectionOf(BuildContext context, BaseNode node) {
+    final String? raw = node.variables[kLayoutDirection];
+    if (raw == null) return null;
+    // A fixed value, not a binding.
+    if (!raw.contains(r'${')) return parseLayoutDirection(raw);
+    final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+      node,
+      kLayoutDirection,
+      // On the design canvas the editor's preview scope (variable defaults
+      // and preview values), at runtime the app's.
+      scopedValues:
+          VariablePreview.scopeOf(node, context: context) ??
+          ScopedValues.of(context),
+    );
+    return parseLayoutDirection(value);
+  }
+
+  /// `rtl`/`ltr` (any case, also `right-to-left`, `true` for right to left)
+  /// as a [TextDirection]; null for anything else.
+  static TextDirection? parseLayoutDirection(Object? value) =>
+      switch (value?.toString().trim().toLowerCase()) {
+        'rtl' || 'right-to-left' || 'righttoleft' || 'true' => TextDirection.rtl,
+        'ltr' || 'left-to-right' || 'lefttoright' || 'false' => TextDirection.ltr,
+        _ => null,
+      };
+
+  /// The variables key of a node's layout direction binding.
+  static const String kLayoutDirection = 'layoutDirection';
 
   /// Moves [widget] to the node's bound `x`/`y` (variables, formulas or
   /// conditions): the distance from the parent's padded top-left to the
