@@ -469,7 +469,18 @@ class PropertyValueDelegate {
     }
 
     final VariableData? variable = scopedValues.variables[match.name];
-    if (variable == null) return null;
+    if (variable == null) {
+      // In a text field's own actions, `inputValue` (the property a field's
+      // text is bound by) reads its text, like `value`, unless an app
+      // variable has that name.
+      if (match.name == 'inputValue' &&
+          !match.hasPath &&
+          !match.hasAccessor &&
+          scopedValues.nodeState is String) {
+        return scopedValues.nodeState;
+      }
+      return null;
+    }
     final bool computed = isComputedVariable(variable);
     final Object? variableValue = variableValueOf(variable, scopedValues);
     // A computed variable's type is whatever its formula returns.
