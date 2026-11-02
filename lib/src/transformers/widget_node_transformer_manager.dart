@@ -5,8 +5,10 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/services.dart' show BrowserContextMenu;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
@@ -456,94 +458,6 @@ abstract class WidgetNodeTransformerManager
     };
   }
 
-  /// Makes [node] draggable ([BaseNode.draggable]) and/or a drop target
-  /// ([BaseNode.dropTarget]), running its drag and drop reactions.
-  Widget wrapWithDragDrop(BuildContext context, BaseNode node, Widget widget) {
-    final DropTargetModel? target = node.dropTarget;
-    final DraggableModel? draggable = node.draggable;
-    if (target == null && draggable == null) return widget;
-    final List<Reaction> reactions = switch (node) {
-      ReactionMixin(:final reactions) => reactions,
-      _ => const [],
-    };
-    String textOf(String key, String fallback) =>
-        node.variables[key] ?? fallback;
-    bool flag(String key, bool fallback) => node.variables.containsKey(key)
-        ? PropertyValueDelegate.getPropertyValue<bool>(
-                node,
-                key,
-                scopedValues: ScopedValues.of(context),
-              ) ??
-              fallback
-        : fallback;
-    if (target != null) {
-      widget = NodeDropTarget(
-        key: ValueKey('drop ${node.id}'),
-        groups: target.groups,
-        enabled: flag(DropTargetModel.enabledVariable, target.enabled),
-        accepts: (context, data) =>
-            evaluateConditionText(
-              textOf(DropTargetModel.acceptIfVariable, target.acceptIf),
-              ScopedValues.of(context),
-            ) ??
-            true,
-        isFull: () =>
-            context.mounted &&
-            (evaluateConditionText(
-                  textOf(DropTargetModel.fullIfVariable, target.fullIf),
-                  ScopedValues.of(context),
-                ) ??
-                false),
-        onEvent: (context, type, result) => FunctionsRepository.triggerAction(
-          context,
-          type,
-          reactions: reactions,
-          result: result,
-        ),
-        child: widget,
-      );
-    }
-    if (draggable != null) {
-      final ScopedValues values = ScopedValues.of(context);
-      final Object? data =
-          node.variables.containsKey(DraggableModel.dataVariable)
-          ? PropertyValueDelegate.getPropertyValue<Object>(
-              node,
-              DraggableModel.dataVariable,
-              scopedValues: values,
-            )
-          : draggable.data;
-      final String flightKey = node.variables.containsKey('flightKey')
-          ? (PropertyValueDelegate.getPropertyValue<Object>(
-                      node,
-                      'flightKey',
-                      scopedValues: values,
-                    ) ??
-                    '')
-                .toString()
-          : node.flightKey;
-      widget = NodeDraggable(
-        key: ValueKey('drag ${node.id}'),
-        nodeId: node.id,
-        model: draggable,
-        data: data,
-        enabled: flag(DraggableModel.enabledVariable, draggable.enabled),
-        flightKey: flightKey,
-        onEvent: (type, data) {
-          if (!context.mounted) return;
-          FunctionsRepository.triggerAction(
-            context,
-            type,
-            reactions: reactions,
-            result: {'data': data},
-          );
-        },
-        child: widget,
-      );
-    }
-    return widget;
-  }
-
   /// Convenience method to handle widget margins.
   Widget applyWidgetMargins(BaseNode node, Widget widget) {
     if (node.margin == EdgeInsetsModel.zero) return widget;
@@ -919,7 +833,7 @@ abstract class WidgetNodeTransformerManager
 
   /// Convenience method to handle widget reactions.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
-    final Widget tappable = _wrapWithTapReactions(context, node, widget);
+    Widget tappable = _wrapWithTapReactions(context, node, widget);
     if (node is! ReactionMixin || node is CanvasNode || node is SpacerNode) {
       return tappable;
     }
@@ -936,6 +850,24 @@ abstract class WidgetNodeTransformerManager
         : of(TriggerType.dragEnd);
     final List<Reaction> onPointerDown = of(TriggerType.pointerDown);
     final List<Reaction> onPointerUp = of(TriggerType.pointerUp);
+    final List<Reaction> onSecondary = of(TriggerType.secondaryClick);
+    if (onSecondary.isNotEmpty) {
+      // A right click opens the app's menu, not the browser's.
+      if (kIsWeb) BrowserContextMenu.disableContextMenu();
+      tappable = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onSecondaryTapUp: (details) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.secondaryClick,
+          reactions: onSecondary,
+          result: {
+            'x': details.globalPosition.dx,
+            'y': details.globalPosition.dy,
+          },
+        ),
+        child: tappable,
+      );
+    }
     if (onDrag.isEmpty &&
         onDragEnd.isEmpty &&
         onPointerDown.isEmpty &&

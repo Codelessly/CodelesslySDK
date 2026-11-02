@@ -4,97 +4,64 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
+/// Enter submits a text field ("Submitted"); clicking elsewhere only ends
+/// the editing ("Editing Complete"), so it doesn't submit a form.
 void main() {
-  Future<List<String>> run(
-    WidgetTester tester, {
-    required bool submitOnUnfocus,
-    required Future<void> Function() act,
-  }) async {
-    final List<String> submitted = <String>[];
+  testWidgets('Enter submits, losing focus completes the editing', (
+    tester,
+  ) async {
+    final List<String> fired = [];
+    Reaction record(TriggerType type) => Reaction(
+      trigger: TriggerModel(type: type),
+      action: CallFunctionAction(name: type.name),
+    );
     final TextFieldNode node = TextFieldNode(
-      id: 'field',
-      name: 'Field',
-      basicBoxLocal: NodeBox(0, 0, 300, 48),
-      properties: TextFieldProperties(submitOnUnfocus: submitOnUnfocus),
+      id: 'title',
+      name: 'Title',
+      basicBoxLocal: NodeBox(0, 0, 200, 44),
+      properties: TextFieldProperties(),
+      reactions: [
+        record(TriggerType.submitted),
+        record(TriggerType.editingComplete),
+      ],
+    );
+    final manager = PassiveNodeTransformerManager(
+      (id) => throw StateError(id),
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
     );
     await tester.pumpWidget(
       ChangeNotifierProvider<CodelesslyContext>.value(
-        value: CodelesslyContext.empty(),
+        value: CodelesslyContext.empty()
+          ..functions = {
+            for (final String name in ['submitted', 'editingComplete'])
+              name: (context, reference, params) => fired.add(name),
+          },
         child: MaterialApp(
-          home: Scaffold(
-            body: Column(
+          home: Material(
+            child: Column(
               children: [
-                PassiveTextFieldWidget(
-                  node: node,
-                  settings: const WidgetBuildSettings(debugLabel: 'test'),
-                  onSubmitted: (context, value) => submitted.add(value),
+                Builder(
+                  builder: (context) => manager.buildWidgetFromNode(
+                    node,
+                    context,
+                    settings: const WidgetBuildSettings(debugLabel: 'test'),
+                  ),
                 ),
-                const SizedBox(height: 40),
-                const TextButton(onPressed: null, child: Text('Elsewhere')),
-                const Focus(child: SizedBox(key: Key('other'))),
+                const TextField(key: ValueKey('other')),
               ],
             ),
           ),
         ),
       ),
     );
-    await tester.tap(find.byType(TextField));
-    await tester.enterText(find.byType(TextField), 'mia');
-    await act();
-    await tester.pump();
-    return submitted;
-  }
+    await tester.tap(find.byType(TextField).first);
+    await tester.enterText(find.byType(TextField).first, 'Ship it');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(fired, ['submitted']);
 
-  Future<void> unfocus(WidgetTester tester) async {
-    FocusManager.instance.primaryFocus?.unfocus();
-  }
-
-  testWidgets('by default leaving the field submits it, once', (tester) async {
-    expect(
-      await run(tester, submitOnUnfocus: true, act: () => unfocus(tester)),
-      ['mia'],
-    );
-  });
-
-  testWidgets('submitOnUnfocus off: leaving the field does not submit', (
-    tester,
-  ) async {
-    expect(
-      await run(tester, submitOnUnfocus: false, act: () => unfocus(tester)),
-      isEmpty,
-    );
-  });
-
-  testWidgets('submitOnUnfocus off: Enter submits, once', (tester) async {
-    expect(
-      await run(
-        tester,
-        submitOnUnfocus: false,
-        act: () => tester.testTextInput.receiveAction(TextInputAction.done),
-      ),
-      ['mia'],
-    );
-  });
-
-  testWidgets('by default Enter submits once, not twice', (tester) async {
-    expect(
-      await run(
-        tester,
-        submitOnUnfocus: true,
-        act: () => tester.testTextInput.receiveAction(TextInputAction.done),
-      ),
-      ['mia'],
-    );
-  });
-
-  test('submitOnUnfocus round-trips and defaults on', () {
-    expect(TextFieldProperties().submitOnUnfocus, isTrue);
-    final json = TextFieldProperties(submitOnUnfocus: false).toJson();
-    expect(json['submitOnUnfocus'], isFalse);
-    expect(TextFieldProperties.fromJson(json).submitOnUnfocus, isFalse);
-    expect(
-      TextFieldProperties().toJson().containsKey('submitOnUnfocus'),
-      isFalse,
-    );
+    await tester.tap(find.byKey(const ValueKey('other')));
+    await tester.pumpAndSettle();
+    expect(fired, ['submitted', 'editingComplete']);
   });
 }
