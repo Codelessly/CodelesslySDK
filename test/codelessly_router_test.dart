@@ -263,6 +263,15 @@ void main() {
       expect(find.text('Tides'), findsOneWidget);
     });
 
+    testWidgets("an unknown link opens the app's own not found screen", (
+      tester,
+    ) async {
+      final browser = FakeBrowser(tester, url: '/amp/room');
+      await pumpRouterApp(tester, tidepoolModel(withNotFound: true), browser);
+      expect(find.text('lost /amp/room'), findsOneWidget);
+      expect(browser.url, '/amp/room');
+    });
+
     testWidgets('a link to a screen id still opens it', (tester) async {
       final browser = FakeBrowser(tester, url: '/creature?id=kraken');
       await pumpRouterApp(tester, appModel(), browser);
