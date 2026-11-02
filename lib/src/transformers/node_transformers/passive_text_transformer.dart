@@ -188,7 +188,7 @@ class TextNodeBox extends StatelessWidget {
   }
 }
 
-/// Rounds a text's maximum intrinsic width up, plus half a pixel.
+/// Rounds a text's maximum intrinsic width up to a whole pixel.
 ///
 /// A row or column that sizes its children by their intrinsic width (a
 /// shrink-wrapped column that stretches them) gives the text exactly that
@@ -205,9 +205,9 @@ class TextIntrinsicSlack extends SingleChildRenderObjectWidget {
 }
 
 class RenderTextIntrinsicSlack extends RenderProxyBox {
-  /// [width] rounded up, after adding half a pixel.
+  /// [width] rounded up to a whole pixel.
   static double slackWidth(double width) =>
-      width <= 0 || !width.isFinite ? width : (width + 0.5).ceilToDouble();
+      width <= 0 || !width.isFinite ? width : width.ceilToDouble();
 
   @override
   double computeMaxIntrinsicWidth(double height) =>
