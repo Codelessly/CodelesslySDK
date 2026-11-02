@@ -764,9 +764,20 @@ class RenderScrollContentExtent extends RenderProxyBox {
     if (!_viewportExtent.isFinite || natExtent >= _viewportExtent) {
       return constraints;
     }
+    // At most the viewport, not exactly it: the content (a Row/Column that
+    // fills its main axis) still takes the whole viewport, but tight
+    // constraints would make it a relayout boundary, so content that grows
+    // later (a form that finishes loading) would never reach this box to be
+    // measured again, and would overflow the viewport instead of scrolling.
     return _axis == Axis.vertical
-        ? constraints.tighten(height: _viewportExtent)
-        : constraints.tighten(width: _viewportExtent);
+        ? constraints.copyWith(
+            minHeight: math.min(constraints.minHeight, _viewportExtent),
+            maxHeight: _viewportExtent,
+          )
+        : constraints.copyWith(
+            minWidth: math.min(constraints.minWidth, _viewportExtent),
+            maxWidth: _viewportExtent,
+          );
   }
 
   @override
