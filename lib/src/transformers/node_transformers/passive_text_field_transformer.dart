@@ -363,6 +363,57 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     if (!focusNode.hasFocus) {
       widget.onEditingComplete?.call(context, controller.text);
     }
+    if (!mounted) return;
+    if (focusNode.hasFocus && widget.node.properties.selectAllOnFocus) {
+      // After the tap that focused it places the caret.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !focusNode.hasFocus) return;
+        controller.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: controller.text.length,
+        );
+      });
+    }
+    FunctionsRepository.triggerAction(
+      context,
+      node: widget.node,
+      focusNode.hasFocus ? TriggerType.focusGained : TriggerType.focusLost,
+      value: controller.text,
+    );
+  }
+
+  /// The field's "Key Down" reactions: keys pressed while it has focus.
+  /// A reaction for a specific key takes it (↑ ↓ don't move the caret);
+  /// one for any key lets typing through.
+  KeyEventResult onKey(FocusNode _, KeyEvent event) {
+    if (event is KeyUpEvent) return KeyEventResult.ignored;
+    final String key = keyTriggerLabel(event.logicalKey);
+    final List<Reaction> reactions = [
+      for (final Reaction reaction in widget.node.reactions)
+        if (reaction.trigger.type == TriggerType.keyDown &&
+            reaction.action.enabled &&
+            (reaction.trigger.key == null ||
+                reaction.trigger.key!.isEmpty ||
+                normalizeKeyLabel(reaction.trigger.key!) == normalizeKeyLabel(key)))
+          reaction,
+    ];
+    if (reactions.isEmpty) return KeyEventResult.ignored;
+    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
+    FunctionsRepository.triggerAction(
+      context,
+      TriggerType.keyDown,
+      reactions: reactions,
+      value: controller.text,
+      result: {
+        'key': key,
+        'shift': keyboard.isShiftPressed,
+        'alt': keyboard.isAltPressed,
+        'meta': keyboard.isMetaPressed || keyboard.isControlPressed,
+      },
+    );
+    return reactions.any((r) => r.trigger.key?.isNotEmpty ?? false)
+        ? KeyEventResult.handled
+        : KeyEventResult.ignored;
   }
 
   @override
@@ -462,7 +513,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
           : null,
       inputFormatters: [
         if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
-        ?properties.formatter.toFlutterFormatter(),
+        ?properties.formatter.toFlutterFormatter(
+          resolve: (value) => PropertyValueDelegate.substituteVariables(
+            value,
+            nullSubstitutionMode: widget.settings.nullSubstitutionMode,
+            scopedValues: widget.scopedValues ?? ScopedValues.of(context),
+          ),
+        ),
       ],
       maxLines: maxLines,
       minLines: minLines,
@@ -515,6 +572,10 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     }
     if (node.isVerticalWrap) {
       field = IntrinsicHeight(child: field);
+    }
+
+    if (node.reactions.any((r) => r.trigger.type == TriggerType.keyDown)) {
+      field = Focus(onKeyEvent: onKey, skipTraversal: true, child: field);
     }
 
     field = AdaptiveNodeBox(node: node, child: field);

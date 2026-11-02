@@ -194,6 +194,7 @@ class TextNodeBox extends StatelessWidget {
     if (minHeight) {
       box = TextMinHeight(minHeight: node.basicBoxLocal.height, child: box);
     }
+    if (hFit == SizeFit.shrinkWrap) box = TextIntrinsicSlack(child: box);
     return SizedBox(
       width: switch (hFit) {
         SizeFit.shrinkWrap || SizeFit.flexible => null,
@@ -204,6 +205,32 @@ class TextNodeBox extends StatelessWidget {
       child: box,
     );
   }
+}
+
+/// Rounds a text's maximum intrinsic width up to a whole pixel.
+///
+/// A row or column that sizes its children by their intrinsic width (a
+/// shrink-wrapped column that stretches them) gives the text exactly that
+/// width. On the web a paragraph's intrinsic width can come out a fraction
+/// narrower than the width it needs to lay out on one line, so its last
+/// word wrapped away: `Bluebird Coffee` drew as `Bluebird`, with the space
+/// for `Coffee` left empty.
+class TextIntrinsicSlack extends SingleChildRenderObjectWidget {
+  const TextIntrinsicSlack({super.key, super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      RenderTextIntrinsicSlack();
+}
+
+class RenderTextIntrinsicSlack extends RenderProxyBox {
+  /// [width] rounded up to a whole pixel.
+  static double slackWidth(double width) =>
+      width <= 0 || !width.isFinite ? width : width.ceilToDouble();
+
+  @override
+  double computeMaxIntrinsicWidth(double height) =>
+      slackWidth(super.computeMaxIntrinsicWidth(height));
 }
 
 /// Gives text a minimum height, its design height, that it may grow past.

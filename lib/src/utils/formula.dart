@@ -328,6 +328,23 @@ class FormulaEvaluator {
       r'money(price) → $1,234.50',
     ),
     FormulaFunctionDoc(
+      'currency',
+      'currency(value, code, options?)',
+      'currency(-1234.5, "EUR") → −1.234,50 €; currency(42, "USD", "signed") → +\$42.00',
+    ),
+    FormulaFunctionDoc(
+      'parseAmount',
+      'parseAmount(text, code)',
+      'parseAmount("1.234,50", "EUR") → 1234.5',
+    ),
+    FormulaFunctionDoc(
+      'formatAmount',
+      'formatAmount(text, code)',
+      'formatAmount("12345.6", "USD") → 12,345.6',
+    ),
+    FormulaFunctionDoc('currencySymbol', 'currencySymbol(code)', 'currencySymbol("GBP") → £'),
+    FormulaFunctionDoc('currencyDecimals', 'currencyDecimals(code)', 'currencyDecimals("JPY") → 0'),
+    FormulaFunctionDoc(
       'formatNumber',
       'formatNumber(value, digits?, locale?)',
       'formatNumber(2481.64, 1) → 2,481.6 · '
@@ -451,6 +468,16 @@ class FormulaEvaluator {
       'replace("a-b-c", "-", " ") → a b c',
     ),
     FormulaFunctionDoc(
+      'regexReplace',
+      'regexReplace(text, pattern, to)',
+      r'regexReplace("WILLOW PHARMACY 044", " [0-9]+$", "") → WILLOW PHARMACY; \$1 in to inserts a group',
+    ),
+    FormulaFunctionDoc(
+      'titleCase',
+      'titleCase(text)',
+      'titleCase("SQ *KESTREL FLOWERS") → Sq *Kestrel Flowers',
+    ),
+    FormulaFunctionDoc(
       'split',
       'split(text, separator)',
       'split("rock, jazz", ", ") → [rock, jazz]',
@@ -520,6 +547,11 @@ class FormulaEvaluator {
       'findIndex',
       'findIndex(list, item => condition) or findIndex(list, field, value)',
       'findIndex(records, r => r.id == selectedId) → 2 (-1 when none)',
+    ),
+    FormulaFunctionDoc(
+      'groupBy',
+      'groupBy(list, field or item => key) → [{key, items, count}]',
+      'groupBy(txns, "date") → one entry per day, in order of first appearance',
     ),
     FormulaFunctionDoc(
       'unique',
@@ -610,8 +642,8 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'indexOf',
-      'indexOf(list, value) or indexOf(list, item => test)',
-      'indexOf(trips, t => t.id == id) → 2',
+      'indexOf(list, value), indexOf(list, item => test) or indexOf(text, part)',
+      'indexOf(trips, t => t.id == id) → 2; indexOf("Dining", "in") → 1',
     ),
     FormulaFunctionDoc(
       'object',
@@ -775,7 +807,7 @@ class FormulaEvaluator {
     FormulaFunctionDoc(
       'parseDate',
       'parseDate(text or millis)',
-      'parseDate("2026-10-21") → 2026-10-21T00:00:00.000',
+      'parseDate("10/21/2026") or parseDate("Oct 21, 2026") → 2026-10-21; null when not a real date',
     ),
     FormulaFunctionDoc(
       'formatDate',
@@ -1024,6 +1056,145 @@ String _money(Object? value, Object? symbol, Object? decimals) {
       .substring(0, dot)
       .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
   return '$sign${symbol ?? r'$'}$whole${text.substring(dot)}';
+}
+
+/// How a currency is written: symbol, which side it goes on, digit
+/// grouping and decimal marks, and how many decimals it has.
+class _CurrencyFormat {
+  const _CurrencyFormat(this.symbol, this.decimals, this.group, this.decimal,
+      {this.after = false, this.space = false});
+  final String symbol, group, decimal;
+  final int decimals;
+  final bool after, space;
+}
+
+const Map<String, _CurrencyFormat> _currencyFormats = {
+  'USD': _CurrencyFormat(r'$', 2, ',', '.'),
+  'EUR': _CurrencyFormat('€', 2, '.', ',', after: true, space: true),
+  'GBP': _CurrencyFormat('£', 2, ',', '.'),
+  'JPY': _CurrencyFormat('¥', 0, ',', '.'),
+  'CNY': _CurrencyFormat('¥', 2, ',', '.'),
+  'CAD': _CurrencyFormat(r'CA$', 2, ',', '.'),
+  'AUD': _CurrencyFormat(r'A$', 2, ',', '.'),
+  'CHF': _CurrencyFormat('CHF', 2, '’', '.', space: true),
+  'INR': _CurrencyFormat('₹', 2, ',', '.'),
+  'KRW': _CurrencyFormat('₩', 0, ',', '.'),
+  'MXN': _CurrencyFormat(r'MX$', 2, ',', '.'),
+  'BRL': _CurrencyFormat(r'R$', 2, '.', ',', space: true),
+  'SEK': _CurrencyFormat('kr', 2, ' ', ',', after: true, space: true),
+};
+
+_CurrencyFormat _currencyFormat(Object? code) {
+  final String c = FormulaEvaluator.stringify(code).trim().toUpperCase();
+  return _currencyFormats[c.isEmpty ? 'USD' : c] ??
+      _CurrencyFormat(c, 2, ',', '.', space: true);
+}
+
+String _groupDigits(String digits, String sep) => digits.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (_) => sep,
+    );
+
+/// [value] written the way [code] writes money: `currency(-1234.5, "EUR")`
+/// is "−1.234,50 €", `currency(123456, "JPY")` is "¥123,456". [options] is
+/// a list of words: `signed` puts "+" on positive amounts, `whole` drops the
+/// decimals, `compact` shortens to "$12k" / "$1.2M", `plain` leaves the
+/// symbol out, `ascii` uses "-" instead of the true minus sign.
+String _currency(Object? value, Object? code, Object? options) {
+  final num amount = _num(value);
+  if (!amount.isFinite) return '';
+  final _CurrencyFormat f = _currencyFormat(code);
+  final Set<String> opts = FormulaEvaluator.stringify(options)
+      .toLowerCase()
+      .split(RegExp(r'[\s,]+'))
+      .where((s) => s.isNotEmpty)
+      .toSet();
+  String body;
+  final num a = amount.abs();
+  if (opts.contains('compact')) {
+    String n;
+    if (a >= 1e6) {
+      n = '${(a / 1e6).toStringAsFixed(1)}M';
+    } else if (a >= 1e4) {
+      n = '${(a / 1e3).toStringAsFixed(0)}k';
+    } else if (a >= 1e3) {
+      n = '${(a / 1e3).toStringAsFixed(1)}k';
+    } else {
+      n = a.toStringAsFixed(0);
+    }
+    body = f.decimal == ',' ? n.replaceAll('.', ',') : n;
+  } else {
+    final int digits = opts.contains('whole') ? 0 : f.decimals;
+    final String text = a.toStringAsFixed(digits);
+    final List<String> parts = text.split('.');
+    body = _groupDigits(parts[0], f.group);
+    if (parts.length > 1) body = '$body${f.decimal}${parts[1]}';
+  }
+  final bool zero = num.parse(
+        a.toStringAsFixed(opts.contains('whole') ? 0 : f.decimals),
+      ) ==
+      0;
+  if (!opts.contains('plain')) {
+    final String gap = f.space ? ' ' : '';
+    body = f.after ? '$body$gap${f.symbol}' : '${f.symbol}$gap$body';
+  }
+  if (amount < 0 && !zero) {
+    return '${opts.contains('ascii') ? '-' : '−'}$body';
+  }
+  if (opts.contains('signed') && amount > 0 && !zero) return '+$body';
+  return body;
+}
+
+/// [text] grouped as an amount being typed in [code]'s format; used by the
+/// text field's currency formatter and the `formatAmount` formula.
+String formatAmountInput(String text, String code) => _formatAmount(text, code);
+
+/// The number typed into an amount field for [code]: accepts its own marks
+/// ("1.234,5" for EUR) and loose input ("12", "-3.50"). Null when it isn't a
+/// number.
+num? _parseAmount(Object? text, Object? code) {
+  final _CurrencyFormat f = _currencyFormat(code);
+  String t = FormulaEvaluator.stringify(text)
+      .trim()
+      .replaceAll('−', '-')
+      .replaceAll(RegExp(r'[^0-9.,\-]'), '');
+  if (t.isEmpty || t == '-') return null;
+  if (f.decimal == ',') {
+    t = t.replaceAll('.', '').replaceAll(',', '.');
+  } else {
+    t = t.replaceAll(',', '');
+  }
+  return num.tryParse(t);
+}
+
+/// What an amount field shows while typing in [code]: the whole part
+/// grouped, the person's decimals kept but capped at the currency's, "."
+/// accepted for a comma currency's decimal mark. `formatAmount("1234,5",
+/// "EUR")` is "1.234,5"; `formatAmount("12345.678", "JPY")` is "12,345".
+String _formatAmount(Object? text, Object? code) {
+  final _CurrencyFormat f = _currencyFormat(code);
+  String raw = FormulaEvaluator.stringify(text);
+  if (f.decimal == ',') {
+    // A "." after the last group (not a group mark) is a decimal point.
+    final int dot = raw.lastIndexOf('.');
+    if (dot >= 0 && !raw.contains(',') && raw.length - dot - 1 != 3) {
+      raw = '${raw.substring(0, dot)},${raw.substring(dot + 1)}';
+    }
+  }
+  final String clean =
+      raw.replaceAll(RegExp('[^0-9${RegExp.escape(f.decimal)}]'), '');
+  final int i = clean.indexOf(f.decimal);
+  String whole = i < 0 ? clean : clean.substring(0, i);
+  String? frac = i < 0 ? null : clean.substring(i + 1).replaceAll(f.decimal, '');
+  whole = whole.replaceFirst(RegExp(r'^0+(?=\d)'), '');
+  if (frac != null && frac.length > f.decimals) {
+    frac = frac.substring(0, f.decimals);
+  }
+  final String g = whole.isEmpty
+      ? (frac != null ? '0' : '')
+      : _groupDigits(whole, f.group);
+  if (f.decimals == 0 || frac == null) return g;
+  return '$g${f.decimal}$frac';
 }
 
 /// [value] with [digits] decimals (default 0) and thousands separators,
@@ -1672,6 +1843,31 @@ List<Object?> _unique(List<Object?> args) {
   return items;
 }
 
+/// [args]' list split into groups by key, in the order each key first
+/// appears: `[{key, items, count}]`. The key is a field name or a lambda.
+List<Object?> _groupBy(List<Object?> args) {
+  final List<Object?> keys = [];
+  final List<List<Object?>> groups = [];
+  for (final (int i, Object? item) in _indexed(args)) {
+    final Object? key = _select(item, _arg(args, 1), i);
+    final int at = keys.indexWhere((seen) => _looseEquals(seen, key));
+    if (at < 0) {
+      keys.add(key);
+      groups.add([item]);
+    } else {
+      groups[at].add(item);
+    }
+  }
+  return [
+    for (int i = 0; i < keys.length; i++)
+      <String, Object?>{
+        'key': keys[i],
+        'items': groups[i],
+        'count': groups[i].length,
+      },
+  ];
+}
+
 /// A lambda such as `t => t.price`, `(t, i) => i + 1` or, as a user
 /// function stored in a variable, `(qty, unit, system) => ...`. List
 /// functions call it with an item and its index; a user function call
@@ -1736,7 +1932,7 @@ DateTime? _toDate(Object? value) {
       if (millis != null && text.length > 8) {
         return DateTime.fromMillisecondsSinceEpoch(millis);
       }
-      return DateTime.tryParse(text);
+      return DateTime.tryParse(text) ?? _typedDate(text);
     case Map():
       final Object? seconds = value['seconds'] ?? value['_seconds'];
       if (seconds is! num) return null;
@@ -1751,6 +1947,48 @@ DateTime? _toDate(Object? value) {
   } catch (_) {
     return null;
   }
+}
+
+
+/// A date as people type it: `10/03/2026` (month first), `Oct 3, 2026`,
+/// `October 3 2026`, `3 Oct 2026`. Null when it isn't one, or the day
+/// doesn't exist (`Feb 30, 2026`).
+DateTime? _typedDate(String text) {
+  DateTime? ymd(int y, int m, int d) {
+    if (m < 1 || m > 12 || d < 1) return null;
+    final DateTime date = DateTime(y, m, d);
+    return date.month == m ? date : null;
+  }
+
+  int month(String name) {
+    final String n = name.toLowerCase().replaceAll('.', '');
+    if (n.length < 3) return 0;
+    return _monthNames.indexWhere((m) => m.toLowerCase().startsWith(n)) + 1;
+  }
+
+  final RegExpMatch? us = RegExp(
+    r'^(\d{1,2})/(\d{1,2})/(\d{4})$',
+  ).firstMatch(text);
+  if (us != null) {
+    return ymd(int.parse(us[3]!), int.parse(us[1]!), int.parse(us[2]!));
+  }
+  final RegExpMatch? named = RegExp(
+    r'^([A-Za-z]+\.?)\s+(\d{1,2}),?\s+(\d{4})$',
+  ).firstMatch(text);
+  if (named != null) {
+    return ymd(int.parse(named[3]!), month(named[1]!), int.parse(named[2]!));
+  }
+  final RegExpMatch? dayFirst = RegExp(
+    r'^(\d{1,2})\s+([A-Za-z]+\.?),?\s+(\d{4})$',
+  ).firstMatch(text);
+  if (dayFirst != null) {
+    return ymd(
+      int.parse(dayFirst[3]!),
+      month(dayFirst[2]!),
+      int.parse(dayFirst[1]!),
+    );
+  }
+  return null;
 }
 
 /// ISO 8601 dates and date-times, such as `2026-10-21`,
@@ -2261,6 +2499,11 @@ final Map<String, _Function> _functions = {
   'textDirection': (a) => _textDirection(_arg(a, 0)),
   'textDirectionOf': (a) => _textDirectionOf(_arg(a, 0)),
   'fill': (a) => _fill(_arg(a, 0), _arg(a, 1)),
+  'currency': (a) => _currency(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
+  'parseAmount': (a) => _parseAmount(_arg(a, 0), _arg(a, 1)),
+  'formatAmount': (a) => _formatAmount(_arg(a, 0), _arg(a, 1)),
+  'currencySymbol': (a) => _currencyFormat(_arg(a, 0)).symbol,
+  'currencyDecimals': (a) => _currencyFormat(_arg(a, 0)).decimals,
   'feetInches': (a) => _feetInches(_arg(a, 0)),
   'fixed': (a) => _fixed(_arg(a, 0), _arg(a, 1)),
   'round': (a) => _round(_arg(a, 0), _arg(a, 1)),
@@ -2306,6 +2549,39 @@ final Map<String, _Function> _functions = {
         ? text
         : text.replaceAll(from, FormulaEvaluator.stringify(_arg(a, 2)));
   },
+  'regexReplace': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final String pattern = FormulaEvaluator.stringify(_arg(a, 1));
+    if (pattern.isEmpty) return text;
+    final String to = FormulaEvaluator.stringify(_arg(a, 2));
+    try {
+      // `$1`, `${name}` insert groups; `$$` is a literal dollar.
+      return text.replaceAllMapped(RegExp(pattern), (m) {
+        return to.replaceAllMapped(
+          RegExp(r'\$\$|\$(\d+)|\$\{(\w+)\}'),
+          (g) {
+            if (g[0] == r'$$') return r'$';
+            if (g[1] != null) {
+              final int i = int.parse(g[1]!);
+              return i <= m.groupCount ? (m.group(i) ?? '') : '';
+            }
+            if (m is RegExpMatch && m.groupNames.contains(g[2])) {
+              return m.namedGroup(g[2]!) ?? '';
+            }
+            return '';
+          },
+        );
+      });
+    } on FormatException {
+      return text;
+    }
+  },
+  'titleCase': (a) => FormulaEvaluator.stringify(_arg(a, 0))
+      .toLowerCase()
+      .replaceAllMapped(
+        RegExp(r"(^|[^A-Za-z0-9'’])([a-z])"),
+        (m) => '${m[1]}${m[2]!.toUpperCase()}',
+      ),
   'split': (a) {
     final String text = FormulaEvaluator.stringify(_arg(a, 0));
     if (text.isEmpty) return <Object?>[];
@@ -2368,6 +2644,7 @@ final Map<String, _Function> _functions = {
     return result;
   },
   'unique': _unique,
+  'groupBy': _groupBy,
   'concat': (a) => [
     for (final value in a)
       if (value is Iterable) ...value else ?value,
