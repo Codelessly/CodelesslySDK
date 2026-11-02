@@ -1933,7 +1933,7 @@ extension ActionModelExt on ActionModel {
         return _namesIn(strings, includePredefined);
       case ActionType.speak:
         final SpeakAction action = this as SpeakAction;
-        strings.addAll([action.text, action.rate, ?action.pitch]);
+        strings.addAll([action.text, action.language, action.rate, ?action.pitch]);
         return _namesIn(strings, includePredefined);
       case ActionType.playSound:
         strings.add((this as PlaySoundAction).url);
