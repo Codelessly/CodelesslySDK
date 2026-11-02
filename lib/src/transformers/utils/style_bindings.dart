@@ -31,6 +31,9 @@ import 'scoped_values.dart';
 /// * [fontSize] (number, logical pixels): the size of every span of a text
 ///   node, e.g. a counter that grows past 99: `${= count > 99 ? 28 : 36}`.
 ///   Line heights and letter spacings given in percent scale with it.
+/// * [textDecoration] (`none`, `underline`, `overline`, `strikethrough`
+///   or `lineThrough`): the decoration of every span of a text node, e.g.
+///   a done checklist item struck through.
 /// * [icon] (string): the name of the icon an icon node shows, in the
 ///   naming of its icon model (`star`, `star_border`, ...). Its family and
 ///   style stay. An icon model JSON map replaces the icon as a whole.
@@ -67,6 +70,9 @@ abstract final class StyleBindings {
 
   /// The font size of every span of a text node.
   static const String fontSize = 'fontSize';
+
+  /// The decoration of every span of a text node.
+  static const String textDecoration = 'textDecoration';
 
   /// The name of the icon an icon node shows.
   static const String icon = 'icon';
@@ -211,6 +217,24 @@ abstract final class StyleBindings {
       }
     }
 
+    if (node is TextNode) {
+      final TextDecorationEnum? decoration = parseTextDecoration(
+        value<Object>(textDecoration),
+      );
+      if (decoration != null &&
+          node.textMixedProps.any(
+            (prop) => prop.textDecoration != decoration,
+          )) {
+        final List spans =
+            patch['textMixedProps'] as List? ??
+            [for (final prop in node.textMixedProps) prop.toJson()];
+        patch['textMixedProps'] = [
+          for (final Map span in spans.cast<Map>())
+            {...span, 'textDecoration': decoration.name},
+        ];
+      }
+    }
+
     if (node is IconNode) {
       final IconModel? bound = _icon(
         node.properties.icon.icon,
@@ -288,6 +312,18 @@ abstract final class StyleBindings {
     } catch (_) {
       return null;
     }
+  }
+
+  /// A text decoration from a binding's value: a [TextDecorationEnum] name
+  /// (`lineThrough` for `strikethrough` too), or null.
+  static TextDecorationEnum? parseTextDecoration(Object? value) {
+    if (value is TextDecorationEnum) return value;
+    if (value is! String) return null;
+    final String name = value.trim();
+    if (name == 'lineThrough' || name == 'line-through') {
+      return TextDecorationEnum.strikethrough;
+    }
+    return TextDecorationEnum.values.asNameMap()[name];
   }
 
   /// The font weight [value] names: a number from 100 to 900 (rounded to the
