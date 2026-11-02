@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -135,12 +136,17 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         rowColumnNode.crossAxisAlignment == CrossAxisAlignmentC.stretch;
     bool measureCross = false;
     bool stretchFallsBack = false;
+    // A stretch is laid out twice instead (see [HugCross]): no intrinsic
+    // pass, which text measures differently on the web (a wrapped CJK line
+    // was cut off) and which a viewport or LayoutBuilder can't answer.
+    bool hugStretch = false;
     if (!wrapsChildren && crossMin == null && crossWraps) {
       final bool anyChildNeedsAlignment = childrenNodes.any(
         (child) => child.alignment != AlignmentModel.none,
       );
-      if (stretches ||
-          anyChildNeedsAlignment ||
+      if (stretches) {
+        hugStretch = true;
+      } else if (anyChildNeedsAlignment ||
           fillsAcrossWrappingRowColumn(rowColumnNode, childrenNodes)) {
         final bool blocked = childrenNodes.any(
           (child) => subtreeBlocksIntrinsics(child, getNode),
@@ -171,6 +177,8 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
 
     if (measureCross) {
       res = isRow ? IntrinsicHeight(child: res) : IntrinsicWidth(child: res);
+    } else if (hugStretch) {
+      res = HugCross(child: res);
     }
 
     // A wrapping row/column puts its children on new runs instead of
@@ -767,5 +775,61 @@ class PassiveRowColumnWidget extends StatelessWidget {
     } else {
       return child;
     }
+  }
+}
+
+/// A [Flex] that hugs its cross axis and stretches its children across it:
+/// as thick as its thickest child, every stretching child that thick.
+///
+/// Flutter stretches only to a bounded cross axis. This lays the flex out
+/// once with its children at the start to find its natural thickness, then
+/// again with that thickness fixed and the stretch back on, instead of an
+/// [IntrinsicHeight] / [IntrinsicWidth]: no intrinsic pass (which a viewport
+/// or LayoutBuilder can't answer, and which can measure text differently
+/// from how it lays out), and the same result.
+class HugCross extends SingleChildRenderObjectWidget {
+  /// Creates a [HugCross] around a [Flex] [child].
+  const HugCross({super.key, required Widget super.child});
+
+  @override
+  RenderHugCross createRenderObject(BuildContext context) => RenderHugCross();
+}
+
+/// The render object of [HugCross].
+class RenderHugCross extends RenderProxyBox {
+  @override
+  void performLayout() {
+    final RenderBox? box = child;
+    if (box is! RenderFlex) {
+      super.performLayout();
+      return;
+    }
+    final CrossAxisAlignment wanted = box.crossAxisAlignment;
+    final bool row = box.direction == Axis.horizontal;
+    // Unbounded across, as hugging means: children that fill that axis take
+    // their own (design) size instead of all the room the parent offers.
+    final BoxConstraints loose = row
+        ? constraints.copyWith(minHeight: 0, maxHeight: double.infinity)
+        : constraints.copyWith(minWidth: 0, maxWidth: double.infinity);
+    // Switching the flex's alignment mid-layout is a mutation of a
+    // descendant, allowed inside a layout callback (as LayoutBuilder does).
+    invokeLayoutCallback<BoxConstraints>(
+      (_) => box.crossAxisAlignment = CrossAxisAlignment.start,
+    );
+    box.layout(loose, parentUsesSize: true);
+    final double natural = row ? box.size.height : box.size.width;
+    final double cross = row
+        ? constraints.constrainHeight(natural)
+        : constraints.constrainWidth(natural);
+    invokeLayoutCallback<BoxConstraints>(
+      (_) => box.crossAxisAlignment = wanted,
+    );
+    box.layout(
+      row
+          ? constraints.copyWith(minHeight: cross, maxHeight: cross)
+          : constraints.copyWith(minWidth: cross, maxWidth: cross),
+      parentUsesSize: true,
+    );
+    size = box.size;
   }
 }
