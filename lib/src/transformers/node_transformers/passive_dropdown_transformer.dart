@@ -488,6 +488,14 @@ class _AnchoredDropdownMenuState extends State<_AnchoredDropdownMenu> {
                         final TextStyle textStyle = selected
                             ? selectedStyle
                             : itemStyle;
+                        Widget check() => Icon(
+                          Icons.check,
+                          key: const ValueKey('codelessly-dropdown-check'),
+                          size: style.checkSize,
+                          color:
+                              style.checkColor?.toFlutterColor() ??
+                              textStyle.color,
+                        );
                         return Semantics(
                           selected: selected,
                           button: true,
@@ -511,6 +519,17 @@ class _AnchoredDropdownMenuState extends State<_AnchoredDropdownMenu> {
                                     AlignmentDirectional.centerStart,
                                 child: Row(
                                   children: [
+                                    if (selected &&
+                                        style.showCheck &&
+                                        style.checkPosition ==
+                                            DropdownCheckPosition.leading)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsetsDirectional.only(
+                                              end: 8,
+                                            ),
+                                        child: check(),
+                                      ),
                                     ?widget.widget.imageOf(context),
                                     Expanded(
                                       child: Text(
@@ -519,23 +538,16 @@ class _AnchoredDropdownMenuState extends State<_AnchoredDropdownMenu> {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    if (selected && style.showCheck)
+                                    if (selected &&
+                                        style.showCheck &&
+                                        style.checkPosition ==
+                                            DropdownCheckPosition.trailing)
                                       Padding(
                                         padding:
                                             const EdgeInsetsDirectional.only(
                                               start: 8,
                                             ),
-                                        child: Icon(
-                                          Icons.check,
-                                          key: const ValueKey(
-                                            'codelessly-dropdown-check',
-                                          ),
-                                          size: style.checkSize,
-                                          color:
-                                              style.checkColor
-                                                  ?.toFlutterColor() ??
-                                              textStyle.color,
-                                        ),
+                                        child: check(),
                                       ),
                                   ],
                                 ),

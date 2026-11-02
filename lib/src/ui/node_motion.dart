@@ -9,6 +9,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path_parsing/path_parsing.dart';
 
+import 'viewport_visibility.dart';
+
 /// The Flutter curve for a [MotionCurve].
 Curve flutterCurveOf(MotionCurve curve) => switch (curve) {
   MotionCurve.linear => Curves.linear,
@@ -23,6 +25,7 @@ Curve flutterCurveOf(MotionCurve curve) => switch (curve) {
   MotionCurve.elasticOut => Curves.elasticOut,
   MotionCurve.bounceOut => Curves.bounceOut,
   MotionCurve.fastOutSlowIn => Curves.fastOutSlowIn,
+  MotionCurve.step => const Threshold(0.5),
 };
 
 /// The spring a [MotionCurve.spring] motion runs with.
@@ -122,6 +125,36 @@ _MeasuredPath? _measure(String data) => _pathCache.putIfAbsent(data, () {
 (Offset, double)? pointOnMotionPath(String data, double progress) =>
     _measure(data)?.at(progress);
 
+/// Turns animation of node motion off for the nodes below it: a design
+/// canvas or an editor capture, which show every node at rest.
+///
+/// Below a [NodeMotionScope] whose [animate] is false, a [NodeMotion] acts
+/// as with [NodeMotion.animate] false: it shows its values without
+/// transitions, entrances, loops or spin, so a
+/// [MotionModel.revealOnScroll] node is visible at rest instead of waiting
+/// to scroll into view, and a [NodeSizeTransition] jumps to its final size.
+class NodeMotionScope extends InheritedWidget {
+  /// Creates a [NodeMotionScope].
+  const NodeMotionScope({
+    super.key,
+    required this.animate,
+    required super.child,
+  });
+
+  /// Whether node motion below animates.
+  final bool animate;
+
+  /// Whether node motion animates at [context]: false below a
+  /// [NodeMotionScope] that turns it off, else true.
+  static bool animatesAt(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<NodeMotionScope>()?.animate ??
+      true;
+
+  @override
+  bool updateShouldNotify(NodeMotionScope oldWidget) =>
+      animate != oldWidget.animate;
+}
+
 /// The transform [motion] draws, without spin, around [origin] in a box of
 /// [size]. [spinTurns] adds a spin angle.
 Matrix4 motionMatrix(MotionModel motion, {double spinTurns = 0}) {
@@ -152,7 +185,11 @@ Matrix4 motionMatrix(MotionModel motion, {double spinTurns = 0}) {
 /// muted (the design canvas runs under a disabled [TickerMode]), it jumps to
 /// them and doesn't spin: a transition would otherwise never advance and the
 /// node would stay where it started.
-class NodeMotion extends StatefulWidget {
+///
+/// A [MotionModel.revealOnScroll] motion holds the node where its entrance
+/// starts until [MotionModel.revealFraction] of it is in view, then plays
+/// the entrance once.
+class NodeMotion extends StatelessWidget {
   /// Creates a [NodeMotion].
   const NodeMotion({
     super.key,
@@ -170,11 +207,37 @@ class NodeMotion extends StatefulWidget {
   /// The node's widget.
   final Widget child;
 
+  /// Whether [MotionModel.revealOnScroll] entrances wait for their node to
+  /// scroll into view. Set it to false to show such nodes at rest at once,
+  /// for example to take deterministic screenshots of a whole page.
+  static bool revealsEnabled = true;
+
   @override
-  State<NodeMotion> createState() => _NodeMotionState();
+  Widget build(BuildContext context) => _NodeMotionBody(
+    motion: motion,
+    animate: animate && NodeMotionScope.animatesAt(context),
+    child: child,
+  );
 }
 
-class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
+/// [NodeMotion] with its [NodeMotionScope] applied.
+class _NodeMotionBody extends StatefulWidget {
+  const _NodeMotionBody({
+    required this.motion,
+    required this.child,
+    required this.animate,
+  });
+
+  final MotionModel motion;
+  final bool animate;
+  final Widget child;
+
+  @override
+  State<_NodeMotionBody> createState() => _NodeMotionState();
+}
+
+class _NodeMotionState extends State<_NodeMotionBody>
+    with TickerProviderStateMixin {
   late final AnimationController _transition = AnimationController(vsync: this)
     ..addListener(_rebuild);
 
@@ -205,6 +268,14 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   /// Whether a counted loop has played all its times: the node rests.
   bool _rested = false;
 
+  /// Whether the node holds at its entrance start until it scrolls into
+  /// view; see [MotionModel.revealOnScroll].
+  bool _awaitingReveal = false;
+
+  /// Keeps the node's widget (and its state) when the transform around it
+  /// comes and goes.
+  final GlobalKey _childKey = GlobalKey();
+
   void _rebuild() => setState(() {});
 
   /// Whether changes animate: [NodeMotion.animate], with tickers running.
@@ -225,13 +296,36 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     final MotionModel motion = widget.motion;
     if (_loops) {
       _startLoop();
+    } else if (_revealsOnScroll(motion)) {
+      _from = motion.entranceStart;
+      _awaitingReveal = true;
     } else if (_animates &&
         motion.hasEntrance &&
+        !motion.revealOnScroll &&
         motionTransitionMs(motion) > 0) {
       _from = motion.entranceStart;
       _run(motionTransitionMs(motion));
     }
     _syncSpin();
+  }
+
+  /// Whether [motion] waits to scroll into view before its entrance.
+  bool _revealsOnScroll(MotionModel motion) =>
+      _animates &&
+      motion.revealOnScroll &&
+      motionTransitionMs(motion) > 0 &&
+      NodeMotion.revealsEnabled;
+
+  /// Plays the entrance once enough of the node is in view.
+  void _onVisibility(double fraction) {
+    if (!_awaitingReveal) return;
+    final MotionModel motion = widget.motion;
+    if (!meetsVisibleFraction(fraction, motion.revealFraction)) return;
+    _awaitingReveal = false;
+    _from = motion.entranceStart;
+    _to = motion;
+    _run(motionTransitionMs(motion));
+    setState(() {});
   }
 
   @override
@@ -325,9 +419,21 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   }
 
   @override
-  void didUpdateWidget(NodeMotion oldWidget) {
+  void didUpdateWidget(_NodeMotionBody oldWidget) {
     super.didUpdateWidget(oldWidget);
     final MotionModel next = widget.motion;
+    if (_awaitingReveal) {
+      // Still out of view: follow the new values without moving.
+      if (_revealsOnScroll(next)) {
+        _from = next.entranceStart;
+      } else {
+        _awaitingReveal = false;
+        _from = next;
+      }
+      _to = next;
+      _syncSpin();
+      return;
+    }
     final bool replay =
         _animates && next.replayKey != oldWidget.motion.replayKey;
     final bool pulse =
@@ -503,11 +609,26 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     // A loop that ran its [MotionModel.repeat] runs rests.
     final MotionModel m = still
         ? widget.motion
+        : _awaitingReveal
+        ? _from
         : _rested && _loops
         ? _to.atRest
         : (_moving ? _current : _to);
-    if (!m.hasTransform && _turns == 0) return widget.child;
-    Widget child = widget.child;
+    final Widget drawn = _draw(m);
+    if (still || !widget.animate || !widget.motion.revealOnScroll) {
+      return drawn;
+    }
+    return ViewportVisibility(
+      enabled: _awaitingReveal,
+      onChanged: _onVisibility,
+      child: drawn,
+    );
+  }
+
+  /// The node's widget drawn with the values of [m].
+  Widget _draw(MotionModel m) {
+    Widget child = KeyedSubtree(key: _childKey, child: widget.child);
+    if (!m.hasTransform && _turns == 0) return child;
     if (m.backfaceHidden) child = BackfaceHidden(child: child);
     if (m.opacity < 1) {
       // A fully transparent node also stops taking taps, like a hidden one.

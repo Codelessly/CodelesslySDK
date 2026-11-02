@@ -855,6 +855,14 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
       'stroke-paint-${paint.id}',
       scopedValues: scopedValues,
     );
+    final PaintModel effective = paintValue ?? paint;
+    // Gradient strokes (e.g. an angular spinner ring) are painted with a
+    // shader; they have no single color.
+    final Gradient? gradient = effective.type == PaintType.solid
+        ? null
+        : retrieveGradient(effective);
+    final Color? color = effective.toFlutterColor();
+    if (gradient == null && color == null) continue;
     if (path != null) {
       strokeWidgets.add(
         Positioned.fill(
@@ -862,7 +870,7 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
             child: CustomPaint(
               painter: SvgPathStrokePainter(
                 path: path,
-                color: (paintValue ?? paint).toFlutterColor()!,
+                color: color ?? gradient!.colors.first,
                 strokeWidth: node.strokeWeight,
                 strokeCap: node.strokeCap,
                 strokeJoin: (node as RectangleNode).strokeJoin,
@@ -882,7 +890,7 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
           child: IgnorePointer(
             child: CustomPaint(
               painter: NotchedStrokePainter(
-                color: (paintValue ?? paint).toFlutterColor()!,
+                color: color ?? gradient!.colors.first,
                 strokeWidth: node.strokeWeight,
                 borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
                 notches: notches,
@@ -897,8 +905,10 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
       continue;
     }
     // A solid stroke on every side is Flutter's own border. A stroke on one
-    // side, or a dashed one, is painted by [StrokePainter].
-    if (node.dashPattern.isEmpty && node.strokeSide == StrokeSide.all) {
+    // side, a dashed one, or a gradient one is painted by [StrokePainter].
+    if (gradient == null &&
+        node.dashPattern.isEmpty &&
+        node.strokeSide == StrokeSide.all) {
       strokeWidgets.add(
         Positioned.fill(
           child: DecoratedBox(
@@ -906,7 +916,7 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
               borderRadius: getBorderRadius(node),
               border: Border.all(
                 strokeAlign: node.strokeAlign.alignment,
-                color: (paintValue ?? paint).toFlutterColor()!,
+                color: color!,
                 width: node.strokeWeight,
               ),
             ),
@@ -918,7 +928,8 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
         Positioned.fill(
           child: CustomPaint(
             painter: StrokePainter(
-              color: (paintValue ?? paint).toFlutterColor()!,
+              color: color ?? const Color(0xFF000000),
+              gradient: gradient,
               borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
               dashPattern: node.dashPattern,
               strokeWidth: node.strokeWeight,
