@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
+
 import 'package:codelessly_api/codelessly_api.dart';
 
 import '../audio/sound.dart';
@@ -47,15 +49,21 @@ class BeatClock {
   static final Map<String, BeatClock> _shared = {};
   final List<void Function(int tick, double at, double waitMs)> _listeners =
       [];
+  final Map<void Function(int, double, double), bool Function()> _isShown =
+      {};
 
   /// The clock of [trigger] shared by every screen with the same settings:
   /// a screen shown in place of another (a tab) picks up the running clock
   /// instead of starting its own count again. The newest listener runs each
   /// tick; [release] removes it, and the clock stops with the last one.
+  /// With [isShown], the newest listener whose screen is shown runs it: a
+  /// screen kept under another (a router's entry screen under a link) does
+  /// not take the clock from the one on top.
   static BeatClock acquire({
     required TriggerModel trigger,
     required String Function(String text) evaluate,
     required void Function(int tick, double at, double waitMs) onTick,
+    bool Function()? isShown,
   }) {
     final String key =
         '${trigger.every}|${trigger.runWhen}|${trigger.lookaheadMs}';
@@ -66,6 +74,7 @@ class BeatClock {
     clock
       .._evaluate = evaluate
       .._listeners.add(onTick);
+    if (isShown != null) clock._isShown[onTick] = isShown;
     if (clock._timer == null) clock.start();
     return clock;
   }
@@ -84,6 +93,7 @@ class BeatClock {
   /// Removes [onTick] from a shared clock; the last one stops it.
   void release(void Function(int tick, double at, double waitMs) onTick) {
     _listeners.remove(onTick);
+    _isShown.remove(onTick);
     if (_listeners.isNotEmpty) return;
     stop();
     _shared.remove(_key);
@@ -95,7 +105,10 @@ class BeatClock {
     if (_key == null) {
       onTick(tick, at, waitMs);
     } else if (_listeners.isNotEmpty) {
-      _listeners.last(tick, at, waitMs);
+      final void Function(int, double, double) listener =
+          _listeners.lastWhereOrNull((l) => _isShown[l]?.call() ?? true) ??
+          _listeners.last;
+      listener(tick, at, waitMs);
     }
   }
 

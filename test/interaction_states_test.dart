@@ -53,6 +53,7 @@ class Harness {
     WidgetBuildSettings settings = const WidgetBuildSettings(
       debugLabel: 'test',
     ),
+    Widget Function(Widget child)? wrap,
   }) async {
     final registry = NodeRegistry()..setNodes({for (final n in nodes) n.id: n});
     final manager = PassiveNodeTransformerManager(
@@ -69,11 +70,13 @@ class Harness {
           home: Material(
             child: Align(
               alignment: Alignment.topLeft,
-              child: Builder(
-                builder: (context) => manager.buildWidgetFromNode(
-                  root ?? nodes.first,
-                  context,
-                  settings: settings,
+              child: (wrap ?? (Widget child) => child)(
+                Builder(
+                  builder: (context) => manager.buildWidgetFromNode(
+                    root ?? nodes.first,
+                    context,
+                    settings: settings,
+                  ),
                 ),
               ),
             ),
@@ -111,6 +114,22 @@ Color? colorOf(WidgetTester tester, double width) {
 }
 
 void main() {
+  testWidgets('a row being dragged shows its dragged state', (tester) async {
+    final (:card, :dot) = cardWithDot();
+    card.interactionStates = {
+      InteractionState.dragged: {'card': fillPatch('#FF0000')},
+    };
+    await Harness().pump(tester, [card, dot]);
+    expect(colorOf(tester, 200), isNot(red));
+    // The copy of a row that a reorder handle drags.
+    await Harness().pump(
+      tester,
+      [card, dot],
+      wrap: (child) => DraggedScope(child: child),
+    );
+    expect(colorOf(tester, 200), red);
+  });
+
   testWidgets('hover and pressed apply their overrides, pressed wins', (
     tester,
   ) async {
