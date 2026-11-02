@@ -52,6 +52,7 @@ abstract final class VariablePreview {
       variables: values.variables,
       codelesslyContext: values.codelesslyContext,
       screenSize: values.screenSize,
+      platformBrightness: values.platformBrightness,
       parentSize: values.parentSize,
       data: values.data,
       routeParams: values.routeParams,

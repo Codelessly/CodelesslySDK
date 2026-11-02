@@ -208,8 +208,11 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
   void _rebuild() => setState(() {});
 
   /// Whether changes animate: [NodeMotion.animate], with tickers running.
-  bool get _animates =>
-      widget.animate && TickerMode.getNotifier(context).value;
+  bool get _animates => widget.animate && TickerMode.getNotifier(context).value;
+
+  /// Whether tickers ran at the last dependency change: when they stop (a
+  /// capture of the design canvas) a running transition settles at its end.
+  bool _tickersEnabled = true;
 
   bool get _loops =>
       _animates &&
@@ -229,6 +232,25 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       _run(motionTransitionMs(motion));
     }
     _syncSpin();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final bool enabled = TickerMode.valuesOf(context).enabled;
+    if (enabled == _tickersEnabled) return;
+    _tickersEnabled = enabled;
+    if (!enabled && !_loops) _settle();
+  }
+
+  /// Ends any transition or entrance at once, at the values to show.
+  void _settle() {
+    _delay?.cancel();
+    _transition
+      ..stop()
+      ..value = 0;
+    _from = widget.motion;
+    _to = widget.motion;
   }
 
   /// Animates from [_from] to [_to] over [ms], after the motion's delay.
@@ -262,11 +284,12 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     }
   }
 
-  /// Repeats between rest and the motion's values.
+  /// Repeats between the loop's start (rest, or what
+  /// [MotionModel.enterFrom] gives) and the motion's values.
   void _startLoop() {
     _delay?.cancel();
     _rested = false;
-    _from = widget.motion.atRest;
+    _from = widget.motion.loopStart;
     _to = widget.motion;
     _curve = _to.curve;
     _transition.duration = Duration(milliseconds: widget.motion.durationMs);
@@ -600,3 +623,13 @@ class RenderBackface extends RenderProxyBox {
   bool hitTest(BoxHitTestResult result, {required Offset position}) =>
       _facing && super.hitTest(result, position: position);
 }
+
+/// How long an implicit transition of [ms] milliseconds (a `transitionMs`
+/// fill or opacity, a drawScale change) runs where it builds: zero under a
+/// disabled [TickerMode] (the editor's design canvas and its captures),
+/// where the transition could never tick and would hold the old value, so
+/// it jumps to the new one instead. Unchanged where tickers run.
+Duration implicitTransitionDuration(BuildContext context, int ms) =>
+    TickerMode.valuesOf(context).enabled
+    ? Duration(milliseconds: ms)
+    : Duration.zero;

@@ -107,6 +107,14 @@ void main() {
       expect(eval("coalesce(missing, '') == ''"), isTrue);
       expect(eval('coalesce(missing, null)'), isNull);
     });
+
+    test('coalesce falls back to its last value, even empty text', () {
+      // `coalesce(gate, '') != ''` must be false when gate is missing.
+      expect(eval("coalesce(missing, '')"), '');
+      expect(eval("coalesce(missing, '') != ''"), false);
+      expect(eval("coalesce('', '')"), '');
+      expect(eval('coalesce(missing, null)'), isNull);
+    });
   });
 
   test('daysInMonth', () {

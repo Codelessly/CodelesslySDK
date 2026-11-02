@@ -33,8 +33,21 @@ class ScopedValues {
   /// [NodeDragTrack]), or null outside one: what the `track` variable reads.
   late final TrackValues? trackValues;
 
-  /// The route params for this route/page for given context.
-  late final Map<String, dynamic> routeParams;
+  /// The route params for this route/page for given context, as
+  /// `${route.<name>}` reads them, plus `path`: the screen's URL path, such
+  /// as `/pass/zz999` (the location a Codelessly router shows the screen
+  /// at), unless a param of
+  /// that name was given.
+  Map<String, dynamic> get routeParams => _routeParams ??= {
+    if (_routePath?.call() case final String path) 'path': path,
+    ..._givenRouteParams,
+  };
+
+  Map<String, dynamic>? _routeParams;
+  late final Map<String, dynamic> _givenRouteParams;
+
+  /// Works out the route's `path` when it is first read.
+  late final String? Function()? _routePath;
 
   /// The signed-in app user, as the `auth` variable sees it. It is read
   /// live from the Codelessly instance, so an action chain that holds on to
@@ -46,6 +59,10 @@ class ScopedValues {
 
   /// The size of the screen, which the `screen` variable describes.
   late final Size? screenSize;
+
+  /// Whether the device is in dark mode, as the `screen` variable's
+  /// `brightness` and `isDark` say.
+  late final Brightness? platformBrightness;
 
   /// The value of the `parent` variable: the `width` and `height` the
   /// node's parent gives it (see [ParentSizeScope]).
@@ -108,9 +125,11 @@ class ScopedValues {
       holdProgress = null,
       dragValues = null,
       trackValues = null,
-      routeParams = {},
+      _givenRouteParams = {},
+      _routePath = null,
       _appUser = null,
       screenSize = null,
+      platformBrightness = null,
       parentSize = null;
 
   /// Creates scoped values for a design canvas, where [variables] (by name)
@@ -125,6 +144,7 @@ class ScopedValues {
     this.parentIndexedItem,
     this._appUser,
     this.screenSize,
+    this.platformBrightness,
     this.parentSize,
     Map<String, dynamic>? data,
     Map<String, dynamic>? routeParams,
@@ -139,7 +159,31 @@ class ScopedValues {
        holdProgress = null,
        dragValues = null,
        trackValues = null,
-       routeParams = routeParams ?? {};
+       _givenRouteParams = routeParams ?? {},
+       _routePath = null;
+
+  /// These values as an item of a list sees them: [item] is what `${item}`
+  /// and `${index}` read, and the item these values had, if any, becomes
+  /// the parent item. Lets a list evaluate a binding for each of its items
+  /// before building them, e.g. their keys and paint order.
+  ScopedValues.forItem(ScopedValues base, IndexedItem item)
+    : _codelesslyContextRef = base._codelesslyContextRef,
+      _instanceRef = base._instanceRef,
+      _variablesOverrides = base._variablesOverrides,
+      _dataOverrides = base._dataOverrides,
+      _previewVariables = base._previewVariables,
+      _appUser = base._appUser,
+      indexedItem = item,
+      parentIndexedItem = base.indexedItem,
+      nodeState = base.nodeState,
+      holdProgress = base.holdProgress,
+      dragValues = base.dragValues,
+      trackValues = base.trackValues,
+      _givenRouteParams = base._givenRouteParams,
+      _routePath = base._routePath,
+      screenSize = base.screenSize,
+      platformBrightness = base.platformBrightness,
+      parentSize = base.parentSize;
 
   /// Creates a new scoped values instance from a given context.
   ScopedValues.of(
@@ -156,6 +200,7 @@ class ScopedValues {
     indexedItem = IndexedItemProvider.maybeOf(context);
     parentIndexedItem = IndexedItemProvider.parentOf(context);
     screenSize = MediaQuery.maybeSizeOf(context);
+    platformBrightness = MediaQuery.maybePlatformBrightnessOf(context);
     parentSize = ParentSizeScope.valueOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     holdProgress = HoldProgressProvider.maybeOf(context);
@@ -164,10 +209,19 @@ class ScopedValues {
     final instance = context.read<Codelessly?>();
     // A screen a Codelessly router shows has the parameters of its location;
     // one pushed on a plain navigator has its route's arguments.
-    routeParams =
-        CodelesslyRouteScope.maybeOf(context)?.params ??
+    final CodelesslyRouteScope? routeScope = CodelesslyRouteScope.maybeOf(
+      context,
+    );
+    _givenRouteParams =
+        routeScope?.params ??
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
         {};
+    _routePath = routeScope == null
+        ? null
+        : () => '/${Uri.parse(routeScope.location).path}'.replaceAll(
+            RegExp('^//+'),
+            '/',
+          );
     _appUser = null;
     _instanceRef = instance == null ? null : WeakReference(instance);
   }

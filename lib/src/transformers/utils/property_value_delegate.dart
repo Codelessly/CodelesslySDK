@@ -141,9 +141,34 @@ class PropertyValueDelegate {
     if (variablePath == null) return null;
 
     return getVariableValueFromPath<R>(
-      variablePath,
-      scopedValues: scopedValues,
-    );
+          variablePath,
+          scopedValues: scopedValues,
+        ) ??
+        literalIconName<R>(node, property, variablePath);
+  }
+
+  /// The icon properties of an icon node that take an icon's name.
+  static const Set<String> iconNameProperties = {'icon', 'iconName'};
+
+  static final RegExp _iconName = RegExp(r'^[a-z0-9_]+$');
+
+  /// [binding] itself as the value of [property] when it is an icon name
+  /// written as is (`block_rounded`) rather than a variable or formula
+  /// giving one: an icon node's `icon` or `iconName` bound to a plain name
+  /// that no variable has shows that icon, as `${= 'block_rounded'}` does.
+  /// Null otherwise, and for any other property.
+  static R? literalIconName<R extends Object>(
+    BaseNode node,
+    String property,
+    String binding,
+  ) {
+    if (node is! IconNode || !iconNameProperties.contains(property)) {
+      return null;
+    }
+    if (R != String && R != Object) return null;
+    final String name = binding.trim();
+    if (!_iconName.hasMatch(name)) return null;
+    return name as R;
   }
 
   /// Substitutes variables & data paths used in given [text] with their values.
@@ -332,6 +357,19 @@ class PropertyValueDelegate {
         getVariableValueFromPath<Object>(path, scopedValues: scopedValues),
   );
 
+  /// The expression in [path] when it is a `${...}` path that indexes by a
+  /// variable, such as `${pal[item.statusKey]}` or `${rows[index]}`; null
+  /// for any other path (literal keys like `${a['b']}` or `${a[0]}` stay
+  /// plain paths).
+  static String? _dynamicIndexPath(String path) {
+    final RegExpMatch? match = _dynamicIndexRegex.firstMatch(path.trim());
+    return match?.group(1);
+  }
+
+  static final RegExp _dynamicIndexRegex = RegExp(
+    r'^\$\{\s*([A-Za-z_][\w.]*\[\s*[A-Za-z_][\w.]*\s*\][\w.\[\]]*)\s*\}$',
+  );
+
   /// Retrieves the value of a variable [path]. This also supports predefined
   /// variables such as data, index, and item.
   ///
@@ -346,7 +384,11 @@ class PropertyValueDelegate {
     String path, {
     required ScopedValues scopedValues,
   }) {
-    final String? expression = FormulaEvaluator.exactExpression(path);
+    // A path that indexes by another variable, e.g. `${pal[item.statusKey]}`,
+    // is read as the formula `pal[item.statusKey]`: a plain path only takes
+    // literal keys and indices.
+    final String? expression =
+        FormulaEvaluator.exactExpression(path) ?? _dynamicIndexPath(path);
     if (expression != null) {
       final Object? value = evaluateFormula(
         expression,
@@ -629,7 +671,12 @@ class PropertyValueDelegate {
       // no app user: read as signed out rather than unknown.
       'auth' => scopedValues.appUser ?? AppAuth.userToMap(null),
       'result' => ActionChain.current?.result,
-      'screen' => scopedValues.screenSize?.let(screenVariableValue),
+      'screen' => scopedValues.screenSize?.let(
+        (Size size) => screenVariableValue(
+          size,
+          brightness: scopedValues.platformBrightness,
+        ),
+      ),
       'hold' => scopedValues.holdProgress ?? 0.0,
       // A drag track's pose of this node (dx, dy, progress, dragging...) and
       // the app's drag and drop session (active, over, accepted...).

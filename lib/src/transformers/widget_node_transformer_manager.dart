@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
@@ -42,6 +43,11 @@ abstract class WidgetNodeTransformerManager
   /// Wraps every node this manager builds, when set. See
   /// [NodeBuildDecorator].
   NodeBuildDecorator? decorator;
+
+  /// Whether nodes with a hero tag are built as shared elements (Flutter
+  /// [Hero]s) that fly between screens. True at runtime; a design canvas
+  /// turns it off, where a node is drawn as designed and nothing navigates.
+  bool buildsHeroes = true;
 
   /// Returns [widget] wrapped by [decorator] at [layer], or [widget] when no
   /// decorator is set.
@@ -110,19 +116,30 @@ abstract class WidgetNodeTransformerManager
         child: widget,
       );
     }
+    // Under a disabled TickerMode (the design canvas, its captures) the
+    // fades jump to the current opacity instead of holding the old one.
     if (node.transition case final NodeTransition transition?) {
-      return AnimatedOpacity(
-        opacity: node.opacity.clamp(0.0, 1.0),
-        duration: transition.duration,
-        curve: transition.curve.flutterCurve,
-        child: widget,
+      final Widget child = widget;
+      return Builder(
+        builder: (context) => AnimatedOpacity(
+          opacity: node.opacity.clamp(0.0, 1.0),
+          duration: implicitTransitionDuration(
+            context,
+            transition.duration.inMilliseconds,
+          ),
+          curve: transition.curve.flutterCurve,
+          child: child,
+        ),
       );
     }
     if (node.transitionMs > 0) {
-      return AnimatedOpacity(
-        opacity: node.opacity.clamp(0.0, 1.0),
-        duration: Duration(milliseconds: node.transitionMs),
-        child: widget,
+      final Widget child = widget;
+      return Builder(
+        builder: (context) => AnimatedOpacity(
+          opacity: node.opacity.clamp(0.0, 1.0),
+          duration: implicitTransitionDuration(context, node.transitionMs),
+          child: child,
+        ),
       );
     }
     if (pulse != null && pulse is! MotionPulseModel) return widget;
@@ -270,21 +287,28 @@ abstract class WidgetNodeTransformerManager
   /// The motion [node] shows now: its [BaseNode.motion] with the values
   /// bound through `motion.<name>` variables resolved from [scopedValues],
   /// the settings in [MotionModel.settings] (duration, delay, curve), and
-  /// `motion.replayKey` and `motion.pulseKey` resolved to text. Null when
+  /// `motion.replayKey` and `motion.pulseKey` resolved to text. With
+  /// [animate] (the running app), a `motion.loop` binding switches the loop
+  /// (see [MotionModel.loopProperty]); the design canvas ignores it. Null when
   /// the node doesn't move.
   static MotionModel? resolveMotion(
     BaseNode node, {
     required ScopedValues scopedValues,
+    bool animate = true,
   }) {
     MotionModel? motion = node.motion;
     for (final String property in MotionModel.properties) {
       final String key = MotionModel.variableKey(property);
-      if (!node.variables.containsKey(key)) continue;
-      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
-        node,
-        key,
-        scopedValues: scopedValues,
-      );
+      final String? raw = node.variables[key];
+      if (raw == null) continue;
+      // A plain value ("-3.4") is a static pose, read as it is.
+      final Object? value = raw.contains(r'${')
+          ? PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              key,
+              scopedValues: scopedValues,
+            )
+          : raw;
       final double? number = switch (value) {
         num n => n.toDouble(),
         String s => double.tryParse(s.trim()),
@@ -343,7 +367,51 @@ abstract class WidgetNodeTransformerManager
         clearPulseKey: value == null,
       );
     }
+    final String loopKey = MotionModel.variableKey(MotionModel.loopProperty);
+    if (animate && node.variables.containsKey(loopKey)) {
+      final MotionModel base = motion ?? MotionModel.none;
+      final String raw = node.variables[loopKey]!;
+      // A plain value ("reverse", "true") is read as it is.
+      final MotionLoop? loop = motionLoopOf(
+        raw.contains(r'${')
+            ? PropertyValueDelegate.getPropertyValue<Object>(
+                node,
+                loopKey,
+                scopedValues: scopedValues,
+              )
+            : raw,
+        saved: base.loop,
+      );
+      if (loop == MotionLoop.none) {
+        // A loop's values are where it swings to; switched off, the node
+        // eases back to rest (or to its values, when enterFrom gives the
+        // loop's start).
+        motion = base.loopOff;
+      } else if (loop != null) {
+        motion = base.copyWith(loop: loop);
+      }
+    }
     return motion;
+  }
+
+  /// The loop a `motion.loop` binding's [value] asks for: `none`, `restart`
+  /// or `reverse` by name; true (or on) keeps [saved], or loops back and
+  /// forth when [saved] is none; false, off, 0 or empty text is none. Null
+  /// (keep [saved]) for anything else, such as an unresolved binding.
+  static MotionLoop? motionLoopOf(Object? value, {required MotionLoop saved}) {
+    final MotionLoop on = saved == MotionLoop.none ? MotionLoop.reverse : saved;
+    return switch (value) {
+      bool b => b ? on : MotionLoop.none,
+      num n => n == 0 ? MotionLoop.none : on,
+      String s => switch (s.trim().toLowerCase()) {
+        'none' || 'off' || 'false' || '0' || '' => MotionLoop.none,
+        'restart' || 'loop' => MotionLoop.restart,
+        'reverse' || 'pulse' => MotionLoop.reverse,
+        'true' || 'on' || '1' => on,
+        _ => null,
+      },
+      _ => null,
+    };
   }
 
   /// Draws [widget] with [node]'s motion: its transform, transitions and
@@ -372,7 +440,7 @@ abstract class WidgetNodeTransformerManager
       widget = animate && node.transitionMs > 0
           ? AnimatedScale(
               scale: scale,
-              duration: Duration(milliseconds: node.transitionMs),
+              duration: implicitTransitionDuration(context, node.transitionMs),
               child: widget,
             )
           : Transform.scale(scale: scale, child: widget);
@@ -384,9 +452,33 @@ abstract class WidgetNodeTransformerManager
     final MotionModel? motion = resolveMotion(
       node,
       scopedValues: scopedValues ?? ScopedValues.of(context),
+      animate: animate,
     );
     if (motion == null) return widget;
     return NodeMotion(motion: motion, animate: animate, child: widget);
+  }
+
+  /// Wraps [widget] in a [Hero] when [node] is a shared element: it has a
+  /// hero tag ([BaseNode.heroTag] or a `heroTag` binding) that resolves to
+  /// non-empty text with [scopedValues] (by default those of [context]),
+  /// and it is visible. See [NodeHero]. Does nothing when [buildsHeroes] is
+  /// false.
+  Widget applyHero(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+  }) {
+    if (!buildsHeroes || !NodeHero.hasHeroTag(node)) return widget;
+    final ScopedValues values = scopedValues ?? ScopedValues.of(context);
+    // A hidden node stays in the tree to keep its state; it must not fly,
+    // nor clash with a shown node of the same tag.
+    final bool visible =
+        runtimeVisibility(context, node, scopedValues: values) ?? node.visible;
+    final String tag = visible
+        ? NodeHero.resolveTag(node, scopedValues: values) ?? ''
+        : '';
+    return NodeHero.wrap(node: node, tag: tag, child: widget);
   }
 
   /// Plays [node]'s one-shot [EffectAnimation]s and [ParticleEmitter] on
@@ -803,11 +895,50 @@ abstract class WidgetNodeTransformerManager
         rest(DragModel.restXVariableKey, drag.restX),
         rest(DragModel.restYVariableKey, drag.restY),
       ),
-      onValues: drag.shareAs.trim().isEmpty
+      onValues:
+          drag.shareAs.trim().isEmpty &&
+              drag.xVariable.trim().isEmpty &&
+              drag.yVariable.trim().isEmpty
           ? null
-          : (values) => shareDragValues(context, drag.shareAs.trim(), values),
+          : (values) {
+              if (drag.shareAs.trim().isNotEmpty) {
+                shareDragValues(context, drag.shareAs.trim(), values);
+              }
+              writeDragOffset(context, drag.xVariable, values.offset.dx);
+              writeDragOffset(context, drag.yVariable, values.offset.dy);
+            },
+      onUpdate: !reactions.any((r) => r.trigger.type == TriggerType.drag)
+          ? null
+          : (result) => FunctionsRepository.triggerAction(
+              context,
+              TriggerType.drag,
+              reactions: reactions,
+              result: result,
+            ),
       child: child,
     );
+  }
+
+  /// Writes [offset], a drag's distance from rest along one axis rounded to
+  /// hundredths, into the number variable [name] (see [DragModel.xVariable]).
+  /// Does nothing for an empty name, a missing or computed variable, or an
+  /// unchanged value.
+  static void writeDragOffset(
+    BuildContext context,
+    String name,
+    double offset,
+  ) {
+    if (name.trim().isEmpty) return;
+    final CodelesslyContext? codelessly = context.read<CodelesslyContext?>();
+    final ValueNotifier<VariableData>? variable = codelessly
+        ?.findVariableByName(name.trim());
+    if (variable == null || variable.value.isComputed) return;
+    final num rounded = (offset * 100).round() / 100;
+    final num value = rounded == rounded.roundToDouble()
+        ? rounded.round()
+        : rounded;
+    if (variable.value.value == value) return;
+    variable.value = variable.value.copyWith(value: value);
   }
 
   /// Writes a drag's live [values] into the variable named [name], so nodes
@@ -1449,6 +1580,11 @@ class SvgIcon extends StatelessWidget {
   final double? grade;
   final double? opticalSize;
 
+  /// The client icon SVGs load with, or null for a new one per load. Tests
+  /// set it: their binding answers every request with a 400.
+  @visibleForTesting
+  static http.Client? httpClient;
+
   const SvgIcon({
     super.key,
     required this.icon,
@@ -1513,6 +1649,7 @@ class SvgIcon extends StatelessWidget {
         url,
         fit: fit,
         colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+        httpClient: httpClient,
         // Offline or unavailable icons leave their space empty.
         errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
       ),

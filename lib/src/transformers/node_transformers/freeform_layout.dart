@@ -51,6 +51,10 @@ class FreeformAxisPlacement {
   /// The child's outer extent at design size.
   final double extent;
 
+  /// Whether this axis is the container's scroll axis: children are content
+  /// there and never clamped ([clamp] is false only along it).
+  bool get isScroll => !clamp;
+
   /// The container's inner extent at design size.
   final double parentExtent;
 
@@ -85,6 +89,14 @@ class FreeformAxisPlacement {
   /// [size] only as a minimum, so the content grows and stays reachable.
   final bool growsWithContent;
 
+  /// The fraction of the container's runtime extent the child takes (its
+  /// `widthFactor` or `heightFactor`), its margins on this axis taken off
+  /// first; null when the child isn't sized by a fraction.
+  final double? sizeFactor;
+
+  /// The child's margins on this axis, for [sizeFactor].
+  final double factorMargin;
+
   const FreeformAxisPlacement({
     required this.mode,
     required this.start,
@@ -98,7 +110,34 @@ class FreeformAxisPlacement {
     this.expands = false,
     this.growsWithContent = false,
     this.minSize = 0,
+    this.sizeFactor,
+    this.factorMargin = 0,
   });
+
+  /// This placement with the child sized as [factor] of the container's
+  /// extent, less [margin], plus [margin].
+  FreeformAxisPlacement withSizeFactor(double factor, double margin) =>
+      FreeformAxisPlacement(
+        mode: mode,
+        start: start,
+        extent: extent,
+        parentExtent: parentExtent,
+        size: size,
+        alignment: alignment,
+        fraction: fraction,
+        anchor: anchor,
+        clamp: clamp,
+        expands: false,
+        growsWithContent: false,
+        minSize: minSize,
+        sizeFactor: factor,
+        factorMargin: margin,
+      );
+
+  /// The outer extent of a child sized by [sizeFactor] in a container of
+  /// runtime extent [s].
+  double factorExtentIn(double s) =>
+      math.max(0, (s - factorMargin) * sizeFactor!) + factorMargin;
 
   /// Distance from the child's outer end edge to the container's inner end
   /// edge at design size.
@@ -178,6 +217,14 @@ class FreeformAxisPlacement {
   /// (it is sized from its children); [incomingMax] is then the most it may
   /// grow to.
   (double min, double max) constraintsIn(double? s, double incomingMax) {
+    if (sizeFactor != null) {
+      final double? container =
+          s ?? (incomingMax.isFinite ? incomingMax : null);
+      final double v = container == null
+          ? math.max(0, extent)
+          : factorExtentIn(container);
+      return (v, v);
+    }
     switch (mode) {
       case FreeformAxisMode.fill:
         final double v = s ?? extent;
@@ -261,7 +308,9 @@ class FreeformAxisPlacement {
       other.clamp == clamp &&
       other.expands == expands &&
       other.growsWithContent == growsWithContent &&
-      other.minSize == minSize;
+      other.minSize == minSize &&
+      other.sizeFactor == sizeFactor &&
+      other.factorMargin == factorMargin;
 
   @override
   int get hashCode => Object.hash(
@@ -277,6 +326,8 @@ class FreeformAxisPlacement {
     expands,
     growsWithContent,
     minSize,
+    sizeFactor,
+    factorMargin,
   );
 
   @override

@@ -764,13 +764,17 @@ class FunctionsRepository {
     Codelessly? codelessly,
     CodelesslyWidgetController? codelesslyController,
     ScopedValues? scopedValues,
+    bool literalParams = false,
   }) async {
     final ScopedValues effectiveScopedValues =
         scopedValues ?? ActionChain.scopedValuesOf(context);
-    final parsedParams = substituteVariablesInMap(
-      action.params,
-      effectiveScopedValues,
-    );
+    // A link's parameters are text the visitor typed: they are passed as
+    // they are, as the first screen reads them, never evaluated (a
+    // `${...}` in a URL is not a formula) or parsed (`?validate=1` stays
+    // the text '1', not the number 1).
+    final Map<String, dynamic> parsedParams = literalParams
+        ? {...action.params}
+        : substituteVariablesInMap(action.params, effectiveScopedValues);
 
     DebugLogger.instance.printInfo(
       'Performing navigation action with params: $parsedParams',
@@ -810,6 +814,7 @@ class FunctionsRepository {
           codelessly: codelessly,
           codelesslyController: codelesslyController,
           scopedValues: scopedValues,
+          literalParams: literalParams,
         );
       }
     } else {
@@ -857,7 +862,8 @@ class FunctionsRepository {
         );
         await Navigator.push(
           context,
-          MaterialPageRoute(
+          navigationRoute<void>(
+            action,
             settings: RouteSettings(arguments: parsedParams),
             builder: (context) => ActionChainOpener(
               openerHosts: openerHosts,
@@ -882,7 +888,8 @@ class FunctionsRepository {
         await _resetTo(
           context,
           action,
-          destination: MaterialPageRoute(
+          destination: navigationRoute<void>(
+            action,
             settings: RouteSettings(arguments: parsedParams),
             builder: (context) {
               final Widget page = CodelesslyWidget(
@@ -906,7 +913,8 @@ class FunctionsRepository {
         unawaited(
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
+            navigationRoute<void>(
+              action,
               settings: RouteSettings(arguments: parsedParams),
               builder: (context) {
                 final Widget page = CodelesslyWidget(
@@ -972,6 +980,8 @@ class FunctionsRepository {
           params: params,
           openerHosts: ActionChainOpener.hostsFor(context),
           transition: action.transition,
+          transitionMs: action.transitionMs,
+          reverseTransitionMs: action.reverseTransitionMs,
         );
       case NavigationType.replace || NavigationType.pop:
         // The new screen takes over the chain: the actions after this one
@@ -983,6 +993,8 @@ class FunctionsRepository {
             params: params,
             chain: ActionChain.current,
             transition: action.transition,
+            transitionMs: action.transitionMs,
+            reverseTransitionMs: action.reverseTransitionMs,
           ),
         );
       case NavigationType.reset:
@@ -1016,6 +1028,95 @@ class FunctionsRepository {
     }
   }
 
+  /// The route a push, replace or reset [action] opens its screen with,
+  /// built by [builder]: a [MaterialPageRoute] for
+  /// [PageTransition.platform], otherwise a [PageRouteBuilder] that plays
+  /// [NavigationAction.transition] over [NavigationAction.resolvedTransitionMs]
+  /// (and back over [NavigationAction.resolvedReverseTransitionMs]).
+  /// Shared elements fly with every transition, as long as it lasts.
+  static PageRoute<T> navigationRoute<T>(
+    NavigationAction action, {
+    required RouteSettings settings,
+    required WidgetBuilder builder,
+  }) {
+    final PageTransition transition = action.transition;
+    if (transition == PageTransition.platform) {
+      return MaterialPageRoute<T>(settings: settings, builder: builder);
+    }
+    return PageRouteBuilder<T>(
+      settings: settings,
+      transitionDuration: Duration(milliseconds: action.resolvedTransitionMs),
+      reverseTransitionDuration: Duration(
+        milliseconds: action.resolvedReverseTransitionMs,
+      ),
+      pageBuilder: (context, _, _) => builder(context),
+      transitionsBuilder: (context, animation, _, child) =>
+          buildPageTransition(context, transition, animation, child),
+    );
+  }
+
+  /// Draws [child], a screen coming in, with [transition] at [animation]'s
+  /// value (0 hidden, 1 shown; it runs back when the screen leaves).
+  static Widget buildPageTransition(
+    BuildContext context,
+    PageTransition transition,
+    Animation<double> animation,
+    Widget child,
+  ) {
+    final Animation<double> eased = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+    switch (transition) {
+      case PageTransition.platform:
+      case PageTransition.none:
+        return child;
+      case PageTransition.fade:
+        return FadeTransition(opacity: eased, child: child);
+      case PageTransition.fadeUp:
+        // Fades in over the first 60% while rising 3% of its height.
+        return FadeTransition(
+          opacity: CurvedAnimation(
+            parent: animation,
+            curve: const Interval(0, 0.6),
+          ),
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.03),
+              end: Offset.zero,
+            ).animate(eased),
+            child: child,
+          ),
+        );
+      case PageTransition.slideUp:
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1),
+            end: Offset.zero,
+          ).animate(eased),
+          child: child,
+        );
+      case PageTransition.slideLeft:
+        final bool rtl = Directionality.maybeOf(context) == TextDirection.rtl;
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: Offset(rtl ? -1 : 1, 0),
+            end: Offset.zero,
+          ).animate(eased),
+          child: child,
+        );
+      case PageTransition.scale:
+        return FadeTransition(
+          opacity: eased,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.9, end: 1).animate(eased),
+            child: child,
+          ),
+        );
+    }
+  }
+
   /// [NavigationType.reset]: clears the navigator's history and shows
   /// [destination], with the action's base screen beneath it when it has
   /// one, as `pushNamedAndRemoveUntil` does: going back from [destination]
@@ -1043,7 +1144,8 @@ class FunctionsRepository {
       }
       final CodelesslyWidgetController baseController = parentController
           .copyWith(layoutID: baseLayoutId, codelessly: codelessly);
-      base = MaterialPageRoute(
+      base = navigationRoute<void>(
+        action,
         settings: RouteSettings(
           arguments: substituteVariablesInMap(
             action.baseParams ?? const {},
@@ -1429,8 +1531,7 @@ class FunctionsRepository {
       DialogPresentation.sideSheet ||
       DialogPresentation.popover => false,
       DialogPresentation.bottomSheet => true,
-      DialogPresentation.adaptive =>
-        (screen?.width ?? 1024) < sheetBelowWidth,
+      DialogPresentation.adaptive => (screen?.width ?? 1024) < sheetBelowWidth,
     };
     Widget content(BuildContext context, CanvasSizing sizing) =>
         asSheet && fullHeight

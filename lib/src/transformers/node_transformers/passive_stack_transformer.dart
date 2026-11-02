@@ -43,10 +43,11 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
 
     // The child widget already listens to its bindings, but its parent data
     // belongs to the freeform slot. Rebuild that slot as well when a bound
-    // position changes, using the mounted scope (including list item values).
+    // position or size fraction changes, using the mounted scope (including list item values).
     if (manager is PassiveNodeTransformerManager &&
         (node.variables.containsKey('positionX') ||
-            node.variables.containsKey('positionY'))) {
+            node.variables.containsKey('positionY') ||
+            hasFractionalSize(node))) {
       final listenables = manager.listenablesFor(context, node);
       if (listenables.isNotEmpty) {
         return AnimatedBuilder(
@@ -124,22 +125,38 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     }
     final bool scrolls = scrollAxis != null;
     final bool verticalScroll = scrollAxis == AxisC.vertical;
-    return FreeformPlacement(
-      horizontal: _axisPlacement(
-        node,
-        parent,
-        horizontal: true,
-        isScrollAxis: scrolls && !verticalScroll,
-        scopedValues: scopedValues,
-      ),
-      vertical: _axisPlacement(
-        node,
-        parent,
-        horizontal: false,
-        isScrollAxis: verticalScroll,
-        scopedValues: scopedValues,
-      ),
+    FreeformAxisPlacement horizontal = _axisPlacement(
+      node,
+      parent,
+      horizontal: true,
+      isScrollAxis: scrolls && !verticalScroll,
+      scopedValues: scopedValues,
     );
+    FreeformAxisPlacement vertical = _axisPlacement(
+      node,
+      parent,
+      horizontal: false,
+      isScrollAxis: verticalScroll,
+      scopedValues: scopedValues,
+    );
+    // A fraction of the container (a progress fill's share of its track),
+    // except along a scroll axis, where the content has no extent to share.
+    if (hasFractionalSize(node)) {
+      final fraction = fractionalSizeOf(
+        node,
+        scopedValues: scopedValues ?? ScopedValues.empty(),
+      );
+      // A bound width or height wins over the factor.
+      if (fraction.width case final double factor?
+          when !horizontal.isScroll && !node.variables.containsKey('width')) {
+        horizontal = horizontal.withSizeFactor(factor, node.margin.horizontal);
+      }
+      if (fraction.height case final double factor?
+          when !vertical.isScroll && !node.variables.containsKey('height')) {
+        vertical = vertical.withSizeFactor(factor, node.margin.vertical);
+      }
+    }
+    return FreeformPlacement(horizontal: horizontal, vertical: vertical);
   }
 
   static FreeformAxisPlacement _axisPlacement(
@@ -347,11 +364,16 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
 
     final AxisC? scrollAxis = scrollAxisFor(node);
     final Fit? contentFit = node is FrameNode ? node.contentFit : null;
+    // Scaled content is laid out at its design size: the frame's
+    // contentSize when set, which stays put while the frame follows its
+    // parent, else its content box.
+    final Size designSize = contentFit != null
+        ? (node as FrameNode).contentDesignSize.flutterSize
+        : node.innerBoxLocal.size.flutterSize;
     Widget content = FreeformLayout(
-      // Scaled content is laid out at its design size.
       wrapsWidth: contentFit == null && node.isHorizontalWrap,
       wrapsHeight: contentFit == null && node.isVerticalWrap,
-      designSize: node.innerBoxLocal.size.flutterSize,
+      designSize: designSize,
       children: [
         for (final BaseNode childNode in children)
           buildStackChild(
@@ -366,7 +388,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     );
     if (contentFit != null) {
       content = ScaledContent(
-        designSize: node.innerBoxLocal.size.flutterSize,
+        designSize: designSize,
         fit: contentFit.boxFit,
         alignment:
             (node as FrameNode).contentAlignment.flutterAlignment ??
@@ -439,12 +461,14 @@ class ScaledContent extends StatelessWidget {
       height: hugsHeight || !constraints.hasBoundedHeight
           ? designSize.height
           : constraints.maxHeight,
-      child: ClipRect(
-        child: FittedBox(
-          fit: fit,
-          alignment: alignment,
-          child: SizedBox.fromSize(size: designSize, child: child),
-        ),
+      // No clip of its own: children's shadows and overflow paint past the
+      // box like they do in any frame. The frame's clipsContent (applied by
+      // the rectangle around this content) is what clips, cover's overflow
+      // included.
+      child: FittedBox(
+        fit: fit,
+        alignment: alignment,
+        child: SizedBox.fromSize(size: designSize, child: child),
       ),
     ),
   );

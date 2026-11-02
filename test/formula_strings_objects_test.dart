@@ -34,6 +34,29 @@ void main() {
       FormulaEvaluator.evaluate(expression, resolve);
 
   group('text', () {
+    test('charCode reads a code unit, index 0 by default', () {
+      expect(eval('charCode("MX")'), 77);
+      expect(eval('charCode("MX", 1)'), 88);
+      expect(eval('charCode(record.artist, 0)'), 77);
+      expect(eval('charCode("é")'), 233);
+      expect(eval('charCode("", 0)'), isNull);
+      expect(eval('charCode("MX", 2)'), isNull);
+      expect(eval('charCode("MX", -1)'), isNull);
+      expect(eval('charCode("A") + 1'), 66);
+    });
+
+    test('fromCharCode builds text from codes or a list of codes', () {
+      expect(eval('fromCharCode(77, 88)'), 'MX');
+      expect(eval('fromCharCode(65 + count)'), 'E');
+      expect(eval('fromCharCode([72, 105])'), 'Hi');
+      expect(eval('fromCharCode("66")'), 'B');
+      expect(eval('fromCharCode(charCode("a") - 32)'), 'A');
+      expect(eval('fromCharCode()'), '');
+      expect(eval('fromCharCode(-1, "x", 67)'), 'C');
+      // A seat letter from a column number, the other way round.
+      expect(eval('fromCharCode(charCode("A") + 3) + 12'), 'D12');
+    });
+
     test('padLeft and padRight', () {
       expect(eval('padLeft(4, 2)'), '04');
       expect(eval('padLeft(count, 3)'), '004');

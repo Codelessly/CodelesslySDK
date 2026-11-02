@@ -9,6 +9,7 @@ export 'passive_chart_transformer.dart';
 export 'passive_chart_series_transformer.dart';
 export 'passive_checkbox_transformer.dart';
 export 'passive_chip_transformer.dart';
+export 'passive_barcode_transformer.dart';
 export 'passive_divider_transformer.dart';
 export 'passive_dropdown_transformer.dart';
 export 'passive_embedded_video_transformer.dart';

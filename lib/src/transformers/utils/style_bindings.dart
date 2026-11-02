@@ -32,7 +32,8 @@ import 'scoped_values.dart';
 ///   node, e.g. a counter that grows past 99: `${= count > 99 ? 28 : 36}`.
 ///   Line heights and letter spacings given in percent scale with it.
 /// * [textDecoration] (`none`, `underline`, `overline`, `strikethrough`
-///   or `lineThrough`): the decoration of every span of a text node, e.g.
+///   or `lineThrough`, see [TextDecorationEnum.parse]; true strikes
+///   through): the decoration of every span of a text node, e.g.
 ///   a done checklist item struck through.
 /// * [icon] (string): the name of the icon an icon node shows, in the
 ///   naming of its icon model (`star`, `star_border`, ...). Its family and
@@ -41,6 +42,13 @@ import 'scoped_values.dart';
 ///   node's first fill when it is a gradient, e.g. a halo whose center
 ///   follows the phase color. A `#RRGGBB` color keeps the stop's own alpha
 ///   (a 35% halo stays 35%); `#AARRGGBB` sets it too.
+/// * [notchOffset] (number): the offset of every notch of a node with
+///   [CornerMixin.notches], in the notch's own unit (pixels, or a fraction
+///   of the edge when the notch is relative), e.g. a ticket whose tear line
+///   follows the screen width: `${146 * screen.width / 340}`.
+/// * [notchOffsetAt] `notch-offset-<index>` (number): the offset of the
+///   notch at index (0-based) of [CornerMixin.notches]. Wins over
+///   [notchOffset].
 abstract final class StyleBindings {
   /// Shows or hides every effect of the node.
   static const String effectsVisible = 'effectsVisible';
@@ -80,6 +88,12 @@ abstract final class StyleBindings {
 
   /// The name of the icon an icon node shows.
   static const String icon = 'icon';
+
+  /// The offset of every notch of the node.
+  static const String notchOffset = 'notchOffset';
+
+  /// The offset of the notch at [index] of the node's notches.
+  static String notchOffsetAt(int index) => 'notch-offset-$index';
 
   /// Shows or hides the effect [effectId].
   static String effectVisible(String effectId) => 'effect-visible-$effectId';
@@ -249,6 +263,13 @@ abstract final class StyleBindings {
       }
     }
 
+    if (node is CornerMixin && node.notches.isNotEmpty) {
+      final List<NotchModel> notches = boundNotches(node, scopedValues);
+      if (!const ListEquality<NotchModel>().equals(notches, node.notches)) {
+        patch['notches'] = [for (final notch in notches) notch.toJson()];
+      }
+    }
+
     if (node is IconNode) {
       final IconModel? bound = _icon(
         node.properties.icon.icon,
@@ -306,6 +327,36 @@ abstract final class StyleBindings {
     ];
     if (!changed) return null;
     return [first.copyWith(gradientStops: next).toJson(), ...fills.skip(1)];
+  }
+
+  /// [node]'s notches with the offsets their [notchOffsetAt] or
+  /// [notchOffset] bindings give them, evaluated with [scopedValues]. A
+  /// binding that is missing or isn't a finite number keeps the notch's own
+  /// offset.
+  static List<NotchModel> boundNotches(
+    CornerMixin node,
+    ScopedValues scopedValues,
+  ) {
+    double? number(String property) {
+      if (node.variables[property] == null) return null;
+      final num? offset = PropertyValueDelegate.getPropertyValue<num>(
+        node,
+        property,
+        scopedValues: scopedValues,
+      );
+      return offset == null || !offset.isFinite ? null : offset.toDouble();
+    }
+
+    final double? all = number(notchOffset);
+    return [
+      for (final (int index, NotchModel notch) in node.notches.indexed)
+        () {
+          final double? offset = number(notchOffsetAt(index)) ?? all;
+          return offset == null || offset == notch.offset
+              ? notch
+              : notch.copyWith(offset: offset);
+        }(),
+    ];
   }
 
   static List<Effect> _effects(
@@ -369,7 +420,8 @@ abstract final class StyleBindings {
   }
 
   /// A text decoration from a binding's value: a [TextDecorationEnum] name
-  /// (`lineThrough` for `strikethrough` too), or null.
+  /// as [TextDecorationEnum.parse] reads it (`lineThrough` for
+  /// `strikethrough` too), true or false (strikethrough or none), or null.
   static TextDecorationEnum? parseTextDecoration(Object? value) {
     if (value is TextDecorationEnum) return value;
     // A bool strikes through: `${= m.wrong}`.
@@ -380,10 +432,7 @@ abstract final class StyleBindings {
     final String name = value.trim();
     if (name == 'true') return TextDecorationEnum.strikethrough;
     if (name == 'false') return TextDecorationEnum.none;
-    if (name == 'lineThrough' || name == 'line-through') {
-      return TextDecorationEnum.strikethrough;
-    }
-    return TextDecorationEnum.values.asNameMap()[name];
+    return TextDecorationEnum.parse(name);
   }
 
   /// The font weight [value] names: a number from 100 to 900 (rounded to the

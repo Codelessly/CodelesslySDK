@@ -261,6 +261,25 @@ class PassiveListViewWidget extends StatelessWidget {
     );
   }
 
+  /// The keys and paint order the list's `itemKey` and `itemZIndex`
+  /// bindings and its reversed paint order give its [count] items, or null
+  /// when it sets none of them. See [ListItemArrangement].
+  ListItemArrangement? arrangementOf(
+    BuildContext context,
+    int count,
+    Object? Function(int index) values, {
+    bool firstOnTop = false,
+  }) {
+    if (!ListItemArrangement.arranges(node)) return null;
+    return ListItemArrangement.of(
+      node,
+      count: count,
+      values: values,
+      scope: ScopedValues.of(context),
+      firstOnTop: firstOnTop,
+    );
+  }
+
   Widget wrapped(
     BuildContext context,
     bool scrolls,
@@ -425,11 +444,21 @@ class PassiveListViewWidget extends StatelessWidget {
                 }
 
                 if (node.properties.stacked) {
+                  final ListItemArrangement? arrangement = arrangementOf(
+                    context,
+                    snapshot.docs.length,
+                    items.dataAt,
+                    firstOnTop: true,
+                  );
                   return StackedItems(
                     itemCount: snapshot.docs.length,
                     clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+                    paintOrder: arrangement?.paintOrder,
+                    keyOf: arrangement?.keyOf,
                     itemBuilder: (context, index) => IndexedItemProvider(
-                      key: ValueKey(index),
+                      key: arrangement == null
+                          ? ValueKey(index)
+                          : listItemKey(arrangement.keyOf(index)),
                       item: IndexedItem(index, items.dataAt(index)),
                       child: Builder(
                         builder: (context) => buildItem(item, context),
@@ -529,11 +558,21 @@ class PassiveListViewWidget extends StatelessWidget {
       );
     }
 
-    // Data-backed rows have stable identity across inserts and reorders.
+    // Data-backed rows have stable identity across inserts and reorders:
+    // by their bound item key, else by their `id`.
+    final ListItemArrangement? keyed =
+        node.variables[ListViewNode.itemKeyVariable]?.trim().isNotEmpty == true
+        ? arrangementOf(
+            context,
+            itemCount ?? 0,
+            (index) => data?.elementAtOrNull(index),
+          )
+        : null;
     final ids = data
         ?.map((value) => value is Map ? value['id'] : null)
         .toList();
     Object itemKey(int index) {
+      if (keyed != null && index < (itemCount ?? 0)) return keyed.keyOf(index);
       final id = ids?.elementAtOrNull(index);
       return id != null &&
               ids!.where((candidate) => candidate == id).length == 1
@@ -643,15 +682,21 @@ class PassiveListViewWidget extends StatelessWidget {
 
     // Legacy stacked and wrapping layouts keep their placement and physics.
     if (node.properties.stacked) {
-      return box(
-        canShrinkWrap: false,
-        (context, _) => StackedItems(
+      return box(canShrinkWrap: false, (context, _) {
+        final ListItemArrangement? arrangement = arrangementOf(
+          context,
+          itemCount ?? 0,
+          (index) => data?.elementAtOrNull(index),
+          firstOnTop: true,
+        );
+        return StackedItems(
           itemCount: itemCount ?? 0,
           clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+          paintOrder: arrangement?.paintOrder,
           itemBuilder: itemBuilder,
           keyOf: itemKey,
-        ),
-      );
+        );
+      });
     }
     if (usesScrollableWrap) {
       return box(
@@ -812,14 +857,26 @@ class StackedListItems extends StatelessWidget {
             item,
           )
         : const [];
+    final ListItemArrangement? arrangement = ListItemArrangement.arranges(node)
+        ? ListItemArrangement.of(
+            node,
+            count: values.length,
+            values: (index) => values[index],
+            scope: ScopedValues.of(context),
+          )
+        : null;
     return Padding(
       padding: node.padding.flutterEdgeInsets,
       child: Stack(
         clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
         children: [
-          for (int index = 0; index < values.length; index++)
+          for (final int index
+              in arrangement?.paintOrder ??
+                  [for (int index = 0; index < values.length; index++) index])
             IndexedItemProvider(
-              key: ValueKey(index),
+              key: arrangement == null
+                  ? ValueKey(index)
+                  : listItemKey(arrangement.keyOf(index)),
               item: IndexedItem(index, values[index]),
               // A component builder between the provider and the Positioned,
               // so the offset reads this item and rebuilds when the
@@ -829,7 +886,9 @@ class StackedListItems extends StatelessWidget {
                 builder: (context) {
                   final ScopedValues scope = ScopedValues.of(context);
                   return Positioned(
-                    key: ValueKey('stacked item $index'),
+                    key: arrangement == null
+                        ? ValueKey('stacked item $index')
+                        : listItemKey(arrangement.keyOf(index), 'positioned'),
                     left: offsetOf(item, node, 'x', scope),
                     top: offsetOf(item, node, 'y', scope),
                     child: manager.buildWidgetByID(
@@ -1023,7 +1082,7 @@ class ListViewItemSeparator extends StatelessWidget {
 }
 
 /// The items of a stacked list: drawn on top of each other in the list's
-/// box, each at its top center, the first item on top.
+/// box, each at its top center, the first item on top, or in [paintOrder].
 class StackedItems extends StatelessWidget {
   /// Creates a [StackedItems].
   const StackedItems({
@@ -1031,8 +1090,13 @@ class StackedItems extends StatelessWidget {
     required this.itemCount,
     required this.itemBuilder,
     this.clipBehavior = Clip.none,
+    this.paintOrder,
     this.keyOf,
   });
+
+  /// The item indexes from the bottom to the top, or null to draw the first
+  /// item on top. See [ListItemArrangement.paintOrder].
+  final List<int>? paintOrder;
 
   /// How many items.
   final int itemCount;
@@ -1054,11 +1118,13 @@ class StackedItems extends StatelessWidget {
   Widget build(BuildContext context) => Stack(
     clipBehavior: clipBehavior,
     children: [
-      // Built last to first, so the first item paints over the rest and
-      // takes taps first.
-      for (int index = itemCount - 1; index >= 0; index--)
+      // By default built last to first, so the first item paints over the
+      // rest and takes taps first.
+      for (final int index
+          in paintOrder ??
+              [for (int index = itemCount - 1; index >= 0; index--) index])
         Positioned.fill(
-          key: ValueKey(keyOf?.call(index) ?? index),
+          key: keyOf == null ? ValueKey(index) : listItemKey(keyOf!(index)),
           child: Align(
             alignment: Alignment.topCenter,
             child: itemBuilder(context, index),
