@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -149,5 +150,98 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(calls, ['desktop']);
+  });
+
+  // The same link at phone width: it names the desktop canvas, the phone
+  // canvas shows. Its parameters were applied only to the canvas the link
+  // named, so the phone canvas's load actions read the defaults (an error
+  // link loaded), and the app then navigated to the desktop canvas.
+  testWidgets('a link to one breakpoint canvas sets its variables on another', (
+    tester,
+  ) async {
+    final List<String> calls = [];
+    final model = SDKPublishModel(
+      projectId: 'project',
+      owner: 'owner',
+      teams: const {},
+      users: const {},
+      roles: const {},
+      public: false,
+    );
+    final layout = SDKPublishLayout.private(
+      id: 'layout',
+      projectId: 'project',
+      pageId: 'page',
+      lastUpdated: DateTime(2026),
+      canvases: {
+        'mobile': _canvas('mobile', 390),
+        'desktop': _canvas('desktop', 1440),
+      },
+      breakpoints: [
+        const Breakpoint(nodeId: 'mobile', lowerBound: 0, upperBound: 640),
+        const Breakpoint(nodeId: 'desktop', lowerBound: 640, upperBound: 100000),
+      ],
+      privacy: model,
+    );
+    model.layouts[layout.id] = SDKPublishLayout.fromJson(
+      jsonDecode(jsonEncode(layout.toJson())) as Map<String, dynamic>,
+    );
+    model.variables['layout'] = SDKLayoutVariables(
+      id: 'layout',
+      variables: {
+        kAppVariablesScope: {
+          'mode': VariableData(
+            id: 'mode',
+            name: 'mode',
+            type: VariableType.text,
+            value: '',
+          ),
+        },
+      },
+      owner: 'owner',
+      teams: const {},
+      users: const {},
+      roles: const {},
+      public: false,
+    );
+    final config = CodelesslyConfig(authToken: 'token', isPreview: false);
+    final codelessly = Codelessly(
+      config: config,
+      client: MockClient((request) async => http.Response('{}', 200)),
+      publishDataManager: _TestDataManager(model, config)
+        ..status = CStatus.loaded(),
+      previewDataManager: _TestDataManager(model, config)
+        ..status = CStatus.loaded(),
+    )..status = CStatus.loaded();
+    codelessly.pendingRoute = const CodelesslyRoute('desktop', {
+      'mode': 'error',
+    });
+
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.reset);
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CodelesslyWidget(
+            codelessly: codelessly,
+            layoutID: 'layout',
+            functions: {
+              'record': (context, reference, params) => calls.add(
+                '${params['what']}:'
+                '${context.read<CodelesslyContext>().findVariableByName('mode')?.value.value}',
+              ),
+            },
+          ),
+        ),
+      );
+      for (int i = 0; i < 8; i++) {
+        await tester.pump();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+    });
+
+    expect(tester.takeException(), isNull);
+    expect(calls, ['mobile:error']);
   });
 }
