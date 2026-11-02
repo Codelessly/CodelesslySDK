@@ -122,6 +122,7 @@ SDKPublishLayout testScreen(
 SDKPublishModel tidepoolModel({
   ActionModel? tidesAction,
   Map<String, Map<String, ActionModel>> buttons = const {},
+  bool withNotFound = false,
 }) {
   final model = SDKPublishModel(
     projectId: 'project',
@@ -172,6 +173,12 @@ SDKPublishModel tidepoolModel({
         ...buttonsOf('journal'),
       ],
     ),
+    if (withNotFound)
+      testScreen(
+        'lost',
+        path: '*',
+        children: [(body) => testText('lostPath', body, r'lost ${route.path}')],
+      ),
     testScreen(
       'settings',
       children: [

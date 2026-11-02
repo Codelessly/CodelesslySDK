@@ -452,9 +452,16 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     final String? entry = model.resolveLayoutId(model.entryLayoutId);
     if (entry != null) add('', entry);
     final List<String> layoutIds = CanvasLocation.layoutIdsOf(model).toList();
+    _notFoundLayoutId = null;
     for (final String layoutId in layoutIds) {
       final String? path = CanvasLocation.layoutPathOf(model, layoutId);
-      if (path != null) add(path, layoutId);
+      // The app's own not found screen shows for unknown locations; see
+      // [_buildNotFoundPage].
+      if (path == CanvasLocation.catchAll) {
+        _notFoundLayoutId ??= layoutId;
+      } else if (path != null) {
+        add(path, layoutId);
+      }
     }
     for (final String layoutId in layoutIds) {
       for (final String canvasId in CanvasLocation.canvasIdsOf(
@@ -524,10 +531,29 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     ),
   );
 
+  /// The layout of the app's own not found screen: a canvas at
+  /// [CanvasLocation.catchAll]. Null when the app has none.
+  String? _notFoundLayoutId;
+
+  /// An unknown location: the app's own not found screen, with the location
+  /// as its `path` param (`${route.path}`), else a built-in one.
   Page<dynamic> _buildNotFoundPage(DefaultRoute route) => MaterialPage<void>(
     key: ValueKey('not-found:${route.path}'),
     name: route.name,
-    child: _ScreenNotFound(onHome: () => resetTo(const ['/'])),
+    child: switch (_notFoundLayoutId) {
+      final String layoutId => CodelesslyScreen(
+        key: ValueKey('not-found:${locationOfRoute(route)}'),
+        router: this,
+        layoutId: layoutId,
+        location: locationOfRoute(route),
+        params: {
+          ...route.queryParameters,
+          'path': route.path.startsWith('/') ? route.path : '/${route.path}',
+        },
+        fromLink: true,
+      ),
+      null => _ScreenNotFound(onHome: () => resetTo(const ['/'])),
+    },
   );
 
   /// The location of screen [destinationId] (a canvas or layout id) opened

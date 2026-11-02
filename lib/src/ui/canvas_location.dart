@@ -101,7 +101,10 @@ abstract final class CanvasLocation {
   /// `guide/bat-star?x=1` for a canvas at `guide/:id`. Its params are the path
   /// params (`id: bat-star`) over the query params (`x: 1`). When several
   /// canvases match, the one with the most literal segments wins, so
-  /// `guide/new` beats `guide/:id`. Null when no canvas matches.
+  /// `guide/new` beats `guide/:id`. A canvas at [catchAll] (`*`) takes any
+  /// location no other canvas matches, a not found screen, with the location
+  /// as its `path` param (`${route.path}`, such as `/amp/room`). Null when no
+  /// canvas matches.
   static CanvasLocationMatch? match(SDKPublishModel model, String location) {
     final Uri uri = Uri.parse(location.trim());
     final List<String> segments = uri.pathSegments
@@ -110,11 +113,20 @@ abstract final class CanvasLocation {
     if (segments.isEmpty) return null;
 
     CanvasLocationMatch? best;
+    CanvasLocationMatch? fallback;
     int bestLiterals = -1;
     for (final String layoutId in layoutIdsOf(model)) {
       for (final String canvasId in canvasIdsOf(model, layoutId)) {
         final String? path = pathOf(model, canvasId);
         if (path == null) continue;
+        if (path == catchAll) {
+          fallback ??= CanvasLocationMatch(
+            layoutId: layoutId,
+            canvasId: canvasId,
+            params: {...uri.queryParameters, 'path': '/${segments.join('/')}'},
+          );
+          continue;
+        }
         final List<String> pattern = segmentsOf(path);
         final Map<String, String>? params = matchPattern(pattern, segments);
         if (params == null) continue;
@@ -128,8 +140,12 @@ abstract final class CanvasLocation {
         );
       }
     }
-    return best;
+    return best ?? fallback;
   }
+
+  /// The path of a canvas that shows for any location no other canvas
+  /// matches, such as an app's own not found screen. See [match].
+  static const String catchAll = '*';
 
   /// The location of the screen [destinationId] (a canvas or layout id) opened
   /// with [params]: its path with `:name` segments filled from [params], and
@@ -148,6 +164,8 @@ abstract final class CanvasLocation {
     // breakpoint of its layout.
     final String? path =
         pathOf(model, destinationId) ?? layoutPathOf(model, layoutId);
+    // A catch-all screen has no location of its own: it is opened by id.
+    if (path == catchAll) return null;
     if (path == null && model.entryLayoutId != layoutId) return null;
     return fill(path ?? '', params);
   }
