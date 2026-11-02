@@ -163,11 +163,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       },
     );
     if (!settings.withReactions) return built;
-    return wrapWithDragDrop(
-      context,
-      node,
-      wrapWithInteractionScopes(context, node, built),
-    );
+    return wrapWithInteractionScopes(context, node, built);
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -213,6 +209,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = wrapWithSemantics(styled, widget);
       widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
+      widget = applyDragAndDrop(context, styled, widget);
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
@@ -229,12 +226,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // where its drag track puts it; with them NodeDragTrack draws it there
     // and makes it draggable.
     if (!settings.withReactions) {
-      widget = applyTrackPose(
-        context,
-        styled,
-        widget,
-        scopedValues: preview,
-      );
+      widget = applyTrackPose(context, styled, widget, scopedValues: preview);
     }
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
@@ -257,6 +249,61 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
 
     return decorate(context, styled, widget, NodeBuildLayer.margin);
+  }
+
+  /// Makes [widget] draggable and/or a drop target, as [node]'s
+  /// [BaseNode.draggable] and [BaseNode.dropTarget] say.
+  Widget applyDragAndDrop(BuildContext context, BaseNode node, Widget widget) {
+    // `draggable.enabled` / `dropTarget.enabled` bind the switches.
+    bool flag(String key, bool fallback) => node.variables.containsKey(key)
+        ? PropertyValueDelegate.getPropertyValue<bool>(
+                node,
+                key,
+                scopedValues: ScopedValues.of(context),
+              ) ??
+              fallback
+        : fallback;
+    if (node.dropTarget case final DropTargetModel target) {
+      widget = DropTargetBox(
+        node: node,
+        model: target,
+        enabled: flag(DropTargetModel.enabledVariable, target.enabled),
+        child: widget,
+      );
+    }
+    if (node.draggable case DraggableModel draggable) {
+      // The first form bound the payload as `draggable.data`.
+      if (draggable.data.isEmpty) {
+        if (node.variables['draggable.data'] case final String bound) {
+          draggable = draggable.copyWith(data: bound);
+        }
+      }
+      final Object? flightKey = node.variables.containsKey('flightKey')
+          ? PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              'flightKey',
+              scopedValues: ScopedValues.of(context),
+            )
+          : node.flightKey;
+      widget = DragSourceBox(
+        node: node,
+        model: draggable,
+        enabled: flag(DraggableModel.enabledVariable, draggable.enabled),
+        flightKey: '${flightKey ?? ''}',
+        // The feedback node is usually hidden where it is designed.
+        buildNode: (context, id) => buildWidgetByID(
+          id,
+          context,
+          settings: const WidgetBuildSettings(
+            debugLabel: 'drag feedback',
+            withReactions: false,
+            withVisibility: false,
+          ),
+        ),
+        child: widget,
+      );
+    }
+    return widget;
   }
 
   /// Wraps [widget] in a tooltip showing [node]'s tooltip text (its data
@@ -581,6 +628,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           case 'auth':
             final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
+          case 'drag':
+            listenables.add(codelesslyContext.dragAndDrop);
           case 'speech':
             listenables.add(Speech.instance);
         }
@@ -626,6 +675,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           case 'auth':
             final notifier = context.read<Codelessly?>()?.appUser;
             if (notifier != null) listenables.add(notifier);
+          case 'drag':
+            listenables.add(codelesslyContext.dragAndDrop);
           case 'speech':
             listenables.add(Speech.instance);
         }
@@ -674,6 +725,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             case 'auth':
               final notifier = context.read<Codelessly?>()?.appUser;
               if (notifier != null) listenables.add(notifier);
+            case 'drag':
+              listenables.add(codelesslyContext.dragAndDrop);
             case 'speech':
               listenables.add(Speech.instance);
           }
@@ -732,6 +785,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           context,
         ),
         'auth' => context.read<Codelessly?>()?.appUser,
+        'drag' => codelesslyContext.dragAndDrop,
         'speech' => Speech.instance,
         _ => null,
       };

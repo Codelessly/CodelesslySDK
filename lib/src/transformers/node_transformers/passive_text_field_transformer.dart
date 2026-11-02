@@ -45,6 +45,8 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
           onIconTap(context, node, reactions, value),
       onChanged: (context, value) => onChanged(context, node, value),
       onSubmitted: (context, value) => onSubmitted(context, node, value),
+      onEditingComplete: (context, value) =>
+          onEditingComplete(context, node, value),
     );
   }
 
@@ -108,6 +110,23 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     );
   }
 
+  /// The field lost focus: its value is kept, and its "Editing Complete"
+  /// actions run (not its "Submitted" ones, which wait for the keyboard's
+  /// submit, so clicking elsewhere doesn't submit a form).
+  void onEditingComplete(
+    BuildContext context,
+    TextFieldNode node,
+    String inputValue,
+  ) {
+    NodeStateProvider.setState(context, inputValue);
+    FunctionsRepository.triggerAction(
+      context,
+      node: node,
+      TriggerType.editingComplete,
+      value: inputValue,
+    );
+  }
+
   void onIconTap(
     BuildContext context,
     TextFieldNode node,
@@ -132,6 +151,9 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final Function(BuildContext context, String value)? onTap;
   final Function(BuildContext context, String value)? onChanged;
   final Function(BuildContext context, String value)? onSubmitted;
+
+  /// Called when the field loses focus.
+  final Function(BuildContext context, String value)? onEditingComplete;
   final Function(BuildContext context, List<Reaction> reactions, String value)?
   onIconTap;
   final bool withAutofill;
@@ -150,6 +172,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
     this.onTap,
     this.onChanged,
     this.onSubmitted,
+    this.onEditingComplete,
     this.withAutofill = true,
     this.onIconTap,
     List<VariableData>? variables,
@@ -162,6 +185,15 @@ class PassiveTextFieldWidget extends StatefulWidget {
   @override
   State<PassiveTextFieldWidget> createState() => _PassiveTextFieldWidgetState();
 }
+
+/// Moves the keyboard focus to the text field of a node (Focus action).
+/// Returns whether that field is on screen.
+bool focusTextField(String nodeId, {bool selectAll = false}) =>
+    _PassiveTextFieldWidgetState.focus(nodeId, selectAll: selectAll);
+
+/// Takes the focus from the text field of [nodeId], or from any field.
+void unfocusTextField([String? nodeId]) =>
+    _PassiveTextFieldWidgetState.unfocus(nodeId);
 
 class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   late final TextEditingController controller = TextEditingController(
@@ -182,6 +214,35 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
   final FocusNode focusNode = FocusNode();
 
+  /// The text fields on screen by node id, newest last, so a Focus action
+  /// can reach a field by its node.
+  static final Map<String, List<_PassiveTextFieldWidgetState>> _mounted = {};
+
+  /// Focuses the newest field of [nodeId] on screen (and selects its text
+  /// when [selectAll]); returns whether there was one.
+  static bool focus(String nodeId, {bool selectAll = false}) {
+    final _PassiveTextFieldWidgetState? state = _mounted[nodeId]?.lastOrNull;
+    if (state == null) return false;
+    state.focusNode.requestFocus();
+    if (selectAll) {
+      state.controller.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: state.controller.text.length,
+      );
+    }
+    return true;
+  }
+
+  /// Unfocuses the field of [nodeId] (any field when null).
+  static void unfocus([String? nodeId]) {
+    if (nodeId == null) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      return;
+    }
+    for (final _PassiveTextFieldWidgetState state in [...?_mounted[nodeId]]) {
+      state.focusNode.unfocus();
+    }
+  }
   /// The values the field's bindings read: those it was given, else on the
   /// design canvas (no reactions) the editor's preview values, else the
   /// live ones.
@@ -204,6 +265,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   void initState() {
     super.initState();
     focusNode.addListener(onFocusChanged);
+    (_mounted[widget.node.id] ??= []).add(this);
   }
 
   @override
@@ -281,25 +343,18 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
   @override
   void dispose() {
+    _mounted[widget.node.id]?.remove(this);
+    if (_mounted[widget.node.id]?.isEmpty ?? false) {
+      _mounted.remove(widget.node.id);
+    }
     controller.dispose();
     focusNode.dispose();
     super.dispose();
   }
 
-  /// The text last submitted, so leaving the field right after Enter does
-  /// not submit the same text again.
-  String? _lastSubmitted;
-
-  void submit(String text) {
-    _lastSubmitted = text;
-    widget.onSubmitted?.call(context, text);
-  }
-
   void onFocusChanged() {
-    if (!focusNode.hasFocus &&
-        widget.node.properties.submitOnUnfocus &&
-        controller.text != _lastSubmitted) {
-      submit(controller.text);
+    if (!focusNode.hasFocus) {
+      widget.onEditingComplete?.call(context, controller.text);
     }
   }
 
@@ -412,9 +467,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       onTap: () => widget.onTap?.call(context, controller.text),
       onChanged: (value) => widget.onChanged?.call(context, value),
       onEditingComplete: () {},
-      // Enter (or the keyboard's done key) submits. Leaving the field
-      // submits too with submitOnUnfocus, unless the text was just submitted.
-      onFieldSubmitted: submit,
+      // The keyboard's submit (Enter on a one-line field) runs the
+      // "Submitted" actions; the field keeps its focus, as a form expects.
+      onFieldSubmitted: (value) => widget.onSubmitted?.call(context, value),
       decoration: decoration,
     );
 
