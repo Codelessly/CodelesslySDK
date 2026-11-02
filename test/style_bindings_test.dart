@@ -338,6 +338,52 @@ void main() {
       expect(StyleBindings.parseFontSize(null), isNull);
     });
 
+    testWidgets('textDecoration follows its formula', (tester) async {
+      final selected = boolVariable('selected', false);
+      final host = Host(
+        text({'textDecoration': r"${= selected ? 'lineThrough' : 'none'}"}),
+        variables: {'selected': selected},
+      );
+      await host.pump(tester);
+      expect(
+        (host.styled as TextNode).textMixedProps.single.textDecoration,
+        TextDecorationEnum.none,
+      );
+
+      selected.set(selected.value.copyWith(value: true));
+      await tester.pump();
+      expect(
+        (host.styled as TextNode).textMixedProps.single.textDecoration,
+        TextDecorationEnum.strikethrough,
+      );
+      final List<TextDecoration?> decorations = [];
+      for (final RichText text in tester.widgetList<RichText>(
+        find.byType(RichText),
+      )) {
+        text.text.visitChildren((span) {
+          decorations.add(span.style?.decoration);
+          return true;
+        });
+      }
+      expect(decorations, contains(TextDecoration.lineThrough));
+    });
+
+    test('parseTextDecoration reads names and lineThrough', () {
+      expect(
+        StyleBindings.parseTextDecoration('strikethrough'),
+        TextDecorationEnum.strikethrough,
+      );
+      expect(
+        StyleBindings.parseTextDecoration('lineThrough'),
+        TextDecorationEnum.strikethrough,
+      );
+      expect(
+        StyleBindings.parseTextDecoration('underline'),
+        TextDecorationEnum.underline,
+      );
+      expect(StyleBindings.parseTextDecoration('wavy'), isNull);
+    });
+
     test('parseFontWeight reads numbers, wNNN and names', () {
       expect(StyleBindings.parseFontWeight(700), FontWeightNumeric.w700);
       expect(StyleBindings.parseFontWeight(650.0), FontWeightNumeric.w700);

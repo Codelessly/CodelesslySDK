@@ -2051,9 +2051,15 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     if (match.name != match.fullPath &&
         (propertyNotifier.value.type == VariableType.map ||
             propertyNotifier.value.type == VariableType.list)) {
-      // TODO: support sub path on the variable?
-      // sub path on the variable
-      propertyNotifier.value = propertyNotifier.value.copyWith(value: value);
+      // A field bound to part of a map or list (`${draft.title}`,
+      // `${rows[2].name}`) sets that part, not the whole variable.
+      final List<Object> keys = variablePathKeys(
+        match.fullPath.substring(match.name.length),
+      );
+      final Object? root = propertyNotifier.value.getValue();
+      final Object? updated = setAtPath(root, keys, value);
+      if (updated == null) return false;
+      propertyNotifier.value = propertyNotifier.value.copyWith(value: updated);
       return true;
     }
 
@@ -2153,9 +2159,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     // A click reads the modifier keys held, as `${result.meta}` (Command
     // on macOS, Control elsewhere), `${result.shift}` and `${result.alt}`,
     // for multi-select (⌘-click) and range select (⇧-click).
-    if (type == TriggerType.click && result == null) {
+    // Beside where it landed (`x`, `y`, `globalX`, `globalY`), when known.
+    if (type == TriggerType.click && (result == null || result is Map)) {
       final HardwareKeyboard keys = HardwareKeyboard.instance;
       result = {
+        ...?(result as Map?),
         'meta': keys.isMetaPressed || keys.isControlPressed,
         'shift': keys.isShiftPressed,
         'alt': keys.isAltPressed,
@@ -3227,4 +3235,33 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       NumberOperation.subtract => currentValue - parsedValue,
     };
   }
+}
+
+/// The keys of a variable path after its name: `.title` → `['title']`,
+/// `[2].name` → `[2, 'name']`.
+List<Object> variablePathKeys(String path) => [
+  for (final Match m in RegExp(
+    r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]',
+  ).allMatches(path))
+    if (m.group(1) case final String key) key else int.parse(m.group(2)!),
+];
+
+/// A copy of [root] with [value] at [keys] (map keys and list indexes),
+/// making missing maps on the way; null when a key doesn't fit (an index
+/// past the end of a list, a key into a list).
+Object? setAtPath(Object? root, List<Object> keys, Object? value) {
+  if (keys.isEmpty) return value;
+  final Object key = keys.first;
+  final List<Object> rest = keys.sublist(1);
+  if (key is int) {
+    if (root is! List || key < 0 || key >= root.length) return null;
+    final Object? child = setAtPath(root[key], rest, value);
+    if (child == null && rest.isNotEmpty) return null;
+    return [...root]..[key] = child;
+  }
+  final Map<dynamic, dynamic> map = root is Map ? root : <String, dynamic>{};
+  if (root != null && root is! Map) return null;
+  final Object? child = setAtPath(map[key], rest, value);
+  if (child == null && rest.isNotEmpty) return null;
+  return {...map, key: child};
 }
