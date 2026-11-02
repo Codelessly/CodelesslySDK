@@ -238,6 +238,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = wrapWithCursorReactions(context, styled, widget);
       widget = applyTooltipAndZoom(context, styled, widget);
       widget = applyDragAndDrop(context, styled, widget);
+      // Pointer events pass through to the nodes under this one.
+      if (styled.ignorePointer) widget = IgnorePointer(child: widget);
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
@@ -615,11 +617,16 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       child: Builder(
         builder: (context) {
           if (listenables.isNotEmpty) {
-            return ManagedListenableBuilder(
+            final Widget listening = ManagedListenableBuilder(
               key: ValueKey(node.id),
               listenables: listenables,
               builder: (context) => builder(context),
             );
+            // A node redrawn every frame (it reads nowMs()) paints on a layer
+            // of its own, so its frames don't repaint the rest of the screen.
+            return listenables.contains(FrameClock.instance)
+                ? RepaintBoundary(child: listening)
+                : listening;
           } else {
             return builder(context);
           }

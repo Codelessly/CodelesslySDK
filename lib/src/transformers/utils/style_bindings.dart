@@ -24,9 +24,6 @@ import 'scoped_values.dart';
 ///   JSON value (e.g. `[8, true, 'circular']`) is accepted too.
 /// * [fontWeight] (number 100-900, or `w700`, `bold`, `normal`): the weight
 ///   of every span of a text node.
-/// * [textDecoration] (`none`, `underline`, `overline`, `strikethrough`,
-///   or Flutter's `lineThrough`): the decoration of every span of a text
-///   node, e.g. a ticked item struck through.
 /// * [fontFamily] (string): the font family of every span of a text node
 ///   (of a text field's input and hint),
 ///   e.g. one per script: `${= uiLang == 'ar' ? 'IBM Plex Sans Arabic' :
@@ -34,6 +31,9 @@ import 'scoped_values.dart';
 /// * [fontSize] (number, logical pixels): the size of every span of a text
 ///   node, e.g. a counter that grows past 99: `${= count > 99 ? 28 : 36}`.
 ///   Line heights and letter spacings given in percent scale with it.
+/// * [textDecoration] (`none`, `underline`, `overline`, `strikethrough`
+///   or `lineThrough`): the decoration of every span of a text node, e.g.
+///   a done checklist item struck through.
 /// * [icon] (string): the name of the icon an icon node shows, in the
 ///   naming of its icon model (`star`, `star_border`, ...). Its family and
 ///   style stay. An icon model JSON map replaces the icon as a whole.
@@ -65,27 +65,14 @@ abstract final class StyleBindings {
   /// The font weight of every span of a text node.
   static const String fontWeight = 'fontWeight';
 
-  /// The decoration of every span of a text node.
-  static const String textDecoration = 'textDecoration';
-
-  /// [value] as a text decoration, or null when it names none.
-  static TextDecorationEnum? parseTextDecoration(Object? value) {
-    if (value is TextDecorationEnum) return value;
-    if (value is! String) return null;
-    final String name = value.trim().toLowerCase();
-    if (name == 'linethrough' || name == 'line-through') {
-      return TextDecorationEnum.strikethrough;
-    }
-    return TextDecorationEnum.values.firstWhereOrNull(
-      (decoration) => decoration.name.toLowerCase() == name,
-    );
-  }
-
   /// The font family of every span of a text node.
   static const String fontFamily = 'fontFamily';
 
   /// The font size of every span of a text node.
   static const String fontSize = 'fontSize';
+
+  /// The decoration of every span of a text node.
+  static const String textDecoration = 'textDecoration';
 
   /// The name of the icon an icon node shows.
   static const String icon = 'icon';
@@ -184,24 +171,6 @@ abstract final class StyleBindings {
       }
     }
 
-    if (node is TextNode) {
-      final TextDecorationEnum? decoration = parseTextDecoration(
-        value<Object>(textDecoration),
-      );
-      if (decoration != null &&
-          node.textMixedProps.any(
-            (prop) => prop.textDecoration != decoration,
-          )) {
-        final List spans =
-            patch['textMixedProps'] as List? ??
-            [for (final prop in node.textMixedProps) prop.toJson()];
-        patch['textMixedProps'] = [
-          for (final Map span in spans.cast<Map>())
-            {...span, 'textDecoration': decoration.name},
-        ];
-      }
-    }
-
     if (node is TextFieldNode) {
       // The typed text and the hint take a bound font too, e.g. an input
       // switching to an Arabic font when the query is Arabic.
@@ -245,6 +214,24 @@ abstract final class StyleBindings {
               'hintStyle': hint,
             },
         };
+      }
+    }
+
+    if (node is TextNode) {
+      final TextDecorationEnum? decoration = parseTextDecoration(
+        value<Object>(textDecoration),
+      );
+      if (decoration != null &&
+          node.textMixedProps.any(
+            (prop) => prop.textDecoration != decoration,
+          )) {
+        final List spans =
+            patch['textMixedProps'] as List? ??
+            [for (final prop in node.textMixedProps) prop.toJson()];
+        patch['textMixedProps'] = [
+          for (final Map span in spans.cast<Map>())
+            {...span, 'textDecoration': decoration.name},
+        ];
       }
     }
 
@@ -325,6 +312,24 @@ abstract final class StyleBindings {
     } catch (_) {
       return null;
     }
+  }
+
+  /// A text decoration from a binding's value: a [TextDecorationEnum] name
+  /// (`lineThrough` for `strikethrough` too), or null.
+  static TextDecorationEnum? parseTextDecoration(Object? value) {
+    if (value is TextDecorationEnum) return value;
+    // A bool strikes through: `${= m.wrong}`.
+    if (value is bool) {
+      return value ? TextDecorationEnum.strikethrough : TextDecorationEnum.none;
+    }
+    if (value is! String) return null;
+    final String name = value.trim();
+    if (name == 'true') return TextDecorationEnum.strikethrough;
+    if (name == 'false') return TextDecorationEnum.none;
+    if (name == 'lineThrough' || name == 'line-through') {
+      return TextDecorationEnum.strikethrough;
+    }
+    return TextDecorationEnum.values.asNameMap()[name];
   }
 
   /// The font weight [value] names: a number from 100 to 900 (rounded to the

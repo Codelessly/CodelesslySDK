@@ -1,3 +1,4 @@
+import 'sound_clock.dart';
 import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -50,19 +51,15 @@ class _WebSoundEngine implements SoundEngine {
 
   final Stopwatch _stopwatch = Stopwatch()..start();
 
-  /// Stopwatch time minus audio time, kept while audio runs, so the clock
-  /// carries on (on the stopwatch) while the browser holds audio back.
-  double _offset = 0;
+  /// Continuous across audio starting and stopping; see [SoundClock].
+  final SoundClock _clock = SoundClock();
 
   @override
-  double get now {
-    final double wall = _stopwatch.elapsedMicroseconds / 1e6;
-    if (_ctx.state == 'running') {
-      _offset = wall - _ctx.currentTime;
-      return _ctx.currentTime;
-    }
-    return wall - _offset;
-  }
+  double get now => _clock.now(
+    wall: _stopwatch.elapsedMicroseconds / 1e6,
+    running: _ctx.state == 'running',
+    audio: _ctx.currentTime,
+  );
 
   @override
   void resume() {
@@ -110,7 +107,9 @@ class _WebSoundEngine implements SoundEngine {
     double pitch = 1,
   }) {
     if (volume <= 0.0005) return;
-    final double t = math.max(time ?? 0, _ctx.currentTime);
+    // [time] is on the sound clock ([now]); the audio graph runs on the
+    // audio clock.
+    final double t = math.max(_clock.toAudio(time ?? 0), _ctx.currentTime);
     final double f = pitch;
     switch (voice) {
       case SoundVoice.wood:
