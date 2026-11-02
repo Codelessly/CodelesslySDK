@@ -1,5 +1,6 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/functions/action_chain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -142,5 +143,89 @@ void main() {
         e.focusNode.hasFocus,
     ];
     expect(focused, [false, true, false]);
+  });
+
+  testWidgets('a field the same click reveals gets the focus', (tester) async {
+    final Observable<VariableData> open = Observable(
+      VariableData(
+        id: 'open',
+        name: 'open',
+        type: VariableType.boolean,
+        value: false,
+      ),
+    );
+    final List<BaseNode> nodes = [
+      RowColumnNode(
+        id: 'row',
+        name: 'row',
+        basicBoxLocal: NodeBox(0, 0, 300, 60),
+        rowColumnType: RowColumnType.row,
+        children: ['button', 'field'],
+      )..parentID = kRootNode,
+      RectangleNode(
+        id: 'button',
+        name: 'button',
+        basicBoxLocal: NodeBox(0, 0, 40, 40),
+        fills: [PaintModel.blackPaint],
+        reactions: [
+          Reaction(
+            trigger: TriggerModel(type: TriggerType.click),
+            action: SetVariableAction(
+              variable: VariableData(
+                id: 'open',
+                name: 'open',
+                type: VariableType.boolean,
+              ),
+              newValue: 'true',
+            ),
+          ),
+          Reaction(
+            trigger: TriggerModel(type: TriggerType.click),
+            action: FocusAction(nodeId: 'field'),
+          ),
+        ],
+      )..parentID = 'row',
+      TextFieldNode(
+          id: 'field',
+          name: 'field',
+          basicBoxLocal: NodeBox(0, 0, 200, 40),
+          properties: TextFieldProperties(),
+        )
+        ..parentID = 'row'
+        ..variables['visible'] = r'${open}',
+    ];
+    final registry = NodeRegistry()
+      ..setNodes({for (final node in nodes) node.id: node});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: CodelesslyContext.empty()..variables['open'] = open,
+        child: MaterialApp(
+          home: ActionChainHost(
+            child: Material(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Builder(
+                  builder: (context) => manager.buildWidgetFromNode(
+                    nodes.first,
+                    context,
+                    settings: const WidgetBuildSettings(debugLabel: 'test'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    // The row centers its children; the field is hidden until the click.
+    await tester.tapAt(const Offset(150, 30));
+    await tester.pumpAndSettle();
+    expect(open.value.getValue(), true);
+    final EditableText field = tester.widget(find.byType(EditableText));
+    expect(field.focusNode.hasFocus, isTrue);
   });
 }
