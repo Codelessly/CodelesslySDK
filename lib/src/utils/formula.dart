@@ -757,7 +757,11 @@ class FormulaEvaluator {
       'with(map, key, value, …)',
       "with(item, 'x', item.x + 1) → item with x changed",
     ),
-    FormulaFunctionDoc('at', 'at(list, index)', 'at(tasks, 2)'),
+    FormulaFunctionDoc(
+      'at',
+      'at(list, index) or at(map, key)',
+      "at(drafts, '' + ticketId)",
+    ),
     FormulaFunctionDoc(
       'flatMap',
       'flatMap(list, item => list)',
@@ -2050,6 +2054,12 @@ final Map<String, _Function> _functions = {
       FormulaEvaluator.stringify(a[i]): a[i + 1],
   },
   'at': (a) {
+    // A map reads the key (as text, the way JSON keys are stored).
+    final Object? source = _arg(a, 0);
+    if (source is Map) {
+      final Object? key = _arg(a, 1);
+      return source[key] ?? source[FormulaEvaluator.stringify(key)];
+    }
     final int index = _intArg(_arg(a, 1));
     // indexOf's -1 (not found) reads nothing rather than failing.
     return index < 0 ? null : _values(_arg(a, 0), null).elementAtOrNull(index);
@@ -2101,9 +2111,11 @@ final Map<String, _Function> _functions = {
       FormulaEvaluator.stringify(a[i]): a[i + 1],
   },
   // The first argument that is neither null nor empty text.
+  // The first value that is set; when none is, the last one, so a
+  // fallback of '' (or 0, false) is what it answers rather than null.
   'coalesce': (a) => a.firstWhere(
     (v) => v != null && !(v is String && v.isEmpty),
-    orElse: () => null,
+    orElse: () => a.isEmpty ? null : a.last,
   ),
 };
 
