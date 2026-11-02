@@ -461,12 +461,14 @@ class ScaledContent extends StatelessWidget {
       height: hugsHeight || !constraints.hasBoundedHeight
           ? designSize.height
           : constraints.maxHeight,
-      child: ClipRect(
-        child: FittedBox(
-          fit: fit,
-          alignment: alignment,
-          child: SizedBox.fromSize(size: designSize, child: child),
-        ),
+      // No clip of its own: children's shadows and overflow paint past the
+      // box like they do in any frame. The frame's clipsContent (applied by
+      // the rectangle around this content) is what clips, cover's overflow
+      // included.
+      child: FittedBox(
+        fit: fit,
+        alignment: alignment,
+        child: SizedBox.fromSize(size: designSize, child: child),
       ),
     ),
   );
