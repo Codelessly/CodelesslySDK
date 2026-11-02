@@ -352,10 +352,11 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // Rotation in degrees (the node's `rotation` JSON field), e.g. a card
     // tilted while it's dragged: `${= dragging ? -2 : 0}`.
     final num? rotation = value<num>('rotation');
+    // Fractional degrees are kept: a stamp tilted -4.6° stays at -4.6°.
     if (rotation != null &&
         rotation.isFinite &&
-        rotation.round() != node.rotationDegrees) {
-      patch['rotation'] = rotation.round();
+        rotation != node.rotationDegrees) {
+      patch['rotation'] = rotation;
     }
 
     // Effects, stroke weight, corner radius, font weight and icon.

@@ -36,17 +36,34 @@ class PreviewSwitchWidget extends StatefulWidget {
 }
 
 class _PreviewSwitchWidgetState extends State<PreviewSwitchWidget> {
-  bool effectiveValue = false;
+  /// The value the switch was toggled to in this preview, or null to show
+  /// the node's own value (its `value` binding, else [SwitchNode.value]).
+  bool? toggledValue;
+
+  @override
+  void didUpdateWidget(covariant PreviewSwitchWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A new value given to the node (e.g. inserted on) shows again.
+    if (oldWidget.node.value != widget.node.value) toggledValue = null;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final bool value =
+        toggledValue ??
+        PropertyValueDelegate.getPropertyValue<bool>(
+          widget.node,
+          'value',
+          scopedValues: ScopedValues.of(context),
+        ) ??
+        widget.node.value;
     return TransformerSwitch(
       node: widget.node,
       settings: widget.settings,
       onChanged: (context, value) => setState(() {
-        effectiveValue = value;
+        toggledValue = value;
       }),
-      value: effectiveValue,
+      value: value,
     );
   }
 }
@@ -56,11 +73,16 @@ class PassiveSwitchWidget extends StatelessWidget {
   final WidgetBuildSettings settings;
   final List<VariableData> variablesOverrides;
 
+  /// The values the switch's bindings read; by default the ones in scope
+  /// where it builds. A design canvas passes its variable defaults.
+  final ScopedValues? scopedValues;
+
   const PassiveSwitchWidget({
     super.key,
     required this.node,
     required this.settings,
     this.variablesOverrides = const [],
+    this.scopedValues,
   });
 
   void onChanged(BuildContext context, bool internalValue) {
@@ -82,10 +104,9 @@ class PassiveSwitchWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScopedValues scopedValues = ScopedValues.of(
-      context,
-      variablesOverrides: variablesOverrides,
-    );
+    final ScopedValues scopedValues =
+        this.scopedValues ??
+        ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final bool value =
         PropertyValueDelegate.getPropertyValue<bool>(
           node,
@@ -98,6 +119,7 @@ class PassiveSwitchWidget extends StatelessWidget {
       node: node,
       settings: settings,
       variablesOverrides: variablesOverrides,
+      scopedValues: scopedValues,
       value: value,
       onChanged: onChanged,
     );
@@ -111,6 +133,10 @@ class TransformerSwitch extends StatelessWidget {
   final void Function(BuildContext context, bool value)? onChanged;
   final bool value;
 
+  /// The values the switch's color bindings read; by default the ones in
+  /// scope where it builds.
+  final ScopedValues? scopedValues;
+
   const TransformerSwitch({
     super.key,
     required this.node,
@@ -118,11 +144,45 @@ class TransformerSwitch extends StatelessWidget {
     required this.onChanged,
     required this.value,
     this.variablesOverrides = const [],
+    this.scopedValues,
   });
+
+  /// [node]'s switch properties with the colors their bindings give them
+  /// (`activeTrackColor`, `inactiveTrackColor`, `activeThumbColor`,
+  /// `inactiveThumbColor`, `activeTrackBorderColor` and
+  /// `inactiveTrackBorderColor` in [SwitchNode.variables], e.g.
+  /// `${pal.ink}` or `${= on ? '#1F2B2E' : '#D9D2C3'}`), evaluated with
+  /// [scopedValues]. A binding that is missing or isn't a color keeps the
+  /// node's own color.
+  static SwitchProperties resolvedProperties(
+    SwitchNode node,
+    ScopedValues scopedValues,
+  ) {
+    ColorRGBA? color(String property) => node.variables[property] == null
+        ? null
+        : PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+            node,
+            property,
+            scopedValues: scopedValues,
+          );
+    return node.properties.copyWith(
+      activeTrackColor: color('activeTrackColor'),
+      inactiveTrackColor: color('inactiveTrackColor'),
+      activeThumbColor: color('activeThumbColor'),
+      inactiveThumbColor: color('inactiveThumbColor'),
+      activeTrackBorderColor: color('activeTrackBorderColor'),
+      inactiveTrackBorderColor: color('inactiveTrackBorderColor'),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final scale = node.basicBoxLocal.width / kSwitchDefaultWidth;
+    final SwitchProperties properties = resolvedProperties(
+      node,
+      scopedValues ??
+          ScopedValues.of(context, variablesOverrides: variablesOverrides),
+    );
 
     return AdaptiveNodeBox(
       node: node,
@@ -133,24 +193,24 @@ class TransformerSwitch extends StatelessWidget {
           child: Switch(
             value: value,
             onChanged: (value) => onChanged?.call(context, value),
-            autofocus: node.properties.autofocus,
-            activeTrackColor: node.properties.activeTrackColor.toFlutterColor(),
-            inactiveTrackColor: node.properties.inactiveTrackColor
+            autofocus: properties.autofocus,
+            activeTrackColor: properties.activeTrackColor.toFlutterColor(),
+            inactiveTrackColor: properties.inactiveTrackColor
                 .toFlutterColor(),
-            activeThumbColor: node.properties.activeThumbColor.toFlutterColor(),
-            inactiveThumbColor: node.properties.inactiveThumbColor
+            activeThumbColor: properties.activeThumbColor.toFlutterColor(),
+            inactiveThumbColor: properties.inactiveThumbColor
                 .toFlutterColor(),
-            hoverColor: node.properties.hoverColor.toFlutterColor(),
-            focusColor: node.properties.focusColor.toFlutterColor(),
-            splashRadius: node.properties.splashRadius,
+            hoverColor: properties.hoverColor.toFlutterColor(),
+            focusColor: properties.focusColor.toFlutterColor(),
+            splashRadius: properties.splashRadius,
             trackOutlineColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
-                return node.properties.activeTrackBorderColor?.toFlutterColor();
+                return properties.activeTrackBorderColor?.toFlutterColor();
               }
-              return node.properties.inactiveTrackBorderColor?.toFlutterColor();
+              return properties.inactiveTrackBorderColor?.toFlutterColor();
             }),
             trackOutlineWidth: WidgetStateProperty.all(
-              node.properties.trackOutlineWidth,
+              properties.trackOutlineWidth,
             ),
           ),
         ),
