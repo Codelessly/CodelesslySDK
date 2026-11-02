@@ -54,7 +54,8 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    substring, split, replace and coalesce. See
 ///    [FormulaEvaluator.functions].
 ///  - text functions: indexOf, matches and slug; durations: seconds
-///    ('3:45' → 225) and duration (225 → '3:45'); colors: luminance.
+///    ('3:45' → 225) and duration (225 → '3:45'); colors: luminance and
+///    mix(a, b, t), which blends two colors (t from 0, all a, to 1, all b).
 ///  - maps: `obj('id', 1)`, `object('id', 1)` or `{id: 1}` builds one;
 ///    `set(map, key, value)`, `with(map, key, value, …)` and `merge(a, b)`
 ///    return changed copies; `keys` and `values` read them. `map` can update
@@ -557,7 +558,7 @@ class FormulaEvaluator {
     FormulaFunctionDoc('acos', 'acos(value)', 'acos(1) → 0'),
     FormulaFunctionDoc('atan', 'atan(value)', 'atan(1) → 0.7854'),
     FormulaFunctionDoc('atan2', 'atan2(y, x)', 'atan2(1, 1) → 0.7854'),
-    FormulaFunctionDoc('pi', 'pi()', 'pi() → 3.14159…'),
+    FormulaFunctionDoc('pi', 'pi or pi()', 'pi → 3.14159…'),
     FormulaFunctionDoc(
       'radians',
       'radians(degrees)',
@@ -1443,6 +1444,44 @@ String? _duration(Object? value) {
       : '$sign$minutes:${two(all % 60)}';
 }
 
+/// The 0–255 channels `[a, r, g, b]` of `#RGB`, `#RRGGBB` or `#AARRGGBB`
+/// text, or of `{r, g, b, a?}` with channels from 0 to 1. Null when [value]
+/// isn't a color.
+List<double>? _argb(Object? value) {
+  if (value is Map) {
+    final List<num?> c = [
+      for (final key in ['a', 'r', 'g', 'b'])
+        key == 'a' ? _toNum(value[key] ?? 1) : _toNum(value[key]),
+    ];
+    if (c.any((v) => v == null)) return null;
+    return [for (final v in c) v!.toDouble().clamp(0, 1) * 255];
+  }
+  String hex = FormulaEvaluator.stringify(value).trim();
+  if (hex.startsWith('#')) hex = hex.substring(1);
+  if (hex.length == 3) hex = hex.split('').map((c) => c * 2).join();
+  if (hex.length == 6) hex = 'ff$hex';
+  if (!RegExp(r'^[0-9a-fA-F]{8}$').hasMatch(hex)) return null;
+  final int argb = int.parse(hex, radix: 16);
+  return [
+    for (final shift in [24, 16, 8, 0]) ((argb >> shift) & 0xff).toDouble(),
+  ];
+}
+
+/// Blends color [a] into color [b] by [t] (0 is all a, 1 all b) and returns
+/// `#RRGGBB`, or `#AARRGGBB` when the result isn't opaque. Null unless both
+/// are colors.
+String? _mixColors(Object? a, Object? b, Object? t) {
+  final List<double>? from = _argb(a);
+  final List<double>? to = _argb(b);
+  if (from == null || to == null) return null;
+  final double k = (_toNum(t) ?? 0.5).toDouble().clamp(0, 1);
+  String two(double v) => v.round().clamp(0, 255).toRadixString(16).padLeft(2, '0');
+  final List<String> c = [
+    for (int i = 0; i < 4; i++) two(from[i] + (to[i] - from[i]) * k),
+  ];
+  return '#${c[0] == 'ff' ? '' : c[0]}${c[1]}${c[2]}${c[3]}'.toUpperCase();
+}
+
 /// The relative luminance of a color, from 0 (black) to 1 (white), as WCAG
 /// defines it. Reads `#RGB`, `#RRGGBB` and `#AARRGGBB` text (the `#` is
 /// optional) and `{r, g, b}` objects with channels from 0 to 1. Null when
@@ -2185,29 +2224,6 @@ String? _alpha(Object? color, num opacity) {
   return '#${a.toRadixString(16).padLeft(2, '0').toUpperCase()}$rgb';
 }
 
-/// [from] moved [amount] (0–1) of the way to [to], channel by channel
-/// (alpha too), like Flutter's `Color.lerp`: `mix(paper, ink, 0.28)` is ink
-/// at 28% over paper. Colors are `#RRGGBB` or `#AARRGGBB`.
-String? _mix(Object? from, Object? to, num amount) {
-  int? argb(Object? color) {
-    final String hex = FormulaEvaluator.stringify(color).replaceAll('#', '');
-    if (hex.length != 6 && hex.length != 8) return null;
-    return int.tryParse(hex.length == 6 ? 'FF$hex' : hex, radix: 16);
-  }
-
-  final int? a = argb(from), b = argb(to);
-  if (a == null || b == null) return null;
-  final double t = amount.clamp(0, 1).toDouble();
-  final List<int> channels = <int>[
-    for (final int shift in const <int>[24, 16, 8, 0])
-      (((a >> shift) & 0xFF) +
-              (((b >> shift) & 0xFF) - ((a >> shift) & 0xFF)) * t)
-          .round(),
-  ];
-  // Opaque colors come back as #RRGGBB, like the colors they came from.
-  return '#${[if (channels.first != 0xFF) channels.first, ...channels.skip(1)].map((int c) => c.toRadixString(16).padLeft(2, '0')).join().toUpperCase()}';
-}
-
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
 
@@ -2512,7 +2528,7 @@ final Map<String, _Function> _functions = {
   'get': (a) => _member(_arg(a, 0), _arg(a, 1)),
   'number': (a) => _toNum(_arg(a, 0)),
   'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
-  'mix': (a) => _mix(_arg(a, 0), _arg(a, 1), _num(_arg(a, 2) ?? 0.5)),
+  'mix': (a) => _mixColors(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
     _arg(a, 1) == null ? 2 : _intArg(_arg(a, 1)),
     FormulaEvaluator.stringify(_arg(a, 2) ?? '0'),
@@ -2742,8 +2758,11 @@ class _Path extends _Node {
 
   const _Path(this.path);
 
+  /// Bare `pi` is the constant (as `pi()` is) unless a variable of that
+  /// name exists: `sin(t * 2 * pi)` read pi as a missing variable, 0.
   @override
-  Object? eval(FormulaPathResolver resolve) => resolve(path);
+  Object? eval(FormulaPathResolver resolve) =>
+      resolve(path) ?? (path == 'pi' ? math.pi : null);
 
   @override
   void collectPaths(Set<String> paths) => paths.add(path);
