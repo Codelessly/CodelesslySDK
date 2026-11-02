@@ -148,8 +148,10 @@ Matrix4 motionMatrix(MotionModel motion, {double spinTurns = 0}) {
 ///
 /// [motion] holds the values to show now, with bound variables already
 /// resolved. When they change the widget animates to them over
-/// [MotionModel.durationMs]. When [animate] is false (the design canvas) it
-/// jumps to them and doesn't spin.
+/// [MotionModel.durationMs]. When [animate] is false, or its tickers are
+/// muted (the design canvas runs under a disabled [TickerMode]), it jumps to
+/// them and doesn't spin: a transition would otherwise never advance and the
+/// node would stay where it started.
 class NodeMotion extends StatefulWidget {
   /// Creates a [NodeMotion].
   const NodeMotion({
@@ -205,8 +207,12 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
 
   void _rebuild() => setState(() {});
 
+  /// Whether changes animate: [NodeMotion.animate], with tickers running.
+  bool get _animates =>
+      widget.animate && TickerMode.getNotifier(context).value;
+
   bool get _loops =>
-      widget.animate &&
+      _animates &&
       widget.motion.loop != MotionLoop.none &&
       widget.motion.durationMs > 0;
 
@@ -216,7 +222,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     final MotionModel motion = widget.motion;
     if (_loops) {
       _startLoop();
-    } else if (widget.animate &&
+    } else if (_animates &&
         motion.hasEntrance &&
         motionTransitionMs(motion) > 0) {
       _from = motion.entranceStart;
@@ -300,9 +306,9 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
     super.didUpdateWidget(oldWidget);
     final MotionModel next = widget.motion;
     final bool replay =
-        widget.animate && next.replayKey != oldWidget.motion.replayKey;
+        _animates && next.replayKey != oldWidget.motion.replayKey;
     final bool pulse =
-        widget.animate &&
+        _animates &&
         next.hasKeyframes &&
         next.pulseKey != oldWidget.motion.pulseKey;
     if (_loops && replay) {
@@ -331,7 +337,7 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
       }
     } else if (!_sameTransform(next, _to) ||
         oldWidget.motion.loop != MotionLoop.none) {
-      final ms = widget.animate ? motionTransitionMs(next) : 0;
+      final ms = _animates ? motionTransitionMs(next) : 0;
       if (ms <= 0) {
         _delay?.cancel();
         _transition.stop();
@@ -423,11 +429,11 @@ class _NodeMotionState extends State<NodeMotion> with TickerProviderStateMixin {
 
   void _syncSpin() {
     final bool wantsTicker =
-        widget.animate && (widget.motion.spin != 0 || _speed != 0);
+        _animates && (widget.motion.spin != 0 || _speed != 0);
     if (wantsTicker && _spinTicker == null) {
       _lastTick = Duration.zero;
       _spinTicker = createTicker(_onSpinTick)..start();
-    } else if (!widget.animate && _spinTicker != null) {
+    } else if (!_animates && _spinTicker != null) {
       _spinTicker!.dispose();
       _spinTicker = null;
       _speed = 0;

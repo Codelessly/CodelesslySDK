@@ -348,6 +348,9 @@ class ConditionEvaluator<R extends Object>
   R? visitPlayAnimationAction(PlayAnimationAction action) => null;
 
   @override
+  R? visitEditTextAction(EditTextAction action) => null;
+
+  @override
   R? visitPaywallAction(PaywallAction action) => null;
 
   @override
@@ -546,6 +549,9 @@ class ConditionPrinter
 
   @override
   void visitPlayAnimationAction(PlayAnimationAction action) {}
+
+  @override
+  void visitEditTextAction(EditTextAction action) {}
 
   @override
   void visitPaywallAction(PaywallAction action) {

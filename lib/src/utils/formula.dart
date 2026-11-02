@@ -439,6 +439,11 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc('upper', 'upper(text)', 'upper("hi") → HI'),
     FormulaFunctionDoc('lower', 'lower(text)', 'lower("Hi") → hi'),
+    FormulaFunctionDoc(
+      'codeUnits',
+      'codeUnits(text)',
+      'sum(codeUnits(tag)) % 8 → a stable color index for tag',
+    ),
     FormulaFunctionDoc('trim', 'trim(text)', 'trim("  hi ") → hi'),
     FormulaFunctionDoc(
       'contains',
@@ -933,7 +938,11 @@ class FormulaEvaluator {
       'with(map, key, value, …)',
       "with(item, 'x', item.x + 1) → item with x changed",
     ),
-    FormulaFunctionDoc('at', 'at(list, index)', 'at(tasks, 2)'),
+    FormulaFunctionDoc(
+      'at',
+      'at(list, index) or at(map, key)',
+      "at(drafts, '' + ticketId)",
+    ),
     FormulaFunctionDoc(
       'flatMap',
       'flatMap(list, item => list)',
@@ -2551,6 +2560,9 @@ final Map<String, _Function> _functions = {
       .join((_arg(a, 1) ?? ', ').toString()),
   'upper': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toUpperCase(),
   'lower': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toLowerCase(),
+  // The UTF-16 code units of the text, for hashing a label into a color:
+  // sum(codeUnits(tag)) % 8.
+  'codeUnits': (a) => FormulaEvaluator.stringify(_arg(a, 0)).codeUnits,
   'trim': (a) => FormulaEvaluator.stringify(_arg(a, 0)).trim(),
   'padLeft': (a) => _pad(_arg(a, 0), _arg(a, 1), _arg(a, 2), left: true),
   'padRight': (a) => _pad(_arg(a, 0), _arg(a, 1), _arg(a, 2), left: false),
@@ -2831,6 +2843,12 @@ final Map<String, _Function> _functions = {
       FormulaEvaluator.stringify(a[i]): a[i + 1],
   },
   'at': (a) {
+    // A map reads the key (as text, the way JSON keys are stored).
+    final Object? source = _arg(a, 0);
+    if (source is Map) {
+      final Object? key = _arg(a, 1);
+      return source[key] ?? source[FormulaEvaluator.stringify(key)];
+    }
     final int index = _intArg(_arg(a, 1));
     // indexOf's -1 (not found) reads nothing rather than failing.
     return index < 0 ? null : _values(_arg(a, 0), null).elementAtOrNull(index);

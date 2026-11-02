@@ -1169,6 +1169,17 @@ class Codelessly {
     );
   }
 
+  /// The id of the published layout that holds canvas [canvasId], or null
+  /// before the publish model has loaded.
+  String? layoutIdOfCanvas(String canvasId) {
+    final SDKPublishModel? model = _maybeDataManager?.publishModel;
+    if (model == null) return null;
+    for (final SDKPublishLayout layout in model.layouts.values) {
+      if (layout.canvases.containsKey(canvasId)) return layout.id;
+    }
+    return null;
+  }
+
   /// Sets the variables a link's parameters name to their values, so
   /// `/<app>/<screen>?selectedId=kind-of-blue` opens with `selectedId` set,
   /// as well as passing them as the screen's route parameters. Parameters

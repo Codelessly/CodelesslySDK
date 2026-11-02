@@ -941,6 +941,10 @@ abstract class WidgetNodeTransformerManager
       for (final reaction in reactions)
         if (reaction.trigger.type == type && reaction.action.enabled) reaction,
     ];
+    final List<Reaction> onScrollEnd = of(TriggerType.scrollEnd);
+    if (onScrollEnd.isNotEmpty) {
+      tappable = ScrollEndDetector(reactions: onScrollEnd, child: tappable);
+    }
     // A node with a drag model drags itself (see [wrapWithDrag]).
     final bool ownDrag = node.drag != null;
     final List<Reaction> onDrag = ownDrag ? const [] : of(TriggerType.drag);
