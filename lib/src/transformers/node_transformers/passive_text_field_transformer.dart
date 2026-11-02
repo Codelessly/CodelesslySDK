@@ -45,6 +45,8 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
           onIconTap(context, node, reactions, value),
       onChanged: (context, value) => onChanged(context, node, value),
       onSubmitted: (context, value) => onSubmitted(context, node, value),
+      onEditingComplete: (context, value) =>
+          onEditingComplete(context, node, value),
     );
   }
 
@@ -108,6 +110,23 @@ class PassiveTextFieldTransformer extends NodeWidgetTransformer<TextFieldNode> {
     );
   }
 
+  /// The field lost focus: its value is kept, and its "Editing Complete"
+  /// actions run (not its "Submitted" ones, which wait for the keyboard's
+  /// submit, so clicking elsewhere doesn't submit a form).
+  void onEditingComplete(
+    BuildContext context,
+    TextFieldNode node,
+    String inputValue,
+  ) {
+    NodeStateProvider.setState(context, inputValue);
+    FunctionsRepository.triggerAction(
+      context,
+      node: node,
+      TriggerType.editingComplete,
+      value: inputValue,
+    );
+  }
+
   void onIconTap(
     BuildContext context,
     TextFieldNode node,
@@ -132,6 +151,9 @@ class PassiveTextFieldWidget extends StatefulWidget {
   final Function(BuildContext context, String value)? onTap;
   final Function(BuildContext context, String value)? onChanged;
   final Function(BuildContext context, String value)? onSubmitted;
+
+  /// Called when the field loses focus.
+  final Function(BuildContext context, String value)? onEditingComplete;
   final Function(BuildContext context, List<Reaction> reactions, String value)?
   onIconTap;
   final bool withAutofill;
@@ -150,6 +172,7 @@ class PassiveTextFieldWidget extends StatefulWidget {
     this.onTap,
     this.onChanged,
     this.onSubmitted,
+    this.onEditingComplete,
     this.withAutofill = true,
     this.onIconTap,
     List<VariableData>? variables,
@@ -163,10 +186,24 @@ class PassiveTextFieldWidget extends StatefulWidget {
   State<PassiveTextFieldWidget> createState() => _PassiveTextFieldWidgetState();
 }
 
+/// Moves the keyboard focus to the text field of a node (Focus action).
+/// Returns whether that field is on screen.
+bool focusTextField(String nodeId, {bool selectAll = false}) =>
+    _PassiveTextFieldWidgetState.focus(nodeId, selectAll: selectAll);
+
+/// Takes the focus from the text field of [nodeId], or from any field.
+void unfocusTextField([String? nodeId]) =>
+    _PassiveTextFieldWidgetState.unfocus(nodeId);
+
 class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   late final TextEditingController controller = TextEditingController(
-    text: boundValue() ?? getInitialText(widget.node.initialText),
+    text: _lastBound = boundValue() ?? getInitialText(widget.node.initialText),
   );
+
+  /// The bound value the field last showed. The field takes the binding's
+  /// value only when it changes, so typing into a field whose binding can't
+  /// be set (a computed variable, a formula) isn't undone on every rebuild.
+  String? _lastBound;
 
   /// The current value of the variable this field is bound to, if any. A
   /// variable set before the field first builds (by a canvas load action
@@ -176,17 +213,57 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     return PropertyValueDelegate.getPropertyValue<String>(
       widget.node,
       'inputValue',
-      scopedValues: widget.scopedValues ?? ScopedValues.of(context),
+      scopedValues: _scopedValues,
     );
   }
 
   final FocusNode focusNode = FocusNode();
 
+  /// The text fields on screen by node id, newest last, so a Focus action
+  /// can reach a field by its node.
+  static final Map<String, List<_PassiveTextFieldWidgetState>> _mounted = {};
+
+  /// Focuses the newest field of [nodeId] on screen (and selects its text
+  /// when [selectAll]); returns whether there was one.
+  static bool focus(String nodeId, {bool selectAll = false}) {
+    final _PassiveTextFieldWidgetState? state = _mounted[nodeId]?.lastOrNull;
+    if (state == null) return false;
+    state.focusNode.requestFocus();
+    if (selectAll) {
+      state.controller.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: state.controller.text.length,
+      );
+    }
+    return true;
+  }
+
+  /// Unfocuses the field of [nodeId] (any field when null).
+  static void unfocus([String? nodeId]) {
+    if (nodeId == null) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      return;
+    }
+    for (final _PassiveTextFieldWidgetState state in [...?_mounted[nodeId]]) {
+      state.focusNode.unfocus();
+    }
+  }
+
+  /// The values the field's bindings read: those it was given, else on the
+  /// design canvas (no reactions) the editor's preview values, else the
+  /// live ones.
+  ScopedValues get _scopedValues =>
+      widget.scopedValues ??
+      (widget.settings.withReactions
+          ? null
+          : VariablePreview.scopeOf(widget.node, context: context)) ??
+      ScopedValues.of(context);
+
   String getInitialText(String text) {
     return PropertyValueDelegate.substituteVariables(
       text,
       nullSubstitutionMode: widget.settings.nullSubstitutionMode,
-      scopedValues: widget.scopedValues ?? ScopedValues.of(context),
+      scopedValues: _scopedValues,
     );
   }
 
@@ -194,6 +271,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
   void initState() {
     super.initState();
     focusNode.addListener(onFocusChanged);
+    (_mounted[widget.node.id] ??= []).add(this);
   }
 
   @override
@@ -208,8 +286,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     super.didUpdateWidget(oldWidget);
 
     // Update controller text if this text field is bound to a variable.
-    final ScopedValues scopedValues =
-        widget.scopedValues ?? ScopedValues.of(context);
+    final ScopedValues scopedValues = _scopedValues;
 
     // Get the value of bound variable and update the controller text if it's
     // different from the current controller text.
@@ -240,9 +317,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     }
 
     if (currentPropertyValue != null &&
+        currentPropertyValue != _lastBound &&
         controller.text != currentPropertyValue) {
       controller.text = currentPropertyValue;
     }
+    if (currentPropertyValue != null) _lastBound = currentPropertyValue;
   }
 
   bool _isExistingVariable(String path, ScopedValues scopedValues) {
@@ -271,6 +350,10 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
   @override
   void dispose() {
+    _mounted[widget.node.id]?.remove(this);
+    if (_mounted[widget.node.id]?.isEmpty ?? false) {
+      _mounted.remove(widget.node.id);
+    }
     controller.dispose();
     focusNode.dispose();
     super.dispose();
@@ -278,7 +361,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
 
   void onFocusChanged() {
     if (!focusNode.hasFocus) {
-      widget.onSubmitted?.call(context, controller.text);
+      widget.onEditingComplete?.call(context, controller.text);
     }
   }
 
@@ -287,7 +370,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
     final TextFieldNode node = widget.node;
     final TextFieldProperties properties = node.properties;
 
-    final ScopedValues scopedValues = ScopedValues.of(context);
+    final ScopedValues scopedValues = _scopedValues;
 
     // Resolve variable bindings as well as values set by actions.
     bool flag(String property, bool fallback) =>
@@ -349,6 +432,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       enabled: enabled,
       controller: controller,
       obscureText: obscure,
+      textCapitalization: switch (node.properties.textCapitalization) {
+        TextCapitalizationC.none => TextCapitalization.none,
+        TextCapitalizationC.words => TextCapitalization.words,
+        TextCapitalizationC.sentences => TextCapitalization.sentences,
+        TextCapitalizationC.characters => TextCapitalization.characters,
+      },
       readOnly: readOnly,
       showCursor: showCursor,
       keyboardType: keyboardType,
@@ -385,14 +474,16 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
       onTap: () => widget.onTap?.call(context, controller.text),
       onChanged: (value) => widget.onChanged?.call(context, value),
       onEditingComplete: () {},
-      onFieldSubmitted: (value) {
-        // handled by the focus listener!
-      },
+      // The keyboard's submit (Enter on a one-line field) runs the
+      // "Submitted" actions; the field keeps its focus, as a form expects.
+      onFieldSubmitted: (value) => widget.onSubmitted?.call(context, value),
       decoration: decoration,
     );
 
-    Widget field = fillsHeight && oneLine
-        ? LayoutBuilder(
+    // A field that hugs its width is measured by [IntrinsicWidth] below, so
+    // it can't be sized by a layout builder.
+    Widget field = fillsHeight && oneLine && !node.isHorizontalWrap
+        ? IntrinsicSafeLayoutBuilder(
             builder: (context, constraints) {
               // A collapsed decoration has no box of its own to fill, so the
               // line would sit at the top: place it by the field's vertical

@@ -46,20 +46,17 @@ void main() {
     expect(CodelesslyWidget.layoutIdForScreen(m, 'ledger'), isNull);
   });
 
-  test('A link to no screen opens the Not found screen with its path', () {
+  test('Locations no screen matches open the screen named Not found', () {
     final m = model();
-    final nf = layoutOf('nf-layout', [
-      canvas('nf', 'nfBody')..name = 'Not found',
-      body('nfBody', 'nf', []),
-    ]);
-    // Without a Not found screen the link stays as it was.
-    expect(Codelessly.resolveLinkIn(m, const CodelesslyRoute('nowhere')).canvasId, 'nowhere');
-    m.layouts[nf.id] = nf;
-    final CodelesslyRoute route = Codelessly.resolveLinkIn(m, const CodelesslyRoute('nowhere', {'q': '1'}));
-    expect(route.canvasId, 'nf');
-    expect(route.params, {'q': '1', 'path': '/nowhere'});
-    // Known screens, by id or by name, are left alone.
-    expect(Codelessly.resolveLinkIn(m, const CodelesslyRoute('form')).canvasId, 'form');
-    expect(Codelessly.resolveLinkIn(m, const CodelesslyRoute('record-form')).canvasId, 'record-form');
+    // Without one, the built-in not-found page shows.
+    expect(CodelesslyRouterDelegate.notFoundLayoutId(m), isNull);
+    for (final String name in ['Not found', '404', 'page_not_found']) {
+      final nf = layoutOf('nf-layout', [
+        canvas('nf', 'nfBody')..name = name,
+        body('nfBody', 'nf', []),
+      ]);
+      m.layouts[nf.id] = nf;
+      expect(CodelesslyRouterDelegate.notFoundLayoutId(m), 'nf-layout');
+    }
   });
 }
