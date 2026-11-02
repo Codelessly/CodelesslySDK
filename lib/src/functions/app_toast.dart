@@ -26,6 +26,29 @@ class AppToast {
 
   static OverlayEntry? _current;
 
+  /// The icon [action] shows with [scopedValues]: its `icon` binding
+  /// (`variables: {"icon": "${toastNext.icon}"}`) naming a Material icon,
+  /// such as `check_circle` or `info_outlined`, in [ShowToastAction.icon]'s
+  /// size and colour, else [ShowToastAction.icon]. A binding that gives no
+  /// name keeps the action's icon (or none).
+  static MultiSourceIconModel? iconOf(
+    ShowToastAction action,
+    ScopedValues scopedValues,
+  ) {
+    final String? binding = action.variables['icon'];
+    if (binding == null) return action.icon;
+    final String name = PropertyValueDelegate.substituteVariables(
+      binding,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    if (name.isEmpty) return action.icon;
+    final MultiSourceIconModel base =
+        action.icon ?? const MultiSourceIconModel.icon(size: 18);
+    final MultiSourceIconModel named = iconWithName(base, name);
+    return identical(named, base) ? action.icon : named;
+  }
+
   /// Shows [action]'s message. Returns false when there is no overlay to
   /// show it in.
   static bool show(BuildContext context, ShowToastAction action) {
@@ -47,6 +70,7 @@ class AppToast {
       scopedValues,
       keys: ShowToastAction.bindableColors,
     );
+    final MultiSourceIconModel? icon = iconOf(action, scopedValues);
     final String actionLabel = action.hasAction ? text(action.actionLabel) : '';
     final ResolvedFeedbackTheme theme = FeedbackTheme.of(context);
     // Without a font of its own, the toast takes the app's text style at
@@ -86,6 +110,7 @@ class AppToast {
         action: action,
         message: message,
         title: title,
+        icon: icon,
         colors: colors,
         actionLabel: actionLabel,
         theme: theme,
@@ -203,6 +228,7 @@ class _ToastView extends StatefulWidget {
     required this.action,
     required this.message,
     required this.title,
+    required this.icon,
     required this.colors,
     required this.actionLabel,
     required this.theme,
@@ -217,6 +243,10 @@ class _ToastView extends StatefulWidget {
 
   /// The bold line above [message]; empty for none.
   final String title;
+
+  /// The icon before the message: [ShowToastAction.icon], or the one its
+  /// `icon` binding names.
+  final MultiSourceIconModel? icon;
 
   /// Colors bound in [ShowToastAction.variables], by field name.
   final Map<String, Color> colors;
@@ -300,8 +330,8 @@ class _ToastViewState extends State<_ToastView> {
     final Color? iconColor =
         bound['iconColor'] ?? action.iconColor?.toFlutterColor();
     final MultiSourceIconModel? iconModel = iconColor == null
-        ? action.icon
-        : action.icon?.copyWith(color: iconColor.toColorRGBA());
+        ? widget.icon
+        : widget.icon?.copyWith(color: iconColor.toColorRGBA());
     final Color? iconDisc =
         bound['iconDiscColor'] ?? action.iconDiscColor?.toFlutterColor();
     Widget? icon = iconModel == null

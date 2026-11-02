@@ -279,8 +279,9 @@ abstract class WidgetNodeTransformerManager
       );
       if (loop == MotionLoop.none) {
         // A loop's values are where it swings to; switched off, the node
-        // eases back to rest.
-        motion = base.atRest.copyWith(loop: MotionLoop.none);
+        // eases back to rest (or to its values, when enterFrom gives the
+        // loop's start).
+        motion = base.loopOff;
       } else if (loop != null) {
         motion = base.copyWith(loop: loop);
       }

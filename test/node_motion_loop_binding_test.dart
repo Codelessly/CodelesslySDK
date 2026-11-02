@@ -25,6 +25,15 @@ MotionModel? resolve(RectangleNode node, {bool animate = true}) =>
       animate: animate,
     );
 
+double scaleOf(WidgetTester tester) {
+  final Finder finder = find.descendant(
+    of: find.byType(NodeMotion),
+    matching: find.byType(Transform),
+  );
+  if (finder.evaluate().isEmpty) return 1;
+  return tester.widget<Transform>(finder.first).transform.getMaxScaleOnAxis();
+}
+
 double opacityOf(WidgetTester tester) {
   final Finder finder = find.byType(Opacity);
   return finder.evaluate().isEmpty
@@ -102,5 +111,39 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(opacityOf(tester), closeTo(0.7, 0.01));
     await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('With enterFrom a loop moves only the values it names', (
+    tester,
+  ) async {
+    const MotionModel fade = MotionModel(
+      scale: 1.2,
+      opacity: 1,
+      durationMs: 1000,
+      curve: MotionCurve.linear,
+      loop: MotionLoop.reverse,
+      enterFrom: MotionModel(opacity: 0.3),
+    );
+    expect(fade.loopStart.scale, 1.2);
+    expect(fade.loopStart.opacity, 0.3);
+    await pump(tester, fade);
+    expect(opacityOf(tester), closeTo(0.3, 0.01));
+    expect(scaleOf(tester), closeTo(1.2, 0.001));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(opacityOf(tester), closeTo(0.65, 0.01));
+    expect(scaleOf(tester), closeTo(1.2, 0.001), reason: 'scale holds still');
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(opacityOf(tester), closeTo(1, 0.01));
+
+    // Switched off by a binding it rests at its values.
+    final MotionModel off = resolve(dot('none', motion: fade))!;
+    expect(off.loop, MotionLoop.none);
+    expect(off.scale, 1.2);
+    expect(off.opacity, 1);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  test('Without enterFrom a loop still starts at rest', () {
+    expect(pulse.loopStart, pulse.atRest);
   });
 }
