@@ -43,7 +43,12 @@ class TextUtils {
       characters,
       node: node,
       color:
-          boundTextColor(context, node, variablesOverrides) ??
+          boundTextColor(
+            context,
+            node,
+            variablesOverrides,
+            preview: replaceVariableWithSymbol,
+          ) ??
           retrievePropColor(prop),
       fontSize: prop.fontSize,
       letterSpacing: prop.letterSpacing,
@@ -251,10 +256,13 @@ class TextUtils {
     final Color? textColor = PropertyValueDelegate.getPropertyValue<ColorRGBA>(
       textNode,
       'textColor',
-      scopedValues: ScopedValues.of(
-        context,
-        variablesOverrides: variablesOverrides,
-      ),
+      // On the design canvas, the editor's preview values, as the text
+      // itself reads them.
+      scopedValues:
+          (replaceVariablesWithSymbol
+              ? VariablePreview.scopeOf(textNode, context: context)
+              : null) ??
+          ScopedValues.of(context, variablesOverrides: variablesOverrides),
     )?.toFlutterColor();
 
     return Text.rich(
@@ -329,17 +337,18 @@ class TextUtils {
   static Color? boundTextColor(
     BuildContext? context,
     BaseNode? node,
-    List<VariableData> variablesOverrides,
-  ) {
+    List<VariableData> variablesOverrides, {
+    bool preview = false,
+  }) {
     if (context == null || node == null) return null;
     if (node.variables['textColor'] == null) return null;
     return PropertyValueDelegate.getPropertyValue<ColorRGBA>(
       node,
       'textColor',
-      scopedValues: ScopedValues.of(
-        context,
-        variablesOverrides: variablesOverrides,
-      ),
+      // [preview] (the design canvas): the editor's preview values.
+      scopedValues:
+          (preview ? VariablePreview.scopeOf(node, context: context) : null) ??
+          ScopedValues.of(context, variablesOverrides: variablesOverrides),
     )?.toFlutterColor();
   }
 
