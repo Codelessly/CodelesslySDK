@@ -12,7 +12,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
-import '../utils/material_icons_by_name.dart';
 
 typedef LayoutRetrieverBuilder = Widget Function(
   BuildContext context,
@@ -1432,8 +1431,8 @@ class AdaptiveSizeFitBox extends StatelessWidget {
   }
 }
 
-/// Renders an [IconModel]: Material icons and symbols from Google's prebuilt
-/// SVGs, Cupertino icons from the cupertino_icons font.
+/// Renders Material icons and symbols as on-demand vectors from Google's
+/// prebuilt SVG CDN. Cupertino vectors use the configured static icon CDN.
 class SvgIcon extends StatelessWidget {
   final IconModel icon;
   final Color? color;
@@ -1479,53 +1478,22 @@ class SvgIcon extends StatelessWidget {
     };
     final double dimension = size ?? Theme.of(context).iconTheme.size ?? 24;
 
-    final IconData? cupertinoIcon = icon is CupertinoIcon
-        ? cupertinoIconsByCodepoint[icon.codepoint]
-        : null;
-    if (cupertinoIcon != null) {
-      return Icon(cupertinoIcon, size: dimension, color: iconColor);
-    }
-    // Material Icons ship with Flutter; use their bundled glyph offline.
-    // Icon models hold the codepoints of Google's Material Icons fonts, which
-    // aren't the codepoints of Flutter's MaterialIcons font, so the glyph is
-    // found by name and style. Otherwise it is drawn from its SVG: an
-    // IconData built at runtime fails release web builds (icon fonts are
-    // tree-shaken).
-    // A Material Symbol Flutter also ships (by name, in the matching
-    // style) draws offline the same way; others load their SVG below.
-    final IconModel model = icon;
-    final MaterialIcon? asIcon = switch (model) {
-      final MaterialIcon material => material,
-      final MaterialSymbol symbol => MaterialIcon(
-        codepoint: 0,
-        name: symbol.name,
-        style: switch (symbol.style) {
-          MaterialSymbolStyle.rounded => MaterialIconStyle.rounded,
-          MaterialSymbolStyle.sharp => MaterialIconStyle.sharp,
-          MaterialSymbolStyle.outlined =>
-            (fill ?? 0) >= 1
-                ? MaterialIconStyle.filled
-                : MaterialIconStyle.outlined,
-        },
-      ),
-      _ => null,
-    };
-    if (asIcon case final MaterialIcon material) {
-      final IconData? glyph = materialIconsByName[material.styledName];
-      if (glyph != null) {
-        return Icon(glyph, size: dimension, color: iconColor);
-      }
-      // A name the bundled font doesn't have is drawn from its SVG below.
-      // Never `IconData(codepoint)` from data: a non-constant IconData
-      // breaks icon tree shaking, and with it every release web build.
-    }
+    // Cupertino glyphs use the versioned first-party SVG CDN, avoiding a
+    // dynamic icon map that retains the complete Cupertino font in builds.
+    // Never resolve Material icons or symbols through a full Icons map: doing
+    // so retains the entire MaterialIcons font in release builds. Runtime
+    // IconData(codepoint) is not an alternative (it disables tree shaking).
+    // Google's SVGs are vector, cacheable, and keyed by the model's axes and
+    // style/name/version; no image provider or raster export is needed.
 
-    final url = icon.toSvgUrl(
-      fill: fill,
-      weight: weight,
-      grade: grade,
-      opticalSize: opticalSize,
-    );
+    final url = icon is CupertinoIcon
+        ? cupertinoSvgUrl(icon as CupertinoIcon)
+        : icon.toSvgUrl(
+            fill: fill,
+            weight: weight,
+            grade: grade,
+            opticalSize: opticalSize,
+          );
     if (url == null) {
       log(
         'No icon source | name: ${icon.name} | type: ${icon.type} | '
