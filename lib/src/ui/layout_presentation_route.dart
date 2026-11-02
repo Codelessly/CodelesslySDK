@@ -357,9 +357,11 @@ class _SideSheet extends StatelessWidget {
 extension DialogPresentationResolve on DialogPresentation {
   /// A bottom sheet on phones (narrower than 600 px) and a dialog otherwise
   /// for [DialogPresentation.adaptive]; any other presentation as is.
-  DialogPresentation resolveFor(BuildContext context) =>
-      this == DialogPresentation.adaptive
-      ? (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < 600
+  DialogPresentation resolveFor(
+    BuildContext context, {
+    double sheetBelowWidth = 600,
+  }) => this == DialogPresentation.adaptive
+      ? (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < sheetBelowWidth
             ? DialogPresentation.bottomSheet
             : DialogPresentation.dialog
       : this;

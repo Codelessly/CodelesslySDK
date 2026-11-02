@@ -45,6 +45,8 @@ Future<void> open(
   DialogPlacement placement, {
   Size size = const Size(390, 844),
   DialogAnchor anchor = DialogAnchor.none,
+  DialogPresentation presentation = DialogPresentation.dialog,
+  double sheetBelowWidth = 600,
 }) async {
   await pumpLayouts(tester, [
     layoutOf(
@@ -55,6 +57,8 @@ Future<void> open(
           placement: placement,
           anchor: anchor,
           anchorGap: 6,
+          presentation: presentation,
+          sheetBelowWidth: sheetBelowWidth,
         ),
       ),
     ),
@@ -138,5 +142,102 @@ void main() {
     final Rect shown = menuRect(tester);
     expect(shown.top, greaterThanOrEqualTo(8));
     expect(shown.bottom, lessThanOrEqualTo(192));
+  });
+
+  // A menu: a popover at its trigger on wide screens, a sheet on phones.
+  testWidgets('an adaptive anchored menu is a popover on desktop', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      DialogPlacement.belowStart,
+      anchor: DialogAnchor.trigger,
+      presentation: DialogPresentation.adaptive,
+      size: const Size(1440, 900),
+    );
+    final Rect go = tester.getRect(
+      find.ancestor(of: find.text('Go'), matching: find.byType(FitBox)).first,
+    );
+    final Rect shown = menuRect(tester);
+    expect(shown.top, closeTo(go.bottom + 6, 1));
+    expect(shown.size, const Size(180, 120));
+  });
+
+  testWidgets('an adaptive anchored menu is a sheet on mobile', (tester) async {
+    await open(
+      tester,
+      DialogPlacement.belowStart,
+      anchor: DialogAnchor.trigger,
+      presentation: DialogPresentation.adaptive,
+    );
+    expect(menuRect(tester).bottom, 844);
+    expect(menuRect(tester).width, 390);
+  });
+
+  // Switchboard's phone layout ends at 640, not the default 600: at 620 its
+  // menus must be sheets, as the rest of the screen is the phone layout.
+  testWidgets('an adaptive menu takes the app\'s sheet breakpoint', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      DialogPlacement.belowStart,
+      anchor: DialogAnchor.trigger,
+      presentation: DialogPresentation.adaptive,
+      size: const Size(620, 900),
+    );
+    expect(menuRect(tester).width, isNot(620));
+  });
+
+  testWidgets(
+    'below the app\'s sheet breakpoint, an adaptive menu is a sheet',
+    (tester) async {
+      await open(
+        tester,
+        DialogPlacement.belowStart,
+        anchor: DialogAnchor.trigger,
+        presentation: DialogPresentation.adaptive,
+        size: const Size(620, 900),
+        sheetBelowWidth: 640,
+      );
+      expect(menuRect(tester).bottom, 900);
+      expect(menuRect(tester).width, 620);
+    },
+  );
+
+  // Switchboard's menus are popovers on desktop with nothing dimmed behind
+  // them, and sheets over a scrim on phones, from one adaptive action.
+  testWidgets('an adaptive menu dims behind its sheet, not its popover', (
+    tester,
+  ) async {
+    Color? barrier() => tester
+        .widgetList<ModalBarrier>(find.byType(ModalBarrier))
+        .last
+        .color;
+    await open(
+      tester,
+      DialogPlacement.belowStart,
+      anchor: DialogAnchor.trigger,
+      presentation: DialogPresentation.adaptive,
+      size: const Size(1440, 900),
+    );
+    expect(barrier(), anyOf(isNull, Colors.transparent));
+  });
+
+  testWidgets('an adaptive menu sheet keeps its barrier color', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      DialogPlacement.belowStart,
+      anchor: DialogAnchor.trigger,
+      presentation: DialogPresentation.adaptive,
+    );
+    final Color? color = tester
+        .widgetList<ModalBarrier>(find.byType(ModalBarrier))
+        .last
+        .color;
+    expect(color, isNotNull);
+    expect(color!.a, greaterThan(0));
   });
 }

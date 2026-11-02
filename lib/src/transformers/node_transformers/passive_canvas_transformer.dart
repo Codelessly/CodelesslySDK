@@ -1119,12 +1119,14 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     // The trigger label names keys without a visible label (Space's label
     // is " ", which normalizes to nothing).
     final String pressed = normalizeKeyLabel(keyTriggerLabel(event.logicalKey));
+    final ScopedValues scopedValues = ScopedValues.of(context);
     final List<Reaction> matching = [
       for (final Reaction reaction in widget.node.reactions.whereTriggerType(
         TriggerType.keyPress,
       ))
         if (reaction.action.enabled &&
-            normalizeKeyLabel(reaction.trigger.key ?? '') == pressed)
+            normalizeKeyLabel(reaction.trigger.key ?? '') == pressed &&
+            triggerWhenHolds(reaction.trigger, scopedValues))
           reaction,
     ];
     if (matching.isEmpty) return KeyEventResult.ignored;
@@ -1187,7 +1189,19 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     if (!OverlayScreenScope.of(context)) {
       context.read<Codelessly?>()?.prepareRoute(context, widget.node.id);
     }
-    triggerOnLoadActions(context);
+    // Another breakpoint canvas of this layout may have run them already.
+    // The context names its layout only when the app asked for one by id
+    // (the site opens its entry screen without), so find the layout that
+    // holds this canvas.
+    final CodelesslyContext? screen = context.read<CodelesslyContext?>();
+    final String? layoutId =
+        screen?.layoutID ??
+        context.read<Codelessly?>()?.layoutIdOfCanvas(widget.node.id);
+    if (screen == null ||
+        layoutId == null ||
+        screen.markLayoutLoaded(layoutId)) {
+      triggerOnLoadActions(context);
+    }
   }
 
   /// The screen's "Key Down" and "Key Up" reactions, while it listens to
@@ -1232,55 +1246,27 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       return false;
     }
     // Shift, Control, Alt and Meta alone are modifiers of the next key.
-    if (_modifierKeys.contains(event.logicalKey)) return false;
-    final String key = keyTriggerLabel(event.logicalKey);
+    if (isModifierKey(event.logicalKey)) return false;
+    final ScopedValues scopedValues = ScopedValues.of(context);
     final List<Reaction> reactions = [
       for (final Reaction reaction in _keyReactions)
         if (reaction.trigger.type == type &&
-            (reaction.trigger.key == null ||
-                reaction.trigger.key!.isEmpty ||
-                normalizeKeyLabel(reaction.trigger.key!) ==
-                    normalizeKeyLabel(key)))
+            keyTriggerMatches(reaction.trigger, event.logicalKey) &&
+            triggerWhenHolds(reaction.trigger, scopedValues))
           reaction,
     ];
     if (reactions.isEmpty) return false;
-    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
     FunctionsRepository.triggerAction(
       context,
       type,
       reactions: reactions,
-      result: {
-        'key': key,
-        'shift': keyboard.isShiftPressed,
-        'alt': keyboard.isAltPressed,
-        'meta': keyboard.isMetaPressed || keyboard.isControlPressed,
-        'typing': typing,
-      },
+      result: {...keyTriggerResult(event.logicalKey), 'typing': typing},
     );
     // A reaction for a specific key takes it (an arrow doesn't also scroll
     // the page); a reaction for any key lets it through, so Tab and the
     // browser's shortcuts keep working.
-    return reactions.any(
-      (reaction) => reaction.trigger.key?.isNotEmpty ?? false,
-    );
+    return reactions.any((reaction) => reaction.trigger.keyCombo != null);
   }
-
-  static final Set<LogicalKeyboardKey> _modifierKeys = {
-    LogicalKeyboardKey.shift,
-    LogicalKeyboardKey.shiftLeft,
-    LogicalKeyboardKey.shiftRight,
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.controlLeft,
-    LogicalKeyboardKey.controlRight,
-    LogicalKeyboardKey.alt,
-    LogicalKeyboardKey.altLeft,
-    LogicalKeyboardKey.altRight,
-    LogicalKeyboardKey.meta,
-    LogicalKeyboardKey.metaLeft,
-    LogicalKeyboardKey.metaRight,
-    LogicalKeyboardKey.capsLock,
-    LogicalKeyboardKey.fn,
-  };
 
   List<ActionModel> collectOnLoadActions() => widget.node.reactions
       .whereTriggerType(TriggerType.load)
@@ -1362,19 +1348,4 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
             ),
     );
   }
-}
-
-/// A key label in the form key press triggers compare: lower case, without
-/// spaces, so `Arrow Right`, `ArrowRight` and `arrowright` all match.
-String normalizeKeyLabel(String label) =>
-    label.replaceAll(' ', '').toLowerCase();
-
-/// The label a "Key Down" trigger's `${result.key}` reads for [key]: the
-/// character of a character key (`a`, `1`, `/`), else the key's name
-/// without spaces (`ArrowLeft`, `Delete`, `Escape`, `Enter`, `Space`).
-String keyTriggerLabel(LogicalKeyboardKey key) {
-  if (key == LogicalKeyboardKey.space) return 'Space';
-  final String label = key.keyLabel;
-  if (label.length == 1) return label.toLowerCase();
-  return label.replaceAll(' ', '');
 }
