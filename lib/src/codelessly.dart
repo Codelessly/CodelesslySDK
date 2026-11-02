@@ -1187,7 +1187,9 @@ class Codelessly {
   /// with.
   CodelesslyRoute _routeOf(String canvasId, ModalRoute? modal) {
     final CodelesslyRoute? pending = _resolveLink(pendingRoute);
-    if (pending != null && pending.canvasId == canvasId) return pending;
+    if (pending != null && isSameScreen(pending.canvasId, canvasId)) {
+      return pending;
+    }
     return CodelesslyRoute.of(canvasId, modal?.settings.arguments);
   }
 
@@ -1200,9 +1202,22 @@ class Codelessly {
     if (modal is PopupRoute) return;
     route.value = _routeOf(canvasId, modal);
     final CodelesslyRoute? pending = _resolveLink(pendingRoute);
-    if (pending != null && pending.canvasId == canvasId) {
+    if (pending != null && isSameScreen(pending.canvasId, canvasId)) {
       setVariablesFromRoute(context, pending);
     }
+  }
+
+  /// Whether canvases [a] and [b] show the same screen: the same canvas, or
+  /// two breakpoint canvases of one layout. A link to a layout's desktop
+  /// canvas opened on a phone shows its phone canvas, and is that screen.
+  bool isSameScreen(String a, String b) {
+    if (a == b) return true;
+    final SDKPublishModel? model = _maybeDataManager?.publishModel;
+    if (model == null) return false;
+    return model.layouts.values.any(
+      (SDKPublishLayout layout) =>
+          layout.canvases.containsKey(a) && layout.canvases.containsKey(b),
+    );
   }
 
   /// Sets the variables a link's parameters name to their values, so
@@ -1245,7 +1260,7 @@ class Codelessly {
     final CodelesslyRoute? link = _resolveLink(pending);
     if (link == null) return;
     setVariablesFromRoute(context, link);
-    if (link.canvasId == canvasId) return;
+    if (isSameScreen(link.canvasId, canvasId)) return;
     unawaited(
       FunctionsRepository.navigate(
         context,
