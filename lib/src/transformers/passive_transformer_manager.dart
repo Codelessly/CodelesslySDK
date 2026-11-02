@@ -202,7 +202,15 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
     if (settings.withRotation) {
       widget = applyWidgetRotation(context, styled, widget);
-      widget = applyWidgetMotion(context, styled, widget);
+      // The design canvas (isPreview) shows motion at rest: an entrance
+      // from opacity 0 would otherwise wait there for frames an idle canvas
+      // never draws, leaving the node invisible.
+      widget = applyWidgetMotion(
+        context,
+        styled,
+        widget,
+        animate: !settings.isPreview,
+      );
       widget = applyBoundOffset(context, styled, widget);
     }
     if (settings.withConstraints) {
