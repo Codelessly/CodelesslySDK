@@ -4,16 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-TextNode _text(String id, String chars, SizeFit fit, {int? maxLines}) => TextNode(
-  id: id,
-  name: id,
-  basicBoxLocal: NodeBox(0, 0, 200, 20),
-  data: chars,
-  horizontalFit: fit,
-  verticalFit: SizeFit.shrinkWrap,
-  maxLines: maxLines,
-  textMixedProps: [StartEndProp(start: 0, end: chars.length, fontSize: 14)],
-)..parentID = 'row';
+TextNode _text(String id, String chars, SizeFit fit, {int? maxLines}) =>
+    TextNode(
+      id: id,
+      name: id,
+      basicBoxLocal: NodeBox(0, 0, 200, 20),
+      data: chars,
+      horizontalFit: fit,
+      verticalFit: SizeFit.shrinkWrap,
+      maxLines: maxLines,
+      textMixedProps: [StartEndProp(start: 0, end: chars.length, fontSize: 14)],
+    )..parentID = 'row';
 
 Future<void> pumpRow(WidgetTester tester, String label, double width) async {
   final label_ = _text('label', label, SizeFit.flexible, maxLines: 1);
@@ -28,7 +29,10 @@ Future<void> pumpRow(WidgetTester tester, String label, double width) async {
     verticalFit: SizeFit.shrinkWrap,
     spacing: 8,
   )..parentID = kRootNode;
-  final registry = NodeRegistry()..setNodes({for (final n in <BaseNode>[row, label_, badge]) n.id: n});
+  final registry = NodeRegistry()
+    ..setNodes({
+      for (final n in <BaseNode>[row, label_, badge]) n.id: n,
+    });
   final manager = PassiveNodeTransformerManager(
     registry.getNodeByID,
     (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
@@ -55,7 +59,9 @@ Future<void> pumpRow(WidgetTester tester, String label, double width) async {
 }
 
 void main() {
-  testWidgets('a flexible text hugs its text, so a badge sits right after it', (tester) async {
+  testWidgets('a flexible text hugs its text, so a badge sits right after it', (
+    tester,
+  ) async {
     await pumpRow(tester, 'Tea', 300);
     final double labelRight = tester.getTopRight(find.text('Tea')).dx;
     final double badgeLeft = tester.getTopLeft(find.text('RUNNING')).dx;
@@ -63,12 +69,21 @@ void main() {
   });
 
   testWidgets('a long flexible text gives way to the badge', (tester) async {
-    await pumpRow(tester, 'A very long timer label that will not fit here', 200);
+    await pumpRow(
+      tester,
+      'A very long timer label that will not fit here',
+      200,
+    );
     expect(tester.takeException(), isNull);
-    expect(tester.getTopRight(find.text('RUNNING')).dx, lessThanOrEqualTo(200.5));
+    expect(
+      tester.getTopRight(find.text('RUNNING')).dx,
+      lessThanOrEqualTo(200.5),
+    );
   });
 
-  testWidgets('a scale-down text shrinks to fit instead of wrapping', (tester) async {
+  testWidgets('a scale-down text shrinks to fit instead of wrapping', (
+    tester,
+  ) async {
     final TextNode clock = TextNode(
       id: 'clock',
       name: 'Clock',

@@ -29,21 +29,40 @@ void main() {
       'natural width, not the width the editor measured', (tester) async {
     final payee = text('payee', 'Bluebird Coffee');
     final memo = text('memo', 'Desk lamp');
-    final textCol = flex('textCol', 'cell', [payee, memo],
-        type: RowColumnType.column,
-        horizontalFit: SizeFit.shrinkWrap,
-        verticalFit: SizeFit.shrinkWrap,
-        crossAxisAlignment: CrossAxisAlignmentC.stretch);
+    final textCol = flex(
+      'textCol',
+      'cell',
+      [payee, memo],
+      type: RowColumnType.column,
+      horizontalFit: SizeFit.shrinkWrap,
+      verticalFit: SizeFit.shrinkWrap,
+      crossAxisAlignment: CrossAxisAlignmentC.stretch,
+    );
     final pill = rect('pill', 'cell', width: 50, height: 20);
-    final cell = flex('cell', 'slot', [textCol, pill],
-        type: RowColumnType.row,
-        width: 120,
-        horizontalFit: SizeFit.shrinkWrap,
-        verticalFit: SizeFit.shrinkWrap);
-    final slot = flex('slot', kRootNode, [cell],
-        type: RowColumnType.row, width: 400, height: 40);
-    await pump(tester, slot, [cell, textCol, payee, memo, pill],
-        screen: const Size(1440, 900), host: Host.tight);
+    final cell = flex(
+      'cell',
+      'slot',
+      [textCol, pill],
+      type: RowColumnType.row,
+      width: 120,
+      horizontalFit: SizeFit.shrinkWrap,
+      verticalFit: SizeFit.shrinkWrap,
+    );
+    final slot = flex(
+      'slot',
+      kRootNode,
+      [cell],
+      type: RowColumnType.row,
+      width: 400,
+      height: 40,
+    );
+    await pump(
+      tester,
+      slot,
+      [cell, textCol, payee, memo, pill],
+      screen: const Size(1440, 900),
+      host: Host.tight,
+    );
     // Ahem: every glyph is as wide as the font size.
     expect(paragraphWidth(tester, 'Bluebird Coffee'), 15 * 14);
     expect(paragraphWidth(tester, 'Desk lamp'), 9 * 14);
@@ -55,6 +74,9 @@ void main() {
     expect(RenderTextIntrinsicSlack.slackWidth(154), 154);
     expect(RenderTextIntrinsicSlack.slackWidth(124.4), 125);
     expect(RenderTextIntrinsicSlack.slackWidth(0), 0);
-    expect(RenderTextIntrinsicSlack.slackWidth(double.infinity), double.infinity);
+    expect(
+      RenderTextIntrinsicSlack.slackWidth(double.infinity),
+      double.infinity,
+    );
   });
 }

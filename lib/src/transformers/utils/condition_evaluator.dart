@@ -539,7 +539,9 @@ class ConditionPrinter
 
   @override
   void visitControlDragAction(ControlDragAction action) {
-    _buffer.writeln('\tControl drag ${action.command.name} ${action.direction.name} on ${action.nodeId}');
+    _buffer.writeln(
+      '\tControl drag ${action.command.name} ${action.direction.name} on ${action.nodeId}',
+    );
   }
 
   @override

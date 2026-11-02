@@ -394,7 +394,8 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget> {
             reaction.action.enabled &&
             (reaction.trigger.key == null ||
                 reaction.trigger.key!.isEmpty ||
-                normalizeKeyLabel(reaction.trigger.key!) == normalizeKeyLabel(key)))
+                normalizeKeyLabel(reaction.trigger.key!) ==
+                    normalizeKeyLabel(key)))
           reaction,
     ];
     if (reactions.isEmpty) return KeyEventResult.ignored;

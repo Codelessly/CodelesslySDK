@@ -54,10 +54,9 @@ class CodelesslyRouter {
     String basePath = '',
     String? initialLocation,
     List<NavigatorObserver> observers = const [],
-    @visibleForTesting void Function(int delta)? historyGo,
+    @visibleForTesting this._historyGo,
     @visibleForTesting Object? Function()? historyState,
-  }) : _historyGo = historyGo,
-       _historyState = historyState ?? browserHistoryState,
+  }) : _historyState = historyState ?? browserHistoryState,
        delegate = CodelesslyRouterDelegate(
          controller: controller,
          initialLocation: initialLocation,

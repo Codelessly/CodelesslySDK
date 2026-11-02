@@ -272,9 +272,7 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
         _offset =
             widget.rest +
             Offset(
-              math.sin(_anim.value * math.pi * 6) *
-                  _shake *
-                  (1 - _anim.value),
+              math.sin(_anim.value * math.pi * 6) * _shake * (1 - _anim.value),
               0,
             );
       } else {
@@ -391,7 +389,11 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
     _blocked = !_enabled;
     if (_blocked && _model.disabledFollow <= 0) {
       if (_model.shakeWhenDisabled && !_anim.isAnimating) _shakeOnce();
-      widget.onEnd?.call({'blocked': true, 'dismissed': false, 'direction': ''});
+      widget.onEnd?.call({
+        'blocked': true,
+        'dismissed': false,
+        'direction': '',
+      });
       return;
     }
     _anim.stop();

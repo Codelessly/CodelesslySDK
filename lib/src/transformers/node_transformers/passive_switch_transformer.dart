@@ -43,7 +43,7 @@ class _PreviewSwitchWidgetState extends State<PreviewSwitchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final bool? bound =
+    final bool bound =
         PropertyValueDelegate.getPropertyValue<bool>(
           widget.node,
           'value',
@@ -51,7 +51,7 @@ class _PreviewSwitchWidgetState extends State<PreviewSwitchWidget> {
         ) ??
         widget.node.value;
     if (toggled != null && bound != toggledFrom) toggled = null;
-    final bool effectiveValue = toggled ?? bound ?? false;
+    final bool effectiveValue = toggled ?? bound;
     return TransformerSwitch(
       node: widget.node,
       settings: widget.settings,

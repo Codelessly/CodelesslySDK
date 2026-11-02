@@ -1938,17 +1938,6 @@ extension ActionModelExt on ActionModel {
         return _namesIn(strings, includePredefined);
       case ActionType.speak:
         final SpeakAction action = this as SpeakAction;
-        strings.addAll([action.text, action.language, action.rate, ?action.pitch]);
-        return _namesIn(strings, includePredefined);
-      case ActionType.playSound:
-        strings.add((this as PlaySoundAction).url);
-        return _namesIn(strings, includePredefined);
-      case ActionType.playAnimation:
-        return _namesIn(strings, includePredefined);
-      case ActionType.focus:
-        return {};
-      case ActionType.speak:
-        final SpeakAction action = this as SpeakAction;
         strings.addAll([
           action.text,
           action.language,
@@ -1956,6 +1945,10 @@ extension ActionModelExt on ActionModel {
           ?action.pitch,
         ]);
         return _namesIn(strings, includePredefined);
+      case ActionType.playAnimation:
+        return _namesIn(strings, includePredefined);
+      case ActionType.focus:
+        return {};
       case ActionType.cloudData:
         final CloudDataAction action = this as CloudDataAction;
         strings.addAll([
@@ -2472,7 +2465,8 @@ class CurrencyAmountInputFormatter extends TextInputFormatter {
   ) {
     final String formatted = formatAmountInput(newValue.text, currencyCode);
     final int fromEnd =
-        newValue.text.length - newValue.selection.extentOffset.clamp(0, newValue.text.length);
+        newValue.text.length -
+        newValue.selection.extentOffset.clamp(0, newValue.text.length);
     final int caret = (formatted.length - fromEnd).clamp(0, formatted.length);
     return TextEditingValue(
       text: formatted,

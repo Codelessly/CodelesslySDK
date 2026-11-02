@@ -48,11 +48,9 @@ class _TestDataManager extends DataManager {
   LocalDatabase get localDatabase => _FakeLocalDatabase();
 }
 
-RectangleNode _box(String id, double y, String parent) => RectangleNode(
-  id: id,
-  name: id,
-  basicBoxLocal: NodeBox(0, y, 100, 50),
-)..parentID = parent;
+RectangleNode _box(String id, double y, String parent) =>
+    RectangleNode(id: id, name: id, basicBoxLocal: NodeBox(0, y, 100, 50))
+      ..parentID = parent;
 
 /// A scrolling frame, [height] tall, whose `calendar` is 2000px down and
 /// whose content goes on to 3050px.
@@ -74,15 +72,14 @@ void main() {
     tester,
   ) async {
     final FrameNode list = _list(kRootNode);
-    final RectangleNode button =
-        _box('button', 0, kRootNode)
-          ..reactions = [
-            Reaction(
-              name: 'scroll',
-              trigger: TriggerModel(type: TriggerType.click),
-              action: ScrollToAction(nodeId: 'calendar', offset: -20),
-            ),
-          ];
+    final RectangleNode button = _box('button', 0, kRootNode)
+      ..reactions = [
+        Reaction(
+          name: 'scroll',
+          trigger: TriggerModel(type: TriggerType.click),
+          action: ScrollToAction(nodeId: 'calendar', offset: -20),
+        ),
+      ];
     final nodes = <String, BaseNode>{
       for (final node in [
         list,
@@ -117,7 +114,11 @@ void main() {
                     context,
                     settings: settings,
                   ),
-                  manager.buildWidgetFromNode(list, context, settings: settings),
+                  manager.buildWidgetFromNode(
+                    list,
+                    context,
+                    settings: settings,
+                  ),
                 ],
               ),
             ),

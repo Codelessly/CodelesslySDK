@@ -37,9 +37,7 @@ void main() {
     return result;
   }
 
-  testWidgets('closeModal hands its params back to the opener', (
-    tester,
-  ) async {
+  testWidgets('closeModal hands its params back to the opener', (tester) async {
     expect(
       await closeWith(
         tester,

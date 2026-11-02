@@ -769,21 +769,24 @@ Widget buildScrollView({
     child: content,
   );
   if (!fillViewport && !flexContent) return _onScroll(node, scrollView(child));
-  return _onScroll(node, LayoutBuilder(
-    builder: (BuildContext context, BoxConstraints constraints) {
-      final double extent = vertical
-          ? constraints.maxHeight - (padding?.vertical ?? 0)
-          : constraints.maxWidth - (padding?.horizontal ?? 0);
-      if (!extent.isFinite || extent <= 0) return scrollView(child);
-      return scrollView(
-        ScrollContentExtent(
-          axis: vertical ? Axis.vertical : Axis.horizontal,
-          viewportExtent: extent,
-          child: child,
-        ),
-      );
-    },
-  ));
+  return _onScroll(
+    node,
+    LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double extent = vertical
+            ? constraints.maxHeight - (padding?.vertical ?? 0)
+            : constraints.maxWidth - (padding?.horizontal ?? 0);
+        if (!extent.isFinite || extent <= 0) return scrollView(child);
+        return scrollView(
+          ScrollContentExtent(
+            axis: vertical ? Axis.vertical : Axis.horizontal,
+            viewportExtent: extent,
+            child: child,
+          ),
+        );
+      },
+    ),
+  );
 }
 
 /// Runs [node]'s [TriggerType.scroll] reactions on every scroll update of
@@ -796,31 +799,28 @@ Widget _onScroll(ScrollableMixin node, Widget scrollView) {
       .toList();
   if (reactions.isEmpty) return scrollView;
   return Builder(
-    builder: (BuildContext context) =>
-        NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification notification) {
-            if (notification.depth != 0 ||
-                notification is! ScrollUpdateNotification) {
-              return false;
-            }
-            final ScrollMetrics metrics = notification.metrics;
-            final double max = metrics.maxScrollExtent;
-            FunctionsRepository.triggerAction(
-              context,
-              TriggerType.scroll,
-              reactions: reactions,
-              result: <String, Object?>{
-                'offset': metrics.pixels,
-                'max': max,
-                'fraction': max <= 0
-                    ? 0.0
-                    : (metrics.pixels / max).clamp(0.0, 1.0),
-              },
-            );
-            return false;
+    builder: (BuildContext context) => NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification.depth != 0 ||
+            notification is! ScrollUpdateNotification) {
+          return false;
+        }
+        final ScrollMetrics metrics = notification.metrics;
+        final double max = metrics.maxScrollExtent;
+        FunctionsRepository.triggerAction(
+          context,
+          TriggerType.scroll,
+          reactions: reactions,
+          result: <String, Object?>{
+            'offset': metrics.pixels,
+            'max': max,
+            'fraction': max <= 0 ? 0.0 : (metrics.pixels / max).clamp(0.0, 1.0),
           },
-          child: scrollView,
-        ),
+        );
+        return false;
+      },
+      child: scrollView,
+    ),
   );
 }
 

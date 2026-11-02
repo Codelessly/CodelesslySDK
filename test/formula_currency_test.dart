@@ -4,7 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Object? eval(String expression) => FormulaEvaluator.evaluate(expression, (path) => null);
+  Object? eval(String expression) =>
+      FormulaEvaluator.evaluate(expression, (path) => null);
 
   group('currency', () {
     test('writes each currency its own way', () {
@@ -60,25 +61,36 @@ void main() {
       final f = CurrencyAmountInputFormatter('USD');
       final v = f.formatEditUpdate(
         TextEditingValue.empty,
-        const TextEditingValue(text: '12345', selection: TextSelection.collapsed(offset: 5)),
+        const TextEditingValue(
+          text: '12345',
+          selection: TextSelection.collapsed(offset: 5),
+        ),
       );
       expect(v.text, '12,345');
       expect(v.selection.extentOffset, 6);
       final eur = CurrencyAmountInputFormatter('EUR').formatEditUpdate(
         TextEditingValue.empty,
-        const TextEditingValue(text: '1234.5', selection: TextSelection.collapsed(offset: 6)),
+        const TextEditingValue(
+          text: '1234.5',
+          selection: TextSelection.collapsed(offset: 6),
+        ),
       );
       expect(eur.text, '1.234,5');
       expect(
         const CurrencyTextInputFormatterModel(currencyCode: r'${acct.currency}')
             .toFlutterFormatter(resolve: (s) => 'JPY')!
-            .formatEditUpdate(TextEditingValue.empty, const TextEditingValue(text: '1000.5'))
+            .formatEditUpdate(
+              TextEditingValue.empty,
+              const TextEditingValue(text: '1000.5'),
+            )
             .text,
         '1,000',
       );
       expect(
         TextInputFormatterModel.fromJson(
-          const CurrencyTextInputFormatterModel(currencyCode: 'GBP').toJson().cast<String, dynamic>(),
+          const CurrencyTextInputFormatterModel(currencyCode: 'GBP')
+              .toJson()
+              .cast<String, dynamic>(),
         ),
         const CurrencyTextInputFormatterModel(currencyCode: 'GBP'),
       );

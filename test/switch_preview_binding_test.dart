@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('a switch bound to a variable shows its preview value', (tester) async {
+  testWidgets('a switch bound to a variable shows its preview value', (
+    tester,
+  ) async {
     final SwitchNode node = SwitchNode(
       id: 'sw',
       name: 'Guidance cues',
@@ -14,7 +16,12 @@ void main() {
     )..variables['value'] = r'${cues}';
     final ScopedValues preview = ScopedValues.preview(
       variables: {
-        'cues': VariableData(id: 'cues', name: 'cues', type: VariableType.boolean, value: true),
+        'cues': VariableData(
+          id: 'cues',
+          name: 'cues',
+          type: VariableType.boolean,
+          value: true,
+        ),
       },
     );
     await tester.pumpWidget(

@@ -156,7 +156,10 @@ void main() {
 
   testWidgets('a disabled drag does not move', (tester) async {
     await tester.pumpWidget(
-      card(drag: swipeCard.copyWith(shakeWhenDisabled: true), isEnabled: () => false),
+      card(
+        drag: swipeCard.copyWith(shakeWhenDisabled: true),
+        isEnabled: () => false,
+      ),
     );
     await tester.timedDrag(
       find.text('front'),
@@ -245,7 +248,9 @@ void main() {
   testWidgets('shares its live values and spins as it flies off', (
     tester,
   ) async {
-    await tester.pumpWidget(card(drag: swipeCard.copyWith(flyOutRotate: 20, rotateFactor: 0)));
+    await tester.pumpWidget(
+      card(drag: swipeCard.copyWith(flyOutRotate: 20, rotateFactor: 0)),
+    );
     final gesture = await tester.startGesture(const Offset(100, 150));
     await gesture.moveBy(const Offset(30, 0));
     await gesture.moveBy(const Offset(30, 0));
@@ -258,7 +263,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     final Matrix4 m = tester
         .widget<Transform>(
-          find.ancestor(of: find.text('front'), matching: find.byType(Transform)),
+          find.ancestor(
+            of: find.text('front'),
+            matching: find.byType(Transform),
+          ),
         )
         .transform;
     final double angle = math.atan2(m.storage[1], m.storage[0]) * 180 / math.pi;
@@ -292,9 +300,12 @@ void main() {
     await tester.pumpAndSettle();
     // Past 25% (75); sideways still needs 35%.
     expect(dismissed, [DragDirection.up]);
-    expect(swipeCard.copyWith(verticalThreshold: 0.25).thresholdFor(
-      DragDirection.left,
-    ), 0.35);
+    expect(
+      swipeCard
+          .copyWith(verticalThreshold: 0.25)
+          .thresholdFor(DragDirection.left),
+      0.35,
+    );
   });
 
   testWidgets('rests where data puts it and moves when it changes', (

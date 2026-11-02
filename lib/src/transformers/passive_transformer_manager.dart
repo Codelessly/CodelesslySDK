@@ -126,9 +126,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           : Directionality(
               textDirection: direction,
               child: Builder(
-                builder: (context) => getTransformerByNode(
-                  node,
-                ).buildWidget(node, context, settings),
+                builder: (context) =>
+                    getTransformerByNode(node)
+                        .buildWidget(node, context, settings),
               ),
             );
       return decorate(
@@ -218,9 +218,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         : Directionality(
             textDirection: direction,
             child: Builder(
-              builder: (context) => getTransformerByNode(
-                node,
-              ).buildWidget(styled, context, settings),
+              builder: (context) =>
+                  getTransformerByNode(node)
+                      .buildWidget(styled, context, settings),
             ),
           );
     widget = decorate(context, styled, widget, NodeBuildLayer.content);
@@ -523,12 +523,14 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// `rtl`/`ltr` (any case, also `right-to-left`, `true` for right to left)
   /// as a [TextDirection]; null for anything else.
-  static TextDirection? parseLayoutDirection(Object? value) =>
-      switch (value?.toString().trim().toLowerCase()) {
-        'rtl' || 'right-to-left' || 'righttoleft' || 'true' => TextDirection.rtl,
-        'ltr' || 'left-to-right' || 'lefttoright' || 'false' => TextDirection.ltr,
-        _ => null,
-      };
+  static TextDirection? parseLayoutDirection(Object? value) => switch (value
+      ?.toString()
+      .trim()
+      .toLowerCase()) {
+    'rtl' || 'right-to-left' || 'righttoleft' || 'true' => TextDirection.rtl,
+    'ltr' || 'left-to-right' || 'lefttoright' || 'false' => TextDirection.ltr,
+    _ => null,
+  };
 
   /// The variables key of a node's layout direction binding.
   static const String kLayoutDirection = 'layoutDirection';

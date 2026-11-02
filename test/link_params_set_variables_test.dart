@@ -1,5 +1,4 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/ui/layout_builder.dart' show withLinkParam;
 
@@ -14,7 +13,10 @@ void main() {
       'open': 'true',
     };
     expect(
-      withLinkParam(v('month', VariableType.text, '2026-10'), params).getValue(),
+      withLinkParam(
+        v('month', VariableType.text, '2026-10'),
+        params,
+      ).getValue(),
       '2026-09',
     );
     expect(
@@ -22,7 +24,10 @@ void main() {
       2,
     );
     expect(
-      withLinkParam(v('open', VariableType.boolean, 'false'), params).getValue(),
+      withLinkParam(
+        v('open', VariableType.boolean, 'false'),
+        params,
+      ).getValue(),
       true,
     );
   });
@@ -39,6 +44,9 @@ void main() {
       bodyId: 'b',
       paramsSetVariables: true,
     );
-    expect(CanvasProperties.fromJson(props.toJson()).paramsSetVariables, isTrue);
+    expect(
+      CanvasProperties.fromJson(props.toJson()).paramsSetVariables,
+      isTrue,
+    );
   });
 }

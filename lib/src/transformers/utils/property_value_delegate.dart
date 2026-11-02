@@ -1,4 +1,5 @@
 import 'dart:collection';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
@@ -555,10 +556,7 @@ class PropertyValueDelegate {
   /// clock (`now()`) or the millisecond clock (`nowMs()`). Widgets bound to
   /// [name] listen to these too.
   static ({Set<String> paths, bool readsClock, bool readsFrameClock})
-  computedDependencies(
-    String name,
-    Map<String, VariableData> variables,
-  ) {
+  computedDependencies(String name, Map<String, VariableData> variables) {
     final Set<String> paths = {};
     bool readsClock = false;
     bool readsFrameClock = false;
@@ -574,8 +572,11 @@ class PropertyValueDelegate {
           readsFrameClock || FormulaEvaluator.readsFrameClock(expression);
       // A function's parameters aren't variables.
       final Iterable<String> read = variable.isFunction
-          ? FormulaFunction(variable.parameters, expression, (_) => null)
-                .externalPaths
+          ? FormulaFunction(
+              variable.parameters,
+              expression,
+              (_) => null,
+            ).externalPaths
           : FormulaEvaluator.referencedPaths(expression);
       for (final String path in read) {
         paths.add(path);
@@ -627,8 +628,9 @@ class PropertyValueDelegate {
       'drag' => {
         ...(scopedValues.dragValues ?? DragValues.rest).toMap(),
         ...?(scopedValues.codelesslyContext?.dragAndDrop.value ??
-            DragAndDropController.preview ??
-            DragAndDropController.idle) as Map?,
+                DragAndDropController.preview ??
+                DragAndDropController.idle)
+            as Map?,
       },
       'track' => (scopedValues.trackValues ?? const TrackValues()).toMap(),
       'speech' => Speech.instance.value,

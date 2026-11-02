@@ -25,7 +25,10 @@ void main() {
   test('the image is drawn through a srcIn color filter in the tint', () {
     const Widget image = SizedBox(width: 10, height: 10);
     expect(tintImage(fill(), image), same(image));
-    final Widget tinted = tintImage(fill(tint: ColorRGBA.fromHex('#C8332B')), image);
+    final Widget tinted = tintImage(
+      fill(tint: ColorRGBA.fromHex('#C8332B')),
+      image,
+    );
     expect(tinted, isA<ColorFiltered>());
     expect(
       (tinted as ColorFiltered).colorFilter,
@@ -54,16 +57,16 @@ void main() {
     );
     expect(withContent, isA<Positioned>());
     final Positioned covering = withContent as Positioned;
-    expect([covering.left, covering.top, covering.right, covering.bottom], [
-      0,
-      0,
-      0,
-      0,
-    ]);
+    expect(
+      [covering.left, covering.top, covering.right, covering.bottom],
+      [0, 0, 0, 0],
+    );
     // Without content, the image gives the node its size.
-    final Positioned sized =
-        wrapFillWithPositioned(node: card(), fill: tile, paint: fill())
-            as Positioned;
+    final Positioned sized = wrapFillWithPositioned(
+      node: card(),
+      fill: tile,
+      paint: fill(),
+    ) as Positioned;
     expect(sized.left, isNull);
   });
 }

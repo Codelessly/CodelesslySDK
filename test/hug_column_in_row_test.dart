@@ -44,7 +44,7 @@ void main() {
             horizontalFit: SizeFit.shrinkWrap,
             verticalFit: SizeFit.shrinkWrap,
             crossAxisAlignment: CrossAxisAlignmentC.stretch,
-            padding: EdgeInsetsModel.only(bottom: 6),
+            padding: const EdgeInsetsModel.only(bottom: 6),
             children: ['a', 'b'],
           )..parentID = 'row',
           _text('a', 'cards', 'words', 40),
