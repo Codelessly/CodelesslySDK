@@ -119,25 +119,36 @@ class PassiveListViewWidget extends StatelessWidget {
         itemBuilder(context, index),
       ],
     ];
-    final Widget flex = Padding(
-      padding: node.padding.flutterEdgeInsets,
-      child: Flex(
-        direction: node.scrollDirection.flutterAxis,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: node.reverse ? items.reversed.toList() : items,
-      ),
-    );
-    // The cross axis follows [ViewportLayout]: fill when expanded and
-    // bounded, else the design size. The scroll axis hugs the items.
+    // The cross axis fills when expanded and bounded, hugs the items when
+    // shrink-wrapped, else takes the design size. The scroll axis hugs the
+    // items.
     final SizeFit crossFit = vertical ? node.horizontalFit : node.verticalFit;
     final double designCross = vertical
         ? node.basicBoxLocal.width
         : node.basicBoxLocal.height;
     final bool fill = crossFit == SizeFit.expanded;
+    final bool hugs = crossFit == SizeFit.shrinkWrap;
+    // Hugging, the list is as thick as its thickest item. Stretched items
+    // then all take that thickness, measured first; items that can't be
+    // measured keep their own, centred as in the editor.
+    final bool measure = hugs && stretchesItems && itemsMeasurable;
+    Widget flex = Flex(
+      direction: node.scrollDirection.flutterAxis,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: hugs && !measure
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.stretch,
+      children: node.reverse ? items.reversed.toList() : items,
+    );
+    if (measure) {
+      flex = vertical
+          ? IntrinsicWidth(child: flex)
+          : IntrinsicHeight(child: flex);
+    }
+    flex = Padding(padding: node.padding.flutterEdgeInsets, child: flex);
     return FitBox(
-      width: vertical ? designCross : null,
-      height: vertical ? null : designCross,
+      width: vertical && !hugs ? designCross : null,
+      height: !vertical && !hugs ? designCross : null,
       fillWidth: vertical && fill,
       fillHeight: !vertical && fill,
       child: node.clipsContent ? ClipRect(child: flex) : flex,
@@ -161,14 +172,23 @@ class PassiveListViewWidget extends StatelessWidget {
       for (int index = 0; index < itemCount; index++)
         itemBuilder(context, index),
     ];
+    final List<Widget> ordered = node.reverse ? items.reversed.toList() : items;
     final Widget wrap = Padding(
       padding: node.padding.flutterEdgeInsets,
-      child: Wrap(
-        direction: node.scrollDirection.flutterAxis,
-        spacing: listWrapSpacing(node),
-        runSpacing: math.max(0, node.properties.runSpacing),
-        children: node.reverse ? items.reversed.toList() : items,
-      ),
+      child: stretchesItems
+          ? RunStretchWrap(
+              direction: node.scrollDirection.flutterAxis,
+              spacing: listWrapSpacing(node),
+              runSpacing: math.max(0, node.properties.runSpacing),
+              measureChildren: itemsMeasurable,
+              children: ordered,
+            )
+          : Wrap(
+              direction: node.scrollDirection.flutterAxis,
+              spacing: listWrapSpacing(node),
+              runSpacing: math.max(0, node.properties.runSpacing),
+              children: ordered,
+            ),
     );
     return FitBox(
       width: node.horizontalFit == SizeFit.shrinkWrap
@@ -204,6 +224,7 @@ class PassiveListViewWidget extends StatelessWidget {
       scrollDirection: node.scrollDirection,
       itemExtent: node.properties.itemExtent,
       inWrap: listWraps(node) && !usesScrollableWrap,
+      stretch: stretchesItems || hugsCrossInFlex,
       child: child,
     );
   }
@@ -222,6 +243,34 @@ class PassiveListViewWidget extends StatelessWidget {
         keyboardDismissBehavior:
             node.keyboardDismissBehavior.flutterKeyboardDismissBehavior,
         clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+        stretch: stretchesItems,
+        measureItems: itemsMeasurable,
+      );
+
+  /// Whether the items are as thick as the thickest beside them; see
+  /// [ListViewProperties.stretchItems]. Stacked lists place items freely.
+  bool get stretchesItems =>
+      node.properties.stretchItems &&
+      !node.properties.stacked &&
+      node.properties.layout == ListLayout.list;
+
+  /// Whether the list lays its items out in a [Flex] (see [staticList]) and
+  /// hugs them across its axis: the Flex then places them.
+  bool get hugsCrossInFlex =>
+      listBuildsAllItems(node) &&
+      !listWraps(node) &&
+      (node.scrollDirection == AxisC.vertical
+              ? node.horizontalFit
+              : node.verticalFit) ==
+          SizeFit.shrinkWrap;
+
+  /// Whether the list's item can report its intrinsic size, so the items
+  /// can be measured to stretch them to the thickest one.
+  bool get itemsMeasurable =>
+      node.children.isNotEmpty &&
+      !subtreeBlocksIntrinsics(
+        manager.getNode(node.children.first),
+        manager.getNode,
       );
 
   @override
@@ -892,7 +941,17 @@ class WrappedItems extends StatelessWidget {
     this.physics,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.clipBehavior = Clip.none,
+    this.stretch = false,
+    this.measureItems = true,
   });
+
+  /// Whether every item is as thick as the thickest of its run; see
+  /// [ListViewProperties.stretchItems] and [RunStretchWrap].
+  final bool stretch;
+
+  /// With [stretch], whether the items can be measured; see
+  /// [RunStretchWrap.measureChildren].
+  final bool measureItems;
 
   /// How many items.
   final int itemCount;
@@ -929,16 +988,26 @@ class WrappedItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget wrap = Wrap(
-      direction: direction,
-      spacing: spacing,
-      runSpacing: runSpacing,
-      alignment: alignment,
-      children: [
-        for (int index = 0; index < itemCount; index++)
-          itemBuilder(context, index),
-      ],
-    );
+    final List<Widget> items = [
+      for (int index = 0; index < itemCount; index++)
+        itemBuilder(context, index),
+    ];
+    final Widget wrap = stretch
+        ? RunStretchWrap(
+            direction: direction,
+            spacing: spacing,
+            runSpacing: runSpacing,
+            alignment: alignment,
+            measureChildren: measureItems,
+            children: items,
+          )
+        : Wrap(
+            direction: direction,
+            spacing: spacing,
+            runSpacing: runSpacing,
+            alignment: alignment,
+            children: items,
+          );
     if (scrolls) {
       return DraggableScrollConfiguration(
         child: SingleChildScrollView(
