@@ -3,21 +3,36 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// The editor saves Material icons with Google's codepoints; Flutter's
-/// bundled font numbers them differently, so the SDK finds the glyph by name.
+/// Icons placed from the editor's catalog carry Google's web font
+/// codepoints, which number the glyphs differently from Flutter's bundled
+/// MaterialIcons font; the glyph is looked up by name.
 void main() {
-  test("a Material icon is drawn with Flutter's glyph for its name and style", () {
-    MaterialIcon icon(String name, MaterialIconStyle style, int googleCodepoint) => MaterialIcon(
-          name: name,
-          codepoint: googleCodepoint,
-          style: style,
-        );
-    expect(flutterMaterialCodepoint(icon('add', MaterialIconStyle.filled, 0xe145)), Icons.add.codePoint);
-    expect(flutterMaterialCodepoint(icon('search', MaterialIconStyle.filled, 0xe8b6)), Icons.search.codePoint);
-    expect(
-      flutterMaterialCodepoint(icon('calendar_today', MaterialIconStyle.outlined, 0xe935)),
-      Icons.calendar_today_outlined.codePoint,
+  Future<IconData> glyph(WidgetTester tester, MaterialIcon icon) async {
+    await tester.pumpWidget(MaterialApp(home: SvgIcon(icon: icon, size: 24)));
+    return tester.widget<Icon>(find.byType(Icon)).icon!;
+  }
+
+  testWidgets('a catalog codepoint draws the icon of its name', (tester) async {
+    final IconData data = await glyph(
+      tester,
+      const MaterialIcon(codepoint: 0xe01b, name: 'av_timer', style: MaterialIconStyle.filled, version: 12),
     );
-    expect(flutterMaterialCodepoint(icon('no_such_icon_name', MaterialIconStyle.filled, 1)), isNull);
+    expect(data.codePoint, Icons.av_timer.codePoint);
+  });
+
+  testWidgets('styles pick their own glyph', (tester) async {
+    final IconData data = await glyph(
+      tester,
+      const MaterialIcon(codepoint: 1, name: 'edit', style: MaterialIconStyle.outlined),
+    );
+    expect(data.codePoint, Icons.edit_outlined.codePoint);
+  });
+
+  testWidgets('an unknown name keeps its stored codepoint', (tester) async {
+    final IconData data = await glyph(
+      tester,
+      const MaterialIcon(codepoint: 0xe123, name: 'no_such_icon', style: MaterialIconStyle.filled),
+    );
+    expect(data.codePoint, 0xe123);
   });
 }
