@@ -304,6 +304,16 @@ class FormulaEvaluator {
       'join(tags, " · ")',
     ),
     FormulaFunctionDoc('upper', 'upper(text)', 'upper("hi") → HI'),
+    FormulaFunctionDoc(
+      'charCode',
+      'charCode(text, index)',
+      'charCode("MX", 1) → 88',
+    ),
+    FormulaFunctionDoc(
+      'fromCharCode',
+      'fromCharCode(code, …) or fromCharCode(list)',
+      'fromCharCode(65 + seat) → B',
+    ),
     FormulaFunctionDoc('lower', 'lower(text)', 'lower("Hi") → hi'),
     FormulaFunctionDoc('trim', 'trim(text)', 'trim("  hi ") → hi'),
     FormulaFunctionDoc(
@@ -1802,6 +1812,26 @@ final Map<String, _Function> _functions = {
       .where((s) => s.isNotEmpty)
       .join((_arg(a, 1) ?? ', ').toString()),
   'upper': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toUpperCase(),
+  'charCode': (a) {
+    final String text = FormulaEvaluator.stringify(_arg(a, 0));
+    final num index = a.length > 1 ? _num(_arg(a, 1)) : 0;
+    if (!index.isFinite) return null;
+    // Out of range (indexOf's -1 included) reads nothing, like at().
+    final int i = index.toInt();
+    return i >= 0 && i < text.length ? text.codeUnitAt(i) : null;
+  },
+  'fromCharCode': (a) {
+    final StringBuffer out = StringBuffer();
+    for (final Object? arg in a) {
+      for (final Object? code in arg is Iterable ? arg : [arg]) {
+        final num n = _num(code);
+        if (n.isFinite && n >= 0 && n <= 0x10FFFF) {
+          out.writeCharCode(n.toInt());
+        }
+      }
+    }
+    return out.toString();
+  },
   'lower': (a) => FormulaEvaluator.stringify(_arg(a, 0)).toLowerCase(),
   'trim': (a) => FormulaEvaluator.stringify(_arg(a, 0)).trim(),
   'padLeft': (a) => _pad(_arg(a, 0), _arg(a, 1), _arg(a, 2), left: true),
