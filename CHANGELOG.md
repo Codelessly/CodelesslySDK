@@ -1,4 +1,25 @@
-## Unreleased
+## 9.0.0
+
+Requires codelessly_api 9.0.0. The first release on pub.dev since 8.2.0:
+it includes everything listed below for 8.4.0 and 8.3.0, which were never
+published, and merges the Meridian and Hookline lines into one SDK.
+
+### Breaking changes from 8.2.0
+
+- Navigation goes through `CodelesslyRouter` (see Navigation below).
+  `Codelessly.pendingRoute` and `SDKPublishModel.linkParamsFor` are
+  removed: the router reads links from the address.
+- `DesignCellGridDelegate` is removed.
+
+### Formulas and screen parameters
+
+- `FormulaEvaluator.textErrorOf` finds the first formula in a text that is
+  not closed or doesn't parse, and names the character it starts at.
+- Quoted text in formulas can hold backslash-escaped quotes (`'it\'s'`).
+- `RouteParamsScope` passes a screen's parameters to the nodes under it;
+  `ComputedVariables.resolveAll` takes `routeParams`.
+- A drag no longer rewrites its offset variable on every move when the
+  value is unchanged but stored as text (`"12"` and `12`).
 
 ### Navigation
 
