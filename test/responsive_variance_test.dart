@@ -29,6 +29,7 @@ Map<String, BaseNode> responsivePage({
     ScreenBreakpoint.desktop: 4,
   },
   ScaleMode scaleMode = ScaleMode.responsive,
+  Map<ScreenBreakpoint, Size> rootSizes = const {},
 }) {
   final nodes = <String, BaseNode>{};
   void add(BaseNode node) => nodes[node.id] = node;
@@ -72,7 +73,12 @@ Map<String, BaseNode> responsivePage({
       RowColumnNode(
         id: root,
         name: root,
-        basicBoxLocal: NodeBox(0, 0, canvasWidth, 844),
+        basicBoxLocal: NodeBox(
+          0,
+          0,
+          rootSizes[breakpoint]?.width ?? canvasWidth,
+          rootSizes[breakpoint]?.height ?? 844,
+        ),
         rowColumnType: RowColumnType.column,
         mainAxisAlignment: MainAxisAlignmentC.start,
         crossAxisAlignment: CrossAxisAlignmentC.stretch,
@@ -266,6 +272,37 @@ void main() {
           expect(rect.left, 0);
           expect(rect.bottom, lessThanOrEqualTo(screen.height));
         }
+      });
+    }
+  });
+
+  // Each variant is designed at its breakpoint's width, wider than the
+  // variance's own (mobile) design box. The variant's root still takes the
+  // screen it is shown on, not its design insets inside the variance.
+  group('a variant designed wider than the variance fills the screen', () {
+    for (final screen in screens.skip(1)) {
+      testWidgets('${screen.width.toInt()}', (tester) async {
+        final nodes = responsivePage(
+          rootSizes: const {
+            ScreenBreakpoint.tablet: Size(834, 1194),
+            ScreenBreakpoint.desktop: Size(1440, 900),
+          },
+        );
+        await pumpPage(tester, nodes, screen: screen);
+
+        expect(tester.takeException(), isNull);
+        final ScreenBreakpoint breakpoint = ScreenBreakpoint.forWidth(
+          screen.width,
+        );
+        expect(
+          tester.getRect(rectOf(nodes['${breakpoint.name}-root']!)),
+          Offset.zero & screen,
+        );
+        final Rect first = tester.getRect(
+          rectOf(nodes['${breakpoint.name}-0']!),
+        );
+        expect(first.left, 0);
+        expect(first.width, screen.width);
       });
     }
   });
