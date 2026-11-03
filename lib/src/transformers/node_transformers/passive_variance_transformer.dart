@@ -129,6 +129,25 @@ class PassiveVarianceWidget extends StatelessWidget {
     if (children.isNotEmpty) {
       final childNode = getNode(children.first);
 
+      // A breakpoint variant is designed at its breakpoint's size, not at
+      // the variance's (the mobile design), so its root takes the space the
+      // variance is given: placed in a Stack at its design insets, a root
+      // wider than the variance's design stretched past the screen by the
+      // difference. A root with an alignment (a centered card) is placed by
+      // it.
+      if (!settings.isPreview && node.isResponsive) {
+        return Align(
+          alignment:
+              childNode.alignment.flutterAlignment ??
+              AlignmentDirectional.topStart,
+          child: manager.buildWidgetFromNode(
+            childNode,
+            context,
+            settings: settings,
+          ),
+        );
+      }
+
       return manager
           .getTransformer<PassiveStackTransformer>()
           .buildWidgetForChildren(
