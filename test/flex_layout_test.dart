@@ -959,6 +959,41 @@ void main() {
       });
     }
 
+    // A section header: a title that hugs its text and a rule that takes
+    // the rest of the row. The title's flex must not claim a share of the
+    // free space.
+    testWidgets('leaves the rest of the row to an expanded sibling', (
+      tester,
+    ) async {
+      final title = label('title', 'Ann', squeezable: true)..flex = 8;
+      final rule = rect(
+        'rule',
+        '',
+        width: 100,
+        height: 2,
+        horizontalFit: SizeFit.expanded,
+      );
+      final row = flex(
+        'row',
+        kRootNode,
+        [title, rule],
+        type: RowColumnType.row,
+        width: 200,
+        height: 10,
+      );
+      for (final screen in screens) {
+        final sizes = await pump(
+          tester,
+          row,
+          [title, rule],
+          screen: screen,
+          host: Host.loose,
+        );
+        expect(paragraphOf(tester, 'Ann').size.width, 30);
+        expect(sizes['rule']!.width, 170, reason: '$screen');
+      }
+    });
+
     // A dialog body: a header and a card that is as tall as its content, up
     // to the height the column has left.
     testWidgets('a card hugs its content up to the room left', (tester) async {
