@@ -262,6 +262,55 @@ void main() {
     expect(current().topLeft, const Offset(40, 132));
   });
 
+  // A header whose height follows the scroll: `${= max(64, 372 - scroll)}`.
+  testWidgets('mounted size binding updates its freeform parent slot', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 300);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final header = rect('header', NodeBox(0, 0, 400, 200))
+      ..variables['height'] = r'${= max(64, 200 - scroll)}';
+    final root = frame('frame', NodeBox(0, 0, 400, 300), [header]);
+    final registry = NodeRegistry()
+      ..setNodes({root.id: root, header.id: header});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    final scroll = Observable(
+      VariableData(
+        id: 'scroll',
+        name: 'scroll',
+        type: VariableType.decimal,
+        value: 0,
+      ),
+    );
+    final scope = CodelesslyContext.empty()..variables['scroll'] = scroll;
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: scope,
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => manager.buildWidgetFromNode(
+              root,
+              context,
+              settings: const WidgetBuildSettings(debugLabel: 'test'),
+            ),
+          ),
+        ),
+      ),
+    );
+    Rect current() => tester.getRect(rectOf(header));
+    expect(current().height, 200);
+    scroll.set(scroll.value.copyWith(value: 100));
+    await tester.pump();
+    expect(current().height, 100);
+    scroll.set(scroll.value.copyWith(value: 500));
+    await tester.pump();
+    expect(current().height, 64);
+  });
+
   testWidgets('mounted fractional parent slot follows a changed variable', (
     tester,
   ) async {

@@ -43,10 +43,14 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
 
     // The child widget already listens to its bindings, but its parent data
     // belongs to the freeform slot. Rebuild that slot as well when a bound
-    // position or size fraction changes, using the mounted scope (including list item values).
+    // position, size or size fraction changes, using the mounted scope
+    // (including list item values): a header whose height follows the
+    // scroll otherwise kept the slot of its first height.
     if (manager is PassiveNodeTransformerManager &&
         (node.variables.containsKey('positionX') ||
             node.variables.containsKey('positionY') ||
+            node.variables.containsKey('width') ||
+            node.variables.containsKey('height') ||
             hasFractionalSize(node))) {
       final listenables = manager.listenablesFor(context, node);
       if (listenables.isNotEmpty) {
