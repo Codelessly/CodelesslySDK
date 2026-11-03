@@ -1089,6 +1089,16 @@ class FunctionsRepository {
     }
   }
 
+  /// [transition], except that on the web the platform's transition is
+  /// none: a website switches pages at once, where Flutter's default page
+  /// transition off Apple platforms is Android's zoom.
+  static PageTransition webTransition(
+    PageTransition transition, {
+    bool isWeb = kIsWeb,
+  }) => isWeb && transition == PageTransition.platform
+      ? PageTransition.none
+      : transition;
+
   /// The route a push, replace or reset [action] opens its screen with,
   /// built by [builder]: a [MaterialPageRoute] for
   /// [PageTransition.platform], otherwise a [PageRouteBuilder] that plays
@@ -1100,7 +1110,7 @@ class FunctionsRepository {
     required RouteSettings settings,
     required WidgetBuilder builder,
   }) {
-    final PageTransition transition = action.transition;
+    final PageTransition transition = webTransition(action.transition);
     if (transition == PageTransition.platform) {
       return MaterialPageRoute<T>(settings: settings, builder: builder);
     }
