@@ -337,9 +337,10 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     Map<String, dynamic> globalData,
     Object? arguments,
   ) {
-    final NavigationTransition transition =
-        NavigationTransition.values.asNameMap()[globalData[transitionKey]] ??
-        NavigationTransition.platform;
+    final NavigationTransition transition = FunctionsRepository.webTransition(
+      NavigationTransition.values.asNameMap()[globalData[transitionKey]] ??
+          NavigationTransition.platform,
+    );
     if (transition == NavigationTransition.platform) {
       return MaterialPage<dynamic>(
         key: key,
@@ -575,13 +576,16 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     );
   }
 
-  Page<dynamic> _buildLoadingPage(String name) => MaterialPage<void>(
-    name: name,
-    child: Builder(
+  Page<dynamic> _buildLoadingPage(String name) => pageFor(
+    null,
+    name,
+    Builder(
       builder: (context) =>
           controller.loadingBuilder?.call(context) ??
           const CodelesslyLoadingScreen(),
     ),
+    const {},
+    null,
   );
 
   /// A location no route matches: the app's catch-all screen (a URL path
@@ -593,10 +597,10 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         ? null
         : CanvasLocation.match(model, locationOfRoute(route));
     if (match != null) {
-      return MaterialPage<void>(
-        key: ValueKey('catch-all:${locationOfRoute(route)}'),
-        name: route.name,
-        child: _buildScreen(
+      return pageFor(
+        ValueKey('catch-all:${locationOfRoute(route)}'),
+        route.name,
+        _buildScreen(
           match.layoutId,
           DefaultRoute(
             path: route.path,
@@ -609,16 +613,18 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
           ),
           const {},
         ),
+        const {},
+        null,
       );
     }
     // Else the app's own "Not found" (or "404") screen, with the location
     // as `route.path`.
     final String? notFound = model == null ? null : notFoundLayoutId(model);
     if (notFound != null) {
-      return MaterialPage<void>(
-        key: ValueKey('not-found:${route.path}'),
-        name: route.name,
-        child: _buildScreen(
+      return pageFor(
+        ValueKey('not-found:${route.path}'),
+        route.name,
+        _buildScreen(
           notFound,
           DefaultRoute(
             path: route.path,
@@ -632,12 +638,16 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
           ),
           const {},
         ),
+        const {},
+        null,
       );
     }
-    return MaterialPage<void>(
-      key: ValueKey('not-found:${route.path}'),
-      name: route.name,
-      child: _ScreenNotFound(onHome: () => resetTo(const ['/'])),
+    return pageFor(
+      ValueKey('not-found:${route.path}'),
+      route.name,
+      _ScreenNotFound(onHome: () => resetTo(const ['/'])),
+      const {},
+      null,
     );
   }
 
