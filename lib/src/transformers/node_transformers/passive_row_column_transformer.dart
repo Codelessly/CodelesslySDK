@@ -418,6 +418,31 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     );
   }
 
+  /// Whether a sibling of [node] in [parentRowColumn] flexes on its main
+  /// axis.
+  static bool _hasFlexingSibling(
+    BaseNode node,
+    BaseNode parentRowColumn,
+    GetNode? getNode,
+  ) {
+    if (getNode == null || parentRowColumn is! ChildrenMixin) return false;
+    final bool isRow =
+        (parentRowColumn as RowColumnMixin).rowColumnType == RowColumnType.row;
+    for (final String id in parentRowColumn.children) {
+      if (id == node.id) continue;
+      final BaseNode sibling;
+      try {
+        sibling = getNode(id);
+      } catch (_) {
+        continue;
+      }
+      if ((isRow ? sibling.horizontalFit : sibling.verticalFit).isFlex) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   static Widget wrapChildWithSizeFits(
     BaseNode node,
     BaseNode parentRowColumn,
@@ -575,8 +600,18 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     }
 
     // A squeezable node that wraps its content hugs it while it fits and
-    // shrinks to the room the Row/Column has left when it doesn't.
-    if (mainAxisFit == SizeFit.shrinkWrap && node.squeezable) {
+    // shrinks to the room the Row/Column has left when it doesn't. Next to
+    // a sibling that flexes on the main axis, a loose Flexible would hold on
+    // to its flex share of the free space even where its content is short,
+    // leaving the sibling only the rest (an expanded rule beside a title got
+    // a ninth of the row). There it is laid out like any non-flex child,
+    // which CodelesslyFlex squeezes down to its content when the row runs
+    // out of room, and the sibling takes what is left. A scroll view can't
+    // be laid out unbounded, so it stays Flexible.
+    if (mainAxisFit == SizeFit.shrinkWrap &&
+        node.squeezable &&
+        !(_hasFlexingSibling(node, parentRowColumn, getNode) &&
+            !(node is ScrollableMixin && node.isScrollable))) {
       childWidget = Flexible(flex: flex, child: childWidget);
     }
 
