@@ -468,7 +468,7 @@ void main() {
       expect(shown.version, 1);
       expect(
         shown.toSvgUrl(),
-        'https://fonts.gstatic.com/s/i/materialicons/star/v1/24px.svg',
+        'https://fonts.gstatic.com/s/i/materialicons/star/v${materialIconVersions['star']}/24px.svg',
       );
       expect((host.node as IconNode).properties.icon.icon!.name, 'star_border');
     });
