@@ -1,0 +1,404 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "c"
+   ]
+  },
+  "c": {
+   "id": "c",
+   "type": "canvas",
+   "name": "Canvas",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    600
+   ],
+   "properties": {
+    "bodyId": "b"
+   },
+   "children": [
+    "b"
+   ]
+  },
+  "b": {
+   "id": "b",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    600
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "r1",
+    "r3",
+    "r5",
+    "r7",
+    "r9",
+    "r11",
+    "r13",
+    "r15",
+    "r17",
+    "r19",
+    "r21"
+   ]
+  },
+  "r1": {
+   "id": "r1",
+   "type": "rectangle",
+   "name": "fader cap",
+   "basicBoxLocal": [
+    160,
+    200,
+    40,
+    40
+   ],
+   "edgePins": {
+    "left": 160,
+    "top": 200
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f2",
+     "color": "#3366FF"
+    }
+   ],
+   "drag": {
+    "track": {
+     "variable": "volume",
+     "x1": -100,
+     "y1": 0,
+     "x2": 100,
+     "y2": 0,
+     "min": 0,
+     "max": 10,
+     "defaultValue": 7.5
+    }
+   },
+   "parentID": "b"
+  },
+  "r3": {
+   "id": "r3",
+   "type": "rectangle",
+   "name": "knob",
+   "basicBoxLocal": [
+    160,
+    300,
+    30,
+    30
+   ],
+   "edgePins": {
+    "left": 160,
+    "top": 300
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f4",
+     "color": "#3366FF"
+    }
+   ],
+   "drag": {
+    "track": {
+     "variable": "dial",
+     "shape": "arc",
+     "pivotX": 0,
+     "pivotY": 60,
+     "startAngle": -135,
+     "endAngle": 135,
+     "min": 0,
+     "max": 1,
+     "defaultValue": 0.25
+    }
+   },
+   "parentID": "b"
+  },
+  "r5": {
+   "id": "r5",
+   "type": "rectangle",
+   "name": "turning knob",
+   "basicBoxLocal": [
+    40,
+    300,
+    30,
+    30
+   ],
+   "edgePins": {
+    "left": 40,
+    "top": 300
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f6",
+     "color": "#3366FF"
+    }
+   ],
+   "drag": {
+    "track": {
+     "variable": "turn",
+     "shape": "arc",
+     "rotate": true
+    }
+   },
+   "parentID": "b"
+  },
+  "r7": {
+   "id": "r7",
+   "type": "rectangle",
+   "name": "path track",
+   "basicBoxLocal": [
+    40,
+    400,
+    30,
+    30
+   ],
+   "edgePins": {
+    "left": 40,
+    "top": 400
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f8",
+     "color": "#3366FF"
+    }
+   ],
+   "drag": {
+    "track": {
+     "variable": "p",
+     "shape": "path",
+     "path": "M0 0 L 100 0 L 100 80",
+     "orientToPath": true,
+     "defaultValue": 0.75
+    }
+   },
+   "parentID": "b"
+  },
+  "r9": {
+   "id": "r9",
+   "type": "rectangle",
+   "name": "swipe card",
+   "basicBoxLocal": [
+    20,
+    20,
+    80,
+    100
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f10",
+     "color": "#3366FF"
+    }
+   ],
+   "drag": {
+    "release": "dismiss",
+    "rotateFactor": 0.1,
+    "directions": [
+     "left",
+     "right"
+    ]
+   },
+   "parentID": "b"
+  },
+  "r11": {
+   "id": "r11",
+   "type": "rectangle",
+   "name": "draggable",
+   "basicBoxLocal": [
+    120,
+    20,
+    60,
+    60
+   ],
+   "edgePins": {
+    "left": 120,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f12",
+     "color": "#3366FF"
+    }
+   ],
+   "draggable": {
+    "group": "tiles",
+    "data": "a",
+    "feedbackScale": 1.1
+   },
+   "parentID": "b"
+  },
+  "r13": {
+   "id": "r13",
+   "type": "rectangle",
+   "name": "drop target",
+   "basicBoxLocal": [
+    200,
+    20,
+    100,
+    100
+   ],
+   "edgePins": {
+    "left": 200,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f14",
+     "color": "#3366FF"
+    }
+   ],
+   "dropTarget": {
+    "accepts": [
+     "tiles"
+    ],
+    "hoverDelayMs": 200
+   },
+   "parentID": "b"
+  },
+  "r15": {
+   "id": "r15",
+   "type": "rectangle",
+   "name": "tooltip",
+   "basicBoxLocal": [
+    20,
+    140,
+    60,
+    40
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 140
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f16",
+     "color": "#3366FF"
+    }
+   ],
+   "tooltip": "Hello",
+   "ignorePointer": true,
+   "zoomable": true,
+   "parentID": "b"
+  },
+  "r17": {
+   "id": "r17",
+   "type": "rectangle",
+   "name": "hero",
+   "basicBoxLocal": [
+    100,
+    140,
+    60,
+    40
+   ],
+   "edgePins": {
+    "left": 100,
+    "top": 140
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f18",
+     "color": "#3366FF"
+    }
+   ],
+   "heroTag": "hero-1",
+   "heroFlight": "morphCorners",
+   "flightKey": "tile-1",
+   "parentID": "b"
+  },
+  "r19": {
+   "id": "r19",
+   "type": "rectangle",
+   "name": "reveal",
+   "basicBoxLocal": [
+    180,
+    140,
+    60,
+    40
+   ],
+   "edgePins": {
+    "left": 180,
+    "top": 140
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f20",
+     "color": "#3366FF"
+    }
+   ],
+   "reveal": {
+    "alignment": 0.3,
+    "durationMs": 400
+   },
+   "floating": true,
+   "parentID": "b"
+  },
+  "r21": {
+   "id": "r21",
+   "type": "rectangle",
+   "name": "effects",
+   "basicBoxLocal": [
+    260,
+    140,
+    60,
+    40
+   ],
+   "edgePins": {
+    "left": 260,
+    "top": 140
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f22",
+     "color": "#3366FF"
+    }
+   ],
+   "effectAnimations": [
+    {
+     "name": "shake",
+     "type": "shake",
+     "durationMs": 400
+    }
+   ],
+   "particles": {
+    "count": 20,
+    "colors": [
+     "#FF0000",
+     "#00FF00"
+    ],
+    "lifetimeMs": 1000
+   },
+   "parentID": "b"
+  }
+ }
+}
