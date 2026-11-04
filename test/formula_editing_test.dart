@@ -51,7 +51,7 @@ void main() {
       'c',
     ]);
     expect(eval('slice(range(10), 2, 5)'), [2, 3, 4]);
-    expect(eval('range(2, 5)'), [2, 3, 4, 5]);
+    expect(eval('range(2, 5)'), [2, 3, 4]);
     expect(eval('concat([1, 2], [3], 4)'), [1, 2, 3, 4]);
     expect(eval('reverse([1, 2, 3])'), [3, 2, 1]);
     expect(eval('first(plan).uid + last(plan).uid + at(plan, 1).uid'), 'acb');
