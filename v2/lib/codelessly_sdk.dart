@@ -26,6 +26,7 @@ export 'package:codelessly_api/codelessly_api.dart'
         FontStyle,
         IconAlignment,
         ImageRepeat,
+        ListTileControlAffinity,
         ListTileTitleAlignment,
         MainAxisAlignment,
         MainAxisSize,
@@ -37,17 +38,21 @@ export 'package:codelessly_api/codelessly_api.dart'
         StrokeAlign,
         StrokeCap,
         StrokeJoin,
+        TabAlignment,
+        TabBarIndicatorSize,
         TextAlign,
         TextAlignVertical,
         TextDecoration,
         TextDecorationStyle,
-        TextOverflow,
         TextDirection,
+        TextOverflow,
         TextStyle,
         TileMode,
         VerticalDirection,
         VisualDensity,
-        WidgetState;
+        WidgetState,
+        WrapAlignment,
+        WrapCrossAlignment;
 
 export 'src/render/islands.dart' show IslandEnvironment, IslandHost;
 export 'src/render/node_tree.dart' show NodeTree, NodeBox, NodeTreeObserver, Slot, SlotKind;
