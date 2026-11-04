@@ -22,7 +22,9 @@ class DocumentSource implements NodeSource {
   set document(LayoutDocument next) {
     if (identical(next, _document)) return;
     _document = next;
-    for (final e in _watched.entries) {
+    // A listener may watch a node the new document adds (a new child):
+    // iterate a copy. A node watched from here on reads the new document.
+    for (final e in _watched.entries.toList()) {
       final n = next[e.key];
       if (n != e.value.value) e.value.value = n;
     }
