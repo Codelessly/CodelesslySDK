@@ -431,6 +431,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       _releaseContainerChildren();
       _wire(const []);
       _releaseUnusedIslands();
+      _relayoutHuggingAncestors();
       return;
     }
     final chain = <RenderBox>[];
@@ -482,6 +483,24 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     _releaseUnusedIslands();
     _notifyDependentAncestors();
     _applyParentData();
+    _relayoutHuggingAncestors();
+  }
+
+  /// A row/column that hugs its cross axis and stretches its children
+  /// measures them unstretched, then lays them out stretched, which makes
+  /// them relayout boundaries: a change inside one stops there. This node
+  /// changed, so the hugging layouts above it measure again (as a fresh
+  /// render would). Not while the tree lays out (a node built inside an
+  /// island or a list item): the layout under way measures it already, and
+  /// marking its ancestors would assert.
+  void _relayoutHuggingAncestors() {
+    if (!attached) return;
+    var laying = false;
+    assert(() {
+      laying = owner?.debugDoingLayout ?? false;
+      return true;
+    }());
+    if (!laying) RenderHugCross.relayoutAbove(this);
   }
 
   /// [a] and [b] differ at most in their position.
