@@ -1,3 +1,34 @@
+## 9.0.1
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- A responsive variant designed wider than the variance (a 1440 wide
+  desktop layout in a 390 wide mobile design) takes the screen it is shown
+  on: it was laid out 1050 px too wide, sliding the page under its sidebar.
+- A squeezable child (a section title) next to a sibling that flexes on the
+  main axis (a rule) no longer reserves its flex share of the row: the
+  sibling takes what the title leaves.
+- A row or column pinned to both sides of a frame (chained sizing) fills
+  the slot its pins give it instead of laying its content out at its
+  design width.
+- A freeform child whose width or height is bound (a header that collapses
+  as the page scrolls) moves to its new size as the value changes.
+- Items of a `layout: stack` list bound by `positionX` / `positionY` sit at
+  that fraction of the list, anchored by their alignment.
+
+### Navigation
+
+- On the web, pages switch at once unless a navigation names a transition:
+  the platform's page transition off Apple platforms is Android's zoom.
+
+### Icons
+
+- An icon saved without a version is served from the version the icon
+  catalog lists for it; v1 doesn't exist for most icons, which then didn't
+  draw.
+
 ## 9.0.0
 
 Requires codelessly_api 9.0.0. The first release on pub.dev since 8.2.0:
