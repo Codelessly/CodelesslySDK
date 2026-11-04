@@ -924,8 +924,65 @@ class StackedListItems extends StatelessWidget {
         : item.outerBoxLocal.y - list.innerBoxLocal.edgeTop;
   }
 
+  /// Where [item] starts on an axis when it binds `positionX`/`positionY`:
+  /// a fraction 0..1 of [extent] (the list's padded box on that axis), at
+  /// which the item's anchor sits; its alignment picks the anchor (the
+  /// center without one, a pin's tip with bottom center). Null when the
+  /// axis has no valid fraction, so [offsetOf] places it.
+  static double? fractionOffsetOf(
+    BaseNode item,
+    String property,
+    double extent,
+    ScopedValues scopedValues,
+  ) {
+    if (!item.variables.containsKey(property) || !extent.isFinite) {
+      return null;
+    }
+    final num? fraction = PropertyValueDelegate.getPropertyValue<num>(
+      item,
+      property,
+      scopedValues: scopedValues,
+    );
+    if (fraction == null || !fraction.isFinite) return null;
+    final bool horizontal = property == 'positionX';
+    // The item's bound size, else its design size.
+    final num? bound =
+        item.variables.containsKey(horizontal ? 'width' : 'height')
+        ? PropertyValueDelegate.getPropertyValue<num>(
+            item,
+            horizontal ? 'width' : 'height',
+            scopedValues: scopedValues,
+          )
+        : null;
+    final double size = bound != null && bound.isFinite
+        ? bound.toDouble()
+        : horizontal
+        ? item.outerBoxLocal.width
+        : item.outerBoxLocal.height;
+    final double? alignment = horizontal
+        ? item.alignment.data?.x
+        : item.alignment.data?.y;
+    final double anchor = (alignment ?? 0) / 2 + 0.5;
+    return fraction.toDouble().clamp(0, 1) * extent - anchor * size;
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Items placed by a fraction of the list need its size.
+    if (item.variables.containsKey('positionX') ||
+        item.variables.containsKey('positionY')) {
+      return Padding(
+        padding: node.padding.flutterEdgeInsets,
+        child: LayoutBuilder(
+          builder: (context, constraints) =>
+              _build(context, constraints.biggest, padded: false),
+        ),
+      );
+    }
+    return _build(context, null, padded: true);
+  }
+
+  Widget _build(BuildContext context, Size? size, {required bool padded}) {
     final List<Listenable> listenables =
         manager is PassiveNodeTransformerManager
         ? (manager as PassiveNodeTransformerManager).listenablesFor(
@@ -941,44 +998,61 @@ class StackedListItems extends StatelessWidget {
             scope: ScopedValues.of(context),
           )
         : null;
-    return Padding(
-      padding: node.padding.flutterEdgeInsets,
-      child: Stack(
-        clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
-        children: [
-          for (final int index
-              in arrangement?.paintOrder ??
-                  [for (int index = 0; index < values.length; index++) index])
-            IndexedItemProvider(
-              key: arrangement == null
-                  ? ValueKey(index)
-                  : listItemKey(arrangement.keyOf(index)),
-              item: IndexedItem(index, values[index]),
-              // A component builder between the provider and the Positioned,
-              // so the offset reads this item and rebuilds when the
-              // variables it uses change.
-              child: _StackedItem(
-                listenables: listenables,
-                builder: (context) {
-                  final ScopedValues scope = ScopedValues.of(context);
-                  return Positioned(
-                    key: arrangement == null
-                        ? ValueKey('stacked item $index')
-                        : listItemKey(arrangement.keyOf(index), 'positioned'),
-                    left: offsetOf(item, node, 'x', scope),
-                    top: offsetOf(item, node, 'y', scope),
-                    child: manager.buildWidgetByID(
-                      item.id,
-                      context,
-                      settings: settings,
-                    ),
-                  );
-                },
-              ),
+    final Widget stack = Stack(
+      clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
+      children: [
+        for (final int index
+            in arrangement?.paintOrder ??
+                [for (int index = 0; index < values.length; index++) index])
+          IndexedItemProvider(
+            key: arrangement == null
+                ? ValueKey(index)
+                : listItemKey(arrangement.keyOf(index)),
+            item: IndexedItem(index, values[index]),
+            // A component builder between the provider and the Positioned,
+            // so the offset reads this item and rebuilds when the
+            // variables it uses change.
+            child: _StackedItem(
+              listenables: listenables,
+              builder: (context) {
+                final ScopedValues scope = ScopedValues.of(context);
+                return Positioned(
+                  key: arrangement == null
+                      ? ValueKey('stacked item $index')
+                      : listItemKey(arrangement.keyOf(index), 'positioned'),
+                  left:
+                      (size == null
+                          ? null
+                          : fractionOffsetOf(
+                              item,
+                              'positionX',
+                              size.width,
+                              scope,
+                            )) ??
+                      offsetOf(item, node, 'x', scope),
+                  top:
+                      (size == null
+                          ? null
+                          : fractionOffsetOf(
+                              item,
+                              'positionY',
+                              size.height,
+                              scope,
+                            )) ??
+                      offsetOf(item, node, 'y', scope),
+                  child: manager.buildWidgetByID(
+                    item.id,
+                    context,
+                    settings: settings,
+                  ),
+                );
+              },
             ),
-        ],
-      ),
+          ),
+      ],
     );
+    if (!padded) return stack;
+    return Padding(padding: node.padding.flutterEdgeInsets, child: stack);
   }
 }
 
