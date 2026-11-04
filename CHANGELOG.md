@@ -1,3 +1,17 @@
+## 10.0.0
+
+Requires codelessly_api 9.0.1.
+
+### Breaking
+
+- The formula `range(start, end)` and `range(start, end, step)` now exclude
+  `end`, as Python's `range` does: `range(0, 3)` is `[0, 1, 2]` (it was
+  `[0, 1, 2, 3]`), `range(3, 0)` is `[3, 2, 1]`, and a date range stops
+  before its end time. `range(count)` is unchanged. A formula that relied on
+  the end being included adds one step to `end`, or uses
+  `map(range(count), i => start + i)`, which reads the same in every
+  version.
+
 ## 9.0.1
 
 Requires codelessly_api 9.0.1.
