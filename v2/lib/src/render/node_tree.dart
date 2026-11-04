@@ -27,6 +27,7 @@ import 'islands.dart';
 import 'paint/spread_shadow.dart';
 import 'recipe.dart';
 import 'source.dart';
+import '../widgets/collections.dart' show listBuildsAllItems;
 import '../widgets/registry.dart';
 
 /// How a node is laid out by its parent.
@@ -256,8 +257,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void freeform(Node n, List<RenderBox> chain, {List<String>? children}) => _freeform(n, chain, children: children);
 
   @override
-  void syncChildren(_Container container, List<String> ids, Slot childSlot, {Object? instance}) =>
-      _syncChildren(container, ids, childSlot, instance: instance);
+  void syncChildren(_Container container, List<String> ids, Slot childSlot,
+          {Object? instance, List<Object?>? instances}) =>
+      _syncChildren(container, ids, childSlot, instance: instance, instances: instances);
 
   final Map<String, IslandHost> _islands = {};
   final Set<String> _islandsUsed = {};
@@ -619,7 +621,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   /// Whether intrinsic measurement can't see into [node]'s subtree
   /// (scrolling content).
   bool _subtreeBlocksIntrinsics(Node node) {
-    if (const {'listView', 'gridView', 'pageView', 'webView'}.contains(node.type)) return true;
+    if (const {'gridView', 'pageView', 'webView'}.contains(node.type)) return true;
+    if (node.type == 'listView' && !listBuildsAllItems(node)) return true;
     if (node.type != 'canvas' && node.scrolls) return true;
     for (final c in node.childIds) {
       final child = tree.source.node(c);
@@ -925,14 +928,17 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
 
   // --- children & wiring ------------------------------------------------------
 
-  void _syncChildren(_Container container, List<String> ids, Slot childSlot, {Object? instance}) {
+  void _syncChildren(_Container container, List<String> ids, Slot childSlot,
+      {Object? instance, List<Object?>? instances}) {
     if (!identical(_container, container) && _container != null) _releaseContainerChildren();
     _container = container;
     RenderBox? after;
     final placed = <NodeBox>{};
-    for (final cid in ids) {
+    for (var i = 0; i < ids.length; i++) {
+      final cid = ids[i];
       if (tree.source.node(cid) == null) continue;
-      final box = tree.obtain(cid, childSlot, instance: instance ?? this.instance);
+      final scope = instances != null && i < instances.length ? instances[i] : null;
+      final box = tree.obtain(cid, childSlot, instance: scope ?? instance ?? this.instance);
       if (identical(box, this) || !placed.add(box)) continue;
       if (box.parent != container) {
         if (box.parent != null) box.detachFromParent();
