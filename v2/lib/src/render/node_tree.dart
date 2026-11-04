@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart' show WidgetBuilder;
 
+import 'behaviours.dart';
 import 'convert.dart';
 import 'layout/design_scroll.dart';
 import 'layout/fit_box.dart';
@@ -80,6 +81,45 @@ class NodeTree {
 
   /// The islands (widget-built nodes) of this tree.
   final IslandManager islands;
+
+  /// Whether behaviours play (a running app: entrances, loops, spins) or
+  /// rest (a design canvas).
+  bool get animates => islands.environment.interactive;
+
+  /// The interaction states held by each node (in a repeat instance).
+  final Map<(String, Object?), Set<api.WidgetState>> _states = {};
+
+  /// The interaction states node [id] is in.
+  Set<api.WidgetState> statesOf(String id, {Object? instance}) => _states[(id, instance)] ?? const {};
+
+  /// Turns [state] of node [id] on or off: the nodes its state styles
+  /// patch re-apply (see [api.StateStyles]).
+  void setState(String id, api.WidgetState state, bool on, {Object? instance}) {
+    final key = (id, instance);
+    final current = _states[key] ?? const <api.WidgetState>{};
+    if (current.contains(state) == on) return;
+    final next = {...current};
+    on ? next.add(state) : next.remove(state);
+    next.isEmpty ? _states.remove(key) : _states[key] = next;
+    final affected = {id, ...?source.node(id)?.behaviours.states.targets};
+    for (final b in _boxes.values.toList()) {
+      if (b.instance == instance && affected.contains(b.id)) b._apply();
+    }
+  }
+
+  /// Node [id] as shown: the source's, patched by the active interaction
+  /// states that style it.
+  Node? resolve(String id, {Object? instance}) {
+    final n = source.node(id);
+    if (n == null || _states.isEmpty) return n;
+    var out = n;
+    for (final e in _states.entries) {
+      if (e.key.$2 != instance) continue;
+      final patch = source.node(e.key.$1)?.behaviours.states.patchFor(id, e.value);
+      if (patch != null) out = out.patched(patch);
+    }
+    return out;
+  }
 
   /// The key of node [id]'s box in [instance] (null: outside repeats).
   static String keyOf(String id, Object? instance) => instance == null ? id : '$instance/$id';
@@ -292,7 +332,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
 
   void _apply() {
     if (debugCountApplies) debugApplyCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
-    final n = tree.source.node(id);
+    final n = tree.resolve(id, instance: instance);
     // A top-level node that only moved: its content doesn't depend on where
     // it sits (the host offsets it), so nothing re-applies or repaints.
     if (_slot.kind == SlotKind.root && n != null && _applied != null && _onlyMoved(_applied!, n)) {
@@ -319,7 +359,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
 
     _parentSideWrappers(n, chain);
 
-    // Outer layers, outermost first: margin, constraints, rotation, opacity.
+    // Outer layers, outermost first: margin, constraints, motion and scale
+    // (render/behaviours.dart), rotation, loops, opacity, blurs and stroke
+    // path.
     final margin = n.layout.margin.flutter;
     if (margin != EdgeInsets.zero) {
       chain.add(_obtain<RenderPadding>('margin', () => RenderPadding(padding: margin, textDirection: TextDirection.ltr))
@@ -330,6 +372,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       chain.add(_obtain<RenderConstrainedBox>('constraints', () => RenderConstrainedBox(additionalConstraints: c))
         ..additionalConstraints = c);
     }
+    motionLayers(this, n, chain, animates: tree.animates);
     if (n.layout.rotation != 0) {
       final m = n.layout.margin;
       chain.add(_obtain<RenderTransform>('rotation', () => RenderTransform(transform: Matrix4.identity()))
@@ -337,9 +380,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
         ..origin = Offset(m.left / 2 - m.right / 2, m.top / 2 - m.bottom / 2)
         ..alignment = Alignment.center);
     }
+    loopLayers(this, n, chain, animates: tree.animates);
     if (n.opacity < 0.99) {
       chain.add(_obtain<RenderOpacity>('opacity', () => RenderOpacity(opacity: n.opacity))..opacity = n.opacity);
     }
+    paintLayers(this, n, chain);
     final contentStart = chain.length;
     final ratio = n.layout.aspectRatio;
     if (ratio != null && ratio.isFinite && ratio > 0) {
@@ -479,6 +524,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
         ..decoration = d
         ..foreground = true);
     }
+    if (canStack && tree.animates && n.behaviours.inkWell != null) under.add(inkOverlay(this, n, radius));
     if (content == null && under.isEmpty && over.isEmpty) return;
     final stack = _obtain<RenderStack>('shellStack',
         () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none));
