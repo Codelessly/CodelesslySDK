@@ -73,3 +73,15 @@ export 'src/render/node_view.dart';
 export 'src/render/recipe.dart' show NodeChild;
 export 'src/render/source.dart';
 export 'src/widgets/media.dart' show ExternalComponents;
+
+// The app shell: Codelessly, CodelesslyWidget, loading, navigation.
+export 'src/app/codelessly.dart';
+export 'src/app/codelessly_widget.dart';
+export 'src/app/config.dart';
+export 'src/app/fonts.dart';
+export 'src/app/loader.dart';
+export 'src/app/navigation.dart';
+export 'src/app/runtime.dart';
+export 'src/app/theme.dart' show themeDataOf;
+export 'src/app/viewport.dart';
+export 'src/runtime/contracts.dart';
