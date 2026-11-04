@@ -491,10 +491,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   /// them relayout boundaries: a change inside one stops there. This node
   /// changed, so the hugging layouts above it measure again (as a fresh
   /// render would). Not while the tree lays out (a node built inside an
-  /// island): that layout is fresh already.
+  /// island or a list item): the layout under way measures it already, and
+  /// marking its ancestors would assert.
   void _relayoutHuggingAncestors() {
-    if (!attached || SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) return;
-    RenderHugCross.relayoutAbove(this);
+    if (!attached) return;
+    var laying = false;
+    assert(() {
+      laying = owner?.debugDoingLayout ?? false;
+      return true;
+    }());
+    if (!laying) RenderHugCross.relayoutAbove(this);
   }
 
   /// [a] and [b] differ at most in their position.
