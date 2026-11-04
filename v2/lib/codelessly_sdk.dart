@@ -77,6 +77,7 @@ export 'src/widgets/media.dart' show ExternalComponents;
 export 'src/services/services.dart';
 export 'src/runtime/contracts.dart';
 export 'src/runtime/expressions/expressions.dart';
+export 'src/runtime/actions/actions.dart';
 
 // The app shell: Codelessly, CodelesslyWidget, loading, navigation.
 export 'src/app/codelessly.dart';

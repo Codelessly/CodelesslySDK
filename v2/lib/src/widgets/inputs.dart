@@ -6,8 +6,10 @@
 // that always took it (checkbox, radio, slider, signature), nothing for the
 // pickers (their button's own size).
 //
-// Runtime behaviour (bindings, actions) is a separate port: the widgets keep
-// their own state (typed text, a toggled checkbox) and run no actions yet.
+// The widgets keep their own state (typed text, a toggled checkbox) and, in a
+// running app, report it as the node's `changed` (and `submitted`,
+// `changeEnd`, focus) trigger: the runtime writes the value to the variable
+// the input's value is bound to and runs the node's reactions.
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -34,6 +36,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../render/convert.dart';
+import '../render/node_tree.dart' show fireTrigger;
+import '../runtime/actions/text_fields.dart';
 import '../render/paint/icon_glyph.dart';
 import '../render/recipe.dart';
 import 'inputs_shapes.dart';
@@ -46,10 +50,10 @@ final Map<String, WidgetRecipe> inputsRecipes = {
   'radio': (b, n, chain) => _sized(b, n, chain, (context) => _RadioIsland(node: n)),
   'slider': (b, n, chain) => _sized(b, n, chain, (context) => _SliderIsland(node: n)),
   'dropdown': (b, n, chain) => _fitted(b, n, chain, (context) => _DropdownIsland(node: n)),
-  'datePicker': (b, n, chain) => chain.add(b.island('input', (context) => _DatePickerIsland(node: n, interactive: _interactive(b)))),
-  'timePicker': (b, n, chain) => chain.add(b.island('input', (context) => _TimePickerIsland(node: n, interactive: _interactive(b)))),
+  'datePicker': (b, n, chain) => chain.add(_island(b, (context) => _DatePickerIsland(node: n, interactive: _interactive(b)))),
+  'timePicker': (b, n, chain) => chain.add(_island(b, (context) => _TimePickerIsland(node: n, interactive: _interactive(b)))),
   'dateTimeInput': (b, n, chain) =>
-      chain.add(b.island('input', (context) => _DateTimeInputIsland(node: n, interactive: _interactive(b)))),
+      chain.add(_island(b, (context) => _DateTimeInputIsland(node: n, interactive: _interactive(b)))),
   'segmentedButton': _segmentedButton,
   'signature': (b, n, chain) => _sized(b, n, chain, (context) => _SignatureIsland(node: n)),
 };
@@ -58,10 +62,33 @@ bool _interactive(NodeBuilder b) => b.tree.islands.environment.interactive;
 
 Size _designSize(Node n) => Size(n.layout.width.value, n.layout.height.value);
 
+/// The input island of [b]'s node: [build] under what reports its events.
+RenderBox _island(NodeBuilder b, WidgetBuilder build) =>
+    b.island('input', (context) => _InputEvents(builder: b, child: build(context)));
+
+/// Reports an input's events to its node's reactions ([fireTrigger]).
+class _InputEvents extends StatelessWidget {
+  const _InputEvents({required this.builder, required this.child});
+  final NodeBuilder builder;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
+}
+
+/// The node builder of the input island [context] is in.
+NodeBuilder? _builderOf(BuildContext context) => context.findAncestorWidgetOfExactType<_InputEvents>()?.builder;
+
+/// Reports [trigger] of the input [context] is in, with its new [value].
+void _fire(BuildContext context, String trigger, Object? value) {
+  final b = _builderOf(context);
+  if (b != null) fireTrigger(b, trigger, event: {'value': value});
+}
+
 /// The node's fit box (SDK 8.x's `AdaptiveNodeBox`) around [build].
 void _fitted(NodeBuilder b, Node n, List<RenderBox> chain, WidgetBuilder build) {
   chain.add(b.fitBox('fit', n.layout.width.fit, n.layout.height.fit, _designSize(n)));
-  chain.add(b.island('input', build));
+  chain.add(_island(b, build));
 }
 
 /// The node's design size (SDK 8.x's `SizedBox`, whatever its fits) around
@@ -70,7 +97,7 @@ void _sized(NodeBuilder b, Node n, List<RenderBox> chain, WidgetBuilder build) {
   final c = BoxConstraints.tight(_designSize(n));
   chain.add(b.obtain<RenderConstrainedBox>('sized', () => RenderConstrainedBox(additionalConstraints: c))
     ..additionalConstraints = c);
-  chain.add(b.island('input', build));
+  chain.add(_island(b, build));
 }
 
 void _segmentedButton(NodeBuilder b, Node n, List<RenderBox> chain) {
@@ -323,8 +350,26 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     }
   }
 
+  NodeBuilder? _builder;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final b = _builderOf(context);
+    if (!identical(b, _builder)) {
+      if (_builder != null) TextFieldHandle.unregister(_builder!, controller);
+      _builder = b;
+      if (b != null) TextFieldHandle.register(b, TextFieldHandle(controller, focusNode));
+    }
+  }
+
   void _focusChanged() {
     final n = widget.node;
+    if (mounted) _fire(context, focusNode.hasFocus ? 'focusGained' : 'focusLost', controller.text);
+    if (!focusNode.hasFocus && _edited && mounted) {
+      _edited = false;
+      _fire(context, 'editingComplete', controller.text);
+    }
     if (n.prop(TextFieldProps.focusRingWidth) > 0) setState(() {});
     if (focusNode.hasFocus && n.prop(TextFieldProps.selectAllOnFocus)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -334,8 +379,11 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     }
   }
 
+  bool _edited = false;
+
   @override
   void dispose() {
+    if (_builder != null) TextFieldHandle.unregister(_builder!, controller);
     controller.dispose();
     focusNode.dispose();
     super.dispose();
@@ -388,6 +436,11 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
           obscureText: n.prop(TextFieldProps.obscureText) && oneLine,
           obscuringCharacter: n.prop(TextFieldProps.obscuringCharacter).isEmpty ? '•' : n.prop(TextFieldProps.obscuringCharacter),
           readOnly: n.prop(TextFieldProps.readOnly),
+          onChanged: (v) {
+            _edited = true;
+            _fire(context, 'changed', v);
+          },
+          onSubmitted: (v) => _fire(context, 'submitted', v),
           showCursor: n.prop(TextFieldProps.showCursor),
           cursorColor: _color(n.prop(TextFieldProps.cursorColor)),
           cursorHeight: n.prop(TextFieldProps.cursorHeight),
@@ -552,7 +605,10 @@ class _CheckboxIslandState extends State<_CheckboxIsland> {
         visualDensity: VisualDensity.standard,
         shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter),
         side: side == null ? null : _side(side),
-        onChanged: (v) => setState(() => value = v),
+        onChanged: (v) {
+          setState(() => value = v);
+          _fire(context, 'changed', v);
+        },
       ),
     );
   }
@@ -588,7 +644,10 @@ class _SwitchIslandState extends State<_SwitchIsland> {
       // new switch shows the current value.
       key: TickerMode.valuesOf(context).enabled ? null : ValueKey<bool>(value),
       value: value,
-      onChanged: (v) => setState(() => value = v),
+      onChanged: (v) {
+        setState(() => value = v);
+        _fire(context, 'changed', v);
+      },
       autofocus: n.prop(SwitchProps.autofocus),
       activeTrackColor: _color(n.prop(SwitchProps.activeTrackColor)),
       inactiveTrackColor: _color(n.prop(SwitchProps.inactiveTrackColor)),
@@ -651,7 +710,10 @@ class _RadioIslandState extends State<_RadioIsland> {
       scale: n.layout.width.value / _radioSize,
       child: RadioGroup<String>(
         groupValue: groupValue ?? '',
-        onChanged: (v) => setState(() => groupValue = v),
+        onChanged: (v) {
+          setState(() => groupValue = v);
+          _fire(context, 'changed', v);
+        },
         child: Radio<String>(
           value: n.prop(RadioProps.value),
           autofocus: n.prop(RadioProps.autofocus),
@@ -828,8 +890,11 @@ class _SliderIslandState extends State<_SliderIsland> {
           value: shown,
           onChanged: (v) {
             final kept = selectable(v);
-            if (kept != value) setState(() => value = kept);
+            if (kept == value) return;
+            setState(() => value = kept);
+            _fire(context, 'changed', kept);
           },
+          onChangeEnd: (_) => _fire(context, 'changeEnd', value),
           autofocus: n.prop(SliderProps.autofocus),
           min: min,
           max: max,
@@ -938,7 +1003,12 @@ class _DropdownIslandState extends State<_DropdownIsland> {
       elevation: n.prop(DropdownProps.elevation),
       borderRadius: radius?.flutter,
       padding: n.layout.padding.flutter,
-      onChanged: enabled ? (v) => setState(() => selected = v) : null,
+      onChanged: enabled
+          ? (v) {
+              setState(() => selected = v);
+              _fire(context, 'changed', v);
+            }
+          : null,
       underline: n.prop(DropdownProps.underline) ? null : const SizedBox.shrink(),
       items: [
         for (final item in items)
@@ -971,7 +1041,10 @@ class _DropdownIslandState extends State<_DropdownIsland> {
         enabled: enabled,
         labelOf: labelOf,
         image: image,
-        onPick: (v) => setState(() => selected = v),
+        onPick: (v) {
+          setState(() => selected = v);
+          _fire(context, 'changed', v);
+        },
         child: button,
       );
     }
@@ -1188,7 +1261,9 @@ class _DatePickerIslandState extends State<_DatePickerIsland> {
           ? null
           : () async {
               final date = await showDatePicker(context: context, initialDate: initial, firstDate: first, lastDate: last);
-              if (date != null && mounted) setState(() => picked = _isoDate(date));
+              if (date == null || !mounted) return;
+              setState(() => picked = _isoDate(date));
+              if (context.mounted) _fire(context, 'changed', picked);
             },
       child: Text(_isoDate(initial)),
     );
@@ -1216,7 +1291,9 @@ class _TimePickerIslandState extends State<_TimePickerIsland> {
           ? null
           : () async {
               final t = await showTimePicker(context: context, initialTime: time);
-              if (t != null && mounted) setState(() => picked = _clock(t));
+              if (t == null || !mounted) return;
+              setState(() => picked = _clock(t));
+              if (context.mounted) _fire(context, 'changed', picked);
             },
       child: Text(_clock(time)),
     );
@@ -1290,6 +1367,7 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
                     DateTimeInputMode.dateTime =>
                       DateTime.utc(chosen.year, chosen.month, chosen.day, t!.hour, t.minute).toIso8601String(),
                   });
+              if (context.mounted) _fire(context, 'changed', picked);
             },
       child: InputDecorator(
         isEmpty: display.isEmpty,
@@ -1361,7 +1439,12 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
       segments: segments,
       selected: selection,
       onSelectionChanged:
-          n.prop(SegmentedButtonProps.enabled) ? (s) => setState(() => selected = s) : null,
+          n.prop(SegmentedButtonProps.enabled)
+              ? (s) {
+                  setState(() => selected = s);
+                  _fire(context, 'changed', s.toList());
+                }
+              : null,
       multiSelectionEnabled: multi,
       emptySelectionAllowed: n.prop(SegmentedButtonProps.emptySelectionAllowed) || selection.isEmpty,
       showSelectedIcon: n.prop(SegmentedButtonProps.showSelectedIcon),
@@ -1421,6 +1504,9 @@ class _SignatureIslandState extends State<_SignatureIsland> {
       strokes = [...strokes, stroke];
       current = null;
     });
+    _fire(context, 'changed', [
+      for (final s in strokes) [for (final p in s) [p.dx, p.dy]],
+    ]);
   }
 
   @override
