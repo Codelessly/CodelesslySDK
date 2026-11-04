@@ -1,0 +1,1121 @@
+// Nodes → render objects, without a widget or element per node.
+//
+// Each node is one [NodeBox]. Its chain of render objects is, layer by layer,
+// what SDK 8.x built as widgets for the same node (outer decorations, the
+// shell's size, decoration and clip, padding, then the content), configured
+// directly. The layout render objects are SDK 8.x's own (render/layout), so
+// the semantics aren't re-derived. Parity: test/parity_test.dart compares
+// every node's rect with SDK 8.x on real projects.
+import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:codelessly_api/codelessly_api.dart' show Node, SizeFit, FlexProps, ScrollProps, TextProps, IconProps;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+
+import 'convert.dart';
+import 'layout/design_scroll.dart';
+import 'layout/fit_box.dart';
+import 'layout/freeform.dart';
+import 'layout/hug_cross.dart';
+import 'layout/text_box.dart';
+import 'paint/icon_glyph.dart';
+import 'paint/node_paint.dart';
+import 'paint/spread_shadow.dart';
+import 'source.dart';
+
+/// How a node is laid out by its parent.
+enum SlotKind {
+  /// The tree's root (a screen rendered on its own, or a standalone node).
+  root,
+
+  /// A child of a row/column.
+  flex,
+
+  /// A child of a freeform container (stack).
+  freeform,
+
+  /// A screen's body.
+  canvasBody,
+}
+
+@immutable
+class Slot {
+  const Slot(this.kind, [this.parent]);
+  const Slot.root() : this(SlotKind.root);
+
+  final SlotKind kind;
+
+  /// The parent node instance (identity: a parent edit re-applies children,
+  /// since their wrappers depend on it).
+  final Node? parent;
+
+  @override
+  bool operator ==(Object other) => other is Slot && other.kind == kind && identical(other.parent, parent);
+
+  @override
+  int get hashCode => Object.hash(kind, identityHashCode(parent));
+}
+
+/// Hooks for tools (the editor's geometry cache, perf counters).
+abstract class NodeTreeObserver {
+  void nodeLaidOut(NodeBox box);
+  void nodePainted(NodeBox box);
+}
+
+typedef _Container = ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>;
+
+/// Owns the boxes built from one [NodeSource].
+class NodeTree {
+  NodeTree(this.source, {this.observer});
+
+  final NodeSource source;
+  NodeTreeObserver? observer;
+
+  final Map<String, NodeBox> _boxes = {};
+  final Set<NodeBox> _orphans = {};
+  bool _sweepScheduled = false;
+
+  NodeBox? boxOf(String id) => _boxes[id];
+  int get length => _boxes.length;
+
+  NodeBox obtain(String id, Slot slot) {
+    final existing = _boxes[id];
+    if (existing != null) {
+      _orphans.remove(existing);
+      existing._setSlot(slot);
+      return existing;
+    }
+    final box = NodeBox._(this, id, slot);
+    _boxes[id] = box;
+    box._subscribe();
+    box._apply();
+    return box;
+  }
+
+  void _orphan(NodeBox box) {
+    _orphans.add(box);
+    if (_sweepScheduled) return;
+    _sweepScheduled = true;
+    scheduleMicrotask(() {
+      _sweepScheduled = false;
+      final orphans = _orphans.toList();
+      _orphans.clear();
+      for (final b in orphans) {
+        if (b.parent == null && identical(_boxes[b.id], b)) release(b);
+      }
+    });
+  }
+
+  void release(NodeBox box) {
+    if (box.parent != null) box.detachFromParent();
+    box._releaseSubtree();
+  }
+
+  void dispose() {
+    for (final b in _boxes.values.toList()) {
+      b._unsubscribe();
+    }
+    _boxes.clear();
+  }
+}
+
+extension _NodeLayout on Node {
+  bool get isFlex => type == 'row' || type == 'column';
+  bool get isRow => type == 'row';
+  SizeFit get hFit => layout.width.fit;
+  SizeFit get vFit => layout.height.fit;
+  Size get designSize => Size(layout.width.value, layout.height.value);
+  double get outerWidth => layout.width.value + layout.margin.horizontal;
+  double get outerHeight => layout.height.value + layout.margin.vertical;
+  Size get innerSize => Size(
+        math.max(0, layout.width.value - layout.padding.horizontal),
+        math.max(0, layout.height.value - layout.padding.vertical),
+      );
+  bool get scrolls => prop(ScrollProps.scrollable);
+  api.Axis get scrollDirection => prop(ScrollProps.scrollDirection);
+  bool get wraps => isFlex && prop(FlexProps.wrap);
+}
+
+/// One node in the render tree.
+class NodeBox extends RenderProxyBox {
+  NodeBox._(this.tree, this.id, this._slot);
+
+  final NodeTree tree;
+  final String id;
+  Slot _slot;
+  Slot get slot => _slot;
+  Node? _node;
+
+  /// The node as rendered.
+  Node? get node => _node;
+  ValueListenable<Node?>? _listenable;
+
+  static final Map<String, int> debugApplyCounts = {};
+  static bool debugCountApplies = false;
+
+  /// The node's own box (margin excluded).
+  RenderBox? contentBox;
+
+  List<RenderBox> _chain = const [];
+  final Map<String, RenderBox> _objects = {};
+  _Container? _container;
+
+  bool _hidden = false;
+  bool get hidden => _hidden;
+  set hidden(bool v) {
+    if (v == _hidden) return;
+    _hidden = v;
+    markNeedsPaint();
+  }
+
+  /// This node's rect (margin excluded) relative to [ancestor].
+  Rect? rectIn(RenderObject ancestor) {
+    final box = contentBox ?? this;
+    if (!box.attached || !box.hasSize) return null;
+    return MatrixUtils.transformRect(box.getTransformTo(ancestor), Offset.zero & box.size);
+  }
+
+  @override
+  void performLayout() {
+    final child = this.child;
+    if (child == null) {
+      size = constraints.smallest;
+    } else {
+      child.layout(constraints, parentUsesSize: true);
+      size = constraints.constrain(child.size);
+    }
+    tree.observer?.nodeLaidOut(this);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    tree.observer?.nodePainted(this);
+    if (_hidden || (_node != null && !_node!.visible)) return;
+    super.paint(context, offset);
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (_hidden || (_node != null && !_node!.visible)) return false;
+    return super.hitTest(result, position: position);
+  }
+
+  // --- reconciliation ---------------------------------------------------------
+
+  void _subscribe() => _listenable = tree.source.watch(id)..addListener(_apply);
+
+  void _unsubscribe() {
+    _listenable?.removeListener(_apply);
+    _listenable = null;
+  }
+
+  void _setSlot(Slot slot) {
+    if (slot == _slot) return;
+    _slot = slot;
+    _apply();
+  }
+
+  T _obtain<T extends RenderBox>(String key, T Function() create) {
+    final existing = _objects[key];
+    if (existing is T) return existing;
+    final made = create();
+    _objects[key] = made;
+    return made;
+  }
+
+  Node? _applied;
+
+  void _apply() {
+    if (debugCountApplies) debugApplyCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
+    final n = tree.source.node(id);
+    // A top-level node that only moved: its content doesn't depend on where
+    // it sits (the host offsets it), so nothing re-applies or repaints.
+    if (_slot.kind == SlotKind.root && n != null && _applied != null && _onlyMoved(_applied!, n)) {
+      _node = n;
+      _applied = n;
+      return;
+    }
+    _node = n;
+    _applied = n;
+    contentBox = null;
+    if (n == null) {
+      _releaseContainerChildren();
+      _wire(const []);
+      return;
+    }
+    final chain = <RenderBox>[];
+    _previousInner = [
+      for (final c in _innerChains.values) ...c,
+      for (final e in _stackExtras.values) ...[...e.$1, ...e.$2],
+    ];
+    _innerChains.clear();
+    _stackExtras.clear();
+
+    _parentSideWrappers(n, chain);
+
+    // Outer layers, outermost first: margin, constraints, rotation, opacity.
+    final margin = n.layout.margin.flutter;
+    if (margin != EdgeInsets.zero) {
+      chain.add(_obtain<RenderPadding>('margin', () => RenderPadding(padding: margin, textDirection: TextDirection.ltr))
+        ..padding = margin);
+    }
+    if (!n.layout.constraints.isEmpty) {
+      final c = n.layout.constraints.flutter;
+      chain.add(_obtain<RenderConstrainedBox>('constraints', () => RenderConstrainedBox(additionalConstraints: c))
+        ..additionalConstraints = c);
+    }
+    if (n.layout.rotation != 0) {
+      final m = n.layout.margin;
+      chain.add(_obtain<RenderTransform>('rotation', () => RenderTransform(transform: Matrix4.identity()))
+        ..transform = Matrix4.rotationZ(n.layout.rotation * math.pi / 180)
+        ..origin = Offset(m.left / 2 - m.right / 2, m.top / 2 - m.bottom / 2)
+        ..alignment = Alignment.center);
+    }
+    if (n.opacity < 0.99) {
+      chain.add(_obtain<RenderOpacity>('opacity', () => RenderOpacity(opacity: n.opacity))..opacity = n.opacity);
+    }
+    final contentStart = chain.length;
+    final ratio = n.layout.aspectRatio;
+    if (ratio != null && ratio.isFinite && ratio > 0) {
+      chain.add(_fitBox('aspect', n.hFit, n.vFit, n.designSize)..aspectRatio = ratio);
+    }
+    _content(n, chain);
+    contentBox = chain.length > contentStart ? chain[contentStart] : null;
+
+    _wire(chain);
+    _notifyDependentAncestors();
+    _applyParentData();
+  }
+
+  /// [a] and [b] differ at most in their position.
+  static bool _onlyMoved(Node a, Node b) {
+    if (identical(a, b)) return true;
+    if (a.layout.width != b.layout.width || a.layout.height != b.layout.height) return false;
+    return a.copyWith(layout: b.layout) == b;
+  }
+
+  bool _dependsOnDescendants = false;
+  bool _reapplyScheduled = false;
+
+  /// Row/columns above whose structure depends on their descendants
+  /// re-decide it (coalesced, after the current change).
+  void _notifyDependentAncestors() {
+    var p = tree.source.parentOf(id);
+    while (p != null) {
+      final box = tree._boxes[p];
+      if (box != null && box._dependsOnDescendants) box._reapplySoon();
+      p = tree.source.parentOf(p);
+    }
+  }
+
+  void _reapplySoon() {
+    if (_reapplyScheduled) return;
+    _reapplyScheduled = true;
+    scheduleMicrotask(() {
+      _reapplyScheduled = false;
+      if (tree._boxes[id] == this) _apply();
+    });
+  }
+
+  // --- content per type -------------------------------------------------------
+
+  void _content(Node n, List<RenderBox> chain) {
+    switch (n.type) {
+      case 'spacer':
+        _spacer(n, chain);
+      case 'variance':
+        _variance(n, chain);
+      case 'canvas':
+        _canvas(n, chain);
+      case 'row' || 'column':
+        _shell(n, chain, content: (inner) => _rowColumn(n, inner));
+      case 'stack':
+        if (n.scrolls) {
+          _shell(n, chain, padded: false, content: (inner) => _scrollingFreeform(n, inner));
+        } else {
+          _shell(n, chain, content: (inner) => _freeform(n, inner));
+        }
+      case 'box':
+        _shell(n, chain);
+      case 'text':
+        _text(n, chain);
+      case 'icon':
+        _icon(n, chain);
+      default:
+        // A type this SDK doesn't render yet: its box, at its size.
+        chain.add(_fitBox('placeholder', n.hFit, n.vFit, n.designSize));
+    }
+  }
+
+  bool get _isPlaceholder {
+    final parent = _slot.parent;
+    return parent != null && parent.type == 'canvas' && parent.slots['body'] == id;
+  }
+
+  /// The shell (PassiveRectangleWidget): fit box → shadows → decoration →
+  /// stroke → clip → stack [paint layers, (padding) content].
+  void _shell(Node n, List<RenderBox> chain, {void Function(List<RenderBox> inner)? content, bool padded = true}) {
+    final isPlaceholder = _isPlaceholder;
+    final contentSized = _scrollsFlexiblyOnMainAxis(n);
+    final hFit = isPlaceholder || (contentSized && n.isRow) ? SizeFit.hug : n.hFit;
+    final vFit = isPlaceholder || (contentSized && !n.isRow) ? SizeFit.hug : n.vFit;
+    chain.add(_fitBox('shellFit', hFit, vFit, n.designSize));
+
+    final d = n.decoration;
+    final radius = d.radius.isZero ? null : d.radius.flutter;
+    final rounded = radius != null;
+    final shadows = [
+      for (final e in d.effects)
+        if (e.visible && e.type == api.EffectType.dropShadow) boxShadow(e),
+    ];
+    final spread = [if (rounded) for (final sh in shadows) if (sh.spreadRadius != 0) sh];
+    if (spread.isNotEmpty) {
+      chain.add(_obtain<RenderCustomPaint>('spread', RenderCustomPaint.new)
+        ..painter = SpreadShadowPainter(shadows: spread, borderRadius: radius!));
+    }
+    final plan = _PaintPlan.of(n);
+    chain.add(_obtain<RenderDecoratedBox>('decoration', () => RenderDecoratedBox(decoration: const BoxDecoration()))
+      ..decoration = BoxDecoration(
+        boxShadow: [for (final sh in shadows) if (!spread.contains(sh)) sh],
+        borderRadius: radius,
+        color: plan.native ? plan.fill : null,
+      ));
+    if (plan.native && plan.border != null) {
+      chain.add(_obtain<RenderDecoratedBox>('stroke', () => RenderDecoratedBox(decoration: const BoxDecoration()))
+        ..decoration = BoxDecoration(borderRadius: radius, border: plan.border));
+    }
+    final clipBehavior = clip(d.clip);
+    if (clipBehavior != Clip.none) {
+      if (rounded) {
+        chain.add(_obtain<RenderClipRRect>('clipRRect', () => RenderClipRRect(clipBehavior: clipBehavior))
+          ..borderRadius = radius
+          ..clipBehavior = clipBehavior);
+      } else {
+        chain.add(_obtain<RenderClipRect>('clipRect', () => RenderClipRect(clipBehavior: clipBehavior))
+          ..clipBehavior = clipBehavior);
+      }
+    }
+    final under = <RenderBox>[], over = <RenderBox>[];
+    final canStack = content != null || (hFit != SizeFit.hug && vFit != SizeFit.hug);
+    if (canStack && !plan.native) {
+      under.add(_obtain<RenderNodePaint>('under', RenderNodePaint.new)
+        ..decoration = d
+        ..foreground = false);
+    }
+    if (canStack && plan.foreground) {
+      over.add(_obtain<RenderNodePaint>('over', RenderNodePaint.new)
+        ..decoration = d
+        ..foreground = true);
+    }
+    if (content == null && under.isEmpty && over.isEmpty) return;
+    final stack = _obtain<RenderStack>('shellStack',
+        () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none));
+    _stackExtras[stack] = (under, over);
+    if (content == null) {
+      _innerChains[stack] = const [];
+      chain.add(stack);
+      return;
+    }
+    final inner = <RenderBox>[];
+    final padding = n.layout.padding.flutter;
+    final applyPadding = padded && !n.scrolls;
+    if (applyPadding && padding != EdgeInsets.zero) {
+      inner.add(_fitBox('padFit', isPlaceholder ? SizeFit.hug : n.hFit, isPlaceholder ? SizeFit.hug : n.vFit, n.designSize));
+      inner.add(_obtain<RenderPadding>('pad', () => RenderPadding(padding: padding, textDirection: TextDirection.ltr))
+        ..padding = padding);
+      inner.add(_obtain<RenderStack>('padStack',
+          () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none)));
+    }
+    content(inner);
+    _innerChains[stack] = inner;
+    chain.add(stack);
+  }
+
+  final Map<RenderStack, List<RenderBox>> _innerChains = {};
+  final Map<RenderStack, (List<RenderBox>, List<RenderBox>)> _stackExtras = {};
+  List<RenderBox> _previousInner = const [];
+
+  RenderFitBox _fitBox(String key, SizeFit h, SizeFit v, Size size) {
+    return _obtain<RenderFitBox>(key, () => RenderFitBox())
+      ..width = h == SizeFit.hug ? null : size.width
+      ..height = v == SizeFit.hug ? null : size.height
+      ..fillWidth = h == SizeFit.fill
+      ..fillHeight = v == SizeFit.fill
+      ..aspectRatio = null;
+  }
+
+  /// A row/column that scrolls along its main axis and is flexible on it:
+  /// as long as its content, capped by its Flexible parent.
+  static bool _scrollsFlexiblyOnMainAxis(Node n) {
+    if (!n.isFlex || n.wraps || !n.scrolls) return false;
+    if (n.scrollDirection != (n.isRow ? api.Axis.horizontal : api.Axis.vertical)) return false;
+    return (n.isRow ? n.hFit : n.vFit) == SizeFit.flexible;
+  }
+
+  void _rowColumn(Node n, List<RenderBox> chain) {
+    final isRow = n.isRow;
+    final isPlaceholder = _isPlaceholder;
+    final contentSized = _scrollsFlexiblyOnMainAxis(n);
+    final scrolls = n.scrolls;
+    final padding = scrolls ? api.EdgeInsets.zero : n.layout.padding;
+    final c = n.layout.constraints;
+
+    double? outerExtent(SizeFit fit, double design, double? max, double inset) => switch (fit) {
+          SizeFit.hug => null,
+          SizeFit.fill => max == null ? design : math.max(0, max - inset),
+          SizeFit.fixed || SizeFit.flexible => design,
+        };
+    bool fills(SizeFit fit, double? max) => fit == SizeFit.fill && max == null;
+
+    final ow = contentSized && isRow ? null : outerExtent(n.hFit, n.outerWidth, c.maxWidth, padding.horizontal);
+    final ofw = fills(n.hFit, c.maxWidth);
+    final placeholderFlexHeight = isPlaceholder && (n.vFit == SizeFit.fill || n.vFit == SizeFit.flexible);
+    final oh = contentSized && !isRow
+        ? null
+        : placeholderFlexHeight
+            ? c.minHeight
+            : outerExtent(n.vFit, n.outerHeight, c.maxHeight, padding.vertical);
+    final ofh = !placeholderFlexHeight && fills(n.vFit, c.maxHeight);
+    if (ow != null || oh != null || ofw || ofh) {
+      if (!ofw && !ofh) {
+        final bc = BoxConstraints.tightFor(width: ow, height: oh);
+        chain.add(_obtain<RenderConstrainedBox>('outerSized', () => RenderConstrainedBox(additionalConstraints: bc))
+          ..additionalConstraints = bc);
+      } else {
+        chain.add(_obtain<RenderFitBox>('outerFit', () => RenderFitBox())
+          ..width = ow
+          ..height = oh
+          ..fillWidth = ofw
+          ..fillHeight = ofh
+          ..aspectRatio = null);
+      }
+    }
+    double? minExtent(double? min, double inset) => min == null ? null : math.max(0, min - inset);
+    final minW = n.hFit == SizeFit.hug ? minExtent(c.minWidth, padding.horizontal) : null;
+    final minH = n.vFit == SizeFit.hug && !placeholderFlexHeight ? minExtent(c.minHeight, padding.vertical) : null;
+    if (minW != null || minH != null) {
+      final bc = BoxConstraints(minWidth: minW ?? 0, minHeight: minH ?? 0);
+      chain.add(_obtain<RenderConstrainedBox>('minExtent', () => RenderConstrainedBox(additionalConstraints: bc))
+        ..additionalConstraints = bc);
+    }
+
+    final children = [for (final cid in n.children) ?tree.source.node(cid)];
+    if (scrolls) _scrollView(n, chain, children, contentSized: contentSized);
+    final crossWraps = isRow ? n.vFit == SizeFit.hug : n.hFit == SizeFit.hug;
+    final crossMin = isRow ? c.minHeight : c.minWidth;
+    final cross = n.prop(FlexProps.crossAxisAlignment);
+    final stretches = cross == api.CrossAxisAlignment.stretch;
+    var measureCross = false, stretchFallsBack = false, hugStretch = false;
+    _dependsOnDescendants = crossMin == null && crossWraps;
+    if (crossMin == null && crossWraps) {
+      final anyAlign = children.any((ch) => ch.layout.align != null);
+      if (stretches) {
+        hugStretch = true;
+      } else if (anyAlign || _fillsAcrossWrapping(isRow, children)) {
+        final blocked = children.any(_subtreeBlocksIntrinsics);
+        measureCross = !blocked;
+        stretchFallsBack = blocked && stretches;
+      }
+    }
+    if (measureCross) {
+      chain.add(isRow
+          ? _obtain<RenderIntrinsicHeight>('intrH', RenderIntrinsicHeight.new)
+          : _obtain<RenderIntrinsicWidth>('intrW', RenderIntrinsicWidth.new));
+    } else if (hugStretch) {
+      chain.add(_obtain<RenderHugCross>('hugCross', RenderHugCross.new));
+    }
+    final crossAlign = stretchFallsBack ? CrossAxisAlignment.start : crossAxisAlignment(cross);
+    final mainFit = isRow ? n.hFit : n.vFit;
+    final flex = _obtain<RenderCodelesslyFlex>('flex', () => RenderCodelesslyFlex(textDirection: TextDirection.ltr))
+      ..direction = isRow ? Axis.horizontal : Axis.vertical
+      ..mainAxisAlignment = mainAxisAlignment(n.prop(FlexProps.mainAxisAlignment))
+      ..crossAxisAlignment = crossAlign
+      ..textBaseline = crossAlign == CrossAxisAlignment.baseline ? TextBaseline.alphabetic : null
+      ..mainAxisSize = mainFit == SizeFit.hug ? MainAxisSize.min : MainAxisSize.max
+      ..gap = n.prop(FlexProps.spacing);
+    _syncChildren(flex, n.children, Slot(SlotKind.flex, n));
+    chain.add(flex);
+  }
+
+  /// A child fills the cross axis of a wrapping row/column while another
+  /// gives it a thickness (IntrinsicHeight(Row(...))).
+  static bool _fillsAcrossWrapping(bool isRow, List<Node> children) {
+    bool fills(Node c) => c.type != 'spacer' && (isRow ? c.vFit : c.hFit) == SizeFit.fill;
+    return children.any(fills) && children.any((c) => c.type != 'spacer' && !fills(c));
+  }
+
+  /// Whether intrinsic measurement can't see into [node]'s subtree
+  /// (scrolling content).
+  bool _subtreeBlocksIntrinsics(Node node) {
+    if (const {'listView', 'gridView', 'pageView', 'webView'}.contains(node.type)) return true;
+    if (node.type != 'canvas' && node.scrolls) return true;
+    for (final c in node.childIds) {
+      final child = tree.source.node(c);
+      if (child != null && _subtreeBlocksIntrinsics(child)) return true;
+    }
+    return false;
+  }
+
+  /// A scroll view at rest: fit box → viewport → padding → content extent.
+  void _scrollView(Node n, List<RenderBox> chain, List<Node> children, {required bool contentSized}) {
+    final vertical = n.scrollDirection == api.Axis.vertical;
+    chain.add(_fitBox(
+      'scrollFit',
+      contentSized && !vertical ? SizeFit.hug : n.hFit,
+      contentSized && vertical ? SizeFit.hug : n.vFit,
+      n.designSize,
+    ));
+    final axis = vertical ? Axis.vertical : Axis.horizontal;
+    final viewport = _obtain<RenderDesignScroll>('scroll', () => RenderDesignScroll(axis: axis))
+      ..axis = axis
+      ..reverse = n.prop(ScrollProps.reverse)
+      ..clipBehavior = clip(n.prop(ScrollProps.clipBehavior));
+    chain.add(viewport);
+    final pad = n.layout.padding.flutter;
+    if (pad != EdgeInsets.zero) {
+      chain.add(_obtain<RenderPadding>('scrollPad', () => RenderPadding(padding: pad, textDirection: TextDirection.ltr))
+        ..padding = pad);
+    }
+    final fillViewport = n.isFlex && !contentSized && n.prop(FlexProps.mainAxisAlignment) != api.MainAxisAlignment.start;
+    final flexContent = n.isFlex && children.any((c) => (n.isRow ? c.hFit : c.vFit) == SizeFit.fill || (n.isRow ? c.hFit : c.vFit) == SizeFit.flexible);
+    if (fillViewport || flexContent) {
+      final extent = _obtain<RenderScrollContentExtent>(
+          'scrollExtent', () => RenderScrollContentExtent(axis: axis, viewportExtent: double.infinity))
+        ..axis = axis;
+      viewport.onViewport = (max) {
+        final e = max - (vertical ? pad.vertical : pad.horizontal);
+        extent.viewportExtent = e.isFinite && e > 0 ? e : double.infinity;
+      };
+      chain.add(extent);
+    } else {
+      viewport.onViewport = null;
+    }
+  }
+
+  void _freeform(Node n, List<RenderBox> chain, {List<String>? children}) {
+    final layout = _obtain<RenderFreeformLayout>(
+        'freeform', () => RenderFreeformLayout(wrapsWidth: false, wrapsHeight: false, designSize: Size.zero))
+      ..wrapsWidth = n.hFit == SizeFit.hug
+      ..wrapsHeight = n.vFit == SizeFit.hug
+      ..designSize = n.innerSize
+      ..textDirection = TextDirection.ltr;
+    _syncChildren(layout, children ?? n.children, Slot(SlotKind.freeform, n));
+    chain.add(layout);
+  }
+
+  void _scrollingFreeform(Node n, List<RenderBox> chain) {
+    _scrollView(n, chain, const [], contentSized: false);
+    _freeform(n, chain);
+  }
+
+  /// The current variant's first child, in a freeform layout.
+  void _variance(Node n, List<RenderBox> chain) {
+    final variants = n.prop(api.VarianceProps.variants);
+    final current = n.prop(api.VarianceProps.current);
+    final variant = variants.firstWhere((v) => v['id'] == current, orElse: () => variants.firstOrNull ?? const {});
+    final kids = api.readStrings(variant['children']);
+    if (kids.isEmpty) {
+      final c = BoxConstraints.tight(n.designSize);
+      chain.add(_obtain<RenderConstrainedBox>('empty', () => RenderConstrainedBox(additionalConstraints: c))
+        ..additionalConstraints = c);
+      return;
+    }
+    _shell(n, chain, content: (inner) => _freeform(n, inner, children: [kids.first]));
+  }
+
+  /// A screen: its rectangle at its size, its body in the shell's stack.
+  void _canvas(Node n, List<RenderBox> chain) {
+    _shell(n, chain, content: (inner) {
+      final body = n.slots['body'];
+      final stack = _obtain<RenderStack>('bodyStack',
+          () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none));
+      _syncChildren(stack, [if (body != null && tree.source.node(body) != null) body], Slot(SlotKind.canvasBody, n));
+      inner.add(stack);
+    });
+  }
+
+  void _spacer(Node n, List<RenderBox> chain) {
+    final parent = _slot.parent;
+    if (_slot.kind == SlotKind.flex && parent != null && parent.isFlex) {
+      final isRow = parent.isRow;
+      final mainFit = isRow ? n.hFit : n.vFit;
+      final outer = isRow ? n.outerWidth : n.outerHeight;
+      if (mainFit == SizeFit.fill || mainFit == SizeFit.flexible) {
+        chain.add(_obtain<RenderFitBox>('spacerFit', () => RenderFitBox())
+          ..width = isRow ? outer : null
+          ..height = isRow ? null : outer
+          ..fillWidth = isRow
+          ..fillHeight = !isRow
+          ..aspectRatio = null);
+      } else {
+        final c = BoxConstraints.tightFor(width: isRow ? outer : null, height: isRow ? null : outer);
+        chain.add(_obtain<RenderConstrainedBox>('spacerSized', () => RenderConstrainedBox(additionalConstraints: c))
+          ..additionalConstraints = c);
+      }
+      return;
+    }
+    chain.add(_fitBox('spacerAdaptive', n.hFit, n.vFit, n.designSize));
+  }
+
+  /// Text (TextNodeBox): sized box → slack → min height → align → paragraph.
+  void _text(Node n, List<RenderBox> chain) {
+    final hFit = n.hFit, vFit = n.vFit;
+    final hugsWidth = hFit == SizeFit.hug || hFit == SizeFit.flexible;
+    final minHeight = vFit != SizeFit.hug && vFit != SizeFit.fill;
+    final c = BoxConstraints.tightFor(
+      width: switch (hFit) {
+        SizeFit.hug || SizeFit.flexible => null,
+        SizeFit.fill => double.infinity,
+        SizeFit.fixed => n.layout.width.value,
+      },
+      height: vFit == SizeFit.fill ? double.infinity : null,
+    );
+    chain.add(_obtain<RenderConstrainedBox>('textSized', () => RenderConstrainedBox(additionalConstraints: c))
+      ..additionalConstraints = c);
+    if (hFit == SizeFit.hug) chain.add(_obtain<RenderTextIntrinsicSlack>('textSlack', RenderTextIntrinsicSlack.new));
+    if (minHeight) {
+      chain.add(_obtain<RenderTextMinHeight>('textMin', () => RenderTextMinHeight(minHeight: 0))
+        ..minHeight = n.layout.height.value);
+    }
+    final textAlign = n.prop(TextProps.textAlign);
+    final y = switch (n.prop(TextProps.textAlignVertical)) {
+      api.TextAlignVertical.top => -1.0,
+      api.TextAlignVertical.center => 0.0,
+      api.TextAlignVertical.bottom => 1.0,
+    };
+    final x = switch (textAlign) {
+      api.TextAlign.center => 0.0,
+      api.TextAlign.right || api.TextAlign.end => 1.0,
+      _ => -1.0,
+    };
+    chain.add(_obtain<RenderPositionedBox>('textAlign', () => RenderPositionedBox(textDirection: TextDirection.ltr))
+      ..alignment = Alignment(x, y)
+      ..widthFactor = hugsWidth ? 1 : null
+      ..heightFactor = vFit == SizeFit.fill ? null : 1);
+    final span = _textSpan(n);
+    final paragraph = _obtain<RenderParagraph>('paragraph', () => RenderParagraph(span, textDirection: TextDirection.ltr))
+      ..text = span
+      ..textAlign = flutterTextAlign(textAlign)
+      ..maxLines = n.prop(TextProps.maxLines)
+      ..overflow = textOverflow(n.prop(TextProps.overflow));
+    if (n.prop(TextProps.scaleDown)) {
+      chain.add(_obtain<RenderFittedBox>('textScale', () => RenderFittedBox(fit: BoxFit.scaleDown, textDirection: TextDirection.ltr))
+        ..alignment = Alignment(x, y));
+    }
+    chain.add(paragraph);
+  }
+
+  static TextAlign flutterTextAlign(api.TextAlign a) => a == api.TextAlign.start ? TextAlign.left : textAlign(a);
+
+  /// The node's text as spans: each run's characters in its style, merged
+  /// over the text's base style.
+  static TextSpan _textSpan(Node n) {
+    final text = n.prop(TextProps.text);
+    final base = n.prop(TextProps.style);
+    final runs = n.prop(TextProps.runs);
+    if (runs.isEmpty) return TextSpan(text: text, style: textStyle(base));
+    return TextSpan(children: [
+      for (final r in runs)
+        TextSpan(
+          text: text.substring(r.start.clamp(0, text.length), r.end.clamp(r.start.clamp(0, text.length), text.length)),
+          style: textStyle(base.merge(r.style)),
+        ),
+    ]);
+  }
+
+  void _icon(Node n, List<RenderBox> chain) {
+    chain.add(_fitBox('iconFit', n.hFit, n.vFit, n.designSize));
+    final glyph = _obtain<RenderIconGlyph>('glyph', RenderIconGlyph.new)
+      ..icon = n.prop(IconProps.icon)
+      ..color = n.prop(IconProps.color)?.flutter
+      ..designSize = n.designSize;
+    chain.add(glyph);
+  }
+
+  // --- parent-side wrapping ---------------------------------------------------
+
+  void _parentSideWrappers(Node n, List<RenderBox> chain) {
+    final parent = _slot.parent;
+    if (_slot.kind != SlotKind.flex || parent == null || !parent.isFlex) return;
+    if (n.type == 'spacer') return;
+    final isRow = parent.isRow;
+    final crossFit = isRow ? n.vFit : n.hFit;
+    final parentHugsCross = (isRow ? parent.vFit : parent.hFit) == SizeFit.hug;
+    final cross = parent.prop(FlexProps.crossAxisAlignment);
+    final Alignment? align = n.layout.align?.flutter ??
+        (cross == api.CrossAxisAlignment.stretch && crossFit == SizeFit.hug && !parentHugsCross ? Alignment.topLeft : null);
+    if (align != null) {
+      chain.add(_obtain<RenderPositionedBox>('slotAlign', () => RenderPositionedBox(alignment: align, textDirection: TextDirection.ltr))
+        ..alignment = align);
+    }
+  }
+
+  void _applyParentData() {
+    final n = _node;
+    final pd = parentData;
+    final p = parent;
+    final parentNode = _slot.parent;
+    if (n == null) return;
+    if (pd is CodelesslyFlexParentData && parentNode != null && parentNode.isFlex) {
+      final isRow = parentNode.isRow;
+      final mainFit = isRow ? n.hFit : n.vFit;
+      final c = n.layout.constraints;
+      final mainMax = isRow ? c.maxWidth : c.maxHeight;
+      final flexValue = n.layout.flex;
+      bool isFlexFit(SizeFit f) => f == SizeFit.fill || f == SizeFit.flexible;
+      int? flex;
+      FlexFit? fit;
+      if (n.type == 'spacer') {
+        if (mainFit == SizeFit.fill) (flex, fit) = (flexValue, FlexFit.tight);
+        if (mainFit == SizeFit.flexible) (flex, fit) = (flexValue, FlexFit.loose);
+      } else if (n.hFit == n.vFit) {
+        if (n.hFit == SizeFit.fill) (flex, fit) = (flexValue, mainMax != null ? FlexFit.loose : FlexFit.tight);
+        if (n.hFit == SizeFit.flexible) (flex, fit) = (flexValue, FlexFit.loose);
+      } else if (isFlexFit(mainFit)) {
+        (flex, fit) = (flexValue, mainFit == SizeFit.flexible || mainMax != null ? FlexFit.loose : FlexFit.tight);
+      }
+      if (mainFit == SizeFit.hug && n.layout.squeezable) (flex, fit) = (flexValue, FlexFit.loose);
+      if (pd.flex != flex || pd.fit != fit || pd.collapsed) {
+        pd
+          ..flex = flex
+          ..fit = fit
+          ..collapsed = false;
+        p?.markNeedsLayout();
+      }
+    } else if (pd is FreeformParentData && parentNode != null) {
+      final placement = placementFor(n, parentNode, scrollAxis: _scrollAxisFor(parentNode));
+      if (pd.placement != placement) {
+        pd.placement = placement;
+        p?.markNeedsLayout();
+      }
+    }
+  }
+
+  /// The axis [node]'s children scroll along, if any.
+  Axis? _scrollAxisFor(Node node) {
+    if (node.scrolls) return node.scrollDirection == api.Axis.vertical ? Axis.vertical : Axis.horizontal;
+    final pid = tree.source.parentOf(node.id);
+    final p = pid == null ? null : tree.source.node(pid);
+    if (p != null && p.type == 'canvas' && p.slots['body'] == node.id && p.scrolls) {
+      return p.scrollDirection == api.Axis.vertical ? Axis.vertical : Axis.horizontal;
+    }
+    return null;
+  }
+
+  /// Where a freeform child sits, from its v2 position (DESIGN.md §3).
+  static FreeformPlacement placementFor(Node n, Node parent, {Axis? scrollAxis}) {
+    FreeformAxisPlacement axis(bool horizontal) {
+      final pos = horizontal ? n.layout.x : n.layout.y;
+      final extent = horizontal ? n.outerWidth : n.outerHeight;
+      final inner = parent.innerSize;
+      final parentExtent = horizontal ? inner.width : inner.height;
+      final fit = horizontal ? n.hFit : n.vFit;
+      final c = n.layout.constraints;
+      final expands = fit == SizeFit.fill && (horizontal ? c.maxWidth : c.maxHeight) == null;
+      final wraps = fit == SizeFit.hug;
+      final isScrollAxis = scrollAxis != null && (scrollAxis == Axis.horizontal) == horizontal;
+      final start = pos.start ?? pos.relative ?? (pos.end != null ? parentExtent - pos.end! - extent : 0.0);
+      final grows = n.type == 'text';
+      FreeformAxisPlacement at(FreeformAxisMode mode, {double alignment = 0}) => FreeformAxisPlacement(
+            mode: mode,
+            start: start,
+            extent: extent,
+            parentExtent: parentExtent,
+            size: wraps || expands ? null : extent,
+            alignment: alignment,
+            clamp: !isScrollAxis,
+            expands: expands,
+            growsWithContent: grows,
+          );
+      if (pos.align case final double a) return at(FreeformAxisMode.align, alignment: a);
+      final relative = pos.relative;
+      if (expands) return at(FreeformAxisMode.fill);
+      if (isScrollAxis) return at(FreeformAxisMode.start);
+      if (pos.isStretch && !wraps) {
+        final min = horizontal ? c.minWidth : c.minHeight;
+        return FreeformAxisPlacement(
+          mode: FreeformAxisMode.stretch,
+          start: pos.start!,
+          extent: parentExtent - pos.start! - pos.end!,
+          parentExtent: parentExtent,
+          clamp: !isScrollAxis,
+          growsWithContent: grows,
+          minSize: min == null ? 0 : min + (horizontal ? n.layout.margin.horizontal : n.layout.margin.vertical),
+        );
+      }
+      if (pos.end != null && pos.start == null) return at(FreeformAxisMode.end);
+      if (relative != null) return at(FreeformAxisMode.relative);
+      return at(FreeformAxisMode.start);
+    }
+
+    return FreeformPlacement(horizontal: axis(true), vertical: axis(false));
+  }
+
+  // --- children & wiring ------------------------------------------------------
+
+  void _syncChildren(_Container container, List<String> ids, Slot childSlot) {
+    if (!identical(_container, container) && _container != null) _releaseContainerChildren();
+    _container = container;
+    RenderBox? after;
+    final placed = <NodeBox>{};
+    for (final cid in ids) {
+      if (tree.source.node(cid) == null) continue;
+      final box = tree.obtain(cid, childSlot);
+      if (identical(box, this) || !placed.add(box)) continue;
+      if (box.parent != container) {
+        if (box.parent != null) box.detachFromParent();
+        container.insert(box, after: after);
+      } else if (container.childBefore(box) != after) {
+        container.move(box, after: after);
+      }
+      box._applyParentData();
+      after = box;
+    }
+    var extra = after == null ? container.firstChild : container.childAfter(after);
+    while (extra != null) {
+      final next = container.childAfter(extra);
+      container.remove(extra);
+      if (extra is NodeBox) tree._orphan(extra);
+      extra = next;
+    }
+  }
+
+  void _releaseContainerChildren() {
+    final c = _container;
+    if (c == null) return;
+    var child = c.firstChild;
+    while (child != null) {
+      final next = c.childAfter(child);
+      c.remove(child);
+      if (child is NodeBox) tree._orphan(child);
+      child = next;
+    }
+    _container = null;
+  }
+
+  /// Links [next] under this box; a shell stack's single child is the chain
+  /// recorded for it in [_innerChains], with its paint layers around it.
+  void _wire(List<RenderBox> next) {
+    final relink = _alreadyWired(next);
+    if (relink != null) {
+      for (final o in relink) {
+        o.markNeedsLayout();
+      }
+      markNeedsLayout();
+      _previousInner = const [];
+      _finishWire(next);
+      return;
+    }
+    void unlink(List<RenderBox> chain) {
+      for (final o in chain) {
+        if (o is RenderObjectWithChildMixin<RenderBox>) {
+          (o as RenderObjectWithChildMixin<RenderBox>).child = null;
+        } else if (o is RenderStack && !identical(o, _container)) {
+          var c = o.firstChild;
+          while (c != null) {
+            final n = o.childAfter(c);
+            o.remove(c);
+            c = n;
+          }
+        }
+      }
+    }
+
+    unlink(_chain);
+    unlink(_previousInner);
+    unlink(next);
+    unlink([for (final e in _innerChains.entries) ...e.value]);
+    _previousInner = const [];
+    child = null;
+
+    void link(List<RenderBox> chain) {
+      for (var i = 0; i < chain.length - 1; i++) {
+        final o = chain[i];
+        final nextObj = chain[i + 1];
+        _detachFromAnyParent(nextObj);
+        if (o is RenderStack && !identical(o, _container)) {
+          o.add(nextObj);
+        } else if (o is RenderObjectWithChildMixin<RenderBox>) {
+          (o as RenderObjectWithChildMixin<RenderBox>).child = nextObj;
+        }
+      }
+    }
+
+    link(next);
+    void addPositioned(RenderStack stack, RenderBox box) {
+      _detachFromAnyParent(box);
+      stack.add(box);
+      (box.parentData! as StackParentData)
+        ..left = 0
+        ..top = 0
+        ..right = 0
+        ..bottom = 0;
+    }
+
+    for (final e in _innerChains.entries) {
+      if (!next.contains(e.key)) continue;
+      final (under, over) = _stackExtras[e.key] ?? (const <RenderBox>[], const <RenderBox>[]);
+      for (final b in under) {
+        addPositioned(e.key, b);
+      }
+      if (e.value.isNotEmpty) {
+        _detachFromAnyParent(e.value.first);
+        e.key.add(e.value.first);
+        link(e.value);
+      }
+      for (final b in over) {
+        addPositioned(e.key, b);
+      }
+    }
+    if (next.isNotEmpty) _detachFromAnyParent(next.first);
+    child = next.isEmpty ? null : next.first;
+    _finishWire(next);
+  }
+
+  void _finishWire(List<RenderBox> next) {
+    final keep = <RenderBox>{
+      ...next,
+      for (final e in _innerChains.entries)
+        if (next.contains(e.key)) ...e.value,
+      for (final e in _stackExtras.entries)
+        if (next.contains(e.key)) ...[...e.value.$1, ...e.value.$2],
+    };
+    _stackExtras.removeWhere((stack, _) => !next.contains(stack));
+    _objects.removeWhere((k, v) => !keep.contains(v));
+    _chain = next;
+    _innerChains.removeWhere((stack, _) => !next.contains(stack));
+  }
+
+  /// The objects that hold a child, when everything is already linked as
+  /// [next] describes; null when relinking is needed.
+  List<RenderBox>? _alreadyWired(List<RenderBox> next) {
+    if (!identical(child, next.firstOrNull)) return null;
+    final expected = <RenderBox, List<RenderBox>>{};
+    void chain(List<RenderBox> c) {
+      for (var i = 0; i < c.length - 1; i++) {
+        (expected[c[i]] ??= []).add(c[i + 1]);
+      }
+    }
+
+    chain(next);
+    for (final e in _innerChains.entries) {
+      if (!next.contains(e.key)) continue;
+      final (under, over) = _stackExtras[e.key] ?? (const <RenderBox>[], const <RenderBox>[]);
+      final kids = expected[e.key] ??= [];
+      kids.addAll(under);
+      if (e.value.isNotEmpty) kids.add(e.value.first);
+      kids.addAll(over);
+      chain(e.value);
+    }
+    final all = <RenderBox>{
+      ...next,
+      for (final e in _innerChains.entries)
+        if (next.contains(e.key)) ...e.value,
+    };
+    for (final o in all) {
+      final want = expected[o] ?? const <RenderBox>[];
+      if (o is RenderStack && !identical(o, _container)) {
+        var c = o.firstChild;
+        for (final w in want) {
+          if (!identical(c, w)) return null;
+          c = o.childAfter(c!);
+        }
+        if (c != null) return null;
+      } else if (identical(o, _container)) {
+        if (want.isNotEmpty) return null;
+      } else if (o is RenderObjectWithChildMixin<RenderBox>) {
+        if (want.length > 1) return null;
+        if (!identical((o as RenderObjectWithChildMixin<RenderBox>).child, want.firstOrNull)) return null;
+      } else if (want.isNotEmpty) {
+        return null;
+      }
+    }
+    return [
+      for (final o in all)
+        if (expected[o]?.isNotEmpty ?? false) o,
+    ];
+  }
+
+  static void _detachFromAnyParent(RenderBox o) {
+    switch (o.parent) {
+      case null:
+        return;
+      case final _Container c:
+        c.remove(o);
+      case final RenderObjectWithChildMixin<RenderBox> p:
+        p.child = null;
+      default:
+        break;
+    }
+  }
+
+  void detachFromParent() {
+    switch (parent) {
+      case final _Container c:
+        c.remove(this);
+      case final RenderObjectWithChildMixin<RenderBox> p:
+        p.child = null;
+      default:
+        break;
+    }
+  }
+
+  void _releaseSubtree() {
+    final c = _container;
+    if (c != null) {
+      var child = c.firstChild;
+      while (child != null) {
+        final next = c.childAfter(child);
+        c.remove(child);
+        if (child is NodeBox && identical(tree._boxes[child.id], child)) child._releaseSubtree();
+        child = next;
+      }
+    }
+    _unsubscribe();
+    if (identical(tree._boxes[id], this)) tree._boxes.remove(id);
+  }
+}
+
+/// How a shell paints its fills and strokes: one solid fill and at most one
+/// plain solid stroke on every side are the decoration's color and border;
+/// anything richer is a [RenderNodePaint] layer.
+class _PaintPlan {
+  _PaintPlan(this.native, this.fill, this.border, this.foreground);
+
+  final bool native;
+  final Color? fill;
+  final Border? border;
+  final bool foreground;
+
+  static _PaintPlan of(Node n) {
+    final d = n.decoration;
+    final foreground = d.foregroundFills.any((f) => f.visible);
+    // Paints bound per paint id are resolved at runtime by the paint layer.
+    if (n.bind.keys.any((k) => k.startsWith('fill-') || k.startsWith('stroke-paint-'))) {
+      return _PaintPlan(false, null, null, foreground);
+    }
+    final fills = d.visibleFills.toList();
+    final simpleFill =
+        fills.length <= 1 && fills.every((f) => f.type == api.PaintType.solid && f.blendMode == api.BlendMode.srcOver);
+    final strokes = d.visibleStrokes.toList();
+    final path = n.type == 'box' && n.prop(api.BoxProps.path).isNotEmpty;
+    final simpleStroke = strokes.isEmpty ||
+        (strokes.length == 1 &&
+            strokes.first.type == api.PaintType.solid &&
+            d.dashPattern.isEmpty &&
+            d.strokeSides == api.StrokeSides.all &&
+            !path);
+    if (!simpleFill || !simpleStroke) return _PaintPlan(false, null, null, foreground);
+    final strokeColor = strokes.isEmpty ? null : strokes.first.effectiveColor?.flutter;
+    return _PaintPlan(
+      true,
+      fills.isEmpty ? null : fills.first.effectiveColor?.flutter,
+      strokeColor == null
+          ? null
+          : Border.all(strokeAlign: d.strokeAlign.value, color: strokeColor, width: d.strokeWidth),
+      foreground,
+    );
+  }
+}
