@@ -16,6 +16,7 @@ dependencies:
   collection: ^1.19.1
   flutter_svg: ^2.0.17
   http: ^1.1.2
+  intl: ^0.20.3
   just_audio: ^0.10.5
   shared_preferences: ^2.3.5
   url_launcher: ^6.3.1

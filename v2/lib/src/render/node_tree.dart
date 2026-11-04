@@ -31,6 +31,7 @@ import 'islands.dart';
 import 'paint/spread_shadow.dart';
 import 'recipe.dart';
 import 'source.dart';
+import '../runtime/expressions/bindings.dart' show BoundNode, NodeBinder;
 import '../widgets/collections.dart' show listBuildsAllItems;
 import '../widgets/registry.dart';
 
@@ -77,8 +78,10 @@ typedef _Container = ContainerRenderObjectMixin<RenderBox, ContainerBoxParentDat
 
 /// Owns the boxes built from one [NodeSource].
 class NodeTree {
-  NodeTree(this.source, {this.observer, IslandEnvironment environment = const IslandEnvironment()})
-      : islands = IslandManager(environment);
+  NodeTree(this.source, {this.observer, IslandEnvironment environment = const IslandEnvironment(), NodeBinder? binder})
+      : islands = IslandManager(environment) {
+    _binder = binder;
+  }
 
   final NodeSource source;
   NodeTreeObserver? observer;
@@ -111,9 +114,31 @@ class NodeTree {
     }
   }
 
+  NodeBinder? _binder;
+
+  /// Applies the nodes' bindings (variables, conditions, `${...}` text) when
+  /// set; null renders the nodes as stored. Setting it re-applies every box.
+  NodeBinder? get binder => _binder;
+  set binder(NodeBinder? value) {
+    if (identical(value, _binder)) return;
+    _binder = value;
+    for (final b in _boxes.values.toList()) {
+      b._apply();
+    }
+  }
+
   /// Node [id] as shown: the source's, patched by the active interaction
-  /// states that style it.
-  Node? resolve(String id, {Object? instance}) {
+  /// states that style it, its bindings applied ([binder]).
+  Node? resolve(String id, {Object? instance}) => resolveBound(id, instance: instance)?.node;
+
+  /// [resolve], with whether a binding hides the node and what it read.
+  BoundNode? resolveBound(String id, {Object? instance}) {
+    final n = _patched(id, instance);
+    if (n == null) return null;
+    return _binder?.bind(source, n, instance) ?? BoundNode(n);
+  }
+
+  Node? _patched(String id, Object? instance) {
     final n = source.node(id);
     if (n == null || _states.isEmpty) return n;
     var out = n;
@@ -245,10 +270,26 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     return MatrixUtils.transformRect(box.getTransformTo(ancestor), Offset.zero & box.size);
   }
 
+  /// Hidden by a binding or condition (not by its own `visible`): it takes
+  /// no space, as SDK 8.x's `Visibility` without `maintainSize`.
+  bool get collapsed => _collapsed;
+  bool _collapsed = false;
+  List<Listenable> _bindingWatch = const [];
+  Listenable? _bindingListenable;
+
+  void _watchBindings(List<Listenable> watch) {
+    if (listEquals(watch, _bindingWatch)) return;
+    _bindingListenable?.removeListener(_apply);
+    _bindingWatch = watch;
+    _bindingListenable = watch.isEmpty ? null : (Listenable.merge(watch)..addListener(_apply));
+  }
+
   @override
   void performLayout() {
     final child = this.child;
-    if (child == null) {
+    if (_collapsed) {
+      size = constraints.smallest;
+    } else if (child == null) {
       size = constraints.smallest;
     } else {
       child.layout(constraints, parentUsesSize: true);
@@ -260,14 +301,39 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   @override
   void paint(PaintingContext context, Offset offset) {
     tree.observer?.nodePainted(this);
-    if (_hidden || (_node != null && !_node!.visible)) return;
+    if (_hidden || _collapsed || (_node != null && !_node!.visible)) return;
     super.paint(context, offset);
   }
 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    if (_hidden || (_node != null && !_node!.visible)) return false;
+    if (_hidden || _collapsed || (_node != null && !_node!.visible)) return false;
     return super.hitTest(result, position: position);
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) =>
+      _collapsed ? constraints.smallest : super.computeDryLayout(constraints);
+
+  @override
+  double computeMinIntrinsicWidth(double height) => _collapsed ? 0 : super.computeMinIntrinsicWidth(height);
+
+  @override
+  double computeMaxIntrinsicWidth(double height) => _collapsed ? 0 : super.computeMaxIntrinsicWidth(height);
+
+  @override
+  double computeMinIntrinsicHeight(double width) => _collapsed ? 0 : super.computeMinIntrinsicHeight(width);
+
+  @override
+  double computeMaxIntrinsicHeight(double width) => _collapsed ? 0 : super.computeMaxIntrinsicHeight(width);
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) =>
+      _collapsed ? null : super.computeDistanceToActualBaseline(baseline);
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (!_collapsed) super.visitChildrenForSemantics(visitor);
   }
 
   // --- reconciliation ---------------------------------------------------------
@@ -277,6 +343,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void _unsubscribe() {
     _listenable?.removeListener(_apply);
     _listenable = null;
+    _watchBindings(const []);
   }
 
   void _setSlot(Slot slot) {
@@ -342,7 +409,14 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
 
   void _apply() {
     if (debugCountApplies) debugApplyCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
-    final n = tree.resolve(id, instance: instance);
+    final bound = tree.resolveBound(id, instance: instance);
+    final n = bound?.node;
+    _watchBindings(bound?.watch ?? const []);
+    if ((bound?.collapsed ?? false) != _collapsed) {
+      _collapsed = !_collapsed;
+      markNeedsLayout();
+      _applyParentData();
+    }
     // A top-level node that only moved: its content doesn't depend on where
     // it sits (the host offsets it), so nothing re-applies or repaints.
     if (_slot.kind == SlotKind.root && n != null && _applied != null && _onlyMoved(_applied!, n)) {
@@ -992,11 +1066,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
         (flex, fit) = (flexValue, mainFit == SizeFit.flexible || mainMax != null ? FlexFit.loose : FlexFit.tight);
       }
       if (mainFit == SizeFit.hug && n.layout.squeezable && !parentNode.wraps) (flex, fit) = (flexValue, FlexFit.loose);
-      if (pd.flex != flex || pd.fit != fit || pd.collapsed) {
+      // Collapsed: no flex, no gaps (flex 0).
+      if (_collapsed) (flex, fit) = (null, null);
+      if (pd.flex != flex || pd.fit != fit || pd.collapsed != _collapsed) {
         pd
           ..flex = flex
           ..fit = fit
-          ..collapsed = false;
+          ..collapsed = _collapsed;
         p?.markNeedsLayout();
       }
     } else if (pd is FreeformParentData && parentNode != null) {
