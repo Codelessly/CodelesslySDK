@@ -13,6 +13,7 @@ import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show Node, SizeFit, FlexProps, ScrollProps, TextProps, IconProps;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart' show WidgetBuilder;
 
 import 'convert.dart';
 import 'layout/design_scroll.dart';
@@ -22,8 +23,11 @@ import 'layout/hug_cross.dart';
 import 'layout/text_box.dart';
 import 'paint/icon_glyph.dart';
 import 'paint/node_paint.dart';
+import 'islands.dart';
 import 'paint/spread_shadow.dart';
+import 'recipe.dart';
 import 'source.dart';
+import '../widgets/registry.dart';
 
 /// How a node is laid out by its parent.
 enum SlotKind {
@@ -68,27 +72,35 @@ typedef _Container = ContainerRenderObjectMixin<RenderBox, ContainerBoxParentDat
 
 /// Owns the boxes built from one [NodeSource].
 class NodeTree {
-  NodeTree(this.source, {this.observer});
+  NodeTree(this.source, {this.observer, IslandEnvironment environment = const IslandEnvironment()})
+      : islands = IslandManager(environment);
 
   final NodeSource source;
   NodeTreeObserver? observer;
+
+  /// The islands (widget-built nodes) of this tree.
+  final IslandManager islands;
+
+  /// The key of node [id]'s box in [instance] (null: outside repeats).
+  static String keyOf(String id, Object? instance) => instance == null ? id : '$instance/$id';
 
   final Map<String, NodeBox> _boxes = {};
   final Set<NodeBox> _orphans = {};
   bool _sweepScheduled = false;
 
-  NodeBox? boxOf(String id) => _boxes[id];
+  NodeBox? boxOf(String id, {Object? instance}) => _boxes[keyOf(id, instance)];
   int get length => _boxes.length;
 
-  NodeBox obtain(String id, Slot slot) {
-    final existing = _boxes[id];
+  NodeBox obtain(String id, Slot slot, {Object? instance}) {
+    final key = keyOf(id, instance);
+    final existing = _boxes[key];
     if (existing != null) {
       _orphans.remove(existing);
       existing._setSlot(slot);
       return existing;
     }
-    final box = NodeBox._(this, id, slot);
-    _boxes[id] = box;
+    final box = NodeBox._(this, id, slot, instance);
+    _boxes[key] = box;
     box._subscribe();
     box._apply();
     return box;
@@ -103,7 +115,7 @@ class NodeTree {
       final orphans = _orphans.toList();
       _orphans.clear();
       for (final b in orphans) {
-        if (b.parent == null && identical(_boxes[b.id], b)) release(b);
+        if (b.parent == null && identical(_boxes[b.key], b)) release(b);
       }
     });
   }
@@ -118,6 +130,7 @@ class NodeTree {
       b._unsubscribe();
     }
     _boxes.clear();
+    islands.dispose();
   }
 }
 
@@ -139,12 +152,18 @@ extension _NodeLayout on Node {
 }
 
 /// One node in the render tree.
-class NodeBox extends RenderProxyBox {
-  NodeBox._(this.tree, this.id, this._slot);
+class NodeBox extends RenderProxyBox implements NodeBuilder {
+  NodeBox._(this.tree, this.id, this._slot, this.instance);
 
+  @override
   final NodeTree tree;
+  @override
   final String id;
+  @override
+  final Object? instance;
+  String get key => NodeTree.keyOf(id, instance);
   Slot _slot;
+  @override
   Slot get slot => _slot;
   Node? _node;
 
@@ -217,6 +236,50 @@ class NodeBox extends RenderProxyBox {
     _apply();
   }
 
+  @override
+  Node? nodeOf(String id) => tree.source.node(id);
+
+  @override
+  T obtain<T extends RenderBox>(String key, T Function() create) => _obtain(key, create);
+
+  @override
+  RenderFitBox fitBox(String key, SizeFit h, SizeFit v, Size size) => _fitBox(key, h, v, size);
+
+  @override
+  void shell(Node n, List<RenderBox> chain, {void Function(List<RenderBox> inner)? content, bool padded = true}) =>
+      _shell(n, chain, content: content, padded: padded);
+
+  @override
+  void flex(Node n, List<RenderBox> chain) => _rowColumn(n, chain);
+
+  @override
+  void freeform(Node n, List<RenderBox> chain, {List<String>? children}) => _freeform(n, chain, children: children);
+
+  @override
+  void syncChildren(_Container container, List<String> ids, Slot childSlot, {Object? instance}) =>
+      _syncChildren(container, ids, childSlot, instance: instance);
+
+  final Map<String, IslandHost> _islands = {};
+  final Set<String> _islandsUsed = {};
+
+  @override
+  RenderBox island(String key, WidgetBuilder build) {
+    _islandsUsed.add(key);
+    final existing = _islands[key];
+    if (existing != null && !existing.disposed) {
+      existing.builder = build;
+      return existing;
+    }
+    return _islands[key] = tree.islands.host('$id#$key', build);
+  }
+
+  void _releaseUnusedIslands() {
+    for (final k in _islands.keys.toList()) {
+      if (!_islandsUsed.contains(k)) _islands.remove(k)!.release();
+    }
+    _islandsUsed.clear();
+  }
+
   T _obtain<T extends RenderBox>(String key, T Function() create) {
     final existing = _objects[key];
     if (existing is T) return existing;
@@ -243,6 +306,7 @@ class NodeBox extends RenderProxyBox {
     if (n == null) {
       _releaseContainerChildren();
       _wire(const []);
+      _releaseUnusedIslands();
       return;
     }
     final chain = <RenderBox>[];
@@ -285,6 +349,7 @@ class NodeBox extends RenderProxyBox {
     contentBox = chain.length > contentStart ? chain[contentStart] : null;
 
     _wire(chain);
+    _releaseUnusedIslands();
     _notifyDependentAncestors();
     _applyParentData();
   }
@@ -304,7 +369,7 @@ class NodeBox extends RenderProxyBox {
   void _notifyDependentAncestors() {
     var p = tree.source.parentOf(id);
     while (p != null) {
-      final box = tree._boxes[p];
+      final box = tree._boxes[NodeTree.keyOf(p, instance)];
       if (box != null && box._dependsOnDescendants) box._reapplySoon();
       p = tree.source.parentOf(p);
     }
@@ -315,7 +380,7 @@ class NodeBox extends RenderProxyBox {
     _reapplyScheduled = true;
     scheduleMicrotask(() {
       _reapplyScheduled = false;
-      if (tree._boxes[id] == this) _apply();
+      if (tree._boxes[key] == this) _apply();
     });
   }
 
@@ -344,8 +409,13 @@ class NodeBox extends RenderProxyBox {
       case 'icon':
         _icon(n, chain);
       default:
-        // A type this SDK doesn't render yet: its box, at its size.
-        chain.add(_fitBox('placeholder', n.hFit, n.vFit, n.designSize));
+        final recipe = widgetRecipes[n.type];
+        if (recipe != null) {
+          recipe(this, n, chain);
+        } else {
+          // A type this SDK doesn't render yet: its box, at its size.
+          chain.add(_fitBox('placeholder', n.hFit, n.vFit, n.designSize));
+        }
     }
   }
 
@@ -855,14 +925,14 @@ class NodeBox extends RenderProxyBox {
 
   // --- children & wiring ------------------------------------------------------
 
-  void _syncChildren(_Container container, List<String> ids, Slot childSlot) {
+  void _syncChildren(_Container container, List<String> ids, Slot childSlot, {Object? instance}) {
     if (!identical(_container, container) && _container != null) _releaseContainerChildren();
     _container = container;
     RenderBox? after;
     final placed = <NodeBox>{};
     for (final cid in ids) {
       if (tree.source.node(cid) == null) continue;
-      final box = tree.obtain(cid, childSlot);
+      final box = tree.obtain(cid, childSlot, instance: instance ?? this.instance);
       if (identical(box, this) || !placed.add(box)) continue;
       if (box.parent != container) {
         if (box.parent != null) box.detachFromParent();
@@ -910,7 +980,9 @@ class NodeBox extends RenderProxyBox {
     }
     void unlink(List<RenderBox> chain) {
       for (final o in chain) {
-        if (o is RenderObjectWithChildMixin<RenderBox>) {
+        if (o is IslandHost) {
+          // Its child is the island's own widget tree.
+        } else if (o is RenderObjectWithChildMixin<RenderBox>) {
           (o as RenderObjectWithChildMixin<RenderBox>).child = null;
         } else if (o is RenderStack && !identical(o, _container)) {
           var c = o.firstChild;
@@ -937,6 +1009,8 @@ class NodeBox extends RenderProxyBox {
         _detachFromAnyParent(nextObj);
         if (o is RenderStack && !identical(o, _container)) {
           o.add(nextObj);
+        } else if (o is IslandHost) {
+          assert(false, 'An island ends its chain');
         } else if (o is RenderObjectWithChildMixin<RenderBox>) {
           (o as RenderObjectWithChildMixin<RenderBox>).child = nextObj;
         }
@@ -1023,7 +1097,7 @@ class NodeBox extends RenderProxyBox {
           c = o.childAfter(c!);
         }
         if (c != null) return null;
-      } else if (identical(o, _container)) {
+      } else if (identical(o, _container) || o is IslandHost) {
         if (want.isNotEmpty) return null;
       } else if (o is RenderObjectWithChildMixin<RenderBox>) {
         if (want.length > 1) return null;
@@ -1069,12 +1143,16 @@ class NodeBox extends RenderProxyBox {
       while (child != null) {
         final next = c.childAfter(child);
         c.remove(child);
-        if (child is NodeBox && identical(tree._boxes[child.id], child)) child._releaseSubtree();
+        if (child is NodeBox && identical(tree._boxes[child.key], child)) child._releaseSubtree();
         child = next;
       }
     }
     _unsubscribe();
-    if (identical(tree._boxes[id], this)) tree._boxes.remove(id);
+    for (final h in _islands.values) {
+      h.release();
+    }
+    _islands.clear();
+    if (identical(tree._boxes[key], this)) tree._boxes.remove(key);
   }
 }
 

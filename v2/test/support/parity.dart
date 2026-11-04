@@ -7,8 +7,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+/// Golden sets: `static` (the 65 fixture pages) and `samples-<group>` (v1
+/// sample pages written per widget group, test/samples/<group>).
+List<String> goldenSets() => [
+      for (final d in Directory('test/goldens').listSync().whereType<Directory>()) d.path.split('/').last,
+    ]..sort();
 
 Object? readGz(File f) => jsonDecode(utf8.decode(gzip.decode(f.readAsBytesSync())));
 
@@ -57,7 +63,8 @@ Future<ParityReport> parity(WidgetTester tester, {String project = '', String se
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = Size(size[0].toDouble(), size[1].toDouble());
       final tree = NodeTree(DocumentSource(doc));
-      await tester.pumpWidget(Directionality(textDirection: TextDirection.ltr, child: NodeView(tree: tree, rootId: e.key)));
+      await tester.pumpWidget(MaterialApp(debugShowCheckedModeBanner: false, home: NodeView(tree: tree, rootId: e.key)));
+      await tester.pump();
       final view = tester.renderObject(find.byType(NodeView));
       final got = <String, Rect>{};
       for (final id in rects.keys) {
