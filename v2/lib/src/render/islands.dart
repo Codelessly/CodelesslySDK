@@ -229,9 +229,15 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
         _dirty = false;
         debugBuilds++;
         owner._buildIsland(this, _IslandScope(key: _key, host: this, child: manager.environment.apply(Builder(builder: _builder))));
-      } else {
-        owner.owner!.buildScope(scope);
       }
+      // Always flush the island's own scope, also after rebuilding it from
+      // the top: a widget that marked itself dirty (a ticking spinner) and
+      // was then rebuilt by its parent is clean but still in the scope's
+      // dirty list, and its next setState would assert in
+      // BuildOwner.scheduleBuildFor. Flushing clears the list (and builds
+      // what is still dirty).
+      final built = _scope;
+      if (built != null) owner.owner!.buildScope(built);
     } finally {
       _building = false;
     }

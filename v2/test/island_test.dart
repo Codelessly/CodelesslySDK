@@ -482,4 +482,42 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });
+
+  // A spinner that ticks while its island is rebuilt from the top (its node
+  // re-applies, or the tree is shown under a new view): rebuilt by its parent
+  // while marked dirty, it used to stay in the island's dirty list and assert
+  // in BuildOwner.scheduleBuildFor at its next tick.
+  testWidgets('a ticking island rebuilt as its node re-applies, and under a new view, goes on ticking', (tester) async {
+    widgetRecipes['spin'] = (b, n, chain) {
+      // Not const: rebuilding the island rebuilds the spinner.
+      chain.add(b.island(
+          'spin', (context) => SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Theme.of(context).primaryColor))));
+    };
+    addTearDown(() => widgetRecipes.remove('spin'));
+    LayoutDocument doc(double x) => LayoutDocument.fromJson({
+          'roots': ['s'],
+          'nodes': {
+            's': {'type': 'stack', 'children': ['p'], 'layout': {'width': 100, 'height': 100}},
+            'p': {'type': 'spin', 'layout': {'width': 20, 'height': 20, 'x': {'start': x}, 'y': {'start': 0}}},
+          },
+        });
+    final source = DocumentSource(doc(0));
+    final tree = NodeTree(source);
+    addTearDown(tree.dispose);
+    Widget view() => MaterialApp(
+        home: Align(alignment: Alignment.topLeft, child: NodeView(key: UniqueKey(), tree: tree, rootId: 's')));
+    await tester.pumpWidget(view());
+    for (var i = 1; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      source.document = doc(i * 5.0);
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    await tester.pumpWidget(view());
+    for (var i = 1; i < 6; i++) {
+      source.document = doc(i * 3.0);
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
 }
