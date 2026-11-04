@@ -15,11 +15,13 @@ extension InsetsToFlutter on api.EdgeInsets {
 }
 
 extension RadiusToFlutter on api.BorderRadius {
+  /// Each corner circular or elliptical (decoration, clip and paint all
+  /// take it from here).
   BorderRadius get flutter => BorderRadius.only(
-        topLeft: Radius.circular(topLeft),
-        topRight: Radius.circular(topRight),
-        bottomRight: Radius.circular(bottomRight),
-        bottomLeft: Radius.circular(bottomLeft),
+        topLeft: Radius.elliptical(topLeft, topLeftY),
+        topRight: Radius.elliptical(topRight, topRightY),
+        bottomRight: Radius.elliptical(bottomRight, bottomRightY),
+        bottomLeft: Radius.elliptical(bottomLeft, bottomLeftY),
       );
 }
 
