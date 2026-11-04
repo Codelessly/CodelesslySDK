@@ -1,0 +1,727 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "bars"
+   ]
+  },
+  "bars": {
+   "id": "bars",
+   "type": "canvas",
+   "name": "bars",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    390,
+    844
+   ],
+   "properties": {
+    "bodyId": "bars_body"
+   },
+   "children": [
+    "bars_body"
+   ]
+  },
+  "bars_body": {
+   "id": "bars_body",
+   "type": "column",
+   "name": "Body",
+   "parentID": "bars",
+   "basicBoxLocal": [
+    0,
+    0,
+    390,
+    844
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "appbar",
+    "appbar_center",
+    "appbar_fixed",
+    "nav_m3",
+    "nav_m3_hide",
+    "nav_m2",
+    "nav_m2_shift",
+    "nav_notched",
+    "nav_fixed"
+   ],
+   "rowColumnType": "column",
+   "crossAxisAlignment": "stretch",
+   "spacing": 12,
+   "padding": 0
+  },
+  "appbar": {
+   "id": "appbar",
+   "type": "appBar",
+   "name": "appbar",
+   "parentID": "bars_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    390,
+    64
+   ],
+   "horizontalFit": "expanded",
+   "properties": {
+    "title": "Albums",
+    "backgroundColor": "#FFFBF8FF",
+    "leading": {
+     "id": "menu",
+     "type": "icon",
+     "icon": {
+      "show": true,
+      "icon": {
+       "type": "MATERIAL_ICON",
+       "codepoint": 58834,
+       "name": "menu",
+       "style": "filled",
+       "version": 1
+      },
+      "size": 24
+     }
+    },
+    "automaticallyImplyLeading": false,
+    "actions": [
+     {
+      "id": "search",
+      "type": "icon",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59574,
+        "name": "search",
+        "style": "filled",
+        "version": 1
+       },
+       "size": 24
+      }
+     },
+     {
+      "id": "person",
+      "type": "icon",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59389,
+        "name": "person",
+        "style": "filled",
+        "version": 1
+       },
+       "size": 20
+      }
+     }
+    ],
+    "titleStyle": {
+     "fills": [
+      {
+       "type": "solid",
+       "color": "1B1B21",
+       "id": "f"
+      }
+     ],
+     "fontSize": 22,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Regular",
+      "weight": "w400"
+     }
+    }
+   }
+  },
+  "appbar_center": {
+   "id": "appbar_center",
+   "type": "appBar",
+   "name": "appbar_center",
+   "parentID": "bars_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    390,
+    56
+   ],
+   "horizontalFit": "expanded",
+   "properties": {
+    "title": "Centered",
+    "centerTitle": true,
+    "backgroundColor": "#FF6750A4",
+    "foregroundColor": "#FFFFFFFF",
+    "elevation": 4,
+    "leading": {
+     "id": "menu",
+     "type": "icon",
+     "icon": {
+      "show": true,
+      "icon": {
+       "type": "MATERIAL_ICON",
+       "codepoint": 58834,
+       "name": "menu",
+       "style": "filled",
+       "version": 1
+      },
+      "size": 24
+     }
+    },
+    "titleSpacing": 8
+   }
+  },
+  "appbar_fixed": {
+   "id": "appbar_fixed",
+   "type": "appBar",
+   "name": "appbar_fixed",
+   "parentID": "bars_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    300,
+    48
+   ],
+   "properties": {
+    "title": "",
+    "backgroundColor": "#FFEFEDF4",
+    "leading": {
+     "id": "menu",
+     "type": "icon",
+     "icon": {
+      "show": false,
+      "icon": {
+       "type": "MATERIAL_ICON",
+       "codepoint": 58834,
+       "name": "menu",
+       "style": "filled",
+       "version": 1
+      }
+     }
+    }
+   }
+  },
+  "nav_m3": {
+   "id": "nav_m3",
+   "type": "navigationBar",
+   "name": "nav_m3",
+   "parentID": "bars_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    390,
+    80
+   ],
+   "horizontalFit": "expanded",
+   "selectedIndex": 1,
+   "properties": {
+    "styleDefinition": "material_3",
+    "items": [
+     {
+      "id": "nav_0",
+      "label": "Home",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59530,
+        "name": "home",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": []
+     },
+     {
+      "id": "nav_1",
+      "label": "Albums",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59448,
+        "name": "star",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": [],
+      "differSelectedIcon": true,
+      "selectedIcon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59448,
+        "name": "star",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF434659"
+      }
+     },
+     {
+      "id": "nav_2",
+      "label": "Profile",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59389,
+        "name": "person",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": []
+     }
+    ],
+    "backgroundColor": "#FFEFEDF4",
+    "indicatorColor": "#FFE0E1F9",
+    "selectedLabelStyle": {
+     "fills": [
+      {
+       "type": "solid",
+       "color": "1B1B21",
+       "id": "f"
+      }
+     ],
+     "fontSize": 12,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Medium",
+      "weight": "w500"
+     }
+    },
+    "unselectedLabelStyle": {
+     "fills": [
+      {
+       "type": "solid",
+       "color": "46464F",
+       "id": "f"
+      }
+     ],
+     "fontSize": 12,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Medium",
+      "weight": "w500"
+     }
+    }
+   }
+  },
+  "nav_m3_hide": {
+   "id": "nav_m3_hide",
+   "type": "navigationBar",
+   "name": "nav_m3_hide",
+   "parentID": "bars_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    390,
+    64
+   ],
+   "horizontalFit": "expanded",
+   "properties": {
+    "styleDefinition": "material_3",
+    "items": [
+     {
+      "id": "nav_0",
+      "label": "Home",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59530,
+        "name": "home",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": []
+     },
+     {
+      "id": "nav_1",
+      "label": "Albums",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59448,
+        "name": "star",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": [],
+      "differSelectedIcon": true,
+      "selectedIcon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59448,
+        "name": "star",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF434659"
+      }
+     },
+     {
+      "id": "nav_2",
+      "label": "Profile",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59389,
+        "name": "person",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": []
+     }
+    ],
+    "labelBehavior": "alwaysHide",
+    "elevation": 0
+   }
+  },
+  "nav_m2": {
+   "id": "nav_m2",
+   "type": "navigationBar",
+   "name": "nav_m2",
+   "parentID": "bars_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    390,
+    56
+   ],
+   "horizontalFit": "expanded",
+   "properties": {
+    "styleDefinition": "material_2",
+    "items": [
+     {
+      "id": "nav_0",
+      "label": "Home",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59530,
+        "name": "home",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": []
+     },
+     {
+      "id": "nav_1",
+      "label": "Albums",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59448,
+        "name": "star",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": [],
+      "differSelectedIcon": true,
+      "selectedIcon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59448,
+        "name": "star",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF434659"
+      }
+     },
+     {
+      "id": "nav_2",
+      "label": "Profile",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59389,
+        "name": "person",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": []
+     }
+    ],
+    "backgroundColor": "#FFFFFFFF",
+    "selectedLabelStyle": {
+     "fills": [
+      {
+       "type": "solid",
+       "color": "6750A4",
+       "id": "f"
+      }
+     ],
+     "fontSize": 14,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Medium",
+      "weight": "w500"
+     }
+    },
+    "unselectedLabelStyle": {
+     "fills": [
+      {
+       "type": "solid",
+       "color": "46464F",
+       "id": "f"
+      }
+     ],
+     "fontSize": 12,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Medium",
+      "weight": "w500"
+     }
+    },
+    "navigationBarType": "fixed"
+   }
+  },
+  "nav_m2_shift": {
+   "id": "nav_m2_shift",
+   "type": "navigationBar",
+   "name": "nav_m2_shift",
+   "parentID": "bars_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    390,
+    60
+   ],
+   "horizontalFit": "expanded",
+   "selectedIndex": 2,
+   "properties": {
+    "styleDefinition": "material_2",
+    "items": [
+     {
+      "id": "nav_0",
+      "label": "Home",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59530,
+        "name": "home",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": []
+     },
+     {
+      "id": "nav_1",
+      "label": "Albums",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59448,
+        "name": "star",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": [],
+      "differSelectedIcon": true,
+      "selectedIcon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59448,
+        "name": "star",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF434659"
+      }
+     },
+     {
+      "id": "nav_2",
+      "label": "Profile",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59389,
+        "name": "person",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": []
+     }
+    ],
+    "navigationBarType": "shifting",
+    "backgroundColor": "#FF6750A4",
+    "labelBehavior": "onlyShowSelected"
+   }
+  },
+  "nav_notched": {
+   "id": "nav_notched",
+   "type": "navigationBar",
+   "name": "nav_notched",
+   "parentID": "bars_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    390,
+    80
+   ],
+   "horizontalFit": "expanded",
+   "properties": {
+    "styleDefinition": "material_3",
+    "items": [
+     {
+      "id": "nav_0",
+      "label": "Home",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59530,
+        "name": "home",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": []
+     },
+     {
+      "id": "nav_1",
+      "label": "Albums",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59448,
+        "name": "star",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": [],
+      "differSelectedIcon": true,
+      "selectedIcon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59448,
+        "name": "star",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF434659"
+      }
+     }
+    ],
+    "makeNotched": true,
+    "notchMargin": 6,
+    "backgroundColor": "#FFEFEDF4"
+   }
+  },
+  "nav_fixed": {
+   "id": "nav_fixed",
+   "type": "navigationBar",
+   "name": "nav_fixed",
+   "parentID": "bars_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    300,
+    70
+   ],
+   "properties": {
+    "styleDefinition": "material_3",
+    "items": [
+     {
+      "id": "nav_0",
+      "label": "Home",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59530,
+        "name": "home",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": []
+     },
+     {
+      "id": "nav_1",
+      "label": "Albums",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59448,
+        "name": "star",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": [],
+      "differSelectedIcon": true,
+      "selectedIcon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59448,
+        "name": "star",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF434659"
+      }
+     },
+     {
+      "id": "nav_2",
+      "label": "Profile",
+      "icon": {
+       "show": true,
+       "icon": {
+        "type": "MATERIAL_ICON",
+        "codepoint": 59389,
+        "name": "person",
+        "style": "filled",
+        "version": 1
+       },
+       "color": "#FF46464F"
+      },
+      "reactions": []
+     }
+    ]
+   }
+  }
+ }
+}
