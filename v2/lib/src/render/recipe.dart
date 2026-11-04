@@ -46,12 +46,14 @@ abstract interface class NodeBuilder {
   void freeform(Node n, List<RenderBox> chain, {List<String>? children});
 
   /// Places the boxes of [ids] in [container], in order. [instance] scopes
-  /// them (one box per id per instance: list items repeating a template).
+  /// them (one box per id per instance: list items repeating a template);
+  /// [instances], one per id, scopes each on its own (null: [instance]).
   void syncChildren(
     ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>> container,
     List<String> ids,
     Slot childSlot, {
     Object? instance,
+    List<Object?>? instances,
   });
 
   /// A Flutter widget for (part of) this node, hosted as a render box
