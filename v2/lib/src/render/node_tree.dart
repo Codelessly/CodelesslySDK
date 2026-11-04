@@ -366,6 +366,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     ];
     _innerChains.clear();
     _stackExtras.clear();
+    _filledStacks.clear();
 
     _parentSideWrappers(n, chain);
 
@@ -560,8 +561,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     }
     content(inner);
     _innerChains[stack] = inner;
+    // SDK 8.x put the content of a shell with ink in its InkWell, filling
+    // the shell (Positioned.fill) when the shell has a size on both axes:
+    // its content then sizes nothing (no intrinsic size either).
+    if (n.behaviours.inkWell != null && n.hFit != SizeFit.hug && n.vFit != SizeFit.hug) _filledStacks.add(stack);
     chain.add(stack);
   }
+
+  /// Shell stacks whose content fills them (positioned) instead of sizing
+  /// them.
+  final Set<RenderStack> _filledStacks = {};
 
   final Map<RenderStack, List<RenderBox>> _innerChains = {};
   final Map<RenderStack, (List<RenderBox>, List<RenderBox>)> _stackExtras = {};
@@ -1188,6 +1197,21 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   }
 
   void _finishWire(List<RenderBox> next) {
+    for (final e in _innerChains.entries) {
+      if (!next.contains(e.key) || e.value.isEmpty) continue;
+      final pd = e.value.first.parentData;
+      if (pd is! StackParentData) continue;
+      final double? edge = _filledStacks.contains(e.key) ? 0 : null;
+      if (pd.left != edge || pd.top != edge || pd.right != edge || pd.bottom != edge) {
+        pd
+          ..left = edge
+          ..top = edge
+          ..right = edge
+          ..bottom = edge;
+        e.key.markNeedsLayout();
+      }
+    }
+    _filledStacks.removeWhere((stack) => !next.contains(stack));
     final keep = <RenderBox>{
       ...next,
       for (final e in _innerChains.entries)
