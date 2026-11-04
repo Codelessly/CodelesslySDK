@@ -192,7 +192,8 @@ class VariableScope extends NamedScope {
     if (!_computing.add(v.name)) return null;
     try {
       final value = FormulaEvaluator.evaluate(v.formula, (p) => readPath(local ? this : reader, p));
-      if (local) _cache[v.name] = (_version, value);
+      // Only a top-level read: one inside a cycle saw a partial value.
+      if (local && _computing.length == 1) _cache[v.name] = (_version, value);
       return value;
     } finally {
       _computing.remove(v.name);
