@@ -293,6 +293,39 @@ void main() {
     expect(boxes['section']!.width, 600);
   });
 
+  // A player's side panel: a padded column pinned to both sides of its frame,
+  // its rows stretching across it. On a wider screen the padded content, not
+  // just the panel's background, takes the width the pins give it.
+  testWidgets('a padded column pinned to both sides fills its slot', (
+    tester,
+  ) async {
+    final row = rect(
+      'row',
+      NodeBox(21, 21, 614, 48),
+      parent: 'panel',
+      horizontalFit: SizeFit.expanded,
+    );
+    final panel = RowColumnNode(
+      id: 'panel',
+      name: 'panel',
+      basicBoxLocal: NodeBox(760, 24, 656, 852),
+      rowColumnType: RowColumnType.column,
+      mainAxisAlignment: MainAxisAlignmentC.start,
+      crossAxisAlignment: CrossAxisAlignmentC.start,
+      padding: const EdgeInsetsModel.all(21),
+      edgePins: const EdgePinsModel(left: 760, top: 24, right: 24, bottom: 24),
+      positioningMode: PositioningMode.pin,
+      children: ['row'],
+    )..parentID = 'frame';
+    final root = frame('frame', NodeBox(0, 0, 1440, 900), [panel]);
+    final boxes = await pump(tester, root, [
+      panel,
+      row,
+    ], screen: const Size(1920, 1080));
+    expect(boxes['panel']!.width, 1136);
+    expect(boxes['row']!.width, 1136 - 42);
+  });
+
   // A header whose height follows the scroll: `${= max(64, 372 - scroll)}`.
   testWidgets('mounted size binding updates its freeform parent slot', (
     tester,
