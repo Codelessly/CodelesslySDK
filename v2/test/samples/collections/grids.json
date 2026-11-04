@@ -1,0 +1,842 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "c1",
+    "c5",
+    "c9",
+    "c16",
+    "c22",
+    "c26",
+    "c35"
+   ]
+  },
+  "c1": {
+   "id": "c1",
+   "type": "canvas",
+   "name": "Fixed count",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    500
+   ],
+   "properties": {
+    "bodyId": "b2"
+   },
+   "children": [
+    "b2"
+   ]
+  },
+  "b2": {
+   "id": "b2",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c1",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    500
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "gv3"
+   ]
+  },
+  "gv3": {
+   "id": "gv3",
+   "type": "gridView",
+   "name": "Grid",
+   "basicBoxLocal": [
+    20,
+    20,
+    360,
+    300
+   ],
+   "isScrollable": true,
+   "useFlutterListView": false,
+   "properties": {
+    "gridDelegate": {
+     "type": "fixedCrossAxisCount",
+     "crossAxisCount": 3,
+     "mainAxisSpacing": 8,
+     "crossAxisSpacing": 8,
+     "mainAxisExtent": 60
+    }
+   },
+   "children": [
+    "r4"
+   ],
+   "padding": [
+    6,
+    6,
+    6,
+    6
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "b2"
+  },
+  "r4": {
+   "id": "r4",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    100,
+    60
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#80DEEA",
+     "id": "f80DEEA"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "parentID": "gv3"
+  },
+  "c5": {
+   "id": "c5",
+   "type": "canvas",
+   "name": "Aspect ratio",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    500
+   ],
+   "properties": {
+    "bodyId": "b6"
+   },
+   "children": [
+    "b6"
+   ]
+  },
+  "b6": {
+   "id": "b6",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c5",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    500
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "gv7"
+   ]
+  },
+  "gv7": {
+   "id": "gv7",
+   "type": "gridView",
+   "name": "Grid",
+   "basicBoxLocal": [
+    20,
+    20,
+    300,
+    400
+   ],
+   "isScrollable": true,
+   "useFlutterListView": false,
+   "properties": {
+    "gridDelegate": {
+     "type": "fixedCrossAxisCount",
+     "crossAxisCount": 2,
+     "childAspectRatio": 1.5,
+     "crossAxisSpacing": 10
+    }
+   },
+   "children": [
+    "r8"
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "b6"
+  },
+  "r8": {
+   "id": "r8",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    80,
+    40
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#C5E1A5",
+     "id": "fC5E1A5"
+    }
+   ],
+   "parentID": "gv7"
+  },
+  "c9": {
+   "id": "c9",
+   "type": "canvas",
+   "name": "Max extent",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    500,
+    400
+   ],
+   "properties": {
+    "bodyId": "b10"
+   },
+   "children": [
+    "b10"
+   ]
+  },
+  "b10": {
+   "id": "b10",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c9",
+   "basicBoxLocal": [
+    0,
+    0,
+    500,
+    400
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "gv11"
+   ]
+  },
+  "gv11": {
+   "id": "gv11",
+   "type": "gridView",
+   "name": "Grid",
+   "basicBoxLocal": [
+    20,
+    20,
+    460,
+    300
+   ],
+   "isScrollable": true,
+   "useFlutterListView": false,
+   "properties": {
+    "gridDelegate": {
+     "type": "maxCrossAxisExtent",
+     "maxCrossAxisExtent": 120,
+     "mainAxisSpacing": 4,
+     "crossAxisSpacing": 4
+    }
+   },
+   "children": [
+    "rc12"
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "b10"
+  },
+  "rc12": {
+   "id": "rc12",
+   "type": "row",
+   "rowColumnType": "row",
+   "name": "Row",
+   "basicBoxLocal": [
+    0,
+    0,
+    100,
+    40
+   ],
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "center",
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFF3E0",
+     "id": "fFFF3E0"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "shrinkWrap",
+   "spacing": 8,
+   "padding": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "parentID": "gv11",
+   "children": [
+    "r13",
+    "t14"
+   ]
+  },
+  "r13": {
+   "id": "r13",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    24,
+    24
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#42A5F5",
+     "id": "f42A5F5"
+    }
+   ],
+   "parentID": "rc12"
+  },
+  "t14": {
+   "id": "t14",
+   "type": "text",
+   "name": "Text",
+   "data": "Item",
+   "basicBoxLocal": [
+    0,
+    0,
+    48,
+    12
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "textMixedProps": [
+    {
+     "start": 0,
+     "end": 4,
+     "fontSize": 12,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Regular",
+      "weight": "w400"
+     },
+     "fills": [
+      {
+       "type": "solid",
+       "color": "#222222",
+       "id": "tf15"
+      }
+     ]
+    }
+   ],
+   "parentID": "rc12"
+  },
+  "c16": {
+   "id": "c16",
+   "type": "canvas",
+   "name": "Counted hug",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    600
+   ],
+   "properties": {
+    "bodyId": "b17"
+   },
+   "children": [
+    "b17"
+   ]
+  },
+  "b17": {
+   "id": "b17",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c16",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    600
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "gv18",
+    "gv20"
+   ]
+  },
+  "gv18": {
+   "id": "gv18",
+   "type": "gridView",
+   "name": "Grid",
+   "basicBoxLocal": [
+    20,
+    20,
+    360,
+    300
+   ],
+   "isScrollable": true,
+   "useFlutterListView": false,
+   "properties": {
+    "gridDelegate": {
+     "type": "fixedCrossAxisCount",
+     "crossAxisCount": 4,
+     "mainAxisExtent": 50,
+     "mainAxisSpacing": 6
+    },
+    "itemCount": 6
+   },
+   "children": [
+    "r19"
+   ],
+   "verticalFit": "shrinkWrap",
+   "padding": [
+    0,
+    10,
+    0,
+    10
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "b17"
+  },
+  "r19": {
+   "id": "r19",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    60,
+    50
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFAB91",
+     "id": "fFFAB91"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "parentID": "gv18"
+  },
+  "gv20": {
+   "id": "gv20",
+   "type": "gridView",
+   "name": "Grid",
+   "basicBoxLocal": [
+    20,
+    300,
+    360,
+    200
+   ],
+   "isScrollable": true,
+   "useFlutterListView": false,
+   "properties": {
+    "gridDelegate": {
+     "type": "fixedCrossAxisCount",
+     "crossAxisCount": 3,
+     "mainAxisExtent": 40
+    },
+    "itemCount": 5
+   },
+   "children": [
+    "r21"
+   ],
+   "reverse": true,
+   "edgePins": {
+    "left": 20,
+    "top": 300
+   },
+   "positioningMode": "pin",
+   "parentID": "b17"
+  },
+  "r21": {
+   "id": "r21",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    60,
+    40
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#B39DDB",
+     "id": "fB39DDB"
+    }
+   ],
+   "parentID": "gv20"
+  },
+  "c22": {
+   "id": "c22",
+   "type": "canvas",
+   "name": "Horizontal grid",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    500,
+    300
+   ],
+   "properties": {
+    "bodyId": "b23"
+   },
+   "children": [
+    "b23"
+   ]
+  },
+  "b23": {
+   "id": "b23",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c22",
+   "basicBoxLocal": [
+    0,
+    0,
+    500,
+    300
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "gv24"
+   ]
+  },
+  "gv24": {
+   "id": "gv24",
+   "type": "gridView",
+   "name": "Grid",
+   "basicBoxLocal": [
+    20,
+    20,
+    460,
+    200
+   ],
+   "isScrollable": true,
+   "useFlutterListView": false,
+   "properties": {
+    "gridDelegate": {
+     "type": "fixedCrossAxisCount",
+     "crossAxisCount": 2,
+     "mainAxisSpacing": 8,
+     "crossAxisSpacing": 8,
+     "mainAxisExtent": 90
+    }
+   },
+   "children": [
+    "r25"
+   ],
+   "scrollDirection": "horizontal",
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "b23"
+  },
+  "r25": {
+   "id": "r25",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    90,
+    96
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#F48FB1",
+     "id": "fF48FB1"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "parentID": "gv24"
+  },
+  "c26": {
+   "id": "c26",
+   "type": "canvas",
+   "name": "Rows hug items",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    500
+   ],
+   "properties": {
+    "bodyId": "b27"
+   },
+   "children": [
+    "b27"
+   ]
+  },
+  "b27": {
+   "id": "b27",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c26",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    500
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "gv28",
+    "gv33"
+   ]
+  },
+  "gv28": {
+   "id": "gv28",
+   "type": "gridView",
+   "name": "Grid",
+   "basicBoxLocal": [
+    20,
+    20,
+    360,
+    300
+   ],
+   "isScrollable": true,
+   "useFlutterListView": false,
+   "properties": {
+    "gridDelegate": {
+     "type": "fixedCrossAxisCount",
+     "crossAxisCount": 2,
+     "shrinkWrapRows": true,
+     "mainAxisSpacing": 12,
+     "crossAxisSpacing": 12
+    },
+    "itemCount": 3
+   },
+   "children": [
+    "rc29"
+   ],
+   "verticalFit": "shrinkWrap",
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "b27"
+  },
+  "rc29": {
+   "id": "rc29",
+   "type": "column",
+   "rowColumnType": "column",
+   "name": "Column",
+   "basicBoxLocal": [
+    0,
+    0,
+    174,
+    80
+   ],
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "stretch",
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFF3E0",
+     "id": "fFFF3E0"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "spacing": 4,
+   "parentID": "gv28",
+   "children": [
+    "r30",
+    "t31"
+   ]
+  },
+  "r30": {
+   "id": "r30",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    174,
+    36
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFF59D",
+     "id": "fFFF59D"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "parentID": "rc29"
+  },
+  "t31": {
+   "id": "t31",
+   "type": "text",
+   "name": "Text",
+   "data": "A card title that wraps over lines",
+   "basicBoxLocal": [
+    0,
+    0,
+    174,
+    40
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "shrinkWrap",
+   "textMixedProps": [
+    {
+     "start": 0,
+     "end": 34,
+     "fontSize": 14,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Regular",
+      "weight": "w400"
+     },
+     "fills": [
+      {
+       "type": "solid",
+       "color": "#222222",
+       "id": "tf32"
+      }
+     ]
+    }
+   ],
+   "parentID": "rc29"
+  },
+  "gv33": {
+   "id": "gv33",
+   "type": "gridView",
+   "name": "Grid",
+   "basicBoxLocal": [
+    20,
+    360,
+    360,
+    120
+   ],
+   "isScrollable": true,
+   "useFlutterListView": false,
+   "properties": {
+    "gridDelegate": {
+     "type": "fixedCrossAxisCount",
+     "crossAxisCount": 3,
+     "shrinkWrapRows": true,
+     "mainAxisSpacing": 6
+    }
+   },
+   "children": [
+    "r34"
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 360
+   },
+   "positioningMode": "pin",
+   "parentID": "b27"
+  },
+  "r34": {
+   "id": "r34",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    100,
+    50
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#BCAAA4",
+     "id": "fBCAAA4"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "parentID": "gv33"
+  },
+  "c35": {
+   "id": "c35",
+   "type": "canvas",
+   "name": "Empty grid",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    300,
+    200
+   ],
+   "properties": {
+    "bodyId": "b36"
+   },
+   "children": [
+    "b36"
+   ]
+  },
+  "b36": {
+   "id": "b36",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c35",
+   "basicBoxLocal": [
+    0,
+    0,
+    300,
+    200
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "gv37"
+   ]
+  },
+  "gv37": {
+   "id": "gv37",
+   "type": "gridView",
+   "name": "Grid",
+   "basicBoxLocal": [
+    10,
+    10,
+    200,
+    100
+   ],
+   "isScrollable": true,
+   "useFlutterListView": false,
+   "properties": {
+    "gridDelegate": {
+     "type": "fixedCrossAxisCount",
+     "crossAxisCount": 2
+    }
+   },
+   "children": [],
+   "verticalFit": "shrinkWrap",
+   "edgePins": {
+    "left": 10,
+    "top": 10
+   },
+   "positioningMode": "pin",
+   "parentID": "b36"
+  }
+ }
+}
