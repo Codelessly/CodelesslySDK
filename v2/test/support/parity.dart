@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Golden sets: `static` (the 65 fixture pages) and `samples-<group>` (v1
-/// sample pages written per widget group, test/samples/<group>).
+/// sample pages written per widget group, `test/samples/<group>`).
 List<String> goldenSets() => [
       for (final d in Directory('test/goldens').listSync().whereType<Directory>()) d.path.split('/').last,
     ]..sort();
