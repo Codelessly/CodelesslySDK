@@ -19,8 +19,10 @@ For each v1 node type (`CodelesslyAPI/lib/src/api/nodes/<type>_node.dart`):
    per v1 type in `<group>Migrations`. Read v1 values off the decoded node
    (`m.n as XNode`) and mark each consumed key with `m.take('key')`; keys left
    untaken end up under `v1` and are reported. The goal is none left except
+   editor metadata (`createdTimestamp`, `aspectRatioLock: true`). BaseNode's
    behaviours (motion, inkWell, interactionStates, pulse, loopAnimation,
-   transitions: another port owns those) and editor metadata.
+   transitions, drag and drop...) are migrated for every type by
+   `migrate/lib/src/behaviours.dart`; don't take them.
 3. **Recipe** (SDK v2): `CodelesslySDK/v2/lib/src/widgets/<group>.dart`, a
    `WidgetRecipe` per v2 type in `<group>Recipes`. See
    `lib/src/render/recipe.dart` for the `NodeBuilder` API:
@@ -34,9 +36,10 @@ For each v1 node type (`CodelesslyAPI/lib/src/api/nodes/<type>_node.dart`):
      b.tree, id: childId, instance: ...)`.
    * Repeated templates (list/grid items in preview): `b.syncChildren(...,
      instance: (b.id, index))` gives each repetition its own boxes.
-   The outer layers (margin, constraints, rotation, opacity, aspect ratio)
-   are already added by the tree; build what SDK 8.x's transformer builds
-   inside them.
+   The outer layers (margin, constraints, behaviours such as motion, scale
+   and loops, rotation, opacity, blurs, aspect ratio; see
+   `lib/src/render/behaviours.dart`) are already added by the tree; build
+   what SDK 8.x's transformer builds inside them.
 4. **Tests**: parity, plus unit tests for anything not covered by it.
 
 ## The reference: SDK 8.x
