@@ -73,3 +73,5 @@ export 'src/render/node_view.dart';
 export 'src/render/recipe.dart' show NodeChild;
 export 'src/render/source.dart';
 export 'src/widgets/media.dart' show ExternalComponents;
+export 'src/runtime/contracts.dart';
+export 'src/runtime/expressions/expressions.dart';
