@@ -277,6 +277,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     );
     final stretch = stretchItems && (!hugCross || !_blocksIntrinsics(b, item));
     view
+      ..measurable = true
       ..onNeedItems = null
       ..update(
         axis: n.axis,
@@ -303,6 +304,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final box = _viewportBox(b, n, canShrinkWrap: count != null);
   chain.add(box);
   view
+    ..measurable = false
     ..onNeedItems = ((c) => _syncItems(b, n, container, itemId, c))
     ..update(
       axis: n.axis,
