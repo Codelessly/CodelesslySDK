@@ -26,6 +26,7 @@ export 'package:codelessly_api/codelessly_api.dart'
         ColorStop,
         CrossAxisAlignment,
         Decoration,
+        FieldValue,
         EdgeInsets,
         FloatingActionButtonLocation,
         FloatingLabelBehavior,
