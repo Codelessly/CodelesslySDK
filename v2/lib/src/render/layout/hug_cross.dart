@@ -10,7 +10,22 @@ import 'package:flutter/rendering.dart';
 /// [IntrinsicHeight] / [IntrinsicWidth]: no intrinsic pass (which a viewport
 /// or LayoutBuilder can't answer, and which can measure text differently
 /// from how it lays out), and the same result.
+///
+/// Laid out stretched, the children have tight constraints across, so they
+/// are relayout boundaries: a change inside one relays out only that child,
+/// at the thickness measured before. Whatever changes the content under one
+/// calls [relayoutAbove] (the node tree does, for every node it re-applies),
+/// so the thickness is measured again and incremental layout gives what a
+/// fresh layout gives.
 class RenderHugCross extends RenderProxyBox {
+  /// Marks every [RenderHugCross] above [object] as needing layout. Call it
+  /// outside the layout phase.
+  static void relayoutAbove(RenderObject object) {
+    for (RenderObject? p = object.parent; p != null; p = p.parent) {
+      if (p is RenderHugCross) p.markNeedsLayout();
+    }
+  }
+
   @override
   void performLayout() {
     final RenderBox? box = child;

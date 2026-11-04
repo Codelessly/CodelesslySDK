@@ -68,8 +68,14 @@ export 'package:codelessly_api/codelessly_api.dart'
         WrapAlignment,
         WrapCrossAlignment;
 
-export 'src/render/islands.dart' show IslandEnvironment, IslandHost;
+// Hosts other than NodeView (an editor's board) show node boxes the same
+// way: their element is an IslandOwnerElement and their render object mixes
+// in IslandParent.
+export 'src/render/islands.dart' show IslandEnvironment, IslandHost, IslandOwnerElement, IslandParent;
 export 'src/render/node_tree.dart' show NodeTree, NodeBox, NodeTreeObserver, Slot, SlotKind;
+// Text as the SDK renders it, for a host's own text (an in-place editor).
+export 'src/render/convert.dart' show textStyle;
+export 'src/text_defaults.dart' show kTextBase;
 export 'src/render/node_view.dart';
 export 'src/render/recipe.dart' show NodeChild;
 export 'src/render/source.dart';
