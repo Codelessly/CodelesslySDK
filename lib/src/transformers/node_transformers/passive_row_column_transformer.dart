@@ -79,10 +79,12 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
               max: rowColumnNode.constraints.maxWidth,
               inset: padding.horizontal,
             ),
-      fillWidth: _fillsAxis(
-        rowColumnNode.horizontalFit,
-        max: rowColumnNode.constraints.maxWidth,
-      ),
+      fillWidth:
+          _fillsAxis(
+            rowColumnNode.horizontalFit,
+            max: rowColumnNode.constraints.maxWidth,
+          ) ||
+          chainedOnAxis(rowColumnNode, parent, horizontal: true),
       height: contentSized && !isRow
           ? null
           : isPlaceholder && rowColumnNode.verticalFit.isFlex
@@ -96,10 +98,11 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
             ),
       fillHeight:
           !(isPlaceholder && rowColumnNode.verticalFit.isFlex) &&
-          _fillsAxis(
-            rowColumnNode.verticalFit,
-            max: rowColumnNode.constraints.maxHeight,
-          ),
+          (_fillsAxis(
+                rowColumnNode.verticalFit,
+                max: rowColumnNode.constraints.maxHeight,
+              ) ||
+              chainedOnAxis(rowColumnNode, parent, horizontal: false)),
     );
 
     final bool wrapsChildren = rowColumnWraps(rowColumnNode);
@@ -404,6 +407,33 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
 
   static bool _fillsAxis(SizeFit fit, {required double? max}) =>
       fit == SizeFit.expanded && max == null;
+
+  /// Whether [node] is pinned to both edges of an axis of a freeform
+  /// [parent] (a frame or stack): the editor's chained sizing, where the
+  /// pins, not the node's fixed size, decide its extent on that axis, so it
+  /// fills the slot its parent gives it. A Scroller pinned all around a
+  /// 1280 wide page otherwise laid its content out at 1280 on a wider
+  /// screen. A node that hugs that axis sizes itself.
+  static bool chainedOnAxis(
+    BaseNode node,
+    BaseNode? parent, {
+    required bool horizontal,
+  }) {
+    if (parent == null ||
+        !const {
+          'frame',
+          'stack',
+          'freeformPlaceholder',
+        }.contains(parent.type)) {
+      return false;
+    }
+    final EdgePinsModel pins = node.edgePins;
+    final bool chained = horizontal
+        ? pins.left != null && pins.right != null
+        : pins.top != null && pins.bottom != null;
+    final SizeFit fit = horizontal ? node.horizontalFit : node.verticalFit;
+    return chained && fit != SizeFit.shrinkWrap;
+  }
 
   /// Whether any of [children] flexes along [rowColumnNode]'s main axis
   /// (expanded, flexible, or a flex spacer).
