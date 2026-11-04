@@ -2,6 +2,7 @@
 // `storage` variable), and cloud files (uploads).
 import 'dart:convert';
 
+import 'package:codelessly_api/codelessly_api.dart' show CloudFileAccess;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -146,15 +147,6 @@ class PreferencesLocalStorage extends LocalStorageBase {
       await _prefs.remove('$prefix$key');
     }
   }
-}
-
-/// Who can read an uploaded file.
-enum CloudFileAccess {
-  /// Anyone with its URL.
-  public,
-
-  /// Only the user who uploaded it (under `users/{uid}`).
-  private,
 }
 
 /// A stored file.

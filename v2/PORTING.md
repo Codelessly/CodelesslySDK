@@ -90,6 +90,22 @@ bound prop needs nothing more: it gets the node already bound.
 `test/samples/bindings` is the runtime golden set (SDK 8.x rendered with the
 pages' variables and conditions: `tool/update_samples.sh bindings`).
 
+## Runtime (actions)
+
+`lib/src/runtime/actions` runs reactions (API v2 `Reaction`, `ActionDef`;
+DESIGN.md §5.2): `CodelesslyActions` is the `ActionRunner`, with one typed
+handler per action type (handlers.dart) over an `ActionContext`
+(`RuntimeActionContext`: scope, expressions, services, an `ActionUi`, the
+node tree, `NodeValues`). Give a tree `TreeReactions(runner:, context:)` as
+its `interactions` and, while a `NodeView(interactive: true)` shows it, its
+nodes react: taps, long presses, hover and swipes are recognizers in a
+`RenderReactions` layer of the node's chain; `load`, timers, value changes
+and keys live with the box; viewport triggers are checked after frames. A
+recipe whose island takes input reports it with `fireTrigger(b, 'changed',
+event: {'value': v})` (inputs.dart, material.dart): the runtime writes the
+value to the variable the input's value is bound to and runs the node's
+reactions. A type whose island takes taps itself is in `selfTappedTypes`.
+
 ## Rules
 
 * Edit only your group's files (the three above, `test/samples/<group>`,

@@ -3,7 +3,7 @@
 // navigation actions.
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart' show PublishModel;
+import 'package:codelessly_api/codelessly_api.dart' show ActionDef, Json, NavigateAction, PublishModel;
 import 'package:flutter/foundation.dart';
 
 /// A screen of a Codelessly app and the params it was opened with.
@@ -175,7 +175,7 @@ abstract final class CanvasLocation {
       };
 }
 
-/// What a navigation action (`{"type": "navigation", ...}`) asks for.
+/// What a navigation action (`{"type": "navigate", ...}`) asks for.
 @immutable
 class NavigationRequest {
   const NavigationRequest({
@@ -186,18 +186,20 @@ class NavigationRequest {
     this.baseParams = const {},
   });
 
+  /// [action] with its params (evaluated) [params] and [baseParams].
+  factory NavigationRequest.fromAction(NavigateAction action, {Json? params, Json? baseParams}) => NavigationRequest(
+        type: NavigationType.values[action.mode.index],
+        destinationId: action.to,
+        params: params ?? action.params,
+        baseDestinationId: action.base.isEmpty ? null : action.base,
+        baseParams: baseParams ?? action.baseParams,
+      );
+
   /// Reads a navigation action's JSON.
-  factory NavigationRequest.fromJson(Map<String, Object?> action) {
-    Map<String, Object?> map(Object? v) => v is Map ? {for (final e in v.entries) '${e.key}': e.value} : const {};
-    final base = action['baseDestinationId'];
-    return NavigationRequest(
-      type: NavigationType.values.asNameMap()[action['navigationType']] ?? NavigationType.push,
-      destinationId: action['destinationId'] is String ? action['destinationId'] as String : '',
-      params: map(action['params']),
-      baseDestinationId: base is String && base.isNotEmpty ? base : null,
-      baseParams: map(action['baseParams']),
-    );
-  }
+  factory NavigationRequest.fromJson(Map<String, Object?> action) => switch (ActionDef.fromJson(action)) {
+        final NavigateAction a => NavigationRequest.fromAction(a),
+        _ => const NavigationRequest(),
+      };
 
   final NavigationType type;
 

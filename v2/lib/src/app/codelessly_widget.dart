@@ -1,13 +1,18 @@
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, Node, PublishLayout, PublishModel;
-import 'package:flutter/gestures.dart' show kTouchSlop;
+import 'package:codelessly_api/codelessly_api.dart' show Json, NavigateAction, Node, PublishLayout, PublishModel;
 import 'package:flutter/material.dart';
 
 import '../render/node_tree.dart';
 import '../render/node_view.dart';
 import '../render/source.dart';
+import '../runtime/actions/node_values.dart';
+import '../runtime/actions/ui.dart';
+import '../runtime/actions/wiring.dart';
 import '../runtime/contracts.dart';
+import '../runtime/expressions/bindings.dart';
+import '../runtime/expressions/engine.dart';
+import '../runtime/expressions/scopes.dart';
 import 'codelessly.dart';
 import 'navigation.dart';
 import 'runtime.dart';
@@ -92,8 +97,9 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
   bool get isLoaded => _layout != null && _error == null;
 
-  /// The shown screen's value scope (variables, route params, data).
-  MapValueScope? get scope => _screen?.scope;
+  /// The shown screen's value scope: its variables, over the route's params
+  /// (`route`) and the data (`data`).
+  VariableScope? get scope => _screen?.scope;
 
   /// What the shown screen's actions run with: its scope, services and
   /// navigation.
@@ -108,7 +114,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
 
   /// The value at [path] in the shown screen (`count`, `route.id`,
   /// `data.user.name`).
-  Object? read(String path) => _screen?.scope.read(path);
+  Object? read(String path) => _screen == null ? null : readPath(_screen!.scope, path);
 
   /// Sets variable [name] of the shown screen.
   void setVariable(String name, Object? value) => _screen?.context.setVariable(name, value);
@@ -406,31 +412,43 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   }
 }
 
-/// The runtime state of one shown layout.
+/// The runtime state of one shown layout: its scopes (the app's data, the
+/// route's params, the screen's variables), its node tree with bindings,
+/// conditions and node values, and what its actions run with.
 class _ScreenState {
   _ScreenState({
     required this.layout,
-    required this.root,
+    required this.values,
     required this.scope,
-    required this.source,
+    required this.nodeValues,
+    required this.binder,
+    required this.bound,
     required this.tree,
     required this.context,
     required this.actions,
+    required this.reactions,
   });
 
   final PublishLayout layout;
-  final MapValueScope root;
-  final MapValueScope scope;
-  final BoundSource source;
+  final ValuesScope values;
+  final VariableScope scope;
+  final NodeValues nodeValues;
+  final NodeBinder? binder;
+  final BoundSource? bound;
   final NodeTree tree;
   final ScreenActionContext context;
   final ActionRunner actions;
+  final TreeReactions reactions;
 
   void dispose() {
+    reactions.dispose();
+    context.dispose();
     tree.dispose();
-    source.dispose();
+    binder?.dispose();
+    bound?.dispose();
+    nodeValues.dispose();
     scope.dispose();
-    root.dispose();
+    values.dispose();
   }
 }
 
@@ -470,56 +488,70 @@ class _LayoutViewState extends State<_LayoutView> {
   _ScreenState _create() {
     final config = _codelessly.config;
     final appData = (_codelessly.data.read('data') as Map?)?.cast<String, Object?>() ?? const {};
-    final root = MapValueScope(
-      values: widget.data.isEmpty ? const {} : {'data': {...appData, ...widget.data}},
-      parent: _codelessly.data,
-    );
-    final scope = MapValueScope(values: {'route': widget.params}, parent: root);
-    final source = BoundSource(DocumentSource(widget.layout.document), config.expressions, scope);
+    final values = ValuesScope({
+      'route': widget.params,
+      if (widget.data.isNotEmpty) 'data': {...appData, ...widget.data},
+    }, _codelessly.data);
+    final scope = VariableScope(const [], parent: values);
+    final nodeValues = NodeValues(DocumentSource(widget.layout.document));
+    final engine = config.expressions;
+    NodeBinder? binder;
+    BoundSource? bound;
+    NodeSource source = nodeValues;
+    if (engine is Expressions) {
+      binder = NodeBinder(scope: scope, logic: widget.layout.logic, engine: engine);
+    } else if (engine is! NoopExpressionEngine) {
+      source = bound = BoundSource(nodeValues, engine, scope);
+    }
+    final tree = NodeTree(source, binder: binder);
     final context = ScreenActionContext(
       scope: scope,
-      expressions: config.expressions,
-      services: config.services,
-      navigate: _navigate,
+      expressions: engine,
+      services: _codelessly.services,
+      ui: _ScreenUi(this),
+      functions: config.functions,
+      tree: tree,
+      nodeValues: nodeValues,
     );
+    final reactions = TreeReactions(runner: config.actions, context: context);
+    tree.interactions = reactions;
     final screen = _ScreenState(
       layout: widget.layout,
-      root: root,
+      values: values,
       scope: scope,
-      source: source,
-      tree: NodeTree(source),
+      nodeValues: nodeValues,
+      binder: binder,
+      bound: bound,
+      tree: tree,
       context: context,
       actions: config.actions,
+      reactions: reactions,
     );
     widget.controller?._screen = screen;
     return screen;
   }
 
-  /// Starts canvas [canvasId]'s variables (once per canvas), with route
-  /// params of the same name over them.
+  /// Declares canvas [canvasId]'s variables (once per canvas), starting at
+  /// the route params of the same name.
   void _seed(String canvasId) {
     if (!_seeded.add(canvasId)) return;
-    final vars = initialVariables(widget.layout, canvasId);
     final scope = _screen.scope;
-    final fresh = <String, Object?>{
-      for (final e in vars.entries)
-        if (!scope.declares(e.key)) e.key: widget.params.containsKey(e.key) ? widget.params[e.key] : e.value,
-    };
-    if (fresh.isNotEmpty) scope.setAll(fresh);
+    for (final v in widget.layout.variablesOf(canvasId)) {
+      if (scope.declares(v.name)) continue;
+      scope.define(v);
+      if (widget.params.containsKey(v.name)) scope.set(v.name, widget.params[v.name]);
+    }
   }
 
   void _shownCanvas(String canvasId) {
     if (_shown == canvasId) return;
     _shown = canvasId;
-    // Listeners hear of it, and load reactions run, once the canvas is laid
-    // out (this runs while it is).
+    // Listeners hear of it once the canvas is laid out (this runs while it
+    // is). Its load reactions run from its boxes (TreeReactions).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _shown != canvasId) return;
       widget.controller?._update(canvasId: canvasId);
       _reportRoute();
-      for (final n in widget.layout.document.subtree(canvasId)) {
-        if (reactsTo(n, 'load')) _run(n.id, 'load');
-      }
     });
   }
 
@@ -533,19 +565,8 @@ class _LayoutViewState extends State<_LayoutView> {
     if (_codelessly.route.value != route) _codelessly.route.value = route;
   }
 
-  Future<void> _run(String nodeId, String trigger) async {
-    final node = _screen.tree.resolve(nodeId);
-    if (node == null) return;
-    try {
-      await _codelessly.config.actions.trigger(node, trigger, _screen.context);
-    } catch (e, s) {
-      FlutterError.reportError(FlutterErrorDetails(exception: e, stack: s, library: 'codelessly_sdk', context: ErrorDescription('running the $trigger reactions of $nodeId')));
-    }
-  }
-
-  Future<void> _navigate(Json action) async {
+  Future<void> _navigate(NavigationRequest request) async {
     if (!mounted) return;
-    final request = NavigationRequest.fromJson(action);
     final handler = widget.host.onNavigate;
     if (handler != null && await handler(context, request)) return;
     if (!mounted) return;
@@ -601,34 +622,6 @@ class _LayoutViewState extends State<_LayoutView> {
     }
   }
 
-  void _tap(Offset position, RenderBox view) {
-    final canvasId = _shown;
-    if (canvasId == null) return;
-    final tree = _screen.tree;
-    final source = tree.source;
-    bool shown(String id) {
-      String? at = id;
-      while (at != null) {
-        final n = source.node(at);
-        if (n == null || !n.visible) return false;
-        at = source.parentOf(at);
-      }
-      return true;
-    }
-
-    String? target;
-    for (final n in widget.layout.document.subtree(canvasId)) {
-      if (!reactsTo(n, 'click')) continue;
-      final box = tree.boxOf(n.id);
-      if (box == null || !box.attached || box.hidden) continue;
-      final rect = box.rectIn(view);
-      if (rect == null || !rect.contains(position) || !shown(n.id)) continue;
-      // Depth first: a later match is deeper, or above an earlier sibling.
-      target = n.id;
-    }
-    if (target != null) _run(target, 'click');
-  }
-
   @override
   void didUpdateWidget(_LayoutView oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -665,10 +658,7 @@ class _LayoutViewState extends State<_LayoutView> {
       final box = CanvasViewport.resolve(canvas, constraints, sizing: widget.sizing);
       return CanvasViewportBox(
         box: box,
-        child: _TapListener(
-          onTap: _tap,
-          child: NodeView(tree: _screen.tree, rootId: canvasId, interactive: true),
-        ),
+        child: NodeView(tree: _screen.tree, rootId: canvasId, interactive: true),
       );
     });
     if (!config.useHostTheme) {
@@ -686,39 +676,33 @@ class _LayoutViewState extends State<_LayoutView> {
   }
 }
 
-/// Reports taps (a pointer down and up without moving) at their position in
-/// its child, without taking part in the gesture arena: islands below keep
-/// their own gestures.
-class _TapListener extends StatefulWidget {
-  const _TapListener({required this.onTap, required this.child});
+/// The UI of a screen's actions: navigation through the app's routes (and
+/// [CodelesslyWidget.onNavigate]), modals showing the app's screens.
+class _ScreenUi extends NavigatorActionUi {
+  _ScreenUi(this.view) : super(context: () => view.mounted ? view.context : null);
 
-  final void Function(Offset position, RenderBox view) onTap;
-  final Widget child;
+  final _LayoutViewState view;
 
   @override
-  State<_TapListener> createState() => _TapListenerState();
-}
-
-class _TapListenerState extends State<_TapListener> {
-  final Map<int, Offset> _down = {};
+  ScreenBuilder get modal => (destination, params) {
+        final layoutId = view._codelessly.publishModel?.resolveLayoutId(destination);
+        if (layoutId == null) return null;
+        final model = view._codelessly.publishModel!;
+        final canvasId = model.layouts[layoutId]?.canvases.any((c) => c.id == destination) ?? false ? destination : null;
+        return CodelesslyWidget(
+          codelessly: view._codelessly,
+          layoutId: layoutId,
+          canvasId: canvasId,
+          params: params,
+          data: view.widget.data,
+          sizing: CanvasSizing.design,
+          onNavigate: view.widget.host.onNavigate,
+        );
+      };
 
   @override
-  Widget build(BuildContext context) => Listener(
-        behavior: HitTestBehavior.translucent,
-        onPointerDown: (e) => _down[e.pointer] = e.localPosition,
-        onPointerMove: (e) {
-          final start = _down[e.pointer];
-          if (start != null && (e.localPosition - start).distance > kTouchSlop) _down.remove(e.pointer);
-        },
-        onPointerCancel: (e) => _down.remove(e.pointer),
-        onPointerUp: (e) {
-          final start = _down.remove(e.pointer);
-          if (start == null || (e.localPosition - start).distance > kTouchSlop) return;
-          final box = context.findRenderObject();
-          if (box is RenderBox) widget.onTap(e.localPosition, box);
-        },
-        child: widget.child,
-      );
+  Future<void> navigate(NavigateAction action, {Json params = const {}, Json baseParams = const {}}) =>
+      view._navigate(NavigationRequest.fromAction(action, params: params, baseParams: baseParams));
 }
 
 /// What shows while a layout loads.

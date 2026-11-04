@@ -10,7 +10,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show Node, SizeFit, FlexProps, ScrollProps, TextProps, IconProps;
+import 'package:codelessly_api/codelessly_api.dart' show Json, Node, SizeFit, FlexProps, ScrollProps, TextProps, IconProps;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -68,6 +68,32 @@ class Slot {
   int get hashCode => Object.hash(kind, identityHashCode(parent));
 }
 
+/// A running app's interaction layers: what wires a node's reactions (taps,
+/// hover, viewport, timers...) into its box. Set on [NodeTree.interactions];
+/// used only while the tree is interactive (see [NodeTree.animates]).
+abstract interface class NodeInteractions {
+  /// Adds [box]'s interaction layers for node [n] (as shown) to [chain],
+  /// between its rotation and its loops.
+  void addLayers(NodeBox box, Node n, List<RenderBox> chain);
+
+  /// An event of [box]'s node from inside it: an input's `changed` or
+  /// `submitted`, a button's `click` (islands report them).
+  void fire(NodeBox box, String trigger, {Json event = const {}});
+
+  /// [box] left the tree: what it runs stops.
+  void released(NodeBox box);
+
+  /// [box] was put in or taken out of the render tree ([NodeBox.attached]:
+  /// its view came or went, or it's moving).
+  void attachChanged(NodeBox box);
+}
+
+/// Reports trigger [trigger] of the node [b] builds (an island's input
+/// changed, a button was pressed), when its tree has [NodeTree.interactions].
+void fireTrigger(NodeBuilder b, String trigger, {Json event = const {}}) {
+  if (b is NodeBox && b.tree.animates) b.tree.interactions?.fire(b, trigger, event: event);
+}
+
 /// Hooks for tools (the editor's geometry cache, perf counters).
 abstract class NodeTreeObserver {
   void nodeLaidOut(NodeBox box);
@@ -78,9 +104,11 @@ typedef _Container = ContainerRenderObjectMixin<RenderBox, ContainerBoxParentDat
 
 /// Owns the boxes built from one [NodeSource].
 class NodeTree {
-  NodeTree(this.source, {this.observer, IslandEnvironment environment = const IslandEnvironment(), NodeBinder? binder})
+  NodeTree(this.source,
+      {this.observer, IslandEnvironment environment = const IslandEnvironment(), NodeBinder? binder, NodeInteractions? interactions})
       : islands = IslandManager(environment) {
     _binder = binder;
+    _interactions = interactions;
   }
 
   final NodeSource source;
@@ -88,6 +116,21 @@ class NodeTree {
 
   /// The islands (widget-built nodes) of this tree.
   final IslandManager islands;
+
+  /// Wires the nodes' reactions while the tree is interactive (a running
+  /// app); null: nodes don't react. Setting it re-applies every box.
+  NodeInteractions? get interactions => _interactions;
+  NodeInteractions? _interactions;
+  set interactions(NodeInteractions? value) {
+    if (identical(value, _interactions)) return;
+    for (final b in _boxes.values) {
+      _interactions?.released(b);
+    }
+    _interactions = value;
+    for (final b in _boxes.values.toList()) {
+      b._apply();
+    }
+  }
 
   /// Whether behaviours play (a running app: entrances, loops, spins) or
   /// rest (a design canvas).
@@ -299,6 +342,18 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   }
 
   @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    tree.interactions?.attachChanged(this);
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    tree.interactions?.attachChanged(this);
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     tree.observer?.nodePainted(this);
     if (_hidden || _collapsed || (_node != null && !_node!.visible)) return;
@@ -410,7 +465,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void _apply() {
     if (debugCountApplies) debugApplyCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
     final bound = tree.resolveBound(id, instance: instance);
-    final n = bound?.node;
+    final resolved = bound?.node;
+    // Bindings give a new node each time: the same one keeps its identity,
+    // which the children's slots compare (else re-applying a row whose
+    // structure depends on its children re-applies them, and so on).
+    final n = resolved != null && _applied != null && resolved == _applied ? _applied : resolved;
     _watchBindings(bound?.watch ?? const []);
     if ((bound?.collapsed ?? false) != _collapsed) {
       _collapsed = !_collapsed;
@@ -465,6 +524,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
         ..origin = Offset(m.left / 2 - m.right / 2, m.top / 2 - m.bottom / 2)
         ..alignment = Alignment.center);
     }
+    if (tree.animates) tree.interactions?.addLayers(this, n, chain);
     loopLayers(this, n, chain, animates: tree.animates);
     if (n.opacity < 0.99) {
       chain.add(_obtain<RenderOpacity>('opacity', () => RenderOpacity(opacity: n.opacity))..opacity = n.opacity);
@@ -1387,6 +1447,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       }
     }
     _unsubscribe();
+    tree.interactions?.released(this);
     for (final h in _islands.values) {
       h.release();
     }
