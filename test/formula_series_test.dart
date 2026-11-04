@@ -37,18 +37,17 @@ void main() {
     });
 
     test('range counts numbers through the end', () {
-      expect(eval('range(0, 6, 2)'), [0, 2, 4, 6]);
-      expect(eval('range(-1, 1)'), [-1, 0, 1]);
-      expect(eval('range(3, 1, -1)'), [3, 2, 1]);
+      expect(eval('range(0, 6, 2)'), [0, 2, 4]);
+      expect(eval('range(-1, 1)'), [-1, 0]);
+      expect(eval('range(3, 1, -1)'), [3, 2]);
       expect(eval('range(0, 1, 0)'), isEmpty);
     });
 
-    test('range steps dates by minutes', () {
+    test('range steps dates by minutes, end excluded', () {
       expect(eval('range("2026-10-22T07:25:00", "2026-10-22T07:40:00", 5)'), [
         '2026-10-22T07:25:00.000',
         '2026-10-22T07:30:00.000',
         '2026-10-22T07:35:00.000',
-        '2026-10-22T07:40:00.000',
       ]);
     });
 

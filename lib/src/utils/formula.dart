@@ -726,9 +726,9 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'range',
-      'range(count) or range(start, end, step), end included (dates: step '
+      'range(count) or range(start, end, step), end excluded (dates: step '
           'in minutes)',
-      'range(3, 7) → [3, 4, 5, 6, 7]; range(3) → [0, 1, 2]',
+      'range(3, 7) → [3, 4, 5, 6]; range(3) → [0, 1, 2]',
     ),
     FormulaFunctionDoc(
       'indexOf',
@@ -2321,9 +2321,10 @@ String? _formatDate(Object? value, Object? pattern) {
 /// The most items [range] returns, so a typo can't build a huge list.
 const int _maxRange = 10000;
 
-/// Numbers from [start] through [end] by [step], or, when [start] is a date,
-/// dates from [start] through [end] every [step] minutes (default 1).
-/// The times from [start] to [end], both included, [step] minutes apart
+/// Numbers from [start] up to, not including, [end] by [step], or, when
+/// [start] is a date, dates from [start] up to [end] every [step] minutes
+/// (default 1).
+/// The times from [start] up to, not including, [end], [step] minutes apart
 /// (default 1), as ISO 8601 text: `range(sunrise, sunset, 5)`.
 List<Object?> _dateRange(Object? start, Object? end, Object? step) {
   final DateTime? from = _toDate(start), to = _toDate(end);
@@ -2331,7 +2332,7 @@ List<Object?> _dateRange(Object? start, Object? end, Object? step) {
   if (from == null || to == null || !(minutes > 0)) return const [];
   final Duration delta = Duration(microseconds: (minutes * 60e6).round());
   return [
-    for (DateTime t = from; !t.isAfter(to); t = t.add(delta)) _dateText(t),
+    for (DateTime t = from; t.isBefore(to); t = t.add(delta)) _dateText(t),
   ].take(_maxRange).toList();
 }
 
@@ -2554,9 +2555,10 @@ List<Object?> _range(List<Object?> a) {
   if (!start.isFinite || !end.isFinite || !step.isFinite || step == 0) {
     return [];
   }
-  // A little slack keeps an end reached by fractional steps (0.1) in.
+  // The end is excluded, as in Python: range(0, 3) is [0, 1, 2]. A little
+  // slack keeps an end reached by fractional steps (0.1) out.
   return [
-    for (num v = start; step > 0 ? v <= end + 1e-9 : v >= end - 1e-9; v += step)
+    for (num v = start; step > 0 ? v < end - 1e-9 : v > end + 1e-9; v += step)
       _tidy(v),
   ].take(_maxRange).toList();
 }
