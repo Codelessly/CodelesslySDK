@@ -24,6 +24,7 @@ import 'layout/hug_cross.dart';
 import 'layout/text_box.dart';
 import 'paint/icon_glyph.dart';
 import 'paint/node_paint.dart';
+import 'paint/path_paint.dart';
 import 'islands.dart';
 import 'paint/spread_shadow.dart';
 import 'recipe.dart';
@@ -448,7 +449,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
           _shell(n, chain, content: (inner) => _freeform(n, inner));
         }
       case 'box':
-        _shell(n, chain);
+        if (n.prop(api.BoxProps.path).isNotEmpty) {
+          buildBoxPath(this, n, chain);
+        } else {
+          _shell(n, chain);
+        }
       case 'text':
         _text(n, chain);
       case 'icon':
