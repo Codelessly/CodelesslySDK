@@ -31,9 +31,11 @@ export 'package:codelessly_api/codelessly_api.dart'
         TextDecoration,
         TextDecorationStyle,
         TextOverflow,
+        TextDirection,
         TextStyle,
         TileMode,
-        VerticalDirection;
+        VerticalDirection,
+        WidgetState;
 
 export 'src/render/islands.dart' show IslandEnvironment, IslandHost;
 export 'src/render/node_tree.dart' show NodeTree, NodeBox, NodeTreeObserver, Slot, SlotKind;
