@@ -11,6 +11,11 @@
 # → test/fixtures/samples-<group>  the same pages migrated to v2
 #   (CodelesslyAPI/v2/migrate).
 #
+# The `bindings` group is rendered at runtime instead (variables and
+# conditions applied; tool/v1_runtime/export_v1_runtime_goldens_test.dart):
+# its pages carry the layout's v1 `variables` and `conditions` next to the
+# document.
+#
 # Env: EDITOR_DIR (default /home/user/CodelesslyEditor), API_DIR (default
 # ../../CodelesslyAPI from v2/, i.e. the sibling checkout).
 set -euo pipefail
@@ -25,8 +30,42 @@ for f in "$v2/test/samples/$group"/*.json; do
   gzip -c "$f" > "$tmp/in/$(basename "$f" .json).json.gz"
 done
 rm -rf "$v2/test/goldens/samples-$group" "$v2/test/fixtures/samples-$group"
+if [ "$group" = bindings ]; then
+  # Runtime goldens: SDK 8.x with the pages' variables and conditions applied
+  # (tool/v1_runtime), run from a throwaway package on the editor's SDK 8.x.
+  pkg="$tmp/exporter"
+  mkdir -p "$pkg/test"
+  cp "$v2/tool/v1_runtime/export_v1_runtime_goldens_test.dart" "$pkg/test/"
+  cat > "$pkg/pubspec.yaml" <<YAML
+name: v1_runtime_exporter
+publish_to: none
+environment:
+  sdk: ^3.13.0
+dependencies:
+  flutter:
+    sdk: flutter
+  codelessly_api:
+    path: $editor/CodelesslyAPI
+  codelessly_sdk:
+    path: $editor/CodelesslySDK
+  codelessly_canvas:
+    path: $editor/packages/codelessly_canvas
+  provider: ^6.1.2
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+dependency_overrides:
+  codelessly_api:
+    path: $editor/CodelesslyAPI
+YAML
+  (cd "$pkg" && flutter pub get --offline >/dev/null && flutter test test/export_v1_runtime_goldens_test.dart \
+    --dart-define=input="$tmp/in" \
+    --dart-define=goldens="$v2/test/goldens/samples-$group" \
+    --dart-define=pages="$tmp/pages" 2>&1 | grep -E "exported|failed|Error" || true)
+else
 (cd "$editor/packages/codelessly_canvas" && flutter test test/export_v1_goldens_test.dart \
   --dart-define=input="$tmp/in" \
   --dart-define=goldens="$v2/test/goldens/samples-$group" \
   --dart-define=pages="$tmp/pages" 2>&1 | grep -E "exported|failed|Error" || true)
+fi
 (cd "$api/v2/migrate" && dart run bin/migrate_pages.dart "$tmp/pages" "$v2/test/fixtures/samples-$group")
