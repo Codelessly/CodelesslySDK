@@ -1,0 +1,12 @@
+{"document": {
+  "rootNode": {"children": ["c"]},
+  "c": {"id": "c", "type": "canvas", "name": "Canvas", "parentID": "rootNode", "basicBoxLocal": [0, 0, 640, 640], "properties": {"bodyId": "b"}, "children": ["b"]},
+  "b": {"id": "b", "type": "frame", "name": "Body", "parentID": "c", "basicBoxLocal": [0, 0, 640, 640], "horizontalFit": "expanded", "verticalFit": "expanded", "children": ["sgDefault", "sgInk", "sgNormalized", "sgHug", "col"]},
+  "sgDefault": {"id": "sgDefault", "type": "signature", "name": "sgDefault", "parentID": "b", "basicBoxLocal": [20, 20, 320, 140], "edgePins": {"left": 20, "top": 20}, "positioningMode": "pin", "signatureKind": "strokes", "properties": {}},
+  "sgInk": {"id": "sgInk", "type": "signature", "name": "sgInk", "parentID": "b", "basicBoxLocal": [360, 20, 240, 120], "edgePins": {"left": 360, "top": 20}, "positioningMode": "pin", "signatureKind": "strokes", "value": [[[10, 20], [40, 60], [90, 30], [130, 70]], [[150, 40]]], "properties": {"error": true, "inkColor": "#FF222222", "inkWidth": 3, "showSignLine": false, "cornerRadius": [12, true, "circular"]}},
+  "sgNormalized": {"id": "sgNormalized", "type": "signature", "name": "sgNormalized", "parentID": "b", "basicBoxLocal": [20, 180, 360, 120], "edgePins": {"left": 20, "top": 180}, "positioningMode": "pin", "signatureKind": "normalized", "strokes": [[[0.1, 0.5], [0.3, 0.2], [0.6, 0.8], [0.9, 0.4]]], "properties": {"inkColor": "#FF3355FF", "strokeWidth": 2}},
+  "sgHug": {"id": "sgHug", "type": "signature", "name": "sgHug", "parentID": "b", "basicBoxLocal": [400, 180, 200, 100], "edgePins": {"left": 400, "top": 180}, "positioningMode": "pin", "horizontalFit": "shrinkWrap", "verticalFit": "shrinkWrap", "signatureKind": "strokes", "properties": {"placeholder": "Sign"}},
+  "col": {"id": "col", "type": "rowColumn", "name": "col", "parentID": "b", "basicBoxLocal": [20, 320, 500, 300], "edgePins": {"left": 20, "top": 320}, "positioningMode": "pin", "rowColumnType": "column", "children": ["cFill", "cNarrow"], "crossAxisAlignment": "stretch", "verticalFit": "shrinkWrap", "spacing": 8},
+  "cFill": {"id": "cFill", "type": "signature", "name": "cFill", "parentID": "col", "basicBoxLocal": [0, 0, 500, 140], "horizontalFit": "expanded", "signatureKind": "strokes", "properties": {"placeholderFontSize": 14}},
+  "cNarrow": {"id": "cNarrow", "type": "signature", "name": "cNarrow", "parentID": "col", "basicBoxLocal": [0, 0, 200, 100], "signatureKind": "strokes", "properties": {"backgroundColor": "#FFFFFFFF", "borderWidth": 1}}
+}}
