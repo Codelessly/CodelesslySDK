@@ -35,7 +35,10 @@ For each v1 node type (`CodelesslyAPI/lib/src/api/nodes/<type>_node.dart`):
      web views, charts). Child nodes inside an island: `NodeChild(tree:
      b.tree, id: childId, instance: ...)`.
    * Repeated templates (list/grid items in preview): `b.syncChildren(...,
-     instance: (b.id, index))` gives each repetition its own boxes.
+     instance: (b.id, index))` gives each repetition its own boxes;
+     `instances:` (one per id) scopes each item on its own. Leave the first
+     repetition unscoped (null): the goldens, like the editor, measure a
+     template at its first instance (`tree.boxOf(id)`).
    The outer layers (margin, constraints, behaviours such as motion, scale
    and loops, rotation, opacity, blurs, aspect ratio; see
    `lib/src/render/behaviours.dart`) are already added by the tree; build
