@@ -1,0 +1,84 @@
+// v2 values → Flutter values.
+import 'dart:ui' as ui;
+
+import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:flutter/rendering.dart';
+
+import '../text_defaults.dart';
+
+extension ColorToFlutter on api.Color {
+  Color get flutter => Color(value);
+}
+
+extension InsetsToFlutter on api.EdgeInsets {
+  EdgeInsets get flutter => EdgeInsets.fromLTRB(left, top, right, bottom);
+}
+
+extension RadiusToFlutter on api.BorderRadius {
+  BorderRadius get flutter => BorderRadius.only(
+        topLeft: Radius.circular(topLeft),
+        topRight: Radius.circular(topRight),
+        bottomRight: Radius.circular(bottomRight),
+        bottomLeft: Radius.circular(bottomLeft),
+      );
+}
+
+extension ConstraintsToFlutter on api.BoxConstraints {
+  BoxConstraints get flutter => BoxConstraints(
+        minWidth: minWidth ?? 0,
+        maxWidth: maxWidth ?? double.infinity,
+        minHeight: minHeight ?? 0,
+        maxHeight: maxHeight ?? double.infinity,
+      );
+}
+
+extension AlignmentToFlutter on api.Alignment {
+  Alignment get flutter => Alignment(x, y);
+}
+
+MainAxisAlignment mainAxisAlignment(api.MainAxisAlignment a) => MainAxisAlignment.values.byName(a.name);
+CrossAxisAlignment crossAxisAlignment(api.CrossAxisAlignment a) => CrossAxisAlignment.values.byName(a.name);
+Clip clip(api.Clip c) => Clip.values.byName(c.name);
+TextAlign textAlign(api.TextAlign a) => TextAlign.values.byName(a.name);
+TextOverflow textOverflow(api.TextOverflow o) => TextOverflow.values.byName(o.name);
+BlendMode blendMode(api.BlendMode b) => BlendMode.values.byName(b.name);
+
+/// A drop shadow effect as Flutter's `BoxShadow`.
+BoxShadow boxShadow(api.Effect e) => BoxShadow(
+      color: e.color.flutter,
+      offset: Offset(e.offset.dx, e.offset.dy),
+      blurRadius: e.blurRadius,
+      spreadRadius: e.spreadRadius,
+    );
+
+/// [style] as Flutter's `TextStyle`, over the v1-compatible base
+/// ([kTextBase]).
+TextStyle textStyle(api.TextStyle style) {
+  final weight = style.fontWeight;
+  return kTextBase.merge(TextStyle(
+    fontFamily: style.fontFamily,
+    fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],
+    fontStyle: style.fontStyle == null ? null : FontStyle.values.byName(style.fontStyle!.name),
+    fontSize: style.fontSize,
+    color: style.foreground == null ? style.color?.flutter : null,
+    letterSpacing: style.letterSpacing ?? 0,
+    height: style.height,
+    decoration: switch (style.decoration) {
+      null || api.TextDecoration.none => null,
+      api.TextDecoration.underline => TextDecoration.underline,
+      api.TextDecoration.overline => TextDecoration.overline,
+      api.TextDecoration.lineThrough => TextDecoration.lineThrough,
+    },
+    decorationColor: style.decorationColor?.flutter,
+    decorationStyle: style.decorationStyle == null || style.decorationStyle == api.TextDecorationStyle.solid
+        ? null
+        : TextDecorationStyle.values.byName(style.decorationStyle!.name),
+    decorationThickness: style.decorationThickness,
+    fontFeatures: style.tabularFigures == true ? const [ui.FontFeature.tabularFigures()] : null,
+    shadows: [
+      for (final s in style.shadows)
+        if (s.visible && s.type == api.EffectType.dropShadow)
+          Shadow(color: s.color.flutter, offset: Offset(s.offset.dx, s.offset.dy), blurRadius: s.blurRadius),
+    ],
+  ));
+}
