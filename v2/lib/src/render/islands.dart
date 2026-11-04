@@ -1,20 +1,30 @@
 // Islands: Flutter widgets for one node, hosted under a render box.
 //
-// Most nodes are render objects only. A widget that needs an element tree —
-// a text field, a slider, a video, a chart — is built as an island: its
-// widget is mounted under an [IslandHost] with the app's [BuildOwner]. No
-// widget or element exists above the island; the host is an ordinary render
-// box in the node tree. Islands build lazily, inside the host's layout (as
-// LayoutBuilder does), so a node that's never laid out never builds.
-import 'dart:async';
-
-import 'package:flutter/foundation.dart';
+// Most nodes are render objects only. A widget that needs an element tree (a
+// text field, a slider, a video, a chart) is built as an island: an
+// [IslandHost] render box in the node's chain, and under it the render
+// objects of the island's widgets.
+//
+// The island's elements live in the app's element tree. The element of the
+// widget that shows the nodes ([NodeView], or a [NodeChild] inside another
+// island) is an [IslandOwnerElement]: besides its render object, it owns one
+// child element per island under it, with the island's host as the slot, so
+// the island inherits from the app (theme, media query, localizations,
+// navigator, overlay, focus) like any widget, and is deactivated, reactivated
+// and unmounted with it. Its render object, though, sits under the host deep
+// in the node tree, as with Overlay or a sliver list: the owner element puts
+// it there ([IslandOwnerElement.insertRenderObjectChild]).
+//
+// Islands build lazily, inside their host's layout (as LayoutBuilder does), so
+// a node that's never laid out never builds. The owner is found then: the
+// nearest render ancestor that a [IslandOwnerElement] owns. When a node moves
+// under another owner (a list item, a node inside an island), its island's
+// elements move with it, keeping their state.
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
-/// The ambient widgets islands are built under (theme, media query,
-/// localizations), captured from where the tree is shown.
+/// How islands are built in one node tree.
 @immutable
 class IslandEnvironment {
   const IslandEnvironment({this.wrap, this.interactive = false});
@@ -23,94 +33,75 @@ class IslandEnvironment {
   /// only drawn (a design canvas, the default).
   final bool interactive;
 
-  /// Wraps an island's widget in inherited widgets.
+  /// Wraps every island's widget (extra inherited widgets). The app's own
+  /// inherited widgets reach islands without it.
   final Widget Function(Widget child)? wrap;
 
-  /// Captures the inherited widgets above [context].
-  factory IslandEnvironment.capture(BuildContext context, {bool interactive = false}) {
-    final mq = MediaQuery.maybeOf(context) ?? const MediaQueryData();
-    final dir = Directionality.maybeOf(context) ?? TextDirection.ltr;
-    final hasLocalizations = Localizations.maybeLocaleOf(context) != null;
-    return IslandEnvironment(
-      interactive: interactive,
-      wrap: (child) {
-        Widget w = InheritedTheme.captureAll(context, child);
-        if (hasLocalizations) w = Localizations.override(context: context, child: w);
-        return MediaQuery(data: mq, child: Directionality(textDirection: dir, child: w));
-      },
-    );
-  }
-
   /// [child] under the environment: a transparent Material (inputs and ink
-  /// need one) with an overlay (menus, tooltips); not focusable or tappable
-  /// unless [interactive].
+  /// need one), with the ambient widgets an app normally provides added only
+  /// where the app has none; not focusable or tappable unless [interactive].
   Widget apply(Widget child) {
     if (!interactive) child = ExcludeFocus(child: IgnorePointer(child: child));
-    final material = Material(
-      type: MaterialType.transparency,
-      child: Overlay.wrap(alwaysSizeToContent: true, clipBehavior: Clip.none, child: child),
+    // An island's scroll views are its own, not the app's primary one.
+    child = PrimaryScrollController.none(
+      child: Material(type: MaterialType.transparency, child: child),
     );
-    return wrap?.call(material) ??
-        MediaQuery(
-          data: const MediaQueryData(),
-          child: Directionality(textDirection: TextDirection.ltr, child: material),
-        );
+    child = _Ambient(child: child);
+    return wrap?.call(child) ?? child;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is IslandEnvironment && other.interactive == interactive && other.wrap == wrap;
+
+  @override
+  int get hashCode => Object.hash(interactive, wrap);
+}
+
+/// Media query, directionality and overlay for islands shown outside an app.
+class _Ambient extends StatelessWidget {
+  const _Ambient({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    var w = child;
+    if (Overlay.maybeOf(context) == null) {
+      w = Overlay.wrap(alwaysSizeToContent: true, clipBehavior: Clip.none, child: w);
+    }
+    if (Directionality.maybeOf(context) == null) w = Directionality(textDirection: TextDirection.ltr, child: w);
+    if (MediaQuery.maybeOf(context) == null) w = MediaQuery(data: const MediaQueryData(), child: w);
+    return w;
   }
 }
 
-/// Builds and owns the islands of one node tree.
+/// The islands of one node tree.
 class IslandManager {
-  IslandManager([this.environment = const IslandEnvironment()]);
+  IslandManager([this._environment = const IslandEnvironment()]);
 
-  IslandEnvironment environment;
+  IslandEnvironment _environment;
+  IslandEnvironment get environment => _environment;
 
-  /// Islands share the app's build owner: GlobalKeys and focus resolve
-  /// through it.
-  BuildOwner get buildOwner => WidgetsBinding.instance.buildOwner!;
+  /// Setting another environment rebuilds every island.
+  set environment(IslandEnvironment e) {
+    if (e == _environment) return;
+    _environment = e;
+    rebuildAll();
+  }
+
   final Set<IslandHost> _hosts = {};
   Iterable<IslandHost> get hosts => _hosts;
 
   IslandHost host(String debugLabel, WidgetBuilder builder) {
-    final h = IslandHost._(this, debugLabel)..builder = builder;
+    final h = IslandHost._(this, debugLabel).._builder = builder;
     _hosts.add(h);
-    _markDirty(h);
     return h;
   }
 
-  final Set<IslandHost> _dirty = {};
-  bool _flushing = false;
-
-  /// Called when an island needs building; the view then flushes islands
-  /// before laying out ([flush]).
-  VoidCallback? onNeedsFlush;
-
-  void _markDirty(IslandHost h) {
-    _dirty.add(h);
-    if (!_flushing) onNeedsFlush?.call();
-  }
-
-  /// Rebuilds every island (the environment changed).
+  /// Rebuilds every island on its next layout.
   void rebuildAll() {
     for (final h in _hosts) {
       h.markRebuild();
-    }
-  }
-
-  /// Builds every island that needs it. Called by the view inside its own
-  /// layout callback, so an island is built before a parent measures it.
-  void flush() {
-    if (_dirty.isEmpty) return;
-    _flushing = true;
-    try {
-      while (_dirty.isNotEmpty) {
-        final batch = _dirty.toList();
-        _dirty.clear();
-        for (final h in batch) {
-          if (h.attached) h._buildNow();
-        }
-      }
-    } finally {
-      _flushing = false;
     }
   }
 
@@ -121,18 +112,43 @@ class IslandManager {
   }
 }
 
+/// Schedules [callback] for the layout phase: now during a frame, else from
+/// the next frame's start (the render tree stays clean between frames), as
+/// LayoutBuilder does.
+void _whenLaidOut(VoidCallback callback) {
+  switch (SchedulerBinding.instance.schedulerPhase) {
+    case SchedulerPhase.idle || SchedulerPhase.postFrameCallbacks:
+      SchedulerBinding.instance.scheduleFrameCallback((_) => callback());
+      SchedulerBinding.instance.ensureVisualUpdate();
+    case SchedulerPhase.transientCallbacks || SchedulerPhase.midFrameMicrotasks || SchedulerPhase.persistentCallbacks:
+      callback();
+  }
+}
+
 /// A render box hosting one island's widget.
-class IslandHost extends RenderProxyBox {
+class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin {
   IslandHost._(this.manager, this.debugLabel);
 
   final IslandManager manager;
   final String debugLabel;
-  RenderObjectToWidgetElement<RenderBox>? _element;
-  _IslandScopeElement? _scope;
-  bool _dirty = true;
-  bool _descendantsDirty = false;
   bool _disposed = false;
   bool get disposed => _disposed;
+
+  /// The island's root element (null until built, or once unmounted).
+  _IslandScopeElement? _scope;
+
+  /// The element that owns [_scope].
+  IslandOwnerElement? _owner;
+
+  /// The island's root element, for tools and tests.
+  @visibleForTesting
+  Element? get element => _scope;
+
+  /// Keeps the island's elements (and their state) when its node moves under
+  /// another owner.
+  late final GlobalKey _key = GlobalObjectKey(this);
+
+  bool _dirty = true;
 
   WidgetBuilder _builder = _empty;
   static Widget _empty(BuildContext _) => const SizedBox.shrink();
@@ -151,109 +167,249 @@ class IslandHost extends RenderProxyBox {
   @override
   bool get isRepaintBoundary => _animates;
 
+  /// Times this island was built (tests, profiling).
+  int debugBuilds = 0;
+
   /// Rebuilds the island on its next layout.
   void markRebuild() {
     if (_disposed) return;
-    if (!_dirty) {
-      _dirty = true;
-      manager._markDirty(this);
+    _dirty = true;
+    if (attached) {
+      scheduleLayoutCallback();
+    } else {
+      markNeedsLayout();
     }
-    markNeedsLayout();
   }
 
-  void _buildNow() {
-    if (_disposed) return;
-    if (_dirty) {
-      _rebuild();
-    } else if (_descendantsDirty && _scope != null) {
-      _descendantsDirty = false;
-      if (!_animates) {
+  bool _rebuildScheduled = false;
+  int _ownRebuilds = 0;
+
+  /// A widget inside the island needs building: flushed in the next layout.
+  void _scheduleDescendantRebuild() {
+    if (_disposed || _building || _rebuildScheduled) return;
+    _rebuildScheduled = true;
+    _whenLaidOut(() {
+      _rebuildScheduled = false;
+      if (_disposed) return;
+      // An inherited change rebuilds an island once; a widget that keeps
+      // rebuilding itself animates.
+      if (!_animates && ++_ownRebuilds >= 2) {
         _animates = true;
         markNeedsCompositingBitsUpdate();
         markNeedsPaint();
       }
-      _building = true;
-      try {
-        manager.buildOwner.buildScope(_scope!);
-      } finally {
-        _building = false;
-      }
-    }
+      if (attached) scheduleLayoutCallback();
+    });
   }
 
-  bool _building = false;
+  /// The element owning the islands at this point of the render tree.
+  IslandOwnerElement? _findOwner() {
+    for (RenderObject? p = parent; p != null; p = p.parent) {
+      if (p is IslandParent) return p._islandOwner;
+    }
+    return null;
+  }
 
-  /// Times this island was built (tests, profiling).
-  int debugBuilds = 0;
+  @override
+  void performLayout() {
+    runLayoutCallback();
+    super.performLayout();
+  }
 
-  void _rebuild() {
+  @override
+  void layoutCallback() {
+    if (_disposed) return;
+    final owner = _findOwner();
+    // Shown without a NodeView or NodeChild above: nothing to build under.
+    if (owner == null || !owner.mounted) return;
+    final scope = _scope;
     _building = true;
     try {
-      debugBuilds++;
-      _dirty = false;
-      _descendantsDirty = false;
-      final adapter = RenderObjectToWidgetAdapter<RenderBox>(
-        container: this,
-        debugShortDescription: '[island $debugLabel]',
-        child: _IslandScope(host: this, child: manager.environment.apply(Builder(builder: _builder))),
-      );
-      final owner = manager.buildOwner;
-      final existing = _element;
-      if (existing == null) {
-        _element = adapter.attachToRenderTree(owner);
+      if (_dirty || scope == null || !identical(owner, _owner)) {
+        _dirty = false;
+        debugBuilds++;
+        owner._buildIsland(this, _IslandScope(key: _key, host: this, child: manager.environment.apply(Builder(builder: _builder))));
       } else {
-        owner.buildScope(existing, () => existing.update(adapter));
+        owner.owner!.buildScope(scope);
       }
-      final scope = _scope;
-      if (scope != null) owner.buildScope(scope);
     } finally {
       _building = false;
     }
   }
 
-  void _scheduleDescendantRebuild() {
-    if (_disposed || _building) return;
-    _descendantsDirty = true;
-    manager._markDirty(this);
-  }
-
-  @override
-  void performLayout() {
-    if (!_disposed) {
-      if (_dirty) {
-        invokeLayoutCallback<BoxConstraints>((_) => _rebuild());
-      } else if (_descendantsDirty && _scope != null) {
-        invokeLayoutCallback<BoxConstraints>((_) => _buildNow());
-      }
-    }
-    super.performLayout();
-  }
+  bool _building = false;
 
   /// Unmounts the island's widgets; the host can't be used again.
   void release() {
     if (_disposed) return;
     _disposed = true;
     manager._hosts.remove(this);
-    manager._dirty.remove(this);
-    final e = _element;
-    if (e == null) return;
-    final adapter = RenderObjectToWidgetAdapter<RenderBox>(container: this, child: null);
-    final owner = manager.buildOwner;
-    _element = null;
+    final owner = _owner;
+    if (owner != null && owner.mounted) owner._drop(this);
+  }
+
+  void _unmounted(_IslandScopeElement scope) {
+    if (!identical(_scope, scope)) return;
     _scope = null;
-    void deactivate() => owner.buildScope(e, () => e.update(adapter));
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      scheduleMicrotask(deactivate);
-    } else {
-      deactivate();
+    _owner = null;
+    _dirty = true;
+    // The island's render objects are disposed with its elements.
+    child = null;
+  }
+}
+
+/// A render object whose element ([IslandOwnerElement]) owns the islands
+/// under it.
+mixin IslandParent on RenderBox, RenderObjectWithLayoutCallbackMixin {
+  IslandOwnerElement? _islandOwner;
+
+  @override
+  void performLayout() {
+    runLayoutCallback();
+    super.performLayout();
+  }
+
+  /// Unmounts the islands released since the last layout.
+  @override
+  void layoutCallback() => _islandOwner?._flushDrops();
+}
+
+/// The element of a widget that shows node boxes ([NodeView], [NodeChild]):
+/// it owns the islands under its render object as its children, one per
+/// island, each in the slot of its [IslandHost].
+class IslandOwnerElement extends RenderObjectElement {
+  IslandOwnerElement(super.widget);
+
+  @override
+  IslandParent get renderObject => super.renderObject as IslandParent;
+
+  final Map<IslandHost, Element> _islands = {};
+  final Set<IslandHost> _drops = {};
+
+  /// Islands build during layout, in this scope: building them never flushes
+  /// the app's dirty widgets.
+  @override
+  BuildScope get buildScope => _buildScope;
+  late final BuildScope _buildScope = BuildScope(
+    scheduleRebuild: () => _whenLaidOut(() {
+      if (mounted) renderObject.scheduleLayoutCallback();
+    }),
+  );
+
+  @override
+  void mount(Element? parent, Object? newSlot) {
+    super.mount(parent, newSlot);
+    renderObject._islandOwner = this;
+  }
+
+  /// Going inactive, the islands' render objects leave their hosts (as an
+  /// element's render object leaves its parent): a host may have moved on
+  /// under another owner, which then takes the island over.
+  @override
+  void deactivate() {
+    for (final e in _islands.entries) {
+      final ro = e.value.renderObject;
+      if (ro != null && identical(e.key.child, ro)) e.key.child = null;
     }
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    for (final e in _islands.entries) {
+      final ro = e.value.renderObject;
+      if (ro is RenderBox && e.key.child == null && ro.parent == null) e.key.child = ro;
+    }
+  }
+
+  @override
+  void unmount() {
+    // The islands are unmounted already (children first).
+    final ro = renderObject;
+    if (identical(ro._islandOwner, this)) ro._islandOwner = null;
+    super.unmount();
+  }
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    for (final e in _islands.values.toList()) {
+      visitor(e);
+    }
+  }
+
+  @override
+  void forgetChild(Element child) {
+    final host = child.slot! as IslandHost;
+    if (identical(_islands[host], child)) {
+      _islands.remove(host);
+      if (identical(host._owner, this)) host._owner = null;
+    }
+    super.forgetChild(child);
+  }
+
+  /// Builds (or updates) [host]'s island as [widget]. Called in the host's
+  /// layout callback.
+  void _buildIsland(IslandHost host, Widget widget) {
+    owner!.buildScope(this, () {
+      final previous = host._owner;
+      if (previous != null && !identical(previous, this)) previous._release(host);
+      host._owner = this;
+      final e = updateChild(_islands[host], widget, host);
+      if (e != null) _islands[host] = e;
+    });
+  }
+
+  /// Lets go of [host]'s island so another owner takes it (with its state,
+  /// by its global key).
+  void _release(IslandHost host) {
+    final e = _islands.remove(host);
+    if (e == null) return;
+    forgetChild(e);
+    deactivateChild(e);
+  }
+
+  /// Unmounts [host]'s island at the next layout.
+  void _drop(IslandHost host) {
+    _drops.add(host);
+    _whenLaidOut(() {
+      if (mounted && _drops.isNotEmpty) renderObject.scheduleLayoutCallback();
+    });
+  }
+
+  void _flushDrops() {
+    if (_drops.isEmpty) return;
+    owner!.buildScope(this, () {
+      final drops = _drops.toList();
+      _drops.clear();
+      for (final h in drops) {
+        final e = _islands.remove(h);
+        if (identical(h._owner, this)) h._owner = null;
+        if (e != null) updateChild(e, null, h);
+      }
+    });
+  }
+
+  @override
+  void insertRenderObjectChild(RenderObject child, IslandHost slot) {
+    slot.child = child as RenderBox;
+  }
+
+  @override
+  void moveRenderObjectChild(RenderObject child, IslandHost oldSlot, IslandHost newSlot) {
+    assert(false, 'An island stays in its host');
+  }
+
+  @override
+  void removeRenderObjectChild(RenderObject child, IslandHost slot) {
+    if (identical(slot.child, child)) slot.child = null;
   }
 }
 
 /// The root of an island's widgets: its descendants rebuild in their own
 /// build scope, flushed during the host's layout.
 class _IslandScope extends ProxyWidget {
-  const _IslandScope({required this.host, required super.child});
+  const _IslandScope({super.key, required this.host, required super.child});
   final IslandHost host;
 
   @override
@@ -278,8 +434,9 @@ class _IslandScopeElement extends ProxyElement {
 
   @override
   void unmount() {
-    if (identical(host._scope, this)) host._scope = null;
+    final host = this.host;
     super.unmount();
+    host._unmounted(this);
   }
 
   @override

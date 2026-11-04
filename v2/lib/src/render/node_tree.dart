@@ -13,6 +13,7 @@ import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show Node, SizeFit, FlexProps, ScrollProps, TextProps, IconProps;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show WidgetBuilder;
 
 import 'behaviours.dart';
@@ -148,18 +149,23 @@ class NodeTree {
     return box;
   }
 
-  void _orphan(NodeBox box) {
+  /// [box] was taken out of its parent: unless something places it again by
+  /// the end of the frame (a moved node, a list item, a node inside an
+  /// island, which places its nodes while laid out), it's released.
+  void orphan(NodeBox box) {
+    if (!identical(_boxes[box.key], box)) return;
     _orphans.add(box);
     if (_sweepScheduled) return;
     _sweepScheduled = true;
-    scheduleMicrotask(() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       _sweepScheduled = false;
       final orphans = _orphans.toList();
       _orphans.clear();
       for (final b in orphans) {
         if (b.parent == null && identical(_boxes[b.key], b)) release(b);
       }
-    });
+    }, debugLabel: 'NodeTree.orphan');
+    SchedulerBinding.instance.ensureVisualUpdate();
   }
 
   void release(NodeBox box) {
@@ -298,8 +304,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void freeform(Node n, List<RenderBox> chain, {List<String>? children}) => _freeform(n, chain, children: children);
 
   @override
-  void syncChildren(_Container container, List<String> ids, Slot childSlot,
-          {Object? instance, List<Object?>? instances}) =>
+  void syncChildren(ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>> container, List<String> ids,
+          Slot childSlot, {Object? instance, List<Object?>? instances}) =>
       _syncChildren(container, ids, childSlot, instance: instance, instances: instances);
 
   final Map<String, IslandHost> _islands = {};
@@ -1004,7 +1010,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     while (extra != null) {
       final next = container.childAfter(extra);
       container.remove(extra);
-      if (extra is NodeBox) tree._orphan(extra);
+      if (extra is NodeBox) tree.orphan(extra);
       extra = next;
     }
   }
@@ -1016,7 +1022,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     while (child != null) {
       final next = c.childAfter(child);
       c.remove(child);
-      if (child is NodeBox) tree._orphan(child);
+      if (child is NodeBox) tree.orphan(child);
       child = next;
     }
     _container = null;
