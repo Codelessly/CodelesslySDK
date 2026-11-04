@@ -262,6 +262,37 @@ void main() {
     expect(current().topLeft, const Offset(40, 132));
   });
 
+  // A page drawn at 1280: a column pinned all around its frame, its sections
+  // stretching across it. On a wider screen the pins (chained sizing), not
+  // the column's fixed design width, decide how wide it lays them out.
+  testWidgets('a column pinned to both sides lays out at its slot width', (
+    tester,
+  ) async {
+    final section = rect(
+      'section',
+      NodeBox(0, 0, 400, 50),
+      parent: 'column',
+      horizontalFit: SizeFit.expanded,
+    );
+    final column = RowColumnNode(
+      id: 'column',
+      name: 'column',
+      basicBoxLocal: NodeBox(0, 0, 400, 300),
+      rowColumnType: RowColumnType.column,
+      crossAxisAlignment: CrossAxisAlignmentC.stretch,
+      edgePins: const EdgePinsModel(left: 0, top: 0, right: 0, bottom: 0),
+      positioningMode: PositioningMode.pin,
+      children: ['section'],
+    )..parentID = 'frame';
+    final root = frame('frame', NodeBox(0, 0, 400, 300), [column]);
+    final boxes = await pump(tester, root, [
+      column,
+      section,
+    ], screen: const Size(600, 300));
+    expect(boxes['column']!.width, 600);
+    expect(boxes['section']!.width, 600);
+  });
+
   // A header whose height follows the scroll: `${= max(64, 372 - scroll)}`.
   testWidgets('mounted size binding updates its freeform parent slot', (
     tester,
