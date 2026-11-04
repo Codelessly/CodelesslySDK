@@ -25,13 +25,8 @@ class _ExampleAppState extends State<ExampleApp> {
   String project = projects.keys.first;
   late Codelessly codelessly = _open(project);
 
-  Codelessly _open(String name) => Codelessly.asset(
-        projects[name]!,
-        config: const CodelesslyConfig(
-          // Runs navigation and links until an actions runtime is set.
-          actions: NavigationActionRunner(),
-        ),
-      );
+  // The default config runs the whole runtime: bindings, every action.
+  Codelessly _open(String name) => Codelessly.asset(projects[name]!);
 
   void _switch(String name) {
     if (name == project) return;

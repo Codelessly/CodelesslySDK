@@ -77,6 +77,27 @@ void main() {
     expect(tester.state<NavigatorState>(find.byType(Navigator)).canPop(), isFalse);
   });
 
+  testWidgets('the sign in button validates, waits and navigates (inside a conditional)', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final codelessly = codelesslyFor(actions: const CodelesslyActions());
+    final controller = await pumpApp(tester, codelessly);
+    expect(controller.layout!.id, signIn.id);
+    final button = nodeNamed(signIn, canvasNamed(signIn, 'Sign in · M'), 'Sign in button');
+    await tapNode(tester, controller, button);
+    // The demo's slow network: a delay before the next screen.
+    await tester.pump(const Duration(seconds: 4));
+    await settle(tester);
+    expect(codelessly.route.value?.layoutId, today.id);
+    expect(tester.state<NavigatorState>(find.byType(Navigator)).canPop(), isFalse);
+  });
+
+  testWidgets('by default, the runtime runs: bindings and every action', (tester) async {
+    expect(const CodelesslyConfig().expressions, isA<Expressions>());
+    expect(const CodelesslyConfig().actions, isA<CodelesslyActions>());
+    expect(Codelessly(config: const CodelesslyConfig()).services, isA<Services>());
+  });
+
   testWidgets('without an action runner, a tap does nothing', (tester) async {
     ignoreOverflows();
     setScreen(tester, const Size(390, 844));
@@ -98,11 +119,11 @@ void main() {
     // A push leaves the screen beneath; pop goes back to it.
     final home = await pumpApp(tester, codelessly, layoutId: today.id);
     final navigator = tester.state<NavigatorState>(find.byType(Navigator));
-    unawaited(home.actionContext!.navigate({'type': 'navigation', 'destinationId': canvasNamed(fleet, 'Fleet · M')}));
+    unawaited(home.actionContext!.navigate({'type': 'navigate', 'to': canvasNamed(fleet, 'Fleet · M')}));
     await settle(tester);
     expect(codelessly.route.value?.layoutId, fleet.id);
     expect(navigator.canPop(), isTrue);
-    await home.actionContext!.navigate({'type': 'navigation', 'navigationType': 'pop'});
+    await home.actionContext!.navigate({'type': 'navigate', 'mode': 'pop'});
     await settle(tester);
     expect(navigator.canPop(), isFalse);
     expect(find.byType(CodelesslyWidget), findsOneWidget);
@@ -116,11 +137,11 @@ void main() {
     final fleet = layoutWithCanvas(bundle, 'Fleet · M');
     final shop = layoutWithCanvas(bundle, 'Shop · M');
     final navigate = home.actionContext!.navigate;
-    unawaited(navigate({'type': 'navigation', 'destinationId': fleet.id}));
-    unawaited(navigate({'type': 'navigation', 'destinationId': shop.id}));
+    unawaited(navigate({'type': 'navigate', 'to': fleet.id}));
+    unawaited(navigate({'type': 'navigate', 'to': shop.id}));
     await settle(tester);
     await navigate({
-      'type': 'navigation', 'navigationType': 'reset', 'destinationId': shop.id, 'baseDestinationId': signIn.id, //
+      'type': 'navigate', 'mode': 'reset', 'to': shop.id, 'base': signIn.id, //
     });
     await settle(tester);
     final navigator = tester.state<NavigatorState>(find.byType(Navigator));
@@ -237,6 +258,7 @@ void main() {
     for (final layout in linewatch.layouts.values) {
       final canvas = layout.document[layout.canvasIds.single]!;
       setScreen(tester, Size(canvas.layout.width.value, canvas.layout.height.value));
+      debugPrint('LAYOUT ${canvas.name}');
       final controller = CodelesslyWidgetController(layoutId: layout.id);
       await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: codelessly, controller: controller)));
       await settle(tester);
