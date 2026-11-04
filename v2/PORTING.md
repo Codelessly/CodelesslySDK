@@ -77,6 +77,19 @@ data, actions, cloud data) is a separate port: leave hooks, don't build it.
   (goldens) and migrates them (fixtures), and `flutter test
   test/parity_test.dart --dart-define=sets=samples-<group>` must be 100%.
 
+## Runtime (bindings)
+
+`lib/src/runtime/expressions` is the `${...}` language (SDK 8.x's formula
+evaluator, paths and accessors), the value scopes (`VariableScope`,
+`ItemScope`, `ValuesScope`), conditions, and `NodeBinder`: give a
+`NodeTree` a binder (`NodeTree(source, binder: NodeBinder(scope: ...,
+logic: doc.logic))`) and each node is shown through its bindings; a
+variable change re-applies only the boxes that read it. `preview: true` is
+the design canvas (placeholders for `${...}` in text). A recipe that reads a
+bound prop needs nothing more: it gets the node already bound.
+`test/samples/bindings` is the runtime golden set (SDK 8.x rendered with the
+pages' variables and conditions: `tool/update_samples.sh bindings`).
+
 ## Rules
 
 * Edit only your group's files (the three above, `test/samples/<group>`,
