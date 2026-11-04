@@ -1,0 +1,259 @@
+import 'dart:async';
+
+import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/foundation.dart';
+
+import 'config.dart';
+import 'fonts.dart';
+import 'loader.dart';
+import 'navigation.dart';
+import 'runtime.dart';
+
+/// A published Codelessly project: loads and caches its publish model and
+/// layouts, registers their fonts, and holds the app's data the layouts
+/// read. [CodelesslyWidget]s show its layouts.
+///
+/// Instances are explicit: create one per project (or per publish source)
+/// and pass it to the widgets, or put it above them with a
+/// [CodelesslyScope]. [Codelessly.instance] is an optional default, for apps
+/// with one project.
+class Codelessly extends ChangeNotifier {
+  Codelessly({
+    this.config = const CodelesslyConfig(),
+    PublishLoader? loader,
+    PublishCache? cache,
+    FontFetcher? fonts,
+    Map<String, Object?> data = const {},
+  })  : loader = loader ?? _defaultLoader(config),
+        cache = cache ?? MemoryPublishCache(),
+        fonts = CodelesslyFonts(fetcher: fonts ?? HttpFontFetcher()),
+        data = MapValueScope(values: {'data': data});
+
+  /// A [Codelessly] showing [bundle] (a publish shipped with the app, or a
+  /// test's), offline.
+  factory Codelessly.fromBundle(
+    PublishBundle bundle, {
+    CodelesslyConfig config = const CodelesslyConfig(),
+    FontFetcher? fonts,
+    Map<String, Object?> data = const {},
+  }) =>
+      Codelessly(config: config, loader: MemoryPublishLoader(bundle), fonts: fonts, data: data);
+
+  /// A [Codelessly] showing the bundle in asset [asset] (`.json` or
+  /// `.json.gz`).
+  factory Codelessly.asset(
+    String asset, {
+    CodelesslyConfig config = const CodelesslyConfig(),
+    FontFetcher? fonts,
+    Map<String, Object?> data = const {},
+  }) =>
+      Codelessly(config: config, loader: AssetPublishLoader(asset), fonts: fonts, data: data);
+
+  static Codelessly? _instance;
+
+  /// The default instance, used by widgets given none (and with no
+  /// [CodelesslyScope] above them). Set it with [Codelessly.setDefault].
+  static Codelessly get instance =>
+      _instance ??
+      (throw StateError('No default Codelessly instance: call Codelessly.setDefault, '
+          'or pass a Codelessly to the widget.'));
+
+  /// The default instance, if one is set.
+  static Codelessly? get maybeInstance => _instance;
+
+  /// Makes [codelessly] the default instance (null clears it).
+  static void setDefault(Codelessly? codelessly) => _instance = codelessly;
+
+  static PublishLoader _defaultLoader(CodelesslyConfig config) {
+    final key = config.slug ?? config.projectId;
+    if (key == null) {
+      return _NoLoader();
+    }
+    return HttpPublishLoader.firebaseStorage(
+      projectId: key,
+      bucket: kCodelesslyStorageBucket,
+      bundle: config.slug != null,
+    );
+  }
+
+  final CodelesslyConfig config;
+  final PublishLoader loader;
+  final PublishCache cache;
+  final CodelesslyFonts fonts;
+
+  /// The app's data, read by layouts as `data.<key>`. [setData] changes it.
+  final MapValueScope data;
+
+  PublishSource get publishSource => config.publishSource;
+
+  CStatus _status = const CEmpty();
+  CStatus get status => _status;
+
+  PublishModel? _model;
+
+  /// The publish model, once loaded.
+  PublishModel? get publishModel => _model;
+
+  final Map<String, PublishLayout> _layouts = {};
+  final Map<String, Future<PublishLayout>> _loading = {};
+
+  /// Layouts loaded so far, by id.
+  Map<String, PublishLayout> get layouts => Map.unmodifiable(_layouts);
+
+  /// The screen shown last (by any [CodelesslyWidget] of this instance).
+  final ValueNotifier<CodelesslyRoute?> route = ValueNotifier(null);
+
+  Future<void>? _initializing;
+
+  /// Loads the publish model: from the cache when it has one (then
+  /// refreshed from the loader in the background), else from the loader.
+  /// Safe to call again: later calls wait for the first.
+  Future<void> initialize() => _initializing ??= _initialize();
+
+  Future<void> _initialize() async {
+    _setStatus(const CLoading());
+    final key = publishSource.modelPath(config.uniqueId);
+    PublishModel? cached;
+    try {
+      final json = await cache.read(key);
+      if (json != null) cached = PublishModel.fromJson(json);
+    } catch (_) {
+      cached = null;
+    }
+    if (cached != null) {
+      _model = cached;
+      _setStatus(const CLoaded());
+      unawaited(_refresh(key).catchError((Object _) {}));
+    } else {
+      try {
+        await _refresh(key);
+        _setStatus(const CLoaded());
+      } catch (e) {
+        _initializing = null;
+        _setStatus(CError('Could not load the publish model', e));
+        rethrow;
+      }
+    }
+    if (config.preload) {
+      await Future.wait([
+        for (final id in _model!.layouts.keys)
+          if (!_model!.disabledLayouts.contains(id)) loadLayout(id).then<void>((_) {}, onError: (_) {}),
+      ]);
+    }
+  }
+
+  Future<void> _refresh(String key) async {
+    final fresh = await loader.loadModel(publishSource);
+    final old = _model;
+    _model = fresh;
+    await cache.write(key, fresh.toJson());
+    if (old != null) {
+      // Layouts republished since: drop them, they reload when shown.
+      _layouts.removeWhere((id, l) {
+        final t = fresh.layouts[id]?.lastUpdated;
+        return t != null && (l.lastUpdated == null || l.lastUpdated!.isBefore(t));
+      });
+      notifyListeners();
+    }
+  }
+
+  /// The layout [id] names (a layout id, custom id or canvas id), or null.
+  String? resolveLayoutId(String? id) => _model?.resolveLayoutId(id);
+
+  /// Layout [layoutId], if loaded.
+  PublishLayout? layout(String layoutId) => _layouts[layoutId];
+
+  /// Loads layout [id] (a layout id, custom id or canvas id) and its fonts.
+  /// A cached copy is used while it's as new as the model says; a loading
+  /// failure falls back to any cached copy.
+  Future<PublishLayout> loadLayout(String id) async {
+    await initialize();
+    final model = _model!;
+    final layoutId = model.resolveLayoutId(id);
+    if (layoutId == null) throw PublishLoadException('No layout [$id] in project [${model.projectId}]');
+    final loaded = _layouts[layoutId];
+    if (loaded != null) return loaded;
+    return _loading[layoutId] ??= _loadLayout(model, layoutId).whenComplete(() {
+      _loading.remove(layoutId);
+    });
+  }
+
+  Future<PublishLayout> _loadLayout(PublishModel model, String layoutId) async {
+    final key = publishSource.layoutPath(config.uniqueId, layoutId);
+    final wanted = model.layouts[layoutId]?.lastUpdated;
+    PublishLayout? cached;
+    try {
+      final json = await cache.read(key);
+      if (json != null) cached = PublishLayout.fromJson(json);
+    } catch (_) {
+      cached = null;
+    }
+    PublishLayout layout;
+    final fresh = cached != null &&
+        (wanted == null || (cached.lastUpdated != null && !cached.lastUpdated!.isBefore(wanted)));
+    if (fresh) {
+      layout = cached;
+    } else {
+      try {
+        layout = await loader.loadLayout(publishSource, layoutId);
+        if (layout.id.isEmpty) layout = layout.copyWith(document: layout.document.copyWith(id: layoutId));
+        await cache.write(key, layout.toJson());
+      } catch (e) {
+        if (cached == null) rethrow;
+        layout = cached;
+      }
+    }
+    _layouts[layoutId] = layout;
+    final fontsOf = {
+      ...model.fontsOf(layoutId),
+      for (final f in layout.fonts) ?model.fonts[f],
+    };
+    if (fontsOf.isNotEmpty) {
+      await fonts.load(fontsOf).timeout(config.fontTimeout, onTimeout: () {});
+    }
+    return layout;
+  }
+
+  /// Sets app data [key] (read by layouts as `data.<key>`).
+  void setData(String key, Object? value) {
+    final current = {...?(data.values['data'] as Map?)?.cast<String, Object?>()};
+    current[key] = value;
+    data.set('data', current);
+  }
+
+  /// Forgets the loaded publish (and, with [clearCache], the cached one);
+  /// the next [initialize] loads it again.
+  Future<void> reset({bool clearCache = false}) async {
+    _initializing = null;
+    _model = null;
+    _layouts.clear();
+    if (clearCache) await cache.clear();
+    _setStatus(const CEmpty());
+  }
+
+  void _setStatus(CStatus s) {
+    _status = s;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    route.dispose();
+    data.dispose();
+    if (identical(_instance, this)) _instance = null;
+    super.dispose();
+  }
+}
+
+/// The storage bucket Codelessly publishes to.
+const String kCodelesslyStorageBucket = 'codeless-app.appspot.com';
+
+class _NoLoader implements PublishLoader {
+  @override
+  Future<PublishModel> loadModel(PublishSource source) =>
+      Future.error(const PublishLoadException('No project: configure a projectId, a slug or a loader'));
+
+  @override
+  Future<PublishLayout> loadLayout(PublishSource source, String layoutId) =>
+      Future.error(const PublishLoadException('No project: configure a projectId, a slug or a loader'));
+}
