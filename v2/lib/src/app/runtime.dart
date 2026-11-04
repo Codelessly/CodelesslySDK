@@ -1,15 +1,15 @@
-// The per-screen runtime state the app shell creates over the runtime's
-// seams (runtime/contracts.dart): value scopes, a node source that applies
-// bindings, and the action context actions run in. The expression engine,
-// action runner and services are the app's (CodelesslyConfig); the defaults
-// here do nothing, so a layout renders as designed until they're set.
+// What the app shell runs screens with, beside the runtime itself
+// (Expressions, CodelesslyActions, Services: CodelesslyConfig's defaults):
+// opt-outs that do nothing (a layout as designed), the app's data scope, a
+// node source for an expression engine of the app's own, and a screen's
+// action context.
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, Node, PublishLayout, jsonEquality, readMap;
+import 'package:codelessly_api/codelessly_api.dart' show Json, NavigateAction, Node, OpenLinkAction, PublishLayout, jsonEquality;
 import 'package:flutter/foundation.dart';
 
 import '../render/source.dart';
+import '../runtime/actions/context.dart';
 import '../runtime/contracts.dart';
 
 /// An [ExpressionEngine] that evaluates nothing: text stays as written and
@@ -35,38 +35,31 @@ class NoopActionRunner implements ActionRunner {
   Future<void> trigger(Node node, String trigger, ActionContext context, {Json event = const {}}) async {}
 }
 
-/// An [ActionRunner] that runs only navigation (`navigation`) and links
-/// (`link`): enough to move between the screens of an app before the
-/// actions runtime is configured. Every other action is skipped.
+/// An [ActionRunner] that runs only navigation (`navigate`) and links
+/// (`openLink`): moving between the screens of an app without running
+/// anything else. Every other action is skipped.
 class NavigationActionRunner implements ActionRunner {
   const NavigationActionRunner();
 
   @override
   Future<void> trigger(Node node, String trigger, ActionContext context, {Json event = const {}}) async {
     for (final reaction in node.actions) {
-      if (triggerOf(reaction) != trigger) continue;
-      final action = readMap(reaction['action']);
-      if (action == null) continue;
-      switch (action['type']) {
-        case 'navigation':
-          await context.navigate(action);
-        case 'link':
-          final url = action['url'];
-          if (url is String && url.isNotEmpty) await context.services.openUrl(url);
+      if (reaction.trigger.type.name != trigger) continue;
+      for (final action in reaction.actions) {
+        switch (action) {
+          case NavigateAction():
+            await context.navigate(action.toJson());
+          case OpenLinkAction(:final url) when url.isNotEmpty:
+            await context.services.openUrl(url);
+          default:
+        }
       }
     }
   }
 }
 
-/// The trigger type of a reaction (`{"trigger": {"type": "click"}, ...}`).
-String? triggerOf(Json reaction) {
-  final t = reaction['trigger'];
-  if (t is String) return t;
-  return readMap(t)?['type'] as String?;
-}
-
 /// Whether [node] has a reaction to [trigger].
-bool reactsTo(Node node, String trigger) => node.actions.any((r) => triggerOf(r) == trigger);
+bool reactsTo(Node node, String trigger) => node.actions.any((r) => r.trigger.type.name == trigger);
 
 /// [CodelesslyServices] that call nothing: APIs return null and links don't
 /// open. Apps configure real ones (HTTP, Firebase, url_launcher...).
@@ -161,35 +154,11 @@ class MapValueScope extends ChangeNotifier implements ValueScope {
 }
 
 /// The initial values of the variables canvas [canvasId] of [layout]
-/// declares, by name, typed by their declared type.
+/// declares, by name.
 Map<String, Object?> initialVariables(PublishLayout layout, String canvasId) => {
-      for (final v in layout.variablesOf(canvasId).values)
-        if (readMap(v) case final Json m when m['name'] is String) m['name'] as String: variableValue(m),
+      for (final v in layout.variablesOf(canvasId))
+        if (!v.isComputed) v.name: v.value,
     };
-
-/// A published variable's initial value, from its stored text and type.
-Object? variableValue(Json variable) {
-  final raw = variable['value'];
-  if (raw is! String) return raw;
-  final text = raw.trim();
-  switch (variable['type']) {
-    case 'integer':
-      return int.tryParse(text) ?? double.tryParse(text)?.round() ?? 0;
-    case 'decimal':
-      return double.tryParse(text) ?? 0.0;
-    case 'boolean':
-      return text.toLowerCase() == 'true';
-    case 'list' || 'map':
-      if (text.isEmpty) return variable['type'] == 'list' ? <Object?>[] : <String, Object?>{};
-      try {
-        return jsonDecode(text);
-      } catch (_) {
-        return raw;
-      }
-    default:
-      return raw;
-  }
-}
 
 /// A [NodeSource] over [base] with each node's bindings applied by
 /// [engine] in [scope]. A node re-resolves when its source node changes, or
@@ -261,35 +230,20 @@ class BoundSource implements NodeSource {
   }
 }
 
-/// Navigation for an [ActionContext]: implemented by the screen that hosts
-/// the layout (it holds the Navigator).
-typedef Navigate = Future<void> Function(Json action);
-
-/// The [ActionContext] of one screen.
-class ScreenActionContext implements ActionContext {
+/// The [ActionContext] of one screen: its variables (over the route's
+/// params and the app's data), services, UI and node tree. The app can set
+/// variables no screen declares ([RuntimeActionContext.declareMissing]).
+class ScreenActionContext extends RuntimeActionContext {
   ScreenActionContext({
-    required this.scope,
-    required this.expressions,
-    required this.services,
-    required Navigate navigate,
-  }) : _navigate = navigate; // ignore: prefer_initializing_formals
-
-  @override
-  final MapValueScope scope;
-
-  @override
-  final ExpressionEngine expressions;
-
-  @override
-  final CodelesslyServices services;
-
-  final Navigate _navigate;
-
-  @override
-  void setVariable(String name, Object? value) => (scope.scopeOf(name) ?? scope).set(name, value);
-
-  @override
-  Future<void> navigate(Json action) => _navigate(action);
+    required super.scope,
+    required super.expressions,
+    required super.services,
+    required super.ui,
+    super.functions,
+    super.tree,
+    super.nodeValues,
+    super.onError,
+  }) : super(declareMissing: true);
 }
 
 extension<T> on T {

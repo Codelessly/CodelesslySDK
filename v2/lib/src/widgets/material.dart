@@ -127,13 +127,37 @@ OutlinedBorder _shape(api.ShapeBorder s, {Color? sideColor}) {
 
 TextStyle? _textStyle(api.TextStyle s) => s.isEmpty ? null : textStyle(s);
 
-void _pressed() {}
+/// The types whose island takes a tap itself and reports it as the node's
+/// `click` (the node's own tap layer leaves it to them).
+const Set<String> selfTappedTypes = {
+  'elevatedButton', 'filledButton', 'textButton', 'outlinedButton', 'iconButton', 'floatingActionButton', //
+  'chip', 'actionChip', 'choiceChip', 'filterChip', 'inputChip',
+};
+
+/// [b]'s island [key]: [build] under what reports its presses.
+RenderBox _pressable(NodeBuilder b, String key, WidgetBuilder build) =>
+    b.island(key, (context) => _Pressable(builder: b, child: Builder(builder: build)));
+
+class _Pressable extends StatelessWidget {
+  const _Pressable({required this.builder, required this.child});
+  final NodeBuilder builder;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
+}
+
+/// Reports a press of the island [context] is in as its node's `click`.
+VoidCallback _press(BuildContext context) => () {
+      final b = context.findAncestorWidgetOfExactType<_Pressable>()?.builder;
+      if (b != null) fireTrigger(b, 'click');
+    };
 
 // --- buttons ------------------------------------------------------------------
 
 void _button(NodeBuilder b, Node n, List<RenderBox> chain) {
   _fit(b, n, chain);
-  chain.add(b.island('button', (context) => _buildButton(context, n)));
+  chain.add(_pressable(b, 'button', (context) => _buildButton(context, n)));
 }
 
 Widget _buildButton(BuildContext context, Node n) {
@@ -214,7 +238,7 @@ Widget _buildButton(BuildContext context, Node n) {
       ],
     );
   }
-  final onPressed = n.prop(ButtonProps.enabled) ? _pressed : null;
+  final onPressed = n.prop(ButtonProps.enabled) ? _press(context) : null;
   return switch (n.type) {
     'elevatedButton' => ElevatedButton(onPressed: onPressed, style: effective, child: child),
     'filledButton' when n.prop(ButtonProps.tonal) =>
@@ -227,7 +251,7 @@ Widget _buildButton(BuildContext context, Node n) {
 
 void _iconButton(NodeBuilder b, Node n, List<RenderBox> chain) {
   _fit(b, n, chain);
-  chain.add(b.island('button', (context) {
+  chain.add(_pressable(b, 'button', (context) {
     final s = n.prop(IconButtonProps.style);
     final elevation = s.elevation;
     var style = TextButton.styleFrom(
@@ -243,7 +267,7 @@ void _iconButton(NodeBuilder b, Node n, List<RenderBox> chain) {
     );
     if (elevation != null) style = style.copyWith(elevation: WidgetStatePropertyAll(elevation));
     return ElevatedButton(
-      onPressed: n.prop(IconButtonProps.enabled) ? _pressed : null,
+      onPressed: n.prop(IconButtonProps.enabled) ? _press(context) : null,
       style: style,
       child: _icon(n.prop(IconButtonProps.icon), size: s.iconSize, color: _color(s.iconColor)),
     );
@@ -252,7 +276,7 @@ void _iconButton(NodeBuilder b, Node n, List<RenderBox> chain) {
 
 void _fab(NodeBuilder b, Node n, List<RenderBox> chain) {
   _fixed(b, n, chain);
-  chain.add(b.island('fab', (context) {
+  chain.add(_pressable(b, 'fab', (context) {
     final type = n.prop(FloatingActionButtonProps.type);
     final shape = n.prop(FloatingActionButtonProps.shape);
     final icon = _icon(n.prop(FloatingActionButtonProps.icon), color: _color(n.prop(FloatingActionButtonProps.foregroundColor)));
@@ -269,7 +293,7 @@ void _fab(NodeBuilder b, Node n, List<RenderBox> chain) {
     return switch (type) {
       api.FloatingActionButtonType.extended => FloatingActionButton.extended(
           heroTag: null,
-          onPressed: _pressed,
+          onPressed: _press(context),
           extendedPadding: n.prop(FloatingActionButtonProps.extendedPadding)?.flutter,
           backgroundColor: background,
           foregroundColor: foreground,
@@ -288,7 +312,7 @@ void _fab(NodeBuilder b, Node n, List<RenderBox> chain) {
         ),
       api.FloatingActionButtonType.small => FloatingActionButton.small(
           heroTag: null,
-          onPressed: _pressed,
+          onPressed: _press(context),
           backgroundColor: background,
           foregroundColor: foreground,
           elevation: elevation,
@@ -303,7 +327,7 @@ void _fab(NodeBuilder b, Node n, List<RenderBox> chain) {
         ),
       api.FloatingActionButtonType.large => FloatingActionButton.large(
           heroTag: null,
-          onPressed: _pressed,
+          onPressed: _press(context),
           backgroundColor: background,
           foregroundColor: foreground,
           elevation: elevation,
@@ -318,7 +342,7 @@ void _fab(NodeBuilder b, Node n, List<RenderBox> chain) {
         ),
       api.FloatingActionButtonType.regular => FloatingActionButton(
           heroTag: null,
-          onPressed: _pressed,
+          onPressed: _press(context),
           backgroundColor: background,
           foregroundColor: foreground,
           elevation: elevation,
@@ -339,7 +363,7 @@ void _fab(NodeBuilder b, Node n, List<RenderBox> chain) {
 
 void _chip(NodeBuilder b, Node n, List<RenderBox> chain) {
   _fit(b, n, chain);
-  chain.add(b.island('chip', (context) => Material(type: MaterialType.transparency, child: _buildChip(context, n))));
+  chain.add(_pressable(b, 'chip', (context) => Material(type: MaterialType.transparency, child: _buildChip(context, n))));
 }
 
 Widget _buildChip(BuildContext context, Node n) {
@@ -386,7 +410,7 @@ Widget _buildChip(BuildContext context, Node n) {
         padding: padding,
         tooltip: tooltip,
         autofocus: autofocus,
-        onPressed: enabled ? _pressed : null,
+        onPressed: enabled ? _press(context) : null,
       ),
     'choiceChip' => ChoiceChip(
         label: label,
@@ -442,8 +466,8 @@ Widget _buildChip(BuildContext context, Node n) {
         tooltip: tooltip,
         autofocus: autofocus,
         isEnabled: enabled,
-        onPressed: enabled ? _pressed : null,
-        onDeleted: enabled ? _pressed : null,
+        onPressed: enabled ? _press(context) : null,
+        onDeleted: enabled ? () {} : null,
       ),
     _ => Chip(
         label: label,

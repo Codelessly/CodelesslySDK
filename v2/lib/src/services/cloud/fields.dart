@@ -4,7 +4,8 @@
 // for every backend and are testable without one.
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart' show CollectionSchema, SchemaField, SchemaFieldType;
+import 'package:codelessly_api/codelessly_api.dart'
+    show CloudFieldOperation, CloudFieldWrite, CollectionSchema, SchemaField, SchemaFieldType;
 import 'package:flutter/foundation.dart';
 
 /// Fields every document gets: its id and when it was created and updated
@@ -83,19 +84,7 @@ final class ServerTimeOp extends FieldOp {
   String toString() => 'serverTime';
 }
 
-/// How a cloud data action writes a field.
-enum CloudFieldOperation { set, increment, arrayAdd, arrayRemove, delete, serverTime }
 
-/// One field a cloud data action writes: [value] is text the runtime
-/// evaluates (`${...}`).
-@immutable
-class CloudFieldWrite {
-  const CloudFieldWrite(this.field, this.value, {this.operation = CloudFieldOperation.set});
-
-  final String field;
-  final String value;
-  final CloudFieldOperation operation;
-}
 
 /// Converts written values to what the collection's schema says they are.
 abstract final class CloudFieldValues {
