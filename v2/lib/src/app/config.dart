@@ -2,6 +2,9 @@ import 'package:codelessly_api/codelessly_api.dart' show PublishSource;
 import 'package:flutter/foundation.dart';
 
 import '../runtime/contracts.dart';
+import '../runtime/actions/context.dart' show AppFunction;
+import '../runtime/actions/runner.dart' show CodelesslyActions;
+import '../runtime/expressions/engine.dart' show Expressions;
 import 'runtime.dart';
 
 /// How a [Codelessly] instance runs: which project and publish it shows, and
@@ -14,9 +17,10 @@ class CodelesslyConfig {
     this.authToken,
     this.publishSource = PublishSource.publish,
     this.preload = false,
-    this.expressions = const NoopExpressionEngine(),
-    this.actions = const NoopActionRunner(),
-    this.services = const NoServices(),
+    this.expressions = const Expressions(),
+    this.actions = const CodelesslyActions(),
+    this.services,
+    this.functions = const {},
     this.useHostTheme = false,
     this.maxTextScaleFactor = 1,
     this.fontTimeout = const Duration(seconds: 2),
@@ -40,15 +44,23 @@ class CodelesslyConfig {
   /// loads when first shown).
   final bool preload;
 
-  /// Evaluates bindings and formulas. The default evaluates nothing.
+  /// Evaluates bindings, conditions and formulas: the runtime's
+  /// [Expressions] (variables and conditions per screen, `${...}` text). A
+  /// [NoopExpressionEngine] shows layouts as designed.
   final ExpressionEngine expressions;
 
-  /// Runs reactions (taps, loads...). The default runs nothing;
-  /// [NavigationActionRunner] runs navigation and links only.
+  /// Runs reactions (taps, loads, inputs...): [CodelesslyActions], every
+  /// action type. [NavigationActionRunner] runs navigation and links only,
+  /// [NoopActionRunner] nothing.
   final ActionRunner actions;
 
-  /// Data, APIs, links and the rest of the app's services.
-  final CodelesslyServices services;
+  /// Data, APIs, auth, storage, links and the rest of the app's services;
+  /// null: [Services] with their defaults (HTTP APIs, memory storage and
+  /// data, signed out).
+  final CodelesslyServices? services;
+
+  /// The functions call function actions call, by name.
+  final Map<String, AppFunction> functions;
 
   /// Whether layouts render with the app's [Theme] instead of their own
   /// (from the project's theme tokens).
@@ -79,6 +91,7 @@ class CodelesslyConfig {
     ExpressionEngine? expressions,
     ActionRunner? actions,
     CodelesslyServices? services,
+    Map<String, AppFunction>? functions,
     bool? useHostTheme,
     double? maxTextScaleFactor,
     Duration? fontTimeout,
@@ -93,6 +106,7 @@ class CodelesslyConfig {
         expressions: expressions ?? this.expressions,
         actions: actions ?? this.actions,
         services: services ?? this.services,
+        functions: functions ?? this.functions,
         useHostTheme: useHostTheme ?? this.useHostTheme,
         maxTextScaleFactor: maxTextScaleFactor ?? this.maxTextScaleFactor,
         fontTimeout: fontTimeout ?? this.fontTimeout,

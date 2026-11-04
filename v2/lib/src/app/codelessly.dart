@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/foundation.dart';
 
+import '../runtime/contracts.dart';
+import '../services/services.dart';
 import 'config.dart';
 import 'fonts.dart';
 import 'loader.dart';
@@ -77,6 +79,11 @@ class Codelessly extends ChangeNotifier {
   }
 
   final CodelesslyConfig config;
+
+  /// The services the layouts use: [CodelesslyConfig.services], else
+  /// [Services] with their defaults. A [Services]' config follows the
+  /// publish model (its APIs).
+  late final CodelesslyServices services = config.services ?? Services();
   final PublishLoader loader;
   final PublishCache cache;
   final CodelesslyFonts fonts;
@@ -122,6 +129,7 @@ class Codelessly extends ChangeNotifier {
     }
     if (cached != null) {
       _model = cached;
+      _configureServices(cached);
       _setStatus(const CLoaded());
       unawaited(_refresh(key).catchError((Object _) {}));
     } else {
@@ -146,6 +154,7 @@ class Codelessly extends ChangeNotifier {
     final fresh = await loader.loadModel(publishSource);
     final old = _model;
     _model = fresh;
+    _configureServices(fresh);
     await cache.write(key, fresh.toJson());
     if (old != null) {
       // Layouts republished since: drop them, they reload when shown.
@@ -158,6 +167,13 @@ class Codelessly extends ChangeNotifier {
   }
 
   /// The layout [id] names (a layout id, custom id or canvas id), or null.
+  void _configureServices(PublishModel model) {
+    final s = services;
+    if (s is Services && model.apis.isNotEmpty) {
+      s.config = ServiceConfig.fromJson({...s.config.toJson(), 'apis': {...?s.config.toJson()['apis'] as Map?, ...model.apis}});
+    }
+  }
+
   String? resolveLayoutId(String? id) => _model?.resolveLayoutId(id);
 
   /// Layout [layoutId], if loaded.

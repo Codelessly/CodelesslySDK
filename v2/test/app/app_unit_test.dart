@@ -138,14 +138,13 @@ void main() {
   });
 
   group('NavigationRequest', () {
-    test('reads v1 navigation actions', () {
+    test('reads navigate actions', () {
       final r = NavigationRequest.fromJson({
-        'type': 'navigation', 'navigationType': 'reset', 'destinationId': 'a', 'params': {'x': 1}, //
-        'baseDestinationId': 'b',
+        'type': 'navigate', 'mode': 'reset', 'to': 'a', 'params': {'x': 1}, 'base': 'b', //
       });
       expect((r.type, r.destinationId, r.baseDestinationId), (NavigationType.reset, 'a', 'b'));
       expect(r.params, {'x': 1});
-      final d = NavigationRequest.fromJson({'type': 'navigation', 'destinationId': 'a', 'baseDestinationId': ''});
+      final d = NavigationRequest.fromJson({'type': 'navigate', 'to': 'a', 'base': ''});
       expect((d.type, d.baseDestinationId), (NavigationType.push, null));
     });
   });
@@ -175,13 +174,20 @@ void main() {
       root.dispose();
     });
 
-    test('variables start typed from their published values', () {
-      expect(variableValue({'type': 'integer', 'value': '3'}), 3);
-      expect(variableValue({'type': 'decimal', 'value': '1.5'}), 1.5);
-      expect(variableValue({'type': 'boolean', 'value': 'true'}), true);
-      expect(variableValue({'type': 'list', 'value': '[1,2]'}), [1, 2]);
-      expect(variableValue({'type': 'map', 'value': ''}), <String, Object?>{});
-      expect(variableValue({'type': 'text', 'value': 'hi'}), 'hi');
+    test('variables start at their published values', () {
+      final layout = PublishLayout.fromJson({
+        'id': 'l',
+        'roots': ['c'],
+        'nodes': {'c': {'type': 'canvas'}},
+        'variables': {
+          'c': [
+            {'name': 'n', 'type': 'integer', 'value': 3},
+            {'name': 'list', 'type': 'list', 'value': [1, 2]},
+            {'name': 'twice', 'formula': 'n * 2'},
+          ],
+        },
+      });
+      expect(initialVariables(layout, 'c'), {'n': 3, 'list': [1, 2]});
     });
   });
 
