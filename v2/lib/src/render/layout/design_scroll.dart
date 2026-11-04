@@ -5,10 +5,8 @@
 import 'package:flutter/rendering.dart';
 
 class RenderDesignScroll extends RenderProxyBox {
-  RenderDesignScroll({required Axis axis, bool reverse = false, Clip clipBehavior = Clip.hardEdge})
-      : _axis = axis,
-        _reverse = reverse,
-        _clip = clipBehavior;
+  RenderDesignScroll({required this._axis, this._reverse = false, Clip clipBehavior = Clip.hardEdge})
+      : _clip = clipBehavior;
 
   Axis _axis;
   Axis get axis => _axis;
