@@ -61,12 +61,27 @@ class Expressions implements ExpressionEngine {
     });
   }
 
+  /// [value] (decoded JSON: an API body, a query) with its strings
+  /// evaluated: a string that is one `${path}` or `${= formula}` becomes
+  /// the value as is (a list, a number, null), others are interpolated;
+  /// map keys are interpolated.
+  Object? substituteJson(Object? value, ValueScope scope) => switch (value) {
+        final String s when !s.contains(r'${') => s,
+        final String s when FormulaEvaluator.exactExpression(s) != null || exactPath(s) != null => evaluate(s, scope),
+        final String s => interpolate(s, scope, mode: NullSubstitution.emptyString),
+        final List<Object?> l => [for (final v in l) substituteJson(v, scope)],
+        final Map<Object?, Object?> m => {
+            for (final e in m.entries) interpolate('${e.key}', scope): substituteJson(e.value, scope),
+          },
+        _ => value,
+      };
+
   @override
   (Node, Set<String>) resolve(Node node, ValueScope scope) {
     final b = NodeBindings.of(node);
     final reads = <String>{};
     var out = node;
-    for (final p in b.properties) {
+    for (final p in [...b.properties, ?b.visible]) {
       reads.addAll(p.reads);
       out = p.applyTo(out, this, scope);
     }
