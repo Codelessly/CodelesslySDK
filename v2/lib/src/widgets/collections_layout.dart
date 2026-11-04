@@ -215,6 +215,17 @@ class RenderListItems extends RenderCollection {
 
   /// Null: endless (builds items to cover the viewport and [cacheExtent]).
   int? itemCount;
+
+  /// False for a scroll view (SDK 8.x's ListView): a viewport has no
+  /// intrinsic size, so it reports none (a row squeezing it can take it to
+  /// nothing). True when every item is laid out in a Flex.
+  bool _measurable = true;
+  bool get measurable => _measurable;
+  set measurable(bool v) {
+    if (v == _measurable) return;
+    _measurable = v;
+    markNeedsLayout();
+  }
   double cacheExtent = 250;
 
   void update({
@@ -448,17 +459,21 @@ class RenderListItems extends RenderCollection {
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) =>
-      axis == Axis.horizontal ? _intrinsicMain(height, false) : _intrinsicCross(height, false);
+  double computeMinIntrinsicWidth(double height) => !_measurable
+      ? 0
+      : axis == Axis.horizontal ? _intrinsicMain(height, false) : _intrinsicCross(height, false);
   @override
-  double computeMaxIntrinsicWidth(double height) =>
-      axis == Axis.horizontal ? _intrinsicMain(height, true) : _intrinsicCross(height, true);
+  double computeMaxIntrinsicWidth(double height) => !_measurable
+      ? 0
+      : axis == Axis.horizontal ? _intrinsicMain(height, true) : _intrinsicCross(height, true);
   @override
-  double computeMinIntrinsicHeight(double width) =>
-      axis == Axis.vertical ? _intrinsicMain(width, false) : _intrinsicCross(width, false);
+  double computeMinIntrinsicHeight(double width) => !_measurable
+      ? 0
+      : axis == Axis.vertical ? _intrinsicMain(width, false) : _intrinsicCross(width, false);
   @override
-  double computeMaxIntrinsicHeight(double width) =>
-      axis == Axis.vertical ? _intrinsicMain(width, true) : _intrinsicCross(width, true);
+  double computeMaxIntrinsicHeight(double width) => !_measurable
+      ? 0
+      : axis == Axis.vertical ? _intrinsicMain(width, true) : _intrinsicCross(width, true);
 }
 
 /// How a wrapping list places a run's items along it (`WrapAlignment`).
