@@ -29,4 +29,22 @@ void main() {
       );
     },
   );
+
+  test(
+    'an icon saved without its version uses the version it was added in',
+    () {
+      // Older documents saved icons without a version; v1 of `sell` doesn't
+      // exist, so the icon didn't draw.
+      expect(
+        MaterialIcon(
+          codepoint: 62291,
+          name: 'sell',
+          style: MaterialIconStyle.outlined,
+        ).toSvgUrl(),
+        'https://fonts.gstatic.com/s/i/materialiconsoutlined/sell/v'
+        '${materialIconVersions['sell']}/24px.svg',
+      );
+      expect(materialIconVersions['sell'], greaterThan(1));
+    },
+  );
 }

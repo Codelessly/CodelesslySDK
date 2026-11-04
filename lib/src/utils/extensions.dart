@@ -1252,8 +1252,15 @@ extension IconModelExt on IconModel {
         ' ',
         '',
       );
+      // An icon saved without its version (older documents) reads as v1,
+      // whose SVG exists only for icons that date back to it: such an icon
+      // is served from the version the catalog lists for it instead.
+      final String name = icon.name.toLowerCase();
+      final int version = (icon.version ?? 1) == 1
+          ? materialIconVersions[name] ?? 1
+          : icon.version!;
       return 'https://fonts.gstatic.com/s/i/materialicons$style/'
-          '${icon.name.toLowerCase()}/v${icon.version ?? 1}/24px.svg';
+          '$name/v$version/24px.svg';
     }
     if (icon is MaterialSymbol) {
       // e.g. https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/home/wght300gradN25fill1/40px.svg
