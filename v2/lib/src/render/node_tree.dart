@@ -13,6 +13,7 @@ import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show Node, SizeFit, FlexProps, ScrollProps, TextProps, IconProps;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show WidgetBuilder;
 
 import 'behaviours.dart';
@@ -22,6 +23,7 @@ import 'layout/fit_box.dart';
 import 'layout/freeform.dart';
 import 'layout/hug_cross.dart';
 import 'layout/text_box.dart';
+import 'layout/wrap.dart';
 import 'paint/icon_glyph.dart';
 import 'paint/node_paint.dart';
 import 'paint/path_paint.dart';
@@ -148,18 +150,23 @@ class NodeTree {
     return box;
   }
 
-  void _orphan(NodeBox box) {
+  /// [box] was taken out of its parent: unless something places it again by
+  /// the end of the frame (a moved node, a list item, a node inside an
+  /// island, which places its nodes while laid out), it's released.
+  void orphan(NodeBox box) {
+    if (!identical(_boxes[box.key], box)) return;
     _orphans.add(box);
     if (_sweepScheduled) return;
     _sweepScheduled = true;
-    scheduleMicrotask(() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       _sweepScheduled = false;
       final orphans = _orphans.toList();
       _orphans.clear();
       for (final b in orphans) {
         if (b.parent == null && identical(_boxes[b.key], b)) release(b);
       }
-    });
+    }, debugLabel: 'NodeTree.orphan');
+    SchedulerBinding.instance.ensureVisualUpdate();
   }
 
   void release(NodeBox box) {
@@ -298,8 +305,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void freeform(Node n, List<RenderBox> chain, {List<String>? children}) => _freeform(n, chain, children: children);
 
   @override
-  void syncChildren(_Container container, List<String> ids, Slot childSlot,
-          {Object? instance, List<Object?>? instances}) =>
+  void syncChildren(ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>> container, List<String> ids,
+          Slot childSlot, {Object? instance, List<Object?>? instances}) =>
       _syncChildren(container, ids, childSlot, instance: instance, instances: instances);
 
   final Map<String, IslandHost> _islands = {};
@@ -359,6 +366,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     ];
     _innerChains.clear();
     _stackExtras.clear();
+    _filledStacks.clear();
 
     _parentSideWrappers(n, chain);
 
@@ -553,8 +561,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     }
     content(inner);
     _innerChains[stack] = inner;
+    // SDK 8.x put the content of a shell with ink in its InkWell, filling
+    // the shell (Positioned.fill) when the shell has a size on both axes:
+    // its content then sizes nothing (no intrinsic size either).
+    if (n.behaviours.inkWell != null && n.hFit != SizeFit.hug && n.vFit != SizeFit.hug) _filledStacks.add(stack);
     chain.add(stack);
   }
+
+  /// Shell stacks whose content fills them (positioned) instead of sizing
+  /// them.
+  final Set<RenderStack> _filledStacks = {};
 
   final Map<RenderStack, List<RenderBox>> _innerChains = {};
   final Map<RenderStack, (List<RenderBox>, List<RenderBox>)> _stackExtras = {};
@@ -625,6 +641,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     }
 
     final children = [for (final cid in n.children) ?tree.source.node(cid)];
+    if (n.wraps) {
+      _dependsOnDescendants = false;
+      _wrap(n, chain, scrolls: scrolls);
+      return;
+    }
     if (scrolls) _scrollView(n, chain, children, contentSized: contentSized);
     final crossWraps = isRow ? n.vFit == SizeFit.hug : n.hFit == SizeFit.hug;
     final crossMin = isRow ? c.minHeight : c.minWidth;
@@ -662,6 +683,43 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     chain.add(flex);
   }
 
+  /// A row/column whose children flow onto new runs (SDK 8.x's
+  /// CodelesslyWrap): main-axis alignment within each run, cross-axis
+  /// alignment within a run and for the runs; a scrollable one scrolls
+  /// through its runs.
+  void _wrap(Node n, List<RenderBox> chain, {required bool scrolls}) {
+    final cross = n.prop(FlexProps.crossAxisAlignment);
+    final runAlignment = switch (cross) {
+      api.CrossAxisAlignment.center => WrapAlignment.center,
+      api.CrossAxisAlignment.end => WrapAlignment.end,
+      _ => WrapAlignment.start,
+    };
+    if (scrolls) {
+      _scrollView(n, chain, const [], contentSized: false, fillViewport: runAlignment != WrapAlignment.start);
+    }
+    final wrap = _obtain<RenderCodelesslyWrap>('wrap', RenderCodelesslyWrap.new)
+      ..direction = n.isRow ? Axis.horizontal : Axis.vertical
+      ..alignment = switch (n.prop(FlexProps.mainAxisAlignment)) {
+        api.MainAxisAlignment.start => WrapAlignment.start,
+        api.MainAxisAlignment.end => WrapAlignment.end,
+        api.MainAxisAlignment.center => WrapAlignment.center,
+        api.MainAxisAlignment.spaceBetween => WrapAlignment.spaceBetween,
+        api.MainAxisAlignment.spaceAround => WrapAlignment.spaceAround,
+        api.MainAxisAlignment.spaceEvenly => WrapAlignment.spaceEvenly,
+      }
+      ..spacing = n.prop(FlexProps.spacing)
+      ..runAlignment = runAlignment
+      ..runSpacing = n.prop(FlexProps.runSpacing)
+      ..crossAxisAlignment = switch (cross) {
+        api.CrossAxisAlignment.center => WrapCrossAlignment.center,
+        api.CrossAxisAlignment.end => WrapCrossAlignment.end,
+        _ => WrapCrossAlignment.start,
+      }
+      ..textDirection = TextDirection.ltr;
+    _syncChildren(wrap, n.children, Slot(SlotKind.flex, n));
+    chain.add(wrap);
+  }
+
   /// A child fills the cross axis of a wrapping row/column while another
   /// gives it a thickness (IntrinsicHeight(Row(...))).
   static bool _fillsAcrossWrapping(bool isRow, List<Node> children) {
@@ -683,7 +741,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   }
 
   /// A scroll view at rest: fit box → viewport → padding → content extent.
-  void _scrollView(Node n, List<RenderBox> chain, List<Node> children, {required bool contentSized}) {
+  void _scrollView(Node n, List<RenderBox> chain, List<Node> children,
+      {required bool contentSized, bool? fillViewport}) {
     final vertical = n.scrollDirection == api.Axis.vertical;
     chain.add(_fitBox(
       'scrollFit',
@@ -702,7 +761,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       chain.add(_obtain<RenderPadding>('scrollPad', () => RenderPadding(padding: pad, textDirection: TextDirection.ltr))
         ..padding = pad);
     }
-    final fillViewport = n.isFlex && !contentSized && n.prop(FlexProps.mainAxisAlignment) != api.MainAxisAlignment.start;
+    fillViewport ??= n.isFlex && !contentSized && n.prop(FlexProps.mainAxisAlignment) != api.MainAxisAlignment.start;
     final flexContent = n.isFlex && children.any((c) => (n.isRow ? c.hFit : c.vFit) == SizeFit.fill || (n.isRow ? c.hFit : c.vFit) == SizeFit.flexible);
     if (fillViewport || flexContent) {
       final extent = _obtain<RenderScrollContentExtent>(
@@ -762,6 +821,14 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
 
   void _spacer(Node n, List<RenderBox> chain) {
     final parent = _slot.parent;
+    if (_slot.kind == SlotKind.flex && parent != null && parent.wraps) {
+      // No room in a run but its own length along it.
+      final isRow = parent.isRow;
+      final c = BoxConstraints.tightFor(width: isRow ? n.outerWidth : 0, height: isRow ? 0 : n.outerHeight);
+      chain.add(_obtain<RenderConstrainedBox>('spacerSized', () => RenderConstrainedBox(additionalConstraints: c))
+        ..additionalConstraints = c);
+      return;
+    }
     if (_slot.kind == SlotKind.flex && parent != null && parent.isFlex) {
       final isRow = parent.isRow;
       final mainFit = isRow ? n.hFit : n.vFit;
@@ -864,6 +931,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     final parent = _slot.parent;
     if (_slot.kind != SlotKind.flex || parent == null || !parent.isFlex) return;
     if (n.type == 'spacer') return;
+    if (parent.wraps) {
+      _inRun(n, chain);
+      return;
+    }
     final isRow = parent.isRow;
     final crossFit = isRow ? n.vFit : n.hFit;
     final parentHugsCross = (isRow ? parent.vFit : parent.hFit) == SizeFit.hug;
@@ -874,6 +945,24 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       chain.add(_obtain<RenderPositionedBox>('slotAlign', () => RenderPositionedBox(alignment: align, textDirection: TextDirection.ltr))
         ..alignment = align);
     }
+  }
+
+  /// A child of a wrapping row/column (SDK 8.x's wrapChildInRun): fills
+  /// and flexes mean nothing in a run, so a flexing axis hugs its content
+  /// (measured intrinsically), or takes its design size when its subtree
+  /// can't be measured. Its own alignment doesn't apply.
+  void _inRun(Node n, List<RenderBox> chain) {
+    bool flexes(SizeFit f) => f == SizeFit.fill || f == SizeFit.flexible;
+    final fh = flexes(n.hFit), fv = flexes(n.vFit);
+    if (!fh && !fv) return;
+    if (!n.isFlex || _subtreeBlocksIntrinsics(n)) {
+      final c = BoxConstraints.tightFor(width: fh ? n.outerWidth : null, height: fv ? n.outerHeight : null);
+      chain.add(_obtain<RenderConstrainedBox>('runSized', () => RenderConstrainedBox(additionalConstraints: c))
+        ..additionalConstraints = c);
+      return;
+    }
+    if (fv) chain.add(_obtain<RenderIntrinsicHeight>('runH', RenderIntrinsicHeight.new));
+    if (fh) chain.add(_obtain<RenderIntrinsicWidth>('runW', RenderIntrinsicWidth.new));
   }
 
   void _applyParentData() {
@@ -891,7 +980,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       bool isFlexFit(SizeFit f) => f == SizeFit.fill || f == SizeFit.flexible;
       int? flex;
       FlexFit? fit;
-      if (n.type == 'spacer') {
+      if (parentNode.wraps) {
+        // Nothing flexes in a run.
+      } else if (n.type == 'spacer') {
         if (mainFit == SizeFit.fill) (flex, fit) = (flexValue, FlexFit.tight);
         if (mainFit == SizeFit.flexible) (flex, fit) = (flexValue, FlexFit.loose);
       } else if (n.hFit == n.vFit) {
@@ -900,7 +991,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       } else if (isFlexFit(mainFit)) {
         (flex, fit) = (flexValue, mainFit == SizeFit.flexible || mainMax != null ? FlexFit.loose : FlexFit.tight);
       }
-      if (mainFit == SizeFit.hug && n.layout.squeezable) (flex, fit) = (flexValue, FlexFit.loose);
+      if (mainFit == SizeFit.hug && n.layout.squeezable && !parentNode.wraps) (flex, fit) = (flexValue, FlexFit.loose);
       if (pd.flex != flex || pd.fit != fit || pd.collapsed) {
         pd
           ..flex = flex
@@ -1004,7 +1095,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     while (extra != null) {
       final next = container.childAfter(extra);
       container.remove(extra);
-      if (extra is NodeBox) tree._orphan(extra);
+      if (extra is NodeBox) tree.orphan(extra);
       extra = next;
     }
   }
@@ -1016,7 +1107,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     while (child != null) {
       final next = c.childAfter(child);
       c.remove(child);
-      if (child is NodeBox) tree._orphan(child);
+      if (child is NodeBox) tree.orphan(child);
       child = next;
     }
     _container = null;
@@ -1106,6 +1197,21 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   }
 
   void _finishWire(List<RenderBox> next) {
+    for (final e in _innerChains.entries) {
+      if (!next.contains(e.key) || e.value.isEmpty) continue;
+      final pd = e.value.first.parentData;
+      if (pd is! StackParentData) continue;
+      final double? edge = _filledStacks.contains(e.key) ? 0 : null;
+      if (pd.left != edge || pd.top != edge || pd.right != edge || pd.bottom != edge) {
+        pd
+          ..left = edge
+          ..top = edge
+          ..right = edge
+          ..bottom = edge;
+        e.key.markNeedsLayout();
+      }
+    }
+    _filledStacks.removeWhere((stack) => !next.contains(stack));
     final keep = <RenderBox>{
       ...next,
       for (final e in _innerChains.entries)

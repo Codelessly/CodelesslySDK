@@ -3,6 +3,7 @@ import 'package:codelessly_api/codelessly_api.dart' show Node, SizeFit;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'islands.dart';
 import 'layout/fit_box.dart';
 import 'node_tree.dart';
 
@@ -62,8 +63,10 @@ abstract interface class NodeBuilder {
 }
 
 /// A widget showing node [id]'s box, inside an island (a button's label, a
-/// list item's content): the island's widgets around, nodes inside.
-class NodeChild extends LeafRenderObjectWidget {
+/// list item's content): the island's widgets around, nodes inside. Like a
+/// [NodeView], it owns the islands of the boxes it shows, so they inherit
+/// from the island around.
+class NodeChild extends RenderObjectWidget {
   const NodeChild({super.key, required this.tree, required this.id, this.slot = const Slot.root(), this.instance});
 
   final NodeTree tree;
@@ -71,30 +74,34 @@ class NodeChild extends LeafRenderObjectWidget {
   final Slot slot;
   final Object? instance;
 
-  NodeBox _box() {
-    final box = tree.obtain(id, slot, instance: instance);
-    return box;
-  }
+  NodeBox _box() => tree.obtain(id, slot, instance: instance);
+
+  @override
+  IslandOwnerElement createElement() => IslandOwnerElement(this);
 
   @override
   RenderBox createRenderObject(BuildContext context) => _RenderNodeChild().._hold(_box());
 
   @override
-  void updateRenderObject(BuildContext context, _RenderNodeChild renderObject) => renderObject._hold(_box());
+  void updateRenderObject(BuildContext context, RenderBox renderObject) => (renderObject as _RenderNodeChild)._hold(_box());
 }
 
 /// Holds a node's box inside an island. The box belongs to the tree: it's
 /// handed over (detached from a previous holder) and let go on dispose.
-class _RenderNodeChild extends RenderProxyBox {
+class _RenderNodeChild extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin, IslandParent {
   void _hold(NodeBox box) {
-    if (identical(child, box)) return;
+    final old = child;
+    if (identical(old, box)) return;
     if (box.parent != null) box.detachFromParent();
     child = box;
+    if (old is NodeBox) old.tree.orphan(old);
   }
 
   @override
   void dispose() {
+    final old = child;
     child = null;
+    if (old is NodeBox) old.tree.orphan(old);
     super.dispose();
   }
 }
