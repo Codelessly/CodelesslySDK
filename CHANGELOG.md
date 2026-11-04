@@ -1,3 +1,15 @@
+## 9.1.1
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- A padded row, column or frame pinned to both sides of its parent (chained
+  sizing) lays its content out at the width the pins give it on a screen
+  wider than its design. Only its background stretched before: a player's
+  side panel kept its rows at their 1440 width, and a console bar kept its
+  controls off centre, on a 1920 wide screen.
+
 ## 9.1.0
 
 Requires codelessly_api 9.0.1.

@@ -371,6 +371,7 @@ List<Widget> wrapWithPadding(
   required AlignmentModel stackAlignment,
   bool applyPadding = true,
   bool isPlaceholder = false,
+  BaseNode? parent,
 }) {
   if (children.isEmpty || !applyPadding) return children;
 
@@ -387,10 +388,12 @@ List<Widget> wrapWithPadding(
     // associated [node]. Without it, the Stack can produce cases where it
     // wraps around its concrete child tightly instead of expanding from a
     // SizeFit.expand.
-    // A canvas body hugs, like its rectangle.
+    // A canvas body hugs, like its rectangle. A fixed axis stretched by
+    // pins on both sides (chained sizing) lays its padded content out at the
+    // stretched extent, not at its design size.
     FitBox.fromFits(
-      horizontalFit: isPlaceholder ? SizeFit.shrinkWrap : node.horizontalFit,
-      verticalFit: isPlaceholder ? SizeFit.shrinkWrap : node.verticalFit,
+      horizontalFit: _paddedFit(node, parent, isPlaceholder, horizontal: true),
+      verticalFit: _paddedFit(node, parent, isPlaceholder, horizontal: false),
       size: node.basicBoxLocal.size,
       child: Padding(
         padding: resolvedPadding,
@@ -403,6 +406,26 @@ List<Widget> wrapWithPadding(
       ),
     ),
   ];
+}
+
+/// How the padded content of a rectangle sizes on an axis: as the rectangle
+/// does, except that an axis pinned to both sides of a freeform parent
+/// (chained sizing) fills the extent the pins give it.
+SizeFit _paddedFit(
+  BaseNode node,
+  BaseNode? parent,
+  bool isPlaceholder, {
+  required bool horizontal,
+}) {
+  if (isPlaceholder) return SizeFit.shrinkWrap;
+  final SizeFit fit = horizontal ? node.horizontalFit : node.verticalFit;
+  return PassiveRowColumnTransformer.chainedOnAxis(
+        node,
+        parent,
+        horizontal: horizontal,
+      )
+      ? SizeFit.expanded
+      : fit;
 }
 
 List<Widget> wrapWithPaddingAndScroll(
@@ -467,6 +490,7 @@ List<Widget> wrapWithPaddingAndScroll(
     stackAlignment: stackAlignment,
     applyPadding: applyPadding,
     isPlaceholder: isPlaceholder,
+    parent: node.parentID == kRootNode ? null : getNode?.call(node.parentID),
   );
 }
 
