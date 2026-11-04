@@ -1,0 +1,6 @@
+{"document": {
+  "rootNode": {"children": ["c"]},
+  "c": {"id": "c", "type": "canvas", "name": "Demo", "parentID": "rootNode", "basicBoxLocal": [0, 0, 300, 200], "properties": {"bodyId": "b"}, "children": ["b"]},
+  "b": {"id": "b", "type": "frame", "name": "Body", "parentID": "c", "basicBoxLocal": [0, 0, 300, 200], "horizontalFit": "expanded", "verticalFit": "expanded", "children": ["r"]},
+  "r": {"id": "r", "type": "rectangle", "name": "Box", "parentID": "b", "basicBoxLocal": [20, 30, 100, 40], "edgePins": {"left": 20, "top": 30}, "positioningMode": "pin"}
+}}
