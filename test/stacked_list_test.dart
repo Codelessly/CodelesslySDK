@@ -166,6 +166,28 @@ void main() {
     expect(tester.getSize(items().at(0)), const Size(60, 50));
   });
 
+  // Pins on a floor plan (a list saved with `overlay`): each item's center
+  // sits at a fraction of the list's padded box.
+  testWidgets(
+    'items bound by positionX/positionY sit at fractions of the list',
+    (tester) async {
+      final t = build();
+      t.item.variables
+        ..remove('x')
+        ..remove('y')
+        ..['positionX'] = r'${= item.x / 20}'
+        ..['positionY'] = r'${= item.y / 9}';
+      await pump(tester, t.registry, t.list);
+
+      final List<Positioned> placed = tester
+          .widgetList<Positioned>(items())
+          .toList();
+      // 380 x 180 inside the padding; the items are 60 x 50 (bound size).
+      expect([placed[0].left, placed[0].top], [-30, -25]);
+      expect([placed[1].left, placed[1].top], [190 - 30, 90 - 15]);
+    },
+  );
+
   testWidgets('a bound rotation turns the item', (tester) async {
     final t = build();
     await pump(tester, t.registry, t.list);
