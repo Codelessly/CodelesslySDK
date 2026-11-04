@@ -17,6 +17,22 @@ dependencies:
   flutter_svg: ^2.0.17
   http: ^1.1.2
   just_audio: ^0.10.5
+  shared_preferences: ^2.3.5
+  url_launcher: ^6.3.1
+  web: ^1.1.0
+
+  # Store purchases: package:codelessly_sdk/store.dart.
+  in_app_purchase: ^3.2.3
+  in_app_purchase_android: ^0.5.5
+  in_app_purchase_storekit: ^0.4.15
+
+  # Firebase services: package:codelessly_sdk/firebase.dart. The rest of the
+  # SDK never imports them, so an app can run without Firebase.
+  firebase_core: ^4.15.0
+  firebase_auth: ^6.7.0
+  cloud_firestore: ^6.10.0
+  cloud_functions: ^6.0.6
+  firebase_storage: ^13.0.6
   path_parsing: ^1.1.0
   video_player: ^2.14.0
   webview_flutter: ^4.10.0
