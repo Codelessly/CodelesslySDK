@@ -62,7 +62,8 @@ Future<ParityReport> parity(WidgetTester tester, {String project = '', String se
       final rects = (g['rects'] as Map).cast<String, Object?>();
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = Size(size[0].toDouble(), size[1].toDouble());
-      final tree = NodeTree(DocumentSource(doc));
+      // The runtime set renders with the layout's variables and conditions.
+      final tree = NodeTree(DocumentSource(doc), binder: set == runtimeSet ? runtimeBinder(doc, e.key) : null);
       await tester.pumpWidget(MaterialApp(debugShowCheckedModeBanner: false, home: NodeView(tree: tree, rootId: e.key)));
       await tester.pump();
       final view = tester.renderObject(find.byType(NodeView));
@@ -71,6 +72,8 @@ Future<ParityReport> parity(WidgetTester tester, {String project = '', String se
         final r = tree.boxOf(id)?.rectIn(view);
         if (r != null) got[id] = r;
       }
+      // A node a binding hides has no place (SDK 8.x reports where it was).
+      rects.removeWhere((id, _) => tree.boxOf(id)?.collapsed ?? false);
       bool ok(String id) => got[id] != null && _match((rects[id] as List).cast<num>(), got[id]!);
       final ported = doc.subtree(e.key).every((n) => n.spec != null);
       if (ported) {
@@ -111,3 +114,11 @@ Future<ParityReport> parity(WidgetTester tester, {String project = '', String se
   }
   return report;
 }
+
+/// The golden set rendered at runtime (bindings, variables, conditions).
+const runtimeSet = 'samples-bindings';
+
+/// A running app's binder for canvas [canvasId] of [doc]: its variables at
+/// their defaults, its conditions.
+NodeBinder runtimeBinder(LayoutDocument doc, String canvasId) =>
+    NodeBinder(scope: VariableScope(doc.logic.variablesOf(canvasId)), logic: doc.logic);
