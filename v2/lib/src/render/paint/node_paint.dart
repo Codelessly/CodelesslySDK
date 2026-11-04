@@ -8,19 +8,23 @@ import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:flutter/rendering.dart';
 
 import '../convert.dart';
+import 'image_fill.dart';
 
 /// Paints fills and/or strokes of a box decoration, at the size its parent
 /// gives it.
-class RenderNodePaint extends RenderBox {
+class RenderNodePaint extends RenderBox with ImageClient {
   RenderNodePaint({api.Decoration decoration = api.Decoration.none, bool foreground = false})
       : _decoration = decoration,
-        _foreground = foreground;
+        _foreground = foreground {
+    showImages(decoration.fills.map(imageUrlOf));
+  }
 
   api.Decoration _decoration;
   api.Decoration get decoration => _decoration;
   set decoration(api.Decoration v) {
     if (v == _decoration) return;
     _decoration = v;
+    showImages(v.fills.map(imageUrlOf));
     markNeedsPaint();
   }
 
@@ -81,7 +85,7 @@ class RenderNodePaint extends RenderBox {
     }
     final dashed = decoration.dashPattern.any((d) => d > 0) ? _dash(path, decoration.dashPattern) : path;
     for (final p in strokes) {
-      final paint = _paintFor(p, rect)
+      final paint = paintFor(p, rect)
         ..style = PaintingStyle.stroke
         ..strokeWidth = w
         ..strokeCap = StrokeCap.values.byName(decoration.strokeCap.name);
@@ -89,13 +93,18 @@ class RenderNodePaint extends RenderBox {
     }
   }
 
-  static void _fill(Canvas canvas, RRect rrect, api.Paint p) {
+  void _fill(Canvas canvas, RRect rrect, api.Paint p) {
     if (!p.visible) return;
-    if (p.type == api.PaintType.image) return; // Images: the image loader paints them.
-    canvas.drawRRect(rrect, _paintFor(p, rrect.outerRect));
+    if (p.type == api.PaintType.image) {
+      // Foreground images aren't drawn (as SDK 8.x).
+      if (!_foreground) paintImageFill(canvas, rrect, p, this);
+      return;
+    }
+    canvas.drawRRect(rrect, paintFor(p, rrect.outerRect));
   }
 
-  static Paint _paintFor(api.Paint p, Rect rect) {
+  /// The Flutter paint for a solid or gradient [p] over [rect].
+  static Paint paintFor(api.Paint p, Rect rect) {
     final paint = Paint()..blendMode = blendMode(p.blendMode);
     if (!p.isGradient) {
       paint.color = (p.effectiveColor ?? const api.Color(0)).flutter;

@@ -1,0 +1,386 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "icons"
+   ]
+  },
+  "icons": {
+   "id": "icons",
+   "type": "canvas",
+   "name": "icons",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    400
+   ],
+   "properties": {
+    "bodyId": "icons-body"
+   },
+   "children": [
+    "icons-body"
+   ]
+  },
+  "icons-body": {
+   "id": "icons-body",
+   "type": "frame",
+   "name": "Body",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    400
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "parentID": "icons",
+   "children": [
+    "ic-mat",
+    "ic-mat-out",
+    "ic-sym",
+    "ic-cup",
+    "ic-svg",
+    "ic-png",
+    "ic-png-raw",
+    "ic-hidden",
+    "ic-wide",
+    "irow"
+   ]
+  },
+  "ic-mat": {
+   "id": "ic-mat",
+   "type": "icon",
+   "name": "ic-mat",
+   "basicBoxLocal": [
+    20,
+    20,
+    24,
+    24
+   ],
+   "properties": {
+    "icon": {
+     "show": true,
+     "size": 24,
+     "color": "#FF2196F3",
+     "icon": {
+      "name": "home",
+      "codepoint": 59530,
+      "style": "filled",
+      "version": 16,
+      "type": "MATERIAL_ICON"
+     }
+    }
+   },
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "icons-body"
+  },
+  "ic-mat-out": {
+   "id": "ic-mat-out",
+   "type": "icon",
+   "name": "ic-mat-out",
+   "basicBoxLocal": [
+    60,
+    20,
+    48,
+    48
+   ],
+   "properties": {
+    "icon": {
+     "show": true,
+     "size": 48,
+     "icon": {
+      "name": "home",
+      "codepoint": 59530,
+      "style": "outlined",
+      "version": 16,
+      "type": "MATERIAL_ICON"
+     }
+    }
+   },
+   "edgePins": {
+    "left": 60,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "icons-body"
+  },
+  "ic-sym": {
+   "id": "ic-sym",
+   "type": "icon",
+   "name": "ic-sym",
+   "basicBoxLocal": [
+    120,
+    20,
+    40,
+    40
+   ],
+   "properties": {
+    "icon": {
+     "show": true,
+     "size": 40,
+     "fill": 1,
+     "weight": 700,
+     "grade": 200,
+     "opticalSize": 40,
+     "icon": {
+      "name": "star",
+      "codepoint": 59448,
+      "style": "rounded",
+      "type": "MATERIAL_SYMBOL",
+      "fontFamily": "MaterialSymbolsRounded"
+     }
+    }
+   },
+   "edgePins": {
+    "left": 120,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "icons-body"
+  },
+  "ic-cup": {
+   "id": "ic-cup",
+   "type": "icon",
+   "name": "ic-cup",
+   "basicBoxLocal": [
+    180,
+    20,
+    32,
+    32
+   ],
+   "properties": {
+    "icon": {
+     "show": true,
+     "size": 32,
+     "icon": {
+      "name": "heart",
+      "codepoint": 61708,
+      "type": "CUPERTINO_ICON",
+      "fontFamily": "CupertinoIcons"
+     }
+    }
+   },
+   "edgePins": {
+    "left": 180,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "icons-body"
+  },
+  "ic-svg": {
+   "id": "ic-svg",
+   "type": "icon",
+   "name": "ic-svg",
+   "basicBoxLocal": [
+    230,
+    20,
+    36,
+    36
+   ],
+   "properties": {
+    "icon": {
+     "show": true,
+     "type": "image",
+     "size": 36,
+     "iconImage": "https://cdn.example.com/logo.svg",
+     "color": "#FF000000"
+    }
+   },
+   "edgePins": {
+    "left": 230,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "icons-body"
+  },
+  "ic-png": {
+   "id": "ic-png",
+   "type": "icon",
+   "name": "ic-png",
+   "basicBoxLocal": [
+    280,
+    20,
+    36,
+    36
+   ],
+   "properties": {
+    "icon": {
+     "show": true,
+     "type": "image",
+     "size": 36,
+     "iconImage": "https://cdn.example.com/logo.png",
+     "scale": 2
+    }
+   },
+   "edgePins": {
+    "left": 280,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "icons-body"
+  },
+  "ic-png-raw": {
+   "id": "ic-png-raw",
+   "type": "icon",
+   "name": "ic-png-raw",
+   "basicBoxLocal": [
+    330,
+    20,
+    36,
+    36
+   ],
+   "properties": {
+    "icon": {
+     "show": true,
+     "type": "image",
+     "size": 36,
+     "iconImage": "https://cdn.example.com/logo.png",
+     "color": "#00000000"
+    }
+   },
+   "edgePins": {
+    "left": 330,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "icons-body"
+  },
+  "ic-hidden": {
+   "id": "ic-hidden",
+   "type": "icon",
+   "name": "ic-hidden",
+   "basicBoxLocal": [
+    20,
+    80,
+    30,
+    30
+   ],
+   "properties": {
+    "icon": {
+     "show": false,
+     "icon": {
+      "name": "home",
+      "codepoint": 59530,
+      "style": "filled",
+      "version": 16,
+      "type": "MATERIAL_ICON"
+     }
+    }
+   },
+   "edgePins": {
+    "left": 20,
+    "top": 80
+   },
+   "positioningMode": "pin",
+   "parentID": "icons-body"
+  },
+  "ic-wide": {
+   "id": "ic-wide",
+   "type": "icon",
+   "name": "ic-wide",
+   "basicBoxLocal": [
+    60,
+    80,
+    60,
+    30
+   ],
+   "properties": {
+    "icon": {
+     "show": true,
+     "icon": {
+      "name": "home",
+      "codepoint": 59530,
+      "style": "filled",
+      "version": 16,
+      "type": "MATERIAL_ICON"
+     }
+    }
+   },
+   "edgePins": {
+    "left": 60,
+    "top": 80
+   },
+   "positioningMode": "pin",
+   "parentID": "icons-body"
+  },
+  "irow": {
+   "id": "irow",
+   "type": "row",
+   "name": "irow",
+   "basicBoxLocal": [
+    20,
+    140,
+    360,
+    50
+   ],
+   "rowColumnType": "row",
+   "horizontalFit": "expanded",
+   "edgePins": {
+    "left": 20,
+    "top": 140
+   },
+   "positioningMode": "pin",
+   "parentID": "icons-body",
+   "children": [
+    "ic-row",
+    "ic-row-fill"
+   ]
+  },
+  "ic-row": {
+   "id": "ic-row",
+   "type": "icon",
+   "name": "ic-row",
+   "basicBoxLocal": [
+    0,
+    13,
+    24,
+    24
+   ],
+   "properties": {
+    "icon": {
+     "show": true,
+     "icon": {
+      "name": "home",
+      "codepoint": 59530,
+      "style": "filled",
+      "version": 16,
+      "type": "MATERIAL_ICON"
+     }
+    }
+   },
+   "parentID": "irow"
+  },
+  "ic-row-fill": {
+   "id": "ic-row-fill",
+   "type": "icon",
+   "name": "ic-row-fill",
+   "basicBoxLocal": [
+    24,
+    0,
+    50,
+    50
+   ],
+   "properties": {
+    "icon": {
+     "show": true,
+     "icon": {
+      "name": "home",
+      "codepoint": 59530,
+      "style": "filled",
+      "version": 16,
+      "type": "MATERIAL_ICON"
+     }
+    }
+   },
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "parentID": "irow"
+  }
+ }
+}
