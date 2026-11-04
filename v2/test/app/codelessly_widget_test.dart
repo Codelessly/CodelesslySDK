@@ -1,0 +1,251 @@
+// A migrated real project (rigcheck: screens with mobile, tablet and
+// desktop canvases, navigation between them) shown by CodelesslyWidget.
+import 'dart:async';
+
+import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'support.dart';
+
+void main() {
+  final bundle = fixture('rigcheck');
+  final signIn = layoutWithCanvas(bundle, 'Sign in · M');
+  final today = layoutWithCanvas(bundle, 'Today · M');
+
+  Codelessly codelesslyFor({ActionRunner actions = const NavigationActionRunner(), PublishCache? cache, PublishLoader? loader}) =>
+      Codelessly(
+        config: CodelesslyConfig(projectId: 'rigcheck', actions: actions),
+        loader: loader ?? MemoryPublishLoader(bundle),
+        cache: cache,
+        fonts: const NoFontFetcher(),
+      );
+
+  Future<CodelesslyWidgetController> pumpApp(WidgetTester tester, Codelessly codelessly, {String? layoutId, String? initialScreen}) async {
+    final controller = CodelesslyWidgetController(layoutId: layoutId);
+    addTearDown(controller.dispose);
+    // A fresh app (a new home doesn't replace a navigator's routes).
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: CodelesslyWidget(codelessly: codelessly, controller: controller, initialScreen: initialScreen),
+    ));
+    await settle(tester);
+    return controller;
+  }
+
+  testWidgets('shows the entry screen, its canvas picked by the width', (tester) async {
+    ignoreOverflows();
+    for (final (width, canvas) in [(390.0, 'Sign in · M'), (834.0, 'Sign in · T'), (1440.0, 'Sign in · D')]) {
+      setScreen(tester, Size(width, 900));
+      final controller = await pumpApp(tester, codelesslyFor());
+      expect(controller.layout!.id, bundle.model.entryLayoutId);
+      expect(controller.canvasId, canvasNamed(signIn, canvas), reason: '$width');
+      final view = tester.renderObject<RenderBox>(find.byType(NodeView));
+      expect(view.size, Size(width, 900), reason: 'a responsive canvas fills the screen');
+      expect(controller.tree!.boxOf(controller.canvasId!)!.rectIn(view), Offset.zero & Size(width, 900));
+      await tester.pumpWidget(const SizedBox());
+    }
+  });
+
+  testWidgets('switches canvas when the width crosses a breakpoint', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final codelessly = codelesslyFor();
+    final controller = await pumpApp(tester, codelessly);
+    expect(controller.canvasId, canvasNamed(signIn, 'Sign in · M'));
+    expect(codelessly.route.value?.canvasId, controller.canvasId);
+    tester.view.physicalSize = const Size(1280, 800);
+    await settle(tester);
+    expect(controller.canvasId, canvasNamed(signIn, 'Sign in · D'));
+    expect(codelessly.route.value?.canvasId, controller.canvasId);
+    // The same tree: the mobile canvas's boxes are let go.
+    expect(controller.tree!.boxOf(canvasNamed(signIn, 'Sign in · D'))!.attached, isTrue);
+  });
+
+  testWidgets('a tap runs the reaction: a tab replaces the screen', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final codelessly = codelesslyFor();
+    final shop = layoutWithCanvas(bundle, 'Shop · M');
+    final controller = await pumpApp(tester, codelessly, layoutId: today.id);
+    await tapNode(tester, controller, nodeNamed(today, canvasNamed(today, 'Today · M'), 'Tab Shop'));
+    expect(codelessly.route.value?.layoutId, shop.id);
+    expect(codelessly.route.value?.canvasId, canvasNamed(shop, 'Shop · M'));
+    // Replaced: nothing to go back to.
+    expect(find.byType(CodelesslyWidget), findsOneWidget);
+    expect(tester.state<NavigatorState>(find.byType(Navigator)).canPop(), isFalse);
+  });
+
+  testWidgets('without an action runner, a tap does nothing', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final codelessly = codelesslyFor(actions: const NoopActionRunner());
+    final controller = await pumpApp(tester, codelessly, layoutId: today.id);
+    await tapNode(tester, controller, nodeNamed(today, canvasNamed(today, 'Today · M'), 'Tab Shop'));
+    expect(codelessly.route.value?.layoutId, today.id);
+  });
+
+  testWidgets('navigates on: Today → Fleet (a tab), and push and pop', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final codelessly = codelesslyFor();
+    final fleet = layoutWithCanvas(bundle, 'Fleet · M');
+    final controller = await pumpApp(tester, codelessly, layoutId: today.id);
+    await tapNode(tester, controller, nodeNamed(today, canvasNamed(today, 'Today · M'), 'Tab Fleet'));
+    expect(codelessly.route.value?.layoutId, fleet.id);
+
+    // A push leaves the screen beneath; pop goes back to it.
+    final home = await pumpApp(tester, codelessly, layoutId: today.id);
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    unawaited(home.actionContext!.navigate({'type': 'navigation', 'destinationId': canvasNamed(fleet, 'Fleet · M')}));
+    await settle(tester);
+    expect(codelessly.route.value?.layoutId, fleet.id);
+    expect(navigator.canPop(), isTrue);
+    await home.actionContext!.navigate({'type': 'navigation', 'navigationType': 'pop'});
+    await settle(tester);
+    expect(navigator.canPop(), isFalse);
+    expect(find.byType(CodelesslyWidget), findsOneWidget);
+  });
+
+  testWidgets('reset clears the history, leaving its base screen beneath', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final codelessly = codelesslyFor();
+    final home = await pumpApp(tester, codelessly, layoutId: today.id);
+    final fleet = layoutWithCanvas(bundle, 'Fleet · M');
+    final shop = layoutWithCanvas(bundle, 'Shop · M');
+    final navigate = home.actionContext!.navigate;
+    unawaited(navigate({'type': 'navigation', 'destinationId': fleet.id}));
+    unawaited(navigate({'type': 'navigation', 'destinationId': shop.id}));
+    await settle(tester);
+    await navigate({
+      'type': 'navigation', 'navigationType': 'reset', 'destinationId': shop.id, 'baseDestinationId': signIn.id, //
+    });
+    await settle(tester);
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    expect(codelessly.route.value?.layoutId, shop.id);
+    navigator.pop();
+    await settle(tester);
+    expect(codelessly.route.value?.layoutId, signIn.id);
+    expect(navigator.canPop(), isFalse);
+  });
+
+  testWidgets('opens a layout by canvas id, and a screen by its name', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(1440, 900));
+    final byCanvas = await pumpApp(tester, codelesslyFor(), layoutId: canvasNamed(today, 'Today · T'));
+    expect(byCanvas.layout!.id, today.id);
+    // The breakpoint still picks the canvas.
+    expect(byCanvas.canvasId, canvasNamed(today, 'Today · D'));
+    await tester.pumpWidget(const SizedBox());
+    final byName = await pumpApp(tester, codelesslyFor(), initialScreen: '/vehicle-·-d');
+    expect(byName.error, isNull);
+    expect(byName.layout!.id, layoutWithCanvas(bundle, 'Vehicle · M').id);
+    await tester.pumpWidget(const SizedBox());
+    final unknown = await pumpApp(tester, codelesslyFor(), initialScreen: 'kraken');
+    expect(unknown.layout!.id, bundle.model.entryLayoutId);
+  });
+
+  testWidgets('a canvas can be forced; data and params reach the scope', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final codelessly = codelesslyFor()..setData('user', {'name': 'Ada'});
+    final controller = CodelesslyWidgetController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: CodelesslyWidget(
+        codelessly: codelessly,
+        controller: controller,
+        layoutId: today.id,
+        canvasId: canvasNamed(today, 'Today · D'),
+        params: const {'unit': 'D-1042'},
+      ),
+    ));
+    await settle(tester);
+    expect(controller.canvasId, canvasNamed(today, 'Today · D'));
+    expect(controller.read('route.unit'), 'D-1042');
+    expect(controller.read('data.user.name'), 'Ada');
+    controller.setVariable('count', 3);
+    expect(controller.read('count'), 3);
+  });
+
+  testWidgets('loading, then an error for a layout that does not exist', (tester) async {
+    setScreen(tester, const Size(390, 844));
+    final codelessly = codelesslyFor();
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: codelessly, layoutId: 'nope')));
+    expect(find.byType(CodelesslyLoadingScreen), findsOneWidget);
+    await settle(tester);
+    expect(find.byType(CodelesslyErrorScreen), findsOneWidget);
+    await tester.pumpWidget(MaterialApp(
+      home: CodelesslyWidget(
+        codelessly: codelessly,
+        layoutId: 'nope',
+        errorBuilder: (_, e) => Text('failed: ${e is PublishLoadException}'),
+      ),
+    ));
+    await settle(tester);
+    expect(find.text('failed: true'), findsOneWidget);
+  });
+
+  testWidgets('uses the scope or the default instance when given none', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final scoped = codelesslyFor();
+    await tester.pumpWidget(MaterialApp(home: CodelesslyScope(codelessly: scoped, child: const CodelesslyWidget())));
+    await settle(tester);
+    expect(scoped.route.value?.layoutId, signIn.id);
+
+    final fallback = codelesslyFor();
+    Codelessly.setDefault(fallback);
+    addTearDown(() => Codelessly.setDefault(null));
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(layoutId: today.id)));
+    await settle(tester);
+    expect(fallback.route.value?.layoutId, today.id);
+  });
+
+  testWidgets('an autoScale canvas lays out at its design width, scaled to the screen', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(780, 1000));
+    final account = layoutWithCanvas(bundle, 'Account');
+    final canvasId = account.canvasIds.single;
+    final canvas = account.document[canvasId]!;
+    final scaled = account.copyWith(
+      document: account.document.copyWith(nodes: {
+        ...account.document.nodes,
+        canvasId: canvas.copyWith(props: canvas.props.set(CanvasProps.scaleMode, ScaleMode.autoScale)),
+      }),
+    );
+    final b = PublishBundle(model: bundle.model, layouts: {...bundle.layouts, account.id: scaled});
+    final codelessly = Codelessly.fromBundle(b, fonts: const NoFontFetcher());
+    final controller = CodelesslyWidgetController(layoutId: account.id);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: codelessly, controller: controller)));
+    await settle(tester);
+    final view = tester.renderObject<RenderBox>(find.byType(NodeView));
+    // 420 wide by design: laid out at 420, shown 780 wide.
+    expect(view.size.width, 420);
+    final shown = MatrixUtils.transformRect(view.getTransformTo(null), Offset.zero & view.size);
+    expect(shown.width, closeTo(780, 0.01));
+    expect(shown.top, 0);
+  });
+
+  testWidgets('every screen of a second project renders', (tester) async {
+    ignoreOverflows();
+    final linewatch = fixture('linewatch');
+    final codelessly = Codelessly.fromBundle(linewatch, fonts: const NoFontFetcher());
+    for (final layout in linewatch.layouts.values) {
+      final canvas = layout.document[layout.canvasIds.single]!;
+      setScreen(tester, Size(canvas.layout.width.value, canvas.layout.height.value));
+      final controller = CodelesslyWidgetController(layoutId: layout.id);
+      await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: codelessly, controller: controller)));
+      await settle(tester);
+      expect(controller.error, isNull, reason: canvas.name);
+      expect(controller.canvasId, canvas.id);
+      expect(controller.tree!.length, greaterThan(5), reason: canvas.name);
+      await tester.pumpWidget(const SizedBox());
+      controller.dispose();
+    }
+  });
+}
+
