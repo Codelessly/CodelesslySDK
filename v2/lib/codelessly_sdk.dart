@@ -26,6 +26,7 @@ export 'package:codelessly_api/codelessly_api.dart'
         Paint,
         StrokeAlign,
         StrokeCap,
+        StrokeJoin,
         TextAlign,
         TextAlignVertical,
         TextDecoration,
@@ -40,3 +41,4 @@ export 'src/render/node_tree.dart' show NodeTree, NodeBox, NodeTreeObserver, Slo
 export 'src/render/node_view.dart';
 export 'src/render/recipe.dart' show NodeChild;
 export 'src/render/source.dart';
+export 'src/widgets/media.dart' show ExternalComponents;
