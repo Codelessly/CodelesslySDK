@@ -704,7 +704,13 @@ void _navigationBar(NodeBuilder b, Node n, List<RenderBox> chain) {
           SizeFit.fill => double.infinity,
           _ => s.value,
         };
-    Widget bar = n.type == 'bottomNavigationBar' ? _bottomNavigationBar(context, n) : _materialNavigationBar(context, n);
+    // Flutter's bars need two destinations; fewer (bad or partial data) is
+    // an empty bar of the node's size, never an error.
+    Widget bar = n.prop(NavigationBarProps.destinations).length < 2
+        ? const SizedBox.expand()
+        : n.type == 'bottomNavigationBar'
+            ? _bottomNavigationBar(context, n)
+            : _materialNavigationBar(context, n);
     if (n.prop(NavigationBarProps.notched)) {
       bar = BottomAppBar(
         shape: const CircularNotchedRectangle(),
