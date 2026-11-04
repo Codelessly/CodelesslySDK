@@ -13,9 +13,8 @@ import 'image_fill.dart';
 /// Paints fills and/or strokes of a box decoration, at the size its parent
 /// gives it.
 class RenderNodePaint extends RenderBox with ImageClient {
-  RenderNodePaint({api.Decoration decoration = api.Decoration.none, bool foreground = false})
-      : _decoration = decoration,
-        _foreground = foreground {
+  RenderNodePaint({api.Decoration decoration = api.Decoration.none, this._foreground = false})
+      : _decoration = decoration {
     showImages(decoration.fills.map(imageUrlOf));
   }
 

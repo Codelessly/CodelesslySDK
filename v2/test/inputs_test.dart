@@ -18,24 +18,18 @@ Future<(NodeTree, RenderObject)> _show(WidgetTester tester, DocumentSource sourc
   return (tree, tester.renderObject(find.byType(NodeView)));
 }
 
-/// The widgets of [tree]'s islands (finders only search the app's own
-/// element tree).
+/// The widgets of [tree]'s islands.
 Iterable<Widget> _islandWidgets(NodeTree tree) sync* {
   for (final host in tree.islands.hosts) {
-    final creator = host.child?.debugCreator;
-    if (creator is! DebugCreator) continue;
-    var top = creator.element;
-    creator.element.visitAncestorElements((e) {
-      top = e;
-      return true;
-    });
+    final root = host.element;
+    if (root == null) continue;
     final all = <Widget>[];
     void walk(Element e) {
       all.add(e.widget);
       e.visitChildren(walk);
     }
 
-    walk(top);
+    walk(root);
     yield* all;
   }
 }

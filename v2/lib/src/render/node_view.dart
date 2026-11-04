@@ -5,8 +5,10 @@ import 'islands.dart';
 import 'node_tree.dart';
 
 /// Hosts the render tree of one node of a [NodeTree] (a screen, or any
-/// node): the widget tree stops here.
-class NodeView extends LeafRenderObjectWidget {
+/// node). No widget or element exists per node below it; its element owns
+/// the islands (widget-built nodes) of the boxes it shows, so they live
+/// under the app's element tree (see islands.dart).
+class NodeView extends RenderObjectWidget {
   const NodeView({super.key, required this.tree, required this.rootId, this.interactive = false});
 
   final NodeTree tree;
@@ -17,20 +19,29 @@ class NodeView extends LeafRenderObjectWidget {
   final bool interactive;
 
   @override
+  IslandOwnerElement createElement() => IslandOwnerElement(this);
+
+  void _configure() {
+    final env = tree.islands.environment;
+    if (env.interactive != interactive) {
+      tree.islands.environment = IslandEnvironment(interactive: interactive, wrap: env.wrap);
+    }
+  }
+
+  @override
   RenderNodeView createRenderObject(BuildContext context) {
-    tree.islands.environment = IslandEnvironment.capture(context, interactive: interactive);
+    _configure();
     return RenderNodeView(tree, rootId);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderNodeView renderObject) {
-    tree.islands.environment = IslandEnvironment.capture(context, interactive: interactive);
-    tree.islands.rebuildAll();
+    _configure();
     renderObject.setRoot(tree, rootId);
   }
 }
 
-class RenderNodeView extends RenderProxyBox {
+class RenderNodeView extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin, IslandParent {
   RenderNodeView(NodeTree tree, String rootId) {
     setRoot(tree, rootId);
   }
@@ -45,26 +56,19 @@ class RenderNodeView extends RenderProxyBox {
       child = null;
       old.tree.release(old);
     }
-    _tree?.islands.onNeedsFlush = null;
     _tree = tree;
     _rootId = rootId;
-    tree.islands.onNeedsFlush = markNeedsLayout;
-    child = tree.obtain(rootId, const Slot.root());
+    final box = tree.obtain(rootId, const Slot.root());
+    // Another view showed it (a view rebuilt elsewhere in the app): it's
+    // this one's now.
+    if (box.parent != null) box.detachFromParent();
+    child = box;
   }
 
   /// The root box belongs to the tree, not to this view: let go of it.
   @override
   void dispose() {
-    _tree?.islands.onNeedsFlush = null;
     child = null;
     super.dispose();
-  }
-
-  @override
-  void performLayout() {
-    // Build islands first, where mutating the subtree is allowed.
-    final tree = _tree;
-    if (tree != null) invokeLayoutCallback<BoxConstraints>((_) => tree.islands.flush());
-    super.performLayout();
   }
 }
