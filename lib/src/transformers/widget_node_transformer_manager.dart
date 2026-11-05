@@ -1027,11 +1027,40 @@ abstract class WidgetNodeTransformerManager
       };
     }
 
+    bool? flag(String key) {
+      if (!node.variables.containsKey(key)) return null;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      return switch (value) {
+        bool b => b,
+        num n => n != 0,
+        String s => s.trim().toLowerCase() == 'true',
+        _ => null,
+      };
+    }
+
     final double? min = read(DragTrackModel.minVariableKey);
     final double? max = read(DragTrackModel.maxVariableKey);
     final double? step = read(DragTrackModel.stepVariableKey);
-    if (min == null && max == null && step == null) return track;
-    return track.copyWith(min: min, max: max, step: step);
+    final bool? momentum = flag(DragTrackModel.momentumVariableKey);
+    final bool? smooth = flag(DragTrackModel.smoothVariableKey);
+    if (min == null &&
+        max == null &&
+        step == null &&
+        momentum == null &&
+        smooth == null) {
+      return track;
+    }
+    return track.copyWith(
+      min: min,
+      max: max,
+      step: step,
+      momentum: momentum,
+      smooth: smooth,
+    );
   }
 
   /// Draws [node] where its drag track puts it for its variable's value,
