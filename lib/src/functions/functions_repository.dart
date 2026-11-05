@@ -2322,7 +2322,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
   }) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
 
-    final ValueNotifier<VariableData>? variableNotifier = payload.variables[id];
+    // The variable bindings read with this one's name (see findVariable).
+    final ValueNotifier<VariableData>? variableNotifier = payload.findVariable(
+      id: id,
+    );
     if (variableNotifier == null) return false;
     if (variableNotifier.value.isComputed) return false;
 
