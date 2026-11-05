@@ -2062,7 +2062,9 @@ DateTime? _toDate(Object? value) {
       if (millis != null && text.length > 8) {
         return DateTime.fromMillisecondsSinceEpoch(millis);
       }
-      return DateTime.tryParse(text) ?? _typedDate(text);
+      final DateTime? iso = DateTime.tryParse(text);
+      if (iso != null) return _realIsoDate(text, iso) ? iso : null;
+      return _typedDate(text);
     case Map():
       final Object? seconds = value['seconds'] ?? value['_seconds'];
       if (seconds is! num) return null;
@@ -2145,6 +2147,20 @@ bool _isDateLike(Object? value) {
   } catch (_) {
     return false;
   }
+}
+
+/// Whether [parsed] (what [DateTime.tryParse] made of [text]) is the date
+/// [text] names: `2026-02-30` parses, rolled over to 2 March, but is no
+/// real date, so it doesn't equal `2026-03-02`.
+bool _realIsoDate(String text, DateTime parsed) {
+  final RegExpMatch? m = RegExp(r'^[+-]?(\d{4,6})-?(\d\d)-?(\d\d)')
+      .firstMatch(text);
+  if (m == null) return true;
+  final int month = int.parse(m[2]!);
+  final int day = int.parse(m[3]!);
+  if (month < 1 || month > 12 || day < 1) return false;
+  final int lastDay = DateTime.utc(int.parse(m[1]!), month + 1, 0).day;
+  return day <= lastDay;
 }
 
 /// [a] and [b] as dates when one is a date (see [_isDateLike]) and the other

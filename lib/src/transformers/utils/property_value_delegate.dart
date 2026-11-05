@@ -424,7 +424,7 @@ class PropertyValueDelegate {
             computedExpressionOf(variable) != null
         ? VariableType.fromObjectType(value)
         : variable.type;
-    List<Accessor> accessors = variable.name.startsWith('api')
+    List<Accessor> accessors = isApiVariableName(variable.name)
         ? getApiResponseAccessorsForType(VariableType.map)
         : getAccessorsForType(accessorType);
 
