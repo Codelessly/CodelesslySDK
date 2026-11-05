@@ -1615,9 +1615,33 @@ class FunctionsRepository {
             builder: builder,
           );
 
+    // As wide as the screen and as tall as its content, up to 90% of the
+    // screen; the canvas draws its own background and corners.
+    Widget sheetContent(BuildContext context) {
+      final Size screen = MediaQuery.sizeOf(context);
+      final double cap =
+          CodelesslyDialogWidget.maxHeightFor(maxHeightFactor, screen.height) ??
+          screen.height * 0.88;
+      if (fullHeight) return content(context, CanvasSizing.sheet);
+      if (hugsContent) {
+        return CanvasSizingScope(
+          sizing: CanvasSizing.design,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: screen.width, maxHeight: cap),
+            child: Builder(builder: builder),
+          ),
+        );
+      }
+      return CanvasSizingScope(
+        sizing: CanvasSizing.fill,
+        child: SizedBox(
+          height: math.min(designSize?.height ?? double.infinity, cap),
+          child: Builder(builder: builder),
+        ),
+      );
+    }
+
     if (asSheet) {
-      // As wide as the screen and as tall as its content, up to 90% of the
-      // screen; the canvas draws its own background and corners.
       return showModalBottomSheet<T>(
         context: context,
         useRootNavigator: false,
@@ -1628,37 +1652,16 @@ class FunctionsRepository {
         // The canvas draws the sheet: its fill, corners and grab handle.
         backgroundColor: Colors.transparent,
         elevation: 0,
-        showDragHandle: showDragHandle,
+        // The handle goes on the canvas (see
+        // [LayoutPresentationRoute.withDragHandle]); Flutter's would sit in a
+        // see-through band above it.
         constraints: const BoxConstraints(),
         routeSettings: routeSettings,
         builder: (context) {
-          final Size screen = MediaQuery.sizeOf(context);
-          final double cap =
-              CodelesslyDialogWidget.maxHeightFor(
-                maxHeightFactor,
-                screen.height,
-              ) ??
-              screen.height * 0.88;
-          if (fullHeight) return content(context, CanvasSizing.sheet);
-          if (hugsContent) {
-            return CanvasSizingScope(
-              sizing: CanvasSizing.design,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: screen.width,
-                  maxHeight: cap,
-                ),
-                child: Builder(builder: builder),
-              ),
-            );
-          }
-          return CanvasSizingScope(
-            sizing: CanvasSizing.fill,
-            child: SizedBox(
-              height: math.min(designSize?.height ?? double.infinity, cap),
-              child: Builder(builder: builder),
-            ),
-          );
+          final Widget sheet = sheetContent(context);
+          return showDragHandle
+              ? LayoutPresentationRoute.withDragHandle(sheet)
+              : sheet;
         },
       );
     }
