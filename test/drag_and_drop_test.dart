@@ -206,6 +206,47 @@ void main() {
     expect(lane(c, 'b'), ['c4', 'c1']);
   });
 
+  testWidgets('drag.x/y and fx/fy give where the dragged node lands', (
+    tester,
+  ) async {
+    final c = await pump(tester);
+    // The dragged node's centre is the pointer less the grab's distance
+    // from the node's centre. Column b spans x 160..320, y 0..400.
+    final Offset start = tester.getCenter(find.text('One'));
+    final Rect card = tester.getRect(
+      find
+          .ancestor(of: find.text('One'), matching: find.byType(DragSourceBox))
+          .first,
+    );
+    final Offset fromCentre = start - card.center;
+    final TestGesture gesture = await tester.startGesture(start);
+    await tester.pump();
+    Offset to = const Offset(240, 300);
+    for (int i = 1; i <= 10; i++) {
+      await gesture.moveTo(Offset.lerp(start, to, i / 10)!);
+      await tester.pump();
+    }
+    Map<String, Object?> drag = c.dragAndDrop.value;
+    Offset centre = to - fromCentre - const Offset(160, 0);
+    expect(drag['over'], 'b');
+    expect(drag['x'] as double, closeTo(centre.dx, 0.5));
+    expect(drag['y'] as double, closeTo(centre.dy, 0.5));
+    expect(drag['fx'] as double, closeTo(centre.dx / 160, 0.01));
+    expect(drag['fy'] as double, closeTo(centre.dy / 400, 0.01));
+    // Moving within the target updates it.
+    to = const Offset(250, 100);
+    await gesture.moveTo(to);
+    await tester.pump();
+    drag = c.dragAndDrop.value;
+    centre = to - fromCentre - const Offset(160, 0);
+    expect(drag['x'] as double, closeTo(centre.dx, 0.5));
+    expect(drag['fy'] as double, closeTo(centre.dy / 400, 0.01));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    // The drop keeps where it landed for the drop's actions.
+    expect(c.dragAndDrop.value['fy'] as double, closeTo(centre.dy / 400, 0.01));
+  });
+
   testWidgets('reordering within a column', (tester) async {
     final c = await pump(tester);
     final Offset start = tester.getCenter(find.text('Three'));

@@ -60,6 +60,15 @@ class DragSession {
   /// Whether [overTarget] accepts the drop (its `acceptIf`).
   bool accepted = false;
 
+  /// Where the centre of the dragged node is over [overTarget], in logical
+  /// pixels from the target's top left ([x], [y]) and as a share of the
+  /// target's size, 0 to 1 ([fx], [fy]): the spot a pin dropped on a map
+  /// lands on. 0 while over no target.
+  double x = 0;
+  double y = 0;
+  double fx = 0;
+  double fy = 0;
+
   DragSession({
     required this.group,
     required this.data,
@@ -83,6 +92,10 @@ class DragSession {
     'beforeId': beforeId,
     'before': before,
     'accepted': accepted,
+    'x': x,
+    'y': y,
+    'fx': fx,
+    'fy': fy,
     'width': size.width,
     'height': size.height,
   };
@@ -111,6 +124,10 @@ class DragAndDropController extends ChangeNotifier {
     'beforeId': '',
     'before': null,
     'accepted': false,
+    'x': 0.0,
+    'y': 0.0,
+    'fx': 0.0,
+    'fy': 0.0,
     'width': 0.0,
     'height': 0.0,
   };
@@ -785,8 +802,34 @@ class DropTargetBoxState extends State<DropTargetBox> {
     return value == true || value == 'true';
   }
 
-  void _move(CodelesslyDragPayload payload, Offset position) {
+  /// Sets where the dragged node's centre is over this target, from the
+  /// global position of its top left.
+  bool _locate(DragSession session, Offset topLeft) {
+    final RenderObject? box = context.findRenderObject();
+    if (box is! RenderBox || !box.attached || !box.hasSize) return false;
+    final Offset local = box.globalToLocal(
+      topLeft + session.size.center(Offset.zero),
+    );
+    final Size size = box.size;
+    final double x = local.dx, y = local.dy;
+    final double fx = size.width > 0 ? (x / size.width).clamp(0.0, 1.0) : 0;
+    final double fy = size.height > 0 ? (y / size.height).clamp(0.0, 1.0) : 0;
+    final bool changed =
+        x != session.x ||
+        y != session.y ||
+        fx != session.fx ||
+        fy != session.fy;
+    session
+      ..x = x
+      ..y = y
+      ..fx = fx
+      ..fy = fy;
+    return changed;
+  }
+
+  void _move(CodelesslyDragPayload payload, Offset position, Offset topLeft) {
     final DragSession session = payload.session;
+    final bool moved = _locate(session, topLeft);
     final String oldOver = session.over;
     final int? oldBefore = session.rawBefore;
     final bool oldAccepted = session.accepted;
@@ -803,6 +846,7 @@ class DropTargetBoxState extends State<DropTargetBox> {
     }
     session.accepted = _evaluateAccept();
     if (entering ||
+        moved ||
         oldOver != session.over ||
         oldBefore != session.rawBefore ||
         oldAccepted != session.accepted) {
@@ -835,16 +879,21 @@ class DropTargetBoxState extends State<DropTargetBox> {
       ..overTarget = null
       ..over = ''
       ..accepted = false
+      ..x = 0
+      ..y = 0
+      ..fx = 0
+      ..fy = 0
       ..rawBefore = null;
     payload.controller.changed();
     _fire(TriggerType.dragExit, session.toMap());
   }
 
-  void _drop(CodelesslyDragPayload payload) {
+  void _drop(CodelesslyDragPayload payload, Offset topLeft) {
     _hoverTimer?.cancel();
     _entered = false;
     DropTargetBox.stopAutoScroll();
     final DragSession session = payload.session;
+    _locate(session, topLeft);
     // Let go before a move reached this target: judge the drop now.
     if (!identical(session.overTarget, this)) {
       session
@@ -904,12 +953,12 @@ class DropTargetBoxState extends State<DropTargetBox> {
         onMove: (details) {
           final CodelesslyDragPayload payload = details.data;
           if (!_takes(payload.session.group)) return;
-          _move(payload, details.offset + payload.session.grab);
+          _move(payload, details.offset + payload.session.grab, details.offset);
         },
         onLeave: (payload) {
           if (payload != null) _leave(payload);
         },
-        onAcceptWithDetails: (details) => _drop(details.data),
+        onAcceptWithDetails: (details) => _drop(details.data, details.offset),
         builder: (context, _, _) => widget.child,
       ),
     );
