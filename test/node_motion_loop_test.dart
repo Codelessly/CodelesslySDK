@@ -64,6 +64,31 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets('A swing loop rocks around rest, both ways, on a sine', (
+    tester,
+  ) async {
+    // Safecracker's vault-door wheel rocking: translate stands in for the
+    // rotation (both are lerped the same way).
+    await pump(
+      tester,
+      const MotionModel(translateX: 20, durationMs: 1000, loop: MotionLoop.swing),
+    );
+    expect(dxOf(tester), closeTo(0, 0.01));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(dxOf(tester), closeTo(20, 0.1));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(dxOf(tester), closeTo(0, 0.1));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(dxOf(tester), closeTo(-20, 0.1)); // as far the other way
+    await tester.pump(const Duration(milliseconds: 125));
+    expect(dxOf(tester), closeTo(-20 * 0.7071, 0.2));
+    // Switched off, it rests at rest, not at an end.
+    await pump(tester, const MotionModel(translateX: 20, durationMs: 1000));
+    await tester.pumpAndSettle();
+    expect(dxOf(tester), anyOf(closeTo(20, 0.1), closeTo(0, 0.1)));
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('A restart loop jumps back to rest each time', (tester) async {
     await pump(
       tester,

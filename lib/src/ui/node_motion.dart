@@ -519,6 +519,29 @@ class _NodeMotionState extends State<_NodeMotionBody>
 
   MotionModel get _current {
     final bool spring = _spring.isAnimating || _spring.value != 1;
+    // A swing oscillates around rest: rest ± (values - rest) on a sine of
+    // the loop's time, and rests at rest when it isn't running.
+    if (_to.loop == MotionLoop.swing && !spring) {
+      if (!_moving) return _from;
+      final double s = math.sin(2 * math.pi * _transition.value);
+      double swing(String p) =>
+          _from.valueOf(p) + (_to.valueOf(p) - _from.valueOf(p)) * s;
+      return _to.copyWith(
+        translateX: swing('translateX'),
+        translateY: swing('translateY'),
+        shiftX: swing('shiftX'),
+        shiftY: swing('shiftY'),
+        scale: swing('scale'),
+        scaleX: swing('scaleX'),
+        scaleY: swing('scaleY'),
+        opacity: swing('opacity').clamp(0, 1).toDouble(),
+        rotate: swing('rotate'),
+        rotateX: swing('rotateX'),
+        rotateY: swing('rotateY'),
+        blur: math.max(0, swing('blur')),
+        pathProgress: swing('pathProgress'),
+      );
+    }
     if (!_moving && _transition.value == 0 && !spring) return _to;
     // A spring runs on real physics (and may overshoot past 1); a curve on
     // the transition's time.
