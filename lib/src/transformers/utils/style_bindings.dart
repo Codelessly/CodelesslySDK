@@ -53,6 +53,14 @@ import 'scoped_values.dart';
 ///   node's first fill when it is a gradient, e.g. a halo whose center
 ///   follows the phase color. A `#RRGGBB` color keeps the stop's own alpha
 ///   (a 35% halo stays 35%); `#AARRGGBB` sets it too.
+/// * [paintStop] `fill-stop-<paintId>-<index>` (color): the same for a stop
+///   of any gradient fill, named by its paint id, e.g. a hive icon whose
+///   gradient follows the hive's status color:
+///   `${= mix(hive.statusColor, '#FFFFFF', 0.28)}`. Wins over [fillStop].
+/// * [fillStopPosition] `fill-stop-position-<index>` and
+///   [paintStopPosition] `fill-stop-position-<paintId>-<index>` (number,
+///   0 to 1): the position of one stop along the gradient, of the first
+///   fill or of the fill with that paint id.
 /// * [notchOffset] (number): the offset of every notch of a node with
 ///   [CornerMixin.notches], in the notch's own unit (pixels, or a fraction
 ///   of the edge when the notch is relative), e.g. a ticket whose tear line
@@ -139,6 +147,22 @@ abstract final class StyleBindings {
 
   /// The color of stop [index] of the first fill's gradient.
   static String fillStop(int index) => 'fill-stop-$index';
+
+  /// The color of stop [index] of the gradient fill whose paint id is
+  /// [paintId].
+  static String paintStop(String paintId, int index) =>
+      'fill-stop-$paintId-$index';
+
+  /// The position (0 to 1) of stop [index] of the first fill's gradient.
+  static String fillStopPosition(int index) => 'fill-stop-position-$index';
+
+  /// The position (0 to 1) of stop [index] of the gradient fill whose paint
+  /// id is [paintId].
+  static String paintStopPosition(String paintId, int index) =>
+      'fill-stop-position-$paintId-$index';
+
+  /// Whether [key] binds a part of a gradient stop of a fill.
+  static bool isFillStopKey(String key) => key.startsWith('fill-stop-');
 
   /// Adds to [patch], a partial node JSON, the values that the bindings of
   /// these properties give [node], evaluated with [scopedValues]. A property
@@ -333,44 +357,83 @@ abstract final class StyleBindings {
     }
   }
 
-  /// [fills] (paint JSON) with the first gradient's stops recolored by
-  /// their `fill-stop-<index>` bindings, or null when none changes.
+  /// [fills] (paint JSON) with the gradient stops recolored and moved by
+  /// their bindings ([paintStop], [paintStopPosition], and for the first
+  /// fill [fillStop] and [fillStopPosition]), or null when none changes.
   static List? _fillStops(
     List fills,
     Map<String, String> variables,
     T? Function<T extends Object>(String property) value,
   ) {
-    if (fills.isEmpty ||
-        !variables.keys.any((k) => k.startsWith('fill-stop-'))) {
-      return null;
-    }
-    final PaintModel first = PaintModel.fromJson(fills.first as Map);
-    final List<ColorStop>? stops = first.gradientStops;
-    if (stops == null || stops.isEmpty) return null;
+    if (fills.isEmpty || !variables.keys.any(isFillStopKey)) return null;
     bool changed = false;
-    final List<ColorStop> next = [
-      for (final (int i, ColorStop stop) in stops.indexed)
-        if (variables.containsKey(fillStop(i)))
-          switch (value<Object>(fillStop(i))) {
-            final Object raw when raw.toColorRGBA() != null => () {
-              final ColorRGBA bound = raw.toColorRGBA()!;
-              // #RRGGBB names a hue only: keep the stop's transparency.
-              final bool hueOnly =
-                  raw is String &&
-                  RegExp(r'^#?[0-9a-fA-F]{6}$').hasMatch(raw.trim());
-              final ColorRGBA color = hueOnly
-                  ? bound.copyWith(a: stop.color.a)
-                  : bound;
-              if (color != stop.color) changed = true;
-              return stop.copyWith(color: color);
-            }(),
-            _ => stop,
-          }
-        else
-          stop,
+    final List next = [
+      for (final (int fillIndex, Object? json) in fills.indexed)
+        () {
+          if (json is! Map) return json;
+          final PaintModel paint = PaintModel.fromJson(json);
+          final List<ColorStop>? stops = paint.gradientStops;
+          if (stops == null || stops.isEmpty) return json;
+          // The key of a stop's binding: by paint id, else by index for the
+          // first fill.
+          String? keyOf(String byId, String byIndex) =>
+              variables.containsKey(byId)
+              ? byId
+              : fillIndex == 0 && variables.containsKey(byIndex)
+              ? byIndex
+              : null;
+          bool paintChanged = false;
+          final List<ColorStop> bound = [
+            for (final (int i, ColorStop stop) in stops.indexed)
+              () {
+                ColorStop result = stop;
+                final String? colorKey = keyOf(
+                  paintStop(paint.id, i),
+                  fillStop(i),
+                );
+                if (colorKey != null) {
+                  final ColorRGBA? color = _stopColor(
+                    value<Object>(colorKey),
+                    stop.color,
+                  );
+                  if (color != null) result = result.copyWith(color: color);
+                }
+                final String? positionKey = keyOf(
+                  paintStopPosition(paint.id, i),
+                  fillStopPosition(i),
+                );
+                if (positionKey != null) {
+                  final double? position = _number(value<Object>(positionKey));
+                  if (position != null && position.isFinite) {
+                    result = result.copyWith(
+                      position: position.clamp(0, 1).toDouble(),
+                    );
+                  }
+                }
+                if (result != stop) paintChanged = true;
+                return result;
+              }(),
+          ];
+          if (!paintChanged) return json;
+          changed = true;
+          // Flutter wants the stops in order along the gradient.
+          bound.sort((a, b) => a.position.compareTo(b.position));
+          return paint.copyWith(gradientStops: bound).toJson();
+        }(),
     ];
-    if (!changed) return null;
-    return [first.copyWith(gradientStops: next).toJson(), ...fills.skip(1)];
+    return changed ? next : null;
+  }
+
+  /// The color a stop's binding gives, [raw]: a `#RRGGBB` color names a hue
+  /// only and keeps the stop's own alpha ([current]'s); `#AARRGGBB` and
+  /// colors of other forms set the alpha too. Null when [raw] is no color.
+  static ColorRGBA? _stopColor(Object? raw, ColorRGBA current) {
+    if (raw == null) return null;
+    final ColorRGBA? bound = raw.toColorRGBA();
+    if (bound == null) return null;
+    final bool hueOnly =
+        raw is String && RegExp(r'^#?[0-9a-fA-F]{6}$').hasMatch(raw.trim());
+    return hueOnly ? bound.copyWith(a: current.a) : bound;
   }
 
   /// [node]'s notches with the offsets their [notchOffsetAt] or
