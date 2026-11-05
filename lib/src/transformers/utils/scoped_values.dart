@@ -60,6 +60,10 @@ class ScopedValues {
   /// The size of the screen, which the `screen` variable describes.
   late final Size? screenSize;
 
+  /// The switch widths of the responsive layout around the node, if it has
+  /// its own (`(tablet, desktop)`), for the `screen` variable.
+  late final (double?, double?)? breakpointWidths;
+
   /// Whether the device is in dark mode, as the `screen` variable's
   /// `brightness` and `isDark` say.
   late final Brightness? platformBrightness;
@@ -129,6 +133,7 @@ class ScopedValues {
       _routePath = null,
       _appUser = null,
       screenSize = null,
+      breakpointWidths = null,
       platformBrightness = null,
       parentSize = null;
 
@@ -182,6 +187,7 @@ class ScopedValues {
       _givenRouteParams = base._givenRouteParams,
       _routePath = base._routePath,
       screenSize = base.screenSize,
+      breakpointWidths = base.breakpointWidths,
       platformBrightness = base.platformBrightness,
       parentSize = base.parentSize;
 
@@ -200,6 +206,7 @@ class ScopedValues {
     indexedItem = IndexedItemProvider.maybeOf(context);
     parentIndexedItem = IndexedItemProvider.parentOf(context);
     screenSize = MediaQuery.maybeSizeOf(context);
+    breakpointWidths = ResponsiveWidthsScope.maybeOf(context);
     platformBrightness = MediaQuery.maybePlatformBrightnessOf(context);
     parentSize = ParentSizeScope.valueOf(context);
     nodeState = NodeStateProvider.maybeOf(context)?.state;
@@ -226,4 +233,36 @@ class ScopedValues {
     _appUser = null;
     _instanceRef = instance == null ? null : WeakReference(instance);
   }
+}
+
+
+/// The switch widths of a responsive layout that has its own (see
+/// [VarianceProperties.tabletMinWidth]), for the nodes inside it: their
+/// `screen.breakpoint` and `screen.isMobile` follow the layout on show.
+class ResponsiveWidthsScope extends InheritedWidget {
+  /// Creates a [ResponsiveWidthsScope].
+  const ResponsiveWidthsScope({
+    super.key,
+    required this.tabletMinWidth,
+    required this.desktopMinWidth,
+    required super.child,
+  });
+
+  /// Where the tablet layout starts, or null for the default.
+  final double? tabletMinWidth;
+
+  /// Where the desktop layout starts, or null for the default.
+  final double? desktopMinWidth;
+
+  /// The widths of the nearest scope, or null outside one.
+  static (double?, double?)? maybeOf(BuildContext context) {
+    final ResponsiveWidthsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<ResponsiveWidthsScope>();
+    return scope == null ? null : (scope.tabletMinWidth, scope.desktopMinWidth);
+  }
+
+  @override
+  bool updateShouldNotify(ResponsiveWidthsScope old) =>
+      old.tabletMinWidth != tabletMinWidth ||
+      old.desktopMinWidth != desktopMinWidth;
 }

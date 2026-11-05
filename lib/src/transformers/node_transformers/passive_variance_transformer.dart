@@ -56,6 +56,20 @@ class PassiveVarianceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Widget built = _build(context);
+    final VarianceProperties? widths = node.isResponsive ? node.properties : null;
+    if (widths == null ||
+        (widths.tabletMinWidth == null && widths.desktopMinWidth == null)) {
+      return built;
+    }
+    return ResponsiveWidthsScope(
+      tabletMinWidth: widths.tabletMinWidth,
+      desktopMinWidth: widths.desktopMinWidth,
+      child: built,
+    );
+  }
+
+  Widget _build(BuildContext context) {
     if (!settings.isPreview && node.isResponsive) {
       final double? canvasWidth =
           BreakpointWidthScope.maybeOf(context) ??

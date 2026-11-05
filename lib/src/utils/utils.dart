@@ -93,8 +93,22 @@ const double kDesktopMinWidth = 1024;
 /// `isPortrait` and `isLandscape`, and the device's light or dark mode as
 /// `brightness` (`light` or `dark`) and `isDark`, for a theme that follows
 /// the system.
-Map<String, dynamic> screenVariableValue(Size size, {Brightness? brightness}) {
-  final String breakpoint = ScreenBreakpoint.forWidth(size.width).name;
+///
+/// Inside a responsive layout with its own switch widths
+/// ([tabletMinWidth], [desktopMinWidth]; see [ResponsiveWidthsScope]) the
+/// breakpoint is the one that layout shows, so `screen.isMobile` agrees with
+/// the layout on show.
+Map<String, dynamic> screenVariableValue(
+  Size size, {
+  Brightness? brightness,
+  double? tabletMinWidth,
+  double? desktopMinWidth,
+}) {
+  final String breakpoint = ScreenBreakpoint.forWidth(
+    size.width,
+    tabletMinWidth: tabletMinWidth,
+    desktopMinWidth: desktopMinWidth,
+  ).name;
   final bool portrait = size.height >= size.width;
   return {
     'width': size.width,
