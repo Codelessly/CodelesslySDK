@@ -78,16 +78,23 @@ class DragTrackGeometry {
   final DragTrackModel track;
   final List<Offset> _samples = [];
 
+  /// The node's size: a [DragTrackModel.relative] line is measured in it.
+  Size size = Size.zero;
+
+  /// The ends of a line track, in pixels relative to the rest centre.
+  Offset get _start => track.relative
+      ? Offset(track.x1 * size.width, track.y1 * size.height)
+      : Offset(track.x1, track.y1);
+  Offset get _end => track.relative
+      ? Offset(track.x2 * size.width, track.y2 * size.height)
+      : Offset(track.x2, track.y2);
+
   /// Where the node's centre sits at [progress], relative to rest.
   Offset offsetAt(double progress) {
     final double p = progress.clamp(0.0, 1.0);
     switch (track.shape) {
       case DragTrackShape.line:
-        return Offset.lerp(
-          Offset(track.x1, track.y1),
-          Offset(track.x2, track.y2),
-          p,
-        )!;
+        return Offset.lerp(_start, _end, p)!;
       case DragTrackShape.arc:
         // The node turns around the pivot: its centre moves on a circle
         // through rest, from where it stands at angle 0.
@@ -147,8 +154,8 @@ class DragTrackGeometry {
   double nearest(Offset p) {
     switch (track.shape) {
       case DragTrackShape.line:
-        final Offset a = Offset(track.x1, track.y1);
-        final Offset d = Offset(track.x2, track.y2) - a;
+        final Offset a = _start;
+        final Offset d = _end - a;
         final double len2 = d.distanceSquared;
         if (len2 == 0) return 0;
         final Offset ap = p - a;
@@ -166,8 +173,25 @@ class DragTrackGeometry {
         }
         return best / (_samples.length - 1);
       case DragTrackShape.arc:
-        return 0;
+        return arcProgressOf(p);
     }
+  }
+
+  /// The progress on an arc at the pointer's angle around the pivot: the
+  /// angle is taken round to the arc's range (a full turn from 0 to 360
+  /// reads 15:00 at 225°); outside a partial arc, the nearer end.
+  double arcProgressOf(Offset p) {
+    final double sweep = track.endAngle - track.startAngle;
+    if (sweep == 0) return 0;
+    double a = angleOf(p) - track.startAngle;
+    if (sweep > 0) {
+      a %= 360;
+      if (a > sweep) a = (a - sweep) < (360 - a) ? sweep : 0;
+      return a / sweep;
+    }
+    a = -(a % -360);
+    if (a > -sweep) a = (a + sweep) < (360 - a) ? -sweep : 0;
+    return a / -sweep;
   }
 
   /// The pointer's angle around the arc's pivot, degrees clockwise from up.
@@ -283,10 +307,7 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
 
   void _pointerDown(PointerDownEvent event, Offset local, bool onNode) {
     if (!widget.enabled) return;
-    if (!onNode &&
-        _track.jumpOnTap &&
-        _track.input == DragTrackInput.follow &&
-        _track.shape != DragTrackShape.arc) {
+    if (!onNode && _track.jumpOnTap && _track.input == DragTrackInput.follow) {
       // Tapped the track off the node: jump there, then drag from there.
       _raw = _progress;
       _emit(_geometry.nearest(_rel(local)));
@@ -435,6 +456,7 @@ class _TrackArea extends SingleChildRenderObjectWidget {
 class _RenderTrackArea extends RenderProxyBox {
   late DragTrackGeometry _geometry;
   set geometry(DragTrackGeometry g) {
+    if (hasSize) g.size = size;
     _geometry = g;
     markNeedsPaint();
   }
@@ -459,6 +481,7 @@ class _RenderTrackArea extends RenderProxyBox {
   @override
   void performLayout() {
     super.performLayout();
+    _geometry.size = size;
     onSize(size);
   }
 
