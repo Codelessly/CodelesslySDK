@@ -897,11 +897,70 @@ class PassiveListViewWidget extends StatelessWidget {
     final BaseNode? handle = settings.isPreview || data == null
         ? null
         : reorderHandleOf(item);
-    if (handle != null && !listWraps(node)) {
+    final ReorderModel? reorder = node.reorder;
+    final bool reorders =
+        !settings.isPreview &&
+        data != null &&
+        !listWraps(node) &&
+        (reorder == null
+            ? handle != null
+            : reorder.enabled &&
+                  (reorder.start != ReorderStart.handle || handle != null));
+    if (reorders && reorder != null && reorder.betweenLists) {
+      return box(
+        canShrinkWrap: true,
+        (context, shrinkWrap) => GroupReorderList(
+          node: node,
+          model: reorder,
+          items: [...data],
+          shrinkWrap: shrinkWrap,
+          padding: node.padding.flutterEdgeInsets,
+          itemExtent: listItemExtent(context, node, item),
+          listKey: reorder.listKey.trim().isEmpty
+              ? node.id
+              : PropertyValueDelegate.substituteVariables(
+                  reorder.listKey,
+                  scopedValues: ScopedValues.of(context),
+                  nullSubstitutionMode: NullSubstitutionMode.emptyString,
+                ),
+          placeholderBuilder: reorder.placeholderNodeId.isEmpty
+              ? null
+              : (context) => manager.buildWidgetByID(
+                  reorder.placeholderNodeId,
+                  context,
+                  settings: settings,
+                ),
+          itemBuilder: (context, index) => itemBuilder(context, index),
+        ),
+      );
+    }
+    if (reorders) {
       final double gap = node.properties.hasSeparator
           ? math.max(0, node.properties.separatorSpacing)
           : 0;
       final bool vertical = node.scrollDirection == AxisC.vertical;
+      final List<Object?> items = [...data];
+      final List<Reaction> handleReactions = handle is ReactionMixin
+          ? (handle as ReactionMixin).reactions
+          : const [];
+      final String? listKey = reorder == null || reorder.listKey.trim().isEmpty
+          ? null
+          : PropertyValueDelegate.substituteVariables(
+              reorder.listKey,
+              scopedValues: ScopedValues.of(context),
+              nullSubstitutionMode: NullSubstitutionMode.emptyString,
+            );
+      Future<bool> move(int from, int to) => runListReorder(
+        context,
+        list: node,
+        model: reorder,
+        items: items,
+        from: from,
+        to: to,
+        listKey: listKey,
+        // Before the list's own reorder model, only the handle had them.
+        handleReactions: handleReactions,
+      );
       return box(
         canShrinkWrap: true,
         (context, shrinkWrap) => ReorderableListView.builder(
@@ -913,36 +972,80 @@ class PassiveListViewWidget extends StatelessWidget {
           scrollDirection: node.scrollDirection.flutterAxis,
           buildDefaultDragHandles: false,
           itemCount: itemCount ?? 0,
-          // The row being dragged shows its nodes' `dragged` state.
+          // Without auto-scroll the list barely moves near its edges.
+          autoScrollerVelocityScalar: reorder?.autoScroll == false
+              ? 0.001
+              : null,
           // The row being dragged shows its nodes' `dragged` state. Flutter
           // draws it in the overlay, above the app's providers, so they are
           // given to it again.
-          proxyDecorator: (child, index, animation) => reprovideCodelessly(
-            context,
-            Material(
-              type: MaterialType.transparency,
-              child: DraggedScope(child: child),
-            ),
-          ),
-          onReorderItem: (int from, int to) {
-            FunctionsRepository.triggerAction(
+          proxyDecorator: (child, index, animation) => decorateReorderProxy(
+            reprovideCodelessly(
               context,
-              TriggerType.reorder,
-              reactions: handle is ReactionMixin
-                  ? (handle as ReactionMixin).reactions
-                  : const [],
-              result: {'from': from, 'to': to},
+              Material(
+                type: MaterialType.transparency,
+                child: DraggedScope(child: child),
+              ),
+            ),
+            animation,
+            reorder,
+          ),
+          onReorderItem: (int from, int to) => move(from, to),
+          itemBuilder: (context, index) {
+            final Object? value = items.elementAtOrNull(index);
+            final bool locked =
+                reorder != null &&
+                !reorderConditionHolds(
+                  context,
+                  reorder.canReorderIf,
+                  item: value,
+                  index: index,
+                );
+            Widget child = ReorderLockScope(
+              locked: locked,
+              child: itemBuilder(context, index),
+            );
+            switch (reorder?.start) {
+              case ReorderStart.longPress:
+                child = ReorderableDelayedDragStartListener(
+                  index: index,
+                  enabled: !locked,
+                  child: child,
+                );
+              case ReorderStart.press:
+                child = ReorderableDragStartListener(
+                  index: index,
+                  enabled: !locked,
+                  child: MouseRegion(
+                    cursor: locked
+                        ? MouseCursor.defer
+                        : SystemMouseCursors.grab,
+                    child: child,
+                  ),
+                );
+              case ReorderStart.handle || null:
+                break;
+            }
+            if (reorder?.keyboard ?? false) {
+              child = KeyboardReorderItem(
+                index: index,
+                count: itemCount ?? 0,
+                enabled: !locked,
+                vertical: vertical,
+                onMove: move,
+                child: child,
+              );
+            }
+            return Padding(
+              key: ValueKey(('reorder', itemKey(index))),
+              padding: index == (itemCount ?? 0) - 1
+                  ? EdgeInsets.zero
+                  : vertical
+                  ? EdgeInsets.only(bottom: gap)
+                  : EdgeInsets.only(right: gap),
+              child: child,
             );
           },
-          itemBuilder: (context, index) => Padding(
-            key: ValueKey(('reorder', itemKey(index))),
-            padding: index == (itemCount ?? 0) - 1
-                ? EdgeInsets.zero
-                : vertical
-                ? EdgeInsets.only(bottom: gap)
-                : EdgeInsets.only(right: gap),
-            child: itemBuilder(context, index),
-          ),
         ),
       );
     }
