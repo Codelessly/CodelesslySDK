@@ -957,6 +957,14 @@ class RenderHugCross extends RenderProxyBox {
       parentUsesSize: true,
     );
     size = box.size;
+    // The stretched pass lays the flex and its stretched children out with
+    // boxes fixed in both axes, which makes them relayout boundaries: a
+    // child that grows later (a strip a formula shows) would be laid out
+    // again in its old box and cut off, without this measuring again.
+    // Reading the baseline records that this layout depends on them past
+    // their boxes, as an intrinsic measure does, so a change in any of them
+    // lays this out again (see [RenderBox.markNeedsLayout]).
+    box.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
   }
 }
 
