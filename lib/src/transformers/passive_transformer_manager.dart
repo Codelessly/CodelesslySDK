@@ -345,15 +345,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         model: draggable,
         enabled: flag(DraggableModel.enabledVariable, draggable.enabled),
         flightKey: '${flightKey ?? ''}',
-        feedbackSize: switch (draggable.feedbackNodeId) {
-          '' => null,
-          final String id => switch (getNode(id)) {
-            final BaseNode feedback => Size(
-              feedback.basicBoxLocal.width,
-              feedback.basicBoxLocal.height,
-            ),
-            null => null,
-          },
+        feedbackSize: draggable.feedbackNodeId.isEmpty
+            ? null
+            : _designedSize(draggable.feedbackNodeId),
         },
         // The feedback node is usually hidden where it is designed: it shows
         // anyway, while the nodes inside it keep their own visibility (a
@@ -375,6 +369,16 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       );
     }
     return widget;
+  }
+
+  /// The designed size of node [id], or null when there's no such node.
+  Size? _designedSize(String id) {
+    try {
+      final BaseNode node = getNode(id);
+      return Size(node.basicBoxLocal.width, node.basicBoxLocal.height);
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Wraps [widget] in a tooltip showing [node]'s tooltip text (its data
