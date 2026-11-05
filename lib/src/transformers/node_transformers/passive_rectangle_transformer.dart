@@ -885,7 +885,14 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
     final Gradient? gradient = effective.type == PaintType.solid
         ? null
         : retrieveGradient(effective);
-    final Color? color = effective.toFlutterColor();
+    // A gradient Flutter can't draw (diamond) falls back to its first stop.
+    final Color? color =
+        effective.toFlutterColor() ??
+        (gradient == null
+            ? effective.gradientStops?.firstOrNull?.color
+                  .multiplyAlpha(effective.opacity)
+                  .toFlutterColor()
+            : null);
     if (gradient == null && color == null) continue;
     if (path != null) {
       strokeWidgets.add(
@@ -895,6 +902,7 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
               painter: SvgPathStrokePainter(
                 path: path,
                 color: color ?? gradient!.colors.first,
+                gradient: gradient,
                 strokeWidth: node.strokeWeight,
                 strokeCap: node.strokeCap,
                 strokeJoin: (node as RectangleNode).strokeJoin,
@@ -915,6 +923,7 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
             child: CustomPaint(
               painter: NotchedStrokePainter(
                 color: color ?? gradient!.colors.first,
+                gradient: gradient,
                 strokeWidth: node.strokeWeight,
                 borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
                 notches: notches,

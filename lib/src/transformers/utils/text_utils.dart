@@ -598,16 +598,29 @@ class TextUtils {
       );
     }
 
-    final TextTheme typography = Typography.material2021().englishLike;
-
-    // Material 3's type scale distributes leading evenly, which puts a font
-    // whose ascent is much larger than its descent (DM Serif Display: 1.036em
-    // over 0.335em) up to 0.1em lower in its line than Flutter's own
+    // The base every text style is merged over: Material 3's bodySmall
+    // (12 px, regular, alphabetic baseline, not inheriting a host's default
+    // text style), without its line height and letter spacing. A text whose
+    // line height is auto is set at its font's own line height, as Flutter's
+    // `Text` and Figma's auto line height set it: bodySmall's 1.33 made a
+    // 28 px Cormorant Garamond title 37 px tall instead of 34 (Inter 15 px
+    // 20 instead of 18).
+    //
+    // Material 3's type scale also distributes leading evenly, which puts a
+    // font whose ascent is much larger than its descent (DM Serif Display:
+    // 1.036em over 0.335em) up to 0.1em lower in its line than Flutter's own
     // TextStyle(height: x) does. Keep Flutter's default, proportional
     // leading, and set it explicitly so a host's Material default text style
     // doesn't change where the text sits either.
-    return typography.bodySmall!
-        .merge(style)
-        .copyWith(leadingDistribution: TextLeadingDistribution.proportional);
+    return baseTextStyle.merge(style);
   }
+
+  /// What [retrieveTextStyle] merges every text style over.
+  static const TextStyle baseTextStyle = TextStyle(
+    inherit: false,
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    textBaseline: TextBaseline.alphabetic,
+    leadingDistribution: TextLeadingDistribution.proportional,
+  );
 }

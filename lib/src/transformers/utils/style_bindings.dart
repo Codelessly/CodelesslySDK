@@ -20,6 +20,10 @@ import 'scoped_values.dart';
 ///   offset and spread of every drop and inner shadow.
 /// * [effectsBlur] (number): the blur radius of every effect.
 /// * [strokeWeight] (number): the node's stroke width.
+/// * [pulsePhase] (number 0-1), [pulseDelayMs] (milliseconds): where the
+///   node's `pulse` starts in its loop ([PulseModel.phase],
+///   [PulseModel.delayMs]), e.g. loading dots of a list that ripple in
+///   sequence: `${= index * 0.15}`. Only for a node with a `pulse`.
 /// * [cornerRadius] (number): the radius of every corner. A corner radius
 ///   JSON value (e.g. `[8, true, 'circular']`) is accepted too.
 /// * [fontWeight] (number 100-900, or `w700`, `bold`, `normal`): the weight
@@ -40,6 +44,12 @@ import 'scoped_values.dart';
 /// * [lineHeight] (a multiplier up to 4 such as `1.1`, else pixels such as
 ///   `28`; `"28px"`, `"120%"` or `"1.2x"`; `"auto"`; or a line height JSON
 ///   map): every span's line height.
+/// * [textData] `data` (text): what a text node shows instead of its own
+///   `data`, e.g. `${= applied ? 'Applied' : 'Apply'}` or `${item.label}`.
+///   The binding becomes the text's data, so the text substitutes it as it
+///   substitutes `${...}` in its own data (the design canvas shows the
+///   preview value), and it is measured as painted. The text takes its
+///   first span's style.
 /// * [textAlign] (string): the horizontal alignment of a text node: `left`,
 ///   `center`, `right`, `justified` (or `justify`), `start` or `end`.
 /// * [spacing] (number): the gap between a row's or column's children,
@@ -128,6 +138,9 @@ abstract final class StyleBindings {
   /// The horizontal alignment of a text node.
   static const String textAlign = 'textAlign';
 
+  /// What a text node shows instead of its own data.
+  static const String textData = 'data';
+
   /// The bindable properties of a text node's style, beyond its color.
   static const List<String> textStyle = [
     fontWeight,
@@ -143,6 +156,12 @@ abstract final class StyleBindings {
 
   /// The color of the shadow [effectId].
   static String shadowColor(String effectId) => 'shadow-color-$effectId';
+
+  /// Where the node's pulse starts in its loop, 0 to 1.
+  static const String pulsePhase = 'pulsePhase';
+
+  /// How far, in milliseconds, the node's pulse runs behind.
+  static const String pulseDelayMs = 'pulseDelayMs';
 
   /// The color of stop [index] of the first fill's gradient.
   static String fillStop(int index) => 'fill-stop-$index';
@@ -202,6 +221,20 @@ abstract final class StyleBindings {
       if (weight != null && weight != node.strokeWeight) {
         patch['strokeWeight'] = weight < 0 ? 0.0 : weight;
       }
+    }
+
+    if (node.pulse case final PulseModel pulse?) {
+      final num? phase = node.variables.containsKey(pulsePhase)
+          ? value<num>(pulsePhase)
+          : null;
+      final num? delay = node.variables.containsKey(pulseDelayMs)
+          ? value<num>(pulseDelayMs)
+          : null;
+      final PulseModel phased = pulse.copyWith(
+        phase: phase != null && phase.isFinite ? phase.toDouble() : null,
+        delayMs: delay != null && delay.isFinite ? delay.round() : null,
+      );
+      if (phased != pulse) patch['pulse'] = phased.toJson();
     }
 
     if (node is CornerMixin) {
@@ -331,6 +364,25 @@ abstract final class StyleBindings {
       }
     }
 
+    if (node is TextNode) {
+      final String? data = boundTextData(node, scopedValues: scopedValues);
+      if (data != null && data != node.data) {
+        final List spans =
+            patch['textMixedProps'] as List? ??
+            [for (final prop in node.textMixedProps) prop.toJson()];
+        patch['data'] = data;
+        // A span's range is over the old data: the new data takes the first
+        // span's style throughout.
+        patch['textMixedProps'] = [
+          {
+            if (spans.isNotEmpty) ...(spans.first as Map),
+            'start': 0,
+            'end': data.length,
+          },
+        ];
+      }
+    }
+
     if (node is CornerMixin && node.notches.isNotEmpty) {
       final List<NotchModel> notches = boundNotches(node, scopedValues);
       if (!const ListEquality<NotchModel>().equals(notches, node.notches)) {
@@ -413,6 +465,29 @@ abstract final class StyleBindings {
         raw is String && RegExp(r'^#?[0-9a-fA-F]{6}$').hasMatch(raw.trim());
     final ColorRGBA color = hueOnly ? bound.copyWith(a: stop.color.a) : bound;
     return color == stop.color ? stop : stop.copyWith(color: color);
+  }
+
+  /// The data a text [node] shows by its [textData] binding (or a
+  /// condition setting `data`): the binding itself when it is a `${...}`
+  /// template, which the text substitutes as its own data, else the
+  /// variable path it names as `${path}`. Null when nothing binds it.
+  static String? boundTextData(
+    TextNode node, {
+    required ScopedValues scopedValues,
+  }) {
+    final Object? fromCondition =
+        PropertyValueDelegate.getPropertyValueFromCondition<Object>(
+          node,
+          textData,
+          scopedValues: scopedValues,
+        );
+    // A condition gives a value, which is shown as is.
+    if (fromCondition != null) {
+      return fromCondition.toString();
+    }
+    final String? binding = node.variables[textData]?.trim();
+    if (binding == null || binding.isEmpty) return null;
+    return binding.contains(r'${') ? binding : '\${$binding}';
   }
 
   /// [node]'s notches with the offsets their [notchOffsetAt] or

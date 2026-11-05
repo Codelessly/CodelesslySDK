@@ -178,14 +178,18 @@ class _SvgPathParser {
   }
 }
 
-/// Strokes [path] with [color], [strokeWidth], [strokeCap] and
-/// [strokeJoin], dashed by [dashPattern] when it has one.
+/// Strokes [path] with [color] (or [gradient]), [strokeWidth], [strokeCap]
+/// and [strokeJoin], dashed by [dashPattern] when it has one.
+///
+/// A [gradient] is laid out over the painted box, as a box's gradient
+/// paint is, so an angular gradient centred in the box runs around an arc.
 class SvgPathStrokePainter extends CustomPainter {
   /// Creates a [SvgPathStrokePainter].
   const SvgPathStrokePainter({
     required this.path,
     required this.color,
     required this.strokeWidth,
+    this.gradient,
     this.strokeCap = StrokeCapEnum.none,
     this.strokeJoin = StrokeJoinEnum.miter,
     this.strokeMiterLimit = 4,
@@ -195,8 +199,12 @@ class SvgPathStrokePainter extends CustomPainter {
   /// The path, in the painted box's coordinates.
   final Path path;
 
-  /// The stroke colour.
+  /// The stroke colour, used when there is no [gradient].
   final Color color;
+
+  /// The gradient the stroke is painted with, over the painted box, or null
+  /// for a solid [color].
+  final Gradient? gradient;
 
   /// The stroke width, centered on [path].
   final double strokeWidth;
@@ -223,6 +231,9 @@ class SvgPathStrokePainter extends CustomPainter {
       ..strokeJoin = strokeJoin.flutterStrokeJoin
       ..strokeMiterLimit = strokeMiterLimit
       ..isAntiAlias = true;
+    if (gradient case final Gradient gradient) {
+      paint.shader = gradient.createShader(Offset.zero & size);
+    }
     final List<double> dashes = dashPattern.where((d) => d > 0).toList();
     canvas.drawPath(
       dashes.isEmpty
@@ -236,6 +247,7 @@ class SvgPathStrokePainter extends CustomPainter {
   bool shouldRepaint(SvgPathStrokePainter oldDelegate) =>
       oldDelegate.path != path ||
       oldDelegate.color != color ||
+      oldDelegate.gradient != gradient ||
       oldDelegate.strokeWidth != strokeWidth ||
       oldDelegate.strokeCap != strokeCap ||
       oldDelegate.strokeJoin != strokeJoin ||
