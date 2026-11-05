@@ -653,6 +653,15 @@ abstract class WidgetNodeTransformerManager
     caseSensitive: false,
   );
 
+  /// Whether [node] runs reactions when tapped.
+  static bool _tappable(BaseNode node) =>
+      node is ReactionMixin &&
+      (node as ReactionMixin).reactions.any(
+        (reaction) =>
+            reaction.trigger.type == TriggerType.click &&
+            reaction.action.enabled,
+      );
+
   /// Tells screen readers that a tappable node is a button. A node with text
   /// inside reads as that text; one without (an icon button) reads as its
   /// node name, or its icon's name when the node still has a default name.
@@ -673,11 +682,7 @@ abstract class WidgetNodeTransformerManager
         node.handlesDefaultReactionsInternally) {
       return widget;
     }
-    final bool tappable = (node as ReactionMixin).reactions.any(
-      (reaction) =>
-          reaction.trigger.type == TriggerType.click && reaction.action.enabled,
-    );
-    if (!tappable) return widget;
+    if (!_tappable(node)) return widget;
 
     final List<BaseNode> descendants = [];
     void collect(BaseNode parent) {
@@ -693,6 +698,17 @@ abstract class WidgetNodeTransformerManager
 
     final bool hasText = descendants.any((child) => child is TextNode);
     final String label = hasText ? '' : semanticLabelFor(node, descendants);
+    // A node holding buttons of its own (a map and its pads) keeps them
+    // apart: merged, they would read as one button whose tap is the
+    // container's, and a screen reader could not reach them.
+    if (descendants.any(_tappable)) {
+      return Semantics(
+        container: true,
+        button: true,
+        label: label.isEmpty ? null : label,
+        child: widget,
+      );
+    }
     return MergeSemantics(
       child: Semantics(
         button: true,
