@@ -76,7 +76,7 @@ class PaginationRegistry extends ChangeNotifier {
     final PaginationController? controller = _controllers[name];
     final Map<String, Observable<VariableData>>? variables = _variables;
     if (controller == null || variables == null) return;
-    final Map<String, Object?> state = controller.state;
+    final Map<String, Object?> state = controller.publishedState;
     final Observable<VariableData>? existing = variables.values
         .where((notifier) => notifier.value.name == name)
         .firstOrNull;

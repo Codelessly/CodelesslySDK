@@ -284,6 +284,85 @@ class PassiveListViewWidget extends StatelessWidget {
     return null;
   }
 
+  /// Builds a list that pages, groups its items into sections or has swipe
+  /// actions; see [DataListView].
+  Widget buildDataList(BuildContext context, BaseNode item) {
+    final List? data =
+        PropertyValueDelegate.getVariableValueFromPath<List>(
+          node.variables['data'] ?? '',
+          scopedValues: ScopedValues.of(context),
+        ) ??
+        (node.properties.itemCount != null && node.variables['data'] == null
+            ? List<Object?>.generate(node.properties.itemCount!, (i) => i)
+            : null);
+    final PaginationModel? model = node.pagination;
+    PageFetcher? fetcher;
+    if (model != null && !settings.isPreview) {
+      switch (model.source) {
+        case PaginationSource.data:
+          break;
+        case PaginationSource.cloud:
+          final Codelessly? codelessly = context.read<Codelessly?>();
+          if (codelessly != null && codelessly.authManager.authData != null) {
+            final query = constructQuery(context, codelessly);
+            if (query != null) {
+              fetcher = cloudPageFetcher(
+                ref: query.ref,
+                query: query.query,
+                readyIndexes:
+                    codelessly.cloudDatabase?.rules.readyIndexesFor(
+                      node.collectionPath ?? '',
+                    ) ??
+                    const {},
+              );
+            }
+          }
+        case PaginationSource.api:
+          fetcher = apiPageFetcher(context, model);
+      }
+    }
+    final bool vertical = node.scrollDirection == AxisC.vertical;
+    final String headerId = node.sections?.headerNodeId ?? '';
+    double headerExtent = 32;
+    if (headerId.isNotEmpty) {
+      final BaseNode header = manager.getNode(headerId);
+      headerExtent = vertical
+          ? header.outerBoxLocal.height
+          : header.outerBoxLocal.width;
+    }
+    return box(
+      canShrinkWrap: true,
+      (context, shrinkWrap) => DataListView(
+        node: node,
+        data: data?.cast<Object?>(),
+        fetcher: fetcher,
+        preview: settings.isPreview,
+        itemExtent: listItemExtent(
+          context,
+          node,
+          item,
+          layoutChanges: listItemOverlap(node) > 0,
+        ),
+        headerExtent: headerExtent,
+        shrinkWrap: shrinkWrap,
+        physics: node.isScrollable
+            ? node.physics.flutterScrollPhysics(node.shouldAlwaysScroll)
+            : const NeverScrollableScrollPhysics(),
+        padding: node.padding.flutterEdgeInsets,
+        separatorExtent: math.max(0, node.properties.separatorSpacing),
+        separatorBuilder: node.properties.hasSeparator
+            ? (context, index) => ListViewItemSeparator(
+                scrollDirection: node.scrollDirection,
+                properties: node.properties,
+              )
+            : null,
+        buildTemplate: (context) => buildItem(item, context),
+        buildNode: (context, id) =>
+            manager.buildWidgetByID(id, context, settings: settings),
+      ),
+    );
+  }
+
   /// Builds one item, placed as the editor lays it out; see [ListItemBox].
   /// Legacy wrapping lists retain their item sizing and scroll behavior.
   Widget buildItem(BaseNode item, BuildContext context) {
@@ -400,6 +479,13 @@ class PassiveListViewWidget extends StatelessWidget {
     }
     final itemNode = node.children.first;
     final BaseNode item = manager.getNode(itemNode);
+
+    if (usesDataListView(node) &&
+        !node.properties.stacked &&
+        !node.properties.wrap &&
+        node.properties.layout == ListLayout.list) {
+      return buildDataList(context, item);
+    }
 
     final bool useCloudDatabase = node.useCloudDatabase;
 

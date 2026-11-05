@@ -9,6 +9,25 @@
   interleave with known extents) instead of measuring every item.
 - Data list rows count duplicate ids once per build instead of once per
   row, which was quadratic in the list's length.
+- Pagination: a list with `pagination` pages its bound data, its cloud
+  query or an API through a `PaginationController` (`CodelesslyContext.pagination`,
+  by name), shown a page at a time or as an infinite list that loads the
+  next page near its end (once per page however fast it scrolls), and in
+  both directions with the scroll position kept as pages are put in front.
+  Loading, error-with-retry and end-of-list footer nodes, pull to refresh
+  (`refresh` reactions run too), and the state as a map variable
+  (`${name.page}`, `${name.hasMore}`...). The Paginate action moves it.
+- Lists with `sections` group their items under section headers that stay
+  pinned until the next section pushes them out, with an A–Z index bar.
+- Lists with `swipeActions` reveal actions behind an item swiped sideways;
+  a full swipe runs the first action, with an Undo bar for removing ones,
+  then fires `swipeAction` reactions and can remove the item from the bound
+  list or the cloud collection.
+- The Pagination node renders page controls (first, previous, page numbers
+  with ellipses, next, last, page size select, summary) for a controller.
+- The Table node renders a `TableView` (two_dimensional_scrollables) that
+  scrolls both ways, builds only the visible cells and pins its header row
+  and column.
 
 ## 9.1.9
 
