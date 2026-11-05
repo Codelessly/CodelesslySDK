@@ -1,13 +1,14 @@
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path_parsing/path_parsing.dart';
 
 import '../../../codelessly_sdk.dart';
 
 /// Draws a [PathNode]: its SVG path scaled from its view box to the node's
-/// size, filled with its solid fills and outlined with its strokes (weight,
+/// size, filled with its fills (solid or gradient) and outlined with its strokes (weight,
 /// cap, dashes), trimmed to [PathNode.trimStart]..[PathNode.trimEnd] of its
 /// length. `pathData`, `trimStart` and `trimEnd` can be bound; a bound trim
 /// eases to new values over the node's [BaseNode.transitionMs].
@@ -59,8 +60,15 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
                 : null,
             fills: [
               for (final PaintModel paint in node.fills)
-                if (paint.visible && paint.toFlutterColor() != null)
+                if (paint.visible &&
+                    paint.type == PaintType.solid &&
+                    paint.toFlutterColor() != null)
                   paint.toFlutterColor()!,
+            ],
+            gradients: [
+              for (final PaintModel paint in node.fills)
+                if (paint.visible && paint.type != PaintType.solid)
+                  ?retrieveGradient(paint),
             ],
             strokes: [
               for (final PaintModel paint in node.strokes)
@@ -95,6 +103,7 @@ class PathNodePainter extends CustomPainter {
     required this.data,
     this.viewBox,
     this.fills = const [],
+    this.gradients = const [],
     this.strokes = const [],
     this.strokeWeight = 2,
     this.cap = StrokeCap.round,
@@ -107,6 +116,9 @@ class PathNodePainter extends CustomPainter {
   final String data;
   final Size? viewBox;
   final List<Color> fills;
+
+  /// Gradient fills, laid over the node's box like a box's gradient.
+  final List<Gradient> gradients;
   final List<Color> strokes;
   final double strokeWeight;
   final StrokeCap cap;
@@ -195,6 +207,12 @@ class PathNodePainter extends CustomPainter {
     for (final Color color in fills) {
       canvas.drawPath(path, Paint()..color = color);
     }
+    for (final Gradient gradient in gradients) {
+      canvas.drawPath(
+        path,
+        Paint()..shader = gradient.createShader(Offset.zero & size),
+      );
+    }
     if (strokes.isEmpty || strokeWeight <= 0) return;
     final bool whole = trimStart <= 0 && trimEnd >= 1 && dashes.isEmpty;
     final ui.Path outline = whole
@@ -218,6 +236,7 @@ class PathNodePainter extends CustomPainter {
       old.data != data ||
       old.viewBox != viewBox ||
       !_sameColors(old.fills, fills) ||
+      !listEquals(old.gradients, gradients) ||
       !_sameColors(old.strokes, strokes) ||
       old.strokeWeight != strokeWeight ||
       old.join != join ||
