@@ -712,9 +712,12 @@ class PassiveListViewWidget extends StatelessWidget {
         ),
       ),
     );
+    // The data's own count: [itemCount] grows by one below for a slot after
+    // the last item, and this closure must not see that.
+    final int? dataCount = itemCount;
     Widget itemBuilder(BuildContext context, int index) {
       if (slotAt == null) return dataItemBuilder(context, index);
-      if (index == itemCount) return slot(context);
+      if (index == dataCount) return slot(context);
       if (index != slotAt) return dataItemBuilder(context, index);
       return Flex(
         direction: node.scrollDirection.flutterAxis,

@@ -38,10 +38,23 @@ class ScopedValues {
   /// as `/pass/zz999` (the location a Codelessly router shows the screen
   /// at), unless a param of
   /// that name was given.
+  ///
+  /// In a browser it also has `url`, the page's whole link as the address
+  /// bar shows it, and `origin`, its scheme and host
+  /// (`https://site.codelessly.com`), so a formula can build a link to
+  /// share: `${= route.origin + '/mixtape/tape?id=' + item.id}`.
   Map<String, dynamic> get routeParams => _routeParams ??= {
     if (_routePath?.call() case final String path) 'path': path,
+    if (pageUri() case final Uri uri when uri.isScheme('http') || uri.isScheme('https')) ...{
+      'url': uri.toString(),
+      'origin': uri.origin,
+    },
     ..._givenRouteParams,
   };
+
+  /// The page's address: [Uri.base], the browser's current location on the
+  /// web. Tests replace it.
+  static Uri Function() pageUri = () => Uri.base;
 
   Map<String, dynamic>? _routeParams;
   late final Map<String, dynamic> _givenRouteParams;
