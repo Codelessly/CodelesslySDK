@@ -94,4 +94,39 @@ void main() {
     );
     expect(artBox.height, closeTo(under.bottom, 0.5));
   });
+
+  RectangleNode stripe({double height = 124}) => RectangleNode(
+    id: 'stripe',
+    name: 'stripe',
+    basicBoxLocal: NodeBox(0, 0, 6, height),
+    horizontalFit: SizeFit.fixed,
+    verticalFit: SizeFit.expanded,
+  )..parentID = 'row';
+
+  Rect stripeRect(WidgetTester tester) => tester.getRect(
+    find.byKey(ValueKey('Rectangle Transformer of ${stripe().debugLabel}')),
+  );
+
+  testWidgets('a child filling the cross axis follows its siblings', (
+    tester,
+  ) async {
+    // Designed beside a two-line message (124 tall), the stripe shows next
+    // to a one-line one: the row takes the line's height, not the stripe's.
+    await pump(tester, [
+      row(['stripe', 'line']),
+      stripe(),
+      text('line', 'row', 'X'),
+    ]);
+    final Rect line = tester.getRect(find.text('X'));
+    expect(line.height, lessThan(40));
+    expect(stripeRect(tester).height, closeTo(line.height, 0.5));
+  });
+
+  testWidgets('followers alone keep their own thickness', (tester) async {
+    await pump(tester, [
+      row(['stripe']),
+      stripe(height: 30),
+    ]);
+    expect(stripeRect(tester).height, closeTo(30, 0.5));
+  });
 }

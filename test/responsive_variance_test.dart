@@ -219,6 +219,26 @@ Map<String, BaseNode> responsiveSheet() {
   return nodes;
 }
 
+/// [responsiveSheet] whose desktop root, a 260 x 232 menu, is pinned by
+/// [pins] in pin mode instead of centered.
+Map<String, BaseNode> pinnedMenu(EdgePinsModel pins) {
+  final nodes = responsiveSheet();
+  final root = nodes['desktop-root']! as RowColumnNode;
+  nodes[root.id] = RowColumnNode(
+    id: root.id,
+    name: root.name,
+    basicBoxLocal: NodeBox(16, 584, 260, 232),
+    rowColumnType: RowColumnType.column,
+    mainAxisAlignment: MainAxisAlignmentC.start,
+    crossAxisAlignment: CrossAxisAlignmentC.stretch,
+    positioningMode: PositioningMode.pin,
+    edgePins: pins,
+    fills: [PaintModel.whitePaint],
+    children: root.children,
+  )..parentID = root.parentID;
+  return nodes;
+}
+
 /// A variant's root and its rectangles.
 Set<String> idsOf(ScreenBreakpoint breakpoint, int count) => {
   '${breakpoint.name}-root',
@@ -479,5 +499,54 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(builtRectangles(nodes), isEmpty);
+  });
+
+  testWidgets('a responsive root pinned to the bottom keeps its pins', (
+    tester,
+  ) async {
+    const screen = Size(1440, 900);
+    final nodes = pinnedMenu(
+      const EdgePinsModel(left: 16, top: null, right: null, bottom: 84),
+    );
+    await pumpPage(tester, nodes, screen: screen);
+    expect(tester.takeException(), isNull);
+    expect(
+      tester.getRect(rectOf(nodes['desktop-root']!)),
+      const Rect.fromLTWH(16, 900 - 84 - 232, 260, 232),
+    );
+
+    // The same in a dialog, on a taller screen than the design.
+    await showPageInDialog(tester, nodes, screen: const Size(1920, 1080));
+    expect(tester.takeException(), isNull);
+    expect(
+      tester.getRect(rectOf(nodes['desktop-root']!)),
+      const Rect.fromLTWH(16, 1080 - 84 - 232, 260, 232),
+    );
+  });
+
+  testWidgets('a responsive root pinned only to the top-left is aligned', (
+    tester,
+  ) async {
+    // Start pins alone are often the variant's offset on the design canvas.
+    final nodes = pinnedMenu(
+      const EdgePinsModel(left: -1010, top: 334, right: null, bottom: null),
+    );
+    await pumpPage(tester, nodes, screen: const Size(1440, 900));
+    expect(tester.takeException(), isNull);
+    expect(tester.getTopLeft(rectOf(nodes['desktop-root']!)), Offset.zero);
+  });
+
+  testWidgets('a negative start pin of a bottom-pinned root is dropped', (
+    tester,
+  ) async {
+    final nodes = pinnedMenu(
+      const EdgePinsModel(left: -1010, top: null, right: null, bottom: 20),
+    );
+    await pumpPage(tester, nodes, screen: const Size(1440, 900));
+    expect(tester.takeException(), isNull);
+    expect(
+      tester.getTopLeft(rectOf(nodes['desktop-root']!)),
+      const Offset(0, 900 - 20 - 232),
+    );
   });
 }
