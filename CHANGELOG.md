@@ -19,6 +19,11 @@ Requires codelessly_api 9.1.0.
   `LimitError` and never crashes the app.
 - `SDKLayoutVariables.scripts` carries a layout's project and page scripts;
   `CodelesslyContext.scripts` holds them by name.
+- A computed variable can call a script (`script.splitBill(bill, pct)`):
+  widgets that read it rebuild when the result arrives. A computed
+  variable's formula may be stored with or without its `${= }`.
+- Apps published with scripts need this version: a site on 9.1.9 stays on
+  its loading screen for a layout with scripts and "Run script" actions.
 
 ## 9.1.9
 
