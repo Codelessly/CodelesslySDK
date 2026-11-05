@@ -1,16 +1,21 @@
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path_parsing/path_parsing.dart';
 
 import '../../../codelessly_sdk.dart';
 
 /// Draws a [PathNode]: its SVG path scaled from its view box to the node's
-/// size, filled with its solid fills and outlined with its strokes (weight,
-/// cap, dashes), trimmed to [PathNode.trimStart]..[PathNode.trimEnd] of its
-/// length. `pathData`, `trimStart` and `trimEnd` can be bound; a bound trim
-/// eases to new values over the node's [BaseNode.transitionMs].
+/// size, filled with its fills (solid colours, linear, radial and sweep
+/// gradients and images, in order, with their opacity and blend modes) and
+/// outlined with its strokes (weight, cap, dashes), trimmed to
+/// [PathNode.trimStart]..[PathNode.trimEnd] of its length. Its drop shadows
+/// follow the path's outline (the fill and the stroke) and its inner
+/// shadows are painted inside the filled path. `pathData`, `trimStart` and
+/// `trimEnd` can be bound; a bound trim eases to new values over the node's
+/// [BaseNode.transitionMs].
 class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
   PassivePathTransformer(super.getNode, super.manager);
 
@@ -42,6 +47,60 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
     final String data = bound<Object>('pathData')?.toString() ?? node.pathData;
     final double start = number('trimStart', node.trimStart);
     final double end = number('trimEnd', node.trimEnd);
+    final Size? viewBox =
+        node.viewBoxWidth != null && node.viewBoxHeight != null
+        ? Size(node.viewBoxWidth!, node.viewBoxHeight!)
+        : null;
+    final List<PaintModel> visibleFills = [
+      for (final PaintModel paint in node.fills)
+        if (paint.visible) paint,
+    ];
+    // Image fills are built as widgets (they load), so with one the fills
+    // are laid out as the other shapes lay theirs out, clipped to the path,
+    // between the shadows and the strokes.
+    final bool imageFills = visibleFills.any(
+      (paint) => paint.type == PaintType.image,
+    );
+    final List<PathFill> fills = imageFills
+        ? const []
+        : [
+            for (final PaintModel paint in visibleFills)
+              ?PathFill.of(node, paint, 'fill-${paint.id}', scope),
+          ];
+    final List<PathFill> strokes = [
+      for (final PaintModel paint in node.strokes)
+        if (paint.visible)
+          ?PathFill.of(node, paint, 'stroke-paint-${paint.id}', scope),
+    ];
+    final List<BoxShadow> shadows = retrieveBoxShadow(node, scope);
+    final List<BoxShadow> innerShadows = retrieveInnerShadows(node, scope);
+
+    PathNodePainter painter(Offset trim, PathNodeLayer layer) =>
+        PathNodePainter(
+          data: data,
+          viewBox: viewBox,
+          fills: fills,
+          strokes: strokes,
+          shadows: shadows,
+          innerShadows: innerShadows,
+          filled: visibleFills.isNotEmpty,
+          layer: layer,
+          strokeWeight: node.strokeWeight,
+          cap: switch (node.strokeCap) {
+            StrokeCapEnum.round => StrokeCap.round,
+            StrokeCapEnum.square => StrokeCap.square,
+            _ => StrokeCap.butt,
+          },
+          join: switch (node.strokeJoin) {
+            StrokeJoinEnum.miter => StrokeJoin.miter,
+            StrokeJoinEnum.bevel => StrokeJoin.bevel,
+            StrokeJoinEnum.round => StrokeJoin.round,
+          },
+          dashes: node.dashPattern,
+          trimStart: trim.dx,
+          trimEnd: trim.dy,
+        );
+
     return SizedBox(
       width: node.basicBoxLocal.width,
       height: node.basicBoxLocal.height,
@@ -51,41 +110,141 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
           milliseconds: settings.isPreview ? 0 : node.transitionMs,
         ),
         curve: Curves.easeInOut,
-        builder: (context, trim, _) => CustomPaint(
-          painter: PathNodePainter(
-            data: data,
-            viewBox: node.viewBoxWidth != null && node.viewBoxHeight != null
-                ? Size(node.viewBoxWidth!, node.viewBoxHeight!)
-                : null,
-            fills: [
-              for (final PaintModel paint in node.fills)
-                if (paint.visible && paint.toFlutterColor() != null)
-                  paint.toFlutterColor()!,
-            ],
-            strokes: [
-              for (final PaintModel paint in node.strokes)
-                if (paint.visible && paint.toFlutterColor() != null)
-                  paint.toFlutterColor()!,
-            ],
-            strokeWeight: node.strokeWeight,
-            cap: switch (node.strokeCap) {
-              StrokeCapEnum.round => StrokeCap.round,
-              StrokeCapEnum.square => StrokeCap.square,
-              _ => StrokeCap.butt,
-            },
-            join: switch (node.strokeJoin) {
-              StrokeJoinEnum.miter => StrokeJoin.miter,
-              StrokeJoinEnum.bevel => StrokeJoin.bevel,
-              StrokeJoinEnum.round => StrokeJoin.round,
-            },
-            dashes: node.dashPattern,
-            trimStart: trim.dx,
-            trimEnd: trim.dy,
-          ),
-        ),
+        builder: (context, trim, _) => !imageFills
+            ? CustomPaint(painter: painter(trim, PathNodeLayer.all))
+            : CustomPaint(
+                painter: painter(trim, PathNodeLayer.below),
+                foregroundPainter: painter(trim, PathNodeLayer.above),
+                child: ClipPath(
+                  clipper: PathNodeClipper(data: data, viewBox: viewBox),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: buildFills(
+                      node,
+                      useInk: false,
+                      obscureImages: settings.obscureImages,
+                      settings: settings,
+                      scopedValues: scope,
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }
+}
+
+/// A solid colour or a gradient that fills or strokes a [PathNodePainter]'s
+/// path, with its blend mode.
+@immutable
+class PathFill {
+  /// A fill of one [color].
+  const PathFill.color(Color this.color, {this.blendMode = BlendMode.srcOver})
+    : gradient = null;
+
+  /// A fill of [gradient], laid out in the node's box.
+  const PathFill.gradient(
+    Gradient this.gradient, {
+    this.blendMode = BlendMode.srcOver,
+  }) : color = null;
+
+  /// The fill [paint] of [node] gives (a solid can be bound as [property]),
+  /// or null for one a path can't paint (an image, an emoji, a diamond
+  /// gradient).
+  static PathFill? of(
+    BaseNode node,
+    PaintModel paint,
+    String property,
+    ScopedValues scopedValues,
+  ) {
+    final BlendMode blendMode = paint.blendMode.flutterBlendMode;
+    switch (paint.type) {
+      case PaintType.solid:
+        final PaintModel? bound =
+            PropertyValueDelegate.getPropertyValue<PaintModel>(
+              node,
+              property,
+              scopedValues: scopedValues,
+            );
+        final Color? color = (bound ?? paint).toFlutterColor();
+        return color == null
+            ? null
+            : PathFill.color(color, blendMode: blendMode);
+      case PaintType.gradientLinear:
+      case PaintType.gradientRadial:
+      case PaintType.gradientAngular:
+      case PaintType.gradientDiamond:
+        final Gradient? gradient = retrieveGradient(paint);
+        return gradient == null
+            ? null
+            : PathFill.gradient(gradient, blendMode: blendMode);
+      case PaintType.image:
+      case PaintType.emoji:
+        return null;
+    }
+  }
+
+  /// The colour, for a solid fill.
+  final Color? color;
+
+  /// The gradient, for a gradient fill.
+  final Gradient? gradient;
+
+  /// How the fill blends with what is painted under it.
+  final BlendMode blendMode;
+
+  /// A paint of this fill for a node whose box is [bounds].
+  Paint toPaint(Rect bounds) {
+    final Paint paint = Paint()..blendMode = blendMode;
+    if (gradient case final Gradient gradient) {
+      paint.shader = gradient.createShader(bounds);
+    } else {
+      paint.color = color!;
+    }
+    return paint;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is PathFill &&
+      other.color == color &&
+      other.gradient == gradient &&
+      other.blendMode == blendMode;
+
+  @override
+  int get hashCode => Object.hash(color, gradient, blendMode);
+}
+
+/// What part of a path node a [PathNodePainter] paints.
+enum PathNodeLayer {
+  /// Everything.
+  all,
+
+  /// The drop shadows and the fills.
+  below,
+
+  /// The inner shadows and the strokes.
+  above,
+}
+
+/// Clips to a path node's path, scaled from its view box.
+class PathNodeClipper extends CustomClipper<ui.Path> {
+  /// Creates a [PathNodeClipper].
+  const PathNodeClipper({required this.data, this.viewBox});
+
+  /// The SVG path data.
+  final String data;
+
+  /// The box the path's coordinates are in, or null for logical pixels.
+  final Size? viewBox;
+
+  @override
+  ui.Path getClip(Size size) =>
+      PathNodePainter.shape(data, viewBox, size) ?? ui.Path();
+
+  @override
+  bool shouldReclip(PathNodeClipper oldClipper) =>
+      oldClipper.data != data || oldClipper.viewBox != viewBox;
 }
 
 /// Paints SVG path [data] (see [PassivePathTransformer]).
@@ -96,18 +255,40 @@ class PathNodePainter extends CustomPainter {
     this.viewBox,
     this.fills = const [],
     this.strokes = const [],
+    this.shadows = const [],
+    this.innerShadows = const [],
+    bool? filled,
+    this.layer = PathNodeLayer.all,
     this.strokeWeight = 2,
     this.cap = StrokeCap.round,
     this.join = StrokeJoin.round,
     this.dashes = const [],
     this.trimStart = 0,
     this.trimEnd = 1,
-  });
+  }) : filled = filled ?? fills.isNotEmpty;
 
   final String data;
   final Size? viewBox;
-  final List<Color> fills;
-  final List<Color> strokes;
+
+  /// The fills, painted in order (the first at the bottom).
+  final List<PathFill> fills;
+
+  /// The strokes, painted in order over the fills.
+  final List<PathFill> strokes;
+
+  /// Drop shadows, cast by the filled path (when [filled]) and the stroke.
+  final List<BoxShadow> shadows;
+
+  /// Inner shadows, painted inside the filled path over the fills.
+  final List<BoxShadow> innerShadows;
+
+  /// Whether the path is filled (it has fills, maybe painted by others):
+  /// its drop and inner shadows follow the fill, not only the stroke.
+  final bool filled;
+
+  /// What this painter paints.
+  final PathNodeLayer layer;
+
   final double strokeWeight;
   final StrokeCap cap;
   final StrokeJoin join;
@@ -116,6 +297,25 @@ class PathNodePainter extends CustomPainter {
   final double trimEnd;
 
   static final Map<String, ui.Path?> _cache = {};
+
+  /// [data] as a path scaled from [viewBox] to [size], or null when it
+  /// can't be read.
+  static ui.Path? shape(String data, Size? viewBox, Size size) {
+    final ui.Path? path = parse(data);
+    if (path == null) return null;
+    if (viewBox case final Size box when box.width > 0 && box.height > 0) {
+      return path.transform(
+        (Matrix4.identity()..scaleByDouble(
+              size.width / box.width,
+              size.height / box.height,
+              1,
+              1,
+            ))
+            .storage,
+      );
+    }
+    return path;
+  }
 
   /// [data] as a path, or null when it can't be read.
   static ui.Path? parse(String data) => _cache.putIfAbsent(data, () {
@@ -179,32 +379,41 @@ class PathNodePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    ui.Path? path = parse(data);
+    final ui.Path? path = shape(data, viewBox, size);
     if (path == null) return;
-    if (viewBox case final Size box when box.width > 0 && box.height > 0) {
-      path = path.transform(
-        (Matrix4.identity()..scaleByDouble(
-              size.width / box.width,
-              size.height / box.height,
-              1,
-              1,
-            ))
-            .storage,
-      );
-    }
-    for (final Color color in fills) {
-      canvas.drawPath(path, Paint()..color = color);
-    }
-    if (strokes.isEmpty || strokeWeight <= 0) return;
+    final bool stroked = strokes.isNotEmpty && strokeWeight > 0;
     final bool whole = trimStart <= 0 && trimEnd >= 1 && dashes.isEmpty;
-    final ui.Path outline = whole
+    final ui.Path outline = !stroked || whole
         ? path
         : trim(path, trimStart, trimEnd, dashes);
-    for (final Color color in strokes) {
+    final Rect bounds = Offset.zero & size;
+    if (layer != PathNodeLayer.above) {
+      paintPathShadows(
+        canvas,
+        path,
+        shadows,
+        filled: filled,
+        stroke: outline,
+        strokeWidth: stroked ? strokeWeight : 0,
+        cap: cap,
+        join: join,
+      );
+      // Blending fills blend with the fills under them, not with what is
+      // painted under the node.
+      final bool blends = fills.any((f) => f.blendMode != BlendMode.srcOver);
+      if (blends) canvas.saveLayer(null, Paint());
+      for (final PathFill fill in fills) {
+        canvas.drawPath(path, fill.toPaint(bounds));
+      }
+      if (blends) canvas.restore();
+    }
+    if (layer == PathNodeLayer.below) return;
+    if (filled) paintPathInnerShadows(canvas, path, innerShadows);
+    if (!stroked) return;
+    for (final PathFill stroke in strokes) {
       canvas.drawPath(
         outline,
-        Paint()
-          ..color = color
+        stroke.toPaint(bounds)
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeWeight
           ..strokeCap = cap
@@ -217,18 +426,18 @@ class PathNodePainter extends CustomPainter {
   bool shouldRepaint(PathNodePainter old) =>
       old.data != data ||
       old.viewBox != viewBox ||
-      !_sameColors(old.fills, fills) ||
-      !_sameColors(old.strokes, strokes) ||
+      !const ListEquality<PathFill>().equals(old.fills, fills) ||
+      !const ListEquality<PathFill>().equals(old.strokes, strokes) ||
+      !const ListEquality<BoxShadow>().equals(old.shadows, shadows) ||
+      !const ListEquality<BoxShadow>().equals(old.innerShadows, innerShadows) ||
+      old.filled != filled ||
+      old.layer != layer ||
       old.strokeWeight != strokeWeight ||
       old.join != join ||
       old.cap != cap ||
       old.trimStart != trimStart ||
       old.trimEnd != trimEnd ||
       old.dashes.join(',') != dashes.join(',');
-
-  static bool _sameColors(List<Color> a, List<Color> b) =>
-      a.length == b.length &&
-      [for (int i = 0; i < a.length; i++) a[i] == b[i]].every((same) => same);
 }
 
 class _Proxy extends PathProxy {

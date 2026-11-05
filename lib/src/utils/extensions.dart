@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
-import 'constants.dart';
 
 extension FABLocationHelper on FABLocation {
   FloatingActionButtonLocation toFloatingActionButtonLocation() {
