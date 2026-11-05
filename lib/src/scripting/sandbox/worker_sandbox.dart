@@ -45,7 +45,7 @@ const String _workerAdapter = r'''
 /// as the driver's `compile`, so a syntax error's column can be corrected.
 String scriptHead(List<String> paramNames) =>
     '(async function __script(vars, nodes, app, console, fmt, script, params'
-    '${paramNames.isEmpty ? '' : ', ${paramNames.join(', ')}'}) {"use strict"; ';
+    '${paramNames.isEmpty ? '' : ', ${paramNames.join(', ')}'}) {"use strict"; {';
 
 /// Runs scripts in a dedicated Web Worker.
 ///
@@ -271,7 +271,7 @@ class WorkerSandbox implements ScriptSandbox {
     final String head = scriptHead(paramNames);
     final String url = web.URL.createObjectURL(
       web.Blob(
-        ['$head$source\n})'.toJS].toJS,
+        ['$head$source\n}})'.toJS].toJS,
         web.BlobPropertyBag(type: 'text/javascript'),
       ),
     );
