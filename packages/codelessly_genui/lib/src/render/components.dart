@@ -404,76 +404,77 @@ Widget buildChoicePicker(
           label: ComponentProps.asString(o['label']) ?? o['value'] as String,
         ),
   ];
-  final bool multi = props.string('variant') == 'multipleSelection';
-  // A segmented control fits a few short options; more or longer ones use
-  // the basic chips, which wrap.
-  final int labelChars = options.fold(0, (n, o) => n + o.label.length);
-  final int longest = options.fold(0, (n, o) => math.max(n, o.label.length));
-  if (options.length > 4 ||
-      labelChars > 30 ||
-      longest > 12 ||
-      props.boolean('filterable') == true) {
+  // A search field is the one thing the option chips do not offer.
+  if (props.boolean('filterable') == true && fallback != null) {
     return CommitOnUserChange(
       value: props.value('value'),
       onCommit: _actionOf(props),
-      child: fallback!(context, node, props, buildChild),
+      child: fallback(context, node, props, buildChild),
     );
   }
+  final bool multi = props.string('variant') == 'multipleSelection';
   final List<String> selected = [
     for (final Object? v in props.list('value')) '$v',
   ];
   final void Function(Object?)? write = _writer(context, props, 'value');
+  final VoidCallback? commit = _actionOf(props);
   final String label = _label(props, 'label');
+  final String? error = props.validationErrors.firstOrNull;
+
+  void pick(String value) {
+    if (write == null) return;
+    final List<String> next = multi
+        ? (selected.contains(value)
+              ? [for (final v in selected) if (v != value) v]
+              : [...selected, value])
+        : [value];
+    if (!multi && selected.length == 1 && selected.first == value) return;
+    write(next);
+    commit?.call();
+  }
+
   return Column(
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       if (label.isNotEmpty) _fieldLabel(context, label),
-      _sized(
-        320,
-        (width) => CodelesslyNodeView(
-          nodeJson: CodelesslyNodes.segmented(
-            id: node.componentId,
-            options: options,
-            selected: selected,
-            width: width,
-            theme: theme,
-            multi: multi,
-          ),
-          bindings: {
-            if (write != null)
-              // The SDK writes a selection in its text form, so the
-              // variable holds the selection as JSON text.
-              'selected': NodePropertyBinding(
-                value: jsonEncode(selected),
-                type: VariableType.text,
-                write: (v) => write(_selectionOf(v)),
+      Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final o in options)
+              Semantics(
+                button: true,
+                selected: selected.contains(o.value),
+                label: o.label,
+                child: CodelesslyNodeView(
+                  key: ValueKey('${node.instanceId}_${o.value}'),
+                  nodeJson: CodelesslyNodes.optionChip(
+                    id: '${node.componentId}_${o.value}',
+                    label: o.label,
+                    selected: selected.contains(o.value),
+                    theme: theme,
+                  ),
+                  onTap: write == null ? null : () => pick(o.value),
+                ),
               ),
-          },
-          onCommit: _actionOf(props),
+          ],
         ),
       ),
+      if (error != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            error,
+            style: _style(context, 'caption').copyWith(
+              color: Color(theme.negative),
+            ),
+          ),
+        ),
     ],
   );
-}
-
-List<String> _selectionOf(Object? raw) {
-  if (raw is List) return [for (final v in raw) '$v'];
-  final String text = '${raw ?? ''}'.trim();
-  if (text.isEmpty || text == '[]') return const [];
-  try {
-    final Object? decoded = jsonDecode(text);
-    if (decoded is List) return [for (final v in decoded) '$v'];
-  } on FormatException {
-    // Dart's List.toString form: [a, b].
-  }
-  final String inner = text.startsWith('[') && text.endsWith(']')
-      ? text.substring(1, text.length - 1)
-      : text;
-  return [
-    for (final part in inner.split(','))
-      if (part.trim().isNotEmpty) part.trim(),
-  ];
 }
 
 /// Runs [onCommit] when [value] changes soon after the user touched
