@@ -348,7 +348,6 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         feedbackSize: draggable.feedbackNodeId.isEmpty
             ? null
             : _designedSize(draggable.feedbackNodeId),
-        },
         // The feedback node is usually hidden where it is designed: it shows
         // anyway, while the nodes inside it keep their own visibility (a
         // pedal's two- and three-knob faces).
