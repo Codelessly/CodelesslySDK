@@ -28,6 +28,24 @@ class PassiveGridViewTransformer extends NodeWidgetTransformer<GridViewNode> {
   }
 }
 
+/// [node]'s grid delegate, with its cross-axis count from the
+/// `crossAxisCount` binding ([GridViewNode.crossAxisCountVariable]) when it
+/// has one, e.g. `${bed.cols}` for a grid as wide as the data says.
+GridDelegateProperties gridDelegateOf(GridViewNode node, BuildContext context) {
+  final GridDelegateProperties delegate = node.properties.gridDelegate;
+  if (delegate is! FixedCrossAxisCountGridDelegateProperties ||
+      node.variables[GridViewNode.crossAxisCountVariable] == null) {
+    return delegate;
+  }
+  final num? count = PropertyValueDelegate.getPropertyValue<num>(
+    node,
+    GridViewNode.crossAxisCountVariable,
+    scopedValues: ScopedValues.of(context),
+  );
+  if (count == null || count < 1) return delegate;
+  return delegate.copyWith(crossAxisCount: count.round());
+}
+
 class PassiveGridViewWidget extends StatelessWidget {
   final GridViewNode node;
   final NodeTransformerManager manager;
@@ -195,7 +213,7 @@ class PassiveGridViewWidget extends StatelessWidget {
 
                 return GridViewBuilder(
                   primary: node.primary,
-                  gridDelegate: node.properties.gridDelegate,
+                  gridDelegate: gridDelegateOf(node, context),
                   intrinsicRows: intrinsicRows,
                   shrinkWrap: shrinkWrap,
                   itemCount: itemCount,
@@ -260,7 +278,7 @@ class PassiveGridViewWidget extends StatelessWidget {
       canShrinkWrap: itemCount != null,
       (context, shrinkWrap) => GridViewBuilder(
         primary: node.primary,
-        gridDelegate: node.properties.gridDelegate,
+        gridDelegate: gridDelegateOf(node, context),
         intrinsicRows: intrinsicRows,
         shrinkWrap: shrinkWrap,
         itemCount: itemCount,
