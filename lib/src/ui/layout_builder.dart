@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../utils/remembered_variables.dart';
 
 /// A widget that retrieves a layout from a [CodelesslyWidgetController].
 class CodelesslyLayoutRetriever extends StatefulWidget {
@@ -275,8 +276,11 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         final Observable<VariableData> shared = codelessly.sharedVariables
             .putIfAbsent(
               variable.id,
-              () => Observable(
+              // A remembered variable starts from what the device kept.
+              () => rememberedObservable(
                 variable.copyWith(value: codelesslyContext.data[variable.name]),
+                codelessly.dataManager.localDatabaseOrNull,
+                hostValue: codelesslyContext.data.containsKey(variable.name),
               ),
             );
         if (linkParams.containsKey(variable.name)) {
