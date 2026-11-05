@@ -68,6 +68,13 @@ class ScopedValues {
   /// node's parent gives it (see [ParentSizeScope]).
   late final Map<String, dynamic>? parentSize;
 
+  /// Values a design canvas (or a capture) shows for map predefined
+  /// variables, by variable name then key, on top of what they would read:
+  /// e.g. `{'drag': {'active': true, 'over': 'lamp-2'}}` previews a drag
+  /// over a drop target, and `{'screen': {'isDark': true}}` dark mode.
+  /// Null outside a preview.
+  late final Map<String, Map<String, Object?>>? predefinedOverrides;
+
   // private fields.
   late final WeakReference<CodelesslyContext>? _codelesslyContextRef;
   // The Codelessly instance, read live: its cloud database can become
@@ -130,7 +137,8 @@ class ScopedValues {
       _appUser = null,
       screenSize = null,
       platformBrightness = null,
-      parentSize = null;
+      parentSize = null,
+      predefinedOverrides = null;
 
   /// Creates scoped values for a design canvas, where [variables] (by name)
   /// hold their default values and nothing is read from a running app.
@@ -146,6 +154,7 @@ class ScopedValues {
     this.screenSize,
     this.platformBrightness,
     this.parentSize,
+    this.predefinedOverrides,
     Map<String, dynamic>? data,
     Map<String, dynamic>? routeParams,
   }) : _codelesslyContextRef = codelesslyContext == null
@@ -183,7 +192,8 @@ class ScopedValues {
       _routePath = base._routePath,
       screenSize = base.screenSize,
       platformBrightness = base.platformBrightness,
-      parentSize = base.parentSize;
+      parentSize = base.parentSize,
+      predefinedOverrides = base.predefinedOverrides;
 
   /// Creates a new scoped values instance from a given context.
   ScopedValues.of(
@@ -202,6 +212,7 @@ class ScopedValues {
     screenSize = MediaQuery.maybeSizeOf(context);
     platformBrightness = MediaQuery.maybePlatformBrightnessOf(context);
     parentSize = ParentSizeScope.valueOf(context);
+    predefinedOverrides = null;
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     holdProgress = HoldProgressProvider.maybeOf(context);
     dragValues = DragScope.maybeOf(context);

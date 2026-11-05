@@ -966,6 +966,28 @@ class StackedListItems extends StatelessWidget {
     return fraction.toDouble().clamp(0, 1) * extent - anchor * size;
   }
 
+  /// How an item of a stacked list eases to a new place when its bound
+  /// position changes: its [BaseNode.sizeTransition] (which also eases its
+  /// size), else its style [BlendMixin.transition], else its
+  /// [BaseNode.transitionMs] with an ease-out cubic. Null jumps.
+  static NodeTransition? positionTransitionOf(BaseNode item) {
+    for (final NodeTransition? transition in [
+      item.sizeTransition,
+      if (item case final BlendMixin blend) blend.transition,
+    ]) {
+      if (transition != null && transition.duration > Duration.zero) {
+        return transition;
+      }
+    }
+    if (item.transitionMs > 0) {
+      return NodeTransition(
+        durationMillis: item.transitionMs,
+        curve: TransitionCurve.easeOutCubic,
+      );
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     // Items placed by a fraction of the list need its size.
@@ -1016,35 +1038,58 @@ class StackedListItems extends StatelessWidget {
               listenables: listenables,
               builder: (context) {
                 final ScopedValues scope = ScopedValues.of(context);
-                return Positioned(
-                  key: arrangement == null
-                      ? ValueKey('stacked item $index')
-                      : listItemKey(arrangement.keyOf(index), 'positioned'),
-                  left:
-                      (size == null
-                          ? null
-                          : fractionOffsetOf(
-                              item,
-                              'positionX',
-                              size.width,
-                              scope,
-                            )) ??
-                      offsetOf(item, node, 'x', scope),
-                  top:
-                      (size == null
-                          ? null
-                          : fractionOffsetOf(
-                              item,
-                              'positionY',
-                              size.height,
-                              scope,
-                            )) ??
-                      offsetOf(item, node, 'y', scope),
-                  child: manager.buildWidgetByID(
-                    item.id,
-                    context,
-                    settings: settings,
-                  ),
+                final NodeTransition? move = positionTransitionOf(item);
+                final Key key = arrangement == null
+                    ? ValueKey('stacked item $index')
+                    : listItemKey(arrangement.keyOf(index), 'positioned');
+                final double left =
+                    (size == null
+                        ? null
+                        : fractionOffsetOf(
+                            item,
+                            'positionX',
+                            size.width,
+                            scope,
+                          )) ??
+                    offsetOf(item, node, 'x', scope);
+                final double top =
+                    (size == null
+                        ? null
+                        : fractionOffsetOf(
+                            item,
+                            'positionY',
+                            size.height,
+                            scope,
+                          )) ??
+                    offsetOf(item, node, 'y', scope);
+                final Widget child = manager.buildWidgetByID(
+                  item.id,
+                  context,
+                  settings: settings,
+                );
+                if (move == null) {
+                  return Positioned(
+                    key: key,
+                    left: left,
+                    top: top,
+                    child: child,
+                  );
+                }
+                // An item with a transition eases to its new place (a lamp
+                // moved to another spot); where motion is off (the design
+                // canvas, its captures) it jumps.
+                return AnimatedPositioned(
+                  key: key,
+                  duration: NodeMotionScope.animatesAt(context)
+                      ? implicitTransitionDuration(
+                          context,
+                          move.duration.inMilliseconds,
+                        )
+                      : Duration.zero,
+                  curve: move.curve.flutterCurve,
+                  left: left,
+                  top: top,
+                  child: child,
                 );
               },
             ),

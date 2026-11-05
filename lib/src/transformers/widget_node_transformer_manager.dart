@@ -2080,28 +2080,28 @@ class _NodePulseState extends State<NodePulse>
   @override
   void initState() {
     super.initState();
+    _controller.value = widget.pulse.startFraction;
     _start();
   }
 
   @override
   void didUpdateWidget(NodePulse oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.pulse != widget.pulse) _start();
+    if (oldWidget.pulse != widget.pulse) {
+      // A new phase moves the loop; a new speed keeps where it is.
+      if (oldWidget.pulse.startFraction != widget.pulse.startFraction) {
+        _controller.value = widget.pulse.startFraction;
+      }
+      _start();
+    }
   }
 
+  /// Loops the controller linearly over one whole loop of the pulse; the
+  /// eased there-and-back value is [pulseProgress] of it.
   void _start() {
     _controller
-      ..duration = Duration(
-        milliseconds: max(1, switch (widget.pulse) {
-          MotionPulseModel pulse => pulse.periodMs,
-          PulseModel pulse => pulse.durationMillis,
-        }),
-      )
-      ..repeat(
-        reverse:
-            widget.pulse is! MotionPulseModel ||
-            (widget.pulse as MotionPulseModel).reverse,
-      );
+      ..duration = Duration(milliseconds: max(1, widget.pulse.loopMillis))
+      ..repeat();
   }
 
   @override
@@ -2117,7 +2117,7 @@ class _NodePulseState extends State<NodePulse>
       animation: _controller,
       child: widget.child,
       builder: (context, child) {
-        final double t = Curves.easeInOut.transform(_controller.value);
+        final double t = pulseProgress(pulse, _controller.value);
         if (pulse is! MotionPulseModel) {
           return Opacity(
             opacity: lerpDouble(pulse.minOpacity, 1, t)!.clamp(0, 1),
@@ -2140,6 +2140,16 @@ class _NodePulseState extends State<NodePulse>
   }
 }
 
+/// How far (0 to 1, eased) [pulse] is from its start to its end values at
+/// [loop], the fraction of its whole loop that has run: a reversing pulse
+/// goes there in the first half and back in the second.
+double pulseProgress(PulseModel pulse, double loop) {
+  final bool reverses = pulse is! MotionPulseModel || pulse.reverse;
+  final double v = loop.clamp(0.0, 1.0);
+  final double linear = reverses ? (v < 0.5 ? v * 2 : 2 - v * 2) : v;
+  return Curves.easeInOut.transform(linear.clamp(0.0, 1.0));
+}
+
 /// Fades a relative pulse from [PulseModel.minOpacity] times [opacity] to
 /// [opacity], leaving motion pulses to [NodePulse].
 class PulseOpacity extends StatefulWidget {
@@ -2160,21 +2170,27 @@ class PulseOpacity extends StatefulWidget {
 
 class _PulseOpacityState extends State<PulseOpacity>
     with SingleTickerProviderStateMixin {
+  // Linear over one whole loop (faint, full, faint), from the pulse's
+  // phase; [pulseProgress] eases it there and back.
   late final AnimationController controller = AnimationController(
     vsync: this,
     duration: _duration,
-  )..repeat(reverse: true);
+    value: widget.pulse.startFraction,
+  )..repeat();
 
-  Duration get _duration =>
-      Duration(milliseconds: widget.pulse.durationMillis.clamp(16, 60000));
+  Duration get _duration => Duration(milliseconds: widget.pulse.loopMillis);
 
   @override
   void didUpdateWidget(PulseOpacity oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.pulse.durationMillis != widget.pulse.durationMillis) {
+    final bool phased =
+        oldWidget.pulse.startFraction != widget.pulse.startFraction;
+    if (phased) controller.value = widget.pulse.startFraction;
+    if (phased ||
+        oldWidget.pulse.durationMillis != widget.pulse.durationMillis) {
       controller
         ..duration = _duration
-        ..repeat(reverse: true);
+        ..repeat();
     }
   }
 
@@ -2185,13 +2201,26 @@ class _PulseOpacityState extends State<PulseOpacity>
   }
 
   @override
-  Widget build(BuildContext context) => FadeTransition(
-    opacity: controller.drive(
-      Tween<double>(
-        begin: widget.opacity * widget.pulse.minOpacity.clamp(0, 1),
-        end: widget.opacity,
-      ).chain(CurveTween(curve: Curves.easeInOut)),
-    ),
-    child: widget.child,
-  );
+  Widget build(BuildContext context) {
+    final double faint = widget.opacity * widget.pulse.minOpacity.clamp(0, 1);
+    return FadeTransition(
+      opacity: controller.drive(
+        _PulseTween(widget.pulse, faint, widget.opacity),
+      ),
+      child: widget.child,
+    );
+  }
+}
+
+/// [PulseOpacity]'s opacity at a fraction of its loop.
+class _PulseTween extends Animatable<double> {
+  const _PulseTween(this.pulse, this.begin, this.end);
+
+  final PulseModel pulse;
+  final double begin;
+  final double end;
+
+  @override
+  double transform(double t) =>
+      lerpDouble(begin, end, pulseProgress(pulse, t))!;
 }

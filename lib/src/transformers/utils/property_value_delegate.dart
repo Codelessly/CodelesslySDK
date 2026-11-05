@@ -645,12 +645,10 @@ class PropertyValueDelegate {
     );
   }
 
-  @internal
-  static Object? retrievePredefinedVariableValue(
-    VariableMatch match,
-    ScopedValues scopedValues,
-  ) {
-    final Object? variableValue = switch (match.name) {
+  /// What the predefined variable [name] reads in [scopedValues], before
+  /// any [ScopedValues.predefinedOverrides].
+  static Object? _predefinedValueOf(String name, ScopedValues scopedValues) {
+    return switch (name) {
       'data' => scopedValues.data,
       'product' => scopedValues.data['product'],
       'paywall' => scopedValues.data['paywall'],
@@ -692,6 +690,36 @@ class PropertyValueDelegate {
       'initial' => InitialValues(scopedValues.initialVariables),
       _ => null,
     };
+  }
+
+  /// [value] (the predefined variable [name]'s) with the keys a design
+  /// canvas previews for it ([ScopedValues.predefinedOverrides]) on top.
+  static Object? _withPredefinedOverrides(
+    String name,
+    Object? value,
+    ScopedValues scopedValues,
+  ) {
+    final Map<String, Object?>? override =
+        scopedValues.predefinedOverrides?[name];
+    if (override == null || override.isEmpty) return value;
+    return <String, Object?>{
+      if (value is Map)
+        for (final MapEntry<dynamic, dynamic> entry in value.entries)
+          '${entry.key}': entry.value,
+      ...override,
+    };
+  }
+
+  @internal
+  static Object? retrievePredefinedVariableValue(
+    VariableMatch match,
+    ScopedValues scopedValues,
+  ) {
+    final Object? variableValue = _withPredefinedOverrides(
+      match.name,
+      _predefinedValueOf(match.name, scopedValues),
+      scopedValues,
+    );
 
     if (variableValue == null) return null;
     final VariableType variableType = VariableType.fromObjectType(
