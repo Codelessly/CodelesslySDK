@@ -268,6 +268,9 @@ class _NodeMotionState extends State<_NodeMotionBody>
   /// Whether a counted loop has played all its times: the node rests.
   bool _rested = false;
 
+  /// Whether the motion is held in place ([MotionModel.paused]).
+  bool _paused = false;
+
   /// Whether the node holds at its entrance start until it scrolls into
   /// view; see [MotionModel.revealOnScroll].
   bool _awaitingReveal = false;
@@ -307,6 +310,7 @@ class _NodeMotionState extends State<_NodeMotionBody>
       _run(motionTransitionMs(motion));
     }
     _syncSpin();
+    _syncPause();
   }
 
   /// Whether [motion] waits to scroll into view before its entrance.
@@ -459,7 +463,7 @@ class _NodeMotionState extends State<_NodeMotionBody>
           next.loop != old.loop ||
           next.repeat != old.repeat ||
           next.durationMs != old.durationMs ||
-          !_transition.isAnimating && _delay?.isActive != true) {
+          !_transition.isAnimating && _delay?.isActive != true && !_paused) {
         _startLoop();
       } else {
         _to = next;
@@ -488,6 +492,39 @@ class _NodeMotionState extends State<_NodeMotionBody>
       _to = next;
     }
     _syncSpin();
+    _syncPause();
+  }
+
+  /// Holds every running animation where it is while the motion is
+  /// paused, and carries each on from there when it isn't.
+  void _syncPause() {
+    final bool paused = _animates && widget.motion.paused;
+    if (paused) {
+      // Anything started since (a value change, a replay) holds too.
+      _delay?.cancel();
+      if (_transition.isAnimating) _transition.stop(canceled: false);
+      if (_spring.isAnimating) _spring.stop(canceled: false);
+      _spinTicker?.muted = true;
+      _paused = true;
+      return;
+    }
+    if (!_paused) return;
+    _paused = false;
+    if (_spinTicker != null) {
+      _lastTick = Duration.zero;
+      _spinTicker!.muted = false;
+    }
+    if (_loops && !_rested) {
+      final bool reverse = widget.motion.loop == MotionLoop.reverse;
+      // Carries on from where it stopped; a counted loop counts afresh.
+      _transition.repeat(reverse: reverse);
+    } else if (_spring.value != 1) {
+      _spring.animateWith(
+        SpringSimulation(motionSpring(widget.motion), _spring.value, 1, 0),
+      );
+    } else if (_transition.value > 0 && _transition.value < 1) {
+      _transition.forward();
+    }
   }
 
   static bool _sameTransform(MotionModel a, MotionModel b) =>
@@ -519,7 +556,7 @@ class _NodeMotionState extends State<_NodeMotionBody>
 
   MotionModel get _current {
     final bool spring = _spring.isAnimating || _spring.value != 1;
-    if (!_moving && _transition.value == 0 && !spring) return _to;
+    if (!_moving && !_paused && _transition.value == 0 && !spring) return _to;
     // A spring runs on real physics (and may overshoot past 1); a curve on
     // the transition's time.
     final double time = spring
@@ -613,7 +650,7 @@ class _NodeMotionState extends State<_NodeMotionBody>
         ? _from
         : _rested && _loops
         ? _to.atRest
-        : (_moving ? _current : _to);
+        : (_moving || _paused ? _current : _to);
     final Widget drawn = _draw(m);
     if (still || !widget.animate || !widget.motion.revealOnScroll) {
       return drawn;
