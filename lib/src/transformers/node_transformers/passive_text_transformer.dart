@@ -138,6 +138,20 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
 /// The text sits inside that box per its horizontal and vertical text
 /// alignment, so a text box larger than its text (pinned on all sides,
 /// expanded, or a fixed size) shows it centered, at the bottom, and so on.
+/// The gradient a text is filled with: the first visible gradient paint of
+/// its first style range, or null for a solid colour.
+Gradient? gradientTextFill(TextNode node) {
+  if (node.textMixedProps.isEmpty) return null;
+  for (final PaintModel paint in node.textMixedProps.first.fills) {
+    if (!paint.visible) continue;
+    if (paint.type == PaintType.solid || paint.type == PaintType.image) {
+      return null;
+    }
+    return retrieveGradient(paint);
+  }
+  return null;
+}
+
 class TextNodeBox extends StatelessWidget {
   final TextNode node;
   final Widget child;
@@ -181,13 +195,23 @@ class TextNodeBox extends StatelessWidget {
 
     // Scale-down text stays on its lines and shrinks as a whole to fit the
     // width it is given.
-    final Widget content = node.overflow == TextOverflowC.scaleDown
+    Widget content = node.overflow == TextOverflowC.scaleDown
         ? FittedBox(
             fit: BoxFit.scaleDown,
             alignment: alignmentOf(node),
             child: child,
           )
         : child;
+    // A gradient fill (a steel wordmark) paints the glyphs with the
+    // gradient across the text's own box.
+    final Gradient? gradient = gradientTextFill(node);
+    if (gradient != null) {
+      content = ShaderMask(
+        blendMode: BlendMode.srcIn,
+        shaderCallback: (Rect bounds) => gradient.createShader(bounds),
+        child: content,
+      );
+    }
     Widget box = Align(
       alignment: alignmentOf(node, TextUtils.textAlignOf(node, context)),
       // Hug the text on an axis that does not fill its parent, so a loose

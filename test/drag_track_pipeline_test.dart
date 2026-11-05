@@ -112,6 +112,52 @@ void main() {
     expect(rotationOf(tester), closeTo(135, 0.5));
   });
 
+  testWidgets('a bound range: track.max from data sets the turn', (
+    tester,
+  ) async {
+    // A dial: one turn per N numbers, N from a variable (40 or 100).
+    List<BaseNode> dial() {
+      final List<BaseNode> nodes = knob();
+      final BaseNode cap = nodes[1];
+      cap.drag = const DragModel(
+        track: DragTrackModel(
+          shape: DragTrackShape.arc,
+          variable: 'dial',
+          min: 0,
+          max: 40,
+          step: 1,
+          startAngle: 0,
+          endAngle: 360,
+          endless: true,
+        ),
+      );
+      cap.variables[DragTrackModel.maxVariableKey] = r'${numbers}';
+      return nodes;
+    }
+
+    await pump(
+      tester,
+      dial(),
+      runtime: false,
+      variables: [
+        variable('dial', VariableType.integer, 25),
+        variable('numbers', VariableType.integer, 100),
+      ],
+    );
+    // 25 of 100 numbers: a quarter turn (not 25 of 40).
+    expect(rotationOf(tester), closeTo(90, 0.5));
+    await pump(
+      tester,
+      dial(),
+      runtime: true,
+      variables: [
+        variable('dial', VariableType.integer, 25),
+        variable('numbers', VariableType.integer, 100),
+      ],
+    );
+    expect(rotationOf(tester), closeTo(90, 0.5));
+  });
+
   testWidgets('at runtime dragging the knob writes its variable', (
     tester,
   ) async {
