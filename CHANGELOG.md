@@ -11,6 +11,7 @@ Requires codelessly_api 9.0.4.
 - List drop targets open a slot of `slotExtent` px when it is set.
 - Remembered app and page variables start from the device's stored value and
   store every change (`rememberedObservable`).
+- Quoted formula text reads `\n`, `\t` and `\r`.
 
 ## 9.1.9
 
