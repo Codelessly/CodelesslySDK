@@ -132,6 +132,7 @@ void main() {
         ),
       );
       cap.variables[DragTrackModel.maxVariableKey] = r'${numbers}';
+      cap.variables[DragTrackModel.momentumVariableKey] = r'${= !still}';
       return nodes;
     }
 
@@ -153,9 +154,13 @@ void main() {
       variables: [
         variable('dial', VariableType.integer, 25),
         variable('numbers', VariableType.integer, 100),
+        variable('still', VariableType.boolean, true),
       ],
     );
     expect(rotationOf(tester), closeTo(90, 0.5));
+    final NodeDragTrack track = tester.widget(find.byType(NodeDragTrack));
+    expect(track.track.max, 100);
+    expect(track.track.momentum, isFalse); // bound off (reduce motion)
   });
 
   testWidgets('at runtime dragging the knob writes its variable', (
