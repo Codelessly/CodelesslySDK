@@ -262,8 +262,21 @@ class PaginationController extends ChangeNotifier {
   }
 
   /// The state, as the map variable named by [PaginationModel.name] holds it.
+  ///
+  /// Variables hold their values as JSON text, so the published state
+  /// carries `items` only in [PaginationMode.pages], where it is one page.
+  /// A scrolling list that loaded 10,000 items would otherwise re-encode
+  /// them all with every page; it publishes `itemCount` (as every mode
+  /// does) and its items are read from the list itself.
+  Map<String, Object?> get publishedState => {
+    ...state,
+    if (_model.autoPaginates) 'items': null,
+  }..removeWhere((key, value) => key == 'items' && value == null);
+
+  /// The full state, items included.
   Map<String, Object?> get state => {
     'items': items,
+    'itemCount': items.length,
     'page': _page,
     'pageSize': _pageSize,
     'pageCount': pageCount,
