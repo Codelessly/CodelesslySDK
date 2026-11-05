@@ -67,6 +67,46 @@ class _WebSoundEngine implements SoundEngine {
     if (_ctx.state != 'running') _ctx.resume();
   }
 
+  /// Decoded sound files by URL (a failed one is retried on its next play).
+  final Map<String, Future<web.AudioBuffer?>> _files = {};
+
+  Future<web.AudioBuffer?> _load(String url) => _files[url] ??= () async {
+    try {
+      final web.Response res = await web.window.fetch(url.toJS).toDart;
+      if (!res.ok) throw StateError('HTTP ${res.status}');
+      final JSArrayBuffer bytes = await res.arrayBuffer().toDart;
+      return await _ctx.decodeAudioData(bytes).toDart;
+    } catch (_) {
+      _files.remove(url);
+      return null;
+    }
+  }();
+
+  @override
+  void preload(String url) => _load(url);
+
+  @override
+  bool playFile(
+    String url, {
+    double? time,
+    double volume = 1,
+    double pitch = 1,
+  }) {
+    if (volume <= 0) return true;
+    _load(url).then((buffer) {
+      if (buffer == null) return;
+      final web.GainNode g = _ctx.createGain()..gain.value = volume;
+      g.connect(_ctx.destination);
+      final web.AudioBufferSourceNode src = _ctx.createBufferSource()
+        ..buffer = buffer
+        ..playbackRate.value = pitch;
+      src.connect(g);
+      final double t = time == null ? 0 : math.max(time, _ctx.currentTime);
+      src.start(t);
+    });
+    return true;
+  }
+
   web.GainNode _envelope(double t, double gain, double decay) {
     final web.GainNode g = _ctx.createGain();
     g.gain

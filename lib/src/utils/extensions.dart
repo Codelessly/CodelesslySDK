@@ -1964,6 +1964,8 @@ extension ActionModelExt on ActionModel {
         };
       case ActionType.delay:
       case ActionType.controlDrag:
+        strings.add((this as ControlDragAction).steps);
+        return _namesIn(strings, includePredefined);
       case ActionType.scrollTo:
         return {};
       case ActionType.playSound:
@@ -1990,6 +1992,9 @@ extension ActionModelExt on ActionModel {
         ]);
         return _namesIn(strings, includePredefined);
       case ActionType.playAnimation:
+        return _namesIn(strings, includePredefined);
+      case ActionType.haptic:
+        strings.add((this as HapticAction).when);
         return _namesIn(strings, includePredefined);
       case ActionType.focus:
         return {};

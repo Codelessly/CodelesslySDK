@@ -186,6 +186,9 @@ class NodeDrag extends StatefulWidget {
         await target.reset();
       case DragCommand.shake:
         target.shake();
+      case DragCommand.step:
+        // Tracks are stepped by NodeDragTrack.step.
+        break;
     }
   }
 

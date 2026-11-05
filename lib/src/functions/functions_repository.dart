@@ -209,11 +209,24 @@ class FunctionsRepository {
         return playSound(context, action as PlaySoundAction);
       case ActionType.controlDrag:
         final ControlDragAction drag = action as ControlDragAction;
+        if (drag.command == DragCommand.step) {
+          final String steps = PropertyValueDelegate.substituteVariables(
+            drag.steps,
+            scopedValues: ActionChain.scopedValuesOf(context),
+            nullSubstitutionMode: NullSubstitutionMode.emptyString,
+          ).trim();
+          return NodeDragTrack.step(
+            drag.nodeId,
+            double.tryParse(steps)?.round() ?? 0,
+          );
+        }
         return NodeDrag.control(
           drag.nodeId,
           drag.command,
           drag.direction,
         ).then((_) => true);
+      case ActionType.haptic:
+        return haptic(context, action as HapticAction);
     }
   }
 
@@ -2198,6 +2211,36 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
   }
 
+  /// Buzzes the device as [action] says, unless its `when` formula is false.
+  static bool haptic(BuildContext context, HapticAction action) {
+    if (action.when.trim().isNotEmpty) {
+      final String on = PropertyValueDelegate.substituteVariables(
+        action.when,
+        scopedValues: ActionChain.scopedValuesOf(context),
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ).trim().toLowerCase();
+      if (on.isEmpty || on == 'false' || on == '0' || on == 'null') return true;
+    }
+    lastHaptic = action.kind;
+    switch (action.kind) {
+      case HapticKind.selection:
+        HapticFeedback.selectionClick();
+      case HapticKind.light:
+        HapticFeedback.lightImpact();
+      case HapticKind.medium:
+        HapticFeedback.mediumImpact();
+      case HapticKind.heavy:
+        HapticFeedback.heavyImpact();
+      case HapticKind.vibrate:
+        HapticFeedback.vibrate();
+    }
+    return true;
+  }
+
+  /// The last buzz [haptic] gave (tests).
+  @visibleForTesting
+  static HapticKind? lastHaptic;
+
   /// Plays [action]'s sound, now or at its `at` time on the sound clock, or
   /// its sound file.
   /// Its fields are values or formulas (`${result.at}`, `${voice}`).
@@ -2210,11 +2253,21 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     ).trim();
     double? number(String value) => double.tryParse(text(value));
     final String url = text(action.url);
+    final String at = text(action.at);
     if (url.isNotEmpty) {
-      unawaited(_playFile(url, (number(action.volume) ?? 1).clamp(0, 1)));
+      // Decoded once and kept where the engine can (the web), so a tick on
+      // every detent of a dial plays at once; a media player elsewhere.
+      final double volume = number(action.volume) ?? 1;
+      if (!Sound.playFile(
+        url,
+        time: at.isEmpty ? null : double.tryParse(at),
+        volume: volume,
+        pitch: number(action.pitch) ?? 1,
+      )) {
+        unawaited(_playFile(url, volume.clamp(0, 1).toDouble()));
+      }
       return true;
     }
-    final String at = text(action.at);
     Sound.play(
       Sound.voiceNamed(text(action.sound)),
       time: at.isEmpty ? null : double.tryParse(at),

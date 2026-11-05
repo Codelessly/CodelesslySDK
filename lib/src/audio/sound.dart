@@ -28,6 +28,21 @@ abstract class SoundEngine {
     double volume = 1,
     double pitch = 1,
   });
+
+  /// Plays the sound file at [url] like [play]: decoded once and kept, so a
+  /// tick played on every detent of a dial starts within a frame and
+  /// overlapping plays mix. Returns false when this engine can't play files
+  /// (outside the browser), so the caller can fall back to a media player.
+  bool playFile(
+    String url, {
+    double? time,
+    double volume = 1,
+    double pitch = 1,
+  });
+
+  /// Starts downloading and decoding [url] so its first [playFile] is
+  /// instant.
+  void preload(String url);
 }
 
 /// The app's sound.
@@ -48,6 +63,22 @@ abstract final class Sound {
     engine.resume();
     engine.play(
       voice,
+      time: time,
+      volume: volume.clamp(0, 2).toDouble(),
+      pitch: pitch.clamp(0.25, 4).toDouble(),
+    );
+  }
+
+  /// Plays a sound file; see [SoundEngine.playFile].
+  static bool playFile(
+    String url, {
+    double? time,
+    double volume = 1,
+    double pitch = 1,
+  }) {
+    engine.resume();
+    return engine.playFile(
+      url,
       time: time,
       volume: volume.clamp(0, 2).toDouble(),
       pitch: pitch.clamp(0.25, 4).toDouble(),
@@ -76,6 +107,13 @@ class SilentSoundEngine implements SoundEngine {
   /// Sounds played so far (voice, time, volume, pitch), for tests.
   final List<(SoundVoice, double, double, double)> played = [];
 
+  /// Sound files played so far (url, time, volume, pitch), for tests.
+  final List<(String, double, double, double)> playedFiles = [];
+
+  /// Whether [playFile] says it played (tests set it to check the
+  /// fallback).
+  bool playsFiles = false;
+
   @override
   bool get available => false;
 
@@ -92,4 +130,18 @@ class SilentSoundEngine implements SoundEngine {
     double volume = 1,
     double pitch = 1,
   }) => played.add((voice, time ?? now, volume, pitch));
+
+  @override
+  bool playFile(
+    String url, {
+    double? time,
+    double volume = 1,
+    double pitch = 1,
+  }) {
+    playedFiles.add((url, time ?? now, volume, pitch));
+    return playsFiles;
+  }
+
+  @override
+  void preload(String url) {}
 }

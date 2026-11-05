@@ -1005,6 +1005,35 @@ abstract class WidgetNodeTransformerManager
     variable.value = variable.value.copyWith(value: values.toMap());
   }
 
+  /// [track] with its bound range: `track.min`, `track.max` and
+  /// `track.step` in [node]'s variables override the model's (a dial whose
+  /// numbers per turn come from data: 40 or 100).
+  static DragTrackModel boundTrack(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    double? read(String key) {
+      if (!node.variables.containsKey(key)) return null;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      return switch (value) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()),
+        _ => null,
+      };
+    }
+
+    final double? min = read(DragTrackModel.minVariableKey);
+    final double? max = read(DragTrackModel.maxVariableKey);
+    final double? step = read(DragTrackModel.stepVariableKey);
+    if (min == null && max == null && step == null) return track;
+    return track.copyWith(min: min, max: max, step: step);
+  }
+
   /// Draws [node] where its drag track puts it for its variable's value,
   /// without making it draggable: how the design canvas shows a knob or a
   /// fader cap. Returns [widget] for a node without a track.
@@ -1014,11 +1043,13 @@ abstract class WidgetNodeTransformerManager
     Widget widget, {
     ScopedValues? scopedValues,
   }) {
-    final DragTrackModel? track = node.drag?.track;
-    if (track == null) return widget;
+    final DragTrackModel? model = node.drag?.track;
+    if (model == null) return widget;
+    final ScopedValues scope = scopedValues ?? ScopedValues.of(context);
+    final DragTrackModel track = boundTrack(node, model, scope);
     final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
       track.variable,
-      scopedValues: scopedValues ?? ScopedValues.of(context),
+      scopedValues: scope,
     );
     final double value = switch (raw) {
       num n => n.toDouble(),
@@ -1066,6 +1097,22 @@ abstract class WidgetNodeTransformerManager
       };
     }
 
+    double? gain(BuildContext context) {
+      if (!node.variables.containsKey(DragTrackModel.gainVariableKey)) {
+        return null;
+      }
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        DragTrackModel.gainVariableKey,
+        scopedValues: ScopedValues.of(context),
+      );
+      return switch (value) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()),
+        _ => null,
+      };
+    }
+
     Widget build(BuildContext context) {
       final Object? raw =
           PropertyValueDelegate.getVariableValueFromPath<Object>(
@@ -1078,8 +1125,10 @@ abstract class WidgetNodeTransformerManager
         _ => track.defaultValue ?? track.min,
       };
       return NodeDragTrack(
-        track: track,
+        track: boundTrack(node, track, ScopedValues.of(context)),
         value: value,
+        nodeId: node.id,
+        gain: gain(context),
         enabled: enabled(context),
         onChanged: (v) {
           final bool whole = variable?.value.type == VariableType.integer;
@@ -1087,16 +1136,25 @@ abstract class WidgetNodeTransformerManager
             track.variable,
             whole ? v.round() : v,
           );
-          FunctionsRepository.triggerAction(
-            context,
-            TriggerType.changed,
-            reactions: reactions,
-            result: {'value': v},
-          );
         },
+        // `changed` reads the new value, the one before, the direction and
+        // every step crossed (a fast spin crosses several in one frame).
+        onChange: (change) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.changed,
+          reactions: reactions,
+          result: change.toMap(),
+        ),
         onEnd: (v) => FunctionsRepository.triggerAction(
           context,
           TriggerType.dragEnd,
+          reactions: reactions,
+          result: {'value': v},
+        ),
+        // `changeEnd` once it has come to rest: after a coast and the snap.
+        onSettled: (v) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.changeEnd,
           reactions: reactions,
           result: {'value': v},
         ),
