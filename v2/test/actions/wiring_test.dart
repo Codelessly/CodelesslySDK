@@ -1,7 +1,7 @@
 // Triggers in the render tree: nodes tapped (pressed, hovered, swiped...)
 // in a NodeView(interactive: true) run their reactions; a variable they set
 // re-applies only the boxes that read it.
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';

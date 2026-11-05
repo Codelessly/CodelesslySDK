@@ -3,8 +3,8 @@
 // PassiveRectangleWidget did.
 import 'dart:ui' as ui;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show Node, BoxProps, PathProps;
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
+import 'package:codelessly_api_v2/codelessly_api.dart' show Node, BoxProps, PathProps;
 import 'package:flutter/rendering.dart';
 import 'package:path_parsing/path_parsing.dart';
 

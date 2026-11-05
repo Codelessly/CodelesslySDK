@@ -1,7 +1,7 @@
 // A stored query (CloudQueryDef) resolved against the runtime's values.
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart' show CloudQueryDef, WhereFilter;
+import 'package:codelessly_api_v2/codelessly_api.dart' show CloudQueryDef, WhereFilter;
 
 import '../../runtime/contracts.dart';
 import 'query.dart';

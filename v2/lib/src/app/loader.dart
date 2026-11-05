@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart' show GZipDecoder;
-import 'package:codelessly_api/codelessly_api.dart';
+import 'package:codelessly_api_v2/codelessly_api.dart';
 import 'package:flutter/services.dart' show AssetBundle, rootBundle;
 import 'package:http/http.dart' as http;
 

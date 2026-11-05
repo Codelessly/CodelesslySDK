@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, NavigateAction, Node, PublishLayout, PublishModel;
+import 'package:codelessly_api_v2/codelessly_api.dart' show Json, NavigateAction, Node, PublishLayout, PublishModel;
 import 'package:flutter/material.dart';
 
 import '../render/node_tree.dart';

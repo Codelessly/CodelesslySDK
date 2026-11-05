@@ -1,7 +1,7 @@
 // A row/column that hugs its cross axis and stretches its children
 // (RenderHugCross) relays out when a stretched child's content changes:
 // incremental relayout gives what a fresh render gives.
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

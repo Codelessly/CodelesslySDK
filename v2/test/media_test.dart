@@ -1,9 +1,9 @@
 // Painting and islands of the media group: image fills, SVG paths (the
 // `path` widget and a box's path), icons, and the players' islands.
-import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart';
-import 'package:codelessly_sdk/src/render/paint/path_paint.dart';
-import 'package:codelessly_sdk/src/widgets/media_players.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/src/render/paint/icon_glyph.dart';
+import 'package:codelessly_sdk_v2/src/render/paint/path_paint.dart';
+import 'package:codelessly_sdk_v2/src/widgets/media_players.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -3,7 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart' show HttpApi, HttpBodyType, HttpMethod, HttpParam;
+import 'package:codelessly_api_v2/codelessly_api.dart' show HttpApi, HttpBodyType, HttpMethod, HttpParam;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 

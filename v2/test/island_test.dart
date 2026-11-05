@@ -1,7 +1,7 @@
 // Islands: widgets hosted under a node's render box, with their elements in
 // the app's element tree (lib/src/render/islands.dart).
-import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/widgets/registry.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/src/widgets/registry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

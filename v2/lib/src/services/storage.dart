@@ -2,7 +2,7 @@
 // `storage` variable), and cloud files (uploads).
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart' show CloudFileAccess;
+import 'package:codelessly_api_v2/codelessly_api.dart' show CloudFileAccess;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
