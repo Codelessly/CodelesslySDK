@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'dart:ui' show ImageFilter, PathMetric, Tangent;
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -665,6 +666,13 @@ class _NodeMotionState extends State<_NodeMotionBody>
   /// The node's widget drawn with the values of [m].
   Widget _draw(MotionModel m) {
     Widget child = KeyedSubtree(key: _childKey, child: widget.child);
+    if (m.shimmer case final MotionShimmer shimmer) {
+      child = ShimmerBand(
+        shimmer: shimmer,
+        running: widget.animate,
+        child: child,
+      );
+    }
     if (!m.hasTransform && _turns == 0) return child;
     if (m.backfaceHidden) child = BackfaceHidden(child: child);
     if (m.opacity < 1) {
@@ -791,3 +799,112 @@ Duration implicitTransitionDuration(BuildContext context, int ms) =>
     TickerMode.valuesOf(context).enabled
     ? Duration(milliseconds: ms)
     : Duration.zero;
+
+
+/// [hex] (`#RRGGBB` or `#AARRGGBB`) as a colour; white when it isn't one.
+Color shimmerColorOf(String hex) {
+  String h = hex.trim().replaceFirst('#', '');
+  if (h.length == 6) h = 'FF$h';
+  final int? v = h.length == 8 ? int.tryParse(h, radix: 16) : null;
+  return v == null ? const Color(0xFFFFFFFF) : Color(v);
+}
+
+/// Sweeps [MotionShimmer]'s band of light across [child]'s painted pixels,
+/// over and over while [running]; still, halfway across, otherwise (the
+/// design canvas).
+class ShimmerBand extends StatefulWidget {
+  /// Creates a [ShimmerBand].
+  const ShimmerBand({
+    super.key,
+    required this.shimmer,
+    required this.child,
+    this.running = true,
+  });
+
+  /// The band.
+  final MotionShimmer shimmer;
+
+  /// Whether the band sweeps.
+  final bool running;
+
+  /// What the band lights up.
+  final Widget child;
+
+  @override
+  State<ShimmerBand> createState() => _ShimmerBandState();
+}
+
+class _ShimmerBandState extends State<ShimmerBand>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _sweep = AnimationController(vsync: this);
+
+  @override
+  void initState() {
+    super.initState();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(ShimmerBand oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.shimmer.durationMs != widget.shimmer.durationMs ||
+        oldWidget.running != widget.running) {
+      _sync();
+    }
+  }
+
+  void _sync() {
+    final int ms = math.max(1, widget.shimmer.durationMs);
+    _sweep.duration = Duration(milliseconds: ms);
+    if (widget.running) {
+      _sweep.repeat();
+    } else {
+      _sweep
+        ..stop()
+        ..value = 0.5;
+    }
+  }
+
+  @override
+  void dispose() {
+    _sweep.dispose();
+    super.dispose();
+  }
+
+  /// The shader for the band at [t] (0 to 1 across) over [bounds].
+  Shader shaderAt(double t, Rect bounds) {
+    final MotionShimmer s = widget.shimmer;
+    final Color color = shimmerColorOf(s.color);
+    final Color glow = color.withValues(
+      alpha: color.a * s.strength.clamp(0.0, 1.0),
+    );
+    final Color clear = color.withValues(alpha: 0);
+    final double half = math.max(0.001, s.width / 2);
+    // The band travels from fully off one side to fully off the other.
+    final double centre = -half + t * (1 + 2 * half);
+    final double a = s.angle * math.pi / 180;
+    final Offset dir = Offset(math.cos(a), math.sin(a));
+    // Project the box onto the sweep direction.
+    final double extent =
+        (bounds.width * dir.dx).abs() + (bounds.height * dir.dy).abs();
+    final Offset mid = bounds.center;
+    Offset at(double f) => mid + dir * ((f - 0.5) * extent);
+    return ui.Gradient.linear(
+      at(centre - half),
+      at(centre + half),
+      [clear, glow, clear],
+      const [0, 0.5, 1],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _sweep,
+    child: widget.child,
+    builder: (context, child) => ShaderMask(
+      blendMode: BlendMode.srcATop,
+      shaderCallback: (bounds) => shaderAt(_sweep.value, bounds),
+      child: child,
+    ),
+  );
+}
