@@ -236,6 +236,7 @@ void main() {
       variables: {
         'bill': variable('bill', VariableType.decimal, 50.0),
         'total': variable('total', VariableType.decimal, 0.0),
+        'amount': variable('amount', VariableType.text, '350000'),
       },
       scripts: [
         addTip,
@@ -254,8 +255,14 @@ void main() {
     final ScopedValues scope = ScopedValues.of(context);
     Object? payment;
     Object? tip;
+    Object? fromText;
     await tester.runAsync(() async {
       for (int i = 0; i < 40; i++) {
+        // Text from a text field: the script converts it.
+        fromText = PropertyValueDelegate.getVariableValueFromPath<Object>(
+          r"${= script.payment(amount, '6.5', 30)}",
+          scopedValues: scope,
+        );
         payment = PropertyValueDelegate.getVariableValueFromPath<Object>(
           r'${= script.payment(350000, 6.5, 30)}',
           scopedValues: scope,
@@ -265,11 +272,12 @@ void main() {
           scopedValues: scope,
         );
         // On the web the first evaluation starts the run in the worker.
-        if (payment != null && tip != null) break;
+        if (payment != null && tip != null && fromText != null) break;
         await Future<void>.delayed(const Duration(milliseconds: 50));
       }
     });
     expect(payment, 2212.24);
+    expect(fromText, 2212.24);
     // A formula's script can't change variables: vars.set fails, so the
     // result is null and the variable is untouched.
     expect(tip, isNull);

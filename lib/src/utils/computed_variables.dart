@@ -179,10 +179,13 @@ abstract final class ComputedVariables {
   /// formula's result over the others, as a design canvas previews them with
   /// default values. [data] is what the formulas read as `data`, and
   /// [routeParams] what they read as `route` (a screen's sample params).
+  /// [codelesslyContext] gives formulas the screen's scripts, for
+  /// `script.name(args)`.
   static Map<String, VariableData> resolveAll(
     Map<String, VariableData> variables, {
     Map<String, dynamic>? data,
     Map<String, dynamic>? routeParams,
+    CodelesslyContext? codelesslyContext,
   }) {
     if (!variables.values.any((variable) => variable.isComputed)) {
       return variables;
@@ -193,6 +196,7 @@ abstract final class ComputedVariables {
       variables: resolved,
       data: data,
       routeParams: routeParams,
+      codelesslyContext: codelesslyContext,
     );
     for (final String name in evaluationOrder(variables)) {
       final VariableData variable = resolved[name]!;
