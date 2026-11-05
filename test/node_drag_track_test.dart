@@ -91,59 +91,64 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   });
 
-
-  testWidgets('a knob inside a draggable and a scroll view turns instead of dragging or scrolling', (
-    tester,
-  ) async {
-    value = 50;
-    const knob = DragTrackModel(
-      variable: 'gain',
-      shape: DragTrackShape.arc,
-      min: 0,
-      max: 100,
-      step: 1,
-      startAngle: -150,
-      endAngle: 150,
-      input: DragTrackInput.vertical,
-      pixelsPerRange: 160,
-    );
-    bool dragStarted = false;
-    final ScrollController scroll = ScrollController();
-    addTearDown(scroll.dispose);
-    for (final PointerDeviceKind kind in [PointerDeviceKind.mouse, PointerDeviceKind.touch]) {
+  testWidgets(
+    'a knob inside a draggable and a scroll view turns instead of dragging or scrolling',
+    (tester) async {
       value = 50;
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: Overlay(
-              initialEntries: [
-                OverlayEntry(
-                  builder: (context) => SingleChildScrollView(
-                    controller: scroll,
-                    child: SizedBox(
-                      height: 2000,
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Draggable<String>(
-                          data: 'pedal',
-                          onDragStarted: () => dragStarted = true,
-                          feedback: const SizedBox(width: 10, height: 10),
-                          child: SizedBox(
-                            width: 200,
-                            height: 200,
-                            child: Center(
-                              child: SizedBox(
-                                width: 40,
-                                height: 40,
-                                child: StatefulBuilder(
-                                  builder: (context, setState) => NodeDragTrack(
-                                    track: knob,
-                                    value: value,
-                                    onChanged: (v) => setState(() => value = v),
-                                    onEnd: ends.add,
-                                    child: const SizedBox.expand(),
+      const knob = DragTrackModel(
+        variable: 'gain',
+        shape: DragTrackShape.arc,
+        min: 0,
+        max: 100,
+        step: 1,
+        startAngle: -150,
+        endAngle: 150,
+        input: DragTrackInput.vertical,
+        pixelsPerRange: 160,
+      );
+      bool dragStarted = false;
+      final ScrollController scroll = ScrollController();
+      addTearDown(scroll.dispose);
+      for (final PointerDeviceKind kind in [
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.touch,
+      ]) {
+        value = 50;
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: Overlay(
+                initialEntries: [
+                  OverlayEntry(
+                    builder: (context) => SingleChildScrollView(
+                      controller: scroll,
+                      child: SizedBox(
+                        height: 2000,
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: Draggable<String>(
+                            data: 'pedal',
+                            onDragStarted: () => dragStarted = true,
+                            feedback: const SizedBox(width: 10, height: 10),
+                            child: SizedBox(
+                              width: 200,
+                              height: 200,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 40,
+                                  height: 40,
+                                  child: StatefulBuilder(
+                                    builder: (context, setState) =>
+                                        NodeDragTrack(
+                                          track: knob,
+                                          value: value,
+                                          onChanged: (v) =>
+                                              setState(() => value = v),
+                                          onEnd: ends.add,
+                                          child: const SizedBox.expand(),
+                                        ),
                                   ),
                                 ),
                               ),
@@ -153,26 +158,29 @@ void main() {
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      );
-      final gesture = await tester.startGesture(const Offset(100, 100), kind: kind);
-      for (int i = 0; i < 8; i++) {
-        await gesture.moveBy(const Offset(0, -5));
-        await tester.pump();
+        );
+        final gesture = await tester.startGesture(
+          const Offset(100, 100),
+          kind: kind,
+        );
+        for (int i = 0; i < 8; i++) {
+          await gesture.moveBy(const Offset(0, -5));
+          await tester.pump();
+        }
+        await gesture.up();
+        await tester.pump(const Duration(seconds: 1));
+        // 40px up of 160px for the whole range: a quarter more, less the
+        // slop it took to claim the pointer.
+        expect(value, greaterThan(60), reason: '$kind');
+        expect(dragStarted, isFalse, reason: '$kind');
+        expect(scroll.offset, 0, reason: '$kind');
       }
-      await gesture.up();
-      await tester.pump(const Duration(seconds: 1));
-      // 40px up of 160px for the whole range: a quarter more, less the
-      // slop it took to claim the pointer.
-      expect(value, greaterThan(60), reason: '$kind');
-      expect(dragStarted, isFalse, reason: '$kind');
-      expect(scroll.offset, 0, reason: '$kind');
-    }
-  });
+    },
+  );
 
   testWidgets('dragging along a line writes snapped values', (tester) async {
     value = -48;

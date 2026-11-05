@@ -139,7 +139,6 @@ void main() {
     expect(rotationOf(tester), greaterThan(60));
   });
 
-
   // Knobs in a data list, as on a pedal: each reads its own item's value,
   // writes the list through its `changed` reaction and resets to its own
   // item's default on a double tap.
@@ -167,7 +166,11 @@ void main() {
             name: 'Turn',
             trigger: TriggerModel(type: TriggerType.changed),
             action: SetVariableAction(
-              variable: VariableData(id: 'knobs', name: 'knobs', type: VariableType.list),
+              variable: VariableData(
+                id: 'knobs',
+                name: 'knobs',
+                type: VariableType.list,
+              ),
               newValue: r"${= set(knobs, index, set(item, 'value', round(result.value)))}",
             ),
           ),
@@ -191,43 +194,47 @@ void main() {
       ),
   ];
 
-  testWidgets('knobs in a list read and write their own items, and reset to their own defaults', (
-    tester,
-  ) async {
-    await pump(
-      tester,
-      knobRow(),
-      runtime: true,
-      variables: [
-        variable('knobs', VariableType.list, [
-          {'id': 'gain', 'value': 50, 'default': 45},
-          {'id': 'tone', 'value': 50, 'default': 60},
-        ]),
-      ],
-    );
-    List values() => [
-      for (final Map k in (codelesslyContext.findVariableByName('knobs')!.value.getValue() as List).cast<Map>())
-        k['value'],
-    ];
-    // Turn the second knob up by 40px of its 160px range.
-    final gesture = await tester.startGesture(const Offset(150, 50));
-    for (int i = 0; i < 8; i++) {
-      await gesture.moveBy(const Offset(0, -5));
-      await tester.pump();
-    }
-    await gesture.up();
-    await tester.pump(const Duration(seconds: 1));
-    expect(values()[0], 50);
-    expect(values()[1], inInclusiveRange(70, 75));
-    // Double tap each: back to 45 and 60, their own defaults.
-    for (final Offset at in const [Offset(50, 50), Offset(150, 50)]) {
-      await tester.tapAt(at);
-      await tester.pump(const Duration(milliseconds: 60));
-      await tester.tapAt(at);
+  testWidgets(
+    'knobs in a list read and write their own items, and reset to their own defaults',
+    (tester) async {
+      await pump(
+        tester,
+        knobRow(),
+        runtime: true,
+        variables: [
+          variable('knobs', VariableType.list, [
+            {'id': 'gain', 'value': 50, 'default': 45},
+            {'id': 'tone', 'value': 50, 'default': 60},
+          ]),
+        ],
+      );
+      List values() => [
+        for (final Map k
+            in (codelesslyContext.findVariableByName('knobs')!.value.getValue()
+                    as List)
+                .cast<Map>())
+          k['value'],
+      ];
+      // Turn the second knob up by 40px of its 160px range.
+      final gesture = await tester.startGesture(const Offset(150, 50));
+      for (int i = 0; i < 8; i++) {
+        await gesture.moveBy(const Offset(0, -5));
+        await tester.pump();
+      }
+      await gesture.up();
       await tester.pump(const Duration(seconds: 1));
-    }
-    expect(values(), [45, 60]);
-  });
+      expect(values()[0], 50);
+      expect(values()[1], inInclusiveRange(70, 75));
+      // Double tap each: back to 45 and 60, their own defaults.
+      for (final Offset at in const [Offset(50, 50), Offset(150, 50)]) {
+        await tester.tapAt(at);
+        await tester.pump(const Duration(milliseconds: 60));
+        await tester.tapAt(at);
+        await tester.pump(const Duration(seconds: 1));
+      }
+      expect(values(), [45, 60]);
+    },
+  );
 
   List<BaseNode> songs() => [
     ListViewNode(

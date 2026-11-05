@@ -77,7 +77,10 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
                     effect.color != null)
                   BoxShadow(
                     color: effect.color!.toFlutterColor(),
-                    offset: Offset(effect.offset?.x ?? 0, effect.offset?.y ?? 0),
+                    offset: Offset(
+                      effect.offset?.x ?? 0,
+                      effect.offset?.y ?? 0,
+                    ),
                     blurRadius: effect.radius,
                   ),
             ],

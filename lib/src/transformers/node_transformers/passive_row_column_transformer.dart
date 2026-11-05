@@ -174,6 +174,16 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
           ? MainAxisSize.min
           : MainAxisSize.max,
       spacing: rowColumnNode.spacing,
+      // A row/column that clips its content clips children that overflow
+      // it (a row of skeletons wider than the screen), instead of painting
+      // the debug overflow stripes over them on the design canvas. A Flex
+      // clips only when it overflows, so shadows of children that fit are
+      // drawn as before.
+      clipBehavior:
+          rowColumnNode is ClipMixin &&
+              (rowColumnNode as ClipMixin).clipsContent
+          ? Clip.hardEdge
+          : Clip.none,
       key: ValueKey(rowColumnNode.id),
       children: childrenWidgets,
     );
