@@ -288,7 +288,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = applyWidgetMargins(styled, widget);
     }
 
-    if (settings.withVisibility) {
+    if (settings.withVisibility && !ShownAnyway.covers(context, node.id)) {
       widget = applyWidgetVisibility(
         context,
         styled,
@@ -345,14 +345,30 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         model: draggable,
         enabled: flag(DraggableModel.enabledVariable, draggable.enabled),
         flightKey: '${flightKey ?? ''}',
-        // The feedback node is usually hidden where it is designed.
-        buildNode: (context, id) => buildWidgetByID(
-          id,
-          context,
-          settings: const WidgetBuildSettings(
-            debugLabel: 'drag feedback',
-            withReactions: false,
-            withVisibility: false,
+        feedbackSize: switch (draggable.feedbackNodeId) {
+          '' => null,
+          final String id => switch (getNode(id)) {
+            final BaseNode feedback => Size(
+              feedback.basicBoxLocal.width,
+              feedback.basicBoxLocal.height,
+            ),
+            null => null,
+          },
+        },
+        // The feedback node is usually hidden where it is designed: it shows
+        // anyway, while the nodes inside it keep their own visibility (a
+        // pedal's two- and three-knob faces).
+        buildNode: (context, id) => ShownAnyway(
+          nodeId: id,
+          child: Builder(
+            builder: (context) => buildWidgetByID(
+              id,
+              context,
+              settings: const WidgetBuildSettings(
+                debugLabel: 'drag feedback',
+                withReactions: false,
+              ),
+            ),
           ),
         ),
         child: widget,
