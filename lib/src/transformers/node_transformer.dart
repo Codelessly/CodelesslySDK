@@ -91,6 +91,12 @@ class WidgetBuildSettings extends BuildSettings {
   /// Determines the brightness of the current screen for the system UI.
   final BrightnessModel brightness;
 
+  /// Whether the node being built applies its own visibility (its `visible`
+  /// binding). False draws a node that is hidden where it is designed,
+  /// such as a drag's feedback node or a list's drop slot, while the nodes
+  /// inside it still show and hide by their own bindings.
+  final bool withRootVisibility;
+
   /// Creates a [WidgetBuildSettings] instance.
   const WidgetBuildSettings({
     super.withOpacity,
@@ -109,6 +115,7 @@ class WidgetBuildSettings extends BuildSettings {
     this.replaceVariablesWithSymbols = false,
     this.buildRawWidget = false,
     this.brightness = BrightnessModel.system,
+    this.withRootVisibility = true,
   });
 
   /// Creates a copy of this [WidgetBuildSettings] instance.
@@ -129,8 +136,10 @@ class WidgetBuildSettings extends BuildSettings {
     bool? replaceVariablesWithSymbols,
     bool? buildRawWidget,
     BrightnessModel? brightness,
+    bool? withRootVisibility,
   }) {
     return WidgetBuildSettings(
+      withRootVisibility: withRootVisibility ?? this.withRootVisibility,
       withOpacity: withOpacity ?? this.withOpacity,
       withVisibility: withVisibility ?? this.withVisibility,
       withBlendModes: withBlendModes ?? this.withBlendModes,
@@ -159,6 +168,7 @@ class WidgetBuildSettings extends BuildSettings {
     replaceVariablesWithSymbols,
     buildRawWidget,
     brightness,
+    withRootVisibility,
   ];
 }
 
