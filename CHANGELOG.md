@@ -1,3 +1,7 @@
+## Unreleased
+
+- New package `packages/codelessly_genui`: renders A2UI (agent-generated UI) with the SDK's node transformers. It is not published yet; apps depend on it from git.
+
 ## 9.1.9
 
 Requires codelessly_api 9.0.3.
