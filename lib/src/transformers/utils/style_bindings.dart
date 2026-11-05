@@ -140,6 +140,14 @@ abstract final class StyleBindings {
   /// The color of stop [index] of the first fill's gradient.
   static String fillStop(int index) => 'fill-stop-$index';
 
+  /// A rectangle's SVG [RectangleNode.path] (text): an orbit drawn for the
+  /// planet a screen shows, a curve built from data.
+  static const String path = 'path';
+
+  /// A stroke's [GeometryMixin.dashPattern]: a list of numbers or text such
+  /// as `4 2` (dash, gap, ...).
+  static const String dashPattern = 'dashPattern';
+
   /// Adds to [patch], a partial node JSON, the values that the bindings of
   /// these properties give [node], evaluated with [scopedValues]. A property
   /// whose binding is missing, evaluates to null or gives the node's own
@@ -177,6 +185,19 @@ abstract final class StyleBindings {
       final double? weight = value<double>(strokeWeight);
       if (weight != null && weight != node.strokeWeight) {
         patch['strokeWeight'] = weight < 0 ? 0.0 : weight;
+      }
+    }
+
+    if (node is RectangleNode && node.variables.containsKey(path)) {
+      final Object? data = value<Object>(path);
+      if (data is String && data != node.path) patch['path'] = data;
+    }
+
+    if (node is GeometryMixin && node.variables.containsKey(dashPattern)) {
+      final List<double>? dashes = _dashes(value<Object>(dashPattern));
+      if (dashes != null &&
+          !const ListEquality<double>().equals(dashes, node.dashPattern)) {
+        patch['dashPattern'] = dashes;
       }
     }
 
@@ -462,6 +483,26 @@ abstract final class StyleBindings {
           );
         }(),
     ];
+  }
+
+  static List<double>? _dashes(Object? value) {
+    final List<Object?>? parts = switch (value) {
+      List list => list,
+      String text => text.trim().isEmpty ? <Object?>[] : text.trim().split(RegExp(r'[\s,]+')),
+      _ => null,
+    };
+    if (parts == null) return null;
+    final List<double> out = [];
+    for (final Object? part in parts) {
+      final double? n = switch (part) {
+        num v => v.toDouble(),
+        String v => double.tryParse(v),
+        _ => null,
+      };
+      if (n == null || n < 0) return null;
+      out.add(n);
+    }
+    return out;
   }
 
   static CornerRadius? _cornerRadius(Object? value) {
