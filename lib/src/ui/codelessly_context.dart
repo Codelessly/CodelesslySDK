@@ -238,9 +238,20 @@ class CodelesslyContext with ChangeNotifier, Equatable {
   Observable<VariableData>? findVariableByName(String? name) => variables.values
       .lastWhereOrNull((variable) => variable.value.name == name);
 
-  /// The variable with [id], or else the one in use with [name].
-  Observable<VariableData>? findVariable({String? id, String? name}) =>
-      (id == null ? null : variables[id]) ?? findVariableByName(name);
+  /// The variable an action naming [id] and [name] writes: the one in use
+  /// with the name of the variable with [id], or else the one in use with
+  /// [name].
+  ///
+  /// Bindings read a variable by its name (see [findVariableByName]), so a
+  /// write goes to the variable they read. When two variables share a name
+  /// (a screen variable over an app variable, or a project that holds the
+  /// same app variable twice), writing the variable with [id] would change
+  /// one that nothing shows.
+  Observable<VariableData>? findVariable({String? id, String? name}) {
+    final Observable<VariableData>? byId = id == null ? null : variables[id];
+    if (byId == null) return findVariableByName(name);
+    return findVariableByName(byId.value.name) ?? byId;
+  }
 
   /// Allows to easily [value] of a variable with a given [name].
   /// Returns false if the variable does not exist.
