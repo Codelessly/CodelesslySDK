@@ -181,8 +181,17 @@ class ActionChain {
     ]) {
       if (candidate != null && candidate.mounted) return candidate;
     }
+    // Every screen the chain knew is gone (it was opened directly and then
+    // replaced, say): finish on the screen the app shows now, so a pending
+    // toast hide or app-state update after a delay still runs.
+    for (final BuildContext host in _mountedHosts.reversed) {
+      if (host.mounted) return host;
+    }
     return null;
   }
+
+  /// Every [ActionChainHost] mounted now, oldest first.
+  static final List<BuildContext> _mountedHosts = <BuildContext>[];
 }
 
 /// Marks the widget whose context runs an action chain's remaining actions
@@ -255,8 +264,15 @@ class _ActionChainHostElement extends InheritedElement {
   _ActionChainHostElement(super.widget);
 
   @override
+  void unmount() {
+    ActionChain._mountedHosts.remove(this);
+    super.unmount();
+  }
+
+  @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
+    ActionChain._mountedHosts.add(this);
     final Widget? adopter =
         getElementForInheritedWidgetOfExactType<ActionChainAdopter>()?.widget;
     if (adopter is ActionChainAdopter) adopter.chain.adoptHost(this);
