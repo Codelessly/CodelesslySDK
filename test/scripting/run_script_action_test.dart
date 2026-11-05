@@ -312,6 +312,47 @@ void main() {
     );
   });
 
+  testWidgets('A computed variable that calls a script gets its result', (
+    tester,
+  ) async {
+    final (context, _) = await pumpScreen(
+      tester,
+      variables: {
+        'bill': variable('bill', VariableType.text, '87.35'),
+        'split': Observable(
+          VariableData(
+            id: 'split',
+            name: 'split',
+            type: VariableType.map,
+            formula: r'${= script.half(bill)}',
+          ),
+        ),
+      },
+      scripts: [
+        const ScriptModel(
+          id: 'half',
+          name: 'half',
+          params: [ScriptParam(name: 'n')],
+          source: 'return {each: Number(n) / 2}',
+        ),
+      ],
+    );
+    final ScopedValues scope = ScopedValues.of(context);
+    Object? each;
+    await tester.runAsync(() async {
+      for (int i = 0; i < 40 && each == null; i++) {
+        each = PropertyValueDelegate.getVariableValueFromPath<Object>(
+          r'${split.each}',
+          scopedValues: scope,
+        );
+        if (each == null) {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+        }
+      }
+    });
+    expect(each, 43.675);
+  });
+
   test(
     'Script models round-trip through JSON and drop unknown capabilities',
     () {
