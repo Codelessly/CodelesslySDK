@@ -708,7 +708,7 @@ class PassiveListViewWidget extends StatelessWidget {
         settings: const WidgetBuildSettings(
           debugLabel: 'drop slot',
           withReactions: false,
-          withVisibility: false,
+          withRootVisibility: false,
         ),
       ),
     );

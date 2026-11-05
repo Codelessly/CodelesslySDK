@@ -214,8 +214,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       scopedValues: preview,
     );
     final TextDirection? direction = layoutDirectionOf(context, styled);
+    // A node built without its own visibility (a drag's feedback) still
+    // shows and hides its children by their bindings.
+    final WidgetBuildSettings inner = settings.withRootVisibility
+        ? settings
+        : settings.copyWith(withRootVisibility: true);
     Widget widget = direction == null
-        ? getTransformerByNode(node).buildWidget(styled, context, settings)
+        ? getTransformerByNode(node).buildWidget(styled, context, inner)
         // The content (children, padding, text) is built under the
         // direction, so it reaches every row, freeform layout and text in
         // it; the node's own margin and place follow its parent.
@@ -224,7 +229,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             child: Builder(
               builder: (context) =>
                   getTransformerByNode(node)
-                      .buildWidget(styled, context, settings),
+                      .buildWidget(styled, context, inner),
             ),
           );
     // A node with an aspect ratio derives one axis from the other.
@@ -288,7 +293,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = applyWidgetMargins(styled, widget);
     }
 
-    if (settings.withVisibility) {
+    if (settings.withVisibility && settings.withRootVisibility) {
       widget = applyWidgetVisibility(
         context,
         styled,
@@ -352,7 +357,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           settings: const WidgetBuildSettings(
             debugLabel: 'drag feedback',
             withReactions: false,
-            withVisibility: false,
+            withRootVisibility: false,
           ),
         ),
         child: widget,
