@@ -411,6 +411,7 @@ abstract class WidgetNodeTransformerManager
         'none' || 'off' || 'false' || '0' || '' => MotionLoop.none,
         'restart' || 'loop' => MotionLoop.restart,
         'reverse' || 'pulse' => MotionLoop.reverse,
+        'swing' => MotionLoop.swing,
         'true' || 'on' || '1' => on,
         _ => null,
       },
