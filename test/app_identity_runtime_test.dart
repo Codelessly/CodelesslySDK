@@ -85,16 +85,15 @@ void main() {
       expect(SDKPublishModel.fromJson(json).appIdentity, isNull);
     });
 
-    test('copyWith keeps and replaces the identity', () {
+    test('copyWith keeps the identity; withAppIdentity replaces it', () {
       final SDKPublishModel published = model(identity: identity);
       expect(published.copyWith().appIdentity, identity);
-      expect(
-        published
-            .copyWith(appIdentity: const AppIdentity(name: 'X'))
-            .appIdentity
-            ?.name,
-        'X',
+      final SDKPublishModel replaced = published.withAppIdentity(
+        const AppIdentity(name: 'X'),
       );
+      expect(replaced.appIdentity?.name, 'X');
+      expect(replaced.entryLayoutId, published.entryLayoutId);
+      expect(published.withAppIdentity(null).appIdentity, isNull);
     });
   });
 
