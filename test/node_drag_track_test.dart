@@ -417,6 +417,41 @@ void main() {
     expect(g.arcProgressOf(const Offset(-1, 10)), 0);
     expect(g.arcProgressOf(const Offset(1, 10)), 1);
   });
+
+  testWidgets('a relative line is posed by its size on the design canvas', (
+    tester,
+  ) async {
+    const scrubber = DragTrackModel(
+      variable: 'minute',
+      min: 0,
+      max: 1440,
+      x2: 1,
+      y2: 0,
+      relative: true,
+    );
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              top: 0,
+              width: 300,
+              height: 20,
+              child: TrackPose(
+                track: scrubber,
+                progress: 0.25,
+                child: SizedBox.expand(child: Text('thumb')),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    // A quarter of its 300px width to the right of its rest centre.
+    expect(tester.getCenter(find.text('thumb')), const Offset(225, 10));
+  });
 }
 
 double _sin(double r) => math.sin(r);

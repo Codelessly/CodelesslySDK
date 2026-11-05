@@ -1025,9 +1025,9 @@ abstract class WidgetNodeTransformerManager
       String s => double.tryParse(s.trim()) ?? track.defaultValue ?? track.min,
       _ => track.defaultValue ?? track.min,
     };
-    return Transform(
-      alignment: Alignment.center,
-      transform: DragTrackGeometry(track).poseAt(track.progressOf(value)),
+    return TrackPose(
+      track: track,
+      progress: track.progressOf(value),
       child: widget,
     );
   }

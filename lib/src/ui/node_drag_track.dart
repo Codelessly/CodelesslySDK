@@ -542,3 +542,86 @@ class _RenderTrackArea extends RenderProxyBox {
     transform.multiply(_transform);
   }
 }
+
+/// Draws [child] where its track puts it at [progress], without making it
+/// draggable (the design canvas). The pose is worked out from the child's
+/// laid-out size, so relative lines ([DragTrackModel.relative]) move by
+/// their share of it.
+class TrackPose extends SingleChildRenderObjectWidget {
+  /// Creates a [TrackPose].
+  const TrackPose({
+    super.key,
+    required this.track,
+    required this.progress,
+    required super.child,
+  });
+
+  /// The track.
+  final DragTrackModel track;
+
+  /// Where along the track to draw the child, 0 to 1.
+  final double progress;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderTrackPose(DragTrackGeometry(track), progress);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    final _RenderTrackPose r = renderObject as _RenderTrackPose;
+    if (r._geometry.track != track) r.geometry = DragTrackGeometry(track);
+    r.progress = progress;
+  }
+}
+
+class _RenderTrackPose extends RenderProxyBox {
+  _RenderTrackPose(this._geometry, this._progress);
+
+  DragTrackGeometry _geometry;
+  set geometry(DragTrackGeometry g) {
+    if (hasSize) g.size = size;
+    _geometry = g;
+    markNeedsPaint();
+  }
+
+  double _progress;
+  set progress(double p) {
+    if (p == _progress) return;
+    _progress = p;
+    markNeedsPaint();
+  }
+
+  Matrix4 get _transform => _geometry.transformAt(_progress, size);
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    _geometry.size = size;
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      result.addWithPaintTransform(
+        transform: _transform,
+        position: position,
+        hitTest: (result, position) =>
+            super.hitTestChildren(result, position: position),
+      );
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null) return;
+    layer = context.pushTransform(
+      needsCompositing,
+      offset,
+      _transform,
+      super.paint,
+      oldLayer: layer is TransformLayer ? layer as TransformLayer : null,
+    );
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.multiply(_transform);
+  }
+}
