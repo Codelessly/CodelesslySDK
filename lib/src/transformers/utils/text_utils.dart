@@ -92,7 +92,7 @@ class TextUtils {
   }) {
     String characters = rawText;
 
-    final TextStyle style = switch (hasMissingFont) {
+    final TextStyle baseStyle = switch (hasMissingFont) {
       false => retrieveTextStyle(
         fontSize: fontSize,
         fontName: fontName,
@@ -113,6 +113,13 @@ class TextUtils {
         decoration: TextDecoration.underline,
       ),
     };
+    // A text node's OpenType features (lining or tabular figures, small
+    // caps...) go on every span's own style, so the text is measured the way
+    // it is painted, variable placeholders included.
+    final List<FontFeature> features = fontFeaturesOf(node);
+    final TextStyle style = features.isEmpty
+        ? baseStyle
+        : baseStyle.copyWith(fontFeatures: features);
 
     // On a design canvas, show defaults or placeholders for variables.
     if (replaceVariableWithSymbol) {
@@ -167,44 +174,36 @@ class TextUtils {
     List<Effect>? effects,
     Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
   }) {
-    // Tabular figures wrap each span in a style that only adds the feature,
-    // so the span's own style still sets everything else.
-    final bool tabular = node is TextNode && node.tabularFigures;
     return [
       for (final prop in props)
-        if (tabular)
-          TextSpan(
-            style: const TextStyle(
-              fontFeatures: [FontFeature.tabularFigures()],
-            ),
-            children: [
-              buildTextSpanForProp(
-                context,
-                rawText,
-                node: node,
-                prop: prop,
-                variablesOverrides: variablesOverrides,
-                nullSubstitutionMode: nullSubstitutionMode,
-                replaceVariableWithSymbol: replaceVariablesWithSymbol,
-                hasMissingFont: hasMissingFont,
-                tapGestureRecognizer: tapGestureRecognizers[prop.link],
-                effects: effects ?? node.effects,
-              ),
-            ],
-          )
-        else
-          buildTextSpanForProp(
-            context,
-            rawText,
-            node: node,
-            prop: prop,
-            variablesOverrides: variablesOverrides,
-            nullSubstitutionMode: nullSubstitutionMode,
-            replaceVariableWithSymbol: replaceVariablesWithSymbol,
-            hasMissingFont: hasMissingFont,
-            tapGestureRecognizer: tapGestureRecognizers[prop.link],
-            effects: effects ?? (node is BlendMixin ? node.effects : const []),
-          ),
+        buildTextSpanForProp(
+          context,
+          rawText,
+          node: node,
+          prop: prop,
+          variablesOverrides: variablesOverrides,
+          nullSubstitutionMode: nullSubstitutionMode,
+          replaceVariableWithSymbol: replaceVariablesWithSymbol,
+          hasMissingFont: hasMissingFont,
+          tapGestureRecognizer: tapGestureRecognizers[prop.link],
+          effects: effects ?? (node is BlendMixin ? node.effects : const []),
+        ),
+    ];
+  }
+
+  /// The Flutter font features of [node]'s text: its
+  /// [TextNode.resolvedFontFeatures] ([TextNode.fontFeatures], plus `tnum`
+  /// for [TextNode.tabularFigures]). Empty for any other node.
+  static List<FontFeature> fontFeaturesOf(BaseNode? node) {
+    if (node is! TextNode) return const [];
+    if (node.fontFeatures.isEmpty) {
+      return node.tabularFigures
+          ? const [FontFeature.tabularFigures()]
+          : const [];
+    }
+    return [
+      for (final OpenTypeFeature feature in node.resolvedFontFeatures)
+        FontFeature(feature.tag, feature.value),
     ];
   }
 
