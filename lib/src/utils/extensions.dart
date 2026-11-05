@@ -1966,6 +1966,9 @@ extension ActionModelExt on ActionModel {
       case ActionType.controlDrag:
       case ActionType.scrollTo:
         return {};
+      case ActionType.paginate:
+        final PaginateAction action = this as PaginateAction;
+        return _namesIn([action.page, action.pageSize], includePredefined);
       case ActionType.playSound:
         final PlaySoundAction action = this as PlaySoundAction;
         return _namesIn([

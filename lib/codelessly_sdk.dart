@@ -25,6 +25,8 @@ export 'src/data/data_rules.dart';
 export 'src/data/firebase_data_repository.dart';
 export 'src/data/local_data_repository.dart';
 export 'src/data/local_database.dart';
+export 'src/data/pagination_controller.dart';
+export 'src/data/pagination_registry.dart';
 export 'src/data/network_data_repository.dart';
 export 'src/data/web_data_repository.dart';
 export 'src/functions/functions.dart';
