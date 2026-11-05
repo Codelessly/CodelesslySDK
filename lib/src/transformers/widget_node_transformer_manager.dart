@@ -237,8 +237,12 @@ abstract class WidgetNodeTransformerManager
       // (Visibility mutes its tickers); one that keeps its space keeps them.
       maintainAnimation: keepSize,
       maintainSize: keepSize,
-      maintainSemantics: keepSize,
-      maintainInteractivity: keepSize,
+      // A hidden node keeps its space but is not there for the user: taps
+      // pass through it to what is under it (a hidden full-screen scrim
+      // would otherwise swallow every tap on the page) and screen readers
+      // skip it.
+      maintainSemantics: false,
+      maintainInteractivity: false,
       child: widget,
     );
   }
@@ -656,10 +660,6 @@ abstract class WidgetNodeTransformerManager
   /// Tells screen readers that a tappable node is a button. A node with text
   /// inside reads as that text; one without (an icon button) reads as its
   /// node name, or its icon's name when the node still has a default name.
-  /// A node with controls of its own inside (a card with an edit button) is
-  /// a button that keeps them as separate nodes, so each runs its own tap:
-  /// merged, a screen reader (and a click on the web while semantics are on)
-  /// would only reach the outer node's tap.
   Widget wrapWithSemantics(BaseNode node, Widget widget) {
     final String? customLabel = node.variables['semanticLabel'];
     final String? customSelected = node.variables['semanticSelected'];
@@ -683,11 +683,18 @@ abstract class WidgetNodeTransformerManager
     );
     if (!tappable) return widget;
 
+    // The node's own content: its descendants down to (not into) any that
+    // take input themselves, like an edit button on a tappable song row.
     final List<BaseNode> descendants = [];
+    bool hasInteractiveDescendant = false;
     void collect(BaseNode parent) {
       for (final String id in parent.childrenOrEmpty) {
         final BaseNode? child = tryGetNode(id);
         if (child == null) continue;
+        if (takesInput(child)) {
+          hasInteractiveDescendant = true;
+          continue;
+        }
         descendants.add(child);
         collect(child);
       }
@@ -697,37 +704,33 @@ abstract class WidgetNodeTransformerManager
 
     final bool hasText = descendants.any((child) => child is TextNode);
     final String label = hasText ? '' : semanticLabelFor(node, descendants);
-    if (descendants.any(_isInteractive)) {
-      // Its text reads from its own nodes inside the button.
-      return Semantics(
-        container: true,
-        button: true,
-        label: label.isEmpty ? null : label,
-        child: widget,
-      );
-    }
-    return MergeSemantics(
-      child: Semantics(
-        button: true,
-        label: label.isEmpty ? null : label,
-        child: widget,
-      ),
+    final Widget button = Semantics(
+      container: hasInteractiveDescendant,
+      button: true,
+      label: label.isEmpty ? null : label,
+      child: widget,
     );
+    // Merging would fold an inner button into this one: a screen reader (and
+    // Flutter web with semantics on) would then see one button whose tap is
+    // this node's, so the inner one could never be tapped. With one inside,
+    // this node keeps its own text and tap in its own node, and the inner
+    // button keeps its node.
+    if (hasInteractiveDescendant) return button;
+    return MergeSemantics(child: button);
   }
 
-  /// Whether [node] takes input of its own: it reacts to taps, or it is a
-  /// widget (a button, a field, a switch) that handles its input itself.
-  static bool _isInteractive(BaseNode node) {
+  /// Whether [node] takes taps or input itself: it has a click reaction, or
+  /// it is a widget (a button, a field, a switch) that handles its own.
+  static bool takesInput(BaseNode node) {
     if (node is CustomPropertiesMixin &&
         node.handlesDefaultReactionsInternally) {
       return true;
     }
-    return node is ReactionMixin &&
-        (node as ReactionMixin).reactions.any(
-          (reaction) =>
-              reaction.trigger.type == TriggerType.click &&
-              reaction.action.enabled,
-        );
+    if (node is! ReactionMixin) return false;
+    return (node as ReactionMixin).reactions.any(
+      (reaction) =>
+          reaction.trigger.type == TriggerType.click && reaction.action.enabled,
+    );
   }
 
   /// Semantics a node's `semanticLabel` variable gives it (a text with paths

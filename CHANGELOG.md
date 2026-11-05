@@ -1,14 +1,103 @@
+## 9.1.8
+
+Requires codelessly_api 9.0.1.
+
+### Fixes
+
+- A node hidden in the design (visible off, shown by a condition or
+  binding) no longer takes taps while hidden. It kept its space and stayed
+  hit-testable, so a hidden full-screen scrim swallowed every tap meant for
+  the buttons under it. Screen readers skip it too.
+- A slug-loaded app whose background authentication fails (its anonymous
+  sign-in can be refused) authenticates again when a user signs in, so its
+  cloud data loads. Lists stayed on their spinner after the user signed in
+  with their own account. See `SignInRetry`.
+
+## 9.1.7
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- A row that hugs its height and stretches its children grows when a child
+  grows after it is laid out, as when a formula shows a hidden strip in a
+  card. With its width fixed too (a list item), the row kept its old height
+  and cut the child off.
+
+### Actions
+
+- A bottom sheet's grab handle (`showDragHandle`) lies on the sheet canvas,
+  8 px below its top edge. It sat in a band of its own above the canvas,
+  which the canvas's own fill left see-through, so the handle floated over
+  the screen behind the sheet.
+
+## 9.1.6
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- An aligned child that is expanded on an axis fills its frame on that axis.
+  It kept the overflow its stored box had at design size before, so a
+  full-screen row stored 1768 wide in a 1440 frame rendered 328 wider than
+  any screen: a board's header buttons and its card side panel were pushed
+  off the right edge. Aligned children with a fixed size still keep their
+  design overhang.
+
+## 9.1.5
+
+Requires codelessly_api 9.0.1.
+
+### Text fields
+
+- A one-line text field that fills a fixed height draws its border at that
+  height under desktop's compact visual density. The density took 8 px off
+  the border, so a 44 px field showed a 36 px outline over a strip of its
+  box's background on desktop browsers.
+
+## 9.1.4
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- A child that fills the cross axis of a row or column that stretches its
+  children and hugs that axis takes the thickness its siblings give it, as
+  in the editor, instead of its design size. An accent stripe designed
+  beside a two-line message kept a one-line notice card two lines tall.
+
+## 9.1.3
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- A breakpoint layout whose root is pinned to the right or bottom edge keeps
+  those distances to the edges of the screen, in a dialog too. It was always
+  placed by its alignment: an account menu pinned above a sidebar's user card
+  opened at the top-left corner. A root pinned only by its left and top keeps
+  its alignment, since those pins are often its place on the design canvas.
+
+### Variables
+
+- A set-variable action writes the variable that bindings read by its name.
+  When two variables share a name (a project holding the same app variable
+  twice, or a screen variable over an app variable), the action wrote the one
+  its id named while text, colors and conditions read the other, so taps
+  seemed to do nothing.
+
 ## 9.1.2
 
 Requires codelessly_api 9.0.1.
 
 ### Accessibility
 
-- A tappable node with tappable nodes inside (a server card with an edit
-  button) keeps each of them as a button of its own. It merged them into one
-  button before, so a screen reader, and a click on the web while semantics
-  were on, only reached the outer node's tap: the card's edit button selected
-  the card instead of opening its dialog.
+- A tappable node with its own tappable nodes inside (a song row that loads
+  its song, with edit and move buttons in it) no longer merges them into one
+  button for screen readers. The inner buttons were read as part of the row
+  and their taps went to the row, so with a screen reader, or on the web once
+  semantics is on, they could not be used. The row now keeps its own text and
+  tap, and each inner button is its own button.
 
 ## 9.1.1
 
