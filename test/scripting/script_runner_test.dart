@@ -538,6 +538,8 @@ void main() {
       ]);
       for (int i = 0; i < 8; i++) {
         expect(results[i], hasValue(i), reason: 'run $i');
+        // Its own time, not the time it waited for the others.
+        expect(results[i].cpuMs, inInclusiveRange(100, 400), reason: 'run $i');
       }
     });
 
