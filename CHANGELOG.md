@@ -23,6 +23,17 @@
   a full swipe runs the first action, with an Undo bar for removing ones,
   then fires `swipeAction` reactions and can remove the item from the bound
   list or the cloud collection.
+- Lists with a `reorder` model reorder by a handle, a long press or a press
+  anywhere, with proxy elevation, scale and opacity, auto-scroll, per-item
+  `canReorderIf` and per-drop `canDropIf`, Alt+arrow keyboard moves (with
+  screen reader actions and announcements), and an optional built-in apply
+  to the bound list variable or the cloud collection's order field. Lists
+  that share a `group` take each other's items (a Kanban board), with a
+  placeholder where the drop lands. `reorder` reactions run on the list
+  with `${result.from}`, `${result.to}`, `${result.item}`,
+  `${result.fromList}` and `${result.toList}`; a handle's reactions still
+  run too.
+- Grids with `pagination` page and load more like lists.
 - The Pagination node renders page controls (first, previous, page numbers
   with ellipses, next, last, page size select, summary) for a controller.
 - The Table node renders a `TableView` (two_dimensional_scrollables) that
