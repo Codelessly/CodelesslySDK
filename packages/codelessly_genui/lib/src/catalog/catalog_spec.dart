@@ -337,7 +337,9 @@ Map<String, Object?> _extensionComponents() => {
       'inlineControls': {
         'type': 'array',
         'items': _ref('ComponentId'),
-        'description': 'Controls shown inline under the child (keep to 1-3).',
+        'description':
+            'Controls shown inline under the child (keep to 1-3). The same '
+            'ids may also be listed in controls.',
       },
       'detail': _ref(
         'ComponentId',
@@ -384,10 +386,11 @@ Map<String, Object?> _calcFunction() => {
       'it reads changes. Pure: no network, no writes, no clock. Identifiers '
       'name data model fields (inside a List template, the item\'s fields '
       'first): `weight * 2`, `items[0].qty`, `sum(items, i => i.qty * '
-      'i.cost)`. Functions: + - * / % ^, comparisons, a ? b : c, if, min, '
+      'i.cost)`. Operators: + - * / % (unary minus too), == != < <= > >=, && || !, a ? b : c; + also joins text. A ChoicePicker value is a list: read it with first(sex) or sex[0]. Functions: if, min, '
       'max, round(x, d), floor, ceil, abs, sqrt, pow, exp, ln, log, clamp, '
       'sum, count, map, where, range(start, end, step), object(k, v, ...), '
-      'first, last, fixed(x, d), formatNumber, formatCurrency. Use map and '
+      "first, last, fixed(x, d), formatNumber(x), formatCurrency(x, 'USD'). "
+      'Use map and '
       'range to build chart rows. Do not give calc a returnType.',
   'properties': {
     'call': {'const': 'calc'},
@@ -418,7 +421,7 @@ Write A2UI v0.9.1 messages for the Codelessly GenUI catalog.
 - Bind inputs to data model paths ({"path": "/weightKg"}) so the user's values are kept and sent back.
 - Derived values (totals, projections, chart rows) must use {"call": "calc", ...} formulas so they update on the device when inputs change. Never hard-code numbers that depend on inputs.
 - For anything the user may want to explore (charts with inputs), wrap it in a CodelesslyVisualization with its inputs in controls.
-- Give inputs an action (event) when the agent should hear about a committed value; give Buttons an action with a context that reads the relevant paths.
+- Give every input the user is meant to change (sliders, pickers, toggles, checklists) an action (event) whose context carries its value, so you hear each committed value and can respond; the UI still updates live through formulas. Give Buttons an action with a context that reads the relevant paths.
 - Keep labels short. Use Text variant h2/h3 for headings, caption for notes.
 ''';
 
