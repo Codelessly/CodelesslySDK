@@ -44,4 +44,23 @@ void main() {
       isFalse,
     );
   });
+
+  test('a dial jumps to the angle tapped; the gap snaps to the nearer end', () {
+    final g = DragTrackGeometry(
+      DragTrackModel(
+        shape: DragTrackShape.arc,
+        variable: 'goal',
+        startAngle: -135,
+        endAngle: 135,
+        jumpOnTap: true,
+      ),
+    );
+    expect(g.progressAtAngle(-135), 0);
+    expect(g.progressAtAngle(0), closeTo(0.5, 1e-9));
+    expect(g.progressAtAngle(90), closeTo(225 / 270, 1e-9));
+    expect(g.progressAtAngle(170), 1); // just past the end
+    expect(g.progressAtAngle(-170), 0); // just before the start
+    // The angle straight up from a tap above the knob's centre.
+    expect(g.angleOf(const Offset(0, -50)), closeTo(0, 1e-9));
+  });
 }
