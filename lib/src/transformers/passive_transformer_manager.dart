@@ -725,6 +725,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     };
     bool readsClock = false;
     bool readsFrameClock = false;
+    bool computedCallsScript = false;
     // A computed variable listens to whatever its formula reads.
     final Map<String, VariableData> variablesByName = {
       for (final notifier in codelesslyContext.variables.values)
@@ -742,6 +743,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         expanded.addAll(deps.paths);
         readsClock = readsClock || deps.readsClock;
         readsFrameClock = readsFrameClock || deps.readsFrameClock;
+        computedCallsScript = computedCallsScript || deps.callsScript;
       }
       return expanded;
     }
@@ -878,6 +880,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // A formula that calls a script gets the result late on the web (the
     // script runs in a worker), so it rebuilds when results arrive.
     final bool callsScript =
+        computedCallsScript ||
         node.variables.values.any(
           (path) => switch (FormulaEvaluator.exactExpression(path)) {
             final String expression => FormulaEvaluator.callsScript(expression),
