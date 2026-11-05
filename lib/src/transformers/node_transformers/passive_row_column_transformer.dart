@@ -174,6 +174,12 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
           ? MainAxisSize.min
           : MainAxisSize.max,
       spacing: rowColumnNode.spacing,
+      // A row/column that clips its content cuts an overflow off at its
+      // edge, with no debug stripes (a row of skeleton chips wider than
+      // its slot), as the app shows it.
+      clipsOverflow:
+          rowColumnNode is ClipMixin &&
+          (rowColumnNode as ClipMixin).clipsContent,
       key: ValueKey(rowColumnNode.id),
       children: childrenWidgets,
     );
@@ -196,7 +202,8 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         // Sized by its content, there is no free space to align it in.
         fillViewport:
             !contentSized &&
-            rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start,
+            (rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start ||
+                fillsViewport(rowColumnNode)),
         flexContent: hasMainAxisFlexChild(rowColumnNode, childrenNodes),
         contentSizedOnScrollAxis: contentSized,
         clipBehavior: scrollClipBehavior(rowColumnNode),
@@ -300,7 +307,9 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         res = wrapWithPaddedScrollable(
           padding: node.resolvedPadding().flutterEdgeInsetsDirectional,
           node: scrollable,
-          fillViewport: runAlignment != WrapAlignment.start,
+          fillViewport:
+              runAlignment != WrapAlignment.start ||
+              fillsViewport(node as BaseNode),
           clipBehavior: scrollClipBehavior(node),
           child: res,
         );
@@ -334,6 +343,11 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     }
     return (isRow ? node.horizontalFit : node.verticalFit) == SizeFit.flexible;
   }
+
+  /// Whether [node] is a scrolling row/column set to make its content at
+  /// least as long as its viewport ([RowColumnNode.fillViewport]).
+  static bool fillsViewport(BaseNode node) =>
+      node is RowColumnNode && node.isScrollable && node.fillViewport;
 
   /// Whether [node] is a row/column whose children flow onto new runs when
   /// they don't fit ([RowColumnMixin.wrap]), built as a [CodelesslyWrap].
