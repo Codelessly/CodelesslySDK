@@ -73,14 +73,32 @@ class PassiveIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return retrieveIconWidget(
-          resolvedIcon(node, scopedValues ?? ScopedValues.of(context)),
-          node.basicBoxLocal.width,
-        ) ??
+    final MultiSourceIconModel icon = resolvedIcon(
+      node,
+      scopedValues ?? ScopedValues.of(context),
+    );
+    Widget paint(MultiSourceIconModel icon) =>
+        retrieveIconWidget(icon, node.basicBoxLocal.width) ??
         SizedBox(
           width: node.basicBoxLocal.width,
           height: node.basicBoxLocal.height,
         );
+
+    // With a transition the icon eases to a new color (its `iconColor`
+    // binding following a palette), as a solid fill does. Where tickers
+    // are off (the design canvas, its captures) it jumps.
+    final Color? color = icon.color?.toFlutterColor();
+    if (node.transitionMs <= 0 || color == null) return paint(icon);
+    return TweenAnimationBuilder<Color?>(
+      tween: ColorTween(end: color),
+      duration: implicitTransitionDuration(context, node.transitionMs),
+      curve: Curves.easeOutCubic,
+      builder: (context, eased, _) => paint(
+        eased == null || eased == color
+            ? icon
+            : icon.copyWith(color: eased.toColorRGBA()),
+      ),
+    );
   }
 }
 
