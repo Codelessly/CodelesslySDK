@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'gesture_physics.dart';
 import 'node_motion.dart';
+import 'node_transform_gesture.dart';
 
 /// The live state of a drag, as the `drag` variable shows it.
 @immutable
@@ -202,7 +203,14 @@ class NodeDrag extends StatefulWidget {
       if (_pendingReturns.remove(nodeId) == null) return;
     }
     final NodeDragState? target = instanceOf(nodeId);
-    if (target == null) return;
+    if (target == null) {
+      // A node with a transform gesture instead: reset brings it back to
+      // its rest pose.
+      if (command == DragCommand.reset) {
+        await NodeTransformGesture.reset(nodeId);
+      }
+      return;
+    }
     switch (command) {
       case DragCommand.fling:
         await target.fling(direction);

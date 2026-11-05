@@ -215,6 +215,20 @@ void main() {
       expect(results['end']!.last['gesture'], 'variable');
     });
 
+    testWidgets('a Control Drag reset springs a transform back to rest and '
+        'writes its variables', (tester) async {
+      final List<BaseNode> nodes = photo();
+      await pump(tester, nodes, variables: pose);
+      await pinch(tester, const Offset(200, 200), 30, 60);
+      await tester.pumpAndSettle();
+      expect(valueOf('zoom'), closeTo(2, 0.02));
+      await NodeDrag.control('photo', DragCommand.reset, DragDirection.right);
+      await tester.pumpAndSettle();
+      expect(poseOf(tester).scale, closeTo(1, 0.001));
+      expect(valueOf('zoom'), 1);
+      expect(valueOf('panX'), 0);
+    });
+
     testWidgets('a node with only zoomable: true zooms its content', (
       tester,
     ) async {
@@ -257,11 +271,13 @@ void main() {
         board(['a', 'b']),
         box('a', NodeBox(20, 20, 100, 100))
           ..transformGesture = const TransformGestureModel(
+            bounds: GestureBounds.none,
             doubleTapScale: 0,
             handles: TransformHandlesModel(selectionVariable: 'selected'),
           ),
         box('b', NodeBox(220, 220, 100, 100))
           ..transformGesture = const TransformGestureModel(
+            bounds: GestureBounds.none,
             doubleTapScale: 0,
             handles: TransformHandlesModel(selectionVariable: 'selected'),
           ),

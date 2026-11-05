@@ -1068,6 +1068,7 @@ abstract class WidgetNodeTransformerManager
       }
 
       return NodeTransformGesture(
+        nodeId: node.id,
         model: model,
         given: given,
         enabled: enabled,
