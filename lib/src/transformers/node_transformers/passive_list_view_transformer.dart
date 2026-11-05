@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../../../codelessly_sdk.dart';
 import '../../ui/cloud_query_builder.dart';
 import '../../ui/draggable_scroll_configuration.dart';
+import '../utils/list_item_extent.dart';
 
 class PassiveListViewTransformer extends NodeWidgetTransformer<ListViewNode> {
   PassiveListViewTransformer(super.getNode, super.manager);
@@ -571,7 +572,19 @@ class PassiveListViewWidget extends StatelessWidget {
                   scrollDirection: node.scrollDirection.flutterAxis,
                   cacheExtent: node.properties.cacheExtent,
                   reverse: node.reverse,
-                  itemExtent: node.properties.itemExtent,
+                  // A "Show more" button is not as long as an item.
+                  itemExtent: items.hasButton
+                      ? node.properties.itemExtent
+                      : listItemExtent(
+                          context,
+                          node,
+                          item,
+                          layoutChanges: listItemOverlap(node) > 0,
+                        ),
+                  separatorExtent: math.max(
+                    0,
+                    node.properties.separatorSpacing,
+                  ),
                   clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
                   separatedBuilder: node.properties.hasSeparator
                       ? (context, index) => ListViewItemSeparator(
@@ -647,13 +660,18 @@ class PassiveListViewWidget extends StatelessWidget {
     final ids = data
         ?.map((value) => value is Map ? value['id'] : null)
         .toList();
+    // How often each id occurs, counted once per build: a row is keyed by
+    // its id only when no other row shares it.
+    final Map<Object?, int> idCounts = <Object?, int>{};
+    if (ids != null) {
+      for (final Object? id in ids) {
+        idCounts[id] = (idCounts[id] ?? 0) + 1;
+      }
+    }
     Object itemKey(int index) {
       if (keyed != null && index < (itemCount ?? 0)) return keyed.keyOf(index);
       final id = ids?.elementAtOrNull(index);
-      return id != null &&
-              ids!.where((candidate) => candidate == id).length == 1
-          ? ('id', id)
-          : ('index', index);
+      return id != null && idCounts[id] == 1 ? ('id', id) : ('index', index);
     }
 
     Widget dataItemBuilder(BuildContext context, int index) =>
@@ -739,7 +757,13 @@ class PassiveListViewWidget extends StatelessWidget {
       scrollDirection: node.scrollDirection.flutterAxis,
       cacheExtent: node.properties.cacheExtent,
       reverse: node.reverse,
-      itemExtent: node.properties.itemExtent,
+      itemExtent: listItemExtent(
+        context,
+        node,
+        item,
+        layoutChanges: target != null || listItemOverlap(node) > 0,
+      ),
+      separatorExtent: math.max(0, node.properties.separatorSpacing),
       clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
       separatedBuilder:
           (node.properties.itemCount != null || data != null) &&
@@ -1118,6 +1142,11 @@ class ListViewBuilder extends StatelessWidget {
   final bool reverse;
   final bool primary;
   final double? itemExtent;
+
+  /// How long each separator is along the scroll axis. With [itemExtent]
+  /// set, items and separators then all have known extents, so the list
+  /// still lays out any offset without building what comes before it.
+  final double separatorExtent;
   final Clip clipBehavior;
   final NullableIndexedWidgetBuilder? itemBuilder;
   final IndexedWidgetBuilder? separatedBuilder;
@@ -1135,6 +1164,7 @@ class ListViewBuilder extends StatelessWidget {
     this.physics,
     this.cacheExtent,
     this.itemExtent,
+    this.separatorExtent = 0,
     this.itemBuilder,
     this.separatedBuilder,
     this.primary = false,
@@ -1145,6 +1175,30 @@ class ListViewBuilder extends StatelessWidget {
     return DraggableScrollConfiguration(
       child: Builder(
         builder: (context) {
+          if (separatedBuilder != null && itemExtent != null) {
+            // Items and separators interleave: even children are items.
+            final int? count = itemCount;
+            final double extent = itemExtent!;
+            return ListView.builder(
+              primary: primary,
+              shrinkWrap: shrinkWrap,
+              itemCount: count == null ? null : math.max(0, count * 2 - 1),
+              padding: padding,
+              physics: physics,
+              scrollDirection: scrollDirection,
+              scrollCacheExtent: cacheExtent == null
+                  ? null
+                  : ScrollCacheExtent.pixels(cacheExtent!),
+              reverse: reverse,
+              clipBehavior: clipBehavior,
+              itemExtentBuilder: (index, _) =>
+                  index.isEven ? extent : separatorExtent,
+              itemBuilder: (context, index) => index.isEven
+                  ? itemBuilder!(context, index ~/ 2)
+                  : separatedBuilder!(context, index ~/ 2),
+              keyboardDismissBehavior: keyboardDismissBehavior,
+            );
+          }
           if (separatedBuilder != null) {
             return ListView.separated(
               primary: primary,
