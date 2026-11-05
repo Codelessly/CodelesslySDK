@@ -302,6 +302,9 @@ abstract class WidgetNodeTransformerManager
     bool animate = true,
   }) {
     MotionModel? motion = node.motion;
+    // Values bound to a number: they still apply when a bound loop is
+    // switched off (a frozen loop shows the bound pose, not rest).
+    final Map<String, double> bound = {};
     for (final String property in MotionModel.properties) {
       final String key = MotionModel.variableKey(property);
       final String? raw = node.variables[key];
@@ -321,6 +324,7 @@ abstract class WidgetNodeTransformerManager
         _ => null,
       };
       if (number == null || !number.isFinite) continue;
+      if (raw.contains(r'${')) bound[property] = number;
       motion = (motion ?? MotionModel.none).withValue(property, number);
     }
     final String pathKey = MotionModel.variableKey(MotionModel.pathProperty);
@@ -403,8 +407,14 @@ abstract class WidgetNodeTransformerManager
       if (loop == MotionLoop.none) {
         // A loop's values are where it swings to; switched off, the node
         // eases back to rest (or to its values, when enterFrom gives the
-        // loop's start).
-        motion = base.loopOff;
+        // loop's start), except values bound by formulas, which hold: a
+        // plane frozen on its looping path at `pathProgress: ${= freeze ?
+        // 0.36 : 1}` stays at 0.36.
+        MotionModel off = base.loopOff;
+        for (final MapEntry<String, double> entry in bound.entries) {
+          off = off.withValue(entry.key, entry.value);
+        }
+        motion = off;
       } else if (loop != null) {
         motion = base.copyWith(loop: loop);
       }
