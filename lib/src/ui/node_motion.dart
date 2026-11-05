@@ -539,11 +539,29 @@ class _NodeMotionState extends State<_NodeMotionBody>
           time,
         ) ??
         _from.valueOf(p) + (_to.valueOf(p) - _from.valueOf(p)) * t;
+    // MotionModel.arc: a change of position follows a quadratic curve, its
+    // middle `arc` of the distance off the straight line (to the right of
+    // the direction of travel on screen). On the curve the node is 2t(1-t)
+    // of the way out to that point: (-dy, dx) * arc * 2t(1-t).
+    final double bend = _to.arc == 0 ? 0 : _to.arc * 2 * t * (1 - t);
+    (double, double) bent(String x, String y) {
+      final double bx = lerp(x), by = lerp(y);
+      if (bend == 0 ||
+          _to.keyframes.any((k) => k.valueOf(x) != null || k.valueOf(y) != null)) {
+        return (bx, by);
+      }
+      final double dx = _to.valueOf(x) - _from.valueOf(x);
+      final double dy = _to.valueOf(y) - _from.valueOf(y);
+      return (bx - dy * bend, by + dx * bend);
+    }
+
+    final (double tx, double ty) = bent('translateX', 'translateY');
+    final (double sx, double sy) = bent('shiftX', 'shiftY');
     return _to.copyWith(
-      translateX: lerp('translateX'),
-      translateY: lerp('translateY'),
-      shiftX: lerp('shiftX'),
-      shiftY: lerp('shiftY'),
+      translateX: tx,
+      translateY: ty,
+      shiftX: sx,
+      shiftY: sy,
       scale: lerp('scale'),
       scaleX: lerp('scaleX'),
       scaleY: lerp('scaleY'),
