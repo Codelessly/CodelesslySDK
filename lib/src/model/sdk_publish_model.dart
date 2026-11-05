@@ -382,6 +382,27 @@ class SDKPublishModel extends PrivacyBase {
   /// Converts this instance to a JSON map.
   Map<String, dynamic> toFullJson() => _$SDKPublishModelToJson(this);
 
+  /// A copy with [identity] as its [appIdentity].
+  SDKPublishModel withAppIdentity(AppIdentity? identity) =>
+      SDKPublishModel.private(
+        projectId: projectId,
+        layoutIDMap: layoutIDMap,
+        pages: pages,
+        updates: updates,
+        fonts: fonts.dataMap,
+        layouts: layouts.dataMap,
+        apis: apis,
+        variables: variables.dataMap,
+        conditions: conditions.dataMap,
+        entryLayoutId: entryLayoutId,
+        entryPageId: entryPageId,
+        entryCanvasId: entryCanvasId,
+        lastUpdated: lastUpdated,
+        disabledLayouts: disabledLayouts,
+        appIdentity: identity,
+        privacy: this,
+      );
+
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishModel copyWith({
     String? projectId,
@@ -398,7 +419,6 @@ class SDKPublishModel extends PrivacyBase {
     String? entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
-    AppIdentity? appIdentity,
 
     // Privacy
     PrivacyBase? privacy,
@@ -418,7 +438,9 @@ class SDKPublishModel extends PrivacyBase {
       entryCanvasId: entryCanvasId ?? this.entryCanvasId,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       disabledLayouts: disabledLayouts ?? this.disabledLayouts,
-      appIdentity: appIdentity ?? this.appIdentity,
+      // Not a copyWith parameter: subclasses override copyWith, and a new
+      // parameter would break them. Set it with withAppIdentity.
+      appIdentity: appIdentity,
 
       // Privacy
       privacy: privacy ?? this,
