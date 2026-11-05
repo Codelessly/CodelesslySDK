@@ -255,10 +255,12 @@ const String scriptDriver = r'''
       }
     }
     // Everything before the source is on its first line, so its line
-    // numbers are the script's own.
+    // numbers are the script's own. The source is in a block of its own,
+    // so its declarations shadow the host names (a script may declare its
+    // own `nodes` or `app`) instead of clashing with them.
     const head = '(async function __script(vars, nodes, app, console, fmt, script, params' +
-      (paramNames.length ? ', ' + paramNames.join(', ') : '') + ') {"use strict"; ';
-    const tail = '\n;return typeof main === "function" ? main(' + paramNames.join(', ') + ') : undefined;\n})';
+      (paramNames.length ? ', ' + paramNames.join(', ') : '') + ') {"use strict"; {';
+    const tail = '\n;return typeof main === "function" ? main(' + paramNames.join(', ') + ') : undefined;\n}})';
     return { fn: indirectEval(head + source + tail + '\n//# sourceURL=script.js'), headLength: head.length };
   }
 

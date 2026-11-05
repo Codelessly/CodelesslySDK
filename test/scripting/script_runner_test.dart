@@ -618,6 +618,15 @@ void main() {
       );
     });
 
+    test('a script may declare names the host uses', () async {
+      expect(
+        await run(
+          'let nodes = 3; const app = 4; function fmt() { return 5 } return nodes + app + fmt()',
+        ),
+        hasValue(12),
+      );
+    });
+
     test('reserved parameter names are rejected', () async {
       expect(await run('return 1', params: ['vars']), hasError('SyntaxError'));
     });
