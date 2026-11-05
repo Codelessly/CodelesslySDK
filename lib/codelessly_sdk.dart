@@ -1,6 +1,7 @@
 library;
 
 export 'src/auth/auth_manager.dart';
+export 'src/auth/sign_in_retry.dart';
 export 'src/cache/cache_manager.dart';
 export 'src/cache/codelessly_cache_manager.dart';
 export 'src/codelessly.dart';
