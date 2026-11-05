@@ -290,11 +290,19 @@ void main() {
         find.descendant(
           of: drag,
           matching: find.byWidgetPredicate(
-            (w) => w is Transform && w.child is DragScope,
+            // NodeDrag's own transform: the drag's listener and detector
+            // sit inside it, so the card is grabbed where it is drawn.
+            (w) =>
+                w is Transform &&
+                w.child is Listener &&
+                (w.child! as Listener).child is GestureDetector,
           ),
         ),
       );
-      return transforms.firstOrNull as Transform?;
+      final Transform? found = transforms.firstOrNull as Transform?;
+      // At rest the transform is the identity: the card isn't moved.
+      if (found == null || found.transform.isIdentity()) return null;
+      return found;
     }
 
     double deckDrag(CodelesslyContext context) =>

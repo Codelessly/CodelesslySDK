@@ -24,6 +24,7 @@ const Set<String> predefinedVariableNames = {
   'hold',
   'drag',
   'track',
+  'transform',
   'speech',
   'initial',
 };
@@ -77,6 +78,7 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'hold', type: VariableType.decimal),
   PredefinedVariableData(name: 'drag', type: VariableType.map),
   PredefinedVariableData(name: 'track', type: VariableType.map),
+  PredefinedVariableData(name: 'transform', type: VariableType.map),
   PredefinedVariableData(name: 'speech', type: VariableType.map),
   PredefinedVariableData(name: 'initial', type: VariableType.map),
 };

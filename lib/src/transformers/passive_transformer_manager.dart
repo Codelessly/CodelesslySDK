@@ -362,16 +362,14 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   }
 
   /// Wraps [widget] in a tooltip showing [node]'s tooltip text (its data
-  /// substituted) and, when [node] is zoomable, in a viewer that pinches,
-  /// scrolls and double-taps to zoom.
+  /// substituted).
   Widget applyTooltipAndZoom(
     BuildContext context,
     BaseNode node,
     Widget widget,
   ) {
-    if (node.zoomable) {
-      widget = ZoomableBox(child: widget);
-    }
+    // A zoomable node zooms through its transform gesture
+    // ([BaseNode.effectiveTransformGesture]; see wrapWithTransformGesture).
     if (node.tooltip.trim().isNotEmpty) {
       final String message = PropertyValueDelegate.substituteVariables(
         node.tooltip,
