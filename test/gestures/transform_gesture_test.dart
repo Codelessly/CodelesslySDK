@@ -222,6 +222,20 @@ void main() {
     expect(poseOf(tester).x, closeTo(-100, 0.1));
   });
 
+  testWidgets('a given pose outside cover bounds is moved inside on layout', (
+    tester,
+  ) async {
+    // A 200 box in its own viewport at 2×: x may go -100..100.
+    await pump(
+      tester,
+      const TransformGestureModel(target: TransformTarget.content),
+      given: const {'scale': 2, 'x': 300},
+    );
+    await tester.pump();
+    expect(poseOf(tester).x, closeTo(100, 0.01));
+    expect(poses.last.x, closeTo(100, 0.01));
+  });
+
   testWidgets('a release flings on by friction and slows to a stop', (
     tester,
   ) async {

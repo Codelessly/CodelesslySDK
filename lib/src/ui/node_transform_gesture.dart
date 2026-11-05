@@ -245,6 +245,7 @@ class NodeTransformGesture extends StatefulWidget {
     super.key,
     required this.model,
     required this.child,
+    this.nodeId = '',
     this.given = const {},
     this.enabled = true,
     this.selected = true,
@@ -257,6 +258,20 @@ class NodeTransformGesture extends StatefulWidget {
 
   /// What the gestures do.
   final TransformGestureModel model;
+
+  /// The node this belongs to, so [reset] can find it; empty for none.
+  final String nodeId;
+
+  static final Map<String, Set<NodeTransformGestureState>> _instances = {};
+
+  /// Springs every instance of [nodeId] back to its rest pose (no offset,
+  /// scale 1, no rotation or stretch), writing the bound variables: what a
+  /// Control Drag action's reset does to a node with a transform gesture.
+  static Future<void> reset(String nodeId) async {
+    for (final NodeTransformGestureState state in [...?_instances[nodeId]]) {
+      if (state.mounted) state.reset();
+    }
+  }
 
   /// The values of the pose given from outside (bound variables or data),
   /// by [TransformPose.keys] name; the others are the node's own. A change
@@ -349,9 +364,25 @@ class NodeTransformGestureState extends State<NodeTransformGesture>
   /// Whether a gesture or settle is running.
   bool get active => _gestureActive || _ticker.isActive;
 
+  /// Springs back to the rest pose: no offset, scale 1 (or the minimum),
+  /// no rotation or stretch.
+  void reset() {
+    _gesture = 'settle';
+    _lastVelocity = Offset.zero;
+    final TransformPose rest = TransformPose(
+      scale: 1.clamp(_minScale, _maxScale).toDouble(),
+    );
+    _written = rest;
+    widget.onPose?.call(rest);
+    _springTo(_clamped(rest));
+  }
+
   @override
   void initState() {
     super.initState();
+    if (widget.nodeId.isNotEmpty) {
+      (NodeTransformGesture._instances[widget.nodeId] ??= {}).add(this);
+    }
     _pose = _with(TransformPose.identity, widget.given);
     _written = _pose;
   }
@@ -359,6 +390,12 @@ class NodeTransformGestureState extends State<NodeTransformGesture>
   @override
   void didUpdateWidget(NodeTransformGesture oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.nodeId != widget.nodeId) {
+      NodeTransformGesture._instances[oldWidget.nodeId]?.remove(this);
+      if (widget.nodeId.isNotEmpty) {
+        (NodeTransformGesture._instances[widget.nodeId] ??= {}).add(this);
+      }
+    }
     final Map<String, double> given = widget.given;
     if (given.isEmpty || _gestureActive) return;
     // Ours coming back through the variables: nothing to do.
@@ -383,6 +420,7 @@ class NodeTransformGestureState extends State<NodeTransformGesture>
 
   @override
   void dispose() {
+    NodeTransformGesture._instances[widget.nodeId]?.remove(this);
     _wheelEnd?.cancel();
     _ticker.dispose();
     _scale.dispose();
@@ -503,6 +541,18 @@ class NodeTransformGestureState extends State<NodeTransformGesture>
       scale: from.scale * factor,
       rotation: from.rotation + turn,
     );
+  }
+
+  /// Moves a pose given from outside (a variable, data, the first frame)
+  /// inside the bounds once the node and its viewport are laid out: a map
+  /// whose saved offset would leave a gap on a wider screen. Writes the
+  /// bound variables back.
+  void _keepInBounds() {
+    if (_model.bounds == GestureBounds.none || active || _root == null) return;
+    final TransformPose clamped = _clamped(_pose);
+    if (clamped.sameAs(_pose)) return;
+    _gesture = 'settle';
+    _set(clamped);
   }
 
   // ---- Reporting ----------------------------------------------------------
@@ -1118,11 +1168,13 @@ class NodeTransformGestureState extends State<NodeTransformGesture>
       // Handles are placed by the node's size, known after layout.
       final bool first = _builtSize == null || size.isEmpty;
       _builtSize = size;
-      if (_model.handles != null && (first || size != Size.zero)) {
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      }
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (_model.handles != null && (first || size != Size.zero)) {
+          setState(() {});
+        }
+        _keepInBounds();
+      });
     }
     Widget listen(Widget child) => Listener(
       behavior: HitTestBehavior.translucent,
