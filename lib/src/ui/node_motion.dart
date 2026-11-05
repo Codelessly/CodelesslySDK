@@ -388,7 +388,8 @@ class _NodeMotionState extends State<_NodeMotionBody>
     _curve = _to.curve;
     _transition.duration = Duration(milliseconds: widget.motion.durationMs);
     void start() {
-      if (!mounted) return;
+      // A paused loop waits at its start until it is resumed.
+      if (!mounted || widget.motion.paused) return;
       final bool reverse = widget.motion.loop == MotionLoop.reverse;
       final int repeat = widget.motion.repeat;
       if (repeat <= 0) {
@@ -440,7 +441,16 @@ class _NodeMotionState extends State<_NodeMotionBody>
         _animates &&
         next.hasKeyframes &&
         next.pulseKey != oldWidget.motion.pulseKey;
-    if (_loops && replay) {
+    if (_loops && !replay && next.paused != oldWidget.motion.paused) {
+      // Freezes the loop where it is, or carries on from there.
+      _to = next;
+      if (next.paused) {
+        _delay?.cancel();
+        _transition.stop();
+      } else if (_delay?.isActive != true) {
+        _transition.repeat(reverse: next.loop == MotionLoop.reverse);
+      }
+    } else if (_loops && replay) {
       _startLoop();
     } else if (replay && motionTransitionMs(next) > 0) {
       // Plays the entrance again, wherever the node was.
@@ -459,7 +469,9 @@ class _NodeMotionState extends State<_NodeMotionBody>
           next.loop != old.loop ||
           next.repeat != old.repeat ||
           next.durationMs != old.durationMs ||
-          !_transition.isAnimating && _delay?.isActive != true) {
+          !next.paused &&
+              !_transition.isAnimating &&
+              _delay?.isActive != true) {
         _startLoop();
       } else {
         _to = next;
@@ -519,7 +531,10 @@ class _NodeMotionState extends State<_NodeMotionBody>
 
   MotionModel get _current {
     final bool spring = _spring.isAnimating || _spring.value != 1;
-    if (!_moving && _transition.value == 0 && !spring) return _to;
+    if (!_moving && _transition.value == 0 && !spring) {
+      // A loop paused before it started sits at its start.
+      return _loops && widget.motion.paused ? _from : _to;
+    }
     // A spring runs on real physics (and may overshoot past 1); a curve on
     // the transition's time.
     final double time = spring
@@ -573,7 +588,8 @@ class _NodeMotionState extends State<_NodeMotionBody>
     final double dt = (elapsed - _lastTick).inMicroseconds / 1e6;
     _lastTick = elapsed;
     if (dt <= 0 || dt > 0.25) return;
-    final double target = widget.motion.spin;
+    // A paused motion's spin winds down and stops.
+    final double target = widget.motion.paused ? 0 : widget.motion.spin;
     final int ramp = widget.motion.spinRampMs;
     if (ramp <= 0) {
       _speed = target;
@@ -584,7 +600,7 @@ class _NodeMotionState extends State<_NodeMotionBody>
       if ((target - _speed).abs() < 0.002) _speed = target;
     }
     _turns = (_turns + _speed * dt) % 1;
-    if (_speed == 0 && target == 0) {
+    if (_speed == 0 && widget.motion.spin == 0) {
       _spinTicker?.dispose();
       _spinTicker = null;
     }
@@ -613,7 +629,8 @@ class _NodeMotionState extends State<_NodeMotionBody>
         ? _from
         : _rested && _loops
         ? _to.atRest
-        : (_moving ? _current : _to);
+        // A paused loop holds wherever it stopped.
+        : (_moving || _loops && widget.motion.paused ? _current : _to);
     final Widget drawn = _draw(m);
     if (still || !widget.animate || !widget.motion.revealOnScroll) {
       return drawn;
