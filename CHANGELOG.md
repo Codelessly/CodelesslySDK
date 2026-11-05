@@ -1,3 +1,10 @@
+## 9.1.9
+
+Requires codelessly_api 9.0.3.
+
+- Depends on codelessly_api ^9.0.3, so apps get the API's latest fixes (icon
+  click reactions; padding stored on a text node pads nothing).
+
 ## 9.1.8
 
 Requires codelessly_api 9.0.1.
