@@ -1,5 +1,8 @@
+import 'dart:ui' show PathMetric, Tangent;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import '../transformers/utils/dash_path.dart';
 import 'extensions.dart';
@@ -264,4 +267,131 @@ class SvgPathClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(SvgPathClipper oldClipper) => oldClipper.data != data;
+}
+
+/// Takes pointer events only on its [path]: inside it when [filled], and
+/// within half the [strokeWidth] plus [slop] of its outline when
+/// [stroked]. Everywhere else in its box it lets them through to whatever
+/// is beneath.
+///
+/// A rectangle drawn from SVG path data ([RectangleNode.path]) still has a
+/// rectangular box, often far larger than its shape: every run on a trail
+/// map is a full-map box with one line in it. Without this, the topmost
+/// box took every tap on the map, so no line under it could be tapped.
+class SvgPathHitRegion extends SingleChildRenderObjectWidget {
+  /// Creates a [SvgPathHitRegion].
+  const SvgPathHitRegion({
+    super.key,
+    required this.path,
+    required this.filled,
+    required this.stroked,
+    this.strokeWidth = 0,
+    this.slop = kSvgPathHitSlop,
+    super.child,
+  });
+
+  /// The shape, in the box's own coordinates.
+  final Path path;
+
+  /// Whether taps inside the shape count.
+  final bool filled;
+
+  /// Whether taps on the outline count.
+  final bool stroked;
+
+  /// The outline's width.
+  final double strokeWidth;
+
+  /// How far past the outline's edge a tap still counts.
+  final double slop;
+
+  @override
+  RenderSvgPathHitRegion createRenderObject(BuildContext context) =>
+      RenderSvgPathHitRegion(
+        path: path,
+        filled: filled,
+        stroked: stroked,
+        strokeWidth: strokeWidth,
+        slop: slop,
+      );
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderSvgPathHitRegion renderObject,
+  ) {
+    renderObject
+      ..path = path
+      ..filled = filled
+      ..stroked = stroked
+      ..strokeWidth = strokeWidth
+      ..slop = slop;
+  }
+}
+
+/// How far past a path's stroke a tap still hits it, in logical pixels: a
+/// thin line is hard to hit exactly with a finger.
+const double kSvgPathHitSlop = 8;
+
+/// The render object of [SvgPathHitRegion].
+class RenderSvgPathHitRegion extends RenderProxyBox {
+  /// Creates a [RenderSvgPathHitRegion].
+  RenderSvgPathHitRegion({
+    required Path path,
+    required this.filled,
+    required this.stroked,
+    required this.strokeWidth,
+    required this.slop,
+  }) : _path = path;
+
+  Path _path;
+  List<PathMetric>? _metrics;
+
+  /// The shape.
+  Path get path => _path;
+
+  set path(Path value) {
+    if (identical(value, _path)) return;
+    _path = value;
+    _metrics = null;
+  }
+
+  /// See [SvgPathHitRegion.filled].
+  bool filled;
+
+  /// See [SvgPathHitRegion.stroked].
+  bool stroked;
+
+  /// See [SvgPathHitRegion.strokeWidth].
+  double strokeWidth;
+
+  /// See [SvgPathHitRegion.slop].
+  double slop;
+
+  /// Whether [position] is on the shape.
+  bool hits(Offset position) {
+    if (filled && _path.contains(position)) return true;
+    if (!stroked) return false;
+    final double reach = strokeWidth / 2 + slop;
+    final double reach2 = reach * reach;
+    // Sample the outline every few pixels; close enough for a finger.
+    final double step = (reach / 2).clamp(1.0, 4.0);
+    for (final PathMetric metric in _metrics ??= _path
+        .computeMetrics()
+        .toList()) {
+      for (double d = 0; d <= metric.length; d += step) {
+        final Tangent? t = metric.getTangentForOffset(d);
+        if (t != null && (t.position - position).distanceSquared <= reach2) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (!hits(position)) return false;
+    return super.hitTest(result, position: position);
+  }
 }
