@@ -1258,8 +1258,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
     required ScopedValues scopedValues,
     required WidgetBuildSettings settings,
   }) {
+    // A set-value action's value wins; then a binding of the property in
+    // the node's variables (`hintText: ${= arrival ? 'Last port' : ...}`);
+    // then the decoration's own text.
     final String? value =
-        context.getNodeValue(node.id, property) ?? defaultValue;
+        context.getNodeValue(node.id, property) ??
+        node.variables[property] ??
+        defaultValue;
     if (value == null || value.isEmpty) return null;
     final newValue = PropertyValueDelegate.substituteVariables(
       value,
@@ -1289,7 +1294,9 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
     int? maxLines,
   }) {
     final String? value =
-        context.getNodeValue(node.id, property) ?? defaultValue;
+        context.getNodeValue(node.id, property) ??
+        node.variables[property] ??
+        defaultValue;
     if (value == null || value.isEmpty) return null;
     // A text that is only variables, like an error message from a formula,
     // shows nothing when they come out empty: an empty error text would
