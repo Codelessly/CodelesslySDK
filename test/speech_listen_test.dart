@@ -21,6 +21,7 @@ class FakeRecognizer implements SpeechRecognizer {
 }
 
 void main() {
+  scoreNullTests();
   group('pronunciationScore', () {
     test('exact, case and punctuation free', () {
       expect(pronunciationScore('Although it rained, we went out.', 'although it rained we went out'), 100);
@@ -78,5 +79,14 @@ void main() {
     ));
     FunctionsRepository.callFunction(inner, CallFunctionAction(name: 'listen'));
     expect(called, isTrue);
+  });
+}
+
+void scoreNullTests() {
+  testWidgets('score is null until something is heard', (tester) async {
+    Speech.recognizer = FakeRecognizer(const RecognitionResult('', error: 'no-speech'));
+    await tester.runAsync(() => Speech.instance.listen(expected: 'despite'));
+    expect(Speech.instance.value['score'], isNull);
+    expect(Speech.instance.value['error'], 'no-speech');
   });
 }

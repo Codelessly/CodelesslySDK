@@ -9,7 +9,7 @@ import 'speech_engine_stub.dart'
 /// `speaking`, `text` (what is being said, '' when quiet), `available`
 /// (whether this device has a voice), `canListen`, `listening`, `heard`
 /// (the last transcript), `score` (0-100, how close [heard] was to what was
-/// expected), `confidence` (0-1) and `error` (why nothing was heard).
+/// expected; null until something was heard and scored), `confidence` (0-1) and `error` (why nothing was heard).
 class Speech extends ValueNotifier<Map<String, dynamic>> {
   Speech._()
     : super({
@@ -19,7 +19,9 @@ class Speech extends ValueNotifier<Map<String, dynamic>> {
         'canListen': recognizer.available,
         'listening': false,
         'heard': '',
-        'score': 0,
+        // Null until a phrase has been scored, so a screen can tell "not
+        // tried yet" from a low score.
+        'score': null,
         'confidence': 0.0,
         'error': '',
       });
@@ -63,7 +65,7 @@ class Speech extends ValueNotifier<Map<String, dynamic>> {
       'canListen': recognizer.available,
       'listening': true,
       'heard': '',
-      'score': 0,
+      'score': null,
       'confidence': 0.0,
       'error': '',
     };
@@ -73,7 +75,7 @@ class Speech extends ValueNotifier<Map<String, dynamic>> {
       'listening': false,
       'heard': result.transcript,
       'confidence': result.confidence,
-      'score': expected.trim().isEmpty ? 0 : pronunciationScore(expected, result.transcript),
+      'score': expected.trim().isEmpty || result.transcript.isEmpty ? null : pronunciationScore(expected, result.transcript),
       'error': result.error ?? '',
     };
     return value;
