@@ -18,11 +18,7 @@ class ScreenIdentity {
   /// The layout shown, when known.
   final String? layoutId;
 
-  const ScreenIdentity({
-    required this.title,
-    this.description,
-    this.layoutId,
-  });
+  const ScreenIdentity({required this.title, this.description, this.layoutId});
 
   @override
   bool operator ==(Object other) =>
@@ -63,6 +59,12 @@ abstract final class CodelesslyAppIdentity {
     final String path = Uri.parse(location).path;
     final List<String> segments = CanvasLocation.segmentsOf(path);
     if (segments.isEmpty) return model.resolveLayoutId(model.entryLayoutId);
+    // A screen without a URL path is at /<its id>: that wins over a
+    // catch-all (*path) screen, which matches any location.
+    if (segments.length == 1) {
+      final String? byId = model.resolveLayoutId(segments.first);
+      if (byId != null) return byId;
+    }
     final CanvasLocationMatch? match = CanvasLocation.match(model, location);
     if (match != null) return match.layoutId;
     return model.resolveLayoutId(segments.first);
@@ -118,8 +120,7 @@ abstract final class CodelesslyAppIdentity {
       );
     }
     final PageIdentity? page = pageOf(model, identity, layoutId);
-    final bool isEntry =
-        layoutId == model.resolveLayoutId(model.entryLayoutId);
+    final bool isEntry = layoutId == model.resolveLayoutId(model.entryLayoutId);
     final String? pageTitle =
         page?.title ??
         (isEntry ? null : page?.name ?? screenNameOf(model, layoutId));
@@ -212,9 +213,7 @@ class CodelesslyAppIdentityUpdater {
     if (applyTitle) {
       CodelesslyAppIdentity.applyTitle(
         next.title,
-        color: CodelesslyAppIdentity.parseColor(
-          model.appIdentity?.themeColor,
-        ),
+        color: CodelesslyAppIdentity.parseColor(model.appIdentity?.themeColor),
       );
     }
     onChanged?.call(next);

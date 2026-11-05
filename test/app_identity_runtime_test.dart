@@ -43,6 +43,11 @@ SDKPublishModel model({AppIdentity? identity}) => SDKPublishModel(
         canvas('cPlans', 'Plans', path: 'plans'),
       ),
       'about': layout('about', 'pageAbout', canvas('cAbout', 'About us')),
+      'notFound': layout(
+        'notFound',
+        'pageNotFound',
+        canvas('cNotFound', 'Not found', path: '*path'),
+      ),
     },
   )),
   entryLayoutId: 'home',
@@ -70,9 +75,9 @@ void main() {
   group('SDKPublishModel.appIdentity', () {
     test('round-trips through the publish JSON', () {
       final SDKPublishModel published = model(identity: identity);
-      final Map<String, dynamic> json =
-          jsonDecode(jsonEncode(published.toFullJson()))
-              as Map<String, dynamic>;
+      final Map<String, dynamic> json = jsonDecode(
+        jsonEncode(published.toFullJson()),
+      ) as Map<String, dynamic>;
       expect(json['appIdentity']['name'], 'Wireless');
       final SDKPublishModel read = SDKPublishModel.fromJson(json);
       expect(read.appIdentity, identity);
@@ -103,6 +108,9 @@ void main() {
       expect(CodelesslyAppIdentity.layoutIdAt(m, '/'), 'home');
       expect(CodelesslyAppIdentity.layoutIdAt(m, '/plans'), 'plans');
       expect(CodelesslyAppIdentity.layoutIdAt(m, '/about?x=1'), 'about');
+      // A screen's id wins over the catch-all; other locations reach it.
+      expect(CodelesslyAppIdentity.layoutIdAt(m, '/cAbout'), 'about');
+      expect(CodelesslyAppIdentity.layoutIdAt(m, '/nope/deep'), 'notFound');
     });
 
     test('titles screens from overrides, screen names, and the app name', () {
@@ -153,10 +161,7 @@ void main() {
         CodelesslyAppIdentity.overlayStyleOf(identity),
         SystemUiOverlayStyle.light,
       );
-      expect(
-        CodelesslyAppIdentity.overlayStyleOf(const AppIdentity()),
-        isNull,
-      );
+      expect(CodelesslyAppIdentity.overlayStyleOf(const AppIdentity()), isNull);
     });
 
     test('applyTitle sets the application switcher description', () async {
