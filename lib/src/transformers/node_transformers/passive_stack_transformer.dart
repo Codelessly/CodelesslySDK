@@ -163,6 +163,23 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     return FreeformPlacement(horizontal: horizontal, vertical: vertical);
   }
 
+  /// The extent [parent] lays its children out in at design size: its
+  /// inner box, or the design size of its content when it scales that
+  /// content ([FrameNode.contentFit]). A scaled frame lays its children out
+  /// at [FrameNode.contentDesignSize] (see [buildWidgetForChildren]), so a
+  /// child's share of the free space must be measured there too: measured
+  /// in the frame's own (smaller) box, a 60 px child placed at x 300 of a
+  /// 1200 px design landed at 300 / 330 of the free space, x 1036.
+  static double _designExtent(BaseNode parent, {required bool horizontal}) {
+    if (parent is FrameNode && parent.contentFit != null) {
+      final SizeC design = parent.contentDesignSize;
+      return horizontal ? design.width : design.height;
+    }
+    return horizontal
+        ? parent.innerBoxLocal.width
+        : parent.innerBoxLocal.height;
+  }
+
   static FreeformAxisPlacement _axisPlacement(
     BaseNode node,
     BaseNode parent, {
@@ -190,9 +207,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
           extent: horizontal
               ? node.outerBoxLocal.width
               : node.outerBoxLocal.height,
-          parentExtent: horizontal
-              ? parent.innerBoxLocal.width
-              : parent.innerBoxLocal.height,
+          parentExtent: _designExtent(parent, horizontal: horizontal),
           fraction: fraction.toDouble(),
           anchor: ((horizontal ? alignment?.x : alignment?.y) ?? 0) / 2 + 0.5,
         );
@@ -201,9 +216,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     final double extent = horizontal
         ? node.outerBoxLocal.width
         : node.outerBoxLocal.height;
-    final double parentExtent = horizontal
-        ? parent.innerBoxLocal.width
-        : parent.innerBoxLocal.height;
+    final double parentExtent = _designExtent(parent, horizontal: horizontal);
     final SizeFit fit = horizontal ? node.horizontalFit : node.verticalFit;
     final bool expands =
         fit == SizeFit.expanded &&
