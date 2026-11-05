@@ -148,6 +148,47 @@ class FormulaEvaluator {
 
   static final Map<String, _Node?> _cache = {};
 
+  static Stopwatch? _budgetClock;
+  static int _budgetMicros = 0;
+  static bool _budgetExceeded = false;
+
+  /// Runs [run] with a time [budget] for the formulas it evaluates: once
+  /// the budget is spent, every further function call fails, so the
+  /// formula ends quickly with null instead of running on. [exceeded]
+  /// tells whether it ran out. A budget already running keeps its own
+  /// limit. Meant for previews that must not hold up the screen (a design
+  /// canvas evaluating a heavy computed variable); the running app has no
+  /// budget.
+  static ({T result, bool exceeded}) withinBudget<T>(
+    Duration budget,
+    T Function() run,
+  ) {
+    if (_budgetClock != null) {
+      final T result = run();
+      return (result: result, exceeded: _budgetExceeded);
+    }
+    _budgetClock = Stopwatch()..start();
+    _budgetMicros = budget.inMicroseconds;
+    _budgetExceeded = false;
+    try {
+      final T result = run();
+      return (result: result, exceeded: _budgetExceeded);
+    } finally {
+      _budgetClock = null;
+      _budgetExceeded = false;
+    }
+  }
+
+  /// Throws once the running budget ([withinBudget]) is spent.
+  static void _spend() {
+    final Stopwatch? clock = _budgetClock;
+    if (clock == null) return;
+    if (_budgetExceeded || clock.elapsedMicroseconds > _budgetMicros) {
+      _budgetExceeded = true;
+      throw const _BudgetExceeded();
+    }
+  }
+
   /// Evaluates [expression], resolving variable paths with [resolve].
   static Object? evaluate(String expression, FormulaPathResolver resolve) {
     final _Node? node = _parse(expression);
@@ -3058,6 +3099,12 @@ final Map<String, _Function> _functions = {
 // Syntax tree
 // ---------------------------------------------------------------------------
 
+/// Thrown when a formula's time budget is spent; see
+/// [FormulaEvaluator.withinBudget].
+class _BudgetExceeded implements Exception {
+  const _BudgetExceeded();
+}
+
 sealed class _Node {
   const _Node();
 
@@ -3086,6 +3133,7 @@ class _UserCall extends _Node {
 
   @override
   Object? eval(FormulaPathResolver resolve) {
+    FormulaEvaluator._spend();
     final Object? function = resolve(name);
     final List<Object?> values = [for (final arg in args) arg.eval(resolve)];
     if (function is FormulaFunction) return function.call(values);
@@ -3266,6 +3314,7 @@ class _Call extends _Node {
 
   @override
   Object? eval(FormulaPathResolver resolve) {
+    FormulaEvaluator._spend();
     // `if` only evaluates the branch it returns.
     if (name == 'if') {
       _Node? arg(int i) => i < args.length ? args[i] : null;
