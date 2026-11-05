@@ -34,7 +34,7 @@ void main() {
       rowColumnType: RowColumnType.row,
       horizontalFit: SizeFit.shrinkWrap,
       verticalFit: SizeFit.fixed,
-      padding: EdgeInsetsModel.symmetric(horizontal: 3.3),
+      padding: const EdgeInsetsModel.symmetric(horizontal: 3.3),
       strokes: [PaintModel.solid(id: 's', color: ColorRGB.fromHex('#000000'))],
       strokeWeight: 1.2,
       strokeAlign: StrokeAlignC.inside,
