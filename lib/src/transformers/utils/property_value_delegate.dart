@@ -318,7 +318,11 @@ class PropertyValueDelegate {
     try {
       // Cache only formulas whose inputs are immutable variables, not row,
       // parent, screen, or other predefined values that vary with scope.
-      final List<Object?>? inputs = _computedInputs(expression, scopedValues);
+      // Not formulas that call scripts: on the web a script's result
+      // arrives later (ScriptFormulaCalls keeps results itself).
+      final List<Object?>? inputs = FormulaEvaluator.callsScript(expression)
+          ? null
+          : _computedInputs(expression, scopedValues);
       final _ComputedResult? cached = _computedCache[variable.id];
       if (inputs != null &&
           cached != null &&
@@ -596,8 +600,10 @@ class PropertyValueDelegate {
   /// is written once and read everywhere. Null for other variables.
   static String? computedExpressionOf(VariableData variable) {
     if (!variable.isComputed) return null;
+    // A formula is stored bare (`a + b`) or wrapped (`\${= a + b}`).
     return variable.formula.trim().isNotEmpty
-        ? variable.formula
+        ? FormulaEvaluator.exactExpression(variable.formula.trim()) ??
+              variable.formula
         : FormulaEvaluator.exactExpression(variable.value);
   }
 
