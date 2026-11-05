@@ -518,6 +518,25 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         ? node.verticalFit
         : node.horizontalFit);
 
+    // A child that fills the cross axis of a stretching row/column that hugs
+    // that axis takes the thickness its siblings give it, as the editor
+    // solves it: it doesn't decide that thickness. Measured on its own it
+    // would take its design size there (an accent stripe drawn beside a
+    // two-line card kept every card two lines tall).
+    if (parent.crossAxisAlignment == CrossAxisAlignmentC.stretch &&
+        crossAxisFit == SizeFit.expanded &&
+        (mainAxis == AxisC.horizontal
+                ? parentRowColumn.verticalFit
+                : parentRowColumn.horizontalFit) ==
+            SizeFit.shrinkWrap) {
+      childWidget = HugCrossFollower(
+        crossAxis: mainAxis == AxisC.horizontal
+            ? Axis.vertical
+            : Axis.horizontal,
+        child: childWidget,
+      );
+    }
+
     // A parent that stretches its children across gives each one the full
     // cross axis, like the editor's solver, except a child that hugs on that
     // axis: the solver keeps its own size there and places it at the start.
@@ -874,6 +893,18 @@ class HugCross extends SingleChildRenderObjectWidget {
 
 /// The render object of [HugCross].
 class RenderHugCross extends RenderProxyBox {
+  /// Whether this is measuring its flex's natural thickness, during which a
+  /// [HugCrossFollower] child takes none of it.
+  bool get measuring => _measuring;
+  bool _measuring = false;
+
+  /// The followers that left themselves out of the last measure.
+  final List<RenderObject> _skipped = [];
+
+  /// Called by a [RenderHugCrossFollower] that took no thickness while
+  /// this measured.
+  void skipped(RenderObject follower) => _skipped.add(follower);
+
   @override
   void performLayout() {
     final RenderBox? box = child;
@@ -895,7 +926,23 @@ class RenderHugCross extends RenderProxyBox {
       // text direction for a column's cross axis.
       (_) => box.crossAxisAlignment = CrossAxisAlignment.center,
     );
+    // Children that only follow the thickness are left out of it; when all
+    // of them follow, there is nothing else to size it, so they count.
+    _skipped.clear();
+    _measuring = true;
     box.layout(loose, parentUsesSize: true);
+    _measuring = false;
+    if ((row ? box.size.height : box.size.width) == 0 && _skipped.isNotEmpty) {
+      // Same constraints as the pass before: the followers must be laid out
+      // again to report their own thickness this time.
+      invokeLayoutCallback<BoxConstraints>((_) {
+        for (final RenderObject follower in _skipped) {
+          follower.markNeedsLayout();
+        }
+      });
+      box.layout(loose, parentUsesSize: true);
+    }
+    _skipped.clear();
     final double natural = row ? box.size.height : box.size.width;
     final double cross = row
         ? constraints.constrainHeight(natural)
@@ -910,5 +957,78 @@ class RenderHugCross extends RenderProxyBox {
       parentUsesSize: true,
     );
     size = box.size;
+  }
+}
+
+/// Marks a child of a [HugCross] flex that fills its cross axis, so it
+/// takes the thickness its siblings give the flex instead of deciding it.
+///
+/// While the [HugCross] measures, this reports no extent across (its child
+/// is still laid out, at its own size); otherwise it is a plain proxy.
+class HugCrossFollower extends SingleChildRenderObjectWidget {
+  /// The flex's cross axis.
+  final Axis crossAxis;
+
+  /// Creates a [HugCrossFollower] for a flex whose cross axis is [crossAxis].
+  const HugCrossFollower({
+    super.key,
+    required this.crossAxis,
+    required Widget super.child,
+  });
+
+  @override
+  RenderHugCrossFollower createRenderObject(BuildContext context) =>
+      RenderHugCrossFollower(crossAxis);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderHugCrossFollower renderObject,
+  ) => renderObject.crossAxis = crossAxis;
+}
+
+/// The render object of [HugCrossFollower].
+class RenderHugCrossFollower extends RenderProxyBox {
+  /// Creates a follower across [crossAxis].
+  RenderHugCrossFollower(this._crossAxis);
+
+  /// The flex's cross axis.
+  Axis get crossAxis => _crossAxis;
+  Axis _crossAxis;
+  set crossAxis(Axis value) {
+    if (value == _crossAxis) return;
+    _crossAxis = value;
+    markNeedsLayout();
+  }
+
+  /// The [RenderHugCross] around the flex holding this, while it measures.
+  RenderHugCross? get _measuringHug {
+    RenderObject? node = parent;
+    // The flex holds this directly; HugCross holds the flex.
+    for (int i = 0; i < 3 && node != null; i++) {
+      if (node is RenderHugCross) return node.measuring ? node : null;
+      node = node.parent;
+    }
+    return null;
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox? box = child;
+    final bool unbounded = crossAxis == Axis.vertical
+        ? !constraints.hasBoundedHeight
+        : !constraints.hasBoundedWidth;
+    final RenderHugCross? hug = unbounded ? _measuringHug : null;
+    if (box == null || hug == null) {
+      super.performLayout();
+      return;
+    }
+    hug.skipped(this);
+    box.layout(constraints, parentUsesSize: true);
+    size = constraints.constrain(
+      crossAxis == Axis.vertical
+          ? Size(box.size.width, 0)
+          : Size(0, box.size.height),
+    );
   }
 }

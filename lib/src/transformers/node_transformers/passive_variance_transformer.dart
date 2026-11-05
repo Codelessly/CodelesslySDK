@@ -125,6 +125,28 @@ class PassiveVarianceWidget extends StatelessWidget {
     );
   }
 
+  /// The pins a responsive variant's [root] is placed by, or null when it is
+  /// placed by its alignment. Only a root in pin mode that is pinned to the
+  /// right or bottom edge is placed by its pins: a breakpoint root's start
+  /// pins are often its offset on the design canvas (negative, or the
+  /// variant's x there), so on their own they keep meaning top-start. A
+  /// negative start pin is dropped for the same reason.
+  @visibleForTesting
+  static EdgePinsModel? responsiveRootPins(BaseNode root) {
+    if (root.positioningMode != PositioningMode.pin) return null;
+    final EdgePinsModel pins = root.edgePins;
+    double? valid(double? pin) => pin != null && pin >= 0 ? pin : null;
+    final double? right = valid(pins.right);
+    final double? bottom = valid(pins.bottom);
+    if (right == null && bottom == null) return null;
+    return EdgePinsModel(
+      left: valid(pins.left),
+      top: valid(pins.top),
+      right: right,
+      bottom: bottom,
+    );
+  }
+
   Widget _buildChildren(BuildContext context, List<String> children) {
     if (children.isNotEmpty) {
       final childNode = getNode(children.first);
@@ -136,15 +158,43 @@ class PassiveVarianceWidget extends StatelessWidget {
       // difference. A root with an alignment (a centered card) is placed by
       // it.
       if (!settings.isPreview && node.isResponsive) {
-        return Align(
+        final Widget built = manager.buildWidgetFromNode(
+          childNode,
+          context,
+          settings: settings,
+        );
+        final Widget aligned = Align(
           alignment:
               childNode.alignment.flutterAlignment ??
               AlignmentDirectional.topStart,
-          child: manager.buildWidgetFromNode(
-            childNode,
-            context,
-            settings: settings,
+          child: built,
+        );
+        final EdgePinsModel? pins = responsiveRootPins(childNode);
+        if (pins == null) return aligned;
+        // A root pinned to the right or bottom edge (a menu above a bottom
+        // bar) keeps those distances to the edges of the space it is given.
+        return MeasurableLayoutBuilder(
+          fallbackSize: Size(
+            childNode.basicBoxLocal.width,
+            childNode.basicBoxLocal.height,
           ),
+          builder: (context, constraints) {
+            if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
+              return aligned;
+            }
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  left: pins.left,
+                  top: pins.top,
+                  right: pins.right,
+                  bottom: pins.bottom,
+                  child: built,
+                ),
+              ],
+            );
+          },
         );
       }
 
