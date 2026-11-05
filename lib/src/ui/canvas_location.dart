@@ -48,24 +48,58 @@ abstract final class CanvasLocation {
   static String catchAllName(String segment) =>
       segment.length > 1 ? segment.substring(1) : 'path';
 
+  /// Whether [segment] of a path pattern is an optional param: `:name?`,
+  /// which a location may leave out from the end, such as `sheet/:id?` for
+  /// both `sheet` (the board's sheet) and `sheet/doom`.
+  static bool isOptional(String segment) =>
+      segment.length > 2 && segment.startsWith(':') && segment.endsWith('?');
+
+  /// The param name of path pattern [segment]: `id` for `:id` and `:id?`.
+  static String paramName(String segment) => isOptional(segment)
+      ? segment.substring(1, segment.length - 1)
+      : segment.substring(1);
+
+  /// The patterns [pattern] stands for: one per number of its trailing
+  /// optional params given, without the `?`, longest first
+  /// (`sheet/:id?` is `sheet/:id` and `sheet`).
+  static List<String> expandOptional(String pattern) {
+    final List<String> segments = segmentsOf(pattern);
+    int required = segments.length;
+    while (required > 0 && isOptional(segments[required - 1])) {
+      required--;
+    }
+    return [
+      for (int n = segments.length; n >= required; n--)
+        [
+          for (final String segment in segments.take(n))
+            isOptional(segment) ? ':${paramName(segment)}' : segment,
+        ].join('/'),
+    ];
+  }
+
   /// The params [pattern] takes from [segments], or null when it does not
-  /// match them.
+  /// match them. Trailing optional params (`:id?`) may be left out.
   static Map<String, String>? matchPattern(
     List<String> pattern,
     List<String> segments,
   ) {
     final bool catchAll = pattern.isNotEmpty && isCatchAll(pattern.last);
+    int required = pattern.length;
+    while (!catchAll && required > 0 && isOptional(pattern[required - 1])) {
+      required--;
+    }
     if (catchAll
         ? segments.length < pattern.length
-        : pattern.length != segments.length) {
+        : segments.length < required || segments.length > pattern.length) {
       return null;
     }
     final Map<String, String> params = {};
     for (int i = 0; i < pattern.length; i++) {
+      if (!catchAll && i >= segments.length) break; // optional, left out
       if (catchAll && i == pattern.length - 1) {
         params[catchAllName(pattern[i])] = segments.sublist(i).join('/');
       } else if (pattern[i].startsWith(':') && pattern[i].length > 1) {
-        params[pattern[i].substring(1)] = segments[i];
+        params[paramName(pattern[i])] = segments[i];
       } else if (pattern[i] != segments[i]) {
         return null;
       }
@@ -183,6 +217,11 @@ abstract final class CanvasLocation {
         final String value = _stringOf(query.remove(catchAllName(segment)));
         if (value.isEmpty) return null;
         segments.addAll(segmentsOf(value));
+      } else if (isOptional(segment)) {
+        // Left out when not given, and so is everything after it.
+        final String value = _stringOf(query.remove(paramName(segment)));
+        if (value.isEmpty) continue;
+        segments.add(value);
       } else if (segment.startsWith(':') && segment.length > 1) {
         final String value = _stringOf(query.remove(segment.substring(1)));
         if (value.isEmpty) return null;
