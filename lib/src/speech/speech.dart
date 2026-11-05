@@ -1,14 +1,32 @@
 import 'package:flutter/foundation.dart';
 
+import 'recognition.dart';
 import 'speech_engine_stub.dart'
     if (dart.library.js_interop) 'speech_engine_web.dart';
 
-/// Text-to-speech for [SpeakAction]s, and the live state the `speech`
-/// variable reads: `speaking`, `text` (what is being said, '' when quiet)
-/// and `available` (whether this device has a voice).
+/// Text-to-speech for [SpeakAction]s, speech recognition for the `listen`
+/// app function, and the live state the `speech` variable reads:
+/// `speaking`, `text` (what is being said, '' when quiet), `available`
+/// (whether this device has a voice), `canListen`, `listening`, `heard`
+/// (the last transcript), `score` (0-100, how close [heard] was to what was
+/// expected), `confidence` (0-1) and `error` (why nothing was heard).
 class Speech extends ValueNotifier<Map<String, dynamic>> {
   Speech._()
-    : super({'speaking': false, 'text': '', 'available': engine.available});
+    : super({
+        'speaking': false,
+        'text': '',
+        'available': engine.available,
+        'canListen': recognizer.available,
+        'listening': false,
+        'heard': '',
+        'score': 0,
+        'confidence': 0.0,
+        'error': '',
+      });
+
+  /// The platform's speech-to-text. Tests and hosts (a mobile plugin)
+  /// replace it.
+  static SpeechRecognizer recognizer = createRecognizer();
 
   /// The one speech state of the app.
   static final Speech instance = Speech._();
@@ -22,10 +40,50 @@ class Speech extends ValueNotifier<Map<String, dynamic>> {
   bool get speaking => value['speaking'] == true;
 
   void _set(bool speaking, String text) => value = {
+    ...value,
     'speaking': speaking,
     'text': text,
     'available': engine.available,
   };
+
+  /// Whether the microphone is listening now.
+  bool get listening => value['listening'] == true;
+
+  /// Listens for one phrase in [language] and scores it against
+  /// [expected] (when given). Stops any speech first, so the app doesn't
+  /// hear itself. Completes with the new state.
+  Future<Map<String, dynamic>> listen({
+    String language = 'en-US',
+    String expected = '',
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
+    stop();
+    value = {
+      ...value,
+      'canListen': recognizer.available,
+      'listening': true,
+      'heard': '',
+      'score': 0,
+      'confidence': 0.0,
+      'error': '',
+    };
+    final RecognitionResult result = await recognizer.listen(language: language, timeout: timeout);
+    value = {
+      ...value,
+      'listening': false,
+      'heard': result.transcript,
+      'confidence': result.confidence,
+      'score': expected.trim().isEmpty ? 0 : pronunciationScore(expected, result.transcript),
+      'error': result.error ?? '',
+    };
+    return value;
+  }
+
+  /// Stops listening.
+  void stopListening() {
+    recognizer.stop();
+    if (listening) value = {...value, 'listening': false};
+  }
 
   /// Says [text] in [language] (BCP 47, '' for the default voice). Stops
   /// whatever was being said first. Completes when it has been said, with
