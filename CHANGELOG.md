@@ -1,3 +1,21 @@
+## 9.1.7
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- A row that hugs its height and stretches its children grows when a child
+  grows after it is laid out, as when a formula shows a hidden strip in a
+  card. With its width fixed too (a list item), the row kept its old height
+  and cut the child off.
+
+### Actions
+
+- A bottom sheet's grab handle (`showDragHandle`) lies on the sheet canvas,
+  8 px below its top edge. It sat in a band of its own above the canvas,
+  which the canvas's own fill left see-through, so the handle floated over
+  the screen behind the sheet.
+
 ## 9.1.6
 
 Requires codelessly_api 9.0.1.
