@@ -14,8 +14,10 @@ ScriptSandbox createPlatformSandbox() => WorkerSandbox();
 /// message listener for itself, then runs the driver, which removes them
 /// (and every other non-standard global) from the scripts' reach.
 ///
-/// Messages in are `kind\nrun\npayload` (kind is `start` or `resume`).
-/// Messages out are `run\nstate` once the run's jobs have run.
+/// Messages in are `kind\nrun\npayload` (kind is `start`, `resume`,
+/// `check` or `ping`). Messages out are `run\n#begin` when a step starts
+/// running, `run\nstate` once the run's jobs have run, and `run\n#pong`
+/// for a ping.
 const String _workerAdapter = r'''
 (function () {
   'use strict';
@@ -25,10 +27,15 @@ const String _workerAdapter = r'''
     const text = String(e.data);
     const a = text.indexOf('\n'), b = text.indexOf('\n', a + 1);
     const kind = text.slice(0, a), run = text.slice(a + 1, b), payload = text.slice(b + 1);
+    if (kind === 'ping') {
+      post(run + '\n#pong');
+      return;
+    }
     if (kind === 'check') {
       post(run + '\n' + JSON.stringify({ run, check: globalThis.__cl_check(payload) }));
       return;
     }
+    post(run + '\n#begin');
     try {
       (kind === 'start' ? globalThis.__cl_start : globalThis.__cl_resume)(payload);
     } catch (err) {
@@ -54,6 +61,11 @@ String scriptHead(List<String> paramNames) =>
 /// without waiting on the host can't be interrupted inside the worker, so
 /// the worker is terminated (ending every run in it) and a new one starts
 /// for the next run.
+///
+/// The worker runs one step at a time, and its messages wait while the app
+/// is busy, so a run's clock starts when the worker says it began the
+/// step, not when the app sent it; and before terminating, the app pings
+/// the worker: one that answers isn't stuck in the run.
 class WorkerSandbox implements ScriptSandbox {
   web.Worker? _worker;
   String? _url;
@@ -64,7 +76,17 @@ class WorkerSandbox implements ScriptSandbox {
   final Map<String, List<String>> _paramNames = {};
   final Map<String, String> _sources = {};
   final Map<String, Completer<Map<String, Object?>?>> _checks = {};
+  final Map<String, Duration> _budgets = {};
   int _checkCount = 0;
+
+  /// The run whose step the worker began last.
+  String? _current;
+
+  /// Counts the worker's messages, to tell whether it answered.
+  int _heard = 0;
+
+  /// How long a worker may take to answer a ping before it is terminated.
+  static const Duration pingGrace = Duration(milliseconds: 750);
 
   @override
   bool get isSynchronous => false;
@@ -82,7 +104,15 @@ class WorkerSandbox implements ScriptSandbox {
     worker.onmessage = ((web.MessageEvent e) {
       final String text = (e.data as JSString).toDart;
       final int nl = text.indexOf('\n');
-      _deliver(text.substring(0, nl), text.substring(nl + 1));
+      _heard++;
+      final String run = text.substring(0, nl);
+      final String body = text.substring(nl + 1);
+      if (body == '#pong') return;
+      if (body == '#begin') {
+        _began(run);
+        return;
+      }
+      _deliver(run, body);
     }).toJS;
     worker.onerror = ((web.Event e) {
       e.preventDefault();
@@ -91,6 +121,43 @@ class WorkerSandbox implements ScriptSandbox {
       );
     }).toJS;
     return _worker = worker;
+  }
+
+  /// Starts [run]'s clock and watchdog: the worker began a step of it.
+  void _began(String run) {
+    _current = run;
+    if (!_waiting.containsKey(run)) return;
+    final Stopwatch cpu = _cpu.putIfAbsent(run, Stopwatch.new)..start();
+    final Duration budget = _budgets[run] ?? const Duration(seconds: 1);
+    final Duration left = budget - cpu.elapsed;
+    _watchdogs.remove(run)?.cancel();
+    _watchdogs[run] = Timer(
+      left.isNegative ? Duration.zero : left,
+      () => _overBudget(run, budget),
+    );
+  }
+
+  /// [run]'s step is over its budget, unless the worker has moved on (its
+  /// result is waiting for the app) or answers a ping.
+  void _overBudget(String run, Duration budget) {
+    _watchdogs.remove(run);
+    if (_current != run || !_waiting.containsKey(run)) return;
+    final int heard = _heard;
+    _worker?.postMessage('ping\n$run\n'.toJS);
+    _watchdogs[run] = Timer(pingGrace, () {
+      _watchdogs.remove(run);
+      if (_heard != heard || !_waiting.containsKey(run)) return;
+      _killWorker(
+        'Another script ran too long, so the script engine restarted.',
+        run: run,
+        errorFor: {
+          'type': 'LimitError',
+          'limit': 'time',
+          'message':
+              'The script ran longer than ${budget.inMilliseconds} ms. Is there an endless loop?',
+        },
+      );
+    });
   }
 
   void _deliver(String run, String stateJson) {
@@ -145,6 +212,7 @@ class WorkerSandbox implements ScriptSandbox {
 
   void _forget(String run) {
     _cpu.remove(run);
+    _budgets.remove(run);
     _paramNames.remove(run);
     _sources.remove(run);
   }
@@ -156,6 +224,7 @@ class WorkerSandbox implements ScriptSandbox {
   }) {
     _worker?.terminate();
     _worker = null;
+    _current = null;
     for (final MapEntry<String, Completer<Map<String, Object?>>> entry
         in _waiting.entries.toList()) {
       _watchdogs.remove(entry.key)?.cancel();
@@ -180,20 +249,7 @@ class WorkerSandbox implements ScriptSandbox {
     final web.Worker worker = _ensureWorker();
     final Completer<Map<String, Object?>> completer = Completer();
     _waiting[run] = completer;
-    final Stopwatch cpu = _cpu.putIfAbsent(run, Stopwatch.new)..start();
-    final Duration left = cpuBudget - cpu.elapsed;
-    _watchdogs[run] = Timer(left.isNegative ? Duration.zero : left, () {
-      _killWorker(
-        'Another script ran too long, so the script engine restarted.',
-        run: run,
-        errorFor: {
-          'type': 'LimitError',
-          'limit': 'time',
-          'message':
-              'The script ran longer than ${cpuBudget.inMilliseconds} ms. Is there an endless loop?',
-        },
-      );
-    });
+    _budgets[run] = cpuBudget;
     worker.postMessage('$kind\n$run\n$payload'.toJS);
     return completer.future;
   }

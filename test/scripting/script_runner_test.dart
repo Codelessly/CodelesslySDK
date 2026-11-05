@@ -523,6 +523,24 @@ void main() {
       expect(r.error!['limit'], 'time');
     });
 
+    test('runs started together each keep their own time budget', () async {
+      // The web's worker runs one step at a time: a run waiting behind
+      // others must not be charged for their time, nor a busy app's.
+      final List<ScriptRunResult> results = await Future.wait([
+        for (int i = 0; i < 8; i++)
+          run(
+            'const end = Date.now() + 120; let n = 0;\n'
+            'while (Date.now() < end) n++;\n'
+            'return $i',
+            timeoutMs: 400,
+            caps: [ScriptCapability.clock],
+          ),
+      ]);
+      for (int i = 0; i < 8; i++) {
+        expect(results[i], hasValue(i), reason: 'run $i');
+      }
+    });
+
     test('an endless chain of promise jobs stops too', () async {
       expect(
         await run('while (true) { await null; }', timeoutMs: 200),
