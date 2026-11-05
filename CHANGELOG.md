@@ -1,3 +1,16 @@
+## Unreleased
+
+- `SDKPublishModel.appIdentity`: the project's `AppIdentity` (name, title
+  template, description, icons, colors, manifest, splash, mobile) ships in
+  the publish bundle. Bundles without one load as before (null).
+- `CodelesslyAppIdentity` resolves a screen's title and description from
+  the identity (per-page overrides, screen names, the app name), parses its
+  colors and status bar style, and sets the title through
+  `SystemChrome.setApplicationSwitcherDescription` (document.title on web).
+- `CodelesslyAppIdentityUpdater` keeps the title in step with the screen a
+  `CodelesslyRouter` shows, with a callback for the meta description.
+- Requires the unreleased codelessly_api `AppIdentity`.
+
 ## 9.1.9
 
 Requires codelessly_api 9.0.3.
