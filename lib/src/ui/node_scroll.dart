@@ -121,6 +121,9 @@ abstract final class ScrollTargets {
       if (position.hasContentDimensions) {
         to = to.clamp(position.minScrollExtent, position.maxScrollExtent);
       }
+      // A scroll view along the other axis stays where it is.
+      final String? only = action.axis;
+      if (only != null && only != position.axis.name) to = position.pixels;
       final double delta = to - position.pixels;
 
       // Where the target will be in this scroll view once it has scrolled,
