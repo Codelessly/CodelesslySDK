@@ -1158,6 +1158,31 @@ abstract class WidgetNodeTransformerManager
         );
       }
     }
+    if (node is PathNode) {
+      // A list item's path is usually bound (`pathData`).
+      final String data = node.variables.containsKey('pathData')
+          ? PropertyValueDelegate.getPropertyValue<String>(
+                  node,
+                  'pathData',
+                  scopedValues: ScopedValues.of(context),
+                ) ??
+                node.pathData
+          : node.pathData;
+      final Path? path = parseSvgPath(data);
+      if (path != null) {
+        final double? w = node.viewBoxWidth, h = node.viewBoxHeight;
+        return SvgPathHitRegion(
+          path: path,
+          filled: node.fills.any((paint) => paint.visible),
+          stroked:
+              node.strokeWeight > 0 &&
+              node.strokes.any((paint) => paint.visible),
+          strokeWidth: node.strokeWeight,
+          viewBox: w != null && h != null && w > 0 && h > 0 ? Size(w, h) : null,
+          child: wrapped,
+        );
+      }
+    }
     return wrapped;
   }
 
