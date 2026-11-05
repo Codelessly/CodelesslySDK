@@ -3,8 +3,8 @@
 // SDK 8.x built them. Their child nodes go back in as NodeChild boxes.
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
+import 'package:codelessly_api_v2/codelessly_api.dart'
     show Json, Node, SizeFit, TabsProps, TabBarProps, AccordionProps, ExpansionTileProps, readDouble;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';

@@ -1,6 +1,6 @@
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/widgets/inputs.dart';
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/src/widgets/inputs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -1,5 +1,5 @@
 // Ported from SDK 8.x's cloud_data_test: written values follow the schema.
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const posts = CollectionSchema('posts', fields: [

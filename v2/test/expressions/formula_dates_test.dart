@@ -1,4 +1,4 @@
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// A stand-in for a Firestore Timestamp, which formulas read via `toDate()`.

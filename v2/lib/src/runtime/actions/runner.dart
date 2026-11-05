@@ -15,7 +15,7 @@
 //   first.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show ActionDef, Json, Node, Reaction, TriggerType, UnknownAction;
+import 'package:codelessly_api_v2/codelessly_api.dart' show ActionDef, Json, Node, Reaction, TriggerType, UnknownAction;
 
 import '../contracts.dart';
 import '../expressions/engine.dart';

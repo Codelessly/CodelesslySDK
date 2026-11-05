@@ -1,9 +1,9 @@
 // App user accounts: who is signed in (the `auth` variable) and the auth
 // actions (sign in, sign up, sign out...). Firebase Auth implements it in
-// package:codelessly_sdk/firebase.dart.
+// package:codelessly_sdk_v2/firebase.dart.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show CollectionSchema;
+import 'package:codelessly_api_v2/codelessly_api.dart' show CollectionSchema;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show StringCharacters;
 

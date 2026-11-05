@@ -3,8 +3,8 @@
 // formula_functions_test, formula_test / formula_lists_test "through
 // PropertyValueDelegate", condition_is_empty_test, condition_raw_value_test,
 // variable_preview_test, screen_variable_test), on v2's scopes.
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Variable v(String name, Object? value, [VariableType type = VariableType.text]) =>

@@ -1,11 +1,11 @@
 // The services a running app uses, configured by the app: one object, no
 // globals. Every service has a default that works without a backend (memory,
 // silence, signed out), so previews and tests need no setup; an app plugs in
-// Firebase (package:codelessly_sdk/firebase.dart), the stores
-// (package:codelessly_sdk/store.dart) or its own implementations.
+// Firebase (package:codelessly_sdk_v2/firebase.dart), the stores
+// (package:codelessly_sdk_v2/store.dart) or its own implementations.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, ServiceConfig;
+import 'package:codelessly_api_v2/codelessly_api.dart' show Json, ServiceConfig;
 import 'package:flutter/foundation.dart';
 
 import '../runtime/contracts.dart';

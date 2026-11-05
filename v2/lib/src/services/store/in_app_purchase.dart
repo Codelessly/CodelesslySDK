@@ -1,9 +1,9 @@
 // The App Store / Play Billing adapter of PurchaseService, over the
-// in_app_purchase plugin. Exported by package:codelessly_sdk/store.dart only,
+// in_app_purchase plugin. Exported by package:codelessly_sdk_v2/store.dart only,
 // so apps without purchases don't need the plugin's setup.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show ProductSlot;
+import 'package:codelessly_api_v2/codelessly_api.dart' show ProductSlot;
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';

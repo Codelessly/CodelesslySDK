@@ -2,8 +2,8 @@
 // store_product_metadata_test.
 import 'dart:async';
 
-import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/store.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/store.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
