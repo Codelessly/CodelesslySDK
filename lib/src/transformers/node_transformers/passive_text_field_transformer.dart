@@ -1202,20 +1202,16 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       focusColor: decoration.focusColor.toFlutterColor(),
       hoverColor: decoration.hoverColor.toFlutterColor(),
       errorBorder: getInputBorder(decoration.errorBorder),
-      focusedBorder: getInputBorder(
-        errorFlag && !hasError
-            ? decoration.focusedErrorBorder
-            : decoration.focusedBorder,
-        color: focusedBorderColor,
-      ),
+      focusedBorder: errorFlag && !hasError
+          ? getInputBorder(decoration.focusedErrorBorder)
+          : getInputBorder(decoration.focusedBorder, color: focusedBorderColor),
       focusedErrorBorder: getInputBorder(decoration.focusedErrorBorder),
       disabledBorder: getInputBorder(decoration.disabledBorder),
-      enabledBorder: getInputBorder(
-        errorFlag && !hasError
-            ? decoration.errorBorder
-            : decoration.enabledBorder,
-        color: borderColor,
-      ),
+      // An `error` flag draws the error border in its own color, not the
+      // bound border color (which follows hover and the rest state).
+      enabledBorder: errorFlag && !hasError
+          ? getInputBorder(decoration.errorBorder)
+          : getInputBorder(decoration.enabledBorder, color: borderColor),
       border: getInputBorder(decoration.border, color: borderColor),
       enabled: decoration.enabled,
       semanticCounterText: decoration.semanticCounterText,

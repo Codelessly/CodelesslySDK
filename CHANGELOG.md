@@ -13,6 +13,8 @@ Requires codelessly_api 9.0.4.
   store every change (`rememberedObservable`).
 - A drag track whose variable is a formula or a computed variable is
   controlled: drawn at that value, it only reports drags to its reactions.
+- Impossible days (`2013-02-30`) are not read as dates.
+- A text field's `error` flag draws the error border in its own color.
 - Quoted formula text reads `\n`, `\t` and `\r`.
 
 ## 9.1.9
