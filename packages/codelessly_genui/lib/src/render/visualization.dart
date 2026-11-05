@@ -6,6 +6,7 @@ import 'package:a2ui_flutter/a2ui_flutter.dart';
 import 'package:a2ui_flutter/src/surface_scope.dart';
 import 'package:flutter/material.dart';
 
+import 'genui_material_theme.dart';
 import 'genui_theme.dart';
 
 /// Whether components are shown in a fullscreen visualization, where charts
@@ -213,20 +214,21 @@ class _Header extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontFamily: theme.fontFamily,
-                    fontSize: large ? 20 : 16,
-                    fontWeight: FontWeight.w700,
-                    color: Color(theme.text),
+                  style: genUiTextStyle(
+                    theme,
+                    TextStyle(
+                      fontSize: large ? 20 : 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(theme.text),
+                    ),
                   ),
                 ),
                 if (subtitle.isNotEmpty)
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontFamily: theme.fontFamily,
-                      fontSize: 12,
-                      color: Color(theme.mutedText),
+                    style: genUiTextStyle(
+                      theme,
+                      TextStyle(fontSize: 12, color: Color(theme.mutedText)),
                     ),
                   ),
               ],
@@ -302,12 +304,14 @@ class _Fullscreen extends StatelessWidget {
                   children: [
                     Text(
                       'Inputs',
-                      style: TextStyle(
-                        fontFamily: theme.fontFamily,
-                        fontSize: 12,
-                        letterSpacing: 0.6,
-                        fontWeight: FontWeight.w600,
-                        color: Color(theme.mutedText),
+                      style: genUiTextStyle(
+                        theme,
+                        TextStyle(
+                          fontSize: 12,
+                          letterSpacing: 0.6,
+                          fontWeight: FontWeight.w600,
+                          color: Color(theme.mutedText),
+                        ),
                       ),
                     ),
                     for (final c in controls) buildChild(c),
