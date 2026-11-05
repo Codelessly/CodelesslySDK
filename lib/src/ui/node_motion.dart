@@ -387,6 +387,9 @@ class _NodeMotionState extends State<_NodeMotionBody>
     _to = widget.motion;
     _curve = _to.curve;
     _transition.duration = Duration(milliseconds: widget.motion.durationMs);
+    // A loop with a phase starts that far through its cycle; repeat carries
+    // on from there.
+    _transition.value = widget.motion.phase.clamp(0.0, 1.0);
     void start() {
       // A paused loop waits at its start until it is resumed.
       if (!mounted || widget.motion.paused) return;
@@ -412,7 +415,6 @@ class _NodeMotionState extends State<_NodeMotionBody>
 
     final int delay = widget.motion.delayMs;
     if (delay > 0) {
-      _transition.value = 0;
       _delay = Timer(Duration(milliseconds: delay), start);
     } else {
       start();
@@ -469,6 +471,7 @@ class _NodeMotionState extends State<_NodeMotionBody>
           next.loop != old.loop ||
           next.repeat != old.repeat ||
           next.durationMs != old.durationMs ||
+          next.phase != old.phase ||
           !next.paused &&
               !_transition.isAnimating &&
               _delay?.isActive != true) {
