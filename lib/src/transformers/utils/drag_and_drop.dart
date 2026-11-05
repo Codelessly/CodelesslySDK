@@ -439,6 +439,12 @@ class _DragSourceBoxState extends State<DragSourceBox>
         ),
       ),
     );
+    if (model.feedbackAnchor == FeedbackAnchor.center) {
+      feedback = FractionalTranslation(
+        translation: const Offset(-0.5, -0.5),
+        child: feedback,
+      );
+    }
     return themes.wrap(IgnorePointer(child: feedback));
   }
 
@@ -451,6 +457,11 @@ class _DragSourceBoxState extends State<DragSourceBox>
     _size = box.size;
     final Offset grab = box.globalToLocal(position);
     _payload = _start(grab);
+    // Held by its centre, the copy is drawn from the pointer and shifted
+    // back by half its own size (see [_feedback]), whatever size it is.
+    if (widget.model.feedbackAnchor == FeedbackAnchor.center) {
+      return Offset.zero;
+    }
     return grab;
   }
 
@@ -713,6 +724,25 @@ class DropTargetBoxState extends State<DropTargetBox> {
   ) {
     final DragSession? session = controller.session;
     final Size size = session?.size ?? Size.zero;
+    // A refused drop opens no slot when the target says so.
+    if (!widget.model.slotWhenRefused && session != null && !session.accepted) {
+      return const KeyedSubtree(
+        key: ValueKey('codelessly-drop-slot'),
+        child: SizedBox.shrink(),
+      );
+    }
+    final bool ownSize =
+        widget.model.slotSize == DropSlotSize.node &&
+        widget.model.slot == DropSlot.node &&
+        widget.model.slotNodeId.isNotEmpty &&
+        buildNode != null;
+    if (ownSize) {
+      // The slot node at its own size: an insertion line between rows.
+      return KeyedSubtree(
+        key: const ValueKey('codelessly-drop-slot'),
+        child: buildNode(context, widget.model.slotNodeId),
+      );
+    }
     final Widget sized = SizedBox(
       width: axis == Axis.horizontal ? size.width : null,
       height: axis == Axis.vertical ? size.height : null,
