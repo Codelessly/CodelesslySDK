@@ -371,6 +371,31 @@ abstract class WidgetNodeTransformerManager
         clearPulseKey: value == null,
       );
     }
+    final String pausedKey = MotionModel.variableKey(
+      MotionModel.pausedProperty,
+    );
+    if (animate && node.variables.containsKey(pausedKey)) {
+      final String raw = node.variables[pausedKey]!;
+      final Object? value = raw.contains(r'${')
+          ? PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              pausedKey,
+              scopedValues: scopedValues,
+            )
+          : raw;
+      final bool paused = switch (value) {
+        bool b => b,
+        num n => n != 0,
+        String s => const {
+          'true',
+          'on',
+          '1',
+          'yes',
+        }.contains(s.trim().toLowerCase()),
+        _ => false,
+      };
+      motion = (motion ?? MotionModel.none).copyWith(paused: paused);
+    }
     final String loopKey = MotionModel.variableKey(MotionModel.loopProperty);
     if (animate && node.variables.containsKey(loopKey)) {
       final MotionModel base = motion ?? MotionModel.none;
