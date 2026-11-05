@@ -208,6 +208,33 @@ void main() {
       expect(actions.last.context, {'plan': ['pro']});
     });
 
+    testWidgets('a many-option picker (basic chips) still sends its commit action', (tester) async {
+      session = GenUiSession(catalog: genUiCatalog(theme: testTheme));
+      events = [];
+      sub = session.events.listen(events.add);
+      session.apply([
+        create('u'),
+        data('u', {'unit': ['cup']}),
+        components('u', [
+          {'id': 'root', 'component': 'ChoicePicker', 'label': 'Unit', 'displayStyle': 'chips',
+           'options': [for (final u in ['Cups', 'Tablespoons', 'Teaspoons', 'ml', 'Grams of flour', 'Grams of sugar']) {'label': u, 'value': u.toLowerCase()}],
+           'value': {'path': '/unit'}, 'action': {'event': {'name': 'unit_changed', 'context': {'unit': {'path': '/unit'}}}}},
+        ]),
+      ]);
+      await pumpSurfaces(tester, session);
+      expect(find.byType(SegmentedButton<String>), findsNothing);
+      await tester.tap(find.text('ml'));
+      await tester.pumpAndSettle();
+      expect(session.dataModelOf('u')['unit'], ['ml']);
+      final action = events.whereType<GenUiActionEvent>().single;
+      expect(action.interaction, GenUiInteraction.selection);
+      expect(action.context, {'unit': ['ml']});
+      // An agent update without a touch sends nothing.
+      session.apply(data('u', ['cups'], '/unit'));
+      await tester.pumpAndSettle();
+      expect(events.whereType<GenUiActionEvent>(), hasLength(1));
+    });
+
     testWidgets('table checkboxes update their row and report the toggle', (tester) async {
       session = GenUiSession(catalog: genUiCatalog(theme: testTheme));
       events = [];
