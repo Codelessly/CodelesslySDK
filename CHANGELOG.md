@@ -1,3 +1,17 @@
+## 9.2.0
+
+Requires codelessly_api 9.1.0.
+
+- Drag tracks: vertical/horizontal input uses an axis drag recognizer and
+  follow input claims the pointer after 3 px, so knobs and sliders inside a
+  scrolling page turn instead of scrolling it. Fine mode (Shift, or press
+  and hold still before dragging; Shift + wheel), `track.fine` and the fine
+  variable; the pose animates between values (`snapMs`); arcs find the
+  nearest value around their pivot, so `jumpOnTap` works on curved sliders;
+  bound `drag.track.min/max/step/defaultValue`; `write: false`.
+- An action chain whose screens have all gone finishes on the screen the app
+  shows now (a toast's delayed hide after the screen was replaced).
+
 ## 9.1.9
 
 Requires codelessly_api 9.0.3.
