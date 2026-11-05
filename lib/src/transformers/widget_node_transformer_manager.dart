@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' hide log;
 import 'dart:ui' show ImageFilter, lerpDouble;
@@ -335,6 +336,19 @@ abstract class WidgetNodeTransformerManager
         clearPath: data.isEmpty,
       );
     }
+    final String keyframesKey = MotionModel.variableKey(
+      MotionModel.keyframesProperty,
+    );
+    if (node.variables.containsKey(keyframesKey)) {
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        keyframesKey,
+        scopedValues: scopedValues,
+      );
+      motion = (motion ?? MotionModel.none).copyWith(
+        keyframes: motionKeyframesOf(value),
+      );
+    }
     // The transition's duration, delay and curve, e.g. a slow spring in
     // and a quick ease out: `${= open ? 'elasticOut' : 'easeIn'}`.
     for (final String setting in MotionModel.settings) {
@@ -396,6 +410,36 @@ abstract class WidgetNodeTransformerManager
       }
     }
     return motion;
+  }
+
+  /// The keyframes a `motion.keyframes` binding's [value] gives: a list of
+  /// maps (`{t, translateX, translateY, scale, ...}`) or that list as JSON
+  /// text. Entries that aren't maps with a number `t` are skipped; anything
+  /// else gives no keyframes.
+  static List<MotionKeyframe> motionKeyframesOf(Object? value) {
+    Object? list = value;
+    if (list is String) {
+      try {
+        list = jsonDecode(list);
+      } catch (_) {
+        return const [];
+      }
+    }
+    if (list is! List) return const [];
+    double? num_(Object? v) => switch (v) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()),
+      _ => null,
+    };
+    return [
+      for (final Object? item in list)
+        if (item is Map && num_(item['t']) != null)
+          MotionKeyframe.fromJson({
+            for (final MapEntry entry in item.entries)
+              if (num_(entry.value) case final double v when v.isFinite)
+                entry.key.toString(): v,
+          }),
+    ];
   }
 
   /// The loop a `motion.loop` binding's [value] asks for: `none`, `restart`
