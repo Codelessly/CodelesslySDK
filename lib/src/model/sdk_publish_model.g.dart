@@ -245,6 +245,16 @@ SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
       ),
     ),
   ),
+  scripts:
+      (json['scripts'] as Map?)?.map(
+        (k, e) => MapEntry(
+          k as String,
+          (e as Map).map(
+            (k, e) => MapEntry(k as String, ScriptModel.fromJson(e as Map)),
+          ),
+        ),
+      ) ??
+      {},
   owner: json['owner'] as String,
   teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
   users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
@@ -263,6 +273,9 @@ Map<String, dynamic> _$SDKLayoutVariablesToJson(SDKLayoutVariables instance) =>
       'public': instance.public,
       'id': instance.id,
       'variables': instance.variables.map(
+        (k, e) => MapEntry(k, e.map((k, e) => MapEntry(k, e.toJson()))),
+      ),
+      'scripts': instance.scripts.map(
         (k, e) => MapEntry(k, e.map((k, e) => MapEntry(k, e.toJson()))),
       ),
     };

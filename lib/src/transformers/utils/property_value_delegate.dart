@@ -671,6 +671,8 @@ class PropertyValueDelegate {
       // no app user: read as signed out rather than unknown.
       'auth' => scopedValues.appUser ?? AppAuth.userToMap(null),
       'result' => ActionChain.current?.result,
+      // `script.name(args)` in formulas.
+      'script' => ScriptFormulaCalls(scopedValues),
       'screen' => scopedValues.screenSize?.let(
         (Size size) => screenVariableValue(
           size,
@@ -694,6 +696,10 @@ class PropertyValueDelegate {
     };
 
     if (variableValue == null) return null;
+    // `script` is only called (`script.name(args)`); it has no members.
+    if (variableValue is FormulaScripts) {
+      return match.hasPath || match.hasAccessor ? null : variableValue;
+    }
     final VariableType variableType = VariableType.fromObjectType(
       variableValue,
     );

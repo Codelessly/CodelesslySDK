@@ -1,3 +1,25 @@
+## 9.2.0
+
+Requires codelessly_api 9.1.0.
+
+- Scripts. A "Run script" action (`RunScriptAction`) runs one of the
+  project's JavaScript scripts in a sandbox. Its result is the chain's
+  `${result}`; its `onError` actions get `{error: {type, message, line,
+  column}, logs}`. Formulas call scripts as `script.name(args)`, read-only.
+  A script reaches the app only through the host APIs it was granted:
+  `vars`, `nodes` and `app.navigate`/`back`/`callApi`/`cloudData`/
+  `runAction`/`toast`/`delay`.
+- On Android, iOS, macOS and Linux scripts run in QuickJS through the new
+  `codelessly_quickjs` package, which an app with scripts adds. On the web
+  they run in a Web Worker. The same driver runs in both, so the same
+  script gives the same result everywhere: UTC dates, a seeded
+  `Math.random`, the clock only when granted, and fixed number formatting.
+- Limits: CPU time (`timeoutMs`), memory (`memoryLimitMb`, enforced on
+  devices), recursion depth; a script over a limit stops with a
+  `LimitError` and never crashes the app.
+- `SDKLayoutVariables.scripts` carries a layout's project and page scripts;
+  `CodelesslyContext.scripts` holds them by name.
+
 ## 9.1.9
 
 Requires codelessly_api 9.0.3.

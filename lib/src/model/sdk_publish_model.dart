@@ -864,10 +864,18 @@ class SDKLayoutVariables extends PrivacyBase {
   /// CanvasID -> (VariableID -> VariableData)
   final Map<String, Map<String, VariableData>> variables;
 
+  /// The scripts the layout can run, by scope and then by script id. The
+  /// scopes are [kAppVariablesScope] for project scripts and
+  /// [kPageVariablesScope] for the scripts of the layout's Editor page, as
+  /// for [variables]. A page script of the same name wins.
+  @JsonKey(defaultValue: <String, Map<String, ScriptModel>>{})
+  final Map<String, Map<String, ScriptModel>> scripts;
+
   /// Creates a new instance of [SDKLayoutVariables].
   const SDKLayoutVariables({
     required this.id,
     required this.variables,
+    this.scripts = const {},
 
     // Privacy
     required super.owner,
@@ -882,6 +890,7 @@ class SDKLayoutVariables extends PrivacyBase {
   SDKLayoutVariables.private({
     required this.id,
     required this.variables,
+    this.scripts = const {},
 
     // Privacy
     required super.privacy,
@@ -891,6 +900,7 @@ class SDKLayoutVariables extends PrivacyBase {
   SDKLayoutVariables copyWith({
     String? id,
     Map<String, Map<String, VariableData>>? variables,
+    Map<String, Map<String, ScriptModel>>? scripts,
 
     // Privacy
     PrivacyBase? privacy,
@@ -898,13 +908,14 @@ class SDKLayoutVariables extends PrivacyBase {
     return SDKLayoutVariables.private(
       id: id ?? this.id,
       variables: variables ?? this.variables,
+      scripts: scripts ?? this.scripts,
       // Privacy
       privacy: privacy ?? this,
     );
   }
 
   @override
-  List<Object?> get props => [...super.props, id, variables];
+  List<Object?> get props => [...super.props, id, variables, scripts];
 
   /// Creates a new instance of [SDKLayoutVariables] from a JSON map.
   factory SDKLayoutVariables.fromJson(Map<String, dynamic> json) =>

@@ -348,6 +348,9 @@ class ConditionEvaluator<R extends Object>
   R? visitPlayAnimationAction(PlayAnimationAction action) => null;
 
   @override
+  R? visitRunScriptAction(RunScriptAction action) => null;
+
+  @override
   R? visitEditTextAction(EditTextAction action) => null;
 
   @override
@@ -549,6 +552,11 @@ class ConditionPrinter
 
   @override
   void visitPlayAnimationAction(PlayAnimationAction action) {}
+
+  @override
+  void visitRunScriptAction(RunScriptAction action) {
+    _buffer.writeln('\tRun Script ${action.scriptId} with ${action.arguments}');
+  }
 
   @override
   void visitEditTextAction(EditTextAction action) {}

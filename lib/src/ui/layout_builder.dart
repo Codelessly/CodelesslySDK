@@ -298,6 +298,16 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
       codelesslyContext.initialVariables[variable.name] = published;
     }
 
+    // Project scripts, then the page's, so a page script wins by name.
+    codelesslyContext.scripts.clear();
+    final Map<String, Map<String, ScriptModel>> layoutScripts =
+        publishModel.variables[widget.layout.id]?.scripts ?? {};
+    for (final String scope in [kAppVariablesScope, kPageVariablesScope]) {
+      for (final ScriptModel script in (layoutScripts[scope] ?? {}).values) {
+        codelesslyContext.scripts[script.name] = script;
+      }
+    }
+
     final conditions =
         publishModel.conditions[widget.layout.id]?.conditions[widget
             .canvasId] ??
