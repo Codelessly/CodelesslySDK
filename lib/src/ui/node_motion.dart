@@ -625,6 +625,12 @@ class _NodeMotionState extends State<_NodeMotionBody>
     );
   }
 
+  /// Where the node last was on its path (offset included) and the
+  /// direction it was moving, for [MotionModel.orientToPath] under
+  /// keyframes that push it off the path.
+  Offset? _lastPathPosition;
+  double? _pathHeading;
+
   /// The node's widget drawn with the values of [m].
   Widget _draw(MotionModel m) {
     Widget child = KeyedSubtree(key: _childKey, child: widget.child);
@@ -671,10 +677,32 @@ class _NodeMotionState extends State<_NodeMotionBody>
       );
       if (point != null) {
         final (Offset offset, double angle) = point;
+        final Offset total = Offset(
+          m.translateX + offset.dx,
+          m.translateY + offset.dy,
+        );
+        // Keyframes that push the node off its path (a gust blowing a
+        // plane sideways) turn it too: while it moves, the nose follows
+        // where it actually goes, not just the path's direction.
+        double heading = angle;
+        final bool pushed = m.orientToPath &&
+            _moving &&
+            m.keyframes.any((k) => k.translateX != null || k.translateY != null);
+        if (pushed) {
+          final Offset? previous = _lastPathPosition;
+          if (previous != null && (total - previous).distance > 0.25) {
+            _pathHeading = (total - previous).direction;
+          }
+          _lastPathPosition = total;
+          heading = _pathHeading ?? angle;
+        } else {
+          _lastPathPosition = null;
+          _pathHeading = null;
+        }
         shown = m.copyWith(
-          translateX: m.translateX + offset.dx,
-          translateY: m.translateY + offset.dy,
-          rotate: m.orientToPath ? m.rotate + angle * 180 / math.pi : null,
+          translateX: total.dx,
+          translateY: total.dy,
+          rotate: m.orientToPath ? m.rotate + heading * 180 / math.pi : null,
         );
       }
     }
