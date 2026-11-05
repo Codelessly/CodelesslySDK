@@ -287,8 +287,13 @@ class SvgPathHitRegion extends SingleChildRenderObjectWidget {
     required this.stroked,
     this.strokeWidth = 0,
     this.slop = kSvgPathHitSlop,
+    this.viewBox,
     super.child,
   });
+
+  /// The box the path's coordinates are in, stretched to this widget's
+  /// size (a [PathNode]'s view box). Null: the coordinates are pixels.
+  final Size? viewBox;
 
   /// The shape, in the box's own coordinates.
   final Path path;
@@ -313,6 +318,7 @@ class SvgPathHitRegion extends SingleChildRenderObjectWidget {
         stroked: stroked,
         strokeWidth: strokeWidth,
         slop: slop,
+        viewBox: viewBox,
       );
 
   @override
@@ -325,7 +331,8 @@ class SvgPathHitRegion extends SingleChildRenderObjectWidget {
       ..filled = filled
       ..stroked = stroked
       ..strokeWidth = strokeWidth
-      ..slop = slop;
+      ..slop = slop
+      ..viewBox = viewBox;
   }
 }
 
@@ -342,7 +349,11 @@ class RenderSvgPathHitRegion extends RenderProxyBox {
     required this.stroked,
     required this.strokeWidth,
     required this.slop,
+    this.viewBox,
   }) : _path = path;
+
+  /// See [SvgPathHitRegion.viewBox].
+  Size? viewBox;
 
   Path _path;
   List<PathMetric>? _metrics;
@@ -391,7 +402,19 @@ class RenderSvgPathHitRegion extends RenderProxyBox {
 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    if (!hits(position)) return false;
+    final Size? box = viewBox;
+    final bool onPath;
+    if (box != null && hasSize && size.width > 0 && size.height > 0) {
+      // Into the path's own coordinates; the reach scales with them.
+      final double sx = box.width / size.width, sy = box.height / size.height;
+      final double keep = slop;
+      slop = slop * (sx + sy) / 2;
+      onPath = hits(Offset(position.dx * sx, position.dy * sy));
+      slop = keep;
+    } else {
+      onPath = hits(position);
+    }
+    if (!onPath) return false;
     return super.hitTest(result, position: position);
   }
 }

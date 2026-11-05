@@ -55,4 +55,36 @@ void main() {
     expect(region.hits(const Offset(80, 20)), isTrue);
     expect(region.hits(const Offset(20, 80)), isFalse);
   });
+
+  testWidgets('a region in a view box scales taps into it', (tester) async {
+    final List<String> taps = [];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 600,
+            height: 360,
+            child: SvgPathHitRegion(
+              // A run across a 1200 x 720 trail map drawn at half size.
+              path: parseSvgPath('M0 720 L1200 0')!,
+              filled: false,
+              stroked: true,
+              strokeWidth: 9,
+              viewBox: const Size(1200, 720),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => taps.add('run'),
+                child: const SizedBox.expand(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tapAt(const Offset(300, 180)); // on the line
+    await tester.tapAt(const Offset(300, 60)); // well off it
+    expect(taps, ['run']);
+  });
 }
