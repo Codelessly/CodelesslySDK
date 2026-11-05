@@ -387,6 +387,52 @@ void main() {
       expect(loads.pending, 0);
     });
 
+    testWidgets('in flight, a destination still loading flies over its '
+        'source', (tester) async {
+      _size(tester);
+      final navigator = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: navigator,
+          home: _at(
+            const Rect.fromLTWH(0, 0, 50, 50),
+            NodeHero.wrap(
+              node: _node('thumb'),
+              tag: 'img',
+              child: const ColoredBox(key: Key('thumb'), color: Colors.red),
+            ),
+          ),
+        ),
+      );
+      navigator.currentState!.push(
+        CodelesslyRouteTransitionRoute<void>(
+          transition: const RouteTransition(durationMs: 400),
+          builder: (_) => _at(
+            const Rect.fromLTWH(0, 0, 400, 400),
+            NodeHero.wrap(
+              node: _node('full'),
+              tag: 'img',
+              child: const HeroImageLoadReporter(
+                loaded: false,
+                child: SizedBox.expand(key: Key('full')),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 16));
+      // The thumbnail is drawn in the overlay, under the loading image.
+      final Iterable<Element> thumbs = find
+          .byKey(const Key('thumb'), skipOffstage: false)
+          .evaluate()
+          .where((e) => ModalRoute.of(e) == null);
+      expect(thumbs, isNotEmpty);
+      await tester.pumpAndSettle();
+    });
+
     testWidgets('heroPlaceholder keeps the source drawn until loaded', (
       tester,
     ) async {
@@ -436,6 +482,50 @@ void main() {
       await tester.pump();
       expect(find.byKey(const Key('thumb'), skipOffstage: false), findsOneWidget);
     });
+  });
+
+  testWidgets('a flying copy reads its screen\'s route parameters', (
+    tester,
+  ) async {
+    late BuildContext inner;
+    final ValueNotifier<Widget> overlay = ValueNotifier(const SizedBox());
+    await tester.pumpWidget(
+      MaterialApp(
+        // The copy is built outside the route, as the hero flight builds it.
+        builder: (context, navigator) => Stack(
+          children: [
+            navigator!,
+            ValueListenableBuilder<Widget>(
+              valueListenable: overlay,
+              builder: (context, copy, _) => copy,
+            ),
+          ],
+        ),
+        onGenerateRoute: (settings) => MaterialPageRoute<void>(
+          settings: const RouteSettings(arguments: {'full': 'big.jpg'}),
+          builder: (context) {
+            inner = context;
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    String? read;
+    overlay.value = NodeHeroScope.wrap(
+      from: inner,
+      child: Builder(
+        builder: (context) {
+          read = PropertyValueDelegate.substituteVariables(
+            r'${route.full}',
+            scopedValues: ScopedValues.of(context),
+            nullSubstitutionMode: NullSubstitutionMode.emptyString,
+          );
+          return const SizedBox();
+        },
+      ),
+    );
+    await tester.pump();
+    expect(read, 'big.jpg');
   });
 
   group('3D', () {
