@@ -113,11 +113,41 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
     return TextNodeBox(
       node: widget.node,
       // A design canvas shows the final text.
-      child: countUp == null || widget.settings.isPreview
-          ? text
-          : CountUpText(text: text, countUp: countUp),
+      child: withGradientText(
+        widget.node,
+        countUp == null || widget.settings.isPreview
+            ? text
+            : CountUpText(text: text, countUp: countUp),
+      ),
     );
   }
+}
+
+/// The gradient a text node paints its glyphs with: the first visible fill
+/// of its text, when that is a gradient (engraved brass lettering, a sunset
+/// title). Null for solid text. A gradient spans the text's box.
+Gradient? gradientTextOf(TextNode node) {
+  if (node.textMixedProps.isEmpty) return null;
+  for (final TextProp prop in node.textMixedProps) {
+    final PaintModel? fill = prop.fills.where((f) => f.visible).firstOrNull;
+    if (fill == null || fill.type == PaintType.solid || fill.type == PaintType.image) {
+      return null;
+    }
+  }
+  final PaintModel fill = node.textMixedProps.first.fills.firstWhere((f) => f.visible);
+  return retrieveGradient(fill);
+}
+
+/// [child] (a text node's text) painted with the node's gradient fill, if
+/// it has one ([gradientTextOf]).
+Widget withGradientText(TextNode node, Widget child) {
+  final Gradient? gradient = gradientTextOf(node);
+  if (gradient == null) return child;
+  return ShaderMask(
+    blendMode: BlendMode.srcIn,
+    shaderCallback: (Rect bounds) => gradient.createShader(bounds),
+    child: child,
+  );
 }
 
 /// Sizes a text node's box and places its text inside it.

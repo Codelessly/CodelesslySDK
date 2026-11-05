@@ -1005,6 +1005,27 @@ abstract class WidgetNodeTransformerManager
     variable.value = variable.value.copyWith(value: values.toMap());
   }
 
+  /// [track] with the settings [node] binds through `dragTrack.<name>`
+  /// variables (see [DragTrackModel.bindable]) read from [scopedValues].
+  static DragTrackModel resolveTrack(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    DragTrackModel out = track;
+    for (final String setting in DragTrackModel.bindable) {
+      final String key = DragTrackModel.variableKey(setting);
+      if (!node.variables.containsKey(key)) continue;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      out = out.withBinding(setting, value);
+    }
+    return out;
+  }
+
   /// Draws [node] where its drag track puts it for its variable's value,
   /// without making it draggable: how the design canvas shows a knob or a
   /// fader cap. Returns [widget] for a node without a track.
@@ -1014,11 +1035,13 @@ abstract class WidgetNodeTransformerManager
     Widget widget, {
     ScopedValues? scopedValues,
   }) {
-    final DragTrackModel? track = node.drag?.track;
-    if (track == null) return widget;
+    final DragTrackModel? saved = node.drag?.track;
+    if (saved == null) return widget;
+    final ScopedValues scope = scopedValues ?? ScopedValues.of(context);
+    final DragTrackModel track = resolveTrack(node, saved, scope);
     final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
       track.variable,
-      scopedValues: scopedValues ?? ScopedValues.of(context),
+      scopedValues: scope,
     );
     final double value = switch (raw) {
       num n => n.toDouble(),
@@ -1040,14 +1063,14 @@ abstract class WidgetNodeTransformerManager
     BuildContext context,
     BaseNode node,
     DragModel drag,
-    DragTrackModel track,
+    DragTrackModel savedTrack,
     List<Reaction> reactions,
     Widget child,
   ) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
     final Observable<VariableData>? variable = codelesslyContext?.findVariable(
-      name: track.variable,
+      name: savedTrack.variable,
     );
     bool enabled(BuildContext context) {
       if (!node.variables.containsKey(DragModel.enabledVariableKey)) {
@@ -1067,6 +1090,11 @@ abstract class WidgetNodeTransformerManager
     }
 
     Widget build(BuildContext context) {
+      final DragTrackModel track = resolveTrack(
+        node,
+        savedTrack,
+        ScopedValues.of(context),
+      );
       final Object? raw =
           PropertyValueDelegate.getVariableValueFromPath<Object>(
             track.variable,
