@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../codelessly_sdk.dart';
 import '../transformers/utils/node_state_provider.dart';
 import 'cloud_query_builder.dart';
+import 'route_params_scope.dart';
 
 /// The variable key a node's hero tag is bound through, e.g.
 /// `variables['heroTag'] = 'pass-${item.id}'`.
@@ -355,6 +356,26 @@ abstract final class NodeHeroScope {
     }
     if (from.getInheritedWidgetOfExactType<TapThroughScope>() != null) {
       child = TapThroughScope(child: child);
+    }
+    // The screen's route parameters (`${route.photoId}`): the overlay has
+    // no route of its own, so a destination bound to them would fly empty.
+    if (CodelesslyRouteScope.maybeOf(from) case final CodelesslyRouteScope s?) {
+      child = CodelesslyRouteScope(
+        layoutId: s.layoutId,
+        location: s.location,
+        params: s.params,
+        fromLink: s.fromLink,
+        child: child,
+      );
+    } else {
+      final Map<String, dynamic>? params =
+          RouteParamsScope.maybeOf(from) ??
+          switch (ModalRoute.of(from)?.settings.arguments) {
+            final Map<String, dynamic> map => map,
+            final Map map => map.cast<String, dynamic>(),
+            _ => null,
+          };
+      if (params != null) child = RouteParamsScope(params: params, child: child);
     }
 
     final CodelesslyContext? codelesslyContext =
