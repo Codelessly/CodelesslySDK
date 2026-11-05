@@ -4,6 +4,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../../functions/functions_repository.dart';
 import '../../ui/draggable_scroll_configuration.dart';
+import '../../ui/node_3d.dart';
 import '../../ui/node_motion.dart';
 import '../../utils/extensions.dart';
 import '../../utils/formula.dart';
@@ -279,13 +280,26 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
               builder: (context) {
                 // This builder is important to pass a context that has
                 // the IndexedItemProvider.
-                return KeyedSubtree(
+                final Widget page = KeyedSubtree(
                   key: ValueKey(index),
                   child: widget.manager.buildWidgetByID(
                     itemNode,
                     context,
                     settings: widget.settings,
                   ),
+                );
+                // Coverflow, cube and carousel looks: each page moves by
+                // its distance from the current one.
+                final MotionModel? pageMotion =
+                    widget.node.properties.pageMotion;
+                if (pageMotion == null) return page;
+                return PageMotionItem(
+                  controller: controller,
+                  index: index,
+                  motion: pageMotion,
+                  vertical:
+                      widget.node.scrollDirection.flutterAxis == Axis.vertical,
+                  child: page,
                 );
               },
             ),
