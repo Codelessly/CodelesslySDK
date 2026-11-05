@@ -1100,6 +1100,11 @@ abstract class WidgetNodeTransformerManager
           reactions: reactions,
           result: {'value': v},
         ),
+        onFine: switch (track.fineVariable?.trim()) {
+          final String name? when name.isNotEmpty =>
+            (bool fine) => codelesslyContext?.updateVariable(name, fine),
+          _ => null,
+        },
         child: child,
       );
     }
