@@ -13,9 +13,15 @@ struct cljs {
   // Monotonic time in ms after which running code is interrupted, 0 for
   // none.
   int64_t deadline;
-  // Set when the interrupt handler stopped the code.
+  // Set when the interrupt handler stopped the code. Never cleared: an
+  // interrupt can land inside promise bookkeeping and leave the runtime's
+  // state inconsistent, so everything the runtime returns afterwards is the
+  // time-limit error and the caller throws it away.
   int interrupted;
 };
+
+static const char kInterrupted[] =
+    "\x01{\"name\":\"InternalError\",\"message\":\"interrupted\",\"limit\":\"time\"}";
 
 static int64_t now_ms(void) {
   struct timespec ts;
@@ -168,12 +174,12 @@ static int run_jobs(cljs_t *s) {
 }
 
 static void start_clock(cljs_t *s, int64_t timeout_ms) {
-  s->interrupted = 0;
   s->deadline = timeout_ms > 0 ? now_ms() + timeout_ms : 0;
 }
 
 FFI_PLUGIN_EXPORT char *cljs_eval(cljs_t *s, const char *code, int64_t len,
                                   const char *filename, int64_t timeout_ms) {
+  if (s->interrupted) return copy_string(kInterrupted + 1, sizeof(kInterrupted) - 2);
   start_clock(s, timeout_ms);
   JSValue v = JS_Eval(s->ctx, code, (size_t)len, filename, JS_EVAL_TYPE_GLOBAL);
   char *error = NULL;
@@ -184,12 +190,14 @@ FFI_PLUGIN_EXPORT char *cljs_eval(cljs_t *s, const char *code, int64_t len,
   }
   JS_FreeValue(s->ctx, v);
   s->deadline = 0;
+  if (s->interrupted && !error) error = copy_string(kInterrupted + 1, sizeof(kInterrupted) - 2);
   return error;
 }
 
 FFI_PLUGIN_EXPORT char *cljs_call(cljs_t *s, const char *name, const char *arg,
                                   int64_t arg_len, int64_t timeout_ms) {
   JSContext *ctx = s->ctx;
+  if (s->interrupted) return copy_string(kInterrupted, sizeof(kInterrupted) - 1);
   start_clock(s, timeout_ms);
   JSValue global = JS_GetGlobalObject(ctx);
   JSValue fn = JS_GetPropertyStr(ctx, global, name);
@@ -228,6 +236,10 @@ FFI_PLUGIN_EXPORT char *cljs_call(cljs_t *s, const char *name, const char *arg,
   JS_FreeValue(ctx, fn);
   JS_FreeValue(ctx, global);
   s->deadline = 0;
+  if (s->interrupted) {
+    free(out);
+    return copy_string(kInterrupted, sizeof(kInterrupted) - 1);
+  }
   return out;
 }
 
