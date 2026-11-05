@@ -879,12 +879,17 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
                   child: buildField(decoration),
                 );
               }
+              // The node's box sets the height here, so the theme's density
+              // must not change it: desktop's compact density took 8 px off
+              // the outline, leaving a strip of the box's background below
+              // the border.
               return buildField(
                 constraints.hasBoundedHeight
                     ? decoration.copyWith(
                         constraints: BoxConstraints.tightFor(
                           height: constraints.maxHeight,
                         ),
+                        visualDensity: VisualDensity.standard,
                       )
                     : decoration,
               );
