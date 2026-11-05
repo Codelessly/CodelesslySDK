@@ -675,6 +675,8 @@ class PropertyValueDelegate {
         (Size size) => screenVariableValue(
           size,
           brightness: scopedValues.platformBrightness,
+          tabletMinWidth: scopedValues.breakpointWidths?.$1,
+          desktopMinWidth: scopedValues.breakpointWidths?.$2,
         ),
       ),
       'hold' => scopedValues.holdProgress ?? 0.0,
