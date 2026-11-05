@@ -1,3 +1,17 @@
+## 9.1.10
+
+Requires codelessly_api 9.0.4.
+
+- Path nodes paint gradient fills and strokes (across the node's box) and
+  drop shadows that follow their outline; they painted solid colors only.
+- `motion.arc`: bound positions move along a curve (a formation change
+  sweeping every player to their new spot).
+- An entrance replays from values it names at their defaults
+  (`enterFrom: {opacity: 1}`): fade-out trails on replay.
+- List drop targets open a slot of `slotExtent` px when it is set.
+- Remembered app and page variables start from the device's stored value and
+  store every change (`rememberedObservable`).
+
 ## 9.1.9
 
 Requires codelessly_api 9.0.3.
