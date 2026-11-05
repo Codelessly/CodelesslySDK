@@ -879,9 +879,14 @@ abstract class WidgetNodeTransformerManager
       if (index == null || SliverReorderableList.maybeOf(context) == null) {
         return child;
       }
+      final bool locked = ReorderLockScope.isLocked(context);
       return ReorderableDragStartListener(
         index: index,
-        child: MouseRegion(cursor: SystemMouseCursors.grab, child: child),
+        enabled: !locked,
+        child: MouseRegion(
+          cursor: locked ? MouseCursor.defer : SystemMouseCursors.grab,
+          child: child,
+        ),
       );
     }
     final List<Reaction> reactions = node is ReactionMixin
