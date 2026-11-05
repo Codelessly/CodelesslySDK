@@ -1,3 +1,16 @@
+## 9.1.2
+
+Requires codelessly_api 9.0.1.
+
+### Accessibility
+
+- A tappable node with its own tappable nodes inside (a song row that loads
+  its song, with edit and move buttons in it) no longer merges them into one
+  button for screen readers. The inner buttons were read as part of the row
+  and their taps went to the row, so with a screen reader, or on the web once
+  semantics is on, they could not be used. The row now keeps its own text and
+  tap, and each inner button is its own button.
+
 ## 9.1.1
 
 Requires codelessly_api 9.0.1.

@@ -679,11 +679,18 @@ abstract class WidgetNodeTransformerManager
     );
     if (!tappable) return widget;
 
+    // The node's own content: its descendants down to (not into) any that
+    // take input themselves, like an edit button on a tappable song row.
     final List<BaseNode> descendants = [];
+    bool hasInteractiveDescendant = false;
     void collect(BaseNode parent) {
       for (final String id in parent.childrenOrEmpty) {
         final BaseNode? child = tryGetNode(id);
         if (child == null) continue;
+        if (takesInput(child)) {
+          hasInteractiveDescendant = true;
+          continue;
+        }
         descendants.add(child);
         collect(child);
       }
@@ -693,12 +700,32 @@ abstract class WidgetNodeTransformerManager
 
     final bool hasText = descendants.any((child) => child is TextNode);
     final String label = hasText ? '' : semanticLabelFor(node, descendants);
-    return MergeSemantics(
-      child: Semantics(
-        button: true,
-        label: label.isEmpty ? null : label,
-        child: widget,
-      ),
+    final Widget button = Semantics(
+      container: hasInteractiveDescendant,
+      button: true,
+      label: label.isEmpty ? null : label,
+      child: widget,
+    );
+    // Merging would fold an inner button into this one: a screen reader (and
+    // Flutter web with semantics on) would then see one button whose tap is
+    // this node's, so the inner one could never be tapped. With one inside,
+    // this node keeps its own text and tap in its own node, and the inner
+    // button keeps its node.
+    if (hasInteractiveDescendant) return button;
+    return MergeSemantics(child: button);
+  }
+
+  /// Whether [node] takes taps or input itself: it has a click reaction, or
+  /// it is a widget (a button, a field, a switch) that handles its own.
+  static bool takesInput(BaseNode node) {
+    if (node is CustomPropertiesMixin &&
+        node.handlesDefaultReactionsInternally) {
+      return true;
+    }
+    if (node is! ReactionMixin) return false;
+    return (node as ReactionMixin).reactions.any(
+      (reaction) =>
+          reaction.trigger.type == TriggerType.click && reaction.action.enabled,
     );
   }
 
