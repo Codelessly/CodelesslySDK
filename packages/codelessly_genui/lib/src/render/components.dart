@@ -413,7 +413,11 @@ Widget buildChoicePicker(
       labelChars > 30 ||
       longest > 12 ||
       props.boolean('filterable') == true) {
-    return fallback!(context, node, props, buildChild);
+    return CommitOnUserChange(
+      value: props.value('value'),
+      onCommit: _actionOf(props),
+      child: fallback!(context, node, props, buildChild),
+    );
   }
   final List<String> selected = [
     for (final Object? v in props.list('value')) '$v',
@@ -471,6 +475,64 @@ List<String> _selectionOf(Object? raw) {
       if (part.trim().isNotEmpty) part.trim(),
   ];
 }
+
+/// Runs [onCommit] when [value] changes soon after the user touched
+/// [child]. It gives the commit `action` extension to inputs drawn by the
+/// a2ui_flutter basic widgets (the chip picker, the date and time input),
+/// which only write the data model. A change the agent makes, with no touch
+/// before it, sends nothing.
+class CommitOnUserChange extends StatefulWidget {
+  const CommitOnUserChange({
+    super.key,
+    required this.value,
+    required this.onCommit,
+    required this.child,
+  });
+
+  final Object? value;
+  final VoidCallback? onCommit;
+  final Widget child;
+
+  @override
+  State<CommitOnUserChange> createState() => _CommitOnUserChangeState();
+}
+
+class _CommitOnUserChangeState extends State<CommitOnUserChange> {
+  DateTime? _touched;
+
+  @override
+  void didUpdateWidget(CommitOnUserChange oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final DateTime? touched = _touched;
+    if (touched != null &&
+        DateTime.now().difference(touched) < const Duration(minutes: 2) &&
+        jsonEncode(oldWidget.value) != jsonEncode(widget.value)) {
+      _touched = null;
+      final VoidCallback? commit = widget.onCommit;
+      if (commit != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => commit());
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Listener(
+    onPointerDown: (_) => _touched = DateTime.now(),
+    child: widget.child,
+  );
+}
+
+Widget buildDateTimeInput(
+  BuildContext context,
+  ComponentNode<ComponentImplementation> node,
+  ComponentProps props,
+  ChildWidgetBuilder buildChild, {
+  required ComponentWidgetBuilder basic,
+}) => CommitOnUserChange(
+  value: props.value('value'),
+  onCommit: _actionOf(props),
+  child: basic(context, node, props, buildChild),
+);
 
 Widget buildCard(
   BuildContext context,
@@ -543,7 +605,42 @@ Widget buildChart(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       if (title.isNotEmpty) Text(title, style: _style(context, 'h5')),
-      if (legend && series.length > 1)
+      if (chartType == 'donut' && rows.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 6),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            children: [
+              for (int i = 0; i < rows.length; i++)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Color(
+                          GenUiTheme.parseHexColor(
+                                rows[i][series.firstOrNull?['colorField']]
+                                    as String?,
+                              ) ??
+                              theme.series[i % theme.series.length],
+                        ),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${rows[i][xField] ?? ''}',
+                      style: _style(context, 'caption'),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        )
+      else if (legend && series.length > 1)
         Padding(
           padding: const EdgeInsets.only(top: 4, bottom: 4),
           child: Wrap(
@@ -884,18 +981,36 @@ Widget buildTable(
   final int offset = checkField != null ? 1 : 0;
   final Map<int, TableColumnWidth> widths = {
     if (checkField != null) 0: const FixedColumnWidth(40),
+    // The first text column (usually the item name) takes the spare width
+    // and wraps; the other columns keep their natural width.
     for (int i = 0; i < columns.length; i++)
-      i + offset: numeric(columns[i])
-          ? const IntrinsicColumnWidth()
-          : const FlexColumnWidth(),
+      i + offset: !numeric(columns[i]) &&
+              i == columns.indexWhere((c) => !numeric(c))
+          ? const FlexColumnWidth()
+          : const IntrinsicColumnWidth(),
   };
+  // The width the columns need without squeezing: the longest text in each
+  // (at about 7.5 px a character), and at least 150 px for the item column.
+  final int flexColumn = columns.indexWhere((c) => !numeric(c));
+  double natural = checkField != null ? 40 : 0;
+  for (int i = 0; i < columns.length; i++) {
+    int longest = '${columns[i]['header'] ?? ''}'.length;
+    for (final row in rows) {
+      longest = math.max(
+        longest,
+        format(cell(row, columns[i]), columns[i]).length,
+      );
+    }
+    final double w = longest * 7.5 + 14;
+    natural += i == flexColumn ? math.max(150, math.min(w, 240)) : w;
+  }
   return LayoutBuilder(
     builder: (context, constraints) => SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: ConstrainedBox(
         constraints: BoxConstraints.tightFor(
           width: math.max(
-            300,
+            math.max(300, natural),
             constraints.hasBoundedWidth ? constraints.maxWidth : 360,
           ),
         ),

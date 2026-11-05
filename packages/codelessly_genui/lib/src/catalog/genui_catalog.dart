@@ -53,7 +53,14 @@ CatalogImplementation genUiCatalog({
     'Icon': BasicComponents.icon.builder,
     'Tabs': BasicComponents.tabs.builder,
     'Modal': BasicComponents.modal.builder,
-    'DateTimeInput': BasicComponents.dateTimeInput.builder,
+    'DateTimeInput': (context, node, props, buildChild) =>
+        c.buildDateTimeInput(
+          context,
+          node,
+          props,
+          buildChild,
+          basic: BasicComponents.dateTimeInput.builder,
+        ),
     'CodelesslyChart': c.buildChart,
     'CodelesslyGauge': c.buildGauge,
     'CodelesslyProgress': c.buildProgress,
