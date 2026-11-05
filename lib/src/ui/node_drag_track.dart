@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -79,8 +80,13 @@ class DragTrackGeometry {
   final List<Offset> _samples = [];
 
   /// Where the node's centre sits at [progress], relative to rest.
+  /// A line or arc goes on past its ends for a progress outside 0 to 1
+  /// (a drag stretched past an end, see [DragTrackModel.overscroll]); a
+  /// path stops at its ends.
   Offset offsetAt(double progress) {
-    final double p = progress.clamp(0.0, 1.0);
+    final double p = track.shape == DragTrackShape.path
+        ? progress.clamp(0.0, 1.0)
+        : progress;
     switch (track.shape) {
       case DragTrackShape.line:
         return Offset.lerp(
@@ -93,7 +99,7 @@ class DragTrackGeometry {
         // through rest, from where it stands at angle 0.
         final Offset pivot = Offset(track.pivotX, track.pivotY);
         if (pivot == Offset.zero) return Offset.zero;
-        final double a = track.angleAt(p) * math.pi / 180;
+        final double a = _angle(p) * math.pi / 180;
         final Offset r = -pivot;
         return pivot +
             Offset(
@@ -107,13 +113,17 @@ class DragTrackGeometry {
     }
   }
 
+  /// The arc's angle at [progress], going on past its ends.
+  double _angle(double progress) =>
+      track.startAngle + (track.endAngle - track.startAngle) * progress;
+
   /// How much the node turns at [progress], in degrees.
   double rotationAt(double progress) {
     switch (track.shape) {
       case DragTrackShape.line:
         return 0;
       case DragTrackShape.arc:
-        return track.rotate ? track.angleAt(progress) : 0;
+        return track.rotate ? _angle(progress) : 0;
       case DragTrackShape.path:
         final String? data = track.path;
         if (!track.orientToPath || data == null) return 0;
@@ -144,7 +154,9 @@ class DragTrackGeometry {
 
   /// The progress of the point on a line or path nearest to [p] (relative
   /// to the rest centre).
-  double nearest(Offset p) {
+  /// A line's point may lie past its ends ([unclamped]), for a drag that
+  /// stretches past them.
+  double nearest(Offset p, {bool unclamped = false}) {
     switch (track.shape) {
       case DragTrackShape.line:
         final Offset a = Offset(track.x1, track.y1);
@@ -152,7 +164,8 @@ class DragTrackGeometry {
         final double len2 = d.distanceSquared;
         if (len2 == 0) return 0;
         final Offset ap = p - a;
-        return ((ap.dx * d.dx + ap.dy * d.dy) / len2).clamp(0.0, 1.0);
+        final double t = (ap.dx * d.dx + ap.dy * d.dy) / len2;
+        return unclamped ? t : t.clamp(0.0, 1.0);
       case DragTrackShape.path:
         if (_samples.isEmpty) return 0;
         int best = 0;
@@ -204,6 +217,7 @@ class NodeDragTrack extends StatefulWidget {
     required this.onChanged,
     required this.child,
     this.onEnd,
+    this.onRelease,
     this.enabled = true,
   });
 
@@ -219,6 +233,12 @@ class NodeDragTrack extends StatefulWidget {
   /// Called when the pointer lifts, with the final value.
   final ValueChanged<double>? onEnd;
 
+  /// Called when the pointer lifts after a drag, with the final value, the
+  /// value the drag started at and the release velocity in the variable's
+  /// units per second along the track (see [DragTrackModel.endValues]).
+  final void Function(double value, double startValue, double velocity)?
+  onRelease;
+
   /// Whether the control responds to the pointer.
   final bool enabled;
 
@@ -229,10 +249,12 @@ class NodeDragTrack extends StatefulWidget {
   State<NodeDragTrack> createState() => _NodeDragTrackState();
 }
 
-class _NodeDragTrackState extends State<NodeDragTrack> {
+class _NodeDragTrackState extends State<NodeDragTrack>
+    with SingleTickerProviderStateMixin {
   late DragTrackGeometry _geometry = DragTrackGeometry(widget.track);
 
-  /// The unsnapped progress while dragging.
+  /// The pointer's progress while dragging, unsnapped (and past the ends
+  /// when the track allows [DragTrackModel.overscroll]).
   double _raw = 0;
 
   /// The value shown while dragging, ahead of the variable catching up.
@@ -240,13 +262,23 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
   double? _lastAngle;
   Offset _grab = Offset.zero;
   Size _size = Size.zero;
+  double _startValue = 0;
+
+  /// Glides the drawn progress from [_settleFrom] to [_settleTo] (0 to 1,
+  /// overshooting for springy curves); see [DragTrackModel.settleMs].
+  late final AnimationController _settle = AnimationController.unbounded(
+    vsync: this,
+    value: 1,
+  )..addListener(() => setState(() {}));
+  double _settleFrom = 0;
+  double _settleTo = 0;
 
   late final PanGestureRecognizer _pan = PanGestureRecognizer()
     ..dragStartBehavior = DragStartBehavior.down
     ..onStart = _onStart
     ..onUpdate = _onUpdate
-    ..onEnd = ((_) => _onEnd())
-    ..onCancel = _onEnd;
+    ..onEnd = _onEnd
+    ..onCancel = (() => _onEnd(null));
   late final DoubleTapGestureRecognizer _doubleTap =
       DoubleTapGestureRecognizer()..onDoubleTap = _onDoubleTap;
 
@@ -256,28 +288,94 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
     if (oldWidget.track != widget.track) {
       _geometry = DragTrackGeometry(widget.track);
     }
+    if (_dragValue == null && oldWidget.value != widget.value) {
+      // Changed by an action, a tap or a reset: glide from where it is
+      // drawn now.
+      final double from = _settling
+          ? _lerpSettle
+          : oldWidget.track.progressOf(oldWidget.value);
+      _glide(from, _track.progressOf(widget.value));
+    }
   }
 
   @override
   void dispose() {
     _pan.dispose();
     _doubleTap.dispose();
+    _settle.dispose();
     super.dispose();
   }
 
   DragTrackModel get _track => widget.track;
   double get _shownValue => _dragValue ?? widget.value;
-  double get _progress => _track.progressOf(_shownValue);
+
+  bool get _settling => _settle.isAnimating;
+  double get _lerpSettle =>
+      _settleFrom + (_settleTo - _settleFrom) * _settle.value;
+
+  /// Whether value changes glide instead of jumping.
+  bool get _glides =>
+      _track.settleMs > 0 || _track.settleCurve == MotionCurve.spring;
+
+  /// Where the node is drawn along the track: following the pointer (held
+  /// back by the step's detent, stretched past the ends), gliding to its
+  /// value, or at its value.
+  double get _progress {
+    if (_dragValue != null) return _dragProgress;
+    if (_settling) return _lerpSettle;
+    return _track.progressOf(widget.value);
+  }
+
+  double get _dragProgress {
+    final double clamped = _raw.clamp(0.0, 1.0);
+    double p = clamped;
+    if (_track.step > 0) {
+      final double snapped = _track.progressOf(_shownValue);
+      p = snapped + (clamped - snapped) * _track.detent.clamp(0.0, 1.0);
+    }
+    return p + (_raw - clamped) * _track.overscroll.clamp(0.0, 1.0);
+  }
+
+  void _glide(double from, double to) {
+    if (!_glides || from == to || !mounted) {
+      _settle.value = 1;
+      _settleFrom = _settleTo = to;
+      return;
+    }
+    _settleFrom = from;
+    _settleTo = to;
+    if (_track.settleCurve == MotionCurve.spring) {
+      _settle.animateWith(
+        SpringSimulation(
+          motionSpring(const MotionModel(curve: MotionCurve.spring)),
+          0,
+          1,
+          0,
+        ),
+      );
+    } else {
+      _settle
+        ..value = 0
+        ..animateTo(
+          1,
+          duration: Duration(milliseconds: _track.settleMs),
+          curve: flutterCurveOf(_track.settleCurve),
+        );
+    }
+  }
 
   /// [local] (in the node's untransformed box) relative to the rest centre.
   Offset _rel(Offset local) => local - _size.center(Offset.zero);
 
   void _emit(double raw) {
-    _raw = raw.clamp(0.0, 1.0);
-    final double v = _track.valueAt(_raw);
+    _raw = _track.overscroll > 0 ? raw : raw.clamp(0.0, 1.0);
+    final double v = _track.valueAt(_raw.clamp(0.0, 1.0));
     if (v != _shownValue) {
       setState(() => _dragValue = v);
       widget.onChanged(v);
+    } else {
+      // The drawn place moves with the pointer between steps.
+      setState(() {});
     }
   }
 
@@ -297,9 +395,11 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
 
   void _onStart(DragStartDetails d) {
     final Offset p = _rel(d.localPosition);
+    _settle.stop();
     setState(() {
+      _startValue = widget.value;
       _dragValue = widget.value;
-      _raw = _progress;
+      _raw = _track.progressOf(widget.value);
     });
     _lastAngle = _geometry.angleOf(p);
     _grab = _geometry.offsetAt(_raw) - p;
@@ -329,16 +429,55 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
           final double sweep = _track.endAngle - _track.startAngle;
           if (sweep != 0) _emit(_raw + delta / sweep);
         } else {
-          _emit(_geometry.nearest(p + _grab));
+          _emit(_geometry.nearest(p + _grab, unclamped: _track.overscroll > 0));
         }
     }
   }
 
-  void _onEnd() {
+  /// [velocity] (pixels per second) as progress along the track per second.
+  double _progressVelocity(Velocity? velocity) {
+    if (velocity == null) return 0;
+    final Offset v = velocity.pixelsPerSecond;
+    switch (_track.input) {
+      case DragTrackInput.vertical:
+        return -v.dy / _track.pixelsPerRange;
+      case DragTrackInput.horizontal:
+        return v.dx / _track.pixelsPerRange;
+      case DragTrackInput.follow:
+        if (_track.shape == DragTrackShape.arc) {
+          final double sweep = _track.endAngle - _track.startAngle;
+          final Offset r =
+              _geometry.offsetAt(_raw.clamp(0.0, 1.0)) -
+              Offset(_track.pivotX, _track.pivotY) -
+              _grab;
+          final double r2 = r.distanceSquared;
+          if (sweep == 0 || r2 == 0) return 0;
+          final double degPerSec =
+              (r.dx * v.dy - r.dy * v.dx) / r2 * 180 / math.pi;
+          return degPerSec / sweep;
+        }
+        final double p = _raw.clamp(0.0, 1.0);
+        final double a = (p - 0.01).clamp(0.0, 1.0);
+        final double b = (p + 0.01).clamp(0.0, 1.0);
+        if (a == b) return 0;
+        final Offset t =
+            (_geometry.offsetAt(b) - _geometry.offsetAt(a)) / (b - a);
+        final double t2 = t.distanceSquared;
+        return t2 == 0 ? 0 : (v.dx * t.dx + v.dy * t.dy) / t2;
+    }
+  }
+
+  void _onEnd(DragEndDetails? details) {
+    if (_dragValue == null) return;
     final double v = _shownValue;
-    widget.onEnd?.call(v);
+    final double drawn = _dragProgress;
+    final double velocity =
+        _progressVelocity(details?.velocity) * (_track.max - _track.min);
     // Hold the dragged value until the variable has caught up.
     setState(() => _dragValue = null);
+    _glide(drawn, _track.progressOf(v));
+    widget.onEnd?.call(v);
+    widget.onRelease?.call(v, _startValue, velocity);
   }
 
   void _onDoubleTap() {
