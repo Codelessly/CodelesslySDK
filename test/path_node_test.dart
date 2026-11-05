@@ -18,7 +18,6 @@ void main() {
     expect(PathNodePainter.parse('nonsense 12'), isNull);
   });
 
-
   Future<List<int>> pixelsOf(PathNodePainter painter, Size size) async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     painter.paint(Canvas(recorder), size);
@@ -55,7 +54,9 @@ void main() {
     final PathNodePainter painter = PathNodePainter(
       data: 'M0 0 L10 0 L10 10 L0 10 Z',
       fills: const [Color(0xFFFFFFFF)],
-      shadows: const [BoxShadow(color: Color(0xFF000000), offset: Offset(10, 10))],
+      shadows: const [
+        BoxShadow(color: Color(0xFF000000), offset: Offset(10, 10)),
+      ],
     );
     final List<int> rgba = await pixelsOf(painter, const Size(20, 20));
     expect(pixelAt(rgba, 20, 5, 5), [255, 255, 255, 255]); // the path
