@@ -1,3 +1,14 @@
+## 9.1.2
+
+Requires codelessly_api 9.0.1.
+
+### Text fields
+
+- A one-line text field that fills a fixed height draws its border at that
+  height under desktop's compact visual density. The density took 8 px off
+  the border, so a 44 px field showed a 36 px outline over a strip of its
+  box's background on desktop browsers.
+
 ## 9.1.1
 
 Requires codelessly_api 9.0.1.
