@@ -1,3 +1,18 @@
+## 9.1.8
+
+Requires codelessly_api 9.0.1.
+
+### Fixes
+
+- A node hidden in the design (visible off, shown by a condition or
+  binding) no longer takes taps while hidden. It kept its space and stayed
+  hit-testable, so a hidden full-screen scrim swallowed every tap meant for
+  the buttons under it. Screen readers skip it too.
+- A slug-loaded app whose background authentication fails (its anonymous
+  sign-in can be refused) authenticates again when a user signs in, so its
+  cloud data loads. Lists stayed on their spinner after the user signed in
+  with their own account. See `SignInRetry`.
+
 ## 9.1.7
 
 Requires codelessly_api 9.0.1.

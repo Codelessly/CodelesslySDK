@@ -237,8 +237,12 @@ abstract class WidgetNodeTransformerManager
       // (Visibility mutes its tickers); one that keeps its space keeps them.
       maintainAnimation: keepSize,
       maintainSize: keepSize,
-      maintainSemantics: keepSize,
-      maintainInteractivity: keepSize,
+      // A hidden node keeps its space but is not there for the user: taps
+      // pass through it to what is under it (a hidden full-screen scrim
+      // would otherwise swallow every tap on the page) and screen readers
+      // skip it.
+      maintainSemantics: false,
+      maintainInteractivity: false,
       child: widget,
     );
   }
