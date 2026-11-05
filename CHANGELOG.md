@@ -1,4 +1,4 @@
-## 9.1.3
+## 9.1.4
 
 Requires codelessly_api 9.0.1.
 
@@ -8,6 +8,26 @@ Requires codelessly_api 9.0.1.
   children and hugs that axis takes the thickness its siblings give it, as
   in the editor, instead of its design size. An accent stripe designed
   beside a two-line message kept a one-line notice card two lines tall.
+
+## 9.1.3
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- A breakpoint layout whose root is pinned to the right or bottom edge keeps
+  those distances to the edges of the screen, in a dialog too. It was always
+  placed by its alignment: an account menu pinned above a sidebar's user card
+  opened at the top-left corner. A root pinned only by its left and top keeps
+  its alignment, since those pins are often its place on the design canvas.
+
+### Variables
+
+- A set-variable action writes the variable that bindings read by its name.
+  When two variables share a name (a project holding the same app variable
+  twice, or a screen variable over an app variable), the action wrote the one
+  its id named while text, colors and conditions read the other, so taps
+  seemed to do nothing.
 
 ## 9.1.2
 
