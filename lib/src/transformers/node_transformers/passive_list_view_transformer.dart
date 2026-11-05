@@ -675,6 +675,7 @@ class PassiveListViewWidget extends StatelessWidget {
                   index: index,
                   value: data?.elementAtOrNull(index),
                   axis: node.scrollDirection.flutterAxis,
+                  wraps: listWraps(node),
                   child: child,
                 );
               }
@@ -699,21 +700,33 @@ class PassiveListViewWidget extends StatelessWidget {
     // item changes index (a list reuses items by index, and the dragged item
     // must keep its state), or after the last item.
     final int? slotAt = target?.slotBefore?.clamp(0, itemCount ?? 0);
+    final bool wraps = listWraps(node);
     Widget slot(BuildContext context) => target!.buildSlot(
       context,
       node.scrollDirection.flutterAxis,
-      (context, id) => manager.buildWidgetByID(
-        id,
-        context,
-        settings: const WidgetBuildSettings(
-          debugLabel: 'drop slot',
-          withReactions: false,
-          withVisibility: false,
+      (context, id) => ShownAnyway(
+        nodeId: id,
+        child: Builder(
+          builder: (context) => manager.buildWidgetByID(
+            id,
+            context,
+            settings: const WidgetBuildSettings(
+              debugLabel: 'drop slot',
+              withReactions: false,
+            ),
+          ),
         ),
       ),
+      wraps: wraps,
     );
     Widget itemBuilder(BuildContext context, int index) {
       if (slotAt == null) return dataItemBuilder(context, index);
+      // A wrapping list builds every item up front by its data index, so
+      // the slot can be a cell of its own that the lines reflow around.
+      if (wraps) {
+        if (index == slotAt) return slot(context);
+        return dataItemBuilder(context, index > slotAt ? index - 1 : index);
+      }
       if (index == itemCount) return slot(context);
       if (index != slotAt) return dataItemBuilder(context, index);
       return Flex(
@@ -752,7 +765,7 @@ class PassiveListViewWidget extends StatelessWidget {
       itemBuilder: builder,
     );
 
-    if (slotAt != null && itemCount != null && slotAt == itemCount) {
+    if (slotAt != null && itemCount != null && (wraps || slotAt == itemCount)) {
       itemCount = itemCount + 1;
     }
 
