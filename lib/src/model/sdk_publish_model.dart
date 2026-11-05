@@ -172,6 +172,19 @@ class SDKPublishModel extends PrivacyBase {
   /// A list of layout ids that are explicitly disabled from the server's side.
   final List<String> disabledLayouts;
 
+  /// The project's identity as a web app and a mobile app: name, title,
+  /// description, icons, social card, manifest, colors and splash. Null for
+  /// projects published before it existed, or with none set.
+  @JsonKey(
+    fromJson: AppIdentity.maybeFromJson,
+    toJson: serializeAppIdentity,
+    includeIfNull: false,
+  )
+  final AppIdentity? appIdentity;
+
+  static Map<String, dynamic>? serializeAppIdentity(AppIdentity? identity) =>
+      identity?.toJson();
+
   static Map<String, dynamic> serializeLookupMapFonts(
     LookupMap<SDKPublishFont> map,
   ) => map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
@@ -266,6 +279,7 @@ class SDKPublishModel extends PrivacyBase {
     this.entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
+    this.appIdentity,
 
     // Privacy
     required super.owner,
@@ -323,6 +337,7 @@ class SDKPublishModel extends PrivacyBase {
     this.entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
+    this.appIdentity,
 
     // Privacy
     required super.privacy,
@@ -383,6 +398,7 @@ class SDKPublishModel extends PrivacyBase {
     String? entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
+    AppIdentity? appIdentity,
 
     // Privacy
     PrivacyBase? privacy,
@@ -402,6 +418,7 @@ class SDKPublishModel extends PrivacyBase {
       entryCanvasId: entryCanvasId ?? this.entryCanvasId,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       disabledLayouts: disabledLayouts ?? this.disabledLayouts,
+      appIdentity: appIdentity ?? this.appIdentity,
 
       // Privacy
       privacy: privacy ?? this,
@@ -425,6 +442,7 @@ class SDKPublishModel extends PrivacyBase {
     entryCanvasId,
     lastUpdated,
     disabledLayouts,
+    appIdentity,
   ];
 }
 
