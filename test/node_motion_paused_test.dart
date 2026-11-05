@@ -79,4 +79,20 @@ void main() {
     expect(resolve(r"${= 'open' == 'hold'}")!.paused, isFalse);
     expect(resolve('on')!.paused, isTrue);
   });
+
+  testWidgets('a loop with a phase starts that far through its cycle', (
+    tester,
+  ) async {
+    await pump(tester, ride.copyWith(phase: 0.25));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(x(tester), closeTo(35, 1));
+    // Round the loop: 0.25 + 0.85 -> 0.10 of the way along.
+    await tester.pump(const Duration(milliseconds: 750));
+    expect(x(tester), closeTo(10, 1));
+  });
+
+  test('motion.phase binds as a setting and keeps only the fraction', () {
+    expect(ride.withSetting('phase', '1.375').phase, 0.375);
+    expect(MotionModel.settings, contains('phase'));
+  });
 }
