@@ -9,7 +9,10 @@
   `SystemChrome.setApplicationSwitcherDescription` (document.title on web).
 - `CodelesslyAppIdentityUpdater` keeps the title in step with the screen a
   `CodelesslyRouter` shows, with a callback for the meta description.
+- `SDKPublishModel.withAppIdentity` sets the identity; `copyWith` keeps it
+  (its signature is unchanged, so subclasses that override it still build).
 - Requires the unreleased codelessly_api `AppIdentity`.
+- New package `packages/codelessly_genui`: renders A2UI (agent-generated UI) with the SDK's node transformers. It is not published yet; apps depend on it from git.
 
 ## 9.1.9
 
