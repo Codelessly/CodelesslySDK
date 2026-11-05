@@ -273,12 +273,19 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     for (final String scope in [kAppVariablesScope, kPageVariablesScope]) {
       for (final variable in (layoutVariables[scope] ?? {}).values) {
         final Observable<VariableData> shared = codelessly.sharedVariables
-            .putIfAbsent(
-              variable.id,
-              () => Observable(
-                variable.copyWith(value: codelesslyContext.data[variable.name]),
-              ),
-            );
+            .putIfAbsent(variable.id, () {
+              // A persisting variable starts with its saved value.
+              final LocalDatabase? storage =
+                  codelessly.dataManager.localDatabaseOrNull;
+              final Observable<VariableData> notifier = Observable(
+                PersistedVariables.restore(
+                  variable,
+                  storage,
+                ).copyWith(value: codelesslyContext.data[variable.name]),
+              );
+              PersistedVariables.watch(notifier, storage);
+              return notifier;
+            });
         if (linkParams.containsKey(variable.name)) {
           shared.value = withLinkParam(shared.value, linkParams);
         }
@@ -290,10 +297,13 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     }
     for (final variable in variablesMap.values) {
       // Override default values of variables with values provided in data.
-      final VariableData published = variable.copyWith(
-        value: codelesslyContext.data[variable.name],
-      );
+      final LocalDatabase? storage = codelessly.dataManager.localDatabaseOrNull;
+      final VariableData published = PersistedVariables.restore(
+        variable,
+        storage,
+      ).copyWith(value: codelesslyContext.data[variable.name]);
       final notifier = Observable(withLinkParam(published, linkParams));
+      PersistedVariables.watch(notifier, storage);
       codelesslyContext.variables[variable.id] = notifier;
       codelesslyContext.initialVariables[variable.name] = published;
     }
