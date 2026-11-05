@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'node_motion.dart';
@@ -19,14 +21,23 @@ class TrackValues {
   /// Whether a pointer is dragging the node now.
   final bool dragging;
 
+  /// Whether the track is in fine mode ([DragTrackModel.fineStep]).
+  final bool fine;
+
   /// Creates [TrackValues].
-  const TrackValues({this.value = 0, this.progress = 0, this.dragging = false});
+  const TrackValues({
+    this.value = 0,
+    this.progress = 0,
+    this.dragging = false,
+    this.fine = false,
+  });
 
   /// The values as the `track` variable reads them.
   Map<String, dynamic> toMap() => {
     'value': value,
     'progress': progress,
     'dragging': dragging,
+    'fine': fine,
   };
 
   @override
@@ -34,10 +45,11 @@ class TrackValues {
       other is TrackValues &&
       other.value == value &&
       other.progress == progress &&
-      other.dragging == dragging;
+      other.dragging == dragging &&
+      other.fine == fine;
 
   @override
-  int get hashCode => Object.hash(value, progress, dragging);
+  int get hashCode => Object.hash(value, progress, dragging, fine);
 }
 
 /// Shares the nearest [NodeDragTrack]'s state with the nodes inside it,
@@ -166,7 +178,25 @@ class DragTrackGeometry {
         }
         return best / (_samples.length - 1);
       case DragTrackShape.arc:
-        return 0;
+        // The pointer's angle around the pivot, from where the node rests,
+        // taken in whichever turn lands inside the sweep (or nearest an end
+        // of it, for the gap).
+        final double sweep = track.endAngle - track.startAngle;
+        if (sweep == 0) return 0;
+        final double raw = angleOf(p) - angleOf(Offset.zero);
+        final double lo = math.min(track.startAngle, track.endAngle);
+        final double hi = math.max(track.startAngle, track.endAngle);
+        double a = raw;
+        double best = double.infinity;
+        for (int turn = -2; turn <= 2; turn++) {
+          final double c = raw + turn * 360;
+          final double off = c < lo ? lo - c : (c > hi ? c - hi : 0);
+          if (off < best) {
+            best = off;
+            a = c;
+          }
+        }
+        return ((a - track.startAngle) / sweep).clamp(0.0, 1.0);
     }
   }
 
@@ -194,7 +224,14 @@ class DragTrackGeometry {
 /// [value]'s place on the track, and dragging it (or, with
 /// [DragTrackModel.jumpOnTap], tapping along the track) reports new values
 /// through [onChanged]. Double tap resets to [DragTrackModel.defaultValue];
-/// the mouse wheel steps the value.
+/// the mouse wheel steps the value (Shift + wheel by the fine step).
+///
+/// A vertical or horizontal track takes its drags with a drag recognizer of
+/// that axis, and a follow track claims the pointer as soon as it lands on
+/// it, so a control inside a scrolling page turns instead of scrolling the
+/// page. With [DragTrackModel.fineStep] the track has a fine mode (Shift, or
+/// press and hold still before dragging), reported through [onFine]. With
+/// [DragTrackModel.snapMs] the node animates to each new value.
 class NodeDragTrack extends StatefulWidget {
   /// Creates a [NodeDragTrack].
   const NodeDragTrack({
@@ -204,6 +241,7 @@ class NodeDragTrack extends StatefulWidget {
     required this.onChanged,
     required this.child,
     this.onEnd,
+    this.onFine,
     this.enabled = true,
   });
 
@@ -219,6 +257,9 @@ class NodeDragTrack extends StatefulWidget {
   /// Called when the pointer lifts, with the final value.
   final ValueChanged<double>? onEnd;
 
+  /// Called when fine mode turns on or off.
+  final ValueChanged<bool>? onFine;
+
   /// Whether the control responds to the pointer.
   final bool enabled;
 
@@ -229,7 +270,48 @@ class NodeDragTrack extends StatefulWidget {
   State<NodeDragTrack> createState() => _NodeDragTrackState();
 }
 
-class _NodeDragTrackState extends State<NodeDragTrack> {
+/// A pan that wins the gesture arena once its pointer has moved a few
+/// pixels, well before a scroll view around it reaches its own slop, so a
+/// track that follows the pointer turns instead of scrolling the page. Taps
+/// (and double taps) don't move, so they still reach their recognizers.
+class _EagerPanGestureRecognizer extends PanGestureRecognizer {
+  final Map<int, Offset> _downs = <int, Offset>{};
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    _downs[event.pointer] = event.position;
+    super.addAllowedPointer(event);
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (event is PointerMoveEvent) {
+      final Offset? down = _downs[event.pointer];
+      if (down != null && (event.position - down).distance > 3) {
+        _downs.remove(event.pointer);
+        resolve(GestureDisposition.accepted);
+      }
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+      _downs.remove(event.pointer);
+    }
+    super.handleEvent(event);
+  }
+}
+
+/// The curve named by [DragTrackModel.snapCurve].
+Curve trackSnapCurve(String name) => switch (name) {
+  'linear' => Curves.linear,
+  'easeIn' => Curves.easeIn,
+  'easeOut' => Curves.easeOut,
+  'easeInOut' => Curves.easeInOut,
+  'easeOutCubic' => Curves.easeOutCubic,
+  'elasticOut' => Curves.elasticOut,
+  'bounceOut' => Curves.bounceOut,
+  _ => Curves.easeOutBack,
+};
+
+class _NodeDragTrackState extends State<NodeDragTrack>
+    with SingleTickerProviderStateMixin {
   late DragTrackGeometry _geometry = DragTrackGeometry(widget.track);
 
   /// The unsnapped progress while dragging.
@@ -241,26 +323,61 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
   Offset _grab = Offset.zero;
   Size _size = Size.zero;
 
-  late final PanGestureRecognizer _pan = PanGestureRecognizer()
-    ..dragStartBehavior = DragStartBehavior.down
-    ..onStart = _onStart
-    ..onUpdate = _onUpdate
-    ..onEnd = ((_) => _onEnd())
-    ..onCancel = _onEnd;
+  /// Fine mode: from Shift or a press held still ([DragTrackModel.fineHoldMs]).
+  bool _fine = false;
+  bool _heldFine = false;
+  Timer? _hold;
+
+  /// The drawn progress while it animates to a new value
+  /// ([DragTrackModel.snapMs]).
+  late final AnimationController _snap = AnimationController(vsync: this);
+  double _from = 0;
+  double _to = 0;
+
+  late DragGestureRecognizer _drag = _makeDrag();
   late final DoubleTapGestureRecognizer _doubleTap =
       DoubleTapGestureRecognizer()..onDoubleTap = _onDoubleTap;
+
+  DragGestureRecognizer _makeDrag() {
+    final DragGestureRecognizer r = switch (widget.track.input) {
+      DragTrackInput.vertical => VerticalDragGestureRecognizer(),
+      DragTrackInput.horizontal => HorizontalDragGestureRecognizer(),
+      DragTrackInput.follow => _EagerPanGestureRecognizer(),
+    };
+    return r
+      ..dragStartBehavior = DragStartBehavior.down
+      ..onDown = _onDown
+      ..onStart = _onStart
+      ..onUpdate = _onUpdate
+      ..onEnd = ((_) => _onEnd())
+      ..onCancel = _onEnd;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _from = _to = _progress;
+    _snap.value = 1;
+  }
 
   @override
   void didUpdateWidget(NodeDragTrack oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.track != widget.track) {
       _geometry = DragTrackGeometry(widget.track);
+      if (oldWidget.track.input != widget.track.input) {
+        _drag.dispose();
+        _drag = _makeDrag();
+      }
     }
+    _animateTo(_progress);
   }
 
   @override
   void dispose() {
-    _pan.dispose();
+    _hold?.cancel();
+    _snap.dispose();
+    _drag.dispose();
     _doubleTap.dispose();
     super.dispose();
   }
@@ -269,14 +386,46 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
   double get _shownValue => _dragValue ?? widget.value;
   double get _progress => _track.progressOf(_shownValue);
 
+  /// The progress the node is drawn at: animating towards [_to] with
+  /// [DragTrackModel.snapMs], else where the value is.
+  double get _drawn {
+    if (_track.snapMs <= 0) return _progress;
+    if (!_snap.isAnimating) return _to;
+    final double t = trackSnapCurve(_track.snapCurve).transform(_snap.value);
+    return _from + (_to - _from) * t;
+  }
+
+  void _animateTo(double target) {
+    if (_track.snapMs <= 0 || target == _to) {
+      _to = target;
+      return;
+    }
+    _from = _drawn;
+    _to = target;
+    _snap.duration = Duration(milliseconds: _fine ? (_track.snapMs / 2).round() : _track.snapMs);
+    _snap.forward(from: 0);
+  }
+
+  void _setFine(bool fine) {
+    if (fine == _fine) return;
+    setState(() => _fine = fine);
+    widget.onFine?.call(fine);
+  }
+
+  bool get _wantFine =>
+      _track.hasFine && (_heldFine || HardwareKeyboard.instance.isShiftPressed);
+
   /// [local] (in the node's untransformed box) relative to the rest centre.
   Offset _rel(Offset local) => local - _size.center(Offset.zero);
 
   void _emit(double raw) {
     _raw = raw.clamp(0.0, 1.0);
-    final double v = _track.valueAt(_raw);
+    final double v = _fine
+        ? _track.snapFine(_track.min + (_track.max - _track.min) * _raw)
+        : _track.valueAt(_raw);
     if (v != _shownValue) {
       setState(() => _dragValue = v);
+      _animateTo(_track.progressOf(v));
       widget.onChanged(v);
     }
   }
@@ -285,39 +434,60 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
     if (!widget.enabled) return;
     if (!onNode &&
         _track.jumpOnTap &&
-        _track.input == DragTrackInput.follow &&
-        _track.shape != DragTrackShape.arc) {
+        _track.input == DragTrackInput.follow) {
       // Tapped the track off the node: jump there, then drag from there.
       _raw = _progress;
       _emit(_geometry.nearest(_rel(local)));
     }
-    _pan.addPointer(event);
+    _drag.addPointer(event);
     _doubleTap.addPointer(event);
   }
 
+  void _onDown(DragDownDetails d) {
+    _hold?.cancel();
+    if (!_track.hasFine || _track.fineHoldMs <= 0) return;
+    // Pressed and held still: fine mode for the drag that follows.
+    _hold = Timer(Duration(milliseconds: _track.fineHoldMs), () {
+      if (!mounted) return;
+      _heldFine = true;
+      _setFine(true);
+    });
+  }
+
   void _onStart(DragStartDetails d) {
+    _hold?.cancel();
     final Offset p = _rel(d.localPosition);
     setState(() {
       _dragValue = widget.value;
       _raw = _progress;
     });
+    _setFine(_wantFine);
     _lastAngle = _geometry.angleOf(p);
     _grab = _geometry.offsetAt(_raw) - p;
   }
 
   void _onUpdate(DragUpdateDetails d) {
+    final bool fine = _wantFine;
+    if (fine != _fine) {
+      // Switching mode mid-drag: carry on from where the node is.
+      _raw = _progress;
+      _setFine(fine);
+    }
     final Offset p = _rel(d.localPosition);
+    final double ppr = _fine
+        ? _track.effectiveFinePixelsPerRange
+        : _track.pixelsPerRange;
     switch (_track.input) {
       case DragTrackInput.vertical:
-        _emit(_raw - d.delta.dy / _track.pixelsPerRange);
+        _emit(_raw - d.delta.dy / ppr);
       case DragTrackInput.horizontal:
-        _emit(_raw + d.delta.dx / _track.pixelsPerRange);
+        _emit(_raw + d.delta.dx / ppr);
       case DragTrackInput.follow:
         if (_track.shape == DragTrackShape.arc) {
           final Offset fromPivot = p - Offset(_track.pivotX, _track.pivotY);
           if (fromPivot.distance < _size.shortestSide * 0.12) {
             // Too close to the pivot for a steady angle: use vertical travel.
-            _emit(_raw - d.delta.dy / _track.pixelsPerRange);
+            _emit(_raw - d.delta.dy / ppr);
             _lastAngle = _geometry.angleOf(p);
             return;
           }
@@ -335,6 +505,10 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
   }
 
   void _onEnd() {
+    _hold?.cancel();
+    _heldFine = false;
+    _setFine(false);
+    if (_dragValue == null) return;
     final double v = _shownValue;
     widget.onEnd?.call(v);
     // Hold the dragged value until the variable has caught up.
@@ -355,7 +529,12 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
       final PointerScrollEvent s = e as PointerScrollEvent;
       final double dir = s.scrollDelta.dy < 0 ? 1 : -1;
       final double up = _track.max >= _track.min ? 1 : -1;
-      final double v = _track.snap(widget.value + dir * up * _track.wheelStep);
+      final bool fine =
+          _track.hasFine && HardwareKeyboard.instance.isShiftPressed;
+      final double by = fine ? _track.fineStep : _track.wheelStep;
+      final double v = fine
+          ? _track.snapFine(widget.value + dir * up * by)
+          : _track.snap(widget.value + dir * up * by);
       if (v != widget.value) {
         widget.onChanged(v);
         widget.onEnd?.call(v);
@@ -365,28 +544,35 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
 
   @override
   Widget build(BuildContext context) {
-    final double progress = _progress;
-    return TrackScope(
-      values: TrackValues(
-        value: _shownValue,
-        progress: progress,
-        dragging: _dragValue != null,
-      ),
-      child: _TrackArea(
-        geometry: _geometry,
-        progress: progress,
-        jumpOnTap: _track.jumpOnTap,
-        onSize: (size) => _size = size,
-        onPointerDown: _pointerDown,
-        onWheel: _onWheel,
-        child: MouseRegion(
-          cursor: widget.enabled
-              ? (_dragValue != null
-                    ? SystemMouseCursors.grabbing
-                    : SystemMouseCursors.grab)
-              : MouseCursor.defer,
-          child: widget.child,
-        ),
+    return AnimatedBuilder(
+      animation: _snap,
+      builder: (context, child) {
+        final double progress = _drawn;
+        return TrackScope(
+          values: TrackValues(
+            value: _shownValue,
+            progress: _progress,
+            dragging: _dragValue != null,
+            fine: _fine,
+          ),
+          child: _TrackArea(
+            geometry: _geometry,
+            progress: progress,
+            jumpOnTap: _track.jumpOnTap,
+            onSize: (size) => _size = size,
+            onPointerDown: _pointerDown,
+            onWheel: _onWheel,
+            child: child!,
+          ),
+        );
+      },
+      child: MouseRegion(
+        cursor: widget.enabled
+            ? (_dragValue != null
+                  ? SystemMouseCursors.grabbing
+                  : SystemMouseCursors.grab)
+            : MouseCursor.defer,
+        child: widget.child,
       ),
     );
   }
