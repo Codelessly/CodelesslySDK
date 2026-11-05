@@ -93,6 +93,88 @@ double? sectionOffset(
   return offset;
 }
 
+/// What a [DataListView] reads of its list or grid node.
+@immutable
+class DataListSpec {
+  /// The node's pagination.
+  final PaginationModel? pagination;
+
+  /// The list's sections (lists only).
+  final ListSectionsModel? sections;
+
+  /// The list's swipe actions (lists only).
+  final SwipeActionsModel? swipeActions;
+
+  /// The scroll axis.
+  final AxisC scrollDirection;
+
+  /// Whether the scroll axis is reversed.
+  final bool reverse;
+
+  /// Whether the content is clipped to the node.
+  final bool clipsContent;
+
+  /// The node's reactions.
+  final List<Reaction> reactions;
+
+  /// The variable the node writes its status into.
+  final VariableData? statusVariable;
+
+  /// Pixels beyond the viewport to build items in.
+  final double? cacheExtent;
+
+  /// The cloud collection of the node's query.
+  final String? collectionPath;
+
+  /// The node's bindings.
+  final Map<String, String> variables;
+
+  const DataListSpec._({
+    required this.pagination,
+    required this.sections,
+    required this.swipeActions,
+    required this.scrollDirection,
+    required this.reverse,
+    required this.clipsContent,
+    required this.reactions,
+    required this.statusVariable,
+    required this.cacheExtent,
+    required this.collectionPath,
+    required this.variables,
+  });
+
+  /// The spec of a list or grid [node].
+  factory DataListSpec.of(BaseNode node) => switch (node) {
+    final ListViewNode list => DataListSpec._(
+      pagination: list.pagination,
+      sections: list.sections,
+      swipeActions: list.swipeActions,
+      scrollDirection: list.scrollDirection,
+      reverse: list.reverse,
+      clipsContent: list.clipsContent,
+      reactions: list.reactions,
+      statusVariable: list.statusVariable,
+      cacheExtent: list.properties.cacheExtent,
+      collectionPath: list.collectionPath,
+      variables: list.variables,
+    ),
+    final GridViewNode grid => DataListSpec._(
+      pagination: grid.pagination,
+      sections: null,
+      swipeActions: null,
+      scrollDirection: grid.scrollDirection,
+      reverse: grid.reverse,
+      clipsContent: grid.clipsContent,
+      reactions: grid.reactions,
+      statusVariable: grid.statusVariable,
+      cacheExtent: grid.properties.cacheExtent,
+      collectionPath: grid.collectionPath,
+      variables: grid.variables,
+    ),
+    _ => throw ArgumentError('A data list is a list or a grid: $node'),
+  };
+}
+
 /// Whether [node] needs a [DataListView]: it pages, groups into sections or
 /// has swipe actions.
 bool usesDataListView(ListViewNode node) =>
@@ -115,8 +197,11 @@ typedef ListTemplateBuilder = Widget Function(BuildContext context);
 /// * section headers that stay pinned, with an index bar to jump;
 /// * swipe actions on the items, with undo.
 class DataListView extends StatefulWidget {
-  /// The list node.
-  final ListViewNode node;
+  /// The list or grid node.
+  final BaseNode node;
+
+  /// Lays the items out in a grid instead of a list.
+  final SliverGridDelegate? gridDelegate;
 
   /// The list's bound data, for a list without pagination or with a
   /// [PaginationSource.data] source.
@@ -171,6 +256,7 @@ class DataListView extends StatefulWidget {
     this.separatorBuilder,
     this.separatorExtent = 0,
     this.preview = false,
+    this.gridDelegate,
   });
 
   @override
@@ -202,7 +288,7 @@ class DataListViewState extends State<DataListView> {
   /// The controller of the list's pagination, if any.
   PaginationController? get controller => _controller;
 
-  ListViewNode get _node => widget.node;
+  DataListSpec get _node => DataListSpec.of(widget.node);
 
   @override
   void didChangeDependencies() {
@@ -404,7 +490,7 @@ class DataListViewState extends State<DataListView> {
       case ListApply.variable:
         final Observable<VariableData>? variable = boundListVariable(
           context,
-          _node,
+          widget.node,
         );
         if (variable == null) return;
         final List<Object?> list = [
@@ -493,6 +579,10 @@ class DataListViewState extends State<DataListView> {
   }
 
   Widget _sliverList(SliverChildBuilderDelegate delegate, {Key? key}) {
+    final SliverGridDelegate? grid = widget.gridDelegate;
+    if (grid != null) {
+      return SliverGrid(key: key, delegate: delegate, gridDelegate: grid);
+    }
     final double? extent = widget.itemExtent;
     if (extent != null && widget.separatorBuilder == null) {
       return SliverFixedExtentList(
@@ -675,9 +765,9 @@ class DataListViewState extends State<DataListView> {
       physics: refreshable
           ? const AlwaysScrollableScrollPhysics().applyTo(widget.physics)
           : widget.physics,
-      scrollCacheExtent: _node.properties.cacheExtent == null
+      scrollCacheExtent: _node.cacheExtent == null
           ? null
-          : ScrollCacheExtent.pixels(_node.properties.cacheExtent!),
+          : ScrollCacheExtent.pixels(_node.cacheExtent!),
       clipBehavior: _node.clipsContent ? Clip.hardEdge : Clip.none,
       slivers: [
         for (final Widget sliver in slivers)
@@ -788,7 +878,7 @@ class _PendingSwipe {
 /// The variable a list's data is bound to directly (`${name}`), if any.
 Observable<VariableData>? boundListVariable(
   BuildContext context,
-  ListViewNode node,
+  BaseNode node,
 ) {
   final String path = node.variables['data']?.trim() ?? '';
   final RegExpMatch? match = RegExp(

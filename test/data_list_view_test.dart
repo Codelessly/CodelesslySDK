@@ -570,4 +570,76 @@ void main() {
     expect(pager.pageSize, 100);
     expect(pager.page, 60);
   });
+
+  testWidgets('a grid with pagination pages lazily and loads near its end', (
+    tester,
+  ) async {
+    final VariableData photos = VariableData(
+      id: 'photos',
+      name: 'photos',
+      type: VariableType.list,
+      value: [
+        for (int i = 0; i < 1000; i++) {'id': i},
+      ],
+    );
+    final List<BaseNode> nodes = [
+      GridViewNode(
+        id: 'grid',
+        name: 'grid',
+        basicBoxLocal: NodeBox(0, 0, 300, 400),
+        properties: GridViewProperties(
+          gridDelegate: FixedCrossAxisCountGridDelegateProperties(
+            crossAxisCount: 3,
+            mainAxisExtent: 100,
+          ),
+        ),
+        variables: {'data': r'${photos}'},
+        children: const ['tile'],
+        pagination: const PaginationModel(name: 'photoPages', pageSize: 30),
+      )..parentID = kRootNode,
+      RectangleNode(
+        id: 'tile',
+        name: 'tile',
+        basicBoxLocal: NodeBox(0, 0, 100, 100),
+      )..parentID = 'grid',
+    ];
+    final registry = NodeRegistry()
+      ..setNodes({for (final node in nodes) node.id: node});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    final CodelesslyContext codelessly = CodelesslyContext.empty().copyWith(
+      variables: {photos.id: Observable(photos)},
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: codelessly,
+        child: MaterialApp(
+          home: Material(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Builder(
+                builder: (context) => manager.buildWidgetFromNode(
+                  nodes.first,
+                  context,
+                  settings: const WidgetBuildSettings(debugLabel: 'test'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SliverGrid), findsOneWidget);
+    final PaginationController pager = codelessly.pagination['photoPages']!;
+    expect(pager.items.length, 30);
+    expect(find.byType(IndexedItemProvider).evaluate().length, lessThan(40));
+    // Scroll to the end of the first page's 10 rows.
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -700));
+    await tester.pumpAndSettle();
+    expect(pager.items.length, 60);
+  });
 }
