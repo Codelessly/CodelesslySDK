@@ -275,6 +275,29 @@ void main() {
     expect(tip, isNull);
     expect(codelessly.variables['total']!.value.getValue(), 0.0);
     expect(FormulaEvaluator.callsScript('1 + script.payment(a, b, c)'), isTrue);
+    // Widgets bound to a computed variable that calls a script rebuild with
+    // its result too (on the web it arrives late).
+    final Map<String, VariableData> byName = {
+      'split': VariableData(
+        id: 'split',
+        name: 'split',
+        type: VariableType.map,
+        formula: 'script.splitBill(bill, 18)',
+      ),
+      'perPerson': VariableData(
+        id: 'pp',
+        name: 'perPerson',
+        type: VariableType.decimal,
+        formula: 'split.perPerson',
+      ),
+    };
+    expect(
+      PropertyValueDelegate.computedDependencies(
+        'perPerson',
+        byName,
+      ).callsScript,
+      isTrue,
+    );
     expect(
       FormulaEvaluator.referencedPaths('script.payment(amount, rate, 30)'),
       {'amount', 'rate'},

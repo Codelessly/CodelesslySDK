@@ -530,6 +530,25 @@ void main() {
       );
     });
 
+    test('an endless chain of promise jobs stops every time', () async {
+      // The interrupt can land inside promise bookkeeping; the run must
+      // still end with a LimitError, never a stray error or a hang.
+      for (int i = 0; i < 12; i++) {
+        final r = await run('while (true) { await null; }', timeoutMs: 60);
+        expect(r, hasError('LimitError'), reason: 'run $i');
+        expect(await run('return 2'), hasValue(2));
+      }
+    });
+
+    test('a promise that never settles fails at once', () async {
+      final Stopwatch sw = Stopwatch()..start();
+      expect(
+        await run('await new Promise(() => {}); return 1'),
+        hasError('Error', contains('never settles')),
+      );
+      expect(sw.elapsed, lessThan(const Duration(seconds: 5)));
+    });
+
     test('a loop that catches errors cannot swallow the limit', () async {
       expect(
         await run(

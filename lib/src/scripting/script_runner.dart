@@ -272,6 +272,19 @@ abstract final class ScriptRunner {
             memory: (state['memory'] as num?)?.toInt(),
           );
         }
+        if (responses.isEmpty) {
+          // Waiting with no host call to answer: it waits on a promise that
+          // nothing will settle, e.g. `await new Promise(() => {})`.
+          box.end(run);
+          return ScriptRunResult(
+            error: {
+              'type': 'Error',
+              'message': 'The script is waiting on a promise that never settles. Await only app.* calls, script.* calls and promises your own code settles.',
+            },
+            logs: logs,
+            writes: writes,
+          );
+        }
         if (wall.elapsed > wallTimeout) {
           box.end(run);
           return ScriptRunResult(

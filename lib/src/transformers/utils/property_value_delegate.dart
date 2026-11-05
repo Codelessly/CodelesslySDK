@@ -603,13 +603,20 @@ class PropertyValueDelegate {
 
   /// The variable paths a computed variable's formula reads, followed
   /// through other computed variables, and whether any of them reads the
-  /// clock (`now()`) or the millisecond clock (`nowMs()`). Widgets bound to
-  /// [name] listen to these too.
-  static ({Set<String> paths, bool readsClock, bool readsFrameClock})
+  /// clock (`now()`) or the millisecond clock (`nowMs()`), or calls a script
+  /// (`script.name()`, whose result arrives later on the web). Widgets bound
+  /// to [name] listen to these too.
+  static ({
+    Set<String> paths,
+    bool readsClock,
+    bool readsFrameClock,
+    bool callsScript,
+  })
   computedDependencies(String name, Map<String, VariableData> variables) {
     final Set<String> paths = {};
     bool readsClock = false;
     bool readsFrameClock = false;
+    bool callsScript = false;
     final Set<String> seen = {};
     void visit(String variableName) {
       if (!seen.add(variableName)) return;
@@ -620,6 +627,7 @@ class PropertyValueDelegate {
       readsClock = readsClock || FormulaEvaluator.readsClock(expression);
       readsFrameClock =
           readsFrameClock || FormulaEvaluator.readsFrameClock(expression);
+      callsScript = callsScript || FormulaEvaluator.callsScript(expression);
       // A function's parameters aren't variables.
       final Iterable<String> read = variable.isFunction
           ? FormulaFunction(
@@ -642,6 +650,7 @@ class PropertyValueDelegate {
       paths: paths,
       readsClock: readsClock,
       readsFrameClock: readsFrameClock,
+      callsScript: callsScript,
     );
   }
 
