@@ -1119,11 +1119,11 @@ abstract class WidgetNodeTransformerManager
             result: {'value': v},
           );
         },
-        onEnd: (v) => FunctionsRepository.triggerAction(
+        onRelease: (v, start, velocity) => FunctionsRepository.triggerAction(
           context,
           TriggerType.dragEnd,
           reactions: reactions,
-          result: {'value': v},
+          result: {'value': v, 'startValue': start, 'velocity': velocity},
         ),
         child: child,
       );
