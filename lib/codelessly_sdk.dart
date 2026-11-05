@@ -100,3 +100,4 @@ export 'src/utils/observable.dart';
 export 'src/utils/rgb_to_color.dart';
 export 'src/utils/typed_image_bytes.dart';
 export 'src/utils/utils.dart';
+export 'src/genscreen/runtime_screen_generator.dart';
