@@ -713,9 +713,12 @@ class DropTargetBoxState extends State<DropTargetBox> {
   ) {
     final DragSession? session = controller.session;
     final Size size = session?.size ?? Size.zero;
+    // DropTargetModel.slotExtent: a slot of its own length (a thin marker)
+    // instead of a gap the size of the dragged node.
+    final double extent = widget.model.slotExtent;
     final Widget sized = SizedBox(
-      width: axis == Axis.horizontal ? size.width : null,
-      height: axis == Axis.vertical ? size.height : null,
+      width: axis == Axis.horizontal ? (extent > 0 ? extent : size.width) : null,
+      height: axis == Axis.vertical ? (extent > 0 ? extent : size.height) : null,
       child:
           widget.model.slot == DropSlot.node &&
               widget.model.slotNodeId.isNotEmpty &&

@@ -78,6 +78,9 @@ class DataManager {
     return _localDatabase!;
   }
 
+  /// The local storage, or null before it is initialized.
+  LocalDatabase? get localDatabaseOrNull => _localDatabase;
+
   /// The cloud storage instance used by this data manager.
   /// If it is null, it means it has not yet been initialized.
   CloudDatabase? get cloudDatabase => _cloudDatabase;

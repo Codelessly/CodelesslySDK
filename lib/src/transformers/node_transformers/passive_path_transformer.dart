@@ -7,9 +7,10 @@ import 'package:path_parsing/path_parsing.dart';
 import '../../../codelessly_sdk.dart';
 
 /// Draws a [PathNode]: its SVG path scaled from its view box to the node's
-/// size, filled with its solid fills and outlined with its strokes (weight,
-/// cap, dashes), trimmed to [PathNode.trimStart]..[PathNode.trimEnd] of its
-/// length. `pathData`, `trimStart` and `trimEnd` can be bound; a bound trim
+/// size, with its drop shadows (following the outline), filled with its
+/// fills (solid or gradient, laid across the node's box) and outlined with
+/// its strokes (solid or gradient; weight, cap, dashes), trimmed to
+/// [PathNode.trimStart]..[PathNode.trimEnd] of its length. `pathData`, `trimStart` and `trimEnd` can be bound; a bound trim
 /// eases to new values over the node's [BaseNode.transitionMs].
 class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
   PassivePathTransformer(super.getNode, super.manager);
@@ -59,13 +60,22 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
                 : null,
             fills: [
               for (final PaintModel paint in node.fills)
-                if (paint.visible && paint.toFlutterColor() != null)
-                  paint.toFlutterColor()!,
+                if (paint.visible) ?pathPaintOf(paint),
             ],
             strokes: [
               for (final PaintModel paint in node.strokes)
-                if (paint.visible && paint.toFlutterColor() != null)
-                  paint.toFlutterColor()!,
+                if (paint.visible) ?pathPaintOf(paint),
+            ],
+            shadows: [
+              for (final Effect effect in node.effects)
+                if (effect.visible &&
+                    effect.type == EffectType.dropShadow &&
+                    effect.color != null)
+                  BoxShadow(
+                    color: effect.color!.toFlutterColor(),
+                    offset: Offset(effect.offset?.x ?? 0, effect.offset?.y ?? 0),
+                    blurRadius: effect.radius,
+                  ),
             ],
             strokeWeight: node.strokeWeight,
             cap: switch (node.strokeCap) {
@@ -88,6 +98,15 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
   }
 }
 
+/// How a fill or stroke of a path is painted: a [Color] or a [Gradient]
+/// (laid across the node's box), or null when [paint] draws nothing (an
+/// image fill, a transparent solid).
+Object? pathPaintOf(PaintModel paint) {
+  if (paint.type == PaintType.solid) return paint.toFlutterColor();
+  if (paint.type == PaintType.image) return paint.toFlutterColor();
+  return retrieveGradient(paint) ?? paint.toFlutterColor();
+}
+
 /// Paints SVG path [data] (see [PassivePathTransformer]).
 class PathNodePainter extends CustomPainter {
   /// Creates a [PathNodePainter].
@@ -96,6 +115,7 @@ class PathNodePainter extends CustomPainter {
     this.viewBox,
     this.fills = const [],
     this.strokes = const [],
+    this.shadows = const [],
     this.strokeWeight = 2,
     this.cap = StrokeCap.round,
     this.join = StrokeJoin.round,
@@ -106,8 +126,13 @@ class PathNodePainter extends CustomPainter {
 
   final String data;
   final Size? viewBox;
-  final List<Color> fills;
-  final List<Color> strokes;
+
+  /// Fills and strokes, each a [Color] or a [Gradient].
+  final List<Object> fills;
+  final List<Object> strokes;
+
+  /// Drop shadows of the filled shape, drawn under it.
+  final List<BoxShadow> shadows;
   final double strokeWeight;
   final StrokeCap cap;
   final StrokeJoin join;
@@ -192,19 +217,34 @@ class PathNodePainter extends CustomPainter {
             .storage,
       );
     }
-    for (final Color color in fills) {
-      canvas.drawPath(path, Paint()..color = color);
+    final Rect box = Offset.zero & size;
+    Paint painted(Object paint) => switch (paint) {
+      final Gradient gradient => Paint()..shader = gradient.createShader(box),
+      final Color color => Paint()..color = color,
+      _ => Paint()..color = const Color(0x00000000),
+    };
+    for (final BoxShadow shadow in shadows) {
+      canvas.drawPath(
+        path.shift(shadow.offset),
+        Paint()
+          ..color = shadow.color
+          ..maskFilter = shadow.blurRadius > 0
+              ? MaskFilter.blur(BlurStyle.normal, shadow.blurSigma)
+              : null,
+      );
+    }
+    for (final Object fill in fills) {
+      canvas.drawPath(path, painted(fill));
     }
     if (strokes.isEmpty || strokeWeight <= 0) return;
     final bool whole = trimStart <= 0 && trimEnd >= 1 && dashes.isEmpty;
     final ui.Path outline = whole
         ? path
         : trim(path, trimStart, trimEnd, dashes);
-    for (final Color color in strokes) {
+    for (final Object stroke in strokes) {
       canvas.drawPath(
         outline,
-        Paint()
-          ..color = color
+        painted(stroke)
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeWeight
           ..strokeCap = cap
@@ -217,8 +257,9 @@ class PathNodePainter extends CustomPainter {
   bool shouldRepaint(PathNodePainter old) =>
       old.data != data ||
       old.viewBox != viewBox ||
-      !_sameColors(old.fills, fills) ||
-      !_sameColors(old.strokes, strokes) ||
+      !_samePaints(old.fills, fills) ||
+      !_samePaints(old.strokes, strokes) ||
+      !_samePaints(old.shadows, shadows) ||
       old.strokeWeight != strokeWeight ||
       old.join != join ||
       old.cap != cap ||
@@ -226,7 +267,7 @@ class PathNodePainter extends CustomPainter {
       old.trimEnd != trimEnd ||
       old.dashes.join(',') != dashes.join(',');
 
-  static bool _sameColors(List<Color> a, List<Color> b) =>
+  static bool _samePaints(List<Object> a, List<Object> b) =>
       a.length == b.length &&
       [for (int i = 0; i < a.length; i++) a[i] == b[i]].every((same) => same);
 }
