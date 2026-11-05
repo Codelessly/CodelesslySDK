@@ -267,6 +267,24 @@ class DragTrackGeometry {
     return total == 0 ? 0 : bestAt / total;
   }
 
+  /// The progress along an arc whose angle is nearest [angle] (degrees
+  /// clockwise from up): inside the sweep, where it is; in the gap past its
+  /// ends, the nearer end. Null for a track that isn't an arc or has no
+  /// sweep.
+  double? progressAtAngle(double angle) {
+    if (track.shape != DragTrackShape.arc) return null;
+    final double start = track.startAngle, end = track.endAngle;
+    final double sweep = end - start;
+    if (sweep == 0) return null;
+    // The angle as a turn past the start, in the sweep's direction.
+    double from = (angle - start) * sweep.sign % 360;
+    if (from < 0) from += 360;
+    final double span = sweep.abs();
+    if (from <= span) return from / span;
+    // In the gap: snap to whichever end is closer.
+    return (from - span) < (360 - from) ? 1 : 0;
+  }
+
   /// The pointer's angle around the arc's pivot, degrees clockwise from up.
   double angleOf(Offset p) {
     final Offset v = p - Offset(track.pivotX, track.pivotY);
@@ -380,13 +398,22 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
 
   void _pointerDown(PointerDownEvent event, Offset local, bool onNode) {
     if (!widget.enabled) return;
-    if (!onNode &&
-        _track.jumpOnTap &&
-        _track.input == DragTrackInput.follow &&
-        _track.shape != DragTrackShape.arc) {
-      // Tapped the track off the node: jump there, then drag from there.
-      _raw = _progress;
-      _emit(_geometry.nearest(_rel(local)));
+    if (_track.jumpOnTap && _track.input == DragTrackInput.follow) {
+      if (_track.shape == DragTrackShape.arc) {
+        // A dial turns to the angle tapped (on the knob or its ring), then
+        // drags from there, like a real dial's pointer.
+        final double? jump = _geometry.progressAtAngle(
+          _geometry.angleOf(_rel(local)),
+        );
+        if (jump != null) {
+          _raw = _progress;
+          _emit(jump);
+        }
+      } else if (!onNode) {
+        // Tapped the track off the node: jump there, then drag from there.
+        _raw = _progress;
+        _emit(_geometry.nearest(_rel(local)));
+      }
     }
     _pan.addPointer(event);
     _doubleTap.addPointer(event);
