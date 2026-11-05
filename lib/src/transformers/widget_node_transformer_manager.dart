@@ -209,8 +209,14 @@ abstract class WidgetNodeTransformerManager
     // A node shown and hidden by a binding, with a transition time, grows
     // open and shrinks closed (fading too) instead of popping: an error
     // line sliding open under a field, like Flutter's AnimatedSize.
-    if (runtimeVisible != null && node.transitionMs > 0) {
-      final Duration duration = Duration(milliseconds: node.transitionMs);
+    //
+    // Where tickers are muted (the design canvas and its captures) an
+    // implicit animation never ticks: a node shown again would stay faded
+    // out and at the size it had, so it shows or hides at once there.
+    final Duration duration = node.transitionMs > 0
+        ? implicitTransitionDuration(context, node.transitionMs)
+        : Duration.zero;
+    if (runtimeVisible != null && duration > Duration.zero) {
       return AnimatedSize(
         duration: duration,
         curve: Curves.easeOutBack,
