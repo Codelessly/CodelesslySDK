@@ -73,6 +73,9 @@ class DataManager {
   CloudDatabase? _cloudDatabase;
 
   /// The local storage instance used by this data manager.
+  /// The local storage, or null before it is ready.
+  LocalDatabase? get localDatabaseOrNull => _localDatabase;
+
   LocalDatabase get localDatabase {
     assert(_localDatabase != null, 'Local storage is not initialized yet.');
     return _localDatabase!;
