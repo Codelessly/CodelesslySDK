@@ -1,3 +1,16 @@
+## 9.1.2
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- An aligned child that is expanded on an axis fills its frame on that axis.
+  It kept the overflow its stored box had at design size before, so a
+  full-screen row stored 1768 wide in a 1440 frame rendered 328 wider than
+  any screen: a board's header buttons and its card side panel were pushed
+  off the right edge. Aligned children with a fixed size still keep their
+  design overhang.
+
 ## 9.1.1
 
 Requires codelessly_api 9.0.1.

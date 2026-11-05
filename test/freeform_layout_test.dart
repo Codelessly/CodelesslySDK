@@ -1196,5 +1196,25 @@ void main() {
       expect(rects['card']!.width, 390);
       expect(rects['card']!.left, 0);
     });
+
+    for (final Size screen in const [Size(1440, 900), Size(1920, 1080)]) {
+      testWidgets('an expanded one fills the frame on $screen instead of '
+          'keeping its design overflow', (tester) async {
+        // A full-screen row aligned top-left and expanded on both axes,
+        // stored 1768 wide in a 1440 frame because its content was wider at
+        // design time. Expanded means fill the frame: it must not stay 328
+        // wider than the screen.
+        final child = rect(
+          'content',
+          NodeBox(0, 0, 1768, 900),
+          alignment: const AlignmentModel(AlignmentData(-1, -1)),
+          horizontalFit: SizeFit.expanded,
+          verticalFit: SizeFit.expanded,
+        );
+        final root = frame('frame', NodeBox(0, 0, 1440, 900), [child]);
+        final rects = await pump(tester, root, [child], screen: screen);
+        expect(rects['content'], Offset.zero & screen);
+      });
+    }
   });
 }
