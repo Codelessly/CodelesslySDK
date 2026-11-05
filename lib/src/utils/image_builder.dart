@@ -273,6 +273,13 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         // On the web, hosts that don't allow cross-origin reads (no CORS
         // headers) still show their images, drawn by the browser.
         webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+        // Shared elements keep their source drawn under a destination
+        // image that hasn't loaded yet (see [HeroImageLoadScope]).
+        frameBuilder: (context, child, frame, synchronous) =>
+            HeroImageLoadReporter(
+              loaded: synchronous || frame != null,
+              child: child,
+            ),
         loadingBuilder: widget.loadingBuilder != null
             ? (context, child, loadingProgress) =>
                   widget.loadingBuilder!(context, child)

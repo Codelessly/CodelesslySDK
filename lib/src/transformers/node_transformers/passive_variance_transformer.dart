@@ -97,9 +97,14 @@ class PassiveVarianceWidget extends StatelessWidget {
         Offstage(
           key: const ValueKey('loaded'),
           offstage: ownChildren,
-          child: Skeleton(
-            enabled: variant.skeleton,
-            child: _buildChildren(context, loaded.children),
+          // Hidden shared elements don't fly (or clash with the status
+          // variant's).
+          child: HeroMode(
+            enabled: !ownChildren,
+            child: Skeleton(
+              enabled: variant.skeleton,
+              child: _buildChildren(context, loaded.children),
+            ),
           ),
         ),
         if (ownChildren)

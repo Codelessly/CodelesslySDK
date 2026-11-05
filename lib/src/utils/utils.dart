@@ -26,6 +26,9 @@ const Set<String> predefinedVariableNames = {
   'track',
   'speech',
   'initial',
+  'flip',
+  'tilt',
+  'pageOffset',
 };
 
 /// The key under which a layout's published variables hold the project's
@@ -79,6 +82,9 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'track', type: VariableType.map),
   PredefinedVariableData(name: 'speech', type: VariableType.map),
   PredefinedVariableData(name: 'initial', type: VariableType.map),
+  PredefinedVariableData(name: 'flip', type: VariableType.map),
+  PredefinedVariableData(name: 'tilt', type: VariableType.map),
+  PredefinedVariableData(name: 'pageOffset', type: VariableType.decimal),
 };
 
 /// Widths at which the `screen` variable's breakpoint changes: below 600 is

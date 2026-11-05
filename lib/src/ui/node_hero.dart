@@ -59,12 +59,30 @@ abstract final class NodeHero {
     required Widget child,
   }) {
     final bool enabled = tag.isNotEmpty;
+    final HeroFlight? flight = node.heroFlight;
+    final Widget content = NodeHeroChild(
+      node: node,
+      tag: tag,
+      child: enabled && node.heroPlaceholder == HeroPlaceholder.source
+          ? HeroSourcePlaceholder(tag: tag, child: child)
+          : child,
+    );
     return HeroMode(
       enabled: enabled,
       child: Hero(
         tag: enabled ? tag : _DisabledHeroTag(node.id),
         flightShuttleBuilder: flightShuttle,
-        child: NodeHeroChild(node: node, child: child),
+        // An iOS swipe back (or any drag that closes a screen) moves the
+        // shared element with the finger.
+        transitionOnUserGestures: true,
+        createRectTween: switch (flight) {
+          HeroFlight.arc => (begin, end) =>
+              MaterialRectArcTween(begin: begin, end: end),
+          HeroFlight.containerTransform => (begin, end) =>
+              RectTween(begin: begin, end: end),
+          _ => null,
+        },
+        child: content,
       ),
     );
   }
@@ -95,33 +113,121 @@ abstract final class NodeHero {
         : toContext;
     final NodeHeroChild? top = _payloadOf(topContext);
     final NodeHeroChild? bottom = _payloadOf(bottomContext);
-    final bool morph =
-        top?.node.heroFlight == HeroFlight.morphCorners ||
-        bottom?.node.heroFlight == HeroFlight.morphCorners;
+    HeroFlight flightOf(NodeHeroChild? payload) =>
+        payload?.node.heroFlight ?? HeroFlight.standard;
+    // The more specific flight wins when the two nodes ask for different
+    // ones; a cross-fading flight over one that isn't.
+    final HeroFlight flight = [flightOf(top), flightOf(bottom)].reduce(
+      (a, b) => b.index > a.index ? b : a,
+    );
+    final String? tag = top?.tag ?? bottom?.tag;
+    if (tag != null) HeroSourcePlaceholder.remember(tag, fromContext);
 
-    final BuildContext shownContext = morph ? topContext : toContext;
-    final Hero shown = shownContext.widget as Hero;
-    Widget child = NodeHeroScope.wrap(from: shownContext, child: shown.child);
-    if (morph) {
-      final BorderRadius from = _cornersOf(bottom?.node);
-      final BorderRadius to = _cornersOf(top?.node);
-      if (from != to) {
-        final Widget content = child;
-        child = AnimatedBuilder(
-          animation: animation,
-          builder: (context, _) => ClipRRect(
-            borderRadius: BorderRadius.lerp(
-              from,
-              to,
-              Curves.easeInOut.transform(animation.value.clamp(0.0, 1.0)),
-            )!,
-            child: content,
-          ),
+    final BorderRadius topCorners = _cornersOf(top?.node);
+    final BorderRadius bottomCorners = _cornersOf(bottom?.node);
+    Widget clipped(Widget child, {required bool morph}) {
+      if (!morph || topCorners == bottomCorners) return child;
+      return AnimatedBuilder(
+        animation: animation,
+        child: child,
+        builder: (context, child) => ClipRRect(
+          borderRadius: BorderRadius.lerp(
+            bottomCorners,
+            topCorners,
+            Curves.easeInOut.transform(animation.value.clamp(0.0, 1.0)),
+          )!,
+          child: child,
+        ),
+      );
+    }
+
+    final Widget shuttle;
+    if (flight.crossFades) {
+      // Both nodes fly, each drawn at its own size and fitted to the box:
+      // the top one's opacity follows the route (1 once open), the bottom
+      // one's the reverse, timed per flight.
+      final (Interval bottomOut, Interval topIn) = switch (flight) {
+        HeroFlight.fadeThrough => (
+          const Interval(0, 0.35),
+          const Interval(0.35, 1),
+        ),
+        HeroFlight.containerTransform => (
+          const Interval(0, 0.3),
+          const Interval(0.2, 1),
+        ),
+        _ => (const Interval(0, 1), const Interval(0, 1)),
+      };
+      final Widget topChild = _fitted(topContext);
+      final Widget bottomChild = _fitted(bottomContext);
+      Widget stack = AnimatedBuilder(
+        animation: animation,
+        builder: (context, _) {
+          final double t = animation.value.clamp(0.0, 1.0);
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              Opacity(opacity: 1 - bottomOut.transform(t), child: bottomChild),
+              Opacity(opacity: topIn.transform(t), child: topChild),
+            ],
+          );
+        },
+      );
+      if (flight == HeroFlight.containerTransform) {
+        // The container: a surface the two drawings fade on, as the card
+        // grows into the screen.
+        stack = ColoredBox(
+          color: Theme.of(toContext).colorScheme.surface,
+          child: stack,
         );
       }
+      shuttle = clipped(stack, morph: true);
+    } else {
+      final bool morph = flight == HeroFlight.morphCorners;
+      final BuildContext shownContext = morph ? topContext : toContext;
+      final BuildContext otherContext = identical(shownContext, toContext)
+          ? fromContext
+          : toContext;
+      final Hero shown = shownContext.widget as Hero;
+      final HeroImageLoads loads = HeroImageLoads();
+      // The node arriving may draw a network image that hasn't loaded yet:
+      // the node leaving shows under it until it has, so the flight never
+      // flies an empty box.
+      shuttle = clipped(
+        Stack(
+          fit: StackFit.expand,
+          children: [
+            ListenableBuilder(
+              listenable: loads,
+              builder: (context, _) => loads.pending > 0
+                  ? _fitted(otherContext)
+                  : const SizedBox.shrink(),
+            ),
+            HeroImageLoadScope(
+              loads: loads,
+              child: NodeHeroScope.wrap(from: shownContext, child: shown.child),
+            ),
+          ],
+        ),
+        morph: morph,
+      );
     }
     // Ink and text styles look for a Material above them.
-    return Material(type: MaterialType.transparency, child: child);
+    return Material(type: MaterialType.transparency, child: shuttle);
+  }
+
+  /// The node of the hero at [context], drawn at its own size and scaled to
+  /// fill whatever box it gets, so it can fly fitted to the flight's box.
+  static Widget _fitted(BuildContext context) {
+    if (!context.mounted) return const SizedBox.shrink();
+    final Hero hero = context.widget as Hero;
+    final RenderObject? box = context.findRenderObject();
+    final Size? size = box is RenderBox && box.hasSize ? box.size : null;
+    final Widget child = NodeHeroScope.wrap(from: context, child: hero.child);
+    if (size == null || size.isEmpty) return child;
+    return FittedBox(
+      fit: BoxFit.fill,
+      child: SizedBox.fromSize(size: size, child: child),
+    );
   }
 
   static NodeHeroChild? _payloadOf(BuildContext context) {
@@ -158,11 +264,19 @@ class NodeHeroChild extends StatelessWidget {
   /// The node drawn, with its runtime style.
   final BaseNode node;
 
+  /// The tag the node flies with now (resolved), or null when unknown.
+  final String? tag;
+
   /// The node's drawing.
   final Widget child;
 
   /// Creates a [NodeHeroChild].
-  const NodeHeroChild({super.key, required this.node, required this.child});
+  const NodeHeroChild({
+    super.key,
+    required this.node,
+    this.tag,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) => child;
@@ -273,5 +387,178 @@ abstract final class NodeHeroScope {
       from: from,
       to: navigator.context,
     ).wrap(child);
+  }
+}
+
+/// Counts the images still loading under a [HeroImageLoadScope], which the
+/// SDK's image builder reports to.
+class HeroImageLoads extends ChangeNotifier {
+  int _pending = 0;
+
+  /// How many images under the scope haven't painted a frame yet.
+  int get pending => _pending;
+
+  bool _disposed = false;
+
+  void _change(int delta) {
+    _pending = (_pending + delta).clamp(0, 1 << 30);
+    // Reported while building: tell listeners after the frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_disposed) notifyListeners();
+    });
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+}
+
+/// Lets the images under it report whether they have loaded to [loads].
+class HeroImageLoadScope extends InheritedWidget {
+  /// The counter the images report to.
+  final HeroImageLoads loads;
+
+  /// Creates a [HeroImageLoadScope].
+  const HeroImageLoadScope({
+    super.key,
+    required this.loads,
+    required super.child,
+  });
+
+  /// The nearest counter above [context], if any.
+  static HeroImageLoads? maybeOf(BuildContext context) => context
+      .getInheritedWidgetOfExactType<HeroImageLoadScope>()
+      ?.loads;
+
+  @override
+  bool updateShouldNotify(HeroImageLoadScope oldWidget) =>
+      loads != oldWidget.loads;
+}
+
+/// Reports to the nearest [HeroImageLoadScope] that an image is loading
+/// while [loaded] is false. The SDK's image builder wraps network images in
+/// it.
+class HeroImageLoadReporter extends StatefulWidget {
+  /// Whether the image has painted a frame.
+  final bool loaded;
+
+  /// The image.
+  final Widget child;
+
+  /// Creates a [HeroImageLoadReporter].
+  const HeroImageLoadReporter({
+    super.key,
+    required this.loaded,
+    required this.child,
+  });
+
+  @override
+  State<HeroImageLoadReporter> createState() => _HeroImageLoadReporterState();
+}
+
+class _HeroImageLoadReporterState extends State<HeroImageLoadReporter> {
+  HeroImageLoads? _loads;
+  bool _counted = false;
+
+  void _sync() {
+    final HeroImageLoads? loads = HeroImageLoadScope.maybeOf(context);
+    if (loads != _loads) {
+      if (_counted) _loads?._change(-1);
+      _counted = false;
+      _loads = loads;
+    }
+    final bool loading = !widget.loaded;
+    if (loading != _counted) {
+      _loads?._change(loading ? 1 : -1);
+      _counted = loading;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(HeroImageLoadReporter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _sync();
+  }
+
+  @override
+  void dispose() {
+    if (_counted) _loads?._change(-1);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// The destination of a shared element with [HeroPlaceholder.source]: until
+/// its own images have loaded, the node it flew from keeps showing under
+/// it, so a full-size image that is still downloading shows its thumbnail
+/// instead of a blank box.
+class HeroSourcePlaceholder extends StatefulWidget {
+  /// The shared element's tag.
+  final String tag;
+
+  /// The destination node.
+  final Widget child;
+
+  /// Creates a [HeroSourcePlaceholder].
+  const HeroSourcePlaceholder({
+    super.key,
+    required this.tag,
+    required this.child,
+  });
+
+  static final Map<String, BuildContext> _sources = {};
+
+  /// Records the hero [from] as where the shared element [tag] flew from.
+  static void remember(String tag, BuildContext from) {
+    _sources[tag] = from;
+  }
+
+  @override
+  State<HeroSourcePlaceholder> createState() => _HeroSourcePlaceholderState();
+}
+
+class _HeroSourcePlaceholderState extends State<HeroSourcePlaceholder> {
+  final HeroImageLoads _loads = HeroImageLoads();
+
+  @override
+  void dispose() {
+    _loads.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.passthrough,
+      children: [
+        Positioned.fill(
+          child: ListenableBuilder(
+            listenable: _loads,
+            builder: (context, _) {
+              final BuildContext? source =
+                  HeroSourcePlaceholder._sources[widget.tag];
+              if (_loads.pending == 0 ||
+                  source == null ||
+                  !source.mounted ||
+                  source.widget is! Hero) {
+                return const SizedBox.shrink();
+              }
+              return NodeHero._fitted(source);
+            },
+          ),
+        ),
+        HeroImageLoadScope(loads: _loads, child: widget.child),
+      ],
+    );
   }
 }
