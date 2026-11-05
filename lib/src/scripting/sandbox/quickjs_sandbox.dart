@@ -428,6 +428,35 @@ class QuickJsSandbox implements ScriptSandbox {
   }
 
   @override
+  Map<String, Object?>? check(String source, List<String> paramNames) {
+    final List<QuickJsContext> idle = _idle.putIfAbsent(8 << 20, () => []);
+    final QuickJsContext context = idle.isNotEmpty
+        ? idle.removeLast()
+        : QuickJsContext.create(QuickJsLibrary.load(), memoryLimit: 8 << 20);
+    try {
+      final String out = context.call(
+        '__cl_check',
+        jsonEncode({'source': source, 'paramNames': paramNames}),
+        timeout: const Duration(seconds: 1),
+      );
+      if (idle.length < maxIdle) {
+        idle.add(context);
+      } else {
+        context.dispose();
+      }
+      return out.isEmpty
+          ? null
+          : (jsonDecode(out) as Map).cast<String, Object?>();
+    } on QuickJsException catch (e) {
+      context.dispose();
+      return {
+        'type': e.error['name'] ?? 'Error',
+        'message': e.error['message'] ?? '',
+      };
+    }
+  }
+
+  @override
   void end(String run) {
     // A run ended early (cancelled while waiting): its pending promises may
     // still reference its objects, so its runtime isn't reused.

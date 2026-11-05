@@ -14,6 +14,8 @@ library;
 ///   params, vars, nodes, grants, seed, now, scripts}`.
 /// * `__cl_resume(responses)` delivers the results of host calls:
 ///   `{run, responses: [{id, ok, value | error}]}`.
+/// * `__cl_check(request)` compiles `{source, paramNames}` without
+///   running it: '' when it compiles, else the error as JSON.
 /// * `__cl_state(run)` reports what a run did since the last report, once
 ///   its pending jobs have run: `{run, status: 'waiting' | 'done' |
 ///   'error', events: [{type: 'write', name, value} | {type: 'call', id,
@@ -61,7 +63,7 @@ const String scriptDriver = r'''
     'WeakSet', 'Proxy', 'Reflect', 'decodeURI', 'decodeURIComponent',
     'encodeURI', 'encodeURIComponent', 'escape', 'unescape', 'isFinite',
     'isNaN', 'Iterator',
-    '__cl_start', '__cl_resume', '__cl_state', 'structuredClone',
+    '__cl_start', '__cl_resume', '__cl_state', '__cl_check', 'structuredClone',
   ]);
   const removed = new Set();
   for (let o = global; o && o !== Object.prototype; o = getPrototypeOf(o)) {
@@ -562,6 +564,21 @@ const String scriptDriver = r'''
     },
   });
 
+  // Compiles a script without running it: '' when it's fine, else the
+  // error as JSON.
+  function check(text) {
+    const req = JSONparse(text);
+    try {
+      compile(req.source, req.paramNames || []);
+      return '';
+    } catch (e) {
+      const run = { headLength: 0 };
+      try { run.headLength = compile('', req.paramNames || []).headLength; } catch (_) {}
+      return JSONstringify(errorData(e, run));
+    }
+  }
+
+  global.__cl_check = check;
   global.__cl_start = start;
   global.__cl_resume = resume;
   global.__cl_state = state;

@@ -25,6 +25,10 @@ const String _workerAdapter = r'''
     const text = String(e.data);
     const a = text.indexOf('\n'), b = text.indexOf('\n', a + 1);
     const kind = text.slice(0, a), run = text.slice(a + 1, b), payload = text.slice(b + 1);
+    if (kind === 'check') {
+      post(run + '\n' + JSON.stringify({ run, check: globalThis.__cl_check(payload) }));
+      return;
+    }
     try {
       (kind === 'start' ? globalThis.__cl_start : globalThis.__cl_resume)(payload);
     } catch (err) {
@@ -59,6 +63,8 @@ class WorkerSandbox implements ScriptSandbox {
   final Map<String, Stopwatch> _cpu = {};
   final Map<String, List<String>> _paramNames = {};
   final Map<String, String> _sources = {};
+  final Map<String, Completer<Map<String, Object?>?>> _checks = {};
+  int _checkCount = 0;
 
   @override
   bool get isSynchronous => false;
@@ -88,6 +94,16 @@ class WorkerSandbox implements ScriptSandbox {
   }
 
   void _deliver(String run, String stateJson) {
+    final Completer<Map<String, Object?>?>? checking = _checks.remove(run);
+    if (checking != null) {
+      final Object? check = (jsonDecode(stateJson) as Map)['check'];
+      checking.complete(
+        check is String && check.isNotEmpty
+            ? (jsonDecode(check) as Map).cast<String, Object?>()
+            : null,
+      );
+      return;
+    }
     _watchdogs.remove(run)?.cancel();
     _cpu[run]?.stop();
     final Completer<Map<String, Object?>>? completer = _waiting.remove(run);
@@ -207,6 +223,37 @@ class WorkerSandbox implements ScriptSandbox {
     jsonEncode({'run': run, 'responses': responses}),
     cpuBudget,
   );
+
+  @override
+  Future<Map<String, Object?>?> check(
+    String source,
+    List<String> paramNames,
+  ) async {
+    final String id = 'check${++_checkCount}';
+    final Completer<Map<String, Object?>?> done = Completer();
+    _checks[id] = done;
+    _ensureWorker().postMessage(
+      'check\n$id\n${jsonEncode({'source': source, 'paramNames': paramNames})}'
+          .toJS,
+    );
+    final Map<String, Object?>? error = await done.future.timeout(
+      const Duration(seconds: 2),
+      onTimeout: () {
+        _checks.remove(id);
+        return {'type': 'Error', 'message': 'The check timed out.'};
+      },
+    );
+    if (error != null &&
+        error['type'] == 'SyntaxError' &&
+        error['line'] == null) {
+      final (int, int)? pos = await locateSyntaxError(source, paramNames);
+      if (pos != null) {
+        error['line'] = pos.$1;
+        error['column'] = pos.$2;
+      }
+    }
+    return error;
+  }
 
   @override
   void end(String run) {

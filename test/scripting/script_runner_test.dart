@@ -601,6 +601,23 @@ void main() {
       expect(await run('throw {code: 42}'), hasError('Error', '{"code":42}'));
     });
 
+    test('check compiles without running', () async {
+      expect(await ScriptRunner.check(script('while (true) {}')), isNull);
+      final Map<String, Object?>? error = await ScriptRunner.check(
+        script('let a = 1;\nlet b = ;'),
+      );
+      expect(error?['type'], 'SyntaxError');
+      expect(error?['line'], 2);
+      expect(
+        (await ScriptRunner.check(script('return import("x")')))?['type'],
+        'SyntaxError',
+      );
+      expect(
+        await ScriptRunner.check(script('return a + 1', params: ['a'])),
+        isNull,
+      );
+    });
+
     test('reserved parameter names are rejected', () async {
       expect(await run('return 1', params: ['vars']), hasError('SyntaxError'));
     });

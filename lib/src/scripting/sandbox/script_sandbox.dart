@@ -44,6 +44,11 @@ abstract class ScriptSandbox {
     required Duration cpuBudget,
   });
 
+  /// Compiles [source] (a script with params [paramNames]) without running
+  /// it. Returns null when it compiles, else the error: `{type, message,
+  /// line?, column?}`.
+  FutureOr<Map<String, Object?>?> check(String source, List<String> paramNames);
+
   /// Ends [run] and frees what it holds. A run that ended by itself is
   /// already freed.
   void end(String run);
