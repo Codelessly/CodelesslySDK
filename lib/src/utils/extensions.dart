@@ -2472,7 +2472,7 @@ extension LayoutGroupsExt on Map<String, List<Breakpoint>> {
 }
 
 extension VariableDataExt on VariableData {
-  bool get isApiVariable => name.startsWith(SDKConstants.apiVariablePrefix);
+  bool get isApiVariable => isApiVariableName(name);
 }
 
 extension TextFieldFormatterExt on TextInputFormatterModel {
