@@ -688,6 +688,11 @@ class PropertyValueDelegate {
             as Map?,
       },
       'track' => (scopedValues.trackValues ?? const TrackValues()).toMap(),
+      // A flip card's side, a tilt's pointer and a page's offset from the
+      // current page, around this node.
+      'flip' || 'tilt' || 'pageOffset' =>
+        scopedValues.motionValues[match.name] ??
+            MotionValuesScope.defaults[match.name],
       'speech' => Speech.instance.value,
       'initial' => InitialValues(scopedValues.initialVariables),
       _ => null,
