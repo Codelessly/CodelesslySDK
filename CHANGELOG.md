@@ -1,3 +1,27 @@
+## Unreleased
+
+Requires the unreleased codelessly_api gesture models.
+
+- `NodeTransformGesture` runs `BaseNode.transformGesture` (and `zoomable`,
+  which no longer uses `InteractiveViewer`): focal-point pinch zoom, pan,
+  two-finger rotate, double-tap zoom, wheel and trackpad zoom, rubber-band
+  bounds, fling and spring settle, two-way pose variables, `changed` /
+  `changeEnd` / `doubleTap` reactions, `${transform.*}` inside the node, and
+  corner, edge and rotate handles with a selection variable.
+- `gesture_physics.dart`: the shared physics (`springOf`,
+  `AxisSettleSimulation`, `rubberBand`, `boundsRange`, `snapTargetOf`).
+- `NodeDrag` with `DragModel.physics` flings, springs back with the release
+  velocity, rubber-bands past its bounds and limits and settles on snap
+  points; `dragEnd` reads `targetX`, `targetY`, `snapIndex`, and `drag`
+  reads `settling` and `snapIndex`. Without physics it behaves as before.
+- `NodeDrag` is grabbed where it is drawn (an open sheet by its visible
+  top), counts from pointer down instead of after the touch slop, and an
+  axis-locked drag only claims moves along its axis, so a list across it
+  keeps scrolling.
+- `pinch` reactions read `rotation`, `totalRotation` and `pointerCount`;
+  `drag` and `dragEnd` read `pointerCount`.
+- A draggable's return spring uses `DraggableModel.effectivePhysics`.
+
 ## 9.1.9
 
 Requires codelessly_api 9.0.3.

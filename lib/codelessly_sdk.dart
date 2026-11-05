@@ -66,6 +66,8 @@ export 'src/audio/sound.dart' show Sound, SoundEngine, SilentSoundEngine;
 export 'src/speech/speech.dart' show Speech, SpeechEngine;
 export 'src/ui/node_drag.dart';
 export 'src/ui/node_drag_track.dart';
+export 'src/ui/gesture_physics.dart';
+export 'src/ui/node_transform_gesture.dart';
 export 'src/ui/node_motion.dart';
 export 'src/ui/node_play.dart';
 export 'src/ui/node_path_reveal.dart';
