@@ -341,27 +341,18 @@ class _DragSourceBoxState extends State<DragSourceBox>
   }
 
   /// Flies the node back from where it was let go to its place, on the
-  /// model's spring ([DraggableModel.returnSpring]).
+  /// model's spring ([DraggableModel.effectivePhysics]: its physics, or
+  /// the first [DraggableModel.returnSpring] settings).
   void _springBack(Offset offset) {
     final RenderObject? box = context.findRenderObject();
-    if (!widget.model.returnSpring || box is! RenderBox || !box.attached) {
+    final PhysicsModel? physics = widget.model.effectivePhysics;
+    if (physics == null || box is! RenderBox || !box.attached) {
       return;
     }
     _returnFrom = offset - box.localToGlobal(Offset.zero);
     _return
       ..value = 0
-      ..animateWith(
-        SpringSimulation(
-          SpringDescription(
-            mass: 1,
-            stiffness: widget.model.springStiffness,
-            damping: widget.model.springDamping,
-          ),
-          0,
-          1,
-          0,
-        ),
-      );
+      ..animateWith(SpringSimulation(springOf(physics), 0, 1, 0));
   }
 
   /// The node drawn under the pointer, in the app's overlay. What the node

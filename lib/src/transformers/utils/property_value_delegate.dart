@@ -688,6 +688,9 @@ class PropertyValueDelegate {
             as Map?,
       },
       'track' => (scopedValues.trackValues ?? const TrackValues()).toMap(),
+      // The pose of the nearest transform gesture (x, y, scale, rotation...).
+      'transform' =>
+        (scopedValues.transformValues ?? const TransformValues()).toMap(),
       'speech' => Speech.instance.value,
       'initial' => InitialValues(scopedValues.initialVariables),
       _ => null,

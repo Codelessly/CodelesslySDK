@@ -842,6 +842,9 @@ abstract class WidgetNodeTransformerManager
     BaseNode node,
     Widget child,
   ) {
+    // Inside the drag, so a zoomed photo takes the pan before a dismiss
+    // drag on the same node does (docs/gestures_api.md, rule 3).
+    child = wrapWithTransformGesture(context, node, child);
     child = wrapWithDrag(context, node, child);
     if (node is! ReactionMixin) return child;
     if (node case CanvasNode() || SpacerNode()) return child;
@@ -966,6 +969,139 @@ abstract class WidgetNodeTransformerManager
               result: result,
             ),
       child: child,
+    );
+  }
+
+  /// Makes [node] pannable, zoomable and rotatable when it has a
+  /// [BaseNode.transformGesture] (or the first switch, [BaseNode.zoomable]);
+  /// see [NodeTransformGesture]. The pose reads from the model's variables
+  /// (two-way) and the node's `transform.*` bindings, and writes the
+  /// variables back. Each change runs the node's `changed` reactions, the end
+  /// of a gesture its `changeEnd` reactions, a double tap its `doubleTap`
+  /// reactions.
+  Widget wrapWithTransformGesture(
+    BuildContext context,
+    BaseNode node,
+    Widget child,
+  ) {
+    final TransformGestureModel? model = node.effectiveTransformGesture;
+    if (model == null || node is CanvasNode) return child;
+    final List<Reaction> reactions = node is ReactionMixin
+        ? [
+            for (final reaction in (node as ReactionMixin).reactions)
+              if (reaction.action.enabled) reaction,
+          ]
+        : const [];
+    bool has(TriggerType type) => reactions.any((r) => r.trigger.type == type);
+    final CodelesslyContext? codelessly = context.read<CodelesslyContext?>();
+    final Map<String, ValueNotifier<VariableData>> variables = {
+      for (final MapEntry<String, String> e in model.boundVariables.entries)
+        if (codelessly?.findVariableByName(e.value) case final variable?)
+          e.key: variable,
+    };
+    final TransformHandlesModel? handles = model.handles;
+    final String selectionName = handles?.selectionVariable.trim() ?? '';
+    final ValueNotifier<VariableData>? selection = selectionName.isEmpty
+        ? null
+        : codelessly?.findVariableByName(selectionName);
+
+    double? number(Object? value) => switch (value) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()),
+      _ => null,
+    };
+
+    String selectionKey(BuildContext context) {
+      final String key = handles?.selectionKey ?? '';
+      if (key.trim().isEmpty) return node.id;
+      return PropertyValueDelegate.substituteVariables(
+        key,
+        scopedValues: ScopedValues.of(context),
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      );
+    }
+
+    Widget build(BuildContext context) {
+      final ScopedValues scope = ScopedValues.of(context);
+      final Map<String, double> given = {};
+      for (final String key in TransformPose.keys) {
+        final String binding = 'transform.$key';
+        double? value = number(variables[key]?.value.value);
+        if (value == null && node.variables.containsKey(binding)) {
+          value = number(
+            PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              binding,
+              scopedValues: scope,
+            ),
+          );
+        }
+        if (value != null) given[key] = value;
+      }
+      bool enabled = model.enabled;
+      if (node.variables.containsKey(
+        TransformGestureModel.enabledVariableKey,
+      )) {
+        final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+          node,
+          TransformGestureModel.enabledVariableKey,
+          scopedValues: scope,
+        );
+        enabled = switch (value) {
+          bool b => b,
+          num n => n != 0,
+          String s => s.trim().toLowerCase() == 'true',
+          _ => model.enabled,
+        };
+      }
+      final String key = selectionKey(context);
+      final bool selected =
+          selection == null || '${selection.value.value}' == key;
+      void run(TriggerType type, Map<String, dynamic> result) {
+        if (!has(type)) return;
+        FunctionsRepository.triggerAction(
+          context,
+          type,
+          reactions: reactions,
+          result: result,
+        );
+      }
+
+      return NodeTransformGesture(
+        model: model,
+        given: given,
+        enabled: enabled,
+        selected: selected,
+        onSelect: selection == null
+            ? null
+            : () {
+                if ('${selection.value.value}' == key) return;
+                selection.value = selection.value.copyWith(value: key);
+              },
+        onPose: variables.isEmpty
+            ? null
+            : (pose) {
+                for (final MapEntry<String, ValueNotifier<VariableData>> e
+                    in variables.entries) {
+                  final ValueNotifier<VariableData> variable = e.value;
+                  if (variable.value.isComputed) continue;
+                  final num value = TransformPose.rounded(e.key, pose[e.key]);
+                  if ('${variable.value.value}' == '$value') continue;
+                  variable.value = variable.value.copyWith(value: value);
+                }
+              },
+        onChanged: (result) => run(TriggerType.changed, result),
+        onEnd: (result) => run(TriggerType.changeEnd, result),
+        onDoubleTap: (result) => run(TriggerType.doubleTap, result),
+        child: child,
+      );
+    }
+
+    final List<Listenable> listen = [...variables.values, ?selection];
+    if (listen.isEmpty) return Builder(builder: build);
+    return ListenableBuilder(
+      listenable: Listenable.merge(listen),
+      builder: (context, _) => build(context),
     );
   }
 
@@ -1428,6 +1564,14 @@ abstract class WidgetNodeTransformerManager
   /// (300ms) before they fire `click`.
   Widget wrapWithDoubleTap(BuildContext context, BaseNode node, Widget widget) {
     if (node is! ReactionMixin) return widget;
+    // A transform gesture with double tap zoom runs them itself.
+    final TransformGestureModel? transform = node.effectiveTransformGesture;
+    if (transform != null &&
+        transform.enabled &&
+        transform.zoom &&
+        transform.doubleTapScale > 0) {
+      return widget;
+    }
     final List<Reaction> reactions = (node as ReactionMixin).reactions
         .where(
           (reaction) =>
@@ -1859,6 +2003,9 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
   Offset _last = Offset.zero;
   Offset _lastGlobal = Offset.zero;
   double _lastScale = 1;
+  double _lastRotation = 0;
+  double _lastRawRotation = 0;
+  int _pointerCount = 1;
   bool _pinching = false;
   bool _dragged = false;
 
@@ -1900,6 +2047,7 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
       'y': local.dy,
       'globalX': global.dx,
       'globalY': global.dy,
+      'pointerCount': _pointerCount,
       ..._size,
       ..._modifiers,
     });
@@ -1917,6 +2065,7 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
       'y': _last.dy,
       'globalX': _lastGlobal.dx,
       'globalY': _lastGlobal.dy,
+      'pointerCount': _pointerCount,
       ..._size,
       ..._modifiers,
     });
@@ -1942,10 +2091,13 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
         _run(widget.onPinch, TriggerType.pinch, {
           'scale': event.scale,
           'totalScale': event.scale,
+          'rotation': 0.0,
+          'totalRotation': 0.0,
           'x': event.localPosition.dx,
           'y': event.localPosition.dy,
           'deltaX': 0.0,
           'deltaY': 0.0,
+          'pointerCount': 0,
         });
       }
     });
@@ -1964,6 +2116,9 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
           _origin = details.localFocalPoint;
           _total = Offset.zero;
           _lastScale = 1;
+          _lastRotation = 0;
+          _lastRawRotation = 0;
+          _pointerCount = details.pointerCount;
           _pinching = details.pointerCount > 1;
           _last = details.localFocalPoint;
           _lastGlobal = details.focalPoint;
@@ -1973,9 +2128,25 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
             _pinching = true;
             final double step = details.scale / _lastScale;
             _lastScale = details.scale;
+            // The recognizer's angle jumps a whole turn as the fingers
+            // cross ±180°: add up the small steps instead.
+            double turn = details.rotation * 180 / pi - _lastRawRotation;
+            _lastRawRotation = details.rotation * 180 / pi;
+            while (turn > 180) {
+              turn -= 360;
+            }
+            while (turn < -180) {
+              turn += 360;
+            }
+            _lastRotation += turn;
+            final double degrees = _lastRotation;
+            _pointerCount = details.pointerCount;
             _run(widget.onPinch, TriggerType.pinch, {
               'scale': step,
               'totalScale': details.scale,
+              'rotation': turn,
+              'totalRotation': degrees,
+              'pointerCount': details.pointerCount,
               'x': details.localFocalPoint.dx,
               'y': details.localFocalPoint.dy,
               'deltaX': details.focalPointDelta.dx,
@@ -2010,6 +2181,7 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
           onPanDown: (details) {
             _origin = details.localPosition;
             _total = Offset.zero;
+            _pointerCount = 1;
           },
           onPanUpdate: (details) {
             _last = details.localPosition;
