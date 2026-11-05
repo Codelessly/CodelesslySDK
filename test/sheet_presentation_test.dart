@@ -218,6 +218,25 @@ final Finder dragHandle = find.byKey(
   const ValueKey('Codelessly sheet drag handle'),
 );
 
+/// The grab handle lies on the sheet's canvas, near its top edge and
+/// centered, not in a band of its own above it (which a canvas that draws
+/// its own fill leaves see-through, the handle floating over the screen).
+void expectHandleOnCanvas(
+  WidgetTester tester, {
+  String canvasId = 'sheetCanvas',
+}) {
+  // Flutter's handle would sit in its own band above the canvas.
+  expect(tester.widget<BottomSheet>(bottomSheet).showDragHandle, isFalse);
+  expect(dragHandle, findsOneWidget);
+  final Rect canvas = tester.getRect(
+    find.byKey(ValueKey('Rectangle Transformer of $canvasId [$canvasId]')),
+  );
+  final Rect handle = tester.getRect(dragHandle);
+  expect(handle.top, canvas.top + LayoutPresentationRoute.dragHandleTop);
+  expect(handle.center.dx, closeTo(canvas.center.dx, 0.01));
+  expect(tester.getRect(bottomSheet).top, canvas.top);
+}
+
 void main() {
   for (final Size size in [phone, tablet]) {
     testWidgets('a bottom sheet spans the screen at the bottom, hugs its '
@@ -245,7 +264,7 @@ void main() {
       expect(midTop, greaterThan(sheet.top));
       expect(sheet.bottom, size.height);
       expect(sheet.height, lessThan(size.height / 2));
-      expect(tester.widget<BottomSheet>(bottomSheet).showDragHandle, isTrue);
+      expectHandleOnCanvas(tester);
     });
   }
 
@@ -261,7 +280,7 @@ void main() {
     ], size: phone);
     await tester.tap(find.text('Go'));
     await tester.pumpAndSettle();
-    expect(tester.widget<BottomSheet>(bottomSheet).showDragHandle, isFalse);
+    expect(dragHandle, findsNothing);
   });
 
   testWidgets('a bottom sheet is at most 92% of the screen tall', (
@@ -425,7 +444,7 @@ void main() {
     expect(tester.takeException(), isNull);
     final Rect sheet = tester.getRect(bottomSheet);
     expect(sheet.bottom, phone.height);
-    expect(tester.widget<BottomSheet>(bottomSheet).showDragHandle, isTrue);
+    expectHandleOnCanvas(tester, canvasId: 'confirmCanvas');
 
     await tester.tap(find.text('Reopen'));
     await tester.pump();
