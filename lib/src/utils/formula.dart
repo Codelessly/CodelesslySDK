@@ -3597,17 +3597,30 @@ class _Parser {
   }
 
   /// The quoted text at [pos], without its quotes: a backslash before the
-  /// quote (`'Won\'t'`) keeps the quote in the text; other backslashes are
-  /// kept as written.
+  /// quote (`'Won\'t'`) keeps the quote in the text; `\n`, `\t` and `\r`
+  /// are a newline, a tab and a carriage return (multi-line text such as a
+  /// lineup to paste into a chat); a doubled backslash and other
+  /// backslashes are kept as written, so regex patterns (`'\d+'`) read as
+  /// before.
   String _quotedText() {
     final String quote = source[pos];
     final StringBuffer text = StringBuffer();
     int i = pos + 1;
     while (i < source.length && source[i] != quote) {
-      if (source[i] == r'\' &&
-          i + 1 < source.length &&
-          source[i + 1] == quote) {
-        i++;
+      if (source[i] == r'\' && i + 1 < source.length) {
+        final String next = source[i + 1];
+        if (next == quote) {
+          i++;
+        } else if (next == r'\') {
+          text.write(r'\\');
+          i += 2;
+          continue;
+        } else if (const {'n': '\n', 't': '\t', 'r': '\r'}[next]
+            case final String control) {
+          text.write(control);
+          i += 2;
+          continue;
+        }
       }
       text.write(source[i]);
       i++;
