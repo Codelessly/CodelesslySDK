@@ -68,6 +68,36 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
   });
 
+  testWidgets('a screen covered by another one waits instead of ticking', (
+    tester,
+  ) async {
+    await pumpScreen(tester, [every(1000, addOne())]);
+    await tester.pump(const Duration(milliseconds: 1000));
+    await tester.pump();
+    expect(find.text('Ticks 1'), findsOneWidget);
+
+    // Open a screen over it (a deep link opens over the entry screen).
+    final NavigatorState navigator = tester.state(find.byType(Navigator));
+    navigator.push(
+      MaterialPageRoute<void>(builder: (_) => const SizedBox.expand()),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(seconds: 3));
+    navigator.pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    // Ticks at 2, 3 and 4 s fell while it was covered.
+    expect(find.text('Ticks 1'), findsOneWidget);
+
+    // Shown again, it ticks on (at 5 s).
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+    expect(find.text('Ticks 2'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 5));
+  });
+
   testWidgets('a slow interval chain skips ticks instead of piling up', (
     tester,
   ) async {
