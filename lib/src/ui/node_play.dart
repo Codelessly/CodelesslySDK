@@ -13,12 +13,19 @@ import 'package:collection/collection.dart';
 /// (0 to 1) and strength [amount], as offsets in logical pixels, scales,
 /// a rotation in radians and an opacity.
 ({double dx, double dy, double sx, double sy, double rotation, double opacity})
-effectTransformAt(EffectAnimationType type, double t, double amount) {
+effectTransformAt(
+  EffectAnimationType type,
+  double t,
+  double amount, {
+  double cycles = 0,
+}) {
   final double decay = 1 - t;
+  // Full swings over the effect: the type's own count unless [cycles] says.
+  double swings(double usual) => cycles > 0 ? cycles : usual;
   switch (type) {
     case EffectAnimationType.shake:
       return (
-        dx: math.sin(t * math.pi * 8) * 12 * amount * decay,
+        dx: math.sin(t * math.pi * 2 * swings(4)) * 12 * amount * decay,
         dy: 0,
         sx: 1,
         sy: 1,
@@ -48,11 +55,11 @@ effectTransformAt(EffectAnimationType type, double t, double amount) {
         dy: 0,
         sx: 1,
         sy: 1,
-        rotation: math.sin(t * math.pi * 6) * 0.14 * amount * decay,
+        rotation: math.sin(t * math.pi * 2 * swings(3)) * 0.14 * amount * decay,
         opacity: 1,
       );
     case EffectAnimationType.jelly:
-      final double w = math.sin(t * math.pi * 4) * 0.16 * amount * decay;
+      final double w = math.sin(t * math.pi * 2 * swings(2)) * 0.16 * amount * decay;
       return (dx: 0, dy: 0, sx: 1 + w, sy: 1 - w, rotation: 0, opacity: 1);
     case EffectAnimationType.flash:
       return (
@@ -61,7 +68,7 @@ effectTransformAt(EffectAnimationType type, double t, double amount) {
         sx: 1,
         sy: 1,
         rotation: 0,
-        opacity: 0.5 + math.cos(t * math.pi * 4) * 0.5,
+        opacity: 0.5 + math.cos(t * math.pi * 2 * swings(2)) * 0.5,
       );
     case EffectAnimationType.spin:
       return (
@@ -237,7 +244,12 @@ class NodePlayBoxState extends State<NodePlayBox>
     for (final EffectAnimation effect in widget.effects) {
       final AnimationController? controller = _controllers[effect.name];
       if (controller == null || !controller.isAnimating) continue;
-      final e = effectTransformAt(effect.type, controller.value, effect.amount);
+      final e = effectTransformAt(
+        effect.type,
+        controller.value,
+        effect.amount,
+        cycles: effect.cycles,
+      );
       if (e.opacity < 1) {
         child = Opacity(opacity: e.opacity.clamp(0, 1), child: child);
       }
