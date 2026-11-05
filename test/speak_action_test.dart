@@ -46,11 +46,15 @@ void main() {
     addTearDown(() => Speech.instance.removeListener(listen));
 
     final Future<bool> done = Speech.instance.speak('hola', language: 'es-ES');
-    expect(Speech.instance.value, {
-      'speaking': true,
-      'text': 'hola',
-      'available': true,
-    });
+    // The speech state also carries the listening keys (speech_listen_test).
+    expect(
+      Speech.instance.value,
+      allOf(
+        containsPair('speaking', true),
+        containsPair('text', 'hola'),
+        containsPair('available', true),
+      ),
+    );
     expect(engine.languages, ['es-ES']);
     engine.current!.complete();
     expect(await done, isTrue);

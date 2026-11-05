@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:codelessly_api/codelessly_api.dart' show EdgeInsetsModel;
+
 import '../render/genui_theme.dart';
 
 /// Builds Codelessly node JSON (the wire format `NodeJsonConverter` reads,
@@ -138,8 +140,15 @@ abstract final class CodelesslyNodes {
       if (divisions != null) 'isDiscrete': true,
       'activeTrackColor': hex(theme.primary),
       'thumbColor': hex(theme.primary),
+      'thumbRadius': 9,
+      'thumbBorderColor': '#FFFFFF',
+      'thumbBorderWidth': 2,
+      'thumbStrokeColor': '#FFFFFF',
+      'thumbStrokeWidth': 2,
       'inactiveTrackColor': hex(theme.track),
       'trackHeight': 4,
+      // Room for the thumb only, so the track lines up with the label.
+      'padding': const EdgeInsetsModel.symmetric(horizontal: 11).toJson(),
       'activeTickMarkColor': '#00000000',
       'inactiveTickMarkColor': '#00000000',
       'showLabel': false,
@@ -244,6 +253,45 @@ abstract final class CodelesslyNodes {
       'selectedForegroundColor': hex(theme.primary),
     },
   };
+
+  /// One option of an A2UI `ChoicePicker` → a Codelessly `chip` (action
+  /// kind), drawn in the selected or unselected style of the theme. The
+  /// picker owns the selection, so the chip's look comes from [selected].
+  static Map<String, Object?> optionChip({
+    required String id,
+    required String label,
+    required bool selected,
+    required GenUiTheme theme,
+  }) {
+    final double width = label.length * 7.8 + 30;
+    return {
+      'id': id,
+      'name': 'Option',
+      'type': 'chip',
+      'basicBoxLocal': _box(width, 36),
+      'horizontalFit': 'shrinkWrap',
+      'verticalFit': 'shrinkWrap',
+      'properties': {
+        'chipType': 'action',
+        'label': label,
+        'backgroundColor': hex(selected ? theme.primarySoft : theme.surface),
+        'borderColor': hex(selected ? theme.primary : theme.border),
+        'borderWidth': selected ? 1.5 : 1,
+        'cornerRadius': 10,
+        'elevation': 0,
+        'padding': const EdgeInsetsModel.symmetric(
+          horizontal: 12,
+          vertical: 6,
+        ).toJson(),
+        'labelPadding': EdgeInsetsModel.zero.toJson(),
+        'labelStyle': {
+          'fontSize': 13.5,
+          'fontName': fontName(selected ? 'w600' : 'w500', theme),
+          'fills': [_fill(hex(selected ? theme.primary : theme.text))],
+        },
+      },
+    };
+  }
 
   /// A2UI `Divider` → Codelessly `divider`.
   static Map<String, Object?> divider({

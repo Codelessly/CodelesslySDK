@@ -1377,7 +1377,7 @@
               "items": {
                 "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentId"
               },
-              "description": "Controls shown inline under the child (keep to 1-3)."
+              "description": "Controls shown inline under the child (keep to 1-3). The same ids may also be listed in controls."
             },
             "detail": {
               "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentId",
@@ -1918,7 +1918,7 @@
     },
     "calc": {
       "type": "object",
-      "description": "Codelessly formula, evaluated on the device, live, whenever the data it reads changes. Pure: no network, no writes, no clock. Identifiers name data model fields (inside a List template, the item's fields first): `weight * 2`, `items[0].qty`, `sum(items, i => i.qty * i.cost)`. Functions: + - * / % ^, comparisons, a ? b : c, if, min, max, round(x, d), floor, ceil, abs, sqrt, pow, exp, ln, log, clamp, sum, count, map, where, range(start, end, step), object(k, v, ...), first, last, fixed(x, d), formatNumber, formatCurrency. Use map and range to build chart rows. Do not give calc a returnType.",
+      "description": "Codelessly formula, evaluated on the device, live, whenever the data it reads changes. Pure: no network, no writes, no clock. Identifiers name data model fields (inside a List template, the item's fields first): `weight * 2`, `items[0].qty`, `sum(items, i => i.qty * i.cost)`. Operators: + - * / % (unary minus too), == != < <= > >=, && || !, a ? b : c; + also joins text. A ChoicePicker value is a list: read it with first(sex) or sex[0]. Functions: if, min, max, round(x, d), floor, ceil, abs, sqrt, pow, exp, ln, log, clamp, sum, count, map, where, range(start, end, step), object(k, v, ...), first, last, fixed(x, d), formatNumber(x), formatCurrency(x, 'USD'). Use map and range to build chart rows. Do not give calc a returnType.",
       "properties": {
         "call": {
           "const": "calc"
