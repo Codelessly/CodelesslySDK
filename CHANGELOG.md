@@ -1,3 +1,15 @@
+## Unreleased
+
+### Lists and pagination
+
+- A list whose item template has a fixed height (width, in a horizontal
+  list) and no bound size or visibility gives every item that extent, so a
+  10,000 item list lays out any offset without building the items before it.
+- A list with separators keeps its fixed item extent (items and separators
+  interleave with known extents) instead of measuring every item.
+- Data list rows count duplicate ids once per build instead of once per
+  row, which was quadratic in the list's length.
+
 ## 9.1.9
 
 Requires codelessly_api 9.0.3.
