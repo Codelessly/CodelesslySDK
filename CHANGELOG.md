@@ -13,6 +13,23 @@
   (its signature is unchanged, so subclasses that override it still build).
 - Requires the unreleased codelessly_api `AppIdentity`.
 - New package `packages/codelessly_genui`: renders A2UI (agent-generated UI) with the SDK's node transformers. It is not published yet; apps depend on it from git.
+- Requires the unreleased codelessly_api with `genscreen.dart` (for the
+  runtime screen generator below).
+- Runtime screen generation: `RuntimeScreenGenerator` registers the
+  `generateScreen` app function (Call function with `prompt` and `kit`),
+  gets a plan from a `ScreenPlanSource` (`HttpScreenPlanSource` for a host
+  endpoint that holds the key, `ClaudeScreenPlanSource` for trusted
+  builds), validates it with one fix round, compiles it with the kit and
+  opens it (`GeneratedScreenPage`, `GeneratedScreenView`). Plans are cached
+  per prompt and kit fingerprint (`GeneratedScreenCache`, optionally
+  persisted by the host).
+- Speech recognition: built-in `listen` and `stopListening` app functions
+  (Call function; a host function of the same name wins). The `speech`
+  variable gains `canListen`, `listening`, `heard`, `score` (0-100 against
+  the expected text, null until scored), `confidence` and `error`. Web uses
+  the Web Speech API's SpeechRecognition; other platforms report
+  `canListen: false` until the host sets `Speech.recognizer`.
+  `pronunciationScore` is exported.
 
 ## 9.1.9
 
