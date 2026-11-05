@@ -83,7 +83,6 @@ export 'src/utils/cupertino_svg_url.dart';
 export 'src/utils/directional_icons.dart';
 export 'src/ui/node_hero.dart';
 export 'src/utils/notched_shape.dart';
-export 'src/utils/path_shadow.dart';
 export 'src/utils/svg_path.dart';
 export 'src/utils/cupertino_icons_by_codepoint.dart';
 export 'src/utils/material_icon_versions.dart';
