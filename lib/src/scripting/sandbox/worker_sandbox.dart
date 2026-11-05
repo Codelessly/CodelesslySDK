@@ -16,14 +16,24 @@ ScriptSandbox createPlatformSandbox() => WorkerSandbox();
 ///
 /// Messages in are `kind\nrun\npayload` (kind is `start`, `resume`,
 /// `check` or `ping`). Messages out are `run\n#begin` when a step starts
-/// running, `run\nstate` once the run's jobs have run, and `run\n#pong`
-/// for a ping.
+/// running, `run\n#ms <step time>\nstate` once the run's jobs have run,
+/// and `run\n#pong` for a ping.
 const String _workerAdapter = r'''
 (function () {
   'use strict';
   const post = self.postMessage.bind(self);
   const later = self.setTimeout.bind(self);
+  const now = self.performance.now.bind(self.performance);
+  // A step's time: from its message until the next task starts, by when
+  // its promise jobs have all run.
+  const stepMs = {};
+  let open = null;
+  function close() {
+    if (open) stepMs[open.run] = now() - open.began;
+    open = null;
+  }
   self.addEventListener('message', function (e) {
+    close();
     const text = String(e.data);
     const a = text.indexOf('\n'), b = text.indexOf('\n', a + 1);
     const kind = text.slice(0, a), run = text.slice(a + 1, b), payload = text.slice(b + 1);
@@ -36,6 +46,7 @@ const String _workerAdapter = r'''
       return;
     }
     post(run + '\n#begin');
+    open = { run, began: now() };
     try {
       (kind === 'start' ? globalThis.__cl_start : globalThis.__cl_resume)(payload);
     } catch (err) {
@@ -43,7 +54,13 @@ const String _workerAdapter = r'''
       return;
     }
     // A timer runs after every pending promise reaction of the run.
-    later(function () { post(run + '\n' + globalThis.__cl_state(run)); }, 0);
+    // The step's time, measured here: the app may be too busy to tell.
+    later(function () {
+      close();
+      const ms = stepMs[run] || 0;
+      delete stepMs[run];
+      post(run + '\n#ms ' + ms + '\n' + globalThis.__cl_state(run));
+    }, 0);
   });
 })();
 ''';
@@ -73,6 +90,9 @@ class WorkerSandbox implements ScriptSandbox {
   final Map<String, Completer<Map<String, Object?>>> _waiting = {};
   final Map<String, Timer> _watchdogs = {};
   final Map<String, Stopwatch> _cpu = {};
+
+  /// The time the worker measured for each run's steps so far.
+  final Map<String, double> _workerMs = {};
   final Map<String, List<String>> _paramNames = {};
   final Map<String, String> _sources = {};
   final Map<String, Completer<Map<String, Object?>?>> _checks = {};
@@ -160,7 +180,15 @@ class WorkerSandbox implements ScriptSandbox {
     });
   }
 
-  void _deliver(String run, String stateJson) {
+  void _deliver(String run, String message) {
+    String stateJson = message;
+    if (message.startsWith('#ms ')) {
+      final int nl = message.indexOf('\n');
+      _workerMs[run] =
+          (_workerMs[run] ?? 0) +
+          (double.tryParse(message.substring(4, nl)) ?? 0);
+      stateJson = message.substring(nl + 1);
+    }
     final Completer<Map<String, Object?>?>? checking = _checks.remove(run);
     if (checking != null) {
       final Object? check = (jsonDecode(stateJson) as Map)['check'];
@@ -177,7 +205,8 @@ class WorkerSandbox implements ScriptSandbox {
     if (completer == null) return;
     final Map<String, Object?> state = (jsonDecode(stateJson) as Map)
         .cast<String, Object?>();
-    state['cpuMs'] = (_cpu[run]?.elapsedMicroseconds ?? 0) / 1000;
+    state['cpuMs'] =
+        _workerMs[run] ?? (_cpu[run]?.elapsedMicroseconds ?? 0) / 1000;
     final String? source = _sources[run];
     final List<String> paramNames = _paramNames[run] ?? const [];
     if (state['status'] != 'waiting') _forget(run);
@@ -212,6 +241,7 @@ class WorkerSandbox implements ScriptSandbox {
 
   void _forget(String run) {
     _cpu.remove(run);
+    _workerMs.remove(run);
     _budgets.remove(run);
     _paramNames.remove(run);
     _sources.remove(run);
