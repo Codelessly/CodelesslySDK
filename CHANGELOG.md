@@ -1,3 +1,15 @@
+## 9.1.2
+
+Requires codelessly_api 9.0.1.
+
+### Accessibility
+
+- A tappable node with tappable nodes inside (a server card with an edit
+  button) keeps each of them as a button of its own. It merged them into one
+  button before, so a screen reader, and a click on the web while semantics
+  were on, only reached the outer node's tap: the card's edit button selected
+  the card instead of opening its dialog.
+
 ## 9.1.1
 
 Requires codelessly_api 9.0.1.

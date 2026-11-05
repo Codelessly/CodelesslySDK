@@ -656,6 +656,10 @@ abstract class WidgetNodeTransformerManager
   /// Tells screen readers that a tappable node is a button. A node with text
   /// inside reads as that text; one without (an icon button) reads as its
   /// node name, or its icon's name when the node still has a default name.
+  /// A node with controls of its own inside (a card with an edit button) is
+  /// a button that keeps them as separate nodes, so each runs its own tap:
+  /// merged, a screen reader (and a click on the web while semantics are on)
+  /// would only reach the outer node's tap.
   Widget wrapWithSemantics(BaseNode node, Widget widget) {
     final String? customLabel = node.variables['semanticLabel'];
     final String? customSelected = node.variables['semanticSelected'];
@@ -693,6 +697,15 @@ abstract class WidgetNodeTransformerManager
 
     final bool hasText = descendants.any((child) => child is TextNode);
     final String label = hasText ? '' : semanticLabelFor(node, descendants);
+    if (descendants.any(_isInteractive)) {
+      // Its text reads from its own nodes inside the button.
+      return Semantics(
+        container: true,
+        button: true,
+        label: label.isEmpty ? null : label,
+        child: widget,
+      );
+    }
     return MergeSemantics(
       child: Semantics(
         button: true,
@@ -700,6 +713,21 @@ abstract class WidgetNodeTransformerManager
         child: widget,
       ),
     );
+  }
+
+  /// Whether [node] takes input of its own: it reacts to taps, or it is a
+  /// widget (a button, a field, a switch) that handles its input itself.
+  static bool _isInteractive(BaseNode node) {
+    if (node is CustomPropertiesMixin &&
+        node.handlesDefaultReactionsInternally) {
+      return true;
+    }
+    return node is ReactionMixin &&
+        (node as ReactionMixin).reactions.any(
+          (reaction) =>
+              reaction.trigger.type == TriggerType.click &&
+              reaction.action.enabled,
+        );
   }
 
   /// Semantics a node's `semanticLabel` variable gives it (a text with paths
