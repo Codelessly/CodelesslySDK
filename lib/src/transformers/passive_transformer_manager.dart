@@ -443,6 +443,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         ];
       }
     }
+    if (node is RectangleNode && node.variables.containsKey('path')) {
+      // A shape drawn from bound SVG data, e.g. the filled part of a curved
+      // slider's track: `${= breezeFillPath}`. Empty text draws the box.
+      final String? path = value<Object>('path')?.toString();
+      if (path != null && path != node.path) patch['path'] = path;
+    }
     if (node is CornerMixin) {
       // A number, or [top-left, top-right, bottom-right, bottom-left], e.g.
       // a dialog squared at the bottom as a mobile sheet:

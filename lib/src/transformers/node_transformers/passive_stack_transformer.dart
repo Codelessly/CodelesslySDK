@@ -170,6 +170,12 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     required bool isScrollAxis,
     ScopedValues? scopedValues,
   }) {
+    // Children of scaled content are laid out in its design size (the
+    // frame's contentSize), not the frame's own box: an aligned child keeps
+    // its share of the design's free space, then everything is scaled.
+    final SizeC inner = parent is FrameNode && parent.contentFit != null
+        ? parent.contentDesignSize
+        : parent.innerBoxLocal.size;
     final String property = horizontal ? 'positionX' : 'positionY';
     if (scopedValues != null && node.variables.containsKey(property)) {
       final num? fraction = PropertyValueDelegate.getPropertyValue<num>(
@@ -191,8 +197,8 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
               ? node.outerBoxLocal.width
               : node.outerBoxLocal.height,
           parentExtent: horizontal
-              ? parent.innerBoxLocal.width
-              : parent.innerBoxLocal.height,
+              ? inner.width
+              : inner.height,
           fraction: fraction.toDouble(),
           anchor: ((horizontal ? alignment?.x : alignment?.y) ?? 0) / 2 + 0.5,
         );
@@ -202,8 +208,8 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         ? node.outerBoxLocal.width
         : node.outerBoxLocal.height;
     final double parentExtent = horizontal
-        ? parent.innerBoxLocal.width
-        : parent.innerBoxLocal.height;
+        ? inner.width
+        : inner.height;
     final SizeFit fit = horizontal ? node.horizontalFit : node.verticalFit;
     final bool expands =
         fit == SizeFit.expanded &&

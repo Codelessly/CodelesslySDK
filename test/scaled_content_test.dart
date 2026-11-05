@@ -112,6 +112,68 @@ List<RenderObject> _clipsAbove(WidgetTester tester, String id, String frameId) {
 }
 
 void main() {
+  testWidgets('a motion path inside scaled content moves by the scaled '
+      'offset from its start', (tester) async {
+    final (:truck, :wheel) = _truck(clipsContent: false);
+    final RectangleNode moving = wheel
+      ..motion = const MotionModel(
+        path: 'M 40 40 L 140 40',
+        pathProgress: 1,
+        durationMs: 0,
+      );
+    // 300x660 into 150x330: half size. The wheel (150, 330) moves 100 px
+    // right in design units: 50 px on screen.
+    await _pump(tester, [truck, moving], box: const Size(150, 330));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getRect(_of('wheel')),
+      const Rect.fromLTWH(75 + 50, 165, 75, 165),
+    );
+  });
+
+  testWidgets('an aligned child of scaled content is placed at its scaled '
+      'position', (tester) async {
+    final RectangleNode box = RectangleNode(
+      id: 'wheel',
+      name: 'wheel',
+      basicBoxLocal: NodeBox(200, 100, 40, 20),
+      positioningMode: PositioningMode.align,
+      edgePins: const EdgePinsModel(left: 200, top: 100, right: null, bottom: null),
+    )..parentID = 'truck';
+    // The frame's own box is smaller than its design (contentSize), as when
+    // a 960x600 desk is drawn in a 390 px phone.
+    final FrameNode truck = FrameNode(
+      id: 'truck',
+      name: 'truck',
+      basicBoxLocal: NodeBox(0, 0, 150, 330),
+      children: ['wheel'],
+      horizontalFit: SizeFit.expanded,
+      verticalFit: SizeFit.expanded,
+      contentFit: Fit.contain,
+      contentSize: const SizeC(300, 660),
+    )..parentID = kRootNode;
+    await _pump(tester, [truck, box], box: const Size(150, 330));
+    expect(tester.getRect(_of('wheel')), const Rect.fromLTWH(100, 50, 20, 10));
+  });
+
+  testWidgets('a child overhanging scaled content is scaled with it', (
+    tester,
+  ) async {
+    final (:truck, :wheel) = _truck(clipsContent: false);
+    final RectangleNode tape = RectangleNode(
+      id: 'wheel',
+      name: 'wheel',
+      basicBoxLocal: NodeBox(280, 600, 80, 22),
+      positioningMode: PositioningMode.pin,
+      edgePins: const EdgePinsModel(left: 280, top: 600, right: null, bottom: null),
+    )..parentID = 'truck';
+    await _pump(tester, [truck, tape], box: const Size(150, 330));
+    expect(
+      tester.getRect(_of('wheel')),
+      const Rect.fromLTWH(140, 300, 40, 11),
+    );
+  });
+
   testWidgets('scaled content does not clip its children unless the frame '
       'clips', (tester) async {
     // A card's drop shadow paints past the frame's box: only the frame's

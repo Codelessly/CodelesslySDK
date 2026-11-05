@@ -1234,7 +1234,8 @@ Widget buildFill(
 
       // Substitute URL value from [CodelesslyContext]'s [data] map if
       // [imageURL] represents a JSON path.
-      String? imageURL = paint.croppedImageURL ?? paint.downloadUrl!;
+      // A paint saved without a URL draws nothing rather than failing.
+      String? imageURL = paint.croppedImageURL ?? paint.downloadUrl ?? '';
       final imageURLValue =
           PropertyValueDelegate.getPropertyValue<String>(
             node,

@@ -220,8 +220,11 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
   Widget buildFromUrl({required bool withAlignment}) {
     final String url =
         widget.url ??
-        widget.paint!.croppedImageURL ??
-        widget.paint!.downloadUrl!;
+        widget.paint?.croppedImageURL ??
+        widget.paint?.downloadUrl ??
+        '';
+    // A paint saved without a URL draws nothing rather than failing.
+    if (url.trim().isEmpty) return const SizedBox.shrink();
 
     if (url.containsUncheckedVariablePath) return jsonPathBuilder(url);
 
