@@ -26,6 +26,7 @@ const Set<String> predefinedVariableNames = {
   'track',
   'speech',
   'initial',
+  'script',
 };
 
 /// The key under which a layout's published variables hold the project's

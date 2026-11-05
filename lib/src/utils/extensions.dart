@@ -1862,6 +1862,9 @@ extension ActionModelExt on ActionModel {
       case ActionType.callApi:
         final ApiCallAction action = this as ApiCallAction;
         strings.addAll(action.parameters.values);
+      case ActionType.runScript:
+        final RunScriptAction action = this as RunScriptAction;
+        strings.addAll(action.arguments.values);
       case ActionType.setStorage:
         final SetStorageAction action = this as SetStorageAction;
         strings.addAll([

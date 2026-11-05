@@ -163,6 +163,9 @@ class ConditionVariablesVisitor
   Set<String>? visitPlayAnimationAction(PlayAnimationAction action) => {};
 
   @override
+  Set<String>? visitRunScriptAction(RunScriptAction action) => {};
+
+  @override
   Set<String>? visitEditTextAction(EditTextAction action) => {};
 
   @override
@@ -284,6 +287,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitPlayAnimationAction(PlayAnimationAction action) => null;
+
+  @override
+  String? visitRunScriptAction(RunScriptAction action) => null;
 
   @override
   String? visitEditTextAction(EditTextAction action) => action.nodeId;
