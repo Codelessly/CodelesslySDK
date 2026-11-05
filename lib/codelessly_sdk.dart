@@ -30,6 +30,7 @@ export 'src/data/web_data_repository.dart';
 export 'src/functions/functions.dart';
 export 'src/functions/functions_repository.dart';
 export 'src/scripting/flutter_script_host.dart';
+export 'src/scripting/script_catalog.dart';
 export 'src/scripting/sandbox/script_sandbox.dart';
 export 'src/scripting/script_driver.dart';
 export 'src/scripting/script_formula_calls.dart';

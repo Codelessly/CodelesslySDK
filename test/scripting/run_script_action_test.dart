@@ -316,4 +316,87 @@ void main() {
       );
     },
   );
+
+  test('A script runs its stored test cases with sample variables', () async {
+    const ScriptModel model = ScriptModel(
+      id: 'v',
+      name: 'validate',
+      params: [ScriptParam(name: 'form')],
+      capabilities: [ScriptCapability.variablesRead],
+      source: """
+        const errors = {};
+        if (!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+\$/.test(form.email)) errors.email = 'Invalid email';
+        if (form.age < vars.get('minAge')) errors.age = 'Too young';
+        if (form.age > 150) throw new RangeError('age');
+        return {valid: Object.keys(errors).length === 0, errors};
+      """,
+      tests: [
+        ScriptTest(
+          name: 'ok',
+          args: {
+            'form': {'email': 'a@b.co', 'age': 30},
+          },
+          vars: {'minAge': 13},
+          expect: {'errors': {}, 'valid': true},
+        ),
+        ScriptTest(
+          name: 'bad',
+          args: {
+            'form': {'email': 'nope', 'age': 9},
+          },
+          vars: {'minAge': 13},
+          expect: {
+            'valid': false,
+            'errors': {'email': 'Invalid email', 'age': 'Too young'},
+          },
+        ),
+        ScriptTest(
+          name: 'throws',
+          args: {
+            'form': {'email': 'a@b.co', 'age': 200},
+          },
+          vars: {'minAge': 13},
+          expectError: 'RangeError',
+        ),
+        ScriptTest(
+          name: 'wrong on purpose',
+          args: {
+            'form': {'email': 'a@b.co', 'age': 30},
+          },
+          vars: {'minAge': 13},
+          expect: {'valid': false},
+        ),
+      ],
+    );
+    final List<ScriptTestResult> results = await model.runTests();
+    expect([for (final r in results) r.passed], [true, true, true, false]);
+    expect(results.last.reason, contains('Expected'));
+    expect(ScriptModel.fromJson(model.toJson()).tests, model.tests);
+  });
+
+  test('The catalog describes every host API with its capability', () {
+    final Map<String, Object?> json = ScriptCatalog.toJson();
+    final List api = json['api']! as List;
+    expect(
+      api.map((e) => (e as Map)['signature']),
+      containsAll([
+        'vars.get(name)',
+        'app.callApi(name, inputs?)',
+        'fmt.currency(n, code?, digits?)',
+      ]),
+    );
+    for (final ScriptCapability c in ScriptCapability.values) {
+      expect(
+        (json['capabilities']! as Map).containsKey(c.id),
+        isTrue,
+        reason: c.id,
+      );
+    }
+    expect(
+      ScriptCatalog.entries
+          .firstWhere((e) => e.signature == 'vars.set(name, value)')
+          .parameters,
+      ['name', 'value'],
+    );
+  });
 }

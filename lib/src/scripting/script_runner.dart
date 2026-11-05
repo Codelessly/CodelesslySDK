@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
 
@@ -299,6 +300,25 @@ abstract final class ScriptRunner {
     }
   }
 
+  /// Checks [script]'s source compiles, without running it. Returns null,
+  /// or the error `{type, message, line?, column?}`. Never throws.
+  static Future<Map<String, Object?>?> check(
+    ScriptModel script, {
+    ScriptSandbox? sandbox,
+  }) async {
+    try {
+      return await (sandbox ?? ScriptSandbox.instance).check(
+        script.source,
+        script.paramNames,
+      );
+    } on Object catch (e) {
+      return {
+        'type': e is ScriptEngineUnavailable ? 'EngineUnavailable' : 'Error',
+        'message': '$e',
+      };
+    }
+  }
+
   /// Runs [script] synchronously, for formulas. Returns null when the
   /// platform can't run scripts synchronously (the web) or the script waits
   /// on the host (it awaits an `app.*` call); call [run] then.
@@ -396,5 +416,134 @@ abstract final class ScriptRunner {
         'error': {'type': 'HostError', 'message': '$e'},
       };
     }
+  }
+}
+
+/// A [ScriptHost] with sample data, for running scripts outside a screen:
+/// the Editor's console, the Editor MCP and tests. Variable writes change
+/// [vars]; app calls are recorded in [calls] and answered by [responses]
+/// (by call name), or with null.
+class SampleScriptHost implements ScriptHost {
+  /// The sample variables, by name.
+  final Map<String, Object?> vars;
+
+  /// The sample input values, by node id.
+  final Map<String, Object?> nodes;
+
+  /// What each kind of app call answers, by call name (`callApi`,
+  /// `cloudData`, ...).
+  final Map<String, Object?> responses;
+
+  /// The app calls the script made: `{name, args}` maps.
+  final List<Map<String, Object?>> calls = [];
+
+  /// Creates a [SampleScriptHost].
+  SampleScriptHost({
+    Map<String, Object?>? vars,
+    Map<String, Object?>? nodes,
+    this.responses = const {},
+  }) : vars = {...?vars},
+       nodes = {...?nodes};
+
+  @override
+  Map<String, Object?> variables() => Map.of(vars);
+
+  @override
+  Map<String, Object?> nodeValues() => Map.of(nodes);
+
+  @override
+  void setVariable(String name, Object? value) => vars[name] = value;
+
+  @override
+  Future<Object?> call(String name, List<Object?> args) async {
+    calls.add({'name': name, 'args': args});
+    return responses[name];
+  }
+}
+
+/// The outcome of one [ScriptTest].
+class ScriptTestResult {
+  /// The case.
+  final ScriptTest test;
+
+  /// The run.
+  final ScriptRunResult run;
+
+  /// Whether it gave what the case expects.
+  final bool passed;
+
+  /// Why it didn't, when it didn't.
+  final String? reason;
+
+  /// Creates a [ScriptTestResult].
+  const ScriptTestResult(
+    this.test,
+    this.run, {
+    required this.passed,
+    this.reason,
+  });
+
+  /// The outcome as JSON.
+  Map<String, Object?> toJson() => {
+    'name': test.name,
+    'passed': passed,
+    if (reason != null) 'reason': reason,
+    'result': run.toJson(),
+  };
+}
+
+/// Runs a script's [ScriptTest]s.
+extension ScriptTests on ScriptModel {
+  /// Runs [cases] (the script's own [ScriptModel.tests] by default), each
+  /// with its sample variables and inputs.
+  Future<List<ScriptTestResult>> runTests({
+    List<ScriptTest>? cases,
+    Map<String, ScriptModel> scripts = const {},
+  }) async {
+    final List<ScriptTestResult> results = [];
+    for (final ScriptTest t in cases ?? tests) {
+      final ScriptRunResult run = await ScriptRunner.run(
+        this,
+        args: t.args,
+        scripts: scripts,
+        host: SampleScriptHost(vars: t.vars, nodes: t.nodes),
+      );
+      final String? expectError = t.expectError;
+      String? reason;
+      if (expectError != null) {
+        if (run.ok) {
+          reason =
+              'Expected a $expectError, but it returned ${_json(run.value)}.';
+        } else if (run.error!['type'] != expectError) {
+          reason =
+              'Expected a $expectError, but it failed with ${run.error!['type']}: ${run.error!['message']}';
+        }
+      } else if (!run.ok) {
+        reason =
+            'It failed: ${run.error!['type']}: ${run.error!['message']}'
+            '${run.error!['line'] != null ? ' (line ${run.error!['line']})' : ''}';
+      } else if (_json(run.value) != _json(t.expect)) {
+        reason = 'Expected ${_json(t.expect)}, got ${_json(run.value)}.';
+      }
+      results.add(
+        ScriptTestResult(t, run, passed: reason == null, reason: reason),
+      );
+    }
+    return results;
+  }
+
+  static String _json(Object? v) => jsonEncode(_sorted(v));
+
+  /// [v] with map keys sorted, so key order doesn't fail a comparison; whole
+  /// doubles compare equal to ints.
+  static Object? _sorted(Object? v) {
+    if (v is Map) {
+      final List<String> keys = [for (final k in v.keys) '$k']..sort();
+      return {for (final k in keys) k: _sorted(v[k])};
+    }
+    if (v is List) return [for (final e in v) _sorted(e)];
+    if (v is double && v == v.truncateToDouble() && v.abs() < 1e15)
+      return v.toInt();
+    return v;
   }
 }
