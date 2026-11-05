@@ -64,6 +64,16 @@ class CodelesslyContext with ChangeNotifier, Equatable {
   /// The key is the condition's id.
   final Map<String, BaseCondition> conditions;
 
+  /// The scripts this layout can run, by name: the project's scripts, then
+  /// its Editor page's, which win over a project script of the same name.
+  /// "Run script" actions and `script.name(args)` in formulas use them.
+  final Map<String, ScriptModel> scripts = {};
+
+  /// The script with id or name [idOrName], or null.
+  ScriptModel? findScript(String idOrName) =>
+      scripts[idOrName] ??
+      scripts.values.where((s) => s.id == idOrName).firstOrNull;
+
   /// A notifier that is used to rebuild individual nodes.
   final ValueNotifier<String> nodeRebuildNotifier = ValueNotifier('');
 

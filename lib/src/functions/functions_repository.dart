@@ -207,6 +207,8 @@ class FunctionsRepository {
         return ScrollTargets.scrollTo(action as ScrollToAction);
       case ActionType.playSound:
         return playSound(context, action as PlaySoundAction);
+      case ActionType.runScript:
+        return runScript(context, action as RunScriptAction);
       case ActionType.controlDrag:
         final ControlDragAction drag = action as ControlDragAction;
         return NodeDrag.control(
@@ -497,6 +499,113 @@ class FunctionsRepository {
       scopedValues: scopedValues,
     ).runBatch(action);
     return true;
+  }
+
+  /// Runs the script [action] names with its arguments.
+  ///
+  /// On success the script's result is the chain's `${result}` (and is
+  /// stored in [RunScriptAction.resultVariable] if set). On failure the
+  /// [RunScriptAction.onError] actions run with `${result}` set to
+  /// `{error: {type, message, line, column}, logs}`. Like a Call API
+  /// action, a failure with onError actions doesn't stop the chain; one
+  /// without them is reported and stops it.
+  static Future<bool> runScript(
+    BuildContext context,
+    RunScriptAction action,
+  ) async {
+    final CodelesslyContext codelessly = context.read<CodelesslyContext>();
+    final ScriptModel? script = codelessly.findScript(action.scriptId);
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    final ScriptRunResult result = script == null
+        ? ScriptRunResult.failure(
+            'ReferenceError',
+            'There is no script "${action.scriptId}".',
+          )
+        : await ScriptRunner.run(
+            script,
+            args: {
+              for (final MapEntry<String, String> e in action.arguments.entries)
+                e.key: scriptArgument(e.value, scopedValues),
+            },
+            scripts: codelessly.scripts,
+            host: FlutterScriptHost(context),
+          );
+    for (final Map<String, Object?> log in result.logs) {
+      DebugLogger.instance.printInfo(
+        '[script ${script?.name ?? action.scriptId}] ${log['level']}: ${log['message']}',
+        name: name,
+      );
+    }
+    if (result.ok) {
+      ActionChain.setResult(result.value);
+      final String? variableName = action.resultVariable;
+      if (variableName != null && variableName.isNotEmpty) {
+        final Observable<VariableData>? variable = codelessly.findVariable(
+          name: variableName,
+        );
+        if (variable != null && !variable.value.isComputed) {
+          variable.value = variable.value.copyWith(value: result.value);
+        }
+      }
+      return true;
+    }
+    final Map<String, Object?> failure = {
+      'error': result.error,
+      'logs': result.logs,
+    };
+    final String message =
+        'Script ${script?.name ?? action.scriptId} failed: ${result.error!['type']}: ${result.error!['message']}'
+        '${result.error!['line'] != null ? ' (line ${result.error!['line']})' : ''}';
+    if (action.onError.isNotEmpty) {
+      DebugLogger.instance.printInfo(message, name: name);
+      ActionChain.setResult(failure);
+      // ignore: use_build_context_synchronously
+      await runActions(
+        ActionChain.contextFor(context) ?? context,
+        action.onError,
+      );
+      return true;
+    }
+    throw ScriptFailedException(message, result.error!);
+  }
+
+  /// The value an argument of a "Run script" action passes: the value of a
+  /// text that is exactly one variable or formula (`${cart.items}` passes
+  /// the list), else the text with its variables filled in, read as JSON
+  /// when it is JSON (`30` passes a number, `true` a boolean).
+  static Object? scriptArgument(String text, ScopedValues scopedValues) {
+    final String trimmed = text.trim();
+    final RegExpMatch? match = variableSyntaxIdentifierRegex.firstMatch(
+      trimmed,
+    );
+    final bool exact =
+        match != null && match.start == 0 && match.end == trimmed.length;
+    if (exact) {
+      return PropertyValueDelegate.getVariableValueFromPath<Object>(
+        trimmed,
+        scopedValues: scopedValues,
+      );
+    }
+    final String filled = PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
+    final String t = filled.trim();
+    if (t.isNotEmpty &&
+        (num.tryParse(t) != null ||
+            t == 'true' ||
+            t == 'false' ||
+            t == 'null' ||
+            (t.startsWith('[') && t.endsWith(']')) ||
+            (t.startsWith('{') && t.endsWith('}')))) {
+      try {
+        return jsonDecode(t);
+      } on FormatException {
+        // Not JSON: the text.
+      }
+    }
+    return filled;
   }
 
   /// Runs [actions] in order, like a trigger's reactions: blocking actions

@@ -875,6 +875,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       listenables.add(FormulaClock.instance);
     }
 
+    // A formula that calls a script gets the result late on the web (the
+    // script runs in a worker), so it rebuilds when results arrive.
+    final bool callsScript =
+        node.variables.values.any(
+          (path) => switch (FormulaEvaluator.exactExpression(path)) {
+            final String expression => FormulaEvaluator.callsScript(expression),
+            null => false,
+          },
+        ) ||
+        inlineTextTemplatesOf(node).any(FormulaEvaluator.textCallsScript);
+    if (callsScript) {
+      listenables.add(ScriptResults.instance);
+    }
+
     // A formula that reads the millisecond clock rebuilds on every frame.
     readsFrameClock =
         readsFrameClock ||
