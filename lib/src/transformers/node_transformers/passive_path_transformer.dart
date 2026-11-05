@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -40,6 +41,48 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
     }
 
     final String data = bound<Object>('pathData')?.toString() ?? node.pathData;
+    // A paint whose colour is bound (`fill-<id>`, `stroke-paint-<id>`, as
+    // insertTree stores a `${...}` colour) draws the bound colour.
+    Color? colorOf(PaintModel paint, String key) {
+      final PaintModel? value = node.variables.containsKey(key)
+          ? PropertyValueDelegate.getPropertyValue<PaintModel>(
+              node,
+              key,
+              scopedValues: scope,
+            )
+          : null;
+      return (value ?? paint).toFlutterColor();
+    }
+
+    // The trim eases over `trimMs` (default transitionMs) on `trimCurve`
+    // (a motion curve name, default easeInOut), both bindable, so a trail
+    // can keep pace with a plane flying for a given time.
+    final Object? trimMs = bound<Object>('trimMs');
+    final int trimDuration = switch (trimMs) {
+      num n => n.round(),
+      String t => double.tryParse(t.trim())?.round() ?? node.transitionMs,
+      _ => node.transitionMs,
+    };
+    final Object? trimCurveName = bound<Object>('trimCurve');
+    final MotionCurve? trimCurve = MotionCurve.values
+        .where((c) => c.name == trimCurveName?.toString().trim())
+        .firstOrNull;
+    // Dashes: a list of numbers, or text such as "14, 10".
+    final Object? rawDashes = node.variables['dashPattern'];
+    final Object? boundDashes = rawDashes is String && !rawDashes.contains(r'${')
+        ? rawDashes
+        : bound<Object>('dashPattern');
+    final List<double> dashes = switch (boundDashes) {
+      List l => [
+        for (final Object? v in l)
+          if (v is num) v.toDouble() else if (double.tryParse('$v'.trim()) case final double d) d,
+      ],
+      String t when t.trim().isNotEmpty => [
+        for (final String part in t.split(RegExp(r'[,\s]+')))
+          if (double.tryParse(part) case final double d) d,
+      ],
+      _ => node.dashPattern,
+    };
     final double start = number('trimStart', node.trimStart);
     final double end = number('trimEnd', node.trimEnd);
     return SizedBox(
@@ -48,9 +91,9 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
       child: TweenAnimationBuilder<Offset>(
         tween: Tween(end: Offset(start, end)),
         duration: Duration(
-          milliseconds: settings.isPreview ? 0 : node.transitionMs,
+          milliseconds: settings.isPreview ? 0 : math.max(0, trimDuration),
         ),
-        curve: Curves.easeInOut,
+        curve: trimCurve == null ? Curves.easeInOut : flutterCurveOf(trimCurve),
         builder: (context, trim, _) => CustomPaint(
           painter: PathNodePainter(
             data: data,
@@ -59,13 +102,13 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
                 : null,
             fills: [
               for (final PaintModel paint in node.fills)
-                if (paint.visible && paint.toFlutterColor() != null)
-                  paint.toFlutterColor()!,
+                if (paint.visible)
+                  if (colorOf(paint, 'fill-${paint.id}') case final Color c) c,
             ],
             strokes: [
               for (final PaintModel paint in node.strokes)
-                if (paint.visible && paint.toFlutterColor() != null)
-                  paint.toFlutterColor()!,
+                if (paint.visible)
+                  if (colorOf(paint, 'stroke-paint-${paint.id}') case final Color c) c,
             ],
             strokeWeight: node.strokeWeight,
             cap: switch (node.strokeCap) {
@@ -78,7 +121,7 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
               StrokeJoinEnum.bevel => StrokeJoin.bevel,
               StrokeJoinEnum.round => StrokeJoin.round,
             },
-            dashes: node.dashPattern,
+            dashes: dashes,
             trimStart: trim.dx,
             trimEnd: trim.dy,
           ),
