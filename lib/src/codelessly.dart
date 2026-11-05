@@ -543,6 +543,63 @@ class Codelessly {
     }
   }
 
+  /// Runs background authentication again when a user signs in, if it
+  /// failed.
+  SignInRetry? _backgroundAuth;
+
+  /// Authenticates a slug-loaded app in the background, then opens the
+  /// project's cloud database and listens to its publish model. If that
+  /// fails (the anonymous sign-in it starts with can be refused), it runs
+  /// again when a user signs in, so the app's data loads once the user signs
+  /// in with their own account. See [SignInRetry].
+  void _authenticateInBackground() {
+    final AuthManager? authManager = _authManager;
+    final FirebaseAuth? auth = _firebaseAuth;
+    if (authManager == null || auth == null) return;
+    _backgroundAuth?.dispose();
+    _backgroundAuth = SignInRetry(
+      auth: auth,
+      step: () async {
+        await authManager.init();
+        if (_authManager != authManager) return true;
+        final AuthData? authData = authManager.authData;
+        if (authData == null) return false;
+
+        StatTracker.instance.init(
+          projectId: authData.projectId,
+          serverUrl: Uri.parse(
+            '${_config!.firebaseCloudFunctionsBaseURL}/api/trackStatsRequest',
+          ),
+        );
+
+        DebugLogger.instance.printInfo(
+          '[POST-INIT] Background authentication succeeded. Initializing layout storage.',
+          name: name,
+        );
+        await dataManager.onPublishModelLoaded(authData.projectId);
+
+        DebugLogger.instance.printInfo(
+          '[POST-INIT] Layout storage initialized. Listening to publish model.',
+          name: name,
+        );
+        dataManager.listenToPublishModel(authData.projectId);
+        return true;
+      },
+      onError: (error, stackTrace) {
+        DebugLogger.instance.printInfo(
+          '[POST-INIT] Background authentication failed. Retrying when a user signs in.',
+          name: name,
+        );
+        ErrorLogger.instance.captureException(
+          error,
+          message: 'Failed to authenticate',
+          type: 'authentication_failed',
+          stackTrace: stackTrace,
+        );
+      },
+    )..run();
+  }
+
   /// Disposes this instance of the SDK permanently along with all of its
   /// managers.
   ///
@@ -562,6 +619,8 @@ class Codelessly {
       _cacheManager?.dispose();
     }
     _authManager?.dispose();
+    _backgroundAuth?.dispose();
+    _backgroundAuth = null;
     _appUserSubscription?.cancel();
     _publishDataManager?.dispose();
     _previewDataManager?.dispose();
@@ -1050,48 +1109,7 @@ class Codelessly {
           'Since a slug was provided & data manager finished, authenticating in the background...',
           name: name,
         );
-        _authManager!
-            .init()
-            .then((_) async {
-              if (_authManager!.authData == null) return;
-
-              if (_authManager?.authData?.projectId case String projectId) {
-                StatTracker.instance.init(
-                  projectId: projectId,
-                  serverUrl: Uri.parse(
-                    '${_config!.firebaseCloudFunctionsBaseURL}/api/trackStatsRequest',
-                  ),
-                );
-              }
-
-              DebugLogger.instance.printInfo(
-                '[POST-INIT] Background authentication succeeded. Initializing layout storage.',
-                name: name,
-              );
-              await dataManager.onPublishModelLoaded(
-                _authManager!.authData!.projectId,
-              );
-
-              DebugLogger.instance.printInfo(
-                '[POST-INIT] Layout storage initialized. Listening to publish model.',
-                name: name,
-              );
-              dataManager.listenToPublishModel(
-                _authManager!.authData!.projectId,
-              );
-            })
-            .catchError((e, str) {
-              DebugLogger.instance.printInfo(
-                '[POST-INIT] Background authentication failed.',
-                name: name,
-              );
-              ErrorLogger.instance.captureException(
-                e,
-                message: 'Failed to authenticate',
-                type: 'authentication_failed',
-                stackTrace: str,
-              );
-            });
+        _authenticateInBackground();
         status = CStatus.loading(CLoadingState.initializedSlug);
       }
 
