@@ -1016,9 +1016,9 @@ abstract class WidgetNodeTransformerManager
   }) {
     final DragTrackModel? track = node.drag?.track;
     if (track == null) return widget;
-    final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
-      track.variable,
-      scopedValues: scopedValues ?? ScopedValues.of(context),
+    final Object? raw = dragTrackSource(
+      track,
+      scopedValues ?? ScopedValues.of(context),
     );
     final double value = switch (raw) {
       num n => n.toDouble(),
@@ -1067,11 +1067,7 @@ abstract class WidgetNodeTransformerManager
     }
 
     Widget build(BuildContext context) {
-      final Object? raw =
-          PropertyValueDelegate.getVariableValueFromPath<Object>(
-            track.variable,
-            scopedValues: ScopedValues.of(context),
-          );
+      final Object? raw = dragTrackSource(track, ScopedValues.of(context));
       final double value = switch (raw) {
         num n => n.toDouble(),
         String s => double.tryParse(s.trim()) ?? track.min,
@@ -1082,11 +1078,16 @@ abstract class WidgetNodeTransformerManager
         value: value,
         enabled: enabled(context),
         onChanged: (v) {
-          final bool whole = variable?.value.type == VariableType.integer;
-          codelesslyContext?.updateVariable(
-            track.variable,
-            whole ? v.round() : v,
-          );
+          // A track that follows a formula or a computed variable (a clock
+          // hand showing the match's elapsed time) is controlled: it only
+          // reports the drag; its reactions decide what changes.
+          if (!dragTrackIsControlled(track, variable?.value)) {
+            final bool whole = variable?.value.type == VariableType.integer;
+            codelesslyContext?.updateVariable(
+              track.variable,
+              whole ? v.round() : v,
+            );
+          }
           FunctionsRepository.triggerAction(
             context,
             TriggerType.changed,
@@ -1104,6 +1105,13 @@ abstract class WidgetNodeTransformerManager
       );
     }
 
+    // A formula reads other variables: follow them all.
+    if (track.variable.contains(r'${') && codelesslyContext != null) {
+      return ListenableBuilder(
+        listenable: Listenable.merge(codelesslyContext.variables.values.toList()),
+        builder: (context, _) => build(context),
+      );
+    }
     if (variable == null) return Builder(builder: build);
     return ValueListenableBuilder<VariableData>(
       valueListenable: variable,
@@ -2189,3 +2197,26 @@ class _PulseOpacityState extends State<PulseOpacity>
     child: widget.child,
   );
 }
+
+/// What a drag track is drawn at: its variable's value, or the value of
+/// [DragTrackModel.variable] read as a `${...}` formula or path.
+Object? dragTrackSource(DragTrackModel track, ScopedValues scopedValues) {
+  final String source = track.variable.trim();
+  if (source.contains(r'${')) {
+    return PropertyValueDelegate.substituteVariables(
+      source,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
+  }
+  return PropertyValueDelegate.getVariableValueFromPath<Object>(
+    source,
+    scopedValues: scopedValues,
+  );
+}
+
+/// Whether dragging [track] leaves its value to its reactions: it reads a
+/// formula, or a computed [variable].
+bool dragTrackIsControlled(DragTrackModel track, VariableData? variable) =>
+    track.variable.contains(r'${') || (variable?.isComputed ?? false);
+

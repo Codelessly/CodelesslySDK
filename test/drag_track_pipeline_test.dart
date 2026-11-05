@@ -57,7 +57,7 @@ void main() {
     expect(tester.takeException(), isNull);
   }
 
-  List<BaseNode> knob() => [
+  List<BaseNode> knob({String source = 'bpm', List<Reaction> reactions = const []}) => [
     FrameNode(
       id: 'plate',
       name: 'plate',
@@ -73,16 +73,17 @@ void main() {
         children: ['pointer'],
       )
       ..parentID = 'plate'
-      ..drag = const DragModel(
+      ..drag = DragModel(
         track: DragTrackModel(
           shape: DragTrackShape.arc,
-          variable: 'bpm',
+          variable: source,
           min: 30,
           max: 250,
           step: 1,
           defaultValue: 120,
         ),
-      ),
+      )
+      ..reactions = reactions,
     TextNode(
       id: 'pointer',
       name: 'pointer',
@@ -137,6 +138,45 @@ void main() {
     // A quarter turn of the 270° sweep: +73 BPM.
     expect(bpm, inInclusiveRange(205, 216));
     expect(rotationOf(tester), greaterThan(60));
+  });
+
+  testWidgets('a track reading a formula is drawn at it and only reports the drag', (tester) async {
+    final VariableData ms = variable('ms', VariableType.integer, 140000);
+    await pump(
+      tester,
+      knob(
+        source: r'${= ms / 1000}',
+        reactions: [
+          Reaction(
+            name: 'set',
+            trigger: TriggerModel(type: TriggerType.changed),
+            action: SetVariableAction(variable: ms, newValue: r'${= round(result.value) * 1000}'),
+          ),
+        ],
+      ),
+      runtime: true,
+      variables: [ms],
+    );
+    expect(rotationOf(tester), closeTo(0, 0.5), reason: '140 of 30..250 is the middle');
+    final gesture = await tester.startGesture(const Offset(110, 150));
+    for (double a = -90; a <= 0; a += 10) {
+      final double r = a * 3.141592653589793 / 180;
+      await gesture.moveTo(Offset(150 + 40 * _sin(r), 150 - 40 * _cos(r)));
+    }
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+    // The formula wasn't written as a variable; the reaction moved its source.
+    expect(codelesslyContext.findVariableByName(r'${= ms / 1000}'), isNull);
+    final Object? value = codelesslyContext.findVariableByName('ms')!.value.getValue();
+    expect(value, inInclusiveRange(205000, 216000));
+    expect(rotationOf(tester), greaterThan(60), reason: 'drawn at the new formula value');
+  });
+
+  test('a computed variable or formula makes a track controlled', () {
+    const DragTrackModel plain = DragTrackModel(variable: 'bpm');
+    expect(dragTrackIsControlled(plain, VariableData(id: 'b', name: 'bpm', type: VariableType.integer, value: '1')), isFalse);
+    expect(dragTrackIsControlled(plain, VariableData(id: 'b', name: 'bpm', type: VariableType.integer, formula: 'a + 1')), isTrue);
+    expect(dragTrackIsControlled(const DragTrackModel(variable: r'${= elapsed / 60000}'), null), isTrue);
   });
 
   List<BaseNode> songs() => [

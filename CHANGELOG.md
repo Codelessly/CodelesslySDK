@@ -11,6 +11,8 @@ Requires codelessly_api 9.0.4.
 - List drop targets open a slot of `slotExtent` px when it is set.
 - Remembered app and page variables start from the device's stored value and
   store every change (`rememberedObservable`).
+- A drag track whose variable is a formula or a computed variable is
+  controlled: drawn at that value, it only reports drags to its reactions.
 - Quoted formula text reads `\n`, `\t` and `\r`.
 
 ## 9.1.9
