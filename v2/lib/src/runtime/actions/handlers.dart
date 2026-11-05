@@ -4,7 +4,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart';
+import 'package:codelessly_api_v2/codelessly_api.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Curves;
 import 'package:http/http.dart' as http;

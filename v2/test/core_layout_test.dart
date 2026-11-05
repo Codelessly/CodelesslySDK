@@ -1,6 +1,6 @@
 // Core row/column layout beyond what parity samples: wrapping rows, and
 // what a squeezing row can take from its children.
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

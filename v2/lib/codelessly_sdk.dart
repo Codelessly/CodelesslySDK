@@ -2,9 +2,9 @@
 library;
 
 // The model, without the value types and enums that share Flutter's names
-// (apps import both): use `import 'package:codelessly_api/codelessly_api.dart'
+// (apps import both): use `import 'package:codelessly_api_v2/codelessly_api.dart'
 // as api;` for those.
-export 'package:codelessly_api/codelessly_api.dart'
+export 'package:codelessly_api_v2/codelessly_api.dart'
     hide
         Alignment,
         AutovalidateMode,

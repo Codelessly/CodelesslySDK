@@ -4,8 +4,8 @@
 // values, conditions, interpolated text) and what to watch for it, so a
 // change re-applies only the boxes that read it. No JSON round trips:
 // values land through `BindPaths.apply` on the typed node.
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
+import 'package:codelessly_api_v2/codelessly_api.dart'
     show BindPaths, BindValue, Condition, ConditionOperand, LayoutLogic, Node, PropertySet, SizeFit, TextProps, TextRun;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show TextStyle;

@@ -5,8 +5,8 @@
 // indicators_charts.dart), as SDK 8.x's transformers drew them inside an
 // AdaptiveNodeBox. Spinners animate, so they're islands: an island that
 // rebuilds itself becomes its own layer, keeping each frame local.
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
+import 'package:codelessly_api_v2/codelessly_api.dart'
     show
         ActivityIndicatorProps,
         CircularProgressIndicatorProps,

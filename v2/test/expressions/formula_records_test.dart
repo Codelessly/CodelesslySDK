@@ -1,4 +1,4 @@
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Functions that build and update records (maps) and lists, so actions

@@ -1,5 +1,5 @@
-import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/widgets/indicators_paint.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/src/widgets/indicators_paint.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';

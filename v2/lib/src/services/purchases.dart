@@ -1,11 +1,11 @@
 // In-app purchases and paywalls: store products by slot, purchases verified
 // by a trusted server before they grant anything, and a paywall's session
 // state (selected product, purchasing, errors) for its bindings. The store
-// adapter (StoreKit / Play Billing) is in package:codelessly_sdk/store.dart;
-// the Firebase paywall backend in package:codelessly_sdk/firebase.dart.
+// adapter (StoreKit / Play Billing) is in package:codelessly_sdk_v2/store.dart;
+// the Firebase paywall backend in package:codelessly_sdk_v2/firebase.dart.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show PaywallPlacement, ProductSlot;
+import 'package:codelessly_api_v2/codelessly_api.dart' show PaywallPlacement, ProductSlot;
 import 'package:flutter/foundation.dart';
 
 import 'cache.dart';

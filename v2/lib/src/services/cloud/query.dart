@@ -4,7 +4,7 @@
 // values are JSON values plus DateTime and Uint8List.
 import 'dart:typed_data';
 
-import 'package:codelessly_api/codelessly_api.dart' show WhereOperator;
+import 'package:codelessly_api_v2/codelessly_api.dart' show WhereOperator;
 
 /// The field name that stands for a document's id in a [CloudQuery].
 const String cloudDocumentIdField = '__name__';

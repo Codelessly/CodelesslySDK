@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
+import 'package:codelessly_api_v2/codelessly_api.dart'
     show AudioPlayerProps, EmbeddedVideoProps, EmbeddedVideoSource, Node, VideoProps, WebViewGesture, WebViewProps, WebViewSourceType;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';

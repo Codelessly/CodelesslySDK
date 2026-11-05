@@ -1,6 +1,6 @@
 // Elliptical corners: a node's decoration, clip and painted fills and
 // strokes take each corner's x and y.
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';

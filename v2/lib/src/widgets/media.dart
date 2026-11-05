@@ -1,7 +1,7 @@
 // Widget recipes: media (vector paths, video, audio, web views) and slots the
 // app fills (placeholders, external components). See
 // lib/src/render/recipe.dart.
-import 'package:codelessly_api/codelessly_api.dart' show ExternalProps, Node;
+import 'package:codelessly_api_v2/codelessly_api.dart' show ExternalProps, Node;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 

@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:codelessly_api/codelessly_api.dart' show DataRules, WhereOperator;
+import 'package:codelessly_api_v2/codelessly_api.dart' show DataRules, WhereOperator;
 
 import '../cloud/backend.dart';
 import '../cloud/fields.dart';

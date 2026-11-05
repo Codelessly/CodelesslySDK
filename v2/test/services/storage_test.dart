@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

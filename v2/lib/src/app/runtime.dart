@@ -5,7 +5,7 @@
 // action context.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, NavigateAction, Node, OpenLinkAction, PublishLayout, jsonEquality;
+import 'package:codelessly_api_v2/codelessly_api.dart' show Json, NavigateAction, Node, OpenLinkAction, PublishLayout, jsonEquality;
 import 'package:flutter/foundation.dart';
 
 import '../render/source.dart';

@@ -1,6 +1,6 @@
 // Fakes of the runtime's seams for service tests: values in a map and an
 // expression engine that reads `${path}` from them.
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter/foundation.dart';
 
 class MapScope extends ChangeNotifier implements ValueScope {

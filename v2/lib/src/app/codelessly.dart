@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart';
+import 'package:codelessly_api_v2/codelessly_api.dart';
 import 'package:flutter/foundation.dart';
 
 import '../runtime/contracts.dart';

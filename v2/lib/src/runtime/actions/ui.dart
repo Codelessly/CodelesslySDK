@@ -5,11 +5,11 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
+import 'package:codelessly_api_v2/codelessly_api.dart'
     show CloseModalAction, ConfirmAction, Json, ModalPresentation, NavigateAction, OpenModalAction, ShowToastAction, ToastPosition, ToastStyle;
 import 'package:flutter/material.dart' hide NavigationMode;
-import 'package:codelessly_api/codelessly_api.dart' show NavigationMode;
+import 'package:codelessly_api_v2/codelessly_api.dart' show NavigationMode;
 
 /// What a confirm dialog answered: whether the user confirmed, and what a
 /// screen used as the dialog gave back (its close modal action's result).

@@ -4,7 +4,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:codelessly_api/codelessly_api.dart' show PaywallPlacement, ProductSlot;
+import 'package:codelessly_api_v2/codelessly_api.dart' show PaywallPlacement, ProductSlot;
 
 import '../purchases.dart';
 

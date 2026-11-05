@@ -1,4 +1,4 @@
-import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
 import 'package:flutter/material.dart';
 
 /// [c] as a Flutter color.

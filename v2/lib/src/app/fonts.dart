@@ -6,7 +6,7 @@
 // a Google Font, fetched by family, weight and style.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show PublishFont;
+import 'package:codelessly_api_v2/codelessly_api.dart' show PublishFont;
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 

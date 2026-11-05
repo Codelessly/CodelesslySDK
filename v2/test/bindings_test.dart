@@ -1,8 +1,8 @@
 // The node tree with bindings: SDK 8.x's runtime results for bound
 // visibility (collapse), size, flex, paints, text interpolation, conditions
 // and data-bound lists, and a design canvas's placeholders.
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';

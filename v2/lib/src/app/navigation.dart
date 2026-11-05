@@ -3,7 +3,7 @@
 // navigation actions.
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart' show ActionDef, Json, NavigateAction, PublishModel;
+import 'package:codelessly_api_v2/codelessly_api.dart' show ActionDef, Json, NavigateAction, PublishModel;
 import 'package:flutter/foundation.dart';
 
 /// A screen of a Codelessly app and the params it was opened with.

@@ -3,7 +3,7 @@
 // (`route`, `screen`, `storage`, `auth`...). Scopes nest; a name is read
 // from the nearest scope that declares it, and each name can be watched on
 // its own, so a change re-applies only what read it.
-import 'package:codelessly_api/codelessly_api.dart' show Variable, VariableType;
+import 'package:codelessly_api_v2/codelessly_api.dart' show Variable, VariableType;
 import 'package:flutter/foundation.dart';
 
 import '../contracts.dart';

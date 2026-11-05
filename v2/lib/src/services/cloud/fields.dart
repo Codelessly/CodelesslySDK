@@ -4,7 +4,7 @@
 // for every backend and are testable without one.
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api_v2/codelessly_api.dart'
     show CloudFieldOperation, CloudFieldWrite, CollectionSchema, SchemaField, SchemaFieldType;
 import 'package:flutter/foundation.dart';
 

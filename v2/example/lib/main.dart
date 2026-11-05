@@ -3,7 +3,7 @@
 // The publish comes from a bundle asset (offline). Navigation actions move
 // between screens; resize the window to see each screen pick its mobile,
 // tablet or desktop canvas.
-import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const ExampleApp());

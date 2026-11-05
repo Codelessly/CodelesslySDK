@@ -1,5 +1,5 @@
 // The document store under a CloudDatabase: Firestore in an app
-// (package:codelessly_sdk/firebase.dart), memory by default and in tests.
+// (package:codelessly_sdk_v2/firebase.dart), memory by default and in tests.
 // Paths here are full collection paths (`data/project/tasks`); the
 // CloudDatabase resolves the app's paths and applies the project's rules.
 import 'dart:async';
