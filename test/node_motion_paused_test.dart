@@ -76,6 +76,9 @@ void main() {
     );
     final MotionModel held = ride.copyWith(paused: true, phase: 0.25);
     await show(false, held);
+    // Shown, then hidden again (the app boots: loading), then shown.
+    await show(true, held);
+    await show(false, held);
     // Shown: a held chair sits a quarter of the way round, not at the start.
     await show(true, held);
     await tester.pump(const Duration(milliseconds: 300));

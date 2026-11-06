@@ -345,6 +345,8 @@ class _NodeMotionState extends State<_NodeMotionBody>
 
   /// Ends any transition or entrance at once, at the values to show.
   void _settle() {
+    // A loop starts over (at its phase) when tickers run again.
+    _loopStarted = false;
     _delay?.cancel();
     _transition
       ..stop()
