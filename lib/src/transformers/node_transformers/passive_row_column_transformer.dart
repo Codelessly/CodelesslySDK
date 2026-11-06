@@ -178,6 +178,26 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       children: childrenWidgets,
     );
 
+    // Children that bind a fraction of the row/column take it of its
+    // content box, as on the design canvas, though the main axis is
+    // unbounded for them (see [FlexContentSizeScope]). A row/column that
+    // hugs its main axis has no size of its own to give there.
+    final Set<String> fractionalIds = {
+      for (final child in childrenNodes)
+        if (hasBoundFractionalSize(child)) child.id,
+    };
+    if (fractionalIds.isNotEmpty && mainFit != SizeFit.shrinkWrap) {
+      final Widget flex = res;
+      res = MeasurableLayoutBuilder(
+        builder: (context, constraints) => FlexContentSizeScope(
+          nodeIds: fractionalIds,
+          width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
+          height: constraints.hasBoundedHeight ? constraints.maxHeight : null,
+          child: flex,
+        ),
+      );
+    }
+
     if (measureCross) {
       res = isRow ? IntrinsicHeight(child: res) : IntrinsicWidth(child: res);
     } else if (hugStretch) {
