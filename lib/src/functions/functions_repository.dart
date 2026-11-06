@@ -1043,6 +1043,7 @@ class FunctionsRepository {
           context,
           navigationRoute<void>(
             action,
+            origin: context,
             settings: RouteSettings(arguments: parsedParams),
             builder: (context) => ActionChainOpener(
               openerHosts: openerHosts,
@@ -1069,6 +1070,7 @@ class FunctionsRepository {
           action,
           destination: navigationRoute<void>(
             action,
+            origin: context,
             settings: RouteSettings(arguments: parsedParams),
             builder: (context) {
               final Widget page = CodelesslyWidget(
@@ -1094,6 +1096,7 @@ class FunctionsRepository {
             context,
             navigationRoute<void>(
               action,
+              origin: context,
               settings: RouteSettings(arguments: parsedParams),
               builder: (context) {
                 final Widget page = CodelesslyWidget(
@@ -1161,6 +1164,8 @@ class FunctionsRepository {
           transition: action.transition,
           transitionMs: action.transitionMs,
           reverseTransitionMs: action.reverseTransitionMs,
+          routeTransition: action.routeTransition,
+          anchor: RevealAnchor.of(context),
         );
       case NavigationType.replace || NavigationType.pop:
         // The new screen takes over the chain: the actions after this one
@@ -1174,6 +1179,8 @@ class FunctionsRepository {
             transition: action.transition,
             transitionMs: action.transitionMs,
             reverseTransitionMs: action.reverseTransitionMs,
+            routeTransition: action.routeTransition,
+            anchor: RevealAnchor.of(context),
           ),
         );
       case NavigationType.reset:
@@ -1223,11 +1230,24 @@ class FunctionsRepository {
   /// [NavigationAction.transition] over [NavigationAction.resolvedTransitionMs]
   /// (and back over [NavigationAction.resolvedReverseTransitionMs]).
   /// Shared elements fly with every transition, as long as it lasts.
+  ///
+  /// An action with a [NavigationAction.routeTransition] opens a
+  /// [CodelesslyRouteTransitionRoute] instead, whose reveals grow from the
+  /// last tap or from [origin]'s box (the node that navigated).
   static PageRoute<T> navigationRoute<T>(
     NavigationAction action, {
     required RouteSettings settings,
     required WidgetBuilder builder,
+    BuildContext? origin,
   }) {
+    if (action.routeTransition case final RouteTransition custom?) {
+      return CodelesslyRouteTransitionRoute<T>(
+        transition: custom,
+        settings: settings,
+        anchor: RevealAnchor.of(origin),
+        builder: builder,
+      );
+    }
     final PageTransition transition = webTransition(action.transition);
     if (transition == PageTransition.platform) {
       return MaterialPageRoute<T>(settings: settings, builder: builder);
@@ -1380,6 +1400,7 @@ class FunctionsRepository {
       barrierBlur: action.barrierBlur,
       enterScale: action.enterScale,
       sheetBelowWidth: action.sheetBelowWidth,
+      routeTransition: action.routeTransition,
     );
     if (result case final Map values when values.isNotEmpty) {
       ActionChain.setResult(values);
@@ -1470,6 +1491,7 @@ class FunctionsRepository {
     double barrierBlur = 0,
     double enterScale = 1,
     double sheetBelowWidth = 600,
+    RouteTransition? routeTransition,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -1568,6 +1590,7 @@ class FunctionsRepository {
             barrierBlur: barrierBlur,
             enterScale: enterScale,
             sheetBelowWidth: sheetBelowWidth,
+            routeTransition: routeTransition,
             anchor: effectivePresentation == DialogPresentation.popover
                 ? anchorRectOf(context)
                 : null,
@@ -1674,6 +1697,7 @@ class FunctionsRepository {
     double barrierBlur = 0,
     double enterScale = 1,
     double sheetBelowWidth = 600,
+    RouteTransition? routeTransition,
   }) {
     // A toast already up goes under the dialog, which opens above it.
     final WidgetBuilder dialogContent = builder;
@@ -1762,6 +1786,52 @@ class FunctionsRepository {
       );
     }
 
+    Widget dialogBody(BuildContext context) => Padding(
+      padding: insets,
+      child: maxHeightFactor == null
+          ? content(context, CanvasSizing.design)
+          : ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight:
+                    MediaQuery.sizeOf(context).height *
+                    maxHeightFactor.clamp(0, 1),
+              ),
+              child: content(context, CanvasSizing.design),
+            ),
+    );
+
+    // A custom transition: a page route, so shared elements fly into and
+    // out of the modal, with its own entrance, the screen behind it moving
+    // and a drag that dismisses it.
+    if (routeTransition != null) {
+      final bool fullScreen = presentation == DialogPresentation.fullScreen;
+      return Navigator.of(context).push<T>(
+        CodelesslyRouteTransitionRoute<T>(
+          modal: true,
+          transition: routeTransition,
+          settings: routeSettings,
+          anchor: RevealAnchor.of(context),
+          dismissibleBarrier: barrierDismissible,
+          fallbackBarrierColor: fullScreen
+              ? (barrierColor ?? Colors.black)
+              : (barrierColor ?? Colors.black54),
+          builder: (context) {
+            if (asSheet) {
+              final Widget sheet = sheetContent(context);
+              return Align(
+                alignment: Alignment.bottomCenter,
+                child: showDragHandle
+                    ? LayoutPresentationRoute.withDragHandle(sheet)
+                    : sheet,
+              );
+            }
+            if (fullScreen) return content(context, CanvasSizing.fill);
+            return SafeArea(child: dialogBody(context));
+          },
+        ),
+      );
+    }
+
     if (asSheet) {
       return showModalBottomSheet<T>(
         context: context,
@@ -1801,19 +1871,6 @@ class FunctionsRepository {
         pageBuilder: (context, _, _) => content(context, CanvasSizing.fill),
       );
     }
-    Widget dialogBody(BuildContext context) => Padding(
-      padding: insets,
-      child: maxHeightFactor == null
-          ? content(context, CanvasSizing.design)
-          : ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight:
-                    MediaQuery.sizeOf(context).height *
-                    maxHeightFactor.clamp(0, 1),
-              ),
-              child: content(context, CanvasSizing.design),
-            ),
-    );
     if (barrierBlur > 0 || enterScale != 1) {
       // A frosted scrim: the page behind blurs while the dialog fades and
       // grows in, both following the route's animation.

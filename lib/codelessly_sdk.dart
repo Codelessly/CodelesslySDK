@@ -85,6 +85,8 @@ export 'src/utils/computed_variables.dart';
 export 'src/utils/cupertino_svg_url.dart';
 export 'src/utils/directional_icons.dart';
 export 'src/ui/node_hero.dart';
+export 'src/ui/route_transition.dart';
+export 'src/ui/node_3d.dart';
 export 'src/utils/notched_shape.dart';
 export 'src/utils/svg_path.dart';
 export 'src/utils/cupertino_icons_by_codepoint.dart';
