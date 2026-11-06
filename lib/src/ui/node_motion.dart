@@ -62,10 +62,25 @@ class _MeasuredPath {
   final Offset start;
   final double length;
 
-  /// Position (relative to the path's start) and direction at [progress].
-  (Offset, double)? at(double progress) {
+  /// Samples of the cumulative area swept about each focus asked for, as
+  /// (distance along the path, swept area so far), for area pacing.
+  final Map<Offset, List<(double, double)>> _areas = {};
+
+  static const int _areaSamples = 1440;
+
+  /// Position (relative to the path's start) and direction at [progress],
+  /// by length or, with [pacing] area, by area swept about [focus] (in the
+  /// path's coordinates).
+  (Offset, double)? at(
+    double progress, {
+    MotionPathPacing pacing = MotionPathPacing.length,
+    Offset focus = Offset.zero,
+  }) {
     if (length <= 0) return null;
-    double distance = progress.clamp(0, 1).toDouble() * length;
+    final double p = progress.clamp(0, 1).toDouble();
+    double distance = pacing == MotionPathPacing.area
+        ? _distanceForArea(p, focus)
+        : p * length;
     for (final PathMetric metric in metrics) {
       if (distance <= metric.length || metric == metrics.last) {
         final Tangent? tangent = metric.getTangentForOffset(
@@ -78,6 +93,58 @@ class _MeasuredPath {
     }
     return null;
   }
+
+  /// The distance along the path at which a line from [focus] has swept
+  /// [share] of the whole area it sweeps over the path.
+  double _distanceForArea(double share, Offset focus) {
+    final List<(double, double)> table = _areas.putIfAbsent(focus, () {
+      final List<(double, double)> out = [(0, 0)];
+      Offset? last;
+      double swept = 0;
+      double done = 0;
+      for (final PathMetric metric in metrics) {
+        final int n = math.max(8, (_areaSamples * metric.length / length).round());
+        for (int i = 0; i <= n; i++) {
+          final double d = metric.length * i / n;
+          final Offset? point = metric.getTangentForOffset(d)?.position;
+          if (point == null) continue;
+          if (last != null) {
+            final Offset a = last - focus, b = point - focus;
+            swept += (a.dx * b.dy - a.dy * b.dx).abs() / 2;
+          }
+          last = point;
+          out.add((done + d, swept));
+        }
+        done += metric.length;
+      }
+      return out;
+    });
+    final double total = table.last.$2;
+    if (total <= 0) return share * length;
+    final double target = share * total;
+    int lo = 0, hi = table.length - 1;
+    while (hi - lo > 1) {
+      final int mid = (lo + hi) >> 1;
+      if (table[mid].$2 < target) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    final (double d0, double a0) = table[lo];
+    final (double d1, double a1) = table[hi];
+    final double f = a1 == a0 ? 0 : (target - a0) / (a1 - a0);
+    return d0 + (d1 - d0) * f;
+  }
+}
+
+/// [progress] as a node on a [MotionModel.pathWrap] path reads it: modulo
+/// 1, with exactly 1 kept as the end.
+double wrapPathProgress(double progress) {
+  if (!progress.isFinite) return 0;
+  if (progress >= 0 && progress <= 1) return progress;
+  final double r = progress % 1;
+  return r < 0 ? r + 1 : r;
 }
 
 class _PathBuilder extends PathProxy {
@@ -122,8 +189,12 @@ _MeasuredPath? _measure(String data) => _pathCache.putIfAbsent(data, () {
 /// Where a node moving along SVG path [data] is at [progress] (0 to 1, by
 /// arc length), relative to the path's start, and the path's direction
 /// there in radians. Null when the path can't be read or is empty.
-(Offset, double)? pointOnMotionPath(String data, double progress) =>
-    _measure(data)?.at(progress);
+(Offset, double)? pointOnMotionPath(
+  String data,
+  double progress, {
+  MotionPathPacing pacing = MotionPathPacing.length,
+  Offset focus = Offset.zero,
+}) => _measure(data)?.at(progress, pacing: pacing, focus: focus);
 
 /// Turns animation of node motion off for the nodes below it: a design
 /// canvas or an editor capture, which show every node at rest.
@@ -285,6 +356,11 @@ class _NodeMotionState extends State<_NodeMotionBody>
   /// capture of the design canvas) a running transition settles at its end.
   bool _tickersEnabled = true;
 
+  /// Whether the loop has started: a node built where tickers don't run (a
+  /// page body kept alive but hidden while it loads) starts it once they do,
+  /// so its phase still applies.
+  bool _loopStarted = false;
+
   bool get _loops =>
       _animates &&
       widget.motion.loop != MotionLoop.none &&
@@ -335,10 +411,13 @@ class _NodeMotionState extends State<_NodeMotionBody>
     if (enabled == _tickersEnabled) return;
     _tickersEnabled = enabled;
     if (!enabled && !_loops) _settle();
+    if (enabled && _loops && !_loopStarted) _startLoop();
   }
 
   /// Ends any transition or entrance at once, at the values to show.
   void _settle() {
+    // A loop starts over (at its phase) when tickers run again.
+    _loopStarted = false;
     _delay?.cancel();
     _transition
       ..stop()
@@ -381,14 +460,19 @@ class _NodeMotionState extends State<_NodeMotionBody>
   /// Repeats between the loop's start (rest, or what
   /// [MotionModel.enterFrom] gives) and the motion's values.
   void _startLoop() {
+    _loopStarted = true;
     _delay?.cancel();
     _rested = false;
     _from = widget.motion.loopStart;
     _to = widget.motion;
     _curve = _to.curve;
     _transition.duration = Duration(milliseconds: widget.motion.durationMs);
+    // A loop with a phase starts that far through its cycle; repeat carries
+    // on from there.
+    _transition.value = widget.motion.phase.clamp(0.0, 1.0);
     void start() {
-      if (!mounted) return;
+      // A paused loop waits at its start until it is resumed.
+      if (!mounted || widget.motion.paused) return;
       final bool reverse = widget.motion.loop == MotionLoop.reverse;
       final int repeat = widget.motion.repeat;
       if (repeat <= 0) {
@@ -411,7 +495,6 @@ class _NodeMotionState extends State<_NodeMotionBody>
 
     final int delay = widget.motion.delayMs;
     if (delay > 0) {
-      _transition.value = 0;
       _delay = Timer(Duration(milliseconds: delay), start);
     } else {
       start();
@@ -434,13 +517,27 @@ class _NodeMotionState extends State<_NodeMotionBody>
       _syncSpin();
       return;
     }
+    if (_loops && !_loopStarted) {
+      _startLoop();
+      _syncSpin();
+      return;
+    }
     final bool replay =
         _animates && next.replayKey != oldWidget.motion.replayKey;
     final bool pulse =
         _animates &&
         next.hasKeyframes &&
         next.pulseKey != oldWidget.motion.pulseKey;
-    if (_loops && replay) {
+    if (_loops && !replay && next.paused != oldWidget.motion.paused) {
+      // Freezes the loop where it is, or carries on from there.
+      _to = next;
+      if (next.paused) {
+        _delay?.cancel();
+        _transition.stop();
+      } else if (_delay?.isActive != true) {
+        _transition.repeat(reverse: next.loop == MotionLoop.reverse);
+      }
+    } else if (_loops && replay) {
       _startLoop();
     } else if (replay && motionTransitionMs(next) > 0) {
       // Plays the entrance again, wherever the node was.
@@ -459,7 +556,10 @@ class _NodeMotionState extends State<_NodeMotionBody>
           next.loop != old.loop ||
           next.repeat != old.repeat ||
           next.durationMs != old.durationMs ||
-          !_transition.isAnimating && _delay?.isActive != true) {
+          next.phase != old.phase ||
+          !next.paused &&
+              !_transition.isAnimating &&
+              _delay?.isActive != true) {
         _startLoop();
       } else {
         _to = next;
@@ -542,7 +642,10 @@ class _NodeMotionState extends State<_NodeMotionBody>
         pathProgress: swing('pathProgress'),
       );
     }
-    if (!_moving && _transition.value == 0 && !spring) return _to;
+    if (!_moving && _transition.value == 0 && !spring) {
+      // A loop paused before it started sits at its start.
+      return _loops && widget.motion.paused ? _from : _to;
+    }
     // A spring runs on real physics (and may overshoot past 1); a curve on
     // the transition's time.
     final double time = spring
@@ -575,8 +678,17 @@ class _NodeMotionState extends State<_NodeMotionBody>
       rotateX: lerp('rotateX'),
       rotateY: lerp('rotateY'),
       blur: math.max(0, lerp('blur')),
-      pathProgress: lerp('pathProgress'),
+      pathProgress: _to.pathWrap ? _wrapLerp(t) : lerp('pathProgress'),
     );
+  }
+
+  /// A wrapping path's progress between two values, the short way round.
+  double _wrapLerp(double t) {
+    final double from = wrapPathProgress(_from.pathProgress);
+    double to = wrapPathProgress(_to.pathProgress);
+    if (to - from > 0.5) to -= 1;
+    if (from - to > 0.5) to += 1;
+    return wrapPathProgress(from + (to - from) * t);
   }
 
   void _syncSpin() {
@@ -596,7 +708,8 @@ class _NodeMotionState extends State<_NodeMotionBody>
     final double dt = (elapsed - _lastTick).inMicroseconds / 1e6;
     _lastTick = elapsed;
     if (dt <= 0 || dt > 0.25) return;
-    final double target = widget.motion.spin;
+    // A paused motion's spin winds down and stops.
+    final double target = widget.motion.paused ? 0 : widget.motion.spin;
     final int ramp = widget.motion.spinRampMs;
     if (ramp <= 0) {
       _speed = target;
@@ -607,7 +720,7 @@ class _NodeMotionState extends State<_NodeMotionBody>
       if ((target - _speed).abs() < 0.002) _speed = target;
     }
     _turns = (_turns + _speed * dt) % 1;
-    if (_speed == 0 && target == 0) {
+    if (_speed == 0 && widget.motion.spin == 0) {
       _spinTicker?.dispose();
       _spinTicker = null;
     }
@@ -636,7 +749,8 @@ class _NodeMotionState extends State<_NodeMotionBody>
         ? _from
         : _rested && _loops
         ? _to.atRest
-        : (_moving ? _current : _to);
+        // A paused loop holds wherever it stopped.
+        : (_moving || _loops && widget.motion.paused ? _current : _to);
     final Widget drawn = _draw(m);
     if (still || !widget.animate || !widget.motion.revealOnScroll) {
       return drawn;
@@ -647,6 +761,12 @@ class _NodeMotionState extends State<_NodeMotionBody>
       child: drawn,
     );
   }
+
+  /// Where the node last was on its path (offset included) and the
+  /// direction it was moving, for [MotionModel.orientToPath] under
+  /// keyframes that push it off the path.
+  Offset? _lastPathPosition;
+  double? _pathHeading;
 
   /// The node's widget drawn with the values of [m].
   Widget _draw(MotionModel m) {
@@ -690,14 +810,38 @@ class _NodeMotionState extends State<_NodeMotionBody>
     if (m.hasPath) {
       final (Offset, double)? point = pointOnMotionPath(
         m.path!,
-        m.pathProgress,
+        m.pathWrap ? wrapPathProgress(m.pathProgress) : m.pathProgress,
+        pacing: m.pathPacing,
+        focus: Offset(m.pathFocusX, m.pathFocusY),
       );
       if (point != null) {
         final (Offset offset, double angle) = point;
+        final Offset total = Offset(
+          m.translateX + offset.dx,
+          m.translateY + offset.dy,
+        );
+        // Keyframes that push the node off its path (a gust blowing a
+        // plane sideways) turn it too: while it moves, the nose follows
+        // where it actually goes, not just the path's direction.
+        double heading = angle;
+        final bool pushed = m.orientToPath &&
+            _moving &&
+            m.keyframes.any((k) => k.translateX != null || k.translateY != null);
+        if (pushed) {
+          final Offset? previous = _lastPathPosition;
+          if (previous != null && (total - previous).distance > 0.25) {
+            _pathHeading = (total - previous).direction;
+          }
+          _lastPathPosition = total;
+          heading = _pathHeading ?? angle;
+        } else {
+          _lastPathPosition = null;
+          _pathHeading = null;
+        }
         shown = m.copyWith(
-          translateX: m.translateX + offset.dx,
-          translateY: m.translateY + offset.dy,
-          rotate: m.orientToPath ? m.rotate + angle * 180 / math.pi : null,
+          translateX: total.dx,
+          translateY: total.dy,
+          rotate: m.orientToPath ? m.rotate + heading * 180 / math.pi : null,
         );
       }
     }

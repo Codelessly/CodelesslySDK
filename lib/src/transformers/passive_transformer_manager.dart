@@ -142,10 +142,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     // A node that reads `parent` is built with the size its parent gives
     // it, so its bindings can lay it out by that size.
-    if (readsParentSize(node) && !_parentGivesSize(node)) {
-      // Measurable, so a row or column that measures its children (an
-      // IntrinsicHeight around a stretching row) can have it inside.
-      return MeasurableLayoutBuilder(
+    if (readsParentSize(node)) {
+      Widget measured(BuildContext context) => MeasurableLayoutBuilder(
         key: ValueKey('${node.id}-parent-size'),
         fallbackSize: Size(node.outerBoxLocal.width, node.outerBoxLocal.height),
         builder: (context, constraints) {
@@ -166,21 +164,28 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           );
         },
       );
+      // In a freeform container `parent` is the container's content box,
+      // which it provides, not the constraints this node is given. Looked
+      // up when built (below the container's scope): children are created
+      // with the container's own context.
+      return Builder(
+        builder: (inside) {
+          final FreeformContentSizeScope? box = FreeformContentSizeScope.of(
+            inside,
+            node.parentID,
+          );
+          if (box == null) return measured(inside);
+          return ParentSizeScope(
+            width: box.width,
+            height: box.height,
+            child: Builder(
+              builder: (context) => _buildNode(context, node, settings),
+            ),
+          );
+        },
+      );
     }
     return _buildNode(context, node, settings);
-  }
-
-  /// Whether [node]'s parent is a frame or stack, which gives the nodes in
-  /// it its own content box as their `parent` size (a child is placed there
-  /// at its own size, so its constraints would be just that).
-  bool _parentGivesSize(BaseNode node) {
-    if (node.parentID == kRootNode || node.parentID.isEmpty) return false;
-    try {
-      final String type = getNode(node.parentID).type;
-      return const {'frame', 'stack'}.contains(type);
-    } catch (_) {
-      return false;
-    }
   }
 
   Widget _buildNode(
@@ -217,13 +222,28 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         return decorated;
       },
     );
+    Widget wrapped = settings.withReactions
+        ? wrapWithInteractionScopes(context, node, built)
+        : built;
+    // A draggable node moved by bound x/y (a pin placed from variables) is
+    // moved with its drag handling, so it is grabbed where it is drawn, not
+    // where it was designed.
+    if (_offsetsOutside(node, settings)) {
+      final Widget inner = wrapped;
+      wrapped = _wrapWithListener(
+        context,
+        node: node,
+        builder: (context) => applyBoundOffset(context, node, inner),
+      );
+    }
     // A node a Scroll To action targets records where it is built.
-    return ScrollTargets.wrap(
-      node,
-      settings.withReactions
-          ? wrapWithInteractionScopes(context, node, built)
-          : built,
-    );
+    final Widget scrollable = ScrollTargets.wrap(node, wrapped);
+    // A node motion draws elsewhere takes taps where it is drawn, through
+    // its interaction states' mouse region and the boxes around it.
+    if (!settings.isPreview && movesByMotion(node)) {
+      return HitBeyondBounds(child: scrollable);
+    }
+    return scrollable;
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -310,7 +330,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         animate: !settings.isPreview,
       );
       widget = applyNodePlay(context, styled, widget);
-      widget = applyBoundOffset(context, styled, widget);
+      if (!_offsetsOutside(node, settings)) {
+        widget = applyBoundOffset(context, styled, widget);
+      }
     }
     // Without reactions (the design canvas) a knob or fader cap is drawn
     // where its drag track puts it; with them NodeDragTrack draws it there
@@ -502,6 +524,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         ];
       }
     }
+    if (node is RectangleNode && node.variables.containsKey('path')) {
+      // A shape drawn from bound SVG data, e.g. the filled part of a curved
+      // slider's track: `${= breezeFillPath}`. Empty text draws the box.
+      final String? path = value<Object>('path')?.toString();
+      if (path != null && path != node.path) patch['path'] = path;
+    }
     if (node is CornerMixin) {
       // A number, or [top-left, top-right, bottom-right, bottom-left], e.g.
       // a dialog squared at the bottom as a mobile sheet:
@@ -685,6 +713,14 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       child: widget,
     );
   }
+
+  /// Whether [node]'s bound `x`/`y` move it from outside its drag
+  /// handling (see [_buildNode]) rather than inside its decoration.
+  bool _offsetsOutside(BaseNode node, WidgetBuildSettings settings) =>
+      settings.withReactions &&
+      settings.withRotation &&
+      node.drag != null &&
+      (node.variables.containsKey('x') || node.variables.containsKey('y'));
 
   bool _hasPositionCondition(BuildContext context, BaseNode node) {
     final CodelesslyContext? codelesslyContext = ScopedValues.of(context)
@@ -1193,6 +1229,14 @@ List<String> inlineTextTemplatesOf(BaseNode node) {
   }
 
   if (node is TextNode) collect(node.data);
+  // An image fill named by a variable or formula (`${item.image}`, a play /
+  // pause icon) follows it.
+  if (node is GeometryMixin) {
+    for (final PaintModel fill in node.fills) {
+      collect(fill.downloadUrl);
+      collect(fill.croppedImageURL);
+    }
+  }
   if (node is CustomPropertiesMixin) collect(node.properties.toJson());
   if (node case final QueryableMixin queryable) {
     collect(queryable.collectionPath);

@@ -171,6 +171,18 @@ void main() {
     expect(value, 3);
   });
 
+  testWidgets('a step while gliding to a value set from elsewhere steps from it', (t) async {
+    await t.pumpWidget(plate(dial));
+    value = -23; // a link sets the dial: it glides there
+    await t.pumpWidget(plate(dial));
+    await t.pump(const Duration(milliseconds: 16));
+    expect(await NodeDragTrack.step('dial-node', -1), isTrue);
+    await t.pumpAndSettle();
+    expect(value, -24);
+    expect(changes.last.crossed, [-24]);
+    expect(settled, [-24]);
+  });
+
   testWidgets('a value set from elsewhere glides there on a smooth track', (t) async {
     final lever = const DragTrackModel(
       shape: DragTrackShape.arc,
