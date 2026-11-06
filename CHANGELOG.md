@@ -1,3 +1,34 @@
+## 9.1.10
+
+Requires codelessly_api 9.0.4. Found recreating Chairlift (a ski-resort
+status board) in the editor.
+
+### Layout and drawing
+
+- Children of a frame scaled from its `contentSize` are placed in the design
+  space; small children (map pins, chairs) landed far off the map.
+- Rectangles drawn from a `path`, and path nodes (view box and bound
+  `pathData` included), take taps only on their line or fill, so
+  overlapping shapes can each be tapped.
+
+### Motion and controls
+
+- `motion.paused` freezes a loop in place; `motion.phase` starts it part-way
+  round its cycle.
+- Path drag tracks with a view box follow their frame's size; arc tracks
+  jump to the tapped angle with `jumpOnTap`.
+
+### Actions and runtime
+
+- Interval and timer reactions wait while their screen is covered by
+  another one (a deep link over the entry screen ticked twice as fast).
+- For-each turns expose `${loop.item}` / `${loop.index}`; `${result.item}`
+  was gone after the first action of the turn.
+- A link param sets a variable only when it fits the variable's type
+  (`?feed=3` replaced a `feed` list with "3").
+- Scroll To takes an `axis` and waits up to 60 frames for its target.
+- The toast's action can be a styled button and keeps its own font size.
+
 ## 9.1.9
 
 Requires codelessly_api 9.0.3.
