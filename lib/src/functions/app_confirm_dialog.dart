@@ -23,6 +23,27 @@ typedef ConfirmOutcome = ({bool confirmed, Map<String, dynamic>? values});
 class AppConfirmDialog {
   AppConfirmDialog._();
 
+  /// The icon [action]'s built-in dialog shows: its `icon` binding naming a
+  /// Material icon (`variables: {"icon": "${lamp.icon}"}`), else
+  /// [ConfirmAction.icon]. A binding that gives no name keeps the action's.
+  static MultiSourceIconModel? iconOf(
+    ConfirmAction action,
+    ScopedValues scopedValues,
+  ) {
+    final String? binding = action.variables['icon'];
+    if (binding == null) return action.icon;
+    final String name = PropertyValueDelegate.substituteVariables(
+      binding,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    if (name.isEmpty) return action.icon;
+    final MultiSourceIconModel base =
+        action.icon ?? MultiSourceIconModel.icon(size: action.iconSize);
+    final MultiSourceIconModel named = iconWithName(base, name);
+    return identical(named, base) ? action.icon : named;
+  }
+
   /// Shows [action]'s dialog and completes with whether the user confirmed.
   /// Dismissing the dialog counts as cancelling.
   static Future<bool> show(BuildContext context, ConfirmAction action) async =>
@@ -142,6 +163,16 @@ class AppConfirmDialog {
       confirmTextColor: color('confirmTextColor', action.confirmTextColor),
       cancelColor: color('cancelColor', action.cancelColor),
       cancelTextColor: color('cancelTextColor', action.cancelTextColor),
+      confirmBorder: side(action.confirmBorder, 'confirmBorderColor'),
+      cancelBorder: side(action.cancelBorder, 'cancelBorderColor'),
+      icon: iconOf(action, scopedValues),
+      iconSize: action.iconSize,
+      iconColor: color('iconColor', action.iconColor),
+      iconDiscColor: color('iconDiscColor', action.iconDiscColor),
+      iconDiscSize: action.iconDiscSize,
+      iconDiscBorder: side(action.iconDiscBorder, 'iconDiscBorderColor'),
+      centered: action.centered,
+      expandButtons: action.expandButtons,
     );
 
     final DialogPresentation presentation = action.presentation.resolveFor(
@@ -207,7 +238,47 @@ class ThemedConfirmDialog extends StatelessWidget {
     this.confirmTextColor,
     this.cancelColor,
     this.cancelTextColor,
+    this.confirmBorder,
+    this.cancelBorder,
+    this.icon,
+    this.iconSize = 24,
+    this.iconColor,
+    this.iconDiscColor,
+    this.iconDiscSize = 52,
+    this.iconDiscBorder,
+    this.centered = false,
+    this.expandButtons = false,
   });
+
+  /// Outline of the confirm button, over [buttonBorder].
+  final BorderSide? confirmBorder;
+
+  /// Outline of the cancel button, over [buttonBorder].
+  final BorderSide? cancelBorder;
+
+  /// An icon over the title.
+  final MultiSourceIconModel? icon;
+
+  /// Size of [icon].
+  final double iconSize;
+
+  /// Color of [icon]; null keeps its own, else the text color.
+  final Color? iconColor;
+
+  /// Fill of a circle behind [icon] (a dot on its own without one).
+  final Color? iconDiscColor;
+
+  /// Diameter of the [iconDiscColor] circle.
+  final double iconDiscSize;
+
+  /// Outline of the [iconDiscColor] circle.
+  final BorderSide? iconDiscBorder;
+
+  /// Whether the icon, title and message are centered.
+  final bool centered;
+
+  /// Whether the buttons share the dialog's width equally.
+  final bool expandButtons;
 
   /// The app's look.
   final ResolvedFeedbackTheme theme;
@@ -334,7 +405,7 @@ class ThemedConfirmDialog extends StatelessWidget {
         backgroundColor: cancelColor,
         textStyle: buttonText,
         shape: buttonShape,
-        side: buttonSide,
+        side: cancelBorder ?? buttonSide,
         minimumSize: buttonSize,
         padding: buttonPadding,
       ),
@@ -348,12 +419,42 @@ class ThemedConfirmDialog extends StatelessWidget {
         foregroundColor: onConfirm,
         textStyle: buttonText,
         shape: buttonShape,
-        side: buttonSide,
+        side: confirmBorder ?? buttonSide,
         minimumSize: buttonSize,
         padding: buttonPadding,
       ),
       child: Text(confirmLabel),
     );
+    final TextAlign textAlign = centered ? TextAlign.center : TextAlign.start;
+    Widget? leading = icon == null
+        ? null
+        : retrieveIconWidget(
+            iconColor == null
+                ? icon!
+                : icon!.copyWith(color: iconColor!.toColorRGBA()),
+            iconSize,
+            onSurface,
+          );
+    if (iconDiscColor != null || iconDiscBorder != null) {
+      leading = Container(
+        key: const ValueKey('codelessly-confirm-icon-disc'),
+        width: iconDiscSize,
+        height: iconDiscSize,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: iconDiscColor,
+          shape: BoxShape.circle,
+          border: iconDiscBorder == null
+              ? null
+              : Border.fromBorderSide(iconDiscBorder!),
+        ),
+        child: leading,
+      );
+    }
+    final List<Widget> buttons = [
+      cancelColor != null ? withShadow(cancel) : cancel,
+      withShadow(confirm),
+    ];
 
     final Widget content = Semantics(
       scopesRoute: true,
@@ -364,11 +465,15 @@ class ThemedConfirmDialog extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: centered
+              ? CrossAxisAlignment.center
+              : CrossAxisAlignment.start,
           children: [
+            if (leading != null) ...[leading, const SizedBox(height: 16)],
             if (caption.isNotEmpty) ...[
               Text(
                 caption,
+                textAlign: textAlign,
                 style: captionStyle.applyTo(
                   theme.bodyStyle.copyWith(
                     fontSize: 11,
@@ -384,6 +489,7 @@ class ThemedConfirmDialog extends StatelessWidget {
             if (title.isNotEmpty)
               Text(
                 title,
+                textAlign: textAlign,
                 style: titleStyle.applyTo(
                   theme.titleStyle.copyWith(
                     fontSize: 18,
@@ -399,6 +505,7 @@ class ThemedConfirmDialog extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Text(
                     message,
+                    textAlign: textAlign,
                     style: messageStyle.applyTo(
                       theme.bodyStyle.copyWith(
                         fontSize: 15,
@@ -410,17 +517,32 @@ class ThemedConfirmDialog extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 20),
-            OverflowBar(
-              alignment: MainAxisAlignment.end,
-              overflowAlignment: OverflowBarAlignment.end,
-              // Outlined or shadowed buttons need room between them.
-              spacing: buttonShadowList.isEmpty ? 8 : 12,
-              overflowSpacing: 8,
-              children: [
-                cancelColor != null ? withShadow(cancel) : cancel,
-                withShadow(confirm),
-              ],
-            ),
+            if (expandButtons)
+              Row(
+                children: [
+                  Expanded(child: buttons[0]),
+                  const SizedBox(width: 12),
+                  Expanded(child: buttons[1]),
+                ],
+              )
+            else
+              OverflowBar(
+                alignment: centered
+                    ? MainAxisAlignment.center
+                    : MainAxisAlignment.end,
+                overflowAlignment: centered
+                    ? OverflowBarAlignment.center
+                    : OverflowBarAlignment.end,
+                // Outlined or shadowed buttons need room between them.
+                spacing:
+                    buttonShadowList.isEmpty &&
+                        confirmBorder == null &&
+                        cancelBorder == null
+                    ? 8
+                    : 12,
+                overflowSpacing: 8,
+                children: buttons,
+              ),
           ],
         ),
       ),

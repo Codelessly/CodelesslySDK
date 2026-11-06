@@ -144,7 +144,25 @@ class PropertyValueDelegate {
           variablePath,
           scopedValues: scopedValues,
         ) ??
-        literalIconName<R>(node, property, variablePath);
+        literalIconName<R>(node, property, variablePath) ??
+        literalNumber<R>(variablePath);
+  }
+
+  static final RegExp _number = RegExp(r'^-?(\d+\.?\d*|\.\d+)$');
+
+  /// [binding] itself as a number when it is one written as is (`"17"`,
+  /// `"17.0"`, `"-4.5"`) rather than a variable or formula giving one: a
+  /// stacked list item's `"y": "17.0"` places it like `${= 17}`. Null for
+  /// anything else, and when [R] isn't a number type.
+  static R? literalNumber<R extends Object>(String binding) {
+    if (R != num && R != double && R != int) return null;
+    final String text = binding.trim();
+    if (!_number.hasMatch(text)) return null;
+    final num? value = num.tryParse(text);
+    if (value == null) return null;
+    if (R == int) return value.round() as R;
+    if (R == double) return value.toDouble() as R;
+    return value as R;
   }
 
   /// The icon properties of an icon node that take an icon's name.
