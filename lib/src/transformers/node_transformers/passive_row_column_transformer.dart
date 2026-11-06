@@ -641,34 +641,9 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
             : null);
     final bool hasAlignment = childAlignment != null;
 
-    // A child of a fixed size across the row/column keeps it when the
-    // row/column is thinner, overflowing it where the cross-axis alignment
-    // puts it, as Flutter's Row/Column places a child larger than it:
-    // centred (a 314 px arc in a 312 px column hangs 1 px out each side), at
-    // the start or at the end. Clipped only if the row/column (or an
-    // ancestor) clips.
-    if (!hasAlignment &&
-        (crossAxisFit == SizeFit.fixed || crossAxisFit == SizeFit.locked)) {
-      final double? factor = switch (parent.crossAxisAlignment) {
-        CrossAxisAlignmentC.start => -1,
-        CrossAxisAlignmentC.center => 0,
-        CrossAxisAlignmentC.end => 1,
-        // Stretch makes it as thick as the row/column; a baseline is placed
-        // by its text.
-        _ => null,
-      };
-      if (factor != null) {
-        childWidget = CrossAxisOverflow(
-          axis: mainAxis == AxisC.horizontal ? Axis.vertical : Axis.horizontal,
-          alignment: factor,
-          // Its margin box: the node's widget includes its margins.
-          extent: mainAxis == AxisC.horizontal
-              ? node.outerBoxLocal.height
-              : node.outerBoxLocal.width,
-          child: childWidget,
-        );
-      }
-    }
+    // A child of a fixed size across the row/column is clamped to it when
+    // the row/column is thinner, as Flutter's Row/Column clamps a SizedBox
+    // (a 360 px card in a 350 px column is 350 px wide).
 
     final double? mainAxisMaxConstraint = (mainAxis == AxisC.horizontal
         ? node.constraints.maxWidth
@@ -785,8 +760,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   /// shorter and doesn't clip its content ([ClipMixin.clipsContent]): it is
   /// laid out with at least its design height as its maximum and placed by
   /// the row's cross axis alignment, the row's layout taking only the part
-  /// that fits (see [CrossAxisOverflow], which also holds a child of a fixed
-  /// height, in [wrapChildWithSizeFits]). The editor lays such a child out at its own
+  /// that fits (see [CrossAxisOverflow]). The editor lays such a child out at its own
   /// height over the row's edges; squeezed to the row's height a text would
   /// clip itself. A stretching or baseline row, or one that hugs its height
   /// (as tall as its children already), is left as it is.
