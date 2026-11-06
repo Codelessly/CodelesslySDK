@@ -1,6 +1,6 @@
-## 9.2.0
+## 9.3.0
 
-Requires codelessly_api 9.1.0. Fixes and features from recreating the
+Requires codelessly_api 9.2.0. Fixes and features from recreating the
 Lamplight reference app (CodelesslyEditor `references/lamplight/blockers.md`):
 
 ### Fixes
@@ -29,6 +29,134 @@ Lamplight reference app (CodelesslyEditor `references/lamplight/blockers.md`):
 - Animated stacked-list positions; pulse phase; confirm dialog styling
   and layout; switch thumb shadow; colour literals in bindings; formula
   `alpha(c)`, colour values in colour functions, `without(list, value)`.
+
+## 9.2.0
+
+Requires codelessly_api 9.1.0.
+
+### Features
+
+- Formula functions for curves: `spline(points)` (SVG path data of a smooth
+  curve through `{x, y}` points), `pathPoints(path, n)` (n points equally
+  spaced by arc length, with their direction), `pathPoint(path, t)` and
+  `pathLength(path)`. A motion path can be built from variables and
+  measured along.
+- `motion.keyframes` bindings; under keyframes that push a node off its path,
+  `orientToPath` turns it with its real movement.
+- Path nodes take bound stroke and fill colours, `trimMs` / `trimCurve` (a
+  trim that keeps pace with a flight) and a bound `dashPattern`; a
+  rectangle's `path` is bindable.
+- Drag tracks take their geometry and range from `dragTrack.<field>`
+  bindings (`x2: ${= parent.width - 28}`), and follow a bound `drag.enabled`.
+- `screen.breakpoint` / `isMobile` inside a responsive layout follow its own
+  switch widths.
+- Toasts can be tilted and come in on any curve.
+
+### Fixes
+
+- Computed variables whose formulas read `storage`, `route`, `screen` or
+  `auth` (directly or through other computed variables) are cached again,
+  keyed by those values: such chains were worked out again on every read,
+  which could freeze an app for seconds.
+- A draggable node moved by bound `x`/`y` is grabbed where it is drawn.
+- Children of a frame with `contentFit` are placed in its design size, so a
+  child aligned in a 960 x 600 design drawn in a phone keeps its place.
+- `parent` in a fixed-size child of a frame reads the frame's content box,
+  not the child's own size.
+- A frozen loop (`motion.loop` bound off) keeps the values its formulas give.
+- An image paint without a URL draws nothing instead of throwing.
+
+## 9.1.10
+
+- `SDKPublishModel.appIdentity`: the project's `AppIdentity` (name, title
+  template, description, icons, colors, manifest, splash, mobile) ships in
+  the publish bundle. Bundles without one load as before (null).
+- `CodelesslyAppIdentity` resolves a screen's title and description from
+  the identity (per-page overrides, screen names, the app name), parses its
+  colors and status bar style, and sets the title through
+  `SystemChrome.setApplicationSwitcherDescription` (document.title on web).
+- `CodelesslyAppIdentityUpdater` keeps the title in step with the screen a
+  `CodelesslyRouter` shows, with a callback for the meta description.
+- `SDKPublishModel.withAppIdentity` sets the identity; `copyWith` keeps it
+  (its signature is unchanged, so subclasses that override it still build).
+- Requires the unreleased codelessly_api `AppIdentity`.
+- New package `packages/codelessly_genui`: renders A2UI (agent-generated UI) with the SDK's node transformers. It is not published yet; apps depend on it from git.
+- Requires the unreleased codelessly_api with `genscreen.dart` (for the
+  runtime screen generator below).
+- Runtime screen generation: `RuntimeScreenGenerator` registers the
+  `generateScreen` app function (Call function with `prompt` and `kit`),
+  gets a plan from a `ScreenPlanSource` (`HttpScreenPlanSource` for a host
+  endpoint that holds the key, `ClaudeScreenPlanSource` for trusted
+  builds), validates it with one fix round, compiles it with the kit and
+  opens it (`GeneratedScreenPage`, `GeneratedScreenView`). Plans are cached
+  per prompt and kit fingerprint (`GeneratedScreenCache`, optionally
+  persisted by the host).
+- Speech recognition: built-in `listen` and `stopListening` app functions
+  (Call function; a host function of the same name wins). The `speech`
+  variable gains `canListen`, `listening`, `heard`, `score` (0-100 against
+  the expected text, null until scored), `confidence` and `error`. Web uses
+  the Web Speech API's SpeechRecognition; other platforms report
+  `canListen: false` until the host sets `Speech.recognizer`.
+  `pronunciationScore` is exported.
+- Drag tracks: vertical/horizontal input uses an axis drag recognizer and
+  follow input claims the pointer after 3 px, so knobs and sliders inside a
+  scrolling page turn instead of scrolling it. Fine mode (Shift, or press
+  and hold still before dragging; Shift + wheel), `track.fine` and the fine
+  variable; the pose animates between values (`snapMs`); arcs find the
+  nearest value around their pivot, so `jumpOnTap` works on curved sliders;
+  bound `track.min/max/step` (with master's `track.defaultValue`);
+  `write: false`.
+- An action chain whose screens have all gone finishes on the screen the app
+  shows now (a toast's delayed hide after the screen was replaced).
+
+Requires codelessly_api 9.0.4. Found recreating Chairlift (a ski-resort
+status board) in the editor:
+
+### Layout and drawing
+
+- Children of a frame scaled from its `contentSize` are placed in the design
+  space; small children (map pins, chairs) landed far off the map.
+- Rectangles drawn from a `path`, and path nodes (view box and bound
+  `pathData` included), take taps only on their line or fill, so
+  overlapping shapes can each be tapped.
+
+### Motion and controls
+
+- `motion.paused` freezes a loop in place; `motion.phase` starts it part-way
+  round its cycle.
+- Path drag tracks with a view box follow their frame's size; arc tracks
+  jump to the tapped angle with `jumpOnTap`.
+
+### Actions and runtime
+
+- Interval and timer reactions wait while their screen is covered by
+  another one (a deep link over the entry screen ticked twice as fast).
+- For-each turns expose `${loop.item}` / `${loop.index}`; `${result.item}`
+  was gone after the first action of the turn.
+- A screen whose link params set its variables reads them as the router
+  does: `?ids=3,7` sets a list to `[3, 7]`; a param that can't be read as the
+  variable's type leaves it alone (`?feed=3` used to put the text "3" in a
+  list).
+- Scroll To takes an `axis`, waits up to 60 frames for its target, and
+  scrolls the node on its own screen (a link to the entry screen opens it
+  over itself, building the node twice).
+- A loop built where tickers don't run (a page body kept alive while
+  hidden) starts once they do, so its `phase` applies; a held chair sat at
+  the start of its cable.
+- A binding that is a number written as is (`"172.28"`) reads as that
+  number: a stacked list item's constant `x`/`y` used to fall back to its
+  design offset.
+- A node shown and hidden by a binding keeps its state across toggles; each
+  toggle used to rebuild its whole subtree (a page body came back scrolled
+  to the start).
+- The toast's action can be a styled button and keeps its own font size.
+
+## 9.1.9
+
+Requires codelessly_api 9.0.3.
+
+- Depends on codelessly_api ^9.0.3, so apps get the API's latest fixes (icon
+  click reactions; padding stored on a text node pads nothing).
 
 ## 9.1.8
 
