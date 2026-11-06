@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -110,13 +111,18 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
       replaceVariablesWithSymbol: widget.settings.isPreview,
     );
     final CountUpModel? countUp = widget.node.countUp;
+    // With a transition the text eases to new colors (a bound textColor or
+    // fill following a palette), as a solid fill does.
+    final Widget eased = widget.node.transitionMs > 0
+        ? TextColorTransition(text: text, ms: widget.node.transitionMs)
+        : text;
     return TextNodeBox(
       node: widget.node,
       // A design canvas shows the final text.
       child: withGradientText(
         widget.node,
         countUp == null || widget.settings.isPreview
-            ? text
+            ? eased
             : CountUpText(text: text, countUp: countUp),
       ),
     );
@@ -445,4 +451,156 @@ class RenderTextMinHeight extends RenderProxyBox {
   @override
   double computeMaxIntrinsicHeight(double width) =>
       math.max(minHeight, super.computeMaxIntrinsicHeight(width));
+}
+
+/// [text] whose span colors ease from the colors it showed before to its
+/// own over [ms] milliseconds whenever they change, e.g. a text whose
+/// `textColor` binding follows a palette: the implicit animation a node's
+/// `transitionMs` gives a solid fill, for a text's colors. Where tickers are
+/// off (the design canvas, its captures) the colors change at once.
+///
+/// Span colors are matched in order. When the spans change in number, the
+/// new colors show at once.
+class TextColorTransition extends StatefulWidget {
+  /// The text as it ends up.
+  final Text text;
+
+  /// The transition's length in milliseconds.
+  final int ms;
+
+  /// Creates a [TextColorTransition].
+  const TextColorTransition({super.key, required this.text, required this.ms});
+
+  @override
+  State<TextColorTransition> createState() => _TextColorTransitionState();
+
+  /// The colors of [span]'s spans that hold text, depth first, in order.
+  static List<Color?> spanColors(InlineSpan? span) {
+    final List<Color?> colors = [];
+    // Visits the spans that hold text (and widget spans), in pre-order.
+    span?.visitChildren((child) {
+      if (child is TextSpan) colors.add(child.style?.color);
+      return true;
+    });
+    return colors;
+  }
+
+  /// [span] with its spans that hold text colored by [colors], in the
+  /// order of [spanColors].
+  static InlineSpan withSpanColors(InlineSpan span, Iterator<Color?> colors) {
+    if (span is! TextSpan) return span;
+    final Color? color = span.text != null && colors.moveNext()
+        ? colors.current
+        : null;
+    return TextSpan(
+      text: span.text,
+      style: color == null
+          ? span.style
+          : (span.style ?? const TextStyle()).copyWith(color: color),
+      recognizer: span.recognizer,
+      semanticsLabel: span.semanticsLabel,
+      mouseCursor: span.mouseCursor,
+      onEnter: span.onEnter,
+      onExit: span.onExit,
+      locale: span.locale,
+      spellOut: span.spellOut,
+      children: span.children
+          ?.map((child) => withSpanColors(child, colors))
+          .toList(),
+    );
+  }
+}
+
+class _TextColorTransitionState extends State<TextColorTransition>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    value: 1,
+  );
+  late final CurvedAnimation _curve = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+  );
+
+  /// The colors the transition starts from, null when it shows the text's
+  /// own colors.
+  List<Color?>? _from;
+
+  /// The colors of [TextColorTransition.text]'s spans, in order.
+  late List<Color?> _to;
+
+  @override
+  void initState() {
+    super.initState();
+    _to = TextColorTransition.spanColors(widget.text.textSpan);
+  }
+
+  @override
+  void didUpdateWidget(covariant TextColorTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final List<Color?> to = TextColorTransition.spanColors(widget.text.textSpan);
+    if (listEquals(to, _to)) return;
+    // Start from what shows now, mid-transition included.
+    final List<Color?> shown = _shown();
+    _to = to;
+    final Duration duration = implicitTransitionDuration(context, widget.ms);
+    if (duration == Duration.zero || shown.length != to.length) {
+      _from = null;
+      _controller.value = 1;
+      return;
+    }
+    _from = shown;
+    _controller
+      ..duration = duration
+      ..forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _curve.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  List<Color?> _shown() {
+    final List<Color?>? from = _from;
+    if (from == null || _controller.value >= 1) return _to;
+    final double t = _curve.value;
+    return [
+      for (int i = 0; i < _to.length; i++)
+        from[i] == null || _to[i] == null
+            ? _to[i]
+            : Color.lerp(from[i], _to[i], t),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _controller,
+    builder: (context, _) {
+      final Text text = widget.text;
+      final InlineSpan? span = text.textSpan;
+      if (_from == null || _controller.value >= 1 || span == null) {
+        return text;
+      }
+      final Iterator<Color?> colors = _shown().iterator;
+      return Text.rich(
+        TextColorTransition.withSpanColors(span, colors),
+        key: text.key,
+        style: text.style,
+        strutStyle: text.strutStyle,
+        textAlign: text.textAlign,
+        textDirection: text.textDirection,
+        locale: text.locale,
+        softWrap: text.softWrap,
+        overflow: text.overflow,
+        textScaler: text.textScaler,
+        maxLines: text.maxLines,
+        semanticsLabel: text.semanticsLabel,
+        textWidthBasis: text.textWidthBasis,
+        textHeightBehavior: text.textHeightBehavior,
+        selectionColor: text.selectionColor,
+      );
+    },
+  );
 }

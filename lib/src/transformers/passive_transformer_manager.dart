@@ -143,21 +143,26 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // A node that reads `parent` is built with the size its parent gives
     // it, so its bindings can lay it out by that size.
     if (readsParentSize(node)) {
+      // Measurable, so a row or column that measures its children (an
+      // IntrinsicHeight around a stretching row) can have it inside.
       Widget measured(BuildContext context) => MeasurableLayoutBuilder(
         key: ValueKey('${node.id}-parent-size'),
         fallbackSize: Size(node.outerBoxLocal.width, node.outerBoxLocal.height),
         builder: (context, constraints) {
-          // In a row or column, an axis the node's constraints leave
-          // unbounded (a row's main axis) is measured against the row's
-          // own content size.
+          // An axis the parent lays its children out unbounded on (a
+          // horizontal list, a row's main axis) reads the parent's own
+          // extent there, as on the design canvas: the extent its parent
+          // gives its children ([ParentExtentScope]), else the content size
+          // of the row or column it sits in ([FlexContentScope]).
+          final ParentExtentScope? extent = ParentExtentScope.of(context, node);
           final FlexContentScope? flex = FlexContentScope.maybeOf(context);
           return ParentSizeScope(
             width: constraints.hasBoundedWidth
                 ? constraints.maxWidth
-                : flex?.width,
+                : extent?.width ?? flex?.width,
             height: constraints.hasBoundedHeight
                 ? constraints.maxHeight
-                : flex?.height,
+                : extent?.height ?? flex?.height,
             child: Builder(
               builder: (context) => _buildNode(context, node, settings),
             ),
@@ -165,9 +170,10 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         },
       );
       // In a freeform container `parent` is the container's content box,
-      // which it provides, not the constraints this node is given. Looked
-      // up when built (below the container's scope): children are created
-      // with the container's own context.
+      // which it provides, not the constraints this node is given (the box
+      // a child is placed in is the child's own size). Looked up when built
+      // (below the container's scope): children are created with the
+      // container's own context.
       return Builder(
         builder: (inside) {
           final FreeformContentSizeScope? box = FreeformContentSizeScope.of(
@@ -526,9 +532,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
     if (node is RectangleNode && node.variables.containsKey('path')) {
       // A shape drawn from bound SVG data, e.g. the filled part of a curved
-      // slider's track: `${= breezeFillPath}`. Empty text draws the box.
+      // slider's track (`${= breezeFillPath}`) or a dashed sun path across a
+      // sky of any width (`${= sunPath(parent.width, parent.height)}`).
+      // A binding that gives nothing (or empty text) keeps the saved path.
       final String? path = value<Object>('path')?.toString();
-      if (path != null && path != node.path) patch['path'] = path;
+      if (path != null && path.trim().isNotEmpty && path != node.path) {
+        patch['path'] = path;
+      }
     }
     if (node is CornerMixin) {
       // A number, or [top-left, top-right, bottom-right, bottom-left], e.g.
@@ -673,10 +683,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// Moves [widget] to the node's bound `x`/`y` (variables, formulas or
   /// conditions): the distance from the parent's padded top-left to the
-  /// node's outer box, as in the editor. The node is laid out at its design
-  /// place and painted (and hit tested) at the bound one, so bind it on
-  /// nodes pinned to the top-left of a freeform parent. An item of a
-  /// [ListLayout.stack] list is placed by the list instead.
+  /// node's outer box, as in the editor. In a freeform container (frame,
+  /// stack) the container lays the node out there, in its runtime box,
+  /// whatever the node's alignment or pins (see
+  /// [FreeformAxisPlacement.boundStart]); elsewhere the node is laid out at
+  /// its design place and painted (and hit tested) at the bound one. An
+  /// item of a [ListLayout.stack] list is placed by the list instead.
   Widget applyBoundOffset(BuildContext context, BaseNode node, Widget widget) {
     if (!node.variables.containsKey('x') &&
         !node.variables.containsKey('y') &&
@@ -692,7 +704,14 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       return widget;
     }
     final ScopedValues scopedValues = ScopedValues.of(context);
+    // A freeform container lays the node out at its bound x/y already, in
+    // its runtime box (FreeformAxisPlacement.boundStart).
+    final (bool placedX, bool placedY) = FreeformBoundPlacement.of(
+      context,
+      node.id,
+    );
     double delta(String property) {
+      if (property == 'x' ? placedX : placedY) return 0;
       final num? bound = PropertyValueDelegate.getPropertyValue<num>(
         node,
         property,
@@ -862,6 +881,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             listenables.add(codelesslyContext.dragAndDrop);
           case 'speech':
             listenables.add(Speech.instance);
+          case 'animating':
+            listenables.add(VariableAnimator.changes);
         }
       }
 
@@ -909,6 +930,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             listenables.add(codelesslyContext.dragAndDrop);
           case 'speech':
             listenables.add(Speech.instance);
+          case 'animating':
+            listenables.add(VariableAnimator.changes);
         }
       }
 
@@ -959,6 +982,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
               listenables.add(codelesslyContext.dragAndDrop);
             case 'speech':
               listenables.add(Speech.instance);
+            case 'animating':
+              listenables.add(VariableAnimator.changes);
           }
           continue;
         }
