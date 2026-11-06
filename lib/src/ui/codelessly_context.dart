@@ -80,6 +80,10 @@ class CodelesslyContext with ChangeNotifier, Equatable {
   /// The drag in progress in this layout, which `${drag}` reads.
   final DragAndDropController dragAndDrop = DragAndDropController();
 
+  /// The pagination controllers of this layout, by name; each writes its
+  /// state into the map variable of that name (`${contacts.page}`).
+  final PaginationRegistry pagination = PaginationRegistry();
+
   /// The layouts of this screen whose load actions have run. A layout's
   /// breakpoint canvases are one screen: the canvas shown for a new width
   /// (or the first one replaced by the right one at start-up) doesn't run
@@ -122,6 +126,7 @@ class CodelesslyContext with ChangeNotifier, Equatable {
   @override
   void dispose() {
     nodeRebuildNotifier.dispose();
+    pagination.dispose();
     super.dispose();
   }
 

@@ -151,6 +151,14 @@ class ConditionVariablesVisitor
   Set<String>? visitControlDragAction(ControlDragAction action) => {};
 
   @override
+  Set<String>? visitPaginateAction(PaginateAction action) => {
+    ...variablePathRegex
+        .allMatches('${action.page} ${action.pageSize}')
+        .map((match) => match.namedGroup('value'))
+        .nonNulls,
+  };
+
+  @override
   Set<String>? visitAnimateVariableAction(AnimateVariableAction action) => {};
 
   @override
@@ -160,7 +168,7 @@ class ConditionVariablesVisitor
   Set<String>? visitHapticAction(HapticAction action) => {};
 
   @override
-  Set<String>? visitPaginateAction(PaginateAction action) => {};
+  Set<String>? visitRunScriptAction(RunScriptAction action) => {};
 
   @override
   Set<String>? visitScrollToAction(ScrollToAction action) => {};
@@ -170,9 +178,6 @@ class ConditionVariablesVisitor
 
   @override
   Set<String>? visitPlayAnimationAction(PlayAnimationAction action) => {};
-
-  @override
-  Set<String>? visitRunScriptAction(RunScriptAction action) => {};
 
   @override
   Set<String>? visitEditTextAction(EditTextAction action) => {};
@@ -286,6 +291,9 @@ class ConditionNodesVisitor
   String? visitControlDragAction(ControlDragAction action) => null;
 
   @override
+  String? visitPaginateAction(PaginateAction action) => null;
+
+  @override
   String? visitAnimateVariableAction(AnimateVariableAction action) => null;
 
   @override
@@ -295,7 +303,7 @@ class ConditionNodesVisitor
   String? visitHapticAction(HapticAction action) => null;
 
   @override
-  String? visitPaginateAction(PaginateAction action) => null;
+  String? visitRunScriptAction(RunScriptAction action) => null;
 
   @override
   String? visitScrollToAction(ScrollToAction action) => null;
@@ -305,9 +313,6 @@ class ConditionNodesVisitor
 
   @override
   String? visitPlayAnimationAction(PlayAnimationAction action) => null;
-
-  @override
-  String? visitRunScriptAction(RunScriptAction action) => null;
 
   @override
   String? visitEditTextAction(EditTextAction action) => action.nodeId;
