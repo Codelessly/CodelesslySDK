@@ -186,4 +186,16 @@ void main() {
     expect(field.enabled, isFalse);
     expect(field.readOnly, isTrue);
   });
+
+  testWidgets('the error border keeps its color over a bound border color', (tester) async {
+    final decoration = await _pump(
+      tester,
+      _field({
+        'error': r'${= showErrors && length(trim(note)) < 10}',
+        'decoration.borderColor': r"${= '#0000FF'}",
+      }),
+      _context(showErrors: true, note: ''),
+    );
+    expect(_enabledBorderColor(decoration), _red.toFlutterColor());
+  });
 }

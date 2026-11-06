@@ -139,11 +139,11 @@ void main() {
     // 8 px off the intrinsic height it hugs: 10 px for one line of 18.
   }, variant: TargetPlatformVariant.all());
 
-  // The theme's compact density takes nothing off a dense field either: it
-  // is its padding and its line tall (see text_field_hug_height_test.dart).
-  testWidgets('a dense field is its padding and its line tall', (
+  testWidgets('a dense field keeps all its padding on desktop', (
     tester,
   ) async {
+    // A design is the same on every platform: desktop's compact density
+    // (the web's and the editor canvas's) takes nothing off.
     final double oneLine = await line(tester);
     for (final (double padding, double height) in [
       (0, oneLine),
