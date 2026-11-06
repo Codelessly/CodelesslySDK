@@ -145,7 +145,37 @@ class PropertyValueDelegate {
           scopedValues: scopedValues,
         ) ??
         literalIconName<R>(node, property, variablePath) ??
-        literalNumber<R>(variablePath);
+        literalNumber<R>(variablePath) ??
+        literalColor<R>(variablePath);
+  }
+
+  static final RegExp _hexColor = RegExp(
+    r'^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$',
+    caseSensitive: false,
+  );
+
+  /// [binding] itself as a color when it is one written as is (`#RGB`,
+  /// `#RRGGBB` or `#AARRGGBB`) rather than a variable or formula giving
+  /// one: `"iconColor": "#7A4520"` paints the icon that color, as
+  /// `${= '#7A4520'}` does. Null for anything else, and when [R] isn't a
+  /// color or paint type.
+  static R? literalColor<R extends Object>(String binding) {
+    if (R != ColorRGBA && R != ColorRGB && R != PaintModel) return null;
+    final ColorRGBA? color = parseColorLiteral(binding);
+    if (color == null) return null;
+    if (R == ColorRGB) return ColorRGB(r: color.r, g: color.g, b: color.b) as R;
+    if (R == PaintModel) return color.toPaint() as R;
+    return color as R;
+  }
+
+  /// [text] as a color when it is a hex color literal: `#RGB`, `#RRGGBB` or
+  /// `#AARRGGBB`. Null otherwise.
+  static ColorRGBA? parseColorLiteral(String text) {
+    final String trimmed = text.trim();
+    if (!_hexColor.hasMatch(trimmed)) return null;
+    String hex = trimmed.substring(1);
+    if (hex.length == 3) hex = [for (final c in hex.split('')) '$c$c'].join();
+    return ColorRGBA.fromHex(hex);
   }
 
   static final RegExp _number = RegExp(r'^-?(\d+\.?\d*|\.\d+)$');

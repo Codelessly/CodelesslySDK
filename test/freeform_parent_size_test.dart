@@ -86,9 +86,9 @@ void main() {
     final Offset frame = tester.getTopLeft(
       find.byKey(const ValueKey('Rectangle Transformer of sky [sky]')),
     );
-    // x is in the frame's box, as its design x is: 330 / 2 (not 50 / 2,
-    // the child's own width).
-    expect(tester.getTopLeft(_of('mid')).dx - frame.dx, 165);
+    // x is in the frame's content box, as its design x is: 330 / 2 (not
+    // 50 / 2, the child's own width) from the 10 px padding.
+    expect(tester.getTopLeft(_of('mid')).dx - frame.dx, 10 + 165);
   });
 
   testWidgets('an expanded frame gives the width it fills', (tester) async {

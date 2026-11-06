@@ -622,10 +622,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// Moves [widget] to the node's bound `x`/`y` (variables, formulas or
   /// conditions): the distance from the parent's padded top-left to the
-  /// node's outer box, as in the editor. The node is laid out at its design
-  /// place and painted (and hit tested) at the bound one, so bind it on
-  /// nodes pinned to the top-left of a freeform parent. An item of a
-  /// [ListLayout.stack] list is placed by the list instead.
+  /// node's outer box, as in the editor. In a freeform container (frame,
+  /// stack) the container lays the node out there, in its runtime box,
+  /// whatever the node's alignment or pins (see
+  /// [FreeformAxisPlacement.boundStart]); elsewhere the node is laid out at
+  /// its design place and painted (and hit tested) at the bound one. An
+  /// item of a [ListLayout.stack] list is placed by the list instead.
   Widget applyBoundOffset(BuildContext context, BaseNode node, Widget widget) {
     if (!node.variables.containsKey('x') &&
         !node.variables.containsKey('y') &&
@@ -641,7 +643,14 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       return widget;
     }
     final ScopedValues scopedValues = ScopedValues.of(context);
+    // A freeform container lays the node out at its bound x/y already, in
+    // its runtime box (FreeformAxisPlacement.boundStart).
+    final (bool placedX, bool placedY) = FreeformBoundPlacement.of(
+      context,
+      node.id,
+    );
     double delta(String property) {
+      if (property == 'x' ? placedX : placedY) return 0;
       final num? bound = PropertyValueDelegate.getPropertyValue<num>(
         node,
         property,

@@ -95,9 +95,8 @@ void main() {
   setUpAll(() async {
     GoogleFonts.config.allowRuntimeFetching = false;
     family = TextUtils.retrieveTextStyle(fontName: _inter).fontFamily!;
-    final Uint8List bytes = File(
-      'test/fixtures/fonts/Inter-500.ttf',
-    ).readAsBytesSync();
+    final Uint8List bytes = File('test/fixtures/fonts/Inter-500.ttf')
+        .readAsBytesSync();
     await (FontLoader(
       family,
     )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
@@ -136,7 +135,32 @@ void main() {
       closeTo(oneLine, 0.5),
     );
     expect(_hint(tester).height, closeTo(oneLine, 0.5));
-  });
+    // On desktop (the web, the editor) the theme's compact density took
+    // 8 px off the intrinsic height it hugs: 10 px for one line of 18.
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('a dense field keeps the compact density its padding allows', (
+    tester,
+  ) async {
+    final double oneLine = await line(tester);
+    for (final (double padding, double height) in [
+      (0, oneLine),
+      (2, oneLine),
+      (6, oneLine + 12 - 8),
+      (10, oneLine + 20 - 8),
+    ]) {
+      final TextFieldNode node = _field(SizeFit.shrinkWrap, height: 12);
+      node.properties.decoration = node.properties.decoration.copyWith(
+        contentPadding: EdgeInsetsModel.symmetric(vertical: padding),
+      );
+      await _pump(tester, node);
+      expect(
+        tester.getSize(find.byType(TextField)).height,
+        closeTo(height, 0.5),
+        reason: 'padding $padding',
+      );
+    }
+  }, variant: TargetPlatformVariant.desktop());
 
   for (final (TextAlignVerticalEnum align, double share) in [
     (TextAlignVerticalEnum.top, 0),

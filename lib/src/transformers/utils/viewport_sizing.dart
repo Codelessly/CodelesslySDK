@@ -312,6 +312,12 @@ class WrapNodeBox extends StatelessWidget {
 /// on both axes. An expanded or flexible item, which has nothing to fill in
 /// a run, takes its design size; with [itemExtent] the item takes that
 /// extent along the wrap direction.
+///
+/// With [stretch] (the list's [ListViewProperties.stretchItems]) an item
+/// that fills the cross axis is as thick as its run: the
+/// [RunStretchWrap] measures it from its content, so its design extent
+/// there (solved by the editor for one set of values, e.g. with a list in
+/// it that a binding hides at runtime) is not imposed.
 class WrapItemBox extends StatelessWidget {
   /// The item node.
   final BaseNode item;
@@ -321,6 +327,9 @@ class WrapItemBox extends StatelessWidget {
 
   /// The list's fixed item extent, if any.
   final double? itemExtent;
+
+  /// Whether the list stretches its items across the wrap direction.
+  final bool stretch;
 
   /// The built item.
   final Widget child;
@@ -332,6 +341,7 @@ class WrapItemBox extends StatelessWidget {
     required this.scrollDirection,
     required this.itemExtent,
     required this.child,
+    this.stretch = false,
   });
 
   static bool _fills(SizeFit fit) =>
@@ -340,10 +350,10 @@ class WrapItemBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool vertical = scrollDirection == AxisC.vertical;
-    double? width = _fills(item.horizontalFit)
+    double? width = _fills(item.horizontalFit) && !(stretch && vertical)
         ? item.outerBoxLocal.width
         : null;
-    double? height = _fills(item.verticalFit)
+    double? height = _fills(item.verticalFit) && !(stretch && !vertical)
         ? item.outerBoxLocal.height
         : null;
     if (itemExtent != null) {

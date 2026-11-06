@@ -423,16 +423,22 @@ void main() {
     final registry = NodeRegistry()..setNodes({frame.id: frame, pin.id: pin});
     await pump(tester, registry, frame);
 
-    final Finder translated = find.byWidgetPredicate(
-      (w) => w is Transform && w.transform.getTranslation().x != 0,
+    // Design place (20, 20) to bound (30, 5): the frame lays the pin out
+    // there (FreeformAxisPlacement.boundStart), not translated on top.
+    final Offset at =
+        tester.getTopLeft(
+          find.byKey(const ValueKey('Rectangle Transformer of Pin [pin]')),
+        ) -
+        tester.getTopLeft(
+          find.byKey(const ValueKey('Rectangle Transformer of Map [frame]')),
+        );
+    expect(at, const Offset(30, 5));
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Transform && w.transform.getTranslation().x != 0,
+      ),
+      findsNothing,
     );
-    expect(translated, findsOneWidget);
-    final translation = tester
-        .widget<Transform>(translated)
-        .transform
-        .getTranslation();
-    // Design place (20, 20) to bound (30, 5).
-    expect([translation.x, translation.y], [10, -15]);
   });
 
   testWidgets('a bound size sizes a node pinned in a freeform parent', (
