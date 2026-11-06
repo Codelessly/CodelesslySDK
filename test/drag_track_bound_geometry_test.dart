@@ -17,7 +17,7 @@ void main() {
       basicBoxLocal: NodeBox(0, 0, 28, 28),
     )
       ..variables['dragTrack.x2'] = r'${= 300 - 28}'
-      ..variables['dragTrack.max'] = '0.5';
+      ..variables['dragTrack.max'] = r'${= 0.5}';
     final DragTrackModel resolved = WidgetNodeTransformerManager.resolvedTrack(
       thumb,
       track,
