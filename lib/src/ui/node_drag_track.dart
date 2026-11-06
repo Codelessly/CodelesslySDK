@@ -253,6 +253,26 @@ class NodeDragTrack extends StatefulWidget {
   State<NodeDragTrack> createState() => _NodeDragTrackState();
 }
 
+/// The pan a [NodeDragTrack] turns its value with. It claims the pointer
+/// after half the movement any drag or scroll needs (half a pixel with a
+/// mouse, half the touch slop on touch), so a control wins over what holds
+/// it: a knob on a pedal that can itself be dragged (a draggable starts at
+/// 1px with a mouse), a fader in a scrolling page (a scroll starts at the
+/// touch slop, where a plain pan needs twice that). Holding still is not
+/// claiming, so a double tap still resets the value.
+class TrackPanGestureRecognizer extends PanGestureRecognizer {
+  /// Creates a [TrackPanGestureRecognizer].
+  TrackPanGestureRecognizer({super.debugOwner});
+
+  @override
+  bool hasSufficientGlobalDistanceToAccept(
+    PointerDeviceKind pointerDeviceKind,
+    double? deviceTouchSlop,
+  ) =>
+      globalDistanceMoved.abs() >
+      computeHitSlop(pointerDeviceKind, gestureSettings) / 2;
+}
+
 class _NodeDragTrackState extends State<NodeDragTrack> {
   late DragTrackGeometry _geometry = DragTrackGeometry(widget.track);
 
@@ -265,7 +285,7 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
   Offset _grab = Offset.zero;
   Size _size = Size.zero;
 
-  late final PanGestureRecognizer _pan = PanGestureRecognizer()
+  late final PanGestureRecognizer _pan = TrackPanGestureRecognizer()
     ..dragStartBehavior = DragStartBehavior.down
     ..onStart = _onStart
     ..onUpdate = _onUpdate

@@ -105,6 +105,30 @@ Future<Map<String, Rect>> pump(
 }
 
 void main() {
+  testWidgets(
+    'a row that clips its content clips overflowing children instead of painting overflow stripes',
+    (tester) async {
+      final List<BaseNode> kids = [
+        for (int i = 0; i < 4; i++) rect('s$i', width: 86, height: 34),
+      ];
+      final RowColumnNode row = flex(
+        'row',
+        kids,
+        type: RowColumnType.row,
+        spacing: 8,
+        width: 358,
+        height: 34,
+      )..clipsContent = true;
+      await pump(tester, row, kids);
+      // No overflow error (in debug, RenderFlex reports and stripes an
+      // overflow only when it doesn't clip).
+      expect(tester.takeException(), isNull);
+      final RenderCodelesslyFlex flexBox = tester
+          .renderObject<RenderCodelesslyFlex>(find.byType(CodelesslyFlex));
+      expect(flexBox.clipBehavior, Clip.hardEdge);
+    },
+  );
+
   testWidgets('expanded children share the room left after spacing', (
     tester,
   ) async {
