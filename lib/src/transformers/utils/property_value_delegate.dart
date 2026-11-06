@@ -461,7 +461,8 @@ class PropertyValueDelegate {
     if (segments.isEmpty) return value?.typedValue<R>();
     if (value == null) return null;
 
-    final variable = match.isPredefinedVariable
+    final bool builtin = readsBuiltin(match, scopedValues);
+    final variable = builtin
         ? predefinedVariables.findByNameOrNull(match.name)
         : scopedValues.variables.values.findByNameOrNull(match.name);
 
@@ -471,9 +472,7 @@ class PropertyValueDelegate {
     // variable, so read accessors for the value they hold (an item can be a
     // string, a map, ...).
     VariableType accessorType =
-        match.hasAccessor ||
-            match.isPredefinedVariable ||
-            computedExpressionOf(variable) != null
+        match.hasAccessor || builtin || computedExpressionOf(variable) != null
         ? VariableType.fromObjectType(value)
         : variable.type;
     List<Accessor> accessors = isApiVariableName(variable.name)
@@ -556,7 +555,7 @@ class PropertyValueDelegate {
         path.wrapWithVariableSyntax(),
       );
       if (match == null) continue;
-      if (match.isPredefinedVariable) {
+      if (readsBuiltin(match, scopedValues)) {
         // Saved data (storage) read through a computed chain made every
         // formula after it uncached: a game's whole simulation ran again
         // on each read.
@@ -613,7 +612,7 @@ class PropertyValueDelegate {
     final match = VariableMatch.parse(path.wrapWithVariableSyntax());
     if (match == null) return null;
 
-    if (match.isPredefinedVariable) {
+    if (readsBuiltin(match, scopedValues)) {
       final Object? value = retrievePredefinedVariableValue(
         match,
         scopedValues,
@@ -631,6 +630,27 @@ class PropertyValueDelegate {
     }
     return _userVariableValue(match, scopedValues);
   }
+
+  /// Built-in names the SDK added after projects could already have
+  /// variables called that: a project's own variable of such a name wins
+  /// over the built-in, so a published app keeps meaning what it meant (a
+  /// game's `animating` flag read the built-in map of playing animations,
+  /// which is never false).
+  static const Set<String> shadowableBuiltins = {
+    'animating',
+    'script',
+    'speech',
+    'initial',
+    'hold',
+  };
+
+  /// Whether [match] reads a built-in variable at [scopedValues]: a
+  /// predefined name the project hasn't taken for a variable of its own
+  /// (see [shadowableBuiltins]).
+  static bool readsBuiltin(VariableMatch match, ScopedValues scopedValues) =>
+      match.isPredefinedVariable &&
+      !(shadowableBuiltins.contains(match.name) &&
+          scopedValues.variables.containsKey(match.name));
 
   /// The value of the project's own variable [match] names.
   static Object? _userVariableValue(
