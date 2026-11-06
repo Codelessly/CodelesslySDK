@@ -1200,6 +1200,29 @@ class _NodeStateProviderWidgetState extends State<NodeStateProviderWidget>
   }
 
   @override
+  void didUpdateWidget(covariant NodeStateProviderWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Registered under the old node and listening to the old context, the
+    // state would stay in both after dispose, and through its context keep
+    // the whole screen it was part of alive.
+    if (oldWidget.node.id != widget.node.id) {
+      NodeContextRegistry.unregister(oldWidget.node.id, context);
+      NodeContextRegistry.register(widget.node.id, context);
+    }
+    if (!identical(
+      oldWidget.codelesslyContext.nodeRebuildNotifier,
+      widget.codelesslyContext.nodeRebuildNotifier,
+    )) {
+      oldWidget.codelesslyContext.nodeRebuildNotifier.removeListener(
+        onNodeNotification,
+      );
+      widget.codelesslyContext.nodeRebuildNotifier.addListener(
+        onNodeNotification,
+      );
+    }
+  }
+
+  @override
   void dispose() {
     NodeContextRegistry.unregister(widget.node.id, context);
     nodeState.onChangedByUser = null;

@@ -695,22 +695,36 @@ class DropTargetBox extends StatefulWidget {
     this.enabled = true,
   });
 
-  /// Scrollers of the scroll views under drop targets and their lists.
-  static final Set<EdgeDraggingAutoScroller> _scrollers = {};
-  static final Map<ScrollableState, EdgeDraggingAutoScroller> _byScrollable =
-      {};
+  /// The scroll views around drop targets, held weakly: a design canvas
+  /// that is never dragged on would otherwise keep every scroll view it
+  /// built, and through it its whole screen, after the screen is gone.
+  static final List<WeakReference<ScrollableState>> _watched = [];
+
+  /// The auto-scroller of each watched scroll view, made as it is watched.
+  /// An Expando keeps a scroller only as long as its scroll view lives.
+  static final Expando<EdgeDraggingAutoScroller> _scrollerOf = Expando(
+    'drop target auto-scroller',
+  );
+
+  /// The watched scroll views still mounted (forgetting the others).
+  static List<ScrollableState> _liveScrollables() {
+    final List<ScrollableState> live = [];
+    _watched.removeWhere((ref) {
+      final ScrollableState? scrollable = ref.target;
+      if (scrollable == null || !scrollable.mounted) return true;
+      live.add(scrollable);
+      return false;
+    });
+    return live;
+  }
 
   /// Scrolls the scroll views around the target under [position], and its
   /// list, when [position] is near one of their edges.
   static void autoScroll(Offset position) {
     final Rect probe = Rect.fromCenter(center: position, width: 2, height: 2);
-    for (final EdgeDraggingAutoScroller scroller in _scrollers.toList()) {
-      final ScrollableState scrollable = scroller.scrollable;
-      if (!scrollable.mounted) {
-        _scrollers.remove(scroller);
-        _byScrollable.remove(scrollable);
-        continue;
-      }
+    for (final ScrollableState scrollable in _liveScrollables()) {
+      final EdgeDraggingAutoScroller? scroller = _scrollerOf[scrollable];
+      if (scroller == null) continue;
       final RenderBox? box =
           scrollable.context.findRenderObject() as RenderBox?;
       if (box == null || !box.attached) continue;
@@ -725,20 +739,24 @@ class DropTargetBox extends StatefulWidget {
 
   /// Registers [scrollable] for [autoScroll].
   static void watchScrollable(ScrollableState scrollable) {
-    if (_byScrollable.containsKey(scrollable)) return;
-    final scroller = EdgeDraggingAutoScroller(
+    if (_scrollerOf[scrollable] != null) return;
+    _liveScrollables();
+    _scrollerOf[scrollable] = EdgeDraggingAutoScroller(
       scrollable,
       velocityScalar: 18,
       onScrollViewScrolled: () {},
     );
-    _byScrollable[scrollable] = scroller;
-    _scrollers.add(scroller);
+    _watched.add(WeakReference(scrollable));
   }
+
+  /// How many scroll views are watched (tests).
+  @visibleForTesting
+  static int get watchedCount => _liveScrollables().length;
 
   /// Stops every auto-scroll (the drag ended).
   static void stopAutoScroll() {
-    for (final scroller in _scrollers) {
-      scroller.stopAutoScroll();
+    for (final ScrollableState scrollable in _liveScrollables()) {
+      _scrollerOf[scrollable]?.stopAutoScroll();
     }
   }
 

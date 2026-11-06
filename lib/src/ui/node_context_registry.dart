@@ -26,6 +26,15 @@ class NodeContextRegistry {
     if (contexts.isEmpty) _contexts.remove(nodeId);
   }
 
+  /// How many registered contexts are no longer mounted: each one keeps
+  /// the screen it belonged to alive (a leak). Zero when every widget
+  /// unregistered as it went.
+  static int get debugStaleCount => _contexts.values.fold(
+    0,
+    (int n, List<BuildContext> list) =>
+        n + list.where((BuildContext c) => !c.mounted).length,
+  );
+
   /// The mounted contexts showing the node [nodeId], first shown first.
   static List<BuildContext> contextsOf(String nodeId) => [
     for (final BuildContext context in _contexts[nodeId] ?? const [])

@@ -264,8 +264,8 @@ class PassiveTextFieldWidget extends StatefulWidget {
         (decoration.counterText?.isNotEmpty ?? false)) {
       return decoration;
     }
-    final TextScaler scaler = MediaQuery.maybeTextScalerOf(context) ??
-        TextScaler.noScaling;
+    final TextScaler scaler =
+        MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling;
     double lineOf(TextStyle? style) {
       final TextPainter painter = TextPainter(
         text: TextSpan(text: ' ', style: style),
@@ -538,6 +538,14 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
   void didUpdateWidget(covariant PassiveTextFieldWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     controller.markdown = widget.node.properties.markdown;
+    if (oldWidget.node.id != widget.node.id) {
+      // Registered under the old id, it would be kept there after dispose.
+      _mounted[oldWidget.node.id]?.remove(this);
+      if (_mounted[oldWidget.node.id]?.isEmpty ?? false) {
+        _mounted.remove(oldWidget.node.id);
+      }
+      (_mounted[widget.node.id] ??= []).add(this);
+    }
     if (oldWidget.node.id != widget.node.id ||
         (oldWidget.onChanged != null) != (widget.onChanged != null)) {
       TextFieldRegistry.unregister(oldWidget.node.id, this);

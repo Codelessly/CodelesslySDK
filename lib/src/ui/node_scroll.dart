@@ -20,6 +20,14 @@ abstract final class ScrollTargets {
   static final Set<String> _targets = {};
   static final Map<String, List<BuildContext>> _built = {};
 
+  /// Registered contexts no longer mounted (leaks; see
+  /// NodeContextRegistry.debugStaleCount).
+  static int get debugStaleCount => _built.values.fold(
+    0,
+    (int n, List<BuildContext> list) =>
+        n + list.where((BuildContext c) => !c.mounted).length,
+  );
+
   /// Whether a Scroll To action targets node [nodeId].
   static bool isTarget(String nodeId) => _targets.contains(nodeId);
 
