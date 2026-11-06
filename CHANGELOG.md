@@ -22,6 +22,10 @@ Requires codelessly_api 9.1.0.
 
 ### Fixes
 
+- A child of a row or column sized by a bound `widthFactor` /
+  `heightFactor` (a progress fill) or reading `parent` gets the row's
+  content box; it kept its design width, unbounded along the row.
+
 - Computed variables whose formulas read `storage`, `route`, `screen` or
   `auth` (directly or through other computed variables) are cached again,
   keyed by those values: such chains were worked out again on every read,
