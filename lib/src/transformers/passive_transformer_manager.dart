@@ -143,6 +143,21 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // A node that reads `parent` is built with the size its parent gives
     // it, so its bindings can lay it out by that size.
     if (readsParentSize(node)) {
+      // In a freeform container, `parent` is the container's content box
+      // (it provides it), not the constraints this node is given.
+      final FreeformContentSizeScope? box = FreeformContentSizeScope.of(
+        context,
+        node.parentID,
+      );
+      if (box != null) {
+        return ParentSizeScope(
+          width: box.width,
+          height: box.height,
+          child: Builder(
+            builder: (context) => _buildNode(context, node, settings),
+          ),
+        );
+      }
       // Measurable, so a row or column that measures its children (an
       // IntrinsicHeight around a stretching row) can have it inside.
       return MeasurableLayoutBuilder(
