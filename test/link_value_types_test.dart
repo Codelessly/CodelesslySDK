@@ -29,10 +29,19 @@ void main() {
   });
 
   test('list link parameters split on commas or read JSON', () {
-    expect(Codelessly.linkValueFor(VariableType.list, 'Tired,Wired'), ['Tired', 'Wired']);
-    expect(Codelessly.linkValueFor(VariableType.list, ' Tired , Wired ,'), ['Tired', 'Wired']);
+    expect(Codelessly.linkValueFor(VariableType.list, 'Tired,Wired'), [
+      'Tired',
+      'Wired',
+    ]);
+    expect(Codelessly.linkValueFor(VariableType.list, ' Tired , Wired ,'), [
+      'Tired',
+      'Wired',
+    ]);
     expect(Codelessly.linkValueFor(VariableType.list, '3,7'), [3, 7]);
-    expect(Codelessly.linkValueFor(VariableType.list, '["a,b","c"]'), ['a,b', 'c']);
+    expect(Codelessly.linkValueFor(VariableType.list, '["a,b","c"]'), [
+      'a,b',
+      'c',
+    ]);
     expect(Codelessly.linkValueFor(VariableType.list, ''), isEmpty);
     expect(Codelessly.linkValueFor(VariableType.list, 'Focused'), ['Focused']);
   });

@@ -19,6 +19,7 @@ void main() {
     Map<String, BaseNode> extra = const {},
     Map<String, dynamic>? routeParams,
     IndexedItem? item,
+    double pinSize = 40,
   }) async {
     tester.view.physicalSize = const Size(400, 500);
     tester.view.devicePixelRatio = 1;
@@ -28,7 +29,7 @@ void main() {
         RectangleNode(
             id: 'pin',
             name: 'Pin',
-            basicBoxLocal: NodeBox(0, 0, 40, 40),
+            basicBoxLocal: NodeBox(0, 0, pinSize, pinSize),
           )
           ..parentID = kRootNode
           ..draggable = draggable;
@@ -69,7 +70,7 @@ void main() {
         ),
       ),
     );
-    Widget source = built(pin, 40, 40);
+    Widget source = built(pin, pinSize, pinSize);
     if (item != null) source = IndexedItemProvider(item: item, child: source);
     Widget home = ActionChainHost(
       child: Stack(
@@ -112,7 +113,7 @@ void main() {
       draggable: const DraggableModel(
         group: 'pin',
         start: DragStart.press,
-        feedbackAnchor: DragFeedbackAnchor.center,
+        feedbackAnchor: FeedbackAnchor.center,
         feedbackRotation: 0,
       ),
     );
@@ -181,7 +182,7 @@ void main() {
         group: 'pin',
         start: DragStart.press,
         feedbackNodeId: 'fb',
-        feedbackAnchor: DragFeedbackAnchor.center,
+        feedbackAnchor: FeedbackAnchor.center,
       ),
       extra: {'holder': holder, 'fb': fb},
       routeParams: {'place': 'Orchard'},
@@ -195,12 +196,65 @@ void main() {
     expect(shown, findsWidgets);
     // Centred on the pointer, though wider than the pin.
     final Rect rect = tester.getRect(
-      find.ancestor(of: shown.first, matching: find.byType(OverflowBox)).first,
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is DecoratedBox &&
+            widget.decoration is BoxDecoration &&
+            (widget.decoration as BoxDecoration).boxShadow?.isNotEmpty == true,
+      ),
     );
-    expect(rect.center, to);
+    expect((rect.center - to).distance, lessThan(0.01));
     await gesture.up();
     await tester.pumpAndSettle();
     expect((r.drops.single! as Map)['fx'] as double, closeTo(0.5, 0.001));
+  });
+
+  testWidgets('a centred feedback node smaller than the dragged node is '
+      'centred on the pointer too', (tester) async {
+    final FrameNode holder =
+        FrameNode(
+            id: 'holder',
+            name: 'Holder',
+            basicBoxLocal: NodeBox(0, 0, 40, 46),
+            children: ['token'],
+          )
+          ..parentID = kRootNode
+          ..visible = false;
+    final RectangleNode token = RectangleNode(
+      id: 'token',
+      name: 'Token',
+      basicBoxLocal: NodeBox(0, 0, 40, 46),
+      fills: [
+        PaintModel.solid(id: 't', color: const ColorRGB(r: 1, g: 0, b: 0)),
+      ],
+    )..parentID = 'holder';
+    await pump(
+      tester,
+      pinSize: 88,
+      draggable: const DraggableModel(
+        group: 'pin',
+        start: DragStart.press,
+        feedbackNodeId: 'token',
+        feedbackAnchor: FeedbackAnchor.center,
+        feedbackRotation: 0,
+      ),
+      extra: {'holder': holder, 'token': token},
+    );
+    const Offset to = Offset(200, 250);
+    // Grabbed near the 88×88 node's top left corner.
+    final TestGesture gesture = await dragTo(tester, const Offset(6, 6), to);
+    final Rect rect = tester.getRect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is DecoratedBox &&
+            widget.decoration is BoxDecoration &&
+            (widget.decoration as BoxDecoration).boxShadow?.isNotEmpty == true,
+      ),
+    );
+    expect(rect.size, const Size(40, 46));
+    expect((rect.center - to).distance, lessThan(0.01));
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('a feedback node that does not exist draws nothing', (

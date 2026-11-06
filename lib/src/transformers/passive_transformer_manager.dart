@@ -145,15 +145,50 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (readsParentSize(node)) {
       // Measurable, so a row or column that measures its children (an
       // IntrinsicHeight around a stretching row) can have it inside.
-      return MeasurableLayoutBuilder(
+      Widget measured(BuildContext context) => MeasurableLayoutBuilder(
         key: ValueKey('${node.id}-parent-size'),
         fallbackSize: Size(node.outerBoxLocal.width, node.outerBoxLocal.height),
-        builder: (context, constraints) => ParentSizeScope.fromConstraints(
-          constraints,
-          child: Builder(
-            builder: (context) => _buildNode(context, node, settings),
-          ),
-        ),
+        builder: (context, constraints) {
+          // An axis the parent lays its children out unbounded on (a
+          // horizontal list, a row's main axis) reads the parent's own
+          // extent there, as on the design canvas: the extent its parent
+          // gives its children ([ParentExtentScope]), else the content size
+          // of the row or column it sits in ([FlexContentScope]).
+          final ParentExtentScope? extent = ParentExtentScope.of(context, node);
+          final FlexContentScope? flex = FlexContentScope.maybeOf(context);
+          return ParentSizeScope(
+            width: constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : extent?.width ?? flex?.width,
+            height: constraints.hasBoundedHeight
+                ? constraints.maxHeight
+                : extent?.height ?? flex?.height,
+            child: Builder(
+              builder: (context) => _buildNode(context, node, settings),
+            ),
+          );
+        },
+      );
+      // In a freeform container `parent` is the container's content box,
+      // which it provides, not the constraints this node is given (the box
+      // a child is placed in is the child's own size). Looked up when built
+      // (below the container's scope): children are created with the
+      // container's own context.
+      return Builder(
+        builder: (inside) {
+          final FreeformContentSizeScope? box = FreeformContentSizeScope.of(
+            inside,
+            node.parentID,
+          );
+          if (box == null) return measured(inside);
+          return ParentSizeScope(
+            width: box.width,
+            height: box.height,
+            child: Builder(
+              builder: (context) => _buildNode(context, node, settings),
+            ),
+          );
+        },
       );
     }
     return _buildNode(context, node, settings);
@@ -174,16 +209,47 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             builder: (context) => _buildDecorated(context, node, settings),
           );
         }
-        return _buildDecorated(context, node, settings);
+        final Widget decorated = _buildDecorated(context, node, settings);
+        // The design canvas shows no interaction states, but a node its
+        // `disabled` binding disables (with no disabled state of its own)
+        // is drawn faded there as it is at runtime.
+        if (settings.isPreview &&
+            node.variables.containsKey('disabled') &&
+            !node.interactionStates.containsKey(InteractionState.disabled) &&
+            InteractionStatesBox.propertyStates(
+              context,
+              node,
+            ).contains(InteractionState.disabled)) {
+          return Opacity(
+            opacity: InteractionStatesBox.defaultDisabledOpacity,
+            child: decorated,
+          );
+        }
+        return decorated;
       },
     );
+    Widget wrapped = settings.withReactions
+        ? wrapWithInteractionScopes(context, node, built)
+        : built;
+    // A draggable node moved by bound x/y (a pin placed from variables) is
+    // moved with its drag handling, so it is grabbed where it is drawn, not
+    // where it was designed.
+    if (_offsetsOutside(node, settings)) {
+      final Widget inner = wrapped;
+      wrapped = _wrapWithListener(
+        context,
+        node: node,
+        builder: (context) => applyBoundOffset(context, node, inner),
+      );
+    }
     // A node a Scroll To action targets records where it is built.
-    return ScrollTargets.wrap(
-      node,
-      settings.withReactions
-          ? wrapWithInteractionScopes(context, node, built)
-          : built,
-    );
+    final Widget scrollable = ScrollTargets.wrap(node, wrapped);
+    // A node motion draws elsewhere takes taps where it is drawn, through
+    // its interaction states' mouse region and the boxes around it.
+    if (!settings.isPreview && movesByMotion(node)) {
+      return HitBeyondBounds(child: scrollable);
+    }
+    return scrollable;
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -270,7 +336,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         animate: !settings.isPreview,
       );
       widget = applyNodePlay(context, styled, widget);
-      widget = applyBoundOffset(context, styled, widget);
+      if (!_offsetsOutside(node, settings)) {
+        widget = applyBoundOffset(context, styled, widget);
+      }
     }
     // Without reactions (the design canvas) a knob or fader cap is drawn
     // where its drag track puts it; with them NodeDragTrack draws it there
@@ -288,7 +356,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = applyWidgetMargins(styled, widget);
     }
 
-    if (settings.withVisibility) {
+    if (settings.withVisibility && !ShownAnyway.covers(context, node.id)) {
       widget = applyWidgetVisibility(
         context,
         styled,
@@ -345,24 +413,43 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         model: draggable,
         enabled: flag(DraggableModel.enabledVariable, draggable.enabled),
         flightKey: '${flightKey ?? ''}',
-        // The feedback node is built by id from the layout's nodes, so it
-        // need not be shown anywhere: it is usually hidden, or off screen,
-        // where it is designed.
+        feedbackSize: draggable.feedbackNodeId.isEmpty
+            ? null
+            : _designedSize(draggable.feedbackNodeId),
+        // The feedback node is usually hidden where it is designed: it shows
+        // anyway, while the nodes inside it keep their own visibility (a
+        // pedal's two- and three-knob faces).
+        // It is built by id from the layout's nodes, so it need not be shown
+        // anywhere; an id the layout doesn't have draws nothing.
         buildNode: (context, id) => tryGetNode(id) == null
             ? const SizedBox.shrink()
-            : buildWidgetByID(
-                id,
-                context,
-                settings: const WidgetBuildSettings(
-                  debugLabel: 'drag feedback',
-                  withReactions: false,
-                  withVisibility: false,
+            : ShownAnyway(
+                nodeId: id,
+                child: Builder(
+                  builder: (context) => buildWidgetByID(
+                    id,
+                    context,
+                    settings: const WidgetBuildSettings(
+                      debugLabel: 'drag feedback',
+                      withReactions: false,
+                    ),
+                  ),
                 ),
               ),
         child: widget,
       );
     }
     return widget;
+  }
+
+  /// The designed size of node [id], or null when there's no such node.
+  Size? _designedSize(String id) {
+    try {
+      final BaseNode node = getNode(id);
+      return Size(node.basicBoxLocal.width, node.basicBoxLocal.height);
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Wraps [widget] in a tooltip showing [node]'s tooltip text (its data
@@ -406,9 +493,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     // `variables`, e.g. a hovered card's border `${= overdue ? red :
     // honey}`): they replace the node's own bindings of the same keys and
     // are evaluated with them below.
-    if (PropertyOverrideScope.patchFor(context, node.id) case {
-      'variables': final Map stateVariables,
-    } when stateVariables.isNotEmpty) {
+    if (PropertyOverrideScope.patchFor(context, node.id)
+        case {'variables': final Map stateVariables}
+        when stateVariables.isNotEmpty) {
       final BaseNode? bound = NodeJsonConverter().fromJson(
         PropertyOverridePatch.apply(node.toJson(), {
           'variables': stateVariables,
@@ -461,6 +548,16 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         ];
       }
     }
+    if (node is RectangleNode && node.variables.containsKey('path')) {
+      // A shape drawn from bound SVG data, e.g. the filled part of a curved
+      // slider's track (`${= breezeFillPath}`) or a dashed sun path across a
+      // sky of any width (`${= sunPath(parent.width, parent.height)}`).
+      // A binding that gives nothing (or empty text) keeps the saved path.
+      final String? path = value<Object>('path')?.toString();
+      if (path != null && path.trim().isNotEmpty && path != node.path) {
+        patch['path'] = path;
+      }
+    }
     if (node is CornerMixin) {
       // A number, or [top-left, top-right, bottom-right, bottom-left], e.g.
       // a dialog squared at the bottom as a mobile sheet:
@@ -505,24 +602,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
               'stack',
               'freeformPlaceholder',
             }.contains(parent.type));
-    // A row or column leaves its main axis unbounded for a child that
-    // doesn't flex; a bound factor takes its fraction of the row/column's
-    // content box there, as on the design canvas, which gives `parent` that
-    // box (see [FlexContentSizeScope]).
-    final ({double? width, double? height})? flexContent =
-        hasFractionalSize(node) && !placedByParent
-        ? FlexContentSizeScope.of(context, node.id)
-        : null;
     final fractional = hasFractionalSize(node) && !placedByParent
         ? fractionalBoxOf(
             node,
             scopedValues: scope,
-            parentWidth:
-                (scope.parentSize?['width'] as num?)?.toDouble() ??
-                flexContent?.width,
-            parentHeight:
-                (scope.parentSize?['height'] as num?)?.toDouble() ??
-                flexContent?.height,
+            parentWidth: (scope.parentSize?['width'] as num?)?.toDouble(),
+            parentHeight: (scope.parentSize?['height'] as num?)?.toDouble(),
           )
         : (width: null, height: null);
     final double? width = node.variables.containsKey('width')
@@ -616,10 +701,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
   /// Moves [widget] to the node's bound `x`/`y` (variables, formulas or
   /// conditions): the distance from the parent's padded top-left to the
-  /// node's outer box, as in the editor. The node is laid out at its design
-  /// place and painted (and hit tested) at the bound one, so bind it on
-  /// nodes pinned to the top-left of a freeform parent. An item of a
-  /// [ListLayout.stack] list is placed by the list instead.
+  /// node's outer box, as in the editor. In a freeform container (frame,
+  /// stack) the container lays the node out there, in its runtime box,
+  /// whatever the node's alignment or pins (see
+  /// [FreeformAxisPlacement.boundStart]); elsewhere the node is laid out at
+  /// its design place and painted (and hit tested) at the bound one. An
+  /// item of a [ListLayout.stack] list is placed by the list instead.
   Widget applyBoundOffset(BuildContext context, BaseNode node, Widget widget) {
     if (!node.variables.containsKey('x') &&
         !node.variables.containsKey('y') &&
@@ -635,7 +722,14 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       return widget;
     }
     final ScopedValues scopedValues = ScopedValues.of(context);
+    // A freeform container lays the node out at its bound x/y already, in
+    // its runtime box (FreeformAxisPlacement.boundStart).
+    final (bool placedX, bool placedY) = FreeformBoundPlacement.of(
+      context,
+      node.id,
+    );
     double delta(String property) {
+      if (property == 'x' ? placedX : placedY) return 0;
       final num? bound = PropertyValueDelegate.getPropertyValue<num>(
         node,
         property,
@@ -656,6 +750,14 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       child: widget,
     );
   }
+
+  /// Whether [node]'s bound `x`/`y` move it from outside its drag
+  /// handling (see [_buildNode]) rather than inside its decoration.
+  bool _offsetsOutside(BaseNode node, WidgetBuildSettings settings) =>
+      settings.withReactions &&
+      settings.withRotation &&
+      node.drag != null &&
+      (node.variables.containsKey('x') || node.variables.containsKey('y'));
 
   bool _hasPositionCondition(BuildContext context, BaseNode node) {
     final CodelesslyContext? codelesslyContext = ScopedValues.of(context)
@@ -797,6 +899,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             listenables.add(codelesslyContext.dragAndDrop);
           case 'speech':
             listenables.add(Speech.instance);
+          case 'animating':
+            listenables.add(VariableAnimator.changes);
         }
       }
 
@@ -844,6 +948,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             listenables.add(codelesslyContext.dragAndDrop);
           case 'speech':
             listenables.add(Speech.instance);
+          case 'animating':
+            listenables.add(VariableAnimator.changes);
         }
       }
 
@@ -894,6 +1000,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
               listenables.add(codelesslyContext.dragAndDrop);
             case 'speech':
               listenables.add(Speech.instance);
+            case 'animating':
+              listenables.add(VariableAnimator.changes);
           }
           continue;
         }
@@ -1164,6 +1272,14 @@ List<String> inlineTextTemplatesOf(BaseNode node) {
   }
 
   if (node is TextNode) collect(node.data);
+  // An image fill named by a variable or formula (`${item.image}`, a play /
+  // pause icon) follows it.
+  if (node is GeometryMixin) {
+    for (final PaintModel fill in node.fills) {
+      collect(fill.downloadUrl);
+      collect(fill.croppedImageURL);
+    }
+  }
   if (node is CustomPropertiesMixin) collect(node.properties.toJson());
   if (node case final QueryableMixin queryable) {
     collect(queryable.collectionPath);

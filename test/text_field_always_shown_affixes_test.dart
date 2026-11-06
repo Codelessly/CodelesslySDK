@@ -15,7 +15,7 @@ TextFieldNode _field({required bool always}) => TextFieldNode(
       hintText: 'Weight',
       prefixText: '≈',
       suffixText: 'kg',
-      alwaysShowAffixes: always,
+      affixesAlwaysVisible: always,
       contentPadding: const EdgeInsetsModel.symmetric(
         horizontal: 12,
         vertical: 11,
@@ -71,7 +71,7 @@ void main() {
     expect(_shows(tester, '≈'), isFalse);
   });
 
-  testWidgets('alwaysShowAffixes shows them in an empty field', (tester) async {
+  testWidgets('affixesAlwaysVisible shows them in an empty field', (tester) async {
     await _pump(tester, _field(always: true));
     expect(_shows(tester, 'kg'), isTrue);
     expect(_shows(tester, '≈'), isTrue);
@@ -89,15 +89,15 @@ void main() {
     );
   });
 
-  test('alwaysShowAffixes is read from and written to JSON', () {
+  test('affixesAlwaysVisible is read from and written to JSON', () {
     final InputDecorationModel model = InputDecorationModel.fromJson({
       'suffixText': '%',
-      'alwaysShowAffixes': true,
+      'affixesAlwaysVisible': true,
     });
-    expect(model.alwaysShowAffixes, isTrue);
-    expect(model.toJson()['alwaysShowAffixes'], isTrue);
+    expect(model.affixesAlwaysVisible, isTrue);
+    expect(model.toJson()['affixesAlwaysVisible'], isTrue);
     expect(
-      InputDecorationModel().toJson().containsKey('alwaysShowAffixes'),
+      InputDecorationModel().toJson().containsKey('affixesAlwaysVisible'),
       isFalse,
     );
   });

@@ -38,10 +38,23 @@ class ScopedValues {
   /// as `/pass/zz999` (the location a Codelessly router shows the screen
   /// at), unless a param of
   /// that name was given.
+  ///
+  /// In a browser it also has `url`, the page's whole link as the address
+  /// bar shows it, and `origin`, its scheme and host
+  /// (`https://site.codelessly.com`), so a formula can build a link to
+  /// share: `${= route.origin + '/mixtape/tape?id=' + item.id}`.
   Map<String, dynamic> get routeParams => _routeParams ??= {
     if (_routePath?.call() case final String path) 'path': path,
+    if (pageUri() case final Uri uri when uri.isScheme('http') || uri.isScheme('https')) ...{
+      'url': uri.toString(),
+      'origin': uri.origin,
+    },
     ..._givenRouteParams,
   };
+
+  /// The page's address: [Uri.base], the browser's current location on the
+  /// web. Tests replace it.
+  static Uri Function() pageUri = () => Uri.base;
 
   Map<String, dynamic>? _routeParams;
   late final Map<String, dynamic> _givenRouteParams;
@@ -60,6 +73,10 @@ class ScopedValues {
   /// The size of the screen, which the `screen` variable describes.
   late final Size? screenSize;
 
+  /// The switch widths of the responsive layout around the node, if it has
+  /// its own (`(tablet, desktop)`), for the `screen` variable.
+  late final (double?, double?)? breakpointWidths;
+
   /// Whether the device is in dark mode, as the `screen` variable's
   /// `brightness` and `isDark` say.
   late final Brightness? platformBrightness;
@@ -67,6 +84,13 @@ class ScopedValues {
   /// The value of the `parent` variable: the `width` and `height` the
   /// node's parent gives it (see [ParentSizeScope]).
   late final Map<String, dynamic>? parentSize;
+
+  /// Values a design canvas (or a capture) shows for map predefined
+  /// variables, by variable name then key, on top of what they would read:
+  /// e.g. `{'drag': {'active': true, 'over': 'lamp-2'}}` previews a drag
+  /// over a drop target, and `{'screen': {'isDark': true}}` dark mode.
+  /// Null outside a preview.
+  late final Map<String, Map<String, Object?>>? predefinedOverrides;
 
   // private fields.
   late final WeakReference<CodelesslyContext>? _codelesslyContextRef;
@@ -129,8 +153,10 @@ class ScopedValues {
       _routePath = null,
       _appUser = null,
       screenSize = null,
+      breakpointWidths = null,
       platformBrightness = null,
-      parentSize = null;
+      parentSize = null,
+      predefinedOverrides = null;
 
   /// Creates scoped values for a design canvas, where [variables] (by name)
   /// hold their default values and nothing is read from a running app.
@@ -147,6 +173,8 @@ class ScopedValues {
     this.platformBrightness,
     this.parentSize,
     this.trackValues,
+    this.predefinedOverrides,
+    this.breakpointWidths,
     Map<String, dynamic>? data,
     Map<String, dynamic>? routeParams,
   }) : _codelesslyContextRef = codelesslyContext == null
@@ -182,8 +210,32 @@ class ScopedValues {
       _givenRouteParams = base._givenRouteParams,
       _routePath = base._routePath,
       screenSize = base.screenSize,
+      breakpointWidths = base.breakpointWidths,
       platformBrightness = base.platformBrightness,
-      parentSize = base.parentSize;
+      parentSize = base.parentSize,
+      predefinedOverrides = base.predefinedOverrides;
+
+  /// [base] with `${parent}` reading [parentSize] (a map of `width` and
+  /// `height`, see [parentVariableValue]): what a drag track's geometry
+  /// bindings read, with its parent's measured box.
+  ScopedValues.withParentSize(ScopedValues base, this.parentSize)
+    : _codelesslyContextRef = base._codelesslyContextRef,
+      _instanceRef = base._instanceRef,
+      _variablesOverrides = base._variablesOverrides,
+      _dataOverrides = base._dataOverrides,
+      _previewVariables = base._previewVariables,
+      _appUser = base._appUser,
+      indexedItem = base.indexedItem,
+      parentIndexedItem = base.parentIndexedItem,
+      nodeState = base.nodeState,
+      holdProgress = base.holdProgress,
+      dragValues = base.dragValues,
+      trackValues = base.trackValues,
+      _givenRouteParams = base._givenRouteParams,
+      _routePath = base._routePath,
+      screenSize = base.screenSize,
+      platformBrightness = base.platformBrightness,
+      predefinedOverrides = base.predefinedOverrides;
 
   /// Creates a new scoped values instance from a given context.
   ScopedValues.of(
@@ -200,8 +252,10 @@ class ScopedValues {
     indexedItem = IndexedItemProvider.maybeOf(context);
     parentIndexedItem = IndexedItemProvider.parentOf(context);
     screenSize = MediaQuery.maybeSizeOf(context);
+    breakpointWidths = ResponsiveWidthsScope.maybeOf(context);
     platformBrightness = MediaQuery.maybePlatformBrightnessOf(context);
     parentSize = ParentSizeScope.valueOf(context);
+    predefinedOverrides = null;
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     holdProgress = HoldProgressProvider.maybeOf(context);
     dragValues = DragScope.maybeOf(context);
@@ -226,4 +280,36 @@ class ScopedValues {
     _appUser = null;
     _instanceRef = instance == null ? null : WeakReference(instance);
   }
+}
+
+
+/// The switch widths of a responsive layout that has its own (see
+/// [VarianceProperties.tabletMinWidth]), for the nodes inside it: their
+/// `screen.breakpoint` and `screen.isMobile` follow the layout on show.
+class ResponsiveWidthsScope extends InheritedWidget {
+  /// Creates a [ResponsiveWidthsScope].
+  const ResponsiveWidthsScope({
+    super.key,
+    required this.tabletMinWidth,
+    required this.desktopMinWidth,
+    required super.child,
+  });
+
+  /// Where the tablet layout starts, or null for the default.
+  final double? tabletMinWidth;
+
+  /// Where the desktop layout starts, or null for the default.
+  final double? desktopMinWidth;
+
+  /// The widths of the nearest scope, or null outside one.
+  static (double?, double?)? maybeOf(BuildContext context) {
+    final ResponsiveWidthsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<ResponsiveWidthsScope>();
+    return scope == null ? null : (scope.tabletMinWidth, scope.desktopMinWidth);
+  }
+
+  @override
+  bool updateShouldNotify(ResponsiveWidthsScope old) =>
+      old.tabletMinWidth != tabletMinWidth ||
+      old.desktopMinWidth != desktopMinWidth;
 }

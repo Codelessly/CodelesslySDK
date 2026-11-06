@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -37,6 +38,30 @@ BoxDecoration _decoration(WidgetTester tester) =>
     tester.widget<Container>(_toast).decoration! as BoxDecoration;
 
 void main() {
+  testWidgets('a sticky-note toast is tilted and drops in on its curve', (
+    tester,
+  ) async {
+    final action = ShowToastAction(
+      message: 'Saved!',
+      duration: 1000,
+      position: ToastPosition.top,
+      rotation: -1.5,
+      enterCurve: 'easeOutBack',
+      enterOffset: 1,
+    );
+    expect(ShowToastAction.fromJson(action.toJson()).rotation, -1.5);
+    expect(ShowToastAction.fromJson(action.toJson()).enterCurve, 'easeOutBack');
+    expect(ShowToastAction(message: 'x').toJson().containsKey('rotation'), isFalse);
+    await _show(tester, action);
+    final Transform tilt = tester.widget(
+      find.ancestor(of: _toast, matching: find.byType(Transform)).first,
+    );
+    expect(tilt.transform.getRotation().entry(1, 0), closeTo(-0.026, 0.002));
+    final AnimatedSlide slide = tester.widget(find.byType(AnimatedSlide));
+    expect(slide.curve, Curves.easeOutBack);
+    await _finish(tester);
+  });
+
   testWidgets('an accent color draws a bar down the left edge', (tester) async {
     await _show(
       tester,
@@ -90,8 +115,9 @@ void main() {
         duration: 1000,
       ),
     );
-    final Icon icon = tester.widget(
-      find.descendant(of: _toast, matching: find.byType(Icon)),
+    // Icons are hosted SVGs tinted with the icon colour.
+    final SvgIcon icon = tester.widget(
+      find.descendant(of: _toast, matching: find.byType(SvgIcon)),
     );
     expect(icon.color, _yellow.toFlutterColor());
     expect(icon.size, 20);

@@ -1,9 +1,10 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/data/persisted_variables.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Local storage kept in memory.
+/// Local storage in memory.
 class _MemoryDatabase extends LocalDatabase {
   _MemoryDatabase() : super(identifier: 'test');
   final Map<String, Object?> data = {};
@@ -26,46 +27,46 @@ class _MemoryDatabase extends LocalDatabase {
   void reset() => data.clear();
 }
 
-/// A variable marked to persist keeps its value on the device between
-/// visits: a hive log.
 void main() {
-  VariableData hives({bool persist = true}) => VariableData(
+  VariableData sideA({bool persist = true}) => VariableData(
     id: 'v1',
-    name: 'hiveData',
+    name: 'sideA',
     type: VariableType.list,
-    value: '[{"id": "clover"}]',
-    extra: {if (persist) VariableData.persistKey: true},
+    value: ['s01'],
+    extra: persist ? {VariableData.persistKey: true} : null,
   );
 
-  test('changes are saved and the next start begins with them', () {
-    final storage = _MemoryDatabase();
-    final first = Observable(PersistedVariables.restore(hives(), storage));
-    expect(first.value.value, contains('clover'));
-    PersistedVariables.watch(first, storage);
-    first.value = first.value.copyWith(
-      value: '[{"id": "clover"}, {"id": "heather"}]',
-    );
-    expect(
-      storage.data[PersistedVariables.keyOf(hives())],
-      contains('heather'),
-    );
-
-    // The next visit.
-    final next = PersistedVariables.restore(hives(), storage);
-    expect(next.value, contains('heather'));
+  test('a persisted variable saves each change and starts from it', () {
+    final db = _MemoryDatabase();
+    final first = persistedVariable(sideA(), db);
+    expect(first.value.getValue(), ['s01']);
+    first.value = first.value.copyWith(value: ['s01', 's09']);
+    expect(db.get(persistedVariableKey(sideA())), '["s01","s09"]');
+    // Next launch: the stored value wins over the default.
+    final next = persistedVariable(sideA(), db);
+    expect(next.value.getValue(), ['s01', 's09']);
   });
 
-  test('a variable that does not persist is never saved or restored', () {
-    final storage = _MemoryDatabase()
-      ..data[PersistedVariables.keyOf(hives())] = '[]';
-    final v = Observable(
-      PersistedVariables.restore(hives(persist: false), storage),
+  test('other variables are not stored', () {
+    final db = _MemoryDatabase();
+    final v = persistedVariable(sideA(persist: false), db);
+    v.value = v.value.copyWith(value: ['s02']);
+    expect(db.data, isEmpty);
+    expect(sideA(persist: false).persists, isFalse);
+  });
+
+  test('computed variables never persist', () {
+    final v = VariableData(
+      id: 'c',
+      name: 'usedA',
+      formula: 'length(sideA)',
+      extra: {VariableData.persistKey: true},
     );
-    expect(v.value.value, contains('clover'));
-    PersistedVariables.watch(v, storage);
-    v.value = v.value.copyWith(value: '[{"id": "x"}]');
-    expect(storage.data[PersistedVariables.keyOf(hives())], '[]');
-    expect(hives().persists, isTrue);
-    expect(hives(persist: false).persists, isFalse);
+    expect(v.persists, isFalse);
+  });
+
+  test('the flag survives JSON', () {
+    final back = VariableData.fromJson(sideA().toJson());
+    expect(back.persists, isTrue);
   });
 }

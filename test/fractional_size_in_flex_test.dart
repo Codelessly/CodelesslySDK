@@ -78,12 +78,12 @@ void main() {
     expect(tester.getSize(_of('fill')).width, 80);
   });
 
-  testWidgets('a widthFactor of its own only caps a row child', (
+  testWidgets('a widthFactor of its own takes its share of a row too', (
     tester,
   ) async {
-    // The editor's layout takes a node's own factor as a cap on its size.
+    // A quarter of the track's content box: (200 - 2 * 20) / 4.
     await _pump(tester, widthFactor: 0.25);
-    expect(tester.getSize(_of('fill')).width, 10);
+    expect(tester.getSize(_of('fill')).width, 40);
   });
 
   testWidgets('a bound heightFactor sizes a column child by the column', (

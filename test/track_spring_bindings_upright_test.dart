@@ -211,8 +211,8 @@ void main() {
           children: ['label'],
         )
         ..variables.addAll({
-          DragTrackModel.variableKey('max'): r'${= frames - 1}',
-          DragTrackModel.variableKey('x2'): r'${= (frames - 1) * 50}',
+          DragTrackModel.maxVariableKey: r'${= frames - 1}',
+          DragTrackModel.x2VariableKey: r'${= (frames - 1) * 50}',
         })
         ..parentID = 'stage'
         ..drag = const DragModel(
@@ -286,20 +286,15 @@ void main() {
     double cardX(WidgetTester tester) =>
         tester.getTopLeft(find.text('C', findRichText: true)).dx;
 
-    test('withValue sets each bindable setting', () {
-      const DragTrackModel t = DragTrackModel(variable: 'p');
-      expect(t.withValue('max', 5).max, 5);
-      expect(t.withValue('min', -1).min, -1);
-      expect(t.withValue('step', -2).step, 0);
-      expect(t.withValue('pixelsPerRange', 300).pixelsPerRange, 300);
-      expect(t.withValue('pixelsPerRange', 0).pixelsPerRange, 200);
-      expect(t.withValue('x2', 80).x2, 80);
-      expect(t.withValue('y2', 0).y2, 0);
-      expect(t.withValue('nope', 3), t);
-      expect(DragTrackModel.variableKey('max'), 'track.max');
+    test('the range, step, throw and line ends bind as track.<name>', () {
+      expect(DragTrackModel.minVariableKey, 'track.min');
+      expect(DragTrackModel.maxVariableKey, 'track.max');
+      expect(DragTrackModel.stepVariableKey, 'track.step');
+      expect(DragTrackModel.pixelsPerRangeVariableKey, 'track.pixelsPerRange');
+      expect(DragTrackModel.x2VariableKey, 'track.x2');
     });
 
-    testWidgets('resolveTrack reads bound settings and keeps the rest', (
+    testWidgets('resolvedTrack reads bound settings and keeps the rest', (
       tester,
     ) async {
       final FrameNode node =
@@ -323,15 +318,24 @@ void main() {
           'notANumber': variable('notANumber', VariableType.text, 'x'),
         },
       );
-      final DragTrackModel t = WidgetNodeTransformerManager.resolveTrack(
+      final DragTrackModel t = WidgetNodeTransformerManager.resolvedTrack(
         node,
         node.drag!.track!,
-        scopedValues: values,
+        values,
       );
       expect(t.max, 5);
       expect(t.step, 0.5);
       expect(t.pixelsPerRange, 200);
       expect(t.variable, 'p');
+      node.variables['track.pixelsPerRange'] = r'${= frames * 100}';
+      expect(
+        WidgetNodeTransformerManager.resolvedTrack(
+          node,
+          node.drag!.track!,
+          values,
+        ).pixelsPerRange,
+        600,
+      );
     });
 
     testWidgets('the design canvas draws the deck with its bound range', (

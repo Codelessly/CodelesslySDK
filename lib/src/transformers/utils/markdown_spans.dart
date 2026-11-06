@@ -47,7 +47,8 @@ List<InlineSpan> markdownSpansFor(
 ) {
   final Color? color = base.color;
   final TextStyle dim = base.copyWith(
-    color: style.markerColor?.toFlutterColor() ?? color?.withValues(alpha: 0.35),
+    color:
+        style.markerColor?.toFlutterColor() ?? color?.withValues(alpha: 0.35),
   );
   final TextStyle bullet = base.copyWith(
     color: style.bulletColor?.toFlutterColor() ?? color,
@@ -74,7 +75,8 @@ List<InlineSpan> markdownSpansFor(
       }
       continue;
     }
-    final RegExpMatch? m = _bullet.firstMatch(line) ?? _numbered.firstMatch(line);
+    final RegExpMatch? m =
+        _bullet.firstMatch(line) ?? _numbered.firstMatch(line);
     if (m != null) {
       if (style.showMarkers) {
         out.add(TextSpan(text: line.substring(0, m.end), style: bullet));
@@ -122,11 +124,7 @@ List<InlineSpan> _inlineSpans(
         base.copyWith(fontWeight: FontWeight.w700),
       );
     } else if (m[2] != null) {
-      wrapped(
-        '`',
-        s.substring(1, s.length - 1),
-        _codeStyle(base, style),
-      );
+      wrapped('`', s.substring(1, s.length - 1), _codeStyle(base, style));
     } else if (m[3] != null) {
       wrapped(
         '_',

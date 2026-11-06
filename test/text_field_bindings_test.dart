@@ -65,6 +65,20 @@ void main() {
     );
   });
 
+  testWidgets('the hint follows its binding (a form whose mode changes it)', (
+    WidgetTester tester,
+  ) async {
+    final TextField built = await pump(
+      tester,
+      field(
+        variables: {
+          'hintText': r"${= 1 > 2 ? 'Runner beans' : 'Basil or carrot seed'}",
+        },
+      ),
+    );
+    expect(built.decoration?.hintText, 'Basil or carrot seed');
+  });
+
   testWidgets('a one-line field with a set height stays one line and fills '
       'its height', (WidgetTester tester) async {
     final TextField built = await pump(tester, field(obscureText: true));
