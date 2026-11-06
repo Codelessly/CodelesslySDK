@@ -166,6 +166,27 @@ void main() {
     expect(tester.getSize(items().at(0)), const Size(60, 50));
   });
 
+  testWidgets('an item bound to a number written as is sits there', (
+    tester,
+  ) async {
+    final t = build();
+    // A chair template riding a cable: x/y bound to constants.
+    t.item.variables
+      ..['x'] = '15.61'
+      ..['y'] = '42'
+      ..remove('width')
+      ..remove('height')
+      ..remove('rotation');
+    await pump(tester, t.registry, t.list);
+    final List<Positioned> placed = tester
+        .widgetList<Positioned>(items())
+        .toList();
+    expect([placed[0].left, placed[0].top], [15.61, 42]);
+    expect(PropertyValueDelegate.literalNumber<int>('12'), 12);
+    expect(PropertyValueDelegate.literalNumber<String>('12'), isNull);
+    expect(PropertyValueDelegate.literalNumber<num>('item.x'), isNull);
+  });
+
   // Pins on a floor plan (a list saved with `overlay`): each item's center
   // sits at a fraction of the list's padded box.
   testWidgets(
@@ -218,6 +239,144 @@ void main() {
     );
     await tester.pump();
     expect(tester.widgetList<Positioned>(items()).first.left, 40);
+  });
+
+  // The Lamplight plan: a lamp moved to another spot glides there
+  // (AnimatedPositioned, 500 ms, easeOutCubic).
+  testWidgets('an item with a transition eases to its new place', (
+    tester,
+  ) async {
+    final t = build();
+    t.item.transitionMs = 500;
+    final codelesslyContext = await pump(tester, t.registry, t.list);
+    Finder moving() => find.byWidgetPredicate(
+      (w) => w is AnimatedPositioned && '${w.key}'.contains('stacked item'),
+    );
+    expect(moving(), findsNWidgets(2));
+    final Offset origin = tester.getTopLeft(find.byType(StackedListItems));
+    expect(tester.getTopLeft(moving().first) - origin, const Offset(10, 10));
+
+    final Observable<VariableData> v = codelesslyContext.variables['plan']!;
+    v.set(
+      v.value.copyWith(
+        value: [
+          {...plan[0], 'x': 10},
+          plan[1],
+        ],
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    final double midway = (tester.getTopLeft(moving().first) - origin).dx;
+    // Ease-out: well on its way after a fifth of the time, not there yet.
+    expect(midway, greaterThan(10 + 100 * 0.3));
+    expect(midway, lessThan(110));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(moving().first) - origin, const Offset(110, 10));
+    expect(
+      StackedListItems.positionTransitionOf(t.item)!.curve,
+      TransitionCurve.easeOutCubic,
+    );
+  });
+
+  testWidgets('a size transition sets how an item moves', (tester) async {
+    final t = build();
+    t.item.sizeTransition = const NodeTransition(
+      durationMillis: 300,
+      curve: TransitionCurve.linear,
+    );
+    expect(
+      StackedListItems.positionTransitionOf(t.item),
+      t.item.sizeTransition,
+    );
+    final codelesslyContext = await pump(tester, t.registry, t.list);
+    final Observable<VariableData> v = codelesslyContext.variables['plan']!;
+    v.set(
+      v.value.copyWith(
+        value: [
+          {...plan[0], 'y': 10},
+          plan[1],
+        ],
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+    final Finder first = find
+        .byWidgetPredicate(
+          (w) => w is AnimatedPositioned && '${w.key}'.contains('stacked item'),
+        )
+        .first;
+    final Offset origin = tester.getTopLeft(find.byType(StackedListItems));
+    expect((tester.getTopLeft(first) - origin).dy, closeTo(10 + 50, 0.5));
+    await tester.pumpAndSettle();
+    expect((tester.getTopLeft(first) - origin).dy, 110);
+  });
+
+  testWidgets('with tickers muted (the design canvas) an item jumps', (
+    tester,
+  ) async {
+    final t = build();
+    t.item.transitionMs = 500;
+    final manager = PassiveNodeTransformerManager(
+      t.registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    final CodelesslyContext codelesslyContext = CodelesslyContext.empty()
+      ..variables['plan'] = Observable(
+        VariableData(
+          id: 'plan',
+          name: 'plan',
+          type: VariableType.list,
+          value: plan,
+        ),
+      )
+      ..variables['scale'] = Observable(
+        VariableData(
+          id: 'scale',
+          name: 'scale',
+          type: VariableType.decimal,
+          value: 10.0,
+        ),
+      );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: codelesslyContext,
+        child: MaterialApp(
+          home: TickerMode(
+            enabled: false,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 400,
+                height: 200,
+                child: Builder(
+                  builder: (context) => manager.buildWidgetFromNode(
+                    t.list,
+                    context,
+                    settings: const WidgetBuildSettings(debugLabel: 'test'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Observable<VariableData> v = codelesslyContext.variables['plan']!;
+    v.set(
+      v.value.copyWith(
+        value: [
+          {...plan[0], 'x': 10},
+          plan[1],
+        ],
+      ),
+    );
+    await tester.pump();
+    final AnimatedPositioned first = tester
+        .widgetList<AnimatedPositioned>(find.byType(AnimatedPositioned))
+        .first;
+    expect(first.duration, Duration.zero);
+    expect(first.left, 100);
   });
 
   testWidgets('drag reactions get deltas in result', (tester) async {
@@ -285,16 +444,22 @@ void main() {
     final registry = NodeRegistry()..setNodes({frame.id: frame, pin.id: pin});
     await pump(tester, registry, frame);
 
-    final Finder translated = find.byWidgetPredicate(
-      (w) => w is Transform && w.transform.getTranslation().x != 0,
+    // Design place (20, 20) to bound (30, 5): the frame lays the pin out
+    // there (FreeformAxisPlacement.boundStart), not translated on top.
+    final Offset at =
+        tester.getTopLeft(
+          find.byKey(const ValueKey('Rectangle Transformer of Pin [pin]')),
+        ) -
+        tester.getTopLeft(
+          find.byKey(const ValueKey('Rectangle Transformer of Map [frame]')),
+        );
+    expect(at, const Offset(30, 5));
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Transform && w.transform.getTranslation().x != 0,
+      ),
+      findsNothing,
     );
-    expect(translated, findsOneWidget);
-    final translation = tester
-        .widget<Transform>(translated)
-        .transform
-        .getTranslation();
-    // Design place (20, 20) to bound (30, 5).
-    expect([translation.x, translation.y], [10, -15]);
   });
 
   testWidgets('a bound size sizes a node pinned in a freeform parent', (

@@ -1,4 +1,8 @@
 import 'dart:math' as math;
+import 'dart:ui' show Color;
+
+import 'package:codelessly_api/codelessly_api.dart'
+    show ColorRGB, ColorRGBA, colorHexText;
 
 import 'package:intl/date_symbol_data_custom.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -7,6 +11,7 @@ import 'package:intl/date_time_patterns.dart';
 import 'package:intl/intl.dart';
 
 import 'formula_clock.dart';
+import 'formula_paths.dart';
 
 /// The body of a formula: text and quoted strings, with braces only in
 /// balanced pairs nested up to [depth] deep, such as the object literal in
@@ -54,8 +59,14 @@ typedef FormulaPathResolver = Object? Function(String path);
 ///    substring, split, replace and coalesce. See
 ///    [FormulaEvaluator.functions].
 ///  - text functions: indexOf, matches and slug; durations: seconds
-///    ('3:45' → 225) and duration (225 → '3:45'); colors: luminance and
-///    mix(a, b, t) (alias lerpColor), which blends two colors (t from 0, all a, to 1, all b).
+///    ('3:45' → 225) and duration (225 → '3:45'); colors: luminance,
+///    mix(a, b, t) (alias lerpColor), which blends two colors (t from 0, all
+///    a, to 1, all b), alpha(color, opacity), the color at that opacity
+///    (0 to 1), and alpha(color) with one argument, the color's own
+///    opacity from 0 to 1 (`alpha('#80FF0000')` → 0.5). Color functions
+///    take `#RGB`, `#RRGGBB` and `#AARRGGBB` text, `{r, g, b, a}` maps
+///    and color values (a color variable's value, a Flutter Color); a
+///    color reads as `#RRGGBB` (`#AARRGGBB` when not opaque) in text.
 ///  - maps: `obj('id', 1)`, `object('id', 1)` or `{id: 1}` builds one;
 ///    `set(map, key, value)`, `with(map, key, value, …)` and `merge(a, b)`
 ///    return changed copies; `keys` and `values` read them. `map` can update
@@ -261,6 +272,8 @@ class FormulaEvaluator {
       return text.endsWith('.') ? text.substring(0, text.length - 1) : text;
     }
     if (value is List) return value.map(stringify).join(', ');
+    // A colour (a color variable's value) reads as its hex.
+    if (_colorText(value) case final String hex) return hex;
     return value.toString();
   }
 
@@ -650,8 +663,8 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'without',
-      'without(list, other)',
-      'without(all, picked)',
+      'without(list, other list or value)',
+      'without(all, picked) or without([0, 1, 2], 1) → [0, 2]',
     ),
     FormulaFunctionDoc(
       'concat',
@@ -696,6 +709,26 @@ class FormulaEvaluator {
       'distance',
       "distance(lat1, lng1, lat2, lng2, 'km' or 'mi')",
       "distance(a.lat, a.lng, b.lat, b.lng, 'mi') → 362.4",
+    ),
+    FormulaFunctionDoc(
+      'spline',
+      'spline(points)',
+      'spline([start, pin, mailbox]) → "M 80 300 C ..." (a motion path)',
+    ),
+    FormulaFunctionDoc(
+      'pathPoints',
+      'pathPoints(path, count)',
+      'pathPoints(route, 3) → [{x: 80, y: 300, angle: 0, t: 0}, ...]',
+    ),
+    FormulaFunctionDoc(
+      'pathPoint',
+      'pathPoint(path, t)',
+      'pathPoint(route, 0.5).x → 480',
+    ),
+    FormulaFunctionDoc(
+      'pathLength',
+      'pathLength(path)',
+      "pathLength('M 0 0 L 30 40') → 50",
     ),
     FormulaFunctionDoc('first', 'first(list)', 'first(stops) → the first stop'),
     FormulaFunctionDoc('last', 'last(list)', 'last(stops) → the last stop'),
@@ -837,8 +870,8 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'alpha',
-      'alpha(color, opacity)',
-      "alpha('#FF4D4F', 0.12) → #1FFF4D4F",
+      'alpha(color, opacity), or alpha(color) for its opacity 0–1',
+      "alpha('#FF4D4F', 0.12) → #1FFF4D4F; alpha('#80FF4D4F') → 0.5",
     ),
     FormulaFunctionDoc(
       'mix',
@@ -1748,6 +1781,7 @@ String? _duration(Object? value) {
 /// text, or of `{r, g, b, a?}` with channels from 0 to 1. Null when [value]
 /// isn't a color.
 List<double>? _argb(Object? value) {
+  value = _colorText(value) ?? value;
   if (value is Map) {
     final List<num?> c = [
       for (final key in ['a', 'r', 'g', 'b'])
@@ -1788,6 +1822,7 @@ String? _mixColors(Object? a, Object? b, Object? t) {
 /// optional) and `{r, g, b}` objects with channels from 0 to 1. Null when
 /// [value] isn't a color.
 num? _luminance(Object? value) {
+  value = _colorText(value) ?? value;
   final List<double> channels;
   if (value is Map) {
     final List<num?> rgb = [
@@ -2595,15 +2630,35 @@ Object? _distance(List<Object?> a) {
   return unit.startsWith('mi') ? km / 1.609344 : km;
 }
 
-/// [color] (`#RRGGBB` or `#AARRGGBB`) at [opacity] (0 to 1), as
+/// [color] (any color [_argb] reads) at [opacity] (0 to 1), as
 /// `#AARRGGBB`.
 String? _alpha(Object? color, num opacity) {
-  final String hex = FormulaEvaluator.stringify(color).replaceAll('#', '');
-  if (hex.length != 6 && hex.length != 8) return null;
-  final String rgb = hex.substring(hex.length - 6).toUpperCase();
-  final int a = (opacity.clamp(0, 1) * 255).round();
-  return '#${a.toRadixString(16).padLeft(2, '0').toUpperCase()}$rgb';
+  final List<double>? argb = _argb(color);
+  if (argb == null) return null;
+  String two(num v) =>
+      v.round().clamp(0, 255).toRadixString(16).padLeft(2, '0').toUpperCase();
+  return '#${two(opacity.clamp(0, 1) * 255)}'
+      '${two(argb[1])}${two(argb[2])}${two(argb[3])}';
 }
+
+/// The opacity of [color] from 0 (transparent) to 1 (opaque), or null when
+/// it isn't a color: `alpha(color)` with one argument.
+num? _opacityOf(Object? color) {
+  final List<double>? argb = _argb(color);
+  if (argb == null) return null;
+  return _tidy(argb[0] / 255);
+}
+
+/// A color value that isn't text ([ColorRGB], as a color variable reads,
+/// or a Flutter [Color]) as `#RRGGBB`, or `#AARRGGBB` when not opaque; null
+/// for anything else.
+String? _colorText(Object? value) => switch (value) {
+  final ColorRGB color => colorHexText(color),
+  final Color color => colorHexText(
+    ColorRGBA(r: color.r, g: color.g, b: color.b, a: color.a),
+  ),
+  _ => null,
+};
 
 Object? _arg(List<Object?> args, int index) =>
     index < args.length ? args[index] : null;
@@ -2812,11 +2867,17 @@ final Map<String, _Function> _functions = {
     for (final value in a)
       if (value is Iterable) ...value else ?value,
   ],
-  'without': (a) => [
-    for (final item in _values(_arg(a, 0), null))
-      if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
-        item,
-  ],
+  // A single value takes out that value; a list, each of its values.
+  'without': (a) {
+    final Object? other = _arg(a, 1);
+    final List<Object?> removed = other is Iterable
+        ? _values(other, null).toList()
+        : [if (a.length > 1) other];
+    return [
+      for (final item in _values(_arg(a, 0), null))
+        if (!removed.any((value) => _looseEquals(item, value))) item,
+    ];
+  },
   'sqrt': (a) => _tidy(math.sqrt(_num(_arg(a, 0)))),
   'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
   'exp': (a) => _tidy(math.exp(_num(_arg(a, 0)))),
@@ -2841,6 +2902,16 @@ final Map<String, _Function> _functions = {
   'clamp': (a) =>
       _tidy(_num(_arg(a, 0)).clamp(_num(_arg(a, 1)), _num(_arg(a, 2)))),
   'distance': _distance,
+  'spline': (a) => splinePath(
+    _arg(a, 0) is List ? _arg(a, 0) as List<Object?> : a,
+  ),
+  'pathLength': (a) => pathLength(FormulaEvaluator.stringify(_arg(a, 0))),
+  'pathPoint': (a) =>
+      pathPoint(FormulaEvaluator.stringify(_arg(a, 0)), _num(_arg(a, 1)).toDouble()),
+  'pathPoints': (a) => pathPoints(
+    FormulaEvaluator.stringify(_arg(a, 0)),
+    _num(_arg(a, 1)).isNaN ? 0 : _num(_arg(a, 1)).round(),
+  ),
   'first': (a) => _values(_arg(a, 0), null).firstOrNull,
   'last': (a) => _values(_arg(a, 0), null).lastOrNull,
   'range': _range,
@@ -2967,7 +3038,10 @@ final Map<String, _Function> _functions = {
   'newId': (a) => _newId(_arg(a, 0)),
   'get': (a) => _member(_arg(a, 0), _arg(a, 1)),
   'number': (a) => _toNum(_arg(a, 0)),
-  'alpha': (a) => _alpha(_arg(a, 0), _num(_arg(a, 1))),
+  // One argument reads the color's opacity; two set it.
+  'alpha': (a) => a.length < 2
+      ? _opacityOf(_arg(a, 0))
+      : _alpha(_arg(a, 0), _num(_arg(a, 1))),
   'mix': (a) => _mixColors(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'lerpColor': (a) => _mixColors(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'pad': (a) => FormulaEvaluator.stringify(_arg(a, 0)).padLeft(
@@ -3116,6 +3190,33 @@ class _UserCall extends _Node {
   }
 }
 
+/// A variable path split once into its head and its member accesses:
+/// `p.moons[2].name` is `p` then `moons`, 2, `name`. Paths are few and read
+/// over and over (a search calls the same functions thousands of times), so
+/// splits are cached.
+class _SplitPath {
+  final String head;
+  final List<Object> parts;
+  const _SplitPath(this.head, this.parts);
+
+  static final Map<String, _SplitPath> _cache = {};
+
+  static _SplitPath of(String path) {
+    final _SplitPath? cached = _cache[path];
+    if (cached != null) return cached;
+    int end = 0;
+    while (end < path.length && path.codeUnitAt(end) != 0x2E && path.codeUnitAt(end) != 0x5B) {
+      end++;
+    }
+    final List<Object> parts = [];
+    for (final Match m in FormulaFunction._part.allMatches(path, end)) {
+      parts.add(m[1] ?? int.parse(m[2]!));
+    }
+    if (_cache.length > 4000) _cache.clear();
+    return _cache[path] = _SplitPath(path.substring(0, end), parts);
+  }
+}
+
 /// A function defined by a variable with parameters: its [parameters] and
 /// the formula [body] that computes its result from them.
 ///
@@ -3134,7 +3235,7 @@ class FormulaFunction {
   final FormulaPathResolver scope;
 
   /// Creates a [FormulaFunction].
-  const FormulaFunction(this.parameters, this.body, this.scope);
+  FormulaFunction(this.parameters, this.body, this.scope);
 
   /// The deepest nesting of calls allowed.
   static const int maxDepth = 128;
@@ -3145,27 +3246,19 @@ class FormulaFunction {
 
   /// The result of the body for [arguments].
   Object? call(List<Object?> arguments) {
-    final _Node? node = FormulaEvaluator._parse(body);
+    final _Node? node = _node ??= FormulaEvaluator._parse(body);
     if (node == null || _depth >= maxDepth) return null;
     _depth++;
     try {
       return node.eval((path) {
-        for (int i = 0; i < parameters.length; i++) {
-          final String name = parameters[i];
-          if (!path.startsWith(name)) continue;
-          final Object? bound = i < arguments.length ? arguments[i] : null;
-          if (path.length == name.length) return bound;
-          if (!path.startsWith('.', name.length) &&
-              !path.startsWith('[', name.length)) {
-            continue;
-          }
-          Object? result = bound;
-          for (final Match part in _part.allMatches(path, name.length)) {
-            result = _member(result, part[1] ?? int.parse(part[2]!));
-          }
-          return result;
+        final _SplitPath split = _SplitPath.of(path);
+        final int? i = _index[split.head];
+        if (i == null) return scope(path);
+        Object? result = i < arguments.length ? arguments[i] : null;
+        for (final Object part in split.parts) {
+          result = _member(result, part);
         }
-        return scope(path);
+        return result;
       });
     } catch (_) {
       return null;
@@ -3173,6 +3266,15 @@ class FormulaFunction {
       _depth--;
     }
   }
+
+  /// The parsed body, kept with the function (the shared parse cache is
+  /// cleared when it grows large).
+  _Node? _node;
+
+  /// Each parameter's position, by name.
+  late final Map<String, int> _index = {
+    for (int i = 0; i < parameters.length; i++) parameters[i]: i,
+  };
 
   /// The paths [body] reads that aren't its parameters: the variables a
   /// call depends on.

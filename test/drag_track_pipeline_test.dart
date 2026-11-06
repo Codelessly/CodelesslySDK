@@ -57,7 +57,7 @@ void main() {
     expect(tester.takeException(), isNull);
   }
 
-  List<BaseNode> knob({String source = 'bpm', List<Reaction> reactions = const []}) => [
+  List<BaseNode> knob({String source = 'bpm', String? value, List<Reaction> reactions = const []}) => [
     FrameNode(
       id: 'plate',
       name: 'plate',
@@ -76,13 +76,15 @@ void main() {
       ..drag = DragModel(
         track: DragTrackModel(
           shape: DragTrackShape.arc,
-          variable: source,
+          variable: value == null ? source : '',
+          write: value == null,
           min: 30,
           max: 250,
           step: 1,
           defaultValue: 120,
         ),
       )
+      ..variables.addAll({if (value != null) DragTrackModel.valueBindingKey: value})
       ..reactions = reactions,
     TextNode(
       id: 'pointer',
@@ -111,6 +113,101 @@ void main() {
       variables: [variable('bpm', VariableType.integer, 250)],
     );
     expect(rotationOf(tester), closeTo(135, 0.5));
+  });
+
+  testWidgets('a bound range: track.max from data sets the turn', (
+    tester,
+  ) async {
+    // A dial: one turn per N numbers, N from a variable (40 or 100).
+    List<BaseNode> dial() {
+      final List<BaseNode> nodes = knob();
+      final BaseNode cap = nodes[1];
+      cap.drag = const DragModel(
+        track: DragTrackModel(
+          shape: DragTrackShape.arc,
+          variable: 'dial',
+          min: 0,
+          max: 40,
+          step: 1,
+          startAngle: 0,
+          endAngle: 360,
+          endless: true,
+        ),
+      );
+      cap.variables[DragTrackModel.maxVariableKey] = r'${numbers}';
+      cap.variables[DragTrackModel.momentumVariableKey] = r'${= !still}';
+      return nodes;
+    }
+
+    await pump(
+      tester,
+      dial(),
+      runtime: false,
+      variables: [
+        variable('dial', VariableType.integer, 25),
+        variable('numbers', VariableType.integer, 100),
+      ],
+    );
+    // 25 of 100 numbers: a quarter turn (not 25 of 40).
+    expect(rotationOf(tester), closeTo(90, 0.5));
+    await pump(
+      tester,
+      dial(),
+      runtime: true,
+      variables: [
+        variable('dial', VariableType.integer, 25),
+        variable('numbers', VariableType.integer, 100),
+        variable('still', VariableType.boolean, true),
+      ],
+    );
+    expect(rotationOf(tester), closeTo(90, 0.5));
+    final NodeDragTrack track = tester.widget(find.byType(NodeDragTrack));
+    expect(track.track.max, 100);
+    expect(track.track.momentum, isFalse); // bound off (reduce motion)
+  });
+
+  testWidgets('a slider throw follows its groove: track.x2 from parent.width', (
+    tester,
+  ) async {
+    List<BaseNode> slider(double grooveWidth) => [
+      FrameNode(
+        id: 'plate',
+        name: 'plate',
+        basicBoxLocal: NodeBox(0, 0, grooveWidth, 40),
+        children: ['cap'],
+      )..parentID = kRootNode,
+      FrameNode(
+          id: 'cap',
+          name: 'cap',
+          basicBoxLocal: NodeBox(0, 10, 20, 20),
+          horizontalFit: SizeFit.fixed,
+          verticalFit: SizeFit.fixed,
+          children: ['pointer'],
+        )
+        ..parentID = 'plate'
+        ..drag = const DragModel(
+          track: DragTrackModel(variable: 'volume', min: 0, max: 1, x2: 100, y2: 0),
+        )
+        ..variables[DragTrackModel.x2VariableKey] = r'${= parent.width - 20}',
+      TextNode(
+        id: 'pointer',
+        name: 'pointer',
+        basicBoxLocal: NodeBox(0, 0, 20, 20),
+        data: 'P',
+        textMixedProps: [StartEndProp(start: 0, end: 1, fontSize: 12)],
+      )..parentID = 'cap',
+    ];
+    for (final double width in [300, 500]) {
+      await pump(
+        tester,
+        slider(width),
+        runtime: true,
+        variables: [variable('volume', VariableType.decimal, 1.0)],
+      );
+      final double x = tester.getTopLeft(find.text('P', findRichText: true)).dx;
+      // At the top of the range the cap sits at the groove's right end.
+      expect(x, closeTo(width - 20, 1), reason: 'groove $width');
+    }
   });
 
   testWidgets('at runtime dragging the knob writes its variable', (
@@ -145,7 +242,7 @@ void main() {
     await pump(
       tester,
       knob(
-        source: r'${= ms / 1000}',
+        value: r'${= ms / 1000}',
         reactions: [
           Reaction(
             name: 'set',
@@ -165,18 +262,10 @@ void main() {
     }
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
-    // The formula wasn't written as a variable; the reaction moved its source.
-    expect(codelesslyContext.findVariableByName(r'${= ms / 1000}'), isNull);
+    // The track wrote nothing itself; the reaction moved the value's source.
     final Object? value = codelesslyContext.findVariableByName('ms')!.value.getValue();
     expect(value, inInclusiveRange(205000, 216000));
     expect(rotationOf(tester), greaterThan(60), reason: 'drawn at the new formula value');
-  });
-
-  test('a computed variable or formula makes a track controlled', () {
-    const DragTrackModel plain = DragTrackModel(variable: 'bpm');
-    expect(dragTrackIsControlled(plain, VariableData(id: 'b', name: 'bpm', type: VariableType.integer, value: '1')), isFalse);
-    expect(dragTrackIsControlled(plain, VariableData(id: 'b', name: 'bpm', type: VariableType.integer, formula: 'a + 1')), isTrue);
-    expect(dragTrackIsControlled(const DragTrackModel(variable: r'${= elapsed / 60000}'), null), isTrue);
   });
 
   // Knobs in a data list, as on a pedal: each reads its own item's value,

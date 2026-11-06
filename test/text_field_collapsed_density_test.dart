@@ -108,10 +108,31 @@ void main() {
     );
   });
 
-  testWidgets('a field that is not collapsed is not shrunk by the theme density either', (
+  testWidgets('a dense field that is not collapsed is not shrunk by the '
+      'theme density', (tester) async {
+    await _pump(tester, _note(collapsed: false), VisualDensity.compact);
+    // A design is the same on every platform: no density on desktop.
+    expect(
+      tester
+          .widget<TextField>(find.byType(TextField))
+          .decoration!
+          .visualDensity,
+      VisualDensity.standard,
+    );
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      moreOrLessEquals(threeLines, epsilon: 1),
+    );
+  });
+
+  testWidgets('a field that is not dense is not shrunk by the theme density either', (
     tester,
   ) async {
-    await _pump(tester, _note(collapsed: false), VisualDensity.compact);
+    final TextFieldNode note = _note(collapsed: false);
+    note.properties.decoration = note.properties.decoration.copyWith(
+      isDense: false,
+    );
+    await _pump(tester, note, VisualDensity.compact);
     expect(
       tester
           .widget<TextField>(find.byType(TextField))

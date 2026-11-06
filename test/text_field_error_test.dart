@@ -140,6 +140,23 @@ void main() {
     expect(border.borderSide.width, 2);
   });
 
+  testWidgets('an error wins over a bound border colour, focused too', (
+    tester,
+  ) async {
+    // Safecracker's alias field binds its border teal on focus; in error it
+    // must still turn red.
+    final decoration = await _pump(
+      tester,
+      _field({
+        'error': r'${= showErrors && length(trim(note)) < 10}',
+        'decoration.borderColor': '#4FB8AE',
+        'decoration.focusedBorderColor': '#4FB8AE',
+      }),
+      _context(showErrors: true, note: ''),
+    );
+    expect(_enabledBorderColor(decoration), const Color(0xFFFF0000));
+  });
+
   testWidgets('a false error binding keeps the normal border', (tester) async {
     final decoration = await _pump(
       tester,

@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -15,7 +16,7 @@ IconNode icon(Map<String, String> variables) => IconNode(
   color: _static.toColorRGBA(),
 )..variables.addAll(variables);
 
-Future<Icon> pumpIcon(WidgetTester tester, IconNode node) async {
+Future<SvgIcon> pumpIcon(WidgetTester tester, IconNode node) async {
   await tester.pumpWidget(
     ChangeNotifierProvider<CodelesslyContext>.value(
       value: CodelesslyContext.empty(),
@@ -24,14 +25,15 @@ Future<Icon> pumpIcon(WidgetTester tester, IconNode node) async {
       ),
     ),
   );
-  return tester.widget<Icon>(find.byType(Icon));
+  // Icons are hosted SVGs tinted with the icon's colour.
+  return tester.widget<SvgIcon>(find.byType(SvgIcon));
 }
 
 void main() {
   testWidgets('An icon paints the color its iconColor formula gives it', (
     WidgetTester tester,
   ) async {
-    final Icon painted = await pumpIcon(
+    final SvgIcon painted = await pumpIcon(
       tester,
       icon({'iconColor': r'${= 1 > 2 ? "#FBF8F3" : "#C8643B"}'}),
     );
@@ -41,7 +43,7 @@ void main() {
   testWidgets('An icon without a color binding keeps its static color', (
     WidgetTester tester,
   ) async {
-    final Icon painted = await pumpIcon(tester, icon({}));
+    final SvgIcon painted = await pumpIcon(tester, icon({}));
     expect(painted.color?.toARGB32(), _static.toARGB32());
   });
 }
