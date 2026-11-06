@@ -345,16 +345,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         model: draggable,
         enabled: flag(DraggableModel.enabledVariable, draggable.enabled),
         flightKey: '${flightKey ?? ''}',
-        // The feedback node is usually hidden where it is designed.
-        buildNode: (context, id) => buildWidgetByID(
-          id,
-          context,
-          settings: const WidgetBuildSettings(
-            debugLabel: 'drag feedback',
-            withReactions: false,
-            withVisibility: false,
-          ),
-        ),
+        // The feedback node is built by id from the layout's nodes, so it
+        // need not be shown anywhere: it is usually hidden, or off screen,
+        // where it is designed.
+        buildNode: (context, id) => tryGetNode(id) == null
+            ? const SizedBox.shrink()
+            : buildWidgetByID(
+                id,
+                context,
+                settings: const WidgetBuildSettings(
+                  debugLabel: 'drag feedback',
+                  withReactions: false,
+                  withVisibility: false,
+                ),
+              ),
         child: widget,
       );
     }

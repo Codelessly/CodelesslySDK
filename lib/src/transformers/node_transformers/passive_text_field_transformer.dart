@@ -1110,6 +1110,59 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       textDecoration: decoration.counterStyle.textDecoration,
     );
 
+    final EdgeInsets contentPadding =
+        (decoration.contentPadding ?? node.padding).flutterEdgeInsets;
+    final Widget? prefixIcon =
+        !decoration.prefixIcon.icon.show || decoration.prefixIcon.icon.isEmpty
+        ? null
+        : _ReactiveIcon(
+            onTap: () => widget.onIconTap?.call(
+              context,
+              decoration.prefixIcon.reactions,
+              controller.text,
+            ),
+            iconModel: decoration.prefixIcon,
+          );
+    final Widget? suffixIcon =
+        !decoration.suffixIcon.icon.show || decoration.suffixIcon.icon.isEmpty
+        ? null
+        : _ReactiveIcon(
+            onTap: () => widget.onIconTap?.call(
+              context,
+              decoration.suffixIcon.reactions,
+              controller.text,
+            ),
+            iconModel: decoration.suffixIcon,
+          );
+    // Flutter shows a prefix and suffix only while the field has focus or
+    // text. Always shown, they go in the icon slots, which always show:
+    // inside the content padding at the field's edge (Flutter puts no
+    // padding around an icon slot), or beside the slot's icon, centered
+    // across. Material 3 leaves 4 px between the input and an icon slot.
+    final bool affixesInIconSlots = decoration.alwaysShowAffixes;
+    final Widget? alwaysPrefix = affixesInIconSlots && prefixText != null
+        ? _AlwaysShownAffix(
+            key: const ValueKey('codelessly-text-field-prefix'),
+            padding: EdgeInsets.only(left: contentPadding.left),
+            leading: prefixIcon,
+            iconConstraints: decoration.prefixIconConstraints.isEmpty
+                ? null
+                : decoration.prefixIconConstraints.flutterConstraints,
+            text: prefixText,
+          )
+        : null;
+    final Widget? alwaysSuffix = affixesInIconSlots && suffixText != null
+        ? _AlwaysShownAffix(
+            key: const ValueKey('codelessly-text-field-suffix'),
+            padding: EdgeInsets.only(right: contentPadding.right),
+            text: suffixText,
+            trailing: suffixIcon,
+            iconConstraints: decoration.suffixIconConstraints.isEmpty
+                ? null
+                : decoration.suffixIconConstraints.flutterConstraints,
+          )
+        : null;
+
     return InputDecoration(
       icon: !decoration.icon.show || decoration.icon.isEmpty
           ? null
@@ -1148,41 +1201,22 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       visualDensity: VisualDensity.standard,
       // The decoration's own content padding wins over the node's padding,
       // which defaults to 12 x 16 for text fields: zero makes a bare input.
-      contentPadding:
-          (decoration.contentPadding ?? node.padding).flutterEdgeInsets,
-      prefixIcon:
-          !decoration.prefixIcon.icon.show || decoration.prefixIcon.icon.isEmpty
-          ? null
-          : _ReactiveIcon(
-              onTap: () => widget.onIconTap?.call(
-                context,
-                decoration.prefixIcon.reactions,
-                controller.text,
-              ),
-              iconModel: decoration.prefixIcon,
-            ),
-      // Unset constraints keep Flutter's 48 px icon slot.
+      contentPadding: contentPadding,
+      prefixIcon: alwaysPrefix ?? prefixIcon,
+      // Unset constraints keep Flutter's 48 px icon slot; an always shown
+      // prefix takes its own width.
       prefixIconConstraints: decoration.prefixIconConstraints.isEmpty
-          ? null
+          ? (alwaysPrefix != null ? const BoxConstraints() : null)
           : decoration.prefixIconConstraints.flutterConstraints,
-      prefix: prefixText,
+      prefix: alwaysPrefix != null ? null : prefixText,
       prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
-      suffixIcon:
-          !decoration.suffixIcon.icon.show || decoration.suffixIcon.icon.isEmpty
-          ? null
-          : _ReactiveIcon(
-              onTap: () => widget.onIconTap?.call(
-                context,
-                decoration.suffixIcon.reactions,
-                controller.text,
-              ),
-              iconModel: decoration.suffixIcon,
-            ),
-      suffix: suffixText,
+      suffixIcon: alwaysSuffix ?? suffixIcon,
+      suffix: alwaysSuffix != null ? null : suffixText,
       suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
-      // Unset constraints keep Flutter's 48 px icon slot.
+      // Unset constraints keep Flutter's 48 px icon slot; an always shown
+      // suffix takes its own width.
       suffixIconConstraints: decoration.suffixIconConstraints.isEmpty
-          ? null
+          ? (alwaysSuffix != null ? const BoxConstraints() : null)
           : decoration.suffixIconConstraints.flutterConstraints,
       counter: decoration.showCounter
           ? decoration.counterText?.isNotEmpty == true
@@ -1322,6 +1356,49 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       maxLines: maxLines,
     );
   }
+}
+
+/// A text field's prefix or suffix [text] shown at all times in an icon
+/// slot (see [InputDecorationModel.alwaysShowAffixes]), with the slot's icon
+/// ([leading] before a prefix, [trailing] after a suffix) beside it, and the
+/// field's content padding on the outer side when there is no icon. The
+/// icon keeps its slot's size: [iconConstraints], else Flutter's 48 px.
+class _AlwaysShownAffix extends StatelessWidget {
+  const _AlwaysShownAffix({
+    super.key,
+    required this.padding,
+    required this.text,
+    this.leading,
+    this.trailing,
+    this.iconConstraints,
+  });
+
+  final EdgeInsets padding;
+  final Widget text;
+  final Widget? leading;
+  final Widget? trailing;
+  final BoxConstraints? iconConstraints;
+
+  Widget? _slot(Widget? icon) => icon == null
+      ? null
+      : ConstrainedBox(
+          constraints:
+              iconConstraints ??
+              const BoxConstraints(
+                minWidth: kMinInteractiveDimension,
+                minHeight: kMinInteractiveDimension,
+              ),
+          child: Center(widthFactor: 1, heightFactor: 1, child: icon),
+        );
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: leading != null || trailing != null ? EdgeInsets.zero : padding,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [?_slot(leading), text, ?_slot(trailing)],
+    ),
+  );
 }
 
 class _ReactiveIcon extends StatelessWidget {
