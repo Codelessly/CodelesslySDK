@@ -20,12 +20,16 @@ const Set<String> predefinedVariableNames = {
   'route',
   'auth',
   'result',
+  'loop',
   'screen',
   'hold',
   'drag',
   'track',
   'speech',
   'initial',
+  // Which variables an Animate variable action is playing now:
+  // `${animating.sunriseT}` (see VariableAnimator.playingIn).
+  'animating',
   'script',
 };
 
@@ -58,6 +62,7 @@ const Set<String> predefinedListenableVariableNames = {
   'product',
   'paywall',
   'entitlements',
+  'animating',
 };
 
 final Set<PredefinedVariableData> predefinedVariables = {
@@ -73,6 +78,7 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'route', type: VariableType.map),
   PredefinedVariableData(name: 'auth', type: VariableType.map),
   PredefinedVariableData(name: 'result'),
+  PredefinedVariableData(name: 'loop'),
   PredefinedVariableData(name: 'screen', type: VariableType.map),
   PredefinedVariableData(name: 'parent', type: VariableType.map),
   PredefinedVariableData(name: 'hold', type: VariableType.decimal),
@@ -80,6 +86,7 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'track', type: VariableType.map),
   PredefinedVariableData(name: 'speech', type: VariableType.map),
   PredefinedVariableData(name: 'initial', type: VariableType.map),
+  PredefinedVariableData(name: 'animating', type: VariableType.map),
 };
 
 /// Widths at which the `screen` variable's breakpoint changes: below 600 is
@@ -94,8 +101,22 @@ const double kDesktopMinWidth = 1024;
 /// `isPortrait` and `isLandscape`, and the device's light or dark mode as
 /// `brightness` (`light` or `dark`) and `isDark`, for a theme that follows
 /// the system.
-Map<String, dynamic> screenVariableValue(Size size, {Brightness? brightness}) {
-  final String breakpoint = ScreenBreakpoint.forWidth(size.width).name;
+///
+/// Inside a responsive layout with its own switch widths
+/// ([tabletMinWidth], [desktopMinWidth]; see [ResponsiveWidthsScope]) the
+/// breakpoint is the one that layout shows, so `screen.isMobile` agrees with
+/// the layout on show.
+Map<String, dynamic> screenVariableValue(
+  Size size, {
+  Brightness? brightness,
+  double? tabletMinWidth,
+  double? desktopMinWidth,
+}) {
+  final String breakpoint = ScreenBreakpoint.forWidth(
+    size.width,
+    tabletMinWidth: tabletMinWidth,
+    desktopMinWidth: desktopMinWidth,
+  ).name;
   final bool portrait = size.height >= size.width;
   return {
     'width': size.width,

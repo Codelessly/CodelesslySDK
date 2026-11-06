@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -85,7 +86,7 @@ void main() {
           PassiveIconWidget(key: ValueKey(binding), node: node),
         );
         expect(
-          tester.widget<Icon>(find.byType(Icon)).color?.toARGB32(),
+          tester.widget<SvgIcon>(find.byType(SvgIcon)).color?.toARGB32(),
           argb,
           reason: binding,
         );
