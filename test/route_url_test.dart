@@ -23,8 +23,18 @@ void main() {
 
   test('a given param of the same name wins, and files have none', () {
     ScopedValues.pageUri = () => Uri.parse('https://a.example/x');
-    expect(ScopedValues.preview(variables: const {}, routeParams: {'url': 'mine'}).routeParams['url'], 'mine');
+    expect(
+      ScopedValues.preview(
+        variables: const {},
+        routeParams: {'url': 'mine'},
+      ).routeParams['url'],
+      'mine',
+    );
     ScopedValues.pageUri = () => Uri.parse('file:///app/main.dart');
-    expect(ScopedValues.preview(variables: const {}).routeParams.containsKey('origin'), isFalse);
+    expect(
+      ScopedValues.preview(variables: const {}).routeParams
+          .containsKey('origin'),
+      isFalse,
+    );
   });
 }

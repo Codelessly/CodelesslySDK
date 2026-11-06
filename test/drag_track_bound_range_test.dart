@@ -7,16 +7,18 @@ import 'package:flutter_test/flutter_test.dart';
 /// `tRemaining` without writing it (write: false; reactions seek).
 void main() {
   test('bindings set a track\'s min, max, step and reset value', () {
-    final FrameNode thumb = FrameNode(
-      id: 'thumb',
-      name: 'Thumb',
-      basicBoxLocal: NodeBox(0, 0, 24, 24),
-      children: const [],
-    )..variables = {
-        DragTrackModel.maxVariableKey: r'${tSeconds}',
-        DragTrackModel.stepVariableKey: r'${= 5}',
-        DragTrackModel.defaultValueVariable: r'${tSeconds}',
-      };
+    final FrameNode thumb =
+        FrameNode(
+            id: 'thumb',
+            name: 'Thumb',
+            basicBoxLocal: NodeBox(0, 0, 24, 24),
+            children: const [],
+          )
+          ..variables = {
+            DragTrackModel.maxVariableKey: r'${tSeconds}',
+            DragTrackModel.stepVariableKey: r'${= 5}',
+            DragTrackModel.defaultValueVariable: r'${tSeconds}',
+          };
     const DragTrackModel track = DragTrackModel(
       shape: DragTrackShape.arc,
       variable: 'tRemaining',
@@ -26,10 +28,19 @@ void main() {
     );
     final ScopedValues scope = ScopedValues.preview(
       variables: {
-        'tSeconds': VariableData(id: 's', name: 'tSeconds', type: VariableType.integer, value: '530'),
+        'tSeconds': VariableData(
+          id: 's',
+          name: 'tSeconds',
+          type: VariableType.integer,
+          value: '530',
+        ),
       },
     );
-    final DragTrackModel resolved = WidgetNodeTransformerManager.resolvedTrack(thumb, track, scope);
+    final DragTrackModel resolved = WidgetNodeTransformerManager.resolvedTrack(
+      thumb,
+      track,
+      scope,
+    );
     expect(resolved.max, 530);
     expect(resolved.step, 5);
     expect(resolved.defaultValue, 530);
@@ -39,7 +50,12 @@ void main() {
     // No bindings: the track as saved.
     expect(
       WidgetNodeTransformerManager.resolvedTrack(
-        FrameNode(id: 'k', name: 'K', basicBoxLocal: NodeBox(0, 0, 10, 10), children: const []),
+        FrameNode(
+          id: 'k',
+          name: 'K',
+          basicBoxLocal: NodeBox(0, 0, 10, 10),
+          children: const [],
+        ),
         track,
         scope,
       ),
@@ -48,7 +64,10 @@ void main() {
   });
 
   test('write round-trips and defaults to true', () {
-    expect(const DragTrackModel(variable: 'v').toJson().containsKey('write'), isFalse);
+    expect(
+      const DragTrackModel(variable: 'v').toJson().containsKey('write'),
+      isFalse,
+    );
     final json = const DragTrackModel(variable: 'v', write: false).toJson();
     expect(json['write'], isFalse);
     expect(DragTrackModel.fromJson(json).write, isFalse);

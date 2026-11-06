@@ -208,7 +208,12 @@ void main() {
       name: 'chair',
       basicBoxLocal: NodeBox(300, 300, 60, 60),
       positioningMode: PositioningMode.align,
-      edgePins: const EdgePinsModel(left: 300, top: 300, right: null, bottom: null),
+      edgePins: const EdgePinsModel(
+        left: 300,
+        top: 300,
+        right: null,
+        bottom: null,
+      ),
     )..parentID = 'map';
     final FrameNode map = FrameNode(
       id: 'map',

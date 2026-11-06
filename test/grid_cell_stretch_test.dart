@@ -57,7 +57,9 @@ void main() {
     expect(tester.getSize(blocks.first).width, closeTo(148.7, 1));
   });
 
-  testWidgets('a bound crossAxisCount sets the number of columns', (tester) async {
+  testWidgets('a bound crossAxisCount sets the number of columns', (
+    tester,
+  ) async {
     final Map raw = jsonDecode(
       File('test/fixtures/day_strip_grid.json').readAsStringSync(),
     );

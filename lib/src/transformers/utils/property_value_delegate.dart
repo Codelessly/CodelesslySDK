@@ -548,9 +548,25 @@ class PropertyValueDelegate {
         match,
         scopedValues,
       );
+      // `loop` became a predefined name (a for-each turn's item and index)
+      // after projects already had variables called `loop`. Outside a
+      // for-each turn it reads the project's own variable of that name, so
+      // those projects keep working.
+      if (value == null &&
+          match.name == 'loop' &&
+          scopedValues.variables.containsKey('loop')) {
+        return _userVariableValue(match, scopedValues);
+      }
       return value;
     }
+    return _userVariableValue(match, scopedValues);
+  }
 
+  /// The value of the project's own variable [match] names.
+  static Object? _userVariableValue(
+    VariableMatch match,
+    ScopedValues scopedValues,
+  ) {
     final VariableData? variable = scopedValues.variables[match.name];
     if (variable == null) {
       // In a text field's own actions, `inputValue` (the property a field's

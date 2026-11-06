@@ -18,9 +18,14 @@ void main() {
   });
 
   test('arc is a hero flight in node JSON', () {
-    final RectangleNode node = RectangleNode(id: 'b', name: 'Ball', basicBoxLocal: NodeBox(0, 0, 10, 10))
-      ..heroTag = 'planet-jupiter'
-      ..heroFlight = HeroFlight.arc;
+    final RectangleNode node =
+        RectangleNode(
+            id: 'b',
+            name: 'Ball',
+            basicBoxLocal: NodeBox(0, 0, 10, 10),
+          )
+          ..heroTag = 'planet-jupiter'
+          ..heroFlight = HeroFlight.arc;
     expect(RectangleNode.fromJson(node.toJson()).heroFlight, HeroFlight.arc);
   });
 }

@@ -7,18 +7,26 @@ import 'package:flutter_test/flutter_test.dart';
 /// A browser that denies clipboard access makes Clipboard.setData throw. The
 /// copy is a side effect: the chain goes on to its "Link copied" toast.
 void main() {
-  testWidgets('a copy the platform refuses still lets the chain go on', (tester) async {
+  testWidgets('a copy the platform refuses still lets the chain go on', (
+    tester,
+  ) async {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (call) async {
         if (call.method == 'Clipboard.setData') {
-          throw PlatformException(code: 'denied', message: 'clipboard-write denied');
+          throw PlatformException(
+            code: 'denied',
+            message: 'clipboard-write denied',
+          );
         }
         return null;
       },
     );
     addTearDown(
-      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null),
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
     );
     late BuildContext ctx;
     await tester.pumpWidget(

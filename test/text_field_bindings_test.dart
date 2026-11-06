@@ -70,7 +70,11 @@ void main() {
   ) async {
     final TextField built = await pump(
       tester,
-      field(variables: {'hintText': r"${= 1 > 2 ? 'Runner beans' : 'Basil or carrot seed'}"}),
+      field(
+        variables: {
+          'hintText': r"${= 1 > 2 ? 'Runner beans' : 'Basil or carrot seed'}",
+        },
+      ),
     );
     expect(built.decoration?.hintText, 'Basil or carrot seed');
   });

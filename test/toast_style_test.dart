@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -90,8 +91,9 @@ void main() {
         duration: 1000,
       ),
     );
-    final Icon icon = tester.widget(
-      find.descendant(of: _toast, matching: find.byType(Icon)),
+    // Icons are hosted SVGs tinted with the icon colour.
+    final SvgIcon icon = tester.widget(
+      find.descendant(of: _toast, matching: find.byType(SvgIcon)),
     );
     expect(icon.color, _yellow.toFlutterColor());
     expect(icon.size, 20);
