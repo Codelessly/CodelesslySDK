@@ -31,6 +31,12 @@ status board) in the editor.
 - Scroll To takes an `axis`, waits up to 60 frames for its target, and
   scrolls the node on its own screen (a link to the entry screen opens it
   over itself, building the node twice).
+- A loop built where tickers don't run (a page body kept alive while
+  hidden) starts once they do, so its `phase` applies; a held chair sat at
+  the start of its cable.
+- A binding that is a number written as is (`"172.28"`) reads as that
+  number: a stacked list item's constant `x`/`y` used to fall back to its
+  design offset.
 - A node shown and hidden by a binding keeps its state across toggles; each
   toggle used to rebuild its whole subtree (a page body came back scrolled
   to the start).

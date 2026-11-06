@@ -144,7 +144,22 @@ class PropertyValueDelegate {
           variablePath,
           scopedValues: scopedValues,
         ) ??
-        literalIconName<R>(node, property, variablePath);
+        literalIconName<R>(node, property, variablePath) ??
+        literalNumber<R>(variablePath);
+  }
+
+  /// [binding] itself as a number when [R] takes one and the binding is a
+  /// number written as is (`172.28`) rather than a variable or formula: a
+  /// stacked list item's `x`/`y` bound to a constant sits there, as with
+  /// `${= 172.28}`; it used to fall back to the item's design offset. Null
+  /// otherwise.
+  static R? literalNumber<R extends Object>(String binding) {
+    if (R != num && R != double && R != int) return null;
+    final num? value = num.tryParse(binding.trim());
+    if (value == null || !value.isFinite) return null;
+    if (R == int) return (value is int ? value : null) as R?;
+    if (R == double) return value.toDouble() as R;
+    return value as R;
   }
 
   /// The icon properties of an icon node that take an icon's name.
