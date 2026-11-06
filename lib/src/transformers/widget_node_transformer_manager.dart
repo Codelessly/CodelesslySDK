@@ -224,7 +224,13 @@ abstract class WidgetNodeTransformerManager
       );
     }
 
-    if (visible) return widget;
+    // A node shown and hidden by a binding keeps the same Visibility around
+    // it either way: its build switching between the node and a Visibility
+    // threw the whole subtree away on each toggle, scroll offsets and all,
+    // and with maintainState the state kept while hidden was lost as the
+    // node showed (a page body hidden while loading came back scrolled to
+    // the start).
+    if (visible && runtimeVisible == null) return widget;
 
     // A node hidden by a condition or variable at runtime gives up its space,
     // so alternative content (a sign-in or sign-up title, an error line) can
@@ -388,6 +394,32 @@ abstract class WidgetNodeTransformerManager
         pulseKey: value?.toString(),
         clearPulseKey: value == null,
       );
+    }
+    final String pausedKey = MotionModel.variableKey(
+      MotionModel.pausedProperty,
+    );
+    if (node.variables.containsKey(pausedKey)) {
+      final String raw = node.variables[pausedKey]!;
+      final Object? value = raw.contains(r'${')
+          ? PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              pausedKey,
+              scopedValues: scopedValues,
+            )
+          : raw;
+      final bool? paused = switch (value) {
+        bool b => b,
+        num n => n != 0,
+        String s => switch (s.trim().toLowerCase()) {
+          'true' || 'on' || '1' || 'paused' => true,
+          'false' || 'off' || '0' || '' => false,
+          _ => null,
+        },
+        _ => null,
+      };
+      if (paused != null) {
+        motion = (motion ?? MotionModel.none).copyWith(paused: paused);
+      }
     }
     final String loopKey = MotionModel.variableKey(MotionModel.loopProperty);
     if (animate && node.variables.containsKey(loopKey)) {
@@ -1280,7 +1312,55 @@ abstract class WidgetNodeTransformerManager
   }
 
   /// Convenience method to handle widget reactions.
+  ///
+  /// A rectangle drawn from SVG path data takes pointer events only on its
+  /// shape (see [SvgPathHitRegion]), so overlapping shapes can each be
+  /// tapped where they show.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
+    final Widget wrapped = _wrapWithReaction(context, node, widget);
+    if (node is RectangleNode && node.hasPath) {
+      final Path? path = parseSvgPath(node.path);
+      if (path != null) {
+        return SvgPathHitRegion(
+          path: path,
+          filled: node.fills.any((paint) => paint.visible),
+          stroked:
+              node.strokeWeight > 0 &&
+              node.strokes.any((paint) => paint.visible),
+          strokeWidth: node.strokeWeight,
+          child: wrapped,
+        );
+      }
+    }
+    if (node is PathNode) {
+      // A list item's path is usually bound (`pathData`).
+      final String data = node.variables.containsKey('pathData')
+          ? PropertyValueDelegate.getPropertyValue<String>(
+                  node,
+                  'pathData',
+                  scopedValues: ScopedValues.of(context),
+                ) ??
+                node.pathData
+          : node.pathData;
+      final Path? path = parseSvgPath(data);
+      if (path != null) {
+        final double? w = node.viewBoxWidth, h = node.viewBoxHeight;
+        return SvgPathHitRegion(
+          path: path,
+          filled: node.fills.any((paint) => paint.visible),
+          stroked:
+              node.strokeWeight > 0 &&
+              node.strokes.any((paint) => paint.visible),
+          strokeWidth: node.strokeWeight,
+          viewBox: w != null && h != null && w > 0 && h > 0 ? Size(w, h) : null,
+          child: wrapped,
+        );
+      }
+    }
+    return wrapped;
+  }
+
+  Widget _wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
     Widget tappable = _wrapWithTapReactions(context, node, widget);
     if (node is! ReactionMixin || node is CanvasNode || node is SpacerNode) {
       return tappable;
