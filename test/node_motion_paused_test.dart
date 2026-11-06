@@ -89,6 +89,25 @@ void main() {
     expect(x(tester), closeTo(45, 1));
   });
 
+  testWidgets('a path loop starting from enterFrom holds at its phase', (
+    tester,
+  ) async {
+    // The loading screen's chair: rides its cable from 0, held 42% along.
+    final MotionModel held = MotionModel.fromJson({
+      'durationMs': 2400,
+      'loop': 'restart',
+      'curve': 'linear',
+      'phase': 0.42,
+      'path': 'M0 0 L100 0',
+      'pathProgress': 1,
+      'enterFrom': {'pathProgress': 0},
+      'paused': true,
+    });
+    await pump(tester, held);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(x(tester), closeTo(42, 0.5));
+  });
+
   test('paused round-trips through JSON and is left out when false', () {
     final MotionModel paused = ride.copyWith(paused: true);
     expect(MotionModel.fromJson(paused.toJson()).paused, isTrue);
