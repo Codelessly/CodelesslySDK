@@ -1,6 +1,6 @@
-## 9.4.0
+## 10.0.0
 
-Requires codelessly_api 9.4.0.
+Requires codelessly_api 10.0.0.
 
 - Scripts. A "Run script" action (`RunScriptAction`) runs one of the
   project's JavaScript scripts in a sandbox. Its result is the chain's
