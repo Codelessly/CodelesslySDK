@@ -215,6 +215,8 @@ class FunctionsRepository {
           drag.command,
           drag.direction,
         ).then((_) => true);
+      case ActionType.haptic:
+        return haptic(context, action as HapticAction);
     }
   }
 
@@ -2215,6 +2217,36 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       scopedValues: scopedValues,
     );
   }
+
+  /// Buzzes the device as [action] says, unless its `when` formula is false.
+  static bool haptic(BuildContext context, HapticAction action) {
+    if (action.when.trim().isNotEmpty) {
+      final String on = PropertyValueDelegate.substituteVariables(
+        action.when,
+        scopedValues: ActionChain.scopedValuesOf(context),
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ).trim().toLowerCase();
+      if (on.isEmpty || on == 'false' || on == '0' || on == 'null') return true;
+    }
+    lastHaptic = action.kind;
+    switch (action.kind) {
+      case HapticKind.selection:
+        HapticFeedback.selectionClick();
+      case HapticKind.light:
+        HapticFeedback.lightImpact();
+      case HapticKind.medium:
+        HapticFeedback.mediumImpact();
+      case HapticKind.heavy:
+        HapticFeedback.heavyImpact();
+      case HapticKind.vibrate:
+        HapticFeedback.vibrate();
+    }
+    return true;
+  }
+
+  /// The last buzz [haptic] gave (tests).
+  @visibleForTesting
+  static HapticKind? lastHaptic;
 
   /// Plays [action]'s sound, now or at its `at` time on the sound clock, or
   /// its sound file.

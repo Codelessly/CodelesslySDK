@@ -257,16 +257,22 @@ class SvgPathStrokePainter extends CustomPainter {
 /// Clips its child to an SVG [path].
 class SvgPathClipper extends CustomClipper<Path> {
   /// Creates a [SvgPathClipper].
-  const SvgPathClipper(this.data);
+  const SvgPathClipper(this.data, {this.offset = Offset.zero});
 
   /// The SVG path data.
   final String data;
 
-  @override
-  Path getClip(Size size) => parseSvgPath(data) ?? Path();
+  /// Where the path's origin is in the clipped child (a child laid out over
+  /// the path's bounds rather than the node's box).
+  final Offset offset;
 
   @override
-  bool shouldReclip(SvgPathClipper oldClipper) => oldClipper.data != data;
+  Path getClip(Size size) =>
+      (parseSvgPath(data) ?? Path()).shift(offset);
+
+  @override
+  bool shouldReclip(SvgPathClipper oldClipper) =>
+      oldClipper.data != data || oldClipper.offset != offset;
 }
 
 /// Takes pointer events only on its [path]: inside it when [filled], and
