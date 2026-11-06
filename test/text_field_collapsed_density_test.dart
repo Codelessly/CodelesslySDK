@@ -108,13 +108,36 @@ void main() {
     );
   });
 
+  testWidgets('a dense field that is not collapsed keeps the theme density '
+      'but what its padding can not give', (tester) async {
+    await _pump(tester, _note(collapsed: false), VisualDensity.compact);
+    // No content padding to take the compact -8 px from: Flutter lays the
+    // field out at its lines anyway, and its intrinsic height (which it
+    // hugs) now says so too.
+    expect(
+      tester
+          .widget<TextField>(find.byType(TextField))
+          .decoration!
+          .visualDensity,
+      const VisualDensity(horizontal: -2, vertical: 0),
+    );
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      moreOrLessEquals(threeLines, epsilon: 1),
+    );
+  });
+
   // An uncollapsed field is padded by its decoration's content padding, so
   // the platform's density must not change its height either (see
   // text_field_hug_height_test.dart).
-  testWidgets('a field that is not collapsed ignores the theme density too', (
+  testWidgets('a field that is not dense ignores the theme density too', (
     tester,
   ) async {
-    await _pump(tester, _note(collapsed: false), VisualDensity.compact);
+    final TextFieldNode note = _note(collapsed: false);
+    note.properties.decoration = note.properties.decoration.copyWith(
+      isDense: false,
+    );
+    await _pump(tester, note, VisualDensity.compact);
     expect(
       tester
           .widget<TextField>(find.byType(TextField))

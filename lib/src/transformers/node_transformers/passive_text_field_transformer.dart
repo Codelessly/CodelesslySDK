@@ -212,6 +212,89 @@ class PassiveTextFieldWidget extends StatefulWidget {
   /// The key in [BaseNode.variables] that binds the colour of the cursor.
   static const String cursorColor = 'cursorColor';
 
+  /// The visual density of a dense, unlabeled field with [contentPadding]
+  /// under the [theme]'s density: the theme's, unless it would take more
+  /// off the field than its vertical padding.
+  static VisualDensity denseVisualDensity(
+    VisualDensity theme,
+    EdgeInsets contentPadding,
+  ) {
+    // Flutter's laid-out height of a dense, unlabeled field is
+    // `max(padding + line + density, line)`, but its intrinsic height (which
+    // sizes a field that hugs its height) drops the `line` floor: desktop's
+    // compact density (-8 px) made a dense field with no content padding
+    // 8 px shorter than its line (10 px for Inter 15). Keeping the density
+    // from taking more than the vertical padding gives both the laid-out
+    // height and line placement Flutter's layout gives.
+    final double floor = -contentPadding.vertical / 4;
+    if (theme.vertical >= floor) return theme;
+    return VisualDensity(horizontal: theme.horizontal, vertical: floor);
+  }
+
+  /// [decoration] of a one-line field [height] tall, with its line placed
+  /// in that height per [alignment] (the field's `textAlignVertical`).
+  ///
+  /// Flutter's InputDecorator is only as tall as its content (padding plus
+  /// one line, or 48 px when not dense), whatever height it is given, so a
+  /// dense 52 px field with no content padding showed its text at the top
+  /// even when centered. The space left over goes into the content padding:
+  /// above the line by the alignment's share (half for center), below it
+  /// the rest, so the decorator fills the height and the line sits where
+  /// `textAlignVertical` asks. A decoration with a label, helper, error or
+  /// counter (which take their own room), or a non-dense field no taller
+  /// than 48 px (which Flutter centers itself), is returned unchanged.
+  static InputDecoration alignedVertically(
+    BuildContext context,
+    InputDecoration decoration, {
+    required double height,
+    required TextStyle inputStyle,
+    required TextAlignVerticalEnum alignment,
+  }) {
+    final bool dense = decoration.isDense ?? false;
+    if (!height.isFinite ||
+        (decoration.isCollapsed ?? false) ||
+        (!dense && height <= kMinInteractiveDimension) ||
+        decoration.label != null ||
+        decoration.labelText != null ||
+        decoration.helperText != null ||
+        decoration.helper != null ||
+        decoration.error != null ||
+        decoration.errorText != null ||
+        decoration.counter != null ||
+        (decoration.counterText?.isNotEmpty ?? false)) {
+      return decoration;
+    }
+    final TextScaler scaler =
+        MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling;
+    double lineOf(TextStyle? style) {
+      final TextPainter painter = TextPainter(
+        text: TextSpan(text: ' ', style: style),
+        textDirection: TextDirection.ltr,
+        textScaler: scaler,
+      );
+      final double line = painter.preferredLineHeight;
+      painter.dispose();
+      return line;
+    }
+
+    final double line = [
+      lineOf(inputStyle),
+      if (decoration.hintText != null) lineOf(decoration.hintStyle),
+    ].reduce((a, b) => a > b ? a : b);
+    final EdgeInsets padding =
+        decoration.contentPadding?.resolve(Directionality.maybeOf(context)) ??
+        EdgeInsets.zero;
+    final double extra = height - padding.vertical - line;
+    if (extra <= 0.5) return decoration;
+    final double above = extra * (alignment.flutterTextAlignVertical.y + 1) / 2;
+    return decoration.copyWith(
+      contentPadding: padding.copyWith(
+        top: padding.top + above,
+        bottom: padding.bottom + extra - above,
+      ),
+    );
+  }
+
   /// The colour that the binding [property] of [node] gives, evaluated with
   /// [scopedValues] (or a condition on it), or null when it is missing or
   /// isn't a colour.
@@ -879,16 +962,26 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
                   child: buildField(decoration),
                 );
               }
-              // The node's box sets the height here (the decoration's
-              // standard density keeps the outline at that height).
+              // The node's box sets the height here, so the theme's density
+              // must not change it: desktop's compact density took 8 px off
+              // the outline, leaving a strip of the box's background below
+              // the border.
+              if (!constraints.hasBoundedHeight) return buildField(decoration);
               return buildField(
-                constraints.hasBoundedHeight
-                    ? decoration.copyWith(
-                        constraints: BoxConstraints.tightFor(
-                          height: constraints.maxHeight,
-                        ),
-                      )
-                    : decoration,
+                PassiveTextFieldWidget.alignedVertically(
+                  context,
+                  decoration.copyWith(
+                    constraints: BoxConstraints.tightFor(
+                      height: constraints.maxHeight,
+                    ),
+                    visualDensity: VisualDensity.standard,
+                  ),
+                  height: constraints.maxHeight,
+                  inputStyle: TextUtils.retrieveTextStyleFromProp(
+                    properties.inputStyle,
+                  ),
+                  alignment: properties.textAlignVertical,
+                ),
               );
             },
           )
@@ -1094,6 +1187,35 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       fontName: decoration.suffixStyle.fontName,
       textDecoration: decoration.suffixStyle.textDecoration,
     );
+    // Units like "kWh" that show even before anything is typed: the texts
+    // go in the icon slots, which Flutter always shows, instead of the
+    // prefix/suffix, which it shows only once the field is focused or has
+    // text.
+    final bool alwaysAffixes = decoration.affixesAlwaysVisible;
+    final Widget? prefixIconWidget =
+        !decoration.prefixIcon.icon.show || decoration.prefixIcon.icon.isEmpty
+        ? null
+        : _ReactiveIcon(
+            onTap: () => widget.onIconTap?.call(
+              context,
+              decoration.prefixIcon.reactions,
+              controller.text,
+            ),
+            iconModel: decoration.prefixIcon,
+            padding: decoration.prefixIconPadding?.flutterEdgeInsets,
+          );
+    final Widget? suffixIconWidget =
+        !decoration.suffixIcon.icon.show || decoration.suffixIcon.icon.isEmpty
+        ? null
+        : _ReactiveIcon(
+            onTap: () => widget.onIconTap?.call(
+              context,
+              decoration.suffixIcon.reactions,
+              controller.text,
+            ),
+            iconModel: decoration.suffixIcon,
+            padding: decoration.suffixIconPadding?.flutterEdgeInsets,
+          );
     final Widget? counterText = buildText(
       context,
       node,
@@ -1109,59 +1231,6 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       fontName: decoration.counterStyle.fontName,
       textDecoration: decoration.counterStyle.textDecoration,
     );
-
-    final EdgeInsets contentPadding =
-        (decoration.contentPadding ?? node.padding).flutterEdgeInsets;
-    final Widget? prefixIcon =
-        !decoration.prefixIcon.icon.show || decoration.prefixIcon.icon.isEmpty
-        ? null
-        : _ReactiveIcon(
-            onTap: () => widget.onIconTap?.call(
-              context,
-              decoration.prefixIcon.reactions,
-              controller.text,
-            ),
-            iconModel: decoration.prefixIcon,
-          );
-    final Widget? suffixIcon =
-        !decoration.suffixIcon.icon.show || decoration.suffixIcon.icon.isEmpty
-        ? null
-        : _ReactiveIcon(
-            onTap: () => widget.onIconTap?.call(
-              context,
-              decoration.suffixIcon.reactions,
-              controller.text,
-            ),
-            iconModel: decoration.suffixIcon,
-          );
-    // Flutter shows a prefix and suffix only while the field has focus or
-    // text. Always shown, they go in the icon slots, which always show:
-    // inside the content padding at the field's edge (Flutter puts no
-    // padding around an icon slot), or beside the slot's icon, centered
-    // across. Material 3 leaves 4 px between the input and an icon slot.
-    final bool affixesInIconSlots = decoration.alwaysShowAffixes;
-    final Widget? alwaysPrefix = affixesInIconSlots && prefixText != null
-        ? _AlwaysShownAffix(
-            key: const ValueKey('codelessly-text-field-prefix'),
-            padding: EdgeInsets.only(left: contentPadding.left),
-            leading: prefixIcon,
-            iconConstraints: decoration.prefixIconConstraints.isEmpty
-                ? null
-                : decoration.prefixIconConstraints.flutterConstraints,
-            text: prefixText,
-          )
-        : null;
-    final Widget? alwaysSuffix = affixesInIconSlots && suffixText != null
-        ? _AlwaysShownAffix(
-            key: const ValueKey('codelessly-text-field-suffix'),
-            padding: EdgeInsets.only(right: contentPadding.right),
-            text: suffixText,
-            trailing: suffixIcon,
-            iconConstraints: decoration.suffixIconConstraints.isEmpty
-                ? null
-                : decoration.suffixIconConstraints.flutterConstraints,
-          )
-        : null;
 
     return InputDecoration(
       icon: !decoration.icon.show || decoration.icon.isEmpty
@@ -1190,33 +1259,56 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       floatingLabelBehavior: decoration.floatingLabelBehavior.toFlutter(),
       isCollapsed: isCollapsed,
       isDense: isDense,
-      // The design sets the field's size through its content padding, text
-      // style and line limits, so the platform's density must not change it:
-      // desktop's (and so the web app's and the design canvas's) compact
-      // density took 8 px off every field, a hugging one-line field with
-      // 11 px padding around 16 px x 1.35 text measuring 35.6 instead of
-      // 43.6. Flutter's layout ignores the density for a collapsed field, but
-      // its intrinsic height (which sizes a field that hugs its height) still
-      // subtracts it.
-      visualDensity: VisualDensity.standard,
+      // A collapsed decoration is the bare input: desktop's compact density
+      // must not shrink it. Flutter's layout already ignores the density
+      // there, but the intrinsic height (which sizes a field that hugs its
+      // height) subtracts it, cutting 8 px off a multi-line field.
+      // Nor any other field: the design sets its size through its
+      // content padding, text style and line limits, so desktop's (and so
+      // the web app's and the design canvas's) compact density took 8 px
+      // off every field, a hugging one-line field with 11 px padding around
+      // 16 px x 1.35 text measuring 35.6 instead of 43.6. A dense, unlabeled
+      // field keeps only the theme's horizontal density.
+      visualDensity: !isCollapsed && isDense && labelText == null
+          ? VisualDensity(
+              horizontal: Theme.of(context).visualDensity.horizontal,
+              vertical: 0,
+            )
+          : VisualDensity.standard,
       // The decoration's own content padding wins over the node's padding,
       // which defaults to 12 x 16 for text fields: zero makes a bare input.
-      contentPadding: contentPadding,
-      prefixIcon: alwaysPrefix ?? prefixIcon,
-      // Unset constraints keep Flutter's 48 px icon slot; an always shown
-      // prefix takes its own width.
+      contentPadding:
+          (decoration.contentPadding ?? node.padding).flutterEdgeInsets,
+      prefixIcon: alwaysAffixes && prefixText != null
+          ? _affix(prefixIconWidget, prefixText, before: true)
+          : prefixIconWidget,
+      // Unset constraints keep Flutter's 48 px icon slot (an always-visible
+      // text with no icon takes only its own width).
       prefixIconConstraints: decoration.prefixIconConstraints.isEmpty
-          ? (alwaysPrefix != null ? const BoxConstraints() : null)
+          ? (decoration.prefixIconPadding != null ||
+                    (alwaysAffixes &&
+                        prefixText != null &&
+                        prefixIconWidget == null)
+                ? const BoxConstraints()
+                : null)
           : decoration.prefixIconConstraints.flutterConstraints,
-      prefix: alwaysPrefix != null ? null : prefixText,
+      prefix: alwaysAffixes ? null : prefixText,
       prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
-      suffixIcon: alwaysSuffix ?? suffixIcon,
-      suffix: alwaysSuffix != null ? null : suffixText,
+      suffixIcon: alwaysAffixes && suffixText != null
+          ? _affix(suffixIconWidget, suffixText, before: false)
+          : suffixIconWidget,
+      suffix: alwaysAffixes ? null : suffixText,
       suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
-      // Unset constraints keep Flutter's 48 px icon slot; an always shown
-      // suffix takes its own width.
+      // Unset constraints keep Flutter's 48 px icon slot.
+      // With a padding of its own the icon sits at that inset, so unset
+      // constraints drop the 48 px minimum instead of centring it in one.
       suffixIconConstraints: decoration.suffixIconConstraints.isEmpty
-          ? (alwaysSuffix != null ? const BoxConstraints() : null)
+          ? (decoration.suffixIconPadding != null ||
+                    (alwaysAffixes &&
+                        suffixText != null &&
+                        suffixIconWidget == null)
+                ? const BoxConstraints()
+                : null)
           : decoration.suffixIconConstraints.flutterConstraints,
       counter: decoration.showCounter
           ? decoration.counterText?.isNotEmpty == true
@@ -1237,11 +1329,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       focusColor: decoration.focusColor.toFlutterColor(),
       hoverColor: decoration.hoverColor.toFlutterColor(),
       errorBorder: getInputBorder(decoration.errorBorder),
+      // An error (flag or message) wins over bound border colours: a field
+      // in error stays red when focused.
       focusedBorder: getInputBorder(
         errorFlag && !hasError
             ? decoration.focusedErrorBorder
             : decoration.focusedBorder,
-        color: focusedBorderColor,
+        color: errorFlag || hasError ? null : focusedBorderColor,
       ),
       focusedErrorBorder: getInputBorder(decoration.focusedErrorBorder),
       disabledBorder: getInputBorder(decoration.disabledBorder),
@@ -1249,7 +1343,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
         errorFlag && !hasError
             ? decoration.errorBorder
             : decoration.enabledBorder,
-        color: borderColor,
+        color: errorFlag || hasError ? null : borderColor,
       ),
       border: getInputBorder(decoration.border, color: borderColor),
       enabled: decoration.enabled,
@@ -1293,8 +1387,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
     required ScopedValues scopedValues,
     required WidgetBuildSettings settings,
   }) {
+    // A value set at runtime wins, then a binding of the property in the
+    // node's variables (e.g. a hint that follows a form's mode), then the
+    // design's own text.
     final String? value =
-        context.getNodeValue(node.id, property) ?? defaultValue;
+        context.getNodeValue(node.id, property) ??
+        node.variables[property] ??
+        defaultValue;
     if (value == null || value.isEmpty) return null;
     final newValue = PropertyValueDelegate.substituteVariables(
       value,
@@ -1323,8 +1422,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
     TextAlignHorizontalEnum? textAlignHorizontal,
     int? maxLines,
   }) {
+    // A value set at runtime wins, then a binding of the property in the
+    // node's variables (e.g. a hint that follows a form's mode), then the
+    // design's own text.
     final String? value =
-        context.getNodeValue(node.id, property) ?? defaultValue;
+        context.getNodeValue(node.id, property) ??
+        node.variables[property] ??
+        defaultValue;
     if (value == null || value.isEmpty) return null;
     // A text that is only variables, like an error message from a formula,
     // shows nothing when they come out empty: an empty error text would
@@ -1358,62 +1462,29 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
   }
 }
 
-/// A text field's prefix or suffix [text] shown at all times in an icon
-/// slot (see [InputDecorationModel.alwaysShowAffixes]), with the slot's icon
-/// ([leading] before a prefix, [trailing] after a suffix) beside it, and the
-/// field's content padding on the outer side when there is no icon. The
-/// icon keeps its slot's size: [iconConstraints], else Flutter's 48 px.
-class _AlwaysShownAffix extends StatelessWidget {
-  const _AlwaysShownAffix({
-    super.key,
-    required this.padding,
-    required this.text,
-    this.leading,
-    this.trailing,
-    this.iconConstraints,
-  });
-
-  final EdgeInsets padding;
-  final Widget text;
-  final Widget? leading;
-  final Widget? trailing;
-  final BoxConstraints? iconConstraints;
-
-  Widget? _slot(Widget? icon) => icon == null
-      ? null
-      : ConstrainedBox(
-          constraints:
-              iconConstraints ??
-              const BoxConstraints(
-                minWidth: kMinInteractiveDimension,
-                minHeight: kMinInteractiveDimension,
-              ),
-          child: Center(widthFactor: 1, heightFactor: 1, child: icon),
-        );
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: leading != null || trailing != null ? EdgeInsets.zero : padding,
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [?_slot(leading), text, ?_slot(trailing)],
-    ),
-  );
-}
-
 class _ReactiveIcon extends StatelessWidget {
   final VoidCallback onTap;
   final ReactiveIconModel iconModel;
 
-  const _ReactiveIcon({required this.onTap, required this.iconModel});
+  /// Space round the icon in its slot (the decoration's icon padding).
+  final EdgeInsets? padding;
+
+  const _ReactiveIcon({
+    required this.onTap,
+    required this.iconModel,
+    this.padding,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final icon = Align(
+    Widget icon = Align(
       widthFactor: 1,
       heightFactor: 1,
       child: retrieveIconWidget(iconModel.icon, null)!,
     );
+    if (padding case final EdgeInsets padding) {
+      icon = Padding(padding: padding, child: icon);
+    }
 
     if (iconModel.reactions.isEmpty) return icon;
 
@@ -1422,4 +1493,20 @@ class _ReactiveIcon extends StatelessWidget {
       child: MouseRegion(cursor: SystemMouseCursors.click, child: icon),
     );
   }
+}
+
+/// An always-visible prefix or suffix text, beside its icon if it has one,
+/// for the icon slot of an [InputDecoration].
+Widget _affix(Widget? icon, Widget text, {required bool before}) {
+  final Widget padded = Padding(
+    padding: before
+        ? const EdgeInsetsDirectional.only(start: 12, end: 4)
+        : const EdgeInsetsDirectional.only(start: 4, end: 12),
+    child: text,
+  );
+  if (icon == null) return padded;
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: before ? [icon, padded] : [padded, icon],
+  );
 }

@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 /// Gradient stops bound to a variable or formula
-/// (`fill-stop-<paintId>-<index>`, `fill-stop-position-<paintId>-<index>`):
+/// (`fill-<paintId>-stop-<index>`, `fill-<paintId>-stop-position-<index>`):
 /// a hive icon whose gradient follows the hive's status color, on any node
 /// with fills.
 
@@ -37,10 +37,10 @@ final PaintModel solid = PaintModel.solid(
 /// The bindings of a hive icon: a lightened status color, the status color,
 /// and the status color again at the stop's own 40%.
 const Map<String, String> hiveBindings = {
-  'fill-stop-hive-0': r"${= mix(hive.statusColor, '#FFFFFF', 0.5)}",
-  'fill-stop-hive-1': r'${hive.statusColor}',
-  'fill-stop-hive-2': r'${hive.statusColor}',
-  'fill-stop-position-hive-1': r'${= hive.split}',
+  'fill-hive-stop-0': r"${= mix(hive.statusColor, '#FFFFFF', 0.5)}",
+  'fill-hive-stop-1': r'${hive.statusColor}',
+  'fill-hive-stop-2': r'${hive.statusColor}',
+  'fill-hive-stop-position-1': r'${= hive.split}',
 };
 
 CodelesslyContext hiveContext() => CodelesslyContext.empty()
@@ -137,7 +137,7 @@ void main() {
         name: 'Icon',
         basicBoxLocal: NodeBox(0, 0, 40, 40),
         fills: [gradient('hive')],
-      )..variables['fill-stop-hive-0'] = r'${missing.color}';
+      )..variables['fill-hive-stop-0'] = r'${missing.color}';
       expect(patchOf(node, hiveContext()), isEmpty);
     });
 

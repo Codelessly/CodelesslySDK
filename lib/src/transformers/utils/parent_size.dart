@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../codelessly_sdk.dart';
@@ -52,53 +51,140 @@ class ParentSizeScope extends InheritedWidget {
       width != oldWidget.width || height != oldWidget.height;
 }
 
-/// The content box of a row or column, for its children sized by a fraction
-/// of it ([hasFractionalSize]) on an axis the row/column leaves unbounded:
-/// its main axis, where a child that doesn't flex is laid out unbounded.
-/// The design canvas sizes such a child by its parent's content box (half
-/// of a progress track for `widthFactor: 0.5`); at runtime the child reads
-/// this scope for the axis its [ParentSizeScope] has no value on.
-///
-/// Only the nodes in [nodeIds], the row/column's own children that bind a
-/// factor ([hasBoundFractionalSize]), read it: a grandchild is sized by its
-/// own parent. A node's own [BaseNode.widthFactor] caps its size in the
-/// editor's layout instead, so it doesn't read this scope.
-class FlexContentSizeScope extends InheritedWidget {
-  /// The ids of the children this scope sizes.
-  final Set<String> nodeIds;
+/// The size of the node [parentId] along axes on which it lays its children
+/// out unbounded: a horizontal list's width (its items run on past its end)
+/// or a row's width (a child that doesn't flex). Its children read it as
+/// `${parent.width}`, and a `widthFactor` takes a fraction of it, as on the
+/// design canvas, where a child's constraints would give no width at all.
+/// Only [parentId]'s own children read it.
+class ParentExtentScope extends InheritedWidget {
+  /// The node whose children read this.
+  final String parentId;
 
-  /// The width of the row/column's content box, or null when unbounded.
+  /// The parent's content width, or null to keep the child's own reading.
   final double? width;
 
-  /// The height of the row/column's content box, or null when unbounded.
+  /// The parent's content height, or null to keep the child's own reading.
   final double? height;
 
-  /// Creates a [FlexContentSizeScope].
-  const FlexContentSizeScope({
+  /// Creates a [ParentExtentScope].
+  const ParentExtentScope({
     super.key,
-    required this.nodeIds,
+    required this.parentId,
     required this.width,
     required this.height,
     required super.child,
   });
 
-  /// The content box size of the row/column [nodeId] is a child of, or null
-  /// when it is not built in one that gives it.
-  static ({double? width, double? height})? of(
-    BuildContext context,
-    String nodeId,
-  ) {
-    final FlexContentSizeScope? scope = context
-        .dependOnInheritedWidgetOfExactType<FlexContentSizeScope>();
-    if (scope == null || !scope.nodeIds.contains(nodeId)) return null;
-    return (width: scope.width, height: scope.height);
+  /// The scope [node]'s parent gives above [context], if any.
+  static ParentExtentScope? of(BuildContext context, BaseNode node) {
+    final ParentExtentScope? scope = context
+        .dependOnInheritedWidgetOfExactType<ParentExtentScope>();
+    return scope != null && scope.parentId == node.parentID ? scope : null;
+  }
+
+  /// [child] under a scope with the bounded sides of the constraints its
+  /// builder gets, less [padding] (the parent's padding inside that box),
+  /// for the children of [parent], when any of [children] reads the
+  /// parent's size ([readsParentSize]); else [child] built as is.
+  static Widget around({
+    required BaseNode parent,
+    required Iterable<BaseNode> children,
+    required Size fallbackSize,
+    EdgeInsets padding = EdgeInsets.zero,
+    required Widget Function(BuildContext context) child,
+  }) {
+    if (!children.any(readsParentSize)) {
+      return Builder(builder: child);
+    }
+    return MeasurableLayoutBuilder(
+      key: ValueKey('${parent.id}-parent-extent'),
+      fallbackSize: fallbackSize,
+      builder: (context, constraints) => ParentExtentScope(
+        parentId: parent.id,
+        width: constraints.hasBoundedWidth
+            ? math.max(0, constraints.maxWidth - padding.horizontal).toDouble()
+            : null,
+        height: constraints.hasBoundedHeight
+            ? math.max(0, constraints.maxHeight - padding.vertical).toDouble()
+            : null,
+        child: Builder(builder: child),
+      ),
+    );
   }
 
   @override
-  bool updateShouldNotify(FlexContentSizeScope oldWidget) =>
+  bool updateShouldNotify(ParentExtentScope oldWidget) =>
+      parentId != oldWidget.parentId ||
+      width != oldWidget.width ||
+      height != oldWidget.height;
+}
+
+/// The content box of a freeform container ([parentId]: a frame, a stack,
+/// a canvas body), for its children that read `parent`: a child of fixed
+/// size there is laid out with tight constraints of its own size, so
+/// `${parent.width}` must come from the container itself (a slider thumb
+/// whose track is `parent.width - 28` long). A row or column gives its
+/// fractional children [FlexContentScope] instead.
+class FreeformContentSizeScope extends InheritedWidget {
+  /// The container these sizes belong to.
+  final String parentId;
+
+  /// Its content width, or null when unbounded.
+  final double? width;
+
+  /// Its content height, or null when unbounded.
+  final double? height;
+
+  /// Creates a [FreeformContentSizeScope].
+  const FreeformContentSizeScope({
+    super.key,
+    required this.parentId,
+    required this.width,
+    required this.height,
+    required super.child,
+  });
+
+  /// The scope of the container [parentId] at [context], or null.
+  static FreeformContentSizeScope? of(BuildContext context, String parentId) {
+    final FreeformContentSizeScope? scope = context
+        .dependOnInheritedWidgetOfExactType<FreeformContentSizeScope>();
+    return scope?.parentId == parentId ? scope : null;
+  }
+
+  @override
+  bool updateShouldNotify(FreeformContentSizeScope oldWidget) =>
       width != oldWidget.width ||
       height != oldWidget.height ||
-      !setEquals(nodeIds, oldWidget.nodeIds);
+      parentId != oldWidget.parentId;
+}
+
+/// The content size of the row or column a node sits in, for a child sized
+/// by a fraction of it (a bar's fill in its track): a row gives a child that
+/// doesn't flex no width to measure against, so the child takes its share
+/// of the row's own content width instead.
+class FlexContentScope extends InheritedWidget {
+  /// The row's or column's content width, or null when unbounded.
+  final double? width;
+
+  /// The row's or column's content height, or null when unbounded.
+  final double? height;
+
+  /// Creates a [FlexContentScope].
+  const FlexContentScope({
+    super.key,
+    required this.width,
+    required this.height,
+    required super.child,
+  });
+
+  /// The scope of the nearest row or column above [context], if it gives one.
+  static FlexContentScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<FlexContentScope>();
+
+  @override
+  bool updateShouldNotify(FlexContentScope oldWidget) =>
+      width != oldWidget.width || height != oldWidget.height;
 }
 
 /// The value of the `parent` variable for a parent that gives [width] and
@@ -108,12 +194,29 @@ Map<String, dynamic> parentVariableValue(double? width, double? height) => {
   'height': height,
 };
 
+/// A `parent` path that reads the outer list's row (`parent.item...`,
+/// `parent.index`) rather than the parent's size.
+final RegExp _parentRowPath = RegExp(r'^parent\.(item|index)(?![A-Za-z0-9_])');
+
 /// Whether [node] reads the `parent` variable in a binding, a formula or an
 /// inline `${...}` text, so it is built inside a [ParentSizeScope].
+///
+/// `parent.item` and `parent.index` (the row of the list around the node's
+/// list, see [ScopedValues.parentIndexedItem]) don't read the size: a dot
+/// in a scene card's dots list coloured by `parent.item.states[item.id]`
+/// needs no [ParentSizeScope], and must not stop the card from being
+/// measured ([subtreeBlocksIntrinsics]), or a `stretchItems` grid took the
+/// card's design height (solved with its dots shown) whatever was hidden.
 bool readsParentSize(BaseNode node) {
   if (hasFractionalSize(node)) return true;
-  bool isParent(String path) =>
-      VariableMatch.parse(path.wrapWithVariableSyntax())?.name == 'parent';
+  bool isParent(String path) {
+    final VariableMatch? match = VariableMatch.parse(
+      path.wrapWithVariableSyntax(),
+    );
+    if (match?.name != 'parent') return false;
+    return !_parentRowPath.hasMatch(match!.fullPath);
+  }
+
   for (final String path in node.variables.values) {
     final String? expression = FormulaEvaluator.exactExpression(path);
     if (expression != null) {
@@ -139,6 +242,15 @@ bool readsParentSize(BaseNode node) {
   return false;
 }
 
+/// The node types that place their children freely (a frame, a stack):
+/// they give each child their content box as `${parent}`, since the box a
+/// child is placed in is the child's own size.
+const Set<String> freeformContainerTypes = {
+  'frame',
+  'stack',
+  'freeformPlaceholder',
+};
+
 /// The keys in [BaseNode.variables] that bind [BaseNode.widthFactor] and
 /// [BaseNode.heightFactor].
 const String widthFactorVariable = 'widthFactor';
@@ -151,14 +263,6 @@ const String heightFactorVariable = 'heightFactor';
 /// `variables['widthFactor']` / `variables['heightFactor']`.
 bool hasFractionalSize(BaseNode node) =>
     node.isFractionallySized ||
-    node.variables[widthFactorVariable]?.trim().isNotEmpty == true ||
-    node.variables[heightFactorVariable]?.trim().isNotEmpty == true;
-
-/// Whether [node] binds its `widthFactor` or `heightFactor` through
-/// [BaseNode.variables]. On the design canvas such a binding is read
-/// against the parent's content box (the `parent` variable there), while the
-/// editor's layout takes a node's own [BaseNode.widthFactor] as a cap.
-bool hasBoundFractionalSize(BaseNode node) =>
     node.variables[widthFactorVariable]?.trim().isNotEmpty == true ||
     node.variables[heightFactorVariable]?.trim().isNotEmpty == true;
 
