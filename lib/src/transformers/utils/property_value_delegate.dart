@@ -476,7 +476,7 @@ class PropertyValueDelegate {
             computedExpressionOf(variable) != null
         ? VariableType.fromObjectType(value)
         : variable.type;
-    List<Accessor> accessors = variable.name.startsWith('api')
+    List<Accessor> accessors = isApiVariableName(variable.name)
         ? getApiResponseAccessorsForType(VariableType.map)
         : getAccessorsForType(accessorType);
 
@@ -807,7 +807,11 @@ class PropertyValueDelegate {
                 DragAndDropController.idle)
             as Map?,
       },
-      'track' => (scopedValues.trackValues ?? const TrackValues()).toMap(),
+      // Null outside a drag track: nothing to read.
+      'track' => scopedValues.trackValues?.toMap(),
+      // The pose of the nearest transform gesture (x, y, scale, rotation...);
+      // null outside one.
+      'transform' => scopedValues.transformValues?.toMap(),
       // A flip card's side, a tilt's pointer and a page's offset from the
       // current page, around this node.
       'flip' || 'tilt' || 'pageOffset' =>

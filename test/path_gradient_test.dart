@@ -14,15 +14,18 @@ void main() {
     final image = await recorder.endRecording().toImage(100, 100);
     final data = (await image.toByteData())!;
     return [
-      for (final p in at) data.getUint32(((p.dy.toInt() * 100) + p.dx.toInt()) * 4),
+      for (final p in at)
+        data.getUint32(((p.dy.toInt() * 100) + p.dx.toInt()) * 4),
     ];
   }
 
   test('a gradient fill paints the shape, graded across the box', () async {
     final painter = PathNodePainter(
       data: 'M0 0 L100 0 L100 100 L0 100 Z',
-      gradients: const [
-        LinearGradient(colors: [Color(0xFFFF0000), Color(0xFF0000FF)]),
+      fills: const [
+        PathFill.gradient(
+          LinearGradient(colors: [Color(0xFFFF0000), Color(0xFF0000FF)]),
+        ),
       ],
     );
     final px = await pixelsOf(painter, const [Offset(2, 50), Offset(97, 50)]);
@@ -35,8 +38,10 @@ void main() {
     final painter = PathNodePainter(
       data: 'M0 50 L100 50',
       strokeWeight: 10,
-      strokeGradients: const [
-        LinearGradient(colors: [Color(0xFF00FF00), Color(0xFF00FF00)]),
+      strokes: const [
+        PathFill.gradient(
+          LinearGradient(colors: [Color(0xFF00FF00), Color(0xFF00FF00)]),
+        ),
       ],
     );
     final px = await pixelsOf(painter, const [Offset(50, 50), Offset(50, 10)]);
