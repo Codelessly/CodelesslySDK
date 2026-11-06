@@ -1215,10 +1215,23 @@ abstract class WidgetNodeTransformerManager
       );
     }
 
-    if (variable == null) return Builder(builder: build);
-    return ValueListenableBuilder<VariableData>(
-      valueListenable: variable,
-      builder: (context, _, _) => build(context),
+    // Rebuilt when its value changes, and when anything else it reads does:
+    // a bound `drag.enabled` (a volume slider off while sound is off) or
+    // bound geometry (`dragTrack.x2`).
+    final List<Listenable> others =
+        this is PassiveNodeTransformerManager &&
+            node.variables.keys.any(
+              (k) =>
+                  k == DragModel.enabledVariableKey ||
+                  k.startsWith('dragTrack.'),
+            )
+        ? (this as PassiveNodeTransformerManager).listenablesFor(context, node)
+        : const [];
+    final List<Listenable> listenables = [?variable, ...others];
+    if (listenables.isEmpty) return Builder(builder: build);
+    return AnimatedBuilder(
+      animation: Listenable.merge(listenables),
+      builder: (context, _) => build(context),
     );
   }
 
