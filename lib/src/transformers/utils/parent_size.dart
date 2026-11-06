@@ -51,13 +51,12 @@ class ParentSizeScope extends InheritedWidget {
       width != oldWidget.width || height != oldWidget.height;
 }
 
-/// The content box of a container ([parentId]: a frame, a stack, a canvas
-/// body, or a row/column), for its children that read `parent`: a child of
-/// fixed size in a freeform container is laid out with tight constraints of
-/// its own size, and one in a row is unbounded along the row, so
+/// The content box of a freeform container ([parentId]: a frame, a stack,
+/// a canvas body), for its children that read `parent`: a child of fixed
+/// size there is laid out with tight constraints of its own size, so
 /// `${parent.width}` must come from the container itself (a slider thumb
-/// whose track is `parent.width - 28` long, a progress fill bound to
-/// `widthFactor`).
+/// whose track is `parent.width - 28` long). A row or column gives its
+/// fractional children [FlexContentScope] instead.
 class FreeformContentSizeScope extends InheritedWidget {
   /// The container these sizes belong to.
   final String parentId;
@@ -89,6 +88,34 @@ class FreeformContentSizeScope extends InheritedWidget {
       width != oldWidget.width ||
       height != oldWidget.height ||
       parentId != oldWidget.parentId;
+}
+
+/// The content size of the row or column a node sits in, for a child sized
+/// by a fraction of it (a bar's fill in its track): a row gives a child that
+/// doesn't flex no width to measure against, so the child takes its share
+/// of the row's own content width instead.
+class FlexContentScope extends InheritedWidget {
+  /// The row's or column's content width, or null when unbounded.
+  final double? width;
+
+  /// The row's or column's content height, or null when unbounded.
+  final double? height;
+
+  /// Creates a [FlexContentScope].
+  const FlexContentScope({
+    super.key,
+    required this.width,
+    required this.height,
+    required super.child,
+  });
+
+  /// The scope of the nearest row or column above [context], if it gives one.
+  static FlexContentScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<FlexContentScope>();
+
+  @override
+  bool updateShouldNotify(FlexContentScope oldWidget) =>
+      width != oldWidget.width || height != oldWidget.height;
 }
 
 /// The value of the `parent` variable for a parent that gives [width] and

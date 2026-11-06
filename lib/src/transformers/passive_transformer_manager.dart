@@ -146,12 +146,23 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       Widget measured(BuildContext context) => MeasurableLayoutBuilder(
         key: ValueKey('${node.id}-parent-size'),
         fallbackSize: Size(node.outerBoxLocal.width, node.outerBoxLocal.height),
-        builder: (context, constraints) => ParentSizeScope.fromConstraints(
-          constraints,
-          child: Builder(
-            builder: (context) => _buildNode(context, node, settings),
-          ),
-        ),
+        builder: (context, constraints) {
+          // In a row or column, an axis the node's constraints leave
+          // unbounded (a row's main axis) is measured against the row's
+          // own content size.
+          final FlexContentScope? flex = FlexContentScope.maybeOf(context);
+          return ParentSizeScope(
+            width: constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : flex?.width,
+            height: constraints.hasBoundedHeight
+                ? constraints.maxHeight
+                : flex?.height,
+            child: Builder(
+              builder: (context) => _buildNode(context, node, settings),
+            ),
+          );
+        },
       );
       // In a freeform container `parent` is the container's content box,
       // which it provides, not the constraints this node is given. Looked
@@ -192,7 +203,23 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             builder: (context) => _buildDecorated(context, node, settings),
           );
         }
-        return _buildDecorated(context, node, settings);
+        final Widget decorated = _buildDecorated(context, node, settings);
+        // The design canvas shows no interaction states, but a node its
+        // `disabled` binding disables (with no disabled state of its own)
+        // is drawn faded there as it is at runtime.
+        if (settings.isPreview &&
+            node.variables.containsKey('disabled') &&
+            !node.interactionStates.containsKey(InteractionState.disabled) &&
+            InteractionStatesBox.propertyStates(
+              context,
+              node,
+            ).contains(InteractionState.disabled)) {
+          return Opacity(
+            opacity: InteractionStatesBox.defaultDisabledOpacity,
+            child: decorated,
+          );
+        }
+        return decorated;
       },
     );
     Widget wrapped = settings.withReactions
@@ -210,7 +237,13 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       );
     }
     // A node a Scroll To action targets records where it is built.
-    return ScrollTargets.wrap(node, wrapped);
+    final Widget scrollable = ScrollTargets.wrap(node, wrapped);
+    // A node motion draws elsewhere takes taps where it is drawn, through
+    // its interaction states' mouse region and the boxes around it.
+    if (!settings.isPreview && movesByMotion(node)) {
+      return HitBeyondBounds(child: scrollable);
+    }
+    return scrollable;
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -317,7 +350,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = applyWidgetMargins(styled, widget);
     }
 
-    if (settings.withVisibility) {
+    if (settings.withVisibility && !ShownAnyway.covers(context, node.id)) {
       widget = applyWidgetVisibility(
         context,
         styled,
@@ -374,20 +407,39 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         model: draggable,
         enabled: flag(DraggableModel.enabledVariable, draggable.enabled),
         flightKey: '${flightKey ?? ''}',
-        // The feedback node is usually hidden where it is designed.
-        buildNode: (context, id) => buildWidgetByID(
-          id,
-          context,
-          settings: const WidgetBuildSettings(
-            debugLabel: 'drag feedback',
-            withReactions: false,
-            withVisibility: false,
+        feedbackSize: draggable.feedbackNodeId.isEmpty
+            ? null
+            : _designedSize(draggable.feedbackNodeId),
+        // The feedback node is usually hidden where it is designed: it shows
+        // anyway, while the nodes inside it keep their own visibility (a
+        // pedal's two- and three-knob faces).
+        buildNode: (context, id) => ShownAnyway(
+          nodeId: id,
+          child: Builder(
+            builder: (context) => buildWidgetByID(
+              id,
+              context,
+              settings: const WidgetBuildSettings(
+                debugLabel: 'drag feedback',
+                withReactions: false,
+              ),
+            ),
           ),
         ),
         child: widget,
       );
     }
     return widget;
+  }
+
+  /// The designed size of node [id], or null when there's no such node.
+  Size? _designedSize(String id) {
+    try {
+      final BaseNode node = getNode(id);
+      return Size(node.basicBoxLocal.width, node.basicBoxLocal.height);
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Wraps [widget] in a tooltip showing [node]'s tooltip text (its data
@@ -1177,6 +1229,14 @@ List<String> inlineTextTemplatesOf(BaseNode node) {
   }
 
   if (node is TextNode) collect(node.data);
+  // An image fill named by a variable or formula (`${item.image}`, a play /
+  // pause icon) follows it.
+  if (node is GeometryMixin) {
+    for (final PaintModel fill in node.fills) {
+      collect(fill.downloadUrl);
+      collect(fill.croppedImageURL);
+    }
+  }
   if (node is CustomPropertiesMixin) collect(node.properties.toJson());
   if (node case final QueryableMixin queryable) {
     collect(queryable.collectionPath);

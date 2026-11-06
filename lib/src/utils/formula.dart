@@ -3133,6 +3133,33 @@ class _UserCall extends _Node {
   }
 }
 
+/// A variable path split once into its head and its member accesses:
+/// `p.moons[2].name` is `p` then `moons`, 2, `name`. Paths are few and read
+/// over and over (a search calls the same functions thousands of times), so
+/// splits are cached.
+class _SplitPath {
+  final String head;
+  final List<Object> parts;
+  const _SplitPath(this.head, this.parts);
+
+  static final Map<String, _SplitPath> _cache = {};
+
+  static _SplitPath of(String path) {
+    final _SplitPath? cached = _cache[path];
+    if (cached != null) return cached;
+    int end = 0;
+    while (end < path.length && path.codeUnitAt(end) != 0x2E && path.codeUnitAt(end) != 0x5B) {
+      end++;
+    }
+    final List<Object> parts = [];
+    for (final Match m in FormulaFunction._part.allMatches(path, end)) {
+      parts.add(m[1] ?? int.parse(m[2]!));
+    }
+    if (_cache.length > 4000) _cache.clear();
+    return _cache[path] = _SplitPath(path.substring(0, end), parts);
+  }
+}
+
 /// A function defined by a variable with parameters: its [parameters] and
 /// the formula [body] that computes its result from them.
 ///
@@ -3151,7 +3178,7 @@ class FormulaFunction {
   final FormulaPathResolver scope;
 
   /// Creates a [FormulaFunction].
-  const FormulaFunction(this.parameters, this.body, this.scope);
+  FormulaFunction(this.parameters, this.body, this.scope);
 
   /// The deepest nesting of calls allowed.
   static const int maxDepth = 128;
@@ -3162,27 +3189,19 @@ class FormulaFunction {
 
   /// The result of the body for [arguments].
   Object? call(List<Object?> arguments) {
-    final _Node? node = FormulaEvaluator._parse(body);
+    final _Node? node = _node ??= FormulaEvaluator._parse(body);
     if (node == null || _depth >= maxDepth) return null;
     _depth++;
     try {
       return node.eval((path) {
-        for (int i = 0; i < parameters.length; i++) {
-          final String name = parameters[i];
-          if (!path.startsWith(name)) continue;
-          final Object? bound = i < arguments.length ? arguments[i] : null;
-          if (path.length == name.length) return bound;
-          if (!path.startsWith('.', name.length) &&
-              !path.startsWith('[', name.length)) {
-            continue;
-          }
-          Object? result = bound;
-          for (final Match part in _part.allMatches(path, name.length)) {
-            result = _member(result, part[1] ?? int.parse(part[2]!));
-          }
-          return result;
+        final _SplitPath split = _SplitPath.of(path);
+        final int? i = _index[split.head];
+        if (i == null) return scope(path);
+        Object? result = i < arguments.length ? arguments[i] : null;
+        for (final Object part in split.parts) {
+          result = _member(result, part);
         }
-        return scope(path);
+        return result;
       });
     } catch (_) {
       return null;
@@ -3190,6 +3209,15 @@ class FormulaFunction {
       _depth--;
     }
   }
+
+  /// The parsed body, kept with the function (the shared parse cache is
+  /// cleared when it grows large).
+  _Node? _node;
+
+  /// Each parameter's position, by name.
+  late final Map<String, int> _index = {
+    for (int i = 0; i < parameters.length; i++) parameters[i]: i,
+  };
 
   /// The paths [body] reads that aren't its parameters: the variables a
   /// call depends on.
