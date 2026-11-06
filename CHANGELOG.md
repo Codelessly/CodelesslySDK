@@ -30,6 +30,17 @@
   the Web Speech API's SpeechRecognition; other platforms report
   `canListen: false` until the host sets `Speech.recognizer`.
   `pronunciationScore` is exported.
+- Drag tracks: vertical/horizontal input uses an axis drag recognizer and
+  follow input claims the pointer after 3 px, so knobs and sliders inside a
+  scrolling page turn instead of scrolling it. Fine mode (Shift, or press
+  and hold still before dragging; Shift + wheel), `track.fine` and the fine
+  variable; the pose animates between values (`snapMs`); arcs find the
+  nearest value around their pivot, so `jumpOnTap` works on curved sliders;
+  bound `track.min/max/step` (with master's `track.defaultValue`);
+  `write: false`.
+- An action chain whose screens have all gone finishes on the screen the app
+  shows now (a toast's delayed hide after the screen was replaced).
+
 
 ## 9.1.9
 
