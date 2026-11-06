@@ -162,6 +162,17 @@ void main() {
     expect(tester.getTopLeft(items().at(2)) - list, const Offset(116, 10));
   });
 
+  testWidgets('a vertical wrapping list as tall as its items wraps in rows', (
+    tester,
+  ) async {
+    // Chips in a column-direction list that hugs its height: with no height
+    // to fill, a vertical run never wraps, so the items flow in rows.
+    await pump(tester, wrapList(scrollDirection: AxisC.vertical));
+    final Offset list = tester.getTopLeft(find.byType(WrapNodeBox));
+    expect(tester.getTopLeft(items().at(1)) - list, const Offset(118, 10));
+    expect(tester.getTopLeft(items().at(3)) - list, const Offset(10, 56));
+  });
+
   testWidgets('a wrapping list shows one item per item of its data', (
     tester,
   ) async {
