@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:codelessly_genui/codelessly_genui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart';
@@ -187,12 +188,30 @@ void main() {
       final Finder slider = find.byType(Slider);
       await tester.drag(slider, const Offset(140, 0));
       await tester.pumpAndSettle();
+      await tester.pump(kSliderCommitDelay);
       final int qty = session.dataModelOf('f')['qty'] as int;
       expect(qty, greaterThan(2));
       expect(events.whereType<GenUiValueChanged>().map((e) => e.path), contains('/qty'));
       final action = events.whereType<GenUiActionEvent>().single;
       expect(action.interaction, GenUiInteraction.sliderCommit);
       expect(action.context, {'qty': qty});
+    });
+
+    testWidgets('keyboard steps on a slider send one action after they stop', (tester) async {
+      await pumpForm(tester);
+      final Finder slider = find.byType(Slider);
+      await tester.tap(slider);
+      await tester.pump();
+      for (int i = 0; i < 3; i++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(events.whereType<GenUiActionEvent>(), isEmpty);
+      await tester.pump(kSliderCommitDelay);
+      await tester.pumpAndSettle();
+      final actions = events.whereType<GenUiActionEvent>().toList();
+      expect(actions, hasLength(1));
+      expect(actions.single.context, {'qty': session.dataModelOf('f')['qty']});
     });
 
     testWidgets('a checkbox toggle and a choice send their actions', (tester) async {
