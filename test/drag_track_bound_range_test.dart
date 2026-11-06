@@ -15,7 +15,7 @@ void main() {
     )..variables = {
         DragTrackModel.maxVariableKey: r'${tSeconds}',
         DragTrackModel.stepVariableKey: r'${= 5}',
-        DragTrackModel.defaultValueVariableKey: r'${tSeconds}',
+        DragTrackModel.defaultValueVariable: r'${tSeconds}',
       };
     const DragTrackModel track = DragTrackModel(
       shape: DragTrackShape.arc,
