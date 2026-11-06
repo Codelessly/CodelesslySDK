@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -68,6 +69,20 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 900));
     expect(t(), 0.9);
+  });
+
+  testWidgets('a glide stops when the screen that started it closes', (tester) async {
+    await pump(tester, 0, VariableType.decimal);
+    bool? result;
+    (FunctionsRepository.performAction(context, glide('1', 3600)) as Future).then((r) => result = r as bool?);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    final num at = t();
+    await tester.pumpWidget(const SizedBox()); // navigated away
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(SchedulerBinding.instance.transientCallbackCount, 0);
+    expect(t(), at); // no longer moving
+    expect(result, isFalse);
   });
 
   test('animateMs and curve read and write JSON', () {
