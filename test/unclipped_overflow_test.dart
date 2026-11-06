@@ -88,5 +88,19 @@ void main() {
     await _pump(tester);
     final List<RenderObject> clips = _clipsAbove(tester);
     expect(clips, isEmpty, reason: '$clips');
+    // The label keeps its height on the row's top, moved up 7.5 by its
+    // motion: from 7.5 above the line to 8.5 below it.
+    final Rect line = tester.getRect(
+      find.byKey(const ValueKey('Rectangle Transformer of line [line]')),
+    );
+    final Rect label = tester.getRect(find.text('12'));
+    expect(line.height, 1);
+    expect(label.height, 16);
+    expect(label.top, closeTo(line.top - 7.5, 0.01));
+  });
+
+  testWidgets('a row that clips its content still clips it', (tester) async {
+    await _pump(tester, clipsContent: true);
+    expect(_clipsAbove(tester), isNotEmpty);
   });
 }

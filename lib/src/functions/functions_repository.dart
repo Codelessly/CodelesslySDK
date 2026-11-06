@@ -1284,6 +1284,37 @@ class FunctionsRepository {
     return Offset(x.toDouble(), y.toDouble());
   }
 
+  /// What a click, long press, double tap, right click or pointer trigger
+  /// reports of where it landed: `x`, `y` in the node, `globalX`, `globalY`
+  /// on screen, the node's `width` and `height`, and `fx`, `fy`, where it
+  /// landed as a share (0 to 1) of the node's width and height: a tap on a
+  /// map that resizes with the screen places a pin at the same spot on any
+  /// size.
+  static Map<String, double> pointerResult(
+    Offset local,
+    Offset global,
+    Size? size,
+  ) {
+    final double width = size?.width ?? 0, height = size?.height ?? 0;
+    return {
+      'x': local.dx,
+      'y': local.dy,
+      'globalX': global.dx,
+      'globalY': global.dy,
+      'fx': width > 0 ? (local.dx / width).clamp(0.0, 1.0) : 0.0,
+      'fy': height > 0 ? (local.dy / height).clamp(0.0, 1.0) : 0.0,
+      'width': width,
+      'height': height,
+    };
+  }
+
+  /// The laid out size of the box [context] builds, or null.
+  static Size? boxSizeOf(BuildContext context) {
+    final RenderObject? box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    return box.size;
+  }
+
   /// The rect of the node that [context] belongs to, relative to its
   /// navigator overlay. Null when it has no laid-out box.
   static Rect? anchorRectOf(BuildContext context) {

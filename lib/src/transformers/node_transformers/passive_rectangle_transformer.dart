@@ -322,34 +322,46 @@ List<Widget> wrapWithInkWell(
       .where((reaction) => reaction.trigger.type == TriggerType.longPress)
       .toList();
 
+  // Where the tap landed, for the click's result (see
+  // [FunctionsRepository.pointerResult]).
+  Map<String, double>? tapAt;
   final widget = Material(
     type: MaterialType.transparency,
-    child: InkWell(
-      onTap: onClickReactions.isEmpty
-          ? null
-          : () => FunctionsRepository.triggerAction(
-              context,
-              TriggerType.click,
-              reactions: onClickReactions,
-            ),
-      onLongPress: onLongPressReactions.isEmpty
-          ? null
-          : () => FunctionsRepository.triggerAction(
-              context,
-              TriggerType.longPress,
-              reactions: onLongPressReactions,
-            ),
-      borderRadius: getBorderRadius(node),
-      overlayColor: inkWell.overlayColor != null
-          ? WidgetStatePropertyAll<Color>(
-              inkWell.overlayColor!.toFlutterColor(),
-            )
-          : null,
-      splashColor: inkWell.splashColor?.toFlutterColor(),
-      highlightColor: inkWell.highlightColor?.toFlutterColor(),
-      hoverColor: inkWell.hoverColor?.toFlutterColor(),
-      focusColor: inkWell.focusColor?.toFlutterColor(),
-      child: Stack(alignment: alignment, children: children),
+    child: Builder(
+      builder: (tapContext) => InkWell(
+        onTapDown: (details) => tapAt = FunctionsRepository.pointerResult(
+          details.localPosition,
+          details.globalPosition,
+          FunctionsRepository.boxSizeOf(tapContext),
+        ),
+        onTap: onClickReactions.isEmpty
+            ? null
+            : () => FunctionsRepository.triggerAction(
+                context,
+                TriggerType.click,
+                reactions: onClickReactions,
+                result: tapAt,
+              ),
+        onLongPress: onLongPressReactions.isEmpty
+            ? null
+            : () => FunctionsRepository.triggerAction(
+                context,
+                TriggerType.longPress,
+                reactions: onLongPressReactions,
+                result: tapAt,
+              ),
+        borderRadius: getBorderRadius(node),
+        overlayColor: inkWell.overlayColor != null
+            ? WidgetStatePropertyAll<Color>(
+                inkWell.overlayColor!.toFlutterColor(),
+              )
+            : null,
+        splashColor: inkWell.splashColor?.toFlutterColor(),
+        highlightColor: inkWell.highlightColor?.toFlutterColor(),
+        hoverColor: inkWell.hoverColor?.toFlutterColor(),
+        focusColor: inkWell.focusColor?.toFlutterColor(),
+        child: Stack(alignment: alignment, children: children),
+      ),
     ),
   );
 

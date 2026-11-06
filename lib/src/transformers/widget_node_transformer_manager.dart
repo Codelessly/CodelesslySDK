@@ -1232,18 +1232,33 @@ abstract class WidgetNodeTransformerManager
     if (onSecondary.isNotEmpty) {
       // A right click opens the app's menu, not the browser's.
       if (kIsWeb) BrowserContextMenu.disableContextMenu();
-      tappable = GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onSecondaryTapUp: (details) => FunctionsRepository.triggerAction(
-          context,
-          TriggerType.secondaryClick,
-          reactions: onSecondary,
-          result: {
-            'x': details.globalPosition.dx,
-            'y': details.globalPosition.dy,
+      final Widget inner = tappable;
+      tappable = Builder(
+        builder: (tapContext) => GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          // `x`, `y` are on screen (where a context menu opens); `localX`,
+          // `localY`, `fx`, `fy` in the node.
+          onSecondaryTapUp: (details) {
+            final Map<String, double> at = FunctionsRepository.pointerResult(
+              details.localPosition,
+              details.globalPosition,
+              FunctionsRepository.boxSizeOf(tapContext),
+            );
+            FunctionsRepository.triggerAction(
+              context,
+              TriggerType.secondaryClick,
+              reactions: onSecondary,
+              result: {
+                ...at,
+                'x': details.globalPosition.dx,
+                'y': details.globalPosition.dy,
+                'localX': details.localPosition.dx,
+                'localY': details.localPosition.dy,
+              },
+            );
           },
+          child: inner,
         ),
-        child: tappable,
       );
     }
     if (onDrag.isEmpty &&
@@ -1386,47 +1401,49 @@ abstract class WidgetNodeTransformerManager
         )
         .toList();
 
-    // A click's result says where it landed: `x`, `y` in the node and
-    // `globalX`, `globalY` on screen (one cell can tell which slot of a
-    // timeline was tapped).
+    // A click's (and long press's) result says where it landed: `x`, `y`
+    // in the node, `globalX`, `globalY` on screen, and `fx`, `fy` as a share
+    // of the node's `width` and `height` (one cell can tell which slot of a
+    // timeline was tapped; a map places a pin at the tapped spot at any
+    // size). See [FunctionsRepository.pointerResult].
     Map<String, double>? tapAt;
-    Map<String, double> where(Offset local, Offset global) => {
-      'x': local.dx,
-      'y': local.dy,
-      'globalX': global.dx,
-      'globalY': global.dy,
-    };
 
     if (inkWell != null) {
       return Material(
         type: MaterialType.transparency,
-        child: InkWell(
-          onTapDown: (details) =>
-              tapAt = where(details.localPosition, details.globalPosition),
-          onTap: () => FunctionsRepository.triggerAction(
-            context,
-            TriggerType.click,
-            reactions: onClickReactions,
-            result: tapAt,
+        child: Builder(
+          builder: (tapContext) => InkWell(
+            onTapDown: (details) => tapAt = FunctionsRepository.pointerResult(
+              details.localPosition,
+              details.globalPosition,
+              FunctionsRepository.boxSizeOf(tapContext),
+            ),
+            onTap: () => FunctionsRepository.triggerAction(
+              context,
+              TriggerType.click,
+              reactions: onClickReactions,
+              result: tapAt,
+            ),
+            onLongPress: onLongPressReactions.isEmpty
+                ? null
+                : () => FunctionsRepository.triggerAction(
+                    context,
+                    TriggerType.longPress,
+                    reactions: onLongPressReactions,
+                    result: tapAt,
+                  ),
+            borderRadius: getBorderRadius(node),
+            overlayColor: inkWell.overlayColor != null
+                ? WidgetStatePropertyAll<Color>(
+                    inkWell.overlayColor!.toFlutterColor(),
+                  )
+                : null,
+            splashColor: inkWell.splashColor?.toFlutterColor(),
+            highlightColor: inkWell.highlightColor?.toFlutterColor(),
+            hoverColor: inkWell.hoverColor?.toFlutterColor(),
+            focusColor: inkWell.focusColor?.toFlutterColor(),
+            child: widget,
           ),
-          onLongPress: onLongPressReactions.isEmpty
-              ? null
-              : () => FunctionsRepository.triggerAction(
-                  context,
-                  TriggerType.longPress,
-                  reactions: onLongPressReactions,
-                ),
-          borderRadius: getBorderRadius(node),
-          overlayColor: inkWell.overlayColor != null
-              ? WidgetStatePropertyAll<Color>(
-                  inkWell.overlayColor!.toFlutterColor(),
-                )
-              : null,
-          splashColor: inkWell.splashColor?.toFlutterColor(),
-          highlightColor: inkWell.highlightColor?.toFlutterColor(),
-          hoverColor: inkWell.hoverColor?.toFlutterColor(),
-          focusColor: inkWell.focusColor?.toFlutterColor(),
-          child: widget,
         ),
       );
     } else {
@@ -1437,24 +1454,35 @@ abstract class WidgetNodeTransformerManager
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         hitTestBehavior: HitTestBehavior.opaque,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapUp: onClickReactions.isEmpty
-              ? null
-              : (details) => FunctionsRepository.triggerAction(
-                  context,
-                  TriggerType.click,
-                  reactions: onClickReactions,
-                  result: where(details.localPosition, details.globalPosition),
-                ),
-          onLongPress: onLongPressReactions.isEmpty
-              ? null
-              : () => FunctionsRepository.triggerAction(
-                  context,
-                  TriggerType.longPress,
-                  reactions: onLongPressReactions,
-                ),
-          child: widget,
+        child: Builder(
+          builder: (tapContext) => GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapUp: onClickReactions.isEmpty
+                ? null
+                : (details) => FunctionsRepository.triggerAction(
+                    context,
+                    TriggerType.click,
+                    reactions: onClickReactions,
+                    result: FunctionsRepository.pointerResult(
+                      details.localPosition,
+                      details.globalPosition,
+                      FunctionsRepository.boxSizeOf(tapContext),
+                    ),
+                  ),
+            onLongPressStart: onLongPressReactions.isEmpty
+                ? null
+                : (details) => FunctionsRepository.triggerAction(
+                    context,
+                    TriggerType.longPress,
+                    reactions: onLongPressReactions,
+                    result: FunctionsRepository.pointerResult(
+                      details.localPosition,
+                      details.globalPosition,
+                      FunctionsRepository.boxSizeOf(tapContext),
+                    ),
+                  ),
+            child: widget,
+          ),
         ),
       );
     }
@@ -1528,14 +1556,23 @@ abstract class WidgetNodeTransformerManager
         )
         .toList();
     if (reactions.isEmpty) return widget;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onDoubleTap: () => FunctionsRepository.triggerAction(
-        context,
-        TriggerType.doubleTap,
-        reactions: reactions,
+    Map<String, double>? tapAt;
+    return Builder(
+      builder: (tapContext) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onDoubleTapDown: (details) => tapAt = FunctionsRepository.pointerResult(
+          details.localPosition,
+          details.globalPosition,
+          FunctionsRepository.boxSizeOf(tapContext),
+        ),
+        onDoubleTap: () => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.doubleTap,
+          reactions: reactions,
+          result: tapAt,
+        ),
+        child: widget,
       ),
-      child: widget,
     );
   }
 
@@ -2122,10 +2159,11 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
         widget.onWheel.isNotEmpty ||
         pinches) {
       Map<String, Object> pointer(PointerEvent event) => {
-        'x': event.localPosition.dx,
-        'y': event.localPosition.dy,
-        'globalX': event.position.dx,
-        'globalY': event.position.dy,
+        ...FunctionsRepository.pointerResult(
+          event.localPosition,
+          event.position,
+          context.size,
+        ),
         'button': switch (event.buttons) {
           kSecondaryMouseButton => 'secondary',
           kMiddleMouseButton => 'middle',
