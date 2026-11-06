@@ -991,6 +991,32 @@ abstract class WidgetNodeTransformerManager
     variable.value = variable.value.copyWith(value: value);
   }
 
+  /// [track] with its [DragTrackModel.defaultValue] read from the node's
+  /// `track.defaultValue` binding when it has one that gives a number (the
+  /// list item's own default), else [track] as it is.
+  static DragTrackModel trackWithBoundDefault(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    if (!node.variables.containsKey(DragTrackModel.defaultValueVariable)) {
+      return track;
+    }
+    final Object? raw = PropertyValueDelegate.getPropertyValue<Object>(
+      node,
+      DragTrackModel.defaultValueVariable,
+      scopedValues: scopedValues,
+    );
+    final double? value = switch (raw) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()),
+      _ => null,
+    };
+    return value == null || !value.isFinite
+        ? track
+        : track.copyWith(defaultValue: value);
+  }
+
   /// Writes a drag's live [values] into the variable named [name], so nodes
   /// outside the dragged one can follow it (see [DragModel.shareAs]).
   static void shareDragValues(
@@ -1038,7 +1064,11 @@ abstract class WidgetNodeTransformerManager
     final DragTrackModel? saved = node.drag?.track;
     if (saved == null) return widget;
     final ScopedValues scope = scopedValues ?? ScopedValues.of(context);
-    final DragTrackModel track = resolveTrack(node, saved, scope);
+    final DragTrackModel track = resolveTrack(
+      node,
+      trackWithBoundDefault(node, saved, scope),
+      scope,
+    );
     final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
       track.variable,
       scopedValues: scope,
@@ -1090,10 +1120,11 @@ abstract class WidgetNodeTransformerManager
     }
 
     Widget build(BuildContext context) {
+      final ScopedValues scope = ScopedValues.of(context);
       final DragTrackModel track = resolveTrack(
         node,
-        savedTrack,
-        ScopedValues.of(context),
+        trackWithBoundDefault(node, savedTrack, scope),
+        scope,
       );
       final Object? raw =
           PropertyValueDelegate.getVariableValueFromPath<Object>(
