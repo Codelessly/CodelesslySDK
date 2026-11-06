@@ -1218,7 +1218,6 @@ abstract class WidgetNodeTransformerManager
     List<Reaction> reactions,
     Widget child,
   ) {
-    final DragTrackModel track = model;
     final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
     final Observable<VariableData>? variable = codelesslyContext?.findVariable(
