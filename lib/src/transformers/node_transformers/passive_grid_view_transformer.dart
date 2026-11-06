@@ -93,6 +93,58 @@ class PassiveGridViewWidget extends StatelessWidget {
     );
   }
 
+  /// A grid that loads its items page by page through its pagination
+  /// controller; see [DataListView].
+  Widget buildPagedGrid(BuildContext context, String itemNode) {
+    final PaginationModel model = node.pagination!;
+    final List? data = PropertyValueDelegate.getVariableValueFromPath<List>(
+      node.variables['data'] ?? '',
+      scopedValues: ScopedValues.of(context),
+    );
+    PageFetcher? fetcher;
+    if (!settings.isPreview) {
+      switch (model.source) {
+        case PaginationSource.data:
+          break;
+        case PaginationSource.cloud:
+          final Codelessly? codelessly = context.read<Codelessly?>();
+          if (codelessly != null && codelessly.authManager.authData != null) {
+            final query = constructQuery(context, codelessly);
+            if (query != null) {
+              fetcher = cloudPageFetcher(
+                ref: query.ref,
+                query: query.query,
+                readyIndexes:
+                    codelessly.cloudDatabase?.rules.readyIndexesFor(
+                      node.collectionPath ?? '',
+                    ) ??
+                    const {},
+              );
+            }
+          }
+        case PaginationSource.api:
+          fetcher = apiPageFetcher(context, model);
+      }
+    }
+    return box(
+      canShrinkWrap: true,
+      (context, shrinkWrap) => DataListView(
+        node: node,
+        data: data?.cast<Object?>(),
+        fetcher: fetcher,
+        preview: settings.isPreview,
+        shrinkWrap: shrinkWrap,
+        physics: node.physics.flutterScrollPhysics(node.shouldAlwaysScroll),
+        padding: node.padding.flutterEdgeInsets,
+        gridDelegate: sliverGridDelegateOf(node.properties.gridDelegate),
+        buildTemplate: (context) =>
+            manager.buildWidgetByID(itemNode, context, settings: settings),
+        buildNode: (context, id) =>
+            manager.buildWidgetByID(id, context, settings: settings),
+      ),
+    );
+  }
+
   /// Sizes the grid by [ViewportLayout] around [builder].
   Widget box(ViewportContentBuilder builder, {required bool canShrinkWrap}) =>
       ViewportNodeBox(
@@ -114,6 +166,11 @@ class PassiveGridViewWidget extends StatelessWidget {
       manager.getNode(itemNode),
       manager.getNode,
     );
+
+    if (node.pagination != null &&
+        !node.properties.gridDelegate.shrinkWrapRows) {
+      return buildPagedGrid(context, itemNode);
+    }
 
     final bool useCloudDatabase = node.useCloudDatabase;
     if (useCloudDatabase && !settings.isPreview) {
@@ -396,24 +453,7 @@ class GridViewBuilder extends StatelessWidget {
         clipBehavior: clipBehavior,
         itemBuilder: itemBuilder!,
         keyboardDismissBehavior: keyboardDismissBehavior,
-        gridDelegate: switch (gridDelegate) {
-          FixedCrossAxisCountGridDelegateProperties props =>
-            SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: math.max(1, props.crossAxisCount),
-              mainAxisExtent: props.mainAxisExtent,
-              childAspectRatio: props.childAspectRatio,
-              crossAxisSpacing: props.crossAxisSpacing,
-              mainAxisSpacing: props.mainAxisSpacing,
-            ),
-          MaxCrossAxisExtentGridDelegateProperties props =>
-            SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: props.maxCrossAxisExtent,
-              mainAxisExtent: props.mainAxisExtent,
-              childAspectRatio: props.childAspectRatio,
-              crossAxisSpacing: props.crossAxisSpacing,
-              mainAxisSpacing: props.mainAxisSpacing,
-            ),
-        },
+        gridDelegate: sliverGridDelegateOf(gridDelegate),
       ),
     );
   }
@@ -479,3 +519,24 @@ class GridViewBuilder extends StatelessWidget {
     );
   }
 }
+
+/// The Flutter grid delegate of a grid node's [delegate].
+SliverGridDelegate sliverGridDelegateOf(GridDelegateProperties delegate) =>
+    switch (delegate) {
+      FixedCrossAxisCountGridDelegateProperties props =>
+        SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: math.max(1, props.crossAxisCount),
+          mainAxisExtent: props.mainAxisExtent,
+          childAspectRatio: props.childAspectRatio,
+          crossAxisSpacing: props.crossAxisSpacing,
+          mainAxisSpacing: props.mainAxisSpacing,
+        ),
+      MaxCrossAxisExtentGridDelegateProperties props =>
+        SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: props.maxCrossAxisExtent,
+          mainAxisExtent: props.mainAxisExtent,
+          childAspectRatio: props.childAspectRatio,
+          crossAxisSpacing: props.crossAxisSpacing,
+          mainAxisSpacing: props.mainAxisSpacing,
+        ),
+    };
