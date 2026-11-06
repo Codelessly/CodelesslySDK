@@ -201,6 +201,56 @@ Object? evaluateDragValue(String text, BuildContext context) {
   );
 }
 
+/// [child] with what a node built at [from] reads, for a node drawn in the
+/// app's overlay (the copy that follows the pointer while dragging, or the
+/// node it shows instead): the Codelessly providers
+/// ([reprovideCodelessly]), the list items around [from] (its own and the
+/// outer list's), its screen's route parameters, the drag and track values
+/// of a node it is in, and the text direction.
+Widget reprovideNodeScope(BuildContext from, Widget child) {
+  Widget result = child;
+  final IndexedItem? item = IndexedItemProvider.maybeOf(from);
+  if (item != null) {
+    result = IndexedItemProvider(item: item, child: result);
+    final IndexedItem? parent = IndexedItemProvider.parentOf(from);
+    if (parent != null) {
+      result = IndexedItemProvider(item: parent, child: result);
+    }
+  }
+  final DragValues? drag = DragScope.maybeOf(from);
+  if (drag != null) result = DragScope(values: drag, child: result);
+  final TrackValues? track = TrackScope.maybeOf(from);
+  if (track != null) result = TrackScope(values: track, child: result);
+  final CodelesslyRouteScope? route = CodelesslyRouteScope.maybeOf(from);
+  if (route != null) {
+    result = CodelesslyRouteScope(
+      layoutId: route.layoutId,
+      location: route.location,
+      params: route.params,
+      fromLink: route.fromLink,
+      child: result,
+    );
+  } else {
+    final Map<String, dynamic>? params =
+        RouteParamsScope.maybeOf(from) ??
+        switch (ModalRoute.of(from)?.settings.arguments) {
+          final Map<String, dynamic> arguments => arguments,
+          _ => null,
+        };
+    if (params != null) {
+      result = RouteParamsScope(params: params, child: result);
+    }
+  }
+  result = Directionality(
+    textDirection: Directionality.maybeOf(from) ?? TextDirection.ltr,
+    child: result,
+  );
+  // A layout without an app (a test, a standalone tree) reads `Codelessly?`.
+  final Codelessly? codelessly = from.read<Codelessly?>();
+  result = Provider<Codelessly?>.value(value: codelessly, child: result);
+  return reprovideCodelessly(from, result);
+}
+
 /// Makes [child] (a node's widget) draggable as [model] says.
 class DragSourceBox extends StatefulWidget {
   final BaseNode node;
@@ -387,23 +437,38 @@ class _DragSourceBoxState extends State<DragSourceBox>
   Widget _feedback(BuildContext overlayContext) {
     final BuildContext context = this.context;
     final DraggableModel model = widget.model;
-    final CodelesslyContext codelesslyContext = context
-        .read<CodelesslyContext>();
-    final Codelessly? codelessly = context.read<Codelessly?>();
-    final IndexedItem? item = IndexedItemProvider.maybeOf(context);
     final CapturedThemes themes = InheritedTheme.capture(
       from: context,
       to: Navigator.maybeOf(context, rootNavigator: true)?.context,
     );
-    final TextDirection direction =
-        Directionality.maybeOf(context) ?? TextDirection.ltr;
-    final Widget content =
-        model.feedbackNodeId.isNotEmpty && widget.buildNode != null
-        ? Builder(
-            builder: (context) =>
-                widget.buildNode!(context, model.feedbackNodeId),
-          )
-        : SizedBox.fromSize(size: _size, child: widget.child);
+    final bool centred = model.feedbackAnchor == DragFeedbackAnchor.center;
+    Widget content;
+    if (model.feedbackNodeId.isNotEmpty && widget.buildNode != null) {
+      // Built by id from the layout's nodes, so the feedback node need not
+      // be shown anywhere; at most the screen's size.
+      final Size screen = MediaQuery.sizeOf(overlayContext);
+      content = ConstrainedBox(
+        constraints: BoxConstraints.loose(screen),
+        child: Builder(
+          builder: (context) =>
+              widget.buildNode!(context, model.feedbackNodeId),
+        ),
+      );
+      if (centred) {
+        // Its centre is the dragged node's, which is under the pointer,
+        // whatever size it is.
+        content = SizedBox.fromSize(
+          size: _size,
+          child: OverflowBox(
+            maxWidth: screen.width,
+            maxHeight: screen.height,
+            child: content,
+          ),
+        );
+      }
+    } else {
+      content = SizedBox.fromSize(size: _size, child: widget.child);
+    }
     final double radius = switch (widget.node) {
       final CornerMixin node => node.cornerRadius.tl.x,
       _ => 0,
@@ -438,27 +503,16 @@ class _DragSourceBoxState extends State<DragSourceBox>
     }
     // The feedback is drawn in the app's overlay, outside this layout:
     // take what the node reads along.
-    feedback = MultiProvider(
-      providers: [
-        ChangeNotifierProvider<CodelesslyContext>.value(
-          value: codelesslyContext,
-        ),
-        if (codelessly != null) Provider<Codelessly>.value(value: codelessly),
-        Provider<Codelessly?>.value(value: codelessly),
-      ],
-      child: Directionality(
-        textDirection: direction,
-        child: Material(
-          type: MaterialType.transparency,
-          child: item == null
-              ? feedback
-              : IndexedItemProvider(item: item, child: feedback),
-        ),
-      ),
+    feedback = reprovideNodeScope(
+      context,
+      Material(type: MaterialType.transparency, child: feedback),
     );
     return themes.wrap(IgnorePointer(child: feedback));
   }
 
+  /// Where the feedback is held from its top left: where the pointer
+  /// grabbed the node, or the node's centre
+  /// ([DraggableModel.feedbackAnchor]).
   Offset _anchor(
     Draggable<Object> draggable,
     BuildContext context,
@@ -466,7 +520,10 @@ class _DragSourceBoxState extends State<DragSourceBox>
   ) {
     final RenderBox box = context.findRenderObject()! as RenderBox;
     _size = box.size;
-    final Offset grab = box.globalToLocal(position);
+    final Offset grab = switch (widget.model.feedbackAnchor) {
+      DragFeedbackAnchor.grab => box.globalToLocal(position),
+      DragFeedbackAnchor.center => _size.center(Offset.zero),
+    };
     _payload = _start(grab);
     return grab;
   }

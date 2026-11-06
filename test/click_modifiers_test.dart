@@ -63,6 +63,10 @@ void main() {
       'y': 10,
       'globalX': 10,
       'globalY': 10,
+      'fx': 0.1,
+      'fy': 0.25,
+      'width': 100,
+      'height': 40,
     };
     expect(results, [
       {...at, 'meta': false, 'shift': false, 'alt': false},

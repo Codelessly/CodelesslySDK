@@ -340,8 +340,20 @@ void main() {
     );
     await tester.tapAt(const Offset(30, 20), buttons: kSecondaryButton);
     await tester.pump();
+    // `x`, `y` on screen; `localX`, `localY`, `fx`, `fy` in the node.
     expect(results, [
-      {'x': 30.0, 'y': 20.0},
+      {
+        'x': 30.0,
+        'y': 20.0,
+        'globalX': 30.0,
+        'globalY': 20.0,
+        'localX': 30.0,
+        'localY': 20.0,
+        'fx': 0.3,
+        'fy': 20 / 60,
+        'width': 100.0,
+        'height': 60.0,
+      },
     ]);
     expect(FunctionsRepository.pointerOf(results.single), const Offset(30, 20));
     expect(FunctionsRepository.pointerOf({'x': 'a'}), isNull);

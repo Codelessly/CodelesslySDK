@@ -601,8 +601,45 @@ class RenderCodelesslyFlex extends RenderFlex {
     return false;
   }
 
+  /// How far the children run past the main axis after layout (the
+  /// overflow [RenderFlex] warns about), or zero.
+  double _overflow = 0;
+
+  /// Overflow below this is taken as fitting: [paint] neither clips nor
+  /// paints the overflow warning. Text heights from fonts are fractional, so
+  /// children made to fit a fixed box (a 75 px column with padding 3 and
+  /// 16.7) can come out a fraction of a pixel over it, which no one sees.
+  static const double overflowTolerance = 1;
+
   @override
   void performLayout() {
+    _layOut();
+    double used = _gaps;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      used += _mainExtent(child.size);
+      child = childAfter(child);
+    }
+    _overflow = math.max(0, used - _mainExtent(size));
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_overflow > precisionErrorTolerance && _overflow < overflowTolerance) {
+      // As [RenderFlex] paints children that fit.
+      defaultPaint(context, offset);
+      return;
+    }
+    super.paint(context, offset);
+  }
+
+  @override
+  Rect? describeApproximatePaintClip(RenderObject child) =>
+      _overflow < overflowTolerance
+      ? null
+      : super.describeApproximatePaintClip(child);
+
+  void _layOut() {
     if (!_mainAxisBounded(constraints)) {
       if (_hasFlexChild) {
         _inflexible(_layOutWithGaps);
