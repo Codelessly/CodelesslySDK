@@ -51,11 +51,13 @@ class ParentSizeScope extends InheritedWidget {
       width != oldWidget.width || height != oldWidget.height;
 }
 
-/// The content box of a freeform container ([parentId]: a frame, a stack,
-/// a canvas body), for its children that read `parent`: a child of fixed
-/// size there is laid out with tight constraints of its own size, so
+/// The content box of a container ([parentId]: a frame, a stack, a canvas
+/// body, or a row/column), for its children that read `parent`: a child of
+/// fixed size in a freeform container is laid out with tight constraints of
+/// its own size, and one in a row is unbounded along the row, so
 /// `${parent.width}` must come from the container itself (a slider thumb
-/// whose track is `parent.width - 28` long).
+/// whose track is `parent.width - 28` long, a progress fill bound to
+/// `widthFactor`).
 class FreeformContentSizeScope extends InheritedWidget {
   /// The container these sizes belong to.
   final String parentId;
