@@ -37,6 +37,30 @@ class _RenderHitBeyondBounds extends RenderProxyBox {
   /// child where it draws it. Boxes that decide about pointers themselves
   /// (ignore or absorb pointers, listeners, offstage) are asked as usual.
   static bool _hitThrough(RenderBox box, BoxHitTestResult result, Offset position) {
+    // Pointer switches pass the pointer on while they're off, and decide as
+    // usual while on.
+    if (box is RenderIgnorePointer) {
+      if (box.ignoring) return false;
+      final RenderBox? child = box.child;
+      return child != null && _hitThrough(child, result, position);
+    }
+    if (box is RenderAbsorbPointer && !box.absorbing ||
+        box is RenderOffstage && !box.offstage) {
+      final RenderBox? child = (box as RenderProxyBox).child;
+      return child != null && _hitThrough(child, result, position);
+    }
+    // A listener around the transform (a hover or pressed state's mouse
+    // region, a gesture detector) hears the pointer where its child is
+    // drawn.
+    if (box is RenderProxyBoxWithHitTestBehavior || box is RenderMouseRegion) {
+      final RenderBox? child = (box as RenderProxyBox).child;
+      if (child == null) return box.hitTest(result, position: position);
+      if (_hitThrough(child, result, position)) {
+        result.add(BoxHitTestEntry(box, position));
+        return true;
+      }
+      return false;
+    }
     final bool layoutOnly = box is RenderShiftedBox ||
         (box is RenderProxyBox &&
             box is! RenderTransform &&
