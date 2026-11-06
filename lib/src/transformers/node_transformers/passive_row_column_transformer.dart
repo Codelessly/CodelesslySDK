@@ -188,6 +188,12 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
           ? MainAxisSize.min
           : MainAxisSize.max,
       spacing: rowColumnNode.spacing,
+      // Children that overflow shrink to fit, unless the row/column lets
+      // them run past its end as a Flutter Row/Column does.
+      squeeze: switch (rowColumnNode) {
+        final RowColumnNode node => node.squeezeChildren,
+        _ => true,
+      },
       // A row/column that clips its content cuts an overflow off at its
       // edge, with no debug stripes (a row of skeleton chips wider than
       // its slot), as the app shows it: children placed past its box on

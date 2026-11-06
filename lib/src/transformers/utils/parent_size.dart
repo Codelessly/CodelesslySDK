@@ -216,8 +216,8 @@ bool readsParentSize(BaseNode node) {
     if (match?.name != 'parent') return false;
     return !_parentRowPath.hasMatch(match!.fullPath);
   }
-  for (final MapEntry(key: String key, value: String path)
-      in node.variables.entries) {
+
+  for (final String path in node.variables.values) {
     final String? expression = FormulaEvaluator.exactExpression(path);
     if (expression != null) {
       if (FormulaEvaluator.referencedPaths(expression).any(isParent)) {
