@@ -8,6 +8,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport;
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart' show AudioPlayer;
@@ -133,11 +134,14 @@ class FunctionsRepository {
         setVariant(context, action as SetVariantAction, notify: notify);
         return true;
       case ActionType.setVariable:
-        return setVariableFromAction(
-          context,
-          action as SetVariableAction,
-          notify: notify,
-        );
+        final SetVariableAction set = action as SetVariableAction;
+        final int animateMs = _animateMsOf(context, set);
+        if (animateMs > 0) return animateVariable(context, set, animateMs);
+        // A plain set stops a glide on the same variable.
+        if (_glides.containsKey(set.variable.name)) {
+          _glides[set.variable.name] = _glides[set.variable.name]! + 1;
+        }
+        return setVariableFromAction(context, set, notify: notify);
       case ActionType.callFunction:
         final result = callFunction(context, action as CallFunctionAction);
         // Blocking actions wait for the app's function to finish.
@@ -2366,6 +2370,84 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     variableNotifier.set(updatedVariable, notify: notify);
     return true;
+  }
+
+  /// [action]'s glide time in ms (its `animateMs`, a value or formula).
+  static int _animateMsOf(BuildContext context, SetVariableAction action) {
+    final String raw = action.animateMs.trim();
+    if (raw.isEmpty || raw == '0') return 0;
+    final String text = PropertyValueDelegate.substituteVariables(
+      raw,
+      scopedValues: ActionChain.scopedValuesOf(context),
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    return (double.tryParse(text) ?? 0).round();
+  }
+
+  /// The glide each variable is on now, by name (a newer one stops it).
+  static final Map<String, int> _glides = {};
+
+  /// Sets a number variable as [action] says, gliding there over [ms]
+  /// milliseconds along [SetVariableAction.curve], every frame, and
+  /// completes when it arrives (or when a newer glide or set takes over).
+  /// Anything but a number is set at once.
+  static Future<bool> animateVariable(
+    BuildContext context,
+    SetVariableAction action,
+    int ms,
+  ) async {
+    final CodelesslyContext codelessly = context.read<CodelesslyContext>();
+    final variable = codelessly.findVariable(
+      id: action.variable.id,
+      name: action.variable.name,
+    );
+    if (variable == null) return false;
+    final VariableType type = variable.value.type;
+    final Object? start = variable.value.getValue();
+    if ((type != VariableType.integer && type != VariableType.decimal) ||
+        start is! num) {
+      return setVariableFromAction(context, action);
+    }
+    // Work out the end value the usual way, then glide to it from [start].
+    if (!setVariableFromAction(context, action, notify: false)) return false;
+    final Object? end = variable.value.getValue();
+    variable.set(variable.value.copyWith(value: start), notify: false);
+    if (end is! num || end == start) {
+      variable.set(variable.value.copyWith(value: end));
+      return true;
+    }
+    final String key = variable.value.name;
+    final int glide = (_glides[key] ?? 0) + 1;
+    _glides[key] = glide;
+    final Curve curve = flutterCurveOf(action.curve);
+    // Timed by the frames' own clock (the one animations run on).
+    Duration? begin;
+    final Completer<bool> done = Completer<bool>();
+    void frame(Duration now) {
+      if (_glides[key] != glide) {
+        done.complete(true);
+        return;
+      }
+      begin ??= now;
+      final double t =
+          ((now - begin!).inMicroseconds / 1000 / ms).clamp(0.0, 1.0);
+      final double v = start + (end - start) * curve.transform(t);
+      variable.set(
+        variable.value.copyWith(
+          value: t >= 1 ? end : (type == VariableType.integer ? v.round() : v),
+        ),
+      );
+      if (t >= 1) {
+        done.complete(true);
+      } else {
+        SchedulerBinding.instance.scheduleFrameCallback(frame);
+        SchedulerBinding.instance.scheduleFrame();
+      }
+    }
+
+    SchedulerBinding.instance.scheduleFrameCallback(frame);
+    SchedulerBinding.instance.scheduleFrame();
+    return done.future;
   }
 
   /// Sets given [value] for given [id] to a variable from
