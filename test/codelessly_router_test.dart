@@ -323,11 +323,27 @@ void main() {
       expect(browser.url, '/amp/room');
     });
 
-    testWidgets('a link to a screen id still opens it', (tester) async {
+    testWidgets('a link to a screen id opens it at its path', (tester) async {
       final browser = FakeBrowser(tester, url: '/creature?id=kraken');
       await pumpRouterApp(tester, appModel(), browser);
       expect(find.text('id=kraken'), findsOneWidget);
-      expect(browser.url, '/creature?id=kraken');
+      // The address shows the screen's path, in place of the id link.
+      expect(browser.url, '/guide/kraken');
+      expect(browser.urls, ['/guide/kraken']);
+    });
+
+    testWidgets('a link to the entry screen id opens at the root', (
+      tester,
+    ) async {
+      final browser = FakeBrowser(tester, url: '/tides');
+      await pumpRouterApp(tester, appModel(), browser);
+      expect(browser.url, '/');
+    });
+
+    testWidgets('an id link lacking a path param keeps the id', (tester) async {
+      final browser = FakeBrowser(tester, url: '/creature');
+      await pumpRouterApp(tester, appModel(), browser);
+      expect(browser.url, '/creature');
     });
 
     testWidgets('a reload restores the screens of its history entry', (
