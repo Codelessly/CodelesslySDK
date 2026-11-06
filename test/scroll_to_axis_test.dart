@@ -115,4 +115,26 @@ void main() {
     ScrollTargets.addTargetsIn([screen]);
     expect(ScrollTargets.isTarget('mapCentre'), isTrue);
   });
+
+  testWidgets('waits a few frames for a node that is still being built', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const SizedBox());
+    final Future<bool> result = ScrollTargets.scrollTo(
+      ScrollToAction(
+        nodeId: 'marker',
+        durationMs: 0,
+        alignment: 0.5,
+        axis: 'horizontal',
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    // The page shows the map only now (data loaded).
+    final (outer, inner, _) = await pumpMap(tester);
+    await tester.pumpAndSettle();
+    expect(await result, isTrue);
+    expect(inner.offset, 510);
+    expect(outer.offset, 0);
+  });
 }
