@@ -29,6 +29,11 @@ abstract final class ScrollTargets {
             reaction.action,
         ]);
       }
+      // A screen's own reactions (its load actions, say) can scroll to a
+      // node too.
+      if (node is CanvasNode) {
+        addTargetsOf([for (final Reaction r in node.reactions) r.action]);
+      }
       if (node is ParentReactionMixin) {
         for (final ReactionMixin child
             in (node as ParentReactionMixin).reactiveChildren) {

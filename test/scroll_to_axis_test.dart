@@ -97,4 +97,22 @@ void main() {
     expect(ScrollToAction.fromJson(a.toJson()).axis, 'horizontal');
     expect(ScrollToAction(nodeId: 'm').toJson().containsKey('axis'), isFalse);
   });
+
+  test("a screen's own load actions register their scroll targets", () {
+    final CanvasNode screen = CanvasNode(
+      id: 'canvas',
+      name: 'Map',
+      basicBoxLocal: NodeBox(0, 0, 390, 844),
+      children: const ['body'],
+      properties: CanvasProperties(bodyId: 'body'),
+      reactions: [
+        Reaction(
+          trigger: TriggerModel(type: TriggerType.load),
+          action: ScrollToAction(nodeId: 'mapCentre', axis: 'horizontal'),
+        ),
+      ],
+    );
+    ScrollTargets.addTargetsIn([screen]);
+    expect(ScrollTargets.isTarget('mapCentre'), isTrue);
+  });
 }
