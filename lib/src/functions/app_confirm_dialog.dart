@@ -23,6 +23,33 @@ typedef ConfirmOutcome = ({bool confirmed, Map<String, dynamic>? values});
 class AppConfirmDialog {
   AppConfirmDialog._();
 
+  /// What a dialog canvas receives as `${route.*}`: the action's own text
+  /// (`title`, `caption`, `message`, `confirmLabel`, `cancelLabel`, with
+  /// their `${...}` filled in where the action runs), so one Confirm canvas
+  /// can ask every question, then [ConfirmAction.params], which win.
+  static Map<String, dynamic> dialogParams(
+    BuildContext context,
+    ConfirmAction action,
+  ) {
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    String text(String value) => PropertyValueDelegate.substituteVariables(
+      value,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    );
+    return {
+      for (final (String key, String value) in [
+        ('title', action.title),
+        ('caption', action.caption),
+        ('message', action.message),
+        ('confirmLabel', action.confirmLabel),
+        ('cancelLabel', action.cancelLabel),
+      ])
+        if (value.isNotEmpty) key: text(value),
+      ...action.params,
+    };
+  }
+
   /// Shows [action]'s dialog and completes with whether the user confirmed.
   /// Dismissing the dialog counts as cancelling.
   static Future<bool> show(BuildContext context, ConfirmAction action) async =>
@@ -44,7 +71,7 @@ class AppConfirmDialog {
         final Object? result = await FunctionsRepository.showLayoutDialog(
           context,
           canvasId: dialogId,
-          params: action.params,
+          params: dialogParams(context, action),
           barrierDismissible: action.barrierDismissible,
           barrierColor: action.barrierColor?.toFlutterColor(),
           presentation: action.presentation,
