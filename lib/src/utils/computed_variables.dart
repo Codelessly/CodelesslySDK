@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../codelessly_sdk.dart';
 
@@ -15,8 +16,9 @@ import '../../codelessly_sdk.dart';
 /// out every computed variable at once for the design canvas.
 ///
 /// Semantics:
-///  - It reads other variables, including other computed ones, and the
-///    `data` passed to the layout.
+///  - It reads other variables, including other computed ones, the
+///    `data` passed to the layout, and the predefined values bindings read
+///    (`screen`, `route`, `auth`, `drag`, ...).
 ///  - Computed variables that read themselves, directly or through others,
 ///    form a cycle and evaluate to null.
 ///  - Set variable actions, two-way bindings and
@@ -179,10 +181,18 @@ abstract final class ComputedVariables {
   /// formula's result over the others, as a design canvas previews them with
   /// default values. [data] is what the formulas read as `data`, and
   /// [routeParams] what they read as `route` (a screen's sample params).
+  /// [screenSize] and [platformBrightness] are what they read as `screen`
+  /// (a canvas is its own screen), and [predefinedOverrides] the preview
+  /// values of predefined variables such as `drag` (see
+  /// [ScopedValues.predefinedOverrides]), as bindings on that canvas read
+  /// them.
   static Map<String, VariableData> resolveAll(
     Map<String, VariableData> variables, {
     Map<String, dynamic>? data,
     Map<String, dynamic>? routeParams,
+    Size? screenSize,
+    Brightness? platformBrightness,
+    Map<String, Map<String, Object?>>? predefinedOverrides,
   }) {
     if (!variables.values.any((variable) => variable.isComputed)) {
       return variables;
@@ -193,6 +203,9 @@ abstract final class ComputedVariables {
       variables: resolved,
       data: data,
       routeParams: routeParams,
+      screenSize: screenSize,
+      platformBrightness: platformBrightness,
+      predefinedOverrides: predefinedOverrides,
     );
     for (final String name in evaluationOrder(variables)) {
       final VariableData variable = resolved[name]!;

@@ -8,6 +8,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderProxyBox;
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
@@ -210,8 +211,14 @@ abstract class WidgetNodeTransformerManager
     // A node shown and hidden by a binding, with a transition time, grows
     // open and shrinks closed (fading too) instead of popping: an error
     // line sliding open under a field, like Flutter's AnimatedSize.
-    if (runtimeVisible != null && node.transitionMs > 0) {
-      final Duration duration = Duration(milliseconds: node.transitionMs);
+    //
+    // Where tickers are muted (the design canvas and its captures) an
+    // implicit animation never ticks: a node shown again would stay faded
+    // out and at the size it had, so it shows or hides at once there.
+    final Duration duration = node.transitionMs > 0
+        ? implicitTransitionDuration(context, node.transitionMs)
+        : Duration.zero;
+    if (runtimeVisible != null && duration > Duration.zero) {
       return AnimatedSize(
         duration: duration,
         curve: Curves.easeOutBack,
@@ -1227,25 +1234,174 @@ abstract class WidgetNodeTransformerManager
     Widget widget, {
     ScopedValues? scopedValues,
   }) {
-    final DragTrackModel? model = node.drag?.track;
-    if (model == null) return widget;
-    final ScopedValues scope = scopedValues ?? ScopedValues.of(context);
-    final DragTrackModel track = resolvedTrack(node, model, scope);
-    final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
-      track.variable,
-      scopedValues: scope,
-    );
-    final double value = switch (raw) {
-      num n => n.toDouble(),
-      String s => double.tryParse(s.trim()) ?? track.defaultValue ?? track.min,
-      _ => track.defaultValue ?? track.min,
-    };
-    return TrackPose(
-      track: track,
-      progress: track.progressOf(value),
-      child: widget,
+    final DragTrackModel? saved = node.drag?.track;
+    if (saved == null) return widget;
+    Widget pose(BuildContext context, Size? measured) {
+      final (ScopedValues scope, Size? parent) = trackScope(
+        node,
+        scopedValues ?? ScopedValues.of(context),
+        measured,
+      );
+      final DragTrackModel track = resolveNodeTrack(node, saved, scope, parent);
+      final double value = trackValueOf(node, track, scope);
+      return TrackPose(
+        track: track,
+        progress: track.progressOf(value),
+        pathScale: trackPathScale(track, parent),
+        child: widget,
+      );
+    }
+
+    if (!measuresTrackParent(node)) return pose(context, null);
+    return TrackParentMeasure(
+      parentBox: () => trackParentBox(context, node),
+      builder: pose,
     );
   }
+
+  /// [node]'s drag track [saved] with every binding it has resolved in
+  /// [scope]: the `dragTrack.<name>` and `track.min/max/step/...` settings
+  /// ([resolvedTrack]), then the `track.<field>` geometry
+  /// ([trackBindings]), and for [DragTrackUnits.parent] its line and pivot
+  /// scaled to the [parent] size ([resolveDragTrack]).
+  static DragTrackModel resolveNodeTrack(
+    BaseNode node,
+    DragTrackModel saved,
+    ScopedValues scope,
+    Size? parent,
+  ) => resolveDragTrack(
+    resolvedTrack(node, saved, scope),
+    bound: trackBindings(node, scope),
+    parentSize: parent,
+  );
+
+  /// Whether [node]'s track depends on its parent's size: it is measured
+  /// in [DragTrackUnits.parent] or binds its geometry (which may read
+  /// `${parent}`).
+  static bool measuresTrackParent(BaseNode node) {
+    final DragTrackModel? track = node.drag?.track;
+    if (track == null) return false;
+    if (track.units == DragTrackUnits.parent) return true;
+    return node.variables.keys.any(
+      (key) =>
+          key.startsWith(DragTrackModel.bindingPrefix) &&
+          key != DragTrackModel.valueBindingKey,
+    );
+  }
+
+  /// The render box of the node [node] sits in (the nearest node built
+  /// around [context] other than [node] itself), or null.
+  static RenderBox? trackParentBox(BuildContext context, BaseNode node) {
+    if (!context.mounted) return null;
+    RenderObject? found;
+    context.visitAncestorElements((element) {
+      final Widget widget = element.widget;
+      if (widget is NodeStateProviderWidget && widget.node.id != node.id) {
+        found = element.findRenderObject();
+        return false;
+      }
+      return true;
+    });
+    final RenderObject? box = found;
+    return box is RenderBox ? box : null;
+  }
+
+  /// The scoped values a track's bindings read, with `${parent}` its
+  /// parent's [measured] size, and the size a [DragTrackUnits.parent]
+  /// track measures against (the measured size, else the parent's design
+  /// size; null in pixels).
+  (ScopedValues, Size?) trackScope(
+    BaseNode node,
+    ScopedValues scopedValues,
+    Size? measured,
+  ) {
+    final BaseNode? parent = node.parentID.isEmpty
+        ? null
+        : tryGetNode(node.parentID);
+    // `${parent}` is the size the parent gives its children (a freeform
+    // container's content box, see [FreeformContentSizeScope]) when there is
+    // one, else the parent's measured box, else (before it is measured, the
+    // first frame) its design content box.
+    final ScopedValues scope = scopedValues.parentSize != null
+        ? scopedValues
+        : measured != null
+        ? ScopedValues.withParentSize(
+            scopedValues,
+            parentVariableValue(measured.width, measured.height),
+          )
+        : parent != null
+        ? ScopedValues.withParentSize(
+            scopedValues,
+            parentVariableValue(
+              parent.innerBoxLocal.width,
+              parent.innerBoxLocal.height,
+            ),
+          )
+        : scopedValues;
+    if (node.drag?.track?.units != DragTrackUnits.parent) return (scope, null);
+    if (measured != null) return (scope, measured);
+    return (
+      scope,
+      Size(
+        parent?.innerBoxLocal.width ?? 0,
+        parent?.innerBoxLocal.height ?? 0,
+      ),
+    );
+  }
+
+  /// The resolved `track.<field>` geometry bindings of [node] (see
+  /// [DragTrackModel.bindableFields]), by field name.
+  static Map<String, Object?> trackBindings(
+    BaseNode node,
+    ScopedValues scopedValues,
+  ) => {
+    for (final String field in DragTrackModel.bindableFields)
+      if (field != 'value' &&
+          node.variables.containsKey('${DragTrackModel.bindingPrefix}$field'))
+        field:
+            PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              '${DragTrackModel.bindingPrefix}$field',
+              scopedValues: scopedValues,
+            ) ??
+            // A number written as is: `"track.x2": "240"`.
+            PropertyValueDelegate.literalNumber<double>(
+              node.variables['${DragTrackModel.bindingPrefix}$field']!,
+            ),
+  };
+
+  /// The value [node]'s [track] is drawn at: its `track.value` binding (a
+  /// computed or per-item value), else its variable's value, else the
+  /// track's default or start.
+  static double trackValueOf(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    final Object? raw =
+        node.variables.containsKey(DragTrackModel.valueBindingKey)
+        ? PropertyValueDelegate.getPropertyValue<Object>(
+                node,
+                DragTrackModel.valueBindingKey,
+                scopedValues: scopedValues,
+              ) ??
+              PropertyValueDelegate.literalNumber<double>(
+                node.variables[DragTrackModel.valueBindingKey]!,
+              )
+        : track.hasVariable
+        ? PropertyValueDelegate.getVariableValueFromPath<Object>(
+            track.variable,
+            scopedValues: scopedValues,
+          )
+        : null;
+    final double? value = switch (raw) {
+      num n when n.isFinite => n.toDouble(),
+      String s => double.tryParse(s.trim()),
+      _ => null,
+    };
+    return value ?? track.defaultValue ?? track.min;
+  }
+
 
   /// A node with a [DragTrackModel] is a value control: it is drawn at its
   /// variable's place along the track and dragging it writes the variable,
@@ -1255,15 +1411,18 @@ abstract class WidgetNodeTransformerManager
     BuildContext context,
     BaseNode node,
     DragModel drag,
-    DragTrackModel model,
+    DragTrackModel saved,
     List<Reaction> reactions,
     Widget child,
   ) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
-    final Observable<VariableData>? variable = codelesslyContext?.findVariable(
-      name: model.variable,
-    );
+    final Observable<VariableData>? variable = saved.hasVariable
+        ? codelesslyContext?.findVariable(name: saved.variable)
+        : null;
+    // The parent's box, for a track that takes the pointer anywhere in it
+    // or measures against its size.
+    RenderBox? parentBox() => trackParentBox(context, node);
     bool enabled(BuildContext context) {
       if (!node.variables.containsKey(DragModel.enabledVariableKey)) {
         return drag.enabled;
@@ -1297,31 +1456,31 @@ abstract class WidgetNodeTransformerManager
       };
     }
 
-    Widget build(BuildContext context) {
-      final DragTrackModel track = resolvedTrack(
+    Widget buildMeasured(BuildContext context, Size? measured) {
+      final (ScopedValues scope, Size? parent) = trackScope(
         node,
-        model,
         ScopedValues.of(context),
+        measured,
       );
-      final Object? raw =
-          PropertyValueDelegate.getVariableValueFromPath<Object>(
-            track.variable,
-            scopedValues: ScopedValues.of(context),
-          );
-      final double value = switch (raw) {
-        num n => n.toDouble(),
-        String s => double.tryParse(s.trim()) ?? track.min,
-        _ => track.defaultValue ?? track.min,
-      };
+      final DragTrackModel track = resolveNodeTrack(node, saved, scope, parent);
       return NodeDragTrack(
         track: track,
-        value: value,
+        value: trackValueOf(node, track, scope),
         nodeId: node.id,
         gain: gain(context),
         enabled: enabled(context),
+        pathScale: trackPathScale(track, parent),
+        hitAreaBox: parentBox,
         onChanged: (v) {
-          if (track.write) {
-            final bool whole = variable?.value.type == VariableType.integer;
+          // A variable the track writes ([DragTrackModel.write]); a computed
+          // one (or none) is left to the reactions, which read the value as
+          // ${result.value}.
+          if (track.write && variable != null && !variable.value.isComputed) {
+            final bool whole = variable.value.type == VariableType.integer;
+            // Scrubbing a variable that is being animated pauses it.
+            if (codelesslyContext != null) {
+              VariableAnimator.pause(codelesslyContext, track.variable);
+            }
             codelesslyContext?.updateVariable(
               track.variable,
               whole ? v.round() : v,
@@ -1358,24 +1517,32 @@ abstract class WidgetNodeTransformerManager
       );
     }
 
-    // Rebuilt when its value changes, and when anything else it reads does:
-    // a bound `drag.enabled` (a volume slider off while sound is off) or
-    // bound geometry (`dragTrack.x2`).
-    final List<Listenable> others =
-        this is PassiveNodeTransformerManager &&
-            node.variables.keys.any(
-              (k) =>
-                  k == DragModel.enabledVariableKey ||
-                  k.startsWith('dragTrack.') ||
-                  k.startsWith('track.'),
-            )
-        ? (this as PassiveNodeTransformerManager).listenablesFor(context, node)
-        : const [];
-    final List<Listenable> listenables = [?variable, ...others];
+    Widget build(BuildContext context) => measuresTrackParent(node)
+        ? TrackParentMeasure(parentBox: parentBox, builder: buildMeasured)
+        : buildMeasured(context, null);
+
+    // Rebuilt when its variable changes, and when anything else it reads
+    // does: a bound `drag.enabled` (a volume slider off while sound is off),
+    // `track.value` over a computed variable, or bound geometry
+    // (`dragTrack.x2`, `track.x2`). The node's own listeners rebuild only
+    // the node inside the track.
+    final WidgetNodeTransformerManager self = this;
+    final List<Listenable> listenables = [
+      ?variable,
+      if (self is PassiveNodeTransformerManager &&
+          node.variables.keys.any(
+            (key) =>
+                key == DragModel.enabledVariableKey ||
+                key.startsWith('dragTrack.') ||
+                key.startsWith(DragTrackModel.bindingPrefix),
+          ))
+        ...self.listenablesFor(context, node),
+    ];
     if (listenables.isEmpty) return Builder(builder: build);
-    return AnimatedBuilder(
-      animation: Listenable.merge(listenables),
-      builder: (context, _) => build(context),
+    return ManagedListenableBuilder(
+      key: ValueKey('${node.id}-track'),
+      listenables: listenables,
+      builder: build,
     );
   }
 
@@ -2038,7 +2205,7 @@ class SvgIcon extends StatelessWidget {
       return SizedBox.square(dimension: dimension);
     }
 
-    final Widget svg = SizedBox.square(
+    Widget svg = SizedBox.square(
       dimension: dimension,
       child: SvgPicture.network(
         url,
@@ -2049,6 +2216,15 @@ class SvgIcon extends StatelessWidget {
         errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
       ),
     );
+    // Flutter's Icon draws a Material icon as a glyph of the MaterialIcons
+    // font, whose baseline (the box's bottom: the font's ascent is its em,
+    // its descent 0) the rasterizer rounds to a whole device pixel; the SVG
+    // would sit where its box is, half a pixel off (higher) wherever the
+    // box lands between pixels. Snapped the same way, an icon node of size
+    // S paints like Icon(size: S).
+    if (icon is MaterialIcon) {
+      svg = PixelSnappedBaseline(child: svg);
+    }
     // A directional icon (arrow_back, chevron_right, ...) points the other
     // way in a right-to-left layout, as Flutter's glyph of the same name
     // does, so an icon drawn from its SVG agrees with one drawn from the font.
@@ -2056,6 +2232,76 @@ class SvgIcon extends StatelessWidget {
             Directionality.maybeOf(context) == TextDirection.rtl
         ? Transform.flip(flipX: true, child: svg)
         : svg;
+  }
+}
+
+/// Paints [child] moved down (or up) by less than a device pixel so that its
+/// bottom edge lands on a whole device pixel, as text rasterization places a
+/// glyph's baseline (Skia rounds it to the pixel grid on axis-aligned text):
+/// a vector drawn in place of a font glyph whose baseline is the box's
+/// bottom (a Material icon) then paints where the glyph would. It reports
+/// that baseline (the box's bottom) as the glyph does, so a baseline row
+/// aligns it like Flutter's Icon. Size and hit testing are unchanged. Under a rotation or skew, where glyphs aren't
+/// snapped, it paints in place.
+class PixelSnappedBaseline extends SingleChildRenderObjectWidget {
+  const PixelSnappedBaseline({super.key, super.child});
+
+  @override
+  RenderPixelSnappedBaseline createRenderObject(BuildContext context) =>
+      RenderPixelSnappedBaseline();
+}
+
+/// The render object of [PixelSnappedBaseline].
+class RenderPixelSnappedBaseline extends RenderProxyBox {
+  RenderPixelSnappedBaseline();
+
+  /// How far (in this box's logical pixels, down positive) the child is
+  /// painted from its place so that this box's [bottom] edge, mapped to
+  /// device pixels by [transform] (this box's paint transform to the
+  /// screen, the device pixel ratio included), lands on a whole device
+  /// pixel: the nearest one, a half rounding down the screen as Skia rounds
+  /// a glyph's baseline. 0 under a rotation, skew or perspective.
+  @visibleForTesting
+  static double snapShift(Matrix4 transform, double bottom) {
+    if (transform.entry(0, 1) != 0 ||
+        transform.entry(1, 0) != 0 ||
+        transform.entry(3, 0) != 0 ||
+        transform.entry(3, 1) != 0 ||
+        transform.entry(3, 3) != 1) {
+      return 0;
+    }
+    final double scale = transform.entry(1, 1);
+    if (scale <= 0 || !scale.isFinite) return 0;
+    final double y = scale * bottom + transform.entry(1, 3);
+    if (!y.isFinite) return 0;
+    final double shift = (y + 0.5).floorToDouble() - y;
+    return shift / scale;
+  }
+
+  // The glyph's baseline is the box's bottom: Flutter's Icon of size S (a
+  // MaterialIcons glyph, height 1.0) reports a baseline of S, so a
+  // `crossAxisAlignment: baseline` row places it bottom on the baseline,
+  // where the SVG alone (no baseline) would be top-aligned.
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) =>
+      size.height;
+
+  @override
+  double? computeDryBaseline(
+    BoxConstraints constraints,
+    TextBaseline baseline,
+  ) => getDryLayout(constraints).height;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderBox? child = this.child;
+    if (child == null) return;
+    // Where the bottom edge is on the screen: this box's transform to the
+    // root, which includes every layer offset above it and the device
+    // pixel ratio.
+    double shift = snapShift(getTransformTo(null), size.height);
+    if (shift.abs() < 1e-6) shift = 0;
+    context.paintChild(child, offset + Offset(0, shift));
   }
 }
 
@@ -2390,28 +2636,28 @@ class _NodePulseState extends State<NodePulse>
   @override
   void initState() {
     super.initState();
+    _controller.value = widget.pulse.startFraction;
     _start();
   }
 
   @override
   void didUpdateWidget(NodePulse oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.pulse != widget.pulse) _start();
+    if (oldWidget.pulse != widget.pulse) {
+      // A new phase moves the loop; a new speed keeps where it is.
+      if (oldWidget.pulse.startFraction != widget.pulse.startFraction) {
+        _controller.value = widget.pulse.startFraction;
+      }
+      _start();
+    }
   }
 
+  /// Loops the controller linearly over one whole loop of the pulse; the
+  /// eased there-and-back value is [pulseProgress] of it.
   void _start() {
     _controller
-      ..duration = Duration(
-        milliseconds: max(1, switch (widget.pulse) {
-          MotionPulseModel pulse => pulse.periodMs,
-          PulseModel pulse => pulse.durationMillis,
-        }),
-      )
-      ..repeat(
-        reverse:
-            widget.pulse is! MotionPulseModel ||
-            (widget.pulse as MotionPulseModel).reverse,
-      );
+      ..duration = Duration(milliseconds: max(1, widget.pulse.loopMillis))
+      ..repeat();
   }
 
   @override
@@ -2427,7 +2673,7 @@ class _NodePulseState extends State<NodePulse>
       animation: _controller,
       child: widget.child,
       builder: (context, child) {
-        final double t = Curves.easeInOut.transform(_controller.value);
+        final double t = pulseProgress(pulse, _controller.value);
         if (pulse is! MotionPulseModel) {
           return Opacity(
             opacity: lerpDouble(pulse.minOpacity, 1, t)!.clamp(0, 1),
@@ -2450,6 +2696,16 @@ class _NodePulseState extends State<NodePulse>
   }
 }
 
+/// How far (0 to 1, eased) [pulse] is from its start to its end values at
+/// [loop], the fraction of its whole loop that has run: a reversing pulse
+/// goes there in the first half and back in the second.
+double pulseProgress(PulseModel pulse, double loop) {
+  final bool reverses = pulse is! MotionPulseModel || pulse.reverse;
+  final double v = loop.clamp(0.0, 1.0);
+  final double linear = reverses ? (v < 0.5 ? v * 2 : 2 - v * 2) : v;
+  return Curves.easeInOut.transform(linear.clamp(0.0, 1.0));
+}
+
 /// Fades a relative pulse from [PulseModel.minOpacity] times [opacity] to
 /// [opacity], leaving motion pulses to [NodePulse].
 class PulseOpacity extends StatefulWidget {
@@ -2470,21 +2726,27 @@ class PulseOpacity extends StatefulWidget {
 
 class _PulseOpacityState extends State<PulseOpacity>
     with SingleTickerProviderStateMixin {
+  // Linear over one whole loop (faint, full, faint), from the pulse's
+  // phase; [pulseProgress] eases it there and back.
   late final AnimationController controller = AnimationController(
     vsync: this,
     duration: _duration,
-  )..repeat(reverse: true);
+    value: widget.pulse.startFraction,
+  )..repeat();
 
-  Duration get _duration =>
-      Duration(milliseconds: widget.pulse.durationMillis.clamp(16, 60000));
+  Duration get _duration => Duration(milliseconds: widget.pulse.loopMillis);
 
   @override
   void didUpdateWidget(PulseOpacity oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.pulse.durationMillis != widget.pulse.durationMillis) {
+    final bool phased =
+        oldWidget.pulse.startFraction != widget.pulse.startFraction;
+    if (phased) controller.value = widget.pulse.startFraction;
+    if (phased ||
+        oldWidget.pulse.durationMillis != widget.pulse.durationMillis) {
       controller
         ..duration = _duration
-        ..repeat(reverse: true);
+        ..repeat();
     }
   }
 
@@ -2495,13 +2757,26 @@ class _PulseOpacityState extends State<PulseOpacity>
   }
 
   @override
-  Widget build(BuildContext context) => FadeTransition(
-    opacity: controller.drive(
-      Tween<double>(
-        begin: widget.opacity * widget.pulse.minOpacity.clamp(0, 1),
-        end: widget.opacity,
-      ).chain(CurveTween(curve: Curves.easeInOut)),
-    ),
-    child: widget.child,
-  );
+  Widget build(BuildContext context) {
+    final double faint = widget.opacity * widget.pulse.minOpacity.clamp(0, 1);
+    return FadeTransition(
+      opacity: controller.drive(
+        _PulseTween(widget.pulse, faint, widget.opacity),
+      ),
+      child: widget.child,
+    );
+  }
+}
+
+/// [PulseOpacity]'s opacity at a fraction of its loop.
+class _PulseTween extends Animatable<double> {
+  const _PulseTween(this.pulse, this.begin, this.end);
+
+  final PulseModel pulse;
+  final double begin;
+  final double end;
+
+  @override
+  double transform(double t) =>
+      lerpDouble(begin, end, pulseProgress(pulse, t))!;
 }
