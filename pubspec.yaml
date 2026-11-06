@@ -29,7 +29,7 @@ dependencies:
   flutter:
     sdk: flutter
   # Codelessly
-  codelessly_api: ^9.2.0
+  codelessly_api: ^9.3.0
   json_annotation: ^4.12.0
 
   # Firebase
