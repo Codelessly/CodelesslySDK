@@ -24,8 +24,10 @@ status board) in the editor.
   another one (a deep link over the entry screen ticked twice as fast).
 - For-each turns expose `${loop.item}` / `${loop.index}`; `${result.item}`
   was gone after the first action of the turn.
-- A link param sets a variable only when it fits the variable's type
-  (`?feed=3` replaced a `feed` list with "3").
+- A screen whose link params set its variables reads them as the router
+  does: `?ids=3,7` sets a list to `[3, 7]`; a param that can't be read as the
+  variable's type leaves it alone (`?feed=3` used to put the text "3" in a
+  list).
 - Scroll To takes an `axis` and waits up to 60 frames for its target.
 - The toast's action can be a styled button and keeps its own font size.
 
