@@ -9,7 +9,9 @@ import 'package:provider/provider.dart';
 // (`${= length(placed) > 0}`), and a 14 px "No dots gap" shown otherwise.
 // A hidden dots list must not add its height to the run, also when the
 // lamps are taken off after the grid was first laid out (the boot action
-// emptying the tray).
+// emptying the tray). The real dots read their scene as `parent.item`,
+// which was taken for reading the parent's size: the cards then couldn't be
+// measured and took their design height (solved with the dots shown).
 
 RectangleNode _rect(
   String id,
@@ -28,7 +30,7 @@ RectangleNode _rect(
       ..parentID = parentID
       ..variables.addAll(variables);
 
-List<BaseNode> _scenesGrid() {
+List<BaseNode> _scenesGrid({bool realistic = false}) {
   final ListViewNode grid =
       ListViewNode(
           id: 'grid',
@@ -44,7 +46,10 @@ List<BaseNode> _scenesGrid() {
             stretchItems: true,
           ),
           children: ['card'],
-          variables: {'data': r'${scenes}'},
+          variables: {
+            'data': r'${scenes}',
+            if (realistic) 'itemKey': r'${item.id}',
+          },
         )
         ..isScrollable = false
         ..parentID = kRootNode;
@@ -75,7 +80,9 @@ List<BaseNode> _scenesGrid() {
           ),
           children: ['dot'],
           variables: {
-            'data': r'${placed}',
+            'data': realistic
+                ? r'${= filter(placed, l => item.states[l.id] != null)}'
+                : r'${placed}',
             'visible': r'${= !(length(placed) == 0)}',
           },
         )
@@ -96,7 +103,18 @@ List<BaseNode> _scenesGrid() {
     card,
     _rect('blurb', 'card', 300, 40, horizontalFit: SizeFit.expanded),
     dots,
-    _rect('dot', 'dots', 18, 18),
+    _rect(
+      'dot',
+      'dots',
+      18,
+      18,
+      variables: {
+        if (realistic)
+          // A dot reads its scene as `parent.item`.
+          'fill':
+              r"${= parent.item.states[item.id].on ? '#FFCC00' : '#EADDD0'}",
+      },
+    ),
     _rect(
       'gap',
       'card',
@@ -116,11 +134,12 @@ Observable<VariableData> _list(String name, List<Object?> value) => Observable(
 Future<CodelesslyContext> _pump(
   WidgetTester tester, {
   required List<Object?> placed,
+  bool realistic = false,
 }) async {
   tester.view.physicalSize = const Size(1440, 900);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  final List<BaseNode> nodes = _scenesGrid();
+  final List<BaseNode> nodes = _scenesGrid(realistic: realistic);
   final registry = NodeRegistry()
     ..setNodes({for (final BaseNode node in nodes) node.id: node});
   final manager = PassiveNodeTransformerManager(
@@ -129,9 +148,14 @@ Future<CodelesslyContext> _pump(
   );
   final CodelesslyContext codelesslyContext = CodelesslyContext.empty()
     ..variables['scenes'] = _list('scenes', [
-      {'id': 'a'},
-      {'id': 'b'},
-      {'id': 'c'},
+      for (final String id in ['a', 'b', 'c'])
+        {
+          'id': id,
+          'states': {
+            'l1': {'on': true},
+            'l2': {'on': false},
+          },
+        },
     ])
     ..variables['placed'] = _list('placed', placed);
   await tester.pumpWidget(
@@ -166,6 +190,23 @@ Set<double> _cardHeights() => {
 };
 
 void main() {
+  test('parent.item and parent.index are not the parent\'s size', () {
+    RectangleNode reading(String binding) =>
+        _rect('r', 'p', 10, 10, variables: {'fill': binding});
+    // The dot's colour, from its scene: measurable.
+    expect(
+      readsParentSize(
+        reading(r"${= parent.item.states[item.id].on ? '#FFF' : '#000'}"),
+      ),
+      isFalse,
+    );
+    expect(readsParentSize(reading(r'${parent.index}')), isFalse);
+    expect(readsParentSize(reading(r'${= parent.width / 2}')), isTrue);
+    expect(readsParentSize(reading(r'${parent.height}')), isTrue);
+    expect(readsParentSize(reading(r'${parent}')), isTrue);
+    expect(readsParentSize(reading(r'${parent.items}')), isTrue);
+  });
+
   // Padding 36 + blurb 40 + buttons 42, plus the dots (14 + 18) or the gap.
   const double withDots = 36 + 40 + 32 + 42;
   const double withoutDots = 36 + 40 + 14 + 42;
@@ -193,6 +234,40 @@ void main() {
     expect(_cardHeights(), {withoutDots});
 
     placed.value = placed.value.copyWith(value: const <Object?>['l1']);
+    await tester.pump();
+    await tester.pump();
+    expect(_cardHeights(), {withDots});
+  });
+
+  // The boot action: the scene list (the grid's data) stays as it is, the
+  // lamps move to the tray after the first frame (`placed` empties), so only
+  // the dots' visibility and data change inside each card.
+  testWidgets('a boot that empties the tray re-measures the runs', (
+    tester,
+  ) async {
+    final CodelesslyContext context = await _pump(
+      tester,
+      placed: const [
+        {'id': 'l1'},
+        {'id': 'l2'},
+      ],
+      realistic: true,
+    );
+    expect(tester.takeException(), isNull);
+    expect(_cardHeights(), {withDots});
+
+    final Observable<VariableData> placed = context.variables['placed']!;
+    placed.value = placed.value.copyWith(value: const <Object?>[]);
+    await tester.pump();
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(_cardHeights(), {withoutDots});
+
+    placed.value = placed.value.copyWith(
+      value: const <Object?>[
+        {'id': 'l1'},
+      ],
+    );
     await tester.pump();
     await tester.pump();
     expect(_cardHeights(), {withDots});
