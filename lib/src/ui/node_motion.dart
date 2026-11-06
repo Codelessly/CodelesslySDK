@@ -126,6 +126,18 @@ _MeasuredPath? _measure(String data) => _pathCache.putIfAbsent(data, () {
 (Offset, double)? pointOnMotionPath(String data, double progress) =>
     _measure(data)?.at(progress);
 
+/// A path's direction [radians] (clockwise from the positive x axis, as
+/// [pointOnMotionPath] gives it) folded into -90 to 90 degrees, turned half
+/// round where the path heads left: the turn that keeps a node following
+/// the path from reading upside down (see [MotionModel.orientUpright]).
+double uprightPathAngle(double radians) {
+  double a = radians % (2 * math.pi);
+  if (a > math.pi) a -= 2 * math.pi;
+  if (a > math.pi / 2) return a - math.pi;
+  if (a < -math.pi / 2) return a + math.pi;
+  return a;
+}
+
 /// Turns animation of node motion off for the nodes below it: a design
 /// canvas or an editor capture, which show every node at rest.
 ///
@@ -547,6 +559,7 @@ class _NodeMotionState extends State<_NodeMotionBody>
       a.pathProgress == b.pathProgress &&
       a.path == b.path &&
       a.orientToPath == b.orientToPath &&
+      a.orientUpright == b.orientUpright &&
       a.backfaceHidden == b.backfaceHidden;
 
   /// Whether a transition is running or waiting out its delay.
@@ -719,7 +732,12 @@ class _NodeMotionState extends State<_NodeMotionBody>
         shown = m.copyWith(
           translateX: m.translateX + offset.dx,
           translateY: m.translateY + offset.dy,
-          rotate: m.orientToPath ? m.rotate + angle * 180 / math.pi : null,
+          rotate: m.orientToPath
+              ? m.rotate +
+                    (m.orientUpright ? uprightPathAngle(angle) : angle) *
+                        180 /
+                        math.pi
+              : null,
         );
       }
     }
@@ -799,7 +817,6 @@ Duration implicitTransitionDuration(BuildContext context, int ms) =>
     TickerMode.valuesOf(context).enabled
     ? Duration(milliseconds: ms)
     : Duration.zero;
-
 
 /// [hex] (`#RRGGBB` or `#AARRGGBB`) as a colour; white when it isn't one.
 Color shimmerColorOf(String hex) {

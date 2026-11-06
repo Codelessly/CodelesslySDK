@@ -143,7 +143,11 @@ class DragTrackGeometry {
         final String? data = track.path;
         if (!track.orientToPath || data == null) return 0;
         final (Offset, double)? point = pointOnMotionPath(data, progress);
-        return point == null ? 0 : point.$2 * 180 / math.pi;
+        if (point == null) return 0;
+        final double angle = track.orientUpright
+            ? uprightPathAngle(point.$2)
+            : point.$2;
+        return angle * 180 / math.pi;
     }
   }
 
@@ -239,6 +243,14 @@ class DragTrackGeometry {
   }
 }
 
+/// The spring a [DragTrackModel] settles with when its
+/// [DragTrackModel.settleCurve] is [MotionCurve.spring].
+SpringDescription trackSettleSpring(DragTrackModel track) => SpringDescription(
+  mass: 1,
+  stiffness: track.settleStiffness <= 0 ? 380 : track.settleStiffness,
+  damping: track.settleDamping < 0 ? 20 : track.settleDamping,
+);
+
 /// Makes [child] a value control that moves along [track]: it is drawn at
 /// [value]'s place on the track (or parked, see
 /// [DragTrackModel.parkedProgress]), and dragging it (or, with
@@ -305,7 +317,9 @@ class _NodeDragTrackState extends State<NodeDragTrack>
   double _startValue = 0;
 
   /// Glides the drawn progress from [_settleFrom] to [_settleTo] (0 to 1,
-  /// overshooting for springy curves); see [DragTrackModel.settleMs].
+  /// overshooting for springy curves); see [DragTrackModel.settleMs]. A
+  /// spring settle runs in progress itself (from 0 to 1), so it can carry
+  /// the speed it starts with.
   late final AnimationController _settle = AnimationController.unbounded(
     vsync: this,
     value: 1,
@@ -338,11 +352,16 @@ class _NodeDragTrackState extends State<NodeDragTrack>
     }
     if (_dragValue == null && !_same(oldWidget.value, widget.value)) {
       // Changed by an action, a tap, a key or a reset: glide from where it
-      // is drawn now (to or from its parked place too).
+      // is drawn now (to or from its parked place too), at the speed it is
+      // moving: a deck flung on to its next card carries on smoothly.
       final double from = _settling
           ? _lerpSettle
           : oldWidget.track.restProgressOf(oldWidget.value);
-      _glide(from, _track.restProgressOf(widget.value));
+      _glide(
+        from,
+        _track.restProgressOf(widget.value),
+        velocity: _settleVelocity,
+      );
     }
   }
 
@@ -368,6 +387,10 @@ class _NodeDragTrackState extends State<NodeDragTrack>
   double get _lerpSettle =>
       _settleFrom + (_settleTo - _settleFrom) * _settle.value;
 
+  /// How fast the glide moves the drawn progress now, per second.
+  double get _settleVelocity =>
+      _settling ? _settle.velocity * (_settleTo - _settleFrom) : 0;
+
   /// Whether value changes glide instead of jumping.
   bool get _glides =>
       _track.settleMs > 0 || _track.settleCurve == MotionCurve.spring;
@@ -391,24 +414,28 @@ class _NodeDragTrackState extends State<NodeDragTrack>
     return p + (_raw - clamped) * _track.overscroll.clamp(0.0, 1.0);
   }
 
-  void _glide(double from, double to) {
-    if (!_glides || from == to || !mounted) {
+  /// Glides the drawn progress from [from] to [to]. A spring starts at
+  /// [velocity] (progress per second), so a release or a glide already
+  /// under way carries on; eased curves start from rest.
+  void _glide(double from, double to, {double velocity = 0}) {
+    final bool spring = _track.settleCurve == MotionCurve.spring;
+    if (!_glides ||
+        (from == to && (!spring || velocity == 0)) ||
+        !velocity.isFinite ||
+        !mounted) {
       _settle.value = 1;
       _settleFrom = _settleTo = to;
       return;
     }
-    _settleFrom = from;
-    _settleTo = to;
-    if (_track.settleCurve == MotionCurve.spring) {
+    if (spring) {
+      _settleFrom = 0;
+      _settleTo = 1;
       _settle.animateWith(
-        SpringSimulation(
-          motionSpring(const MotionModel(curve: MotionCurve.spring)),
-          0,
-          1,
-          0,
-        ),
+        SpringSimulation(trackSettleSpring(_track), from, to, velocity),
       );
     } else {
+      _settleFrom = from;
+      _settleTo = to;
       _settle
         ..value = 0
         ..animateTo(
@@ -544,11 +571,12 @@ class _NodeDragTrackState extends State<NodeDragTrack>
     if (_dragValue == null) return;
     final double v = _shownValue;
     final double drawn = _dragProgress;
-    final double velocity =
-        _progressVelocity(details?.velocity) * (_track.max - _track.min);
-    // Hold the dragged value until the variable has caught up.
+    final double progressVelocity = _progressVelocity(details?.velocity);
+    final double velocity = progressVelocity * (_track.max - _track.min);
+    // Hold the dragged value until the variable has caught up. A spring
+    // settle starts at the release speed, so a fling carries on.
     setState(() => _dragValue = null);
-    _glide(drawn, _track.progressOf(v));
+    _glide(drawn, _track.progressOf(v), velocity: progressVelocity);
     widget.onEnd?.call(v);
     widget.onRelease?.call(v, _startValue, velocity);
   }

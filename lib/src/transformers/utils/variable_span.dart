@@ -45,7 +45,14 @@ abstract final class VariablePreview {
     final IndexedItem? outer = context == null
         ? null
         : IndexedItemProvider.parentOf(context);
-    if ((row == null || row == values.indexedItem) && outer == null) {
+    // A node in a drag track's node reads the pose the canvas draws it at
+    // as `track` (see applyTrackPose); outside one `track` is empty.
+    final TrackValues? track = context == null
+        ? null
+        : TrackScope.maybeOf(context);
+    if ((row == null || row == values.indexedItem) &&
+        outer == null &&
+        track == null) {
       return values;
     }
     return ScopedValues.preview(
@@ -62,6 +69,7 @@ abstract final class VariablePreview {
           ? row
           : IndexedItem(row.index, values.indexedItem!.item),
       parentIndexedItem: outer ?? values.parentIndexedItem,
+      trackValues: track ?? values.trackValues,
     );
   }
 

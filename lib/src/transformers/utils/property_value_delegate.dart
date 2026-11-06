@@ -687,7 +687,8 @@ class PropertyValueDelegate {
                 DragAndDropController.idle)
             as Map?,
       },
-      'track' => (scopedValues.trackValues ?? const TrackValues()).toMap(),
+      // Null outside a drag track: nothing to read.
+      'track' => scopedValues.trackValues?.toMap(),
       'speech' => Speech.instance.value,
       'initial' => InitialValues(scopedValues.initialVariables),
       _ => null,

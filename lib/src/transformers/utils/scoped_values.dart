@@ -146,6 +146,7 @@ class ScopedValues {
     this.screenSize,
     this.platformBrightness,
     this.parentSize,
+    this.trackValues,
     Map<String, dynamic>? data,
     Map<String, dynamic>? routeParams,
   }) : _codelesslyContextRef = codelesslyContext == null
@@ -158,7 +159,6 @@ class ScopedValues {
        nodeState = null,
        holdProgress = null,
        dragValues = null,
-       trackValues = null,
        _givenRouteParams = routeParams ?? {},
        _routePath = null;
 
