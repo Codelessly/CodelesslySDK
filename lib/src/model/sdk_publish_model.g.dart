@@ -52,6 +52,7 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
   disabledLayouts: (json['disabledLayouts'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  appIdentity: AppIdentity.maybeFromJson(json['appIdentity']),
   owner: json['owner'] as String,
   teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
   users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
@@ -85,6 +86,7 @@ Map<String, dynamic> _$SDKPublishModelToJson(
   'lastUpdated': ?const DateTimeConverter().toJson(instance.lastUpdated),
   'layoutIDMap': instance.layoutIDMap,
   'disabledLayouts': instance.disabledLayouts,
+  'appIdentity': ?SDKPublishModel.serializeAppIdentity(instance.appIdentity),
 };
 
 SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(

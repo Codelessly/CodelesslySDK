@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../data/persisted_variables.dart';
 
 /// A widget that retrieves a layout from a [CodelesslyWidgetController].
 class CodelesslyLayoutRetriever extends StatefulWidget {
@@ -275,8 +276,9 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         final Observable<VariableData> shared = codelessly.sharedVariables
             .putIfAbsent(
               variable.id,
-              () => Observable(
+              () => persistedVariable(
                 variable.copyWith(value: codelesslyContext.data[variable.name]),
+                codelessly.localDatabase,
               ),
             );
         if (linkParams.containsKey(variable.name)) {

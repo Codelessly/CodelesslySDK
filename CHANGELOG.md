@@ -1,7 +1,48 @@
 ## 9.1.10
 
+- `SDKPublishModel.appIdentity`: the project's `AppIdentity` (name, title
+  template, description, icons, colors, manifest, splash, mobile) ships in
+  the publish bundle. Bundles without one load as before (null).
+- `CodelesslyAppIdentity` resolves a screen's title and description from
+  the identity (per-page overrides, screen names, the app name), parses its
+  colors and status bar style, and sets the title through
+  `SystemChrome.setApplicationSwitcherDescription` (document.title on web).
+- `CodelesslyAppIdentityUpdater` keeps the title in step with the screen a
+  `CodelesslyRouter` shows, with a callback for the meta description.
+- `SDKPublishModel.withAppIdentity` sets the identity; `copyWith` keeps it
+  (its signature is unchanged, so subclasses that override it still build).
+- Requires the unreleased codelessly_api `AppIdentity`.
+- New package `packages/codelessly_genui`: renders A2UI (agent-generated UI) with the SDK's node transformers. It is not published yet; apps depend on it from git.
+- Requires the unreleased codelessly_api with `genscreen.dart` (for the
+  runtime screen generator below).
+- Runtime screen generation: `RuntimeScreenGenerator` registers the
+  `generateScreen` app function (Call function with `prompt` and `kit`),
+  gets a plan from a `ScreenPlanSource` (`HttpScreenPlanSource` for a host
+  endpoint that holds the key, `ClaudeScreenPlanSource` for trusted
+  builds), validates it with one fix round, compiles it with the kit and
+  opens it (`GeneratedScreenPage`, `GeneratedScreenView`). Plans are cached
+  per prompt and kit fingerprint (`GeneratedScreenCache`, optionally
+  persisted by the host).
+- Speech recognition: built-in `listen` and `stopListening` app functions
+  (Call function; a host function of the same name wins). The `speech`
+  variable gains `canListen`, `listening`, `heard`, `score` (0-100 against
+  the expected text, null until scored), `confidence` and `error`. Web uses
+  the Web Speech API's SpeechRecognition; other platforms report
+  `canListen: false` until the host sets `Speech.recognizer`.
+  `pronunciationScore` is exported.
+- Drag tracks: vertical/horizontal input uses an axis drag recognizer and
+  follow input claims the pointer after 3 px, so knobs and sliders inside a
+  scrolling page turn instead of scrolling it. Fine mode (Shift, or press
+  and hold still before dragging; Shift + wheel), `track.fine` and the fine
+  variable; the pose animates between values (`snapMs`); arcs find the
+  nearest value around their pivot, so `jumpOnTap` works on curved sliders;
+  bound `track.min/max/step` (with master's `track.defaultValue`);
+  `write: false`.
+- An action chain whose screens have all gone finishes on the screen the app
+  shows now (a toast's delayed hide after the screen was replaced).
+
 Requires codelessly_api 9.0.4. Found recreating Chairlift (a ski-resort
-status board) in the editor.
+status board) in the editor:
 
 ### Layout and drawing
 
