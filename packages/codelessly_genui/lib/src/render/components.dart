@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -236,12 +237,34 @@ Widget buildSlider(
                 ),
               ),
           },
-          onCommit: _actionOf(props),
+          onCommit: _debounced(
+            '${A2uiSurface.of(context).id}/${node.instanceId}',
+            _actionOf(props),
+          ),
           commitTrigger: TriggerType.changeEnd,
         ),
       ),
     ],
   );
+}
+
+final Map<String, Timer> _commitTimers = {};
+
+/// How long a slider waits after its last change before it sends its
+/// action. Each keyboard step (and each tap on the track) ends a change, so
+/// without the wait one adjustment would send one event per step.
+const Duration kSliderCommitDelay = Duration(milliseconds: 600);
+
+/// [action], run once [kSliderCommitDelay] after the last call for [key].
+VoidCallback? _debounced(String key, VoidCallback? action) {
+  if (action == null) return null;
+  return () {
+    _commitTimers.remove(key)?.cancel();
+    _commitTimers[key] = Timer(kSliderCommitDelay, () {
+      _commitTimers.remove(key);
+      action();
+    });
+  };
 }
 
 num _snap(double v, double? step) {
