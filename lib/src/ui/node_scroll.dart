@@ -81,11 +81,16 @@ abstract final class ScrollTargets {
       await scrolled;
       return true;
     }
-    // The screen may not have been laid out yet, e.g. right as it opens.
-    await SchedulerBinding.instance.endOfFrame;
-    if (_scrollTo(action) case final Future<void> scrolled) {
-      await scrolled;
-      return true;
+    // The screen may not have been laid out yet, e.g. right as it opens or
+    // as an earlier action shows the part the node is in (a page body shown
+    // once data has loaded builds over a few frames). Wait for it, up to 60
+    // frames (about a second).
+    for (int frame = 0; frame < 60; frame++) {
+      await SchedulerBinding.instance.endOfFrame;
+      if (_scrollTo(action) case final Future<void> scrolled) {
+        await scrolled;
+        return true;
+      }
     }
     return false;
   }
