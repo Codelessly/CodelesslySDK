@@ -28,7 +28,12 @@ status board) in the editor.
   does: `?ids=3,7` sets a list to `[3, 7]`; a param that can't be read as the
   variable's type leaves it alone (`?feed=3` used to put the text "3" in a
   list).
-- Scroll To takes an `axis` and waits up to 60 frames for its target.
+- Scroll To takes an `axis`, waits up to 60 frames for its target, and
+  scrolls the node on its own screen (a link to the entry screen opens it
+  over itself, building the node twice).
+- A node shown and hidden by a binding keeps its state across toggles; each
+  toggle used to rebuild its whole subtree (a page body came back scrolled
+  to the start).
 - The toast's action can be a styled button and keeps its own font size.
 
 ## 9.1.9
