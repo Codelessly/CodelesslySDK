@@ -345,6 +345,9 @@ class ConditionEvaluator<R extends Object>
   R? visitHapticAction(HapticAction action) => null;
 
   @override
+  R? visitPaginateAction(PaginateAction action) => null;
+
+  @override
   R? visitScrollToAction(ScrollToAction action) => null;
 
   @override
@@ -547,6 +550,11 @@ class ConditionPrinter
   @override
   void visitHapticAction(HapticAction action) {
     _buffer.writeln('\tHaptic: ${action.kind.name}');
+  }
+
+  @override
+  void visitPaginateAction(PaginateAction action) {
+    _buffer.writeln('\tPaginate');
   }
 
   @override

@@ -517,6 +517,33 @@ void main() {
       expect(tester.getSize(fillBox()), const Size(200, 150));
     });
 
+    testWidgets('a fill in a row takes its share of the row', (tester) async {
+      // A minutes bar: a row (the track) and a rectangle 60% wide in it. A
+      // row gives its children no bounded width, so the share is of the
+      // row's own width, as a percentage width is in CSS.
+      final RectangleNode bar = RectangleNode(
+        id: 'fill',
+        name: 'Fill',
+        basicBoxLocal: NodeBox(0, 0, 4, 6),
+        horizontalFit: SizeFit.fixed,
+        verticalFit: SizeFit.fixed,
+      )..variables['widthFactor'] = r'${= 0.6}';
+      final RowColumnNode row = RowColumnNode(
+        id: 'track',
+        name: 'Track',
+        rowColumnType: RowColumnType.row,
+        basicBoxLocal: NodeBox(0, 0, 250, 6),
+        horizontalFit: SizeFit.fixed,
+        verticalFit: SizeFit.fixed,
+        children: ['fill'],
+      );
+      bar.parentID = row.id;
+      row.parentID = kRootNode;
+      await pump(tester, NodeRegistry()..setNodes({row.id: row, bar.id: bar}), row);
+      final Finder fill = find.byWidgetPredicate((w) => '${w.key}'.contains('fill')).first;
+      expect(tester.getSize(fill).width, closeTo(150, 0.5));
+    });
+
     testWidgets('a bound width wins over the factor', (tester) async {
       final p = progressBar({
         'widthFactor': 0.5,

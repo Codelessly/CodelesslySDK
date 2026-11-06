@@ -25,6 +25,51 @@ Requires codelessly_api 9.4.0.
 - Apps published with scripts need this version: earlier ones don't know
   "Run script" actions (a site on 9.1.9 stays on its loading screen for
   such a layout).
+- Transitions (needs the unreleased `codelessly_api` with `RouteTransition`; see `CodelesslyEditor/docs/transitions_api.md`):
+  - `CodelesslyRouteTransitionRoute` plays a `RouteTransition` on both screens.
+    - The screen it covers moves through Flutter's `delegatedTransition`.
+    - Pops reverse, or play the pop sides.
+    - Reveals grow from the tap point or the tapped node.
+  - Modals (dialogs, sheets, full screen) opened with a `routeTransition` are page routes, so shared elements fly into and out of them. The route's barrier colour applies.
+  - A drag can close a route interactively:
+    - `dismiss` (swipe down to dismiss);
+    - iOS swipe back (`swipeBack`).
+    The drag moves the route's progress, heroes follow the finger, and the release completes or cancels with a spring. It goes through the provisional `TransitionPhysics` adapter until the Gestures shared physics model lands.
+  - Hero fixes and new flights:
+    - Heroes fly during back gestures (`transitionOnUserGestures`).
+    - New flights: `morph`, `fadeThrough` and `containerTransform`; `arc` flights also arrive from a drag.
+    - A destination network image that hasn't loaded yet flies over its source instead of as an empty box.
+    - `heroPlaceholder: source` keeps the source drawn until the destination loads.
+    - Heroes in a hidden cloud-list variant don't fly.
+    - A router nested under another navigator gets its own hero controller.
+  - Flip cards (`NodeFlip`): tap, a variable, a `flip.flipped` binding, or a drag that settles on the nearer face.
+  - Tilt and parallax (`NodeTilt`).
+  - Page view `pageMotion` for coverflow, cube and 3D carousel (`PageMotionItem`).
+  - New predefined variables: `flip`, `tilt` and `pageOffset`.
+- `motion.arc`: bound positions move along a curve (a formation change
+  sweeping every player to their new spot).
+- An entrance replays from values it names at their defaults
+  (`enterFrom: {opacity: 1}`): fade-out trails on replay.
+- Impossible days (`2013-02-30`) are not read as dates.
+- Quoted formula text reads `\n`, `\t` and `\r`.
+- Text fields use standard visual density on every platform: desktop's
+  compact density (also the web's) took 8 px off a padded field that hugs
+  its height, so the editor's canvas and desktop browsers drew it shorter
+  than phones did.
+
+## 9.3.1
+
+Requires codelessly_api 9.3.0.
+
+### Fixed
+
+- A node with a bound `visible` and a transition time animates its size
+  only when it shows or hides. A shown text whose data changes takes its
+  new width at once; it used to ease there with an overshoot that clipped
+  the text for a moment ("Weekdays" drew as "Weekday").
+- Layouts load the SVGs of their toast icons when they load
+  (`AppToast.precacheIcons`, `SvgIcon.precache`), so the first toast of a
+  session shows its icon.
 - A node that clips its content keeps its own stroke outside the clip, as
   Flutter's Container paints its border outside the clip of its child: a
   rounded card's border was cut (or anti-aliased twice), leaving a light
@@ -98,11 +143,6 @@ Requires codelessly_api 9.3.0.
   longer draw overflow stripes.
 - `stretchItems` measures content, so hidden children take no height.
 - Aspect-ratio boxes keep their ratio; icon baselines align to pixels.
-- A node with a bound `visible` and a transition time animates its size
-  only when it shows or hides; a shown text whose data changes takes its
-  new width at once (it eased with an overshoot and clipped its text).
-- Layouts load the SVGs of their toast icons when they load, so the first
-  toast of a session shows its icon.
 - Shadows on rounded boxes with a spread shadow paint in order.
 - Single-line text in a row that runs short of space keeps its width.
 - Paths and path-drawn rectangles take taps only on their stroke or fill.

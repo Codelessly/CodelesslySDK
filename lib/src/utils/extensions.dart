@@ -2013,6 +2013,8 @@ extension ActionModelExt on ActionModel {
         return _namesIn(strings, includePredefined);
       case ActionType.focus:
         return {};
+      case ActionType.paginate:
+        return {};
       case ActionType.editText:
         final EditTextAction action = this as EditTextAction;
         strings.addAll([action.text, action.before, ?action.after]);
