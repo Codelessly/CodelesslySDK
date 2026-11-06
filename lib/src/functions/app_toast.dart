@@ -509,13 +509,31 @@ class _ToastViewState extends State<_ToastView> {
             action.iconSize != 18 ? action.iconSize : iconModel.size ?? 18,
             textColor,
           );
+    final List<BoxShadow> iconShadows = action.iconShadows == null
+        ? const <BoxShadow>[]
+        : boxShadowsOf(action.iconShadows);
     if (icon != null && iconDisc != null) {
       icon = Container(
         key: const ValueKey('codelessly-toast-icon-disc'),
         width: action.iconDiscSize,
         height: action.iconDiscSize,
         alignment: Alignment.center,
-        decoration: BoxDecoration(color: iconDisc, shape: BoxShape.circle),
+        decoration: BoxDecoration(
+          color: iconDisc,
+          shape: BoxShape.circle,
+          boxShadow: iconShadows.isEmpty ? null : iconShadows,
+        ),
+        child: icon,
+      );
+    } else if (icon != null && iconShadows.isNotEmpty) {
+      // A halo round the icon itself: a small round icon becomes a lit
+      // lamp.
+      icon = DecoratedBox(
+        key: const ValueKey('codelessly-toast-icon-glow'),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: iconShadows,
+        ),
         child: icon,
       );
     }
