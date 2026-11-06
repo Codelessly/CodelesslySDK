@@ -1,3 +1,11 @@
+## Unreleased
+
+### Fixed
+
+- A rectangle with no visible fill, such as an outline drawn over a card,
+  no longer blocks taps on what is underneath it. Strokes never take taps;
+  nodes with their own reactions are unaffected.
+
 ## 10.0.0
 
 Requires codelessly_api 10.0.0.
