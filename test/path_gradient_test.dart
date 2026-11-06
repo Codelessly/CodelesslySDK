@@ -21,7 +21,7 @@ void main() {
   test('a gradient fill paints the shape, graded across the box', () async {
     final painter = PathNodePainter(
       data: 'M0 0 L100 0 L100 100 L0 100 Z',
-      fillGradients: const [
+      gradients: const [
         LinearGradient(colors: [Color(0xFFFF0000), Color(0xFF0000FF)]),
       ],
     );

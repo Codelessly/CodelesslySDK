@@ -148,12 +148,23 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       return MeasurableLayoutBuilder(
         key: ValueKey('${node.id}-parent-size'),
         fallbackSize: Size(node.outerBoxLocal.width, node.outerBoxLocal.height),
-        builder: (context, constraints) => ParentSizeScope.fromConstraints(
-          constraints,
-          child: Builder(
-            builder: (context) => _buildNode(context, node, settings),
-          ),
-        ),
+        builder: (context, constraints) {
+          // In a row or column, an axis the node's constraints leave
+          // unbounded (a row's main axis) is measured against the row's
+          // own content size.
+          final FlexContentScope? flex = FlexContentScope.maybeOf(context);
+          return ParentSizeScope(
+            width: constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : flex?.width,
+            height: constraints.hasBoundedHeight
+                ? constraints.maxHeight
+                : flex?.height,
+            child: Builder(
+              builder: (context) => _buildNode(context, node, settings),
+            ),
+          );
+        },
       );
     }
     return _buildNode(context, node, settings);
@@ -166,9 +177,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (node.parentID == kRootNode || node.parentID.isEmpty) return false;
     try {
       final String type = getNode(node.parentID).type;
-      if (const {'frame', 'stack'}.contains(type)) return true;
-      // A row or column gives its fractional children its content box.
-      return const {'row', 'column'}.contains(type) && hasFractionalSize(node);
+      return const {'frame', 'stack'}.contains(type);
     } catch (_) {
       return false;
     }
@@ -189,7 +198,23 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             builder: (context) => _buildDecorated(context, node, settings),
           );
         }
-        return _buildDecorated(context, node, settings);
+        final Widget decorated = _buildDecorated(context, node, settings);
+        // The design canvas shows no interaction states, but a node its
+        // `disabled` binding disables (with no disabled state of its own)
+        // is drawn faded there as it is at runtime.
+        if (settings.isPreview &&
+            node.variables.containsKey('disabled') &&
+            !node.interactionStates.containsKey(InteractionState.disabled) &&
+            InteractionStatesBox.propertyStates(
+              context,
+              node,
+            ).contains(InteractionState.disabled)) {
+          return Opacity(
+            opacity: InteractionStatesBox.defaultDisabledOpacity,
+            child: decorated,
+          );
+        }
+        return decorated;
       },
     );
     // A node a Scroll To action targets records where it is built.
@@ -303,7 +328,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = applyWidgetMargins(styled, widget);
     }
 
-    if (settings.withVisibility) {
+    if (settings.withVisibility && !ShownAnyway.covers(context, node.id)) {
       widget = applyWidgetVisibility(
         context,
         styled,
@@ -360,20 +385,39 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         model: draggable,
         enabled: flag(DraggableModel.enabledVariable, draggable.enabled),
         flightKey: '${flightKey ?? ''}',
-        // The feedback node is usually hidden where it is designed.
-        buildNode: (context, id) => buildWidgetByID(
-          id,
-          context,
-          settings: const WidgetBuildSettings(
-            debugLabel: 'drag feedback',
-            withReactions: false,
-            withVisibility: false,
+        feedbackSize: draggable.feedbackNodeId.isEmpty
+            ? null
+            : _designedSize(draggable.feedbackNodeId),
+        // The feedback node is usually hidden where it is designed: it shows
+        // anyway, while the nodes inside it keep their own visibility (a
+        // pedal's two- and three-knob faces).
+        buildNode: (context, id) => ShownAnyway(
+          nodeId: id,
+          child: Builder(
+            builder: (context) => buildWidgetByID(
+              id,
+              context,
+              settings: const WidgetBuildSettings(
+                debugLabel: 'drag feedback',
+                withReactions: false,
+              ),
+            ),
           ),
         ),
         child: widget,
       );
     }
     return widget;
+  }
+
+  /// The designed size of node [id], or null when there's no such node.
+  Size? _designedSize(String id) {
+    try {
+      final BaseNode node = getNode(id);
+      return Size(node.basicBoxLocal.width, node.basicBoxLocal.height);
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Wraps [widget] in a tooltip showing [node]'s tooltip text (its data
