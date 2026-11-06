@@ -310,6 +310,39 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   });
 
+  testWidgets('tapping round a dial jumps its needle to that angle', (
+    tester,
+  ) async {
+    // A month dial: January at the top, December at 330 degrees.
+    value = 1;
+    const dial = DragTrackModel(
+      shape: DragTrackShape.arc,
+      variable: 'month',
+      min: 1,
+      max: 12,
+      step: 1,
+      startAngle: 0,
+      endAngle: 330,
+      pivotY: 100,
+      rotate: true,
+      jumpOnTap: true,
+    );
+    await tester.pumpWidget(
+      plate(dial, size: const Size(20, 20), at: const Offset(190, 90)),
+    );
+    // Rest centre (200, 100), pivot (200, 200): tap east of the pivot, at
+    // 90 degrees, which is April.
+    await tester.tapAt(const Offset(300, 200));
+    await tester.pump();
+    expect(value, 4);
+    expect(
+      tester.getCenter(find.text('cap')),
+      offsetMoreOrLessEquals(const Offset(300, 200), epsilon: 1),
+    );
+    // Let the double-tap recognizer's timer run out.
+    await tester.pump(const Duration(seconds: 1));
+  });
+
   testWidgets('a path track follows the curve and its nearest point', (
     tester,
   ) async {
