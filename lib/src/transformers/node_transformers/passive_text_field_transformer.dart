@@ -1097,6 +1097,33 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       fontName: decoration.suffixStyle.fontName,
       textDecoration: decoration.suffixStyle.textDecoration,
     );
+    // Units like "kWh" that show even before anything is typed: the texts
+    // go in the icon slots, which Flutter always shows, instead of the
+    // prefix/suffix, which it shows only once the field is focused or has
+    // text.
+    final bool alwaysAffixes = decoration.affixesAlwaysVisible;
+    final Widget? prefixIconWidget =
+        !decoration.prefixIcon.icon.show || decoration.prefixIcon.icon.isEmpty
+        ? null
+        : _ReactiveIcon(
+            onTap: () => widget.onIconTap?.call(
+              context,
+              decoration.prefixIcon.reactions,
+              controller.text,
+            ),
+            iconModel: decoration.prefixIcon,
+          );
+    final Widget? suffixIconWidget =
+        !decoration.suffixIcon.icon.show || decoration.suffixIcon.icon.isEmpty
+        ? null
+        : _ReactiveIcon(
+            onTap: () => widget.onIconTap?.call(
+              context,
+              decoration.suffixIcon.reactions,
+              controller.text,
+            ),
+            iconModel: decoration.suffixIcon,
+          );
     final Widget? counterText = buildText(
       context,
       node,
@@ -1149,39 +1176,28 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       // which defaults to 12 x 16 for text fields: zero makes a bare input.
       contentPadding:
           (decoration.contentPadding ?? node.padding).flutterEdgeInsets,
-      prefixIcon:
-          !decoration.prefixIcon.icon.show || decoration.prefixIcon.icon.isEmpty
-          ? null
-          : _ReactiveIcon(
-              onTap: () => widget.onIconTap?.call(
-                context,
-                decoration.prefixIcon.reactions,
-                controller.text,
-              ),
-              iconModel: decoration.prefixIcon,
-            ),
-      // Unset constraints keep Flutter's 48 px icon slot.
+      prefixIcon: alwaysAffixes && prefixText != null
+          ? _affix(prefixIconWidget, prefixText, before: true)
+          : prefixIconWidget,
+      // Unset constraints keep Flutter's 48 px icon slot (an always-visible
+      // text with no icon takes only its own width).
       prefixIconConstraints: decoration.prefixIconConstraints.isEmpty
-          ? null
+          ? (alwaysAffixes && prefixText != null && prefixIconWidget == null
+                ? const BoxConstraints()
+                : null)
           : decoration.prefixIconConstraints.flutterConstraints,
-      prefix: prefixText,
+      prefix: alwaysAffixes ? null : prefixText,
       prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
-      suffixIcon:
-          !decoration.suffixIcon.icon.show || decoration.suffixIcon.icon.isEmpty
-          ? null
-          : _ReactiveIcon(
-              onTap: () => widget.onIconTap?.call(
-                context,
-                decoration.suffixIcon.reactions,
-                controller.text,
-              ),
-              iconModel: decoration.suffixIcon,
-            ),
-      suffix: suffixText,
+      suffixIcon: alwaysAffixes && suffixText != null
+          ? _affix(suffixIconWidget, suffixText, before: false)
+          : suffixIconWidget,
+      suffix: alwaysAffixes ? null : suffixText,
       suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
       // Unset constraints keep Flutter's 48 px icon slot.
       suffixIconConstraints: decoration.suffixIconConstraints.isEmpty
-          ? null
+          ? (alwaysAffixes && suffixText != null && suffixIconWidget == null
+                ? const BoxConstraints()
+                : null)
           : decoration.suffixIconConstraints.flutterConstraints,
       counter: decoration.showCounter
           ? decoration.counterText?.isNotEmpty == true
@@ -1351,4 +1367,20 @@ class _ReactiveIcon extends StatelessWidget {
       child: MouseRegion(cursor: SystemMouseCursors.click, child: icon),
     );
   }
+}
+
+/// An always-visible prefix or suffix text, beside its icon if it has one,
+/// for the icon slot of an [InputDecoration].
+Widget _affix(Widget? icon, Widget text, {required bool before}) {
+  final Widget padded = Padding(
+    padding: before
+        ? const EdgeInsetsDirectional.only(start: 12, end: 4)
+        : const EdgeInsetsDirectional.only(start: 4, end: 12),
+    child: text,
+  );
+  if (icon == null) return padded;
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: before ? [icon, padded] : [padded, icon],
+  );
 }
