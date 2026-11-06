@@ -166,6 +166,27 @@ void main() {
     expect(tester.getSize(items().at(0)), const Size(60, 50));
   });
 
+  testWidgets('an item bound to a number written as is sits there', (
+    tester,
+  ) async {
+    final t = build();
+    // A chair template riding a cable: x/y bound to constants.
+    t.item.variables
+      ..['x'] = '15.61'
+      ..['y'] = '42'
+      ..remove('width')
+      ..remove('height')
+      ..remove('rotation');
+    await pump(tester, t.registry, t.list);
+    final List<Positioned> placed = tester
+        .widgetList<Positioned>(items())
+        .toList();
+    expect([placed[0].left, placed[0].top], [15.61, 42]);
+    expect(PropertyValueDelegate.literalNumber<int>('12'), 12);
+    expect(PropertyValueDelegate.literalNumber<String>('12'), isNull);
+    expect(PropertyValueDelegate.literalNumber<num>('item.x'), isNull);
+  });
+
   // Pins on a floor plan (a list saved with `overlay`): each item's center
   // sits at a fraction of the list's padded box.
   testWidgets(

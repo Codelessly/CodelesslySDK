@@ -285,6 +285,11 @@ class _NodeMotionState extends State<_NodeMotionBody>
   /// capture of the design canvas) a running transition settles at its end.
   bool _tickersEnabled = true;
 
+  /// Whether the loop has started: a node built where tickers don't run (a
+  /// page body kept alive but hidden while it loads) starts it once they do,
+  /// so its phase still applies.
+  bool _loopStarted = false;
+
   bool get _loops =>
       _animates &&
       widget.motion.loop != MotionLoop.none &&
@@ -335,6 +340,7 @@ class _NodeMotionState extends State<_NodeMotionBody>
     if (enabled == _tickersEnabled) return;
     _tickersEnabled = enabled;
     if (!enabled && !_loops) _settle();
+    if (enabled && _loops && !_loopStarted) _startLoop();
   }
 
   /// Ends any transition or entrance at once, at the values to show.
@@ -381,6 +387,7 @@ class _NodeMotionState extends State<_NodeMotionBody>
   /// Repeats between the loop's start (rest, or what
   /// [MotionModel.enterFrom] gives) and the motion's values.
   void _startLoop() {
+    _loopStarted = true;
     _delay?.cancel();
     _rested = false;
     _from = widget.motion.loopStart;
@@ -434,6 +441,11 @@ class _NodeMotionState extends State<_NodeMotionBody>
         _from = next;
       }
       _to = next;
+      _syncSpin();
+      return;
+    }
+    if (_loops && !_loopStarted) {
+      _startLoop();
       _syncSpin();
       return;
     }

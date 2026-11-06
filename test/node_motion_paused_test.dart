@@ -16,7 +16,8 @@ Future<void> pump(WidgetTester tester, MotionModel motion) => tester.pumpWidget(
   ),
 );
 
-double x(WidgetTester tester) => tester.getTopLeft(find.byKey(const Key('chair'))).dx;
+double x(WidgetTester tester) =>
+    tester.getTopLeft(find.byKey(const Key('chair'))).dx;
 
 // A chair riding a 100 px cable once a second.
 const MotionModel ride = MotionModel(
@@ -54,6 +55,37 @@ void main() {
     expect(x(tester), closeTo(30, 1));
   });
 
+  testWidgets('a loop built where tickers are off starts once they run', (
+    tester,
+  ) async {
+    // A page body kept alive but hidden while it loads: no tickers yet.
+    Future<void> show(bool enabled, MotionModel motion) => tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TickerMode(
+          enabled: enabled,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: NodeMotion(
+              motion: motion,
+              child: const SizedBox(key: Key('chair'), width: 10, height: 10),
+            ),
+          ),
+        ),
+      ),
+    );
+    final MotionModel held = ride.copyWith(paused: true, phase: 0.25);
+    await show(false, held);
+    // Shown: a held chair sits a quarter of the way round, not at the start.
+    await show(true, held);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(x(tester), closeTo(25, 1));
+    // Resumed: it rides on from there.
+    await show(true, ride.copyWith(phase: 0.25));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(x(tester), closeTo(45, 1));
+  });
+
   test('paused round-trips through JSON and is left out when false', () {
     final MotionModel paused = ride.copyWith(paused: true);
     expect(MotionModel.fromJson(paused.toJson()).paused, isTrue);
@@ -61,15 +93,16 @@ void main() {
   });
 
   test('motion.paused binds to a formula', () {
-    RectangleNode chair(String formula) => RectangleNode(
-      id: 'chair',
-      name: 'chair',
-      basicBoxLocal: NodeBox(0, 0, 10, 10),
-    )
-      ..motion = ride
-      ..variables.addAll({
-        MotionModel.variableKey(MotionModel.pausedProperty): formula,
-      });
+    RectangleNode chair(String formula) =>
+        RectangleNode(
+            id: 'chair',
+            name: 'chair',
+            basicBoxLocal: NodeBox(0, 0, 10, 10),
+          )
+          ..motion = ride
+          ..variables.addAll({
+            MotionModel.variableKey(MotionModel.pausedProperty): formula,
+          });
     MotionModel? resolve(String formula) =>
         WidgetNodeTransformerManager.resolveMotion(
           chair(formula),
