@@ -341,6 +341,27 @@ void main() {
     expect(patch, isNull);
   });
 
+  testWidgets('the design canvas draws a node its binding disables faded', (
+    tester,
+  ) async {
+    final (:card, :dot) = cardWithDot();
+    card.variables = {'disabled': r'${= true}'};
+    await Harness().pump(
+      tester,
+      [card, dot],
+      settings: const WidgetBuildSettings(debugLabel: 'test', isPreview: true),
+    );
+    expect(find.byType(InteractionStatesBox), findsNothing);
+    final Opacity faded = tester.widget(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Opacity &&
+            w.opacity == InteractionStatesBox.defaultDisabledOpacity,
+      ),
+    );
+    expect(faded.opacity, InteractionStatesBox.defaultDisabledOpacity);
+  });
+
   testWidgets('the design canvas shows the node without its states', (
     tester,
   ) async {

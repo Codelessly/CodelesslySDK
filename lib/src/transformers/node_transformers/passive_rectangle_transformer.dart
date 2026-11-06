@@ -118,39 +118,76 @@ class PassiveRectangleWidget extends StatelessWidget {
       }
     }
 
-    Widget child = Stack(
-      clipBehavior: Clip.none,
+    final List<Widget> fills = clipFillsToNotches(
+      node,
+      buildFills(
+        node,
+        useInk: false,
+        obscureImages: settings.obscureImages,
+        settings: settings,
+        scopedValues: scopedValues,
+      ),
+    );
+    final List<Widget> strokes = buildStrokes(node, scopedValues);
+    final List<Widget> content = wrapWithInkWell(
+      context,
+      node,
+      wrapWithPaddingAndScroll(
+        node,
+        [...children, ?portalWidget],
+        stackAlignment: stackAlignment,
+        applyPadding: applyPadding,
+        getNode: manager.getNode,
+        isPlaceholder: isPlaceholder,
+      ),
       alignment:
           stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-      children: [
-        ...clipFillsToNotches(
-          node,
-          buildFills(
-            node,
-            useInk: false,
-            obscureImages: settings.obscureImages,
-            settings: settings,
-            scopedValues: scopedValues,
-          ),
-        ),
-        ...buildStrokes(node, scopedValues),
-        ...wrapWithInkWell(
-          context,
-          node,
-          wrapWithPaddingAndScroll(
-            node,
-            [...children, ?portalWidget],
-            stackAlignment: stackAlignment,
-            applyPadding: applyPadding,
-            getNode: manager.getNode,
-            isPlaceholder: isPlaceholder,
-          ),
-          alignment:
-              stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-        ),
-        ...buildForegroundFills(node, scopedValues),
-      ],
     );
+    final List<Widget> foreground = buildForegroundFills(node, scopedValues);
+    final AlignmentGeometry alignment =
+        stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart;
+
+    // A node that clips its content clips its fills and children, not its
+    // own stroke, as Flutter's Container clips its child but paints its
+    // border outside the clip: clipped too, the stroke's edge was cut (or
+    // anti-aliased twice), leaving a light seam between a card's border and
+    // its shadow.
+    Clip clip = getClipBehavior(node);
+    final bool strokeOutsideClip =
+        clip != Clip.none && strokes.isNotEmpty && notchesOf(node).isEmpty;
+    final Widget child0;
+    if (strokeOutsideClip) {
+      final BorderRadius radius = getBorderRadius(node) ?? BorderRadius.zero;
+      Widget clipped(Widget layer) =>
+          ClipRRect(borderRadius: radius, clipBehavior: clip, child: layer);
+      child0 = Stack(
+        clipBehavior: Clip.none,
+        alignment: alignment,
+        children: [
+          if (fills.isNotEmpty)
+            Positioned.fill(
+              child: clipped(Stack(fit: StackFit.expand, children: fills)),
+            ),
+          ...strokes,
+          clipped(
+            Stack(
+              clipBehavior: Clip.none,
+              alignment: alignment,
+              children: content,
+            ),
+          ),
+          ...foreground,
+        ],
+      );
+      clip = Clip.none;
+    } else {
+      child0 = Stack(
+        clipBehavior: Clip.none,
+        alignment: alignment,
+        children: [...fills, ...strokes, ...content, ...foreground],
+      );
+    }
+    Widget child = child0;
 
     bool hasComplexRendering =
         node is GeometryMixin &&
@@ -170,7 +207,7 @@ class PassiveRectangleWidget extends StatelessWidget {
       child: decorateWithShadows(
         boxShadow: retrieveBoxShadow(node, scopedValues),
         borderRadius: getBorderRadius(node),
-        clipBehavior: getClipBehavior(node),
+        clipBehavior: clip,
         tapThrough: TapThroughScope.of(context),
         notches: notchesOf(node),
         child: child,
@@ -188,10 +225,11 @@ class _TapThroughDecoration extends BoxDecoration {
       false;
 }
 
-/// A box with [borderRadius] and [boxShadow] around [child]. A shadow with a
-/// spread on a rounded box is painted by [SpreadShadowPainter], so its
-/// corners grow with it as in CSS and design tools; [BoxDecoration] keeps the
-/// box's radius, which turns a spread glow around a dot into a square.
+/// A box with [borderRadius] and [boxShadow] around [child]. The shadows of a
+/// rounded box with a spread shadow are painted by [SpreadShadowPainter]
+/// (all of them, keeping their order), so a spread shadow's corners grow
+/// with it as in CSS and design tools; [BoxDecoration] keeps the box's
+/// radius, which turns a spread glow around a dot into a square.
 Widget decorateWithShadows({
   required List<BoxShadow> boxShadow,
   required BorderRadius? borderRadius,
@@ -221,28 +259,24 @@ Widget decorateWithShadows({
   }
   final bool rounded =
       borderRadius != null && borderRadius != BorderRadius.zero;
-  final List<BoxShadow> spread = [
-    if (rounded)
-      for (final BoxShadow shadow in boxShadow)
-        if (shadow.spreadRadius != 0) shadow,
-  ];
+  // Once one shadow needs the painter, it paints them all: shadows stack in
+  // list order (the first at the bottom), and the painter paints before the
+  // decoration, so splitting them would put every spread shadow under the
+  // others (a button's 'edge' drawn as a graphite shadow with a coloured,
+  // inset shadow over it lost the colour).
+  final List<BoxShadow> spread =
+      rounded && boxShadow.any((shadow) => shadow.spreadRadius != 0)
+      ? boxShadow
+      : const [];
+  final List<BoxShadow> decorated = spread.isEmpty ? boxShadow : const [];
   final Widget box = Container(
     clipBehavior: clipBehavior,
     decoration: tapThrough
         ? _TapThroughDecoration(
-            boxShadow: [
-              for (final BoxShadow shadow in boxShadow)
-                if (!spread.contains(shadow)) shadow,
-            ],
+            boxShadow: decorated,
             borderRadius: borderRadius,
           )
-        : BoxDecoration(
-            boxShadow: [
-              for (final BoxShadow shadow in boxShadow)
-                if (!spread.contains(shadow)) shadow,
-            ],
-            borderRadius: borderRadius,
-          ),
+        : BoxDecoration(boxShadow: decorated, borderRadius: borderRadius),
     child: child,
   );
   // Always a CustomPaint, painting nothing without spread shadows: a ring
@@ -885,21 +919,43 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
     final Gradient? gradient = effective.type == PaintType.solid
         ? null
         : retrieveGradient(effective);
-    final Color? color = effective.toFlutterColor();
+    // A gradient Flutter can't draw (diamond) falls back to its first stop.
+    final Color? color =
+        effective.toFlutterColor() ??
+        (gradient == null
+            ? effective.gradientStops?.firstOrNull?.color
+                  .multiplyAlpha(effective.opacity)
+                  .toFlutterColor()
+            : null);
     if (gradient == null && color == null) continue;
+    // With a transition the stroke's colour, or its gradient's stops, ease
+    // to new values (an outline following a palette), as a solid fill
+    // does; where tickers are off it jumps.
+    Widget eased(Widget Function(Color? color, Gradient? gradient) build) =>
+        node.transitionMs <= 0
+        ? build(color, gradient)
+        : EasedPaint(
+            ms: node.transitionMs,
+            color: color,
+            gradient: gradient,
+            builder: build,
+          );
     if (path != null) {
       strokeWidgets.add(
         Positioned.fill(
           child: IgnorePointer(
-            child: CustomPaint(
-              painter: SvgPathStrokePainter(
-                path: path,
-                color: color ?? gradient!.colors.first,
-                strokeWidth: node.strokeWeight,
-                strokeCap: node.strokeCap,
-                strokeJoin: (node as RectangleNode).strokeJoin,
-                strokeMiterLimit: node.strokeMiterLimit,
-                dashPattern: node.dashPattern,
+            child: eased(
+              (color, gradient) => CustomPaint(
+                painter: SvgPathStrokePainter(
+                  path: path,
+                  color: color ?? gradient!.colors.first,
+                  gradient: gradient,
+                  strokeWidth: node.strokeWeight,
+                  strokeCap: node.strokeCap,
+                  strokeJoin: (node as RectangleNode).strokeJoin,
+                  strokeMiterLimit: node.strokeMiterLimit,
+                  dashPattern: node.dashPattern,
+                ),
               ),
             ),
           ),
@@ -912,15 +968,18 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
       strokeWidgets.add(
         Positioned.fill(
           child: IgnorePointer(
-            child: CustomPaint(
-              painter: NotchedStrokePainter(
-                color: color ?? gradient!.colors.first,
-                strokeWidth: node.strokeWeight,
-                borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
-                notches: notches,
-                strokeAlign: node.strokeAlign,
-                dashPattern: node.dashPattern,
-                strokeCap: node.strokeCap,
+            child: eased(
+              (color, gradient) => CustomPaint(
+                painter: NotchedStrokePainter(
+                  color: color ?? gradient!.colors.first,
+                  gradient: gradient,
+                  strokeWidth: node.strokeWeight,
+                  borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+                  notches: notches,
+                  strokeAlign: node.strokeAlign,
+                  dashPattern: node.dashPattern,
+                  strokeCap: node.strokeCap,
+                ),
               ),
             ),
           ),
@@ -935,13 +994,15 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
         node.strokeSide == StrokeSide.all) {
       strokeWidgets.add(
         Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: getBorderRadius(node),
-              border: Border.all(
-                strokeAlign: node.strokeAlign.alignment,
-                color: color!,
-                width: node.strokeWeight,
+          child: eased(
+            (color, _) => DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: getBorderRadius(node),
+                border: Border.all(
+                  strokeAlign: node.strokeAlign.alignment,
+                  color: color!,
+                  width: node.strokeWeight,
+                ),
               ),
             ),
           ),
@@ -950,18 +1011,20 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
     } else {
       strokeWidgets.add(
         Positioned.fill(
-          child: CustomPaint(
-            painter: StrokePainter(
-              color: color ?? const Color(0xFF000000),
-              gradient: gradient,
-              borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
-              dashPattern: node.dashPattern,
-              strokeWidth: node.strokeWeight,
-              strokeMiterLimit: node.strokeMiterLimit,
-              strokeCap: node.strokeCap,
-              strokeAlign: node.strokeAlign,
-              strokeSide: node.strokeSide,
-              boxShape: getBoxShape(node),
+          child: eased(
+            (color, gradient) => CustomPaint(
+              painter: StrokePainter(
+                color: color ?? const Color(0xFF000000),
+                gradient: gradient,
+                borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+                dashPattern: node.dashPattern,
+                strokeWidth: node.strokeWeight,
+                strokeMiterLimit: node.strokeMiterLimit,
+                strokeCap: node.strokeCap,
+                strokeAlign: node.strokeAlign,
+                strokeSide: node.strokeSide,
+                boxShape: getBoxShape(node),
+              ),
             ),
           ),
         ),
@@ -1035,10 +1098,30 @@ BoxDecoration? _foregroundDecoration(
 List<Widget> clipFillsToNotches(BaseNode node, List<Widget> fills) {
   if (node is RectangleNode && node.hasPath) {
     if (fills.isEmpty) return fills;
+    // A path may reach past its box (a band drawn above its baseline):
+    // fill the box and the path's bounds together, so the part outside is
+    // filled too and a gradient spans the whole shape.
+    final Rect box = Offset.zero & node.basicBoxLocal.size.flutterSize;
+    final Rect bounds = parseSvgPath(node.path)?.getBounds() ?? box;
+    final Rect area = box.expandToInclude(bounds);
+    if (area == box) {
+      return [
+        Positioned.fill(
+          child: ClipPath(
+            clipper: SvgPathClipper(node.path!),
+            child: Stack(children: fills),
+          ),
+        ),
+      ];
+    }
     return [
-      Positioned.fill(
+      Positioned(
+        left: area.left,
+        top: area.top,
+        width: area.width,
+        height: area.height,
         child: ClipPath(
-          clipper: SvgPathClipper(node.path!),
+          clipper: SvgPathClipper(node.path!, offset: -area.topLeft),
           child: Stack(children: fills),
         ),
       ),
@@ -1221,20 +1304,35 @@ Widget buildFill(
     case PaintType.gradientRadial:
     case PaintType.gradientAngular:
     case PaintType.gradientDiamond:
-      final decoration = BoxDecoration(
-        borderRadius: borderRadius,
+      Widget gradientFill(Gradient? gradient) {
+        final decoration = BoxDecoration(
+          borderRadius: borderRadius,
+          gradient: gradient,
+        );
+        return useInk
+            ? Ink(decoration: decoration)
+            : DecoratedBox(decoration: decoration);
+      }
+
+      // With a transition its stops ease to new colours (bound stops
+      // following a palette), as a solid fill does; where tickers are off
+      // it jumps.
+      final int fillMs = (node as BaseNode).transitionMs;
+      if (fillMs <= 0) return gradientFill(retrieveGradient(paint));
+      return EasedPaint(
+        ms: fillMs,
+        color: null,
         gradient: retrieveGradient(paint),
+        builder: (_, gradient) => gradientFill(gradient),
       );
-      return useInk
-          ? Ink(decoration: decoration)
-          : DecoratedBox(decoration: decoration);
     case PaintType.image:
       final TypedBytes? bytes = imageBytes[index];
       final double modifiedOpacity = (imageOpacity ?? 1) * paint.opacity;
 
       // Substitute URL value from [CodelesslyContext]'s [data] map if
       // [imageURL] represents a JSON path.
-      String? imageURL = paint.croppedImageURL ?? paint.downloadUrl!;
+      // A paint saved without a URL draws nothing rather than failing.
+      String? imageURL = paint.croppedImageURL ?? paint.downloadUrl ?? '';
       final imageURLValue =
           PropertyValueDelegate.getPropertyValue<String>(
             node,

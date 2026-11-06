@@ -1,15 +1,18 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/widgets.dart';
 import 'package:path_parsing/path_parsing.dart';
 
 import '../../../codelessly_sdk.dart';
 
 /// Draws a [PathNode]: its SVG path scaled from its view box to the node's
-/// size, filled with its solid fills and outlined with its strokes (weight,
-/// cap, dashes), trimmed to [PathNode.trimStart]..[PathNode.trimEnd] of its
-/// length. `pathData`, `trimStart` and `trimEnd` can be bound; a bound trim
+/// size, with its drop shadows cast in the path's own shape, filled with its
+/// solid and gradient (linear, radial, angular) fills and outlined with its
+/// strokes (weight, cap, dashes), trimmed to
+/// [PathNode.trimStart]..[PathNode.trimEnd] of its length. `pathData`, `trimStart` and `trimEnd` can be bound; a bound trim
 /// eases to new values over the node's [BaseNode.transitionMs].
 class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
   PassivePathTransformer(super.getNode, super.manager);
@@ -40,6 +43,48 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
     }
 
     final String data = bound<Object>('pathData')?.toString() ?? node.pathData;
+    // A paint whose colour is bound (`fill-<id>`, `stroke-paint-<id>`, as
+    // insertTree stores a `${...}` colour) draws the bound colour.
+    Color? colorOf(PaintModel paint, String key) {
+      final PaintModel? value = node.variables.containsKey(key)
+          ? PropertyValueDelegate.getPropertyValue<PaintModel>(
+              node,
+              key,
+              scopedValues: scope,
+            )
+          : null;
+      return (value ?? paint).toFlutterColor();
+    }
+
+    // The trim eases over `trimMs` (default transitionMs) on `trimCurve`
+    // (a motion curve name, default easeInOut), both bindable, so a trail
+    // can keep pace with a plane flying for a given time.
+    final Object? trimMs = bound<Object>('trimMs');
+    final int trimDuration = switch (trimMs) {
+      num n => n.round(),
+      String t => double.tryParse(t.trim())?.round() ?? node.transitionMs,
+      _ => node.transitionMs,
+    };
+    final Object? trimCurveName = bound<Object>('trimCurve');
+    final MotionCurve? trimCurve = MotionCurve.values
+        .where((c) => c.name == trimCurveName?.toString().trim())
+        .firstOrNull;
+    // Dashes: a list of numbers, or text such as "14, 10".
+    final Object? rawDashes = node.variables['dashPattern'];
+    final Object? boundDashes = rawDashes is String && !rawDashes.contains(r'${')
+        ? rawDashes
+        : bound<Object>('dashPattern');
+    final List<double> dashes = switch (boundDashes) {
+      List l => [
+        for (final Object? v in l)
+          if (v is num) v.toDouble() else if (double.tryParse('$v'.trim()) case final double d) d,
+      ],
+      String t when t.trim().isNotEmpty => [
+        for (final String part in t.split(RegExp(r'[,\s]+')))
+          if (double.tryParse(part) case final double d) d,
+      ],
+      _ => node.dashPattern,
+    };
     final double start = number('trimStart', node.trimStart);
     final double end = number('trimEnd', node.trimEnd);
     return SizedBox(
@@ -48,9 +93,9 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
       child: TweenAnimationBuilder<Offset>(
         tween: Tween(end: Offset(start, end)),
         duration: Duration(
-          milliseconds: settings.isPreview ? 0 : node.transitionMs,
+          milliseconds: settings.isPreview ? 0 : math.max(0, trimDuration),
         ),
-        curve: Curves.easeInOut,
+        curve: trimCurve == null ? Curves.easeInOut : flutterCurveOf(trimCurve),
         builder: (context, trim, _) => CustomPaint(
           painter: PathNodePainter(
             data: data,
@@ -59,13 +104,38 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
                 : null,
             fills: [
               for (final PaintModel paint in node.fills)
-                if (paint.visible && paint.toFlutterColor() != null)
-                  paint.toFlutterColor()!,
+                if (paint.visible)
+                  if (colorOf(paint, 'fill-${paint.id}') case final Color c) c,
+            ],
+            gradients: [
+              for (final PaintModel paint in node.fills)
+                if (paint.visible && _isGradient(paint))
+                  if (retrieveGradient(paint) case final Gradient gradient)
+                    gradient,
+            ],
+            shadows: [
+              for (final Effect effect in node.effects)
+                if (effect.visible &&
+                    effect.type == EffectType.dropShadow &&
+                    effect.color != null)
+                  BoxShadow(
+                    color: effect.color!.toFlutterColor(),
+                    offset: Offset(
+                      effect.offset?.x ?? 0,
+                      effect.offset?.y ?? 0,
+                    ),
+                    blurRadius: effect.radius,
+                  ),
             ],
             strokes: [
               for (final PaintModel paint in node.strokes)
-                if (paint.visible && paint.toFlutterColor() != null)
-                  paint.toFlutterColor()!,
+                if (paint.visible)
+                  if (colorOf(paint, 'stroke-paint-${paint.id}') case final Color c) c,
+            ],
+            strokeGradients: [
+              for (final PaintModel paint in node.strokes)
+                if (paint.visible && _isGradient(paint))
+                  ?retrieveGradient(paint),
             ],
             strokeWeight: node.strokeWeight,
             cap: switch (node.strokeCap) {
@@ -78,7 +148,7 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
               StrokeJoinEnum.bevel => StrokeJoin.bevel,
               StrokeJoinEnum.round => StrokeJoin.round,
             },
-            dashes: node.dashPattern,
+            dashes: dashes,
             trimStart: trim.dx,
             trimEnd: trim.dy,
           ),
@@ -88,14 +158,23 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
   }
 }
 
-/// Paints SVG path [data] (see [PassivePathTransformer]).
+bool _isGradient(PaintModel paint) =>
+    paint.type == PaintType.gradientLinear ||
+    paint.type == PaintType.gradientRadial ||
+    paint.type == PaintType.gradientAngular;
+
+/// Paints SVG path [data] (see [PassivePathTransformer]): solid colours and
+/// gradients (spread over the node's box), filled and stroked.
 class PathNodePainter extends CustomPainter {
   /// Creates a [PathNodePainter].
   PathNodePainter({
     required this.data,
     this.viewBox,
     this.fills = const [],
+    this.gradients = const [],
+    this.shadows = const [],
     this.strokes = const [],
+    this.strokeGradients = const [],
     this.strokeWeight = 2,
     this.cap = StrokeCap.round,
     this.join = StrokeJoin.round,
@@ -107,7 +186,16 @@ class PathNodePainter extends CustomPainter {
   final String data;
   final Size? viewBox;
   final List<Color> fills;
+
+  /// Gradient fills, painted over the solid [fills] across the node's box.
+  final List<Gradient> gradients;
+
+  /// Drop shadows in the path's shape, painted under its fills.
+  final List<BoxShadow> shadows;
   final List<Color> strokes;
+
+  /// Gradient strokes, after [strokes].
+  final List<Gradient> strokeGradients;
   final double strokeWeight;
   final StrokeCap cap;
   final StrokeJoin join;
@@ -192,24 +280,42 @@ class PathNodePainter extends CustomPainter {
             .storage,
       );
     }
+    for (final BoxShadow shadow in shadows) {
+      canvas.drawPath(
+        path.shift(shadow.offset),
+        Paint()
+          ..color = shadow.color
+          ..maskFilter = shadow.blurRadius > 0
+              ? MaskFilter.blur(BlurStyle.normal, shadow.blurSigma)
+              : null,
+      );
+    }
     for (final Color color in fills) {
       canvas.drawPath(path, Paint()..color = color);
     }
-    if (strokes.isEmpty || strokeWeight <= 0) return;
+    for (final Gradient gradient in gradients) {
+      canvas.drawPath(
+        path,
+        Paint()..shader = gradient.createShader(Offset.zero & size),
+      );
+    }
+    if ((strokes.isEmpty && strokeGradients.isEmpty) || strokeWeight <= 0) {
+      return;
+    }
     final bool whole = trimStart <= 0 && trimEnd >= 1 && dashes.isEmpty;
     final ui.Path outline = whole
         ? path
         : trim(path, trimStart, trimEnd, dashes);
+    Paint stroke() => Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWeight
+      ..strokeCap = cap
+      ..strokeJoin = join;
     for (final Color color in strokes) {
-      canvas.drawPath(
-        outline,
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = strokeWeight
-          ..strokeCap = cap
-          ..strokeJoin = join,
-      );
+      canvas.drawPath(outline, stroke()..color = color);
+    }
+    for (final Gradient gradient in strokeGradients) {
+      canvas.drawPath(outline, stroke()..shader = gradient.createShader(Offset.zero & size));
     }
   }
 
@@ -218,7 +324,10 @@ class PathNodePainter extends CustomPainter {
       old.data != data ||
       old.viewBox != viewBox ||
       !_sameColors(old.fills, fills) ||
+      !listEquals(old.gradients, gradients) ||
+      !listEquals(old.shadows, shadows) ||
       !_sameColors(old.strokes, strokes) ||
+      !listEquals(old.strokeGradients, strokeGradients) ||
       old.strokeWeight != strokeWeight ||
       old.join != join ||
       old.cap != cap ||

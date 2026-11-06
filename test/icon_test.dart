@@ -2,6 +2,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -70,23 +71,27 @@ void main() {
     });
   });
 
-  testWidgets('Cupertino icons render from the cupertino_icons font', (
-    tester,
-  ) async {
+  testWidgets('Cupertino icons render from their hosted SVG', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: SvgIcon(
-          icon: CupertinoIcon(
-            codepoint: CupertinoIcons.heart.codePoint,
-            name: 'heart',
+        home: Center(
+          child: SvgIcon(
+            icon: CupertinoIcon(
+              codepoint: CupertinoIcons.heart.codePoint,
+              name: 'heart',
+            ),
+            size: 30,
           ),
-          size: 30,
         ),
       ),
     );
-    final Icon icon = tester.widget(find.byType(Icon));
-    expect(icon.icon, CupertinoIcons.heart);
-    expect(icon.size, 30);
+    await tester.pumpAndSettle();
+    final SvgPicture picture = tester.widget(find.byType(SvgPicture));
+    expect(
+      (picture.bytesLoader as SvgNetworkLoader).url,
+      '$cupertinoSvgBaseUrl/cupertino/1.0.9/f442.svg',
+    );
+    expect(tester.getSize(find.byType(SvgPicture)), const Size(30, 30));
   });
 
   testWidgets('Icons without a source render an empty box', (tester) async {

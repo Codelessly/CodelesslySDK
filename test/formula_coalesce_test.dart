@@ -15,12 +15,20 @@ void main() {
   // draft, coalesce answered null, so the badge showed on every row.
   test('coalesce falls back to its last value when none is set', () {
     expect(eval("coalesce(null, '')"), '');
-    expect(eval("coalesce(at(drafts, '4921').text, '') != ''", {
-      'drafts': <String, Object?>{},
-    }), isFalse);
-    expect(eval("coalesce(at(drafts, '4921').text, '') != ''", {
-      'drafts': <String, Object?>{'4921': {'text': 'Hi'}},
-    }), isTrue);
+    expect(
+      eval("coalesce(at(drafts, '4921').text, '') != ''", {
+        'drafts': <String, Object?>{},
+      }),
+      isFalse,
+    );
+    expect(
+      eval("coalesce(at(drafts, '4921').text, '') != ''", {
+        'drafts': <String, Object?>{
+          '4921': {'text': 'Hi'},
+        },
+      }),
+      isTrue,
+    );
     expect(eval('coalesce(null, null)'), isNull);
   });
 
@@ -32,7 +40,12 @@ void main() {
     expect(eval("at(drafts, '4921')", values), 'a');
     expect(eval('at(drafts, id)', values), 'a');
     expect(eval("at(drafts, '1')", values), isNull);
-    expect(eval("at(list, 1)", {'list': ['x', 'y']}), 'y');
+    expect(
+      eval("at(list, 1)", {
+        'list': ['x', 'y'],
+      }),
+      'y',
+    );
   });
 
   // Tag dots take one of 8 colors from their name, as the reference's

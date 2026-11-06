@@ -7,7 +7,10 @@ import 'package:provider/provider.dart';
 
 /// A 600px-tall scrolling list of [count] 64px rows under a detector whose
 /// reaction counts its runs.
-Future<List<String>> pumpList(WidgetTester tester, ValueNotifier<int> count) async {
+Future<List<String>> pumpList(
+  WidgetTester tester,
+  ValueNotifier<int> count,
+) async {
   final calls = <String>[];
   final codelesslyContext = CodelesslyContext.empty()
     ..functions = {'more': (context, reference, params) => calls.add('more')};
