@@ -152,6 +152,94 @@ void main() {
     await tester.pumpAndSettle();
     expect(last.value.value, 'down');
   });
+
+  // A letter names a key, not a character: `f` and `F` are the same key,
+  // and match it with or without Shift. A reaction for Shift+F names Shift.
+  for (final TriggerType type in [TriggerType.keyDown, TriggerType.keyPress]) {
+    testWidgets('${type.name} letters match the key without case', (
+      tester,
+    ) async {
+      Reaction count(String key, int by) => Reaction(
+        action: SetVariableAction(
+          variable: VariableData(
+            id: 'count',
+            name: 'count',
+            type: VariableType.integer,
+          ),
+          newValue: '$by',
+          numberOperation: NumberOperation.add,
+        ),
+        trigger: TriggerModel(type: type, key: key),
+      );
+      final CanvasNode canvas = CanvasNode(
+        id: 'canvas',
+        name: 'canvas',
+        basicBoxLocal: NodeBox(0, 0, 390, 844),
+        children: ['body'],
+        properties: CanvasProperties(
+          bodyId: 'body',
+          safeArea: const SafeAreaModel.all(false),
+        ),
+        reactions: [
+          count('f', 1),
+          count('F', 10),
+          if (type == TriggerType.keyDown) count('Shift+F', 100),
+        ],
+      )..parentID = kRootNode;
+      final AutoPlaceholderNode body = AutoPlaceholderNode(
+        id: 'body',
+        name: 'body',
+        basicBoxLocal: NodeBox(0, 0, 390, 844),
+        children: const [],
+        horizontalFit: SizeFit.expanded,
+        verticalFit: SizeFit.expanded,
+      )..parentID = 'canvas';
+      final registry = NodeRegistry()
+        ..setNodes({canvas.id: canvas, body.id: body});
+      final manager = PassiveNodeTransformerManager(
+        registry.getNodeByID,
+        (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+      );
+      final Observable<VariableData> count0 = Observable(
+        VariableData(
+          id: 'count',
+          name: 'count',
+          type: VariableType.integer,
+          value: 0,
+        ),
+      );
+      await tester.pumpWidget(
+        ChangeNotifierProvider<CodelesslyContext>.value(
+          value: CodelesslyContext.empty()..variables['count'] = count0,
+          child: MaterialApp(
+            home: Builder(
+              builder: (context) => manager.buildWidgetFromNode(
+                canvas,
+                context,
+                settings: const WidgetBuildSettings(debugLabel: 'test'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // F alone: the reactions for `f` and for `F`, not Shift+F.
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+      await tester.pumpAndSettle();
+      expect('${count0.value.value}', '11');
+
+      // Shift+F: `f` and `F` again, and Shift+F.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pumpAndSettle();
+      expect(
+        '${count0.value.value}',
+        type == TriggerType.keyDown ? '${11 + 111}' : '${11 + 11}',
+      );
+    });
+  }
 }
 
 /// Shows a screen whose "Key Down" action sets `last` to [value], with a

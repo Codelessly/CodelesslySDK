@@ -1,8 +1,10 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:flutter/rendering.dart';
+import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'codelessly_router_test.dart' show FakeBrowser, pumpRouterApp, tap;
+import 'codelessly_router_test.dart'
+    show FakeBrowser, codelesslyFor, pumpRouterApp, tap;
 import 'support/tidepool.dart';
 
 /// `if (true)`, as a form's Save nests its branches: valid? then new or
@@ -62,6 +64,43 @@ Future<void> _expectToast(
   await tester.pump(const Duration(seconds: 10));
   await tester.pumpAndSettle();
 }
+
+/// Shows [model]'s app with a plain [Navigator] (no router), at Tides.
+Future<void> _pumpNavigatorApp(
+  WidgetTester tester,
+  SDKPublishModel model,
+) async {
+  tester.view.devicePixelRatio = 1;
+  tester.view.physicalSize = const Size(390, 844);
+  addTearDown(tester.view.reset);
+  await tester.pumpWidget(
+    MaterialApp(
+      home: CodelesslyWidget(
+        codelessly: codelesslyFor(model),
+        layoutID: 'tides',
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+/// As Apiary's "Delete hive": the built-in confirm dialog whose actions set
+/// a variable, reset to another screen (no transition) and show a toast.
+ConfirmAction _confirmDelete(List<ActionModel> actions, {String? dialogId}) =>
+    ConfirmAction(
+      dialogId: dialogId,
+      title: 'Delete hive?',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Keep',
+      destructive: true,
+      actions: actions,
+    );
+
+NavigationAction _resetTo(String to) => NavigationAction(
+  navigationType: NavigationType.reset,
+  destinationId: to,
+  transition: PageTransition.none,
+);
 
 void main() {
   for (final bool before in [false, true]) {
@@ -124,5 +163,64 @@ void main() {
       await tester.tap(find.text('Save'));
       await _expectToast(tester, 'Saved Bramble', 'Tides');
     });
+  }
+
+  for (final bool router in [true, false]) {
+    final String host = router ? 'the router' : 'a navigator';
+    for (final bool canvas in [false, true]) {
+      final String dialog = canvas ? 'canvas' : 'built-in';
+      for (final bool before in [false, true]) {
+        final String order = before ? 'before' : 'after';
+        testWidgets('a toast $order a reset, confirmed in a $dialog dialog, '
+            'shows on the new screen with $host', (tester) async {
+          final ShowToastAction toast = ShowToastAction(
+            message: 'Hive deleted',
+          );
+          final NavigationAction reset = _resetTo('tides');
+          final model = tidepoolModel(
+            buttons: {
+              'guide': {
+                'Delete': _confirmDelete(
+                  before ? [toast, reset] : [reset, toast],
+                  dialogId: canvas ? 'confirm' : null,
+                ),
+              },
+              'tides': {'ToGuide': _nav(NavigationType.push, 'guide')},
+            },
+          );
+          if (canvas) {
+            model.layouts['confirm'] = testScreen(
+              'confirm',
+              children: [
+                (body) => testText('confirmTitle', body, 'Delete hive?'),
+                (body) => testButton(
+                  'Yes',
+                  body,
+                  NavigationAction(
+                    navigationType: NavigationType.pop,
+                    params: {'confirmed': true},
+                  ),
+                ),
+              ],
+            );
+          }
+          if (router) {
+            await pumpRouterApp(
+              tester,
+              model,
+              FakeBrowser(tester, url: '/guide'),
+            );
+          } else {
+            await _pumpNavigatorApp(tester, model);
+            await tap(tester, 'ToGuide');
+          }
+          await tap(tester, 'Delete');
+          expect(find.text('Delete hive?'), findsOneWidget);
+          await tester.tap(find.text(canvas ? 'Yes' : 'Delete').last);
+          await _expectToast(tester, 'Hive deleted', 'Tides');
+          expect(find.text('Guide'), findsNothing);
+        });
+      }
+    }
   }
 }
