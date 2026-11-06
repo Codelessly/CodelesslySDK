@@ -174,20 +174,26 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
           ? MainAxisSize.min
           : MainAxisSize.max,
       spacing: rowColumnNode.spacing,
+      // A row/column that clips its content clips children that overflow
+      // it (a row of skeletons wider than the screen), instead of painting
+      // the debug overflow stripes over them on the design canvas. A Flex
+      // clips only when it overflows, so shadows of children that fit are
+      // drawn as before.
+      clipBehavior:
+          rowColumnNode is ClipMixin &&
+              (rowColumnNode as ClipMixin).clipsContent
+          ? Clip.hardEdge
+          : Clip.none,
       key: ValueKey(rowColumnNode.id),
       children: childrenWidgets,
     );
 
-    // A child sized by a share of the row/column or reading `parent` (a
-    // progress fill bound to `widthFactor`) would see its own constraints,
-    // unbounded along the main axis, so the row/column gives its content
-    // box itself. A main axis that hugs its children has no box to give.
-    if (mainFit != SizeFit.shrinkWrap &&
-        childrenNodes.any(readsParentSize)) {
+    // Children sized by a fraction of this row/column measure it by its
+    // content size (see [FlexContentScope]).
+    if (!measureCross && childrenNodes.any(hasFractionalSize)) {
       final Widget flex = res;
       res = LayoutBuilder(
-        builder: (context, constraints) => FreeformContentSizeScope(
-          parentId: rowColumnNode.id,
+        builder: (context, constraints) => FlexContentScope(
           width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
           height: constraints.hasBoundedHeight ? constraints.maxHeight : null,
           child: flex,

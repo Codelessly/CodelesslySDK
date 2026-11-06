@@ -18,7 +18,7 @@ void main() {
     )
       ..variables['dragTrack.x2'] = r'${= 300 - 28}'
       ..variables['dragTrack.max'] = '0.5';
-    final DragTrackModel resolved = WidgetNodeTransformerManager.resolveTrack(
+    final DragTrackModel resolved = WidgetNodeTransformerManager.resolvedTrack(
       thumb,
       track,
       ScopedValues.empty(),
@@ -32,7 +32,7 @@ void main() {
       basicBoxLocal: NodeBox(0, 0, 1, 1),
     );
     expect(
-      identical(WidgetNodeTransformerManager.resolveTrack(plain, track, ScopedValues.empty()), track),
+      identical(WidgetNodeTransformerManager.resolvedTrack(plain, track, ScopedValues.empty()), track),
       isTrue,
     );
   });

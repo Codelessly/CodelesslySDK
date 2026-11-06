@@ -91,6 +91,97 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   });
 
+  testWidgets(
+    'a knob inside a draggable and a scroll view turns instead of dragging or scrolling',
+    (tester) async {
+      value = 50;
+      const knob = DragTrackModel(
+        variable: 'gain',
+        shape: DragTrackShape.arc,
+        min: 0,
+        max: 100,
+        step: 1,
+        startAngle: -150,
+        endAngle: 150,
+        input: DragTrackInput.vertical,
+        pixelsPerRange: 160,
+      );
+      bool dragStarted = false;
+      final ScrollController scroll = ScrollController();
+      addTearDown(scroll.dispose);
+      for (final PointerDeviceKind kind in [
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.touch,
+      ]) {
+        value = 50;
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: Overlay(
+                initialEntries: [
+                  OverlayEntry(
+                    builder: (context) => SingleChildScrollView(
+                      controller: scroll,
+                      child: SizedBox(
+                        height: 2000,
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: Draggable<String>(
+                            data: 'pedal',
+                            onDragStarted: () => dragStarted = true,
+                            feedback: const SizedBox(width: 10, height: 10),
+                            child: SizedBox(
+                              width: 200,
+                              height: 200,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 40,
+                                  height: 40,
+                                  child: StatefulBuilder(
+                                    builder: (context, setState) =>
+                                        NodeDragTrack(
+                                          track: knob,
+                                          value: value,
+                                          onChanged: (v) =>
+                                              setState(() => value = v),
+                                          onEnd: ends.add,
+                                          child: const SizedBox.expand(),
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        final gesture = await tester.startGesture(
+          const Offset(100, 100),
+          kind: kind,
+        );
+        for (int i = 0; i < 8; i++) {
+          await gesture.moveBy(const Offset(0, -5));
+          await tester.pump();
+        }
+        await gesture.up();
+        await tester.pump(const Duration(seconds: 1));
+        // 40px up of 160px for the whole range: a quarter more, less the
+        // slop it took to claim the pointer.
+        expect(value, greaterThan(60), reason: '$kind');
+        expect(dragStarted, isFalse, reason: '$kind');
+        expect(scroll.offset, 0, reason: '$kind');
+      }
+    },
+  );
+
   testWidgets('dragging along a line writes snapped values', (tester) async {
     value = -48;
     await tester.pumpWidget(plate(fader));
@@ -305,6 +396,39 @@ void main() {
     expect(
       tester.getCenter(find.text('cap')),
       offsetMoreOrLessEquals(const Offset(300, 200)),
+    );
+    // Let the double-tap recognizer's timer run out.
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('tapping round a dial jumps its needle to that angle', (
+    tester,
+  ) async {
+    // A month dial: January at the top, December at 330 degrees.
+    value = 1;
+    const dial = DragTrackModel(
+      shape: DragTrackShape.arc,
+      variable: 'month',
+      min: 1,
+      max: 12,
+      step: 1,
+      startAngle: 0,
+      endAngle: 330,
+      pivotY: 100,
+      rotate: true,
+      jumpOnTap: true,
+    );
+    await tester.pumpWidget(
+      plate(dial, size: const Size(20, 20), at: const Offset(190, 90)),
+    );
+    // Rest centre (200, 100), pivot (200, 200): tap east of the pivot, at
+    // 90 degrees, which is April.
+    await tester.tapAt(const Offset(300, 200));
+    await tester.pump();
+    expect(value, 4);
+    expect(
+      tester.getCenter(find.text('cap')),
+      offsetMoreOrLessEquals(const Offset(300, 200), epsilon: 1),
     );
     // Let the double-tap recognizer's timer run out.
     await tester.pump(const Duration(seconds: 1));
