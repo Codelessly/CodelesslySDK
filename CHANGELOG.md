@@ -1,3 +1,22 @@
+## 9.3.2
+
+Requires codelessly_api 9.3.0.
+
+### Fixed
+
+- A screen loaded again while it shows (published again, a fresh publish
+  bundle replacing the cached model, its variables arriving after it) keeps
+  the values of its canvas variables unless their published definition
+  changed. They went back to their published defaults, and the screen's
+  load actions, which run once per screen, didn't fill them again: a form
+  whose load actions filled drafts from the selected item opened right
+  after a republish with an empty name and the default time.
+- Load actions wait for the screen's variables. A screen shown before its
+  published variables are in the model (a cached model without them, while
+  the publish bundle or an update downloads them) runs its load actions,
+  and applies its link parameters, once they arrive
+  (`DataManager.variablesPending`).
+
 ## 9.3.1
 
 Requires codelessly_api 9.3.0.
