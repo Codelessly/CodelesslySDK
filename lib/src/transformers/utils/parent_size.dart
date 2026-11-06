@@ -127,12 +127,28 @@ Map<String, dynamic> parentVariableValue(double? width, double? height) => {
   'height': height,
 };
 
+/// A `parent` path that reads the outer list's row (`parent.item...`,
+/// `parent.index`) rather than the parent's size.
+final RegExp _parentRowPath = RegExp(r'^parent\.(item|index)(?![A-Za-z0-9_])');
+
 /// Whether [node] reads the `parent` variable in a binding, a formula or an
 /// inline `${...}` text, so it is built inside a [ParentSizeScope].
+///
+/// `parent.item` and `parent.index` (the row of the list around the node's
+/// list, see [ScopedValues.parentIndexedItem]) don't read the size: a dot
+/// in a scene card's dots list coloured by `parent.item.states[item.id]`
+/// needs no [ParentSizeScope], and must not stop the card from being
+/// measured ([subtreeBlocksIntrinsics]), or a `stretchItems` grid took the
+/// card's design height (solved with its dots shown) whatever was hidden.
 bool readsParentSize(BaseNode node) {
   if (hasFractionalSize(node)) return true;
-  bool isParent(String path) =>
-      VariableMatch.parse(path.wrapWithVariableSyntax())?.name == 'parent';
+  bool isParent(String path) {
+    final VariableMatch? match = VariableMatch.parse(
+      path.wrapWithVariableSyntax(),
+    );
+    if (match?.name != 'parent') return false;
+    return !_parentRowPath.hasMatch(match!.fullPath);
+  }
   for (final MapEntry(key: String key, value: String path)
       in node.variables.entries) {
     // A drag track's bindings read its parent's measured box instead (see
