@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../utils/legacy_google_fonts.dart';
 
 // const Color _kDefaultColor = Colors.black;
 // const double _kDefaultFontSize = 18.0;
@@ -573,8 +576,21 @@ class TextUtils {
         shadows: shadows,
       );
     } else {
+      final bool isLegacyGoogleFont =
+          fontName != null && LegacyGoogleFonts.has(fontName.family);
+      if (isLegacyGoogleFont) {
+        unawaited(
+          LegacyGoogleFonts.ensure(
+            fontName.family,
+            weight: (fontWeightProp ?? FontWeight.w400).value,
+            italic: fontStyle == FontStyle.italic,
+          ),
+        );
+      }
       final String? fontFamily = fontName == null
           ? null
+          : isLegacyGoogleFont
+          ? fontName.family
           : getFontFamilyNameAndVariant(fontName);
 
       // Enable this for fonts debugging.
@@ -604,11 +620,17 @@ class TextUtils {
     // Material 3's type scale distributes leading evenly, which puts a font
     // whose ascent is much larger than its descent (DM Serif Display: 1.036em
     // over 0.335em) up to 0.1em lower in its line than Flutter's own
-    // TextStyle(height: x) does. Keep Flutter's default, proportional
-    // leading, and set it explicitly so a host's Material default text style
-    // doesn't change where the text sits either.
+    // TextStyle(height: x) does. Use the line height's own distribution
+    // (Flutter's default, proportional, unless it says even, as text in a
+    // Material 3 Scaffold lays out) and set it explicitly so a host's
+    // Material default text style doesn't change where the text sits either.
     return typography.bodySmall!
         .merge(style)
-        .copyWith(leadingDistribution: TextLeadingDistribution.proportional);
+        .copyWith(
+          leadingDistribution: switch (lineHeight?.leadingDistribution) {
+            LeadingDistributionEnum.even => TextLeadingDistribution.even,
+            _ => TextLeadingDistribution.proportional,
+          },
+        );
   }
 }

@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -64,6 +67,11 @@ abstract final class NodeHero {
       child: Hero(
         tag: enabled ? tag : _DisabledHeroTag(node.id),
         flightShuttleBuilder: flightShuttle,
+        // Flutter flies on the destination hero's tween: both ends of an
+        // arc flight say so.
+        createRectTween: node.heroFlight == HeroFlight.arc
+            ? (Rect? begin, Rect? end) => HeroArcRectTween(begin: begin, end: end)
+            : null,
         child: NodeHeroChild(node: node, child: child),
       ),
     );
@@ -98,6 +106,9 @@ abstract final class NodeHero {
     final bool morph =
         top?.node.heroFlight == HeroFlight.morphCorners ||
         bottom?.node.heroFlight == HeroFlight.morphCorners;
+    final bool arc =
+        top?.node.heroFlight == HeroFlight.arc ||
+        bottom?.node.heroFlight == HeroFlight.arc;
 
     final BuildContext shownContext = morph ? topContext : toContext;
     final Hero shown = shownContext.widget as Hero;
@@ -120,8 +131,55 @@ abstract final class NodeHero {
         );
       }
     }
+    if (arc) {
+      final Widget content = child;
+      final Color glow = _glowOf(top?.node) ?? _glowOf(bottom?.node) ?? const Color(0x80FFFFFF);
+      final double turn = direction == HeroFlightDirection.push ? 0.6 : -0.6;
+      child = AnimatedBuilder(
+        animation: animation,
+        builder: (context, _) {
+          final double t = animation.value.clamp(0.0, 1.0);
+          final double swell = math.sin(t * math.pi);
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final double size = constraints.biggest.shortestSide.isFinite
+                  ? constraints.biggest.shortestSide
+                  : 100;
+              return Transform.rotate(
+                angle: turn * (1 - t),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: glow.withValues(alpha: glow.a * swell),
+                        blurRadius: size * 0.5,
+                        spreadRadius: size * 0.06,
+                      ),
+                    ],
+                  ),
+                  child: content,
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
     // Ink and text styles look for a Material above them.
     return Material(type: MaterialType.transparency, child: child);
+  }
+
+  /// The colour of [node]'s first visible drop shadow, the glow of an arc
+  /// flight.
+  static Color? _glowOf(BaseNode? node) {
+    if (node is! BlendMixin) return null;
+    for (final Effect effect in node.effects) {
+      if (effect.type == EffectType.dropShadow && effect.visible) {
+        return effect.color?.toFlutterColor();
+      }
+    }
+    return null;
   }
 
   static NodeHeroChild? _payloadOf(BuildContext context) {
@@ -273,5 +331,31 @@ abstract final class NodeHeroScope {
       from: from,
       to: navigator.context,
     ).wrap(child);
+  }
+}
+
+
+/// The path of a [HeroFlight.arc] flight: the centre travels a quadratic
+/// curve bowed to the side by 28% of the distance (like Material's arc),
+/// while the size changes evenly.
+class HeroArcRectTween extends RectTween {
+  /// Creates a [HeroArcRectTween].
+  HeroArcRectTween({super.begin, super.end});
+
+  @override
+  Rect? lerp(double t) {
+    final Rect? b = begin, e = end;
+    if (b == null || e == null) return super.lerp(t);
+    final Offset c0 = b.center, c1 = e.center;
+    final Offset mid = Offset.lerp(c0, c1, 0.5)!;
+    final Offset d = c1 - c0;
+    final Offset control = mid + Offset(-d.dy, d.dx) * 0.28;
+    final double u = 1 - t;
+    final Offset c = c0 * (u * u) + control * (2 * u * t) + c1 * (t * t);
+    return Rect.fromCenter(
+      center: c,
+      width: lerpDouble(b.width, e.width, t)!,
+      height: lerpDouble(b.height, e.height, t)!,
+    );
   }
 }

@@ -180,4 +180,68 @@ void main() {
     await tester.pumpAndSettle();
     expect(painter().trimEnd, 0.75);
   });
+
+  testWidgets('bound stroke colour, dashes and a linear trim over trimMs', (
+    tester,
+  ) async {
+    final PathNode node =
+        PathNode(
+            id: 'trail',
+            name: 'Trail',
+            basicBoxLocal: NodeBox(0, 0, 100, 50),
+            pathData: 'M0 0 L100 0',
+            strokes: [PaintModel.solid(id: 's', color: ColorRGB.black)],
+          )
+          ..parentID = kRootNode
+          ..variables['stroke-paint-s'] = r'${= "#E8473F"}'
+          ..variables['dashPattern'] = '14, 10'
+          ..variables['trimEnd'] = r'${goal}'
+          ..variables['trimMs'] = r'${= 1000}'
+          ..variables['trimCurve'] = 'linear';
+    final Observable<VariableData> goal = Observable(
+      VariableData(id: 'goal', name: 'goal', type: VariableType.decimal, value: 0.0),
+    );
+    final CodelesslyContext codelessly = CodelesslyContext.empty()
+      ..variables['goal'] = goal;
+    final NodeRegistry registry = NodeRegistry()..setNodes({node.id: node});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: codelessly,
+        child: MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Builder(
+              builder: (context) => manager.buildWidgetFromNode(
+                node,
+                context,
+                settings: const WidgetBuildSettings(debugLabel: 'test'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    PathNodePainter painter() =>
+        tester
+                .widget<CustomPaint>(
+                  find.byWidgetPredicate(
+                    (w) => w is CustomPaint && w.painter is PathNodePainter,
+                  ),
+                )
+                .painter!
+            as PathNodePainter;
+    expect(painter().strokes.single, const Color(0xFFE8473F));
+    expect(painter().dashes, [14, 10]);
+    goal.set(goal.value.copyWith(value: 1.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    // Linear over 1000 ms: half way.
+    expect(painter().trimEnd, closeTo(0.5, 0.02));
+    await tester.pumpAndSettle();
+    expect(painter().trimEnd, 1);
+  });
 }

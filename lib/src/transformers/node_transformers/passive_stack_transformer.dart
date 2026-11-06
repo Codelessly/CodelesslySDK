@@ -41,6 +41,39 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       child: child,
     );
 
+    // A bound size that reads `parent` (a fill `18 + (parent.width - 28) *
+    // v` wide) is worked out here, where the child is placed: give it the
+    // container's content box.
+    if (readsParentSize(node)) {
+      // Looked up below the container's scope, inside its layout.
+      return Builder(
+        builder: (inside) {
+          final FreeformContentSizeScope? box = FreeformContentSizeScope.of(
+            inside,
+            parent.id,
+          );
+          if (box == null) {
+            return _placedChild(inside, node, manager, placed);
+          }
+          return ParentSizeScope(
+            width: box.width,
+            height: box.height,
+            child: Builder(
+              builder: (scope) => _placedChild(scope, node, manager, placed),
+            ),
+          );
+        },
+      );
+    }
+    return _placedChild(context, node, manager, placed);
+  }
+
+  static Widget _placedChild(
+    BuildContext context,
+    BaseNode node,
+    WidgetNodeTransformerManager? manager,
+    Widget Function(BuildContext) placed,
+  ) {
     // The child widget already listens to its bindings, but its parent data
     // belongs to the freeform slot. Rebuild that slot as well when a bound
     // position, size or size fraction changes, using the mounted scope
@@ -163,6 +196,23 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     return FreeformPlacement(horizontal: horizontal, vertical: vertical);
   }
 
+  /// The extent [parent] lays its children out in at design size: its
+  /// inner box, or the design size of its content when it scales that
+  /// content ([FrameNode.contentFit]). A scaled frame lays its children out
+  /// at [FrameNode.contentDesignSize] (see [buildWidgetForChildren]), so a
+  /// child's share of the free space must be measured there too: measured
+  /// in the frame's own (smaller) box, a 60 px child placed at x 300 of a
+  /// 1200 px design landed at 300 / 330 of the free space, x 1036.
+  static double _designExtent(BaseNode parent, {required bool horizontal}) {
+    if (parent is FrameNode && parent.contentFit != null) {
+      final SizeC design = parent.contentDesignSize;
+      return horizontal ? design.width : design.height;
+    }
+    return horizontal
+        ? parent.innerBoxLocal.width
+        : parent.innerBoxLocal.height;
+  }
+
   static FreeformAxisPlacement _axisPlacement(
     BaseNode node,
     BaseNode parent, {
@@ -190,9 +240,7 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
           extent: horizontal
               ? node.outerBoxLocal.width
               : node.outerBoxLocal.height,
-          parentExtent: horizontal
-              ? parent.innerBoxLocal.width
-              : parent.innerBoxLocal.height,
+          parentExtent: _designExtent(parent, horizontal: horizontal),
           fraction: fraction.toDouble(),
           anchor: ((horizontal ? alignment?.x : alignment?.y) ?? 0) / 2 + 0.5,
         );
@@ -201,7 +249,16 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     final double extent = horizontal
         ? node.outerBoxLocal.width
         : node.outerBoxLocal.height;
-    final double parentExtent = horizontal
+    // A frame that scales a content box of its own design size
+    // ([FrameNode.contentSize]) lays its children out in that space, from
+    // its origin: the frame's padding is outside it, not an offset in it.
+    final SizeC? design = parent is FrameNode && parent.contentFit != null
+        ? parent.contentSize
+        : null;
+    double edge(double e) => design != null ? 0 : e;
+    final double parentExtent = design != null
+        ? (horizontal ? design.width : design.height)
+        : horizontal
         ? parent.innerBoxLocal.width
         : parent.innerBoxLocal.height;
     final SizeFit fit = horizontal ? node.horizontalFit : node.verticalFit;
@@ -220,17 +277,21 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     final double? startPin = switch (horizontal ? pins.left : pins.top) {
       final double pin =>
         pin -
-            (horizontal
-                ? parent.innerBoxLocal.edgeLeft
-                : parent.innerBoxLocal.edgeTop),
+            edge(
+              horizontal
+                  ? parent.innerBoxLocal.edgeLeft
+                  : parent.innerBoxLocal.edgeTop,
+            ),
       null => null,
     };
     final double? endPin = switch (horizontal ? pins.right : pins.bottom) {
       final double pin =>
         pin -
-            (horizontal
-                ? parent.innerBoxLocal.edgeRight
-                : parent.innerBoxLocal.edgeBottom),
+            edge(
+              horizontal
+                  ? parent.innerBoxLocal.edgeRight
+                  : parent.innerBoxLocal.edgeBottom,
+            ),
       null => null,
     };
     final bool pinnedStart = startPin != null;
@@ -250,8 +311,8 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       start = parentExtent - endPin - extent;
     } else {
       start = horizontal
-          ? node.outerBoxLocal.x - parent.innerBoxLocal.edgeLeft
-          : node.outerBoxLocal.y - parent.innerBoxLocal.edgeTop;
+          ? node.outerBoxLocal.x - edge(parent.innerBoxLocal.edgeLeft)
+          : node.outerBoxLocal.y - edge(parent.innerBoxLocal.edgeTop);
     }
 
     FreeformAxisPlacement placement(
@@ -390,16 +451,27 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
           ),
       ],
     );
-    // A child that reads `parent` (a slider cap whose throw is its groove's
-    // width) gets this frame's content box, not its own placed size.
+    // Children that read `parent` read this container's content box.
     if (children.any(readsParentSize)) {
-      final Widget layout = content;
-      content = MeasurableLayoutBuilder(
-        key: ValueKey('${node.id}-children-parent-size'),
-        fallbackSize: designSize,
-        builder: (context, constraints) =>
-            ParentSizeScope.fromConstraints(constraints, child: layout),
-      );
+      final Widget laidOut = content;
+      content = contentFit != null
+          ? FreeformContentSizeScope(
+              parentId: node.id,
+              width: designSize.width,
+              height: designSize.height,
+              child: laidOut,
+            )
+          : MeasurableLayoutBuilder(
+              fallbackSize: designSize,
+              builder: (context, constraints) => FreeformContentSizeScope(
+                parentId: node.id,
+                width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
+                height: constraints.hasBoundedHeight
+                    ? constraints.maxHeight
+                    : null,
+                child: laidOut,
+              ),
+            );
     }
     if (contentFit != null) {
       content = ScaledContent(

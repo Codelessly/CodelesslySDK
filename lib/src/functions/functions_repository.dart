@@ -209,7 +209,7 @@ class FunctionsRepository {
       case ActionType.speak:
         return speak(context, action as SpeakAction);
       case ActionType.scrollTo:
-        return ScrollTargets.scrollTo(action as ScrollToAction);
+        return ScrollTargets.scrollTo(action as ScrollToAction, near: context);
       case ActionType.playSound:
         return playSound(context, action as PlaySoundAction);
       case ActionType.controlDrag:
@@ -360,7 +360,17 @@ class FunctionsRepository {
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
       scopedValues: ActionChain.scopedValuesOf(context),
     );
-    await Clipboard.setData(ClipboardData(text: text));
+    try {
+      await Clipboard.setData(ClipboardData(text: text));
+    } catch (error) {
+      // A browser that denies clipboard access throws here. The copy is a
+      // side effect: the actions after it (the "Link copied" toast) still
+      // run, as they would in an app that doesn't wait for the clipboard.
+      DebugLogger.instance.printInfo(
+        'Copy to clipboard failed: $error',
+        name: 'FunctionsRepository',
+      );
+    }
     return true;
   }
 
@@ -590,7 +600,9 @@ class FunctionsRepository {
   }
 
   /// Runs the nested actions of [action] once per item of its list, with
-  /// `${result.item}` and `${result.index}` set.
+  /// `${loop.item}` and `${loop.index}` set for the whole turn (and
+  /// `${result.item}` / `${result.index}` until an action replaces the
+  /// result).
   static Future<bool> runForEach(
     BuildContext context,
     ForEachAction action,
@@ -616,9 +628,14 @@ class FunctionsRepository {
     }
     final List snapshot = List.of(items);
     for (int index = 0; index < snapshot.length; index++) {
+      final Map<String, Object?> turn = {
+        'item': snapshot[index],
+        'index': index,
+      };
       await ActionChain.run(
         () => runActions(context, action.actions),
-        result: {'item': snapshot[index], 'index': index},
+        result: turn,
+        loop: turn,
       );
     }
     return true;

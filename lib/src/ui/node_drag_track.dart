@@ -1,11 +1,16 @@
+import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' show PathMetric;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import '../transformers/node_transformers/freeform_layout.dart';
+import '../utils/svg_path.dart';
 import 'node_motion.dart';
 
 /// The live state of a drag track, as the `track` variable shows it.
@@ -20,14 +25,23 @@ class TrackValues {
   /// Whether a pointer is dragging the node now.
   final bool dragging;
 
+  /// Whether the track is in fine mode ([DragTrackModel.fineStep]).
+  final bool fine;
+
   /// Creates [TrackValues].
-  const TrackValues({this.value = 0, this.progress = 0, this.dragging = false});
+  const TrackValues({
+    this.value = 0,
+    this.progress = 0,
+    this.dragging = false,
+    this.fine = false,
+  });
 
   /// The values as the `track` variable reads them.
   Map<String, dynamic> toMap() => {
     'value': value,
     'progress': progress,
     'dragging': dragging,
+    'fine': fine,
   };
 
   @override
@@ -35,10 +49,11 @@ class TrackValues {
       other is TrackValues &&
       other.value == value &&
       other.progress == progress &&
-      other.dragging == dragging;
+      other.dragging == dragging &&
+      other.fine == fine;
 
   @override
-  int get hashCode => Object.hash(value, progress, dragging);
+  int get hashCode => Object.hash(value, progress, dragging, fine);
 }
 
 /// Shares the nearest [NodeDragTrack]'s state with the nodes inside it,
@@ -63,32 +78,87 @@ class TrackScope extends InheritedWidget {
 class DragTrackGeometry {
   /// Creates the geometry of [track].
   DragTrackGeometry(this.track) {
-    final String? data = track.path;
-    if (track.shape == DragTrackShape.path && data != null) {
-      // Samples for finding the nearest point to the pointer.
-      const int n = 240;
-      for (int i = 0; i <= n; i++) {
-        final (Offset, double)? point = pointOnMotionPath(data, i / n);
-        if (point == null) break;
-        _samples.add(point.$1);
-      }
-    }
+    _sample();
   }
 
   /// The track.
   final DragTrackModel track;
   final List<Offset> _samples = [];
 
+  /// For a track in a viewBox ([DragTrackModel.usesViewBox]): the scale
+  /// from viewBox units to the frame's pixels, and the node's rest centre
+  /// in the frame. Set by the track's render object after layout.
+  Offset _scale = const Offset(1, 1);
+  Offset _rest = Offset.zero;
+
+  /// The node's size: a [DragTrackModel.relative] line is measured in it.
+  Size size = Size.zero;
+
+  /// The ends of a line track, in pixels relative to the rest centre.
+  Offset get _lineStart => track.relative
+      ? Offset(track.x1 * size.width, track.y1 * size.height)
+      : Offset(track.x1, track.y1);
+  Offset get _lineEnd => track.relative
+      ? Offset(track.x2 * size.width, track.y2 * size.height)
+      : Offset(track.x2, track.y2);
+
+  /// Places a viewBox track in a frame of [frameSize] where the node's rest
+  /// centre is at [rest]. Returns whether anything changed.
+  bool setFrame(Size frameSize, Offset rest) {
+    if (!track.usesViewBox) return false;
+    final Offset scale = Offset(
+      frameSize.width / track.viewBoxWidth,
+      frameSize.height / track.viewBoxHeight,
+    );
+    if (scale == _scale && rest == _rest) return false;
+    _scale = scale;
+    _rest = rest;
+    _sample();
+    return true;
+  }
+
+  /// [point] of the path as an offset from the node's rest centre.
+  Offset _place(Offset point) => track.usesViewBox
+      ? Offset(
+              (point.dx + _start.dx) * _scale.dx,
+              (point.dy + _start.dy) * _scale.dy,
+            ) -
+            _rest
+      : point;
+
+  /// Where a viewBox path starts, in viewBox units.
+  Offset _start = Offset.zero;
+
+  void _sample() {
+    _samples.clear();
+    final String? data = track.path;
+    // Motion paths are measured from their start; a viewBox path is placed
+    // where it is drawn, so its start goes back on.
+    _start = Offset.zero;
+    if (track.usesViewBox && data != null) {
+      final Path? path = parseSvgPath(data);
+      final Iterator<PathMetric>? it = path?.computeMetrics().iterator;
+      if (it != null && it.moveNext()) {
+        _start = it.current.getTangentForOffset(0)?.position ?? Offset.zero;
+      }
+    }
+    if (track.shape == DragTrackShape.path && data != null) {
+      // Samples for finding the nearest point to the pointer.
+      const int n = 240;
+      for (int i = 0; i <= n; i++) {
+        final (Offset, double)? point = pointOnMotionPath(data, i / n);
+        if (point == null) break;
+        _samples.add(_place(point.$1));
+      }
+    }
+  }
+
   /// Where the node's centre sits at [progress], relative to rest.
   Offset offsetAt(double progress) {
     final double p = track.clampProgress(progress);
     switch (track.shape) {
       case DragTrackShape.line:
-        return Offset.lerp(
-          Offset(track.x1, track.y1),
-          Offset(track.x2, track.y2),
-          p,
-        )!;
+        return Offset.lerp(_lineStart, _lineEnd, p)!;
       case DragTrackShape.arc:
         // The node turns around the pivot: its centre moves on a circle
         // through rest, from where it stands at angle 0.
@@ -104,8 +174,29 @@ class DragTrackGeometry {
       case DragTrackShape.path:
         final String? data = track.path;
         if (data == null) return Offset.zero;
-        return pointOnMotionPath(data, p)?.$1 ?? Offset.zero;
+        if (track.usesViewBox && _samples.isNotEmpty) {
+          // Along the stretched path: by its own (pixel) length.
+          return _alongSamples(p);
+        }
+        return _place(pointOnMotionPath(data, p)?.$1 ?? Offset.zero);
     }
+  }
+
+  /// The point [p] of the way along the sampled (placed) path, by length.
+  Offset _alongSamples(double p) {
+    double total = 0;
+    for (int i = 1; i < _samples.length; i++) {
+      total += (_samples[i] - _samples[i - 1]).distance;
+    }
+    double d = p * total;
+    for (int i = 1; i < _samples.length; i++) {
+      final double seg = (_samples[i] - _samples[i - 1]).distance;
+      if (d <= seg && seg > 0) {
+        return Offset.lerp(_samples[i - 1], _samples[i], d / seg)!;
+      }
+      d -= seg;
+    }
+    return _samples.last;
   }
 
   /// How much the node turns at [progress], in degrees.
@@ -144,18 +235,19 @@ class DragTrackGeometry {
   }
 
   /// The progress of the point on a line or path nearest to [p] (relative
-  /// to the rest centre).
+  /// to the rest centre), or of the angle [p] makes around an arc's pivot.
   double nearest(Offset p) {
     switch (track.shape) {
       case DragTrackShape.line:
-        final Offset a = Offset(track.x1, track.y1);
-        final Offset d = Offset(track.x2, track.y2) - a;
+        final Offset a = _lineStart;
+        final Offset d = _lineEnd - a;
         final double len2 = d.distanceSquared;
         if (len2 == 0) return 0;
         final Offset ap = p - a;
         return ((ap.dx * d.dx + ap.dy * d.dy) / len2).clamp(0.0, 1.0);
       case DragTrackShape.path:
         if (_samples.isEmpty) return 0;
+        if (track.usesViewBox) return _nearestByLength(p);
         int best = 0;
         double bestD = double.infinity;
         for (int i = 0; i < _samples.length; i++) {
@@ -167,8 +259,68 @@ class DragTrackGeometry {
         }
         return best / (_samples.length - 1);
       case DragTrackShape.arc:
-        return 0;
+        // The pointer's angle around the pivot, from where the node rests,
+        // taken in whichever turn lands inside the sweep (or nearest an end
+        // of it, for the gap).
+        final double sweep = track.endAngle - track.startAngle;
+        if (sweep == 0) return 0;
+        final double raw = angleOf(p) - angleOf(Offset.zero);
+        final double lo = math.min(track.startAngle, track.endAngle);
+        final double hi = math.max(track.startAngle, track.endAngle);
+        double a = raw;
+        double best = double.infinity;
+        for (int turn = -2; turn <= 2; turn++) {
+          final double c = raw + turn * 360;
+          final double off = c < lo ? lo - c : (c > hi ? c - hi : 0);
+          if (off < best) {
+            best = off;
+            a = c;
+          }
+        }
+        return ((a - track.startAngle) / sweep).clamp(0.0, 1.0);
     }
+  }
+
+  /// The progress (by length along the placed path) nearest [p].
+  double _nearestByLength(Offset p) {
+    double total = 0, at = 0, bestD = double.infinity, bestAt = 0;
+    for (int i = 1; i < _samples.length; i++) {
+      final Offset a = _samples[i - 1];
+      final Offset d = _samples[i] - a;
+      final double len = d.distance;
+      final double t = len == 0
+          ? 0
+          : (((p - a).dx * d.dx + (p - a).dy * d.dy) / (len * len)).clamp(
+              0.0,
+              1.0,
+            );
+      final double dist = (a + d * t - p).distanceSquared;
+      if (dist < bestD) {
+        bestD = dist;
+        bestAt = at + len * t;
+      }
+      at += len;
+      total += len;
+    }
+    return total == 0 ? 0 : bestAt / total;
+  }
+
+  /// The progress along an arc whose angle is nearest [angle] (degrees
+  /// clockwise from up): inside the sweep, where it is; in the gap past its
+  /// ends, the nearer end. Null for a track that isn't an arc or has no
+  /// sweep.
+  double? progressAtAngle(double angle) {
+    if (track.shape != DragTrackShape.arc) return null;
+    final double start = track.startAngle, end = track.endAngle;
+    final double sweep = end - start;
+    if (sweep == 0) return null;
+    // The angle as a turn past the start, in the sweep's direction.
+    double from = (angle - start) * sweep.sign % 360;
+    if (from < 0) from += 360;
+    final double span = sweep.abs();
+    if (from <= span) return from / span;
+    // In the gap: snap to whichever end is closer.
+    return (from - span) < (360 - from) ? 1 : 0;
   }
 
   /// The pointer's angle around the arc's pivot, degrees clockwise from up.
@@ -230,7 +382,14 @@ class TrackChange {
 /// [value]'s place on the track, and dragging it (or, with
 /// [DragTrackModel.jumpOnTap], tapping along the track) reports new values
 /// through [onChanged]. Double tap resets to [DragTrackModel.defaultValue];
-/// the mouse wheel steps the value.
+/// the mouse wheel steps the value (Shift + wheel by the fine step).
+///
+/// A vertical or horizontal track takes its drags with a drag recognizer of
+/// that axis, and a follow track claims the pointer as soon as it lands on
+/// it, so a control inside a scrolling page turns instead of scrolling the
+/// page. With [DragTrackModel.fineStep] the track has a fine mode (Shift, or
+/// press and hold still before dragging), reported through [onFine]. With
+/// [DragTrackModel.snapMs] the node animates to each new value.
 ///
 /// With [DragTrackModel.momentum] a flick keeps it going after the pointer
 /// lifts, slowing by [DragTrackModel.friction]; with
@@ -248,6 +407,7 @@ class NodeDragTrack extends StatefulWidget {
     this.onEnd,
     this.onChange,
     this.onSettled,
+    this.onFine,
     this.enabled = true,
     this.gain,
     this.nodeId,
@@ -271,6 +431,9 @@ class NodeDragTrack extends StatefulWidget {
   /// Called when the control comes to rest after a drag, a coast, a wheel
   /// notch or a [step], with the value it rests on.
   final ValueChanged<double>? onSettled;
+
+  /// Called when fine mode turns on or off.
+  final ValueChanged<bool>? onFine;
 
   /// Whether the control responds to the pointer.
   final bool enabled;
@@ -330,8 +493,20 @@ class TrackPanGestureRecognizer extends PanGestureRecognizer {
       computeHitSlop(pointerDeviceKind, gestureSettings) / 2;
 }
 
+/// The curve named by [DragTrackModel.snapCurve].
+Curve trackSnapCurve(String name) => switch (name) {
+  'linear' => Curves.linear,
+  'easeIn' => Curves.easeIn,
+  'easeOut' => Curves.easeOut,
+  'easeInOut' => Curves.easeInOut,
+  'easeOutCubic' => Curves.easeOutCubic,
+  'elasticOut' => Curves.elasticOut,
+  'bounceOut' => Curves.bounceOut,
+  _ => Curves.easeOutBack,
+};
+
 class _NodeDragTrackState extends State<NodeDragTrack>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late DragTrackGeometry _geometry = DragTrackGeometry(widget.track);
 
   /// The unsnapped progress while dragging, coasting or snapping.
@@ -344,6 +519,17 @@ class _NodeDragTrackState extends State<NodeDragTrack>
   Size _size = Size.zero;
   Offset? _lastLocal;
 
+  /// Fine mode: from Shift or a press held still ([DragTrackModel.fineHoldMs]).
+  bool _fine = false;
+  bool _heldFine = false;
+  Timer? _hold;
+
+  /// The drawn progress while it animates to a new value
+  /// ([DragTrackModel.snapMs]).
+  late final AnimationController _snap = AnimationController(vsync: this);
+  double _from = 0;
+  double _to = 0;
+
   /// Where a smooth track is drawn while it moves (null: at its value).
   double? _drawProgress;
 
@@ -353,7 +539,7 @@ class _NodeDragTrackState extends State<NodeDragTrack>
   /// Progress a snap (or an animated external change) is heading for.
   double? _snapTo;
 
-  /// Whether the motion that is ending should report [onSettled].
+  /// Whether the motion that is ending should report [NodeDragTrack.onSettled].
   bool _settleWhenDone = false;
 
   /// Where a value set from elsewhere is being drawn gliding to.
@@ -364,18 +550,30 @@ class _NodeDragTrackState extends State<NodeDragTrack>
   Duration _last = Duration.zero;
   late final Ticker _ticker = createTicker(_onTick);
 
-  late final PanGestureRecognizer _pan = TrackPanGestureRecognizer()
-    ..dragStartBehavior = DragStartBehavior.down
-    ..onStart = _onStart
-    ..onUpdate = _onUpdate
-    ..onEnd = _onPanEnd
-    ..onCancel = _onEnd;
+  late DragGestureRecognizer _drag = _makeDrag();
   late final DoubleTapGestureRecognizer _doubleTap =
       DoubleTapGestureRecognizer()..onDoubleTap = _onDoubleTap;
+
+  DragGestureRecognizer _makeDrag() {
+    final DragGestureRecognizer r = switch (widget.track.input) {
+      DragTrackInput.vertical => VerticalDragGestureRecognizer(),
+      DragTrackInput.horizontal => HorizontalDragGestureRecognizer(),
+      DragTrackInput.follow => TrackPanGestureRecognizer(),
+    };
+    return r
+      ..dragStartBehavior = DragStartBehavior.down
+      ..onDown = _onDown
+      ..onStart = _onStart
+      ..onUpdate = _onUpdate
+      ..onEnd = _onPanEnd
+      ..onCancel = _onEnd;
+  }
 
   @override
   void initState() {
     super.initState();
+    _from = _to = _progress;
+    _snap.value = 1;
     _register();
   }
 
@@ -397,6 +595,10 @@ class _NodeDragTrackState extends State<NodeDragTrack>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.track != widget.track) {
       _geometry = DragTrackGeometry(widget.track);
+      if (oldWidget.track.input != widget.track.input) {
+        _drag.dispose();
+        _drag = _makeDrag();
+      }
     }
     if (oldWidget.nodeId != widget.nodeId) {
       _unregister(oldWidget.nodeId);
@@ -419,13 +621,16 @@ class _NodeDragTrackState extends State<NodeDragTrack>
       _glideTo = _track.progressOf(widget.value);
       _startTicker();
     }
+    _animateTo(_progress);
   }
 
   @override
   void dispose() {
     _unregister(widget.nodeId);
+    _hold?.cancel();
     _ticker.dispose();
-    _pan.dispose();
+    _snap.dispose();
+    _drag.dispose();
     _doubleTap.dispose();
     super.dispose();
   }
@@ -435,6 +640,37 @@ class _NodeDragTrackState extends State<NodeDragTrack>
   double get _shownValue => _dragValue ?? widget.value;
   double get _progress => _drawProgress ?? _track.progressOf(_shownValue);
   bool get _moving => _ticker.isActive;
+
+  /// The progress the node is drawn at: animating towards [_to] with
+  /// [DragTrackModel.snapMs], else where the value is.
+  double get _drawn {
+    if (_track.snapMs <= 0) return _progress;
+    if (!_snap.isAnimating) return _to;
+    final double t = trackSnapCurve(_track.snapCurve).transform(_snap.value);
+    return _from + (_to - _from) * t;
+  }
+
+  void _animateTo(double target) {
+    if (_track.snapMs <= 0 || target == _to) {
+      _to = target;
+      return;
+    }
+    _from = _drawn;
+    _to = target;
+    _snap.duration = Duration(
+      milliseconds: _fine ? (_track.snapMs / 2).round() : _track.snapMs,
+    );
+    _snap.forward(from: 0);
+  }
+
+  void _setFine(bool fine) {
+    if (fine == _fine) return;
+    setState(() => _fine = fine);
+    widget.onFine?.call(fine);
+  }
+
+  bool get _wantFine =>
+      _track.hasFine && (_heldFine || HardwareKeyboard.instance.isShiftPressed);
 
   /// [local] (in the node's untransformed box) relative to the rest centre.
   Offset _rel(Offset local) => local - _size.center(Offset.zero);
@@ -458,10 +694,13 @@ class _NodeDragTrackState extends State<NodeDragTrack>
   void _emit(double raw) {
     _raw = _track.clampProgress(raw);
     if (_track.smooth) _drawProgress = _raw;
-    final double v = _track.valueAt(_raw);
+    final double v = _fine
+        ? _track.snapFine(_track.min + (_track.max - _track.min) * _raw)
+        : _track.valueAt(_raw);
     final double from = _shownValue;
     if (v != from) {
       setState(() => _dragValue = v);
+      _animateTo(_track.progressOf(v));
       widget.onChanged(v);
       widget.onChange?.call(
         TrackChange(value: v, from: from, crossed: _crossed(from, v)),
@@ -483,19 +722,43 @@ class _NodeDragTrackState extends State<NodeDragTrack>
         _drawProgress = null;
       }
     }
-    if (!onNode &&
-        _track.jumpOnTap &&
-        _track.input == DragTrackInput.follow &&
-        _track.shape != DragTrackShape.arc) {
-      // Tapped the track off the node: jump there, then drag from there.
-      _raw = _progress;
-      _emit(_geometry.nearest(_rel(local)));
+    if (_track.jumpOnTap && _track.input == DragTrackInput.follow) {
+      if (_track.shape == DragTrackShape.arc) {
+        // A dial turns to the angle tapped (on the knob or its ring), then
+        // drags from there, like a real dial's pointer.
+        final double? jump = _geometry.progressAtAngle(
+          _geometry.angleOf(_rel(local)),
+        );
+        if (jump != null) {
+          _raw = _progress;
+          _emit(jump);
+        }
+      } else if (!onNode ||
+          // A relative line's node is usually a scrub area as wide as its
+          // track (a transparent thumb over a chart): a tap on it jumps too.
+          (_track.relative && _track.shape == DragTrackShape.line)) {
+        // Tapped the track off the node: jump there, then drag from there.
+        _raw = _progress;
+        _emit(_geometry.nearest(_rel(local)));
+      }
     }
-    _pan.addPointer(event);
+    _drag.addPointer(event);
     _doubleTap.addPointer(event);
   }
 
+  void _onDown(DragDownDetails d) {
+    _hold?.cancel();
+    if (!_track.hasFine || _track.fineHoldMs <= 0) return;
+    // Pressed and held still: fine mode for the drag that follows.
+    _hold = Timer(Duration(milliseconds: _track.fineHoldMs), () {
+      if (!mounted) return;
+      _heldFine = true;
+      _setFine(true);
+    });
+  }
+
   void _onStart(DragStartDetails d) {
+    _hold?.cancel();
     final Offset p = _rel(d.localPosition);
     _pointerActive = true;
     if (_glideTo != null) {
@@ -507,25 +770,35 @@ class _NodeDragTrackState extends State<NodeDragTrack>
       _dragValue = _shownValue;
       if (_track.smooth) _drawProgress = _raw;
     });
+    _setFine(_wantFine);
     _lastAngle = _geometry.angleOf(p);
     _lastLocal = d.localPosition;
     _grab = _geometry.offsetAt(_raw) - p;
   }
 
   void _onUpdate(DragUpdateDetails d) {
+    final bool fine = _wantFine;
+    if (fine != _fine) {
+      // Switching mode mid-drag: carry on from where the node is.
+      _raw = _progress;
+      _setFine(fine);
+    }
     final Offset p = _rel(d.localPosition);
     _lastLocal = d.localPosition;
+    final double ppr = _fine
+        ? _track.effectiveFinePixelsPerRange
+        : _track.pixelsPerRange;
     switch (_track.input) {
       case DragTrackInput.vertical:
-        _emit(_raw - d.delta.dy * _gain / _track.pixelsPerRange);
+        _emit(_raw - d.delta.dy * _gain / ppr);
       case DragTrackInput.horizontal:
-        _emit(_raw + d.delta.dx * _gain / _track.pixelsPerRange);
+        _emit(_raw + d.delta.dx * _gain / ppr);
       case DragTrackInput.follow:
         if (_track.shape == DragTrackShape.arc) {
           final Offset fromPivot = p - Offset(_track.pivotX, _track.pivotY);
           if (fromPivot.distance < _size.shortestSide * 0.12) {
             // Too close to the pivot for a steady angle: use vertical travel.
-            _emit(_raw - d.delta.dy * _gain / _track.pixelsPerRange);
+            _emit(_raw - d.delta.dy * _gain / ppr);
             _lastAngle = _geometry.angleOf(p);
             return;
           }
@@ -555,8 +828,7 @@ class _NodeDragTrackState extends State<NodeDragTrack>
         return v.dx * _gain / _track.pixelsPerRange;
       case DragTrackInput.follow:
         if (_track.shape == DragTrackShape.arc) {
-          final Offset r =
-              _rel(local) - Offset(_track.pivotX, _track.pivotY);
+          final Offset r = _rel(local) - Offset(_track.pivotX, _track.pivotY);
           final double r2 = r.distanceSquared;
           if (r2 < 1) return 0;
           final double degPerSec =
@@ -565,8 +837,7 @@ class _NodeDragTrackState extends State<NodeDragTrack>
           return sweep == 0 ? 0 : degPerSec * _gain / sweep;
         }
         if (_track.shape == DragTrackShape.line) {
-          final Offset d =
-              Offset(_track.x2 - _track.x1, _track.y2 - _track.y1);
+          final Offset d = Offset(_track.x2 - _track.x1, _track.y2 - _track.y1);
           final double len2 = d.distanceSquared;
           return len2 == 0 ? 0 : (v.dx * d.dx + v.dy * d.dy) / len2;
         }
@@ -576,10 +847,12 @@ class _NodeDragTrackState extends State<NodeDragTrack>
 
   /// A coast starts above this speed (in degrees per second on an arc,
   /// about 230°/s; 400 px/s along a line or drag input).
-  double get _coastStart => _speedOf(_track.shape == DragTrackShape.arc ? 230 : 400);
+  double get _coastStart =>
+      _speedOf(_track.shape == DragTrackShape.arc ? 230 : 400);
 
   /// And ends below this one.
-  double get _coastStop => _speedOf(_track.shape == DragTrackShape.arc ? 52 : 60);
+  double get _coastStop =>
+      _speedOf(_track.shape == DragTrackShape.arc ? 52 : 60);
 
   /// [units] (°/s on an arc, px/s otherwise) in progress per second.
   double _speedOf(double units) {
@@ -600,9 +873,12 @@ class _NodeDragTrackState extends State<NodeDragTrack>
 
   void _onPanEnd(DragEndDetails d) {
     _pointerActive = false;
-    if (_track.momentum && _dragValue != null) {
+    if (_track.momentum && _dragValue != null && !_fine) {
       final double speed = _releaseSpeed(d.velocity);
       if (speed.abs() > _coastStart) {
+        _hold?.cancel();
+        _heldFine = false;
+        _setFine(false);
         _velocity = speed.clamp(-_coastStart * 4, _coastStart * 4);
         _settleWhenDone = true;
         widget.onEnd?.call(_shownValue);
@@ -615,6 +891,10 @@ class _NodeDragTrackState extends State<NodeDragTrack>
 
   void _onEnd() {
     _pointerActive = false;
+    _hold?.cancel();
+    _heldFine = false;
+    _setFine(false);
+    if (_dragValue == null) return;
     final double v = _shownValue;
     widget.onEnd?.call(v);
     if (_track.smooth && _drawProgress != null) {
@@ -717,6 +997,14 @@ class _NodeDragTrackState extends State<NodeDragTrack>
   /// a continuous one), as a drag would: crossing each step and settling.
   Future<bool> stepBy(int steps) async {
     if (!mounted || steps == 0) return mounted;
+    // Gliding to a value set from elsewhere: finish there, then step on
+    // from that value (the glide only draws; the value is already set).
+    if (_glideTo != null) {
+      _raw = _track.progressOf(widget.value);
+      _drawProgress = _raw;
+      _glideTo = null;
+      _dragValue = widget.value;
+    }
     final double unit = _track.step > 0 ? _track.step : _track.wheelStep;
     final double base = _snapTo != null
         ? _track.valueAt(_snapTo!)
@@ -760,12 +1048,21 @@ class _NodeDragTrackState extends State<NodeDragTrack>
       final PointerScrollEvent s = e as PointerScrollEvent;
       final int dir = s.scrollDelta.dy < 0 ? 1 : -1;
       final int up = _track.max >= _track.min ? 1 : -1;
-      if (_track.step > 0 || _track.smooth) {
+      final bool fine =
+          _track.hasFine && HardwareKeyboard.instance.isShiftPressed;
+      // A stepped or smooth track turns one step, through the same path as
+      // a drag (crossing, settling).
+      if (!fine && (_track.step > 0 || _track.smooth)) {
         stepBy(dir * up);
-        widget.onEnd?.call(_track.snap(widget.value + dir * up * _track.wheelStep));
+        widget.onEnd?.call(
+          _track.snap(widget.value + dir * up * _track.wheelStep),
+        );
         return;
       }
-      final double v = _track.snap(widget.value + dir * up * _track.wheelStep);
+      final double by = fine ? _track.fineStep : _track.wheelStep;
+      final double v = fine
+          ? _track.snapFine(widget.value + dir * up * by)
+          : _track.snap(widget.value + dir * up * by);
       if (v != widget.value) {
         final double from = widget.value;
         widget.onChanged(v);
@@ -778,30 +1075,37 @@ class _NodeDragTrackState extends State<NodeDragTrack>
 
   @override
   Widget build(BuildContext context) {
-    final double progress = _progress;
-    return TrackScope(
-      values: TrackValues(
-        value: _shownValue,
-        progress: _track.unbounded
-            ? progress - progress.floorToDouble()
-            : progress,
-        dragging: _dragValue != null,
-      ),
-      child: _TrackArea(
-        geometry: _geometry,
-        progress: progress,
-        jumpOnTap: _track.jumpOnTap,
-        onSize: (size) => _size = size,
-        onPointerDown: _pointerDown,
-        onWheel: _onWheel,
-        child: MouseRegion(
-          cursor: widget.enabled
-              ? (_dragValue != null
-                    ? SystemMouseCursors.grabbing
-                    : SystemMouseCursors.grab)
-              : MouseCursor.defer,
-          child: widget.child,
-        ),
+    return AnimatedBuilder(
+      animation: _snap,
+      builder: (context, child) {
+        final double progress = _drawn;
+        final double shown = _progress;
+        return TrackScope(
+          values: TrackValues(
+            value: _shownValue,
+            // An endless track reports where it is within one turn.
+            progress: _track.unbounded ? shown - shown.floorToDouble() : shown,
+            dragging: _dragValue != null,
+            fine: _fine,
+          ),
+          child: _TrackArea(
+            geometry: _geometry,
+            progress: progress,
+            jumpOnTap: _track.jumpOnTap,
+            onSize: (size) => _size = size,
+            onPointerDown: _pointerDown,
+            onWheel: _onWheel,
+            child: child!,
+          ),
+        );
+      },
+      child: MouseRegion(
+        cursor: widget.enabled
+            ? (_dragValue != null
+                  ? SystemMouseCursors.grabbing
+                  : SystemMouseCursors.grab)
+            : MouseCursor.defer,
+        child: widget.child,
       ),
     );
   }
@@ -850,6 +1154,7 @@ class _TrackArea extends SingleChildRenderObjectWidget {
 class _RenderTrackArea extends RenderProxyBox {
   late DragTrackGeometry _geometry;
   set geometry(DragTrackGeometry g) {
+    if (hasSize) g.size = size;
     _geometry = g;
     markNeedsPaint();
   }
@@ -869,11 +1174,32 @@ class _RenderTrackArea extends RenderProxyBox {
   /// Whether the last hit landed on the moved child (else on the track).
   bool _hitNode = false;
 
-  Matrix4 get _transform => _geometry.transformAt(_progress, size);
+  Matrix4 get _transform {
+    _placeInFrame();
+    return _geometry.transformAt(_progress, size);
+  }
+
+  /// For a track drawn in its frame's viewBox: tells the geometry how big
+  /// the frame is and where the node rests in it.
+  void _placeInFrame() {
+    if (!_geometry.track.usesViewBox || !hasSize) return;
+    RenderObject? up = parent;
+    while (up != null && up is! RenderFreeformLayout) {
+      up = up.parent;
+    }
+    final RenderObject? frame = up;
+    if (frame is! RenderFreeformLayout || !frame.hasSize) return;
+    final Offset rest = MatrixUtils.transformPoint(
+      getTransformTo(frame),
+      size.center(Offset.zero),
+    );
+    _geometry.setFrame(frame.size, rest);
+  }
 
   @override
   void performLayout() {
     super.performLayout();
+    _geometry.size = size;
     onSize(size);
   }
 
@@ -916,6 +1242,89 @@ class _RenderTrackArea extends RenderProxyBox {
       onWheel(event);
     }
   }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null) return;
+    layer = context.pushTransform(
+      needsCompositing,
+      offset,
+      _transform,
+      super.paint,
+      oldLayer: layer is TransformLayer ? layer as TransformLayer : null,
+    );
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.multiply(_transform);
+  }
+}
+
+/// Draws [child] where its track puts it at [progress], without making it
+/// draggable (the design canvas). The pose is worked out from the child's
+/// laid-out size, so relative lines ([DragTrackModel.relative]) move by
+/// their share of it.
+class TrackPose extends SingleChildRenderObjectWidget {
+  /// Creates a [TrackPose].
+  const TrackPose({
+    super.key,
+    required this.track,
+    required this.progress,
+    required super.child,
+  });
+
+  /// The track.
+  final DragTrackModel track;
+
+  /// Where along the track to draw the child, 0 to 1.
+  final double progress;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderTrackPose(DragTrackGeometry(track), progress);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    final _RenderTrackPose r = renderObject as _RenderTrackPose;
+    if (r._geometry.track != track) r.geometry = DragTrackGeometry(track);
+    r.progress = progress;
+  }
+}
+
+class _RenderTrackPose extends RenderProxyBox {
+  _RenderTrackPose(this._geometry, this._progress);
+
+  DragTrackGeometry _geometry;
+  set geometry(DragTrackGeometry g) {
+    if (hasSize) g.size = size;
+    _geometry = g;
+    markNeedsPaint();
+  }
+
+  double _progress;
+  set progress(double p) {
+    if (p == _progress) return;
+    _progress = p;
+    markNeedsPaint();
+  }
+
+  Matrix4 get _transform => _geometry.transformAt(_progress, size);
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    _geometry.size = size;
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      result.addWithPaintTransform(
+        transform: _transform,
+        position: position,
+        hitTest: (result, position) =>
+            super.hitTestChildren(result, position: position),
+      );
 
   @override
   void paint(PaintingContext context, Offset offset) {

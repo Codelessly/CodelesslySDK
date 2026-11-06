@@ -144,7 +144,37 @@ class PropertyValueDelegate {
           variablePath,
           scopedValues: scopedValues,
         ) ??
-        literalIconName<R>(node, property, variablePath);
+        literalIconName<R>(node, property, variablePath) ??
+        literalColor<R>(variablePath) ??
+        literalNumber<R>(variablePath);
+  }
+
+  static final RegExp _hexColor = RegExp(r'^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$');
+
+  /// [binding] itself as a colour when it is a hex colour written as is
+  /// (`#3A3530`, `#FF3A3530`) rather than a variable or formula giving one:
+  /// `"variables": {"iconColor": "#3A3530"}` colours the icon, as
+  /// `${= '#3A3530'}` does (no variable can be named `#...`). Null
+  /// otherwise, and for properties that don't take a colour.
+  static R? literalColor<R extends Object>(String binding) {
+    if (R != ColorRGBA) return null;
+    final String hex = binding.trim();
+    if (!_hexColor.hasMatch(hex)) return null;
+    return ColorRGBA.fromHex(hex) as R?;
+  }
+
+  /// [binding] itself as a number when [R] takes one and the binding is a
+  /// number written as is (`172.28`) rather than a variable or formula: a
+  /// stacked list item's `x`/`y` bound to a constant sits there, as with
+  /// `${= 172.28}`; it used to fall back to the item's design offset. Null
+  /// otherwise.
+  static R? literalNumber<R extends Object>(String binding) {
+    if (R != num && R != double && R != int) return null;
+    final num? value = num.tryParse(binding.trim());
+    if (value == null || !value.isFinite) return null;
+    if (R == int) return (value is int ? value : null) as R?;
+    if (R == double) return value.toDouble() as R;
+    return value as R;
   }
 
   /// The icon properties of an icon node that take an icon's name.
@@ -468,12 +498,23 @@ class PropertyValueDelegate {
   static List<Object?>? _computedInputs(
     String expression,
     ScopedValues scopedValues,
-  ) => _inputsOf(expression, scopedValues.variables, <String>{});
+  ) => _inputsOf(expression, scopedValues.variables, <String>{}, scopedValues);
+
+  /// Predefined values that are the same wherever they are read on a
+  /// screen (unlike item, index, parent...): a formula reading them can
+  /// still be cached, keyed by their current value.
+  static const Set<String> _screenWideValues = {
+    'storage',
+    'route',
+    'screen',
+    'auth',
+  };
 
   static List<Object?>? _inputsOf(
     String expression,
     Map<String, VariableData> variables,
     Set<String> seen,
+    ScopedValues scopedValues,
   ) {
     final List<Object?> inputs = [
       // A formula that reads the clock changes as time passes: its value
@@ -482,13 +523,29 @@ class PropertyValueDelegate {
       // being worked out, and rebuilt, on every read.
       if (FormulaEvaluator.readsClock(expression))
         FormulaClock.now().millisecondsSinceEpoch ~/ 1000,
+      // One that reads the millisecond clock (`nowMs()`, e.g. a tape's
+      // position while it plays) holds only for the millisecond it was
+      // worked out in, so the computed variables built on it move too.
+      if (FormulaEvaluator.readsFrameClock(expression))
+        DateTime.now().millisecondsSinceEpoch,
     ];
     for (final String path in FormulaEvaluator.referencedPaths(expression)) {
       final VariableMatch? match = VariableMatch.parse(
         path.wrapWithVariableSyntax(),
       );
       if (match == null) continue;
-      if (match.isPredefinedVariable) return null;
+      if (match.isPredefinedVariable) {
+        // Saved data (storage) read through a computed chain made every
+        // formula after it uncached: a game's whole simulation ran again
+        // on each read.
+        if (!_screenWideValues.contains(match.name)) return null;
+        if (seen.add('\u0000${match.name}')) {
+          inputs.add(
+            _ValueInput(retrievePredefinedVariableValue(match, scopedValues)),
+          );
+        }
+        continue;
+      }
       final VariableData? input = variables[match.name];
       inputs.add(input);
       // A computed input changes when its own inputs do, so they count too;
@@ -496,7 +553,12 @@ class PropertyValueDelegate {
       if (input != null && input.isComputed && seen.add(input.name)) {
         final String? inner = computedExpressionOf(input);
         if (inner == null) continue;
-        final List<Object?>? nested = _inputsOf(inner, variables, seen);
+        final List<Object?>? nested = _inputsOf(
+          inner,
+          variables,
+          seen,
+          scopedValues,
+        );
         if (nested == null) return null;
         inputs.addAll(nested);
       }
@@ -510,6 +572,12 @@ class PropertyValueDelegate {
       final Object? x = a[i], y = b[i];
       // Variables by identity (they are immutable); the clock's second by
       // value.
+      if (x is _ValueInput && y is _ValueInput) {
+        if (!const DeepCollectionEquality().equals(x.value, y.value)) {
+          return false;
+        }
+        continue;
+      }
       if (!identical(x, y) && !(x is int && x == y)) return false;
     }
     return true;
@@ -528,9 +596,25 @@ class PropertyValueDelegate {
         match,
         scopedValues,
       );
+      // `loop` became a predefined name (a for-each turn's item and index)
+      // after projects already had variables called `loop`. Outside a
+      // for-each turn it reads the project's own variable of that name, so
+      // those projects keep working.
+      if (value == null &&
+          match.name == 'loop' &&
+          scopedValues.variables.containsKey('loop')) {
+        return _userVariableValue(match, scopedValues);
+      }
       return value;
     }
+    return _userVariableValue(match, scopedValues);
+  }
 
+  /// The value of the project's own variable [match] names.
+  static Object? _userVariableValue(
+    VariableMatch match,
+    ScopedValues scopedValues,
+  ) {
     final VariableData? variable = scopedValues.variables[match.name];
     if (variable == null) {
       // In a text field's own actions, `inputValue` (the property a field's
@@ -671,10 +755,13 @@ class PropertyValueDelegate {
       // no app user: read as signed out rather than unknown.
       'auth' => scopedValues.appUser ?? AppAuth.userToMap(null),
       'result' => ActionChain.current?.result,
+      'loop' => ActionChain.current?.loop,
       'screen' => scopedValues.screenSize?.let(
         (Size size) => screenVariableValue(
           size,
           brightness: scopedValues.platformBrightness,
+          tabletMinWidth: scopedValues.breakpointWidths?.$1,
+          desktopMinWidth: scopedValues.breakpointWidths?.$2,
         ),
       ),
       'hold' => scopedValues.holdProgress ?? 0.0,
@@ -1414,4 +1501,11 @@ class InitialValues extends MapBase<String, Object?> {
   @override
   Object? remove(Object? key) =>
       throw UnsupportedError('initial values are read-only');
+}
+
+/// A screen-wide predefined value (storage, route, screen, auth) a
+/// computed variable reads, compared by value for its cache.
+class _ValueInput {
+  const _ValueInput(this.value);
+  final Object? value;
 }

@@ -1097,6 +1097,35 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       fontName: decoration.suffixStyle.fontName,
       textDecoration: decoration.suffixStyle.textDecoration,
     );
+    // Units like "kWh" that show even before anything is typed: the texts
+    // go in the icon slots, which Flutter always shows, instead of the
+    // prefix/suffix, which it shows only once the field is focused or has
+    // text.
+    final bool alwaysAffixes = decoration.affixesAlwaysVisible;
+    final Widget? prefixIconWidget =
+        !decoration.prefixIcon.icon.show || decoration.prefixIcon.icon.isEmpty
+        ? null
+        : _ReactiveIcon(
+            onTap: () => widget.onIconTap?.call(
+              context,
+              decoration.prefixIcon.reactions,
+              controller.text,
+            ),
+            iconModel: decoration.prefixIcon,
+            padding: decoration.prefixIconPadding?.flutterEdgeInsets,
+          );
+    final Widget? suffixIconWidget =
+        !decoration.suffixIcon.icon.show || decoration.suffixIcon.icon.isEmpty
+        ? null
+        : _ReactiveIcon(
+            onTap: () => widget.onIconTap?.call(
+              context,
+              decoration.suffixIcon.reactions,
+              controller.text,
+            ),
+            iconModel: decoration.suffixIcon,
+            padding: decoration.suffixIconPadding?.flutterEdgeInsets,
+          );
     final Widget? counterText = buildText(
       context,
       node,
@@ -1149,39 +1178,36 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       // which defaults to 12 x 16 for text fields: zero makes a bare input.
       contentPadding:
           (decoration.contentPadding ?? node.padding).flutterEdgeInsets,
-      prefixIcon:
-          !decoration.prefixIcon.icon.show || decoration.prefixIcon.icon.isEmpty
-          ? null
-          : _ReactiveIcon(
-              onTap: () => widget.onIconTap?.call(
-                context,
-                decoration.prefixIcon.reactions,
-                controller.text,
-              ),
-              iconModel: decoration.prefixIcon,
-            ),
-      // Unset constraints keep Flutter's 48 px icon slot.
+      prefixIcon: alwaysAffixes && prefixText != null
+          ? _affix(prefixIconWidget, prefixText, before: true)
+          : prefixIconWidget,
+      // Unset constraints keep Flutter's 48 px icon slot (an always-visible
+      // text with no icon takes only its own width).
       prefixIconConstraints: decoration.prefixIconConstraints.isEmpty
-          ? null
+          ? (decoration.prefixIconPadding != null ||
+                    (alwaysAffixes &&
+                        prefixText != null &&
+                        prefixIconWidget == null)
+                ? const BoxConstraints()
+                : null)
           : decoration.prefixIconConstraints.flutterConstraints,
-      prefix: prefixText,
+      prefix: alwaysAffixes ? null : prefixText,
       prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
-      suffixIcon:
-          !decoration.suffixIcon.icon.show || decoration.suffixIcon.icon.isEmpty
-          ? null
-          : _ReactiveIcon(
-              onTap: () => widget.onIconTap?.call(
-                context,
-                decoration.suffixIcon.reactions,
-                controller.text,
-              ),
-              iconModel: decoration.suffixIcon,
-            ),
-      suffix: suffixText,
+      suffixIcon: alwaysAffixes && suffixText != null
+          ? _affix(suffixIconWidget, suffixText, before: false)
+          : suffixIconWidget,
+      suffix: alwaysAffixes ? null : suffixText,
       suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
       // Unset constraints keep Flutter's 48 px icon slot.
+      // With a padding of its own the icon sits at that inset, so unset
+      // constraints drop the 48 px minimum instead of centring it in one.
       suffixIconConstraints: decoration.suffixIconConstraints.isEmpty
-          ? null
+          ? (decoration.suffixIconPadding != null ||
+                    (alwaysAffixes &&
+                        suffixText != null &&
+                        suffixIconWidget == null)
+                ? const BoxConstraints()
+                : null)
           : decoration.suffixIconConstraints.flutterConstraints,
       counter: decoration.showCounter
           ? decoration.counterText?.isNotEmpty == true
@@ -1260,8 +1286,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
     required ScopedValues scopedValues,
     required WidgetBuildSettings settings,
   }) {
+    // A value set at runtime wins, then a binding of the property in the
+    // node's variables (e.g. a hint that follows a form's mode), then the
+    // design's own text.
     final String? value =
-        context.getNodeValue(node.id, property) ?? defaultValue;
+        context.getNodeValue(node.id, property) ??
+        node.variables[property] ??
+        defaultValue;
     if (value == null || value.isEmpty) return null;
     final newValue = PropertyValueDelegate.substituteVariables(
       value,
@@ -1290,8 +1321,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
     TextAlignHorizontalEnum? textAlignHorizontal,
     int? maxLines,
   }) {
+    // A value set at runtime wins, then a binding of the property in the
+    // node's variables (e.g. a hint that follows a form's mode), then the
+    // design's own text.
     final String? value =
-        context.getNodeValue(node.id, property) ?? defaultValue;
+        context.getNodeValue(node.id, property) ??
+        node.variables[property] ??
+        defaultValue;
     if (value == null || value.isEmpty) return null;
     // A text that is only variables, like an error message from a formula,
     // shows nothing when they come out empty: an empty error text would
@@ -1329,15 +1365,25 @@ class _ReactiveIcon extends StatelessWidget {
   final VoidCallback onTap;
   final ReactiveIconModel iconModel;
 
-  const _ReactiveIcon({required this.onTap, required this.iconModel});
+  /// Space round the icon in its slot (the decoration's icon padding).
+  final EdgeInsets? padding;
+
+  const _ReactiveIcon({
+    required this.onTap,
+    required this.iconModel,
+    this.padding,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final icon = Align(
+    Widget icon = Align(
       widthFactor: 1,
       heightFactor: 1,
       child: retrieveIconWidget(iconModel.icon, null)!,
     );
+    if (padding case final EdgeInsets padding) {
+      icon = Padding(padding: padding, child: icon);
+    }
 
     if (iconModel.reactions.isEmpty) return icon;
 
@@ -1346,4 +1392,20 @@ class _ReactiveIcon extends StatelessWidget {
       child: MouseRegion(cursor: SystemMouseCursors.click, child: icon),
     );
   }
+}
+
+/// An always-visible prefix or suffix text, beside its icon if it has one,
+/// for the icon slot of an [InputDecoration].
+Widget _affix(Widget? icon, Widget text, {required bool before}) {
+  final Widget padded = Padding(
+    padding: before
+        ? const EdgeInsetsDirectional.only(start: 12, end: 4)
+        : const EdgeInsetsDirectional.only(start: 4, end: 12),
+    child: text,
+  );
+  if (icon == null) return padded;
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: before ? [icon, padded] : [padded, icon],
+  );
 }

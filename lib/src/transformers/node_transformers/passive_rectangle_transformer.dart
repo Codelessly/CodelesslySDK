@@ -188,10 +188,11 @@ class _TapThroughDecoration extends BoxDecoration {
       false;
 }
 
-/// A box with [borderRadius] and [boxShadow] around [child]. A shadow with a
-/// spread on a rounded box is painted by [SpreadShadowPainter], so its
-/// corners grow with it as in CSS and design tools; [BoxDecoration] keeps the
-/// box's radius, which turns a spread glow around a dot into a square.
+/// A box with [borderRadius] and [boxShadow] around [child]. The shadows of a
+/// rounded box with a spread shadow are painted by [SpreadShadowPainter]
+/// (all of them, keeping their order), so a spread shadow's corners grow
+/// with it as in CSS and design tools; [BoxDecoration] keeps the box's
+/// radius, which turns a spread glow around a dot into a square.
 Widget decorateWithShadows({
   required List<BoxShadow> boxShadow,
   required BorderRadius? borderRadius,
@@ -221,28 +222,24 @@ Widget decorateWithShadows({
   }
   final bool rounded =
       borderRadius != null && borderRadius != BorderRadius.zero;
-  final List<BoxShadow> spread = [
-    if (rounded)
-      for (final BoxShadow shadow in boxShadow)
-        if (shadow.spreadRadius != 0) shadow,
-  ];
+  // Once one shadow needs the painter, it paints them all: shadows stack in
+  // list order (the first at the bottom), and the painter paints before the
+  // decoration, so splitting them would put every spread shadow under the
+  // others (a button's 'edge' drawn as a graphite shadow with a coloured,
+  // inset shadow over it lost the colour).
+  final List<BoxShadow> spread =
+      rounded && boxShadow.any((shadow) => shadow.spreadRadius != 0)
+      ? boxShadow
+      : const [];
+  final List<BoxShadow> decorated = spread.isEmpty ? boxShadow : const [];
   final Widget box = Container(
     clipBehavior: clipBehavior,
     decoration: tapThrough
         ? _TapThroughDecoration(
-            boxShadow: [
-              for (final BoxShadow shadow in boxShadow)
-                if (!spread.contains(shadow)) shadow,
-            ],
+            boxShadow: decorated,
             borderRadius: borderRadius,
           )
-        : BoxDecoration(
-            boxShadow: [
-              for (final BoxShadow shadow in boxShadow)
-                if (!spread.contains(shadow)) shadow,
-            ],
-            borderRadius: borderRadius,
-          ),
+        : BoxDecoration(boxShadow: decorated, borderRadius: borderRadius),
     child: child,
   );
   // Always a CustomPaint, painting nothing without spread shadows: a ring
@@ -1035,10 +1032,30 @@ BoxDecoration? _foregroundDecoration(
 List<Widget> clipFillsToNotches(BaseNode node, List<Widget> fills) {
   if (node is RectangleNode && node.hasPath) {
     if (fills.isEmpty) return fills;
+    // A path may reach past its box (a band drawn above its baseline):
+    // fill the box and the path's bounds together, so the part outside is
+    // filled too and a gradient spans the whole shape.
+    final Rect box = Offset.zero & node.basicBoxLocal.size.flutterSize;
+    final Rect bounds = parseSvgPath(node.path)?.getBounds() ?? box;
+    final Rect area = box.expandToInclude(bounds);
+    if (area == box) {
+      return [
+        Positioned.fill(
+          child: ClipPath(
+            clipper: SvgPathClipper(node.path!),
+            child: Stack(children: fills),
+          ),
+        ),
+      ];
+    }
     return [
-      Positioned.fill(
+      Positioned(
+        left: area.left,
+        top: area.top,
+        width: area.width,
+        height: area.height,
         child: ClipPath(
-          clipper: SvgPathClipper(node.path!),
+          clipper: SvgPathClipper(node.path!, offset: -area.topLeft),
           child: Stack(children: fills),
         ),
       ),
@@ -1234,7 +1251,8 @@ Widget buildFill(
 
       // Substitute URL value from [CodelesslyContext]'s [data] map if
       // [imageURL] represents a JSON path.
-      String? imageURL = paint.croppedImageURL ?? paint.downloadUrl!;
+      // A paint saved without a URL draws nothing rather than failing.
+      String? imageURL = paint.croppedImageURL ?? paint.downloadUrl ?? '';
       final imageURLValue =
           PropertyValueDelegate.getPropertyValue<String>(
             node,

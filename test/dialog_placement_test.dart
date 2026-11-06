@@ -210,10 +210,8 @@ void main() {
   testWidgets('an adaptive menu dims behind its sheet, not its popover', (
     tester,
   ) async {
-    Color? barrier() => tester
-        .widgetList<ModalBarrier>(find.byType(ModalBarrier))
-        .last
-        .color;
+    Color? barrier() =>
+        tester.widgetList<ModalBarrier>(find.byType(ModalBarrier)).last.color;
     await open(
       tester,
       DialogPlacement.belowStart,
@@ -224,9 +222,7 @@ void main() {
     expect(barrier(), anyOf(isNull, Colors.transparent));
   });
 
-  testWidgets('an adaptive menu sheet keeps its barrier color', (
-    tester,
-  ) async {
+  testWidgets('an adaptive menu sheet keeps its barrier color', (tester) async {
     await open(
       tester,
       DialogPlacement.belowStart,

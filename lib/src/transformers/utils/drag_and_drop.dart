@@ -115,6 +115,10 @@ class DragSession {
   /// Whether [overTarget] accepts the drop (its `acceptIf`).
   bool accepted = false;
 
+  /// Whether [overTarget] is full ([DropTargetModel.fullIf]): it takes no
+  /// drop, but still reports itself in [over] so a binding can say why.
+  bool full = false;
+
   DragSession({
     required this.group,
     required this.data,
@@ -138,6 +142,7 @@ class DragSession {
     'beforeId': beforeId,
     'before': before,
     'accepted': accepted,
+    'full': full,
     'width': size.width,
     'height': size.height,
   };
@@ -166,6 +171,7 @@ class DragAndDropController extends ChangeNotifier {
     'beforeId': '',
     'before': null,
     'accepted': false,
+    'full': false,
     'width': 0.0,
     'height': 0.0,
   };
@@ -214,7 +220,7 @@ class CodelesslyDragPayload {
   /// Fires the source's `dragCancel` reactions.
   VoidCallback cancel = () {};
 
-  /// Whether a target took the drop (its group, `acceptIf` and `fullIf`
+  /// Whether a target took the drop (its group, `fullIf` and `acceptIf`
   /// allowed it), as opposed to the drag merely ending over one.
   bool dropped = false;
 }
@@ -448,9 +454,15 @@ class _DragSourceBoxState extends State<DragSourceBox>
         Directionality.maybeOf(context) ?? TextDirection.ltr;
     final Widget content =
         model.feedbackNodeId.isNotEmpty && widget.buildNode != null
-        ? Builder(
-            builder: (context) =>
-                widget.buildNode!(context, model.feedbackNodeId),
+        // Drawn in the overlay, nothing around the feedback node gives it its
+        // size: it takes its designed size (a 260px label stays 260px).
+        ? SizedBox(
+            width: widget.feedbackSize?.width,
+            height: widget.feedbackSize?.height,
+            child: Builder(
+              builder: (context) =>
+                  widget.buildNode!(context, model.feedbackNodeId),
+            ),
           )
         : SizedBox.fromSize(size: _size, child: widget.child);
     final double radius = switch (widget.node) {
@@ -505,6 +517,12 @@ class _DragSourceBoxState extends State<DragSourceBox>
         ),
       ),
     );
+    if (model.feedbackAnchor == FeedbackAnchor.center) {
+      feedback = FractionalTranslation(
+        translation: const Offset(-0.5, -0.5),
+        child: feedback,
+      );
+    }
     return themes.wrap(IgnorePointer(child: feedback));
   }
 
@@ -517,6 +535,11 @@ class _DragSourceBoxState extends State<DragSourceBox>
     _size = box.size;
     final Offset grab = box.globalToLocal(position);
     _payload = _start(grab);
+    // Held by its centre, the copy is drawn from the pointer and shifted
+    // back by half its own size (see [_feedback]), whatever size it is.
+    if (widget.model.feedbackAnchor == FeedbackAnchor.center) {
+      return Offset.zero;
+    }
     return grab;
   }
 
@@ -538,9 +561,11 @@ class _DragSourceBoxState extends State<DragSourceBox>
         }
         if (dragged) {
           shown = switch (model.whileDragging) {
-            // Collapses while over a target, so the slot there is the only
-            // place it shows; ghosts elsewhere so it can be found again.
-            DragSourceStyle.hidden when session.overTarget != null =>
+            // Collapses while over a target that would take it, so the slot
+            // there is the only place it shows; ghosts elsewhere (and over a
+            // full target) so it can be found again.
+            DragSourceStyle.hidden
+                when session.overTarget != null && !session.full =>
               const SizedBox.shrink(),
             DragSourceStyle.hidden || DragSourceStyle.ghost => Opacity(
               opacity: model.ghostOpacity.clamp(0, 1),
@@ -788,6 +813,25 @@ class DropTargetBoxState extends State<DropTargetBox> {
   }) {
     final DragSession? session = controller.session;
     final Size size = session?.size ?? Size.zero;
+    // A refused drop opens no slot when the target says so.
+    if (!widget.model.slotWhenRefused && session != null && !session.accepted) {
+      return const KeyedSubtree(
+        key: ValueKey('codelessly-drop-slot'),
+        child: SizedBox.shrink(),
+      );
+    }
+    final bool ownSize =
+        widget.model.slotSize == DropSlotSize.node &&
+        widget.model.slot == DropSlot.node &&
+        widget.model.slotNodeId.isNotEmpty &&
+        buildNode != null;
+    if (ownSize) {
+      // The slot node at its own size: an insertion line between rows.
+      return KeyedSubtree(
+        key: const ValueKey('codelessly-drop-slot'),
+        child: buildNode(context, widget.model.slotNodeId),
+      );
+    }
     final Widget sized = SizedBox(
       width: wraps || axis == Axis.horizontal ? size.width : null,
       height: wraps || axis == Axis.vertical ? size.height : null,
@@ -852,9 +896,11 @@ class DropTargetBoxState extends State<DropTargetBox> {
   }
 
   /// Whether a drag of [group] may come onto this target at all: a group it
-  /// accepts, while it is enabled and not full.
+  /// accepts, while it is enabled. A full target still takes the drag onto
+  /// it (so `drag.over` and `drag.full` can say why it won't take the
+  /// drop) and refuses the drop itself.
   bool _takes(String group) =>
-      widget.enabled && widget.model.acceptsGroup(group) && !_isFull();
+      widget.enabled && widget.model.acceptsGroup(group);
 
   bool _evaluateAccept() {
     final String condition = widget.model.acceptIf.trim();
@@ -869,9 +915,11 @@ class DropTargetBoxState extends State<DropTargetBox> {
     final int? oldBefore = session.rawBefore;
     final bool oldAccepted = session.accepted;
     final bool entering = !identical(session.overTarget, this);
+    final bool oldFull = session.full;
     session.overTarget = this;
     session.over = key;
-    if (widget.model.listNodeId.isNotEmpty) {
+    session.full = _isFull();
+    if (widget.model.listNodeId.isNotEmpty && !session.full) {
       _place(session, position);
     } else {
       session.index = 0;
@@ -879,14 +927,17 @@ class DropTargetBoxState extends State<DropTargetBox> {
       session.before = null;
       session.beforeId = '';
     }
-    session.accepted = _evaluateAccept();
+    session.accepted = !session.full && _evaluateAccept();
     if (entering ||
         oldOver != session.over ||
         oldBefore != session.rawBefore ||
-        oldAccepted != session.accepted) {
+        oldAccepted != session.accepted ||
+        oldFull != session.full) {
       payload.controller.changed();
     }
-    if (entering && !_entered) {
+    // A full target reports itself (drag.over, drag.full) but isn't
+    // entered: enter, hover and exit are for targets that would take it.
+    if (entering && !_entered && !session.full) {
       _entered = true;
       _fire(TriggerType.dragEnter, session.toMap());
       if (widget.model.hoverDelayMs > 0) {
@@ -906,6 +957,7 @@ class DropTargetBoxState extends State<DropTargetBox> {
 
   void _leave(CodelesslyDragPayload payload) {
     _hoverTimer?.cancel();
+    final bool wasEntered = _entered;
     _entered = false;
     final DragSession session = payload.session;
     if (!identical(session.overTarget, this)) return;
@@ -913,9 +965,10 @@ class DropTargetBoxState extends State<DropTargetBox> {
       ..overTarget = null
       ..over = ''
       ..accepted = false
+      ..full = false
       ..rawBefore = null;
     payload.controller.changed();
-    _fire(TriggerType.dragExit, session.toMap());
+    if (wasEntered) _fire(TriggerType.dragExit, session.toMap());
   }
 
   void _drop(CodelesslyDragPayload payload) {
@@ -928,8 +981,10 @@ class DropTargetBoxState extends State<DropTargetBox> {
       session
         ..overTarget = this
         ..over = key
-        ..accepted = _evaluateAccept();
+        ..full = _isFull()
+        ..accepted = !session.full && _evaluateAccept();
     }
+    final bool full = session.full;
     final bool accepted = session.accepted;
     final Map<String, Object?> result = session.toMap(active: false)
       ..['key'] = session.over;
@@ -937,6 +992,11 @@ class DropTargetBoxState extends State<DropTargetBox> {
     payload.controller.end(dropped: accepted);
     if (accepted) {
       _fire(TriggerType.drop, result);
+    } else if (full) {
+      // Let go on a full target: not a wrong answer, but say so (e.g.
+      // "A2 is full").
+      _fire(TriggerType.dropFull, result);
+      payload.cancel();
     } else {
       // Let go on this target, of a group it takes, but its acceptIf
       // refused it: a wrong answer.

@@ -200,9 +200,7 @@ void main() {
       expect(paintOrder(tester), ['a', 'd', 'c', 'b']);
       // Same card, same state: its motion slides it back over 400ms.
       expect(
-        tester.state(
-          find.descendant(of: cardKeyed('a'), matching: motionBody),
-        ),
+        tester.state(find.descendant(of: cardKeyed('a'), matching: motionBody)),
         same(motionOfA),
       );
       await tester.pump(const Duration(milliseconds: 200));
@@ -224,9 +222,7 @@ void main() {
       await tester.pump();
       expect(paintOrder(tester), ['b', 'a', 'c']);
       expect(
-        tester.state(
-          find.descendant(of: cardKeyed('c'), matching: motionBody),
-        ),
+        tester.state(find.descendant(of: cardKeyed('c'), matching: motionBody)),
         same(before),
       );
     });
