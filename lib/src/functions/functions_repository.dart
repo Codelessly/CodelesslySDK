@@ -205,7 +205,7 @@ class FunctionsRepository {
       case ActionType.speak:
         return speak(context, action as SpeakAction);
       case ActionType.scrollTo:
-        return ScrollTargets.scrollTo(action as ScrollToAction);
+        return ScrollTargets.scrollTo(action as ScrollToAction, near: context);
       case ActionType.playSound:
         return playSound(context, action as PlaySoundAction);
       case ActionType.controlDrag:
@@ -215,6 +215,8 @@ class FunctionsRepository {
           drag.command,
           drag.direction,
         ).then((_) => true);
+      case ActionType.haptic:
+        return haptic(context, action as HapticAction);
     }
   }
 
@@ -583,7 +585,9 @@ class FunctionsRepository {
   }
 
   /// Runs the nested actions of [action] once per item of its list, with
-  /// `${result.item}` and `${result.index}` set.
+  /// `${loop.item}` and `${loop.index}` set for the whole turn (and
+  /// `${result.item}` / `${result.index}` until an action replaces the
+  /// result).
   static Future<bool> runForEach(
     BuildContext context,
     ForEachAction action,
@@ -609,9 +613,14 @@ class FunctionsRepository {
     }
     final List snapshot = List.of(items);
     for (int index = 0; index < snapshot.length; index++) {
+      final Map<String, Object?> turn = {
+        'item': snapshot[index],
+        'index': index,
+      };
       await ActionChain.run(
         () => runActions(context, action.actions),
-        result: {'item': snapshot[index], 'index': index},
+        result: turn,
+        loop: turn,
       );
     }
     return true;
@@ -2208,6 +2217,36 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
       scopedValues: scopedValues,
     );
   }
+
+  /// Buzzes the device as [action] says, unless its `when` formula is false.
+  static bool haptic(BuildContext context, HapticAction action) {
+    if (action.when.trim().isNotEmpty) {
+      final String on = PropertyValueDelegate.substituteVariables(
+        action.when,
+        scopedValues: ActionChain.scopedValuesOf(context),
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ).trim().toLowerCase();
+      if (on.isEmpty || on == 'false' || on == '0' || on == 'null') return true;
+    }
+    lastHaptic = action.kind;
+    switch (action.kind) {
+      case HapticKind.selection:
+        HapticFeedback.selectionClick();
+      case HapticKind.light:
+        HapticFeedback.lightImpact();
+      case HapticKind.medium:
+        HapticFeedback.mediumImpact();
+      case HapticKind.heavy:
+        HapticFeedback.heavyImpact();
+      case HapticKind.vibrate:
+        HapticFeedback.vibrate();
+    }
+    return true;
+  }
+
+  /// The last buzz [haptic] gave (tests).
+  @visibleForTesting
+  static HapticKind? lastHaptic;
 
   /// Plays [action]'s sound, now or at its `at` time on the sound clock, or
   /// its sound file.
