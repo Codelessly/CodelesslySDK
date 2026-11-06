@@ -25,7 +25,26 @@ Requires codelessly_api 9.4.0.
 - Apps published with scripts need this version: earlier ones don't know
   "Run script" actions (a site on 9.1.9 stays on its loading screen for
   such a layout).
-- Transitions (needs the unreleased `codelessly_api` with `RouteTransition`; see `CodelesslyEditor/docs/transitions_api.md`):
+- `NodeTransformGesture` runs `BaseNode.transformGesture` (and `zoomable`,
+  which no longer uses `InteractiveViewer`): focal-point pinch zoom, pan,
+  two-finger rotate, double-tap zoom, wheel and trackpad zoom, rubber-band
+  bounds, fling and spring settle, two-way pose variables, `changed` /
+  `changeEnd` / `doubleTap` reactions, `${transform.*}` inside the node, and
+  corner, edge and rotate handles with a selection variable.
+- `gesture_physics.dart`: the shared physics (`springOf`,
+  `AxisSettleSimulation`, `rubberBand`, `boundsRange`, `snapTargetOf`).
+- `NodeDrag` with `DragModel.physics` flings, springs back with the release
+  velocity, rubber-bands past its bounds and limits and settles on snap
+  points; `dragEnd` reads `targetX`, `targetY`, `snapIndex`, and `drag`
+  reads `settling` and `snapIndex`. Without physics it behaves as before.
+- `NodeDrag` is grabbed where it is drawn (an open sheet by its visible
+  top), counts from pointer down instead of after the touch slop, and an
+  axis-locked drag only claims moves along its axis, so a list across it
+  keeps scrolling.
+- `pinch` reactions read `rotation`, `totalRotation` and `pointerCount`;
+  `drag` and `dragEnd` read `pointerCount`.
+- A draggable's return spring uses `DraggableModel.effectivePhysics`.
+- Transitions (see `CodelesslyEditor/docs/transitions_api.md`):
   - `CodelesslyRouteTransitionRoute` plays a `RouteTransition` on both screens.
     - The screen it covers moves through Flutter's `delegatedTransition`.
     - Pops reverse, or play the pop sides.
@@ -99,6 +118,25 @@ Requires codelessly_api 9.4.0.
   scrolls both ways, builds only the visible cells and pins its header row
   and column.
 
+## 9.3.3
+
+Requires codelessly_api 9.3.0. Rendering fixes found matching the Chairlift
+reference app pixel for pixel.
+
+### Fixed
+
+- A colour or gradient fill sits inside its node's solid border by half the
+  border's inset, as Flutter's BoxDecoration paints a background under a
+  uniform border: drawn to the edge, the fill's anti-aliased rim showed
+  through the border's (a light seam between a card's border and shadow).
+- A node that clips its content keeps its own stroke outside the clip, as
+  Flutter's Container paints its border outside the clip of its child: a
+  rounded card's border was cut (or anti-aliased twice), leaving a light
+  seam between it and its shadow.
+- A stroke on one side paints only its band. It was the difference of two
+  rounded rects whose other three edges coincide, and at a fractional
+  position the GPU backend left faint lines along them.
+
 ## 9.3.2
 
 Requires codelessly_api 9.3.0.
@@ -131,10 +169,6 @@ Requires codelessly_api 9.3.0.
 - Layouts load the SVGs of their toast icons when they load
   (`AppToast.precacheIcons`, `SvgIcon.precache`), so the first toast of a
   session shows its icon.
-- A node that clips its content keeps its own stroke outside the clip, as
-  Flutter's Container paints its border outside the clip of its child: a
-  rounded card's border was cut (or anti-aliased twice), leaving a light
-  seam between it and its shadow.
 
 ## 9.3.0
 
