@@ -159,6 +159,47 @@ class FormulaEvaluator {
 
   static final Map<String, _Node?> _cache = {};
 
+  static Stopwatch? _budgetClock;
+  static int _budgetMicros = 0;
+  static bool _budgetExceeded = false;
+
+  /// Runs [run] with a time [budget] for the formulas it evaluates: once
+  /// the budget is spent, every further function call fails, so the
+  /// formula ends quickly with null instead of running on. [exceeded]
+  /// tells whether it ran out. A budget already running keeps its own
+  /// limit. Meant for previews that must not hold up the screen (a design
+  /// canvas evaluating a heavy computed variable); the running app has no
+  /// budget.
+  static ({T result, bool exceeded}) withinBudget<T>(
+    Duration budget,
+    T Function() run,
+  ) {
+    if (_budgetClock != null) {
+      final T result = run();
+      return (result: result, exceeded: _budgetExceeded);
+    }
+    _budgetClock = Stopwatch()..start();
+    _budgetMicros = budget.inMicroseconds;
+    _budgetExceeded = false;
+    try {
+      final T result = run();
+      return (result: result, exceeded: _budgetExceeded);
+    } finally {
+      _budgetClock = null;
+      _budgetExceeded = false;
+    }
+  }
+
+  /// Throws once the running budget ([withinBudget]) is spent.
+  static void _spend() {
+    final Stopwatch? clock = _budgetClock;
+    if (clock == null) return;
+    if (_budgetExceeded || clock.elapsedMicroseconds > _budgetMicros) {
+      _budgetExceeded = true;
+      throw const _BudgetExceeded();
+    }
+  }
+
   /// Evaluates [expression], resolving variable paths with [resolve].
   static Object? evaluate(String expression, FormulaPathResolver resolve) {
     final _Node? node = _parse(expression);
@@ -3130,6 +3171,12 @@ final Map<String, _Function> _functions = {
 // Syntax tree
 // ---------------------------------------------------------------------------
 
+/// Thrown when a formula's time budget is spent; see
+/// [FormulaEvaluator.withinBudget].
+class _BudgetExceeded implements Exception {
+  const _BudgetExceeded();
+}
+
 sealed class _Node {
   const _Node();
 
@@ -3158,6 +3205,7 @@ class _UserCall extends _Node {
 
   @override
   Object? eval(FormulaPathResolver resolve) {
+    FormulaEvaluator._spend();
     final Object? function = resolve(name);
     final List<Object?> values = [for (final arg in args) arg.eval(resolve)];
     if (function is FormulaFunction) return function.call(values);
@@ -3366,6 +3414,7 @@ class _Call extends _Node {
 
   @override
   Object? eval(FormulaPathResolver resolve) {
+    FormulaEvaluator._spend();
     // `if` only evaluates the branch it returns.
     if (name == 'if') {
       _Node? arg(int i) => i < args.length ? args[i] : null;
@@ -3381,6 +3430,40 @@ class _Call extends _Node {
 
   @override
   void collectPaths(Set<String> paths) {
+    for (final arg in args) {
+      arg.collectPaths(paths);
+    }
+  }
+}
+
+/// A call of whatever [target] evaluates to: a lambda written in place,
+/// `(k => k == 'x' ? 1 : 2)(s.kind)`, or a function held in a value.
+class _Invoke extends _Node {
+  final _Node target;
+  final List<_Node> args;
+
+  const _Invoke(this.target, this.args);
+
+  @override
+  Object? eval(FormulaPathResolver resolve) {
+    FormulaEvaluator._spend();
+    final Object? function = target.eval(resolve);
+    final List<Object?> values = [for (final arg in args) arg.eval(resolve)];
+    if (function is FormulaFunction) return function.call(values);
+    // A closure made here keeps what it captured (`x => y => x + y`).
+    if (function is _Closure) return function.callWith(values);
+    if (_userFunction(function, resolve) case final _Closure closure) {
+      return closure.callWith(values);
+    }
+    throw StateError('Not a function');
+  }
+
+  @override
+  Iterable<_Node> get children => [target, ...args];
+
+  @override
+  void collectPaths(Set<String> paths) {
+    target.collectPaths(paths);
     for (final arg in args) {
       arg.collectPaths(paths);
     }
@@ -3574,7 +3657,7 @@ class _Parser {
   static final RegExp _identifier = RegExp(r'[a-zA-Z_][a-zA-Z0-9_]*');
   static final RegExp _lambdaHead = RegExp(
     r'(?:([a-zA-Z_][a-zA-Z0-9_]*)'
-    r'|\(\s*([a-zA-Z_][a-zA-Z0-9_]*(?:\s*,\s*[a-zA-Z_][a-zA-Z0-9_]*)*)\s*\))'
+    r'|\(\s*((?:[a-zA-Z_][a-zA-Z0-9_]*(?:\s*,\s*[a-zA-Z_][a-zA-Z0-9_]*)*)?)\s*\))'
     r'\s*=>',
   );
 
@@ -3621,8 +3704,11 @@ class _Parser {
     pos = head.end;
     final List<String> params = head[1] != null
         ? [head[1]!]
+        : head[2]!.trim().isEmpty
+        ? <String>[]
         : head[2]!.split(',').map((name) => name.trim()).toList();
-    final _Node body = _ternary();
+    // The body may itself be a lambda: `x => y => x + y`.
+    final _Node body = _argument();
     return _Lambda(params, body, source.substring(start, pos).trim());
   }
 
@@ -3706,6 +3792,17 @@ class _Parser {
         if (name == null) throw FormatException('Expected a name', source, pos);
         pos = name.end;
         node = _Member(node, _Literal(name[0]));
+      } else if (_eat('(')) {
+        // Calling what an expression gives: a lambda written in place,
+        // `(k => k * 2)(n)`, or a function a list or map holds.
+        final List<_Node> args = [];
+        if (!_eat(')')) {
+          do {
+            args.add(_argument());
+          } while (_eat(','));
+          _expect(')');
+        }
+        node = _Invoke(node, args);
       } else {
         return node;
       }
@@ -3769,7 +3866,9 @@ class _Parser {
 
     if (char == '(') {
       pos++;
-      final _Node node = _ternary();
+      // A lambda may stand in parentheses, to be called at once:
+      // `(k => k * 2)(n)`.
+      final _Node node = _argument();
       _expect(')');
       return node;
     }

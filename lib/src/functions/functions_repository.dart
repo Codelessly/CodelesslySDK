@@ -1036,7 +1036,11 @@ class FunctionsRepository {
     final String? myCanvasId = effectiveCodelessly.currentNavigatedCanvasId;
 
     if (action.navigationType == NavigationType.pop) {
-      final bool popped = await Navigator.maybePop(context, parsedParams);
+      // The screen's own pop leaves even while it blocks back.
+      final bool popped = await BackInterceptor.allowPop(
+        context,
+        () => Navigator.maybePop(context, parsedParams),
+      );
       // Nothing to go back to (the screen was opened directly): a pop with a
       // destination goes there instead.
       if (!popped && action.destinationId.isNotEmpty && context.mounted) {
@@ -1180,7 +1184,10 @@ class FunctionsRepository {
       // A dialog or sheet over the screen closes first.
       final ModalRoute<Object?>? modal = ModalRoute.of(context);
       if (modal != null && (!modal.isCurrent || modal.settings is! Page)) {
-        await Navigator.maybePop(context, params);
+        await BackInterceptor.allowPop(
+          context,
+          () => Navigator.maybePop(context, params),
+        );
         return;
       }
       final bool fallsBack =
@@ -1467,6 +1474,37 @@ class FunctionsRepository {
     final Object? x = result['x'], y = result['y'];
     if (x is! num || y is! num) return null;
     return Offset(x.toDouble(), y.toDouble());
+  }
+
+  /// What a click, long press, double tap, right click or pointer trigger
+  /// reports of where it landed: `x`, `y` in the node, `globalX`, `globalY`
+  /// on screen, the node's `width` and `height`, and `fx`, `fy`, where it
+  /// landed as a share (0 to 1) of the node's width and height: a tap on a
+  /// map that resizes with the screen places a pin at the same spot on any
+  /// size.
+  static Map<String, double> pointerResult(
+    Offset local,
+    Offset global,
+    Size? size,
+  ) {
+    final double width = size?.width ?? 0, height = size?.height ?? 0;
+    return {
+      'x': local.dx,
+      'y': local.dy,
+      'globalX': global.dx,
+      'globalY': global.dy,
+      'fx': width > 0 ? (local.dx / width).clamp(0.0, 1.0) : 0.0,
+      'fy': height > 0 ? (local.dy / height).clamp(0.0, 1.0) : 0.0,
+      'width': width,
+      'height': height,
+    };
+  }
+
+  /// The laid out size of the box [context] builds, or null.
+  static Size? boxSizeOf(BuildContext context) {
+    final RenderObject? box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    return box.size;
   }
 
   /// The rect of the node that [context] belongs to, relative to its

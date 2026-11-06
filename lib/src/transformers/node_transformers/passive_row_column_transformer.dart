@@ -612,6 +612,15 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       );
     }
 
+    // A row that doesn't clip its content lets a child that hugs its height
+    // overflow it (a fixed one, below), as the editor lays it out: a gridline's
+    // label, 15 tall, on a row 1 tall (moved up by its motion to sit on the
+    // line) keeps its height instead of being squeezed into the row and
+    // clipped by its own paragraph.
+    if (mainAxis == AxisC.horizontal) {
+      childWidget = overflowRowCrossAxis(node, parentRowColumn, childWidget);
+    }
+
     // A parent that stretches its children across gives each one the full
     // cross axis, like the editor's solver, except a child that hugs on that
     // axis: the solver keeps its own size there and places it at the start.
@@ -769,6 +778,49 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     }
 
     return childWidget;
+  }
+
+  /// Lets [childWidget], a child of [row] that hugs its height, be as tall
+  /// as it is designed (a hugging text: as its lines) when the row is
+  /// shorter and doesn't clip its content ([ClipMixin.clipsContent]): it is
+  /// laid out with at least its design height as its maximum and placed by
+  /// the row's cross axis alignment, the row's layout taking only the part
+  /// that fits (see [CrossAxisOverflow], which also holds a child of a fixed
+  /// height, in [wrapChildWithSizeFits]). The editor lays such a child out at its own
+  /// height over the row's edges; squeezed to the row's height a text would
+  /// clip itself. A stretching or baseline row, or one that hugs its height
+  /// (as tall as its children already), is left as it is.
+  static Widget overflowRowCrossAxis(
+    BaseNode child,
+    BaseNode row,
+    Widget childWidget,
+  ) {
+    if (row is ClipMixin && row.clipsContent) return childWidget;
+    if (row.verticalFit == SizeFit.shrinkWrap) return childWidget;
+    if (child is SpacerNode || child.verticalFit != SizeFit.shrinkWrap) {
+      return childWidget;
+    }
+    if (child.alignment != AlignmentModel.none) return childWidget;
+    final double? y = switch ((row as RowColumnMixin).crossAxisAlignment) {
+      CrossAxisAlignmentC.start => -1,
+      CrossAxisAlignmentC.center => 0,
+      CrossAxisAlignmentC.end => 1,
+      _ => null,
+    };
+    // A text that hugs its height takes its lines' height, whatever the
+    // fonts measure at runtime; anything else at least its design height
+    // (a subtree that fills its height needs a bound).
+    final double height =
+        child is TextNode && child.verticalFit == SizeFit.shrinkWrap
+        ? double.infinity
+        : child.outerBoxLocal.height;
+    if (y == null || height.isNaN || height <= 0) return childWidget;
+    return CrossAxisOverflow(
+      axis: Axis.vertical,
+      alignment: y,
+      extent: height,
+      child: childWidget,
+    );
   }
 
   /// Sizes a child of a wrapping row/column ([rowColumnWraps]) for its [CodelesslyWrap] run.
@@ -1246,11 +1298,11 @@ class RenderCrossAxisOverflow extends RenderShiftedBox {
   // child that fits reads the row/column's extent as before (a
   // `${parent.width}` binding).
   BoxConstraints _childConstraints(BoxConstraints constraints) {
-    final double extent = _extent.isFinite ? _extent : 0;
+    // Infinite for a child that takes whatever height it needs (a hugging
+    // text's lines).
+    final double extent = _extent.isNaN ? 0 : _extent;
     return _axis == Axis.horizontal
-        ? constraints.copyWith(
-            maxWidth: math.max(constraints.maxWidth, extent),
-          )
+        ? constraints.copyWith(maxWidth: math.max(constraints.maxWidth, extent))
         : constraints.copyWith(
             maxHeight: math.max(constraints.maxHeight, extent),
           );

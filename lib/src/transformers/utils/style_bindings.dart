@@ -69,7 +69,13 @@ import 'scoped_values.dart';
 ///   `foreground-<paint id>-stop-<index>` for gradient strokes and
 ///   foreground fills. Linear, radial, angular and diamond gradients alike,
 ///   e.g. a background whose two stops follow a palette:
-///   `${pal.bg}`, `${pal.bgAlt}`. Wins over [fillStop].
+///   `${pal.bg}`, `${pal.bgAlt}`, or a hive icon whose gradient follows
+///   the hive's status color: `${= mix(hive.statusColor, '#FFFFFF', 0.28)}`.
+///   Wins over [fillStop].
+/// * [fillStopPosition] `fill-stop-position-<index>` and
+///   [paintStopPosition] `fill-<paint id>-stop-position-<index>` (number,
+///   0 to 1): the position of one stop along the gradient, of the first
+///   fill or of the paint with that id (strokes and foreground fills too).
 /// * [notchOffset] (number): the offset of every notch of a node with
 ///   [CornerMixin.notches], in the notch's own unit (pixels, or a fraction
 ///   of the edge when the notch is relative), e.g. a ticket whose tear line
@@ -171,6 +177,14 @@ abstract final class StyleBindings {
   /// `foreground-<paint id>`, e.g. `fill-g1-stop-0`.
   static String paintStop(String paintKey, int index) =>
       ColorStop.bindingKey(paintKey, index);
+
+  /// The position (0 to 1) of stop [index] of the first fill's gradient.
+  static String fillStopPosition(int index) => 'fill-stop-position-$index';
+
+  /// The position (0 to 1) of stop [index] of the gradient paint whose own
+  /// binding key is [paintKey], e.g. `fill-g1-stop-position-1`.
+  static String paintStopPosition(String paintKey, int index) =>
+      ColorStop.positionBindingKey(paintKey, index);
 
   /// A rectangle's SVG [RectangleNode.path] (text): an orbit drawn for the
   /// planet a screen shows, a curve built from data.
@@ -433,11 +447,12 @@ abstract final class StyleBindings {
     }
   }
 
-  /// [paints] (paint JSON) with their gradient stops recolored by their
-  /// [paintStop] bindings (the paint's binding key, `<prefix><paint id>`,
-  /// with `-stop-<index>`), or null when none changes. With [legacyFirst]
-  /// the first paint's stops also follow their [fillStop] bindings, which
-  /// the per-paint keys win over.
+  /// [paints] (paint JSON) with their gradient stops recolored and moved by
+  /// their [paintStop] and [paintStopPosition] bindings (the paint's binding
+  /// key, `<prefix><paint id>`, with `-stop-<index>` or
+  /// `-stop-position-<index>`), or null when none changes. With
+  /// [legacyFirst] the first paint's stops also follow their [fillStop] and
+  /// [fillStopPosition] bindings, which the per-paint keys win over.
   static List? _paintStops(
     List paints,
     String prefix,
@@ -453,26 +468,49 @@ abstract final class StyleBindings {
           final PaintModel paint = PaintModel.fromJson(json);
           final List<ColorStop>? stops = paint.gradientStops;
           if (stops == null || stops.isEmpty) return json;
-          bool recolored = false;
+          // The key of a stop's binding: by paint, else by index for the
+          // first fill.
+          String? keyOf(String own, String legacy) => variables.containsKey(own)
+              ? own
+              : legacyFirst && p == 0 && variables.containsKey(legacy)
+              ? legacy
+              : null;
+          bool changedStops = false;
+          bool moved = false;
           final List<ColorStop> bound = [
             for (final (int i, ColorStop stop) in stops.indexed)
               () {
-                final String own = paintStop('$prefix${paint.id}', i);
-                final String? key = variables.containsKey(own)
-                    ? own
-                    : legacyFirst &&
-                          p == 0 &&
-                          variables.containsKey(fillStop(i))
-                    ? fillStop(i)
-                    : null;
-                if (key == null) return stop;
-                final ColorStop next = _boundStop(stop, value<Object>(key));
-                if (next != stop) recolored = true;
+                ColorStop next = stop;
+                final String? colorKey = keyOf(
+                  paintStop('$prefix${paint.id}', i),
+                  fillStop(i),
+                );
+                if (colorKey != null) {
+                  next = _boundStop(next, value<Object>(colorKey));
+                }
+                final String? positionKey = keyOf(
+                  paintStopPosition('$prefix${paint.id}', i),
+                  fillStopPosition(i),
+                );
+                if (positionKey != null) {
+                  final double? position = _number(value<Object>(positionKey));
+                  if (position != null &&
+                      position.isFinite &&
+                      position.clamp(0, 1) != next.position) {
+                    next = next.copyWith(
+                      position: position.clamp(0, 1).toDouble(),
+                    );
+                    moved = true;
+                  }
+                }
+                if (next != stop) changedStops = true;
                 return next;
               }(),
           ];
-          if (!recolored) return json;
+          if (!changedStops) return json;
           changed = true;
+          // Flutter wants the stops in order along the gradient.
+          if (moved) bound.sort((a, b) => a.position.compareTo(b.position));
           return paint.copyWith(gradientStops: bound).toJson();
         }(),
     ];
@@ -608,7 +646,10 @@ abstract final class StyleBindings {
   static List<double>? _dashes(Object? value) {
     final List<Object?>? parts = switch (value) {
       List list => list,
-      String text => text.trim().isEmpty ? <Object?>[] : text.trim().split(RegExp(r'[\s,]+')),
+      String text =>
+        text.trim().isEmpty
+            ? <Object?>[]
+            : text.trim().split(RegExp(r'[\s,]+')),
       _ => null,
     };
     if (parts == null) return null;

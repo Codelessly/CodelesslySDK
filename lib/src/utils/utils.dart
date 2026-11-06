@@ -432,6 +432,13 @@ AlignmentModel retrieveCommonStackAlignment(
   return bestAlignment ?? AlignmentModel.none;
 }
 
+/// Whether [name] is the name of an API's response variable: the
+/// [SDKConstants.apiVariablePrefix] followed by a capitalised name, as
+/// [apiNameToVariableName] makes them (`apiGetUsers`). Other names that
+/// happen to start with "api" (`apiary`, `apiece`) are ordinary variables.
+bool isApiVariableName(String name) =>
+    RegExp('^${SDKConstants.apiVariablePrefix}([A-Z0-9_]|\$)').hasMatch(name);
+
 String apiNameToVariableName(String name) {
   if (name.startsWith(RegExp(r'\d+'))) {
     name = name.replaceFirst(RegExp(r'\d+'), '').trim();
