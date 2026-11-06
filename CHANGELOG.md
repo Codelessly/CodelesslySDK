@@ -1,5 +1,9 @@
 ## Unreleased
 
+- A colour or gradient fill sits inside its node's solid border by half the
+  border's inset, as Flutter's BoxDecoration paints a background under a
+  uniform border: drawn to the edge, the fill's anti-aliased rim showed
+  through the border's (a light seam between a card's border and shadow).
 - A node that clips its content keeps its own stroke outside the clip, as
   Flutter's Container paints its border outside the clip of its child: a
   rounded card's border was cut (or anti-aliased twice), leaving a light
