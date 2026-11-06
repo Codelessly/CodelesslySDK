@@ -1,4 +1,5 @@
 import 'builtin_functions.dart';
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -1674,6 +1675,9 @@ class FunctionsRepository {
     double enterScale = 1,
     double sheetBelowWidth = 600,
   }) {
+    // A toast already up goes under the dialog, which opens above it.
+    final WidgetBuilder dialogContent = builder;
+    builder = (context) => ToastBelowRoute(child: dialogContent(context));
     if (presentation == DialogPresentation.popover) {
       return showGeneralDialog<T>(
         context: context,
