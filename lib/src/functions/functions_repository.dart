@@ -2424,8 +2424,15 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     Duration? begin;
     final Completer<bool> done = Completer<bool>();
     void frame(Duration now) {
+      // A newer set took over.
       if (_glides[key] != glide) {
         done.complete(true);
+        return;
+      }
+      // The screen that started it has closed: stop, don't run on.
+      if (!context.mounted) {
+        _glides.remove(key);
+        done.complete(false);
         return;
       }
       begin ??= now;
