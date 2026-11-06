@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../codelessly_sdk.dart';
@@ -49,6 +50,55 @@ class ParentSizeScope extends InheritedWidget {
   @override
   bool updateShouldNotify(ParentSizeScope oldWidget) =>
       width != oldWidget.width || height != oldWidget.height;
+}
+
+/// The content box of a row or column, for its children sized by a fraction
+/// of it ([hasFractionalSize]) on an axis the row/column leaves unbounded:
+/// its main axis, where a child that doesn't flex is laid out unbounded.
+/// The design canvas sizes such a child by its parent's content box (half
+/// of a progress track for `widthFactor: 0.5`); at runtime the child reads
+/// this scope for the axis its [ParentSizeScope] has no value on.
+///
+/// Only the nodes in [nodeIds], the row/column's own children that bind a
+/// factor ([hasBoundFractionalSize]), read it: a grandchild is sized by its
+/// own parent. A node's own [BaseNode.widthFactor] caps its size in the
+/// editor's layout instead, so it doesn't read this scope.
+class FlexContentSizeScope extends InheritedWidget {
+  /// The ids of the children this scope sizes.
+  final Set<String> nodeIds;
+
+  /// The width of the row/column's content box, or null when unbounded.
+  final double? width;
+
+  /// The height of the row/column's content box, or null when unbounded.
+  final double? height;
+
+  /// Creates a [FlexContentSizeScope].
+  const FlexContentSizeScope({
+    super.key,
+    required this.nodeIds,
+    required this.width,
+    required this.height,
+    required super.child,
+  });
+
+  /// The content box size of the row/column [nodeId] is a child of, or null
+  /// when it is not built in one that gives it.
+  static ({double? width, double? height})? of(
+    BuildContext context,
+    String nodeId,
+  ) {
+    final FlexContentSizeScope? scope = context
+        .dependOnInheritedWidgetOfExactType<FlexContentSizeScope>();
+    if (scope == null || !scope.nodeIds.contains(nodeId)) return null;
+    return (width: scope.width, height: scope.height);
+  }
+
+  @override
+  bool updateShouldNotify(FlexContentSizeScope oldWidget) =>
+      width != oldWidget.width ||
+      height != oldWidget.height ||
+      !setEquals(nodeIds, oldWidget.nodeIds);
 }
 
 /// The value of the `parent` variable for a parent that gives [width] and
@@ -101,6 +151,14 @@ const String heightFactorVariable = 'heightFactor';
 /// `variables['widthFactor']` / `variables['heightFactor']`.
 bool hasFractionalSize(BaseNode node) =>
     node.isFractionallySized ||
+    node.variables[widthFactorVariable]?.trim().isNotEmpty == true ||
+    node.variables[heightFactorVariable]?.trim().isNotEmpty == true;
+
+/// Whether [node] binds its `widthFactor` or `heightFactor` through
+/// [BaseNode.variables]. On the design canvas such a binding is read
+/// against the parent's content box (the `parent` variable there), while the
+/// editor's layout takes a node's own [BaseNode.widthFactor] as a cap.
+bool hasBoundFractionalSize(BaseNode node) =>
     node.variables[widthFactorVariable]?.trim().isNotEmpty == true ||
     node.variables[heightFactorVariable]?.trim().isNotEmpty == true;
 
