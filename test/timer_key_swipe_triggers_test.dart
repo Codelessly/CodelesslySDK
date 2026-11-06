@@ -23,8 +23,9 @@ CanvasNode canvas(List<Reaction> reactions) => CanvasNode(
 
 Future<List<String>> pumpCanvas(
   WidgetTester tester,
-  List<Reaction> reactions,
-) async {
+  List<Reaction> reactions, {
+  WidgetBuildSettings settings = const WidgetBuildSettings(debugLabel: 'test'),
+}) async {
   final calls = <String>[];
   final codelesslyContext = CodelesslyContext.empty()
     ..functions = {
@@ -38,7 +39,7 @@ Future<List<String>> pumpCanvas(
         home: ActionChainHost(
           child: PassiveCanvasWidget(
             node: canvas(reactions),
-            settings: const WidgetBuildSettings(debugLabel: 'test'),
+            settings: settings,
             builder: (_) => const SizedBox.expand(),
           ),
         ),
@@ -102,6 +103,26 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 1));
     expect(calls, hasLength(3));
+  });
+
+  // Lamplight's Sunrise canvas ran a 50 ms timer; the design canvas (and
+  // its captures) build canvases as previews, which run no timers, keys or
+  // load actions.
+  testWidgets('A design-canvas preview runs no timer reactions', (
+    tester,
+  ) async {
+    final calls = await pumpCanvas(
+      tester,
+      [reaction(TriggerModel(type: TriggerType.timer, intervalMs: 50), 'tick')],
+      settings: const WidgetBuildSettings(
+        debugLabel: 'render canvas',
+        isPreview: true,
+        withReactions: false,
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(calls, isEmpty);
+    expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
   testWidgets('A key press reaction runs for its key only', (tester) async {

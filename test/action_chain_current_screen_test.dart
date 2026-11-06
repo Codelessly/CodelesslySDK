@@ -20,7 +20,9 @@ void main() {
     BuildContext? found = trigger;
     ActionChain.run(() {
       // An action after a delay, in the same chain.
-      unawaited(delay.future.then((_) => found = ActionChain.contextFor(trigger)));
+      unawaited(
+        delay.future.then((_) => found = ActionChain.contextFor(trigger)),
+      );
     }, context: trigger);
     await tester.pumpWidget(next);
     delay.complete();
@@ -28,17 +30,25 @@ void main() {
     return found;
   }
 
-  testWidgets('a chain whose screens are all gone finishes on the current screen', (tester) async {
-    final GlobalKey b = GlobalKey();
-    final BuildContext? found = await afterScreenChange(
-      tester,
-      ActionChainHost(key: const ValueKey('next screen'), child: SizedBox(key: b)),
-    );
-    expect(found, isNotNull);
-    expect(found!.mounted, isTrue);
-  });
+  testWidgets(
+    'a chain whose screens are all gone finishes on the current screen',
+    (tester) async {
+      final GlobalKey b = GlobalKey();
+      final BuildContext? found = await afterScreenChange(
+        tester,
+        ActionChainHost(
+          key: const ValueKey('next screen'),
+          child: SizedBox(key: b),
+        ),
+      );
+      expect(found, isNotNull);
+      expect(found!.mounted, isTrue);
+    },
+  );
 
-  testWidgets('with no screen left at all, nothing is returned', (tester) async {
+  testWidgets('with no screen left at all, nothing is returned', (
+    tester,
+  ) async {
     expect(await afterScreenChange(tester, const SizedBox()), isNull);
   });
 }

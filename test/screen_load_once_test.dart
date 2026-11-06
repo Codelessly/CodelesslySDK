@@ -118,10 +118,10 @@ void main() {
         jsonDecode(jsonEncode(layout.toJson())) as Map<String, dynamic>,
       );
       final config = CodelesslyConfig(
-      authToken: 'token',
-      isPreview: false,
-      slug: byId ? null : 'app',
-    );
+        authToken: 'token',
+        isPreview: false,
+        slug: byId ? null : 'app',
+      );
       final codelessly = Codelessly(
         config: config,
         client: MockClient((request) async => http.Response('{}', 200)),

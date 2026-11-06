@@ -74,7 +74,9 @@ void main() {
   }
 
   for (final bool scroll in [false, true]) {
-    testWidgets('padded scaled content sits centred (scroll: $scroll)', (tester) async {
+    testWidgets('padded scaled content sits centred (scroll: $scroll)', (
+      tester,
+    ) async {
       await pump(tester, scroll: scroll);
       final Rect stage = tester.getRect(_of('stage'));
       expect(stage.height, 418);

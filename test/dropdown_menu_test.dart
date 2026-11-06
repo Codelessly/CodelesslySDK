@@ -213,7 +213,9 @@ void main() {
     await tester.tap(find.byType(PassiveDropdownWidget));
     await tester.pumpAndSettle();
     final Finder menu = find.byKey(const ValueKey('codelessly-dropdown-menu'));
-    final Finder check = find.byKey(const ValueKey('codelessly-dropdown-check'));
+    final Finder check = find.byKey(
+      const ValueKey('codelessly-dropdown-check'),
+    );
     expect(check, findsOneWidget);
     final Finder row = find.byKey(const ValueKey('codelessly-dropdown-item-1'));
     final Rect checkRect = tester.getRect(check);

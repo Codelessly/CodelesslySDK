@@ -14,12 +14,16 @@ void main() {
         PaintModel(
           id: 'img',
           type: PaintType.image,
-          downloadUrl: r"${= playing ? 'https://x/pause.png' : 'https://x/play.png'}",
+          downloadUrl:
+              r"${= playing ? 'https://x/pause.png' : 'https://x/play.png'}",
         ),
       ],
     );
     final List<String> templates = inlineTextTemplatesOf(icon);
     expect(templates.any((t) => t.contains('playing')), isTrue);
-    expect(FormulaEvaluator.referencedPathsInText(templates.first), contains('playing'));
+    expect(
+      FormulaEvaluator.referencedPathsInText(templates.first),
+      contains('playing'),
+    );
   });
 }

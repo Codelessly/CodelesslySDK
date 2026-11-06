@@ -271,7 +271,9 @@ void main() {
       ListViewProperties.fromJson(json).wrapCrossAlignment,
       CrossAxisAlignmentC.center,
     );
-    expect(ListViewProperties().toJson().containsKey('wrapCrossAlignment'),
-        isFalse);
+    expect(
+      ListViewProperties().toJson().containsKey('wrapCrossAlignment'),
+      isFalse,
+    );
   });
 }

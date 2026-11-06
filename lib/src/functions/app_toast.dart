@@ -22,10 +22,92 @@ import 'action_chain.dart';
 /// [ShowToastAction.iconDiscColor]). Colors bound in
 /// [ShowToastAction.variables] are read when the toast shows (see
 /// [ActionColorBindings]) and win over the action's own.
+/// Names the overlay toasts of the app below it show in, instead of the
+/// root overlay: an app embedded in another (the editor's run preview)
+/// keeps its toasts in its own window.
+class ToastOverlayScope extends InheritedWidget {
+  /// Creates a [ToastOverlayScope] showing toasts in [overlay].
+  const ToastOverlayScope({
+    super.key,
+    required this.overlay,
+    required super.child,
+  });
+
+  /// The overlay toasts show in.
+  final GlobalKey<OverlayState> overlay;
+
+  /// The overlay of the nearest [ToastOverlayScope] above [context], or null.
+  static OverlayState? maybeOf(BuildContext context) => context
+      .getInheritedWidgetOfExactType<ToastOverlayScope>()
+      ?.overlay
+      .currentState;
+
+  @override
+  bool updateShouldNotify(ToastOverlayScope oldWidget) =>
+      oldWidget.overlay != overlay;
+}
+
 class AppToast {
   AppToast._();
 
   static OverlayEntry? _current;
+
+  /// The icons of the showToast actions anywhere in [nodes]' reactions
+  /// (nested in conditions, confirmations, API outcomes and so on), as
+  /// [ShowToastAction.icon] gives them. A bound icon name isn't known
+  /// before the toast shows and isn't included.
+  static List<MultiSourceIconModel> iconsIn(Iterable<BaseNode> nodes) {
+    final List<MultiSourceIconModel> icons = [];
+    void visit(Object? json) {
+      if (json is Map) {
+        final Object? icon = json['icon'];
+        if (json['type'] == ActionType.showToast.name && icon is Map) {
+          try {
+            icons.add(
+              MultiSourceIconModel.fromJson(Map<String, dynamic>.from(icon)),
+            );
+          } catch (_) {
+            // Not an icon this SDK reads.
+          }
+        }
+        json.values.forEach(visit);
+      } else if (json is List) {
+        json.forEach(visit);
+      }
+    }
+
+    for (final BaseNode node in nodes) {
+      if (node is! ReactionMixin) continue;
+      for (final Reaction reaction in (node as ReactionMixin).reactions) {
+        visit(reaction.action.toJson());
+      }
+    }
+    return icons;
+  }
+
+  /// Loads the SVGs of the toast icons in [nodes] ([iconsIn]) ahead of
+  /// time. A toast is on screen for a couple of seconds, and the first one
+  /// of a session showed without its icon while the icon's SVG was still
+  /// being fetched.
+  static Future<void> precacheIcons(Iterable<BaseNode> nodes) async {
+    final List<Future<void>> loads = [];
+    for (final MultiSourceIconModel icon in iconsIn(nodes)) {
+      final IconModel? glyph = icon.icon;
+      if (!icon.show || icon.type != IconTypeEnum.icon || glyph == null) {
+        continue;
+      }
+      loads.add(
+        SvgIcon.precache(
+          glyph,
+          fill: icon.fill,
+          weight: icon.weight,
+          grade: icon.grade,
+          opticalSize: icon.opticalSize,
+        ),
+      );
+    }
+    await Future.wait(loads);
+  }
 
   /// The icon [action] shows with [scopedValues]: its `icon` binding
   /// (`variables: {"icon": "${toastNext.icon}"}`) naming a Material icon,
@@ -53,7 +135,9 @@ class AppToast {
   /// Shows [action]'s message. Returns false when there is no overlay to
   /// show it in.
   static bool show(BuildContext context, ShowToastAction action) {
-    final OverlayState? overlay = Overlay.maybeOf(context, rootOverlay: true);
+    final OverlayState? overlay =
+        ToastOverlayScope.maybeOf(context) ??
+        Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) return false;
 
     // Read variables and the look now: the action that follows may navigate

@@ -212,6 +212,89 @@ class PassiveTextFieldWidget extends StatefulWidget {
   /// The key in [BaseNode.variables] that binds the colour of the cursor.
   static const String cursorColor = 'cursorColor';
 
+  /// The visual density of a dense, unlabeled field with [contentPadding]
+  /// under the [theme]'s density: the theme's, unless it would take more
+  /// off the field than its vertical padding.
+  static VisualDensity denseVisualDensity(
+    VisualDensity theme,
+    EdgeInsets contentPadding,
+  ) {
+    // Flutter's laid-out height of a dense, unlabeled field is
+    // `max(padding + line + density, line)`, but its intrinsic height (which
+    // sizes a field that hugs its height) drops the `line` floor: desktop's
+    // compact density (-8 px) made a dense field with no content padding
+    // 8 px shorter than its line (10 px for Inter 15). Keeping the density
+    // from taking more than the vertical padding gives both the laid-out
+    // height and line placement Flutter's layout gives.
+    final double floor = -contentPadding.vertical / 4;
+    if (theme.vertical >= floor) return theme;
+    return VisualDensity(horizontal: theme.horizontal, vertical: floor);
+  }
+
+  /// [decoration] of a one-line field [height] tall, with its line placed
+  /// in that height per [alignment] (the field's `textAlignVertical`).
+  ///
+  /// Flutter's InputDecorator is only as tall as its content (padding plus
+  /// one line, or 48 px when not dense), whatever height it is given, so a
+  /// dense 52 px field with no content padding showed its text at the top
+  /// even when centered. The space left over goes into the content padding:
+  /// above the line by the alignment's share (half for center), below it
+  /// the rest, so the decorator fills the height and the line sits where
+  /// `textAlignVertical` asks. A decoration with a label, helper, error or
+  /// counter (which take their own room), or a non-dense field no taller
+  /// than 48 px (which Flutter centers itself), is returned unchanged.
+  static InputDecoration alignedVertically(
+    BuildContext context,
+    InputDecoration decoration, {
+    required double height,
+    required TextStyle inputStyle,
+    required TextAlignVerticalEnum alignment,
+  }) {
+    final bool dense = decoration.isDense ?? false;
+    if (!height.isFinite ||
+        (decoration.isCollapsed ?? false) ||
+        (!dense && height <= kMinInteractiveDimension) ||
+        decoration.label != null ||
+        decoration.labelText != null ||
+        decoration.helperText != null ||
+        decoration.helper != null ||
+        decoration.error != null ||
+        decoration.errorText != null ||
+        decoration.counter != null ||
+        (decoration.counterText?.isNotEmpty ?? false)) {
+      return decoration;
+    }
+    final TextScaler scaler = MediaQuery.maybeTextScalerOf(context) ??
+        TextScaler.noScaling;
+    double lineOf(TextStyle? style) {
+      final TextPainter painter = TextPainter(
+        text: TextSpan(text: ' ', style: style),
+        textDirection: TextDirection.ltr,
+        textScaler: scaler,
+      );
+      final double line = painter.preferredLineHeight;
+      painter.dispose();
+      return line;
+    }
+
+    final double line = [
+      lineOf(inputStyle),
+      if (decoration.hintText != null) lineOf(decoration.hintStyle),
+    ].reduce((a, b) => a > b ? a : b);
+    final EdgeInsets padding =
+        decoration.contentPadding?.resolve(Directionality.maybeOf(context)) ??
+        EdgeInsets.zero;
+    final double extra = height - padding.vertical - line;
+    if (extra <= 0.5) return decoration;
+    final double above = extra * (alignment.flutterTextAlignVertical.y + 1) / 2;
+    return decoration.copyWith(
+      contentPadding: padding.copyWith(
+        top: padding.top + above,
+        bottom: padding.bottom + extra - above,
+      ),
+    );
+  }
+
   /// The colour that the binding [property] of [node] gives, evaluated with
   /// [scopedValues] (or a condition on it), or null when it is missing or
   /// isn't a colour.
@@ -883,15 +966,22 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
               // must not change it: desktop's compact density took 8 px off
               // the outline, leaving a strip of the box's background below
               // the border.
+              if (!constraints.hasBoundedHeight) return buildField(decoration);
               return buildField(
-                constraints.hasBoundedHeight
-                    ? decoration.copyWith(
-                        constraints: BoxConstraints.tightFor(
-                          height: constraints.maxHeight,
-                        ),
-                        visualDensity: VisualDensity.standard,
-                      )
-                    : decoration,
+                PassiveTextFieldWidget.alignedVertically(
+                  context,
+                  decoration.copyWith(
+                    constraints: BoxConstraints.tightFor(
+                      height: constraints.maxHeight,
+                    ),
+                    visualDensity: VisualDensity.standard,
+                  ),
+                  height: constraints.maxHeight,
+                  inputStyle: TextUtils.retrieveTextStyleFromProp(
+                    properties.inputStyle,
+                  ),
+                  alignment: properties.textAlignVertical,
+                ),
               );
             },
           )
@@ -1173,7 +1263,14 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       // must not shrink it. Flutter's layout already ignores the density
       // there, but the intrinsic height (which sizes a field that hugs its
       // height) subtracts it, cutting 8 px off a multi-line field.
-      visualDensity: isCollapsed ? VisualDensity.standard : null,
+      visualDensity: isCollapsed
+          ? VisualDensity.standard
+          : isDense && labelText == null
+          ? PassiveTextFieldWidget.denseVisualDensity(
+              Theme.of(context).visualDensity,
+              (decoration.contentPadding ?? node.padding).flutterEdgeInsets,
+            )
+          : null,
       // The decoration's own content padding wins over the node's padding,
       // which defaults to 12 x 16 for text fields: zero makes a bare input.
       contentPadding:
@@ -1228,11 +1325,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       focusColor: decoration.focusColor.toFlutterColor(),
       hoverColor: decoration.hoverColor.toFlutterColor(),
       errorBorder: getInputBorder(decoration.errorBorder),
+      // An error (flag or message) wins over bound border colours: a field
+      // in error stays red when focused.
       focusedBorder: getInputBorder(
         errorFlag && !hasError
             ? decoration.focusedErrorBorder
             : decoration.focusedBorder,
-        color: focusedBorderColor,
+        color: errorFlag || hasError ? null : focusedBorderColor,
       ),
       focusedErrorBorder: getInputBorder(decoration.focusedErrorBorder),
       disabledBorder: getInputBorder(decoration.disabledBorder),
@@ -1240,7 +1339,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
         errorFlag && !hasError
             ? decoration.errorBorder
             : decoration.enabledBorder,
-        color: borderColor,
+        color: errorFlag || hasError ? null : borderColor,
       ),
       border: getInputBorder(decoration.border, color: borderColor),
       enabled: decoration.enabled,

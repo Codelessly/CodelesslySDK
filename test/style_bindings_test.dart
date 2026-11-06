@@ -219,7 +219,10 @@ void main() {
         'runSpacing': r'${= -4}',
       },
     })..parentID = kRootNode;
-    final host = Host(row, variables: {'isMobile': boolVariable('isMobile', true)});
+    final host = Host(
+      row,
+      variables: {'isMobile': boolVariable('isMobile', true)},
+    );
     await host.pump(tester, build: false);
     expect((host.styled as RowColumnNode).spacing, 28);
     // A negative gap is no gap.

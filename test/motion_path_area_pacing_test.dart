@@ -20,7 +20,10 @@ Offset kepler(double a, double e, double m) {
   for (int k = 0; k < 30; k++) {
     ecc -= (ecc - e * math.sin(ecc) - m) / (1 - e * math.cos(ecc));
   }
-  return Offset(a * (math.cos(ecc) - e), -a * math.sqrt(1 - e * e) * math.sin(ecc));
+  return Offset(
+    a * (math.cos(ecc) - e),
+    -a * math.sqrt(1 - e * e) * math.sin(ecc),
+  );
 }
 
 void main() {
@@ -28,16 +31,28 @@ void main() {
     const double a = 200, e = 0.6;
     final String path = orbit(a, e);
     for (final double share in [0.0, 0.05, 0.1, 0.25, 0.5, 0.7, 0.9, 0.99]) {
-      final (Offset at, _) = pointOnMotionPath(path, share, pacing: MotionPathPacing.area)!;
+      final (Offset at, _) = pointOnMotionPath(
+        path,
+        share,
+        pacing: MotionPathPacing.area,
+      )!;
       final Offset want = kepler(a, e, share * 2 * math.pi);
-      expect((at - want).distance, lessThan(1.0), reason: 'share $share: $at vs $want');
+      expect(
+        (at - want).distance,
+        lessThan(1.0),
+        reason: 'share $share: $at vs $want',
+      );
     }
   });
 
   test('length pacing differs from area pacing near perihelion', () {
     final String path = orbit(200, 0.6);
     final (Offset byLength, _) = pointOnMotionPath(path, 0.1)!;
-    final (Offset byArea, _) = pointOnMotionPath(path, 0.1, pacing: MotionPathPacing.area)!;
+    final (Offset byArea, _) = pointOnMotionPath(
+      path,
+      0.1,
+      pacing: MotionPathPacing.area,
+    )!;
     // Near the Sun a planet covers far more of its path in a tenth of its
     // year than an even-speed node does.
     expect((byArea - byLength).distance, greaterThan(20));
@@ -48,8 +63,14 @@ void main() {
     const double a = 150, e = 0.3;
     final double b = a * math.sqrt(1 - e * e);
     final double q = a * (1 - e), big = a * (1 + e);
-    final String path = 'M${300 + q} 300 A$a $b 0 0 0 ${300 - big} 300 A$a $b 0 0 0 ${300 + q} 300';
-    final (Offset at, _) = pointOnMotionPath(path, 0.3, pacing: MotionPathPacing.area, focus: const Offset(300, 300))!;
+    final String path =
+        'M${300 + q} 300 A$a $b 0 0 0 ${300 - big} 300 A$a $b 0 0 0 ${300 + q} 300';
+    final (Offset at, _) = pointOnMotionPath(
+      path,
+      0.3,
+      pacing: MotionPathPacing.area,
+      focus: const Offset(300, 300),
+    )!;
     // Positions are relative to the path's first point.
     final Offset want = kepler(a, e, 0.3 * 2 * math.pi) - Offset(q, 0);
     expect((at - want).distance, lessThan(1.0));
@@ -63,9 +84,19 @@ void main() {
   });
 
   test('pacing, focus and wrap survive JSON', () {
-    const m = MotionModel(path: 'M0 0 L10 0', pathPacing: MotionPathPacing.area, pathFocusX: 4, pathFocusY: -2, pathWrap: true);
+    const m = MotionModel(
+      path: 'M0 0 L10 0',
+      pathPacing: MotionPathPacing.area,
+      pathFocusX: 4,
+      pathFocusY: -2,
+      pathWrap: true,
+    );
     final back = MotionModel.fromJson(m.toJson());
     expect(back, m);
-    expect(MotionModel.fromJson(const MotionModel(path: 'M0 0 L1 0').toJson()).pathPacing, MotionPathPacing.length);
+    expect(
+      MotionModel.fromJson(const MotionModel(path: 'M0 0 L1 0').toJson())
+          .pathPacing,
+      MotionPathPacing.length,
+    );
   });
 }
