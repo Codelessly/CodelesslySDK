@@ -132,6 +132,11 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
                 if (paint.visible)
                   if (colorOf(paint, 'stroke-paint-${paint.id}') case final Color c) c,
             ],
+            strokeGradients: [
+              for (final PaintModel paint in node.strokes)
+                if (paint.visible && _isGradient(paint))
+                  ?retrieveGradient(paint),
+            ],
             strokeWeight: node.strokeWeight,
             cap: switch (node.strokeCap) {
               StrokeCapEnum.round => StrokeCap.round,
@@ -158,7 +163,8 @@ bool _isGradient(PaintModel paint) =>
     paint.type == PaintType.gradientRadial ||
     paint.type == PaintType.gradientAngular;
 
-/// Paints SVG path [data] (see [PassivePathTransformer]).
+/// Paints SVG path [data] (see [PassivePathTransformer]): solid colours and
+/// gradients (spread over the node's box), filled and stroked.
 class PathNodePainter extends CustomPainter {
   /// Creates a [PathNodePainter].
   PathNodePainter({
@@ -168,6 +174,7 @@ class PathNodePainter extends CustomPainter {
     this.gradients = const [],
     this.shadows = const [],
     this.strokes = const [],
+    this.strokeGradients = const [],
     this.strokeWeight = 2,
     this.cap = StrokeCap.round,
     this.join = StrokeJoin.round,
@@ -186,6 +193,9 @@ class PathNodePainter extends CustomPainter {
   /// Drop shadows in the path's shape, painted under its fills.
   final List<BoxShadow> shadows;
   final List<Color> strokes;
+
+  /// Gradient strokes, after [strokes].
+  final List<Gradient> strokeGradients;
   final double strokeWeight;
   final StrokeCap cap;
   final StrokeJoin join;
@@ -289,21 +299,23 @@ class PathNodePainter extends CustomPainter {
         Paint()..shader = gradient.createShader(Offset.zero & size),
       );
     }
-    if (strokes.isEmpty || strokeWeight <= 0) return;
+    if ((strokes.isEmpty && strokeGradients.isEmpty) || strokeWeight <= 0) {
+      return;
+    }
     final bool whole = trimStart <= 0 && trimEnd >= 1 && dashes.isEmpty;
     final ui.Path outline = whole
         ? path
         : trim(path, trimStart, trimEnd, dashes);
+    Paint stroke() => Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWeight
+      ..strokeCap = cap
+      ..strokeJoin = join;
     for (final Color color in strokes) {
-      canvas.drawPath(
-        outline,
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = strokeWeight
-          ..strokeCap = cap
-          ..strokeJoin = join,
-      );
+      canvas.drawPath(outline, stroke()..color = color);
+    }
+    for (final Gradient gradient in strokeGradients) {
+      canvas.drawPath(outline, stroke()..shader = gradient.createShader(Offset.zero & size));
     }
   }
 
@@ -315,6 +327,7 @@ class PathNodePainter extends CustomPainter {
       !listEquals(old.gradients, gradients) ||
       !listEquals(old.shadows, shadows) ||
       !_sameColors(old.strokes, strokes) ||
+      !listEquals(old.strokeGradients, strokeGradients) ||
       old.strokeWeight != strokeWeight ||
       old.join != join ||
       old.cap != cap ||

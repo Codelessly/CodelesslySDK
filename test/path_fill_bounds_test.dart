@@ -14,7 +14,10 @@ void main() {
   )..path = path;
 
   test('a path inside its box fills the box', () {
-    final List<Widget> out = clipFillsToNotches(shape('M0 10 L100 10 L100 40 L0 40 Z'), [const SizedBox()]);
+    final List<Widget> out = clipFillsToNotches(
+      shape('M0 10 L100 10 L100 40 L0 40 Z'),
+      [const SizedBox()],
+    );
     expect(out.single, isA<Positioned>());
     final Positioned p = out.single as Positioned;
     expect(p.top, 0);
@@ -22,7 +25,10 @@ void main() {
   });
 
   test('a path above its box is filled over its bounds', () {
-    final List<Widget> out = clipFillsToNotches(shape('M0 -20 L100 -20 L100 40 L0 40 Z'), [const SizedBox()]);
+    final List<Widget> out = clipFillsToNotches(
+      shape('M0 -20 L100 -20 L100 40 L0 40 Z'),
+      [const SizedBox()],
+    );
     final Positioned p = out.single as Positioned;
     expect(p.top, -20);
     expect(p.height, 60);

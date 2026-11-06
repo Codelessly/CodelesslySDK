@@ -45,7 +45,9 @@ Future<Size> pumpCard(
     crossAxisAlignment: cross,
   )..parentID = kRootNode;
   final registry = NodeRegistry()
-    ..setNodes({for (final n in <BaseNode>[outer, card, label]) n.id: n});
+    ..setNodes({
+      for (final n in <BaseNode>[outer, card, label]) n.id: n,
+    });
   final manager = PassiveNodeTransformerManager(
     registry.getNodeByID,
     (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
@@ -70,7 +72,9 @@ Future<Size> pumpCard(
     ),
   );
   expect(tester.takeException(), isNull);
-  return tester.getSize(find.byKey(const ValueKey('Rectangle Transformer of card [card]')).first);
+  return tester.getSize(
+    find.byKey(const ValueKey('Rectangle Transformer of card [card]')).first,
+  );
 }
 
 void main() {
@@ -97,7 +101,11 @@ void main() {
 
   testWidgets('with a hugging text inside, centred', (tester) async {
     expect(
-      (await pumpCard(tester, 358, cardCross: CrossAxisAlignmentC.center)).width,
+      (await pumpCard(
+        tester,
+        358,
+        cardCross: CrossAxisAlignmentC.center,
+      )).width,
       358,
     );
   });

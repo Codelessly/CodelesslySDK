@@ -112,6 +112,101 @@ void main() {
     expect(rotationOf(tester), closeTo(135, 0.5));
   });
 
+  testWidgets('a bound range: track.max from data sets the turn', (
+    tester,
+  ) async {
+    // A dial: one turn per N numbers, N from a variable (40 or 100).
+    List<BaseNode> dial() {
+      final List<BaseNode> nodes = knob();
+      final BaseNode cap = nodes[1];
+      cap.drag = const DragModel(
+        track: DragTrackModel(
+          shape: DragTrackShape.arc,
+          variable: 'dial',
+          min: 0,
+          max: 40,
+          step: 1,
+          startAngle: 0,
+          endAngle: 360,
+          endless: true,
+        ),
+      );
+      cap.variables[DragTrackModel.maxVariableKey] = r'${numbers}';
+      cap.variables[DragTrackModel.momentumVariableKey] = r'${= !still}';
+      return nodes;
+    }
+
+    await pump(
+      tester,
+      dial(),
+      runtime: false,
+      variables: [
+        variable('dial', VariableType.integer, 25),
+        variable('numbers', VariableType.integer, 100),
+      ],
+    );
+    // 25 of 100 numbers: a quarter turn (not 25 of 40).
+    expect(rotationOf(tester), closeTo(90, 0.5));
+    await pump(
+      tester,
+      dial(),
+      runtime: true,
+      variables: [
+        variable('dial', VariableType.integer, 25),
+        variable('numbers', VariableType.integer, 100),
+        variable('still', VariableType.boolean, true),
+      ],
+    );
+    expect(rotationOf(tester), closeTo(90, 0.5));
+    final NodeDragTrack track = tester.widget(find.byType(NodeDragTrack));
+    expect(track.track.max, 100);
+    expect(track.track.momentum, isFalse); // bound off (reduce motion)
+  });
+
+  testWidgets('a slider throw follows its groove: track.x2 from parent.width', (
+    tester,
+  ) async {
+    List<BaseNode> slider(double grooveWidth) => [
+      FrameNode(
+        id: 'plate',
+        name: 'plate',
+        basicBoxLocal: NodeBox(0, 0, grooveWidth, 40),
+        children: ['cap'],
+      )..parentID = kRootNode,
+      FrameNode(
+          id: 'cap',
+          name: 'cap',
+          basicBoxLocal: NodeBox(0, 10, 20, 20),
+          horizontalFit: SizeFit.fixed,
+          verticalFit: SizeFit.fixed,
+          children: ['pointer'],
+        )
+        ..parentID = 'plate'
+        ..drag = const DragModel(
+          track: DragTrackModel(variable: 'volume', min: 0, max: 1, x2: 100, y2: 0),
+        )
+        ..variables[DragTrackModel.x2VariableKey] = r'${= parent.width - 20}',
+      TextNode(
+        id: 'pointer',
+        name: 'pointer',
+        basicBoxLocal: NodeBox(0, 0, 20, 20),
+        data: 'P',
+        textMixedProps: [StartEndProp(start: 0, end: 1, fontSize: 12)],
+      )..parentID = 'cap',
+    ];
+    for (final double width in [300, 500]) {
+      await pump(
+        tester,
+        slider(width),
+        runtime: true,
+        variables: [variable('volume', VariableType.decimal, 1.0)],
+      );
+      final double x = tester.getTopLeft(find.text('P', findRichText: true)).dx;
+      // At the top of the range the cap sits at the groove's right end.
+      expect(x, closeTo(width - 20, 1), reason: 'groove $width');
+    }
+  });
+
   testWidgets('at runtime dragging the knob writes its variable', (
     tester,
   ) async {

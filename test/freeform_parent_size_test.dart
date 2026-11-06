@@ -4,97 +4,98 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-Finder _of(String id) => find.byKey(ValueKey('Rectangle Transformer of $id [$id]'));
+// `${parent.width}` in a frame child's x or width binding reads the frame's
+// content box (the Sunrise sky: a 350-wide frame), not the child's own box,
+// as a text's `${parent.width}` in the same frame does and the design
+// canvas shows.
+
+Finder _of(String id) =>
+    find.byKey(ValueKey('Rectangle Transformer of $id [$id]'));
+
+RectangleNode _rect(String id, Map<String, String> variables) =>
+    RectangleNode(id: id, name: id, basicBoxLocal: NodeBox(10, 40, 50, 20))
+      ..parentID = 'sky'
+      ..positioningMode = PositioningMode.pin
+      ..variables.addAll(variables);
+
+Future<void> _pump(
+  WidgetTester tester,
+  List<BaseNode> children, {
+  SizeFit fit = SizeFit.fixed,
+  double screen = 800,
+}) async {
+  tester.view.physicalSize = Size(screen, 800);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+  final FrameNode sky = FrameNode(
+    id: 'sky',
+    name: 'sky',
+    basicBoxLocal: NodeBox(0, 0, 350, 200),
+    horizontalFit: fit,
+    padding: const EdgeInsetsModel.all(10),
+    children: [for (final c in children) c.id],
+  )..parentID = kRootNode;
+  final registry = NodeRegistry()
+    ..setNodes({sky.id: sky, for (final n in children) n.id: n});
+  final manager = PassiveNodeTransformerManager(
+    registry.getNodeByID,
+    (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+  );
+  await tester.pumpWidget(
+    ChangeNotifierProvider<CodelesslyContext>.value(
+      value: CodelesslyContext.empty(),
+      child: MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: fit == SizeFit.expanded ? 500 : null,
+              child: Builder(
+                builder: (context) => manager.buildWidgetFromNode(
+                  sky,
+                  context,
+                  settings: const WidgetBuildSettings(debugLabel: 'test'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  expect(tester.takeException(), isNull);
+}
 
 void main() {
-  testWidgets('a fixed-size child reads its freeform parent\'s size as parent', (
+  testWidgets('a bound x and width read the frame\'s content width', (
     tester,
   ) async {
-    final RectangleNode fill = RectangleNode(
-      id: 'fill',
-      name: 'fill',
-      basicBoxLocal: NodeBox(0, 0, 10, 14),
-      positioningMode: PositioningMode.pin,
-      edgePins: const EdgePinsModel(left: 0, top: 0, right: null, bottom: null),
-    )..variables['width'] = r'${= 18 + (parent.width - 28) * 0.5}';
-    final FrameNode track = FrameNode(
-      id: 'track',
-      name: 'track',
-      basicBoxLocal: NodeBox(0, 0, 300, 36),
-      children: ['fill'],
-    )..parentID = kRootNode;
-    fill.parentID = track.id;
-    final NodeRegistry registry = NodeRegistry()..setNodes({track.id: track, fill.id: fill});
-    final manager = PassiveNodeTransformerManager(
-      registry.getNodeByID,
-      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
-    );
-    await tester.pumpWidget(
-      ChangeNotifierProvider<CodelesslyContext>.value(
-        value: CodelesslyContext.empty(),
-        child: MaterialApp(
-          home: Align(
-            alignment: Alignment.topLeft,
-            child: Builder(
-              builder: (c) => manager.buildWidgetFromNode(
-                track,
-                c,
-                settings: const WidgetBuildSettings(debugLabel: 'test'),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(tester.getSize(_of('fill')).width, 18 + (300 - 28) * 0.5);
+    await _pump(tester, [
+      _rect('mid', {'positionX': r'${= 0.5}', 'x': r'${= parent.width / 2}'}),
+      _rect('half', {'width': r'${= parent.width / 2}'}),
+    ]);
+    // 350 - 2 * 10 padding = 330.
+    expect(tester.getSize(_of('half')).width, 165);
+    expect(tester.getSize(_of('mid')).width, 50);
   });
 
-  testWidgets('a drag track thumb reads its slot width as parent', (tester) async {
-    final RectangleNode thumb = RectangleNode(
-      id: 'thumb',
-      name: 'thumb',
-      basicBoxLocal: NodeBox(0, 4, 28, 28),
-      positioningMode: PositioningMode.pin,
-      edgePins: const EdgePinsModel(left: 0, top: 4, right: null, bottom: null),
-    )
-      ..drag = const DragModel(
-        track: DragTrackModel(shape: DragTrackShape.line, variable: 'v', min: 0, max: 1, x2: 200),
-      )
-      ..variables['dragTrack.x2'] = r'${= parent.width - 28}';
-    final FrameNode slot = FrameNode(
-      id: 'slot',
-      name: 'slot',
-      basicBoxLocal: NodeBox(0, 0, 300, 36),
-      children: ['thumb'],
-    )..parentID = kRootNode;
-    thumb.parentID = slot.id;
-    final NodeRegistry registry = NodeRegistry()..setNodes({slot.id: slot, thumb.id: thumb});
-    final manager = PassiveNodeTransformerManager(
-      registry.getNodeByID,
-      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+  testWidgets('x lands at the frame\'s half', (tester) async {
+    await _pump(tester, [
+      _rect('mid', {'x': r'${= parent.width / 2}'}),
+    ]);
+    final Offset frame = tester.getTopLeft(
+      find.byKey(const ValueKey('Rectangle Transformer of sky [sky]')),
     );
-    final CodelesslyContext context = CodelesslyContext.empty()
-      ..variables['v'] = Observable(VariableData(id: 'v', name: 'v', type: VariableType.decimal, value: 0.5));
-    await tester.pumpWidget(
-      ChangeNotifierProvider<CodelesslyContext>.value(
-        value: context,
-        child: MaterialApp(
-          home: Align(
-            alignment: Alignment.topLeft,
-            child: Builder(
-              builder: (c) => manager.buildWidgetFromNode(
-                slot,
-                c,
-                settings: const WidgetBuildSettings(debugLabel: 'test'),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    // Half way along a 272 px track.
-    expect(tester.getTopLeft(_of('thumb')).dx, closeTo(136, 1));
+    // x is in the frame's content box, as its design x is: 330 / 2 (not
+    // 50 / 2, the child's own width) from the 10 px padding.
+    expect(tester.getTopLeft(_of('mid')).dx - frame.dx, 10 + 165);
+  });
+
+  testWidgets('an expanded frame gives the width it fills', (tester) async {
+    await _pump(tester, [
+      _rect('half', {'width': r'${= parent.width / 2}'}),
+    ], fit: SizeFit.expanded);
+    // 500 - 20.
+    expect(tester.getSize(_of('half')).width, 240);
   });
 }

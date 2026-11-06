@@ -1,123 +1,97 @@
-## 9.2.0
+## Unreleased
 
-Requires codelessly_api 9.1.0.
+- A node that clips its content keeps its own stroke outside the clip, as
+  Flutter's Container paints its border outside the clip of its child: a
+  rounded card's border was cut (or anti-aliased twice), leaving a light
+  seam between it and its shadow.
 
-### Features
+## 9.3.0
 
-- Formula functions for curves: `spline(points)` (SVG path data of a smooth
-  curve through `{x, y}` points), `pathPoints(path, n)` (n points equally
-  spaced by arc length, with their direction), `pathPoint(path, t)` and
-  `pathLength(path)`. A motion path can be built from variables and
-  measured along.
-- `motion.keyframes` bindings; under keyframes that push a node off its path,
-  `orientToPath` turns it with its real movement.
-- Path nodes take bound stroke and fill colours, `trimMs` / `trimCurve` (a
-  trim that keeps pace with a flight) and a bound `dashPattern`; a
-  rectangle's `path` is bindable.
-- Drag tracks take their geometry and range from `dragTrack.<field>`
-  bindings (`x2: ${= parent.width - 28}`), and follow a bound `drag.enabled`.
-- `screen.breakpoint` / `isMobile` inside a responsive layout follow its own
-  switch widths.
-- Toasts can be tilted and come in on any curve.
+Requires codelessly_api 9.3.0.
 
-### Fixes
+### Added
 
-- Computed variables whose formulas read `storage`, `route`, `screen` or
-  `auth` (directly or through other computed variables) are cached again,
-  keyed by those values: such chains were worked out again on every read,
-  which could freeze an app for seconds.
-- A draggable node moved by bound `x`/`y` is grabbed where it is drawn.
-- Children of a frame with `contentFit` are placed in its design size, so a
-  child aligned in a 960 x 600 design drawn in a phone keeps its place.
-- `parent` in a fixed-size child of a frame reads the frame's content box,
-  not the child's own size.
-- A frozen loop (`motion.loop` bound off) keeps the values its formulas give.
-- An image paint without a URL draws nothing instead of throwing.
-
-## 9.1.10
-
-- `SDKPublishModel.appIdentity`: the project's `AppIdentity` (name, title
-  template, description, icons, colors, manifest, splash, mobile) ships in
-  the publish bundle. Bundles without one load as before (null).
-- `CodelesslyAppIdentity` resolves a screen's title and description from
-  the identity (per-page overrides, screen names, the app name), parses its
-  colors and status bar style, and sets the title through
-  `SystemChrome.setApplicationSwitcherDescription` (document.title on web).
-- `CodelesslyAppIdentityUpdater` keeps the title in step with the screen a
-  `CodelesslyRouter` shows, with a callback for the meta description.
-- `SDKPublishModel.withAppIdentity` sets the identity; `copyWith` keeps it
-  (its signature is unchanged, so subclasses that override it still build).
-- Requires the unreleased codelessly_api `AppIdentity`.
-- New package `packages/codelessly_genui`: renders A2UI (agent-generated UI) with the SDK's node transformers. It is not published yet; apps depend on it from git.
-- Requires the unreleased codelessly_api with `genscreen.dart` (for the
-  runtime screen generator below).
+- App identity: `SDKPublishModel.appIdentity` and `withAppIdentity`;
+  `CodelesslyAppIdentity` resolves each screen's title and description and
+  sets the window title; `CodelesslyAppIdentityUpdater` keeps it in sync
+  with the `CodelesslyRouter`.
 - Runtime screen generation: `RuntimeScreenGenerator` registers the
-  `generateScreen` app function (Call function with `prompt` and `kit`),
-  gets a plan from a `ScreenPlanSource` (`HttpScreenPlanSource` for a host
-  endpoint that holds the key, `ClaudeScreenPlanSource` for trusted
-  builds), validates it with one fix round, compiles it with the kit and
-  opens it (`GeneratedScreenPage`, `GeneratedScreenView`). Plans are cached
-  per prompt and kit fingerprint (`GeneratedScreenCache`, optionally
-  persisted by the host).
-- Speech recognition: built-in `listen` and `stopListening` app functions
-  (Call function; a host function of the same name wins). The `speech`
-  variable gains `canListen`, `listening`, `heard`, `score` (0-100 against
-  the expected text, null until scored), `confidence` and `error`. Web uses
-  the Web Speech API's SpeechRecognition; other platforms report
-  `canListen: false` until the host sets `Speech.recognizer`.
-  `pronunciationScore` is exported.
-- Drag tracks: vertical/horizontal input uses an axis drag recognizer and
-  follow input claims the pointer after 3 px, so knobs and sliders inside a
-  scrolling page turn instead of scrolling it. Fine mode (Shift, or press
-  and hold still before dragging; Shift + wheel), `track.fine` and the fine
-  variable; the pose animates between values (`snapMs`); arcs find the
-  nearest value around their pivot, so `jumpOnTap` works on curved sliders;
-  bound `track.min/max/step` (with master's `track.defaultValue`);
-  `write: false`.
-- An action chain whose screens have all gone finishes on the screen the app
-  shows now (a toast's delayed hide after the screen was replaced).
+  `generateScreen` app function, backed by a `ScreenPlanSource`
+  (`HttpScreenPlanSource`, `ClaudeScreenPlanSource`); generated screens are
+  shown with `GeneratedScreenPage` / `GeneratedScreenView` and cached with
+  `GeneratedScreenCache`.
+- Speech recognition: `listen` and `stopListening` app functions; the
+  `speech` variable gains `canListen`, `listening`, `heard`, `score`,
+  `confidence` and `error`. `pronunciationScore` is exported.
+- Formula functions: `spline`, `pathPoints`, `pathPoint`, `pathLength`,
+  `alpha` and `without`; color functions accept color values.
+- `motion.keyframes`, `motion.paused` and `motion.phase` bindings.
+- `orientToPath` follows a node's actual movement when keyframes move it
+  off its path.
+- `animateVariable` and `${animating.<variable>}`.
+- `transitionMs` animates bound text, icon, gradient and stroke colors.
+- Text: OpenType `fontFeatures` and `LineHeight.leadingDistribution`.
+- Paths: bound stroke and fill colors, `trimMs` / `trimCurve`, bound
+  `dashPattern`, gradient strokes and bindable rectangle `path`.
+- Bound gradient stops on any paint.
+- Drag tracks:
+  - Bindable value, geometry and range (`track.*`, `dragTrack.*`).
+  - Hit area, combined input, wheel and key steps, double-tap values and
+    `write: false`.
+  - Fine adjustment (Shift, press-and-hold, Shift + wheel).
+  - Animated value changes (`snapMs`).
+  - `jumpOnTap` on arc tracks.
+  - Path tracks scale with their frame's view box.
+  - Knobs and sliders inside scroll views no longer scroll the page.
+- Toasts: rotation and entry curve; the action can be a styled button.
+- Confirm dialogs: borders, icon, alignment and sizing options.
+- Scroll To: an `axis` option.
+- Animated positions in stacked lists; pulse `phase`; switch thumb shadow.
+- Bindings accept literal colors (`#3A3530`) and numbers (`172.28`).
+- `screen.breakpoint` and `screen.isMobile` follow a responsive layout's
+  own breakpoints.
+- `codelessly_genui` package (not yet published): renders A2UI surfaces
+  with the SDK.
 
-Requires codelessly_api 9.0.4. Found recreating Chairlift (a ski-resort
-status board) in the editor:
+### Fixed
 
-### Layout and drawing
-
-- Children of a frame scaled from its `contentSize` are placed in the design
-  space; small children (map pins, chairs) landed far off the map.
-- Rectangles drawn from a `path`, and path nodes (view box and bound
-  `pathData` included), take taps only on their line or fill, so
-  overlapping shapes can each be tapped.
-
-### Motion and controls
-
-- `motion.paused` freezes a loop in place; `motion.phase` starts it part-way
-  round its cycle.
-- Path drag tracks with a view box follow their frame's size; arc tracks
-  jump to the tapped angle with `jumpOnTap`.
-
-### Actions and runtime
-
-- Interval and timer reactions wait while their screen is covered by
-  another one (a deep link over the entry screen ticked twice as fast).
-- For-each turns expose `${loop.item}` / `${loop.index}`; `${result.item}`
-  was gone after the first action of the turn.
-- A screen whose link params set its variables reads them as the router
-  does: `?ids=3,7` sets a list to `[3, 7]`; a param that can't be read as the
-  variable's type leaves it alone (`?feed=3` used to put the text "3" in a
-  list).
-- Scroll To takes an `axis`, waits up to 60 frames for its target, and
-  scrolls the node on its own screen (a link to the entry screen opens it
-  over itself, building the node twice).
-- A loop built where tickers don't run (a page body kept alive while
-  hidden) starts once they do, so its `phase` applies; a held chair sat at
-  the start of its cable.
-- A binding that is a number written as is (`"172.28"`) reads as that
-  number: a stacked list item's constant `x`/`y` used to fall back to its
-  design offset.
-- A node shown and hidden by a binding keeps its state across toggles; each
-  toggle used to rebuild its whole subtree (a page body came back scrolled
-  to the start).
-- The toast's action can be a styled button and keeps its own font size.
+- `CodelesslyRouter.config()` can be called before `runApp`.
+- Text is measured the same way as Flutter's `Text`; dense text fields that
+  size to their content stay on one line.
+- Actions, conditions and list data use runtime values only, and computed
+  variables resolve everywhere.
+- Computed variables that read `storage`, `route`, `screen` or `auth` are
+  cached, preventing slowdowns.
+- `widthFactor` and `heightFactor` resolve inside rows, columns and
+  horizontal lists.
+- Children of a frame with `contentFit` are placed in its design size.
+- `parent` inside a fixed-size child of a frame reads the frame's content
+  size.
+- Freeform children are placed at bound `x` / `y`; draggable nodes moved
+  by bound `x` / `y` can be grabbed where they are drawn.
+- Cross-axis overflow is placed as in Flutter; clipped flex layouts no
+  longer draw overflow stripes.
+- `stretchItems` measures content, so hidden children take no height.
+- Aspect-ratio boxes keep their ratio; icon baselines align to pixels.
+- A node with a bound `visible` and a transition time animates its size
+  only when it shows or hides; a shown text whose data changes takes its
+  new width at once (it eased with an overshoot and clipped its text).
+- Layouts load the SVGs of their toast icons when they load, so the first
+  toast of a session shows its icon.
+- Shadows on rounded boxes with a spread shadow paint in order.
+- Single-line text in a row that runs short of space keeps its width.
+- Paths and path-drawn rectangles take taps only on their stroke or fill.
+- A loop stopped by a binding keeps its bound values; a loop created while
+  tickers are paused starts when they resume.
+- An image fill without a URL no longer throws.
+- Interval and timer reactions pause while their screen is covered.
+- `${loop.item}` and `${loop.index}` are available in for-each actions,
+  and `${result.item}` persists through each iteration.
+- Link parameters are parsed by the variable's type (`?ids=3,7` sets a list).
+- Scroll To waits for its target and scrolls it on the current screen.
+- Nodes shown and hidden by a binding keep their state.
+- Action chains finish on the current screen after the original screen
+  is gone.
 
 ## 9.1.9
 

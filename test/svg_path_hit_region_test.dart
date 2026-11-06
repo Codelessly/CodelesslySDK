@@ -38,7 +38,9 @@ void main() {
       ),
     );
     await tester.tapAt(const Offset(100, 100)); // on "over"
-    await tester.tapAt(const Offset(100, 300)); // on "under", inside "over"'s box
+    await tester.tapAt(
+      const Offset(100, 300),
+    ); // on "under", inside "over"'s box
     await tester.tapAt(const Offset(105, 291)); // within the slop of "under"
     await tester.tapAt(const Offset(200, 100)); // on neither
     expect(taps, ['over', 'under', 'under']);

@@ -95,7 +95,7 @@ class TextUtils {
   }) {
     String characters = rawText;
 
-    final TextStyle style = switch (hasMissingFont) {
+    final TextStyle baseStyle = switch (hasMissingFont) {
       false => retrieveTextStyle(
         fontSize: fontSize,
         fontName: fontName,
@@ -116,6 +116,13 @@ class TextUtils {
         decoration: TextDecoration.underline,
       ),
     };
+    // A text node's OpenType features (lining or tabular figures, small
+    // caps...) go on every span's own style, so the text is measured the way
+    // it is painted, variable placeholders included.
+    final List<FontFeature> features = fontFeaturesOf(node);
+    final TextStyle style = features.isEmpty
+        ? baseStyle
+        : baseStyle.copyWith(fontFeatures: features);
 
     // On a design canvas, show defaults or placeholders for variables.
     if (replaceVariableWithSymbol) {
@@ -170,44 +177,36 @@ class TextUtils {
     List<Effect>? effects,
     Map<String, TapGestureRecognizer> tapGestureRecognizers = const {},
   }) {
-    // Tabular figures wrap each span in a style that only adds the feature,
-    // so the span's own style still sets everything else.
-    final bool tabular = node is TextNode && node.tabularFigures;
     return [
       for (final prop in props)
-        if (tabular)
-          TextSpan(
-            style: const TextStyle(
-              fontFeatures: [FontFeature.tabularFigures()],
-            ),
-            children: [
-              buildTextSpanForProp(
-                context,
-                rawText,
-                node: node,
-                prop: prop,
-                variablesOverrides: variablesOverrides,
-                nullSubstitutionMode: nullSubstitutionMode,
-                replaceVariableWithSymbol: replaceVariablesWithSymbol,
-                hasMissingFont: hasMissingFont,
-                tapGestureRecognizer: tapGestureRecognizers[prop.link],
-                effects: effects ?? node.effects,
-              ),
-            ],
-          )
-        else
-          buildTextSpanForProp(
-            context,
-            rawText,
-            node: node,
-            prop: prop,
-            variablesOverrides: variablesOverrides,
-            nullSubstitutionMode: nullSubstitutionMode,
-            replaceVariableWithSymbol: replaceVariablesWithSymbol,
-            hasMissingFont: hasMissingFont,
-            tapGestureRecognizer: tapGestureRecognizers[prop.link],
-            effects: effects ?? (node is BlendMixin ? node.effects : const []),
-          ),
+        buildTextSpanForProp(
+          context,
+          rawText,
+          node: node,
+          prop: prop,
+          variablesOverrides: variablesOverrides,
+          nullSubstitutionMode: nullSubstitutionMode,
+          replaceVariableWithSymbol: replaceVariablesWithSymbol,
+          hasMissingFont: hasMissingFont,
+          tapGestureRecognizer: tapGestureRecognizers[prop.link],
+          effects: effects ?? (node is BlendMixin ? node.effects : const []),
+        ),
+    ];
+  }
+
+  /// The Flutter font features of [node]'s text: its
+  /// [TextNode.resolvedFontFeatures] ([TextNode.fontFeatures], plus `tnum`
+  /// for [TextNode.tabularFigures]). Empty for any other node.
+  static List<FontFeature> fontFeaturesOf(BaseNode? node) {
+    if (node is! TextNode) return const [];
+    if (node.fontFeatures.isEmpty) {
+      return node.tabularFigures
+          ? const [FontFeature.tabularFigures()]
+          : const [];
+    }
+    return [
+      for (final OpenTypeFeature feature in node.resolvedFontFeatures)
+        FontFeature(feature.tag, feature.value),
     ];
   }
 
@@ -237,6 +236,8 @@ class TextUtils {
 
     return Text.rich(
       TextSpan(children: spans),
+      // See [rootTextStyle].
+      style: rootTextStyle,
       textAlign: textAlignHorizontal?.toFlutter(),
       maxLines: maxLines,
       overflow: overflow?.flutterOverflow,
@@ -295,6 +296,10 @@ class TextUtils {
         : InlineCode.apply(colored, inlineCode);
 
     return Text.rich(
+      // A host's default text style (a Scaffold's Material 3 bodyMedium, 14 px
+      // at 1.43) would set the paragraph's line height under every span
+      // without one of its own. See [rootTextStyle].
+      style: rootTextStyle,
       TextSpan(
         children: language != SyntaxLanguage.none
             ? CodeHighlighter.highlightSpans(
@@ -388,6 +393,7 @@ class TextUtils {
 
     return Text.rich(
       TextSpan(children: [span]),
+      style: rootTextStyle,
       textAlign: textAlignHorizontal?.toFlutter(),
       maxLines: maxLines,
       overflow: overflow?.flutterOverflow,
@@ -615,16 +621,22 @@ class TextUtils {
       );
     }
 
-    final TextTheme typography = Typography.material2021().englishLike;
-
-    // Material 3's type scale distributes leading evenly, which puts a font
-    // whose ascent is much larger than its descent (DM Serif Display: 1.036em
-    // over 0.335em) up to 0.1em lower in its line than Flutter's own
+    // The base every text style is merged over: Material 3's bodySmall
+    // (12 px, regular, alphabetic baseline, not inheriting a host's default
+    // text style), without its line height and letter spacing. A text whose
+    // line height is auto is set at its font's own line height, as Flutter's
+    // `Text` and Figma's auto line height set it: bodySmall's 1.33 made a
+    // 28 px Cormorant Garamond title 37 px tall instead of 34 (Inter 15 px
+    // 20 instead of 18).
+    //
+    // Material 3's type scale also distributes leading evenly, which puts a
+    // font whose ascent is much larger than its descent (DM Serif Display:
+    // 1.036em over 0.335em) up to 0.1em lower in its line than Flutter's own
     // TextStyle(height: x) does. Use the line height's own distribution
     // (Flutter's default, proportional, unless it says even, as text in a
     // Material 3 Scaffold lays out) and set it explicitly so a host's
     // Material default text style doesn't change where the text sits either.
-    return typography.bodySmall!
+    return baseTextStyle
         .merge(style)
         .copyWith(
           leadingDistribution: switch (lineHeight?.leadingDistribution) {
@@ -633,4 +645,20 @@ class TextUtils {
           },
         );
   }
+
+  /// The style of the text widgets the SDK builds for its spans: theirs
+  /// alone, never the default text style around them. The paragraph takes
+  /// its line height from it, so a host's Material 3 default (a Scaffold's
+  /// bodyMedium, 1.43) made every span whose line height is auto 43% taller
+  /// than Flutter's `Text` with the same style.
+  static const TextStyle rootTextStyle = baseTextStyle;
+
+  /// What [retrieveTextStyle] merges every text style over.
+  static const TextStyle baseTextStyle = TextStyle(
+    inherit: false,
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    textBaseline: TextBaseline.alphabetic,
+    leadingDistribution: TextLeadingDistribution.proportional,
+  );
 }

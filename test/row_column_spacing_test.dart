@@ -388,15 +388,14 @@ void main() {
       spacing: 8,
     );
     await pump(tester, column, [shown, gone]);
-    bool ticks(String id) =>
-        TickerMode.valuesOf(
-          tester.element(
-            find.byKey(
-              ValueKey('Rectangle Transformer of $id [$id]'),
-              skipOffstage: false,
-            ),
-          ),
-        ).enabled;
+    bool ticks(String id) => TickerMode.valuesOf(
+      tester.element(
+        find.byKey(
+          ValueKey('Rectangle Transformer of $id [$id]'),
+          skipOffstage: false,
+        ),
+      ),
+    ).enabled;
     // A loop on a hidden panel (the loading chair) waits until it shows.
     expect(ticks('gone'), isFalse);
     expect(ticks('shown'), isTrue);

@@ -1947,6 +1947,8 @@ extension ActionModelExt on ActionModel {
           action.message,
           action.confirmLabel,
           action.cancelLabel,
+          // Colour and icon bindings.
+          ...action.variables.values,
           for (final MapEntry(:key, :value) in action.params.entries) ...[
             key,
             if (value is String) value,
@@ -1964,8 +1966,20 @@ extension ActionModelExt on ActionModel {
         };
       case ActionType.delay:
       case ActionType.controlDrag:
+        strings.add((this as ControlDragAction).steps);
+        return _namesIn(strings, includePredefined);
       case ActionType.scrollTo:
         return {};
+      case ActionType.animateVariable:
+        final AnimateVariableAction action = this as AnimateVariableAction;
+        return {
+          if (action.variable.trim().isNotEmpty) action.variable.trim(),
+          ..._namesIn([
+            action.from,
+            action.to,
+            ?action.duration,
+          ], includePredefined),
+        };
       case ActionType.playSound:
         final PlaySoundAction action = this as PlaySoundAction;
         return _namesIn([
