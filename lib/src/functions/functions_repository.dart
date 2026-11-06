@@ -231,6 +231,8 @@ class FunctionsRepository {
           drag.command,
           drag.direction,
         ).then((_) => true);
+      case ActionType.paginate:
+        return paginate(context, action as PaginateAction);
       case ActionType.haptic:
         return haptic(context, action as HapticAction);
       case ActionType.animateVariable:
@@ -316,6 +318,57 @@ class FunctionsRepository {
         VariableAnimator.seek(variable, to);
         return true;
     }
+  }
+
+  /// Moves the pagination controller [action] names. A controller no list
+  /// has created (its list isn't on screen) is skipped.
+  static Future<bool> paginate(
+    BuildContext context,
+    PaginateAction action,
+  ) async {
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    String resolve(String text) => PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    ).trim();
+    int? number(String text) {
+      final String value = resolve(text);
+      return int.tryParse(value) ?? double.tryParse(value)?.round();
+    }
+
+    final String name = resolve(action.controller);
+    final PaginationController? controller = context
+        .read<CodelesslyContext?>()
+        ?.pagination[name];
+    if (controller == null) {
+      DebugLogger.instance.printInfo(
+        'No pagination controller named "$name" is on screen.',
+        name: 'FunctionsRepository',
+      );
+      return true;
+    }
+    switch (action.command) {
+      case PaginateCommand.next:
+        await controller.next();
+      case PaginateCommand.previous:
+        await controller.previous();
+      case PaginateCommand.goTo:
+        final int? page = number(action.page);
+        if (page != null) await controller.goTo(page);
+      case PaginateCommand.first:
+        await controller.first();
+      case PaginateCommand.last:
+        await controller.last();
+      case PaginateCommand.refresh:
+        await controller.refresh();
+      case PaginateCommand.retry:
+        await controller.retry();
+      case PaginateCommand.setPageSize:
+        final int? size = number(action.pageSize);
+        if (size != null) await controller.setPageSize(size);
+    }
+    return true;
   }
 
   /// Focuses (or unfocuses) the text field [action] names.

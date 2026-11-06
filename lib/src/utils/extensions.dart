@@ -1969,6 +1969,9 @@ extension ActionModelExt on ActionModel {
         return _namesIn(strings, includePredefined);
       case ActionType.scrollTo:
         return {};
+      case ActionType.paginate:
+        final PaginateAction action = this as PaginateAction;
+        return _namesIn([action.page, action.pageSize], includePredefined);
       case ActionType.animateVariable:
         final AnimateVariableAction action = this as AnimateVariableAction;
         return {
