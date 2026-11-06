@@ -438,11 +438,43 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
 }
 
 /// [variable] holding the link param of its name, when [params] has a
-/// non-empty one; the raw text is read as the variable's type.
+/// non-empty one that reads as the variable's type; the raw text is read as
+/// the variable's type.
+///
+/// A param that doesn't fit leaves the variable alone: `?feed=3` (a debug
+/// count of events to replay, read as `${route.feed}`) used to replace an
+/// app's `feed` list with the text "3".
 VariableData withLinkParam(VariableData variable, Map<String, dynamic> params) {
   final Object? param = params[variable.name];
   if (param == null) return variable;
   final String value = param is String ? param : jsonEncode(param);
   if (value.isEmpty) return variable;
+  if (!_fitsType(value, variable.type)) return variable;
   return variable.copyWith(value: value);
+}
+
+/// Whether link param text [value] can be read as a [type] value.
+bool _fitsType(String value, VariableType type) {
+  final String text = value.trim();
+  Object? decoded() {
+    try {
+      return jsonDecode(text);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  return switch (type) {
+    VariableType.list => decoded() is List,
+    VariableType.map => decoded() is Map,
+    VariableType.integer => int.tryParse(text) != null,
+    VariableType.decimal => double.tryParse(text) != null,
+    VariableType.boolean => const {
+      'true',
+      'false',
+      '1',
+      '0',
+    }.contains(text.toLowerCase()),
+    _ => true,
+  };
 }
