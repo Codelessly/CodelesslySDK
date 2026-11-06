@@ -33,6 +33,14 @@ class ScopedValues {
   /// [NodeDragTrack]), or null outside one: what the `track` variable reads.
   late final TrackValues? trackValues;
 
+  /// The pose of the nearest transform gesture above this context (see
+  /// [NodeTransformGesture]), or null outside one: what the `transform`
+  /// variable reads.
+  late final TransformValues? transformValues;
+  /// The live values of the flip card, tilt and page around this context
+  /// (see [MotionValuesScope]): what `flip`, `tilt` and `pageOffset` read.
+  late final Map<String, Object?> motionValues;
+
   /// The route params for this route/page for given context, as
   /// `${route.<name>}` reads them, plus `path`: the screen's URL path, such
   /// as `/pass/zz999` (the location a Codelessly router shows the screen
@@ -149,6 +157,8 @@ class ScopedValues {
       holdProgress = null,
       dragValues = null,
       trackValues = null,
+      transformValues = null,
+      motionValues = const {},
       _givenRouteParams = {},
       _routePath = null,
       _appUser = null,
@@ -172,6 +182,7 @@ class ScopedValues {
     this.screenSize,
     this.platformBrightness,
     this.parentSize,
+    this.trackValues,
     this.predefinedOverrides,
     this.breakpointWidths,
     Map<String, dynamic>? data,
@@ -186,7 +197,8 @@ class ScopedValues {
        nodeState = null,
        holdProgress = null,
        dragValues = null,
-       trackValues = null,
+       transformValues = null,
+       motionValues = const {},
        _givenRouteParams = routeParams ?? {},
        _routePath = null;
 
@@ -207,6 +219,8 @@ class ScopedValues {
       holdProgress = base.holdProgress,
       dragValues = base.dragValues,
       trackValues = base.trackValues,
+      transformValues = base.transformValues,
+      motionValues = base.motionValues,
       _givenRouteParams = base._givenRouteParams,
       _routePath = base._routePath,
       screenSize = base.screenSize,
@@ -260,6 +274,8 @@ class ScopedValues {
     holdProgress = HoldProgressProvider.maybeOf(context);
     dragValues = DragScope.maybeOf(context);
     trackValues = TrackScope.maybeOf(context);
+    transformValues = TransformScope.maybeOf(context);
+    motionValues = MotionValuesScope.of(context);
     final instance = context.read<Codelessly?>();
     // A screen a Codelessly router shows has the parameters of its location;
     // one pushed on a plain navigator has its route's arguments.

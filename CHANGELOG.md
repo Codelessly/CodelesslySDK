@@ -1,3 +1,152 @@
+## Unreleased
+
+Requires the unreleased codelessly_api gesture models.
+
+- `NodeTransformGesture` runs `BaseNode.transformGesture` (and `zoomable`,
+  which no longer uses `InteractiveViewer`): focal-point pinch zoom, pan,
+  two-finger rotate, double-tap zoom, wheel and trackpad zoom, rubber-band
+  bounds, fling and spring settle, two-way pose variables, `changed` /
+  `changeEnd` / `doubleTap` reactions, `${transform.*}` inside the node, and
+  corner, edge and rotate handles with a selection variable.
+- `gesture_physics.dart`: the shared physics (`springOf`,
+  `AxisSettleSimulation`, `rubberBand`, `boundsRange`, `snapTargetOf`).
+- `NodeDrag` with `DragModel.physics` flings, springs back with the release
+  velocity, rubber-bands past its bounds and limits and settles on snap
+  points; `dragEnd` reads `targetX`, `targetY`, `snapIndex`, and `drag`
+  reads `settling` and `snapIndex`. Without physics it behaves as before.
+- `NodeDrag` is grabbed where it is drawn (an open sheet by its visible
+  top), counts from pointer down instead of after the touch slop, and an
+  axis-locked drag only claims moves along its axis, so a list across it
+  keeps scrolling.
+- `pinch` reactions read `rotation`, `totalRotation` and `pointerCount`;
+  `drag` and `dragEnd` read `pointerCount`.
+- A draggable's return spring uses `DraggableModel.effectivePhysics`.
+- Transitions (needs the unreleased `codelessly_api` with `RouteTransition`; see `CodelesslyEditor/docs/transitions_api.md`):
+  - `CodelesslyRouteTransitionRoute` plays a `RouteTransition` on both screens.
+    - The screen it covers moves through Flutter's `delegatedTransition`.
+    - Pops reverse, or play the pop sides.
+    - Reveals grow from the tap point or the tapped node.
+  - Modals (dialogs, sheets, full screen) opened with a `routeTransition` are page routes, so shared elements fly into and out of them. The route's barrier colour applies.
+  - A drag can close a route interactively:
+    - `dismiss` (swipe down to dismiss);
+    - iOS swipe back (`swipeBack`).
+    The drag moves the route's progress, heroes follow the finger, and the release completes or cancels with a spring. It goes through the provisional `TransitionPhysics` adapter until the Gestures shared physics model lands.
+  - Hero fixes and new flights:
+    - Heroes fly during back gestures (`transitionOnUserGestures`).
+    - New flights: `morph`, `fadeThrough` and `containerTransform`; `arc` flights also arrive from a drag.
+    - A destination network image that hasn't loaded yet flies over its source instead of as an empty box.
+    - `heroPlaceholder: source` keeps the source drawn until the destination loads.
+    - Heroes in a hidden cloud-list variant don't fly.
+    - A router nested under another navigator gets its own hero controller.
+  - Flip cards (`NodeFlip`): tap, a variable, a `flip.flipped` binding, or a drag that settles on the nearer face.
+  - Tilt and parallax (`NodeTilt`).
+  - Page view `pageMotion` for coverflow, cube and 3D carousel (`PageMotionItem`).
+  - New predefined variables: `flip`, `tilt` and `pageOffset`.
+- `motion.arc`: bound positions move along a curve (a formation change
+  sweeping every player to their new spot).
+- An entrance replays from values it names at their defaults
+  (`enterFrom: {opacity: 1}`): fade-out trails on replay.
+- Impossible days (`2013-02-30`) are not read as dates.
+- Quoted formula text reads `\n`, `\t` and `\r`.
+- Text fields use standard visual density on every platform: desktop's
+  compact density (also the web's) took 8 px off a padded field that hugs
+  its height, so the editor's canvas and desktop browsers drew it shorter
+  than phones did.
+
+### Lists and pagination
+
+- A list whose item template has a fixed height (width, in a horizontal
+  list) and no bound size or visibility gives every item that extent, so a
+  10,000 item list lays out any offset without building the items before it.
+  A bound `widthFactor`, `heightFactor` or `aspectRatio` keeps the items
+  measured.
+- A list with separators keeps its fixed item extent (items and separators
+  interleave with known extents) instead of measuring every item.
+- Data list rows count duplicate ids once per build instead of once per
+  row, which was quadratic in the list's length.
+- Pagination: a list with `pagination` pages its bound data, its cloud
+  query or an API through a `PaginationController` (`CodelesslyContext.pagination`,
+  by name), shown a page at a time or as an infinite list that loads the
+  next page near its end (once per page however fast it scrolls), and in
+  both directions with the scroll position kept as pages are put in front.
+  Loading, error-with-retry and end-of-list footer nodes, pull to refresh
+  (`refresh` reactions run too), and the state as a map variable
+  (`${name.page}`, `${name.hasMore}`...). The Paginate action moves it.
+- Lists with `sections` group their items under section headers that stay
+  pinned until the next section pushes them out, with an A–Z index bar.
+- Lists with `swipeActions` reveal actions behind an item swiped sideways;
+  a full swipe runs the first action, with an Undo bar for removing ones,
+  then fires `swipeAction` reactions and can remove the item from the bound
+  list or the cloud collection.
+- Lists with a `reorder` model reorder by a handle, a long press or a press
+  anywhere, with proxy elevation, scale and opacity, auto-scroll, per-item
+  `canReorderIf` and per-drop `canDropIf`, Alt+arrow keyboard moves (with
+  screen reader actions and announcements), and an optional built-in apply
+  to the bound list variable or the cloud collection's order field. Lists
+  that share a `group` take each other's items (a Kanban board), with a
+  placeholder where the drop lands. `reorder` reactions run on the list
+  with `${result.from}`, `${result.to}`, `${result.item}`,
+  `${result.fromList}` and `${result.toList}`; a handle's reactions still
+  run too.
+- Grids with `pagination` page and load more like lists.
+- The Pagination node renders page controls (first, previous, page numbers
+  with ellipses, next, last, page size select, summary) for a controller.
+- The Table node renders a `TableView` (two_dimensional_scrollables) that
+  scrolls both ways, builds only the visible cells and pins its header row
+  and column.
+
+## 9.3.3
+
+Requires codelessly_api 9.3.0. Rendering fixes found matching the Chairlift
+reference app pixel for pixel.
+
+### Fixed
+
+- A colour or gradient fill sits inside its node's solid border by half the
+  border's inset, as Flutter's BoxDecoration paints a background under a
+  uniform border: drawn to the edge, the fill's anti-aliased rim showed
+  through the border's (a light seam between a card's border and shadow).
+- A node that clips its content keeps its own stroke outside the clip, as
+  Flutter's Container paints its border outside the clip of its child: a
+  rounded card's border was cut (or anti-aliased twice), leaving a light
+  seam between it and its shadow.
+- A stroke on one side paints only its band. It was the difference of two
+  rounded rects whose other three edges coincide, and at a fractional
+  position the GPU backend left faint lines along them.
+
+## 9.3.2
+
+Requires codelessly_api 9.3.0.
+
+### Fixed
+
+- A screen loaded again while it shows (published again, a fresh publish
+  bundle replacing the cached model, its variables arriving after it) keeps
+  the values of its canvas variables unless their published definition
+  changed. They went back to their published defaults, and the screen's
+  load actions, which run once per screen, didn't fill them again: a form
+  whose load actions filled drafts from the selected item opened right
+  after a republish with an empty name and the default time.
+- Load actions wait for the screen's variables. A screen shown before its
+  published variables are in the model (a cached model without them, while
+  the publish bundle or an update downloads them) runs its load actions,
+  and applies its link parameters, once they arrive
+  (`DataManager.variablesPending`).
+
+## 9.3.1
+
+Requires codelessly_api 9.3.0.
+
+### Fixed
+
+- A node with a bound `visible` and a transition time animates its size
+  only when it shows or hides. A shown text whose data changes takes its
+  new width at once; it used to ease there with an overshoot that clipped
+  the text for a moment ("Weekdays" drew as "Weekday").
+- Layouts load the SVGs of their toast icons when they load
+  (`AppToast.precacheIcons`, `SvgIcon.precache`), so the first toast of a
+  session shows its icon.
+
 ## 9.3.0
 
 Requires codelessly_api 9.3.0.

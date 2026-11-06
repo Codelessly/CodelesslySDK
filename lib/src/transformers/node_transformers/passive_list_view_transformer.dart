@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../../../codelessly_sdk.dart';
 import '../../ui/cloud_query_builder.dart';
 import '../../ui/draggable_scroll_configuration.dart';
+import '../utils/list_item_extent.dart';
 
 class PassiveListViewTransformer extends NodeWidgetTransformer<ListViewNode> {
   PassiveListViewTransformer(super.getNode, super.manager);
@@ -308,6 +309,85 @@ class PassiveListViewWidget extends StatelessWidget {
     return null;
   }
 
+  /// Builds a list that pages, groups its items into sections or has swipe
+  /// actions; see [DataListView].
+  Widget buildDataList(BuildContext context, BaseNode item) {
+    final List? data =
+        PropertyValueDelegate.getVariableValueFromPath<List>(
+          node.variables['data'] ?? '',
+          scopedValues: ScopedValues.of(context),
+        ) ??
+        (node.properties.itemCount != null && node.variables['data'] == null
+            ? List<Object?>.generate(node.properties.itemCount!, (i) => i)
+            : null);
+    final PaginationModel? model = node.pagination;
+    PageFetcher? fetcher;
+    if (model != null && !settings.isPreview) {
+      switch (model.source) {
+        case PaginationSource.data:
+          break;
+        case PaginationSource.cloud:
+          final Codelessly? codelessly = context.read<Codelessly?>();
+          if (codelessly != null && codelessly.authManager.authData != null) {
+            final query = constructQuery(context, codelessly);
+            if (query != null) {
+              fetcher = cloudPageFetcher(
+                ref: query.ref,
+                query: query.query,
+                readyIndexes:
+                    codelessly.cloudDatabase?.rules.readyIndexesFor(
+                      node.collectionPath ?? '',
+                    ) ??
+                    const {},
+              );
+            }
+          }
+        case PaginationSource.api:
+          fetcher = apiPageFetcher(context, model);
+      }
+    }
+    final bool vertical = node.scrollDirection == AxisC.vertical;
+    final String headerId = node.sections?.headerNodeId ?? '';
+    double headerExtent = 32;
+    if (headerId.isNotEmpty) {
+      final BaseNode header = manager.getNode(headerId);
+      headerExtent = vertical
+          ? header.outerBoxLocal.height
+          : header.outerBoxLocal.width;
+    }
+    return box(
+      canShrinkWrap: true,
+      (context, shrinkWrap) => DataListView(
+        node: node,
+        data: data?.cast<Object?>(),
+        fetcher: fetcher,
+        preview: settings.isPreview,
+        itemExtent: listItemExtent(
+          context,
+          node,
+          item,
+          layoutChanges: listItemOverlap(node) > 0,
+        ),
+        headerExtent: headerExtent,
+        shrinkWrap: shrinkWrap,
+        physics: node.isScrollable
+            ? node.physics.flutterScrollPhysics(node.shouldAlwaysScroll)
+            : const NeverScrollableScrollPhysics(),
+        padding: node.padding.flutterEdgeInsets,
+        separatorExtent: math.max(0, node.properties.separatorSpacing),
+        separatorBuilder: node.properties.hasSeparator
+            ? (context, index) => ListViewItemSeparator(
+                scrollDirection: node.scrollDirection,
+                properties: node.properties,
+              )
+            : null,
+        buildTemplate: (context) => buildItem(item, context),
+        buildNode: (context, id) =>
+            manager.buildWidgetByID(id, context, settings: settings),
+      ),
+    );
+  }
+
   /// Builds one item, placed as the editor lays it out; see [ListItemBox].
   /// Legacy wrapping lists retain their item sizing and scroll behavior.
   Widget buildItem(BaseNode item, BuildContext context) {
@@ -425,6 +505,13 @@ class PassiveListViewWidget extends StatelessWidget {
     }
     final itemNode = node.children.first;
     final BaseNode item = manager.getNode(itemNode);
+
+    if (usesDataListView(node) &&
+        !node.properties.stacked &&
+        !node.properties.wrap &&
+        node.properties.layout == ListLayout.list) {
+      return buildDataList(context, item);
+    }
 
     final bool useCloudDatabase = node.useCloudDatabase;
 
@@ -597,7 +684,19 @@ class PassiveListViewWidget extends StatelessWidget {
                   scrollDirection: node.scrollDirection.flutterAxis,
                   cacheExtent: node.properties.cacheExtent,
                   reverse: node.reverse,
-                  itemExtent: node.properties.itemExtent,
+                  // A "Show more" button is not as long as an item.
+                  itemExtent: items.hasButton
+                      ? node.properties.itemExtent
+                      : listItemExtent(
+                          context,
+                          node,
+                          item,
+                          layoutChanges: listItemOverlap(node) > 0,
+                        ),
+                  separatorExtent: math.max(
+                    0,
+                    node.properties.separatorSpacing,
+                  ),
                   clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
                   separatedBuilder: node.properties.hasSeparator
                       ? (context, index) => ListViewItemSeparator(
@@ -673,13 +772,18 @@ class PassiveListViewWidget extends StatelessWidget {
     final ids = data
         ?.map((value) => value is Map ? value['id'] : null)
         .toList();
+    // How often each id occurs, counted once per build: a row is keyed by
+    // its id only when no other row shares it.
+    final Map<Object?, int> idCounts = <Object?, int>{};
+    if (ids != null) {
+      for (final Object? id in ids) {
+        idCounts[id] = (idCounts[id] ?? 0) + 1;
+      }
+    }
     Object itemKey(int index) {
       if (keyed != null && index < (itemCount ?? 0)) return keyed.keyOf(index);
       final id = ids?.elementAtOrNull(index);
-      return id != null &&
-              ids!.where((candidate) => candidate == id).length == 1
-          ? ('id', id)
-          : ('index', index);
+      return id != null && idCounts[id] == 1 ? ('id', id) : ('index', index);
     }
 
     Widget dataItemBuilder(BuildContext context, int index) =>
@@ -781,7 +885,13 @@ class PassiveListViewWidget extends StatelessWidget {
       scrollDirection: node.scrollDirection.flutterAxis,
       cacheExtent: node.properties.cacheExtent,
       reverse: node.reverse,
-      itemExtent: node.properties.itemExtent,
+      itemExtent: listItemExtent(
+        context,
+        node,
+        item,
+        layoutChanges: target != null || listItemOverlap(node) > 0,
+      ),
+      separatorExtent: math.max(0, node.properties.separatorSpacing),
       clipBehavior: node.clipsContent ? Clip.hardEdge : Clip.none,
       separatedBuilder:
           (node.properties.itemCount != null || data != null) &&
@@ -829,11 +939,70 @@ class PassiveListViewWidget extends StatelessWidget {
     final BaseNode? handle = settings.isPreview || data == null
         ? null
         : reorderHandleOf(item);
-    if (handle != null && !listWraps(node)) {
+    final ReorderModel? reorder = node.reorder;
+    final bool reorders =
+        !settings.isPreview &&
+        data != null &&
+        !listWraps(node) &&
+        (reorder == null
+            ? handle != null
+            : reorder.enabled &&
+                  (reorder.start != ReorderStart.handle || handle != null));
+    if (reorders && reorder != null && reorder.betweenLists) {
+      return box(
+        canShrinkWrap: true,
+        (context, shrinkWrap) => GroupReorderList(
+          node: node,
+          model: reorder,
+          items: [...data],
+          shrinkWrap: shrinkWrap,
+          padding: node.padding.flutterEdgeInsets,
+          itemExtent: listItemExtent(context, node, item),
+          listKey: reorder.listKey.trim().isEmpty
+              ? node.id
+              : PropertyValueDelegate.substituteVariables(
+                  reorder.listKey,
+                  scopedValues: ScopedValues.of(context),
+                  nullSubstitutionMode: NullSubstitutionMode.emptyString,
+                ),
+          placeholderBuilder: reorder.placeholderNodeId.isEmpty
+              ? null
+              : (context) => manager.buildWidgetByID(
+                  reorder.placeholderNodeId,
+                  context,
+                  settings: settings,
+                ),
+          itemBuilder: (context, index) => itemBuilder(context, index),
+        ),
+      );
+    }
+    if (reorders) {
       final double gap = node.properties.hasSeparator
           ? math.max(0, node.properties.separatorSpacing)
           : 0;
       final bool vertical = node.scrollDirection == AxisC.vertical;
+      final List<Object?> items = [...data];
+      final List<Reaction> handleReactions = handle is ReactionMixin
+          ? (handle as ReactionMixin).reactions
+          : const [];
+      final String? listKey = reorder == null || reorder.listKey.trim().isEmpty
+          ? null
+          : PropertyValueDelegate.substituteVariables(
+              reorder.listKey,
+              scopedValues: ScopedValues.of(context),
+              nullSubstitutionMode: NullSubstitutionMode.emptyString,
+            );
+      Future<bool> move(int from, int to) => runListReorder(
+        context,
+        list: node,
+        model: reorder,
+        items: items,
+        from: from,
+        to: to,
+        listKey: listKey,
+        // Before the list's own reorder model, only the handle had them.
+        handleReactions: handleReactions,
+      );
       return box(
         canShrinkWrap: true,
         (context, shrinkWrap) => ReorderableListView.builder(
@@ -845,36 +1014,80 @@ class PassiveListViewWidget extends StatelessWidget {
           scrollDirection: node.scrollDirection.flutterAxis,
           buildDefaultDragHandles: false,
           itemCount: itemCount ?? 0,
-          // The row being dragged shows its nodes' `dragged` state.
+          // Without auto-scroll the list barely moves near its edges.
+          autoScrollerVelocityScalar: reorder?.autoScroll == false
+              ? 0.001
+              : null,
           // The row being dragged shows its nodes' `dragged` state. Flutter
           // draws it in the overlay, above the app's providers, so they are
           // given to it again.
-          proxyDecorator: (child, index, animation) => reprovideCodelessly(
-            context,
-            Material(
-              type: MaterialType.transparency,
-              child: DraggedScope(child: child),
-            ),
-          ),
-          onReorderItem: (int from, int to) {
-            FunctionsRepository.triggerAction(
+          proxyDecorator: (child, index, animation) => decorateReorderProxy(
+            reprovideCodelessly(
               context,
-              TriggerType.reorder,
-              reactions: handle is ReactionMixin
-                  ? (handle as ReactionMixin).reactions
-                  : const [],
-              result: {'from': from, 'to': to},
+              Material(
+                type: MaterialType.transparency,
+                child: DraggedScope(child: child),
+              ),
+            ),
+            animation,
+            reorder,
+          ),
+          onReorderItem: (int from, int to) => move(from, to),
+          itemBuilder: (context, index) {
+            final Object? value = items.elementAtOrNull(index);
+            final bool locked =
+                reorder != null &&
+                !reorderConditionHolds(
+                  context,
+                  reorder.canReorderIf,
+                  item: value,
+                  index: index,
+                );
+            Widget child = ReorderLockScope(
+              locked: locked,
+              child: itemBuilder(context, index),
+            );
+            switch (reorder?.start) {
+              case ReorderStart.longPress:
+                child = ReorderableDelayedDragStartListener(
+                  index: index,
+                  enabled: !locked,
+                  child: child,
+                );
+              case ReorderStart.press:
+                child = ReorderableDragStartListener(
+                  index: index,
+                  enabled: !locked,
+                  child: MouseRegion(
+                    cursor: locked
+                        ? MouseCursor.defer
+                        : SystemMouseCursors.grab,
+                    child: child,
+                  ),
+                );
+              case ReorderStart.handle || null:
+                break;
+            }
+            if (reorder?.keyboard ?? false) {
+              child = KeyboardReorderItem(
+                index: index,
+                count: itemCount ?? 0,
+                enabled: !locked,
+                vertical: vertical,
+                onMove: move,
+                child: child,
+              );
+            }
+            return Padding(
+              key: ValueKey(('reorder', itemKey(index))),
+              padding: index == (itemCount ?? 0) - 1
+                  ? EdgeInsets.zero
+                  : vertical
+                  ? EdgeInsets.only(bottom: gap)
+                  : EdgeInsets.only(right: gap),
+              child: child,
             );
           },
-          itemBuilder: (context, index) => Padding(
-            key: ValueKey(('reorder', itemKey(index))),
-            padding: index == (itemCount ?? 0) - 1
-                ? EdgeInsets.zero
-                : vertical
-                ? EdgeInsets.only(bottom: gap)
-                : EdgeInsets.only(right: gap),
-            child: itemBuilder(context, index),
-          ),
         ),
       );
     }
@@ -1117,10 +1330,15 @@ class StackedListItems extends StatelessWidget {
                             scope,
                           )) ??
                     offsetOf(item, node, 'y', scope);
-                final Widget child = manager.buildWidgetByID(
-                  item.id,
-                  context,
-                  settings: settings,
+                // Items overlap (pins on a map): an item's empty area, where
+                // it has no fill, stroke or reaction of its own, lets taps
+                // through to the items and the list beneath.
+                final Widget child = TapThroughScope(
+                  child: manager.buildWidgetByID(
+                    item.id,
+                    context,
+                    settings: settings,
+                  ),
                 );
                 if (move == null) {
                   return Positioned(
@@ -1218,6 +1436,11 @@ class ListViewBuilder extends StatelessWidget {
   final bool reverse;
   final bool primary;
   final double? itemExtent;
+
+  /// How long each separator is along the scroll axis. With [itemExtent]
+  /// set, items and separators then all have known extents, so the list
+  /// still lays out any offset without building what comes before it.
+  final double separatorExtent;
   final Clip clipBehavior;
   final NullableIndexedWidgetBuilder? itemBuilder;
   final IndexedWidgetBuilder? separatedBuilder;
@@ -1235,6 +1458,7 @@ class ListViewBuilder extends StatelessWidget {
     this.physics,
     this.cacheExtent,
     this.itemExtent,
+    this.separatorExtent = 0,
     this.itemBuilder,
     this.separatedBuilder,
     this.primary = false,
@@ -1245,6 +1469,30 @@ class ListViewBuilder extends StatelessWidget {
     return DraggableScrollConfiguration(
       child: Builder(
         builder: (context) {
+          if (separatedBuilder != null && itemExtent != null) {
+            // Items and separators interleave: even children are items.
+            final int? count = itemCount;
+            final double extent = itemExtent!;
+            return ListView.builder(
+              primary: primary,
+              shrinkWrap: shrinkWrap,
+              itemCount: count == null ? null : math.max(0, count * 2 - 1),
+              padding: padding,
+              physics: physics,
+              scrollDirection: scrollDirection,
+              scrollCacheExtent: cacheExtent == null
+                  ? null
+                  : ScrollCacheExtent.pixels(cacheExtent!),
+              reverse: reverse,
+              clipBehavior: clipBehavior,
+              itemExtentBuilder: (index, _) =>
+                  index.isEven ? extent : separatorExtent,
+              itemBuilder: (context, index) => index.isEven
+                  ? itemBuilder!(context, index ~/ 2)
+                  : separatedBuilder!(context, index ~/ 2),
+              keyboardDismissBehavior: keyboardDismissBehavior,
+            );
+          }
           if (separatedBuilder != null) {
             return ListView.separated(
               primary: primary,
