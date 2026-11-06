@@ -57,6 +57,67 @@ Requires codelessly_api 9.4.0.
   its height, so the editor's canvas and desktop browsers drew it shorter
   than phones did.
 
+### Lists and pagination
+
+- A list whose item template has a fixed height (width, in a horizontal
+  list) and no bound size or visibility gives every item that extent, so a
+  10,000 item list lays out any offset without building the items before it.
+  A bound `widthFactor`, `heightFactor` or `aspectRatio` keeps the items
+  measured.
+- A list with separators keeps its fixed item extent (items and separators
+  interleave with known extents) instead of measuring every item.
+- Data list rows count duplicate ids once per build instead of once per
+  row, which was quadratic in the list's length.
+- Pagination: a list with `pagination` pages its bound data, its cloud
+  query or an API through a `PaginationController` (`CodelesslyContext.pagination`,
+  by name), shown a page at a time or as an infinite list that loads the
+  next page near its end (once per page however fast it scrolls), and in
+  both directions with the scroll position kept as pages are put in front.
+  Loading, error-with-retry and end-of-list footer nodes, pull to refresh
+  (`refresh` reactions run too), and the state as a map variable
+  (`${name.page}`, `${name.hasMore}`...). The Paginate action moves it.
+- Lists with `sections` group their items under section headers that stay
+  pinned until the next section pushes them out, with an A–Z index bar.
+- Lists with `swipeActions` reveal actions behind an item swiped sideways;
+  a full swipe runs the first action, with an Undo bar for removing ones,
+  then fires `swipeAction` reactions and can remove the item from the bound
+  list or the cloud collection.
+- Lists with a `reorder` model reorder by a handle, a long press or a press
+  anywhere, with proxy elevation, scale and opacity, auto-scroll, per-item
+  `canReorderIf` and per-drop `canDropIf`, Alt+arrow keyboard moves (with
+  screen reader actions and announcements), and an optional built-in apply
+  to the bound list variable or the cloud collection's order field. Lists
+  that share a `group` take each other's items (a Kanban board), with a
+  placeholder where the drop lands. `reorder` reactions run on the list
+  with `${result.from}`, `${result.to}`, `${result.item}`,
+  `${result.fromList}` and `${result.toList}`; a handle's reactions still
+  run too.
+- Grids with `pagination` page and load more like lists.
+- The Pagination node renders page controls (first, previous, page numbers
+  with ellipses, next, last, page size select, summary) for a controller.
+- The Table node renders a `TableView` (two_dimensional_scrollables) that
+  scrolls both ways, builds only the visible cells and pins its header row
+  and column.
+
+## 9.3.2
+
+Requires codelessly_api 9.3.0.
+
+### Fixed
+
+- A screen loaded again while it shows (published again, a fresh publish
+  bundle replacing the cached model, its variables arriving after it) keeps
+  the values of its canvas variables unless their published definition
+  changed. They went back to their published defaults, and the screen's
+  load actions, which run once per screen, didn't fill them again: a form
+  whose load actions filled drafts from the selected item opened right
+  after a republish with an empty name and the default time.
+- Load actions wait for the screen's variables. A screen shown before its
+  published variables are in the model (a cached model without them, while
+  the publish bundle or an update downloads them) runs its load actions,
+  and applies its link parameters, once they arrive
+  (`DataManager.variablesPending`).
+
 ## 9.3.1
 
 Requires codelessly_api 9.3.0.

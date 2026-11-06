@@ -162,6 +162,9 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
   SDKLayoutVariables? loadedVariables;
   SDKLayoutConditions? loadedConditions;
 
+  /// The layout and canvas [loadLayout] last loaded, as `layoutId/canvasId`.
+  String? _loadedCanvasKey;
+
   @override
   void didUpdateWidget(covariant CodelesslyLayoutBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -254,6 +257,22 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     final Map<String, VariableData> variablesMap =
         layoutVariables[widget.canvasId] ?? {};
 
+    // The same screen loaded again (published again while it shows, its
+    // variables arriving after it, a fresh publish bundle replacing the
+    // cached one): its canvas variables keep what they hold — values its
+    // load actions or the user set — unless their published definition
+    // changed. The load actions run once per screen and don't fill them
+    // again.
+    final String canvasKey = '${widget.layout.id}/${widget.canvasId}';
+    final bool reloading = canvasKey == _loadedCanvasKey;
+    _loadedCanvasKey = canvasKey;
+    final Map<String, Observable<VariableData>> previousVariables = reloading
+        ? Map.of(codelesslyContext.variables)
+        : const {};
+    final Map<String, VariableData> previousPublished = reloading
+        ? Map.of(codelesslyContext.initialVariables)
+        : const {};
+
     // Clear all the variables that are not api variables. We persist api
     // variables across canvases from the same layout group so that the
     // api request is not made again.
@@ -298,7 +317,11 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
       final VariableData published = variable.copyWith(
         value: codelesslyContext.data[variable.name],
       );
-      final notifier = Observable(withLinkParam(published, linkParams));
+      final Observable<VariableData>? kept = previousVariables[variable.id];
+      final notifier =
+          kept != null && previousPublished[variable.name] == published
+          ? kept
+          : Observable(withLinkParam(published, linkParams));
       codelesslyContext.variables[variable.id] = notifier;
       codelesslyContext.initialVariables[variable.name] = published;
     }
