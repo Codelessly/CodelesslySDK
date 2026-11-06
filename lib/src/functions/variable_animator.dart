@@ -16,6 +16,27 @@ import '../ui/codelessly_context.dart';
 abstract final class VariableAnimator {
   static final Expando<_VariableTween> _tweens = Expando('animateVariable');
 
+  /// Notifies when any animation starts, pauses, resumes or ends, so
+  /// bindings reading `${animating.<variable>}` (see [playingIn]) update
+  /// when an animation pauses (its variable then stops changing).
+  static final ChangeNotifier changes = _Changes();
+
+  static void _changed() => (changes as _Changes).ping();
+
+  /// Whether each variable of [context] (by name) has an animation playing
+  /// now (not paused): what `${animating.<variable>}` reads, e.g.
+  /// `${= animating.sunriseT ? 'pause' : 'play_arrow'}` for a play button.
+  static Map<String, bool> playingIn(CodelesslyContext? context) => {
+    for (final ValueNotifier<VariableData> variable
+        in context?.variables.values ?? const <ValueNotifier<VariableData>>[])
+      variable.value.name: isPlaying(variable),
+  };
+
+  /// Completes when [variable]'s animation ends: true when it reaches its
+  /// end, false when it is stopped or replaced. Null when it has none.
+  static Future<bool>? completionOf(ValueNotifier<VariableData> variable) =>
+      _tweens[variable]?.done.future;
+
   /// Plays [variable] from [from] (its current value when null) to [to]
   /// over [duration] with [curve], replacing an animation of it that runs.
   /// Completes with true when it reaches [to], false when it is stopped or
@@ -122,6 +143,10 @@ abstract final class VariableAnimator {
   }
 }
 
+class _Changes extends ChangeNotifier {
+  void ping() => notifyListeners();
+}
+
 class _VariableTween {
   _VariableTween(
     this.variable, {
@@ -182,6 +207,7 @@ class _VariableTween {
     }
     _base = duration * t;
     _ticker = Ticker(_tick, debugLabel: 'animateVariable')..start();
+    VariableAnimator._changed();
   }
 
   void _tick(Duration elapsed) {
@@ -197,6 +223,7 @@ class _VariableTween {
   void pause() {
     _ticker?.dispose();
     _ticker = null;
+    VariableAnimator._changed();
   }
 
   void finish(bool completed) {
@@ -204,5 +231,6 @@ class _VariableTween {
     _ticker = null;
     VariableAnimator._forget(this);
     if (!done.isCompleted) done.complete(completed);
+    VariableAnimator._changed();
   }
 }

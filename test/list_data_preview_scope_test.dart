@@ -103,7 +103,10 @@ void main() {
 
   for (final ListLayout layout in [ListLayout.list, ListLayout.stack]) {
     testWidgets('a list literal gives its items ($layout)', (tester) async {
-      final t = build(r'${= [{p: spots[0]}, {p: spots[1] + 1}]}', layout: layout);
+      final t = build(
+        r'${= [{p: spots[0]}, {p: spots[1] + 1}]}',
+        layout: layout,
+      );
       await pump(tester, t.registry, t.list, withReactions: true);
       expect(find.text('row 7'), findsOneWidget);
       expect(find.text('row 9'), findsOneWidget);

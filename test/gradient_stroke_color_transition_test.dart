@@ -16,7 +16,12 @@ String hex(Color c) =>
     '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
 
 Observable<VariableData> bg(Color color) => Observable(
-  VariableData(id: 'bg', name: 'bg', type: VariableType.text, value: hex(color)),
+  VariableData(
+    id: 'bg',
+    name: 'bg',
+    type: VariableType.text,
+    value: hex(color),
+  ),
 );
 
 /// A box with a two-stop gradient whose first stop is bound to `bg`, and an
@@ -104,17 +109,21 @@ Future<Observable<VariableData>> pump(
   return variable;
 }
 
-Color? fillStop(WidgetTester tester) => [
-  for (final Ink ink in tester.widgetList<Ink>(find.byType(Ink)))
-    ink.decoration,
-  for (final DecoratedBox box in tester.widgetList<DecoratedBox>(
-    find.byType(DecoratedBox),
-  ))
-    box.decoration,
-].whereType<BoxDecoration>().map((d) => d.gradient).whereType<Gradient>()
-    .firstOrNull
-    ?.colors
-    .first;
+Color? fillStop(WidgetTester tester) =>
+    [
+          for (final Ink ink in tester.widgetList<Ink>(find.byType(Ink)))
+            ink.decoration,
+          for (final DecoratedBox box in tester.widgetList<DecoratedBox>(
+            find.byType(DecoratedBox),
+          ))
+            box.decoration,
+        ]
+        .whereType<BoxDecoration>()
+        .map((d) => d.gradient)
+        .whereType<Gradient>()
+        .firstOrNull
+        ?.colors
+        .first;
 
 Color? borderColor(WidgetTester tester) => tester
     .widgetList<DecoratedBox>(find.byType(DecoratedBox))
@@ -153,10 +162,16 @@ void main() {
     variable.value = variable.value.copyWith(value: hex(night));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(between(fillStop(tester), dusk, night), isTrue,
-        reason: '${fillStop(tester)}');
-    expect(between(borderColor(tester), dusk, night), isTrue,
-        reason: '${borderColor(tester)}');
+    expect(
+      between(fillStop(tester), dusk, night),
+      isTrue,
+      reason: '${fillStop(tester)}',
+    );
+    expect(
+      between(borderColor(tester), dusk, night),
+      isTrue,
+      reason: '${borderColor(tester)}',
+    );
 
     await tester.pumpAndSettle();
     expect(fillStop(tester), night);
@@ -178,8 +193,11 @@ void main() {
       variable.value = variable.value.copyWith(value: hex(night));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(between(painterColor(tester), dusk, night), isTrue,
-          reason: 'gradient: $gradient, ${painterColor(tester)}');
+      expect(
+        between(painterColor(tester), dusk, night),
+        isTrue,
+        reason: 'gradient: $gradient, ${painterColor(tester)}',
+      );
       await tester.pumpAndSettle();
       expect(painterColor(tester), night);
       // A fresh tree for the next case.

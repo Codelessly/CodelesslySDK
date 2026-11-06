@@ -688,7 +688,8 @@ class ThemedConfirmDialog extends StatelessWidget {
           shadowColor: dialogShadows != null ? Colors.transparent : null,
           elevation: dialogShadows != null ? 0 : 8,
           insetPadding:
-              insets ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              insets ??
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radius),
             side: dialogShadows == null

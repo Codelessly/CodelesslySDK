@@ -84,12 +84,14 @@ class ParentExtentScope extends InheritedWidget {
   }
 
   /// [child] under a scope with the bounded sides of the constraints its
-  /// builder gets, for the children of [parent], when any of [children]
-  /// reads the parent's size ([readsParentSize]); else [child] built as is.
+  /// builder gets, less [padding] (the parent's padding inside that box),
+  /// for the children of [parent], when any of [children] reads the
+  /// parent's size ([readsParentSize]); else [child] built as is.
   static Widget around({
     required BaseNode parent,
     required Iterable<BaseNode> children,
     required Size fallbackSize,
+    EdgeInsets padding = EdgeInsets.zero,
     required Widget Function(BuildContext context) child,
   }) {
     if (!children.any(readsParentSize)) {
@@ -100,8 +102,12 @@ class ParentExtentScope extends InheritedWidget {
       fallbackSize: fallbackSize,
       builder: (context, constraints) => ParentExtentScope(
         parentId: parent.id,
-        width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
-        height: constraints.hasBoundedHeight ? constraints.maxHeight : null,
+        width: constraints.hasBoundedWidth
+            ? math.max(0, constraints.maxWidth - padding.horizontal).toDouble()
+            : null,
+        height: constraints.hasBoundedHeight
+            ? math.max(0, constraints.maxHeight - padding.vertical).toDouble()
+            : null,
         child: Builder(builder: child),
       ),
     );

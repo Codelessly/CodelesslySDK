@@ -220,8 +220,9 @@ class FunctionsRepository {
   }
 
   /// Runs an [AnimateVariableAction] on its variable (see
-  /// [VariableAnimator]). A play completes when the animation does; the
-  /// other modes at once. False when the variable isn't found, is computed
+  /// [VariableAnimator]). A play or a resume completes when the animation
+  /// ends (true at its end, false when stopped or replaced; a pause keeps
+  /// both waiting); the other modes at once. False when the variable isn't found, is computed
   /// or the values aren't numbers.
   static FutureOr<bool> animateVariable(
     BuildContext context,
@@ -252,8 +253,16 @@ class FunctionsRepository {
 
     switch (action.mode) {
       case AnimateVariableMode.resume:
-        if (VariableAnimator.resume(variable)) return true;
-        if (VariableAnimator.isPlaying(variable)) return true;
+        // Resuming (or finding it playing) waits, like a play, for the
+        // animation to end: a blocking resume holds the actions after it
+        // until then, as the play it carries on does (that play's pending
+        // action completes at the same moment).
+        if (VariableAnimator.resume(variable) ||
+            VariableAnimator.isPlaying(variable)) {
+          final Future<bool>? done = VariableAnimator.completionOf(variable);
+          if (done != null) return done;
+          return true;
+        }
         // Nothing to resume: play from where the value is, along the
         // timeline from `from` (or from the value itself) to `to`.
         return animateVariable(
